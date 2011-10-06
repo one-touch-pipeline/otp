@@ -22,6 +22,10 @@ public class ProcessingStepUpdate implements Serializable {
     static constraints = {
         processingStep(nullable: false)
         previous(nullable: true, validator: { val, obj ->
+            if (obj.id) {
+                // this obj had already been validated, so no need to do it again
+                return true
+            }
             if (val) {
                 // the previous update needs to belong to the same processing step us this update
                 return val.processingStep == obj.processingStep
@@ -33,13 +37,21 @@ public class ProcessingStepUpdate implements Serializable {
                 (obj.processingStep.updates.size() == 1 && obj.processingStep.updates.asList().first() == obj)
         })
         date(nullable: false, validator: { val, obj ->
-            if (!obj.processingStep.updates) {
+            if (obj.id) {
+                // this obj had already been validated, so no need to do it again
+                return true
+            }
+            if (!obj.processingStep.updates ||
+                    (obj.processingStep.updates.size() == 1 && obj.processingStep.updates.asList().first() == obj)) {
                 // there are no processing step updates yet, so our value is acceptable
                 return true
             }
             boolean ok = true
             // compare all the existing update dates with the current one, they all have to be before this one
-            obj.processingStep.updates.each {
+            obj.processingStep.updates.asList().sort { it.id }.each {
+                if (it == obj) {
+                    return
+                }
                 if (it.date > val) {
                     ok = false
                 }
@@ -47,6 +59,10 @@ public class ProcessingStepUpdate implements Serializable {
             return ok
         })
         state(nullable: false, validator: { val, obj ->
+            if (obj.id) {
+                // this obj had already been validated, so no need to do it again
+                return true
+            }
             // only first update may be created
             if (!obj.processingStep.updates ||
                     (obj.processingStep.updates.size() == 1 && obj.processingStep.updates.asList().first() == obj)) {
