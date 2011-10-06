@@ -1,0 +1,42 @@
+package de.dkfz.tbi.otp.job.processing
+
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+
+/**
+ * The Process represents one execution of a JobExecutionPlan.
+ *
+ * A Process is triggered by a {@link groovy.de.dkfz.tbi.otp.job.processing.StartJob} and generated from a {@link JobExecutionPlan}. It
+ * groups all the {@link groovy.de.dkfz.tbi.otp.job.processing.Job}s run for the various {@link JobDefinition}s. For each run groovy.de.dkfz.tbi.otp.job.processing.Job a
+ * {@link ProcessingStep} is added to this Process.
+ *
+ * For each JobExecutionPlan there can be many Processes representing the various executions for
+ * different values (e.g. different file name).
+ *
+ * @see Process
+ * @see ProcessingStep
+ * @see JobExecutionPlan
+ * @see JobDefinition
+ * @see groovy.de.dkfz.tbi.otp.job.processing.Job
+ * @see groovy.de.dkfz.tbi.otp.job.processing.StartJob
+ * @see Parameter
+ **/
+public class Process implements Serializable {
+    static belongsTo = [jobExecutionPlan: JobExecutionPlan]
+    static hasMany = [processingSteps: ProcessingStep, input: Parameter]
+    /**
+     * The Date when this process was started.
+     **/
+    Date started
+    /**
+     * The name of the StartJob class which triggered this Process.
+     **/
+    String startJobClass
+    /**
+     * The version of the StartJob class which triggered this Process.
+     **/
+    String startJobVersion
+    /**
+     * Whether there are Jobs still running (false) for this process or not (true).
+     **/
+    boolean finished = false
+}
