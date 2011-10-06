@@ -1,4 +1,4 @@
-package groovy.de.dkfz.tbi.otp.job.processing
+package de.dkfz.tbi.otp.job.processing
 
 /**
  * Interface for a groovy.de.dkfz.tbi.otp.job.processing.Job which is allowed to update the state of a previously run groovy.de.dkfz.tbi.otp.job.processing.Job.

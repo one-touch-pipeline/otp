@@ -1,4 +1,4 @@
-package groovy.de.dkfz.tbi.otp.job.processing
+package de.dkfz.tbi.otp.job.processing
 
 /**
  * Interface for Jobs which use the Portable Batch System for executing their task.

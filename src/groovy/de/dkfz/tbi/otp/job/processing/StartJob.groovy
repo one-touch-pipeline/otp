@@ -1,4 +1,6 @@
-package groovy.de.dkfz.tbi.otp.job.processing
+package de.dkfz.tbi.otp.job.processing
+
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 
 /**
  * Interface for a groovy.de.dkfz.tbi.otp.job.processing.Job which triggers the processing of a JobExecutionPlan.

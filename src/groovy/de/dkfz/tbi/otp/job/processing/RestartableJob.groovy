@@ -1,7 +1,9 @@
-package groovy.de.dkfz.tbi.otp.job.processing;
+package de.dkfz.tbi.otp.job.processing
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import java.lang.annotation.ElementType
+import java.lang.annotation.Retention
+import java.lang.annotation.RetentionPolicy
+import java.lang.annotation.Target
 
 /**
  * Annotation for any groovy.de.dkfz.tbi.otp.job.processing.Job that can be restarted safely.
@@ -21,7 +23,7 @@ import java.lang.annotation.Target;
  * for a file and stop processing when the file is available.
  *
  **/
-@Retention(value=RUNTIME)
-@Target(value=TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
 public @interface RestartableJob {
 }

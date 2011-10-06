@@ -1,8 +1,5 @@
-package groovy.de.dkfz.tbi.otp.job.processing
+package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.ibios.otp.jobSystem.scheduler.Job
-import groovy.de.dkfz.ibios.otp.jobSystem.Job
-import groovy.de.dkfz.ibios.otp.jobSystem.processing.Job
 /**
  * This interface can be used for Jobs which are able to decide whether they succeeded or failed.
  *
@@ -20,5 +17,5 @@ public interface EndStateAwareJob extends Job {
      * @return The ExecutionState after the method finished as determined by the groovy.de.dkfz.tbi.otp.job.processing.Job itself.
      * @throws InvalidStateException If the groovy.de.dkfz.tbi.otp.job.processing.Job execution has not yet finished.
      **/
-    public ExecutionState getEndState() throws InvalidStateException();
+    public ExecutionState getEndState() throws InvalidStateException;
 }
