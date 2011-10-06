@@ -88,4 +88,6 @@ log4j = {
            'org.hibernate',
            'net.sf.ehcache.hibernate',
            'de.dkfz.tbi.otp' // our own stuff
+
+    debug 'de.dkfz.tbi.otp' // our own stuff
 }
