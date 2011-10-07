@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.job.processing.InvalidStateException
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.job.scheduler.JobExecution
 import org.springframework.stereotype.Component
 import org.springframework.context.annotation.Scope
 
@@ -17,7 +16,6 @@ import org.springframework.context.annotation.Scope
 class TestJob implements Job {
     ProcessingStep processingStep
 
-    @JobExecution
     @Override
     public void execute() throws Exception {
         println("Execute method of TestJob called")
