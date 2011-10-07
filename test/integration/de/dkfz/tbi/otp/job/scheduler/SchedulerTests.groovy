@@ -64,4 +64,31 @@ class SchedulerTests {
         assertEquals(ExecutionState.STARTED, updates[1].state)
         assertEquals(ExecutionState.FINISHED, updates[2].state)
     }
+
+    @Test
+    void testFailingExecution() {
+        Job job = grailsApplication.mainContext.getBean("failingTestJob") as Job
+        ProcessingStep step = new ProcessingStep()
+        assertNotNull(step.save())
+        job.processingStep = step
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.CREATED,
+            previous: null
+            )
+        step.addToUpdates(update)
+        assertNotNull(step.save(flush: true))
+        shouldFail(Exception) {
+            job.execute()
+        }
+        // now we should have three processingStepUpdates for the processing step
+        step.refresh()
+        assertEquals(3, step.updates.size())
+        List<ProcessingStepUpdate> updates = step.updates.toList().sort { it.id }
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FAILURE, updates[2].state)
+        assertNotNull(updates[2].error)
+        assertEquals("Testing", updates[2].error.errorMessage)
+    }
 }

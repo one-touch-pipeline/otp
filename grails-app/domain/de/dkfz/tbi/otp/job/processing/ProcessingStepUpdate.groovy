@@ -18,6 +18,10 @@ public class ProcessingStepUpdate implements Serializable {
      * The Processing Step this update belongs to.
      */
     ProcessingStep processingStep
+    /**
+     * The error object in case this update is a failure.
+     */
+    ProcessingError error
 
     static constraints = {
         processingStep(nullable: false)
@@ -70,6 +74,12 @@ public class ProcessingStepUpdate implements Serializable {
             } else {
                 return val != ExecutionState.CREATED
             }
+        })
+        error(nullable: true, validator: {val, obj ->
+            if (!val) {
+                return true
+            }
+            return obj.state == ExecutionState.FAILURE
         })
     }
 }

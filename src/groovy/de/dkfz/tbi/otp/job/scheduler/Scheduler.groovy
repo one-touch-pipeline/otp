@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.scheduler
 
 import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
 import de.dkfz.tbi.otp.job.processing.Job
+import de.dkfz.tbi.otp.job.processing.ProcessingError
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import org.apache.commons.logging.LogFactory
@@ -133,8 +134,41 @@ class Scheduler {
         log.debug("doEndCheck performed for ${joinPoint.getTarget().class} with ProcessingStep ${job.processingStep.id}")
     }
 
+    /**
+     * Aspect for after exception got thrown during Job execution.
+     *
+     * It is important to know that the aspect is not able to eat the exception. The exception will propagate to
+     * the calling class. That is the service method which triggers the Job execution has to wrap it in a try/catch block
+     * and eat the exception itself.
+     *
+     * The aspect logs the exception, and stores a failure update for the ProcessingStep. As well it triggers the error
+     * handling process for the Job's JobExecutionPlan.
+     *
+     * @param joinPoint The JoinPoint we intercept
+     * @param e The intercepted Exception
+     */
     @AfterThrowing(pointcut="@annotation(de.dkfz.tbi.otp.job.scheduler.JobExecution) && this(de.dkfz.tbi.otp.job.processing.Job)", throwing="e")
     public void doErrorHandling(JoinPoint joinPoint, Exception e) {
-        println("doErrorHandling called")
+        Job job = joinPoint.target as Job
+        // get the last ProcessingStepUpdate
+        List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(job.processingStep)
+        // add a ProcessingStepUpdate to the ProcessingStep
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.FAILURE,
+            previous: existingUpdates.sort { it.date }.last()
+            )
+        // TODO: add the stacktrace identifier
+        ProcessingError error = new ProcessingError(errorMessage: e.message, processingStepUpdate: update)
+        update.error = error
+        error.save()
+        job.processingStep.addToUpdates(update)
+        if (!job.processingStep.save(flush: true)) {
+            // TODO: trigger error handling
+            log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
+            throw new RuntimeException("Could not create a FAILURE Update for Job")
+        }
+        // TODO: trigger error handling
+        log.debug("doErrorHandling performed for ${joinPoint.getTarget().class} with ProcessingStep ${job.processingStep.id}")
     }
 }
