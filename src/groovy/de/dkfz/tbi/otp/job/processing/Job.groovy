@@ -68,6 +68,19 @@ public interface Job {
      * @return The ProcessingStep describing the execution of this groovy.de.dkfz.tbi.otp.job.processing.Job.
      **/
     public ProcessingStep getProcessingStep();
+    /**
+     * Invoked by the Container to indicate that the Job has been started. Called when the execute method
+     * has been invoked.
+     * Implement if the Job needs to know when execute is started.
+     * @throws InvalidStateException In case the Job is not in a state where it could be started.
+     */
+    public void start() throws InvalidStateException;
+    /**
+     * Invoked by the Container to indicate that the Job has finished.
+     * Implement if the Job needs to know exactly when the execution finished.
+     * @throws InvalidStateException In case the Job is not in a state where it could end.
+     */
+    public void end() throws InvalidStateException;
 
     /**
      * Returns a unique version identifier of this class version.

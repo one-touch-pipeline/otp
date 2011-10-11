@@ -36,14 +36,9 @@ class SchedulerTests {
 
     @Test
     void testNormalJobExecution() {
-        Job job = grailsApplication.mainContext.getBean("testJob") as Job
-        // job does not yet have a processing step - execution should fail with a runtime exception
-        shouldFail(RuntimeException) {
-            job.execute()
-        }
         ProcessingStep step = new ProcessingStep()
         assertNotNull(step.save())
-        job.processingStep = step
+        Job job = grailsApplication.mainContext.getBean("testJob", step, []) as Job
         // There is no Created ProcessingStep update - execution should fail
         shouldFail(RuntimeException) {
             job.execute()
@@ -67,10 +62,9 @@ class SchedulerTests {
 
     @Test
     void testFailingExecution() {
-        Job job = grailsApplication.mainContext.getBean("failingTestJob") as Job
         ProcessingStep step = new ProcessingStep()
         assertNotNull(step.save())
-        job.processingStep = step
+        Job job = grailsApplication.mainContext.getBean("failingTestJob", step, []) as Job
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.CREATED,

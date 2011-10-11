@@ -4,8 +4,16 @@ import groovyjarjarasm.asm.Opcodes
 import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ASTNode
 import org.codehaus.groovy.ast.ClassNode
+import org.codehaus.groovy.ast.ConstructorNode
+import org.codehaus.groovy.ast.Parameter
+import org.codehaus.groovy.ast.expr.ArgumentListExpression
+import org.codehaus.groovy.ast.expr.ConstructorCallExpression
 import org.codehaus.groovy.ast.expr.ConstantExpression
+import org.codehaus.groovy.ast.expr.VariableExpression
 import org.codehaus.groovy.ast.stmt.ReturnStatement
+import org.codehaus.groovy.ast.stmt.BlockStatement
+import org.codehaus.groovy.ast.stmt.ExpressionStatement
+import org.codehaus.groovy.ast.stmt.Statement
 import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.control.SourceUnit
 import org.codehaus.groovy.transform.ASTTransformation
@@ -27,6 +35,9 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
  * history of the source file for the Job implementation. The latest git commit becomes
  * the unique version number of the Job.
  *
+ * If the Job Implementation class inherits the AbstractJobImpl class the transformation
+ * also adds the required constructors.
+ *
  * The annotation JobExecution is required by the Aspect intercepting the JobExecution.
  *
  * @see JobExecution
@@ -39,20 +50,42 @@ class JobTransformation implements ASTTransformation {
     public void visit(ASTNode[] astNodes, SourceUnit sourceUnit) {
         List classNodes = sourceUnit.getAST()?.getClasses()
         
-        classNodes.each { classNode ->
+        classNodes.each { ClassNode classNode ->
             if (classNode.isInterface()) {
                 // skip interfaces
                 return
             }
+            if ((classNode.modifiers & Opcodes.ACC_ABSTRACT) > 0) {
+                // skip abstract classes
+                return
+            }
             // test whether the class implements the Job interface
             boolean isJob = false
+            boolean inheritsAbstractJob = false
             classNode.getAllInterfaces().each {
                 if (it.name == "de.dkfz.tbi.otp.job.processing.Job") {
                     isJob = true
                 }
             }
+            if (classNode.superClass.name == "de.dkfz.tbi.otp.job.processing.AbstractJobImpl") {
+                isJob = true
+                inheritsAbstractJob = true
+            }
             if (!isJob) {
                 return
+            }
+            if (inheritsAbstractJob) {
+                // add generic Constructor
+                classNode.addConstructor(new ConstructorNode(Opcodes.ACC_PUBLIC, new BlockStatement()))
+                // add constructor with two arguments calling the super class constructor
+                Parameter[] params = [
+                    new Parameter(classNode.superClass.getField("processingStep").type, "a"),
+                    new Parameter(new ClassNode(List), "b") ] as Parameter[]
+                BlockStatement stmt = new BlockStatement()
+                stmt.addStatement(new ExpressionStatement(new ConstructorCallExpression(ClassNode.SUPER, new ArgumentListExpression(new VariableExpression("a"), new VariableExpression("b")))))
+                classNode.addConstructor(Opcodes.ACC_PUBLIC, params, ClassNode.EMPTY_ARRAY, stmt)
+                // add getVersion method - actual code will be generated below
+                classNode.addMethod("getVersion", Opcodes.ACC_PUBLIC, new ClassNode(String), Parameter.EMPTY_ARRAY, ClassNode.EMPTY_ARRAY, new ReturnStatement(new ConstantExpression("")))
             }
 
             // add the Annotation to the execute method and generates the version
