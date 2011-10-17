@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.scheduler
 
 import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
 import de.dkfz.tbi.otp.job.processing.Job
+import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ProcessingError
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.job.processing.ExecutionState
@@ -107,11 +108,13 @@ class Scheduler {
             previous: existingUpdates.sort { it.date }.last()
             )
         job.processingStep.addToUpdates(update)
+        job.getOutputParameters().each { Parameter param ->
+            job.processingStep.addToOutput(param)
+        }
         if (!job.processingStep.save(flush: true)) {
             log.fatal("Could not create a FINISHED Update for Job of type ${joinPoint.target.class}")
             throw new RuntimeException("Could not create a FINISHED Update for Job")
         }
-        // TODO: persist output parameters
 
         // test whether the Job knows if it ended
         if (job instanceof EndStateAwareJob) {

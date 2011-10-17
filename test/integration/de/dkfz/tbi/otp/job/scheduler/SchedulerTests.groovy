@@ -3,8 +3,10 @@ package de.dkfz.tbi.otp.job.scheduler
 import static org.junit.Assert.*
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.Job
+import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
+import de.dkfz.tbi.otp.job.processing.InvalidStateException
 import org.junit.*
 
 class SchedulerTests {
@@ -50,6 +52,9 @@ class SchedulerTests {
             )
         step.addToUpdates(update)
         assertNotNull(step.save(flush: true))
+        shouldFail(InvalidStateException) {
+            job.getOutputParameters()
+        }
         job.execute()
         // now we should have three processingStepUpdates for the processing step
         step.refresh()
@@ -58,6 +63,15 @@ class SchedulerTests {
         assertEquals(ExecutionState.CREATED, updates[0].state)
         assertEquals(ExecutionState.STARTED, updates[1].state)
         assertEquals(ExecutionState.FINISHED, updates[2].state)
+        // and there should be some output parameters
+        List<Parameter> params = step.output.toList().sort { it.key }
+        assertEquals(2, params.size())
+        assertEquals("test", params[0].key)
+        assertEquals("1234", params[0].value)
+        assertFalse(params[0].referencesDomainClass)
+        assertEquals("test2", params[1].key)
+        assertEquals("4321", params[1].value)
+        assertTrue(params[1].referencesDomainClass)
     }
 
     @Test
