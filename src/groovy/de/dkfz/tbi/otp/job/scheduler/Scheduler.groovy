@@ -79,6 +79,7 @@ class Scheduler {
         }
         // TODO: persist input parameters
         log.debug("doCreateCheck performed for ${joinPoint.getTarget().class} with ProcessingStep ${job.processingStep.id}")
+        job.start()
     }
 
     /**
@@ -96,6 +97,7 @@ class Scheduler {
     @AfterReturning("@annotation(de.dkfz.tbi.otp.job.scheduler.JobExecution) && this(de.dkfz.tbi.otp.job.processing.Job)")
     public void doEndCheck(JoinPoint joinPoint) {
         Job job = joinPoint.target as Job
+        job.end()
         // get the last ProcessingStepUpdate
         List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(job.processingStep)
         // add a ProcessingStepUpdate to the ProcessingStep

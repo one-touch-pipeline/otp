@@ -89,8 +89,10 @@ abstract class AbstractJobImpl implements Job {
         switch (state) {
         case ExecutionState.CREATED:
             state = ExecutionState.STARTED
+            break
         case ExecutionState.SUSPENDED:
             state = ExecutionState.RESUMED
+            break
         default:
             throw new InvalidStateException("Cannot start the Job from state " + state)
         }
@@ -103,6 +105,7 @@ abstract class AbstractJobImpl implements Job {
         case ExecutionState.RESTARTED:
         case ExecutionState.RESUMED:
             state = ExecutionState.FINISHED
+            break
         default:
             throw new InvalidStateException("Cannot end the Job from state " + state)
         }
