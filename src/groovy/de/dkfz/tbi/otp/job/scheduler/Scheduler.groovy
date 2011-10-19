@@ -12,6 +12,7 @@ import org.aspectj.lang.annotation.AfterReturning
 import org.aspectj.lang.annotation.AfterThrowing
 import org.aspectj.lang.annotation.Before
 import org.aspectj.lang.JoinPoint
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 /**
@@ -34,6 +35,11 @@ import org.springframework.stereotype.Component
 @Component("scheduler")
 @Aspect
 class Scheduler {
+    /**
+     * Dependency Injection of Scheduler Service
+     */
+    @Autowired
+    SchedulerService schedulerService
     /**
      * Log for this class.
      */
@@ -99,6 +105,7 @@ class Scheduler {
     public void doEndCheck(JoinPoint joinPoint) {
         Job job = joinPoint.target as Job
         job.end()
+        schedulerService.removeRunningJob(job)
         // get the last ProcessingStepUpdate
         List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(job.processingStep)
         // add a ProcessingStepUpdate to the ProcessingStep
@@ -135,7 +142,7 @@ class Scheduler {
                 return
             }
         }
-        // TODO: start next Job
+        schedulerService.createNextProcessingStep(job.processingStep)
         log.debug("doEndCheck performed for ${joinPoint.getTarget().class} with ProcessingStep ${job.processingStep.id}")
     }
 
@@ -155,6 +162,7 @@ class Scheduler {
     @AfterThrowing(pointcut="@annotation(de.dkfz.tbi.otp.job.scheduler.JobExecution) && this(de.dkfz.tbi.otp.job.processing.Job)", throwing="e")
     public void doErrorHandling(JoinPoint joinPoint, Exception e) {
         Job job = joinPoint.target as Job
+        schedulerService.removeRunningJob(job)
         // get the last ProcessingStepUpdate
         List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(job.processingStep)
         // add a ProcessingStepUpdate to the ProcessingStep

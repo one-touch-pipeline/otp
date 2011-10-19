@@ -39,11 +39,22 @@ public class ProcessingStep implements Serializable {
      * The Process this ProcessingStep belongs to.
      */
     Process process
+    /**
+     * The previous ProcessingStep. Is null for the first ProcessingStep of a Process.
+     */
+    ProcessingStep previous
+    /**
+     * The next ProcessingStep. Is null as long as the processing step has not been set and for the last ProcessingStep
+     * of a Process.
+     */
+    ProcessingStep next
 
     static constraints = {
         jobDefinition(nullable: false)
         jobClass(nullable: true, empty: false)
         jobVersion(nullable: true, empty: false)
         process(nullable: false)
+        previous(nullable: true)
+        next(nullable: true)
     }
 }
