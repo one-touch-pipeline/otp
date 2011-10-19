@@ -69,11 +69,10 @@ class SchedulerService {
             lock.unlock()
         }
     }
-    
+
     public void createProcess(JobExecutionPlan plan, List<Parameter> input) {
-        
     }
-    
+
     /**
      * Invokes the primitive scheduler to determine which job is to execute next if any at all.
      */
@@ -96,7 +95,7 @@ class SchedulerService {
             lock.unlock()
         }
     }
-    
+
     /**
      * Called by the Scheduler aspect when a Job finished or failed.
      * Removes the Job from the list of running jobs.
@@ -117,7 +116,7 @@ class SchedulerService {
             lock.unlock()
         }
     }
-    
+
     /**
      * Creates a Job for one ProcessingStep.
      * @param step
@@ -130,7 +129,7 @@ class SchedulerService {
         step.save(flush: true)
         return job
     }
-    
+
     /**
      * Method responsible for handling the successful ending of a Process.
      * @param process The Process which finished
@@ -141,7 +140,7 @@ class SchedulerService {
         process.save(flush: true)
         // TODO: start some notifications?
     }
-    
+
     /**
      * Getter for Unit Tests
      * @return
@@ -149,7 +148,7 @@ class SchedulerService {
     protected Queue<ProcessingStep> getQueue() {
         return this.queue
     }
-    
+
     /**
      * Getter for Unit Tests
      * @return
