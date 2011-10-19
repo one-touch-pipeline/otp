@@ -63,7 +63,7 @@ public interface Job {
      * @return List of generated output parameters by this job.
      * @throws InvalidStateException In case the groovy.de.dkfz.tbi.otp.job.processing.Job has not finished the execution.
      **/
-    public List<Parameter> getOutputParameters() throws InvalidStateException;
+    public Set<Parameter> getOutputParameters() throws InvalidStateException;
     /**
      * @return The ProcessingStep describing the execution of this groovy.de.dkfz.tbi.otp.job.processing.Job.
      **/

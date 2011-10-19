@@ -51,7 +51,7 @@ class SchedulerTests {
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
-        Job job = grailsApplication.mainContext.getBean("testJob", step, []) as Job
+        Job job = grailsApplication.mainContext.getBean("testJob", step, [] as Set) as Job
         // There is no Created ProcessingStep update - execution should fail
         shouldFail(RuntimeException) {
             job.execute()
@@ -97,7 +97,7 @@ class SchedulerTests {
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(process: process, jobDefinition: jobDefinition)
         assertNotNull(step.save())
-        Job job = grailsApplication.mainContext.getBean("failingTestJob", step, []) as Job
+        Job job = grailsApplication.mainContext.getBean("failingTestJob", step, [] as Set) as Job
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.CREATED,
