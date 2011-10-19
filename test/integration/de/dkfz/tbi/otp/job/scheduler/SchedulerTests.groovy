@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import static org.junit.Assert.*
+import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.Parameter
@@ -38,7 +40,13 @@ class SchedulerTests {
 
     @Test
     void testNormalJobExecution() {
-        ProcessingStep step = new ProcessingStep()
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "testJob", plan: jep)
+        jep.addToJobDefinitions(jobDefinition)
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save(flush: true))
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition)
         assertNotNull(step.save())
         Job job = grailsApplication.mainContext.getBean("testJob", step, []) as Job
         // There is no Created ProcessingStep update - execution should fail
@@ -76,7 +84,13 @@ class SchedulerTests {
 
     @Test
     void testFailingExecution() {
-        ProcessingStep step = new ProcessingStep()
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "failingTestJob", plan: jep)
+        jep.addToJobDefinitions(jobDefinition)
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save(flush: true))
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition)
         assertNotNull(step.save())
         Job job = grailsApplication.mainContext.getBean("failingTestJob", step, []) as Job
         ProcessingStepUpdate update = new ProcessingStepUpdate(

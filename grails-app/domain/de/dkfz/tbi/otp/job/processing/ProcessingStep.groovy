@@ -41,8 +41,7 @@ public class ProcessingStep implements Serializable {
     Process process
 
     static constraints = {
-        // TODO: this has to be false in the future, it is only true as we need to test
-        jobDefinition(nullable: true)
+        jobDefinition(nullable: false)
         jobClass(nullable: true, empty: false)
         jobVersion(nullable: true, empty: false)
         process(nullable: true)
