@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 
+import java.util.concurrent.Callable
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
@@ -17,6 +18,10 @@ class SchedulerService {
      * Dependency Injection of grailsApplication
      */
     def grailsApplication
+    /**
+     * Dependency Injection of ExecutorService
+     */
+    def executorService
     /**
      * Queue of next to be started ProcessingSteps
      */
@@ -83,8 +88,10 @@ class SchedulerService {
             Job job = createJob(queue.peek())
             running.add(job)
             queue.poll()
-            // TODO: start in a thread
-            job.execute()
+
+            executorService.submit({
+                job.execute()
+            } as Callable)
         } finally {
             lock.unlock()
         }
