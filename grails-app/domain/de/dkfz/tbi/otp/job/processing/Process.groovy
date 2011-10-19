@@ -39,4 +39,11 @@ public class Process implements Serializable {
      * Whether there are Jobs still running (false) for this process or not (true).
      **/
     boolean finished = false
+
+    static constraints = {
+        jobExecutionPlan(nullable: false)
+        started(nullable: false)
+        startJobClass(nullable: false, blank: false)
+        startJobVersion(nullable: false, blank: false)
+    }
 }
