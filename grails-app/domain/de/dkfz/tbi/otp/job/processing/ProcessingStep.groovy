@@ -44,6 +44,6 @@ public class ProcessingStep implements Serializable {
         jobDefinition(nullable: false)
         jobClass(nullable: true, empty: false)
         jobVersion(nullable: true, empty: false)
-        process(nullable: true)
+        process(nullable: false)
     }
 }

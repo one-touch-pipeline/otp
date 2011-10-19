@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.Parameter
+import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.job.processing.InvalidStateException
@@ -46,7 +47,9 @@ class SchedulerTests {
         jep.addToJobDefinitions(jobDefinition)
         jep.firstJob = jobDefinition
         assertNotNull(jep.save(flush: true))
-        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition)
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        assertNotNull(process.save())
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
         Job job = grailsApplication.mainContext.getBean("testJob", step, []) as Job
         // There is no Created ProcessingStep update - execution should fail
@@ -90,7 +93,9 @@ class SchedulerTests {
         jep.addToJobDefinitions(jobDefinition)
         jep.firstJob = jobDefinition
         assertNotNull(jep.save(flush: true))
-        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition)
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        assertNotNull(process.save())
+        ProcessingStep step = new ProcessingStep(process: process, jobDefinition: jobDefinition)
         assertNotNull(step.save())
         Job job = grailsApplication.mainContext.getBean("failingTestJob", step, []) as Job
         ProcessingStepUpdate update = new ProcessingStepUpdate(
