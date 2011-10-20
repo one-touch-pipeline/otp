@@ -33,10 +33,15 @@ class ParameterType {
      * The JobDefinition for which this parameter type has been created
      */
     JobDefinition jobDefinition
+    /**
+     * The kind for which the Job is used
+     */
+    ParameterUsage usage
 
     static constraints = {
         name(nullable: false, blank: false, unique: 'jobDefinition')
         description(nullable: true)
         className(nullable: true)
+        usage(nullable: false)
     }
 }
