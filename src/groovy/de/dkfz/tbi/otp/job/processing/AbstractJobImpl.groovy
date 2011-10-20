@@ -64,18 +64,29 @@ abstract class AbstractJobImpl implements Job {
      * 
      * If a parameter with the same key already exists, this parameter will be
      * replaced.
-     * @param parameter The new output parameter to add.
+     * @param name The name of the ParameterType for which the parameter is going to be added
+     * @param value The value of the parameter
      */
-    protected final void addOutputParameter(Parameter parameter) {
+    protected final void addOutputParameter(String name, String value) {
         Iterator<Parameter> it = outputParameters.iterator()
         while (it.hasNext()) {
             Parameter param = it.next()
-            if (param.type == parameter.type) {
-                it.remove()
-                break
+            if (param.type.name == name) {
+                param.value = value
+                return
             }
         }
-        outputParameters << parameter
+        // find the ParameterType
+        ParameterType type = ParameterType.findByNameAndJobDefinition(name, processingStep.jobDefinition)
+        if (!type) {
+            // TODO: throw proper Exception
+            throw new RuntimeException("ParameterType missing")
+        }
+        if (type.usage != ParameterUsage.OUTPUT) {
+            // TODO: throw proper Exception
+            throw new RuntimeException("Not an output parameter")
+        }
+        outputParameters << new Parameter(type: type, value: value)
     }
 
     /**

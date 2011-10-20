@@ -23,8 +23,8 @@ class TestJob extends AbstractJobImpl {
         ParameterType test2 = new ParameterType(name: "test2", description: "Test description", jobDefinition: getProcessingStep().jobDefinition, usage: ParameterUsage.OUTPUT)
         test.save()
         test2.save()
-        addOutputParameter(new Parameter(type: test, value: "1234"))
-        addOutputParameter(new Parameter(type: test2, value: "1234"))
-        addOutputParameter(new Parameter(type: test2, value: "4321"))
+        addOutputParameter("test", "1234")
+        addOutputParameter("test2", "1234")
+        addOutputParameter("test2", "4321")
     }
 }
