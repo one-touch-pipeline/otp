@@ -2,48 +2,44 @@ package de.dkfz.tbi.otp.ngsdata
 
 class Run {
 
-    String name
+	String name                      // run name
 
     Date dateExecuted = null
-    Date dateCreated  = new Date()
+    Date dateCreated  = new Date()   // do we need object creation ?
 
-    String dataPath
-    String mdPath
+    String dataPath                  // path to data (ftp area)
+    String mdPath                    // path to meta-data
 
-    boolean complete             // complete run was delivered
-    boolean allFilesUsed = false
-    boolean finalLocation = false
+    boolean complete                 // complete run was delivered
+    boolean allFilesUsed = false     // flag if data if all files find relations
+    boolean finalLocation = false    // was run moved to final destination from ftp
 
-    boolean multipleSource
+    boolean multipleSource           // for runs from a few projects 
 
-    //ProcessDefinition lastStep = null
-    //boolean isBlocked = false    // under processing
-    //int lastStep = 0             // last processing step
+    static belongsTo = [
+		projects : Project,
+		seqCenter : SeqCenter,
+		seqTech : SeqTech
+	]
+	
+    static hasMany = [
+        projects  : Project,
+        dataFiles : DataFile,
+        seqTracks : SeqTrack,
+    ]
+	
+	static constraints = {
+		name(blank: false, unique: true)
+		allFilesUsed()
+		projects(nullable: true)
+		dateExecuted(nullable: true)
+		dateCreated()
+		complete()
+		dataPath()
+		mdPath()
+	}
 
-    /*
-    static constraints = {
-        name(blank: false, unique: true)
-                allFilesUsed()
-                projects(nullable: true)
-                dateExecuted(nullable: true)
-                dateCreated()
-                complete()
-                //isBlocked()
-                dataPath()
-                mdPath()
-                //lastStep(nullable: true)
-        }
-
-        static belongsTo = [projects : Project, seqCenter : SeqCenter, seqTech : SeqTech]
-        static hasMany = [
-                projects  : Project,
-                dataFiles : DataFile,
-                seqTracks : SeqTrack,
-        ]
-	*/
-
-        String toString() {
-                name
-        }
-
+    String toString() {
+            name
+    }
 }
