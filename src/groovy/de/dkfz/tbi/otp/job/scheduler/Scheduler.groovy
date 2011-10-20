@@ -42,6 +42,11 @@ class Scheduler {
     @Autowired
     SchedulerService schedulerService
     /**
+     * Dependency Injection of Error Log Service
+     */
+    @Autowired
+    ErrorLogService errorLogService
+    /**
      * Log for this class.
      */
     private static final log = LogFactory.getLog(this)
@@ -184,7 +189,7 @@ class Scheduler {
             state: ExecutionState.FAILURE,
             previous: existingUpdates.sort { it.date }.last()
             )
-        // TODO: add the stacktrace identifier
+        errorLogService.writeStacktraceToFile(joinPoint.getTarget().class, e)
         ProcessingError error = new ProcessingError(errorMessage: e.message, processingStepUpdate: update)
         update.error = error
         error.save()

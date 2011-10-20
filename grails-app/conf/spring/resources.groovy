@@ -8,5 +8,6 @@ beans = {
 
     if (Environment.getCurrent() == Environment.TEST) {
         executorService(de.dkfz.tbi.otp.testing.SynchronousTestingExecutorService)
+        servletContext(de.dkfz.tbi.otp.testing.OTPServletContext)
     }
 }

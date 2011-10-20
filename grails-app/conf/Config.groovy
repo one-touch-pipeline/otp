@@ -67,6 +67,8 @@ environments {
     }
 }
 
+otp.errorLogging.stacktraces = "../target/stacktraces/"
+
 // log4j configuration
 log4j = {
     // Example of changing the log pattern for the default console
