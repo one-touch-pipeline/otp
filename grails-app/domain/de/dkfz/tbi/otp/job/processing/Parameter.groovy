@@ -1,9 +1,8 @@
 package de.dkfz.tbi.otp.job.processing
 
 class Parameter {
-    String key
+    ParameterType type
     String value
-    boolean referencesDomainClass
 
     static constraints = {
     }

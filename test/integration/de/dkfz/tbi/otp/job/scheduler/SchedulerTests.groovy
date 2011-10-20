@@ -75,14 +75,16 @@ class SchedulerTests {
         assertEquals(ExecutionState.STARTED, updates[1].state)
         assertEquals(ExecutionState.FINISHED, updates[2].state)
         // and there should be some output parameters
-        List<Parameter> params = step.output.toList().sort { it.key }
+        List<Parameter> params = step.output.toList().sort { it.type.name }
         assertEquals(2, params.size())
-        assertEquals("test", params[0].key)
+        assertEquals("test", params[0].type.name)
         assertEquals("1234", params[0].value)
-        assertFalse(params[0].referencesDomainClass)
-        assertEquals("test2", params[1].key)
+        assertNull(params[0].type.className)
+        assertSame(jobDefinition, params[0].type.jobDefinition)
+        assertEquals("test2", params[1].type.name)
         assertEquals("4321", params[1].value)
-        assertTrue(params[1].referencesDomainClass)
+        assertNull(params[1].type.className)
+        assertSame(jobDefinition, params[1].type.jobDefinition)
     }
 
     @Test

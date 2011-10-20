@@ -70,7 +70,7 @@ abstract class AbstractJobImpl implements Job {
         Iterator<Parameter> it = outputParameters.iterator()
         while (it.hasNext()) {
             Parameter param = it.next()
-            if (param.key == parameter.key) {
+            if (param.type == parameter.type) {
                 it.remove()
                 break
             }

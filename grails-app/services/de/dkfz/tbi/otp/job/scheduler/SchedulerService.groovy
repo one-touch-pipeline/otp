@@ -45,7 +45,7 @@ class SchedulerService {
         ProcessingStep next = new ProcessingStep(jobDefinition: nextJob, process: previous.process, previous: previous)
         previous.output.each { Parameter param ->
             // TODO: proper mapping output to input parameters
-            next.addToInput(new Parameter(key: param.key, value: param.value, referencesDomainClass: param.referencesDomainClass))
+            next.addToInput(new Parameter(type: param.type, value: param.value))
         }
         ProcessingStepUpdate created = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date())
         next.addToUpdates(created)
