@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
+import de.dkfz.tbi.otp.job.processing.InvalidStateException;
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ProcessingError
@@ -61,32 +62,40 @@ class Scheduler {
     @Before("@annotation(de.dkfz.tbi.otp.job.scheduler.JobExecution) && this(de.dkfz.tbi.otp.job.processing.Job)")
     public void doCreateCheck(JoinPoint joinPoint) {
         Job job = joinPoint.target as Job
-        // verify that the Job has a processing Step
-        if (!job.processingStep) {
-            log.fatal("Job of type ${joinPoint.target.class} executed without a ProcessingStep being set")
-            throw new RuntimeException("Job executed without a ProcessingStep being set")
+        try {
+            // verify that the Job has a processing Step
+            if (!job.processingStep) {
+                log.fatal("Job of type ${joinPoint.target.class} executed without a ProcessingStep being set")
+                throw new RuntimeException("Job executed without a ProcessingStep being set")
+            }
+            // get the last ProcessingStepUpdate
+            List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(job.processingStep)
+            if (existingUpdates.isEmpty()) {
+                log.fatal("Job of type ${joinPoint.target.class} executed before entering the CREATED state")
+                throw new RuntimeException("Job executed before entering the CREATED state")
+            }
+            // add a ProcessingStepUpdate to the ProcessingStep
+            ProcessingStepUpdate update = new ProcessingStepUpdate(
+                date: new Date(),
+                state: ExecutionState.STARTED,
+                previous: existingUpdates.sort { it.date }.last(),
+                processingStep: job.processingStep
+                )
+            job.processingStep.addToUpdates(update)
+            if (!job.processingStep.save(flush: true)) {
+                log.fatal("Could not create a STARTED Update for Job of type ${joinPoint.target.class}")
+                throw new RuntimeException("Could not create a STARTED Update for Job")
+            }
+            // TODO: persist input parameters
+            log.debug("doCreateCheck performed for ${joinPoint.getTarget().class} with ProcessingStep ${job.processingStep.id}")
+            job.start()
+        } catch (RuntimeException e) {
+            // TODO: trigger error handling
+            // removing Job from running
+            schedulerService.removeRunningJob(job)
+            // pass along the exception
+            throw e
         }
-        // get the last ProcessingStepUpdate
-        List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(job.processingStep)
-        if (existingUpdates.isEmpty()) {
-            log.fatal("Job of type ${joinPoint.target.class} executed before entering the CREATED state")
-            throw new RuntimeException("Job executed before entering the CREATED state")
-        }
-        // add a ProcessingStepUpdate to the ProcessingStep
-        ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.STARTED,
-            previous: existingUpdates.sort { it.date }.last(),
-            processingStep: job.processingStep
-            )
-        job.processingStep.addToUpdates(update)
-        if (!job.processingStep.save(flush: true)) {
-            log.fatal("Could not create a STARTED Update for Job of type ${joinPoint.target.class}")
-            throw new RuntimeException("Could not create a STARTED Update for Job")
-        }
-        // TODO: persist input parameters
-        log.debug("doCreateCheck performed for ${joinPoint.getTarget().class} with ProcessingStep ${job.processingStep.id}")
-        job.start()
     }
 
     /**
