@@ -73,6 +73,11 @@ class Scheduler {
             if (existingUpdates.isEmpty()) {
                 log.fatal("Job of type ${joinPoint.target.class} executed before entering the CREATED state")
                 throw new RuntimeException("Job executed before entering the CREATED state")
+            } else if (existingUpdates.size() > 1) {
+                if (existingUpdates.sort{ it.id }.last().state == ExecutionState.FAILURE) {
+                    // scheduler is already in failed state - no reason to process
+                    throw new RuntimeException("Job already in failed condition before execution")
+                }
             }
             // add a ProcessingStepUpdate to the ProcessingStep
             ProcessingStepUpdate update = new ProcessingStepUpdate(

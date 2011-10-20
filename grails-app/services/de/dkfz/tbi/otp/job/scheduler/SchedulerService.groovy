@@ -5,7 +5,9 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.Parameter
+import de.dkfz.tbi.otp.job.processing.ParameterUsage
 import de.dkfz.tbi.otp.job.processing.Process
+import de.dkfz.tbi.otp.job.processing.ProcessingError
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 
@@ -47,6 +49,15 @@ class SchedulerService {
             // TODO: proper mapping output to input parameters
             next.addToInput(new Parameter(type: param.type, value: param.value))
         }
+        // add constant parameters to the next processing step
+        Parameter failedConstantParameter = null
+        nextJob.constantParameters.each { Parameter param ->
+            if (param.type.usage != ParameterUsage.INPUT) {
+                failedConstantParameter = param
+                return // continue
+            }
+            next.addToInput(param)
+        }
         ProcessingStepUpdate created = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date())
         next.addToUpdates(created)
         lock.lock()
@@ -55,12 +66,27 @@ class SchedulerService {
                 // TODO: proper error handling
                 throw new RuntimeException("Something bad happened")
             }
+            if (failedConstantParameter) {
+                ProcessingStepUpdate failure = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: new Date(), previous: created)
+                ProcessingError error = new ProcessingError(errorMessage: "Failed to add constant input parameter ${failedConstantParameter.id} of type ${failedConstantParameter.type.name} to new processing step",
+                     processingStepUpdate: failure)
+                failure.error = error
+                next.addToUpdates(failure)
+                if (!next.save()) {
+                    // TODO: proper error handling
+                    throw new RuntimeException("Something bad happened")
+                }
+            }
             previous.next = next
-            if (!previous.save(flush: true)) {
+            if (!previous.save()) {
                 // TODO: proper error handling
                 throw new RuntimeException("Something bad happened")
             }
             next.process.addToProcessingSteps(next)
+            if (!next.process.save(flush: true)) {
+                // TODO: proper error handling
+                throw new RuntimeException("Something bad happened")
+            }
             queue.add(next)
         } catch (Exception e) {
             // TODO: proper error handling

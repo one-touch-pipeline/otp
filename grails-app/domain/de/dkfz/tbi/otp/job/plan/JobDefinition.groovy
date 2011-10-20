@@ -1,6 +1,9 @@
 package de.dkfz.tbi.otp.job.plan
 
+import de.dkfz.tbi.otp.job.processing.Parameter
+
 class JobDefinition {
+    static hasMany = [constantParameters: Parameter]
     static belongsTo = [plan: JobExecutionPlan]
     /**
      * The JobExecutionPlan this JobDefinition belongs to.
