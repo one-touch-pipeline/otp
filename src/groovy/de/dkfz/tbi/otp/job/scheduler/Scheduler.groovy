@@ -91,7 +91,6 @@ class Scheduler {
                 log.fatal("Could not create a STARTED Update for Job of type ${joinPoint.target.class}")
                 throw new RuntimeException("Could not create a STARTED Update for Job")
             }
-            // TODO: persist input parameters
             log.debug("doCreateCheck performed for ${joinPoint.getTarget().class} with ProcessingStep ${job.processingStep.id}")
             job.start()
         } catch (RuntimeException e) {
