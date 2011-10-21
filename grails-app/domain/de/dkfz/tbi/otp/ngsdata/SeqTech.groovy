@@ -14,6 +14,7 @@ class SeqTech {
 	
 	static constraints = {
 		name(unique: true)
+		model(nullable: true)
 	}
 	
 	String toString() {
