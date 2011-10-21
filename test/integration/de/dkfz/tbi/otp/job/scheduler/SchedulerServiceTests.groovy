@@ -54,7 +54,7 @@ class SchedulerServiceTests {
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
         assertNotNull(jep.save())
         JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "testJob", plan: jep)
-        jep.addToJobDefinitions(jobDefinition)
+        assertNotNull(jobDefinition.save())
         jep.firstJob = jobDefinition
         assertNotNull(jep.save(flush: true))
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
@@ -91,11 +91,11 @@ class SchedulerServiceTests {
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
         assertNotNull(jep.save())
         JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "testJob", plan: jep)
-        jep.addToJobDefinitions(jobDefinition)
+        assertNotNull(jobDefinition.save())
         jep.firstJob = jobDefinition
         assertNotNull(jep.save())
         JobDefinition jobDefinition2 = new JobDefinition(name: "test2", bean: "testJob", plan: jep, previous: jobDefinition)
-        jep.addToJobDefinitions(jobDefinition2)
+        assertNotNull(jobDefinition2.save())
         jobDefinition.next = jobDefinition2
         assertNotNull(jobDefinition.save())
         assertNotNull(jep.save(flush: true))
@@ -111,15 +111,13 @@ class SchedulerServiceTests {
             )
         step.addToUpdates(update)
         assertNotNull(step.save(flush: true))
-        process.addToProcessingSteps(step)
-        assertNotNull(process.save(flush: true))
         // first Job should be run
         assertFalse(process.finished)
         assertNull(step.jobClass)
         assertNull(step.jobVersion)
         assertNull(step.next)
         assertNull(step.previous)
-        assertEquals(1, process.processingSteps.size())
+        assertEquals(1, ProcessingStep.countByProcess(process))
         assertTrue(schedulerService.queue.add(step))
         schedulerService.schedule()
         assertFalse(process.finished)
@@ -130,18 +128,20 @@ class SchedulerServiceTests {
         assertNull(step.previous)
         assertFalse(step.id == step.next.id)
         assertSame(step, step.next.previous)
-        assertEquals(2, process.processingSteps.size())
+        assertEquals(2, ProcessingStep.countByProcess(process))
         // another Job should be be scheduled
         assertFalse(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
         
         // after running the second job the Process should be finished
         schedulerService.schedule()
+        // TODO: why is that needed?
+        process = Process.get(process.id)
         assertTrue(process.finished)
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
-        assertEquals(2, process.processingSteps.size())
-        process.processingSteps.each { ProcessingStep s ->
+        assertEquals(2, ProcessingStep.countByProcess(process))
+        ProcessingStep.findAllByProcess(process).each { ProcessingStep s ->
             assertEquals(3, s.updates.size())
             List<ProcessingStepUpdate> updates = s.updates.toList().sort { it.id }
             assertEquals(ExecutionState.CREATED, updates[0].state)
@@ -158,18 +158,18 @@ class SchedulerServiceTests {
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
         assertNotNull(jep.save())
         JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "testJob", plan: jep)
-        jep.addToJobDefinitions(jobDefinition)
+        assertNotNull(jobDefinition.save())
         jep.firstJob = jobDefinition
         assertNotNull(jep.save())
         // second Job Definition
         JobDefinition jobDefinition2 = new JobDefinition(name: "test2", bean: "testJob", plan: jep, previous: jobDefinition)
-        jep.addToJobDefinitions(jobDefinition2)
+        assertNotNull(jobDefinition2.save())
         jobDefinition.next = jobDefinition2
         assertNotNull(jobDefinition.save())
         assertNotNull(jep.save(flush: true))
         // third Job Definition
         JobDefinition jobDefinition3 = new JobDefinition(name: "test3", bean: "testJob", plan: jep, previous: jobDefinition2)
-        jep.addToJobDefinitions(jobDefinition3)
+        assertNotNull(jobDefinition3.save())
         jobDefinition2.next = jobDefinition3
         assertNotNull(jobDefinition2.save())
         assertNotNull(jep.save(flush: true))
@@ -191,8 +191,6 @@ class SchedulerServiceTests {
             )
         step.addToUpdates(update)
         assertNotNull(step.save(flush: true))
-        process.addToProcessingSteps(step)
-        assertNotNull(process.save(flush: true))
 
         // running the JobExecutionPlan
         assertTrue(schedulerService.queue.isEmpty())
@@ -260,8 +258,6 @@ class SchedulerServiceTests {
             )
         step.addToUpdates(update)
         assertNotNull(step.save(flush: true))
-        process.addToProcessingSteps(step)
-        assertNotNull(process.save(flush: true))
         // running the JobExecutionPlan
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())

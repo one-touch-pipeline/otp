@@ -21,8 +21,7 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
  * @see Parameter
  **/
 public class Process implements Serializable {
-    static belongsTo = [jobExecutionPlan: JobExecutionPlan]
-    static hasMany = [processingSteps: ProcessingStep, input: Parameter]
+    static hasMany = [input: Parameter]
     /**
      * The Date when this process was started.
      **/
@@ -35,6 +34,10 @@ public class Process implements Serializable {
      * The version of the StartJob class which triggered this Process.
      **/
     String startJobVersion
+    /**
+     * The JobExecutionPlan this Process belongs to
+     */
+    JobExecutionPlan jobExecutionPlan
     /**
      * Whether there are Jobs still running (false) for this process or not (true).
      **/

@@ -82,7 +82,6 @@ class SchedulerService {
                 // TODO: proper error handling
                 throw new RuntimeException("Something bad happened")
             }
-            next.process.addToProcessingSteps(next)
             if (!next.process.save(flush: true)) {
                 // TODO: proper error handling
                 throw new RuntimeException("Something bad happened")

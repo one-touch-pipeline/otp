@@ -21,7 +21,6 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
  * @see Parameter
  **/
 public class ProcessingStep implements Serializable {
-    static belongsTo = [process: Process]
     static hasMany = [input: Parameter, output: Parameter, updates: ProcessingStepUpdate]
     /**
      * The JobDefinition this ProcessingStep is generated from.

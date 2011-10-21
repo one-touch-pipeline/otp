@@ -44,7 +44,7 @@ class SchedulerTests {
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
         assertNotNull(jep.save())
         JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "testJob", plan: jep)
-        jep.addToJobDefinitions(jobDefinition)
+        assertNotNull(jobDefinition.save())
         jep.firstJob = jobDefinition
         assertNotNull(jep.save(flush: true))
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
@@ -92,7 +92,7 @@ class SchedulerTests {
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
         assertNotNull(jep.save())
         JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "failingTestJob", plan: jep)
-        jep.addToJobDefinitions(jobDefinition)
+        assertNotNull(jobDefinition.save())
         jep.firstJob = jobDefinition
         assertNotNull(jep.save(flush: true))
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
