@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.testing
 
 import javax.servlet.*
 import javax.servlet.descriptor.JspConfigDescriptor
+import org.apache.commons.io.FileUtils
 
 class OTPServletContext implements ServletContext {
     public String getRealPath(String arg0) {
@@ -11,6 +12,11 @@ class OTPServletContext implements ServletContext {
         return null
     }
     public Object getAttribute(String arg0) {
+        if (arg0 == "javax.servlet.context.tempdir") {
+            File tempDir = new File(System.getProperty("user.dir") + "/target/tmp")
+            FileUtils.forceMkdir(tempDir)
+            return tempDir
+        }
         return null
     }
     public Enumeration<String> getAttributeNames() {
