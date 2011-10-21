@@ -25,6 +25,6 @@ class MetaDataEntry {
 	}
 
 	String toString() {
-		"${value}"
+		value
 	}
 }
