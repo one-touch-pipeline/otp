@@ -16,7 +16,6 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
  * @see JobDefinition
  */
 class ParameterType {
-    static belongsTo = [jobDefinition: JobDefinition]
     /**
      * The name for this parameter
      */
