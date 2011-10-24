@@ -46,7 +46,11 @@ class ErrorLogService {
      * @param thrownException The thrown exception
      */
     public void log(Exception thrownException) {
-        String fileName = (thrownException.toString() + thrownException.backtrace.toString()).encodeAsMD5() + ".xml"
+        String exceptionElements = ""
+        thrownException.stackTrace.each {
+            exceptionElements += it.toString()
+        }
+        String fileName = (exceptionElements).encodeAsMD5() + ".xml"
         File exceptionStoringFile = new File(fileName)
         String dir = servletContext.getRealPath(grailsApplication.config.otp.errorLogging.stacktraces)
         String exceptionFilePath = "${dir}${File.separatorChar}${fileName}"

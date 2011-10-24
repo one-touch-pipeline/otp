@@ -46,6 +46,8 @@ class ErrorLogServiceTests {
         Exception e = new Exception("test message")
         String path = "/target/stacktraces/testing/"
         String fullPath = servletContext.getRealPath(path)
+        // To test whether calling log method produces error
+        errorLogService.log(e)
         // To test if md5 is correctly taken as file name
         String md5Sum = (e.toString()).encodeAsMD5()
         String fileName = md5Sum + ".xml"
@@ -71,6 +73,5 @@ class ErrorLogServiceTests {
         assertSame(2, timestamps.size())
         // Test if the root node has correct attributes
         assertTrue(root.@exceptionMessage == "test message")
-        
     }
 }
