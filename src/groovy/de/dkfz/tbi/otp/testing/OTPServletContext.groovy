@@ -5,8 +5,8 @@ import javax.servlet.descriptor.JspConfigDescriptor
 import org.apache.commons.io.FileUtils
 
 class OTPServletContext implements ServletContext {
-    public String getRealPath(String arg0) {
-        return System.getProperty("user.dir") + "/target/stacktraces/testing/"
+    public String getRealPath(String relativePath) {
+        return System.getProperty("user.dir") + relativePath
     }
     public String getContextPath() {
         return null

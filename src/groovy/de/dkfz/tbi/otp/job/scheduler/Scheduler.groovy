@@ -189,7 +189,7 @@ class Scheduler {
             state: ExecutionState.FAILURE,
             previous: existingUpdates.sort { it.date }.last()
             )
-        errorLogService.writeStacktraceToFile(joinPoint.getTarget().class, e)
+        errorLogService.log(e)
         ProcessingError error = new ProcessingError(errorMessage: e.message, processingStepUpdate: update)
         update.error = error
         error.save()
