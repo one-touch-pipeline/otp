@@ -1,10 +1,15 @@
 package de.dkfz.tbi.otp.job.plan
 
 import de.dkfz.tbi.otp.job.processing.Parameter
+import de.dkfz.tbi.otp.job.processing.ParameterMapping
 import de.dkfz.tbi.otp.job.processing.ParameterType
 
 class JobDefinition {
-    static hasMany = [constantParameters: Parameter]
+    /**
+     * Mapping of parameters.
+     */
+    Collection parameterMappings
+    static hasMany = [constantParameters: Parameter, parameterMappings: ParameterMapping]
     /**
      * The JobExecutionPlan this JobDefinition belongs to.
      */
@@ -27,11 +32,6 @@ class JobDefinition {
      * The name of the Spring Bean which implements the Job to be executed for this JobDefinition
      */
     String bean
-    /**
-     * Mapping of parameters. As key the parameter type of the previous Job is used, as value
-     * the Parameter to which it is mapped.
-     */
-    Map<ParameterType, ParameterType> parameterMapping
 
     static constraints = {
         name(nullable: false, blank: false, unique: 'plan')

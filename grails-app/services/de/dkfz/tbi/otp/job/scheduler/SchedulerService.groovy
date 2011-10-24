@@ -5,7 +5,9 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.Parameter
+import de.dkfz.tbi.otp.job.processing.ParameterMapping
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
+import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessingError
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
@@ -45,9 +47,15 @@ class SchedulerService {
         }
         JobDefinition nextJob = previous.jobDefinition.next
         ProcessingStep next = new ProcessingStep(jobDefinition: nextJob, process: previous.process, previous: previous)
+        if (previous.output && !next.save()) {
+            // we have to save the next processing step as the ParameterMapping references the JobDefinition
+            // TODO: proper error handling
+            throw new RuntimeException("Something bad happened")
+        }
         previous.output.each { Parameter param ->
-            if (nextJob.parameterMapping?.containsKey(param.type)) {
-                Parameter nextParam = new Parameter(type: nextJob.parameterMapping.get(param.type), value: param.value)
+            ParameterMapping mapping = ParameterMapping.findByFromAndJob(param.type, nextJob)
+            if (mapping) {
+                Parameter nextParam = new Parameter(type: mapping.to, value: param.value)
                 next.addToInput(nextParam)
             }
         }
@@ -69,6 +77,10 @@ class SchedulerService {
                 throw new RuntimeException("Something bad happened")
             }
             if (failedConstantParameter) {
+                if (!created.save()) {
+                    // TODO: proper error handling
+                    throw new RuntimeException("Something bad happened")
+                }
                 ProcessingStepUpdate failure = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: new Date(), previous: created)
                 ProcessingError error = new ProcessingError(errorMessage: "Failed to add constant input parameter ${failedConstantParameter.id} of type ${failedConstantParameter.type.name} to new processing step",
                      processingStepUpdate: failure)
