@@ -53,8 +53,7 @@ class SchedulerServiceTests {
         // create the JobExecutionPlan
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
         assertNotNull(jep.save())
-        JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "testJob", plan: jep)
-        assertNotNull(jobDefinition.save())
+        JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
         assertNotNull(jep.save(flush: true))
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
@@ -90,13 +89,10 @@ class SchedulerServiceTests {
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
         assertNotNull(jep.save())
-        JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "testJob", plan: jep)
-        assertNotNull(jobDefinition.save())
+        JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
         assertNotNull(jep.save())
-        JobDefinition jobDefinition2 = new JobDefinition(name: "test2", bean: "testJob", plan: jep, previous: jobDefinition)
-        assertNotNull(jobDefinition2.save())
-        jobDefinition.next = jobDefinition2
+        jobDefinition.next = createTestJob("test2", jep, jobDefinition)
         assertNotNull(jobDefinition.save())
         assertNotNull(jep.save(flush: true))
         // create the Process
@@ -157,19 +153,16 @@ class SchedulerServiceTests {
         // create the JobExecutionPlan with three Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
         assertNotNull(jep.save())
-        JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "testJob", plan: jep)
-        assertNotNull(jobDefinition.save())
+        JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
         assertNotNull(jep.save())
         // second Job Definition
-        JobDefinition jobDefinition2 = new JobDefinition(name: "test2", bean: "testJob", plan: jep, previous: jobDefinition)
-        assertNotNull(jobDefinition2.save())
+        JobDefinition jobDefinition2 = createTestJob("test2", jep, jobDefinition)
         jobDefinition.next = jobDefinition2
         assertNotNull(jobDefinition.save())
         assertNotNull(jep.save(flush: true))
         // third Job Definition
-        JobDefinition jobDefinition3 = new JobDefinition(name: "test3", bean: "testJob", plan: jep, previous: jobDefinition2)
-        assertNotNull(jobDefinition3.save())
+        JobDefinition jobDefinition3 = createTestJob("test3", jep, jobDefinition2)
         jobDefinition2.next = jobDefinition3
         assertNotNull(jobDefinition2.save())
         assertNotNull(jep.save(flush: true))
@@ -270,5 +263,22 @@ class SchedulerServiceTests {
         assertEquals(2, failedStep.updates.size())
         assertEquals(ExecutionState.CREATED, failedStep.updates.toList().sort { it.id }.first().state )
         assertEquals(ExecutionState.FAILURE, failedStep.updates.toList().sort { it.id }.last().state )
+    }
+
+    /**
+     * Creates a JobDefinition for the testJob.
+     * @param name Name of the JobDefinition
+     * @param jep The JobExecutionPlan this JobDefinition will belong to
+     * @param previous The previous Job Execution plan (optional)
+     * @return Created JobDefinition
+     */
+    private JobDefinition createTestJob(String name, JobExecutionPlan jep, JobDefinition previous = null) {
+        JobDefinition jobDefinition = new JobDefinition(name: name, bean: "testJob", plan: jep, previous: previous)
+        assertNotNull(jobDefinition.save())
+        ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, usage: ParameterUsage.OUTPUT)
+        ParameterType test2 = new ParameterType(name: "test2", description: "Test description", jobDefinition: jobDefinition, usage: ParameterUsage.OUTPUT)
+        assertNotNull(test.save())
+        assertNotNull(test2.save())
+        return jobDefinition
     }
 }

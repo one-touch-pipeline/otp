@@ -6,6 +6,8 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.Parameter
+import de.dkfz.tbi.otp.job.processing.ParameterType
+import de.dkfz.tbi.otp.job.processing.ParameterUsage
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
@@ -43,8 +45,7 @@ class SchedulerTests {
     void testNormalJobExecution() {
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
         assertNotNull(jep.save())
-        JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "testJob", plan: jep)
-        assertNotNull(jobDefinition.save())
+        JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
         assertNotNull(jep.save(flush: true))
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
@@ -119,5 +120,22 @@ class SchedulerTests {
         assertEquals(ExecutionState.FAILURE, updates[2].state)
         assertNotNull(updates[2].error)
         assertEquals("Testing", updates[2].error.errorMessage)
+    }
+
+    /**
+     * Creates a JobDefinition for the testJob.
+     * @param name Name of the JobDefinition
+     * @param jep The JobExecutionPlan this JobDefinition will belong to
+     * @param previous The previous Job Execution plan (optional)
+     * @return Created JobDefinition
+     */
+    private JobDefinition createTestJob(String name, JobExecutionPlan jep, JobDefinition previous = null) {
+        JobDefinition jobDefinition = new JobDefinition(name: name, bean: "testJob", plan: jep, previous: previous)
+        assertNotNull(jobDefinition.save())
+        ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, usage: ParameterUsage.OUTPUT)
+        ParameterType test2 = new ParameterType(name: "test2", description: "Test description", jobDefinition: jobDefinition, usage: ParameterUsage.OUTPUT)
+        assertNotNull(test.save())
+        assertNotNull(test2.save())
+        return jobDefinition
     }
 }
