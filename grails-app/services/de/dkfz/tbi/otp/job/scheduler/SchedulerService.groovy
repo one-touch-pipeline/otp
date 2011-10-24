@@ -46,8 +46,10 @@ class SchedulerService {
         JobDefinition nextJob = previous.jobDefinition.next
         ProcessingStep next = new ProcessingStep(jobDefinition: nextJob, process: previous.process, previous: previous)
         previous.output.each { Parameter param ->
-            // TODO: proper mapping output to input parameters
-            next.addToInput(new Parameter(type: param.type, value: param.value))
+            if (nextJob.parameterMapping?.containsKey(param.type)) {
+                Parameter nextParam = new Parameter(type: nextJob.parameterMapping.get(param.type), value: param.value)
+                next.addToInput(nextParam)
+            }
         }
         // add constant parameters to the next processing step
         Parameter failedConstantParameter = null

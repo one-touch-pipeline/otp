@@ -205,12 +205,7 @@ class SchedulerServiceTests {
         assertNotNull(step2)
         assertSame(step, step2.previous)
         assertSame(step2, step.next)
-        List<Parameter> parameters = step2.input.toList().sort{ it.type.id }
-        assertEquals(2, parameters.size())
-        assertEquals("test", parameters[0].type.name)
-        assertEquals("test2", parameters[1].type.name)
-        assertEquals("1234", parameters[0].value)
-        assertEquals("4321", parameters[1].value)
+        assertNull(step2.input)
         // continue
         schedulerService.schedule()
         // the third Job should be scheduled
@@ -223,16 +218,12 @@ class SchedulerServiceTests {
         assertSame(step2, step3.previous)
         assertSame(step3, step2.next)
         assertNull(step3.next)
-        parameters = step3.input.toList().sort{ it.value }
-        assertEquals(4, parameters.size())
-        assertEquals("test", parameters[0].type.name)
-        assertEquals("test2", parameters[1].type.name)
-        assertSame(constantParameterType, parameters[2].type)
-        assertSame(constantParameterType, parameters[3].type)
-        assertEquals("1234", parameters[0].value)
-        assertEquals("4321", parameters[1].value)
-        assertEquals("constant1", parameters[2].value)
-        assertEquals("constant2", parameters[3].value)
+        List<Parameter> parameters = step3.input.toList().sort{ it.value }
+        assertEquals(2, parameters.size())
+        assertSame(constantParameterType, parameters[0].type)
+        assertSame(constantParameterType, parameters[1].type)
+        assertEquals("constant1", parameters[0].value)
+        assertEquals("constant2", parameters[1].value)
         // there should not have been a parameter created for the constant types
         assertEquals(2, Parameter.countByType(constantParameterType))
         // continue
