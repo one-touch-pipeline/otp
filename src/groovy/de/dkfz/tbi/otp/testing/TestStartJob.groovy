@@ -28,7 +28,7 @@ class TestStartJob implements StartJob {
 
     @Override
     public String getVersion() {
-        return "1"
+        return ""
     }
 
 }

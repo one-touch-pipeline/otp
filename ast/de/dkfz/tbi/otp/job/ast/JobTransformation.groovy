@@ -43,8 +43,7 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
  * @see JobExecution
  */
 @GroovyASTTransformation(phase=CompilePhase.SEMANTIC_ANALYSIS)
-class JobTransformation implements ASTTransformation {
-    Git git = null
+class JobTransformation extends AbstractJobTransformation implements ASTTransformation {
 
     @Override
     public void visit(ASTNode[] astNodes, SourceUnit sourceUnit) {
@@ -93,46 +92,9 @@ class JobTransformation implements ASTTransformation {
                 if (method.getName() == "execute") {
                     method.addAnnotation(new AnnotationNode(new ClassNode(this.class.classLoader.loadClass("de.dkfz.tbi.otp.job.scheduler.JobExecution"))))
                 }
-                if (method.getName() == "getVersion") {
-                    if (!git) {
-                        setupGit()
-                    }
-                    String version = "Unresolved Version"
-                    // find the latest git commit on the file
-                    Iterator<RevCommit> log = git.log().addPath(classNameToPath(classNode.name)).call().iterator()
-                    if (log.hasNext()) {
-                        RevCommit commit = log.next()
-                        version = commit.getName()
-                    }
-                    // and add a return statement for the method
-                    method.setCode(new ReturnStatement(new ConstantExpression(version)))
-                }
+                createGetVersion(method)
             }
         }
-    }
-
-    /**
-     * Creates the git repository from the current working directory.
-     * Assumes that the directory from where grails something is called is the root of a git repository.
-     * This assumption should hold for whenever a grails project is git versioned.
-     */
-    private void setupGit() {
-        FileRepositoryBuilder builder = new FileRepositoryBuilder()
-        Repository repository = builder.setWorkTree(new File(System.getProperty("user.dir")))
-        .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
-        .build()
-        git = new Git(repository)
-    }
-
-    /**
-     * Translates a fully qualified class name into the directory structure.
-     * Assumes that all files are in src/groovy and end with .groovy.
-     * @param className The Class Name as org.example.foo.Bar
-     * @return Path to the source file, e.g. src/groovy/org/example/foo/Bar.groovy
-     */
-    private String classNameToPath(String className) {
-        return "src/groovy/" + className.replace('.', '/') + ".groovy"
     }
 
 }
