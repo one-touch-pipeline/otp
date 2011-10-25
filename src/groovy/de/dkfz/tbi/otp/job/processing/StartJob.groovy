@@ -18,4 +18,16 @@ public interface StartJob {
      * @return The JobExecutionPlan which is triggered by this StartJob.
      **/
     public JobExecutionPlan getExecutionPlan()
+
+    /**
+     * Returns a unique version identifier of this class version.
+     *
+     * The version is the git SHA hash of the last change. The code of this method in implementing
+     * classes gets auto-generated through an AST Transformation.
+     *
+     * Although the code gets generated a dummy implementation can be added just to make the IDE
+     * happy.
+     * @return Unique identifier of the source code version of the class.
+     **/
+    public String getVersion()
 }

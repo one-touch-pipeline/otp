@@ -26,9 +26,9 @@ class JobExecutionPlan {
      */
     JobDefinition firstJob
     /**
-     * The name of the StartJob which triggers the Process for this Job Execution Plan.
+     * The JobDefinition describing the StartJob
      */
-    String startJobBean
+    StartJobDefinition startJob
     /**
      * Whether this Job Execution Plan is currently enabled or disabled. If it is disabled
      * no new Job will be started for this Plan.
@@ -47,6 +47,7 @@ class JobExecutionPlan {
         })
         // firstJob needs to be nullable as JobDefinition has a dependency on JobExecutionPlan and this circle could not be solved in the database
         firstJob(nullable: true)
-        startJobBean(nullable: false, blank: false)
+        // firstJob needs to be nullable as JobDefinition has a dependency on JobExecutionPlan and this circle could not be solved in the database
+        startJob(nullable: true)
     }
 }

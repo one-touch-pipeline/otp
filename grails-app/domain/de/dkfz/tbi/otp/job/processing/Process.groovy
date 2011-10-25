@@ -18,10 +18,8 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
  * @see JobDefinition
  * @see groovy.de.dkfz.tbi.otp.job.processing.Job
  * @see groovy.de.dkfz.tbi.otp.job.processing.StartJob
- * @see Parameter
  **/
 public class Process implements Serializable {
-    static hasMany = [input: Parameter]
     /**
      * The Date when this process was started.
      **/

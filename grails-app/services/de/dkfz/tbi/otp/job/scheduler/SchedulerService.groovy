@@ -12,6 +12,7 @@ import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessingError
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
+import de.dkfz.tbi.otp.job.processing.StartJob
 
 import java.util.concurrent.Callable
 import java.util.concurrent.locks.Lock
@@ -113,7 +114,84 @@ class SchedulerService {
         }
     }
 
-    public void createProcess(JobExecutionPlan plan, List<Parameter> input) {
+    /**
+     * Creates a new {@link Process} for the {@link JobExecutionPlan} plan triggered by
+     * the {@link StartJob}.
+     *
+     * From the JobExecutionPlan the first {@link JobDefinition} describing the first Job
+     * is derived and a {@link ProcessingStep} is created. The {@link Parameter}s passed into
+     * the method are mapped to the input parameters accepted by the first JobDefinition.
+     * Last but not least the created ProcessingStep gets scheduled.
+     * @param startJob The StartJob which wants to trigger the Process
+     * @param input List of Parameters provided by the StartJob for this Process.
+     */
+    public void createProcess(StartJob startJob, List<Parameter> input) {
+        JobExecutionPlan plan = startJob.getExecutionPlan()
+        Process process = new Process(started: new Date(),
+            jobExecutionPlan: plan,
+            startJobClass: startJob.class.toString(),
+            startJobVersion: startJob.getVersion()
+        )
+        if (!process.save()) {
+            // TODO: proper error handling
+            throw new RuntimeException("Could not save the process for the JobExecutionPlan ${plan.id}")
+        }
+        // TODO: merge with createNextProcessingStep
+        // create the first processing step
+        ProcessingStep step = new ProcessingStep(jobDefinition: plan.firstJob, process: process)
+        // TODO: how to map the parameters?
+        if (input && !step.save()) {
+            // we have to save the next processing step as the ParameterMapping references the JobDefinition
+            // TODO: proper error handling
+            throw new RuntimeException("Something bad happened")
+        }
+        input.each { Parameter param ->
+            ParameterMapping mapping = ParameterMapping.findByFromAndJob(param.type, plan.firstJob)
+            if (mapping) {
+                Parameter nextParam = new Parameter(type: mapping.to, value: param.value)
+                if (mapping.to.usage == ParameterUsage.PASSTHROUGH) {
+                    step.addToOutput(nextParam)
+                } else {
+                    step.addToInput(nextParam)
+                }
+            }
+        }
+        // add constant parameters to the next processing step
+        Parameter failedConstantParameter = null
+        plan.firstJob.constantParameters.each { Parameter param ->
+            if (param.type.usage != ParameterUsage.INPUT) {
+                failedConstantParameter = param
+                return // continue
+            }
+            step.addToInput(param)
+        }
+        ProcessingStepUpdate created = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date())
+        step.addToUpdates(created)
+        lock.lock()
+        try {
+            if (!step.save(flush: true)) {
+                // TODO: proper error handling
+                throw new RuntimeException("Could not save the first ProcessingStep for Process ${process.id}")
+            }
+            if (failedConstantParameter) {
+                if (!created.save()) {
+                    // TODO: proper error handling
+                    throw new RuntimeException("Something bad happened")
+                }
+                ProcessingStepUpdate failure = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: new Date(), previous: created)
+                ProcessingError error = new ProcessingError(errorMessage: "Failed to add constant input parameter ${failedConstantParameter.id} of type ${failedConstantParameter.type.name} to new processing step",
+                     processingStepUpdate: failure)
+                failure.error = error
+                step.addToUpdates(failure)
+                if (!step.save(flush: true)) {
+                    // TODO: proper error handling
+                    throw new RuntimeException("Something bad happened")
+                }
+            }
+            queue.add(step)
+        } finally {
+            lock.unlock()
+        }
     }
 
     /**
