@@ -56,7 +56,11 @@ class SchedulerService {
             ParameterMapping mapping = ParameterMapping.findByFromAndJob(param.type, nextJob)
             if (mapping) {
                 Parameter nextParam = new Parameter(type: mapping.to, value: param.value)
-                next.addToInput(nextParam)
+                if (mapping.to.usage == ParameterUsage.PASSTHROUGH) {
+                    next.addToOutput(nextParam)
+                } else {
+                    next.addToInput(nextParam)
+                }
             }
         }
         // add constant parameters to the next processing step

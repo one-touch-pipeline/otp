@@ -337,4 +337,71 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         schedulerService.schedule()
         assertTrue(process.finished)
     }
+
+    @Test
+    void testPassthroughParameters() {
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // create the JobExecutionPlan with two Job Definitions
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = createTestJob("test", jep)
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        // second Job Definition
+        JobDefinition jobDefinition2 = createTestJob("test2", jep, jobDefinition)
+        ParameterType passThrough = new ParameterType(jobDefinition: jobDefinition2, name: "passthrough", description: "test", usage: ParameterUsage.PASSTHROUGH)
+        assertNotNull(passThrough.save())
+        ParameterMapping mapping = new ParameterMapping(job: jobDefinition2, from: ParameterType.findByJobDefinitionAndName(jobDefinition, "test"), to: passThrough)
+        jobDefinition2.addToParameterMappings(mapping)
+        jobDefinition.next = jobDefinition2
+        assertNotNull(jobDefinition.save())
+        assertNotNull(jobDefinition2.save())
+        assertNotNull(jep.save())
+        // create the Process
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        assertNotNull(process.save())
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assertNotNull(step.save())
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.CREATED,
+            previous: null
+            )
+        step.addToUpdates(update)
+        assertNotNull(step.save(flush: true))
+
+        // running the JobExecutionPlan
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        assertTrue(schedulerService.queue.add(step))
+        assertNull(Parameter.findByType(passThrough))
+        schedulerService.schedule()
+        Parameter passThroughParameter = Parameter.findByType(passThrough)
+        assertNotNull(passThroughParameter)
+        // another Job should be be scheduled
+        assertFalse(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // there should be a processing step for jobDefinition2 with no input parameter
+        ProcessingStep step2 = ProcessingStep.findByJobDefinition(jobDefinition2)
+        assertNotNull(step2)
+        assertSame(step, step2.previous)
+        assertSame(step2, step.next)
+        assertNull(step2.input)
+        // schedule the next Job
+        schedulerService.schedule()
+        // no Job should be be scheduled
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // there should be three output parameters
+        assertNotNull(step2.output)
+        List<Parameter> params = step2.output.toList().sort{ it.value }
+        assertEquals(3, params.size())
+        assertEquals("1234", params[0].value)
+        assertEquals("1234", params[1].value)
+        assertEquals("4321", params[2].value)
+        assertTrue(params.contains(passThroughParameter))
+        // should be finished
+        assertTrue(process.finished)
+    }
 }
