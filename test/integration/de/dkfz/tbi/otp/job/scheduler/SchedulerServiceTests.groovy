@@ -443,4 +443,68 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
     }
+
+    @Test
+    void testCreateProcessWithParameters() {
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // create the JobExecutionPlan with one Job Definition
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
+        assertNotNull(jep.save())
+        // create the StartJobDefinition for the JobExecutionPlan
+        StartJobDefinition startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: jep)
+        assertNotNull(startJob.save())
+        jep.startJob = startJob
+        assertNotNull(jep.save())
+        // create first job definition
+        JobDefinition jobDefinition = createTestJob("test", jep)
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        // create some Parameter Types
+        ParameterType type1 = new ParameterType(name: "test", description: "StartJob Parameter", jobDefinition: startJob, usage: ParameterUsage.OUTPUT)
+        assertNotNull(type1.save())
+        ParameterType type2 = new ParameterType(name: "test2", description: "StartJob Parameter", jobDefinition: startJob, usage: ParameterUsage.OUTPUT)
+        assertNotNull(type2.save())
+        ParameterType passthrough = new ParameterType(name: "passthrough", description: "Job Passthrough Parameter", jobDefinition: jobDefinition, usage: ParameterUsage.PASSTHROUGH)
+        assertNotNull(passthrough.save())
+        ParameterType input = new ParameterType(name: "input", description: "Input Parameter", jobDefinition: jobDefinition, usage: ParameterUsage.INPUT)
+        assertNotNull(input.save())
+        // is StartJobDefinition a Problem for ParameterType?
+        assertSame(startJob, type1.jobDefinition)
+        assertSame(startJob, type2.jobDefinition)
+        assertSame(jobDefinition, passthrough.jobDefinition)
+        assertSame(jobDefinition, input.jobDefinition)
+        // create the ParameterMapping
+        ParameterMapping mapping1 = new ParameterMapping(from: type1, to: passthrough, jobDefinition: jobDefinition)
+        ParameterMapping mapping2 = new ParameterMapping(from: type2, to: input, jobDefinition: jobDefinition)
+        jobDefinition.addToParameterMappings(mapping1)
+        jobDefinition.addToParameterMappings(mapping2)
+        assertNotNull(jobDefinition.save(flush: true))
+        // get the startjob
+        StartJob job = grailsApplication.mainContext.getBean("testStartJob", jep) as StartJob
+        assertNotNull(job)
+        assertEquals(0, Process.count())
+        assertEquals(0, ProcessingStep.count())
+        schedulerService.createProcess(job, [new Parameter(value: "1234", type: type1), new Parameter(value: "abcd", type: type2)])
+        // verify that the Process is created
+        assertFalse(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        assertEquals(1, Process.count())
+        assertEquals(1, ProcessingStep.count())
+        Process process = Process.findByJobExecutionPlan(jep)
+        assertNotNull(process)
+        assertSame(schedulerService.queue.first().jobDefinition, jobDefinition)
+        assertFalse(process.finished)
+        // first processing step should have one input parameter and one output parameter
+        ProcessingStep step = schedulerService.queue.first()
+        assertEquals(1, step.input.size())
+        assertEquals(1, step.output.size())
+        assertSame(passthrough, step.output.toList()[0].type)
+        assertSame(input, step.input.toList()[0].type)
+        // running the Job should create more output params
+        schedulerService.schedule()
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        assertEquals(3, step.output.size())
+    }
 }
