@@ -4,6 +4,8 @@ import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
 import de.dkfz.tbi.otp.job.processing.InvalidStateException;
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.Parameter
+import de.dkfz.tbi.otp.job.processing.ParameterType
+import de.dkfz.tbi.otp.job.processing.ParameterUsage
 import de.dkfz.tbi.otp.job.processing.ProcessingError
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.job.processing.ExecutionState
@@ -133,12 +135,68 @@ class Scheduler {
             previous: existingUpdates.sort { it.date }.last()
             )
         job.processingStep.addToUpdates(update)
+        Parameter failedOutputParameter
         job.getOutputParameters().each { Parameter param ->
+            if (param.type.usage != ParameterUsage.OUTPUT) {
+                failedOutputParameter = param
+            }
+            if (param.type.jobDefinition != job.processingStep.jobDefinition) {
+                failedOutputParameter = param
+            }
             job.processingStep.addToOutput(param)
         }
         if (!job.processingStep.save(flush: true)) {
             log.fatal("Could not create a FINISHED Update for Job of type ${joinPoint.target.class}")
             throw new RuntimeException("Could not create a FINISHED Update for Job")
+        }
+        if (failedOutputParameter) {
+            // at least one output parameter is wrong - set to failure
+            ProcessingStepUpdate failedParameterUpdate = new ProcessingStepUpdate(
+                date: new Date(),
+                state: ExecutionState.FAILURE,
+                previous: update)
+            ProcessingError error = new ProcessingError(errorMessage: "Parameter ${failedOutputParameter.value} is either not defined for JobDefintion ${job.processingStep.jobDefinition.id} or not of type Output.",
+                processingStepUpdate: failedParameterUpdate)
+            failedParameterUpdate.error = error
+            error.save()
+            job.processingStep.addToUpdates(failedParameterUpdate)
+            if (!job.processingStep.save(flush: true)) {
+                // TODO: trigger error handling
+                log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
+                throw new RuntimeException("Could not create a FAILURE Update for Job")
+            }
+            // TODO: trigger error handling
+            return
+        }
+        // check that all Output Parameters are set
+        List<ParameterType> parameterTypes = ParameterType.findAllByJobDefinitionAndUsage(job.processingStep.jobDefinition, ParameterUsage.OUTPUT)
+        for (ParameterType parameterType in parameterTypes) {
+            boolean found = false
+            for (Parameter param in job.processingStep.output) {
+                if (param.type == parameterType) {
+                    found = true
+                    break
+                }
+            }
+            if (!found) {
+                // a required output parameter has not been generated
+                ProcessingStepUpdate failedParameterUpdate = new ProcessingStepUpdate(
+                    date: new Date(),
+                    state: ExecutionState.FAILURE,
+                    previous: update)
+                ProcessingError error = new ProcessingError(errorMessage: "Required Output Parameter of type ${parameterType.id} is not set.",
+                    processingStepUpdate: failedParameterUpdate)
+                failedParameterUpdate.error = error
+                error.save()
+                job.processingStep.addToUpdates(failedParameterUpdate)
+                if (!job.processingStep.save(flush: true)) {
+                    // TODO: trigger error handling
+                    log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
+                    throw new RuntimeException("Could not create a FAILURE Update for Job")
+                }
+                // TODO: trigger error handling
+                return
+            }
         }
 
         // test whether the Job knows if it ended
@@ -189,7 +247,11 @@ class Scheduler {
             state: ExecutionState.FAILURE,
             previous: existingUpdates.sort { it.date }.last()
             )
-        errorLogService.log(e)
+        try {
+            errorLogService.log(e)
+        } catch (Exception ex) {
+            println ex.message
+        }
         ProcessingError error = new ProcessingError(errorMessage: e.message, processingStepUpdate: update)
         update.error = error
         error.save()

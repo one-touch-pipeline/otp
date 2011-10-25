@@ -122,6 +122,96 @@ class SchedulerTests {
         assertEquals("Testing", updates[2].error.errorMessage)
     }
 
+    @Test
+    void testMissingOutputParameter() {
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = createTestJob("test", jep)
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        // create a third parameter type for which the job does not create a parameter
+        ParameterType type = new ParameterType(name: "fail", description: "Test description", jobDefinition: jobDefinition, usage: ParameterUsage.OUTPUT)
+        assertNotNull(type.save())
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        assertNotNull(process.save())
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assertNotNull(step.save())
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.CREATED,
+            previous: null
+            )
+        step.addToUpdates(update)
+        assertNotNull(step.save(flush: true))
+        // run the Job
+        Job job = grailsApplication.mainContext.getBean("testJob", step, [] as Set) as Job
+        job.execute()
+        assertEquals(4, step.updates.size())
+        List<ProcessingStepUpdate> updates = step.updates.toList().sort { it.id }
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FINISHED, updates[2].state)
+        assertEquals(ExecutionState.FAILURE, updates[3].state)
+        assertNotNull(updates[3].error)
+        assertEquals("Required Output Parameter of type ${type.id} is not set.".toString(), updates[3].error.errorMessage)
+    }
+
+    @Test
+    void testInputAsOutputParameter() {
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "directTestJob", plan: jep)
+        assertNotNull(jobDefinition.save())
+        ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, usage: ParameterUsage.INPUT)
+        assertNotNull(test.save())
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        assertNotNull(process.save())
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assertNotNull(step.save())
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.CREATED,
+            previous: null
+            )
+        step.addToUpdates(update)
+        assertNotNull(step.save(flush: true))
+        Job job = grailsApplication.mainContext.getBean("directTestJob", step, [] as Set) as Job
+        // run the Job
+        job.execute()
+        assertEquals(4, step.updates.size())
+        List<ProcessingStepUpdate> updates = step.updates.toList().sort { it.id }
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FINISHED, updates[2].state)
+        assertEquals(ExecutionState.FAILURE, updates[3].state)
+        assertNotNull(updates[3].error)
+        assertEquals("Parameter abcd is either not defined for JobDefintion ${jobDefinition.id} or not of type Output.".toString(), updates[3].error.errorMessage)
+        // verify that the test works if we use a proper parameter type
+        test.usage = ParameterUsage.OUTPUT
+        assertNotNull(test.save())
+        process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        assertNotNull(process.save())
+        step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assertNotNull(step.save())
+        update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.CREATED,
+            previous: null
+            )
+        step.addToUpdates(update)
+        assertNotNull(step.save(flush: true))
+        job = grailsApplication.mainContext.getBean("directTestJob", step, [] as Set) as Job
+        // run the Job
+        job.execute()
+        assertEquals(3, step.updates.size())
+        updates = step.updates.toList().sort { it.id }
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FINISHED, updates[2].state)
+    }
+
     /**
      * Creates a JobDefinition for the testJob.
      * @param name Name of the JobDefinition
