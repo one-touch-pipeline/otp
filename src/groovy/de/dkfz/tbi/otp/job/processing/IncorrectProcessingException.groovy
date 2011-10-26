@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.job.scheduler.SchedulerException
+
 /**
 * Exception thrown when processing fails
 *
