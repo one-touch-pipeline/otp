@@ -79,7 +79,7 @@ class JobTransformation extends AbstractJobTransformation implements ASTTransfor
                 // add constructor with two arguments calling the super class constructor
                 Parameter[] params = [
                     new Parameter(classNode.superClass.getField("processingStep").type, "a"),
-                    new Parameter(new ClassNode(Set), "b") ] as Parameter[]
+                    new Parameter(new ClassNode(Collection), "b") ] as Parameter[]
                 BlockStatement stmt = new BlockStatement()
                 stmt.addStatement(new ExpressionStatement(new ConstructorCallExpression(ClassNode.SUPER, new ArgumentListExpression(new VariableExpression("a"), new VariableExpression("b")))))
                 classNode.addConstructor(Opcodes.ACC_PUBLIC, params, ClassNode.EMPTY_ARRAY, stmt)

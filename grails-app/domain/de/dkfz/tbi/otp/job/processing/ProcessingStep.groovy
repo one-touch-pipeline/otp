@@ -21,6 +21,18 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
  * @see Parameter
  **/
 public class ProcessingStep implements Serializable {
+    /**
+     * Input Parameters added to this ProcessingStep.
+     */
+    Collection<Parameter> input
+    /**
+     * Output Parameters generated during this ProcessingStep.
+     */
+    Collection<Parameter> output
+    /**
+     * The history of state updates of this ProcessingStep
+     */
+    Collection<ProcessingStepUpdate> updates
     static hasMany = [input: Parameter, output: Parameter, updates: ProcessingStepUpdate]
     /**
      * The JobDefinition this ProcessingStep is generated from.
