@@ -52,17 +52,12 @@ class SchedulerService {
         try {
             previous.next = next
             if (!previous.save()) {
-                // TODO: proper error handling
-                throw new RuntimeException("Something bad happened")
+                throw new SchedulerPersistencyException("Could not save previous ProcessingStep for the process ${previous.process.id}")
             }
             if (!next.process.save(flush: true)) {
-                // TODO: proper error handling
-                throw new RuntimeException("Something bad happened")
+                throw new SchedulerPersistencyException("Could not save next ProcessingStep for the process ${next.process.id}")
             }
             queue.add(next)
-        } catch (Exception e) {
-            // TODO: proper error handling
-            println e.message
         } finally {
             lock.unlock()
         }
@@ -87,14 +82,12 @@ class SchedulerService {
             startJobVersion: startJob.getVersion()
         )
         if (!process.save()) {
-            // TODO: proper error handling
-            throw new RuntimeException("Could not save the process for the JobExecutionPlan ${plan.id}")
+            throw new SchedulerPersistencyException("Could not save the process for the JobExecutionPlan ${plan.id}")
         }
         // create the first processing step
         ProcessingStep step = createProcessingStep(process, plan.firstJob, input)
         if (!process.save(flush: true)) {
-            // TODO: proper error handling
-            throw new RuntimeException("Could not save the process for the JobExecutionPlan ${plan.id}")
+            throw new SchedulerPersistencyException("Could not save the process for the JobExecutionPlan ${plan.id}")
         }
         lock.lock()
         try {
@@ -177,8 +170,7 @@ class SchedulerService {
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process, previous: previous)
         if (input && !step.save()) {
             // we have to save the next processing step as the ParameterMapping references the JobDefinition
-            // TODO: proper error handling
-            throw new RuntimeException("Something bad happened")
+            throw new SchedulerPersistencyException("Could not create new ProcessingStep for Process ${process.id}")
         }
         input.each { Parameter param ->
             ParameterMapping mapping = ParameterMapping.findByFromAndJob(param.type, jobDefinition)
@@ -203,13 +195,11 @@ class SchedulerService {
         ProcessingStepUpdate created = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date())
         step.addToUpdates(created)
         if (!step.save(flush: true)) {
-            // TODO: proper error handling
-            throw new RuntimeException("Could not save the first ProcessingStep for Process ${process.id}")
+            throw new SchedulerPersistencyException("Could not save the first ProcessingStep for Process ${process.id}")
         }
         if (failedConstantParameter) {
             if (!created.save()) {
-                // TODO: proper error handling
-                throw new RuntimeException("Something bad happened")
+                throw new SchedulerPersistencyException("Could not save ProcessingStepUpdate for Process ${process.id}")
             }
             ProcessingStepUpdate failure = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: new Date(), previous: created)
             ProcessingError error = new ProcessingError(errorMessage: "Failed to add constant input parameter ${failedConstantParameter.id} of type ${failedConstantParameter.type.name} to new processing step",
@@ -217,8 +207,7 @@ class SchedulerService {
             failure.error = error
             step.addToUpdates(failure)
             if (!step.save()) {
-                // TODO: proper error handling
-                throw new RuntimeException("Something bad happened")
+                throw new SchedulerPersistencyException("Could not save the ProcessingStep for Process ${process.id}")
             }
         }
         return step

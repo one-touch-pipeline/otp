@@ -79,12 +79,10 @@ abstract class AbstractJobImpl implements Job {
         // find the ParameterType
         ParameterType type = ParameterType.findByNameAndJobDefinition(name, processingStep.jobDefinition)
         if (!type) {
-            // TODO: throw proper Exception
-            throw new RuntimeException("ParameterType missing")
+            throw new ProcessingException("ParameterType missing")
         }
         if (type.usage != ParameterUsage.OUTPUT) {
-            // TODO: throw proper Exception
-            throw new RuntimeException("Not an output parameter")
+            throw new ProcessingException("Not an output parameter")
         }
         outputParameters << new Parameter(type: type, value: value)
     }

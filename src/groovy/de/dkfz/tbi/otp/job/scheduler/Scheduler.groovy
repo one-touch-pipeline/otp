@@ -1,12 +1,16 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
+import de.dkfz.tbi.otp.job.processing.IncorrectProcessingException
 import de.dkfz.tbi.otp.job.processing.InvalidStateException;
 import de.dkfz.tbi.otp.job.processing.Job
+import de.dkfz.tbi.otp.job.processing.JobExcecutionException
+import de.dkfz.tbi.otp.job.processing.LoggingException;
 import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
 import de.dkfz.tbi.otp.job.processing.ProcessingError
+import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import org.apache.commons.logging.LogFactory
@@ -73,17 +77,17 @@ class Scheduler {
             // verify that the Job has a processing Step
             if (!job.processingStep) {
                 log.fatal("Job of type ${joinPoint.target.class} executed without a ProcessingStep being set")
-                throw new RuntimeException("Job executed without a ProcessingStep being set")
+                throw new ProcessingException("Job executed without a ProcessingStep being set")
             }
             // get the last ProcessingStepUpdate
             List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(job.processingStep)
             if (existingUpdates.isEmpty()) {
                 log.fatal("Job of type ${joinPoint.target.class} executed before entering the CREATED state")
-                throw new RuntimeException("Job executed before entering the CREATED state")
+                throw new ProcessingException("Job executed before entering the CREATED state")
             } else if (existingUpdates.size() > 1) {
                 if (existingUpdates.sort{ it.id }.last().state == ExecutionState.FAILURE) {
                     // scheduler is already in failed state - no reason to process
-                    throw new RuntimeException("Job already in failed condition before execution")
+                    throw new ProcessingException("Job already in failed condition before execution")
                 }
             }
             // add a ProcessingStepUpdate to the ProcessingStep
@@ -96,16 +100,14 @@ class Scheduler {
             job.processingStep.addToUpdates(update)
             if (!job.processingStep.save(flush: true)) {
                 log.fatal("Could not create a STARTED Update for Job of type ${joinPoint.target.class}")
-                throw new RuntimeException("Could not create a STARTED Update for Job")
+                throw new ProcessingException("Could not create a STARTED Update for Job")
             }
             log.debug("doCreateCheck performed for ${joinPoint.getTarget().class} with ProcessingStep ${job.processingStep.id}")
             job.start()
         } catch (RuntimeException e) {
-            // TODO: trigger error handling
             // removing Job from running
             schedulerService.removeRunningJob(job)
-            // pass along the exception
-            throw e
+            throw new SchedulerException("Could not create @Before annotation for Job of type ${joinPoint.target.class}", e.cause)
         }
     }
 
@@ -147,7 +149,7 @@ class Scheduler {
         }
         if (!job.processingStep.save(flush: true)) {
             log.fatal("Could not create a FINISHED Update for Job of type ${joinPoint.target.class}")
-            throw new RuntimeException("Could not create a FINISHED Update for Job")
+            throw new ProcessingException("Could not create a FINISHED Update for Job")
         }
         if (failedOutputParameter) {
             // at least one output parameter is wrong - set to failure
@@ -161,12 +163,10 @@ class Scheduler {
             error.save()
             job.processingStep.addToUpdates(failedParameterUpdate)
             if (!job.processingStep.save(flush: true)) {
-                // TODO: trigger error handling
                 log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
-                throw new RuntimeException("Could not create a FAILURE Update for Job")
+                throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
             }
-            // TODO: trigger error handling
-            return
+            throw new IncorrectProcessingException("Could not correctly set output parameter for Job of type ${joinPoint.target.class}")
         }
         // check that all Output Parameters are set
         List<ParameterType> parameterTypes = ParameterType.findAllByJobDefinitionAndUsage(job.processingStep.jobDefinition, ParameterUsage.OUTPUT)
@@ -190,12 +190,10 @@ class Scheduler {
                 error.save()
                 job.processingStep.addToUpdates(failedParameterUpdate)
                 if (!job.processingStep.save(flush: true)) {
-                    // TODO: trigger error handling
                     log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
-                    throw new RuntimeException("Could not create a FAILURE Update for Job")
+                    throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
                 }
-                // TODO: trigger error handling
-                return
+                throw new IncorrectProcessingException("Could not correctly set output parameter for Job of type ${joinPoint.target.class}")
             }
         }
 
@@ -210,15 +208,17 @@ class Scheduler {
             job.processingStep.addToUpdates(endStateUpdate)
             if (!job.processingStep.save(flush: true)) {
                 log.fatal("Could not create a ERROR/SUCCESS Update for Job of type ${joinPoint.target.class}")
-                throw new RuntimeException("Could not create a ERROR/SUCCESS Update for Job")
+                throw new JobExcecutionException("Could not create a ERROR/SUCCESS Update for Job")
             }
             if (endStateAwareJob.getEndState() == ExecutionState.FAILURE) {
-                // TODO: do error handling
-                // we failed, so don't start next Job
-                return
+                throw new ProcessingException("Something went wrong in endStateAwareJob of type ${joinPoint.target.class}, execution state set to FAILURE")
             }
         }
-        schedulerService.createNextProcessingStep(job.processingStep)
+        try {
+            schedulerService.createNextProcessingStep(job.processingStep)
+        } catch(Exception se) {
+            throw new SchedulerException("Could not create new ProcessingStep", se.cause)
+        }
         log.debug("doEndCheck performed for ${joinPoint.getTarget().class} with ProcessingStep ${job.processingStep.id}")
     }
 
@@ -250,7 +250,7 @@ class Scheduler {
         try {
             errorLogService.log(e)
         } catch (Exception ex) {
-            println ex.message
+            throw new LoggingException("Could not write error log file properly", ex.cause)
         }
         ProcessingError error = new ProcessingError(errorMessage: e.message, processingStepUpdate: update)
         update.error = error
@@ -259,7 +259,7 @@ class Scheduler {
         if (!job.processingStep.save(flush: true)) {
             // TODO: trigger error handling
             log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
-            throw new RuntimeException("Could not create a FAILURE Update for Job")
+            throw new ProcessingException("Could not create a FAILURE Update for Job")
         }
         // TODO: trigger error handling
         log.debug("doErrorHandling performed for ${joinPoint.getTarget().class} with ProcessingStep ${job.processingStep.id}")
