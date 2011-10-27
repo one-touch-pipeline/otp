@@ -141,9 +141,11 @@ class Scheduler {
         job.getOutputParameters().each { Parameter param ->
             if (param.type.usage != ParameterUsage.OUTPUT) {
                 failedOutputParameter = param
+                return // continue
             }
             if (param.type.jobDefinition != job.processingStep.jobDefinition) {
                 failedOutputParameter = param
+                return // continue
             }
             job.processingStep.addToOutput(param)
         }

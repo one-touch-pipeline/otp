@@ -91,4 +91,70 @@ class ProcessingStepTests {
         otherType.usage = ParameterUsage.INPUT
         assertTrue(step.validate())
     }
+
+    void testOutput() {
+        Process process = new Process()
+        JobDefinition jobDefinition = new JobDefinition()
+        JobDefinition jobDefinition2 = new JobDefinition()
+        mockDomain(Process, [process])
+        mockDomain(JobDefinition, [jobDefinition, jobDefinition2])
+        mockForConstraintsTests(ProcessingStep, [])
+
+        ProcessingStep step = new ProcessingStep(jobClass: "foo",
+            jobVersion: "bar",
+            process: process,
+            jobDefinition: jobDefinition
+            )
+        // simple ProcessingStep which should validate
+        assertTrue(step.validate())
+        // prepare a Parameter
+        ParameterType type = new ParameterType(name: "test", jobDefinition: jobDefinition, usage: ParameterUsage.OUTPUT)
+        mockForConstraintsTests(ParameterType, [])
+        assertTrue(type.validate())
+        mockForConstraintsTests(Parameter, [])
+        Parameter parameter = new Parameter(value: "1234", type: type)
+        assertTrue(parameter.validate())
+        step.addToOutput(parameter)
+        assertTrue(step.validate())
+        // use a passthrough parameter
+        ParameterType passThroughType = new ParameterType(name: "passthrough", jobDefinition: jobDefinition, usage: ParameterUsage.PASSTHROUGH)
+        assertTrue(passThroughType.validate())
+        Parameter passThrough = new Parameter(value: "passThrough", type: passThroughType)
+        assertTrue(passThrough.validate())
+        step.addToOutput(passThrough)
+        assertTrue(step.validate())
+        // a Parameter for another job definition should fail
+        ParameterType otherJobType = new ParameterType(name: "other", jobDefinition: jobDefinition2, usage: ParameterUsage.OUTPUT)
+        assertTrue(otherJobType.validate())
+        Parameter otherJob = new Parameter(value: "other", type: otherJobType)
+        assertTrue(otherJob.validate())
+        step.addToOutput(otherJob)
+        assertFalse(step.validate())
+        assertEquals("invalid.jobDefinition", step.errors["output"])
+        otherJob.type = type
+        assertTrue(step.validate())
+        // a Parameter for usage input should fail
+        ParameterType inputType = new ParameterType(name: "input", jobDefinition: jobDefinition, usage: ParameterUsage.INPUT)
+        assertTrue(inputType.validate())
+        Parameter input = new Parameter(value: "input", type: inputType)
+        assertTrue(input.validate())
+        step.addToOutput(input)
+        assertFalse(step.validate())
+        assertEquals("invalid.usage", step.errors["output"])
+        inputType.usage = ParameterUsage.PASSTHROUGH
+        assertTrue(step.validate())
+        // a Parameter for a wrong job definition and wrong usage should fail twice
+        ParameterType doubleFailType = new ParameterType(name: "two", jobDefinition: jobDefinition2, usage: ParameterUsage.INPUT)
+        assertTrue(doubleFailType.validate())
+        Parameter doubleFail = new Parameter(value: "two", type: doubleFailType)
+        assertTrue(doubleFail.validate())
+        step.addToOutput(doubleFail)
+        assertFalse(step.validate())
+        assertEquals("invalid.jobDefinition", step.errors["output"])
+        doubleFailType.jobDefinition = jobDefinition
+        assertFalse(step.validate())
+        assertEquals("invalid.usage", step.errors["output"])
+        doubleFailType.usage = ParameterUsage.OUTPUT
+        assertTrue(step.validate())
+    }
 }

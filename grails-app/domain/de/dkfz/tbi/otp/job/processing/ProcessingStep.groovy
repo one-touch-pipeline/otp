@@ -85,5 +85,23 @@ public class ProcessingStep implements Serializable {
             }
             return errors
         })
+        output(validator: { Collection<Parameter> val, ProcessingStep obj ->
+            if (!val) {
+                return true
+            }
+            List<String> errors = []
+            val.each { Parameter param ->
+                if (param.type.jobDefinition != obj.jobDefinition) {
+                    errors << "invalid.jobDefinition"
+                }
+                if (param.type.usage != ParameterUsage.OUTPUT && param.type.usage != ParameterUsage.PASSTHROUGH) {
+                    errors << "invalid.usage"
+                }
+            }
+            if (!errors) {
+                return true
+            }
+            return errors
+        })
     }
 }
