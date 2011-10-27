@@ -21,6 +21,18 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
  * @see Parameter
  **/
 public class ProcessingStep implements Serializable {
+    /**
+     * Input Parameters added to this ProcessingStep.
+     */
+    Collection<Parameter> input
+    /**
+     * Output Parameters generated during this ProcessingStep.
+     */
+    Collection<Parameter> output
+    /**
+     * The history of state updates of this ProcessingStep
+     */
+    Collection<ProcessingStepUpdate> updates
     static hasMany = [input: Parameter, output: Parameter, updates: ProcessingStepUpdate]
     /**
      * The JobDefinition this ProcessingStep is generated from.
@@ -55,5 +67,59 @@ public class ProcessingStep implements Serializable {
         process(nullable: false)
         previous(nullable: true)
         next(nullable: true)
+        input(validator: { Collection<Parameter> val, ProcessingStep obj ->
+            if (!val) {
+                return true
+            }
+            List<String> errors = []
+            val.each { Parameter param ->
+                if (param.type.jobDefinition != obj.jobDefinition) {
+                    errors << "invalid.jobDefinition"
+                }
+                if (param.type.usage != ParameterUsage.INPUT) {
+                    errors << "invalid.usage"
+                }
+                // check for uniqueness of parameter types
+                for (Parameter p in obj.input) {
+                    if (p == param) {
+                        continue
+                    }
+                    if (p.type == param.type) {
+                        errors << "unique.type"
+                    }
+                }
+            }
+            if (!errors) {
+                return true
+            }
+            return errors
+        })
+        output(validator: { Collection<Parameter> val, ProcessingStep obj ->
+            if (!val) {
+                return true
+            }
+            List<String> errors = []
+            val.each { Parameter param ->
+                if (param.type.jobDefinition != obj.jobDefinition) {
+                    errors << "invalid.jobDefinition"
+                }
+                if (param.type.usage != ParameterUsage.OUTPUT && param.type.usage != ParameterUsage.PASSTHROUGH) {
+                    errors << "invalid.usage"
+                }
+                // check for uniqueness of parameter types
+                for (Parameter p in obj.output) {
+                    if (p == param) {
+                        continue
+                    }
+                    if (p.type == param.type) {
+                        errors << "unique.type"
+                    }
+                }
+            }
+            if (!errors) {
+                return true
+            }
+            return errors
+        })
     }
 }

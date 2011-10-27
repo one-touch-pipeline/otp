@@ -161,9 +161,11 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jep.save(flush: true))
         // third JobDefinition gets two constant parameters
         ParameterType constantParameterType = new ParameterType(jobDefinition: jobDefinition3, name: "constant", description: "test", usage: ParameterUsage.INPUT)
+        ParameterType constantParameterType2 = new ParameterType(jobDefinition: jobDefinition3, name: "constant2", description: "test", usage: ParameterUsage.INPUT)
         assertNotNull(constantParameterType.save())
+        assertNotNull(constantParameterType2.save())
         jobDefinition3.addToConstantParameters(new Parameter(type: constantParameterType, value: "constant1"))
-        jobDefinition3.addToConstantParameters(new Parameter(type: constantParameterType, value: "constant2"))
+        jobDefinition3.addToConstantParameters(new Parameter(type: constantParameterType2, value: "constant2"))
         assertNotNull(jobDefinition3.save(flush: true))
         // create the Process
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
@@ -207,11 +209,12 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         List<Parameter> parameters = step3.input.toList().sort{ it.value }
         assertEquals(2, parameters.size())
         assertSame(constantParameterType, parameters[0].type)
-        assertSame(constantParameterType, parameters[1].type)
+        assertSame(constantParameterType2, parameters[1].type)
         assertEquals("constant1", parameters[0].value)
         assertEquals("constant2", parameters[1].value)
         // there should not have been a parameter created for the constant types
-        assertEquals(2, Parameter.countByType(constantParameterType))
+        assertEquals(1, Parameter.countByType(constantParameterType))
+        assertEquals(1, Parameter.countByType(constantParameterType2))
         // continue
         schedulerService.schedule()
         // the third Job should be scheduled
@@ -270,7 +273,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jep.save())
         // second Job Definition
         JobDefinition jobDefinition2 = createTestJob("test2", jep, jobDefinition)
-        ParameterMapping mapping = new ParameterMapping(job: jobDefinition2, from: ParameterType.findByJobDefinitionAndName(jobDefinition, "test"), to: ParameterType.findByJobDefinitionAndName(jobDefinition2, "test"))
+        ParameterMapping mapping = new ParameterMapping(job: jobDefinition2, from: ParameterType.findByJobDefinitionAndName(jobDefinition, "test"), to: ParameterType.findByJobDefinitionAndName(jobDefinition2, "input"))
         jobDefinition2.addToParameterMappings(mapping)
         jobDefinition.next = jobDefinition2
         assertNotNull(jobDefinition.save())
@@ -278,19 +281,21 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jep.save())
         // third Job Definition
         JobDefinition jobDefinition3 = createTestJob("test3", jep, jobDefinition2)
-        mapping = new ParameterMapping(job: jobDefinition3, from: ParameterType.findByJobDefinitionAndName(jobDefinition2, "test"), to: ParameterType.findByJobDefinitionAndName(jobDefinition3, "test"))
+        mapping = new ParameterMapping(job: jobDefinition3, from: ParameterType.findByJobDefinitionAndName(jobDefinition2, "test"), to: ParameterType.findByJobDefinitionAndName(jobDefinition3, "input"))
         jobDefinition3.addToParameterMappings(mapping)
-        mapping = new ParameterMapping(job: jobDefinition3, from: ParameterType.findByJobDefinitionAndName(jobDefinition2, "test2"), to: ParameterType.findByJobDefinitionAndName(jobDefinition3, "test2"))
+        mapping = new ParameterMapping(job: jobDefinition3, from: ParameterType.findByJobDefinitionAndName(jobDefinition2, "test2"), to: ParameterType.findByJobDefinitionAndName(jobDefinition3, "input2"))
         jobDefinition3.addToParameterMappings(mapping)
         jobDefinition2.next = jobDefinition3
         assertNotNull(jobDefinition2.save())
         assertNotNull(jep.save(flush: true))
         // third JobDefinition gets two constant parameters
         ParameterType constantParameterType = new ParameterType(jobDefinition: jobDefinition3, name: "constant", description: "test", usage: ParameterUsage.INPUT)
+        ParameterType constantParameterType2 = new ParameterType(jobDefinition: jobDefinition3, name: "constant2", description: "test", usage: ParameterUsage.INPUT)
         assertNotNull(constantParameterType.save())
+        assertNotNull(constantParameterType2.save())
         jobDefinition3.addToConstantParameters(new Parameter(type: constantParameterType, value: "constant1"))
         assertNotNull(jobDefinition3.save())
-        jobDefinition3.addToConstantParameters(new Parameter(type: constantParameterType, value: "constant2"))
+        jobDefinition3.addToConstantParameters(new Parameter(type: constantParameterType2, value: "constant2"))
         assertNotNull(jobDefinition3.save(flush: true))
         // create the Process
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
@@ -467,7 +472,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(type2.save())
         ParameterType passthrough = new ParameterType(name: "passthrough", description: "Job Passthrough Parameter", jobDefinition: jobDefinition, usage: ParameterUsage.PASSTHROUGH)
         assertNotNull(passthrough.save())
-        ParameterType input = new ParameterType(name: "input", description: "Input Parameter", jobDefinition: jobDefinition, usage: ParameterUsage.INPUT)
+        ParameterType input = new ParameterType(name: "input3", description: "Input Parameter", jobDefinition: jobDefinition, usage: ParameterUsage.INPUT)
         assertNotNull(input.save())
         // is StartJobDefinition a Problem for ParameterType?
         assertSame(startJob, type1.jobDefinition)

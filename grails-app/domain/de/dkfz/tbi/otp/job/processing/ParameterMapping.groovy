@@ -23,8 +23,24 @@ class ParameterMapping {
     JobDefinition job
 
     static constraints = {
-        from(nullable: false, unique: 'to')
-        to(nullable: false, unique: 'from')
-        job(nullable: false)
+        from(nullable: false, unique: 'to', validator: { ParameterType value, ParameterMapping mapping ->
+            if (value.jobDefinition == mapping.to?.jobDefinition) {
+                return "jobDefinition"
+            }
+            if (value.usage != ParameterUsage.OUTPUT) {
+                return "usage"
+            }
+        })
+        to(nullable: false, unique: 'from', validator: { ParameterType value, ParameterMapping mapping ->
+            if (value.jobDefinition == mapping.from?.jobDefinition) {
+                return "jobDefinition"
+            }
+            if (value.usage != ParameterUsage.INPUT && value.usage != ParameterUsage.PASSTHROUGH) {
+                return "usage"
+            }
+        })
+        job(nullable: false, validator: { JobDefinition value, ParameterMapping mapping ->
+            return value == mapping.to?.jobDefinition
+        })
     }
 }
