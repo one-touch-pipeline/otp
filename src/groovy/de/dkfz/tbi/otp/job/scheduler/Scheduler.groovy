@@ -166,7 +166,8 @@ class Scheduler {
                 log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
                 throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
             }
-            throw new IncorrectProcessingException("Could not correctly set output parameter for Job of type ${joinPoint.target.class}")
+            // TODO Proper error handling here
+            return
         }
         // check that all Output Parameters are set
         List<ParameterType> parameterTypes = ParameterType.findAllByJobDefinitionAndUsage(job.processingStep.jobDefinition, ParameterUsage.OUTPUT)
@@ -193,7 +194,8 @@ class Scheduler {
                     log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
                     throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
                 }
-                throw new IncorrectProcessingException("Could not correctly set output parameter for Job of type ${joinPoint.target.class}")
+                // TODO Proper error handling here
+                return
             }
         }
 
