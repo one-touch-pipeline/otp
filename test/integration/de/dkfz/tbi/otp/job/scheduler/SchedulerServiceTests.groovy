@@ -161,9 +161,11 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jep.save(flush: true))
         // third JobDefinition gets two constant parameters
         ParameterType constantParameterType = new ParameterType(jobDefinition: jobDefinition3, name: "constant", description: "test", usage: ParameterUsage.INPUT)
+        ParameterType constantParameterType2 = new ParameterType(jobDefinition: jobDefinition3, name: "constant2", description: "test", usage: ParameterUsage.INPUT)
         assertNotNull(constantParameterType.save())
+        assertNotNull(constantParameterType2.save())
         jobDefinition3.addToConstantParameters(new Parameter(type: constantParameterType, value: "constant1"))
-        jobDefinition3.addToConstantParameters(new Parameter(type: constantParameterType, value: "constant2"))
+        jobDefinition3.addToConstantParameters(new Parameter(type: constantParameterType2, value: "constant2"))
         assertNotNull(jobDefinition3.save(flush: true))
         // create the Process
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
@@ -207,11 +209,12 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         List<Parameter> parameters = step3.input.toList().sort{ it.value }
         assertEquals(2, parameters.size())
         assertSame(constantParameterType, parameters[0].type)
-        assertSame(constantParameterType, parameters[1].type)
+        assertSame(constantParameterType2, parameters[1].type)
         assertEquals("constant1", parameters[0].value)
         assertEquals("constant2", parameters[1].value)
         // there should not have been a parameter created for the constant types
-        assertEquals(2, Parameter.countByType(constantParameterType))
+        assertEquals(1, Parameter.countByType(constantParameterType))
+        assertEquals(1, Parameter.countByType(constantParameterType2))
         // continue
         schedulerService.schedule()
         // the third Job should be scheduled
@@ -287,10 +290,12 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jep.save(flush: true))
         // third JobDefinition gets two constant parameters
         ParameterType constantParameterType = new ParameterType(jobDefinition: jobDefinition3, name: "constant", description: "test", usage: ParameterUsage.INPUT)
+        ParameterType constantParameterType2 = new ParameterType(jobDefinition: jobDefinition3, name: "constant2", description: "test", usage: ParameterUsage.INPUT)
         assertNotNull(constantParameterType.save())
+        assertNotNull(constantParameterType2.save())
         jobDefinition3.addToConstantParameters(new Parameter(type: constantParameterType, value: "constant1"))
         assertNotNull(jobDefinition3.save())
-        jobDefinition3.addToConstantParameters(new Parameter(type: constantParameterType, value: "constant2"))
+        jobDefinition3.addToConstantParameters(new Parameter(type: constantParameterType2, value: "constant2"))
         assertNotNull(jobDefinition3.save(flush: true))
         // create the Process
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")

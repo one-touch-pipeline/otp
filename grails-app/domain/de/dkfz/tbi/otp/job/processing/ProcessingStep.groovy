@@ -79,6 +79,15 @@ public class ProcessingStep implements Serializable {
                 if (param.type.usage != ParameterUsage.INPUT) {
                     errors << "invalid.usage"
                 }
+                // check for uniqueness of parameter types
+                for (Parameter p in obj.input) {
+                    if (p == param) {
+                        continue
+                    }
+                    if (p.type == param.type) {
+                        errors << "unique.type"
+                    }
+                }
             }
             if (!errors) {
                 return true
@@ -96,6 +105,15 @@ public class ProcessingStep implements Serializable {
                 }
                 if (param.type.usage != ParameterUsage.OUTPUT && param.type.usage != ParameterUsage.PASSTHROUGH) {
                     errors << "invalid.usage"
+                }
+                // check for uniqueness of parameter types
+                for (Parameter p in obj.output) {
+                    if (p == param) {
+                        continue
+                    }
+                    if (p.type == param.type) {
+                        errors << "unique.type"
+                    }
                 }
             }
             if (!errors) {

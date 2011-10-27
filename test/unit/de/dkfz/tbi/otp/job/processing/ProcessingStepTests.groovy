@@ -55,7 +55,7 @@ class ProcessingStepTests {
         step.addToInput(failingParam1)
         assertFalse(step.validate())
         assertEquals("invalid.jobDefinition", step.errors["input"])
-        failingParam1.type = type
+        type2.jobDefinition = jobDefinition
         assertTrue(step.validate())
         // create a Parameter for an Output parameter
         ParameterType outputType = new ParameterType(name: "output", jobDefinition: jobDefinition, usage: ParameterUsage.OUTPUT)
@@ -65,7 +65,7 @@ class ProcessingStepTests {
         step.addToInput(failingParam2)
         assertFalse(step.validate())
         assertEquals("invalid.usage", step.errors["input"])
-        failingParam2.type = type
+        outputType.usage = ParameterUsage.INPUT
         assertTrue(step.validate())
         // create a Parameter for a PassThrough parameter
         ParameterType passThroughType = new ParameterType(name: "passthrough", jobDefinition: jobDefinition, usage: ParameterUsage.PASSTHROUGH)
@@ -75,7 +75,7 @@ class ProcessingStepTests {
         step.addToInput(failingParam3)
         assertFalse(step.validate())
         assertEquals("invalid.usage", step.errors["input"])
-        failingParam3.type = type
+        passThroughType.usage = ParameterUsage.INPUT
         assertTrue(step.validate())
         // create a Parameter for an Output type for a different job definition
         ParameterType otherType = new ParameterType(name: "testing", jobDefinition: jobDefinition2, usage: ParameterUsage.OUTPUT)
@@ -89,6 +89,26 @@ class ProcessingStepTests {
         assertFalse(step.validate())
         assertEquals("invalid.usage", step.errors["input"])
         otherType.usage = ParameterUsage.INPUT
+        assertTrue(step.validate())
+
+        // create two parameters for the same type should fail - to better test use a new ProcessingStep
+        step = new ProcessingStep(jobClass: "foo",
+            jobVersion: "bar",
+            process: process,
+            jobDefinition: jobDefinition
+            )
+        assertTrue(step.validate())
+        Parameter param1 = new Parameter(value: "foo", type: type)
+        assertTrue(param1.validate())
+        step.addToInput(param1)
+        assertTrue(step.validate())
+        Parameter param2 = new Parameter(value: "bar", type: type)
+        assertTrue(param2.validate())
+        step.addToInput(param2)
+        assertFalse(step.validate())
+        assertEquals("unique.type", step.errors["input"])
+        // output type was changed above to work
+        param2.type = outputType
         assertTrue(step.validate())
     }
 
@@ -131,7 +151,7 @@ class ProcessingStepTests {
         step.addToOutput(otherJob)
         assertFalse(step.validate())
         assertEquals("invalid.jobDefinition", step.errors["output"])
-        otherJob.type = type
+        otherJobType.jobDefinition = jobDefinition
         assertTrue(step.validate())
         // a Parameter for usage input should fail
         ParameterType inputType = new ParameterType(name: "input", jobDefinition: jobDefinition, usage: ParameterUsage.INPUT)
@@ -155,6 +175,26 @@ class ProcessingStepTests {
         assertFalse(step.validate())
         assertEquals("invalid.usage", step.errors["output"])
         doubleFailType.usage = ParameterUsage.OUTPUT
+        assertTrue(step.validate())
+
+        // create two parameters for the same type should fail - to better test use a new ProcessingStep
+        step = new ProcessingStep(jobClass: "foo",
+            jobVersion: "bar",
+            process: process,
+            jobDefinition: jobDefinition
+            )
+        assertTrue(step.validate())
+        Parameter param1 = new Parameter(value: "foo", type: type)
+        assertTrue(param1.validate())
+        step.addToOutput(param1)
+        assertTrue(step.validate())
+        Parameter param2 = new Parameter(value: "bar", type: type)
+        assertTrue(param2.validate())
+        step.addToOutput(param2)
+        assertFalse(step.validate())
+        assertEquals("unique.type", step.errors["output"])
+        // output type was changed above to work
+        param2.type = otherJobType
         assertTrue(step.validate())
     }
 }
