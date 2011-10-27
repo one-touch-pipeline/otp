@@ -79,6 +79,53 @@ class SchedulerTests extends AbstractIntegrationTest {
     }
 
     @Test
+    void testNormalEndStateAwareJobExecution() {
+        JobExecutionPlan jep = new JobExecutionPlan(name: "testEndStateAware", planVersion: 0, startJobBean: "someBean")
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = createTestEndStateAwareJob("testEndStateAware", jep)
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save(flush: true))
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        assertNotNull(process.save())
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assertNotNull(step.save())
+        Job endStateAwareJob = grailsApplication.mainContext.getBean("testEndStateAwareJob", step, [] as Set) as Job
+        // There is no Created ProcessingStep update - execution should fail
+        shouldFail(RuntimeException) {
+            endStateAwareJob.execute()
+        }
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.CREATED,
+            previous: null
+            )
+        step.addToUpdates(update)
+        assertNotNull(step.save(flush: true))
+        shouldFail(InvalidStateException) {
+            endStateAwareJob.getOutputParameters()
+        }
+        endStateAwareJob.execute()
+        // now we should have three processingStepUpdates for the processing step
+        step.refresh()
+        assertEquals(4, step.updates.size())
+        List<ProcessingStepUpdate> updates = step.updates.toList().sort { it.id }
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FINISHED, updates[2].state)
+        // and there should be some output parameters
+        List<Parameter> params = step.output.toList().sort { it.type.name }
+        assertEquals(2, params.size())
+        assertEquals("test", params[0].type.name)
+        assertEquals("1234", params[0].value)
+        assertNull(params[0].type.className)
+        assertSame(jobDefinition, params[0].type.jobDefinition)
+        assertEquals("test2", params[1].type.name)
+        assertEquals("4321", params[1].value)
+        assertNull(params[1].type.className)
+        assertSame(jobDefinition, params[1].type.jobDefinition)
+    }
+
+    @Test
     void testFailingExecution() {
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
         assertNotNull(jep.save())
