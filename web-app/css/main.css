@@ -2,6 +2,7 @@
 body,
 input, select, textarea {
 	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+	font-size: 10pt;
 }
 
 /* BASE LAYOUT */
@@ -104,7 +105,7 @@ img {
 }
 
 .footer {
-	background: #abbf78;
+	background: #99aacc;
 	color: #000;
 	clear: both;
 	font-size: 0.8em;
@@ -400,27 +401,36 @@ table {
 }
 
 tr {
-	border: 0;
+	border: 0; 
 }
+
 
 tr>td:first-child, tr>th:first-child {
 	padding-left: 1.25em;
 }
 
+
 tr>td:last-child, tr>th:last-child {
 	padding-right: 1.25em;
 }
 
+/* tiny row formatting */
+td.tinyRow {
+	line-height: 0.3em;
+	background: #ffffff;
+	background-image: -moz-linear-gradient(right, #ffffff, #aaaff);
+}
+
 td, th {
 	line-height: 1.5em;
-	padding: 0.5em 0.6em;
+	padding: 0.1em 0.1em;
 	text-align: left;
-	vertical-align: top;
+	vertical-align: center;
 }
 
 th {
 	background-color: #efefef;
-	background-image: -moz-linear-gradient(top, #ffffff, #eaeaea);
+	background-image: -moz-linear-gradient(top, #ffffff, #e0e0ff);
 	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #ffffff), color-stop(1, #eaeaea));
 	    filter: progid:DXImageTransform.Microsoft.gradient(startColorStr = '#ffffff', EndColorStr = '#eaeaea');
 	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#ffffff', EndColorStr='#eaeaea')";
@@ -429,6 +439,11 @@ th {
 	line-height: 1.7em;
 	padding: 0.2em 0.6em;
 }
+
+th.sample {
+	background-image: -moz-linear-gradient(right, #ffffff, #e0e0ff);
+}
+
 
 thead th {
 	white-space: nowrap;
@@ -469,8 +484,30 @@ th.desc a {
 	background: #ffffff;
 }
 
+.TUMOR {
+	background: #f0f0ff;
+}
+
+.CONTROL {
+	background: #ffffff;
+	border-bottom: 0px solid #d0d0d0;
+}
+
+.QA1 {
+	background: #ffffaa;	
+	background-image: -moz-linear-gradient(right, #ffffff, #ffffaa);
+}
+
+.QA2 {
+	background: #ffaaaa;
+	background-image: -moz-linear-gradient(right, #ffffff, #ffaaaa);
+}
+
+
 th:hover, tr:hover {
-	background: #E1F2B6;
+	ackground: #E1F2B6;
+	background: #dadada;	
+	/*text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);*/
 }
 
 /* PAGINATION */
