@@ -4,14 +4,18 @@ class MetaDataEntry {
 	
 	String value
 
-	// does the value corresponds to a value 
-	// known in database (eg. sample)
+	/* 
+	 * does the value corresponds to a value 
+	 *  known in database (eg. sample)
+	 */
 	
 	enum Status {VALID, INVALID, UNKNOWN}
 	Status status = Status.UNKNOWN
 
-	// was this entry present in metadata file
-	// or was it inferred by the OTP ?
+    /*
+     * was this entry present in metadata file
+     * or was it inferred by the OTP ?
+     */
 	
 	enum Source {MDFILE, SYSTEM}
 	Source source

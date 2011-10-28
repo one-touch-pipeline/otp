@@ -6,9 +6,11 @@ class SeqScan {
 	long nBasePairs = 0       // calculated from seqTracks
 	double coverage = 0.0     // from somewhere 
 
-	enum State {DECLARED, PROCESSING, FINISHED, OBSOLITE}
+	enum State {DECLARED, PROCESSING, FINISHED, OBSOLETE}
 	State state  = State.DECLARED
 
+	String seqCenters = ""
+	
 	// quality control 
 	enum QCState {NON, PASS, BLOCK}
 	QCState qcState = QCState.NON
@@ -28,14 +30,16 @@ class SeqScan {
 	]
 
 	static constraints = {
+		sample()
+		seqType()
 		nLanes()
 		nBasePairs()
 		coverage()
+        seqCenters()
 		state()
 		qcState()
-		seqType()
-		sample()
 		dataFiles(nullable: true)
+		alignmentParams(nullable: true)
 	}
 
 	String toString() {

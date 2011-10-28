@@ -25,7 +25,7 @@ class DataFile {
 		seqTrack : SeqTrack,
 		seqScan : SeqScan,
 		alignmentLog : AlignmentLog,
-		fileType: FileType
+		fileType : FileType
 	]
 
 	static hasMany   = [metaDataEntries : MetaDataEntry]

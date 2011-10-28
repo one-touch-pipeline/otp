@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 class SeqTrack {
 
+		
 	int  laneId
 	
 	boolean hasFinalBam = false
