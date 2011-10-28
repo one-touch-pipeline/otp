@@ -1,9 +1,13 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import static org.junit.Assert.*
+import de.dkfz.tbi.otp.job.plan.DecidingJobDefinition
+import de.dkfz.tbi.otp.job.plan.DecisionMapping
+import de.dkfz.tbi.otp.job.plan.JobDecision
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.StartJobDefinition
+import de.dkfz.tbi.otp.job.processing.DecisionProcessingStep
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.InvalidStateException
 import de.dkfz.tbi.otp.job.processing.Job
@@ -16,6 +20,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.job.processing.StartJob
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
+
 import org.junit.*
 
 class SchedulerServiceTests extends AbstractIntegrationTest {
@@ -511,5 +516,78 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
         assertEquals(3, step.output.size())
+    }
+
+    @Test
+    void testDecisions() {
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // create the JobExecutionPlan with one Job Definition
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
+        assertNotNull(jep.save())
+        // create the StartJobDefinition for the JobExecutionPlan
+        StartJobDefinition startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: jep)
+        assertNotNull(startJob.save())
+        jep.startJob = startJob
+        assertNotNull(jep.save())
+        DecidingJobDefinition decidingJobDefinition = new DecidingJobDefinition(name: "test", bean: "decisionTestJob", plan: jep)
+        assertNotNull(decidingJobDefinition.save())
+        // decisions for the job
+        JobDecision decision1 = new JobDecision(jobDefinition: decidingJobDefinition, name: "outcome1", description: "test")
+        JobDecision decision2 = new JobDecision(jobDefinition: decidingJobDefinition, name: "outcome2", description: "test")
+        assertNotNull(decision1.save())
+        assertNotNull(decision2.save())
+        // create the JobDefinitions after the decision
+        JobDefinition jobDefinition1 = createTestJob("decision1", jep, decidingJobDefinition)
+        JobDefinition jobDefinition2 = new JobDefinition(name: "decision2", bean: "directTestJob", plan: jep, previous: decidingJobDefinition)
+        assertNotNull(jobDefinition1.save())
+        assertNotNull(jobDefinition2.save())
+        decidingJobDefinition.next = null
+        assertNotNull(decidingJobDefinition.save())
+        assertNull(decidingJobDefinition.next)
+        assertNotNull(jobDefinition1.previous)
+        assertNotNull(jobDefinition2.previous)
+        DecisionMapping mapping1 = new DecisionMapping(decision: decision1, definition: jobDefinition1)
+        DecisionMapping mapping2 = new DecisionMapping(decision: decision2, definition: jobDefinition2)
+        assertNotNull(mapping1.save())
+        assertNotNull(mapping2.save())
+        assertNotNull(decidingJobDefinition.save())
+        // set in the job execution plan
+        jep.firstJob = decidingJobDefinition
+        assertNotNull(jep.save(flush: true))
+        // get the startjob
+        StartJob job = grailsApplication.mainContext.getBean("testStartJob", jep) as StartJob
+        assertNotNull(job)
+        assertEquals(0, Process.count())
+        assertEquals(0, ProcessingStep.count())
+        schedulerService.createProcess(job, [])
+        // verify that the Process is created
+        assertFalse(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        assertEquals(1, Process.count())
+        assertEquals(1, ProcessingStep.count())
+        assertEquals(1, DecisionProcessingStep.count())
+        ProcessingStep step = ProcessingStep.list().first()
+        assertTrue(step instanceof DecisionProcessingStep)
+        assertNull((step as DecisionProcessingStep).decision)
+        Process process = Process.findByJobExecutionPlan(jep)
+        assertNotNull(process)
+        assertSame(schedulerService.queue.first().jobDefinition, decidingJobDefinition)
+        // running the Job should queue another one
+        schedulerService.schedule()
+        assertFalse(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        assertEquals(1, schedulerService.queue.size())
+        assertEquals(2, ProcessingStep.count())
+        assertEquals(1, DecisionProcessingStep.count())
+        // the decision job decided for first decision
+        assertEquals(decision1, (step as DecisionProcessingStep).decision)
+        assertEquals(jobDefinition1, schedulerService.queue.first().jobDefinition)
+        assertFalse(Process.list().first().finished)
+        // let the job run
+        schedulerService.schedule()
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        assertTrue(Process.list().first().finished)
     }
 }

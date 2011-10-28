@@ -1,7 +1,10 @@
 package de.dkfz.tbi.otp.job.scheduler
 
+import de.dkfz.tbi.otp.job.plan.DecidingJobDefinition
+import de.dkfz.tbi.otp.job.plan.DecisionMapping
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.processing.DecisionProcessingStep
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.Parameter
@@ -42,12 +45,15 @@ class SchedulerService {
 
     public void createNextProcessingStep(ProcessingStep previous) {
         // test whether the Process ended
-        if (!previous.jobDefinition.next) {
+        if (!previous.jobDefinition.next && !(previous.jobDefinition instanceof DecidingJobDefinition)) {
             endProcess(previous.process)
             return
         }
         JobDefinition nextJob = previous.jobDefinition.next
-        ProcessingStep next = createProcessingStep(previous.process, previous.jobDefinition.next, previous.output, previous)
+        if (!nextJob && (previous.jobDefinition instanceof DecidingJobDefinition)) {
+            nextJob = DecisionMapping.findByDecision(((DecisionProcessingStep)previous).decision).definition
+        }
+        ProcessingStep next = createProcessingStep(previous.process, nextJob, previous.output, previous)
         lock.lock()
         try {
             previous.next = next
@@ -167,7 +173,12 @@ class SchedulerService {
 
     // TODO: comment me
     private ProcessingStep createProcessingStep(Process process, JobDefinition jobDefinition, Collection<Parameter> input, ProcessingStep previous = null) {
-        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process, previous: previous)
+        ProcessingStep step = null
+        if (jobDefinition instanceof DecidingJobDefinition) {
+            step = new DecisionProcessingStep(jobDefinition: jobDefinition, process: process, previous: previous)
+        } else {
+            step = new ProcessingStep(jobDefinition: jobDefinition, process: process, previous: previous)
+        }
         if (input && !step.save()) {
             // we have to save the next processing step as the ParameterMapping references the JobDefinition
             throw new SchedulerPersistencyException("Could not create new ProcessingStep for Process ${process.id}")

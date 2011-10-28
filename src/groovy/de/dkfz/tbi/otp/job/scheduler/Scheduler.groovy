@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.scheduler
 
+import de.dkfz.tbi.otp.job.processing.DecisionJob
+import de.dkfz.tbi.otp.job.processing.DecisionProcessingStep
 import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
 import de.dkfz.tbi.otp.job.processing.IncorrectProcessingException
 import de.dkfz.tbi.otp.job.processing.InvalidStateException;
@@ -11,6 +13,7 @@ import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
 import de.dkfz.tbi.otp.job.processing.ProcessingError
 import de.dkfz.tbi.otp.job.processing.ProcessingException
+import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import org.apache.commons.logging.LogFactory
@@ -210,6 +213,9 @@ class Scheduler {
                 previous: update
                 )
             job.processingStep.addToUpdates(endStateUpdate)
+            if (job instanceof DecisionJob && endStateUpdate.state == ExecutionState.SUCCESS) {
+                ((DecisionProcessingStep)job.processingStep).decision = (job as DecisionJob).getDecision()
+            }
             if (!job.processingStep.save(flush: true)) {
                 log.fatal("Could not create a ERROR/SUCCESS Update for Job of type ${joinPoint.target.class}")
                 throw new JobExcecutionException("Could not create a ERROR/SUCCESS Update for Job")
