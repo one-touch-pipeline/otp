@@ -123,7 +123,7 @@ class IndividualService {
 			return
 		}
 
-		if (!obj.save(flush: true))
+		if (!obj.save())
 			println "can not save ${obj}"
 	}
 		
