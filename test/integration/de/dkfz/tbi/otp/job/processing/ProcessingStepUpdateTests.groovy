@@ -2,10 +2,6 @@ package de.dkfz.tbi.otp.job.processing
 
 import static org.junit.Assert.*
 
-import java.sql.Date;
-
-import javax.validation.constraints.AssertFalse;
-
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import org.junit.*
