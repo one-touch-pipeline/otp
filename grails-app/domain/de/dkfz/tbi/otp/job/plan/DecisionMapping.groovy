@@ -20,6 +20,21 @@ class DecisionMapping {
     JobDefinition definition
 
     static constraints = {
-        decision(unique: 'definition')
+        decision(unique: true)
+        definition(validator: { JobDefinition jobDefinition, DecisionMapping mapping ->
+            if (!jobDefinition) {
+                return false
+            }
+            if (!mapping.decision) {
+                return false
+            }
+            if (jobDefinition == mapping.decision.jobDefinition) {
+                return "recursive"
+            }
+            if (jobDefinition.plan != mapping.decision.jobDefinition.plan) {
+                return "plan"
+            }
+            return true
+        })
     }
 }
