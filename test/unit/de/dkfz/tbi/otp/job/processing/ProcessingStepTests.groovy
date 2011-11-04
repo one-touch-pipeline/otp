@@ -241,7 +241,37 @@ class ProcessingStepTests {
         step.next = testStep3
         assertFalse(step.validate())
         assertEquals("next", step.errors["previous"])
+        assertEquals("previous", step.errors["next"])
         step.next = null
+        assertTrue(step.validate())
+    }
+
+    @Test
+    void testNext() {
+        Process process = new Process()
+        Process process2 = new Process()
+        JobDefinition jobDefinition = new JobDefinition()
+        JobDefinition jobDefinition2 = new JobDefinition()
+        ProcessingStep testStep1 = new ProcessingStep(process: process2, jobDefinition: jobDefinition)
+        ProcessingStep testStep2 = new ProcessingStep(process: process, jobDefinition: jobDefinition)
+        ProcessingStep testStep3 = new ProcessingStep(process: process, jobDefinition: jobDefinition2)
+        mockDomain(Process, [process, process2])
+        mockDomain(JobDefinition, [jobDefinition, jobDefinition2])
+        ProcessingStep step = new ProcessingStep(process: process, jobDefinition: jobDefinition)
+        mockForConstraintsTests(ProcessingStep, [testStep1, testStep2])
+        assertTrue(step.validate())
+        step.next = testStep1
+        assertFalse(step.validate())
+        assertEquals("process", step.errors["next"])
+        step.next = testStep2
+        assertFalse(step.validate())
+        assertEquals("jobDefinition", step.errors["next"])
+        step.previous = testStep3
+        step.next = testStep3
+        assertFalse(step.validate())
+        assertEquals("next", step.errors["previous"])
+        assertEquals("previous", step.errors["next"])
+        step.previous = null
         assertTrue(step.validate())
     }
 }
