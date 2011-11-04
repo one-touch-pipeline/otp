@@ -197,4 +197,23 @@ class ProcessingStepTests {
         param2.type = otherJobType
         assertTrue(step.validate())
     }
+
+    @Test
+    void testNullable() {
+        ProcessingStep step = new ProcessingStep()
+        mockForConstraintsTests(ProcessingStep, [])
+        assertFalse(step.validate())
+        assertEquals("nullable", step.errors["jobDefinition"])
+        assertEquals("nullable", step.errors["process"])
+        Process process = new Process()
+        mockDomain(Process, [process])
+        step.process = process
+        assertFalse(step.validate())
+        assertEquals("nullable", step.errors["jobDefinition"])
+        assertNull(step.errors["process"])
+        JobDefinition jobDefinition = new JobDefinition()
+        mockDomain(JobDefinition, [jobDefinition])
+        step.jobDefinition = jobDefinition
+        assertTrue(step.validate())
+    }
 }
