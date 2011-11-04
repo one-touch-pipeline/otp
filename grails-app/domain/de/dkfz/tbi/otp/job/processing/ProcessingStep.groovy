@@ -65,7 +65,21 @@ public class ProcessingStep implements Serializable {
         jobClass(nullable: true, empty: false)
         jobVersion(nullable: true, empty: false)
         process(nullable: false)
-        previous(nullable: true)
+        previous(nullable: true, validator: { ProcessingStep val, ProcessingStep obj ->
+            if (!val) {
+                return true
+            }
+            if (val.process != obj.process) {
+                return "process"
+            }
+            if (val.jobDefinition == obj.jobDefinition) {
+                return "jobDefinition"
+            }
+            if (val == obj.next) {
+                return "next"
+            }
+            return true
+        })
         next(nullable: true)
         input(validator: { Collection<Parameter> val, ProcessingStep obj ->
             if (!val) {
