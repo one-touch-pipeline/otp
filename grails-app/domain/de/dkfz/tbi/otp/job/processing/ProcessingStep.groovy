@@ -64,7 +64,15 @@ public class ProcessingStep implements Serializable {
         jobDefinition(nullable: false)
         jobClass(nullable: true, empty: false)
         jobVersion(nullable: true, empty: false)
-        process(nullable: false)
+        process(nullable: false, validator: { Process val, ProcessingStep obj ->
+            if (!val) {
+                return false
+            }
+            if (val.jobExecutionPlan != obj.jobDefinition?.plan) {
+                return "jobExecutionPlan"
+            }
+            return true
+        })
         previous(nullable: true, validator: { ProcessingStep val, ProcessingStep obj ->
             if (!val) {
                 return true

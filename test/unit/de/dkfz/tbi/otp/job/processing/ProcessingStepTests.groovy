@@ -274,4 +274,22 @@ class ProcessingStepTests {
         step.previous = null
         assertTrue(step.validate())
     }
+
+    @Test
+    void testProcess() {
+        JobExecutionPlan plan1 = new JobExecutionPlan()
+        JobExecutionPlan plan2 = new JobExecutionPlan()
+        mockDomain(JobExecutionPlan, [plan1, plan2])
+        JobDefinition jobDefinition = new JobDefinition(plan: plan1)
+        JobDefinition jobDefinition2 = new JobDefinition(plan: plan2)
+        mockDomain(JobDefinition, [jobDefinition, jobDefinition2])
+        Process process = new Process(jobExecutionPlan: plan2)
+        mockDomain(Process, [process])
+        ProcessingStep step = new ProcessingStep(process: process, jobDefinition: jobDefinition)
+        mockForConstraintsTests(ProcessingStep, [])
+        assertFalse(step.validate())
+        assertEquals("jobExecutionPlan", step.errors["process"])
+        process.jobExecutionPlan = plan1
+        assertTrue(step.validate())
+    }
 }
