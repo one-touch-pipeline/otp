@@ -15,6 +15,14 @@ class DecisionProcessingStep extends ProcessingStep {
     JobDecision decision
 
     static constraints = {
-        decision(nullable: true)
+        decision(nullable: true, validator: { JobDecision val, DecisionProcessingStep step ->
+            if (!val) {
+                return true
+            }
+            if (val.jobDefinition != step.jobDefinition) {
+                return "jobDefinition"
+            }
+            return true
+        })
     }
 }
