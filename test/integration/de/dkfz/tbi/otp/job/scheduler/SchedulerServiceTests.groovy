@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.job.processing.DecisionProcessingStep
 import de.dkfz.tbi.otp.job.processing.ExecutionState
+import de.dkfz.tbi.otp.job.processing.IncorrectProcessingException
 import de.dkfz.tbi.otp.job.processing.InvalidStateException
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.Parameter
@@ -595,5 +596,39 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
         assertTrue(Process.list().first().finished)
+    }
+
+    @Test
+    void tesFailingEndOfProcess() {
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // create the JobExecutionPlan with one Job Definition
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
+        assertNotNull(jep.save())
+        // create the StartJobDefinition for the JobExecutionPlan
+        StartJobDefinition startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: jep)
+        assertNotNull(startJob.save())
+        jep.startJob = startJob
+        assertNotNull(jep.save())
+        // create first job definition
+        JobDefinition jobDefinition = createTestJob("test", jep)
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        // get the startjob
+        StartJob job = grailsApplication.mainContext.getBean("testStartJob", jep) as StartJob
+        assertNotNull(job)
+        assertEquals(0, Process.count())
+        assertEquals(0, ProcessingStep.count())
+        schedulerService.createProcess(job, [])
+
+        // schedule
+        try {
+            schedulerService.schedule()
+            fail("Exception of type SchedulerException was expected")
+        } catch (SchedulerException e) {
+            assertEquals("Could not create new ProcessingStep", e.message)
+            assertTrue(e.cause instanceof IncorrectProcessingException)
+            assertEquals("Process finished but is not in success state", e.cause.message)
+        }
     }
 }

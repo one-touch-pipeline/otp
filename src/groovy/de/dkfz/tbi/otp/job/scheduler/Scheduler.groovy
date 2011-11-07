@@ -227,7 +227,7 @@ class Scheduler {
         try {
             schedulerService.createNextProcessingStep(job.processingStep)
         } catch(Exception se) {
-            throw new SchedulerException("Could not create new ProcessingStep", se.cause)
+            throw new SchedulerException("Could not create new ProcessingStep", se)
         }
         log.debug("doEndCheck performed for ${joinPoint.getTarget().class} with ProcessingStep ${job.processingStep.id}")
     }
