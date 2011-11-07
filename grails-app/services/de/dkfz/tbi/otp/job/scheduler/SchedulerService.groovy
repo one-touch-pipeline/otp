@@ -46,7 +46,7 @@ class SchedulerService {
     public void createNextProcessingStep(ProcessingStep previous) {
         // test whether the Process ended
         if (!previous.jobDefinition.next && !(previous.jobDefinition instanceof DecidingJobDefinition)) {
-            endProcess(previous.process)
+            endProcess(previous)
             return
         }
         JobDefinition nextJob = previous.jobDefinition.next
@@ -162,12 +162,12 @@ class SchedulerService {
 
     /**
      * Method responsible for handling the successful ending of a Process.
-     * @param process The Process which finished
+     * @param last The last executed ProcessingStep
      */
-    private void endProcess(Process process) {
+    private void endProcess(ProcessingStep last) {
         // TODO: add safety check that last ProcessingStep did not fail
-        process.finished = true
-        process.save(flush: true)
+        last.process.finished = true
+        last.process.save(flush: true)
         // TODO: start some notifications?
     }
 
