@@ -24,7 +24,7 @@ class TestEndStateAwareJob extends AbstractJobImpl implements EndStateAwareJob {
     @Override
     public ExecutionState getEndState() {
         println("Getter for end state of TestEndStateAwareJob called")
-        ExecutionState.FINISHED
+        ExecutionState.SUCCESS
     }
 
     @Override

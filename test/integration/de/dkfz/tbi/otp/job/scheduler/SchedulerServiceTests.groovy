@@ -51,7 +51,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         // create the JobExecutionPlan
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
-        JobDefinition jobDefinition = createTestJob("test", jep)
+        JobDefinition jobDefinition = createTestEndStateAwareJob("test", jep)
         jep.firstJob = jobDefinition
         assertNotNull(jep.save(flush: true))
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
@@ -74,7 +74,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         schedulerService.schedule()
         assertTrue(process.finished)
         assertNotNull(step.jobClass)
-        assertEquals(de.dkfz.tbi.otp.job.jobs.TestJob.toString(), step.jobClass)
+        assertEquals(de.dkfz.tbi.otp.testing.TestEndStateAwareJob.toString(), step.jobClass)
         assertNotNull(step.jobVersion)
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
@@ -90,7 +90,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
         assertNotNull(jep.save())
-        jobDefinition.next = createTestJob("test2", jep, jobDefinition)
+        jobDefinition.next = createTestEndStateAwareJob("test2", jep, jobDefinition)
         assertNotNull(jobDefinition.save())
         assertNotNull(jep.save(flush: true))
         // create the Process
@@ -126,6 +126,11 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         // another Job should be be scheduled
         assertFalse(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
+        assertEquals(3, step.updates.size())
+        List<ProcessingStepUpdate> updates = step.updates.toList().sort { it.id }
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FINISHED, updates[2].state)
         
         // after running the second job the Process should be finished
         schedulerService.schedule()
@@ -135,13 +140,14 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
         assertEquals(2, ProcessingStep.countByProcess(process))
-        ProcessingStep.findAllByProcess(process).each { ProcessingStep s ->
-            assertEquals(3, s.updates.size())
-            List<ProcessingStepUpdate> updates = s.updates.toList().sort { it.id }
-            assertEquals(ExecutionState.CREATED, updates[0].state)
-            assertEquals(ExecutionState.STARTED, updates[1].state)
-            assertEquals(ExecutionState.FINISHED, updates[2].state)
-        }
+
+        step = ProcessingStep.findByProcessAndPrevious(process, step)
+        assertEquals(4, step.updates.size())
+        updates = step.updates.toList().sort { it.id }
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FINISHED, updates[2].state)
+        assertEquals(ExecutionState.SUCCESS, updates[3].state)
     }
 
     @Test
@@ -160,7 +166,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jobDefinition.save())
         assertNotNull(jep.save(flush: true))
         // third Job Definition
-        JobDefinition jobDefinition3 = createTestJob("test3", jep, jobDefinition2)
+        JobDefinition jobDefinition3 = createTestEndStateAwareJob("test3", jep, jobDefinition2)
         jobDefinition2.next = jobDefinition3
         assertNotNull(jobDefinition2.save())
         assertNotNull(jep.save(flush: true))
@@ -285,7 +291,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jobDefinition2.save())
         assertNotNull(jep.save())
         // third Job Definition
-        JobDefinition jobDefinition3 = createTestJob("test3", jep, jobDefinition2)
+        JobDefinition jobDefinition3 = createTestEndStateAwareJob("test3", jep, jobDefinition2)
         mapping = new ParameterMapping(job: jobDefinition3, from: ParameterType.findByJobDefinitionAndName(jobDefinition2, "test"), to: ParameterType.findByJobDefinitionAndName(jobDefinition3, "input"))
         jobDefinition3.addToParameterMappings(mapping)
         mapping = new ParameterMapping(job: jobDefinition3, from: ParameterType.findByJobDefinitionAndName(jobDefinition2, "test2"), to: ParameterType.findByJobDefinitionAndName(jobDefinition3, "input2"))
@@ -361,7 +367,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         jep.firstJob = jobDefinition
         assertNotNull(jep.save())
         // second Job Definition
-        JobDefinition jobDefinition2 = createTestJob("test2", jep, jobDefinition)
+        JobDefinition jobDefinition2 = createTestEndStateAwareJob("test2", jep, jobDefinition)
         ParameterType passThrough = new ParameterType(jobDefinition: jobDefinition2, name: "passthrough", description: "test", usage: ParameterUsage.PASSTHROUGH)
         assertNotNull(passThrough.save())
         ParameterMapping mapping = new ParameterMapping(job: jobDefinition2, from: ParameterType.findByJobDefinitionAndName(jobDefinition, "test"), to: passThrough)
@@ -430,7 +436,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         jep.startJob = startJob
         assertNotNull(jep.save())
         // create first job definition
-        JobDefinition jobDefinition = createTestJob("test", jep)
+        JobDefinition jobDefinition = createTestEndStateAwareJob("test", jep)
         jep.firstJob = jobDefinition
         assertNotNull(jep.save())
         assertNotNull(jep.save(flush: true))
@@ -467,7 +473,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         jep.startJob = startJob
         assertNotNull(jep.save())
         // create first job definition
-        JobDefinition jobDefinition = createTestJob("test", jep)
+        JobDefinition jobDefinition = createTestEndStateAwareJob("test", jep)
         jep.firstJob = jobDefinition
         assertNotNull(jep.save())
         // create some Parameter Types
@@ -538,7 +544,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(decision1.save())
         assertNotNull(decision2.save())
         // create the JobDefinitions after the decision
-        JobDefinition jobDefinition1 = createTestJob("decision1", jep, decidingJobDefinition)
+        JobDefinition jobDefinition1 = createTestEndStateAwareJob("decision1", jep, decidingJobDefinition)
         JobDefinition jobDefinition2 = new JobDefinition(name: "decision2", bean: "directTestJob", plan: jep, previous: decidingJobDefinition)
         assertNotNull(jobDefinition1.save())
         assertNotNull(jobDefinition2.save())

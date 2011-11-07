@@ -55,8 +55,12 @@ abstract class AbstractIntegrationTest {
        assertNotNull(jobDefinition.save())
        ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, usage: ParameterUsage.OUTPUT)
        ParameterType test2 = new ParameterType(name: "test2", description: "Test description", jobDefinition: jobDefinition, usage: ParameterUsage.OUTPUT)
+       ParameterType input = new ParameterType(name: "input", description: "Test description", jobDefinition: jobDefinition, usage: ParameterUsage.INPUT)
+       ParameterType input2 = new ParameterType(name: "input2", description: "Test description", jobDefinition: jobDefinition, usage: ParameterUsage.INPUT)
        assertNotNull(test.save())
        assertNotNull(test2.save())
+       assertNotNull(input.save())
+       assertNotNull(input2.save())
        return jobDefinition
    }
 }

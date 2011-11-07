@@ -42,7 +42,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
-        Job job = grailsApplication.mainContext.getBean("testJob", step, [] as Set) as Job
+        Job job = grailsApplication.mainContext.getBean("testEndStateAwareJob", step, [] as Set) as Job
         // There is no Created ProcessingStep update - execution should fail
         shouldFail(RuntimeException) {
             job.execute()
@@ -60,11 +60,12 @@ class SchedulerTests extends AbstractIntegrationTest {
         job.execute()
         // now we should have three processingStepUpdates for the processing step
         step.refresh()
-        assertEquals(3, step.updates.size())
+        assertEquals(4, step.updates.size())
         List<ProcessingStepUpdate> updates = step.updates.toList().sort { it.id }
         assertEquals(ExecutionState.CREATED, updates[0].state)
         assertEquals(ExecutionState.STARTED, updates[1].state)
         assertEquals(ExecutionState.FINISHED, updates[2].state)
+        assertEquals(ExecutionState.SUCCESS, updates[3].state)
         // and there should be some output parameters
         List<Parameter> params = step.output.toList().sort { it.type.name }
         assertEquals(2, params.size())
@@ -198,6 +199,10 @@ class SchedulerTests extends AbstractIntegrationTest {
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
         assertNotNull(jep.save())
         JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "directTestJob", plan: jep)
+        assertNotNull(jobDefinition.save())
+        JobDefinition jobDefinition2 = new JobDefinition(name: "test2", bean: "directTestJob", plan: jep, previous: jobDefinition)
+        assertNotNull(jobDefinition2.save())
+        jobDefinition.next = jobDefinition2
         assertNotNull(jobDefinition.save())
         ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, usage: ParameterUsage.INPUT)
         assertNotNull(test.save())

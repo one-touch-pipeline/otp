@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.DecisionProcessingStep
 import de.dkfz.tbi.otp.job.processing.ExecutionState
+import de.dkfz.tbi.otp.job.processing.IncorrectProcessingException
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterMapping
@@ -165,7 +166,10 @@ class SchedulerService {
      * @param last The last executed ProcessingStep
      */
     private void endProcess(ProcessingStep last) {
-        // TODO: add safety check that last ProcessingStep did not fail
+        ProcessingStepUpdate update = last.updates.toList().sort { it.id }.last()
+        if (update.state != ExecutionState.SUCCESS) {
+            throw new IncorrectProcessingException("Process finished but is not in success state")
+        }
         last.process.finished = true
         last.process.save(flush: true)
         // TODO: start some notifications?
