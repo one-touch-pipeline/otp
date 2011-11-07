@@ -53,7 +53,6 @@ abstract public class AbstractDecisionJobImpl extends AbstractJobImpl implements
         } else {
             fail()
         }
-        // TODO: verify that decision belongs to current Job Definition
         if (decision.jobDefinition != getProcessingStep().jobDefinition) {
             throw new IncorrectProcessingException("Decision does not belong to current JobDefinition")
         }
