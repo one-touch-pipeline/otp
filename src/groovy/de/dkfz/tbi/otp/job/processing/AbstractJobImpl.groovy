@@ -95,6 +95,14 @@ abstract class AbstractJobImpl implements Job {
         return inputParameters
     }
 
+    /**
+     *
+     * @return The current state of the Job
+     */
+    protected final ExecutionState getState() {
+        return state
+    }
+
     @Override
     public final void start() throws InvalidStateException {
         switch (state) {
