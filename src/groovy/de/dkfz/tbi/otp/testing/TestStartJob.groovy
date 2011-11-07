@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.testing
 
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.StartJob
+import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -13,22 +13,5 @@ import org.springframework.stereotype.Component
  */
 @Component("testStartJob")
 @Scope("prototype")
-class TestStartJob implements StartJob {
-    private JobExecutionPlan plan
-    
-    TestStartJob() {}
-    TestStartJob(JobExecutionPlan plan) {
-        this.plan = plan
-    }
-
-    @Override
-    public JobExecutionPlan getExecutionPlan() {
-        return plan
-    }
-
-    @Override
-    public String getVersion() {
-        return ""
-    }
-
+class TestStartJob extends AbstractStartJobImpl {
 }
