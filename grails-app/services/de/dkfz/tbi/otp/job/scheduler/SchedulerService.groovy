@@ -92,7 +92,7 @@ class SchedulerService {
             throw new SchedulerPersistencyException("Could not save the process for the JobExecutionPlan ${plan.id}")
         }
         // create the first processing step
-        ProcessingStep step = createProcessingStep(process, plan.firstJob, input)
+        ProcessingStep step = createProcessingStep(process, JobDefinition.get(plan.firstJob.id), input)
         if (!process.save(flush: true)) {
             throw new SchedulerPersistencyException("Could not save the process for the JobExecutionPlan ${plan.id}")
         }
@@ -205,7 +205,10 @@ class SchedulerService {
                 failedConstantParameter = param
                 return // continue
             }
-            step.addToInput(param)
+            step.addToInput(Parameter.get(param.id))
+        }
+        if (!step.save()) {
+            throw new SchedulerPersistencyException("Could not save the ProcessingStep for Process ${process.id}")
         }
         ProcessingStepUpdate created = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date())
         step.addToUpdates(created)
