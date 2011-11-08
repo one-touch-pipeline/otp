@@ -82,8 +82,9 @@ class Scheduler {
                 log.fatal("Job of type ${joinPoint.target.class} executed without a ProcessingStep being set")
                 throw new ProcessingException("Job executed without a ProcessingStep being set")
             }
+            ProcessingStep step = ProcessingStep.get(job.processingStep.id)
             // get the last ProcessingStepUpdate
-            List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(job.processingStep)
+            List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(step)
             if (existingUpdates.isEmpty()) {
                 log.fatal("Job of type ${joinPoint.target.class} executed before entering the CREATED state")
                 throw new ProcessingException("Job executed before entering the CREATED state")
@@ -98,10 +99,10 @@ class Scheduler {
                 date: new Date(),
                 state: ExecutionState.STARTED,
                 previous: existingUpdates.sort { it.date }.last(),
-                processingStep: job.processingStep
+                processingStep: step
                 )
-            job.processingStep.addToUpdates(update)
-            if (!job.processingStep.save(flush: true)) {
+            step.addToUpdates(update)
+            if (!step.save(flush: true)) {
                 log.fatal("Could not create a STARTED Update for Job of type ${joinPoint.target.class}")
                 throw new ProcessingException("Could not create a STARTED Update for Job")
             }

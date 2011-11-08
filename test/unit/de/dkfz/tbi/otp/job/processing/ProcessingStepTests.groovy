@@ -25,8 +25,8 @@ class ProcessingStepTests {
 
     void testInput() {
         Process process = new Process()
-        JobDefinition jobDefinition = new JobDefinition()
-        JobDefinition jobDefinition2 = new JobDefinition()
+        JobDefinition jobDefinition = new JobDefinition(id: 1)
+        JobDefinition jobDefinition2 = new JobDefinition(id: 2)
         mockDomain(Process, [process])
         mockDomain(JobDefinition, [jobDefinition, jobDefinition2])
         mockForConstraintsTests(ProcessingStep, [])
@@ -277,8 +277,8 @@ class ProcessingStepTests {
 
     @Test
     void testProcess() {
-        JobExecutionPlan plan1 = new JobExecutionPlan()
-        JobExecutionPlan plan2 = new JobExecutionPlan()
+        JobExecutionPlan plan1 = new JobExecutionPlan(id: 1)
+        JobExecutionPlan plan2 = new JobExecutionPlan(id: 2)
         mockDomain(JobExecutionPlan, [plan1, plan2])
         JobDefinition jobDefinition = new JobDefinition(plan: plan1)
         JobDefinition jobDefinition2 = new JobDefinition(plan: plan2)

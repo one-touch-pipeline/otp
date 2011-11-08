@@ -68,7 +68,7 @@ public class ProcessingStep implements Serializable {
             if (!val) {
                 return false
             }
-            if (val.jobExecutionPlan != obj.jobDefinition?.plan) {
+            if (val.jobExecutionPlan?.id != obj.jobDefinition?.plan?.id) {
                 return "jobExecutionPlan"
             }
             return true
@@ -109,7 +109,7 @@ public class ProcessingStep implements Serializable {
             }
             List<String> errors = []
             val.each { Parameter param ->
-                if (param.type.jobDefinition != obj.jobDefinition) {
+                if (param.type.jobDefinition.id != obj.jobDefinition.id) {
                     errors << "invalid.jobDefinition"
                 }
                 if (param.type.usage != ParameterUsage.INPUT) {
