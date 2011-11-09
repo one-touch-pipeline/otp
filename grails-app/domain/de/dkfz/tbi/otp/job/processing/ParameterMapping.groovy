@@ -27,7 +27,7 @@ class ParameterMapping {
             if (value.jobDefinition == mapping.to?.jobDefinition) {
                 return "jobDefinition"
             }
-            if (value.usage != ParameterUsage.OUTPUT) {
+            if (value.usage != ParameterUsage.OUTPUT && value.usage != ParameterUsage.PASSTHROUGH) {
                 return "usage"
             }
         })
