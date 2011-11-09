@@ -80,7 +80,7 @@ public class ProcessingStep implements Serializable {
             if (val.process != obj.process) {
                 return "process"
             }
-            if (val.jobDefinition == obj.jobDefinition) {
+            if (val.jobDefinition?.id == obj.jobDefinition?.id) {
                 return "jobDefinition"
             }
             if (val == obj.next) {
@@ -95,7 +95,7 @@ public class ProcessingStep implements Serializable {
             if (val.process != obj.process) {
                 return "process"
             }
-            if (val.jobDefinition == obj.jobDefinition) {
+            if (val.jobDefinition?.id == obj.jobDefinition?.id) {
                 return "jobDefinition"
             }
             if (val == obj.previous) {
@@ -136,7 +136,7 @@ public class ProcessingStep implements Serializable {
             }
             List<String> errors = []
             val.each { Parameter param ->
-                if (param.type.jobDefinition != obj.jobDefinition) {
+                if (param.type.jobDefinition.id != obj.jobDefinition.id) {
                     errors << "invalid.jobDefinition"
                 }
                 if (param.type.usage != ParameterUsage.OUTPUT && param.type.usage != ParameterUsage.PASSTHROUGH) {
