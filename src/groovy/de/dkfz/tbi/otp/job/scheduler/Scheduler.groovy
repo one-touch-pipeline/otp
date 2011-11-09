@@ -172,6 +172,7 @@ class Scheduler {
                 log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
                 throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
             }
+            log.error("Parameter ${failedOutputParameter.value} is either not defined for JobDefintion ${job.processingStep.jobDefinition.id} or not of type Output.")
             // TODO Proper error handling here
             return
         }
@@ -200,6 +201,7 @@ class Scheduler {
                     log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
                     throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
                 }
+                log.error("Required Output Parameter of type ${parameterType.id} is not set.")
                 // TODO Proper error handling here
                 return
             }
@@ -228,6 +230,7 @@ class Scheduler {
         try {
             schedulerService.createNextProcessingStep(job.processingStep)
         } catch(Exception se) {
+            log.error("Could not create new ProcessingStep for Process ${job.processingStep.process}")
             throw new SchedulerException("Could not create new ProcessingStep", se)
         }
         log.debug("doEndCheck performed for ${joinPoint.getTarget().class} with ProcessingStep ${job.processingStep.id}")
