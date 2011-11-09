@@ -21,6 +21,8 @@ import de.dkfz.tbi.otp.job.processing.StartJob
 import java.util.concurrent.Callable
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
+import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
+import org.springframework.scheduling.annotation.Scheduled
 
 class SchedulerService {
     /**
@@ -31,6 +33,10 @@ class SchedulerService {
      * Dependency Injection of ExecutorService
      */
     def executorService
+    /**
+     * Dependency Injection of PersistenceContextInterceptor
+     */
+    PersistenceContextInterceptor persistenceInterceptor
     /**
      * Queue of next to be started ProcessingSteps
      */
@@ -107,7 +113,26 @@ class SchedulerService {
     /**
      * Invokes the primitive scheduler to determine which job is to execute next if any at all.
      */
+    @Scheduled(fixedRate=10000l)
     public void schedule() {
+        Job job = null
+        persistenceInterceptor.init()
+        try {
+            job = doSchedule()
+            if (job) {
+                job.execute()
+            }
+        } finally {
+            persistenceInterceptor.flush()
+            persistenceInterceptor.destroy()
+        }
+    }
+
+    /**
+     * Performs the actual scheduling and returns a scheduled Job if any.
+     * @return The Job to run or null
+     */
+    private Job doSchedule() {
         lock.lock()
         try {
             // TODO: add a proper scheduling method
@@ -118,13 +143,11 @@ class SchedulerService {
             Job job = createJob(queue.peek())
             running.add(job)
             queue.poll()
-
-            executorService.submit({
-                job.execute()
-            } as Callable)
+            return job
         } finally {
             lock.unlock()
         }
+        return null
     }
 
     /**
