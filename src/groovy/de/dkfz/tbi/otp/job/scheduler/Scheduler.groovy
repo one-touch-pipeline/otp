@@ -266,9 +266,9 @@ class Scheduler {
         } catch (Exception ex) {
             throw new LoggingException("Could not write error log file properly", ex.cause)
         }
-        ProcessingError error = new ProcessingError(errorMessage: e.message, processingStepUpdate: update)
-        update.error = error
+        ProcessingError error = new ProcessingError(errorMessage: e.message ? e.message : "No Exception message", processingStepUpdate: update)
         error.save()
+        update.error = error
         job.processingStep.addToUpdates(update)
         if (!job.processingStep.save(flush: true)) {
             // TODO: trigger error handling
