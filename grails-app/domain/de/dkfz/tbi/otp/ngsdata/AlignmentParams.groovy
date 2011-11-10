@@ -9,7 +9,7 @@ class AlignmentParams {
 
 	static hasMany = [
 		alignmentLogs : AlignmentLog,
-		seqScans : SeqScan
+		mergingLogs : MergingLog
 	]
 
 	static constraints = {

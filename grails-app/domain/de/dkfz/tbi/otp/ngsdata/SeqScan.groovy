@@ -21,12 +21,13 @@ class SeqScan {
 		sample : Sample,
 		seqType : SeqType,
 		seqTech : SeqTech,
-		alignmentParams : AlignmentParams
+        //alignmentParams : AlignmentParams
 	]
 
 	static hasMany   = [
-		seqTracks : SeqTrack,  // input seq tracks
-		dataFiles : DataFile   // points to merged bam file(s) 
+		seqTracks : SeqTrack,       // input seq tracks
+		mergingLogs : MergingLog    // points to merging operation and merged bam file
+        //dataFiles : DataFile      // points to merged bam file(s) 
 	]
 
 	static constraints = {
@@ -38,13 +39,12 @@ class SeqScan {
         seqCenters()
 		state()
 		qcState()
-		dataFiles(nullable: true)
-		alignmentParams(nullable: true)
+		//dataFiles(nullable: true)
+		//alignmentParams(nullable: true)
 	}
 
 	String toString() {
-		"${sample} ${seqType} ${nBasePairs}"
+		"${sample} ${seqType}"
 	}
-
 
 }
