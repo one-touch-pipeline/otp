@@ -18,6 +18,16 @@
 	</head>
 	<body>
 		<div id="grailsLogo" role="banner"><a href="http://grails.org"><img src="${resource(dir: 'images', file: 'grails_logo.png')}" alt="Grails"/></a></div>
+
+		<div class="nav" role="navigation">
+			<ul>
+				<li><a href="/otp/PROJECT_NAMEOverview/index">Overview</a></li>
+				<li><a href="/otp/run/index">Runs</a></li>
+				<li><a href="/otp/seqScan/index">Sequence Scans</a></li>
+			</ul>
+		</div>
+
+		
 		<g:layoutBody/>
 		<div class="footer" role="contentinfo">OneTouchPipeline  | TBI DKFZ</div>
 		<div id="spinner" class="spinner" style="display:none;"><g:message code="spinner.alt" default="Loading&hellip;"/></div>
