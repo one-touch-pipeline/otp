@@ -75,6 +75,7 @@ class MetaDataService {
         listOfMDFiles.each {
 
             if (it.fileType.type != FileType.Type.METADATA) return
+            if (it.used) return
 
             println "\tfound md souce file ${it.fileName}"
 
@@ -160,6 +161,9 @@ class MetaDataService {
                     */
                 }
             }
+
+            it.used = true;
+            safeSave(it)
 
             // save the keys
             //keys.each { key ->
@@ -338,11 +342,14 @@ class MetaDataService {
     }
 
     /**
-    * 
-    * @param file
-    * @param key
-    * @return
-    */
+     * 
+     * Returns a metat data entry belonging the a given data file 
+     * with a key specified by the input parameter
+     * 
+     * @param file
+     * @param key
+     * @return
+     */
 
     private MetaDataEntry getMetaDataEntry(DataFile file, MetaDataKey key) {
 
@@ -350,6 +357,9 @@ class MetaDataService {
     }
 
     /**
+     * 
+     * Returns a metat data entry belonging the a given data file 
+     * with a key specified by the input parameter
      * 
      * @param file
      * @param key
