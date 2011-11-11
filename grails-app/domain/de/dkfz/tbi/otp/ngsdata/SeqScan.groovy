@@ -42,7 +42,11 @@ class SeqScan {
 		//dataFiles(nullable: true)
 		//alignmentParams(nullable: true)
 	}
-
+    
+    static mapping = {
+        seqTracks sort:'laneId'
+    }
+    
 	String toString() {
 		"${sample} ${seqType}"
 	}

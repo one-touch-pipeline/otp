@@ -13,7 +13,7 @@ class DataFile {
     String vbpFilePath = ""        // viev by pid structure
     String prvFilePath = ""        // path from run name to this file (used in solid)
 
-    boolean metaDataValid = true   
+    boolean metaDataValid = true
 
     boolean used = false           // is this file used in any seqTrack
     boolean fileExists = false     // does file exists in file system
