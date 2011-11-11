@@ -48,6 +48,44 @@ body {
 	background-color: #abbf78;
 }
 
+/* my styles start here */
+
+.myKey {
+	background: #addaad
+}
+
+.myValue {     
+	list-style-type: none;
+}
+
+.myLine {
+    list-style-type: none; 
+    padding-left: 1em
+}
+
+.myHeader { 
+	font-weight: bold;
+	background: #fafafa;
+	background-image: -moz-linear-gradient(center bottom, #efefef, #ffffff);
+    
+    -moz-box-shadow: 0 0 3px 1px #cccccc;
+	margin-top: 1em;
+	margin-bottom: 0.5em;
+	margin-right: 400px;
+	margin-left: 50px;
+	padding: 0.3em;
+}
+
+.myContent{ 
+    margin-left: 50px;
+    margin-bottom: 2em; 
+    margin-right: 400px;
+}
+/* end of my styles */
+
+
+
+
 /* replace with .no-boxshadow body if you have modernizr available */
 .ie6 body,
 .ie7 body,
@@ -397,7 +435,7 @@ input:invalid:focus, select:invalid:focus, textarea:invalid:focus {
 /* TABLES */
 
 table {
-	border-top: 1px solid #DFDFDF;
+	border-bottom: 1px solid #DFDFDF;
 	border-collapse: collapse;
 	width: 100%;
 	margin-bottom: 1em;
