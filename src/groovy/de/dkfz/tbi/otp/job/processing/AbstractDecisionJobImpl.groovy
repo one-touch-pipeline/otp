@@ -7,34 +7,16 @@ import de.dkfz.tbi.otp.job.plan.DecisionMapping
  * Abstract base class for {@link DecisionJob}s.
  * @see DecisionJob
  */
-abstract public class AbstractDecisionJobImpl extends AbstractJobImpl implements DecisionJob {
+abstract public class AbstractDecisionJobImpl extends AbstractEndStateAwareJobImpl implements DecisionJob {
     private JobDecision decision
-    private ExecutionState endState = null
 
     /**
      * Default empty constructor
      */
     public AbstractDecisionJobImpl() {
     }
-    public AbstractDecisionJobImpl(ProcessingStep processingStep,
-            Collection<Parameter> inputParameters) {
+    public AbstractDecisionJobImpl(ProcessingStep processingStep, Collection<Parameter> inputParameters) {
         super(processingStep, inputParameters)
-    }
-
-    /**
-     * Can be used by an implementing Job to set the Job as failed.
-     * @see succeed
-     */
-    protected final void fail() {
-        this.endState = ExecutionState.FAILURE
-    }
-
-    /**
-     * Can be used by an implementing Job to set the Job as succeeded.
-     * @see fail
-     */
-    protected final void succeed() {
-        this.endState = ExecutionState.SUCCESS
     }
 
     /**
@@ -60,22 +42,11 @@ abstract public class AbstractDecisionJobImpl extends AbstractJobImpl implements
     }
 
     /**
-     * 
+     *
      * @return List of available decisions the Job can take ordered by ID.
      */
     protected final List<JobDecision> getAvailableDecisions() {
         return JobDecision.findAllByJobDefinition(getProcessingStep().jobDefinition).sort { it.id }
-    }
-
-    @Override
-    public final ExecutionState getEndState() throws InvalidStateException {
-        if (!endState) {
-            throw new InvalidStateException("EndState accessed without end state being set")
-        }
-        if (getState() != ExecutionState.FINISHED && getState() != ExecutionState.SUCCESS) {
-            throw new InvalidStateException("EndState accessed but not in finished state")
-        }
-        return endState
     }
 
     @Override
