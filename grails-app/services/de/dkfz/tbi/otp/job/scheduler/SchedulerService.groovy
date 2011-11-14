@@ -211,8 +211,8 @@ class SchedulerService {
             throw new SchedulerPersistencyException("Could not create new ProcessingStep for Process ${process.id}")
         }
         input.each { Parameter param ->
-            ParameterMapping mapping = ParameterMapping.findByFromAndJob(param.type, jobDefinition)
-            if (mapping) {
+            List<ParameterMapping> mappings = ParameterMapping.findAllByFromAndJob(param.type, jobDefinition)
+            mappings.each { ParameterMapping mapping ->
                 Parameter nextParam = new Parameter(type: mapping.to, value: param.value)
                 if (mapping.to.usage == ParameterUsage.PASSTHROUGH) {
                     step.addToOutput(nextParam)

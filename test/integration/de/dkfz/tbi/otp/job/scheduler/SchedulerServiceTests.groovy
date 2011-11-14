@@ -424,6 +424,93 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertTrue(process.finished)
     }
 
+    /**
+     * Test that one output parameter can be mapped into multiple input parameters
+     * and passthrough parameters of the next Job.
+     */
+    @Test
+    void testOneToManyParameterMapping() {
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // create the JobExecutionPlan with two Job Definitions
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = createTestJob("test", jep)
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        // second Job Definition
+        JobDefinition jobDefinition2 = createTestEndStateAwareJob("test2", jep, jobDefinition)
+        ParameterType passThrough = new ParameterType(jobDefinition: jobDefinition2, name: "passthrough", description: "test", usage: ParameterUsage.PASSTHROUGH)
+        assertNotNull(passThrough.save())
+        ParameterType passThrough2 = new ParameterType(jobDefinition: jobDefinition2, name: "passthrough2", description: "test", usage: ParameterUsage.PASSTHROUGH)
+        assertNotNull(passThrough2.save())
+        // map output parameter test to our two passthrough parameters
+        ParameterMapping mapping = new ParameterMapping(job: jobDefinition2, from: ParameterType.findByJobDefinitionAndName(jobDefinition, "test"), to: passThrough)
+        jobDefinition2.addToParameterMappings(mapping)
+        ParameterMapping mapping2 = new ParameterMapping(job: jobDefinition2, from: ParameterType.findByJobDefinitionAndName(jobDefinition, "test"), to: passThrough2)
+        jobDefinition2.addToParameterMappings(mapping2)
+        // pass the output parameter test also to both input parameters
+        ParameterMapping mapping3 = new ParameterMapping(job: jobDefinition2, from: ParameterType.findByJobDefinitionAndName(jobDefinition, "test"),
+            to: ParameterType.findByJobDefinitionAndName(jobDefinition2, "input"))
+        jobDefinition2.addToParameterMappings(mapping3)
+        ParameterMapping mapping4 = new ParameterMapping(job: jobDefinition2, from: ParameterType.findByJobDefinitionAndName(jobDefinition, "test"),
+            to: ParameterType.findByJobDefinitionAndName(jobDefinition2, "input2"))
+        jobDefinition2.addToParameterMappings(mapping4)
+        jobDefinition.next = jobDefinition2
+        assertNotNull(jobDefinition.save())
+        assertNotNull(jobDefinition2.save())
+        assertNotNull(jep.save())
+        // create the Process
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        assertNotNull(process.save())
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assertNotNull(step.save())
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.CREATED,
+            previous: null
+            )
+        step.addToUpdates(update)
+        assertNotNull(step.save(flush: true))
+        // running the JobExecutionPlan
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        assertTrue(schedulerService.queue.add(step))
+        assertNull(Parameter.findByType(passThrough))
+        schedulerService.schedule()
+        Parameter passThroughParameter = Parameter.findByType(passThrough)
+        assertNotNull(passThroughParameter)
+        Parameter passThroughParameter2 = Parameter.findByType(passThrough2)
+        assertNotNull(passThroughParameter2)
+        // another Job should be be scheduled
+        assertFalse(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // there should be a processing step for jobDefinition2 with two input parameter
+        ProcessingStep step2 = ProcessingStep.findByJobDefinition(jobDefinition2)
+        assertNotNull(step2)
+        assertSame(step, step2.previous)
+        assertSame(step2, step.next)
+        assertNotNull(step2.input)
+        assertEquals(2, step2.input.size())
+        // schedule the next Job
+        schedulerService.schedule()
+        // no Job should be be scheduled
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // there should be three output parameters
+        assertNotNull(step2.output)
+        List<Parameter> params = step2.output.toList().sort{ it.value }
+        assertEquals(4, params.size())
+        assertEquals("1234", params[0].value)
+        assertEquals("1234", params[1].value)
+        assertEquals("1234", params[2].value)
+        assertEquals("4321", params[3].value)
+        assertTrue(params.contains(passThroughParameter))
+        assertTrue(params.contains(passThroughParameter2))
+        // should be finished
+        assertTrue(process.finished)
+    }
+
     @Test
     void testCreateProcess() {
         assertTrue(schedulerService.queue.isEmpty())
