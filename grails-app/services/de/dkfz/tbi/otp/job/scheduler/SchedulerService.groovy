@@ -25,6 +25,7 @@ import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 import org.springframework.scheduling.annotation.Scheduled
 
 class SchedulerService {
+    static transactional = false
     /**
      * Dependency Injection of grailsApplication
      */
@@ -88,7 +89,7 @@ class SchedulerService {
      * @param input List of Parameters provided by the StartJob for this Process.
      */
     public void createProcess(StartJob startJob, List<Parameter> input) {
-        JobExecutionPlan plan = startJob.getExecutionPlan()
+        JobExecutionPlan plan = JobExecutionPlan.get(startJob.getExecutionPlan().id)
         Process process = new Process(started: new Date(),
             jobExecutionPlan: plan,
             startJobClass: startJob.class.toString(),

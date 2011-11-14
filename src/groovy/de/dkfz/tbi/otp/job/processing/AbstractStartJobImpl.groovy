@@ -53,6 +53,6 @@ abstract class AbstractStartJobImpl implements StartJob {
         if (!plan) {
             throw new InvalidStateException("Execution plan has not been set")
         }
-        return plan.startJob
+        return StartJobDefinition.get(plan.startJob.id)
     }
 }
