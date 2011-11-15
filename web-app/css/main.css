@@ -51,7 +51,11 @@ body {
 /* my styles start here */
 
 .myKey {
-	background: #addaad
+    width: 20%;
+    text-align: right;
+    font-weight: bold;
+    color:  #99aacc;
+    padding-right: 1em;
 }
 
 .myValue {     
@@ -59,8 +63,10 @@ body {
 }
 
 .myLine {
+    
     list-style-type: none; 
-    padding-left: 1em
+    padding-left: 1em;
+
 }
 
 .myHeader { 
