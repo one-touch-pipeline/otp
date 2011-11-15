@@ -14,4 +14,7 @@ import org.springframework.stereotype.Component
 @Component("testStartJob")
 @Scope("prototype")
 class TestStartJob extends AbstractStartJobImpl {
+
+    void execute() {
+    }
 }

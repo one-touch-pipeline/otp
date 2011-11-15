@@ -3,6 +3,8 @@ package de.dkfz.tbi.otp.job.processing
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
+
+import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 import org.springframework.beans.factory.annotation.Autowired
 
 /**
@@ -15,6 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired
 abstract class AbstractStartJobImpl implements StartJob {
     @Autowired
     SchedulerService schedulerService
+    /**
+     * Dependency Injection of PersistenceContextInterceptor
+     */
+    @Autowired
+    PersistenceContextInterceptor persistenceInterceptor
     private JobExecutionPlan plan
 
     protected AbstractStartJobImpl() {}
