@@ -7,4 +7,28 @@ class IndividualController {
 	//def list = {
 	//	render "test"
 	//}
+
+    def display = {
+
+        println params.id
+        Individual ind = Individual.findByMockFullName(params.id)
+        redirect(action: show, id: ind.id)
+    }
+
+
+    def show = {
+
+        Individual ind = Individual.get(params.id)
+
+        Vector<SeqType> seqTypes= new Vector<SeqType>();
+
+        seqTypes.add(SeqType.findByNameAndLibraryLayout("WHOLE_GENOME", "PAIRED"))
+        seqTypes.add(SeqType.findByNameAndLibraryLayout("WHOLE_GENOME", "MATE_PAIR"))
+        seqTypes.add(SeqType.findByNameAndLibraryLayout("RNA", "PAIRED"))
+        seqTypes.add(SeqType.findByName("MI_RNA")) 
+
+
+        [ind: ind, seqTypes: seqTypes]
+    }
+
 }
