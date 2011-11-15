@@ -16,7 +16,10 @@
 
 
     <g:each var="name" in="${names}"> 
-        <tr><th rowspan=3 class="sample">${name}
+        <tr><th rowspan=3 class="sample">
+            <g:link controller="individual" action="display" id="${name}">
+                 ${name}
+            </g:link>
 
         <g:each var="type" in ="${types}">
 
