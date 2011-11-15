@@ -2,6 +2,7 @@
 body,
 input, select, textarea {
 	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+	font-size: 10pt;
 }
 
 /* BASE LAYOUT */
@@ -36,7 +37,7 @@ body {
 	background: #ffffff;
 	color: #333333;
 	margin: 0 auto;
-	max-width: 960px;
+	max-width: 1024px;
 	overflow-x: hidden; /* prevents box-shadow causing a horizontal scrollbar in firefox when viewport < 960px wide */
 	   -moz-box-shadow: 0 0 0.3em #255b17;
 	-webkit-box-shadow: 0 0 0.3em #255b17;
@@ -46,6 +47,50 @@ body {
 #grailsLogo {
 	background-color: #abbf78;
 }
+
+/* my styles start here */
+
+.myKey {
+    width: 20%;
+    text-align: right;
+    font-weight: bold;
+    color:  #99aacc;
+    padding-right: 1em;
+}
+
+.myValue {     
+	list-style-type: none;
+}
+
+.myLine {
+    
+    list-style-type: none; 
+    padding-left: 1em;
+
+}
+
+.myHeader { 
+	font-weight: bold;
+	background: #fafafa;
+	background-image: -moz-linear-gradient(center bottom, #efefef, #ffffff);
+    
+    -moz-box-shadow: 0 0 3px 1px #cccccc;
+	margin-top: 1em;
+	margin-bottom: 0.5em;
+	margin-right: 400px;
+	margin-left: 50px;
+	padding: 0.3em;
+}
+
+.myContent{ 
+    margin-left: 50px;
+    margin-bottom: 2em; 
+    margin-right: 400px;
+}
+/* end of my styles */
+
+
+
 
 /* replace with .no-boxshadow body if you have modernizr available */
 .ie6 body,
@@ -104,17 +149,18 @@ img {
 }
 
 .footer {
-	background: #abbf78;
-	color: #000;
+	background: #99aacc;
+	color: #ffffff;
 	clear: both;
 	font-size: 0.8em;
 	margin-top: 1.5em;
 	padding: 1em;
 	min-height: 1em;
+	margin-bottom: 3em;	
 }
 
 .footer a {
-	color: #255b17;
+	color: #255b17;	
 }
 
 .spinner {
@@ -136,7 +182,9 @@ img {
 	   -moz-box-shadow: 0 0 3px 1px #aaaaaa;
 	-webkit-box-shadow: 0 0 3px 1px #aaaaaa;
 	        box-shadow: 0 0 3px 1px #aaaaaa;
-	zoom: 1;
+	zoom: 1;	
+	margin-bottom: 1em;	
+	margin-top: 1em;
 }
 
 .nav ul {
@@ -393,34 +441,43 @@ input:invalid:focus, select:invalid:focus, textarea:invalid:focus {
 /* TABLES */
 
 table {
-	border-top: 1px solid #DFDFDF;
+	border-bottom: 1px solid #DFDFDF;
 	border-collapse: collapse;
 	width: 100%;
 	margin-bottom: 1em;
 }
 
 tr {
-	border: 0;
+	border: 0; 
 }
+
 
 tr>td:first-child, tr>th:first-child {
 	padding-left: 1.25em;
 }
 
+
 tr>td:last-child, tr>th:last-child {
 	padding-right: 1.25em;
 }
 
+/* tiny row formatting */
+td.tinyRow {
+	line-height: 0.3em;
+	background: #ffffff;
+	background-image: -moz-linear-gradient(right, #ffffff, #aaaff);
+}
+
 td, th {
 	line-height: 1.5em;
-	padding: 0.5em 0.6em;
+	padding: 0.1em 0.1em;
 	text-align: left;
-	vertical-align: top;
+	vertical-align: center;
 }
 
 th {
 	background-color: #efefef;
-	background-image: -moz-linear-gradient(top, #ffffff, #eaeaea);
+	background-image: -moz-linear-gradient(top, #ffffff, #e0e0ff);
 	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #ffffff), color-stop(1, #eaeaea));
 	    filter: progid:DXImageTransform.Microsoft.gradient(startColorStr = '#ffffff', EndColorStr = '#eaeaea');
 	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#ffffff', EndColorStr='#eaeaea')";
@@ -429,6 +486,12 @@ th {
 	line-height: 1.7em;
 	padding: 0.2em 0.6em;
 }
+
+th.sample {
+	background-image: -moz-linear-gradient(right, #ffffff, #f4f4ff);	
+	background-color: #ffffff 
+}
+
 
 thead th {
 	white-space: nowrap;
@@ -469,8 +532,30 @@ th.desc a {
 	background: #ffffff;
 }
 
+.TUMOR {
+	background: #f0f0ff;
+}
+
+.CONTROL {
+	background: #ffffff;
+	border-bottom: 1px dotted #d0d0d0;
+}
+
+.QA1 {
+	background: #ffffaa;	
+	background-image: -moz-linear-gradient(right, #ffffff, #ffffaa);
+}
+
+.QA2 {
+	background: #ffaaaa;
+	background-image: -moz-linear-gradient(right, #ffffff, #ffaaaa);
+}
+
+
 th:hover, tr:hover {
-	background: #E1F2B6;
+	ackground: #E1F2B6;
+	background: #dadada;	
+	/*text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);*/
 }
 
 /* PAGINATION */

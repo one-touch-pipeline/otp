@@ -1,9 +1,12 @@
 dataSource {
     pooled = true
-    driverClassName = "org.h2.Driver"
+    driverClassName = "org.h2.Driver" 
+	//driverClassName = "com.mysql.jdbc.Driver"
+    //dialect = org.hibernate.dialect.MySQL5InnoDBDialect
     username = "sa"
     password = ""
 }
+
 hibernate {
     cache.use_second_level_cache = true
     cache.use_query_cache = true
@@ -13,8 +16,11 @@ hibernate {
 environments {
     development {
         dataSource {
-            dbCreate = "create-drop" // one of 'create', 'create-drop', 'update', 'validate', ''
-            url = "jdbc:h2:mem:devDb"
+			//loggingSql = true
+            dbCreate = "update" // one of 'create', 'create-drop', 'update', 'validate', ''
+            //url = "jdbc:h2:mem:devDb" 
+			url = "jdbc:h2:~/h2/ngsdata"
+			//url = "jdbc:mysql://localhost/test"
         }
     }
     test {
