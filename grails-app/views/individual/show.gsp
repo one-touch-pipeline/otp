@@ -3,11 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
-<title>Insert title here</title>
+<title>Individual overview</title>
 </head>
 <body>
   <div class="body">
 
+    <h1>General</h1>
     <table>
        <tr> 
             <td class="myKey">PID</td>
@@ -31,14 +32,53 @@
        </tr> 
     </table>
 
+    <h1>Samples</h1>
+    <table>
+        <g:each var="sample" in="${ind.samples}">
+            <tr>
+                <td class="myKey">${sample.type}</td>
+                <td class="myValue">${sample.sampleIdentifiers}</td>
+            </tr>
+        </g:each>
+    </table>
+
+    <H1>Sequencing Scans</H1>
 
     <g:each var="type" in="${seqTypes}">
-        <h1>${type}</h1>
 
+        <div class="myHeader">
+            ${type}
+        </div>
+        <div class="myContent">
 
+        <table>
+           <g:each var="scan" in="${seqScans}">
+               <g:if test="${scan.seqType == type}">
+               <tr>
+                    <td>
+                        <g:link controller="seqScan" action="show" id="${scan.id}">
+                            ${scan.id}
+                        </g:link>
+                    </td>
+                    <td><strong>${scan.sample.type}</strong></td>
+                    <td>${scan.state}</td>
+                    <td>${scan.seqCenters.toLowerCase()}</td>
 
+                    <td>${scan.nLanes}</td>
+                    <td>${scan.coverage}</td>
+                    <td>${scan.basePairsString()}</td>
 
-
+                    <g:if test="scan.mergingLog.size() == 0">
+                        <td>not merged</td>
+                    </g:if>
+                    <g:else>
+                        <td>merged</td>
+                    </g:else>    
+               </tr>
+               </g:if>
+           </g:each>
+        </table>
+      </div>
 
     </g:each>
 
