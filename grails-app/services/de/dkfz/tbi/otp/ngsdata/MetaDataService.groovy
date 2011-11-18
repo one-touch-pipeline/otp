@@ -792,7 +792,8 @@ class MetaDataService {
         // create alignment log		
         AlignmentLog alignLog = new AlignmentLog(
             alignmentParams : alignParams,
-            seqTrack : seqTrack
+            seqTrack : seqTrack,
+            executedBy : AlignmentLog.Execution.INITIAL
         )
 
         // attach data files
