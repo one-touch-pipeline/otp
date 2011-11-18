@@ -63,7 +63,7 @@ class ProstateOverviewController {
                     scanTable["id"] = seqScan.id
                     scanTable["center"] = seqScan.seqCenters.toLowerCase() 
                     scanTable["lanes"] = getBullets(seqScan.nLanes)
-                    scanTable["qa"] = getStringFromNumber(seqScan.nBasePairs)
+                    scanTable["qa"] = Tools.getStringFromNumber(seqScan.nBasePairs)
 
                     if (key == "WGP") {
                         if (seqScan.nBasePairs < 110e9) scanTable["qav"] = "QA1"
@@ -90,24 +90,6 @@ class ProstateOverviewController {
 
     /**
      * 
-     * 
-     */
-
-    private String getStringFromNumber(long number) {
-
-        final long billion = 1000000000
-        final long million = 1000000
-        final long kilo = 1000
-
-        if (number/billion > 0) return String.format("%.1f G",(number/billion))
-        if (number/million > 0) return String.format("%.1f M", (number/million))
-        if (number/kilo > 0) return String.format("%.1f k", (number/kilo)) 
-
-        return (number as String)  
-    }
-
-    /**
-     * 
      * @param n
      * @return
      */
@@ -115,6 +97,7 @@ class ProstateOverviewController {
     private String getBullets(int n) {
 
         String str = ""
+        if (n > 3) return "${n} &curren;"
         for(int i=0; i<n; i++)
             str += " &curren; "
 

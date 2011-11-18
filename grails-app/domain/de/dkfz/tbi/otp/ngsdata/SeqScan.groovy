@@ -49,6 +49,10 @@ class SeqScan {
     
 	String toString() {
 		"${sample} ${seqType}"
-	}
+	}  
+    
+    String basePairsString() {
+        return String.format("%.1f G",(nBasePairs/1e9))
+    }
 
 }
