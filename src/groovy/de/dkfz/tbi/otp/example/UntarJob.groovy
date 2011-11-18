@@ -12,22 +12,18 @@ class UntarJob extends AbstractJobImpl {
 
     @Override
     public void execute() throws Exception {
-        // TODO: convenient method
-        Parameter fileName = processingStep.input.find { it.type.name == "file" }
-        Parameter directory = processingStep.input.find { it.type.name == "directory" }
-        if (!fileName || !directory) {
-            throw new RuntimeException("Required parameter not found")
-        }
+        String fileName = getParameterValueOrClass("file")
+        String directory = getParameterValueOrClass("directory")
         // run the process
-        def process = "tar -pxv --atime-preserve -f ${fileName.value}".execute(null, new File(directory.value))
+        def process = "tar -pxv --atime-preserve -f ${fileName}".execute(null, new File(directory.value))
         process.waitFor()
         if (process.exitValue()) {
             throw new RuntimeException("Untar failed")
         }
         String files = ""
         process.in.eachLine { line ->
-            files += directory.value
-            if (!directory.value.endsWith('/')) {
+            files += directory
+            if (!directory.endsWith('/')) {
                 files += '/'
             }
             files += line.replace(" ", "\\ ")

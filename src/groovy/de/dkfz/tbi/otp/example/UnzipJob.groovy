@@ -12,11 +12,11 @@ class UnzipJob extends AbstractJobImpl {
 
     @Override
     public void execute() throws Exception {
-        Parameter zipFile = processingStep.input.find { it.type.name == "zipFile" }
-        Parameter outputDir = processingStep.input.find { it.type.name == "directory" }
+        String zipFile = getParameterValueOrClass("zipFile")
+        String outputDir = getParameterValueOrClass("directory")
 
-        String name = "${outputDir.value}/unzipJob_${System.currentTimeMillis()}.tar"
-        String command = "gunzip -c ${zipFile.value}"
+        String name = "${outputDir}/unzipJob_${System.currentTimeMillis()}.tar"
+        String command = "gunzip -c ${zipFile}"
         println command
         def process = command.execute()
         process.waitFor()
@@ -26,7 +26,5 @@ class UnzipJob extends AbstractJobImpl {
         File outputFile = new File(name)
         outputFile.append(process.in)
         addOutputParameter("unzipFile", name)
-
     }
-
 }

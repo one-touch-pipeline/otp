@@ -12,11 +12,8 @@ class Md5SumJob extends AbstractJobImpl {
 
     @Override
     public void execute() throws Exception {
-        Parameter file = processingStep.input.find { it.type.name == "file" }
-        if (!file) {
-            throw new RuntimeException("Required parameter not found")
-        }
-        def process = "md5sum ${file.value}".execute()
+        String file = getParameterValueOrClass("file")
+        def process = "md5sum ${file}".execute()
         process.waitFor()
         if (process.exitValue()) {
             throw new RuntimeException("Calculating MD5Sum failed: ${process.err.text}")
@@ -25,5 +22,4 @@ class Md5SumJob extends AbstractJobImpl {
         addOutputParameter("md5sum", md5sum)
         println "md5sum calculated: ${md5sum}"
     }
-
 }
