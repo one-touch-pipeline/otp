@@ -29,7 +29,7 @@
                     <td>${track.insertSize}</td>
 
                     <g:if test="${track.alignmentLog.size() == 0}">
-                        <td>n/a</td>
+                        <td>no alignment</td>
                     </g:if><g:else>
 
                     <g:each var="alignment" in="${track.alignmentLog}">
