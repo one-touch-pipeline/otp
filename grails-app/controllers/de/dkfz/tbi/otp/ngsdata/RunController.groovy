@@ -17,4 +17,13 @@ class RunController {
 
         redirect(action: "show", id:id)
     }
+    
+    
+    def show = {
+        
+        Run run = Run.get(params.id)
+        
+        [run: run]
+    }
+    
 }
