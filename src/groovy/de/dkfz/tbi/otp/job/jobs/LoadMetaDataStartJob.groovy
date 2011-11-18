@@ -29,7 +29,7 @@ class LoadMetaDataStartJob extends AbstractStartJobImpl {
             schedulerService.createProcess(
                 this, [
                 new Parameter(
-                    type: ParameterType.findByNameAndJobDefinition("Run", getExecutionPlan().startJob), 
+                    type: ParameterType.findByNameAndJobDefinition("run", getExecutionPlan().startJob), 
                     value: run.id.toString()
                 )
             ])

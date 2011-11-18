@@ -16,7 +16,7 @@ class BuildSequenceTracksJob extends AbstractJobImpl {
 
     @Override
     public void execute() throws Exception {
-        long runId = getParameterValueOrClass("Run")
+        long runId = getParameterValueOrClass("run")
         metaDataService.buildSequenceTracks(runId)
     }
 }
