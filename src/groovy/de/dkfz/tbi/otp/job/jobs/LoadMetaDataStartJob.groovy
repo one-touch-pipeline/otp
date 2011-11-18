@@ -23,6 +23,7 @@ class LoadMetaDataStartJob extends AbstractStartJobImpl {
             return
         }
         println("Load Meta Data Start Job called")
+        // TODO Assure that the runs are processed only once. Verify via Process?
         List<Run> runs = Run.findAll()
         runs.each { Run run ->
             schedulerService.createProcess(
@@ -34,26 +35,6 @@ class LoadMetaDataStartJob extends AbstractStartJobImpl {
             ])
             println run.name
         }
-
-
-
-        /*        // processing and poor's man time measurement
-         def times = []
-         println run.name
-         times << new Date().getTime()
-         metaDataService.registerInputFiles(id)
-         times << new Date().getTime()
-         metaDataService.loadMetaData(id)
-         times << new Date().getTime()
-         metaDataService.validateMetadata(id)
-         times << new Date().getTime()
-         metaDataService.buildExecutionDate(id)
-         times << new Date().getTime()
-         metaDataService.buildSequenceTracks(id)
-         times << new Date().getTime()
-         metaDataService.checkSequenceTracks(id)
-         times << new Date().getTime()
-         println "total ${times[6]-times[0]}"*/
         performed = true
     }
 }
