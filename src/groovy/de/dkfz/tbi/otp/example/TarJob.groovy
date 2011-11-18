@@ -12,11 +12,11 @@ class TarJob extends AbstractJobImpl {
 
     @Override
     public void execute() throws Exception {
-        Parameter tarFiles = processingStep.input.find { it.type.name == "files" }
-        Parameter outputDir = processingStep.input.find { it.type.name == "directory" }
+        String tarFiles = getParameterValueOrClass("files")
+        String outputDir = getParameterValueOrClass("directory")
 
-        String name = "${outputDir.value}/tarJob_${System.currentTimeMillis()}.tar"
-        String[] files = tarFiles.value.split(" ")
+        String name = "${outputDir}/tarJob_${System.currentTimeMillis()}.tar"
+        String[] files = tarFiles.split(" ")
         String path = files[0].substring(0, files[0].lastIndexOf('/') + 1)
         String command = "tar -pc --atime-preserve -f ${name} "
         files.each {
@@ -30,5 +30,4 @@ class TarJob extends AbstractJobImpl {
         }
         addOutputParameter("tarFile", name)
     }
-
 }

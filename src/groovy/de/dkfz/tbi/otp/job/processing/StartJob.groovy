@@ -30,4 +30,12 @@ public interface StartJob {
      * @return Unique identifier of the source code version of the class.
      **/
     public String getVersion()
+    /**
+     * This method can be implemented by the StartJob for the checking.
+     * The implementing method is wrapped into a construct so that a hibernate session is bound in
+     * case that the Job extends the AbstractJobImpl.
+     *
+     * It is recommended to use the {@code @Scheduled} annotation on this method.
+     */
+    public void execute()
 }

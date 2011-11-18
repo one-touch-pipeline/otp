@@ -15,12 +15,9 @@ class CompareJob extends AbstractJobImpl implements EndStateAwareJob {
 
     @Override
     public void execute() throws Exception {
-        Parameter value1 = processingStep.input.find { it.type.name == "value1" }
-        Parameter value2 = processingStep.input.find { it.type.name == "value2" }
-        if (!value1 || !value2) {
-            throw new RuntimeException("Required parameter not found")
-        }
-        if (value1.value == value2.value) {
+        String value1 = getParameterValueOrClass("value1")
+        String value2 = getParameterValueOrClass("value2")
+        if (value1 == value2) {
             endState = ExecutionState.SUCCESS
         } else {
             endState = ExecutionState.FAILURE
@@ -34,5 +31,4 @@ class CompareJob extends AbstractJobImpl implements EndStateAwareJob {
         }
         return endState
     }
-
 }

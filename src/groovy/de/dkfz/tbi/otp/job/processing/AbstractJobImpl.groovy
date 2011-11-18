@@ -19,6 +19,10 @@ import de.dkfz.tbi.otp.job.processing.ProcessingStep
  */
 abstract class AbstractJobImpl implements Job {
     /**
+     * Dependency injection for Grails Application
+     */
+    def grailsApplication
+    /**
      * The processing step for this Job
      */
     private ProcessingStep processingStep
@@ -151,5 +155,26 @@ abstract class AbstractJobImpl implements Job {
     @Override
     public String getVersion() {
         return "";
+    }
+
+   /**
+    * Returns the parameter value or the associated class.
+    *
+    * The parameter value is the value of the instance the job has an instance of.
+    * If the associated parameter type has the className value set this one is returned
+    * instead of the parameter value. Therefore the return type of the method is generic.
+    * @param typeName The type name of the type to be returned a value of
+    * @return The parameter value or the class of the instance.
+    * @throws RuntimeException In case the parameter could not be found.
+    */
+    public <T> T getParameterValueOrClass(String typeName) {
+        Parameter parameter = processingStep.input.find { it.type.name == typeName }
+        if (!parameter) {
+            throw new RuntimeException("Required parameter not found")
+        }
+        if(parameter.type.className) {
+            return grailsApplication.getClassForName(parameter.type.className).get(parameter.value.toLong())
+        }
+        return parameter.value
     }
 }

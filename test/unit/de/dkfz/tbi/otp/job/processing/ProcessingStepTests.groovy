@@ -114,8 +114,8 @@ class ProcessingStepTests {
 
     void testOutput() {
         Process process = new Process()
-        JobDefinition jobDefinition = new JobDefinition()
-        JobDefinition jobDefinition2 = new JobDefinition()
+        JobDefinition jobDefinition = new JobDefinition(id: 1)
+        JobDefinition jobDefinition2 = new JobDefinition(id: 2)
         mockDomain(Process, [process])
         mockDomain(JobDefinition, [jobDefinition, jobDefinition2])
         mockForConstraintsTests(ProcessingStep, [])
@@ -221,8 +221,8 @@ class ProcessingStepTests {
     void testPrevious() {
         Process process = new Process()
         Process process2 = new Process()
-        JobDefinition jobDefinition = new JobDefinition()
-        JobDefinition jobDefinition2 = new JobDefinition()
+        JobDefinition jobDefinition = new JobDefinition(id: 1)
+        JobDefinition jobDefinition2 = new JobDefinition(id: 2)
         ProcessingStep testStep1 = new ProcessingStep(process: process2, jobDefinition: jobDefinition)
         ProcessingStep testStep2 = new ProcessingStep(process: process, jobDefinition: jobDefinition)
         ProcessingStep testStep3 = new ProcessingStep(process: process, jobDefinition: jobDefinition2)
@@ -250,8 +250,8 @@ class ProcessingStepTests {
     void testNext() {
         Process process = new Process()
         Process process2 = new Process()
-        JobDefinition jobDefinition = new JobDefinition()
-        JobDefinition jobDefinition2 = new JobDefinition()
+        JobDefinition jobDefinition = new JobDefinition(id: 1)
+        JobDefinition jobDefinition2 = new JobDefinition(id: 2)
         ProcessingStep testStep1 = new ProcessingStep(process: process2, jobDefinition: jobDefinition)
         ProcessingStep testStep2 = new ProcessingStep(process: process, jobDefinition: jobDefinition)
         ProcessingStep testStep3 = new ProcessingStep(process: process, jobDefinition: jobDefinition2)
