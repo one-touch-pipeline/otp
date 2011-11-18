@@ -18,8 +18,12 @@ class AlignmentLog {
 
 	static constraints = {
 	}
-
-	String toString() {
+    
+    static mapping = {
+        dataFiles sort:'fileName'
+    }
+	
+    String toString() {
 		"${alignmentParams} ${dataFiles}"
 	}
 }

@@ -38,7 +38,10 @@ class SeqTrack {
 		sample()
 	}
 
-
+    static mapping = {
+        dataFiles sort:'fileName'
+    }
+    
     String nBaseString() {
         return String.format("%.1f G",(nBasePairs/1e9))
     }
@@ -48,6 +51,7 @@ class SeqTrack {
         "${laneId} ${sample} ${nbase} ${insertSize}"
     }
 
+    
     String alignmentLogString() {
 
         String text = ""
