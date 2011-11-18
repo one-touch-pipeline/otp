@@ -87,6 +87,15 @@ body {
     margin-bottom: 2em; 
     margin-right: 400px;
 }
+
+
+.miniHeader {
+	color: #48802c;
+    font-weight: bold;
+	padding-top: 1em;
+	border-bottom: 1px dotted #CCCCCC;
+	border-top: 1px solid #CCCCCC;
+}
 /* end of my styles */
 
 
