@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.job.jobs
+package de.dkfz.tbi.otp.job.jobs.metaData
 
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.Parameter;

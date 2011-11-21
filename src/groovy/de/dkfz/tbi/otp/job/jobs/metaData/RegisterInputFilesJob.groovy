@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.job.jobs
+package de.dkfz.tbi.otp.job.jobs.metaData
 
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
