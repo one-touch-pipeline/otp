@@ -37,10 +37,3 @@ assert(buildSequenceTracksJob.save())
 // set the first job
 jep.firstJob = registerInputFilesJob
 assert(jep.save(flush: true))
-// Parameters for Start Job
-ParameterType type = new ParameterType(name: "run", jobDefinition: definition, usage: ParameterUsage.OUTPUT)
-assert(type.save())
-Parameter parameter = new Parameter(type: type)
-assert(parameter.save())
-definition.addToConstantParameters(parameter)
-assert(definition.save(flush: true))
