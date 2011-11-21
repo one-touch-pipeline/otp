@@ -1,16 +1,17 @@
 package de.dkfz.tbi.otp.job.jobs.metaData
 
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
-import de.dkfz.tbi.otp.job.processing.Parameter;
-import de.dkfz.tbi.otp.job.processing.ParameterType;
+import de.dkfz.tbi.otp.job.processing.Parameter
+import de.dkfz.tbi.otp.job.processing.ProcessParameterType
+import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.ngsdata.Run
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
-@Component("loadMetaDataStartJob")
+@Component("metaDataStartJob")
 @Scope("singleton")
-class LoadMetaDataStartJob extends AbstractStartJobImpl {
+class MetaDataStartJob extends AbstractStartJobImpl {
     boolean performed = false
 
     @Scheduled(fixedRate=10000l)
@@ -27,9 +28,9 @@ class LoadMetaDataStartJob extends AbstractStartJobImpl {
         List<Run> runs = Run.findAll()
         runs.each { Run run ->
             schedulerService.createProcess(
-                this, [
-                new Parameter(
-                    type: ParameterType.findByNameAndJobDefinition("run", getExecutionPlan().startJob), 
+                this, [], [
+                new ProcessParameter(
+                    type: new ProcessParameterType(name: "run"),
                     value: run.id.toString()
                 )
             ])

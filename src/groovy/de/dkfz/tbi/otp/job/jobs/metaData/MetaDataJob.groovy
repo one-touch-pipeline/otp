@@ -7,7 +7,7 @@ import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
 
 @Component("loadMetaDataJob")
 @Scope("prototype")
-class LoadMetaDataJob extends AbstractJobImpl {
+class MetaDataJob extends AbstractJobImpl {
 
    /**
     * dependency injection of meta data service
@@ -16,7 +16,7 @@ class LoadMetaDataJob extends AbstractJobImpl {
 
     @Override
     public void execute() throws Exception {
-        long runId = Long.parseLong(getParameterValueOrClass("run"))
+        long runId = getParameterValueOrClass("run")
         metaDataService.loadMetaData(runId)
     }
 }
