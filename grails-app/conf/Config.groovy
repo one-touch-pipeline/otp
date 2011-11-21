@@ -10,6 +10,14 @@
 //    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
 // }
 
+Properties otpProperties = new Properties()
+try {
+    otpProperties.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") + ".otp.properties"))
+} catch (Exception e) {
+    otpProperties.setProperty("otp.security.ldap.enabled", "false")
+}
+def otpConfig = new ConfigSlurper().parse(otpProperties)
+List pluginsToExclude = []
 
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
@@ -92,4 +100,35 @@ log4j = {
            'de.dkfz.tbi.otp' // our own stuff
 
     debug 'de.dkfz.tbi.otp' // our own stuff
+}
+
+// Added by the Spring Security Core plugin:
+grails.plugins.springsecurity.userLookup.userDomainClassName = 'de.dkfz.tbi.otp.security.User'
+grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'de.dkfz.tbi.otp.security.UserRole'
+grails.plugins.springsecurity.authority.className = 'de.dkfz.tbi.otp.security.Role'
+
+// ldap
+if ((otpConfig.otp.security.ldap.enabled instanceof ConfigObject) || !Boolean.parseBoolean(otpConfig.otp.security.ldap.enabled)) {
+    otp.security.ldap.enabled = false
+    println("Excluding ldap")
+    pluginsToExclude << "spring-security-ldap"
+} else {
+    println("using ldap")
+    otp.security.ldap.enabled = true
+    grails.plugins.springsecurity.ldap.context.managerDn         = otpConfig.otp.security.ldap.managerDn
+    grails.plugins.springsecurity.ldap.context.managerPassword   = otpConfig.otp.security.ldap.managerPw
+    grails.plugins.springsecurity.ldap.context.server            = otpConfig.otp.security.ldap.server
+    grails.plugins.springsecurity.ldap.search.base               = otpConfig.otp.security.ldap.search.base
+    grails.plugins.springsecurity.ldap.authorities.searchSubtree = otpConfig.otp.security.ldap.search.subTree
+    grails.plugins.springsecurity.ldap.search.filter             = otpConfig.otp.security.ldap.search.filter
+
+    // static options
+    grails.plugins.springsecurity.ldap.authorities.ignorePartialResultException = true
+    grails.plugins.springsecurity.ldap.authorities.retrieveGroupRoles = true
+    grails.plugins.springsecurity.ldap.authorities.retrieveDatabaseRoles = true
+}
+
+// exclude unused plugins
+if (pluginsToExclude) {
+    grails.plugin.exclude = pluginsToExclude
 }
