@@ -177,4 +177,12 @@ abstract class AbstractJobImpl implements Job {
         }
         return parameter.value
     }
+
+    public String getProcessParameterValue(String typeName) {
+        Parameter parameter = processingStep.process.processParameters.find { it.type.name == typeName }
+        if (!parameter) {
+            throw new RuntimeException("Required parameter not found")
+        }
+        return parameter.value
+    }
 }
