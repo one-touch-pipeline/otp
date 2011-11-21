@@ -13,6 +13,7 @@ import de.dkfz.tbi.otp.job.processing.ParameterMapping
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
 import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.Process
+import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.job.processing.ProcessingError
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
@@ -84,17 +85,25 @@ class SchedulerService {
      * From the JobExecutionPlan the first {@link JobDefinition} describing the first Job
      * is derived and a {@link ProcessingStep} is created. The {@link Parameter}s passed into
      * the method are mapped to the input parameters accepted by the first JobDefinition.
+     * The {@link ProcessParameter}s passed into the method are put to the Process.
      * Last but not least the created ProcessingStep gets scheduled.
      * @param startJob The StartJob which wants to trigger the Process
      * @param input List of Parameters provided by the StartJob for this Process.
+     * @param processParameters List of ProcessParameters provided by the StartJob for this Process.
      */
-    public void createProcess(StartJob startJob, List<Parameter> input) {
+    public void createProcess(StartJob startJob, List<Parameter> input, List<ProcessParameter> processParameters = []) {
         JobExecutionPlan plan = JobExecutionPlan.get(startJob.getExecutionPlan().id)
         Process process = new Process(started: new Date(),
             jobExecutionPlan: plan,
             startJobClass: startJob.class.toString(),
             startJobVersion: startJob.getVersion()
         )
+        if (processParameters) {
+            processParameters.each { ProcessParameter processParameter ->
+                processParameter.type.process = process
+            }
+            process.addToProcessParameters(processParameters)
+        }
         if (!process.save()) {
             throw new SchedulerPersistencyException("Could not save the process for the JobExecutionPlan ${plan.id}")
         }
