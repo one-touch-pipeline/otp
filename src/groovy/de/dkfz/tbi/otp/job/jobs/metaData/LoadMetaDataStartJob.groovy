@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
-@Component("exampleStartJob")
+@Component("loadMetaDataStartJob")
 @Scope("singleton")
 class LoadMetaDataStartJob extends AbstractStartJobImpl {
     boolean performed = false
