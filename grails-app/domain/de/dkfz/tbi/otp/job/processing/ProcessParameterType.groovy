@@ -11,7 +11,7 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan;
  * which combines a ProcessParameterType with a value.
  *
  * @see ProcessParameter
- * @see Process
+ * @see JobExecutionPlan
  */
 class ProcessParameterType {
     /**
@@ -28,7 +28,7 @@ class ProcessParameterType {
     JobExecutionPlan plan
 
     static constraints = {
-        name(nullable: false, blank: false, unique: 'process')
+        name(nullable: false, blank: false, unique: 'plan')
         description(nullable: true)
     }
 }
