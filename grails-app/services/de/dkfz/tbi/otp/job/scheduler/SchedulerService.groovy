@@ -100,9 +100,9 @@ class SchedulerService {
         )
         if (processParameters) {
             processParameters.each { ProcessParameter processParameter ->
-                processParameter.type.process = process
+                processParameter.type.plan = plan
+                plan.addToProcessParameters(processParameter)
             }
-            process.addToProcessParameters(processParameters)
         }
         if (!process.save()) {
             throw new SchedulerPersistencyException("Could not save the process for the JobExecutionPlan ${plan.id}")
