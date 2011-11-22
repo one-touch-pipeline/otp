@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.job.plan
 
-import de.dkfz.tbi.otp.job.processing.Parameter
+import de.dkfz.tbi.otp.job.processing.ProcessParameter
+
 
 class JobExecutionPlan {
-    static hasMany = [processParameters: Parameter]
+    static hasMany = [processParameters: ProcessParameter]
     /**
      * A descriptive name for this Job Execution Plan
      */
