@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.job.plan
 import de.dkfz.tbi.otp.job.processing.Parameter
 
 class JobExecutionPlan {
-    static hasMany = [inputParameters: Parameter]
+    static hasMany = [processParameters: Parameter]
     /**
      * A descriptive name for this Job Execution Plan
      */
