@@ -12,7 +12,6 @@ class ExpectedSequenceFile {
 	]
 	
 	static constraints = {
-		namePattern(nullable: true)
 		fileType(nullable: false)
 		seqTech()
 		seqType()
