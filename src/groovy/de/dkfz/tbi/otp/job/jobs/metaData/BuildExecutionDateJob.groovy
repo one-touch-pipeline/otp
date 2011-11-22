@@ -16,7 +16,7 @@ class BuildExecutionDateJob extends AbstractJobImpl {
 
     @Override
     public void execute() throws Exception {
-        long runId = getParameterValueOrClass("run")
+        long runId = getProcessParameterValue("run")
         metaDataService.buildExecutionDate(runId)
     }
 }

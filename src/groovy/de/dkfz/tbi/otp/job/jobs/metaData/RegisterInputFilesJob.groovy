@@ -16,7 +16,7 @@ class RegisterInputFilesJob extends AbstractJobImpl {
 
     @Override
     public void execute() throws Exception {
-        long runId = Long.parseLong(getParameterValueOrClass("run"))
+        long runId = getProcessParameterValue("run")
         metaDataService.registerInputFiles(runId)
     }
 }
