@@ -48,19 +48,19 @@
     <table>
        <tr>
             <td class="myKey">is complete</td>
-            <td class="myValue">${run.complete}</td>
+            <td class="${run.complete}">${run.complete}</td>
        </tr>
                <tr>
             <td class="myKey">all files used</td>
-            <td class="myValue">${run.allFilesUsed}</td>
+            <td class="${run.allFilesUsed}">${run.allFilesUsed}</td>
        </tr>
        <tr>
             <td class="myKey">data moved to final location</td>
-            <td class="myValue">${run.finalLocation}</td>
+            <td class="${run.finalLocation}">${run.finalLocation}</td>
        </tr>
             <tr>
             <td class="myKey">run from multiple sources</td>
-            <td class="myValue">${run.multipleSource}</td>
+            <td class="${run.multipleSource}">${run.multipleSource}</td>
        </tr>
     </table>
 
@@ -90,7 +90,7 @@
         <g:each var="track" in="${run.seqTracks}">
 
             <tr>
-                <td class="miniHeader" colspan="3">${track}</td>
+                <td class="miniHeader" colspan="4">${track}</td>
                 <td class="miniHeader">${track.insertSize}</td>
                 <td class="miniHeader">${track.nBaseString()}</td>
             </tr>
@@ -99,9 +99,10 @@
                     <td>-</td>
                     <td>s</td>
                     <td>${file.fileName}</td>
-                    <td>${file.fileSize/1e9} GB</td>
+                    <td>${file.fileSize/1e-9} GB</td>
+                    <td>${file.project}</td>
                     <td>
-                        <g:if test="${file.metaDataValid}">md valid</g:if>
+                        <g:if test="${file.metaDataValid}">meta-data valid</g:if>
                         <g:else>md invalid</g:else>
                     </td>
                 </tr>
@@ -120,7 +121,6 @@
           </g:each>
         </table>
       </div>
-
 
   </div>
 </body>

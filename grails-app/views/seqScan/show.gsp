@@ -8,7 +8,69 @@
 <body>
   <div class="body">
 
-    <H1>Details of Sequence Scan:  ${scan}</H1>
+    <H1>General</H1>
+
+    <table>
+       <tr>
+            <td class="myKey">individual</td>
+            <td>
+            <g:link 
+                    controller="individual" 
+                    action="show" 
+                    id="${scan.sample.individual.id}"
+            >
+                ${scan.sample.individual}
+            </g:link>
+            </td>
+       <tr> 
+            <td class="myKey">sample</td>
+            <td class="myValue">${scan.sample}</td>
+       </tr>  
+       <tr> 
+            <td class="myKey">sequencing type</td>
+            <td class="myValue">${scan.seqType}</td>
+       </tr>
+       <tr> 
+            <td class="myKey">sequencing technology</td>
+            <td class="myValue">${scan.seqTech}</td>
+       </tr>
+       <tr>
+            <td class="myKey">date</td>
+            <td>${scan.dateCreated}</td>
+       </tr>
+    </table>
+
+    <h1>Status</h1>   
+
+    <table>
+      <tr>
+        <td class="myKey">status</td>
+        <td>${scan.state}</td>
+      </tr> 
+      <tr>
+        <td class="myKey">quality status</td>
+        <td>${scan.qcState}</td>
+      </tr>
+    </table>
+
+    <h1>Sequencing tracks</h1>
+
+    <table>
+        <tr>
+            <td class="myKey">number of lanes</td>
+            <td>${scan.nLanes}</td>
+        </tr>
+        <tr>
+            <td class="myKey">number of base pairs</td>
+            <td>${scan.basePairsString()}</td>
+        </tr>
+        <tr>
+            <td class="myKey">coverage</td>
+            <td>${scan.coverage}</td>
+        </tr>
+    </table>
+
+    <h1>Runs and Lanes</h1>
 
     <g:each var="run" in="${runs}">
 
