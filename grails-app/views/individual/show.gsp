@@ -8,7 +8,7 @@
 <body>
   <div class="body">
 
-    <h1>General</h1>
+    <h1>Details of Individual</h1>
     <table>
        <tr> 
             <td class="myKey">PID</td>
@@ -69,7 +69,7 @@
                     <td>${scan.basePairsString()}</td>
 
                     <g:if test="scan.mergingLog.size() == 0">
-                        <td>not merged</td>
+                        <td class="false">not merged</td>
                     </g:if>
                     <g:else>
                         <td>merged</td>

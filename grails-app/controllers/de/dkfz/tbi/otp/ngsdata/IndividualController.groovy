@@ -26,7 +26,7 @@ class IndividualController {
         seqTypes.add(SeqType.findByNameAndLibraryLayout("RNA", "PAIRED"))
         seqTypes.add(SeqType.findByName("MI_RNA")) 
 
-        Set<SeqScan> seqScans = new HashSet<SeqScan>()
+        List<SeqScan> seqScans = new ArrayList<SeqScan>()
 
         ind.samples.each {Sample sample ->
             sample.seqScans.each {SeqScan seqScan ->
