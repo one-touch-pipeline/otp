@@ -45,6 +45,7 @@ grails.project.dependency.resolution = {
         compile ":spring-security-core:1.2.4"
         compile ":spring-security-ldap:1.0.5"
         compile ":spring-security-acl:1.1"
+        compile ":jquery-datatables:1.7.5"
 
         build ":tomcat:$grailsVersion"
     }
