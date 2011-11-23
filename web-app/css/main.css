@@ -87,6 +87,15 @@ body {
     margin-bottom: 2em; 
     margin-right: 400px;
 }
+
+
+.miniHeader {
+	color: #48802c;
+    font-weight: bold;
+	padding-top: 1em;
+	border-bottom: 1px dotted #CCCCCC;
+	border-top: 1px solid #CCCCCC;
+}
 /* end of my styles */
 
 
@@ -550,6 +559,21 @@ th.desc a {
 	background: #ffaaaa;
 	background-image: -moz-linear-gradient(right, #ffffff, #ffaaaa);
 }
+
+/* my styles for boolena values */
+
+td.true {
+    background-image: url(../images/skin/house.png);
+    background-repeat: no-repeat;
+    text-indent: 25px;
+}
+
+td.false {
+    background-image: url(../images/skin/exclamation.png);
+    background-repeat: no-repeat;
+    text-indent: 25px;
+}
+
 
 
 th:hover, tr:hover {

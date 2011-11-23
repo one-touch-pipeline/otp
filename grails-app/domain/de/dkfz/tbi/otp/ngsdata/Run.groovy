@@ -16,10 +16,13 @@ class Run {
 
     boolean multipleSource           // for runs from a few projects 
 
+    SeqCenter seqCenter
+    SeqTech seqTech
+
     static belongsTo = [
-        projects : Project,
-        seqCenter : SeqCenter,
-        seqTech : SeqTech
+        Project,
+        SeqCenter,
+        SeqTech
     ]
 
     static hasMany = [
