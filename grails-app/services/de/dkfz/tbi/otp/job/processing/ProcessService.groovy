@@ -14,7 +14,7 @@ class ProcessService {
      * @param process The Process for which the end date has to be retrieved
      * @return The date when the Process finished
      */
-    @PreAuthorize("hasPermission(#process, read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
     public Date getFinishDate(Process process) {
         if (!process.finished) {
             throw new IllegalArgumentException("Process is finished")
@@ -45,7 +45,7 @@ class ProcessService {
      * @param process The Process for which the duration should be retrieved
      * @return The number of msec the Process took
      */
-    @PreAuthorize("hasPermission(#process, read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
     public long getDuration(Process process) {
         if (!process.finished) {
             throw new IllegalArgumentException("Process is finished")
