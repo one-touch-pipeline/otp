@@ -7,6 +7,7 @@
 <link rel='stylesheet' href='http://www.datatables.net//release-datatables/media/css/demo_table.css' />
 <jqDT:resources/>
 <g:javascript library="jquery.dataTables" />
+<g:javascript src="jquery.timeago.js"/>
 </head>
 <body>
   <div class="body">
@@ -47,14 +48,12 @@
                                 rowData[0] = '<img src="${request.contextPath}/images/status/' + statusToImage(rowData[0].name) + '" alt="' + rowData[0].name + '" title="' + rowData[0].name + '">';
                                 rowData[2] = '<a href="${request.contextPath}/processes/show/' + rowData[2].id + '">' + rowData[2].name + '</a>'
                                 if (rowData[4]) {
-                                    // TODO: use jquery plugin for nice formatting
-                                    rowData[4] = new Date(rowData[4]).toLocaleString();
+                                    rowData[4] = $.timeago(new Date(rowData[4]));
                                 } else {
                                     rowData[4] = "-";
                                 }
                                 if (rowData[5]) {
-                                    // TODO: use jquery plugin for nice formatting
-                                    rowData[5] = new Date(rowData[5]).toLocaleString();
+                                    rowData[5] = $.timeago(new Date(rowData[5]));
                                 } else {
                                     rowData[5] = "-";
                                 }
