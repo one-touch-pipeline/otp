@@ -275,6 +275,12 @@ class Scheduler {
             log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
             throw new ProcessingException("Could not create a FAILURE Update for Job")
         }
+        job.processingStep.process.finished = true
+        if (!job.processingStep.process.save(flush: true)) {
+            // TODO: trigger error handling
+            log.fatal("Could not set Process to finished")
+            throw new ProcessingException("Could not set Process to finished")
+        }
         // TODO: trigger error handling
         log.debug("doErrorHandling performed for ${joinPoint.getTarget().class} with ProcessingStep ${job.processingStep.id}")
     }
