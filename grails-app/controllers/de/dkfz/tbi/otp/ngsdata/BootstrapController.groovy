@@ -2,9 +2,9 @@ package de.dkfz.tbi.otp.ngsdata
 
 class BootstrapController {
 	
-	def metaDataService
 	def bootstrapService
-	
+	def seqScanService
+    
     def index() {		
 	}
 	
@@ -20,7 +20,7 @@ class BootstrapController {
 	
 	
 	def buildSeqScans = {
-		metaDataService.buildSeqScans()
+		seqScanService.buildSeqScans()
 		render "created"
 	}
 }
