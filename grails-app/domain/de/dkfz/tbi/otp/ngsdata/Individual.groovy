@@ -15,6 +15,10 @@ class Individual {
 	static constraints = {
 		pid(unique: true)
 	}
+    
+    static mapping = {
+        samples sort: "type"
+    }
 
 	String toString() {
 		"${mockPid} ${mockFullName}"

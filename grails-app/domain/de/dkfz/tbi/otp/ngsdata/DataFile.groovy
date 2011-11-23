@@ -6,6 +6,8 @@ class DataFile {
     String pathName
     String md5sum
 
+    Project project = null;
+
     Date dateExecuted = null       // when the file was originally produced
     Date dateFileSystem = null     // when the file was created on LSDF
     Date dateCreated = null        // when the object was created in db
@@ -17,6 +19,7 @@ class DataFile {
 
     boolean used = false           // is this file used in any seqTrack
     boolean fileExists = false     // does file exists in file system
+    boolean fileLinked = false     // is the file properly linked 
     long fileSize = 0              // size of the file
 
 
@@ -39,6 +42,8 @@ class DataFile {
         fileType(nullable: true)
         pathName(nullable: true)
         md5sum(nullable: true)
+
+        project(nullable: true)
 
         dateExecuted(nullable: true)
         dateFileSystem(nullable: true)
