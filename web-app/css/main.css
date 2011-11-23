@@ -560,6 +560,21 @@ th.desc a {
 	background-image: -moz-linear-gradient(right, #ffffff, #ffaaaa);
 }
 
+/* my styles for boolena values */
+
+td.true {
+    background-image: url(../images/skin/house.png);
+    background-repeat: no-repeat;
+    text-indent: 25px;
+}
+
+td.false {
+    background-image: url(../images/skin/exclamation.png);
+    background-repeat: no-repeat;
+    text-indent: 25px;
+}
+
+
 
 th:hover, tr:hover {
 	ackground: #E1F2B6;
