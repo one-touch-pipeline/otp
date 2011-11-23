@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import org.springframework.security.access.prepost.PreAuthorize
 
 /**
@@ -7,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize
  *
  */
 class ProcessService {
+    static transactional = true
 
     /**
      * Retrieves the date when the given Process finished.
@@ -52,5 +54,69 @@ class ProcessService {
         }
         Date endDate = getFinishDate(process)
         return endDate.time - process.started.time
+    }
+
+    /**
+     * Retrieves the latest ProcessingStep of the given Process.
+     * If there is no ProcessingStep for the Process {@code null} is returned.
+     * @param process The Process for which the latest Processing step has to be retrieved.
+     * @return The latest ProcessingStep of the Process
+     */
+    @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    public ProcessingStep getLatestProcessingStep(Process process) {
+        List<ProcessingStep> steps = ProcessingStep.findAllByProcess(process)
+        for (ProcessingStep step in steps) {
+            if (!step.next) {
+                return step
+            }
+        }
+        return null
+    }
+
+    /**
+     * Returns the latest execution state of the Process.
+     * @param process The Process for which the ExecutionState should be retrieved
+     * @return Latest execution state of the Process
+     */
+    @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    public ExecutionState getState(Process process) {
+        getState(getLatestProcessingStep(process))
+    }
+
+    /**
+     * Overloaded method for convenience.
+     * @param step
+     * @return
+     * @see getState(Process)
+     */
+    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    public ExecutionState getState(ProcessingStep step) {
+        if (step.updates.isEmpty()) {
+            throw new IllegalArgumentException("ProcessingStep has no updates")
+        }
+        return step.updates.sort { it.id }.last().state
+    }
+
+    /**
+     * Retrieves the last update date for the Process.
+     * @param process
+     * @return
+     */
+    @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    public Date getLastUpdate(Process process) {
+        getLastUpdate(getLatestProcessingStep(process))
+    }
+
+    /**
+     * Overloaded method for convenience
+     * @param step
+     * @return
+     */
+    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    public Date getLastUpdate(ProcessingStep step) {
+        if (step.updates.isEmpty()) {
+            throw new IllegalArgumentException("ProcessingStep has no updates")
+        }
+        return step.updates.sort { it.id }.last().date
     }
 }

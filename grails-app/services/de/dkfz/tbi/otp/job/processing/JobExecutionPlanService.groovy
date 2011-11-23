@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.access.prepost.PostFilter
 
@@ -11,6 +12,17 @@ import org.springframework.security.access.prepost.PostFilter
  */
 class JobExecutionPlanService {
     static transactional = true
+
+    /**
+     * Security aware way to access a JobExecutionPlan.
+     * @param id The JobExecutionPlan's id
+     * @return
+     */
+    @PostAuthorize("hasPermission(returnObject, read) or hasRole('ROLE_ADMIN')")
+    public JobExecutionPlan getPlan(long id) {
+        return JobExecutionPlan.get(id)
+    }
+
     /**
      * Retrieves a list of all JobExecutionPlans the current User has access to.
      * Obsoleted JobExecutionPlans are not considered.
@@ -19,6 +31,17 @@ class JobExecutionPlanService {
     @PostFilter("hasPermission(filterObject, read) or hasRole('ROLE_ADMIN')")
     public List<JobExecutionPlan> getAllJobExecutionPlans() {
         return JobExecutionPlan.findAllByObsoleted(false)
+    }
+
+    /**
+     * Retrieves all Processes for the given JobExecutionPlan.
+     * @param plan The Plan whose Processes should be retrieved
+     * @return List of all Processes run for the JobExecutionPlan
+     */
+    @PreAuthorize("hasPermission(#plan, read) or hasRole('ROLE_ADMIN')")
+    public List<Process> getAllProcesses(JobExecutionPlan plan) {
+        final List<JobExecutionPlan> plans = withParents(plan)
+        return Process.findAllByJobExecutionPlanInList(plans)
     }
 
     /**
