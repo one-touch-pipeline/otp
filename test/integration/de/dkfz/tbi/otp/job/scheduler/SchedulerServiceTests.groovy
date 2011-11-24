@@ -238,7 +238,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
         // run another process for same JobExecutionPlan, but trigger an exception by using an OUTPUT parameter as constant
         constantParameterType.refresh()
-        constantParameterType.usage = ParameterUsage.OUTPUT
+        constantParameterType.parameterUsage = ParameterUsage.OUTPUT
         assertNotNull(constantParameterType.save(flush: true))
         // create Process
         process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")

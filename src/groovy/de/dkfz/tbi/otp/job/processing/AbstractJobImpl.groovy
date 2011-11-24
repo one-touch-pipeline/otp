@@ -85,7 +85,7 @@ abstract class AbstractJobImpl implements Job {
         if (!type) {
             throw new ProcessingException("ParameterType missing")
         }
-        if (type.usage != ParameterUsage.OUTPUT) {
+        if (type.parameterUsage != ParameterUsage.OUTPUT) {
             throw new ProcessingException("Not an output parameter")
         }
         outputParameters << new Parameter(type: type, value: value)

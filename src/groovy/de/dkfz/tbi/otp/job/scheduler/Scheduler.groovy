@@ -143,7 +143,7 @@ class Scheduler {
         job.processingStep.addToUpdates(update)
         Parameter failedOutputParameter
         job.getOutputParameters().each { Parameter param ->
-            if (param.type.usage != ParameterUsage.OUTPUT) {
+            if (param.type.parameterUsage != ParameterUsage.OUTPUT) {
                 failedOutputParameter = param
                 return // continue
             }

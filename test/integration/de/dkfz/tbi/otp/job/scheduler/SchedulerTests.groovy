@@ -231,7 +231,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         assertNotNull(updates[3].error)
         assertEquals("Parameter abcd is either not defined for JobDefintion ${jobDefinition.id} or not of type Output.".toString(), updates[3].error.errorMessage)
         // verify that the test works if we use a proper parameter type
-        test.usage = ParameterUsage.OUTPUT
+        test.parameterUsage = ParameterUsage.OUTPUT
         assertNotNull(test.save())
         process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
         assertNotNull(process.save())

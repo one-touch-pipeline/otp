@@ -35,12 +35,12 @@ class ParameterType {
     /**
      * The kind for which the Job is used
      */
-    ParameterUsage usage
+    ParameterUsage parameterUsage
 
     static constraints = {
         name(nullable: false, blank: false, unique: 'jobDefinition')
         description(nullable: true)
         className(nullable: true)
-        usage(nullable: false)
+        parameterUsage(nullable: false)
     }
 }

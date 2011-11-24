@@ -224,7 +224,7 @@ class SchedulerService {
             List<ParameterMapping> mappings = ParameterMapping.findAllByFromAndJob(param.type, jobDefinition)
             mappings.each { ParameterMapping mapping ->
                 Parameter nextParam = new Parameter(type: mapping.to, value: param.value)
-                if (mapping.to.usage == ParameterUsage.PASSTHROUGH) {
+                if (mapping.to.parameterUsage == ParameterUsage.PASSTHROUGH) {
                     step.addToOutput(nextParam)
                 } else {
                     step.addToInput(nextParam)
@@ -234,7 +234,7 @@ class SchedulerService {
         // add constant parameters to the next processing step
         Parameter failedConstantParameter = null
         jobDefinition.constantParameters.each { Parameter param ->
-            if (param.type.usage != ParameterUsage.INPUT) {
+            if (param.type.parameterUsage != ParameterUsage.INPUT) {
                 failedConstantParameter = param
                 return // continue
             }

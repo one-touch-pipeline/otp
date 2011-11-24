@@ -65,7 +65,7 @@ class ProcessingStepTests {
         step.addToInput(failingParam2)
         assertFalse(step.validate())
         assertEquals("invalid.usage", step.errors["input"])
-        outputType.usage = ParameterUsage.INPUT
+        outputType.parameterUsage = ParameterUsage.INPUT
         assertTrue(step.validate())
         // create a Parameter for a PassThrough parameter
         ParameterType passThroughType = new ParameterType(name: "passthrough", jobDefinition: jobDefinition, usage: ParameterUsage.PASSTHROUGH)
@@ -75,7 +75,7 @@ class ProcessingStepTests {
         step.addToInput(failingParam3)
         assertFalse(step.validate())
         assertEquals("invalid.usage", step.errors["input"])
-        passThroughType.usage = ParameterUsage.INPUT
+        passThroughType.parameterUsage = ParameterUsage.INPUT
         assertTrue(step.validate())
         // create a Parameter for an Output type for a different job definition
         ParameterType otherType = new ParameterType(name: "testing", jobDefinition: jobDefinition2, usage: ParameterUsage.OUTPUT)
@@ -88,7 +88,7 @@ class ProcessingStepTests {
         otherType.jobDefinition = jobDefinition
         assertFalse(step.validate())
         assertEquals("invalid.usage", step.errors["input"])
-        otherType.usage = ParameterUsage.INPUT
+        otherType.parameterUsage = ParameterUsage.INPUT
         assertTrue(step.validate())
 
         // create two parameters for the same type should fail - to better test use a new ProcessingStep
@@ -161,7 +161,7 @@ class ProcessingStepTests {
         step.addToOutput(input)
         assertFalse(step.validate())
         assertEquals("invalid.usage", step.errors["output"])
-        inputType.usage = ParameterUsage.PASSTHROUGH
+        inputType.parameterUsage = ParameterUsage.PASSTHROUGH
         assertTrue(step.validate())
         // a Parameter for a wrong job definition and wrong usage should fail twice
         ParameterType doubleFailType = new ParameterType(name: "two", jobDefinition: jobDefinition2, usage: ParameterUsage.INPUT)
@@ -174,7 +174,7 @@ class ProcessingStepTests {
         doubleFailType.jobDefinition = jobDefinition
         assertFalse(step.validate())
         assertEquals("invalid.usage", step.errors["output"])
-        doubleFailType.usage = ParameterUsage.OUTPUT
+        doubleFailType.parameterUsage = ParameterUsage.OUTPUT
         assertTrue(step.validate())
 
         // create two parameters for the same type should fail - to better test use a new ProcessingStep
