@@ -10,13 +10,13 @@ import de.dkfz.tbi.otp.job.processing.AbstractJobImpl;
 class CheckSequenceTracksJob extends AbstractJobImpl {
 
    /**
-    * dependency injection of meta data service
+    * dependency injection of seqTrack service
     */
-   def metaDataService
+   def seqTrackService
 
     @Override
     public void execute() throws Exception {
         long runId = getProcessParameterValue("run")
-        metaDataService.checkSequenceTracks(runId)
+        seqTrackService.checkSequenceTracks(runId)
     }
 }
