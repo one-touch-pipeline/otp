@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 class SeqTrackService {
-    
+
     /**
     *
     * A sequence track corresponds to one lane in Illumina
@@ -13,87 +13,59 @@ class SeqTrackService {
     *
     * @param runId
     */
-
    void buildSequenceTracks(long runId) {
-
        Run run = Run.get(runId)
-
        // find out present lanes/slides
        // lines/ slides could by identifiers not only numbers
-
        MetaDataKey key = MetaDataKey.findByName("LANE_NO")
-
-       /*
-       def entries = MetaDataEntry.findAll (
-       "from MetaDataEntry mde " +
-       "where mde.dataFile.run.id = ? and mde.dataFile.fileType.type = ? " +
-       "and mde.dataFile.metaDataValid = ? " +
-       "and mde.key = ? order by mde.value",
-       run.id, FileType.Type.SEQUENCE, true, key
-       )
-       */
-
-       def entries = []
-
+       List<MetaDataEntry> entries = []
        // get the list of unique lanes identifiers
        run.dataFiles.each {DataFile dataFile ->
-
-           if (!dataFile.metaDataValid) return
-           if (dataFile.fileType.type != FileType.Type.SEQUENCE) return
-
-           dataFile.metaDataEntries.each {entry ->
-
-               if (entry.key != key) return
-
-               // check if exists
-               for(int i=0; i<entries.size(); i++) {
-                   if (entries[i].value == entry.value)
+           if (!dataFile.metaDataValid) {
+               return
+           }
+           if (dataFile.fileType.type != FileType.Type.SEQUENCE) {
+               return
+           }
+           dataFile.metaDataEntries.each { MetaDataEntry entry ->
+               if (entry.key != key) {
                    return
                }
-
+               // check if exists
+               for(int i=0; i<entries.size(); i++) {
+                   if (entries[i].value == entry.value) {
+                       return
+                   }
+               }
                entries << entry
            }
        }
-
        // run track creation for each lane
        for(int i=0; i<entries.size(); i++) {
-           println "LANE ${entries[i].value}"
+           log.debug("LANE ${entries[i].value}")
            buildOneSequenceTrack(run, entries[i].value)
        }
    }
 
-
-
    /**
-    *
     * Builds one sequence track identified by a lane id
     *
     * @param run - Run obejct
     * @param lane - lane identifier string
     */
-
    private void buildOneSequenceTrack(Run run, String lane) {
-       //
-       // this function build one sequence track for a given run
-       //
-
-       //println "Building lane ${lane}"
-
        // find sequence files
        def laneDataFiles =
            getRunFilesWithTypeAndLane(run, FileType.Type.SEQUENCE, lane)
-
        // check if metadata consistent
-
-       def keyNames = [
+       List<String> keyNames = [
            "SAMPLE_ID",
            "SEQUENCING_TYPE",
            "LIBRARY_LAYOUT",
            "PIPELINE_VERSION",
            "READ_COUNT"
        ]
-
-       def keys = []
+       List<MetaDataKey> keys = []
        keyNames.each {
            MetaDataKey key = MetaDataKey.findByName(it)
            keys << key
@@ -130,49 +102,39 @@ class SeqTrackService {
            hasOriginalBam : false,
            usingOriginalBam : false
        )
-
        laneDataFiles.each {
            seqTrack.addToDataFiles(it)
        }
-
-       fillReadsForSeqTrack(seqTrack);
-       safeSave(seqTrack)
-
+       fillReadsForSeqTrack(seqTrack)
+       seqTrack.save()
        // alignment part
-
        // get files
        def alignFiles =
            getRunFilesWithTypeAndLane(run, FileType.Type.ALIGNMENT, lane)
-
        // no alignment files
-       if (!alignFiles) return
-
+       if (!alignFiles) {
+           return
+       }
        // find out if data complete
-       def alignKeyNames = ["SAMPLE_ID", "ALIGN_TOOL"]
-       def alignKeys = []
+       List<String> alignKeyNames = ["SAMPLE_ID", "ALIGN_TOOL"]
+       List<MetaDataKey> alignKeys = []
        alignKeyNames.each {
            MetaDataKey key = MetaDataKey.findByName(it)
            alignKeys << key
        }
-
        def alignValues = []
        consistent = checkIfConsistent(alignFiles, alignKeys, alignValues)
-
-       //println "${alignValues} ${consistent}"
-       if (!consistent) return
-       if (values[0] != alignValues[0]) return
-
-
-       println "alignment data found"
-
+       if (!consistent || values[0] != alignValues[0]) {
+           return
+       }
+       log.debug("alignment data found")
        // create or find aligment params object
-
        String alignProgram = alignValues[1] ?: values[3]
        AlignmentParams alignParams = AlignmentParams.findByProgramName(alignProgram)
-
-       if (!alignParams)
-       alignParams = new AlignmentParams(programName: alignProgram)
-       safeSave(alignParams)
+       if (!alignParams) {
+           alignParams = new AlignmentParams(programName: alignProgram)
+       }
+       alignParams.save()
 
        // create alignment log
        AlignmentLog alignLog = new AlignmentLog(
@@ -182,35 +144,25 @@ class SeqTrackService {
        )
 
        // attach data files
-
        alignFiles.each {
            alignLog.addToDataFiles(it)
        }
-
        seqTrack.hasOriginalBam = true
-
        // save
-       safeSave(alignLog)
-       safeSave(alignParams)
-       safeSave(seqTrack)
+       alignLog.save()
+       alignParams.save()
+       seqTrack.save()
    }
 
-
-
    /**
-    *
-    * @param run
-    * @param type
-    * @param lane
+    * Return all dataFiles for a given run, type and lane
+    * 
+    * @param run The Run
+    * @param type The Type
+    * @param lane The lane
     * @return
     */
-
    private def getRunFilesWithTypeAndLane(Run run, FileType.Type type, String lane) {
-       //
-       // helper function
-       // return all dataFiles for a given run, type and lane
-       //
-
        MetaDataKey key = MetaDataKey.findByName("LANE_NO")
 
        def c = DataFile.createCriteria()
@@ -228,11 +180,8 @@ class SeqTrackService {
                }
            }
        }
-
        return dataFiles
    }
-
-
 
    /**
     *
@@ -247,40 +196,27 @@ class SeqTrackService {
     * @return consistency status
     */
 
-   private boolean checkIfConsistent(def dataFiles, def keys, def values) {
-       //
-       // helper function
-       // checks if metadata entries for a given dataFiles
-       // and keys are consistent, fill values collection
-       //
-
-       if (dataFiles == null) return false;
-
+   private boolean checkIfConsistent(def dataFiles, List<MetaDataKey>keys, def values) {
+       if (dataFiles == null) {
+           return false
+       }
        boolean consistent = true
        for(int iKey=0; iKey<keys.size; iKey++) {
-
            MetaDataEntry reference =
                    getMetaDataEntry(dataFiles[0], keys[iKey])
-           //MetaDataEntry.findByDataFileAndKey(dataFiles[0], keys[iKey])
-
            values[iKey] = reference?.value
 
            for(int iFile = 1; iFile < dataFiles.size; iFile++) {
                MetaDataEntry entry = getMetaDataEntry(dataFiles[iFile], keys[iKey])
-               //MetaDataEntry.findByDataFileAndKey(dataFiles[iFile], keys[iKey])
-
                if (entry?.value != reference?.value) {
-                   println entry?.value
-                   println reference?.value
+                   log.debug(entry?.value)
+                   log.debug(reference?.value)
                    consistent = false
                }
            }
        }
-
-       consistent
+       return consistent
    }
-
-
 
    /**
     *
@@ -289,43 +225,34 @@ class SeqTrackService {
     *
     * @param seqTrack
     */
-
    private void fillReadsForSeqTrack(SeqTrack seqTrack) {
-
        if (seqTrack.seqTech.name == "illumina") {
-
-           def dataFiles = seqTrack.dataFiles
-
-           def dbKeys = ["BASE_COUNT", "READ_COUNT", "INSERT_SIZE"]
-           def dbFields = ["nBasePairs", "nReads", "insertSize"]
-           def add = [true, false, false]
-
-           dataFiles.each {file ->
-
-               if (file.fileType.type != FileType.Type.SEQUENCE) return
-
-               file.metaDataEntries.each {entry ->
-
+           List<DataFile> dataFiles = seqTrack.dataFiles
+           List<String> dbKeys = ["BASE_COUNT", "READ_COUNT", "INSERT_SIZE"]
+           List<String> dbFields = ["nBasePairs", "nReads", "insertSize"]
+           List<Boolean> add = [true, false, false]
+           dataFiles.each { DataFile file ->
+               if (file.fileType.type != FileType.Type.SEQUENCE) {
+                   return
+               }
+               file.metaDataEntries.each { MetaDataEntry entry ->
                    for(int iKey=0; iKey < dbKeys.size(); iKey++) {
-
                        if (entry.key.name == dbKeys[iKey]) {
-
-                           long value = 0;
-                           if  (entry.value.isLong())
+                           long value = 0
+                           if (entry.value.isLong()) {
                                value = entry.value as long
-
-                           if (add[iKey])
+                           }
+                           if (add[iKey]) {
                                seqTrack."${dbFields[iKey]}" += value
-                           else
+                           } else {
                                seqTrack."${dbFields[iKey]}" = value
+                           }
                        }
                    }
                }
            }
        }
    }
-
-
 
    /**
     *
@@ -336,35 +263,28 @@ class SeqTrackService {
     *
     * @param runId
     */
-
    void checkSequenceTracks(long runId) {
-
        Run run = Run.get(runId)
        run.allFilesUsed = true
-
-       run.dataFiles.each { dataFile ->
-
+       run.dataFiles.each { DataFile dataFile ->
            if (dataFile.fileType.type == FileType.Type.SEQUENCE) {
                dataFile.used = (dataFile.seqTrack != null)
                if (!dataFile.used) {
-                   println dataFile
+                   log.debug(dataFile)
                    run.allFilesUsed = false
                }
            }
-
            if (dataFile.fileType.type == FileType.Type.ALIGNMENT) {
                dataFile.used = (dataFile.alignmentLog != null)
                if (!dataFile.used) {
-                   println dataFile
+                   log.debug(dataFile)
                    run.allFilesUsed = false
                }
            }
        }
-
-       println "All files used: ${run.allFilesUsed}\n"
+       log.debug("All files used: ${run.allFilesUsed}\n")
    }
-   
-   
+
    /**
    *
    * Returns a metat data entry belonging the a given data file
@@ -374,12 +294,10 @@ class SeqTrackService {
    * @param key
    * @return
    */
-
   private MetaDataEntry getMetaDataEntry(DataFile file, MetaDataKey key) {
-
       getMetaDataEntry(file, key.name)
   }
-   
+
    /**
    *
    * Returns a metat data entry belonging the a given data file
@@ -389,39 +307,13 @@ class SeqTrackService {
    * @param key
    * @return
    */
-
   private MetaDataEntry getMetaDataEntry(DataFile file, String key) {
-
       MetaDataEntry entry = null
-
       file.metaDataEntries.each { MetaDataEntry iEntry ->
           if (iEntry.key.name == key) {
               entry = iEntry
-              //println entry.value
           }
       }
-
       return entry
   }
-
-   /**
-   *
-   * probably will go to separate static class
-   * no formal exception, information only
-   *
-   * @param obj
-   */
-
-  private void safeSave(def obj) {
-
-      obj.validate()
-      if (obj.hasErrors()) {
-          println obj.errors
-          return
-      }
-
-      if (!obj.save())
-      println "can not save ${obj}"
-  }
-
 }
