@@ -120,6 +120,14 @@ abstract class AbstractIntegrationTest {
               passwordExpired: false)
       assertNotNull(admin.save())
       assertNotNull(new AclSid(sid: admin.username, principal: true).save(flush: true))
+      Role userRole = new Role(authority: "ROLE_USER")
+      assertNotNull(userRole.save())
+      UserRole.create(user, userRole, false)
+      UserRole.create(user2, userRole, false)
+      UserRole.create(admin, userRole, false)
+      Role adminRole = new Role(authority: "ROLE_ADMIN")
+      assertNotNull(adminRole.save())
+      UserRole.create(admin, adminRole, false)
   }
 
   /**
