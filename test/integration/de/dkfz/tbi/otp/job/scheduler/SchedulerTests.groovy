@@ -168,7 +168,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         jep.firstJob = jobDefinition
         assertNotNull(jep.save())
         // create a third parameter type for which the job does not create a parameter
-        ParameterType type = new ParameterType(name: "fail", description: "Test description", jobDefinition: jobDefinition, usage: ParameterUsage.OUTPUT)
+        ParameterType type = new ParameterType(name: "fail", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         assertNotNull(type.save())
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
         assertNotNull(process.save())
@@ -204,7 +204,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         assertNotNull(jobDefinition2.save())
         jobDefinition.next = jobDefinition2
         assertNotNull(jobDefinition.save())
-        ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, usage: ParameterUsage.INPUT)
+        ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
         assertNotNull(test.save())
         jep.firstJob = jobDefinition
         assertNotNull(jep.save())

@@ -28,7 +28,7 @@ class ParameterMapping {
                 return "jobDefinition"
             }
             if (value.parameterUsage != ParameterUsage.OUTPUT && value.parameterUsage != ParameterUsage.PASSTHROUGH) {
-                return "usage"
+                return "parameterUsage"
             }
         })
         to(nullable: false, unique: 'from', validator: { ParameterType value, ParameterMapping mapping ->
@@ -36,7 +36,7 @@ class ParameterMapping {
                 return "jobDefinition"
             }
             if (value.parameterUsage != ParameterUsage.INPUT && value.parameterUsage != ParameterUsage.PASSTHROUGH) {
-                return "usage"
+                return "parameterUsage"
             }
         })
         job(nullable: false, validator: { JobDefinition value, ParameterMapping mapping ->

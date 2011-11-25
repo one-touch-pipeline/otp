@@ -39,7 +39,7 @@ class ProcessingStepTests {
         // simple ProcessingStep which should validate
         assertTrue(step.validate())
         // prepare a Parameter
-        ParameterType type = new ParameterType(name: "test", jobDefinition: jobDefinition, usage: ParameterUsage.INPUT)
+        ParameterType type = new ParameterType(name: "test", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
         mockForConstraintsTests(ParameterType, [])
         assertTrue(type.validate())
         mockForConstraintsTests(Parameter, [])
@@ -48,7 +48,7 @@ class ProcessingStepTests {
         step.addToInput(parameter)
         assertTrue(step.validate())
         // create a Parameter for an incorrect Parameter type
-        ParameterType type2 = new ParameterType(name: "other job definition", jobDefinition: jobDefinition2, usage: ParameterUsage.INPUT)
+        ParameterType type2 = new ParameterType(name: "other job definition", jobDefinition: jobDefinition2, parameterUsage: ParameterUsage.INPUT)
         assertTrue(type2.validate())
         Parameter failingParam1 = new Parameter(value: "1234", type: type2)
         assertTrue(failingParam1.validate())
@@ -58,27 +58,27 @@ class ProcessingStepTests {
         type2.jobDefinition = jobDefinition
         assertTrue(step.validate())
         // create a Parameter for an Output parameter
-        ParameterType outputType = new ParameterType(name: "output", jobDefinition: jobDefinition, usage: ParameterUsage.OUTPUT)
+        ParameterType outputType = new ParameterType(name: "output", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         assertTrue(outputType.validate())
         Parameter failingParam2 = new Parameter(value: "output", type: outputType)
         assertTrue(failingParam2.validate())
         step.addToInput(failingParam2)
         assertFalse(step.validate())
-        assertEquals("invalid.usage", step.errors["input"])
+        assertEquals("invalid.parameterUsage", step.errors["input"])
         outputType.parameterUsage = ParameterUsage.INPUT
         assertTrue(step.validate())
         // create a Parameter for a PassThrough parameter
-        ParameterType passThroughType = new ParameterType(name: "passthrough", jobDefinition: jobDefinition, usage: ParameterUsage.PASSTHROUGH)
+        ParameterType passThroughType = new ParameterType(name: "passthrough", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.PASSTHROUGH)
         assertTrue(passThroughType.validate())
         Parameter failingParam3 = new Parameter(value: "passthrough", type: passThroughType)
         assertTrue(failingParam3.validate())
         step.addToInput(failingParam3)
         assertFalse(step.validate())
-        assertEquals("invalid.usage", step.errors["input"])
+        assertEquals("invalid.parameterUsage", step.errors["input"])
         passThroughType.parameterUsage = ParameterUsage.INPUT
         assertTrue(step.validate())
         // create a Parameter for an Output type for a different job definition
-        ParameterType otherType = new ParameterType(name: "testing", jobDefinition: jobDefinition2, usage: ParameterUsage.OUTPUT)
+        ParameterType otherType = new ParameterType(name: "testing", jobDefinition: jobDefinition2, parameterUsage: ParameterUsage.OUTPUT)
         assertTrue(otherType.validate())
         Parameter failingParam4 = new Parameter(value: "bar", type: otherType)
         assertTrue(failingParam4.validate())
@@ -87,7 +87,7 @@ class ProcessingStepTests {
         assertEquals("invalid.jobDefinition", step.errors["input"])
         otherType.jobDefinition = jobDefinition
         assertFalse(step.validate())
-        assertEquals("invalid.usage", step.errors["input"])
+        assertEquals("invalid.parameterUsage", step.errors["input"])
         otherType.parameterUsage = ParameterUsage.INPUT
         assertTrue(step.validate())
 
@@ -128,7 +128,7 @@ class ProcessingStepTests {
         // simple ProcessingStep which should validate
         assertTrue(step.validate())
         // prepare a Parameter
-        ParameterType type = new ParameterType(name: "test", jobDefinition: jobDefinition, usage: ParameterUsage.OUTPUT)
+        ParameterType type = new ParameterType(name: "test", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         mockForConstraintsTests(ParameterType, [])
         assertTrue(type.validate())
         mockForConstraintsTests(Parameter, [])
@@ -137,14 +137,14 @@ class ProcessingStepTests {
         step.addToOutput(parameter)
         assertTrue(step.validate())
         // use a passthrough parameter
-        ParameterType passThroughType = new ParameterType(name: "passthrough", jobDefinition: jobDefinition, usage: ParameterUsage.PASSTHROUGH)
+        ParameterType passThroughType = new ParameterType(name: "passthrough", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.PASSTHROUGH)
         assertTrue(passThroughType.validate())
         Parameter passThrough = new Parameter(value: "passThrough", type: passThroughType)
         assertTrue(passThrough.validate())
         step.addToOutput(passThrough)
         assertTrue(step.validate())
         // a Parameter for another job definition should fail
-        ParameterType otherJobType = new ParameterType(name: "other", jobDefinition: jobDefinition2, usage: ParameterUsage.OUTPUT)
+        ParameterType otherJobType = new ParameterType(name: "other", jobDefinition: jobDefinition2, parameterUsage: ParameterUsage.OUTPUT)
         assertTrue(otherJobType.validate())
         Parameter otherJob = new Parameter(value: "other", type: otherJobType)
         assertTrue(otherJob.validate())
@@ -154,17 +154,17 @@ class ProcessingStepTests {
         otherJobType.jobDefinition = jobDefinition
         assertTrue(step.validate())
         // a Parameter for usage input should fail
-        ParameterType inputType = new ParameterType(name: "input", jobDefinition: jobDefinition, usage: ParameterUsage.INPUT)
+        ParameterType inputType = new ParameterType(name: "input", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
         assertTrue(inputType.validate())
         Parameter input = new Parameter(value: "input", type: inputType)
         assertTrue(input.validate())
         step.addToOutput(input)
         assertFalse(step.validate())
-        assertEquals("invalid.usage", step.errors["output"])
+        assertEquals("invalid.parameterUsage", step.errors["output"])
         inputType.parameterUsage = ParameterUsage.PASSTHROUGH
         assertTrue(step.validate())
         // a Parameter for a wrong job definition and wrong usage should fail twice
-        ParameterType doubleFailType = new ParameterType(name: "two", jobDefinition: jobDefinition2, usage: ParameterUsage.INPUT)
+        ParameterType doubleFailType = new ParameterType(name: "two", jobDefinition: jobDefinition2, parameterUsage: ParameterUsage.INPUT)
         assertTrue(doubleFailType.validate())
         Parameter doubleFail = new Parameter(value: "two", type: doubleFailType)
         assertTrue(doubleFail.validate())
@@ -173,7 +173,7 @@ class ProcessingStepTests {
         assertEquals("invalid.jobDefinition", step.errors["output"])
         doubleFailType.jobDefinition = jobDefinition
         assertFalse(step.validate())
-        assertEquals("invalid.usage", step.errors["output"])
+        assertEquals("invalid.parameterUsage", step.errors["output"])
         doubleFailType.parameterUsage = ParameterUsage.OUTPUT
         assertTrue(step.validate())
 

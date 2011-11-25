@@ -112,8 +112,8 @@ public class ProcessingStep implements Serializable {
                 if (param.type.jobDefinition.id != obj.jobDefinition.id) {
                     errors << "invalid.jobDefinition"
                 }
-                if (param.type.usage != ParameterUsage.INPUT) {
-                    errors << "invalid.usage"
+                if (param.type.parameterUsage != ParameterUsage.INPUT) {
+                    errors << "invalid.parameterUsage"
                 }
                 // check for uniqueness of parameter types
                 for (Parameter p in obj.input) {
@@ -139,8 +139,8 @@ public class ProcessingStep implements Serializable {
                 if (param.type.jobDefinition.id != obj.jobDefinition.id) {
                     errors << "invalid.jobDefinition"
                 }
-                if (param.type.usage != ParameterUsage.OUTPUT && param.type.usage != ParameterUsage.PASSTHROUGH) {
-                    errors << "invalid.usage"
+                if (param.type.parameterUsage != ParameterUsage.OUTPUT && param.type.parameterUsage != ParameterUsage.PASSTHROUGH) {
+                    errors << "invalid.parameterUsage"
                 }
                 // check for uniqueness of parameter types
                 for (Parameter p in obj.output) {

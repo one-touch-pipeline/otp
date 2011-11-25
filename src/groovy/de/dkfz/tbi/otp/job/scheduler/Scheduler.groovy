@@ -177,7 +177,7 @@ class Scheduler {
             return
         }
         // check that all Output Parameters are set
-        List<ParameterType> parameterTypes = ParameterType.findAllByJobDefinitionAndUsage(job.processingStep.jobDefinition, ParameterUsage.OUTPUT)
+        List<ParameterType> parameterTypes = ParameterType.findAllByJobDefinitionAndParameterUsage(job.processingStep.jobDefinition, ParameterUsage.OUTPUT)
         for (ParameterType parameterType in parameterTypes) {
             boolean found = false
             for (Parameter param in job.processingStep.output) {

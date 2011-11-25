@@ -174,8 +174,8 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jobDefinition2.save())
         assertNotNull(jep.save(flush: true))
         // third JobDefinition gets two constant parameters
-        ParameterType constantParameterType = new ParameterType(jobDefinition: jobDefinition3, name: "constant", description: "test", usage: ParameterUsage.INPUT)
-        ParameterType constantParameterType2 = new ParameterType(jobDefinition: jobDefinition3, name: "constant2", description: "test", usage: ParameterUsage.INPUT)
+        ParameterType constantParameterType = new ParameterType(jobDefinition: jobDefinition3, name: "constant", description: "test", parameterUsage: ParameterUsage.INPUT)
+        ParameterType constantParameterType2 = new ParameterType(jobDefinition: jobDefinition3, name: "constant2", description: "test", parameterUsage: ParameterUsage.INPUT)
         assertNotNull(constantParameterType.save())
         assertNotNull(constantParameterType2.save())
         jobDefinition3.addToConstantParameters(new Parameter(type: constantParameterType, value: "constant1"))
@@ -303,8 +303,8 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jobDefinition2.save())
         assertNotNull(jep.save(flush: true))
         // third JobDefinition gets two constant parameters
-        ParameterType constantParameterType = new ParameterType(jobDefinition: jobDefinition3, name: "constant", description: "test", usage: ParameterUsage.INPUT)
-        ParameterType constantParameterType2 = new ParameterType(jobDefinition: jobDefinition3, name: "constant2", description: "test", usage: ParameterUsage.INPUT)
+        ParameterType constantParameterType = new ParameterType(jobDefinition: jobDefinition3, name: "constant", description: "test", parameterUsage: ParameterUsage.INPUT)
+        ParameterType constantParameterType2 = new ParameterType(jobDefinition: jobDefinition3, name: "constant2", description: "test", parameterUsage: ParameterUsage.INPUT)
         assertNotNull(constantParameterType.save())
         assertNotNull(constantParameterType2.save())
         jobDefinition3.addToConstantParameters(new Parameter(type: constantParameterType, value: "constant1"))
@@ -371,7 +371,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jep.save())
         // second Job Definition
         JobDefinition jobDefinition2 = createTestEndStateAwareJob("test2", jep, jobDefinition)
-        ParameterType passThrough = new ParameterType(jobDefinition: jobDefinition2, name: "passthrough", description: "test", usage: ParameterUsage.PASSTHROUGH)
+        ParameterType passThrough = new ParameterType(jobDefinition: jobDefinition2, name: "passthrough", description: "test", parameterUsage: ParameterUsage.PASSTHROUGH)
         assertNotNull(passThrough.save())
         ParameterMapping mapping = new ParameterMapping(job: jobDefinition2, from: ParameterType.findByJobDefinitionAndName(jobDefinition, "test"), to: passThrough)
         jobDefinition2.addToParameterMappings(mapping)
@@ -442,9 +442,9 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jep.save())
         // second Job Definition
         JobDefinition jobDefinition2 = createTestEndStateAwareJob("test2", jep, jobDefinition)
-        ParameterType passThrough = new ParameterType(jobDefinition: jobDefinition2, name: "passthrough", description: "test", usage: ParameterUsage.PASSTHROUGH)
+        ParameterType passThrough = new ParameterType(jobDefinition: jobDefinition2, name: "passthrough", description: "test", parameterUsage: ParameterUsage.PASSTHROUGH)
         assertNotNull(passThrough.save())
-        ParameterType passThrough2 = new ParameterType(jobDefinition: jobDefinition2, name: "passthrough2", description: "test", usage: ParameterUsage.PASSTHROUGH)
+        ParameterType passThrough2 = new ParameterType(jobDefinition: jobDefinition2, name: "passthrough2", description: "test", parameterUsage: ParameterUsage.PASSTHROUGH)
         assertNotNull(passThrough2.save())
         // map output parameter test to our two passthrough parameters
         ParameterMapping mapping = new ParameterMapping(job: jobDefinition2, from: ParameterType.findByJobDefinitionAndName(jobDefinition, "test"), to: passThrough)
@@ -567,13 +567,13 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         jep.firstJob = jobDefinition
         assertNotNull(jep.save())
         // create some Parameter Types
-        ParameterType type1 = new ParameterType(name: "test", description: "StartJob Parameter", jobDefinition: startJob, usage: ParameterUsage.OUTPUT)
+        ParameterType type1 = new ParameterType(name: "test", description: "StartJob Parameter", jobDefinition: startJob, parameterUsage: ParameterUsage.OUTPUT)
         assertNotNull(type1.save())
-        ParameterType type2 = new ParameterType(name: "test2", description: "StartJob Parameter", jobDefinition: startJob, usage: ParameterUsage.OUTPUT)
+        ParameterType type2 = new ParameterType(name: "test2", description: "StartJob Parameter", jobDefinition: startJob, parameterUsage: ParameterUsage.OUTPUT)
         assertNotNull(type2.save())
-        ParameterType passthrough = new ParameterType(name: "passthrough", description: "Job Passthrough Parameter", jobDefinition: jobDefinition, usage: ParameterUsage.PASSTHROUGH)
+        ParameterType passthrough = new ParameterType(name: "passthrough", description: "Job Passthrough Parameter", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.PASSTHROUGH)
         assertNotNull(passthrough.save())
-        ParameterType input = new ParameterType(name: "input3", description: "Input Parameter", jobDefinition: jobDefinition, usage: ParameterUsage.INPUT)
+        ParameterType input = new ParameterType(name: "input3", description: "Input Parameter", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
         assertNotNull(input.save())
         // is StartJobDefinition a Problem for ParameterType?
         assertSame(startJob, type1.jobDefinition)
@@ -631,13 +631,13 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         jep.firstJob = jobDefinition
         assertNotNull(jep.save())
         // create some Parameter Types
-        ParameterType type1 = new ParameterType(name: "test", description: "StartJob Parameter", jobDefinition: startJob, usage: ParameterUsage.OUTPUT)
+        ParameterType type1 = new ParameterType(name: "test", description: "StartJob Parameter", jobDefinition: startJob, parameterUsage: ParameterUsage.OUTPUT)
         assertNotNull(type1.save())
-        ParameterType type2 = new ParameterType(name: "test2", description: "StartJob Parameter", jobDefinition: startJob, usage: ParameterUsage.OUTPUT)
+        ParameterType type2 = new ParameterType(name: "test2", description: "StartJob Parameter", jobDefinition: startJob, parameterUsage: ParameterUsage.OUTPUT)
         assertNotNull(type2.save())
-        ParameterType passthrough = new ParameterType(name: "passthrough", description: "Job Passthrough Parameter", jobDefinition: jobDefinition, usage: ParameterUsage.PASSTHROUGH)
+        ParameterType passthrough = new ParameterType(name: "passthrough", description: "Job Passthrough Parameter", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.PASSTHROUGH)
         assertNotNull(passthrough.save())
-        ParameterType input = new ParameterType(name: "input3", description: "Input Parameter", jobDefinition: jobDefinition, usage: ParameterUsage.INPUT)
+        ParameterType input = new ParameterType(name: "input3", description: "Input Parameter", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
         assertNotNull(input.save())
         // is StartJobDefinition a Problem for ParameterType?
         assertSame(startJob, type1.jobDefinition)

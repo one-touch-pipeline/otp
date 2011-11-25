@@ -33,10 +33,10 @@ class ParameterMappingTests {
        assertEquals("validator", mapping.errors["job"])
 
        // mock some Parameter Types
-       ParameterType type = new ParameterType(jobDefinition: jobDefinition, usage: ParameterUsage.INPUT)
-       ParameterType type2 = new ParameterType(jobDefinition: jobDefinition, usage: ParameterUsage.INPUT)
-       ParameterType type3 = new ParameterType(jobDefinition: jobDefinition2, usage: ParameterUsage.INPUT)
-       ParameterType type4 = new ParameterType(jobDefinition: jobDefinition2, usage: ParameterUsage.OUTPUT)
+       ParameterType type = new ParameterType(jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
+       ParameterType type2 = new ParameterType(jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
+       ParameterType type3 = new ParameterType(jobDefinition: jobDefinition2, parameterUsage: ParameterUsage.INPUT)
+       ParameterType type4 = new ParameterType(jobDefinition: jobDefinition2, parameterUsage: ParameterUsage.OUTPUT)
        mockDomain(ParameterType, [type, type2, type3, type4])
 
        // use the from
@@ -44,7 +44,7 @@ class ParameterMappingTests {
        assertFalse(mapping.validate())
        assertEquals("nullable", mapping.errors["to"])
        assertEquals("validator", mapping.errors["job"])
-       assertEquals("usage", mapping.errors["from"])
+       assertEquals("parameterUsage", mapping.errors["from"])
        // use the to - same as from
        mapping.to = type
        assertFalse(mapping.validate())
@@ -55,7 +55,7 @@ class ParameterMappingTests {
        mapping.to = type3
        assertFalse(mapping.validate())
        assertEquals("validator", mapping.errors["job"])
-       assertEquals("usage", mapping.errors["from"])
+       assertEquals("parameterUsage", mapping.errors["from"])
        assertNull(mapping.errors["to"])
        // use correct type for from, but same jobDefinition for to
        mapping.from = type2
