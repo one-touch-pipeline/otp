@@ -21,7 +21,7 @@ import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
  */
 abstract class AbstractIntegrationTest {
 
-    /**
+   /**
     * Dependency injection of Spring security's authentication manager
     */
     def authenticationManager
@@ -83,7 +83,7 @@ abstract class AbstractIntegrationTest {
        return jobDefinition
    }
 
-   /**
+  /**
    * Creates three users and their roles:
    * @li testuser with password secret and role ROLE_USER
    * @li user with password verysecret and role ROLE_USER
@@ -120,31 +120,9 @@ abstract class AbstractIntegrationTest {
               passwordExpired: false)
       assertNotNull(admin.save())
       assertNotNull(new AclSid(sid: admin.username, principal: true).save(flush: true))
-      User curator = new User(username: "curator",
-              password: springSecurityService.encodePassword("extremelysecret"),
-              userRealName: "Curator",
-              email: "curator@test.com",
-              enabled: true,
-              accountExpired: false,
-              accountLocked: false,
-              passwordExpired: false)
-      assertNotNull(curator.save())
-      assertNotNull(new AclSid(sid: curator.username, principal: true).save(flush: true))
-      Role userRole = new Role(authority: "ROLE_USER")
-      assertNotNull(userRole.save())
-      UserRole.create(user, userRole, false)
-      UserRole.create(user2, userRole, false)
-      UserRole.create(admin, userRole, false)
-      UserRole.create(curator, userRole, false)
-      Role adminRole = new Role(authority: "ROLE_ADMIN")
-      assertNotNull(adminRole.save())
-      UserRole.create(admin, adminRole, false)
-      Role curatorRole = new Role(authority: "ROLE_CURATOR")
-      assertNotNull(curatorRole.save())
-      UserRole.create(curator, curatorRole, false)
   }
 
-   /**
+  /**
    * Sets an authentication based on username and password.
    * @param username The name of the user
    * @param password The password of the user.
