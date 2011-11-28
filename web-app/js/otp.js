@@ -4,6 +4,7 @@
  * @returns
  */
 function OTP(contextPath) {
+    "use strict";
     this.contextPath = contextPath;
 }
 
@@ -21,7 +22,8 @@ function OTP(contextPath) {
  * @param status The name of the status
  * @returns HTML string for the status image
  */
-OTP.prototype.statusImageHtml = function(status) {
+OTP.prototype.statusImageHtml = function (status) {
+    "use strict";
     return '<img src="' + this.contextPath + '/images/status/' + this.statusToImage(status) + '" alt="' + status + '" title="' + status + '"/>';
 };
 
@@ -31,7 +33,8 @@ OTP.prototype.statusImageHtml = function(status) {
  * @returns Name of image or {@code null} if incorrect status
  * @see statusImageHtml
  */
-OTP.prototype.statusToImage = function(status) {
+OTP.prototype.statusToImage = function (status) {
+    "use strict";
     switch (status) {
     case "NEW":
         return "empty.png";
@@ -55,27 +58,29 @@ OTP.prototype.statusToImage = function(status) {
  * @param msec The time span in milliseconds
  * @returns Nicely formatted text to represent the time span
  */
-OTP.prototype.formatTimespan = function(msec) {
+OTP.prototype.formatTimespan = function (msec) {
+    "use strict";
+    var sec, min, hour, day;
     if (msec < 1000) {
         return msec + " msec";
     }
-    var sec = Math.round(msec/1000);
-    msec = msec%1000;
+    sec = Math.round(msec / 1000);
+    msec = msec % 1000;
     if (sec < 60) {
         return sec + " sec " + msec + " msec";
     }
-    var min = msec/60;
+    min = msec / 60;
     sec = Math.round(sec % 60);
     if (min < 60) {
         return min + " min " + sec + " sec";
     }
-    var hour = min/60;
+    hour = min / 60;
     min = Math.round(min % 60);
     if (hour < 24) {
         return hour + " h " + min + " min";
     }
-    var day = Math.round(hour/24);
-    hour = hour%24;
+    day = Math.round(hour / 24);
+    hour = hour % 24;
     return day + " day(s) " + hour + " h";
 };
 
@@ -83,24 +88,26 @@ OTP.prototype.formatTimespan = function(msec) {
  * Creates the datatables view for the list of all JobExecutionPlans
  * @param selector The JQuery selector for the table to create the datatable into
  */
-OTP.prototype.createJobExecutionPlanListView = function(selector) {
+OTP.prototype.createJobExecutionPlanListView = function (selector) {
+    "use strict";
     $(selector).dataTable({
         sPaginationType: "full_numbers",
         bJQueryUI: true,
         bProcessing: true,
         bServerSide: true,
         sAjaxSource: this.contextPath + '/processes/listData',
-        fnServerData: function(sSource, aoData, fnCallback) {
+        fnServerData: function (sSource, aoData, fnCallback) {
             $.ajax({
                 "dataType": 'json',
                 "type": "POST",
                 "url": sSource,
                 "data": aoData,
-                "success": function(json) {
-                    for (var i=0; i<json.aaData.length; i++) {
-                        var rowData = json.aaData[i];
+                "success": function (json) {
+                    var i, rowData;
+                    for (i = 0; i < json.aaData.length; i++) {
+                        rowData = json.aaData[i];
                         rowData[0] = $.otp.statusImageHtml(rowData[0].name);
-                        rowData[2] = '<a href="' + $.otp.contextPath +  '/processes/plan/' + rowData[2].id + '">' + rowData[2].name + '</a>'
+                        rowData[2] = '<a href="' + $.otp.contextPath +  '/processes/plan/' + rowData[2].id + '">' + rowData[2].name + '</a>';
                         if (rowData[4]) {
                             rowData[4] = $.timeago(new Date(rowData[4]));
                         } else {
@@ -118,7 +125,8 @@ OTP.prototype.createJobExecutionPlanListView = function(selector) {
                         }
                     }
                     fnCallback(json);
-            }});
+                }
+            });
         }
     });
 };
@@ -128,22 +136,24 @@ OTP.prototype.createJobExecutionPlanListView = function(selector) {
  * @param selector The JQuery selector for the table to create the datatable into
  * @param planId The id of the JobExecutionPlan for which the list of Processes should be retrieved.
  */
-OTP.prototype.createProcessListView = function(selector, planId) {
+OTP.prototype.createProcessListView = function (selector, planId) {
+    "use strict";
     $(selector).dataTable({
         sPaginationType: "full_numbers",
         bJQueryUI: true,
         bProcessing: true,
         bServerSide: true,
         sAjaxSource: $.otp.contextPath + '/processes/planData/' +  planId + '/',
-        fnServerData: function(sSource, aoData, fnCallback) {
+        fnServerData: function (sSource, aoData, fnCallback) {
             $.ajax({
                 "dataType": 'json',
                 "type": "POST",
                 "url": sSource,
                 "data": aoData,
-                "success": function(json) {
-                    for (var i=0; i<json.aaData.length; i++) {
-                        var rowData = json.aaData[i];
+                "success": function (json) {
+                    var i, rowData;
+                    for (i = 0; i < json.aaData.length; i++) {
+                        rowData = json.aaData[i];
                         rowData[1] = $.otp.statusImageHtml(rowData[1].name);
                         if (rowData[2]) {
                             rowData[2] = $.timeago(new Date(rowData[2]));
@@ -158,7 +168,8 @@ OTP.prototype.createProcessListView = function(selector, planId) {
                         rowData[5] = rowData[5].name;
                     }
                     fnCallback(json);
-            }});
+                }
+            });
         },
         aaSorting: [[0, "desc"]],
         aoColumnDefs: [
