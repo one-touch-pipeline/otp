@@ -147,6 +147,56 @@ class ProcessesController {
         render dataToRender as JSON
     }
 
+    def process() {
+        Process process = processService.getProcess(params.id as long)
+        [name: process.jobExecutionPlan.name, id: process.id, planId: process.jobExecutionPlan.id]
+    }
+
+    def processData() {
+        // input validation
+        int start = 0
+        int length = 10
+        if (params.iDisplayStart) {
+            start = params.iDisplayStart as int
+        }
+        if (params.iDisplayLength) {
+            length = Math.min(100, params.iDisplayLength as int)
+        }
+        def dataToRender = [:]
+        dataToRender.sEcho = params.sEcho
+        dataToRender.aaData = []
+        boolean sortOrder = false
+        if (params.sSortDir_0) {
+            if (params.sSortDir_0 == "asc") {
+                sortOrder = true
+            } else if (params.sSortDir_0 == "desc") {
+                sortOrder = false
+            }
+        }
+
+        Process process = processService.getProcess(params.id as long)
+        List<ProcessingStep> steps = processService.getAllProcessingSteps(process, length, start, "id", sortOrder)
+        dataToRender.iTotalRecords = processService.getNumberOfProcessessingSteps(process)
+        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+        dataToRender.offset = start
+        dataToRender.iSortCol_0 = 0
+        dataToRender.sSortDir_0 = sortOrder ? "asc" : "desc"
+        steps.each { ProcessingStep step ->
+            ExecutionState state = processService.getState(step)
+            dataToRender.aaData << [
+                step.id,
+                state, // last reached status
+                step.jobDefinition.name,
+                step.jobClass ? [name: step.jobClass, version: step.jobVersion] : null,
+                processService.getFirstUpdate(step), // started
+                processService.getLastUpdate(step), // last update
+                processService.getProcessingStepDuration(step), // duration
+                state // last reached status
+            ]
+        }
+        render dataToRender as JSON
+    }
+
     private PlanStatus calculateStatus(JobExecutionPlan plan, Process lastSuccess, Process lastFailure, Process lastFinished) {
         if (!plan.enabled) {
             return PlanStatus.DISABLED

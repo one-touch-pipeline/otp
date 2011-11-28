@@ -161,6 +161,7 @@ OTP.prototype.createProcessListView = function (selector, planId) {
                     var i, rowData;
                     for (i = 0; i < json.aaData.length; i++) {
                         rowData = json.aaData[i];
+                        rowData[0] = '<a href="' + $.otp.contextPath + '/processes/process/' + rowData[0] + '">' + rowData[0] + '</a>';
                         rowData[1] = $.otp.statusImageHtml(rowData[1].name);
                         if (rowData[2]) {
                             rowData[2] = $.timeago(new Date(rowData[2]));
@@ -186,6 +187,71 @@ OTP.prototype.createProcessListView = function (selector, planId) {
             { "bSortable": false, "aTargets": [3] },
             { "bSortable": false, "aTargets": [4] },
             { "bSortable": false, "aTargets": [5] }
+        ]
+    });
+};
+
+/**
+ * Creates the datatables view for the list of all ProcessingSteps for a given Process.
+ * @param selector The JQuery selector for the table to create the datatable into
+ * @param processId The id of the Process for which the list of ProcessingSteps should be retrieved.
+ */
+OTP.prototype.createProcessingStepListView = function (selector, processId) {
+    "use strict";
+    $(selector).dataTable({
+        sPaginationType: "full_numbers",
+        bJQueryUI: true,
+        bProcessing: true,
+        bServerSide: true,
+        sAjaxSource: $.otp.contextPath + '/processes/processData/' +  processId + '/',
+        fnServerData: function (sSource, aoData, fnCallback) {
+            $.ajax({
+                "dataType": 'json',
+                "type": "POST",
+                "url": sSource,
+                "data": aoData,
+                "success": function (json) {
+                    var i, rowData;
+                    for (i = 0; i < json.aaData.length; i++) {
+                        rowData = json.aaData[i];
+                        rowData[0] = '<a href="' + $.otp.contextPath + '/processes/processingStep/' + rowData[0] + '">' + rowData[0] + '</a>';
+                        rowData[1] = $.otp.statusImageHtml(rowData[1].name);
+                        if (rowData[3]) {
+                            rowData[3] = rowData[3].name + "<br/>" + rowData[3].version.substring(0, 7);
+                        } else {
+                            rowData[3] = "-";
+                        }
+                        if (rowData[4]) {
+                            rowData[4] = $.timeago(new Date(rowData[4]));
+                        } else {
+                            rowData[4] = "-";
+                        }
+                        if (rowData[5]) {
+                            rowData[5] = $.timeago(new Date(rowData[5]));
+                        } else {
+                            rowData[5] = "-";
+                        }
+                        if (rowData[6]) {
+                            rowData[6] = $.otp.formatTimespan(rowData[6]);
+                        } else {
+                            rowData[6] = "-";
+                        }
+                        rowData[7] = rowData[7].name;
+                    }
+                    fnCallback(json);
+                }
+            });
+        },
+        aaSorting: [[0, "desc"]],
+        aoColumnDefs: [
+            { "bSortable": true,  "aTargets": [0] },
+            { "bSortable": false, "aTargets": [1] },
+            { "bSortable": false, "aTargets": [2] },
+            { "bSortable": false, "aTargets": [3] },
+            { "bSortable": false, "aTargets": [4] },
+            { "bSortable": false, "aTargets": [5] },
+            { "bSortable": false, "aTargets": [6] },
+            { "bSortable": false, "aTargets": [7] }
         ]
     });
 };
