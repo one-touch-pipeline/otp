@@ -91,10 +91,7 @@ class ProcessService {
      */
     @PreAuthorize("hasPermission(#step.process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
     public ExecutionState getState(ProcessingStep step) {
-        if (step.updates.isEmpty()) {
-            throw new IllegalArgumentException("ProcessingStep has no updates")
-        }
-        return step.updates.sort { it.id }.last().state
+        return lastUpdate(step).state
     }
 
     /**
@@ -114,9 +111,19 @@ class ProcessService {
      */
     @PreAuthorize("hasPermission(#step.process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
     public Date getLastUpdate(ProcessingStep step) {
-        if (step.updates.isEmpty()) {
+        return lastUpdate(step).date
+    }
+
+    /**
+     * Helper function to retrieve the last ProcessingStepUpdate for given ProcessingStep.
+     * @param step
+     * @return
+     */
+    private ProcessingStepUpdate lastUpdate(ProcessingStep step) {
+        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step)
+        if (updates.isEmpty()) {
             throw new IllegalArgumentException("ProcessingStep has no updates")
         }
-        return step.updates.sort { it.id }.last().date
+        return updates.sort { it.id }.last()
     }
 }
