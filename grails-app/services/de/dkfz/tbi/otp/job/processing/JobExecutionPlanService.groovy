@@ -36,12 +36,27 @@ class JobExecutionPlanService {
     /**
      * Retrieves all Processes for the given JobExecutionPlan.
      * @param plan The Plan whose Processes should be retrieved
-     * @return List of all Processes run for the JobExecutionPlan
+     * @param max The number of elements to retrieve, default 10
+     * @param offset The offset in the list, default -
+     * @param column The column to search for, default "id"
+     * @param order {@code true} for ascending ordering, {@code false} for descending, default {@code false}
+     * @return List of all Processes run for the JobExecutionPlan filtered as requested
      */
     @PreAuthorize("hasPermission(#plan, read) or hasRole('ROLE_ADMIN')")
-    public List<Process> getAllProcesses(JobExecutionPlan plan) {
+    public List<Process> getAllProcesses(JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false) {
         final List<JobExecutionPlan> plans = withParents(plan)
-        return Process.findAllByJobExecutionPlanInList(plans)
+        return Process.findAllByJobExecutionPlanInList(plans, [max: max, offset: offset, sort: column, order: order ? "asc" : "desc"])
+    }
+
+    /**
+     * Returns the number of Processes run for the given JobExecutionPlan.
+     * @param plan The Plan for which the number of run Processes should be returned
+     * @return The number of Processes run for this plan
+     */
+    @PreAuthorize("hasPermission(#plan, read) or hasRole('ROLE_ADMIN')")
+    public int getProcessCount(JobExecutionPlan plan) {
+        final List<JobExecutionPlan> plans = withParents(plan)
+        return Process.countByJobExecutionPlanInList(plans)
     }
 
     /**
