@@ -59,7 +59,7 @@ class ProcessesController {
 
         List<JobExecutionPlan> plans = jobExecutionPlanService.getAllJobExecutionPlans()
         dataToRender.iTotalRecords = plans.size()
-        dataToRender.iTotalDisplayRecords = plans.size()
+        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.offset = start
         dataToRender.iSortCol_0 = params.iSortCol_0
         dataToRender.sSortDir_0 = params.sSortDir_0
@@ -125,8 +125,8 @@ class ProcessesController {
 
         JobExecutionPlan plan = jobExecutionPlanService.getPlan(params.id as long)
         List<JobExecutionPlan> processes = jobExecutionPlanService.getAllProcesses(plan, length, start, sort, sortOrder)
-        dataToRender.iTotalRecords = processes.size()
-        dataToRender.iTotalDisplayRecords = jobExecutionPlanService.getNumberOfProcesses(plan)
+        dataToRender.iTotalRecords = jobExecutionPlanService.getNumberOfProcesses(plan)
+        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.offset = start
         dataToRender.iSortCol_0 = sortColumn
         dataToRender.sSortDir_0 = sortOrder ? "asc" : "desc"
