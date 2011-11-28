@@ -15,6 +15,10 @@
 		<link rel="stylesheet" href="${resource(dir: 'css', file: 'main.css')}" type="text/css">
 		<link rel="stylesheet" href="${resource(dir: 'css', file: 'mobile.css')}" type="text/css">
 		<g:javascript library="jquery" plugin="jquery"/>
+		<g:javascript library="otp"/>
+		<g:javascript>
+		$.otp = new OTP('${request.contextPath}');
+		</g:javascript>
 		<g:layoutHead/>
 	</head>
 	<body>
