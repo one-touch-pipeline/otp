@@ -67,7 +67,8 @@ OTP.prototype.statusToImage = function (status) {
 OTP.prototype.renderDate = function (value) {
     "use strict";
     if (value) {
-        return $.timeago(new Date(value));
+        var date = new Date(value);
+        return '<span title="' + date.toLocaleString() +'">' + $.timeago(date) + '</span>';
     } else {
         return "-";
     }
