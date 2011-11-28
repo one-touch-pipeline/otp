@@ -60,6 +60,20 @@ OTP.prototype.statusToImage = function (status) {
 };
 
 /**
+ * Helper method to render a date in a common way.
+ * @param value Date in JSON representation
+ * @returns Formatted date
+ */
+OTP.prototype.renderDate = function (value) {
+    "use strict";
+    if (value) {
+        return $.timeago(new Date(value));
+    } else {
+        return "-";
+    }
+};
+
+/**
  * Formats a given time span in msec into a human readable text split by the most
  * convenient unit.
  * @param msec The time span in milliseconds
@@ -115,16 +129,8 @@ OTP.prototype.createJobExecutionPlanListView = function (selector) {
                         rowData = json.aaData[i];
                         rowData[0] = $.otp.statusImageHtml(rowData[0].name);
                         rowData[2] = '<a href="' + $.otp.contextPath +  '/processes/plan/' + rowData[2].id + '">' + rowData[2].name + '</a>';
-                        if (rowData[4]) {
-                            rowData[4] = $.timeago(new Date(rowData[4]));
-                        } else {
-                            rowData[4] = "-";
-                        }
-                        if (rowData[5]) {
-                            rowData[5] = $.timeago(new Date(rowData[5]));
-                        } else {
-                            rowData[5] = "-";
-                        }
+                        rowData[4] = $.otp.renderDate(rowData[4]);
+                        rowData[5] = $.otp.renderDate(rowData[5]);
                         if (rowData[6]) {
                             rowData[6] = $.otp.formatTimespan(rowData[6]);
                         } else {
@@ -163,16 +169,8 @@ OTP.prototype.createProcessListView = function (selector, planId) {
                         rowData = json.aaData[i];
                         rowData[0] = '<a href="' + $.otp.contextPath + '/processes/process/' + rowData[0] + '">' + rowData[0] + '</a>';
                         rowData[1] = $.otp.statusImageHtml(rowData[1].name);
-                        if (rowData[2]) {
-                            rowData[2] = $.timeago(new Date(rowData[2]));
-                        } else {
-                            rowData[2] = "-";
-                        }
-                        if (rowData[3]) {
-                            rowData[3] = $.timeago(new Date(rowData[3]));
-                        } else {
-                            rowData[3] = "-";
-                        }
+                        rowData[2] = $.otp.renderDate(rowData[2]);
+                        rowData[3] = $.otp.renderDate(rowData[3]);
                         rowData[5] = rowData[5].name;
                     }
                     fnCallback(json);
@@ -221,16 +219,8 @@ OTP.prototype.createProcessingStepListView = function (selector, processId) {
                         } else {
                             rowData[3] = "-";
                         }
-                        if (rowData[4]) {
-                            rowData[4] = $.timeago(new Date(rowData[4]));
-                        } else {
-                            rowData[4] = "-";
-                        }
-                        if (rowData[5]) {
-                            rowData[5] = $.timeago(new Date(rowData[5]));
-                        } else {
-                            rowData[5] = "-";
-                        }
+                        rowData[4] = $.otp.renderDate(rowData[4]);
+                        rowData[5] = $.otp.renderDate(rowData[5]);
                         if (rowData[6]) {
                             rowData[6] = $.otp.formatTimespan(rowData[6]);
                         } else {
@@ -279,11 +269,7 @@ OTP.prototype.createProcessingStepUpdatesListView = function (selector, stepId) 
                     var i, rowData;
                     for (i = 0; i < json.aaData.length; i++) {
                         rowData = json.aaData[i];
-                        if (rowData[1]) {
-                            rowData[1] = $.timeago(new Date(rowData[1]));
-                        } else {
-                            rowData[1] = "-";
-                        }
+                        rowData[1] = $.otp.renderDate(rowData[1]);
                         rowData[2] = rowData[2].name;
                         if (!rowData[3]) {
                             rowData[3] = "-";
