@@ -37,13 +37,20 @@ OTP.prototype.statusToImage = function (status) {
     "use strict";
     switch (status) {
     case "NEW":
+    case "CREATED":
         return "empty.png";
     case "DISABLED":
+    case "SUSPENDED":
         return "grey.png";
     case "RUNNING":
+    case "STARTED":
+    case "RESUMED":
         return "green_anime.gif";
     case "RUNNINGFAILEDBEFORE":
+    case "RESTARTED":
         return "red_anime.gif";
+    case "FINISHED":
+        return "blue.png";
     case "SUCCESS":
         return "green.png";
     case "FAILURE":
