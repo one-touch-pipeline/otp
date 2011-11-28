@@ -100,17 +100,39 @@ class ProcessesController {
         def dataToRender = [:]
         dataToRender.sEcho = params.sEcho
         dataToRender.aaData = []
+        int sortColumn = 0
+        if (params.iSortCol_0) {
+            sortColumn = params.iSortCol_0
+        }
+        String sort
+        switch (sortColumn) {
+        case 2:
+            sort = "started"
+            break
+        case 0:
+        default:
+            sort = "id"
+            break
+        }
+        boolean sortOrder = false
+        if (params.sSortDir_0) {
+            if (params.sSortDir_0 == "asc") {
+                sortOrder = true
+            } else if (params.sSortDir_0 == "desc") {
+                sortOrder = false
+            }
+        }
 
         JobExecutionPlan plan = jobExecutionPlanService.getPlan(params.id as long)
-        List<JobExecutionPlan> processes = jobExecutionPlanService.getAllProcesses(plan)
+        List<JobExecutionPlan> processes = jobExecutionPlanService.getAllProcesses(plan, length, start, sort, sortOrder)
         dataToRender.iTotalRecords = processes.size()
-        dataToRender.iTotalDisplayRecords = processes.size()
+        dataToRender.iTotalDisplayRecords = jobExecutionPlanService.getNumberOfProcesses(plan)
         dataToRender.offset = start
-        dataToRender.iSortCol_0 = params.iSortCol_0
-        dataToRender.sSortDir_0 = params.sSortDir_0
+        dataToRender.iSortCol_0 = sortColumn
+        dataToRender.sSortDir_0 = sortOrder ? "asc" : "desc"
 
-        // TODO: sorting
-        processes.reverse().each { Process process ->
+        // TODO: sorting for additional columns
+        processes.each { Process process ->
             ProcessingStep latest = processService.getLatestProcessingStep(process)
             ExecutionState lastState = processService.getState(process)
             dataToRender.aaData << [

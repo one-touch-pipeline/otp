@@ -59,7 +59,16 @@
                             }
                             fnCallback(json);
                     }});
-                }
+                },
+                aaSorting: [[0, "desc"]],
+                aoColumnDefs: [
+                    { "bSortable": true, "aTargets": [0] },
+                    { "bSortable": false, "aTargets": [1] },
+                    { "bSortable": true, "aTargets": [2] },
+                    { "bSortable": false, "aTargets": [3] },
+                    { "bSortable": false, "aTargets": [4] },
+                    { "bSortable": false, "aTargets": [5] }
+                ]
             });
         });
         /**
