@@ -11,6 +11,7 @@
 </head>
 <body>
   <div class="body">
+    <h1>List of Processes for Workflow ${name}</h1>
     <div id="workflowOverview">
         <table id="workflowOverviewTable">
             <thead>
