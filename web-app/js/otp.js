@@ -255,3 +255,50 @@ OTP.prototype.createProcessingStepListView = function (selector, processId) {
         ]
     });
 };
+
+/**
+ * Creates the datatables view for the list of all ProcessingStepUpdates for a given ProcessingStep.
+ * @param selector The JQuery selector for the table to create the datatable into
+ * @param processId The id of the ProcessingStep for which the list of Updates should be retrieved.
+ */
+OTP.prototype.createProcessingStepUpdatesListView = function (selector, stepId) {
+    "use strict";
+    $(selector).dataTable({
+        sPaginationType: "full_numbers",
+        bJQueryUI: true,
+        bProcessing: true,
+        bServerSide: true,
+        sAjaxSource: $.otp.contextPath + '/processes/processingStepDate/' +  stepId + '/',
+        fnServerData: function (sSource, aoData, fnCallback) {
+            $.ajax({
+                "dataType": 'json',
+                "type": "POST",
+                "url": sSource,
+                "data": aoData,
+                "success": function (json) {
+                    var i, rowData;
+                    for (i = 0; i < json.aaData.length; i++) {
+                        rowData = json.aaData[i];
+                        if (rowData[1]) {
+                            rowData[1] = $.timeago(new Date(rowData[1]));
+                        } else {
+                            rowData[1] = "-";
+                        }
+                        rowData[2] = rowData[2].name;
+                        if (!rowData[3]) {
+                            rowData[3] = "-";
+                        }
+                    }
+                    fnCallback(json);
+                }
+            });
+        },
+        aaSorting: [[0, "desc"]],
+        aoColumnDefs: [
+            { "bSortable": true,  "aTargets": [0] },
+            { "bSortable": false, "aTargets": [1] },
+            { "bSortable": false, "aTargets": [2] },
+            { "bSortable": false, "aTargets": [3] }
+        ]
+    });
+};

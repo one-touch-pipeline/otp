@@ -46,6 +46,40 @@ class ProcessService {
     }
 
     /**
+     * Security aware way to access a ProcessingStep.
+     * @param id The ProcessingStep's id
+     * @return
+     */
+    @PostAuthorize("hasPermission(returnObject.process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    public ProcessingStep getProcessingStep(long id) {
+        return ProcessingStep.get(id)
+    }
+
+    /**
+     * Retrieves all ProcessingStepUpdates for the given ProcessingStep.
+     * @param step The ProcessingStep whose Updates should be retrieved
+     * @param max The number of elements to retrieve, default 10
+     * @param offset The offset in the list, default -
+     * @param column The column to search for, default "id"
+     * @param order {@code true} for ascending ordering, {@code false} for descending, default {@code false}
+     * @return List of all ProcessingStepUpdates for the Step filtered as requested
+     */
+    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    public List<ProcessingStepUpdate> getAllUpdates(ProcessingStep step, int max = 10, int offset = 0, String column = "id", boolean order = false) {
+        return ProcessingStepUpdate.findAllByProcessingStep(step, [max: max, offset: offset, sort: column, order: order ? "asc" : "desc"])
+    }
+
+    /**
+     * Returns the number of ProcessingStepUpdates for the given ProcessingStep.
+     * @param step The ProcessingStep for which the number of Updates should be returned
+     * @return The number of ProcessingStepUpdates for the given Step
+     */
+    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    public int getNumberOfUpdates(ProcessingStep step) {
+        return ProcessingStepUpdate.countByProcessingStep(step)
+    }
+
+    /**
      * Retrieves the date when the given Process finished.
      * In case the Process has not yet finished a runtime exception is thrown.
      * @param process The Process for which the end date has to be retrieved

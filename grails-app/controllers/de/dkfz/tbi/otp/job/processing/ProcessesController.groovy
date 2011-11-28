@@ -197,6 +197,51 @@ class ProcessesController {
         render dataToRender as JSON
     }
 
+    def processingStep() {
+        ProcessingStep step = processService.getProcessingStep(params.id as long)
+        [step: step]
+    }
+
+    def processingStepDate() {
+        // input validation
+        int start = 0
+        int length = 10
+        if (params.iDisplayStart) {
+            start = params.iDisplayStart as int
+        }
+        if (params.iDisplayLength) {
+            length = Math.min(100, params.iDisplayLength as int)
+        }
+        def dataToRender = [:]
+        dataToRender.sEcho = params.sEcho
+        dataToRender.aaData = []
+        boolean sortOrder = false
+        if (params.sSortDir_0) {
+            if (params.sSortDir_0 == "asc") {
+                sortOrder = true
+            } else if (params.sSortDir_0 == "desc") {
+                sortOrder = false
+            }
+        }
+
+        ProcessingStep step = processService.getProcessingStep(params.id as long)
+        List<ProcessingStepUpdate> updates = processService.getAllUpdates(step, length, start, "id", sortOrder)
+        dataToRender.iTotalRecords = processService.getNumberOfUpdates(step)
+        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+        dataToRender.offset = start
+        dataToRender.iSortCol_0 = 0
+        dataToRender.sSortDir_0 = sortOrder ? "asc" : "desc"
+        updates.each { ProcessingStepUpdate update ->
+            dataToRender.aaData << [
+                update.id,
+                update.date,
+                update.state,
+                update.error ? update.error.errorMessage : null
+            ]
+        }
+        render dataToRender as JSON
+    }
+
     private PlanStatus calculateStatus(JobExecutionPlan plan, Process lastSuccess, Process lastFailure, Process lastFinished) {
         if (!plan.enabled) {
             return PlanStatus.DISABLED
