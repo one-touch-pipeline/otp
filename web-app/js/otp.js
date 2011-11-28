@@ -216,7 +216,8 @@ OTP.prototype.createProcessingStepListView = function (selector, processId) {
                         rowData[0] = '<a href="' + $.otp.contextPath + '/processes/processingStep/' + rowData[0] + '">' + rowData[0] + '</a>';
                         rowData[1] = $.otp.statusImageHtml(rowData[1].name);
                         if (rowData[3]) {
-                            rowData[3] = rowData[3].name + "<br/>" + rowData[3].version.substring(0, 7);
+                            rowData[3] = '<span title="' + rowData[3].name + '">' + rowData[3].name.substr(rowData[3].name.lastIndexOf('.') + 1) + "</span><br/>" +
+                                '<span title="' + rowData[3].version + '">' + rowData[3].version.substring(0, 7) + '</span>';
                         } else {
                             rowData[3] = "-";
                         }
