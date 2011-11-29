@@ -139,6 +139,7 @@ OTP.prototype.createJobExecutionPlanListView = function (selector) {
     "use strict";
     $(selector).dataTable({
         sPaginationType: "full_numbers",
+        bFilter: false,
         bJQueryUI: true,
         bProcessing: true,
         bServerSide: true,
@@ -184,6 +185,7 @@ OTP.prototype.createProcessListView = function (selector, planId) {
     "use strict";
     $(selector).dataTable({
         sPaginationType: "full_numbers",
+        bFilter: false,
         bJQueryUI: true,
         bProcessing: true,
         bServerSide: true,
@@ -233,6 +235,7 @@ OTP.prototype.createProcessingStepListView = function (selector, processId) {
     "use strict";
     $(selector).dataTable({
         sPaginationType: "full_numbers",
+        bFilter: false,
         bJQueryUI: true,
         bProcessing: true,
         bServerSide: true,
@@ -295,6 +298,7 @@ OTP.prototype.createProcessingStepUpdatesListView = function (selector, stepId) 
     "use strict";
     $(selector).dataTable({
         sPaginationType: "full_numbers",
+        bFilter: false,
         bJQueryUI: true,
         bProcessing: true,
         bServerSide: true,
@@ -339,6 +343,7 @@ OTP.prototype.createParameterListView = function (selector, stepId, inputOrOutpu
     "use strict";
     $(selector).dataTable({
         sPaginationType: "full_numbers",
+        bFilter: false,
         bJQueryUI: true,
         bProcessing: true,
         bServerSide: true,
