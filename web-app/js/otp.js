@@ -132,10 +132,15 @@ OTP.prototype.formatTimespan = function (msec) {
 };
 
 /**
- * Creates the datatables view for the list of all JobExecutionPlans
+ * Shared definition for a datatables view.
  * @param selector The JQuery selector for the table to create the datatable into
+ * @param sourcePath The path to the ajax resource
+ * @param sortOrder {@code true} for ascending, {@code false} for descending initial sorting of first collumn
+ * @param jsonCallback (optional) the callback to invoke when json data has been returned. Get's one argument json
+ * @param columnDefs (optional) Array of column definitions, can be used to enable/disable sorting of columns
+ * @param postData (optional) Array of additional data to be added to the POST requests
  */
-OTP.prototype.createJobExecutionPlanListView = function (selector) {
+OTP.prototype.createListView = function (selector, sourcePath, sortOrder, jsonCallback, columnDefs, postData) {
     "use strict";
     $(selector).dataTable({
         sPaginationType: "full_numbers",
@@ -143,35 +148,56 @@ OTP.prototype.createJobExecutionPlanListView = function (selector) {
         bJQueryUI: true,
         bProcessing: true,
         bServerSide: true,
-        sAjaxSource: this.contextPath + '/processes/listData',
+        sAjaxSource: sourcePath,
         fnServerData: function (sSource, aoData, fnCallback) {
+            var i;
+            if (postData) {
+                for (i = 0; i < postData.length; i++) {
+                    aoData.push(postData[i]);
+                }
+            }
             $.ajax({
                 "dataType": 'json',
                 "type": "POST",
                 "url": sSource,
                 "data": aoData,
                 "success": function (json) {
-                    var i, rowData;
-                    for (i = 0; i < json.aaData.length; i++) {
-                        rowData = json.aaData[i];
-                        rowData[0] = $.otp.statusImageHtml(rowData[0].name);
-                        if (rowData[1]) {
-                            rowData[1] = $.otp.healthImageHtml(rowData[1].succeeded, rowData[1].finished);
-                        } else {
-                            rowData[1] = "-";
-                        }
-                        rowData[2] = '<a href="' + $.otp.contextPath +  '/processes/plan/' + rowData[2].id + '">' + rowData[2].name + '</a>';
-                        rowData[4] = $.otp.renderDate(rowData[4]);
-                        rowData[5] = $.otp.renderDate(rowData[5]);
-                        if (rowData[6]) {
-                            rowData[6] = $.otp.formatTimespan(rowData[6]);
-                        } else {
-                            rowData[6] = "-";
-                        }
+                    if (jsonCallback) {
+                        jsonCallback(json);
                     }
                     fnCallback(json);
                 }
             });
+        },
+        aoColumnDefs: columnDefs,
+        aaSorting: [[0, sortOrder ? "asc" : "desc"]]
+    });
+};
+
+/**
+ * Creates the datatables view for the list of all JobExecutionPlans
+ * @param selector The JQuery selector for the table to create the datatable into
+ */
+OTP.prototype.createJobExecutionPlanListView = function (selector) {
+    "use strict";
+    this.createListView(selector, this.contextPath + '/processes/listData', true, function (json) {
+        var i, rowData;
+        for (i = 0; i < json.aaData.length; i++) {
+            rowData = json.aaData[i];
+            rowData[0] = $.otp.statusImageHtml(rowData[0].name);
+            if (rowData[1]) {
+                rowData[1] = $.otp.healthImageHtml(rowData[1].succeeded, rowData[1].finished);
+            } else {
+                rowData[1] = "-";
+            }
+            rowData[2] = '<a href="' + $.otp.contextPath +  '/processes/plan/' + rowData[2].id + '">' + rowData[2].name + '</a>';
+            rowData[4] = $.otp.renderDate(rowData[4]);
+            rowData[5] = $.otp.renderDate(rowData[5]);
+            if (rowData[6]) {
+                rowData[6] = $.otp.formatTimespan(rowData[6]);
+            } else {
+                rowData[6] = "-";
+            }
         }
     });
 };
@@ -183,47 +209,28 @@ OTP.prototype.createJobExecutionPlanListView = function (selector) {
  */
 OTP.prototype.createProcessListView = function (selector, planId) {
     "use strict";
-    $(selector).dataTable({
-        sPaginationType: "full_numbers",
-        bFilter: false,
-        bJQueryUI: true,
-        bProcessing: true,
-        bServerSide: true,
-        sAjaxSource: $.otp.contextPath + '/processes/planData/' +  planId + '/',
-        fnServerData: function (sSource, aoData, fnCallback) {
-            $.ajax({
-                "dataType": 'json',
-                "type": "POST",
-                "url": sSource,
-                "data": aoData,
-                "success": function (json) {
-                    var i, rowData;
-                    for (i = 0; i < json.aaData.length; i++) {
-                        rowData = json.aaData[i];
-                        rowData[0] = '<a href="' + $.otp.contextPath + '/processes/process/' + rowData[0] + '">' + rowData[0] + '</a>';
-                        rowData[1] = $.otp.statusImageHtml(rowData[1].name);
-                        rowData[2] = $.otp.renderDate(rowData[2]);
-                        rowData[3] = $.otp.renderDate(rowData[3]);
-                        if (rowData[5].error) {
-                            rowData[5] = '<a href="' + $.otp.contextPath + '/processes/processingStep/' + rowData[5].id + '" title="' + rowData[5].error + '">' + rowData[5].state.name + '</a>';
-                        } else {
-                            rowData[5] = rowData[5].state.name;
-                        }
-                    }
-                    fnCallback(json);
-                }
-            });
-        },
-        aaSorting: [[0, "desc"]],
-        aoColumnDefs: [
-            { "bSortable": true,  "aTargets": [0] },
-            { "bSortable": false, "aTargets": [1] },
-            { "bSortable": true,  "aTargets": [2] },
-            { "bSortable": false, "aTargets": [3] },
-            { "bSortable": false, "aTargets": [4] },
-            { "bSortable": false, "aTargets": [5] }
-        ]
-    });
+    this.createListView(selector, this.contextPath + '/processes/planData/' +  planId + '/', false, function (json) {
+        var i, rowData;
+        for (i = 0; i < json.aaData.length; i++) {
+            rowData = json.aaData[i];
+            rowData[0] = '<a href="' + $.otp.contextPath + '/processes/process/' + rowData[0] + '">' + rowData[0] + '</a>';
+            rowData[1] = $.otp.statusImageHtml(rowData[1].name);
+            rowData[2] = $.otp.renderDate(rowData[2]);
+            rowData[3] = $.otp.renderDate(rowData[3]);
+            if (rowData[5].error) {
+                rowData[5] = '<a href="' + $.otp.contextPath + '/processes/processingStep/' + rowData[5].id + '" title="' + rowData[5].error + '">' + rowData[5].state.name + '</a>';
+            } else {
+                rowData[5] = rowData[5].state.name;
+            }
+        }
+    }, [
+        { "bSortable": true,  "aTargets": [0] },
+        { "bSortable": false, "aTargets": [1] },
+        { "bSortable": true,  "aTargets": [2] },
+        { "bSortable": false, "aTargets": [3] },
+        { "bSortable": false, "aTargets": [4] },
+        { "bSortable": false, "aTargets": [5] }
+    ]);
 };
 
 /**
@@ -233,60 +240,41 @@ OTP.prototype.createProcessListView = function (selector, planId) {
  */
 OTP.prototype.createProcessingStepListView = function (selector, processId) {
     "use strict";
-    $(selector).dataTable({
-        sPaginationType: "full_numbers",
-        bFilter: false,
-        bJQueryUI: true,
-        bProcessing: true,
-        bServerSide: true,
-        sAjaxSource: $.otp.contextPath + '/processes/processData/' +  processId + '/',
-        fnServerData: function (sSource, aoData, fnCallback) {
-            $.ajax({
-                "dataType": 'json',
-                "type": "POST",
-                "url": sSource,
-                "data": aoData,
-                "success": function (json) {
-                    var i, rowData;
-                    for (i = 0; i < json.aaData.length; i++) {
-                        rowData = json.aaData[i];
-                        rowData[0] = '<a href="' + $.otp.contextPath + '/processes/processingStep/' + rowData[0] + '">' + rowData[0] + '</a>';
-                        rowData[1] = $.otp.statusImageHtml(rowData[1].name);
-                        if (rowData[3]) {
-                            rowData[3] = '<span title="' + rowData[3].name + '">' + rowData[3].name.substr(rowData[3].name.lastIndexOf('.') + 1) + "</span><br/>" +
-                                '<span title="' + rowData[3].version + '">' + rowData[3].version.substring(0, 7) + '</span>';
-                        } else {
-                            rowData[3] = "-";
-                        }
-                        rowData[4] = $.otp.renderDate(rowData[4]);
-                        rowData[5] = $.otp.renderDate(rowData[5]);
-                        if (rowData[6]) {
-                            rowData[6] = $.otp.formatTimespan(rowData[6]);
-                        } else {
-                            rowData[6] = "-";
-                        }
-                        if (rowData[7].error) {
-                            rowData[7] = '<span title="' + rowData[7].error + '">' + rowData[7].state.name + '</span>';
-                        } else {
-                            rowData[7] = rowData[7].state.name;
-                        }
-                    }
-                    fnCallback(json);
-                }
-            });
-        },
-        aaSorting: [[0, "desc"]],
-        aoColumnDefs: [
-            { "bSortable": true,  "aTargets": [0] },
-            { "bSortable": false, "aTargets": [1] },
-            { "bSortable": false, "aTargets": [2] },
-            { "bSortable": false, "aTargets": [3] },
-            { "bSortable": false, "aTargets": [4] },
-            { "bSortable": false, "aTargets": [5] },
-            { "bSortable": false, "aTargets": [6] },
-            { "bSortable": false, "aTargets": [7] }
-        ]
-    });
+    this.createListView(selector, this.contextPath + '/processes/processData/' +  processId + '/', false, function (json) {
+        var i, rowData;
+        for (i = 0; i < json.aaData.length; i++) {
+            rowData = json.aaData[i];
+            rowData[0] = '<a href="' + $.otp.contextPath + '/processes/processingStep/' + rowData[0] + '">' + rowData[0] + '</a>';
+            rowData[1] = $.otp.statusImageHtml(rowData[1].name);
+            if (rowData[3]) {
+                rowData[3] = '<span title="' + rowData[3].name + '">' + rowData[3].name.substr(rowData[3].name.lastIndexOf('.') + 1) + "</span><br/>" +
+                    '<span title="' + rowData[3].version + '">' + rowData[3].version.substring(0, 7) + '</span>';
+            } else {
+                rowData[3] = "-";
+            }
+            rowData[4] = $.otp.renderDate(rowData[4]);
+            rowData[5] = $.otp.renderDate(rowData[5]);
+            if (rowData[6]) {
+                rowData[6] = $.otp.formatTimespan(rowData[6]);
+            } else {
+                rowData[6] = "-";
+            }
+            if (rowData[7].error) {
+                rowData[7] = '<span title="' + rowData[7].error + '">' + rowData[7].state.name + '</span>';
+            } else {
+                rowData[7] = rowData[7].state.name;
+            }
+        }
+    }, [
+        { "bSortable": true,  "aTargets": [0] },
+        { "bSortable": false, "aTargets": [1] },
+        { "bSortable": false, "aTargets": [2] },
+        { "bSortable": false, "aTargets": [3] },
+        { "bSortable": false, "aTargets": [4] },
+        { "bSortable": false, "aTargets": [5] },
+        { "bSortable": false, "aTargets": [6] },
+        { "bSortable": false, "aTargets": [7] }
+    ]);
 };
 
 /**
@@ -296,41 +284,22 @@ OTP.prototype.createProcessingStepListView = function (selector, processId) {
  */
 OTP.prototype.createProcessingStepUpdatesListView = function (selector, stepId) {
     "use strict";
-    $(selector).dataTable({
-        sPaginationType: "full_numbers",
-        bFilter: false,
-        bJQueryUI: true,
-        bProcessing: true,
-        bServerSide: true,
-        sAjaxSource: $.otp.contextPath + '/processes/processingStepDate/' +  stepId + '/',
-        fnServerData: function (sSource, aoData, fnCallback) {
-            $.ajax({
-                "dataType": 'json',
-                "type": "POST",
-                "url": sSource,
-                "data": aoData,
-                "success": function (json) {
-                    var i, rowData;
-                    for (i = 0; i < json.aaData.length; i++) {
-                        rowData = json.aaData[i];
-                        rowData[1] = $.otp.renderDate(rowData[1]);
-                        rowData[2] = rowData[2].name;
-                        if (!rowData[3]) {
-                            rowData[3] = "-";
-                        }
-                    }
-                    fnCallback(json);
-                }
-            });
-        },
-        aaSorting: [[0, "desc"]],
-        aoColumnDefs: [
-            { "bSortable": true,  "aTargets": [0] },
-            { "bSortable": false, "aTargets": [1] },
-            { "bSortable": false, "aTargets": [2] },
-            { "bSortable": false, "aTargets": [3] }
-        ]
-    });
+    this.createListView(selector, this.contextPath + '/processes/processingStepDate/' +  stepId + '/', false, function (json) {
+        var i, rowData;
+        for (i = 0; i < json.aaData.length; i++) {
+            rowData = json.aaData[i];
+            rowData[1] = $.otp.renderDate(rowData[1]);
+            rowData[2] = rowData[2].name;
+            if (!rowData[3]) {
+                rowData[3] = "-";
+            }
+        }
+    }, [
+        { "bSortable": true,  "aTargets": [0] },
+        { "bSortable": false, "aTargets": [1] },
+        { "bSortable": false, "aTargets": [2] },
+        { "bSortable": false, "aTargets": [3] }
+    ]);
 };
 
 /**
@@ -341,31 +310,10 @@ OTP.prototype.createProcessingStepUpdatesListView = function (selector, stepId) 
  */
 OTP.prototype.createParameterListView = function (selector, stepId, inputOrOutput) {
     "use strict";
-    $(selector).dataTable({
-        sPaginationType: "full_numbers",
-        bFilter: false,
-        bJQueryUI: true,
-        bProcessing: true,
-        bServerSide: true,
-        sAjaxSource: $.otp.contextPath + '/processes/parameterData/' +  stepId + '/',
-        fnServerData: function (sSource, aoData, fnCallback) {
-            aoData.push({"name": "input", "value": inputOrOutput});
-            $.ajax({
-                "dataType": 'json',
-                "type": "POST",
-                "url": sSource,
-                "data": aoData,
-                "success": function (json) {
-                    fnCallback(json);
-                }
-            });
-        },
-        aaSorting: [[0, "asc"]],
-        aoColumnDefs: [
-            { "bSortable": true,  "aTargets": [0] },
-            { "bSortable": false, "aTargets": [1] },
-            { "bSortable": false, "aTargets": [2] },
-            { "bSortable": false, "aTargets": [3] }
-        ]
-    });
+    this.createListView(selector, this.contextPath + '/processes/parameterData/' +  stepId + '/', true, null, [
+        { "bSortable": true,  "aTargets": [0] },
+        { "bSortable": false, "aTargets": [1] },
+        { "bSortable": false, "aTargets": [2] },
+        { "bSortable": false, "aTargets": [3] }
+    ], [{"name": "input", "value": inputOrOutput}]);
 };
