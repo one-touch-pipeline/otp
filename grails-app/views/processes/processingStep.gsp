@@ -26,6 +26,18 @@
                 <td>Version:</td>
                 <td>${step.jobVersion}</td>
             </tr>
+            <g:if test="${step.previous}">
+            <tr>
+                <td>Previous:</td>
+                <td><g:link action="processingStep" id="${step.previous.id}">${step.previous.jobDefinition.name}</g:link>
+            </tr>
+            </g:if>
+            <g:if test="${step.next}">
+            <tr>
+                <td>Next:</td>
+                <td><g:link action="processingStep" id="${step.next.id}">${step.next.jobDefinition.name}</g:link>
+            </tr>
+            </g:if>
         </tbody>
     </table>
     <h2>Input Parameters</h2>
