@@ -35,6 +35,7 @@ grails.project.dependency.resolution = {
         // runtime 'mysql:mysql-connector-java:5.1.16'
         //git
         compile 'org.eclipse.jgit:org.eclipse.jgit:1.0.0.201106090707-r'
+        runtime "commons-jexl:commons-jexl:1.1"
     }
 
     plugins {
@@ -46,6 +47,7 @@ grails.project.dependency.resolution = {
         compile ":spring-security-ldap:1.0.5"
         compile ":spring-security-acl:1.1"
         compile ":jquery-datatables:1.7.5"
+        compile ":perf4j:0.1.1"
 
         build ":tomcat:$grailsVersion"
     }
