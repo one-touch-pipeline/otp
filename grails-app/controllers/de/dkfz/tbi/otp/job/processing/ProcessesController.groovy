@@ -242,6 +242,56 @@ class ProcessesController {
         render dataToRender as JSON
     }
 
+    def parameterData() {
+        // input validation
+        int start = 0
+        int length = 10
+        if (params.iDisplayStart) {
+            start = params.iDisplayStart as int
+        }
+        if (params.iDisplayLength) {
+            length = Math.min(100, params.iDisplayLength as int)
+        }
+        def dataToRender = [:]
+        dataToRender.sEcho = params.sEcho
+        dataToRender.aaData = []
+        boolean sortOrder = true
+        if (params.sSortDir_0) {
+            if (params.sSortDir_0 == "asc") {
+                sortOrder = true
+            } else if (params.sSortDir_0 == "desc") {
+                sortOrder = false
+            }
+        }
+        boolean input = Boolean.parseBoolean(params.input)
+
+        ProcessingStep step = processService.getProcessingStep(params.id as long)
+        // TODO: move into service
+        List<Parameter> parameters = []
+        if (input) {
+            parameters = step.input.toList().sort { it.id }
+        } else {
+            parameters = step.output.toList().sort { it.id }
+        }
+        if (!sortOrder) {
+            parameters = parameters.reverse()
+        }
+        dataToRender.iTotalRecords = parameters.size()
+        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+        dataToRender.offset = start
+        dataToRender.iSortCol_0 = 0
+        dataToRender.sSortDir_0 = sortOrder ? "asc" : "desc"
+        parameters.each { Parameter param ->
+            dataToRender.aaData << [
+                param.id,
+                param.type.name,
+                param.type.description,
+                param.value
+            ]
+        }
+        render dataToRender as JSON
+    }
+
     private PlanStatus calculateStatus(JobExecutionPlan plan, Process lastSuccess, Process lastFailure, Process lastFinished) {
         if (!plan.enabled) {
             return PlanStatus.DISABLED

@@ -28,6 +28,46 @@
             </tr>
         </tbody>
     </table>
+    <h2>Input Parameters</h2>
+    <div>
+    <table id="inputParametersList">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <g:javascript>
+        $(document).ready(function() {
+            $.otp.createParameterListView('#inputParametersList', ${step.id}, true);
+        });
+    </g:javascript>
+    </div>
+    <h2>Output Parameters</h2>
+    <div>
+    <table id="outputParametersList">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <g:javascript>
+        $(document).ready(function() {
+            $.otp.createParameterListView('#outputParametersList', ${step.id}, false);
+        });
+    </g:javascript>
+    </div>
     <h2>Updates</h2>
     <div>
     <table id="processingStepUpdatesList">

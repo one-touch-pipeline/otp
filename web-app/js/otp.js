@@ -298,3 +298,39 @@ OTP.prototype.createProcessingStepUpdatesListView = function (selector, stepId) 
         ]
     });
 };
+
+/**
+ * Creates the datatables view for the list of Parameters (either input or output) for a given ProcessingStep.
+ * @param selector The JQuery selector for the table to create the datatable into
+ * @param processId The id of the ProcessingStep for which the list of Updates should be retrieved.
+ * @param inputOrOutput If {@code true} the input parameters are retrieved, if {@code false} the output
+ */
+OTP.prototype.createParameterListView = function (selector, stepId, inputOrOutput) {
+    "use strict";
+    $(selector).dataTable({
+        sPaginationType: "full_numbers",
+        bJQueryUI: true,
+        bProcessing: true,
+        bServerSide: true,
+        sAjaxSource: $.otp.contextPath + '/processes/parameterData/' +  stepId + '/',
+        fnServerData: function (sSource, aoData, fnCallback) {
+            aoData.push({"name": "input", "value": inputOrOutput});
+            $.ajax({
+                "dataType": 'json',
+                "type": "POST",
+                "url": sSource,
+                "data": aoData,
+                "success": function (json) {
+                    fnCallback(json);
+                }
+            });
+        },
+        aaSorting: [[0, "asc"]],
+        aoColumnDefs: [
+            { "bSortable": true,  "aTargets": [0] },
+            { "bSortable": false, "aTargets": [1] },
+            { "bSortable": false, "aTargets": [2] },
+            { "bSortable": false, "aTargets": [3] }
+        ]
+    });
+};
