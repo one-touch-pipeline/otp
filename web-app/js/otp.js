@@ -173,7 +173,7 @@ OTP.prototype.createProcessListView = function (selector, planId) {
                         rowData[2] = $.otp.renderDate(rowData[2]);
                         rowData[3] = $.otp.renderDate(rowData[3]);
                         if (rowData[5].error) {
-                            rowData[5] = '<span title="' + rowData[5].error + '">' + rowData[5].state.name + '</span>';
+                            rowData[5] = '<a href="' + $.otp.contextPath + '/processes/processingStep/' + rowData[5].id + '" title="' + rowData[5].error + '">' + rowData[5].state.name + '</a>';
                         } else {
                             rowData[5] = rowData[5].state.name;
                         }

@@ -141,7 +141,7 @@ class ProcessesController {
                 process.started,
                 processService.getLastUpdate(latest),
                 latest.jobDefinition.name,
-                [state: lastState, error: processService.getError(process)]
+                [state: lastState, error: processService.getError(process), id: latest.id]
                 ]
         }
         render dataToRender as JSON
