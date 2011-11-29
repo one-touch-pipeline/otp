@@ -17,7 +17,7 @@ class ProcessService {
      * @param id The Process's id
      * @return
      */
-    @PostAuthorize("hasPermission(returnObject.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    @PostAuthorize("hasPermission(returnObject.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public Process getProcess(long id) {
         return Process.get(id)
     }
@@ -31,7 +31,7 @@ class ProcessService {
     * @param order {@code true} for ascending ordering, {@code false} for descending, default {@code false}
     * @return List of all ProcessingSteps run for the Process filtered as requested
     */
-    @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public List<ProcessingStep> getAllProcessingSteps(Process process, int max = 10, int offset = 0, String column = "id", boolean order = false) {
         return ProcessingStep.findAllByProcess(process, [max: max, offset: offset, sort: column, order: order ? "asc" : "desc"])
     }
@@ -41,7 +41,7 @@ class ProcessService {
     * @param plan The Process for which the number of ProcessingSteps should be returned
     * @return The number of ProcessingSteps for the given Process
     */
-    @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public int getNumberOfProcessessingSteps(Process process) {
         return ProcessingStep.countByProcess(process)
     }
@@ -51,7 +51,7 @@ class ProcessService {
      * @param id The ProcessingStep's id
      * @return
      */
-    @PostAuthorize("hasPermission(returnObject.process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    @PostAuthorize("hasPermission(returnObject.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public ProcessingStep getProcessingStep(long id) {
         return ProcessingStep.get(id)
     }
@@ -65,7 +65,7 @@ class ProcessService {
      * @param order {@code true} for ascending ordering, {@code false} for descending, default {@code false}
      * @return List of all ProcessingStepUpdates for the Step filtered as requested
      */
-    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public List<ProcessingStepUpdate> getAllUpdates(ProcessingStep step, int max = 10, int offset = 0, String column = "id", boolean order = false) {
         return ProcessingStepUpdate.findAllByProcessingStep(step, [max: max, offset: offset, sort: column, order: order ? "asc" : "desc"])
     }
@@ -75,7 +75,7 @@ class ProcessService {
      * @param step The ProcessingStep for which the number of Updates should be returned
      * @return The number of ProcessingStepUpdates for the given Step
      */
-    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public int getNumberOfUpdates(ProcessingStep step) {
         return ProcessingStepUpdate.countByProcessingStep(step)
     }
@@ -159,7 +159,7 @@ class ProcessService {
      * @return
      * @see getState(Process)
      */
-    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public ExecutionState getState(ProcessingStep step) {
         return lastUpdate(step).state
     }
@@ -181,7 +181,7 @@ class ProcessService {
      * @return
      * @see getError(Process)
      */
-    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public String getError(ProcessingStep step) {
         ProcessingError error = lastUpdate(step).error
         if (!error) {
@@ -205,7 +205,7 @@ class ProcessService {
      * @param step
      * @return
      */
-    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public Date getLastUpdate(ProcessingStep step) {
         return lastUpdate(step).date
     }
@@ -215,7 +215,7 @@ class ProcessService {
      * @param step
      * @return
      */
-    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public Date getFirstUpdate(ProcessingStep step) {
         List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step)
         if (updates.isEmpty()) {
@@ -230,7 +230,7 @@ class ProcessService {
      * @param step The processing step for which the duration has to be calculated
      * @return The duration between the started and finished event for this ProcessingStep
      */
-    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public Long getProcessingStepDuration(ProcessingStep step) {
         List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step)
         if (updates.isEmpty()) {
