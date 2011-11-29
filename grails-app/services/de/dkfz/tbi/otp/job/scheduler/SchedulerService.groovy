@@ -195,7 +195,13 @@ class SchedulerService {
             throw new IncorrectProcessingException("Process finished but is not in success state")
         }
         last.process.finished = true
-        last.process.save(flush: true)
+        last.process.save()
+        if (!last.process.jobExecutionPlan.finishedSuccessful) {
+            last.process.jobExecutionPlan.finishedSuccessful = 1
+        } else {
+            last.process.jobExecutionPlan.finishedSuccessful++
+        }
+        last.process.jobExecutionPlan.save(flush: true)
         // TODO: start some notifications?
     }
 

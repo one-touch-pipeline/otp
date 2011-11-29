@@ -169,6 +169,38 @@ class JobExecutionPlanService {
     }
 
     /**
+     * Returns the number of successful finished Processes for the given JobExecutionPlan.
+     * The method also considers the previous, but obsoleted JobExecutionPlans for the given plan.
+     * @param plan The JobExecutionPlan for which the number of successful finished Processes should be retrieved.
+     * @return The number of successful finished Processes
+     */
+    @PreAuthorize("hasPermission(#plan, read) or hasRole('ROLE_ADMIN')")
+    public int getNumberOfSuccessfulFinishedProcesses(JobExecutionPlan plan) {
+        final List<JobExecutionPlan> plans = withParents(plan)
+        int count = 0
+        plans.each {
+            if (it.finishedSuccessful) {
+                count += it.finishedSuccessful
+            }
+        }
+        return count
+    }
+
+    /**
+     * Returns the number of finished Processes (either successful or failed) for the given JobExecutionPlan.
+     * The method also considers the previous, but obsoleted JobExecutionPlans for the given plan.
+     * The method differs to getNumberOfProcesses by not considering running Processes
+     * @param plan The JobExecutionPlan for which the number of finished Processes should be retrieved.
+     * @return The number of finished Processes
+     * @see getNumberOfProcesses
+     */
+    @PreAuthorize("hasPermission(#plan, read) or hasRole('ROLE_ADMIN')")
+    public int getNumberOfFinishedProcesses(JobExecutionPlan plan) {
+        final List<JobExecutionPlan> plans = withParents(plan)
+        return Process.countByFinishedAndJobExecutionPlanInList(true, plans)
+    }
+
+    /**
      * Returns a list of JobExecutionPlans containing the passed in plan and all it's obsoleted
      * previous plans.
      *
