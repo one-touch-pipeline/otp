@@ -37,7 +37,7 @@ class JobExecutionPlan {
     /**
      * Number of Processes which finished successful for this JobExecutionPlan
      */
-    Integer finishedSuccessful = 0
+    int finishedSuccessful = 0
 
     static constraints = {
         name(nullable: false, blank: false, unique: 'version')
@@ -53,6 +53,5 @@ class JobExecutionPlan {
         firstJob(nullable: true)
         // firstJob needs to be nullable as JobDefinition has a dependency on JobExecutionPlan and this circle could not be solved in the database
         startJob(nullable: true)
-        finishedSuccessful(nullable: true)
     }
 }
