@@ -28,6 +28,31 @@ OTP.prototype.statusImageHtml = function (status) {
 };
 
 /**
+ * Creates the HTML markup for the health image.
+ * @param succeeded The number of succeeded processes
+ * @param finished The number of finished processes
+ * @return HTML string for health image
+ */
+OTP.prototype.healthImageHtml = function (succeeded, finished) {
+    "use strict";
+    var percent, image, title;
+    percent = (finished > 0) ? succeeded / finished * 100 : 0;
+    if (percent <= 19) {
+        image = "health-00to19.png";
+    } else if (percent <= 39) {
+        image = "health-20to39.png";
+    } else if (percent <= 59) {
+        image = "health-40to59.png";
+    } else if (percent <= 79) {
+        image = "health-60to79.png";
+    } else {
+        image = "health-80plus.png";
+    }
+    title = succeeded + ' of ' + finished + ' Processes finished successfully';
+    return '<img src="' + this.contextPath + '/images/status/' + image + '" alt="' + title + '" title="' + title + '"/>';
+};
+
+/**
  * Converts the status name into the image name which is used to represent the status.
  * @param status The name as listed in documentation for statusImageHtml
  * @returns Name of image or {@code null} if incorrect status
@@ -129,6 +154,11 @@ OTP.prototype.createJobExecutionPlanListView = function (selector) {
                     for (i = 0; i < json.aaData.length; i++) {
                         rowData = json.aaData[i];
                         rowData[0] = $.otp.statusImageHtml(rowData[0].name);
+                        if (rowData[1]) {
+                            rowData[1] = $.otp.healthImageHtml(rowData[1].succeeded, rowData[1].finished);
+                        } else {
+                            rowData[1] = "-";
+                        }
                         rowData[2] = '<a href="' + $.otp.contextPath +  '/processes/plan/' + rowData[2].id + '">' + rowData[2].name + '</a>';
                         rowData[4] = $.otp.renderDate(rowData[4]);
                         rowData[5] = $.otp.renderDate(rowData[5]);

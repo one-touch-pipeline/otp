@@ -69,9 +69,11 @@ class ProcessesController {
             Process lastSuccess = jobExecutionPlanService.getLastSucceededProcess(plan)
             Process lastFailure = jobExecutionPlanService.getLastFailedProcess(plan)
             Process lastFinished = jobExecutionPlanService.getLastFinishedProcess(plan)
+            int succeeded = jobExecutionPlanService.getNumberOfSuccessfulFinishedProcesses(plan)
+            int finished = jobExecutionPlanService.getNumberOfFinishedProcesses(plan)
             dataToRender.aaData << [
                 calculateStatus(plan, lastSuccess, lastFailure, lastFinished),
-                '2', // TODO: health value
+                finished > 0 ? [succeeded: succeeded, finished: finished] : null,
                 [id: plan.id, name: plan.name],
                 jobExecutionPlanService.getNumberOfProcesses(plan),
                 lastSuccess ? processService.getFinishDate(lastSuccess) : null,
