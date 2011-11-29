@@ -172,7 +172,11 @@ OTP.prototype.createProcessListView = function (selector, planId) {
                         rowData[1] = $.otp.statusImageHtml(rowData[1].name);
                         rowData[2] = $.otp.renderDate(rowData[2]);
                         rowData[3] = $.otp.renderDate(rowData[3]);
-                        rowData[5] = rowData[5].name;
+                        if (rowData[5].error) {
+                            rowData[5] = '<span title="' + rowData[5].error + '">' + rowData[5].state.name + '</span>';
+                        } else {
+                            rowData[5] = rowData[5].state.name;
+                        }
                     }
                     fnCallback(json);
                 }
@@ -228,7 +232,11 @@ OTP.prototype.createProcessingStepListView = function (selector, processId) {
                         } else {
                             rowData[6] = "-";
                         }
-                        rowData[7] = rowData[7].name;
+                        if (rowData[7].error) {
+                            rowData[7] = '<span title="' + rowData[7].error + '">' + rowData[7].state.name + '</span>';
+                        } else {
+                            rowData[7] = rowData[7].state.name;
+                        }
                     }
                     fnCallback(json);
                 }

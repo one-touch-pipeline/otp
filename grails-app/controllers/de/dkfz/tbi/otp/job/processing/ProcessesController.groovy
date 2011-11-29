@@ -141,7 +141,7 @@ class ProcessesController {
                 process.started,
                 processService.getLastUpdate(latest),
                 latest.jobDefinition.name,
-                lastState
+                [state: lastState, error: processService.getError(process)]
                 ]
         }
         render dataToRender as JSON
@@ -191,7 +191,7 @@ class ProcessesController {
                 processService.getFirstUpdate(step), // started
                 processService.getLastUpdate(step), // last update
                 processService.getProcessingStepDuration(step), // duration
-                state // last reached status
+                [state: processService.getState(step), error: processService.getError(step)]
             ]
         }
         render dataToRender as JSON

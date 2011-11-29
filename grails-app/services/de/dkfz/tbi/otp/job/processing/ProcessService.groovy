@@ -164,6 +164,32 @@ class ProcessService {
     }
 
     /**
+     * Returns the error message in case the last ProcessingStep failed.
+     * If the last ProcessingStep did not fail, {@code null} is returned.
+     * @param process The Process for which the possible error message should be returned.
+     * @return
+     */
+    @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    public String getError(Process process) {
+        return getError(getLatestProcessingStep(process))
+    }
+
+    /**
+     * Overloaded method for convenience.
+     * @param step
+     * @return
+     * @see getError(Process)
+     */
+    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    public String getError(ProcessingStep step) {
+        ProcessingError error = lastUpdate(step).error
+        if (!error) {
+            return null
+        }
+        return error.errorMessage
+    }
+
+    /**
      * Retrieves the last update date for the Process.
      * @param process
      * @return
