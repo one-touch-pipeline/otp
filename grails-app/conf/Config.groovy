@@ -130,6 +130,13 @@ log4j = {
     debug 'de.dkfz.tbi.otp' // our own stuff
 }
 
+// mail settings
+if (otpConfig.otp.mail.sender instanceof ConfigObject) {
+    otp.mail.sender = "otp@localhost"
+} else {
+    otp.mail.sender = otpConfig.otp.mail.sender
+}
+
 // Added by the Spring Security Core plugin:
 grails.plugins.springsecurity.userLookup.userDomainClassName = 'de.dkfz.tbi.otp.security.User'
 grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'de.dkfz.tbi.otp.security.UserRole'

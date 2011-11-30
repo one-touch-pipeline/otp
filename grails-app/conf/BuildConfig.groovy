@@ -48,6 +48,7 @@ grails.project.dependency.resolution = {
         compile ":spring-security-acl:1.1"
         compile ":jquery-datatables:1.7.5"
         compile ":perf4j:0.1.1"
+        compile ":mail:1.0-SNAPSHOT"
 
         build ":tomcat:$grailsVersion"
     }
