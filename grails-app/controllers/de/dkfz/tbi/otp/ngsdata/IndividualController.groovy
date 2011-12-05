@@ -2,6 +2,8 @@ package de.dkfz.tbi.otp.ngsdata
 
 class IndividualController {
 	
+    def mergingService
+    
 	def scaffold = Individual
 	
 	//def list = {
@@ -18,7 +20,13 @@ class IndividualController {
 
     def show = {
 
-        Individual ind = Individual.get(params.id)
+        int id = params.id as int
+        Individual ind = Individual.get(id)
+        if (!ind) {
+            render ("Individual with id=${id} does not exist")
+            return
+        }
+
         Vector<SeqType> seqTypes= new Vector<SeqType>();
 
         seqTypes.add(SeqType.findByNameAndLibraryLayout("WHOLE_GENOME", "PAIRED"))
@@ -34,7 +42,11 @@ class IndividualController {
             }
         }
 
+        List<String> mergedBams =
+             mergingService.printAllMergedBamForIndividual(ind, seqTypes)
 
+        int prevId = (id > 1)? id-1 : 1
+        int nextId = id+1
         /*
         def allRuns = [:]
         seqTypes.each {SeqType seqType ->
@@ -59,7 +71,8 @@ class IndividualController {
         }
         */
 
-        [ind: ind, seqTypes: seqTypes, seqScans: seqScans]
+        [ind: ind, seqTypes: seqTypes, seqScans: seqScans, mergedBams: mergedBams,
+            prevId: prevId, nextId: nextId]
     }
 
 }
