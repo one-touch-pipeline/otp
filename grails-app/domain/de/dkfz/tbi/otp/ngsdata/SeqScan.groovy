@@ -10,6 +10,7 @@ class SeqScan {
     State state  = State.DECLARED
 
     String seqCenters = ""
+    String insertSize = ""
 
     // quality control 
     enum QCState {NON, PASS, BLOCK}
@@ -36,9 +37,10 @@ class SeqScan {
         nLanes()
         nBasePairs()
         coverage()
-        seqCenters()
         state()
+        seqCenters()
         qcState()
+        insertSize(nullable: true)
         //dataFiles(nullable: true)
         //alignmentParams(nullable: true)
     }
