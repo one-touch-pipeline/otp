@@ -10,6 +10,7 @@
 
     <H1>General</H1>
 
+    <div class="myContent">
     <table>
        <tr>
             <td class="myKey">individual</td>
@@ -31,7 +32,7 @@
             <td class="myValue">${scan.seqType}</td>
        </tr>
        <tr> 
-            <td class="myKey">sequencing technology</td>
+            <td class="myKey">technology platform</td>
             <td class="myValue">${scan.seqTech}</td>
        </tr>
        <tr>
@@ -39,9 +40,11 @@
             <td>${scan.dateCreated}</td>
        </tr>
     </table>
+    </div>
 
     <h1>Status</h1>   
 
+    <div class="myContent">
     <table>
       <tr>
         <td class="myKey">status</td>
@@ -52,9 +55,11 @@
         <td>${scan.qcState}</td>
       </tr>
     </table>
+    </div>
 
     <h1>Sequencing tracks</h1>
 
+    <div class="myContent">
     <table>
         <tr>
             <td class="myKey">number of lanes</td>
@@ -69,8 +74,9 @@
             <td>${scan.coverage}</td>
         </tr>
     </table>
+    </div>
 
-    <h1>Runs and Lanes</h1>
+    <h1>Runs, Lanes, Merging</h1>
 
     <g:each var="run" in="${runs}">
 
@@ -104,8 +110,32 @@
            </g:each>
         </table>
       </div>
-
     </g:each>
+    
+
+    <div class="myHeader">
+        Merged alignment files
+    </div>
+    
+    <div class="myContent">
+    <table>
+    <g:each var="log" in="${scan.mergingLogs}">
+        <tr>
+            <g:each var="dataFile" in="${log.dataFiles}">
+                <td>
+                <g:link controller="dataFile" action="show" id="${dataFile.id}">
+                ${dataFile.fileName}
+                </g:link>
+                </td>
+                <td>${dataFile.fileSizeString()}</td>
+            </g:each>
+            <td>${log.executedBy}</td>
+            <td>${log.status}</td>
+            <td>${log.alignmentParams}</td>
+    </g:each>
+    </table>
+    </div>
+
   </div>
 </body>
 </html>

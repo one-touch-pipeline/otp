@@ -37,11 +37,12 @@
                 </g:if>
             </td>
 
-            <td> 
+
+            <td>
                 <g:if test="${table[name][type] != null && table[name][type][key] != null}">
                     <g:link controller="seqScan" action="show" id="${table[name][type][key].id}">
                         ${table[name][type][key]?.lanes}
-                    </g:link>  
+                    </g:link>
                 </g:if>
             </td>
 
