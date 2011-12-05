@@ -19,4 +19,12 @@ beans = {
         executorService(de.dkfz.tbi.otp.testing.SynchronousTestingExecutorService)
         servletContext(de.dkfz.tbi.otp.testing.OTPServletContext)
     }
+    if (grailsApplication.config.otp.jabber.enabled) {
+        jabberService(de.dkfz.tbi.otp.notification.JabberService) {
+            grailsApplication = ref("grailsApplication")
+            service = grailsApplication.config.otp.jabber.service
+            username = grailsApplication.config.otp.jabber.username
+            password = grailsApplication.config.otp.jabber.password
+        }
+    }
 }

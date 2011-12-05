@@ -14,10 +14,12 @@ class User {
     boolean accountExpired
     boolean accountLocked
     boolean passwordExpired
+    String jabberId
 
     static constraints = {
         username blank: false, unique: true
         password blank: false
+        jabberId nullable: true
     }
 
     static mapping = {

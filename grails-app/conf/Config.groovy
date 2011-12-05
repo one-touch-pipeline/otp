@@ -15,6 +15,7 @@ try {
     otpProperties.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") + ".otp.properties"))
 } catch (Exception e) {
     otpProperties.setProperty("otp.security.ldap.enabled", "false")
+    otpProperties.setProperty("otp.jabber.enabled", "false")
 }
 def otpConfig = new ConfigSlurper().parse(otpProperties)
 List pluginsToExclude = []
@@ -161,6 +162,20 @@ if ((otpConfig.otp.security.ldap.enabled instanceof ConfigObject) || !Boolean.pa
     grails.plugins.springsecurity.ldap.authorities.ignorePartialResultException = true
     grails.plugins.springsecurity.ldap.authorities.retrieveGroupRoles = true
     grails.plugins.springsecurity.ldap.authorities.retrieveDatabaseRoles = true
+}
+
+//configuration for jabber accounts
+if ((otpConfig.otp.jabber.enabled instanceof ConfigObject) || !Boolean.parseBoolean(otpConfig.otp.jabber.enabled)) {
+    println("jabber disabled")
+    otp.jabber.enabled = false
+} else {
+    println("jabber enabled")
+    otp.jabber.enabled = true
+    otp.jabber.username = otpConfig.otp.jabber.username
+    otp.jabber.password = otpConfig.otp.jabber.password
+    otp.jabber.host = otpConfig.otp.jabber.host
+    otp.jabber.port = otpConfig.otp.jabber.port
+    otp.jabber.service = otpConfig.otp.jabber.service
 }
 
 // exclude unused plugins
