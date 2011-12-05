@@ -8,79 +8,50 @@ class RunController {
 
     static scaffold = Run
 
-    //static list = {
-    // render "test "
-    //} 
-
-
     def display = {
-
-        //render params.id
         Run run = Run.findByName(params.id)
         long id = run.id
-
         redirect(action: "show", id:id)
     }
 
-
     def show = {
-
         int id = params.id as int
         Run run = Run.get(id)
-
-        if (!run) render ("run id=${id} does not exist.")
-
+        if (!run) {
+            render ("run id=${id} does not exist.")
+        }
         String[] paths = lsdfFilesService.getAllPathsForRun(run)
 
         int prevId = (id > 1)? id-1 : 1
         int nextId = id+1
-        //if (Run.get(next) == null) {
-        //    next = 0
-        //}
-
         return [run: run, finalPaths: paths , nextId: nextId, prevId: prevId]
     }
 
-    
     def submitForm = {
-
         List<SeqCenter> centers = SeqCenter.findAll()
         List<String> centerNames = new Vector<String>()
-
-        centers.each {
-            centerNames << it.name
-        }
-
+        centers.each { centerNames << it.name }
         List<SeqTech> seqTechs = SeqTech.findAll()
-
         [centers: centerNames, seqTechs: seqTechs ]
     }
 
     def submit = {
-
         SeqCenter seqCenter = SeqCenter.findByName(params.center)
         SeqTech seqTech = SeqTech.findByName(params.seqTech)
-
         Run run = Run.findByName(params.runName)
-
         if (run) {
-            println "Run ${params.runName} already exist"
+            log.debug("Run ${params.runName} already exist")
         } else {
-
             run = new Run(
-                name: params.runName,
-                seqCenter: seqCenter,
-                seqTech: seqTech,
-            )
+                    name: params.runName,
+                    seqCenter: seqCenter,
+                    seqTech: seqTech,
+                    )
         }
-
         run.dataPath = params.dataPath
         run.mdPath = params.mdPath
-
         run.save(flush: true)
-
-        println run
-
+        log.debug(run)
         long id = run.id
 
         // processing and poor's man time measurement

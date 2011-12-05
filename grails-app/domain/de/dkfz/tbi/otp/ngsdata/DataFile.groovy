@@ -21,7 +21,7 @@ class DataFile {
 
     boolean used = false           // is this file used in any seqTrack
     boolean fileExists = false     // does file exists in file system
-    boolean fileLinked = false     // is the file properly linked 
+    boolean fileLinked = false     // is the file properly linked
     long fileSize = 0              // size of the file
 
 
@@ -62,13 +62,13 @@ class DataFile {
     }
 
     String fileSizeString() {
-        
+
         if (fileSize > 1e9) return String.format("%.2f GB", fileSize/1e9)
         if (fileSize > 1e6) return String.format("%.2f MB", fileSize/1e6)
         if (fileSize > 1e3) return String.format("%.2f kB", fileSize/1e3)
         return fileSize
     }
-    
+
     String toString() {
         fileName
     }

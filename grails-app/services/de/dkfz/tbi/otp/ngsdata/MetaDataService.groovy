@@ -1,22 +1,25 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import java.text.SimpleDateFormat;
+import java.text.SimpleDateFormat
 
-import de.dkfz.tbi.otp.job.processing.ProcessingException;
+import de.dkfz.tbi.otp.job.processing.ProcessingException
 
 class MetaDataService {
 
+    /**
+     * Dependency injection of file type service
+     */
     def fileTypeService
 
     static transactional = true
 
     /**
-    *
-    * looks into directory pointed by mdPath of a Run object
-    * and register files that could be meta-data files
-    * 
-    * @param runId - database id or the Run object
-    */
+     *
+     * looks into directory pointed by mdPath of a Run object
+     * and register files that could be meta-data files
+     *
+     * @param runId - database id or the Run object
+     */
     void registerInputFiles(long runId) {
         Run run = Run.get(runId)
         if (!run) {
@@ -31,18 +34,19 @@ class MetaDataService {
             // TODO Ask Sylwester
             throw new ProcessingException("not readable directory ${dir}")
         }
-        List<String> fileNames = dir.list() 
+        List<String> fileNames = dir.list()
         FileType fileType = FileType.findByType(FileType.Type.METADATA)
         DataFile dataFile
-        fileNames.each { String fileName
+        fileNames.each {
+            String fileName
             if (fileName.count("wrong")) {
                 return
             }
             if (fileName.count("fastq") > 0 || fileName.count("align") > 0) {
                 dataFile = new DataFile(
-                    pathName: runDir,
-                    fileName: fileName
-                )
+                        pathName: runDir,
+                        fileName: fileName
+                        )
                 run.addToDataFiles(dataFile)
                 fileType.addToDataFiles(dataFile)
                 run.save()
@@ -52,10 +56,10 @@ class MetaDataService {
     }
 
     /**
-     * 
-     * this method loads registered input meta-data files 
+     *
+     * this method loads registered input meta-data files
      * into database table MetaDataEntry
-     * 
+     *
      * @param runId - database id or the Run object
      */
     void loadMetaData(long runId) {
@@ -104,10 +108,10 @@ class MetaDataService {
                     for(int i=0; i<keys.size(); i++) {
                         MetaDataKey key = keys.getAt(i)
                         MetaDataEntry entry = new MetaDataEntry (
-                            value: values.getAt(i) ?: "",
-                            source: MetaDataEntry.Source.MDFILE,
-                            key: key
-                        )
+                                value: values.getAt(i) ?: "",
+                                source: MetaDataEntry.Source.MDFILE,
+                                key: key
+                                )
                         dataFile.addToMetaDataEntries(entry)
                         entry.save()
                     }
@@ -131,11 +135,11 @@ class MetaDataService {
 
     /**
      * This method tokenizes a string
-     * 
+     *
      * Standard java method can not be used because two subsequent tabs
-     * shall return empty token. The tokens are stripped from quotation 
+     * shall return empty token. The tokens are stripped from quotation
      * marks
-     * 
+     *
      * @param line - input string
      * @param tab - separator (typically '\t')
      * @return - array of strings
@@ -174,17 +178,17 @@ class MetaDataService {
 
     /**
      * Assign file name for a specific DataFile object
-     * 
-     * The file name is in either FASTQ_FILE or ALIGN_FILE 
+     *
+     * The file name is in either FASTQ_FILE or ALIGN_FILE
      * column of meta-data.
      * this function also fills MD5 check sum field from meta-data
-     * 
+     *
      * @param dataFile
      */
     private void assignFileName(DataFile dataFile) {
         long start = new Date().getTime()
         def keyNames = ["FASTQ_FILE", "ALIGN_FILE"]
-        keyNames.each { 
+        keyNames.each {
             long startDF = new Date().getTime()
             MetaDataEntry entry	= getMetaDataEntry(dataFile, it)
             long stopDF = new Date().getTime()
@@ -200,8 +204,8 @@ class MetaDataService {
                 value = value.substring(idx+1)
             }
             // run name
-            if (value.startsWith(dataFile.run.name) || 
-                value.startsWith("run" + dataFile.run.name)) {
+            if (value.startsWith(dataFile.run.name) ||
+            value.startsWith("run" + dataFile.run.name)) {
                 int idx = value.indexOf("/")
                 value = value.substring(idx+1)
             }
@@ -213,75 +217,58 @@ class MetaDataService {
         if (dataFile.fileName == null) {
             dataFile.fileName = "errorNoHeader"
             dataFile.pathName = "errorNoHeader"
-            dataFile.metaDataEntries.each {
-                println "${it.key} ${it.value}"
-            }
+            dataFile.metaDataEntries.each { println "${it.key} ${it.value}" }
         }
         long stop = new Date().getTime()
     }
 
-
-
     /**
-     * 
+     *
      * @param dataFile
      * @return
      */
     private void fillVbpFileName(DataFile dataFile) {
-
         if (dataFile.run.seqTech.name.contains("illumina") &&
-            dataFile.fileName.contains("fastq.gz")) {
-
+        dataFile.fileName.contains("fastq.gz")) {
             String lane = getMetaDataEntry(dataFile, "LANE_NO")
             String readId = "0"
-
-            if (dataFile.fileName.contains("read1"))
+            if (dataFile.fileName.contains("read1")) {
                 readId = "1"
-            else if (dataFile.fileName.contains("read2"))
+            } else if (dataFile.fileName.contains("read2")) {
                 readId = "2"
-
+            }
             String name =  "s_" + lane + "_" + readId + "_sequence.txt.gz"
             dataFile.vbpFileName = name
-
-            println  "${dataFile.fileName} ${dataFile.vbpFileName}"
-
+            log.debug("${dataFile.fileName} ${dataFile.vbpFileName}")
         } else {
-
             dataFile.vbpFileName = dataFile.fileName
         }
     }
 
-
-
     /**
-     *  
+     *
      * @param dataFile
      */
     private void fillMD5Sum(DataFile dataFile) {
-
         MetaDataEntry entry = getMetaDataEntry(dataFile, "MD5")
         dataFile.md5sum = entry?.value
     }
 
-
     /**
-     * 
+     *
      * Mark file, if the file is withdrawn
-     * 
+     *
      * @param dataFile
      */
     private void checkIfWithdrawn(DataFile dataFile) {
-
         MetaDataEntry entry = getMetaDataEntry(dataFile, "WITHDRAWN")
         dataFile.fileWithdrawn = (entry?.value == "1")
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-
     /**
-     * Returns a meta data entry belonging the a given data file 
+     * Returns a meta data entry belonging the a given data file
      * with a key specified by the input parameter
-     * 
+     *
      * @param file
      * @param key
      * @return
@@ -291,9 +278,9 @@ class MetaDataService {
     }
 
     /**
-     * Returns a meta data entry belonging the a given data file 
+     * Returns a meta data entry belonging the a given data file
      * with a key specified by the input parameter
-     * 
+     *
      * @param file
      * @param key
      * @return
@@ -313,7 +300,7 @@ class MetaDataService {
      * the assignment is based on two sources of information:
      * file name and if the file comes from "fastq" or "align"
      * meta-data file
-     * 
+     *
      * @param dataFile
      * @param type
      */
@@ -324,11 +311,11 @@ class MetaDataService {
     }
 
     /**
-     * 
+     *
      * In old meta-data, sequencing type was not included in meta-data
-     * in this case the sequencing type is created by the system 
+     * in this case the sequencing type is created by the system
      * from directory name
-     * 
+     *
      * @param run
      * @param dataFile
      */
@@ -349,10 +336,10 @@ class MetaDataService {
                 String value = types[iType].name
                 log.debug("\tassiginig to ${value}")
                 entry = new MetaDataEntry (
-                    value: value,
-                    source: MetaDataEntry.Source.SYSTEM,
-                    key: key
-                )
+                        value: value,
+                        source: MetaDataEntry.Source.SYSTEM,
+                        key: key
+                        )
                 dataFile.addToMetaDataEntries(entry)
                 return
             }
@@ -361,11 +348,11 @@ class MetaDataService {
 
     /**
      * Solve known bugs
-     * 
+     *
      * For example meta-data column which shall be "LANE_NO"
      * for some runs is "lane". The solid standard "SLIDE_NO"
      * is changed to "LANE_NO" to unify key for later processing
-     * 
+     *
      * @param token
      * @return
      */
@@ -380,11 +367,11 @@ class MetaDataService {
 
     /**
      * Checks if values of MetaDataEntry table are correct
-     *  
+     *
      * the following keys are checked
      * RunID, sample identifier, sequencing center
      * sequencing type and library layout
-     * 
+     *
      * @param runId
      */
     boolean validateMetadata(long runId) {
@@ -434,12 +421,12 @@ class MetaDataService {
 
     /**
      * This method tries to assign execution data for a run
-     * 
-     * this method knows different standards of encoding data 
-     * in meta-data. If there is no MetaDataEntry with "RUN_DATE" 
-     * key, the run date is build from run name. The method 
-     * knows Solid and Illumina run naming standards. 
-     * 
+     *
+     * this method knows different standards of encoding data
+     * in meta-data. If there is no MetaDataEntry with "RUN_DATE"
+     * key, the run date is build from run name. The method
+     * knows Solid and Illumina run naming standards.
+     *
      * @param runId - database ID of Run object
      */
     void buildExecutionDate(long runId) {

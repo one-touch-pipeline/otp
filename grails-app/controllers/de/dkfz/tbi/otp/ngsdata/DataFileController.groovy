@@ -1,13 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
 class DataFileController {
-    
+
     def lsdfFilesService
-    
+
     def scaffold = DataFile
-    
-   // def index() { }
-    
+
     def showDetails = {
 
         DataFile dataFile = DataFile.get(params.id)
@@ -28,5 +26,5 @@ class DataFileController {
         values << lsdfFilesService.getViewByPidPath(dataFile)
 
         return [keys: keys, values: values]
-   }
+    }
 }

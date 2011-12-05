@@ -5,12 +5,14 @@ class MetaDataEntry {
     String value
 
     /**
-     * does the value corresponds to a value 
+     * does the value corresponds to a value
      * known in database (eg. sample)
-     * 
+     *
      */
 
-        enum Status {VALID, INVALID, UNKNOWN}
+    enum Status {
+        VALID, INVALID, UNKNOWN
+    }
     Status status = Status.UNKNOWN
 
     /**
@@ -18,7 +20,9 @@ class MetaDataEntry {
      * or was it inferred by the OTP ?
      */
 
-    enum Source {MDFILE, SYSTEM}
+    enum Source {
+        MDFILE, SYSTEM
+    }
     Source source
 
     static belongsTo = [dataFile : DataFile, key : MetaDataKey]
@@ -32,7 +36,7 @@ class MetaDataEntry {
     String toString() {
         value
     }
-    
+
     def onLoad = {
         //println "loading MDE"
     }
