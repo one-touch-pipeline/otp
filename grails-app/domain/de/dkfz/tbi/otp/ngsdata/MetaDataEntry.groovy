@@ -32,4 +32,8 @@ class MetaDataEntry {
     String toString() {
         value
     }
+    
+    def onLoad = {
+        //println "loading MDE"
+    }
 }
