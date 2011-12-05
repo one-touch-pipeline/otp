@@ -17,6 +17,8 @@ import de.dkfz.tbi.otp.job.processing.ProcessingError
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.job.processing.StartJob
+import de.dkfz.tbi.otp.notification.NotificationEvent
+import de.dkfz.tbi.otp.notification.NotificationType;
 
 import java.util.concurrent.Callable
 import java.util.concurrent.locks.Lock
@@ -103,6 +105,8 @@ class SchedulerService {
         if (!process.save(flush: true)) {
             throw new SchedulerPersistencyException("Could not save the process for the JobExecutionPlan ${plan.id}")
         }
+        NotificationEvent event = new NotificationEvent(this, process, NotificationType.PROCESS_STARTED)
+        grailsApplication.mainContext.publishEvent(event)
         lock.lock()
         try {
             queue.add(step)
@@ -202,7 +206,10 @@ class SchedulerService {
             last.process.jobExecutionPlan.finishedSuccessful++
         }
         last.process.jobExecutionPlan.save(flush: true)
-        // TODO: start some notifications?
+
+        // send notification
+        NotificationEvent event = new NotificationEvent(this, last.process, NotificationType.PROCESS_SUCCEEDED)
+        grailsApplication.mainContext.publishEvent(event)
     }
 
     // TODO: comment me
