@@ -7,6 +7,12 @@
 </head>
 <body>
   <div class="body">
+    
+    <ul>
+        <li class="button"><g:link action="show" id="${nextId}">next run</g:link></li>
+        <li class="button"><g:link action="show" id="${prevId}">previous run</g:link></li>
+    </ul>
+
 
     <h1>General</h1>
     
@@ -26,7 +32,9 @@
        <tr>
             <td class="myKey">date executed</td>
             <td class="myValue">
-                ${(new Date(run.dateExecuted.getTime())).format("yyyy-MM-dd")}
+                <g:if test="${run.dateExecuted != null}">
+                    ${(new Date(run.dateExecuted.getTime())).format("yyyy-MM-dd")}
+                </g:if>
             </td>
        </tr>
        <tr>
@@ -41,6 +49,15 @@
             <td class="myKey">meta data path</td>
             <td class="myValue">${run.mdPath}</td>
        </tr>
+       <tr>
+            <td class="myKey">final locations</td>
+            <td class="myValue">
+                <g:each var="path" in="${finalPaths}">
+                    ${path} <br/>
+                </g:each>
+            </td>
+       </tr>
+       
     </table>
 
 
@@ -65,11 +82,11 @@
     </table>
 
 
-    <div class="myHeader">
+    <div class="myHeaderWide">
         Data Files
     </div>
 
-    <div class="myContent">
+    <div class="myContentWide">
 
         <table>
 
@@ -86,25 +103,31 @@
            </g:each>
         </table>
 
+        <%--  Data Files located on Seq Tracks  --%>
         <table>
         <g:each var="track" in="${run.seqTracks}">
 
             <tr>
-                <td class="miniHeader" colspan="4">${track}</td>
-                <td class="miniHeader">${track.insertSize}</td>
-                <td class="miniHeader">${track.nBaseString()}</td>
+                <td class="miniHeader" colspan="3">${track}</td>
+                <td class="miniHeader" colspan="3">insert size: ${track.insertSize}</td>
+                <td class="miniHeader" colspan="3">number of base pairs: ${track.nBaseString()}</td>
             </tr>
             <g:each var="file" in="${track.dataFiles}">
                 <tr>
                     <td>-</td>
                     <td>s</td>
-                    <td>${file.fileName}</td>
-                    <td>${file.fileSize/1e-9} GB</td>
+                    <td><g:link controller="dataFile" action="showDetails" id="${file.id}">
+                        ${file.fileName}</g:link>
+                    </td>
                     <td>${file.project}</td>
-                    <td>
+                    <td class="${file.metaDataValid}">
                         <g:if test="${file.metaDataValid}">meta-data valid</g:if>
                         <g:else>md invalid</g:else>
                     </td>
+                    <td class="${file.fileExists}">on LSDF</td>
+                    <td class="${file.fileLinked}">linked</td>
+                    <td>${String.format("%.1f GB", file.fileSize/1e9)}</td>
+                    <td>${(new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd")}</td>
                 </tr>
             </g:each>
             <g:each var="alignment" in="${track.alignmentLog}">
@@ -112,14 +135,40 @@
                     <tr>
                         <td>-</td>
                         <td>a</td>
-                        <td>${file.fileName}</td>
+
+                        <td><g:link controller="dataFile" action="showDetails" id="${file.id}">
+                            ${file.fileName}</g:link>
+                        </td>
+
                         <td>${alignment.alignmentParams.programName}
                         <td>${alignment.executedBy}</td>
+
+                        <td class="${file.fileExists}">on LSDF</td>
+                        <td class="${file.fileLinked}">linked</td>
+                        <td>${String.format("%.1f GB", file.fileSize/1e9)}</td>
+                        <td>${(new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd")}</td>
                     </tr>
                 </g:each>
             </g:each> 
           </g:each>
         </table>
+
+        <%--  Data Files with errors  --%>
+        <table>
+            <g:if test="${run.allFilesUsed == false}">
+            <tr>
+                <td class="miniHeader">Files not used:</td>
+            </tr>
+            </g:if>
+
+            <g:each var="file" in="${run.dataFiles}">
+            <g:if test="${file.used == false}">
+                <tr>
+                    <td>${file.fileName}</td>
+            </g:if>
+            </g:each>
+        </table>
+
       </div>
 
   </div>
