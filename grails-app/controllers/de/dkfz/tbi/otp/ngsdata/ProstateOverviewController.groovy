@@ -64,6 +64,7 @@ class ProstateOverviewController {
                     scanTable["center"] = seqScan.seqCenters.toLowerCase() 
                     scanTable["lanes"] = getBullets(seqScan.nLanes)
                     scanTable["qa"] = Tools.getStringFromNumber(seqScan.nBasePairs)
+                    scanTable["merged"] = (seqScan.mergingLogs.size() > 0)
 
                     if (key == "WGP") {
                         if (seqScan.nBasePairs < 110e9) scanTable["qav"] = "QA1"

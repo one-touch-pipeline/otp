@@ -19,6 +19,9 @@ class MetaDataService {
     */
     void registerInputFiles(long runId) {
         Run run = Run.get(runId)
+        if (!run) {
+            return false
+        }
 
         log.debug("registering run ${run.name} from ${run.seqCenter}")
 
@@ -111,8 +114,11 @@ class MetaDataService {
                     long middle1 = new Date().getTime()
                     // fill-up important fields
                     assignFileName(dataFile)
+                    fillVbpFileName(dataFile)
+                    fillMD5Sum(dataFile)
                     assignFileType(dataFile, type)
                     addKnownMissingMetaData(run, dataFile)
+                    checkIfWithdrawn(dataFile)
                     long middle2 = new Date().getTime()
                     long stop = new Date().getTime()
                 }
@@ -204,9 +210,6 @@ class MetaDataService {
             dataFile.pathName = (idx == -1)? "" : value.substring(0, idx)
             dataFile.fileName = value.substring(idx+1) ?: "error"
         }
-        // md5 check sum
-        MetaDataEntry entry = getMetaDataEntry(dataFile, "MD5")
-        dataFile.md5sum = entry?.value
         if (dataFile.fileName == null) {
             dataFile.fileName = "errorNoHeader"
             dataFile.pathName = "errorNoHeader"
@@ -216,6 +219,64 @@ class MetaDataService {
         }
         long stop = new Date().getTime()
     }
+
+
+
+    /**
+     * 
+     * @param dataFile
+     * @return
+     */
+    private void fillVbpFileName(DataFile dataFile) {
+
+        if (dataFile.run.seqTech.name.contains("illumina") &&
+            dataFile.fileName.contains("fastq.gz")) {
+
+            String lane = getMetaDataEntry(dataFile, "LANE_NO")
+            String readId = "0"
+
+            if (dataFile.fileName.contains("read1"))
+                readId = "1"
+            else if (dataFile.fileName.contains("read2"))
+                readId = "2"
+
+            String name =  "s_" + lane + "_" + readId + "_sequence.txt.gz"
+            dataFile.vbpFileName = name
+
+            println  "${dataFile.fileName} ${dataFile.vbpFileName}"
+
+        } else {
+
+            dataFile.vbpFileName = dataFile.fileName
+        }
+    }
+
+
+
+    /**
+     *  
+     * @param dataFile
+     */
+    private void fillMD5Sum(DataFile dataFile) {
+
+        MetaDataEntry entry = getMetaDataEntry(dataFile, "MD5")
+        dataFile.md5sum = entry?.value
+    }
+
+
+    /**
+     * 
+     * Mark file, if the file is withdrawn
+     * 
+     * @param dataFile
+     */
+    private void checkIfWithdrawn(DataFile dataFile) {
+
+        MetaDataEntry entry = getMetaDataEntry(dataFile, "WITHDRAWN")
+        dataFile.fileWithdrawn = (entry?.value == "1")
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
 
     /**
      * Returns a meta data entry belonging the a given data file 
@@ -326,8 +387,9 @@ class MetaDataService {
      * 
      * @param runId
      */
-    void validateMetadata(long runId) {
+    boolean validateMetadata(long runId) {
         Run run = Run.get(runId)
+        boolean allValid = true
         run.dataFiles.each { DataFile dataFile ->
             dataFile.metaDataValid = true
             dataFile.metaDataEntries.each { MetaDataEntry entry ->
@@ -360,12 +422,14 @@ class MetaDataService {
                         break
                 }
                 if (entry.status == invalid) {
-                    log.debug("${entry.key}\t${entry.value}")
+                    log.debug("invalid md entry ${entry.key}\t${entry.value}")
                     dataFile.metaDataValid = false
+                    allValid = false
                 }
             }
         }
         run.save()
+        return allValid
     }
 
     /**
@@ -417,13 +481,21 @@ class MetaDataService {
         if (run.dateExecuted == null) {
             SimpleDateFormat simpleDateFormat
             if (run.seqTech.name == "illumina") {
-                String subname = run.name.substring(0, 6)
-                simpleDateFormat = new SimpleDateFormat("yyMMdd")
-                run.dateExecuted = simpleDateFormat.parse(subname)
+                try {
+                    String subname = run.name.substring(0, 6)
+                    simpleDateFormat = new SimpleDateFormat("yyMMdd")
+                    run.dateExecuted = simpleDateFormat.parse(subname)
+                } catch (Exception e) {
+                    // TODO: Appropriate exception
+                }
             } else if (run.seqTech.name == "solid") {
-                String subname = run.name.substring(10, 18)
-                simpleDateFormat = new SimpleDateFormat("yyyyMMdd")
-                run.dateExecuted = simpleDateFormat.parse(subname)
+                try {
+                    String subname = run.name.substring(10, 18)
+                    simpleDateFormat = new SimpleDateFormat("yyyyMMdd")
+                    run.dateExecuted = simpleDateFormat.parse(subname)
+                } catch (Exception e) {
+                    // TODO: Appropriate exception
+                }
             }
         }
         run.save()

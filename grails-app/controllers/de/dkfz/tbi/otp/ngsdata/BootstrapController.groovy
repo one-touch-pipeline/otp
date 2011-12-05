@@ -4,6 +4,8 @@ class BootstrapController {
 	
 	def bootstrapService
 	def seqScanService
+    def mergingService
+    def lsdfFilesService
     
     def index() {		
 	}
@@ -23,4 +25,21 @@ class BootstrapController {
 		seqScanService.buildSeqScans()
 		render "created"
 	}
+
+    def discoverBams = {
+        List<Individual> inds = Individual.findAll()
+        inds.each {Individual ind ->
+            println ind
+            mergingService.discoverMergedBams(ind)
+        }
+        render "done"
+    }
+    
+    def checkProstate = {
+        lsdfFilesService.checkAllRuns("PROJECT_NAME")
+        
+        render "checked"
+    }
+     
+    
 }

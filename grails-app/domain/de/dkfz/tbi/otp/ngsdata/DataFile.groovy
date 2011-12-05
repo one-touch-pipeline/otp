@@ -2,8 +2,9 @@ package de.dkfz.tbi.otp.ngsdata
 
 class DataFile {
 
-    String fileName
-    String pathName
+    String fileName                // file name
+    String pathName                // path from run folder to file or full path
+    String vbpFileName             // file name used in view-by-pid linking
     String md5sum
 
     Project project = null;
@@ -16,6 +17,7 @@ class DataFile {
     String prvFilePath = ""        // path from run name to this file (used in solid)
 
     boolean metaDataValid = true
+    boolean fileWithdrawn = false
 
     boolean used = false           // is this file used in any seqTrack
     boolean fileExists = false     // does file exists in file system
@@ -37,8 +39,12 @@ class DataFile {
 
         metaDataValid()
         used()
+        fileExists()
+        fileLinked()
 
         fileName(nullable: true)
+        vbpFileName(nullable: true)
+
         fileType(nullable: true)
         pathName(nullable: true)
         md5sum(nullable: true)
@@ -55,6 +61,14 @@ class DataFile {
         alignmentLog(nullable: true)
     }
 
+    String fileSizeString() {
+        
+        if (fileSize > 1e9) return String.format("%.2f GB", fileSize/1e9)
+        if (fileSize > 1e6) return String.format("%.2f MB", fileSize/1e6)
+        if (fileSize > 1e3) return String.format("%.2f kB", fileSize/1e3)
+        return fileSize
+    }
+    
     String toString() {
         fileName
     }

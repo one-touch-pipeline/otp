@@ -24,6 +24,9 @@ class SeqTrackService {
            if (!dataFile.metaDataValid) {
                return
            }
+           if (dataFile.fileWithdrawn) {
+               return
+           }
            if (dataFile.fileType.type != FileType.Type.SEQUENCE) {
                return
            }
@@ -97,7 +100,7 @@ class SeqTrackService {
            sample : sample,
            seqType : seqType,
            seqTech : run.seqTech,
-           laneId : lane as int,
+           laneId : lane,
            hasFinalBam : false,
            hasOriginalBam : false,
            usingOriginalBam : false
@@ -169,6 +172,7 @@ class SeqTrackService {
        def dataFiles = c.list {
            and {
                eq("run", run)
+               eq("fileWithdrawn", false)
                fileType{
                    eq("type", type)
                }

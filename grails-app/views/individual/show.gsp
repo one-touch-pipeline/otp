@@ -8,7 +8,13 @@
 <body>
   <div class="body">
 
+    <ul>
+        <li class="button"><g:link action="show" id="${nextId}">next individual</g:link></li>
+        <li class="button"><g:link action="show" id="${prevId}">previous individual</g:link></li>
+    </ul>
+
     <h1>Details of Individual</h1>
+    <div class="myContent">
     <table>
        <tr> 
             <td class="myKey">PID</td>
@@ -31,8 +37,10 @@
             <td class="myValue">${ind.project}</td>
        </tr> 
     </table>
+    </div>
 
     <h1>Samples</h1>
+    <div class="myContent">
     <table>
         <g:each var="sample" in="${ind.samples}">
             <tr>
@@ -41,6 +49,9 @@
             </tr>
         </g:each>
     </table>
+    </div>
+
+<%--    ${mergedBams}--%>
 
     <H1>Sequencing Scans</H1>
 
@@ -52,6 +63,17 @@
         <div class="myContent">
 
         <table>
+           <tr>
+                <td></td>
+                <td class="microHeader">type</td>
+                <td class="microHeader">status</td>
+                <td class="microHeader">center</td>
+                <td class="microHeader">#lanes</td>
+                <td class="microHeader">coverage</td>
+                <td class="microHeader">#bases</td>
+                <td class="microHeader">insert size</td>
+                <td class="microHeader">merging</td>
+           </tr> 
            <g:each var="scan" in="${seqScans}">
                <g:if test="${scan.seqType == type}">
                <tr>
@@ -67,13 +89,13 @@
                     <td>${scan.nLanes}</td>
                     <td>${scan.coverage}</td>
                     <td>${scan.basePairsString()}</td>
+                    <td>${scan.insertSize}</td>
 
-                    <g:if test="scan.mergingLog.size() == 0">
-                        <td class="false">not merged</td>
-                    </g:if>
-                    <g:else>
-                        <td>merged</td>
-                    </g:else>    
+                    <td class="${scan.mergingLogs.size() != 0}">
+                        <g:formatBoolean boolean="${scan.mergingLogs.size() != 0}"
+                            true="merged" false="not merged"
+                        />
+                    </td>
                </tr>
                </g:if>
            </g:each>

@@ -2,8 +2,8 @@ package de.dkfz.tbi.otp.ngsdata
 
 class SeqTrack {
 
-
-    int  laneId
+    String laneId
+    //String subLaneLabel                // for multiplexing
 
     boolean hasFinalBam = false
     boolean hasOriginalBam = false
@@ -13,12 +13,12 @@ class SeqTrack {
     long nReads = 0
     int insertSize = -1
 
-    
+
     Run run
     Sample sample
     SeqType seqType
     SeqTech seqTech
-    
+
 
     /*
     static belongsTo = [
