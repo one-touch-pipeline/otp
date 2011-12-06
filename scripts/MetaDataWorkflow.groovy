@@ -8,13 +8,13 @@ import de.dkfz.tbi.otp.job.processing.ParameterUsage
 
 JobExecutionPlan jep = new JobExecutionPlan(name: "loadMetaData", planVersion: 0, enabled: true)
 assert(jep.save())
-StartJobDefinition definition = new StartJobDefinition(name: "start", bean: "loadMetaDataStartJob", plan: jep)
+StartJobDefinition definition = new StartJobDefinition(name: "start", bean: "metaDataStartJob", plan: jep)
 assert(definition.save())
 jep.startJob = definition
 
 JobDefinition registerInputFilesJob = new JobDefinition(name: "registerInputFiles", bean: "registerInputFilesJob", plan: jep)
 assert(registerInputFilesJob.save())
-JobDefinition loadMetaDataJob = new JobDefinition(name: "loadMetaData", bean: "loadMetaDataJob", plan: jep, previous: registerInputFilesJob)
+JobDefinition loadMetaDataJob = new JobDefinition(name: "loadMetaData", bean: "metaDataJob", plan: jep, previous: registerInputFilesJob)
 assert(loadMetaDataJob.save())
 registerInputFilesJob.next = loadMetaDataJob
 assert(registerInputFilesJob.save())
