@@ -15,22 +15,23 @@ class MergingService {
      * @param types
      */
     List<String> printAllMergedBamForIndividual(Individual ind, List<SeqType> types) {
-        if (ind == null) {
+        if (!ind) {
             return
         }
         List<String> mergedBams = new ArrayList<String>()
         String projectPath = ind.project.dirName
         String baseDir = basePath + "/" + projectPath + "/sequencing/"
-        types.each {SeqType type ->
-            ind.samples.each {Sample sample ->
+        types.each { SeqType type ->
+            ind.samples.each { Sample sample ->
                 String path = baseDir + type.dirName + "/view-by-pid/" +
                         ind.pid + "/" + sample.type.toString().toLowerCase() +
                         "/" + type.libraryLayout.toLowerCase() +
                         "/merged-alignment/"
                 File mergedDir = new File(path)
-                mergedDir.list().each {String fileName ->
-                    if (fileName.endsWith(".bam"))
+                mergedDir.list().each { String fileName ->
+                    if (fileName.endsWith(".bam")) {
                         mergedBams << fileName
+                    }
                 }
             }
         }
@@ -46,20 +47,20 @@ class MergingService {
      * @param ind Individual to be analyzed
      */
     void discoverMergedBams(Individual ind) {
-        if (ind == null) {
+        if (!ind) {
             return
         }
         List<SeqType> types = SeqType.findAll()
         String projectPath = ind.project.dirName
         String baseDir = basePath + "/" + projectPath + "/sequencing/"
-        types.each {SeqType type ->
-            ind.samples.each {Sample sample ->
+        types.each { SeqType type ->
+            ind.samples.each { Sample sample ->
                 String path = baseDir + type.dirName + "/view-by-pid/" +
                         ind.pid + "/" + sample.type.toString().toLowerCase() +
                         "/" + type.libraryLayout.toLowerCase() +
                         "/merged-alignment/"
                 File mergedDir = new File(path)
-                mergedDir.list().each {String fileName ->
+                mergedDir.list().each { String fileName ->
                     if (fileName.endsWith(".bam")) {
                         log.debug("Discovered ${fileName}")
                         buildSeqScan(sample, type, path, fileName)
@@ -88,7 +89,7 @@ class MergingService {
     String pathToBam, String fileName) {
         // check if already exists
         DataFile file = DataFile.findByFileNameAndPathName(fileName, pathToBam)
-        if (file != null) {
+        if (!file) {
             log.debug("File ${fileName} in ${pathToBam} already registered")
             return
         }
@@ -99,7 +100,7 @@ class MergingService {
             return
         }
         List<String> header = parseBamHeader(bamFile)
-        if (header == null) {
+        if (!header) {
             log.debug("No hader for file ${bamFile}")
             return
         }
@@ -114,7 +115,7 @@ class MergingService {
         // get alignment log from header
         AlignmentParams alignParams = getAlignmentParamsFromHeader(bamFile)
         // build SeqScan
-        if (matchingScan == null) {
+        if (!matchingScan) {
             log.debug("Building new SeqScan")
             matchingScan = seqScanService.buildSeqScan(tracks, alignParams)
         }
@@ -157,7 +158,7 @@ class MergingService {
      */
     private SeqScan getMatchingSeqScan(List<SeqScan> seqScans, List<SeqTrack> tracks) {
         SeqTrack[] arrTracks = (SeqTrack[]) tracks.toArray()
-        for(int i=0; i<seqScans.size(); i++) {
+        for (int i=0; i<seqScans.size(); i++) {
             SeqScan scan = seqScans.get(i)
             if (scan.seqTracks.size() != tracks.size()) {
                 log.debug("size does not match ${scan.seqTracks.size()} ${tracks.size()}")
@@ -165,14 +166,17 @@ class MergingService {
             }
             boolean match = true
             SeqTrack[] scanTracks = (SeqTrack[])scan.seqTracks.toArray()
-            for(int j=0; j<scanTracks.length; j++) {
+            for (int j=0; j<scanTracks.length; j++) {
                 long refId = scanTracks[j].id
                 boolean hasPair = false
-                for(int k=0; k<arrTracks.length; k++) {
-                    if (arrTracks[k].id == refId)
+                for (int k=0; k<arrTracks.length; k++) {
+                    if (arrTracks[k].id == refId) {
                         hasPair = true
+                    }
                 }
-                if (!hasPair) match = false
+                if (!hasPair) {
+                    match = false
+                }
             }
             if (match) {
                 log.debug("SeqScan Found !!")
@@ -196,7 +200,7 @@ class MergingService {
         final String separator = "_s_"
         final String preNumber = "_"
         List<SeqTrack> tracks = new Vector<SeqTrack>()
-        for(int i=0; i<header.size(); i++) {
+        for (int i=0; i<header.size(); i++) {
             String line = header.get(i)
             String runName
             String lane
@@ -210,7 +214,7 @@ class MergingService {
                 lane = line.substring(sepId + 5, sepId + 6)
             }
             SeqTrack seqTrack = getSeqTrack(sample, seqType, runName, lane)
-            if (seqTrack == null) {
+            if (!seqTrack) {
                 log.debug("no SeqTrack for ${runName} ${lane}")
                 continue
             } else {
@@ -249,7 +253,7 @@ class MergingService {
         } else {
             return seqTracks.get(0)
         }
-        return 0
+        return null
     }
 
     /**
@@ -286,7 +290,7 @@ class MergingService {
         text.eachLine {String line ->
             if (line.startsWith(lineStart)) {
                 List<String> tokens = line.tokenize("\t")
-                for(int i=0; i<tokens.size(); i++) {
+                for (int i=0; i<tokens.size(); i++) {
                     String token = tokens.get(i)
                     // select id only
                     if (token.startsWith(startToken)) {
@@ -320,7 +324,7 @@ class MergingService {
         text.eachLine {String line ->
             if (line.startsWith(lineStart)) {
                 List<String> tokens = line.tokenize("\t")
-                for(int i=0; i<tokens.size(); i++) {
+                for (int i=0; i<tokens.size(); i++) {
                     String token = tokens.get(i)
                     if (token.startsWith(nameTag)) {
                         progName = token.substring(3)
@@ -332,7 +336,7 @@ class MergingService {
             }
         }
         AlignmentParams alignParams = AlignmentParams.findByProgramNameAndProgramVersion(progName, progVersion)
-        if (alignParams == null) {
+        if (!alignParams) {
             alignParams = new AlignmentParams(
                     programName: progName,
                     programVersion: progVersion

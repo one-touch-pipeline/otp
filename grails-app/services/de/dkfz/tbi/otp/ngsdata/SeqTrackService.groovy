@@ -19,7 +19,7 @@ class SeqTrackService {
         MetaDataKey key = MetaDataKey.findByName("LANE_NO")
         List<MetaDataEntry> entries = []
         // get the list of unique lanes identifiers
-        run.dataFiles.each {DataFile dataFile ->
+        run.dataFiles.each { DataFile dataFile ->
             if (!dataFile.metaDataValid) {
                 return
             }
@@ -34,7 +34,7 @@ class SeqTrackService {
                     return
                 }
                 // check if exists
-                for(int i=0; i<entries.size(); i++) {
+                for (int i=0; i<entries.size(); i++) {
                     if (entries[i].value == entry.value) {
                         return
                     }
@@ -43,7 +43,7 @@ class SeqTrackService {
             }
         }
         // run track creation for each lane
-        for(int i=0; i<entries.size(); i++) {
+        for (int i=0; i<entries.size(); i++) {
             log.debug("LANE ${entries[i].value}")
             buildOneSequenceTrack(run, entries[i].value)
         }
@@ -84,11 +84,11 @@ class SeqTrackService {
         // build structure
         SampleIdentifier sampleId = SampleIdentifier.findByName(values[0])
         Sample sample = sampleId.sample
-        if (sample == null) {
+        if (!sample) {
             return
         }
         SeqType seqType = SeqType.findByNameAndLibraryLayout(values[1], values[2])
-        if (seqType == null) {
+        if (!seqType) {
             return
         }
         SeqTrack seqTrack = new SeqTrack(
@@ -188,11 +188,11 @@ class SeqTrackService {
             return false
         }
         boolean consistent = true
-        for(int iKey=0; iKey<keys.size; iKey++) {
+        for (int iKey=0; iKey<keys.size; iKey++) {
             MetaDataEntry reference = getMetaDataEntry(dataFiles[0], keys[iKey])
             values[iKey] = reference?.value
 
-            for(int iFile = 1; iFile < dataFiles.size; iFile++) {
+            for (int iFile = 1; iFile < dataFiles.size; iFile++) {
                 MetaDataEntry entry = getMetaDataEntry(dataFiles[iFile], keys[iKey])
                 if (entry?.value != reference?.value) {
                     log.debug(entry?.value)
@@ -230,7 +230,7 @@ class SeqTrackService {
                     return
                 }
                 file.metaDataEntries.each { MetaDataEntry entry ->
-                    for(int iKey=0; iKey < dbKeys.size(); iKey++) {
+                    for (int iKey=0; iKey < dbKeys.size(); iKey++) {
                         if (entry.key.name == dbKeys[iKey]) {
                             long value = 0
                             if (entry.value.isLong()) {

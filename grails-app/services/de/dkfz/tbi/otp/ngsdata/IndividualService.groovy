@@ -4,111 +4,107 @@ class IndividualService {
 
     // TODO: this constant should not be here! And is also wrong!
     private static final String resourcesPath = "${home}STS/ngsTest/resources/"
-	
-	
-	///////////////////////////////////////////////////////////////////////////
-	
-	void loadIndividuals() {
-		//
-		// this function loads individuals name from the provided list
-		//
 
-		// PROJECT_NAME
+    /**
+     * this function loads individuals name from the provided list
+     */
+    void loadIndividuals() {
+        // PROJECT_NAME
+        Project proj = Project.findByName("PROJECT_NAME")
 
-		Project proj = Project.findByName("PROJECT_NAME")
+        File file = new File(resourcesPath + "listInd.txt")
+        if (!file.canRead()) {
+            // TODO: shall be exception
+            log.warn "can not read ${file}"
+            return
+        }
 
-		File file = new File(resourcesPath + "listInd.txt")
-		if (!file.canRead()) {
-			// shall be exception
-			println "can not read ${file}"
-			return
-		}
-						
-		println "reading list of individuals from ${file}"
-		
-		Individual ind
-		file.eachLine { line, no ->
-			
-			// magic standard to DB relation
-			String pid = line.substring(0, line.indexOf(','))
-			String name = line.substring(line.indexOf(',') + 1)
-			String mockPid = (no as String).padLeft(3, '0')
+        log.debug "reading list of individuals from ${file}"
 
-			ind = new Individual(mockFullName: name, pid: pid, mockPid: mockPid)
-			ind.type = Individual.Type.REAL
-			
-			// hack
-			if (name.indexOf("Pool") != -1) ind.type = Individual.Type.POOL
+        Individual ind
+        file.eachLine { line, no ->
+            // magic standard to DB relation
+            String pid = line.substring(0, line.indexOf(','))
+            String name = line.substring(line.indexOf(',') + 1)
+            String mockPid = (no as String).padLeft(3, '0')
 
-			proj.addToIndividuals(ind)
-			safeSave(ind)
-		}
-	}
+            ind = new Individual(mockFullName: name, pid: pid, mockPid: mockPid)
+            ind.type = Individual.Type.REAL
 
-	///////////////////////////////////////////////////////////////////////////
-	
-	def loadSamples() {
-		//
-		// this function load samples from the provided list
-		// and attache samples to individuals
-		//
+            // HACK
+            if (name.indexOf("Pool") != -1) {
+                ind.type = Individual.Type.POOL
+            }
 
-		// PROJECT_NAME
+            proj.addToIndividuals(ind)
+            safeSave(ind)
+        }
+    }
 
-		String prefix = "${home}"
+    /**
+     * this function load samples from the provided list
+     * and attache samples to individuals
+     * @return
+     */
+    def loadSamples() {
+        // PROJECT_NAME
 
-		def files = [
-			"$DATA_HOME/PROJECT_NAME/map-pid-tumor-control.csv",
-			"$DATA_HOME/PROJECT_NAME/map-pid-tumor-control-with-prefix.csv"
-		]
+        // TODO: we are not in this directory
+        String prefix = "${home}"
 
-		Sample sample
+        def files = [
+            "$DATA_HOME/PROJECT_NAME/map-pid-tumor-control.csv",
+            "$DATA_HOME/PROJECT_NAME/map-pid-tumor-control-with-prefix.csv"
+        ]
 
-		files.each {
-			
-			File file = new File(prefix + it);
-			if (!file.canRead()) {
-				println "can not read ${file}"
-				return
-				
-			}
+        files.each {
+            Sample sample
+            File file = new File(prefix + it);
+            if (!file.canRead()) {
+                log.debug "can not read ${file}"
+                // continue
+                return
+            }
 
-			println "reading samples from file ${it}"
+            log.debug "reading samples from file ${it}"
 
-			file.eachLine { line, no ->
+            file.eachLine { line, no ->
 
-				// magic file format
-				String name = line.substring(0, line.indexOf(','));
-				String pid  = line.substring(line.indexOf(',') + 1, line.indexOf('/'))
+                // magic file format
+                String name = line.substring(0, line.indexOf(','));
+                String pid  = line.substring(line.indexOf(',') + 1, line.indexOf('/'))
 
-				// find out type
-				String typeText  = line.substring(line.indexOf('/') + 1)
-				Sample.Type type = Sample.Type.UNKNOWN
-				if (typeText.indexOf("tumor") != -1) type = Sample.Type.TUMOR
-				if (typeText.indexOf("control") != -1) type = Sample.Type.CONTROL
+                // find out type
+                String typeText  = line.substring(line.indexOf('/') + 1)
+                Sample.Type type = Sample.Type.UNKNOWN
+                if (typeText.indexOf("tumor") != -1) {
+                    type = Sample.Type.TUMOR
+                }
+                if (typeText.indexOf("control") != -1) {
+                    type = Sample.Type.CONTROL
+                }
 
-				Individual ind = Individual.findByPid(pid);
+                Individual ind = Individual.findByPid(pid);
 
-				sample = Sample.findByIndividualAndType(ind, type)
+                sample = Sample.findByIndividualAndType(ind, type)
 
-				if (sample == null) {
-					sample = new Sample(type: type)
-					ind.addToSamples(sample)
-					safeSave(sample)
-				}
+                if (!sample) {
+                    sample = new Sample(type: type)
+                    ind.addToSamples(sample)
+                    safeSave(sample)
+                }
 
-				SampleIdentifier identifier = new SampleIdentifier(
-					name: name,
-					sample: sample
-				)
-				//sample.addToSampleIdentifiers(name);
+                SampleIdentifier identifier = new SampleIdentifier(
+                    name: name,
+                    sample: sample
+                )
 
-				safeSave(identifier)
-				safeSave(ind)
-				safeSave(sample)
-			}
-		}
-	}
+                safeSave(identifier)
+                safeSave(ind)
+                safeSave(sample)
+            }
+        }
+    }
 	
 	///////////////////////////////////////////////////////////////////////////
 	

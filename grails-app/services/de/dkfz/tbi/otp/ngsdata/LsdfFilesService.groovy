@@ -15,21 +15,22 @@ class LsdfFilesService {
      */
     void checkAllFiles(long runId) {
         Run run = Run.get(runId)
-        if (run == null) {
+        if (!run) {
             log.debug("Run ${runID} not found")
             return
         }
-        run.dataFiles.each {DataFile dataFile ->
+        run.dataFiles.each { DataFile dataFile ->
             boolean exists = fileExists(dataFile)
             if (!exists) {
                 log.debug("file ${dataFile.fileName} does not exist")
+                // continue
                 return
             }
             dataFile.fileExists = true
             dataFile.fileSize = fileSize(dataFile)
             dataFile.dateFileSystem = fileCreationDate(dataFile)
             String vbpPath = getViewByPidPath(dataFile)
-            if (vbpPath != null) {
+            if (vbpPath) {
                 dataFile.fileLinked = fileExists(vbpPath)
             }
         }
@@ -90,7 +91,7 @@ class LsdfFilesService {
      */
     String getViewByPidPath(long fileId) {
         DataFile file = DataFile.get(fileId)
-        if (file == null) {
+        if (!file) {
             return null
         }
         return getViewByPidPath(file)
@@ -102,7 +103,7 @@ class LsdfFilesService {
      * @return
      */
     String getViewByPidPath(DataFile file) {
-        if (file == null) {
+        if (!file) {
             return null
         }
         if (file.fileType.type == FileType.Type.METADATA) {
@@ -113,7 +114,7 @@ class LsdfFilesService {
             return null
         }
         SeqTrack seqTrack = file.seqTrack ?: file.alignmentLog.seqTrack
-        if (seqTrack == null) {
+        if (!seqTrack) {
             log.debug("File used but no SeqTrack ${file.fileName}")
             return null
         }
@@ -146,7 +147,7 @@ class LsdfFilesService {
      */
     boolean fileExists(DataFile file) {
         String path = getFilePath(file)
-        if (path == null) {
+        if (!path) {
             return false
         }
         return fileExists(path)
@@ -159,7 +160,7 @@ class LsdfFilesService {
      */
     boolean fileExists(long fileId) {
         DataFile file = DataFiele.get(fileId)
-        if (file == null) {
+        if (!file) {
             return false
         }
         return fileExists(file)
@@ -185,7 +186,7 @@ class LsdfFilesService {
      */
     long fileSize(DataFile file) {
         String path = getFilePath(file)
-        if (path == null) {
+        if (!path) {
             return 0
         }
         return fileSize(path)
@@ -198,7 +199,7 @@ class LsdfFilesService {
      */
     long fileSize(long fileId) {
         DataFile file = DataFile.get(fileId)
-        if (file == null) {
+        if (!file) {
             return 0
         }
         return fileSize(file)
@@ -210,7 +211,7 @@ class LsdfFilesService {
      * @return
      */
     Date fileCreationDate(String path) {
-        if (path == null) {
+        if (!path) {
             return null
         }
         File file = new File(path)
@@ -227,11 +228,11 @@ class LsdfFilesService {
      * @return
      */
     Date fileCreationDate(DataFile file) {
-        if (file == null) {
+        if (!file) {
             return null
         }
         String path = getFilePath(file)
-        if (path == null) {
+        if (!path) {
             return null
         }
         return fileCreationDate(path)
@@ -244,7 +245,7 @@ class LsdfFilesService {
      */
     Date fileCreationDate(long fileId) {
         DataFile file = DataFile.get(fileId)
-        if (file == null) {
+        if (!file) {
             return null
         }
         return fileCreationDate(file)
@@ -257,7 +258,7 @@ class LsdfFilesService {
      */
     boolean runInFinalLocation(long runId) {
         Run run = Run.get(runId)
-        if (run == null) {
+        if (!run) {
             return false
         }
         return runInFinalLocation(run)
@@ -269,18 +270,19 @@ class LsdfFilesService {
      * @return
      */
     boolean runInFinalLocation(Run run) {
-        if (run == null) {
+        if (!run) {
             return false
         }
         String [] paths = getAllPathsForRun(run)
         run.finalLocation = false
         run.save(flush: true)
         boolean locationMissing = false
-        paths.each {String path ->
+        paths.each { String path ->
             log.debug(path)
             File file = new File(path + "/run" + run.name)
-            if (!file.isDirectory() || !file.canRead())
+            if (!file.isDirectory() || !file.canRead()) {
                 locationMissing = true
+            }
         }
         if (locationMissing) {
             return false
@@ -296,7 +298,7 @@ class LsdfFilesService {
      */
     String[] getAllPathsForRun(long runId) {
         Run run = Run.getAt(runId)
-        if (run == null) {
+        if (!run) {
             return null
         }
         return getAllPathsForRun(run)
@@ -307,16 +309,16 @@ class LsdfFilesService {
      *
      */
     String[] getAllPathsForRun(Run run) {
-        if (run == null) {
+        if (!run) {
             return null
         }
         Set<String> paths = new HashSet<String>()
-        run.dataFiles.each {DataFile file ->
+        run.dataFiles.each { DataFile file ->
             if (file.fileType.type == FileType.Type.METADATA) {
                 return
             }
             String path = getPathToRun(file)
-            if (path == null) {
+            if (!path) {
                 paths << run.dataPath
             }
             paths << path
@@ -329,7 +331,7 @@ class LsdfFilesService {
      *
      */
     private String getPathToRun(DataFile file) {
-        if (file == null) {
+        if (!file) {
             return null
         }
         if (file.fileType.type == FileType.Type.METADATA) {
@@ -339,7 +341,7 @@ class LsdfFilesService {
             return null
         }
         SeqTrack seqTrack = file.seqTrack ?: file.alignmentLog.seqTrack
-        if (seqTrack == null) {
+        if (!seqTrack) {
             return null
         }
         String path =
@@ -354,31 +356,31 @@ class LsdfFilesService {
         File baseDir = new File(dir)
         File[] seqDirs = baseDir.listFiles()
         int nMissing = 0
-        for(int i=0; i<seqDirs.size(); i++) {
+        for (int i=0; i<seqDirs.size(); i++) {
             File seqTypeDir = seqDirs[i]
             if (!seqTypeDir.isDirectory()) {
                 continue
             }
             SeqType seqType = SeqType.findByDirName(seqTypeDir.getName())
-            if (seqType == null) {
+            if (!seqType) {
                 continue
             }
             File[] seqCenters = seqTypeDir.listFiles()
-            for(int j=0; j<seqCenters.size(); j++) {
+            for (int j=0; j<seqCenters.size(); j++) {
                 SeqCenter center = SeqCenter.findByDirName(seqCenters[j].getName())
-                if (center == null) {
+                if (!center) {
                     continue
                 }
                 log.debug("\nChecking ${seqTypeDir} ${seqCenters[j]}")
                 File[] runs = seqCenters[j].listFiles()
-                for(int iRun=0; iRun<runs.size(); iRun++) {
+                for (int iRun=0; iRun<runs.size(); iRun++) {
                     if (!runs[iRun].getName().contains("run")) {
                         continue
                     }
                     log.debug("\t ${runs[iRun].getName()}")
                     String runName = runs[iRun].getName().substring(3)
                     Run run = Run.findByName(runName)
-                    if (run == null) {
+                    if (!run) {
                         nMissing++
                         log.debug("!!! Run ${runName} does not exist !!!")
                     }
