@@ -10,8 +10,8 @@ class SeqScanService {
      *
      */
     void buildSeqScans() {
-        def seqTracks = SeqTrack.findAll()
-        def seqTracksNew = []
+        List<SeqTrack> seqTracks = SeqTrack.findAll()
+        List<SeqTrack> seqTracksNew = []
         // create a list of new seqTracks
         seqTracks.each { seqTrack ->
             if (seqTrack.seqScan.size() == 0) {
