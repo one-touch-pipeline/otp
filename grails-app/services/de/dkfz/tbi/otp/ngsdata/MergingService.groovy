@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
 class MergingService {
-
-    def SeqScanService
+    /**
+     * Dependency injection of SeqScanService
+     */
+    def seqScanService
 
     String basePath = "$ROOT_PATH/project/"
 
