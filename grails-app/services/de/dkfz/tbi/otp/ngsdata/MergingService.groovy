@@ -16,7 +16,7 @@ class MergingService {
      */
     List<String> printAllMergedBamForIndividual(Individual ind, List<SeqType> types) {
         if (!ind) {
-            return
+            throw new IllegalArgumentException("Individual may not be null")
         }
         List<String> mergedBams = new ArrayList<String>()
         String projectPath = ind.project.dirName
@@ -48,7 +48,7 @@ class MergingService {
      */
     void discoverMergedBams(Individual ind) {
         if (!ind) {
-            return
+            throw new IllegalArgumentException("Individual may not be null")
         }
         List<SeqType> types = SeqType.findAll()
         String projectPath = ind.project.dirName
