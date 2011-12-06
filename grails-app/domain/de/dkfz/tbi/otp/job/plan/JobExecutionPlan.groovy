@@ -35,6 +35,10 @@ class JobExecutionPlan {
      * no new Job will be started for this Plan.
      */
     boolean enabled
+    /**
+     * Number of Processes which finished successful for this JobExecutionPlan
+     */
+    int finishedSuccessful = 0
 
     static constraints = {
         name(nullable: false, blank: false, unique: 'version')

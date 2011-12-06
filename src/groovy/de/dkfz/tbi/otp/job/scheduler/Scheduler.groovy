@@ -16,12 +16,15 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.job.processing.ExecutionState
+import de.dkfz.tbi.otp.notification.NotificationEvent
+import de.dkfz.tbi.otp.notification.NotificationType
 import org.apache.commons.logging.LogFactory
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.annotation.AfterReturning
 import org.aspectj.lang.annotation.AfterThrowing
 import org.aspectj.lang.annotation.Before
 import org.aspectj.lang.JoinPoint
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -55,6 +58,11 @@ class Scheduler {
      */
     @Autowired
     ErrorLogService errorLogService
+    /**
+     * Dependency Injection of grailsApplication
+     */
+    @Autowired
+    GrailsApplication grailsApplication
     /**
      * Log for this class.
      */
@@ -108,6 +116,9 @@ class Scheduler {
             }
             log.debug("doCreateCheck performed for ${joinPoint.getTarget().class} with ProcessingStep ${job.processingStep.id}")
             job.start()
+            // send notification
+            NotificationEvent event = new NotificationEvent(this, step, NotificationType.PROCESS_STEP_STARTED)
+            grailsApplication.mainContext.publishEvent(event)
         } catch (RuntimeException e) {
             // removing Job from running
             schedulerService.removeRunningJob(job)
@@ -274,6 +285,12 @@ class Scheduler {
             // TODO: trigger error handling
             log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
             throw new ProcessingException("Could not create a FAILURE Update for Job")
+        }
+        job.processingStep.process.finished = true
+        if (!job.processingStep.process.save(flush: true)) {
+            // TODO: trigger error handling
+            log.fatal("Could not set Process to finished")
+            throw new ProcessingException("Could not set Process to finished")
         }
         // TODO: trigger error handling
         log.debug("doErrorHandling performed for ${joinPoint.getTarget().class} with ProcessingStep ${job.processingStep.id}")
