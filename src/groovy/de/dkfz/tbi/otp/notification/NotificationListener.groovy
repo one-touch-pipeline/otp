@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.notification
 
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.Process
+import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserRole
@@ -70,6 +71,9 @@ class NotificationListener implements ApplicationListener {
         case NotificationType.PROCESS_FAILED:
             handleProcessNotification(event)
             break
+        case NotificationType.PROCESS_STEP_STARTED:
+            handleProcessingStepNotification(event)
+            break
         default:
             // type which we cannot handle
             break
@@ -94,6 +98,26 @@ class NotificationListener implements ApplicationListener {
             return
         }
         Map binding = [process: process]
+        sendNotifications(notifications, binding)
+    }
+
+    /**
+     * Method for Processing Step related events.
+     * It gets the Notifications and sets up the binding containing Process, ProcessingStep, Input Parameters and JobDefinition.
+     * @param event
+     */
+    private void handleProcessingStepNotification(NotificationEvent event) {
+        if (!(event.payload instanceof ProcessingStep)) {
+            return
+        }
+        ProcessingStep step = ProcessingStep.get(event.payload.id)
+        // for a ProcessingStep the Trigger is the JobExecutionPlan
+        List<Notification> notifications = resolveNotifications(JobExecutionPlan.class.getName(), step.process.jobExecutionPlan.id, event.type)
+        if (notifications.isEmpty()) {
+            // No Notifications configured for the JobExecutionPlan
+            return
+        }
+        Map binding = [process: step.process, step: step, input: step.input, jobDefinition: step.jobDefinition]
         sendNotifications(notifications, binding)
     }
 

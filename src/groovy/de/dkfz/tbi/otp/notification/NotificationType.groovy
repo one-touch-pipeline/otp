@@ -16,5 +16,13 @@ enum NotificationType {
     /**
      * A Process for a JobExecutionPlan failed
      */
-    PROCESS_FAILED
+    PROCESS_FAILED,
+    /**
+     * A ProcessingStep for a Process started.
+     */
+    PROCESS_STEP_STARTED,
+    /**
+     * A ProcessingStep for a Process finished.
+     */
+    PROCESS_STEP_FINISHED
 }
