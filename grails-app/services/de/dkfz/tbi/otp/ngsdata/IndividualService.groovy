@@ -37,7 +37,7 @@ class IndividualService {
             }
 
             proj.addToIndividuals(ind)
-            safeSave(ind)
+            ind.save()
         }
     }
 
@@ -91,7 +91,7 @@ class IndividualService {
                 if (!sample) {
                     sample = new Sample(type: type)
                     ind.addToSamples(sample)
-                    safeSave(sample)
+                    sample.save()
                 }
 
                 SampleIdentifier identifier = new SampleIdentifier(
@@ -99,31 +99,10 @@ class IndividualService {
                     sample: sample
                 )
 
-                safeSave(identifier)
-                safeSave(ind)
-                safeSave(sample)
+                identifier.save()
+                ind.save()
+                sample.save()
             }
         }
     }
-	
-	///////////////////////////////////////////////////////////////////////////
-	
-	private void safeSave(def obj) {
-		//
-		// probably will go to separate static class
-		// no formal exception, information only
-		//
-		
-		obj.validate()
-		if (obj.hasErrors()) {
-			println obj.errors
-			return
-		}
-
-		if (!obj.save())
-			println "can not save ${obj}"
-	}
-		
-	///////////////////////////////////////////////////////////////////////////
-
 }
