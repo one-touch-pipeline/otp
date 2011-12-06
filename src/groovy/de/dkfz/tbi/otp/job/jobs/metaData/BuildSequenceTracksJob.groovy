@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.job.jobs.metaData
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import de.dkfz.tbi.otp.job.processing.AbstractJobImpl;
+import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 
 @Component("buildSequenceTracksJob")
 @Scope("prototype")
@@ -12,7 +14,8 @@ class BuildSequenceTracksJob extends AbstractJobImpl {
    /**
     * dependency injection of seqTrack service
     */
-   def seqTrackService
+    @Autowired
+    SeqTrackService seqTrackService
 
     @Override
     public void execute() throws Exception {
