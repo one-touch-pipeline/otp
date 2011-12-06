@@ -6,7 +6,8 @@ class MergingService {
      */
     def seqScanService
 
-    String basePath = "$ROOT_PATH/project/"
+    // TODO: this constant should not be here!
+    private static final String basePath = "$ROOT_PATH/project/"
 
     /**
      *

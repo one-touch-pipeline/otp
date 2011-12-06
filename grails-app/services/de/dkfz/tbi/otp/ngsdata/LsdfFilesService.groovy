@@ -5,8 +5,9 @@ import java.io.*
 
 class LsdfFilesService {
     // will go somewhere
-    String basePath = "$ROOT_PATH/project/"
-    String metaDataPath = "~/ngs-isgc/"
+    // TODO: these constants should not be here!
+    private static final String basePath = "$ROOT_PATH/project/"
+    private static final String metaDataPath = "~/ngs-isgc/"
 
     /**
      *

@@ -2,7 +2,8 @@ package de.dkfz.tbi.otp.ngsdata
 
 class IndividualService {
 
-	String resourcesPath = "${home}STS/ngsTest/resources/"
+    // TODO: this constant should not be here! And is also wrong!
+    private static final String resourcesPath = "${home}STS/ngsTest/resources/"
 	
 	
 	///////////////////////////////////////////////////////////////////////////
