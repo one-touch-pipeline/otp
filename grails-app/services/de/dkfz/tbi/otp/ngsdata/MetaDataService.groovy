@@ -23,7 +23,7 @@ class MetaDataService {
     void registerInputFiles(long runId) {
         Run run = Run.get(runId)
         if (!run) {
-            return false
+            return
         }
 
         log.debug("registering run ${run.name} from ${run.seqCenter}")
