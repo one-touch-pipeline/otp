@@ -98,14 +98,16 @@ class SchedulerService {
             startJobClass: startJob.class.toString(),
             startJobVersion: startJob.getVersion()
         )
-        if (processParameters) {
-            processParameters.each { ProcessParameter processParameter ->
-                processParameter.type.plan = plan
-                plan.addToProcessParameters(processParameter)
-            }
-        }
         if (!process.save()) {
             throw new SchedulerPersistencyException("Could not save the process for the JobExecutionPlan ${plan.id}")
+        }
+        if (processParameters) {
+            processParameters.each { ProcessParameter processParameter ->
+                processParameter.process = process
+                if (!processParameter.save()) {
+                    throw new SchedulerPersistencyException("Could not save the process parameter for the Process ${process.id}")
+                }
+            }
         }
         // create the first processing step
         ProcessingStep step = createProcessingStep(process, JobDefinition.get(plan.firstJob.id), input)

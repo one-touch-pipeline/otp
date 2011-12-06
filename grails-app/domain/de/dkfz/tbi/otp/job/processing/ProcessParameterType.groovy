@@ -30,6 +30,6 @@ class ProcessParameterType {
     static constraints = {
         name(nullable: false, blank: false, unique: 'plan')
         description(nullable: true)
-        plan(nullable: true)
+        plan(nullable: false)
     }
 }
