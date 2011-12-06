@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 class BootstrapController {
 
+    def individualService
     def bootstrapService
     def seqScanService
     def mergingService
@@ -11,8 +12,9 @@ class BootstrapController {
     }
 
     def bootstrap = {
-        bootstrapService.bootstrap()
-        render "bootstraping ..."
+        individualService.loadIndividuals()
+        individualService.loadSamples()
+        render "Individual and Samples loaded"
     }
 
     def loadRuns = {
