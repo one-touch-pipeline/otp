@@ -129,7 +129,7 @@ class SchedulerService {
     /**
      * Invokes the primitive scheduler to determine which job is to execute next if any at all.
      */
-    @Scheduled(fixedRate=10000l)
+    @Scheduled(fixedRate=100l)
     public void schedule() {
         Job job = null
         persistenceInterceptor.init()
