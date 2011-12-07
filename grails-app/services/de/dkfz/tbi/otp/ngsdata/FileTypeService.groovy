@@ -4,9 +4,8 @@ class FileTypeService {
 
     FileType getFileType(String filename) {
         // try to provide and object from file name
-        List<FileType> fileTypeList = FileType.findAll()
         FileType tt = null
-        fileTypeList.each { FileType fileType ->
+        FileType.list().each { FileType fileType ->
             if (filename.contains(fileType.signature)) {
                 tt = fileType
             }
@@ -27,9 +26,8 @@ class FileTypeService {
      * @return FileType
      */
     FileType getFileType(String filename, FileType.Type type) {
-        List <FileType> fileTypeList = FileType.findAll()
         FileType tt
-        fileTypeList.each { FileType fileType ->
+        FileType.list().each { FileType fileType ->
             if (fileType.type != type) {
                 return
             }

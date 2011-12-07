@@ -223,7 +223,7 @@ class SeqTrackService {
         if (seqTrack.seqTech.name != "illumina") {
             return
         }
-        List<DataFile> dataFiles = seqTrack.dataFiles
+        List<DataFile> dataFiles = seqTrack.dataFiles.toList()
         List<String> dbKeys = [
             "BASE_COUNT",
             "READ_COUNT",
