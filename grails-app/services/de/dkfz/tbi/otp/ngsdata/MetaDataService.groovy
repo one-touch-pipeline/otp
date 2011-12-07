@@ -91,15 +91,12 @@ class MetaDataService {
             List<MetaDataKey> keys
             mdFile.eachLine { line, no ->
                 if (no == 1) {
-                    long start = new Date().getTime()
                     // parse the header
                     tokens = tokenize(line, '\t')
                     keys = getKeysFromTokens(tokens)
-                    long stop = new Date().getTime()
                 } else {
                     // match values with the header
                     // new entry in MetaData
-                    long start = new Date().getTime()
                     dataFile = new DataFile() // set-up later
                     run.addToDataFiles(dataFile)
                     dataFile.save()
@@ -114,7 +111,6 @@ class MetaDataService {
                         dataFile.addToMetaDataEntries(entry)
                         entry.save()
                     }
-                    long middle1 = new Date().getTime()
                     // fill-up important fields
                     assignFileName(dataFile)
                     fillVbpFileName(dataFile)
@@ -122,8 +118,6 @@ class MetaDataService {
                     assignFileType(dataFile, type)
                     addKnownMissingMetaData(run, dataFile)
                     checkIfWithdrawn(dataFile)
-                    long middle2 = new Date().getTime()
-                    long stop = new Date().getTime()
                 }
             }
             file.used = true
@@ -188,9 +182,7 @@ class MetaDataService {
         long start = new Date().getTime()
         def keyNames = ["FASTQ_FILE", "ALIGN_FILE"]
         keyNames.each {
-            long startDF = new Date().getTime()
             MetaDataEntry entry	= getMetaDataEntry(dataFile, it)
-            long stopDF = new Date().getTime()
             if (!entry) {
                 return
             }
@@ -218,7 +210,6 @@ class MetaDataService {
             dataFile.pathName = "errorNoHeader"
             dataFile.metaDataEntries.each { println "${it.key} ${it.value}" }
         }
-        long stop = new Date().getTime()
     }
 
     /**
