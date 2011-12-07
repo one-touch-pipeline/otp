@@ -29,7 +29,7 @@ class FileTypeService {
     FileType getFileType(String filename, FileType.Type type) {
         List <FileType> fileTypeList = FileType.findAll()
         FileType tt
-        fileTypeList.each { FileType fileType
+        fileTypeList.each { FileType fileType ->
             if (fileType.type != type) {
                 return
             }

@@ -37,8 +37,7 @@ class MetaDataService {
         List<String> fileNames = dir.list()
         FileType fileType = FileType.findByType(FileType.Type.METADATA)
         DataFile dataFile
-        fileNames.each {
-            String fileName
+        fileNames.each { String fileName ->
             if (fileName.count("wrong")) {
                 return
             }
@@ -74,7 +73,7 @@ class MetaDataService {
             if (file.fileType.type != FileType.Type.METADATA || file.used) {
                 return
             }
-            log.debug("\tfound md souce file ${it.fileName}")
+            log.debug("\tfound md souce file ${file.fileName}")
             // hint to determine file type
             FileType.Type type = FileType.Type.UNKNOWN
             if (file.fileName.contains("fastq")) {
@@ -84,7 +83,7 @@ class MetaDataService {
             }
             File mdFile = new File(file.pathName + "/" + file.fileName)
             if (!mdFile.canRead()) {
-                log.debug("\tcan not read ${it.fileName}")
+                log.debug("\tcan not read ${file.fileName}")
                 return
             }
             List<String> tokens
@@ -144,7 +143,7 @@ class MetaDataService {
      * @param tab - separator (typically '\t')
      * @return - array of strings
      */
-    private List<String> tokenize(String line, char tab) {
+    private List<String> tokenize(String line, String tab) {
         List<String> tokens = []
         int idx = 0
         for(int i=0; i < line.length(); i++) {
@@ -164,12 +163,12 @@ class MetaDataService {
     private List<MetaDataKey> getKeysFromTokens(List tokens) {
         List<MetaDataKey> keys = []
         MetaDataKey key
-        tokens.each { MetaDataKey mdKey ->
+        tokens.each { mdKey ->
             String token = correctedKey(mdKey)
             key = MetaDataKey.findByName(token)
             if (key == null) {
                 key = new MetaDataKey(name: token)
-                safeSave(key)
+                key.save()
             }
             keys << key
         }
@@ -324,13 +323,13 @@ class MetaDataService {
         MetaDataKey key = MetaDataKey.findByName(keyName)
         if (!key) {
             key = new MetaDataKey(name: keyName)
-            dbGateService.safeSave(key)
+            key.save()
         }
         MetaDataEntry entry = getMetaDataEntry(dataFile, keyName)
         if (entry) {
             return
         }
-        SeqType types = SeqType.findAll()
+        List<SeqType> types = SeqType.list()
         for(int iType = 0; iType < types.size(); iType++) {
             if (run.mdPath.contains(types[iType].dirName)) {
                 String value = types[iType].name
