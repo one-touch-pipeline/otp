@@ -101,7 +101,7 @@ class SeqTrackService {
                 usingOriginalBam : false
                 )
         laneDataFiles.each { seqTrack.addToDataFiles(it) }
-        fillReadsForSeqTrack(seqTrack)
+        seqTrack = fillReadsForSeqTrack(seqTrack)
         seqTrack.save()
         List<DataFile> alignFiles = getRunFilesWithTypeAndLane(run, FileType.Type.ALIGNMENT, lane)
         // no alignment files
@@ -218,8 +218,9 @@ class SeqTrackService {
      * objects from the DataFile objects belonging to this SeqTrack.
      *
      * @param seqTrack
+     * @return manipulated seqTrack
      */
-    private void fillReadsForSeqTrack(SeqTrack seqTrack) {
+    private SeqTrack fillReadsForSeqTrack(SeqTrack seqTrack) {
         if (seqTrack.seqTech.name != "illumina") {
             return
         }
@@ -255,6 +256,7 @@ class SeqTrackService {
                 }
             }
         }
+        return seqTrack
     }
 
     /**
