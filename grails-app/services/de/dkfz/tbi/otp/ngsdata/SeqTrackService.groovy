@@ -212,35 +212,36 @@ class SeqTrackService {
      * @param seqTrack
      */
     private void fillReadsForSeqTrack(SeqTrack seqTrack) {
-        if (seqTrack.seqTech.name == "illumina") {
-            List<DataFile> dataFiles = seqTrack.dataFiles
-            List<String> dbKeys = [
-                "BASE_COUNT",
-                "READ_COUNT",
-                "INSERT_SIZE"
-            ]
-            List<String> dbFields = [
-                "nBasePairs",
-                "nReads",
-                "insertSize"
-            ]
-            List<Boolean> add = [true, false, false]
-            dataFiles.each { DataFile file ->
-                if (file.fileType.type != FileType.Type.SEQUENCE) {
-                    return
-                }
-                file.metaDataEntries.each { MetaDataEntry entry ->
-                    for (int iKey=0; iKey < dbKeys.size(); iKey++) {
-                        if (entry.key.name == dbKeys[iKey]) {
-                            long value = 0
-                            if (entry.value.isLong()) {
-                                value = entry.value as long
-                            }
-                            if (add[iKey]) {
-                                seqTrack."${dbFields[iKey]}" += value
-                            } else {
-                                seqTrack."${dbFields[iKey]}" = value
-                            }
+        if (seqTrack.seqTech.name != "illumina") {
+            return
+        }
+        List<DataFile> dataFiles = seqTrack.dataFiles
+        List<String> dbKeys = [
+            "BASE_COUNT",
+            "READ_COUNT",
+            "INSERT_SIZE"
+        ]
+        List<String> dbFields = [
+            "nBasePairs",
+            "nReads",
+            "insertSize"
+        ]
+        List<Boolean> add = [true, false, false]
+        dataFiles.each { DataFile file ->
+            if (file.fileType.type != FileType.Type.SEQUENCE) {
+                return
+            }
+            file.metaDataEntries.each { MetaDataEntry entry ->
+                for (int iKey=0; iKey < dbKeys.size(); iKey++) {
+                    if (entry.key.name == dbKeys[iKey]) {
+                        long value = 0
+                        if (entry.value.isLong()) {
+                            value = entry.value as long
+                        }
+                        if (add[iKey]) {
+                            seqTrack."${dbFields[iKey]}" += value
+                        } else {
+                            seqTrack."${dbFields[iKey]}" = value
                         }
                     }
                 }
