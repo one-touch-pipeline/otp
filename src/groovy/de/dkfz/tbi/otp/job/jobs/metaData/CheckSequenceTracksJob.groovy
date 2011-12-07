@@ -4,16 +4,16 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import de.dkfz.tbi.otp.job.processing.AbstractJobImpl;
+import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 
 @Component("checkSequenceTracksJob")
 @Scope("prototype")
-class CheckSequenceTracksJob extends AbstractJobImpl {
+class CheckSequenceTracksJob extends AbstractEndStateAwareJobImpl {
 
-   /**
-    * dependency injection of seqTrack service
-    */
+    /**
+     * dependency injection of seqTrack service
+     */
     @Autowired
     SeqTrackService seqTrackService
 
