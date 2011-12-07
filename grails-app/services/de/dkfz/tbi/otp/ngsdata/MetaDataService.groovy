@@ -67,7 +67,7 @@ class MetaDataService {
         log.debug("loading metadata for run ${run.name}")
 
         List<DataFile> listOfMDFiles = []
-        run.dataFiles.each {listOfMDFiles << it}
+        listOfMDFiles.addAll(run.dataFiles)
         DataFile dataFile
         listOfMDFiles.each { DataFile file ->
             if (file.fileType.type != FileType.Type.METADATA || file.used) {
@@ -81,7 +81,7 @@ class MetaDataService {
             } else if (file.fileName.contains("align")) {
                 type = FileType.Type.ALIGNMENT
             }
-            File mdFile = new File(file.pathName + "/" + file.fileName)
+            File mdFile = new File(file.pathName + File.separatorChar + file.fileName)
             if (!mdFile.canRead()) {
                 log.debug("\tcan not read ${file.fileName}")
                 return
@@ -90,6 +90,7 @@ class MetaDataService {
             List<String> values
             List<MetaDataKey> keys
             mdFile.eachLine { line, no ->
+                // line numbering starts at 1 and not at 0
                 if (no == 1) {
                     // parse the header
                     tokens = tokenize(line, '\t')
@@ -432,6 +433,7 @@ class MetaDataService {
             SimpleDateFormat simpleDateFormat
             try {
                 // best effort to interpret date
+                // TODO: magic numbers are magic
                 if (entry.value.size() == 6) {
                     simpleDateFormat = new SimpleDateFormat("yyMMdd")
                     date = simpleDateFormat.parse(entry.value)
