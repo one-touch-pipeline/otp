@@ -14,7 +14,7 @@ class SeqScanService {
         List<SeqTrack> seqTracksNew = []
         // create a list of new seqTracks
         seqTracks.each { seqTrack ->
-            if (seqTrack.seqScan.size() == 0) {
+            if (seqTrack.seqScan.empty) {
                 seqTracksNew << seqTrack
             }
         }
@@ -32,7 +32,7 @@ class SeqScanService {
      */
     void buildSeqScan(SeqTrack seqTrack) {
         // maybe track already consumed
-        if (seqTrack.seqScan.size() != 0) {
+        if (!seqTrack.seqScan.empty) {
             log.debug("seqTrack ${seqTrack} already used")
             return
         }
