@@ -38,10 +38,10 @@ class MetaDataService {
         FileType fileType = FileType.findByType(FileType.Type.METADATA)
         DataFile dataFile
         fileNames.each { String fileName ->
-            if (fileName.count("wrong")) {
+            if (fileName.contains("wrong")) {
                 return
             }
-            if (fileName.count("fastq") > 0 || fileName.count("align") > 0) {
+            if (fileName.contains("fastq") || fileName.contains("align")) {
                 dataFile = new DataFile(
                         pathName: runDir,
                         fileName: fileName
