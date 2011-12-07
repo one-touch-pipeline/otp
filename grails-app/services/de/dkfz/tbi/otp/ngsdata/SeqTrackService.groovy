@@ -70,11 +70,7 @@ class SeqTrackService {
             "PIPELINE_VERSION",
             "READ_COUNT"
         ]
-        List<MetaDataKey> keys = []
-        keyNames.each {
-            MetaDataKey key = MetaDataKey.findByName(it)
-            keys << key
-        }
+        List<MetaDataKey> keys = MetaDataKey.findAllByName(keyNames)
         List<MetaDataEntry> metaDataEntries = getMetaDataValues(laneDataFiles.get(0), keys)
         boolean consistent = checkIfConsistent(laneDataFiles, keys, metaDataEntries)
         // error handling
@@ -114,11 +110,7 @@ class SeqTrackService {
         }
         // find out if data complete
         List<String> alignKeyNames = ["SAMPLE_ID", "ALIGN_TOOL"]
-        List<MetaDataKey> alignKeys = []
-        alignKeyNames.each {
-            MetaDataKey key = MetaDataKey.findByName(it)
-            alignKeys << key
-        }
+        List<MetaDataKey> alignKeys = MetaDataKey.findAllByName(alignKeyNames)
         Map alignValues = getMetaDataValues(alignFiles.get(0), keys)
         consistent = checkIfConsistent(alignFiles, alignKeys, alignValues)
         if (!consistent || metaDataEntries.get(0) != alignValues.get(0)) {
