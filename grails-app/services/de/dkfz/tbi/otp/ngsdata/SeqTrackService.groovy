@@ -20,6 +20,7 @@ class SeqTrackService {
         List<MetaDataEntry> entries = []
         // get the list of unique lanes identifiers
         run.dataFiles.each { DataFile dataFile ->
+            // These returns are continues
             if (!dataFile.metaDataValid) {
                 return
             }
@@ -30,11 +31,13 @@ class SeqTrackService {
                 return
             }
             dataFile.metaDataEntries.each { MetaDataEntry entry ->
+                // Continue
                 if (entry.key != key) {
                     return
                 }
                 // check if exists
                 for (int i=0; i<entries.size(); i++) {
+                    // Continue
                     if (entries[i].value == entry.value) {
                         return
                     }
@@ -79,7 +82,7 @@ class SeqTrackService {
             return
         }
         // check if complete
-        // to be implemented
+        // TODO to be implemented
 
         // build structure
         SampleIdentifier sampleId = SampleIdentifier.findByName(values[0])
