@@ -10,7 +10,7 @@ class SeqScanService {
      *
      */
     void buildSeqScans() {
-        List<SeqTrack> seqTracks = SeqTrack.findAll()
+        List<SeqTrack> seqTracks = SeqTrack.list()
         List<SeqTrack> seqTracksNew = []
         // create a list of new seqTracks
         seqTracks.each { seqTrack ->
