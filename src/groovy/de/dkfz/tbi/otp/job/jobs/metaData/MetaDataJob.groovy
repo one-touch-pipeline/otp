@@ -19,7 +19,7 @@ class MetaDataJob extends AbstractJobImpl {
 
     @Override
     public void execute() throws Exception {
-        long runId = getProcessParameterValue("run")
+        long runId = Long.parseLong(getProcessParameterValue("run"))
         metaDataService.loadMetaData(runId)
     }
 }
