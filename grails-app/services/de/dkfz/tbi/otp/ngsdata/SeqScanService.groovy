@@ -59,7 +59,7 @@ class SeqScanService {
                 eq("seqType", seqType)
             }
         }
-        oldSeqScans.each {SeqScan old ->
+        oldSeqScans.each { SeqScan old ->
             old.state = SeqScan.State.OBSOLETE
             old.save()
         }
@@ -135,7 +135,7 @@ class SeqScanService {
     private void fillSeqScan(SeqScan seqScan) {
         seqScan.nLanes = seqScan.seqTracks.size()
         long nbp = 0
-        seqScan.seqTracks.each {SeqTrack seqTrack ->
+        seqScan.seqTracks.each { SeqTrack seqTrack ->
             nbp += seqTrack.nBasePairs
         }
         seqScan.nBasePairs = nbp
@@ -152,13 +152,14 @@ class SeqScanService {
     private void fillSeqCenters(SeqScan seqScan) {
         SeqCenter seqCenter = null
         String name = ""
-        seqScan.seqTracks.each {SeqTrack seqTrack ->
-            if (seqCenter == null) {
+        seqScan.seqTracks.each { SeqTrack seqTrack ->
+            if (!seqCenter) {
                 seqCenter = seqTrack.run.seqCenter
                 name = seqCenter.name
-            } else if (seqCenter != null) {
-                if (seqTrack.run.seqCenter != seqCenter)
+            } else {
+                if (seqTrack.run.seqCenter != seqCenter) {
                     name += "*"
+                }
             }
         }
         seqScan.seqCenters = name
@@ -176,7 +177,7 @@ class SeqScanService {
         boolean defined = false
         int iSize = 0
         String insertSize = ""
-        seqScan.seqTracks.each {SeqTrack seqTrack ->
+        seqScan.seqTracks.each { SeqTrack seqTrack ->
             if (!defined) {
                 iSize = seqTrack.insertSize
                 defined = true
