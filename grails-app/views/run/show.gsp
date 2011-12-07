@@ -127,7 +127,14 @@
                     <td class="${file.fileExists}">on LSDF</td>
                     <td class="${file.fileLinked}">linked</td>
                     <td>${String.format("%.1f GB", file.fileSize/1e9)}</td>
-                    <td>${(new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd")}</td>
+                    <td>
+                    <g:if test="${file.dateFileSystem}">
+                    ${(new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd")}
+                    </g:if>
+                    <g:else>
+                    &nbsp;
+                    </g:else>
+                    </td>
                 </tr>
             </g:each>
             <g:each var="alignment" in="${track.alignmentLog}">
