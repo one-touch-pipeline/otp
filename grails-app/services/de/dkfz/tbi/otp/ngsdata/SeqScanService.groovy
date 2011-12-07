@@ -61,7 +61,7 @@ class SeqScanService {
         }
         oldSeqScans.each {SeqScan old ->
             old.state = SeqScan.State.OBSOLETE
-            safeSave(old)
+            old.save()
         }
         log.debug("invalidating ${oldSeqScans.size()} seq scans")
         // create new seqScan
@@ -73,7 +73,7 @@ class SeqScanService {
                 )
         seqTracksToMerge.each { SeqTrack iTrack ->
             seqScan.addToSeqTracks(iTrack)
-            safeSave(iTrack)
+            iTrack.save()
         }
 
         fillSeqScan(seqScan)
@@ -107,7 +107,7 @@ class SeqScanService {
                 )
         tracks.each { SeqTrack iTrack ->
             seqScan.addToSeqTracks(iTrack)
-            safeSave(iTrack)
+            iTrack.save()
         }
         fillSeqScan(seqScan)
         fillSeqCenters(seqScan)
