@@ -102,10 +102,10 @@ class MetaDataService {
                     run.addToDataFiles(dataFile)
                     dataFile.save()
                     values = tokenize(line, '\t')
-                    for(int i=0; i<keys.size(); i++) {
+                    for (int i=0; i<keys.size(); i++) {
                         MetaDataKey key = keys.getAt(i)
                         MetaDataEntry entry = new MetaDataEntry (
-                                value: values.getAt(i) ?: "",
+                                value: values.getAt(i) ? values.getAt(i) : "",
                                 source: MetaDataEntry.Source.MDFILE,
                                 key: key
                                 )
@@ -141,7 +141,7 @@ class MetaDataService {
     private List<String> tokenize(String line, String tab) {
         List<String> tokens = []
         int idx = 0
-        for(int i=0; i < line.length(); i++) {
+        for (int i=0; i < line.length(); i++) {
             if ((line.charAt(i) == tab) || (i == line.length() - 1)) {
                 int end = ((i == line.length() - 1) ? i + 1 : i)
                 String token = line.substring(idx, end)
@@ -151,7 +151,7 @@ class MetaDataService {
                 idx = i + 1
             }
         }
-        tokens
+        return tokens
     }
 
     // TODO: Add comment
@@ -161,7 +161,7 @@ class MetaDataService {
         tokens.each { mdKey ->
             String token = correctedKey(mdKey)
             key = MetaDataKey.findByName(token)
-            if (key == null) {
+            if (!key) {
                 key = new MetaDataKey(name: token)
                 key.save()
             }
@@ -197,16 +197,16 @@ class MetaDataService {
             }
             // run name
             if (value.startsWith(dataFile.run.name) ||
-            value.startsWith("run" + dataFile.run.name)) {
+                    value.startsWith("run" + dataFile.run.name)) {
                 int idx = value.indexOf("/")
                 value = value.substring(idx+1)
             }
             // split into file name nand path (important for solid)
             int idx = value.lastIndexOf("/")
-            dataFile.pathName = (idx == -1)? "" : value.substring(0, idx)
-            dataFile.fileName = value.substring(idx+1) ?: "error"
+            dataFile.pathName = (idx == -1) ? "" : value.substring(0, idx)
+            dataFile.fileName = value.substring(idx+1) ? value.substring(idx+1) : "error"
         }
-        if (dataFile.fileName == null) {
+        if (!dataFile.fileName) {
             dataFile.fileName = "errorNoHeader"
             dataFile.pathName = "errorNoHeader"
             dataFile.metaDataEntries.each { println "${it.key} ${it.value}" }
@@ -220,7 +220,7 @@ class MetaDataService {
      */
     private void fillVbpFileName(DataFile dataFile) {
         if (dataFile.run.seqTech.name.contains("illumina") &&
-        dataFile.fileName.contains("fastq.gz")) {
+                dataFile.fileName.contains("fastq.gz")) {
             String lane = getMetaDataEntry(dataFile, "LANE_NO")
             String readId = "0"
             if (dataFile.fileName.contains("read1")) {
@@ -322,7 +322,7 @@ class MetaDataService {
             return
         }
         List<SeqType> types = SeqType.list()
-        for(int iType = 0; iType < types.size(); iType++) {
+        for (int iType = 0; iType < types.size(); iType++) {
             if (run.mdPath.contains(types[iType].dirName)) {
                 String value = types[iType].name
                 log.debug("\tassiginig to ${value}")
@@ -425,8 +425,8 @@ class MetaDataService {
         Date exDate = null
         boolean consistant = true
         run.dataFiles.each { DataFile dataFile ->
-            MetaDataEntry entry = dataFile.metaDataEntries.find {it.key =="RUN_DATE"}
-            if (entry == null) {
+            MetaDataEntry entry = dataFile.metaDataEntries.find { it.key =="RUN_DATE" }
+            if (!entry) {
                 return
             }
             Date date
@@ -441,23 +441,23 @@ class MetaDataService {
                     simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
                     date = simpleDateFormat.parse(entry.value)
                 }
-            } catch(Exception e) {
+            } catch (Exception e) {
                 // TODO: catch exception!!
             }
-            if (exDate == null) {
+            if (!exDate) {
                 exDate = date
             }
-            if (exDate != null && !exDate.equals(date)) {
+            if (exDate && !exDate.equals(date)) {
                 consistant = false
             }
             dataFile.dateExecuted = date
         }
         // fill if all files have the same executions date
-        if (exDate != null && consistant) {
+        if (exDate && consistant) {
             run.dateExecuted = exDate
         }
         // date from the runName
-        if (run.dateExecuted == null) {
+        if (!run.dateExecuted) {
             SimpleDateFormat simpleDateFormat
             if (run.seqTech.name == "illumina") {
                 try {
