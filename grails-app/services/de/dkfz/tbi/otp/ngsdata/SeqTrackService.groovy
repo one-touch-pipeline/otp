@@ -111,7 +111,7 @@ class SeqTrackService {
         // find out if data complete
         List<String> alignKeyNames = ["SAMPLE_ID", "ALIGN_TOOL"]
         List<MetaDataKey> alignKeys = MetaDataKey.findAllByName(alignKeyNames)
-        Map alignValues = getMetaDataValues(alignFiles.get(0), keys)
+        List<MetaDataEntry> alignValues = getMetaDataValues(alignFiles.get(0), keys)
         consistent = checkIfConsistent(alignFiles, alignKeys, alignValues)
         if (!consistent || metaDataEntries.get(0) != alignValues.get(0)) {
             return
@@ -171,9 +171,9 @@ class SeqTrackService {
      *
      * @param dataFile The DataFile containing the values
      * @param metaDataKeys The MetaDataKeys for which the MetaDataEntrys are to be found
-     * @return Map containing MetaDataEntrys and the metaDataKeys associated
+     * @return List containing MetaDataEntrys and the metaDataKeys associated
      */
-    private Map getMetaDataValues(DataFile dataFile, List<MetaDataKey>metaDataKeys) {
+    private List<MetaDataEntry> getMetaDataValues(DataFile dataFile, List<MetaDataKey>metaDataKeys) {
         if (!dataFile) {
             return
         }
