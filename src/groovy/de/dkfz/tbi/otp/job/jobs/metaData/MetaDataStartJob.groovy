@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.job.jobs.metaData
 
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.Parameter
-import de.dkfz.tbi.otp.job.processing.ProcessParameterType
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.ngsdata.Run
 import org.springframework.scheduling.annotation.Scheduled
@@ -26,15 +25,13 @@ class MetaDataStartJob extends AbstractStartJobImpl {
         println("Load Meta Data Start Job called")
         // TODO Assure that the runs are processed only once. Verify via Process?
         List<Run> runs = Run.findAll()
-        ProcessParameterType type = ProcessParameterType.findByNameAndPlan("run", getExecutionPlan())
         runs.each { Run run ->
             schedulerService.createProcess(
                 this, [], [
-                new ProcessParameter(
-                    type: type,
+                    new ProcessParameter(
                     value: run.id.toString()
-                )
-            ])
+                    )
+                ])
             println run.name
         }
         performed = true

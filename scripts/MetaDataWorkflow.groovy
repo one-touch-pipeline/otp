@@ -5,7 +5,6 @@ import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterMapping
 import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
-import de.dkfz.tbi.otp.job.processing.ProcessParameterType
 
 JobExecutionPlan jep = new JobExecutionPlan(name: "loadMetaData", planVersion: 0, enabled: true)
 assert(jep.save())
@@ -38,5 +37,3 @@ assert(buildSequenceTracksJob.save())
 // set the first job
 jep.firstJob = registerInputFilesJob
 assert(jep.save(flush: true))
-ProcessParameterType type = new ProcessParameterType(name: "run", plan: jep)
-assert(type.save(flush: true))
