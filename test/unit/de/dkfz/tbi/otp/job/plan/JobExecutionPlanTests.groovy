@@ -8,7 +8,6 @@ import org.junit.*
 
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan;
 import de.dkfz.tbi.otp.job.processing.ProcessParameter;
-import de.dkfz.tbi.otp.job.processing.ProcessParameterType;
 
 /**
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
@@ -71,30 +70,14 @@ class JobExecutionPlanTests {
         assertTrue(jobExecutionPlan.validate())
         // mock the JobExecutionPlan to be able to assign it to the processParameterType
         mockDomain(JobExecutionPlan, [jobExecutionPlan])
-        ProcessParameterType processParameterType1 = new ProcessParameterType(name: "testType1", plan: jobExecutionPlan)
-        // 2. ProcessParameterType without assigning plan to it
-        ProcessParameterType processParameterType2 = new ProcessParameterType(name: "testType2")
         // mock the ProcessParameterType
-        mockDomain(ProcessParameterType, [processParameterType1, processParameterType2])
-        ProcessParameter processParameter1 = new ProcessParameter(type: processParameterType1, value: "test1")
-        ProcessParameter processParameter2 = new ProcessParameter(type: processParameterType2, value: "test2")
+        ProcessParameter processParameter = new ProcessParameter(value: "test")
         // mock the ProcessParameter
-        mockDomain(ProcessParameter, [processParameter1, processParameter2])
+        mockDomain(ProcessParameter, [processParameter])
         // Add the processParameter to the jobExeceutionPlan
-        jobExecutionPlan.addToProcessParameters(processParameter1)
+        jobExecutionPlan.processParameter = processParameter
         assertTrue(jobExecutionPlan.validate())
-        assertEquals(1, jobExecutionPlan.processParameters.size())
-        assertTrue(jobExecutionPlan.processParameters.contains(processParameter1))
-        // Add 2. processParameter to jobExecutionPlan
-        jobExecutionPlan.addToProcessParameters(processParameter2)
-        assertEquals(2, jobExecutionPlan.processParameters.size())
-        assertTrue(jobExecutionPlan.processParameters.contains(processParameter2))
-        List jepList = jobExecutionPlan.processParameters.toList().sort { it.id}
-        Iterator it = jepList.iterator()
-        for(int i = 1; i <= jobExecutionPlan.processParameters.size(); i++) {
-            ProcessParameter processParameter = it.next() as ProcessParameter
-            assertEquals("testType${i}".toString(), processParameter.type.name)
-            assertEquals("test${i}".toString(), processParameter.value)
-        }
+        assertTrue(jobExecutionPlan.processParameter.is(processParameter))
+        assertEquals("test".toString(), processParameter.value)
     }
 }

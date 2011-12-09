@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
-import de.dkfz.tbi.otp.job.processing.ProcessParameterType
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 
 /**
@@ -181,8 +180,7 @@ abstract class AbstractJobImpl implements Job {
     }
 
     public String getProcessParameterValue(String typeName) {
-        ProcessParameter parameter = ProcessParameter.findByProcessAndType(processingStep.process,
-             ProcessParameterType.findByPlanAndName(processingStep.process.jobExecutionPlan, typeName))
+        ProcessParameter parameter = ProcessParameter.findByProcess(processingStep.process)
         if (!parameter) {
             throw new RuntimeException("Required parameter not found")
         }

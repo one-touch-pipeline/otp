@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameter
 
 
 class JobExecutionPlan {
-    static hasMany = [processParameters: ProcessParameter]
     /**
      * A descriptive name for this Job Execution Plan
      */
@@ -39,6 +38,10 @@ class JobExecutionPlan {
      * Number of Processes which finished successful for this JobExecutionPlan
      */
     int finishedSuccessful = 0
+    /**
+     * The parameter which is static for the process
+     */
+    ProcessParameter processParameter
 
     static constraints = {
         name(nullable: false, blank: false, unique: 'version')
@@ -54,5 +57,6 @@ class JobExecutionPlan {
         firstJob(nullable: true)
         // firstJob needs to be nullable as JobDefinition has a dependency on JobExecutionPlan and this circle could not be solved in the database
         startJob(nullable: true)
+        processParameter(nullable: true, blank: true)
     }
 }

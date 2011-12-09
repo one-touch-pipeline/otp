@@ -87,13 +87,13 @@ class SchedulerService {
      * From the JobExecutionPlan the first {@link JobDefinition} describing the first Job
      * is derived and a {@link ProcessingStep} is created. The {@link Parameter}s passed into
      * the method are mapped to the input parameters accepted by the first JobDefinition.
-     * The {@link ProcessParameter}s passed into the method are put to the Process.
+     * The {@link ProcessParameter} passed into the method is put to the Process.
      * Last but not least the created ProcessingStep gets scheduled.
      * @param startJob The StartJob which wants to trigger the Process
      * @param input List of Parameters provided by the StartJob for this Process.
-     * @param processParameters List of ProcessParameters provided by the StartJob for this Process.
+     * @param processParameter ProcessParameter provided by the StartJob for this Process.
      */
-    public void createProcess(StartJob startJob, List<Parameter> input, List<ProcessParameter> processParameters = []) {
+    public void createProcess(StartJob startJob, List<Parameter> input, ProcessParameter processParameter = null) {
         JobExecutionPlan plan = JobExecutionPlan.get(startJob.getExecutionPlan().id)
         Process process = new Process(started: new Date(),
             jobExecutionPlan: plan,
@@ -103,12 +103,10 @@ class SchedulerService {
         if (!process.save()) {
             throw new SchedulerPersistencyException("Could not save the process for the JobExecutionPlan ${plan.id}")
         }
-        if (processParameters) {
-            processParameters.each { ProcessParameter processParameter ->
-                processParameter.process = process
-                if (!processParameter.save()) {
-                    throw new SchedulerPersistencyException("Could not save the process parameter for the Process ${process.id}")
-                }
+        if (processParameter) {
+            processParameter.process = process
+            if (!processParameter.save()) {
+                throw new SchedulerPersistencyException("Could not save the process parameter for the Process ${process.id}")
             }
         }
         // create the first processing step

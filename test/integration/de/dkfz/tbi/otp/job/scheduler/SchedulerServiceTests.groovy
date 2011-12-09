@@ -18,7 +18,6 @@ import de.dkfz.tbi.otp.job.processing.ParameterUsage
 import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessParameter;
-import de.dkfz.tbi.otp.job.processing.ProcessParameterType
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.job.processing.StartJob
@@ -656,13 +655,10 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertEquals(0, Process.count())
         assertEquals(0, ProcessingStep.count())
         // create ProcessParameter for handing over as additional parameter
-        ProcessParameterType processParameterType = new ProcessParameterType(name: "testType")
-        assertNotNull(processParameterType.save())
-        ProcessParameter processParameter = new ProcessParameter(type: processParameterType, value: "test")
+        ProcessParameter processParameter = new ProcessParameter(value: "test")
         assertNotNull(processParameter.save())
-        List processParameters = [processParameter]
         // test for process parameter
-        schedulerService.createProcess(job, [], processParameters)
+        schedulerService.createProcess(job, [], processParameter)
         // verify that the Process is created
         assertFalse(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
@@ -677,8 +673,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
         // process parameter should be accessible
-        assertEquals("test", step.process.jobExecutionPlan.processParameters.iterator().next().value)
-        assertEquals("testType", step.process.jobExecutionPlan.processParameters.iterator().next().type.name)
+        assertEquals("test", step.process.jobExecutionPlan.processParameter.value)
     }
 
     @Test
