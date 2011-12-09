@@ -22,7 +22,7 @@ class MergingLog {
     static constraints = {
         alignmentParams()
         seqScan()
-        //dataFiles()     
+        //dataFiles()
     }
 
     String toString() {

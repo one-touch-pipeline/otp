@@ -1,24 +1,24 @@
 package de.dkfz.tbi.otp.ngsdata
 
 class Project {
-	
-	String name
-	String dirName
-	String host      // es. BioQuant, DKFZ
 
-	static hasMany = [
-		runs : Run,
-		individuals: Individual,
-	]
+    String name
+    String dirName
+    String host      // es. BioQuant, DKFZ
 
-	static constraints = {
+    static hasMany = [
+        runs : Run,
+        individuals: Individual,
+    ]
 
-		name(blank: false, unique: true)
-		dirName(blank: false)
-		host(blank: false)
-	}
+    static constraints = {
 
-	String toString() {
-		name
-	}
+        name(blank: false, unique: true)
+        dirName(blank: false)
+        host(blank: false)
+    }
+
+    String toString() {
+        name
+    }
 }

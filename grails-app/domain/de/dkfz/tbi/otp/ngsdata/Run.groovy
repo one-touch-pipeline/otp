@@ -14,7 +14,7 @@ class Run {
     boolean allFilesUsed = false     // flag if data if all files find relations
     boolean finalLocation = false    // was run moved to final destination from ftp
 
-    boolean multipleSource           // for runs from a few projects 
+    boolean multipleSource           // for runs from a few projects
 
     SeqCenter seqCenter
     SeqTech seqTech
