@@ -53,7 +53,7 @@ class ErrorLogService {
         String fileName = (exceptionElements).encodeAsMD5() + ".xml"
         File exceptionStoringFile = new File(fileName)
         String dir = servletContext.getRealPath(grailsApplication.config.otp.errorLogging.stacktraces)
-        String exceptionFilePath = "${dir}${File.separatorChar}${fileName}"
+        String exceptionFilePath = "${dir}${File.separatorChar}"
         if (new File(exceptionFilePath).isFile()) {
             addToXml(exceptionFilePath)
         } else {
