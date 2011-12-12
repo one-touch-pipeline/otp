@@ -22,7 +22,7 @@ StartJobDefinition definition = new StartJobDefinition(
     name: "start",
     bean: "dataTransferStartJob",
     plan: jep
- )
+)
 assert(definition.save())
 jep.startJob = definition
 
@@ -139,8 +139,33 @@ assert(compareMd5sumJob.save())
 
 
 /*
- * Maping of the output to input
- * used to connect PBS jobs to watchdogs
+ * This job creates view-by-pid structure for this run.
+ * This job have to executed as a script on separate node
+ * for the authentication for writting
+ */
+JobDefinition createViewByPidJob = new JobDefinition(
+    name: "createViewByPid",
+    bean: "createViewByPid",
+    plan: jep,
+    previous: compareMd5sumJob
+)
+assert(createViewByPidJob.save())
+
+/*
+ * This job checks is all files are properly linked in view-by-pid structure.
+ * This job is end state aware
+ */
+JobDefinition checkViewByPidJob = new JobDefinition(
+    name: "checkViewByPid",
+    bean: "checkViewByPid",
+    plan: jep,
+    previous: createViewByPidJob
+)
+assert(checkViewByPidJob.save())
+
+
+/*
+ * Maping of the output to input used to connect PBS jobs to watchdogs
  */
 
 
