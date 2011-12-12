@@ -22,16 +22,17 @@ class MetaDataStartJob extends AbstractStartJobImpl {
             println("Execution plan not set or not active")
             return
         }
+        //return
         println("Load Meta Data Start Job called")
         // TODO Assure that the runs are processed only once. Verify via Process?
         List<Run> runs = Run.findAll()
         runs.each { Run run ->
             schedulerService.createProcess(
-                this, [], [
+                this, [],
                     new ProcessParameter(
                     value: run.id.toString()
                     )
-                ])
+                )
             println run.name
         }
         performed = true
