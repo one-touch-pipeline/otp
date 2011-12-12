@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import java.io.*
+//import java.io.*
 
 
 class LsdfFilesService {
@@ -10,14 +10,17 @@ class LsdfFilesService {
     private static final String metaDataPath = "~/ngs-isgc/"
 
     /**
+     * This function checks if all dataFiles belonging to this 
+     * run are in the final location and properly linked.
      *
+     * If run does not exists the RunTimeException with be risen.
      * @param runId
      */
     void checkAllFiles(long runId) {
         Run run = Run.get(runId)
         if (!run) {
             log.debug("Run ${runID} not found")
-            return
+            //return
         }
         run.dataFiles.each { DataFile dataFile ->
             boolean exists = fileExists(dataFile)
