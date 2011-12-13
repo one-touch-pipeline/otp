@@ -128,8 +128,8 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         // another Job should be be scheduled
         assertFalse(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
-        assertEquals(3, step.updates.size())
-        List<ProcessingStepUpdate> updates = step.updates.toList().sort { it.id }
+        assertEquals(3, ProcessingStepUpdate.countByProcessingStep(step))
+        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
         assertEquals(ExecutionState.CREATED, updates[0].state)
         assertEquals(ExecutionState.STARTED, updates[1].state)
         assertEquals(ExecutionState.FINISHED, updates[2].state)
@@ -144,8 +144,8 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertEquals(2, ProcessingStep.countByProcess(process))
 
         step = ProcessingStep.findByProcessAndPrevious(process, step)
-        assertEquals(4, step.updates.size())
-        updates = step.updates.toList().sort { it.id }
+        assertEquals(4, ProcessingStepUpdate.countByProcessingStep(step))
+        updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
         assertEquals(ExecutionState.CREATED, updates[0].state)
         assertEquals(ExecutionState.STARTED, updates[1].state)
         assertEquals(ExecutionState.FINISHED, updates[2].state)
