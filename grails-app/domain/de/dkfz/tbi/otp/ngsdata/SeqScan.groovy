@@ -24,11 +24,6 @@ class SeqScan {
         seqTech : SeqTech
     ]
 
-    static hasMany   = [
-        seqTracks : SeqTrack,       // input seq tracks
-        mergingLogs : MergingLog    // points to merging operation and merged bam file
-    ]
-
     static constraints = {
         sample()
         seqType()

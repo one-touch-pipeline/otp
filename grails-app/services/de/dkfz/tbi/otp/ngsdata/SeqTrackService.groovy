@@ -19,7 +19,7 @@ class SeqTrackService {
         MetaDataKey key = MetaDataKey.findByName("LANE_NO")
         List<MetaDataEntry> entries = []
         // get the list of unique lanes identifiers
-        run.dataFiles.each { DataFile dataFile ->
+        DataFile.findAllBy(run).each { DataFile dataFile ->
             // These returns are continues
             if (!dataFile.metaDataValid) {
                 return
@@ -30,7 +30,7 @@ class SeqTrackService {
             if (dataFile.fileType.type != FileType.Type.SEQUENCE) {
                 return
             }
-            dataFile.metaDataEntries.each { MetaDataEntry entry ->
+            MetaDataEntry.findAllByDataFile(dataFile).each { MetaDataEntry entry ->
                 // Continue
                 if (entry.key != key) {
                     return
@@ -100,7 +100,10 @@ class SeqTrackService {
                 hasOriginalBam : false,
                 usingOriginalBam : false
                 )
-        laneDataFiles.each { seqTrack.addToDataFiles(it) }
+        laneDataFiles.each {
+            it.seqTrack = seqTrack
+            it.save()
+        }
         seqTrack = fillReadsForSeqTrack(seqTrack)
         seqTrack.save()
         List<DataFile> alignFiles = getRunFilesWithTypeAndLane(run, FileType.Type.ALIGNMENT, lane)
@@ -131,7 +134,10 @@ class SeqTrackService {
                 executedBy : AlignmentLog.Execution.INITIAL
                 )
         // attach data files
-        alignFiles.each { alignLog.addToDataFiles(it) }
+        alignFiles.each {
+            it.alignmentLog = alignLog
+            it.save()
+        }
         seqTrack.hasOriginalBam = true
         // save
         alignLog.save()
@@ -150,6 +156,7 @@ class SeqTrackService {
     private def getRunFilesWithTypeAndLane(Run run, FileType.Type type, String lane) {
         MetaDataKey key = MetaDataKey.findByName("LANE_NO")
         def c = DataFile.createCriteria()
+        // TODO: HQL
         def dataFiles = c.list {
             and {
                 eq("run", run)
@@ -224,7 +231,7 @@ class SeqTrackService {
         if (seqTrack.seqTech.name != "illumina") {
             return
         }
-        List<DataFile> dataFiles = seqTrack.dataFiles.toList()
+        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
         List<String> dbKeys = [
             "BASE_COUNT",
             "READ_COUNT",
@@ -240,7 +247,7 @@ class SeqTrackService {
             if (file.fileType.type != FileType.Type.SEQUENCE) {
                 return
             }
-            file.metaDataEntries.each { MetaDataEntry entry ->
+            MetaDataEntry.findAllByDataFile(file).each { MetaDataEntry entry ->
                 for (int iKey=0; iKey < dbKeys.size(); iKey++) {
                     if (entry.key.name == dbKeys[iKey]) {
                         long value = 0
@@ -271,7 +278,7 @@ class SeqTrackService {
     void checkSequenceTracks(long runId) {
         Run run = Run.get(runId)
         run.allFilesUsed = true
-        run.dataFiles.each { DataFile dataFile ->
+        DataFile.findAllByRun(run).each { DataFile dataFile ->
             if (dataFile.fileType.type == FileType.Type.SEQUENCE) {
                 dataFile.used = (dataFile.seqTrack != null)
                 if (!dataFile.used) {
@@ -314,7 +321,8 @@ class SeqTrackService {
      */
     private MetaDataEntry getMetaDataEntry(DataFile file, String key) {
         MetaDataEntry entry = null
-        file.metaDataEntries.each { MetaDataEntry iEntry ->
+        // TODO: optimize
+        MetaDataEntry.findAllByDataFile(file).each { MetaDataEntry iEntry ->
             if (iEntry.key.name == key) {
                 entry = iEntry
             }

@@ -14,8 +14,8 @@ class SeqScanService {
         List<SeqTrack> seqTracksNew = []
         // create a list of new seqTracks
         seqTracks.each { seqTrack ->
-            if (seqTrack.seqScan.empty) {
-                seqTracksNew << seqTrack
+            SeqTrackBySeqScan.findAllBySeqTrack(seqTrack).each { SeqTrackBySeqScan seqTrackScan ->
+                seqTracksNew << seqTrackScan.seqScan
             }
         }
         log.debug("- number of new tracks: ${seqTracksNew.size()}")
@@ -32,7 +32,7 @@ class SeqScanService {
      */
     void buildSeqScan(SeqTrack seqTrack) {
         // maybe track already consumed
-        if (!seqTrack.seqScan.empty) {
+        if (SeqTrackBySeqScan.countBySeqTrack(seqTrack) > 0) {
             log.debug("seqTrack ${seqTrack} already used")
             return
         }
@@ -72,8 +72,8 @@ class SeqScanService {
                 seqType: seqType
                 )
         seqTracksToMerge.each { SeqTrack iTrack ->
-            seqScan.addToSeqTracks(iTrack)
-            iTrack.save()
+            SeqTrackBySeqScan seqTrackScan = new SeqTrackBySeqScan(seqTrack: iTrack, seqScan: seqScan)
+            seqTrackScan.save()
         }
 
         fillSeqScan(seqScan)
@@ -105,9 +105,10 @@ class SeqScanService {
                 seqTech: seqTech,
                 seqType: seqType
                 )
+        seqScan.save()
         tracks.each { SeqTrack iTrack ->
-            seqScan.addToSeqTracks(iTrack)
-            iTrack.save()
+            SeqTrackBySeqScan seqTrackScan = new SeqTrackBySeqScan(seqTrack: iTrack, seqScan: seqScan)
+            seqTrackScan.save()
         }
         fillSeqScan(seqScan)
         fillSeqCenters(seqScan)
@@ -133,10 +134,10 @@ class SeqScanService {
      * @param seqScan - SeqScan object
      */
     private void fillSeqScan(SeqScan seqScan) {
-        seqScan.nLanes = seqScan.seqTracks.size()
+        seqScan.nLanes = SeqTrackBySeqScan.countBySeqScan(seqScan)
         long nbp = 0
-        seqScan.seqTracks.each { SeqTrack seqTrack ->
-            nbp += seqTrack.nBasePairs
+        SeqTrackBySeqScan.findAllBySeqScan(seqScan).each { SeqTrackBySeqScan seqTrackScan ->
+            nbp += seqTrackScan.seqTrack.nBasePairs
         }
         seqScan.nBasePairs = nbp
     }
@@ -152,12 +153,12 @@ class SeqScanService {
     private void fillSeqCenters(SeqScan seqScan) {
         SeqCenter seqCenter = null
         String name = ""
-        seqScan.seqTracks.each { SeqTrack seqTrack ->
+        SeqTrackBySeqScan.findAllBySeqScan(seqScan).each { SeqTrackBySeqScan seqTrackScan ->
             if (!seqCenter) {
-                seqCenter = seqTrack.run.seqCenter
+                seqCenter = seqTrackScan.seqTrack.run.seqCenter
                 name = seqCenter.name
             } else {
-                if (seqTrack.run.seqCenter != seqCenter) {
+                if (seqTrackScan.seqTrack.run.seqCenter != seqCenter) {
                     name += "*"
                 }
             }
@@ -177,13 +178,13 @@ class SeqScanService {
         boolean defined = false
         int iSize = 0
         String insertSize = ""
-        seqScan.seqTracks.each { SeqTrack seqTrack ->
+        SeqTrackBySeqScan.findAllBySeqScan(seqScan).each { SeqTrackBySeqScan seqTrackScan ->
             if (!defined) {
-                iSize = seqTrack.insertSize
+                iSize = seqTrackScan.seqTrack.insertSize
                 defined = true
                 insertSize += iSize
             } else {
-                if (seqTrack.insertSize != iSize) {
+                if (seqTrackScan.seqTrack.insertSize != iSize) {
                     insertSize += "!"
                 }
             }

@@ -17,14 +17,7 @@ class SeqTrack {
         Run,
         Sample,
         SeqType,
-        SeqTech,
-        SeqScan
-    ]
-
-    static hasMany = [
-        dataFiles : DataFile,
-        alignmentLog : AlignmentLog,
-        seqScan : SeqScan
+        SeqTech
     ]
 
     static constraints = {
@@ -32,12 +25,9 @@ class SeqTrack {
         hasOriginalBam()
         hasFinalBam()
         usingOriginalBam()
-        seqScan(nullable: true)
         seqType()
         sample()
     }
-
-    static mapping = { dataFiles sort:'fileName' }
 
     String nBaseString() {
         return String.format("%.1f G",(nBasePairs/1e9))
@@ -50,7 +40,7 @@ class SeqTrack {
 
     String alignmentLogString() {
         String text = ""
-        alignmentLog.each {
+        AlignmentLog.findAllBySeqTrack(this).each {
             text += it.alignmentParams
             text += it.executedBy
         }

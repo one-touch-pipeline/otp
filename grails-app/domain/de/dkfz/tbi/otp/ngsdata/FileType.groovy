@@ -11,8 +11,6 @@ class FileType {
     String vbpPath = ""         // where to link the file
     String signature = ""       // how to recognize the file
 
-    static hasMany = [dataFiles : DataFile]
-
     static constraints = {
         type(blank: false)
         subType()

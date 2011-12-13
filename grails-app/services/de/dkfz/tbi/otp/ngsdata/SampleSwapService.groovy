@@ -41,15 +41,14 @@ class SampleSwapService {
             subType = sample.subType
         )
 
-        oldIndividual.addToSamples(newSample);
-        oldIndividual.save()
+        newSample.individual = oldIndividual
         newSample.save()
 
         // move Sample identifiers
-        sample.sampleIdentifiers.each {SampleIdentifier identifier ->
-            newSample.addToSampleIdentifiers(identifier)
+        SampleIdentifier.findAllBySample(sample).each {SampleIdentifier identifier ->
+            identifier.sample = newSample
+            identifier.save()
         }
-        newSample.save()
 
         // invalidate meta-data entries
         

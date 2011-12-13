@@ -46,9 +46,9 @@ class MetaDataService {
                         pathName: runDir,
                         fileName: fileName
                         )
-                run.addToDataFiles(dataFile)
-                fileType.addToDataFiles(dataFile)
-                run.save()
+                dataFile.run = run
+                dataFile.fileType = fileType
+                dataFile.save()
             }
         }
         fileType.save()
@@ -66,8 +66,7 @@ class MetaDataService {
 
         log.debug("loading metadata for run ${run.name}")
 
-        List<DataFile> listOfMDFiles = []
-        listOfMDFiles.addAll(run.dataFiles)
+        List<DataFile> listOfMDFiles = DataFile.findAllByRun(run)
         DataFile dataFile
         listOfMDFiles.each { DataFile file ->
             if (file.fileType.type != FileType.Type.METADATA || file.used) {
@@ -99,7 +98,7 @@ class MetaDataService {
                     // match values with the header
                     // new entry in MetaData
                     dataFile = new DataFile() // set-up later
-                    run.addToDataFiles(dataFile)
+                    dataFile.run = run
                     dataFile.save()
                     values = tokenize(line, '\t')
                     for (int i=0; i<keys.size(); i++) {
@@ -109,7 +108,7 @@ class MetaDataService {
                                 source: MetaDataEntry.Source.MDFILE,
                                 key: key
                                 )
-                        dataFile.addToMetaDataEntries(entry)
+                        entry.dataFile = dataFile
                         entry.save()
                     }
                     // fill-up important fields
@@ -209,7 +208,7 @@ class MetaDataService {
         if (!dataFile.fileName) {
             dataFile.fileName = "errorNoHeader"
             dataFile.pathName = "errorNoHeader"
-            dataFile.metaDataEntries.each { println "${it.key} ${it.value}" }
+            MetaDataEntry.findAllByDataFile(dataFile).each { println "${it.key} ${it.value}" }
         }
     }
 
@@ -277,8 +276,9 @@ class MetaDataService {
      * @return
      */
     private MetaDataEntry getMetaDataEntry(DataFile file, String key) {
+        // TODO: optimize
         MetaDataEntry entry = null
-        file.metaDataEntries.each { MetaDataEntry iEntry ->
+        MetaDataEntry.findAllByDataFile(file).each { MetaDataEntry iEntry ->
             if (iEntry.key.name == key) {
                 entry = iEntry
             }
@@ -297,8 +297,9 @@ class MetaDataService {
      */
     private void assignFileType(DataFile dataFile, FileType.Type type) {
         FileType fileType = fileTypeService.getFileType(dataFile.fileName, type)
-        fileType.addToDataFiles(dataFile)
         fileType.save()
+        dataFile.fileType = fileType
+        dataFile.save()
     }
 
     /**
@@ -331,7 +332,8 @@ class MetaDataService {
                         source: MetaDataEntry.Source.SYSTEM,
                         key: key
                         )
-                dataFile.addToMetaDataEntries(entry)
+                entry.dataFile = dataFile
+                entry.save()
                 return
             }
         }
@@ -368,9 +370,9 @@ class MetaDataService {
     boolean validateMetadata(long runId) {
         Run run = Run.get(runId)
         boolean allValid = true
-        run.dataFiles.each { DataFile dataFile ->
+        DataFile.findAllByRun(run).each { DataFile dataFile ->
             dataFile.metaDataValid = true
-            dataFile.metaDataEntries.each { MetaDataEntry entry ->
+            MetaDataEntry.findAllByDataFile(dataFile).each { MetaDataEntry entry ->
                 MetaDataEntry.Status valid = MetaDataEntry.Status.VALID
                 MetaDataEntry.Status invalid = MetaDataEntry.Status.INVALID
                 switch(entry.key.name) {
@@ -424,8 +426,9 @@ class MetaDataService {
         Run run = Run.get(runId)
         Date exDate = null
         boolean consistant = true
-        run.dataFiles.each { DataFile dataFile ->
-            MetaDataEntry entry = dataFile.metaDataEntries.find { it.key =="RUN_DATE" }
+        DataFile.findAllByRun(run).each { DataFile dataFile ->
+            // TODO: optimize
+            MetaDataEntry entry = MetaDataEntry.findAllByDataFile(dataFile).find { it.key =="RUN_DATE" }
             if (!entry) {
                 return
             }
@@ -482,7 +485,7 @@ class MetaDataService {
 
     void assignFilesToProjects(long runId) {
         Run run = Run.get(runId)
-        run.dataFiles.each { DataFile dataFile ->
+        DataFile.findAllByRun(run).each { DataFile dataFile ->
             if (!dataFile.used) {
                 return
             }
@@ -491,12 +494,16 @@ class MetaDataService {
             }
             if (dataFile.fileType.type == FileType.Type.SEQUENCE) {
                 Project project = dataFile.seqTrack.sample.individual.project
-                project.addToRuns(run)
+                RunByProject runProject = new RunByProject(project: project, run: run)
+                runProject.save()
                 dataFile.project = project
+                dataFile.save()
             } else if (dataFile.fileType.type == FileType.Type.ALIGNMENT) {
                 Project project = dataFile.alignmentLog.seqTrack.sample.individual.project
-                project.addToRuns(run)
+                RunByProject runProject = new RunByProject(project: project, run: run)
+                runProject.save()
                 dataFile.project = project
+                dataFile.save()
             }
         }
         run.save()

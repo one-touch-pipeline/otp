@@ -29,8 +29,8 @@ class IndividualController {
 
         List<SeqScan> seqScans = new ArrayList<SeqScan>()
 
-        ind.samples.each {Sample sample ->
-            sample.seqScans.each {SeqScan seqScan -> seqScans << seqScan }
+        Sample.findAllByIndividual(ind).each {Sample sample ->
+            SeqScan.findAllBySample(sample).each {SeqScan seqScan -> seqScans << seqScan }
         }
 
         List<String> mergedBams =

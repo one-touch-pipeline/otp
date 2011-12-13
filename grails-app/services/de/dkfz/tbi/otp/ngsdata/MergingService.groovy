@@ -22,7 +22,7 @@ class MergingService {
         String projectPath = ind.project.dirName
         String baseDir = basePath + "/" + projectPath + "/sequencing/"
         types.each { SeqType type ->
-            ind.samples.each { Sample sample ->
+            Sample.findAllByIndividual(ind).each { Sample sample ->
                 String path = baseDir + type.dirName + "/view-by-pid/" +
                         ind.pid + "/" + sample.type.toString().toLowerCase() +
                         "/" + type.libraryLayout.toLowerCase() +
@@ -54,7 +54,7 @@ class MergingService {
         String projectPath = ind.project.dirName
         String baseDir = basePath + "/" + projectPath + "/sequencing/"
         types.each { SeqType type ->
-            ind.samples.each { Sample sample ->
+            Sample.findAllByIndividual(ind).each { Sample sample ->
                 String path = baseDir + type.dirName + "/view-by-pid/" +
                         ind.pid + "/" + sample.type.toString().toLowerCase() +
                         "/" + type.libraryLayout.toLowerCase() +
@@ -138,8 +138,11 @@ class MergingService {
                 executedBy: MergingLog.Execution.UPLOAD,
                 status: MergingLog.Status.FINISHED
                 )
-        mergingLog.addToDataFiles(bamDataFile)
-        matchingScan.addToMergingLogs(mergingLog)
+        mergingLog.save()
+        bamDataFile.mergingLog = mergingLog
+        bamDataFile.save()
+        mergingLog.seqScan = matchingScan
+        mergingLog.save()
         if (matchingScan.state != SeqScan.State.OBSOLETE) {
             matchingScan.state = SeqScan.State.FINISHED
         }
@@ -160,13 +163,13 @@ class MergingService {
         SeqTrack[] arrTracks = (SeqTrack[]) tracks.toArray()
         for (int i=0; i<seqScans.size(); i++) {
             SeqScan scan = seqScans.get(i)
-            if (scan.seqTracks.size() != tracks.size()) {
-                log.debug("size does not match ${scan.seqTracks.size()} ${tracks.size()}")
+            if (SeqTrack.countBySeqScan(scan) != tracks.size()) {
+                log.debug("size does not match ${SeqTrack.countBySeqScan(scan)} ${tracks.size()}")
                 continue
             }
             boolean match = true
-            SeqTrack[] scanTracks = (SeqTrack[])scan.seqTracks.toArray()
-            for (int j=0; j<scanTracks.length; j++) {
+            List<SeqTrack> scanTracks = (SeqTrack[])SeqTrack.findAllBySeqScan(scan)
+            for (int j=0; j<scanTracks.size(); j++) {
                 long refId = scanTracks[j].id
                 boolean hasPair = false
                 for (int k=0; k<arrTracks.length; k++) {
@@ -239,6 +242,7 @@ class MergingService {
      */
     private SeqTrack getSeqTrack(Sample sample, SeqType seqType, String runName, String lane) {
         String runString = runName.substring(3) // removing "run"
+        // TODO: HQL
         List<SeqTrack> seqTracks =
                 SeqTrack.withCriteria {
                     and {

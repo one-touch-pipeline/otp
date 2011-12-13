@@ -22,9 +22,9 @@ class ProstateOverviewController {
         individuals.each { Individual individual ->
             names << individual.mockFullName
             Map indTable = [:]
-            individual.samples.each { Sample sample ->
+            Sample.findAllByIndividual(individual).each { Sample sample ->
                 Map sampleTable = [:]
-                sample.seqScans.each { SeqScan seqScan ->
+                SeqScan.findAllBySample(sample).each { SeqScan seqScan ->
                     // only current seqScans
                     if (seqScan.state == SeqScan.State.OBSOLETE) {
                         return
@@ -54,7 +54,7 @@ class ProstateOverviewController {
                     scanTable["center"] = seqScan.seqCenters.toLowerCase()
                     scanTable["lanes"] = getBullets(seqScan.nLanes)
                     scanTable["qa"] = Tools.getStringFromNumber(seqScan.nBasePairs)
-                    scanTable["merged"] = (seqScan.mergingLogs.size() > 0)
+                    scanTable["merged"] = (MergingLog.countBySeqScan(seqScan) > 0)
 
                     if (key == "WGP") {
                         if (seqScan.nBasePairs < 110e9) scanTable["qav"] = "QA1"

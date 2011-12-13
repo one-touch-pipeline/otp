@@ -6,11 +6,6 @@ class Project {
     String dirName
     String host      // es. BioQuant, DKFZ
 
-    static hasMany = [
-        runs : Run,
-        individuals: Individual,
-    ]
-
     static constraints = {
 
         name(blank: false, unique: true)

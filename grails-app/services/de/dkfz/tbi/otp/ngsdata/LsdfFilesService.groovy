@@ -19,7 +19,7 @@ class LsdfFilesService {
             log.debug("Run ${runID} not found")
             return
         }
-        run.dataFiles.each { DataFile dataFile ->
+        DataFile.findAllByRun(run).each { DataFile dataFile ->
             boolean exists = fileExists(dataFile)
             if (!exists) {
                 log.debug("file ${dataFile.fileName} does not exist")
@@ -313,7 +313,7 @@ class LsdfFilesService {
             return null
         }
         Set<String> paths = new HashSet<String>()
-        run.dataFiles.each { DataFile file ->
+        DataFile.findAllByRun(run).each { DataFile file ->
             if (file.fileType.type == FileType.Type.METADATA) {
                 return
             }

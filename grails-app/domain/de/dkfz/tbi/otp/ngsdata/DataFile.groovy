@@ -33,8 +33,6 @@ class DataFile {
         fileType : FileType
     ]
 
-    static hasMany   = [metaDataEntries : MetaDataEntry]
-
     static constraints = {
 
         metaDataValid()

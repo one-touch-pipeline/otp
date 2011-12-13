@@ -11,7 +11,7 @@ class SeqScanController {
         SeqScan scan = SeqScan.get(params.id)
         Set<String> runs = new HashSet<String>()
 
-        scan.seqTracks.each {seqTrack ->
+        SeqTrack.findAllBySeqScan(scan).each {seqTrack ->
             runs.add(seqTrack.run.name)
         }
 

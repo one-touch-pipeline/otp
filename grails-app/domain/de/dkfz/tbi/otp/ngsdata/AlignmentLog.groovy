@@ -14,14 +14,11 @@ class AlignmentLog {
         seqTrack : SeqTrack
     ]
 
-    static hasMany = [dataFiles : DataFile]
-
     static constraints = {
     }
 
-    static mapping = { dataFiles sort:'fileName' }
-
     String toString() {
+        List<DataFile> dataFiles = DataFile.findAllByAlignmentLog(this)
         "${alignmentParams} ${dataFiles}"
     }
 }

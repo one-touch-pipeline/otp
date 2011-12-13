@@ -17,15 +17,13 @@ class MergingLog {
         seqScan : SeqScan
     ]
 
-    static hasMany = [dataFiles : DataFile]
-
     static constraints = {
         alignmentParams()
         seqScan()
-        //dataFiles()
     }
 
     String toString() {
+        List<DataFile> dataFiles = DataFile.findAllByMergingLog(this)
         "${alignmentParams} ${dataFiles}"
     }
 

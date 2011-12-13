@@ -25,28 +25,15 @@ class Run {
         SeqTech
     ]
 
-    static hasMany = [
-        projects  : Project,
-        dataFiles : DataFile,
-        seqTracks : SeqTrack,
-    ]
-
     static constraints = {
         name(blank: false, unique: true)
         allFilesUsed()
-        projects(nullable: true)
         dateExecuted(nullable: true)
         dateCreated()
         complete()
         dataPath()
         mdPath()
     }
-
-    static mapping = {
-        dataFiles sort:'fileName'
-        seqTracks sort:'laneId'
-    }
-
 
     String toString() {
         name

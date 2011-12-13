@@ -36,7 +36,7 @@ class IndividualService {
                 ind.type = Individual.Type.POOL
             }
 
-            proj.addToIndividuals(ind)
+            ind.project = proj
             ind.save()
         }
     }
@@ -90,7 +90,7 @@ class IndividualService {
 
                 if (!sample) {
                     sample = new Sample(type: type)
-                    ind.addToSamples(sample)
+                    sample.individual = ind
                     sample.save()
                 }
 

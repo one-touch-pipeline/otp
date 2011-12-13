@@ -10,11 +10,8 @@ class Individual {
     Type type
 
     static belongsTo = [project : Project]
-    static hasMany   = [samples : Sample]
 
     static constraints = { pid(unique: true) }
-
-    static mapping = { samples sort: "type" }
 
     String toString() {
         "${mockPid} ${mockFullName}"
