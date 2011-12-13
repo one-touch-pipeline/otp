@@ -29,11 +29,7 @@ public class ProcessingStep implements Serializable {
      * Output Parameters generated during this ProcessingStep.
      */
     Collection<Parameter> output
-    /**
-     * The history of state updates of this ProcessingStep
-     */
-    Collection<ProcessingStepUpdate> updates
-    static hasMany = [input: Parameter, output: Parameter, updates: ProcessingStepUpdate]
+    static hasMany = [input: Parameter, output: Parameter]
     /**
      * The JobDefinition this ProcessingStep is generated from.
      **/

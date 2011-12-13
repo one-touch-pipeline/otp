@@ -36,23 +36,24 @@ public class ProcessingStepUpdate implements Serializable {
             }
             // we don't set a previous update, this is only allowed if the processingStep has no updates
             // or if it has one element which is this one
-            return !obj.processingStep.updates ||
-                obj.processingStep.updates.isEmpty() ||
-                (obj.processingStep.updates.size() == 1 && obj.processingStep.updates.asList().first() == obj)
+            List<ProcessingStepUpdate> stepUpdates = ProcessingStepUpdate.findAllByProcessingStep(obj.processingStep)
+            return stepUpdates.isEmpty() ||
+                (stepUpdates.size() == 1 && stepUpdates.first() == obj)
         })
         date(nullable: false, validator: { val, obj ->
             if (obj.id) {
                 // this obj had already been validated, so no need to do it again
                 return true
             }
-            if (!obj.processingStep.updates ||
-                    (obj.processingStep.updates.size() == 1 && obj.processingStep.updates.asList().first() == obj)) {
+            List<ProcessingStepUpdate> stepUpdates = ProcessingStepUpdate.findAllByProcessingStep(obj.processingStep)
+            if (stepUpdates.isEmpty() ||
+                    (stepUpdates.size() == 1 && stepUpdates.first() == obj)) {
                 // there are no processing step updates yet, so our value is acceptable
                 return true
             }
             boolean ok = true
             // compare all the existing update dates with the current one, they all have to be before this one
-            obj.processingStep.updates.asList().sort { it.id }.each {
+            stepUpdates.sort { it.id }.each {
                 if (it == obj) {
                     return
                 }
@@ -68,8 +69,9 @@ public class ProcessingStepUpdate implements Serializable {
                 return true
             }
             // only first update may be created
-            if (!obj.processingStep.updates ||
-                    (obj.processingStep.updates.size() == 1 && obj.processingStep.updates.asList().first() == obj)) {
+            List<ProcessingStepUpdate> stepUpdates = ProcessingStepUpdate.findAllByProcessingStep(obj.processingStep)
+            if (stepUpdates.isEmpty() ||
+                    (stepUpdates.size() == 1 && stepUpdates.first() == obj)) {
                 return val == ExecutionState.CREATED
             } else {
                 return val != ExecutionState.CREATED

@@ -109,8 +109,7 @@ class Scheduler {
                 previous: existingUpdates.sort { it.date }.last(),
                 processingStep: step
                 )
-            step.addToUpdates(update)
-            if (!step.save(flush: true)) {
+            if (!update.save(flush: true)) {
                 log.fatal("Could not create a STARTED Update for Job of type ${joinPoint.target.class}")
                 throw new ProcessingException("Could not create a STARTED Update for Job")
             }
@@ -149,9 +148,13 @@ class Scheduler {
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.FINISHED,
-            previous: existingUpdates.sort { it.date }.last()
+            previous: existingUpdates.sort { it.date }.last(),
+            processingStep: job.processingStep
             )
-        job.processingStep.addToUpdates(update)
+        if (!update.save(flush: true)) {
+            log.fatal("Could not create a FINISHED Update for Job of type ${joinPoint.target.class}")
+            throw new ProcessingException("Could not create a FINISHED Update for Job")
+        }
         Parameter failedOutputParameter
         job.getOutputParameters().each { Parameter param ->
             if (param.type.parameterUsage != ParameterUsage.OUTPUT) {
@@ -173,13 +176,17 @@ class Scheduler {
             ProcessingStepUpdate failedParameterUpdate = new ProcessingStepUpdate(
                 date: new Date(),
                 state: ExecutionState.FAILURE,
-                previous: update)
+                previous: update,
+                processingStep: job.processingStep)
+            if (!failedParameterUpdate.save()) {
+                log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
+                throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
+            }
             ProcessingError error = new ProcessingError(errorMessage: "Parameter ${failedOutputParameter.value} is either not defined for JobDefintion ${job.processingStep.jobDefinition.id} or not of type Output.",
                 processingStepUpdate: failedParameterUpdate)
             failedParameterUpdate.error = error
             error.save()
-            job.processingStep.addToUpdates(failedParameterUpdate)
-            if (!job.processingStep.save(flush: true)) {
+            if (!error.save(flush: true)) {
                 log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
                 throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
             }
@@ -202,13 +209,13 @@ class Scheduler {
                 ProcessingStepUpdate failedParameterUpdate = new ProcessingStepUpdate(
                     date: new Date(),
                     state: ExecutionState.FAILURE,
-                    previous: update)
+                    previous: update,
+                    processingStep: job.processingStep)
+                failedParameterUpdate.save()
                 ProcessingError error = new ProcessingError(errorMessage: "Required Output Parameter of type ${parameterType.id} is not set.",
                     processingStepUpdate: failedParameterUpdate)
                 failedParameterUpdate.error = error
-                error.save()
-                job.processingStep.addToUpdates(failedParameterUpdate)
-                if (!job.processingStep.save(flush: true)) {
+                if (!error.save(flush: true)) {
                     log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
                     throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
                 }
@@ -224,9 +231,10 @@ class Scheduler {
             ProcessingStepUpdate endStateUpdate = new ProcessingStepUpdate(
                 date: new Date(),
                 state: endStateAwareJob.getEndState(),
-                previous: update
+                previous: update,
+                processingStep: job.processingStep
                 )
-            job.processingStep.addToUpdates(endStateUpdate)
+            endStateUpdate.save()
             if (job instanceof DecisionJob && endStateUpdate.state == ExecutionState.SUCCESS) {
                 ((DecisionProcessingStep)job.processingStep).decision = (job as DecisionJob).getDecision()
             }
@@ -270,8 +278,10 @@ class Scheduler {
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.FAILURE,
-            previous: existingUpdates.sort { it.date }.last()
+            previous: existingUpdates.sort { it.date }.last(),
+            processingStep: job.processingStep
             )
+        update.save()
         try {
             errorLogService.log(e)
         } catch (Exception ex) {
@@ -280,8 +290,7 @@ class Scheduler {
         ProcessingError error = new ProcessingError(errorMessage: e.message ? e.message : "No Exception message", processingStepUpdate: update)
         error.save()
         update.error = error
-        job.processingStep.addToUpdates(update)
-        if (!job.processingStep.save(flush: true)) {
+        if (!update.save(flush: true)) {
             // TODO: trigger error handling
             log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
             throw new ProcessingException("Could not create a FAILURE Update for Job")

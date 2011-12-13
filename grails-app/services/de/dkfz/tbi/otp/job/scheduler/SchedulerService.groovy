@@ -203,7 +203,8 @@ class SchedulerService {
      * @param last The last executed ProcessingStep
      */
     private void endProcess(ProcessingStep last) {
-        ProcessingStepUpdate update = last.updates.toList().sort { it.id }.last()
+        // TODO: directly sort
+        ProcessingStepUpdate update = ProcessingStepUpdate.findAllByProcessingStep(last).sort { it.id }.last()
         if (update.state != ExecutionState.SUCCESS) {
             throw new IncorrectProcessingException("Process finished but is not in success state")
         }
@@ -256,21 +257,19 @@ class SchedulerService {
         if (!step.save()) {
             throw new SchedulerPersistencyException("Could not save the ProcessingStep for Process ${process.id}")
         }
-        ProcessingStepUpdate created = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date())
-        step.addToUpdates(created)
-        if (!step.save(flush: true)) {
+        ProcessingStepUpdate created = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: step)
+        if (!created.save(flush: true)) {
             throw new SchedulerPersistencyException("Could not save the first ProcessingStep for Process ${process.id}")
         }
         if (failedConstantParameter) {
             if (!created.save()) {
                 throw new SchedulerPersistencyException("Could not save ProcessingStepUpdate for Process ${process.id}")
             }
-            ProcessingStepUpdate failure = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: new Date(), previous: created)
+            ProcessingStepUpdate failure = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: new Date(), previous: created, processingStep: step)
             ProcessingError error = new ProcessingError(errorMessage: "Failed to add constant input parameter ${failedConstantParameter.id} of type ${failedConstantParameter.type.name} to new processing step",
                  processingStepUpdate: failure)
             failure.error = error
-            step.addToUpdates(failure)
-            if (!step.save()) {
+            if (!failure.save()) {
                 throw new SchedulerPersistencyException("Could not save the ProcessingStep for Process ${process.id}")
             }
         }
