@@ -32,7 +32,7 @@ public class ProcessingStepUpdate implements Serializable {
             }
             if (val) {
                 // the previous update needs to belong to the same processing step us this update
-                return val.processingStep == obj.processingStep
+                return val.processingStep.id == obj.processingStep.id
             }
             // we don't set a previous update, this is only allowed if the processingStep has no updates
             // or if it has one element which is this one
