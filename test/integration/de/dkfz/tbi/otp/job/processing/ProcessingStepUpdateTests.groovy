@@ -89,10 +89,10 @@ class ProcessingStepUpdateTests {
         assertTrue(processingStepUpdate.validate())
 
         JobDefinition jobDefinition2 = new JobDefinition()
-        jobDefinition2.name = "testJobDefinition"
+        jobDefinition2.name = "testJobDefinition2"
         jobDefinition2.bean = "testJob"
         jobDefinition2.plan = jobExecutionPlan
-        jobDefinition2.save(flush:true)
+        assertNotNull(jobDefinition2.save(flush:true))
         // Initialize 2. step
         ProcessingStep processingStep2 = new ProcessingStep()
         processingStep2.process = process
@@ -100,6 +100,7 @@ class ProcessingStepUpdateTests {
         processingStep2.jobDefinition = jobDefinition2
         processingStep2.jobVersion = null
         assertTrue(processingStep2.validate())
+        assertNotNull(processingStep2.save(flush: true))
         // Should crash tests, updates must belong to same step
         processingStepUpdate2.processingStep = processingStep2
         // Should not validate
