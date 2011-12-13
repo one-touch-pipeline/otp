@@ -16,6 +16,11 @@ beans = {
     }
 
     if (Environment.getCurrent() == Environment.TEST) {
+        trueExecutorService(grails.plugin.executor.PersistenceContextExecutorWrapper) { bean ->
+            bean.destroyMethod = 'destroy'
+            persistenceInterceptor = ref("persistenceInterceptor")
+            executor = java.util.concurrent.Executors.newCachedThreadPool()
+        }
         executorService(de.dkfz.tbi.otp.testing.SynchronousTestingExecutorService)
         servletContext(de.dkfz.tbi.otp.testing.OTPServletContext)
     }
