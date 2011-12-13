@@ -269,9 +269,10 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertFalse(process.finished)
         // the last JobDefinition should have a ProcessingStep with a created and a failed update
         ProcessingStep failedStep = ProcessingStep.findAllByJobDefinition(jobDefinition3).toList().sort { it.id }.last()
-        assertEquals(2, failedStep.updates.size())
-        assertEquals(ExecutionState.CREATED, failedStep.updates.toList().sort { it.id }.first().state )
-        assertEquals(ExecutionState.FAILURE, failedStep.updates.toList().sort { it.id }.last().state )
+        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(failedStep)
+        assertEquals(2, updates.size())
+        assertEquals(ExecutionState.CREATED, updates.sort { it.id }.first().state )
+        assertEquals(ExecutionState.FAILURE, updates.sort { it.id }.last().state )
     }
 
     @Test
