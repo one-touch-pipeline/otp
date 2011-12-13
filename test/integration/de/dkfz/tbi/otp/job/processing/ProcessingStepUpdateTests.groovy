@@ -49,7 +49,6 @@ class ProcessingStepUpdateTests {
         // Initialize 1. step
         ProcessingStep processingStep = new ProcessingStep()
         processingStep.process = process
-        processingStep.updates = null
         processingStep.jobDefinition = jobDefinition
         processingStep.jobVersion = null
         processingStep.save(flush:true)
@@ -67,10 +66,9 @@ class ProcessingStepUpdateTests {
         processingStepUpdate.save(flush:true)
         // Should validate
         assertTrue(processingStepUpdate.validate())
-        // Add the update to the step
-        processingStep.addToUpdates(processingStepUpdate)
+        processingStepUpdate.processingStep = processingStep
         // Should validate
-        assertTrue(processingStep.validate())
+        assertTrue(processingStepUpdate.validate())
         // Initialize 2. update
         ProcessingStepUpdate processingStepUpdate2 = new ProcessingStepUpdate()
         processingStepUpdate2.previous = null
@@ -96,7 +94,6 @@ class ProcessingStepUpdateTests {
         // Initialize 2. step
         ProcessingStep processingStep2 = new ProcessingStep()
         processingStep2.process = process
-        processingStep2.updates = null
         processingStep2.jobDefinition = jobDefinition2
         processingStep2.jobVersion = null
         assertTrue(processingStep2.validate())

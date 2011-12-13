@@ -63,10 +63,10 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.CREATED,
-            previous: null
+            previous: null,
+            processingStep: step
             )
-        step.addToUpdates(update)
-        assertNotNull(step.save(flush: true))
+        assertNotNull(update.save(flush: true))
 
         // there is no further Job in the Job Execution Plan. Executing should finish the Process
         assertFalse(process.finished)
@@ -103,10 +103,10 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.CREATED,
-            previous: null
+            previous: null,
+            processingStep: step
             )
-        step.addToUpdates(update)
-        assertNotNull(step.save(flush: true))
+        assertNotNull(update.save(flush: true))
         // first Job should be run
         assertFalse(process.finished)
         assertNull(step.jobClass)
@@ -188,10 +188,10 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.CREATED,
-            previous: null
+            previous: null,
+            processingStep: step
             )
-        step.addToUpdates(update)
-        assertNotNull(step.save(flush: true))
+        assertNotNull(update.save(flush: true))
 
         // running the JobExecutionPlan
         assertTrue(schedulerService.queue.isEmpty())
@@ -247,10 +247,10 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.CREATED,
-            previous: null
+            previous: null,
+            processingStep: step
             )
-        step.addToUpdates(update)
-        assertNotNull(step.save(flush: true))
+        assertNotNull(update.save(flush: true))
         // running the JobExecutionPlan
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
@@ -319,10 +319,10 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.CREATED,
-            previous: null
+            previous: null,
+            processingStep: step
             )
-        step.addToUpdates(update)
-        assertNotNull(step.save(flush: true))
+        assertNotNull(update.save(flush: true))
 
         // running the JobExecutionPlan
         assertTrue(schedulerService.queue.isEmpty())
@@ -387,10 +387,10 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.CREATED,
-            previous: null
+            previous: null,
+            processingStep: step
             )
-        step.addToUpdates(update)
-        assertNotNull(step.save(flush: true))
+        assertNotNull(update.save(flush: true))
 
         // running the JobExecutionPlan
         assertTrue(schedulerService.queue.isEmpty())
@@ -470,10 +470,10 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.CREATED,
-            previous: null
+            previous: null,
+            processingStep: step
             )
-        step.addToUpdates(update)
-        assertNotNull(step.save(flush: true))
+        assertNotNull(update.save(flush: true))
         // running the JobExecutionPlan
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
