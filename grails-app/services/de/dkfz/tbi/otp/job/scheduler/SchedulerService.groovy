@@ -209,18 +209,27 @@ class SchedulerService {
      */
     private void endProcess(ProcessingStep last) {
         // TODO: directly sort
-        ProcessingStepUpdate update = ProcessingStepUpdate.findAllByProcessingStep(last).sort { it.id }.last()
-        if (update.state != ExecutionState.SUCCESS) {
-            throw new IncorrectProcessingException("Process finished but is not in success state")
+        lock.lock()
+        try {
+            // updating the JobExecutionPlan information has to be thread save due to multiple processes ending in the same time is possible
+            ProcessingStepUpdate update = ProcessingStepUpdate.findAllByProcessingStep(last).sort { it.id }.last()
+            if (update.state != ExecutionState.SUCCESS) {
+                throw new IncorrectProcessingException("Process finished but is not in success state")
+            }
+            last.process.finished = true
+            last.process.save(flush: true)
+            JobExecutionPlan.withNewSession {
+                JobExecutionPlan plan = JobExecutionPlan.get(last.process.jobExecutionPlan.id)
+                if (!plan.finishedSuccessful) {
+                    plan.finishedSuccessful = 1
+                } else {
+                    plan.finishedSuccessful++
+                }
+                plan.save(flush: true)
+            }
+        } finally {
+            lock.unlock()
         }
-        last.process.finished = true
-        last.process.save()
-        if (!last.process.jobExecutionPlan.finishedSuccessful) {
-            last.process.jobExecutionPlan.finishedSuccessful = 1
-        } else {
-            last.process.jobExecutionPlan.finishedSuccessful++
-        }
-        last.process.jobExecutionPlan.save(flush: true)
 
         // send notification
         NotificationEvent event = new NotificationEvent(this, last.process, NotificationType.PROCESS_SUCCEEDED)
