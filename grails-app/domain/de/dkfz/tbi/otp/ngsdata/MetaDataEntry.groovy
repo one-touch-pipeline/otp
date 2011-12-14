@@ -3,6 +3,8 @@ package de.dkfz.tbi.otp.ngsdata
 class MetaDataEntry {
 
     String value
+    DataFile dataFile
+    MetaDataKey key
 
     /**
      * does the value corresponds to a value
