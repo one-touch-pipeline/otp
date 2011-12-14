@@ -11,6 +11,9 @@ class SeqScan {
 
     String seqCenters = ""
     String insertSize = ""
+    Sample sample
+    SeqTech seqTech
+    SeqType seqType
 
     // quality control
     enum QCState {NON, PASS, BLOCK}
