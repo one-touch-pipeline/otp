@@ -1,10 +1,16 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import java.text.SimpleDateFormat
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
 
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 
 class MetaDataService {
+    /**
+     * Loading Meta data is not thread save - use a lock for it
+     */
+    private final Lock loadMetaDataLock = new ReentrantLock()
 
     /**
      * Dependency injection of file type service
@@ -65,64 +71,69 @@ class MetaDataService {
         Run run = Run.get(runId)
 
         log.debug("loading metadata for run ${run.name}")
-
-        List<DataFile> listOfMDFiles = DataFile.findAllByRun(run)
-        DataFile dataFile
-        listOfMDFiles.each { DataFile file ->
-            if (file.fileType.type != FileType.Type.METADATA || file.used) {
-                return
-            }
-            log.debug("\tfound md souce file ${file.fileName}")
-            // hint to determine file type
-            FileType.Type type = FileType.Type.UNKNOWN
-            if (file.fileName.contains("fastq")) {
-                type = FileType.Type.SEQUENCE
-            } else if (file.fileName.contains("align")) {
-                type = FileType.Type.ALIGNMENT
-            }
-            File mdFile = new File(file.pathName + File.separatorChar + file.fileName)
-            if (!mdFile.canRead()) {
-                log.debug("\tcan not read ${file.fileName}")
-                return
-            }
-            List<String> tokens
-            List<String> values
-            List<MetaDataKey> keys
-            mdFile.eachLine { line, no ->
-                // line numbering starts at 1 and not at 0
-                if (no == 1) {
-                    // parse the header
-                    tokens = tokenize(line, '\t')
-                    keys = getKeysFromTokens(tokens)
-                } else {
-                    // match values with the header
-                    // new entry in MetaData
-                    dataFile = new DataFile() // set-up later
-                    dataFile.run = run
-                    dataFile.save()
-                    values = tokenize(line, '\t')
-                    for (int i=0; i<keys.size(); i++) {
-                        MetaDataKey key = keys.getAt(i)
-                        MetaDataEntry entry = new MetaDataEntry (
-                                value: values.getAt(i) ? values.getAt(i) : "",
-                                source: MetaDataEntry.Source.MDFILE,
-                                key: key
-                                )
-                        entry.dataFile = dataFile
-                        entry.save()
-                    }
-                    // fill-up important fields
-                    assignFileName(dataFile)
-                    fillVbpFileName(dataFile)
-                    fillMD5Sum(dataFile)
-                    assignFileType(dataFile, type)
-                    addKnownMissingMetaData(run, dataFile)
-                    checkIfWithdrawn(dataFile)
+        // loading metadata is not thread save - use a lock
+        loadMetaDataLock.lock()
+        try {
+            List<DataFile> listOfMDFiles = DataFile.findAllByRun(run)
+            DataFile dataFile
+            listOfMDFiles.each { DataFile file ->
+                if (file.fileType.type != FileType.Type.METADATA || file.used) {
+                    return
                 }
+                log.debug("\tfound md souce file ${file.fileName}")
+                // hint to determine file type
+                FileType.Type type = FileType.Type.UNKNOWN
+                if (file.fileName.contains("fastq")) {
+                    type = FileType.Type.SEQUENCE
+                } else if (file.fileName.contains("align")) {
+                    type = FileType.Type.ALIGNMENT
+                }
+                File mdFile = new File(file.pathName + File.separatorChar + file.fileName)
+                if (!mdFile.canRead()) {
+                    log.debug("\tcan not read ${file.fileName}")
+                    return
+                }
+                List<String> tokens
+                List<String> values
+                List<MetaDataKey> keys
+                mdFile.eachLine { line, no ->
+                    // line numbering starts at 1 and not at 0
+                    if (no == 1) {
+                        // parse the header
+                        tokens = tokenize(line, '\t')
+                        keys = getKeysFromTokens(tokens)
+                    } else {
+                        // match values with the header
+                        // new entry in MetaData
+                        dataFile = new DataFile() // set-up later
+                        dataFile.run = run
+                        dataFile.save()
+                        values = tokenize(line, '\t')
+                        for (int i=0; i<keys.size(); i++) {
+                            MetaDataKey key = keys.getAt(i)
+                            MetaDataEntry entry = new MetaDataEntry (
+                                    value: values.getAt(i) ? values.getAt(i) : "",
+                                    source: MetaDataEntry.Source.MDFILE,
+                                    key: key
+                                    )
+                            entry.dataFile = dataFile
+                            entry.save()
+                        }
+                        // fill-up important fields
+                        assignFileName(dataFile)
+                        fillVbpFileName(dataFile)
+                        fillMD5Sum(dataFile)
+                        assignFileType(dataFile, type)
+                        addKnownMissingMetaData(run, dataFile)
+                        checkIfWithdrawn(dataFile)
+                    }
+                }
+                file.used = true
+                file.save()
+                run.save()
             }
-            file.used = true
-            file.save()
-            run.save()
+        } finally {
+            loadMetaDataLock.unlock()
         }
     }
 
