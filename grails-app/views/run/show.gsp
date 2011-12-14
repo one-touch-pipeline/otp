@@ -90,7 +90,7 @@
 
         <table>
 
-           <g:each var="file" in="${run.dataFiles}">
+           <g:each var="file" in="${de.dkfz.tbi.otp.ngsdata.DataFile.findAllByRun(run)}">
            <g:if test="${file.fileType.type.toString() == 'METADATA'}">
            <tr>
                 <td>${file.fileName}</td>
@@ -105,7 +105,7 @@
 
         <%--  Data Files located on Seq Tracks  --%>
         <table>
-        <g:each var="track" in="${run.seqTracks}">
+        <g:each var="track" in="${de.dkfz.tbi.otp.ngsdata.SeqTrack.findAllByRun(run)}">
 
             <tr>
                 <td class="miniHeader" colspan="3">${track}</td>
@@ -137,7 +137,7 @@
                     </td>
                 </tr>
             </g:each>
-            <g:each var="alignment" in="${track.alignmentLog}">
+            <g:each var="alignment" in="${de.dkfz.tbi.otp.ngsdata.AlignmentLog.findAllBySeqTrack(track)}">
                 <g:each var="file" in="${alignment.dataFiles}">
                     <tr>
                         <td>-</td>
@@ -175,7 +175,7 @@
             </tr>
             </g:if>
 
-            <g:each var="file" in="${run.dataFiles}">
+            <g:each var="file" in="${de.dkfz.tbi.otp.ngsdata.DataFile.findAllByRun(run)}">
             <g:if test="${file.used == false}">
                 <tr>
                     <td>${file.fileName}</td>
