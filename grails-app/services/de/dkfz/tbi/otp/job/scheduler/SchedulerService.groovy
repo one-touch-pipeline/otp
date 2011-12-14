@@ -136,12 +136,14 @@ class SchedulerService {
         persistenceInterceptor.init()
         try {
             job = doSchedule()
-            if (job) {
-                job.execute()
-            }
         } finally {
             persistenceInterceptor.flush()
             persistenceInterceptor.destroy()
+        }
+
+        if (job) {
+            // start the Job in an own thread
+            executorService.submit({job.execute()} as Callable)
         }
     }
 
