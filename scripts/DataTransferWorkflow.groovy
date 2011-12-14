@@ -41,7 +41,7 @@ assert(checkInputFilesJob.save())
  * This jobs creates output directories if needed
  */
 JobDefinition createOutputDirectoryJob = new JobDefinition(
-    name: "createOutputDirectoy",
+    name: "createOutputDirectory",
     baen: "createOutputDirectory",
     plan: jep,
     previous: checkInputFilesJob
@@ -74,8 +74,7 @@ assert(copyFilesWatchdogJob.save())
 
 /*
  * This jobs checks if files are in the final location
- * and fills statistics (file size, creation date) 
- * into DataFile objects
+ * and fills statistics (file size, creation date)into DataFile objects
  */
 JobDefinition checkFinalLocationJob = new JobDefinition(
     name: "checkFinalLoaction",
@@ -87,7 +86,7 @@ JobDefinition checkFinalLocationJob = new JobDefinition(
 assert(checkFinalLocationJob.save())
 
 /*
- * This job will evelutate performance of the copy job
+ * This job will evelutate performance of the copy job 
  * from the time of the job and file size.
  * Non essential but for throuput optimization
  */
