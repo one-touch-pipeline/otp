@@ -231,9 +231,9 @@ class SchedulerService {
     private ProcessingStep createProcessingStep(Process process, JobDefinition jobDefinition, Collection<Parameter> input, ProcessingStep previous = null) {
         ProcessingStep step = null
         if (jobDefinition instanceof DecidingJobDefinition) {
-            step = new DecisionProcessingStep(jobDefinition: jobDefinition, process: process, previous: previous)
+            step = new DecisionProcessingStep(jobDefinition: JobDefinition.get(jobDefinition.id), process: Process.get(process.id), previous: previous ? ProcessingStep.get(previous.id) : null)
         } else {
-            step = new ProcessingStep(jobDefinition: jobDefinition, process: process, previous: previous)
+            step = new ProcessingStep(jobDefinition: JobDefinition.get(jobDefinition.id), process: Process.get(process.id), previous: previous ? ProcessingStep.get(previous.id) : null)
         }
         if (input && !step.save()) {
             // we have to save the next processing step as the ParameterMapping references the JobDefinition
