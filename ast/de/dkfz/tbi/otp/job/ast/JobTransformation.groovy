@@ -62,11 +62,11 @@ class JobTransformation extends AbstractJobTransformation implements ASTTransfor
             boolean isJob = false
             boolean inheritsAbstractJob = false
             classNode.getAllInterfaces().each {
-                if (it.name == "de.dkfz.tbi.otp.job.processing.Job") {
+                if (it.name == "de.dkfz.tbi.otp.job.processing.Job" || it.name == "de.dkfz.tbi.otp.job.processing.EndStateAwareJob") {
                     isJob = true
                 }
             }
-            if (classNode.superClass.name == "de.dkfz.tbi.otp.job.processing.AbstractJobImpl") {
+            if (classNode.superClass.name == "de.dkfz.tbi.otp.job.processing.AbstractJobImpl" || classNode.superClass.name == "de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl") {
                 isJob = true
                 inheritsAbstractJob = true
             }
