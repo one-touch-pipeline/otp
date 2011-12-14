@@ -8,28 +8,25 @@ import org.springframework.stereotype.Component
 
 @Component("checkInputFiles")
 @Scope("prototype")
-class CheckInputFilesJob extends AbstractEndStateAwareJobImpl {
+class CreateOutputDirectoryJob extends AbstractJobImpl {
 
-    /**
-     * dependency injection of meta data service
-     */
     @Autowired
     LsdfFilesService lsdfFilesService
 
-    /**
-     * Check if all sequence files belonging to this run are
-     * present in the initial location. The job is delegated to service
-     * 
-     * @throws Exception
-     */
+    final private String projectName = "PROJECT_NAME"
+
     @Override
     public void execute() throws Exception {
+
         long runId = Long.parseLong(getProcessParameterValue("run"))
         Run run = Run.get(runId)
-        if (lsdfFilesService.checkInitialSequenceFiles(run)) {
-            succeed()
-        } else {
-            fail()
+
+        String[] dirs = lsdfFilesService.getListOfRunDirecotries(run, projectName)
+
+        String cmd = ""
+        dirs.each {String line ->
+            cmd += "mkdir " + line + ";"
         }
+        println cmd
     }
 }

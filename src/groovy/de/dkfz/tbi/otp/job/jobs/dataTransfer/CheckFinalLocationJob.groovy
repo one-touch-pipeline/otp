@@ -6,27 +6,26 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
-@Component("checkInputFiles")
+@Component("checkFinalLocation")
 @Scope("prototype")
-class CheckInputFilesJob extends AbstractEndStateAwareJobImpl {
+class CheckFinalLocationJob extends AbstractEndStateAwareJobImpl {
 
     /**
      * dependency injection of meta data service
      */
     @Autowired
-    LsdfFilesService lsdfFilesService
+    FilesCompletenessService filesCompletenessService
 
     /**
-     * Check if all sequence files belonging to this run are
-     * present in the initial location. The job is delegated to service
-     * 
+     * Check if all files are in the final location
+     *
      * @throws Exception
      */
     @Override
     public void execute() throws Exception {
         long runId = Long.parseLong(getProcessParameterValue("run"))
         Run run = Run.get(runId)
-        if (lsdfFilesService.checkInitialSequenceFiles(run)) {
+        if (filesCompletenessService.checkFinalLocation(run)) {
             succeed()
         } else {
             fail()
