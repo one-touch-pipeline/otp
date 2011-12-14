@@ -6,15 +6,6 @@ beans = {
     xmlns context:"http://www.springframework.org/schema/context"
     context.'component-scan'('base-package' :"de.dkfz.tbi.otp" )
 
-    taskExecutor(org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor) {
-        corePoolSize = 5
-        maxPoolSize = 10
-    }
-    xmlns task: "http://www.springframework.org/schema/task"
-    task.'annotation-driven'() {
-        executor = "taskExecutor"
-    }
-
     if (Environment.getCurrent() == Environment.TEST) {
         trueExecutorService(grails.plugin.executor.PersistenceContextExecutorWrapper) { bean ->
             bean.destroyMethod = 'destroy'
@@ -23,6 +14,11 @@ beans = {
         }
         executorService(de.dkfz.tbi.otp.testing.SynchronousTestingExecutorService)
         servletContext(de.dkfz.tbi.otp.testing.OTPServletContext)
+    } else {
+        // proper thread pool
+        xmlns task: "http://www.springframework.org/schema/task"
+        task.executor(id: "taskExecutor", "pool-size": 10)
+        task.'annotation-driven'(executor: "taskExecutor")
     }
     if (grailsApplication.config.otp.jabber.enabled) {
         jabberService(de.dkfz.tbi.otp.notification.JabberService) {
