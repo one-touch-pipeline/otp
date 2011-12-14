@@ -88,19 +88,19 @@
         <div class="myContent">
 
         <table>
-           <g:each var="track" in="${scan.seqTracks}">
-               <g:if test="${track.run.name == run}">
+           <g:each var="track" in="${de.dkfz.tbi.otp.ngsdata.SeqTrackBySeqScan.findAllBySeqScan(scan)}">
+               <g:if test="${track.seqTrack.run.name == run}">
                <tr>
-                    <td><strong>${track.laneId}</strong></td>
-                    <td>${track.sample}</td>
-                    <td>${track.nBaseString()}</td>
-                    <td>${track.insertSize}</td>
+                    <td><strong>${track.seqTrack.laneId}</strong></td>
+                    <td>${track.seqTrack.sample}</td>
+                    <td>${track.seqTrack.nBaseString()}</td>
+                    <td>${track.seqTrack.insertSize}</td>
 
-                    <g:if test="${track.alignmentLog.size() == 0}">
+                    <g:if test="${de.dkfz.tbi.otp.ngsdata.AlignmentLog.countBySeqTrack(track.seqTrack) == 0}">
                         <td>no alignment</td>
                     </g:if><g:else>
 
-                    <g:each var="alignment" in="${track.alignmentLog}">
+                    <g:each var="alignment" in="${de.dkfz.tbi.otp.ngsdata.AlignmentLog.findAllBySeqTrack(track.seqTrack)}">
                         <td>${alignment.alignmentParams.programName}</td>
                     </g:each>
                     </g:else>
@@ -119,9 +119,9 @@
     
     <div class="myContent">
     <table>
-    <g:each var="log" in="${scan.mergingLogs}">
+    <g:each var="log" in="${de.dkfz.tbi.otp.ngsdata.MergingLog.findAllBySeqScan(scan)}">
         <tr>
-            <g:each var="dataFile" in="${log.dataFiles}">
+            <g:each var="dataFile" in="${de.dkfz.tbi.otp.ngsdata.DataFile.findAllByMergingLog(log)}">
                 <td>
                 <g:link controller="dataFile" action="show" id="${dataFile.id}">
                 ${dataFile.fileName}

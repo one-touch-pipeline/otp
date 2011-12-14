@@ -42,10 +42,10 @@
     <h1>Samples</h1>
     <div class="myContent">
     <table>
-        <g:each var="sample" in="${ind.samples}">
+        <g:each var="sample" in="${de.dkfz.tbi.otp.ngsdata.Sample.findAllByIndividual(ind)}">
             <tr>
                 <td class="myKey">${sample.type}</td>
-                <td class="myValue">${sample.sampleIdentifiers}</td>
+                <td class="myValue">${de.dkfz.tbi.otp.ngsdata.SampleIdentifier.findAllBySample(sample)}</td>
             </tr>
         </g:each>
     </table>
@@ -91,8 +91,8 @@
                     <td>${scan.basePairsString()}</td>
                     <td>${scan.insertSize}</td>
 
-                    <td class="${scan.mergingLogs.size() != 0}">
-                        <g:formatBoolean boolean="${scan.mergingLogs.size() != 0}"
+                    <td class="${de.dkfz.tbi.otp.ngsdata.MergingLog.countBySeqScan(scan) != 0}">
+                        <g:formatBoolean boolean="${de.dkfz.tbi.otp.ngsdata.MergingLog.countBySeqScan(scan) != 0}"
                             true="merged" false="not merged"
                         />
                     </td>
