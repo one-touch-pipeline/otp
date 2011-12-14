@@ -242,7 +242,6 @@ class MergingService {
      */
     private SeqTrack getSeqTrack(Sample sample, SeqType seqType, String runName, String lane) {
         String runString = runName.substring(3) // removing "run"
-        // TODO: HQL
         List<SeqTrack> seqTracks =
                 SeqTrack.withCriteria {
                     and {
