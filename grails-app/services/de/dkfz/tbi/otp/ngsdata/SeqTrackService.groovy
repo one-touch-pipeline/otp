@@ -82,6 +82,9 @@ class SeqTrackService {
 
         // build structure
         SampleIdentifier sampleId = SampleIdentifier.findByName(metaDataEntries.get(0))
+        if (!sampleId) {
+            return
+        }
         Sample sample = sampleId.sample
         if (!sample) {
             return
