@@ -129,6 +129,9 @@ class SchedulerService {
      */
     @Scheduled(fixedRate=100l)
     public void schedule() {
+        if (queue.isEmpty()) {
+            return
+        }
         Job job = null
         persistenceInterceptor.init()
         try {
