@@ -155,8 +155,8 @@ class SchedulerService {
         lock.lock()
         try {
             // TODO: add a proper scheduling method
-            // simple scheduler: run a new Job if there are less running Jobs than executed Jobs
-            if (running.size() > queue.size() || queue.isEmpty()) {
+            // simple scheduler: run a new Job if something is in the queue
+            if (queue.isEmpty()) {
                 return
             }
             Job job = createJob(queue.peek())
