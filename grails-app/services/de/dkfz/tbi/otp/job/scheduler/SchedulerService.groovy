@@ -259,7 +259,8 @@ class SchedulerService {
             }
             step.addToInput(Parameter.get(param.id))
         }
-        if (!step.save()) {
+        step = step.save(flush: true)
+        if (!step) {
             throw new SchedulerPersistencyException("Could not save the ProcessingStep for Process ${process.id}")
         }
         ProcessingStepUpdate created = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: step)
