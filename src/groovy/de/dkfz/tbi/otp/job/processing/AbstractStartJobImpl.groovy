@@ -1,8 +1,13 @@
 package de.dkfz.tbi.otp.job.processing
 
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Callable
 
 import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,6 +27,8 @@ abstract class AbstractStartJobImpl implements StartJob {
      */
     @Autowired
     PersistenceContextInterceptor persistenceInterceptor
+    @Autowired
+    ExecutorService executorService
     private JobExecutionPlan plan
 
     protected AbstractStartJobImpl() {}
@@ -61,5 +68,15 @@ abstract class AbstractStartJobImpl implements StartJob {
             throw new InvalidStateException("Execution plan has not been set")
         }
         return StartJobDefinition.get(plan.startJob.id)
+    }
+
+    protected void createProcess(List<Parameter> input, ProcessParameter processParameter = null) {
+        executorService.submit({
+            schedulerService.createProcess(this, input, processParameter)
+        } as Callable )
+    }
+
+    protected void createProcess(ProcessParameter processParameter) {
+        createProcess([], processParameter)
     }
 }
