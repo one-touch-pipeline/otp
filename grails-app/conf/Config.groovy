@@ -158,6 +158,81 @@ if (otpConfig.otp.mail.sender instanceof ConfigObject) {
     otp.mail.sender = otpConfig.otp.mail.sender
 }
 
+// Folder for putting stacktrace files made by error log service
+if (otpConfig.otp.errorLogging.stacktraces instanceof ConfigObject) {
+    otp.errorLogging.stacktraces = "../target/stacktraces/"
+} else {
+    otp.errorLogging.stacktraces = otpConfig.otp.errorLogging.stacktraces
+}
+// Folder for data of NGS data files
+if (otpConfig.otp.ngsdata.bootstrap.dataPath instanceof ConfigObject) {
+    otp.ngsdata.bootstrap.dataPath = ""
+} else {
+    otp.ngsdata.bootstrap.dataPath = otpConfig.otp.ngsdata.bootstrap.dataPath
+}
+// Folder for meta data files of NGS meta data files
+if (otpConfig.otp.ngsdata.bootstrap.mdPath instanceof ConfigObject) {
+    otp.ngsdata.bootstrap.mdPath = ""
+} else {
+    otp.ngsdata.bootstrap.mdPath = otpConfig.otp.ngsdata.bootstrap.mdPath
+}
+
+// File with path for PBS job IDs
+if (otpConfig.otp.pbs.fileWithPbsIds instanceof ConfigObject) {
+    otp.pbs.fileWithPbsIds = "pbsJob"
+} else {
+    otp.pbs.fileWithPbsIds = otpConfig.otp.pbs.fileWithPbsIds
+}
+// The PBS host
+if (otpConfig.otp.pbs.host instanceof ConfigObject) {
+    otp.pbs.host = ""
+} else {
+    otp.pbs.host = otpConfig.otp.pbs.host
+}
+// The PBS key file
+if (otpConfig.otp.pbs.keyfile instanceof ConfigObject) {
+    otp.pbs.keyfile = ""
+} else {
+    otp.pbs.keyfile = otpConfig.otp.pbs.keyfile
+}
+// The PBS user name
+if (otpConfig.otp.pbs.username instanceof ConfigObject) {
+    otp.pbs.username = ""
+} else {
+    otp.pbs.username = otpConfig.otp.pbs.username
+}
+// The PBS user's password
+if (otpConfig.otp.pbs.password instanceof ConfigObject) {
+    otp.pbs.password = ""
+} else {
+    otp.pbs.password = otpConfig.otp.pbs.password
+}
+// The path to the file holding commands to be executed on the PBS
+if (otpConfig.otp.pbs.commandResource instanceof ConfigObject) {
+    otp.pbs.commandResource = ""
+} else {
+    otp.pbs.commandResource = otpConfig.otp.pbs.commandResource
+}
+// The timeout for the commands processed on the PBS (if zero, it runs infinitely)
+if (otpConfig.otp.pbs.timeout instanceof ConfigObject) {
+    otp.pbs.timeout = ""
+} else {
+    otp.pbs.timeout = otpConfig.otp.pbs.timeout
+}
+// If the new output of the PBS' shall be appended to the file or overwrite
+if (otpConfig.otp.pbs.appendToFile instanceof ConfigObject) {
+    otp.pbs.appendToFile = ""
+} else {
+    otp.pbs.appendToFile = otpConfig.otp.pbs.appendToFile
+}
+// The file to which the PBS' output is written to
+// TODO replace with direct database write
+if (otpConfig.otp.pbs.fileToOutput instanceof ConfigObject) {
+    otp.pbs.fileToOutput = ""
+} else {
+    otp.pbs.fileToOutput = otpConfig.otp.pbs.fileToOutput
+}
+
 // Added by the Spring Security Core plugin:
 grails.plugins.springsecurity.userLookup.userDomainClassName = 'de.dkfz.tbi.otp.security.User'
 grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'de.dkfz.tbi.otp.security.UserRole'
