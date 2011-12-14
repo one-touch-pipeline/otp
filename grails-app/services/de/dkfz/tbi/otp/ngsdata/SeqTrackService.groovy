@@ -19,7 +19,7 @@ class SeqTrackService {
         MetaDataKey key = MetaDataKey.findByName("LANE_NO")
         List<MetaDataEntry> entries = []
         // get the list of unique lanes identifiers
-        DataFile.findAllBy(run).each { DataFile dataFile ->
+        DataFile.findAllByRun(run).each { DataFile dataFile ->
             // These returns are continues
             if (!dataFile.metaDataValid) {
                 return
@@ -70,7 +70,7 @@ class SeqTrackService {
             "PIPELINE_VERSION",
             "READ_COUNT"
         ]
-        List<MetaDataKey> keys = MetaDataKey.findAllByName(keyNames)
+        List<MetaDataKey> keys = MetaDataKey.findAllByNameInList(keyNames)
         List<MetaDataEntry> metaDataEntries = getMetaDataValues(laneDataFiles.get(0), keys)
         boolean consistent = checkIfConsistent(laneDataFiles, keys, metaDataEntries)
         // error handling
