@@ -156,10 +156,9 @@ class MetaDataService {
     // TODO: Add comment
     private List<MetaDataKey> getKeysFromTokens(List tokens) {
         List<MetaDataKey> keys = []
-        MetaDataKey key
         tokens.each { mdKey ->
             String token = correctedKey(mdKey)
-            key = MetaDataKey.findByName(token)
+            MetaDataKey key = MetaDataKey.findByName(token)
             if (!key) {
                 key = new MetaDataKey(name: token)
                 key.save()
