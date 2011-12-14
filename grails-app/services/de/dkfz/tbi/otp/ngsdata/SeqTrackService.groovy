@@ -155,21 +155,17 @@ class SeqTrackService {
      */
     private def getRunFilesWithTypeAndLane(Run run, FileType.Type type, String lane) {
         MetaDataKey key = MetaDataKey.findByName("LANE_NO")
-        def c = DataFile.createCriteria()
-        // TODO: HQL
-        def dataFiles = c.list {
-            and {
-                eq("run", run)
-                eq("fileWithdrawn", false)
-                fileType{ eq("type", type) }
-                metaDataEntries {
-                    and{
-                        eq("key", key)
-                        eq("value", lane)
-                    }
-                }
-            }
-        }
+        def dataFiles = DataFile.executeQuery('''
+SELECT dataFile FROM MetaDataEntry as entry
+INNER JOIN entry.dataFile as dataFile
+WHERE
+dataFile.run = :run
+AND dataFile.fileWithdrawn = false
+AND dataFile.fileType.type = :type
+AND entry.key = :key
+AND entry.value = :value
+''',
+            [run: run, type: type, key: key, value: lane])
         return dataFiles
     }
 
