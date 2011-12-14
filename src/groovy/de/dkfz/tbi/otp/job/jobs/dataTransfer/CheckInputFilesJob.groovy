@@ -14,7 +14,7 @@ class CheckInputFilesJob extends AbstractEndStateAwareJobImpl {
      * dependency injection of meta data service
      */
     @Autowired
-    LsdfFilesService lsdfFilesService
+    FilesCompletenessService filesCompletenessService
 
     /**
      * Check if all sequence files belonging to this run are
@@ -26,7 +26,7 @@ class CheckInputFilesJob extends AbstractEndStateAwareJobImpl {
     public void execute() throws Exception {
         long runId = Long.parseLong(getProcessParameterValue("run"))
         Run run = Run.get(runId)
-        if (lsdfFilesService.checkInitialSequenceFiles(run)) {
+        if (filesCompletenessService.checkInitialSequenceFiles(run)) {
             succeed()
         } else {
             fail()
