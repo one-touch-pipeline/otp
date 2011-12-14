@@ -5,6 +5,28 @@ class FilesCompletenessService {
     def LsdfFilesService
 
     /**
+     *
+     * This function loops over files from a run, registered in meta-data
+     * and check if they exists in the initial location
+     *
+     * @param run
+     */
+    public boolean checkInitialSequenceFiles(Run run) {
+        boolean allExists = true
+        Set<DataFile> dataFiles = run.dataFiles
+        dataFiles.each {DataFile dataFile ->
+            if (dataFile.fileType == FileType.Type.SEQUENCE ||
+                dataFile.fileType == FileType.Type.ALIGNMENT) {
+                String path = getFileInitialPath(run, dataFile)
+                if (!fileExists(path)) {
+                    allExists = false
+                }
+            }
+        }
+        return allExists
+    }
+
+    /**
      * This function checks if all files with defined final location 
      * are in the right final location. This function fills statistics
      * fields of DataFile (size and date from the file system)
@@ -15,6 +37,9 @@ class FilesCompletenessService {
      * @return true if all files are in the final location
      */
     boolean checkFinalLocation(Run run) {
+        run.finalLocation = false
+        run.save(flush: true)
+
         boolean allExists = true
         Set<DataFile> dataFiles = run.dataFiles
         dataFiles.each {DataFile dataFile ->
@@ -23,18 +48,49 @@ class FilesCompletenessService {
                 return // continue
             }
             boolean exists = lsdfFilesService.fileExists(path)
-            if (!exists) {
+            if (exists) {
+                dataFile.fileExists = true
+                dataFile.fileSize = lsdfFilesService.fileSize(path)
+                dataFile.dateFileSystem = lsdfFilesService.fileCreationDate(path)
+            } else {
                 dataFile.fileExists = false
-                dataFile.save(flush: true)
                 allExists = false
             }
-            dataFile.fileExists = true
-            dataFile.fileSize = lsdfFilesService.fileSize(path)
-            dataFile.dateFileSystem = lsdfFilesService.fileCreationDate(path)
             dataFile.save(flush: true)
         }
-        run.save(flush: true)
+        if (allExists) {
+            run.finalLocation = true
+            run.save(flush: true)
+        }
         return allExists
+    }
+
+    /**
+     * This function checks if all files are linked in the view by pid
+     * structure. Only files with determined view by pid path are checked.
+     * Location of the view by pid link is decided by lsdfFilesService
+     * 
+     * @param run
+     * @return
+     */
+    boolean checkViewByPid(Run run) {
+        boolean allLinked = true
+        Set<DataFile> dataFiles = run.dataFiles
+        dataFiles.each {DataFile dataFile ->
+            String path = lsdfFilesService.getFilesViewByPidPath(dataFile)
+            if (path == null) {
+                return // continue
+            }
+            boolean exists = lsdfFilesService.fileExists(path)
+            if (exists) {
+                dataFile.fileLinked = true
+            } else {
+                dataFile.fileLinked = false
+                allLinked = false
+            }
+            dataFile.save(flush: true)
+        }
+        return allLinked
     }
 
     /**

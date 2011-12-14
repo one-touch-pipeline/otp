@@ -20,28 +20,6 @@ class LsdfFilesService {
     }
 
     /**
-     *
-     * This function loops over files from a run, registered in meta-data
-     * and check if they exists in the initial location
-     *
-     * @param run
-     */
-    public boolean checkInitialSequenceFiles(Run run) {
-        boolean allExists = true
-        Set<DataFile> dataFiles = run.dataFiles
-        dataFiles.each {DataFile dataFile ->
-            if (dataFile.fileType == FileType.Type.SEQUENCE ||
-                dataFile.fileType == FileType.Type.ALIGNMENT) {
-                String path = getFileInitialPath(run, dataFile)
-                if (!fileExists(path)) {
-                    allExists = false
-                }
-            }
-        }
-        return allExists
-    }
-
-    /**
      * This function returns an array of strings to final locations of this runs.
      * Only data files belonging to a given project are considered, because
      * projects are often processed separately.
@@ -96,7 +74,7 @@ class LsdfFilesService {
             return null
         }
         if (file.fileType.type == FileType.Type.METADATA) {
-            String path = metaDataPath + "/data-tracking-orig/" +
+            String path = otp.datPath['metadata'] + "/data-tracking-orig/" +
                     file.run.seqCenter?.dirName +
                     "/run" + file.run.name + file.fileName
             return path
@@ -133,14 +111,14 @@ class LsdfFilesService {
     }
 
     /**
-     * Important finction.
+     * Important function.
      * This function knows view-by-pid data organization schema
      * If the view by bid path do not apply, the function returns null
      *
      * @param DataFile
      * @return path to view by pid file, or null if vbp does not apply
      */
-    String getFileViewByPidPath(DataFile file, String host) {
+    String getFileViewByPidPath(DataFile file) {
         if (!file) {
             return null
         }
@@ -304,20 +282,22 @@ class LsdfFilesService {
      * @param runId
      * @return
      */
-    boolean runInFinalLocation(long runId) {
+    /*
+    boolean runFolderInFinalLocation(long runId) {
         Run run = Run.get(runId)
         if (!run) {
             return false
         }
         return runInFinalLocation(run)
     }
-
+    */
     /**
      *
      * @param run
      * @return
      */
-    boolean runInFinalLocation(Run run) {
+    /*
+    boolean runFolderInFinalLocation(Run run) {
         if (!run) {
             // will be exception
             return false
@@ -340,7 +320,7 @@ class LsdfFilesService {
         run.save(flush: true)
         return true
     }
-
+    */
     /**
      *
      *
@@ -400,5 +380,4 @@ class LsdfFilesService {
                 seqTrack.seqType.dirName + "/" + file.run.seqCenter?.dirName + "/"
         return path
     }
-    
 }
