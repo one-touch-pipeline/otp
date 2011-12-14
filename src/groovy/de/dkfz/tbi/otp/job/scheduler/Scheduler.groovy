@@ -233,13 +233,13 @@ class Scheduler {
                 date: new Date(),
                 state: endStateAwareJob.getEndState(),
                 previous: update,
-                processingStep: job.processingStep
+                processingStep: step
                 )
             endStateUpdate.save()
             if (job instanceof DecisionJob && endStateUpdate.state == ExecutionState.SUCCESS) {
-                ((DecisionProcessingStep)job.processingStep).decision = (job as DecisionJob).getDecision()
+                ((DecisionProcessingStep)step).decision = (job as DecisionJob).getDecision()
             }
-            if (!job.processingStep.save(flush: true)) {
+            if (!step.save(flush: true)) {
                 log.fatal("Could not create a ERROR/SUCCESS Update for Job of type ${joinPoint.target.class}")
                 throw new JobExcecutionException("Could not create a ERROR/SUCCESS Update for Job")
             }
