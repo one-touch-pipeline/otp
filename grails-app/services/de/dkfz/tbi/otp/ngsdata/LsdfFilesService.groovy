@@ -74,7 +74,7 @@ class LsdfFilesService {
             return null
         }
         if (file.fileType.type == FileType.Type.METADATA) {
-            String path = metaDataPath + "/data-tracking-orig/" +
+            String path = otp.datPath['metadata'] + "/data-tracking-orig/" +
                     file.run.seqCenter?.dirName +
                     "/run" + file.run.name + file.fileName
             return path
