@@ -73,7 +73,7 @@ public class ProcessingStep implements Serializable {
             if (!val) {
                 return true
             }
-            if (val.process != obj.process) {
+            if (val.process?.id != obj.process?.id) {
                 return "process"
             }
             if (val.jobDefinition?.id == obj.jobDefinition?.id) {
@@ -88,7 +88,7 @@ public class ProcessingStep implements Serializable {
             if (!val) {
                 return true
             }
-            if (val.process != obj.process) {
+            if (val.process?.id != obj.process?.id) {
                 return "process"
             }
             if (val.jobDefinition?.id == obj.jobDefinition?.id) {
