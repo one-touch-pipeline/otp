@@ -42,6 +42,12 @@ class JobExecutionPlan {
      * The parameter which is static for the process
      */
     ProcessParameter processParameter
+    /**
+     * The number of Processes can be limited to a certain values if needed.
+     * If the value is negative there is no limit.
+     * The default value is -1, indicating that there is no limitation.
+     */
+    int numberOfAllowedProcesses = -1
 
     static constraints = {
         name(nullable: false, blank: false, unique: 'version')
