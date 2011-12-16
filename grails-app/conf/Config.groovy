@@ -176,61 +176,53 @@ if (otpConfig.otp.ngsdata.bootstrap.mdPath instanceof ConfigObject) {
 } else {
     otp.ngsdata.bootstrap.mdPath = otpConfig.otp.ngsdata.bootstrap.mdPath
 }
-
-// File with path for PBS job IDs
-if (otpConfig.otp.pbs.fileWithPbsIds instanceof ConfigObject) {
-    otp.pbs.fileWithPbsIds = "pbsJob"
-} else {
-    otp.pbs.fileWithPbsIds = otpConfig.otp.pbs.fileWithPbsIds
-}
 // The PBS host
-if (otpConfig.otp.pbs.host instanceof ConfigObject) {
-    otp.pbs.host = ""
+if (otpConfig.otp.pbs.ssh.host instanceof ConfigObject) {
+    otp.pbs.ssh.host = ""
 } else {
-    otp.pbs.host = otpConfig.otp.pbs.host
+    otp.pbs.ssh.host = otpConfig.otp.pbs.ssh.host
 }
 // The PBS key file
-if (otpConfig.otp.pbs.keyfile instanceof ConfigObject) {
-    otp.pbs.keyfile = ""
+if (otpConfig.otp.pbs.ssh.keyfile instanceof ConfigObject) {
+    otp.pbs.ssh.keyfile = ""
 } else {
-    otp.pbs.keyfile = otpConfig.otp.pbs.keyfile
+    otp.pbs.ssh.keyfile = otpConfig.otp.pbs.ssh.keyfile
 }
 // The PBS user name
-if (otpConfig.otp.pbs.username instanceof ConfigObject) {
-    otp.pbs.username = ""
+if (otpConfig.otp.pbs.ssh.username instanceof ConfigObject) {
+    otp.pbs.ssh.username = ""
 } else {
-    otp.pbs.username = otpConfig.otp.pbs.username
+    otp.pbs.ssh.username = otpConfig.otp.pbs.ssh.username
 }
 // The PBS user's password
-if (otpConfig.otp.pbs.password instanceof ConfigObject) {
-    otp.pbs.password = ""
+if (otpConfig.otp.pbs.ssh.password instanceof ConfigObject) {
+    otp.pbs.ssh.password = ""
 } else {
-    otp.pbs.password = otpConfig.otp.pbs.password
+    otp.pbs.ssh.password = otpConfig.otp.pbs.ssh.password
 }
 // The path to the file holding commands to be executed on the PBS
-if (otpConfig.otp.pbs.commandResource instanceof ConfigObject) {
-    otp.pbs.commandResource = ""
+if (otpConfig.otp.pbs.ssh.commandResource instanceof ConfigObject) {
+    otp.pbs.ssh.commandResource = ""
 } else {
-    otp.pbs.commandResource = otpConfig.otp.pbs.commandResource
+    otp.pbs.ssh.commandResource = otpConfig.otp.pbs.ssh.commandResource
 }
 // The timeout for the commands processed on the PBS (if zero, it runs infinitely)
-if (otpConfig.otp.pbs.timeout instanceof ConfigObject) {
+if (otpConfig.otp.pbs.ssh.timeout instanceof ConfigObject) {
     otp.pbs.timeout = ""
 } else {
-    otp.pbs.timeout = otpConfig.otp.pbs.timeout
+    otp.pbs.ssh.timeout = otpConfig.otp.pbs.ssh.timeout
 }
-// If the new output of the PBS' shall be appended to the file or overwrite
-if (otpConfig.otp.pbs.appendToFile instanceof ConfigObject) {
-    otp.pbs.appendToFile = ""
+// The pattern identifying the PBS id
+if (otpConfig.otp.pbs.pattern.pbsId instanceof ConfigObject) {
+    otp.pbs.pattern.pbsId = ""
 } else {
-    otp.pbs.appendToFile = otpConfig.otp.pbs.appendToFile
+    otp.pbs.pattern.pbsId = otpConfig.otp.pbs.pattern.pbsId
 }
-// The file to which the PBS' output is written to
-// TODO replace with direct database write
-if (otpConfig.otp.pbs.fileToOutput instanceof ConfigObject) {
-    otp.pbs.fileToOutput = ""
+// The pattern identifying if a PBS job is running
+if (otpConfig.otp.pbs.pattern.running instanceof ConfigObject) {
+    otp.pbs.pattern.running = ""
 } else {
-    otp.pbs.fileToOutput = otpConfig.otp.pbs.fileToOutput
+    otp.pbs.pattern.running = otpConfig.otp.pbs.pattern.running
 }
 
 // Added by the Spring Security Core plugin:
