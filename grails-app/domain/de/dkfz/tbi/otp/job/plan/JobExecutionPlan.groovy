@@ -64,5 +64,6 @@ class JobExecutionPlan {
         // firstJob needs to be nullable as JobDefinition has a dependency on JobExecutionPlan and this circle could not be solved in the database
         startJob(nullable: true)
         processParameter(nullable: true, blank: true)
+        numberOfAllowedProcesses(nullable: true, blank: true)
     }
 }
