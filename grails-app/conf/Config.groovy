@@ -198,7 +198,17 @@ if ((otpConfig.otp.jabber.enabled instanceof ConfigObject) || !Boolean.parseBool
     otp.jabber.service = otpConfig.otp.jabber.service
 }
 
+// configure paths
+otp.dataPath.bioquant = otpConfig.otp.dataPath.bioquant
+otp.dataPath.dkfz = otpConfig.otp.dataPath.dkfz
+otp.dataPath.metadata = otpConfig.otp.dataPath.metadata
+
+
 // exclude unused plugins
 if (pluginsToExclude) {
     grails.plugin.exclude = pluginsToExclude
 }
+
+
+
+
