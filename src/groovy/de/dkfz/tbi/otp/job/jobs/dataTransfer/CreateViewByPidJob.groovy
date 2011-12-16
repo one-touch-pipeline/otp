@@ -13,6 +13,7 @@ class CreateViewByPidJob extends AbstractJobImpl {
     @Autowired
     LsdfFilesService lsdfFilesService
 
+    // for testing the transfer bioquant -> dkfz
     final private String projectName = "PROJECT_NAME"
 
     @Override
