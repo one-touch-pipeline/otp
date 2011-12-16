@@ -12,7 +12,7 @@ class PbsHelper {
     @Autowired
     GrailsApplication grailsApplication
 
-    Logger log = new Logger(this)
+    Logger log = Logger.getLogger(PbsHelper.class)
 
     public File sshConnect(File resource = null, String cmd = null) {
         if(!resource && !cmd) {
