@@ -158,6 +158,73 @@ if (otpConfig.otp.mail.sender instanceof ConfigObject) {
     otp.mail.sender = otpConfig.otp.mail.sender
 }
 
+// Folder for putting stacktrace files made by error log service
+if (otpConfig.otp.errorLogging.stacktraces instanceof ConfigObject) {
+    otp.errorLogging.stacktraces = "../target/stacktraces/"
+} else {
+    otp.errorLogging.stacktraces = otpConfig.otp.errorLogging.stacktraces
+}
+// Folder for data of NGS data files
+if (otpConfig.otp.ngsdata.bootstrap.dataPath instanceof ConfigObject) {
+    otp.ngsdata.bootstrap.dataPath = ""
+} else {
+    otp.ngsdata.bootstrap.dataPath = otpConfig.otp.ngsdata.bootstrap.dataPath
+}
+// Folder for meta data files of NGS meta data files
+if (otpConfig.otp.ngsdata.bootstrap.mdPath instanceof ConfigObject) {
+    otp.ngsdata.bootstrap.mdPath = ""
+} else {
+    otp.ngsdata.bootstrap.mdPath = otpConfig.otp.ngsdata.bootstrap.mdPath
+}
+// The PBS host
+if (otpConfig.otp.pbs.ssh.host instanceof ConfigObject) {
+    otp.pbs.ssh.host = ""
+} else {
+    otp.pbs.ssh.host = otpConfig.otp.pbs.ssh.host
+}
+// The PBS key file
+if (otpConfig.otp.pbs.ssh.keyfile instanceof ConfigObject) {
+    otp.pbs.ssh.keyfile = ""
+} else {
+    otp.pbs.ssh.keyfile = otpConfig.otp.pbs.ssh.keyfile
+}
+// The PBS user name
+if (otpConfig.otp.pbs.ssh.username instanceof ConfigObject) {
+    otp.pbs.ssh.username = ""
+} else {
+    otp.pbs.ssh.username = otpConfig.otp.pbs.ssh.username
+}
+// The PBS user's password
+if (otpConfig.otp.pbs.ssh.password instanceof ConfigObject) {
+    otp.pbs.ssh.password = ""
+} else {
+    otp.pbs.ssh.password = otpConfig.otp.pbs.ssh.password
+}
+// The path to the file holding commands to be executed on the PBS
+if (otpConfig.otp.pbs.ssh.commandResource instanceof ConfigObject) {
+    otp.pbs.ssh.commandResource = ""
+} else {
+    otp.pbs.ssh.commandResource = otpConfig.otp.pbs.ssh.commandResource
+}
+// The timeout for the commands processed on the PBS (if zero, it runs infinitely)
+if (otpConfig.otp.pbs.ssh.timeout instanceof ConfigObject) {
+    otp.pbs.timeout = ""
+} else {
+    otp.pbs.ssh.timeout = otpConfig.otp.pbs.ssh.timeout
+}
+// The pattern identifying the PBS id
+if (otpConfig.otp.pbs.pattern.pbsId instanceof ConfigObject) {
+    otp.pbs.pattern.pbsId = ""
+} else {
+    otp.pbs.pattern.pbsId = otpConfig.otp.pbs.pattern.pbsId
+}
+// The pattern identifying if a PBS job is running
+if (otpConfig.otp.pbs.pattern.running instanceof ConfigObject) {
+    otp.pbs.pattern.running = ""
+} else {
+    otp.pbs.pattern.running = otpConfig.otp.pbs.pattern.running
+}
+
 // Added by the Spring Security Core plugin:
 grails.plugins.springsecurity.userLookup.userDomainClassName = 'de.dkfz.tbi.otp.security.User'
 grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'de.dkfz.tbi.otp.security.UserRole'
