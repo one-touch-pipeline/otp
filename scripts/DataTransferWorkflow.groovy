@@ -164,9 +164,8 @@ assert(checkViewByPidJob.save())
 
 
 /*
- * Maping of the output to input used to connect PBS jobs to watchdogs
+ * TODO: Maping of the output to input used to connect PBS jobs to watchdogs
  */
-
 
 
 // set the first job
