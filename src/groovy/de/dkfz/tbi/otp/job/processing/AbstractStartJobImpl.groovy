@@ -74,10 +74,6 @@ abstract class AbstractStartJobImpl implements StartJob {
        if (plan.numberOfAllowedProcesses <= -1) {
            return true
        }
-       List<Process> processes = Process.findAllByJobExecutionPlan(plan)
-       if(processes.size() < plan.numberOfAllowedProcesses) {
-           return true
-       }
-       return false
+       return Process.countByJobExecutionPlanAndFinished(plan, false) < plan.numberOfAllowedProcesses
    }
 }
