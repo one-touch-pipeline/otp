@@ -27,6 +27,10 @@ class MetaDataStartJob extends AbstractStartJobImpl {
         // TODO Assure that the runs are processed only once. Verify via Process?
         List<Run> runs = Run.list()
         runs.each { Run run ->
+            if (!isNewProcessAllowed()) {
+                // new Jobs currently not allowed, so continue
+                return
+            }
             createProcess(new ProcessParameter(value: run.id.toString()))
             println run.name
         }
