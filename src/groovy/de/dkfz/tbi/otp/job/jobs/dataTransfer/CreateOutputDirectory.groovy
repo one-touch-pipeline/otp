@@ -13,7 +13,7 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
     @Autowired
     LsdfFilesService lsdfFilesService
 
-    final private String projectName = "PROJECT_NAME"
+    private String projectName
 
     @Override
     public void execute() throws Exception {
@@ -21,6 +21,7 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
         long runId = Long.parseLong(getProcessParameterValue("run"))
         Run run = Run.get(runId)
 
+        projectName = getParameterValueOrClass("project")
         String[] dirs = lsdfFilesService.getListOfRunDirecotries(run, projectName)
 
         String cmd = ""

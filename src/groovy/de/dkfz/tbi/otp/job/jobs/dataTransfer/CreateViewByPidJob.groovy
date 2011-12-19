@@ -13,15 +13,14 @@ class CreateViewByPidJob extends AbstractJobImpl {
     @Autowired
     LsdfFilesService lsdfFilesService
 
-    // for testing the transfer bioquant -> dkfz
-    final private String projectName = "PROJECT_NAME"
+    private String projectName
 
     @Override
     public void execute() throws Exception {
 
         long runId = Long.parseLong(getProcessParameterValue("run"))
         Run run = Run.get(runId)
-
+        projectName = getParameterValueOrClass("project")
         String cmd = ""
         DataFile[] dataFiles = (DataFile[])run.dataFiles.toArray()
         for(int iFile=0; iFile<dataFiles.length; iFile++) {
