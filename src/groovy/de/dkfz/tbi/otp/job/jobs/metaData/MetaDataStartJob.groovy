@@ -16,6 +16,7 @@ class MetaDataStartJob extends AbstractStartJobImpl {
     @Scheduled(fixedRate=10000l)
     void execute() {
         if (performed) {
+            println "Jobs already started ..."
             return
         }
         if (!getExecutionPlan() || !getExecutionPlan().enabled) {
@@ -28,7 +29,7 @@ class MetaDataStartJob extends AbstractStartJobImpl {
         List<Run> runs = Run.list()
         runs.each { Run run ->
             createProcess(new ProcessParameter(value: run.id.toString()))
-            println run.name
+            println run.toString()
         }
         performed = true
     }
