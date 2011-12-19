@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.ngsdata
 import java.text.SimpleDateFormat
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
-
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 
 class MetaDataService {
@@ -31,6 +30,7 @@ class MetaDataService {
      * @param runId - database id or the Run object
      */
     void registerInputFiles(long runId) {
+
         Run run = Run.get(runId)
         if (!run) {
             return
@@ -196,7 +196,7 @@ class MetaDataService {
         long start = new Date().getTime()
         def keyNames = ["FASTQ_FILE", "ALIGN_FILE"]
         keyNames.each {
-            MetaDataEntry entry	= getMetaDataEntry(dataFile, it)
+            MetaDataEntry entry = getMetaDataEntry(dataFile, it)
             if (!entry) {
                 return
             }

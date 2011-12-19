@@ -79,4 +79,22 @@ abstract class AbstractStartJobImpl implements StartJob {
     protected void createProcess(ProcessParameter processParameter) {
         createProcess([], processParameter)
     }
+
+   /**
+    * Returns if it is allowed to create a new process.
+    *
+    * {@code true} is returned if it is allowed to create a new {@link Process}
+    * for the given {@link JobExecutionPlan} {@code false} otherwise.
+    * @return boolean indicating if it is allowed to create new {@link Process}
+    */
+   protected boolean isNewProcessAllowed() {
+       if(plan.numberOfAllowedProcesses <= -1) {
+           return true
+       }
+       List<Process> processes = Process.findAllByJobExecutionPlan(plan)
+       if(processes.size() < plan.numberOfAllowedProcesses) {
+           return true
+       }
+       return false
+   }
 }

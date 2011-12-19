@@ -1,40 +1,47 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import java.io.*
+//import java.io.*
 
 
 class LsdfFilesService {
     // will go somewhere
     // TODO: these constants should not be here!
-    private static final String basePath = "$ROOT_PATH/project/"
-    private static final String metaDataPath = "~/ngs-isgc/"
+    //private static final String basePath = "$ROOT_PATH/project/"
+    //private static final String metaDataPath = "~/ngs-isgc/"
 
     /**
-     *
-     * @param runId
+     * This function return path to the initial location
+     * of the given dataFile
      */
-    void checkAllFiles(long runId) {
-        Run run = Run.get(runId)
-        if (!run) {
-            log.debug("Run ${runID} not found")
-            return
-        }
-        DataFile.findAllByRun(run).each { DataFile dataFile ->
-            boolean exists = fileExists(dataFile)
-            if (!exists) {
-                log.debug("file ${dataFile.fileName} does not exist")
-                // continue
-                return
+    public String getFileInitialPath(DataFile dataFile) {
+        Run run = dataFile.run
+        return run.dataPath() + "/" + run.name() + "/" +
+            dataFile.pathName() + "/" + dataFile.fileName
+    }
+
+    /**
+     * This function returns an array of strings to final locations of this runs.
+     * Only data files belonging to a given project are considered, because
+     * projects are often processed separately.
+     * 
+     * @param run to be processed
+     * @param projectName only data files belonging to a given project are used
+     * @return
+     */
+    String[] getListOfRunDirecotries(run, projectName) {
+
+        DataFile dataFiles = run.dataFiles
+        Set<String> paths = new HashSet<String>()
+        dataFiles.each {DataFile dataFile ->
+            if (dataFile.project.name.contains(projectName)) {
+                String path = getPathToRun(dataFile)
+                if (path != null) {
+                    String fullPath = path + "/run" + run.name
+                    paths << fullPath
+                }
             }
-            dataFile.fileExists = true
-            dataFile.fileSize = fileSize(dataFile)
-            dataFile.dateFileSystem = fileCreationDate(dataFile)
-            String vbpPath = getViewByPidPath(dataFile)
-            if (vbpPath) {
-                dataFile.fileLinked = fileExists(vbpPath)
-            }
         }
-        run.save(flush: true)
+        return (String[])paths.toArray()
     }
 
     /**
@@ -42,20 +49,22 @@ class LsdfFilesService {
      * @param fileId
      * @return
      */
-    String getFilePath(long fileId) {
-        DataFile file = DateFile.getAt(fileId)
+    String getFileFinalPath(long fileId) {
+        DataFile file = DataFile.getAt(fileId)
         if (!file) {
             return null
         }
-        return getFilePath(file)
+        return getFileFinalPath(file)
     }
 
     /**
-     *
+     * Important function. 
+     * This function knows all naming conventions and data organization
+     * 
      * @param file
-     * @return
+     * @return String with path or null if path can not be established
      */
-    String getFilePath(DataFile file) {
+    String getFileFinalPath(DataFile file) {
         if (!file) {
             log.debug("null file object")
             return null
@@ -65,7 +74,7 @@ class LsdfFilesService {
             return null
         }
         if (file.fileType.type == FileType.Type.METADATA) {
-            String path = metaDataPath + "/data-tracking-orig/" +
+            String path = otp.datPath['metadata'] + "/data-tracking-orig/" +
                     file.run.seqCenter?.dirName +
                     "/run" + file.run.name + file.fileName
             return path
@@ -75,6 +84,10 @@ class LsdfFilesService {
             seqTypeDir = file.seqTrack.seqType?.dirName
         } else if (file.alignmentLog) {
             seqTypeDir = file.alignmentLog.seqTrack.seqType?.dirName
+        }
+        String basePath = otp.dataPath[host]
+        if (!basePath) {
+            return null
         }
         String path =
                 basePath + file?.project?.dirName + "/sequencing/" +
@@ -89,20 +102,23 @@ class LsdfFilesService {
      * @param fileId
      * @return
      */
-    String getViewByPidPath(long fileId) {
+    String getFileViewByPidPath(long fileId) {
         DataFile file = DataFile.get(fileId)
         if (!file) {
             return null
         }
-        return getViewByPidPath(file)
+        return getFileViewByPidPath(file)
     }
 
     /**
+     * Important function.
+     * This function knows view-by-pid data organization schema
+     * If the view by bid path do not apply, the function returns null
      *
      * @param DataFile
-     * @return
+     * @return path to view by pid file, or null if vbp does not apply
      */
-    String getViewByPidPath(DataFile file) {
+    String getFileViewByPidPath(DataFile file) {
         if (!file) {
             return null
         }
@@ -117,6 +133,10 @@ class LsdfFilesService {
         if (!seqTrack) {
             log.debug("File used but no SeqTrack ${file.fileName}")
             return null
+        }
+        String basePath = otp.dataPath[host]
+        if (!basePath) {
+             return null
         }
         String pid = seqTrack.sample.individual.pid
         String path =
@@ -145,6 +165,7 @@ class LsdfFilesService {
      * @param file
      * @return
      */
+    /*
     boolean fileExists(DataFile file) {
         String path = getFilePath(file)
         if (!path) {
@@ -152,20 +173,21 @@ class LsdfFilesService {
         }
         return fileExists(path)
     }
-
+    */
     /**
      *
      * @param fileId
      * @return
      */
+    /*
     boolean fileExists(long fileId) {
-        DataFile file = DataFiele.get(fileId)
+        DataFile file = DataFile.get(fileId)
         if (!file) {
             return false
         }
         return fileExists(file)
     }
-
+    */
     /**
      *
      * @param path
@@ -184,6 +206,7 @@ class LsdfFilesService {
      * @param file
      * @return
      */
+    /*
     long fileSize(DataFile file) {
         String path = getFilePath(file)
         if (!path) {
@@ -191,12 +214,13 @@ class LsdfFilesService {
         }
         return fileSize(path)
     }
-
+    */
     /**
      *
      * @param fileId
      * @return
      */
+    /*
     long fileSize(long fileId) {
         DataFile file = DataFile.get(fileId)
         if (!file) {
@@ -204,7 +228,7 @@ class LsdfFilesService {
         }
         return fileSize(file)
     }
-
+    */
     /**
      *
      * @param path
@@ -227,6 +251,7 @@ class LsdfFilesService {
      * @param file
      * @return
      */
+    /*
     Date fileCreationDate(DataFile file) {
         if (!file) {
             return null
@@ -237,12 +262,13 @@ class LsdfFilesService {
         }
         return fileCreationDate(path)
     }
-
+    */
     /**
      *
      * @param fileId
      * @return
      */
+    /*
     Date fileCreationDate(long fileId) {
         DataFile file = DataFile.get(fileId)
         if (!file) {
@@ -250,27 +276,30 @@ class LsdfFilesService {
         }
         return fileCreationDate(file)
     }
-
+    */
     /**
      *
      * @param runId
      * @return
      */
-    boolean runInFinalLocation(long runId) {
+    /*
+    boolean runFolderInFinalLocation(long runId) {
         Run run = Run.get(runId)
         if (!run) {
             return false
         }
         return runInFinalLocation(run)
     }
-
+    */
     /**
      *
      * @param run
      * @return
      */
-    boolean runInFinalLocation(Run run) {
+    /*
+    boolean runFolderInFinalLocation(Run run) {
         if (!run) {
+            // will be exception
             return false
         }
         String [] paths = getAllPathsForRun(run)
@@ -291,7 +320,7 @@ class LsdfFilesService {
         run.save(flush: true)
         return true
     }
-
+    */
     /**
      *
      *
@@ -310,6 +339,7 @@ class LsdfFilesService {
      */
     String[] getAllPathsForRun(Run run) {
         if (!run) {
+            //exception
             return null
         }
         Set<String> paths = new HashSet<String>()
@@ -344,52 +374,10 @@ class LsdfFilesService {
         if (!seqTrack) {
             return null
         }
+        String basePath = otp.dataPath[file.project.host]
         String path =
                 basePath + file?.project?.dirName + "/sequencing/" +
                 seqTrack.seqType.dirName + "/" + file.run.seqCenter?.dirName + "/"
         return path
-    }
-
-    boolean checkAllRuns(String projectName) {
-        Project project = Project.findByName(projectName)
-        String dir = basePath + "/" + project.dirName + "/sequencing/"
-        File baseDir = new File(dir)
-        File[] seqDirs = baseDir.listFiles()
-        int nMissing = 0
-        for (int i=0; i<seqDirs.size(); i++) {
-            File seqTypeDir = seqDirs[i]
-            if (!seqTypeDir.isDirectory()) {
-                continue
-            }
-            SeqType seqType = SeqType.findByDirName(seqTypeDir.getName())
-            if (!seqType) {
-                continue
-            }
-            File[] seqCenters = seqTypeDir.listFiles()
-            for (int j=0; j<seqCenters.size(); j++) {
-                SeqCenter center = SeqCenter.findByDirName(seqCenters[j].getName())
-                if (!center) {
-                    continue
-                }
-                log.debug("\nChecking ${seqTypeDir} ${seqCenters[j]}")
-                File[] runs = seqCenters[j].listFiles()
-                for (int iRun=0; iRun<runs.size(); iRun++) {
-                    if (!runs[iRun].getName().contains("run")) {
-                        continue
-                    }
-                    log.debug("\t ${runs[iRun].getName()}")
-                    String runName = runs[iRun].getName().substring(3)
-                    Run run = Run.findByName(runName)
-                    if (!run) {
-                        nMissing++
-                        log.debug("!!! Run ${runName} does not exist !!!")
-                    }
-                }
-            }
-        }
-        if (nMissing > 0) {
-            return false
-        }
-        return true
     }
 }

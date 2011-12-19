@@ -28,9 +28,9 @@ class ErrorLogService {
      */
     def grailsApplication
 
-   /**
-    * Dependency injection of Servlet Context
-    */
+    /**
+     * Dependency injection of Servlet Context
+     */
     def servletContext
 
     /**
@@ -53,11 +53,11 @@ class ErrorLogService {
         String fileName = (exceptionElements).encodeAsMD5() + ".xml"
         File exceptionStoringFile = new File(fileName)
         String dir = servletContext.getRealPath(grailsApplication.config.otp.errorLogging.stacktraces)
-        String exceptionFilePath = "${dir}${File.separatorChar}"
+        String exceptionFilePath = "${dir}${File.separatorChar}${exceptionStoringFile}"
         if (new File(exceptionFilePath).isFile()) {
             addToXml(exceptionFilePath)
         } else {
-            contentToXml(thrownException, fileName, exceptionFilePath)
+            contentToXml(thrownException, fileName, dir)
         }
     }
 
@@ -71,9 +71,7 @@ class ErrorLogService {
      * @param content The content to be stored
      */
     private void writeToFile(File file, String content) {
-        file.withWriter { out ->
-            out.println content
-        }
+        file.withWriter { out -> out.println content }
     }
 
     /**
