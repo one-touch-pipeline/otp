@@ -48,6 +48,17 @@ JobDefinition createOutputDirectoryJob = new JobDefinition(
 )
 assert(createOutputDirectoryJob.save())
 
+// will be executed only for "PROJECT_NAME"
+ParameterType type = new ParameterType(
+    name: "project",
+    jobDefinition: createOutputDirectoryJob,
+    parameterUsage: ParameterUsage.INPUT
+)
+assert(type.save())
+Parameter parameter = new Parameter(type: type, value: "PROJECT_NAME")
+assert(parameter.save())
+
+
 /*
  * This job sends PBS jobs with copy command
  * Output of this job shall be list of PBS jobs
