@@ -42,7 +42,7 @@ class ExampleStartJob extends AbstractStartJobImpl {
                 return file.exists() && file.isFile() && file.name.endsWith("tar.gz")
             }
         }).each {
-            if(isNewProcessAllowed) {
+            if (isNewProcessAllowed()) {
                 schedulerService.createProcess(this, [
                     new Parameter(type: ParameterType.findByNameAndJobDefinition("file", getExecutionPlan().startJob), value: it.absolutePath)
                     ])
