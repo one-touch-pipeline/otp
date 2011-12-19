@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
-@Component("checkFinalLocation")
+@Component("checkViewByPidJob")
 @Scope("prototype")
 class CheckViewByPidJob extends AbstractEndStateAwareJobImpl {
 
