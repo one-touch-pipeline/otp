@@ -6,6 +6,7 @@ class BootstrapController {
     def seqScanService
     def mergingService
     def lsdfFilesService
+    def filesCompletenessService
 
     def index() {
     }
@@ -31,7 +32,7 @@ class BootstrapController {
     }
 
     def checkProstate = {
-        lsdfFilesService.checkAllRuns("PROJECT_NAME")
+        filesCompletenessService.checkAllRuns("PROJECT_NAME")
         render "checked"
     }
 }
