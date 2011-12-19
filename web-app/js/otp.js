@@ -215,21 +215,23 @@ OTP.prototype.createProcessListView = function (selector, planId) {
             rowData = json.aaData[i];
             rowData[0] = '<a href="' + $.otp.contextPath + '/processes/process/' + rowData[0] + '">' + rowData[0] + '</a>';
             rowData[1] = $.otp.statusImageHtml(rowData[1].name);
-            rowData[2] = $.otp.renderDate(rowData[2]);
+            rowData[2] = rowData[2] ? rowData[2] : "-";
             rowData[3] = $.otp.renderDate(rowData[3]);
-            if (rowData[5].error) {
-                rowData[5] = '<a href="' + $.otp.contextPath + '/processes/processingStep/' + rowData[5].id + '" title="' + rowData[5].error + '">' + rowData[5].state.name + '</a>';
+            rowData[4] = $.otp.renderDate(rowData[4]);
+            if (rowData[6].error) {
+                rowData[6] = '<a href="' + $.otp.contextPath + '/processes/processingStep/' + rowData[6].id + '" title="' + rowData[6].error + '">' + rowData[6].state.name + '</a>';
             } else {
-                rowData[5] = rowData[5].state.name;
+                rowData[6] = rowData[6].state.name;
             }
         }
     }, [
         { "bSortable": true,  "aTargets": [0] },
         { "bSortable": false, "aTargets": [1] },
-        { "bSortable": true,  "aTargets": [2] },
-        { "bSortable": false, "aTargets": [3] },
+        { "bSortable": false, "aTargets": [2] },
+        { "bSortable": true,  "aTargets": [3] },
         { "bSortable": false, "aTargets": [4] },
-        { "bSortable": false, "aTargets": [5] }
+        { "bSortable": false, "aTargets": [5] },
+        { "bSortable": false, "aTargets": [6] }
     ]);
 };
 

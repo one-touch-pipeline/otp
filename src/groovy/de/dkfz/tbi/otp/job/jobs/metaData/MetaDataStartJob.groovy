@@ -31,7 +31,7 @@ class MetaDataStartJob extends AbstractStartJobImpl {
                 // new Jobs currently not allowed, so continue
                 return
             }
-            createProcess(new ProcessParameter(value: run.id.toString()))
+            createProcess(new ProcessParameter(value: run.id.toString(), className: run.class.name))
             println run.name
         }
         performed = true

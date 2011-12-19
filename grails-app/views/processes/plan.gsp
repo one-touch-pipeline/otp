@@ -18,6 +18,7 @@
                 <tr>
                     <th>&nbsp;</th>
                     <th>&nbsp;</th>
+                    <th>Operates on</th>
                     <th>Creation Date</th>
                     <th>Last Update</th>
                     <th>Current Processing Step</th>
