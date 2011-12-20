@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import grails.converters.JSON
+import grails.util.GrailsNameUtils
 
 class ProcessesController {
     private enum PlanStatus {
@@ -137,9 +138,21 @@ class ProcessesController {
         processes.each { Process process ->
             ProcessingStep latest = processService.getLatestProcessingStep(process)
             ExecutionState lastState = processService.getState(process)
+            ProcessParameter parameter = ProcessParameter.findByProcess(process)
+            String parameterData = null
+            if (parameter) {
+                if (parameter.className) {
+                    def object = ProcessParameter.executeQuery("FROM " + parameter.className + " WHERE id=" + parameter.value)
+                    parameterData = g.link(controller: GrailsNameUtils.getShortName(parameter.className), action: "show", id: parameter.value) { object[0].toString() }
+                } else {
+                    // not a class, just use the value
+                    parameterData = parameter.value
+                }
+            }
             dataToRender.aaData << [
                 process.id,
                 stateForExecutionState(process, lastState),
+                parameterData,
                 process.started,
                 processService.getLastUpdate(latest),
                 latest.jobDefinition.name,

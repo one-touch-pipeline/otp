@@ -88,13 +88,9 @@ abstract class AbstractStartJobImpl implements StartJob {
     * @return boolean indicating if it is allowed to create new {@link Process}
     */
    protected boolean isNewProcessAllowed() {
-       if(plan.numberOfAllowedProcesses <= -1) {
+       if (plan.numberOfAllowedProcesses <= -1) {
            return true
        }
-       List<Process> processes = Process.findAllByJobExecutionPlan(plan)
-       if(processes.size() < plan.numberOfAllowedProcesses) {
-           return true
-       }
-       return false
+       return Process.countByJobExecutionPlanAndFinished(plan, false) < plan.numberOfAllowedProcesses
    }
 }
