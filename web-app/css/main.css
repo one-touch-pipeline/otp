@@ -612,6 +612,7 @@ td.true {
 td.false {
     background-image: url(../images/skin/exclamation.png);
     background-repeat: no-repeat;
+    color: red;
     text-indent: 25px;
 }
 
