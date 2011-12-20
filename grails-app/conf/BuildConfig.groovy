@@ -38,6 +38,7 @@ grails.project.dependency.resolution = {
         runtime "commons-jexl:commons-jexl:1.1"
         // XMPP
         compile "jivesoftware:smack:3.1.0"
+        runtime 'org.apache.ant:ant-jsch:1.8.2'
     }
 
     plugins {
