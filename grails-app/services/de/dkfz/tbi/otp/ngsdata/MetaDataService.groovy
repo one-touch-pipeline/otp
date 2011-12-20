@@ -193,7 +193,6 @@ class MetaDataService {
      * @param dataFile
      */
     private void assignFileName(DataFile dataFile) {
-        long start = new Date().getTime()
         def keyNames = ["FASTQ_FILE", "ALIGN_FILE"]
         keyNames.each {
             MetaDataEntry entry = getMetaDataEntry(dataFile, it)

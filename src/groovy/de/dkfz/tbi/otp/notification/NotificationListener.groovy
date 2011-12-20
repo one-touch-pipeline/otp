@@ -91,7 +91,6 @@ class NotificationListener implements ApplicationListener {
         }
         Process process = Process.get(event.payload.id)
         // for a Process the Trigger is the JobExecutionPlan
-        String className = JobExecutionPlan.class.getName()
         List<Notification> notifications = resolveNotifications(JobExecutionPlan.class.getName(), process.jobExecutionPlan.id, event.type)
         if (notifications.isEmpty()) {
             // No Notifications configured for the JobExecutionPlan
