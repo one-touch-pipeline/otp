@@ -161,6 +161,8 @@ class JobExecutionPlanServiceTests {
         JobExecutionPlanService service = new JobExecutionPlanService()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false)
         JobExecutionPlan plan2 = new JobExecutionPlan(name: "test", obsoleted: false)
+        plan.previousPlan = null
+        plan2.previousPlan = null
         assertNotNull(plan.save())
         assertNotNull(plan2.save())
         // has no Process - should return false
@@ -183,14 +185,20 @@ class JobExecutionPlanServiceTests {
     @Test
     void testIsProcessRunningObsoletedPlan() {
         JobExecutionPlanService service = new JobExecutionPlanService()
-        JobExecutionPlan plan = new JobExecutionPlan(name: "testIsProcessRunningObsoletedPlan", obsoleted: true, planVersion: 0)
+        JobExecutionPlan plan = new JobExecutionPlan(id: 1, name: "testIsProcessRunningObsoletedPlan", obsoleted: true, planVersion: 0, previousPlan: null)
         assertNotNull(plan.save())
-        JobExecutionPlan plan2 = new JobExecutionPlan(name: "testIsProcessRunningObsoletedPlan", obsoleted: true, planVersion: 1, previousPlan: plan)
+        JobExecutionPlan plan2 = new JobExecutionPlan(id: 2, name: "testIsProcessRunningObsoletedPlan", obsoleted: true, planVersion: 1, previousPlan: plan)
         assertNotNull(plan2.save())
-        JobExecutionPlan plan3 = new JobExecutionPlan(name: "testIsProcessRunningObsoletedPlan", obsoleted: false, planVersion: 2, previousPlan: plan2)
+        plan.previousPlan = null
+        assertNotNull(plan.save())
+        JobExecutionPlan plan3 = new JobExecutionPlan(id: 3, name: "testIsProcessRunningObsoletedPlan", obsoleted: false, planVersion: 2, previousPlan: plan2)
         assertNotNull(plan3.save())
+        plan2.previousPlan = plan
+        assertNotNull(plan2.save())
+        plan.previousPlan = null
+        assertNotNull(plan.save())
         // an unrelated Plan
-        JobExecutionPlan plan4 = new JobExecutionPlan(name: "otherPlan", obsoleted: false, planVersion: 0)
+        JobExecutionPlan plan4 = new JobExecutionPlan(id: 4, name: "otherPlan", obsoleted: false, planVersion: 0)
         assertNotNull(plan4.save())
         // no process is running
         assertFalse(service.isProcessRunning(plan))
@@ -325,14 +333,20 @@ class JobExecutionPlanServiceTests {
     @Test
     void testGetLastSucceededProcessMultiplePlans() {
         JobExecutionPlanService service = new JobExecutionPlanService()
-        JobExecutionPlan plan1 = new JobExecutionPlan(name: "testGetLastSucceededProcessMultiplePlans", obsoleted: true, planVersion: 0)
+        JobExecutionPlan plan1 = new JobExecutionPlan(id: 1, name: "testGetLastSucceededProcessMultiplePlans", obsoleted: true, planVersion: 0)
         assertNotNull(plan1.save())
-        JobExecutionPlan plan2 = new JobExecutionPlan(name: "testGetLastSucceededProcessMultiplePlans", obsoleted: true, planVersion: 1, previousPlan: plan1)
+        JobExecutionPlan plan2 = new JobExecutionPlan(id: 2, name: "testGetLastSucceededProcessMultiplePlans", obsoleted: true, planVersion: 1, previousPlan: plan1)
         assertNotNull(plan2.save())
-        JobExecutionPlan plan3 = new JobExecutionPlan(name: "testGetLastSucceededProcessMultiplePlans", obsoleted: false, planVersion: 2, previousPlan: plan2)
+        plan1.previousPlan = null
+        assertNotNull(plan1.save())
+        JobExecutionPlan plan3 = new JobExecutionPlan(id: 3, name: "testGetLastSucceededProcessMultiplePlans", obsoleted: false, planVersion: 2, previousPlan: plan2)
         assertNotNull(plan3.save())
+        plan2.previousPlan = plan1
+        assertNotNull(plan2.save())
+        plan1.previousPlan = null
+        assertNotNull(plan1.save())
         // an unrelated Plan
-        JobExecutionPlan plan4 = new JobExecutionPlan(name: "otherPlan", obsoleted: false, planVersion: 0)
+        JobExecutionPlan plan4 = new JobExecutionPlan(id: 4, name: "otherPlan", obsoleted: false, planVersion: 0)
         assertNotNull(plan4.save())
         // let's create some processes
         Process process1 = new Process(finished: true, jobExecutionPlan: plan1, started: new Date(), startJobClass: "foo", startJobVersion: "1")
@@ -515,14 +529,20 @@ class JobExecutionPlanServiceTests {
     @Test
     void testGetLastFailedProcessMultiplePlans() {
         JobExecutionPlanService service = new JobExecutionPlanService()
-        JobExecutionPlan plan1 = new JobExecutionPlan(name: "testGetLastFailedProcessMultiplePlans", obsoleted: true, planVersion: 0)
+        JobExecutionPlan plan1 = new JobExecutionPlan(id: 1, name: "testGetLastFailedProcessMultiplePlans", obsoleted: true, planVersion: 0)
         assertNotNull(plan1.save())
-        JobExecutionPlan plan2 = new JobExecutionPlan(name: "testGetLastFailedProcessMultiplePlans", obsoleted: true, planVersion: 1, previousPlan: plan1)
+        JobExecutionPlan plan2 = new JobExecutionPlan(id: 2, name: "testGetLastFailedProcessMultiplePlans", obsoleted: true, planVersion: 1, previousPlan: plan1)
         assertNotNull(plan2.save())
-        JobExecutionPlan plan3 = new JobExecutionPlan(name: "testGetLastFailedProcessMultiplePlans", obsoleted: false, planVersion: 2, previousPlan: plan2)
+        plan1.previousPlan = null
+        assertNotNull(plan1.save())
+        JobExecutionPlan plan3 = new JobExecutionPlan(id: 3, name: "testGetLastFailedProcessMultiplePlans", obsoleted: false, planVersion: 2, previousPlan: plan2)
         assertNotNull(plan3.save())
+        plan2.previousPlan = plan1
+        assertNotNull(plan2.save())
+        plan1.previousPlan = null
+        assertNotNull(plan1.save())
         // an unrelated Plan
-        JobExecutionPlan plan4 = new JobExecutionPlan(name: "otherPlan", obsoleted: false, planVersion: 0)
+        JobExecutionPlan plan4 = new JobExecutionPlan(id: 4, name: "otherPlan", obsoleted: false, planVersion: 0)
         assertNotNull(plan4.save())
         // let's create some processes
         Process process1 = new Process(finished: true, jobExecutionPlan: plan1, started: new Date(), startJobClass: "foo", startJobVersion: "1")
