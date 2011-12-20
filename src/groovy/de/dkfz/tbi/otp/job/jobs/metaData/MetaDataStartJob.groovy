@@ -28,7 +28,7 @@ class MetaDataStartJob extends AbstractStartJobImpl {
         // TODO Assure that the runs are processed only once. Verify via Process?
         List<Run> runs = Run.list()
         runs.each { Run run ->
-            createProcess(new ProcessParameter(value: run.id.toString()))
+            createProcess(new ProcessParameter(value: run.id.toString(), className: run.class.name))
             println run.toString()
         }
         performed = true
