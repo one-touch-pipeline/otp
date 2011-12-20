@@ -55,7 +55,7 @@ class ErrorLogService {
         String dir = servletContext.getRealPath(grailsApplication.config.otp.errorLogging.stacktraces)
         String exceptionFilePath = "${dir}${File.separatorChar}${exceptionStoringFile}"
         if (new File(exceptionFilePath).isFile()) {
-            addToXml(exceptionFilePath)
+            addToXml(new File(exceptionFilePath))
         } else {
             contentToXml(thrownException, fileName, dir)
         }
