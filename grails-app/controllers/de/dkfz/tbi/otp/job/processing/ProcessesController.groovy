@@ -73,7 +73,7 @@ class ProcessesController {
             int succeeded = jobExecutionPlanService.getNumberOfSuccessfulFinishedProcesses(plan)
             int finished = jobExecutionPlanService.getNumberOfFinishedProcesses(plan)
             dataToRender.aaData << [
-                calculateStatus(plan, lastSuccess, lastFailure, lastFinished),
+                calculateStatus(plan, lastSuccess, lastFinished),
                 finished > 0 ? [succeeded: succeeded, finished: finished] : null,
                 [id: plan.id, name: plan.name],
                 jobExecutionPlanService.getNumberOfProcesses(plan),
@@ -307,7 +307,7 @@ class ProcessesController {
         render dataToRender as JSON
     }
 
-    private PlanStatus calculateStatus(JobExecutionPlan plan, Process lastSuccess, Process lastFailure, Process lastFinished) {
+    private PlanStatus calculateStatus(JobExecutionPlan plan, Process lastSuccess, Process lastFinished) {
         if (!plan.enabled) {
             return PlanStatus.DISABLED
         }
