@@ -773,13 +773,8 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         schedulerService.createProcess(job, [])
 
         // schedule
-        try {
+        shouldFail(SchedulerException) {
             schedulerService.schedule()
-            fail("Exception of type SchedulerException was expected")
-        } catch (SchedulerException e) {
-            assertEquals("Could not create new ProcessingStep", e.message)
-            assertTrue(e.cause instanceof IncorrectProcessingException)
-            assertEquals("Process finished but is not in success state", e.cause.message)
         }
     }
 }
