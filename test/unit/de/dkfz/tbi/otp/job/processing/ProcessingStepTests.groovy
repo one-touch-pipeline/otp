@@ -219,8 +219,8 @@ class ProcessingStepTests {
 
     @Test
     void testPrevious() {
-        Process process = new Process()
-        Process process2 = new Process()
+        Process process = new Process(id: 1)
+        Process process2 = new Process(id: 2)
         JobDefinition jobDefinition = new JobDefinition(id: 1)
         JobDefinition jobDefinition2 = new JobDefinition(id: 2)
         ProcessingStep testStep1 = new ProcessingStep(process: process2, jobDefinition: jobDefinition)
@@ -248,8 +248,8 @@ class ProcessingStepTests {
 
     @Test
     void testNext() {
-        Process process = new Process()
-        Process process2 = new Process()
+        Process process = new Process(id: 1)
+        Process process2 = new Process(id: 2)
         JobDefinition jobDefinition = new JobDefinition(id: 1)
         JobDefinition jobDefinition2 = new JobDefinition(id: 2)
         ProcessingStep testStep1 = new ProcessingStep(process: process2, jobDefinition: jobDefinition)
