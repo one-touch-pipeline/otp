@@ -6,9 +6,6 @@ import grails.test.mixin.*
 import grails.test.mixin.support.*
 import org.junit.*
 
-import de.dkfz.tbi.otp.job.plan.JobDefinition;
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan;
-
 /**
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */

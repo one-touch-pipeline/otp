@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.job.plan
 
 import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterMapping
-import de.dkfz.tbi.otp.job.processing.ParameterType
 
 class JobDefinition {
     /**

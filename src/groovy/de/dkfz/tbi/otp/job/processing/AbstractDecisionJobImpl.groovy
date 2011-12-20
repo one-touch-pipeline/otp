@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.job.plan.JobDecision
-import de.dkfz.tbi.otp.job.plan.DecisionMapping
 
 /**
  * Abstract base class for {@link DecisionJob}s.

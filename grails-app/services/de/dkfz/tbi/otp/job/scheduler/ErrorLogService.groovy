@@ -1,12 +1,6 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import groovy.xml.MarkupBuilder
-import java.lang.reflect.Field
-import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
-import org.codehaus.groovy.grails.plugins.codecs.MD5Codec
-import javax.servlet.ServletContext
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
 
 /**
  * Service for logging exceptions to files

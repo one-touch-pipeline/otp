@@ -4,10 +4,7 @@ import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterType
-import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 
-import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component

@@ -6,7 +6,6 @@ import grails.test.mixin.*
 import grails.test.mixin.support.*
 import org.junit.*
 
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan;
 import de.dkfz.tbi.otp.job.processing.ProcessParameter;
 
 /**

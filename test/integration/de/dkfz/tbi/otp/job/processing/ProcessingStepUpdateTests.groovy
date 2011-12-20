@@ -8,12 +8,6 @@ import org.junit.*
 
 import de.dkfz.tbi.otp.job.plan.JobDefinition;
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan;
-import de.dkfz.tbi.otp.job.processing.ExecutionState;
-import de.dkfz.tbi.otp.job.processing.ProcessingError;
-import de.dkfz.tbi.otp.job.processing.ProcessingStep;
-import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate;
-
-import grails.test.mixin.TestFor
 
 class ProcessingStepUpdateTests {
 

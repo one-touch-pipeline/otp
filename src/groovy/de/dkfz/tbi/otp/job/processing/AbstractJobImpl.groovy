@@ -1,9 +1,5 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.job.processing.Parameter
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
-
 /**
  * Abstract Base class for all Job implementations.
  * 

@@ -1,14 +1,9 @@
 package de.dkfz.tbi.otp.testing
 
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
 import de.dkfz.tbi.otp.job.processing.ExecutionState
-import de.dkfz.tbi.otp.job.processing.InvalidStateException
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.job.processing.StartJob
 import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
 
-import org.apache.tools.ant.types.selectors.ExtendSelector
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 

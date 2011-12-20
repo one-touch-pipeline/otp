@@ -1,14 +1,9 @@
 package de.dkfz.tbi.otp.job.processing
 
-import java.util.List
-
 import javax.servlet.ServletContext
 
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.beans.factory.annotation.Autowired
-
-import de.dkfz.tbi.otp.job.plan.JobDecision
-import de.dkfz.tbi.otp.job.plan.DecisionMapping
 
 /**
  * Abstract base class for {@link ValidatingJob}s.

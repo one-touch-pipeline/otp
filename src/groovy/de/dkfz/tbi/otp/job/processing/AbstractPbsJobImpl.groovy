@@ -1,7 +1,5 @@
 package de.dkfz.tbi.otp.job.processing
 
-import java.util.List
-
 import javax.servlet.ServletContext
 
 import org.codehaus.groovy.grails.commons.GrailsApplication

@@ -3,9 +3,7 @@ package de.dkfz.tbi.otp.job.scheduler
 import static org.junit.Assert.*
 
 import java.text.SimpleDateFormat
-import javax.servlet.ServletContext
 import org.apache.commons.io.FileUtils
-import org.apache.commons.io.FilenameUtils;
 
 import org.junit.*
 

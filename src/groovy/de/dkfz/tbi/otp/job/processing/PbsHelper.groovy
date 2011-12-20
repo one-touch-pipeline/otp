@@ -1,12 +1,9 @@
 package de.dkfz.tbi.otp.job.processing
 
-import java.util.List
 import org.apache.log4j.Logger
 
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.beans.factory.annotation.Autowired
-
-import de.dkfz.tbi.otp.example.Md5SumJob
 
 class PbsHelper {
     @Autowired

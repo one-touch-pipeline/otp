@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.testing
 
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 
 import org.springframework.context.annotation.Scope

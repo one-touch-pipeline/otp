@@ -3,8 +3,6 @@ package de.dkfz.tbi.otp.job.scheduler
 import de.dkfz.tbi.otp.job.processing.DecisionJob
 import de.dkfz.tbi.otp.job.processing.DecisionProcessingStep
 import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
-import de.dkfz.tbi.otp.job.processing.IncorrectProcessingException
-import de.dkfz.tbi.otp.job.processing.InvalidStateException;
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.JobExcecutionException
 import de.dkfz.tbi.otp.job.processing.LoggingException;

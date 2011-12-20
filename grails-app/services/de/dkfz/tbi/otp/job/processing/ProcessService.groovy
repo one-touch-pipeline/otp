@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.access.prepost.PostAuthorize
 

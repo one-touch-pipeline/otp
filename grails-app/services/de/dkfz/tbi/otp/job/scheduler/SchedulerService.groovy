@@ -11,7 +11,6 @@ import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterMapping
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
-import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.job.processing.ProcessingError

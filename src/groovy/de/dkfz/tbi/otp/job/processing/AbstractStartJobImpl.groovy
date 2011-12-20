@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.job.processing
 
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
