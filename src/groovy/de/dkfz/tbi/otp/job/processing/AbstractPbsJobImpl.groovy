@@ -38,9 +38,9 @@ abstract public class AbstractPbsJobImpl extends AbstractJobImpl implements PbsJ
      * To connect parameters set in properties file are used.
      * @return List of String with PBS ids
      */
-    public List<String> getPbsIds() {
+    public List<String> sendPbsJob() {
         PbsHelper pbsHelper = new PbsHelper()
-        File fileWithPbsId = pbsHelper.sshConnect()
+        File fileWithPbsId = pbsHelper.sendPbsJob()
         if(!fileWithPbsId.isFile || fileWithPbsId.size() == 0) {
             throw new ProcessingException("File for PBS ids is not existing or empty.")
         }

@@ -20,5 +20,5 @@ public interface PbsJob extends Job {
      * @return List of all job ids on the PBS triggered by this PbsJob.
      * @throws InvalidStateException If the execution of the groovy.de.dkfz.tbi.otp.job.processing.Job (not on the PBS) has not yet finished.
      **/
-    public List<String> getPbsIds() throws InvalidStateException;
+    public List<String> sendPbsJob() throws InvalidStateException;
 }
