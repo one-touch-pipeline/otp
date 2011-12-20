@@ -4,8 +4,11 @@ package de.dkfz.tbi.otp.ngsdata
 
 
 class LsdfFilesService {
+
+    def grailsApplication
+
     // will go somewhere
-    // TODO: these constants should not be here!
+    // TODO: these constants should not be here!src/groovy/de/dkfz/tbi/otp/job/jobs/metaData/MetaDataStartJob.groovy
     //private static final String basePath = "$ROOT_PATH/project/"
     //private static final String metaDataPath = "~/ngs-isgc/"
 
@@ -74,7 +77,8 @@ class LsdfFilesService {
             return null
         }
         if (file.fileType.type == FileType.Type.METADATA) {
-            String path = otp.datPath['metadata'] + "/data-tracking-orig/" +
+            String basePath = grailsApplication.config.otp.datPath['metadata']
+            String path = basePath + "/data-tracking-orig/" +
                     file.run.seqCenter?.dirName +
                     "/run" + file.run.name + file.fileName
             return path
@@ -85,7 +89,7 @@ class LsdfFilesService {
         } else if (file.alignmentLog) {
             seqTypeDir = file.alignmentLog.seqTrack.seqType?.dirName
         }
-        String basePath = otp.dataPath[host]
+        String basePath = grailsApplication.config.otp.dataPath[file.project.host]
         if (!basePath) {
             return null
         }
@@ -134,7 +138,7 @@ class LsdfFilesService {
             log.debug("File used but no SeqTrack ${file.fileName}")
             return null
         }
-        String basePath = otp.dataPath[host]
+        String basePath = grailsApplication.config.otp.dataPath[file.project.host]
         if (!basePath) {
              return null
         }
@@ -374,7 +378,7 @@ class LsdfFilesService {
         if (!seqTrack) {
             return null
         }
-        String basePath = otp.dataPath[file.project.host]
+        String basePath = grailsApplication.config.otp.dataPath[file.project.host]
         String path =
                 basePath + file?.project?.dirName + "/sequencing/" +
                 seqTrack.seqType.dirName + "/" + file.run.seqCenter?.dirName + "/"
