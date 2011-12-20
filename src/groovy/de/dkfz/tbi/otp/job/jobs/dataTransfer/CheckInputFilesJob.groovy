@@ -24,7 +24,7 @@ class CheckInputFilesJob extends AbstractEndStateAwareJobImpl {
      */
     @Override
     public void execute() throws Exception {
-        long runId = Long.parseLong(getProcessParameterValue("run"))
+        long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
         if (filesCompletenessService.checkInitialSequenceFiles(run)) {
             succeed()

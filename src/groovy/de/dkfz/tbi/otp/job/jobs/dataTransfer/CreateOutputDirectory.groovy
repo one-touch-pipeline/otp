@@ -18,7 +18,7 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
     @Override
     public void execute() throws Exception {
 
-        long runId = Long.parseLong(getProcessParameterValue("run"))
+        long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
 
         projectName = getParameterValueOrClass("project")
