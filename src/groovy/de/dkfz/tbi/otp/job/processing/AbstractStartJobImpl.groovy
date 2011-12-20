@@ -1,7 +1,5 @@
 package de.dkfz.tbi.otp.job.processing
 
-import java.util.concurrent.ExecutorService;
-
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
