@@ -12,7 +12,7 @@ import org.springframework.security.access.prepost.PostFilter
  */
 class JobExecutionPlanService {
     static transactional = true
-    static profiled = true
+    static final profiled = true
 
     /**
      * Security aware way to access a JobExecutionPlan.

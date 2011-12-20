@@ -10,7 +10,7 @@ import org.springframework.security.access.prepost.PostAuthorize
  */
 class ProcessService {
     static transactional = true
-    static profiled = true
+    static final profiled = true
 
     /**
      * Security aware way to access a Process.
