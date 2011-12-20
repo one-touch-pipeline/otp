@@ -657,7 +657,6 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertEquals(0, ProcessingStep.count())
         // create ProcessParameter for handing over as additional parameter
         ProcessParameter processParameter = new ProcessParameter(value: "test")
-        assertNotNull(processParameter.save())
         // test for process parameter
         schedulerService.createProcess(job, [], processParameter)
         // verify that the Process is created
@@ -674,7 +673,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
         // process parameter should be accessible
-        assertEquals("test", step.process.jobExecutionPlan.processParameter.value)
+        assertEquals("test", ProcessParameter.findByProcess(process).value)
     }
 
     @Test
