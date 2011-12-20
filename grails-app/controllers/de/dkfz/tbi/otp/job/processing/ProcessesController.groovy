@@ -4,6 +4,8 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import grails.converters.JSON
 import grails.util.GrailsNameUtils
 
+
+@SuppressWarnings("GrailsPublicControllerMethod")
 class ProcessesController {
     private enum PlanStatus {
         /**
@@ -41,6 +43,7 @@ class ProcessesController {
         redirect(action: 'list')
     }
 
+    @SuppressWarnings("EmptyMethod")
     def list() {
     }
 
