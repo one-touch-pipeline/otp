@@ -17,7 +17,7 @@ class SeqTrackService {
         // find out present lanes/slides
         // lines/ slides could by identifiers not only numbers
         MetaDataKey key = MetaDataKey.findByName("LANE_NO")
-        List<MetaDataEntry> entries = []
+        Set<String> lanes = new HashSet<String>()
         // get the list of unique lanes identifiers
         DataFile.findAllByRun(run).each { DataFile dataFile ->
             // These returns are continues
@@ -35,20 +35,14 @@ class SeqTrackService {
                 if (entry.key != key) {
                     return
                 }
-                // check if exists
-                for (int i=0; i<entries.size(); i++) {
-                    // Continue
-                    if (entries[i].value == entry.value) {
-                        return
-                    }
-                }
-                entries << entry
+                //println "Lane = ${entry.value}"
+                lanes << entry.value
             }
         }
         // run track creation for each lane
-        for (int i=0; i<entries.size(); i++) {
-            log.debug("LANE ${entries[i].value}")
-            buildOneSequenceTrack(run, entries[i].value)
+        lanes.each{String laneId ->
+            println "processing ${laneId}"
+            buildOneSequenceTrack(run, laneId)
         }
     }
 
@@ -70,11 +64,13 @@ class SeqTrackService {
             "PIPELINE_VERSION",
             "READ_COUNT"
         ]
-        List<MetaDataKey> keys = MetaDataKey.findAllByNameInList(keyNames)
-        List<MetaDataEntry> metaDataEntries = getMetaDataValues(laneDataFiles.get(0), keys)
-        boolean consistent = checkIfConsistent(laneDataFiles, keys, metaDataEntries)
+        //List<MetaDataKey> keys = MetaDataKey.findAllByNameInList(keyNames)
+        List<MetaDataEntry> metaDataEntries = getMetaDataValues(laneDataFiles.get(0), keyNames)
+        println metaDataEntries
+        boolean consistent = checkIfConsistent(laneDataFiles, keyNames, metaDataEntries)
         // error handling
         if (!consistent) {
+            println "Meta-data inconsistent"
             return
         }
         // check if complete
@@ -83,10 +79,12 @@ class SeqTrackService {
         // build structure
         SampleIdentifier sampleId = SampleIdentifier.findByName(metaDataEntries.get(0))
         if (!sampleId) {
+            println "Sample identifier ${metaDataEntries.get(0)} not found"
             return
         }
         Sample sample = sampleId.sample
         if (!sample) {
+            println "sample not found"
             return
         }
         SeqType seqType = SeqType.findByNameAndLibraryLayout(metaDataEntries.get(1), metaDataEntries.get(2))
@@ -103,12 +101,16 @@ class SeqTrackService {
                 hasOriginalBam : false,
                 usingOriginalBam : false
                 )
-        laneDataFiles.each {
-            it.seqTrack = seqTrack
-            it.save()
+        laneDataFiles.each {DataFile dataFile ->
+            dataFile.seqTrack = seqTrack
+            dataFile.project = sample.individual.project
+            dataFile.save()
         }
+        seqTrack.save()
         seqTrack = fillReadsForSeqTrack(seqTrack)
         seqTrack.save()
+
+        // attach alignment to seqTrack
         List<DataFile> alignFiles = getRunFilesWithTypeAndLane(run, FileType.Type.ALIGNMENT, lane)
         // no alignment files
         if (!alignFiles) {
@@ -116,9 +118,9 @@ class SeqTrackService {
         }
         // find out if data complete
         List<String> alignKeyNames = ["SAMPLE_ID", "ALIGN_TOOL"]
-        List<MetaDataKey> alignKeys = MetaDataKey.findAllByName(alignKeyNames)
-        List<MetaDataEntry> alignValues = getMetaDataValues(alignFiles.get(0), keys)
-        consistent = checkIfConsistent(alignFiles, alignKeys, alignValues)
+        //List<MetaDataKey> alignKeys = MetaDataKey.findAllByName(alignKeyNames)
+        List<MetaDataEntry> alignValues = getMetaDataValues(alignFiles.get(0), alignKeyNames)
+        consistent = checkIfConsistent(alignFiles, alignKeyNames, alignValues)
         if (!consistent || metaDataEntries.get(0) != alignValues.get(0)) {
             return
         }
@@ -138,6 +140,7 @@ class SeqTrackService {
                 )
         // attach data files
         alignFiles.each {
+            it.project = sample.individual.project
             it.alignmentLog = alignLog
             it.save()
         }
@@ -146,6 +149,14 @@ class SeqTrackService {
         alignLog.save()
         alignParams.save()
         seqTrack.save()
+    }
+
+    private SeqTrack buildFastqSeqTrack(Run run, String lane) {
+        
+    }
+
+    private void appendAlignmentToSeqTrack(SeqTrack seqTrack) {
+        
     }
 
     /**
@@ -168,7 +179,8 @@ AND dataFile.fileType.type = :type
 AND entry.key = :key
 AND entry.value = :value
 ''',
-            [run: run, type: type, key: key, value: lane])
+                [run: run, type: type, key: key, value: lane])
+        println dataFiles
         return dataFiles
     }
 
@@ -179,13 +191,13 @@ AND entry.value = :value
      * @param metaDataKeys The MetaDataKeys for which the MetaDataEntrys are to be found
      * @return List containing MetaDataEntrys and the metaDataKeys associated
      */
-    private List<MetaDataEntry> getMetaDataValues(DataFile dataFile, List<MetaDataKey>metaDataKeys) {
+    private List<MetaDataEntry> getMetaDataValues(DataFile dataFile, List<String>keyNames) {
         if (!dataFile) {
             return
         }
         List<MetaDataEntry> metaDataEntries = []
-        for (int i = 0; i < metaDataKeys.size(); i++) {
-            metaDataEntries[i] = getMetaDataEntry(dataFile, metaDataKeys[i])
+        for (int i = 0; i < keyNames.size(); i++) {
+            metaDataEntries[i] = getMetaDataEntry(dataFile, keyNames[i])
         }
         return metaDataEntries
     }
@@ -199,15 +211,15 @@ AND entry.value = :value
      * @param values - this array will be filled with values for given keys
      * @return consistency status
      */
-    private boolean checkIfConsistent(List<DataFile> dataFiles, List<MetaDataKey>metaDataKeys, List<MetaDataEntry> metaDataEntries) {
+    private boolean checkIfConsistent(List<DataFile> dataFiles, List<String>keyNames, List<MetaDataEntry> metaDataEntries) {
         if (dataFiles == null) {
             return false
         }
-        for (int i=0; i<metaDataKeys.size; i++) {
-            MetaDataEntry reference = getMetaDataEntry(dataFiles.get(0), metaDataKeys.get(i))
+        for (int i=0; i<keyNames.size; i++) {
+            MetaDataEntry reference = getMetaDataEntry(dataFiles.get(0), keyNames.get(i))
             metaDataEntries[i] = reference?.value
             for (int j = 1; j < dataFiles.size; j++) {
-                MetaDataEntry entry = getMetaDataEntry(dataFiles.get(j), metaDataKeys.get(i))
+                MetaDataEntry entry = getMetaDataEntry(dataFiles.get(j), keyNames.get(i))
                 if (entry?.value != reference?.value) {
                     log.debug(entry?.value)
                     log.debug(reference?.value)

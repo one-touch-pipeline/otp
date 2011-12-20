@@ -36,7 +36,7 @@ class MetaDataEntry {
     }
 
     String toString() {
-        value
+        return "${key.name}:${value}"
     }
 
     def onLoad = {

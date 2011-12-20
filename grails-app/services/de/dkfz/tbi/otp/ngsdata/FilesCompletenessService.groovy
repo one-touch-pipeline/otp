@@ -16,7 +16,7 @@ class FilesCompletenessService {
         DataFile.findAllByRun(run).each {DataFile dataFile ->
             if (dataFile.fileType == FileType.Type.SEQUENCE ||
                 dataFile.fileType == FileType.Type.ALIGNMENT) {
-                String path = getFileInitialPath(run, dataFile)
+                String path = lsdfFilesService.getFileInitialPath(run, dataFile)
                 if (!fileExists(path)) {
                     allExists = false
                 }

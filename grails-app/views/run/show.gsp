@@ -15,7 +15,7 @@
 
 
     <h1>General</h1>
-    
+
     <table>
        <tr> 
             <td class="myKey">name</td>
@@ -105,14 +105,14 @@
 
         <%--  Data Files located on Seq Tracks  --%>
         <table>
-        <g:each var="track" in="${de.dkfz.tbi.otp.ngsdata.SeqTrack.findAllByRun(run)}">
+        <g:each var="track" in="${de.dkfz.tbi.otp.ngsdata.SeqTrack.findAllByRun(run, [sort: 'laneId'])}">
 
             <tr>
                 <td class="miniHeader" colspan="3">${track}</td>
                 <td class="miniHeader" colspan="3">insert size: ${track.insertSize}</td>
                 <td class="miniHeader" colspan="3">number of base pairs: ${track.nBaseString()}</td>
             </tr>
-            <g:each var="file" in="${track.dataFiles}">
+            <g:each var="file" in="${de.dkfz.tbi.otp.ngsdata.DataFile.findAllBySeqTrack(track)}">
                 <tr>
                     <td>-</td>
                     <td>s</td>
@@ -138,7 +138,7 @@
                 </tr>
             </g:each>
             <g:each var="alignment" in="${de.dkfz.tbi.otp.ngsdata.AlignmentLog.findAllBySeqTrack(track)}">
-                <g:each var="file" in="${alignment.dataFiles}">
+                <g:each var="file" in="${de.dkfz.tbi.otp.ngsdata.DataFile.findAllByAlignmentLog(alignment)}">
                     <tr>
                         <td>-</td>
                         <td>a</td>

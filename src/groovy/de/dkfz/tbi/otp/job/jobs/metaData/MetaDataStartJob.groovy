@@ -16,6 +16,7 @@ class MetaDataStartJob extends AbstractStartJobImpl {
     @Scheduled(fixedRate=10000l)
     void execute() {
         if (performed) {
+            println "Jobs already started ..."
             return
         }
         if (!getExecutionPlan() || !getExecutionPlan().enabled) {
@@ -27,12 +28,8 @@ class MetaDataStartJob extends AbstractStartJobImpl {
         // TODO Assure that the runs are processed only once. Verify via Process?
         List<Run> runs = Run.list()
         runs.each { Run run ->
-            if (!isNewProcessAllowed()) {
-                // new Jobs currently not allowed, so continue
-                return
-            }
-            createProcess(new ProcessParameter(value: run.id.toString(), className: run.class.name))
-            println run.name
+            createProcess(new ProcessParameter(value: run.id.toString()))
+            println run.toString()
         }
         performed = true
     }
