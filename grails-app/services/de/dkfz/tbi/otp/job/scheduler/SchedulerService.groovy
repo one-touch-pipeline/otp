@@ -31,6 +31,7 @@ class SchedulerService {
     /**
      * Dependency Injection of grailsApplication
      */
+    @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
     /**
      * Dependency Injection of ExecutorService
@@ -39,6 +40,7 @@ class SchedulerService {
     /**
      * Dependency Injection of PersistenceContextInterceptor
      */
+    @SuppressWarnings("GrailsStatelessService")
     PersistenceContextInterceptor persistenceInterceptor
     /**
      * Queue of next to be started ProcessingSteps

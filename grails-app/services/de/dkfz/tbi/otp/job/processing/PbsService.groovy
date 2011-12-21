@@ -15,6 +15,7 @@ class PbsService {
     /**
      * Dependency injection of grails application
      */
+    @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
 
     /**

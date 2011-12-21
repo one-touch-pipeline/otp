@@ -5,6 +5,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 class LsdfFilesService {
 
+    @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
 
     // will go somewhere

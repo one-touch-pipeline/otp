@@ -4,6 +4,7 @@ import javax.servlet.*
 import javax.servlet.descriptor.JspConfigDescriptor
 import org.apache.commons.io.FileUtils
 
+@SuppressWarnings("UnusedMethodParameter")
 class OTPServletContext implements ServletContext {
     public String getRealPath(String relativePath) {
         return System.getProperty("user.dir") + relativePath

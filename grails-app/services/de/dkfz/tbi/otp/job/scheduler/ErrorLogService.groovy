@@ -20,11 +20,13 @@ class ErrorLogService {
     /**
      * Dependency injection of grails Application
      */
+    @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
 
     /**
      * Dependency injection of Servlet Context
      */
+    @SuppressWarnings("GrailsStatelessService")
     def servletContext
 
     /**

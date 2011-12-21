@@ -15,22 +15,27 @@ class JabberService implements InitializingBean {
     /**
      * Dependency injection of grails application
      */
+    @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
     /**
      * Dependency injected Jabber service name
      */
+    @SuppressWarnings("GrailsStatelessService")
     String service
     /**
      * Dependency injected user name
      */
+    @SuppressWarnings("GrailsStatelessService")
     String username
     /**
      * Dependency injected password
      */
+    @SuppressWarnings("GrailsStatelessService")
     String password
     /**
      * Internal connection to jabber server
      */
+    @SuppressWarnings("GrailsStatelessService")
     private XMPPConnection xmppConnection = null
 
     public void afterPropertiesSet() {
