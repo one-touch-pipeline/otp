@@ -1,10 +1,5 @@
 package de.dkfz.tbi.otp.job.processing
 
-import javax.servlet.ServletContext
-
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.springframework.beans.factory.annotation.Autowired
-
 /**
  * Abstract base class for {@link PbsJob}s.
  * @see PbsJob
