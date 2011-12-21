@@ -7,8 +7,6 @@ import org.apache.commons.io.FileUtils
 
 import org.junit.*
 
-import de.dkfz.tbi.otp.job.jobs.TestJob;
-
 class ErrorLogServiceTests {
 
    /**
