@@ -12,17 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired
  * @see PbsJob
  */
 abstract public class AbstractPbsJobImpl extends AbstractJobImpl implements PbsJob {
-
     /**
-     * Dependency injection of grails Application
+     * Dependency injection of pbs service
      */
-    @Autowired
-    GrailsApplication grailsApplication
-    /**
-     * Dependency injection of Servlet Context
-     */
-    @Autowired
-    ServletContext servletContext
+    def pbsService
 
     /**
      * Default empty constructor
@@ -38,12 +31,11 @@ abstract public class AbstractPbsJobImpl extends AbstractJobImpl implements PbsJ
      * To connect parameters set in properties file are used.
      * @return List of String with PBS ids
      */
-    public List<String> sendPbsJob() {
-        PbsHelper pbsHelper = new PbsHelper()
-        File fileWithPbsId = pbsHelper.sendPbsJob()
-        if(!fileWithPbsId.isFile || fileWithPbsId.size() == 0) {
+    protected List<String> sendPbsJob() {
+        File fileWithPbsId = pbsService.sendPbsJob()
+        if (!fileWithPbsId.isFile || fileWithPbsId.size() == 0) {
             throw new ProcessingException("File for PBS ids is not existing or empty.")
         }
-        List<String> pbsIds = pbsHelper.extractPbsIds(fileWithPbsId)
+        List<String> pbsIds = pbsService.extractPbsIds(fileWithPbsId)
     }
 }

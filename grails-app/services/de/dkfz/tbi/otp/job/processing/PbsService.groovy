@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.job.processing
 
 import java.io.File
 import java.util.List
-import java.util.Map;
+import java.util.Map
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import org.apache.log4j.Logger
@@ -13,10 +13,19 @@ import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.example.Md5SumJob
 import org.codehaus.groovy.grails.commons.*
 
-class PbsHelper {
-    def config = org.codehaus.groovy.grails.commons.ConfigurationHolder.config
-
-    Logger log = Logger.getLogger(PbsHelper.class)
+/**
+ * Helper class providing functionality for PBS related stuff
+ * 
+ * Provides connection to a remote host via ssh and validation of
+ * pbs ids. 
+ * 
+ *
+ */
+class PbsService {
+    /**
+     * Dependency injection of grails application
+     */
+    def grailsApplication
 
     /**
      * Triggers the sending of pbs jobs
@@ -34,7 +43,7 @@ class PbsHelper {
         String resourceIdentifier
         String resource
         if(!cmd) {
-            resource = new File((config.otp.pbs.ssh.commandResource)).absolutePath
+            resource = new File((grailsApplication.config.otp.pbs.ssh.commandResource)).absolutePath
             resourceIdentifier = "commandResource"
         } else if(cmd) {
             resource = cmd
@@ -42,13 +51,13 @@ class PbsHelper {
         } else {
             throw new ProcessingException("No resource is specified to be run on PBS.")
         }
-        String host = (config.otp.pbs.ssh.host).toString()
-        String username = (config.otp.pbs.ssh.username).toString()
-        String password = (config.otp.pbs.ssh.password).toString()
+        String host = (grailsApplication.config.otp.pbs.ssh.host).toString()
+        String username = (grailsApplication.config.otp.pbs.ssh.username).toString()
+        String password = (grailsApplication.config.otp.pbs.ssh.password).toString()
         if(resource.empty) {
             throw new ProcessingException("No resource is specified to be run on PBS.")
         }
-        String timeout = (config.otp.pbs.ssh.timeout).toString()
+        String timeout = (grailsApplication.config.otp.pbs.ssh.timeout).toString()
         return querySsh(resourceIdentifier, resource, host, username, password, timeout)
     }
 
@@ -85,9 +94,8 @@ class PbsHelper {
      *
      * @param file File containing output of ssh session from pbs
      * @return List of Strings each them a pbs id
-     * @throws InvalidStateException
      */
-    public List<String> extractPbsIds(File file) throws InvalidStateException {
+    public List<String> extractPbsIds(File file) {
         Pattern pattern = Pattern.compile("\\d+")
         List<String> pbsIds = []
         file.eachLine { String line ->
@@ -122,14 +130,14 @@ class PbsHelper {
      * Validates if jobs of which the pbs ids are are handed over are running
      *
      * @param pbsIds Pbs ids to be validated
-     * @return Map of pbs ids with associated validation identifiers, which Boolean values
+     * @return Map of pbs ids with associated validation identifiers, which are Boolean values
      */
     private Map<String, Boolean> validate(List<String> pbsIds) {
         if(!pbsIds) {
-            return [:]
+            throw new InvalidStateException("No pbs ids handed over to be validated.")
         }
         Map<String, Boolean> stats = [:]
-        for(String pbsId : pbsIds) {
+        for(String pbsId in pbsIds) {
             String cmd = "qstat ${pbsId}"
             File tmpStat= sendPbsJob(cmd)
             if(tmpStat.size() == 0 || !tmpStat.isFile()) {
@@ -153,13 +161,13 @@ class PbsHelper {
      */
     private boolean isRunning(File file) {
         Pattern pattern = Pattern.compile("\\s*Job id\\s*Name\\s*User.*")
-        boolean find = false
+        boolean found = false
         file.eachLine { String line ->
             Matcher m = pattern.matcher(line)
             if(m.find()) {
-                find = true
+                found = true
             }
         }
-        return find
+        return found
     }
 }

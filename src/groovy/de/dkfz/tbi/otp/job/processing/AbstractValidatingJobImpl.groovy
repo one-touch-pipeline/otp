@@ -16,7 +16,10 @@ import de.dkfz.tbi.otp.job.plan.DecisionMapping
  */
 abstract public class AbstractValidatingJobImpl extends AbstractEndStateAwareJobImpl implements ValidatingJob {
 
-    private PbsHelper pbsHelper = new PbsHelper()
+    /**
+     * Dependency injection of pbs service
+     */
+    def pbsService
 
     /**
      * Default empty constructor
@@ -29,7 +32,7 @@ abstract public class AbstractValidatingJobImpl extends AbstractEndStateAwareJob
 
     @Override
     public List<ProcessingStep> getValidatorFor() {
-        return getProcessingStep().all.toList()
+        return [ProcessingStep.get(processingStep.previous.id)]
     }
 
     /**
@@ -42,6 +45,6 @@ abstract public class AbstractValidatingJobImpl extends AbstractEndStateAwareJob
         if(!pbsIds) {
             return [:]
         }
-        return pbsHelper.validate(pbsIds)
+        return pbsService.validate(pbsIds)
     }
 }
