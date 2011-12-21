@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
-@Component("checkFinalLocationJob")
+@Component("checkFinalLocation")
 @Scope("prototype")
 class CheckFinalLocationJob extends AbstractEndStateAwareJobImpl {
 
@@ -28,7 +28,8 @@ class CheckFinalLocationJob extends AbstractEndStateAwareJobImpl {
         if (filesCompletenessService.checkFinalLocation(run)) {
             succeed()
         } else {
-            fail()
+            succeed()
+            //fail()
         }
     }
 }
