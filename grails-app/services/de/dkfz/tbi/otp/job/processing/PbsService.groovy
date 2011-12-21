@@ -122,7 +122,7 @@ class PbsService {
      * @param pbsIds Pbs ids to be validated
      * @return Map of pbs ids with associated validation identifiers, which are Boolean values
      */
-    private Map<String, Boolean> validate(List<String> pbsIds) {
+    public Map<String, Boolean> validate(List<String> pbsIds) {
         if(!pbsIds) {
             throw new InvalidStateException("No pbs ids handed over to be validated.")
         }

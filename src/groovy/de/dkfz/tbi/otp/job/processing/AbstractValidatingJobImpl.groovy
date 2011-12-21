@@ -1,15 +1,14 @@
 package de.dkfz.tbi.otp.job.processing
 
+import org.springframework.beans.factory.annotation.Autowired
+
 /**
  * Abstract base class for {@link ValidatingJob}s.
  * @see ValidatingJob
  */
 abstract public class AbstractValidatingJobImpl extends AbstractEndStateAwareJobImpl implements ValidatingJob {
-
-    /**
-     * Dependency injection of pbs service
-     */
-    def pbsService
+    @Autowired
+    PbsService pbsService
 
     /**
      * Default empty constructor

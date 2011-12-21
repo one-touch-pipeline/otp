@@ -1,14 +1,14 @@
 package de.dkfz.tbi.otp.job.processing
 
+import org.springframework.beans.factory.annotation.Autowired
+
 /**
  * Abstract base class for {@link PbsJob}s.
  * @see PbsJob
  */
 abstract public class AbstractPbsJobImpl extends AbstractJobImpl implements PbsJob {
-    /**
-     * Dependency injection of pbs service
-     */
-    def pbsService
+    @Autowired
+    PbsService pbsService
 
     /**
      * Default empty constructor
