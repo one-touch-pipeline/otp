@@ -13,7 +13,10 @@ class CopyFilesJob extends AbstractJobImpl {
     @Autowired
     LsdfFilesService lsdfFilesService
 
-    private String projectName
+    @Autowired
+    PbsService pbsService
+
+   private String projectName
 
     @Override
     public void execute() throws Exception {
@@ -21,7 +24,8 @@ class CopyFilesJob extends AbstractJobImpl {
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
 
-        String cmd = ""
+        List<String> allIds = new ArrayList<String>()
+
         DataFile.findAllByRun(run).each {DataFile file ->
             if (file.project == null) {
                 return
@@ -29,8 +33,18 @@ class CopyFilesJob extends AbstractJobImpl {
             String from = lsdfFilesService.getFileInitialPath(file)
             String to = lsdfFilesService.getFileFinalPath(file)
             println from + " " + to
-            cmd += "cp ${from} ${to};\n"
+            String cpCmd = "cp ${from} ${to}"
+
+            File cmdFile = File.createTempFile("test", ".tmp", new File(System.getProperty("user.home")))
+            cmdFile.setText(cpCmd)
+            cmdFile.setExecutable(true)
+            String cmd = "qsub ${cmdFile.name}"
+            File responseFile = pbsService.sendPbsJob(cmd)
+            List<String> extractedPbsIds = pbsService.extractPbsIds(responseFile)
+            println extractedPbsIds
+            extractedPbsIds.each {
+                allIds << it
+            }
         }
-        println cmd
     }
 }
