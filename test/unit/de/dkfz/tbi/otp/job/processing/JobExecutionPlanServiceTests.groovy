@@ -18,10 +18,12 @@ import org.junit.*
 @Mock([Process, ProcessingStep, ProcessingStepUpdate, JobDefinition])
 class JobExecutionPlanServiceTests {
 
+    @SuppressWarnings("EmptyMethod")
     void setUp() {
         // Setup logic here
     }
 
+    @SuppressWarnings("EmptyMethod")
     void tearDown() {
         // Tear down logic here
     }

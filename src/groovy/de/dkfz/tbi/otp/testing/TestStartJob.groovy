@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component
 @Scope("prototype")
 class TestStartJob extends AbstractStartJobImpl {
 
+    @SuppressWarnings("EmptyMethod")
     void execute() {
     }
 }

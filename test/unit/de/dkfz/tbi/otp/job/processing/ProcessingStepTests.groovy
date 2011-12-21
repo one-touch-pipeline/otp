@@ -15,10 +15,12 @@ import org.junit.*
 @TestFor(ProcessingStep)
 class ProcessingStepTests {
 
+    @SuppressWarnings("EmptyMethod")
     void setUp() {
         // Setup logic here
     }
 
+    @SuppressWarnings("EmptyMethod")
     void tearDown() {
         // Tear down logic here
     }

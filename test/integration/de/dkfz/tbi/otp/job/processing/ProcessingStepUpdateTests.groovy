@@ -11,10 +11,12 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan;
 
 class ProcessingStepUpdateTests {
 
+    @SuppressWarnings("EmptyMethod")
     @Before
     void setUp() {
     }
 
+    @SuppressWarnings("EmptyMethod")
     @After
     void tearDown() {
     }

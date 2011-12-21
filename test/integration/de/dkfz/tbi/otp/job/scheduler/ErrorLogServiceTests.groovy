@@ -28,6 +28,7 @@ class ErrorLogServiceTests {
 
    File exceptionStoringFile
 
+    @SuppressWarnings("EmptyMethod")
     @Before
     void setUp() {
     }

@@ -7,10 +7,12 @@ class PbsServiceTests {
 
     def pbsService
 
+    @SuppressWarnings("EmptyMethod")
     void setUp() {
         // Setup logic here
     }
 
+    @SuppressWarnings("EmptyMethod")
     void tearDown() {
         // Tear down logic here
     }

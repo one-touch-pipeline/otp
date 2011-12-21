@@ -33,12 +33,14 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
      */
     def schedulerService
 
+    @SuppressWarnings("EmptyMethod")
     @Before
     void setUp() {
         schedulerService.queue.clear()
         schedulerService.running.clear()
     }
 
+    @SuppressWarnings("EmptyMethod")
     @After
     void tearDown() {
         // Tear down logic here

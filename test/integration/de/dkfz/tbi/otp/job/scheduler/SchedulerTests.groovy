@@ -21,11 +21,13 @@ class SchedulerTests extends AbstractIntegrationTest {
      */
     def grailsApplication
 
+    @SuppressWarnings("EmptyMethod")
     @Before
     void setUp() {
         // Setup logic here
     }
 
+    @SuppressWarnings("EmptyMethod")
     @After
     void tearDown() {
         // Tear down logic here
