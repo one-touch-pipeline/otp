@@ -30,6 +30,7 @@ abstract class AbstractIntegrationTest {
      */
     def springSecurityService
 
+    @SuppressWarnings("CatchException")
     protected def shouldFail = { exception, code ->
         try {
             code.call()

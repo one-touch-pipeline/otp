@@ -45,6 +45,7 @@ import org.springframework.stereotype.Component
  */
 @Component("scheduler")
 @Aspect
+@SuppressWarnings(["CatchException", "CatchRuntimeException"])
 class Scheduler {
     /**
      * Dependency Injection of Scheduler Service
