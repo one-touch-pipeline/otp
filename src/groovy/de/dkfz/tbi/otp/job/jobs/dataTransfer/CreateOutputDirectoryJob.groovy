@@ -24,10 +24,14 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
         projectName = getParameterValueOrClass("project")
         String[] dirs = lsdfFilesService.getListOfRunDirecotries(run, projectName)
 
-        String cmd = ""
+        //String cmd = ""
         dirs.each {String line ->
-            cmd += "mkdir -p " + line + ";\n"
+            String cmd = "mkdir -p " + line
+            println cmd
+            java.lang.Process process = cmd.execute()
+            process.waitFor()
+            println "creating directory finished with " + process.exitValue()
         }
-        println cmd
+        //println cmd
     }
 }
