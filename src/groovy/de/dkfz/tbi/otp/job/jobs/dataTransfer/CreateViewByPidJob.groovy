@@ -34,7 +34,7 @@ class CreateViewByPidJob extends AbstractJobImpl {
             if (linkName == null || target == null) {
                 continue
             }
-            String dirName = linkName.substring(0. linkName.lastIndexOf('/'))
+            String dirName = linkName.substring(0, linkName.lastIndexOf('/'))
             cmd += "mkdir -p ${dirName};\n"
             cmd += "ln -s " + target + " " + linkName + ";\n"
         }
