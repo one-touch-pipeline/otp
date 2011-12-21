@@ -40,8 +40,6 @@ class ErrorLogServiceTests {
 
     @Test
     void testLog() {
-        // Create a job
-        TestJob testJob = new TestJob()
         Exception e = new Exception("test message")
         String path = "/target/stacktraces/testing/"
         String fullPath = servletContext.getRealPath(path)

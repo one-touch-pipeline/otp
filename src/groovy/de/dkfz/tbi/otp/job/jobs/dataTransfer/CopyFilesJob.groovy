@@ -16,8 +16,6 @@ class CopyFilesJob extends AbstractJobImpl {
     @Autowired
     PbsService pbsService
 
-   private String projectName
-
     @Override
     public void execute() throws Exception {
 

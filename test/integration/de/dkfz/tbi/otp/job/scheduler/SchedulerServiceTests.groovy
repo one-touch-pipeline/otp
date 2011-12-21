@@ -668,7 +668,6 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(process)
         assertSame(schedulerService.queue.first().jobDefinition, jobDefinition)
         assertFalse(process.finished)
-        ProcessingStep step = schedulerService.queue.first()
         schedulerService.schedule()
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
