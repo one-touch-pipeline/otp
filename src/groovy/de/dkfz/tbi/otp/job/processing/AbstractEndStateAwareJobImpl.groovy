@@ -165,7 +165,7 @@ abstract public class AbstractEndStateAwareJobImpl implements EndStateAwareJob {
        return parameter.value
    }
 
-   public String getProcessParameterValue(String typeName) {
+   public String getProcessParameterValue() {
        ProcessParameter parameter = ProcessParameter.findByProcess(processingStep.process)
        if (!parameter) {
            throw new RuntimeException("Required parameter not found")

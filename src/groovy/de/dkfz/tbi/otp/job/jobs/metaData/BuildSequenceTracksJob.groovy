@@ -19,7 +19,7 @@ class BuildSequenceTracksJob extends AbstractJobImpl {
 
     @Override
     public void execute() throws Exception {
-        long runId = Long.parseLong(getProcessParameterValue("run"))
+        long runId = Long.parseLong(getProcessParameterValue())
         seqTrackService.buildSequenceTracks(runId)
     }
 }
