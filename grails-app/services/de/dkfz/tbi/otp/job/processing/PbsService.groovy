@@ -1,17 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
-import java.io.File
-import java.util.List
-import java.util.Map
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import org.apache.log4j.Logger
-
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.springframework.beans.factory.annotation.Autowired
-
-import de.dkfz.tbi.otp.example.Md5SumJob
-import org.codehaus.groovy.grails.commons.*
 
 /**
  * Helper class providing functionality for PBS related stuff
