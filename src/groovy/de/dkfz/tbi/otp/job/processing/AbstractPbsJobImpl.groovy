@@ -1,8 +1,5 @@
 package de.dkfz.tbi.otp.job.processing
 
-import javax.servlet.ServletContext
-
-import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.beans.factory.annotation.Autowired
 
 /**
@@ -10,10 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired
  * @see PbsJob
  */
 abstract public class AbstractPbsJobImpl extends AbstractJobImpl implements PbsJob {
-    /**
-     * Dependency injection of pbs service
-     */
-    def pbsService
+    @Autowired
+    PbsService pbsService
 
     /**
      * Default empty constructor
