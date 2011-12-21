@@ -29,6 +29,6 @@ abstract public class AbstractPbsJobImpl extends AbstractJobImpl implements PbsJ
         if (!fileWithPbsId.isFile || fileWithPbsId.size() == 0) {
             throw new ProcessingException("File for PBS ids is not existing or empty.")
         }
-        List<String> pbsIds = pbsService.extractPbsIds(fileWithPbsId)
+        return pbsService.extractPbsIds(fileWithPbsId)
     }
 }
