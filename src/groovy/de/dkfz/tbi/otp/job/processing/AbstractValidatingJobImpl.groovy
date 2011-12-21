@@ -12,16 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired
 abstract public class AbstractValidatingJobImpl extends AbstractEndStateAwareJobImpl implements ValidatingJob {
 
     /**
-     * Dependency injection of grails Application
+     * Dependency injection of pbs service
      */
-    @Autowired
-    GrailsApplication grailsApplication
-
-    /**
-     * Dependency injection of Servlet Context
-     */
-    @Autowired
-    ServletContext servletContext
+    def pbsService
 
     /**
      * Default empty constructor
@@ -34,35 +27,19 @@ abstract public class AbstractValidatingJobImpl extends AbstractEndStateAwareJob
 
     @Override
     public List<ProcessingStep> getValidatorFor() {
-        return getProcessingStep().all.toList()
+        return [ProcessingStep.get(processingStep.previous.id)]
     }
 
-    private PbsHelper pbsHelper = new PbsHelper()
-
-    private Map<String, Boolean> validate(List<String> pbsIds) {
+    /**
+     * Pass-through method accessing Pbshelper's method
+     * 
+     * @param pbsIds The pbsIds to be validated
+     * @return Map indicating if jobs are running identified by their pbsIds
+     */
+    public Map<String, Boolean> validate(List<String> pbsIds) {
         if(!pbsIds) {
             return [:]
         }
-        Map<String, Boolean> stats
-        for(String pbsId : pbsIds) {
-            String qstat = "qstat -i ${pbsId}"
-            File tmpStat= pbsHelper.sshConnect(null, qstat)
-            if(tmpStat.size() == 0 || !tmpStat.isFile) {
-                throw new ProcessingException("Temporary file to contain qstat could not be written properly.")
-            }
-            Boolean running = isRunning(tmpStat)
-            stats.put(running, pbsId)
-        }
-        return stats
-    }
-
-    private boolean isRunning(File file) {
-        def pattern = grailsApplication.config.otp.pbs.pattern.running
-        file.eachLine { String line ->
-            if(pattern.matcher(line)) {
-                return true
-            }
-        }
-        return false
+        return pbsService.validate(pbsIds)
     }
 }
