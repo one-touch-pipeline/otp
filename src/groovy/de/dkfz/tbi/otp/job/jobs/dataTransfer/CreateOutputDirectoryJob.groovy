@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
-@Component("createOutputDirectoryJob")
+@Component("createOutputDirectory")
 @Scope("prototype")
 class CreateOutputDirectoryJob extends AbstractJobImpl {
 
@@ -20,13 +20,13 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
 
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
-
+        println "run name = " + run
         projectName = getParameterValueOrClass("project")
         String[] dirs = lsdfFilesService.getListOfRunDirecotries(run, projectName)
 
         String cmd = ""
         dirs.each {String line ->
-            cmd += "mkdir " + line + ";"
+            cmd += "mkdir -p " + line + ";\n"
         }
         println cmd
     }

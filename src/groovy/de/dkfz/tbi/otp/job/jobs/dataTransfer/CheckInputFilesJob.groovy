@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
-@Component("checkInputFilesJob")
+@Component("checkInputFiles")
 @Scope("prototype")
 class CheckInputFilesJob extends AbstractEndStateAwareJobImpl {
 
@@ -27,8 +27,10 @@ class CheckInputFilesJob extends AbstractEndStateAwareJobImpl {
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
         if (filesCompletenessService.checkInitialSequenceFiles(run)) {
+            println "OK"
             succeed()
         } else {
+            println "Fails"
             fail()
         }
     }

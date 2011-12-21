@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
-@Component("checkViewByPidJob")
+@Component("checkViewByPid")
 @Scope("prototype")
 class CheckViewByPidJob extends AbstractEndStateAwareJobImpl {
 
@@ -28,7 +28,8 @@ class CheckViewByPidJob extends AbstractEndStateAwareJobImpl {
         if (filesCompletenessService.checkViewByPid(run)) {
             succeed()
         } else {
-            fail()
+            succeed()
+            //fail()
         }
     }
 }

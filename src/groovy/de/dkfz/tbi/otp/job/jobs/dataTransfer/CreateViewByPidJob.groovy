@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
-@Component("createViewByPidJob")
+@Component("createViewByPid")
 @Scope("prototype")
 class CreateViewByPidJob extends AbstractJobImpl {
 
@@ -20,9 +20,10 @@ class CreateViewByPidJob extends AbstractJobImpl {
 
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
-        projectName = getParameterValueOrClass("project")
+        projectName = "PROJECT_NAME" //getParameterValueOrClass("project")
         String cmd = ""
-        DataFile[] dataFiles = (DataFile[])run.dataFiles.toArray()
+        DataFile[] dataFiles = DataFile.findAllByRun(run).toArray()
+        //(DataFile[])run.dataFiles.toArray()
         for(int iFile=0; iFile<dataFiles.length; iFile++) {
             DataFile dataFile = dataFiles[iFile]
             if (dataFile.project.toString() != projectName) {
@@ -33,7 +34,9 @@ class CreateViewByPidJob extends AbstractJobImpl {
             if (linkName == null || target == null) {
                 continue
             }
-            cmd += "ln -s " + target + " " + linkName + ";"
+            String dirName = linkName.substring(0. linkName.lastIndexOf('/'))
+            cmd += "mkdir -p ${dirName};\n"
+            cmd += "ln -s " + target + " " + linkName + ";\n"
         }
         println cmd
     }

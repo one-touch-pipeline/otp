@@ -9,7 +9,8 @@ class DataFileController {
     def showDetails = {
 
         DataFile dataFile = DataFile.get(params.id)
-
+        println dataFile.project
+        
         List<String> keys = new Vector<String>()
         List<String> values = new Vector<String>()
 
@@ -17,7 +18,7 @@ class DataFileController {
         values << dataFile.fileName
 
         keys <<  "full path"
-        values << lsdfFilesService.getFilePath(dataFile)
+        values << lsdfFilesService.getFileFinalPath(dataFile)
 
         keys << "view-by-pid name"
         values << dataFile.vbpFileName

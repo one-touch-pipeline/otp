@@ -14,11 +14,14 @@ class FilesCompletenessService {
     public boolean checkInitialSequenceFiles(Run run) {
         boolean allExists = true
         DataFile.findAllByRun(run).each {DataFile dataFile ->
-            if (dataFile.fileType == FileType.Type.SEQUENCE ||
-                dataFile.fileType == FileType.Type.ALIGNMENT) {
-                String path = lsdfFilesService.getFileInitialPath(run, dataFile)
-                if (!fileExists(path)) {
+            //println dataFile
+            if (dataFile.fileType.type == FileType.Type.SEQUENCE ||
+                dataFile.fileType.type == FileType.Type.ALIGNMENT) {
+                String path = lsdfFilesService.getFileInitialPath(dataFile)
+                //println path
+                if (!lsdfFilesService.fileExists(path)) {
                     allExists = false
+                    println "missing file ${path}"
                 }
             }
         }
@@ -54,6 +57,7 @@ class FilesCompletenessService {
                 dataFile.fileExists = false
                 allExists = false
             }
+            println path + " " + exists
             dataFile.save(flush: true)
         }
         if (allExists) {
@@ -74,7 +78,7 @@ class FilesCompletenessService {
     boolean checkViewByPid(Run run) {
         boolean allLinked = true
         DataFile.findAllByRun(run).each {DataFile dataFile ->
-            String path = lsdfFilesService.getFilesViewByPidPath(dataFile)
+            String path = lsdfFilesService.getFileViewByPidPath(dataFile)
             if (path == null) {
                 return // continue
             }

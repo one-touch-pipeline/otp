@@ -11,7 +11,9 @@ JobExecutionPlan jep = new JobExecutionPlan(
     planVersion: 0,
     enabled: true
 )
-assert(jep.save())
+println jep.validate()
+println jep.errors
+assert(jep.save(flush: true))
 
 /*
  * Start job looks over runs with loaded meta-data 
@@ -23,8 +25,9 @@ StartJobDefinition definition = new StartJobDefinition(
     bean: "dataTransferStartJob",
     plan: jep
 )
-assert(definition.save())
+assert(definition.save(flush: true))
 jep.startJob = definition
+assert(jep.save(flush: true))
 
 /*
  * Thie job will check if input files exists on file system.
@@ -35,18 +38,22 @@ JobDefinition checkInputFilesJob = new JobDefinition(
     bean: "checkInputFiles",
     plan: jep
 )
-assert(checkInputFilesJob.save())
+assert(checkInputFilesJob.save(flush: true))
+
 
 /*
  * This jobs creates output directories if needed
  */
 JobDefinition createOutputDirectoryJob = new JobDefinition(
     name: "createOutputDirectory",
-    baen: "createOutputDirectory",
+    bean: "createOutputDirectory",
     plan: jep,
     previous: checkInputFilesJob
 )
 assert(createOutputDirectoryJob.save())
+checkInputFilesJob.next = createOutputDirectoryJob
+assert(checkInputFilesJob.save())
+
 
 // will be executed only for "PROJECT_NAME"
 ParameterType type = new ParameterType(
@@ -57,6 +64,8 @@ ParameterType type = new ParameterType(
 assert(type.save())
 Parameter parameter = new Parameter(type: type, value: "PROJECT_NAME")
 assert(parameter.save())
+createOutputDirectoryJob.addToConstantParameters(parameter)
+assert(createOutputDirectoryJob.save())
 
 
 /*
@@ -64,24 +73,29 @@ assert(parameter.save())
  * Output of this job shall be list of PBS jobs
  */
 JobDefinition copyFilesJob = new JobDefinition(
-    name: "copyFilesJob",
-    bean: "copyFilesJob",
+    name: "copyFiles",
+    bean: "copyFiles",
     plan: jep,
     previous: createOutputDirectoryJob
 )
 assert(copyFilesJob.save())
+createOutputDirectoryJob.next = copyFilesJob
+assert(createOutputDirectoryJob.save())
+
 
 /*
  * This job watch-dog PBS copu jobs
  * This job uses universal bean for watchdog
  */
 JobDefinition copyFilesWatchdogJob = new JobDefinition(
-    name: "copyFilesWatchdogJob",
-    bean: "pbsWatchdog",
+    name: "copyFilesWatchdog",
+    bean: "myPbsWatchdog",
     plan: jep,
     previous: copyFilesJob
 )
 assert(copyFilesWatchdogJob.save())
+copyFilesJob.next = copyFilesWatchdogJob
+assert(copyFilesJob.save())
 
 /*
  * This jobs checks if files are in the final location
@@ -95,12 +109,15 @@ JobDefinition checkFinalLocationJob = new JobDefinition(
     milestone: true
 )
 assert(checkFinalLocationJob.save())
+copyFilesWatchdogJob.next = checkFinalLocationJob
+assert(copyFilesWatchdogJob.save())
 
 /*
  * This job will evelutate performance of the copy job 
  * from the time of the job and file size.
  * Non essential but for throuput optimization
  */
+/*
 JobDefinition copyStatisticsJob = new JobDefinition(
     name: "copyStatistics",
     bean: "copyStatistics",
@@ -108,6 +125,7 @@ JobDefinition copyStatisticsJob = new JobDefinition(
     previous: checkFinalLocationJob
 )
 assert(copyStatisticsJob.save())
+*/
 
 /*
  * This job calculates md5sum
@@ -115,6 +133,7 @@ assert(copyStatisticsJob.save())
  * the output is appended to the text file 
  * The output of this job is a list of PBS job ids
  */
+/*
 JobDefinition md5sumJob = new JobDefinition(
     name: "md5sum",
     bean: "md5sum",
@@ -122,22 +141,25 @@ JobDefinition md5sumJob = new JobDefinition(
     previous: copyStatisticsJob
 )
 assert(md5sumJob.save())
-
+*/
 /*
  * Watchdog for md5sum
  */
+/*
 JobDefinition md5sumWatchdogJob = new JobDefinition(
     name: "md5sumWatchdog",
-    beam: "pbsWatchdog",
+    bean: "pbsWatchdog",
     plan: jep,
     previous: md5sumJob
 )
 assert(md5sumWatchdogJob.save())
+*/
 
 /*
  * This job parses md5sum file and compares values with
  * original values froder in DB. This job is end state aware
  */
+/*
 JobDefinition compareMd5sumJob = new JobDefinition(
     name: "compareMd5sum",
     bean: "compareMd5sum",
@@ -146,7 +168,7 @@ JobDefinition compareMd5sumJob = new JobDefinition(
     milestone: true
 )
 assert(compareMd5sumJob.save())
-
+*/
 
 /*
  * This job creates view-by-pid structure for this run.
@@ -157,9 +179,12 @@ JobDefinition createViewByPidJob = new JobDefinition(
     name: "createViewByPid",
     bean: "createViewByPid",
     plan: jep,
-    previous: compareMd5sumJob
+    previous: checkFinalLocationJob
 )
 assert(createViewByPidJob.save())
+checkFinalLocationJob.next = createViewByPidJob
+assert(checkFinalLocationJob.save())
+
 
 /*
  * This job checks is all files are properly linked in view-by-pid structure.
@@ -172,7 +197,8 @@ JobDefinition checkViewByPidJob = new JobDefinition(
     previous: createViewByPidJob
 )
 assert(checkViewByPidJob.save())
-
+createViewByPidJob.next = checkViewByPidJob
+assert(createViewByPidJob)
 
 /*
  * TODO: Maping of the output to input used to connect PBS jobs to watchdogs

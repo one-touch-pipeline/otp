@@ -18,8 +18,8 @@ class LsdfFilesService {
      */
     public String getFileInitialPath(DataFile dataFile) {
         Run run = dataFile.run
-        return run.dataPath() + "/" + run.name() + "/" +
-            dataFile.pathName() + "/" + dataFile.fileName
+        return run.dataPath + "/run" + run.name + "/" +
+            dataFile.pathName + "/" + dataFile.fileName
     }
 
     /**
@@ -31,11 +31,14 @@ class LsdfFilesService {
      * @param projectName only data files belonging to a given project are used
      * @return
      */
-    String[] getListOfRunDirecotries(run, projectName) {
+    String[] getListOfRunDirecotries(Run run, String projectName) {
 
-        DataFile dataFiles = run.dataFiles
         Set<String> paths = new HashSet<String>()
-        dataFiles.each {DataFile dataFile ->
+        DataFile.findAllByRun(run).each {DataFile dataFile ->
+            if (dataFile.project == null) {
+                // data files without projects eg. metadata file
+                return
+            }
             if (dataFile.project.name.contains(projectName)) {
                 String path = getPathToRun(dataFile)
                 if (path != null) {
@@ -77,10 +80,10 @@ class LsdfFilesService {
             return null
         }
         if (file.fileType.type == FileType.Type.METADATA) {
-            String basePath = grailsApplication.config.otp.datPath['metadata']
+            String basePath = grailsApplication.config.otp.dataPath['metadata']
             String path = basePath + "/data-tracking-orig/" +
                     file.run.seqCenter?.dirName +
-                    "/run" + file.run.name + file.fileName
+                    "/run" + file.run.name + "/" + file.fileName
             return path
         }
         String seqTypeDir = "";
@@ -89,7 +92,7 @@ class LsdfFilesService {
         } else if (file.alignmentLog) {
             seqTypeDir = file.alignmentLog.seqTrack.seqType?.dirName
         }
-        String basePath = grailsApplication.config.otp.dataPath[file.project.host]
+        String basePath = grailsApplication.config.otp.dataPath[file.project.host.toLowerCase()]
         if (!basePath) {
             return null
         }
@@ -138,7 +141,7 @@ class LsdfFilesService {
             log.debug("File used but no SeqTrack ${file.fileName}")
             return null
         }
-        String basePath = grailsApplication.config.otp.dataPath[file.project.host]
+        String basePath = grailsApplication.config.otp.dataPath[file.project.host.toLowerCase()]
         if (!basePath) {
              return null
         }
@@ -378,7 +381,9 @@ class LsdfFilesService {
         if (!seqTrack) {
             return null
         }
-        String basePath = grailsApplication.config.otp.dataPath[file.project.host]
+        //println file.project.host
+        //println grailsApplication.config
+        String basePath = grailsApplication.config.otp.dataPath[file.project.host.toLowerCase()]
         String path =
                 basePath + file?.project?.dirName + "/sequencing/" +
                 seqTrack.seqType.dirName + "/" + file.run.seqCenter?.dirName + "/"
