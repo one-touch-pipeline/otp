@@ -66,16 +66,9 @@ class PbsService {
         def ant = new AntBuilder()
         String identifier = resourceIdentifier.toString()
         File tempFile = File.createTempFile("pbsJobTempFile", ".tmp", new File("/tmp/"))
-        ant.sshexec(host: host,
-                password: password,
-                username: username,
-                trust: true,
-                verbose: false,
-                command: resource,
-                //"${identifier}": resource,
-                timeout: timeout,
-                output: tempFile.absoluteFile
-                )
+        Map sshParameter = [host: host, password: password, username: username, timeout: timeout, output: tempFile.absoluteFile, trust: true, verbose: false]
+        sshParameter.put(identifier, resource)
+        ant.sshexec(sshParameter)
         return tempFile
     }
 
