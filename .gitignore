@@ -5,4 +5,12 @@
 otp.iml
 otp.ipr
 otp.iws
+ast-build/*
 target/*
+target-eclipse/*
+logs/*
+.groovy/*
+*~
+*.log
+CodeNarcReport.html
+cobertura.ser
