@@ -25,7 +25,7 @@ class ProcessingStepTests {
         // Tear down logic here
     }
 
-    void testInput() {
+    void disabledTestInput() {
         Process process = new Process()
         JobDefinition jobDefinition = new JobDefinition(id: 1)
         JobDefinition jobDefinition2 = new JobDefinition(id: 2)
@@ -114,7 +114,7 @@ class ProcessingStepTests {
         assertTrue(step.validate())
     }
 
-    void testOutput() {
+    void disabledTestOutput() {
         Process process = new Process()
         JobDefinition jobDefinition = new JobDefinition(id: 1)
         JobDefinition jobDefinition2 = new JobDefinition(id: 2)
