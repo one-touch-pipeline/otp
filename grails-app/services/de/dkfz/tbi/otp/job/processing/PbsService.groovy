@@ -1,5 +1,9 @@
 package de.dkfz.tbi.otp.job.processing
 
+import com.jcraft.jsch.Channel
+import com.jcraft.jsch.ChannelExec
+import com.jcraft.jsch.JSch
+import com.jcraft.jsch.Session
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -30,59 +34,77 @@ class PbsService {
      * 
      * @return The temporary file containing the output of the triggered pbs job
      */
-    public File sendPbsJob(String cmd = null) {
-        String resourceIdentifier
-        String resource
-        if(!cmd) {
-            resource = new File((grailsApplication.config.otp.pbs.ssh.commandResource)).absolutePath
-            resourceIdentifier = "commandResource"
-        } else if(cmd) {
-            resource = cmd
-            resourceIdentifier = "command"
-        } else {
+    public List<String> sendPbsJob(String command) {
+        if(!command) {
             throw new ProcessingException("No resource is specified to be run on PBS.")
         }
         String host = (grailsApplication.config.otp.pbs.ssh.host).toString()
         String username = (grailsApplication.config.otp.pbs.ssh.username).toString()
         String password = (grailsApplication.config.otp.pbs.ssh.password).toString()
-        if(resource.empty) {
-            throw new ProcessingException("No resource is specified to be run on PBS.")
-        }
         String timeout = (grailsApplication.config.otp.pbs.ssh.timeout).toString()
-        return querySsh(resourceIdentifier, resource, host, username, password, timeout)
+        return querySsh(command, host, username, password, timeout)
     }
 
     /**
      * Opens an ssh connection to a specified host with specified credentials 
      *
-     * @param resourceIdentifier Identifies which resource shall be taken, string or file
-     * @param resource Resource of the job
+     * @param command Command of the job
      * @param host Host to which the connection shall be opened
      * @param username User name to open the connection 
      * @param password Password of the user who opens the connection
      * @param timeout Timeout in seconds after which the connection is closed
      * @return Temporary file containing output of the connection
      */
-    private File querySsh(String resourceIdentifier, String resource, String host, String username, String password, String timeout) {
-        def ant = new AntBuilder()
-        String identifier = resourceIdentifier.toString()
-        File tempFile = File.createTempFile("pbsJobTempFile", ".tmp", new File("/tmp/"))
-        Map sshParameter = [host: host, password: password, username: username, timeout: timeout, output: tempFile.absoluteFile, trust: true, verbose: false]
-        sshParameter.put(identifier, resource)
-        ant.sshexec(sshParameter)
-        return tempFile
+    private List<String> querySsh(String command, String host, String username, String password, String timeout) {
+        JSch jsch = new JSch()
+        Session session = jsch.getSession(username, host, 22)
+        session.setPassword(password)
+        session.setTimeout(timeout.toInteger())
+        java.util.Properties config = new java.util.Properties()
+        config.put("StrictHostKeyChecking", "no")
+        session.setConfig(config)
+        session.connect()
+        Channel channel = session.openChannel("exec")
+        ((ChannelExec)channel).setCommand(command)
+        channel.setInputStream(null)
+        ((ChannelExec)channel).setErrStream(System.err)
+        InputStream inputStream = channel.getInputStream()
+        channel.connect()
+
+        byte[] tmp = new byte[1024]
+        List<String> values = []
+        while (true){
+            while (inputStream.available() > 0) {
+                int i = inputStream.read(tmp, 0, 1024)
+                if (i < 0) {
+                    break
+                }
+                values.add(new String(tmp, 0, i))
+            }
+            if (channel.isClosed()) {
+                break
+            }
+            try {
+                Thread.sleep(1000)
+            } catch(Exception ee){
+            }
+        }
+        channel.disconnect()
+        session.disconnect()
+
+        return values
     }
 
     /**
-     * Extracts pbs ids from a given file
+     * Extracts pbs ids from a given String
      *
-     * @param file File containing output of ssh session from pbs
-     * @return List of Strings each them a pbs id
+     * @param sshOut List of Strings containing output of ssh session from pbs
+     * @return List of Strings each of them a pbs id
      */
-    public List<String> extractPbsIds(File file) {
+    public List<String> extractPbsIds(String sshOutput) {
         Pattern pattern = Pattern.compile("\\d+")
         List<String> pbsIds = []
-        file.eachLine { String line ->
+        sshOutput.eachLine { String line ->
             Matcher m = pattern.matcher(line)
             if (m.find()) {
                 pbsIds.add(m.group())
@@ -91,23 +113,7 @@ class PbsService {
                 return null
             }
         }
-        if(!deleteFile(file)) {
-            log.debug("File for temporaly storing PBS ids with name ${file.name} could not be deleted.")
-        }
         return pbsIds
-    }
-
-    /**
-     * Deletes a file and returns {@code true} if deleting was possible {@code false} otherwise
-     *
-     * @param file File to be deleted
-     * @return Boolean value indicating if the file could be deleted
-     */
-    public boolean deleteFile(File file) {
-        if(file.isFile()) {
-            return file.delete()
-        }
-        return false
     }
 
     /**
@@ -123,10 +129,7 @@ class PbsService {
         Map<String, Boolean> stats = [:]
         for(String pbsId in pbsIds) {
             String cmd = "qstat ${pbsId}"
-            File tmpStat= sendPbsJob(cmd)
-            if(tmpStat.size() == 0 || !tmpStat.isFile()) {
-                throw new ProcessingException("Temporary file to contain qstat could not be written properly.")
-            }
+            List<String> tmpStat = sendPbsJob(cmd)
             Boolean running = isRunning(tmpStat)
             stats.put(pbsId, running)
         }
@@ -140,13 +143,13 @@ class PbsService {
      * particular content indicating the job is running.
      * Returns {@code true} if job is running, otherwise {@code false}.
      *
-     * @param file File containing output of a pbs job
+     * @param output List of Strings containing output of a pbs job
      * @return Indicating if job is running
      */
-    private boolean isRunning(File file) {
+    private boolean isRunning(List<String> output) {
         Pattern pattern = Pattern.compile("\\s*Job id\\s*Name\\s*User.*")
         boolean found = false
-        file.eachLine { String line ->
+        output.each { String line ->
             Matcher m = pattern.matcher(line)
             if(m.find()) {
                 found = true

@@ -31,18 +31,18 @@ class PbsServiceTests {
         cmdFile.setExecutable(true)
         // Construct pbs command
         String cmd = "qsub ${cmdFile.name}"
-        // Send command to pbs via helper class
-        File responseFile = pbsService.sendPbsJob(cmd)
-        // Extract pbs ids from temporary file
-        List<String> extractedPbsIds = pbsService.extractPbsIds(responseFile)
+        // Send command to pbs
+        String response = pbsService.sendPbsJob(cmd)
+        // Extract pbs ids
+        List<String> extractedPbsIds = pbsService.extractPbsIds(response)
         assertNotNull(extractedPbsIds)
         // Only one pbs id is set
         String extractedPbsId = extractedPbsIds.get(0)
         // Make new pbs command to verify whether pbs job still is running
         cmd = "qstat ${extractedPbsId}"
-        // Send verifying commat with recent pbs id to pbs
-        File checkFile = pbsService.sendPbsJob(cmd)
-        extractedPbsIds = pbsService.extractPbsIds(checkFile)
+        // Send verifying command with recent pbs id to pbs
+        String check = pbsService.sendPbsJob(cmd)
+        extractedPbsIds = pbsService.extractPbsIds(check)
         assertNotNull(extractedPbsIds)
         String extractedPbsId_qstat = extractedPbsIds.get(0)
         // Assert if the two extracted pbs ids are equal
@@ -62,8 +62,8 @@ class PbsServiceTests {
         cmdFile.setExecutable(true)
         // Make executable file a pbs job
         String cmd = "qsub ${cmdFile.name}"
-        File responseFile = pbsService.sendPbsJob(cmd)
-        List<String> extractedPbsIds = pbsService.extractPbsIds(responseFile)
+        String response = pbsService.sendPbsJob(cmd)
+        List<String> extractedPbsIds = pbsService.extractPbsIds(response)
         assertNotNull(extractedPbsIds)
         // Get validation identifier
         Map<String, Boolean> validatedIds = pbsService.validate(extractedPbsIds)
