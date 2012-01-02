@@ -56,3 +56,15 @@ grails.project.dependency.resolution = {
         build ":tomcat:$grailsVersion"
     }
 }
+
+codenarc.reports = {
+    CodeNarcXmlReport('xml') {
+        outputFile = 'target/CodeNarc-Report.xml'
+        title = "OTP CodeNarc Report"
+    }
+    CodeNarcHtmlReport('html') {
+        outputFile = 'target/CodeNarc-Report.html'
+        title = "OTP CodeNarc Report"
+    }
+}
+codenarc.extraIncludeDirs=['ast']
