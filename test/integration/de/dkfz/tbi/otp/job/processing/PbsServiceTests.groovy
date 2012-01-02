@@ -17,6 +17,7 @@ class PbsServiceTests {
         // Tear down logic here
     }
 
+    @Ignore
     @Test
     void testSendPbsJob() {
         println("testSendPbsJob")
@@ -48,6 +49,7 @@ class PbsServiceTests {
         assertEquals(extractedPbsId, extractedPbsId_qstat)
     }
 
+    @Ignore
     @Test
     void testValidate() {
         println("testValidate")
