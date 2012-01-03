@@ -3,6 +3,11 @@ package de.dkfz.tbi.otp.ngsdata
 class FilesCompletenessService {
 
     def lsdfFilesService
+    /**
+     * Dependency injection of Grails Application
+     */
+    @SuppressWarnings("GrailsStatelessService")
+    def grailsApplication
 
     /**
      *
@@ -132,7 +137,7 @@ class FilesCompletenessService {
      */
     boolean checkAllRuns(String projectName, String host) {
         Project project = Project.findByName(projectName)
-        String basePath = otp.dataPath[host]
+        String basePath = grailsApplication.config.otp.dataPath[host]
         String dir = basePath + "/" + project.dirName + "/sequencing/"
         File baseDir = new File(dir)
         File[] seqDirs = baseDir.listFiles()
