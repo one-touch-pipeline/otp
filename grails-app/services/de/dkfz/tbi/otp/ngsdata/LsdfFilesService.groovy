@@ -1,8 +1,5 @@
 package de.dkfz.tbi.otp.ngsdata
 
-//import java.io.*
-
-
 class LsdfFilesService {
 
     @SuppressWarnings("GrailsStatelessService")
@@ -170,34 +167,6 @@ class LsdfFilesService {
 
     /**
      *
-     * @param file
-     * @return
-     */
-    /*
-    boolean fileExists(DataFile file) {
-        String path = getFilePath(file)
-        if (!path) {
-            return false
-        }
-        return fileExists(path)
-    }
-    */
-    /**
-     *
-     * @param fileId
-     * @return
-     */
-    /*
-    boolean fileExists(long fileId) {
-        DataFile file = DataFile.get(fileId)
-        if (!file) {
-            return false
-        }
-        return fileExists(file)
-    }
-    */
-    /**
-     *
      * @param path
      * @return
      */
@@ -209,34 +178,6 @@ class LsdfFilesService {
         return file.length()
     }
 
-    /**
-     *
-     * @param file
-     * @return
-     */
-    /*
-    long fileSize(DataFile file) {
-        String path = getFilePath(file)
-        if (!path) {
-            return 0
-        }
-        return fileSize(path)
-    }
-    */
-    /**
-     *
-     * @param fileId
-     * @return
-     */
-    /*
-    long fileSize(long fileId) {
-        DataFile file = DataFile.get(fileId)
-        if (!file) {
-            return 0
-        }
-        return fileSize(file)
-    }
-    */
     /**
      *
      * @param path
@@ -254,81 +195,6 @@ class LsdfFilesService {
         return new Date(timestamp)
     }
 
-    /**
-     *
-     * @param file
-     * @return
-     */
-    /*
-    Date fileCreationDate(DataFile file) {
-        if (!file) {
-            return null
-        }
-        String path = getFilePath(file)
-        if (!path) {
-            return null
-        }
-        return fileCreationDate(path)
-    }
-    */
-    /**
-     *
-     * @param fileId
-     * @return
-     */
-    /*
-    Date fileCreationDate(long fileId) {
-        DataFile file = DataFile.get(fileId)
-        if (!file) {
-            return null
-        }
-        return fileCreationDate(file)
-    }
-    */
-    /**
-     *
-     * @param runId
-     * @return
-     */
-    /*
-    boolean runFolderInFinalLocation(long runId) {
-        Run run = Run.get(runId)
-        if (!run) {
-            return false
-        }
-        return runInFinalLocation(run)
-    }
-    */
-    /**
-     *
-     * @param run
-     * @return
-     */
-    /*
-    boolean runFolderInFinalLocation(Run run) {
-        if (!run) {
-            // will be exception
-            return false
-        }
-        String [] paths = getAllPathsForRun(run)
-        run.finalLocation = false
-        run.save(flush: true)
-        boolean locationMissing = false
-        paths.each { String path ->
-            log.debug(path)
-            File file = new File(path + "/run" + run.name)
-            if (!file.isDirectory() || !file.canRead()) {
-                locationMissing = true
-            }
-        }
-        if (locationMissing) {
-            return false
-        }
-        run.finalLocation = true
-        run.save(flush: true)
-        return true
-    }
-    */
     /**
      *
      *
@@ -382,8 +248,6 @@ class LsdfFilesService {
         if (!seqTrack) {
             return null
         }
-        //println file.project.host
-        //println grailsApplication.config
         String basePath = grailsApplication.config.otp.dataPath[file.project.host.toLowerCase()]
         String path =
                 basePath + file?.project?.dirName + "/sequencing/" +
