@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 class FilesCompletenessService {
 
-    def LsdfFilesService
+    def lsdfFilesService
 
     /**
      *
