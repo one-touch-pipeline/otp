@@ -363,9 +363,7 @@ class MetaDataService {
      * @return
      */
     private String correctedKey(String token) {
-        if (token == "lane") {
-            return "LANE_NO"
-        } else if (token == "SLIDE_NO") {
+        if (token == "lane" || token == "SLIDE_NO") {
             return "LANE_NO"
         }
         return token
