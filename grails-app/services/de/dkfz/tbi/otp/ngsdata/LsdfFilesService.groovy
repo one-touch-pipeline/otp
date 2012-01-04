@@ -54,7 +54,7 @@ class LsdfFilesService {
      * @return
      */
     String getFileFinalPath(long fileId) {
-        DataFile file = DataFile.getAt(fileId)
+        DataFile file = DataFile.get(fileId)
         if (!file) {
             return null
         }
