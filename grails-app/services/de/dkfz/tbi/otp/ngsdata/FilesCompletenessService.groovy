@@ -49,7 +49,8 @@ class FilesCompletenessService {
 
         boolean allExists = true
         DataFile.findAllByRun(run).each {DataFile dataFile ->
-            String path = lsdfFilesService.getFileFinalPath(dataFile)
+            println dataFile
+            String path = lsdfFilesService.getFileFinalPath(dataFile.id)
             if (path == null) {
                 return // continue
             }
