@@ -134,14 +134,18 @@ class LsdfFilesService {
             log.debug("File not used ${file.fileName}")
             return null
         }
-        SeqTrack seqTrack = file.seqTrack ?: file.alignmentLog.seqTrack
-        if (!seqTrack) {
+        if (!file.seqTrack) {
             log.debug("File used but no SeqTrack ${file.fileName}")
             return null
         }
+        SeqTrack seqTrack = file.seqTrack ?: file.alignmentLog.seqTrack
         String basePath = grailsApplication.config.otp.dataPath[file.project.host.toLowerCase()]
         if (!basePath) {
              return null
+        }
+        if(!seqTrack.sample.individual.pid) {
+            log.debug("No individual pid set.")
+            return null
         }
         String pid = seqTrack.sample.individual.pid
         String path =
@@ -161,6 +165,7 @@ class LsdfFilesService {
      * @return
      */
     boolean fileExists(String path) {
+        println("hier????")
         File file = new File(path)
         return file.canRead()
     }
