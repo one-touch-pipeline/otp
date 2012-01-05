@@ -122,7 +122,11 @@ class FilesCompletenessService {
         if (!run) {
             throw new ProcessingException("The handed over runId has no associated Run.")
         }
-        DataFile.findAllByRun(run).each { DataFile dataFile ->
+        List<DataFile> dataFiles = DataFile.findAllByRun(run)
+        if(dataFiles.empty) {
+            throw new ProcessingException("No data file provided for the given run.")
+        }
+        dataFiles..each { DataFile dataFile ->
             boolean exists = fileExists(dataFile)
             if (!exists) {
                 log.debug("file ${dataFile.fileName} does not exist")
