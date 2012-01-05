@@ -120,8 +120,7 @@ class FilesCompletenessService {
     void checkAllFiles(long runId) {
         Run run = Run.get(runId)
         if (!run) {
-            log.debug("Run ${runID} not found")
-            //return
+            throw new ProcessingException("The handed over runId has no associated Run.")
         }
         DataFile.findAllByRun(run).each { DataFile dataFile ->
             boolean exists = fileExists(dataFile)
