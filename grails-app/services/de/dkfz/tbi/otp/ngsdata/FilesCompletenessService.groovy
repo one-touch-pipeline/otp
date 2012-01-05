@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.job.processing.ProcessingException
+
 class FilesCompletenessService {
 
     def lsdfFilesService
@@ -18,12 +20,14 @@ class FilesCompletenessService {
      */
     public boolean checkInitialSequenceFiles(Run run) {
         boolean allExists = true
-        DataFile.findAllByRun(run).each {DataFile dataFile ->
-            //println dataFile
+        List<DataFile> dataFiles = DataFile.findAllByRun(run)
+        if(dataFiles.empty) {
+            throw new ProcessingException("No data file provided for the given run.")
+        }
+        dataFiles.each {DataFile dataFile ->
             if (dataFile.fileType.type == FileType.Type.SEQUENCE ||
-                dataFile.fileType.type == FileType.Type.ALIGNMENT) {
+            dataFile.fileType.type == FileType.Type.ALIGNMENT) {
                 String path = lsdfFilesService.getFileInitialPath(dataFile)
-                //println path
                 if (!lsdfFilesService.fileExists(path)) {
                     allExists = false
                     println "missing file ${path}"
@@ -46,10 +50,12 @@ class FilesCompletenessService {
     boolean checkFinalLocation(Run run) {
         run.finalLocation = false
         run.save(flush: true)
-
         boolean allExists = true
-        DataFile.findAllByRun(run).each {DataFile dataFile ->
-            println dataFile
+        List<DataFile> dataFiles = DataFile.findAllByRun(run)
+        if(dataFiles.empty) {
+            throw new ProcessingException("No data file provided for the given run.")
+        }
+        dataFiles.each {DataFile dataFile ->
             String path = lsdfFilesService.getFileFinalPath(dataFile.id)
             if (path == null) {
                 return // continue
@@ -63,7 +69,6 @@ class FilesCompletenessService {
                 dataFile.fileExists = false
                 allExists = false
             }
-            println path + " " + exists
             dataFile.save(flush: true)
         }
         if (allExists) {
@@ -83,9 +88,14 @@ class FilesCompletenessService {
      */
     boolean checkViewByPid(Run run) {
         boolean allLinked = true
-        DataFile.findAllByRun(run).each {DataFile dataFile ->
+        List<DataFile> dataFiles = DataFile.findAllByRun(run)
+        if(dataFiles.empty) {
+            throw new ProcessingException("No data file provided for the given run.")
+        }
+        dataFiles.each {DataFile dataFile ->
             String path = lsdfFilesService.getFileViewByPidPath(dataFile)
             if (path == null) {
+                allLinked = false
                 return // continue
             }
             boolean exists = lsdfFilesService.fileExists(path)
@@ -101,36 +111,36 @@ class FilesCompletenessService {
     }
 
     /**
-    * This function checks if all dataFiles belonging to this
-    * run are in the final location and properly linked.
-    *
-    * If run does not exists the RunTimeException with be risen.
-    * @param runId
-    */
-   void checkAllFiles(long runId) {
-       Run run = Run.get(runId)
-       if (!run) {
-           log.debug("Run ${runID} not found")
-           //return
-       }
-       DataFile.findAllByRun(run).each { DataFile dataFile ->
-           boolean exists = fileExists(dataFile)
-           if (!exists) {
-               log.debug("file ${dataFile.fileName} does not exist")
-               // continue
-               return
-           }
-           dataFile.fileExists = true
-           dataFile.fileSize = fileSize(dataFile)
-           dataFile.dateFileSystem = fileCreationDate(dataFile)
-           String vbpPath = getViewByPidPath(dataFile)
-           if (vbpPath) {
-               dataFile.fileLinked = fileExists(vbpPath)
-           }
-       }
-   }
+     * This function checks if all dataFiles belonging to this
+     * run are in the final location and properly linked.
+     *
+     * If run does not exists the RunTimeException with be risen.
+     * @param runId
+     */
+    void checkAllFiles(long runId) {
+        Run run = Run.get(runId)
+        if (!run) {
+            log.debug("Run ${runID} not found")
+            //return
+        }
+        DataFile.findAllByRun(run).each { DataFile dataFile ->
+            boolean exists = fileExists(dataFile)
+            if (!exists) {
+                log.debug("file ${dataFile.fileName} does not exist")
+                // continue
+                return
+            }
+            dataFile.fileExists = true
+            dataFile.fileSize = fileSize(dataFile)
+            dataFile.dateFileSystem = fileCreationDate(dataFile)
+            String vbpPath = getViewByPidPath(dataFile)
+            if (vbpPath) {
+                dataFile.fileLinked = fileExists(vbpPath)
+            }
+        }
+    }
 
-   /**
+    /**
      *
      * @param projectName
      * @param host
