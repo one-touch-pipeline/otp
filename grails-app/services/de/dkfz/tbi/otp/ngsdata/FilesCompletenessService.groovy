@@ -126,7 +126,7 @@ class FilesCompletenessService {
         if(dataFiles.empty) {
             throw new ProcessingException("No data file provided for the given run.")
         }
-        dataFiles..each { DataFile dataFile ->
+        dataFiles.each { DataFile dataFile ->
             boolean exists = fileExists(dataFile)
             if (!exists) {
                 log.debug("file ${dataFile.fileName} does not exist")
