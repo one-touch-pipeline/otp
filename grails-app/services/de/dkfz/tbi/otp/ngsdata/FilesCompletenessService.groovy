@@ -150,12 +150,27 @@ class FilesCompletenessService {
      * @return
      */
     boolean checkAllRuns(String projectName, String host) {
+        if (!projectName) {
+            throw new ProcessingException("No projectName specified.")
+        }
         Project project = Project.findByName(projectName)
+        if (!project) {
+            throw new ProcessingException("No Project could be found for the specified projectName.")
+        }
+        if (!host) {
+            throw new ProcessingException("No host specified.")
+        }
         String basePath = grailsApplication.config.otp.dataPath[host]
+        if (basePath == "{}") {
+            throw new ProcessingException("No base path could be found.")
+        }
         String dir = basePath + "/" + project.dirName + "/sequencing/"
         File baseDir = new File(dir)
         File[] seqDirs = baseDir.listFiles()
         int nMissing = 0
+        if (!seqDirs) {
+            throw new ProcessingException("No sequencing directories could be found.")
+        }
         for (int i=0; i<seqDirs.size(); i++) {
             File seqTypeDir = seqDirs[i]
             if (!seqTypeDir.isDirectory()) {
