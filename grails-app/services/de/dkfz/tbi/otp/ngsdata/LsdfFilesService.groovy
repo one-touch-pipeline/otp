@@ -165,7 +165,6 @@ class LsdfFilesService {
      * @return
      */
     boolean fileExists(String path) {
-        println("hier????")
         File file = new File(path)
         return file.canRead()
     }
