@@ -28,8 +28,8 @@ class CheckFinalLocationJob extends AbstractEndStateAwareJobImpl {
         if (filesCompletenessService.checkFinalLocation(run)) {
             succeed()
         } else {
-            succeed()
-            //fail()
+            //succeed()
+            fail()
         }
     }
 }
