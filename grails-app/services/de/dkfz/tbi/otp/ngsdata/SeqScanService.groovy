@@ -13,7 +13,7 @@ class SeqScanService {
         List<SeqTrack> seqTracks = SeqTrack.list()
         List<SeqTrack> seqTracksNew = []
         // create a list of new seqTracks
-        seqTracks.each { seqTrack ->
+        seqTracks.each { SeqTrack seqTrack ->
             SeqTrackBySeqScan.findAllBySeqTrack(seqTrack).each { SeqTrackBySeqScan seqTrackScan ->
                 seqTracksNew << seqTrackScan.seqScan
             }
