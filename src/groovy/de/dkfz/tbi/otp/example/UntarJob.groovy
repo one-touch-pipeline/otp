@@ -15,7 +15,7 @@ class UntarJob extends AbstractJobImpl {
         String fileName = getParameterValueOrClass("file")
         String directory = getParameterValueOrClass("directory")
         // run the process
-        def process = "tar -pxv --atime-preserve -f ${fileName}".execute(null, new File(directory.value))
+        def process = "tar -pxv --atime-preserve -f ${fileName}".execute(null, new File(directory))
         process.waitFor()
         if (process.exitValue()) {
             throw new RuntimeException("Untar failed")
