@@ -44,5 +44,8 @@ class CopyFilesJob extends AbstractJobImpl {
                 allIds << it
             }
         }
+        // sleep instead of watch dog
+        java.lang.Process sleepProc = "sleep 600".execute()
+        sleepProc.waitFor()
     }
 }
