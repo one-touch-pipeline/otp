@@ -275,7 +275,3 @@ otp.dataPath.metadata = otpConfig.otp.dataPath.metadata
 if (pluginsToExclude) {
     grails.plugin.exclude = pluginsToExclude
 }
-
-
-
-
