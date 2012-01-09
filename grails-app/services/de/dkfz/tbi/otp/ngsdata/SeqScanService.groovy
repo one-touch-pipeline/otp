@@ -11,15 +11,8 @@ class SeqScanService {
      */
     void buildSeqScans() {
         List<SeqTrack> seqTracks = SeqTrack.list()
-        List<SeqTrack> seqTracksNew = []
-        // create a list of new seqTracks
-        seqTracks.each { seqTrack ->
-            SeqTrackBySeqScan.findAllBySeqTrack(seqTrack).each { SeqTrackBySeqScan seqTrackScan ->
-                seqTracksNew << seqTrackScan.seqScan
-            }
-        }
-        log.debug("- number of new tracks: ${seqTracksNew.size()}")
-        seqTracksNew.each { buildSeqScan(it) }
+        println "- number of new tracks: ${seqTracks.size()}"
+        seqTracks.each { buildSeqScan(it) }
     }
 
     /**
@@ -33,8 +26,10 @@ class SeqScanService {
     void buildSeqScan(SeqTrack seqTrack) {
         // maybe track already consumed
         if (SeqTrackBySeqScan.countBySeqTrack(seqTrack) > 0) {
-            log.debug("seqTrack ${seqTrack} already used")
+            println "seqTrack ${seqTrack} already used"
             return
+        } else {
+            println "building secScan from ${seqTrack}"
         }
         // take parameters
         Sample sample = seqTrack.sample
@@ -169,7 +164,7 @@ class SeqScanService {
     /**
      *
      * fills insert size as string
-     * in case of mized library "!" signs
+     * in case of mixed library "!" signs
      * are used
      *
      * @param SeqScan
