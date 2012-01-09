@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.job.processing.LoggingException;
 import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
+import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessingError
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
@@ -272,14 +273,15 @@ class Scheduler {
     public void doErrorHandling(JoinPoint joinPoint, Exception e) {
         Job job = joinPoint.target as Job
         schedulerService.removeRunningJob(job)
+        ProcessingStep step = ProcessingStep.get(job.processingStep.id)
         // get the last ProcessingStepUpdate
-        List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(job.processingStep)
+        List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(step)
         // add a ProcessingStepUpdate to the ProcessingStep
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.FAILURE,
             previous: existingUpdates.sort { it.date }.last(),
-            processingStep: job.processingStep
+            processingStep: step
             )
         update.save()
         try {
@@ -295,13 +297,14 @@ class Scheduler {
             log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
             throw new ProcessingException("Could not create a FAILURE Update for Job")
         }
-        job.processingStep.process.finished = true
-        if (!job.processingStep.process.save(flush: true)) {
+        Process process = Process.get(step.process.id)
+        process.finished = true
+        if (!process.save(flush: true)) {
             // TODO: trigger error handling
             log.fatal("Could not set Process to finished")
             throw new ProcessingException("Could not set Process to finished")
         }
         // TODO: trigger error handling
-        log.debug("doErrorHandling performed for ${joinPoint.getTarget().class} with ProcessingStep ${job.processingStep.id}")
+        log.debug("doErrorHandling performed for ${joinPoint.getTarget().class} with ProcessingStep ${step.id}")
     }
 }
