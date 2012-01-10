@@ -85,21 +85,10 @@ class JobTransformation extends AbstractJobTransformation implements ASTTransfor
                 classNode.addConstructor(Opcodes.ACC_PUBLIC, params, ClassNode.EMPTY_ARRAY, stmt)
                 // add getVersion method - actual code will be generated below
                 classNode.addMethod("getVersion", Opcodes.ACC_PUBLIC, new ClassNode(String), Parameter.EMPTY_ARRAY, ClassNode.EMPTY_ARRAY, new ReturnStatement(new ConstantExpression("")))
-                // add annotation nodes for scope
-                ClassNode scopeAnnotationClass = new ClassNode(this.class.classLoader.loadClass("org.springframework.context.annotation.Scope"))
-                if (classNode.getAnnotations(scopeAnnotationClass).isEmpty()) {
-                    AnnotationNode scopeAnnotation = new AnnotationNode(scopeAnnotationClass)
-                    scopeAnnotation.addMember("value", new ConstantExpression("prototype"))
-                    classNode.addAnnotation(scopeAnnotation)
-                }
-                ClassNode componentAnnotationClass = new ClassNode(this.class.classLoader.loadClass("org.springframework.stereotype.Component"))
-                if (classNode.getAnnotations(componentAnnotationClass).isEmpty()) {
-                    AnnotationNode componentAnnotation = new AnnotationNode(componentAnnotationClass)
-                    String name = classNode.nameWithoutPackage.substring(0, 1).toLowerCase() + classNode.nameWithoutPackage.substring(1)
-                    componentAnnotation.addMember("value", new ConstantExpression(name))
-                    classNode.addAnnotation(componentAnnotation)
-                }
             }
+            // add annotation nodes for scope
+            addScopeAnnotation(classNode)
+            addComponentAnnotation(classNode)
 
             // add the Annotation to the execute method and generates the version
             classNode.getMethods().each { method ->
