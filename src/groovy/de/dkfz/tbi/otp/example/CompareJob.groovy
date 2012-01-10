@@ -5,11 +5,7 @@ import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.InvalidStateException
 import de.dkfz.tbi.otp.job.processing.Parameter
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
 
-@Component("compareJob")
-@Scope("prototype")
 class CompareJob extends AbstractJobImpl implements EndStateAwareJob {
     private ExecutionState endState = null
 

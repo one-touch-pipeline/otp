@@ -6,16 +6,11 @@ import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
-
 /**
  * Simple test implementing the Job interface without inheriting
  * AbstractJob.
  *
  */
-@Component("directTestJob")
-@Scope("prototype")
 class DirectTestJob implements Job {
     private ProcessingStep step
 
