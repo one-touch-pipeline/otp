@@ -21,10 +21,13 @@ class RunController {
             render ("run id=${id} does not exist.")
         }
         String[] paths = lsdfFilesService.getAllPathsForRun(run)
+        List<MetaDataKey> keys = []
+        keys[0] = MetaDataKey.findByName("SAMPLE_ID")
+        keys[1] = MetaDataKey.findByName("WITHDRAWN")
 
         int prevId = (id > 1)? id-1 : 1
         int nextId = id+1
-        return [run: run, finalPaths: paths , nextId: nextId, prevId: prevId]
+        return [run: run, finalPaths: paths, keys: keys, nextId: nextId, prevId: prevId]
     }
 
     def submitForm = {
