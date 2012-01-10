@@ -98,15 +98,16 @@ class SeqTrackService {
             return null
         }
         SeqTrack seqTrack = new SeqTrack(
-                run : run,
-                sample : sample,
-                seqType : seqType,
-                seqTech : run.seqTech,
-                laneId : lane,
-                hasFinalBam : false,
-                hasOriginalBam : false,
-                usingOriginalBam : false
-                )
+            run : run,
+            sample : sample,
+            seqType : seqType,
+            seqTech : run.seqTech,
+            laneId : lane,
+            hasFinalBam : false,
+            hasOriginalBam : false,
+            usingOriginalBam : false,
+            pipelineVersion: metaDataEntries.get(3)
+        )
         if (!seqTrack.validate()) {
             println seqTrack.errors
         }
@@ -114,7 +115,7 @@ class SeqTrackService {
         laneDataFiles.each {DataFile dataFile ->
             dataFile.seqTrack = seqTrack
             dataFile.project = sample.individual.project
-            dataFile.save()
+            dataFile.save(flush: true)
         }
         seqTrack = fillReadsForSeqTrack(seqTrack)
         seqTrack.save(flush: true)
@@ -161,7 +162,7 @@ class SeqTrackService {
         }
         log.debug("alignment data found")
         // create or find alignment params object
-        String alignProgram = alignValues.get(1) ?: metaDataEntries.get(3)
+        String alignProgram = alignValues.get(1) ?: seqTrack.pipelineVersion
         AlignmentParams alignParams = AlignmentParams.findByProgramName(alignProgram)
         if (!alignParams) {
             alignParams = new AlignmentParams(programName: alignProgram)
