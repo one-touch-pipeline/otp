@@ -11,11 +11,13 @@ class BootstrapController {
     def index() {
     }
 
+    /*
     def bootstrap = {
-        individualService.loadIndividuals()
-        individualService.loadSamples()
-        render "Individual and Samples loaded"
+       // individualService.loadIndividuals()
+       // individualService.loadSamples()
+       // render "Individual and Samples loaded"
     }
+    */
 
     def buildSeqScans = {
         seqScanService.buildSeqScans()
