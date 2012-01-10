@@ -66,6 +66,7 @@ class SeqScanService {
                 seqTech: seqTech,
                 seqType: seqType
                 )
+        seqScan.save()
         seqTracksToMerge.each { SeqTrack iTrack ->
             MergingAssignment seqTrackScan = new MergingAssignment(seqTrack: iTrack, seqScan: seqScan)
             seqTrackScan.save()
