@@ -8,6 +8,7 @@ class SeqTrack {
     long nBasePairs = 0
     long nReads = 0
     int insertSize = -1
+    String pipelineVersion
     Run run
     Sample sample
     SeqType seqType
@@ -27,6 +28,7 @@ class SeqTrack {
         usingOriginalBam()
         seqType()
         sample()
+        pipelineVersion()
     }
 
     String nBaseString() {
