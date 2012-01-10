@@ -3,11 +3,6 @@ package de.dkfz.tbi.otp.example
 import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
 import de.dkfz.tbi.otp.job.processing.Parameter
 
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
-
-@Component("untarJob")
-@Scope("prototype")
 class UntarJob extends AbstractJobImpl {
 
     @Override
@@ -15,7 +10,7 @@ class UntarJob extends AbstractJobImpl {
         String fileName = getParameterValueOrClass("file")
         String directory = getParameterValueOrClass("directory")
         // run the process
-        def process = "tar -pxv --atime-preserve -f ${fileName}".execute(null, new File(directory.value))
+        def process = "tar -pxv --atime-preserve -f ${fileName}".execute(null, new File(directory))
         process.waitFor()
         if (process.exitValue()) {
             throw new RuntimeException("Untar failed")

@@ -38,6 +38,8 @@ grails.project.dependency.resolution = {
         runtime "commons-jexl:commons-jexl:1.1"
         // XMPP
         compile "jivesoftware:smack:3.1.0"
+        // jdbc
+        runtime "postgresql:postgresql:9.1-901.jdbc4"
     }
 
     plugins {

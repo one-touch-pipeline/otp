@@ -3,11 +3,6 @@ package de.dkfz.tbi.otp.example
 import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
 import de.dkfz.tbi.otp.job.processing.Parameter
 
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
-
-@Component("tarJob")
-@Scope("prototype")
 class TarJob extends AbstractJobImpl {
 
     @Override

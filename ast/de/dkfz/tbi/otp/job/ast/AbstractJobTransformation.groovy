@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.ast
 
+import org.codehaus.groovy.ast.AnnotationNode
+import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.MethodNode
 import org.codehaus.groovy.ast.expr.ConstantExpression
 import org.codehaus.groovy.ast.stmt.ReturnStatement
@@ -40,6 +42,25 @@ abstract class AbstractJobTransformation {
         }
         // and add a return statement for the method
         method.setCode(new ReturnStatement(new ConstantExpression(version)))
+    }
+
+    protected void addScopeAnnotation(ClassNode classNode) {
+        ClassNode scopeAnnotationClass = new ClassNode(this.class.classLoader.loadClass("org.springframework.context.annotation.Scope"))
+        if (classNode.getAnnotations(scopeAnnotationClass).isEmpty()) {
+            AnnotationNode scopeAnnotation = new AnnotationNode(scopeAnnotationClass)
+            scopeAnnotation.addMember("value", new ConstantExpression("prototype"))
+            classNode.addAnnotation(scopeAnnotation)
+        }
+    }
+
+    protected void addComponentAnnotation(ClassNode classNode) {
+        ClassNode componentAnnotationClass = new ClassNode(this.class.classLoader.loadClass("org.springframework.stereotype.Component"))
+        if (classNode.getAnnotations(componentAnnotationClass).isEmpty()) {
+            AnnotationNode componentAnnotation = new AnnotationNode(componentAnnotationClass)
+            String name = classNode.nameWithoutPackage.substring(0, 1).toLowerCase() + classNode.nameWithoutPackage.substring(1)
+            componentAnnotation.addMember("value", new ConstantExpression(name))
+            classNode.addAnnotation(componentAnnotation)
+        }
     }
 
     /**

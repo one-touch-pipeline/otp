@@ -3,11 +3,7 @@ package de.dkfz.tbi.otp.job.jobs.dataTransfer
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
 
-@Component("createOutputDirectory")
-@Scope("prototype")
 class CreateOutputDirectoryJob extends AbstractJobImpl {
 
     @Autowired

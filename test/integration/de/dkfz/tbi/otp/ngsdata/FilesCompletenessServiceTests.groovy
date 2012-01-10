@@ -237,8 +237,86 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         shouldFail(ProcessingException) {
             filesCompletenessService.checkAllRuns(project.name, null)
         }
+        // ProcessingException: No sequencing directories could be found.
         shouldFail(ProcessingException) {
             filesCompletenessService.checkAllRuns(project.name, "dkfz")
         }
+        // first part of temp path used for all paths
+        String tmpPath = dataPath.absolutePath + "/" + project.dirName + "/sequencing"
+        new File(tmpPath).mkdirs()
+        // the seqTypeDirs
+        new File(tmpPath + "/seqTypeDir1").mkdir()
+        new File(tmpPath + "/seqTypeDir2").mkdir()
+        new File(tmpPath + "/seqTypeDir3").mkdir()
+        new File(tmpPath + "/seqTypeDir4").mkdir()
+        new File(tmpPath + "/seqTypeDir5").mkdir()
+        // the seqTypes
+        SeqType seqType1 = new SeqType(name: "testSeqType1", libraryLayout: "testLibraryLayout1", dirName: "seqTypeDir1")
+        assert(seqType1.save())
+        SeqType seqType2 = new SeqType(name: "testSeqType2", libraryLayout: "testLibraryLayout2", dirName: "seqTypeDir2")
+        assert(seqType2.save())
+        SeqType seqType3 = new SeqType(name: "testSeqType3", libraryLayout: "testLibraryLayout3", dirName: "seqTypeDir3")
+        assert(seqType3.save())
+        SeqType seqType4 = new SeqType(name: "testSeqType4", libraryLayout: "testLibraryLayout4", dirName: "seqTypeDir4")
+        assert(seqType4.save())
+        SeqType seqType5 = new SeqType(name: "testSeqType5", libraryLayout: "testLibraryLayout5", dirName: "seqTypeDir5")
+        assert(seqType5.save())
+        // the seqCenterDirs
+        new File(tmpPath + "/seqTypeDir1" + "/seqCenterDir1").mkdir()
+        new File(tmpPath + "/seqTypeDir2" + "/seqCenterDir2").mkdir()
+        new File(tmpPath + "/seqTypeDir3" + "/seqCenterDir3").mkdir()
+        new File(tmpPath + "/seqTypeDir4" + "/seqCenterDir4").mkdir()
+        new File(tmpPath + "/seqTypeDir5" + "/seqCenterDir5").mkdir()
+        // the seqCenters
+        SeqCenter seqCenter1 = new SeqCenter(name: "testSeqCenter1", dirName: "seqCenterDir1")
+        assert(seqCenter1.save())
+        SeqCenter seqCenter2 = new SeqCenter(name: "testSeqCenter2", dirName: "seqCenterDir2")
+        assert(seqCenter2.save())
+        SeqCenter seqCenter3 = new SeqCenter(name: "testSeqCenter3", dirName: "seqCenterDir3")
+        assert(seqCenter3.save())
+        SeqCenter seqCenter4 = new SeqCenter(name: "testSeqCenter4", dirName: "seqCenterDir4")
+        assert(seqCenter4.save())
+        SeqCenter seqCenter5 = new SeqCenter(name: "testSeqCenter5", dirName: "seqCenterDir5")
+        assert(seqCenter5.save())
+        // the runDirs
+        new File(tmpPath + "/seqTypeDir1" + "/seqCenterDir1" + "/runtestRun1").mkdir()
+        new File(tmpPath + "/seqTypeDir2" + "/seqCenterDir2" + "/runtestRun2").mkdir()
+        new File(tmpPath + "/seqTypeDir3" + "/seqCenterDir3" + "/runtestRun3").mkdir()
+        new File(tmpPath + "/seqTypeDir4" + "/seqCenterDir4" + "/runtestRun4").mkdir()
+        new File(tmpPath + "/seqTypeDir5" + "/seqCenterDir5" + "/runtestRun5").mkdir()
+        // the seqTechs
+        SeqTech seqTech1 = new SeqTech(name: "testSolid1")
+        assert(seqTech1.save())
+        SeqTech seqTech2 = new SeqTech(name: "testSolid2")
+        assert(seqTech2.save())
+        SeqTech seqTech3 = new SeqTech(name: "testSolid3")
+        assert(seqTech3.save())
+        SeqTech seqTech4 = new SeqTech(name: "testSolid4")
+        assert(seqTech4.save())
+        SeqTech seqTech5 = new SeqTech(name: "testSolid5")
+        assert(seqTech5.save())
+        // the runs
+        Run run1 = new Run(name: "testRun1", complete: false, seqCenter: seqCenter1, seqTech: seqTech1)
+        run1.dataPath = dataPath
+        run1.mdPath = mdPath
+        assert(run1.save())
+        Run run2 = new Run(name: "testRun2", complete: false, seqCenter: seqCenter2, seqTech: seqTech2)
+        run2.dataPath = dataPath
+        run2.mdPath = mdPath
+        assert(run2.save())
+        Run run3 = new Run(name: "testRun3", complete: false, seqCenter: seqCenter3, seqTech: seqTech3)
+        run3.dataPath = dataPath
+        run3.mdPath = mdPath
+        assert(run3.save())
+        Run run4 = new Run(name: "testRun4", complete: false, seqCenter: seqCenter4, seqTech: seqTech4)
+        run4.dataPath = dataPath
+        run4.mdPath = mdPath
+        assert(run4.save())
+        Run run5 = new Run(name: "testRun5", complete: false, seqCenter: seqCenter5, seqTech: seqTech5)
+        run5.dataPath = dataPath
+        run5.mdPath = mdPath
+        assert(run5.save())
+        // should correctly and completely run and therefore return true
+        assertTrue(filesCompletenessService.checkAllRuns(project.name, "dkfz"))
     }
 }
