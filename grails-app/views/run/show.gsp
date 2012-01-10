@@ -171,14 +171,16 @@
         <table>
             <g:if test="${run.allFilesUsed == false}">
             <tr>
-                <td class="miniHeader">Files not used:</td>
+                <td class="miniHeader" colspan="3">Files not used:</td>
             </tr>
             </g:if>
 
-            <g:each var="file" in="${de.dkfz.tbi.otp.ngsdata.DataFile.findAllByRun(run)}">
+            <g:each var="file" in="${de.dkfz.tbi.otp.ngsdata.DataFile.findAllByRun(run, [sort: 'fileName'])}">
             <g:if test="${file.used == false}">
                 <tr>
                     <td>${file.fileName}</td>
+                    <td>${de.dkfz.tbi.otp.ngsdata.MetaDataEntry.findByDataFileAndKey(file, keys[0]).value}</td>
+                    <td>${de.dkfz.tbi.otp.ngsdata.MetaDataEntry.findAllByDataFileAndKey(file, keys[1])}</td>
             </g:if>
             </g:each>
         </table>
