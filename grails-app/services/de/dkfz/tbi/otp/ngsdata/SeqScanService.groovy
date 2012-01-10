@@ -26,10 +26,10 @@ class SeqScanService {
     void buildSeqScan(SeqTrack seqTrack) {
         // maybe track already consumed
         if (MergingAssignment.countBySeqTrack(seqTrack) > 0) {
-            println "seqTrack ${seqTrack} already used"
+            log.debug("seqTrack ${seqTrack} already used")
             return
         } else {
-            println "building secScan from ${seqTrack}"
+            log.debug("building secScan from ${seqTrack}")
         }
         // take parameters
         Sample sample = seqTrack.sample
