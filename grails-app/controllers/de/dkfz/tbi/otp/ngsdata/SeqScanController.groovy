@@ -10,7 +10,7 @@ class SeqScanController {
 
         SeqScan scan = SeqScan.get(params.id)
         Set<String> runs = new HashSet<String>()
-        List<SeqTrack> tracks = MergingAssignment.findAllBySeqScan(scan)
+        List<SeqTrack> tracks = MergingAssignment.findAllBySeqScan(scan, [sort: "seqTrack.laneId"])
 
         tracks.each {seqTrack ->
             runs.add(seqTrack.seqTrack.run.name)
