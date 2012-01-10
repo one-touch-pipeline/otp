@@ -52,16 +52,17 @@ class MetaDataService {
                 return
             }
             if (fileName.contains("fastq") || fileName.contains("align")) {
+                // TODO check if already registered
                 dataFile = new DataFile(
                         pathName: runDir,
                         fileName: fileName
                         )
                 dataFile.run = run
                 dataFile.fileType = fileType
-                dataFile.save()
+                dataFile.save(flush: true)
             }
         }
-        fileType.save()
+        fileType.save(flush: true)
     }
 
     /**
@@ -111,7 +112,7 @@ class MetaDataService {
                         // new entry in MetaData
                         dataFile = new DataFile() // set-up later
                         dataFile.run = run
-                        dataFile.save()
+                        dataFile.save(flush: true)
                         values = tokenize(line, '\t')
                         for (int i=0; i<keys.size(); i++) {
                             MetaDataKey key = keys.getAt(i)
@@ -121,7 +122,7 @@ class MetaDataService {
                                     key: key
                                     )
                             entry.dataFile = dataFile
-                            entry.save()
+                            entry.save(flush: true)
                         }
                         // fill-up important fields
                         assignFileName(dataFile)
@@ -133,8 +134,8 @@ class MetaDataService {
                     }
                 }
                 file.used = true
-                file.save()
-                run.save()
+                file.save(flush: true)
+                run.save(flush: true)
             }
         } finally {
             loadMetaDataLock.unlock()
@@ -176,7 +177,7 @@ class MetaDataService {
             MetaDataKey key = MetaDataKey.findByName(token)
             if (!key) {
                 key = new MetaDataKey(name: token)
-                key.save()
+                key.save(flush: true)
             }
             keys << key
         }
@@ -310,9 +311,9 @@ class MetaDataService {
      */
     private void assignFileType(DataFile dataFile, FileType.Type type) {
         FileType fileType = fileTypeService.getFileType(dataFile.fileName, type)
-        fileType.save()
+        fileType.save(flush: true)
         dataFile.fileType = fileType
-        dataFile.save()
+        dataFile.save(flush: true)
     }
 
     /**
@@ -329,7 +330,7 @@ class MetaDataService {
         MetaDataKey key = MetaDataKey.findByName(keyName)
         if (!key) {
             key = new MetaDataKey(name: keyName)
-            key.save()
+            key.save(flush: true)
         }
         MetaDataEntry entry = getMetaDataEntry(dataFile, keyName)
         if (entry) {
@@ -346,7 +347,7 @@ class MetaDataService {
                         key: key
                         )
                 entry.dataFile = dataFile
-                entry.save()
+                entry.save(flush: true)
                 return
             }
         }
@@ -419,13 +420,13 @@ class MetaDataService {
                         dataFile.metaDataValid = false
                         allValid = false
                     }
-                    entry.save()
+                    entry.save(flush: true)
                 }
             }
         } finally {
             validateMetaDataLock.unlock()
         }
-        run.save()
+        run.save(flush: true)
         return allValid
     }
 
@@ -498,7 +499,7 @@ class MetaDataService {
                 }
             }
         }
-        run.save()
+        run.save(flush: true)
     }
 
     /**
@@ -518,17 +519,17 @@ class MetaDataService {
             if (dataFile.fileType.type == FileType.Type.SEQUENCE) {
                 Project project = dataFile.seqTrack.sample.individual.project
                 RunByProject runProject = new RunByProject(project: project, run: run)
-                runProject.save()
+                runProject.save(flush: true)
                 dataFile.project = project
-                dataFile.save()
+                dataFile.save(flush: true)
             } else if (dataFile.fileType.type == FileType.Type.ALIGNMENT) {
                 Project project = dataFile.alignmentLog.seqTrack.sample.individual.project
                 RunByProject runProject = new RunByProject(project: project, run: run)
-                runProject.save()
+                runProject.save(flush: true)
                 dataFile.project = project
-                dataFile.save()
+                dataFile.save(flush: true)
             }
         }
-        run.save()
+        run.save(flush: true)
     }
 }
