@@ -419,6 +419,7 @@ class MetaDataService {
                         dataFile.metaDataValid = false
                         allValid = false
                     }
+                    entry.save()
                 }
             }
         } finally {
@@ -461,7 +462,8 @@ class MetaDataService {
                     date = simpleDateFormat.parse(entry.value)
                 }
             } catch (Exception e) {
-                // TODO: catch exception!!
+                // no exception catching, 
+                // if parsing fails, (date == null)
             }
             if (!exDate) {
                 exDate = date
@@ -499,6 +501,11 @@ class MetaDataService {
         run.save()
     }
 
+    /**
+     * Each sequence and alignment file belonging to a run is 
+     * assigned to a project based on the Sample object.
+     * @param runId
+     */
     void assignFilesToProjects(long runId) {
         Run run = Run.get(runId)
         DataFile.findAllByRun(run).each { DataFile dataFile ->
