@@ -10,7 +10,7 @@ class MergingService {
     private static final String basePath = "$ROOT_PATH/project/"
 
     /**
-     *
+     * needs revision
      * @param ind
      * @param types
      */
@@ -51,14 +51,10 @@ class MergingService {
             throw new IllegalArgumentException("Individual may not be null")
         }
         List<SeqType> types = SeqType.findAll()
-        String projectPath = ind.project.dirName
-        String baseDir = basePath + "/" + projectPath + "/sequencing/"
+        String baseDir = getProjectFullPath(ind.project)
         types.each { SeqType type ->
             Sample.findAllByIndividual(ind).each { Sample sample ->
-                String path = baseDir + type.dirName + "/view-by-pid/" +
-                        ind.pid + "/" + sample.type.toString().toLowerCase() +
-                        "/" + type.libraryLayout.toLowerCase() +
-                        "/merged-alignment/"
+                String path = baseDir + getRelativePathToMergedAlignment(type, sample)
                 File mergedDir = new File(path)
                 mergedDir.list().each { String fileName ->
                     if (fileName.endsWith(".bam")) {
@@ -68,6 +64,29 @@ class MergingService {
                 }
             }
         }
+    }
+
+    /**
+     * returns base directory of the project
+     * based on base directory of the OTP system and project object
+     * @param project
+     * @return
+     */
+    private String getProjectFullPath(Project project) {
+        return basePath + "/" + project.dirName + "/sequencing/"
+    }
+
+    /**
+     * returns path relative to project base paths
+     * to directory with merged alignment files
+     * @param type
+     * @param sample
+     * @return
+     */
+    private String getRelativePathToMergedAlignment(SeqType type, Sample sample) {
+        return type.dirName + "/view-by-pid/" + sample.individual.pid + "/" + 
+        sample.type.toString().toLowerCase() + "/" + type.libraryLayout.toLowerCase() + 
+        "/merged-alignment/"
     }
 
     /**
@@ -243,14 +262,14 @@ class MergingService {
     private SeqTrack getSeqTrack(Sample sample, SeqType seqType, String runName, String lane) {
         String runString = runName.substring(3) // removing "run"
         List<SeqTrack> seqTracks =
-                SeqTrack.withCriteria {
-                    and {
-                        eq("sample", sample)
-                        eq("seqType", seqType)
-                        eq("laneId", lane)
-                        run { eq("name", runString) }
-                    }
+            SeqTrack.withCriteria {
+                and {
+                    eq("sample", sample)
+                    eq("seqType", seqType)
+                    eq("laneId", lane)
+                    run { eq("name", runString) }
                 }
+            }
         if (seqTracks.size() != 1) {
             log.debug("Number of seqTracks = ${seqTracks.size()}")
         } else {
