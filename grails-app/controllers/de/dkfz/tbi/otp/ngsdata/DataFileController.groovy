@@ -24,7 +24,7 @@ class DataFileController {
         values << dataFile.vbpFileName
 
         keys << "view-by-pid path"
-        values << lsdfFilesService.getViewByPidPath(dataFile)
+        values << lsdfFilesService.getFileViewByPidPath(dataFile)
 
         return [keys: keys, values: values]
     }

@@ -56,7 +56,7 @@ class SeqScanService {
         }
         oldSeqScans.each { SeqScan old ->
             old.state = SeqScan.State.OBSOLETE
-            old.save()
+            old.save(flush: true)
         }
         log.debug("invalidating ${oldSeqScans.size()} seq scans")
         // create new seqScan
@@ -66,20 +66,20 @@ class SeqScanService {
                 seqTech: seqTech,
                 seqType: seqType
                 )
-        seqScan.save()
+        seqScan.save(flush: true)
         seqTracksToMerge.each { SeqTrack iTrack ->
             MergingAssignment mergingAssignment = new MergingAssignment(seqTrack: iTrack, seqScan: seqScan)
-            mergingAssignment.save()
+            mergingAssignment.save(flush: true)
         }
 
         fillSeqScan(seqScan)
         fillSeqCenters(seqScan)
         fillInsertSize(seqScan)
 
-        seqScan.save()
-        sample.save()
-        seqTech.save()
-        seqType.save()
+        seqScan.save(flush: true)
+        sample.save(flush: true)
+        seqTech.save(flush: true)
+        seqType.save(flush: true)
     }
 
     /**
@@ -101,19 +101,19 @@ class SeqScanService {
                 seqTech: seqTech,
                 seqType: seqType
                 )
-        seqScan.save()
+        seqScan.save(flush: true)
         tracks.each { SeqTrack iTrack ->
             MergingAssignment mergingAssignment = new MergingAssignment(seqTrack: iTrack, seqScan: seqScan)
-            mergingAssignment.save()
+            mergingAssignment.save(flush: true)
         }
         fillSeqScan(seqScan)
         fillSeqCenters(seqScan)
         fillInsertSize(seqScan)
 
-        seqScan.save()
-        sample.save()
-        seqTech.save()
-        seqType.save()
+        seqScan.save(flush: true)
+        sample.save(flush: true)
+        seqTech.save(flush: true)
+        seqType.save(flush: true)
 
         return seqScan
     }

@@ -26,10 +26,12 @@
 
 		<div class="nav" role="navigation">
 			<ul>
-				<li><a href="/otp/PROJECT_NAMEOverview/index">Overview</a></li>             
+				<li><a href="/otp/PROJECT_NAMEOverview/index">Overview</a></li>
 				<li><a href="/otp/individual/index">Individuals</a></li>
 				<li><a href="/otp/run/index">Runs</a></li>
 				<li><a href="/otp/seqScan/index">Sequence Scans</a></li>
+				<li><a href="/otp/processes/index">Processes</a></li>
+				<li><a href="/otp/login/index">| Login |</a></li>
 			</ul>
 		</div>
 

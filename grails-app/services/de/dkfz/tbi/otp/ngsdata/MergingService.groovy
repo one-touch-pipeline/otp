@@ -56,7 +56,9 @@ class MergingService {
             Sample.findAllByIndividual(ind).each { Sample sample ->
                 String path = baseDir + getRelativePathToMergedAlignment(type, sample)
                 File mergedDir = new File(path)
+                //println mergedDir
                 mergedDir.list().each { String fileName ->
+                    //println "\t${fileName}"
                     if (fileName.endsWith(".bam")) {
                         log.debug("Discovered ${fileName}")
                         buildSeqScan(sample, type, path, fileName)

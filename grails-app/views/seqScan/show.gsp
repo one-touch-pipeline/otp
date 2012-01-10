@@ -88,7 +88,7 @@
         <div class="myContent">
 
         <table>
-           <g:each var="track" in="${de.dkfz.tbi.otp.ngsdata.SeqTrackBySeqScan.findAllBySeqScan(scan)}">
+           <g:each var="track" in="${tracks}">
                <g:if test="${track.seqTrack.run.name == run}">
                <tr>
                     <td><strong>${track.seqTrack.laneId}</strong></td>
