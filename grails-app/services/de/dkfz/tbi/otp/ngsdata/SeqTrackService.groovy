@@ -6,7 +6,7 @@ class SeqTrackService {
      * A sequence track corresponds to one lane in Illumina
      * and one slide in Solid.
      *
-     * This method build sequenc tracks for a given run.
+     * This method build sequence tracks for a given run.
      * To each sequence track there are raw data and alignment
      * data attached
      *
@@ -53,6 +53,17 @@ class SeqTrackService {
      * @param lane - lane identifier string
      */
     private void buildOneSequenceTrack(Run run, String lane) {
+        SeqTrack seqTrack = buildFastqSeqTrack(run, lane)
+        appendAlignmentToSeqTrack(seqTrack)
+    }
+
+    /**
+     * Build one seqTrack from sequence (fastq) files
+     * @param run
+     * @param lane
+     * @return
+     */
+    private SeqTrack buildFastqSeqTrack(Run run, String lane) {
         // find sequence files
         List<DataFile> laneDataFiles =
                 getRunFilesWithTypeAndLane(run, FileType.Type.SEQUENCE, lane)
@@ -71,25 +82,20 @@ class SeqTrackService {
         // error handling
         if (!consistent) {
             println "Meta-data inconsistent"
-            return
+            return null
         }
         // check if complete
         // TODO to be implemented
 
         // build structure
-        SampleIdentifier sampleId = SampleIdentifier.findByName(metaDataEntries.get(0))
-        if (!sampleId) {
-            println "Sample identifier ${metaDataEntries.get(0)} not found"
-            return
-        }
-        Sample sample = sampleId.sample
+        Sample sample = getSampleByString(metaDataEntries.get(0))
         if (!sample) {
             println "sample not found"
-            return
+            return null
         }
         SeqType seqType = SeqType.findByNameAndLibraryLayout(metaDataEntries.get(1), metaDataEntries.get(2))
         if (!seqType) {
-            return
+            return null
         }
         SeqTrack seqTrack = new SeqTrack(
                 run : run,
@@ -101,17 +107,40 @@ class SeqTrackService {
                 hasOriginalBam : false,
                 usingOriginalBam : false
                 )
+        if (!seqTrack.validate()) {
+            println seqTrack.errors
+        }
+        seqTrack.save(flush: true)
         laneDataFiles.each {DataFile dataFile ->
             dataFile.seqTrack = seqTrack
             dataFile.project = sample.individual.project
             dataFile.save()
         }
-        seqTrack.save()
         seqTrack = fillReadsForSeqTrack(seqTrack)
-        seqTrack.save()
+        seqTrack.save(flush: true)
+        return seqTrack
+    }
 
+    /**
+     * 
+     */
+    private Sample getSampleByString(String sampleString) {
+        SampleIdentifier sampleId = SampleIdentifier.findByName(sampleString)
+        if (!sampleId) {
+            println "Sample identifier ${sampleString} not found"
+            return null
+        }
+        return sampleId.sample
+    }
+
+    /**
+     * Attach alignment files to a given seq track
+     * @param seqTrack
+     */
+    private void appendAlignmentToSeqTrack(SeqTrack seqTrack) {
         // attach alignment to seqTrack
-        List<DataFile> alignFiles = getRunFilesWithTypeAndLane(run, FileType.Type.ALIGNMENT, lane)
+        List<DataFile> alignFiles =
+            getRunFilesWithTypeAndLane(seqTrack.run, FileType.Type.ALIGNMENT, seqTrack.laneId)
         // no alignment files
         if (!alignFiles) {
             return
@@ -120,12 +149,18 @@ class SeqTrackService {
         List<String> alignKeyNames = ["SAMPLE_ID", "ALIGN_TOOL"]
         //List<MetaDataKey> alignKeys = MetaDataKey.findAllByName(alignKeyNames)
         List<MetaDataEntry> alignValues = getMetaDataValues(alignFiles.get(0), alignKeyNames)
-        consistent = checkIfConsistent(alignFiles, alignKeyNames, alignValues)
-        if (!consistent || metaDataEntries.get(0) != alignValues.get(0)) {
+        boolean consistent = checkIfConsistent(alignFiles, alignKeyNames, alignValues)
+        if (!consistent) {
+            println "inconsistent meta data to alignment file"
+            return
+        }
+        Sample sample = getSampleByString(alignValues.get(0))
+        if (sample != seqTrack.sample) {
+            println "inconsistent sample between fastq and bam files"
             return
         }
         log.debug("alignment data found")
-        // create or find aligment params object
+        // create or find alignment params object
         String alignProgram = alignValues.get(1) ?: metaDataEntries.get(3)
         AlignmentParams alignParams = AlignmentParams.findByProgramName(alignProgram)
         if (!alignParams) {
@@ -149,14 +184,6 @@ class SeqTrackService {
         alignLog.save()
         alignParams.save()
         seqTrack.save()
-    }
-
-    private SeqTrack buildFastqSeqTrack(Run run, String lane) {
-        
-    }
-
-    private void appendAlignmentToSeqTrack(SeqTrack seqTrack) {
-        
     }
 
     /**
