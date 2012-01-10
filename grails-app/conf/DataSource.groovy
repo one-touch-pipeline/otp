@@ -16,10 +16,14 @@ hibernate {
 environments {
     development {
         dataSource {
+            driverClassName = "org.postgresql.Driver"
+            dialect = org.hibernate.dialect.PostgreSQLDialect
 			//loggingSql = true
             dbCreate = "update" // one of 'create', 'create-drop', 'update', 'validate', ''
-            //url = "jdbc:h2:mem:devDb" 
-			url = "jdbc:h2:~/h2/ngsdata"
+            //url = "jdbc:h2:mem:devDb"
+            username = "otp"
+            password = "otp"
+            url = "jdbc:postgresql://localhost:5432/otp"
 			//url = "jdbc:mysql://localhost/test"
         }
     }
