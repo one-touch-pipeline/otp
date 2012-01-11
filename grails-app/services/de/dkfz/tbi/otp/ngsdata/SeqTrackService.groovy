@@ -30,7 +30,7 @@ class SeqTrackService {
             if (dataFile.fileType.type != FileType.Type.SEQUENCE) {
                 return
             }
-            MetaDataEntry laneValue = MetaDataEntry.findByDataFileAnKey(dataFile, key)
+            MetaDataEntry laneValue = MetaDataEntry.findByDataFileAndKey(dataFile, key)
             if (!laneValue) {
                 throw new LaneNotDefinedException(run.name, dataFile.fileName)
             }
@@ -352,7 +352,7 @@ AND entry.value = :value
      * @return
      */
     private MetaDataEntry getMetaDataEntry(DataFile file, String keyName) {
-        MetaDataKey key = MetaDataKey.findByName(key)
+        MetaDataKey key = MetaDataKey.findByName(keyName)
         return MetaDataEntry.findByDataFileAndKey(file, key)
     }
 }

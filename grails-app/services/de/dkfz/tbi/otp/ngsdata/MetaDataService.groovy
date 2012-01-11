@@ -301,7 +301,7 @@ class MetaDataService {
      * @return
      */
     private MetaDataEntry getMetaDataEntry(DataFile file, MetaDataKey key) {
-        return MetaDataEntry.findByDataFileAndMetaDataKey(file, key)
+        return MetaDataEntry.findByDataFileAndKey(file, key)
     }
 
     /**
@@ -314,7 +314,7 @@ class MetaDataService {
      */
     private MetaDataEntry getMetaDataEntry(DataFile file, String keyName) {
         MetaDataKey key = MetaDataKey.findByName(keyName)
-        return MetaDataEntry.findByDataFileAndMetaDataKey(file, key)
+        return MetaDataEntry.findByDataFileAndKey(file, key)
     }
 
     /**
