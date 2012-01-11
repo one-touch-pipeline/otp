@@ -79,8 +79,7 @@ class SeqTrackService {
         boolean consistent = checkIfConsistent(laneDataFiles, keyNames, metaDataEntries)
         // error handling
         if (!consistent) {
-            println "Meta-data inconsistent"
-            return null
+            throw new MetaDataInconsistentException(laneDataFiles)
         }
         // check if complete
         // TODO to be implemented
