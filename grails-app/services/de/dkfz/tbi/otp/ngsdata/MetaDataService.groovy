@@ -32,17 +32,16 @@ class MetaDataService {
     void registerInputFiles(long runId) {
 
         Run run = Run.get(runId)
-        if (!run) {
-            return
-        }
+        //if (!run) {
+        //    return
+        //}
 
         log.debug("registering run ${run.name} from ${run.seqCenter}")
 
         String runDir = run.mdPath + "/run" + run.name
         File dir = new File(runDir)
         if (!dir.canRead() || !dir.isDirectory()) {
-            // TODO Ask Sylwester
-            throw new ProcessingException("not readable directory ${dir}")
+            throw new DirectoryNotReadableException(dir)
         }
         List<String> fileNames = dir.list()
         FileType fileType = FileType.findByType(FileType.Type.METADATA)
@@ -52,17 +51,30 @@ class MetaDataService {
                 return
             }
             if (fileName.contains("fastq") || fileName.contains("align")) {
-                // TODO check if already registered
+                if (fileRegistered(run, fileName)) {
+                    throw new MetaDataFileDuplicationException(run.name, fileName)
+                }
                 dataFile = new DataFile(
-                        pathName: runDir,
-                        fileName: fileName
-                        )
+                    pathName: runDir,
+                    fileName: fileName
+                )
                 dataFile.run = run
                 dataFile.fileType = fileType
                 dataFile.save(flush: true)
             }
         }
         fileType.save(flush: true)
+    }
+
+    /**
+     * Check if given meta data file was already registered
+     * @param run
+     * @param fileName
+     * @return
+     */
+    private boolean fileRegistered(Run run, String fileName) {
+        DataFile file = DataFile.findByRunAndFileName(run, fileName)
+        return (boolean)file
     }
 
     /**
