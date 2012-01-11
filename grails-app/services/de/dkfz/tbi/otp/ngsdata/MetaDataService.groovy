@@ -301,7 +301,7 @@ class MetaDataService {
      * @return
      */
     private MetaDataEntry getMetaDataEntry(DataFile file, MetaDataKey key) {
-        getMetaDataEntry(file, key.name)
+        return MetaDataEntry.findByDataFileAndMetaDataKey(file, key)
     }
 
     /**
@@ -312,15 +312,9 @@ class MetaDataService {
      * @param key
      * @return
      */
-    private MetaDataEntry getMetaDataEntry(DataFile file, String key) {
-        // TODO: optimize
-        MetaDataEntry entry = null
-        MetaDataEntry.findAllByDataFile(file).each { MetaDataEntry iEntry ->
-            if (iEntry.key.name == key) {
-                entry = iEntry
-            }
-        }
-        return entry
+    private MetaDataEntry getMetaDataEntry(DataFile file, String keyName) {
+        MetaDataKey key = MetaDataKey.findByName(keyName)
+        return MetaDataEntry.findByDataFileAndMetaDataKey(file, key)
     }
 
     /**
@@ -334,7 +328,6 @@ class MetaDataService {
      */
     private void assignFileType(DataFile dataFile, FileType.Type type) {
         FileType fileType = fileTypeService.getFileType(dataFile.fileName, type)
-        fileType.save(flush: true)
         dataFile.fileType = fileType
         dataFile.save(flush: true)
     }
