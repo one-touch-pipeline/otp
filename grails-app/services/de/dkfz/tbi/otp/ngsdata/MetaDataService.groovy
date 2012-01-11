@@ -107,8 +107,7 @@ class MetaDataService {
                 }
                 File mdFile = new File(file.pathName + File.separatorChar + file.fileName)
                 if (!mdFile.canRead()) {
-                    log.debug("\tcan not read ${file.fileName}")
-                    return
+                    throw new FileNotReadableException(mdFile.path)
                 }
                 List<String> tokens
                 List<String> values
