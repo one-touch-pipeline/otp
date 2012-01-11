@@ -30,14 +30,12 @@ class SeqTrackService {
             if (dataFile.fileType.type != FileType.Type.SEQUENCE) {
                 return
             }
-            MetaDataEntry.findAllByDataFile(dataFile).each { MetaDataEntry entry ->
-                // Continue
-                if (entry.key != key) {
-                    return
-                }
-                //println "Lane = ${entry.value}"
-                lanes << entry.value
+            MetaDataEntry laneValue = MetaDataEntry.findByDataFileAnKey(dataFile, key)
+            if (!laneValue) {
+                throw new LaneNotDefinedException(run.name, dataFile.fileName)
             }
+            lanes << laneValue.value
+
         }
         // run track creation for each lane
         lanes.each{String laneId ->
