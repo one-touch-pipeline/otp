@@ -1,10 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.job.processing.ProcessParameter
+import de.dkfz.tbi.otp.job.processing.Process
+
 class RunController {
 
     def lsdfFilesService
     def metaDataService
     def seqTrackService
+    def processService
 
     static scaffold = Run
 
@@ -25,9 +29,13 @@ class RunController {
         keys[0] = MetaDataKey.findByName("SAMPLE_ID")
         keys[1] = MetaDataKey.findByName("WITHDRAWN")
 
+        // processing
+        List<ProcessParameter> processParameters = 
+            ProcessParameter.findAllByValue(run.id, run.class.name)
+
         int prevId = (id > 1)? id-1 : 1
         int nextId = id+1
-        return [run: run, finalPaths: paths, keys: keys, nextId: nextId, prevId: prevId]
+        return [run: run, finalPaths: paths, keys: keys, processParameters: processParameters, nextId: nextId, prevId: prevId]
     }
 
     def submitForm = {

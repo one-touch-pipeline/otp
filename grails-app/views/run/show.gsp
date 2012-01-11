@@ -81,6 +81,18 @@
        </tr>
     </table>
 
+    <h1>Processing</h1>
+    <table>
+        <g:each var="processParameter" in="${processParameters}">
+        <tr>
+            <td class="myKey">${processParameter.process.jobExecutionPlan.name}</td>
+            <td><g:link controller="processes" action="process" id="${processParameter.process.id}">
+                show details
+            </g:link></td>
+        </tr>
+        </g:each>
+    </table>
+
 
     <div class="myHeaderWide">
         Data Files
