@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.job.processing.*
 
-class DirectoryNotReadableException extends ProcessingException {
+public class DirectoryNotReadableException extends ProcessingException {
 
     String dirName
     public DirectoryNotReadableException(String dirName) {
