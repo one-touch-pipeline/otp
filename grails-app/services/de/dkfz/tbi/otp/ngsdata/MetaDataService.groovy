@@ -144,26 +144,7 @@ class MetaDataService {
         }
     }
 
-    /**
-     * This function loops oven keys and values and attache them 
-     * as MetaDataEntries to DataFile object
-     * @param DataFile
-     * @param keys
-     * @param values
-     * @return
-     */
-    private addMetaDataEntries(DataFile dataFile, List<MetaDataKey> keys, List<String> values) {
-        for (int i=0; i<keys.size(); i++) {
-            MetaDataKey key = keys.getAt(i)
-            MetaDataEntry entry = new MetaDataEntry (
-                value: values.getAt(i) ? values.getAt(i) : "",
-                source: MetaDataEntry.Source.MDFILE,
-                key: key
-            )
-            entry.dataFile = dataFile
-            entry.save(flush: true)
-        }
-    }
+
 
     /**
      * This method tokenizes a string
@@ -208,6 +189,27 @@ class MetaDataService {
     }
 
     /**
+    * This function loops oven keys and values and attache them
+    * as MetaDataEntries to DataFile object
+    * @param DataFile
+    * @param keys
+    * @param values
+    * @return
+    */
+    private addMetaDataEntries(DataFile dataFile, List<MetaDataKey> keys, List<String> values) {
+       for (int i=0; i<keys.size(); i++) {
+           MetaDataKey key = keys.getAt(i)
+           MetaDataEntry entry = new MetaDataEntry (
+               value: values.getAt(i) ? values.getAt(i) : "",
+               source: MetaDataEntry.Source.MDFILE,
+               key: key
+           )
+           entry.dataFile = dataFile
+           entry.save(flush: true)
+       }
+    }
+
+    /**
      * Assign file name for a specific DataFile object
      *
      * The file name is in either FASTQ_FILE or ALIGN_FILE
@@ -243,9 +245,7 @@ class MetaDataService {
             dataFile.fileName = value.substring(idx+1) ? value.substring(idx+1) : "error"
         }
         if (!dataFile.fileName) {
-            dataFile.fileName = "errorNoHeader"
-            dataFile.pathName = "errorNoHeader"
-            MetaDataEntry.findAllByDataFile(dataFile).each { println "${it.key} ${it.value}" }
+            throw new FileNameNotDefinedException(dataFile.run.name)
         }
     }
 
