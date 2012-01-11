@@ -87,8 +87,7 @@ class SeqTrackService {
         // build structure
         Sample sample = getSampleByString(metaDataEntries.get(0))
         if (!sample) {
-            println "sample not found"
-            return null
+            throw new SampleNotDefinedException(metaDataEntries.get(0))
         }
         SeqType seqType = SeqType.findByNameAndLibraryLayout(metaDataEntries.get(1), metaDataEntries.get(2))
         if (!seqType) {
