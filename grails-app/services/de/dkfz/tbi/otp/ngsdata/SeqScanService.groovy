@@ -26,10 +26,10 @@ class SeqScanService {
     void buildSeqScan(SeqTrack seqTrack) {
         // maybe track already consumed
         if (MergingAssignment.countBySeqTrack(seqTrack) > 0) {
-            println "seqTrack ${seqTrack} already used"
+            log.debug("seqTrack ${seqTrack} already used")
             return
         } else {
-            println "building secScan from ${seqTrack}"
+            log.debug("building secScan from ${seqTrack}")
         }
         // take parameters
         Sample sample = seqTrack.sample
@@ -61,15 +61,15 @@ class SeqScanService {
         log.debug("invalidating ${oldSeqScans.size()} seq scans")
         // create new seqScan
         SeqScan seqScan = new SeqScan(
-            alignmentParams: null,
-            sample: sample,
-            seqTech: seqTech,
-            seqType: seqType
-        )
+                alignmentParams : null,
+                sample: sample,
+                seqTech: seqTech,
+                seqType: seqType
+                )
         seqScan.save(flush: true)
         seqTracksToMerge.each { SeqTrack iTrack ->
-            MergingAssignment seqTrackScan = new MergingAssignment(seqTrack: iTrack, seqScan: seqScan)
-            seqTrackScan.save(flush: true)
+            MergingAssignment mergingAssignment = new MergingAssignment(seqTrack: iTrack, seqScan: seqScan)
+            mergingAssignment.save(flush: true)
         }
 
         fillSeqScan(seqScan)
@@ -103,8 +103,8 @@ class SeqScanService {
                 )
         seqScan.save(flush: true)
         tracks.each { SeqTrack iTrack ->
-            MergingAssignment seqTrackScan = new MergingAssignment(seqTrack: iTrack, seqScan: seqScan)
-            seqTrackScan.save(flush: true)
+            MergingAssignment mergingAssignment = new MergingAssignment(seqTrack: iTrack, seqScan: seqScan)
+            mergingAssignment.save(flush: true)
         }
         fillSeqScan(seqScan)
         fillSeqCenters(seqScan)
@@ -132,8 +132,8 @@ class SeqScanService {
     private void fillSeqScan(SeqScan seqScan) {
         seqScan.nLanes = MergingAssignment.countBySeqScan(seqScan)
         long nbp = 0
-        MergingAssignment.findAllBySeqScan(seqScan).each { MergingAssignment seqTrackScan ->
-            nbp += seqTrackScan.seqTrack.nBasePairs
+        MergingAssignment.findAllBySeqScan(seqScan).each { MergingAssignment mergingAssignment ->
+            nbp += mergingAssignment.seqTrack.nBasePairs
         }
         seqScan.nBasePairs = nbp
     }
@@ -149,12 +149,12 @@ class SeqScanService {
     private void fillSeqCenters(SeqScan seqScan) {
         SeqCenter seqCenter = null
         String name = ""
-        MergingAssignment.findAllBySeqScan(seqScan).each { MergingAssignment seqTrackScan ->
+        MergingAssignment.findAllBySeqScan(seqScan).each { MergingAssignment mergingAssignment ->
             if (!seqCenter) {
-                seqCenter = seqTrackScan.seqTrack.run.seqCenter
+                seqCenter = mergingAssignment.seqTrack.run.seqCenter
                 name = seqCenter.name
             } else {
-                if (seqTrackScan.seqTrack.run.seqCenter != seqCenter) {
+                if (mergingAssignment.seqTrack.run.seqCenter != seqCenter) {
                     name += "*"
                 }
             }
@@ -174,13 +174,13 @@ class SeqScanService {
         boolean defined = false
         int iSize = 0
         String insertSize = ""
-        MergingAssignment.findAllBySeqScan(seqScan).each {MergingAssignment seqTrackScan ->
+        MergingAssignment.findAllBySeqScan(seqScan).each {MergingAssignment mergingAssignment ->
             if (!defined) {
-                iSize = seqTrackScan.seqTrack.insertSize
+                iSize = mergingAssignment.seqTrack.insertSize
                 defined = true
                 insertSize += iSize
             } else {
-                if (seqTrackScan.seqTrack.insertSize != iSize) {
+                if (mergingAssignment.seqTrack.insertSize != iSize) {
                     insertSize += "!"
                 }
             }

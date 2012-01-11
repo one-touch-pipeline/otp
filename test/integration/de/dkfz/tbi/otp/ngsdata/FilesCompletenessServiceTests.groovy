@@ -64,7 +64,7 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         assert(individual.save())
         sample.individual = individual
         assert(sample.save())
-        SeqTrack seqTrack = new SeqTrack(laneId: "testLaneId", run: run, seqType: seqType, seqTech: seqTech, sample: sample)
+        SeqTrack seqTrack = new SeqTrack(laneId: "testLaneId", pipelineVersion: "2", run: run, seqType: seqType, seqTech: seqTech, sample: sample)
         assert(seqTrack.save())
         // one of the two file types leading to full check
         FileType fileType = new FileType(type: FileType.Type.ALIGNMENT)
@@ -113,9 +113,9 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         assert(individual.save())
         sample.individual = individual
         assert(sample.save())
-        SeqTrack seqTrack1 = new SeqTrack(laneId: "testLaneId", run: run, seqType: seqType1, seqTech: seqTech, sample: sample)
+        SeqTrack seqTrack1 = new SeqTrack(laneId: "testLaneId", pipelineVersion: "2", run: run, seqType: seqType1, seqTech: seqTech, sample: sample)
         assert(seqTrack1.save())
-        SeqTrack seqTrack2 = new SeqTrack(laneId: "testLaneId", run: run, seqType: seqType2, seqTech: seqTech, sample: sample)
+        SeqTrack seqTrack2 = new SeqTrack(laneId: "testLaneId", pipelineVersion: "1", run: run, seqType: seqType2, seqTech: seqTech, sample: sample)
         assert(seqTrack2.save())
         // one of the two file types leading to full check
         FileType fileType = new FileType(type: FileType.Type.ALIGNMENT)
@@ -166,7 +166,7 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         assert(individual.save())
         sample.individual = individual
         assert(sample.save())
-        SeqTrack seqTrack1 = new SeqTrack(laneId: "testLaneId", run: run1, seqType: seqType, seqTech: seqTech, sample: sample)
+        SeqTrack seqTrack1 = new SeqTrack(laneId: "testLaneId", pipelineVersion: "2", run: run1, seqType: seqType, seqTech: seqTech, sample: sample)
         assert(seqTrack1.save())
         FileType fileType = new FileType(type: FileType.Type.ALIGNMENT, vbpPath: "vbpTestPath")
         assert(fileType.save())
@@ -180,7 +180,7 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         run2.dataPath = dataPath
         run2.mdPath = mdPath
         assert(run2.save())
-        SeqTrack seqTrack2 = new SeqTrack(laneId: "testLaneId", run: run2, seqType: seqType, seqTech: seqTech, sample: sample)
+        SeqTrack seqTrack2 = new SeqTrack(laneId: "testLaneId", pipelineVersion: "2", run: run2, seqType: seqType, seqTech: seqTech, sample: sample)
         assert(seqTrack2.save())
         // two correct data files to be able to loop over more than one data file
         DataFile dataFile1 = new DataFile(fileName: "dataFile1", pathName: "testPath", used: true, vbpFileName: "vbpTestFileName", run: run2, fileType: fileType, seqTrack: seqTrack2, project: project)
