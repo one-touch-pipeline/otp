@@ -125,16 +125,7 @@ class MetaDataService {
                         dataFile.run = run
                         dataFile.save(flush: true)
                         values = tokenize(line, '\t')
-                        for (int i=0; i<keys.size(); i++) {
-                            MetaDataKey key = keys.getAt(i)
-                            MetaDataEntry entry = new MetaDataEntry (
-                                    value: values.getAt(i) ? values.getAt(i) : "",
-                                    source: MetaDataEntry.Source.MDFILE,
-                                    key: key
-                                    )
-                            entry.dataFile = dataFile
-                            entry.save(flush: true)
-                        }
+                        addMetaDataEntries(dataFile, keys, values)
                         // fill-up important fields
                         assignFileName(dataFile)
                         fillVbpFileName(dataFile)
@@ -150,6 +141,27 @@ class MetaDataService {
             }
         } finally {
             loadMetaDataLock.unlock()
+        }
+    }
+
+    /**
+     * This function loops oven keys and values and attache them 
+     * as MetaDataEntries to DataFile object
+     * @param DataFile
+     * @param keys
+     * @param values
+     * @return
+     */
+    private addMetaDataEntries(DataFile dataFile, List<MetaDataKey> keys, List<String> values) {
+        for (int i=0; i<keys.size(); i++) {
+            MetaDataKey key = keys.getAt(i)
+            MetaDataEntry entry = new MetaDataEntry (
+                value: values.getAt(i) ? values.getAt(i) : "",
+                source: MetaDataEntry.Source.MDFILE,
+                key: key
+            )
+            entry.dataFile = dataFile
+            entry.save(flush: true)
         }
     }
 
