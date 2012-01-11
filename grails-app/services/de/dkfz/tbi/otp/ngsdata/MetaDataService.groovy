@@ -523,29 +523,53 @@ class MetaDataService {
      * assigned to a project based on the Sample object.
      * @param runId
      */
-    void assignFilesToProjects(long runId) {
+    private void assignFilesToProjects(long runId) {
         Run run = Run.get(runId)
         DataFile.findAllByRun(run).each { DataFile dataFile ->
-            if (!dataFile.used) {
-                return
+            Project projct = getProjectForDataFile(dataFile)
+            if (!project) {
+                return // continue
             }
-            if (dataFile.fileType.type == FileType.Type.METADATA) {
-                return
-            }
-            if (dataFile.fileType.type == FileType.Type.SEQUENCE) {
-                Project project = dataFile.seqTrack.sample.individual.project
-                RunByProject runProject = new RunByProject(project: project, run: run)
-                runProject.save(flush: true)
-                dataFile.project = project
-                dataFile.save(flush: true)
-            } else if (dataFile.fileType.type == FileType.Type.ALIGNMENT) {
-                Project project = dataFile.alignmentLog.seqTrack.sample.individual.project
-                RunByProject runProject = new RunByProject(project: project, run: run)
-                runProject.save(flush: true)
-                dataFile.project = project
-                dataFile.save(flush: true)
-            }
+            dataFile.project = project
+            dataFile.save(flush: true)
+            assignRunToProject(run, project)
         }
         run.save(flush: true)
+    }
+
+    /**
+     * return project for a given dataFile or null if a dataFile 
+     * does not belong to a specific project (eg. metadata file)
+     * @param dataFile
+     * @return
+     */
+    private Project getProjectForDataFile(DataFile dataFile) {
+        if (!dataFile.used) {
+            return null
+        }
+        if (dataFile.fileType.type == FileType.Type.METADATA) {
+            return null
+        }
+        if (dataFile.fileType.type == FileType.Type.SEQUENCE) {
+            return dataFile.seqTrack.sample.individual.project
+        }
+        if (dataFile.fileType.type == FileType.Type.ALIGNMENT) {
+            return dataFile.alignmentLog.seqTrack.sample.individual.project
+        }
+    }
+
+    /**
+     * Checks if given run is already assigned to a given project
+     * if not a new object is created
+     * 
+     * @param run
+     * @param project
+     */
+    private void assignRunToProject(Run run, Project project) {
+        RunByProject runByProject = RunByProject.findByRunAndProject(run, project)
+        if (!runByProject) {
+            runByProject = new RunByProject(project: project, run: run)
+            runByProject.save(flush: true)
+        }
     }
 }
