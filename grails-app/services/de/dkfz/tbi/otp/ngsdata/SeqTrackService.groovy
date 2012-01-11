@@ -147,13 +147,11 @@ class SeqTrackService {
         List<MetaDataEntry> alignValues = getMetaDataValues(alignFiles.get(0), alignKeyNames)
         boolean consistent = checkIfConsistent(alignFiles, alignKeyNames, alignValues)
         if (!consistent) {
-            println "inconsistent meta data to alignment file"
-            return
+            throw new MetaDataInconsistentException(alignFiles)
         }
         Sample sample = getSampleByString(alignValues.get(0))
         if (sample != seqTrack.sample) {
-            println "inconsistent sample between fastq and bam files"
-            return
+            throw new MetaDataInconsistentException(alignFiles)
         }
         log.debug("alignment data found")
         // create or find alignment params object
@@ -235,7 +233,7 @@ AND entry.value = :value
      * @return consistency status
      */
     private boolean checkIfConsistent(List<DataFile> dataFiles, List<String>keyNames, List<MetaDataEntry> metaDataEntries) {
-        if (dataFiles == null) {
+        if (!dataFiles) {
             return false
         }
         for (int i=0; i<keyNames.size; i++) {
@@ -341,26 +339,20 @@ AND entry.value = :value
      * @return
      */
     private MetaDataEntry getMetaDataEntry(DataFile file, MetaDataKey key) {
-        getMetaDataEntry(file, key.name)
+        return MetaDataEntry.findByDataFileAndKey(file, key)
     }
 
     /**
      *
-     * Returns a metat data entry belonging the a given data file
+     * Returns a meta-data entry belonging the a given data file
      * with a key specified by the input parameter
      *
      * @param file
      * @param key
      * @return
      */
-    private MetaDataEntry getMetaDataEntry(DataFile file, String key) {
-        MetaDataEntry entry = null
-        // TODO: optimize
-        MetaDataEntry.findAllByDataFile(file).each { MetaDataEntry iEntry ->
-            if (iEntry.key.name == key) {
-                entry = iEntry
-            }
-        }
-        return entry
+    private MetaDataEntry getMetaDataEntry(DataFile file, String keyName) {
+        MetaDataKey key = MetaDataKey.findByName(key)
+        return MetaDataEntry.findByDataFileAndKey(file, key)
     }
 }
