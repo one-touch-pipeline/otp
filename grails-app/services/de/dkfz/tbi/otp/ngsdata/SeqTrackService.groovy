@@ -91,7 +91,7 @@ class SeqTrackService {
         }
         SeqType seqType = SeqType.findByNameAndLibraryLayout(metaDataEntries.get(1), metaDataEntries.get(2))
         if (!seqType) {
-            return null
+            throw new SeqTypeNotDefinedException(metaDataEntries.get(1), metaDataEntries.get(2))
         }
         SeqTrack seqTrack = new SeqTrack(
             run : run,
@@ -124,7 +124,6 @@ class SeqTrackService {
     private Sample getSampleByString(String sampleString) {
         SampleIdentifier sampleId = SampleIdentifier.findByName(sampleString)
         if (!sampleId) {
-            println "Sample identifier ${sampleString} not found"
             return null
         }
         return sampleId.sample
