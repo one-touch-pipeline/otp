@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
 
-import org.apache.ivy.core.module.descriptor.ExtendsDescriptor
 import org.junit.*
 
 import de.dkfz.tbi.otp.job.processing.ProcessingException
