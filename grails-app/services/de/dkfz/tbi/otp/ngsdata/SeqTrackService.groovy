@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.job.processing.ProcessingException
+
 class SeqTrackService {
     /**
      *
@@ -39,7 +41,6 @@ class SeqTrackService {
         }
         // run track creation for each lane
         lanes.each{String laneId ->
-            println "processing ${laneId}"
             buildOneSequenceTrack(run, laneId)
         }
     }
@@ -73,9 +74,11 @@ class SeqTrackService {
             "PIPELINE_VERSION",
             "READ_COUNT"
         ]
+        if (!laneDataFiles) {
+            throw new ProcessingException("No laneDataFiles found.")
+        }
         //List<MetaDataKey> keys = MetaDataKey.findAllByNameInList(keyNames)
         List<MetaDataEntry> metaDataEntries = getMetaDataValues(laneDataFiles.get(0), keyNames)
-        println metaDataEntries
         boolean consistent = checkIfConsistent(laneDataFiles, keyNames, metaDataEntries)
         // error handling
         if (!consistent) {
@@ -106,6 +109,7 @@ class SeqTrackService {
         )
         if (!seqTrack.validate()) {
             println seqTrack.errors
+            throw new ProcessingException("seqTrack could not be validated.")
         }
         seqTrack.save(flush: true)
         laneDataFiles.each {DataFile dataFile ->
@@ -122,8 +126,12 @@ class SeqTrackService {
      * 
      */
     private Sample getSampleByString(String sampleString) {
+        if (!sampleString) {
+            throw new SampleNotDefinedException("No SampleIdentifier name provided.")
+        }
         SampleIdentifier sampleId = SampleIdentifier.findByName(sampleString)
         if (!sampleId) {
+            log.debug("SampleIdentifier for sampleString: ${sampleString} could not be found.")
             return null
         }
         return sampleId.sample
@@ -201,7 +209,6 @@ AND entry.key = :key
 AND entry.value = :value
 ''',
                 [run: run, type: type, key: key, value: lane])
-        println dataFiles
         return dataFiles
     }
 
@@ -261,6 +268,7 @@ AND entry.value = :value
      */
     private SeqTrack fillReadsForSeqTrack(SeqTrack seqTrack) {
         if (seqTrack.seqTech.name != "illumina") {
+            log.debug("seqTech.name is not illumina, returning.")
             return
         }
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
