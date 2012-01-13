@@ -38,7 +38,6 @@ class PbsService {
         if(!command) {
             throw new ProcessingException("No resource is specified to be run on PBS.")
         }
-        println grailsApplication.config.otp.pbs.ssh
         String host = (grailsApplication.config.otp.pbs.ssh.host).toString()
         String username = (grailsApplication.config.otp.pbs.ssh.username).toString()
         String password = (grailsApplication.config.otp.pbs.ssh.password).toString()
