@@ -8,4 +8,5 @@ plan("loadMetaData") {
     job("buildExecutionDate", "buildExecutionDateJob")
     job("buildSequenceTracks", "buildSequenceTracksJob")
     job("checkSequenceTracks", "checkSequenceTracksJob")
+    job("setCompleted", "setCompletedJob")
 }
