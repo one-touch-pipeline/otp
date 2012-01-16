@@ -63,14 +63,6 @@ class MetaDataStartJob extends AbstractStartJobImpl {
      * @return
      */
     private int numberOfRunningProcesses() {
-        int numberOfRunning = 0;
-        List<Process>  processes = Process.findAllByJobExecutionPlan(getExecutionPlan())
-        for(Process process in processes) {
-            println process.finished
-            if (!process.finished) {
-                numberOfRunning++
-            }
-        }
-        return numberOfRunning
+        return Process.countByFinishedAndJobExecutionPlan(false, getExecutionPlan())
     }
 }
