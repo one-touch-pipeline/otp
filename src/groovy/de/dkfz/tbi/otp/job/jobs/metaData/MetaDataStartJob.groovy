@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.metaData
 
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.Parameter
+import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.ngsdata.Run
 import org.springframework.scheduling.annotation.Scheduled
@@ -12,15 +13,25 @@ import org.springframework.stereotype.Component
 @Scope("singleton")
 class MetaDataStartJob extends AbstractStartJobImpl {
 
+    final int MAX_RUNNING = 1
+
     @Scheduled(fixedRate=10000l)
     void execute() {
-        int n = 0
         if (!getExecutionPlan() || !getExecutionPlan().enabled) {
             println("meta data Execution plan not set or not active")
             return
         }
+        int numberOfRunning = numberOfRunningProcesses()
+        if (numberOfRunning >= MAX_RUNNING) {
+            println "MetaDataWorkflow: ${numberOfRunning} already running"
+            return
+        }
+        int n = 0
         List<Run> runs = Run.list()
         for(Run run in runs) {
+            if (n >= MAX_RUNNING) {
+                break
+            }
             if (processed(run)) {
                 continue
             }
@@ -37,7 +48,7 @@ class MetaDataStartJob extends AbstractStartJobImpl {
      * @param run
      * @return
      */
-    boolean processed(Run run) {
+    private boolean processed(Run run) {
         List<ProcessParameter> processParameters =
             ProcessParameter.findAllByValue(run.id.toString(), run.class.name)
         for(ProcessParameter parameter in processParameters) {
@@ -45,5 +56,21 @@ class MetaDataStartJob extends AbstractStartJobImpl {
                 return true
             }
         }
+    }
+
+    /**
+     * returns number of running processes for this execution plan
+     * @return
+     */
+    private int numberOfRunningProcesses() {
+        int numberOfRunning = 0;
+        List<Process>  processes = Process.findAllByJobExecutionPlan(getExecutionPlan())
+        for(Process process in processes) {
+            println process.finished
+            if (!process.finished) {
+                numberOfRunning++
+            }
+        }
+        return numberOfRunning
     }
 }
