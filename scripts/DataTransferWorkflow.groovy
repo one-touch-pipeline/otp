@@ -20,6 +20,7 @@ plan("DataTransferWorkflow") {
     job("calculateChecksumWatchdog", "myPBSWatchdogJob") {
         inputParameter("pbsIds", "calculateChecksum", "pbsIds")
     }
+    job("compareChecksum", "compareChecksumJob")
     job("createViewByPid", "createViewByPidJob")
     job("checkViewByPid", "checkViewByPidJob")
 }
