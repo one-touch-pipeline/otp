@@ -10,18 +10,24 @@ class SendSleepJob extends AbstractJobImpl {
     @Autowired
     PbsService pbsService
 
+    final int N_JOBS = 5
+
     public void execute() throws Exception {
-        File cmdFile = File.createTempFile("test", ".tmp", new File(System.getProperty("user.home")))
-        cmdFile.setText("""#! /bin/bash
-                            date
-                            sleep 200
-                         """)
-        cmdFile.setExecutable(true)
-        // Make executable file a pbs job
-        String cmd = "qsub ${cmdFile.name}"
-        String response = pbsService.sendPbsJob(cmd)
-        List<String> extractedPbsIds = pbsService.extractPbsIds(response)
-        println extractedPbsIds
-        addOutputParameter("pbsIds", extractedPbsIds.get(0))
+        String listOfPids = ""
+        for(int i=0; i<N_JOBS; i++) {
+            File cmdFile = File.createTempFile("test-", ".tmp", new File(System.getProperty("user.home")))
+            cmdFile.setText("""#! /bin/bash
+                                date
+                                sleep 600
+                             """)
+            cmdFile.setExecutable(true)
+            // Make executable file a pbs job
+            String cmd = "qsub ${cmdFile.name}"
+            String response = pbsService.sendPbsJob(cmd)
+            List<String> extractedPbsIds = pbsService.extractPbsIds(response)
+            println extractedPbsIds
+            listOfPids += extractedPbsIds.get(0) + ","
+        }
+        addOutputParameter("pbsIds", listOfPids)
     }
 }

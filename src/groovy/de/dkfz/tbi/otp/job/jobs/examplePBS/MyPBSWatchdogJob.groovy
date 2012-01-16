@@ -9,10 +9,10 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl {
     @Autowired
     PbsService pbsService
 
+
     public void execute() throws Exception {
         String jobIds = getParameterValueOrClass("pbsIds")
-        List<String> listJobIds = new ArrayList<String>()
-        listJobIds.add(jobIds)
+        List<String> listJobIds = parseInputString(jobIds)
 
         boolean finished = false
         while(!finished) {
@@ -32,5 +32,9 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl {
     private sleep(int time) {
         java.lang.Process process = "sleep ${time}".execute()
         process.waitFor()
+    }
+
+    private parseInputString(String jobIds) {
+        List<String> pbsIds = jobIds.tokenize(",")
     }
 }
