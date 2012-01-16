@@ -18,30 +18,47 @@ class CopyFilesJob extends AbstractJobImpl {
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
 
-        List<String> allIds = new ArrayList<String>()
+        String pbsIds = ""
 
         DataFile.findAllByRun(run).each {DataFile file ->
             if (file.project == null) {
                 return
             }
-            String from = lsdfFilesService.getFileInitialPath(file)
-            String to = lsdfFilesService.getFileFinalPath(file)
-            println from + " " + to
-            String cpCmd = "cp ${from} ${to}"
-
-            File cmdFile = File.createTempFile("test", ".tmp", new File(System.getProperty("user.home")))
-            cmdFile.setText(cpCmd)
-            cmdFile.setExecutable(true)
-            String cmd = "qsub ${cmdFile.name}"
-            File responseFile = pbsService.sendPbsJob(cmd)
-            List<String> extractedPbsIds = pbsService.extractPbsIds(responseFile)
-            println extractedPbsIds
-            extractedPbsIds.each {
-                allIds << it
-            }
+            String scriptName = buildScript(file)
+            String jobId = sendScript(scriptName)
+            println "Job ${jobId} submitted to PBS"
+            pbsIds += jobId + ","
         }
-        // sleep instead of watch dog
-        java.lang.Process sleepProc = "sleep 600".execute()
-        sleepProc.waitFor()
+        addOutputParameter("pbsIds", pbsIds)
+    }
+
+    /**
+     * 
+     * @param file
+     * @return
+     */
+    private String buildScript(DataFile file) {
+        String from = lsdfFilesService.getFileInitialPath(file)
+        String to = lsdfFilesService.getFileFinalPath(file)
+        println from + " " + to
+        String cpCmd = "cp ${from} ${to}"
+
+        File cmdFile = File.createTempFile("copyJob", ".tmp", new File(System.getProperty("user.home")))
+        cmdFile.setText(cpCmd)
+        cmdFile.setExecutable(true)
+        return cmdFile.name
+    }
+
+    /**
+     * 
+     * @param scriptName
+     * @return
+     */
+    private String sendScript(String scriptName) {
+        //String cmd = "qsub ${scriptName}"
+        String cmd = "qsub testJob.sh"
+        String response = pbsService.sendPbsJob(cmd)
+        List<String> extractedPbsIds = pbsService.extractPbsIds(response)
+        return extractedPbsIds.get(0)
     }
 }
