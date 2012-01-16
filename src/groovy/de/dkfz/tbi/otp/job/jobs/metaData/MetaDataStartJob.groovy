@@ -23,13 +23,13 @@ class MetaDataStartJob extends AbstractStartJobImpl {
         }
         int numberOfRunning = numberOfRunningProcesses()
         if (numberOfRunning >= MAX_RUNNING) {
-            println "MetaDataWorkflow: ${numberOfRunning} already running"
+            println "MetaDataWorkflow: ${numberOfRunning} processes already running"
             return
         }
-        int n = 0
+        int n=0
         List<Run> runs = Run.list()
         for(Run run in runs) {
-            if (n >= MAX_RUNNING) {
+            if (numberOfRunning >= MAX_RUNNING) {
                 break
             }
             if (processed(run)) {
@@ -38,6 +38,7 @@ class MetaDataStartJob extends AbstractStartJobImpl {
             // new run to be processed
             createProcess(new ProcessParameter(value: run.id.toString(), className: run.class.name))
             println run.toString()
+            numberOfRunning++
             n++
         }
         println "MetaDataWorkflow: ${n} jobs started"
