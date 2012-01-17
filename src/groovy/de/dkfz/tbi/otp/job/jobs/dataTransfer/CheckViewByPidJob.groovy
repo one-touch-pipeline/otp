@@ -24,8 +24,7 @@ class CheckViewByPidJob extends AbstractEndStateAwareJobImpl {
         if (filesCompletenessService.checkViewByPid(run)) {
             succeed()
         } else {
-            succeed()
-            //fail()
+            fail()
         }
     }
 }

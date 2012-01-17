@@ -49,8 +49,8 @@ public class CalculateChecksumJob extends AbstractJobImpl {
      * @return
      */
     private String sendScript(String scriptName) {
-        //String cmd = "qsub ${scriptName}"
-        String cmd = "qsub testJob.sh"
+        String cmd = "qsub ${scriptName}"
+        //String cmd = "qsub testJob.sh"
         String response = pbsService.sendPbsJob(cmd)
         List<String> extractedPbsIds = pbsService.extractPbsIds(response)
         return extractedPbsIds.get(0)

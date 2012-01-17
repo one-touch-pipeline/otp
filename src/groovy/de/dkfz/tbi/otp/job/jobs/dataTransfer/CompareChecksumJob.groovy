@@ -19,7 +19,7 @@ public class CompareChecksumJob extends AbstractEndStateAwareJobImpl {
         String[] directories = lsdfFilesService.getAllPathsForRun(run)
         for(String directory in directories) {
             if (!checkMd5File(run, directory)) {
-                //fail()
+                fail()
             }
         }
         succeed()

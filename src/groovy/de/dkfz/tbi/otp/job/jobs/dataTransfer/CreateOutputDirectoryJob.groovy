@@ -17,7 +17,7 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
         println "run name = " + run
-        projectName = getParameterValueOrClass("project")
+        projectName = "PROJECT_NAME" //getParameterValueOrClass("project")
         String[] dirs = lsdfFilesService.getListOfRunDirecotries(run, projectName)
 
         dirs.each {String line ->
