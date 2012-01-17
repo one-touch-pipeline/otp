@@ -56,26 +56,56 @@ class FilesCompletenessService {
             throw new ProcessingException("No data file provided for the given run.")
         }
         dataFiles.each {DataFile dataFile ->
-            String path = lsdfFilesService.getFileFinalPath(dataFile.id)
-            if (path == null) {
+            if (hasFinalLocation()) {
                 return // continue
             }
-            boolean exists = lsdfFilesService.fileExists(path)
+            boolean exists = fileExistsInFinalLocation(dataFile)
             if (exists) {
-                dataFile.fileExists = true
-                dataFile.fileSize = lsdfFilesService.fileSize(path)
-                dataFile.dateFileSystem = lsdfFilesService.fileCreationDate(path)
-            } else {
-                dataFile.fileExists = false
                 allExists = false
             }
-            dataFile.save(flush: true)
+            fillFileStatistics(dataFile, exists)
         }
         if (allExists) {
             run.finalLocation = true
             run.save(flush: true)
         }
         return allExists
+    }
+
+    /**
+     * Checks of give DataFile has defined final location
+     * @param dataFile
+     * @return
+     */
+    private boolean hasFinalLocation(DataFile dataFile) {
+        return (boolean) lsdfFilesService.getFileFinalPath(dataFile.id)
+    }
+
+    /**
+     * Checks if a given DataFile exists in the final location
+     * @param dataFile
+     * @return
+     */
+    private boolean fileExistsInFinalLocation(DataFile dataFile) {
+        String path = lsdfFilesService.getFileFinalPath(dataFile.id)
+        return lsdfFilesService.fileExists(path)
+    }
+
+    /**
+     * Fill statistcis from the file system in the DataFile in a database
+     * data size and data of file creation are filed only if file exists 
+     * in the file system
+     * @param dataFile
+     * @param exists
+     */
+    private void fillFileStatistics(DataFile dataFile, boolean exists) {
+        dataFile.fileExists = exists
+        if (exists) {
+            String path = lsdfFilesService.getFileFinalPath(dataFile.id)
+            dataFile.fileSize = lsdfFilesService.fileSize(path)
+            dataFile.dateFileSystem = lsdfFilesService.fileCreationDate(path)
+        }
+        dataFile.save(flush: true)
     }
 
     /**
