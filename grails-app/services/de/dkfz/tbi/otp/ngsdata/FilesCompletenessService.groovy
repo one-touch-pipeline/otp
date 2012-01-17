@@ -56,7 +56,7 @@ class FilesCompletenessService {
             throw new ProcessingException("No data file provided for the given run.")
         }
         dataFiles.each {DataFile dataFile ->
-            if (hasFinalLocation()) {
+            if (hasFinalLocation(dataFile)) {
                 return // continue
             }
             boolean exists = fileExistsInFinalLocation(dataFile)
@@ -78,7 +78,10 @@ class FilesCompletenessService {
      * @return
      */
     private boolean hasFinalLocation(DataFile dataFile) {
-        return (boolean) lsdfFilesService.getFileFinalPath(dataFile.id)
+        if (lsdfFilesService.getFileFinalPath(dataFile.id) == null) {
+            return false
+        }
+        return true 
     }
 
     /**
@@ -141,6 +144,7 @@ class FilesCompletenessService {
     }
 
     /**
+     * TODO: check if function needed
      * This function checks if all dataFiles belonging to this
      * run are in the final location and properly linked.
      *
@@ -174,7 +178,7 @@ class FilesCompletenessService {
     }
 
     /**
-     *
+     * TODO: check if function needed then refactor
      * @param projectName
      * @param host
      * @return
