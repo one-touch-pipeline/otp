@@ -1,6 +1,9 @@
 package de.dkfz.tbi.otp.job.jobs.dataTransfer
 
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.Run
+import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -8,6 +11,9 @@ class CreateViewByPidJob extends AbstractJobImpl {
 
     @Autowired
     LsdfFilesService lsdfFilesService
+
+    @Autowired
+    PbsService pbsService
 
     private String projectName
 
@@ -20,11 +26,11 @@ class CreateViewByPidJob extends AbstractJobImpl {
 
         List<DataFile> dataFiles = DataFile.findAllByRun(run)
         for(DataFile dataFile in dataFiles) {
-            println dataFile.name + " " + dataFile.project
+            println dataFile.fileName + " " + dataFile.project
             if (dataFile.project.toString() != projectName) {
                 continue
             }
-            linkDataFile(file)
+            linkDataFile(dataFile)
         }
     }
 
@@ -45,7 +51,9 @@ class CreateViewByPidJob extends AbstractJobImpl {
     // TODO move to service and store command in a database
     private executeCommand(String cmd) {
         println cmd
-        java.lang.Process process = cmd.execute()
-        process.waitFor()
+        String response = pbsService.sendPbsJob(cmd)
+        println response
+        //java.lang.Process process = cmd.execute()
+        //process.waitFor()
     }
 }
