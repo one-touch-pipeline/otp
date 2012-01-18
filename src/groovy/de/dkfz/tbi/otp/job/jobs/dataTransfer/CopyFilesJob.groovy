@@ -19,7 +19,6 @@ class CopyFilesJob extends AbstractJobImpl {
         Run run = Run.get(runId)
 
         String pbsIds = ""
-
         DataFile.findAllByRun(run).each {DataFile file ->
             if (file.project == null) {
                 return
