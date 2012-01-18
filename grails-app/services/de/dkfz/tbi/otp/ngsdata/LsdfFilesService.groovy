@@ -69,6 +69,7 @@ class LsdfFilesService {
      * @return String with path or null if path can not be established
      */
     String getFileFinalPath(DataFile file) {
+        // TODO check if configuration variables are present
         if (!file) {
             log.debug("null file object")
             return null
@@ -78,28 +79,39 @@ class LsdfFilesService {
             return null
         }
         if (file.fileType.type == FileType.Type.METADATA) {
-            String basePath = grailsApplication.config.otp.dataPath['metadata']
-            String path = basePath + "/data-tracking-orig/" +
-                    file.run.seqCenter?.dirName +
-                    "/run" + file.run.name + "/" + file.fileName
-            return path
+            return metaDataFinalPath(file)
         }
-        String seqTypeDir = "";
-        if (file.seqTrack) {
-            seqTypeDir = file.seqTrack.seqType?.dirName
-        } else if (file.alignmentLog) {
-            seqTypeDir = file.alignmentLog.seqTrack.seqType?.dirName
-        }
-        String basePath = grailsApplication.config.otp.dataPath[file.project.host.toLowerCase()]
-        if (!basePath) {
-            return null
-        }
+        return sequenceDataFinalPath(file)
+        // TODO check if correct for merged bam files
+    }
+
+    private String metaDataFinalPath(DataFile file) {
+        String basePath = grailsApplication.config.otp.dataPath['metadata']
+        String path = basePath + "/data-tracking-orig/" +
+                file.run.seqCenter?.dirName +
+                "/run" + file.run.name + "/" + file.fileName
+        return path
+    }
+
+    private String sequenceDataFinalPath(DataFile file) {
+        String seqTypeDir = seqTypeDirectory(file);
+        String projectHost = file.project.host.toLowerCase()
+        String basePath = grailsApplication.config.otp.dataPath[projectHost]
         String path =
                 basePath + file?.project?.dirName + "/sequencing/" +
                 seqTypeDir + "/" + file.run.seqCenter?.dirName +
                 "/run" + file.run?.name + "/" + file?.prvFilePath + "/" +
                 file?.fileName
         return path
+    }
+
+    private String seqTypeDirectory(DataFile file) {
+        if (file.seqTrack) {
+            return seqTypeDir = file.seqTrack.seqType?.dirName
+        } else if (file.alignmentLog) {
+            return seqTypeDir = file.alignmentLog.seqTrack.seqType?.dirName
+        }
+        return "/error/"
     }
 
     /**
