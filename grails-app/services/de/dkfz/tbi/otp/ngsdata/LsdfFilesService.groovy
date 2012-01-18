@@ -107,9 +107,10 @@ class LsdfFilesService {
 
     private String seqTypeDirectory(DataFile file) {
         if (file.seqTrack) {
-            return seqTypeDir = file.seqTrack.seqType?.dirName
-        } else if (file.alignmentLog) {
-            return seqTypeDir = file.alignmentLog.seqTrack.seqType?.dirName
+            return file.seqTrack.seqType?.dirName
+        }
+        if (file.alignmentLog) {
+            return file.alignmentLog.seqTrack.seqType?.dirName
         }
         return "/error/"
     }
@@ -146,19 +147,17 @@ class LsdfFilesService {
             log.debug("File not used ${file.fileName}")
             return null
         }
-        if (!file.seqTrack) {
-            log.debug("File used but no SeqTrack ${file.fileName}")
-            return null
-        }
         SeqTrack seqTrack = file.seqTrack ?: file.alignmentLog.seqTrack
         String basePath = grailsApplication.config.otp.dataPath[file.project.host.toLowerCase()]
         if (!basePath) {
              return null
         }
+        /*
         if(!seqTrack.sample.individual.pid) {
             log.debug("No individual pid set.")
             return null
         }
+        */
         String pid = seqTrack.sample.individual.pid
         String path =
                 basePath + file.project?.dirName + "/sequencing/" +

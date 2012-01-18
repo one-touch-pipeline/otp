@@ -118,19 +118,18 @@ class FilesCompletenessService {
             throw new ProcessingException("No data file provided for the given run.")
         }
         dataFiles.each {DataFile dataFile ->
+            println dataFile.fileName
             String path = lsdfFilesService.getFileViewByPidPath(dataFile)
             if (path == null) {
-                allLinked = false
                 return // continue
             }
             boolean exists = lsdfFilesService.fileExists(path)
-            if (exists) {
-                dataFile.fileLinked = true
-            } else {
-                dataFile.fileLinked = false
+            if (!exists) {
                 allLinked = false
             }
+            dataFile.fileLinked = exists
             dataFile.save(flush: true)
+            println dataFile.fileName + " " + path  + " " + exists
         }
         return allLinked
     }
