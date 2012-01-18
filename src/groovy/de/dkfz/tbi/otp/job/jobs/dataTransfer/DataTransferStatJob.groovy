@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.dataTransfer
 
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.Parameter
+import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.ngsdata.Run
 import org.springframework.scheduling.annotation.Scheduled
@@ -11,33 +12,58 @@ import org.springframework.stereotype.Component
 @Component("dataTransferStartJob")
 @Scope("singleton")
 class DataTransferStatJob extends AbstractStartJobImpl  {
-    boolean performed = true
 
-    int N = 1
+    final int MAX_RUNNING = 1
 
     @Scheduled(fixedRate=60000l)
-    void execute() {       
+    void execute() {
         if (!getExecutionPlan() || !getExecutionPlan().enabled) {
             println("transfer Execution plan not set or not active")
             return
         }
-        println "Executing Data Transfer workflow with N = " + N
-        if (N > 10) {
+        int numberOfRunning = numberOfRunningProcesses()
+        if (numberOfRunning >= MAX_RUNNING) {
+            println "MetaDataWorkflow: ${numberOfRunning} processes already running"
             return
         }
-        if (performed) {
-            println "Jobs already started ..."
-            return
+        int n = 0;
+        List<Run> runs = Run.findAllByComplete(true)
+        for(Run run in runs) {
+            if (numberOfRunning >= MAX_RUNNING) {
+                break
+            }
+            if (processed(run)) {
+                continue
+            }
+            // new run to be processed
+            createProcess(new ProcessParameter(value: run.id.toString(), className: run.class.name))
+            println run.toString()
+            numberOfRunning++
+            n++
         }
-        //return
-        println("Transfer Data Start Job called")
-        // TODO Assure that the runs are processed only once. Verify via Process?
-        List<Run> runs = Run.list()
-        //runs.each { Run run ->
-            createProcess(new ProcessParameter(value: runs[N].id.toString(), className: runs[N].class.name))
-            println runs[N].toString()
-        //}
-        N++
-        //performed = true
+        println "DataTransferWorkflow: ${n} jobs started"
+    }
+
+   /**
+    * Checks if given run was already processed by MetaData execution plan
+    * @param run
+    * @return
+    */
+   boolean processed(Run run) {
+       List<ProcessParameter> processParameters =
+           ProcessParameter.findAllByValue(run.id.toString(), run.class.name)
+       for(ProcessParameter parameter in processParameters) {
+           if (parameter.process.jobExecutionPlan.id == getExecutionPlan().id) {
+               return true
+           }
+       }
+   }
+
+   /**
+     * returns number of running processes for this execution plan
+     * @return
+     */
+    private int numberOfRunningProcesses() {
+        return Process.countByFinishedAndJobExecutionPlan(false, getExecutionPlan())
     }
 }

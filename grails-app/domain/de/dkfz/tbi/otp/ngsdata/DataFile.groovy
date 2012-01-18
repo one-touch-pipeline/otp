@@ -67,6 +67,17 @@ class DataFile {
         return fileSize
     }
 
+    /**
+     * return formated file name starting from run directory 
+     * @return
+     */
+    public String formFileName() {
+        if (pathName) {
+            pathName + "/" + fileName
+        }
+        return fileName
+    }
+
     String toString() {
         fileName
     }

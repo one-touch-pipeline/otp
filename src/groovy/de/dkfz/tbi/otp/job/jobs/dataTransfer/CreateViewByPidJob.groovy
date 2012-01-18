@@ -1,6 +1,9 @@
 package de.dkfz.tbi.otp.job.jobs.dataTransfer
 
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.Run
+import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -8,6 +11,9 @@ class CreateViewByPidJob extends AbstractJobImpl {
 
     @Autowired
     LsdfFilesService lsdfFilesService
+
+    @Autowired
+    PbsService pbsService
 
     private String projectName
 
@@ -17,23 +23,37 @@ class CreateViewByPidJob extends AbstractJobImpl {
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
         projectName = "PROJECT_NAME" //getParameterValueOrClass("project")
-        String cmd = ""
-        DataFile[] dataFiles = DataFile.findAllByRun(run).toArray()
-        //(DataFile[])run.dataFiles.toArray()
-        for(int iFile=0; iFile<dataFiles.length; iFile++) {
-            DataFile dataFile = dataFiles[iFile]
+
+        List<DataFile> dataFiles = DataFile.findAllByRun(run)
+        for(DataFile dataFile in dataFiles) {
+            println dataFile.fileName + " " + dataFile.project
             if (dataFile.project.toString() != projectName) {
                 continue
             }
-            String target = lsdfFilesService.getFileFinalPath(dataFile)
-            String linkName = lsdfFilesService.getFileViewByPidPath(dataFile)
-            if (linkName == null || target == null) {
-                continue
-            }
-            String dirName = linkName.substring(0, linkName.lastIndexOf('/'))
-            cmd += "mkdir -p ${dirName};\n"
-            cmd += "ln -s " + target + " " + linkName + ";\n"
+            linkDataFile(dataFile)
         }
+    }
+
+    private linkDataFile(DataFile file) {
+        String target = lsdfFilesService.getFileFinalPath(file)
+        String linkName = lsdfFilesService.getFileViewByPidPath(file)
+        if (linkName == null || target == null) {
+            return
+        }
+        String dirName = linkName.substring(0, linkName.lastIndexOf('/'))
+        String cmd = "mkdir -p ${dirName}"
+        executeCommand(cmd)
+
+        cmd = "ln -s " + target + " " + linkName
+        executeCommand(cmd)
+    }
+
+    // TODO move to service and store command in a database
+    private executeCommand(String cmd) {
         println cmd
+        String response = pbsService.sendPbsJob(cmd)
+        println response
+        //java.lang.Process process = cmd.execute()
+        //process.waitFor()
     }
 }

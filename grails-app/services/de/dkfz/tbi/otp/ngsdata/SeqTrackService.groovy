@@ -175,11 +175,12 @@ class SeqTrackService {
                 seqTrack : seqTrack,
                 executedBy : AlignmentLog.Execution.INITIAL
                 )
+        alignLog.save(flush: true)
         // attach data files
         alignFiles.each {
             it.project = sample.individual.project
             it.alignmentLog = alignLog
-            it.save()
+            it.save(flush: true)
         }
         seqTrack.hasOriginalBam = true
         // save

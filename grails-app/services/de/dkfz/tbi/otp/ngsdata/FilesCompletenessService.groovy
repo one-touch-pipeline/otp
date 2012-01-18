@@ -56,26 +56,51 @@ class FilesCompletenessService {
             throw new ProcessingException("No data file provided for the given run.")
         }
         dataFiles.each {DataFile dataFile ->
-            String path = lsdfFilesService.getFileFinalPath(dataFile.id)
-            if (path == null) {
+            if (!hasFinalLocation(dataFile)) {
                 return // continue
             }
-            boolean exists = lsdfFilesService.fileExists(path)
-            if (exists) {
-                dataFile.fileExists = true
-                dataFile.fileSize = lsdfFilesService.fileSize(path)
-                dataFile.dateFileSystem = lsdfFilesService.fileCreationDate(path)
-            } else {
-                dataFile.fileExists = false
+            boolean exists = fileExistsInFinalLocation(dataFile)
+            if (!exists) {
                 allExists = false
             }
-            dataFile.save(flush: true)
+            String path = lsdfFilesService.getFileFinalPath(dataFile.id)
+            println "File ${path} exists: ${exists}"
+            fillFileStatistics(dataFile, exists)
         }
         if (allExists) {
             run.finalLocation = true
             run.save(flush: true)
         }
         return allExists
+    }
+
+    private boolean hasFinalLocation(DataFile dataFile) {
+        if (lsdfFilesService.getFileFinalPath(dataFile.id) == null) {
+            return false
+        }
+        return true 
+    }
+
+    private boolean fileExistsInFinalLocation(DataFile dataFile) {
+        String path = lsdfFilesService.getFileFinalPath(dataFile.id)
+        return lsdfFilesService.fileExists(path)
+    }
+
+    /**
+     * Fill statistics from the file system in the DataFile in a database
+     * data size and data of file creation are filed only if file exists 
+     * in the file system
+     * @param dataFile
+     * @param exists
+     */
+    private void fillFileStatistics(DataFile dataFile, boolean exists) {
+        dataFile.fileExists = exists
+        if (exists) {
+            String path = lsdfFilesService.getFileFinalPath(dataFile.id)
+            dataFile.fileSize = lsdfFilesService.fileSize(path)
+            dataFile.dateFileSystem = lsdfFilesService.fileCreationDate(path)
+        }
+        dataFile.save(flush: true)
     }
 
     /**
@@ -93,24 +118,24 @@ class FilesCompletenessService {
             throw new ProcessingException("No data file provided for the given run.")
         }
         dataFiles.each {DataFile dataFile ->
+            println dataFile.fileName
             String path = lsdfFilesService.getFileViewByPidPath(dataFile)
             if (path == null) {
-                allLinked = false
                 return // continue
             }
             boolean exists = lsdfFilesService.fileExists(path)
-            if (exists) {
-                dataFile.fileLinked = true
-            } else {
-                dataFile.fileLinked = false
+            if (!exists) {
                 allLinked = false
             }
+            dataFile.fileLinked = exists
             dataFile.save(flush: true)
+            println dataFile.fileName + " " + path  + " " + exists
         }
         return allLinked
     }
 
     /**
+     * TODO: check if function needed
      * This function checks if all dataFiles belonging to this
      * run are in the final location and properly linked.
      *
@@ -144,7 +169,7 @@ class FilesCompletenessService {
     }
 
     /**
-     *
+     * TODO: check if function needed then refactor
      * @param projectName
      * @param host
      * @return
