@@ -56,13 +56,15 @@ class FilesCompletenessService {
             throw new ProcessingException("No data file provided for the given run.")
         }
         dataFiles.each {DataFile dataFile ->
-            if (hasFinalLocation(dataFile)) {
+            if (!hasFinalLocation(dataFile)) {
                 return // continue
             }
             boolean exists = fileExistsInFinalLocation(dataFile)
-            if (exists) {
+            if (!exists) {
                 allExists = false
             }
+            String path = lsdfFilesService.getFileFinalPath(dataFile.id)
+            println "File ${path} exists: ${exists}"
             fillFileStatistics(dataFile, exists)
         }
         if (allExists) {
@@ -72,11 +74,6 @@ class FilesCompletenessService {
         return allExists
     }
 
-    /**
-     * Checks of give DataFile has defined final location
-     * @param dataFile
-     * @return
-     */
     private boolean hasFinalLocation(DataFile dataFile) {
         if (lsdfFilesService.getFileFinalPath(dataFile.id) == null) {
             return false
@@ -84,18 +81,13 @@ class FilesCompletenessService {
         return true 
     }
 
-    /**
-     * Checks if a given DataFile exists in the final location
-     * @param dataFile
-     * @return
-     */
     private boolean fileExistsInFinalLocation(DataFile dataFile) {
         String path = lsdfFilesService.getFileFinalPath(dataFile.id)
         return lsdfFilesService.fileExists(path)
     }
 
     /**
-     * Fill statistcis from the file system in the DataFile in a database
+     * Fill statistics from the file system in the DataFile in a database
      * data size and data of file creation are filed only if file exists 
      * in the file system
      * @param dataFile
