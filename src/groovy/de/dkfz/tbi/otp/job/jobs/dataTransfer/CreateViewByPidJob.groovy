@@ -29,8 +29,8 @@ class CreateViewByPidJob extends AbstractJobImpl {
     }
 
     private linkDataFile(DataFile file) {
-        String target = lsdfFilesService.getFileFinalPath(dataFile)
-        String linkName = lsdfFilesService.getFileViewByPidPath(dataFile)
+        String target = lsdfFilesService.getFileFinalPath(file)
+        String linkName = lsdfFilesService.getFileViewByPidPath(file)
         if (linkName == null || target == null) {
             return
         }
