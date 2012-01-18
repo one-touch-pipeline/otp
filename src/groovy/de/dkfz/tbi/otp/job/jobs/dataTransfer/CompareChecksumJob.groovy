@@ -32,8 +32,10 @@ public class CompareChecksumJob extends AbstractEndStateAwareJobImpl {
      * @return
      */
     private boolean checkMd5File(Run run, String directory) {
-        File md5file = new File(directory + "/" + "files.md5sum")
-        if (md5file.canRead()) {
+        String fileName = directory + "/run" + run.name + "/files.md5sum"
+        println fileName
+        File md5file = new File(fileName)
+        if (!md5file.canRead()) {
             return false
         }
         boolean allOK = true
@@ -57,6 +59,6 @@ public class CompareChecksumJob extends AbstractEndStateAwareJobImpl {
         String fileName = tokens.get(1)
         DataFile dataFile = DataFile.findByRunAndFileName(run, fileName)
         String origMd5sum = dataFile.md5sum
-        return (origMd5sum == md5sum) 
+        return (origMd5sum == md5sum)
     }
 }

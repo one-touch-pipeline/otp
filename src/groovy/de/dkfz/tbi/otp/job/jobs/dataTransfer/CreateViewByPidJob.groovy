@@ -17,23 +17,35 @@ class CreateViewByPidJob extends AbstractJobImpl {
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
         projectName = "PROJECT_NAME" //getParameterValueOrClass("project")
-        String cmd = ""
-        DataFile[] dataFiles = DataFile.findAllByRun(run).toArray()
-        //(DataFile[])run.dataFiles.toArray()
-        for(int iFile=0; iFile<dataFiles.length; iFile++) {
-            DataFile dataFile = dataFiles[iFile]
+
+        List<DataFile> dataFiles = DataFile.findAllByRun(run)
+        for(DataFile dataFile in dataFiles) {
+            println dataFile.name + " " + dataFile.project
             if (dataFile.project.toString() != projectName) {
                 continue
             }
-            String target = lsdfFilesService.getFileFinalPath(dataFile)
-            String linkName = lsdfFilesService.getFileViewByPidPath(dataFile)
-            if (linkName == null || target == null) {
-                continue
-            }
-            String dirName = linkName.substring(0, linkName.lastIndexOf('/'))
-            cmd += "mkdir -p ${dirName};\n"
-            cmd += "ln -s " + target + " " + linkName + ";\n"
+            linkDataFile(file)
         }
+    }
+
+    private linkDataFile(DataFile file) {
+        String target = lsdfFilesService.getFileFinalPath(dataFile)
+        String linkName = lsdfFilesService.getFileViewByPidPath(dataFile)
+        if (linkName == null || target == null) {
+            return
+        }
+        String dirName = linkName.substring(0, linkName.lastIndexOf('/'))
+        String cmd = "mkdir -p ${dirName}"
+        executeCommand(cmd)
+
+        cmd = "ln -s " + target + " " + linkName
+        executeCommand(cmd)
+    }
+
+    // TODO move to service and store command in a database
+    private executeCommand(String cmd) {
         println cmd
+        java.lang.Process process = cmd.execute()
+        process.waitFor()
     }
 }
