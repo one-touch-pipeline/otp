@@ -41,7 +41,7 @@ class MetaDataService {
         String runDir = run.mdPath + "/run" + run.name
         File dir = new File(runDir)
         if (!dir.canRead() || !dir.isDirectory()) {
-            throw new DirectoryNotReadableException(dir)
+            throw new DirectoryNotReadableException(dir.name)
         }
         List<String> fileNames = dir.list()
         FileType fileType = FileType.findByType(FileType.Type.METADATA)
