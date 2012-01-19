@@ -9,6 +9,9 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
     @Autowired
     LsdfFilesService lsdfFilesService
 
+    @Autowired
+    PbsService pbsService
+
     private String projectName
 
     @Override
@@ -16,20 +19,17 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
 
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
-        println "run name = " + run
+
         projectName = "PROJECT_NAME" //getParameterValueOrClass("project")
         String[] dirs = lsdfFilesService.getListOfRunDirecotries(run, projectName)
-
         dirs.each {String line ->
-            int exitCode = createDirectory(line)
-            println "creating directory finished with exit code" + exitCode
+            String exitCode = createDirectory(line)
+            println "creating directory finished with exit code " + exitCode
         }
     }
 
-    private int createDirectory(String line) {
+    private String createDirectory(String line) {
         String cmd = "mkdir -p " + line
-        java.lang.Process process = cmd.execute()
-        process.waitFor()
-        return process.exitValue()
+        return pbsService.sendPbsJob(cmd)
     }
 }
