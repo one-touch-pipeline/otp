@@ -19,10 +19,7 @@ class CopyFilesJob extends AbstractJobImpl {
         Run run = Run.get(runId)
 
         String pbsIds = ""
-        DataFile.findAllByRun(run).each {DataFile file ->
-            if (file.project == null) {
-                return
-            }
+        DataFile.findAllByRunAndProjectIsNotNull(run).each {DataFile file ->
             String scriptName = buildScript(file)
             String jobId = sendScript(scriptName)
             println "Job ${jobId} submitted to PBS"
@@ -31,28 +28,22 @@ class CopyFilesJob extends AbstractJobImpl {
         addOutputParameter("pbsIds", pbsIds)
     }
 
-    /**
-     * 
-     * @param file
-     * @return
-     */
     private String buildScript(DataFile file) {
-        String from = lsdfFilesService.getFileInitialPath(file)
-        String to = lsdfFilesService.getFileFinalPath(file)
-        println from + " " + to
-        String cpCmd = "cp ${from} ${to}"
-
+        String cpCmd = scriptText(file)
         File cmdFile = File.createTempFile("copyJob", ".tmp", new File(System.getProperty("user.home")))
         cmdFile.setText(cpCmd)
         cmdFile.setExecutable(true)
         return cmdFile.name
     }
 
-    /**
-     * 
-     * @param scriptName
-     * @return
-     */
+    private String scriptText(DataFile file) {
+        String from = lsdfFilesService.getFileInitialPath(file)
+        String to = lsdfFilesService.getFileFinalPath(file)
+        println from + " " + to
+        String cmd = "cp ${from} ${to};chmod 440 ${to}"
+        return cmd
+    }
+
     private String sendScript(String scriptName) {
         String cmd = "qsub ${scriptName}"
         //String cmd = "qsub testJob.sh"
