@@ -45,7 +45,7 @@ class CopyFilesJob extends AbstractJobImpl {
     }
 
     private String sendScript(String scriptName) {
-        String cmd = "qsub ${scriptName}"
+        String cmd = "qsub -l nodes=1:lsdf ${scriptName}"
         //String cmd = "qsub testJob.sh"
         String response = pbsService.sendPbsJob(cmd)
         List<String> extractedPbsIds = pbsService.extractPbsIds(response)
