@@ -18,7 +18,7 @@ class CopyFilesJob extends AbstractJobImpl {
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
 
-        String pbsIds = ""
+        String pbsIds = "1,"
         DataFile.findAllByRunAndProjectIsNotNull(run).each {DataFile file ->
             String scriptName = buildScript(file)
             String jobId = sendScript(scriptName)
