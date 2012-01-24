@@ -16,6 +16,8 @@ public class CalculateChecksumJob extends AbstractJobImpl {
     @Autowired
     PbsService pbsService
 
+    String suffix = ".md5sum"
+
     @Override
     public void execute() throws Exception {
         long runId = Long.parseLong(getProcessParameterValue())
@@ -35,33 +37,25 @@ public class CalculateChecksumJob extends AbstractJobImpl {
         addOutputParameter("pbsIds", pbsIds)
     }
 
-    private boolean md5sumFileExists(DataFile file) {
-        String directory = runDirectory(file)
-        String md5FileFullPath = directory + "/run" + file.run.name + "/files.md5sum"
-        File md5file = new File(md5FileFullPath)
-        if (md5file.canRead() && containsDataFile(file, md5file)) {
-            return true
-        }
-        return false
-    }
-
-    private boolean containsDataFile(DataFile file, File md5file) {
-        String text = md5file.getText()
-        if (text.contains(file.fileName)) {
-            return true
-        }
-        return false
-    }
-
-    private String runDirectory(DataFile file) {
+    private String dirToMd5File(DataFile file) {
         String path = lsdfFilesService.getFileFinalPath(file)
-        String[] directories = lsdfFilesService.getAllPathsForRun(file.run)
-        for(String directory in directories) {
-            if (path.contains(directory)) {
-                return directory
-            }
+        String dirPath = path.substring(0, path.lastIndexOf("/")+1)
+        return dirPath
+    }
+
+    private String pathToMd5File(DataFile file) {
+        String path = lsdfFilesService.getFileFinalPath(file)
+        String md5file = path + suffix
+        return md5file
+    }
+
+    private boolean md5sumFileExists(DataFile file) {
+        String path = pathToMd5File(file)
+        File md5file = new File(path)
+        if (md5file.canRead()) {
+            return true
         }
-        return null // shall never happen (exception ?)
+        return false
     }
 
     private String buildScript(DataFile file) {
@@ -73,10 +67,10 @@ public class CalculateChecksumJob extends AbstractJobImpl {
     }
 
     private scriptText(DataFile file) {
-        String directory = runDirectory(file)
-        String runFullPath = directory + "/run" + file.run.name
-        String fullFileName = file.formFileName()
-        String text = "cd ${runFullPath};md5sum ${fullFileName} >> files.md5sum"
+        String directory = dirToMd5File(file)
+        String fileName = file.fileName
+        String md5FileName = fileName + suffix
+        String text = "cd ${directory};md5sum ${fileName} > ${md5FileName}"
         return text
     }
 
