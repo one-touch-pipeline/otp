@@ -11,7 +11,7 @@ class Individual {
 
     static belongsTo = [project : Project]
 
-    static constraints = { pid(unique: true) }
+    static constraints = { pid(unique: true, nullable: false) }
 
     String toString() {
         "${mockPid} ${mockFullName}"

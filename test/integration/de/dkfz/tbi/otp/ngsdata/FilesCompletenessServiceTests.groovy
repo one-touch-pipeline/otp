@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
 
-import org.apache.ivy.core.module.descriptor.ExtendsDescriptor
 import org.junit.*
 
 import de.dkfz.tbi.otp.job.processing.ProcessingException
@@ -173,8 +172,10 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         // a data file with an associated run but not all needed variables and keys set
         DataFile dataFile3 = new DataFile(fileName: "dataFile3", pathName: "testPath", used: true, run: run1, fileType: fileType)
         assert(dataFile3.save())
-        // false should be returned
-        assertFalse(filesCompletenessService.checkViewByPid(run1))
+        // seqTrack not associated
+        shouldFail(NullPointerException) {
+            filesCompletenessService.checkViewByPid(run1)
+        }
         // make second run with correct associations
         Run run2 = new Run(name: "testRun2", complete: false, seqCenter: seqCenter, seqTech: seqTech)
         run2.dataPath = dataPath

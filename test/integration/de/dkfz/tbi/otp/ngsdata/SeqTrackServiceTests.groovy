@@ -2,8 +2,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
 
-import java.io.File
-
 import org.junit.*
 
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest

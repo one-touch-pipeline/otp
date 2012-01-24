@@ -152,12 +152,6 @@ class LsdfFilesService {
         if (!basePath) {
              return null
         }
-        /*
-        if(!seqTrack.sample.individual.pid) {
-            log.debug("No individual pid set.")
-            return null
-        }
-        */
         String pid = seqTrack.sample.individual.pid
         String path =
                 basePath + file.project?.dirName + "/sequencing/" +
