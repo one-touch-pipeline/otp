@@ -5,5 +5,6 @@ class Parameter {
     String value
 
     static constraints = {
+        value(size:0..1000)
     }
 }
