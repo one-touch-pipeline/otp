@@ -75,6 +75,9 @@ class FilesCompletenessService {
     }
 
     private boolean hasFinalLocation(DataFile dataFile) {
+        if (dataFile.fileType.type == FileType.Type.METADATA) {
+            return false
+        }
         if (lsdfFilesService.getFileFinalPath(dataFile.id) == null) {
             return false
         }
