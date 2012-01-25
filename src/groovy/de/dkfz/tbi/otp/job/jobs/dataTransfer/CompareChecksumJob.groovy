@@ -11,54 +11,36 @@ public class CompareChecksumJob extends AbstractEndStateAwareJobImpl {
     @Autowired
     LsdfFilesService lsdfFilesService
 
+    String suffix = ".md5sum"
+
     @Override
     public void execute() throws Exception {
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
 
-        String[] directories = lsdfFilesService.getAllPathsForRun(run)
-        for(String directory in directories) {
-            if (!checkMd5File(run, directory)) {
+        DataFile.findAllByRunAndProjectIsNotNull(run).each {DataFile file ->
+            if (!compareMd5(file)) {
                 fail()
             }
         }
         succeed()
     }
 
-    /**
-     * 
-     * @param run
-     * @param directory
-     * @return
-     */
-    private boolean checkMd5File(Run run, String directory) {
-        String fileName = directory + "/run" + run.name + "/files.md5sum"
-        println fileName
-        File md5file = new File(fileName)
-        if (!md5file.canRead()) {
+    private boolean compareMd5(DataFile file) {
+        String path = pathToMd5File(file)
+        File md5File = new File(path)
+        if (md5File.canRead()) {
             return false
         }
-        boolean allOK = true
-        md5file.eachLine {String line ->
-            println line
-            if (!checkMd5Line(run, line)) {
-                allOK = false
-            }
-        }
-        return allOK
+        List<String> lines = md5File.readLines()
+        List<String> tokens = lines.get(0).tokenize()
+        String md5sum = tokens.get(0)
+        return (md5sum == file.md5sum)
     }
 
-    /**
-     * 
-     * @param line
-     * @return
-     */
-    private boolean checkMd5Line(Run run, String line) {
-        List<String> tokens = line.tokenize()
-        String md5sum = tokens.get(0)
-        String fileName = tokens.get(1)
-        DataFile dataFile = DataFile.findByRunAndFileName(run, fileName)
-        String origMd5sum = dataFile.md5sum
-        return (origMd5sum == md5sum)
+    private String pathToMd5File(DataFile file) {
+        String path = lsdfFilesService.getFileFinalPath(file)
+        String md5file = path + suffix
+        return md5file
     }
 }

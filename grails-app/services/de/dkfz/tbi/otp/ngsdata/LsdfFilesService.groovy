@@ -231,10 +231,11 @@ class LsdfFilesService {
                 return
             }
             String path = getPathToRun(file)
-            if (!path) {
+            if (path) {
+                paths << path
+            } else  {
                 paths << run.dataPath
             }
-            paths << path
         }
         return (String[])paths.toArray()
     }

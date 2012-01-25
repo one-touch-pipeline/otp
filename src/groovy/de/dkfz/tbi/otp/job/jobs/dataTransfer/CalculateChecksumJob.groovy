@@ -16,14 +16,17 @@ public class CalculateChecksumJob extends AbstractJobImpl {
     @Autowired
     PbsService pbsService
 
+    String suffix = ".md5sum"
+
     @Override
     public void execute() throws Exception {
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
 
-        String pbsIds = ""
-        DataFile.findAllByRun(run).each {DataFile file ->
-            if (file.project == null) {
+        String pbsIds = "1,"
+        DataFile.findAllByRunAndProjectIsNotNull(run).each {DataFile file ->
+            if (md5sumFileExists(file)) {
+                println "checksum file already exists ..."
                 return
             }
             String scriptName = buildScript(file)
@@ -32,6 +35,27 @@ public class CalculateChecksumJob extends AbstractJobImpl {
             pbsIds += jobId + ","
         }
         addOutputParameter("pbsIds", pbsIds)
+    }
+
+    private String dirToMd5File(DataFile file) {
+        String path = lsdfFilesService.getFileFinalPath(file)
+        String dirPath = path.substring(0, path.lastIndexOf("/")+1)
+        return dirPath
+    }
+
+    private String pathToMd5File(DataFile file) {
+        String path = lsdfFilesService.getFileFinalPath(file)
+        String md5file = path + suffix
+        return md5file
+    }
+
+    private boolean md5sumFileExists(DataFile file) {
+        String path = pathToMd5File(file)
+        File md5file = new File(path)
+        if (md5file.canRead()) {
+            return true
+        }
+        return false
     }
 
     private String buildScript(DataFile file) {
@@ -43,21 +67,15 @@ public class CalculateChecksumJob extends AbstractJobImpl {
     }
 
     private scriptText(DataFile file) {
-        String path = lsdfFilesService.getFileFinalPath(file)
-        String[] directories = lsdfFilesService.getAllPathsForRun(file.run)
-        String text = ""
-        for(String directory in directories) {
-            if (path.contains(directory)) {
-                String runFullPath = directory + "/run" + file.run.name
-                String fullFileName = file.formFileName()
-                text = "cd ${runFullPath};md5sum ${fullFileName} >> files.md5sum"
-            }
-        }
+        String directory = dirToMd5File(file)
+        String fileName = file.fileName
+        String md5FileName = fileName + suffix
+        String text = "cd ${directory};md5sum ${fileName} > ${md5FileName}"
         return text
     }
 
     private String sendScript(String scriptName) {
-        String cmd = "qsub ${scriptName}"
+        String cmd = "qsub -l nodes=1:lsdf ${scriptName}"
         //String cmd = "qsub testJob.sh"
         String response = pbsService.sendPbsJob(cmd)
         List<String> extractedPbsIds = pbsService.extractPbsIds(response)
