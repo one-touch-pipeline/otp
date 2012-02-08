@@ -2,6 +2,22 @@ package de.dkfz.tbi.otp.ngsdata
 
 class FileTypeService {
 
+    boolean isRawDataFile(DataFile dataFile) {
+        switch(dataFile.fileType.type) {
+            case "SEQUENCE" :
+            case "ALIGNMENT" :
+                return true
+        }
+        return false
+    }
+
+    boolean isSequenceDataFile(DataFile dataFile) {
+        if (dataFile.fileType.type == Type.SEQUENCE) {
+            return true
+        }
+        return false
+    }
+
     FileType getFileType(String filename) {
         // try to provide and object from file name
         FileType tt = null
@@ -19,7 +35,7 @@ class FileTypeService {
     /**
      * Provides object from file name and known type
      * 
-     * to make a difference between stats from sequence and alignment
+     * to make a difference between 'stats' from sequence and alignment
      * 
      * @param filename
      * @param type
