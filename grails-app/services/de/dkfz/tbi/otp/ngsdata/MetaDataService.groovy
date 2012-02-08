@@ -255,21 +255,38 @@ class MetaDataService {
      * @return
      */
     private void fillVbpFileName(DataFile dataFile) {
-        if (dataFile.run.seqTech.name.contains("illumina") &&
-                dataFile.fileName.contains("fastq.gz")) {
+        if (needsVBPNameChange(dataFile)) {
             String lane = getMetaDataEntry(dataFile, "LANE_NO")
-            String readId = "0"
-            if (dataFile.fileName.contains("read1")) {
-                readId = "1"
-            } else if (dataFile.fileName.contains("read2")) {
-                readId = "2"
-            }
+            String readId = readStringFormFileName(dataFile.fileName)
             String name =  "s_" + lane + "_" + readId + "_sequence.txt.gz"
             dataFile.vbpFileName = name
             log.debug("${dataFile.fileName} ${dataFile.vbpFileName}")
         } else {
             dataFile.vbpFileName = dataFile.fileName
         }
+    }
+
+    private boolean needsVBPNameChange(DataFile dataFile) {
+        if (!dataFile.run.seqTech.name.contains("illumina")) {
+            return false
+        }
+        if (!dataFile.fileName.contains("fastq.gz")) {
+            return false
+        }
+        if (!dataFile.fileName.contains("read")) {
+            return false
+        }
+        return true
+    }
+ 
+    private String readStringFormFileName(String fileName) {
+        String readId = "0"
+        if (fileName.contains("read1")) {
+            readId = "1"
+        } else if (fileName.contains("read2")) {
+            readId = "2"
+        }
+        return readId
     }
 
     /**
