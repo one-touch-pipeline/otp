@@ -12,7 +12,7 @@ class FileTypeService {
     }
 
     boolean isSequenceDataFile(DataFile dataFile) {
-        if (dataFile.fileType.type == Type.SEQUENCE) {
+        if (dataFile.fileType.type == FileType.Type.SEQUENCE) {
             return true
         }
         return false
