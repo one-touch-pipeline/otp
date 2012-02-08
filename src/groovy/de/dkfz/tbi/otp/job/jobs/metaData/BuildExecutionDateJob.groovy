@@ -11,11 +11,11 @@ class BuildExecutionDateJob extends AbstractJobImpl {
     * dependency injection of meta data service
     */
    @Autowired
-   MetaDataService metaDataService
+   RunDateParserService runDateParserService
 
     @Override
     public void execute() throws Exception {
         long runId = Long.parseLong(getProcessParameterValue())
-        metaDataService.buildExecutionDate(runId)
+        runDateParserService.buildExecutionDate(runId)
     }
 }
