@@ -27,7 +27,6 @@ class RunDateParserService {
                return //continue
            }
            Date date = getDateFromMetaData(dataFile)
-           println "${dataFile.fileName} + ${date}"
            if (!exDate) {
                exDate = date
            }
