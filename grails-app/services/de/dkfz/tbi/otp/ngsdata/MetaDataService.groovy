@@ -6,14 +6,10 @@ import java.util.concurrent.locks.ReentrantLock
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 
 class MetaDataService {
-    /**
-     * Loading Meta data is not thread save - use a lock for it
-     */
+
+    // locks for operation that are not tread safe
     private final Lock loadMetaDataLock = new ReentrantLock()
-    /**
-     * Validating Meta Data is not thread save = use a lock for it
-     */
-    private final Lock validateMetaDataLock = new ReentrantLock()
+
 
     /**
      * Dependency injection of file type service
@@ -32,10 +28,6 @@ class MetaDataService {
     void registerInputFiles(long runId) {
 
         Run run = Run.get(runId)
-        //if (!run) {
-        //    return
-        //}
-
         log.debug("registering run ${run.name} from ${run.seqCenter}")
 
         String runDir = run.mdPath + "/run" + run.name
@@ -86,57 +78,17 @@ class MetaDataService {
      */
     void loadMetaData(long runId) {
         Run run = Run.get(runId)
-
         log.debug("loading metadata for run ${run.name}")
         // loading metadata is not thread save - use a lock
         loadMetaDataLock.lock()
         try {
             List<DataFile> listOfMDFiles = DataFile.findAllByRun(run)
-            DataFile dataFile
             listOfMDFiles.each { DataFile file ->
-                if (file.fileType.type != FileType.Type.METADATA || file.used) {
+                if (!isNewMetaDataFile(file)) {
                     return
                 }
                 log.debug("\tfound md souce file ${file.fileName}")
-                // hint to determine file type
-                FileType.Type type = FileType.Type.UNKNOWN
-                if (file.fileName.contains("fastq")) {
-                    type = FileType.Type.SEQUENCE
-                } else if (file.fileName.contains("align")) {
-                    type = FileType.Type.ALIGNMENT
-                }
-                File mdFile = new File(file.pathName + File.separatorChar + file.fileName)
-                if (!mdFile.canRead()) {
-                    throw new FileNotReadableException(mdFile.path)
-                }
-                List<String> tokens
-                List<String> values
-                List<MetaDataKey> keys
-                mdFile.eachLine { line, no ->
-                    // line numbering starts at 1 and not at 0
-                    if (no == 1) {
-                        // parse the header
-                        tokens = tokenize(line, '\t')
-                        keys = getKeysFromTokens(tokens)
-                    } else {
-                        // match values with the header
-                        // new entry in MetaData
-                        dataFile = new DataFile() // set-up later
-                        dataFile.run = run
-                        dataFile.save(flush: true)
-                        values = tokenize(line, '\t')
-                        addMetaDataEntries(dataFile, keys, values)
-                        // fill-up important fields
-                        assignFileName(dataFile)
-                        fillVbpFileName(dataFile)
-                        fillMD5Sum(dataFile)
-                        assignFileType(dataFile, type)
-                        addKnownMissingMetaData(run, dataFile)
-                        checkIfWithdrawn(dataFile)
-                    }
-                }
-                file.used = true
-                file.save(flush: true)
+                processMetaDataFile(file)
                 run.save(flush: true)
             }
         } finally {
@@ -144,7 +96,61 @@ class MetaDataService {
         }
     }
 
+    private boolean isNewMetaDataFile(DataFile file) {
+        return (file.fileType.type == FileType.Type.METADATA && !file.used)
+    }
 
+    private void processMetaDataFile(DataFile file) {
+        FileType.Type type = getTypeInMetaDataFile(file.fileName)
+        File mdFile = openTextFile(file)
+        List<String> tokens
+        List<String> values
+        List<MetaDataKey> keys
+        DataFile dataFile
+        mdFile.eachLine { line, no ->
+            // line numbering starts at 1 and not at 0
+            if (no == 1) {
+                // parse the header
+                tokens = tokenize(line, '\t')
+                keys = getKeysFromTokens(tokens)
+            } else {
+                // match values with the header
+                // new entry in MetaData
+                dataFile = new DataFile() // set-up later
+                dataFile.run = file.run
+                dataFile.save(flush: true)
+                values = tokenize(line, '\t')
+                addMetaDataEntries(dataFile, keys, values)
+                // fill-up important fields
+                assignFileName(dataFile)
+                fillVbpFileName(dataFile)
+                fillMD5Sum(dataFile)
+                assignFileType(dataFile, type)
+                addKnownMissingMetaData(file.run, dataFile)
+                checkIfWithdrawn(dataFile)
+            }
+        }
+        file.used = true
+        file.save(flush: true)
+    }
+
+    private FileType.Type getTypeInMetaDataFile(String fileName) { 
+        FileType.Type type = FileType.Type.UNKNOWN
+        if (fileName.contains("fastq")) {
+            type = FileType.Type.SEQUENCE
+        } else if (fileName.contains("align")) {
+            type = FileType.Type.ALIGNMENT
+        }
+        return type
+    }
+
+    private File openTextFile(DataFile file) {
+        File mdFile = new File(file.pathName + File.separatorChar + file.fileName)
+        if (!mdFile.canRead()) {
+            throw new FileNotReadableException(mdFile.path)
+        }
+        return mdFile
+    }
 
     /**
      * This method tokenizes a string
@@ -420,47 +426,52 @@ class MetaDataService {
             DataFile.findAllByRun(run).each { DataFile dataFile ->
                 dataFile.metaDataValid = true
                 MetaDataEntry.findAllByDataFile(dataFile).each { MetaDataEntry entry ->
-                    MetaDataEntry.Status valid = MetaDataEntry.Status.VALID
-                    MetaDataEntry.Status invalid = MetaDataEntry.Status.INVALID
-                    switch(entry.key.name) {
-                        case "RUN_ID":
-                            entry.status = (run.name == entry.value) ? valid : invalid
-                            break
-                        case "SAMPLE_ID":
-                            SampleIdentifier sample = SampleIdentifier.findByName(entry.value)
-                            entry.status = (sample != null) ? valid : invalid
-                            break
-                        case "CENTER_NAME":
-                            entry.status = invalid
-                            SeqCenter center = run.seqCenter
-                            if (center.dirName == entry.value.toLowerCase()) {
-                                entry.status = valid
-                            } else if (center.name == entry.value) {
-                                entry.status = valid
-                            }
-                            break
-                        case "SEQUENCING_TYPE":
-                            SeqType seqType = SeqType.findByName(entry.value)
-                            entry.status = (seqType != null) ? valid : invalid
-                            break
-                        case "LIBRARY_LAYOUT":
-                            SeqType seqType = SeqType.findByLibraryLayout(entry.value)
-                            entry.status = (seqType != null) ? valid : invalid
-                            break
-                    }
-                    if (entry.status == invalid) {
-                        log.debug("invalid md entry ${entry.key}\t${entry.value}")
+                    boolean isValid = validateMetaDataEntry(run, entry)
+                    if (!isValid) {
                         dataFile.metaDataValid = false
                         allValid = false
                     }
-                    entry.save(flush: true)
                 }
+                dataFile.save()
             }
         } finally {
             validateMetaDataLock.unlock()
         }
         run.save(flush: true)
         return allValid
+    }
+
+    private boolean validateMetaDataEntry(Run run, MetaDataEntry entry) {
+        MetaDataEntry.Status valid = MetaDataEntry.Status.VALID
+        MetaDataEntry.Status invalid = MetaDataEntry.Status.INVALID
+        switch(entry.key.name) {
+            case "RUN_ID":
+                entry.status = (run.name == entry.value) ? valid : invalid
+                break
+            case "SAMPLE_ID":
+                SampleIdentifier sample = SampleIdentifier.findByName(entry.value)
+                entry.status = (sample != null) ? valid : invalid
+                break
+            case "CENTER_NAME":
+                entry.status = invalid
+                SeqCenter center = run.seqCenter
+                if (center.dirName == entry.value.toLowerCase()) {
+                    entry.status = valid
+                } else if (center.name == entry.value) {
+                    entry.status = valid
+                }
+                break
+            case "SEQUENCING_TYPE":
+                SeqType seqType = SeqType.findByName(entry.value)
+                entry.status = (seqType != null) ? valid : invalid
+                break
+            case "LIBRARY_LAYOUT":
+                SeqType seqType = SeqType.findByLibraryLayout(entry.value)
+                entry.status = (seqType != null) ? valid : invalid
+                break
+        }
+        entry.save(flush: true)
+        return (entry.status == invalid)? false : true
     }
 
     /**

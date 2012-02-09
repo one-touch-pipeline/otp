@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.job.jobs.metaData
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
-import de.dkfz.tbi.otp.ngsdata.MetaDataService
+import de.dkfz.tbi.otp.ngsdata.MetaDataValidationService
 
 class ValidateMetadataJob extends AbstractEndStateAwareJobImpl {
 
@@ -11,12 +11,12 @@ class ValidateMetadataJob extends AbstractEndStateAwareJobImpl {
     * dependency injection of meta data service
     */
     @Autowired
-    MetaDataService metaDataService
+    MetaDataValidationService metaDataValidationService
 
     @Override
     public void execute() throws Exception {
         long runId = Long.parseLong(getProcessParameterValue())
-        if (metaDataService.validateMetadata(runId)) {
+        if (metaDataValidationService.validateMetadata(runId)) {
             succeed()
         } else {
             fail()
