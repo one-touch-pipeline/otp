@@ -10,64 +10,11 @@ class MetaDataService {
     // locks for operation that are not tread safe
     private final Lock loadMetaDataLock = new ReentrantLock()
 
-
     /**
      * Dependency injection of file type service
      */
     def fileTypeService
-
     static transactional = true
-
-    /**
-     *
-     * looks into directory pointed by mdPath of a Run object
-     * and register files that could be meta-data files
-     *
-     * @param runId - database id or the Run object
-     */
-    void registerInputFiles(long runId) {
-
-        Run run = Run.get(runId)
-        log.debug("registering run ${run.name} from ${run.seqCenter}")
-
-        String runDir = run.mdPath + "/run" + run.name
-        File dir = new File(runDir)
-        if (!dir.canRead() || !dir.isDirectory()) {
-            throw new DirectoryNotReadableException(dir)
-        }
-        List<String> fileNames = dir.list()
-        FileType fileType = FileType.findByType(FileType.Type.METADATA)
-        DataFile dataFile
-        fileNames.each { String fileName ->
-            if (fileName.contains("wrong")) {
-                return
-            }
-            if (fileName.contains("fastq") || fileName.contains("align")) {
-                if (fileRegistered(run, fileName)) {
-                    throw new MetaDataFileDuplicationException(run.name, fileName)
-                }
-                dataFile = new DataFile(
-                    pathName: runDir,
-                    fileName: fileName
-                )
-                dataFile.run = run
-                dataFile.fileType = fileType
-                dataFile.save(flush: true)
-            }
-        }
-        fileType.save(flush: true)
-    }
-
-    /**
-     * Check if given meta data file was already registered
-     * @param run
-     * @param fileName
-     * @return
-     */
-    private boolean fileRegistered(Run run, String fileName) {
-        DataFile file = DataFile.findByRunAndFileName(run, fileName)
-        return (boolean)file
-    }
 
     /**
      *
@@ -410,71 +357,6 @@ class MetaDataService {
     }
 
     /**
-     * Checks if values of MetaDataEntry table are correct
-     *
-     * the following keys are checked
-     * RunID, sample identifier, sequencing center
-     * sequencing type and library layout
-     *
-     * @param runId
-     */
-    boolean validateMetadata(long runId) {
-        Run run = Run.get(runId)
-        boolean allValid = true
-        validateMetaDataLock.lock()
-        try {
-            DataFile.findAllByRun(run).each { DataFile dataFile ->
-                dataFile.metaDataValid = true
-                MetaDataEntry.findAllByDataFile(dataFile).each { MetaDataEntry entry ->
-                    boolean isValid = validateMetaDataEntry(run, entry)
-                    if (!isValid) {
-                        dataFile.metaDataValid = false
-                        allValid = false
-                    }
-                }
-                dataFile.save()
-            }
-        } finally {
-            validateMetaDataLock.unlock()
-        }
-        run.save(flush: true)
-        return allValid
-    }
-
-    private boolean validateMetaDataEntry(Run run, MetaDataEntry entry) {
-        MetaDataEntry.Status valid = MetaDataEntry.Status.VALID
-        MetaDataEntry.Status invalid = MetaDataEntry.Status.INVALID
-        switch(entry.key.name) {
-            case "RUN_ID":
-                entry.status = (run.name == entry.value) ? valid : invalid
-                break
-            case "SAMPLE_ID":
-                SampleIdentifier sample = SampleIdentifier.findByName(entry.value)
-                entry.status = (sample != null) ? valid : invalid
-                break
-            case "CENTER_NAME":
-                entry.status = invalid
-                SeqCenter center = run.seqCenter
-                if (center.dirName == entry.value.toLowerCase()) {
-                    entry.status = valid
-                } else if (center.name == entry.value) {
-                    entry.status = valid
-                }
-                break
-            case "SEQUENCING_TYPE":
-                SeqType seqType = SeqType.findByName(entry.value)
-                entry.status = (seqType != null) ? valid : invalid
-                break
-            case "LIBRARY_LAYOUT":
-                SeqType seqType = SeqType.findByLibraryLayout(entry.value)
-                entry.status = (seqType != null) ? valid : invalid
-                break
-        }
-        entry.save(flush: true)
-        return (entry.status == invalid)? false : true
-    }
-
-    /**
      * Each sequence and alignment file belonging to a run is 
      * assigned to a project based on the Sample object.
      * @param runId
@@ -503,15 +385,13 @@ class MetaDataService {
         if (!dataFile.used) {
             return null
         }
-        if (dataFile.fileType.type == FileType.Type.METADATA) {
-            return null
-        }
         if (dataFile.fileType.type == FileType.Type.SEQUENCE) {
             return dataFile.seqTrack.sample.individual.project
         }
         if (dataFile.fileType.type == FileType.Type.ALIGNMENT) {
             return dataFile.alignmentLog.seqTrack.sample.individual.project
         }
+        return null
     }
 
     /**

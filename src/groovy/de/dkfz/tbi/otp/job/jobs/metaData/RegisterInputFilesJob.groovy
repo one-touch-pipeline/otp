@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.job.jobs.metaData
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
-import de.dkfz.tbi.otp.ngsdata.MetaDataService
+import de.dkfz.tbi.otp.ngsdata.MetaDataRegistrationService
 
 class RegisterInputFilesJob extends AbstractJobImpl {
 
@@ -11,11 +11,11 @@ class RegisterInputFilesJob extends AbstractJobImpl {
      * dependency injection of meta data service
      */
     @Autowired
-    MetaDataService metaDataService
+    MetaDataRegistrationService metaDataRegistrationService
 
     @Override
     public void execute() throws Exception {
         long runId = Long.parseLong(getProcessParameterValue())
-        metaDataService.registerInputFiles(runId)
+        metaDataRegistrationService.registerInputFiles(runId)
     }
 }
