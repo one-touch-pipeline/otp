@@ -29,7 +29,7 @@ class MetaDataValidationService {
                        allValid = false
                    }
                }
-               dataFile.save()
+               dataFile.save(flush: true)
            }
        } finally {
            validateMetaDataLock.unlock()
@@ -38,36 +38,49 @@ class MetaDataValidationService {
        return allValid
    }
 
-   private boolean validateMetaDataEntry(Run run, MetaDataEntry entry) {
-       MetaDataEntry.Status valid = MetaDataEntry.Status.VALID
-       MetaDataEntry.Status invalid = MetaDataEntry.Status.INVALID
-       switch(entry.key.name) {
-           case "RUN_ID":
-               entry.status = (run.name == entry.value) ? valid : invalid
-               break
-           case "SAMPLE_ID":
-               SampleIdentifier sample = SampleIdentifier.findByName(entry.value)
-               entry.status = (sample != null) ? valid : invalid
-               break
-           case "CENTER_NAME":
-               entry.status = invalid
-               SeqCenter center = run.seqCenter
-               if (center.dirName == entry.value.toLowerCase()) {
-                   entry.status = valid
-               } else if (center.name == entry.value) {
-                   entry.status = valid
-               }
-               break
-           case "SEQUENCING_TYPE":
-               SeqType seqType = SeqType.findByName(entry.value)
-               entry.status = (seqType != null) ? valid : invalid
-               break
-           case "LIBRARY_LAYOUT":
-               SeqType seqType = SeqType.findByLibraryLayout(entry.value)
-               entry.status = (seqType != null) ? valid : invalid
-               break
-       }
-       entry.save(flush: true)
-       return (entry.status == invalid)? false : true
-   }
+    private boolean validateMetaDataEntry(Run run, MetaDataEntry entry) {
+        MetaDataEntry.Status valid = MetaDataEntry.Status.VALID
+        MetaDataEntry.Status invalid = MetaDataEntry.Status.INVALID
+        switch(entry.key.name) {
+            case "RUN_ID":
+                entry.status = (run.name == entry.value) ? valid : invalid
+                break
+            case "SAMPLE_ID":
+                SampleIdentifier sample = SampleIdentifier.findByName(entry.value)
+                entry.status = (sample != null) ? valid : invalid
+                break
+            case "CENTER_NAME":
+                entry.status = invalid
+                SeqCenter center = run.seqCenter
+                if (center.dirName == entry.value.toLowerCase()) {
+                    entry.status = valid
+                } else if (center.name == entry.value) {
+                    entry.status = valid
+                }
+                break
+            case "SEQUENCING_TYPE":
+                SeqType seqType = SeqType.findByName(entry.value)
+                entry.status = (seqType != null) ? valid : invalid
+                break
+            case "LIBRARY_LAYOUT":
+                SeqType seqType = SeqType.findByLibraryLayout(entry.value)
+                entry.status = (seqType != null) ? valid : invalid
+                break
+            case "INSERT_SIZE":
+                entry.status = (checkInsertSize(entry.value)) ? valid : invalid
+                break
+        }
+        entry.save(flush: true)
+        return (entry.status == invalid)? false : true
+    }
+
+    private boolean checkInsertSize(String value) {
+        if (value.isAllWhitespace()) {
+            return true
+        }
+        if (value.isInteger()) {
+            return true
+        }
+        return false
+    }
 }
