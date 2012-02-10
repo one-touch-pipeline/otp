@@ -326,6 +326,7 @@ AND entry.value = :value
                     log.debug(dataFile)
                     run.allFilesUsed = false
                 }
+                dataFile.save(flush: true)
             }
             if (dataFile.fileType.type == FileType.Type.ALIGNMENT) {
                 dataFile.used = (dataFile.alignmentLog != null)
@@ -333,8 +334,10 @@ AND entry.value = :value
                     log.debug(dataFile)
                     run.allFilesUsed = false
                 }
+                dataFile.save(flush: true)
             }
         }
+        run.save(flush: true)
         log.debug("All files used: ${run.allFilesUsed}\n")
     }
 

@@ -23,7 +23,7 @@ class MetaDataEntry {
      */
 
     enum Source {
-        MDFILE, SYSTEM
+        MDFILE, SYSTEM, MANUAL
     }
     Source source
 

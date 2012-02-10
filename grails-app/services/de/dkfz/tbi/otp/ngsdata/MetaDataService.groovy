@@ -6,76 +6,15 @@ import java.util.concurrent.locks.ReentrantLock
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 
 class MetaDataService {
-    /**
-     * Loading Meta data is not thread save - use a lock for it
-     */
+
+    // locks for operation that are not tread safe
     private final Lock loadMetaDataLock = new ReentrantLock()
-    /**
-     * Validating Meta Data is not thread save = use a lock for it
-     */
-    private final Lock validateMetaDataLock = new ReentrantLock()
 
     /**
      * Dependency injection of file type service
      */
     def fileTypeService
-
     static transactional = true
-
-    /**
-     *
-     * looks into directory pointed by mdPath of a Run object
-     * and register files that could be meta-data files
-     *
-     * @param runId - database id or the Run object
-     */
-    void registerInputFiles(long runId) {
-
-        Run run = Run.get(runId)
-        //if (!run) {
-        //    return
-        //}
-
-        log.debug("registering run ${run.name} from ${run.seqCenter}")
-
-        String runDir = run.mdPath + "/run" + run.name
-        File dir = new File(runDir)
-        if (!dir.canRead() || !dir.isDirectory()) {
-            throw new DirectoryNotReadableException(dir.name)
-        }
-        List<String> fileNames = dir.list()
-        FileType fileType = FileType.findByType(FileType.Type.METADATA)
-        DataFile dataFile
-        fileNames.each { String fileName ->
-            if (fileName.contains("wrong")) {
-                return
-            }
-            if (fileName.contains("fastq") || fileName.contains("align")) {
-                if (fileRegistered(run, fileName)) {
-                    throw new MetaDataFileDuplicationException(run.name, fileName)
-                }
-                dataFile = new DataFile(
-                    pathName: runDir,
-                    fileName: fileName
-                )
-                dataFile.run = run
-                dataFile.fileType = fileType
-                dataFile.save(flush: true)
-            }
-        }
-        fileType.save(flush: true)
-    }
-
-    /**
-     * Check if given meta data file was already registered
-     * @param run
-     * @param fileName
-     * @return
-     */
-    private boolean fileRegistered(Run run, String fileName) {
-        DataFile file = DataFile.findByRunAndFileName(run, fileName)
-        return (boolean)file
-    }
 
     /**
      *
@@ -86,57 +25,17 @@ class MetaDataService {
      */
     void loadMetaData(long runId) {
         Run run = Run.get(runId)
-
         log.debug("loading metadata for run ${run.name}")
         // loading metadata is not thread save - use a lock
         loadMetaDataLock.lock()
         try {
             List<DataFile> listOfMDFiles = DataFile.findAllByRun(run)
-            DataFile dataFile
             listOfMDFiles.each { DataFile file ->
-                if (file.fileType.type != FileType.Type.METADATA || file.used) {
+                if (!isNewMetaDataFile(file)) {
                     return
                 }
                 log.debug("\tfound md souce file ${file.fileName}")
-                // hint to determine file type
-                FileType.Type type = FileType.Type.UNKNOWN
-                if (file.fileName.contains("fastq")) {
-                    type = FileType.Type.SEQUENCE
-                } else if (file.fileName.contains("align")) {
-                    type = FileType.Type.ALIGNMENT
-                }
-                File mdFile = new File(file.pathName + File.separatorChar + file.fileName)
-                if (!mdFile.canRead()) {
-                    throw new FileNotReadableException(mdFile.path)
-                }
-                List<String> tokens
-                List<String> values
-                List<MetaDataKey> keys
-                mdFile.eachLine { line, no ->
-                    // line numbering starts at 1 and not at 0
-                    if (no == 1) {
-                        // parse the header
-                        tokens = tokenize(line, '\t')
-                        keys = getKeysFromTokens(tokens)
-                    } else {
-                        // match values with the header
-                        // new entry in MetaData
-                        dataFile = new DataFile() // set-up later
-                        dataFile.run = run
-                        dataFile.save(flush: true)
-                        values = tokenize(line, '\t')
-                        addMetaDataEntries(dataFile, keys, values)
-                        // fill-up important fields
-                        assignFileName(dataFile)
-                        fillVbpFileName(dataFile)
-                        fillMD5Sum(dataFile)
-                        assignFileType(dataFile, type)
-                        addKnownMissingMetaData(run, dataFile)
-                        checkIfWithdrawn(dataFile)
-                    }
-                }
-                file.used = true
-                file.save(flush: true)
+                processMetaDataFile(file)
                 run.save(flush: true)
             }
         } finally {
@@ -144,7 +43,61 @@ class MetaDataService {
         }
     }
 
+    private boolean isNewMetaDataFile(DataFile file) {
+        return (file.fileType.type == FileType.Type.METADATA && !file.used)
+    }
 
+    private void processMetaDataFile(DataFile file) {
+        FileType.Type type = getTypeInMetaDataFile(file.fileName)
+        File mdFile = openTextFile(file)
+        List<String> tokens
+        List<String> values
+        List<MetaDataKey> keys
+        DataFile dataFile
+        mdFile.eachLine { line, no ->
+            // line numbering starts at 1 and not at 0
+            if (no == 1) {
+                // parse the header
+                tokens = tokenize(line, '\t')
+                keys = getKeysFromTokens(tokens)
+            } else {
+                // match values with the header
+                // new entry in MetaData
+                dataFile = new DataFile() // set-up later
+                dataFile.run = file.run
+                dataFile.save(flush: true)
+                values = tokenize(line, '\t')
+                addMetaDataEntries(dataFile, keys, values)
+                // fill-up important fields
+                assignFileName(dataFile)
+                fillVbpFileName(dataFile)
+                fillMD5Sum(dataFile)
+                assignFileType(dataFile, type)
+                addKnownMissingMetaData(file.run, dataFile)
+                checkIfWithdrawn(dataFile)
+            }
+        }
+        file.used = true
+        file.save(flush: true)
+    }
+
+    private FileType.Type getTypeInMetaDataFile(String fileName) { 
+        FileType.Type type = FileType.Type.UNKNOWN
+        if (fileName.contains("fastq")) {
+            type = FileType.Type.SEQUENCE
+        } else if (fileName.contains("align")) {
+            type = FileType.Type.ALIGNMENT
+        }
+        return type
+    }
+
+    private File openTextFile(DataFile file) {
+        File mdFile = new File(file.pathName + File.separatorChar + file.fileName)
+        if (!mdFile.canRead()) {
+            throw new FileNotReadableException(mdFile.path)
+        }
+        return mdFile
+    }
 
     /**
      * This method tokenizes a string
@@ -255,21 +208,38 @@ class MetaDataService {
      * @return
      */
     private void fillVbpFileName(DataFile dataFile) {
-        if (dataFile.run.seqTech.name.contains("illumina") &&
-                dataFile.fileName.contains("fastq.gz")) {
+        if (needsVBPNameChange(dataFile)) {
             String lane = getMetaDataEntry(dataFile, "LANE_NO")
-            String readId = "0"
-            if (dataFile.fileName.contains("read1")) {
-                readId = "1"
-            } else if (dataFile.fileName.contains("read2")) {
-                readId = "2"
-            }
+            String readId = readStringFormFileName(dataFile.fileName)
             String name =  "s_" + lane + "_" + readId + "_sequence.txt.gz"
             dataFile.vbpFileName = name
             log.debug("${dataFile.fileName} ${dataFile.vbpFileName}")
         } else {
             dataFile.vbpFileName = dataFile.fileName
         }
+    }
+
+    private boolean needsVBPNameChange(DataFile dataFile) {
+        if (!dataFile.run.seqTech.name.contains("illumina")) {
+            return false
+        }
+        if (!dataFile.fileName.contains("fastq.gz")) {
+            return false
+        }
+        if (!dataFile.fileName.contains("read")) {
+            return false
+        }
+        return true
+    }
+ 
+    private String readStringFormFileName(String fileName) {
+        String readId = "0"
+        if (fileName.contains("read1")) {
+            readId = "1"
+        } else if (fileName.contains("read2")) {
+            readId = "2"
+        }
+        return readId
     }
 
     /**
@@ -387,138 +357,6 @@ class MetaDataService {
     }
 
     /**
-     * Checks if values of MetaDataEntry table are correct
-     *
-     * the following keys are checked
-     * RunID, sample identifier, sequencing center
-     * sequencing type and library layout
-     *
-     * @param runId
-     */
-    boolean validateMetadata(long runId) {
-        Run run = Run.get(runId)
-        boolean allValid = true
-        validateMetaDataLock.lock()
-        try {
-            DataFile.findAllByRun(run).each { DataFile dataFile ->
-                dataFile.metaDataValid = true
-                MetaDataEntry.findAllByDataFile(dataFile).each { MetaDataEntry entry ->
-                    MetaDataEntry.Status valid = MetaDataEntry.Status.VALID
-                    MetaDataEntry.Status invalid = MetaDataEntry.Status.INVALID
-                    switch(entry.key.name) {
-                        case "RUN_ID":
-                            entry.status = (run.name == entry.value) ? valid : invalid
-                            break
-                        case "SAMPLE_ID":
-                            SampleIdentifier sample = SampleIdentifier.findByName(entry.value)
-                            entry.status = (sample != null) ? valid : invalid
-                            break
-                        case "CENTER_NAME":
-                            entry.status = invalid
-                            SeqCenter center = run.seqCenter
-                            if (center.dirName == entry.value.toLowerCase()) {
-                                entry.status = valid
-                            } else if (center.name == entry.value) {
-                                entry.status = valid
-                            }
-                            break
-                        case "SEQUENCING_TYPE":
-                            SeqType seqType = SeqType.findByName(entry.value)
-                            entry.status = (seqType != null) ? valid : invalid
-                            break
-                        case "LIBRARY_LAYOUT":
-                            SeqType seqType = SeqType.findByLibraryLayout(entry.value)
-                            entry.status = (seqType != null) ? valid : invalid
-                            break
-                    }
-                    if (entry.status == invalid) {
-                        log.debug("invalid md entry ${entry.key}\t${entry.value}")
-                        dataFile.metaDataValid = false
-                        allValid = false
-                    }
-                    entry.save(flush: true)
-                }
-            }
-        } finally {
-            validateMetaDataLock.unlock()
-        }
-        run.save(flush: true)
-        return allValid
-    }
-
-    /**
-     * This method tries to assign execution data for a run
-     *
-     * this method knows different standards of encoding data
-     * in meta-data. If there is no MetaDataEntry with "RUN_DATE"
-     * key, the run date is build from run name. The method
-     * knows Solid and Illumina run naming standards.
-     *
-     * @param runId - database ID of Run object
-     */
-    void buildExecutionDate(long runId) {
-        Run run = Run.get(runId)
-        Date exDate = null
-        boolean consistant = true
-        DataFile.findAllByRun(run).each { DataFile dataFile ->
-            // TODO: optimize
-            MetaDataEntry entry = MetaDataEntry.findAllByDataFile(dataFile).find { it.key =="RUN_DATE" }
-            if (!entry) {
-                return
-            }
-            Date date
-            SimpleDateFormat simpleDateFormat
-            try {
-                // best effort to interpret date
-                // TODO: magic numbers are magic
-                if (entry.value.size() == 6) {
-                    simpleDateFormat = new SimpleDateFormat("yyMMdd")
-                    date = simpleDateFormat.parse(entry.value)
-                } else if (entry.value.size() == 10) {
-                    simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
-                    date = simpleDateFormat.parse(entry.value)
-                }
-            } catch (Exception e) {
-                // no exception catching, 
-                // if parsing fails, (date == null)
-            }
-            if (!exDate) {
-                exDate = date
-            }
-            if (exDate && !exDate.equals(date)) {
-                consistant = false
-            }
-            dataFile.dateExecuted = date
-        }
-        // fill if all files have the same executions date
-        if (exDate && consistant) {
-            run.dateExecuted = exDate
-        }
-        // date from the runName
-        if (!run.dateExecuted) {
-            SimpleDateFormat simpleDateFormat
-            if (run.seqTech.name == "illumina") {
-                try {
-                    String subname = run.name.substring(0, 6)
-                    simpleDateFormat = new SimpleDateFormat("yyMMdd")
-                    run.dateExecuted = simpleDateFormat.parse(subname)
-                } catch (Exception e) {
-                    // TODO: Appropriate exception
-                }
-            } else if (run.seqTech.name == "solid") {
-                try {
-                    String subname = run.name.substring(10, 18)
-                    simpleDateFormat = new SimpleDateFormat("yyyyMMdd")
-                    run.dateExecuted = simpleDateFormat.parse(subname)
-                } catch (Exception e) {
-                    // TODO: Appropriate exception
-                }
-            }
-        }
-        run.save(flush: true)
-    }
-
-    /**
      * Each sequence and alignment file belonging to a run is 
      * assigned to a project based on the Sample object.
      * @param runId
@@ -547,15 +385,13 @@ class MetaDataService {
         if (!dataFile.used) {
             return null
         }
-        if (dataFile.fileType.type == FileType.Type.METADATA) {
-            return null
-        }
         if (dataFile.fileType.type == FileType.Type.SEQUENCE) {
             return dataFile.seqTrack.sample.individual.project
         }
         if (dataFile.fileType.type == FileType.Type.ALIGNMENT) {
             return dataFile.alignmentLog.seqTrack.sample.individual.project
         }
+        return null
     }
 
     /**
