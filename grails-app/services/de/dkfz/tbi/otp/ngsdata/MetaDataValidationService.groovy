@@ -15,29 +15,35 @@ class MetaDataValidationService {
     *
     * @param runId
     */
-   boolean validateMetadata(long runId) {
-       Run run = Run.get(runId)
-       boolean allValid = true
-       validateMetaDataLock.lock()
-       try {
-           DataFile.findAllByRun(run).each { DataFile dataFile ->
-               dataFile.metaDataValid = true
-               MetaDataEntry.findAllByDataFile(dataFile).each { MetaDataEntry entry ->
-                   boolean isValid = validateMetaDataEntry(run, entry)
-                   if (!isValid) {
-                       dataFile.metaDataValid = false
-                       allValid = false
+    boolean validateMetadata(long runId) {
+        Run run = Run.get(runId)
+        boolean allValid = true
+        validateMetaDataLock.lock()
+        try {
+            DataFile.findAllByRun(run).each { DataFile dataFile ->
+                dataFile.metaDataValid = true
+                MetaDataEntry.findAllByDataFile(dataFile).each { MetaDataEntry entry ->
+                    boolean isValid = validateMetaDataEntry(run, entry)
+                    if (!isValid) {
+                        dataFile.metaDataValid = false
+                        allValid = false
                    }
-               }
-               dataFile.save(flush: true)
-           }
-       } finally {
-           validateMetaDataLock.unlock()
-       }
-       run.save(flush: true)
-       return allValid
-   }
+                }
+                dataFile.save(flush: true)
+            }
+        } finally {
+            validateMetaDataLock.unlock()
+        }
+        run.save(flush: true)
+        return allValid
+    }
 
+    /**
+     * Validate individual MetaDataEntry
+     * @param run
+     * @param entry
+     * @return
+     */
     private boolean validateMetaDataEntry(Run run, MetaDataEntry entry) {
         MetaDataEntry.Status valid = MetaDataEntry.Status.VALID
         MetaDataEntry.Status invalid = MetaDataEntry.Status.INVALID
@@ -67,11 +73,24 @@ class MetaDataValidationService {
                 entry.status = (seqType != null) ? valid : invalid
                 break
             case "INSERT_SIZE":
-                entry.status = (checkInsertSize(entry.value)) ? valid : invalid
+                entry.status = (checkAndCorrectInsertSize(entry)) ? valid : invalid
                 break
         }
         entry.save(flush: true)
         return (entry.status == invalid)? false : true
+    }
+
+    /**
+     * Best effort to interpret insdert_size if it is incorrect try to recover
+     * by removing trailing 'bp'
+     * @param entry
+     * @return
+     */
+    private boolean checkAndCorrectInsertSize(MetaDataEntry entry) {
+        if (checkInsertSize(entry.value)) {
+            return true
+        }
+        return tryToRecoverInsertSize(entry)
     }
 
     private boolean checkInsertSize(String value) {
@@ -82,5 +101,29 @@ class MetaDataValidationService {
             return true
         }
         return false
+    }
+
+    private boolean tryToRecoverInsertSize(MetaDataEntry entry) {
+        String substring = entry.value.substring(0, entry.value.indexOf("b"))
+        if (substring.isInteger()) {
+            changeInsertSizeValue(entry, substring)
+            return true
+        }
+        return false
+    }
+
+    private void changeInsertSizeValue(MetaDataEntry entry, substring) {
+        ChangeLog changeLog = new ChangeLog(
+            rowId : entry.id,
+            tableName : "MetaDataEntry",
+            columnName : "value",
+            fromValue : entry.value,
+            toValue : substring,
+            comment : "removing trailing 'bp'",
+            source : ChangeLog.Source.SYSTEM
+        )
+        changeLog.save(flush: true)
+        entry.value = substring
+        entry.source = MetaDataEntry.Source.SYSTEM
     }
 }
