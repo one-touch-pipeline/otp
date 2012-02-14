@@ -34,7 +34,7 @@ grails.project.dependency.resolution = {
 
         // runtime 'mysql:mysql-connector-java:5.1.16'
         //git
-        compile 'org.eclipse.jgit:org.eclipse.jgit:1.0.0.201106090707-r'
+        compile 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
         runtime "commons-jexl:commons-jexl:1.1"
         // XMPP
         compile "jivesoftware:smack:3.1.0"
