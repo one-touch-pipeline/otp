@@ -15,10 +15,12 @@ grails.project.dependency.resolution = {
 
     repositories {
         inherits true // Whether to inherit repository definitions from plugins
-        grailsPlugins()
-        grailsHome()
-        grailsCentral()
-        mavenCentral()
+        mavenRepo "$ARTIFACTORY_URL"
+        grailsRepo "$ARTIFACTORY_URL/svn.codehaus.org_grails-plugins"
+        //grailsPlugins()
+        //grailsHome()
+        //grailsCentral()
+        //mavenCentral()
 
         // uncomment these to enable remote dependency resolution from public Maven repositories
         //mavenCentral()
@@ -27,7 +29,6 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
-        mavenRepo "http://download.eclipse.org/jgit/maven"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
