@@ -14,5 +14,10 @@ class ChangeLog {
     }
     Source source
     static constraints = {
+        tableName()
+        columnName()
+        fromValue()
+        toValue()
+        comment()
     }
 }
