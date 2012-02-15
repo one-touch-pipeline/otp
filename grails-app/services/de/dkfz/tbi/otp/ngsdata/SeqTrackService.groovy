@@ -268,8 +268,8 @@ AND entry.value = :value
      * @return manipulated seqTrack
      */
     private SeqTrack fillReadsForSeqTrack(SeqTrack seqTrack) {
-        if (seqTrack.seqPlatform.name != "illumina") {
-            log.debug("seqPlatform.name is not illumina, returning.")
+        if (seqTrack.seqPlatform.name != "Illumina") {
+            log.debug("seqPlatform.name is not Illumina, returning.")
             return
         }
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
