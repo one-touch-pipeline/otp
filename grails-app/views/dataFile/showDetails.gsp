@@ -106,7 +106,7 @@
        <tr>
             <td class="myKey">${metaDataEntry.key.name}</td>
             <td class="myValue"}">${metaDataEntry.value}</td>
-            <td>${metaDataEntry.status}</td>
+            <td class="${metaDataEntry.status}">${metaDataEntry.status}</td>
             <td>${metaDataEntry.source}</td>
        </tr>
     </g:each> 
