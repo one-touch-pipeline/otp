@@ -63,6 +63,8 @@ class RunDateParserService {
        } else if (entry.value.size() == 10) {
            date = parseDate("yyyy-MM-dd", entry.value)
        }
+       entry.status = (date == null)? MetaDataEntry.Status.INVALID : MetaDataEntry.Status.VALID
+       entry.save(flush: true)
        return date
    }
 
