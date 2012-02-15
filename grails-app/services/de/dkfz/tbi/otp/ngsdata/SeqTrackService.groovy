@@ -100,7 +100,7 @@ class SeqTrackService {
             run : run,
             sample : sample,
             seqType : seqType,
-            seqTech : run.seqTech,
+            seqPlatform : run.seqPlatform,
             laneId : lane,
             hasFinalBam : false,
             hasOriginalBam : false,
@@ -268,8 +268,8 @@ AND entry.value = :value
      * @return manipulated seqTrack
      */
     private SeqTrack fillReadsForSeqTrack(SeqTrack seqTrack) {
-        if (seqTrack.seqTech.name != "illumina") {
-            log.debug("seqTech.name is not illumina, returning.")
+        if (seqTrack.seqPlatform.name != "illumina") {
+            log.debug("seqPlatform.name is not illumina, returning.")
             return
         }
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)

@@ -48,7 +48,7 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqTech seqTech = new SeqTech(name: "testSolid")
+        SeqPlatform seqTech = new SeqPlatform(name: "testSolid")
         assert(seqTech.save())
         run.seqTech = seqTech
         assert(run.save())
@@ -95,7 +95,7 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqTech seqTech = new SeqTech(name: "testSolid")
+        SeqPlatform seqTech = new SeqPlatform(name: "testSolid")
         assert(seqTech.save())
         run.seqTech = seqTech
         assert(run.save())
@@ -150,7 +150,7 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run1.seqCenter = seqCenter
-        SeqTech seqTech = new SeqTech(name: "testSolid")
+        SeqPlatform seqTech = new SeqPlatform(name: "testSolid")
         assert(seqTech.save())
         run1.seqTech = seqTech
         assert(run1.save())
@@ -213,7 +213,7 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run1.seqCenter = seqCenter
-        SeqTech seqTech = new SeqTech(name: "testSolid")
+        SeqPlatform seqTech = new SeqPlatform(name: "testSolid")
         assert(seqTech.save())
         run1.seqTech = seqTech
         assert(run1.save())
@@ -286,15 +286,15 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         new File(tmpPath + "/seqTypeDir4" + "/seqCenterDir4" + "/runtestRun4").mkdir()
         new File(tmpPath + "/seqTypeDir5" + "/seqCenterDir5" + "/runtestRun5").mkdir()
         // the seqTechs
-        SeqTech seqTech1 = new SeqTech(name: "testSolid1")
+        SeqPlatform seqTech1 = new SeqPlatform(name: "testSolid1")
         assert(seqTech1.save())
-        SeqTech seqTech2 = new SeqTech(name: "testSolid2")
+        SeqPlatform seqTech2 = new SeqPlatform(name: "testSolid2")
         assert(seqTech2.save())
-        SeqTech seqTech3 = new SeqTech(name: "testSolid3")
+        SeqPlatform seqTech3 = new SeqPlatform(name: "testSolid3")
         assert(seqTech3.save())
-        SeqTech seqTech4 = new SeqTech(name: "testSolid4")
+        SeqPlatform seqTech4 = new SeqPlatform(name: "testSolid4")
         assert(seqTech4.save())
-        SeqTech seqTech5 = new SeqTech(name: "testSolid5")
+        SeqPlatform seqTech5 = new SeqPlatform(name: "testSolid5")
         assert(seqTech5.save())
         // the runs
         Run run1 = new Run(name: "testRun1", complete: false, seqCenter: seqCenter1, seqTech: seqTech1)

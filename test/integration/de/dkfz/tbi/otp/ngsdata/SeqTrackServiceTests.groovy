@@ -45,7 +45,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqTech seqTech = new SeqTech(name: "illumina")
+        SeqPlatform seqTech = new SeqPlatform(name: "illumina")
         assert(seqTech.save())
         run.seqTech = seqTech
         assert(run.save())

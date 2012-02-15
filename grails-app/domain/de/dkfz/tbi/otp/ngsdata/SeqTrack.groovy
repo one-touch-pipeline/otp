@@ -12,13 +12,13 @@ class SeqTrack {
     Run run
     Sample sample
     SeqType seqType
-    SeqTech seqTech
+    SeqPlatform seqPlatform
 
     static belongsTo = [
         Run,
         Sample,
         SeqType,
-        SeqTech
+        SeqPlatform
     ]
 
     static constraints = {

@@ -12,7 +12,7 @@ class SeqScan {
     String seqCenters = ""
     String insertSize = ""
     Sample sample
-    SeqTech seqTech
+    SeqPlatform seqPlatform
     SeqType seqType
 
     // quality control
@@ -24,7 +24,7 @@ class SeqScan {
     static belongsTo = [
         sample : Sample,
         seqType : SeqType,
-        seqTech : SeqTech
+        seqPlatform : SeqPlatform
     ]
 
     static constraints = {
