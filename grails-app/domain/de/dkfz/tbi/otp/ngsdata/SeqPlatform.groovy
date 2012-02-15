@@ -5,7 +5,7 @@ class SeqPlatform {
     String name   // eg. solid, illumina
     String model
 
-    static constraints = { 
+    static constraints = {
         name(blank: false)
         model(nullable: true)
     }
