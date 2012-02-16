@@ -100,7 +100,7 @@ class LsdfFilesService {
         String path =
                 basePath + file?.project?.dirName + "/sequencing/" +
                 seqTypeDir + "/" + file.run.seqCenter?.dirName +
-                "/run" + file.run?.name + "/" + file?.prvFilePath + "/" +
+                "/run" + file.run?.name + "/" + file?.pathName + "/" +
                 file?.fileName
         return path
     }

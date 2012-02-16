@@ -14,7 +14,7 @@ class DataFile {
     Date dateCreated = null        // when the object was created in db
 
     String vbpFilePath = ""        // viev by pid structure
-    String prvFilePath = ""        // path from run name to this file (used in solid)
+    //String prvFilePath = ""        // path from run name to this file (used in solid)
 
     boolean metaDataValid = true
     boolean fileWithdrawn = false
