@@ -33,7 +33,7 @@
        </tr>
        <tr> 
             <td class="myKey">technology platform</td>
-            <td class="myValue">${scan.seqTech}</td>
+            <td class="myValue">${scan.seqPlatform}</td>
        </tr>
        <tr>
             <td class="myKey">date</td>
