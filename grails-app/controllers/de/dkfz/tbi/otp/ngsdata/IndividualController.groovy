@@ -36,10 +36,16 @@ class IndividualController {
         List<String> mergedBams =
                 mergingService.printAllMergedBamForIndividual(ind, seqTypes)
 
-        int prevId = (id > 1)? id-1 : 1
-        int nextId = id+1
+        int prevId = findId(ind, -1)
+        int nextId = findId(ind, 1)
 
         [ind: ind, seqTypes: seqTypes, seqScans: seqScans, mergedBams: mergedBams,
                     prevId: prevId, nextId: nextId]
+    }
+
+    private int findId(Individual ind, int delta) {
+        int pid = ind.mockPid as int
+        String newMockPid = String.format("%d", (pid+delta))
+        return Individual.findByMockPid(newMockPid).id
     }
 }
