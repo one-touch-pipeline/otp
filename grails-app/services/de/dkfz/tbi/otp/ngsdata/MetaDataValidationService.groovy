@@ -65,8 +65,8 @@ class MetaDataValidationService {
                 }
                 break
             case "SEQUENCING_TYPE":
-                SeqType seqType = SeqType.findByName(entry.value)
-                entry.status = (seqType != null) ? valid : invalid
+                boolean status = checkAndCorrectSequencingType(entry)
+                entry.status = (status) ? valid : invalid
                 break
             case "LIBRARY_LAYOUT":
                 SeqType seqType = SeqType.findByLibraryLayout(entry.value)
@@ -113,17 +113,47 @@ class MetaDataValidationService {
     }
 
     private void changeInsertSizeValue(MetaDataEntry entry, substring) {
-        ChangeLog changeLog = new ChangeLog(
+        ChangeLog changeLog = buildChangeLog(
             rowId : entry.id,
-            tableName : "MetaDataEntry",
-            columnName : "value",
-            fromValue : entry.value,
-            toValue : substring,
+            from : entry.value,
+            to : substring,
             comment : "removing trailing 'bp'",
-            source : ChangeLog.Source.SYSTEM
         )
         changeLog.save(flush: true)
         entry.value = substring
         entry.source = MetaDataEntry.Source.SYSTEM
+    }
+
+    private boolean checkAndCorrectSequencingType(MetaDataEntry entry) {
+        SeqType seqType = SeqType.findByName(entry.value)
+        if (seqType != null) {
+            return true
+        }
+        seqType = SeqType.findByDirName(entry.value)
+        if(seqType != null) {
+            ChangeLog changeLog = buildChangeLog(
+                rowId : entry.id,
+                from : entry.value,
+                to : seqType.name,
+                comment : "seqType recogniozed by directory name",
+            )
+            changeLog.save(flush: true)
+            entry.value = seqType.name
+            entry.source = MetaDataEntry.Source.SYSTEM
+            entry.save()
+        }
+    }
+
+    private ChangeLog buildChangeLog(long rowId, String from, String to, String comment) {
+        ChangeLog changeLog = new ChangeLog(
+            rowId : rowId,
+            tableName : "MetaDataEntry",
+            columnName : "value",
+            fromValue : from,
+            toValue : to,
+            comment : comment,
+            source : ChangeLog.Source.SYSTEM
+        )
+        return changeLog
     }
 }
