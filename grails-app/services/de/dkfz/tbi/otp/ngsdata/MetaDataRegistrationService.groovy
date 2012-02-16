@@ -20,7 +20,7 @@ class MetaDataRegistrationService {
        File dir = getMetaDataDirectory(run)
        List<String> fileNames = dir.list()
        fileNames.each { String fileName ->
-           if (fileName.contains("wrong")) {
+           if (fileBlacklisted(fileName)) {
                return
            }
            if (fileName.contains("fastq") || fileName.contains("align")) {
@@ -37,9 +37,19 @@ class MetaDataRegistrationService {
            }
        }
        fileType.save(flush: true)
-   }
+    }
 
-   private File getMetaDataDirectory(Run run) {
+    private boolean fileBlacklisted(String fileName) {
+        String[] blacklist = ["wrong", "old"]
+        for(String name in blacklist) {
+            if (fileName.contains(name)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    private File getMetaDataDirectory(Run run) {
        List<String> separators = ["/run", "/"]
        for(String separator in separators) {
            String runDir = run.mdPath + separator + run.name
@@ -51,12 +61,6 @@ class MetaDataRegistrationService {
        throw new DirectoryNotReadableException(run.mdPath)
    }
 
-   /**
-    * Check if given meta data file was already registered
-    * @param run
-    * @param fileName
-    * @return
-    */
    private boolean isFileRegistered(Run run, String fileName) {
        DataFile file = DataFile.findByRunAndFileName(run, fileName)
        return (boolean)file
