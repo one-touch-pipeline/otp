@@ -76,10 +76,10 @@ class RunDateParserService {
     */
    private Date getDateFromRunName(Run run) {
        Date date = null
-       if (run.seqTech.name == "Illumina") {
+       if (run.seqPlatform.name == "Illumina") {
            String subname = run.name.substring(0, 6)
            date = parseDate("yyMMdd", subname)
-       } else if (run.seqTech.name == "SOLiD") {
+       } else if (run.seqPlatform.name == "SOLiD") {
            String subname = run.name.substring(10, 18)
            date = parseDate("yyyyMMdd", subname)
        }
