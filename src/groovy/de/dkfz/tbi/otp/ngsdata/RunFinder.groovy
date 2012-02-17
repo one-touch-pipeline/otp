@@ -31,6 +31,7 @@ class RunFinder {
         String dirPath = baseDir + "/" + seqType
         File dir = buildDirectory(dirPath)
         String[] seqCenterNames = dir.list()
+        println seqType
         for(String seqCenter in seqCenterNames) {
             if (validateSeqCenter(seqCenter)) {
                 analyzeSeqCenter(dirPath, seqCenter)
@@ -47,6 +48,7 @@ class RunFinder {
         String dirPath = baseDir + "/" + centerDir
         File dir = buildDirectory(dirPath)
         String[] runNames = dir.list()
+        println "\t" + centerDir
         for(String runDirName in runNames) {
             registerRun(dirPath, runDirName)
         }
