@@ -6,6 +6,8 @@ class MetaDataValidationService {
 
     private final Lock validateMetaDataLock = new ReentrantLock()
 
+    HashMap bugs = ["SBS": "WHOLE_GENOME_BISULFITE"]
+
     /**
     * Checks if values of MetaDataEntry table are correct
     *
@@ -114,10 +116,7 @@ class MetaDataValidationService {
 
     private void changeInsertSizeValue(MetaDataEntry entry, substring) {
         ChangeLog changeLog = buildChangeLog(
-            rowId : entry.id,
-            from : entry.value,
-            to : substring,
-            comment : "removing trailing 'bp'",
+            entry.id, entry.value, substring, "removing trailing 'bp'",
         )
         changeLog.save(flush: true)
         entry.value = substring
@@ -129,19 +128,44 @@ class MetaDataValidationService {
         if (seqType != null) {
             return true
         }
-        seqType = SeqType.findByDirName(entry.value)
+        if (tryDirNameBug(entry)) {
+            return true
+        }
+        if (tryHashMapBug(entry)) {
+            return true
+        }
+        return false
+    }
+
+    private boolean tryDirNameBug(MetaDataEntry entry) {
+        SeqType seqType = SeqType.findByDirName(entry.value)
         if(seqType != null) {
             ChangeLog changeLog = buildChangeLog(
-                rowId : entry.id,
-                from : entry.value,
-                to : seqType.name,
-                comment : "seqType recogniozed by directory name",
+                entry.id, entry.value, seqType.name, 
+                "seqType recogniozed by directory name"
             )
             changeLog.save(flush: true)
             entry.value = seqType.name
             entry.source = MetaDataEntry.Source.SYSTEM
             entry.save()
+            return true
         }
+        return false
+    }
+
+    private boolean tryHashMapBug(MetaDataEntry entry) {
+        String value = bugs[entry.value]
+        if (value != null) {
+            ChangeLog changeLog = buildChangeLog(
+                entry.id, entry.value, value, "fixing known bug"
+            )
+            changeLog.save(flush: true)
+            entry.value = value
+            entry.source = MetaDataEntry.Source.SYSTEM
+            entry.save()
+            return true
+        }
+        return false
     }
 
     private ChangeLog buildChangeLog(long rowId, String from, String to, String comment) {
