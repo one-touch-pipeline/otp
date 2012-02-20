@@ -48,9 +48,9 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqPlatform seqTech = new SeqPlatform(name: "testSolid")
-        assert(seqTech.save())
-        run.seqTech = seqTech
+        SeqPlatform seqPlatform = new SeqPlatform(name: "testSolid")
+        assert(seqPlatform.save())
+        run.seqPlatform = seqPlatform
         assert(run.save())
         // when no data file is associated it should always throw exception
         shouldFail(ProcessingException) { filesCompletenessService.checkInitialSequenceFiles(run) }
@@ -63,7 +63,7 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         assert(individual.save())
         sample.individual = individual
         assert(sample.save())
-        SeqTrack seqTrack = new SeqTrack(laneId: "testLaneId", pipelineVersion: "2", run: run, seqType: seqType, seqTech: seqTech, sample: sample)
+        SeqTrack seqTrack = new SeqTrack(laneId: "testLaneId", pipelineVersion: "2", run: run, seqType: seqType, seqPlatform: seqPlatform, sample: sample)
         assert(seqTrack.save())
         // one of the two file types leading to full check
         FileType fileType = new FileType(type: FileType.Type.ALIGNMENT)
@@ -95,9 +95,9 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqPlatform seqTech = new SeqPlatform(name: "testSolid")
-        assert(seqTech.save())
-        run.seqTech = seqTech
+        SeqPlatform seqPlatform = new SeqPlatform(name: "testSolid")
+        assert(seqPlatform.save())
+        run.seqPlatform = seqPlatform
         assert(run.save())
         // when no data file is associated it should always throw exception
         shouldFail(ProcessingException) { filesCompletenessService.checkFinalLocation(run) }
@@ -112,24 +112,24 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         assert(individual.save())
         sample.individual = individual
         assert(sample.save())
-        SeqTrack seqTrack1 = new SeqTrack(laneId: "testLaneId", pipelineVersion: "2", run: run, seqType: seqType1, seqTech: seqTech, sample: sample)
+        SeqTrack seqTrack1 = new SeqTrack(laneId: "testLaneId", pipelineVersion: "2", run: run, seqType: seqType1, seqPlatform: seqPlatform, sample: sample)
         assert(seqTrack1.save())
-        SeqTrack seqTrack2 = new SeqTrack(laneId: "testLaneId", pipelineVersion: "1", run: run, seqType: seqType2, seqTech: seqTech, sample: sample)
+        SeqTrack seqTrack2 = new SeqTrack(laneId: "testLaneId", pipelineVersion: "1", run: run, seqType: seqType2, seqPlatform: seqPlatform, sample: sample)
         assert(seqTrack2.save())
         // one of the two file types leading to full check
         FileType fileType = new FileType(type: FileType.Type.ALIGNMENT)
         assert(fileType.save())
         // three data files (of which two are associated with the run) to be able to loop over more than one data file
-        DataFile dataFile1 = new DataFile(fileName: "dataFile1", pathName: "testPath1", used: true, prvFilePath: "prvTestFilePath1", run: run, fileType: fileType, seqTrack: seqTrack1, project: project)
+        DataFile dataFile1 = new DataFile(fileName: "dataFile1", pathName: "testPath1", used: true, vbpFilePath: "testPath1", run: run, fileType: fileType, seqTrack: seqTrack1, project: project)
         assert(dataFile1.save())
-        DataFile dataFile2 = new DataFile(fileName: "dataFile2", pathName: "testPath2", used: true, prvFilePath: "prvTestFilePath2", run: run, fileType: fileType, seqTrack: seqTrack2, project: project)
+        DataFile dataFile2 = new DataFile(fileName: "dataFile2", pathName: "testPath2", used: true, vbpFilePath: "testPath2", run: run, fileType: fileType, seqTrack: seqTrack2, project: project)
         assert(dataFile2.save())
         // not used for the run due to run set to null
         DataFile dataFile3 = new DataFile(fileName: "dataFile3", pathName: "testPath3", run: null, fileType: fileType)
         assert(dataFile3.save())
         // the complete paths to be checked have to be created
-        String tmpPath1 = dataPath.absolutePath + "/" + project.dirName + "/sequencing/" + seqType1.dirName + "/" + seqCenter.dirName + "/run" + run.name + "/" + dataFile1.prvFilePath + "/" + dataFile1.fileName
-        String tmpPath2 = dataPath.absolutePath + "/" + project.dirName + "/sequencing/" + seqType2.dirName + "/" + seqCenter.dirName + "/run" + run.name + "/" + dataFile2.prvFilePath + "/" + dataFile2.fileName
+        String tmpPath1 = dataPath.absolutePath + "/" + project.dirName + "/sequencing/" + seqType1.dirName + "/" + seqCenter.dirName + "/run" + run.name + "/" + dataFile1.vbpFilePath + "/" + dataFile1.fileName
+        String tmpPath2 = dataPath.absolutePath + "/" + project.dirName + "/sequencing/" + seqType2.dirName + "/" + seqCenter.dirName + "/run" + run.name + "/" + dataFile2.vbpFilePath + "/" + dataFile2.fileName
         new File(tmpPath1).mkdirs()
         new File(tmpPath2).mkdirs()
         // fake dataPath normally read from configuration
@@ -150,9 +150,9 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run1.seqCenter = seqCenter
-        SeqPlatform seqTech = new SeqPlatform(name: "testSolid")
-        assert(seqTech.save())
-        run1.seqTech = seqTech
+        SeqPlatform seqPlatform = new SeqPlatform(name: "testSolid")
+        assert(seqPlatform.save())
+        run1.seqPlatform = seqPlatform
         assert(run1.save())
         // when no data files are associated it should always throw exception
         shouldFail(ProcessingException) { filesCompletenessService.checkViewByPid(run1) }
@@ -165,7 +165,7 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         assert(individual.save())
         sample.individual = individual
         assert(sample.save())
-        SeqTrack seqTrack1 = new SeqTrack(laneId: "testLaneId", pipelineVersion: "2", run: run1, seqType: seqType, seqTech: seqTech, sample: sample)
+        SeqTrack seqTrack1 = new SeqTrack(laneId: "testLaneId", pipelineVersion: "2", run: run1, seqType: seqType, seqPlatform: seqPlatform, sample: sample)
         assert(seqTrack1.save())
         FileType fileType = new FileType(type: FileType.Type.ALIGNMENT, vbpPath: "vbpTestPath")
         assert(fileType.save())
@@ -177,11 +177,11 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
             filesCompletenessService.checkViewByPid(run1)
         }
         // make second run with correct associations
-        Run run2 = new Run(name: "testRun2", complete: false, seqCenter: seqCenter, seqTech: seqTech)
+        Run run2 = new Run(name: "testRun2", complete: false, seqCenter: seqCenter, seqPlatform: seqPlatform)
         run2.dataPath = dataPath
         run2.mdPath = mdPath
         assert(run2.save())
-        SeqTrack seqTrack2 = new SeqTrack(laneId: "testLaneId", pipelineVersion: "2", run: run2, seqType: seqType, seqTech: seqTech, sample: sample)
+        SeqTrack seqTrack2 = new SeqTrack(laneId: "testLaneId", pipelineVersion: "2", run: run2, seqType: seqType, seqPlatform: seqPlatform, sample: sample)
         assert(seqTrack2.save())
         // two correct data files to be able to loop over more than one data file
         DataFile dataFile1 = new DataFile(fileName: "dataFile1", pathName: "testPath", used: true, vbpFileName: "vbpTestFileName", run: run2, fileType: fileType, seqTrack: seqTrack2, project: project)
@@ -213,9 +213,9 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run1.seqCenter = seqCenter
-        SeqPlatform seqTech = new SeqPlatform(name: "testSolid")
-        assert(seqTech.save())
-        run1.seqTech = seqTech
+        SeqPlatform seqPlatform = new SeqPlatform(name: "testSolid")
+        assert(seqPlatform.save())
+        run1.seqPlatform = seqPlatform
         assert(run1.save())
         // when no data files are associated it should always throw exception
         shouldFail(ProcessingException) {
@@ -286,34 +286,34 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         new File(tmpPath + "/seqTypeDir4" + "/seqCenterDir4" + "/runtestRun4").mkdir()
         new File(tmpPath + "/seqTypeDir5" + "/seqCenterDir5" + "/runtestRun5").mkdir()
         // the seqTechs
-        SeqPlatform seqTech1 = new SeqPlatform(name: "testSolid1")
-        assert(seqTech1.save())
-        SeqPlatform seqTech2 = new SeqPlatform(name: "testSolid2")
-        assert(seqTech2.save())
-        SeqPlatform seqTech3 = new SeqPlatform(name: "testSolid3")
-        assert(seqTech3.save())
-        SeqPlatform seqTech4 = new SeqPlatform(name: "testSolid4")
-        assert(seqTech4.save())
-        SeqPlatform seqTech5 = new SeqPlatform(name: "testSolid5")
-        assert(seqTech5.save())
+        SeqPlatform seqPlatform1 = new SeqPlatform(name: "testSolid1")
+        assert(seqPlatform1.save())
+        SeqPlatform seqPlatform2 = new SeqPlatform(name: "testSolid2")
+        assert(seqPlatform2.save())
+        SeqPlatform seqPlatform3 = new SeqPlatform(name: "testSolid3")
+        assert(seqPlatform3.save())
+        SeqPlatform seqPlatform4 = new SeqPlatform(name: "testSolid4")
+        assert(seqPlatform4.save())
+        SeqPlatform seqPlatform5 = new SeqPlatform(name: "testSolid5")
+        assert(seqPlatform5.save())
         // the runs
-        Run run1 = new Run(name: "testRun1", complete: false, seqCenter: seqCenter1, seqTech: seqTech1)
+        Run run1 = new Run(name: "testRun1", complete: false, seqCenter: seqCenter1, seqPlatform: seqPlatform1)
         run1.dataPath = dataPath
         run1.mdPath = mdPath
         assert(run1.save())
-        Run run2 = new Run(name: "testRun2", complete: false, seqCenter: seqCenter2, seqTech: seqTech2)
+        Run run2 = new Run(name: "testRun2", complete: false, seqCenter: seqCenter2, seqPlatform: seqPlatform2)
         run2.dataPath = dataPath
         run2.mdPath = mdPath
         assert(run2.save())
-        Run run3 = new Run(name: "testRun3", complete: false, seqCenter: seqCenter3, seqTech: seqTech3)
+        Run run3 = new Run(name: "testRun3", complete: false, seqCenter: seqCenter3, seqPlatform: seqPlatform3)
         run3.dataPath = dataPath
         run3.mdPath = mdPath
         assert(run3.save())
-        Run run4 = new Run(name: "testRun4", complete: false, seqCenter: seqCenter4, seqTech: seqTech4)
+        Run run4 = new Run(name: "testRun4", complete: false, seqCenter: seqCenter4, seqPlatform: seqPlatform4)
         run4.dataPath = dataPath
         run4.mdPath = mdPath
         assert(run4.save())
-        Run run5 = new Run(name: "testRun5", complete: false, seqCenter: seqCenter5, seqTech: seqTech5)
+        Run run5 = new Run(name: "testRun5", complete: false, seqCenter: seqCenter5, seqPlatform: seqPlatform5)
         run5.dataPath = dataPath
         run5.mdPath = mdPath
         assert(run5.save())
