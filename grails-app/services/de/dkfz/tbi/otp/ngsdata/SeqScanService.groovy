@@ -33,14 +33,14 @@ class SeqScanService {
         }
         // take parameters
         Sample sample = seqTrack.sample
-        SeqTech seqTech = seqTrack.seqTech
+        SeqPlatform seqPlatform = seqTrack.seqPlatform
         SeqType seqType = seqTrack.seqType
         // find all lanes
         def c = SeqTrack.createCriteria()
         def seqTracksToMerge = c.list {
             and {
                 eq("sample", sample)
-                eq("seqTech", seqTech)
+                eq("seqPlatform", seqPlatform)
                 eq("seqType", seqType)
             }
         }
@@ -50,7 +50,7 @@ class SeqScanService {
         def oldSeqScans = criteria.list {
             and {
                 eq("sample", sample)
-                eq("seqTech", seqTech)
+                eq("seqPlatform", seqPlatform)
                 eq("seqType", seqType)
             }
         }
@@ -63,7 +63,7 @@ class SeqScanService {
         SeqScan seqScan = new SeqScan(
                 alignmentParams : null,
                 sample: sample,
-                seqTech: seqTech,
+                seqPlatform: seqPlatform,
                 seqType: seqType
                 )
         seqScan.save(flush: true)
@@ -78,7 +78,7 @@ class SeqScanService {
 
         seqScan.save(flush: true)
         sample.save(flush: true)
-        seqTech.save(flush: true)
+        seqPlatform.save(flush: true)
         seqType.save(flush: true)
     }
 
@@ -92,13 +92,13 @@ class SeqScanService {
         // take parameters
         SeqTrack seqTrack = tracks.get(0)
         Sample sample = seqTrack.sample
-        SeqTech seqTech = seqTrack.seqTech
+        SeqPlatform seqPlatform = seqTrack.seqPlatform
         SeqType seqType = seqTrack.seqType
         // create new seqScan
         SeqScan seqScan = new SeqScan(
                 alignmentParams : alignParams,
                 sample: sample,
-                seqTech: seqTech,
+                seqPlatform: seqPlatform,
                 seqType: seqType
                 )
         seqScan.save(flush: true)
@@ -112,7 +112,7 @@ class SeqScanService {
 
         seqScan.save(flush: true)
         sample.save(flush: true)
-        seqTech.save(flush: true)
+        seqPlatform.save(flush: true)
         seqType.save(flush: true)
 
         return seqScan

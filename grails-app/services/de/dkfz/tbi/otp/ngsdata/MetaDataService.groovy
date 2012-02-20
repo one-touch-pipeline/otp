@@ -220,7 +220,7 @@ class MetaDataService {
     }
 
     private boolean needsVBPNameChange(DataFile dataFile) {
-        if (!dataFile.run.seqTech.name.contains("illumina")) {
+        if (!dataFile.run.seqPlatform.name.contains("Illumina")) {
             return false
         }
         if (!dataFile.fileName.contains("fastq.gz")) {

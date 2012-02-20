@@ -8,7 +8,6 @@ class DataFileController {
     def showDetails = {
 
         DataFile dataFile = DataFile.get(params.id)
-        println dataFile.project
         List<MetaDataEntry> entries = MetaDataEntry.findAllByDataFile(dataFile, [sort:"key.id"])
 
         List<String> keys = new Vector<String>()

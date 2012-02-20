@@ -616,6 +616,20 @@ td.false {
     text-indent: 25px;
 }
 
+td.VALID {
+    background-image: url(../images/status/green.png);
+    background-repeat: no-repeat; 
+    text-indent: 25px;
+}
+
+td.invalid {
+    background-image: url(../images/status/red.png);
+}
+
+td.unknown {
+    background-image: url(../images/status/blue.png);
+}
+
 
 
 th:hover, tr:hover {

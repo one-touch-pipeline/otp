@@ -48,7 +48,7 @@ class SeqScanServiceTests {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqTech seqTech = new SeqTech(name: "testSolid")
+        SeqPlatform seqTech = new SeqPlatform(name: "testSolid")
         assert(seqTech.save())
         run.seqTech = seqTech
         assert(run.save())
@@ -87,7 +87,7 @@ class SeqScanServiceTests {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqTech seqTech = new SeqTech(name: "testSolid")
+        SeqPlatform seqTech = new SeqPlatform(name: "testSolid")
         assert(seqTech.save())
         run.seqTech = seqTech
         assert(run.save())
@@ -126,7 +126,7 @@ class SeqScanServiceTests {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqTech seqTech = new SeqTech(name: "testSolid")
+        SeqPlatform seqTech = new SeqPlatform(name: "testSolid")
         assert(seqTech.save())
         run.seqTech = seqTech
         assert(run.save())
@@ -161,7 +161,7 @@ class SeqScanServiceTests {
         assert(sample.save())
         SeqType seqType = new SeqType(name: "testSeqType", libraryLayout: "testLibraryLayout", dirName: "testDir")
         assert(seqType.save())
-        SeqTech seqTech = new SeqTech(name: "testSolid")
+        SeqPlatform seqTech = new SeqPlatform(name: "testSolid")
         assert(seqTech.save())
         SeqScan seqScan = new SeqScan(sample: sample, seqType: seqType, seqCenters: "testCenters", insertSize: "7", nLanes: 4, nBasePairs: 9l, coverage: 8.8, state: SeqScan.State.PROCESSING, qcState: SeqScan.QCState.PASS, seqTech: seqTech)
         assert(seqScan.save())
@@ -181,7 +181,7 @@ class SeqScanServiceTests {
         assert(sample.save())
         SeqType seqType = new SeqType(name: "testSeqType", libraryLayout: "testLibraryLayout", dirName: "testDir")
         assert(seqType.save())
-        SeqTech seqTech = new SeqTech(name: "testSolid")
+        SeqPlatform seqTech = new SeqPlatform(name: "testSolid")
         assert(seqTech.save())
         SeqScan seqScan = new SeqScan(sample: sample, seqType: seqType, seqCenters: "testCenters", insertSize: "7", nLanes: 4, nBasePairs: 9l, coverage: 8.8, state: SeqScan.State.PROCESSING, qcState: SeqScan.QCState.PASS, seqTech: seqTech)
         assert(seqScan.save())

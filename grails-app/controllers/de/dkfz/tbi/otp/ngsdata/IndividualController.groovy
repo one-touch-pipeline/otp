@@ -36,10 +36,22 @@ class IndividualController {
         List<String> mergedBams =
                 mergingService.printAllMergedBamForIndividual(ind, seqTypes)
 
-        int prevId = (id > 1)? id-1 : 1
-        int nextId = id+1
+        int prevId = findPrevious(ind)
+        int nextId = findNext(ind)
 
         [ind: ind, seqTypes: seqTypes, seqScans: seqScans, mergedBams: mergedBams,
                     prevId: prevId, nextId: nextId]
+    }
+
+    private int findPrevious(Individual ind) {
+        List<Individual> inds =
+             Individual.findAllByIdLessThan(ind.id, [sort: "id", order: "desc", max: 1])
+        return (inds.size()>0) ? inds.get(0).id : ind.id
+    }
+
+    private int findNext(Individual ind) {
+        List<Individual> inds =
+            Individual.findAllByIdGreaterThan(ind.id, [sort: "id", order: "asc", max: 1])
+        return (inds.size()>0) ? inds.get(0).id : ind.id
     }
 }

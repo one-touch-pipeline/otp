@@ -17,12 +17,12 @@ class Run {
     boolean multipleSource           // for runs from a few projects
 
     SeqCenter seqCenter
-    SeqTech seqTech
+    SeqPlatform seqPlatform
 
     static belongsTo = [
         Project,
         SeqCenter,
-        SeqTech
+        SeqPlatform
     ]
 
     static constraints = {

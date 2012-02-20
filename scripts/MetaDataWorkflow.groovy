@@ -5,6 +5,7 @@ plan("loadMetaData") {
     job("registerInputFiles", "registerInputFilesJob")
     job("loadMetaData", "metaDataJob")
     job("validateMetadata", "validateMetadataJob")
+    job("validatePlatform", "validatePlatformJob")
     job("buildExecutionDate", "buildExecutionDateJob")
     job("buildSequenceTracks", "buildSequenceTracksJob")
     job("checkSequenceTracks", "checkSequenceTracksJob")

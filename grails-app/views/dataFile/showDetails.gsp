@@ -20,10 +20,10 @@
             <td class="myKey">file name</td>
             <td class="myValue">${dataFile.fileName}</td>
        </tr>
-       <g:if test="${!dataFile.prvFilePath.isAllWhitespace()}">
+       <g:if test="${!dataFile.pathName.isAllWhitespace()}">
        <tr>
             <td class="myKey">file path from run directory</td>
-            <td class="myValue">${dataFile.prvFilePath}</td>
+            <td class="myValue">${dataFile.pathName}</td>
        </tr>
        </g:if>
        <tr>
@@ -106,7 +106,7 @@
        <tr>
             <td class="myKey">${metaDataEntry.key.name}</td>
             <td class="myValue"}">${metaDataEntry.value}</td>
-            <td>${metaDataEntry.status}</td>
+            <td class="${metaDataEntry.status}">${metaDataEntry.status}</td>
             <td>${metaDataEntry.source}</td>
        </tr>
     </g:each> 

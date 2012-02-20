@@ -6,7 +6,7 @@ class ExpectedSequenceFile {
     int numberOfRepeats = 1       // default value
 
     static belongsTo = [
-        seqTech : SeqTech,
+        seqTech : SeqPlatform,
         seqType : SeqType
     ]
 

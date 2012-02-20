@@ -71,19 +71,15 @@ class SeqTrackService {
             "SAMPLE_ID",
             "SEQUENCING_TYPE",
             "LIBRARY_LAYOUT",
-            "PIPELINE_VERSION",
-            "READ_COUNT"
+            "PIPELINE_VERSION"
+            //"READ_COUNT"
         ]
         if (!laneDataFiles) {
             throw new ProcessingException("No laneDataFiles found.")
         }
-        //List<MetaDataKey> keys = MetaDataKey.findAllByNameInList(keyNames)
         List<MetaDataEntry> metaDataEntries = getMetaDataValues(laneDataFiles.get(0), keyNames)
-        boolean consistent = checkIfConsistent(laneDataFiles, keyNames, metaDataEntries)
-        // error handling
-        if (!consistent) {
-            throw new MetaDataInconsistentException(laneDataFiles)
-        }
+        checkIfConsistent(laneDataFiles, keyNames, metaDataEntries)
+
         // check if complete
         // TODO to be implemented
 
@@ -100,7 +96,7 @@ class SeqTrackService {
             run : run,
             sample : sample,
             seqType : seqType,
-            seqTech : run.seqTech,
+            seqPlatform : run.seqPlatform,
             laneId : lane,
             hasFinalBam : false,
             hasOriginalBam : false,
@@ -151,12 +147,9 @@ class SeqTrackService {
         }
         // find out if data complete
         List<String> alignKeyNames = ["SAMPLE_ID", "ALIGN_TOOL"]
-        //List<MetaDataKey> alignKeys = MetaDataKey.findAllByName(alignKeyNames)
         List<MetaDataEntry> alignValues = getMetaDataValues(alignFiles.get(0), alignKeyNames)
-        boolean consistent = checkIfConsistent(alignFiles, alignKeyNames, alignValues)
-        if (!consistent) {
-            throw new MetaDataInconsistentException(alignFiles)
-        }
+        checkIfConsistent(alignFiles, alignKeyNames, alignValues)
+
         Sample sample = getSampleByString(alignValues.get(0))
         if (sample != seqTrack.sample) {
             throw new MetaDataInconsistentException(alignFiles)
@@ -240,23 +233,17 @@ AND entry.value = :value
      * @param values - this array will be filled with values for given keys
      * @return consistency status
      */
-    private boolean checkIfConsistent(List<DataFile> dataFiles, List<String>keyNames, List<MetaDataEntry> metaDataEntries) {
-        if (!dataFiles) {
-            return false
-        }
+    private void checkIfConsistent(List<DataFile> dataFiles, List<String>keyNames, List<MetaDataEntry> metaDataEntries) {
         for (int i=0; i<keyNames.size; i++) {
             MetaDataEntry reference = getMetaDataEntry(dataFiles.get(0), keyNames.get(i))
             metaDataEntries[i] = reference?.value
             for (int j = 1; j < dataFiles.size; j++) {
                 MetaDataEntry entry = getMetaDataEntry(dataFiles.get(j), keyNames.get(i))
                 if (entry?.value != reference?.value) {
-                    log.debug(entry?.value)
-                    log.debug(reference?.value)
-                    return false
+                    throw new MetaDataInconsistentException(dataFiles, entry.value, reference.value)
                 }
             }
         }
-        return true
     }
 
     /**
@@ -268,10 +255,10 @@ AND entry.value = :value
      * @return manipulated seqTrack
      */
     private SeqTrack fillReadsForSeqTrack(SeqTrack seqTrack) {
-        if (seqTrack.seqTech.name != "illumina") {
-            log.debug("seqTech.name is not illumina, returning.")
-            return
-        }
+        //if (seqTrack.seqPlatform.name != "Illumina") {
+        //    log.debug("seqPlatform.name is not Illumina, returning.")
+        //    return
+        //}
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
         List<String> dbKeys = [
             "BASE_COUNT",

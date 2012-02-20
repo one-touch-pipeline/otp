@@ -63,6 +63,8 @@ class RunDateParserService {
        } else if (entry.value.size() == 10) {
            date = parseDate("yyyy-MM-dd", entry.value)
        }
+       entry.status = (date == null)? MetaDataEntry.Status.INVALID : MetaDataEntry.Status.VALID
+       entry.save(flush: true)
        return date
    }
 
@@ -74,10 +76,10 @@ class RunDateParserService {
     */
    private Date getDateFromRunName(Run run) {
        Date date = null
-       if (run.seqTech.name == "illumina") {
+       if (run.seqPlatform.name == "Illumina") {
            String subname = run.name.substring(0, 6)
            date = parseDate("yyMMdd", subname)
-       } else if (run.seqTech.name == "solid") {
+       } else if (run.seqPlatform.name == "SOLiD") {
            String subname = run.name.substring(10, 18)
            date = parseDate("yyyyMMdd", subname)
        }

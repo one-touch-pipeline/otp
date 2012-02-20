@@ -42,13 +42,13 @@ class RunController {
         List<SeqCenter> centers = SeqCenter.findAll()
         List<String> centerNames = new Vector<String>()
         centers.each { centerNames << it.name }
-        List<SeqTech> seqTechs = SeqTech.findAll()
+        List<SeqPlatform> seqTechs = SeqPlatform.findAll()
         [centers: centerNames, seqTechs: seqTechs ]
     }
 
     def submit = {
         SeqCenter seqCenter = SeqCenter.findByName(params.center)
-        SeqTech seqTech = SeqTech.findByName(params.seqTech)
+        SeqPlatform seqTech = SeqPlatform.findByName(params.seqTech)
         Run run = Run.findByName(params.runName)
         if (run) {
             log.debug("Run ${params.runName} already exist")

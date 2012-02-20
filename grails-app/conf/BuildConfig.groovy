@@ -15,10 +15,12 @@ grails.project.dependency.resolution = {
 
     repositories {
         inherits true // Whether to inherit repository definitions from plugins
-        grailsPlugins()
-        grailsHome()
-        grailsCentral()
-        mavenCentral()
+        mavenRepo "$ARTIFACTORY_URL"
+        grailsRepo "$ARTIFACTORY_URL/svn.codehaus.org_grails-plugins"
+        //grailsPlugins()
+        //grailsHome()
+        //grailsCentral()
+        //mavenCentral()
 
         // uncomment these to enable remote dependency resolution from public Maven repositories
         //mavenCentral()
@@ -27,14 +29,13 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
-        mavenRepo "http://download.eclipse.org/jgit/maven"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         // runtime 'mysql:mysql-connector-java:5.1.16'
         //git
-        compile 'org.eclipse.jgit:org.eclipse.jgit:1.0.0.201106090707-r'
+        compile 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
         runtime "commons-jexl:commons-jexl:1.1"
         // XMPP
         compile "jivesoftware:smack:3.1.0"
@@ -47,7 +48,7 @@ grails.project.dependency.resolution = {
         compile ":jquery:1.6.1.1"
         compile ":resources:1.0.2"
         compile ":executor:0.3"
-        compile ":spring-security-core:1.2.4"
+        compile ":spring-security-core:1.2.7.2"
         compile ":spring-security-ldap:1.0.5"
         compile ":spring-security-acl:1.1"
         compile ":jquery-datatables:1.7.5"
