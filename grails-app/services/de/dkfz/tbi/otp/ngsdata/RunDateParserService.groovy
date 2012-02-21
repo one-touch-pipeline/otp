@@ -1,8 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import java.util.Date
 import java.text.SimpleDateFormat
-import de.dkfz.tbi.otp.ngsdata.FileTypeService
 
 class RunDateParserService {
 
