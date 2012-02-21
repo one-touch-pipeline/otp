@@ -6,10 +6,15 @@ class SeqPlatformService {
 
     final String platformKeyName = "INSTRUMENT_PLATFORM"
     final String modelKeyName = "INSTRUMENT_MODEL"
+    @SuppressWarnings("GrailsStatelessService")
     MetaDataKey platformKey
+    @SuppressWarnings("GrailsStatelessService")
     MetaDataKey modelKey
+    @SuppressWarnings("GrailsStatelessService")
     MetaDataEntry platformEntry
+    @SuppressWarnings("GrailsStatelessService")
     MetaDataEntry modelEntry
+    @SuppressWarnings("GrailsStatelessService")
     SeqPlatform seqPlatform = null
 
     public boolean validateSeqPlatform(long runId) {
