@@ -1,9 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import java.text.SimpleDateFormat
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
-import de.dkfz.tbi.otp.job.processing.ProcessingException
 
 class MetaDataService {
 
