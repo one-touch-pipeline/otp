@@ -362,7 +362,7 @@ class MetaDataService {
     private void assignFilesToProjects(long runId) {
         Run run = Run.get(runId)
         DataFile.findAllByRun(run).each { DataFile dataFile ->
-            Project projct = getProjectForDataFile(dataFile)
+            Project project = getProjectForDataFile(dataFile)
             if (!project) {
                 return // continue
             }
