@@ -21,7 +21,7 @@ class MergingService {
         }
         List<String> mergedBams = new ArrayList<String>()
         String projectPath = ind.project.dirName
-        String baseDir = basePath + "/" + projectPath + "/sequencing/"
+        String baseDir = basePath + projectPath + "/sequencing/"
         types.each { SeqType type ->
             Sample.findAllByIndividual(ind).each { Sample sample ->
                 String path = baseDir + type.dirName + "/view-by-pid/" +
