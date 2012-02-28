@@ -45,9 +45,9 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqPlatform seqTech = new SeqPlatform(name: "illumina")
-        assert(seqTech.save())
-        run.seqTech = seqTech
+        SeqPlatform seqPlatform = new SeqPlatform(name: "illumina")
+        assert(seqPlatform.save())
+        run.seqPlatform = seqPlatform
         assert(run.save())
         // does not proceed as no DataFile is set with the run associated
         seqTrackService.buildSequenceTracks(run.id)
@@ -62,7 +62,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assert(individual.save())
         sample.individual = individual
         assert(sample.save())
-        SeqTrack seqTrack = new SeqTrack(laneId: "testLaneId", pipelineVersion: "2", run: run, seqType: seqType, seqTech: seqTech, sample: sample)
+        SeqTrack seqTrack = new SeqTrack(laneId: "testLaneId", pipelineVersion: "2", run: run, seqType: seqType, seqPlatform: seqPlatform, sample: sample)
         assert(seqTrack.save())
         DataFile dataFile = new DataFile(fileName: "dataFile1", pathName: "testPath", metaDataValid: false, run: run, fileType: fileType, seqTrack: seqTrack)
         assert(dataFile.save())
@@ -83,7 +83,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         otherRun.dataPath = dataPath
         otherRun.mdPath = mdPath
         otherRun.seqCenter = seqCenter
-        otherRun.seqTech = seqTech
+        otherRun.seqPlatform = seqPlatform
         assert(otherRun.save())
         DataFile differentlyAssociatedDataFile = new DataFile(fileName: "dataFile1", pathName: "testPath", metaDataValid: false, run: otherRun, fileType: fileType ,seqTrack: seqTrack)
         assert(differentlyAssociatedDataFile.save())

@@ -1,9 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import java.text.SimpleDateFormat
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
-import de.dkfz.tbi.otp.job.processing.ProcessingException
 
 class MetaDataService {
 
@@ -373,7 +371,7 @@ class MetaDataService {
     private void assignFilesToProjects(long runId) {
         Run run = Run.get(runId)
         DataFile.findAllByRun(run).each { DataFile dataFile ->
-            Project projct = getProjectForDataFile(dataFile)
+            Project project = getProjectForDataFile(dataFile)
             if (!project) {
                 return // continue
             }

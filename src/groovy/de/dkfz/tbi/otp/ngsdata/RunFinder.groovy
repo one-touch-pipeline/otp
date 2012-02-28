@@ -57,7 +57,6 @@ class RunFinder {
     private void registerRun(String baseDir, String runDirName) {
         final String signature = "run"
         final String dataPath = "/icgc/ftp/"
-        String dir = buildDirectory(baseDir + "/" + runDirName)
         if (!runDirName.contains(signature)) {
             return
         }
