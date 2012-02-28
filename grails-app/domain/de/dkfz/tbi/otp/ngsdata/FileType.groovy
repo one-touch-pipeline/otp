@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 class FileType {
 
     enum Type {
-        SOURCE, METADATA, MERGED, RESULT, SEQUENCE, ALIGNMENT, UNKNOWN
+        SOURCE, MERGED, RESULT, SEQUENCE, ALIGNMENT, UNKNOWN
     }
     Type type
 

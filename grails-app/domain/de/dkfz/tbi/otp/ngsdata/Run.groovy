@@ -7,9 +7,6 @@ class Run {
     Date dateExecuted = null
     Date dateCreated  = new Date()   // do we need object creation ?
 
-    String dataPath                  // path to data (ftp area)
-    String mdPath                    // path to meta-data
-
     boolean complete                 // complete run was delivered
     boolean allFilesUsed = false     // flag if data if all files find relations
     boolean finalLocation = false    // was run moved to final destination from ftp
@@ -31,11 +28,15 @@ class Run {
         dateExecuted(nullable: true)
         dateCreated()
         complete()
-        dataPath()
-        mdPath()
     }
 
     String toString() {
         name
+    }
+
+    String initialMDPaths() {
+        String paths = ""
+        RunInitialPath.findAllByRun(this).each {paths += it.mdPath + " "}
+        return paths
     }
 }

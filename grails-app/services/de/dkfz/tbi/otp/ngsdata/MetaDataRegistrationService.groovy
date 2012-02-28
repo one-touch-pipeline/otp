@@ -9,34 +9,58 @@ class MetaDataRegistrationService {
     *
     * @param runId - database id or the Run object
     */
-   void registerInputFiles(long runId) {
+    void registerInputFiles(long runId) {
+        Run run = Run.get(runId)
+        List<RunInitialPath> paths = RunInitialPath.findAllByRun(run)
+        for(RunInitialPath path in paths) {
+            registerInputFilesForPath(path)
+        }
+        if (paths.size() > 1) {
+            run.multipleSource = true
+        }
+        run.save(flush: true)
+    }
 
-       Run run = Run.get(runId)
-       log.debug("registering run ${run.name} from ${run.seqCenter}")
+    private void registerInputFilesForPath(RunInitialPath path) {
+        File dir = getMetaDataDirectory(path.mdPath, path.run.name)
+        processDirectory(path, dir)
+    }
 
-       FileType fileType = FileType.findByType(FileType.Type.METADATA)
-       DataFile dataFile
-
-       File dir = getMetaDataDirectory(run)
-       List<String> fileNames = dir.list()
-       fileNames.each { String fileName ->
-           if (fileBlacklisted(fileName)) {
-               return
-           }
-           if (fileName.contains("fastq") || fileName.contains("align")) {
-               if (isFileRegistered(run, fileName)) {
-                   throw new MetaDataFileDuplicationException(run.name, fileName)
-               }
-               dataFile = new DataFile(
-                   pathName: dir.getAbsolutePath(),
-                   fileName: fileName
-               )
-               dataFile.run = run
-               dataFile.fileType = fileType
-               dataFile.save(flush: true)
+    private File getMetaDataDirectory(String path, String runName) {
+       List<String> separators = ["/run", "/"]
+       for(String separator in separators) {
+           String runDir = path + separator + runName
+           File dir = new File(runDir)
+           if (dir.canRead() && dir.isDirectory()) {
+               return dir
            }
        }
-       fileType.save(flush: true)
+       throw new DirectoryNotReadableException(path)
+    }
+
+    private void processDirectory(RunInitialPath path, File dir) {
+        MetaDataFile metaDataFile
+        List<String> fileNames = dir.list()
+        for(String fileName in fileNames) {
+            //println  fileName
+            if (fileBlacklisted(fileName)) {
+                continue
+            }
+            if (fileName.contains("fastq") || fileName.contains("align")) {
+                if (isFileRegistered(path, fileName)) {
+                    throw new MetaDataFileDuplicationException(path.run.name, fileName)
+                }
+                metaDataFile = new MetaDataFile(
+                    fileName: fileName,
+                    filePath: dir.absolutePath,
+                    runInitialPath: path,
+                    used: false
+                )
+                metaDataFile.validate()
+                //println metaDataFile.errors
+                metaDataFile.save(flush: true)
+            }
+        }
     }
 
     private boolean fileBlacklisted(String fileName) {
@@ -48,21 +72,19 @@ class MetaDataRegistrationService {
         }
         return false
     }
+    private List<File> getListOfDirectories(Run run) {
+        List<File> dirs = new ArrayList<File>()
+        List<RunInitialPath> paths = RunInitialPath.findAllByRun(run)
+        paths.each {RunInitialPath initPath ->
+            File dir = getMetaDataDirectory(initPath.mdPath, run.name)
+            dirs.add(dir)
+        }
+        return dirs
+    }
 
-    private File getMetaDataDirectory(Run run) {
-       List<String> separators = ["/run", "/"]
-       for(String separator in separators) {
-           String runDir = run.mdPath + separator + run.name
-           File dir = new File(runDir)
-           if (dir.canRead() && dir.isDirectory()) {
-               return dir
-           }
-       }
-       throw new DirectoryNotReadableException(run.mdPath)
-   }
-
-   private boolean isFileRegistered(Run run, String fileName) {
-       DataFile file = DataFile.findByRunAndFileName(run, fileName)
-       return (boolean)file
-   }
+    private boolean isFileRegistered(RunInitialPath path, String fileName) {
+        MetaDataFile existingFile =
+            MetaDataFile.findByRunInitialPathAndFileName(path, fileName)
+        return (boolean)existingFile
+    }
 }

@@ -24,7 +24,7 @@ class RunController {
         if (!run) {
             render ("run id=${id} does not exist.")
         }
-        String[] paths = lsdfFilesService.getAllPathsForRun(run)
+        String[] finalPaths = lsdfFilesService.getAllPathsForRun(run)
         List<MetaDataKey> keys = []
         keys[0] = MetaDataKey.findByName("SAMPLE_ID")
         keys[1] = MetaDataKey.findByName("WITHDRAWN")
@@ -33,11 +33,24 @@ class RunController {
         List<ProcessParameter> processParameters = 
             ProcessParameter.findAllByValue(run.id, run.class.name)
 
-        int prevId = (id > 1)? id-1 : 1
-        int nextId = id+1
-        return [run: run, finalPaths: paths, keys: keys, processParameters: processParameters, nextId: nextId, prevId: prevId]
+        int prevId = findPrevious(run)
+        int nextId = findNext(run)
+        return [run: run, finalPaths: finalPaths, keys: keys, processParameters: processParameters, nextId: nextId, prevId: prevId]
     }
 
+    private int findPrevious(Run run) {
+        List<Run> runs =
+             Run.findAllByIdLessThan(run.id, [sort: "id", order: "desc", max: 1])
+        return (runs.size()>0) ? runs.get(0).id : run.id
+    }
+
+    private int findNext(Run run) {
+        List<Run> runs =
+             Run.findAllByIdGreaterThan(run.id, [sort: "id", order: "asc", max: 1])
+        return (runs.size()>0) ? runs.get(0).id : run.id
+    }
+    
+    
     def submitForm = {
         List<SeqCenter> centers = SeqCenter.findAll()
         List<String> centerNames = new Vector<String>()

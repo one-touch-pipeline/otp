@@ -5,11 +5,6 @@ class LsdfFilesService {
     @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
 
-    // will go somewhere
-    // TODO: these constants should not be here!src/groovy/de/dkfz/tbi/otp/job/jobs/metaData/MetaDataStartJob.groovy
-    //private static final String basePath = "$ROOT_PATH/project/"
-    //private static final String metaDataPath = "~/ngs-isgc/"
-
     /**
      * This function return path to the initial location
      * of the given dataFile
@@ -78,13 +73,14 @@ class LsdfFilesService {
             log.debug("File not used in seqTrack, location undefined [${file}]")
             return null
         }
-        if (file.fileType.type == FileType.Type.METADATA) {
-            return metaDataFinalPath(file)
-        }
+        //if (file.fileType.type == FileType.Type.METADATA) {
+        //    return metaDataFinalPath(file)
+        //}
         return sequenceDataFinalPath(file)
         // TODO check if correct for merged bam files
     }
 
+    /*
     private String metaDataFinalPath(DataFile file) {
         String basePath = grailsApplication.config.otp.dataPath['metadata']
         String path = basePath + "/data-tracking-orig/" +
@@ -92,6 +88,7 @@ class LsdfFilesService {
                 "/run" + file.run.name + "/" + file.fileName
         return path
     }
+    */
 
     private String sequenceDataFinalPath(DataFile file) {
         String seqTypeDir = seqTypeDirectory(file);
@@ -138,9 +135,6 @@ class LsdfFilesService {
      */
     String getFileViewByPidPath(DataFile file) {
         if (!file) {
-            return null
-        }
-        if (file.fileType.type == FileType.Type.METADATA) {
             return null
         }
         if (!file.used) {
@@ -227,9 +221,6 @@ class LsdfFilesService {
         }
         Set<String> paths = new HashSet<String>()
         DataFile.findAllByRun(run).each { DataFile file ->
-            if (file.fileType.type == FileType.Type.METADATA) {
-                return
-            }
             String path = getPathToRun(file)
             if (path) {
                 paths << path
@@ -246,9 +237,6 @@ class LsdfFilesService {
      */
     private String getPathToRun(DataFile file) {
         if (!file) {
-            return null
-        }
-        if (file.fileType.type == FileType.Type.METADATA) {
             return null
         }
         if (!file.used) {

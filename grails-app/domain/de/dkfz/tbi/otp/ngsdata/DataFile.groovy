@@ -14,7 +14,6 @@ class DataFile {
     Date dateCreated = null        // when the object was created in db
 
     String vbpFilePath = ""        // viev by pid structure
-    //String prvFilePath = ""        // path from run name to this file (used in solid)
 
     boolean metaDataValid = true
     boolean fileWithdrawn = false
@@ -27,6 +26,7 @@ class DataFile {
 
     static belongsTo = [
         run : Run,
+        runInitialPath : RunInitialPath,
         seqTrack : SeqTrack,
         mergingLog : MergingLog,
         alignmentLog : AlignmentLog,

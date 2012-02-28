@@ -62,20 +62,37 @@ class RunFinder {
             return
         }
         String runName = runDirName.substring(3)
+        Run run = findOrCreateRun(runName)
+        RunInitialPath initialPath = new RunInitialPath(
+            dataPath: dataPath,
+            mdPath: baseDir,
+            run: run
+        )
+        //initialPath.validate()
+        //println initialPath.run
+        //println initialPath.errors
+        //println initialPath
+        initialPath.save(flush: true)
+        run.save(flush: true)
+    }
+
+    private Run findOrCreateRun(String runName) {
         Run run = Run.findByName(runName)
-        if (run != null) {
-            println "Duplicated run ${runName}"
-            return
+        if (run) {
+            return run
         }
+        return createRun(runName)
+    }
+
+    private Run createRun(String runName) {
         SeqPlatform platform = guessSeqPlatform(runName)
-        run = new Run(
+        Run run = new Run(
             name: runName,
             seqCenter: seqCenter,
             seqPlatform: platform,
-            dataPath : dataPath,
-            mdPath : baseDir
         )
-        run.save(flush: true)
+        run.save()
+        return run
     }
 
     private SeqPlatform guessSeqPlatform(String runName) {

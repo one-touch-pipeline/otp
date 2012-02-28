@@ -14,6 +14,7 @@ class MetaDataService {
      * Dependency injection of file type service
      */
     def fileTypeService
+    def metaDataFileService
     static transactional = true
 
     /**
@@ -29,25 +30,26 @@ class MetaDataService {
         // loading metadata is not thread save - use a lock
         loadMetaDataLock.lock()
         try {
-            List<DataFile> listOfMDFiles = DataFile.findAllByRun(run)
-            listOfMDFiles.each { DataFile file ->
-                if (!isNewMetaDataFile(file)) {
-                    return
-                }
-                log.debug("\tfound md souce file ${file.fileName}")
-                processMetaDataFile(file)
-                run.save(flush: true)
-            }
+            processMetaDataFiles(run)
         } finally {
             loadMetaDataLock.unlock()
         }
     }
 
-    private boolean isNewMetaDataFile(DataFile file) {
-        return (file.fileType.type == FileType.Type.METADATA && !file.used)
+    private void processMetaDataFiles(Run run) {
+        List<RunInitialPath> paths = RunInitialPath.findAllByRun(run)
+        List<MetaDataFile> mdFiles = MetaDataFile.findAllByRunInitialPathInList(paths)
+        mdFiles.each { MetaDataFile file ->
+            if (file.used) {
+                return
+            }
+            log.debug("\tfound md souce file ${file.fileName}")
+            processMetaDataFile(file)
+            run.save(flush: true)
+        }
     }
 
-    private void processMetaDataFile(DataFile file) {
+    private void processMetaDataFile(MetaDataFile file) {
         FileType.Type type = getTypeInMetaDataFile(file.fileName)
         File mdFile = openTextFile(file)
         List<String> tokens
@@ -63,8 +65,11 @@ class MetaDataService {
             } else {
                 // match values with the header
                 // new entry in MetaData
-                dataFile = new DataFile() // set-up later
-                dataFile.run = file.run
+                dataFile = new DataFile(
+                    run : file.runInitialPath.run,
+                    runInitialPath : file.runInitialPath
+                )
+                dataFile.validate()
                 dataFile.save(flush: true)
                 values = tokenize(line, '\t')
                 addMetaDataEntries(dataFile, keys, values)
@@ -73,7 +78,7 @@ class MetaDataService {
                 fillVbpFileName(dataFile)
                 fillMD5Sum(dataFile)
                 assignFileType(dataFile, type)
-                addKnownMissingMetaData(file.run, dataFile)
+                addKnownMissingMetaData(file.runInitialPath.run, dataFile)
                 checkIfWithdrawn(dataFile)
             }
         }
@@ -91,8 +96,9 @@ class MetaDataService {
         return type
     }
 
-    private File openTextFile(DataFile file) {
-        File mdFile = new File(file.pathName + File.separatorChar + file.fileName)
+    private File openTextFile(MetaDataFile file) {
+        String path = metaDataFileService.initialLocation(file)
+        File mdFile = new File(path)
         if (!mdFile.canRead()) {
             throw new FileNotReadableException(mdFile.path)
         }
@@ -324,17 +330,20 @@ class MetaDataService {
         }
         List<SeqType> types = SeqType.list()
         for (int iType = 0; iType < types.size(); iType++) {
-            if (run.mdPath.contains(types[iType].dirName)) {
-                String value = types[iType].name
-                log.debug("\tassiginig to ${value}")
-                entry = new MetaDataEntry (
+            List<RunInitialPath> initalPaths = RunInitialPath.findAllByRun(run)
+            for(RunInitialPath initialPath in initalPaths) {
+                if (initialPath.mdPath.contains(types[iType].dirName)) {
+                    String value = types[iType].name
+                    log.debug("\tassiginig to ${value}")
+                    entry = new MetaDataEntry (
                         value: value,
                         source: MetaDataEntry.Source.SYSTEM,
                         key: key
-                        )
-                entry.dataFile = dataFile
-                entry.save(flush: true)
-                return
+                    )
+                    entry.dataFile = dataFile
+                    entry.save(flush: true)
+                    return
+                }
             }
         }
     }

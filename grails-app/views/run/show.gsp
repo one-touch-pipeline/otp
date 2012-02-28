@@ -27,7 +27,7 @@
        </tr>
        <tr> 
             <td class="myKey">sequencing technology</td>
-            <td class="myValue">${run.seqTech}</td>
+            <td class="myValue">${run.seqPlatform}</td>
        </tr>
        <tr>
             <td class="myKey">date executed</td>
@@ -43,11 +43,11 @@
        </tr>
        <tr>
             <td class="myKey">data path</td>
-            <td class="myValue">${run.dataPath}</td>
+            <td class="myValue"></td>
        </tr>
        <tr>
             <td class="myKey">meta data path</td>
-            <td class="myValue">${run.mdPath}</td>
+            <td class="myValue">${run.initialMDPaths()}</td>
        </tr>
        <tr>
             <td class="myKey">final locations</td>
@@ -57,7 +57,6 @@
                 </g:each>
             </td>
        </tr>
-       
     </table>
 
 
@@ -99,19 +98,15 @@
     </div>
 
     <div class="myContentWide">
-
         <table>
-
-           <g:each var="file" in="${de.dkfz.tbi.otp.ngsdata.DataFile.findAllByRun(run)}">
-           <g:if test="${file.fileType.type.toString() == 'METADATA'}">
-           <tr>
-                <td>${file.fileName}</td>
-                <td>${(new Date(file.dateCreated.getTime())).format("yyyy-MM-dd")}</td>
-                <td>${file.fileType.type}</td>
-<%--                <td>${file.fileExists}</td>--%>
-<%--                <td>${file.used}</td>--%>
-           </tr>
-           </g:if>
+            <g:each var="rip" in="${de.dkfz.tbi.otp.ngsdata.RunInitialPath.findAllByRun(run)}">
+                <g:each var="file" in="${de.dkfz.tbi.otp.ngsdata.MetaDataFile.findAllByRunInitialPath(rip)}">
+                    <tr>
+                        <td>${file.fileName}</td>
+                        <td>${(new Date(file.dateCreated.getTime())).format("yyyy-MM-dd")}</td>
+                        <td>${file.used}</td>
+                    </tr>
+            </g:each>
            </g:each>
         </table>
 
