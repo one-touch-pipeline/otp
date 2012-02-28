@@ -102,6 +102,9 @@ class MetaDataValidationService {
         if (value.isInteger()) {
             return true
         }
+        if (value.contains("n/a")) {
+            return true // essentially shall be false
+        }
         return false
     }
 
