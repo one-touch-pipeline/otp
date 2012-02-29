@@ -225,7 +225,7 @@ class LsdfFilesService {
             if (path) {
                 paths << path
             } else  {
-                paths << run.dataPath
+                paths << file.runInitialPath.dataPath
             }
         }
         return (String[])paths.toArray()
