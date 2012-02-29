@@ -17,6 +17,7 @@ class SeqPlatformService {
     @SuppressWarnings("GrailsStatelessService")
     SeqPlatform seqPlatform = null
 
+    //@Scope("Prototype")
     public boolean validateSeqPlatform(long runId) {
         Run run = Run.get(runId)
         seqPlatform = null
@@ -66,14 +67,17 @@ class SeqPlatformService {
     }
 
     private boolean validateWithEntries(MetaDataEntry pEntry, MetaDataEntry mEntry) {
+        SeqPlatform platform = null
         SeqPlatformModelIdentifier identifier = SeqPlatformModelIdentifier.findByName(mEntry.value)
-        if (identifier == null) {
-            return false
+        if (identifier) {
+            platform = identifier.seqPlatform
+            if (platform.name.toLowerCase() != pEntry.value.toLowerCase()) {
+                return false
+            }
+        } else {
+            platform = SeqPlatform.findByNameAndModel(pEntry.value, null)
         }
-        SeqPlatform platform = identifier.seqPlatform
-        if (platform.name.toLowerCase() != pEntry.value.toLowerCase()) {
-            return false
-        }
+
         if (seqPlatform == null) {
             seqPlatform = platform
             return true
