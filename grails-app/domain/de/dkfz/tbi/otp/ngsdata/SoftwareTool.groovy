@@ -14,4 +14,8 @@ class SoftwareTool {
         qualityCode(nullable: true)
         type()
     }
+
+    String toString() {
+        return "${programName} ${programVersion}"
+    }
 }
