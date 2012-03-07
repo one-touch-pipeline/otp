@@ -40,7 +40,7 @@ class CopyFilesJob extends AbstractJobImpl {
         String from = lsdfFilesService.getFileInitialPath(file)
         String to = lsdfFilesService.getFileFinalPath(file)
         println from + " " + to
-        String cmd = "cp ${from} ${to};chmod 440 ${to}"
+        String cmd = "echo \$HOST;cp ${from} ${to};chmod 440 ${to}"
         return cmd
     }
 
