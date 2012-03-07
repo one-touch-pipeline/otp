@@ -3,6 +3,9 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 
 class SeqTrackService {
+
+    def FileTypeService
+
     /**
      *
      * A sequence track corresponds to one lane in Illumina
@@ -14,22 +17,19 @@ class SeqTrackService {
      *
      * @param runId
      */
-    void buildSequenceTracks(long runId) {
+    public void buildSequenceTracks(long runId) {
         Run run = Run.get(runId)
-        // find out present lanes/slides
-        // lines/ slides could by identifiers not only numbers
+        Set<String> lanes = getSetOfLanes(run)
+        lanes.each{String laneId ->
+            buildOneSequenceTrack(run, laneId)
+        }
+    }
+
+    private Set<String> getSetOfLanes(Run run) {  
         MetaDataKey key = MetaDataKey.findByName("LANE_NO")
         Set<String> lanes = new HashSet<String>()
-        // get the list of unique lanes identifiers
         DataFile.findAllByRun(run).each { DataFile dataFile ->
-            // These returns are continues
-            if (!dataFile.metaDataValid) {
-                return
-            }
-            if (dataFile.fileWithdrawn) {
-                return
-            }
-            if (dataFile.fileType.type != FileType.Type.SEQUENCE) {
+            if (!fileTypeService.isGoodSequenceDataFile(dataFile)) {
                 return
             }
             MetaDataEntry laneValue = MetaDataEntry.findByDataFileAndKey(dataFile, key)
@@ -37,61 +37,31 @@ class SeqTrackService {
                 throw new LaneNotDefinedException(run.name, dataFile.fileName)
             }
             lanes << laneValue.value
-
         }
-        // run track creation for each lane
-        lanes.each{String laneId ->
-            buildOneSequenceTrack(run, laneId)
-        }
+        return lanes
     }
 
-    /**
-     * Builds one sequence track identified by a lane id
-     *
-     * @param run - Run obejct
-     * @param lane - lane identifier string
-     */
     private void buildOneSequenceTrack(Run run, String lane) {
         SeqTrack seqTrack = buildFastqSeqTrack(run, lane)
         appendAlignmentToSeqTrack(seqTrack)
     }
 
-    /**
-     * Build one seqTrack from sequence (fastq) files
-     * @param run
-     * @param lane
-     * @return
-     */
     private SeqTrack buildFastqSeqTrack(Run run, String lane) {
         // find sequence files
-        List<DataFile> laneDataFiles =
+        List<DataFile> dataFiles =
                 getRunFilesWithTypeAndLane(run, FileType.Type.SEQUENCE, lane)
-        // check if metadata consistent
-        List<String> keyNames = [
-            "SAMPLE_ID",
-            "SEQUENCING_TYPE",
-            "LIBRARY_LAYOUT",
-            "PIPELINE_VERSION"
-            //"READ_COUNT"
-        ]
-        if (!laneDataFiles) {
+        if (!dataFiles) {
             throw new ProcessingException("No laneDataFiles found.")
         }
-        List<MetaDataEntry> metaDataEntries = getMetaDataValues(laneDataFiles.get(0), keyNames)
-        checkIfConsistent(laneDataFiles, keyNames, metaDataEntries)
+        Sample sample = getSample(dataFiles.get(0))
+        assertConsistentSample(sample, dataFiles)
 
-        // check if complete
-        // TODO to be implemented
+        SeqType seqType = getSeqType(dataFiles.get(0))
+        assertConsistentSeqType(seqType, dataFiles)
 
-        // build structure
-        Sample sample = getSampleByString(metaDataEntries.get(0))
-        if (!sample) {
-            throw new SampleNotDefinedException(metaDataEntries.get(0))
-        }
-        SeqType seqType = SeqType.findByNameAndLibraryLayout(metaDataEntries.get(1), metaDataEntries.get(2))
-        if (!seqType) {
-            throw new SeqTypeNotDefinedException(metaDataEntries.get(1), metaDataEntries.get(2))
-        }
+        SoftwareTool pipeline = getPipeline(dataFiles.get(0))
+        assertConsistentPipeline(pipeline, dataFiles)
+
         SeqTrack seqTrack = new SeqTrack(
             run : run,
             sample : sample,
@@ -101,36 +71,113 @@ class SeqTrackService {
             hasFinalBam : false,
             hasOriginalBam : false,
             usingOriginalBam : false,
-            pipelineVersion: metaDataEntries.get(3)
+            pipelineVersion: pipeline
         )
         if (!seqTrack.validate()) {
             println seqTrack.errors
             throw new ProcessingException("seqTrack could not be validated.")
         }
         seqTrack.save(flush: true)
-        laneDataFiles.each {DataFile dataFile ->
-            dataFile.seqTrack = seqTrack
-            dataFile.project = sample.individual.project
-            dataFile.save(flush: true)
-        }
-        seqTrack = fillReadsForSeqTrack(seqTrack)
+        consumeDataFiles(dataFiles, seqTrack)
+        fillReadsForSeqTrack(seqTrack)
         seqTrack.save(flush: true)
         return seqTrack
     }
 
+    private Sample getSample(DataFile file) {
+        String sampleName = metaDataValue(file, "SAMPLE_ID")
+        SampleIdentifier idx = SampleIdentifier.findByName(sampleName)
+        return idx.sample
+    }
+
+    private void assertConsistentSample(Sample sample, List<DataFile> files) {
+        for(DataFile file in files) {
+            Sample fileSample = getSample(file)
+            if (!sample.equals(fileSample)) {
+                throw new MetaDataInconsistentException(files, sample, fileSample)
+            }
+        }
+    }
+
+    private SeqType getSeqType(DataFile file) {
+        String type = metaDataValue(file, "SEQUENCING_TYPE" )
+        String layout = metaDataValue(file, "LIBRARY_LAYOUT")
+        SeqType seqType = SeqType.findByNameAndLibraryLayout(type, layout)
+        if (!seqType) {
+            throw new SeqTypeNotDefinedException(type, layout)
+        }
+        return seqType
+    }
+
+    private void assertConsistentSeqType(SeqType seqType, List<DataFile> files) {
+        for(DataFile file in files) {
+            SeqType fileSeqType = getSeqType(file)
+            if (!seqType.equals(fileSeqType)) {
+                throw new MetaDataInconsistentException(files, seqType, fileSeqType)
+            }
+        }
+    }
+
+    private SoftwareTool getPipeline(DataFile file) {
+        String name = metaDataValue(file, "PIPELINE_VERSION")
+        List<SoftwareToolIdentifier> idx = SoftwareToolIdentifier.findAllByName(name)
+        for(SoftwareToolIdentifier si in idx) {
+            if (si.softwareTool.type == SoftwareTool.Type.BASECALLING) {
+                return si.softwareTool
+            }
+        }
+        return null
+    }
+
+    private void assertConsistentPipeline(SoftwareTool pipeline, List<DataFile> files) {
+        for(DataFile file in file) {
+            SoftwareTool filePipeline = getPipeline(file)
+            if (!pipeline.equals(filePipeline)) {
+                throw new MetaDataInconsistentException(files, pipeline, filePipeline)
+            }
+        }
+    }
+
+    private void consumeDataFiles(List<DataFile> files, SeqTrack seqTrack) {
+        files.each {DataFile dataFile ->
+            dataFile.seqTrack = seqTrack
+            dataFile.project = seqTrack.sample.individual.project
+            dataFile.used = true
+            dataFile.save(flush: true)
+        }
+    }
+
     /**
-     * 
-     */
-    private Sample getSampleByString(String sampleString) {
-        if (!sampleString) {
-            throw new SampleNotDefinedException("No SampleIdentifier name provided.")
+    *
+    * Fills the numbers in the SeqTrack object using MetaDataEntry
+    * objects from the DataFile objects belonging to this SeqTrack.
+    *
+    * @param seqTrack
+    * @return manipulated seqTrack
+    */
+    private void fillReadsForSeqTrack(SeqTrack seqTrack) {
+        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
+        fillInsertSize(seqTrack, dataFiles)
+        fillReadCount(seqTrack, dataFiles)
+        fillBaseCount(seqTrack, dataFiles)
+    }
+
+    private void fillInsertSize(SeqTrack seqTrack, List<DataFile> files) {
+        seqTrack.insertSize = metaDataLongValue(files.get(0), "INSERT_SIZE")
+    }
+
+    private void fillReadCount(SeqTrack seqTrack, List<DataFile> files) {
+        seqTrack.nReads = 0
+        for(DataFile file in files) {
+            seqTrack.nReads += metaDataLongValue(file, "READ_COUNT")
         }
-        SampleIdentifier sampleId = SampleIdentifier.findByName(sampleString)
-        if (!sampleId) {
-            log.debug("SampleIdentifier for sampleString: ${sampleString} could not be found.")
-            return null
+    }
+
+    private void fillBaseCount(SeqTrack seqTrack, List<DataFile> files) {
+        seqTrack.nBasePairs = 0
+        for(DataFile file in files) {
+            seqTrack.nBasePairs += metaDataLongValue(file, "BASE_COUNT")
         }
-        return sampleId.sample
     }
 
     /**
@@ -141,45 +188,71 @@ class SeqTrackService {
         // attach alignment to seqTrack
         List<DataFile> alignFiles =
             getRunFilesWithTypeAndLane(seqTrack.run, FileType.Type.ALIGNMENT, seqTrack.laneId)
-        // no alignment files
-        if (!alignFiles) {
+        if (alignFiles.size() == 0) {
             return
         }
-        // find out if data complete
-        List<String> alignKeyNames = ["SAMPLE_ID", "ALIGN_TOOL"]
-        List<MetaDataEntry> alignValues = getMetaDataValues(alignFiles.get(0), alignKeyNames)
-        checkIfConsistent(alignFiles, alignKeyNames, alignValues)
+        Set<SoftwareTool> pipelines = getAlignmentPipelineSet(alignFiles)
 
-        Sample sample = getSampleByString(alignValues.get(0))
-        if (sample != seqTrack.sample) {
-            throw new MetaDataInconsistentException(alignFiles)
-        }
-        log.debug("alignment data found")
-        // create or find alignment params object
-        String alignProgram = alignValues.get(1) ?: seqTrack.pipelineVersion
-        AlignmentParams alignParams = AlignmentParams.findByProgramName(alignProgram)
-        if (!alignParams) {
-            alignParams = new AlignmentParams(programName: alignProgram)
-        }
-        alignParams.save()
-        // create alignment log
-        AlignmentLog alignLog = new AlignmentLog(
+        Sample sample = getSample(alignFiles.get(0))
+        assertConsistentSample(sample, alignFiles)
+
+
+        for(SoftwareTool pipeline in pipelines) {
+
+            AlignmentParams alignParams = getAlignmentParams(pipeline)
+            AlignmentLog alignLog = new AlignmentLog(
                 alignmentParams : alignParams,
                 seqTrack : seqTrack,
                 executedBy : AlignmentLog.Execution.INITIAL
-                )
-        alignLog.save(flush: true)
-        // attach data files
-        alignFiles.each {
-            it.project = sample.individual.project
-            it.alignmentLog = alignLog
-            it.save(flush: true)
+            )
+            alignLog.save(flush: true)
+            consumeAlignmentFiles(alignLog, alignFiles, pipeline)
+            seqTrack.hasOriginalBam = true
+            alignLog.save()
+            alignParams.save()
         }
-        seqTrack.hasOriginalBam = true
-        // save
-        alignLog.save()
-        alignParams.save()
-        seqTrack.save()
+        seqTrack.save(flush: true)
+    }
+
+    Set<SoftwareTool> getAlignmentPipelineSet(List<DataFile> alignFiles) {
+        Set<SoftwareTool> set = new HashSet<SoftwareTool>()
+        for(DataFile file in alignFiles) {
+            SoftwareTool pipeline = getAlignmentPipeline(file)
+            set << pipeline
+        }
+        return set
+    }
+
+    SoftwareTool getAlignmentPipeline(DataFile file) {
+        String name = metaDataValue(file, "ALIGN_TOOL")
+        List<SoftwareToolIdentifier> idx = SoftwareToolIdentifier.findAllByName(name)
+        for(SoftwareToolIdentifier si in idx) {
+            if (si.softwareTool.type == SoftwareTool.Type.ALIGNMENT) {
+                return si.softwareTool
+            }
+        }
+        return null
+    }
+
+    private AlignmentParams getAlignmentParams(SoftwareTool pipeline) {
+        AlignmentParams alignParams = AlignmentParams.findByPipeline(pipeline)
+        if (!alignParams) {
+            alignParams = new AlignmentParams(pipeline: pipeline)
+            alignParams.save(flush: true)
+        }
+        return alignParams
+    }
+
+    private void consumeAlignmentFiles(AlignmentLog alignLog, List<DataFile> files, SoftwareTool pipeline) {
+        for(DataFile file in files) {
+            SoftwareTool filePipeline = getAlignmentPipeline(file)
+            if (pipeline.equals(filePipeline)) {
+                file.project = alignLog.seqTrack.sample.individual.project
+                file.alignmentLog = alignLog
+                file.used = true
+                file.save(flush: true)
+            }
+        }
     }
 
     /**
@@ -206,93 +279,6 @@ AND entry.value = :value
         return dataFiles
     }
 
-    /**
-     * The function returns the MetaDataEntry values associated with the keys
-     *
-     * @param dataFile The DataFile containing the values
-     * @param metaDataKeys The MetaDataKeys for which the MetaDataEntrys are to be found
-     * @return List containing MetaDataEntrys and the metaDataKeys associated
-     */
-    private List<MetaDataEntry> getMetaDataValues(DataFile dataFile, List<String>keyNames) {
-        if (!dataFile) {
-            return
-        }
-        List<MetaDataEntry> metaDataEntries = []
-        for (int i = 0; i < keyNames.size(); i++) {
-            metaDataEntries[i] = getMetaDataEntry(dataFile, keyNames[i])
-        }
-        return metaDataEntries
-    }
-
-    /**
-     * Check if meta-data values for DataFile objects belonging
-     * presumably to the same lane are consistent
-     *
-     * @param dataFiles - array of data files
-     * @param keys - keys for which the consistency have to be checked
-     * @param values - this array will be filled with values for given keys
-     * @return consistency status
-     */
-    private void checkIfConsistent(List<DataFile> dataFiles, List<String>keyNames, List<MetaDataEntry> metaDataEntries) {
-        for (int i=0; i<keyNames.size; i++) {
-            MetaDataEntry reference = getMetaDataEntry(dataFiles.get(0), keyNames.get(i))
-            metaDataEntries[i] = reference?.value
-            for (int j = 1; j < dataFiles.size; j++) {
-                MetaDataEntry entry = getMetaDataEntry(dataFiles.get(j), keyNames.get(i))
-                if (entry?.value != reference?.value) {
-                    throw new MetaDataInconsistentException(dataFiles, entry.value, reference.value)
-                }
-            }
-        }
-    }
-
-    /**
-     *
-     * Fills the numbers in the SeqTrack object using MetaDataEntry
-     * objects from the DataFile objects belonging to this SeqTrack.
-     *
-     * @param seqTrack
-     * @return manipulated seqTrack
-     */
-    private SeqTrack fillReadsForSeqTrack(SeqTrack seqTrack) {
-        //if (seqTrack.seqPlatform.name != "Illumina") {
-        //    log.debug("seqPlatform.name is not Illumina, returning.")
-        //    return
-        //}
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
-        List<String> dbKeys = [
-            "BASE_COUNT",
-            "READ_COUNT",
-            "INSERT_SIZE"
-        ]
-        List<String> dbFields = [
-            "nBasePairs",
-            "nReads",
-            "insertSize"
-        ]
-        List<Boolean> add = [true, false, false]
-        dataFiles.each { DataFile file ->
-            if (file.fileType.type != FileType.Type.SEQUENCE) {
-                return
-            }
-            MetaDataEntry.findAllByDataFile(file).each { MetaDataEntry entry ->
-                for (int iKey=0; iKey < dbKeys.size(); iKey++) {
-                    if (entry.key.name == dbKeys[iKey]) {
-                        long value = 0
-                        if (entry.value.isLong()) {
-                            value = entry.value as long
-                        }
-                        if (add[iKey]) {
-                            seqTrack."${dbFields[iKey]}" += value
-                        } else {
-                            seqTrack."${dbFields[iKey]}" = value
-                        }
-                    }
-                }
-            }
-        }
-        return seqTrack
-    }
 
     /**
      *
@@ -303,55 +289,39 @@ AND entry.value = :value
      *
      * @param runId
      */
-    void checkSequenceTracks(long runId) {
+    public void checkSequenceTracks(long runId) {
         Run run = Run.get(runId)
         run.allFilesUsed = true
-        DataFile.findAllByRun(run).each { DataFile dataFile ->
-            if (dataFile.fileType.type == FileType.Type.SEQUENCE) {
-                dataFile.used = (dataFile.seqTrack != null)
-                if (!dataFile.used) {
-                    log.debug(dataFile)
+        List<DataFile> files = DataFile.findAllByRun(run)
+        for(DataFile file in files) {
+            if(fileTypeService.isRawDataFile(file)) {
+                if (!file.used) {
                     run.allFilesUsed = false
                 }
-                dataFile.save(flush: true)
-            }
-            if (dataFile.fileType.type == FileType.Type.ALIGNMENT) {
-                dataFile.used = (dataFile.alignmentLog != null)
-                if (!dataFile.used) {
-                    log.debug(dataFile)
-                    run.allFilesUsed = false
-                }
-                dataFile.save(flush: true)
             }
         }
         run.save(flush: true)
-        log.debug("All files used: ${run.allFilesUsed}\n")
     }
 
-    /**
-     *
-     * Returns a metat data entry belonging the a given data file
-     * with a key specified by the input parameter
-     *
-     * @param file
-     * @param key
-     * @return
-     */
-    private MetaDataEntry getMetaDataEntry(DataFile file, MetaDataKey key) {
-        return MetaDataEntry.findByDataFileAndKey(file, key)
-    }
-
-    /**
-     *
-     * Returns a meta-data entry belonging the a given data file
-     * with a key specified by the input parameter
-     *
-     * @param file
-     * @param key
-     * @return
-     */
-    private MetaDataEntry getMetaDataEntry(DataFile file, String keyName) {
+    private MetaDataEntry metaDataEntry(DataFile file, String keyName) {
         MetaDataKey key = MetaDataKey.findByName(keyName)
+        MetaDataEntry entry = MetaDataEntry.findByDataFileAndKey(file, key)
+        if (!entry) {
+            throw new ProcessingException("no entry for key: ${keyName}")
+        }
         return MetaDataEntry.findByDataFileAndKey(file, key)
+    }
+
+    private String metaDataValue(DataFile file, String keyName) {
+        MetaDataEntry entry = metaDataEntry(file, keyName)
+        return entry.value
+    }
+
+    private long metaDataLongValue(DataFile file, String keyName) {
+        MetaDataEntry entry = metaDataEntry(file, keyName)
+        if (entry.value.isLong()) {
+            return entry.value as long
+        }
+        return 0
     }
 }
