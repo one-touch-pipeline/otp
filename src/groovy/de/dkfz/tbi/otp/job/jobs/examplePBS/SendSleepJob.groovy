@@ -13,6 +13,7 @@ class SendSleepJob extends AbstractJobImpl {
     final int N_JOBS = 5
 
     public void execute() throws Exception {
+        /*
         String listOfPids = ""
         for(int i=0; i<N_JOBS; i++) {
             File cmdFile = File.createTempFile("test-", ".tmp", new File(System.getProperty("user.home")))
@@ -22,12 +23,14 @@ class SendSleepJob extends AbstractJobImpl {
                              """)
             cmdFile.setExecutable(true)
             // Make executable file a pbs job
-            String cmd = "qsub ${cmdFile.name}"
-            String response = pbsService.sendPbsJob(cmd)
+            //String cmd = "qsub ${cmdFile.name}"
+            //String response = pbsService.sendPbsJob(cmd)
             List<String> extractedPbsIds = pbsService.extractPbsIds(response)
             println extractedPbsIds
             listOfPids += extractedPbsIds.get(0) + ","
         }
-        addOutputParameter("pbsIds", listOfPids)
+        //addOutputParameter("pbsIds", listOfPids)
+         */
+        addOutputParameter("pbsIds", "1,")
     }
 }
