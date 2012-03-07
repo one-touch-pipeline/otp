@@ -1,8 +1,15 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
+import org.springframework.context.annotation.Scope
+
+@Scope("prototype")
 class SeqPlatformService {
 
     def fileTypeService
+
+    //private final Lock lock = new ReentrantLock()
 
     final String platformKeyName = "INSTRUMENT_PLATFORM"
     final String modelKeyName = "INSTRUMENT_MODEL"
@@ -77,7 +84,9 @@ class SeqPlatformService {
         } else {
             platform = SeqPlatform.findByNameAndModel(pEntry.value, null)
         }
-
+        if (platform == null) {
+            return false
+        }
         if (seqPlatform == null) {
             seqPlatform = platform
             return true
