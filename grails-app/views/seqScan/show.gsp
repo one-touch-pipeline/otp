@@ -101,7 +101,7 @@
                     </g:if><g:else>
 
                     <g:each var="alignment" in="${de.dkfz.tbi.otp.ngsdata.AlignmentLog.findAllBySeqTrack(track.seqTrack)}">
-                        <td>${alignment.alignmentParams.programName}</td>
+                        <td>${alignment.alignmentParams.pipeline}</td>
                     </g:each>
                     </g:else>
 

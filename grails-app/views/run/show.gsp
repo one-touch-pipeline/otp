@@ -154,7 +154,7 @@
                             ${file.fileName}</g:link>
                         </td>
 
-                        <td>${alignment.alignmentParams.programName}
+                        <td>${alignment.alignmentParams.pipeline}
                         <td>${alignment.executedBy}</td>
 
                         <td class="${file.fileExists}">on LSDF</td>
