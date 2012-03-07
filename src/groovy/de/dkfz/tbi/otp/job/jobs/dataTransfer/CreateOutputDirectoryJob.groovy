@@ -12,24 +12,35 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
     @Autowired
     PbsService pbsService
 
-    private String projectName
-
     @Override
     public void execute() throws Exception {
 
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
 
-        projectName = "PROJECT_NAME" //getParameterValueOrClass("project")
-        String[] dirs = lsdfFilesService.getListOfRunDirecotries(run, projectName)
-        dirs.each {String line ->
-            String exitCode = createDirectory(line)
-            println "creating directory finished with exit code " + exitCode
+        Set<String> projects = projects(run)
+        projects.each {String projectName ->
+            String[] dirs = lsdfFilesService.getListOfRunDirecotries(run, projectName)
+            dirs.each {String line ->
+                String exitCode = createDirectory(line)
+                println "creating directory finished with exit code " + exitCode
+            }
         }
     }
 
     private String createDirectory(String line) {
         String cmd = "mkdir -p " + line
         return pbsService.sendPbsJob(cmd)
+    }
+
+    private Set<String> projects(Run run) {
+        Set<String> projects = new HashSet<String>()
+        List<DataFile> files = DataFile.findAllByRun(run)
+        for(DataFile file in files) {
+            if (file.project) {
+                projects << file.project.name
+            }
+        }
+        return projects
     }
 }
