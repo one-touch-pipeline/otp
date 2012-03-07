@@ -20,12 +20,15 @@ class IndividualController {
             render ("Individual with id=${id} does not exist")
             return
         }
-        Vector<SeqType> seqTypes= new Vector<SeqType>();
+        List<SeqType> seqTypes= getSeqTypes(ind)
 
+        /*
         seqTypes.add(SeqType.findByNameAndLibraryLayout("WHOLE_GENOME", "PAIRED"))
         seqTypes.add(SeqType.findByNameAndLibraryLayout("WHOLE_GENOME", "MATE_PAIR"))
+        seqTypes.add(SeqType.findByNameAndLibraryLayout("WHOLE_GENOME_BISULFITE", "PAIRED"))
         seqTypes.add(SeqType.findByNameAndLibraryLayout("RNA", "PAIRED"))
         seqTypes.add(SeqType.findByName("MI_RNA"))
+        */
 
         List<SeqScan> seqScans = new ArrayList<SeqScan>()
 
@@ -53,5 +56,22 @@ class IndividualController {
         List<Individual> inds =
             Individual.findAllByIdGreaterThan(ind.id, [sort: "id", order: "asc", max: 1])
         return (inds.size()>0) ? inds.get(0).id : ind.id
+    }
+
+    private List<SeqType> getSeqTypes(Individual ind) {
+        List<SeqType> allSeqTypes = SeqType.list([sort: "id", order:"asc"])
+        List<SeqType> seqTypes = new ArrayList<SeqType>()
+        allSeqTypes.each {SeqType type ->
+            Sample.findAllByIndividual(ind).each {Sample sample ->
+                SeqScan.findAllBySample(sample).each {SeqScan scan -> 
+                    if (scan.seqType.equals(type)) {
+                        if (!seqTypes.contains(type)) {
+                            seqTypes << type 
+                        }
+                    }
+                }
+            }
+        }
+        return seqTypes
     }
 }
