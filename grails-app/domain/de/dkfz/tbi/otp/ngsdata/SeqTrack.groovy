@@ -8,11 +8,11 @@ class SeqTrack {
     long nBasePairs = 0
     long nReads = 0
     int insertSize = -1
-    String pipelineVersion
     Run run
     Sample sample
     SeqType seqType
     SeqPlatform seqPlatform
+    SoftwareTool pipelineVersion
 
     static belongsTo = [
         Run,
