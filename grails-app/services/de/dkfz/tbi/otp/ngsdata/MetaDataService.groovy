@@ -213,7 +213,7 @@ class MetaDataService {
      */
     private void fillVbpFileName(DataFile dataFile) {
         if (needsVBPNameChange(dataFile)) {
-            String lane = getMetaDataEntry(dataFile, "LANE_NO")
+            String lane = metaDataValue(dataFile, "LANE_NO")
             String readId = readStringFormFileName(dataFile.fileName)
             String name =  "s_" + lane + "_" + readId + "_sequence.txt.gz"
             dataFile.vbpFileName = name
@@ -291,6 +291,12 @@ class MetaDataService {
         return MetaDataEntry.findByDataFileAndKey(file, key)
     }
 
+    private String metaDataValue(DataFile file, String keyName) {
+        MetaDataKey key = MetaDataKey.findByName(keyName)
+        MetaDataEntry entry = MetaDataEntry.findByDataFileAndKey(file, key)
+        return entry.value
+    }
+
     /**
      * Assign a file type object to e given DataFile
      * the assignment is based on two sources of information:
@@ -326,22 +332,20 @@ class MetaDataService {
         if (entry) {
             return
         }
+        RunInitialPath initialPath = dataFile.runInitialPath
         List<SeqType> types = SeqType.list()
-        for (int iType = 0; iType < types.size(); iType++) {
-            List<RunInitialPath> initalPaths = RunInitialPath.findAllByRun(run)
-            for(RunInitialPath initialPath in initalPaths) {
-                if (initialPath.mdPath.contains(types[iType].dirName)) {
-                    String value = types[iType].name
-                    log.debug("\tassiginig to ${value}")
-                    entry = new MetaDataEntry (
-                        value: value,
-                        source: MetaDataEntry.Source.SYSTEM,
-                        key: key
-                    )
-                    entry.dataFile = dataFile
-                    entry.save(flush: true)
-                    return
-                }
+        for (SeqType type in types) {
+            if (initialPath.mdPath.contains(type.dirName)) {
+                String value = type.name
+                log.debug("\tassiginig to ${value}")
+                entry = new MetaDataEntry (
+                    value: value,
+                    key: key,
+                    source: MetaDataEntry.Source.SYSTEM,
+                    dataFile: dataFile
+                )
+                entry.save(flush: true)
+                return
             }
         }
     }
