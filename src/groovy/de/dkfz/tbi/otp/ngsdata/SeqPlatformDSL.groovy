@@ -6,7 +6,7 @@ class SeqPlatformDSL {
         SeqPlatform platform = new SeqPlatform(name: vendor, model: model)
         assert(platform.save())
         c.name = {String name ->
-         assert((new SeqPlatformModelIdentifier(seqPlatform: platform, name: name)).save())
+            assert((new SeqPlatformModelIdentifier(seqPlatform: platform, name: name)).save())
         }
         c()
         assert(platform.save(flush: true))
