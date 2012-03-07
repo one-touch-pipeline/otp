@@ -4,6 +4,7 @@ plan("loadMetaData") {
     start("start", "metaDataStartJob")
     job("registerInputFiles", "registerInputFilesJob")
     job("loadMetaData", "metaDataJob")
+    job("blackmailRun", "blackmailRunJob")
     job("validateMetadata", "validateMetadataJob")
     job("validatePlatform", "validatePlatformJob")
     job("buildExecutionDate", "buildExecutionDateJob")
