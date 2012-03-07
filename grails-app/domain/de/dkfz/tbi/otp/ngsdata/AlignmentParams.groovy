@@ -2,19 +2,17 @@ package de.dkfz.tbi.otp.ngsdata
 
 class AlignmentParams {
 
-    String programName
-    String programVersion
+    SoftwareTool pipeline
     String genome
     String params
 
     static constraints = {
-        programName(blank: false)
-        programVersion(nullable: true)
+        pipeline()
         genome(nullable: true)
         params(nullable: true)
     }
 
     String toString() {
-        "${programName} ${programVersion}"
+        pipeline.toString()
     }
 }
