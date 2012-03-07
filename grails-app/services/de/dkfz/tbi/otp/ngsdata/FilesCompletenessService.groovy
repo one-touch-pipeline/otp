@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 class FilesCompletenessService {
 
     def lsdfFilesService
+    def fileTypeService
     /**
      * Dependency injection of Grails Application
      */
@@ -25,13 +26,10 @@ class FilesCompletenessService {
             throw new ProcessingException("No data file provided for the given run.")
         }
         dataFiles.each {DataFile dataFile ->
-            if (dataFile.fileType.type == FileType.Type.SEQUENCE ||
-            dataFile.fileType.type == FileType.Type.ALIGNMENT) {
-                String path = lsdfFilesService.getFileInitialPath(dataFile)
-                if (!lsdfFilesService.fileExists(path)) {
-                    allExists = false
-                    println "missing file ${path}"
-                }
+            String path = lsdfFilesService.getFileInitialPath(dataFile)
+            if (!lsdfFilesService.fileExists(path)) {
+                allExists = false
+                println "missing file ${path}"
             }
         }
         return allExists
@@ -64,7 +62,7 @@ class FilesCompletenessService {
                 allExists = false
             }
             String path = lsdfFilesService.getFileFinalPath(dataFile.id)
-            println "File ${path} exists: ${exists}"
+            //println "File ${path} exists: ${exists}"
             fillFileStatistics(dataFile, exists)
         }
         if (allExists) {
@@ -75,9 +73,6 @@ class FilesCompletenessService {
     }
 
     private boolean hasFinalLocation(DataFile dataFile) {
-        if (dataFile.fileType.type == FileType.Type.METADATA) {
-            return false
-        }
         if (lsdfFilesService.getFileFinalPath(dataFile.id) == null) {
             return false
         }
@@ -132,7 +127,7 @@ class FilesCompletenessService {
             }
             dataFile.fileLinked = exists
             dataFile.save(flush: true)
-            println dataFile.fileName + " " + path  + " " + exists
+            //println dataFile.fileName + " " + path  + " " + exists
         }
         return allLinked
     }

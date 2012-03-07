@@ -10,8 +10,9 @@ class LsdfFilesService {
      * of the given dataFile
      */
     public String getFileInitialPath(DataFile dataFile) {
+        // TODO: handle runs directories starting with / and with /run
         Run run = dataFile.run
-        return run.dataPath + "/run" + run.name + "/" +
+        return dataFile.runInitialPath.dataPath + "/run" + run.name + "/" +
             dataFile.pathName + "/" + dataFile.fileName
     }
 
@@ -73,9 +74,6 @@ class LsdfFilesService {
             log.debug("File not used in seqTrack, location undefined [${file}]")
             return null
         }
-        //if (file.fileType.type == FileType.Type.METADATA) {
-        //    return metaDataFinalPath(file)
-        //}
         return sequenceDataFinalPath(file)
         // TODO check if correct for merged bam files
     }
