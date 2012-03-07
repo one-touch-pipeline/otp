@@ -18,7 +18,7 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
     final int MAX_RUNNING = 1
     final String name = "seqScanWorkflow"
 
-    @Scheduled(fixedRate=5000l)
+    @Scheduled(fixedRate=2000l)
     void execute() {
         if (!getExecutionPlan() || !getExecutionPlan().enabled) {
             //println("${name}: execution plan not set or not active")
@@ -29,7 +29,7 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
             //println "${name}: ${numberOfRunning} processes already running"
             return
         }
-        List<Run> runs = Run.findAllByComplete(false)
+        List<Run> runs = Run.findAllByCompleteAndBlacklisted(false, false)
         if (runs.size() > 0) {
             //println "${name}: runs processing running"
             return
