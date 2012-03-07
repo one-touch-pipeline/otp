@@ -2,14 +2,28 @@ package de.dkfz.tbi.otp.ngsdata
 
 class RunFinder {
 
+    String dataPath = "$BQ_ROOTPATH/ftp/"
+    String project = null
+    String type = null
     SeqCenter seqCenter = null
+    boolean transfer = false
+    String typeLimit = null
 
-    public void findRuns(String basePath) {
-        File baseDir = buildDirectory(basePath)
+    public void setSeqType(String seqTypeDirName) {
+        typeLimit = seqTypeDirName
+    }
+
+    public void findRuns(String basePath, String project, String dataPath) {
+        this.project = project
+        if (dataPath) {
+            this.dataPath = dataPath
+            transfer = true
+        }
+        File baseDir = buildDirectory("${basePath}/${project}/sequencing/")
         String[] seqTypeNames = baseDir.list()
         for(String seqTypeName in seqTypeNames) {
             if (validSeqType(seqTypeName)) {
-                analyzeSeqType(basePath, seqTypeName)
+                analyzeSeqType(baseDir.getPath(), seqTypeName)
             }
         }
     }
@@ -23,8 +37,15 @@ class RunFinder {
     }
 
     private boolean validSeqType(String seqTypeName) {
+        if (typeLimit && seqTypeName != typeLimit) {
+            return false
+        }
         SeqType type = SeqType.findByDirName(seqTypeName)
-        return (boolean)type
+        if (type) {
+            this.type = type.dirName
+            return true
+        }
+        return false
     }
 
     private void analyzeSeqType(String baseDir, String seqType) {
@@ -56,14 +77,17 @@ class RunFinder {
 
     private void registerRun(String baseDir, String runDirName) {
         final String signature = "run"
-        final String dataPath = "/icgc/ftp/"
+        String path = dataPath
+        if (transfer) {
+            path = "${dataPath}/${project}/sequencing/${type}/${seqCenter.dirName}"
+        }
         if (!runDirName.contains(signature)) {
             return
         }
         String runName = runDirName.substring(3)
         Run run = findOrCreateRun(runName)
         RunInitialPath initialPath = new RunInitialPath(
-            dataPath: dataPath,
+            dataPath: path,
             mdPath: baseDir,
             run: run
         )
