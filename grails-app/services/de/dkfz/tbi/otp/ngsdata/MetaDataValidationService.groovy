@@ -31,6 +31,8 @@ class MetaDataValidationService {
                         allValid = false
                    }
                 }
+                addMissingEntries(dataFile)
+                combineLaneAndIndex(dataFile)
                 dataFile.save(flush: true)
             }
         } finally {
@@ -76,6 +78,11 @@ class MetaDataValidationService {
                 break
             case "INSERT_SIZE":
                 entry.status = (checkAndCorrectInsertSize(entry)) ? valid : invalid
+                break
+            case "PIPELINE_VERSION":
+            case "ALIGN_TOOL":
+                boolean status = checkSoftwareTool(entry)
+                entry.status = (status) ? valid : invalid
                 break
         }
         entry.save(flush: true)
@@ -171,6 +178,67 @@ class MetaDataValidationService {
         return false
     }
 
+    private boolean checkSoftwareTool(MetaDataEntry entry) {
+        SoftwareToolIdentifier idx = SoftwareToolIdentifier.findByName(entry.value)
+        if (idx) {
+            return true
+        }
+        if (entry.value.isAllWhitespace()) {
+            ChangeLog changeLog = buildChangeLog(
+                entry.id, entry.value, "unknown", "changing blank to unknown"
+            )
+            changeLog.save(flush: true)
+            entry.value = "unknown"
+            entry.source = MetaDataEntry.Source.SYSTEM
+            entry.save()
+            return true
+        }
+        return false
+    }
+
+    private void addMissingEntries(DataFile dataFile) {
+        addAlignmentToolIfNeeded(dataFile)
+    }
+
+    private void addAlignmentToolIfNeeded(DataFile file) {
+        if (file.fileType.type != FileType.Type.ALIGNMENT) {
+            return
+        }
+        MetaDataKey key = MetaDataKey.findByName("ALIGN_TOOL")
+        MetaDataEntry entry = MetaDataEntry.findByDataFileAndKey(file, key)
+        if (entry) {
+            return
+        }
+        entry = new MetaDataEntry(
+            dataFile: file,
+            key: key,
+            value: "unknown",
+            source: MetaDataEntry.Source.SYSTEM,
+            status: MetaDataEntry.Status.VALID
+        )
+        entry.save(flush: true)
+        String cmnt = "adding missing entry ALIGN_TOOL"
+        ChangeLog changeLog = buildChangeLog(entry.id, "", "unknown", cmnt)
+        changeLog.save(flush: true)
+    }
+
+    private void combineLaneAndIndex(DataFile file) {
+        MetaDataEntry index = metaDataEntry(file, "INDEX_NO")
+        if (!index) {
+            return
+        }
+        MetaDataEntry lane = metaDataEntry(file, "LANE_NO")
+        String oldValue = lane.value
+        String value = lane.value + "_" + index.value
+        lane.value = value
+        lane.source = MetaDataEntry.Source.SYSTEM
+        lane.save(flush: true)
+
+        String cmnt = "combinig lane_no and index_no"
+        ChangeLog changeLog = buildChangeLog(lane.id, oldValue, value, cmnt)
+        changeLog.save(flush: true)
+    }
+
     private ChangeLog buildChangeLog(long rowId, String from, String to, String comment) {
         ChangeLog changeLog = new ChangeLog(
             rowId : rowId,
@@ -182,5 +250,10 @@ class MetaDataValidationService {
             source : ChangeLog.Source.SYSTEM
         )
         return changeLog
+    }
+
+    private MetaDataEntry metaDataEntry(DataFile file, String keyName) {
+        MetaDataKey key = MetaDataKey.findByName(keyName)
+        return MetaDataEntry.findByDataFileAndKey(file, key)
     }
 }
