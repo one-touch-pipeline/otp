@@ -15,21 +15,15 @@ class CreateViewByPidJob extends AbstractJobImpl {
     @Autowired
     PbsService pbsService
 
-    private String projectName
-
     @Override
     public void execute() throws Exception {
 
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
-        projectName = "PROJECT_NAME" //getParameterValueOrClass("project")
 
-        List<DataFile> dataFiles = DataFile.findAllByRun(run)
+        List<DataFile> dataFiles = DataFile.findAllByRunAndProjectIsNotNull(run)
         for(DataFile dataFile in dataFiles) {
             println dataFile.fileName + " " + dataFile.project
-            if (dataFile.project.toString() != projectName) {
-                continue
-            }
             linkDataFile(dataFile)
         }
     }
