@@ -14,6 +14,7 @@ class MergingService {
      * @param ind
      * @param types
      */
+    // TODO check if needed
     List<String> printAllMergedBamForIndividual(Individual ind, List<SeqType> types) {
         if (!ind) {
             throw new IllegalArgumentException("Individual may not be null")
@@ -56,16 +57,27 @@ class MergingService {
             Sample.findAllByIndividual(ind).each { Sample sample ->
                 String path = baseDir + getRelativePathToMergedAlignment(type, sample)
                 File mergedDir = new File(path)
-                //println mergedDir
                 mergedDir.list().each { String fileName ->
-                    //println "\t${fileName}"
-                    if (fileName.endsWith(".bam")) {
-                        log.debug("Discovered ${fileName}")
+                    if (isNewBamFile(path, fileName)) {
                         buildSeqScan(sample, type, path, fileName)
                     }
                 }
             }
         }
+    }
+
+    private boolean isNewBamFile(String path, String fileName) {
+        if (!fileName.endsWith(".bam")) {
+            return false
+        }
+        File bamFile = new File(path, fileName)
+        if (!bamFile.canRead()) {
+            return false
+        }
+        if (DataFile.findByPathNameAndFileName(path, fileName)) {
+            return false
+        }
+        return true
     }
 
     /**
@@ -107,21 +119,12 @@ class MergingService {
      * @param fileName
      */
     private void buildSeqScan(Sample sample, SeqType seqType,
-    String pathToBam, String fileName) {
-        // check if already exists
-        DataFile file = DataFile.findByFileNameAndPathName(fileName, pathToBam)
-        if (!file) {
-            log.debug("File ${fileName} in ${pathToBam} already registered")
-            return
-        }
-        // parse header
+              String pathToBam, String fileName) {
+
         File bamFile = new File(pathToBam, fileName)
-        if (!bamFile.canRead()) {
-            log.debug("Can not read file ${bamFile}")
-            return
-        }
         List<String> header = parseBamHeader(bamFile)
         if (!header) {
+            // TODO exception
             log.debug("No hader for file ${bamFile}")
             return
         }
@@ -132,7 +135,6 @@ class MergingService {
         List<SeqScan> seqScans = getSeqScans(sample, seqType)
         // check if the matching seq scan exists
         SeqScan matchingScan = getMatchingSeqScan(seqScans, tracks)
-        // database
         // get alignment log from header
         AlignmentParams alignParams = getAlignmentParamsFromHeader(bamFile)
         // build SeqScan
@@ -153,6 +155,9 @@ class MergingService {
                 )
         bamDataFile.dateFileSystem = new Date(bamFile.lastModified())
         bamDataFile.fileSize = bamFile.length()
+        bamDataFile.validate()
+        println bamDataFile.errors
+        bamDataFile.save(flush:true)
         // create Merging Log
         MergingLog mergingLog = new MergingLog(
                 alignmentParams: alignParams,
@@ -181,33 +186,28 @@ class MergingService {
      * @return
      */
     private SeqScan getMatchingSeqScan(List<SeqScan> seqScans, List<SeqTrack> tracks) {
-        SeqTrack[] arrTracks = (SeqTrack[]) tracks.toArray()
-        for (int i=0; i<seqScans.size(); i++) {
-            SeqScan scan = seqScans.get(i)
-            if (SeqTrack.countBySeqScan(scan) != tracks.size()) {
-                log.debug("size does not match ${SeqTrack.countBySeqScan(scan)} ${tracks.size()}")
-                continue
-            }
-            boolean match = true
-            List<SeqTrack> scanTracks = (SeqTrack[])SeqTrack.findAllBySeqScan(scan)
-            for (int j=0; j<scanTracks.size(); j++) {
-                long refId = scanTracks[j].id
-                boolean hasPair = false
-                for (int k=0; k<arrTracks.length; k++) {
-                    if (arrTracks[k].id == refId) {
-                        hasPair = true
-                    }
-                }
-                if (!hasPair) {
-                    match = false
-                }
-            }
-            if (match) {
-                log.debug("SeqScan Found !!")
+        List<MergingAssignment> assignments = MergingAssignment.findAllBySeqTrackInList(tracks)
+        for(MergingAssignment assignment in assignments) {
+            SeqScan scan = assignment.seqScan
+            if (checkIfCorrect(scan, tracks)) {
                 return scan
             }
         }
         return null
+    }
+
+    private boolean checkIfCorrect(SeqScan scan, List<SeqTrack> tracks) {
+        List<MergingAssignment> assignments = MergingAssignment.findAllBySeqScan(scan)
+        if (assignments.size() != tracks.size()) {
+            return false
+        }
+        for(MergingAssignment assignment in assignments) {
+            SeqTrack seqTrack = assignment.seqTrack
+            if (!tracks.contains(seqTrack)) {
+                return false
+            }
+        }
+        return true
     }
 
     /**
@@ -239,7 +239,7 @@ class MergingService {
             }
             SeqTrack seqTrack = getSeqTrack(sample, seqType, runName, lane)
             if (!seqTrack) {
-                log.debug("no SeqTrack for ${runName} ${lane}")
+                println "no SeqTrack for ${runName} ${lane}"
                 continue
             } else {
                 tracks << seqTrack
@@ -348,8 +348,7 @@ class MergingService {
         text.eachLine {String line ->
             if (line.startsWith(lineStart)) {
                 List<String> tokens = line.tokenize("\t")
-                for (int i=0; i<tokens.size(); i++) {
-                    String token = tokens.get(i)
+                for (String token in tokens) {
                     if (token.startsWith(nameTag)) {
                         progName = token.substring(3)
                     }
@@ -359,12 +358,15 @@ class MergingService {
                 }
             }
         }
-        AlignmentParams alignParams = AlignmentParams.findByProgramNameAndProgramVersion(progName, progVersion)
+        println "${progName} ${progVersion}"
+        SoftwareTool pipeline = 
+            SoftwareTool.findByProgramNameIlikeAndProgramVersion(progName, progVersion)
+        println pipeline
+        AlignmentParams alignParams = AlignmentParams.findByPipeline(pipeline)
         if (!alignParams) {
             alignParams = new AlignmentParams(
-                    programName: progName,
-                    programVersion: progVersion
-                    )
+                pipeline: pipeline
+            )
             alignParams.save()
         }
         alignParams.refresh()
