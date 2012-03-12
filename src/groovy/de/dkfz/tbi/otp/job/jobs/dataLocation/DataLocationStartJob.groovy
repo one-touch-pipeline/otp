@@ -15,13 +15,13 @@ class DataLocationStartJob extends AbstractStartJobImpl {
 
     final int MAX_RUNNING = 1
 
-    @Scheduled(fixedRate=5000l)
+    @Scheduled(fixedRate=10000l)
     void execute() {
         if (!hasOpenSlots()) {
             return
         }
         int n = 0;
-        List<Run> runs = Run.findAllByComplete(true)
+        List<Run> runs = Run.findAllByCompleteAndFinalLocation(true, false)
         for(Run run in runs) {
             if (!hasOpenSlots()) {
                 break
