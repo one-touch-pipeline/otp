@@ -57,6 +57,7 @@ class DataFile {
         seqTrack(nullable: true)
         mergingLog(nullable: true)
         alignmentLog(nullable: true)
+        runInitialPath(nullable: true)
     }
 
     String fileSizeString() {
