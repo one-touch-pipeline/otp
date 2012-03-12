@@ -204,7 +204,7 @@ class MetaDataValidationService {
         if (file.fileType.type != FileType.Type.ALIGNMENT) {
             return
         }
-        MetaDataKey key = MetaDataKey.findByName("ALIGN_TOOL")
+        MetaDataKey key = getKey("ALIGN_TOOL")
         MetaDataEntry entry = MetaDataEntry.findByDataFileAndKey(file, key)
         if (entry) {
             return
@@ -216,15 +216,26 @@ class MetaDataValidationService {
             source: MetaDataEntry.Source.SYSTEM,
             status: MetaDataEntry.Status.VALID
         )
+        //entry.validate()
+        //println entry.errors
         entry.save(flush: true)
         String cmnt = "adding missing entry ALIGN_TOOL"
         ChangeLog changeLog = buildChangeLog(entry.id, "", "unknown", cmnt)
         changeLog.save(flush: true)
     }
 
+    private MetaDataKey getKey(String keyName) {
+        MetaDataKey key = MetaDataKey.findByName(keyName)
+        if (!key) {
+            key = new MetaDataKey(name: keyName)
+            key.save(flush: true)
+        }
+        return key
+    }
+
     private void combineLaneAndIndex(DataFile file) {
         MetaDataEntry index = metaDataEntry(file, "INDEX_NO")
-        if (!index) {
+        if (!index || index.value.isAllWhitespace()) {
             return
         }
         MetaDataEntry lane = metaDataEntry(file, "LANE_NO")
