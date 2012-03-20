@@ -54,6 +54,7 @@
 <%--    ${mergedBams}--%>
 
     <H1>Sequencing Scans</H1>
+    <g:form>
 
     <g:each var="type" in="${seqTypes}">
 
@@ -73,13 +74,14 @@
                 <td class="microHeader">#bases</td>
                 <td class="microHeader">insert size</td>
                 <td class="microHeader">merging</td>
+                <td class="microHeader">IGV</td>
            </tr> 
            <g:each var="scan" in="${seqScans}">
                <g:if test="${scan.seqType == type}">
                <tr>
                     <td>
                         <g:link controller="seqScan" action="show" id="${scan.id}">
-                            ${scan.id}
+                            |details|
                         </g:link>
                     </td>
                     <td><strong>${scan.sample.type}</strong></td>
@@ -91,19 +93,27 @@
                     <td>${scan.basePairsString()}</td>
                     <td>${scan.insertSize}</td>
 
+                    <g:if test="${scan.nLanes > 1}">
                     <td class="${de.dkfz.tbi.otp.ngsdata.MergingLog.countBySeqScan(scan) != 0}">
                         <g:formatBoolean boolean="${de.dkfz.tbi.otp.ngsdata.MergingLog.countBySeqScan(scan) != 0}"
                             true="merged" false="not merged"
                         />
                     </td>
+                    </g:if>
+                    <g:else><td></td></g:else>
+                    <td><g:checkBox name="${scan.id}" value="${false}"/></td>
                </tr>
                </g:if>
            </g:each>
         </table>
       </div>
-
     </g:each>
-
+    <h1>Data Access</h1>
+        <div class="myContent" align="right">
+            <g:actionSubmit class="button" value="Start IGV" action="igvStart"/>
+            <g:actionSubmit class="button" value="Get IGV Session File" action="igvDownload"/>
+        </div>
+    </g:form>
 
   </div>
 </body>

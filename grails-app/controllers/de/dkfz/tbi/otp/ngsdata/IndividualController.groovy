@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 class IndividualController {
 
     def mergingService
+    def igvSessionFileService
 
     def scaffold = Individual
 
@@ -15,35 +16,21 @@ class IndividualController {
 
     def show = {
         int id = params.id as int
+        flash.ind=id
         Individual ind = Individual.get(id)
         if (!ind) {
             render ("Individual with id=${id} does not exist")
             return
         }
         List<SeqType> seqTypes= getSeqTypes(ind)
-
-        /*
-        seqTypes.add(SeqType.findByNameAndLibraryLayout("WHOLE_GENOME", "PAIRED"))
-        seqTypes.add(SeqType.findByNameAndLibraryLayout("WHOLE_GENOME", "MATE_PAIR"))
-        seqTypes.add(SeqType.findByNameAndLibraryLayout("WHOLE_GENOME_BISULFITE", "PAIRED"))
-        seqTypes.add(SeqType.findByNameAndLibraryLayout("RNA", "PAIRED"))
-        seqTypes.add(SeqType.findByName("MI_RNA"))
-        */
-
         List<SeqScan> seqScans = new ArrayList<SeqScan>()
-
         Sample.findAllByIndividual(ind).each {Sample sample ->
             SeqScan.findAllBySample(sample).each {SeqScan seqScan -> seqScans << seqScan }
         }
-
-        List<String> mergedBams =
-                mergingService.printAllMergedBamForIndividual(ind, seqTypes)
-
         int prevId = findPrevious(ind)
         int nextId = findNext(ind)
 
-        [ind: ind, seqTypes: seqTypes, seqScans: seqScans, mergedBams: mergedBams,
-                    prevId: prevId, nextId: nextId]
+        [ind: ind, seqTypes: seqTypes, seqScans: seqScans, prevId: prevId, nextId: nextId]
     }
 
     private int findPrevious(Individual ind) {
@@ -73,5 +60,26 @@ class IndividualController {
             }
         }
         return seqTypes
+    }
+
+    def igvStart = {
+        println params
+        println flash
+
+        List<SeqScan> scans = new ArrayList<SeqScan>()
+        params.each {
+            if (it.value == "on") {
+                SeqScan scan = SeqScan.get(it.key as int)
+                scans << scan
+            }
+        }
+        String url = igvSessionFileService.buildSessionFile(scans)
+        println "Redirecting: ${url}"
+        redirect(url: url)
+    }
+
+    def igvDownload = {
+        println "Download"
+        render "downloging ..."
     }
 }
