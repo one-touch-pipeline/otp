@@ -93,7 +93,7 @@ class SeqScanService {
         SeqTrack seqTrack = tracks.get(0)
         Sample sample = seqTrack.sample
         SeqPlatform seqPlatform = seqTrack.seqPlatform
-        SeqType seqType = seqTrack.seqType
+        SeqType seqType = getSeqType(tracks)
         // create new seqScan
         SeqScan seqScan = new SeqScan(
                 alignmentParams : alignParams,
@@ -116,6 +116,35 @@ class SeqScanService {
         seqType.save(flush: true)
 
         return seqScan
+    }
+
+    private SeqType getSeqType(List<SeqTrack> tracks) {
+        String name = tracks.get(0).seqType.name
+        String library = tracks.get(0).seqType.libraryLayout
+        for(SeqTrack track in tracks) {
+            name = getNewType(name, track.seqType.name)
+            library = getNewLibrary(library, track.seqType.libraryLayout)
+        }
+        SeqType type = SeqType.findByNameAndLibraryLayout(name, library)
+        return type
+    }
+
+    private String getNewType(String oldType, String newType) {
+        final String lower = "EXON"
+        final String higher = "WHOLE_GENOME"
+        if (oldType == lower && newType == higher) {
+            return higher
+        }
+        return oldType
+    }
+
+    private String getNewLibrary(String oldType, String newType) {
+        final String lower = "SINGLE"
+        final String higher = "PAIRED"
+        if (oldType == lower && newType == higher) {
+            return higher
+        }
+        return oldType
     }
 
     /**
@@ -180,7 +209,8 @@ class SeqScanService {
                 defined = true
                 insertSize += iSize
             } else {
-                if (mergingAssignment.seqTrack.insertSize != iSize) {
+                int thisSize = mergingAssignment.seqTrack.insertSize
+                if (thisSize > iSize + 5 || thisSize < iSize - 5) {
                     insertSize += "!"
                 }
             }
