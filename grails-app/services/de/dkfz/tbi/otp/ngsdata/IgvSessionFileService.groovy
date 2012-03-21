@@ -7,7 +7,7 @@ class IgvSessionFileService {
     private final String webServer = "https://otp.local"
     private final String header = '<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n'
 
-    private final String igvBase = "http://www.broadinstitute.org/igv/projects/current/igv_lm.jnlp?file="
+    private final String igvBase = "http://www.broadinstitute.org/igv/projects/current/igv.php?sessionURL="
     private final String myURL = "https://otp.local/otpdevel/igvSessionFile/file/"
 
     String buildSessionFile(List<SeqScan> scans) {
