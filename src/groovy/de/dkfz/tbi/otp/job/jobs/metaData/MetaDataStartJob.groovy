@@ -15,7 +15,7 @@ class MetaDataStartJob extends AbstractStartJobImpl {
 
     final int MAX_RUNNING = 1
 
-    @Scheduled(fixedRate=5000l)
+    @Scheduled(fixedRate=10000l)
     void execute() {
         if (!getExecutionPlan() || !getExecutionPlan().enabled) {
             println("meta data Execution plan not set or not active")
