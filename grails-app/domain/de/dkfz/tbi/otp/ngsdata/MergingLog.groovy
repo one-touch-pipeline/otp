@@ -6,7 +6,7 @@ class MergingLog {
     enum QCState {NON, PASS, BLOCK}
     QCState qcState = QCState.NON
 
-    enum Execution {UNKNOWN, SYSTEM, UPLOAD}
+    enum Execution {UNKNOWN, SYSTEM, UPLOAD, DISCOVERY}
     Execution executedBy = Execution.UNKNOWN
 
     enum Status {DECLARED, PROCESSING, FINISHED}
