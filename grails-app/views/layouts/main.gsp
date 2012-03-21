@@ -26,12 +26,12 @@
 
 		<div class="nav" role="navigation">
 			<ul>
-				<li><a href="/otp/PROJECT_NAMEOverview/index">Overview</a></li>
-				<li><a href="/otp/individual/index">Individuals</a></li>
-				<li><a href="/otp/run/index">Runs</a></li>
-				<li><a href="/otp/seqScan/index">Sequence Scans</a></li>
-				<li><a href="/otp/processes/index">Processes</a></li>
-				<li><a href="/otp/login/index">| Login |</a></li>
+    			<li><g:link controller="overviewMB" action="index">Overview</g:link></li>
+				<li><g:link controller="individual" action="index">Individuals</g:link></li>
+				<li><g:link controller="run" action="index">Runs</g:link></li>
+				<li><g:link controller="seqScan" action="index">Sequence Scans</g:link></li>
+				<li><g:link controller="processes" action="index">Processes</g:link></li>
+				<li><g:link controller="login" action="index">| Login |</g:link></li>
 			</ul>
 		</div>
 
