@@ -70,11 +70,11 @@ class MergingService {
         if (!fileName.endsWith(".bam")) {
             return false
         }
-        File bamFile = new File(path, fileName)
-        if (!bamFile.canRead()) {
+        if (DataFile.findByPathNameAndFileName(path, fileName)) {
             return false
         }
-        if (DataFile.findByPathNameAndFileName(path, fileName)) {
+        File bamFile = new File(path, fileName)
+        if (!bamFile.canRead()) {
             return false
         }
         return true
@@ -122,15 +122,15 @@ class MergingService {
               String pathToBam, String fileName) {
 
         File bamFile = new File(pathToBam, fileName)
-        List<String> header = parseBamHeader(bamFile)
-        if (!header) {
-            // TODO exception
-            log.debug("No hader for file ${bamFile}")
+        String text = getBamFileHeader(bamFile)
+        List<SeqTrack> tracks = getSeqTracks(text)
+        if (!tracks) {
+            return
+        }
+        if (!assertSample(sample, tracks)) {
             return
         }
 
-        // get list of seq Tracks
-        List<SeqTrack> tracks = getSeqTracks(sample, seqType, header)
         // get all possible seq scans
         List<SeqScan> seqScans = getSeqScans(sample, seqType)
         // check if the matching seq scan exists
@@ -141,6 +141,7 @@ class MergingService {
         if (!matchingScan) {
             log.debug("Building new SeqScan")
             matchingScan = seqScanService.buildSeqScan(tracks, alignParams)
+            checkIfObsolite(matchingScan)
         }
         // file type
         FileType mergedType = FileType.findByType(FileType.Type.MERGED)
@@ -161,7 +162,7 @@ class MergingService {
         // create Merging Log
         MergingLog mergingLog = new MergingLog(
                 alignmentParams: alignParams,
-                executedBy: MergingLog.Execution.UPLOAD,
+                executedBy: MergingLog.Execution.DISCOVERY,
                 status: MergingLog.Status.FINISHED
                 )
         mergingLog.save()
@@ -174,6 +175,128 @@ class MergingService {
         }
         matchingScan.validate()
         matchingScan.save(flush: true)
+    }
+
+    private List<SeqTrack> getSeqTracks(String text) {
+        final String lineStart = "@RG"
+        List<SeqTrack> seqTracks = new ArrayList<SeqTrack>()
+        String rgString = ""
+        int nLines = 0
+        text.eachLine {String line ->
+            if (line.startsWith(lineStart)) {
+                rgString += line + "\n"
+                nLines++
+                List<String> tokens = line.tokenize("\t")
+                SeqTrack track = null
+                track = parseTokensV1(tokens)
+                if (track) {
+                    seqTracks << track
+                    return
+                }
+                track = parseTokensV2(tokens)
+                if (track) {
+                    seqTracks << track
+                    return
+                }
+                track = parseTokensV3(tokens)
+                if (track) {
+                    seqTracks << track
+                    return
+                }
+                track = parseTokensV4(tokens)
+                if (track) {
+                    seqTracks << track
+                    return
+                }
+            }
+        }
+        if (seqTracks.size() != nLines) {
+            println "Number of tracks: ${seqTracks.size()} ${nLines}"
+            println rgString
+            return null
+        }
+        return seqTracks
+    }
+
+    /*
+    * parse format ID:runName_s_lane
+    */
+    private SeqTrack parseTokensV1(List<String> tokens) {
+        for(String token in tokens) {
+            if (token.startsWith("ID:")) {
+                int sepId = token.indexOf("_s_")
+                if (sepId > -1) {
+                    String runName = token.substring(3, sepId);
+                    String lane = token.substring(token.lastIndexOf("_")+1)
+                    println "${runName} ${lane}"
+                    return getSeqTrack(runName, lane)
+                }
+            }
+        }
+        return null
+    }
+
+    private SeqTrack parseTokensV2(List<String> tokens) {
+        for(String token in tokens) {
+            if (token.startsWith("ID:")) {
+                int sepId = token.indexOf("_lane")
+                if (sepId > -1) {
+                    String runName = token.substring(3, sepId);
+                    String lane = token.substring(sepId+5, sepId+6)
+                    println "${runName} ${lane}"
+                    return getSeqTrack(runName, lane)
+                }
+            }
+        }
+        return null
+    }
+
+    private SeqTrack parseTokensV3(List<String> tokens) {
+        String runName
+        String lane
+        for(String token in tokens) {
+            if (token.startsWith("SM:")) {
+                runName = token.substring(3)
+            }
+            if (token.startsWith("ID:")) {
+                int idxFrom = token.indexOf("_") + 1
+                int idxTo = token.indexOf(".")
+                if (idxTo > 0) {
+                    lane = token.substring(idxFrom, idxTo)
+                } else {
+                    lane = token.substring(idxFrom)
+                }
+            }
+        }
+        println "${runName} ${lane}"
+        return getSeqTrack(runName, lane)
+    }
+
+    private SeqTrack parseTokensV4(List<String> tokens) {
+        for(String token in tokens) {
+            if (token.contains("DS:")) {
+                token = token.substring(token.indexOf("DS:"))
+            }
+            if (token.startsWith("DS:")) {
+                String runName = token.substring(3)
+                int idx = runName.indexOf("_FC") + 3
+                String lane = runName.substring(idx)
+                println "${runName} ${lane}"
+                return getSeqTrack(runName, lane)
+            }
+        }
+        return null
+    }
+
+    private boolean assertSample(Sample sample, List<SeqTrack> tracks) {
+        for(SeqTrack track in tracks) {
+            if (track.sample.id != sample.id) {
+                //throw new SampleInconsistentException(sample.toString(), track.toString())
+                println "SAMPLE MIXUP ${sample} -- ${track}"
+                return false
+            }
+        }
+        return true
     }
 
     /**
@@ -220,12 +343,13 @@ class MergingService {
      * @param header - List of strings from bam file header
      * @return
      */
+    /*
     private List<SeqTrack> getSeqTracks(Sample sample, SeqType seqType, List<String> header) {
         final String separator = "_s_"
         final String preNumber = "_"
         List<SeqTrack> tracks = new Vector<SeqTrack>()
-        for (int i=0; i<header.size(); i++) {
-            String line = header.get(i)
+        for(String line in header) {
+            println line
             String runName
             String lane
             int sepId = line.indexOf(separator)
@@ -237,7 +361,8 @@ class MergingService {
                 runName = line.substring(0, sepId);
                 lane = line.substring(sepId + 5, sepId + 6)
             }
-            SeqTrack seqTrack = getSeqTrack(sample, seqType, runName, lane)
+            //SeqTrack seqTrack = getSeqTrack(sample, seqType, runName, lane)
+            SeqTrack seqTrack = getSeqTrack(runName, lane)
             if (!seqTrack) {
                 println "no SeqTrack for ${runName} ${lane}"
                 continue
@@ -246,6 +371,17 @@ class MergingService {
             }
         }
         return tracks
+    }
+    */
+
+    private SeqTrack getSeqTrack(String runName, String lane) {
+        String runString = runName
+        if (runName.startsWith("run")) {
+            runString = runName.substring(3)
+        }
+        Run run = Run.findByName(runString)
+        SeqTrack seqTrack = SeqTrack.findByRunAndLaneId(run, lane)
+        return seqTrack
     }
 
     /**
@@ -261,6 +397,7 @@ class MergingService {
      * @param lane
      * @return
      */
+    /*
     private SeqTrack getSeqTrack(Sample sample, SeqType seqType, String runName, String lane) {
         String runString = runName.substring(3) // removing "run"
         List<SeqTrack> seqTracks =
@@ -279,6 +416,7 @@ class MergingService {
         }
         return null
     }
+    */
 
     /**
      *
@@ -294,6 +432,26 @@ class MergingService {
     }
 
     /**
+     * 
+     * @param scan
+     * @return
+     */
+    private checkIfObsolite(SeqScan scan) {
+        int nLanes = scan.nLanes
+        List<SeqScan> allScans = getSeqScans(scan.sample, scan.seqType)
+        for(SeqScan otherScan in allScans) {
+            if (!otherScan.seqPlatform.equals(scan.seqPlatform)) {
+                continue
+            }
+            if (otherScan.nLanes > nLanes &&
+                otherScan.state == SeqScan.State.FINISHED) {
+                scan.state = SeqScan.State.OBSOLETE
+                scan.save()
+            }
+        }
+    }
+
+    /**
      *
      * This function parses header of a bam file.
      * It is intended to provide a list of run names and
@@ -304,6 +462,7 @@ class MergingService {
      * @param bamFile input file
      * @return list of strings, each string contains one run_lane id
      */
+    /*
     private List<String> parseBamHeader(File bamFile) {
         final String lineStart = "@RG"
         final String startToken = "ID:"
@@ -313,9 +472,9 @@ class MergingService {
         List<String> lines = new Vector<String>()
         text.eachLine {String line ->
             if (line.startsWith(lineStart)) {
+                lines << header 
                 List<String> tokens = line.tokenize("\t")
-                for (int i=0; i<tokens.size(); i++) {
-                    String token = tokens.get(i)
+                for (String token in tokens) {
                     // select id only
                     if (token.startsWith(startToken)) {
                         String runName = token.substring(startToken.size())
@@ -326,6 +485,7 @@ class MergingService {
         }
         return lines
     }
+    */
 
     /**
      * Parses header of bam file for obtain informations
@@ -359,9 +519,7 @@ class MergingService {
             }
         }
         println "${progName} ${progVersion}"
-        SoftwareTool pipeline = 
-            SoftwareTool.findByProgramNameIlikeAndProgramVersion(progName, progVersion)
-        println pipeline
+        SoftwareTool pipeline =  getPipeline(progName, progVersion)
         AlignmentParams alignParams = AlignmentParams.findByPipeline(pipeline)
         if (!alignParams) {
             alignParams = new AlignmentParams(
@@ -369,8 +527,22 @@ class MergingService {
             )
             alignParams.save()
         }
-        alignParams.refresh()
         return alignParams
+    }
+
+    private SoftwareTool getPipeline(String progName, String progVersion) {
+        SoftwareTool pipeline =
+            SoftwareTool.findByProgramNameIlikeAndProgramVersion(progName, progVersion)
+        if (!pipeline) {
+            pipeline = getDefaultPipeline()
+        }
+        return pipeline
+    }
+
+    private SoftwareTool getDefaultPipeline() {
+        final String defProgram = "Unknown"
+        final SoftwareTool.Type type = SoftwareTool.Type.ALIGNMENT
+        return SoftwareTool.findByProgramNameIlikeAndType(defProgram, type)
     }
 
     /**
