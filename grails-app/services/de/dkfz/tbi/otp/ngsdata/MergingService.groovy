@@ -131,10 +131,8 @@ class MergingService {
             return
         }
 
-        // get all possible seq scans
-        List<SeqScan> seqScans = getSeqScans(sample, seqType)
         // check if the matching seq scan exists
-        SeqScan matchingScan = getMatchingSeqScan(seqScans, tracks)
+        SeqScan matchingScan = getMatchingSeqScan(tracks)
         // get alignment log from header
         AlignmentParams alignParams = getAlignmentParamsFromHeader(bamFile)
         // build SeqScan
@@ -304,11 +302,10 @@ class MergingService {
      * This function analyzes seqSacan to check if it contains
      * all and only seqTracks from the provided list
      *
-     * @param seqScans
      * @param tracks
      * @return
      */
-    private SeqScan getMatchingSeqScan(List<SeqScan> seqScans, List<SeqTrack> tracks) {
+    private SeqScan getMatchingSeqScan(List<SeqTrack> tracks) {
         List<MergingAssignment> assignments = MergingAssignment.findAllBySeqTrackInList(tracks)
         for(MergingAssignment assignment in assignments) {
             SeqScan scan = assignment.seqScan
