@@ -43,8 +43,6 @@ class SeqScanServiceTests {
         assertFalse(run.validate())
         run.name = "testRun"
         run.complete = false
-        run.dataPath = dataPath
-        run.mdPath = mdPath
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
@@ -61,7 +59,9 @@ class SeqScanServiceTests {
         assert(individual.save())
         sample.individual = individual
         assert(sample.save())
-        SeqTrack seqTrack = new SeqTrack(laneId: "testLaneId", pipelineVersion: "2", run: run, seqType: seqType, seqPlatform: seqPlatform, sample: sample)
+        SoftwareTool softwareTool = new SoftwareTool(programName: "testProgram", type: SoftwareTool.Type.BASECALLING)
+        assert(softwareTool.save())
+        SeqTrack seqTrack = new SeqTrack(laneId: "testLaneId", pipelineVersion: softwareTool, run: run, seqType: seqType, seqPlatform: seqPlatform, sample: sample)
         assert(seqTrack.save())
         SeqScan seqScan = new SeqScan(sample: sample, seqType: seqType, seqPlatform: seqPlatform)
         assert(seqScan.save())
@@ -71,7 +71,7 @@ class SeqScanServiceTests {
         // already used seqTrack
         seqScanService.buildSeqScans()
         // unused seqTrack triggers processing
-        SeqTrack seqTrack2 = new SeqTrack(laneId: "testLaneId2", pipelineVersion: "2", run: run, seqType: seqType, seqPlatform: seqPlatform, sample: sample)
+        SeqTrack seqTrack2 = new SeqTrack(laneId: "testLaneId2", pipelineVersion: softwareTool, run: run, seqType: seqType, seqPlatform: seqPlatform, sample: sample)
         assert(seqTrack2.save())
         seqScanService.buildSeqScans()
     }
@@ -82,8 +82,6 @@ class SeqScanServiceTests {
         assertFalse(run.validate())
         run.name = "testRun"
         run.complete = false
-        run.dataPath = dataPath
-        run.mdPath = mdPath
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
@@ -100,7 +98,9 @@ class SeqScanServiceTests {
         assert(individual.save())
         sample.individual = individual
         assert(sample.save())
-        SeqTrack seqTrack = new SeqTrack(laneId: "testLaneId", pipelineVersion: "2", run: run, seqType: seqType, seqPlatform: seqPlatform, sample: sample)
+        SoftwareTool softwareTool = new SoftwareTool(programName: "testProgram", type: SoftwareTool.Type.BASECALLING)
+        assert(softwareTool.save())
+        SeqTrack seqTrack = new SeqTrack(laneId: "testLaneId", pipelineVersion: softwareTool, run: run, seqType: seqType, seqPlatform: seqPlatform, sample: sample)
         assert(seqTrack.save())
         SeqScan seqScan = new SeqScan(sample: sample, seqType: seqType, seqPlatform: seqPlatform)
         assert(seqScan.save())
@@ -109,7 +109,7 @@ class SeqScanServiceTests {
         assert(mergingAssignment.save())
         // already used seqTrack
         seqScanService.buildSeqScan(seqTrack)
-        SeqTrack seqTrack2 = new SeqTrack(laneId: "testLaneId2", pipelineVersion: "2", run: run, seqType: seqType, seqPlatform: seqPlatform, sample: sample)
+        SeqTrack seqTrack2 = new SeqTrack(laneId: "testLaneId2", pipelineVersion: softwareTool, run: run, seqType: seqType, seqPlatform: seqPlatform, sample: sample)
         assert(seqTrack2.save())
         // unused seqTrack triggers processing
         seqScanService.buildSeqScan(seqTrack2)
@@ -121,8 +121,6 @@ class SeqScanServiceTests {
         assertFalse(run.validate())
         run.name = "testRun"
         run.complete = false
-        run.dataPath = dataPath
-        run.mdPath = mdPath
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
@@ -139,15 +137,11 @@ class SeqScanServiceTests {
         assert(individual.save())
         sample.individual = individual
         assert(sample.save())
-        SeqTrack seqTrack = new SeqTrack(laneId: "testLaneId", pipelineVersion: "2", run: run, seqType: seqType, seqPlatform: seqPlatform, sample: sample)
+        SoftwareTool softwareTool = new SoftwareTool(programName: "testProgram", type: SoftwareTool.Type.BASECALLING)
+        assert(softwareTool.save())
+        SeqTrack seqTrack = new SeqTrack(laneId: "testLaneId", pipelineVersion: softwareTool, run: run, seqType: seqType, seqPlatform: seqPlatform, sample: sample)
         assert(seqTrack.save())
-        AlignmentParams alignmentParams = new AlignmentParams(programName: "testProgram")
-        assert(alignmentParams.save())
-        SeqScan seqScan = seqScanService.buildSeqScan([seqTrack], alignmentParams)
-        assertEquals(individual.mockFullName, seqScan.sample.individual.mockFullName)
-        assertEquals(sample.type, seqScan.sample.type)
-        assertEquals(seqType.name, seqScan.seqType.name)
-        assertEquals(seqType.libraryLayout, seqScan.seqType.libraryLayout)
+        seqScanService.buildSeqScan(seqTrack)
     }
 
     @Test
@@ -189,14 +183,14 @@ class SeqScanServiceTests {
         assertFalse(run.validate())
         run.name = "testRun"
         run.complete = false
-        run.dataPath = dataPath
-        run.mdPath = mdPath
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
         run.seqPlatform = seqPlatform
         assert(run.save())
-        SeqTrack seqTrack = new SeqTrack(laneId: "testLaneId", pipelineVersion: "2", run: run, seqType: seqType, seqPlatform: seqPlatform, sample: sample, insertSize: "42")
+        SoftwareTool softwareTool = new SoftwareTool(programName: "testProgram", type: SoftwareTool.Type.BASECALLING)
+        assert(softwareTool.save())
+        SeqTrack seqTrack = new SeqTrack(laneId: "testLaneId", pipelineVersion: softwareTool, run: run, seqType: seqType, seqPlatform: seqPlatform, sample: sample, insertSize: "42")
         assert(seqTrack.save())
         MergingAssignment mergingAssignment = new MergingAssignment(seqScan: seqScan, seqTrack: seqTrack)
         assert(mergingAssignment.save())
