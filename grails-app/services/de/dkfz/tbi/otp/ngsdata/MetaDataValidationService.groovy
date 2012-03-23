@@ -6,6 +6,7 @@ class MetaDataValidationService {
 
     private final Lock validateMetaDataLock = new ReentrantLock()
 
+    @SuppressWarnings("GrailsStatelessService")
     HashMap bugs = ["SBS": "WHOLE_GENOME_BISULFITE"]
 
     /**
