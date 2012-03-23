@@ -50,17 +50,19 @@ class MetaDataRegistrationServiceTests extends AbstractIntegrationTest {
         run.seqPlatform = seqPlatform
         assert(run.save())
         metaDataRegistrationService.registerInputFiles(run.id)
-        //new File(mdPath.absolutePath + "/runtestRun").mkdir()
-        //File runtestRun = new File(mdPath.absolutePath + "/runtestRun")
+        new File(mdPath.absolutePath + "/runtestRun").mkdir()
+        File runtestRun = new File(mdPath.absolutePath + "/runtestRun")
         metaDataRegistrationService.registerInputFiles(run.id)
         FileType fileType = new FileType(type: FileType.Type.SOURCE)
         assert(fileType.save())
         Run run2 = new Run()
         assertFalse(run2.validate())
-        run2.name = "testRun"
+        run2.name = "testRun2"
         run2.complete = false
         run2.seqCenter = seqCenter
         run2.seqPlatform = seqPlatform
+        run2.validate()
+        println(run2.errors)
         assert(run2.save())
         // should work
         metaDataRegistrationService.registerInputFiles(run2.id)
