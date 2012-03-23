@@ -5,7 +5,6 @@ import static org.junit.Assert.*
 import java.io.File;
 
 import grails.test.mixin.*
-import grails.test.mixin.support.*
 import org.junit.*
 
 
