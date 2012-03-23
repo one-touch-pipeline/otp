@@ -368,25 +368,6 @@ class MetaDataService {
     }
 
     /**
-     * Each sequence and alignment file belonging to a run is 
-     * assigned to a project based on the Sample object.
-     * @param runId
-     */
-    private void assignFilesToProjects(long runId) {
-        Run run = Run.get(runId)
-        DataFile.findAllByRun(run).each { DataFile dataFile ->
-            Project project = getProjectForDataFile(dataFile)
-            if (!project) {
-                return // continue
-            }
-            dataFile.project = project
-            dataFile.save(flush: true)
-            assignRunToProject(run, project)
-        }
-        run.save(flush: true)
-    }
-
-    /**
      * return project for a given dataFile or null if a dataFile 
      * does not belong to a specific project (eg. metadata file)
      * @param dataFile
