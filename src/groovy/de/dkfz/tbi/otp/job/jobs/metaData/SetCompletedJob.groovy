@@ -1,9 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.metaData
 
-import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.ngsdata.Run
-import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.DataFile
 
 class SetCompletedJob extends AbstractEndStateAwareJobImpl {
