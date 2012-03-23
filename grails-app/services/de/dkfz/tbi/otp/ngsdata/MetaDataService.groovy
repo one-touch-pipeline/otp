@@ -76,7 +76,7 @@ class MetaDataService {
                 fillVbpFileName(dataFile)
                 fillMD5Sum(dataFile)
                 assignFileType(dataFile, type)
-                addKnownMissingMetaData(file.runInitialPath.run, dataFile)
+                addKnownMissingMetaData(dataFile)
                 checkIfWithdrawn(dataFile)
             }
         }
@@ -318,10 +318,9 @@ class MetaDataService {
      * in this case the sequencing type is created by the system
      * from directory name
      *
-     * @param run
      * @param dataFile
      */
-    private void addKnownMissingMetaData(Run run, DataFile dataFile) {
+    private void addKnownMissingMetaData(DataFile dataFile) {
         final String keyName = "SEQUENCING_TYPE"
         MetaDataKey key = MetaDataKey.findByName(keyName)
         if (!key) {
