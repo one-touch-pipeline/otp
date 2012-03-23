@@ -61,8 +61,6 @@ class FilesCompletenessService {
             if (!exists) {
                 allExists = false
             }
-            String path = lsdfFilesService.getFileFinalPath(dataFile.id)
-            //println "File ${path} exists: ${exists}"
             fillFileStatistics(dataFile, exists)
         }
         if (allExists) {
