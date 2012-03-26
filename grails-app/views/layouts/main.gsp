@@ -19,6 +19,7 @@
 		<g:javascript>
 		$.otp = new OTP('${request.contextPath}');
 		</g:javascript>
+        <r:layoutResources/>
 		<g:layoutHead/>
 	</head>
 	<body>
@@ -40,5 +41,6 @@
 		<div class="footer" role="contentinfo">OneTouchPipeline  | TBI DKFZ</div>
 		<div id="spinner" class="spinner" style="display:none;"><g:message code="spinner.alt" default="Loading&hellip;"/></div>
 		<g:javascript library="application"/>
+        <r:layoutResources/>
 	</body>
 </html>
