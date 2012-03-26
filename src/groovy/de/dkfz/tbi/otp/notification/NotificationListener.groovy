@@ -72,6 +72,7 @@ class NotificationListener implements ApplicationListener {
             handleProcessNotification(event)
             break
         case NotificationType.PROCESS_STEP_STARTED:
+        case NotificationType.PROCESS_STEP_FAILED:
             handleProcessingStepNotification(event)
             break
         default:
@@ -86,17 +87,17 @@ class NotificationListener implements ApplicationListener {
      * @param event The NotificationEvent to process
      */
     private void handleProcessNotification(NotificationEvent event) {
-        if (!(event.payload instanceof Process)) {
+        if (!(event.payload instanceof Process) && (!event.payload instanceof Map)) {
             return
         }
-        Process process = Process.get(event.payload.id)
+        Process process = Process.get((event.payload instanceof Process) ? event.payload.id : event.payload.process.id)
         // for a Process the Trigger is the JobExecutionPlan
         List<Notification> notifications = resolveNotifications(JobExecutionPlan.class.getName(), process.jobExecutionPlan.id, event.type)
         if (notifications.isEmpty()) {
             // No Notifications configured for the JobExecutionPlan
             return
         }
-        Map binding = [process: process]
+        Map binding = [process: process, error: (event.payload instanceof Map) ? event.payload.error : null]
         sendNotifications(notifications, binding)
     }
 
@@ -106,17 +107,17 @@ class NotificationListener implements ApplicationListener {
      * @param event
      */
     private void handleProcessingStepNotification(NotificationEvent event) {
-        if (!(event.payload instanceof ProcessingStep)) {
+        if (!(event.payload instanceof ProcessingStep) && (!event.payload instanceof Map)) {
             return
         }
-        ProcessingStep step = ProcessingStep.get(event.payload.id)
+        ProcessingStep step = ProcessingStep.get((event.payload instanceof ProcessingStep) ? event.payload.id : event.payload.processingStep.id)
         // for a ProcessingStep the Trigger is the JobExecutionPlan
         List<Notification> notifications = resolveNotifications(JobExecutionPlan.class.getName(), step.process.jobExecutionPlan.id, event.type)
         if (notifications.isEmpty()) {
             // No Notifications configured for the JobExecutionPlan
             return
         }
-        Map binding = [process: step.process, step: step, input: step.input, jobDefinition: step.jobDefinition]
+        Map binding = [process: step.process, step: step, input: step.input, jobDefinition: step.jobDefinition, error: (event.payload instanceof Map) ? event.payload.error : null]
         sendNotifications(notifications, binding)
     }
 

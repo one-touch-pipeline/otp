@@ -24,5 +24,9 @@ enum NotificationType {
     /**
      * A ProcessingStep for a Process finished.
      */
-    PROCESS_STEP_FINISHED
+    PROCESS_STEP_FINISHED,
+    /**
+     * A ProcessingStep for a Process failed
+     */
+    PROCESS_STEP_FAILED
 }

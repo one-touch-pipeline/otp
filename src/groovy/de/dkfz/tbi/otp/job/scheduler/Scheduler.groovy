@@ -188,7 +188,7 @@ class Scheduler {
                 // list of Process IDs is empty - watchdog cannot be started
                 createError(step, update, "PbsJob does not provide PBS Process Ids", joinPoint.target.class)
                 log.error("PbsJob for JobDefinition ${step.jobDefinition.id} does not provide PBS Process Ids")
-                // TODO Proper error handling here
+                markProcessAsFailed(step, "PbsJob for JobDefinition ${step.jobDefinition.id} does not provide PBS Process Ids.")
                 return
             }
             String pbsParameterValue = ""
@@ -203,7 +203,7 @@ class Scheduler {
                 // output type is missing
                 createError(step, update, "PbsJob does not have required output parameter type", joinPoint.target.class)
                 log.error("PbsJob for JobDefinition ${step.jobDefinition.id} does not have required output parameter type")
-                // TODO Proper error handling here
+                markProcessAsFailed(step, "PbsJob for JobDefinition ${step.jobDefinition.id} does not have required output parameter type.")
                 return
             }
             Parameter pbsIdParameter = new Parameter(type: pbsIdType, value: pbsParameterValue)
@@ -215,7 +215,7 @@ class Scheduler {
                 // output type is missing
                 createError(step, update, "PbsJob does not provide the Realm it is operating on or Realm Id is incorrect", joinPoint.target.class)
                 log.error("PbsJob for JobDefinition ${step.jobDefinition.id} does not provide the Realm it is operating on or Realm Id is incorrect")
-                // TODO Proper error handling here
+                markProcessAsFailed(step, "PbsJob for JobDefinition ${step.jobDefinition.id} does not provide the Realm it is operating on or Realm Id is incorrect.")
                 return
             }
             ParameterType pbsRealmType = ParameterType.findByJobDefinitionAndParameterUsageAndName(step.jobDefinition, ParameterUsage.OUTPUT, "__pbsRealm")
@@ -223,7 +223,7 @@ class Scheduler {
                 // output type is missing
                 createError(step, update, "PbsJob does not have required output parameter type for pbs realm", joinPoint.target.class)
                 log.error("PbsJob for JobDefinition ${step.jobDefinition.id} does not have required output parameter type for pbs realm")
-                // TODO Proper error handling here
+                markProcessAsFailed(step, "PbsJob for JobDefinition ${step.jobDefinition.id} does not have required output parameter type for pbs realm.")
                 return
             }
             Parameter realmIdParameter = new Parameter(type: pbsRealmType, value: realmId)
@@ -237,7 +237,7 @@ class Scheduler {
             // at least one output parameter is wrong - set to failure
             createError(step, update, "Parameter ${failedOutputParameter.value} is either not defined for JobDefintion ${step.jobDefinition.id} or not of type Output.", joinPoint.target.class)
             log.error("Parameter ${failedOutputParameter.value} is either not defined for JobDefintion ${step.jobDefinition.id} or not of type Output.")
-            // TODO Proper error handling here
+            markProcessAsFailed(step, "Parameter ${failedOutputParameter.value} is either not defined for JobDefintion $step.jobDefinition.id} or not of type Output.")
             return
         }
         // check that all Output Parameters are set
@@ -254,7 +254,7 @@ class Scheduler {
                 // a required output parameter has not been generated
                 createError(step, update, "Required Output Parameter of type ${parameterType.id} is not set.", joinPoint.target.class)
                 log.error("Required Output Parameter of type ${parameterType.id} is not set.")
-                // TODO Proper error handling here
+                markProcessAsFailed(step, "Required Output Parameter of type ${parameterType.id} is not set.")
                 return
             }
         }
@@ -284,13 +284,7 @@ class Scheduler {
                     log.fatal("Could not create a FAILURE Update for Job of type ${jobClass}")
                     throw new ProcessingException("Could not create a FAILURE Update for Job of type ${jobClass}")
                 }
-                Process process = Process.get(step.process.id)
-                process.finished = true
-                if (!process.save(flush: true)) {
-                    // TODO: trigger error handling
-                    log.fatal("Could not set Process to finished")
-                    throw new ProcessingException("Could not set Process to finished")
-                }
+                markProcessAsFailed(step, "Something went wrong in endStateAwareJob of type ${joinPoint.target.class}, execution state set to FAILURE")
                 log.debug("doEndCheck performed for ${joinPoint.getTarget().class} with ProcessingStep ${step.id}")
                 return
             }
@@ -383,6 +377,16 @@ class Scheduler {
             log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
             throw new ProcessingException("Could not create a FAILURE Update for Job")
         }
+        markProcessAsFailed(step, error.errorMessage)
+        log.debug("doErrorHandling performed for ${joinPoint.getTarget().class} with ProcessingStep ${step.id}")
+    }
+
+    /**
+     * Helper function to set a Process as failed and send out an error notification.
+     * @param step The ProcessignStep which failed
+     * @param error The error message why this step failed.
+     */
+    private void markProcessAsFailed(ProcessingStep step, String error) {
         Process process = Process.get(step.process.id)
         process.finished = true
         if (!process.save(flush: true)) {
@@ -390,8 +394,11 @@ class Scheduler {
             log.fatal("Could not set Process to finished")
             throw new ProcessingException("Could not set Process to finished")
         }
-        // TODO: trigger error handling
-        log.debug("doErrorHandling performed for ${joinPoint.getTarget().class} with ProcessingStep ${step.id}")
+        // send notification
+        NotificationEvent event = new NotificationEvent(this, [process: process, error: error], NotificationType.PROCESS_FAILED)
+        grailsApplication.mainContext.publishEvent(event)
+        NotificationEvent event2 = new NotificationEvent(this, [processingStep: step, error: error], NotificationType.PROCESS_STEP_FAILED)
+        grailsApplication.mainContext.publishEvent(event2)
     }
 
     /**
