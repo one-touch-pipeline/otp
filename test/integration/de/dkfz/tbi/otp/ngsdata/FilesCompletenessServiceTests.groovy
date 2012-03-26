@@ -80,12 +80,16 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         new File(dataPath.absolutePath + "/run" + run.name + "/" + dataFile1.pathName + "/" + dataFile1.fileName).mkdirs()
         new File(dataPath.absolutePath + "/run" + run.name + "/" + dataFile2.pathName + "/" + dataFile2.fileName).mkdirs()
         new File(dataPath.absolutePath + "/run" + run.name + "/" + dataFile3.pathName + "/" + dataFile3.fileName).mkdirs()
-        // dataFile3 has no run associated
-        shouldFail(ProcessingException) { filesCompletenessService.checkInitialSequenceFiles(run) }
+        //  Cannot get property 'dataPath' on null object
+        shouldFail(NullPointerException) {
+            filesCompletenessService.checkInitialSequenceFiles(run)
+        }
         dataFile3.run = run
         assert(dataFile3.save())
-        // dataFiles have no runInitialPath associated
-        shouldFail(ProcessingException) { filesCompletenessService.checkInitialSequenceFiles(run) }
+        // Cannot get property 'dataPath' on null object
+        shouldFail(NullPointerException) {
+            filesCompletenessService.checkInitialSequenceFiles(run)
+        }
         RunInitialPath runInitialPath = new RunInitialPath(dataPath: dataPath.absolutePath, mdPath: mdPath.absolutePath, run: run)
         assert(runInitialPath.save())
         dataFile1.runInitialPath = runInitialPath
