@@ -9,6 +9,7 @@ class IgvSessionFileService {
 
     private final String igvBase = "http://www.broadinstitute.org/igv/projects/current/igv.php?sessionURL="
     private final String myURL = "https://otp.local/otpdevel/igvSessionFile/file/"
+    private final String myMut = "https://otp.local/otpdevel/igvSessionFile/mutFile/"
 
     String buildSessionFile(List<SeqScan> scans) {
         String text = buildContent(scans)
@@ -23,6 +24,7 @@ class IgvSessionFileService {
     private String buildContent(List<SeqScan> scans) {
         StringWriter writer = new StringWriter()
         MarkupBuilder xml = new MarkupBuilder(writer)
+        int indId = scans.get(0).sample.individual.id
 
         xml.Session(genome:"hg19", locus:"All", version:"4") {
             Resources {
@@ -30,6 +32,7 @@ class IgvSessionFileService {
                     String path = getPathForScan(scan)
                     Resource(path: path)
                 }
+                Resource(path: "${myMut}${indId}.mut")
             }
         }
         String text = header + writer.toString()
