@@ -72,15 +72,6 @@ class MetaDataRegistrationService {
         }
         return false
     }
-    private List<File> getListOfDirectories(Run run) {
-        List<File> dirs = new ArrayList<File>()
-        List<RunInitialPath> paths = RunInitialPath.findAllByRun(run)
-        paths.each {RunInitialPath initPath ->
-            File dir = getMetaDataDirectory(initPath.mdPath, run.name)
-            dirs.add(dir)
-        }
-        return dirs
-    }
 
     private boolean isFileRegistered(RunInitialPath path, String fileName) {
         MetaDataFile existingFile =

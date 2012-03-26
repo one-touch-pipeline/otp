@@ -76,7 +76,7 @@ class MetaDataService {
                 fillVbpFileName(dataFile)
                 fillMD5Sum(dataFile)
                 assignFileType(dataFile, type)
-                addKnownMissingMetaData(file.runInitialPath.run, dataFile)
+                addKnownMissingMetaData(dataFile)
                 checkIfWithdrawn(dataFile)
             }
         }
@@ -318,10 +318,9 @@ class MetaDataService {
      * in this case the sequencing type is created by the system
      * from directory name
      *
-     * @param run
      * @param dataFile
      */
-    private void addKnownMissingMetaData(Run run, DataFile dataFile) {
+    private void addKnownMissingMetaData(DataFile dataFile) {
         final String keyName = "SEQUENCING_TYPE"
         MetaDataKey key = MetaDataKey.findByName(keyName)
         if (!key) {
@@ -365,25 +364,6 @@ class MetaDataService {
             return "LANE_NO"
         }
         return token
-    }
-
-    /**
-     * Each sequence and alignment file belonging to a run is 
-     * assigned to a project based on the Sample object.
-     * @param runId
-     */
-    private void assignFilesToProjects(long runId) {
-        Run run = Run.get(runId)
-        DataFile.findAllByRun(run).each { DataFile dataFile ->
-            Project project = getProjectForDataFile(dataFile)
-            if (!project) {
-                return // continue
-            }
-            dataFile.project = project
-            dataFile.save(flush: true)
-            assignRunToProject(run, project)
-        }
-        run.save(flush: true)
     }
 
     /**

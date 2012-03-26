@@ -40,12 +40,10 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertFalse(run.validate())
         run.name = "testRun"
         run.complete = false
-        run.dataPath = dataPath
-        run.mdPath = mdPath
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqPlatform seqPlatform = new SeqPlatform(name: "illumina")
+        SeqPlatform seqPlatform = new SeqPlatform(name: "testSolid")
         assert(seqPlatform.save())
         run.seqPlatform = seqPlatform
         assert(run.save())
@@ -62,7 +60,9 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assert(individual.save())
         sample.individual = individual
         assert(sample.save())
-        SeqTrack seqTrack = new SeqTrack(laneId: "testLaneId", pipelineVersion: "2", run: run, seqType: seqType, seqPlatform: seqPlatform, sample: sample)
+        SoftwareTool softwareTool = new SoftwareTool(programName: "testProgram", type: SoftwareTool.Type.BASECALLING, programVersion: "1")
+        assert(softwareTool.save())
+        SeqTrack seqTrack = new SeqTrack(laneId: "testLaneId", pipelineVersion: softwareTool, run: run, seqType: seqType, seqPlatform: seqPlatform, sample: sample)
         assert(seqTrack.save())
         DataFile dataFile = new DataFile(fileName: "dataFile1", pathName: "testPath", metaDataValid: false, run: run, fileType: fileType, seqTrack: seqTrack)
         assert(dataFile.save())
@@ -80,8 +80,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         Run otherRun = new Run()
         otherRun.name = "otherTestRun"
         otherRun.complete = false
-        otherRun.dataPath = dataPath
-        otherRun.mdPath = mdPath
         otherRun.seqCenter = seqCenter
         otherRun.seqPlatform = seqPlatform
         assert(otherRun.save())
@@ -112,8 +110,8 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assert(sequenceFileType.save())
         dataFile.fileType = sequenceFileType
         assert(dataFile.save(flush: true))
-        // No SampleIdentifier name provided.
-        shouldFail(SampleNotDefinedException) {
+        // no entry for key: SAMPLE_ID
+        shouldFail(ProcessingException) {
             seqTrackService.buildSequenceTracks(run.id)
         }
         MetaDataKey metaDataKey3 = new MetaDataKey(name: "SAMPLE_ID")
@@ -142,7 +140,37 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         }
         SeqType seqType2 = new SeqType(name: "testEntry3", libraryLayout: "testEntry4", dirName: "testDir")
         assert(seqType2.save())
-        // should work
+        // seqTrack could not be validated
+        shouldFail(ProcessingException) {
+            seqTrackService.buildSequenceTracks(run.id)
+        }
+        // SoftwareToolIdentifier missing
+        SoftwareToolIdentifier softwareToolIdentifier = new SoftwareToolIdentifier(name: "testEntry5", softwareTool: softwareTool)
+        assert(softwareToolIdentifier.save())
+        // no entry for key: INSERT_SIZE
+        shouldFail(ProcessingException) {
+            seqTrackService.buildSequenceTracks(run.id)
+        }
+        MetaDataKey metaDataKey7 = new MetaDataKey(name: "INSERT_SIZE")
+        assert(metaDataKey7.save())
+        MetaDataEntry metaDataEntry6 = new MetaDataEntry(value: "testEntry6", dataFile: dataFile, key: metaDataKey7, source: MetaDataEntry.Source.SYSTEM)
+        assert(metaDataEntry6.save())
+        // no entry for key: READ_COUNT
+        shouldFail(ProcessingException) {
+            seqTrackService.buildSequenceTracks(run.id)
+        }
+        MetaDataKey metaDataKey8 = new MetaDataKey(name: "READ_COUNT")
+        assert(metaDataKey8.save())
+        MetaDataEntry metaDataEntry7 = new MetaDataEntry(value: "testEntry7", dataFile: dataFile, key: metaDataKey8, source: MetaDataEntry.Source.SYSTEM)
+        assert(metaDataEntry7.save())
+        // no entry for key: BASE_COUNT
+        shouldFail(ProcessingException) {
+            seqTrackService.buildSequenceTracks(run.id)
+        }
+        MetaDataKey metaDataKey9 = new MetaDataKey(name: "BASE_COUNT")
+        assert(metaDataKey9.save())
+        MetaDataEntry metaDataEntry8 = new MetaDataEntry(value: "testEntry8", dataFile: dataFile, key: metaDataKey9, source: MetaDataEntry.Source.SYSTEM)
+        assert(metaDataEntry8.save())
         seqTrackService.buildSequenceTracks(run.id)
     }
 }
