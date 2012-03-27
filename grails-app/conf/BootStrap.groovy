@@ -15,6 +15,8 @@ class BootStrap {
                 startJob.setJobExecutionPlan(plan)
             }
         }
+        // load the shutdown service
+        grailsApplication.mainContext.getBean("shutdownService")
     }
     def destroy = {
     }

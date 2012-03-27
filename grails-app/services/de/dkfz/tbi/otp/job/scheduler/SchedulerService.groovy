@@ -25,6 +25,7 @@ import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.security.access.prepost.PreAuthorize
 
 class SchedulerService {
     static transactional = false
@@ -54,6 +55,22 @@ class SchedulerService {
      * Lock to protect the internal data from Multi Threading issues
      */
     private final Lock lock = new ReentrantLock()
+    /**
+     * Whether the Scheduler is currently active.
+     * This is false when shutting down the server
+     **/
+    @SuppressWarnings("GrailsStatelessService")
+    private boolean schedulerActive = true
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void suspendScheduler() {
+        schedulerActive = false
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void resumeScheduler() {
+        schedulerActive = true
+    }
 
     public void createNextProcessingStep(ProcessingStep previous) {
         // test whether the Process ended
@@ -93,8 +110,12 @@ class SchedulerService {
      * @param startJob The StartJob which wants to trigger the Process
      * @param input List of Parameters provided by the StartJob for this Process.
      * @param processParameter ProcessParameter provided by the StartJob for this Process.
+     * @return true if the Process got started, false otherwise (e.g. scheduler is not active)
      */
-    public void createProcess(StartJob startJob, List<Parameter> input, ProcessParameter processParameter = null) {
+    public boolean createProcess(StartJob startJob, List<Parameter> input, ProcessParameter processParameter = null) {
+        if (!schedulerActive) {
+            return false
+        }
         JobExecutionPlan plan = JobExecutionPlan.get(startJob.getExecutionPlan().id)
         Process process = new Process(started: new Date(),
             jobExecutionPlan: plan,
@@ -123,6 +144,7 @@ class SchedulerService {
         } finally {
             lock.unlock()
         }
+        return true
     }
 
     /**
@@ -130,6 +152,9 @@ class SchedulerService {
      */
     @Scheduled(fixedRate=100l)
     public void schedule() {
+        if (!schedulerActive) {
+            return
+        }
         if (queue.isEmpty()) {
             return
         }
