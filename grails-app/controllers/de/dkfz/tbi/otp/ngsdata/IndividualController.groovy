@@ -30,7 +30,9 @@ class IndividualController {
         int prevId = findPrevious(ind)
         int nextId = findNext(ind)
 
-        [ind: ind, seqTypes: seqTypes, seqScans: seqScans, prevId: prevId, nextId: nextId]
+        List<Mutation> muts = Mutation.findAllByIndividual(ind)
+
+        [ind: ind, seqTypes: seqTypes, seqScans: seqScans, prevId: prevId, nextId: nextId, muts: muts]
     }
 
     private int findPrevious(Individual ind) {
