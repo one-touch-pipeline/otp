@@ -57,6 +57,7 @@ class MetaDataStartJob extends AbstractStartJobImpl {
                 return true
             }
         }
+        return false
     }
 
     /**
