@@ -93,14 +93,11 @@
                     <td>${scan.basePairsString()}</td>
                     <td>${scan.insertSize}</td>
 
-                    <g:if test="${scan.nLanes > 1}">
                     <td class="${de.dkfz.tbi.otp.ngsdata.MergingLog.countBySeqScan(scan) != 0}">
                         <g:formatBoolean boolean="${de.dkfz.tbi.otp.ngsdata.MergingLog.countBySeqScan(scan) != 0}"
                             true="merged" false="not merged"
                         />
                     </td>
-                    </g:if>
-                    <g:else><td></td></g:else>
                     <td><g:checkBox name="${scan.id}" value="${false}"/></td>
                </tr>
                </g:if>
@@ -108,6 +105,18 @@
         </table>
       </div>
     </g:each>
+
+    <h1>Analysis Results</h1>
+    <div class="myContent">
+    <table>
+        <tr>
+            <g:each var="mutation" in="${muts}">
+                ${mutation.gene}, 
+            </g:each>
+        </tr>
+    </table>
+    </div>
+
     <h1>Data Access</h1>
         <div class="myContent" align="right">
             <g:actionSubmit class="button" value="Start IGV" action="igvStart"/>
