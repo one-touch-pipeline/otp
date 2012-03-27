@@ -98,7 +98,7 @@ class SchedulerService {
         JobExecutionPlan plan = JobExecutionPlan.get(startJob.getExecutionPlan().id)
         Process process = new Process(started: new Date(),
             jobExecutionPlan: plan,
-            startJobClass: startJob.class.toString(),
+            startJobClass: startJob.class.name,
             startJobVersion: startJob.getVersion()
         )
         if (!process.save()) {
@@ -198,7 +198,7 @@ class SchedulerService {
      */
     private Job createJob(ProcessingStep step) {
         Job job = grailsApplication.mainContext.getBean(step.jobDefinition.bean, step, step.input) as Job
-        step.jobClass = job.class.toString()
+        step.jobClass = job.class.name
         step.jobVersion = job.getVersion()
         step.save(flush: true)
         return job
