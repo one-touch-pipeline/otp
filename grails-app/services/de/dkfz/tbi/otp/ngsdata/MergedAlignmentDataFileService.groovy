@@ -2,8 +2,24 @@ package de.dkfz.tbi.otp.ngsdata
 
 class MergedAlignmentDataFileService {
 
+    String getFullPath(MergedAlignmentDataFile dataFile) {
+        String basePath = pathToHost(dataFile.mergingLog.seqScan)
+        String filePath = dataFile.filePath
+        String fileName = dataFile.fileName
+        String path = "${basePath}/${filePath}/${fileName}"
+        return path
+    }
+
     String pathToHost(SeqScan scan) {
-        return scan.sample.individual.project.dirName
+        String host = scan.sample.individual.project.host
+        switch (host) {
+            case "DKFZ":
+                return "$OTP_ROOT_PATH/"
+            case "BioQuant":
+                return "$BQ_ROOTPATH/project"
+            default: 
+                throw new Exception()
+        }
     }
 
     String buildPath(MergingLog mergingLog) {
