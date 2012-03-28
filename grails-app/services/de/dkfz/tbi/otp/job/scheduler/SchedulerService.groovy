@@ -84,7 +84,7 @@ class SchedulerService {
             return
         }
         boolean ok = true
-        lock.lock()
+        List<ProcessingStep> processesToRestart = []
         try {
             ProcessingStep.withTransaction { status ->
                 List<Process> processes = Process.findAllByFinished(false)
@@ -99,7 +99,7 @@ class SchedulerService {
                     }
                     ProcessingStepUpdate last = updates.sort { it.id }.last()
                     if (last.state == ExecutionState.CREATED) {
-                        queue << step
+                        processesToRestart << step
                     } else if (last.state == ExecutionState.SUSPENDED) {
                         ProcessingStepUpdate update = new ProcessingStepUpdate(
                             date: new Date(),
@@ -112,7 +112,7 @@ class SchedulerService {
                             status.setRollbackOnly()
                             log.error("ProcessingStep ${step.id} could not be resumed")
                         }
-                        queue << step
+                        processesToRestart << step
                     } else {
                         status.setRollbackOnly()
                         ok = false
@@ -124,15 +124,23 @@ class SchedulerService {
             ok = false
             log.error(e.message)
             e.printStackTrace()
-        } finally {
-            if (!ok) {
-                queue.clear()
-            }
-            lock.unlock()
         }
         if (ok) {
             startupOk = true
             schedulerActive = true
+            lock.lock()
+            try {
+                processesToRestart.each { ProcessingStep step ->
+                    for (ProcessingStep queued in queue) {
+                        if (queue.id == step.id) {
+                            return
+                        }
+                    }
+                    queue << step
+                }
+            } finally {
+                lock.unlock()
+            }
         }
         log.info("Scheduler started after server startup: ${schedulerActive}")
     }
