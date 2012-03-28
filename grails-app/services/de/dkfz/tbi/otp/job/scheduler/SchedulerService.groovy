@@ -161,6 +161,11 @@ class SchedulerService {
         schedulerActive = true
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public boolean isStartupOk() {
+        return startupOk
+    }
+
     public void createNextProcessingStep(ProcessingStep previous) {
         // test whether the Process ended
         if (!previous.jobDefinition.next && !(previous.jobDefinition instanceof DecidingJobDefinition)) {
