@@ -60,15 +60,96 @@ class SchedulerService {
      * This is false when shutting down the server
      **/
     @SuppressWarnings("GrailsStatelessService")
-    private boolean schedulerActive = true
+    private boolean schedulerActive = false
+    /**
+     * Whether the scheduler startup has been successful.
+     * False as long as the server has not started. If false the scheduler cannot be started,
+     * if true the startup cannot be performed again.
+     **/
+    @SuppressWarnings("GrailsStatelessService")
+    private boolean startupOk = false
+
+    /**
+     * Starts the Scheduler at Server startup.
+     * This method inspects the state of the Job system before the shutdown. In case of a clean
+     * Shutdown the scheduler will be started again. All ProcessingSteps in status CREATED will
+     * be queued and all ProcessingSteps in status SUSPENDED will be RESUMED and added to the queue.
+     * In case the method finds a Process in another state, the server performed an unclean shutdown.
+     * This requires manual intervention and the server does not start up. If an unclean shutdown is
+     * detected the changes to the ProcessingSteps are discarded, so that this method can be executed
+     * once again after the manual intervention fixed all ProcessingSteps in unknown state.
+     **/
+    public void startup() {
+        if (schedulerActive || startupOk) {
+            return
+        }
+        boolean ok = true
+        lock.lock()
+        try {
+            ProcessingStep.withTransaction { status ->
+                List<Process> processes = Process.findAllByFinished(false)
+                List<ProcessingStep> lastProcessingSteps = ProcessingStep.findAllByProcessInListAndNextIsNull(processes)
+                lastProcessingSteps.each { ProcessingStep step ->
+                    List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step)
+                    if (updates.isEmpty()) {
+                        status.setRollbackOnly()
+                        ok = false
+                        log.error("Error during startup: ProcessingStep ${step.id} does not have any Updates")
+                        return
+                    }
+                    ProcessingStepUpdate last = updates.sort { it.id }.last()
+                    if (last.state == ExecutionState.CREATED) {
+                        queue << step
+                    } else if (last.state == ExecutionState.SUSPENDED) {
+                        ProcessingStepUpdate update = new ProcessingStepUpdate(
+                            date: new Date(),
+                            state: ExecutionState.RESUMED,
+                            previous: last,
+                            processingStep: step
+                        )
+                        if (!update.save(flush: true)) {
+                            ok = false
+                            status.setRollbackOnly()
+                            log.error("ProcessingStep ${step.id} could not be resumed")
+                        }
+                        queue << step
+                    } else {
+                        status.setRollbackOnly()
+                        ok = false
+                        log.error("Error during startup: ProcessingStep ${step.id} is in state ${last.state}")
+                    }
+                }
+            }
+        } catch (Exception e) {
+            ok = false
+            log.error(e.message)
+            e.printStackTrace()
+        } finally {
+            if (!ok) {
+                queue.clear()
+            }
+            lock.unlock()
+        }
+        if (ok) {
+            startupOk = true
+            schedulerActive = true
+        }
+        log.info("Scheduler started after server startup: ${schedulerActive}")
+    }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void suspendScheduler() {
+        if (!startupOk) {
+            return
+        }
         schedulerActive = false
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void resumeScheduler() {
+        if (!startupOk) {
+            return
+        }
         schedulerActive = true
     }
 

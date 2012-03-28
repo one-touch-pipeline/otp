@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class BootStrap {
     def grailsApplication
+    def schedulerService
 
     def init = { servletContext ->
         if (Environment.current != Environment.TEST) {
@@ -17,6 +18,8 @@ class BootStrap {
         }
         // load the shutdown service
         grailsApplication.mainContext.getBean("shutdownService")
+        // startup the scheduler
+        schedulerService.startup()
     }
     def destroy = {
     }
