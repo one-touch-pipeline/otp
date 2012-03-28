@@ -3,10 +3,10 @@
  * @param contextPath The contextPath which is used to create links.
  * @returns
  */
-function OTP(contextPath) {
-    "use strict";
-    this.contextPath = contextPath;
+function OTP() {
 }
+
+$.otp = new OTP();
 
 /**
  * Creates the HTML markup for the status image.

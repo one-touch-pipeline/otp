@@ -14,13 +14,12 @@
 		<link rel="apple-touch-icon" sizes="114x114" href="${resource(dir: 'images', file: 'apple-touch-icon-retina.png')}">
 		<link rel="stylesheet" href="${resource(dir: 'css', file: 'main.css')}" type="text/css">
 		<link rel="stylesheet" href="${resource(dir: 'css', file: 'mobile.css')}" type="text/css">
-		<g:javascript library="jquery" plugin="jquery"/>
-		<g:javascript library="otp"/>
-		<g:javascript>
-		$.otp = new OTP('${request.contextPath}');
-		</g:javascript>
+        <r:require module="core"/>
         <r:layoutResources/>
-		<g:layoutHead/>
+        <g:layoutHead/>
+        <r:script>
+        $.otp.contextPath = '${request.contextPath}';
+        </r:script>
 	</head>
 	<body>
 <%--		<div id="grailsLogo" role="banner"><a href="http://grails.org"><img src="${resource(dir: 'images', file: 'grails_logo.png')}" alt="Grails"/></a></div>--%>
