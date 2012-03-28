@@ -185,7 +185,7 @@ class SchedulerService {
             if (queue.isEmpty()) {
                 return
             }
-            Job job = createJob(queue.peek())
+            Job job = createJob(ProcessingStep.get(queue.peek().id))
             running.add(job)
             queue.poll()
             return job
