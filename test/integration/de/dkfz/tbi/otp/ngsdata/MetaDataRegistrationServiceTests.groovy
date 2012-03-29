@@ -11,7 +11,6 @@ import de.dkfz.tbi.otp.testing.AbstractIntegrationTest;
 class MetaDataRegistrationServiceTests extends AbstractIntegrationTest {
 
     def metaDataRegistrationService
-    def grailsApplication
 
     File dataPath
     File mdPath
