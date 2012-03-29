@@ -15,7 +15,7 @@
        <tr>
             <td class="myKey">individual</td>
             <td>
-            <g:link 
+            <g:link
                     controller="individual" 
                     action="show" 
                     id="${scan.sample.individual.id}"
@@ -111,23 +111,23 @@
         </table>
       </div>
     </g:each>
-    
 
     <div class="myHeader">
         Merged alignment files
     </div>
-    
+
     <div class="myContent">
     <table>
     <g:each var="log" in="${de.dkfz.tbi.otp.ngsdata.MergingLog.findAllBySeqScan(scan)}">
         <tr>
-            <g:each var="dataFile" in="${de.dkfz.tbi.otp.ngsdata.DataFile.findAllByMergingLog(log)}">
+            <g:each var="dataFile" in="${de.dkfz.tbi.otp.ngsdata.MergedAlignmentDataFile.findAllByMergingLog(log)}">
                 <td>
-                <g:link controller="dataFile" action="show" id="${dataFile.id}">
+                <g:link controller="mergedAlignmentDataFile" action="show" id="${dataFile.id}">
                 ${dataFile.fileName}
                 </g:link>
                 </td>
                 <td>${dataFile.fileSizeString()}</td>
+                <td class="dataFile.indexFileExists">indexed</td> 
             </g:each>
             <td>${log.executedBy}</td>
             <td>${log.status}</td>
