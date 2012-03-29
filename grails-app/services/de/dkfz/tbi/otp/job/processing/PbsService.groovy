@@ -13,6 +13,7 @@ import java.util.regex.Pattern
  * Provides connection to a remote host via ssh and validation of
  * pbs ids. 
  * 
+ * @deprecated Is replaced by ExecutionService
  *
  */
 class PbsService {
