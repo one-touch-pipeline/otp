@@ -10,10 +10,9 @@ plan("IndexSingleBamWorkflow") {
     job("sendIndexingBam", "sendIndexingBamJob") {
         outputParameter("pbsIds")
     }
+    job("indexingWatchdog", "myPBSWatchdogJob") {
+        inputParameter("pbsIds", "sendIndexingBam", "pbsIds")
+    }
+    job("checkIndexFile", "checkIndexFileJob")
 }
-//    job("indexingWatchdog", "myPBSWatchdogJob") {
-//        inputParameter("pbsIds", "startIndexing", "pbsIds")
-//    }
-//    job("checkIndexingFile", "checkIndexingFileJob")
-//}
 
