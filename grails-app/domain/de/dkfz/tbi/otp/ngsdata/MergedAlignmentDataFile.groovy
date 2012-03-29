@@ -2,8 +2,9 @@ package de.dkfz.tbi.otp.ngsdata
 
 class MergedAlignmentDataFile {
 
-    String fileName
+    String fileSystem
     String filePath
+    String fileName
 
     Date createdDate = new Date()
     Date fileSystemDate
@@ -19,8 +20,16 @@ class MergedAlignmentDataFile {
     static constraints = {
         fileName()
         filePath()
+        fileSystem()
         createdDate()
         fileSystemDate(nullable: true)
         mergingLog()
+    }
+
+    String fileSizeString() {
+        if (fileSize > 1e9) return String.format("%.2f GB", fileSize/1e9)
+        if (fileSize > 1e6) return String.format("%.2f MB", fileSize/1e6)
+        if (fileSize > 1e3) return String.format("%.2f kB", fileSize/1e3)
+        return fileSize
     }
 }

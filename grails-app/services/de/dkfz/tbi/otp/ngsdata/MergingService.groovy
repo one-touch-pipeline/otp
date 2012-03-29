@@ -1,13 +1,25 @@
 package de.dkfz.tbi.otp.ngsdata
 
+private class SplittedPath {
+    String root
+    String relative
+    String fileName
+    String dirPath() {
+        return "${root}/${relative}"
+    }
+    String filePath() {
+        return "${dirPath()}/${fileName}"
+    }
+}
+
+
 class MergingService {
     /**
      * Dependency injection of SeqScanService
      */
     def seqScanService
-
-    // TODO: this constant should not be here!
-    private static final String basePath = "$ROOT_PATH/project/"
+    def configService
+    def bamHeaderParsingService
 
     /**
      * needs revision
@@ -15,6 +27,7 @@ class MergingService {
      * @param types
      */
     // TODO check if needed
+    /*
     List<String> printAllMergedBamForIndividual(Individual ind, List<SeqType> types) {
         if (!ind) {
             throw new IllegalArgumentException("Individual may not be null")
@@ -38,10 +51,11 @@ class MergingService {
         }
         return mergedBams
     }
+    */
 
     /**
      *
-     * This funtions discovers all files in a directory for
+     * This function discovers all files in a directory for
      * merged bam files and with suffix ".bam".
      * For discovered files the function buildSeqScan is called
      *
@@ -52,42 +66,34 @@ class MergingService {
             throw new IllegalArgumentException("Individual may not be null")
         }
         List<SeqType> types = SeqType.findAll()
-        String baseDir = getProjectFullPath(ind.project)
+        SplittedPath path = new SplittedPath()
+        path.root = configService.getProjectRootPath(ind.project)
         types.each { SeqType type ->
             Sample.findAllByIndividual(ind).each { Sample sample ->
-                String path = baseDir + getRelativePathToMergedAlignment(type, sample)
-                File mergedDir = new File(path)
+                path.relative = getRelativePathToMergedAlignment(type, sample)
+                File mergedDir = new File(path.dirPath())
                 mergedDir.list().each { String fileName ->
-                    if (isNewBamFile(path, fileName)) {
-                        buildSeqScan(sample, type, path, fileName)
+                    path.fileName = fileName
+                    if (isNewBamFile(path)) {
+                        buildSeqScan(sample, type, path)
                     }
                 }
             }
         }
     }
 
-    private boolean isNewBamFile(String path, String fileName) {
-        if (!fileName.endsWith(".bam")) {
+    private boolean isNewBamFile(SplittedPath path) {
+        if (!path.fileName.endsWith(".bam")) {
             return false
         }
-        if (DataFile.findByPathNameAndFileName(path, fileName)) {
+        if (MergedAlignmentDataFile.findByFilePathAndFileName(path.relative, path.fileName)) {
             return false
         }
-        File bamFile = new File(path, fileName)
+        File bamFile = new File(path.filePath())
         if (!bamFile.canRead()) {
             return false
         }
         return true
-    }
-
-    /**
-     * returns base directory of the project
-     * based on base directory of the OTP system and project object
-     * @param project
-     * @return
-     */
-    private String getProjectFullPath(Project project) {
-        return basePath + "/" + project.dirName + "/sequencing/"
     }
 
     /**
@@ -98,9 +104,11 @@ class MergingService {
      * @return
      */
     private String getRelativePathToMergedAlignment(SeqType type, Sample sample) {
-        return type.dirName + "/view-by-pid/" + sample.individual.pid + "/" + 
-        sample.type.toString().toLowerCase() + "/" + type.libraryLayout.toLowerCase() + 
-        "/merged-alignment/"
+        String projectDir = sample.individual.project.dirName
+        String pid = sample.individual.pid
+        String sampleType = sample.type.toString().toLowerCase()
+        String layout = type.libraryLayout.toLowerCase() 
+        return "${projectDir}/sequencing/${type.dirName}/view-by-pid/${pid}/${sampleType}/${layout}/merged-alignment/"
     }
 
     /**
@@ -118,16 +126,16 @@ class MergingService {
      * @param pathToBam
      * @param fileName
      */
-    private void buildSeqScan(Sample sample, SeqType seqType,
-              String pathToBam, String fileName) {
-
-        File bamFile = new File(pathToBam, fileName)
+    private void buildSeqScan(Sample sample, SeqType seqType, SplittedPath path) {
+        File bamFile = new File(path.filePath())
         String text = getBamFileHeader(bamFile)
         List<SeqTrack> tracks = getSeqTracks(text)
         if (!tracks) {
+            println "no tracks"
             return
         }
         if (!assertSample(sample, tracks)) {
+            println "sample inconsistent"
             return
         }
 
@@ -141,38 +149,39 @@ class MergingService {
             matchingScan = seqScanService.buildSeqScan(tracks, alignParams)
             checkIfObsolite(matchingScan)
         }
-        // file type
-        FileType mergedType = FileType.findByType(FileType.Type.MERGED)
-        // create common objects (dataFile and mergingLog)
-        DataFile bamDataFile = new DataFile(
-                fileName: fileName,
-                pathName: pathToBam,
-                project: sample.individual.project,
-                fileExists: true,
-                used: true,
-                fileType: mergedType
-                )
-        bamDataFile.dateFileSystem = new Date(bamFile.lastModified())
-        bamDataFile.fileSize = bamFile.length()
-        bamDataFile.validate()
-        println bamDataFile.errors
-        bamDataFile.save(flush:true)
+
         // create Merging Log
         MergingLog mergingLog = new MergingLog(
-                alignmentParams: alignParams,
-                executedBy: MergingLog.Execution.DISCOVERY,
-                status: MergingLog.Status.FINISHED
-                )
-        mergingLog.save()
-        bamDataFile.mergingLog = mergingLog
-        bamDataFile.save()
-        mergingLog.seqScan = matchingScan
-        mergingLog.save()
+            alignmentParams: alignParams,
+            executedBy: MergingLog.Execution.DISCOVERY,
+            status: MergingLog.Status.FINISHED,
+            seqScan: matchingScan
+        )
+        verboseSave(mergingLog)
+
+        // create common objects (dataFile and mergingLog)
+        MergedAlignmentDataFile bamDataFile = new MergedAlignmentDataFile(
+            mergingLog: mergingLog,
+            fileName: path.fileName,
+            filePath: path.relative,
+            fileSystem: path.root,
+            fileExists: true,
+            indexFileExists: false,
+            dateFileSystem: new Date(bamFile.lastModified()),
+            fileSize: bamFile.length()
+        )
+        verboseSave(bamDataFile)
+
         if (matchingScan.state != SeqScan.State.OBSOLETE) {
             matchingScan.state = SeqScan.State.FINISHED
         }
-        matchingScan.validate()
-        matchingScan.save(flush: true)
+        verboseSave(matchingScan)
+    }
+
+    private List<SeqTrack> getSeqTracks(SplittedPath path) {
+        File bamFile = new File(path.filePath())
+        String text = getBamFileHeader(bamFile)
+        return getSeqTracks(text)
     }
 
     private List<SeqTrack> getSeqTracks(String text) {
@@ -185,23 +194,7 @@ class MergingService {
                 rgString += line + "\n"
                 nLines++
                 List<String> tokens = line.tokenize("\t")
-                SeqTrack track = null
-                track = parseTokensV1(tokens)
-                if (track) {
-                    seqTracks << track
-                    return
-                }
-                track = parseTokensV2(tokens)
-                if (track) {
-                    seqTracks << track
-                    return
-                }
-                track = parseTokensV3(tokens)
-                if (track) {
-                    seqTracks << track
-                    return
-                }
-                track = parseTokensV4(tokens)
+                SeqTrack track = bamHeaderParsingService.seqTrackFromTokens(tokens)
                 if (track) {
                     seqTracks << track
                     return
@@ -216,75 +209,7 @@ class MergingService {
         return seqTracks
     }
 
-    /*
-    * parse format ID:runName_s_lane
-    */
-    private SeqTrack parseTokensV1(List<String> tokens) {
-        for(String token in tokens) {
-            if (token.startsWith("ID:")) {
-                int sepId = token.indexOf("_s_")
-                if (sepId > -1) {
-                    String runName = token.substring(3, sepId);
-                    String lane = token.substring(token.lastIndexOf("_")+1)
-                    println "${runName} ${lane}"
-                    return getSeqTrack(runName, lane)
-                }
-            }
-        }
-        return null
-    }
 
-    private SeqTrack parseTokensV2(List<String> tokens) {
-        for(String token in tokens) {
-            if (token.startsWith("ID:")) {
-                int sepId = token.indexOf("_lane")
-                if (sepId > -1) {
-                    String runName = token.substring(3, sepId);
-                    String lane = token.substring(sepId+5, sepId+6)
-                    println "${runName} ${lane}"
-                    return getSeqTrack(runName, lane)
-                }
-            }
-        }
-        return null
-    }
-
-    private SeqTrack parseTokensV3(List<String> tokens) {
-        String runName
-        String lane
-        for(String token in tokens) {
-            if (token.startsWith("SM:")) {
-                runName = token.substring(3)
-            }
-            if (token.startsWith("ID:")) {
-                int idxFrom = token.indexOf("_") + 1
-                int idxTo = token.indexOf(".")
-                if (idxTo > 0) {
-                    lane = token.substring(idxFrom, idxTo)
-                } else {
-                    lane = token.substring(idxFrom)
-                }
-            }
-        }
-        println "${runName} ${lane}"
-        return getSeqTrack(runName, lane)
-    }
-
-    private SeqTrack parseTokensV4(List<String> tokens) {
-        for(String token in tokens) {
-            if (token.contains("DS:")) {
-                token = token.substring(token.indexOf("DS:"))
-            }
-            if (token.startsWith("DS:")) {
-                String runName = token.substring(3)
-                int idx = runName.indexOf("_FC") + 3
-                String lane = runName.substring(idx)
-                println "${runName} ${lane}"
-                return getSeqTrack(runName, lane)
-            }
-        }
-        return null
-    }
 
     private boolean assertSample(Sample sample, List<SeqTrack> tracks) {
         for(SeqTrack track in tracks) {
@@ -370,16 +295,6 @@ class MergingService {
         return tracks
     }
     */
-
-    private SeqTrack getSeqTrack(String runName, String lane) {
-        String runString = runName
-        if (runName.startsWith("run")) {
-            runString = runName.substring(3)
-        }
-        Run run = Run.findByName(runString)
-        SeqTrack seqTrack = SeqTrack.findByRunAndLaneId(run, lane)
-        return seqTrack
-    }
 
     /**
      *
@@ -557,5 +472,14 @@ class MergingService {
         process.waitFor()
         // get the header
         return process.getInputStream().getText()
+    }
+
+    private void verboseSave(Object obj) {
+        if (obj.validate()) {
+            obj.save(flush: true)
+        } else {
+            println obj
+            println obj.errors
+        }
     }
 }

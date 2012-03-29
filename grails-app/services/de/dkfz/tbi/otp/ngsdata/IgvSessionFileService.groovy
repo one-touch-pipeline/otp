@@ -4,12 +4,11 @@ import groovy.xml.MarkupBuilder
 
 class IgvSessionFileService {
 
-    private final String webServer = "https://otp.local"
+    def configService
+
     private final String header = '<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n'
 
-    private final String igvBase = "http://www.broadinstitute.org/igv/projects/current/igv.php?sessionURL="
-    private final String myURL = "https://otp.local/otpdevel/igvSessionFile/file/"
-    private final String myMut = "https://otp.local/otpdevel/igvSessionFile/mutFile/"
+    //private final String myMut = "https://otp.local/otpdevel/igvSessionFile/mutFile/"
 
     String buildSessionFile(List<SeqScan> scans) {
         String text = buildContent(scans)
@@ -17,7 +16,9 @@ class IgvSessionFileService {
         String name = "${hash}.xml"
         IgvSessionFile sessionFile = new IgvSessionFile(name: name, content: text)
         sessionFile.save(flush: true)
-        String url = "${igvBase}${myURL}${name}"
+        String igvBase = configService.igvPath()
+        String myURL = configService.otpWebServer()
+        String url = "${igvBase}${myURL}igvSessionFile/file/${name}"
         return url
     }
 
@@ -32,7 +33,8 @@ class IgvSessionFileService {
                     String path = getPathForScan(scan)
                     Resource(path: path)
                 }
-                Resource(path: "${myMut}${indId}.mut")
+                String myURL = configService.otpWebServer()
+                Resource(path: "${myURL}igvSessionFile/mutFile/${indId}.mut")
             }
         }
         String text = header + writer.toString()
@@ -44,15 +46,21 @@ class IgvSessionFileService {
         if (!merging) {
             return "noMerging"
         }
+        MergedAlignmentDataFile dataFile = MergedAlignmentDataFile.findByMergingLog(merging)
+        String dataWebServer = configService.dataWebServer()
+        String path = "${dataWebServer}/${dataFile.filePath}/${dataFile.fileName}"
+        return path
+        /*
         String path = ""
         String projPath = scan.sample.individual.project.dirName
         String typePath = scan.seqType.dirName
         String pid = scan.sample.individual.pid
         String sampleType = scan.sample.type.toString().toLowerCase()
         String layout = scan.seqType.libraryLayout.toLowerCase()
-        DataFile bamFile = DataFile.findByMergingLog(merging)
+        DataFile bamFile = MergedAlignmentDataFile.findByMergingLog(merging)
         String fileName = bamFile.fileName
         path = "${webServer}/${projPath}/sequencing/${typePath}/view-by-pid/${pid}/${sampleType}/${layout}/merged-alignment/${fileName}"
         return path
+        */
     }
 }
