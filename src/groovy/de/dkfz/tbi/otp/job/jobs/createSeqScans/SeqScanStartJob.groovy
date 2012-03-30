@@ -17,8 +17,9 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
 
     final int MAX_RUNNING = 1
     final String name = "seqScanWorkflow"
+    final String hql = "FROM SeqTrack as track WHERE track.id not in (SELECT seqTrack.id from MergingAssignment)"
 
-    @Scheduled(fixedRate=2000l)
+    @Scheduled(fixedRate=1000l)
     void execute() {
         if (!getExecutionPlan() || !getExecutionPlan().enabled) {
             //println("${name}: execution plan not set or not active")
@@ -29,8 +30,8 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
             //println "${name}: ${numberOfRunning} processes already running"
             return
         }
-        List<Run> runs = Run.findAllByCompleteAndBlacklisted(false, false)
-        if (runs.size() > 0) {
+        int nRuns = Run.countByCompleteAndBlacklisted(false, false)
+        if (nRuns > 1) {
             //println "${name}: runs processing running"
             return
         }
@@ -51,12 +52,6 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
     }
 
     private SeqTrack newSeqTrack() {
-        List<SeqTrack> seqTracks = SeqTrack.list()
-        for(SeqTrack seqTrack in seqTracks) {
-            if (MergingAssignment.countBySeqTrack(seqTrack) == 0) {
-                return seqTrack
-            }
-        }
-        return null
+        return SeqTrack.find(hql)
     }
 }
