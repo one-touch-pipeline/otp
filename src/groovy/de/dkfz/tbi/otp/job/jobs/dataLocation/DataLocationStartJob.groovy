@@ -15,7 +15,7 @@ class DataLocationStartJob extends AbstractStartJobImpl {
 
     final int MAX_RUNNING = 1
 
-    @Scheduled(fixedRate=10000l)
+    @Scheduled(fixedRate=5000l)
     void execute() {
         if (!hasOpenSlots()) {
             return
@@ -34,7 +34,9 @@ class DataLocationStartJob extends AbstractStartJobImpl {
             println run.toString()
             n++
         }
-        println "DataLocationWorkflow: ${n} jobs started"
+        if (n>0) {
+            println "DataLocationWorkflow: ${n} jobs started"
+        }
     }
 
     /**
