@@ -15,19 +15,19 @@ class MetaDataStartJob extends AbstractStartJobImpl {
 
     final int MAX_RUNNING = 1
 
-    @Scheduled(fixedRate=10000l)
+    @Scheduled(fixedRate=2000l)
     void execute() {
         if (!getExecutionPlan() || !getExecutionPlan().enabled) {
-            println("meta data Execution plan not set or not active")
+            //println("meta data Execution plan not set or not active")
             return
         }
         int numberOfRunning = numberOfRunningProcesses()
         if (numberOfRunning >= MAX_RUNNING) {
-            println "MetaDataWorkflow: ${numberOfRunning} processes already running"
+            //println "MetaDataWorkflow: ${numberOfRunning} processes already running"
             return
         }
         int n=0
-        List<Run> runs = Run.list()
+        List<Run> runs = Run.findAllByComplete(false)
         for(Run run in runs) {
             if (numberOfRunning >= MAX_RUNNING) {
                 break
@@ -41,7 +41,9 @@ class MetaDataStartJob extends AbstractStartJobImpl {
             numberOfRunning++
             n++
         }
-        println "MetaDataWorkflow: ${n} jobs started"
+        if (n>0) {
+            println "MetaDataWorkflow: ${n} jobs started"
+        }
     }
 
     /**
