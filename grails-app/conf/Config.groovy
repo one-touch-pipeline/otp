@@ -205,29 +205,11 @@ if (otpConfig.otp.pbs.ssh.password instanceof ConfigObject) {
 } else {
     otp.pbs.ssh.password = otpConfig.otp.pbs.ssh.password
 }
-// The path to the file holding commands to be executed on the PBS
-if (otpConfig.otp.pbs.ssh.commandResource instanceof ConfigObject) {
-    otp.pbs.ssh.commandResource = ""
-} else {
-    otp.pbs.ssh.commandResource = otpConfig.otp.pbs.ssh.commandResource
-}
 // The timeout for the commands processed on the PBS (if zero, it runs infinitely)
 if (otpConfig.otp.pbs.ssh.timeout instanceof ConfigObject) {
     otp.pbs.timeout = ""
 } else {
     otp.pbs.ssh.timeout = otpConfig.otp.pbs.ssh.timeout
-}
-// The pattern identifying the PBS id
-if (otpConfig.otp.pbs.pattern.pbsId instanceof ConfigObject) {
-    otp.pbs.pattern.pbsId = ""
-} else {
-    otp.pbs.pattern.pbsId = otpConfig.otp.pbs.pattern.pbsId
-}
-// The pattern identifying if a PBS job is running
-if (otpConfig.otp.pbs.pattern.running instanceof ConfigObject) {
-    otp.pbs.pattern.running = ""
-} else {
-    otp.pbs.pattern.running = otpConfig.otp.pbs.pattern.running
 }
 
 // Added by the Spring Security Core plugin:
