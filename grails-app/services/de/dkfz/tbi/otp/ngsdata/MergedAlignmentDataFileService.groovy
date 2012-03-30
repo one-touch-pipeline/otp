@@ -2,6 +2,8 @@ package de.dkfz.tbi.otp.ngsdata
 
 class MergedAlignmentDataFileService {
 
+    def configService
+
     String getFullPath(MergedAlignmentDataFile dataFile) {
         String basePath = pathToHost(dataFile.mergingLog.seqScan)
         String filePath = dataFile.filePath
@@ -11,27 +13,19 @@ class MergedAlignmentDataFileService {
     }
 
     String pathToHost(SeqScan scan) {
-        String host = scan.sample.individual.project.host
-        switch (host) {
-            case "DKFZ":
-                return "$OTP_ROOT_PATH/"
-            case "BioQuant":
-                return "$BQ_ROOTPATH/project"
-            default: 
-                throw new Exception()
-        }
+        return configService.getProjectRootPath(scan.sample.individual.project)
     }
 
-    String buildPath(MergingLog mergingLog) {
-        SeqScan scan = mergingLog.seqScan
-        String path = ""
-        String projPath = scan.sample.individual.project.dirName
-        String typePath = scan.seqType.dirName
-        String pid = scan.sample.individual.pid
-        String sampleType = scan.sample.type.toString().toLowerCase()
-        String layout = scan.seqType.libraryLayout.toLowerCase()
-        path = "${projPath}/sequencing/${typePath}/view-by-pid/${pid}/${sampleType}/${layout}/merged-alignment/"
-        return path
+    String buildRelativePath(SeqType type, Sample sample) {
+        String projectDir = sample.individual.project.dirName
+        String pid = sample.individual.pid
+        String sampleType = sample.type.toString().toLowerCase()
+        String layout = type.libraryLayout.toLowerCase()
+        return "${projectDir}/sequencing/${type.dirName}/view-by-pid/${pid}/${sampleType}/${layout}/merged-alignment/"
+    }
+
+    String buildRelativePath(MergingLog mergingLog) {
+        return buildRelativePath(mergingLog.seqScan.seqType, mergingLog.seqScan.sample) 
     }
 
     String buildFileName(MergingLog mergingLog) {
@@ -42,7 +36,7 @@ class MergedAlignmentDataFileService {
 
     private File fullDirectory(MergingLog mergingLog) {
         String basePath = pathToHost(mergingLog.seqScan)
-        String path = buildPath(mergingLog)
+        String path = buildRelativePath(mergingLog)
         String fullPath = "${basePath}/${path}"
         File dir = new File(fullPath)
     }

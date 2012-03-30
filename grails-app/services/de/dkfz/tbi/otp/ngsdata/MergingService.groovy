@@ -20,6 +20,7 @@ class MergingService {
     def seqScanService
     def configService
     def bamHeaderParsingService
+    def mergedAlignmentDataFileService
 
     /**
      * needs revision
@@ -65,14 +66,15 @@ class MergingService {
         if (!ind) {
             throw new IllegalArgumentException("Individual may not be null")
         }
-        List<SeqType> types = SeqType.findAll()
+        List<SeqType> types = SeqType.list()
+        List<Sample> samples = Sample.findAllByIndividual(ind)
         SplittedPath path = new SplittedPath()
         path.root = configService.getProjectRootPath(ind.project)
-        types.each { SeqType type ->
-            Sample.findAllByIndividual(ind).each { Sample sample ->
-                path.relative = getRelativePathToMergedAlignment(type, sample)
+        for(SeqType type in types) {
+            for(Sample sample in samples) {
+                path.relative = mergedAlignmentDataFileService.buildRelativePath(type, sample)
                 File mergedDir = new File(path.dirPath())
-                mergedDir.list().each { String fileName ->
+                for(String fileName in mergedDir.list()) {
                     path.fileName = fileName
                     if (isNewBamFile(path)) {
                         buildSeqScan(sample, type, path)
@@ -94,21 +96,6 @@ class MergingService {
             return false
         }
         return true
-    }
-
-    /**
-     * returns path relative to project base paths
-     * to directory with merged alignment files
-     * @param type
-     * @param sample
-     * @return
-     */
-    private String getRelativePathToMergedAlignment(SeqType type, Sample sample) {
-        String projectDir = sample.individual.project.dirName
-        String pid = sample.individual.pid
-        String sampleType = sample.type.toString().toLowerCase()
-        String layout = type.libraryLayout.toLowerCase() 
-        return "${projectDir}/sequencing/${type.dirName}/view-by-pid/${pid}/${sampleType}/${layout}/merged-alignment/"
     }
 
     /**
