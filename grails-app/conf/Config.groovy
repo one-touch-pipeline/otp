@@ -207,7 +207,7 @@ if (otpConfig.otp.pbs.ssh.password instanceof ConfigObject) {
 }
 // The timeout for the commands processed on the PBS (if zero, it runs infinitely)
 if (otpConfig.otp.pbs.ssh.timeout instanceof ConfigObject) {
-    otp.pbs.timeout = ""
+    otp.pbs.ssh.timeout = ""
 } else {
     otp.pbs.ssh.timeout = otpConfig.otp.pbs.ssh.timeout
 }
