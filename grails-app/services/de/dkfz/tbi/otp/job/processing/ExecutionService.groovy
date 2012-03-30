@@ -22,10 +22,6 @@ class ExecutionService {
      */
     @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
-    /**
-     * The session holding the connection to the remote host
-     */
-    private Session session = null
 
     /**
      * Triggers the sending of remote jobs
@@ -73,16 +69,16 @@ class ExecutionService {
         String username = (grailsApplication.config.otp.pbs.ssh.username).toString()
         String password = (grailsApplication.config.otp.pbs.ssh.password).toString()
         JSch jsch = new JSch()
-        this.session = jsch.getSession(username, host, port)
+        Session session = jsch.getSession(username, host, port)
         if (!password) {
             throw new ProcessingException("No password for remote connection specified.")
         }
-        this.session.setPassword(password)
-        this.session.setTimeout(timeout)
+        session.setPassword(password)
+        session.setTimeout(timeout)
         java.util.Properties config = new java.util.Properties()
         config.put("StrictHostKeyChecking", "no")
-        this.session.setConfig(config)
-        this.session.connect()
+        session.setConfig(config)
+        session.connect()
         Channel channel = session.openChannel("exec")
         if (command) {
             ((ChannelExec)channel).setCommand(command)
@@ -111,8 +107,8 @@ class ExecutionService {
      * @param channel The channel to be disconnected
      */
     private void disconnectSsh(Channel channel) {
+        channel.session.disconnect()
         channel.disconnect()
-        this.session.disconnect()
     }
 
     /**
