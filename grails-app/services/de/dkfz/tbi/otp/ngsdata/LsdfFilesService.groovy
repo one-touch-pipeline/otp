@@ -4,6 +4,7 @@ class LsdfFilesService {
 
     @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
+    def configService
 
     /**
      * This function return path to the initial location
@@ -12,7 +13,7 @@ class LsdfFilesService {
     public String getFileInitialPath(DataFile dataFile) {
         // TODO: handle runs directories starting with / and with /run
         Run run = dataFile.run
-        return dataFile.runInitialPath.dataPath + "/run" + run.name + "/" +
+        return dataFile.runInitialPath.dataPath + "/" + run.name + "/" +
             dataFile.pathName + "/" + dataFile.fileName
     }
 
@@ -65,40 +66,34 @@ class LsdfFilesService {
      * @return String with path or null if path can not be established
      */
     String getFileFinalPath(DataFile file) {
-        // TODO check if configuration variables are present
-        if (!file) {
-            log.debug("null file object")
-            return null
+        assertFinalPathDefined(file)
+        String seqTypeDir = seqTypeDirectory(file);
+        String centerDir = file.run.seqCenter.dirName
+        String basePath = configService.getProjectSequencePath(file.project)
+        String path =
+            "${basePath}/${seqTypeDir}/${centerDir}/run${file.run.name}/${file.pathName}/${file?.fileName}"
+        return path
+    }
+
+    void assertFinalPathDefined(DataFile dataFile) {
+        if (!dataFile) {
+            throw new FileNameNotDefinedException("0")
         }
-        if (!file.used) {
-            log.debug("File not used in seqTrack, location undefined [${file}]")
-            return null
+        if (!dataFile.used) {
+            throw new  FileNameNotDefinedException(dataFile.id as String)
         }
-        return sequenceDataFinalPath(file)
-        // TODO check if correct for merged bam files
     }
 
     /*
-    private String metaDataFinalPath(DataFile file) {
-        String basePath = grailsApplication.config.otp.dataPath['metadata']
-        String path = basePath + "/data-tracking-orig/" +
-                file.run.seqCenter?.dirName +
-                "/run" + file.run.name + "/" + file.fileName
+    private String sequenceDataFinalPath(DataFile file) {
+        String seqTypeDir = seqTypeDirectory(file);
+        String centerDir = file.run.seqCenter.dirName
+        String basePath = configService.getProjectSequencePath(file.project)
+        String path =
+            "${basePath}/${seqTypeDir}/${centerDir}/run${file.run.name}/${file.pathName}/${file?.fileName}"
         return path
     }
     */
-
-    private String sequenceDataFinalPath(DataFile file) {
-        String seqTypeDir = seqTypeDirectory(file);
-        String projectHost = file.project.host.toLowerCase()
-        String basePath = grailsApplication.config.otp.dataPath[projectHost]
-        String path =
-                basePath + file?.project?.dirName + "/sequencing/" +
-                seqTypeDir + "/" + file.run.seqCenter?.dirName +
-                "/run" + file.run?.name + "/" + file?.pathName + "/" +
-                file?.fileName
-        return path
-    }
 
     private String seqTypeDirectory(DataFile file) {
         if (file.seqTrack) {
@@ -107,7 +102,7 @@ class LsdfFilesService {
         if (file.alignmentLog) {
             return file.alignmentLog.seqTrack.seqType?.dirName
         }
-        return "/error/"
+        throw new FileNameNotDefinedException(file.id as String)
     }
 
     /**
@@ -132,26 +127,15 @@ class LsdfFilesService {
      * @return path to view by pid file, or null if vbp does not apply
      */
     String getFileViewByPidPath(DataFile file) {
-        if (!file) {
-            return null
-        }
-        if (!file.used) {
-            log.debug("File not used ${file.fileName}")
-            return null
-        }
+        assertFinalPathDefined(file)
         SeqTrack seqTrack = file.seqTrack ?: file.alignmentLog.seqTrack
-        String basePath = grailsApplication.config.otp.dataPath[file.project.host.toLowerCase()]
-        if (!basePath) {
-             return null
-        }
+        String basePath = configService.getProjectSequencePath(file.project)
+        String seqTypeDir = seqTrack.seqType.dirName
         String pid = seqTrack.sample.individual.pid
+        String sampleType = seqTrack.sample.type.toString().toLowerCase()
+        String library = seqTrack.seqType.libraryLayout.toLowerCase()
         String path =
-                basePath + file.project?.dirName + "/sequencing/" +
-                seqTrack.seqType.dirName +  "/view-by-pid/" + pid +
-                "/" + seqTrack.sample.type.toString().toLowerCase() + "/" +
-                seqTrack.seqType.libraryLayout.toLowerCase() +
-                "/run" + file.run.name + "/" + file.fileType.vbpPath + "/" +
-                file.vbpFileName
+            "${basePath}/${seqTypeDir}/view-by-pid/${pid}/${sampleType}/${library}/run${file.run.name}/${file.fileType.vbpPath}/${file.vbpFileName}"
         return path
     }
 
@@ -234,20 +218,11 @@ class LsdfFilesService {
      *
      */
     private String getPathToRun(DataFile file) {
-        if (!file) {
-            return null
-        }
-        if (!file.used) {
-            return null
-        }
-        SeqTrack seqTrack = file.seqTrack ?: file.alignmentLog.seqTrack
-        if (!seqTrack) {
-            return null
-        }
-        String basePath = grailsApplication.config.otp.dataPath[file.project.host.toLowerCase()]
-        String path =
-                basePath + file?.project?.dirName + "/sequencing/" +
-                seqTrack.seqType.dirName + "/" + file.run.seqCenter?.dirName + "/"
+        assertFinalPathDefined(file)
+        String basePath = configService.getProjectSequencePath(file.project)
+        String seqTypeDir = seqTypeDirectory(file);
+        String centerDir = file.run.seqCenter.dirName
+        String path = "${basePath}/${seqTypeDir}/${centerDir}/"
         return path
     }
 }
