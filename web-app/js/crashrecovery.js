@@ -31,24 +31,49 @@ $.otp.crashRecovery.createListView = function () {
     });
 };
 
+$.otp.crashRecovery.showParametersDialog = function (id, target) {
+    "use strict";
+    $.get($.otp.contextPath + "/crashRecovery/parametersOfJob/" + id, function (data) {
+        $(data).dialog({
+            buttons: {
+                Ok: function () {
+                    var parameters = [];
+                    $("ul li input", $(this)).each(function () {
+                        parameters[parameters.length] = {
+                            key: $(this).attr("name"),
+                            value: $(this).val()
+                        };
+                    });
+                    $.getJSON($.otp.contextPath + target + id, 'parameters=' + JSON.stringify(parameters), function (data) {
+                        $("#crashRecoveryTable").dataTable().fnDraw();
+                        alert(data.success);
+                    });
+                    $(this).dialog("close");
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+    });
+};
+
 $.otp.crashRecovery.finishedButton = function () {
+    "use strict";
     var id = $.otp.crashRecovery.processingStepId();
     if (!id) {
         return;
     }
-    console.log(id);
-    // TODO: query for Process Parameters to set.
-    alert("Marking a Job as finished is not yet implemented");
+    $.otp.crashRecovery.showParametersDialog(id, "/crashRecovery/markFinished/");
 };
 
 $.otp.crashRecovery.succeededButton = function () {
+    "use strict";
     var id = $.otp.crashRecovery.processingStepId();
     if (!id) {
         return;
     }
-    console.log(id);
-    // TODO: query for Process Parameters to set.
-    alert("Marking a Job as succeeded is not yet implemented");
+    $.otp.crashRecovery.showParametersDialog(id, "/crashRecovery/markSucceeded/");
 };
 
 $.otp.crashRecovery.failedButton = function () {

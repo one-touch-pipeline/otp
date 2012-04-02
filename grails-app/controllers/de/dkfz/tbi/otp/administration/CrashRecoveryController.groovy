@@ -74,6 +74,16 @@ class CrashRecoveryController {
         render data as JSON
     }
 
+    def markFinished() {
+        def data = performMarkAsFinished(false, params.id as Long, params)
+        render data as JSON
+    }
+
+    def markSucceeded() {
+        def data = performMarkAsFinished(true, params.id as Long, params)
+        render data as JSON
+    }
+
     def startScheduler() {
         if (!crashRecoveryService.crashRecovery) {
             def data = [success: false, error: "Not in Crash Recovery"]
@@ -83,5 +93,30 @@ class CrashRecoveryController {
         schedulerService.startup()
         def data = [success: !crashRecoveryService.crashRecovery]
         render data as JSON
+    }
+
+    def parametersOfJob() {
+        [parameters: crashRecoveryService.getOutputParametersOfJob(params.id as Long)]
+    }
+
+    private performMarkAsFinished(boolean successOrFinished, Long processingStepId, Map params) {
+        boolean success = true
+        String error = null
+        def jsonParameters = JSON.parse(params["parameters"])
+        Map<String, String> parameters = [:]
+        jsonParameters.each {
+            parameters.put(it.key, it.value)
+        }
+        try {
+            if (successOrFinished) {
+                crashRecoveryService.markJobAsSucceeded(processingStepId, parameters)
+            } else {
+                crashRecoveryService.markJobAsFinished(processingStepId, parameters)
+            }
+        } catch (RuntimeException e) {
+            success = false
+            error = e.message
+        }
+        return [success: success, error: error]
     }
 }

@@ -1,6 +1,9 @@
 package de.dkfz.tbi.otp.administration
 
 import de.dkfz.tbi.otp.job.processing.ExecutionState
+import de.dkfz.tbi.otp.job.processing.Parameter
+import de.dkfz.tbi.otp.job.processing.ParameterType
+import de.dkfz.tbi.otp.job.processing.ParameterUsage
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessingError
 import de.dkfz.tbi.otp.job.processing.ProcessingException
@@ -33,7 +36,7 @@ class CrashRecoveryService {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void markJobAsFinished(Long id, Map<String, String> parameters) {
         ProcessingStep step = getProcessingStep(id)
-        // TODO: store parameters
+        storeParameters(step, parameters)
         // finished update
         createNewProcessingStepUpdate(step, ExecutionState.FINISHED)
         // and schedule
@@ -50,7 +53,7 @@ class CrashRecoveryService {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void markJobAsSucceeded(Long id, Map<String, String> parameters) {
         ProcessingStep step = getProcessingStep(id)
-        // TODO: store parameters
+        storeParameters(step, parameters)
         // finished and success update
         createNewProcessingStepUpdate(step, ExecutionState.FINISHED)
         createNewProcessingStepUpdate(step, ExecutionState.SUCCESS)
@@ -125,6 +128,17 @@ class CrashRecoveryService {
     }
 
     /**
+     * Retrieves all Output Parameter Types for the given ProcessingStep.
+     * @param id The id of the ProcessingStep for which the output parameters should be retrieved
+     * @return List of output parameters used by the given processing step
+     **/
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    List<ParameterType> getOutputParametersOfJob(Long id) {
+        ProcessingStep step = getProcessingStep(id)
+        return ParameterType.findAllByJobDefinitionAndParameterUsage(step.jobDefinition, ParameterUsage.OUTPUT)
+    }
+
+    /**
      * Helper function to retrieve the ProcessingStep for the given Id.
      * The method does not only retrieve the ProcessingStep from Database, but also ensures
      * that the ProcessingStep is in a state requiring crash recovery. If not in such a case
@@ -177,5 +191,54 @@ class CrashRecoveryService {
             throw new ProcessingException("Could not create a ${state} Update for ProcessingStep ${step.id}")
         }
         return update
+    }
+
+    /**
+     * Stores the Output parameters for the given processing step.
+     * This method also validates that all output parameters have been provided.
+     * @param step The processing step for which the output parameters should be stored
+     * @param parameters Key/Value pair of Parameters, key is id of ParameterType, Value the value for the Parameter
+     **/
+    private void storeParameters(ProcessingStep step, Map<String, String> parameters) {
+        Parameter.withTransaction {  status ->
+            parameters.each { key, value ->
+                println key + "/" + value
+                ParameterType type = ParameterType.get(key as Long)
+                if (type.jobDefinition.id != step.jobDefinition.id) {
+                    status.setRollbackOnly()
+                    // TODO: throw proper exception
+                    throw new RuntimeException("ParameterType with id ${key} does not belong to ProcessingStep with id ${step.id}")
+                }
+                if (type.parameterUsage != ParameterUsage.OUTPUT) {
+                    status.setRollbackOnly()
+                    // TODO: throw proper exception
+                    throw new RuntimeException("ParameterType with id ${key} is not an output Parameter")
+                }
+                Parameter param = new Parameter(type: type, value: value)
+                if (!param.validate()) {
+                    status.setRollbackOnly()
+                    // TODO: throw proper exception
+                    throw new RuntimeException("Parameter with type id ${key} and value ${value} cannot be stored")
+                }
+                step.addToOutput(param)
+            }
+            // validate that all output parameters are set
+            List<ParameterType> parameterTypes = ParameterType.findAllByJobDefinitionAndParameterUsage(step.jobDefinition, ParameterUsage.OUTPUT)
+            for (ParameterType parameterType in parameterTypes) {
+                boolean found = false
+                for (Parameter param in step.output) {
+                    if (param.type == parameterType) {
+                        found = true
+                        break
+                    }
+                }
+                if (!found) {
+                    status.setRollbackOnly()
+                    // TODO: throw proper exception
+                    throw new RuntimeException("Parameter for type ${parameterType.id} has not been set")
+                }
+            }
+            step.save(flush: true)
+        }
     }
 }
