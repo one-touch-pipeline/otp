@@ -14,6 +14,8 @@ class Run {
 
     boolean multipleSource           // for runs from a few projects
 
+    boolean legacyRun = false
+
     SeqCenter seqCenter
     SeqPlatform seqPlatform
 
