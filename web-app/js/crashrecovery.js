@@ -2,6 +2,7 @@
 
 $.otp.crashRecovery = {};
 $.otp.crashRecovery.processingStepId = function () {
+    "use strict";
     var id = $("#crashRecoveryTable input[name=processingStep]:checked").val();
     if (!id) {
         $("#dialog-select-job").dialog({
@@ -18,9 +19,10 @@ $.otp.crashRecovery.processingStepId = function () {
 };
 
 $.otp.crashRecovery.createListView = function () {
+    "use strict";
     $.otp.createListView("#crashRecoveryTable", $.otp.contextPath + "/crashRecovery/datatable/", true, function (json) {
         var i, rowData;
-        for (i = 0; i < json.aaData.length; i++) {
+        for (i = 0; i < json.aaData.length; i += 1) {
             rowData = json.aaData[i];
             rowData[0] = '<input type="radio" name="processingStep" value="' + rowData[0] + '"/>';
             rowData[1] = '<a href="' + $.otp.contextPath +  '/processes/plan/' + rowData[1].id + '">' + rowData[1].name + '</a>';
@@ -77,6 +79,7 @@ $.otp.crashRecovery.succeededButton = function () {
 };
 
 $.otp.crashRecovery.failedButton = function () {
+    "use strict";
     var id = $.otp.crashRecovery.processingStepId();
     if (!id) {
         return;
@@ -105,6 +108,7 @@ $.otp.crashRecovery.failedButton = function () {
 };
 
 $.otp.crashRecovery.restartButton = function () {
+    "use strict";
     var id = $.otp.crashRecovery.processingStepId();
     if (!id) {
         return;
@@ -115,6 +119,7 @@ $.otp.crashRecovery.restartButton = function () {
 };
 
 $.otp.crashRecovery.startSchedulerButton = function () {
+    "use strict";
     $.getJSON($.otp.contextPath + "/crashRecovery/startScheduler/", function (data) {
         if (data.success) {
             alert("Scheduler successfully restarted");
@@ -125,6 +130,7 @@ $.otp.crashRecovery.startSchedulerButton = function () {
     });
 };
 $.otp.crashRecovery.setupView = function () {
+    "use strict";
     $.otp.crashRecovery.createListView();
     $("#markFinished").click($.otp.crashRecovery.finishedButton);
     $("#markSucceeded").click($.otp.crashRecovery.succeededButton);
