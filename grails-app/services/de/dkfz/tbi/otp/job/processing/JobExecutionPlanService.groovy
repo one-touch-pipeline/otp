@@ -49,6 +49,31 @@ class JobExecutionPlanService {
         return Process.findAllByJobExecutionPlanInList(plans, [max: max, offset: offset, sort: column, order: order ? "asc" : "desc"])
     }
 
+    @PreAuthorize("hasPermission(#plan, read) or hasRole('ROLE_ADMIN')")
+    public Map<Process, ProcessingStepUpdate> getLatestUpdatesForPlan(JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false) {
+        final List<Long> plans = withParents(plan).collect { it.id }
+        String query = '''
+SELECT p, max(u.id)
+FROM ProcessingStepUpdate as u
+INNER JOIN u.processingStep as step
+INNER JOIN step.process as p
+INNER JOIN p.jobExecutionPlan as plan
+WHERE plan.id in (:planIds)
+GROUP BY p.id
+'''
+        query = query + "ORDER BY p.${column} ${order ? 'asc' : 'desc'}"
+
+        LinkedHashMap<Process, ProcessingStepUpdate> results = new LinkedHashMap<Process, ProcessingStepUpdate>()
+        def processes = ProcessingStepUpdate.executeQuery(query, [planIds: plans], [max: max, offset: offset])
+        List<Long> ids = processes.collect { it[1] }
+        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByIdInList(ids)
+        processes.each {
+            results.put(it[0] as Process, updates.find { update -> update.id == it[1] } )
+        }
+
+        return results
+    }
+
     /**
      * Returns the number of Processes run for the given JobExecutionPlan.
      * @param plan The Plan for which the number of run Processes should be returned

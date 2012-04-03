@@ -130,17 +130,14 @@ class ProcessesController {
         }
 
         JobExecutionPlan plan = jobExecutionPlanService.getPlan(params.id as long)
-        List<JobExecutionPlan> processes = jobExecutionPlanService.getAllProcesses(plan, length, start, sort, sortOrder)
+        Map<Process, ProcessingStepUpdate> processes = jobExecutionPlanService.getLatestUpdatesForPlan(plan, length, start, sort, sortOrder)
         dataToRender.iTotalRecords = jobExecutionPlanService.getNumberOfProcesses(plan)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.offset = start
         dataToRender.iSortCol_0 = sortColumn
         dataToRender.sSortDir_0 = sortOrder ? "asc" : "desc"
 
-        // TODO: sorting for additional columns
-        processes.each { Process process ->
-            ProcessingStep latest = processService.getLatestProcessingStep(process)
-            ExecutionState lastState = processService.getState(process)
+        processes.each { Process process, ProcessingStepUpdate latest ->
             ProcessParameter parameter = ProcessParameter.findByProcess(process)
             String parameterData = null
             if (parameter) {
@@ -153,19 +150,19 @@ class ProcessesController {
                 }
             }
             def actions = []
-            if (lastState == ExecutionState.FAILURE) {
+            if (latest.state == ExecutionState.FAILURE) {
                 actions << "restart"
             }
             dataToRender.aaData << [
                 process.id,
-                stateForExecutionState(process, lastState),
+                stateForExecutionState(process, latest.state),
                 parameterData,
                 process.started,
-                processService.getLastUpdate(latest),
-                latest.jobDefinition.name,
-                [state: lastState, error: processService.getError(process), id: latest.id],
+                latest.date,
+                latest.processingStep.jobDefinition.name,
+                [state: latest.state, error: latest.error ? latest.error.errorMessage : null, id: latest.processingStep.id],
                 [actions: actions]
-                ]
+            ]
         }
         render dataToRender as JSON
     }
