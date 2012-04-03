@@ -12,6 +12,12 @@ class ProcessService {
     static final profiled = true
 
     /**
+     * Dependency Injection of schedulerService.
+     * Needed to restart Processing Steps.
+     **/
+    def schedulerService
+
+    /**
      * Security aware way to access a Process.
      * @param id The Process's id
      * @return
@@ -53,6 +59,17 @@ class ProcessService {
     @PostAuthorize("hasPermission(returnObject.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public ProcessingStep getProcessingStep(long id) {
         return ProcessingStep.get(id)
+    }
+
+    /**
+     * Restarts the given ProcessingStep.
+     * Thin ACL aware wrapper around schedulerService.
+     * @param step The ProcessingStep to restart
+     **/
+    // TODO: better ACL rights?
+    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', write) or hasRole('ROLE_ADMIN')")
+    public void restartProcessingStep(ProcessingStep step) {
+        schedulerService.restartProcessingStep(step)
     }
 
     /**

@@ -60,6 +60,29 @@ $.otp.crashRecovery.showParametersDialog = function (id, target) {
     });
 };
 
+$.otp.crashRecovery.showFailedJobDialog = function (id, target) {
+    $("#dialog-error-message-job").dialog({
+        modal: true,
+        buttons: {
+            "Mark Job as Failed": function () {
+                var message = $("input", $(this)).val();
+                if (!message || message == "") {
+                    message = null;
+                    return;
+                }
+                $(this).dialog("close");
+                $.getJSON($.otp.contextPath + target + id, {message: message}, function (data) {
+                    $("#crashRecoveryTable").dataTable().fnDraw();
+                    alert(data.success);
+                });
+            },
+            Cancel: function () {
+                $(this).dialog("close");
+            }
+        }
+    });
+};
+
 $.otp.crashRecovery.finishedButton = function () {
     "use strict";
     var id = $.otp.crashRecovery.processingStepId();
@@ -84,27 +107,7 @@ $.otp.crashRecovery.failedButton = function () {
     if (!id) {
         return;
     }
-    $("#dialog-error-message-job").dialog({
-        modal: true,
-        buttons: {
-            "Mark Job as Failed": function () {
-                var message = $("input", $(this)).val();
-                console.log(message);
-                if (!message || message == "") {
-                    message = null;
-                    return;
-                }
-                $(this).dialog("close");
-                $.getJSON($.otp.contextPath + "/crashRecovery/markFailed/" + id, {message: message}, function (data) {
-                    $("#crashRecoveryTable").dataTable().fnDraw();
-                    alert(data.success);
-                });
-            },
-            Cancel: function () {
-                $(this).dialog("close");
-            }
-        }
-    });
+    $.otp.crashRecovery.showFailedJobDialog(id, "/crashRecovery/markFailed/");
 };
 
 $.otp.crashRecovery.restartButton = function () {
@@ -113,9 +116,7 @@ $.otp.crashRecovery.restartButton = function () {
     if (!id) {
         return;
     }
-    console.log(id);
-    // TODO: show dialog
-    alert("Restarting a Job is not yet implemented");
+    $.otp.crashRecovery.showFailedJobDialog(id, "/crashRecovery/restart/");
 };
 
 $.otp.crashRecovery.startSchedulerButton = function () {

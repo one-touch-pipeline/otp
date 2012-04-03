@@ -74,6 +74,19 @@ class CrashRecoveryController {
         render data as JSON
     }
 
+    def restart() {
+        boolean success = true
+        String error = null
+        try {
+            crashRecoveryService.restartJob(params.id as Long, params.message)
+        } catch (RuntimeException e) {
+            success = false
+            error = e.message
+        }
+        def data = [success: success, error: error]
+        render data as JSON
+    }
+
     def markFinished() {
         def data = performMarkAsFinished(false, params.id as Long, params)
         render data as JSON

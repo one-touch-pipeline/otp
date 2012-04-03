@@ -203,6 +203,32 @@ OTP.prototype.createJobExecutionPlanListView = function (selector) {
 };
 
 /**
+ * Callback for restart ProcessingStep.
+ * Performs the AJAX call to restart the step and reloads the given datatable.
+ * @param id The id of the ProcessingStep to restart.
+ * @param dataTable Selector for the datatable
+ **/
+OTP.prototype.restartProcessingStep = function (id, selector) {
+    "use strict";
+    $.getJSON($.otp.contextPath + "/processes/restartStep/" + id, function (data) {
+        // TODO: proper notification.
+        alert(data.success);
+        $(selector).dataTable().fnDraw();
+    });
+};
+
+/**
+ * Creates HTML markup for link to restart a ProcessingStep.
+ * @param id The id of the ProcessingStep to restart.
+ * @param dataTable Selector for the datatable
+ **/
+OTP.prototype.createRestartProcessingStepLink = function (id, dataTable) {
+    "use strict";
+    var imageLink = $.otp.contextPath + "/images/redo.png";
+    return '<a onclick="$.otp.restartProcessingStep(' + id + ', \'' + dataTable + '\');" href="#" title="Restart" ><img src="' + imageLink + '"/></a>';
+};
+
+/**
  * Creates the datatables view for the list of all Processes for a given JobExecutionPlan
  * @param selector The JQuery selector for the table to create the datatable into
  * @param planId The id of the JobExecutionPlan for which the list of Processes should be retrieved.
@@ -210,7 +236,7 @@ OTP.prototype.createJobExecutionPlanListView = function (selector) {
 OTP.prototype.createProcessListView = function (selector, planId) {
     "use strict";
     this.createListView(selector, this.contextPath + '/processes/planData/' +  planId + '/', false, function (json) {
-        var i, rowData;
+        var i, j, rowData, stepId, actions;
         for (i = 0; i < json.aaData.length; i++) {
             rowData = json.aaData[i];
             rowData[0] = '<a href="' + $.otp.contextPath + '/processes/process/' + rowData[0] + '">' + rowData[0] + '</a>';
@@ -218,10 +244,23 @@ OTP.prototype.createProcessListView = function (selector, planId) {
             rowData[2] = rowData[2] ? rowData[2] : "-";
             rowData[3] = $.otp.renderDate(rowData[3]);
             rowData[4] = $.otp.renderDate(rowData[4]);
+            stepId = rowData[6].id;
             if (rowData[6].error) {
                 rowData[6] = '<a href="' + $.otp.contextPath + '/processes/processingStep/' + rowData[6].id + '" title="' + rowData[6].error + '">' + rowData[6].state.name + '</a>';
             } else {
                 rowData[6] = rowData[6].state.name;
+            }
+            actions = rowData[7].actions;
+            rowData[7] = "";
+            for (j = 0; j < actions.length; j += 1) {
+                switch (actions[j]) {
+                case "restart":
+                    rowData[7] += $.otp.createRestartProcessingStepLink(stepId, selector);
+                    break;
+                default:
+                    // nothing
+                    break;
+                }
             }
         }
     }, [
@@ -231,7 +270,8 @@ OTP.prototype.createProcessListView = function (selector, planId) {
         { "bSortable": true,  "aTargets": [3] },
         { "bSortable": false, "aTargets": [4] },
         { "bSortable": false, "aTargets": [5] },
-        { "bSortable": false, "aTargets": [6] }
+        { "bSortable": false, "aTargets": [6] },
+        { "bSortable": false, "aTargets": [7] }
     ]);
 };
 
@@ -243,10 +283,11 @@ OTP.prototype.createProcessListView = function (selector, planId) {
 OTP.prototype.createProcessingStepListView = function (selector, processId) {
     "use strict";
     this.createListView(selector, this.contextPath + '/processes/processData/' +  processId + '/', false, function (json) {
-        var i, rowData;
+        var i, j, rowData, stepId, actions;
         for (i = 0; i < json.aaData.length; i++) {
             rowData = json.aaData[i];
-            rowData[0] = '<a href="' + $.otp.contextPath + '/processes/processingStep/' + rowData[0] + '">' + rowData[0] + '</a>';
+            stepId = rowData[0];
+            rowData[0] = '<a href="' + $.otp.contextPath + '/processes/processingStep/' + stepId + '">' + stepId + '</a>';
             rowData[1] = $.otp.statusImageHtml(rowData[1].name);
             if (rowData[3]) {
                 rowData[3] = '<span title="' + rowData[3].name + '">' + rowData[3].name.substr(rowData[3].name.lastIndexOf('.') + 1) + "</span><br/>" +
@@ -266,6 +307,18 @@ OTP.prototype.createProcessingStepListView = function (selector, processId) {
             } else {
                 rowData[7] = rowData[7].state.name;
             }
+            actions = rowData[8].actions;
+            rowData[8] = "";
+            for (j = 0; j < actions.length; j += 1) {
+                switch (actions[j]) {
+                case "restart":
+                    rowData[8] += $.otp.createRestartProcessingStepLink(stepId, selector);
+                    break;
+                default:
+                    // nothing
+                    break;
+                }
+            }
         }
     }, [
         { "bSortable": true,  "aTargets": [0] },
@@ -275,7 +328,8 @@ OTP.prototype.createProcessingStepListView = function (selector, processId) {
         { "bSortable": false, "aTargets": [4] },
         { "bSortable": false, "aTargets": [5] },
         { "bSortable": false, "aTargets": [6] },
-        { "bSortable": false, "aTargets": [7] }
+        { "bSortable": false, "aTargets": [7] },
+        { "bSortable": false, "aTargets": [8] }
     ]);
 };
 

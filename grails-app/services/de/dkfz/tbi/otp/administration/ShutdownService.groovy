@@ -197,7 +197,7 @@ class ShutdownService implements DisposableBean {
 
     /**
      * Retrieves all ProcessingSteps for currently running Jobs.
-     * This are ProcessingSteps with the latest ProcessingStepUpdate in state STARTED, RESTARTED or RESUMED.
+     * This are ProcessingSteps with the latest ProcessingStepUpdate in state STARTED or RESUMED.
      * @return List of running ProcessingSteps
      **/
     private List<ProcessingStep> retrieveRunningJobs() {
@@ -210,7 +210,7 @@ class ShutdownService implements DisposableBean {
                 return
             }
             ProcessingStepUpdate last = updates.sort { it.id }.last()
-            if (last.state == ExecutionState.STARTED || last.state == ExecutionState.RESTARTED || last.state == ExecutionState.RESUMED) {
+            if (last.state == ExecutionState.STARTED || last.state == ExecutionState.RESUMED) {
                 runningJobs << step
             }
         }

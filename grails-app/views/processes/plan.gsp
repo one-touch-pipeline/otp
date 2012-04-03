@@ -23,6 +23,7 @@
                     <th>Last Update</th>
                     <th>Current Processing Step</th>
                     <th>Status</th>
+                    <th>&nbsp;</th>
                 </tr>
             </thead>
             <tbody>

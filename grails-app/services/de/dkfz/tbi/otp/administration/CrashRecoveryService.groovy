@@ -69,23 +69,7 @@ class CrashRecoveryService {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void markJobAsFailed(Long id, String reason) {
         ProcessingStep step = getProcessingStep(id)
-        createNewProcessingStepUpdate(step, ExecutionState.FINISHED)
-        ProcessingStepUpdate update = createNewProcessingStepUpdate(step, ExecutionState.FAILURE)
-        ProcessingError error = new ProcessingError(errorMessage: reason, processingStepUpdate: update)
-        error.save()
-        update.error = error
-        if (!update.save(flush: true)) {
-            // TODO: trigger error handling
-            log.fatal("Could not create a FAILURE Update for ProcessingStep ${step.id}")
-            throw new ProcessingException("Could not create a FAILURE Update for ProcessingStep ${step.id}")
-        }
-        Process process = Process.get(step.process.id)
-        process.finished = true
-        if (!process.save(flush: true)) {
-            // TODO: trigger error handling
-            log.fatal("Could not set Process ${step.process.id} to finished")
-            throw new ProcessingException("Could not set Process ${step.process.id} to finished")
-        }
+        performMarkProcessingStepAsFailed(step, reason)
     }
 
     /**
@@ -97,7 +81,8 @@ class CrashRecoveryService {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void restartJob(Long id, String reason) {
         ProcessingStep step = getProcessingStep(id)
-        // TODO: how to restart?
+        performMarkProcessingStepAsFailed(step, reason)
+        schedulerService.restartProcessingStep(step, false)
     }
 
     /**
@@ -120,7 +105,7 @@ class CrashRecoveryService {
                 return
             }
             ProcessingStepUpdate last = updates.sort { it.id }.last()
-            if (last.state == ExecutionState.STARTED || last.state == ExecutionState.RESTARTED || last.state == ExecutionState.RESUMED) {
+            if (last.state == ExecutionState.STARTED || last.state == ExecutionState.RESUMED) {
                 crashed << step
             }
         }
@@ -239,6 +224,26 @@ class CrashRecoveryService {
                 }
             }
             step.save(flush: true)
+        }
+    }
+
+    private void performMarkProcessingStepAsFailed(ProcessingStep step, String reason) {
+        createNewProcessingStepUpdate(step, ExecutionState.FINISHED)
+        ProcessingStepUpdate update = createNewProcessingStepUpdate(step, ExecutionState.FAILURE)
+        ProcessingError error = new ProcessingError(errorMessage: reason, processingStepUpdate: update)
+        error.save()
+        update.error = error
+        if (!update.save(flush: true)) {
+            // TODO: trigger error handling
+            log.fatal("Could not create a FAILURE Update for ProcessingStep ${step.id}")
+            throw new ProcessingException("Could not create a FAILURE Update for ProcessingStep ${step.id}")
+        }
+        Process process = Process.get(step.process.id)
+        process.finished = true
+        if (!process.save(flush: true)) {
+            // TODO: trigger error handling
+            log.fatal("Could not set Process ${step.process.id} to finished")
+            throw new ProcessingException("Could not set Process ${step.process.id} to finished")
         }
     }
 }

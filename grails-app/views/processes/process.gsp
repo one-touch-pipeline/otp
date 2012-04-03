@@ -23,6 +23,7 @@
                 <th>Last Update</th>
                 <th>Duration</th>
                 <th>Status</th>
+                <th>&nbsp;</th>
             </tr>
         </thead>
         <tbody>

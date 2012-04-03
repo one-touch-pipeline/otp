@@ -152,6 +152,10 @@ class ProcessesController {
                     parameterData = parameter.value
                 }
             }
+            def actions = []
+            if (lastState == ExecutionState.FAILURE) {
+                actions << "restart"
+            }
             dataToRender.aaData << [
                 process.id,
                 stateForExecutionState(process, lastState),
@@ -159,7 +163,8 @@ class ProcessesController {
                 process.started,
                 processService.getLastUpdate(latest),
                 latest.jobDefinition.name,
-                [state: lastState, error: processService.getError(process), id: latest.id]
+                [state: lastState, error: processService.getError(process), id: latest.id],
+                [actions: actions]
                 ]
         }
         render dataToRender as JSON
@@ -201,6 +206,10 @@ class ProcessesController {
         dataToRender.sSortDir_0 = sortOrder ? "asc" : "desc"
         steps.each { ProcessingStep step ->
             ExecutionState state = processService.getState(step)
+            def actions = []
+            if (state == ExecutionState.FAILURE) {
+                actions << "restart"
+            }
             dataToRender.aaData << [
                 step.id,
                 state, // last reached status
@@ -209,7 +218,8 @@ class ProcessesController {
                 processService.getFirstUpdate(step), // started
                 processService.getLastUpdate(step), // last update
                 processService.getProcessingStepDuration(step), // duration
-                [state: processService.getState(step), error: processService.getError(step)]
+                [state: state, error: processService.getError(step)],
+                [actions: actions]
             ]
         }
         render dataToRender as JSON
@@ -218,6 +228,19 @@ class ProcessesController {
     def processingStep() {
         ProcessingStep step = processService.getProcessingStep(params.id as long)
         [step: step]
+    }
+
+    def restartStep() {
+        boolean ok = true
+        String error = null
+        try {
+            processService.restartProcessingStep(processService.getProcessingStep(params.id as long))
+        } catch (RuntimeException e) {
+            ok = false
+            error = e.message
+        }
+        def data = [success: ok, error: error]
+        render data as JSON
     }
 
     def processingStepDate() {
