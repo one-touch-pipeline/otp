@@ -150,13 +150,7 @@ class ProcessService {
      */
     @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
     public ProcessingStep getLatestProcessingStep(Process process) {
-        List<ProcessingStep> steps = ProcessingStep.findAllByProcess(process)
-        for (ProcessingStep step in steps) {
-            if (!step.next) {
-                return step
-            }
-        }
-        return null
+        return ProcessingStep.findByProcessAndNextIsNull(process)
     }
 
     /**
@@ -166,7 +160,7 @@ class ProcessService {
      */
     @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
     public ExecutionState getState(Process process) {
-        getState(getLatestProcessingStep(process))
+        return lastUpdate(process).state
     }
 
     /**
@@ -188,7 +182,11 @@ class ProcessService {
      */
     @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
     public String getError(Process process) {
-        return getError(getLatestProcessingStep(process))
+        ProcessingStepUpdate update = lastUpdate(process)
+        if (update.error) {
+            return update.error.errorMessage
+        }
+        return null
     }
 
     /**
@@ -213,7 +211,7 @@ class ProcessService {
      */
     @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
     public Date getLastUpdate(Process process) {
-        getLastUpdate(getLatestProcessingStep(process))
+        return lastUpdate.date
     }
 
     /**
@@ -233,11 +231,7 @@ class ProcessService {
      */
     @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public Date getFirstUpdate(ProcessingStep step) {
-        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step)
-        if (updates.isEmpty()) {
-            throw new IllegalArgumentException("ProcessingStep has no updates")
-        }
-        return updates.sort { it.id }.first().date
+        return ProcessingStepUpdate.findByProcessingStep(step, [sort: "id", order: "asc"]).date
     }
 
     /**
@@ -282,10 +276,21 @@ class ProcessService {
      * @return
      */
     private ProcessingStepUpdate lastUpdate(ProcessingStep step) {
-        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step)
-        if (updates.isEmpty()) {
-            throw new IllegalArgumentException("ProcessingStep has no updates")
-        }
-        return updates.sort { it.id }.last()
+        return ProcessingStepUpdate.findByProcessingStep(step, [sort: "id", order: "desc"])
+    }
+
+    /**
+     * Helper function to retrieve the last ProcessingSTepUpdate for given Process.
+     * @param process
+     * @return
+     **/
+    private ProcessingStepUpdate lastUpdate(Process process) {
+        return ProcessingStepUpdate.withCriteria {
+            processingStep {
+                eq("process", process)
+            }
+            maxResults(1)
+            order("id", "desc")
+        }[0]
     }
 }
