@@ -32,9 +32,9 @@
 				<li><g:link controller="seqScan" action="index">Sequence Scans</g:link></li>
 				<li><g:link controller="processes" action="index">Processes</g:link></li>
 				<li><g:link controller="login" action="index">| Login |</g:link></li>
+				<li><g:link controller="runSubmit" action="index">Run Submit</g:link></li>
 			</ul>
 		</div>
-
 		
 		<g:layoutBody/>
 		<div class="footer" role="contentinfo">OneTouchPipeline  | TBI DKFZ</div>
