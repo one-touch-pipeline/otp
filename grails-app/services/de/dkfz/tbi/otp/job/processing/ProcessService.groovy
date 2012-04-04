@@ -225,6 +225,16 @@ ORDER BY u.id desc
     }
 
     /**
+     * Provides access to the latest ProcessingStepUpdate for the given ProcessingStep.
+     * @param step The ProcessingStep for which the latest ProcessingStepUpdate should be retrieved.
+     * @return Latest ProcessingStepUpdate
+     **/
+    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
+    public ProcessingStepUpdate getLatestProcessingStepUpdate(ProcessingStep step) {
+        return lastUpdate(step)
+    }
+
+    /**
      * Retrieves the first update date for the ProcessingStep
      * @param step
      * @return
