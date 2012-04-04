@@ -155,17 +155,7 @@ class ProcessesController {
         dataToRender.sSortDir_0 = sortOrder ? "asc" : "desc"
 
         processes.each { Process process, ProcessingStepUpdate latest ->
-            ProcessParameter parameter = ProcessParameter.findByProcess(process)
-            String parameterData = null
-            if (parameter) {
-                if (parameter.className) {
-                    def object = ProcessParameter.executeQuery("FROM " + parameter.className + " WHERE id=" + parameter.value)
-                    parameterData = g.link(controller: GrailsNameUtils.getShortName(parameter.className), action: "show", id: parameter.value) { object[0].toString() }
-                } else {
-                    // not a class, just use the value
-                    parameterData = parameter.value
-                }
-            }
+            String parameterData = processParameterData(process)
             def actions = []
             if (latest.state == ExecutionState.FAILURE) {
                 actions << "restart"
@@ -186,7 +176,7 @@ class ProcessesController {
 
     def process() {
         Process process = processService.getProcess(params.id as long)
-        [name: process.jobExecutionPlan.name, id: process.id, planId: process.jobExecutionPlan.id]
+        [name: process.jobExecutionPlan.name, id: process.id, planId: process.jobExecutionPlan.id, parameter: processParameterData(process)]
     }
 
     def processData() {
@@ -390,5 +380,20 @@ class ProcessesController {
             return PlanStatus.FAILURE
         }
         return PlanStatus.RUNNING
+    }
+
+    private String processParameterData(Process process) {
+        ProcessParameter parameter = ProcessParameter.findByProcess(process)
+        String parameterData = null
+        if (parameter) {
+            if (parameter.className) {
+                def object = ProcessParameter.executeQuery("FROM " + parameter.className + " WHERE id=" + parameter.value)
+                parameterData = g.link(controller: GrailsNameUtils.getShortName(parameter.className), action: "show", id: parameter.value) { object[0].toString() }
+            } else {
+                // not a class, just use the value
+                parameterData = parameter.value
+            }
+        }
+        return parameterData
     }
 }

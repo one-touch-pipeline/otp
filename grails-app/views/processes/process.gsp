@@ -11,6 +11,9 @@
 <body>
   <div class="body">
     <h1>List of Processing Steps for Process # ${id} for <g:link action="plan" id="${planId}">Workflow ${name}</g:link></h1>
+    <g:if test="${parameter}">
+    <p>Process operates on ${parameter}</p>
+    </g:if>
     <div id="processOverview">
       <table id="processOverviewTable">
         <thead>
