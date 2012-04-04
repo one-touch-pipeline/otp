@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.job.processing
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import grails.converters.JSON
 import grails.util.GrailsNameUtils
+import org.springframework.security.core.context.SecurityContextHolder
 
 
 @SuppressWarnings("GrailsPublicControllerMethod")
@@ -69,21 +70,37 @@ class ProcessesController {
         dataToRender.sSortDir_0 = params.sSortDir_0
 
         // TODO: sorting
+        List futures = []
+        def auth = SecurityContextHolder.context.authentication
         plans.each { JobExecutionPlan plan ->
-            Process lastSuccess = jobExecutionPlanService.getLastSucceededProcess(plan)
-            Process lastFailure = jobExecutionPlanService.getLastFailedProcess(plan)
-            Process lastFinished = jobExecutionPlanService.getLastFinishedProcess(plan)
-            int succeeded = jobExecutionPlanService.getNumberOfSuccessfulFinishedProcesses(plan)
-            int finished = jobExecutionPlanService.getNumberOfFinishedProcesses(plan)
+            // spin off threads to fetch the data in parallel
+            futures << callAsync {
+                SecurityContextHolder.context.authentication = auth
+                Map data = [:]
+                data.put("plan", plan)
+                data.put("lastSuccess", jobExecutionPlanService.getLastSucceededProcess(plan))
+                data.put("lastFailure", jobExecutionPlanService.getLastFailedProcess(plan))
+                data.put("lastFinished", jobExecutionPlanService.getLastFinishedProcess(plan))
+                data.put("succeeded", jobExecutionPlanService.getNumberOfSuccessfulFinishedProcesses(plan))
+                data.put("finished", jobExecutionPlanService.getNumberOfFinishedProcesses(plan))
+                data.put("numberOfProcesses", jobExecutionPlanService.getNumberOfProcesses(plan))
+                data.put("lastSuccessDate", data.lastSuccess ? processService.getFinishDate(data.lastSuccess) : null)
+                data.put("lastFailureDate", data.lastFailure ? processService.getFinishDate(data.lastFailure) : null)
+                data.put("duration", data.lastFinished ? processService.getDuration(data.lastFinished) : null)
+                return data
+            }
+        }
+        futures.each { future ->
+            def data = future.get()
             dataToRender.aaData << [
-                calculateStatus(plan, lastSuccess, lastFinished),
-                finished > 0 ? [succeeded: succeeded, finished: finished] : null,
-                [id: plan.id, name: plan.name],
-                jobExecutionPlanService.getNumberOfProcesses(plan),
-                lastSuccess ? processService.getFinishDate(lastSuccess) : null,
-                lastFailure ? processService.getFinishDate(lastFailure) : null,
-                lastFinished ? processService.getDuration(lastFinished) : null
-                ]
+                calculateStatus(data.plan, data.lastSuccess, data.lastFinished),
+                data.finished > 0 ? [succeeded: data.succeeded, finished: data.finished] : null,
+                [id: data.plan.id, name: data.plan.name],
+                data.numberOfProcesses,
+                data.lastSuccessDate,
+                data.lastFailureDate,
+                data.duration
+            ]
         }
         render dataToRender as JSON
     }
