@@ -244,25 +244,32 @@ GROUP BY p.id
     }
 
     private Process lastProcessWithState(JobExecutionPlan plan, ExecutionState state) {
-        final List<JobExecutionPlan> plans = withParents(plan)
-        // find all finished processes for the plan with its parents
-        final List<Process> finishedProcesses = Process.findAllByFinishedAndJobExecutionPlanInList(true, plans)
-        // finds all the processing steps of all found processes
-        final List<ProcessingStep> allSteps = ProcessingStep.findAllByProcessInList(finishedProcesses)
-        // isNull seems not to work (at least in unit test), so go through the list by ourselves and filter on next is null
-        List<ProcessingStep> lastSteps = []
-        allSteps.each {
-            if (!it.next) {
-                lastSteps << it
-            }
-        }
-        // restricts to the Processing Step Updates which are a success state of the found last steps
-        final List<ProcessingStepUpdate> lastUpdates = ProcessingStepUpdate.findAllByStateAndProcessingStepInList(state, lastSteps)
-        // if we did not find any updates, there is no successful process for this plan
-        if (lastUpdates.isEmpty()) {
+        final List<Long> planIds = withParents(plan).collect { it.id }
+        // Selects for the given JobExecutionPlans all processes
+        // Restricts them on the last run ProcessingStep
+        // selects the ProcessingStepUpdate for these steps with the maximum id
+        // and restricts on the requested execution state
+        // orders by the update id in descending way and takes the first list element
+        // and that's the Process we are looking for.
+        String query =
+'''
+SELECT p
+FROM ProcessingStepUpdate AS u
+INNER JOIN u.processingStep AS step
+INNER JOIN step.process AS p
+INNER JOIN p.jobExecutionPlan AS plan
+WHERE
+step.next IS NULL
+AND u.state = :state
+AND plan.id in (:planIds)
+GROUP BY p.id, u.id
+HAVING u.id = MAX(u.id)
+ORDER BY MAX(u.id) desc
+'''
+        List results = Process.executeQuery(query, [state: state, planIds: planIds], [max: 1])
+        if (results.isEmpty()) {
             return null
         }
-        // otherwise order by date and the last one is the last succeeded
-        return (lastUpdates.sort { it.date }.last() as ProcessingStepUpdate).processingStep.process
+        return results[0]
     }
 }
