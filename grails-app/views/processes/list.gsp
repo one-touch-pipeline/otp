@@ -19,6 +19,7 @@
                     <th>&nbsp;</th>
                     <th>Workflow</th>
                     <th>#</th>
+                    <th># of Failed</th>
                     <th>Last Success</th>
                     <th>Last Failure</th>
                     <th>Duration</th>

@@ -12,6 +12,12 @@ class ProcessService {
     static final profiled = true
 
     /**
+     * Dependency Injection of schedulerService.
+     * Needed to restart Processing Steps.
+     **/
+    def schedulerService
+
+    /**
      * Security aware way to access a Process.
      * @param id The Process's id
      * @return
@@ -56,6 +62,17 @@ class ProcessService {
     }
 
     /**
+     * Restarts the given ProcessingStep.
+     * Thin ACL aware wrapper around schedulerService.
+     * @param step The ProcessingStep to restart
+     **/
+    // TODO: better ACL rights?
+    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', write) or hasRole('ROLE_ADMIN')")
+    public void restartProcessingStep(ProcessingStep step) {
+        schedulerService.restartProcessingStep(step)
+    }
+
+    /**
      * Retrieves all ProcessingStepUpdates for the given ProcessingStep.
      * @param step The ProcessingStep whose Updates should be retrieved
      * @param max The number of elements to retrieve, default 10
@@ -90,23 +107,23 @@ class ProcessService {
         if (!process.finished) {
             throw new IllegalArgumentException("Process is finished")
         }
-        final List<ProcessingStep> allSteps = ProcessingStep.findAllByProcess(process)
-        ProcessingStep lastStep = null
-        for (ProcessingStep step : allSteps) {
-            if (!step.next) {
-                lastStep = step
-                break
-            }
-        }
-        if (!lastStep) {
-            // TODO: throw proper exception
-            throw new RuntimeException("Finished Process does not have an end ProcessingStep")
-        }
-        final List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(lastStep)
-        if (updates.isEmpty()) {
+        String query =
+'''
+SELECT u.date
+FROM ProcessingStepUpdate AS u
+INNER JOIN u.processingStep AS step
+INNER JOIN step.process AS process
+WHERE
+step.next IS NULL
+AND
+process.id = :process
+ORDER BY u.id desc
+'''
+        List results = ProcessingStepUpdate.executeQuery(query, [process: process.id], [max: 1])
+        if (results.isEmpty()) {
             throw new RuntimeException("No ProcessingStepUpdates for last ProcessingStep")
         }
-        return updates.sort { it.id }.last().date
+        return results[0]
     }
 
     /**
@@ -133,13 +150,7 @@ class ProcessService {
      */
     @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
     public ProcessingStep getLatestProcessingStep(Process process) {
-        List<ProcessingStep> steps = ProcessingStep.findAllByProcess(process)
-        for (ProcessingStep step in steps) {
-            if (!step.next) {
-                return step
-            }
-        }
-        return null
+        return ProcessingStep.findByProcessAndNextIsNull(process)
     }
 
     /**
@@ -149,7 +160,7 @@ class ProcessService {
      */
     @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
     public ExecutionState getState(Process process) {
-        getState(getLatestProcessingStep(process))
+        return lastUpdate(process).state
     }
 
     /**
@@ -171,7 +182,11 @@ class ProcessService {
      */
     @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
     public String getError(Process process) {
-        return getError(getLatestProcessingStep(process))
+        ProcessingStepUpdate update = lastUpdate(process)
+        if (update.error) {
+            return update.error.errorMessage
+        }
+        return null
     }
 
     /**
@@ -196,7 +211,7 @@ class ProcessService {
      */
     @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
     public Date getLastUpdate(Process process) {
-        getLastUpdate(getLatestProcessingStep(process))
+        return lastUpdate.date
     }
 
     /**
@@ -210,17 +225,23 @@ class ProcessService {
     }
 
     /**
+     * Provides access to the latest ProcessingStepUpdate for the given ProcessingStep.
+     * @param step The ProcessingStep for which the latest ProcessingStepUpdate should be retrieved.
+     * @return Latest ProcessingStepUpdate
+     **/
+    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
+    public ProcessingStepUpdate getLatestProcessingStepUpdate(ProcessingStep step) {
+        return lastUpdate(step)
+    }
+
+    /**
      * Retrieves the first update date for the ProcessingStep
      * @param step
      * @return
      */
     @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public Date getFirstUpdate(ProcessingStep step) {
-        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step)
-        if (updates.isEmpty()) {
-            throw new IllegalArgumentException("ProcessingStep has no updates")
-        }
-        return updates.sort { it.id }.first().date
+        return ProcessingStepUpdate.findByProcessingStep(step, [sort: "id", order: "asc"]).date
     }
 
     /**
@@ -265,10 +286,21 @@ class ProcessService {
      * @return
      */
     private ProcessingStepUpdate lastUpdate(ProcessingStep step) {
-        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step)
-        if (updates.isEmpty()) {
-            throw new IllegalArgumentException("ProcessingStep has no updates")
-        }
-        return updates.sort { it.id }.last()
+        return ProcessingStepUpdate.findByProcessingStep(step, [sort: "id", order: "desc"])
+    }
+
+    /**
+     * Helper function to retrieve the last ProcessingSTepUpdate for given Process.
+     * @param process
+     * @return
+     **/
+    private ProcessingStepUpdate lastUpdate(Process process) {
+        return ProcessingStepUpdate.withCriteria {
+            processingStep {
+                eq("process", process)
+            }
+            maxResults(1)
+            order("id", "desc")
+        }[0]
     }
 }

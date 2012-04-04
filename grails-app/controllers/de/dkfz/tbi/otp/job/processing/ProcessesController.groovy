@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.job.processing
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import grails.converters.JSON
 import grails.util.GrailsNameUtils
+import org.springframework.security.core.context.SecurityContextHolder
 
 
 @SuppressWarnings("GrailsPublicControllerMethod")
@@ -69,28 +70,45 @@ class ProcessesController {
         dataToRender.sSortDir_0 = params.sSortDir_0
 
         // TODO: sorting
+        List futures = []
+        def auth = SecurityContextHolder.context.authentication
         plans.each { JobExecutionPlan plan ->
-            Process lastSuccess = jobExecutionPlanService.getLastSucceededProcess(plan)
-            Process lastFailure = jobExecutionPlanService.getLastFailedProcess(plan)
-            Process lastFinished = jobExecutionPlanService.getLastFinishedProcess(plan)
-            int succeeded = jobExecutionPlanService.getNumberOfSuccessfulFinishedProcesses(plan)
-            int finished = jobExecutionPlanService.getNumberOfFinishedProcesses(plan)
+            // spin off threads to fetch the data in parallel
+            futures << callAsync {
+                SecurityContextHolder.context.authentication = auth
+                Map data = [:]
+                data.put("plan", plan)
+                data.put("lastSuccess", jobExecutionPlanService.getLastSucceededProcess(plan))
+                data.put("lastFailure", jobExecutionPlanService.getLastFailedProcess(plan))
+                data.put("lastFinished", jobExecutionPlanService.getLastFinishedProcess(plan))
+                data.put("succeeded", jobExecutionPlanService.getNumberOfSuccessfulFinishedProcesses(plan))
+                data.put("finished", jobExecutionPlanService.getNumberOfFinishedProcesses(plan))
+                data.put("numberOfProcesses", jobExecutionPlanService.getNumberOfProcesses(plan))
+                data.put("lastSuccessDate", data.lastSuccess ? processService.getFinishDate(data.lastSuccess) : null)
+                data.put("lastFailureDate", data.lastFailure ? processService.getFinishDate(data.lastFailure) : null)
+                data.put("duration", data.lastFinished ? processService.getDuration(data.lastFinished) : null)
+                return data
+            }
+        }
+        futures.each { future ->
+            def data = future.get()
             dataToRender.aaData << [
-                calculateStatus(plan, lastSuccess, lastFinished),
-                finished > 0 ? [succeeded: succeeded, finished: finished] : null,
-                [id: plan.id, name: plan.name],
-                jobExecutionPlanService.getNumberOfProcesses(plan),
-                lastSuccess ? processService.getFinishDate(lastSuccess) : null,
-                lastFailure ? processService.getFinishDate(lastFailure) : null,
-                lastFinished ? processService.getDuration(lastFinished) : null
-                ]
+                calculateStatus(data.plan, data.lastSuccess, data.lastFinished),
+                data.finished > 0 ? [succeeded: data.succeeded, finished: data.finished] : null,
+                [id: data.plan.id, name: data.plan.name],
+                data.numberOfProcesses,
+                data.finished - data.succeeded,
+                data.lastSuccessDate,
+                data.lastFailureDate,
+                data.duration
+            ]
         }
         render dataToRender as JSON
     }
 
     def plan() {
         JobExecutionPlan plan = jobExecutionPlanService.getPlan(params.id as long)
-        [name: plan.name, id: plan.id]
+        [name: plan.name, id: plan.id, failed: Boolean.parseBoolean(params.failed)]
     }
 
     def planData() {
@@ -130,44 +148,40 @@ class ProcessesController {
         }
 
         JobExecutionPlan plan = jobExecutionPlanService.getPlan(params.id as long)
-        List<JobExecutionPlan> processes = jobExecutionPlanService.getAllProcesses(plan, length, start, sort, sortOrder)
-        dataToRender.iTotalRecords = jobExecutionPlanService.getNumberOfProcesses(plan)
+        ExecutionState restriction = null
+        if (Boolean.parseBoolean(params.failed)) {
+            restriction = ExecutionState.FAILURE
+        }
+        Map<Process, ProcessingStepUpdate> processes = jobExecutionPlanService.getLatestUpdatesForPlan(plan, length, start, sort, sortOrder, restriction)
+        dataToRender.iTotalRecords = jobExecutionPlanService.getNumberOfProcesses(plan, restriction)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.offset = start
         dataToRender.iSortCol_0 = sortColumn
         dataToRender.sSortDir_0 = sortOrder ? "asc" : "desc"
 
-        // TODO: sorting for additional columns
-        processes.each { Process process ->
-            ProcessingStep latest = processService.getLatestProcessingStep(process)
-            ExecutionState lastState = processService.getState(process)
-            ProcessParameter parameter = ProcessParameter.findByProcess(process)
-            String parameterData = null
-            if (parameter) {
-                if (parameter.className) {
-                    def object = ProcessParameter.executeQuery("FROM " + parameter.className + " WHERE id=" + parameter.value)
-                    parameterData = g.link(controller: GrailsNameUtils.getShortName(parameter.className), action: "show", id: parameter.value) { object[0].toString() }
-                } else {
-                    // not a class, just use the value
-                    parameterData = parameter.value
-                }
+        processes.each { Process process, ProcessingStepUpdate latest ->
+            String parameterData = processParameterData(process)
+            def actions = []
+            if (latest.state == ExecutionState.FAILURE) {
+                actions << "restart"
             }
             dataToRender.aaData << [
                 process.id,
-                stateForExecutionState(process, lastState),
+                stateForExecutionState(process, latest.state),
                 parameterData,
                 process.started,
-                processService.getLastUpdate(latest),
-                latest.jobDefinition.name,
-                [state: lastState, error: processService.getError(process), id: latest.id]
-                ]
+                latest.date,
+                latest.processingStep.jobDefinition.name,
+                [state: latest.state, error: latest.error ? latest.error.errorMessage : null, id: latest.processingStep.id],
+                [actions: actions]
+            ]
         }
         render dataToRender as JSON
     }
 
     def process() {
         Process process = processService.getProcess(params.id as long)
-        [name: process.jobExecutionPlan.name, id: process.id, planId: process.jobExecutionPlan.id]
+        [name: process.jobExecutionPlan.name, id: process.id, planId: process.jobExecutionPlan.id, parameter: processParameterData(process)]
     }
 
     def processData() {
@@ -199,17 +213,39 @@ class ProcessesController {
         dataToRender.offset = start
         dataToRender.iSortCol_0 = 0
         dataToRender.sSortDir_0 = sortOrder ? "asc" : "desc"
+        List futures = []
+        def auth = SecurityContextHolder.context.authentication
         steps.each { ProcessingStep step ->
-            ExecutionState state = processService.getState(step)
+            // spin off threads to fetch the data in parallel
+            futures << callAsync {
+                SecurityContextHolder.context.authentication = auth
+                Map data = [:]
+                ProcessingStepUpdate update = processService.getLatestProcessingStepUpdate(step)
+                data.put("step", step)
+                data.put("state", update?.state)
+                data.put("firstUpdate", processService.getFirstUpdate(step))
+                data.put("lastUpdate", update?.date)
+                data.put("duration", processService.getProcessingStepDuration(step))
+                data.put("error", update?.error?.errorMessage)
+                return data
+            }
+        }
+        futures.each { future ->
+            def data = future.get()
+            def actions = []
+            if (data.state == ExecutionState.FAILURE) {
+                actions << "restart"
+            }
             dataToRender.aaData << [
-                step.id,
-                state, // last reached status
-                step.jobDefinition.name,
-                step.jobClass ? [name: step.jobClass, version: step.jobVersion] : null,
-                processService.getFirstUpdate(step), // started
-                processService.getLastUpdate(step), // last update
-                processService.getProcessingStepDuration(step), // duration
-                [state: processService.getState(step), error: processService.getError(step)]
+                data.step.id,
+                data.state,
+                data.step.jobDefinition.name,
+                data.step.jobClass ? [name: data.step.jobClass, version: data.step.jobVersion] : null,
+                data.firstUpdate,
+                data.lastUpdate,
+                data.duration,
+                [state: data.state, error: data.error],
+                [actions: actions]
             ]
         }
         render dataToRender as JSON
@@ -218,6 +254,19 @@ class ProcessesController {
     def processingStep() {
         ProcessingStep step = processService.getProcessingStep(params.id as long)
         [step: step]
+    }
+
+    def restartStep() {
+        boolean ok = true
+        String error = null
+        try {
+            processService.restartProcessingStep(processService.getProcessingStep(params.id as long))
+        } catch (RuntimeException e) {
+            ok = false
+            error = e.message
+        }
+        def data = [success: ok, error: error]
+        render data as JSON
     }
 
     def processingStepDate() {
@@ -336,5 +385,20 @@ class ProcessesController {
             return PlanStatus.FAILURE
         }
         return PlanStatus.RUNNING
+    }
+
+    private String processParameterData(Process process) {
+        ProcessParameter parameter = ProcessParameter.findByProcess(process)
+        String parameterData = null
+        if (parameter) {
+            if (parameter.className) {
+                def object = ProcessParameter.executeQuery("FROM " + parameter.className + " WHERE id=" + parameter.value)
+                parameterData = g.link(controller: GrailsNameUtils.getShortName(parameter.className), action: "show", id: parameter.value) { object[0].toString() }
+            } else {
+                // not a class, just use the value
+                parameterData = parameter.value
+            }
+        }
+        return parameterData
     }
 }

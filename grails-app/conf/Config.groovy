@@ -130,6 +130,8 @@ log4j = {
             layout: pattern(conversionPattern: '%m%n')  // alternatively use the StatisticsCsvLayout to generate CSV
         )
         appender name: 'performanceStatsFileAppender', performanceStatsFileAppender
+
+        console name: "stdout", threshold: org.apache.log4j.Level.DEBUG
     }
 
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
@@ -142,13 +144,16 @@ log4j = {
             'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
             'org.springframework',
             'org.hibernate',
-            'net.sf.ehcache.hibernate',
-            'de.dkfz.tbi.otp' // our own stuff
+            'net.sf.ehcache.hibernate'
 
     // Perf4j
     info performanceStatsAppender: 'org.perf4j.TimingLogger'
 
-    debug 'de.dkfz.tbi.otp' // our own stuff
+    debug stdout: 'de.dkfz.tbi.otp', // our own stuff
+                    'grails.app.controllers.de.dkfz.tbi.otp', // controllers
+                    'grails.app.domain.de.dkfz.tbi.otp',
+                    'grails.app.services.de.dkfz.tbi.otp',
+                    'grails.app.taglib.de.dkfz.tbi.otp'
 }
 
 // mail settings

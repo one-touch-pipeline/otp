@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
-<title>List of Processes for Workflow ${name}</title>
+<title>List of ${failed ? 'failed' : ''} Processes for Workflow ${name}</title>
 <link rel='stylesheet' href='http://www.datatables.net//release-datatables/media/css/demo_table.css' />
 <jqDT:resources/>
 <g:javascript library="jquery.dataTables" />
@@ -11,7 +11,7 @@
 </head>
 <body>
   <div class="body">
-    <h1>List of Processes for Workflow ${name}</h1>
+    <h1>List of ${failed ? 'failed' : ''} Processes for Workflow ${name}</h1>
     <div id="workflowOverview">
         <table id="workflowOverviewTable">
             <thead>
@@ -23,6 +23,7 @@
                     <th>Last Update</th>
                     <th>Current Processing Step</th>
                     <th>Status</th>
+                    <th>&nbsp;</th>
                 </tr>
             </thead>
             <tbody>
@@ -31,7 +32,7 @@
     </div>
     <g:javascript>
        $(document).ready(function() {
-            $.otp.createProcessListView("#workflowOverviewTable", ${id});
+            $.otp.createProcessListView("#workflowOverviewTable", ${id}, ${failed ? 'true' : 'false'});
         });
     </g:javascript>
   </div>

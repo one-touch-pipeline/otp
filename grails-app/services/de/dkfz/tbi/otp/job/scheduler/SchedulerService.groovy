@@ -14,6 +14,7 @@ import de.dkfz.tbi.otp.job.processing.ParameterUsage
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.job.processing.ProcessingError
+import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.job.processing.StartJob
@@ -25,6 +26,7 @@ import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.security.access.prepost.PreAuthorize
 
 class SchedulerService {
     static transactional = false
@@ -54,6 +56,116 @@ class SchedulerService {
      * Lock to protect the internal data from Multi Threading issues
      */
     private final Lock lock = new ReentrantLock()
+    /**
+     * Whether the Scheduler is currently active.
+     * This is false when shutting down the server
+     **/
+    @SuppressWarnings("GrailsStatelessService")
+    private boolean schedulerActive = false
+    /**
+     * Whether the scheduler startup has been successful.
+     * False as long as the server has not started. If false the scheduler cannot be started,
+     * if true the startup cannot be performed again.
+     **/
+    @SuppressWarnings("GrailsStatelessService")
+    private boolean startupOk = false
+
+    /**
+     * Starts the Scheduler at Server startup.
+     * This method inspects the state of the Job system before the shutdown. In case of a clean
+     * Shutdown the scheduler will be started again. All ProcessingSteps in status CREATED will
+     * be queued and all ProcessingSteps in status SUSPENDED will be RESUMED and added to the queue.
+     * In case the method finds a Process in another state, the server performed an unclean shutdown.
+     * This requires manual intervention and the server does not start up. If an unclean shutdown is
+     * detected the changes to the ProcessingSteps are discarded, so that this method can be executed
+     * once again after the manual intervention fixed all ProcessingSteps in unknown state.
+     **/
+    public void startup() {
+        if (schedulerActive || startupOk) {
+            return
+        }
+        boolean ok = true
+        List<ProcessingStep> processesToRestart = []
+        try {
+            ProcessingStep.withTransaction { status ->
+                List<Process> processes = Process.findAllByFinished(false)
+                List<ProcessingStep> lastProcessingSteps = ProcessingStep.findAllByProcessInListAndNextIsNull(processes)
+                lastProcessingSteps.each { ProcessingStep step ->
+                    List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step)
+                    if (updates.isEmpty()) {
+                        status.setRollbackOnly()
+                        ok = false
+                        log.error("Error during startup: ProcessingStep ${step.id} does not have any Updates")
+                        return
+                    }
+                    ProcessingStepUpdate last = updates.sort { it.id }.last()
+                    if (last.state == ExecutionState.CREATED || last.state == ExecutionState.RESTARTED) {
+                        processesToRestart << step
+                    } else if (last.state == ExecutionState.SUSPENDED) {
+                        ProcessingStepUpdate update = new ProcessingStepUpdate(
+                            date: new Date(),
+                            state: ExecutionState.RESUMED,
+                            previous: last,
+                            processingStep: step
+                        )
+                        if (!update.save(flush: true)) {
+                            ok = false
+                            status.setRollbackOnly()
+                            log.error("ProcessingStep ${step.id} could not be resumed")
+                        }
+                        processesToRestart << step
+                    } else {
+                        status.setRollbackOnly()
+                        ok = false
+                        log.error("Error during startup: ProcessingStep ${step.id} is in state ${last.state}")
+                    }
+                }
+            }
+        } catch (Exception e) {
+            ok = false
+            log.error(e.message)
+            e.printStackTrace()
+        }
+        if (ok) {
+            startupOk = true
+            schedulerActive = true
+            lock.lock()
+            try {
+                processesToRestart.each { ProcessingStep step ->
+                    for (ProcessingStep queued in queue) {
+                        if (queue.id == step.id) {
+                            return
+                        }
+                    }
+                    queue << step
+                }
+            } finally {
+                lock.unlock()
+            }
+        }
+        log.info("Scheduler started after server startup: ${schedulerActive}")
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void suspendScheduler() {
+        if (!startupOk) {
+            return
+        }
+        schedulerActive = false
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void resumeScheduler() {
+        if (!startupOk) {
+            return
+        }
+        schedulerActive = true
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public boolean isStartupOk() {
+        return startupOk
+    }
 
     public void createNextProcessingStep(ProcessingStep previous) {
         // test whether the Process ended
@@ -93,12 +205,16 @@ class SchedulerService {
      * @param startJob The StartJob which wants to trigger the Process
      * @param input List of Parameters provided by the StartJob for this Process.
      * @param processParameter ProcessParameter provided by the StartJob for this Process.
+     * @return true if the Process got started, false otherwise (e.g. scheduler is not active)
      */
-    public void createProcess(StartJob startJob, List<Parameter> input, ProcessParameter processParameter = null) {
+    public boolean createProcess(StartJob startJob, List<Parameter> input, ProcessParameter processParameter = null) {
+        if (!schedulerActive) {
+            return false
+        }
         JobExecutionPlan plan = JobExecutionPlan.get(startJob.getExecutionPlan().id)
         Process process = new Process(started: new Date(),
             jobExecutionPlan: plan,
-            startJobClass: startJob.class.toString(),
+            startJobClass: startJob.class.name,
             startJobVersion: startJob.getVersion()
         )
         if (!process.save()) {
@@ -123,6 +239,7 @@ class SchedulerService {
         } finally {
             lock.unlock()
         }
+        return true
     }
 
     /**
@@ -130,6 +247,9 @@ class SchedulerService {
      */
     @Scheduled(fixedRate=100l)
     public void schedule() {
+        if (!schedulerActive) {
+            return
+        }
         if (queue.isEmpty()) {
             return
         }
@@ -160,7 +280,7 @@ class SchedulerService {
             if (queue.isEmpty()) {
                 return
             }
-            Job job = createJob(queue.peek())
+            Job job = createJob(ProcessingStep.get(queue.peek().id))
             running.add(job)
             queue.poll()
             return job
@@ -192,13 +312,63 @@ class SchedulerService {
     }
 
     /**
+     * Restarts the given ProcessingStep.
+     * Checks whether the given ProcessingStep is actually failed and creates a RESTARTED update
+     * for it and sets the Process to no longer being finished.
+     * If the boolean parameter schedule is provided the updated ProcessingStep is readded to the
+     * queue of waiting ProcessingSteps. Setting this parameter to false might make sense for the
+     * case that the ProcessingStep will be added to the queue by a different method, e.g. restarting
+     * the scheduler.
+     * @param step The failed ProcessingStep which needs to be restarted.
+     * @param schedule Whether to add the restarted ProcessingStep to the scheduler or not
+     **/
+    public void restartProcessingStep(ProcessingStep step, boolean schedule = true) {
+        ProcessingStep.withTransaction {
+            List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(step)
+            if (existingUpdates.isEmpty()) {
+                throw new IncorrectProcessingException("ProcessingStep ${step.id} cannot be restarted as it has no updates")
+            }
+            ProcessingStepUpdate lastUpdate = existingUpdates.sort { it.date }.last()
+            if (lastUpdate.state != ExecutionState.FAILURE) {
+                throw new IncorrectProcessingException("ProcessingStep ${step.id} cannot be restarted as it is in state ${lastUpdate.state}")
+            }
+            // create restart event
+            ProcessingStepUpdate restart = new ProcessingStepUpdate(
+                date: new Date(),
+                state: ExecutionState.RESTARTED,
+                previous: lastUpdate,
+                processingStep: step)
+            if (!restart.save(flush: true)) {
+                log.fatal("Could not create a RESTARTED Update for ProcessingStep ${step.id}")
+                throw new ProcessingException("Could not create a RESTARTED Update for ProcessingStep ${step.id}")
+            }
+
+            Process process = Process.get(step.process.id)
+            process.finished = false
+            if (!process.save(flush: true)) {
+                log.fatal("Could not set Process ${process.id} to not finished")
+                throw new ProcessingException("Could not set Process ${process.id} to not finished")
+            }
+        }
+        // add to queue
+        if (schedule) {
+            lock.lock()
+            try {
+                queue.add(step)
+            } finally {
+                lock.unlock()
+            }
+        }
+    }
+
+    /**
      * Creates a Job for one ProcessingStep.
      * @param step
      * @return
      */
     private Job createJob(ProcessingStep step) {
         Job job = grailsApplication.mainContext.getBean(step.jobDefinition.bean, step, step.input) as Job
-        step.jobClass = job.class.toString()
+        step.jobClass = job.class.name
         step.jobVersion = job.getVersion()
         step.save(flush: true)
         return job

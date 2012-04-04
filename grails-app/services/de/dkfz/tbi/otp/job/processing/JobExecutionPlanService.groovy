@@ -49,6 +49,38 @@ class JobExecutionPlanService {
         return Process.findAllByJobExecutionPlanInList(plans, [max: max, offset: offset, sort: column, order: order ? "asc" : "desc"])
     }
 
+    @PreAuthorize("hasPermission(#plan, read) or hasRole('ROLE_ADMIN')")
+    public Map<Process, ProcessingStepUpdate> getLatestUpdatesForPlan(JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false, ExecutionState state = null) {
+        final List<Long> plans = withParents(plan).collect { it.id }
+        String query = '''
+SELECT p, max(u.id)
+FROM ProcessingStepUpdate as u
+INNER JOIN u.processingStep as step
+INNER JOIN step.process as p
+INNER JOIN p.jobExecutionPlan as plan
+WHERE plan.id in (:planIds)
+'''
+        if (state) {
+            query = query + "AND u.state = :state\n"
+        }
+        query = query + "GROUP BY p.id\n"
+        query = query + "ORDER BY p.${column} ${order ? 'asc' : 'desc'}"
+
+        LinkedHashMap<Process, ProcessingStepUpdate> results = new LinkedHashMap<Process, ProcessingStepUpdate>()
+        Map params = [planIds: plans]
+        if (state) {
+            params.put("state", state)
+        }
+        def processes = ProcessingStepUpdate.executeQuery(query, params, [max: max, offset: offset])
+        List<Long> ids = processes.collect { it[1] }
+        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByIdInList(ids)
+        processes.each {
+            results.put(it[0] as Process, updates.find { update -> update.id == it[1] } )
+        }
+
+        return results
+    }
+
     /**
      * Returns the number of Processes run for the given JobExecutionPlan.
      * @param plan The Plan for which the number of run Processes should be returned
@@ -160,12 +192,36 @@ class JobExecutionPlanService {
      * Both finished and running Processes are considered. The method also considers the previous,
      * but obsoleted JobExecutionPlans for the given plan.
      * @param plan The JobExecutionPlan for which the number of started processes should be retrieved.
+     * @param state Optional ExecutionState to restrict the number of Processes returned
      * @return The number of Processes which have been started for plan
     **/
     @PreAuthorize("hasPermission(#plan, read) or hasRole('ROLE_ADMIN')")
-    public int getNumberOfProcesses(JobExecutionPlan plan) {
+    public int getNumberOfProcesses(JobExecutionPlan plan, ExecutionState state = null) {
         final List<JobExecutionPlan> plans = withParents(plan)
-        return Process.countByJobExecutionPlanInList(plans)
+        if (!state) {
+            return Process.countByJobExecutionPlanInList(plans)
+        }
+        String query = '''
+SELECT COUNT(DISTINCT p.id)
+FROM ProcessingStepUpdate AS u
+INNER JOIN u.processingStep as step
+INNER JOIN step.process as p
+INNER JOIN p.jobExecutionPlan as plan
+WHERE plan.id in (:planIds)
+AND step.next IS NULL
+AND u.state = :state
+AND u.id IN (
+    SELECT MAX(u2.id)
+    FROM ProcessingStepUpdate AS u2
+    INNER JOIN u2.processingStep as step2
+    INNER JOIN step2.process as p2
+    INNER JOIN p2.jobExecutionPlan as plan2
+    WHERE plan2.id in (:planIds)
+    AND step2.next IS NULL
+    GROUP BY p2.id
+)
+'''
+        return Process.executeQuery(query, [planIds: plans.collect { it.id }, state: state])[0]
     }
 
     /**
@@ -219,25 +275,32 @@ class JobExecutionPlanService {
     }
 
     private Process lastProcessWithState(JobExecutionPlan plan, ExecutionState state) {
-        final List<JobExecutionPlan> plans = withParents(plan)
-        // find all finished processes for the plan with its parents
-        final List<Process> finishedProcesses = Process.findAllByFinishedAndJobExecutionPlanInList(true, plans)
-        // finds all the processing steps of all found processes
-        final List<ProcessingStep> allSteps = ProcessingStep.findAllByProcessInList(finishedProcesses)
-        // isNull seems not to work (at least in unit test), so go through the list by ourselves and filter on next is null
-        List<ProcessingStep> lastSteps = []
-        allSteps.each {
-            if (!it.next) {
-                lastSteps << it
-            }
-        }
-        // restricts to the Processing Step Updates which are a success state of the found last steps
-        final List<ProcessingStepUpdate> lastUpdates = ProcessingStepUpdate.findAllByStateAndProcessingStepInList(state, lastSteps)
-        // if we did not find any updates, there is no successful process for this plan
-        if (lastUpdates.isEmpty()) {
+        final List<Long> planIds = withParents(plan).collect { it.id }
+        // Selects for the given JobExecutionPlans all processes
+        // Restricts them on the last run ProcessingStep
+        // selects the ProcessingStepUpdate for these steps with the maximum id
+        // and restricts on the requested execution state
+        // orders by the update id in descending way and takes the first list element
+        // and that's the Process we are looking for.
+        String query =
+'''
+SELECT p
+FROM ProcessingStepUpdate AS u
+INNER JOIN u.processingStep AS step
+INNER JOIN step.process AS p
+INNER JOIN p.jobExecutionPlan AS plan
+WHERE
+step.next IS NULL
+AND u.state = :state
+AND plan.id in (:planIds)
+GROUP BY p.id, u.id
+HAVING u.id = MAX(u.id)
+ORDER BY MAX(u.id) desc
+'''
+        List results = Process.executeQuery(query, [state: state, planIds: planIds], [max: 1])
+        if (results.isEmpty()) {
             return null
         }
-        // otherwise order by date and the last one is the last succeeded
-        return (lastUpdates.sort { it.date }.last() as ProcessingStepUpdate).processingStep.process
+        return results[0]
     }
 }
