@@ -218,21 +218,37 @@ class ProcessesController {
         dataToRender.offset = start
         dataToRender.iSortCol_0 = 0
         dataToRender.sSortDir_0 = sortOrder ? "asc" : "desc"
+        List futures = []
+        def auth = SecurityContextHolder.context.authentication
         steps.each { ProcessingStep step ->
-            ExecutionState state = processService.getState(step)
+            // spin off threads to fetch the data in parallel
+            futures << callAsync {
+                SecurityContextHolder.context.authentication = auth
+                Map data = [:]
+                data.put("step", step)
+                data.put("state", processService.getState(step))
+                data.put("firstUpdate", processService.getFirstUpdate(step))
+                data.put("lastUpdate", processService.getLastUpdate(step))
+                data.put("duration", processService.getProcessingStepDuration(step))
+                data.put("error", processService.getError(step))
+                return data
+            }
+        }
+        futures.each { future ->
+            def data = future.get()
             def actions = []
-            if (state == ExecutionState.FAILURE) {
+            if (data.state == ExecutionState.FAILURE) {
                 actions << "restart"
             }
             dataToRender.aaData << [
-                step.id,
-                state, // last reached status
-                step.jobDefinition.name,
-                step.jobClass ? [name: step.jobClass, version: step.jobVersion] : null,
-                processService.getFirstUpdate(step), // started
-                processService.getLastUpdate(step), // last update
-                processService.getProcessingStepDuration(step), // duration
-                [state: state, error: processService.getError(step)],
+                data.step.id,
+                data.state,
+                data.step.jobDefinition.name,
+                data.step.jobClass ? [name: data.step.jobClass, version: data.step.jobVersion] : null,
+                data.firstUpdate,
+                data.lastUpdate,
+                data.duration,
+                [state: data.state, error: data.error],
                 [actions: actions]
             ]
         }
