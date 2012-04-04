@@ -181,22 +181,24 @@ OTP.prototype.createListView = function (selector, sourcePath, sortOrder, jsonCa
 OTP.prototype.createJobExecutionPlanListView = function (selector) {
     "use strict";
     this.createListView(selector, this.contextPath + '/processes/listData', true, function (json) {
-        var i, rowData;
+        var i, processId, rowData;
         for (i = 0; i < json.aaData.length; i++) {
             rowData = json.aaData[i];
+            processId = rowData[2].id;
             rowData[0] = $.otp.statusImageHtml(rowData[0].name);
             if (rowData[1]) {
                 rowData[1] = $.otp.healthImageHtml(rowData[1].succeeded, rowData[1].finished);
             } else {
                 rowData[1] = "-";
             }
-            rowData[2] = '<a href="' + $.otp.contextPath +  '/processes/plan/' + rowData[2].id + '">' + rowData[2].name + '</a>';
-            rowData[4] = $.otp.renderDate(rowData[4]);
+            rowData[2] = '<a href="' + $.otp.contextPath +  '/processes/plan/' + processId + '">' + rowData[2].name + '</a>';
+            rowData[4] = '<a href="' + $.otp.contextPath + '/processes/plan/' + processId + '?failed=true">' + rowData[4] + '</a>';
             rowData[5] = $.otp.renderDate(rowData[5]);
-            if (rowData[6]) {
-                rowData[6] = $.otp.formatTimespan(rowData[6]);
+            rowData[6] = $.otp.renderDate(rowData[6]);
+            if (rowData[7]) {
+                rowData[7] = $.otp.formatTimespan(rowData[7]);
             } else {
-                rowData[6] = "-";
+                rowData[7] = "-";
             }
         }
     });
@@ -232,10 +234,11 @@ OTP.prototype.createRestartProcessingStepLink = function (id, dataTable) {
  * Creates the datatables view for the list of all Processes for a given JobExecutionPlan
  * @param selector The JQuery selector for the table to create the datatable into
  * @param planId The id of the JobExecutionPlan for which the list of Processes should be retrieved.
+ * @param failed Whether to limit to failed processes (true) or include all processes (false)
  */
-OTP.prototype.createProcessListView = function (selector, planId) {
+OTP.prototype.createProcessListView = function (selector, planId, failed) {
     "use strict";
-    this.createListView(selector, this.contextPath + '/processes/planData/' +  planId + '/', false, function (json) {
+    this.createListView(selector, this.contextPath + '/processes/planData/' +  planId + '/?failed=' + failed, false, function (json) {
         var i, j, rowData, stepId, actions;
         for (i = 0; i < json.aaData.length; i++) {
             rowData = json.aaData[i];

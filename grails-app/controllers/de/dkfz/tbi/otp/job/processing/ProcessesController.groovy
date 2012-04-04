@@ -97,6 +97,7 @@ class ProcessesController {
                 data.finished > 0 ? [succeeded: data.succeeded, finished: data.finished] : null,
                 [id: data.plan.id, name: data.plan.name],
                 data.numberOfProcesses,
+                data.finished - data.succeeded,
                 data.lastSuccessDate,
                 data.lastFailureDate,
                 data.duration
@@ -107,7 +108,7 @@ class ProcessesController {
 
     def plan() {
         JobExecutionPlan plan = jobExecutionPlanService.getPlan(params.id as long)
-        [name: plan.name, id: plan.id]
+        [name: plan.name, id: plan.id, failed: Boolean.parseBoolean(params.failed)]
     }
 
     def planData() {
@@ -147,8 +148,12 @@ class ProcessesController {
         }
 
         JobExecutionPlan plan = jobExecutionPlanService.getPlan(params.id as long)
-        Map<Process, ProcessingStepUpdate> processes = jobExecutionPlanService.getLatestUpdatesForPlan(plan, length, start, sort, sortOrder)
-        dataToRender.iTotalRecords = jobExecutionPlanService.getNumberOfProcesses(plan)
+        ExecutionState restriction = null
+        if (Boolean.parseBoolean(params.failed)) {
+            restriction = ExecutionState.FAILURE
+        }
+        Map<Process, ProcessingStepUpdate> processes = jobExecutionPlanService.getLatestUpdatesForPlan(plan, length, start, sort, sortOrder, restriction)
+        dataToRender.iTotalRecords = jobExecutionPlanService.getNumberOfProcesses(plan, restriction)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.offset = start
         dataToRender.iSortCol_0 = sortColumn

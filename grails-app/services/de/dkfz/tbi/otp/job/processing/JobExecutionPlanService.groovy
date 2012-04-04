@@ -50,7 +50,7 @@ class JobExecutionPlanService {
     }
 
     @PreAuthorize("hasPermission(#plan, read) or hasRole('ROLE_ADMIN')")
-    public Map<Process, ProcessingStepUpdate> getLatestUpdatesForPlan(JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false) {
+    public Map<Process, ProcessingStepUpdate> getLatestUpdatesForPlan(JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false, ExecutionState state = null) {
         final List<Long> plans = withParents(plan).collect { it.id }
         String query = '''
 SELECT p, max(u.id)
@@ -59,12 +59,19 @@ INNER JOIN u.processingStep as step
 INNER JOIN step.process as p
 INNER JOIN p.jobExecutionPlan as plan
 WHERE plan.id in (:planIds)
-GROUP BY p.id
 '''
+        if (state) {
+            query = query + "AND u.state = :state\n"
+        }
+        query = query + "GROUP BY p.id\n"
         query = query + "ORDER BY p.${column} ${order ? 'asc' : 'desc'}"
 
         LinkedHashMap<Process, ProcessingStepUpdate> results = new LinkedHashMap<Process, ProcessingStepUpdate>()
-        def processes = ProcessingStepUpdate.executeQuery(query, [planIds: plans], [max: max, offset: offset])
+        Map params = [planIds: plans]
+        if (state) {
+            params.put("state", state)
+        }
+        def processes = ProcessingStepUpdate.executeQuery(query, params, [max: max, offset: offset])
         List<Long> ids = processes.collect { it[1] }
         List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByIdInList(ids)
         processes.each {
@@ -185,12 +192,36 @@ GROUP BY p.id
      * Both finished and running Processes are considered. The method also considers the previous,
      * but obsoleted JobExecutionPlans for the given plan.
      * @param plan The JobExecutionPlan for which the number of started processes should be retrieved.
+     * @param state Optional ExecutionState to restrict the number of Processes returned
      * @return The number of Processes which have been started for plan
     **/
     @PreAuthorize("hasPermission(#plan, read) or hasRole('ROLE_ADMIN')")
-    public int getNumberOfProcesses(JobExecutionPlan plan) {
+    public int getNumberOfProcesses(JobExecutionPlan plan, ExecutionState state = null) {
         final List<JobExecutionPlan> plans = withParents(plan)
-        return Process.countByJobExecutionPlanInList(plans)
+        if (!state) {
+            return Process.countByJobExecutionPlanInList(plans)
+        }
+        String query = '''
+SELECT COUNT(DISTINCT p.id)
+FROM ProcessingStepUpdate AS u
+INNER JOIN u.processingStep as step
+INNER JOIN step.process as p
+INNER JOIN p.jobExecutionPlan as plan
+WHERE plan.id in (:planIds)
+AND step.next IS NULL
+AND u.state = :state
+AND u.id IN (
+    SELECT MAX(u2.id)
+    FROM ProcessingStepUpdate AS u2
+    INNER JOIN u2.processingStep as step2
+    INNER JOIN step2.process as p2
+    INNER JOIN p2.jobExecutionPlan as plan2
+    WHERE plan2.id in (:planIds)
+    AND step2.next IS NULL
+    GROUP BY p2.id
+)
+'''
+        return Process.executeQuery(query, [planIds: plans.collect { it.id }, state: state])[0]
     }
 
     /**
