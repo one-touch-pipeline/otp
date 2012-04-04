@@ -107,23 +107,23 @@ class ProcessService {
         if (!process.finished) {
             throw new IllegalArgumentException("Process is finished")
         }
-        final List<ProcessingStep> allSteps = ProcessingStep.findAllByProcess(process)
-        ProcessingStep lastStep = null
-        for (ProcessingStep step : allSteps) {
-            if (!step.next) {
-                lastStep = step
-                break
-            }
-        }
-        if (!lastStep) {
-            // TODO: throw proper exception
-            throw new RuntimeException("Finished Process does not have an end ProcessingStep")
-        }
-        final List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(lastStep)
-        if (updates.isEmpty()) {
+        String query =
+'''
+SELECT u.date
+FROM ProcessingStepUpdate AS u
+INNER JOIN u.processingStep AS step
+INNER JOIN step.process AS process
+WHERE
+step.next IS NULL
+AND
+process.id = :process
+ORDER BY u.id desc
+'''
+        List results = ProcessingStepUpdate.executeQuery(query, [process: process.id], [max: 1])
+        if (results.isEmpty()) {
             throw new RuntimeException("No ProcessingStepUpdates for last ProcessingStep")
         }
-        return updates.sort { it.id }.last().date
+        return results[0]
     }
 
     /**
