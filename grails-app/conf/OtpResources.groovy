@@ -8,4 +8,8 @@ modules = {
         dependsOn 'jquery-ui, core'
         resource url: '/js/crashrecovery.js'
     }
+    userAdministration {
+        dependsOn 'core'
+        resource url: '/js/useradministration.js'
+    }
 }
