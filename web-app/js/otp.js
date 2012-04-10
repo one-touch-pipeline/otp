@@ -15,6 +15,36 @@ $.i18n.properties({
     mode: "map"
 });
 
+$.otp.message = function (message, warning) {
+    "use strict";
+    if (!message) {
+        return;
+    }
+    var classes, button, divCode;
+    classes = "message";
+    if (warning) {
+        classes += " errors";
+    }
+    button = $("<div class=\"close\"><button></button></div>");
+    $("button", button).click(function () {
+        $(this).parent().parent().remove();
+    });
+    divCode = $("<div class=\"" + classes + "\"><p>" + message + "</p></div>");
+    button.appendTo(divCode);
+    divCode.append($("<div style=\"clear: both;\"></div>"));
+    $("#infoBox").append(divCode);
+};
+
+$.otp.infoMessage = function (message) {
+    "use strict";
+    this.message(message, false);
+};
+
+$.otp.warningMessage = function (message) {
+    "use strict";
+    this.message(message, true);
+};
+
 /**
  * Creates the HTML markup for the status image.
  * The status is referenced by name:
