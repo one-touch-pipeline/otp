@@ -313,6 +313,32 @@ OTP.prototype.createProcessListView = function (selector, planId, failed) {
         { "bSortable": false, "aTargets": [6] },
         { "bSortable": false, "aTargets": [7] }
     ]);
+    $("#enable-workflow-button").click(function () {
+        $.get($.otp.contextPath + "/processes/enablePlan/" + planId, function (data) {
+            if (data !== "true") {
+                $.otp.warningMessage("Could not enable Workflow");
+                return;
+            }
+            $("#enable-workflow-button").hide();
+            $("#disable-workflow-button").show();
+            $("strong", $("#disable-workflow-button").parent()).text("enabled");
+            var image = $("img", $("#disable-workflow-button").parent());
+            image.attr("src", image.attr("src").replace("grey", "green"));
+        });
+    });
+    $("#disable-workflow-button").click(function () {
+        $.get($.otp.contextPath + "/processes/disablePlan/" + planId, function (data) {
+            if (data !== "false") {
+                $.otp.warningMessage("Could not disable Workflow");
+                return;
+            }
+            $("#disable-workflow-button").hide();
+            $("#enable-workflow-button").show();
+            $("strong", $("#disable-workflow-button").parent()).text("disabled");
+            var image = $("img", $("#disable-workflow-button").parent());
+            image.attr("src", image.attr("src").replace("green", "grey"));
+        });
+    });
 };
 
 /**
