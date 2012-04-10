@@ -8,6 +8,13 @@ function OTP() {
 
 $.otp = new OTP();
 
+// TODO: create proper links
+$.i18n.properties({
+    name: 'messages',
+    path: '/otp/js/i18n/',
+    mode: "map"
+});
+
 /**
  * Creates the HTML markup for the status image.
  * The status is referenced by name:
