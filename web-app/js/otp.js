@@ -388,6 +388,12 @@ OTP.prototype.createProcessingStepUpdatesListView = function (selector, stepId) 
             rowData[2] = rowData[2].name;
             if (!rowData[3]) {
                 rowData[3] = "-";
+            } else {
+                if (rowData[3].stackTraceIdentifier) {
+                    rowData[3] = '<a href="' + $.otp.contextPath + "/processes/getProcessingErrorStackTrace/" + rowData[3].id + '" target="_blank">' + rowData[3].errorMessage + '</a>';
+                } else {
+                    rowData[3] = rowData[3].errorMessage;
+                }
             }
         }
     }, [

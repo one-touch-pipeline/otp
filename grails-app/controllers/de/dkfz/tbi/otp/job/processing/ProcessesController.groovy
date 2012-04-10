@@ -303,7 +303,7 @@ class ProcessesController {
                 update.id,
                 update.date,
                 update.state,
-                update.error ? update.error.errorMessage : null
+                update.error
             ]
         }
         render dataToRender as JSON
@@ -357,6 +357,10 @@ class ProcessesController {
             ]
         }
         render dataToRender as JSON
+    }
+
+    def getProcessingErrorStackTrace() {
+        render processService.getProcessingErrorStackTrace(params.id as long)
     }
 
     private PlanStatus calculateStatus(JobExecutionPlan plan, Process lastSuccess, Process lastFinished) {

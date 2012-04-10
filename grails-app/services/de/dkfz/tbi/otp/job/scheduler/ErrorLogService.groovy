@@ -30,7 +30,7 @@ class ErrorLogService {
     def servletContext
 
     /**
-     * The central method coordinating the service's functionality
+     * The central method coordinating the service's functionality.
      *
      * The method makes the functionality the service provides publicly available.
      * The MD5 sum is calculated and taken as name of the file storing
@@ -40,13 +40,15 @@ class ErrorLogService {
      *
      * @param jobClassName The name of the job of which an exception is to be stored
      * @param thrownException The thrown exception
+     * @return Unique hash of caught exception.
      */
-    public void log(Exception thrownException) {
+    public String log(Exception thrownException) {
         String exceptionElements = ""
         thrownException.stackTrace.each {
             exceptionElements += it.toString()
         }
-        String fileName = (exceptionElements).encodeAsMD5() + ".xml"
+        String md5sum = (exceptionElements).encodeAsMD5()
+        String fileName = md5sum + ".xml"
         File exceptionStoringFile = new File(fileName)
         String dir = servletContext.getRealPath(grailsApplication.config.otp.errorLogging.stacktraces)
         String exceptionFilePath = "${dir}${File.separatorChar}${exceptionStoringFile}"
@@ -55,6 +57,27 @@ class ErrorLogService {
         } else {
             contentToXml(thrownException, fileName, dir)
         }
+        return md5sum
+    }
+
+    /**
+     * Retrieves the stacktrace identified by given identifier.
+     *
+     * If the stacktrace file cannot be found null is returned.
+     * @param identifier The stacktrace's identifier
+     * @return The stacktrace if found otherwise null
+     **/
+    public String loggedError(String identifier) {
+        File dir = new File(servletContext.getRealPath(grailsApplication.config.otp.errorLogging.stacktraces))
+        if (!dir.isDirectory()) {
+            return null
+        }
+        File stacktraceFile = new File(dir, identifier + ".xml")
+        if (!stacktraceFile.isFile()) {
+            return null
+        }
+        def records = new XmlSlurper().parse(stacktraceFile)
+        return records.stacktrace.text()
     }
 
     /**
