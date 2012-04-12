@@ -22,6 +22,63 @@ class ExecutionService {
      */
     @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
+    /**
+     * Dependency injection of config service
+     */
+    @SuppressWarnings("GrailsStatelessService")
+    def configService
+
+    /**
+     * Executes a command on a specified host
+     *
+     * The host the command is to be executed
+     * is identified by the realm.
+     * @param realm The realm which identifies the host
+     * @param command The command to be executed
+     * @return what the server sends back
+     */
+    public String executeCommand(String realm, String command) {
+        List<String> config = getConfig(realm)
+        List<String> values = executeRemoteJob(config.get(0), config.get(1), config.get(2), config.get(3), config.get(4), command, null, null)
+        return concatResults(values)
+    }
+
+    /**
+     * Executes a job on a specified host
+     *
+     * @param realm The realm which identifies the host
+     * @param text The script to be run a pbs system
+     * @return what the server sends back
+     */
+    public String executeJob(String realm, String text) {
+        if (!text || text == null) {
+            throw new ProcessingException("No job specified.")
+        }
+        File tmpFile = File.createTempFile("remoteJob", ".tmp", new File(System.getProperty("user.home")))
+        tmpFile.setText(text)
+        // File has to be executable
+        tmpFile.setExecutable(true)
+        List<String> config = getConfig(realm)
+        List<String> values = executeRemoteJob(config.get(0), config.get(1), config.get(2), config.get(3), config.get(4), null, tmpFile, null)
+        return concatResults(values)
+    }
+
+    /**
+     * Executes a script on a specified host
+     *
+     * @param realm The realm which identifies the host
+     * @param filePath The path of the file to be executed
+     * @return what the server sends back
+     */
+    public String executeJobScript(String realm, String filePath) {
+        if (!filePath || filePath == "") {
+            throw new ProcessingException("No file path specified.")
+        }
+        File file = new File(filePath)
+        List<String> config = getConfig(realm)
+        List<String> values = executeRemoteJob(config.get(0), config.get(1), config.get(2), config.get(3), config.get(4), null, file, null)
+        return concatResults(values)
+    }
 
     /**
      * Triggers the sending of remote jobs
@@ -35,20 +92,21 @@ class ExecutionService {
      * @param host The host on which the command shall be executed
      * @param port The port to be addressed on the server
      * @param timeout The timeout in milliseconds after which execution interrupts
+     * @param username The user name for the connection
+     * @param password The password for the user
      * @param command The command to be executed on the remote server
      * @param script The script to be executed on the remote server
      * @param options The options To make the command more specific
      * 
      * @return List of Strings containing the output of the triggered remote job
      */
-    public List<String> executeRemoteJob(String host, int port, int timeout, String command = null, File script = null, String options = null) {
+    private List<String> executeRemoteJob(String host, String port, String timeout, String username, String password, String command = null, File script = null, String options = null) {
         if (!command && !script) {
             throw new ProcessingException("Neither a command nor a script specified to be run remotely.")
         }
-        if (command) {
-            // TODO: Script and command storage
-        }
-        return querySsh(host, port, timeout, command, script)
+        int iPort = port as int
+        int iTimeout = timeout as int
+        return querySsh(host, iPort, iTimeout, username, password, command, script, options)
     }
 
     /**
@@ -59,15 +117,15 @@ class ExecutionService {
      *
      * @param host The host on which the command shall be executed
      * @param port The port to be addressed on the server
-     * @param timeout The timeout in milliseconds after which execution interrupts
+     * @param timeout The timeout to use for the ssh connection
+     * @param username The user name for the connection
+     * @param password The password for the user
      * @param command The command to be executed on the remote server
      * @param script The script to be executed on the remote server
      * @param options The options To make the command more specific
      * @return List of Strings containing the output of the executed job
      */
-    private List<String> querySsh(String host, int port, int timeout, String command = null, File script = null, String options = null) {
-        String username = (grailsApplication.config.otp.pbs.ssh.username).toString()
-        String password = (grailsApplication.config.otp.pbs.ssh.password).toString()
+    private List<String> querySsh(String host, int port, int timeout, String username, String password, String command = null, File script = null, String options = null) {
         JSch jsch = new JSch()
         Session session = jsch.getSession(username, host, port)
         if (!password) {
@@ -140,6 +198,34 @@ class ExecutionService {
         }
         return values
     }
+
+    /**
+     * Retrieves and returns the configuration to connect
+     * to remote server
+     *
+     * @param realm The realm identifying the host to be used
+     * @return List of Strings with configuration values
+     */
+    private List<String> getConfig(String realm) {
+        List<String> config = []
+        config.add(configService.getPbsHost(realm))
+        config.add(configService.pbsPort)
+        config.add(configService.pbsTimeout)
+        config.add(configService.pbsUser)
+        config.add(configService.pbsPassword)
+        return config
+    }
+
+    private String concatResults(List<String> values) {
+        String answer = ""
+        values.each { String value ->
+            if (value) {
+                answer += value
+            }
+        }
+        return answer
+    }
+
     /**
      * Extracts pbs ids from a given String
      *
