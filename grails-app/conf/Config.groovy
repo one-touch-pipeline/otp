@@ -271,10 +271,9 @@ if ((otpConfig.otp.jabber.enabled instanceof ConfigObject) || !Boolean.parseBool
 }
 
 // configure paths
-otp.dataPath.bioquant = otpConfig.otp.dataPath.bioquant
-otp.dataPath.dkfz = otpConfig.otp.dataPath.dkfz
-otp.dataPath.metadata = otpConfig.otp.dataPath.metadata
-
+otp.dataPath.bioquant = "$ROOT_PATH/project/"
+otp.dataPath.dkfz = "$OTP_ROOT_PATH/"
+otp.dataPath.metadata = "${home}ngs-icgc/"
 
 // exclude unused plugins
 if (pluginsToExclude) {
