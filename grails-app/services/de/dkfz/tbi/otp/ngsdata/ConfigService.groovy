@@ -15,7 +15,7 @@ class ConfigService {
             case "BioQuant":
                 return "$ROOT_PATH/project/"
             case "DKFZ":
-                return "$ROOT_PATH/project/"
+                return "$OTP_ROOT_PATH/"
             default:
                 throw new Exception()
         }
