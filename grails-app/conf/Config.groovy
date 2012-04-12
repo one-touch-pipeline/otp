@@ -181,11 +181,24 @@ if (otpConfig.otp.ngsdata.bootstrap.mdPath instanceof ConfigObject) {
 } else {
     otp.ngsdata.bootstrap.mdPath = otpConfig.otp.ngsdata.bootstrap.mdPath
 }
-// The PBS host
-if (otpConfig.otp.pbs.ssh.host instanceof ConfigObject) {
-    otp.pbs.ssh.host = ""
+// The PBS hosts
+// DKFZ
+if (otpConfig.otp.pbs.dkfz instanceof ConfigObject) {
+    otp.pbs.dkfz = ""
 } else {
-    otp.pbs.ssh.host = otpConfig.otp.pbs.ssh.host
+    otp.pbs.dkfz = otpConfig.otp.pbs.dkfz
+}
+// BioQuant
+if (otpConfig.otp.pbs.bioquant instanceof ConfigObject) {
+    otp.pbs.bioquant = ""
+} else {
+    otp.pbs.bioquant = otpConfig.otp.pbs.bioquant
+}
+// The PBS port
+if (otpConfig.otp.pbs.ssh.port instanceof ConfigObject) {
+    otp.pbs.ssh.port = "22"
+} else {
+    otp.pbs.ssh.port = otpConfig.otp.pbs.ssh.port
 }
 // The PBS key file
 if (otpConfig.otp.pbs.ssh.keyfile instanceof ConfigObject) {
@@ -205,29 +218,22 @@ if (otpConfig.otp.pbs.ssh.password instanceof ConfigObject) {
 } else {
     otp.pbs.ssh.password = otpConfig.otp.pbs.ssh.password
 }
-// The path to the file holding commands to be executed on the PBS
-if (otpConfig.otp.pbs.ssh.commandResource instanceof ConfigObject) {
-    otp.pbs.ssh.commandResource = ""
-} else {
-    otp.pbs.ssh.commandResource = otpConfig.otp.pbs.ssh.commandResource
-}
 // The timeout for the commands processed on the PBS (if zero, it runs infinitely)
 if (otpConfig.otp.pbs.ssh.timeout instanceof ConfigObject) {
-    otp.pbs.timeout = ""
+    otp.pbs.ssh.timeout = ""
 } else {
     otp.pbs.ssh.timeout = otpConfig.otp.pbs.ssh.timeout
 }
-// The pattern identifying the PBS id
-if (otpConfig.otp.pbs.pattern.pbsId instanceof ConfigObject) {
-    otp.pbs.pattern.pbsId = ""
+
+if (otpConfig.otp.pbs.vcs.exchangeDirectory instanceof ConfigObject) {
+    otp.pbs.vcs.exchangeDirectory = ""
 } else {
-    otp.pbs.pattern.pbsId = otpConfig.otp.pbs.pattern.pbsId
+    otp.pbs.vcs.exchangeDirectory = otpConfig.otp.pbs.vcs.exchangeDirectory
 }
-// The pattern identifying if a PBS job is running
-if (otpConfig.otp.pbs.pattern.running instanceof ConfigObject) {
-    otp.pbs.pattern.running = ""
+if (otpConfig.otp.pbs.vcs.cloneDirectory instanceof ConfigObject) {
+    otp.pbs.vcs.cloneDirectory = ""
 } else {
-    otp.pbs.pattern.running = otpConfig.otp.pbs.pattern.running
+    otp.pbs.vcs.cloneDirectory = otpConfig.otp.pbs.vcs.cloneDirectory
 }
 
 // Added by the Spring Security Core plugin:
