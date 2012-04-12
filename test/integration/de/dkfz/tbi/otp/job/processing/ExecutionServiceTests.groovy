@@ -1,8 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
 import static org.junit.Assert.*
-
-import de.dkfz.tbi.otp.plugins.git.GitManager
 import org.junit.*
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 
