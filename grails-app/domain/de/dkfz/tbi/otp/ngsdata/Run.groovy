@@ -11,6 +11,7 @@ class Run {
     boolean complete = false         // complete run was delivered
     boolean allFilesUsed = false     // flag if data if all files find relations
     boolean finalLocation = false    // was run moved to final destination from ftp
+    boolean finalLocationChecked = false // was final location tested ?
 
     boolean multipleSource           // for runs from a few projects
 
