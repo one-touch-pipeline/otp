@@ -30,7 +30,8 @@ public class CalculateChecksumJob extends AbstractJobImpl {
                 return
             }
             String scriptName = buildScript(file)
-            String jobId = sendScript(scriptName)
+            String cmd = scriptText(file)
+            String jobId = sendScript(cmd)
             println "Job ${jobId} submitted to PBS"
             pbsIds += jobId + ","
         }
@@ -70,12 +71,13 @@ public class CalculateChecksumJob extends AbstractJobImpl {
         String directory = dirToMd5File(file)
         String fileName = file.fileName
         String md5FileName = fileName + suffix
-        String text = "cd ${directory};md5sum ${fileName} > ${md5FileName}"
+        String text = "cd ${directory};md5sum ${fileName} > ${md5FileName};chmod 440 ${md5FileName}"
         return text
     }
 
-    private String sendScript(String scriptName) {
-        String cmd = "qsub -l nodes=1:lsdf ${scriptName}"
+    private String sendScript(String text) {
+        String cmd = "echo '${text}' | qsub -l nodes=1:lsdf"
+        println cmd
         //String cmd = "qsub testJob.sh"
         String response = pbsService.sendPbsJob(cmd)
         List<String> extractedPbsIds = pbsService.extractPbsIds(response)

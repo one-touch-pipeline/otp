@@ -22,15 +22,17 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
         projects.each {String projectName ->
             String[] dirs = lsdfFilesService.getListOfRunDirecotries(run, projectName)
             dirs.each {String line ->
-                String exitCode = createDirectory(line)
-                println "creating directory finished with exit code " + exitCode
+                def exitCode = createDirectory(line)
+                println "creating directory finished with exit code " + exitCode.toString()
             }
         }
     }
 
-    private String createDirectory(String line) {
+    private def createDirectory(String line) {
         String cmd = "mkdir -p " + line
-        return pbsService.sendPbsJob(cmd)
+        println cmd
+        def out = pbsService.sendPbsJob(cmd)
+        return out
     }
 
     private Set<String> projects(Run run) {

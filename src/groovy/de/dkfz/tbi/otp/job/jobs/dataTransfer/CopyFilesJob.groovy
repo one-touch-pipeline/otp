@@ -20,8 +20,9 @@ class CopyFilesJob extends AbstractJobImpl {
 
         String pbsIds = "1,"
         DataFile.findAllByRunAndProjectIsNotNull(run).each {DataFile file ->
-            String scriptName = buildScript(file)
-            String jobId = sendScript(scriptName)
+            //String scriptName = buildScript(file)
+            String cmd = scriptText(file)
+            String jobId = sendScript(cmd)
             println "Job ${jobId} submitted to PBS"
             pbsIds += jobId + ","
         }
@@ -39,16 +40,17 @@ class CopyFilesJob extends AbstractJobImpl {
     private String scriptText(DataFile file) {
         String from = lsdfFilesService.getFileInitialPath(file)
         String to = lsdfFilesService.getFileFinalPath(file)
-        println from + " " + to
         String cmd = "echo \$HOST;cp ${from} ${to};chmod 440 ${to}"
+        println cmd
         return cmd
     }
 
-    private String sendScript(String scriptName) {
-        String cmd = "qsub -l nodes=1:lsdf ${scriptName}"
+    private String sendScript(String text) {
+        String cmd = "echo '${text}' | qsub -l nodes=1:lsdf"
+        println cmd
         //String cmd = "qsub testJob.sh"
-        String response = pbsService.sendPbsJob(cmd)
-        List<String> extractedPbsIds = pbsService.extractPbsIds(response)
+        String pbsResponse = pbsService.sendPbsJob(cmd)
+        List<String> extractedPbsIds = pbsService.extractPbsIds(pbsResponse)
         return extractedPbsIds.get(0)
     }
 }
