@@ -15,14 +15,14 @@ class DataTransferDKFZStatJob extends AbstractStartJobImpl  {
 
     final int MAX_RUNNING = 4
 
-    @Scheduled(fixedRate=60000l)
+    @Scheduled(fixedRate=6000l)
     void execute() {
         if (!hasSlot()) {
             return
         }
         int n = 0;
         int nRunning = numberOfRunningProcesses()
-        List<Run> runs = Run.findAllByCompleteAndRealm(true, Run.Realm.DKFZ)
+        List<Run> runs = listOfRuns()
         for(Run run in runs) {
             if (!hasSlot()) {
                 break
@@ -40,6 +40,18 @@ class DataTransferDKFZStatJob extends AbstractStartJobImpl  {
             n++
         }
         println "DataTransferWorkflow: ${n} jobs started"
+    }
+
+    List<Run> listOfRuns() {
+        def c = Run.createCriteria()
+        List<Run> runs = c.list {
+            and{
+                eq("complete", true)
+                eq("finalLocation", false)
+                eq("finalLocationChecked", true)
+                eq("realm", Run.Realm.DKFZ)
+            }
+        }
     }
 
     private boolean hasSlot() {
