@@ -55,6 +55,7 @@ grails.project.dependency.resolution = {
         compile ":jquery-datatables:1.7.5"
         compile ":perf4j:0.1.1"
         compile ":mail:1.0-SNAPSHOT"
+        compile ":codenarc:0.17"
 
         build ":tomcat:$grailsVersion"
     }
