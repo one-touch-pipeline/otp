@@ -245,7 +245,7 @@ OTP.prototype.createJobExecutionPlanListView = function (selector) {
  * Callback for restart ProcessingStep.
  * Performs the AJAX call to restart the step and reloads the given datatable.
  * @param id The id of the ProcessingStep to restart.
- * @param dataTable Selector for the datatable
+ * @param selector Selector for the datatable
  **/
 OTP.prototype.restartProcessingStep = function (id, selector) {
     "use strict";
