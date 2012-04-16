@@ -15,7 +15,7 @@ class IgvSessionFileController {
         Individual ind = Individual.get(indId)
         List<Mutation> muts = Mutation.findAllByIndividual(ind)
 
-        println ind
+        println "mutFile for ${ind}"
         println muts
 
         String text = "chr\tstart\tend\tsample\ttype\n"
