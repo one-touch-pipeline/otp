@@ -2,16 +2,16 @@ import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
 plan("DataInstallationWorkflow") {
     start("start", "dataInstallationStartJob")
-    job("checkInitialDataNotCompressed", "checkInitialDataNotCompressedJob")
+    //job("checkInitialDataNotCompressed", "checkInitialDataNotCompressedJob")
     job("checkInputFiles", "checkInputFilesJob")
-    job("compressSequenceFiles", "compressSequenceFilesJob") {
-        outputParameter("pbsIds")
-    }
-    job("compressSequenceFilesWatchdog", "myPbsWatchdog") {
-        inputParameter("pbsIds", "compressSequenceFiles", "pbsIDs")
-    }
+    //job("compressSequenceFiles", "compressSequenceFilesJob") {
+    //    outputParameter("pbsIds")
+    //}
+    //job("compressSequenceFilesWatchdog", "myPbsWatchdog") {
+    //    inputParameter("pbsIds", "compressSequenceFiles", "pbsIDs")
+    //}
     job("createOutputDirectory", "createOutputDirectoryJob")
-    job("copyFilesToFinalLocation", "copyFilesToFinalLocationJob") {
+    job("copyFilesToFinalLocation", "copyFilesJob") {
         outputParameter("pbsIds")
     }
     job("copyFilesToFinalLocationWatchdog", "myPBSWatchdogJob") {
@@ -28,6 +28,7 @@ plan("DataInstallationWorkflow") {
     job("compareChecksum", "compareChecksumJob")
     job("createViewByPid", "createViewByPidJob")
     job("checkViewByPid", "checkViewByPidJob")
-    job("archiveInitialData", "archiveInitialDataJob")
-    job("setInstallationCompleted", "setInstallationCompletedJob")
+    //job("checkArchivingPossible", "checkArchivingPossible")
+    //job("archiveInitialData", "archiveInitialDataJob")
+    //job("checkFinalArchive", "checkFinalArchive")
 }
