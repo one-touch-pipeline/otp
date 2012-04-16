@@ -16,15 +16,7 @@ class ConfigService {
     def grailsApplication
 
     String getProjectRootPath(Project proj) {
-        String host = proj.host
-        switch (host) {
-            case "BioQuant":
-                return "$ROOT_PATH/project/"
-            case "DKFZ":
-                return "$OTP_ROOT_PATH/"
-            default:
-                throw new Exception()
-        }
+        return proj.realm.rootPath
     }
 
     String getProjectSequencePath(Project proj) {
