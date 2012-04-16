@@ -108,7 +108,7 @@ class ProcessesController {
 
     def plan() {
         JobExecutionPlan plan = jobExecutionPlanService.getPlan(params.id as long)
-        [name: plan.name, id: plan.id, failed: Boolean.parseBoolean(params.failed)]
+        [name: plan.name, id: plan.id, failed: Boolean.parseBoolean(params.failed), enabled: plan.enabled]
     }
 
     def planData() {
@@ -177,6 +177,14 @@ class ProcessesController {
             ]
         }
         render dataToRender as JSON
+    }
+
+    def enablePlan() {
+        render jobExecutionPlanService.enablePlan(jobExecutionPlanService.getPlan(params.id as long))
+    }
+
+    def disablePlan() {
+        render jobExecutionPlanService.disablePlan(jobExecutionPlanService.getPlan(params.id as long))
     }
 
     def process() {
@@ -303,7 +311,7 @@ class ProcessesController {
                 update.id,
                 update.date,
                 update.state,
-                update.error ? update.error.errorMessage : null
+                update.error
             ]
         }
         render dataToRender as JSON
@@ -357,6 +365,10 @@ class ProcessesController {
             ]
         }
         render dataToRender as JSON
+    }
+
+    def getProcessingErrorStackTrace() {
+        render processService.getProcessingErrorStackTrace(params.id as long)
     }
 
     private PlanStatus calculateStatus(JobExecutionPlan plan, Process lastSuccess, Process lastFinished) {

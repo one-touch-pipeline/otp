@@ -8,6 +8,43 @@ function OTP() {
 
 $.otp = new OTP();
 
+// TODO: create proper links
+$.i18n.properties({
+    name: 'messages',
+    path: '/otp/js/i18n/',
+    mode: "map"
+});
+
+$.otp.message = function (message, warning) {
+    "use strict";
+    if (!message) {
+        return;
+    }
+    var classes, button, divCode;
+    classes = "message";
+    if (warning) {
+        classes += " errors";
+    }
+    button = $("<div class=\"close\"><button></button></div>");
+    $("button", button).click(function () {
+        $(this).parent().parent().remove();
+    });
+    divCode = $("<div class=\"" + classes + "\"><p>" + message + "</p></div>");
+    button.appendTo(divCode);
+    divCode.append($("<div style=\"clear: both;\"></div>"));
+    $("#infoBox").append(divCode);
+};
+
+$.otp.infoMessage = function (message) {
+    "use strict";
+    this.message(message, false);
+};
+
+$.otp.warningMessage = function (message) {
+    "use strict";
+    this.message(message, true);
+};
+
 /**
  * Creates the HTML markup for the status image.
  * The status is referenced by name:
@@ -208,7 +245,7 @@ OTP.prototype.createJobExecutionPlanListView = function (selector) {
  * Callback for restart ProcessingStep.
  * Performs the AJAX call to restart the step and reloads the given datatable.
  * @param id The id of the ProcessingStep to restart.
- * @param dataTable Selector for the datatable
+ * @param selector Selector for the datatable
  **/
 OTP.prototype.restartProcessingStep = function (id, selector) {
     "use strict";
@@ -276,6 +313,32 @@ OTP.prototype.createProcessListView = function (selector, planId, failed) {
         { "bSortable": false, "aTargets": [6] },
         { "bSortable": false, "aTargets": [7] }
     ]);
+    $("#enable-workflow-button").click(function () {
+        $.get($.otp.contextPath + "/processes/enablePlan/" + planId, function (data) {
+            if (data !== "true") {
+                $.otp.warningMessage("Could not enable Workflow");
+                return;
+            }
+            $("#enable-workflow-button").hide();
+            $("#disable-workflow-button").show();
+            $("strong", $("#disable-workflow-button").parent()).text("enabled");
+            var image = $("img", $("#disable-workflow-button").parent());
+            image.attr("src", image.attr("src").replace("grey", "green"));
+        });
+    });
+    $("#disable-workflow-button").click(function () {
+        $.get($.otp.contextPath + "/processes/disablePlan/" + planId, function (data) {
+            if (data !== "false") {
+                $.otp.warningMessage("Could not disable Workflow");
+                return;
+            }
+            $("#disable-workflow-button").hide();
+            $("#enable-workflow-button").show();
+            $("strong", $("#disable-workflow-button").parent()).text("disabled");
+            var image = $("img", $("#disable-workflow-button").parent());
+            image.attr("src", image.attr("src").replace("green", "grey"));
+        });
+    });
 };
 
 /**
@@ -351,6 +414,12 @@ OTP.prototype.createProcessingStepUpdatesListView = function (selector, stepId) 
             rowData[2] = rowData[2].name;
             if (!rowData[3]) {
                 rowData[3] = "-";
+            } else {
+                if (rowData[3].stackTraceIdentifier) {
+                    rowData[3] = '<a href="' + $.otp.contextPath + "/processes/getProcessingErrorStackTrace/" + rowData[3].id + '" target="_blank">' + rowData[3].errorMessage + '</a>';
+                } else {
+                    rowData[3] = rowData[3].errorMessage;
+                }
             }
         }
     }, [

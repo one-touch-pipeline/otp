@@ -43,6 +43,7 @@ class ShutdownService implements DisposableBean {
                 ShutdownInformation info = ShutdownInformation.findBySucceededIsNullAndCanceledIsNull()
                 if (!info) {
                     log.error("Shutdown Information is missing")
+                    return
                 }
                 info.succeeded = new Date()
                 if (!info.validate()) {

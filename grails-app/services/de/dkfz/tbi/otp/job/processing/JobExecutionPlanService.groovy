@@ -25,6 +25,44 @@ class JobExecutionPlanService {
     }
 
     /**
+     * Enables the given JobExecutionPlan.
+     * In case the plan is obsoleted, it cannot be enabled.
+     * @param plan The JobExecutionPlan to enable.
+     * @return The enabled state after the operation. Should be true on success.
+     **/
+    @PreAuthorize("hasPermission(#plan, write) or hasRole('ROLE_ADMIN')")
+    public boolean enablePlan(JobExecutionPlan plan) {
+        if (plan.obsoleted) {
+            return false
+        }
+        boolean before = plan.enabled
+        plan.enabled = true
+        plan = plan.save(flush: true)
+        if (!plan) {
+            log.error("JobExecutionPlan ${plan.id} could not be enabled")
+            return before
+        }
+        return plan.enabled
+    }
+
+    /**
+     * Disables the given JobExecutionPlan.
+     * @param plan The JobExecutionPlan to disable.
+     * @return The enabled state after the operation. Should be false(!) on success.
+     **/
+    @PreAuthorize("hasPermission(#plan, write) or hasRole('ROLE_ADMIN')")
+    public boolean disablePlan(JobExecutionPlan plan) {
+        boolean before = plan.enabled
+        plan.enabled = false
+        plan = plan.save(flush: true)
+        if (!plan) {
+            log.error("JobExecutionPlan ${plan.id} could not be disabled")
+            return before
+        }
+        return plan.enabled
+    }
+
+    /**
      * Retrieves a list of all JobExecutionPlans the current User has access to.
      * Obsoleted JobExecutionPlans are not considered.
      * @return List of all not obsoleted JobExecutionPlans

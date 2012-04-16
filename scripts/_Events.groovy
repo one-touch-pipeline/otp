@@ -20,3 +20,9 @@ eventSetClasspath = { rootLoader ->
 
     classpath()
 }
+
+eventCompileStart = {
+    // copy the messages.properties
+    ant.mkdir(dir: "web-app/js/i18n/")
+    ant.copy(file: "grails-app/i18n/messages.properties", todir: "web-app/js/i18n/")
+}

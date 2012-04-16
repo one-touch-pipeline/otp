@@ -46,4 +46,12 @@ class User {
     protected void encodePassword() {
         password = springSecurityService.encodePassword(password)
     }
+
+    /**
+     *
+     * @return User without any security relevant information.
+     */
+    User sanitizedUser() {
+        return new User(id: this.id, username: this.username, jabberId: this.jabberId, email: this.email)
+    }
 }

@@ -1,7 +1,10 @@
 package de.dkfz.tbi.otp.job.processing
 
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.access.prepost.PostAuthorize
+import org.springframework.security.acls.domain.BasePermission
+import org.springframework.security.core.context.SecurityContextHolder
 
 /**
  * Service providing methods to access information about Processes.
@@ -16,6 +19,17 @@ class ProcessService {
      * Needed to restart Processing Steps.
      **/
     def schedulerService
+
+    /**
+     * Dependency Injection of errorLogService.
+     * Required to read the stacktrace for an error.
+     **/
+    def errorLogService
+
+    /**
+     * Dependency Injection of aclUtilService.
+     **/
+    def aclUtilService
 
     /**
      * Security aware way to access a Process.
@@ -276,6 +290,23 @@ ORDER BY u.id desc
         }
         if (finishDate) {
             return finishDate.time - startDate.time
+        }
+        return null
+    }
+
+    /**
+     * Retrieves the stacktrace saved for the ProcessingError.
+     * @param id The id of the ProcessingError
+     * @return The stacktrace or null if not found
+     **/
+    public String getProcessingErrorStackTrace(long id) {
+        ProcessingError error = ProcessingError.get(id)
+        if (!error.stackTraceIdentifier) {
+            return null
+        }
+        if (aclUtilService.hasPermission(SecurityContextHolder.context.authentication, error.processingStepUpdate.processingStep.process.jobExecutionPlan, BasePermission.READ) ||
+                (SpringSecurityUtils.ifAllGranted("ROLE_ADMIN"))) {
+            return errorLogService.loggedError(error.stackTraceIdentifier)
         }
         return null
     }
