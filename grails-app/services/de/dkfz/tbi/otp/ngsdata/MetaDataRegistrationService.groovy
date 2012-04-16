@@ -46,6 +46,9 @@ class MetaDataRegistrationService {
             if (fileBlacklisted(fileName)) {
                 continue
             }
+            if (!fileName.endsWith(".tsv")) {
+                continue
+            }
             if (fileName.contains("fastq") || fileName.contains("align")) {
                 if (isFileRegistered(path, fileName)) {
                     throw new MetaDataFileDuplicationException(path.run.name, fileName)

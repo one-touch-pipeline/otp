@@ -99,7 +99,6 @@ class BamHeaderParsingService {
     }
 
     private SeqTrack parseTokensV5(List<String> tokens) {
-        println "parseTokensV5"
         for(String token in tokens) {
             if (token.startsWith("ID:")) {
                 int sepId = token.indexOf("_L")
