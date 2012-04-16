@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.metaData
 
 import org.springframework.beans.factory.annotation.Autowired
-
 import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
 import de.dkfz.tbi.otp.ngsdata.MetaDataService
 

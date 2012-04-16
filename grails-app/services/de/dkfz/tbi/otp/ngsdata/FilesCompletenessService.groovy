@@ -65,8 +65,9 @@ class FilesCompletenessService {
         }
         if (allExists) {
             run.finalLocation = true
-            run.save(flush: true)
         }
+        run.finalLocationChecked = true
+        run.save(flush: true)
         return allExists
     }
 
@@ -114,7 +115,7 @@ class FilesCompletenessService {
             throw new ProcessingException("No data file provided for the given run.")
         }
         dataFiles.each {DataFile dataFile ->
-            println dataFile.fileName
+            //println dataFile.fileName
             String path = lsdfFilesService.getFileViewByPidPath(dataFile)
             if (path == null) {
                 return // continue

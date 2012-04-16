@@ -21,7 +21,14 @@ class DataLocationStartJob extends AbstractStartJobImpl {
             return
         }
         int n = 0;
-        List<Run> runs = Run.findAllByCompleteAndFinalLocation(true, false)
+        def c = Run.createCriteria()
+        List<Run> runs = c.list {
+            and{
+                eq("complete", true)
+                eq("finalLocation", false)
+                eq("legacyRun", true)
+            }
+        }
         for(Run run in runs) {
             if (!hasOpenSlots()) {
                 break

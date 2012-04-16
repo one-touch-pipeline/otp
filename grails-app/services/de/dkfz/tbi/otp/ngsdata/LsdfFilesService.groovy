@@ -11,10 +11,10 @@ class LsdfFilesService {
      * of the given dataFile
      */
     public String getFileInitialPath(DataFile dataFile) {
-        // TODO: handle runs directories starting with / and with /run
         Run run = dataFile.run
-        return dataFile.runInitialPath.dataPath + "/" + run.name + "/" +
-            dataFile.pathName + "/" + dataFile.fileName
+        String prefix = (run.legacyRun) ? "run" : ""
+        String initialPath = dataFile.runInitialPath.dataPath
+        return "${initialPath}/${prefix}${run.name}/${dataFile.pathName}/${dataFile.fileName}"
     }
 
     /**
@@ -27,7 +27,6 @@ class LsdfFilesService {
      * @return
      */
     String[] getListOfRunDirecotries(Run run, String projectName) {
-
         Set<String> paths = new HashSet<String>()
         DataFile.findAllByRun(run).each {DataFile dataFile ->
             if (dataFile.project == null) {
@@ -66,8 +65,13 @@ class LsdfFilesService {
      * @return String with path or null if path can not be established
      */
     String getFileFinalPath(DataFile file) {
-        assertFinalPathDefined(file)
+        if (!checkFinalPathDefined(file)) {
+            return null
+        }
         String seqTypeDir = seqTypeDirectory(file);
+        if (seqTypeDir == null) {
+            return null
+        }
         String centerDir = file.run.seqCenter.dirName
         String basePath = configService.getProjectSequencePath(file.project)
         String path =
@@ -75,25 +79,15 @@ class LsdfFilesService {
         return path
     }
 
-    void assertFinalPathDefined(DataFile dataFile) {
+    boolean checkFinalPathDefined(DataFile dataFile) {
         if (!dataFile) {
-            throw new FileNameNotDefinedException("0")
+            return false;
         }
         if (!dataFile.used) {
-            throw new  FileNameNotDefinedException(dataFile.id as String)
+            return false; 
         }
+        return true
     }
-
-    /*
-    private String sequenceDataFinalPath(DataFile file) {
-        String seqTypeDir = seqTypeDirectory(file);
-        String centerDir = file.run.seqCenter.dirName
-        String basePath = configService.getProjectSequencePath(file.project)
-        String path =
-            "${basePath}/${seqTypeDir}/${centerDir}/run${file.run.name}/${file.pathName}/${file?.fileName}"
-        return path
-    }
-    */
 
     private String seqTypeDirectory(DataFile file) {
         if (file.seqTrack) {
@@ -102,7 +96,7 @@ class LsdfFilesService {
         if (file.alignmentLog) {
             return file.alignmentLog.seqTrack.seqType?.dirName
         }
-        throw new FileNameNotDefinedException(file.id as String)
+        return null
     }
 
     /**
@@ -127,7 +121,9 @@ class LsdfFilesService {
      * @return path to view by pid file, or null if vbp does not apply
      */
     String getFileViewByPidPath(DataFile file) {
-        assertFinalPathDefined(file)
+        if (!checkFinalPathDefined(file)) {
+            return null
+        }
         SeqTrack seqTrack = file.seqTrack ?: file.alignmentLog.seqTrack
         String basePath = configService.getProjectSequencePath(file.project)
         String seqTypeDir = seqTrack.seqType.dirName
@@ -218,7 +214,9 @@ class LsdfFilesService {
      *
      */
     private String getPathToRun(DataFile file) {
-        assertFinalPathDefined(file)
+        if (!checkFinalPathDefined(file)) {
+            return null
+        }
         String basePath = configService.getProjectSequencePath(file.project)
         String seqTypeDir = seqTypeDirectory(file);
         String centerDir = file.run.seqCenter.dirName

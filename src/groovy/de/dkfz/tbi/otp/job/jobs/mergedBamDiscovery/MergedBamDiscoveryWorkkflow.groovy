@@ -19,8 +19,11 @@ class MergedBamDiscoveryWorkkflow extends AbstractStartJobImpl  {
     @Scheduled(fixedDelay=60000l)
     void execute() {
         if (!getExecutionPlan() || !getExecutionPlan().enabled) {
+            println "Merged Bam discovery workflow not active"
             return
         }
+        println "Discovering merged bam-files"
+        println getExecutionPlan()
         List<Individual> inds = Individual.list()
         for(Individual ind in inds) {
             println ind
