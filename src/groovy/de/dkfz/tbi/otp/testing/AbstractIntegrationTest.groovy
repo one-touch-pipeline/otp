@@ -36,7 +36,18 @@ abstract class AbstractIntegrationTest {
             code.call()
             fail("Exception of type ${exception} was expected")
         } catch (Exception e) {
-            if (!exception.isAssignableFrom(e.class) && !exception.isAssignableFrom(e.getCause().class)) {
+            boolean foundException = false
+            if (exception.isAssignableFrom(e.class)) {
+                foundException = true
+            }
+            Throwable cause = e.getCause()
+            while (!foundException && cause) {
+                if (exception.isAssignableFrom(cause.class)) {
+                    foundException = true
+                }
+                cause = cause.getCause()
+            }
+            if (!foundException) {
                 fail("Exception of type ${exception} expected but got ${e.class}")
             }
         }
