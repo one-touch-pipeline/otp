@@ -50,7 +50,7 @@ class JobExecutionPlan {
     int numberOfAllowedProcesses = -1
 
     static constraints = {
-        name(nullable: false, blank: false, unique: 'version')
+        name(nullable: false, blank: false, unique: 'planVersion')
         planVersion(min: 0)
         previousPlan(nullable: true, validator: { JobExecutionPlan value, JobExecutionPlan current ->
             if (value) {
