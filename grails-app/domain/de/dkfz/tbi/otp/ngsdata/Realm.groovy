@@ -2,12 +2,12 @@ package de.dkfz.tbi.otp.ngsdata
 
 class Realm {
 
-    String name
-    String rootPath
-    String webHost
-    String host
+    String name              // name of the realm
+    String rootPath          // mount path of the file system with data
+    String webHost           // web address
+    String host              // PBS head address
     String port
-    String user
+    String unixUser
     String timeout
 
     static constraints = {
