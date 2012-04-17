@@ -21,7 +21,7 @@ class SetCompletedJob extends AbstractEndStateAwareJobImpl {
         List<DataFile> files = DataFile.findAllByRun(run)
         for(DataFile file in files) {
             if (file.project) {
-                hosts << file.project.host
+                hosts << file.project.realm.name
             }
         }
         switch(hosts.size()) {
