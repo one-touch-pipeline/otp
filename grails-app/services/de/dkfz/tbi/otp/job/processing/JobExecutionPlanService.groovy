@@ -212,17 +212,25 @@ WHERE plan.id in (:planIds)
     **/
     @PreAuthorize("hasPermission(#plan, read) or hasRole('ROLE_ADMIN')")
     public Process getLastExecutedProcess(JobExecutionPlan plan) {
-        final List<JobExecutionPlan> plans = withParents(plan)
-        List<JobDefinition> firstJobs = []
-        plans.each { JobExecutionPlan p ->
-            firstJobs << p.firstJob
-        }
-        final List<ProcessingStep> steps = ProcessingStep.findAllByJobDefinitionInList(firstJobs)
-        final List<ProcessingStepUpdate> created = ProcessingStepUpdate.findAllByStateAndProcessingStepInList(ExecutionState.CREATED, steps)
-        if (created.isEmpty()) {
+        final List<Long> plans = withParents(plan).collect { it.id }
+        String query = '''
+SELECT p
+FROM ProcessingStepUpdate AS u
+INNER JOIN u.processingStep AS step
+INNER JOIN step.process AS p
+INNER JOIN p.jobExecutionPlan AS plan
+WHERE
+plan.id IN (:planIds)
+AND u.state = 'CREATED'
+AND step.previous IS NULL
+ORDER BY p.id DESC
+'''
+
+        List result = Process.executeQuery(query, [planIds: plans], [max: 1])
+        if (result.isEmpty()) {
             return null
         }
-        return created.sort { it.date }.last().processingStep.process
+        return result[0]
     }
 
     /**
