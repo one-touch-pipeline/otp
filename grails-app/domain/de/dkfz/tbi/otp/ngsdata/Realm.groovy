@@ -9,6 +9,7 @@ class Realm {
     String port
     String unixUser
     String timeout
+    String pbsOpts
 
     static constraints = {
         name(unique: true)
