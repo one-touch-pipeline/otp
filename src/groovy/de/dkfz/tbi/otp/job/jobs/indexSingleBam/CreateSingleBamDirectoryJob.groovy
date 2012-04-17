@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.indexSingleBam
 
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
+import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.*
 
 class CreateSingleBamDirectoryJob extends AbstractJobImpl {
@@ -11,12 +12,16 @@ class CreateSingleBamDirectoryJob extends AbstractJobImpl {
     @Autowired
     MergedAlignmentDataFileService mergedAlignmentDataFileService
 
+    @Autowired
+    ExecutionService executionService
+
     @Override
     public void execute() throws Exception {
         long scanId = Long.parseLong(getProcessParameterValue())
         scan = SeqScan.get(scanId)
+        Realm realm = scan.sample.individual.project.realm
         String text = buildScriptText()
-        println text
+        executionService.executeCommand(realm, text)
     }
 
     private String buildScriptText() {

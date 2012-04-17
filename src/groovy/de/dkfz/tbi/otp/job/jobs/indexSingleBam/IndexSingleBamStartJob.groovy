@@ -31,10 +31,10 @@ class IndexSingleBamStartJob extends AbstractStartJobImpl {
             if (numberOfRunning >= MAX_RUNNING) {
                 break
             }
-            if (processed(scan) || processingFailed(scan)) {
+            if (!isAligned(scan)) {
                 continue
             }
-            if (!isAligned(scan)) {
+            if (processed(scan) || processingFailed(scan)) {
                 continue
             }
             // new run to be processed

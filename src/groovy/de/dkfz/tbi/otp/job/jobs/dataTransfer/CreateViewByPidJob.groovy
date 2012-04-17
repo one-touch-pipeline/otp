@@ -13,7 +13,7 @@ class CreateViewByPidJob extends AbstractJobImpl {
     LsdfFilesService lsdfFilesService
 
     @Autowired
-    PbsService pbsService
+    ExecutionService executionService
 
     @Override
     public void execute() throws Exception {
@@ -37,15 +37,6 @@ class CreateViewByPidJob extends AbstractJobImpl {
         String dirName = linkName.substring(0, linkName.lastIndexOf('/'))
         String cmd = "mkdir -p ${dirName};"
         cmd += "ln -s " + target + " " + linkName
-        executeCommand(cmd)
-    }
-
-    // TODO move to service and store command in a database
-    private executeCommand(String cmd) {
-        println cmd
-        String response = pbsService.sendPbsJob(cmd)
-        println response
-        //java.lang.Process process = cmd.execute()
-        //process.waitFor()
+        executionService.executeCommand(file.project.realm, cmd)
     }
 }
