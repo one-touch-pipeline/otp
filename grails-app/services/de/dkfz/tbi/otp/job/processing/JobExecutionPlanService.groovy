@@ -331,9 +331,10 @@ WHERE
 step.next IS NULL
 AND u.state = :state
 AND plan.id in (:planIds)
-GROUP BY p.id, u.id
-HAVING u.id = MAX(u.id)
-ORDER BY MAX(u.id) desc
+AND p.finished = true
+GROUP BY p.id, u.id, u.date
+HAVING u.date = MAX(u.date)
+ORDER BY MAX(u.date) desc
 '''
         List results = Process.executeQuery(query, [state: state, planIds: planIds], [max: 1])
         if (results.isEmpty()) {
