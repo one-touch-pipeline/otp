@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.ngsdata.Realm
 import com.jcraft.jsch.Channel
 import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.JSch
@@ -37,9 +38,11 @@ class ExecutionService {
      * @param command The command to be executed
      * @return what the server sends back
      */
-    public String executeCommand(String realm, String command) {
-        List<String> config = getConfig(realm)
-        List<String> values = executeRemoteJob(config.get(0), config.get(1), config.get(2), config.get(3), config.get(4), command, null, null)
+    public String executeCommand(Realm realm, String command) {
+        if (!command) {
+            throw new ProcessingException("No command specified")
+        }
+        List<String> values = executeRemoteJob(realm, command, null)
         return concatResults(values)
     }
 
@@ -50,16 +53,12 @@ class ExecutionService {
      * @param text The script to be run a pbs system
      * @return what the server sends back
      */
-    public String executeJob(String realm, String text) {
+    public String executeJob(Realm realm, String text) {
         if (!text || text == null) {
-            throw new ProcessingException("No job specified.")
+            throw new ProcessingException("No job text specified.")
         }
-        File tmpFile = File.createTempFile("remoteJob", ".tmp", new File(System.getProperty("user.home")))
-        tmpFile.setText(text)
-        // File has to be executable
-        tmpFile.setExecutable(true)
-        List<String> config = getConfig(realm)
-        List<String> values = executeRemoteJob(config.get(0), config.get(1), config.get(2), config.get(3), config.get(4), null, tmpFile, null)
+        String command = "echo '${text}' | qsub " + realm.pbsOpts
+        List<String> values = executeRemoteJob(realm, command, null)
         return concatResults(values)
     }
 
@@ -70,15 +69,15 @@ class ExecutionService {
      * @param filePath The path of the file to be executed
      * @return what the server sends back
      */
-    public String executeJobScript(String realm, String filePath) {
+    public String executeJobScript(Realm realm, String filePath) {
         if (!filePath || filePath == "") {
             throw new ProcessingException("No file path specified.")
         }
         File file = new File(filePath)
-        List<String> config = getConfig(realm)
-        List<String> values = executeRemoteJob(config.get(0), config.get(1), config.get(2), config.get(3), config.get(4), null, file, null)
+        List<String> values = executeRemoteJob(realm, null, file)
         return concatResults(values)
     }
+
 
     /**
      * Triggers the sending of remote jobs
@@ -100,13 +99,14 @@ class ExecutionService {
      * 
      * @return List of Strings containing the output of the triggered remote job
      */
-    private List<String> executeRemoteJob(String host, String port, String timeout, String username, String password, String command = null, File script = null, String options = null) {
+    private List<String> executeRemoteJob(Realm realm, String command = null, File script = null) {
         if (!command && !script) {
             throw new ProcessingException("Neither a command nor a script specified to be run remotely.")
         }
-        int iPort = port as int
-        int iTimeout = timeout as int
-        return querySsh(host, iPort, iTimeout, username, password, command, script, options)
+        int iPort = realm.port as int
+        int iTimeout = realm.timeout as int
+        String password = configService.getPbsPassword()
+        return querySsh(realm.host, iPort, iTimeout, realm.unixUser, password, command, script, realm.pbsOpts)
     }
 
     /**
@@ -125,12 +125,12 @@ class ExecutionService {
      * @param options The options To make the command more specific
      * @return List of Strings containing the output of the executed job
      */
-    private List<String> querySsh(String host, int port, int timeout, String username, String password, String command = null, File script = null, String options = null) {
-        JSch jsch = new JSch()
-        Session session = jsch.getSession(username, host, port)
+    private List<String> querySsh(String host, int port, int timeout, String username, String password, String command = null, File script = null, String options) {
         if (!password) {
             throw new ProcessingException("No password for remote connection specified.")
         }
+        JSch jsch = new JSch()
+        Session session = jsch.getSession(username, host, port)
         session.setPassword(password)
         session.setTimeout(timeout)
         java.util.Properties config = new java.util.Properties()
@@ -199,23 +199,6 @@ class ExecutionService {
         return values
     }
 
-    /**
-     * Retrieves and returns the configuration to connect
-     * to remote server
-     *
-     * @param realm The realm identifying the host to be used
-     * @return List of Strings with configuration values
-     */
-    private List<String> getConfig(String realm) {
-        List<String> config = []
-        config.add(configService.getPbsHost(realm))
-        config.add(configService.pbsPort)
-        config.add(configService.pbsTimeout)
-        config.add(configService.pbsUser)
-        config.add(configService.pbsPassword)
-        return config
-    }
-
     private String concatResults(List<String> values) {
         String answer = ""
         values.each { String value ->
@@ -257,12 +240,19 @@ class ExecutionService {
         if(!pbsIds) {
             throw new InvalidStateException("No pbs ids handed over to be validated.")
         }
+        // TODO: improve algorithm to query PBS once
+        List<Realm> realms = Realm.list()
         Map<String, Boolean> stats = [:]
         for(String pbsId in pbsIds) {
-            String cmd = "qstat ${pbsId}"
-            List<String> tmpStat = sendPbsJob(cmd)
-            Boolean running = isRunning(tmpStat)
-            stats.put(pbsId, running)
+            stats.put(pbsId, false)
+            for(Realm realm in realms) {
+                String cmd = "qstat ${pbsId}"
+                List<String> tmpStat = executeCommand(realm, cmd)
+                Boolean running = isRunning(tmpStat)
+                if (running) {
+                    stats.put(pbsId, true)
+                }
+            }
         }
         return stats
     }
