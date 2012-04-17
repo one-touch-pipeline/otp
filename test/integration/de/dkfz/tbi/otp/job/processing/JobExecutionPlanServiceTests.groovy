@@ -4,19 +4,14 @@ import static org.junit.Assert.*
 
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import grails.test.mixin.domain.*
 import org.junit.*
 
-/**
- * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
- */
-@TestMixin(GrailsUnitTestMixin)
-@TestFor(JobExecutionPlan)
-@Mock([Process, ProcessingStep, ProcessingStepUpdate, JobDefinition])
-class JobExecutionPlanServiceTests {
+class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
 
     @SuppressWarnings("EmptyMethod")
     void setUp() {
@@ -31,7 +26,6 @@ class JobExecutionPlanServiceTests {
     @Test
     void testWithParentNoParent() {
         JobExecutionPlan plan = new JobExecutionPlan()
-        mockDomain(JobExecutionPlan, [plan])
         JobExecutionPlanService service = new JobExecutionPlanService()
         List<JobExecutionPlan> plans = service.withParents(plan)
         assertEquals(1, plans.size())
@@ -42,7 +36,6 @@ class JobExecutionPlanServiceTests {
     void testWithParentOneParent() {
         JobExecutionPlan plan = new JobExecutionPlan(obsoleted: true)
         JobExecutionPlan plan2 = new JobExecutionPlan(previousPlan: plan)
-        mockDomain(JobExecutionPlan, [plan, plan2])
         JobExecutionPlanService service = new JobExecutionPlanService()
         // first plan should only return the plan
         List<JobExecutionPlan> plans = service.withParents(plan)
@@ -64,7 +57,6 @@ class JobExecutionPlanServiceTests {
         JobExecutionPlan plan5 = new JobExecutionPlan(previousPlan: plan4, obsoleted: true)
         JobExecutionPlan plan6 = new JobExecutionPlan(previousPlan: plan5)
         JobExecutionPlan otherPlan = new JobExecutionPlan()
-        mockDomain(JobExecutionPlan, [plan, plan2, plan3, plan4, plan5, plan6, otherPlan])
         JobExecutionPlanService service = new JobExecutionPlanService()
         // first plan should only return the plan
         List<JobExecutionPlan> plans = service.withParents(plan)
@@ -118,9 +110,7 @@ class JobExecutionPlanServiceTests {
 
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: true)
         assertNotNull(plan.save())
-        // one plan is mocked, but it is obsoleted
         assertTrue(service.getAllJobExecutionPlans().isEmpty())
-        // mock a parent, it should have one plan
         JobExecutionPlan plan2 = new JobExecutionPlan(name: "test2", previousPlan: plan, obsoleted: false, planVersion: 1)
         assertNotNull(plan2.save())
         List<JobExecutionPlan> plans = service.getAllJobExecutionPlans()
@@ -162,7 +152,7 @@ class JobExecutionPlanServiceTests {
     void testIsProcessRunningOnePlan() {
         JobExecutionPlanService service = new JobExecutionPlanService()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false)
-        JobExecutionPlan plan2 = new JobExecutionPlan(name: "test", obsoleted: false)
+        JobExecutionPlan plan2 = new JobExecutionPlan(name: "test2", obsoleted: false)
         plan.previousPlan = null
         plan2.previousPlan = null
         assertNotNull(plan.save())
@@ -243,7 +233,7 @@ class JobExecutionPlanServiceTests {
         assertNull(service.getLastSucceededProcess(plan))
         // create a ProcessingStep for this Process - but not succeeded
         JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "foo", plan: plan)
-        assertNotNull(jobDefinition)
+        assertNotNull(jobDefinition.save())
         ProcessingStep step = new ProcessingStep(process: process, jobDefinition: jobDefinition)
         assertNotNull(step.save())
         assertNull(service.getLastSucceededProcess(plan))
@@ -259,7 +249,7 @@ class JobExecutionPlanServiceTests {
         JobDefinition jobDefinition2 = new JobDefinition(name: "test2", bean: "foo", plan: plan, previous: jobDefinition)
         assertNotNull(jobDefinition2)
         jobDefinition.next = jobDefinition2
-        assertNotNull(jobDefinition.save())
+        assertNotNull(jobDefinition2.save())
         ProcessingStep step2 = new ProcessingStep(process: process, jobDefinition: jobDefinition2, next: null)
         assertNotNull(step2.save())
         step.next = step2
@@ -439,7 +429,7 @@ class JobExecutionPlanServiceTests {
         assertNull(service.getLastFailedProcess(plan))
         // create a ProcessingStep for this Process - but not succeeded
         JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "foo", plan: plan)
-        assertNotNull(jobDefinition)
+        assertNotNull(jobDefinition.save())
         ProcessingStep step = new ProcessingStep(process: process, jobDefinition: jobDefinition)
         assertNotNull(step.save())
         assertNull(service.getLastFailedProcess(plan))
@@ -453,7 +443,7 @@ class JobExecutionPlanServiceTests {
         assertSame(process, service.getLastFailedProcess(plan))
         // now we are evil and add another processing step
         JobDefinition jobDefinition2 = new JobDefinition(name: "test2", bean: "foo", plan: plan, previous: jobDefinition)
-        assertNotNull(jobDefinition2)
+        assertNotNull(jobDefinition2.save())
         jobDefinition.next = jobDefinition2
         assertNotNull(jobDefinition.save())
         ProcessingStep step2 = new ProcessingStep(process: process, jobDefinition: jobDefinition2, next: null)
