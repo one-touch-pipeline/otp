@@ -69,7 +69,7 @@ class JobExecutionPlanService {
     **/
     @PostFilter("hasPermission(filterObject, read) or hasRole('ROLE_ADMIN')")
     public List<JobExecutionPlan> getAllJobExecutionPlans() {
-        return JobExecutionPlan.findAllByObsoleted(false)
+        return JobExecutionPlan.findAllByObsoleted(false, [sort: "id", order: "desc"])
     }
 
     /**
