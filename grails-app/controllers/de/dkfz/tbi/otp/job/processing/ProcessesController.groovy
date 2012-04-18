@@ -69,7 +69,6 @@ class ProcessesController {
         dataToRender.iSortCol_0 = params.iSortCol_0
         dataToRender.sSortDir_0 = params.sSortDir_0
 
-        // TODO: sorting
         List futures = []
         def auth = SecurityContextHolder.context.authentication
         plans.each { JobExecutionPlan plan ->
@@ -102,6 +101,43 @@ class ProcessesController {
                 data.lastFailureDate,
                 data.duration
             ]
+        }
+        // perform sorting on fetched data
+        // this is acceptable, as we do not use pagination for the process overview
+        // fetch the data with multiple queries, that means we cannot sort in the query directly
+        // so we have to sort the fetched data
+        dataToRender.aaData.sort { a, b ->
+            switch (dataToRender.iSortCol_0 as Integer) {
+            case 0: // status
+                return a[0] <=> b[0]
+            case 1: // succeeded/finished
+                if (a[1] && b[1]) {
+                    return a[1].succeeded/a[1].finished <=> b[1].succeeded/b[1].finished
+                } else if (a[1]) {
+                    return 1
+                } else if (b[1]) {
+                    return -1
+                } else {
+                    return 0
+                }
+            case 3: // number of processes
+                return a[3] <=> b[3]
+            case 4: // number of failed
+                return a[4] <=> b[4]
+            case 5: // last succeeded
+                return a[5] <=> b[5]
+            case 6: // last failed
+                return a[6] <=> b[6]
+            case 7: // duration
+                return a[7] <=> b[7]
+            case 2: // id -> default
+            default:
+                return a[2].id <=> b[2].id
+            }
+        }
+        // reverse sort order if descending
+        if (params.sSortDir_0 == "desc") {
+            dataToRender.aaData = dataToRender.aaData.reverse()
         }
         render dataToRender as JSON
     }
