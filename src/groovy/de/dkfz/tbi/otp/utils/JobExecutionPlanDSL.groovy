@@ -105,6 +105,18 @@ class JobExecutionPlanDSL {
                             assert(finalMapping.save())
                         }
                     }
+                    // TODO: in future have a generic watchdog which obsoletes the watchdogBean
+                    closure.watchdog = { String watchdogBean ->
+                        ParameterType type = new ParameterType(name: "__pbsIds", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
+                        assert(type.save())
+                        JobDefinition watchdogJobDefinition = new JobDefinition(name: "__WatchdogFor__" + jobName, bean: watchdogBean, plan: jep, previous: jobDefinition)
+                        assert(watchdogJobDefinition.save())
+                        ParameterType inputType = new ParameterType(name: "__pbsIds", jobDefinition: watchdogJobDefinition, parameterUsage: ParameterUsage.INPUT)
+                        assert(inputType.save())
+                        ParameterMapping mapping = new ParameterMapping(from: type, to: inputType, job: watchdogJobDefinition)
+                        assert(mapping.save())
+                        jobDefinition = watchdogJobDefinition
+                    }
                     closure()
                 }
                 previous = jobDefinition
