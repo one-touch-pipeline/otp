@@ -150,7 +150,7 @@ class ExecutionService {
         }
         ((ChannelExec)channel).setErrStream(System.err)
         List<String> values = getInputStream(channel)
-        if (!values) {
+        if (values == null) {
             // TODO: How to handle this?
             throw new ProcessingException("test!")
         }
