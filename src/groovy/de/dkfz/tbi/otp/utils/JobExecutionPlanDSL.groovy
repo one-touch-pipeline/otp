@@ -109,12 +109,18 @@ class JobExecutionPlanDSL {
                     closure.watchdog = { String watchdogBean ->
                         ParameterType type = new ParameterType(name: "__pbsIds", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
                         assert(type.save())
+                        ParameterType realmOutputType = new ParameterType(name: "__pbsRealm", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT, className: "de.dkfz.tbi.otp.ngsdata.Realm")
+                        assert(realmOutputType.save())
                         JobDefinition watchdogJobDefinition = new JobDefinition(name: "__WatchdogFor__" + jobName, bean: watchdogBean, plan: jep, previous: jobDefinition)
                         assert(watchdogJobDefinition.save())
                         ParameterType inputType = new ParameterType(name: "__pbsIds", jobDefinition: watchdogJobDefinition, parameterUsage: ParameterUsage.INPUT)
                         assert(inputType.save())
+                        ParameterType realmInputType = new ParameterType(name: "__pbsRealm", jobDefinition: watchdogJobDefinition, parameterUsage: ParameterUsage.INPUT, className: "de.dkfz.tbi.otp.ngsdata.Realm")
+                        assert(realmInputType.save())
                         ParameterMapping mapping = new ParameterMapping(from: type, to: inputType, job: watchdogJobDefinition)
                         assert(mapping.save())
+                        ParameterMapping realmMapping = new ParameterMapping(from: realmOutputType, to: realmInputType, job: watchdogJobDefinition)
+                        assert(realmMapping.save())
                         jobDefinition = watchdogJobDefinition
                     }
                     closure()
