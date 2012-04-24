@@ -255,4 +255,113 @@ class SchedulerTests extends AbstractIntegrationTest {
         assertEquals(ExecutionState.STARTED, updates[1].state)
         assertEquals(ExecutionState.FINISHED, updates[2].state)
     }
+
+    @Test
+    void testMissingPbsIds() {
+        // this test checks that PbsJobs set the PbsIds
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "failingPbsTestJob", plan: jep)
+        assertNotNull(jobDefinition.save())
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        assertNotNull(process.save())
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assertNotNull(step.save())
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.CREATED,
+            previous: null,
+            processingStep: step
+            )
+        assertNotNull(update.save(flush: true))
+        Job job = grailsApplication.mainContext.getBean("failingPbsTestJob", step, [] as Set) as Job
+        // run the Job
+        job.execute()
+        assertEquals(4, ProcessingStepUpdate.countByProcessingStep(step))
+        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FINISHED, updates[2].state)
+        assertEquals(ExecutionState.FAILURE, updates[3].state)
+        assertNotNull(updates[3].error)
+        assertEquals("PbsJob does not provide PBS Process Ids", updates[3].error.errorMessage)
+    }
+
+    @Test
+    void testMissingPbsOutputParameterType() {
+        // this test checks that PbsJobs set the PbsIds
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "pbsTestJob", plan: jep)
+        assertNotNull(jobDefinition.save())
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        assertNotNull(process.save())
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assertNotNull(step.save())
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.CREATED,
+            previous: null,
+            processingStep: step
+            )
+        assertNotNull(update.save(flush: true))
+        Job job = grailsApplication.mainContext.getBean("pbsTestJob", step, [] as Set) as Job
+        // run the Job
+        job.execute()
+        assertEquals(4, ProcessingStepUpdate.countByProcessingStep(step))
+        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FINISHED, updates[2].state)
+        assertEquals(ExecutionState.FAILURE, updates[3].state)
+        assertNotNull(updates[3].error)
+        assertEquals("PbsJob does not have required output parameter type", updates[3].error.errorMessage)
+    }
+
+    @Test
+    void testPbsIdParameters() {
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "pbsTestJob", plan: jep)
+        assertNotNull(jobDefinition.save())
+        JobDefinition jobDefinition2 = createTestEndStateAwareJob("testEndStateAware", jep)
+        assertNotNull(jobDefinition2.save())
+        jobDefinition.next = jobDefinition2
+        assertNotNull(jobDefinition.save())
+        // TODO: add Watchdog job definition
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        // required output parameter
+        ParameterType pbsOutputParameterType = new ParameterType(name: "__pbsIds", description: "Ids on PBS", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
+        assertNotNull(pbsOutputParameterType.save())
+        // Create the Process
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        assertNotNull(process.save())
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assertNotNull(step.save())
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.CREATED,
+            previous: null,
+            processingStep: step
+            )
+        assertNotNull(update.save(flush: true))
+        Job job = grailsApplication.mainContext.getBean("pbsTestJob", step, [] as Set) as Job
+        // run the Job
+        job.execute()
+        assertEquals(3, ProcessingStepUpdate.countByProcessingStep(step))
+        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FINISHED, updates[2].state)
+        // and there should be some output parameters
+        List<Parameter> params = step.output.toList().sort { it.type.name }
+        assertEquals(1, params.size())
+        assertEquals("__pbsIds", params[0].type.name)
+        assertEquals("1,2,3", params[0].value)
+    }
 }

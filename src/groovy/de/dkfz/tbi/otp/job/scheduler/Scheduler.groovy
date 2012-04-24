@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.job.processing.LoggingException;
 import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
+import de.dkfz.tbi.otp.job.processing.PbsJob
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessingError
 import de.dkfz.tbi.otp.job.processing.ProcessingException
@@ -172,6 +173,69 @@ class Scheduler {
             log.fatal("Could not create a FINISHED Update for Job of type ${joinPoint.target.class}")
             throw new ProcessingException("Could not create a FINISHED Update for Job")
         }
+        if (job instanceof PbsJob) {
+            List<String> pbsIds = (job as PbsJob).getPbsIds()
+            if (pbsIds.empty) {
+                // list of Process IDs is empty - watchdog cannot be started
+                ProcessingStepUpdate missingPbsIds = new ProcessingStepUpdate(
+                    date: new Date(),
+                    state: ExecutionState.FAILURE,
+                    previous: update,
+                    processingStep: step)
+                if (!missingPbsIds.save()) {
+                    log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
+                    throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
+                }
+                ProcessingError error = new ProcessingError(errorMessage: "PbsJob does not provide PBS Process Ids",
+                    processingStepUpdate: missingPbsIds)
+                missingPbsIds.error = error
+                error.save()
+                if (!error.save(flush: true)) {
+                    log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
+                    throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
+                }
+                log.error("PbsJob for JobDefinition ${step.jobDefinition.id} does not provide PBS Process Ids")
+                // TODO Proper error handling here
+                return
+            }
+            String pbsParameterValue = ""
+            pbsIds.eachWithIndex { id, i ->
+                if (i > 0) {
+                    pbsParameterValue = pbsParameterValue + ","
+                }
+                pbsParameterValue = pbsParameterValue + id
+            }
+            ParameterType pbsIdType = ParameterType.findByJobDefinitionAndParameterUsageAndName(step.jobDefinition, ParameterUsage.OUTPUT, "__pbsIds")
+            if (!pbsIdType) {
+                // output type is missing
+                ProcessingStepUpdate missingOutputType = new ProcessingStepUpdate(
+                    date: new Date(),
+                    state: ExecutionState.FAILURE,
+                    previous: update,
+                    processingStep: step)
+                if (!missingOutputType.save()) {
+                    log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
+                    throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
+                }
+                ProcessingError error = new ProcessingError(errorMessage: "PbsJob does not have required output parameter type",
+                    processingStepUpdate: missingOutputType)
+                missingOutputType.error = error
+                error.save()
+                if (!error.save(flush: true)) {
+                    log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
+                    throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
+                }
+                log.error("PbsJob for JobDefinition ${step.jobDefinition.id} does not have required output parameter type")
+                // TODO Proper error handling here
+                return
+            }
+            Parameter pbsIdParameter = new Parameter(type: pbsIdType, value: pbsParameterValue)
+            step.addToOutput(pbsIdParameter)
+            if (!step.save(flush: true)) {
+                log.fatal("Could not add the PbsIds Parameter to Job of type ${joinPoint.target.class}")
+                throw new ProcessingException("Could not add the PbsIds Parameter to Job")
+            }
+        }
         if (failedOutputParameter) {
             // at least one output parameter is wrong - set to failure
             ProcessingStepUpdate failedParameterUpdate = new ProcessingStepUpdate(
@@ -191,7 +255,7 @@ class Scheduler {
                 log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
                 throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
             }
-            log.error("Parameter ${failedOutputParameter.value} is either not defined for JobDefintion $step.jobDefinition.id} or not of type Output.")
+            log.error("Parameter ${failedOutputParameter.value} is either not defined for JobDefintion ${step.jobDefinition.id} or not of type Output.")
             // TODO Proper error handling here
             return
         }

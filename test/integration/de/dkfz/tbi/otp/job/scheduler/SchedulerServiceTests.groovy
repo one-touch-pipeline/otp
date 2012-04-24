@@ -776,4 +776,77 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
             schedulerService.schedule()
         }
     }
+
+    @Test
+    void testPbsJobs() {
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
+        assertNotNull(jep.save())
+        // create the StartJobDefinition for the JobExecutionPlan
+        StartJobDefinition startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: jep)
+        assertNotNull(startJob.save())
+        jep.startJob = startJob
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "pbsTestJob", plan: jep)
+        assertNotNull(jobDefinition.save())
+        JobDefinition jobDefinition2 = createTestEndStateAwareJob("testEndStateAware", jep)
+        assertNotNull(jobDefinition2.save())
+        jobDefinition.next = jobDefinition2
+        assertNotNull(jobDefinition.save())
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        // required output parameter
+        ParameterType pbsOutputParameterType = new ParameterType(name: "__pbsIds", description: "Ids on PBS", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
+        assertNotNull(pbsOutputParameterType.save())
+        // TODO: add a paremeter mapping to the second Job
+
+        // get the startjob
+        StartJob job = grailsApplication.mainContext.getBean("testStartJob", jep) as StartJob
+        assertNotNull(job)
+        assertEquals(0, Process.count())
+        assertEquals(0, ProcessingStep.count())
+        schedulerService.createProcess(job, [])
+
+        // verify that the Process is created
+        assertFalse(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        assertEquals(1, Process.count())
+        assertEquals(1, ProcessingStep.count())
+        Process process = Process.findByJobExecutionPlan(jep)
+        assertNotNull(process)
+        assertSame(schedulerService.queue.first().jobDefinition, jobDefinition)
+        assertFalse(process.finished)
+        schedulerService.schedule()
+        assertFalse(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+
+        // verify first Job
+        ProcessingStep step = ProcessingStep.list().first()
+        assertEquals(3, ProcessingStepUpdate.countByProcessingStep(step))
+        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FINISHED, updates[2].state)
+        // and there should be some output parameters
+        List<Parameter> params = step.output.toList().sort { it.type.name }
+        assertEquals(1, params.size())
+        assertEquals("__pbsIds", params[0].type.name)
+        assertEquals("1,2,3", params[0].value)
+        // run second job
+        schedulerService.schedule()
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // verify second job
+        step = ProcessingStep.list().last()
+        assertEquals(4, ProcessingStepUpdate.countByProcessingStep(step))
+        updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FINISHED, updates[2].state)
+        assertEquals(ExecutionState.SUCCESS, updates[3].state)
+        // TODO: check that second job has the required input parameters
+        process.refresh()
+        assertTrue(process.finished)
+    }
 }

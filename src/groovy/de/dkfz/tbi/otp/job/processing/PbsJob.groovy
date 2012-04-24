@@ -16,4 +16,11 @@ package de.dkfz.tbi.otp.job.processing
  *
  **/
 public interface PbsJob extends Job {
+    /**
+     * List of Pbs Process IDs started by the PbsJob.
+     * As long as the Job has not yet started the list may be empty.
+     * But when the job has executed this list may not be empty.
+     * @return List of process Ids started on the Pbs.
+     **/
+    List<String> getPbsIds()
 }
