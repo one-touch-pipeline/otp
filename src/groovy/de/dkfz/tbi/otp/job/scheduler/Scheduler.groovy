@@ -177,23 +177,7 @@ class Scheduler {
             List<String> pbsIds = (job as PbsJob).getPbsIds()
             if (pbsIds.empty) {
                 // list of Process IDs is empty - watchdog cannot be started
-                ProcessingStepUpdate missingPbsIds = new ProcessingStepUpdate(
-                    date: new Date(),
-                    state: ExecutionState.FAILURE,
-                    previous: update,
-                    processingStep: step)
-                if (!missingPbsIds.save()) {
-                    log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
-                    throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
-                }
-                ProcessingError error = new ProcessingError(errorMessage: "PbsJob does not provide PBS Process Ids",
-                    processingStepUpdate: missingPbsIds)
-                missingPbsIds.error = error
-                error.save()
-                if (!error.save(flush: true)) {
-                    log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
-                    throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
-                }
+                createError(step, update, "PbsJob does not provide PBS Process Ids", joinPoint.target.class)
                 log.error("PbsJob for JobDefinition ${step.jobDefinition.id} does not provide PBS Process Ids")
                 // TODO Proper error handling here
                 return
@@ -208,23 +192,7 @@ class Scheduler {
             ParameterType pbsIdType = ParameterType.findByJobDefinitionAndParameterUsageAndName(step.jobDefinition, ParameterUsage.OUTPUT, "__pbsIds")
             if (!pbsIdType) {
                 // output type is missing
-                ProcessingStepUpdate missingOutputType = new ProcessingStepUpdate(
-                    date: new Date(),
-                    state: ExecutionState.FAILURE,
-                    previous: update,
-                    processingStep: step)
-                if (!missingOutputType.save()) {
-                    log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
-                    throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
-                }
-                ProcessingError error = new ProcessingError(errorMessage: "PbsJob does not have required output parameter type",
-                    processingStepUpdate: missingOutputType)
-                missingOutputType.error = error
-                error.save()
-                if (!error.save(flush: true)) {
-                    log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
-                    throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
-                }
+                createError(step, update, "PbsJob does not have required output parameter type", joinPoint.target.class)
                 log.error("PbsJob for JobDefinition ${step.jobDefinition.id} does not have required output parameter type")
                 // TODO Proper error handling here
                 return
@@ -238,23 +206,7 @@ class Scheduler {
         }
         if (failedOutputParameter) {
             // at least one output parameter is wrong - set to failure
-            ProcessingStepUpdate failedParameterUpdate = new ProcessingStepUpdate(
-                date: new Date(),
-                state: ExecutionState.FAILURE,
-                previous: update,
-                processingStep: step)
-            if (!failedParameterUpdate.save()) {
-                log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
-                throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
-            }
-            ProcessingError error = new ProcessingError(errorMessage: "Parameter ${failedOutputParameter.value} is either not defined for JobDefintion ${step.jobDefinition.id} or not of type Output.",
-                processingStepUpdate: failedParameterUpdate)
-            failedParameterUpdate.error = error
-            error.save()
-            if (!error.save(flush: true)) {
-                log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
-                throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
-            }
+            createError(step, update, "Parameter ${failedOutputParameter.value} is either not defined for JobDefintion ${step.jobDefinition.id} or not of type Output.", joinPoint.target.class)
             log.error("Parameter ${failedOutputParameter.value} is either not defined for JobDefintion ${step.jobDefinition.id} or not of type Output.")
             // TODO Proper error handling here
             return
@@ -271,19 +223,7 @@ class Scheduler {
             }
             if (!found) {
                 // a required output parameter has not been generated
-                ProcessingStepUpdate failedParameterUpdate = new ProcessingStepUpdate(
-                    date: new Date(),
-                    state: ExecutionState.FAILURE,
-                    previous: update,
-                    processingStep: step)
-                failedParameterUpdate.save()
-                ProcessingError error = new ProcessingError(errorMessage: "Required Output Parameter of type ${parameterType.id} is not set.",
-                    processingStepUpdate: failedParameterUpdate)
-                failedParameterUpdate.error = error
-                if (!error.save(flush: true)) {
-                    log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
-                    throw new ProcessingException("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
-                }
+                createError(step, update, "Required Output Parameter of type ${parameterType.id} is not set.", joinPoint.target.class)
                 log.error("Required Output Parameter of type ${parameterType.id} is not set.")
                 // TODO Proper error handling here
                 return
@@ -371,5 +311,33 @@ class Scheduler {
         }
         // TODO: trigger error handling
         log.debug("doErrorHandling performed for ${joinPoint.getTarget().class} with ProcessingStep ${step.id}")
+    }
+
+    /**
+     * Helper method to create a ProcessingError and add it to given ProcessingStep.
+     * Includes creating the Failure ProcessingStepUpdate.
+     * @param step The ProcessingStep for which the Error needs to be created.
+     * @param previous The ProcessingStepUpdate which should be used as the previous update
+     * @param errorMessage The message to be stored for the Error
+     * @param jobClass The Job Class to use in logging in case of severe error
+     * @throws ProcessingException In case the ProcessingError cannot be saved.
+     **/
+    private void createError(ProcessingStep step, ProcessingStepUpdate previous, String errorMessage, Class jobClass) {
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.FAILURE,
+            previous: previous,
+            processingStep: step)
+        if (!update.save()) {
+            log.fatal("Could not create a FAILURE Update for Job of type ${jobClass}")
+            throw new ProcessingException("Could not create a FAILURE Update for Job of type ${jobClass}")
+        }
+        ProcessingError error = new ProcessingError(errorMessage: errorMessage, processingStepUpdate: update)
+        update.error = error
+        error.save()
+        if (!error.save(flush: true)) {
+            log.fatal("Could not create a FAILURE Update for Job of type ${jobClass}")
+            throw new ProcessingException("Could not create a FAILURE Update for Job of type ${jobClass}")
+        }
     }
 }
