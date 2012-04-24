@@ -29,6 +29,7 @@ class CheckIndexFileJob  extends AbstractEndStateAwareJobImpl {
     private boolean checkIndexDataFile(MergedAlignmentDataFile dataFile) {
         String fullPath = mergedAlignmentDataFileService.getFullPath(dataFile)
         File file = new File("${fullPath}.bai")
+        println file.toString()
         if (!file.canRead()) {
             return false
         }

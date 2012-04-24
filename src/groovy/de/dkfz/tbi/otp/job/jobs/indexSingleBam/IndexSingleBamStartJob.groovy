@@ -15,7 +15,7 @@ class IndexSingleBamStartJob extends AbstractStartJobImpl {
 
     final int MAX_RUNNING = 1
 
-    @Scheduled(fixedRate=2000l)
+    @Scheduled(fixedRate=60000l)
     void execute() {
         if (!getExecutionPlan() || !getExecutionPlan().enabled) {
             return
@@ -25,11 +25,15 @@ class IndexSingleBamStartJob extends AbstractStartJobImpl {
             println "Number of running: ${numberOfRunning}"
             return
         }
+        Realm realm = Realm.findByName("BioQuant")
         int n = 0;
         List<SeqScan> scans = SeqScan.findAllByNLanes(1)
         for(SeqScan scan in scans) {
             if (numberOfRunning >= MAX_RUNNING) {
                 break
+            }
+            if (scan.sample.individual.project.realm.id != realm.id) {
+                continue
             }
             if (!isAligned(scan)) {
                 continue

@@ -21,6 +21,7 @@ class CreateSingleBamDirectoryJob extends AbstractJobImpl {
         scan = SeqScan.get(scanId)
         Realm realm = scan.sample.individual.project.realm
         String text = buildScriptText()
+        println text
         executionService.executeCommand(realm, text)
     }
 
