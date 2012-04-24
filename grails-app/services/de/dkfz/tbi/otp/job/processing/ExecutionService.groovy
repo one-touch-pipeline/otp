@@ -247,7 +247,7 @@ class ExecutionService {
             stats.put(pbsId, false)
             for(Realm realm in realms) {
                 String cmd = "qstat ${pbsId}"
-                List<String> tmpStat = executeCommand(realm, cmd)
+                String tmpStat = executeCommand(realm, cmd)
                 Boolean running = isRunning(tmpStat)
                 if (running) {
                     stats.put(pbsId, true)
@@ -267,10 +267,10 @@ class ExecutionService {
      * @param output List of Strings containing output of a pbs job
      * @return Indicating if job is running
      */
-    private boolean isRunning(List<String> output) {
+    private boolean isRunning(String output) {
         Pattern pattern = Pattern.compile("\\s*Job id\\s*Name\\s*User.*")
         boolean found = false
-        output.each { String line ->
+        output.eachLine { String line ->
             Matcher m = pattern.matcher(line)
             if(m.find()) {
                 found = true
