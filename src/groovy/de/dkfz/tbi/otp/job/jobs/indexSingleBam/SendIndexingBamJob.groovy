@@ -23,7 +23,7 @@ class SendIndexingBamJob extends AbstractJobImpl {
         String text = buildScriptText()
         String jobId = sendScript(realm, text)
         println "Job ${jobId} submitted to PBS"
-        addOutputParameter("pbsIds", pbsId)
+        addOutputParameter("pbsIds", jobId)
     }
 
     private String buildScriptText() {
@@ -31,11 +31,12 @@ class SendIndexingBamJob extends AbstractJobImpl {
         MergedAlignmentDataFile dataFile = MergedAlignmentDataFile.findByMergingLog(mergingLog)
         String basePath = mergedAlignmentDataFileService.pathToHost(scan)
         String path = "${basePath}/${dataFile.filePath}"
-        String cmd = "cd ${path}; samtools index ${dataFile.fileName} ${dataFile.fileName}.bai"
+        String cmd = "cd ${path}; samtools index ${dataFile.fileName} ${dataFile.fileName}.bai;chmod 440 ${dataFile.fileName}.bai"
         return cmd
     }
 
     private String sendScript(Realm realm, String text) {
+        println text
         String pbsResponse = executionService.executeJob(realm, text)
         List<String> extractedPbsIds = executionService.extractPbsIds(pbsResponse)
         if (extractedPbsIds.size() != 1) {
