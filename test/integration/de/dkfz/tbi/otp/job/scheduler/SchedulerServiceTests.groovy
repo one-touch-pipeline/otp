@@ -18,6 +18,7 @@ import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessParameter;
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.job.processing.StartJob
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 
@@ -799,6 +800,18 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         // required output parameter
         ParameterType pbsOutputParameterType = new ParameterType(name: "__pbsIds", description: "Ids on PBS", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         assertNotNull(pbsOutputParameterType.save())
+        ParameterType pbsRealmOutputParameterType = new ParameterType(name: "__pbsRealm", description: "PBS Realm", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
+        assertNotNull(pbsRealmOutputParameterType.save())
+        // Realm as Input Parameter
+        ParameterType pbsRealmInputParameterType = new ParameterType(name: "__pbsRealm", description: "PBS Realm", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
+        assertNotNull(pbsRealmInputParameterType.save())
+        Realm realm = new Realm(name: "realm", rootPath: "/", webHost: "http://localhost", host: "localhost", port: "1234", unixUser: "test", timeout: "200")
+        realm = realm.save()
+        assertNotNull(realm)
+        Parameter constantRealmParameter = new Parameter(type: pbsRealmInputParameterType, value: realm.id)
+        assertNotNull(constantRealmParameter.save())
+        jobDefinition.addToConstantParameters(constantRealmParameter)
+        assert(jobDefinition.save())
         // TODO: add a paremeter mapping to the second Job
 
         // get the startjob
@@ -830,9 +843,11 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertEquals(ExecutionState.FINISHED, updates[2].state)
         // and there should be some output parameters
         List<Parameter> params = step.output.toList().sort { it.type.name }
-        assertEquals(1, params.size())
+        assertEquals(2, params.size())
         assertEquals("__pbsIds", params[0].type.name)
         assertEquals("1,2,3", params[0].value)
+        assertEquals("__pbsRealm", params[1].type.name)
+        assertEquals("${realm.id}".toString(), params[1].value)
         // run second job
         schedulerService.schedule()
         assertTrue(schedulerService.queue.isEmpty())

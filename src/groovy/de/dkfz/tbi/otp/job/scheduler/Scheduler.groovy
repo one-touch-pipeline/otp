@@ -16,6 +16,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.job.processing.ExecutionState
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.notification.NotificationEvent
 import de.dkfz.tbi.otp.notification.NotificationType
 import org.apache.commons.logging.LogFactory
@@ -199,6 +200,26 @@ class Scheduler {
             }
             Parameter pbsIdParameter = new Parameter(type: pbsIdType, value: pbsParameterValue)
             step.addToOutput(pbsIdParameter)
+            // get the Realm
+            Long realmId = (job as PbsJob).getRealm()
+            Realm realm = Realm.get(realmId)
+            if (!realm) {
+                // output type is missing
+                createError(step, update, "PbsJob does not provide the Realm it is operating on or Realm Id is incorrect", joinPoint.target.class)
+                log.error("PbsJob for JobDefinition ${step.jobDefinition.id} does not provide the Realm it is operating on or Realm Id is incorrect")
+                // TODO Proper error handling here
+                return
+            }
+            ParameterType pbsRealmType = ParameterType.findByJobDefinitionAndParameterUsageAndName(step.jobDefinition, ParameterUsage.OUTPUT, "__pbsRealm")
+            if (!pbsRealmType) {
+                // output type is missing
+                createError(step, update, "PbsJob does not have required output parameter type for pbs realm", joinPoint.target.class)
+                log.error("PbsJob for JobDefinition ${step.jobDefinition.id} does not have required output parameter type for pbs realm")
+                // TODO Proper error handling here
+                return
+            }
+            Parameter realmIdParameter = new Parameter(type: pbsRealmType, value: realmId)
+            step.addToOutput(realmIdParameter)
             if (!step.save(flush: true)) {
                 log.fatal("Could not add the PbsIds Parameter to Job of type ${joinPoint.target.class}")
                 throw new ProcessingException("Could not add the PbsIds Parameter to Job")

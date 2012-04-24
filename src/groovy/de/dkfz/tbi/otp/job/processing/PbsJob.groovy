@@ -23,4 +23,9 @@ public interface PbsJob extends Job {
      * @return List of process Ids started on the Pbs.
      **/
     List<String> getPbsIds()
+    /**
+     * The ID of the PBS Realm this PbsJob is operating on.
+     * @return The Id of the PBS Realm
+     **/
+    Long getRealm()
 }
