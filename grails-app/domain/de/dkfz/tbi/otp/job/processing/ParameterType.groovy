@@ -38,7 +38,7 @@ class ParameterType {
     ParameterUsage parameterUsage
 
     static constraints = {
-        name(nullable: false, blank: false, unique: 'jobDefinition')
+        name(nullable: false, blank: false, unique: ['jobDefinition', 'parameterUsage'])
         description(nullable: true)
         className(nullable: true)
         parameterUsage(nullable: false)
