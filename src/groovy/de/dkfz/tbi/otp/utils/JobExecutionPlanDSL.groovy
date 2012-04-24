@@ -15,6 +15,7 @@ class JobExecutionPlanDSL {
             assert(jep.save())
             JobDefinition firstJob = null
             JobDefinition previous = null
+            JobDefinition watchdogJobDefinition = null
             c.start = { String startName, String bean, closure = null ->
                 StartJobDefinition startJobDefinition = new StartJobDefinition(name: startName, bean: bean, plan: jep)
                 assert(startJobDefinition.save())
@@ -111,7 +112,7 @@ class JobExecutionPlanDSL {
                         assert(type.save())
                         ParameterType realmOutputType = new ParameterType(name: "__pbsRealm", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT, className: "de.dkfz.tbi.otp.ngsdata.Realm")
                         assert(realmOutputType.save())
-                        JobDefinition watchdogJobDefinition = new JobDefinition(name: "__WatchdogFor__" + jobName, bean: watchdogBean, plan: jep, previous: jobDefinition)
+                        watchdogJobDefinition = new JobDefinition(name: "__WatchdogFor__" + jobName, bean: watchdogBean, plan: jep, previous: jobDefinition)
                         assert(watchdogJobDefinition.save())
                         ParameterType inputType = new ParameterType(name: "__pbsIds", jobDefinition: watchdogJobDefinition, parameterUsage: ParameterUsage.INPUT)
                         assert(inputType.save())
@@ -121,11 +122,22 @@ class JobExecutionPlanDSL {
                         assert(mapping.save())
                         ParameterMapping realmMapping = new ParameterMapping(from: realmOutputType, to: realmInputType, job: watchdogJobDefinition)
                         assert(realmMapping.save())
-                        jobDefinition = watchdogJobDefinition
                     }
                     closure()
                 }
                 previous = jobDefinition
+            }
+            c.pbsJob = { String jobName, String bean, String realmId, closure = null ->
+                c.job(jobName, bean, closure)
+                ParameterType realmInputType = new ParameterType(name: "__pbsRealm", jobDefinition: previous,  parameterUsage: ParameterUsage.INPUT, className: "de.dkfz.tbi.otp.ngsdata.Realm")
+                assert(realmInputType.save())
+                Parameter parameter = new Parameter(type: realmInputType, value: realmId)
+                assert(parameter.save())
+                previous.addToConstantParameters(parameter)
+                if (watchdogJobDefinition) {
+                    previous = watchdogJobDefinition
+                    watchdogJobDefinition = null
+                }
             }
             c()
             jep.firstJob = firstJob
