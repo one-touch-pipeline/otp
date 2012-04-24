@@ -9,6 +9,8 @@ class RunFinder {
     boolean transfer = false
     String typeLimit = null
 
+    public boolean updateMode = false
+
     public void setSeqType(String seqTypeDirName) {
         typeLimit = seqTypeDirName
     }
@@ -84,7 +86,15 @@ class RunFinder {
         if (!runDirName.contains(signature)) {
             return
         }
+        //if (!runDirName.contains("110826_SN169_0223_BD07H6ACXX")) {
+        //    return
+        //}
         String runName = runDirName.substring(3)
+        if (updateMode) {
+            if (Run.findByName(runName)) {
+                return
+            }
+        }
         Run run = findOrCreateRun(runName)
         RunInitialPath initialPath = new RunInitialPath(
             dataPath: path,
@@ -113,6 +123,7 @@ class RunFinder {
             name: runName,
             seqCenter: seqCenter,
             seqPlatform: platform,
+            legacyRun: true
         )
         run.save()
         return run
