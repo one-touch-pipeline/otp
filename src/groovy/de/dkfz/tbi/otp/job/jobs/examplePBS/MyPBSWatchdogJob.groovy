@@ -2,12 +2,12 @@ package de.dkfz.tbi.otp.job.jobs.examplePBS
 
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import org.springframework.beans.factory.annotation.Autowired
-import de.dkfz.tbi.otp.job.processing.PbsService
+import de.dkfz.tbi.otp.job.processing.ExecutionService
 
 class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl {
 
     @Autowired
-    PbsService pbsService
+    ExecutionService executionService
 
     final int timeout = 10
 
@@ -23,7 +23,7 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl {
 
     private boolean checkIfAllFinished(List<String> listJobIds) {
         boolean finished = true
-        Map<String, Boolean> validatedIds = pbsService.validate(listJobIds)
+        Map<String, Boolean> validatedIds = executionService.validate(listJobIds)
         validatedIds.each {String job, boolean isRunning ->
             println "${job} ${isRunning}"
             if (isRunning) {
