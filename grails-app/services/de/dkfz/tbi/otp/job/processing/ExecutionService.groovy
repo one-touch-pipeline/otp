@@ -96,7 +96,7 @@ class ExecutionService {
      * @param command The command to be executed on the remote server
      * @param script The script to be executed on the remote server
      * @param options The options To make the command more specific
-     * 
+     *
      * @return List of Strings containing the output of the triggered remote job
      */
     private List<String> executeRemoteJob(Realm realm, String command = null, File script = null) {
@@ -235,15 +235,15 @@ class ExecutionService {
      * @return Map of pbs ids with associated validation identifiers, which are Boolean values
      */
     public Map<String, Boolean> validate(List<String> pbsIds) {
-        if(!pbsIds) {
+        if (!pbsIds) {
             throw new InvalidStateException("No pbs ids handed over to be validated.")
         }
         // TODO: improve algorithm to query PBS once
         List<Realm> realms = Realm.list()
         Map<String, Boolean> stats = [:]
-        for(String pbsId in pbsIds) {
+        for (String pbsId in pbsIds) {
             stats.put(pbsId, false)
-            for(Realm realm in realms) {
+            for (Realm realm in realms) {
                 String cmd = "qstat ${pbsId}"
                 String tmpStat = executeCommand(realm, cmd)
                 Boolean running = isRunning(tmpStat)
@@ -270,7 +270,7 @@ class ExecutionService {
         boolean found = false
         output.eachLine { String line ->
             Matcher m = pattern.matcher(line)
-            if(m.find()) {
+            if (m.find()) {
                 found = true
             }
         }

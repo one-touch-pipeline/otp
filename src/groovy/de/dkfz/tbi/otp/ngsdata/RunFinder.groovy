@@ -86,9 +86,6 @@ class RunFinder {
         if (!runDirName.contains(signature)) {
             return
         }
-        //if (!runDirName.contains("110826_SN169_0223_BD07H6ACXX")) {
-        //    return
-        //}
         String runName = runDirName.substring(3)
         if (updateMode) {
             if (Run.findByName(runName)) {
@@ -101,10 +98,6 @@ class RunFinder {
             mdPath: baseDir,
             run: run
         )
-        //initialPath.validate()
-        //println initialPath.run
-        //println initialPath.errors
-        //println initialPath
         initialPath.save(flush: true)
         run.save(flush: true)
     }

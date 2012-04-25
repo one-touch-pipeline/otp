@@ -30,7 +30,7 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
     }
 
     private Set<Project> projects(Run run) {
-        Set<Project> projects = new HashSet<String>()
+        Set<Project> projects = new HashSet<Project>()
         List<DataFile> files = DataFile.findAllByRun(run)
         for(DataFile file in files) {
             if (file.project) {

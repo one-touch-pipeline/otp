@@ -6,9 +6,9 @@ class Realm {
     String rootPath          // mount path of the file system with data
     String webHost           // web address
     String host              // PBS head address
-    String port
+    int port
     String unixUser
-    String timeout
+    int timeout
     String pbsOpts
 
     static constraints = {

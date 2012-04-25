@@ -25,7 +25,6 @@ class IndexSingleBamStartJob extends AbstractStartJobImpl {
             println "Number of running: ${numberOfRunning}"
             return
         }
-        Realm realm = Realm.findByName("BioQuant")
         int n = 0;
         List<SeqScan> scans = SeqScan.findAllByNLanes(1)
         for(SeqScan scan in scans) {
