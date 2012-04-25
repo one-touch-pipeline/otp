@@ -57,7 +57,7 @@ class ExecutionService {
         if (!text) {
             throw new ProcessingException("No job text specified.")
         }
-        String command = "echo '${text}' | qsub " + realm.pbsOpts
+        String command = "echo '${text}' | qsub " + realm.pbsOptions
         List<String> values = executeRemoteJob(realm, command)
         return concatResults(values)
     }
@@ -104,7 +104,7 @@ class ExecutionService {
             throw new ProcessingException("Neither a command nor a script specified to be run remotely.")
         }
         String password = configService.getPbsPassword()
-        return querySsh(realm.host, realm.port, realm.timeout, realm.unixUser, password, command, script, realm.pbsOpts)
+        return querySsh(realm.host, realm.port, realm.timeout, realm.unixUser, password, command, script, realm.pbsOptions)
     }
 
     /**

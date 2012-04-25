@@ -9,7 +9,7 @@ class Realm {
     int port
     String unixUser
     int timeout
-    String pbsOpts
+    String pbsOptions        // realm dependent options of the PBS system
 
     static constraints = {
         name(unique: true)
