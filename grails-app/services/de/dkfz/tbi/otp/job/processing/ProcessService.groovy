@@ -119,7 +119,7 @@ class ProcessService {
     @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
     public Date getFinishDate(Process process) {
         if (!process.finished) {
-            throw new IllegalArgumentException("Process is finished")
+            throw new IllegalArgumentException("Process is not finished")
         }
         String query =
 '''
@@ -150,7 +150,7 @@ ORDER BY u.id desc
     @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
     public long getDuration(Process process) {
         if (!process.finished) {
-            throw new IllegalArgumentException("Process is finished")
+            throw new IllegalArgumentException("Process is not finished")
         }
         Date endDate = getFinishDate(process)
         return endDate.time - process.started.time
