@@ -1,0 +1,160 @@
+package de.dkfz.tbi.otp.job.processing
+
+import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.plan.StartJobDefinition
+
+/**
+ * Service to test whether a given Job Execution Plan is valid.
+ * This service just offers one method which validates a given Job Execution Plan
+ * and returns all found errors as String values.
+ *
+ * Be aware that just because the validation does not return errors it does not
+ * mean that the plan is correctly. Like always it's possible to find errors but
+ * not possible to find all errors.
+ *
+ * The validation does not yet validate plans correctly containing DecisionJobs.
+ **/
+class PlanValidatorService {
+    public static final String NO_STARTJOB = "No StartJob defined for JobExecutionPlan"
+    public static final String STARTJOB_BEAN_MISSING = "The bean specified as a StartJob does not exist in the Spring context"
+    public static final String STARTJOB_BEAN_NOT_IMPLEMENTING_STARTJOB = "The bean specified as StartJob does not implement the StartJob interface"
+    public static final String NO_FIRSTJOB = "First JobDefinition not defined for JobExecutionPlan"
+    public static final String JOB_BEAN_MISSING = "The bean specified as Job does not exists in Spring context (JobDefinition, Bean name): "
+    public static final String JOB_BEAN_NOT_IMPLEMENTING_JOB = "The bean specified as a Job does not implement the Job interface (JobDefinition, Bean name): "
+    public static final String LAST_JOB_NOT_ENDSTATE_AWARE = "The last specified Job does not implement the end state aware interface"
+    public static final String CIRCULAR_JOBS = "The Job Execution Plan contains a circular Job dependency"
+    public static final String NOT_ALL_JOBS_LINKED = "Not all Job Definitions defined for this Job Execution Plan are linked through the next relationship"
+
+    /**
+     * Dependency Injection of grailsApplication
+     **/
+    def grailsApplication
+
+    public List<String> validate(JobExecutionPlan plan) {
+        List<String> foundErrors = []
+        if (hasStartJob(plan)) {
+            // perform validation on StartJob
+            if (startJobBeanExists(plan.startJob)) {
+                if (!startJobBeanIsStartJob(plan.startJob)) {
+                    foundErrors << STARTJOB_BEAN_NOT_IMPLEMENTING_STARTJOB
+                }
+            } else {
+                foundErrors << STARTJOB_BEAN_MISSING
+            }
+        } else {
+            foundErrors << NO_STARTJOB
+        }
+
+        if (!hasFirstJob(plan)) {
+            foundErrors << NO_FIRSTJOB
+        }
+        List<JobDefinition> jobDefinitions = JobDefinition.findAllByPlan(plan, [sort: 'id', order: 'asc'])
+        jobDefinitions.each { job ->
+            if (job instanceof StartJobDefinition) {
+                return
+            }
+            if (jobBeanExists(job)) {
+                if (!jobBeanIsJob(job)) {
+                    foundErrors << JOB_BEAN_NOT_IMPLEMENTING_JOB + "${job.id}, ${job.bean}"
+                }
+            } else {
+                foundErrors << JOB_BEAN_MISSING + "${job.id}, ${job.bean}"
+            }
+        }
+        if (noCircularDependency(plan)) {
+            // checks which may not be in a circular dependency
+            if (!lastJobIsEndStateAware(plan)) {
+                foundErrors << LAST_JOB_NOT_ENDSTATE_AWARE
+            }
+            if (!allJobsAreLinked(plan)) {
+                foundErrors << NOT_ALL_JOBS_LINKED
+            }
+        } else {
+            foundErrors << CIRCULAR_JOBS
+        }
+        return foundErrors
+    }
+
+    private boolean hasStartJob(JobExecutionPlan plan) {
+        return plan.startJob
+    }
+
+    private boolean startJobBeanExists(StartJobDefinition startJob) {
+        if (!startJob) {
+            return false
+        }
+        return grailsApplication.mainContext.containsBean(startJob.bean)
+    }
+
+    private boolean startJobBeanIsStartJob(StartJobDefinition startJob) {
+        if (!startJob) {
+            return false
+        }
+        def startJobBean = grailsApplication.mainContext.getBean(startJob.bean)
+        return (startJobBean instanceof StartJob)
+    }
+
+    private boolean hasFirstJob(JobExecutionPlan plan) {
+        return plan.firstJob
+    }
+
+    private boolean jobBeanExists(JobDefinition job) {
+        return grailsApplication.mainContext.containsBean(job.bean)
+    }
+
+    private boolean jobBeanIsJob(JobDefinition job) {
+        def jobBean = grailsApplication.mainContext.getBean(job.bean)
+        return (jobBean instanceof Job)
+    }
+
+    private boolean noCircularDependency(JobExecutionPlan plan) {
+        if (!plan.firstJob) {
+            return true
+        }
+        List<JobDefinition> processedJobs = []
+        JobDefinition job = plan.firstJob
+        while (job.next) {
+            processedJobs << job
+            job = job.next
+            if (processedJobs.contains(job)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private boolean lastJobIsEndStateAware(JobExecutionPlan plan) {
+        if (!plan.firstJob) {
+            return false
+        }
+        JobDefinition lastJob = plan.firstJob
+        while (lastJob.next) {
+            lastJob = lastJob.next
+        }
+        if (jobBeanExists(lastJob)) {
+            def jobBean = grailsApplication.mainContext.getBean(lastJob.bean)
+            return (jobBean instanceof EndStateAwareJob)
+        }
+        return false
+    }
+
+    private boolean allJobsAreLinked(JobExecutionPlan plan) {
+        if (!plan.firstJob) {
+            return true
+        }
+        List<Long> jobDefinitions = JobDefinition.findAllByPlan(plan).findAll { !(it instanceof StartJobDefinition) }.collect { it.id }
+        List<Long> linkedDefinition = []
+        JobDefinition lastJob = plan.firstJob
+        while (lastJob) {
+            linkedDefinition << lastJob.id
+            lastJob = lastJob.next
+        }
+        for (Long id in jobDefinitions) {
+            if (!linkedDefinition.contains(id)) {
+                return false
+            }
+        }
+        return true
+    }
+}
