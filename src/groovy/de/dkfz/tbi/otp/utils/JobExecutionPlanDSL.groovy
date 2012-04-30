@@ -7,9 +7,11 @@ import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterMapping
 import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
+import org.codehaus.groovy.grails.web.context.ServletContextHolder
+import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 
 class JobExecutionPlanDSL {
-    public static def plan = { String name, c ->
+    public static def plan = { String name, def ctx = null, boolean validate = false, c ->
         JobExecutionPlan.withTransaction {
             JobExecutionPlan jep = new JobExecutionPlan(name: name, planVersion: 0, enabled: true)
             assert(jep.save())
@@ -145,6 +147,14 @@ class JobExecutionPlanDSL {
             c()
             jep.firstJob = firstJob
             assert(jep.save(flush: true))
+            if (validate && ctx) {
+                List<String> errors = ctx.planValidatorService.validate(jep)
+                if (!errors.isEmpty()) {
+                    println("Errors found during validation")
+                    errors.each { println(it) }
+                }
+                assert(errors.isEmpty())
+            }
         }
         println("Plan created")
     }
