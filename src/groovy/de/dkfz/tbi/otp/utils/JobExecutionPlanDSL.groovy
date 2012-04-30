@@ -16,7 +16,9 @@ class JobExecutionPlanDSL {
             JobDefinition firstJob = null
             JobDefinition previous = null
             JobDefinition watchdogJobDefinition = null
+            boolean startJobDefined = false
             c.start = { String startName, String bean, closure = null ->
+                assert !startJobDefined, "Only one Start Job Definition can be defined per Job Execution Plan"
                 StartJobDefinition startJobDefinition = new StartJobDefinition(name: startName, bean: bean, plan: jep)
                 assert(startJobDefinition.save())
                 jep.startJob = startJobDefinition
@@ -36,6 +38,7 @@ class JobExecutionPlanDSL {
                     }
                     closure()
                 }
+                startJobDefined = true
             }
             c.job = { String jobName, String bean, closure = null ->
                 JobDefinition jobDefinition = new JobDefinition(name: jobName, bean: bean, plan: jep, previous: previous)
