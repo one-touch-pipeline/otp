@@ -12,4 +12,10 @@ modules = {
         dependsOn 'core'
         resource url: '/js/useradministration.js'
     }
+    graphDracula {
+        dependsOn 'jquery'
+        resource url: '/js/dracula/raphael-min.js'
+        resource url: '/js/dracula/dracula_graffle.js'
+        resource url: '/js/dracula/dracula_graph.js'
+    }
 }

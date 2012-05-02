@@ -8,6 +8,7 @@
 <jqDT:resources/>
 <g:javascript library="jquery.dataTables" />
 <g:javascript src="jquery.timeago.js"/>
+<r:require module="graphDracula"/>
 </head>
 <body>
   <div class="body">
@@ -27,6 +28,11 @@
                 <button id="disable-workflow-button" style="${enabled ? '' : 'display: none;'}">Disable Workflow</button>
             </sec:ifAllGranted>
         </g:if>
+    </div>
+    <div>
+        <div id="plan-visualization" style="display: none"></div>
+        <button id="show-visualization">Show Plan Visualization</button>
+        <button id="hide-visualization" style="display: none">Hide Plan Visualization</button>
     </div>
     <div id="workflowOverview">
         <table id="workflowOverviewTable">

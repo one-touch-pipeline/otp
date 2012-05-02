@@ -268,6 +268,99 @@ OTP.prototype.createRestartProcessingStepLink = function (id, dataTable) {
 };
 
 /**
+ * Renders a graph representing a JobExecutionPlan or Process.
+ * @param idName Name of the element id where to render the graph to
+ * @param data JSON data structure containing jobs and connections
+ **/
+OTP.prototype.renderJobExecutionPlanGraph = function (idName, data) {
+    "use strict";
+    var i, g, job, c, layouter, renderer;
+    var render = function (r, n) {
+        var element, textElement;
+        var attr = {
+            'stroke-width': '1px',
+            'fill': '#feb'
+        };
+        if (n.startJob) {
+            // start jobs are green ellipse
+            element = r.ellipse(n.point[0], n.point[1], 75, 25);
+            attr.fill = 'green';
+        } else if (n.endStateAware) {
+            // end state aware jobs are ellipse
+            element = r.ellipse(n.point[0], n.point[1], 75, 25);
+        } else {
+            // normal jobs are rects
+            element = r.rect(n.point[0] - 75, n.point[1] - 25, 150, 50);
+        }
+        if (n.pbsJob) {
+            // pbsJobs are orange
+            attr.fill = 'orange';
+        }
+        textElement = r.text(n.point[0], n.point[1], (n.label || n.id));
+        if (n.processingStep !== undefined && n.processingStep !== null) {
+            if (n.failed) {
+                attr.fill = 'red';
+            } else if (n.succeeded) {
+                attr.fill = 'lightgreen';
+            } else if (n.finished) {
+                attr.fill = 'lightblue';
+            }
+            textElement.attr({
+                href: $.otp.contextPath + "/processes/processingStep/" + n.processingStep
+            });
+        }
+        element.attr(attr);
+        return r.set().push(element, textElement);
+    };
+    g = new Graph();
+    g.edgeFactory.template.style.directed = true;
+    for (i = 0; i < data.jobs.length; i += 1) {
+        job = data.jobs[i];
+        g.addNode(job.id, {
+            render: render,
+            label: job.name,
+            startJob: job.startJob,
+            endStateAware: job.endStateAware,
+            pbsJob: job.pbsJob,
+            processingStep: job.processingStep,
+            failed: job.failed,
+            succeeded: job.succeeded,
+            finished: job.finished,
+            started: job.started
+        });
+    }
+    for (i = 0; i < data.connections.length; i += 1) {
+        c = data.connections[i];
+        var test = function () {
+            var j;
+            var fromValid = false;
+            var toValid = false;
+            for (j = 0; j < data.jobs.length; j += 1) {
+                if (j === 0 && data.jobs[j].id === c.from) {
+                    fromValid = true;
+                    continue;
+                }
+                if (data.jobs[j].id === c.from) {
+                    fromValid = data.jobs[j].processingStep !== null;
+                }
+                if (data.jobs[j].id === c.to) {
+                    toValid = data.jobs[j].processingStep !== null;
+                }
+            }
+            return fromValid && toValid;
+        };
+        g.addEdge(c.from, c.to, {
+            stroke: test() ? "red" : "black"
+        });
+    }
+    layouter = new Graph.Layout.Spring(g);
+    layouter.layout();
+    renderer = new Graph.Renderer.Raphael(idName, g, $("#" + idName).parent().width() - 20, 600);
+    renderer.draw();
+    $("#" + idName).data("graph", {layouter: layouter, renderer: renderer});
+};
+
+/**
  * Creates the datatables view for the list of all Processes for a given JobExecutionPlan
  * @param selector The JQuery selector for the table to create the datatable into
  * @param planId The id of the JobExecutionPlan for which the list of Processes should be retrieved.
@@ -339,6 +432,24 @@ OTP.prototype.createProcessListView = function (selector, planId, failed) {
             image.attr("src", image.attr("src").replace("green", "grey"));
         });
     });
+    $("#show-visualization").click(function () {
+        $("#plan-visualization").show();
+        $("#hide-visualization").show();
+        $(this).hide();
+        if ($("#plan-visualization").data("graph")) {
+            $("#plan-visualization").data("graph").layouter.layout();
+            $("#plan-visualization").data("graph").renderer.draw();
+            return;
+        }
+        $.getJSON($.otp.contextPath + "/processes/planVisualization/" + planId, function (data) {
+            $.otp.renderJobExecutionPlanGraph("plan-visualization", data);
+        });
+    });
+    $("#hide-visualization").click(function () {
+        $("#plan-visualization").hide();
+        $("#show-visualization").show();
+        $(this).hide();
+    });
 };
 
 /**
@@ -397,6 +508,24 @@ OTP.prototype.createProcessingStepListView = function (selector, processId) {
         { "bSortable": false, "aTargets": [7] },
         { "bSortable": false, "aTargets": [8] }
     ]);
+    $("#show-visualization").click(function () {
+        $("#process-visualization").show();
+        $("#hide-visualization").show();
+        $(this).hide();
+        if ($("#process-visualization").data("graph")) {
+            $("#process-visualization").data("graph").layouter.layout();
+            $("#process-visualization").data("graph").renderer.draw();
+            return;
+        }
+        $.getJSON($.otp.contextPath + "/processes/processVisualization/" + processId, function (data) {
+            $.otp.renderJobExecutionPlanGraph("process-visualization", data);
+        });
+    });
+    $("#hide-visualization").click(function () {
+        $("#plan-visualization").hide();
+        $("#show-visualization").show();
+        $(this).hide();
+    });
 };
 
 /**

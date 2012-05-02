@@ -15,6 +15,12 @@ class JobExecutionPlanService {
     static final profiled = true
 
     /**
+     * Dependency Injection of Grails Application.
+     * Needed to resolve job beans for introspection.
+     **/
+    def grailsApplication
+
+    /**
      * Security aware way to access a JobExecutionPlan.
      * @param id The JobExecutionPlan's id
      * @return
@@ -300,6 +306,50 @@ AND u.id IN (
     public int getNumberOfFinishedProcesses(JobExecutionPlan plan) {
         final List<JobExecutionPlan> plans = withParents(plan)
         return Process.countByFinishedAndJobExecutionPlanInList(true, plans)
+    }
+
+    /**
+     * Generates some information about the given Plan.
+     * Returns a Map with two elements "jobs" and "connections".
+     * Jobs is a List containing the information about each Job in this plan as a map with the following fields:
+     * <ul>
+     * <li>id (long)</li>
+     * <li>name (string)</li>
+     * <li>startJob (boolean)</li>
+     * <li>endStateAware (boolean)</li>
+     * <li>pbsJob (boolean)</li>
+     * </ul>
+     *
+     * Connections is a List containing the connections between two jobs as a map with fields "from" and "to"
+     * taking just the id of the Job in the "jobs" field.
+     * @param plan The JobExecutionPlan for which the information should be extracted.
+     * @return Plan Information in a JSON ready format
+     */
+    @PreAuthorize("hasPermission(#plan, read) or hasRole('ROLE_ADMIN')")
+    public Map planInformation(JobExecutionPlan plan) {
+        List jobs = []
+        List connections = []
+        def addToJobs = { job ->
+            def bean = grailsApplication.mainContext.getBean(job.bean)
+            boolean startJob = (bean instanceof StartJob)
+            boolean endStateAware = (bean instanceof EndStateAwareJob)
+            boolean pbsJob = (bean instanceof PbsJob)
+            jobs << [id: job.id, name: job.name, startJob: startJob, endStateAware: endStateAware, pbsJob: pbsJob]
+        }
+        def addConnection = { from, to ->
+            connections << [from: from.id, to: to.id]
+        }
+        addToJobs(plan.startJob)
+        addConnection(plan.startJob, plan.firstJob)
+        JobDefinition job = plan.firstJob
+        while (job) {
+            addToJobs(job)
+            if (job.next) {
+                addConnection(job, job.next)
+            }
+            job = job.next
+        }
+        return [jobs: jobs, connections: connections]
     }
 
     /**
