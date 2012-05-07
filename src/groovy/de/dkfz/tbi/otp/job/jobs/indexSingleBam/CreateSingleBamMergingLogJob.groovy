@@ -18,7 +18,7 @@ class CreateSingleBamMergingLogJob extends AbstractEndStateAwareJobImpl {
         MergingLog mergingLog = new MergingLog(
             qcState: MergingLog.QCState.NON,
             executedBy: MergingLog.Execution.SYSTEM,
-            status: MergingLog.Status.DECLARED,
+            status: MergingLog.Status.PROCESSING,
             seqScan: scan,
             alignmentParams: alignParams,
         )

@@ -20,6 +20,7 @@ class CheckIndexFileJob  extends AbstractEndStateAwareJobImpl {
         scan = SeqScan.get(scanId)
         MergedAlignmentDataFile dataFile = getDataFile()
         if (checkIndexDataFile(dataFile)) {
+            updateMergingLog(dataFile.mergingLog)
             succeed()
         } else {
             fail()
@@ -29,6 +30,7 @@ class CheckIndexFileJob  extends AbstractEndStateAwareJobImpl {
     private boolean checkIndexDataFile(MergedAlignmentDataFile dataFile) {
         String fullPath = mergedAlignmentDataFileService.getFullPath(dataFile)
         File file = new File("${fullPath}.bai")
+        println file.toString()
         if (!file.canRead()) {
             return false
         }
@@ -41,6 +43,11 @@ class CheckIndexFileJob  extends AbstractEndStateAwareJobImpl {
         MergingLog mergingLog = MergingLog.findBySeqScan(scan)
         MergedAlignmentDataFile dataFile = MergedAlignmentDataFile.findByMergingLog(mergingLog)
         return dataFile
+    }
+
+    private void updateMergingLog(MergingLog mergingLog) {
+        mergingLog.status = MergingLog.Status.FINISHED
+        mergingLog.save(flush: true)
     }
 
 }

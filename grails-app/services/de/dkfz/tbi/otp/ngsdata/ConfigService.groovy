@@ -36,29 +36,6 @@ class ConfigService {
         return "https://otp.local/otpdevel/"
     }
 
-    String getPbsHost(String realm) {
-        switch (realm) {
-            case "BioQuant":
-                return grailsApplication.config.otp.pbs.bioquant
-            case "DKFZ":
-                return grailsApplication.config.otp.pbs.dkfz
-            default:
-                throw new ProcessingException("No valid realm specified.")
-        }
-    }
-
-    String getPbsPort() {
-        return grailsApplication.config.otp.pbs.ssh.port
-    }
-
-    String getPbsTimeout() {
-        return grailsApplication.config.otp.pbs.ssh.timeout
-    }
-
-    String getPbsUser() {
-        return grailsApplication.config.otp.pbs.ssh.username
-    }
-
     String getPbsPassword() {
         return grailsApplication.config.otp.pbs.ssh.password
     }

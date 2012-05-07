@@ -10,47 +10,37 @@ class CopyFilesJob extends AbstractJobImpl {
     LsdfFilesService lsdfFilesService
 
     @Autowired
-    PbsService pbsService
+    ExecutionService executionService
 
     @Override
     public void execute() throws Exception {
 
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
+        List<DataFile> files = DataFile.findAllByRunAndProjectIsNotNull(run)
 
         String pbsIds = "1,"
-        DataFile.findAllByRunAndProjectIsNotNull(run).each {DataFile file ->
-            //String scriptName = buildScript(file)
+        files.each {DataFile file ->
             String cmd = scriptText(file)
-            String jobId = sendScript(cmd)
+            String jobId = sendScript(file.project.realm, cmd)
             println "Job ${jobId} submitted to PBS"
             pbsIds += jobId + ","
         }
         addOutputParameter("pbsIds", pbsIds)
     }
 
-    private String buildScript(DataFile file) {
-        String cpCmd = scriptText(file)
-        File cmdFile = File.createTempFile("copyJob", ".tmp", new File(System.getProperty("user.home")))
-        cmdFile.setText(cpCmd)
-        cmdFile.setExecutable(true)
-        return cmdFile.name
-    }
-
     private String scriptText(DataFile file) {
         String from = lsdfFilesService.getFileInitialPath(file)
         String to = lsdfFilesService.getFileFinalPath(file)
-        String cmd = "echo \$HOST;cp ${from} ${to};chmod 440 ${to}"
-        println cmd
-        return cmd
+        return "echo \$HOST;cp ${from} ${to};chmod 440 ${to}"
     }
 
-    private String sendScript(String text) {
-        String cmd = "echo '${text}' | qsub -l nodes=1:lsdf"
-        println cmd
-        //String cmd = "qsub testJob.sh"
-        String pbsResponse = pbsService.sendPbsJob(cmd)
-        List<String> extractedPbsIds = pbsService.extractPbsIds(pbsResponse)
+    private String sendScript(Realm realm, String text) {
+        String pbsResponse = executionService.executeJob(realm, text)
+        List<String> extractedPbsIds = executionService.extractPbsIds(pbsResponse)
+        if (extractedPbsIds.size() != 1) {
+            println "Number of PBS is = ${extractedPbsIds.size()}"
+        }
         return extractedPbsIds.get(0)
     }
 }

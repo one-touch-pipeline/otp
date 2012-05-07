@@ -90,9 +90,11 @@ class BamHeaderParsingService {
             if (token.startsWith("DS:")) {
                 String runName = token.substring(3)
                 int idx = runName.indexOf("_FC") + 3
-                String lane = runName.substring(idx)
-                println "${runName} ${lane}"
-                return getSeqTrack(runName, lane)
+                if (idx < runName.size()) {
+                    String lane = runName.substring(idx)
+                    println "${runName} ${lane}"
+                    return getSeqTrack(runName, lane)
+                }
             }
         }
         return null

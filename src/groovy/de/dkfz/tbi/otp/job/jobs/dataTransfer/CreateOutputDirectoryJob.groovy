@@ -10,7 +10,7 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
     LsdfFilesService lsdfFilesService
 
     @Autowired
-    PbsService pbsService
+    ExecutionService executionService
 
     @Override
     public void execute() throws Exception {
@@ -18,29 +18,23 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
 
-        Set<String> projects = projects(run)
-        projects.each {String projectName ->
-            String[] dirs = lsdfFilesService.getListOfRunDirecotries(run, projectName)
+        Set<Project> projects = projects(run)
+        projects.each {Project project ->
+            String[] dirs = lsdfFilesService.getListOfRunDirecotries(run, project.name)
             dirs.each {String line ->
-                def exitCode = createDirectory(line)
-                println "creating directory finished with exit code " + exitCode.toString()
+                String cmd = "mkdir -p " + line
+                String exitCode = executionService.executeCommand(project.realm, cmd)
+                println "creating directory finished with exit code " + exitCode
             }
         }
     }
 
-    private def createDirectory(String line) {
-        String cmd = "mkdir -p " + line
-        println cmd
-        def out = pbsService.sendPbsJob(cmd)
-        return out
-    }
-
-    private Set<String> projects(Run run) {
-        Set<String> projects = new HashSet<String>()
+    private Set<Project> projects(Run run) {
+        Set<Project> projects = new HashSet<Project>()
         List<DataFile> files = DataFile.findAllByRun(run)
         for(DataFile file in files) {
             if (file.project) {
-                projects << file.project.name
+                projects << file.project
             }
         }
         return projects

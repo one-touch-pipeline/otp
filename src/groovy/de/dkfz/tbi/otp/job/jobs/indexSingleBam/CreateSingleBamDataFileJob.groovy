@@ -17,12 +17,11 @@ class CreateSingleBamDataFileJob extends AbstractEndStateAwareJobImpl {
         long scanId = Long.parseLong(getProcessParameterValue())
         scan = SeqScan.get(scanId)
         mergingLog = MergingLog.findBySeqScan(scan)
-        String filePath = mergedAlignmentDataFileService.buildRelativePath(mergingLog)
-        String fileName = mergedAlignmentDataFileService.buildFileName(mergingLog)
         MergedAlignmentDataFile dataFile = new MergedAlignmentDataFile (
-            fileName: fileName,
-            filePath: filePath,
-            mergingLog: mergingLog
+            fileSystem: mergedAlignmentDataFileService.pathToHost(scan),
+            fileName: mergedAlignmentDataFileService.buildFileName(mergingLog),
+            filePath: mergedAlignmentDataFileService.buildRelativePath(mergingLog),
+            mergingLog: MergingLog.findBySeqScan(scan)
         )
         if (dataFile.validate()) {
             dataFile.save(flush: true)

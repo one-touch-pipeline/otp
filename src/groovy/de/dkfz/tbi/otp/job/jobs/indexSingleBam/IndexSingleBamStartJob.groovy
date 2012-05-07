@@ -15,7 +15,7 @@ class IndexSingleBamStartJob extends AbstractStartJobImpl {
 
     final int MAX_RUNNING = 1
 
-    @Scheduled(fixedRate=2000l)
+    @Scheduled(fixedRate=60000l)
     void execute() {
         if (!getExecutionPlan() || !getExecutionPlan().enabled) {
             return
@@ -31,10 +31,13 @@ class IndexSingleBamStartJob extends AbstractStartJobImpl {
             if (numberOfRunning >= MAX_RUNNING) {
                 break
             }
-            if (processed(scan) || processingFailed(scan)) {
+            if (scan.sample.individual.project.realm.id != realm.id) {
                 continue
             }
             if (!isAligned(scan)) {
+                continue
+            }
+            if (processed(scan) || processingFailed(scan)) {
                 continue
             }
             // new run to be processed

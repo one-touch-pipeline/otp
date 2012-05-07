@@ -2,11 +2,11 @@ package de.dkfz.tbi.otp.job.jobs.dataTransfer
 
 import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
 import org.springframework.beans.factory.annotation.Autowired
-import de.dkfz.tbi.otp.job.processing.PbsService
+import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Run
 import de.dkfz.tbi.otp.ngsdata.DataFile
-
+import de.dkfz.tbi.otp.ngsdata.Realm
 
 public class CalculateChecksumJob extends AbstractJobImpl {
 
@@ -14,7 +14,7 @@ public class CalculateChecksumJob extends AbstractJobImpl {
     LsdfFilesService lsdfFilesService
 
     @Autowired
-    PbsService pbsService
+    ExecutionService executionService
 
     String suffix = ".md5sum"
 
@@ -22,16 +22,16 @@ public class CalculateChecksumJob extends AbstractJobImpl {
     public void execute() throws Exception {
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
+        List<DataFile> files =  DataFile.findAllByRunAndProjectIsNotNull(run)
 
         String pbsIds = "1,"
-        DataFile.findAllByRunAndProjectIsNotNull(run).each {DataFile file ->
+        files.each {DataFile file ->
             if (md5sumFileExists(file)) {
-                println "checksum file already exists ..."
+                println "checksum file already exists"
                 return
             }
-            String scriptName = buildScript(file)
             String cmd = scriptText(file)
-            String jobId = sendScript(cmd)
+            String jobId = sendScript(file.project.realm, cmd)
             println "Job ${jobId} submitted to PBS"
             pbsIds += jobId + ","
         }
@@ -59,14 +59,6 @@ public class CalculateChecksumJob extends AbstractJobImpl {
         return false
     }
 
-    private String buildScript(DataFile file) {
-        String text = scriptText(file)
-        File cmdFile = File.createTempFile("md5sumJob", ".tmp", new File(System.getProperty("user.home")))
-        cmdFile.setText(text)
-        cmdFile.setExecutable(true)
-        return cmdFile.name
-    }
-
     private scriptText(DataFile file) {
         String directory = dirToMd5File(file)
         String fileName = file.fileName
@@ -75,12 +67,12 @@ public class CalculateChecksumJob extends AbstractJobImpl {
         return text
     }
 
-    private String sendScript(String text) {
-        String cmd = "echo '${text}' | qsub -l nodes=1:lsdf"
-        println cmd
-        //String cmd = "qsub testJob.sh"
-        String response = pbsService.sendPbsJob(cmd)
-        List<String> extractedPbsIds = pbsService.extractPbsIds(response)
+    private String sendScript(Realm realm, String text) {
+        String pbsResponse = executionService.executeJob(realm, text)
+        List<String> extractedPbsIds = executionService.extractPbsIds(pbsResponse)
+        if (extractedPbsIds.size() != 1) {
+            println "Number of PBS is = ${extractedPbsIds.size()}"
+        }
         return extractedPbsIds.get(0)
     }
 }

@@ -9,6 +9,8 @@ class RunFinder {
     boolean transfer = false
     String typeLimit = null
 
+    public boolean updateMode = false
+
     public void setSeqType(String seqTypeDirName) {
         typeLimit = seqTypeDirName
     }
@@ -85,16 +87,17 @@ class RunFinder {
             return
         }
         String runName = runDirName.substring(3)
+        if (updateMode) {
+            if (Run.findByName(runName)) {
+                return
+            }
+        }
         Run run = findOrCreateRun(runName)
         RunInitialPath initialPath = new RunInitialPath(
             dataPath: path,
             mdPath: baseDir,
             run: run
         )
-        //initialPath.validate()
-        //println initialPath.run
-        //println initialPath.errors
-        //println initialPath
         initialPath.save(flush: true)
         run.save(flush: true)
     }
@@ -113,6 +116,7 @@ class RunFinder {
             name: runName,
             seqCenter: seqCenter,
             seqPlatform: platform,
+            legacyRun: true
         )
         run.save()
         return run
