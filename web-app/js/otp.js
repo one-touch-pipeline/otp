@@ -276,10 +276,60 @@ OTP.prototype.renderJobExecutionPlanGraph = function (idName, data) {
     "use strict";
     var i, g, job, c, layouter, renderer;
     var render = function (r, n) {
-        var element, textElement;
-        var attr = {
+        var element, textElement, i, param, addNewline, attr;
+        var parameters = "";
+        addNewline = false;
+        if (n.constantParameters.length > 0) {
+            parameters = "Constant Parameters:\n";
+        }
+        for (i = 0; i < n.constantParameters.length; i += 1) {
+            if (addNewline) {
+                parameters += "\n";
+            }
+            param = n.constantParameters[i];
+            parameters += param.type.name + ": " + param.value;
+            addNewline = true;
+        }
+        if (n.inputParameters.length > 0) {
+            if (addNewline) {
+                parameters += "\n";
+            }
+            parameters = "Input Parameters:\n";
+            addNewline = false;
+        }
+        for (i = 0; i < n.inputParameters.length; i += 1) {
+            if (addNewline) {
+                parameters += "\n";
+            }
+            param = n.inputParameters[i];
+            parameters += param.type.name + ": ";
+            if (param.value) {
+                parameters += param.value;
+            }
+            addNewline = true;
+        }
+        if (n.outputParameters.length > 0) {
+            if (addNewline) {
+                parameters += "\n";
+            }
+            parameters = "Output Parameters:\n";
+            addNewline = false;
+        }
+        for (i = 0; i < n.outputParameters.length; i += 1) {
+            if (addNewline) {
+                parameters += "\n";
+            }
+            param = n.outputParameters[i];
+            parameters += param.type.name + ": ";
+            if (param.value) {
+                parameters += param.value;
+            }
+            addNewline = true;
+        }
+        attr = {
             'stroke-width': '1px',
-            'fill': '#feb'
+            'fill': '#feb',
+            'title': parameters
         };
         if (n.startJob) {
             // start jobs are green ellipse
@@ -316,18 +366,9 @@ OTP.prototype.renderJobExecutionPlanGraph = function (idName, data) {
     g.edgeFactory.template.style.directed = true;
     for (i = 0; i < data.jobs.length; i += 1) {
         job = data.jobs[i];
-        g.addNode(job.id, {
-            render: render,
-            label: job.name,
-            startJob: job.startJob,
-            endStateAware: job.endStateAware,
-            pbsJob: job.pbsJob,
-            processingStep: job.processingStep,
-            failed: job.failed,
-            succeeded: job.succeeded,
-            finished: job.finished,
-            started: job.started
-        });
+        job.render = render;
+        job.label = job.name;
+        g.addNode(job.id, job);
     }
     for (i = 0; i < data.connections.length; i += 1) {
         c = data.connections[i];

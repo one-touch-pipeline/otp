@@ -311,6 +311,8 @@ ORDER BY u.id desc
      * <li>succeeded (boolean)</li>
      * <li>failed (boolean)</li>
      * </ul>
+     *
+     * Additionally for input and output parameters the actual value is added.
      * @param process The Process for which the information should be extracted
      * @return Process Information in a JSON ready format
      * @see JobExecutionPlanService.planInformation
@@ -330,6 +332,20 @@ ORDER BY u.id desc
                 job.finished = (update.state == ExecutionState.FINISHED || update.state == ExecutionState.SUCCESS || update.state == ExecutionState.FAILURE)
                 job.succeeded = update.state == ExecutionState.SUCCESS
                 job.failed = (update.state == ExecutionState.FAILURE || update.state == ExecutionState.RESTARTED)
+                step.input.each { param ->
+                    job.inputParameters.each {
+                        if (it.type.id == param.type.id) {
+                            it.value = param.value
+                        }
+                    }
+                }
+                step.output.each { param ->
+                    job.outputParameters.each {
+                        if (it.type.id == param.type.id) {
+                            it.value = param.value
+                        }
+                    }
+                }
             } else {
                 job.processingStep = null
                 job.created = false
