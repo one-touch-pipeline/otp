@@ -310,7 +310,7 @@ AND u.id IN (
 
     /**
      * Generates some information about the given Plan.
-     * Returns a Map with two elements "jobs" and "connections".
+     * Returns a Map with three elements "jobs", "connections" and "name".
      * Jobs is a List containing the information about each Job in this plan as a map with the following fields:
      * <ul>
      * <li>id (long)</li>
@@ -318,6 +318,26 @@ AND u.id IN (
      * <li>startJob (boolean)</li>
      * <li>endStateAware (boolean)</li>
      * <li>pbsJob (boolean)</li>
+     * <li>constantParameters (list)</li>
+     * <li>inputParameters (list)</li>
+     * <li>outputParameters (list)</li>
+     * <li>passthroughParameters (list)</li>
+     * </ul>
+     *
+     * The lists of parameters contain objects of the following structure:
+     * <ul>
+     * <li>id (long) (only provided for constant parameter)</li>
+     * <li>value (string) (only provided for constant parameter)</li>
+     * <li>type (map)</li>
+     * <li>mapping (long) (only provided for input and passthrough parameter)</li>
+     * </ul>
+     *
+     * The type is a complex structure consiting of the following fields:
+     * <ul>
+     * <li>id (long) (referrenced by mapping)</li>
+     * <li>name (string)</li>
+     * <li>description (string)</li>
+     * <li>className (string)</li>
      * </ul>
      *
      * Connections is a List containing the connections between two jobs as a map with fields "from" and "to"
@@ -334,7 +354,47 @@ AND u.id IN (
             boolean startJob = (bean instanceof StartJob)
             boolean endStateAware = (bean instanceof EndStateAwareJob)
             boolean pbsJob = (bean instanceof PbsJob)
-            jobs << [id: job.id, name: job.name, startJob: startJob, endStateAware: endStateAware, pbsJob: pbsJob]
+            List constantParameters = []
+            List outputParameters = []
+            List inputParameters = []
+            List passthroughParameters = []
+            List parameterMappings = []
+            def typeToMap = {
+                [
+                    id: it.id,
+                    name: it.name,
+                    description: it.description,
+                    className: it.className
+                ]
+            }
+            job.constantParameters.each { param ->
+                constantParameters << [
+                    id: param.id,
+                    value: param.value,
+                    type: typeToMap(param.type)
+                ]
+            }
+            ParameterType.findAllByJobDefinitionAndParameterUsage(job, ParameterUsage.INPUT).each {
+                inputParameters << [type: typeToMap(it), mapping: ParameterMapping.findByJobAndTo(job, it)?.from?.id]
+            }
+            ParameterType.findAllByJobDefinitionAndParameterUsage(job, ParameterUsage.OUTPUT).each {
+                outputParameters << [type: typeToMap(it)]
+            }
+            ParameterType.findAllByJobDefinitionAndParameterUsage(job, ParameterUsage.PASSTHROUGH).each {
+                passthroughParameters << [type: typeToMap(it), mapping: ParameterMapping.findByJobAndTo(job, it)?.from?.id]
+            }
+            jobs << [
+                id: job.id,
+                name: job.name,
+                startJob: startJob,
+                endStateAware: endStateAware,
+                pbsJob: pbsJob,
+                bean: job.bean,
+                constantParameters: constantParameters,
+                inputParameters: inputParameters,
+                outputParameters: outputParameters,
+                passthroughParameters: passthroughParameters
+            ]
         }
         def addConnection = { from, to ->
             connections << [from: from.id, to: to.id]
@@ -349,7 +409,7 @@ AND u.id IN (
             }
             job = job.next
         }
-        return [jobs: jobs, connections: connections]
+        return [jobs: jobs, connections: connections, name: plan.name]
     }
 
     /**

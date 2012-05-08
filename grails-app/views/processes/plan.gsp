@@ -9,9 +9,13 @@
 <g:javascript library="jquery.dataTables" />
 <g:javascript src="jquery.timeago.js"/>
 <r:require module="graphDracula"/>
+<r:require module="jquery-ui"/>
 </head>
 <body>
   <div class="body">
+    <div id="plan-dsl-dialog" title="DSL for Workflow ${name}" style="display: none">
+        <textarea readonly="readonly" cols="200" rows="100"></textarea>
+    </div>
     <h1>List of ${failed ? 'failed' : ''} Processes for Workflow ${name}</h1>
     <div>
         <g:img dir="images/status" file="${enabled ? 'green.png' : 'grey.png'}" style="vertical-align: middle"/>
@@ -33,6 +37,7 @@
         <div id="plan-visualization" style="display: none"></div>
         <button id="show-visualization">Show Plan Visualization</button>
         <button id="hide-visualization" style="display: none">Hide Plan Visualization</button>
+        <button id="generate-dsl">Generate Plan Markup</button>
     </div>
     <div id="workflowOverview">
         <table id="workflowOverviewTable">

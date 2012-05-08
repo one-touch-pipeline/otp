@@ -182,7 +182,7 @@ OTP.prototype.createListView = function (selector, sourcePath, sortOrder, jsonCa
     $(selector).dataTable({
         sPaginationType: "full_numbers",
         bFilter: false,
-        bJQueryUI: true,
+        bJQueryUI: false,
         bProcessing: true,
         bServerSide: true,
         sAjaxSource: sourcePath,
@@ -361,6 +361,132 @@ OTP.prototype.renderJobExecutionPlanGraph = function (idName, data) {
 };
 
 /**
+ * Generates the JobExecutionPlan DSL for the given plan.
+ * Writes the DSL into a textarea of a dialog.
+ * @param plan JSON structure of the JobExecutionPlan
+ **/
+OTP.prototype.generatePlanDSL = function (plan) {
+    "use strict";
+    var startJob, job, dsl, findStartJob, nextJob, renderConstantParameters, findOutputParameter, jobForParameter, renderInputParameters, renderOutputParameters;
+    dsl = "";
+    findStartJob = function () {
+        var i;
+        for (i = 0; i < plan.jobs.length; i += 1) {
+            if (plan.jobs[i].startJob) {
+                return plan.jobs[i];
+            }
+        }
+        return null;
+    };
+    nextJob = function (currentJob) {
+        var i, j;
+        for (i = 0; i < plan.connections.length; i += 1) {
+            if (plan.connections[i].from === currentJob.id) {
+                for (j = 0; j < plan.jobs.length; j += 1) {
+                    if (plan.jobs[j].id === plan.connections[i].to) {
+                        return plan.jobs[j];
+                    }
+                }
+            }
+        }
+        return null;
+    };
+    renderConstantParameters = function (job) {
+        var i, param;
+        for (i = 0; i < job.constantParameters.length; i += 1) {
+            param = job.constantParameters[i];
+            dsl += "        constantParameter(\"";
+            dsl += param.type.name;
+            dsl += "\", \"";
+            dsl += param.value;
+            dsl += "\")\n";
+        }
+    };
+    findOutputParameter = function (id) {
+        var i, j, job;
+        for (i = 0; i < plan.jobs.length; i += 1) {
+            job = plan.jobs[i];
+            for (j = 0; j < job.outputParameters.length; j += 1) {
+                if (id === job.outputParameters[j].type.id) {
+                    return job.outputParameters[j];
+                }
+            }
+            for (j = 0; j < job.passthroughParameters.length; j += 1) {
+                if (id === job.passthroughParameters[j].type.id) {
+                    return findOutputParameter(job.passthroughParameters[j].mapping);
+                }
+            }
+        }
+        return null;
+    };
+    jobForParameter = function (parameter) {
+        var i, j, job;
+        for (i = 0; i < plan.jobs.length; i += 1) {
+            job = plan.jobs[i];
+            for (j = 0; j < job.inputParameters.length; j += 1) {
+                if (parameter === job.inputParameters[j]) {
+                    return job;
+                }
+            }
+            for (j = 0; j < job.outputParameters.length; j += 1) {
+                if (parameter === job.outputParameters[j]) {
+                    return job;
+                }
+            }
+            for (j = 0; j < job.passthroughParameters.length; j += 1) {
+                if (parameter === job.passthroughParameters[j]) {
+                    return job;
+                }
+            }
+        }
+        return null;
+    };
+    renderInputParameters = function (job) {
+        var i, outputParameter;
+        for (i = 0; i < job.inputParameters.length; i += 1) {
+            outputParameter = findOutputParameter(job.inputParameters[i].mapping);
+            if (!outputParameter) {
+                continue;
+            }
+            dsl += "        inputParameter(\"";
+            dsl += job.inputParameters[i].type.name;
+            dsl += "\", \"";
+            dsl += jobForParameter(outputParameter).name;
+            dsl += "\", \"";
+            dsl += outputParameter.type.name;
+            dsl += "\")\n";
+        }
+    };
+    renderOutputParameters = function (job) {
+        var i, param;
+        for (i = 0; i < job.outputParameters.length; i += 1) {
+            param = job.outputParameters[i];
+            dsl += "        outputParameter(\"";
+            dsl += param.type.name;
+            dsl += "\")\n";
+        }
+    };
+    dsl += "plan(\"" + plan.name + "\") {\n";
+    startJob = findStartJob();
+    dsl += "    start(\"" + startJob.name + "\", \"" + startJob.bean + "\") {\n";
+    renderConstantParameters(startJob);
+    renderOutputParameters(startJob);
+    dsl += "    }\n";
+    job = nextJob(startJob);
+    while (job) {
+        dsl += "    job(\"" + job.name + "\", \"" + job.bean + "\") {\n";
+        renderConstantParameters(job);
+        renderInputParameters(job);
+        renderOutputParameters(job);
+        dsl += "    }\n";
+        job = nextJob(job);
+    }
+    dsl += "}\n";
+    $("#plan-dsl-dialog textarea").text(dsl);
+    $("#plan-dsl-dialog").dialog();
+};
+
+/**
  * Creates the datatables view for the list of all Processes for a given JobExecutionPlan
  * @param selector The JQuery selector for the table to create the datatable into
  * @param planId The id of the JobExecutionPlan for which the list of Processes should be retrieved.
@@ -449,6 +575,9 @@ OTP.prototype.createProcessListView = function (selector, planId, failed) {
         $("#plan-visualization").hide();
         $("#show-visualization").show();
         $(this).hide();
+    });
+    $("#generate-dsl").click(function () {
+        $.getJSON($.otp.contextPath + "/processes/planVisualization/" + planId, $.otp.generatePlanDSL);
     });
 };
 
