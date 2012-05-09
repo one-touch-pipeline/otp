@@ -72,3 +72,5 @@ codenarc.reports = {
     }
 }
 codenarc.extraIncludeDirs=['ast']
+
+grails.tomcat.jvmArgs = ["-Xmx1024m", "-XX:MaxPermSize=256m"]
