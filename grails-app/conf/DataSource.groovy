@@ -1,6 +1,11 @@
 Properties databaseProperties = new Properties()
 try {
-    databaseProperties.load(new FileInputStream(System.getProperty("user.home") + "/.otp.properties"))
+    def env = System.getenv()
+    if (env['OTP_PROPERTIES'] != null) {
+        databaseProperties.load(new FileInputStream(env['OTP_PROPERTIES']))
+    } else {
+        databaseProperties.load(new FileInputStream(System.getProperty("user.home") + "/.otp.properties"))
+    }
     String server = databaseProperties.getProperty("otp.database.server")
     String port = databaseProperties.getProperty("otp.database.port")
     String database = databaseProperties.getProperty("otp.database.database")
