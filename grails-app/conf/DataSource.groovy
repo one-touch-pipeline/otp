@@ -48,12 +48,10 @@ environments {
             driverClassName = "org.postgresql.Driver"
             dialect = org.hibernate.dialect.PostgreSQLDialect
 			//loggingSql = true
-            dbCreate = "update" // one of 'create', 'create-drop', 'update', 'validate', ''
-            //url = "jdbc:h2:mem:devDb"
-            username = "otp"
-            password = "otp"
-            url = "jdbc:postgresql://localhost:5432/otp"
-			//url = "jdbc:mysql://localhost/test"
+            dbCreate = databaseConfig.otp.database.dbCreate
+            username = databaseConfig.otp.database.username
+            password = databaseConfig.otp.database.password
+            url = databaseConfig.otp.database.url
         }
     }
     test {
