@@ -31,6 +31,11 @@ class FileTypeService {
         return true
     }
 
+    List<FileType> alignmentSequenceTypes() {
+        List<String> extensions = ["bam", "bwt"]
+        return FileType.findAllByTypeAndSubTypeInList(FileType.Type.ALIGNMENT, extensions)
+    }
+
     FileType getFileType(String filename) {
         // try to provide and object from file name
         FileType tt = null
