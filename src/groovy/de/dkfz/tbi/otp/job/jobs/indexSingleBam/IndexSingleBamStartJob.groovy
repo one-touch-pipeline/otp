@@ -15,7 +15,7 @@ class IndexSingleBamStartJob extends AbstractStartJobImpl {
 
     final int MAX_RUNNING = 1
 
-    @Scheduled(fixedRate=60000l)
+    @Scheduled(fixedRate=10000l)
     void execute() {
         if (!getExecutionPlan() || !getExecutionPlan().enabled) {
             return
@@ -31,13 +31,10 @@ class IndexSingleBamStartJob extends AbstractStartJobImpl {
             if (numberOfRunning >= MAX_RUNNING) {
                 break
             }
-            if (scan.sample.individual.project.realm.id != realm.id) {
-                continue
-            }
             if (!isAligned(scan)) {
                 continue
             }
-            if (processed(scan) || processingFailed(scan)) {
+            if (processed(scan)) {
                 continue
             }
             // new run to be processed
@@ -52,11 +49,6 @@ class IndexSingleBamStartJob extends AbstractStartJobImpl {
     }
 
     private boolean processed(SeqScan scan) {
-        MergingLog mergingLog = MergingLog.findBySeqScan(scan)
-        return (boolean)mergingLog
-    }
-
-    private boolean processingFailed(SeqScan scan) {
         List<ProcessParameter> processParameters =
             ProcessParameter.findAllByValue(scan.id.toString())
         for(ProcessParameter parameter in processParameters) {

@@ -124,14 +124,40 @@ class LsdfFilesService {
         if (!checkFinalPathDefined(file)) {
             return null
         }
-        SeqTrack seqTrack = file.seqTrack ?: file.alignmentLog.seqTrack
         String basePath = configService.getProjectSequencePath(file.project)
+        String relativePath = getFileViewByPidRelativePath(file)
+        return "${basePath}/${relativePath}"
+    }
+
+    String getFileViewByPidDirectory(DataFile file) {
+        if (!checkFinalPathDefined(file)) {
+            return null
+        }
+        String basePath = configService.getProjectSequencePath(file.project)
+        String relativePath = getFileViewByPidRelativeDirectory(file)
+        return "${basePath}/${relativePath}"
+    }
+
+    String getFileViewByPidRelativePath(DataFile file) {
+        if (!checkFinalPathDefined(file)) {
+            return null
+        }
+        String directory = getFileViewByPidRelativeDirectory(file)
+        return "${directory}/${file.vbpFileName}"
+    }
+
+
+    private String getFileViewByPidRelativeDirectory(DataFile file) {
+        if (!checkFinalPathDefined(file)) {
+            return null
+        }
+        SeqTrack seqTrack = file.seqTrack ?: file.alignmentLog.seqTrack
         String seqTypeDir = seqTrack.seqType.dirName
         String pid = seqTrack.sample.individual.pid
         String sampleType = seqTrack.sample.type.toString().toLowerCase()
         String library = seqTrack.seqType.libraryLayout.toLowerCase()
         String path =
-            "${basePath}/${seqTypeDir}/view-by-pid/${pid}/${sampleType}/${library}/run${file.run.name}/${file.fileType.vbpPath}/${file.vbpFileName}"
+            "${seqTypeDir}/view-by-pid/${pid}/${sampleType}/${library}/run${file.run.name}/${file.fileType.vbpPath}"
         return path
     }
 

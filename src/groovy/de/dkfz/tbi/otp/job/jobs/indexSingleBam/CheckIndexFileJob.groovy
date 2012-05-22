@@ -18,36 +18,17 @@ class CheckIndexFileJob  extends AbstractEndStateAwareJobImpl {
     public void execute() throws Exception {
         long scanId = Long.parseLong(getProcessParameterValue())
         scan = SeqScan.get(scanId)
-        MergedAlignmentDataFile dataFile = getDataFile()
-        if (checkIndexDataFile(dataFile)) {
-            updateMergingLog(dataFile.mergingLog)
-            succeed()
-        } else {
-            fail()
+        List<DataFile> alignFiles = mergedAlignmentDataFileService.alignmentSequenceFiles(scan)
+        for(DataFile file in alignFiles) {
+            String path = lsdfFilesService.getFileViewByPidPath(file)
+            path = "${path}.bai"
+            println path
+            if (!lsdfFilesService.fileExists(path)) {
+                println "FAIL !"
+                fail()
+                return
+            }
         }
+        succeed()
     }
-
-    private boolean checkIndexDataFile(MergedAlignmentDataFile dataFile) {
-        String fullPath = mergedAlignmentDataFileService.getFullPath(dataFile)
-        File file = new File("${fullPath}.bai")
-        println file.toString()
-        if (!file.canRead()) {
-            return false
-        }
-        dataFile.indexFileExists = true
-        dataFile.save(flush: true)
-        return true
-    }
-
-    private MergedAlignmentDataFile getDataFile() {
-        MergingLog mergingLog = MergingLog.findBySeqScan(scan)
-        MergedAlignmentDataFile dataFile = MergedAlignmentDataFile.findByMergingLog(mergingLog)
-        return dataFile
-    }
-
-    private void updateMergingLog(MergingLog mergingLog) {
-        mergingLog.status = MergingLog.Status.FINISHED
-        mergingLog.save(flush: true)
-    }
-
 }

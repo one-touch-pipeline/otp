@@ -7,36 +7,56 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class SendIndexingBamJob extends AbstractJobImpl {
 
-    SeqScan scan
-
     @Autowired
     ExecutionService executionService
 
     @Autowired
     MergedAlignmentDataFileService mergedAlignmentDataFileService
 
+    @Autowired
+    LsdfFilesService lsdfFilesService
+
     @Override
     public void execute() throws Exception {
         long scanId = Long.parseLong(getProcessParameterValue())
-        scan = SeqScan.get(scanId)
-        Realm realm = scan.sample.individual.project.realm
-        String text = buildScriptText()
-        String jobId = sendScript(realm, text)
-        println "Job ${jobId} submitted to PBS"
-        addOutputParameter("pbsIds", jobId)
+        SeqScan scan = SeqScan.get(scanId)
+        String jobIds = processScan(scan)
+        addOutputParameter("pbsIds", jobIds)
     }
 
-    private String buildScriptText() {
-        MergingLog mergingLog = MergingLog.findBySeqScan(scan)
-        MergedAlignmentDataFile dataFile = MergedAlignmentDataFile.findByMergingLog(mergingLog)
-        String basePath = mergedAlignmentDataFileService.pathToHost(scan)
-        String path = "${basePath}/${dataFile.filePath}"
-        String cmd = "cd ${path}; samtools index ${dataFile.fileName} ${dataFile.fileName}.bai;chmod 440 ${dataFile.fileName}.bai"
+    private String processScan(SeqScan scan) {
+        String jobIds = ""
+        List<DataFile> alignFiles = mergedAlignmentDataFileService.alignmentSequenceFiles(scan)
+        for(DataFile file in alignFiles) {
+            jobIds += processFile(file)
+            jobIds += ","
+        }
+        return jobIds
+    }
+
+    private String processFile(DataFile file) {
+        Realm realm = file.project.realm
+        String text = buildScriptText(file)
+        String jobId = sendScript(realm, text)
+        return jobId
+    }
+
+    private String buildScriptText(DataFile file) {
+        println file.fileName
+        String path = lsdfFilesService.getFileViewByPidDirectory(file)
+        if (!path) {
+            throw new Exception("View-by-Pid location not defined for file id = ${file.id}")
+        }
+        println path
+        String inFile = file.fileName
+        String outFile = "${inFile}.bai"
+        String cmd = "cd ${path}; samtools index ${inFile} ${outFile}.bai;chmod 440 ${outFile}"
+        println cmd
         return cmd
     }
 
     private String sendScript(Realm realm, String text) {
-        println text
+        return "1"
         String pbsResponse = executionService.executeJob(realm, text)
         List<String> extractedPbsIds = executionService.extractPbsIds(pbsResponse)
         if (extractedPbsIds.size() != 1) {
