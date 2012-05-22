@@ -75,7 +75,7 @@ class IndividualController {
                 scans << scan
             }
         }
-        String url = igvSessionFileService.buildSessionFile(scans)
+        String url = igvSessionFileService.buildSessionFile(scans, request)
         println "Redirecting: ${url}"
         redirect(url: url)
     }

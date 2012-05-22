@@ -32,10 +32,6 @@ class ConfigService {
         return "https://otp.local/"
     }
 
-    String otpWebServer() {
-        return "https://otp.local/otpdevel/"
-    }
-
     String getPbsPassword() {
         return grailsApplication.config.otp.pbs.ssh.password
     }
