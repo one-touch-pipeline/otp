@@ -54,7 +54,7 @@ class FilesCompletenessService {
             throw new ProcessingException("No data file provided for the given run.")
         }
         dataFiles.each {DataFile dataFile ->
-            if (!hasFinalLocation(dataFile)) {
+            if (!lsdfFilesService.checkFinalPathDefined(dataFile)) {
                 return // continue
             }
             boolean exists = fileExistsInFinalLocation(dataFile)
@@ -69,13 +69,6 @@ class FilesCompletenessService {
         run.finalLocationChecked = true
         run.save(flush: true)
         return allExists
-    }
-
-    private boolean hasFinalLocation(DataFile dataFile) {
-        if (lsdfFilesService.getFileFinalPath(dataFile.id) == null) {
-            return false
-        }
-        return true 
     }
 
     private boolean fileExistsInFinalLocation(DataFile dataFile) {
