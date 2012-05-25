@@ -58,15 +58,16 @@
 
     <g:each var="type" in="${seqTypes}">
 
-        <div class="myHeader">
+        <div class="myHeaderWide">
             ${type}
         </div>
-        <div class="myContent">
+        <div class="myContentWide">
 
         <table>
            <tr>
                 <td></td>
                 <td class="microHeader">type</td>
+                <td class="microHeader">platform</td>
                 <td class="microHeader">status</td>
                 <td class="microHeader">center</td>
                 <td class="microHeader">#lanes</td>
@@ -85,6 +86,7 @@
                         </g:link>
                     </td>
                     <td><strong>${scan.sample.type}</strong></td>
+                    <td>${scan.seqPlatform}</td>
                     <td>${scan.state}</td>
                     <td>${scan.seqCenters.toLowerCase()}</td>
 
@@ -98,7 +100,10 @@
                             true="merged" false="not merged"
                         />
                     </td>
-                    <td><g:checkBox name="${scan.id}" value="${false}"/></td>
+                    <td><g:if test="${igvMap.get(scan.id)}">
+                            <g:checkBox name="${scan.id}" value="${false}"/>
+                        </g:if>
+                    </td>
                </tr>
                </g:if>
            </g:each>
@@ -107,7 +112,7 @@
     </g:each>
 
     <h1>Analysis Results</h1>
-    <div class="myContent">
+    <div class="myContentWide">
     <table>
         <tr>
             <g:each var="mutation" in="${muts}">
@@ -118,8 +123,8 @@
     </div>
 
     <h1>Data Access</h1>
-        <div class="myContent" align="right">
-            <g:actionSubmit class="button" value="Start IGV" action="igvStart"/>
+        <div class="myContentWide" align="right">
+<%--            <g:actionSubmit class="button" value="Start IGV" action="igvStart"/>--%>
             <g:actionSubmit class="button" value="Get IGV Session File" action="igvDownload"/>
         </div>
     </g:form>

@@ -31,8 +31,9 @@ class IndividualController {
         int nextId = findNext(ind)
 
         List<Mutation> muts = Mutation.findAllByIndividual(ind)
+        Map<Integer,Boolean> igvMap = igvSessionFileService.createMapOfIgvEnabledScans(seqScans)
 
-        [ind: ind, seqTypes: seqTypes, seqScans: seqScans, prevId: prevId, nextId: nextId, muts: muts]
+        [ind: ind, seqTypes: seqTypes, seqScans: seqScans, prevId: prevId, nextId: nextId, muts: muts, igvMap: igvMap]
     }
 
     private int findPrevious(Individual ind) {
