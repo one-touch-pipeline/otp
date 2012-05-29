@@ -11,7 +11,8 @@ class SeqPlatform {
     }
 
     String toString() {
-        if (model.size() > 4) {
+        final int expressiveModelNameLimit = 4
+        if (model.size() > expressiveModelNameLimit) {
             return model
         }
         return name + " " + model
