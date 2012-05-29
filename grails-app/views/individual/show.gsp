@@ -124,8 +124,8 @@
 
     <h1>Data Access</h1>
         <div class="myContentWide" align="right">
-<%--            <g:actionSubmit class="button" value="Start IGV" action="igvStart"/>--%>
-            <g:actionSubmit class="button" value="Get IGV Session File" action="igvDownload"/>
+            <g:actionSubmit class="button" value="Start IGV" action="igvStart"/>
+<%--            <g:actionSubmit class="button" value="Get IGV Session File" action="igvDownload"/>--%>
         </div>
     </g:form>
 

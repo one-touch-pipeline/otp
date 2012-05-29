@@ -14,9 +14,7 @@ class IgvSessionFileService {
     String buildSessionFile(List<SeqScan> scans, HttpServletRequest request) {
         String text = buildContent(scans, request)
         String name = createSessionFileObjectAndReturnName(text)
-        String igvBase = configService.igvPath()
-        String myURL = getMyURL(request)
-        String url = "${igvBase}${myURL}igvSessionFile/file/${name}"
+        String url = buildURLString(request, name)
         return url
     }
 
@@ -47,7 +45,14 @@ class IgvSessionFileService {
         IgvSessionFile sessionFile = new IgvSessionFile(name: name, content: text)
         sessionFile.save(flush: true)
         return name
-    } 
+    }
+
+    private String buildURLString(HttpServletRequest request, String name) {
+        String igvBase = configService.igvPath()
+        String myURL = getMyURL(request)
+        String url = "${igvBase}${myURL}igvSessionFile/file/${name}"
+        return url
+    }
 
     private String getMyURL(HttpServletRequest request) {
         String url = request.getRequestURL()
@@ -115,7 +120,6 @@ class IgvSessionFileService {
             String projectPath = file.project.dirName
             String fullPath = "${dataWebServer}/${projectPath}/sequencing/${path}"
             paths << fullPath
-            println fullPath
         }
         return paths
     }

@@ -11,6 +11,9 @@ class SeqPlatform {
     }
 
     String toString() {
-        name + " " + model
+        if (model.size() > 4) {
+            return model
+        }
+        return name + " " + model
     }
 }
