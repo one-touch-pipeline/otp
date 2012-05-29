@@ -11,11 +11,11 @@
 
     <g:form>
         <td><g:datePicker name="startDate" value="${startDate}" precision="day" years="[2010, 2011,2012]"/>
-        <g:select 
+        <g:select
             name="projects"
             value="${projects}"
             from="${de.dkfz.tbi.otp.ngsdata.Project.list()}"
-            optionKey="name" 
+            optionKey="name"
             multiple="true"
         />
         <g:submitButton name="progress" value=" Display " action="progress" />

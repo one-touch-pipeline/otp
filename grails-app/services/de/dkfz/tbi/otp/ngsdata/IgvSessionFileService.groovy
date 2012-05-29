@@ -20,18 +20,18 @@ class IgvSessionFileService {
 
     Map<Integer,Boolean> createMapOfIgvEnabledScans(List<SeqScan> scans) {
         Map<Integer,Boolean> map = [:]
-        for(SeqScan scan in scans) {
-            boolean enabled = igvEnabled(scan)
+        for (SeqScan scan in scans) {
+            boolean enabled = isIgvEnabled(scan)
             map.put(scan.id, enabled)
         }
         return map
     }
 
-    boolean igvEnabled(SeqScan scan) {
+    boolean isIgvEnabled(SeqScan scan) {
         List<String> paths = getFileSystemPathForScan(scan)
-        for(String path in paths) {
+        for (String path in paths) {
             String baiPath = "${path}.bai"
-            File baiFile =new File(baiPath)
+            File baiFile = new File(baiPath)
             if (baiFile.canRead()) {
                 return true
             }
@@ -69,7 +69,7 @@ class IgvSessionFileService {
             Resources {
                 scans.each {SeqScan scan ->
                     List<String> paths = getPathForScan(scan)
-                    for(String path in paths) {
+                    for (String path in paths) {
                         Resource(path: path)
                     }
                 }
@@ -114,7 +114,7 @@ class IgvSessionFileService {
         List<DataFile> files = mergedAlignmentDataFileService.alignmentSequenceFiles(seqScan)
         String dataWebServer = dataWebServer(seqScan)
         List<String> paths = []
-        for(DataFile file in files) {
+        for (DataFile file in files) {
             // TODO: add selection based of alignment type
             String path = lsdfFilesService.getFileViewByPidRelativePath(file)
             String projectPath = file.project.dirName
@@ -127,7 +127,7 @@ class IgvSessionFileService {
     private List<String> getFileSystemPathForSingleFiles(SeqScan seqScan) {
         List<DataFile> files = mergedAlignmentDataFileService.alignmentSequenceFiles(seqScan)
         List<String> paths = []
-        for(DataFile file in files) {
+        for (DataFile file in files) {
             String path = lsdfFilesService.getFileViewByPidPath(file)
             paths << path
         }

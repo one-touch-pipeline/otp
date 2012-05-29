@@ -19,7 +19,7 @@ class CheckIndexFileJob  extends AbstractEndStateAwareJobImpl {
         long scanId = Long.parseLong(getProcessParameterValue())
         scan = SeqScan.get(scanId)
         List<DataFile> alignFiles = mergedAlignmentDataFileService.alignmentSequenceFiles(scan)
-        for(DataFile file in alignFiles) {
+        for (DataFile file in alignFiles) {
             String path = lsdfFilesService.getFileViewByPidPath(file)
             path = "${path}.bai"
             println path

@@ -18,11 +18,11 @@ class MergedAlignmentDataFileService {
         List<DataFile> files = []
         List<FileType> types = fileTypeService.alignmentSequenceTypes()
         List<SeqTrack> tracks = MergingAssignment.findAllBySeqScan(scan)*.seqTrack
-        for(SeqTrack track in tracks) {
+        for (SeqTrack track in tracks) {
             List<AlignmentLog> alignLogs = AlignmentLog.findAllBySeqTrack(track)
-            for(AlignmentLog alignLog in alignLogs) {
+            for (AlignmentLog alignLog in alignLogs) {
                 List<DataFile> f = DataFile.findAllByFileTypeInListAndAlignmentLog(types, alignLog)
-                for(DataFile file in f) {
+                for (DataFile file in f) {
                     files << file
                 }
             }
