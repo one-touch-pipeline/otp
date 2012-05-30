@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.job.processing.ProcessingException
+import javax.servlet.http.HttpServletRequest
 
 /**
  * This service knows all the configuration parameters like root paths,
@@ -28,8 +29,14 @@ class ConfigService {
         return "http://www.broadinstitute.org/igv/projects/current/igv.php?sessionURL="
     }
 
-    String dataWebServer() {
-        return "https://otp.local/"
+    /*
+     * fragile code. Shall be replaced by accessing servlet container 
+     * configuration.
+     */
+    String getMyURL(HttpServletRequest request) {
+        String url = request.getRequestURL()
+        url = url.substring(0, url.indexOf("grails"))
+        return url
     }
 
     String getPbsPassword() {

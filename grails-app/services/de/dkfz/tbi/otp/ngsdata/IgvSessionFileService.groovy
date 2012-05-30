@@ -49,14 +49,8 @@ class IgvSessionFileService {
 
     private String buildURLString(HttpServletRequest request, String name) {
         String igvBase = configService.igvPath()
-        String myURL = getMyURL(request)
+        String myURL = configService.getMyURL(request)
         String url = "${igvBase}${myURL}igvSessionFile/file/${name}"
-        return url
-    }
-
-    private String getMyURL(HttpServletRequest request) {
-        String url = request.getRequestURL()
-        url = url.substring(0, url.indexOf("grails"))
         return url
     }
 
