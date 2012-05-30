@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.job.processing
 import static org.junit.Assert.*
 import org.junit.*
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
+import de.dkfz.tbi.otp.ngsdata.Realm
 
 class ExecutionServiceTests extends AbstractIntegrationTest {
 
@@ -24,9 +25,11 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
     @Test
     void testExecuteCommand() {
         println("testExecuteCommand")
+        Realm realm = new Realm(name: "test", rootPath: "/", webHost: "http://test.me", host: "127.0.0.1", port: 12345, unixUser: "test", timeout: 100, pbsOptions: "")
+        assertNotNull(realm.save())
         // Neither a command nor a script specified to be run remotely.
         shouldFail(ProcessingException) {
-            executionService.executeCommand("DKFZ", null)
+            executionService.executeCommand(realm, null)
         }
         // Create temporary file to be executed on pbs. The file is stored on user's home.
         File cmdFile = File.createTempFile("test", ".tmp", new File(System.getProperty("user.home")))
@@ -39,11 +42,11 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         // Construct pbs command
         String cmd = "qsub ${cmdFile.name}"
         // No valid realm specified.
-        shouldFail(ProcessingException) {
-            executionService.executeCommand("", cmd)
+        shouldFail(NullPointerException) {
+            executionService.executeCommand(null, cmd)
         }
         // Send command to pbs
-        String response = executionService.executeCommand("DKFZ", cmd)
+        String response = executionService.executeCommand(realm, cmd)
         // Extract pbs ids
         List<String> extractedPbsIds = executionService.extractPbsIds(response)
         assertNotNull(extractedPbsIds)
@@ -52,7 +55,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         // Make new pbs command to verify whether pbs job still is running
         cmd = "qstat ${extractedPbsId}"
         // Send verifying command with recent pbs id to pbs
-        String check = executionService.executeCommand("DKFZ", cmd)
+        String check = executionService.executeCommand(realm, cmd)
         extractedPbsIds = executionService.extractPbsIds(check)
         assertNotNull(extractedPbsIds)
         String extractedPbsId_qstat = extractedPbsIds.get(0)
@@ -64,8 +67,9 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
     void testExecuteJobScript() {
         println("testExecuteJobScript")
         // No file path specified.
+        Realm realm = new Realm(name: "test", rootPath: "/", webHost: "http://test.me", host: "127.0.0.1", port: 12345, unixUser: "test", timeout: 100, pbsOptions: "")
         shouldFail(ProcessingException) {
-            executionService.executeJobScript("DKFZ", null)
+            executionService.executeJobScript(realm, null)
         }
         // Create temporary file to be executed on pbs. The file is stored on user's home.
         File file = File.createTempFile("test", ".tmp", new File(System.getProperty("user.home")))
@@ -75,11 +79,11 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
                        """)
         file.setExecutable(true)
         // No valid realm specified.
-        shouldFail(ProcessingException) {
-            executionService.executeJobScript("", file.absolutePath)
+        shouldFail(NullPointerException) {
+            executionService.executeJobScript(null, file.absolutePath)
         }
         // Send file path to pbs
-        String response = executionService.executeJobScript("DKFZ", file.absolutePath)
+        String response = executionService.executeJobScript(realm, file.absolutePath)
         // Extract pbs ids
         List<String> extractedPbsIds = executionService.extractPbsIds(response)
         assertNotNull(extractedPbsIds)
@@ -88,7 +92,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         // Make new pbs command to verify whether pbs job still is running
         String cmd = "qstat ${extractedPbsId}"
         // Send verifying command with recent pbs id to pbs
-        String check = executionService.executeCommand("DKFZ", cmd)
+        String check = executionService.executeCommand(realm, cmd)
         extractedPbsIds = executionService.extractPbsIds(check)
         assertNotNull(extractedPbsIds)
         String extractedPbsId_qstat = extractedPbsIds.get(0)
@@ -100,19 +104,20 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
     void testExecuteJob() {
         println("testExecuteJob")
         // No job specified.
+        Realm realm = new Realm(name: "test", rootPath: "/", webHost: "http://test.me", host: "127.0.0.1", port: 12345, unixUser: "test", timeout: 100, pbsOptions: "")
         shouldFail(ProcessingException) {
-            executionService.executeJob("DKFZ", null)
+            executionService.executeJob(realm, null)
         }
         String script = ("""#! /bin/bash
                        date
                        sleep 20
                        """)
         // No valid realm specified.
-        shouldFail(ProcessingException) {
-            executionService.executeJob("", script)
+        shouldFail(NullPointerException) {
+            executionService.executeJob(null, script)
         }
         // Send script to pbs
-        String response = executionService.executeJob("DKFZ", script)
+        String response = executionService.executeJob(realm, script)
         // Extract pbs ids
         List<String> extractedPbsIds = executionService.extractPbsIds(response)
         assertNotNull(extractedPbsIds)
@@ -121,7 +126,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         // Make new pbs command to verify whether pbs job still is running
         String cmd = "qstat ${extractedPbsId}"
         // Send verifying command with recent pbs id to pbs
-        String check = executionService.executeCommand("DKFZ", cmd)
+        String check = executionService.executeCommand(realm, cmd)
         extractedPbsIds = executionService.extractPbsIds(check)
         assertNotNull(extractedPbsIds)
         String extractedPbsId_qstat = extractedPbsIds.get(0)
