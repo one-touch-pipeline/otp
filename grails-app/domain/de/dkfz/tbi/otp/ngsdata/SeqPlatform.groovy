@@ -12,9 +12,19 @@ class SeqPlatform {
 
     String toString() {
         final int expressiveModelNameLimit = 4
+        if (!model) {
+            return name
+        }
         if (model.size() > expressiveModelNameLimit) {
             return model
         }
         return name + " " + model
+    }
+
+    String fullName() {
+        if (model) {
+            return name + " " + model
+        }
+        return name
     }
 }
