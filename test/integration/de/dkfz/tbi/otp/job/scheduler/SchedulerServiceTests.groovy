@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.job.processing.DecisionProcessingStep
 import de.dkfz.tbi.otp.job.processing.ExecutionState
+import de.dkfz.tbi.otp.job.processing.IncorrectProcessingException
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterMapping
@@ -863,5 +864,283 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         // TODO: check that second job has the required input parameters
         process.refresh()
         assertTrue(process.finished)
+    }
+
+    @Test
+    void testRestartProcessingStepInCorrectState() {
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // create the JobExecutionPlan with two Job Definitions
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = createTestJob("test", jep)
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        jobDefinition.next = createTestEndStateAwareJob("test2", jep, jobDefinition)
+        assertNotNull(jobDefinition.save())
+        assertNotNull(jep.save(flush: true))
+        // create the Process
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        process.finished = true
+        assertNotNull(process.save())
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assertNotNull(step.save())
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.CREATED,
+            previous: null,
+            processingStep: step
+            )
+        assertNotNull(update.save(flush: true))
+        // with a created event it should fail
+        shouldFail(IncorrectProcessingException) {
+            schedulerService.restartProcessingStep(step)
+        }
+        // with a started event it should fail
+        update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.STARTED,
+            previous: update,
+            processingStep: step
+        )
+        assertNotNull(update.save(flush: true))
+        shouldFail(IncorrectProcessingException) {
+            schedulerService.restartProcessingStep(step)
+        }
+        // with a finished event it should fail
+        update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.FINISHED,
+            previous: update,
+            processingStep: step
+        )
+        assertNotNull(update.save(flush: true))
+        shouldFail(IncorrectProcessingException) {
+            schedulerService.restartProcessingStep(step)
+        }
+        // with a success event it should fail
+        update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.SUCCESS,
+            previous: update,
+            processingStep: step
+        )
+        assertNotNull(update.save(flush: true))
+        shouldFail(IncorrectProcessingException) {
+            schedulerService.restartProcessingStep(step)
+        }
+        // with a restarted event it should fail
+        update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.RESTARTED,
+            previous: update,
+            processingStep: step
+        )
+        assertNotNull(update.save(flush: true))
+        shouldFail(IncorrectProcessingException) {
+            schedulerService.restartProcessingStep(step)
+        }
+        // with a suspended event it should fail
+        update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.SUSPENDED,
+            previous: update,
+            processingStep: step
+        )
+        assertNotNull(update.save(flush: true))
+        shouldFail(IncorrectProcessingException) {
+            schedulerService.restartProcessingStep(step)
+        }
+        // with a resumed event it should fail
+        update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.RESUMED,
+            previous: update,
+            processingStep: step
+        )
+        assertNotNull(update.save(flush: true))
+        shouldFail(IncorrectProcessingException) {
+            schedulerService.restartProcessingStep(step)
+        }
+
+        // set to failed
+        update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.FINISHED,
+            previous: update,
+            processingStep: step
+        )
+        assertNotNull(update.save(flush: true))
+        update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.FAILURE,
+            previous: update,
+            processingStep: step
+        )
+        assertNotNull(update.save(flush: true))
+        assertEquals(9, ProcessingStepUpdate.countByProcessingStep(step))
+        // this one should succeed
+        // do not queue
+        schedulerService.restartProcessingStep(step, false)
+        assertEquals(10, ProcessingStepUpdate.countByProcessingStep(step))
+        assertEquals(ExecutionState.RESTARTED, ProcessingStepUpdate.findAllByProcessingStep(step).last().state)
+        assertFalse(process.finished)
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+    }
+
+    @Test
+    void testRestartProcessingStepProcessFinished() {
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // create the JobExecutionPlan with two Job Definitions
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = createTestJob("test", jep)
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        jobDefinition.next = createTestEndStateAwareJob("test2", jep, jobDefinition)
+        assertNotNull(jobDefinition.save())
+        assertNotNull(jep.save(flush: true))
+        // create the Process
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        assertNotNull(process.save())
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assertNotNull(step.save())
+        mockProcessingStepAsFailed(step)
+        assertFalse(process.finished)
+        // a not finished process should fail
+        shouldFail(IncorrectProcessingException) {
+            schedulerService.restartProcessingStep(step, false)
+        }
+        assertEquals(4, ProcessingStepUpdate.countByProcessingStep(step))
+        process.finished = true
+        assertNotNull(process.save())
+        assertTrue(process.finished)
+        schedulerService.restartProcessingStep(step, false)
+        assertEquals(5, ProcessingStepUpdate.countByProcessingStep(step))
+        assertEquals(ExecutionState.RESTARTED, ProcessingStepUpdate.findAllByProcessingStep(step).last().state)
+        assertFalse(process.finished)
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+    }
+
+    void testRestartProcessingStepHasUpdates() {
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // create the JobExecutionPlan with two Job Definitions
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = createTestJob("test", jep)
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        jobDefinition.next = createTestEndStateAwareJob("test2", jep, jobDefinition)
+        assertNotNull(jobDefinition.save())
+        assertNotNull(jep.save(flush: true))
+        // create the Process
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        process.finished = true
+        assertNotNull(process.save())
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assertNotNull(step.save())
+        shouldFail(IncorrectProcessingException) {
+            schedulerService.restartProcessingStep(step, false)
+        }
+        mockProcessingStepAsFailed(step)
+        schedulerService.restartProcessingStep(step, false)
+        assertEquals(5, ProcessingStepUpdate.countByProcessingStep(step))
+        assertEquals(ExecutionState.RESTARTED, ProcessingStepUpdate.findAllByProcessingStep(step).last().state)
+        assertFalse(process.finished)
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+    }
+
+    void testRestartProcessingStep() {
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // create the JobExecutionPlan with two Job Definitions
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = createTestJob("test", jep)
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        jobDefinition.next = createTestEndStateAwareJob("test2", jep, jobDefinition)
+        assertNotNull(jobDefinition.save())
+        assertNotNull(jep.save(flush: true))
+        // create the Process
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        process.finished = true
+        assertNotNull(process.save())
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assertNotNull(step.save())
+        mockProcessingStepAsFailed(step)
+        schedulerService.restartProcessingStep(step, false)
+        assertEquals(5, ProcessingStepUpdate.countByProcessingStep(step))
+        assertEquals(ExecutionState.RESTARTED, ProcessingStepUpdate.findAllByProcessingStep(step).last().state)
+        assertFalse(process.finished)
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // now the same with schedule
+        ProcessingStepUpdate update = ProcessingStepUpdate.findAllByProcessingStep(step).last()
+        update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.FINISHED,
+            previous: update,
+            processingStep: step
+            )
+        assertNotNull(update.save(flush: true))
+        update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.FAILURE,
+            previous: update,
+            processingStep: step
+            )
+        assertNotNull(update.save(flush: true))
+        assertEquals(7, ProcessingStepUpdate.countByProcessingStep(step))
+        process.finished = true
+        assertNotNull(process.save())
+        schedulerService.restartProcessingStep(step)
+        assertEquals(8, ProcessingStepUpdate.countByProcessingStep(step))
+        assertEquals(ExecutionState.RESTARTED, ProcessingStepUpdate.findAllByProcessingStep(step).last().state)
+        assertFalse(process.finished)
+        assertFalse(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        schedulerService.schedule()
+        assertEquals(10, ProcessingStepUpdate.countByProcessingStep(step))
+        schedulerService.schedule()
+        assertTrue(process.finished)
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+    }
+
+    private void mockProcessingStepAsFailed(ProcessingStep step) {
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.CREATED,
+            previous: null,
+            processingStep: step
+            )
+        assertNotNull(update.save(flush: true))
+        update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.STARTED,
+            previous: update,
+            processingStep: step
+            )
+        assertNotNull(update.save(flush: true))
+        update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.FINISHED,
+            previous: update,
+            processingStep: step
+            )
+        assertNotNull(update.save(flush: true))
+        update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.FAILURE,
+            previous: update,
+            processingStep: step
+            )
+        assertNotNull(update.save(flush: true))
     }
 }

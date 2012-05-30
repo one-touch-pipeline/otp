@@ -328,6 +328,9 @@ class SchedulerService {
             if (existingUpdates.isEmpty()) {
                 throw new IncorrectProcessingException("ProcessingStep ${step.id} cannot be restarted as it has no updates")
             }
+            if (!step.process.finished) {
+                throw new IncorrectProcessingException("ProcessingStep ${step.id} cannot be restarted as its Process is not in finished state")
+            }
             ProcessingStepUpdate lastUpdate = existingUpdates.sort { it.date }.last()
             if (lastUpdate.state != ExecutionState.FAILURE) {
                 throw new IncorrectProcessingException("ProcessingStep ${step.id} cannot be restarted as it is in state ${lastUpdate.state}")
