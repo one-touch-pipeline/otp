@@ -15,7 +15,24 @@ package de.dkfz.tbi.otp.job.processing
  **/
 public interface ValidatingJob extends EndStateAwareJob {
     /**
-     * @return List of the ProcessingStep this groovy.de.dkfz.tbi.otp.job.processing.Job is validating.
+     * @return ProcessingStep this groovy.de.dkfz.tbi.otp.job.processing.Job is validating.
      **/
-    public List<ProcessingStep> getValidatorFor();
+    public ProcessingStep getValidatorFor()
+
+    /**
+     * Used by the Scheduler to add a concrete Processing Step to validate
+     * based on the information of the ValidatingJobDefinition.
+     *
+     * @param step A Processing Step this Job is validating
+     */
+    public void setValidatorFor(ProcessingStep step)
+
+    /**
+     * Used by the Scheduler to determine whether the validated job succeeded
+     * or failed.
+     * In case the job failed the validated processing step is set to FAILURE and the Process is
+     * marked as failed.
+     * @return Whether the validated Job succeeded
+     **/
+    public boolean hasValidatedJobSucceeded()
 }

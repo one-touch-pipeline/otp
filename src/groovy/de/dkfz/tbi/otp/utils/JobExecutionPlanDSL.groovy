@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.utils
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.StartJobDefinition
+import de.dkfz.tbi.otp.job.plan.ValidatingJobDefinition
 import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterMapping
 import de.dkfz.tbi.otp.job.processing.ParameterType
@@ -145,6 +146,29 @@ class JobExecutionPlanDSL {
         }
     }
 
+    private static def validatingJobClosure = { JobExecutionPlan jep, Helper helper, String jobName, String bean, String validatorForName, closure = null ->
+        JobDefinition validatorFor = JobDefinition.findByNameAndPlan(validatorForName, jep)
+        assert(validatorFor)
+        ValidatingJobDefinition jobDefinition = new ValidatingJobDefinition(name: jobName, bean: bean, plan: jep, previous: helper.previous, validatorFor: validatorFor)
+        assert(jobDefinition.save())
+        if (!helper.firstJob) {
+            helper.firstJob = jobDefinition
+        }
+        if (helper.previous) {
+            helper.previous.next = jobDefinition
+            assert(helper.previous.save())
+        }
+        if (closure) {
+            closure.constantParameter = JobExecutionPlanDSL.constantParameterClosure.curry(jobDefinition)
+            closure.outputParameter = JobExecutionPlanDSL.outputParameterClosure.curry(jobDefinition)
+            closure.inputParameter = JobExecutionPlanDSL.inputParameterClosure.curry(jobDefinition, helper.previous, jep)
+            // TODO: in future have a generic watchdog which obsoletes the watchdogBean
+            closure.watchdog = JobExecutionPlanDSL.watchdogClosure.curry(jobDefinition, jep, helper)
+            closure()
+        }
+        helper.previous = jobDefinition
+    }
+
     public static def plan = { String name, def ctx = null, boolean validate = false, c ->
         JobExecutionPlan.withTransaction {
             JobExecutionPlan jep = new JobExecutionPlan(name: name, planVersion: 0, enabled: true)
@@ -154,6 +178,7 @@ class JobExecutionPlanDSL {
             c.start = JobExecutionPlanDSL.startJobClosure.curry(jep, startJobDefined)
             c.job = JobExecutionPlanDSL.jobClosure.curry(jep, helper)
             c.pbsJob = JobExecutionPlanDSL.pbsJobClosure.curry(jep, helper)
+            c.validatingJob = JobExecutionPlanDSL.validatingJobClosure.curry(jep, helper)
             c()
             jep.firstJob = helper.firstJob
             assert(jep.save(flush: true))

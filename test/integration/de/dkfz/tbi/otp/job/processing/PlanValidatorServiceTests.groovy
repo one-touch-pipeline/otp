@@ -6,6 +6,7 @@ import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.StartJobDefinition
+import de.dkfz.tbi.otp.job.plan.ValidatingJobDefinition
 import org.junit.*
 
 class PlanValidatorServiceTests {
@@ -194,6 +195,56 @@ class PlanValidatorServiceTests {
         List<String> errors = planValidatorService.validate(plan)
         assertFalse(errors.isEmpty())
         assertEquals(PlanValidatorService.NOT_ALL_JOBS_LINKED, errors[0])
+    }
+
+    @Test
+    void testValidatorBeanIsValidatingJob() {
+        JobExecutionPlan plan = createTestPlan()
+        JobDefinition jobDefinition = new JobDefinition(name: "testJob", bean: "testJob", plan: plan)
+        assertNotNull(jobDefinition.save())
+        ValidatingJobDefinition validator = new ValidatingJobDefinition(name: "validator", bean: "testEndStateAwareJob", validatorFor: jobDefinition, plan: plan)
+        assertNotNull(validator.save())
+        jobDefinition.next = validator
+        assertNotNull(jobDefinition.save())
+        plan.firstJob = jobDefinition
+        assertNotNull(plan.save())
+        List<String> errors = planValidatorService.validate(plan)
+        assertFalse(errors.isEmpty())
+        assertEquals(PlanValidatorService.VALIDATOR_BEAN_NOT_IMPLEMENTING_INTERFACE + "${validator.id}, testEndStateAwareJob", errors[0])
+    }
+
+    @Test
+    void testValidatorBeforeToValidateJobDefinition() {
+        JobExecutionPlan plan = createTestPlan()
+        JobDefinition jobDefinition = new JobDefinition(name: "testJob", bean: "testEndStateAwareJob", plan: plan)
+        assertNotNull(jobDefinition.save())
+        ValidatingJobDefinition validatingJobDefinition = new ValidatingJobDefinition(name: "validator", bean: "validatingTestJob", validatorFor: jobDefinition, plan: plan)
+        assertNotNull(validatingJobDefinition.save())
+        validatingJobDefinition.next = jobDefinition
+        assertNotNull(validatingJobDefinition.save())
+        jobDefinition.next = null
+        assertNotNull(jobDefinition.save())
+        plan.firstJob = validatingJobDefinition
+        assertNotNull(plan.save())
+        List<String> errors = planValidatorService.validate(plan)
+        assertFalse(errors.isEmpty())
+        assertEquals(PlanValidatorService.VALIDATOR_LOOP, errors[0])
+    }
+
+    @Test
+    void testValidatedJobNotEndstateAware() {
+        JobExecutionPlan plan = createTestPlan()
+        JobDefinition jobDefinition = new JobDefinition(name: "testJob", bean: "testEndStateAwareJob", plan: plan)
+        assertNotNull(jobDefinition.save())
+        ValidatingJobDefinition validatingJobDefinition = new ValidatingJobDefinition(name: "validator", bean: "validatingTestJob", validatorFor: jobDefinition, plan: plan)
+        assertNotNull(validatingJobDefinition.save())
+        jobDefinition.next = validatingJobDefinition
+        assertNotNull(jobDefinition.save())
+        plan.firstJob = jobDefinition
+        assertNotNull(plan.save())
+        List<String> errors = planValidatorService.validate(plan)
+        assertFalse(errors.isEmpty())
+        assertEquals(PlanValidatorService.VALIDATOR_ON_ENDSTATE + "${validatingJobDefinition.id}, validatingTestJob", errors[0])
     }
 
     @Test

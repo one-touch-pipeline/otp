@@ -61,7 +61,9 @@ class JobTransformation extends AbstractJobTransformation implements ASTTransfor
                     isJob = true
                 }
             }
-            if (classNode.superClass.name == "de.dkfz.tbi.otp.job.processing.AbstractJobImpl" || classNode.superClass.name == "de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl") {
+            if (classNode.superClass.name == "de.dkfz.tbi.otp.job.processing.AbstractJobImpl" ||
+                    classNode.superClass.name == "de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl" ||
+                    classNode.superClass.name == "de.dkfz.tbi.otp.job.processing.AbstractValidatingJobImpl") {
                 isJob = true
                 inheritsAbstractJob = true
             }

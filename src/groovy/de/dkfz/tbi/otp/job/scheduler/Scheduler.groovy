@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.scheduler
 
+import de.dkfz.tbi.otp.job.plan.ValidatingJobDefinition
 import de.dkfz.tbi.otp.job.processing.DecisionJob
 import de.dkfz.tbi.otp.job.processing.DecisionProcessingStep
 import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
@@ -16,6 +17,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.job.processing.ExecutionState
+import de.dkfz.tbi.otp.job.processing.ValidatingJob
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.notification.NotificationEvent
 import de.dkfz.tbi.otp.notification.NotificationType
@@ -103,6 +105,11 @@ class Scheduler {
                     // scheduler is already in failed state - no reason to process
                     throw new ProcessingException("Job already in failed condition before execution")
                 }
+            }
+            if (job instanceof ValidatingJob) {
+                ValidatingJobDefinition validator = step.jobDefinition as ValidatingJobDefinition
+                ProcessingStep validatedStep = ProcessingStep.findByProcessAndJobDefinition(step.process, validator.validatorFor)
+                (job as ValidatingJob).setValidatorFor(validatedStep)
             }
             // add a ProcessingStepUpdate to the ProcessingStep
             ProcessingStepUpdate update = new ProcessingStepUpdate(
@@ -270,6 +277,43 @@ class Scheduler {
             }
             if (endStateAwareJob.getEndState() == ExecutionState.FAILURE) {
                 throw new ProcessingException("Something went wrong in endStateAwareJob of type ${joinPoint.target.class}, execution state set to FAILURE")
+            }
+            if (job instanceof ValidatingJob) {
+                ValidatingJob validatingJob = job as ValidatingJob
+                // get the last ProcessingStepUpdate
+                ProcessingStep validatedStep = ProcessingStep.get(validatingJob.validatorFor.id)
+                List<ProcessingStepUpdate> existingValidatingUpdates = ProcessingStepUpdate.findAllByProcessingStep(validatedStep)
+                boolean succeeded = validatingJob.hasValidatedJobSucceeded()
+
+                ProcessingStepUpdate validatedUpdate = new ProcessingStepUpdate(
+                    date: new Date(),
+                    state: succeeded ? ExecutionState.SUCCESS : ExecutionState.FAILURE,
+                    previous: existingValidatingUpdates.sort { it.date }.last(),
+                    processingStep: validatedStep
+                    )
+                validatedUpdate.save()
+                if (!succeeded) {
+                    // create error
+                    ProcessingError validatedError = new ProcessingError(errorMessage: "Marked as failed by validating job", processingStepUpdate: validatedUpdate)
+                    validatedError.save()
+                    validatedUpdate.error = validatedError
+                }
+                if (!validatedUpdate.save(flush: true)) {
+                    log.fatal("Could not create a FAILED/SUCCEEDED Update for validated job processed by ${joinPoint.target.class}")
+                    throw new ProcessingException("Could not create a FAILED/SUCCEEDED Update for validated job")
+                }
+                if (!succeeded) {
+                    Process process = Process.get(step.process.id)
+                    process.finished = true
+                    if (!process.save(flush: true)) {
+                        // TODO: trigger error handling
+                        log.fatal("Could not set Process to finished")
+                        throw new ProcessingException("Could not set Process to finished")
+                    }
+                    // do not trigger next generation of Processing Step
+                    log.debug("doEndCheck performed for ${joinPoint.getTarget().class} with ProcessingStep ${step.id}")
+                    return
+                }
             }
         }
         try {

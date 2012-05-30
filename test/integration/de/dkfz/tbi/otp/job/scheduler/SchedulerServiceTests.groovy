@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.job.plan.JobDecision
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.StartJobDefinition
+import de.dkfz.tbi.otp.job.plan.ValidatingJobDefinition
 import de.dkfz.tbi.otp.job.processing.DecisionProcessingStep
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.IncorrectProcessingException
@@ -864,6 +865,139 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         // TODO: check that second job has the required input parameters
         process.refresh()
         assertTrue(process.finished)
+    }
+
+    @Test
+    void testFailingValidation() {
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = createTestJob("test", jep)
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        ValidatingJobDefinition validator = new ValidatingJobDefinition(name: "validator", bean: "failingValidatingTestJob", validatorFor: jobDefinition, plan: jep)
+        assertNotNull(validator.save())
+        jobDefinition.next = validator
+        assertNotNull(jobDefinition.save())
+        JobDefinition jobDefinition2 = createTestEndStateAwareJob("testEndStateAware", jep)
+        assertNotNull(jobDefinition2.save())
+        validator.next = jobDefinition2
+        assertNotNull(validator.save())
+        // Create the Process
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        assertNotNull(process.save())
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assertNotNull(step.save())
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.CREATED,
+            previous: null,
+            processingStep: step
+            )
+        assertNotNull(update.save(flush: true))
+        assertTrue(schedulerService.queue.add(step))
+        schedulerService.schedule()
+        assertFalse(process.finished)
+        // verify first job
+        assertEquals(3, ProcessingStepUpdate.countByProcessingStep(step))
+        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FINISHED, updates[2].state)
+        // another Job should be be scheduled
+        assertFalse(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // executing the validator should fail the process
+        schedulerService.schedule()
+        // process should be finished and the step should be set to failure
+        assertTrue(process.finished)
+        assertEquals(4, ProcessingStepUpdate.countByProcessingStep(step))
+        updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FINISHED, updates[2].state)
+        assertEquals(ExecutionState.FAILURE, updates[3].state)
+        // no further jobs should be scheduled
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // the validating job itself should be succeeded
+        step = ProcessingStep.list().last()
+        assertEquals(4, ProcessingStepUpdate.countByProcessingStep(step))
+        updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FINISHED, updates[2].state)
+        assertEquals(ExecutionState.SUCCESS, updates[3].state)
+    }
+
+    @Test
+    void testSuccessfulValidation() {
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = createTestJob("test", jep)
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        ValidatingJobDefinition validator = new ValidatingJobDefinition(name: "validator", bean: "validatingTestJob", validatorFor: jobDefinition, plan: jep)
+        assertNotNull(validator.save())
+        jobDefinition.next = validator
+        assertNotNull(jobDefinition.save())
+        JobDefinition jobDefinition2 = createTestEndStateAwareJob("testEndStateAware", jep)
+        assertNotNull(jobDefinition2.save())
+        validator.next = jobDefinition2
+        assertNotNull(validator.save())
+        // Create the Process
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        assertNotNull(process.save())
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assertNotNull(step.save())
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.CREATED,
+            previous: null,
+            processingStep: step
+            )
+        assertNotNull(update.save(flush: true))
+        assertTrue(schedulerService.queue.add(step))
+        schedulerService.schedule()
+        assertFalse(process.finished)
+        // verify first job
+        assertEquals(3, ProcessingStepUpdate.countByProcessingStep(step))
+        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FINISHED, updates[2].state)
+        // another Job should be be scheduled
+        assertFalse(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // executing the validator should fail the process
+        schedulerService.schedule()
+        // process should not yet be finished and the step should be set to success
+        assertFalse(process.finished)
+        assertEquals(4, ProcessingStepUpdate.countByProcessingStep(step))
+        updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FINISHED, updates[2].state)
+        assertEquals(ExecutionState.SUCCESS, updates[3].state)
+        // the validating job itself should be succeeded
+        step = ProcessingStep.findByJobDefinition(validator)
+        assertEquals(4, ProcessingStepUpdate.countByProcessingStep(step))
+        updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FINISHED, updates[2].state)
+        assertEquals(ExecutionState.SUCCESS, updates[3].state)
+        // another job should be scheduled
+        assertFalse(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // this should end the process
+        schedulerService.schedule()
+        assertTrue(process.finished)
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
     }
 
     @Test

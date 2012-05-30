@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.job.processing
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.StartJobDefinition
+import de.dkfz.tbi.otp.job.plan.ValidatingJobDefinition
 
 /**
  * Service to test whether a given Job Execution Plan is valid.
@@ -25,6 +26,9 @@ class PlanValidatorService {
     public static final String LAST_JOB_NOT_ENDSTATE_AWARE = "The last specified Job does not implement the end state aware interface"
     public static final String CIRCULAR_JOBS = "The Job Execution Plan contains a circular Job dependency"
     public static final String NOT_ALL_JOBS_LINKED = "Not all Job Definitions defined for this Job Execution Plan are linked through the next relationship"
+    public static final String VALIDATOR_LOOP = "Validator is specified before the job it should validate"
+    public static final String VALIDATOR_BEAN_NOT_IMPLEMENTING_INTERFACE = "The bean specified as a ValidatingJob does not implement the ValidatingJob interface (JobDefinition, Bean name): "
+    public static final String VALIDATOR_ON_ENDSTATE = "The to be validated job is endstate aware (JobDefinition, Bean name): "
 
     /**
      * Dependency Injection of grailsApplication
@@ -60,6 +64,17 @@ class PlanValidatorService {
                 }
             } else {
                 foundErrors << JOB_BEAN_MISSING + "${job.id}, ${job.bean}"
+            }
+            if (job instanceof ValidatingJobDefinition) {
+                if (!validatingJobBeanIsValidatingJob(job as ValidatingJobDefinition)) {
+                    foundErrors << VALIDATOR_BEAN_NOT_IMPLEMENTING_INTERFACE + "${job.id}, ${job.bean}"
+                }
+                if (!validatedJobBeforeValidator(plan, job as ValidatingJobDefinition)) {
+                    foundErrors << VALIDATOR_LOOP
+                }
+                if (!validatedJobIsNotEndstateAware(job as ValidatingJobDefinition)) {
+                    foundErrors << VALIDATOR_ON_ENDSTATE + "${job.id}, ${job.bean}"
+                }
             }
         }
         if (noCircularDependency(plan)) {
@@ -156,5 +171,29 @@ class PlanValidatorService {
             }
         }
         return true
+    }
+
+    private boolean validatingJobBeanIsValidatingJob(ValidatingJobDefinition validator) {
+        def jobBean = grailsApplication.mainContext.getBean(validator.bean)
+        return (jobBean instanceof ValidatingJob)
+    }
+
+    private boolean validatedJobBeforeValidator(JobExecutionPlan plan, ValidatingJobDefinition validator) {
+        JobDefinition jobDefinition = plan.firstJob
+        while (jobDefinition.next) {
+            if (jobDefinition == validator) {
+                return false
+            }
+            if (jobDefinition == validator.validatorFor) {
+                return true
+            }
+            jobDefinition = jobDefinition.next
+        }
+        return false
+    }
+
+    private boolean validatedJobIsNotEndstateAware(ValidatingJobDefinition validator) {
+        def jobBean = grailsApplication.mainContext.getBean(validator.validatorFor.bean)
+        return !(jobBean instanceof EndStateAwareJob)
     }
 }
