@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import groovy.xml.MarkupBuilder
-//import javax.servlet.http.HttpServletRequest
 
 class IgvSessionFileService {
 

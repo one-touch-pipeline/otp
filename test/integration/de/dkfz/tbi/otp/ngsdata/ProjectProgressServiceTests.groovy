@@ -37,4 +37,11 @@ class ProjectProgressServiceTests {
             println samples
         }
     }
+
+    @Test
+    void testProject() {
+        List<String> names = Project.list()*.name
+        List<Project> projects = projectProgressService.getProjectsFromNameList(names)
+        println projects
+    }
 }

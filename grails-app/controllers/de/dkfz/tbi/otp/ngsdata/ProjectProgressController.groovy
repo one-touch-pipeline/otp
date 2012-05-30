@@ -17,7 +17,7 @@ class ProjectProgressController {
 
     def progress(ProjectProgressCommand ppc) {
         ppc.validate()
-        List<Project> projects = Project.findAllByNameInList(ppc.projects)
+        List<Project> projects = projectProgressService.getProjectsFromNameList(ppc.projects)
         List<Run> runs = projectProgressService.getListOfRuns(projects, ppc.startDate)
         List data = fillTable(runs)
         [data: data, startDate: ppc.startDate, projects: ppc.projects]

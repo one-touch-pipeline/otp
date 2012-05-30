@@ -10,7 +10,7 @@
     <h1>Runs from: ${projects} since: <g:formatDate format="yyyy-MM-dd" date="${startDate}"/></h1>
 
     <g:form>
-        <td><g:datePicker name="startDate" value="${startDate}" precision="day" years="[2010, 2011,2012]"/>
+        <td><g:datePicker name="startDate" value="${startDate}" precision="day" years="${2010..Calendar.getInstance().get(Calendar.YEAR)}"/>
         <g:select
             name="projects"
             value="${projects}"
