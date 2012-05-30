@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import groovy.xml.MarkupBuilder
-import javax.servlet.http.HttpServletRequest
+//import javax.servlet.http.HttpServletRequest
 
 class IgvSessionFileService {
 
@@ -11,10 +11,10 @@ class IgvSessionFileService {
 
     private final String header = '<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n'
 
-    String buildSessionFile(List<SeqScan> scans, HttpServletRequest request) {
-        String text = buildContent(scans, request)
+    String buildSessionFile(List<SeqScan> scans, String requestURL) {
+        String text = buildContent(scans, requestURL)
         String name = createSessionFileObjectAndReturnName(text)
-        String url = buildURLString(request, name)
+        String url = buildURLString(requestURL, name)
         return url
     }
 
@@ -47,14 +47,14 @@ class IgvSessionFileService {
         return name
     }
 
-    private String buildURLString(HttpServletRequest request, String name) {
+    private String buildURLString(String requestURL, String name) {
         String igvBase = configService.igvPath()
-        String myURL = configService.getMyURL(request)
+        String myURL = configService.getMyURL(requestURL)
         String url = "${igvBase}${myURL}igvSessionFile/file/${name}"
         return url
     }
 
-    private String buildContent(List<SeqScan> scans, HttpServletRequest request) {
+    private String buildContent(List<SeqScan> scans, String requestURL) {
         StringWriter writer = new StringWriter()
         MarkupBuilder xml = new MarkupBuilder(writer)
         int indId = scans.get(0).sample.individual.id
@@ -67,7 +67,7 @@ class IgvSessionFileService {
                         Resource(path: path)
                     }
                 }
-                String myURL = getMyURL(request)
+                String myURL = configService.getMyURL(requestURL)
                 Resource(path: "${myURL}igvSessionFile/mutFile/${indId}.mut")
             }
         }
@@ -133,7 +133,6 @@ class IgvSessionFileService {
     }
 
     private String dataWebServer(SeqScan scan) {
-        Realm realm = scan.sample.individual.project.realm
-        return realm.webHost
+        return scan.sample.individual.project.realm.webHost
     }
 }

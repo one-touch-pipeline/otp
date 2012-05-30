@@ -76,13 +76,13 @@ class IndividualController {
                 scans << scan
             }
         }
-        String url = igvSessionFileService.buildSessionFile(scans, request)
+        String url = igvSessionFileService.buildSessionFile(scans, request.getRequestURL().toString())
         println "Redirecting: ${url}"
         redirect(url: url)
     }
 
     def igvDownload = {
         println "Download"
-        render "downloging ..."
+        render "downloding ..."
     }
 }

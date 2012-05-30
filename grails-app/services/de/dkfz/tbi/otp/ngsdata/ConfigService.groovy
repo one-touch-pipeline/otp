@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.job.processing.ProcessingException
-import javax.servlet.http.HttpServletRequest
 
 /**
  * This service knows all the configuration parameters like root paths,
@@ -33,10 +32,8 @@ class ConfigService {
      * fragile code. Shall be replaced by accessing servlet container 
      * configuration.
      */
-    String getMyURL(HttpServletRequest request) {
-        String url = request.getRequestURL()
-        url = url.substring(0, url.indexOf("grails"))
-        return url
+    String getMyURL(String requestURL) {
+        return requestURL.substring(0, requestURL.indexOf("grails"))
     }
 
     String getPbsPassword() {
