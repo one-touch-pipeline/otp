@@ -19,6 +19,7 @@ class MergingServiceTests extends AbstractIntegrationTest {
         // Tear down logic here
     }
 
+    @Ignore
     @Test
     void testPrintAllMergedBamForIndividual() {
         // Individual may not be null

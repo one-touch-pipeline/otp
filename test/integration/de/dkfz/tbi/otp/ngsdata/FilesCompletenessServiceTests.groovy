@@ -37,6 +37,7 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         mdPath.deleteDir()
     }
 
+    @Ignore
     @Test
     void testCheckInitialSequenceFiles() {
         // the Run to be checked
@@ -101,6 +102,7 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         assertTrue(filesCompletenessService.checkInitialSequenceFiles(run))
     }
 
+    @Ignore
     @Test
     void testCheckFinalLocation() {
         // the Run to be checked
@@ -158,6 +160,7 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         assertTrue(filesCompletenessService.checkFinalLocation(run))
     }
 
+    @Ignore
     @Test
     void testCheckViewByPid() {
         // the Run to be checked
