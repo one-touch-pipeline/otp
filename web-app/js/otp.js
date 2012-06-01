@@ -182,7 +182,7 @@ OTP.prototype.createListView = function (selector, sourcePath, sortOrder, jsonCa
     $(selector).dataTable({
         sPaginationType: "full_numbers",
         bFilter: false,
-        bJQueryUI: true,
+        bJQueryUI: false,
         bProcessing: true,
         bServerSide: true,
         sAjaxSource: sourcePath,
@@ -268,6 +268,266 @@ OTP.prototype.createRestartProcessingStepLink = function (id, dataTable) {
 };
 
 /**
+ * Renders a graph representing a JobExecutionPlan or Process.
+ * @param idName Name of the element id where to render the graph to
+ * @param data JSON data structure containing jobs and connections
+ **/
+OTP.prototype.renderJobExecutionPlanGraph = function (idName, data) {
+    "use strict";
+    var i, g, job, c, layouter, renderer;
+    var render = function (r, n) {
+        var element, textElement, i, param, addNewline, attr;
+        var parameters = "";
+        addNewline = false;
+        if (n.constantParameters.length > 0) {
+            parameters = "Constant Parameters:\n";
+        }
+        for (i = 0; i < n.constantParameters.length; i += 1) {
+            if (addNewline) {
+                parameters += "\n";
+            }
+            param = n.constantParameters[i];
+            parameters += param.type.name + ": " + param.value;
+            addNewline = true;
+        }
+        if (n.inputParameters.length > 0) {
+            if (addNewline) {
+                parameters += "\n";
+            }
+            parameters = "Input Parameters:\n";
+            addNewline = false;
+        }
+        for (i = 0; i < n.inputParameters.length; i += 1) {
+            if (addNewline) {
+                parameters += "\n";
+            }
+            param = n.inputParameters[i];
+            parameters += param.type.name + ": ";
+            if (param.value) {
+                parameters += param.value;
+            }
+            addNewline = true;
+        }
+        if (n.outputParameters.length > 0) {
+            if (addNewline) {
+                parameters += "\n";
+            }
+            parameters = "Output Parameters:\n";
+            addNewline = false;
+        }
+        for (i = 0; i < n.outputParameters.length; i += 1) {
+            if (addNewline) {
+                parameters += "\n";
+            }
+            param = n.outputParameters[i];
+            parameters += param.type.name + ": ";
+            if (param.value) {
+                parameters += param.value;
+            }
+            addNewline = true;
+        }
+        attr = {
+            'stroke-width': '1px',
+            'fill': '#feb',
+            'title': parameters
+        };
+        if (n.startJob) {
+            // start jobs are green ellipse
+            element = r.ellipse(n.point[0], n.point[1], 75, 25);
+            attr.fill = 'green';
+        } else if (n.endStateAware) {
+            // end state aware jobs are ellipse
+            element = r.ellipse(n.point[0], n.point[1], 75, 25);
+        } else {
+            // normal jobs are rects
+            element = r.rect(n.point[0] - 75, n.point[1] - 25, 150, 50);
+        }
+        if (n.pbsJob) {
+            // pbsJobs are orange
+            attr.fill = 'orange';
+        }
+        textElement = r.text(n.point[0], n.point[1], (n.label || n.id));
+        if (n.processingStep !== undefined && n.processingStep !== null) {
+            if (n.failed) {
+                attr.fill = 'red';
+            } else if (n.succeeded) {
+                attr.fill = 'lightgreen';
+            } else if (n.finished) {
+                attr.fill = 'lightblue';
+            }
+            textElement.attr({
+                href: $.otp.contextPath + "/processes/processingStep/" + n.processingStep
+            });
+        }
+        element.attr(attr);
+        return r.set().push(element, textElement);
+    };
+    g = new Graph();
+    g.edgeFactory.template.style.directed = true;
+    for (i = 0; i < data.jobs.length; i += 1) {
+        job = data.jobs[i];
+        job.render = render;
+        job.label = job.name;
+        g.addNode(job.id, job);
+    }
+    for (i = 0; i < data.connections.length; i += 1) {
+        c = data.connections[i];
+        var test = function () {
+            var j;
+            var fromValid = false;
+            var toValid = false;
+            for (j = 0; j < data.jobs.length; j += 1) {
+                if (j === 0 && data.jobs[j].id === c.from) {
+                    fromValid = true;
+                    continue;
+                }
+                if (data.jobs[j].id === c.from) {
+                    fromValid = data.jobs[j].processingStep !== null;
+                }
+                if (data.jobs[j].id === c.to) {
+                    toValid = data.jobs[j].processingStep !== null;
+                }
+            }
+            return fromValid && toValid;
+        };
+        g.addEdge(c.from, c.to, {
+            stroke: test() ? "red" : "black"
+        });
+    }
+    layouter = new Graph.Layout.Spring(g);
+    layouter.layout();
+    renderer = new Graph.Renderer.Raphael(idName, g, $("#" + idName).parent().width() - 20, 600);
+    renderer.draw();
+    $("#" + idName).data("graph", {layouter: layouter, renderer: renderer});
+};
+
+/**
+ * Generates the JobExecutionPlan DSL for the given plan.
+ * Writes the DSL into a textarea of a dialog.
+ * @param plan JSON structure of the JobExecutionPlan
+ **/
+OTP.prototype.generatePlanDSL = function (plan) {
+    "use strict";
+    var startJob, job, dsl, findStartJob, nextJob, renderConstantParameters, findOutputParameter, jobForParameter, renderInputParameters, renderOutputParameters;
+    dsl = "";
+    findStartJob = function () {
+        var i;
+        for (i = 0; i < plan.jobs.length; i += 1) {
+            if (plan.jobs[i].startJob) {
+                return plan.jobs[i];
+            }
+        }
+        return null;
+    };
+    nextJob = function (currentJob) {
+        var i, j;
+        for (i = 0; i < plan.connections.length; i += 1) {
+            if (plan.connections[i].from === currentJob.id) {
+                for (j = 0; j < plan.jobs.length; j += 1) {
+                    if (plan.jobs[j].id === plan.connections[i].to) {
+                        return plan.jobs[j];
+                    }
+                }
+            }
+        }
+        return null;
+    };
+    renderConstantParameters = function (job) {
+        var i, param;
+        for (i = 0; i < job.constantParameters.length; i += 1) {
+            param = job.constantParameters[i];
+            dsl += "        constantParameter(\"";
+            dsl += param.type.name;
+            dsl += "\", \"";
+            dsl += param.value;
+            dsl += "\")\n";
+        }
+    };
+    findOutputParameter = function (id) {
+        var i, j, job;
+        for (i = 0; i < plan.jobs.length; i += 1) {
+            job = plan.jobs[i];
+            for (j = 0; j < job.outputParameters.length; j += 1) {
+                if (id === job.outputParameters[j].type.id) {
+                    return job.outputParameters[j];
+                }
+            }
+            for (j = 0; j < job.passthroughParameters.length; j += 1) {
+                if (id === job.passthroughParameters[j].type.id) {
+                    return findOutputParameter(job.passthroughParameters[j].mapping);
+                }
+            }
+        }
+        return null;
+    };
+    jobForParameter = function (parameter) {
+        var i, j, job;
+        for (i = 0; i < plan.jobs.length; i += 1) {
+            job = plan.jobs[i];
+            for (j = 0; j < job.inputParameters.length; j += 1) {
+                if (parameter === job.inputParameters[j]) {
+                    return job;
+                }
+            }
+            for (j = 0; j < job.outputParameters.length; j += 1) {
+                if (parameter === job.outputParameters[j]) {
+                    return job;
+                }
+            }
+            for (j = 0; j < job.passthroughParameters.length; j += 1) {
+                if (parameter === job.passthroughParameters[j]) {
+                    return job;
+                }
+            }
+        }
+        return null;
+    };
+    renderInputParameters = function (job) {
+        var i, outputParameter;
+        for (i = 0; i < job.inputParameters.length; i += 1) {
+            outputParameter = findOutputParameter(job.inputParameters[i].mapping);
+            if (!outputParameter) {
+                continue;
+            }
+            dsl += "        inputParameter(\"";
+            dsl += job.inputParameters[i].type.name;
+            dsl += "\", \"";
+            dsl += jobForParameter(outputParameter).name;
+            dsl += "\", \"";
+            dsl += outputParameter.type.name;
+            dsl += "\")\n";
+        }
+    };
+    renderOutputParameters = function (job) {
+        var i, param;
+        for (i = 0; i < job.outputParameters.length; i += 1) {
+            param = job.outputParameters[i];
+            dsl += "        outputParameter(\"";
+            dsl += param.type.name;
+            dsl += "\")\n";
+        }
+    };
+    dsl += "plan(\"" + plan.name + "\") {\n";
+    startJob = findStartJob();
+    dsl += "    start(\"" + startJob.name + "\", \"" + startJob.bean + "\") {\n";
+    renderConstantParameters(startJob);
+    renderOutputParameters(startJob);
+    dsl += "    }\n";
+    job = nextJob(startJob);
+    while (job) {
+        dsl += "    job(\"" + job.name + "\", \"" + job.bean + "\") {\n";
+        renderConstantParameters(job);
+        renderInputParameters(job);
+        renderOutputParameters(job);
+        dsl += "    }\n";
+        job = nextJob(job);
+    }
+    dsl += "}\n";
+    $("#plan-dsl-dialog textarea").text(dsl);
+    $("#plan-dsl-dialog").dialog();
+};
+
+/**
  * Creates the datatables view for the list of all Processes for a given JobExecutionPlan
  * @param selector The JQuery selector for the table to create the datatable into
  * @param planId The id of the JobExecutionPlan for which the list of Processes should be retrieved.
@@ -339,6 +599,27 @@ OTP.prototype.createProcessListView = function (selector, planId, failed) {
             image.attr("src", image.attr("src").replace("green", "grey"));
         });
     });
+    $("#show-visualization").click(function () {
+        $("#plan-visualization").show();
+        $("#hide-visualization").show();
+        $(this).hide();
+        if ($("#plan-visualization").data("graph")) {
+            $("#plan-visualization").data("graph").layouter.layout();
+            $("#plan-visualization").data("graph").renderer.draw();
+            return;
+        }
+        $.getJSON($.otp.contextPath + "/processes/planVisualization/" + planId, function (data) {
+            $.otp.renderJobExecutionPlanGraph("plan-visualization", data);
+        });
+    });
+    $("#hide-visualization").click(function () {
+        $("#plan-visualization").hide();
+        $("#show-visualization").show();
+        $(this).hide();
+    });
+    $("#generate-dsl").click(function () {
+        $.getJSON($.otp.contextPath + "/processes/planVisualization/" + planId, $.otp.generatePlanDSL);
+    });
 };
 
 /**
@@ -397,6 +678,24 @@ OTP.prototype.createProcessingStepListView = function (selector, processId) {
         { "bSortable": false, "aTargets": [7] },
         { "bSortable": false, "aTargets": [8] }
     ]);
+    $("#show-visualization").click(function () {
+        $("#process-visualization").show();
+        $("#hide-visualization").show();
+        $(this).hide();
+        if ($("#process-visualization").data("graph")) {
+            $("#process-visualization").data("graph").layouter.layout();
+            $("#process-visualization").data("graph").renderer.draw();
+            return;
+        }
+        $.getJSON($.otp.contextPath + "/processes/processVisualization/" + processId, function (data) {
+            $.otp.renderJobExecutionPlanGraph("process-visualization", data);
+        });
+    });
+    $("#hide-visualization").click(function () {
+        $("#plan-visualization").hide();
+        $("#show-visualization").show();
+        $(this).hide();
+    });
 };
 
 /**

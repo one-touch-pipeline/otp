@@ -805,7 +805,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         // Realm as Input Parameter
         ParameterType pbsRealmInputParameterType = new ParameterType(name: "__pbsRealm", description: "PBS Realm", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
         assertNotNull(pbsRealmInputParameterType.save())
-        Realm realm = new Realm(name: "realm", rootPath: "/", webHost: "http://localhost", host: "localhost", port: "1234", unixUser: "test", timeout: "200")
+        Realm realm = new Realm(name: "realm", rootPath: "/", webHost: "http://localhost", host: "localhost", port: 1234, unixUser: "test", timeout: 200, pbsOptions: "")
         realm = realm.save()
         assertNotNull(realm)
         Parameter constantRealmParameter = new Parameter(type: pbsRealmInputParameterType, value: realm.id)

@@ -236,6 +236,24 @@ if (otpConfig.otp.pbs.vcs.cloneDirectory instanceof ConfigObject) {
     otp.pbs.vcs.cloneDirectory = otpConfig.otp.pbs.vcs.cloneDirectory
 }
 
+if (otpConfig.otp.dataprocessing.outputbasedir instanceof ConfigObject) {
+    otp.dataprocessing.outputbasedir = ""
+} else {
+    otp.dataprocessing.outputbasedir = otpConfig.otp.dataprocessing.outputbasedir
+}
+
+if (otpConfig.otp.dataprocessing.scriptdir instanceof ConfigObject) {
+    otp.dataprocessing.scriptdir = ""
+} else {
+    otp.dataprocessing.scriptdir = otpConfig.otp.dataprocessing.scriptdir
+}
+
+if (otpConfig.otp.dataprocessing.alignment.referenceIndex instanceof ConfigObject) {
+    otp.dataprocessing.alignment.referenceIndex = ""
+} else {
+    otp.dataprocessing.alignment.referenceIndex = otpConfig.otp.dataprocessing.alignment.referenceIndex
+}
+
 // Added by the Spring Security Core plugin:
 grails.plugins.springsecurity.userLookup.userDomainClassName = 'de.dkfz.tbi.otp.security.User'
 grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'de.dkfz.tbi.otp.security.UserRole'

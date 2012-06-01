@@ -25,4 +25,9 @@ eventCompileStart = {
     // copy the messages.properties
     ant.mkdir(dir: "web-app/js/i18n/")
     ant.copy(file: "grails-app/i18n/messages.properties", todir: "web-app/js/i18n/")
+    ant.copy(file: "ast/de/dkfz/tbi/otp/job/scheduler/JobExecution.groovy", tofile: "src/groovy/de/dkfz/tbi/otp/job/scheduler/JobExecution.groovy")
+}
+
+eventCompileEnd = {
+    ant.delete(file: "src/groovy/de/dkfz/tbi/otp/job/scheduler/JobExecution.groovy")
 }

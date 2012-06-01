@@ -32,6 +32,11 @@ class ProcessService {
     def aclUtilService
 
     /**
+     * Dependency Injection of JobExecutionPlanService.
+     **/
+    def jobExecutionPlanService
+
+    /**
      * Security aware way to access a Process.
      * @param id The Process's id
      * @return
@@ -292,6 +297,65 @@ ORDER BY u.id desc
             return finishDate.time - startDate.time
         }
         return null
+    }
+
+    /**
+     * Generates some information about the given Process.
+     * Information is based on the information for the plan of the process. Each Job is extended
+     * by information about the execution of the ProcessingStep. The added information to Job is:
+     * <ul>
+     * <li>processingStep (long): Id of the ProcessingStep or null if not yet present</li>
+     * <li>created (boolean)</li>
+     * <li>started (boolean)</li>
+     * <li>finished (boolean)</li>
+     * <li>succeeded (boolean)</li>
+     * <li>failed (boolean)</li>
+     * </ul>
+     *
+     * Additionally for input and output parameters the actual value is added.
+     * @param process The Process for which the information should be extracted
+     * @return Process Information in a JSON ready format
+     * @see JobExecutionPlanService.planInformation
+     **/
+    @PreAuthorize("hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
+    public Map processInformation(Process process) {
+        Map plan = jobExecutionPlanService.planInformation(process.jobExecutionPlan)
+        List<ProcessingStep> processingSteps = ProcessingStep.findAllByProcess(process)
+        List<Long> jobIdsOfProcessingSteps = processingSteps.collect { it.jobDefinition.id }
+        plan.jobs.each { job ->
+            if (jobIdsOfProcessingSteps.contains(job.id)) {
+                ProcessingStep step = processingSteps.find { it.jobDefinition.id == job.id }
+                job.processingStep = step.id
+                job.created = true
+                ProcessingStepUpdate update = lastUpdate(step)
+                job.started = update.state != ExecutionState.CREATED
+                job.finished = (update.state == ExecutionState.FINISHED || update.state == ExecutionState.SUCCESS || update.state == ExecutionState.FAILURE)
+                job.succeeded = update.state == ExecutionState.SUCCESS
+                job.failed = (update.state == ExecutionState.FAILURE || update.state == ExecutionState.RESTARTED)
+                step.input.each { param ->
+                    job.inputParameters.each {
+                        if (it.type.id == param.type.id) {
+                            it.value = param.value
+                        }
+                    }
+                }
+                step.output.each { param ->
+                    job.outputParameters.each {
+                        if (it.type.id == param.type.id) {
+                            it.value = param.value
+                        }
+                    }
+                }
+            } else {
+                job.processingStep = null
+                job.created = false
+                job.started = false
+                job.finished = false
+                job.succeeded = false
+                job.failed = false
+            }
+        }
+        return plan
     }
 
     /**

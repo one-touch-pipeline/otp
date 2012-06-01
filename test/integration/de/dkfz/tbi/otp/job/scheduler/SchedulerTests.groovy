@@ -359,7 +359,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         assertEquals("PbsJob does not provide the Realm it is operating on or Realm Id is incorrect", updates[3].error.errorMessage)
 
         // Create the Realm
-        Realm realm = new Realm(name: "realm", rootPath: "/", webHost: "http://localhost", host: "localhost", port: "1234", unixUser: "test", timeout: "200")
+        Realm realm = new Realm(name: "realm", rootPath: "/", webHost: "http://localhost", host: "localhost", port: 1234, unixUser: "test", timeout: 200, pbsOptions: "")
         assertNotNull(realm.save())
         // Create a new Process
         Process process2 = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
@@ -432,7 +432,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         ParameterType pbsOutputParameterType = new ParameterType(name: "__pbsIds", description: "Ids on PBS", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         assertNotNull(pbsOutputParameterType.save())
         // create the Realm
-        Realm realm = new Realm(name: "realm", rootPath: "/", webHost: "http://localhost", host: "localhost", port: "1234", unixUser: "test", timeout: "200")
+        Realm realm = new Realm(name: "realm", rootPath: "/", webHost: "http://localhost", host: "localhost", port: 1234, unixUser: "test", timeout: 200, pbsOptions: "")
         assertNotNull(realm.save())
         ParameterType pbsRealmOutputParameterType = new ParameterType(name: "__pbsRealm", description: "PBS Realm", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         assertNotNull(pbsRealmOutputParameterType.save())

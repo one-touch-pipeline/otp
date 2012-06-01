@@ -215,6 +215,11 @@ class ProcessesController {
         render dataToRender as JSON
     }
 
+    def planVisualization() {
+        JobExecutionPlan plan = jobExecutionPlanService.getPlan(params.id as long)
+        render jobExecutionPlanService.planInformation(plan) as JSON
+    }
+
     def enablePlan() {
         render jobExecutionPlanService.enablePlan(jobExecutionPlanService.getPlan(params.id as long))
     }
@@ -293,6 +298,11 @@ class ProcessesController {
             ]
         }
         render dataToRender as JSON
+    }
+
+    def processVisualization() {
+        Process process = processService.getProcess(params.id as long)
+        render processService.processInformation(process) as JSON
     }
 
     def processingStep() {

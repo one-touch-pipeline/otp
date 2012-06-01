@@ -7,6 +7,7 @@
 <jqDT:resources/>
 <g:javascript library="jquery.dataTables" />
 <g:javascript src="jquery.timeago.js"/>
+<r:require module="graphDracula"/>
 </head>
 <body>
   <div class="body">
@@ -14,6 +15,11 @@
     <g:if test="${parameter}">
     <p>Process operates on ${parameter}</p>
     </g:if>
+    <div>
+        <div id="process-visualization" style="display: none"></div>
+        <button id="show-visualization">Show Process Visualization</button>
+        <button id="hide-visualization" style="display: none">Hide Process Visualization</button>
+    </div>
     <div id="processOverview">
       <table id="processOverviewTable">
         <thead>
