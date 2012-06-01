@@ -29,7 +29,7 @@ class ConfigService {
     }
 
     /*
-     * fragile code. Shall be replaced by accessing servlet container 
+     * fragile code. Shall be replaced by accessing servlet container
      * configuration.
      */
     String getMyURL(String requestURL) {
