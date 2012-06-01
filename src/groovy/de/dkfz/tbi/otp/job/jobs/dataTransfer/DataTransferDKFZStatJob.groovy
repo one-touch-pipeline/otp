@@ -49,7 +49,7 @@ class DataTransferDKFZStatJob extends AbstractStartJobImpl  {
                 eq("complete", true)
                 eq("finalLocation", false)
                 eq("finalLocationChecked", true)
-                eq("realm", Run.Realm.DKFZ)
+                eq("realm", Run.StorageRealm.DKFZ)
             }
         }
     }

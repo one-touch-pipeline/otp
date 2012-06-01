@@ -10,13 +10,13 @@ class SetCompletedJob extends AbstractEndStateAwareJobImpl {
     public void execute() throws Exception {
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
-        setRealm(run)
+        setStorageRealm(run)
         run.complete = true
         run.save(flush: true)
         succeed()
     }
 
-    private void setRealm(Run run) {
+    private void setStorageRealm(Run run) {
         Set<String> hosts = new HashSet<String>()
         List<DataFile> files = DataFile.findAllByRun(run)
         for(DataFile file in files) {
@@ -30,10 +30,10 @@ class SetCompletedJob extends AbstractEndStateAwareJobImpl {
             case 1: 
                 String[] array= hosts.toArray()
                 String rr = array[0].toUpperCase()
-                run.realm = Run.Realm."${rr}"
+                run.storageRealm = Run.StorageRealm."${rr}"
                 return
             default:
-                run.realm = Run.Realm.MIXED
+                run.StorageRealm = Run.StorageRealm.MIXED
         }
     }
 

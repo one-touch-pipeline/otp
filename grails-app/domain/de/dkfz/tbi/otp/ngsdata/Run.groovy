@@ -15,13 +15,17 @@ class Run {
 
     boolean multipleSource           // for runs from a few projects
 
+    boolean compressedArchive
+    enum InitialFormat {FILES_IN_DIRECTORY, TAR, TAR_IN_DIRECTORY}
+    InitialFormat initialFormat
+
     boolean legacyRun = false
 
     SeqCenter seqCenter
     SeqPlatform seqPlatform
 
-    enum Realm {DKFZ, BIOQUANT, MIXED}
-    Realm realm
+    enum StorageRealm {DKFZ, BIOQUANT, MIXED}
+    StorageRealm storageRealm
 
     static belongsTo = [
         Project,
@@ -31,7 +35,7 @@ class Run {
 
     static constraints = {
         name(blank: false, unique: true)
-        realm(nullable: true)
+        storageRealm(nullable: true)
         allFilesUsed()
         dateExecuted(nullable: true)
         dateCreated()
