@@ -29,13 +29,13 @@
             <g:if test="${step.previous}">
             <tr>
                 <td>Previous:</td>
-                <td><g:link action="processingStep" id="${step.previous.id}">${step.previous.jobDefinition.name}</g:link>
+                <td><g:link action="processingStep" id="${step.previous.id}">${step.previous.jobDefinition.name}</g:link></td>
             </tr>
             </g:if>
             <g:if test="${step.next}">
             <tr>
                 <td>Next:</td>
-                <td><g:link action="processingStep" id="${step.next.id}">${step.next.jobDefinition.name}</g:link>
+                <td><g:link action="processingStep" id="${step.next.id}">${step.next.jobDefinition.name}</g:link></td>
             </tr>
             </g:if>
         </tbody>
