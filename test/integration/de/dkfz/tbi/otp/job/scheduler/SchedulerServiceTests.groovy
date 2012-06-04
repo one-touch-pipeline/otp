@@ -20,6 +20,7 @@ import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessParameter;
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
+import de.dkfz.tbi.otp.job.processing.RestartedProcessingStep
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.job.processing.StartJob
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
@@ -1239,15 +1240,180 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertFalse(process.finished)
         assertFalse(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
+        // a restarted ProcessingStep should have been created
+        RestartedProcessingStep restartedStep = RestartedProcessingStep.findAllByOriginal(step).last()
+        assertNotNull(restartedStep)
+        assertEquals(step, restartedStep.original)
+        assertEquals(1, ProcessingStepUpdate.countByProcessingStep(restartedStep))
+        assertEquals(ExecutionState.CREATED, ProcessingStepUpdate.findAllByProcessingStep(restartedStep).last().state)
+        assertEquals(restartedStep, schedulerService.queue.first())
         schedulerService.schedule()
-        assertEquals(10, ProcessingStepUpdate.countByProcessingStep(step))
+        assertEquals(8, ProcessingStepUpdate.countByProcessingStep(step))
+        assertEquals(3, ProcessingStepUpdate.countByProcessingStep(restartedStep))
+        assertEquals(ExecutionState.FINISHED, ProcessingStepUpdate.findAllByProcessingStep(restartedStep).last().state)
+        assertFalse(process.finished)
         schedulerService.schedule()
         assertTrue(process.finished)
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
+        assertTrue(process.finished)
     }
 
-    private void mockProcessingStepAsFailed(ProcessingStep step) {
+    /**
+     * Tests that the previous next link is updated and the next job is run.
+    **/
+    void testRestartProcessingStepUpdatesLink() {
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // create the JobExecutionPlan with two Job Definitions
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = createTestJob("test", jep)
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition2 = createTestJob("test2", jep)
+        jobDefinition.next = jobDefinition2
+        assertNotNull(jobDefinition.save())
+        JobDefinition jobDefinition3 = createTestEndStateAwareJob("test3", jep, jobDefinition2)
+        jobDefinition2.next = jobDefinition3
+        assertNotNull(jobDefinition2.save())
+        assertNotNull(jep.save(flush: true))
+        // create the Process
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        assertNotNull(process.save())
+        // let first ProcessingStep succeed
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assertNotNull(step.save())
+        mockProcessingStepAsSucceeded(step)
+        ProcessingStep step2 = new ProcessingStep(jobDefinition: jobDefinition2, process: process, previous: step)
+        assertNotNull(step2.save())
+        step.next = step2
+        assertNotNull(step.save())
+        // verify links before anything is done
+        assertNull(step.previous)
+        assertEquals(step2, step.next)
+        assertEquals(step, step2.previous)
+        assertNull(step2.next)
+        // mark step2 as failed
+        mockProcessingStepAsFailed(step2)
+        process.finished = true
+        assertNotNull(process.save())
+        // let's restart step2
+        assertEquals(0, RestartedProcessingStep.count())
+        schedulerService.restartProcessingStep(step2)
+        assertEquals(1, RestartedProcessingStep.count())
+        schedulerService.schedule()
+        schedulerService.schedule()
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        assertTrue(process.finished)
+        // validate new chain
+        step = ProcessingStep.findByJobDefinition(jobDefinition)
+        assertNull(step.previous)
+        RestartedProcessingStep restartedStep = RestartedProcessingStep.findByJobDefinition(jobDefinition2)
+        assertEquals(restartedStep.previous, step)
+        assertEquals(step.next, restartedStep)
+        assertEquals(step2, restartedStep.original)
+        assertNull(step2.next)
+        ProcessingStep lastStep = ProcessingStep.findByJobDefinition(jobDefinition3)
+        assertEquals(restartedStep.next, lastStep)
+        assertEquals(lastStep.previous, restartedStep)
+        assertNull(lastStep.next)
+    }
+
+    /**
+     * Test that the branching is done correctly.
+     **/
+    void testRestartProcessingStepKeepsLinks() {
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // create the JobExecutionPlan with two Job Definitions
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = createTestJob("test", jep)
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition2 = createTestJob("test2", jep)
+        jobDefinition.next = jobDefinition2
+        assertNotNull(jobDefinition.save())
+        JobDefinition jobDefinition3 = createTestJob("test3", jep)
+        jobDefinition2.next = jobDefinition3
+        assertNotNull(jobDefinition2.save())
+        JobDefinition jobDefinition4 = createTestEndStateAwareJob("test4", jep, jobDefinition3)
+        jobDefinition3.next = jobDefinition4
+        assertNotNull(jobDefinition3.save())
+        assertNotNull(jep.save(flush: true))
+        // create the Process
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        assertNotNull(process.save())
+        ProcessingStep firstStep = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assertNotNull(firstStep.save())
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.CREATED,
+            previous: null,
+            processingStep: firstStep
+            )
+        assertNotNull(update.save(flush: true))
+        schedulerService.queue << firstStep
+        schedulerService.schedule()
+        schedulerService.schedule()
+        schedulerService.schedule()
+        schedulerService.schedule()
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        assertTrue(process.finished)
+        // let's get our ProcessingSteps
+        ProcessingStep secondStep = ProcessingStep.findByJobDefinition(jobDefinition2)
+        assertNotNull(secondStep)
+        ProcessingStep thirdStep = secondStep.next
+        assertNotNull(thirdStep)
+        ProcessingStep fourthStep = thirdStep.next
+        assertNotNull(fourthStep)
+        // lets fail the second job
+        ProcessingStepUpdate failureUpdate = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.FAILURE,
+            previous: ProcessingStepUpdate.findAllByProcessingStep(secondStep).last(),
+            processingStep: secondStep
+            )
+        assertNotNull(failureUpdate.save())
+        schedulerService.restartProcessingStep(secondStep)
+        schedulerService.schedule()
+        schedulerService.schedule()
+        schedulerService.schedule()
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        assertTrue(process.finished)
+        // verify the chain of ProcessingSteps
+        assertEquals(1, RestartedProcessingStep.count())
+        assertEquals(1, ProcessingStep.countByJobDefinition(jobDefinition))
+        assertEquals(2, ProcessingStep.countByJobDefinition(jobDefinition2))
+        assertEquals(2, ProcessingStep.countByJobDefinition(jobDefinition3))
+        assertEquals(2, ProcessingStep.countByJobDefinition(jobDefinition4))
+        RestartedProcessingStep restartedStep = RestartedProcessingStep.list().last()
+        assertEquals(firstStep.next, restartedStep)
+        assertEquals(restartedStep.previous, firstStep)
+        assertEquals(restartedStep.original, secondStep)
+        assertTrue(restartedStep.next != thirdStep)
+        assertEquals(secondStep.previous, firstStep)
+        assertEquals(secondStep.next, thirdStep)
+        assertEquals(thirdStep.previous, secondStep)
+        assertEquals(thirdStep.next, fourthStep)
+        assertEquals(fourthStep.previous, thirdStep)
+        assertNull(fourthStep.next)
+        ProcessingStep thirdStep2 = ProcessingStep.findAllByJobDefinition(jobDefinition3).last()
+        assertTrue(thirdStep2 != thirdStep)
+        assertEquals(restartedStep.next, thirdStep2)
+        assertEquals(thirdStep2.previous, restartedStep)
+        ProcessingStep fourthStep2 = ProcessingStep.findAllByJobDefinition(jobDefinition4).last()
+        assertTrue(fourthStep2 != fourthStep)
+        assertEquals(thirdStep2.next, fourthStep2)
+        assertEquals(fourthStep2.previous, thirdStep2)
+        assertNull(fourthStep2.next)
+    }
+
+    private ProcessingStepUpdate mockProcessingStepAsFinished(ProcessingStep step) {
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.CREATED,
@@ -1269,9 +1435,25 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
             processingStep: step
             )
         assertNotNull(update.save(flush: true))
+        return update
+    }
+
+    private void mockProcessingStepAsFailed(ProcessingStep step) {
+        ProcessingStepUpdate update = mockProcessingStepAsFinished(step)
         update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.FAILURE,
+            previous: update,
+            processingStep: step
+            )
+        assertNotNull(update.save(flush: true))
+    }
+
+    private void mockProcessingStepAsSucceeded(ProcessingStep step) {
+        ProcessingStepUpdate update = mockProcessingStepAsFinished(step)
+        update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.SUCCESS,
             previous: update,
             processingStep: step
             )

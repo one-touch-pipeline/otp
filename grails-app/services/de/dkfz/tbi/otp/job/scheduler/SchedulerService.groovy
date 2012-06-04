@@ -17,6 +17,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessingError
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
+import de.dkfz.tbi.otp.job.processing.RestartedProcessingStep
 import de.dkfz.tbi.otp.job.processing.StartJob
 import de.dkfz.tbi.otp.notification.NotificationEvent
 import de.dkfz.tbi.otp.notification.NotificationType;
@@ -99,7 +100,7 @@ class SchedulerService {
                         return
                     }
                     ProcessingStepUpdate last = updates.sort { it.id }.last()
-                    if (last.state == ExecutionState.CREATED || last.state == ExecutionState.RESTARTED) {
+                    if (last.state == ExecutionState.CREATED) {
                         processesToRestart << step
                     } else if (last.state == ExecutionState.SUSPENDED) {
                         ProcessingStepUpdate update = new ProcessingStepUpdate(
@@ -323,6 +324,7 @@ class SchedulerService {
      * @param schedule Whether to add the restarted ProcessingStep to the scheduler or not
      **/
     public void restartProcessingStep(ProcessingStep step, boolean schedule = true) {
+        RestartedProcessingStep restartedStep = null
         ProcessingStep.withTransaction {
             List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(step)
             if (existingUpdates.isEmpty()) {
@@ -345,6 +347,23 @@ class SchedulerService {
                 log.fatal("Could not create a RESTARTED Update for ProcessingStep ${step.id}")
                 throw new ProcessingException("Could not create a RESTARTED Update for ProcessingStep ${step.id}")
             }
+            restartedStep = RestartedProcessingStep.create(step)
+            if (!restartedStep.save(flush: true)) {
+                log.fatal("Could not create a RestartedProcessingStep for ProcessingStep ${step.id}")
+                throw new SchedulerPersistencyException("Could not create a RestartedProcessingStep for ProcessingStep ${step.id}")
+            }
+            // update the previous link
+            if (restartedStep.previous) {
+                restartedStep.previous.next = restartedStep
+                if (!restartedStep.previous.save(flush: true)) {
+                    log.fatal("Could not update previous ProcessingStep of ProcessingStep ${step.id}")
+                    throw new SchedulerPersistencyException("Could not update previous ProcessingStep of ProcessingStep ${step.id}")
+                }
+            }
+            ProcessingStepUpdate created = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: restartedStep)
+            if (!created.save(flush: true)) {
+                throw new SchedulerPersistencyException("Could not save the first ProcessingStepUpdate for RestartedProcessingStep ${restartedStep.id}")
+            }
 
             Process process = Process.get(step.process.id)
             process.finished = false
@@ -357,7 +376,9 @@ class SchedulerService {
         if (schedule) {
             lock.lock()
             try {
-                queue.add(step)
+                if (restartedStep) {
+                    queue.add(restartedStep)
+                }
             } finally {
                 lock.unlock()
             }

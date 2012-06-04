@@ -38,6 +38,12 @@
                 <td><g:link action="processingStep" id="${step.next.id}">${step.next.jobDefinition.name}</g:link></td>
             </tr>
             </g:if>
+            <g:if test="${step instanceof de.dkfz.tbi.otp.job.processing.RestartedProcessingStep}">
+            <tr>
+                <td>Previously failed Step:</td>
+                <td><g:link action="processingStep" id="${step.original.id}"># ${step.original.id}</g:link></td>
+            </tr>
+            </g:if>
         </tbody>
     </table>
     <h2>Input Parameters</h2>
