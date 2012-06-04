@@ -93,6 +93,21 @@ class JobExecutionPlanService {
         return Process.findAllByJobExecutionPlanInList(plans, [max: max, offset: offset, sort: column, order: order ? "asc" : "desc"])
     }
 
+    /**
+     * Retrieves all Processes for the given JobExecutionPlan together with their latests Update.
+     * This method returns a map of all Processes for the given JobExecutionPlan as the key values
+     * and the latest ProcessingStepUpdate for the Processes as values.
+     * It is possible to restrict the returned Processes. The most important one is probably the
+     * restriction on execution state. Using this one will filter out all Processes whose latest
+     * update is not in the requested state.
+     * @param plan The JobExecutionPlan for which the data should be retrieved
+     * @param max The maximum number of Processes to retrieve
+     * @param offset The offset in the list of Processes to retrieve
+     * @param column The column for searching
+     * @param order The sort order, true for ascending, false for descending
+     * @param state The execution state for restricting the result
+     * @return Map of Processes with latest ProcessingStepUpdate
+     **/
     @PreAuthorize("hasPermission(#plan, read) or hasRole('ROLE_ADMIN')")
     public Map<Process, ProcessingStepUpdate> getLatestUpdatesForPlan(JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false, ExecutionState state = null) {
         final List<Long> plans = withParents(plan).collect { it.id }
@@ -103,6 +118,17 @@ INNER JOIN u.processingStep as step
 INNER JOIN step.process as p
 INNER JOIN p.jobExecutionPlan as plan
 WHERE plan.id in (:planIds)
+AND step.next IS NULL
+AND u.id IN (
+    SELECT MAX(u2.id)
+    FROM ProcessingStepUpdate AS u2
+    INNER JOIN u2.processingStep as step2
+    INNER JOIN step2.process as p2
+    INNER JOIN p2.jobExecutionPlan as plan2
+    WHERE plan2.id in (:planIds)
+    AND step2.next IS NULL
+    GROUP BY p2.id
+)
 '''
         if (state) {
             query = query + "AND u.state = :state\n"

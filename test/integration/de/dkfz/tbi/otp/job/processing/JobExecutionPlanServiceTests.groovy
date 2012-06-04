@@ -747,7 +747,128 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertSame(process2, service.getLastExecutedProcess(plan))
     }
 
+    public void testGetLatestUpdatesForPlanInStateFailure() {
+        JobExecutionPlanService service = new JobExecutionPlanService()
+        JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0)
+        assertNotNull(plan.save())
+        def planData = service.getLatestUpdatesForPlan(plan)
+        assertTrue(planData.isEmpty())
+        // create the process
+        Process process1 = new Process(finished: false, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
+        assertNotNull(process1.save())
+        // create the Processing Step
+        JobDefinition jobDefinition1 = new JobDefinition(name: "test", bean: "foo", plan: plan)
+        assertNotNull(jobDefinition1.save())
+        plan.firstJob = jobDefinition1
+        assertNotNull(plan.save())
+        ProcessingStep step1 = new ProcessingStep(process: process1, jobDefinition: jobDefinition1)
+        assertNotNull(step1.save())
+        // now a created Processing Step Update...
+        mockProcessingStepAsFinished(step1)
+        // latest updates for plan should show one
+        planData = service.getLatestUpdatesForPlan(plan)
+        assertFalse(planData.isEmpty())
+        assertTrue(planData.containsKey(process1))
+        assertEquals(planData.get(process1).state, ExecutionState.FINISHED)
+        // lets restrict the returned data
+        assertEquals(1, service.getNumberOfProcesses(plan,  ExecutionState.FINISHED))
+        planData = service.getLatestUpdatesForPlan(plan, 10, 0, "id", false, ExecutionState.FINISHED)
+        assertFalse(planData.isEmpty())
+        assertTrue(planData.containsKey(process1))
+        assertEquals(planData.get(process1).state, ExecutionState.FINISHED)
+        // try to restrict on something else
+        assertEquals(0, service.getNumberOfProcesses(plan,  ExecutionState.CREATED))
+        planData = service.getLatestUpdatesForPlan(plan, 10, 0, "id", false, ExecutionState.CREATED)
+        assertTrue(planData.isEmpty())
+        // lets create a failure for the processing step
+        ProcessingStepUpdate update = ProcessingStepUpdate.findByState(ExecutionState.FINISHED)
+        ProcessingStepUpdate failure = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.FAILURE,
+            previous: update,
+            processingStep: update.processingStep
+        )
+        assertNotNull(failure.save())
+        // test for failure
+        assertEquals(1, service.getNumberOfProcesses(plan,  ExecutionState.FAILURE))
+        planData = service.getLatestUpdatesForPlan(plan, 10, 0, "id", false, ExecutionState.FAILURE)
+        assertFalse(planData.isEmpty())
+        assertTrue(planData.containsKey(process1))
+        assertEquals(planData.get(process1), failure)
+        // create a restarted update
+        ProcessingStepUpdate restarted = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.RESTARTED,
+            previous: failure,
+            processingStep: update.processingStep
+        )
+        assertNotNull(restarted.save())
+        // test for failure
+        assertEquals(0, service.getNumberOfProcesses(plan,  ExecutionState.FAILURE))
+        planData = service.getLatestUpdatesForPlan(plan, 10, 0, "id", false, ExecutionState.FAILURE)
+        assertTrue(planData.isEmpty())
+        // test for restarted
+        assertEquals(1, service.getNumberOfProcesses(plan,  ExecutionState.RESTARTED))
+        planData = service.getLatestUpdatesForPlan(plan, 10, 0, "id", false, ExecutionState.RESTARTED)
+        assertFalse(planData.isEmpty())
+        assertTrue(planData.containsKey(process1))
+        assertEquals(planData.get(process1), restarted)
+        // test generic
+        assertEquals(1, service.getNumberOfProcesses(plan))
+        planData = service.getLatestUpdatesForPlan(plan)
+        assertFalse(planData.isEmpty())
+        assertTrue(planData.containsKey(process1))
+        assertEquals(planData.get(process1), restarted)
+    }
+
     private Date nextDate(ProcessingStepUpdate update) {
         return new Date(update.date.time + 1)
+    }
+
+    private ProcessingStepUpdate mockProcessingStepAsFinished(ProcessingStep step) {
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.CREATED,
+            previous: null,
+            processingStep: step
+            )
+        assertNotNull(update.save(flush: true))
+        update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.STARTED,
+            previous: update,
+            processingStep: step
+            )
+        assertNotNull(update.save(flush: true))
+        update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.FINISHED,
+            previous: update,
+            processingStep: step
+            )
+        assertNotNull(update.save(flush: true))
+        return update
+    }
+
+    private void mockProcessingStepAsFailed(ProcessingStep step) {
+        ProcessingStepUpdate update = mockProcessingStepAsFinished(step)
+        update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.FAILURE,
+            previous: update,
+            processingStep: step
+            )
+        assertNotNull(update.save(flush: true))
+    }
+
+    private void mockProcessingStepAsSucceeded(ProcessingStep step) {
+        ProcessingStepUpdate update = mockProcessingStepAsFinished(step)
+        update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.SUCCESS,
+            previous: update,
+            processingStep: step
+            )
+        assertNotNull(update.save(flush: true))
     }
 }
