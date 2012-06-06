@@ -1,8 +1,8 @@
 Properties databaseProperties = new Properties()
 try {
-    def env = System.getenv()
-    if (env['OTP_PROPERTIES'] != null) {
-        databaseProperties.load(new FileInputStream(env['OTP_PROPERTIES']))
+    String propertiesFile = System.getenv("OTP_PROPERTIES")
+    if (new File(propertiesFile).canRead()) {
+        databaseProperties.load(new FileInputStream(propertiesFile))
     } else {
         databaseProperties.load(new FileInputStream(System.getProperty("user.home") + "/.otp.properties"))
     }
@@ -21,24 +21,23 @@ try {
         }
     }
 } catch (Exception e) {
-    // no database configured yet, use hsqldb
-    databaseProperties.setProperty("otp.database.driver", "org.hsqldb.jdbcDriver")
+    // no database configured yet, use h2
+    databaseProperties.setProperty("otp.database.driver", "org.h2.Driver")
     databaseProperties.setProperty("otp.database.username", "sa")
     databaseProperties.setProperty("otp.database.password", "")
-    databaseProperties.setProperty("otp.database.url", "jdbc:hsqldb:mem:devDb")
-    databaseProperties.setProperty("otp.database.pooled", "false")
-    databaseProperties.setProperty("otp.database.dbCreate", "create")
-    databaseProperties.setProperty("otp.database.dialect", "org.hibernate.dialect.HSQLDialect")
+    databaseProperties.setProperty("otp.database.url", "jdbc:h2:mem:devDb")
+    databaseProperties.setProperty("otp.database.pooled", "true")
+    databaseProperties.setProperty("otp.database.dbCreate", "update")
 }
 def databaseConfig = new ConfigSlurper().parse(databaseProperties)
-
 dataSource {
     pooled = Boolean.parseBoolean(databaseConfig.otp.database.pooled)
-    driverClassName = "org.h2.Driver" 
-	//driverClassName = "com.mysql.jdbc.Driver"
-    //dialect = org.hibernate.dialect.MySQL5InnoDBDialect
-    username = "sa"
-    password = ""
+    driverClassName = "org.postgresql.Driver"
+    dialect = org.hibernate.dialect.PostgreSQLDialect
+    dbCreate = databaseConfig.otp.database.dbCreate
+    username = databaseConfig.otp.database.username
+    password = databaseConfig.otp.database.password
+    url = databaseConfig.otp.database.url
 }
 
 hibernate {
@@ -48,31 +47,29 @@ hibernate {
 }
 // environment specific settings
 environments {
+    // Everything is set in general data source
+    production {
+        dataSource {
+        }
+    }
+    // Everything is set in general data source
     development {
         dataSource {
-            driverClassName = "org.postgresql.Driver"
-            dialect = org.hibernate.dialect.PostgreSQLDialect
 			//loggingSql = true
-            dbCreate = databaseConfig.otp.database.dbCreate
-            username = databaseConfig.otp.database.username
-            password = databaseConfig.otp.database.password
-            url = databaseConfig.otp.database.url
         }
     }
     test {
+        hibernate {
+            cache.use_second_level_cache = false
+            cache.use_query_cache = false
+        }
         dataSource {
+            driverClassName = "org.h2.Driver"
+            username = "sa"
+            password = ""
+            pooled = true
             dbCreate = "update"
             url = "jdbc:h2:mem:testDb"
-        }
-    }
-    production {
-        dataSource {
-            driverClassName = "org.postgresql.Driver"
-            dialect = org.hibernate.dialect.PostgreSQLDialect
-            dbCreate = databaseConfig.otp.database.dbCreate
-            username = databaseConfig.otp.database.username
-            password = databaseConfig.otp.database.password
-            url = databaseConfig.otp.database.url
         }
     }
 }
