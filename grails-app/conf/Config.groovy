@@ -157,72 +157,6 @@ if (otpConfig.otp.errorLogging.stacktraces instanceof ConfigObject) {
 } else {
     otp.errorLogging.stacktraces = otpConfig.otp.errorLogging.stacktraces
 }
-// Folder for data of NGS data files
-if (otpConfig.otp.ngsdata.bootstrap.dataPath instanceof ConfigObject) {
-    otp.ngsdata.bootstrap.dataPath = ""
-} else {
-    otp.ngsdata.bootstrap.dataPath = otpConfig.otp.ngsdata.bootstrap.dataPath
-}
-// Folder for meta data files of NGS meta data files
-if (otpConfig.otp.ngsdata.bootstrap.mdPath instanceof ConfigObject) {
-    otp.ngsdata.bootstrap.mdPath = ""
-} else {
-    otp.ngsdata.bootstrap.mdPath = otpConfig.otp.ngsdata.bootstrap.mdPath
-}
-// The PBS hosts
-// DKFZ
-if (otpConfig.otp.pbs.dkfz instanceof ConfigObject) {
-    otp.pbs.dkfz = ""
-} else {
-    otp.pbs.dkfz = otpConfig.otp.pbs.dkfz
-}
-// BioQuant
-if (otpConfig.otp.pbs.bioquant instanceof ConfigObject) {
-    otp.pbs.bioquant = ""
-} else {
-    otp.pbs.bioquant = otpConfig.otp.pbs.bioquant
-}
-// The PBS port
-if (otpConfig.otp.pbs.ssh.port instanceof ConfigObject) {
-    otp.pbs.ssh.port = "22"
-} else {
-    otp.pbs.ssh.port = otpConfig.otp.pbs.ssh.port
-}
-// The PBS key file
-if (otpConfig.otp.pbs.ssh.keyfile instanceof ConfigObject) {
-    otp.pbs.ssh.keyfile = ""
-} else {
-    otp.pbs.ssh.keyfile = otpConfig.otp.pbs.ssh.keyfile
-}
-// The PBS user name
-if (otpConfig.otp.pbs.ssh.username instanceof ConfigObject) {
-    otp.pbs.ssh.username = ""
-} else {
-    otp.pbs.ssh.username = otpConfig.otp.pbs.ssh.username
-}
-// The PBS user's password
-if (otpConfig.otp.pbs.ssh.password instanceof ConfigObject) {
-    otp.pbs.ssh.password = ""
-} else {
-    otp.pbs.ssh.password = otpConfig.otp.pbs.ssh.password
-}
-// The timeout for the commands processed on the PBS (if zero, it runs infinitely)
-if (otpConfig.otp.pbs.ssh.timeout instanceof ConfigObject) {
-    otp.pbs.ssh.timeout = ""
-} else {
-    otp.pbs.ssh.timeout = otpConfig.otp.pbs.ssh.timeout
-}
-
-if (otpConfig.otp.pbs.vcs.exchangeDirectory instanceof ConfigObject) {
-    otp.pbs.vcs.exchangeDirectory = ""
-} else {
-    otp.pbs.vcs.exchangeDirectory = otpConfig.otp.pbs.vcs.exchangeDirectory
-}
-if (otpConfig.otp.pbs.vcs.cloneDirectory instanceof ConfigObject) {
-    otp.pbs.vcs.cloneDirectory = ""
-} else {
-    otp.pbs.vcs.cloneDirectory = otpConfig.otp.pbs.vcs.cloneDirectory
-}
 
 if (otpConfig.otp.dataprocessing.outputbasedir instanceof ConfigObject) {
     otp.dataprocessing.outputbasedir = ""
@@ -281,11 +215,6 @@ if ((otpConfig.otp.jabber.enabled instanceof ConfigObject) || !Boolean.parseBool
     otp.jabber.port = otpConfig.otp.jabber.port
     otp.jabber.service = otpConfig.otp.jabber.service
 }
-
-// configure paths
-otp.dataPath.bioquant = "$ROOT_PATH/project/"
-otp.dataPath.dkfz = "$OTP_ROOT_PATH/"
-otp.dataPath.metadata = "${home}ngs-icgc/"
 
 // exclude unused plugins
 if (pluginsToExclude) {
