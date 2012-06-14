@@ -12,7 +12,12 @@
 
 Properties otpProperties = new Properties()
 try {
-    otpProperties.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") + ".otp.properties"))
+    String propertiesFile = System.getenv("OTP_PROPERTIES")
+    if (new File(propertiesFile).canRead()) {
+        otpProperties.load(new FileInputStream(propertiesFile))
+    } else {
+        otpProperties.load(new FileInputStream(System.getProperty("user.home") + "/.otp.properties"))
+    }
 } catch (Exception e) {
     otpProperties.setProperty("otp.security.ldap.enabled", "false")
     otpProperties.setProperty("otp.jabber.enabled", "false")
@@ -83,10 +88,14 @@ grails.exceptionresolver.params.exclude = ['password']
 environments {
     development {
         grails.logging.jul.usebridge = true
+        grails.serverURL = "http://localhost:8080/${appName}"
     }
     production {
         grails.logging.jul.usebridge = false
-        grails.serverURL = "http://www.changeme.com"
+        grails.serverURL = otpConfig.otp.server.url
+    }
+    test {
+        grails.serverURL = "http://localhost:8080/${appName}"
     }
 }
 
