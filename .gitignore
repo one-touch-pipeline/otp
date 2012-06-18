@@ -15,3 +15,7 @@ web-app/js/i18n/*
 *.log
 CodeNarcReport.html
 cobertura.ser
+*.txt
+*.sh
+web-app/WEB-INF/tld/c.tld
+web-app/WEB-INF/tld/fmt.tld
