@@ -1,5 +1,20 @@
 package de.dkfz.tbi.otp.ngsdata
 
+/**
+ * Run represents one sequencing Run. It is one of the most important classes
+ * in the NGS database. The run is typically submitted all at once, but it
+ * could be submitted in parts from different locations and belonging to different
+ * projects. The initial locations are stored in RunInitalLocation objects. 
+ *
+ * Runs arrive in three formats: files in a directory, TAR archive in a directory
+ * with uncompressed MetaDataFiles and as TAR archive with a directory and MetaDataFiles
+ * inside archive. The initialFormat is a variable to store this format. 
+ * Depending on this variable proper uncompressing workflow will be started. 
+ * As long as "compressedArchive" variable is set to true, no workflow 
+ * other than uncompressing shall be started.
+ *
+ */
+
 class Run {
 
     String name                      // run name
@@ -8,18 +23,7 @@ class Run {
     Date dateCreated  = new Date()   // do we need object creation ?
 
     boolean blacklisted = false      // run is known to be invalid
-    boolean complete = false         // complete run was delivered
-    boolean allFilesUsed = false     // flag if data if all files find relations
-    boolean finalLocation = false    // was run moved to final destination from ftp
-    boolean finalLocationChecked = false // was final location tested ?
-
-    boolean multipleSource           // for runs from a few projects
-
-    boolean compressedArchive
-    enum InitialFormat {FILES_IN_DIRECTORY, TAR, TAR_IN_DIRECTORY}
-    InitialFormat initialFormat
-
-    boolean legacyRun = false
+    boolean multipleSource = false   // for runs for more than one projects
 
     SeqCenter seqCenter
     SeqPlatform seqPlatform
@@ -28,7 +32,6 @@ class Run {
     StorageRealm storageRealm
 
     static belongsTo = [
-        Project,
         SeqCenter,
         SeqPlatform
     ]
@@ -36,10 +39,8 @@ class Run {
     static constraints = {
         name(blank: false, unique: true)
         storageRealm(nullable: true)
-        allFilesUsed()
         dateExecuted(nullable: true)
         dateCreated()
-        complete()
     }
 
     String toString() {
@@ -48,7 +49,7 @@ class Run {
 
     String initialMDPaths() {
         String paths = ""
-        RunInitialPath.findAllByRun(this).each {paths += it.mdPath + " "}
+        RunSegment.findAllByRun(this).each {paths += it.mdPath + " "}
         return paths
     }
 }

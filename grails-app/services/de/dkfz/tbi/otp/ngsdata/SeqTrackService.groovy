@@ -291,16 +291,19 @@ AND entry.value = :value
      */
     public void checkSequenceTracks(long runId) {
         Run run = Run.get(runId)
-        run.allFilesUsed = true
-        List<DataFile> files = DataFile.findAllByRun(run)
-        for(DataFile file in files) {
-            if(fileTypeService.isRawDataFile(file)) {
-                if (!file.used) {
-                    run.allFilesUsed = false
+        List<RunSegment> segments = RunSegment.findAllByRun(run)
+        for(RunSegment segment in segments) {
+            segment.allFilesUsed = true
+            List<DataFile> files = DataFile.findAllByRunSegment(segment)
+            for(DataFile file in files) {
+                if (fileTypeService.isRawDataFile(file)) {
+                    if (!file.used) {
+                        segment.allFilesUsed = false
+                    }
                 }
             }
+            segment.save(flus: true)
         }
-        run.save(flush: true)
     }
 
     private MetaDataEntry metaDataEntry(DataFile file, String keyName) {

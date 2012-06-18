@@ -26,7 +26,7 @@ class DataFile {
 
     static belongsTo = [
         run : Run,
-        runInitialPath : RunInitialPath,
+        runSegment : RunSegment,
         seqTrack : SeqTrack,
         mergingLog : MergingLog,
         alignmentLog : AlignmentLog,
@@ -57,7 +57,7 @@ class DataFile {
         seqTrack(nullable: true)
         mergingLog(nullable: true)
         alignmentLog(nullable: true)
-        runInitialPath(nullable: true)
+        runSegment(nullable: true)
     }
 
     String fileSizeString() {

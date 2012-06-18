@@ -93,9 +93,12 @@ class RunFinder {
             }
         }
         Run run = findOrCreateRun(runName)
-        RunInitialPath initialPath = new RunInitialPath(
+        RunSegment initialPath = new RunSegment(
             dataPath: path,
             mdPath: baseDir,
+            initialFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
+            currentFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
+            filesStatus: RunSegment.FilesStatus.NEEDS_CHECKING,
             run: run
         )
         initialPath.save(flush: true)
@@ -115,8 +118,7 @@ class RunFinder {
         Run run = new Run(
             name: runName,
             seqCenter: seqCenter,
-            seqPlatform: platform,
-            legacyRun: true
+            seqPlatform: platform
         )
         run.save()
         return run

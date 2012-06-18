@@ -5,59 +5,32 @@ import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.ngsdata.Run
+import de.dkfz.tbi.otp.ngsdata.RunProcessingService
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
-
+import org.springframework.beans.factory.annotation.Autowired
 @Component("dataLocationStartJob")
 @Scope("singleton")
 class DataLocationStartJob extends AbstractStartJobImpl {
 
+    @Autowired
+    RunProcessingService runProcessingService
+
     final int MAX_RUNNING = 1
 
-    @Scheduled(fixedRate=5000l)
+    @Scheduled(fixedRate=3000l)
     void execute() {
         if (!hasOpenSlots()) {
             return
         }
-        int n = 0;
-        def c = Run.createCriteria()
-        List<Run> runs = c.list {
-            and{
-                eq("complete", true)
-                eq("finalLocation", false)
-                eq("legacyRun", true)
-            }
-        }
-        for(Run run in runs) {
-            if (!hasOpenSlots()) {
-                break
-            }
-            if (processed(run)) {
-                continue
-            }
-            // new run to be processed
+        Run run = runProcessingService.runReadyToCheckFinalLocation()
+        if (run) {
+            println "RUN: ${run.id}"
+            runProcessingService.blockCheckingFinalLocation(run)
+            println "BLOCKED RUN: ${run.id}"
             createProcess(new ProcessParameter(value: run.id.toString(), className: run.class.name))
-            println run.toString()
-            n++
-        }
-        if (n>0) {
-            println "DataLocationWorkflow: ${n} jobs started"
-        }
-    }
-
-    /**
-    * Checks if given run was already processed by DataLocation execution plan
-    * @param run
-    * @return
-    */
-    boolean processed(Run run) {
-        List<ProcessParameter> processParameters =
-            ProcessParameter.findAllByValue(run.id.toString(), run.class.name)
-        for(ProcessParameter parameter in processParameters) {
-            if (parameter.process.jobExecutionPlan.id == getExecutionPlan().id) {
-                return true
-            }
+            println "Starting dataLocationWorkflow for run ${run.name}"
         }
     }
 

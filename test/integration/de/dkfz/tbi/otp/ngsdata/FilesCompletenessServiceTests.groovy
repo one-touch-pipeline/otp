@@ -6,7 +6,7 @@ import org.junit.*
 
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
-import de.dkfz.tbi.otp.ngsdata.RunInitialPath
+import de.dkfz.tbi.otp.ngsdata.RunSegment
 
 class FilesCompletenessServiceTests extends AbstractIntegrationTest {
 
@@ -93,7 +93,7 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         shouldFail(NullPointerException) {
             filesCompletenessService.checkInitialSequenceFiles(run)
         }
-        RunInitialPath runInitialPath = new RunInitialPath(dataPath: dataPath.absolutePath, mdPath: mdPath.absolutePath, run: run)
+        RunSegment runInitialPath = new RunSegment(dataPath: dataPath.absolutePath, mdPath: mdPath.absolutePath, run: run)
         assert(runInitialPath.save())
         dataFile1.runInitialPath = runInitialPath
         dataFile2.runInitialPath = runInitialPath

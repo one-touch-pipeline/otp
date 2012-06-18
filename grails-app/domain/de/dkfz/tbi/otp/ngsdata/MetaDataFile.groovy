@@ -8,12 +8,12 @@ class MetaDataFile {
     Date dateCreated = null
 
     static belongsTo = [
-        runInitialPath : RunInitialPath
+        runSegment : RunSegment
     ]
     static constraints = {
         fileName()
         filePath()
-        runInitialPath()
+        runSegment()
         dateCreated()
     }
 }

@@ -46,10 +46,6 @@
             <td class="myValue">${run.dateCreated}</td>
        </tr>
        <tr>
-            <td class="myKey">data path</td>
-            <td class="myValue"></td>
-       </tr>
-       <tr>
             <td class="myKey">meta data path</td>
             <td class="myValue">${run.initialMDPaths()}</td>
        </tr>
@@ -60,27 +56,6 @@
                     ${path} <br/>
                 </g:each>
             </td>
-       </tr>
-    </table>
-
-
-    <h1>Status</h1>
-    <table>
-       <tr>
-            <td class="myKey">is complete</td>
-            <td class="${run.complete}">${run.complete}</td>
-       </tr>
-               <tr>
-            <td class="myKey">all files used</td>
-            <td class="${run.allFilesUsed}">${run.allFilesUsed}</td>
-       </tr>
-       <tr>
-            <td class="myKey">data moved to final location</td>
-            <td class="${run.finalLocation}">${run.finalLocation}</td>
-       </tr>
-            <tr>
-            <td class="myKey">run from multiple sources</td>
-            <td class="${run.multipleSource}">${run.multipleSource}</td>
        </tr>
     </table>
 
@@ -178,11 +153,10 @@
 
         <%--  Data Files with errors  --%>
         <table>
-            <g:if test="${run.allFilesUsed == false}">
+
             <tr>
                 <td class="miniHeader" colspan="4">Files not used:</td>
             </tr>
-            </g:if>
 
             <g:each var="file" in="${errorFiles}">
                 <tr>

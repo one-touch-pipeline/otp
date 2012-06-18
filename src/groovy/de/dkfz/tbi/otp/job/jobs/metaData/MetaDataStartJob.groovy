@@ -1,65 +1,45 @@
 package de.dkfz.tbi.otp.job.jobs.metaData
 
-import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
-import de.dkfz.tbi.otp.job.processing.Parameter
-import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
-import de.dkfz.tbi.otp.ngsdata.Run
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
+import org.springframework.beans.factory.annotation.Autowired
 
 @Component("metaDataStartJob")
 @Scope("singleton")
 class MetaDataStartJob extends AbstractStartJobImpl {
 
+    @Autowired
+    RunProcessingService runProcessingService
+
     final int MAX_RUNNING = 1
 
-    @Scheduled(fixedDelay=2000l)
+    @Scheduled(fixedDelay=5000l)
     void execute() {
+        if (!hasOpenSlot()) {
+            return
+        }
+        Run run = runProcessingService.runWithNewMetaData()
+        if (run) {
+            runProcessingService.blockMetaData(run)
+            createProcess(new ProcessParameter(value: run.id.toString(), className: run.class.name))
+            println "MetaDataWorkflow started for: ${run.toString()}"
+        }
+    }
+
+    boolean hasOpenSlot() {
         if (!getExecutionPlan() || !getExecutionPlan().enabled) {
             //println("meta data Execution plan not set or not active")
-            return
+            return false
         }
         int numberOfRunning = numberOfRunningProcesses()
         if (numberOfRunning >= MAX_RUNNING) {
             //println "MetaDataWorkflow: ${numberOfRunning} processes already running"
-            return
+            return false
         }
-        int n=0
-        List<Run> runs = Run.findAllByComplete(false)
-        for(Run run in runs) {
-            if (numberOfRunning >= MAX_RUNNING) {
-                break
-            }
-            if (processed(run)) {
-                continue
-            }
-            // new run to be processed
-            createProcess(new ProcessParameter(value: run.id.toString(), className: run.class.name))
-            println run.toString()
-            numberOfRunning++
-            n++
-        }
-        if (n>0) {
-            println "MetaDataWorkflow: ${n} jobs started"
-        }
-    }
-
-    /**
-     * Checks if given run was already processed by MetaData execution plan
-     * @param run
-     * @return
-     */
-    private boolean processed(Run run) {
-        List<ProcessParameter> processParameters =
-            ProcessParameter.findAllByValue(run.id.toString(), run.class.name)
-        for(ProcessParameter parameter in processParameters) {
-            if (parameter.process.jobExecutionPlan.id == getExecutionPlan().id) {
-                return true
-            }
-        }
-        return false
+        return true
     }
 
     /**

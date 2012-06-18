@@ -11,17 +11,20 @@ class MetaDataRegistrationService {
     */
     void registerInputFiles(long runId) {
         Run run = Run.get(runId)
-        List<RunInitialPath> paths = RunInitialPath.findAllByRun(run)
-        for(RunInitialPath path in paths) {
-            registerInputFilesForPath(path)
+        List<RunSegment> segments =
+            RunSegment.findAllByRunAndMetaDataStatus(run, RunSegment.Status.BLOCKED)
+        for(RunSegment segment in segments) {
+            registerInputFilesForPath(segment)
+            segment.metaDataStatus = RunSegment.Status.PROCESSING
+            segment.save(flush: true)
         }
-        if (paths.size() > 1) {
+        if (segments.size() > 1) {
             run.multipleSource = true
         }
         run.save(flush: true)
     }
 
-    private void registerInputFilesForPath(RunInitialPath path) {
+    private void registerInputFilesForPath(RunSegment path) {
         File dir = getMetaDataDirectory(path.mdPath, path.run.name)
         processDirectory(path, dir)
     }
@@ -38,7 +41,7 @@ class MetaDataRegistrationService {
        throw new DirectoryNotReadableException(path)
     }
 
-    private void processDirectory(RunInitialPath path, File dir) {
+    private void processDirectory(RunSegment path, File dir) {
         MetaDataFile metaDataFile
         List<String> fileNames = dir.list()
         for(String fileName in fileNames) {
@@ -56,7 +59,7 @@ class MetaDataRegistrationService {
                 metaDataFile = new MetaDataFile(
                     fileName: fileName,
                     filePath: dir.absolutePath,
-                    runInitialPath: path,
+                    runSegment: path,
                     used: false
                 )
                 metaDataFile.validate()
@@ -76,9 +79,9 @@ class MetaDataRegistrationService {
         return false
     }
 
-    private boolean isFileRegistered(RunInitialPath path, String fileName) {
+    private boolean isFileRegistered(RunSegment path, String fileName) {
         MetaDataFile existingFile =
-            MetaDataFile.findByRunInitialPathAndFileName(path, fileName)
+            MetaDataFile.findByRunSegmentAndFileName(path, fileName)
         return (boolean)existingFile
     }
 }

@@ -25,7 +25,11 @@
         </tr>
         <tr>
             <td class="myKey">data location</td>
-            <td><g:textField name="dataPath"size="80" /></td>
+            <td><g:textField name="dataPath" size="80" /></td>
+        </tr>
+        <tr>
+             <td class="myKey">format of the initial data</td>
+             <td><g:select name="initialFormat" from="${de.dkfz.tbi.otp.ngsdata.RunSegment.DataFormat}"/></td>
         </tr>
         <tr>
             <td></td><td><g:submitButton name="submit" value="Submit" /></td>

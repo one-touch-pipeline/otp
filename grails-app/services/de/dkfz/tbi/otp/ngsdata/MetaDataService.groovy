@@ -35,8 +35,8 @@ class MetaDataService {
     }
 
     private void processMetaDataFiles(Run run) {
-        List<RunInitialPath> paths = RunInitialPath.findAllByRun(run)
-        List<MetaDataFile> mdFiles = MetaDataFile.findAllByRunInitialPathInList(paths)
+        List<RunSegment> paths = RunSegment.findAllByRunAndMetaDataStatus(run, RunSegment.Status.PROCESSING)
+        List<MetaDataFile> mdFiles = MetaDataFile.findAllByRunSegmentInList(paths)
         mdFiles.each { MetaDataFile file ->
             if (file.used) {
                 return
@@ -64,8 +64,8 @@ class MetaDataService {
                 // match values with the header
                 // new entry in MetaData
                 dataFile = new DataFile(
-                    run : file.runInitialPath.run,
-                    runInitialPath : file.runInitialPath
+                    run : file.runSegment.run,
+                    runSegment : file.runSegment
                 )
                 dataFile.validate()
                 dataFile.save(flush: true)
@@ -331,7 +331,7 @@ class MetaDataService {
         if (entry) {
             return
         }
-        RunInitialPath initialPath = dataFile.runInitialPath
+        RunSegment initialPath = dataFile.runSegment
         List<SeqType> types = SeqType.list()
         for (SeqType type in types) {
             if (initialPath.mdPath.contains(type.dirName)) {

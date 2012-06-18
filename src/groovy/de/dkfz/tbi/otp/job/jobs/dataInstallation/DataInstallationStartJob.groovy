@@ -4,14 +4,18 @@ import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
-import de.dkfz.tbi.otp.ngsdata.Run
+import de.dkfz.tbi.otp.ngsdata.*
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
+import org.springframework.beans.factory.annotation.Autowired
 
 @Component("dataInstallationStartJob")
 @Scope("singleton")
 class DataInstallationStartJob extends AbstractStartJobImpl {
+
+    @Autowired
+    RunProcessingService runProcessingService
 
     final int MAX_RUNNING = 1
 
@@ -20,48 +24,11 @@ class DataInstallationStartJob extends AbstractStartJobImpl {
         if (!hasOpenSlots()) {
             return
         }
-        int n = 0;
-        List<Run> runs = listOfRuns()
-        for(Run run in runs) {
-            if (!hasOpenSlots()) {
-                break
-            }
-            if (processed(run)) {
-                continue
-            }
-            // new run to be processed
+        Run run = runProcessingService.runRedyToInstall()
+        if (run) {
+            runProcessingService.blockInstallation(run)
             createProcess(new ProcessParameter(value: run.id.toString(), className: run.class.name))
-            println run.toString()
-            n++
-        }
-        if (n>0) {
-            println "DataInstallationWorkflow: ${n} jobs started"
-        }
-    }
-
-    List<Run> listOfRuns() {
-        def c = Run.createCriteria()
-        List<Run> runs = c.list {
-            and{
-                eq("complete", true)
-                eq("finalLocation", false)
-                eq("legacyRun", false)
-            }
-        }
-    }
-
-    /**
-    * Checks if given run was already processed by DataLocation execution plan
-    * @param run
-    * @return
-    */
-    boolean processed(Run run) {
-        List<ProcessParameter> processParameters =
-            ProcessParameter.findAllByValue(run.id.toString(), run.class.name)
-        for(ProcessParameter parameter in processParameters) {
-            if (parameter.process.jobExecutionPlan.id == getExecutionPlan().id) {
-                return true
-            }
+            println "Installing Run: ${run.name}"
         }
     }
 

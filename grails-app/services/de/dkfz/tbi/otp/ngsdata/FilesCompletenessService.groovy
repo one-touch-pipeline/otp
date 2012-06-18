@@ -46,28 +46,27 @@ class FilesCompletenessService {
      * @return true if all files are in the final location
      */
     boolean checkFinalLocation(Run run) {
-        run.finalLocation = false
-        run.save(flush: true)
+        // TODO more integration with RunService
         boolean allExists = true
-        List<DataFile> dataFiles = DataFile.findAllByRun(run)
-        if(dataFiles.empty) {
-            throw new ProcessingException("No data file provided for the given run.")
-        }
-        dataFiles.each {DataFile dataFile ->
-            if (!lsdfFilesService.checkFinalPathDefined(dataFile)) {
-                return // continue
+        List<RunSegment> rips = RunSegment.findAllByRun(run)
+        for(RunSegment rip in rips) {
+            if (rip.filesStatus == RunSegment.FilesStatus.PROCESSING_CHECKING) {
+                rip.filesStatus = RunSegment.FilesStatus.FILES_CORRECT
+                List<DataFile> dataFiles = DataFile.findAllByRunSegment(rip)
+                for(DataFile dataFile in dataFiles) {
+                    if (!lsdfFilesService.checkFinalPathDefined(dataFile)) {
+                        continue
+                    }
+                    boolean exists = fileExistsInFinalLocation(dataFile)
+                    fillFileStatistics(dataFile, exists)
+                    if (!exists) {
+                        allExists = false
+                        rip.filesStatus = RunSegment.FilesStatus.FILES_MISSING
+                    }
+                }
+                rip.save(flush: true)
             }
-            boolean exists = fileExistsInFinalLocation(dataFile)
-            if (!exists) {
-                allExists = false
-            }
-            fillFileStatistics(dataFile, exists)
         }
-        if (allExists) {
-            run.finalLocation = true
-        }
-        run.finalLocationChecked = true
-        run.save(flush: true)
         return allExists
     }
 
