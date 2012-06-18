@@ -1,7 +1,7 @@
 Properties databaseProperties = new Properties()
 try {
     String propertiesFile = System.getenv("OTP_PROPERTIES")
-    if (new File(propertiesFile).canRead()) {
+    if (propertiesFile && new File(propertiesFile).canRead()) {
         databaseProperties.load(new FileInputStream(propertiesFile))
     } else {
         databaseProperties.load(new FileInputStream(System.getProperty("user.home") + "/.otp.properties"))
