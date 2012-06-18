@@ -9,8 +9,12 @@
   <div class="body">
     
     <ul>
-        <li class="button"><g:link action="show" id="${nextId}">next run</g:link></li>
-        <li class="button"><g:link action="show" id="${prevId}">previous run</g:link></li>
+        <g:if test="${nextRun}">
+            <li class="button"><g:link action="show" id="${nextRun.id}">next run</g:link></li>
+        </g:if>
+        <g:if test="${previousRun}">
+            <li class="button"><g:link action="show" id="${previousRun.id}">previous run</g:link></li>
+        </g:if>
     </ul>
 
 
@@ -99,27 +103,25 @@
 
     <div class="myContentWide">
         <table>
-            <g:each var="rip" in="${de.dkfz.tbi.otp.ngsdata.RunInitialPath.findAllByRun(run)}">
-                <g:each var="file" in="${de.dkfz.tbi.otp.ngsdata.MetaDataFile.findAllByRunInitialPath(rip)}">
-                    <tr>
-                        <td>${file.fileName}</td>
-                        <td>${(new Date(file.dateCreated.getTime())).format("yyyy-MM-dd")}</td>
-                        <td>${file.used}</td>
-                    </tr>
+            <g:each var="file" in="${metaDataFiles}">
+                <tr>
+                    <td>${file.fileName}</td>
+                    <td>${(new Date(file.dateCreated.getTime())).format("yyyy-MM-dd")}</td>
+                    <td>${file.used}</td>
+                </tr>
             </g:each>
-           </g:each>
         </table>
 
         <%--  Data Files located on Seq Tracks  --%>
         <table>
-        <g:each var="track" in="${de.dkfz.tbi.otp.ngsdata.SeqTrack.findAllByRun(run, [sort: 'laneId'])}">
+        <g:each var="track" in="${seqTracks}">
 
             <tr>
-                <td class="miniHeader" colspan="3">${track}</td>
-                <td class="miniHeader" colspan="3">insert size: ${track.insertSize}</td>
-                <td class="miniHeader" colspan="3">number of base pairs: ${track.nBaseString()}</td>
+                <td class="miniHeader" colspan="3">${track.key}</td>
+                <td class="miniHeader" colspan="3">insert size: ${track.key.insertSize}</td>
+                <td class="miniHeader" colspan="3">number of base pairs: ${track.key.nBaseString()}</td>
             </tr>
-            <g:each var="file" in="${de.dkfz.tbi.otp.ngsdata.DataFile.findAllBySeqTrack(track)}">
+            <g:each var="file" in="${track.value.files}">
                 <tr>
                     <td>-</td>
                     <td>s</td>
@@ -144,8 +146,8 @@
                     </td>
                 </tr>
             </g:each>
-            <g:each var="alignment" in="${de.dkfz.tbi.otp.ngsdata.AlignmentLog.findAllBySeqTrack(track)}">
-                <g:each var="file" in="${de.dkfz.tbi.otp.ngsdata.DataFile.findAllByAlignmentLog(alignment)}">
+            <g:each var="alignment" in="${track.value.alignments}">
+                <g:each var="file" in="${alignment.value}">
                     <tr>
                         <td>-</td>
                         <td>a</td>
@@ -154,8 +156,8 @@
                             ${file.fileName}</g:link>
                         </td>
 
-                        <td>${alignment.alignmentParams.pipeline}
-                        <td>${alignment.executedBy}</td>
+                        <td>${alignment.key.alignmentParams.pipeline}
+                        <td>${alignment.key.executedBy}</td>
 
                         <td class="${file.fileExists}">on LSDF</td>
                         <td class="${file.fileLinked}">linked</td>
@@ -182,15 +184,13 @@
             </tr>
             </g:if>
 
-            <g:each var="file" in="${de.dkfz.tbi.otp.ngsdata.DataFile.findAllByRun(run, [sort: 'fileName'])}">
-            <g:if test="${file.used == false}">
+            <g:each var="file" in="${errorFiles}">
                 <tr>
                     <td><g:link controller="dataFile" action="showDetails" id="${file.id}">
                         ${file.fileName}</g:link></td>
                     <td>${de.dkfz.tbi.otp.ngsdata.MetaDataEntry.findByDataFileAndKey(file, keys[0]).value}</td>
                     <td>${de.dkfz.tbi.otp.ngsdata.MetaDataEntry.findAllByDataFileAndKey(file, keys[1])}</td>
                     <td class="${file.metaDataValid}">meta-data</td>
-            </g:if>
             </g:each>
         </table>
 
