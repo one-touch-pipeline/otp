@@ -20,7 +20,6 @@ class ExampleStartJob extends AbstractStartJobImpl {
             return
         }
         if (!getExecutionPlan() || !getExecutionPlan().enabled) {
-            println("Execution plan not set or not active")
             return
         }
         println("Example Start Job called")
