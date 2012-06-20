@@ -87,8 +87,12 @@ class JobExecutionPlanDSL {
         jep.startJob = startJobDefinition
         assert(jep.save())
         if (closure) {
-            closure.constantParameter = JobExecutionPlanDSL.constantParameterClosure.curry(startJobDefinition)
-            closure.outputParameter = JobExecutionPlanDSL.outputParameterClosure.curry(startJobDefinition)
+            closure.metaClass.constantParameter = { String typeName, String value ->
+                JobExecutionPlanDSL.constantParameterClosure(startJobDefinition, typeName, value)
+            }
+            closure.metaClass.outputParameter = { String typeName ->
+                JobExecutionPlanDSL.outputParameterClosure(startJobDefinition, typeName)
+            }
             closure()
         }
         startJobDefined = true
@@ -113,6 +117,7 @@ class JobExecutionPlanDSL {
     }
 
     private static def jobClosure = { JobExecutionPlan jep, Helper helper, String jobName, String bean, closure = null ->
+        println "In job Closure with " + jobName
         JobDefinition jobDefinition = new JobDefinition(name: jobName, bean: bean, plan: jep, previous: helper.previous)
         assert(jobDefinition.save())
         if (!helper.firstJob) {
@@ -123,11 +128,19 @@ class JobExecutionPlanDSL {
             assert(helper.previous.save())
         }
         if (closure) {
-            closure.constantParameter = JobExecutionPlanDSL.constantParameterClosure.curry(jobDefinition)
-            closure.outputParameter = JobExecutionPlanDSL.outputParameterClosure.curry(jobDefinition)
-            closure.inputParameter = JobExecutionPlanDSL.inputParameterClosure.curry(jobDefinition, helper.previous, jep)
+            closure.metaClass.constantParameter = { String typeName, String value ->
+                JobExecutionPlanDSL.constantParameterClosure(jobDefinition, typeName, value)
+            }
+            closure.metaClass.outputParameter = { String typeName ->
+                JobExecutionPlanDSL.outputParameterClosure(jobDefinition, typeName)
+            }
+            closure.metaClass.inputParameter = { String typeName, String fromJob, String fromParameter ->
+                JobExecutionPlanDSL.inputParameterClosure(jobDefinition, helper.previous, jep, typeName, fromJob, fromParameter)
+            }
             // TODO: in future have a generic watchdog which obsoletes the watchdogBean
-            closure.watchdog = JobExecutionPlanDSL.watchdogClosure.curry(jobDefinition, jep, helper)
+            closure.metaClass.watchdog = { String watchdogBean ->
+                JobExecutionPlanDSL.watchdogClosure(jobDefinition, jep, helper, watchdogBean)
+            }
             closure()
         }
         helper.previous = jobDefinition
@@ -159,11 +172,19 @@ class JobExecutionPlanDSL {
             assert(helper.previous.save())
         }
         if (closure) {
-            closure.constantParameter = JobExecutionPlanDSL.constantParameterClosure.curry(jobDefinition)
-            closure.outputParameter = JobExecutionPlanDSL.outputParameterClosure.curry(jobDefinition)
-            closure.inputParameter = JobExecutionPlanDSL.inputParameterClosure.curry(jobDefinition, helper.previous, jep)
+            closure.metaClass.constantParameter = { String typeName, String value ->
+                JobExecutionPlanDSL.constantParameterClosure(jobDefinition, typeName, value)
+            }
+            closure.metaClass.outputParameter = { String typeName ->
+                JobExecutionPlanDSL.outputParameterClosure(jobDefinition, typeName)
+            }
+            closure.metaClass.inputParameter = { String typeName, String fromJob, String fromParameter ->
+                JobExecutionPlanDSL.inputParameterClosure(jobDefinition, helper.previous, jep, typeName, fromJob, fromParameter)
+            }
             // TODO: in future have a generic watchdog which obsoletes the watchdogBean
-            closure.watchdog = JobExecutionPlanDSL.watchdogClosure.curry(jobDefinition, jep, helper)
+            closure.metaClass.watchdog = { String watchdogBean ->
+                JobExecutionPlanDSL.watchdogClosure(jobDefinition, jep, helper, watchdogBean)
+            }
             closure()
         }
         helper.previous = jobDefinition
@@ -175,10 +196,18 @@ class JobExecutionPlanDSL {
             assert(jep.save())
             Helper helper = new Helper()
             Boolean startJobDefined = false
-            c.start = JobExecutionPlanDSL.startJobClosure.curry(jep, startJobDefined)
-            c.job = JobExecutionPlanDSL.jobClosure.curry(jep, helper)
-            c.pbsJob = JobExecutionPlanDSL.pbsJobClosure.curry(jep, helper)
-            c.validatingJob = JobExecutionPlanDSL.validatingJobClosure.curry(jep, helper)
+            c.metaClass.start = { String n, String bean, closure = null ->
+                JobExecutionPlanDSL.startJobClosure(jep, startJobDefined, n, bean, closure)
+            }
+            c.metaClass.job = { String n, String bean, closure = null ->
+                JobExecutionPlanDSL.jobClosure(jep, helper, n, bean, closure)
+            }
+            c.metaClass.pbsJob = { String jobName, String bean, String realmId, closure = null ->
+                JobExecutionPlanDSL.pbsJobClosure(jep, helper, jobName, bean, realmId, closure)
+            }
+            c.metaClass.validatingJob = { String jobName, String bean, String validatorForName, closure = null ->
+                JobExecutionPlanDSL.validatingJobClosure(jep, helper, jobName, bean, validatorForName, closure)
+            }
             c()
             jep.firstJob = helper.firstJob
             assert(jep.save(flush: true))

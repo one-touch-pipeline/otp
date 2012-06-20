@@ -28,171 +28,155 @@ class PlanValidatorServiceTests {
 
     @Test
     void testMissingStartJob() {
-        JobExecutionPlan plan = new JobExecutionPlan(name: "test", planVersion: 0, enabled: true)
-        assertNotNull(plan.save())
-        List<String> errors = planValidatorService.validate(plan)
+        plan("test") {
+        }
+        List<String> errors = planValidatorService.validate(JobExecutionPlan.list().last())
         assertFalse(errors.isEmpty())
         assertEquals(PlanValidatorService.NO_STARTJOB, errors[0])
     }
 
     @Test
     void testMissingStartJobBean() {
-        JobExecutionPlan plan = new JobExecutionPlan(name: "test", planVersion: 0, enabled: true)
-        assertNotNull(plan.save())
-        StartJobDefinition startJob = new StartJobDefinition(name: "test", bean: "thisBeanDoesNotExist12345", plan: plan)
-        assertNotNull(startJob.save())
-        plan.startJob = startJob
-        assertNotNull(plan.save())
-        List<String> errors = planValidatorService.validate(plan)
+        plan("test") {
+            start("test", "thisBeanDoesNotExist12345")
+        }
+        List<String> errors = planValidatorService.validate(JobExecutionPlan.list().last())
         assertFalse(errors.isEmpty())
         assertEquals(PlanValidatorService.STARTJOB_BEAN_MISSING, errors[0])
     }
 
     @Test
     void testStartJobImplementsInterface() {
-        JobExecutionPlan plan = new JobExecutionPlan(name: "test", planVersion: 0, enabled: true)
-        assertNotNull(plan.save())
-        StartJobDefinition startJob = new StartJobDefinition(name: "test", bean: "testJob", plan: plan)
-        assertNotNull(startJob.save())
-        plan.startJob = startJob
-        assertNotNull(plan.save())
-        List<String> errors = planValidatorService.validate(plan)
+        plan("test") {
+            start("test", "testJob")
+        }
+        List<String> errors = planValidatorService.validate(JobExecutionPlan.list().last())
         assertFalse(errors.isEmpty())
         assertEquals(PlanValidatorService.STARTJOB_BEAN_NOT_IMPLEMENTING_STARTJOB, errors[0])
     }
 
     @Test
     void testMissingFirstJob() {
-        JobExecutionPlan plan = new JobExecutionPlan(name: "test", planVersion: 0, enabled: true)
-        assertNotNull(plan.save())
+        plan("test") {
+        }
         // neither start job nor first job
-        List<String> errors = planValidatorService.validate(plan)
+        List<String> errors = planValidatorService.validate(JobExecutionPlan.list().last())
         assertFalse(errors.isEmpty())
         assertEquals(PlanValidatorService.NO_STARTJOB, errors[0])
         assertEquals(PlanValidatorService.NO_FIRSTJOB, errors[1])
+        plan("test2") {
+            start("test", "testStartJob")
+        }
         // creating start job should not change
-        StartJobDefinition startJob = new StartJobDefinition(name: "test", bean: "testStartJob", plan: plan)
-        assertNotNull(startJob.save())
-        plan.startJob = startJob
-        assertNotNull(plan.save())
-        plan.firstJob = null
-        assertNotNull(plan.save())
-        errors = planValidatorService.validate(plan)
+        errors = planValidatorService.validate(JobExecutionPlan.list().last())
         assertFalse(errors.isEmpty())
         assertEquals(PlanValidatorService.NO_FIRSTJOB, errors[0])
     }
 
     @Test
     void testMissingJobBean() {
-        JobExecutionPlan plan = createTestPlan()
-        // create a JobDefinition with missing bean
-        JobDefinition jobDefinition = new JobDefinition(name: "testJob", bean: "thisBeanDoesNotExist12345", plan: plan)
-        assertNotNull(jobDefinition.save())
-        plan.firstJob = jobDefinition
-        assertNotNull(plan.save())
-        List<String> errors = planValidatorService.validate(plan)
+        plan("test") {
+            start("test", "testStartJob")
+            job("testJob", "thisBeanDoesNotExist12345")
+        }
+        JobExecutionPlan jep = JobExecutionPlan.list().last()
+        List<String> errors = planValidatorService.validate(jep)
+        println errors
         assertFalse(errors.isEmpty())
-        assertEquals(PlanValidatorService.JOB_BEAN_MISSING + "${jobDefinition.id}, thisBeanDoesNotExist12345", errors[0])
+        assertEquals(PlanValidatorService.JOB_BEAN_MISSING + "${JobDefinition.findByNameAndPlan('testJob', jep).id}, thisBeanDoesNotExist12345", errors[0])
         // creating a second Job which exist should not change anything
-        JobDefinition jobDefinition2 = new JobDefinition(name: "testJob2", bean: "testJob", plan: plan)
-        assertNotNull(jobDefinition2.save())
-        jobDefinition.next = jobDefinition2
-        assertNotNull(jobDefinition.save())
-        plan.firstJob = jobDefinition
-        assertNotNull(plan.save())
-        errors = planValidatorService.validate(plan)
+        plan("test2") {
+            start("test", "testStartJob")
+            job("testJob", "thisBeanDoesNotExist12345")
+            job("testJob2", "testJob")
+        }
+        jep = JobExecutionPlan.list().last()
+        errors = planValidatorService.validate(jep)
         assertFalse(errors.isEmpty())
-        assertEquals(PlanValidatorService.JOB_BEAN_MISSING + "${jobDefinition.id}, thisBeanDoesNotExist12345", errors[0])
+        assertEquals(PlanValidatorService.JOB_BEAN_MISSING + "${JobDefinition.findByNameAndPlan('testJob', jep).id}, thisBeanDoesNotExist12345", errors[0])
+        plan("test3") {
+            start("test", "testStartJob")
+            job("testJob", "thisBeanDoesNotExist12345")
+            job("testJob2", "testJob")
+            job("testJob3", "thisBeanDoesNotExist12345")
+        }
         // adding a third Job with incorrect bean should not change anything
-        JobDefinition jobDefinition3 = new JobDefinition(name: "testJob3", bean: "thisBeanDoesNotExist12345", plan: plan)
-        assertNotNull(jobDefinition3.save())
-        jobDefinition2.next = jobDefinition3
-        assertNotNull(jobDefinition2.save())
-        plan.firstJob = jobDefinition
-        assertNotNull(plan.save())
-        errors = planValidatorService.validate(plan)
+        jep = JobExecutionPlan.list().last()
+        errors = planValidatorService.validate(jep)
         assertFalse(errors.isEmpty())
-        assertEquals(PlanValidatorService.JOB_BEAN_MISSING + "${jobDefinition.id}, thisBeanDoesNotExist12345", errors[0])
-        assertEquals(PlanValidatorService.JOB_BEAN_MISSING + "${jobDefinition3.id}, thisBeanDoesNotExist12345", errors[1])
+        assertEquals(PlanValidatorService.JOB_BEAN_MISSING + "${JobDefinition.findByNameAndPlan('testJob', jep).id}, thisBeanDoesNotExist12345", errors[0])
+        assertEquals(PlanValidatorService.JOB_BEAN_MISSING + "${JobDefinition.findByNameAndPlan('testJob3', jep).id}, thisBeanDoesNotExist12345", errors[1])
     }
 
     @Test
     void testAllJobsImplementJob() {
-        JobExecutionPlan plan = createTestPlan()
-        JobDefinition jobDefinition = new JobDefinition(name: "testJob", bean: "planValidatorService", plan: plan)
-        assertNotNull(jobDefinition.save())
-        JobDefinition jobDefinition2 = new JobDefinition(name: "testJob2", bean: "testJob", plan: plan)
-        assertNotNull(jobDefinition2.save())
-        jobDefinition.next = jobDefinition2
-        assertNotNull(jobDefinition.save())
-        JobDefinition jobDefinition3 = new JobDefinition(name: "testJob3", bean: "testStartJob", plan: plan)
-        assertNotNull(jobDefinition3.save())
-        jobDefinition2.next = jobDefinition3
-        assertNotNull(jobDefinition2.save())
-        plan.firstJob = jobDefinition
-        assertNotNull(plan.save())
+        plan("test") {
+            start("test", "testStartJob")
+            job("testJob", "planValidatorService")
+            job("testJob2", "testJob")
+            job("testJob3", "testStartJob")
+        }
 
-        List<String> errors = planValidatorService.validate(plan)
+        JobExecutionPlan jep = JobExecutionPlan.list().last()
+        List<String> errors = planValidatorService.validate(jep)
         assertFalse(errors.isEmpty())
-        assertEquals(PlanValidatorService.JOB_BEAN_NOT_IMPLEMENTING_JOB + "${jobDefinition.id}, planValidatorService", errors[0])
-        assertEquals(PlanValidatorService.JOB_BEAN_NOT_IMPLEMENTING_JOB + "${jobDefinition3.id}, testStartJob", errors[1])
+        assertEquals(PlanValidatorService.JOB_BEAN_NOT_IMPLEMENTING_JOB + "${JobDefinition.findByNameAndPlan('testJob', jep).id}, planValidatorService", errors[0])
+        assertEquals(PlanValidatorService.JOB_BEAN_NOT_IMPLEMENTING_JOB + "${JobDefinition.findByNameAndPlan('testJob3', jep).id}, testStartJob", errors[1])
     }
 
     @Test
     void testLastJobIsEndStateAware() {
-        JobExecutionPlan plan = createTestPlan()
-        JobDefinition jobDefinition = new JobDefinition(name: "testJob", bean: "testJob", plan: plan)
-        assertNotNull(jobDefinition.save())
-        plan.firstJob = jobDefinition
-        assertNotNull(plan.save())
+        plan("test") {
+            start("test", "testStartJob")
+            job("testJob", "testJob")
+        }
 
-        List<String> errors = planValidatorService.validate(plan)
+        List<String> errors = planValidatorService.validate(JobExecutionPlan.list().last())
         assertFalse(errors.isEmpty())
         assertEquals(PlanValidatorService.LAST_JOB_NOT_ENDSTATE_AWARE, errors[0])
 
         // add two further JobDefinitions
-        JobDefinition jobDefinition2 = new JobDefinition(name: "testJob2", bean: "testJob", plan: plan)
-        assertNotNull(jobDefinition2.save())
-        jobDefinition.next = jobDefinition2
-        assertNotNull(jobDefinition.save())
-        JobDefinition jobDefinition3 = new JobDefinition(name: "testJob3", bean: "testJob", plan: plan)
-        jobDefinition2.next = jobDefinition3
-        assertNotNull(jobDefinition2.save())
-        plan.firstJob = jobDefinition
-        assertNotNull(plan.save())
-        // and it should still failerrors = planValidatorService.validate(plan)
+        plan("test2") {
+            start("test", "testStartJob")
+            job("testJob", "testJob")
+            job("testJob2", "testJob")
+            job("testJob3", "testJob")
+        }
+        // and it should still fail
+        errors = planValidatorService.validate(JobExecutionPlan.list().last())
         assertFalse(errors.isEmpty())
         assertEquals(PlanValidatorService.LAST_JOB_NOT_ENDSTATE_AWARE, errors[0])
     }
 
     @Test
     void testCircularDependency() {
-        JobExecutionPlan plan = createTestPlan()
-        JobDefinition jobDefinition = new JobDefinition(name: "testJob", bean: "testJob", plan: plan)
-        assertNotNull(jobDefinition.save())
-        JobDefinition jobDefinition2 = new JobDefinition(name: "testJob2", bean: "testJob", plan: plan)
-        assertNotNull(jobDefinition2.save())
-        jobDefinition.next = jobDefinition
-        assertNotNull(jobDefinition.save())
+        plan("test") {
+            start("test", "testStartJob")
+            job("testJob", "testJob")
+            job("testJob2", "testJob")
+        }
+        JobExecutionPlan jep = JobExecutionPlan.list().last()
+        JobDefinition jobDefinition = JobDefinition.findByNameAndPlan('testJob', jep)
+        JobDefinition jobDefinition2 = JobDefinition.findByNameAndPlan('testJob2', jep)
         jobDefinition2.next = jobDefinition
         assertNotNull(jobDefinition2.save())
-        plan.firstJob = jobDefinition
-        assertNotNull(plan.save())
-        List<String> errors = planValidatorService.validate(plan)
+        List<String> errors = planValidatorService.validate(jep)
         assertFalse(errors.isEmpty())
         assertEquals(PlanValidatorService.CIRCULAR_JOBS, errors[0])
     }
 
     @Test
     void testMissingLinkdedJobDefiniton() {
-        JobExecutionPlan plan = createTestPlan()
-        JobDefinition jobDefinition = new JobDefinition(name: "testJob", bean: "testEndStateAwareJob", plan: plan)
+        plan("test") {
+            start("test", "testStartJob")
+            job("testJob", "testEndStateAwareJob")
+            job("testJob2", "testJob")
+        }
+        JobExecutionPlan jep = JobExecutionPlan.list().last()
+        JobDefinition jobDefinition = JobDefinition.findByNameAndPlan('testJob', jep)
+        jobDefinition.next = null
         assertNotNull(jobDefinition.save())
-        JobDefinition jobDefinition2 = new JobDefinition(name: "testJob2", bean: "testJob", plan: plan)
-        assertNotNull(jobDefinition2.save())
-        plan.firstJob = jobDefinition
-        assertNotNull(plan.save())
-        List<String> errors = planValidatorService.validate(plan)
+        List<String> errors = planValidatorService.validate(jep)
         assertFalse(errors.isEmpty())
         assertEquals(PlanValidatorService.NOT_ALL_JOBS_LINKED, errors[0])
     }
