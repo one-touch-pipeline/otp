@@ -81,8 +81,8 @@ abstract class AbstractIntegrationTest {
     * @param previous The previous Job Execution plan (optional)
     * @return Created JobDefinition
     */
-   protected JobDefinition createTestEndStateAwareJob(String name, JobExecutionPlan jep, JobDefinition previous = null) {
-       JobDefinition jobDefinition = new JobDefinition(name: name, bean: "testEndStateAwareJob", plan: jep, previous: previous)
+   protected JobDefinition createTestEndStateAwareJob(String name, JobExecutionPlan jep, JobDefinition previous = null, String beanName = "testEndStateAwareJob") {
+       JobDefinition jobDefinition = new JobDefinition(name: name, bean: beanName, plan: jep, previous: previous)
        assertNotNull(jobDefinition.save())
        ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
        ParameterType test2 = new ParameterType(name: "test2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)

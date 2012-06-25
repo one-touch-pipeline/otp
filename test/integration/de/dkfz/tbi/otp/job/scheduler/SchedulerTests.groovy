@@ -108,7 +108,11 @@ class SchedulerTests extends AbstractIntegrationTest {
         shouldFail(InvalidStateException) {
             endStateAwareJob.getOutputParameters()
         }
+        shouldFail(InvalidStateException) {
+            endStateAwareJob.getEndState()
+        }
         endStateAwareJob.execute()
+        assertEquals(ExecutionState.SUCCESS, endStateAwareJob.endState)
         // now we should have three processingStepUpdates for the processing step
         step.refresh()
         assertEquals(4, ProcessingStepUpdate.countByProcessingStep(step))
@@ -116,6 +120,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         assertEquals(ExecutionState.CREATED, updates[0].state)
         assertEquals(ExecutionState.STARTED, updates[1].state)
         assertEquals(ExecutionState.FINISHED, updates[2].state)
+        assertEquals(ExecutionState.SUCCESS, updates[3].state)
         // and there should be some output parameters
         List<Parameter> params = step.output.toList().sort { it.type.name }
         assertEquals(2, params.size())
@@ -127,6 +132,47 @@ class SchedulerTests extends AbstractIntegrationTest {
         assertEquals("4321", params[1].value)
         assertNull(params[1].type.className)
         assertSame(jobDefinition, params[1].type.jobDefinition)
+    }
+
+    @Test
+    void testFailingEndStateAwareJobExecution() {
+        JobExecutionPlan jep = new JobExecutionPlan(name: "testFailureEndStateAware", planVersion: 0, startJobBean: "someBean")
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = createTestEndStateAwareJob("testEndStateAware", jep, null, "testFailureEndStateAwareJob")
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save(flush: true))
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        assertNotNull(process.save())
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assertNotNull(step.save())
+        Job endStateAwareJob = grailsApplication.mainContext.getBean("testFailureEndStateAwareJob", step, [] as Set) as Job
+        // There is no Created ProcessingStep update - execution should fail
+        shouldFail(RuntimeException) {
+            endStateAwareJob.execute()
+        }
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+            date: new Date(),
+            state: ExecutionState.CREATED,
+            previous: null,
+            processingStep: step
+            )
+        assertNotNull(update.save(flush: true))
+        shouldFail(InvalidStateException) {
+            endStateAwareJob.getOutputParameters()
+        }
+        shouldFail(InvalidStateException) {
+            endStateAwareJob.getEndState()
+        }
+        endStateAwareJob.execute()
+        assertEquals(ExecutionState.FAILURE, endStateAwareJob.endState)
+        step.refresh()
+        assertEquals(4, ProcessingStepUpdate.countByProcessingStep(step))
+        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FINISHED, updates[2].state)
+        assertEquals(ExecutionState.FAILURE, updates[3].state)
+        assertTrue(process.finished)
     }
 
     @Test

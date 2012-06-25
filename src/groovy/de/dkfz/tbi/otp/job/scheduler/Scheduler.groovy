@@ -277,7 +277,22 @@ class Scheduler {
                 throw new JobExcecutionException("Could not create a ERROR/SUCCESS Update for Job")
             }
             if (endStateAwareJob.getEndState() == ExecutionState.FAILURE) {
-                throw new ProcessingException("Something went wrong in endStateAwareJob of type ${joinPoint.target.class}, execution state set to FAILURE")
+                log.debug("Something went wrong in endStateAwareJob of type ${joinPoint.target.class}, execution state set to FAILURE")
+                ProcessingError error = new ProcessingError(errorMessage: "Something went wrong in endStateAwareJob of type ${joinPoint.target.class}, execution state set to FAILURE", processingStepUpdate: endStateUpdate)
+                endStateUpdate.error = error
+                if (!error.save(flush: true)) {
+                    log.fatal("Could not create a FAILURE Update for Job of type ${jobClass}")
+                    throw new ProcessingException("Could not create a FAILURE Update for Job of type ${jobClass}")
+                }
+                Process process = Process.get(step.process.id)
+                process.finished = true
+                if (!process.save(flush: true)) {
+                    // TODO: trigger error handling
+                    log.fatal("Could not set Process to finished")
+                    throw new ProcessingException("Could not set Process to finished")
+                }
+                log.debug("doEndCheck performed for ${joinPoint.getTarget().class} with ProcessingStep ${step.id}")
+                return
             }
             if (job instanceof ValidatingJob) {
                 ValidatingJob validatingJob = job as ValidatingJob

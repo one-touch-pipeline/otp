@@ -8,25 +8,19 @@ import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 /**
- * Very simple Test implementation of the EndStateAware interface.
- * Does nothing useful.
+ * Very simple Test implementation of the EndStateAware interface which fails.
  *
  */
-@Component("testEndStateAwareJob")
+@Component("testFailureEndStateAwareJob")
 @Scope("prototype")
-class TestEndStateAwareJob extends AbstractEndStateAwareJobImpl {
+class FailingTestEndStateAwareJob extends AbstractEndStateAwareJobImpl {
 
     @Override
     public void execute() throws Exception {
-        println("Execute method of TestEndStateAwareJob called")
+        println("Execute method of FailingTestEndStateAwareJob called")
         addOutputParameter("test", "1234")
         addOutputParameter("test2", "1234")
         addOutputParameter("test2", "4321")
-        succeed()
-    }
-
-    @Override
-    public String getVersion() {
-        return ""
+        fail()
     }
 }
