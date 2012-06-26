@@ -1,5 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.plugins.springsecurity.Secured
+
+@Secured(['ROLE_ADMIN'])
 class RunSubmitController {
 
     def index() {

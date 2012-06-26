@@ -1,10 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.plugins.springsecurity.Secured
+
 class ResultsUploadCommand {
     String identifier
     String fileText
 }
 
+@Secured(['ROLE_ADMIN'])
 class ResultsUploadController {
 
     def resultsParserService
