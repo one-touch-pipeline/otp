@@ -6,11 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired
 
 class CopyFilesJob extends AbstractJobImpl {
 
+    final String paramName = "__pbsIds"
+
     @Autowired
     LsdfFilesService lsdfFilesService
 
     @Autowired
     ExecutionService executionService
+
+    @Autowired
+    ConfigService configService
 
     @Override
     public void execute() throws Exception {
@@ -22,11 +27,12 @@ class CopyFilesJob extends AbstractJobImpl {
         String pbsIds = "1,"
         files.each {DataFile file ->
             String cmd = scriptText(file)
-            String jobId = sendScript(file.project.realm, cmd)
+            Realm realm = configService.getRealmDataManagement(file.project)
+            String jobId = sendScript(realm, cmd)
             println "Job ${jobId} submitted to PBS"
             pbsIds += jobId + ","
         }
-        addOutputParameter("pbsIds", pbsIds)
+        addOutputParameter(paramName, pbsIds)
     }
 
     private String scriptText(DataFile file) {

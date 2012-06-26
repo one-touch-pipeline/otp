@@ -21,15 +21,21 @@ class FilesCompletenessService {
      */
     public boolean checkInitialSequenceFiles(Run run) {
         boolean allExists = true
-        List<DataFile> dataFiles = DataFile.findAllByRun(run)
-        if(dataFiles.empty) {
-            throw new ProcessingException("No data file provided for the given run.")
+        def c = RunSegment.createCriteria()
+        List<RunSegment> segments = c.list {
+            and{
+                eq("run", run)
+                eq("filesStatus", RunSegment.FilesStatus.PROCESSING_INSTALLATION)
+            }
         }
-        dataFiles.each {DataFile dataFile ->
-            String path = lsdfFilesService.getFileInitialPath(dataFile)
-            if (!lsdfFilesService.fileExists(path)) {
-                allExists = false
-                println "missing file ${path}"
+        for (RunSegment segment in segments) {
+            List<DataFile> files = DataFile.findAllByRunSegment(segment)
+            for (DataFile file in files) {
+                String path = lsdfFilesService.getFileInitialPath(file)
+                if (!lsdfFilesService.fileExists(path)) {
+                    allExists = false
+                    println "missing file ${path}"
+                }
             }
         }
         return allExists
@@ -48,24 +54,26 @@ class FilesCompletenessService {
     boolean checkFinalLocation(Run run) {
         // TODO more integration with RunService
         boolean allExists = true
-        List<RunSegment> rips = RunSegment.findAllByRun(run)
-        for(RunSegment rip in rips) {
-            if (rip.filesStatus == RunSegment.FilesStatus.PROCESSING_CHECKING) {
-                rip.filesStatus = RunSegment.FilesStatus.FILES_CORRECT
-                List<DataFile> dataFiles = DataFile.findAllByRunSegment(rip)
-                for(DataFile dataFile in dataFiles) {
-                    if (!lsdfFilesService.checkFinalPathDefined(dataFile)) {
-                        continue
-                    }
-                    boolean exists = fileExistsInFinalLocation(dataFile)
-                    fillFileStatistics(dataFile, exists)
-                    if (!exists) {
-                        allExists = false
-                        rip.filesStatus = RunSegment.FilesStatus.FILES_MISSING
-                    }
+        def stats = [
+            RunSegment.FilesStatus.PROCESSING_CHECKING,
+            RunSegment.FilesStatus.PROCESSING_INSTALLATION
+        ]
+        List<RunSegment> segments = RunSegment.findAllByRunAndFilesStatusInList(run, stats)
+        for (RunSegment segment in segments) {
+            segment.filesStatus = RunSegment.FilesStatus.FILES_CORRECT
+            List<DataFile> dataFiles = DataFile.findAllByRunSegment(segment)
+            for (DataFile dataFile in dataFiles) {
+                if (!lsdfFilesService.checkFinalPathDefined(dataFile)) {
+                    continue
                 }
-                rip.save(flush: true)
+                boolean exists = fileExistsInFinalLocation(dataFile)
+                fillFileStatistics(dataFile, exists)
+                if (!exists) {
+                    allExists = false
+                    segment.filesStatus = RunSegment.FilesStatus.FILES_MISSING
+                }
             }
+            segment.save(flush: true)
         }
         return allExists
     }

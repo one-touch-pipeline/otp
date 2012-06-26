@@ -12,6 +12,9 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
     @Autowired
     ExecutionService executionService
 
+    @Autowired
+    ConfigService configService
+
     @Override
     public void execute() throws Exception {
 
@@ -23,7 +26,8 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
             String[] dirs = lsdfFilesService.getListOfRunDirecotries(run, project.name)
             dirs.each {String line ->
                 String cmd = "mkdir -p " + line
-                String exitCode = executionService.executeCommand(project.realm, cmd)
+                Realm realm = configService.getRealmDataManagement(project)
+                String exitCode = executionService.executeCommand(realm, cmd)
                 println "creating directory finished with exit code " + exitCode
             }
         }

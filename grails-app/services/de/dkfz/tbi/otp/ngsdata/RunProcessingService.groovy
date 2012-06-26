@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 /**
- * This service is responsible for orchestration of workflows running on Run objects. 
+ * This service is responsible for orchestration of workflows running on Run objects.
  * 
  */
 
@@ -35,9 +35,9 @@ class RunProcessingService {
     }
 
     void setMetaDataComplete(Run run) {
-        List<RunSegment> segments = 
+        List<RunSegment> segments =
             RunSegment.findAllByRunAndMetaDataStatus(run, RunSegment.Status.PROCESSING)
-        for(RunSegment segment in segments) {
+        for (RunSegment segment in segments) {
             segment.metaDataStatus = RunSegment.Status.COMPLETE
             segment.save(flush: true)
         }
@@ -51,12 +51,12 @@ class RunProcessingService {
                 eq("metaDataStatus", RunSegment.Status.COMPLETE)
             }
         }
-        if (segments.size() == 0) {
+        if (!segments) {
             return null
         }
         return segments.first().run
-        for(RunSegment segment in segments) {
-            //println "Segment Status: ${segment.metaDataStatus}"
+        // TODO check multi-threading
+        for (RunSegment segment in segments) {
             Run run = segment.run
             if (checkIfAllSegmentsComplete(run)) {
                 return run
@@ -66,10 +66,9 @@ class RunProcessingService {
     }
 
     private boolean checkIfAllSegmentsComplete(run) {
-        println "checking if all complete ... ${run.name}"
         List<RunSegment> segments = 
             RunSegment.findAllByRunAndFilesStatus(run, RunSegment.FilesStatus.NEEDS_CHECKING)
-        for(RunSegment segment in segments) {
+        for (RunSegment segment in segments) {
             if (segment.metaDataStatus != RunSegment.Status.COMPLETE) {
                 println "Status: ${segment.metaDataStatus} ${segment.id}"
                 return false
@@ -79,24 +78,31 @@ class RunProcessingService {
     }
 
     void blockCheckingFinalLocation(Run run) {
-        List<RunSegment> segments = RunSegment.findAllByRun(run)
-        for(RunSegment segment in segments) {
-            if (segment.filesStatus == RunSegment.FilesStatus.NEEDS_CHECKING) {
-                segment.filesStatus = RunSegment.FilesStatus.PROCESSING_CHECKING
-                segment.save(flush: true)
+        def c = RunSegment.createCriteria()
+        List<RunSegment> segments = c.list {
+            and {
+                eq("run", run)
+                eq("filesStatus", RunSegment.FilesStatus.NEEDS_CHECKING)
             }
+        }
+        for (RunSegment segment in segments) {
+            segment.filesStatus = RunSegment.FilesStatus.PROCESSING_CHECKING
+            segment.save(flush: true)
         }
     }
 
-    Run runRedyToInstall() {
+    Run runReadyToInstall() {
         def c = RunSegment.createCriteria()
-        RunSegment segment = c.get {
+        List<RunSegment> segments = c.list {
             and{
                 eq("metaDataStatus", RunSegment.Status.COMPLETE)
                 eq("filesStatus", RunSegment.FilesStatus.NEEDS_INSTALLATION)
             }
         }
-        return (segment) ? segment.run : null
+        if (!segments) {
+            return null
+        }
+        return segments.first().run
     }
 
     void blockInstallation(Run run) {
@@ -108,8 +114,8 @@ class RunProcessingService {
                 eq("filesStatus", RunSegment.FilesStatus.NEEDS_INSTALLATION)
             }
         }
-        for(RunSegment segment in segments) {
-            segment.filesStatus = RunSegment.FilesStatus.PROCESSIG_INSTALLATION
+        for (RunSegment segment in segments) {
+            segment.filesStatus = RunSegment.FilesStatus.PROCESSING_INSTALLATION
             segment.save(flush: true)
         }
     }
@@ -128,7 +134,7 @@ class RunProcessingService {
                 eq("filesStatus", RunSegment.FilesStatus.NEEDS_UNPACK)
             }
         }
-        for(RunSegment segment in segments) {
+        for (RunSegment segment in segments) {
             segment.filesStatus = RunSegment.FilesStatus.PROCESSING_UNPACK
             segment.save(flush: true)
         }
@@ -142,7 +148,7 @@ class RunProcessingService {
                 eq("filesStatus", RunSegment.FilesStatus.PROCESSING_UNPACK)
             }
         }
-        for(RunSegment segment in segments) {
+        for (RunSegment segment in segments) {
             segment.filesStatus = RunSegment.FilesStatus.NEEDS_INSTALLATION
             segment.currentFormat = RunSegment.DataFormat.FILES_IN_DIRECTORY
             segment.save(flush: true)
@@ -153,7 +159,7 @@ class RunProcessingService {
         List<RunSegment> segments =
             RunSegment.findAllByMetaDataStatusNotEqual(RunSegment.Status.COMPLETE)
         //println "Number of not finished segments: ${segments.size()}"
-        for(RunSegment segment in segments) {
+        for (RunSegment segment in segments) {
             if (!segment.run.blacklisted) {
                 return false
             }

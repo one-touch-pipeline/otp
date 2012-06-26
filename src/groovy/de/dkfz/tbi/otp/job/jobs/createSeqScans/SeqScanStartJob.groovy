@@ -1,10 +1,8 @@
 package de.dkfz.tbi.otp.job.jobs.createSeqScans
 
-import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
-import de.dkfz.tbi.otp.job.processing.Parameter
-import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -22,7 +20,6 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
 
     @Scheduled(fixedRate=1000l)
     void execute() {
-        //println "${name}: execute"
         if (!hasOpenSlots()) {
             return
         }
@@ -34,17 +31,15 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
             return
         }
         createProcess(new ProcessParameter(value: seqTrack.id.toString(), className: seqTrack.class.name))
-        //println "${name}: job started for seqTrack ${seqTrack}"
+        println "${name}: job started for seqTrack ${seqTrack}"
     }
 
     boolean hasOpenSlots() {
         if (!getExecutionPlan() || !getExecutionPlan().enabled) {
-            //println "${name}: not active "
             return false
         }
         int numberOfRunning = numberOfRunningProcesses()
         if (numberOfRunning >= MAX_RUNNING) {
-            //println "${name}: number of running is ${numberOfRunning}"
             return false
         }
         return true

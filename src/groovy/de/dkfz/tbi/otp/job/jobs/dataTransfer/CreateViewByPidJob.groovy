@@ -2,7 +2,9 @@ package de.dkfz.tbi.otp.job.jobs.dataTransfer
 
 import de.dkfz.tbi.otp.ngsdata.Run
 import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,6 +16,9 @@ class CreateViewByPidJob extends AbstractJobImpl {
 
     @Autowired
     ExecutionService executionService
+
+    @Autowired
+    ConfigService configService
 
     @Override
     public void execute() throws Exception {
@@ -37,6 +42,7 @@ class CreateViewByPidJob extends AbstractJobImpl {
         String dirName = linkName.substring(0, linkName.lastIndexOf('/'))
         String cmd = "mkdir -p ${dirName};"
         cmd += "ln -s " + target + " " + linkName
-        executionService.executeCommand(file.project.realm, cmd)
+        Realm realm = configService.getRealmDataManagement(file.project)
+        executionService.executeCommand(realm, cmd)
     }
 }

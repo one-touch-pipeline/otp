@@ -4,12 +4,12 @@ class Project {
 
     String name
     String dirName
-
-    static belongsTo = [realm: Realm]
+    String realmName
 
     static constraints = {
         name(blank: false, unique: true)
         dirName(blank: false)
+        realmName(blank: false)
     }
 
     String toString() {

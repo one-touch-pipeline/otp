@@ -92,7 +92,7 @@
         <g:each var="track" in="${seqTracks}">
 
             <tr>
-                <td class="miniHeader" colspan="3">${track.key}</td>
+                <td class="miniHeader" colspan="3">${track.key.laneId} ${track.key.sample}<br>${track.key.seqType}</td>
                 <td class="miniHeader" colspan="3">insert size: ${track.key.insertSize}</td>
                 <td class="miniHeader" colspan="3">number of base pairs: ${track.key.nBaseString()}</td>
             </tr>

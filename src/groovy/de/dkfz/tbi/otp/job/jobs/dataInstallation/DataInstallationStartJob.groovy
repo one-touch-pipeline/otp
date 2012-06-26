@@ -17,14 +17,14 @@ class DataInstallationStartJob extends AbstractStartJobImpl {
     @Autowired
     RunProcessingService runProcessingService
 
-    final int MAX_RUNNING = 1
+    final int MAX_RUNNING = 2
 
     @Scheduled(fixedRate=5000l)
     void execute() {
         if (!hasOpenSlots()) {
             return
         }
-        Run run = runProcessingService.runRedyToInstall()
+        Run run = runProcessingService.runReadyToInstall()
         if (run) {
             runProcessingService.blockInstallation(run)
             createProcess(new ProcessParameter(value: run.id.toString(), className: run.class.name))

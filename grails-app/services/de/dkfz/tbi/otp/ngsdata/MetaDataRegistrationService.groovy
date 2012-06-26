@@ -13,7 +13,7 @@ class MetaDataRegistrationService {
         Run run = Run.get(runId)
         List<RunSegment> segments =
             RunSegment.findAllByRunAndMetaDataStatus(run, RunSegment.Status.BLOCKED)
-        for(RunSegment segment in segments) {
+        for (RunSegment segment in segments) {
             registerInputFilesForPath(segment)
             segment.metaDataStatus = RunSegment.Status.PROCESSING
             segment.save(flush: true)
@@ -31,7 +31,7 @@ class MetaDataRegistrationService {
 
     private File getMetaDataDirectory(String path, String runName) {
        List<String> separators = ["/run", "/"]
-       for(String separator in separators) {
+       for (String separator in separators) {
            String runDir = path + separator + runName
            File dir = new File(runDir)
            if (dir.canRead() && dir.isDirectory()) {
@@ -41,10 +41,10 @@ class MetaDataRegistrationService {
        throw new DirectoryNotReadableException(path)
     }
 
-    private void processDirectory(RunSegment path, File dir) {
+    private void processDirectory(RunSegment segment, File dir) {
         MetaDataFile metaDataFile
         List<String> fileNames = dir.list()
-        for(String fileName in fileNames) {
+        for (String fileName in fileNames) {
             //println  fileName
             if (fileBlacklisted(fileName)) {
                 continue
@@ -53,13 +53,13 @@ class MetaDataRegistrationService {
                 continue
             }
             if (fileName.contains("fastq") || fileName.contains("align")) {
-                if (isFileRegistered(path, fileName)) {
-                    throw new MetaDataFileDuplicationException(path.run.name, fileName)
+                if (isFileRegistered(dir.absolutePath, fileName)) {
+                    throw new MetaDataFileDuplicationException(segment.run.name, fileName)
                 }
                 metaDataFile = new MetaDataFile(
                     fileName: fileName,
                     filePath: dir.absolutePath,
-                    runSegment: path,
+                    runSegment: segment,
                     used: false
                 )
                 metaDataFile.validate()
@@ -71,7 +71,7 @@ class MetaDataRegistrationService {
 
     private boolean fileBlacklisted(String fileName) {
         String[] blacklist = ["wrong", "old"]
-        for(String name in blacklist) {
+        for (String name in blacklist) {
             if (fileName.contains(name)) {
                 return true
             }
@@ -79,9 +79,9 @@ class MetaDataRegistrationService {
         return false
     }
 
-    private boolean isFileRegistered(RunSegment path, String fileName) {
+    private boolean isFileRegistered(String mdPath, String fileName) {
         MetaDataFile existingFile =
-            MetaDataFile.findByRunSegmentAndFileName(path, fileName)
+            MetaDataFile.findByFilePathAndFileName(mdPath, fileName)
         return (boolean)existingFile
     }
 }

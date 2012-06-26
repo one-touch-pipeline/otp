@@ -12,9 +12,9 @@ class LsdfFilesService {
      */
     public String getFileInitialPath(DataFile dataFile) {
         Run run = dataFile.run
-        String prefix = (run.legacyRun) ? "run" : ""
-        String initialPath = dataFile.runInitialPath.dataPath
-        return "${initialPath}/${prefix}${run.name}/${dataFile.pathName}/${dataFile.fileName}"
+        //String prefix = (run.legacyRun) ? "run" : ""
+        String initialPath = dataFile.runSegment.dataPath
+        return "${initialPath}/${run.name}/${dataFile.pathName}/${dataFile.fileName}"
     }
 
     /**

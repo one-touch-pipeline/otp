@@ -4,17 +4,24 @@ import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.Run
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.Realm
 
+
 public class CalculateChecksumJob extends AbstractJobImpl {
+
+    final String paramName = "__pbsIds"
 
     @Autowired
     LsdfFilesService lsdfFilesService
 
     @Autowired
     ExecutionService executionService
+
+    @Autowired
+    ConfigService configService
 
     String suffix = ".md5sum"
 
@@ -31,11 +38,12 @@ public class CalculateChecksumJob extends AbstractJobImpl {
                 return
             }
             String cmd = scriptText(file)
-            String jobId = sendScript(file.project.realm, cmd)
+            Realm realm = configService.getRealmDataManagement(file.project)
+            String jobId = sendScript(realm, cmd)
             println "Job ${jobId} submitted to PBS"
             pbsIds += jobId + ","
         }
-        addOutputParameter("pbsIds", pbsIds)
+        addOutputParameter(paramName, pbsIds)
     }
 
     private String dirToMd5File(DataFile file) {

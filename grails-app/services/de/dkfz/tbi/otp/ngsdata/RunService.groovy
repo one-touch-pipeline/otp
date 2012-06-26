@@ -92,9 +92,9 @@ class RunService {
         }
         // TODO: query with a criteria
         List<MetaDataFile> files = []
-        List<RunInitialPath> paths = RunInitialPath.findAllByRun(run)
+        List<RunSegment> paths = RunSegment.findAllByRun(run)
         paths.each {
-            MetaDataFile.findAllByRunInitialPath(it).each {
+            MetaDataFile.findAllByRunSegment(it).each {
                 files << it
             }
         }

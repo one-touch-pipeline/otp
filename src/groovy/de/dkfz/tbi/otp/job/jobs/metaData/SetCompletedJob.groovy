@@ -9,7 +9,7 @@ class SetCompletedJob extends AbstractEndStateAwareJobImpl {
 
     @Autowired
     RunProcessingService runProcessingService
-    
+
     @Override
     public void execute() throws Exception {
         long runId = Long.parseLong(getProcessParameterValue())
@@ -25,7 +25,7 @@ class SetCompletedJob extends AbstractEndStateAwareJobImpl {
         List<DataFile> files = DataFile.findAllByRun(run)
         for(DataFile file in files) {
             if (file.project) {
-                hosts << file.project.realm.name
+                hosts << file.project.realmName
             }
         }
         switch(hosts.size()) {

@@ -12,9 +12,8 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl {
     final int timeout = 10
 
     public void execute() throws Exception {
-        String jobIds = getParameterValueOrClass("pbsIds")
+        String jobIds = getParameterValueOrClass("__pbsIds")
         List<String> listJobIds = parseInputString(jobIds)
-
         while(!checkIfAllFinished(listJobIds)) {
             sleep(timeout)
         }
@@ -33,9 +32,12 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl {
         return finished
     }
 
-    private sleep(int time) {
-        java.lang.Process process = "sleep ${time}".execute()
-        process.waitFor()
+    void sleep(int time) {
+        try {
+            Thread.sleep(time * 1000)
+        } catch (InterruptedException e) {
+            // do nothing
+        }
     }
 
     private parseInputString(String jobIds) {

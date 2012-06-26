@@ -127,33 +127,37 @@ class ExecutionService {
         if (!password) {
             throw new ProcessingException("No password for remote connection specified.")
         }
-        JSch jsch = new JSch()
-        Session session = jsch.getSession(username, host, port)
-        session.setPassword(password)
-        session.setTimeout(timeout)
-        java.util.Properties config = new java.util.Properties()
-        config.put("StrictHostKeyChecking", "no")
-        session.setConfig(config)
-        session.connect()
-        Channel channel = session.openChannel("exec")
-        if (command) {
-            ((ChannelExec)channel).setCommand(command)
-        } else if (script) {
-            command = "qsub"
-            if (options) {
-                command += " ${options}"
+        try {
+            JSch jsch = new JSch()
+            Session session = jsch.getSession(username, host, port)
+            session.setPassword(password)
+            session.setTimeout(timeout)
+            java.util.Properties config = new java.util.Properties()
+            config.put("StrictHostKeyChecking", "no")
+            session.setConfig(config)
+            session.connect()
+            Channel channel = session.openChannel("exec")
+            if (command) {
+                ((ChannelExec)channel).setCommand(command)
+            } else if (script) {
+                command = "qsub"
+                if (options) {
+                    command += " ${options}"
+                }
+                ((ChannelExec)channel).setCommand(command)
+                ((ChannelExec)channel).setInputStream(script.newInputStream())
             }
-            ((ChannelExec)channel).setCommand(command)
-            ((ChannelExec)channel).setInputStream(script.newInputStream())
+            ((ChannelExec)channel).setErrStream(System.err)
+            List<String> values = getInputStream(channel)
+            if (values == null) {
+                // TODO: How to handle this?
+                throw new ProcessingException("test!")
+            }
+            disconnectSsh(channel)
+            return values
+        } catch (Exception e) {
+            throw new ProcessingException(e.toString())
         }
-        ((ChannelExec)channel).setErrStream(System.err)
-        List<String> values = getInputStream(channel)
-        if (values == null) {
-            // TODO: How to handle this?
-            throw new ProcessingException("test!")
-        }
-        disconnectSsh(channel)
-        return values
     }
 
     /**
