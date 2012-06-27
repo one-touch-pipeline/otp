@@ -46,6 +46,46 @@ $.otp.warningMessage = function (message) {
 };
 
 /**
+ * Generates the list of individuals
+ **/
+$.otp.individualList = function () {
+    "use strict";
+    $('#individualTable').dataTable({
+        bFilter: true,
+        bProcessing: true,
+        bServerSide: true,
+        bSort: true,
+        bJQueryUI: false,
+        bAutoWidth: false,
+        sAjaxSource: 'dataTableSource',
+        bScrollInfinite: true,
+        bScrollCollapse: true,
+        sScrollY: "600px",
+        bDeferRender: true,
+        fnServerData: function (sSource, aoData, fnCallback) {
+            $.ajax({
+                "dataType": 'json',
+                "type": "POST",
+                "url": sSource,
+                "data": aoData,
+                "error": function () {
+                    // clear the table
+                    fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
+                },
+                "success": function (json) {
+                    var i, rowData;
+                    for (i = 0; i < json.aaData.length; i += 1) {
+                        rowData = json.aaData[i];
+                        rowData[0] = "<a href=\"" + $.otp.contextPath + "/individual/show/" + rowData[0].id + "\">" + rowData[0].text + "</a>";
+                    }
+                    fnCallback(json);
+                }
+            });
+        }
+    });
+};
+
+/**
  * Creates the HTML markup for the status image.
  * The status is referenced by name:
  * <ul>
