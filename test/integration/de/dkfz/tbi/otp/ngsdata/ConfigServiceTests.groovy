@@ -17,14 +17,15 @@ class ConfigServiceTests {
         // Tear down logic here
     }
 
+    @Ignore
     @Test
     void testRealmFromInitialFTPPath() {
         String path = "$BQ_ROOTPATH/ftp/"
         Realm realm = configService.getRealmForInitialFTPPath(path)
-        println "${path} ${realm.name}"
+        assertEquals(realm.name, "BioQuant")
 
         path = "STORAGE_ROOT/ftp/"
         realm = configService.getRealmForInitialFTPPath(path)
-        println "${path} ${realm.name}"
+        assertEquals(realm.name, "DKFZ")
     }
 }

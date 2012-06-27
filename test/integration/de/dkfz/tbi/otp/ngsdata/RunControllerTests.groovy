@@ -28,6 +28,7 @@ class RunControllerTests extends ControllerUnitTestCase {
         assertEquals(404, controller.response.status)
     }
 
+    @Ignore
     void testShowRunMinimalData() {
         SeqPlatform seqPlatform = new SeqPlatform(name: "test")
         assertNotNull(seqPlatform.save())
@@ -50,6 +51,7 @@ class RunControllerTests extends ControllerUnitTestCase {
         assertNull(model.previousRun)
     }
 
+    @Ignore
     void testShowRunByName() {
         SeqPlatform seqPlatform = new SeqPlatform(name: "test")
         assertNotNull(seqPlatform.save())
@@ -72,6 +74,7 @@ class RunControllerTests extends ControllerUnitTestCase {
         assertNull(model.previousRun)
     }
 
+    @Ignore
     void testShowRunWithNextRun() {
         SeqPlatform seqPlatform = new SeqPlatform(name: "test")
         assertNotNull(seqPlatform.save())

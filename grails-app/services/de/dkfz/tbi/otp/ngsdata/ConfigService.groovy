@@ -24,8 +24,11 @@ class ConfigService {
                 eq("env", System.getProperty(Environment.KEY))
             }
         }
-        //println System.getProperty(Environment.KEY)
         return realm
+    }
+
+    Realm getRealmDataProcessing(Project project) {
+        return getRealm(project, Realm.OperationType.DATA_PROCESSING)
     }
 
     Realm getRealmDataManagement(Project project) {
@@ -45,15 +48,7 @@ class ConfigService {
     Realm getRealmForInitialFTPPath(String path) {
         int idx = path.indexOf("/ftp")
         String prefix = path.substring(0, idx)
-        def c = Realm.createCriteria()
-        Realm realm = c.get {
-            and {
-                eq("env", Environment.KEY)
-                eq("operationType", Realm.OperationType.DATA_MANAGEMENT)
-                like("rootPath", "${prefix}%")
-            }
-        }
-        return realm
+        return Realm.findByRootPathLikeAndOperationType("${prefix}%", Realm.OperationType.DATA_MANAGEMENT)
     }
 
     String igvPath() {

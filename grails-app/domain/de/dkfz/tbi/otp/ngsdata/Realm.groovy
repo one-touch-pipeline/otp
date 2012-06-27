@@ -19,6 +19,5 @@ class Realm {
     String pbsOptions                  // realm dependent options of the PBS system
 
     static constraints = {
-        
     }
 }

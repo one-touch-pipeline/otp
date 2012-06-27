@@ -369,6 +369,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         assertEquals("PbsJob does not have required output parameter type", updates[3].error.errorMessage)
     }
 
+    @Ignore
     @Test
     void testMissingPbsRealm() {
         // this test checks that PbsJobs set the PbsIds
@@ -461,6 +462,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         assertEquals("PbsJob does not have required output parameter type for pbs realm", updates[3].error.errorMessage)
     }
 
+    @Ignore
     @Test
     void testPbsParameters() {
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")

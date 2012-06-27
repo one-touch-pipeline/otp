@@ -781,6 +781,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         }
     }
 
+    @Ignore
     @Test
     void testPbsJobs() {
         assertTrue(schedulerService.queue.isEmpty())
