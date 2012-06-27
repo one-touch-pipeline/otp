@@ -47,4 +47,8 @@ class SeqScan {
         return String.format("%.1f G",(nBasePairs/1e9))
     }
 
+    boolean isMerged() {
+        return (MergingLog.countBySeqScan(this) != 0)
+    }
+
 }

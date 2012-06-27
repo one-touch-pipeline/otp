@@ -9,8 +9,12 @@
   <div class="body">
 
     <ul>
-        <li class="button"><g:link action="show" id="${nextId}">next individual</g:link></li>
-        <li class="button"><g:link action="show" id="${prevId}">previous individual</g:link></li>
+        <g:if test="${next}">
+            <li class="button"><g:link action="show" id="${next.id}">next individual</g:link></li>
+        </g:if>
+        <g:if test="${previous}">
+            <li class="button"><g:link action="show" id="${previous.id}">previous individual</g:link></li>
+        </g:if>
     </ul>
 
     <h1>Details of Individual</h1>
@@ -42,10 +46,10 @@
     <h1>Samples</h1>
     <div class="myContent">
     <table>
-        <g:each var="sample" in="${de.dkfz.tbi.otp.ngsdata.Sample.findAllByIndividual(ind)}">
+        <g:each var="sample" in="${ind.samples}">
             <tr>
                 <td class="myKey">${sample.type}</td>
-                <td class="myValue">${de.dkfz.tbi.otp.ngsdata.SampleIdentifier.findAllBySample(sample)}</td>
+                <td class="myValue">${sample.sampleIdentifiers}</td>
             </tr>
         </g:each>
     </table>
@@ -56,7 +60,7 @@
     <H1>Sequencing Scans</H1>
     <g:form>
 
-    <g:each var="type" in="${seqTypes}">
+    <g:each var="type" in="${ind.seqTypes}">
 
         <div class="myHeaderWide">
             ${type}
@@ -77,8 +81,8 @@
                 <td class="microHeader">merging</td>
                 <td class="microHeader">IGV</td>
            </tr> 
-           <g:each var="scan" in="${seqScans}">
-               <g:if test="${scan.seqType == type}">
+           <g:each var="scan" in="${ind.seqScans}">
+               <g:if test="${scan.seqType.id == type.id}">
                <tr>
                     <td>
                         <g:link controller="seqScan" action="show" id="${scan.id}">
@@ -95,8 +99,8 @@
                     <td>${scan.basePairsString()}</td>
                     <td>${scan.insertSize}</td>
 
-                    <td class="${de.dkfz.tbi.otp.ngsdata.MergingLog.countBySeqScan(scan) != 0}">
-                        <g:formatBoolean boolean="${de.dkfz.tbi.otp.ngsdata.MergingLog.countBySeqScan(scan) != 0}"
+                    <td class="${scan.merged}">
+                        <g:formatBoolean boolean="${scan.merged}"
                             true="merged" false="not merged"
                         />
                     </td>
@@ -115,7 +119,7 @@
     <div class="myContentWide">
     <table>
         <tr>
-            <g:each var="mutation" in="${muts}">
+            <g:each var="mutation" in="${ind.mutations}">
                 ${mutation.gene}, 
             </g:each>
         </tr>

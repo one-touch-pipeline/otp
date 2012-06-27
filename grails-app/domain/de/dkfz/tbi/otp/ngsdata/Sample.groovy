@@ -19,4 +19,11 @@ class Sample {
         // usefulll for scaffolding
         "${individual.mockFullName} ${type}"
     }
+
+    /**
+     * @return List of SampleIdentifier for this Sample.
+     **/
+    List<SampleIdentifier> getSampleIdentifiers() {
+        return SampleIdentifier.findAllBySample(this)
+    }
 }
