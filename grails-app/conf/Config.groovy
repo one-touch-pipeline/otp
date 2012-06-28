@@ -182,6 +182,13 @@ if (otpConfig.otp.dataprocessing.alignment.referenceIndex instanceof ConfigObjec
     otp.dataprocessing.alignment.referenceIndex = otpConfig.otp.dataprocessing.alignment.referenceIndex
 }
 
+// pbs password
+if (otpConfig.otp.pbs.ssh.password instanceof ConfigObject) {
+	otp.pbs.ssh.password = ""
+} else {
+	otp.pbs.ssh.password = otpConfig.otp.pbs.ssh.password
+}
+
 // Added by the Spring Security Core plugin:
 grails.plugins.springsecurity.userLookup.userDomainClassName = 'de.dkfz.tbi.otp.security.User'
 grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'de.dkfz.tbi.otp.security.UserRole'
