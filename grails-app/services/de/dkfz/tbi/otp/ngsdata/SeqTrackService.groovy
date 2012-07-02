@@ -302,7 +302,7 @@ AND entry.value = :value
                     }
                 }
             }
-            segment.save(flus: true)
+            segment.save(flush: true)
         }
     }
 

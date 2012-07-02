@@ -157,7 +157,7 @@ class MetaDataService {
        for (int i=0; i<keys.size(); i++) {
            MetaDataKey key = keys.getAt(i)
            MetaDataEntry entry = new MetaDataEntry (
-               value: values.getAt(i) ? values.getAt(i) : "",
+               value: values.getAt(i) ? values.getAt(i).trim() : "",
                source: MetaDataEntry.Source.MDFILE,
                key: key
            )
