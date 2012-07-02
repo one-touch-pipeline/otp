@@ -26,6 +26,7 @@ class BlackmailRunJob extends AbstractEndStateAwareJobImpl {
             "110325_SN750_0056_BB0244ABXX",
             "110325_SN750_0055_AB022NABXX",
             "110616_SN750_0075_BC018AACXX",
+            "120531_SN7001149_0083_AC0RJUACXX"
         ]
         if (blackList.contains(run.name)) {
             return false
