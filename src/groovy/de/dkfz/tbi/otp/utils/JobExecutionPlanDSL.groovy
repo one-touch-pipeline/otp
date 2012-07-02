@@ -87,10 +87,10 @@ class JobExecutionPlanDSL {
         jep.startJob = startJobDefinition
         assert(jep.save())
         if (closure) {
-            closure.metaClass.constantParameter = { String typeName, String value ->
+            closure.constantParameter = { String typeName, String value ->
                 JobExecutionPlanDSL.constantParameterClosure(startJobDefinition, typeName, value)
             }
-            closure.metaClass.outputParameter = { String typeName ->
+            closure.outputParameter = { String typeName ->
                 JobExecutionPlanDSL.outputParameterClosure(startJobDefinition, typeName)
             }
             closure()
@@ -128,17 +128,17 @@ class JobExecutionPlanDSL {
             assert(helper.previous.save())
         }
         if (closure) {
-            closure.metaClass.constantParameter = { String typeName, String value ->
+            closure.constantParameter = { String typeName, String value ->
                 JobExecutionPlanDSL.constantParameterClosure(jobDefinition, typeName, value)
             }
-            closure.metaClass.outputParameter = { String typeName ->
+            closure.outputParameter = { String typeName ->
                 JobExecutionPlanDSL.outputParameterClosure(jobDefinition, typeName)
             }
-            closure.metaClass.inputParameter = { String typeName, String fromJob, String fromParameter ->
+            closure.inputParameter = { String typeName, String fromJob, String fromParameter ->
                 JobExecutionPlanDSL.inputParameterClosure(jobDefinition, helper.previous, jep, typeName, fromJob, fromParameter)
             }
             // TODO: in future have a generic watchdog which obsoletes the watchdogBean
-            closure.metaClass.watchdog = { String watchdogBean ->
+            closure.watchdog = { String watchdogBean ->
                 JobExecutionPlanDSL.watchdogClosure(jobDefinition, jep, helper, watchdogBean)
             }
             closure()
@@ -172,17 +172,17 @@ class JobExecutionPlanDSL {
             assert(helper.previous.save())
         }
         if (closure) {
-            closure.metaClass.constantParameter = { String typeName, String value ->
+            closure.constantParameter = { String typeName, String value ->
                 JobExecutionPlanDSL.constantParameterClosure(jobDefinition, typeName, value)
             }
-            closure.metaClass.outputParameter = { String typeName ->
+            closure.outputParameter = { String typeName ->
                 JobExecutionPlanDSL.outputParameterClosure(jobDefinition, typeName)
             }
-            closure.metaClass.inputParameter = { String typeName, String fromJob, String fromParameter ->
+            closure.inputParameter = { String typeName, String fromJob, String fromParameter ->
                 JobExecutionPlanDSL.inputParameterClosure(jobDefinition, helper.previous, jep, typeName, fromJob, fromParameter)
             }
             // TODO: in future have a generic watchdog which obsoletes the watchdogBean
-            closure.metaClass.watchdog = { String watchdogBean ->
+            closure.watchdog = { String watchdogBean ->
                 JobExecutionPlanDSL.watchdogClosure(jobDefinition, jep, helper, watchdogBean)
             }
             closure()
@@ -196,16 +196,16 @@ class JobExecutionPlanDSL {
             assert(jep.save())
             Helper helper = new Helper()
             Boolean startJobDefined = false
-            c.metaClass.start = { String n, String bean, closure = null ->
+            c.start = { String n, String bean, closure = null ->
                 JobExecutionPlanDSL.startJobClosure(jep, startJobDefined, n, bean, closure)
             }
-            c.metaClass.job = { String n, String bean, closure = null ->
+            c.job = { String n, String bean, closure = null ->
                 JobExecutionPlanDSL.jobClosure(jep, helper, n, bean, closure)
             }
-            c.metaClass.pbsJob = { String jobName, String bean, String realmId, closure = null ->
+            c.pbsJob = { String jobName, String bean, String realmId, closure = null ->
                 JobExecutionPlanDSL.pbsJobClosure(jep, helper, jobName, bean, realmId, closure)
             }
-            c.metaClass.validatingJob = { String jobName, String bean, String validatorForName, closure = null ->
+            c.validatingJob = { String jobName, String bean, String validatorForName, closure = null ->
                 JobExecutionPlanDSL.validatingJobClosure(jep, helper, jobName, bean, validatorForName, closure)
             }
             c()
