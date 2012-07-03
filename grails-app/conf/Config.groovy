@@ -4,7 +4,7 @@ try {
     if (propertiesFile && new File(propertiesFile).canRead()) {
         otpProperties.load(new FileInputStream(propertiesFile))
     } else {
-        otpProperties.load(new FileInputStream(System.getProperty("user.home") + "/.otp.properties"))
+        otpProperties.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") + ".otp.properties"))
     }
 } catch (Exception e) {
     otpProperties.setProperty("otp.security.ldap.enabled", "false")
