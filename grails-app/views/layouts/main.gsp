@@ -27,7 +27,7 @@
 		<div class="nav" role="navigation">
 			<ul>
     			<li><g:link controller="overviewMB" action="index">Overview</g:link></li>
-				<li><g:link controller="individual" action="index">Individuals</g:link></li>
+				<li><g:link controller="individual" action="list">Individuals</g:link></li>
 				<li><g:link controller="run" action="index">Runs</g:link></li>
 				<li><g:link controller="projectProgress" action="progress">Progress</g:link></li>
 				<li><g:link controller="processes" action="index">Processes</g:link></li>
