@@ -158,7 +158,6 @@ class RunProcessingService {
     boolean isMetaDataProcessingFinished() {
         List<RunSegment> segments =
             RunSegment.findAllByMetaDataStatusNotEqual(RunSegment.Status.COMPLETE)
-        //println "Number of not finished segments: ${segments.size()}"
         for (RunSegment segment in segments) {
             if (!segment.run.blacklisted) {
                 return false
