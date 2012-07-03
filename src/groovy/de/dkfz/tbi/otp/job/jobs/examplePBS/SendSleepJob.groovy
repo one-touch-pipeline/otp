@@ -3,12 +3,8 @@ package de.dkfz.tbi.otp.job.jobs.examplePBS
 import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
 import de.dkfz.tbi.otp.job.processing.Parameter
 import org.springframework.beans.factory.annotation.Autowired
-import de.dkfz.tbi.otp.job.processing.PbsService
 
 class SendSleepJob extends AbstractJobImpl {
-
-    @Autowired
-    PbsService pbsService
 
     final int N_JOBS = 5
 

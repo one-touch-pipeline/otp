@@ -7,8 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
  * @see PbsJob
  */
 abstract public class AbstractPbsJobImpl extends AbstractJobImpl implements PbsJob {
-    @Autowired
-    PbsService pbsService
+
 
     /**
      * Default empty constructor

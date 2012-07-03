@@ -5,7 +5,6 @@ import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.ConfigService
-import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.beans.factory.annotation.Autowired
 
