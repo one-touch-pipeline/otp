@@ -2,17 +2,14 @@ package de.dkfz.tbi.otp.ngsdata
 
 class Sample {
 
-    enum Type {
-        TUMOR, CONTROL, UNKNOWN
-    }
-    Type type
-    String subType             // hedge for the future, eg. tumor 1, tumor 2
-
-    static belongsTo = [individual : Individual]
+    static belongsTo = [
+        individual : Individual,
+        sampleType : SampleType
+    ]
 
     static constraints = {
-        type()
-        subType(nullable: true)
+        individual(nullable: false)
+        sampleType(nullable: false)
     }
 
     String toString() {

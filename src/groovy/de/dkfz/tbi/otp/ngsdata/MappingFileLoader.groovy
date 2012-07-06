@@ -35,14 +35,14 @@ class MappingFileLoader {
     private void readLine(String line) {
         String name = parseName(line)
         String pid = parsePid(line)
-        Sample.Type type = parseType(line)
+        SampleType sampleType = parseType(line)
         Individual ind = findOrCreate(pid)
         if (ind.mockPid == null) {
             ind.mockPid = name
             ind.mockFullName = name
         }
         ind.save(flush: true)
-        Sample sample = findOrCreateSample(ind, type)
+        Sample sample = findOrCreateSample(ind, sampleType)
         (new SampleIdentifier(name: name, sample: sample)).save(flush: true)
     }
 
@@ -54,15 +54,9 @@ class MappingFileLoader {
         return line.substring(line.indexOf(separator1)+1, line.indexOf(separator2))
     }
 
-    private String parseType(String line) {
+    private SampleType parseType(String line) {
         String name = line.substring(line.indexOf(separator2)+1)
-        switch (name) {
-            case "tumor":
-                return Sample.Type.TUMOR
-            case "control":
-                return Sample.Type.CONTROL 
-        }
-        return Sample.Type.UNKNOWN
+        return SampleType.findByNameIlike(name)
     }
 
     private Individual findOrCreate(String pid) {
@@ -75,12 +69,12 @@ class MappingFileLoader {
         return ind 
     }
 
-    private Sample findOrCreateSample(Individual ind, Sample.Type type) {
-        Sample sample = Sample.findByIndividualAndType(ind, type)
+    private Sample findOrCreateSample(Individual ind, SampleType type) {
+        Sample sample = Sample.findByIndividualAndSampleType(ind, type)
         if (sample == null) {
             sample = new Sample(
                individual: ind,
-               type: type
+               sampleType: type
             )
             sample.save(flush: true)
         }

@@ -48,7 +48,7 @@
     <table>
         <g:each var="sample" in="${ind.samples}">
             <tr>
-                <td class="myKey">${sample.type}</td>
+                <td class="myKey">${sample.sampleType.name}</td>
                 <td class="myValue">${sample.sampleIdentifiers}</td>
             </tr>
         </g:each>

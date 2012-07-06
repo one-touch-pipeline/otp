@@ -9,7 +9,7 @@ class Realm {
     OperationType operationType
 
     String rootPath                    // mount path of the file system with data
-    String processingRootPath         // mount path for the file system with results data
+    String processingRootPath          // mount path for the file system with results data
     String programsRootPath            // location of programs
     String webHost                     // web address
     String host                        // PBS head address

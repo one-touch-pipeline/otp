@@ -21,7 +21,7 @@ class ConfigService {
             and {
                 eq("name", project.realmName)
                 eq("operationType", operationType)
-                eq("env", System.getProperty(Environment.KEY))
+                eq("env", Environment.getCurrent().getName())
             }
         }
         return realm

@@ -94,13 +94,13 @@ class SeqTrackService {
         for(DataFile file in files) {
             Sample fileSample = getSample(file)
             if (!sample.equals(fileSample)) {
-                throw new MetaDataInconsistentException(files, sample, fileSample)
+                throw new SampleInconsistentException(files, sample, fileSample)
             }
         }
     }
 
     private SeqType getSeqType(DataFile file) {
-        String type = metaDataValue(file, "SEQUENCING_TYPE" )
+        String type = metaDataValue(file, "SEQUENCING_TYPE")
         String layout = metaDataValue(file, "LIBRARY_LAYOUT")
         SeqType seqType = SeqType.findByNameAndLibraryLayout(type, layout)
         if (!seqType) {
