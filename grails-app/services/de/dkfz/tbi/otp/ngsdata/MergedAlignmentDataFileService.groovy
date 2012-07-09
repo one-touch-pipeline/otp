@@ -45,7 +45,7 @@ class MergedAlignmentDataFileService {
     String buildRelativePath(SeqType type, Sample sample) {
         String projectDir = sample.individual.project.dirName
         String pid = sample.individual.pid
-        String sampleType = sample.type.toString().toLowerCase()
+        String sampleType = sample.sampleType.name.toLowerCase()
         String layout = type.libraryLayout.toLowerCase()
         return "${projectDir}/sequencing/${type.dirName}/view-by-pid/${pid}/${sampleType}/${layout}/merged-alignment/"
     }
@@ -82,7 +82,7 @@ class MergedAlignmentDataFileService {
     }
 
     private String fileName(SeqScan scan, int n) {
-        String type = scan.sample.type.toString().toLowerCase()
+        String type = scan.sample.sampleType.name.toLowerCase()
         String pid = scan.sample.individual.pid
         return "v${n}.${type}_${pid}_merged.bam.rmdup.bam"
     }

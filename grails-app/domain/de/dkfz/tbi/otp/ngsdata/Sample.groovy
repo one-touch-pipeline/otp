@@ -14,7 +14,7 @@ class Sample {
 
     String toString() {
         // usefulll for scaffolding
-        "${individual.mockFullName} ${type}"
+        "${individual.mockFullName} ${sampleType.name}"
     }
 
     /**

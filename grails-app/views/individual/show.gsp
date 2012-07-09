@@ -89,7 +89,7 @@
                             |details|
                         </g:link>
                     </td>
-                    <td><strong>${scan.sample.type}</strong></td>
+                    <td><strong>${scan.sample.sampleType.name}</strong></td>
                     <td>${scan.seqPlatform}</td>
                     <td>${scan.state}</td>
                     <td>${scan.seqCenters.toLowerCase()}</td>

@@ -154,7 +154,7 @@ class LsdfFilesService {
         SeqTrack seqTrack = file.seqTrack ?: file.alignmentLog.seqTrack
         String seqTypeDir = seqTrack.seqType.dirName
         String pid = seqTrack.sample.individual.pid
-        String sampleType = seqTrack.sample.type.toString().toLowerCase()
+        String sampleType = seqTrack.sample.sampleType.name.toLowerCase()
         String library = seqTrack.seqType.libraryLayout.toLowerCase()
         String path =
             "${seqTypeDir}/view-by-pid/${pid}/${sampleType}/${library}/run${file.run.name}/${file.fileType.vbpPath}"
