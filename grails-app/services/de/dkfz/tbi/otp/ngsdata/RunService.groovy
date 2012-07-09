@@ -146,4 +146,91 @@ class RunService {
     List<DataFile> dataFilesWithError(Run run) {
         return DataFile.findAllByRunAndUsed(run, false, [sort: "fileName"])
     }
+
+    /**
+     * Retrieves list of Runs with filter applied.
+     *
+     * The result set can be paginated, sorted and filtered. The filter (search) is only applied if the
+     * filter String has a length of at least three characters. It considers the name and storage realm.
+     * The sorting is applied using the sort order and the column which is an integer identifying one of
+     * the following columns:
+     * <ul>
+     * <li><strong>0:</strong> name (sorted by Id)</li>
+     * <li><strong>1:</strong> storage realm</li>
+     * <li><strong>2:</strong> date created</li>
+     * <li><strong>3:</strong> date executed</li>
+     * <li><strong>4:</strong> blacklisted</li>
+     * <li><strong>5:</strong> multiple Source</li>
+     * </ul>
+     * @param offset Offset in result list of pagination
+     * @param count The number of Individuals to return in this query
+     * @param sortOrder true for ascending, false for descending sorting
+     * @param column the column to sort on, see above for mapping
+     * @param filter The search filter
+     * @return List of Runs matching the criteria
+     */
+    List<Run> listRuns(int offset, int count, boolean sortOrder, int column, String filter) {
+        String order = "${sortOrder ? 'asc' : 'desc'}"
+        String sortColumn = ""
+        switch (column) {
+        case 1:
+            sortColumn = "storageRealm"
+            break
+        case 2:
+            sortColumn = "dateCreated"
+            break
+        case 3:
+            sortColumn = "dateExecuted"
+            break
+        case 4:
+            sortColumn = "blacklisted"
+            break
+        case 5:
+            sortColumn = "multipleSource"
+            break
+        case 0:
+        default:
+            sortColumn = "id"
+            break
+        }
+        // TODO: ACL
+        if (filter.length() >= 3) {
+            String query = '''
+SELECT r FROM Run as r
+WHERE
+lower(r.name) like :filter
+OR lower (r.storageRealm) like :filter
+'''
+            query = query + "ORDER BY r.${sortColumn} ${order}"
+            Map params = [
+                filter: "%${filter.toLowerCase()}%",
+                max: count, offset: offset
+            ]
+            return Run.executeQuery(query, params)
+        } else {
+            // use primitive listing till we have an ACL variant
+            return Run.list(max: count, offset: offset, sort: sortColumn, order: order)
+        }
+    }
+
+    /**
+     * Counts the Runs applying the given filter if present.
+     * @param filter Restrict on this search filter if at least three characters
+     * @return Number of Runs
+     */
+    int countRun(String filter) {
+        // TODO: ACL
+        if (filter.length() >= 3) {
+            String query = '''
+SELECT COUNT(DISTINCT r.id) FROM Run as r
+WHERE
+lower(r.name) like :filter
+OR lower (r.storageRealm) like :filter
+'''
+            Map params = [filter: "%${filter.toLowerCase()}%"]
+            return Run.executeQuery(query, params)[0] as Integer
+        } else {
+            return Run.count()
+        }
+    }
 }

@@ -46,11 +46,16 @@ $.otp.warningMessage = function (message) {
 };
 
 /**
- * Generates the list of individuals
- **/
-$.otp.individualList = function () {
+ * Generates a generic datatable.
+ * The datatable expects an ajax source at "dataTableSource" which provides a JSON response.
+ * The first column of the data source is expected to be a complex datatabe consisting of <em>id</em>
+ * and a descriptive <em>text</em>.
+ * @param selector The jQuery selector of the table
+ * @param showLink The link to the controller/action to show more details of an element
+ */
+$.otp.genericList = function (selector, showLink) {
     "use strict";
-    $('#individualTable').dataTable({
+    $(selector).dataTable({
         bFilter: true,
         bProcessing: true,
         bServerSide: true,
@@ -76,13 +81,29 @@ $.otp.individualList = function () {
                     var i, rowData;
                     for (i = 0; i < json.aaData.length; i += 1) {
                         rowData = json.aaData[i];
-                        rowData[0] = "<a href=\"" + $.otp.contextPath + "/individual/show/" + rowData[0].id + "\">" + rowData[0].text + "</a>";
+                        rowData[0] = "<a href=\"" + $.otp.contextPath + showLink + rowData[0].id + "\">" + rowData[0].text + "</a>";
                     }
                     fnCallback(json);
                 }
             });
         }
     });
+};
+
+/**
+ * Generates the list of individuals
+ **/
+$.otp.individualList = function () {
+    "use strict";
+    $.otp.genericList('#individualTable', "/individual/show/");
+};
+
+/**
+ * Generates the list of Runs
+ **/
+$.otp.runList = function () {
+    "use strict";
+    $.otp.genericList('#runTable', "/run/show/");
 };
 
 /**

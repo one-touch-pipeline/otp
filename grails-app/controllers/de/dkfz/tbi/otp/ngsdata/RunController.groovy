@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.converters.JSON
+
 class RunController {
 
     def lsdfFilesService
     def runService
-
-    static scaffold = Run
 
     def display = {
         redirect(action: "show", id: params.id)
@@ -34,5 +34,44 @@ class RunController {
                 nextRun: runService.nextRun(run),
                 previousRun: runService.previousRun(run)
         ]
+    }
+
+    def list = {
+    }
+
+    def dataTableSource = {
+        int start = 0
+        int length = 10
+        if (params.iDisplayStart) {
+            start = params.iDisplayStart as int
+        }
+        if (params.iDisplayLength) {
+            length = Math.min(100, params.iDisplayLength as int)
+        }
+        int column = 0
+        if (params.iSortCol_0) {
+            column = params.iSortCol_0 as int
+        }
+        def dataToRender = [:]
+        dataToRender.sEcho = params.sEcho
+        dataToRender.aaData = []
+
+        dataToRender.offset = start
+        dataToRender.iSortCol_0 = params.iSortCol_0
+        dataToRender.sSortDir_0 = params.sSortDir_0
+        dataToRender.iTotalRecords = runService.countRun(params.sSearch)
+        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+
+        runService.listRuns(start, length, params.sSortDir_0 == "asc", column, params.sSearch).each { run ->
+            dataToRender.aaData << [
+                [id: run.id, text: run.name],
+                run.storageRealm?.toString(),
+                run.dateCreated,
+                run.dateExecuted,
+                run.blacklisted,
+                run.multipleSource
+            ]
+        }
+        render dataToRender as JSON
     }
 }
