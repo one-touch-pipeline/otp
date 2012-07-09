@@ -7,7 +7,6 @@
 </head>
 <body>
   <div class="body">
-    
     <ul>
         <g:if test="${nextRun}">
             <li class="button"><g:link action="show" id="${nextRun.id}">next run</g:link></li>

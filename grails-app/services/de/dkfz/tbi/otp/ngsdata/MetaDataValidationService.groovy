@@ -113,9 +113,6 @@ class MetaDataValidationService {
         if (value.contains("n/a")) {
             return true // essentially shall be false
         }
-        if (value.contains("FRAGMENT")) {
-            return true
-        }
         return false
     }
 

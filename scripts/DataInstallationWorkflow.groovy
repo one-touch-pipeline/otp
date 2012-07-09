@@ -12,18 +12,18 @@ plan("DataInstallationWorkflow") {
     //}
     job("createOutputDirectory", "createOutputDirectoryJob")
     job("copyFilesToFinalLocation", "copyFilesJob") {
-        outputParameter("pbsIds")
+        outputParameter("__pbsIds")
     }
     job("copyFilesToFinalLocationWatchdog", "myPBSWatchdogJob") {
-        inputParameter("pbsIds", "copyFilesToFinalLocation", "pbsIds")
+        inputParameter("__pbsIds", "copyFilesToFinalLocation", "__pbsIds")
     }
     // TODO: milestone
     job("checkFinalLocation", "checkFinalLocationJob")
     job("calculateChecksum", "calculateChecksumJob") {
-        outputParameter("pbsIds")
+        outputParameter("__pbsIds")
     }
     job("calculateChecksumWatchdog", "myPBSWatchdogJob") {
-        inputParameter("pbsIds", "calculateChecksum", "pbsIds")
+        inputParameter("__pbsIds", "calculateChecksum", "__pbsIds")
     }
     job("compareChecksum", "compareChecksumJob")
     job("createViewByPid", "createViewByPidJob")
