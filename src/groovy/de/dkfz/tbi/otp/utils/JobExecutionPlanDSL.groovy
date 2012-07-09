@@ -87,12 +87,14 @@ class JobExecutionPlanDSL {
         jep.startJob = startJobDefinition
         assert(jep.save())
         if (closure) {
+            closure.metaClass = new ExpandoMetaClass(closure.class)
             closure.metaClass.constantParameter = { String typeName, String value ->
                 JobExecutionPlanDSL.constantParameterClosure(startJobDefinition, typeName, value)
             }
             closure.metaClass.outputParameter = { String typeName ->
                 JobExecutionPlanDSL.outputParameterClosure(startJobDefinition, typeName)
             }
+            closure.metaClass.initialize()
             closure()
         }
         startJobDefined = true
@@ -128,6 +130,7 @@ class JobExecutionPlanDSL {
             assert(helper.previous.save())
         }
         if (closure) {
+            closure.metaClass = new ExpandoMetaClass(closure.class)
             closure.metaClass.constantParameter = { String typeName, String value ->
                 JobExecutionPlanDSL.constantParameterClosure(jobDefinition, typeName, value)
             }
@@ -141,6 +144,7 @@ class JobExecutionPlanDSL {
             closure.metaClass.watchdog = { String watchdogBean ->
                 JobExecutionPlanDSL.watchdogClosure(jobDefinition, jep, helper, watchdogBean)
             }
+            closure.metaClass.initialize()
             closure()
         }
         helper.previous = jobDefinition
@@ -172,6 +176,7 @@ class JobExecutionPlanDSL {
             assert(helper.previous.save())
         }
         if (closure) {
+            closure.metaClass = new ExpandoMetaClass(closure.class)
             closure.metaClass.constantParameter = { String typeName, String value ->
                 JobExecutionPlanDSL.constantParameterClosure(jobDefinition, typeName, value)
             }
@@ -185,6 +190,7 @@ class JobExecutionPlanDSL {
             closure.metaClass.watchdog = { String watchdogBean ->
                 JobExecutionPlanDSL.watchdogClosure(jobDefinition, jep, helper, watchdogBean)
             }
+            closure.metaClass.initialize()
             closure()
         }
         helper.previous = jobDefinition
@@ -196,6 +202,9 @@ class JobExecutionPlanDSL {
             assert(jep.save())
             Helper helper = new Helper()
             Boolean startJobDefined = false
+
+            // need to create our own meta class to be able to add properties
+            c.metaClass = new ExpandoMetaClass(c.class)
             c.metaClass.start = { String n, String bean, closure = null ->
                 JobExecutionPlanDSL.startJobClosure(jep, startJobDefined, n, bean, closure)
             }
@@ -208,6 +217,7 @@ class JobExecutionPlanDSL {
             c.metaClass.validatingJob = { String jobName, String bean, String validatorForName, closure = null ->
                 JobExecutionPlanDSL.validatingJobClosure(jep, helper, jobName, bean, validatorForName, closure)
             }
+            c.metaClass.initialize()
             c()
             jep.firstJob = helper.firstJob
             assert(jep.save(flush: true))
