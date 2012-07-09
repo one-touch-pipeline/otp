@@ -10,8 +10,8 @@ class BuildExecutionDateJob extends AbstractJobImpl {
    /**
     * dependency injection of meta data service
     */
-   @Autowired
-   RunDateParserService runDateParserService
+    @Autowired
+    RunDateParserService runDateParserService
 
     @Override
     public void execute() throws Exception {
