@@ -177,15 +177,18 @@ class RunService {
             sortColumn = "storageRealm"
             break
         case 2:
-            sortColumn = "dateCreated"
+            sortColumn = "seqCenter.name"
             break
         case 3:
-            sortColumn = "dateExecuted"
+            sortColumn = "dateCreated"
             break
         case 4:
-            sortColumn = "blacklisted"
+            sortColumn = "dateExecuted"
             break
         case 5:
+            sortColumn = "blacklisted"
+            break
+        case 6:
             sortColumn = "multipleSource"
             break
         case 0:

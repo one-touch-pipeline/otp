@@ -13,6 +13,7 @@
             <thead>
             <tr>
                 <th><g:message code="run.list.name"/></th>
+                <th><g:message code="run.list.seqCenter"/></th>
                 <th><g:message code="run.list.storageRealm"/></th>
                 <th><g:message code="run.list.dateCreated"/></th>
                 <th><g:message code="run.list.dateExecuted"/></th>
@@ -24,6 +25,7 @@
             <tfoot>
             <tr>
                 <th><g:message code="run.list.name"/></th>
+                <th><g:message code="run.list.seqCenter"/></th>
                 <th><g:message code="run.list.storageRealm"/></th>
                 <th><g:message code="run.list.dateCreated"/></th>
                 <th><g:message code="run.list.dateExecuted"/></th>

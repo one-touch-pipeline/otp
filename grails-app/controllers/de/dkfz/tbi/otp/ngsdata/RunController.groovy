@@ -65,6 +65,7 @@ class RunController {
         runService.listRuns(start, length, params.sSortDir_0 == "asc", column, params.sSearch).each { run ->
             dataToRender.aaData << [
                 [id: run.id, text: run.name],
+                run.seqCenter.name,
                 run.storageRealm?.toString(),
                 run.dateCreated,
                 run.dateExecuted,
