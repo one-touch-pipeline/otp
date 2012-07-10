@@ -132,7 +132,7 @@ OR lower(i.type) like :filter
                     filter: "%${filter.toLowerCase()}%",
                     max: count, offset: offset]
                 return Individual.executeQuery(query, params)
-            }   
+            }
             List<String> columnNames = ["pid", "mockFullName", "mockPid", "project.id", "type"]
             String sortColumn = (column >=0 && column < columnNames.size()) ? columnNames.get(column) : "pid"
             return Individual.list(max: count, offset: offset, sort: sortColumn, order: sortOrder ? "asc" : "desc")
