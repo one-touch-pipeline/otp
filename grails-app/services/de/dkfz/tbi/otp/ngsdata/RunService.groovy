@@ -174,10 +174,10 @@ class RunService {
         String sortColumn = ""
         switch (column) {
         case 1:
-            sortColumn = "storageRealm"
+            sortColumn = "seqCenter.name"
             break
         case 2:
-            sortColumn = "seqCenter.name"
+            sortColumn = "storageRealm"
             break
         case 3:
             sortColumn = "dateCreated"
@@ -203,6 +203,7 @@ SELECT r FROM Run as r
 WHERE
 lower(r.name) like :filter
 OR lower (r.storageRealm) like :filter
+OR lower (r.seqCenter.name) like :filter
 '''
             query = query + "ORDER BY r.${sortColumn} ${order}"
             Map params = [
@@ -229,6 +230,7 @@ SELECT COUNT(DISTINCT r.id) FROM Run as r
 WHERE
 lower(r.name) like :filter
 OR lower (r.storageRealm) like :filter
+OR lower (r.seqCenter.name) like :filter
 '''
             Map params = [filter: "%${filter.toLowerCase()}%"]
             return Run.executeQuery(query, params)[0] as Integer
