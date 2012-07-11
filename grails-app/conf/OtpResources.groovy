@@ -4,6 +4,10 @@ modules = {
         resource url: '/js/jquery/jquery.i18n.properties-min-1.0.9.js'
         resource url: '/js/otp.js'
     }
+    editorSwitch {
+        dependsOn 'core'
+        resource url: '/js/editorswitch.js'
+    }
     crashRecovery {
         dependsOn 'jquery-ui, core'
         resource url: '/js/crashrecovery.js'
