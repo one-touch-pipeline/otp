@@ -5,6 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
 <title>Insert title here</title>
+<r:require module="editorSwitch"/>
 </head>
 <body>
   <div class="body">
@@ -105,7 +106,9 @@
     <g:each var="metaDataEntry" in="${entries}">
        <tr>
             <td class="myKey">${metaDataEntry.key.name}</td>
-            <td class="myValue"}">${metaDataEntry.value}</td>
+            <td class="myValue"}">
+                 <otp:editorSwitch roles="ROLE_ADMIN" link="${g.createLink(controller: 'dataFile', action: 'updateMetaData', id: metaDataEntry.id)}" value="${metaDataEntry.value}"/>
+            </td>
             <td class="${metaDataEntry.status}">${metaDataEntry.status}</td>
             <td>${metaDataEntry.source}</td>
        </tr>

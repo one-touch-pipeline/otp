@@ -3,6 +3,10 @@ package de.dkfz.tbi.otp.ngsdata
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.access.prepost.PostAuthorize
+
+
 class MetaDataService {
 
     // locks for operation that are not tread safe
@@ -31,6 +35,36 @@ class MetaDataService {
             processMetaDataFiles(run)
         } finally {
             loadMetaDataLock.unlock()
+        }
+    }
+
+    /**
+     * Retries a MetaDataEntry in an ACL aware manner.
+     * @param id The id of the MetaDataEntry to retrieve
+     * @return The MetaDataEntry if present, otherwise null
+     */
+    @PostAuthorize("(returnObject == null) or hasPermission(returnObject.dataFile.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_ADMIN')")
+    MetaDataEntry getMetaDataEntryById(Long id) {
+        return MetaDataEntry.get(id)
+    }
+
+    /**
+     * Updates the given MetaDataEntry's value to the new given value.
+     * Creates a ChangeLog entry for this update.
+     * @param entry The MetaDataEntry to update
+     * @param value The new value to set
+     * @throws ChangelogException In case the Changelog Entry could not be created
+     * @throws MetaDataEntryUpdateException In case the MetaDataEntry could not be updated
+     */
+    @PreAuthorize("hasPermission(#entry.dataFile.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_ADMIN')")
+    boolean updateMetaDataEntry(MetaDataEntry entry, String value) throws ChangelogException, MetaDataEntryUpdateException {
+        ChangeLog changelog = new ChangeLog(rowId: entry.id, tableName: entry.class.getName(), columnName: "value", fromValue: entry.value, toValue: value, comment: "-", source: ChangeLog.Source.MANUAL)
+        if (!changelog.save()) {
+            throw new ChangelogException("Creation of changelog failed, errors: " + changelog.errors.toString())
+        }
+        entry.value = value
+        if (!entry.save(flush: true)) {
+            throw new MetaDataEntryUpdateException(entry)
         }
     }
 
