@@ -66,6 +66,6 @@ class FileTypeService {
                 return subType
             }
         }
-        return FileType.findByType(FileType.Type.UNKNOWN)
+        throw new FileTypeUndefinedException(filename)
     }
 }
