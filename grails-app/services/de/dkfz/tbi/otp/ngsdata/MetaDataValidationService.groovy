@@ -235,7 +235,7 @@ class MetaDataValidationService {
     }
 
     private void combineLaneAndIndex(DataFile file) {
-        MetaDataEntry index = metaDataEntry(file, "INDEX_NO")
+        MetaDataEntry index = metaDataEntryFromList(file, ["INDEX_NO", "BARCODE"])
         if (!index || index.value.isAllWhitespace()) {
             return
         }
@@ -262,6 +262,20 @@ class MetaDataValidationService {
             source : ChangeLog.Source.SYSTEM
         )
         return changeLog
+    }
+
+    /*
+     * Returns first found meta data entry from the key names in a list.
+     * If no entry was found returns null
+     */
+    private MetaDataEntry metaDataEntryFromList(DataFile file, List<String> keyNames) {
+        for(String keyName in keyNames) {
+            MetaDataEntry entry = metaDataEntry(file, keyName)
+            if (entry) {
+                return entry
+            }
+        }
+        return null
     }
 
     private MetaDataEntry metaDataEntry(DataFile file, String keyName) {
