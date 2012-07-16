@@ -68,6 +68,34 @@ class MetaDataService {
         }
     }
 
+    /**
+     * Checks for the list of given Meta Data Entries whether there exists at least one ChangeLog element.
+     * A map is created with the MetaDataEntry as key and a boolean as value. True means there is at least
+     * one ChangeLog entry, false means there is none.
+     *
+     * @param entries The MetaDataEntries for which it should be checked whether there is a ChangeLog
+     * @return Map of MetaDataEntries with boolean information as value whether there is a ChangeLog
+     */
+    Map<MetaDataEntry, Boolean> checkForChangelog(List<MetaDataEntry> entries) {
+        List<ChangeLog> changelogs = ChangeLog.findAllByRowIdInListAndTableName(entries.collect { it.id }, MetaDataEntry.class.getName())
+        Map<MetaDataEntry, Boolean> results = [:]
+        entries.each { MetaDataEntry entry ->
+            results.put(entry, changelogs.find { it.rowId == entry.id } ? true : false)
+        }
+        return results
+    }
+
+    /**
+     * Retrieves the ChangeLog for the given MetaDataEntry.
+     *
+     * @param entry The MetaDataEntry for which the ChangeLog should be retrieved
+     * @return List of ChangeLog entries
+     */
+    @PreAuthorize("hasPermission(#entry.dataFile.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_ADMIN')")
+    List<ChangeLog> retrieveChangeLog(MetaDataEntry entry) {
+        return ChangeLog.findAllByRowIdAndTableName(entry.id, MetaDataEntry.class.getName())
+    }
+
     private void processMetaDataFiles(Run run) {
         List<RunSegment> paths = RunSegment.findAllByRunAndMetaDataStatus(run, RunSegment.Status.PROCESSING)
         List<MetaDataFile> mdFiles = MetaDataFile.findAllByRunSegmentInList(paths)

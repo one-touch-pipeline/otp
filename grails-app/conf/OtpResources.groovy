@@ -8,6 +8,10 @@ modules = {
         dependsOn 'core'
         resource url: '/js/editorswitch.js'
     }
+    changeLog {
+        dependsOn 'jquery-ui, core'
+        resource url: '/js/changelog.js'
+    }
     crashRecovery {
         dependsOn 'jquery-ui, core'
         resource url: '/js/crashrecovery.js'

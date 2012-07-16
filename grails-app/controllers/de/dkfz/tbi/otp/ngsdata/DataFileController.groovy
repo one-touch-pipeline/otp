@@ -11,6 +11,7 @@ class DataFileController {
 
         DataFile dataFile = DataFile.get(params.id)
         List<MetaDataEntry> entries = MetaDataEntry.findAllByDataFile(dataFile, [sort:"key.id"])
+        Map<MetaDataEntry, Boolean> changelogs = metaDataService.checkForChangelog(entries)
 
         List<String> keys = new Vector<String>()
         List<String> values = new Vector<String>()
@@ -21,7 +22,7 @@ class DataFileController {
         keys << "view-by-pid path"
         values << lsdfFilesService.getFileViewByPidPath(dataFile)
 
-        return [dataFile: dataFile, entries: entries, values: values]
+        return [dataFile: dataFile, entries: entries, values: values, changelogs: changelogs]
     }
 
     def updateMetaData = {
@@ -39,6 +40,20 @@ class DataFileController {
             data.put("error", g.message(code: "datafile.metadata.update.error"))
         } catch (ChangelogException e) {
             data.put("error", g.message(code: "datafile.metadata.update.changelog.error"))
+        }
+        render data as JSON
+    }
+
+    def metaDataChangelog = {
+        MetaDataEntry entry = metaDataService.getMetaDataEntryById(params.id as Long)
+        if (!entry) {
+            List data = []
+            render data as JSON
+            return
+        }
+        List data = []
+        metaDataService.retrieveChangeLog(entry).each { ChangeLog log ->
+            data << [comment: log.comment, from: log.fromValue, to: log.toValue, source: log.source.toString()]
         }
         render data as JSON
     }

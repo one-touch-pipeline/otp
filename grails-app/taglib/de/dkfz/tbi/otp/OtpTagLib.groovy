@@ -38,4 +38,30 @@ class OtpTagLib {
             out << render(template: "/templates/editorSwitch", model: [link: attrs.link, value: attrs.value])
         }
     }
+
+    /**
+     * Renders a button to open the ChangeLog for the ChangeLog data retrieved from provided JSON URL.
+     * When the button is clicked an AJAX call is performed to the specified controller action and the
+     * retrieved data is rendered in a table presented in a dialog.
+     *
+     * The expected JSON format the controller action has to be a list of elements with following key/value pairs:
+     * <ul>
+     * <li><strong>to</strong>: the new value</li>
+     * <li><strong>from</strong>: the old value</li>
+     * <li><strong>source</strong>: whether system or manual change</li>
+     * <li><strong>comment</strong>: the comment of the change</li>
+     * </ul>
+     *
+     * The required JavaScript code is part of the resource "changeLog", so this one has to be required.
+     * <code>
+     * <r:require module="changeLog"/>
+     * </code>
+     *
+     * @attr controller REQUIRED The controller where to fetch the changelog
+     * @attr action REQUIRED The action where to fetch the changelog
+     * @attr id REQUIRED The data id
+     */
+    def showChangeLog = { attrs ->
+        out << render(template: "/templates/showChangeLog", model: [link: g.createLink(controller: attrs.controller, action: attrs.action, id: attrs.id)])
+    }
 }
