@@ -229,6 +229,15 @@ if ((otpConfig.otp.jabber.enabled instanceof ConfigObject) || !Boolean.parseBool
     otp.jabber.service = otpConfig.otp.jabber.service
 }
 
+// protect everything for role user
+grails.plugins.springsecurity.controllerAnnotations.staticRules = [
+        "/login/**":             ['IS_AUTHENTICATED_ANONYMOUSLY'],
+        "/css/**":               ["permitAll"],
+        "/images/**":            ["permitAll"],
+        "/js/**":                ["permitAll"],
+        "/**":                   ['ROLE_USER']
+        ]
+
 // exclude unused plugins
 if (pluginsToExclude) {
     grails.plugin.exclude = pluginsToExclude
