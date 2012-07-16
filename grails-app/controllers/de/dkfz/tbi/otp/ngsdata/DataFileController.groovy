@@ -6,7 +6,6 @@ class DataFileController {
 
     def lsdfFilesService
     def metaDataService
-    def scaffold = DataFile
 
     def showDetails = {
 
