@@ -26,6 +26,7 @@
 
 		<div class="nav" role="navigation">
 			<ul>
+				<li><g:link url="${request.contextPath}">Home</g:link></li>
     			<li><g:link controller="overviewMB" action="index">Overview</g:link></li>
 				<li><g:link controller="individual" action="list">Individuals</g:link></li>
 				<li><g:link controller="run" action="list">Runs</g:link></li>
