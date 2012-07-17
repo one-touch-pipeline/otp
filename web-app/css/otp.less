@@ -1,3 +1,25 @@
+/******************************************
+* Common less classes
+******************************************/
+.box-shadowed (@x, @y, @radius, @color) {
+       -moz-box-shadow: @arguments;
+    -webkit-box-shadow: @arguments;
+            box-shadow: @arguments;
+}
+.box-shadowed2 (@x, @y, @blur, @radius, @color) {
+       -moz-box-shadow: @arguments;
+    -webkit-box-shadow: @arguments;
+            box-shadow: @arguments;
+}
+.no-box-shadow {
+       -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+            box-shadow: none;
+}
+.input-error {
+    .box-shadowed(0, 0, 0.5em, #ffaaaa);
+}
+
 /* FONT STACK */
 body,
 input, select, textarea {
@@ -28,14 +50,12 @@ html {
 }
 
 body {
+    .box-shadowed(0, 0, 0.3em, #255b17);
     background: #ffffff;
     color: #333333;
     margin: 0 auto;
     max-width: 1024px;
     overflow-x: hidden; /* prevents box-shadow causing a horizontal scrollbar in firefox when viewport < 960px wide */
-       -moz-box-shadow: 0 0 0.3em #255b17;
-    -webkit-box-shadow: 0 0 0.3em #255b17;
-            box-shadow: 0 0 0.3em #255b17;
 }
 
 /* my styles start here */
@@ -58,10 +78,10 @@ body {
 }
 
 .myHeader {
+    .box-shadowed2(0, 0, 3px, 1px, #cccccc);
     font-weight: bold;
     background: #fafafa;
     background-image: -moz-linear-gradient(center bottom, #efefef, #ffffff);
-    -moz-box-shadow: 0 0 3px 1px #cccccc;
     margin-top: 1em;
     margin-bottom: 0.5em;
     margin-right: 200px;
@@ -76,10 +96,10 @@ body {
 }
 
 .myHeaderWide {
+    .box-shadowed2(0, 0, 3px, 1px, #cccccc);
     font-weight: bold;
     background: #fafafa;
     background-image: -moz-linear-gradient(center bottom, #efefef, #ffffff);
-    -moz-box-shadow: 0 0 3px 1px #cccccc;
     margin-top: 1em;
     margin-bottom: 0.5em;
     margin-right: 50px;
@@ -108,9 +128,9 @@ body {
 }
 
 .button {
+    .box-shadowed2(0, 0, 3px, 1px, #cccccc);
     display: block;
     background-image: -moz-linear-gradient(center bottom, #efefef, #ffffff);
-        -moz-box-shadow: 0 0 3px 1px #cccccc;
     float: right;
     border: 1px solid #cccccc;
     margin: 0.5em 0.5em 0.5em 0.5em;
@@ -193,11 +213,9 @@ img {
 /* NAVIGATION MENU */
 
 .nav {
+    .box-shadowed2(0, 0, 3px, 1px, #aaaaaa);
     background-color: #efefef;
     padding: 0.5em 0.75em;
-       -moz-box-shadow: 0 0 3px 1px #aaaaaa;
-    -webkit-box-shadow: 0 0 3px 1px #aaaaaa;
-            box-shadow: 0 0 3px 1px #aaaaaa;
     zoom: 1;
     margin-bottom: 1em;
     margin-top: 1em;
@@ -314,12 +332,10 @@ input[type=checkbox], input[type=radio] {
 }
 
 input:focus, select:focus, textarea:focus {
+    .box-shadowed(0, 0, 0.5em, #ffffff);
     background-color: #ffffff;
     border: 1px solid #eeeeee;
     outline: 0;
-       -moz-box-shadow: 0 0 0.5em #ffffff;
-    -webkit-box-shadow: 0 0 0.5em #ffffff;
-            box-shadow: 0 0 0.5em #ffffff;
 }
 
 .required-indicator {
@@ -334,13 +350,11 @@ input:focus, select:focus, textarea:focus {
 /* EMBEDDED PROPERTIES */
 
 fieldset.embedded {
+    .no-box-shadow;
     background-color: transparent;
     border: 1px solid #CCCCCC;
     padding-left: 0;
     padding-right: 0;
-       -moz-box-shadow: none;
-    -webkit-box-shadow: none;
-            box-shadow: none;
     legend {
         margin: 0 1em;
     }
@@ -357,23 +371,19 @@ fieldset.embedded {
 }
 
 .message {
+    .box-shadowed(0, 0, 0.25em, #b2d1ff);
     background: #f3f3ff;
     border: 1px solid #b2d1ff;
     color: #006dba;
-       -moz-box-shadow: 0 0 0.25em #b2d1ff;
-    -webkit-box-shadow: 0 0 0.25em #b2d1ff;
-            box-shadow: 0 0 0.25em #b2d1ff;
     background: transparent url(../images/skin/information.png) 0 50% no-repeat;
     text-indent: 22px;
 }
 
 .errors {
+    .box-shadowed(0, 0, 0.25em, #ff8888);
     background: #fff3f3;
     border: 1px solid #ffaaaa;
     color: #cc0000;
-       -moz-box-shadow: 0 0 0.25em #ff8888;
-    -webkit-box-shadow: 0 0 0.25em #ff8888;
-            box-shadow: 0 0 0.25em #ff8888;
 }
 
 .errors ul,
@@ -412,9 +422,7 @@ div.message {
 }
 
 .error input:focus, .error select:focus, .error textarea:focus {
-       -moz-box-shadow: 0 0 0.5em #ffaaaa;
-    -webkit-box-shadow: 0 0 0.5em #ffaaaa;
-            box-shadow: 0 0 0.5em #ffaaaa;
+    .input-error;
 }
 
 /* same effects for browsers that support HTML5 client-side validation (these have to be specified separately or IE will ignore the entire rule) */
@@ -426,9 +434,7 @@ input:invalid, select:invalid, textarea:invalid {
 }
 
 input:invalid:focus, select:invalid:focus, textarea:invalid:focus {
-       -moz-box-shadow: 0 0 0.5em #ffaaaa;
-    -webkit-box-shadow: 0 0 0.5em #ffaaaa;
-            box-shadow: 0 0 0.5em #ffaaaa;
+    .input-error;
 }
 
 /* TABLES */
@@ -551,13 +557,11 @@ td {
 /* PAGINATION */
 
 .pagination {
+    .box-shadowed2(0, 0, 3px, 1px, #aaaaaa);
     border-top: 0;
     margin: 0;
     padding: 0.3em 0.2em;
     text-align: center;
-       -moz-box-shadow: 0 0 3px 1px #AAAAAA;
-    -webkit-box-shadow: 0 0 3px 1px #AAAAAA;
-            box-shadow: 0 0 3px 1px #AAAAAA;
     background-color: #EFEFEF;
     a, &.currentStep {
         color: #666666;
@@ -579,12 +583,10 @@ td {
 
 /* ACTION BUTTONS */
 .buttons {
+    .box-shadowed2(0, 0, 3px, 1px, #aaaaaa);
     background-color: #efefef;
     overflow: hidden;
     padding: 0.3em;
-       -moz-box-shadow: 0 0 3px 1px #aaaaaa;
-    -webkit-box-shadow: 0 0 3px 1px #aaaaaa;
-            box-shadow: 0 0 3px 1px #aaaaaa;
     margin: 0.1em 0 0 0;
     border: none;
     input, a {
@@ -601,13 +603,11 @@ td {
         -webkit-border-radius: 0.3em;
                 border-radius: 0.3em;
         &:hover, &:focus {
+            .no-box-shadow;
             background-color: #999999;
             color: #ffffff;
             outline: none;
             text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
-               -moz-box-shadow: none;
-            -webkit-box-shadow: none;
-                    box-shadow: none;
         }
     }
     &.delete, &.edit, &.save {
