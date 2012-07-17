@@ -53,7 +53,7 @@ class DataFileController {
         }
         List data = []
         metaDataService.retrieveChangeLog(entry).each { ChangeLog log ->
-            data << [comment: log.comment, from: log.fromValue, to: log.toValue, source: log.source.toString()]
+            data << [comment: log.comment, from: log.fromValue, to: log.toValue, source: log.source.toString(), timestamp: log.dateCreated]
         }
         render data as JSON
     }

@@ -8,6 +8,7 @@ class ChangeLog {
     String fromValue
     String toValue
     String comment
+    Date dateCreated = new Date()
 
     enum Source {
         SYSTEM, MANUAL
@@ -19,5 +20,7 @@ class ChangeLog {
         fromValue()
         toValue()
         comment()
+        // nullable for compatibility with existing objects in Database
+        dateCreated(nullable: true)
     }
 }

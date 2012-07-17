@@ -5,6 +5,7 @@
         <table>
             <thead>
             <tr>
+                <th><g:message code="showChangeLog.table.head.timestamp"/></th>
                 <th><g:message code="showChangeLog.table.head.from"/></th>
                 <th><g:message code="showChangeLog.table.head.to"/></th>
                 <th><g:message code="showChangeLog.table.head.source"/></th>

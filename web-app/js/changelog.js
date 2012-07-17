@@ -8,11 +8,13 @@ $("div.showChangeLog button").click(function () {
         url: $("input:hidden", container).val(),
         dataType: 'json',
         success: function (data) {
-            var tbody, tr, i, dialog;
+            var tbody, tr, i, dialog, date;
             tbody = $("table tbody", container);
             dialog = $("div", container).clone();
             for (i = 0; i < data.length; i += 1) {
                 tr = tbody.append("<tr>");
+                date = new Date(data[i].timestamp);
+                tr.append("<td title=\"" + date.toLocaleString() + "\">" + $.datepicker.formatDate("yy-mm-dd", date) + "</td>");
                 tr.append("<td>" + data[i].from + "</td>");
                 tr.append("<td>" + data[i].to + "</td>");
                 tr.append("<td>" + data[i].source + "</td>");

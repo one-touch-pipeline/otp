@@ -50,6 +50,7 @@ class OtpTagLib {
      * <li><strong>from</strong>: the old value</li>
      * <li><strong>source</strong>: whether system or manual change</li>
      * <li><strong>comment</strong>: the comment of the change</li>
+     * <li><strong>timestamp</strong>: the time stamp of the change</li>
      * </ul>
      *
      * The required JavaScript code is part of the resource "changeLog", so this one has to be required.
