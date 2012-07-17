@@ -1,6 +1,9 @@
 modules = {
     application {
     }
+    'style' {
+        resource url:'/css/otp.less'
+    }
     core {
         dependsOn 'jquery'
         resource url: '/js/jquery/jquery.i18n.properties-min-1.0.9.js'
