@@ -2,6 +2,8 @@ package de.dkfz.tbi.otp.ngsdata
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
+import de.dkfz.tbi.otp.utils.ReferencedClass
+
 class MetaDataValidationService {
 
     private final Lock validateMetaDataLock = new ReentrantLock()
@@ -252,9 +254,10 @@ class MetaDataValidationService {
     }
 
     private ChangeLog buildChangeLog(long rowId, String from, String to, String comment) {
+        ReferencedClass clazz = ReferencedClass.findOrSaveByClassName(MetaDataEntry.class.getName())
         ChangeLog changeLog = new ChangeLog(
             rowId : rowId,
-            tableName : "MetaDataEntry",
+            ReferencedClass: clazz,
             columnName : "value",
             fromValue : from,
             toValue : to,

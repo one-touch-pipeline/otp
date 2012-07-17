@@ -6,6 +6,7 @@ import java.util.concurrent.locks.ReentrantLock
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.access.prepost.PostAuthorize
 
+import de.dkfz.tbi.otp.utils.ReferencedClass
 
 class MetaDataService {
 
@@ -58,7 +59,8 @@ class MetaDataService {
      */
     @PreAuthorize("hasPermission(#entry.dataFile.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_ADMIN')")
     boolean updateMetaDataEntry(MetaDataEntry entry, String value) throws ChangelogException, MetaDataEntryUpdateException {
-        ChangeLog changelog = new ChangeLog(rowId: entry.id, tableName: entry.class.getName(), columnName: "value", fromValue: entry.value, toValue: value, comment: "-", source: ChangeLog.Source.MANUAL)
+        ReferencedClass clazz = ReferencedClass.findOrSaveByClassName(MetaDataEntry.class.getName())
+        ChangeLog changelog = new ChangeLog(rowId: entry.id, referencedClass: clazz, columnName: "value", fromValue: entry.value, toValue: value, comment: "-", source: ChangeLog.Source.MANUAL)
         if (!changelog.save()) {
             throw new ChangelogException("Creation of changelog failed, errors: " + changelog.errors.toString())
         }
@@ -77,7 +79,15 @@ class MetaDataService {
      * @return Map of MetaDataEntries with boolean information as value whether there is a ChangeLog
      */
     Map<MetaDataEntry, Boolean> checkForChangelog(List<MetaDataEntry> entries) {
-        List<ChangeLog> changelogs = ChangeLog.findAllByRowIdInListAndTableName(entries.collect { it.id }, MetaDataEntry.class.getName())
+        ReferencedClass clazz = ReferencedClass.findByClassName(MetaDataEntry.class.getName())
+        if (!clazz) {
+            Map<MetaDataEntry, Boolean> results = [:]
+            entries.each { MetaDataEntry entry ->
+                results.put(entry, false)
+            }
+            return results
+        }
+        List<ChangeLog> changelogs = ChangeLog.findAllByRowIdInListAndReferencedClass(entries.collect { it.id }, clazz)
         Map<MetaDataEntry, Boolean> results = [:]
         entries.each { MetaDataEntry entry ->
             results.put(entry, changelogs.find { it.rowId == entry.id } ? true : false)
@@ -93,7 +103,11 @@ class MetaDataService {
      */
     @PreAuthorize("hasPermission(#entry.dataFile.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_ADMIN')")
     List<ChangeLog> retrieveChangeLog(MetaDataEntry entry) {
-        return ChangeLog.findAllByRowIdAndTableName(entry.id, MetaDataEntry.class.getName())
+        ReferencedClass clazz = ReferencedClass.findByClassName(MetaDataEntry.class.getName())
+        if (!clazz) {
+            return []
+        }
+        return ChangeLog.findAllByRowIdAndReferencedClass(entry.id, clazz)
     }
 
     private void processMetaDataFiles(Run run) {

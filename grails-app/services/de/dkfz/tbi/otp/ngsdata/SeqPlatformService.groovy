@@ -4,6 +4,8 @@ import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import org.springframework.context.annotation.Scope
 
+import de.dkfz.tbi.otp.utils.ReferencedClass
+
 @Scope("prototype")
 class SeqPlatformService {
 
@@ -112,9 +114,10 @@ class SeqPlatformService {
 
     private boolean correctMD(MetaDataEntry entry, String value) {
         if (entry.value != value) {
+            ReferencedClass clazz = ReferencedClass.findOrSaveByClassName(MetaDataEntry.class.getName())
             ChangeLog changeLog = new ChangeLog(
                 rowId: entry.id,
-                tableName: "MetaDataEntry",
+                referencedClass: clazz,
                 columnName: "value",
                 fromValue: entry.value,
                 toValue: value,

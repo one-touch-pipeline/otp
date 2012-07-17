@@ -1,9 +1,19 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.utils.ReferencedClass
+
 class ChangeLog {
 
     long rowId
-    String tableName
+    /**
+     * The class this ChangeLog is pointing to
+     */
+    ReferencedClass referencedClass
+    /**
+     * This field has been dropped, only listed for backward compatibility of database
+     * @deprecated Use referencedClass
+     */
+    String tableName = ""
     String columnName
     String fromValue
     String toValue
@@ -15,7 +25,10 @@ class ChangeLog {
     }
     Source source
     static constraints = {
-        tableName()
+        // blank to be able to keep existing objects in Database
+        tableName(blank: true)
+        // nullable for compatibility with existing objects in Database
+        referencedClass(nullable: true)
         columnName()
         fromValue()
         toValue()
