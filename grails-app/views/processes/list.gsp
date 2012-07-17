@@ -4,9 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
 <title>List of Workflows</title>
-<link rel='stylesheet' href='http://www.datatables.net//release-datatables/media/css/demo_table.css' />
 <jqDT:resources/>
-<g:javascript library="jquery.dataTables" />
 <g:javascript src="jquery.timeago.js"/>
 </head>
 <body>

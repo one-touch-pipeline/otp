@@ -6,7 +6,6 @@
 <title>List of ${failed ? 'failed' : ''} Processes for Workflow ${name}</title>
 <link rel='stylesheet' href='http://www.datatables.net//release-datatables/media/css/demo_table.css' />
 <jqDT:resources/>
-<g:javascript library="jquery.dataTables" />
 <g:javascript src="jquery.timeago.js"/>
 <r:require module="graphDracula"/>
 <r:require module="jquery-ui"/>

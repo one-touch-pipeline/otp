@@ -5,7 +5,6 @@
 <meta name="layout" content="main"/>
 <title>Processing Step ${step.jobDefinition.name} (# ${step.id})</title>
 <jqDT:resources/>
-<g:javascript library="jquery.dataTables" />
 <g:javascript src="jquery.timeago.js"/>
 </head>
 <body>

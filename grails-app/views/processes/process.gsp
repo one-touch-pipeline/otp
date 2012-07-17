@@ -5,7 +5,6 @@
 <meta name="layout" content="main"/>
 <title>List of Processing Steps for Process # ${id} for Workflow ${name}</title>
 <jqDT:resources/>
-<g:javascript library="jquery.dataTables" />
 <g:javascript src="jquery.timeago.js"/>
 <r:require module="graphDracula"/>
 </head>
