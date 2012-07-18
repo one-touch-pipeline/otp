@@ -451,15 +451,15 @@ table {
 
 tr {
     border: 0;
-    &:hover {
-        background: #dadada;
-    }
     &.TUMOR {
         background: #f0f0ff;
     }
     &.CONTROL {
         background: #ffffff;
         border-bottom: 1px dotted #d0d0d0;
+    }
+    &:nth-last-child(2n) {
+        background-color: #EFEFEF;
     }
 }
 
