@@ -10,7 +10,7 @@
 
     <H1>General</H1>
 
-    <div class="myContent">
+    <div class="tableBlock">
     <table>
        <tr>
             <td class="myKey">individual</td>
@@ -44,7 +44,7 @@
 
     <h1>Status</h1>   
 
-    <div class="myContent">
+    <div class="tableBlock">
     <table>
       <tr>
         <td class="myKey">status</td>
@@ -59,7 +59,7 @@
 
     <h1>Sequencing tracks</h1>
 
-    <div class="myContent">
+    <div class="tableBlock">
     <table>
         <tr>
             <td class="myKey">number of lanes</td>

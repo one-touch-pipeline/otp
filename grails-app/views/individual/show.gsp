@@ -18,7 +18,7 @@
     </ul>
 
     <h1>Details of Individual</h1>
-    <div class="myContent">
+    <div class="tableBlock">
     <table>
        <tr> 
             <td class="myKey">PID</td>
@@ -44,7 +44,7 @@
     </div>
 
     <h1>Samples</h1>
-    <div class="myContent">
+    <div class="tableBlock">
     <table>
         <g:each var="sample" in="${ind.samples}">
             <tr>
