@@ -109,14 +109,10 @@
     </g:each>
 
     <h1>Analysis Results</h1>
-    <div class="myContentWide">
-    <table>
-        <tr>
-            <g:each var="mutation" in="${ind.mutations}">
-                ${mutation.gene}, 
-            </g:each>
-        </tr>
-    </table>
+    <div class="tableBlock">
+        <g:each var="mutation" in="${ind.mutations}">
+              ${mutation.gene},
+       </g:each>
     </div>
 
     <h1>Data Access</h1>
