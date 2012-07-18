@@ -452,10 +452,11 @@ td, th {
 }
 
 th {
+    @webkit-gradient: -webkit-gradient(linear, left top, left bottom, color-stop(0, #ffffff), color-stop(1, #eaeaea));
+    @moz-gradient: -moz-linear-gradient(center bottom, #efefef, #ffffff);
     background-color: #efefef;
-    bckground-image: -moz-linear-gradient(top, #ffffff, #e0e0ff);
-    background-image: -moz-linear-gradient(center bottom, #efefef, #ffffff);
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #ffffff), color-stop(1, #eaeaea));
+    background-image: @moz-gradient;
+    background-image: @webkit-gradient;
     color: #666666;
     font-weight: bold;
     line-height: 1.7em;
@@ -484,11 +485,15 @@ th {
         background-repeat: no-repeat;
         padding-right: 1.1em;
     }
-    &.asc a {
-        background-image: url(../images/skin/sorted_asc.gif);
+    &.asc a, &.sorting_asc {
+        @image: url(../images/skin/sorted_asc.gif) center right no-repeat;
+        background: @image, @webkit-gradient;
+        background: @image, @moz-gradient;
     }
-    &.desc a {
-        background-image: url(../images/skin/sorted_desc.gif);
+    &.desc a, &.sorting_desc {
+        @image: url(../images/skin/sorted_desc.gif) center right no-repeat;
+        background: @image, @webkit-gradient;
+        background: @image, @moz-gradient;
     }
 }
 
