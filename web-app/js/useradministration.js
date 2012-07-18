@@ -32,7 +32,10 @@ $.otp.userAdministration.loadUserList = function () {
         bFilter: false,
         bProcessing: true,
         bServerSide: true,
-        bJQueryUI: true,
+        bJQueryUI: false,
+        bScrollInfinite: true,
+        bScrollCollapse: true,
+        sScrollY: "600px",
         sPaginationType: "full_numbers",
         sAjaxSource: $.otp.contextPath + '/userAdministration/dataTableSource',
         "fnServerData": function (sSource, aoData, fnCallback) {

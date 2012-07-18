@@ -257,6 +257,9 @@ OTP.prototype.createListView = function (selector, sourcePath, sortOrder, jsonCa
         bJQueryUI: false,
         bProcessing: true,
         bServerSide: true,
+        bScrollInfinite: true,
+        bScrollCollapse: true,
+        sScrollY: "600px",
         sAjaxSource: sourcePath,
         fnServerData: function (sSource, aoData, fnCallback) {
             var i;
