@@ -75,3 +75,6 @@ codenarc.reports = {
 codenarc.extraIncludeDirs=['ast']
 
 grails.tomcat.jvmArgs = ["-Xmx1024m", "-XX:MaxPermSize=256m"]
+
+// As OTP is now productive the application's name should be clean from any version numbering
+grails.project.war.file = "target/otp.war"
