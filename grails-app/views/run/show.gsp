@@ -71,53 +71,40 @@
     </table>
 
 
-    <div class="myHeaderWide">
-        Data Files
-    </div>
-
-    <div class="myContentWide">
+    <div class="tableBlock">
+        <h1>Data Files</h1>
         <table>
             <g:each var="file" in="${metaDataFiles}">
+            <tbody>
                 <tr>
                     <td>${file.fileName}</td>
                     <td>${(new Date(file.dateCreated.getTime())).format("yyyy-MM-dd")}</td>
                     <td>${file.used}</td>
                 </tr>
+            </tbody>
             </g:each>
         </table>
-
-        <%--  Data Files located on Seq Tracks  --%>
-        <table>
         <g:each var="track" in="${seqTracks}">
-
-            <tr>
-                <td class="miniHeader" colspan="3">${track.key.laneId} ${track.key.sample}<br>${track.key.seqType}</td>
-                <td class="miniHeader" colspan="3">insert size: ${track.key.insertSize}</td>
-                <td class="miniHeader" colspan="3">number of base pairs: ${track.key.nBaseString()}</td>
-            </tr>
-            <g:each var="file" in="${track.value.files}">
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="3">${track.key.laneId} ${track.key.sample}<br/>${track.key.seqType}</th>
+                    <th colspan="3">insert size: ${track.key.insertSize}</th>
+                    <th colspan="3">number of base pairs: ${track.key.nBaseString()}</th>
+                </tr>
+            </thead>
+            <tbody>
+            <g:each  var="file" in="${track.value.files}">
                 <tr>
                     <td>-</td>
                     <td>s</td>
-                    <td><g:link controller="dataFile" action="showDetails" id="${file.id}">
-                        ${file.fileName}</g:link>
-                    </td>
+                    <td><g:link controller="dataFile" action="showDetails" id="${file.id}">${file.fileName}</g:link></td>
                     <td>${file.project}</td>
-                    <td class="${file.metaDataValid}">
-                        <g:if test="${file.metaDataValid}">meta-data valid</g:if>
-                        <g:else>md invalid</g:else>
-                    </td>
+                    <td class="${file.metaDataValid}">${file.metaDataValid ? 'meta-data valid' : 'md invalid'}</td>
                     <td class="${file.fileExists}">on LSDF</td>
                     <td class="${file.fileLinked}">linked</td>
                     <td>${String.format("%.1f GB", file.fileSize/1e9)}</td>
-                    <td>
-                    <g:if test="${file.dateFileSystem}">
-                    ${(new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd")}
-                    </g:if>
-                    <g:else>
-                    &nbsp;
-                    </g:else>
-                    </td>
+                    <td>${file.dateFileSystem ? (new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd") : '&nbsp;' }</td>
                 </tr>
             </g:each>
             <g:each var="alignment" in="${track.value.alignments}">
@@ -125,50 +112,37 @@
                     <tr>
                         <td>-</td>
                         <td>a</td>
-
-                        <td><g:link controller="dataFile" action="showDetails" id="${file.id}">
-                            ${file.fileName}</g:link>
-                        </td>
-
-                        <td>${alignment.key.alignmentParams.pipeline}
+                        <td><g:link controller="dataFile" action="showDetails" id="${file.id}">${file.fileName}</g:link></td>
+                        <td>${alignment.key.alignmentParams.pipeline}</td>
                         <td>${alignment.key.executedBy}</td>
-
                         <td class="${file.fileExists}">on LSDF</td>
                         <td class="${file.fileLinked}">linked</td>
                         <td>${String.format("%.1f GB", file.fileSize/1e9)}</td>
-                        <td>
-	                    <g:if test="${file.dateFileSystem}">
-	                    ${(new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd")}
-	                    </g:if>
-	                    <g:else>
-	                    &nbsp;
-	                    </g:else>
-                        </td>
+                        <td>${file.dateFileSystem ? (new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd") : '&nbsp;' }</td>
                     </tr>
                 </g:each>
             </g:each> 
-          </g:each>
+            </tbody>
         </table>
-
-        <%--  Data Files with errors  --%>
+        </g:each>
         <table>
-
-            <tr>
-                <td class="miniHeader" colspan="4">Files not used:</td>
-            </tr>
-
+            <thead>
+                <tr>
+                    <td colspan="4">Files not used:</td>
+                </tr>
+            </thead>
+            <tbody>
             <g:each var="file" in="${errorFiles}">
                 <tr>
-                    <td><g:link controller="dataFile" action="showDetails" id="${file.id}">
-                        ${file.fileName}</g:link></td>
+                    <td><g:link controller="dataFile" action="showDetails" id="${file.id}">${file.fileName}</g:link></td>
                     <td>${de.dkfz.tbi.otp.ngsdata.MetaDataEntry.findByDataFileAndKey(file, keys[0]).value}</td>
                     <td>${de.dkfz.tbi.otp.ngsdata.MetaDataEntry.findAllByDataFileAndKey(file, keys[1])}</td>
                     <td class="${file.metaDataValid}">meta-data</td>
+                </tr>
             </g:each>
+            </tbody>
         </table>
-
-      </div>
-
+    </div>
   </div>
 </body>
 </html>

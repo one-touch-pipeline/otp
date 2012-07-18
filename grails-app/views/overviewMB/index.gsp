@@ -6,40 +6,35 @@
 <title>Insert title here</title>
 </head>
 <body>
-   <div class="body">
-    <div class="myHeader">
-    Centers Overview
-    </div>
-    <div class="myContent">
-    <table>
-    <g:each var="line" in="${centers}">
-        <tr>
-            <g:each var="token" in="${line}">
-                <td>${token}</td>
-            </g:each>
-        </tr>
-    </g:each>
-    </table>
-    </div>
-
     <div class="body">
-    <div class="myHeader">
-    Sequencing Types Overview
+        <div class="tableBlock">
+            <h1>Centers Overview</h1>
+            <table>
+                <tbody>
+                    <g:each var="line" in="${centers}">
+                        <tr>
+                            <g:each var="token" in="${line}">
+                                <td>${token}</td>
+                            </g:each>
+                        </tr>
+                    </g:each>
+                </tbody>
+            </table>
+        </div>
+        <div class="tableBlock">
+            <h1>Sequencing Types Overview</h1>
+            <table>
+                <tbody>
+                    <g:each var="line" in="${types}">
+                        <tr>
+                            <g:each var="token" in="${line}">
+                                <td>${token}</td>
+                            </g:each>
+                        </tr>
+                    </g:each>
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div class="myContent">
-    <table>
-    <g:each var="line" in="${types}">
-        <tr>
-            <g:each var="token" in="${line}">
-                <td>${token}</td>
-            </g:each>
-        </tr>
-    </g:each>
-    </table>
-    </div>
-
-
-  </div>
 </body>
 </html>
-

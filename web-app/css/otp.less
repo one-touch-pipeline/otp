@@ -65,65 +65,43 @@ body {
 
 /* my styles start here */
 
-.myKey {
-    width: 30%;
-    text-align: right;
-    font-weight: bold;
-    color:  #99aacc;
-    padding-right: 1em;
-}
-
-.myValue {
-    list-style-type: none;
-}
-
-.myLine {
-    list-style-type: none;
-    padding-left: 1em;
-}
-
-.myHeader {
-    .box-shadowed2(0, 0, 3px, 1px, #cccccc);
-    font-weight: bold;
-    background: #fafafa;
-    background-image: -moz-linear-gradient(center bottom, #efefef, #ffffff);
-    margin-top: 1em;
-    margin-bottom: 0.5em;
-    margin-right: 200px;
-    margin-left: 50px;
-    padding: 0.3em;
-}
-
 .myContent{
     margin-left: 50px;
     margin-bottom: 2em;
     margin-right: 200px;
 }
 
-.myHeaderWide {
-    .box-shadowed2(0, 0, 3px, 1px, #cccccc);
-    font-weight: bold;
-    background: #fafafa;
-    background-image: -moz-linear-gradient(center bottom, #efefef, #ffffff);
-    margin-top: 1em;
-    margin-bottom: 0.5em;
-    margin-right: 50px;
-    margin-left: 50px;
-    padding: 0.3em;
-}
-
-.myContentWide {
+/**
+* tableBlock is used for a div with a header and a table underneath
+* having the same width and belonging together.
+**/
+div.tableBlock {
     margin-left: 50px;
     margin-bottom: 2em;
     margin-right: 50px;
-}
-
-.miniHeader {
-    color: #48802c;
-    font-weight: bold;
-    padding-top: 1em;
-    border-bottom: 1px dotted #CCCCCC;
-    border-top: 1px solid #CCCCCC;
+    h1 {
+        .box-shadowed2(0, 0, 3px, 1px, #cccccc);
+        font-weight: bold;
+        background: #fafafa;
+        background-image: -moz-linear-gradient(center bottom, #efefef, #ffffff);
+        margin-top: 1em;
+        margin-bottom: 0.5em;
+        padding: 0.3em;
+        color: #333;
+    }
+    th {
+        color: #aaaaaa;
+        font-weight: bold;
+        font-size: 0.8em;
+        border: 0px;
+        background-color: #ffffff;
+        background-image: none;
+    }
+    td {
+        ul {
+            list-style-type: none;
+        }
+    }
 }
 
 .microHeader {
@@ -554,6 +532,16 @@ td {
         line-height: 0.3em;
         background: #ffffff;
         background-image: -moz-linear-gradient(right, #ffffff, #aaaff);
+    }
+    &.myKey {
+        width: 200px;
+        text-align: right;
+        font-weight: bold;
+        color:  #99aacc;
+        padding-right: 1em;
+    }
+    &.myValue {
+        list-style-type: none;
     }
 }
 

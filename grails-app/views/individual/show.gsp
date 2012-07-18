@@ -62,57 +62,50 @@
 
     <g:each var="type" in="${ind.seqTypes}">
 
-        <div class="myHeaderWide">
-            ${type}
+        <div class="tableBlock">
+            <h1>${type}</h1>
+            <table>
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>type</th>
+                    <th>platform</th>
+                    <th>status</th>
+                    <th>center</th>
+                    <th>#lanes</th>
+                    <th>coverage</th>
+                    <th>#bases</th>
+                    <th>insert size</th>
+                    <th>merging</th>
+                    <th>IGV</th>
+                </tr>
+                </thead>
+                <tbody>
+                <g:each var="scan" in="${ind.seqScans}">
+                    <g:if test="${scan.seqType.id == type.id}">
+                        <tr>
+                            <td><g:link controller="seqScan" action="show" id="${scan.id}">|details|</g:link></td>
+                            <td><strong>${scan.sample.sampleType.name}</strong></td>
+                            <td>${scan.seqPlatform}</td>
+                            <td>${scan.state}</td>
+                            <td>${scan.seqCenters.toLowerCase()}</td>
+                            <td>${scan.nLanes}</td>
+                            <td>${scan.coverage}</td>
+                            <td>${scan.basePairsString()}</td>
+                            <td>${scan.insertSize}</td>
+
+                            <td class="${scan.merged}"><g:formatBoolean boolean="${scan.merged}" true="merged" false="not merged"/></td>
+                            <td>
+                                <g:if test="${igvMap.get(scan.id)}">
+                                    <g:checkBox name="${scan.id}" value="${false}"/>
+                                </g:if>
+                            </td>
+                        </tr>
+                    </g:if>
+                </g:each>
+                </tbody>
+            </table>
         </div>
-        <div class="myContentWide">
-
-        <table>
-           <tr>
-                <td></td>
-                <td class="microHeader">type</td>
-                <td class="microHeader">platform</td>
-                <td class="microHeader">status</td>
-                <td class="microHeader">center</td>
-                <td class="microHeader">#lanes</td>
-                <td class="microHeader">coverage</td>
-                <td class="microHeader">#bases</td>
-                <td class="microHeader">insert size</td>
-                <td class="microHeader">merging</td>
-                <td class="microHeader">IGV</td>
-           </tr> 
-           <g:each var="scan" in="${ind.seqScans}">
-               <g:if test="${scan.seqType.id == type.id}">
-               <tr>
-                    <td>
-                        <g:link controller="seqScan" action="show" id="${scan.id}">
-                            |details|
-                        </g:link>
-                    </td>
-                    <td><strong>${scan.sample.sampleType.name}</strong></td>
-                    <td>${scan.seqPlatform}</td>
-                    <td>${scan.state}</td>
-                    <td>${scan.seqCenters.toLowerCase()}</td>
-
-                    <td>${scan.nLanes}</td>
-                    <td>${scan.coverage}</td>
-                    <td>${scan.basePairsString()}</td>
-                    <td>${scan.insertSize}</td>
-
-                    <td class="${scan.merged}">
-                        <g:formatBoolean boolean="${scan.merged}"
-                            true="merged" false="not merged"
-                        />
-                    </td>
-                    <td><g:if test="${igvMap.get(scan.id)}">
-                            <g:checkBox name="${scan.id}" value="${false}"/>
-                        </g:if>
-                    </td>
-               </tr>
-               </g:if>
-           </g:each>
-        </table>
-      </div>
     </g:each>
 
     <h1>Analysis Results</h1>

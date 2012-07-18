@@ -80,62 +80,58 @@
 
     <g:each var="run" in="${runs}">
 
-        <div class="myHeader">
-            <g:link controller="run" action="display" id="${run}">
-                ${run}
-            </g:link>
+        <div class="tableBlock">
+            <h1>
+                <g:link controller="run" action="display" id="${run}">${run}</g:link>
+            </h1>
+            <table>
+                <tbody>
+                <g:each var="track" in="${tracks}">
+                    <g:if test="${track.seqTrack.run.name == run}">
+                    <tr>
+                        <td><strong>${track.seqTrack.laneId}</strong></td>
+                        <td>${track.seqTrack.sample}</td>
+                        <td>${track.seqTrack.nBaseString()}</td>
+                        <td>${track.seqTrack.insertSize}</td>
+                        <g:if test="${de.dkfz.tbi.otp.ngsdata.AlignmentLog.countBySeqTrack(track.seqTrack) == 0}">
+                            <td>no alignment</td>
+                        </g:if>
+                        <g:else>
+                            <td>
+                                <ul>
+                                <g:each var="alignment" in="${de.dkfz.tbi.otp.ngsdata.AlignmentLog.findAllBySeqTrack(track.seqTrack)}">
+                                    <li>${alignment.alignmentParams.pipeline}</li>
+                                </g:each>
+                                </ul>
+                            </td>
+                        </g:else>
+                    </tr>
+                    </g:if>
+                </g:each>
+                </tbody>
+            </table>
         </div>
-        <div class="myContent">
+    </g:each>
 
+    <div class="tableBlock">
+        <h1>Merged alignment files</h1>
         <table>
-           <g:each var="track" in="${tracks}">
-               <g:if test="${track.seqTrack.run.name == run}">
-               <tr>
-                    <td><strong>${track.seqTrack.laneId}</strong></td>
-                    <td>${track.seqTrack.sample}</td>
-                    <td>${track.seqTrack.nBaseString()}</td>
-                    <td>${track.seqTrack.insertSize}</td>
-
-                    <g:if test="${de.dkfz.tbi.otp.ngsdata.AlignmentLog.countBySeqTrack(track.seqTrack) == 0}">
-                        <td>no alignment</td>
-                    </g:if><g:else>
-
-                    <g:each var="alignment" in="${de.dkfz.tbi.otp.ngsdata.AlignmentLog.findAllBySeqTrack(track.seqTrack)}">
-                        <td>${alignment.alignmentParams.pipeline}</td>
-                    </g:each>
-                    </g:else>
-
-               </tr>
-               </g:if>
-           </g:each>
-        </table>
-      </div>
-    </g:each>
-
-    <div class="myHeader">
-        Merged alignment files
-    </div>
-
-    <div class="myContent">
-    <table>
-    <g:each var="log" in="${de.dkfz.tbi.otp.ngsdata.MergingLog.findAllBySeqScan(scan)}">
-        <tr>
-            <g:each var="dataFile" in="${de.dkfz.tbi.otp.ngsdata.MergedAlignmentDataFile.findAllByMergingLog(log)}">
-                <td>
-                <g:link controller="mergedAlignmentDataFile" action="show" id="${dataFile.id}">
-                ${dataFile.fileName}
-                </g:link>
-                </td>
-                <td>${dataFile.fileSizeString()}</td>
-                <td class="dataFile.indexFileExists">indexed</td> 
+            <tbody>
+            <g:each var="log" in="${de.dkfz.tbi.otp.ngsdata.MergingLog.findAllBySeqScan(scan)}">
+                <g:each var="dataFile" in="${de.dkfz.tbi.otp.ngsdata.MergedAlignmentDataFile.findAllByMergingLog(log)}">
+                    <tr>
+                        <td><g:link controller="mergedAlignmentDataFile" action="show" id="${dataFile.id}">${dataFile.fileName}</g:link></td>
+                        <td>${dataFile.fileSizeString()}</td>
+                        <td class="dataFile.indexFileExists">indexed</td>
+                        <td>${log.executedBy}</td>
+                        <td>${log.status}</td>
+                        <td>${log.alignmentParams}</td>
+                    </tr>
+                </g:each>
             </g:each>
-            <td>${log.executedBy}</td>
-            <td>${log.status}</td>
-            <td>${log.alignmentParams}</td>
-    </g:each>
-    </table>
+            </tbody>
+        </table>
     </div>
-
   </div>
 </body>
 </html>
