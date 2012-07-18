@@ -4,8 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
 <title>List of ${failed ? 'failed' : ''} Processes for Workflow ${name}</title>
-<link rel='stylesheet' href='http://www.datatables.net//release-datatables/media/css/demo_table.css' />
-<jqDT:resources/>
+<jqDT:resources type="js"/>
 <g:javascript src="jquery.timeago.js"/>
 <r:require module="graphDracula"/>
 <r:require module="jquery-ui"/>

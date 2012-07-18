@@ -4,7 +4,7 @@
         <title><g:message code="user.administration.header"/></title>
         <meta name="layout" content="main" />
         <r:require module="userAdministration"/>
-        <jqDT:resources/>
+        <jqDT:resources type="js"/>
     </head>
     <body>
         <h2><g:message code="user.administration.header"/></h2>

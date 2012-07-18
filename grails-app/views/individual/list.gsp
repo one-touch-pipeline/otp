@@ -4,7 +4,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
         <title><g:message code="individual.list.title"/></title>
-        <jqDT:resources/>
+        <jqDT:resources type="js"/>
     </head>
 <body>
     <div class="body">

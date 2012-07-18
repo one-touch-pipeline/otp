@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
 <title>Processing Step ${step.jobDefinition.name} (# ${step.id})</title>
-<jqDT:resources/>
+<jqDT:resources type="js"/>
 <g:javascript src="jquery.timeago.js"/>
 </head>
 <body>

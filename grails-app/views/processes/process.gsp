@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
 <title>List of Processing Steps for Process # ${id} for Workflow ${name}</title>
-<jqDT:resources/>
+<jqDT:resources type="js"/>
 <g:javascript src="jquery.timeago.js"/>
 <r:require module="graphDracula"/>
 </head>
