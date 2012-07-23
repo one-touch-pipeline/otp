@@ -611,3 +611,22 @@ td {
         background-image: url(../images/skin/database_save.png);
     }
 }
+
+div.edit-switch {
+    p {
+        input[type=text] {
+            width: 400px;
+        }
+        &.edit-switch-label {
+            button {
+                float: right;
+                background-image: url(images/document-edit.png);
+                background-color: transparent;
+                border: 0px;
+                &:focus, &:hover {
+                    cursor: pointer;
+                }
+            }
+        }
+    }
+}
