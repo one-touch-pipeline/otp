@@ -505,27 +505,22 @@ th {
 /* my styles for boolean values */
 
 td {
-    &.true {
-        background-image: url(../images/skin/house.png);
+    .background-usage-hint {
         background-repeat: no-repeat;
-        text-indent: 25px;
+        text-indent: 18px;
     }
-    &.false {
-        background-image: url(../images/skin/exclamation.png);
-        background-repeat: no-repeat;
+    &.false, &.INVALID {
+        .background-usage-hint;
+        background-image: url(images/error.png);
         color: red;
-        text-indent: 25px;
     }
-    &.VALID {
-        background-image: url(../images/status/green.png);
-        background-repeat: no-repeat;
-        text-indent: 25px;
+    &.VALID, &.true {
+        .background-usage-hint;
+        background-image: url(images/ok.png);
     }
-    &.invalid {
-        background-image: url(../images/status/red.png);
-    }
-    &.unknown {
-        background-image: url(../images/status/blue.png);
+    &.UNKNOWN {
+        .background-usage-hint;
+        background-image: url(images/status_unknown.png);
     }
     &.tinyRow {
         line-height: 0.3em;
