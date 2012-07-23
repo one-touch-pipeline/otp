@@ -24,6 +24,14 @@
     -webkit-border-radius: @radius;
             border-radius: @radius;
 }
+.image-button {
+    background-color: transparent;
+    background-repeat: no-repeat;
+    border: 0px;
+    &:focus, &:hover {
+        cursor: pointer;
+    }
+}
 
 /* FONT STACK */
 body,
@@ -614,14 +622,19 @@ div.edit-switch {
         }
         &.edit-switch-label {
             button {
-                float: right;
+                .image-button;
                 background-image: url(images/document-edit.png);
-                background-color: transparent;
-                border: 0px;
-                &:focus, &:hover {
-                    cursor: pointer;
-                }
+                float: right;
             }
         }
+    }
+}
+
+div.showChangeLog {
+    width: 18px;
+    button {
+        .image-button;
+        width: 18px;
+        background-image: url(images/view-journal.png);
     }
 }
