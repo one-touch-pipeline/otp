@@ -20,22 +20,22 @@
        </tr>
        <tr>
             <td class="myKey">file name</td>
-            <td class="myValue">${dataFile.fileName}</td>
+            <td class="myValue"><span class="wordBreak">${dataFile.fileName}</span></td>
        </tr>
        <g:if test="${!dataFile.pathName.isAllWhitespace()}">
        <tr>
             <td class="myKey">file path from run directory</td>
-            <td class="myValue">${dataFile.pathName}</td>
+            <td class="myValue"><span class="wordBreak">${dataFile.pathName}</span></td>
        </tr>
        </g:if>
        <tr>
             <td class="myKey">view by pid name</td>
-            <td class="myValue">${dataFile.vbpFileName}</td>
+            <td class="myValue"><span class="wordBreak">${dataFile.vbpFileName}</span></td>
        </tr>
        <g:if test="${!dataFile.vbpFilePath.isAllWhitespace()}">
        <tr>
             <td class="myKey">view by pid path</td>
-            <td class="myValue">${dataFile.vbpFilePath}</td>
+            <td class="myValue"><span class="wordBreak">${dataFile.vbpFilePath}</span></td>
        </tr>
        </g:if>
        <tr>
@@ -44,11 +44,11 @@
        </tr>
        <tr>
             <td class="myKey">full path</td>
-            <td class="myValue">${values.get(0)}</td>
+            <td class="myValue"><span class="wordBreak">${values.get(0)}</span></td>
        </tr>  
        <tr>
             <td class="myKey">view by pid full path</td>
-            <td class="myValue">${values.get(1)}</td>
+            <td class="myValue"><span class="wordBreak">${values.get(1)}</span></td>
        </tr>
        <tr>
             <td class="myKey">file exists</td>
