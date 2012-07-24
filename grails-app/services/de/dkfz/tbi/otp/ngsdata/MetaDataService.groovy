@@ -44,7 +44,7 @@ class MetaDataService {
      * @param id The id of the MetaDataEntry to retrieve
      * @return The MetaDataEntry if present, otherwise null
      */
-    @PostAuthorize("(returnObject == null) or hasPermission(returnObject.dataFile.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_ADMIN')")
+    @PostAuthorize("(returnObject == null) or ((returnObject.dataFile.project != null) and hasPermission(returnObject.dataFile.project?.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)) or hasRole('ROLE_ADMIN')")
     MetaDataEntry getMetaDataEntryById(Long id) {
         return MetaDataEntry.get(id)
     }
@@ -57,7 +57,7 @@ class MetaDataService {
      * @throws ChangelogException In case the Changelog Entry could not be created
      * @throws MetaDataEntryUpdateException In case the MetaDataEntry could not be updated
      */
-    @PreAuthorize("hasPermission(#entry.dataFile.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("((#entry.dataFile.project != null) and hasPermission(#entry.dataFile.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', write)) or hasRole('ROLE_ADMIN')")
     boolean updateMetaDataEntry(MetaDataEntry entry, String value) throws ChangelogException, MetaDataEntryUpdateException {
         ReferencedClass clazz = ReferencedClass.findOrSaveByClassName(MetaDataEntry.class.getName())
         ChangeLog changelog = new ChangeLog(rowId: entry.id, referencedClass: clazz, columnName: "value", fromValue: entry.value, toValue: value, comment: "-", source: ChangeLog.Source.MANUAL)
@@ -68,6 +68,7 @@ class MetaDataService {
         if (!entry.save(flush: true)) {
             throw new MetaDataEntryUpdateException(entry)
         }
+        return true
     }
 
     /**
