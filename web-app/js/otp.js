@@ -190,8 +190,19 @@ OTP.prototype.statusToImage = function (status) {
 OTP.prototype.renderDate = function (value) {
     "use strict";
     if (value) {
-        var date = new Date(value);
-        return '<span title="' + date.toLocaleString() + '">' + $.timeago(date) + '</span>';
+        var date, isInLast24Hours, text;
+        date = new Date(value);
+        isInLast24Hours = function (d) {
+            return ((Date.now() - d.getTime()) <= 24 * 60 * 60 * 1000);
+        };
+        text = '<span title="' + date.toLocaleString() + '">';
+        if (isInLast24Hours(date)) {
+            text += date.toLocaleTimeString();
+        } else {
+            text += date.toLocaleString();
+        }
+        text += '</span>';
+        return  text;
     } else {
         return "-";
     }
