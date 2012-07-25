@@ -4,23 +4,27 @@ import static org.junit.Assert.*
 
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
+import de.dkfz.tbi.otp.testing.TestSingletonStartJob
 
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import grails.test.mixin.domain.*
+
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.junit.*
 
 class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
+    def jobExecutionPlanService
+    def grailsApplication
 
-    @SuppressWarnings("EmptyMethod")
     void setUp() {
-        // Setup logic here
+        createUserAndRoles()
     }
 
-    @SuppressWarnings("EmptyMethod")
     void tearDown() {
-        // Tear down logic here
+        (grailsApplication.mainContext.getBean("testSingletonStartJob") as TestSingletonStartJob).setExecutionPlan(null)
     }
 
     @Test
@@ -819,6 +823,100 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertFalse(planData.isEmpty())
         assertTrue(planData.containsKey(process1))
         assertEquals(planData.get(process1), restarted)
+    }
+
+    /**
+     * Test that verifies that enabling a JobExecutionPlan properly updates the state, that is
+     * it is in enabled state afterwards.
+     */
+    @Test
+    void testEnablePlan() {
+        JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0)
+        plan = plan.save(flush: true)
+        assertNotNull(plan)
+        assertFalse(plan.enabled)
+        // let's enable the Plan
+        SpringSecurityUtils.doWithAuth("admin") {
+            jobExecutionPlanService.enablePlan(plan)
+        }
+        assertTrue(plan.enabled)
+        // enabling the plan again should not change anything
+        SpringSecurityUtils.doWithAuth("admin") {
+            jobExecutionPlanService.enablePlan(plan)
+        }
+        assertTrue(plan.enabled)
+    }
+
+    @Test
+    void testEnablePlanForStartJob() {
+        JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0)
+        plan = plan.save(flush: true)
+        StartJobDefinition startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: plan)
+        assertNotNull(startJob.save())
+        plan.startJob = startJob
+        assertNotNull(plan.save(flush: true))
+
+        // get a startJob Instance for the testStartJob and inject the JobExecutionPlan
+        TestSingletonStartJob job = null
+        StartJobDefinition.withNewSession {
+            job = grailsApplication.mainContext.getBean("testSingletonStartJob") as TestSingletonStartJob
+            job.setExecutionPlan(plan)
+        }
+        assertNotNull(job)
+        // everything should be disabled now
+        assertFalse(plan.enabled)
+        assertFalse(job.executionPlan.enabled)
+        // let's enable the Plan
+        SpringSecurityUtils.doWithAuth("admin") {
+            jobExecutionPlanService.enablePlan(plan)
+        }
+        assertTrue(plan.enabled)
+        assertTrue(job.executionPlan.enabled)
+    }
+
+    @Test
+    void testDisablePlan() {
+        JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0, enabled: true)
+        plan = plan.save(flush: true)
+        assertNotNull(plan)
+        assertTrue(plan.enabled)
+        // let's disable the Plan
+        SpringSecurityUtils.doWithAuth("admin") {
+            jobExecutionPlanService.disablePlan(plan)
+        }
+        assertFalse(plan.enabled)
+        // disabling the plan again should not change anything
+        SpringSecurityUtils.doWithAuth("admin") {
+            jobExecutionPlanService.disablePlan(plan)
+        }
+        assertFalse(plan.enabled)
+    }
+
+    @Test
+    void testDisablePlanForStartJob() {
+        JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0, enabled: true)
+        plan = plan.save(flush: true)
+        StartJobDefinition startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: plan)
+        assertNotNull(startJob.save())
+        plan.startJob = startJob
+        assertNotNull(plan.save(flush: true))
+
+        // get a startJob Instance for the testStartJob and inject the JobExecutionPlan
+        TestSingletonStartJob job = null
+        StartJobDefinition.withNewSession {
+            job = grailsApplication.mainContext.getBean("testSingletonStartJob") as TestSingletonStartJob
+            job.setExecutionPlan(plan)
+        }
+        assertNotNull(job)
+        // everything should be enabled now
+        assertTrue(plan.enabled)
+        assertTrue(job.executionPlan.enabled)
+        // let's disable the Plan
+        SpringSecurityUtils.doWithAuth("admin") {
+            jobExecutionPlanService.disablePlan(plan)
+        }
+        assertFalse(plan.enabled)
+        assertFalse(job.getExecutionPlan().enabled)
     }
 
     private Date nextDate(ProcessingStepUpdate update) {
