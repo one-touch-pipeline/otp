@@ -6,6 +6,48 @@
         <r:require module="userAdministration"/>
     </head>
     <body>
+        <div id="create-group-dialog" style="display: none" title="${g.message(code: 'group.create.ui.dialog.title') }">
+            <form>
+            <table>
+                <tbody>
+                    <tr>
+                        <td><label for="create-group-name"><g:message code="group.create.ui.name"/></label></td>
+                        <td><input type="text" name="name" id="create-group-name"/><span class="error-marker"></span></td>
+                    </tr>
+                    <tr>
+                        <td><label for="create-group-description"><g:message code="group.create.ui.description"/></label></td>
+                        <td><input type="text" name="description" id="create-group-description"/><span class="error-marker"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <table>
+                <thead>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th><g:message code="group.create.ui.permission.read"/></th>
+                        <th><g:message code="group.create.ui.permission.write"/></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th><g:message code="group.create.ui.project"/></th>
+                        <td><input type="checkbox" name="readProject"/></td>
+                        <td><input type="checkbox" name="writeProject"/><span class="error-marker"></span></td>
+                    </tr>
+                    <tr>
+                        <th><g:message code="group.create.ui.jobSystem"/></th>
+                        <td><input type="checkbox" name="readJobSystem"/></td>
+                        <td><input type="checkbox" name="writeJobSystem"/><span class="error-marker"></span></td>
+                    </tr>
+                    <tr>
+                        <th><g:message code="group.create.ui.seqeuenceCenter"/></th>
+                        <td><input type="checkbox" name="readSequenceCenter"/></td>
+                        <td><input type="checkbox" name="writeSequenceCenter"/><span class="error-marker"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+            </form>
+        </div>
         <h1><g:message code="user.administration.ui.heading.user"/></h1>
         <div>
         <form id="edit-user-form" method="POST">
@@ -31,6 +73,36 @@
                 <input type="submit" value="${g.message(code: 'user.administration.save')}"/>
             </div>
         </form>
+        </div>
+        <div id="user-group-management">
+            <h1><g:message code="user.administration.userGroup.ui.heading"/></h1>
+            <div id="userGroups">
+                <h3><g:message code="user.administration.userGroup.ui.heading.userGroups"/></h3>
+                <input type="hidden" value="${user.id}"/>
+                <input type="hidden" value="removeGroup"/>
+                <table>
+                    <tbody>
+                    <g:each var="group" in="${userGroups}">
+                        <tr><td title="${group.description}">${group.name}</td><td><input type="hidden" value="${group.id}"/><a href="#" rel="#userGroups-${group.id}"><g:message code="user.administration.userGroup.ui.removeGroup"/></a></td></tr>
+                    </g:each>
+                    </tbody>
+                </table>
+            </div>
+            <div id="availableGroups">
+                <h3><g:message code="user.administration.userGroup.ui.heading.availableGroups"/></h3>
+                <input type="hidden" value="${user.id}"/>
+                <input type="hidden" value="addGroup"/>
+                <table>
+                    <tbody>
+                    <g:each var="group" in="${groups}">
+                        <tr><td title="${group.description}">${group.name}</td><td><input type="hidden" value="${group.id}"/><a href="#" rel="#userGroups-${group.id}"><g:message code="user.administration.userGroup.ui.addGroup"/></a></td></tr>
+                    </g:each>
+                    </tbody>
+                </table>
+            </div>
+            <div class="buttons">
+            <button id="create-new-group"><g:message code="user.administration.userGroup.ui.heading.newGroup"/></button>
+            </div>
         </div>
         <div id="user-role-management">
             <h1><g:message code="user.administration.userRole.ui.heading" args="[user.username]"/></h1>

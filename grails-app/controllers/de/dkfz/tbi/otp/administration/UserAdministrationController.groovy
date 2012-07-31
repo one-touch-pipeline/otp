@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.administration
 
 import grails.plugins.springsecurity.Secured
 import grails.converters.JSON
+import de.dkfz.tbi.otp.security.Group
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.user.RoleNotFoundException
 import de.dkfz.tbi.otp.user.UserNotFoundException
@@ -25,6 +26,10 @@ class UserAdministrationController {
      * Dependency Injection of SpringSecurityService
      */
     def springSecurityService
+    /**
+     * Dependency Injection of GroupService
+     */
+    def groupService
 
     /**
      * Default action showing the DataTable markup
@@ -119,7 +124,15 @@ class UserAdministrationController {
             render(template: "/templates/page", model: [link: g.createLink(action: "show", id: params.id), callback: "loadAdminUserCallback"])
             return
         }*/
-        [user: userService.getUser(params.id as Long), roles: userService.getAllRoles(), userRoles: userService.getRolesForUser(params.id as Long)]
+        User user = userService.getUser(params.id as Long)
+        List<Group> userGroups = groupService.groupsForUser(user)
+        List<Group> availableGroups = []
+        groupService.availableGroups().each { Group group ->
+            if (!userGroups.contains(group)) {
+                availableGroups << group
+            }
+        }
+        [user: user, roles: userService.getAllRoles(), userRoles: userService.getRolesForUser(params.id as Long), groups: availableGroups, userGroups: userGroups]
     }
 
     /**
@@ -205,6 +218,49 @@ class UserAdministrationController {
             data.put("success", true)
         }
         render data as JSON
+    }
+
+    /**
+     * Creates a given Group from command object
+     * @param command
+     * @return
+     */
+    def createGroup(GroupCommand command) {
+        if (command.hasErrors()) {
+            render command.errors as JSON
+            return
+        }
+        Map result = [:]
+        try {
+            Group group = groupService.createGroup(command)
+            result.put("success", true)
+            result.put("group", group)
+        } catch (GroupCreationException e) {
+            result.put("errors", [[field: 'name', message: e.message]])
+        }
+        render result as JSON
+    }
+
+    /**
+     * Adds the user to the group
+     * @param command
+     * @return
+     */
+    def addGroup(AddRemoveGroupCommand command) {
+        groupService.addUserToGroup(userService.getUser(command.userId), groupService.getGroup(command.id))
+        def result = [success: true]
+        render result as JSON
+    }
+
+    /**
+     * Removes the user from the group
+     * @param command
+     * @return
+     */
+    def removeGroup(AddRemoveGroupCommand command) {
+        groupService.removeUserFromGroup(userService.getUser(command.userId), groupService.getGroup(command.id))
+        def result = [success: true]
+        render result as JSON
     }
 
     private String resolveErrorMessage(EditUserCommand cmd, String field, String description) {
@@ -299,4 +355,10 @@ class EditUserCommand implements Serializable {
     User toUser() {
         return new User(username: this.username, email: this.email, jabberId: this.jabber)
     }
+}
+
+class AddRemoveGroupCommand implements Serializable {
+    private static final long serialVersionUID = 1L
+    long id
+    long userId
 }

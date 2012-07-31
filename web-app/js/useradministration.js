@@ -102,6 +102,40 @@ $.otp.userAdministration.editUser = function () {
             }
         });
     });
+    $("#user-group-management table tr a").click(function () {
+        var link, id, container, userId, action;
+        link = $(this);
+        id = link.prev().val();
+        container = link.parents("div")[0];
+        userId = $($("input", container)[0]).val();
+        action = $($("input", container)[1]).val();
+        $.ajax({
+            type: 'GET',
+            url: $.otp.contextPath + "/userAdministration/" + action + "/" + id + "?userId=" + userId,
+            dataType: 'json',
+            cache: 'false',
+            success: function (data) {
+                if (data.error) {
+                    $.otp.errorMessage(data.error);
+                } else if (data.success) {
+                    var linkText, divInsertId, tableRow;
+                    linkText = "";
+                    divInsertId = "";
+                    if (action === "addGroup") {
+                        linkText = $.i18n.prop("user.administration.userGroup.ui.removeGroup");
+                        divInsertId = "#userGroups";
+                    } else if (action === "removeGroup") {
+                        linkText = $.i18n.prop("user.administration.userGroup.ui.addGroup");
+                        divInsertId = "#availableGroups";
+                    }
+                    tableRow = link.parents("tr");
+                    $("a", tableRow).text(linkText);
+                    tableRow.detach();
+                    tableRow.appendTo($("table tbody", $(divInsertId)));
+                }
+            }
+        });
+    });
     $("#edit-user-form").submit(function (event) {
         event.preventDefault();
         $.ajax({
@@ -129,6 +163,57 @@ $.otp.userAdministration.editUser = function () {
                     $.otp.infoMessage($.i18n.prop("user.administration.edit.success"));
                 }
             }
+        });
+    });
+    $("#create-new-group").click(function () {
+        var removeErrors = function (parent) {
+            var textFields, checkBoxes;
+            textFields = $("input[type=text]", parent);
+            textFields.parent().removeClass("error");
+            textFields.removeAttr("title");
+
+            checkBoxes = $("input[type=checkbox]", parent);
+            checkBoxes.parent().removeClass("error");
+            checkBoxes.removeAttr("title");
+        };
+        var resetFields = function (parent) {
+            $("input[type=text]", parent).val("");
+            $("input[type=checkbox]", parent).attr("checked", false);
+            removeErrors(parent);
+        };
+        resetFields($("#create-group-dialog"));
+        $("#create-group-dialog").dialog({
+            buttons: [
+                {
+                    text: $.i18n.prop("default.button.cancel.label"),
+                    click: function () {
+                        $(this).dialog("close");
+                    }
+                }, {
+                    text: $.i18n.prop("default.button.create.label"),
+                    click: function () {
+                        $.getJSON($.otp.contextPath + "/userAdministration/createGroup", $("form", $(this)).serialize(), function (data) {
+                            removeErrors($("#create-group-dialog"));
+                            if (data.success === true) {
+                                // create the new available group
+                                var row = $("<tr></tr>").appendTo($("#availableGroups table tbody"));
+                                $("<td title=\"" + data.group.description + "\">" +  data.group.name + "</td>").appendTo(row);
+                                $("<td><input type=\"hidden\" value=\"" + data.group.id + "\"/><a href=\"#\" rel=\"userGroups-" + data.group.id + "\">" + $.i18n.prop("user.administration.userGroup.ui.addGroup") + "</a></td>").appendTo(row);
+                                resetFields($("#create-group-dialog"));
+                                $("#create-group-dialog").dialog("close");
+                            } else if (data.errors) {
+                                if (Array.isArray(data.errors)) {
+                                    data.errors.forEach(function (error) {
+                                        var errorField = $("#create-group-dialog input[name=" + error.field + "]");
+                                        errorField.attr("title", error.message);
+                                        $("span.error-marker", errorField.parent()).attr("title", error.message);
+                                        errorField.parent().addClass("error");
+                                    });
+                                }
+                            }
+                        });
+                    }
+                }]
         });
     });
 };

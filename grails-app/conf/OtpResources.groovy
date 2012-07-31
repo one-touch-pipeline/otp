@@ -22,7 +22,7 @@ modules = {
         resource url: '/js/crashrecovery.js'
     }
     userAdministration {
-        dependsOn 'core'
+        dependsOn 'jquery-ui, core'
         resource url: '/js/useradministration.js'
     }
     graphDracula {

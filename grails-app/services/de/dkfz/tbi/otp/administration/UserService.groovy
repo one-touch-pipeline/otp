@@ -309,12 +309,12 @@ class UserService {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<Role> getAllRoles() {
-        return Role.listOrderById()
+        return Role.listOrderById().findAll { !it.authority.startsWith("GROUP_") }
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<Role> getRolesForUser(Long id) {
-        return Role.executeQuery("SELECT role FROM UserRole AS userRole JOIN userRole.role AS role JOIN userRole.user AS user WHERE user.id=:id ORDER BY role.id", [id: id])
+        return Role.executeQuery("SELECT role FROM UserRole AS userRole JOIN userRole.role AS role JOIN userRole.user AS user WHERE user.id=:id ORDER BY role.id", [id: id]).findAll { !it.authority.startsWith("GROUP_") }
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
