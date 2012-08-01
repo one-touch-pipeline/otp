@@ -31,4 +31,12 @@ modules = {
         resource url: '/js/dracula/dracula_graffle.js'
         resource url: '/js/dracula/dracula_graph.js'
     }
+    qunit {
+        resource url: '/css/qunit.css'
+        resource url: '/js/qunit.js'
+    }
+    testSuite {
+        dependsOn 'qunit, userAdministration'
+        resource url: '/js/test/group-creation-dialog-tests.js'
+    }
 }
