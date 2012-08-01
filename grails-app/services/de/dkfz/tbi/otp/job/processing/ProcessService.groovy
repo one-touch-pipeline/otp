@@ -121,7 +121,7 @@ class ProcessService {
      * @param process The Process for which the end date has to be retrieved
      * @return The date when the Process finished
      */
-    @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public Date getFinishDate(Process process) {
         if (!process.finished) {
             throw new IllegalArgumentException("Process is not finished")
@@ -152,7 +152,7 @@ ORDER BY u.id desc
      * @param process The Process for which the duration should be retrieved
      * @return The number of msec the Process took
      */
-    @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public long getDuration(Process process) {
         if (!process.finished) {
             throw new IllegalArgumentException("Process is not finished")
@@ -167,7 +167,7 @@ ORDER BY u.id desc
      * @param process The Process for which the latest Processing step has to be retrieved.
      * @return The latest ProcessingStep of the Process
      */
-    @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public ProcessingStep getLatestProcessingStep(Process process) {
         return ProcessingStep.findByProcessAndNextIsNull(process)
     }
@@ -177,7 +177,7 @@ ORDER BY u.id desc
      * @param process The Process for which the ExecutionState should be retrieved
      * @return Latest execution state of the Process
      */
-    @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public ExecutionState getState(Process process) {
         return lastUpdate(process).state
     }
@@ -199,7 +199,7 @@ ORDER BY u.id desc
      * @param process The Process for which the possible error message should be returned.
      * @return
      */
-    @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public String getError(Process process) {
         ProcessingStepUpdate update = lastUpdate(process)
         if (update.error) {
@@ -228,7 +228,7 @@ ORDER BY u.id desc
      * @param process
      * @return
      */
-    @PreAuthorize("hasPermission(#process.jobExecutionPlan, read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public Date getLastUpdate(Process process) {
         return lastUpdate.date
     }

@@ -8,6 +8,7 @@ import java.util.concurrent.Callable
 
 import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationListener
 
 /**
  * Abstract base class for {@link StartJob}s.
@@ -16,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired
  * container to use a StartJob.
  * @see StartJob
  */
-abstract class AbstractStartJobImpl implements StartJob {
+abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<JobExecutionPlanChangedEvent> {
     @Autowired
     SchedulerService schedulerService
     /**
@@ -27,6 +28,12 @@ abstract class AbstractStartJobImpl implements StartJob {
     @Autowired
     ExecutorService executorService
     private JobExecutionPlan plan
+    /**
+     * Whether the JobExecutionPlan needs to be refreshed when it is
+     * accessed. This happens when receiving a JobExecutionPlanChangedEvent
+     * for the JobExecutionPlan belonging to this StartJob.
+     */
+    private boolean planNeedsRefresh = false
 
     protected AbstractStartJobImpl() {}
     protected AbstractStartJobImpl(JobExecutionPlan plan) {
@@ -47,12 +54,22 @@ abstract class AbstractStartJobImpl implements StartJob {
 
     @Override
     public JobExecutionPlan getExecutionPlan() {
+        if (planNeedsRefresh) {
+            plan = JobExecutionPlan.get(plan.id)
+            planNeedsRefresh = false
+        }
         return plan
     }
 
     @Override
     public String getVersion() {
         return ""
+    }
+
+    void onApplicationEvent(JobExecutionPlanChangedEvent event) {
+        if (this.plan && event.planId == this.plan.id) {
+            planNeedsRefresh = true
+        }
     }
 
     /**

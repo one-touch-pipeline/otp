@@ -48,6 +48,8 @@ class JobExecutionPlanService {
             log.error("JobExecutionPlan ${plan.id} could not be enabled")
             return before
         }
+        JobExecutionPlanChangedEvent event = new JobExecutionPlanChangedEvent(this, plan.id)
+        grailsApplication.mainContext.publishEvent(event)
         return plan.enabled
     }
 
@@ -65,6 +67,8 @@ class JobExecutionPlanService {
             log.error("JobExecutionPlan ${plan.id} could not be disabled")
             return before
         }
+        JobExecutionPlanChangedEvent event = new JobExecutionPlanChangedEvent(this, plan.id)
+        grailsApplication.mainContext.publishEvent(event)
         return plan.enabled
     }
 
