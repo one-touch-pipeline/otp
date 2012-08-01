@@ -140,7 +140,7 @@
         </div>
         <r:script>
 $(function() {
-    $.otp.userAdministration.editUser();
+    $.otp.userAdministration.editUser.register.call($.otp.userAdministration.editUser);
 });
         </r:script>
     </body>
