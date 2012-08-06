@@ -2,11 +2,23 @@ package de.dkfz.tbi.otp.utils
 
 import static org.junit.Assert.*
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 
-class JobExecutionPlanDSLTests {
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.springframework.security.acls.domain.BasePermission
+
+import de.dkfz.tbi.otp.administration.GroupCommand
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.security.Group
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.UserRole
+import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
+
+
+class JobExecutionPlanDSLTests extends AbstractIntegrationTest {
     def grailsApplication
     def planValidatorService
+    def groupService
+    def aclUtilService
 
     void testEmptyPlan() {
         assertEquals(0, JobExecutionPlan.count())
@@ -32,5 +44,63 @@ class JobExecutionPlanDSLTests {
         JobExecutionPlan jep = JobExecutionPlan.list().last()
         def errors = planValidatorService.validate(jep)
         assertTrue(errors.isEmpty())
+    }
+
+    void testGrantReadToGroup() {
+        createUserAndRoles()
+        Group group = null
+        SpringSecurityUtils.doWithAuth("admin") {
+            GroupCommand cmd = new GroupCommand(name: "test", description: "test", readJobSystem: true)
+            group = groupService.createGroup(cmd)
+            group.save(flush: true)
+            plan("test") {
+                start("startJob", "testStartJob")
+                job("test", "testJob") {
+                    watchdog("testEndStateAwareJob")
+                }
+            }
+        }
+        JobExecutionPlan jep = JobExecutionPlan.list().last()
+        // create a user and add him to the group
+        UserRole.create(User.findByUsername("testuser"), group.role, true)
+
+        SpringSecurityUtils.doWithAuth("testuser") {
+            assertTrue(aclUtilService.hasPermission(springSecurityService.authentication, jep, BasePermission.READ))
+            assertFalse(aclUtilService.hasPermission(springSecurityService.authentication, jep, BasePermission.WRITE))
+        }
+        // other user should not see
+        SpringSecurityUtils.doWithAuth("user") {
+            assertFalse(aclUtilService.hasPermission(springSecurityService.authentication, jep, BasePermission.READ))
+            assertFalse(aclUtilService.hasPermission(springSecurityService.authentication, jep, BasePermission.WRITE))
+        }
+    }
+
+    void testGrantWriteToGroup() {
+        createUserAndRoles()
+        Group group = null
+        SpringSecurityUtils.doWithAuth("admin") {
+            GroupCommand cmd = new GroupCommand(name: "test", description: "test", readJobSystem: true, writeJobSystem: true)
+            group = groupService.createGroup(cmd)
+            group.save(flush: true)
+            plan("test") {
+                start("startJob", "testStartJob")
+                job("test", "testJob") {
+                    watchdog("testEndStateAwareJob")
+                }
+            }
+        }
+        JobExecutionPlan jep = JobExecutionPlan.list().last()
+        // create a user and add him to the group
+        UserRole.create(User.findByUsername("testuser"), group.role, true)
+
+        SpringSecurityUtils.doWithAuth("testuser") {
+            assertTrue(aclUtilService.hasPermission(springSecurityService.authentication, jep, BasePermission.READ))
+            assertTrue(aclUtilService.hasPermission(springSecurityService.authentication, jep, BasePermission.WRITE))
+        }
+        // other user should not see
+        SpringSecurityUtils.doWithAuth("user") {
+            assertFalse(aclUtilService.hasPermission(springSecurityService.authentication, jep, BasePermission.READ))
+            assertFalse(aclUtilService.hasPermission(springSecurityService.authentication, jep, BasePermission.WRITE))
+        }
     }
 }

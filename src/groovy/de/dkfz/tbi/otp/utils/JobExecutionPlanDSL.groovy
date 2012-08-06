@@ -1,5 +1,9 @@
 package de.dkfz.tbi.otp.utils
 
+import org.springframework.security.acls.domain.BasePermission
+import org.springframework.security.acls.domain.GrantedAuthoritySid
+import org.springframework.security.acls.model.Sid
+
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.StartJobDefinition
@@ -8,8 +12,7 @@ import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterMapping
 import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
+import de.dkfz.tbi.otp.security.Group
 
 class Helper {
     JobDefinition firstJob = null
@@ -228,6 +231,17 @@ class JobExecutionPlanDSL {
                     errors.each { println(it) }
                 }
                 assert(errors.isEmpty())
+            }
+            // add the ACL
+            def aclUtilService = jep.domainClass.grailsApplication.mainContext.getBean("aclUtilService")
+            Group.list().each { Group group ->
+                if (group.readJobSystem) {
+                    Sid sid = new GrantedAuthoritySid(group.role.authority)
+                    aclUtilService.addPermission(jep, sid, BasePermission.READ)
+                    if (group.writeJobSystem) {
+                        aclUtilService.addPermission(jep, sid, BasePermission.WRITE)
+                    }
+                }
             }
         }
         println("Plan created")
