@@ -244,6 +244,36 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     }
 
     /**
+     * Test that verifies that an admin user can retrieve the changelog
+     * if there is no project assigned to the Entry yet.
+     * Test for BUG OTP-36
+     */
+    void testRetrieveChangelogWithoutProject() {
+        MetaDataEntry entry = mockEntry()
+        // admin should always be able to see the entry
+        SpringSecurityUtils.doWithAuth("admin") {
+            assertTrue(metaDataService.retrieveChangeLog(entry).empty)
+        }
+        // but a user should not
+        SpringSecurityUtils.doWithAuth("testuser") {
+            shouldFail(AccessDeniedException) {
+                metaDataService.retrieveChangeLog(entry)
+            }
+        }
+        // creating a changelog entry should not change anything
+        SpringSecurityUtils.doWithAuth("admin") {
+            metaDataService.updateMetaDataEntry(entry, "test2")
+            assertEquals(1, metaDataService.retrieveChangeLog(entry).size())
+        }
+        // a user should still not be able to see it
+        SpringSecurityUtils.doWithAuth("testuser") {
+            shouldFail(AccessDeniedException) {
+                metaDataService.retrieveChangeLog(entry)
+            }
+        }
+    }
+
+    /**
      * Creates a very simple MetaDataEntry with minimum required fields.
      * @return
      */
