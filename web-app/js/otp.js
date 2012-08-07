@@ -281,6 +281,11 @@ OTP.prototype.createListView = function (selector, sourcePath, sortOrder, jsonCa
         aoColumnDefs: columnDefs,
         aaSorting: [[0, sortOrder ? "asc" : "desc"]]
     });
+    window.setInterval(function () {
+        if ($.otp.autorefresh.enabled) {
+            $(selector).dataTable().fnDraw();
+        }
+    }, 10000);
 };
 
 /**
@@ -815,4 +820,47 @@ OTP.prototype.createParameterListView = function (selector, stepId, inputOrOutpu
         { "bSortable": false, "aTargets": [2] },
         { "bSortable": false, "aTargets": [3] }
     ], [{"name": "input", "value": inputOrOutput}]);
+};
+
+/**
+ * Handles the enable/disable auto-refresh functionality.
+ */
+$.otp.autorefresh = {
+    /**
+     * Whether auto-refresh is currently enabled.
+     */
+    enabled: false,
+    /**
+     * Registers the click handler on the links
+     */
+    setup: function (enabled) {
+        "use strict";
+        $("#refreshBox a").click($.otp.autorefresh.handleClick);
+        $.otp.autorefresh.enabled = enabled;
+    },
+    /**
+     * The click handler for the links. Performs an AJAX request to enable/disable auto-refresh.
+     * @param event
+     */
+    handleClick: function (event) {
+        "use strict";
+        event.preventDefault();
+        $.getJSON($(this).attr("href"), $.otp.autorefresh.ajaxHandler);
+    },
+    /**
+     * Callback for AJAX request to enable/diasble auto-refresh
+     * @param data
+     */
+    ajaxHandler: function (data) {
+        "use strict";
+        if (data.enabled === true) {
+            $("#refreshBox span.enable").hide();
+            $("#refreshBox span.disable").show();
+            $.otp.autorefresh.enabled = true;
+        } else if (data.enabled === false) {
+            $("#refreshBox span.enable").show();
+            $("#refreshBox span.disable").hide();
+            $.otp.autorefresh.enabled = false;
+        }
+    }
 };

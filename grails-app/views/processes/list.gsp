@@ -11,6 +11,7 @@
 </head>
 <body>
   <div class="body">
+    <otp:autoRefresh/>
     <div id="workflowOverview">
         <table id="workflowOverviewTable">
             <thead>

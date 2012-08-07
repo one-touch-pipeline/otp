@@ -65,4 +65,12 @@ class OtpTagLib {
     def showChangeLog = { attrs ->
         out << render(template: "/templates/showChangeLog", model: [link: g.createLink(controller: attrs.controller, action: attrs.action, id: attrs.id)])
     }
+
+    /**
+     * Renders the enable/disable auto-refresh buttons.
+     * Depending on the current state in the session either enable or disable is pre-selected.
+     */
+    def autoRefresh = {
+        out << render(template: "/templates/autoRefresh", model: [enabled: Boolean.valueOf(session["auto-refresh"])])
+    }
 }
