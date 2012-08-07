@@ -170,13 +170,13 @@ OTP.prototype.statusToImage = function (status) {
     case "RESUMED":
         return "green_anime.gif";
     case "RUNNINGFAILEDBEFORE":
-    case "RESTARTED":
         return "red_anime.gif";
     case "FINISHED":
         return "blue.png";
     case "SUCCESS":
         return "green.png";
     case "FAILURE":
+    case "RESTARTED":
         return "red.png";
     }
     return null;
