@@ -246,6 +246,12 @@ grails.plugins.springsecurity.controllerAnnotations.staticRules = [
         "/**":                   ['ROLE_USER']
         ]
 
+// hierarchy of roles
+grails.plugins.springsecurity.roleHierarchy = '''
+    ROLE_ADMIN > ROLE_OPERATOR
+    ROLE_OPERATOR > ROLE_USER
+'''
+
 // exclude unused plugins
 if (pluginsToExclude) {
     grails.plugin.exclude = pluginsToExclude

@@ -122,6 +122,16 @@ abstract class AbstractIntegrationTest {
               passwordExpired: false)
       assertNotNull(user2.save())
       assertNotNull(new AclSid(sid: user2.username, principal: true).save(flush: true))
+      User operator = new User(username: "operator",
+              password: springSecurityService.encodePassword("verysecret"),
+              userRealName: "Operator",
+              email: "test2@test.com",
+              enabled: true,
+              accountExpired: false,
+              accountLocked: false,
+              passwordExpired: false)
+      assertNotNull(operator.save())
+      assertNotNull(new AclSid(sid: operator.username, principal: true).save(flush: true))
       User admin = new User(username: "admin",
               password: springSecurityService.encodePassword("1234"),
               userRealName: "Administrator",
@@ -140,6 +150,9 @@ abstract class AbstractIntegrationTest {
       Role adminRole = new Role(authority: "ROLE_ADMIN")
       assertNotNull(adminRole.save())
       UserRole.create(admin, adminRole, false)
+      Role operatorRole = new Role(authority: "ROLE_OPERATOR")
+      assertNotNull(operatorRole.save())
+      UserRole.create(operator, operatorRole, true)
   }
 
   /**
