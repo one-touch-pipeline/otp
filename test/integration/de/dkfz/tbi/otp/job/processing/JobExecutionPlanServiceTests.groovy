@@ -933,6 +933,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
                 jobExecutionPlanService.getPlan(plan.id)
             }
         }
+        // an operator should see it
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertSame(plan, jobExecutionPlanService.getPlan(plan.id))
+        }
         SpringSecurityUtils.doWithAuth("admin") {
             assertSame(plan, jobExecutionPlanService.getPlan(plan.id))
             // grant read priv to testuser
@@ -959,6 +963,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
             shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.enablePlan(plan)
             }
+        }
+        // an operator should be able to enable the plan
+        SpringSecurityUtils.doWithAuth("operator") {
+            jobExecutionPlanService.enablePlan(plan)
         }
         // an admin user should be able to enable the plan
         SpringSecurityUtils.doWithAuth("admin") {
@@ -996,6 +1004,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
             shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.disablePlan(plan)
             }
+        }
+        // an operator should be able to disable the plan
+        SpringSecurityUtils.doWithAuth("operator") {
+            jobExecutionPlanService.disablePlan(plan)
         }
         // an admin user should be able to disable the plan
         SpringSecurityUtils.doWithAuth("admin") {
@@ -1040,6 +1052,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         SpringSecurityUtils.doWithAuth("testuser") {
             assertTrue(jobExecutionPlanService.getAllJobExecutionPlans().empty)
         }
+        // an operator should see all three plans
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertEquals(3, jobExecutionPlanService.getAllJobExecutionPlans().size())
+        }
         // admin should see all three plans
         SpringSecurityUtils.doWithAuth("admin") {
             assertEquals(3, jobExecutionPlanService.getAllJobExecutionPlans().size())
@@ -1079,6 +1095,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
                 jobExecutionPlanService.getAllProcesses(plan)
             }
         }
+        // operator should be able to access the plans
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertTrue(jobExecutionPlanService.getAllProcesses(plan).empty)
+        }
         // admin should be able to do so
         SpringSecurityUtils.doWithAuth("admin") {
             assertTrue(jobExecutionPlanService.getAllProcesses(plan).empty)
@@ -1107,6 +1127,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
             shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getLatestUpdatesForPlan(plan)
             }
+        }
+        // operator should be able to get the latest updates for the plan
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertNull(jobExecutionPlanService.getLatestUpdatesForPlan(plan).empty)
         }
         // but admin should
         SpringSecurityUtils.doWithAuth("admin") {
@@ -1137,6 +1161,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
                 jobExecutionPlanService.isProcessRunning(plan)
             }
         }
+        // operator should be able to get information about running processes
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertFalse(jobExecutionPlanService.isProcessRunning(plan))
+        }
         // but admin should
         SpringSecurityUtils.doWithAuth("admin") {
             assertFalse(jobExecutionPlanService.isProcessRunning(plan))
@@ -1165,6 +1193,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
             shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getProcessCount(plan)
             }
+        }
+        // an operator should be able to retrieve the Process count
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertEquals(0, jobExecutionPlanService.getProcessCount(plan))
         }
         // but admin should
         SpringSecurityUtils.doWithAuth("admin") {
@@ -1195,6 +1227,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
                 jobExecutionPlanService.getLastSucceededProcess(plan)
             }
         }
+        // an operator should be able tor retrieve the last succeeded Process
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertNull(jobExecutionPlanService.getLastSucceededProcess(plan))
+        }
         // but admin should
         SpringSecurityUtils.doWithAuth("admin") {
             assertNull(jobExecutionPlanService.getLastSucceededProcess(plan))
@@ -1223,6 +1259,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
             shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getLastFailedProcess(plan)
             }
+        }
+        // an operator should be able to retrieve the last failed Process
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertNull(jobExecutionPlanService.getLastFailedProcess(plan))
         }
         // but admin should
         SpringSecurityUtils.doWithAuth("admin") {
@@ -1253,6 +1293,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
                 jobExecutionPlanService.getLastFinishedProcess(plan)
             }
         }
+        // an operator should be able to retrieve the last finished Process
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertNull(jobExecutionPlanService.getLastFinishedProcess(plan))
+        }
         // but admin should
         SpringSecurityUtils.doWithAuth("admin") {
             assertNull(jobExecutionPlanService.getLastFinishedProcess(plan))
@@ -1281,6 +1325,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
             shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getLastExecutedProcess(plan)
             }
+        }
+        // an operator should be able to retrieve the last executed Process
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertNull(jobExecutionPlanService.getLastExecutedProcess(plan))
         }
         // but admin should
         SpringSecurityUtils.doWithAuth("admin") {
@@ -1311,6 +1359,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
                 jobExecutionPlanService.getNumberOfProcesses(plan)
             }
         }
+        // an operator should be able to retrieve the number of Processes
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertEquals(0, jobExecutionPlanService.getNumberOfProcesses(plan))
+        }
         // but admin should
         SpringSecurityUtils.doWithAuth("admin") {
             assertEquals(0, jobExecutionPlanService.getNumberOfProcesses(plan))
@@ -1340,6 +1392,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
                 jobExecutionPlanService.getNumberOfSuccessfulFinishedProcesses(plan)
             }
         }
+        // an operator should be able to retrieve the number of successfully finished Processes
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertEquals(0, jobExecutionPlanService.getNumberOfSuccessfulFinishedProcesses(plan))
+        }
         // but admin should
         SpringSecurityUtils.doWithAuth("admin") {
             assertEquals(0, jobExecutionPlanService.getNumberOfSuccessfulFinishedProcesses(plan))
@@ -1368,6 +1424,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
             shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getNumberOfFinishedProcesses(plan)
             }
+        }
+        // an operator should be able to retrieve the number of finished Processes
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertEquals(0, jobExecutionPlanService.getNumberOfFinishedProcesses(plan))
         }
         // but admin should
         SpringSecurityUtils.doWithAuth("admin") {
@@ -1401,6 +1461,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
             shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.planInformation(plan)
             }
+        }
+        // an operator should be able to retrieve the plan information
+        SpringSecurityUtils.doWithAuth("operator") {
+            jobExecutionPlanService.planInformation(plan)
         }
         // but admin should
         SpringSecurityUtils.doWithAuth("admin") {
