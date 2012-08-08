@@ -29,7 +29,12 @@
 				<li><g:link controller="run" action="list">Runs</g:link></li>
 				<li><g:link controller="projectProgress" action="progress">Progress</g:link></li>
 				<li><g:link controller="processes" action="index">Processes</g:link></li>
-				<li><g:link controller="login" action="index">| Login |</g:link></li>
+                <sec:ifNotLoggedIn>
+                    <li><g:link controller="login" action="auth">| Login |</g:link></li>
+                </sec:ifNotLoggedIn>
+                <sec:ifLoggedIn>
+                    <li><g:link controller="logout" action="index">| Logout |</g:link></li>
+                </sec:ifLoggedIn>
 				<li><g:link controller="runSubmit" action="index">Run Submit</g:link></li>
 			</ul>
 		</div>
