@@ -102,7 +102,7 @@ class MetaDataService {
      * @param entry The MetaDataEntry for which the ChangeLog should be retrieved
      * @return List of ChangeLog entries
      */
-    @PreAuthorize("hasPermission(#entry.dataFile.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("((#entry.dataFile.project != null) and hasPermission(#entry.dataFile.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)) or hasRole('ROLE_ADMIN')")
     List<ChangeLog> retrieveChangeLog(MetaDataEntry entry) {
         ReferencedClass clazz = ReferencedClass.findByClassName(MetaDataEntry.class.getName())
         if (!clazz) {

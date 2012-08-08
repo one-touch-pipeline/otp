@@ -11,6 +11,7 @@
 </head>
 <body>
   <div class="body">
+    <otp:autoRefresh/>
     <div id="plan-dsl-dialog" title="DSL for Workflow ${name}" style="display: none">
         <textarea readonly="readonly" cols="200" rows="100"></textarea>
     </div>
