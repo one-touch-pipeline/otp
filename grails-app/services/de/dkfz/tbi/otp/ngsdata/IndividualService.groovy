@@ -97,7 +97,7 @@ class IndividualService {
      * @return List of Individuals matching the criterias and ACL restricted
      **/
     List<Individual> listIndividuals(int offset, int count, boolean sortOrder, int column, String filter) {
-        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+        if (SpringSecurityUtils.ifAllGranted("ROLE_ADMIN")) {
             if (filter.length() >= 3) {
                 String query = '''
 SELECT i FROM Individual as i
@@ -162,7 +162,7 @@ AND ace.granting = true
 AND (
 lower(i.pid) like :filter
 OR lower(i.mockFullName) like :filter
-OR lower(i.mockPid like) :filter
+OR lower(i.mockPid) like :filter
 OR lower(i.project.name) like :filter
 OR lower(i.type) like :filter
 )
@@ -206,7 +206,7 @@ OR lower(i.type) like :filter
      * @return Number of Individuals in ACL aware manner
      **/
     int countIndividual(String filter) {
-        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+        if (SpringSecurityUtils.ifAllGranted("ROLE_ADMIN")) {
             if (filter.length() >= 3) {
                 String query = '''
 SELECT COUNT(DISTINCT i.id) FROM Individual as i
@@ -248,7 +248,7 @@ AND ace.granting = true
 AND (
 lower(i.pid) like :filter
 OR lower(i.mockFullName) like :filter
-OR lower(i.mockPid like) :filter
+OR lower(i.mockPid) like :filter
 OR lower(i.project.name) like :filter
 OR lower(i.type) like :filter
 )
