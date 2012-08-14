@@ -41,7 +41,7 @@ class ProcessService {
      * @param id The Process's id
      * @return
      */
-    @PostAuthorize("hasPermission(returnObject.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
+    @PostAuthorize("returnObject == null or hasPermission(returnObject.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public Process getProcess(long id) {
         return Process.get(id)
     }
@@ -75,7 +75,7 @@ class ProcessService {
      * @param id The ProcessingStep's id
      * @return
      */
-    @PostAuthorize("hasPermission(returnObject.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
+    @PostAuthorize("returnObject == null or hasPermission(returnObject.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public ProcessingStep getProcessingStep(long id) {
         return ProcessingStep.get(id)
     }
@@ -255,7 +255,7 @@ ORDER BY u.id desc
      */
     @PreAuthorize("hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public Date getLastUpdate(Process process) {
-        return lastUpdate.date
+        return lastUpdate(process).date
     }
 
     /**
