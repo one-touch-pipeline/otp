@@ -19,7 +19,7 @@ class IndividualService {
      * @param identifier Name or database Id
      * @return Individual
      **/
-    @PostAuthorize("(returnObject == null) or hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_ADMIN')")
+    @PostAuthorize("(returnObject == null) or hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
     Individual getIndividual(String identifier) {
         if (!identifier) {
             return null
@@ -40,7 +40,7 @@ class IndividualService {
      * @param identifier Name or database Id
      * @return Individual
      **/
-    @PostAuthorize("(returnObject == null) or hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_ADMIN')")
+    @PostAuthorize("(returnObject == null) or hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
     Individual getIndividual(long identifier) {
         return getIndividual("${identifier}")
     }
@@ -50,7 +50,7 @@ class IndividualService {
      * @param individual The Individual for which the predecessor has to be retrieved
      * @return Previous Individual if present, otherwise null
      **/
-    @PreAuthorize("hasPermission(#individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
     Individual previousIndividual(Individual individual) {
         if (!individual) {
             return null
@@ -64,7 +64,7 @@ class IndividualService {
      * @param individual The Individual for which the successor has to be retrieved
      * @return Next Individual if present, otherwise null
      **/
-    @PreAuthorize("hasPermission(#individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
     Individual nextIndividual(Individual individual) {
         if (!individual) {
             return null
@@ -97,7 +97,7 @@ class IndividualService {
      * @return List of Individuals matching the criterias and ACL restricted
      **/
     List<Individual> listIndividuals(int offset, int count, boolean sortOrder, int column, String filter) {
-        if (SpringSecurityUtils.ifAllGranted("ROLE_ADMIN")) {
+        if (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR")) {
             if (filter.length() >= 3) {
                 String query = '''
 SELECT i FROM Individual as i
@@ -206,7 +206,7 @@ OR lower(i.type) like :filter
      * @return Number of Individuals in ACL aware manner
      **/
     int countIndividual(String filter) {
-        if (SpringSecurityUtils.ifAllGranted("ROLE_ADMIN")) {
+        if (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR")) {
             if (filter.length() >= 3) {
                 String query = '''
 SELECT COUNT(DISTINCT i.id) FROM Individual as i

@@ -34,6 +34,12 @@ class IndividualServiceTests extends AbstractIntegrationTest {
             // but trying to access an individual that does not exist should work
             assertNull(individualService.getIndividual("test1"))
         }
+        SpringSecurityUtils.doWithAuth("operator") {
+            // operator user should find this individual
+            assertSame(individual, individualService.getIndividual("test"))
+            // searching for something else should not retrieve this one
+            assertNull(individualService.getIndividual("test1"))
+        }
         SpringSecurityUtils.doWithAuth("admin") {
             // admin user should find this individual
             assertSame(individual, individualService.getIndividual("test"))
@@ -65,6 +71,12 @@ class IndividualServiceTests extends AbstractIntegrationTest {
                 individualService.getIndividual(individual.id)
             }
             // but trying to access an individual that does not exist should work
+            assertNull(individualService.getIndividual(individual.id + 1))
+        }
+        SpringSecurityUtils.doWithAuth("operator") {
+            // admin user should find this individual
+            assertSame(individual, individualService.getIndividual(individual.id))
+            // searching for something else should not retrieve this one
             assertNull(individualService.getIndividual(individual.id + 1))
         }
         SpringSecurityUtils.doWithAuth("admin") {
@@ -130,6 +142,10 @@ class IndividualServiceTests extends AbstractIntegrationTest {
                 individualService.previousIndividual(individual)
             }
         }
+        // operator user should be allowed
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertNull(individualService.previousIndividual(individual))
+        }
         // admin user should be allowed
         SpringSecurityUtils.doWithAuth("admin") {
             assertNull(individualService.previousIndividual(individual))
@@ -156,6 +172,10 @@ class IndividualServiceTests extends AbstractIntegrationTest {
             shouldFail(AccessDeniedException) {
                 individualService.nextIndividual(individual)
             }
+        }
+        // operator user should be allowed
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertNull(individualService.nextIndividual(individual))
         }
         // admin user should be allowed
         SpringSecurityUtils.doWithAuth("admin") {
@@ -309,6 +329,139 @@ class IndividualServiceTests extends AbstractIntegrationTest {
     }
 
     @Test
+    void testListIndividualAsOperator() {
+        // let's create a few Projects and Individuals
+        Project project1 = mockProject("test")
+        Project project2 = mockProject("test2")
+        Project project3 = mockProject("test3")
+        Individual individual1 = new Individual(pid: "123", mockPid: "1234", mockFullName: "testa", project: project1, type: Individual.Type.REAL)
+        assertNotNull(individual1.save())
+        Individual individual2 = new Individual(pid: "122", mockPid: "6234", mockFullName: "testb", project: project2, type: Individual.Type.POOL)
+        assertNotNull(individual2.save())
+        Individual individual3 = new Individual(pid: "121", mockPid: "4758", mockFullName: "testc", project: project3, type: Individual.Type.CELLLINE)
+        assertNotNull(individual3.save())
+        Individual individual4 = new Individual(pid: "120", mockPid: "4623", mockFullName: "testd", project: project1, type: Individual.Type.UNDEFINED)
+        assertNotNull(individual4.save())
+        Individual individual5 = new Individual(pid: "119", mockPid: "1243", mockFullName: "teste", project: project2, type: Individual.Type.REAL)
+        assertNotNull(individual5.save())
+        Individual individual6 = new Individual(pid: "118", mockPid: "1843", mockFullName: "testf", project: project3, type: Individual.Type.POOL)
+        assertNotNull(individual6.save())
+        Individual individual7 = new Individual(pid: "117", mockPid: "0946", mockFullName: "testg", project: project1, type: Individual.Type.CELLLINE)
+        assertNotNull(individual7.save())
+        Individual individual8 = new Individual(pid: "116", mockPid: "2462", mockFullName: "testh", project: project2, type: Individual.Type.UNDEFINED)
+        assertNotNull(individual8.save())
+        Individual individual9 = new Individual(pid: "115", mockPid: "5678", mockFullName: "testi", project: project3, type: Individual.Type.REAL)
+        assertNotNull(individual9.save())
+        Individual individual10 = new Individual(pid: "114", mockPid: "asgd", mockFullName: "testj", project: project1, type: Individual.Type.POOL)
+        assertNotNull(individual10.save())
+        Individual individual11 = new Individual(pid: "113", mockPid: "tyew", mockFullName: "testk", project: project2, type: Individual.Type.CELLLINE)
+        assertNotNull(individual11.save())
+        Individual individual12 = new Individual(pid: "112", mockPid: "bhrs", mockFullName: "testl", project: project3, type: Individual.Type.UNDEFINED)
+        assertNotNull(individual12.save())
+        Individual individual13 = new Individual(pid: "111", mockPid: "3477", mockFullName: "testm", project: project1, type: Individual.Type.REAL)
+        assertNotNull(individual13.save())
+        Individual individual14 = new Individual(pid: "110", mockPid: "awrs", mockFullName: "testn", project: project2, type: Individual.Type.POOL)
+        assertNotNull(individual14.save())
+        Individual individual15 = new Individual(pid: "109", mockPid: "yrgf", mockFullName: "testo", project: project3, type: Individual.Type.CELLLINE)
+        assertNotNull(individual15.save())
+
+        SpringSecurityUtils.doWithAuth("operator") {
+            // without any constraints we should get all individuals
+            assertEquals(15, individualService.countIndividual(""))
+            List<Individual> results = individualService.listIndividuals(0, 15, true, 0, "")
+            assertEquals(15, results.size())
+            // should be ordered ascending by pid
+            results.eachWithIndex { Individual ind, int i ->
+                assertEquals("${109+i}".toString(), ind.pid)
+            }
+            // let's use same options but order descending
+            results = individualService.listIndividuals(0, 15, false, 0, "")
+            assertEquals(15, results.size())
+            results.eachWithIndex { Individual ind, int i ->
+                assertEquals("${123-i}".toString(), ind.pid)
+            }
+            // now let's restrict on five elements with offset of three
+            results = individualService.listIndividuals(3, 5, true, 0, "")
+            assertEquals(5, results.size())
+            results.eachWithIndex { Individual ind, int i ->
+                assertEquals("${112+i}".toString(), ind.pid)
+            }
+            // and descending sorting
+            results = individualService.listIndividuals(3, 5, false, 0, "")
+            assertEquals(5, results.size())
+            results.eachWithIndex { Individual ind, int i ->
+                assertEquals("${120-i}".toString(), ind.pid)
+            }
+            // and a corner case
+            results = individualService.listIndividuals(14, 5, false, 0, "")
+            assertEquals(1, results.size())
+            assertSame(individual15, results.first())
+
+            // test the sorting by mock full name
+            results = individualService.listIndividuals(0, 5, true, 1, "")
+            assertEquals(5, results.size())
+            assertSame(individual1, results[0])
+            assertSame(individual2, results[1])
+            assertSame(individual3, results[2])
+            assertSame(individual4, results[3])
+            assertSame(individual5, results[4])
+            // other direction
+            results = individualService.listIndividuals(0, 5, false, 1, "")
+            assertEquals(5, results.size())
+            assertSame(individual15, results[0])
+            assertSame(individual14, results[1])
+            assertSame(individual13, results[2])
+            assertSame(individual12, results[3])
+            assertSame(individual11, results[4])
+
+            // test sorting by mock pid
+            results = individualService.listIndividuals(0, 5, true, 2, "")
+            assertEquals(5, results.size())
+            assertSame(individual7, results[0])
+            assertSame(individual1, results[1])
+            assertSame(individual5, results[2])
+            assertSame(individual6, results[3])
+            assertSame(individual8, results[4])
+            // other direction
+            results = individualService.listIndividuals(0, 5, false, 2, "")
+            assertEquals(5, results.size())
+            assertSame(individual15, results[0])
+            assertSame(individual11, results[1])
+            assertSame(individual12, results[2])
+            assertSame(individual14, results[3])
+            assertSame(individual10, results[4])
+
+            // test sorting by project id
+            results = individualService.listIndividuals(0, 5, true, 3, "")
+            assertEquals(5, results.size())
+            results.each {
+                assertSame(project1, it.project)
+            }
+            // other direction
+            results = individualService.listIndividuals(0, 5, false, 3, "")
+            results.each {
+                assertSame(project3, it.project)
+            }
+
+            // test sorting by type
+            results = individualService.listIndividuals(0, 5, true, 4, "")
+            assertEquals(5, results.size())
+            assertEquals(Individual.Type.CELLLINE, results[0].type)
+            assertEquals(Individual.Type.CELLLINE, results[1].type)
+            assertEquals(Individual.Type.CELLLINE, results[2].type)
+            assertEquals(Individual.Type.CELLLINE, results[3].type)
+            assertEquals(Individual.Type.POOL, results[4].type)
+            // other direction
+            results = individualService.listIndividuals(0, 5, false, 4, "")
+            assertEquals(Individual.Type.UNDEFINED, results[0].type)
+            assertEquals(Individual.Type.UNDEFINED, results[1].type)
+            assertEquals(Individual.Type.UNDEFINED, results[2].type)
+            assertEquals(Individual.Type.REAL, results[3].type)
+            assertEquals(Individual.Type.REAL, results[4].type)
+        }
+    }
+
+    @Test
     void testListIndividualWithFilterAsAdmin() {
         // let's create a few Projects and Individuals
         Project project1 = mockProject("project")
@@ -345,6 +498,186 @@ class IndividualServiceTests extends AbstractIntegrationTest {
         Individual individual15 = new Individual(pid: "109", mockPid: "yrgf", mockFullName: "testo", project: project3, type: Individual.Type.CELLLINE)
         assertNotNull(individual15.save())
         SpringSecurityUtils.doWithAuth("admin") {
+            // no filter should not change anything
+            assertEquals(15, individualService.countIndividual(""))
+            List<Individual> results = individualService.listIndividuals(0, 15, true, 0, "")
+            assertEquals(15, results.size())
+            // filter with one character should not change anything
+            assertEquals(15, individualService.countIndividual("1"))
+            results = individualService.listIndividuals(0, 15, true, 0, "1")
+            assertEquals(15, results.size())
+            // filter with two characters should not change anything
+            assertEquals(15, individualService.countIndividual("10"))
+            results = individualService.listIndividuals(0, 15, true, 0, "10")
+            assertEquals(15, results.size())
+            // filter with three characters should start the filter, we filter on individual15 through the pid
+            assertEquals(1, individualService.countIndividual("109"))
+            results = individualService.listIndividuals(0, 15, true, 0, "109")
+            assertEquals(1, results.size())
+            assertSame(individual15, results[0])
+
+            // let's test the sorting by filter on a text that will include all results
+            assertEquals(15, individualService.countIndividual("test"))
+            results = individualService.listIndividuals(0, 15, true, 0, "test")
+            assertEquals(15, results.size())
+            // should be ordered ascending by pid
+            results.eachWithIndex { Individual ind, int i ->
+                assertEquals("${109+i}".toString(), ind.pid)
+            }
+            // let's use same options but order descending
+            results = individualService.listIndividuals(0, 15, false, 0, "test")
+            assertEquals(15, results.size())
+            results.eachWithIndex { Individual ind, int i ->
+                assertEquals("${123-i}".toString(), ind.pid)
+            }
+            // now let's restrict on five elements with offset of three
+            results = individualService.listIndividuals(3, 5, true, 0, "test")
+            assertEquals(5, results.size())
+            results.eachWithIndex { Individual ind, int i ->
+                assertEquals("${112+i}".toString(), ind.pid)
+            }
+            // and descending sorting
+            results = individualService.listIndividuals(3, 5, false, 0, "test")
+            assertEquals(5, results.size())
+            results.eachWithIndex { Individual ind, int i ->
+                assertEquals("${120-i}".toString(), ind.pid)
+            }
+            // and a corner case
+            results = individualService.listIndividuals(14, 5, false, 0, "test")
+            assertEquals(1, results.size())
+            assertSame(individual15, results.first())
+
+            // test the sorting by mock full name
+            results = individualService.listIndividuals(0, 5, true, 1, "test")
+            assertEquals(5, results.size())
+            assertSame(individual1, results[0])
+            assertSame(individual2, results[1])
+            assertSame(individual3, results[2])
+            assertSame(individual4, results[3])
+            assertSame(individual5, results[4])
+            // other direction
+            results = individualService.listIndividuals(0, 5, false, 1, "test")
+            assertEquals(5, results.size())
+            assertSame(individual15, results[0])
+            assertSame(individual14, results[1])
+            assertSame(individual13, results[2])
+            assertSame(individual12, results[3])
+            assertSame(individual11, results[4])
+
+            // test sorting by mock pid
+            results = individualService.listIndividuals(0, 5, true, 2, "test")
+            assertEquals(5, results.size())
+            assertSame(individual7, results[0])
+            assertSame(individual1, results[1])
+            assertSame(individual5, results[2])
+            assertSame(individual6, results[3])
+            assertSame(individual8, results[4])
+            // other direction
+            results = individualService.listIndividuals(0, 5, false, 2, "test")
+            assertEquals(5, results.size())
+            assertSame(individual15, results[0])
+            assertSame(individual11, results[1])
+            assertSame(individual12, results[2])
+            assertSame(individual14, results[3])
+            assertSame(individual10, results[4])
+
+            // test sorting by project id
+            results = individualService.listIndividuals(0, 5, true, 3, "test")
+            assertEquals(5, results.size())
+            results.each {
+                assertSame(project1, it.project)
+            }
+            // other direction
+            results = individualService.listIndividuals(0, 5, false, 3, "test")
+            results.each {
+                assertSame(project3, it.project)
+            }
+
+            // test sorting by type
+            results = individualService.listIndividuals(0, 5, true, 4, "test")
+            assertEquals(5, results.size())
+            assertEquals(Individual.Type.CELLLINE, results[0].type)
+            assertEquals(Individual.Type.CELLLINE, results[1].type)
+            assertEquals(Individual.Type.CELLLINE, results[2].type)
+            assertEquals(Individual.Type.CELLLINE, results[3].type)
+            assertEquals(Individual.Type.POOL, results[4].type)
+            // other direction
+            results = individualService.listIndividuals(0, 5, false, 4, "test")
+            assertEquals(Individual.Type.UNDEFINED, results[0].type)
+            assertEquals(Individual.Type.UNDEFINED, results[1].type)
+            assertEquals(Individual.Type.UNDEFINED, results[2].type)
+            assertEquals(Individual.Type.REAL, results[3].type)
+            assertEquals(Individual.Type.REAL, results[4].type)
+
+            // now test filter on various elements, pid was already tested
+            // try filter on project name
+            assertEquals(5, individualService.countIndividual("project1"))
+            results = individualService.listIndividuals(0, 15, false, 0, "project1")
+            assertEquals(5, results.size())
+            results.each {
+                assertSame(project2, it.project)
+            }
+            // try filter on mock full name
+            assertEquals(1, individualService.countIndividual("testh"))
+            results = individualService.listIndividuals(0, 15, false, 0, "testh")
+            assertEquals(1, results.size())
+            assertSame(individual8, results[0])
+            // try filter on mock pid
+            assertEquals(1, individualService.countIndividual("asgd"))
+            results = individualService.listIndividuals(0, 15, false, 0, "asgd")
+            assertEquals(1, results.size())
+            assertSame(individual10, results[0])
+            // try filter on type
+            assertEquals(4, individualService.countIndividual("cell"))
+            results = individualService.listIndividuals(0, 15, false, 0, "cell")
+            assertEquals(4, results.size())
+            results.each {
+                assertSame(Individual.Type.CELLLINE, it.type)
+            }
+            // try a combined filter
+            assertEquals(3, individualService.countIndividual("%g%"))
+            results = individualService.listIndividuals(0, 15, false, 0, "%g%")
+            assertEquals(3, results.size())
+        }
+    }
+
+    @Test
+    void testListIndividualWithFilterAsOperator() {
+        // let's create a few Projects and Individuals
+        Project project1 = mockProject("project")
+        Project project2 = mockProject("project1")
+        Project project3 = mockProject("project2")
+        Individual individual1 = new Individual(pid: "123", mockPid: "1234", mockFullName: "testa", project: project1, type: Individual.Type.REAL)
+        assertNotNull(individual1.save())
+        Individual individual2 = new Individual(pid: "122", mockPid: "6234", mockFullName: "testb", project: project2, type: Individual.Type.POOL)
+        assertNotNull(individual2.save())
+        Individual individual3 = new Individual(pid: "121", mockPid: "4758", mockFullName: "testc", project: project3, type: Individual.Type.CELLLINE)
+        assertNotNull(individual3.save())
+        Individual individual4 = new Individual(pid: "120", mockPid: "4623", mockFullName: "testd", project: project1, type: Individual.Type.UNDEFINED)
+        assertNotNull(individual4.save())
+        Individual individual5 = new Individual(pid: "119", mockPid: "1243", mockFullName: "teste", project: project2, type: Individual.Type.REAL)
+        assertNotNull(individual5.save())
+        Individual individual6 = new Individual(pid: "118", mockPid: "1843", mockFullName: "testf", project: project3, type: Individual.Type.POOL)
+        assertNotNull(individual6.save())
+        Individual individual7 = new Individual(pid: "117", mockPid: "0946", mockFullName: "testg", project: project1, type: Individual.Type.CELLLINE)
+        assertNotNull(individual7.save())
+        Individual individual8 = new Individual(pid: "116", mockPid: "2462", mockFullName: "testh", project: project2, type: Individual.Type.UNDEFINED)
+        assertNotNull(individual8.save())
+        Individual individual9 = new Individual(pid: "115", mockPid: "5678", mockFullName: "testi", project: project3, type: Individual.Type.REAL)
+        assertNotNull(individual9.save())
+        Individual individual10 = new Individual(pid: "114", mockPid: "asgd", mockFullName: "testj", project: project1, type: Individual.Type.POOL)
+        assertNotNull(individual10.save())
+        Individual individual11 = new Individual(pid: "113", mockPid: "tyew", mockFullName: "testk", project: project2, type: Individual.Type.CELLLINE)
+        assertNotNull(individual11.save())
+        Individual individual12 = new Individual(pid: "112", mockPid: "bhrs", mockFullName: "testl", project: project3, type: Individual.Type.UNDEFINED)
+        assertNotNull(individual12.save())
+        Individual individual13 = new Individual(pid: "111", mockPid: "3477", mockFullName: "testm", project: project1, type: Individual.Type.REAL)
+        assertNotNull(individual13.save())
+        Individual individual14 = new Individual(pid: "110", mockPid: "awrs", mockFullName: "testn", project: project2, type: Individual.Type.POOL)
+        assertNotNull(individual14.save())
+        Individual individual15 = new Individual(pid: "109", mockPid: "yrgf", mockFullName: "testo", project: project3, type: Individual.Type.CELLLINE)
+        assertNotNull(individual15.save())
+        SpringSecurityUtils.doWithAuth("operator") {
             // no filter should not change anything
             assertEquals(15, individualService.countIndividual(""))
             List<Individual> results = individualService.listIndividuals(0, 15, true, 0, "")
