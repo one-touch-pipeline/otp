@@ -35,8 +35,22 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         SpringSecurityUtils.doWithAuth("testuser") {
             assertNull(processService.getProcess(1))
         }
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertNull(processService.getProcess(1))
+        }
         SpringSecurityUtils.doWithAuth("admin") {
             assertNull(processService.getProcess(1))
+        }
+    }
+
+    /**
+     * Tests that an operator user has access to all processes
+     */
+    void testGetProcessAsOperator() {
+        JobExecutionPlan plan = mockPlan()
+        Process process = mockProcess(plan)
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertSame(process, processService.getProcess(process.id))
         }
     }
 
@@ -93,6 +107,10 @@ class ProcessServiceTests extends AbstractIntegrationTest {
                 processService.getAllProcessingSteps(process)
             }
         }
+        // operator should have access
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertTrue(processService.getAllProcessingSteps(process).empty)
+        }
         // admin should have access
         SpringSecurityUtils.doWithAuth("admin") {
             assertTrue(processService.getAllProcessingSteps(process).empty)
@@ -124,6 +142,10 @@ class ProcessServiceTests extends AbstractIntegrationTest {
                 processService.getNumberOfProcessessingSteps(process)
             }
         }
+        // operator should have access
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertEquals(0, processService.getNumberOfProcessessingSteps(process))
+        }
         // admin should have access
         SpringSecurityUtils.doWithAuth("admin") {
             assertEquals(0, processService.getNumberOfProcessessingSteps(process))
@@ -150,8 +172,24 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         SpringSecurityUtils.doWithAuth("testuser") {
             assertNull(processService.getProcessingStep(1))
         }
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertNull(processService.getProcessingStep(1))
+        }
         SpringSecurityUtils.doWithAuth("admin") {
             assertNull(processService.getProcessingStep(1))
+        }
+    }
+
+    /**
+     * Tests that an operator user has access to all processing steps
+     */
+    void testGetProcessingStepAsOperator() {
+        JobExecutionPlan plan = mockPlan()
+        Process process = mockProcess(plan)
+        JobDefinition job = createTestJob("Test", plan)
+        ProcessingStep step = mockProcessingStep(process, job)
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertSame(step, processService.getProcessingStep(step.id))
         }
     }
 
@@ -214,6 +252,10 @@ class ProcessServiceTests extends AbstractIntegrationTest {
                 processService.getAllUpdates(step)
             }
         }
+        // operator should have access
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertTrue(processService.getAllUpdates(step).empty)
+        }
         // but admin user should have access
         SpringSecurityUtils.doWithAuth("admin") {
             assertTrue(processService.getAllUpdates(step).empty)
@@ -246,6 +288,10 @@ class ProcessServiceTests extends AbstractIntegrationTest {
             shouldFail(AccessDeniedException) {
                 processService.getNumberOfUpdates(step)
             }
+        }
+        // operator should have access
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertEquals(0, processService.getNumberOfUpdates(step))
         }
         // admin should have access
         SpringSecurityUtils.doWithAuth("admin") {
@@ -302,6 +348,10 @@ class ProcessServiceTests extends AbstractIntegrationTest {
             // grant read permission to testuser
             aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
         }
+        // operator should have access
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertEquals(update.date, processService.getFinishDate(process))
+        }
         // now the testuser should have access
         SpringSecurityUtils.doWithAuth("testuser") {
             assertEquals(update.date, processService.getFinishDate(process))
@@ -355,6 +405,10 @@ class ProcessServiceTests extends AbstractIntegrationTest {
             // grant read permission to our testuser
             aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
         }
+        // operator should have access
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertEquals(duration, processService.getDuration(process))
+        }
         // now also the testuser should be able to see it
         SpringSecurityUtils.doWithAuth("testuser") {
             assertEquals(duration, processService.getDuration(process))
@@ -379,6 +433,10 @@ class ProcessServiceTests extends AbstractIntegrationTest {
             shouldFail(AccessDeniedException) {
                 processService.getLatestProcessingStep(process)
             }
+        }
+        // operator should have access
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertNull(processService.getLatestProcessingStep(process))
         }
         // but an admin should have access
         SpringSecurityUtils.doWithAuth("admin") {
@@ -416,6 +474,11 @@ class ProcessServiceTests extends AbstractIntegrationTest {
             shouldFail(AccessDeniedException) {
                 processService.getState(step)
             }
+        }
+        // operator should have access
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertEquals(ExecutionState.CREATED, processService.getState(process))
+            assertEquals(ExecutionState.CREATED, processService.getState(step))
         }
         // admin user should have access
         SpringSecurityUtils.doWithAuth("admin") {
@@ -459,6 +522,11 @@ class ProcessServiceTests extends AbstractIntegrationTest {
                 processService.getError(step)
             }
         }
+        // operator should have access
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertNull(processService.getError(process))
+            assertNull(processService.getError(step))
+        }
         // admin user should have access
         SpringSecurityUtils.doWithAuth("admin") {
             assertNull(processService.getError(process))
@@ -501,6 +569,11 @@ class ProcessServiceTests extends AbstractIntegrationTest {
                 processService.getLastUpdate(step)
             }
         }
+        // operator should have access
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertEquals(update.date, processService.getLastUpdate(process))
+            assertEquals(update.date, processService.getLastUpdate(step))
+        }
         // admin user should have access
         SpringSecurityUtils.doWithAuth("admin") {
             assertEquals(update.date, processService.getLastUpdate(process))
@@ -540,6 +613,10 @@ class ProcessServiceTests extends AbstractIntegrationTest {
                 processService.getLatestProcessingStepUpdate(step)
             }
         }
+        // operator should have access
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertSame(update, processService.getLatestProcessingStepUpdate(step))
+        }
         // admin user should have access
         SpringSecurityUtils.doWithAuth("admin") {
             assertSame(update, processService.getLatestProcessingStepUpdate(step))
@@ -574,6 +651,10 @@ class ProcessServiceTests extends AbstractIntegrationTest {
                 processService.getFirstUpdate(step)
             }
         }
+        // operator should have access
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertEquals(update.date, processService.getFirstUpdate(step))
+        }
         // admin user should have access
         SpringSecurityUtils.doWithAuth("admin") {
             assertEquals(update.date, processService.getFirstUpdate(step))
@@ -607,6 +688,10 @@ class ProcessServiceTests extends AbstractIntegrationTest {
             shouldFail(AccessDeniedException) {
                 processService.getProcessingStepDuration(step)
             }
+        }
+        // operator should have access
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertNull(processService.getProcessingStepDuration(step))
         }
         // admin user should have access
         SpringSecurityUtils.doWithAuth("admin") {
@@ -647,6 +732,10 @@ class ProcessServiceTests extends AbstractIntegrationTest {
                 processService.processInformation(process)
             }
         }
+        // operator should have access
+        SpringSecurityUtils.doWithAuth("operator") {
+            processService.processInformation(process)
+        }
         // but admin should have access
         SpringSecurityUtils.doWithAuth("admin") {
             // we don't verify the map - needs a dedicated test
@@ -682,9 +771,16 @@ class ProcessServiceTests extends AbstractIntegrationTest {
                 processService.restartProcessingStep(step)
             }
         }
+        // operator should be allowed to restart
+        SpringSecurityUtils.doWithAuth("operator") {
+            // we are in wrong state, so we let if fail on purpose
+            shouldFail(IncorrectProcessingException) {
+                processService.restartProcessingStep(step)
+            }
+        }
         // an admin user should be allowed
         SpringSecurityUtils.doWithAuth("admin") {
-            // we are in wrong state, so we let if fail on purpose
+            // still in wrong state
             shouldFail(IncorrectProcessingException) {
                 processService.restartProcessingStep(step)
             }
