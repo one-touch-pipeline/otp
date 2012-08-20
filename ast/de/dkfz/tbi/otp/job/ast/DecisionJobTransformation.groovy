@@ -71,6 +71,7 @@ class DecisionJobTransformation extends AbstractJobTransformation implements AST
                 // add getVersion method - actual code will be generated below
                 classNode.addMethod("getVersion", Opcodes.ACC_PUBLIC, new ClassNode(String), Parameter.EMPTY_ARRAY, ClassNode.EMPTY_ARRAY, new ReturnStatement(new ConstantExpression("")))
             }
+            addLog(classNode)
             // add annotation nodes for scope
             addScopeAnnotation(classNode)
             addComponentAnnotation(classNode)

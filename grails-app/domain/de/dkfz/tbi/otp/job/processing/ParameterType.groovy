@@ -15,7 +15,7 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
  * @see Parameter
  * @see JobDefinition
  */
-class ParameterType {
+class ParameterType implements Serializable {
     /**
      * The name for this parameter
      */

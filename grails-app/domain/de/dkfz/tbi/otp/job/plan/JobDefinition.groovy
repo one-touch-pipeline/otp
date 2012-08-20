@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.job.plan
 import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterMapping
 
-class JobDefinition {
+class JobDefinition implements Serializable {
     /**
      * Mapping of parameters.
      */

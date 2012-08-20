@@ -8,7 +8,7 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
  *
  *
  */
-class ParameterMapping {
+class ParameterMapping implements Serializable {
     /**
      * The ParameterType of the output Parameter of the previous Job
      */

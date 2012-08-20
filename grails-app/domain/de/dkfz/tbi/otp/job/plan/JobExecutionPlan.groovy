@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.job.plan
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 
 
-class JobExecutionPlan {
+class JobExecutionPlan implements Serializable {
     /**
      * A descriptive name for this Job Execution Plan
      */

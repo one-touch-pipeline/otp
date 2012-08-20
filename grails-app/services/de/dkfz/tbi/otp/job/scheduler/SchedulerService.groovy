@@ -21,10 +21,14 @@ import de.dkfz.tbi.otp.job.processing.RestartedProcessingStep
 import de.dkfz.tbi.otp.job.processing.StartJob
 import de.dkfz.tbi.otp.notification.NotificationEvent
 import de.dkfz.tbi.otp.notification.NotificationType;
+import de.dkfz.tbi.otp.utils.logging.JobAppender
+import de.dkfz.tbi.otp.utils.logging.JobLog
 
 import java.util.concurrent.Callable
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
+
+import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.security.access.prepost.PreAuthorize
@@ -297,6 +301,21 @@ class SchedulerService {
      * @param job The Job which finished
      */
     public void removeRunningJob(Job job) {
+        // unregister the logging
+        Logger logger = Logger.getLogger(job.class.getName())
+        if (logger) {
+            // the JobAppender might not be added to the Logger directly but to a parent Logger
+            // therefore move up the hierarchy till we are at the root Logger (getParent() returns null)
+            // and check for each whether our jobs appender is added
+            JobAppender jobAppender = null
+            while (!jobAppender && logger) {
+                jobAppender = (JobAppender)logger.getAppender("jobs")
+                logger = (Logger)logger.getParent()
+            }
+            if (jobAppender) {
+                jobAppender.unregisterProcessingStep(job.processingStep)
+            }
+        }
         lock.lock()
         try {
             // need to use an iterator and compare the processing step as identity of the Job
@@ -395,6 +414,7 @@ class SchedulerService {
         step.jobClass = job.class.getName()
         step.jobVersion = job.getVersion()
         step.save(flush: true)
+        job.log = new JobLog(step, job.__internalLog)
         return job
     }
 

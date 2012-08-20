@@ -1,9 +1,15 @@
 package de.dkfz.tbi.otp.job.ast
 
+import groovyjarjarasm.asm.Opcodes
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.MethodNode
+import org.codehaus.groovy.ast.expr.ArgumentListExpression
 import org.codehaus.groovy.ast.expr.ConstantExpression
+import org.codehaus.groovy.ast.expr.EmptyExpression
+import org.codehaus.groovy.ast.expr.StaticMethodCallExpression
 import org.codehaus.groovy.ast.stmt.ReturnStatement
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Repository
@@ -61,6 +67,18 @@ abstract class AbstractJobTransformation {
             componentAnnotation.addMember("value", new ConstantExpression(name))
             classNode.addAnnotation(componentAnnotation)
         }
+    }
+
+    /**
+     * Adds the
+     * private static final Log __internalLog = LogFactory.getLog(this)
+     * to the classNode
+     * @param classNode
+     */
+    protected void addLog(ClassNode classNode) {
+        classNode.addField("__internalLog", Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL, new ClassNode(Log),
+            new StaticMethodCallExpression(new ClassNode(LogFactory), "getLog", new ArgumentListExpression(new ConstantExpression(classNode.name))))
+        classNode.addField("log", Opcodes.ACC_PRIVATE, new ClassNode(Log), new EmptyExpression())
     }
 
     /**
