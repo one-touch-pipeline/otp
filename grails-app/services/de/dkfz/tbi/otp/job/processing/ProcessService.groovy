@@ -81,6 +81,31 @@ class ProcessService {
     }
 
     /**
+     * Checks whether there is a Log file for the given ProcessingStep.
+     * @param step The ProcessingStep for which it should be looked for a log file
+     * @return True if there is a log file, false otherwise
+     */
+    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
+    public boolean processingStepLogExists(ProcessingStep step) {
+        File file = new File("logs${File.separatorChar}${step.process.id}${File.separatorChar}${step.id}.log")
+        return file.exists()
+    }
+
+    /**
+     * Retrieves the Log file for the given ProcessingStep and returns the file content.
+     * @param step The ProcessingStep for which the log file should be retrieved
+     * @return Content of log file or empty String in case log file does not exist
+     */
+    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
+    public String processingStepLog(ProcessingStep step) {
+        File file = new File("logs${File.separatorChar}${step.process.id}${File.separatorChar}${step.id}.log")
+        if (!file.exists() || !file.isFile()) {
+            return ""
+        }
+        return file.getText()
+    }
+
+    /**
      * Restarts the given ProcessingStep.
      * Thin ACL aware wrapper around schedulerService.
      * @param step The ProcessingStep to restart

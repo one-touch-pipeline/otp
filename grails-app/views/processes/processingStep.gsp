@@ -43,6 +43,17 @@
                 <td><g:link action="processingStep" id="${step.original.id}"># ${step.original.id}</g:link></td>
             </tr>
             </g:if>
+            <tr>
+                <td>Log:</td>
+                <td>
+                    <g:if test="${hasLog}">
+                        <g:link action="processingStepLog" id="${step.id}">Show Log file</g:link>
+                    </g:if>
+                    <g:else>
+                        No Log file
+                    </g:else>
+                </td>
+            </tr>
         </tbody>
     </table>
     <h2>Input Parameters</h2>

@@ -307,7 +307,12 @@ class ProcessesController {
 
     def processingStep() {
         ProcessingStep step = processService.getProcessingStep(params.id as long)
-        [step: step]
+        [step: step, hasLog: processService.processingStepLogExists(step)]
+    }
+
+    def processingStepLog() {
+        ProcessingStep step = processService.getProcessingStep(params.id as long)
+        render processService.processingStepLog(step)
     }
 
     def restartStep() {
