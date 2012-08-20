@@ -24,7 +24,7 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl {
         boolean finished = true
         Map<String, Boolean> validatedIds = executionService.validate(listJobIds)
         validatedIds.each {String job, boolean isRunning ->
-            println "${job} ${isRunning}"
+            log.debug "${job} ${isRunning}"
             if (isRunning) {
                 finished = false
             }

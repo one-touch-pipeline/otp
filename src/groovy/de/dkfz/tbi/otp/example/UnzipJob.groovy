@@ -12,7 +12,7 @@ class UnzipJob extends AbstractJobImpl {
 
         String name = "${outputDir}/unzipJob_${System.currentTimeMillis()}.tar"
         String command = "gunzip -c ${zipFile}"
-        println command
+        log.debug("Executing command: " + command)
         def process = command.execute()
         process.waitFor()
         if (process.exitValue()) {

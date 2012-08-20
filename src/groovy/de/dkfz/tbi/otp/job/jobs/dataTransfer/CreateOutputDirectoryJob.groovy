@@ -28,7 +28,7 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
                 String cmd = "mkdir -p " + line
                 Realm realm = configService.getRealmDataManagement(project)
                 String exitCode = executionService.executeCommand(realm, cmd)
-                println "creating directory finished with exit code " + exitCode
+                log.debug "creating directory finished with exit code " + exitCode
             }
         }
     }

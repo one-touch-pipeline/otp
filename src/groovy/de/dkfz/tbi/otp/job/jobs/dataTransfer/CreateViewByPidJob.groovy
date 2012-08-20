@@ -27,7 +27,7 @@ class CreateViewByPidJob extends AbstractJobImpl {
 
         List<DataFile> dataFiles = DataFile.findAllByRunAndProjectIsNotNull(run)
         for(DataFile dataFile in dataFiles) {
-            println dataFile.fileName + " " + dataFile.project
+            log.debug dataFile.fileName + " " + dataFile.project
             linkDataFile(dataFile)
         }
     }

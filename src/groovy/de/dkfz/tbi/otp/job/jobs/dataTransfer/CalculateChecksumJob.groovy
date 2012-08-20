@@ -34,13 +34,13 @@ public class CalculateChecksumJob extends AbstractJobImpl {
         String pbsIds = "1,"
         files.each {DataFile file ->
             if (md5sumFileExists(file)) {
-                println "checksum file already exists"
+                log.debug "checksum file already exists"
                 return
             }
             String cmd = scriptText(file)
             Realm realm = configService.getRealmDataManagement(file.project)
             String jobId = sendScript(realm, cmd)
-            println "Job ${jobId} submitted to PBS"
+            log.debug "Job ${jobId} submitted to PBS"
             pbsIds += jobId + ","
         }
         addOutputParameter(paramName, pbsIds)
@@ -79,7 +79,7 @@ public class CalculateChecksumJob extends AbstractJobImpl {
         String pbsResponse = executionService.executeJob(realm, text)
         List<String> extractedPbsIds = executionService.extractPbsIds(pbsResponse)
         if (extractedPbsIds.size() != 1) {
-            println "Number of PBS is = ${extractedPbsIds.size()}"
+            log.debug "Number of PBS is = ${extractedPbsIds.size()}"
         }
         return extractedPbsIds.get(0)
     }

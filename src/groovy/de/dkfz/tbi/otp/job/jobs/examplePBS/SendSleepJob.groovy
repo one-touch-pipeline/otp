@@ -22,7 +22,7 @@ class SendSleepJob extends AbstractJobImpl {
             //String cmd = "qsub ${cmdFile.name}"
             //String response = pbsService.sendPbsJob(cmd)
             List<String> extractedPbsIds = pbsService.extractPbsIds(response)
-            println extractedPbsIds
+            log.debug extractedPbsIds
             listOfPids += extractedPbsIds.get(0) + ","
         }
         //addOutputParameter("pbsIds", listOfPids)

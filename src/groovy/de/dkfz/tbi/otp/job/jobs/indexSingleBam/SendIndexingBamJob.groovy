@@ -42,16 +42,16 @@ class SendIndexingBamJob extends AbstractJobImpl {
     }
 
     private String buildScriptText(DataFile file) {
-        println file.fileName
+        log.debug file.fileName
         String path = lsdfFilesService.getFileViewByPidDirectory(file)
         if (!path) {
             throw new Exception("View-by-Pid location not defined for file id = ${file.id}")
         }
-        println path
+        log.debug path
         String inFile = file.fileName
         String outFile = "${inFile}.bai"
         String cmd = "cd ${path}; samtools index ${inFile} ${outFile}.bai;chmod 440 ${outFile}"
-        println cmd
+        log.debug cmd
         return cmd
     }
 
@@ -60,7 +60,7 @@ class SendIndexingBamJob extends AbstractJobImpl {
         String pbsResponse = executionService.executeJob(realm, text)
         List<String> extractedPbsIds = executionService.extractPbsIds(pbsResponse)
         if (extractedPbsIds.size() != 1) {
-            println "Number of PBS is = ${extractedPbsIds.size()}"
+            log.debug "Number of PBS is = ${extractedPbsIds.size()}"
         }
         return extractedPbsIds.get(0)
     }

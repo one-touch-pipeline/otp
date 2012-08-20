@@ -24,7 +24,7 @@ class UntarJob extends AbstractJobImpl {
             files += line.replace(" ", "\\ ")
             files += " "
         }
-        println files
+        log.debug files
         addOutputParameter("extractedFiles", files)
     }
 

@@ -17,6 +17,6 @@ class Md5SumJob extends AbstractJobImpl {
         }
         String md5sum = process.in.text.split(' ')[0]
         addOutputParameter("md5sum", md5sum)
-        println "md5sum calculated: ${md5sum}"
+        log.debug "md5sum calculated: ${md5sum}"
     }
 }

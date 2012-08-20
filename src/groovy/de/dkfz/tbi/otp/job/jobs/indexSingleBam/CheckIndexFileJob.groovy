@@ -22,7 +22,7 @@ class CheckIndexFileJob  extends AbstractEndStateAwareJobImpl {
         for (DataFile file in alignFiles) {
             String path = lsdfFilesService.getFileViewByPidPath(file)
             path = "${path}.bai"
-            println path
+            log.debug path
             if (!lsdfFilesService.fileExists(path)) {
                 println "FAIL !"
                 fail()

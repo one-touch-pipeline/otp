@@ -26,7 +26,7 @@ class CreateSingleBamMergingLogJob extends AbstractEndStateAwareJobImpl {
             mergingLog.save(flush:true)
             succeed()
         } else {
-            println mergingLog.errors
+            log.debug mergingLog.errors
             fail()
         }
     }
