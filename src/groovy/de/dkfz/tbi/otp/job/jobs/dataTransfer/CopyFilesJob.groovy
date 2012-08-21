@@ -45,7 +45,7 @@ class CopyFilesJob extends AbstractJobImpl {
         String pbsResponse = executionService.executeJob(realm, text)
         List<String> extractedPbsIds = executionService.extractPbsIds(pbsResponse)
         if (extractedPbsIds.size() != 1) {
-            log.debug "Number of PBS is = ${extractedPbsIds.size()}"
+            log.debug "Number of PBS jobs is = ${extractedPbsIds.size()}"
         }
         return extractedPbsIds.get(0)
     }

@@ -24,7 +24,6 @@ class CheckIndexFileJob  extends AbstractEndStateAwareJobImpl {
             path = "${path}.bai"
             log.debug path
             if (!lsdfFilesService.fileExists(path)) {
-                println "FAIL !"
                 fail()
                 return
             }
