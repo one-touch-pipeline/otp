@@ -1,9 +1,16 @@
 package de.dkfz.tbi.otp
 
+import grails.util.Environment
+
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 
 class OtpTagLib {
     static namespace = "otp"
+
+    /**
+     * Dependency Injection of GrailsApplication
+     */
+    def grailsApplication
 
     /**
      * Renders a text field with editor functionality. The editor renders the text with a button next to it.
@@ -72,5 +79,19 @@ class OtpTagLib {
      */
     def autoRefresh = {
         out << render(template: "/templates/autoRefresh", model: [enabled: Boolean.valueOf(session["auto-refresh"])])
+    }
+
+    /**
+     * Renders either the configured environment name or the name of the
+     * current Grails environment.
+     *
+     * This name can be used to have environment or instance specific CSS classes.
+     */
+    def environmentName = {
+        if (!(grailsApplication.config.otp.environment.name instanceof ConfigObject)) {
+            out << grailsApplication.config.otp.environment.name
+        } else {
+            out << Environment.getCurrent().name
+        }
     }
 }

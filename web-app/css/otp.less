@@ -36,6 +36,12 @@
     word-wrap: break-word;
     word-break: break-all;
 }
+.main-background(@top, @bottom) {
+    background-color: @bottom;
+    background-image: -moz-linear-gradient(center top, @top, @bottom);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, @top), color-stop(1, @bottom));
+    background-image: linear-gradient(top, @top, @bottom);
+}
 
 /* FONT STACK */
 body,
@@ -47,10 +53,7 @@ input, select, textarea {
 /* BASE LAYOUT */
 
 html {
-    background-color: #ddd;
-    background-image: -moz-linear-gradient(center top, #aaa, #ddd);
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #aaa), color-stop(1, #ddd));
-    background-image: linear-gradient(top, #aaa, #ddd);
+    .main-background(#aaa, #ddd);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorStr = '#aaa', EndColorStr = '#ddd');
     background-repeat: no-repeat;
     height: 100%;
@@ -58,6 +61,18 @@ html {
     -webkit-box-sizing: border-box;
        -moz-box-sizing: border-box;
             box-sizing: border-box;
+    &.development {
+        /* red background for development */
+        .main-background(#f00, #f22);
+    }
+    &.alpha {
+        /* yellow background for alpha */
+        .main-background(#ff0, #fffb0e);
+    }
+    &.beta {
+        /* blue background for beta */
+        .main-background(#00f, #22f);
+    }
     &.no-cssgradients {
         background-color: #aaa;
     }
@@ -208,8 +223,9 @@ img {
     zoom: 1;
     margin-bottom: 1em;
     margin-top: 1em;
+    overflow: hidden;
     ul {
-        overflow: hidden;
+        float: left;
         padding-left: 0;
         zoom: 1;
         li {
@@ -249,6 +265,13 @@ img {
         &.create {
             background-image: url(../images/skin/database_add.png);
         }
+    }
+    p.environmentName {
+        float: right;
+        color: #F00;
+        font-variant: small-caps;
+        font-weight: bolder;
+        font-size: 1.5em;
     }
 }
 

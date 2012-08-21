@@ -187,6 +187,8 @@ if (otpConfig.otp.dataprocessing.alignment.referenceIndex instanceof ConfigObjec
     otp.dataprocessing.alignment.referenceIndex = otpConfig.otp.dataprocessing.alignment.referenceIndex
 }
 
+otp.environment.name = otpConfig.otp.environment.name
+
 // pbs password
 if (otpConfig.otp.pbs.ssh.password instanceof ConfigObject) {
 	otp.pbs.ssh.password = ""
