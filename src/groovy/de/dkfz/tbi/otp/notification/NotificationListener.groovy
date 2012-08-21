@@ -13,10 +13,17 @@ import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
+import org.grails.plugins.springsecurity.service.acl.AclUtilService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationListener
+import org.springframework.security.acls.domain.BasePermission
+import org.springframework.security.acls.domain.GrantedAuthoritySid
+import org.springframework.security.acls.domain.PrincipalSid
+import org.springframework.security.acls.model.Acl
+import org.springframework.security.acls.model.NotFoundException
+import org.springframework.security.acls.model.Sid
 import org.springframework.stereotype.Component
 
 /**
@@ -47,6 +54,8 @@ class NotificationListener implements ApplicationListener {
     JabberService jabberService
     @Autowired
     GrailsApplication grailsApplication
+    @Autowired
+    AclUtilService aclUtilService
 
     /**
      * The Application Event listener waiting for NotificationEvents and passing them
@@ -134,11 +143,11 @@ class NotificationListener implements ApplicationListener {
         if (!clazz) {
             return []
         }
-        Trigger trigger = Trigger.findByClazzAndTriggerId(clazz, id)
-        if (!trigger) {
+        List<Trigger> triggers = Trigger.findAllByClazzAndTriggerId(clazz, id)
+        if (!triggers) {
             return []
         }
-        return Notification.findAllByTriggerAndType(trigger, type)
+        return Notification.findAllByTriggerInListAndType(triggers, type)
     }
 
     /**
@@ -156,7 +165,7 @@ class NotificationListener implements ApplicationListener {
             if (notification.subjectTemplate) {
                 subject = applyTemplate(notification.subjectTemplate, binding)
             }
-            Set<User> users = getUsers(notification)
+            Set<User> users = getUsers(notification, binding)
             users.each { User user ->
                 binding.put("user", user)
                 String text = applyTemplate(notification.template, binding)
@@ -194,20 +203,49 @@ class NotificationListener implements ApplicationListener {
     /**
      * Retrieves all Users configured to receive the Notification
      * @param notication The Notification for which the configured Users should be retrieved
+     * @param binding The binding for the Notification
      * @return List of Users for this Notification.
      */
-    private Set<User> getUsers(Notification notication) {
+    private Set<User> getUsers(Notification notication, Map binding) {
         Set<User> users = []
         notication.recipients.each { Recipient recipient ->
             if (recipient instanceof UsersRecipient) {
                 users.addAll((recipient as UsersRecipient).users)
             } else if (recipient instanceof SidRecipient) {
-                AclSid sid = (recipient as SidRecipient).sid
+                AclSid aclSid = (recipient as SidRecipient).sid
+                Sid sid = aclSid.principal ? new PrincipalSid(aclSid.sid) : new GrantedAuthoritySid(aclSid.sid)
+                // include if aclField is not specified, if specified depend on ACL definitions
+                boolean include = notication.trigger.aclField == null
+                // if the Trigger is configured to perform an ACL check we retrieve the ACL for the protected domain object
+                // and verify that the AclSid has access to the object
+                // if not granted he will not be added to the Notification recipients
+                if (notication.trigger.aclField) {
+                    if (binding.data && !(binding.data instanceof String)) {
+                        def objectToTest = binding.data
+                        if (!notication.trigger.aclField.isEmpty()) {
+                            // references different field
+                            objectToTest = objectToTest."${notication.trigger.aclField}"
+                        }
+                        Acl acl = aclUtilService.readAcl(objectToTest.class, objectToTest.id)
+                        try {
+                            include = acl.isGranted([BasePermission.READ], [sid], true)
+                        } catch (NotFoundException e) {
+                            // deny access
+                            include = false
+                        }
+                    } else {
+                        include = false
+                    }
+                }
+                if (!include) {
+                    // continue
+                    return
+                }
                 if (sid.principal) {
-                    users.add(User.findByUsername(sid.sid))
+                    users.add(User.findByUsername(aclSid.sid))
                 } else {
                     // sid is a role
-                    Role role = Role.findByAuthority(sid.sid)
+                    Role role = Role.findByAuthority(aclSid.sid)
                     List<UserRole> roles = UserRole.findAllByRole(role)
                     roles.each { UserRole userRole ->
                         users.add(userRole.user)
