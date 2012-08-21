@@ -30,7 +30,18 @@ eventCompileStart = {
     def proc = "git rev-parse --short HEAD".execute()
     proc.waitFor()
     ant.mkdir(dir: "grails-app/views/templates/")
-    new FileOutputStream("grails-app/views/templates/_version.gsp", false) << proc.in.text
+    FileOutputStream out = new FileOutputStream("grails-app/views/templates/_version.gsp", false)
+    out << proc.in.text
+    out << " ("
+    // get the branch name
+    proc = "git symbolic-ref HEAD".execute()
+    proc.waitFor()
+    String branchName = proc.in.text
+    if (branchName.startsWith("refs/heads/")) {
+        branchName = branchName.substring(11, branchName.length()-1)
+    }
+    out << branchName
+    out << ")"
 }
 
 eventCompileEnd = {
