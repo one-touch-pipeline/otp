@@ -25,7 +25,7 @@ class SeqTrackService {
         }
     }
 
-    private Set<String> getSetOfLanes(Run run) {  
+    private Set<String> getSetOfLanes(Run run) {
         MetaDataKey key = MetaDataKey.findByName("LANE_NO")
         Set<String> lanes = new HashSet<String>()
         DataFile.findAllByRun(run).each { DataFile dataFile ->
@@ -41,8 +41,20 @@ class SeqTrackService {
         return lanes
     }
 
+    /**
+     * builds one sequence track (SeqTrack).
+     * If the seqTrack for a given run and given lane already exists
+     * it is used and only alignment files could be attached.
+     * Once the seqTrack is created it is not possible to add sequence files to it.
+     *
+     * @param run Run for which sequence track is build
+     * @param lane Lane identifier
+     */
     private void buildOneSequenceTrack(Run run, String lane) {
-        SeqTrack seqTrack = buildFastqSeqTrack(run, lane)
+        SeqTrack seqTrack = SeqTrack.findByRunAndLaneId(run, lane)
+        if (!seqTrack) {
+            seqTrack = buildFastqSeqTrack(run, lane)
+        }
         appendAlignmentToSeqTrack(seqTrack)
     }
 
@@ -257,6 +269,7 @@ class SeqTrackService {
 
     /**
      * Return all dataFiles for a given run, type and lane
+     * Only dataFiles which are not used are returned
      *
      * @param run The Run
      * @param type The Type
@@ -272,6 +285,7 @@ WHERE
 dataFile.run = :run
 AND dataFile.fileWithdrawn = false
 AND dataFile.fileType.type = :type
+AND dataFile.used = false
 AND entry.key = :key
 AND entry.value = :value
 ''',
