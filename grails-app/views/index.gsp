@@ -15,6 +15,7 @@
                     <li><g:link controller="userAdministration"><g:message code="otp.welcome.administration.userAdmin"/></g:link></li>
                     <li><g:link controller="crashRecovery"><g:message code="otp.welcome.administration.crashRecovery"/></g:link></li>
                     <li><g:link controller="shutdown"><g:message code="otp.welcome.administration.shutdown"/></g:link></li>
+                    <li><g:link controller="notification"><g:message code="otp.welcome.administration.notification"/></g:link></li>
                     </ul>
                 </div>
             </sec:ifAnyGranted>

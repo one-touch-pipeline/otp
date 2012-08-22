@@ -66,4 +66,9 @@ class JobExecutionPlan implements Serializable {
         processParameter(nullable: true, blank: true)
         numberOfAllowedProcesses(nullable: true, blank: true)
     }
+
+    @Override
+    public String toString() {
+        return this.name
+    }
 }

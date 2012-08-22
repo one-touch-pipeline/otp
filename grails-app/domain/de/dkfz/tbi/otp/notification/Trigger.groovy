@@ -36,4 +36,12 @@ class Trigger {
         triggerId(unique: ['clazz', 'aclField'])
         aclField(nullable: true, blank: true)
     }
+
+    /**
+     * Retrieves the domain Object this Trigger is for.
+     * @return
+     */
+    def toTriggerObject() {
+        return Trigger.executeQuery("FROM " + clazz.className + " WHERE id=" + triggerId).first()
+    }
 }

@@ -42,6 +42,11 @@
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, @top), color-stop(1, @bottom));
     background-image: linear-gradient(top, @top, @bottom);
 }
+.edit-button {
+    .image-button;
+    background-image: url(images/document-edit.png);
+    float: right;
+}
 
 /* FONT STACK */
 body,
@@ -575,6 +580,10 @@ td {
     &.myValue {
         list-style-type: none;
     }
+    button.edit {
+        .edit-button;
+        width: 16px;
+    }
 }
 
 /* PAGINATION */
@@ -652,9 +661,7 @@ div.edit-switch {
         }
         &.edit-switch-label {
             button {
-                .image-button;
-                background-image: url(images/document-edit.png);
-                float: right;
+                .edit-button;
             }
         }
     }

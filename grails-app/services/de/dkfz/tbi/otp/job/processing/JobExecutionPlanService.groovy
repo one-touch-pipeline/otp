@@ -31,6 +31,16 @@ class JobExecutionPlanService {
     }
 
     /**
+     * Security aware way to access a JobDefinition.
+     * @param id The JobDefinition's id
+     * @return
+     */
+    @PostAuthorize("(returnObject == null) or hasPermission(returnObject.plan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_OPERATOR')")
+    public JobDefinition getJobDefinition(long id) {
+        return JobDefinition.get(id)
+    }
+
+    /**
      * Enables the given JobExecutionPlan.
      * In case the plan is obsoleted, it cannot be enabled.
      * @param plan The JobExecutionPlan to enable.
@@ -440,6 +450,22 @@ AND u.id IN (
             job = job.next
         }
         return [jobs: jobs, connections: connections, name: plan.name]
+    }
+
+    /**
+     * Retrieves all JobDefinitions for the given JobExecutionPlan
+     * @param plan
+     * @return
+     */
+    @PreAuthorize("hasPermission(#plan, read) or hasRole('ROLE_OPERATOR')")
+    public List<JobDefinition> jobDefinitions(JobExecutionPlan plan) {
+        List<JobDefinition> jobs = []
+        JobDefinition job = plan.firstJob
+        while (job) {
+            jobs << job
+            job = job.next
+        }
+        return jobs
     }
 
     /**
