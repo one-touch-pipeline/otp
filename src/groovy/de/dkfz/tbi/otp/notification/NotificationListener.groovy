@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.notification
 
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.Process
+import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
@@ -97,7 +98,7 @@ class NotificationListener implements ApplicationListener {
             // No Notifications configured for the JobExecutionPlan
             return
         }
-        Map binding = [process: process, error: (event.payload instanceof Map) ? event.payload.error : null]
+        Map binding = [process: process, data: processParameterData(process), error: (event.payload instanceof Map) ? event.payload.error : null]
         sendNotifications(notifications, binding)
     }
 
@@ -117,7 +118,7 @@ class NotificationListener implements ApplicationListener {
             // No Notifications configured for the JobExecutionPlan
             return
         }
-        Map binding = [process: step.process, step: step, input: step.input, jobDefinition: step.jobDefinition, error: (event.payload instanceof Map) ? event.payload.error : null]
+        Map binding = [process: step.process, data: processParameterData(step.process), step: step, input: step.input, jobDefinition: step.jobDefinition, error: (event.payload instanceof Map) ? event.payload.error : null]
         sendNotifications(notifications, binding)
     }
 
@@ -226,5 +227,26 @@ class NotificationListener implements ApplicationListener {
     private String applyTemplate(NotificationTemplate template, Map binding) {
         SimpleTemplateEngine engine = new SimpleTemplateEngine()
         return engine.createTemplate(template.template).make(binding).toString()
+    }
+
+    /**
+     * Retrieves the ProcessParameter for this Process.
+     * If the ProcessParameter references a domain class instance, this instance is returned.
+     * If it represents a String value this value is returned.
+     * @param process The Process for which the ProcessParameter needs to be retrieved
+     * @return The data the ProcessParameter encapsulates
+     */
+    private def processParameterData(Process process) {
+        ProcessParameter parameter = ProcessParameter.findByProcess(process)
+        def parameterData = null
+        if (parameter) {
+            if (parameter.className) {
+                parameterData = grailsApplication.getDomainClass(parameter.className).clazz.get(parameter.value as Long)
+            } else {
+                // not a class, just use the value
+                parameterData = parameter.value
+            }
+        }
+        return parameterData
     }
 }
