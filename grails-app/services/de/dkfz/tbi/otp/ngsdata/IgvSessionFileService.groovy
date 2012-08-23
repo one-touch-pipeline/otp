@@ -109,7 +109,7 @@ class IgvSessionFileService {
             }
         }
         String text = header + writer.toString()
-        return text 
+        return text
     }
 
     private List<String> getPathForScan(SeqScan scan) {

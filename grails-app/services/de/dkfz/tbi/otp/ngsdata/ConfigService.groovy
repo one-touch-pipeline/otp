@@ -57,7 +57,7 @@ class ConfigService {
     }
 
     String igvSessionFileServer() {
-        final String dir = igvSessionFiles()
+        String dir = igvSessionFiles()
         return "${grailsApplication.config.grails.serverURL}/static/$dir/"
     }
 
