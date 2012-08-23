@@ -10,10 +10,11 @@ class IgvSessionFileService {
 
     private final String header = '<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n'
 
-    String buildSessionFile(List<SeqScan> scans, String requestURL) {
-        String text = buildContent(scans, requestURL)
-        String name = createSessionFileObjectAndReturnName(text)
-        String url = buildURLString(requestURL, name)
+    String buildSessionFile(List<SeqScan> scans) {
+        String mutFileName = createMutationFile(scans)
+        String text = buildContent(scans, mutFileName)
+        String name = storeSessionFile(text)
+        String url = buildURLString(name)
         return url
     }
 
@@ -38,25 +39,62 @@ class IgvSessionFileService {
         return false
     }
 
-    private String createSessionFileObjectAndReturnName(String text) {
-        String hash = Integer.toHexString(text.hashCode())
-        String name = "${hash}.xml"
-        IgvSessionFile sessionFile = new IgvSessionFile(name: name, content: text)
-        sessionFile.save(flush: true)
+    private String createMutationFile(List<SeqScan> scans) {
+        Individual ind = scans.get(0).sample.individual
+        String text = mutationFileText(ind)
+        String name = text.encodeAsMD5() + ".mut"
+        String path = configService.igvSessionFileDirectory()
+        assertPathExists(path)
+        File file = new File("${path}/${name}")
+        file.setText(text)
         return name
     }
 
-    private String buildURLString(String requestURL, String name) {
-        String igvBase = configService.igvPath()
-        String myURL = configService.getMyURL(requestURL)
-        String url = "${igvBase}${myURL}igvSessionFile/file/${name}"
-        return url
+    private String mutationFileText(Individual ind) {
+        List<Mutation> muts = Mutation.findAllByIndividual(ind)
+        String text = "chr\tstart\tend\tsample\ttype\n"
+        for(Mutation mut in muts) {
+            text += mut.chromosome + "\t"
+            text += mut.startPosition + "\t"
+            text += mut.endPosition + "\t"
+            text += mut.individual.mockFullName + "\t"
+            text += mut.type + "\n"
+        }
+        return text
     }
 
-    private String buildContent(List<SeqScan> scans, String requestURL) {
+    private void assertPathExists(String path) {
+        File file = new File(path)
+        if (file.isDirectory()) {
+            return
+        }
+        file.mkdirs()
+    }
+
+    private String storeSessionFile(String text) {
+        String name = text.encodeAsMD5() + ".xml"
+        String path = configService.igvSessionFileDirectory()
+        assertPathExists(path)
+        File file = new File("${path}/${name}")
+        file.setText(text)
+        return name
+    }
+
+    /**
+     * Builds URL to IGV including web start address and path to a session file
+     *
+     * @param name name of the session file
+     * @return URL
+     */
+    private String buildURLString(String name) {
+        String igvBase = configService.igvPath()
+        String sessionFileURL = "${configService.igvSessionFileServer()}${name}"
+        return "${igvBase}${sessionFileURL}"
+    }
+
+    private String buildContent(List<SeqScan> scans, String mutFileName) {
         StringWriter writer = new StringWriter()
         MarkupBuilder xml = new MarkupBuilder(writer)
-        int indId = scans.get(0).sample.individual.id
 
         xml.Session(genome:"hg19", locus:"All", version:"4") {
             Resources {
@@ -66,8 +104,8 @@ class IgvSessionFileService {
                         Resource(path: path)
                     }
                 }
-                String myURL = configService.getMyURL(requestURL)
-                Resource(path: "${myURL}igvSessionFile/mutFile/${indId}.mut")
+                String mutFileURL = "${configService.igvSessionFileServer()}${mutFileName}"
+                Resource(path: mutFileURL)
             }
         }
         String text = header + writer.toString()

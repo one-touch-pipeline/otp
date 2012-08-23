@@ -14,6 +14,7 @@ class ConfigService {
      * Dependency injection grails application
      */
     def grailsApplication
+    def servletContext
 
     Realm getRealm(Project project, Realm.OperationType operationType) {
         def c = Realm.createCriteria()
@@ -55,12 +56,17 @@ class ConfigService {
         return "http://www.broadinstitute.org/igv/projects/current/igv.php?sessionURL="
     }
 
-    /*
-     * fragile code. Shall be replaced by accessing servlet container
-     * configuration.
-     */
-    String getMyURL(String requestURL) {
-        return requestURL.substring(0, requestURL.indexOf("grails"))
+    String igvSessionFileServer() {
+        final String dir = igvSessionFiles()
+        return "${grailsApplication.config.grails.serverURL}/static/$dir/"
+    }
+
+    String igvSessionFileDirectory() {
+        return servletContext.getRealPath(igvSessionFiles())
+    }
+
+    private String igvSessionFiles() {
+        return "igvSessionFiles"
     }
 
     String getPbsPassword() {

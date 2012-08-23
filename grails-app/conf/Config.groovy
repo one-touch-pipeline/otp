@@ -196,6 +196,9 @@ if (otpConfig.otp.pbs.ssh.password instanceof ConfigObject) {
 	otp.pbs.ssh.password = otpConfig.otp.pbs.ssh.password
 }
 
+// URL of the web server fir IGV session and mutation files
+// otp.fileserver.url = otpConfig.otp.fileserver.url
+
 // Added by the Spring Security Core plugin:
 grails.plugins.springsecurity.userLookup.userDomainClassName = 'de.dkfz.tbi.otp.security.User'
 grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'de.dkfz.tbi.otp.security.UserRole'
@@ -242,6 +245,7 @@ grails.plugins.springsecurity.controllerAnnotations.staticRules = [
         "/css/**":               ["permitAll"],
         "/images/**":            ["permitAll"],
         "/js/**":                ["permitAll"],
+        "/igvSessionFiles/**":   ["permitAll"],
         "/console/**":           ['ROLE_ADMIN'],
         "/**":                   ['ROLE_USER']
         ]
