@@ -1,6 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
 class SeqTrack {
+
+    enum DataProcessingState {
+        UNKNOWN,
+        NOT_STARTED,
+        IN_PROGRESS,
+        FINISHED
+    }
+
     String laneId
     boolean hasFinalBam = false
     boolean hasOriginalBam = false
@@ -13,6 +21,10 @@ class SeqTrack {
     SeqType seqType
     SeqPlatform seqPlatform
     SoftwareTool pipelineVersion
+
+    String qualityType // phred, illumina or null, to be replace by enum
+    DataProcessingState alignmentState = DataProcessingState.UNKNOWN
+    DataProcessingState fastqcState = DataProcessingState.UNKNOWN
 
     static belongsTo = [
         Run,
@@ -29,6 +41,7 @@ class SeqTrack {
         seqType()
         sample()
         pipelineVersion()
+        qualityType(nullable: true)
     }
 
     String nBaseString() {

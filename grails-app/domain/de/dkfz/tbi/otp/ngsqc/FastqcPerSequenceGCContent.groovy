@@ -10,7 +10,7 @@ class FastqcPerSequenceGCContent {
     /**
      * Percentage of GC content (Column Label in fastqc file is '#GC Content')
      */
-    int pgc
+    int percentageOfGC
 
     /**
      * Mean quality score value for this column (Column label in fastqc file is 'Count' which is a reserved word)
@@ -22,6 +22,6 @@ class FastqcPerSequenceGCContent {
     ]
 
     static constraints = {
-        pgc(min:0,max:100)
+        percentageOfGC(min:0,max:100)
     }
 }

@@ -1,0 +1,567 @@
+package de.dkfz.tbi.otp.ngsqc
+
+import de.dkfz.tbi.otp.ngsqc.FastqcModule
+import de.dkfz.tbi.otp.ngsqc.FastqcModuleStatus
+import de.dkfz.tbi.otp.ngsqc.FastqcPerBaseSequenceAnalysis
+import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
+import de.dkfz.tbi.otp.ngsqc.FastqcModuleStatus
+import de.dkfz.tbi.otp.ngsqc.FastqcKmerContent
+import de.dkfz.tbi.otp.ngsqc.FastqcSequenceDuplicationLevels
+import de.dkfz.tbi.otp.ngsqc.FastqcPerSequenceGCContent
+import de.dkfz.tbi.otp.ngsqc.FastqcPerSequenceQualityScores
+import de.dkfz.tbi.otp.ngsqc.FastqcOverrepresentedSequences
+import de.dkfz.tbi.otp.ngsqc.FastqcSequenceLengthDistribution
+import de.dkfz.tbi.otp.ngsdata.Run
+import de.dkfz.tbi.otp.ngsdata.FileType
+import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqCenter
+//import de.dkfz.tbi.otp.ngsdata.DataFormatException
+import de.dkfz.tbi.otp.ngsdata.FileNotReadableException
+import java.util.regex.*
+import java.util.zip.*
+
+
+/**
+ * Service providing methods to parse FastQC files and saving the parsed data to the database
+ */
+class FastqcUploadService {
+    /**
+     * Dependency Injection of dataProcessingFilesService
+     */
+    def dataProcessingFilesService
+
+    /**
+     * Uploads the fastQC file contents generated from the fastq file to the database
+     * @param dataFile DataFile with sequence file
+     */
+    public void uploadFileContentsToDataBase(DataFile dataFile) {
+        uploadFileContentsToDataBase(dataFile, getFastQCFileContents(dataFile))
+    }
+
+    /**
+     * Get FastQC file contents from the fastq id
+     * @param fastqID Id from the fastq file, it returns the fastQC file contents from
+     * @return String with the contents of the fastQC file
+     */
+    private String getFastQCFileContents(DataFile dataFile) {
+        String pathToFile = dataProcessingFilesService.getPathOfFastqcFile(dataFile)
+        return getInputStreamFromZip(pathToFile, "fastqc_data.txt").text
+    }
+
+    /**
+     * Returns an inputStream from the contents of the zip file
+     * @param zipPath Path to the zip file
+     * @param withinZipPath Path to the resource within the zip file
+     * @return An inputStream for the combination of zipPath and the withinZipPath parameters
+     */
+    private InputStream getInputStreamFromZip(String zipPath, String withinZipPath) {
+        File input = new File(zipPath)
+        if (!input.canRead()) {
+            throw new FileNotReadableException(input.path)
+        }
+        ZipFile zipFile = new ZipFile(input)
+        String zipBasePath = zipPath.substring(zipPath.lastIndexOf("/")+1,zipPath.lastIndexOf(".zip"))
+        ZipEntry zipEntry = zipFile.getEntry("${zipBasePath}/${withinZipPath}")
+        return zipFile.getInputStream(zipEntry)
+    }
+
+    /**
+     * Uploads the fastQC file contents generated from the fastq file to the database
+     * @param fastqc String containing the contents of the fastqc file
+     * @param fastqDataFile reference to the fastq dataFile the fastQC was generated from
+     */
+    private void uploadFileContentsToDataBase(DataFile fastqDataFile, String fastqc) {
+        log.debug("Start parsing the data...")
+        String myRegularExpression = /(?s)>>.*?>>END_MODULE/
+        Matcher matcher = ( fastqc =~ myRegularExpression )
+        Map<String,String> data = [:]
+        Map<String,String> dataStatus = [:]
+        // For each module (starting with '>>' and ending with '>>END_MODULE'),
+        // will be stored two maps, one with the content and the other with status of each module
+        matcher.each {
+            String title = it.substring(2,it.indexOf('\t')).trim()
+            String status = it.substring(it.indexOf('\t'),it.indexOf('\n')).trim()
+            String content = it.substring(it.indexOf('\n'),it.indexOf('>>END_MODULE')).trim()
+            data[title] = content
+            dataStatus[title] = status
+        }
+        parseAndSaveModulesStatus(dataStatus, fastqDataFile)
+        parseAndSaveBasicStatistics(data, fastqDataFile)
+        parseAndSaveBaseSequenceAnalysis(data, fastqDataFile)
+        parseAndSaveSeqQualityScores(data, fastqDataFile)
+        parseAndSaveSeqGCContent(data, fastqDataFile)
+        parseAndSaveSeqLengthDistribution(data, fastqDataFile)
+        parseAndSaveSeqDupLevels(data, fastqDataFile)
+        parseAndSaveOverSeq(data, fastqDataFile)
+        parseAndSaveKmerContent(data, fastqDataFile)
+        log.debug "Parsing and upload of modules successfull"
+    }
+
+    /**
+     * Returns the tabular part of the module text contents
+     * @param text Module text contents
+     * @return The tabular part of the module text contents
+     */
+    private String getModuleTableBody(String text) {
+        // skips the first line with title columns
+        return text.substring(text.indexOf('\n')+1,text.size())
+    }
+
+    /**
+     * Parse and Saves Modules Status
+     * @param data A Map with the identifier of the module as a key and the content text of the module as a value
+     * @param fastqc A DataFile object representing an already processed Fastq file and a FastQC generated file
+     */
+    private parseAndSaveModulesStatus(Map<String,String> dataStatus, fastqcDataFile) {
+        log.debug "Parsing and saving Modules Status..."
+        FastqcModuleStatus fastqcStat
+        FastqcModule fastqcModule
+        dataStatus.each {
+            fastqcStat = new FastqcModuleStatus()
+            fastqcModule = FastqcModule.findByName(it.key)
+            if (!fastqcModule) {
+                log.debug "Not identified Module ${it.key}."
+                throw new DataFormatException("Not identified Module found '${it.key}'")
+            }
+            fastqcStat.module = fastqcModule
+            fastqcStat.status = it.value.toUpperCase() as FastqcModuleStatus.Status // not sure this is best way...
+            fastqcStat.dataFile = fastqcDataFile
+            fastqcStat.save(flush:true)
+        }
+    }
+
+    /**
+     * Parse and fill the data on the 'FastqcPerBaseSequenceAnalysis' table. Data from different modules at the fastqc file is going to the same table
+     * Per base sequence analysis                      #Base   Mean    Median  Lower Quartile  Upper Quartile  10th Percentile 90th Percentile
+     * Per base sequence content                       #Base   G       A       T       C
+     * Per base GC content                             #Base   %GC
+     * Per base N content                              #Base   N-Count
+     * @param data A Map with the identifier of the module as a key and the content text of the module as a value
+     * @param fastqc A DataFile object representing an already processed Fastq file and a FastQC generated file
+     */
+    private void parseAndSaveBaseSequenceAnalysis(data,fastqcDataFile) {
+        log.debug "Parsing Base Sequence Analysis data..."
+        List<FastqcPerBaseSequenceAnalysis> listFastqc = []
+        log.debug " Parsing 'Per base sequence quality'"
+        String text = data['Per base sequence quality']
+        String body = getModuleTableBody(text)
+
+        String[] fields
+        body.eachLine {String line, int number ->
+            listFastqc << new FastqcPerBaseSequenceAnalysis()
+            fields = line.split('\t')
+            listFastqc[number].cycle = fields[0] as int
+            listFastqc[number].mean = fields[1] as double
+            listFastqc[number].median = fields[2] as double
+            listFastqc[number].q1 = fields[3] as double
+            listFastqc[number].q3 = fields[4] as double
+            listFastqc[number].p10th = fields[5] as double
+            listFastqc[number].p90th = fields[6] as double
+        }
+        log.debug " Parsing 'Per base sequence content'"
+        text =  data['Per base sequence content']
+        body = getModuleTableBody(text)
+        body.eachLine {String line, int number ->
+            fields = line.split('\t')
+            listFastqc[number].countOfNucleotideG = fields[1] as double
+            listFastqc[number].countOfNucleotideA = fields[2] as double
+            listFastqc[number].countOfNucleotideT = fields[3] as double
+            listFastqc[number].countOfNucleotideC = fields[4] as double
+        }
+        log.debug " Parsing 'Per base GC content'"
+        text =  data['Per base GC content']
+        body = getModuleTableBody(text)
+        body.eachLine {String line, int number ->
+            fields = line.split('\t')
+            listFastqc[number].percentageOfGC = fields[1] as double
+        }
+        log.debug " Parsing 'Per base N content'"
+        text =  data['Per base N content']
+        body = getModuleTableBody(text)
+        body.eachLine {String line, int number ->
+            fields = line.split('\t')
+            listFastqc[number].countOfNucleotideN = fields[1] as double
+            listFastqc[number].dataFile = fastqcDataFile
+            listFastqc[number].save(flush:true)
+        }
+    }
+
+    /**
+     * Parses and saves "Kmer Content"
+     * @param data A Map with the identifier of the module as a key and the content text of the module as a value
+     * @param fastqc A DataFile object representing an already processed Fastq file and a FastQC generated filev
+     */
+    private void parseAndSaveKmerContent(Map<String,String> data, DataFile fastqc) {
+        log.debug "Parsing and saving 'Kmer Content'"
+        String text = data['Kmer Content']
+        String body = getModuleTableBody(text)
+        FastqcKmerContent fastqckmer
+        String[] fields
+        body.eachLine {String line ->
+            fields = line.split('\t')
+            fastqckmer = new FastqcKmerContent()
+            fastqckmer.sequence = fields[0]
+            fastqckmer.countOfKmer = fields[1] as int
+            fastqckmer.overall = fields[2] as double
+            fastqckmer.max = fields[3] as double
+            fastqckmer.position = fields[4] as int
+            fastqckmer.dataFile = fastqc
+            fastqckmer.save(flush:true)
+        }
+    }
+
+    /**
+     * Parses and saves "Overepresented sequences"
+     * @param data A Map with the identifier of the module as a key and the content text of the module as a value
+     * @param fastqc A DataFile object representing an already processed Fastq file and a FastQC generated file
+     */
+    private void parseAndSaveOverSeq(Map<String,String> data, DataFile fastqc) {
+        log.debug "Parsing and saving 'Overrepresented sequences'"
+        String text = data['Overrepresented sequences']
+        // skips the first line with title columns
+        String body = getModuleTableBody(text)
+        FastqcOverrepresentedSequences fastqcOverRepSeq
+        String[] fields
+        body.eachLine {String line ->
+            fields = line.split('\t')
+            fastqcOverRepSeq = new FastqcOverrepresentedSequences()
+            fastqcOverRepSeq.sequence = fields[0]
+            fastqcOverRepSeq.countOverRep = fields[1] as int
+            fastqcOverRepSeq.percentage = fields[2] as double
+            fastqcOverRepSeq.possibleSource =fields[3]
+            fastqcOverRepSeq.dataFile = fastqc
+            fastqcOverRepSeq.save(flush:true)
+        }
+    }
+
+    /**
+     * Parses and saves "Sequence Duplication levels"
+     * @param data A Map with the identifier of the module as a key and the content text of the module as a value
+     * @param fastqc A DataFile object representing an already processed Fastq file and a FastQC generated file
+     */
+    private void parseAndSaveSeqDupLevels(Map<String,String> data, DataFile fastqc) {
+        log.debug "Parsing and saving 'Sequence Duplication Levels'"
+        String text = data['Sequence Duplication Levels']
+        // skips the two first lines with the title columns
+        String body = text.substring(text.indexOf('Relative count\n')+15,text.size())
+        FastqcSequenceDuplicationLevels fastqcSeqDupLevels
+        String[] fields
+        body.eachLine {String line ->
+            fields = line.split('\t')
+            fastqcSeqDupLevels = new FastqcSequenceDuplicationLevels()
+            try {
+                fastqcSeqDupLevels.duplicationLevel = fields[0] as int
+            } catch (NumberFormatException nfe) {
+                // The last of the entrances have the format "10++" meaning, "more than 10". To insert it in the database, will be removed the trailing "++"
+                fastqcSeqDupLevels.duplicationLevel = fields[0].substring(0,fields[0].indexOf("+")) as int
+            }
+            fastqcSeqDupLevels.relativeCount = fields[1] as double
+            fastqcSeqDupLevels.dataFile = fastqc
+            fastqcSeqDupLevels.save(flush:true)
+        }
+    }
+
+    /**
+     * Parses and saves "Per sequence GC content"
+     * @param data A Map with the identifier of the module as a key and the content text of the module as a value
+     * @param fastqc A DataFile object representing an already processed Fastq file and a FastQC generated file
+     */
+    private void parseAndSaveSeqGCContent(Map<String,String> data, DataFile fastqc) {
+        log.debug "Parsing and Saving 'Per sequence GC content'"
+        String text = data['Per sequence GC content']
+        String body = getModuleTableBody(text)
+        FastqcPerSequenceGCContent fastqcSeqGC
+        String[] fields
+        body.eachLine {String line ->
+            fields = line.split('\t')
+            fastqcSeqGC = new FastqcPerSequenceGCContent()
+            fastqcSeqGC.percentageOfGC = fields[0] as int
+            fastqcSeqGC.countGC = fields[1] as double
+            fastqcSeqGC.dataFile = fastqc
+            fastqcSeqGC.save(flush:true)
+        }
+    }
+
+    /**
+     * Parses and saves "Per sequence quality scores"
+     * @param data A Map with the identifier of the module as a key and the content text of the module as a value
+     * @param fastqc A DataFile object representing an already processed Fastq file and a FastQC generated file
+     */
+    private void parseAndSaveSeqQualityScores(Map<String, String> data, DataFile fastqc) {
+        log.debug "Parsing and Saving 'Per sequence quality scores'"
+        String text = data['Per sequence quality scores']
+        String body = getModuleTableBody(text)
+        FastqcPerSequenceQualityScores fastqcSeqQualScore
+        String[] fields
+        body.eachLine {String line ->
+            fields = line.split('\t')
+            fastqcSeqQualScore = new FastqcPerSequenceQualityScores()
+            fastqcSeqQualScore.quality = fields[0] as int
+            fastqcSeqQualScore.countQS = fields[1] as double
+            fastqcSeqQualScore.dataFile = fastqc
+            fastqcSeqQualScore.save(flush:true)
+        }
+    }
+
+    /**
+     * Parses and saves "Basic Statistics"
+     * @param data A Map with the identifier of the module as a key and the content text of the module as a value
+     * @param fastqc A DataFile object representing an already processed Fastq file and a FastQC generated file
+     */
+    private void parseAndSaveBasicStatistics(Map<String,String> data, DataFile fastqc) {
+        log.debug "Parsing and Saving 'Basic Statistics'"
+        String text = data['Basic Statistics']
+        String body = getModuleTableBody(text)
+        log.debug(body)
+        FastqcBasicStatistics fastqcBasicStats = new FastqcBasicStatistics()
+        String[] fields
+        body.eachLine {String line ->
+            fields = line.split('\t')
+            switch (fields[0]) {
+                case "File type":
+                    fastqcBasicStats.fileType = fields[1]
+                    break
+                case "Encoding":
+                    fastqcBasicStats.encoding = fields[1]
+                    break
+                case "Total Sequences":
+                    fastqcBasicStats.totalSequences = fields[1] as long
+                    break
+                case "Filtered Sequences":
+                    fastqcBasicStats.filteredSequences = fields[1] as long
+                    break
+                case "Sequence length":
+                    fastqcBasicStats.sequenceLength = fields[1] as int
+                    break
+            }
+        }
+        //This section is related with the 'Sequence Duplication Levels' module that will be stored together with the other 'Basic Statistics'
+        text = data['Sequence Duplication Levels']
+        String labelTDP = '#Total Duplicate Percentage'
+        String totalDuplicatePercentage = text.substring(text.indexOf(labelTDP)+labelTDP.size(),text.indexOf('\n')).trim()
+        fastqcBasicStats.totalDuplicatePercentage = totalDuplicatePercentage as double
+        fastqcBasicStats.dataFile = fastqc
+        fastqcBasicStats.save(flush:true)
+    }
+
+    /**
+     * Parsing and saving "Sequence Length Distribution"
+     * @param data A Map with the identifier of the module as a key and the content text of the module as a value
+     * @param fastqc A DataFile object representing an already processed Fastq file and a FastQC generated file
+     */
+    private void parseAndSaveSeqLengthDistribution(Map<String,String> data, DataFile fastqc) {
+        log.debug "Parsing and Saving 'Sequence Length Distribution'"
+        String text = data['Sequence Length Distribution']
+        String body = getModuleTableBody(text)
+        FastqcSequenceLengthDistribution fastqcSeqLengDist
+        String[] fields
+        body.eachLine {String line ->
+            fields = line.split('\t')
+            fastqcSeqLengDist = new FastqcSequenceLengthDistribution()
+            fastqcSeqLengDist.length = fields[0] as int
+            fastqcSeqLengDist.countSequences = fields[1] as double
+            fastqcSeqLengDist.dataFile = fastqc
+            fastqcSeqLengDist.save(flush:true)
+        }
+    }
+
+    /**
+     * Returns a Map of dataFiles by sequencing type
+     * Return data example : ["WHOLE_GENOME":[dataFile0,dataFile1,dataFile2],"EXOM":[dataFile3,dataFile4,dataFile5,dataFile6]]
+     * @param listDataFiles A List of DataFiles
+     * @return Returns a Map of dataFiles by sequencing type
+     */
+    private Map<String,List> getDataFilesMapBySeqType(List listDataFiles) {
+        Map<String,List> seqTypes = [:]
+        listDataFiles.each {
+            if (!seqTypes.containsKey(it.seqTrack.seqType)) {
+                seqTypes<<[(it.seqTrack.seqType):[]]
+            }
+            seqTypes[it.seqTrack.seqType]<<it
+        }
+        return seqTypes
+    }
+
+    /**
+     * Returns a Map of dataFiles (fastq already processed and used to generate a FastQC file) by sequencing type (for a specific center)
+     * Return data example : ["WHOLE_GENOME":[dataFile0,dataFile1,dataFile2],"EXOM":[dataFile3,dataFile4,dataFile5,dataFile6]]
+     * @param center A sequencing center object
+     * @return Returns a Map of dataFiles by sequencing type
+     */
+    private Map<String,List> getProcessedFastQCDataFiles(SeqCenter center) {
+        String query =
+                '''
+SELECT DISTINCT a.dataFile
+FROM FastqcModuleStatus a 
+WHERE a.dataFile.run.seqCenter.id = :seqCenter
+'''
+        List listDataFiles = FastqcModuleStatus.executeQuery(query,[seqCenter:center.id])
+
+        return getDataFilesMapBySeqType(listDataFiles)
+
+        //        Map<String,List> seqTypes = [:]
+        //        listDataFiles.each {
+        //                if (!seqTypes.containsKey(it.seqTrack.seqType)) {
+        //                    seqTypes<<[(it.seqTrack.seqType):[]]
+        //                }
+        //                seqTypes[it.seqTrack.seqType]<<it
+        //        }
+        //        return seqTypes
+    }
+
+
+
+    /**
+     * Returns a Map of dataFiles (fastq already processed and used to generate a FastQC file) by sequencing type (for a specific center)
+     * Return data example : ["WHOLE_GENOME":[dataFile0,dataFile1,dataFile2],"EXOM":[dataFile3,dataFile4,dataFile5,dataFile6]]
+     * @param run Run that produced the data files
+     * @return Returns a Map of dataFiles by sequencing type
+     */
+    private Map<String,List> getProcessedFastQCDataFiles(Run run) {
+        String query =
+                '''
+SELECT DISTINCT a.dataFile
+FROM FastqcModuleStatus a
+WHERE
+a.dataFile.run.id = :run
+'''
+        List listDataFiles = FastqcModuleStatus.executeQuery(query,[run:run.id])
+        println "run DataFiles : " + listDataFiles.size()
+        //        Map<String,List> seqTypes = [:]
+        //        listDataFiles.each {
+        //                if (!seqTypes.containsKey(it.seqTrack.seqType)) {
+        //                    seqTypes<<[(it.seqTrack.seqType):[]]
+        //                }
+        //                seqTypes[it.seqTrack.seqType]<<it
+        //        }
+        //        println "run map DataFiles : " + seqTypes.size()
+        //        println "run rna paired map DataFiles values : " + seqTypes.values()
+        //        return seqTypes
+
+        return getDataFilesMapBySeqType(listDataFiles)
+
+    }
+
+    /**
+     * Returns the FastQC modules distribution for each status
+     * Return data example for 100 FastQC files processed: [pass:[100,50,75,..,0,0], warn:[0,50,25,..,100,100], fail:[0,0,0,..,0,0]]
+     * For every module the total sum should be equal to the number of files (in this case 100),  by example for the third module (pass:75,warn:25,fail:0)
+     * @param List of identifiers from the modules
+     * @param listDataFiles List of processed fastq files
+     * @return FastQC Modules distribution for each status for a list of the fastq corresponding FastQC files
+     */
+    private Map<String,List> getFastQCModulesDistributionByStatus(List<String> moduleIdentifiersOrdered, List listDataFiles) {
+        String query =
+                '''
+SELECT a.module.identifier, COUNT(a.id)
+FROM FastqcModuleStatus a
+WHERE
+a.dataFile IN (:listDataFiles)
+AND
+a.module.identifier IN (:moduleIdentifiersOrdered)
+AND
+status = :status
+GROUP BY
+a.module.identifier
+'''
+        Map<String,Integer> statPass = FastqcModuleStatus.executeQuery(query,[listDataFiles:listDataFiles, moduleIdentifiersOrdered:moduleIdentifiersOrdered, status:FastqcModuleStatus.Status.PASS]).collectEntries{ it -> new MapEntry(it[0],it[1])}
+        Map<String,Integer> statWarn = FastqcModuleStatus.executeQuery(query,[listDataFiles:listDataFiles, moduleIdentifiersOrdered:moduleIdentifiersOrdered, status:FastqcModuleStatus.Status.WARN]).collectEntries{ it -> new MapEntry(it[0],it[1])}
+        Map<String,Integer> statFail = FastqcModuleStatus.executeQuery(query,[listDataFiles:listDataFiles, moduleIdentifiersOrdered:moduleIdentifiersOrdered, status:FastqcModuleStatus.Status.FAIL]).collectEntries{ it -> new MapEntry(it[0],it[1])}
+
+        List passCounts = []
+        List warnCounts = []
+        List failCounts = []
+        // the previous query does not returns counts when there are any.. so I have to add 0 for the count at the matching position
+        moduleIdentifiersOrdered.each {
+            statPass.get(it) ? passCounts << statPass.get(it) : passCounts << 0
+            statWarn.get(it) ? warnCounts << statWarn.get(it) : warnCounts << 0
+            statFail.get(it) ? failCounts << statFail.get(it) : failCounts << 0
+        }
+        return ['pass':passCounts, 'warn':warnCounts, 'fail':failCounts]
+    }
+
+    /**
+     * Returns the Module Status Distribution by each sequencing type for a sequencing center
+     * @param center Sequencing center
+     * @return Map containing for each Sequencing type as identifier, the respective module status distribution
+     */
+    private Map<String,Map<String,List>> getStatsDist(List<String> modules, SeqCenter center) {
+        Map<String,List> dataFilesList = getProcessedFastQCDataFiles(center)
+        Map<String,Map<String,List>> result = [:]
+        dataFilesList.each{
+            result[it.key as String] = getFastQCModulesDistributionByStatus(modules, it.value)
+        }
+        return result
+    }
+
+    /**
+     * Returns the Module Status Distribution by each sequencing type for a run
+     * @param run Run
+     * @return Map containing for each Sequencing type as identifier, the respective module status distribution
+     */
+    private Map<String,Map<String,List>> getStatsDist(List<String> modules, Run run) {
+        Map<String,List> dataFilesList = getProcessedFastQCDataFiles(run)
+        Map<String,Map<String,List>> result = [:]
+        dataFilesList.each{
+            result[it.key as String] = getFastQCModulesDistributionByStatus(modules, it.value)
+        }
+        return result
+    }
+
+    /**
+     * Retrieves the Fastqc basic statistics
+     * @param id The id of the data file associated with this fastqc
+     * @return Fastqc basic statistics associated with the given data file
+     */
+    FastqcBasicStatistics getBasicStatistics(Long id) {
+        DataFile df = DataFile.get(id)
+        FastqcBasicStatistics basicStats = FastqcBasicStatistics.findByDataFile(df)
+        return basicStats
+    }
+
+    /**
+     * Retrieves the Fastqc Kmer Content
+     * @param id The id of the data file associated with this fastqc
+     * @return Fastqc kmer content associated with the given data file
+     */
+    private List<FastqcKmerContent> getKmerContent(Long id) {
+        DataFile df = DataFile.get(id)
+        List<FastqcKmerContent> kmerContent = FastqcKmerContent.findAllByDataFile(df)
+        return kmerContent
+    }
+
+    /**
+     * Retrieves the Fastqc Overrepresented sequences
+     * @param id The id of the data file associated with this fastqc
+     * @return Fastqc overrepresented sequences associated with the given data file
+     */
+    private List<FastqcOverrepresentedSequences> getOverrepresentedSequences(Long id) {
+        DataFile df = DataFile.get(id)
+        List<FastqcOverrepresentedSequences> overrepSeq = FastqcOverrepresentedSequences.findAllByDataFile(df)
+        return overrepSeq
+    }
+
+    /**
+     * Retrieves the Fastqc modules status
+     * @param id The id of the data file associated with this fastqc
+     * @return Fastqc modules status associated with the given data file
+     */
+    private List<FastqcOverrepresentedSequences> getModuleStatus(Long id) {
+        log.debug("vou pedir : "+id)
+        DataFile df = DataFile.get(id)
+        log.debug("df : " + df)
+        List<FastqcModuleStatus> modules = FastqcModuleStatus.findAllByDataFile(df)
+        log.debug("modules : " + modules)
+        return modules
+    }
+
+    /**
+     * Retrieves the Fastqc module names at the same order as the input list of modules identifiers
+     * @param moduleIdentifiersOrdered List with the module identifiers ordered
+     * @return Fastqc modules names in the same order as the inputed Identifiers
+     */
+    private List<String> getModuleNamesByIdentifiers(List<String> moduleIdentifiersOrdered) {
+        return moduleIdentifiersOrdered.collect{FastqcModule.findByIdentifier(it).name}
+    }
+}

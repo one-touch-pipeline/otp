@@ -1,11 +1,39 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import java.util.List;
+
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 
 class SeqTrackService {
 
     def FileTypeService
 
+    public SeqTrack getSeqTrackReadyForFastqcProcessing() {
+        return SeqTrack.findByFastqcState(SeqTrack.DataProcessingState.NOT_STARTED)
+    }
+
+    public void setFastqcInProgress(SeqTrack seqTrack) {
+        seqTrack.fastqcState = SeqTrack.DataProcessingState.IN_PROGRESS
+        assert(seqTrack.save(flush: true))
+    }
+
+    public List<DataFile> getSequenceFilesForSeqTrack(SeqTrack seqTrack) {
+        List<DataFile> files = DataFile.findAllBySeqTrack(seqTrack)
+        List<DataFile> filteredFiles = []
+        files.each {
+            if (fileTypeService.isGoodSequenceDataFile(it)) {
+                filteredFiles.add(it)
+            }
+        }
+        return filteredFiles
+    }
+    
+    
+    
+    
+    
+    
+    
     /**
      *
      * A sequence track corresponds to one lane in Illumina

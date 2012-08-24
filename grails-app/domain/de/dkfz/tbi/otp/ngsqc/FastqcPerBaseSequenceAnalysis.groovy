@@ -48,40 +48,21 @@ class FastqcPerBaseSequenceAnalysis {
      */
     double p90th
 
-    /**
-     * Count of 'A' nucleotides
-     */
-    double a
+    double countOfNucleotideA
+    double countOfNucleotideC
+    double countOfNucleotideG
+    double countOfNucleotideT
+    double countOfNucleotideN
 
     /**
-     * Count of 'C' nucleotides
+     * Percentage of GC
      */
-    double c
-
-    /**
-     * Count of 'G' nucleotides
-     */ 
-    double g
-
-    /**
-     * Count of 'T' nucleotides
-     */
-    double t
-
-    /**
-     * Percent of QC
-     */
-    double pgc
-
-    /**
-     * Count of 'N' (Not identified) nucleotides
-     */
-    double n
+    double percentageOfGC
 
     static belongsTo = [
         dataFile : DataFile
     ]
-    
+
     static constraints = {
         cycle()
         mean()
@@ -90,11 +71,11 @@ class FastqcPerBaseSequenceAnalysis {
         q3()
         p10th()
         p90th()
-        a(min:0D)
-        c(min:0D)
-        g(min:0D)
-        t(min:0D)
-        n(min:0D)
-        pgc(min:0D,max:100D)
+        countOfNucleotideA(min:0D)
+        countOfNucleotideC(min:0D)
+        countOfNucleotideG(min:0D)
+        countOfNucleotideT(min:0D)
+        countOfNucleotideN(min:0D)
+        percentageOfGC(min:0D,max:100D)
     }
 }

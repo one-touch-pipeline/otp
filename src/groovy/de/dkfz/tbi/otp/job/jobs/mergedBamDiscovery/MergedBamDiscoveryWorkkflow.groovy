@@ -18,6 +18,7 @@ class MergedBamDiscoveryWorkkflow extends AbstractStartJobImpl  {
 
     @Scheduled(fixedDelay=60000l)
     void execute() {
+        return
         if (!getExecutionPlan() || !getExecutionPlan().enabled) {
             println "Merged Bam discovery workflow not active"
             return
