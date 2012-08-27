@@ -13,8 +13,8 @@
                 <div>
                     <ul>
                     <li><g:link controller="userAdministration"><g:message code="otp.welcome.administration.userAdmin"/></g:link></li>
-                    <li><g:link controller="crashRecover"><g:message code="otp.welcome.administration.crashRecover"/></g:link></li>
-                    <li><g:link controller="shutdownController"><g:message code="otp.welcome.administration.shutdown"/></g:link></li>
+                    <li><g:link controller="crashRecovery"><g:message code="otp.welcome.administration.crashRecovery"/></g:link></li>
+                    <li><g:link controller="shutdown"><g:message code="otp.welcome.administration.shutdown"/></g:link></li>
                     </ul>
                 </div>
             </sec:ifAnyGranted>
