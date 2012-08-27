@@ -34,11 +34,20 @@ eventCompileStart = {
     out << proc.in.text
     out << " ("
     // get the branch name
-    proc = "git symbolic-ref HEAD".execute()
-    proc.waitFor()
-    String branchName = proc.in.text
+    // first check for an environment variable
+    // the GIT_BRANCH variable is available in Jenkins
+    String branchName = System.getenv("GIT_BRANCH")
+    if (!branchName) {
+        // not specified through environment - try to resolve through git
+        proc = "git symbolic-ref HEAD".execute()
+        proc.waitFor()
+        branchName = proc.in.text
+    }
     if (branchName.startsWith("refs/heads/")) {
         branchName = branchName.substring(11, branchName.length()-1)
+    }
+    if (branchName.startsWith("origin/")) {
+        branchName = branchName.substring(7)
     }
     out << branchName
     out << ")"
