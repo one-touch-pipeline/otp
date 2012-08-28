@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.ngsqc
 
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 
 /**
  * Maps the 'Sequence Duplication Levels' module
@@ -27,6 +27,6 @@ class FastqcSequenceDuplicationLevels {
     }
 
     static belongsTo = [
-        dataFile: DataFile
+        fastqcProcessedFile: FastqcProcessedFile
     ]
 }

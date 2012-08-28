@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.ngsqc
 
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 
 /**
  * Domain class to store the data from Fastqc "Per Sequence GC Content" module
@@ -18,7 +18,7 @@ class FastqcPerSequenceGCContent {
     double countGC
 
     static belongsTo = [
-        dataFile: DataFile
+        fastqcProcessedFile: FastqcProcessedFile
     ]
 
     static constraints = {

@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.ngsqc
 
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 
 /**
  * Domain class to store the data from several fastqc modules
@@ -60,7 +60,7 @@ class FastqcPerBaseSequenceAnalysis {
     double percentageOfGC
 
     static belongsTo = [
-        dataFile : DataFile
+        fastqcProcessedFile : FastqcProcessedFile
     ]
 
     static constraints = {

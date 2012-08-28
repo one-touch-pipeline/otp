@@ -8,6 +8,8 @@ class FastqcDataFilesService {
     def configService
     def dataProcessingFilesService
 
+    final String fastqcFileSuffix = "_fastqc.zip"
+
     public String fastqcOutputDirectory(SeqTrack seqTrack) {
         Individual individual = seqTrack.sample.individual
         def type = DataProcessingFilesService.OutputDirectories.FASTX_QC
@@ -35,5 +37,20 @@ class FastqcDataFilesService {
     public Realm fastqcRealm(SeqTrack seqTrack) {
         Individual individual = seqTrack.sample.individual
         Realm realm = configService.getRealmDataProcessing(individual.project)
+    }
+
+    public createFastqcProcessedFile(DataFile dataFile) {
+        assert(new FastqcProcessedFile(dataFile: dataFile).save(flush: true))
+    }
+
+    public updateFastqcProcessedFile(FastqcProcessedFile fastqc) {
+        String path = fastqcOutputFile(fastqc.dataFile)
+        File fastqcFile = new File(path)
+        if (fastqcFile.canRead()) {
+            fastqc.fileExists = true
+            fastqc.fileSize = fastqcFile.length()
+            fastqc.dateFileSystem = new Date(fastqcFile.lastModified())
+        }
+        assert(fastqc.save(flush: true))
     }
 }

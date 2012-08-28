@@ -26,22 +26,6 @@ class DataProcessingFilesService {
         STRUCTURAL_VARIATION
     }
 
-    static final HashMap<ProcessedFile.Type, String> filenameEnds = [
-        (ProcessedFile.Type.ALIGNED_SEQUENCE): ".sequence.sai",
-        (ProcessedFile.Type.ALIGNED_LANE_QUALITY): ".laneQuality.txt",
-        (ProcessedFile.Type.ALIGNMENT_SUMMARY_FILE) : "_wroteQcSummary.txt",
-        (ProcessedFile.Type.BAM) : ".bam",
-        (ProcessedFile.Type.BAM_INDEX): ".bai", //Additional, depends on bam file
-        (ProcessedFile.Type.FASTQC_ARCHIVE): "_fastqc.zip", //Replacing something...
-        (ProcessedFile.Type.FLAGSTATS): "_flagstats.txt", //Additional, depends on bam file
-        (ProcessedFile.Type.GENOME_COVERAGE_FILE): ".DepthOfCoverage.txt",
-        (ProcessedFile.Type.INSERTSIZE_DISTRIBUTION_FILE): "_insertsizes.txt",
-        (ProcessedFile.Type.INSERTSIZE_DISTRIBUTION_PLOT): "_insertsize_plot.png",
-        (ProcessedFile.Type.STRUCTURAL_VARIATION_FILE): "_DiffChroms.txt",
-        (ProcessedFile.Type.STRUCTURAL_VARIATION_PLOT): "_DiffChroms.png",
-        (ProcessedFile.Type.PAIRED_BAM): "_paired.bam.sorted.bam" //Setting
-    ]
-
     private String getOutputStem(Individual individual) {
         if (!individual) {
             throw new RuntimeException("individual must not be null")

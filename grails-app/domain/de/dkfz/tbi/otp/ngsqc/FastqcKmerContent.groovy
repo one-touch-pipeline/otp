@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.ngsqc
 
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 
 /**
  * Domain class to store the 'Kmer Content' module data from fastqc files
@@ -38,6 +38,6 @@ class FastqcKmerContent {
     }
 
     static belongsTo = [
-        dataFile : DataFile
+        fastqcProcessedFile : FastqcProcessedFile
     ]
 }
