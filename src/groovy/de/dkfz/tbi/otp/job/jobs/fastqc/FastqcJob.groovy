@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class FastqcJob extends AbstractJobImpl {
 
     @Autowired
-    DataProcessingFilesService dataProcessingFilesService
+    FastqcDataFilesService fastqcDataFilesService
 
     @Autowired
     ExecutionService executionService
@@ -22,26 +22,18 @@ class FastqcJob extends AbstractJobImpl {
     @Autowired
     SeqTrackService seqTrackService
 
-    @Autowired
-    ConfigService configService
-
     @Override
     public void execute() throws Exception {
         SeqTrack seqTrack = SeqTrack.get(Long.parseLong(getProcessParameterValue()))
-        Individual ind = seqTrack.sample.individual
-        Realm realm = configService.getRealmDataProcessing(ind.project)
+        String outDir = fastqcDataFilesService.fastqcOutputDirectory(seqTrack)
+        Realm realm = fastqcDataFilesService.fastqcRealm(seqTrack)
         List<DataFile> seqFiles = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
 
-        String outDir = dataProcessingFilesService.getOutputDirectory(ind, DataProcessingFilesService.OutputDirectories.FASTX_QC)
         List<String> pbsIDs = []
-
-        seqFiles.each { seq ->
-            String rawSeq = lsdfFilesService.getFileFinalPath(seq)
+        seqFiles.each { seqFile ->
+            String rawSeq = lsdfFilesService.getFileFinalPath(seqFile)
             String cmd = "fastqc ${rawSeq} --noextract --nogroup -o ${outDir};chmod -R 440 ${outDir}/*.zip"
             pbsIDs.add(executionService.executeJob(realm, cmd))
-
-            dataProcessingFilesService.createAndSaveProcessedFile(
-                ProcessedFile.Type.FASTQC_ARCHIVE, seq, this, ind, MergingLog.Execution.SYSTEM)
         }
         addOutputParameter("__pbsIds", pbsIDs.join(","))
         addOutputParameter("__pbsRealm", realm.id.toString())

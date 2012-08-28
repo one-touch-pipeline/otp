@@ -71,11 +71,11 @@ class FastqcPerBaseSequenceAnalysis {
         q3()
         p10th()
         p90th()
-        countOfNucleotideA(min:0D)
-        countOfNucleotideC(min:0D)
-        countOfNucleotideG(min:0D)
-        countOfNucleotideT(min:0D)
-        countOfNucleotideN(min:0D)
-        percentageOfGC(min:0D,max:100D)
+        countOfNucleotideA(min: 0D)
+        countOfNucleotideC(min: 0D)
+        countOfNucleotideG(min: 0D)
+        countOfNucleotideT(min: 0D)
+        countOfNucleotideN(min: 0D)
+        percentageOfGC(min: 0D, max: 100D)
     }
 }

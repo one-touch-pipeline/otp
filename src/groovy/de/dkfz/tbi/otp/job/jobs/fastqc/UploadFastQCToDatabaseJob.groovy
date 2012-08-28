@@ -32,6 +32,8 @@ class UploadFastQCToDatabaseJob extends AbstractEndStateAwareJobImpl {
         for (DataFile file in files) {
             fastqcUploadService.uploadFileContentsToDataBase(file)
         }
+        seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
+        assert(seqTrack.save(flush: true))
         succeed()
     }
 }

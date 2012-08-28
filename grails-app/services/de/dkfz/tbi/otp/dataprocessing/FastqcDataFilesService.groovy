@@ -1,0 +1,39 @@
+package de.dkfz.tbi.otp.dataprocessing
+
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.job.processing.*
+
+class FastqcDataFilesService {
+
+    def configService
+    def dataProcessingFilesService
+
+    public String fastqcOutputDirectory(SeqTrack seqTrack) {
+        Individual individual = seqTrack.sample.individual
+        def type = DataProcessingFilesService.OutputDirectories.FASTX_QC
+        String baseString = dataProcessingFilesService.getOutputDirectory(individual, type)
+        return "${baseString}/${seqTrack.run.name}"
+    }
+
+    public String fastqcOutputFile(DataFile dataFile) {
+        SeqTrack seqTrack = dataFile.seqTrack
+        if (!seqTrack) {
+            ProcessingException("DataFile not assigned to a SeqTrack")
+        }
+        String base = fastqcOutputDirectory(seqTrack)
+        String fileName = fastqcFileName(dataFile)
+        return "${base}/${fileName}"
+    }
+
+    private String fastqcFileName(DataFile dataFile) {
+        String fileName = dataFile.fileName
+        String body = dataFile.fileName.substring(0, fileName.indexOf("."))
+        String postfix = dataProcessingFilesService.filenameEnds[ProcessedFile.Type.FASTQC_ARCHIVE]
+        return "${body}${postfix}"
+    }
+
+    public Realm fastqcRealm(SeqTrack seqTrack) {
+        Individual individual = seqTrack.sample.individual
+        Realm realm = configService.getRealmDataProcessing(individual.project)
+    }
+}

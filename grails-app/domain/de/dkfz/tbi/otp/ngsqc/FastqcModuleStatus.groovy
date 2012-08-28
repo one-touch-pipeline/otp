@@ -9,7 +9,9 @@ import de.dkfz.tbi.otp.ngsdata.DataFile
 class FastqcModuleStatus {
 
     enum Status {
-        PASS, WARN, FAIL
+        PASS,
+        WARN,
+        FAIL
     }
 
     /**

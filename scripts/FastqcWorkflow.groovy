@@ -16,5 +16,6 @@ plan("FastqcWorkflow") {
         inputParameter("__pbsIds", "createFastqcArchive", "__pbsIds")
         inputParameter("__pbsRealm", "createFastqcArchive", "__pbsRealm")
     }
+    //job("createFastqcProcessedFile", "")
     job("uploadFastQCToDatabase", "uploadFastQCToDatabaseJob")
 }

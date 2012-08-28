@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class CreateFastqcOutputDirectoryJob extends AbstractJobImpl {
 
     @Autowired
-    ConfigService configService
-
-    @Autowired
-    DataProcessingFilesService dataProcessingFilesService
+    FastqcDataFilesService fastqcDataFilesService
 
     @Autowired
     ExecutionService executionService
@@ -21,17 +18,14 @@ class CreateFastqcOutputDirectoryJob extends AbstractJobImpl {
     public void execute() throws Exception {
         long seqTrackId = Long.parseLong(getProcessParameterValue())
         SeqTrack seqTrack = SeqTrack.get(seqTrackId)
-        Individual individual = seqTrack.sample.individual
-        Realm realm = configService.getRealmDataProcessing(individual.project)
-
-        def type = DataProcessingFilesService.OutputDirectories.FASTX_QC
-        String dir = dataProcessingFilesService.getOutputDirectory(individual, type)
+        String dir = fastqcDataFilesService.fastqcOutputDirectory(seqTrack)
+        Realm realm = fastqcDataFilesService.fastqcRealm(seqTrack)
         execute(dir, realm)
     }
 
     private void execute(String directory, Realm realm) {
         String cmd = "mkdir -p " + directory
         String exitCode = executionService.executeCommand(realm, cmd)
-        println "creating directory finished with exit code " + exitCode
+        log.debug "creating directory finished with exit code " + exitCode
     }
 }

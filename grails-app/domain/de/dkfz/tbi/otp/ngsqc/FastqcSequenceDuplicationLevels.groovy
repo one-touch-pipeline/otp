@@ -6,7 +6,7 @@ import de.dkfz.tbi.otp.ngsdata.DataFile
  * Maps the 'Sequence Duplication Levels' module
  * This module at FastQC file has a field that will be stored on the 'Basic Statistics' module corresponding class
  * (#Total Duplicate Percentage	11.091313808867866)
- * 
+ *
  */
 class FastqcSequenceDuplicationLevels {
 
@@ -23,10 +23,10 @@ class FastqcSequenceDuplicationLevels {
 
     static constraints = {
         duplicationLevel(min: 1, max:10)
-        relativeCount(min:0D)
+        relativeCount(min: 0D)
     }
 
     static belongsTo = [
-        dataFile : DataFile
+        dataFile: DataFile
     ]
 }

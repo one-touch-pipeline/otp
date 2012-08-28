@@ -18,7 +18,7 @@ class FastqcPerSequenceQualityScores {
     double countQS
 
     static belongsTo = [
-        dataFile : DataFile
+        dataFile: DataFile
     ]
 
     static constraints = {

@@ -18,10 +18,10 @@ class FastqcPerSequenceGCContent {
     double countGC
 
     static belongsTo = [
-        dataFile : DataFile
+        dataFile: DataFile
     ]
 
     static constraints = {
-        percentageOfGC(min:0,max:100)
+        percentageOfGC(min: 0, max:100)
     }
 }

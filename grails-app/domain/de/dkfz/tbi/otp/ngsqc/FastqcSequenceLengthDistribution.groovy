@@ -4,7 +4,7 @@ import de.dkfz.tbi.otp.ngsdata.DataFile
 
 /**
  * Domain class to store the 'Sequence Length Distribution' module data from fastqc files
- * 
+ *
  */
 class FastqcSequenceLengthDistribution {
 
@@ -19,6 +19,6 @@ class FastqcSequenceLengthDistribution {
     double countSequences
 
     static belongsTo = [
-        dataFile : DataFile
+        dataFile: DataFile
     ]
 }

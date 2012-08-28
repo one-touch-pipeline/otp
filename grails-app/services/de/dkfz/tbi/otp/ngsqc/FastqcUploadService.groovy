@@ -29,7 +29,7 @@ class FastqcUploadService {
     /**
      * Dependency Injection of dataProcessingFilesService
      */
-    def dataProcessingFilesService
+    def fastqcDataFilesService
 
     /**
      * Uploads the fastQC file contents generated from the fastq file to the database
@@ -45,7 +45,7 @@ class FastqcUploadService {
      * @return String with the contents of the fastQC file
      */
     private String getFastQCFileContents(DataFile dataFile) {
-        String pathToFile = dataProcessingFilesService.getPathOfFastqcFile(dataFile)
+        String pathToFile = fastqcDataFilesService.fastqcOutputFile(dataFile)
         return getInputStreamFromZip(pathToFile, "fastqc_data.txt").text
     }
 
@@ -127,7 +127,7 @@ class FastqcUploadService {
             fastqcStat.module = fastqcModule
             fastqcStat.status = it.value.toUpperCase() as FastqcModuleStatus.Status // not sure this is best way...
             fastqcStat.dataFile = fastqcDataFile
-            fastqcStat.save(flush:true)
+            fastqcStat.save(flush: true)
         }
     }
 
@@ -183,7 +183,7 @@ class FastqcUploadService {
             fields = line.split('\t')
             listFastqc[number].countOfNucleotideN = fields[1] as double
             listFastqc[number].dataFile = fastqcDataFile
-            listFastqc[number].save(flush:true)
+            listFastqc[number].save(flush: true)
         }
     }
 
@@ -207,7 +207,7 @@ class FastqcUploadService {
             fastqckmer.max = fields[3] as double
             fastqckmer.position = fields[4] as int
             fastqckmer.dataFile = fastqc
-            fastqckmer.save(flush:true)
+            fastqckmer.save(flush: true)
         }
     }
 
@@ -231,7 +231,7 @@ class FastqcUploadService {
             fastqcOverRepSeq.percentage = fields[2] as double
             fastqcOverRepSeq.possibleSource =fields[3]
             fastqcOverRepSeq.dataFile = fastqc
-            fastqcOverRepSeq.save(flush:true)
+            fastqcOverRepSeq.save(flush: true)
         }
     }
 
@@ -258,7 +258,7 @@ class FastqcUploadService {
             }
             fastqcSeqDupLevels.relativeCount = fields[1] as double
             fastqcSeqDupLevels.dataFile = fastqc
-            fastqcSeqDupLevels.save(flush:true)
+            fastqcSeqDupLevels.save(flush: true)
         }
     }
 
@@ -279,7 +279,7 @@ class FastqcUploadService {
             fastqcSeqGC.percentageOfGC = fields[0] as int
             fastqcSeqGC.countGC = fields[1] as double
             fastqcSeqGC.dataFile = fastqc
-            fastqcSeqGC.save(flush:true)
+            fastqcSeqGC.save(flush: true)
         }
     }
 
@@ -300,7 +300,7 @@ class FastqcUploadService {
             fastqcSeqQualScore.quality = fields[0] as int
             fastqcSeqQualScore.countQS = fields[1] as double
             fastqcSeqQualScore.dataFile = fastqc
-            fastqcSeqQualScore.save(flush:true)
+            fastqcSeqQualScore.save(flush: true)
         }
     }
 
@@ -342,7 +342,7 @@ class FastqcUploadService {
         String totalDuplicatePercentage = text.substring(text.indexOf(labelTDP)+labelTDP.size(),text.indexOf('\n')).trim()
         fastqcBasicStats.totalDuplicatePercentage = totalDuplicatePercentage as double
         fastqcBasicStats.dataFile = fastqc
-        fastqcBasicStats.save(flush:true)
+        fastqcBasicStats.save(flush: true)
     }
 
     /**
@@ -362,7 +362,7 @@ class FastqcUploadService {
             fastqcSeqLengDist.length = fields[0] as int
             fastqcSeqLengDist.countSequences = fields[1] as double
             fastqcSeqLengDist.dataFile = fastqc
-            fastqcSeqLengDist.save(flush:true)
+            fastqcSeqLengDist.save(flush: true)
         }
     }
 
@@ -399,15 +399,6 @@ WHERE a.dataFile.run.seqCenter.id = :seqCenter
         List listDataFiles = FastqcModuleStatus.executeQuery(query,[seqCenter:center.id])
 
         return getDataFilesMapBySeqType(listDataFiles)
-
-        //        Map<String,List> seqTypes = [:]
-        //        listDataFiles.each {
-        //                if (!seqTypes.containsKey(it.seqTrack.seqType)) {
-        //                    seqTypes<<[(it.seqTrack.seqType):[]]
-        //                }
-        //                seqTypes[it.seqTrack.seqType]<<it
-        //        }
-        //        return seqTypes
     }
 
 
@@ -427,20 +418,8 @@ WHERE
 a.dataFile.run.id = :run
 '''
         List listDataFiles = FastqcModuleStatus.executeQuery(query,[run:run.id])
-        println "run DataFiles : " + listDataFiles.size()
-        //        Map<String,List> seqTypes = [:]
-        //        listDataFiles.each {
-        //                if (!seqTypes.containsKey(it.seqTrack.seqType)) {
-        //                    seqTypes<<[(it.seqTrack.seqType):[]]
-        //                }
-        //                seqTypes[it.seqTrack.seqType]<<it
-        //        }
-        //        println "run map DataFiles : " + seqTypes.size()
-        //        println "run rna paired map DataFiles values : " + seqTypes.values()
-        //        return seqTypes
-
+        log.debug "run DataFiles : " + listDataFiles.size()
         return getDataFilesMapBySeqType(listDataFiles)
-
     }
 
     /**
