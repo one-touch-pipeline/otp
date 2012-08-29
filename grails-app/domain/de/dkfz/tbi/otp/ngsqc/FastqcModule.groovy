@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.ngsqc
 
 /**
  * Domain class to store the modules from fastqc files
- * 
+ *
  */
 class FastqcModule {
 

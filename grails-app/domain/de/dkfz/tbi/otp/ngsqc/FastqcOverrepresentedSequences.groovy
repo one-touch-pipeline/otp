@@ -4,7 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 
 /**
  * Domain class to store the Overrepresented sequences data from fastqc files
- * 
+ *
  */
 class FastqcOverrepresentedSequences {
 

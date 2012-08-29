@@ -27,13 +27,7 @@ class SeqTrackService {
         }
         return filteredFiles
     }
-    
-    
-    
-    
-    
-    
-    
+
     /**
      *
      * A sequence track corresponds to one lane in Illumina

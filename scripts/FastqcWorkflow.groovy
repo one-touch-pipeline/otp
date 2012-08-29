@@ -7,7 +7,7 @@ plan("FastqcWorkflow") {
      * Loads an unprocessed SeqTrack object from database and stores it as a process parameter
      */
     start("start", "fastqcStartJob")
-    job("createOutputDirectories", "createFastqcOutputDirectoryJob") 
+    job("createOutputDirectories", "createFastqcOutputDirectoryJob")
     job("createFastqcArchive", "fastqcJob") {
         outputParameter("__pbsIds")
         outputParameter("__pbsRealm")

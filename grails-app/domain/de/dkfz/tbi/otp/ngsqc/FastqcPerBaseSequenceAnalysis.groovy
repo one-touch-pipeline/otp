@@ -9,7 +9,7 @@ import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
  * Per base sequence content :  G, A, T, C
  * Per base GC content       :  %GC
  * Per base N content        :  N-Count
- * 
+ *
  */
 class FastqcPerBaseSequenceAnalysis {
 
