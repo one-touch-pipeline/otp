@@ -30,8 +30,7 @@ class FastqcDataFilesService {
     private String fastqcFileName(DataFile dataFile) {
         String fileName = dataFile.fileName
         String body = dataFile.fileName.substring(0, fileName.indexOf("."))
-        String postfix = dataProcessingFilesService.filenameEnds[ProcessedFile.Type.FASTQC_ARCHIVE]
-        return "${body}${postfix}"
+        return "${body}${fastqcFileSuffix}"
     }
 
     public Realm fastqcRealm(SeqTrack seqTrack) {

@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.ngsdata.DataFile
 class FastqcProcessedFile {
 
     boolean fileExists = false
+    boolean contentUploaded = false
     long fileSize = -1
 
     Date dateCreated = new Date()

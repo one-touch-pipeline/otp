@@ -33,10 +33,19 @@ class FastqcJob extends AbstractJobImpl {
         seqFiles.each { seqFile ->
             String rawSeq = lsdfFilesService.getFileFinalPath(seqFile)
             String cmd = "fastqc ${rawSeq} --noextract --nogroup -o ${outDir};chmod -R 440 ${outDir}/*.zip"
-            pbsIDs.add(executionService.executeJob(realm, cmd))
+            pbsIDs.add(sendScript(realm, cmd))
             fastqcDataFilesService.createFastqcProcessedFile(seqFile)
         }
         addOutputParameter("__pbsIds", pbsIDs.join(","))
         addOutputParameter("__pbsRealm", realm.id.toString())
+    }
+
+    private String sendScript(Realm realm, String text) {
+        String pbsResponse = executionService.executeJob(realm, text)
+        List<String> extractedPbsIds = executionService.extractPbsIds(pbsResponse)
+        if (extractedPbsIds.size() != 1) {
+            log.debug "Number of PBS jobs is = ${extractedPbsIds.size()}"
+        }
+        return extractedPbsIds.get(0)
     }
 }
