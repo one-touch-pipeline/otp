@@ -455,8 +455,7 @@ class ProcessesController {
         String parameterData = null
         if (parameter) {
             if (parameter.className) {
-                def object = ProcessParameter.executeQuery("FROM " + parameter.className + " WHERE id=" + parameter.value)
-                parameterData = g.link(controller: GrailsNameUtils.getShortName(parameter.className), action: "show", id: parameter.value) { object[0].toString() }
+                parameterData = g.link(controller: GrailsNameUtils.getShortName(parameter.className), action: "show", id: parameter.value) { parameter.toObject().toString() }
             } else {
                 // not a class, just use the value
                 parameterData = parameter.value
