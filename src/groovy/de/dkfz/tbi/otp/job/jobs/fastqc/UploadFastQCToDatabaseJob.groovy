@@ -35,10 +35,9 @@ class UploadFastQCToDatabaseJob extends AbstractEndStateAwareJobImpl {
         for (DataFile file in files) {
             FastqcProcessedFile fastqc = getFastqcProcessedFile(file)
             fastqcUploadService.uploadFileContentsToDataBase(fastqc)
-            setContentUploaded(fastqc)
+            fastqcDataFilesService.setFastqcProcessedFileUploaded(fastqc)
         }
-        seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
-        assert(seqTrack.save(flush: true))
+        seqTrackService.setFastqcFinished(seqTrack)
         succeed()
     }
 
@@ -54,10 +53,5 @@ class UploadFastQCToDatabaseJob extends AbstractEndStateAwareJobImpl {
             String path = fastqcDataFilesService.fastqcFileName(fastqc.dataFile)
             throw new FileNotReadableException(path)
         }
-    }
-
-    private setContentUploaded(FastqcProcessedFile fastqc) {
-        fastqc.contentUploaded = true
-        assert(fastqc.save(flush: true))
     }
 }

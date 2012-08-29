@@ -38,11 +38,11 @@ class FastqcDataFilesService {
         Realm realm = configService.getRealmDataProcessing(individual.project)
     }
 
-    public createFastqcProcessedFile(DataFile dataFile) {
+    public void createFastqcProcessedFile(DataFile dataFile) {
         assert(new FastqcProcessedFile(dataFile: dataFile).save(flush: true))
     }
 
-    public updateFastqcProcessedFile(FastqcProcessedFile fastqc) {
+    public void updateFastqcProcessedFile(FastqcProcessedFile fastqc) {
         String path = fastqcOutputFile(fastqc.dataFile)
         File fastqcFile = new File(path)
         if (fastqcFile.canRead()) {
@@ -50,6 +50,11 @@ class FastqcDataFilesService {
             fastqc.fileSize = fastqcFile.length()
             fastqc.dateFileSystem = new Date(fastqcFile.lastModified())
         }
+        assert(fastqc.save(flush: true))
+    }
+
+    public void setFastqcProcessedFileUploaded(FastqcProcessedFile fastqc) {
+        fastqc.contentUploaded = true
         assert(fastqc.save(flush: true))
     }
 }

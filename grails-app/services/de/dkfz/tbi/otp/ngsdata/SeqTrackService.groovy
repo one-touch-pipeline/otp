@@ -17,6 +17,11 @@ class SeqTrackService {
         assert(seqTrack.save(flush: true))
     }
 
+    public void setFastqcFinished(SeqTrack seqTrack) {
+        seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
+        assert(seqTrack.save(flush: true))
+    }
+
     public List<DataFile> getSequenceFilesForSeqTrack(SeqTrack seqTrack) {
         List<DataFile> files = DataFile.findAllBySeqTrack(seqTrack)
         List<DataFile> filteredFiles = []

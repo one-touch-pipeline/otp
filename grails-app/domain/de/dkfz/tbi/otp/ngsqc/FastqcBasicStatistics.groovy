@@ -4,7 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 
 /**
  * Domain class to store the 'Basic Statistics' module data from fastqc files
- * 
+ *
  */
 class FastqcBasicStatistics {
 

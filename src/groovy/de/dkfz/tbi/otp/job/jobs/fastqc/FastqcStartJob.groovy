@@ -17,7 +17,7 @@ class FastqcStartJob extends AbstractStartJobImpl {
     @Autowired
     SeqTrackService seqTrackService
 
-    final int MAX_RUNNING = 8
+    final int MAX_RUNNING = 4
 
     @Scheduled(fixedRate=10000l)
     void execute() {
