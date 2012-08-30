@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import groovy.json.JsonSlurper
 
 class IndividualController {
 
     def individualService
     def igvSessionFileService
+    def projectService
 
     def display = {
         redirect(action: "show", id: params.id)
@@ -87,5 +89,35 @@ class IndividualController {
     def igvDownload = {
         println "Download"
         render "downloding ..."
+    }
+
+    def insert = {
+        List<Project> projects = projectService.getAllProjects()
+        List<Individual.Type> individualTypes = Individual.Type.values()
+        List<String> sampleTypes = individualService.getSampleTypeNames()
+        List<SampleIdentifier> sampleIdentifiers = individualService.getSampleIdentifiers()
+        [projects: projects, individualTypes: individualTypes, sampleTypes: sampleTypes, sampleIdentifiers: sampleIdentifiers]
+    }
+
+    def save = { IndividualCommand cmd ->
+        individualService.createIndividual(projectService.getProject(cmd.project), cmd)
+    }
+}
+
+class IndividualCommand {
+    String pid
+    Long project
+    String mockPid
+    String mockFullName
+    Individual.Type individualType
+    String samples
+
+    Map<String, List<String>> parseSamples() {
+        def jSonObj = new JsonSlurper().parseText(this.samples)
+        Map<String, List<String>> samplesMap = [:]
+        jSonObj.each {
+            samplesMap.put(it.type, it.id)
+        }
+        return samplesMap
     }
 }

@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.springframework.security.access.prepost.PostFilter
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.acls.domain.BasePermission
@@ -8,6 +9,9 @@ import org.springframework.security.core.userdetails.UserDetails
 
 class IndividualService {
     def springSecurityService
+    def sampleTypeService
+    def sampleService
+    def sampleIdentifierService
 
     /**
      * Retrieves the given Individual.
@@ -263,5 +267,91 @@ OR lower(i.type) like :filter
             params.put("filter", "%${filter.toLowerCase()}%");
         }
         return Individual.executeQuery(query, params)[0] as Integer
+    }
+
+    /**
+     * Creates a new Individual together with depending objects
+     *
+     * @param project The Project for which the new Individual should be created
+     * @param command IndividualCommand holding data of objects to be saved
+     * @return created Individual
+     * @throws IndividualCreationException
+     */
+    @PreAuthorize("hasPermission(#project, 'write') or hasRole('ROLE_OPERATOR')")
+    public Individual createIndividual(Project project, IndividualCommand command) throws IndividualCreationException {
+        Individual individual = new Individual(pid: command.pid, mockPid: command.mockPid, mockFullName: command.mockFullName, type: command.individualType, project: project)
+        if (!individual.validate()) {
+            throw new IndividualCreationException("Individual does not validate")
+        }
+        if (!individual.save(flush: true)) {
+            throw new IndividualCreationException("Individual could not be saved.")
+        }
+        command.parseSamples().each { key, value ->
+            SampleType sampleType = createSampleType(key)
+            if (!sampleType) {
+                throw new IndividualCreationException("SampleType could not be found nor created.")
+            }
+            Sample sample = createSample(individual, sampleType)
+            value.each { String name ->
+                SampleIdentifier sampleIdentifier = createSampleIdentifier(name, sample)
+            }
+        }
+        return individual
+    }
+
+    /**
+     * Checks whether a Individual with the given pid already exists
+     * @param pid The pid to check
+     * @return true if there is already a Individual with the pid, false otherwise
+     */
+    public boolean individualExists(String pid) {
+        return (Individual.findByPid(pid) != null)
+    }
+
+    /**
+     * Fetches all SampleTypes available
+     * @return List of SampleTypes
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public List<String> getSampleTypeNames() {
+        return SampleType.list().name
+    }
+
+    /**
+     * Fetches all SampleIdentifiers available
+     * @return List of SampleIdentifiers
+     */
+    @PostFilter("hasPermission(filterObject.sample.individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
+    public List<SampleIdentifier> getSampleIdentifiers() {
+        return SampleIdentifier.list()
+    }
+
+    /**
+     * Creates a new Sample if not existing
+     * @param individual the Individual to be associated
+     * @param sampleType the SampleType to be associated
+     * @return the Sample
+     */
+    private Sample createSample(Individual individual, SampleType sampleType) {
+        return Sample.findOrSaveByIndividualAndSampleType(individual, sampleType)
+    }
+
+    /**
+     * Creates a new SampleIdentifier if not existing
+     * @param name Name of the new Sample
+     * @param sample Sample to be associated
+     * @return the SampleIdentifier
+     */
+    private SampleIdentifier createSampleIdentifier(String name, Sample sample) {
+        return SampleIdentifier.findOrSaveByNameAndSample(name, sample)
+    }
+
+    /**
+     * Creates a new SampleType if not existing
+     * @param name Name of the new SampleType
+     * @return the SampleType
+     */
+    private SampleType createSampleType(String name) {
+        return SampleType.findOrSaveByName(name)
     }
 }

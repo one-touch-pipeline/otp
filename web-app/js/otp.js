@@ -106,6 +106,99 @@ $.otp.runList = function () {
     $.otp.genericList('#runTable', "/run/show/");
 };
 
+$.otp.addIndividual = {
+    addSample: function (event) {
+        "use strict";
+        event.preventDefault();
+        var existingSamples, placeOfLastSampleInTable, sampleBoxes, newSampleRow;
+        // Subtract the hidden element
+        existingSamples = $("tr.sample").not(".hidden");
+        placeOfLastSampleInTable = existingSamples.last();
+        sampleBoxes = $("tr.hidden").clone().removeClass("hidden");
+        sampleBoxes.find("button").click($.otp.plusButtonClickHandler);
+        sampleBoxes.appendTo(placeOfLastSampleInTable.parent());
+        newSampleRow = $("tr.newSample");
+        newSampleRow.appendTo(sampleBoxes.last().parent());
+    },
+    addSampleIdentifier: function (event) {
+        "use strict";
+        event.preventDefault();
+        var clickedButton, td, row, inputs, newInput, minusButton;
+        clickedButton = $(this);
+        td = clickedButton.parent().parent().get(0);
+        row = $(td).parent().get(0);
+        inputs = $(row).find("input");
+        newInput = inputs.last().clone().val('');
+        minusButton = clickedButton.clone();
+        minusButton.text("-");
+        newInput.appendTo($(td));
+        newInput.wrap('<div class="removeSampleIdentifier"></div>');
+        minusButton.click(function (event) {
+            event.preventDefault();
+            $(this).parent().remove();
+        });
+        minusButton.appendTo(newInput.parent());
+    },
+    submitIndividual: function (event) {
+        "use strict";
+        event.preventDefault();
+        var samplesArray = [], samples = "";
+        $.each($("tr.sample").not("tr.sample:hidden"), function (index, value) {
+            var sample = { };
+            sample.id = [];
+            sample.type = ($("select option:selected", value).val());
+            $(value).next().find("input").each( function(idx, v) {
+                sample.id.push($(v).val());
+            });
+            samplesArray.push(sample);
+        });
+        samples = JSON.stringify(samplesArray);
+        $.ajax({
+            type: 'GET',
+            url: $.otp.contextPath + "/individual/save",
+            dataType: 'json',
+            cache: 'false',
+            data: {
+                pid: $("#pid").val(),
+                project: $("#project").val(),
+                mockPid: $("#mockPid").val(),
+                mockFullName: $("#mockFullName").val(),
+                individualType: $("#individualType").val(),
+                samples: samples
+            },
+            success: function (data) {
+                console.log(data);
+                if (data.error) {
+                    if (data.pid) {
+                        $.otp.warningMessage($.i18n.prop(data.pid));
+                    }
+                    if (data.project) {
+                        $.otp.warningMessage($.i18n.prop(data.project));
+                    }
+                    if (data.mockPid) {
+                        $.otp.warningMessage($.i18n.prop(data.mockPid));
+                    }
+                    if (data.mockFullName) {
+                        $.otp.warningMessage($.i18n.prop(data.mockFullName));
+                    }
+                    if (data.individualType) {
+                        $.otp.warningMessage($.i18n.prop(data.individualType));
+                    }
+                } else if (data.success) {
+                    console.log(("juhu"));
+                    $.otp.infoMessage($.i18n.prop("individual.insert.add.success", data.individual));
+                }
+            }
+        });
+    },
+    register: function () {
+        "use strict";
+        $("div.addSample button").click(this.addSample);
+        $("div.newSampleIdentifier button").click(this.addSampleIdentifier);
+        $("#add-individual-form").submit(this.submitIndividual);
+    }
+};
+
 /**
  * Creates the HTML markup for the status image.
  * The status is referenced by name:
