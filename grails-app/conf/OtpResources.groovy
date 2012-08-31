@@ -39,4 +39,19 @@ modules = {
         dependsOn 'qunit, userAdministration'
         resource url: '/js/test/group-creation-dialog-tests.js'
     }
+    lightbox {
+        dependsOn 'jquery'
+        resource url: '/js/lightbox/js/lightbox.js'
+        resource url: '/js/lightbox/css/lightbox.css'
+        resource url: '/js/lightbox/images/close.png'
+        resource url: '/js/lightbox/images/loading.gif'
+        resource url: '/js/lightbox/images/next.png'
+        resource url: '/js/lightbox/images/prev.png'
+        resource url: '/js/lightbox/images/bg-checker.png'
+        resource url: '/js/lightbox/images/box.png'
+        resource url: '/js/lightbox/images/bullet.gif'
+        resource url: '/js/lightbox/images/donate.png'
+        resource url: '/js/lightbox/images/speech-bubbles.png'
+        resource url: '/js/lightbox/images/favicon.gif'
+    }
 }

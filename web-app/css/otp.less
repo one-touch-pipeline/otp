@@ -675,3 +675,48 @@ div.showChangeLog {
         background-image: url(images/view-journal.png);
     }
 }
+
+/* FASTQC MODULE */
+div.fastqc {
+    padding: 30px;
+    img.small {
+        max-width: 950px;
+    }
+
+    @pass-image: url(images/ok.png);
+    @warn-image: url(images/status_unknown.png);
+    @fail-image: url(images/error.png);
+
+    .pass, .warn, .fail {
+        background-repeat: no-repeat;
+        text-indent: 20px;
+    }
+    .module.pass {
+        background-image: @pass-image;
+    }
+    .warn {
+        background-image: @warn-image;
+    }
+    .fail {
+        background-image: @fail-image;
+    }
+    td {
+        background-repeat: no-repeat;
+        &.pass {
+            background-image: @pass-image;
+        }
+        &.warn {
+            background-image: @warn-image;
+        }
+        &.fail {
+            background-image: @fail-image;
+        }
+    }
+
+    .module {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+}
+
+

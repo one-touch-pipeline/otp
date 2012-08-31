@@ -20,7 +20,6 @@ import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 //import de.dkfz.tbi.otp.ngsdata.DataFormatException
 import de.dkfz.tbi.otp.ngsdata.FileNotReadableException
 import java.util.regex.*
-import java.util.zip.*
 
 
 /**
@@ -47,24 +46,7 @@ class FastqcUploadService {
      */
     private String getFastQCFileContents(DataFile dataFile) {
         String pathToFile = fastqcDataFilesService.fastqcOutputFile(dataFile)
-        return getInputStreamFromZip(pathToFile, "fastqc_data.txt").text
-    }
-
-    /**
-     * Returns an inputStream from the contents of the zip file
-     * @param zipPath Path to the zip file
-     * @param withinZipPath Path to the resource within the zip file
-     * @return An inputStream for the combination of zipPath and the withinZipPath parameters
-     */
-    private InputStream getInputStreamFromZip(String zipPath, String withinZipPath) {
-        File input = new File(zipPath)
-        if (!input.canRead()) {
-            throw new FileNotReadableException(input.path)
-        }
-        ZipFile zipFile = new ZipFile(input)
-        String zipBasePath = zipPath.substring(zipPath.lastIndexOf("/")+1,zipPath.lastIndexOf(".zip"))
-        ZipEntry zipEntry = zipFile.getEntry("${zipBasePath}/${withinZipPath}")
-        return zipFile.getInputStream(zipEntry)
+        return fastqcDataFilesService.getInputStreamFromZip(pathToFile, "fastqc_data.txt").text
     }
 
     /**
@@ -123,7 +105,7 @@ class FastqcUploadService {
             fastqcModule = FastqcModule.findByName(it.key)
             if (!fastqcModule) {
                 log.debug "Not identified Module ${it.key}."
-                throw new DataFormatException("Not identified Module found '${it.key}'")
+                throw new Exception("Not identified Module found '${it.key}'")
             }
             fastqcStat.module = fastqcModule
             fastqcStat.status = it.value.toUpperCase() as FastqcModuleStatus.Status // not sure this is best way...

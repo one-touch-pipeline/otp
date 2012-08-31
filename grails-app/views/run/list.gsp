@@ -19,6 +19,7 @@
                 <th><g:message code="run.list.dateExecuted"/></th>
                 <th><g:message code="run.list.blacklisted"/></th>
                 <th><g:message code="run.list.multipleSource"/></th>
+                <th><g:message code="run.list.fastqcState"/></th>
             </tr>
             </thead>
             <tbody></tbody>
@@ -31,6 +32,7 @@
                 <th><g:message code="run.list.dateExecuted"/></th>
                 <th><g:message code="run.list.blacklisted"/></th>
                 <th><g:message code="run.list.multipleSource"/></th>
+                <th><g:message code="run.list.fastqcState"/></th>
             </tr>
             </tfoot>
         </table>

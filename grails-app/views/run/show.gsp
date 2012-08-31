@@ -100,11 +100,17 @@
                     <td>s</td>
                     <td><g:link controller="dataFile" action="showDetails" id="${file.id}">${file.fileName}</g:link></td>
                     <td>${file.project}</td>
-                    <td class="${file.metaDataValid}">${file.metaDataValid ? 'meta-data valid' : 'md invalid'}</td>
-                    <td class="${file.fileExists}">on LSDF</td>
+                    <td class="${file.metaDataValid}">meta-data</td>
+                    <td class="${file.fileExists}">lsdf</td>
                     <td class="${file.fileLinked}">linked</td>
                     <td>${String.format("%.1f GB", file.fileSize/1e9)}</td>
                     <td>${file.dateFileSystem ? (new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd") : '&nbsp;' }</td>
+                    <td>
+                        <g:if test="${fastqcLinks.get(file.id)}">
+                            <g:link controller="fastqcResults" action="show" id="${file.id}">fastqc</g:link>
+                            ${fastqcSummary.get(file.id)}
+                        </g:if>
+                    </td>
                 </tr>
             </g:each>
             <g:each var="alignment" in="${track.value.alignments}">
@@ -115,10 +121,11 @@
                         <td><g:link controller="dataFile" action="showDetails" id="${file.id}">${file.fileName}</g:link></td>
                         <td>${alignment.key.alignmentParams.pipeline}</td>
                         <td>${alignment.key.executedBy}</td>
-                        <td class="${file.fileExists}">on LSDF</td>
+                        <td class="${file.fileExists}">lsdf</td>
                         <td class="${file.fileLinked}">linked</td>
                         <td>${String.format("%.1f GB", file.fileSize/1e9)}</td>
                         <td>${file.dateFileSystem ? (new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd") : '&nbsp;' }</td>
+                        <td></td>
                     </tr>
                 </g:each>
             </g:each> 

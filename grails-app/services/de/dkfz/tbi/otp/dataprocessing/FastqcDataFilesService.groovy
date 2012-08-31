@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.*
+import java.util.zip.*
 
 class FastqcDataFilesService {
 
@@ -57,4 +58,21 @@ class FastqcDataFilesService {
         fastqc.contentUploaded = true
         assert(fastqc.save(flush: true))
     }
+
+    /**
+    * Returns an inputStream from the contents of the zip file
+    * @param zipPath Path to the zip file
+    * @param withinZipPath Path to the resource within the zip file
+    * @return An inputStream for the combination of zipPath and the withinZipPath parameters
+    */
+   public InputStream getInputStreamFromZip(String zipPath, String withinZipPath) {
+       File input = new File(zipPath)
+       if (!input.canRead()) {
+           throw new FileNotReadableException(input.path)
+       }
+       ZipFile zipFile = new ZipFile(input)
+       String zipBasePath = zipPath.substring(zipPath.lastIndexOf("/")+1,zipPath.lastIndexOf(".zip"))
+       ZipEntry zipEntry = zipFile.getEntry("${zipBasePath}/${withinZipPath}")
+       return zipFile.getInputStream(zipEntry)
+   }
 }

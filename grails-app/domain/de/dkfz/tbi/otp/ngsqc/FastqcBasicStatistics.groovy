@@ -25,6 +25,6 @@ class FastqcBasicStatistics {
     }
 
     static belongsTo = [
-        fastqcProcessedFile : FastqcProcessedFile
+        fastqcProcessedFile: FastqcProcessedFile
     ]
 }
