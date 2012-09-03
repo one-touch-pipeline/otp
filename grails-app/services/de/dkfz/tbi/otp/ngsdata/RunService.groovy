@@ -78,8 +78,41 @@ class RunService {
         if (!run) {
             return null
         }
-        // TODO: make check ACL aware
-        return Run.findByIdLessThan(run.id, [sort: "id", order: "desc"])
+        if (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR")) {
+            // shortcut for operator
+            return Run.findByIdLessThan(run.id, [sort: "id", order: "desc"])
+        }
+        // for normal users
+        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
+        if (springSecurityService.isLoggedIn()) {
+            // anonymous users do not have a principal
+            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
+        }
+        String query = '''
+SELECT MAX(r.id) FROM Run AS r, AclEntry AS ace
+JOIN r.seqCenter AS s
+JOIN ace.aclObjectIdentity AS aoi
+JOIN aoi.aclClass AS ac
+JOIN ace.sid AS sid
+WHERE
+aoi.objectId = s.id
+AND ac.className = :className
+AND sid.sid IN (:roles)
+AND ace.mask IN (:permissions)
+AND ace.granting = true
+AND r.id < :runId
+'''
+        Map params = [
+            className: SeqCenter.class.getName(),
+            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
+            roles: roles,
+            runId: run.id
+        ]
+        List result = Run.executeQuery(query, params)
+        if (!result) {
+            return null
+        }
+        return Run.get(result[0] as Long)
     }
 
     /**
@@ -92,8 +125,40 @@ class RunService {
         if (!run) {
             return null
         }
-        // TODO: make check ACL aware
-        return Run.findByIdGreaterThan(run.id, [sort: "id", oder: "asc"])
+        if (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR")) {
+            return Run.findByIdGreaterThan(run.id, [sort: "id", oder: "asc"])
+        }
+        // for normal users
+        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
+        if (springSecurityService.isLoggedIn()) {
+            // anonymous users do not have a principal
+            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
+        }
+        String query = '''
+SELECT MIN(r.id) FROM Run AS r, AclEntry AS ace
+JOIN r.seqCenter AS s
+JOIN ace.aclObjectIdentity AS aoi
+JOIN aoi.aclClass AS ac
+JOIN ace.sid AS sid
+WHERE
+aoi.objectId = s.id
+AND ac.className = :className
+AND sid.sid IN (:roles)
+AND ace.mask IN (:permissions)
+AND ace.granting = true
+AND r.id > :runId
+'''
+        Map params = [
+            className: SeqCenter.class.getName(),
+            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
+            roles: roles,
+            runId: run.id
+        ]
+        List result = Run.executeQuery(query, params)
+        if (!result) {
+            return null
+        }
+        return Run.get(result[0] as Long)
     }
 
     /**
