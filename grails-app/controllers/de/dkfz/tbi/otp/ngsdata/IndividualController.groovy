@@ -100,11 +100,24 @@ class IndividualController {
     }
 
     def save = { IndividualCommand cmd ->
-        individualService.createIndividual(projectService.getProject(cmd.project), cmd)
+        if (cmd.hasErrors()) {
+            render cmd.errors as JSON
+            return
+        }
+        try {
+            individualService.createIndividual(projectService.getProject(cmd.project), cmd)
+            def data = [success: true]
+            render data as JSON
+        } catch (IndividualCreationException e) {
+            def data = [error: e.message]
+            render data as JSON
+        }
     }
 }
 
 class IndividualCommand {
+    def individualService
+    def projectService
     String pid
     Long project
     String mockPid
@@ -119,5 +132,16 @@ class IndividualCommand {
             samplesMap.put(it.type, it.id)
         }
         return samplesMap
+    }
+
+    static constraints = {
+        pid(blank: false, validator: { val, obj ->
+            return val && !obj.individualService.individualExists(val)
+        })
+        mockPid(blank: false)
+        mockFullName(blank: false)
+        project(min: 0L, validator: { val, obj ->
+            return val && (obj.projectService.getProject(val) != null)
+        })
     }
 }

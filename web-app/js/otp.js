@@ -153,42 +153,30 @@ $.otp.addIndividual = {
             samplesArray.push(sample);
         });
         samples = JSON.stringify(samplesArray);
-        $.ajax({
-            type: 'GET',
-            url: $.otp.contextPath + "/individual/save",
-            dataType: 'json',
-            cache: 'false',
-            data: {
-                pid: $("#pid").val(),
-                project: $("#project").val(),
-                mockPid: $("#mockPid").val(),
-                mockFullName: $("#mockFullName").val(),
-                individualType: $("#individualType").val(),
-                samples: samples
-            },
-            success: function (data) {
-                console.log(data);
-                if (data.error) {
-                    if (data.pid) {
-                        $.otp.warningMessage($.i18n.prop(data.pid));
-                    }
-                    if (data.project) {
-                        $.otp.warningMessage($.i18n.prop(data.project));
-                    }
-                    if (data.mockPid) {
-                        $.otp.warningMessage($.i18n.prop(data.mockPid));
-                    }
-                    if (data.mockFullName) {
-                        $.otp.warningMessage($.i18n.prop(data.mockFullName));
-                    }
-                    if (data.individualType) {
-                        $.otp.warningMessage($.i18n.prop(data.individualType));
-                    }
-                } else if (data.success) {
-                    console.log(("juhu"));
-                    $.otp.infoMessage($.i18n.prop("individual.insert.add.success", data.individual));
+        $.getJSON($.otp.contextPath + "/individual/save", {
+            pid: $("#pid").val(),
+            project: $("#project").val(),
+            mockPid: $("#mockPid").val(),
+            mockFullName: $("#mockFullName").val(),
+            individualType: $("#individualType").val(),
+            samples: samples
+        }, function (data) {
+            var message, i;
+            if (data.error) {
+                $.otp.warningMessage(data.error);
+            } else if (data.errors) {
+                message = "<ul>";
+                for (i = 0; i < data.errors.length; i += 1) {
+                    message += "<li>" + data.errors[i].message + "</li>";
                 }
+                message += "</ul>";
+                $.otp.warningMessage(message);
+            } else if (data.success) {
+                console.log(("juhu"));
+                $.otp.infoMessage($.i18n.prop("individual.insert.add.success", data.individual));
             }
+        }).error(function (jqXHR) {
+            $.otp.warningMessage(jqXHR.statusText + jqXHR.status);
         });
     },
     register: function () {
