@@ -1,7 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
+
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.junit.*
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.acls.domain.BasePermission
+
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.ExecutionState
@@ -15,40 +20,130 @@ import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 
 class RunServiceTests extends AbstractIntegrationTest {
     def runService
+    def aclUtilService
+
+    @Before
+    void setUp() {
+        createUserAndRoles()
+    }
 
     void testGetRunWithoutRun() {
-        assertNull(runService.getRun(null))
-        assertNull(runService.getRun(""))
-        assertNull(runService.getRun(0))
-        assertNull(runService.getRun("test"))
+        SpringSecurityUtils.doWithAuth("testuser") {
+            assertNull(runService.getRun(null))
+            assertNull(runService.getRun(""))
+            assertNull(runService.getRun(0))
+            assertNull(runService.getRun("test"))
+        }
     }
 
     void testGetRunByIdentifier() {
         Run run = mockRun("test")
-        assertEquals(run, runService.getRun(run.id))
-        assertEquals(run, runService.getRun("${run.id}"))
+        SpringSecurityUtils.doWithAuth("testuser") {
+            shouldFail(AccessDeniedException) {
+                runService.getRun(run.id)
+                runService.getRun("${run.id}")
+            }
+        }
+        // Role Operator should have access
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertEquals(run, runService.getRun(run.id))
+            assertEquals(run, runService.getRun("${run.id}"))
+        }
+        // Admin should have access
+        SpringSecurityUtils.doWithAuth("admin") {
+            assertEquals(run, runService.getRun(run.id))
+            assertEquals(run, runService.getRun("${run.id}"))
+            // grant read permission to testuser
+            aclUtilService.addPermission(run.seqCenter, "testuser", BasePermission.READ)
+        }
+        // now testuser should succeed
+        SpringSecurityUtils.doWithAuth("testuser") {
+            assertEquals(run, runService.getRun(run.id))
+            assertEquals(run, runService.getRun("${run.id}"))
+        }
+        // but other user should still fail
+        SpringSecurityUtils.doWithAuth("user") {
+            shouldFail(AccessDeniedException) {
+                runService.getRun(run.id)
+                runService.getRun("${run.id}")
+            }
+        }
     }
 
     void testGetRunByName() {
         Run run = mockRun("test")
-        assertEquals(run, runService.getRun("test"))
+        SpringSecurityUtils.doWithAuth("testuser") {
+            shouldFail(AccessDeniedException) {
+                runService.getRun("test")
+            }
+        }
+        // operator should have access
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertEquals(run, runService.getRun("test"))
+        }
+        // admin should have access
+        SpringSecurityUtils.doWithAuth("admin") {
+            assertEquals(run, runService.getRun("test"))
+            // grant read permission
+            aclUtilService.addPermission(run.seqCenter, "testuser", BasePermission.READ)
+        }
+        // now testuser should succeed
+        SpringSecurityUtils.doWithAuth("testuser") {
+            assertEquals(run, runService.getRun("test"))
+        }
+        // but other user should still fail
+        SpringSecurityUtils.doWithAuth("user") {
+            shouldFail(AccessDeniedException) {
+                runService.getRun("test")
+            }
+        }
     }
 
     void testGetRunByNameAsIdentifier() {
         Run run = mockRun("2")
-        assertEquals(run, runService.getRun("2"))
-        run.name = run.id + 1
-        assertNotNull(run.save())
-        assertEquals(run, runService.getRun(run.name))
-        Run run2 = new Run(name: "foo", seqCenter: SeqCenter.list().first(), seqPlatform: SeqPlatform.list().first())
-        assertNotNull(run2.save())
-        assertEquals(run2, runService.getRun(run.name))
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertEquals(run, runService.getRun("2"))
+            run.name = run.id + 1
+            assertNotNull(run.save())
+            assertEquals(run, runService.getRun(run.name))
+            Run run2 = new Run(name: "foo", seqCenter: SeqCenter.list().first(), seqPlatform: SeqPlatform.list().first())
+            assertNotNull(run2.save())
+            assertEquals(run2, runService.getRun(run.name))
+        }
     }
 
     void testRetrieveProcessParameterEmpty() {
-        assertTrue(runService.retrieveProcessParameters(null).isEmpty())
+        SpringSecurityUtils.doWithAuth("testuser") {
+            // any user has access with no run
+            assertTrue(runService.retrieveProcessParameters(null).isEmpty())
+        }
         Run run = mockRun("test")
-        assertTrue(runService.retrieveProcessParameters(run).isEmpty())
+        // without ACL accessing a run should fail
+        SpringSecurityUtils.doWithAuth("testuser") {
+            shouldFail(AccessDeniedException) {
+                runService.retrieveProcessParameters(run).isEmpty()
+            }
+        }
+        // but not for an operator
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertTrue(runService.retrieveProcessParameters(run).isEmpty())
+        }
+        // neither for an admin
+        SpringSecurityUtils.doWithAuth("admin") {
+            assertTrue(runService.retrieveProcessParameters(run).isEmpty())
+            // grant read permission
+            aclUtilService.addPermission(run.seqCenter, "testuser", BasePermission.READ)
+        }
+        // and not for the testuser after granting permission
+        SpringSecurityUtils.doWithAuth("testuser") {
+            assertTrue(runService.retrieveProcessParameters(run).isEmpty())
+        }
+        // but still for any other user
+        SpringSecurityUtils.doWithAuth("user") {
+            shouldFail(AccessDeniedException) {
+                runService.retrieveProcessParameters(run).isEmpty()
+            }
+        }
     }
 
     void testRetrieveProcessParameter() {
@@ -67,8 +162,32 @@ class RunServiceTests extends AbstractIntegrationTest {
         ProcessParameter param = new ProcessParameter(value: run.id, className: Run.class.name, process: process)
         assertNotNull(param.save())
 
-        assertEquals(1, runService.retrieveProcessParameters(run).size())
-        assertEquals(param, runService.retrieveProcessParameters(run).first())
+        SpringSecurityUtils.doWithAuth("testuser") {
+            shouldFail(AccessDeniedException) {
+                runService.retrieveProcessParameters(run).size()
+                runService.retrieveProcessParameters(run).first()
+            }
+        }
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertEquals(1, runService.retrieveProcessParameters(run).size())
+            assertEquals(param, runService.retrieveProcessParameters(run).first())
+        }
+        SpringSecurityUtils.doWithAuth("admin") {
+            assertEquals(1, runService.retrieveProcessParameters(run).size())
+            assertEquals(param, runService.retrieveProcessParameters(run).first())
+            // grant read permission
+            aclUtilService.addPermission(run.seqCenter, "testuser", BasePermission.READ)
+        }
+        SpringSecurityUtils.doWithAuth("testuser") {
+            assertEquals(1, runService.retrieveProcessParameters(run).size())
+            assertEquals(param, runService.retrieveProcessParameters(run).first())
+        }
+        SpringSecurityUtils.doWithAuth("user") {
+            shouldFail(AccessDeniedException) {
+                runService.retrieveProcessParameters(run).size()
+                runService.retrieveProcessParameters(run).first()
+            }
+        }
 
         // create second Process
         Process process2 = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
@@ -76,50 +195,115 @@ class RunServiceTests extends AbstractIntegrationTest {
         ProcessParameter param2 = new ProcessParameter(value: run.id, className: Run.class.name, process: process2)
         assertNotNull(param2.save())
 
-        assertEquals(2, runService.retrieveProcessParameters(run).size())
-        assertEquals(param, runService.retrieveProcessParameters(run).first())
-        assertEquals(param2, runService.retrieveProcessParameters(run).last())
+        SpringSecurityUtils.doWithAuth("testuser") {
+            assertEquals(2, runService.retrieveProcessParameters(run).size())
+            assertEquals(param, runService.retrieveProcessParameters(run).first())
+            assertEquals(param2, runService.retrieveProcessParameters(run).last())
+        }
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertEquals(2, runService.retrieveProcessParameters(run).size())
+            assertEquals(param, runService.retrieveProcessParameters(run).first())
+            assertEquals(param2, runService.retrieveProcessParameters(run).last())
+        }
+        SpringSecurityUtils.doWithAuth("user") {
+            shouldFail(AccessDeniedException) {
+                runService.retrieveProcessParameters(run).size()
+                runService.retrieveProcessParameters(run).first()
+                runService.retrieveProcessParameters(run).last()
+            }
+        }
     }
 
-    @Ignore
     void testPreviousRun() {
         // no Run yet, should be null
-        assertNull(runService.previousRun(null))
+        SpringSecurityUtils.doWithAuth("testuser") {
+            assertNull(runService.previousRun(null))
+        }
         // create a run
         Run run = mockRun("test")
         // no previous run yet
-        assertNull(runService.previousRun(run))
+        SpringSecurityUtils.doWithAuth("testuser") {
+            shouldFail(AccessDeniedException) {
+                assertNull(runService.previousRun(run))
+            }
+        }
+        SpringSecurityUtils.doWithAuth("operator") {
+                assertNull(runService.previousRun(run))
+        }
+        SpringSecurityUtils.doWithAuth("admin") {
+                assertNull(runService.previousRun(run))
+            // grant read permission
+            aclUtilService.addPermission(run.seqCenter, "testuser", BasePermission.READ)
+        }
+        SpringSecurityUtils.doWithAuth("testuser") {
+                assertNull(runService.previousRun(run))
+        }
+        SpringSecurityUtils.doWithAuth("user") {
+            shouldFail(AccessDeniedException) {
+                assertNull(runService.previousRun(run))
+            }
+        }
         // create another run
         Run run2 = new Run(name: "test2", seqCenter: SeqCenter.list().first(), seqPlatform: SeqPlatform.list().first())
         assertNotNull(run2.save())
-        assertNull(runService.previousRun(run))
-        assertEquals(run, runService.previousRun(run2))
+        SpringSecurityUtils.doWithAuth("testuser") {
+            assertNull(runService.previousRun(run))
+            assertEquals(run, runService.previousRun(run2))
+        }
         // create a third run
         Run run3 = new Run(name: "test3", seqCenter: SeqCenter.list().first(), seqPlatform: SeqPlatform.list().first())
         assertNotNull(run3.save())
-        assertNull(runService.previousRun(run))
-        assertEquals(run, runService.previousRun(run2))
-        assertEquals(run2, runService.previousRun(run3))
+        SpringSecurityUtils.doWithAuth("testuser") {
+            assertNull(runService.previousRun(run))
+            assertEquals(run, runService.previousRun(run2))
+            assertEquals(run2, runService.previousRun(run3))
+        }
     }
 
     void testNextRun() {
-        // no Run yet, should be null
-        assertNull(runService.nextRun(null))
+        // no Run yet, should be null for any user
+        SpringSecurityUtils.doWithAuth("testuser") {
+            assertNull(runService.nextRun(null))
+        }
         // create a run
         Run run = mockRun("test")
         // no previous run yet
-        assertNull(runService.nextRun(run))
+        SpringSecurityUtils.doWithAuth("testuser") {
+            shouldFail(AccessDeniedException) {
+                runService.nextRun(run)
+            }
+        }
+        SpringSecurityUtils.doWithAuth("operator") {
+            assertNull(runService.nextRun(run))
+        }
+        SpringSecurityUtils.doWithAuth("admin") {
+            assertNull(runService.nextRun(run))
+            // grant read permission
+            aclUtilService.addPermission(run.seqCenter, "testuser", BasePermission.READ)
+        }
+        SpringSecurityUtils.doWithAuth("testuser") {
+            assertNull(runService.nextRun(run))
+        }
+        SpringSecurityUtils.doWithAuth("user") {
+            shouldFail(AccessDeniedException) {
+                runService.nextRun(run)
+            }
+        }
         // create another run
         Run run2 = new Run(name: "test2", seqCenter: SeqCenter.list().first(), seqPlatform: SeqPlatform.list().first())
         assertNotNull(run2.save())
-        assertEquals(run2, runService.nextRun(run))
-        assertNull(runService.nextRun(run2))
+        SpringSecurityUtils.doWithAuth("testuser") {
+            assertEquals(run2, runService.nextRun(run))
+            assertNull(runService.nextRun(run2))
+        }
         // create a third run
         Run run3 = new Run(name: "test3", seqCenter: SeqCenter.list().first(), seqPlatform: SeqPlatform.list().first())
         assertNotNull(run3.save())
-        assertEquals(run2, runService.nextRun(run))
-        assertEquals(run3, runService.nextRun(run2))
-        assertNull(runService.nextRun(run3))
+        SpringSecurityUtils.doWithAuth("testuser") {
+            assertEquals(run2, runService.nextRun(run))
+            assertEquals(run3, runService.nextRun(run2))
+            assertNull(runService.nextRun(run3))
+        }
     }
 
     @Ignore

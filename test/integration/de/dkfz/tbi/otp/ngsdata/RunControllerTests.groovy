@@ -2,9 +2,79 @@ package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
 import grails.test.ControllerUnitTestCase
+
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
 import org.junit.*
+import org.springframework.security.acls.domain.BasePermission
+
+import de.dkfz.tbi.otp.security.Role
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.UserRole
 
 class RunControllerTests extends ControllerUnitTestCase {
+    def springSecurityService
+    def aclUtilService
+
+    @Before
+    void setUp() {
+        super.setUp()
+        createUserAndRoles()
+    }
+
+    private void createUserAndRoles() {
+      User user = new User(username: "testuser",
+              password: springSecurityService.encodePassword("secret"),
+              userRealName: "Test",
+              email: "test@test.com",
+              enabled: true,
+              accountExpired: false,
+              accountLocked: false,
+              passwordExpired: false)
+      assertNotNull(user.save())
+      assertNotNull(new AclSid(sid: user.username, principal: true).save(flush: true))
+      User user2 = new User(username: "user",
+              password: springSecurityService.encodePassword("verysecret"),
+              userRealName: "Test2",
+              email: "test2@test.com",
+              enabled: true,
+              accountExpired: false,
+              accountLocked: false,
+              passwordExpired: false)
+      assertNotNull(user2.save())
+      assertNotNull(new AclSid(sid: user2.username, principal: true).save(flush: true))
+      User operator = new User(username: "operator",
+              password: springSecurityService.encodePassword("verysecret"),
+              userRealName: "Operator",
+              email: "test2@test.com",
+              enabled: true,
+              accountExpired: false,
+              accountLocked: false,
+              passwordExpired: false)
+      assertNotNull(operator.save())
+      assertNotNull(new AclSid(sid: operator.username, principal: true).save(flush: true))
+      User admin = new User(username: "admin",
+              password: springSecurityService.encodePassword("1234"),
+              userRealName: "Administrator",
+              email: "admin@test.com",
+              enabled: true,
+              accountExpired: false,
+              accountLocked: false,
+              passwordExpired: false)
+      assertNotNull(admin.save())
+      assertNotNull(new AclSid(sid: admin.username, principal: true).save(flush: true))
+      Role userRole = new Role(authority: "ROLE_USER")
+      assertNotNull(userRole.save())
+      UserRole.create(user, userRole, false)
+      UserRole.create(user2, userRole, false)
+      UserRole.create(admin, userRole, false)
+      Role adminRole = new Role(authority: "ROLE_ADMIN")
+      assertNotNull(adminRole.save())
+      UserRole.create(admin, adminRole, false)
+      Role operatorRole = new Role(authority: "ROLE_OPERATOR")
+      assertNotNull(operatorRole.save())
+      UserRole.create(operator, operatorRole, true)
+  }
 
     void testDisplayRedirect() {
         controller.display()
@@ -12,20 +82,26 @@ class RunControllerTests extends ControllerUnitTestCase {
     }
 
     void testShowRunNonExisting() {
-        controller.params.id = "0"
-        controller.show()
-        assertEquals(404, controller.response.status)
+        SpringSecurityUtils.doWithAuth("testuser") {
+            controller.params.id = "0"
+            controller.show()
+            assertEquals(404, controller.response.status)
+        }
     }
 
     void testShowRunMissingId() {
-        controller.show()
-        assertEquals(404, controller.response.status)
+        SpringSecurityUtils.doWithAuth("testuser") {
+            controller.show()
+            assertEquals(404, controller.response.status)
+        }
     }
 
     void testShowRunIdNoLong() {
-        controller.params.id = "test"
-        controller.show()
-        assertEquals(404, controller.response.status)
+        SpringSecurityUtils.doWithAuth("testuser") {
+            controller.params.id = "test"
+            controller.show()
+            assertEquals(404, controller.response.status)
+        }
     }
 
     @Ignore
@@ -105,12 +181,18 @@ class RunControllerTests extends ControllerUnitTestCase {
         assertNotNull(run2.save())
         Run run3 = new Run(name: "test2", seqCenter: seqCenter, seqPlatform: seqPlatform)
         assertNotNull(run3.save())
-        // test the outcome
-        controller.params.id = run3.id.toString()
-        def model = controller.show()
-        assertEquals(run3, model.run)
-        assertEquals(run2, model.previousRun)
-        assertNull(model.nextRun)
+        // add permissions
+        SpringSecurityUtils.doWithAuth("admin") {
+            aclUtilService.addPermission(seqCenter, "testuser", BasePermission.READ)
+        }
+        SpringSecurityUtils.doWithAuth("testuser") {
+            // test the outcome
+            controller.params.id = run3.id.toString()
+            def model = controller.show()
+            assertEquals(run3, model.run)
+            assertEquals(run2, model.previousRun)
+            assertNull(model.nextRun)
+        }
     }
 
     void testShowRunWithPrevNextRun() {
@@ -124,11 +206,17 @@ class RunControllerTests extends ControllerUnitTestCase {
         assertNotNull(run2.save())
         Run run3 = new Run(name: "test2", seqCenter: seqCenter, seqPlatform: seqPlatform)
         assertNotNull(run3.save())
-        // test the outcome
-        controller.params.id = run2.id.toString()
-        def model = controller.show()
-        assertEquals(run2, model.run)
-        assertEquals(run1, model.previousRun)
-        assertEquals(run3, model.nextRun)
+        // add permissions
+        SpringSecurityUtils.doWithAuth("admin") {
+            aclUtilService.addPermission(seqCenter, "testuser", BasePermission.READ)
+        }
+        SpringSecurityUtils.doWithAuth("testuser") {
+            // test the outcome
+            controller.params.id = run2.id.toString()
+            def model = controller.show()
+            assertEquals(run2, model.run)
+            assertEquals(run1, model.previousRun)
+            assertEquals(run3, model.nextRun)
+        }
     }
 }
