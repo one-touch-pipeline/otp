@@ -24,10 +24,14 @@
 		<div class="nav" role="navigation">
 			<ul>
 				<li><g:link url="${request.contextPath}">Home</g:link></li>
-    			<li><g:link controller="overviewMB" action="index">Overview</g:link></li>
+                <sec:ifAllGranted roles="ROLE_OPERATOR">
+                    <li><g:link controller="overviewMB" action="index">Overview</g:link></li>
+                </sec:ifAllGranted>
 				<li><g:link controller="individual" action="list">Individuals</g:link></li>
 				<li><g:link controller="run" action="list">Runs</g:link></li>
-				<li><g:link controller="projectProgress" action="progress">Progress</g:link></li>
+                <sec:ifAllGranted roles="ROLE_OPERATOR">
+                    <li><g:link controller="projectProgress" action="progress">Progress</g:link></li>
+                </sec:ifAllGranted>
 				<li><g:link controller="processes" action="index">Processes</g:link></li>
                 <sec:ifNotLoggedIn>
                     <li><g:link controller="login" action="auth">| Login |</g:link></li>
@@ -35,7 +39,9 @@
                 <sec:ifLoggedIn>
                     <li><g:link controller="logout" action="index">| Logout |</g:link></li>
                 </sec:ifLoggedIn>
-				<li><g:link controller="runSubmit" action="index">Run Submit</g:link></li>
+                <sec:ifAllGranted roles="ROLE_OPERATOR">
+                    <li><g:link controller="runSubmit" action="index">Run Submit</g:link></li>
+                </sec:ifAllGranted>
 			</ul>
             <g:if test="${otp.environmentName() != 'production'}">
                 <p class="environmentName"><otp:environmentName/></p>
