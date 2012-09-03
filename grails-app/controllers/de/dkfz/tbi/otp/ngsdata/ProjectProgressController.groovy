@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.plugins.springsecurity.Secured
+
 class ProjectProgressCommand {
     Date startDate
     List projects
@@ -11,6 +13,7 @@ class ProjectProgressCommand {
     }
 }
 
+@Secured(['ROLE_OPERATOR'])
 class ProjectProgressController {
 
     def projectProgressService

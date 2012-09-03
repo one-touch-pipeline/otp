@@ -1,6 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
+
+import grails.plugins.springsecurity.Secured
 import de.dkfz.tbi.otp.ngsdata.WorkPackagesDSL
 
+@Secured(['ROLE_OPERATOR'])
 class OverviewMBController {
 
     def index() {
