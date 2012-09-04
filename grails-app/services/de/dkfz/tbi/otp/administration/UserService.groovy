@@ -91,6 +91,11 @@ class UserService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    int getUserCount() {
+        return User.count()
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     Boolean enableUser(Long userId, Boolean enable) throws UserNotFoundException {
         User user = User.get(userId)
         if (!user) {

@@ -54,7 +54,7 @@ class UserAdministrationController {
         dataToRender.sEcho = params.sEcho
         dataToRender.aaData = []
 
-        dataToRender.iTotalRecords = 10 // TODO: real value from core
+        dataToRender.iTotalRecords = userService.getUserCount()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
         List users = userService.getAllUsers(start, length)
