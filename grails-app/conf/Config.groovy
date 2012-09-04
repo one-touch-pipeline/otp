@@ -74,6 +74,12 @@ environments {
     development {
         grails.logging.jul.usebridge = true
         grails.serverURL = "${otpConfig.otp.server.url}${appName}"
+
+        // Backdoor config options for BackdoorFilter in development mode
+        if (!(otpConfig.otp.security.useBackdoor instanceof ConfigObject)) {
+            otp.security.useBackdoor = Boolean.parseBoolean(otpConfig.otp.security.useBackdoor)
+            otp.security.backdoorUser = otpConfig.otp.security.backdoorUser
+        }
     }
     production {
         grails.logging.jul.usebridge = false
