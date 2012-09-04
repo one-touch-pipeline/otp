@@ -82,7 +82,7 @@ $.otp.userAdministration.editUser = {
         "use strict";
         var link, id, container, userId, action;
         link = $(this);
-        id = link.prev().val();
+        id = $("input:hidden", link.parent()).val();
         container = link.parents("div")[0];
         userId = $($("input", container)[0]).val();
         action = $($("input", container)[1]).val();
@@ -213,7 +213,9 @@ $.otp.userAdministration.editUser = {
                 // create the new available group
                 var row = $("<tr></tr>").appendTo($("#availableGroups table tbody"));
                 $("<td title=\"" + data.group.description + "\">" +  data.group.name + "</td>").appendTo(row);
-                $("<td><input type=\"hidden\" value=\"" + data.group.id + "\"/><a href=\"#\" rel=\"userGroups-" + data.group.id + "\">" + $.i18n.prop("user.administration.userGroup.ui.addGroup") + "</a></td>").appendTo(row);
+                $("<td><input type=\"hidden\" value=\"" + data.group.id + "\"/><a href=\"#\" rel=\"userGroups-" + data.group.id + "\">" + $.i18n.prop("user.administration.userGroup.ui.addGroup") + "</a></td>")
+                    .appendTo(row)
+                    .click($.otp.userAdministration.editUser.addRemoveGroups);
                 this.resetFields($("#create-group-dialog"));
                 $("#create-group-dialog").dialog("close");
             } else if (data.errors) {
