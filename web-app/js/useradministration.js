@@ -58,10 +58,21 @@ $.otp.userAdministration.loadUserList = function () {
                         rowData[5] = createUserChangeMarkup(id, 'expireAccount', rowData[5]);
                         rowData[6] = createUserChangeMarkup(id, 'lockAccount', rowData[6]);
                         rowData[7] = createUserChangeMarkup(id, 'expirePassword', rowData[7]);
+                        rowData[8] = '<input type="hidden" value="' + rowData[1] + '"/><button>Switch to ' + rowData[1] + '</button>';
                     }
                     fnCallback(json);
                 }
             });
+        },
+        fnRowCallback: function (nRow) {
+            $("td:eq(8) button", nRow).click(function (event) {
+                var form;
+                event.preventDefault();
+                form = $("#switch-user-form");
+                $("input:hidden", form).val($("input:hidden", $(this).parent()).val());
+                form.submit();
+            });
+            return nRow;
         }
     });
 };

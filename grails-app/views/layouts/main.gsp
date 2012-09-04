@@ -38,6 +38,9 @@
                 </sec:ifNotLoggedIn>
                 <sec:ifLoggedIn>
                     <li><g:link controller="logout" action="index">| Logout |</g:link></li>
+                    <sec:ifSwitched>
+                        <li><a href='${request.contextPath}/j_spring_security_exit_user'>Resume as <sec:switchedUserOriginalUsername/></a></li>
+                    </sec:ifSwitched>
                 </sec:ifLoggedIn>
                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                     <li><g:link controller="runSubmit" action="index">Run Submit</g:link></li>

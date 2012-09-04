@@ -9,6 +9,9 @@
     <body>
         <h2><g:message code="user.administration.header"/></h2>
         <div>
+        <form id="switch-user-form" action="${request.contextPath}/j_spring_security_switch_user" method="POST">
+            <input type="hidden" name="j_username"/>
+        </form>
         <table id="userTable">
             <thead>
             <tr>
@@ -20,6 +23,7 @@
                 <th><g:message code="user.administration.list.accountExpired"/></th>
                 <th><g:message code="user.administration.list.accountLocked"/></th>
                 <th><g:message code="user.administration.list.passwordExpired"/></th>
+                <th>&nbsp;</th>
             </tr>
             </thead>
             <tbody></tbody>
@@ -33,6 +37,7 @@
                 <th><g:message code="user.administration.list.accountExpired"/></th>
                 <th><g:message code="user.administration.list.accountLocked"/></th>
                 <th><g:message code="user.administration.list.passwordExpired"/></th>
+                <th>&nbsp;</th>
             </tr>
             </tfoot>
         </table>
