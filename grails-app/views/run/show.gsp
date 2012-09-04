@@ -20,15 +20,15 @@
     <h1>General</h1>
 
     <table>
-       <tr> 
+       <tr>
             <td class="myKey">name</td>
             <td class="myValue">${run.name}</td>
-       </tr>  
-       <tr> 
+       </tr>
+       <tr>
             <td class="myKey">sequencing center</td>
             <td class="myValue">${run.seqCenter.name.toLowerCase()}</td>
        </tr>
-       <tr> 
+       <tr>
             <td class="myKey">sequencing technology</td>
             <td class="myValue">${run.seqPlatform}</td>
        </tr>
