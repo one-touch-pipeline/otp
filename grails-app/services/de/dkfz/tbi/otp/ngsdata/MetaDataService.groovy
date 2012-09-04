@@ -4,6 +4,7 @@ import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.access.prepost.PreFilter
 import org.springframework.security.access.prepost.PostAuthorize
 
 import de.dkfz.tbi.otp.utils.ReferencedClass
@@ -79,6 +80,7 @@ class MetaDataService {
      * @param entries The MetaDataEntries for which it should be checked whether there is a ChangeLog
      * @return Map of MetaDataEntries with boolean information as value whether there is a ChangeLog
      */
+    @PreFilter("((filterObject.dataFile.project != null) and hasPermission(filterObject.dataFile.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', 'read')) or ((filterObject.dataFile.run != null) and hasPermission(filterObject.dataFile.run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', 'read')) or hasRole('ROLE_OPERATOR')")
     Map<MetaDataEntry, Boolean> checkForChangelog(List<MetaDataEntry> entries) {
         ReferencedClass clazz = ReferencedClass.findByClassName(MetaDataEntry.class.getName())
         if (!clazz) {
@@ -109,6 +111,16 @@ class MetaDataService {
             return []
         }
         return ChangeLog.findAllByRowIdAndReferencedClass(entry.id, clazz)
+    }
+
+    /**
+     * Retrieves the DataFile identified by the given ID in an ACL aware manner.
+     * @param id The Id of the DataFile.
+     * @return DataFile if it exists, otherwise null
+     */
+    @PostAuthorize("(returnObject == null) or ((returnObject.project != null) and hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', 'read')) or ((returnObject.run != null) and hasPermission(returnObject.run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', 'read')) or hasRole('ROLE_OPERATOR')")
+    DataFile getDataFile(Long id) {
+        return DataFile.get(id)
     }
 
     private void processMetaDataFiles(Run run) {

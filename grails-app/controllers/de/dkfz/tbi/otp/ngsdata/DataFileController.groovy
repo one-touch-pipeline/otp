@@ -7,9 +7,17 @@ class DataFileController {
     def lsdfFilesService
     def metaDataService
 
-    def showDetails = {
+    def showDetails(ShowDetailsCommand cmd) {
+        if (cmd.hasErrors()) {
+            response.sendError(404)
+            return
+        }
 
-        DataFile dataFile = DataFile.get(params.id)
+        DataFile dataFile = metaDataService.getDataFile(cmd.id)
+        if (!dataFile) {
+            response.sendError(404)
+            return
+        }
         List<MetaDataEntry> entries = MetaDataEntry.findAllByDataFile(dataFile, [sort:"key.id"])
         Map<MetaDataEntry, Boolean> changelogs = metaDataService.checkForChangelog(entries)
 
@@ -57,4 +65,8 @@ class DataFileController {
         }
         render data as JSON
     }
+}
+
+class ShowDetailsCommand {
+    Long id
 }
