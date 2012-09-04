@@ -23,7 +23,7 @@
 
 		<div class="nav" role="navigation">
 			<ul>
-				<li><g:link url="${request.contextPath}">Home</g:link></li>
+				<li><g:link url="${request.contextPath}/">Home</g:link></li>
                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                     <li><g:link controller="overviewMB" action="index">Overview</g:link></li>
                 </sec:ifAllGranted>
@@ -32,7 +32,7 @@
                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                     <li><g:link controller="projectProgress" action="progress">Progress</g:link></li>
                 </sec:ifAllGranted>
-				<li><g:link controller="processes" action="index">Processes</g:link></li>
+				<li><g:link controller="processes" action="list">Processes</g:link></li>
                 <sec:ifNotLoggedIn>
                     <li><g:link controller="login" action="auth">| Login |</g:link></li>
                 </sec:ifNotLoggedIn>
