@@ -59,8 +59,41 @@ class IndividualService {
         if (!individual) {
             return null
         }
-        // TODO: navigate to Individual in ACL aware manner
-        return Individual.findByIdLessThan(individual.id, [sort: "id", order: "desc"])
+        if (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR")) {
+            // shortcut for operator
+            return Individual.findByIdLessThan(individual.id, [sort: "id", order: "desc"])
+        }
+        // for normal users
+        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
+        if (springSecurityService.isLoggedIn()) {
+            // anonymous users do not have a principal
+            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
+        }
+        String query = '''
+SELECT MAX(i.id) FROM Individual AS i, AclEntry AS ace
+JOIN i.project AS p
+JOIN ace.aclObjectIdentity AS aoi
+JOIN aoi.aclClass AS ac
+JOIN ace.sid AS sid
+WHERE
+aoi.objectId = p.id
+AND ac.className = :className
+AND sid.sid IN (:roles)
+AND ace.mask IN (:permissions)
+AND ace.granting = true
+AND i.id < :indId
+'''
+        Map params = [
+            className: Project.class.getName(),
+            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
+            roles: roles,
+            indId: individual.id
+        ]
+        List result = Individual.executeQuery(query, params)
+        if (!result) {
+            return null
+        }
+        return Individual.get(result[0] as Long)
     }
 
     /**
@@ -73,8 +106,41 @@ class IndividualService {
         if (!individual) {
             return null
         }
-        // TODO: navigate to Individual in ACL aware manner
-        return Individual.findByIdGreaterThan(individual.id, [sort: "id", order: "asc"])
+        if (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR")) {
+            // shortcut for operator
+            return Individual.findByIdGreaterThan(individual.id, [sort: "id", order: "asc"])
+        }
+        // for normal users
+        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
+        if (springSecurityService.isLoggedIn()) {
+            // anonymous users do not have a principal
+            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
+        }
+        String query = '''
+SELECT MIN(i.id) FROM Individual AS i, AclEntry AS ace
+JOIN i.project AS p
+JOIN ace.aclObjectIdentity AS aoi
+JOIN aoi.aclClass AS ac
+JOIN ace.sid AS sid
+WHERE
+aoi.objectId = p.id
+AND ac.className = :className
+AND sid.sid IN (:roles)
+AND ace.mask IN (:permissions)
+AND ace.granting = true
+AND i.id > :indId
+'''
+        Map params = [
+            className: Project.class.getName(),
+            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
+            roles: roles,
+            indId: individual.id
+        ]
+        List result = Individual.executeQuery(query, params)
+        if (!result) {
+            return null
+        }
+        return Individual.get(result[0] as Long)
     }
 
     /**
