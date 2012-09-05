@@ -1414,6 +1414,75 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNull(fourthStep2.next)
     }
 
+    /**
+     * Test for BUG: #OTP-57
+     */
+    void testRestartProcessingStepKeepsParameters() {
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition1 = createTestJob("test", jep)
+        jep.firstJob = jobDefinition1
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition2 = createTestJob("test2", jep)
+        jobDefinition1.next = jobDefinition2
+        assertNotNull(jobDefinition1.save())
+        JobDefinition jobDefinition3 = createTestEndStateAwareJob("test4", jep, jobDefinition2)
+        jobDefinition2.next = jobDefinition3
+        assertNotNull(jobDefinition2.save())
+        assertNotNull(jep.save(flush: true))
+
+        // create some parameter types
+        ParameterType type4 = new ParameterType(name: "passthrough", jobDefinition: jobDefinition2, parameterUsage: ParameterUsage.PASSTHROUGH)
+        assertNotNull(type4.save())
+        ParameterType type5 = new ParameterType(name: "constant", jobDefinition: jobDefinition2, parameterUsage: ParameterUsage.INPUT)
+        assertNotNull(type5.save())
+
+        // create the Mappings
+        ParameterMapping mapping1 = new ParameterMapping(from: ParameterType.findByNameAndJobDefinition("test", jobDefinition1), to: ParameterType.findByNameAndJobDefinition("input", jobDefinition2), job: jobDefinition2)
+        jobDefinition2.addToParameterMappings(mapping1)
+        ParameterMapping mapping2 = new ParameterMapping(from: ParameterType.findByNameAndJobDefinition("test2", jobDefinition1), to: type4, job: jobDefinition2)
+        jobDefinition2.addToParameterMappings(mapping2)
+        assertNotNull(jobDefinition2.save(flush: true))
+
+        // create the constant parameter for jobDefinition2
+        jobDefinition2.addToConstantParameters(new Parameter(type: type5, value: "foobar"))
+        assertNotNull(jobDefinition2.save(flush: true))
+
+        // start the Process
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        assertNotNull(process.save())
+        ProcessingStep firstStep = new ProcessingStep(jobDefinition: jobDefinition1, process: process)
+        assertNotNull(firstStep.save())
+        mockProcessingStepAsFinished(firstStep)
+        // create some output parameters for the step
+        firstStep.addToOutput(new Parameter(type: ParameterType.findByNameAndJobDefinition("test", jobDefinition1), value: "bar"))
+        firstStep.addToOutput(new Parameter(type: ParameterType.findByNameAndJobDefinition("test2", jobDefinition1), value: "foo"))
+        assertNotNull(firstStep.save(flush: true))
+
+        // create second ProcessingStep
+        ProcessingStep secondStep = new ProcessingStep(jobDefinition: jobDefinition2, process: process, previous: firstStep)
+        assertNotNull(secondStep.save())
+        firstStep.next = secondStep
+        assertNotNull(firstStep.save(flush: true))
+        mockProcessingStepAsFailed(secondStep)
+        process.finished = true
+        assertNotNull(process.save(flush: true))
+
+        // now let's restart the failed Processing Step
+        schedulerService.restartProcessingStep(secondStep, false)
+        RestartedProcessingStep restartedStep = RestartedProcessingStep.list().last()
+        assertNotNull(restartedStep)
+        assertSame(secondStep, restartedStep.original)
+        assertFalse(restartedStep.input.empty)
+        List<String> values = restartedStep.input.collect { it.value }.sort()
+        assertEquals(2, values.size())
+        assertEquals("bar", values[0])
+        assertEquals("foobar", values[1])
+        assertFalse(restartedStep.output.empty)
+        assertEquals(1, restartedStep.output.size())
+        assertEquals("foo", restartedStep.output[0].value)
+    }
+
     private ProcessingStepUpdate mockProcessingStepAsFinished(ProcessingStep step) {
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),

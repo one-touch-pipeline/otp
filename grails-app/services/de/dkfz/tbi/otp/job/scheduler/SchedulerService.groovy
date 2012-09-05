@@ -371,6 +371,11 @@ class SchedulerService {
                 log.fatal("Could not create a RestartedProcessingStep for ProcessingStep ${step.id}")
                 throw new SchedulerPersistencyException("Could not create a RestartedProcessingStep for ProcessingStep ${step.id}")
             }
+            // Limitation: in case the restartedStep is the first step of the Process and the Process had been started with Input Parameters
+            // those will not be available as it is difficult to map them back
+            // this is considered as a theoretical problem as input parameters to the first ProcessingStep are from a time when the ProcessParameter
+            // did not yet exist and all existing Workflows do not use this feature
+            mapInputParamatersToStep(restartedStep, step.previous ? step.previous.output  : [])
             // update the previous link
             if (restartedStep.previous) {
                 restartedStep.previous.next = restartedStep
@@ -463,26 +468,7 @@ class SchedulerService {
             // we have to save the next processing step as the ParameterMapping references the JobDefinition
             throw new SchedulerPersistencyException("Could not create new ProcessingStep for Process ${process.id}")
         }
-        input.each { Parameter param ->
-            List<ParameterMapping> mappings = ParameterMapping.findAllByFromAndJob(param.type, jobDefinition)
-            mappings.each { ParameterMapping mapping ->
-                Parameter nextParam = new Parameter(type: mapping.to, value: param.value)
-                if (mapping.to.parameterUsage == ParameterUsage.PASSTHROUGH) {
-                    step.addToOutput(nextParam)
-                } else {
-                    step.addToInput(nextParam)
-                }
-            }
-        }
-        // add constant parameters to the next processing step
-        Parameter failedConstantParameter = null
-        jobDefinition.constantParameters.each { Parameter param ->
-            if (param.type.parameterUsage != ParameterUsage.INPUT) {
-                failedConstantParameter = param
-                return // continue
-            }
-            step.addToInput(Parameter.get(param.id))
-        }
+        Parameter failedConstantParameter = mapInputParamatersToStep(step, input)
         step = step.save(flush: true)
         if (!step) {
             throw new SchedulerPersistencyException("Could not save the ProcessingStep for Process ${process.id}")
@@ -504,6 +490,39 @@ class SchedulerService {
             }
         }
         return step
+    }
+
+    /**
+     * Maps the given input parameters to the ProcessingStep and searches also for constant parameters and creates them.
+     *
+     * In case one of the constant parameters cannot be created it gets returned. In case everything works fine null is returned.
+     * @param step The ProcessingStep for which the Input Parameters need to be created
+     * @param input The Output Parameters of the previous Step to be mapped to the input
+     * @return Null in success case, failed constant parameter in error case
+     */
+    private Parameter mapInputParamatersToStep(ProcessingStep step, Collection<Parameter> input) {
+        JobDefinition jobDefinition = step.jobDefinition
+        input.each { Parameter param ->
+            List<ParameterMapping> mappings = ParameterMapping.findAllByFromAndJob(param.type, jobDefinition)
+            mappings.each { ParameterMapping mapping ->
+                Parameter nextParam = new Parameter(type: mapping.to, value: param.value)
+                if (mapping.to.parameterUsage == ParameterUsage.PASSTHROUGH) {
+                    step.addToOutput(nextParam)
+                } else {
+                    step.addToInput(nextParam)
+                }
+            }
+        }
+        // add constant parameters to the next processing step
+        Parameter failedConstantParameter = null
+        jobDefinition.constantParameters.each { Parameter param ->
+            if (param.type.parameterUsage != ParameterUsage.INPUT) {
+                failedConstantParameter = param
+                return // continue
+            }
+            step.addToInput(Parameter.get(param.id))
+        }
+        return failedConstantParameter
     }
 
     /**
