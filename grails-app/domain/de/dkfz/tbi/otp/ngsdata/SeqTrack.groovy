@@ -22,7 +22,7 @@ class SeqTrack {
     SeqPlatform seqPlatform
     SoftwareTool pipelineVersion
 
-    String qualityType // phred, illumina or null, to be replace by enum
+    String qualityType // TODO: phred, illumina or null, to be replace by enum
     DataProcessingState alignmentState = DataProcessingState.UNKNOWN
     DataProcessingState fastqcState = DataProcessingState.UNKNOWN
 

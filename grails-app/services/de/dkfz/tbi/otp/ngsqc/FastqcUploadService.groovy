@@ -17,10 +17,8 @@ import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqCenter
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-//import de.dkfz.tbi.otp.ngsdata.DataFormatException
 import de.dkfz.tbi.otp.ngsdata.FileNotReadableException
 import java.util.regex.*
-
 
 /**
  * Service providing methods to parse FastQC files and saving the parsed data to the database

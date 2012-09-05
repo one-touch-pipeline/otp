@@ -52,6 +52,6 @@ class ScriptFilesService {
 
     String getScriptDir(ScriptFileID index, Project project) {
         Realm realm = configService.getRealm(project, Realm.OperationType.DATA_PROCESSING)
-        String scriptDir = realm.programsRootPath + "/analysis_tools"
+        return realm.programsRootPath + "/analysis_tools"
     }
 }

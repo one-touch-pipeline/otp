@@ -4,6 +4,13 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.*
 import java.util.zip.*
 
+/**
+ * This service is used to run "fastqc" program. This service implements
+ * all conventions have output files of fastqc are organized. This service
+ * creates and update "FastqcDataFile" object and serves content of fastqc
+ * output file.
+ */
+
 class FastqcDataFilesService {
 
     def configService
@@ -30,13 +37,13 @@ class FastqcDataFilesService {
 
     private String fastqcFileName(DataFile dataFile) {
         String fileName = dataFile.fileName
-        String body = dataFile.fileName.substring(0, fileName.indexOf("."))
+        String body = fileName.substring(0, fileName.indexOf("."))
         return "${body}${fastqcFileSuffix}"
     }
 
     public Realm fastqcRealm(SeqTrack seqTrack) {
-        Individual individual = seqTrack.sample.individual
-        Realm realm = configService.getRealmDataProcessing(individual.project)
+        Project project = seqTrack.sample.individual.project
+        return configService.getRealmDataProcessing(project)
     }
 
     public void createFastqcProcessedFile(DataFile dataFile) {

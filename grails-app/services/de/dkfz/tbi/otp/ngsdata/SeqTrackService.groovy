@@ -1,12 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import java.util.List;
 
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 
 class SeqTrackService {
 
-    def FileTypeService
+    def fileTypeService
 
     public SeqTrack getSeqTrackReadyForFastqcProcessing() {
         return SeqTrack.findByFastqcState(SeqTrack.DataProcessingState.NOT_STARTED)

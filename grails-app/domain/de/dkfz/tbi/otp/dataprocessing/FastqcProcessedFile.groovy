@@ -2,6 +2,13 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.DataFile
 
+/**
+ * One object of FastqcProcessedFile represents one output file
+ * of "fastqc" program. It belongs to dataFile object which represents
+ * original sequence file and keep track of the status: if the file exists
+ * and if it content was uploaded to data base.
+ */
+
 class FastqcProcessedFile {
 
     boolean fileExists = false

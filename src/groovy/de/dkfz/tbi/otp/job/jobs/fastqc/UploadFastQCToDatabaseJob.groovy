@@ -10,10 +10,8 @@ import org.springframework.stereotype.Component
 /**
  */
 @Component("uploadFastQCToDatabaseJob")
-//class UploadFastQCToDatabaseJob extends AbstractJobImpl {
 class UploadFastQCToDatabaseJob extends AbstractEndStateAwareJobImpl {
 
-    /** FastQC files service */
     @Autowired
     FastqcUploadService fastqcUploadService
 
@@ -23,10 +21,6 @@ class UploadFastQCToDatabaseJob extends AbstractEndStateAwareJobImpl {
     @Autowired
     SeqTrackService seqTrackService
 
-    /**
-     * Check if all files are in the final location
-     * @throws Exception
-     */
     @Override
     public void execute() throws Exception {
         long seqTrackId =  Long.parseLong(getProcessParameterValue())

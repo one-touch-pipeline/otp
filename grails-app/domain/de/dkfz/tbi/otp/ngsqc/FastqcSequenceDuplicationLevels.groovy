@@ -22,7 +22,7 @@ class FastqcSequenceDuplicationLevels {
     double relativeCount
 
     static constraints = {
-        duplicationLevel(min: 1, max:10)
+        duplicationLevel(min: 1, max: 10)
         relativeCount(min: 0D)
     }
 

@@ -1,19 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.common.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.job.processing.*
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import grails.util.GrailsUtil
 
 class DataProcessingFilesService {
 
-    ConfigService configService
-
-    def grailsApplication
+    def configService
 
     public enum OutputDirectories {
         BASE,
@@ -26,9 +18,9 @@ class DataProcessingFilesService {
         STRUCTURAL_VARIATION
     }
 
-    private String getOutputStem(Individual individual) {
+    private String getOutputRoot(Individual individual) {
         if (!individual) {
-            throw new RuntimeException("individual must not be null")
+            throw new IllegalArgumentException("individual must not be null")
         }
         Project project = individual.project
         Realm realm = configService.getRealmDataProcessing(project)
@@ -46,9 +38,8 @@ class DataProcessingFilesService {
     }
 
     public String getOutputDirectory(Individual individual, OutputDirectories dir) {
-        String outputBaseDir = getOutputStem(individual)
+        String outputBaseDir = getOutputRoot(individual)
         String postfix = (!dir || dir == OutputDirectories.BASE) ? "" : "${dir.toString().toLowerCase()}/"
-        String outputDirectory = "${outputBaseDir}/results_per_pid/${individual.pid}/${postfix}"
-        return outputDirectory
+        return "${outputBaseDir}/results_per_pid/${individual.pid}/${postfix}"
     }
 }
