@@ -125,7 +125,7 @@
                         <td class="${file.fileLinked}">linked</td>
                         <td>${String.format("%.1f GB", file.fileSize/1e9)}</td>
                         <td>${file.dateFileSystem ? (new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd") : '&nbsp;' }</td>
-                        <td></td>
+                        <td>&nbsp;</td>
                     </tr>
                 </g:each>
             </g:each> 

@@ -5,10 +5,10 @@ import de.dkfz.tbi.otp.job.processing.*
 import java.util.zip.*
 
 /**
- * This service is used to run "fastqc" program. This service implements
- * all conventions have output files of fastqc are organized. This service
- * creates and update "FastqcDataFile" object and serves content of fastqc
- * output file.
+ * This service is used by jobs running "fastqc" program.
+ * Implements all conventions of organization of fastqc output files.
+ * Creates and updates "FastqcDataFile" object.
+ * Serves content of fastqc zipped output file.
  */
 
 class FastqcDataFilesService {
@@ -56,7 +56,7 @@ class FastqcDataFilesService {
         if (fastqcFile.canRead()) {
             fastqc.fileExists = true
             fastqc.fileSize = fastqcFile.length()
-            fastqc.dateFileSystem = new Date(fastqcFile.lastModified())
+            fastqc.dateFromFileSystem = new Date(fastqcFile.lastModified())
         }
         assert(fastqc.save(flush: true))
     }
@@ -78,7 +78,7 @@ class FastqcDataFilesService {
            throw new FileNotReadableException(input.path)
        }
        ZipFile zipFile = new ZipFile(input)
-       String zipBasePath = zipPath.substring(zipPath.lastIndexOf("/")+1,zipPath.lastIndexOf(".zip"))
+       String zipBasePath = zipPath.substring(zipPath.lastIndexOf("/")+1, zipPath.lastIndexOf(".zip"))
        ZipEntry zipEntry = zipFile.getEntry("${zipBasePath}/${withinZipPath}")
        return zipFile.getInputStream(zipEntry)
    }

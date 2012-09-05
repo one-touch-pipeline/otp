@@ -16,13 +16,13 @@ class FastqcProcessedFile {
     long fileSize = -1
 
     Date dateCreated = new Date()
-    Date dateFileSystem = null
+    Date dateFromFileSystem = null
 
     static belongsTo = [
         dataFile: DataFile
     ]
 
     static constraints = {
-        dateFileSystem(nullable: true)
+        dateFromFileSystem(nullable: true)
     }
 }

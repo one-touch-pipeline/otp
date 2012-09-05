@@ -19,9 +19,14 @@ or hasRole('ROLE_OPERATOR')
         return FastqcProcessedFile.findByDataFileAndContentUploaded(dataFile, true)
     }
 
+    // ACL: access to dataFile
+    public FastqcProcessedFile fastqcProcessedFile(DataFile dataFile) {
+        return FastqcProcessedFile.findByDataFile(dataFile)
+    }
+
     // Needs ACLs ?
     public boolean isFastqcAvailable(Run run) {
-        return (boolean) fastqcFilesForRun(run)
+        return !fastqcFilesForRun(run).empty
     }
 
     private List<FastqcProcessedFile> fastqcFilesForRun(Run run) {
@@ -44,8 +49,7 @@ or hasRole('ROLE_OPERATOR')
         seqTracks.each { SeqTrack seqTrack ->
             List<DataFile> files = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
             files.each { DataFile file ->
-                boolean state = isFastqcAvailable(file)
-                map.put(file.id, state)
+                map.put(file.id, isFastqcAvailable(file))
             }
         }
         return map
@@ -54,15 +58,14 @@ or hasRole('ROLE_OPERATOR')
     /**
      * This function generates condensed overview of the fastqc results.
      * The function is documented due too usage of Map as output
-     * @param Run run 
+     * @param Run run
      * @return map with the id of the dataFile as key and string with condensed info
      */
     // Needs for ACLs not clear
     public Map<Long, String> fastqcSummaryMap(Run run) {
         Map<Long, String> results = [:]
-        for(FastqcProcessedFile fastqc in fastqcFilesForRun(run)) {
-            String info = fastqcSummaryForDataFile(fastqc)
-            results.put(fastqc.dataFile.id, info)
+        for (FastqcProcessedFile fastqc in fastqcFilesForRun(run)) {
+            results.put(fastqc.dataFile.id, fastqcSummaryForDataFile(fastqc))
         }
         return results
     }
@@ -74,33 +77,29 @@ or hasRole('ROLE_OPERATOR')
             FastqcModuleStatus.Status.FAIL
         ]
         List<Integer> N = []
-        for(FastqcModuleStatus.Status status in statusList) {
+        for (FastqcModuleStatus.Status status in statusList) {
             N << FastqcModuleStatus.countByFastqcProcessedFileAndStatus(fastqc, status)
         }
         return "(${N.get(0)}/${N.get(1)}/${N.get(2)})"
     }
 
     // Needs ACLs: prerequisite access to dataFile
-    public List<FastqcModuleStatus> moduleStatusForDataFile(DataFile dataFile) {
-        FastqcProcessedFile fastqc = FastqcProcessedFile.findByDataFile(dataFile)
+    public List<FastqcModuleStatus> moduleStatusForDataFile(FastqcProcessedFile fastqc) {
         return FastqcModuleStatus.findAllByFastqcProcessedFile(fastqc)
     }
 
     // Needs ACLs: prerequisite access to dataFile
-    public FastqcBasicStatistics basicStatisticsForDataFile(DataFile dataFile) {
-        FastqcProcessedFile fastqc = FastqcProcessedFile.findByDataFile(dataFile)
+    public FastqcBasicStatistics basicStatisticsForDataFile(FastqcProcessedFile fastqc) {
         return FastqcBasicStatistics.findByFastqcProcessedFile(fastqc)
     }
 
     // Needs ACLs: prerequisite access to dataFile
-    public List<FastqcKmerContent> kmerContentForDataFile(DataFile dataFile) {
-        FastqcProcessedFile fastqc = FastqcProcessedFile.findByDataFile(dataFile)
+    public List<FastqcKmerContent> kmerContentForDataFile(FastqcProcessedFile fastqc) {
         return FastqcKmerContent.findAllByFastqcProcessedFile(fastqc)
     }
 
     // Needs ACLs: prerequisite access to dataFile
-    public List<FastqcOverrepresentedSequences> overrepresentedSequencesForDataFile(DataFile dataFile) {
-        FastqcProcessedFile fastqc = FastqcProcessedFile.findByDataFile(dataFile)
+    public List<FastqcOverrepresentedSequences> overrepresentedSequencesForDataFile(FastqcProcessedFile fastqc) {
         return FastqcOverrepresentedSequences.findAllByFastqcProcessedFile(fastqc)
     }
 }

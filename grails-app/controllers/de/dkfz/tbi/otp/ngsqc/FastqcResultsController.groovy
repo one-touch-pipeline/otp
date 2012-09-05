@@ -1,7 +1,13 @@
 package de.dkfz.tbi.otp.ngsqc
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.*
 import grails.converters.JSON
+
+class RenderFileCommand {
+    long id
+    String withinZipPath
+}
 
 class FastqcResultsController {
 
@@ -15,7 +21,8 @@ class FastqcResultsController {
             response.sendError(404)
             return
         }
-        List<FastqcModuleStatus> modules = fastqcResultsService.moduleStatusForDataFile(dataFile)
+        FastqcProcessedFile fastqc = fastqcResultsService.fastqcProcessedFile(dataFile)
+        List<FastqcModuleStatus> modules = fastqcResultsService.moduleStatusForDataFile(fastqc)
         Map<String, String> moduleStatus = [:]
         Map<String, String> moduleText = [:]
         modules.each {
@@ -27,9 +34,9 @@ class FastqcResultsController {
             fileName: dataFile.fileName,
             moduleStatus: moduleStatus,
             moduleText: moduleText,
-            basicStats: fastqcResultsService.basicStatisticsForDataFile(dataFile),
-            kmerContent: fastqcResultsService.kmerContentForDataFile(dataFile),
-            overrepSeq: fastqcResultsService.overrepresentedSequencesForDataFile(dataFile)
+            basicStats: fastqcResultsService.basicStatisticsForDataFile(fastqc),
+            kmerContent: fastqcResultsService.kmerContentForDataFile(fastqc),
+            overrepSeq: fastqcResultsService.overrepresentedSequencesForDataFile(fastqc)
         ]
     }
 
@@ -37,10 +44,14 @@ class FastqcResultsController {
      * All images and flat text files from fastqc are zipped.
      * So this closure is used to get content to be rendered by the browser from within the fastqc zip file
      */
-    def renderFromZip(String id, String withinZipPath) {
-        DataFile dataFile = DataFile.get(id as long)
+    def renderFile(RenderFileCommand cmd) {
+        if (cmd.hasErrors()) {
+            response.sendError(404)
+            return
+        }
+        DataFile dataFile = DataFile.get(cmd.id)
         String zipPath = fastqcDataFilesService.fastqcOutputFile(dataFile)
-        response.outputStream << fastqcDataFilesService.getInputStreamFromZip(zipPath, withinZipPath)
+        response.outputStream << fastqcDataFilesService.getInputStreamFromZip(zipPath, cmd.withinZipPath)
         response.outputStream.flush()
     }
 }
