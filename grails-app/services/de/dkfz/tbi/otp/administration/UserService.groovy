@@ -359,6 +359,16 @@ class UserService {
         return role
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    User getNextUser(User user) {
+        return User.findByIdGreaterThan(user.id, [sort: "id", oder: "asc"])
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    User getPreviousUser(User user) {
+        return User.findByIdLessThan(user.id, [sort: "id", order: "desc"])
+    }
+
     boolean persistAdminWithRoles(User person) {
         boolean ok = true
         User.withTransaction { TransactionStatus status ->

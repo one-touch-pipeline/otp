@@ -132,7 +132,9 @@ class UserAdministrationController {
                 availableGroups << group
             }
         }
-        [user: user, roles: userService.getAllRoles(), userRoles: userService.getRolesForUser(params.id as Long), groups: availableGroups, userGroups: userGroups]
+        [user: user, roles: userService.getAllRoles(), userRoles: userService.getRolesForUser(params.id as Long), groups: availableGroups, userGroups: userGroups,
+            next: userService.getNextUser(user),
+            previous: userService.getPreviousUser(user)]
     }
 
     /**
