@@ -5,7 +5,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import grails.converters.JSON
 
 class RenderFileCommand {
-    long id
+    Long id
     String withinZipPath
 }
 

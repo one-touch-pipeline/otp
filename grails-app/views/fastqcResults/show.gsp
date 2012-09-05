@@ -14,7 +14,7 @@
         <h1><g:message code="fastqc.show.fastqcReport"/></h1>
         <div class="modules">
           <div class="module" align="right">
-            <g:link target="_blank" controller="fastqcResults" action="renderFromZip" params="[id: id, withinZipPath: 'fastqc_data.txt']">fastqc_data.txt</g:link>
+            <g:link target="_blank" controller="fastqcResults" action="renderFile" params="[id: id, withinZipPath: 'fastqc_data.txt']">fastqc_data.txt</g:link>
           </div>
           <div class="module">
             <table>
@@ -62,50 +62,50 @@
 
           <div id="PER_BASE_SEQUENCE_QUALITY" class="module">
             <div class="${moduleStatus.PER_BASE_SEQUENCE_QUALITY}"><h2><g:message code="fastqc.perBaseSequenceQuality"/></h2></div>
-            <a href="${createLink(controller: 'fastqcResults', action: 'renderFromZip', params : [id:id ,withinZipPath : 'Images/per_base_quality.png'])}" rel="lightbox[fastqc]" title="Per base sequence quality">
-              <img class="small" src="${createLink(controller: 'fastqcResults', action: 'renderFromZip', params : [id:id ,withinZipPath : 'Images/per_base_quality.png'])}"/>
+            <a href="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id ,withinZipPath : 'Images/per_base_quality.png'])}" rel="lightbox[fastqc]" title="Per base sequence quality">
+              <img class="small" src="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id ,withinZipPath : 'Images/per_base_quality.png'])}"/>
             </a>
           </div>
           <div id="PER_SEQUENCE_QUALITY_SCORES" class="module">
             <div class="${moduleStatus.PER_SEQUENCE_QUALITY_SCORES}"><h2><g:message code="fastqc.perSequenceQualityScores"/></h2></div>
-            <a href="${createLink(controller: 'fastqcResults', action: 'renderFromZip', params : [id:id ,withinZipPath : 'Images/per_sequence_quality.png'])}" rel="lightbox[fastqc]" title="Per sequence quality scores">
-              <img class="small" src="${createLink(controller: 'fastqcResults', action: 'renderFromZip', params : [id:id ,withinZipPath : 'Images/per_sequence_quality.png'])}"/>
+            <a href="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id ,withinZipPath : 'Images/per_sequence_quality.png'])}" rel="lightbox[fastqc]" title="Per sequence quality scores">
+              <img class="small" src="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id ,withinZipPath : 'Images/per_sequence_quality.png'])}"/>
             </a>
           </div>
           <div id="PER_BASE_SEQUENCE_CONTENT" class="module">
             <div class="${moduleStatus.PER_BASE_SEQUENCE_CONTENT}"><h2><g:message code="fastqc.perBaseSequenceContent"/></h2></div>
-            <a href="${createLink(controller: 'fastqcResults', action: 'renderFromZip', params : [id:id ,withinZipPath : 'Images/per_base_sequence_content.png'])}" rel="lightbox[fastqc]" title="Per base sequence content">
-            <img class="small" onClick="resizeMe(this);" src="${createLink(controller: 'fastqcResults', action: 'renderFromZip', params : [id:id, withinZipPath : 'Images/per_base_sequence_content.png'])}"/>
+            <a href="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id ,withinZipPath : 'Images/per_base_sequence_content.png'])}" rel="lightbox[fastqc]" title="Per base sequence content">
+            <img class="small" onClick="resizeMe(this);" src="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id, withinZipPath : 'Images/per_base_sequence_content.png'])}"/>
             </a>
           </div>
           <div id="PER_BASE_GC_CONTENT" class="module">
             <div class="${moduleStatus.PER_BASE_GC_CONTENT}"><h2><g:message code="fastqc.perBaseGCContent"/></h2></div>
-            <a href="${createLink(controller: 'fastqcResults', action: 'renderFromZip', params : [id:id ,withinZipPath : 'Images/per_base_gc_content.png'])}" rel="lightbox[fastqc]" title="Per base GC content">
-            <img class="small" onClick="resizeMe(this);" src="${createLink(controller: 'fastqcResults', action: 'renderFromZip', params : [id:id, withinZipPath:'Images/per_base_gc_content.png'])}"/>
+            <a href="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id ,withinZipPath : 'Images/per_base_gc_content.png'])}" rel="lightbox[fastqc]" title="Per base GC content">
+            <img class="small" onClick="resizeMe(this);" src="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id, withinZipPath:'Images/per_base_gc_content.png'])}"/>
             </a>
           </div>
           <div id="PER_SEQUENCE_GC_CONTENT" class="module">
             <div class="${moduleStatus.PER_SEQUENCE_GC_CONTENT}"><h2><g:message code="fastqc.perSequenceGCContent"/></h2></div>
-            <a href="${createLink(controller: 'fastqcResults', action: 'renderFromZip', params : [id:id ,withinZipPath : 'Images/per_sequence_gc_content.png'])}" rel="lightbox[fastqc]" title="Per sequence GC content">
-              <img class="small" src="${createLink(controller: 'fastqcResults', action: 'renderFromZip', params : [id:id, withinZipPath:'Images/per_sequence_gc_content.png'])}"/>
+            <a href="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id ,withinZipPath : 'Images/per_sequence_gc_content.png'])}" rel="lightbox[fastqc]" title="Per sequence GC content">
+              <img class="small" src="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id, withinZipPath:'Images/per_sequence_gc_content.png'])}"/>
             </a>
           </div>
           <div id="PER_BASE_N_CONTENT" class="module">
             <div class="${moduleStatus.PER_BASE_N_CONTENT}"><h2><g:message code="fastqc.perBaseNContent"/></h2></div>
-            <a href="${createLink(controller: 'fastqcResults', action: 'renderFromZip', params : [id:id ,withinZipPath : 'Images/per_base_n_content.png'])}" rel="lightbox[fastqc]" title="Per base N content">
-              <img class="small" onClick="resizeMe(this);" src="${createLink(controller: 'fastqcResults', action: 'renderFromZip', params : [id:id, withinZipPath:'Images/per_base_n_content.png'])}"/>
+            <a href="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id ,withinZipPath : 'Images/per_base_n_content.png'])}" rel="lightbox[fastqc]" title="Per base N content">
+              <img class="small" onClick="resizeMe(this);" src="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id, withinZipPath:'Images/per_base_n_content.png'])}"/>
             <a>
           </div>
           <div id="SEQUENCE_LENGTH_DISTRIBUTION" class="module">
             <div class="${moduleStatus.SEQUENCE_LENGTH_DISTRIBUTION}"><h2><g:message code="fastqc.sequenceLengthDistribution"/></h2></div>
-            <a href="${createLink(controller: 'fastqcResults', action: 'renderFromZip', params : [id:id ,withinZipPath : 'Images/sequence_length_distribution.png'])}" rel="lightbox[fastqc]" title="Sequence length distribution">
-              <img class="small" src="${createLink(controller: 'fastqcResults', action: 'renderFromZip', params : [id:id, withinZipPath:'Images/sequence_length_distribution.png'])}"/>
+            <a href="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id ,withinZipPath : 'Images/sequence_length_distribution.png'])}" rel="lightbox[fastqc]" title="Sequence length distribution">
+              <img class="small" src="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id, withinZipPath:'Images/sequence_length_distribution.png'])}"/>
             </a>
           </div>
           <div id="SEQUENCE_DUPLICATION_LEVELS" class="module">
             <div class="${moduleStatus.SEQUENCE_DUPLICATION_LEVELS}"><h2><g:message code="fastqc.sequenceDuplicationLevels"/></h2></div>
-            <a href="${createLink(controller: 'fastqcResults', action: 'renderFromZip', params : [id:id ,withinZipPath : 'Images/duplication_levels.png'])}" rel="lightbox[fastqc]" title="Sequence Duplication Levels">
-              <img  class="small" src="${createLink(controller: 'fastqcResults', action: 'renderFromZip', params : [id:id, withinZipPath:'Images/duplication_levels.png'])}"/>
+            <a href="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id ,withinZipPath : 'Images/duplication_levels.png'])}" rel="lightbox[fastqc]" title="Sequence Duplication Levels">
+              <img  class="small" src="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id, withinZipPath:'Images/duplication_levels.png'])}"/>
             </a>
           </div>
           <div id="OVERREPRESENTED_SEQUENCES" class="module">
@@ -139,8 +139,8 @@
               <g:message code="fastqc.show.noKmerContent"/>
             </g:if>
             <g:else>
-              <a href="${createLink(controller: 'fastqcResults', action: 'renderFromZip', params : [id:id, withinZipPath: 'Images/kmer_profiles.png'])}" rel="lightbox[fastqc]" title="Kmer content">
-                <img  class="small" src="${createLink(controller: 'fastqcResults', action: 'renderFromZip', params : [id:id, withinZipPath:'Images/kmer_profiles.png'])}"/>
+              <a href="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id, withinZipPath: 'Images/kmer_profiles.png'])}" rel="lightbox[fastqc]" title="Kmer content">
+                <img  class="small" src="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id, withinZipPath:'Images/kmer_profiles.png'])}"/>
               </a>
               <br/><br/>
               <table>

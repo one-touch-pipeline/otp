@@ -128,7 +128,7 @@
                         <td>&nbsp;</td>
                     </tr>
                 </g:each>
-            </g:each> 
+            </g:each>
             </tbody>
         </table>
         </g:each>
