@@ -54,14 +54,12 @@ class ProcessingOptionService {
     }
 
     private ProcessingOption findStrict(String name, String type, Project project) {
-        return ProcessingOption.withCriteria(uniqueResult: true) {
-            and {
-                eq("name", name)
-                eq("type", type)
-                eq("project", project)
-                eq("dateObsoleted", null)
-            }
-        }
+        return ProcessingOption.findWhere(
+            name: name,
+            type: type,
+            project: project,
+            dateObsoleted: null
+        )
     }
 
     public String findOption(String name, String type, Project project) {
@@ -80,10 +78,9 @@ class ProcessingOptionService {
      */
     public long findOptionAsNumber(String name, String type, Project project, long defaultValue) {
         String value = findOptionSafe(name, type, project)
-        try {
-            return (new Long(value)).longValue
-        } catch(NumberFormatException e) {
-            return defaultValue
+        if (value.isLong()) {
+            return value.toLong()
         }
+        return defaultValue
     }
 }

@@ -248,10 +248,16 @@ class ExecutionService {
         for (String pbsId in pbsIds) {
             stats.put(pbsId, false)
             for (Realm realm in realms) {
-                String cmd = "qstat ${pbsId}"
-                String tmpStat = executeCommand(realm, cmd)
-                Boolean running = isRunning(tmpStat)
-                if (running) {
+                try {
+                    String cmd = "qstat ${pbsId}"
+                    String tmpStat = executeCommand(realm, cmd)
+                    Boolean running = isRunning(tmpStat)
+                    if (running) {
+                        stats.put(pbsId, true)
+                    }
+                } catch (Exception e) {
+                    // catch all exceptions and assume the job is still running
+                    log.debug e.stackTrace()
                     stats.put(pbsId, true)
                 }
             }
