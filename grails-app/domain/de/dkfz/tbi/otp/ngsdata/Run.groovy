@@ -37,6 +37,7 @@ class Run {
         dateExecuted(nullable: true)
         dateCreated()
         dataQuality(nullable: true)
+        qualityEvaluated(nullable: true)
     }
 
     String toString() {

@@ -47,7 +47,7 @@ class SeqTrackService {
             and {
                 eq("fastqcState", SeqTrack.DataProcessingState.FINISHED)
                 run {
-                    lt("qualityEvaluated", false)
+                    eq("qualityEvaluated", false)
                 }
             }
         }
