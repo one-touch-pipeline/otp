@@ -23,6 +23,9 @@ class Run {
     enum StorageRealm {DKFZ, BIOQUANT, MIXED}
     StorageRealm storageRealm
 
+    Double dataQuality = null
+    boolean qualityEvaluated = false
+
     static belongsTo = [
         SeqCenter,
         SeqPlatform
@@ -33,6 +36,7 @@ class Run {
         storageRealm(nullable: true)
         dateExecuted(nullable: true)
         dateCreated()
+        dataQuality(nullable: true)
     }
 
     String toString() {

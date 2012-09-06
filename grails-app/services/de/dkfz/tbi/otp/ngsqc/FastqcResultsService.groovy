@@ -29,7 +29,8 @@ or hasRole('ROLE_OPERATOR')
         return !fastqcFilesForRun(run).empty
     }
 
-    private List<FastqcProcessedFile> fastqcFilesForRun(Run run) {
+    // ACL ?
+    public List<FastqcProcessedFile> fastqcFilesForRun(Run run) {
         def c = FastqcProcessedFile.createCriteria()
         List<FastqcProcessedFile> files = c.list {
             and {

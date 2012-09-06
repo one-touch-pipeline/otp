@@ -32,6 +32,34 @@ class SeqTrackService {
         return filteredFiles
     }
 
+    public Run getRunReadyForFastqcSummary() {
+        List<Run> runsInProgress = getCandidatesForFastqcSummary()
+        for (Run run in runsInProgress) {
+            if (isRunReadyForFastqcSummary(run)) {
+                return run
+            }
+        }
+        return null
+    }
+
+    private List<Run> getCandidatesForFastqcSummary() {
+        List<SeqTrack> tracks = SeqTrack.withCriteria {
+            and {
+                eq("fastqcState", SeqTrack.DataProcessingState.FINISHED)
+                run {
+                    lt("qualityEvaluated", false)
+                }
+            }
+        }
+        return tracks*.run
+    }
+
+    private boolean isRunReadyForFastqcSummary(Run run) {
+        int nFinished = SeqTrack.countByRunAndFastqcState(run, SeqTrack.DataProcessingState.FINISHED)
+        int nTotal = SeqTrack.countByRun(run)
+        return (nTotal == nFinished)
+    }
+
     /**
      *
      * A sequence track corresponds to one lane in Illumina

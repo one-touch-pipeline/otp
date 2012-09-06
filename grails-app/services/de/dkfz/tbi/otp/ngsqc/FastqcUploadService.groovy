@@ -1,21 +1,6 @@
 package de.dkfz.tbi.otp.ngsqc
 
-import de.dkfz.tbi.otp.ngsqc.FastqcModule
-import de.dkfz.tbi.otp.ngsqc.FastqcModuleStatus
-import de.dkfz.tbi.otp.ngsqc.FastqcPerBaseSequenceAnalysis
-import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
-import de.dkfz.tbi.otp.ngsqc.FastqcModuleStatus
-import de.dkfz.tbi.otp.ngsqc.FastqcKmerContent
-import de.dkfz.tbi.otp.ngsqc.FastqcSequenceDuplicationLevels
-import de.dkfz.tbi.otp.ngsqc.FastqcPerSequenceGCContent
-import de.dkfz.tbi.otp.ngsqc.FastqcPerSequenceQualityScores
-import de.dkfz.tbi.otp.ngsqc.FastqcOverrepresentedSequences
-import de.dkfz.tbi.otp.ngsqc.FastqcSequenceLengthDistribution
-import de.dkfz.tbi.otp.ngsdata.Run
-import de.dkfz.tbi.otp.ngsdata.FileType
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqCenter
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.FileNotReadableException
 import java.util.regex.*

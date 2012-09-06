@@ -75,9 +75,10 @@ class RunController {
                 run.dateExecuted?.format("yyyy-MM-dd"),
                 run.blacklisted,
                 run.multipleSource,
-                fastqcResultsService.isFastqcAvailable(run)
+                run.qualityEvaluated ? String.format("%.2f", run.dataQuality) : "NaN"
             ]
         }
         render dataToRender as JSON
     }
+
 }

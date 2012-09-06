@@ -275,6 +275,9 @@ AND r.id > :runId
         case 6:
             sortColumn = "multipleSource"
             break
+        case 7:
+            sortColumn = "dataQuality"
+            break
         case 0:
         default:
             sortColumn = "id"
