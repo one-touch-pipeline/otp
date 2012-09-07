@@ -9,6 +9,12 @@ class SeqTrack {
         FINISHED
     }
 
+    enum QualityEncoding {
+        UNKNOWN,
+        PHRED,
+        ILLUMINA
+    }
+
     String laneId
     boolean hasFinalBam = false
     boolean hasOriginalBam = false
@@ -22,7 +28,7 @@ class SeqTrack {
     SeqPlatform seqPlatform
     SoftwareTool pipelineVersion
 
-    String qualityType // TODO: phred, illumina or null, to be replace by enum
+    QualityEncoding qualityEncoding = QualityEncoding.UNKNOWN
     DataProcessingState alignmentState = DataProcessingState.UNKNOWN
     DataProcessingState fastqcState = DataProcessingState.UNKNOWN
 
@@ -41,7 +47,6 @@ class SeqTrack {
         seqType()
         sample()
         pipelineVersion()
-        qualityType(nullable: true)
     }
 
     String nBaseString() {
