@@ -12,6 +12,9 @@ class CheckViewByPidJob extends AbstractEndStateAwareJobImpl {
     @Autowired
     FilesCompletenessService filesCompletenessService
 
+    @Autowired
+    SeqTrackService seqTrackService
+
     /**
      * Check if all files are linked in the view by pid structure
      *
@@ -22,6 +25,7 @@ class CheckViewByPidJob extends AbstractEndStateAwareJobImpl {
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
         if (filesCompletenessService.checkViewByPid(run)) {
+            seqTrackService.setRunReadyForFastqc(run)
             succeed()
         } else {
             fail()

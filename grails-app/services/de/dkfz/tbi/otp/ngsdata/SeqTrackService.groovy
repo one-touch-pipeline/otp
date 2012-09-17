@@ -7,6 +7,14 @@ class SeqTrackService {
 
     def fileTypeService
 
+    public void setRunReadyForFastqc(Run run) {
+        def unknown = SeqTrack.DataProcessingState.UNKNOWN
+        SeqTrack.findAllByRunAndFastqcState(run, unknown).each { SeqTrack seqTrack ->
+            seqTrack.fastqcState = SeqTrack.DataProcessingState.NOT_STARTED
+            assert(seqTrack.save(flush: true))
+        }
+    }
+
     public SeqTrack getSeqTrackReadyForFastqcProcessing() {
         return SeqTrack.findByFastqcState(SeqTrack.DataProcessingState.NOT_STARTED)
     }
