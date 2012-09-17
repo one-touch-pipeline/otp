@@ -266,3 +266,5 @@ grails.plugins.springsecurity.useSwitchUserFilter = true
 if (pluginsToExclude) {
     grails.plugin.exclude = pluginsToExclude
 }
+
+grails.plugin.databasemigration.changelogFileName = 'changelog.xml'
