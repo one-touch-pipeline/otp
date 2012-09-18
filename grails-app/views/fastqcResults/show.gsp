@@ -5,8 +5,6 @@
     <meta name="layout" content="main"/>
     <title><g:message code="fastqc.show.fastqcReport"/></title>
     <r:require module="lightbox"/>
-<!--It does not work with older versions of jquery... that is why this is here... actual jquery version 1.6.1.1 -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
   </head>
   <body>
     <div class="body">
@@ -94,7 +92,7 @@
             <div class="${moduleStatus.PER_BASE_N_CONTENT}"><h2><g:message code="fastqc.perBaseNContent"/></h2></div>
             <a href="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id ,withinZipPath : 'Images/per_base_n_content.png'])}" rel="lightbox[fastqc]" title="Per base N content">
               <img class="small" onClick="resizeMe(this);" src="${createLink(controller: 'fastqcResults', action: 'renderFile', params : [id:id, withinZipPath:'Images/per_base_n_content.png'])}"/>
-            <a>
+            </a>
           </div>
           <div id="SEQUENCE_LENGTH_DISTRIBUTION" class="module">
             <div class="${moduleStatus.SEQUENCE_LENGTH_DISTRIBUTION}"><h2><g:message code="fastqc.sequenceLengthDistribution"/></h2></div>
@@ -125,7 +123,7 @@
                   <tr title="${overSeq.percentage}">
                     <td>${overSeq.sequence}</td>
                     <td>${overSeq.countOverRep}</td>
-                    <td><div><g:formatNumber number="${overSeq.percentage}" type="number" maxFractionDigits="2" /><div></td>
+                    <td><g:formatNumber number="${overSeq.percentage}" type="number" maxFractionDigits="2" /></td>
                     <td>${overSeq.possibleSource}</td>
                   </tr>
                 </g:each>
