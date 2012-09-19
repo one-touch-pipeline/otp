@@ -7,7 +7,7 @@
 <jqDT:resources type="js"/>
 <g:javascript src="jquery.timeago.js"/>
 <r:require module="graphDracula"/>
-<r:require module="jquery-ui"/>
+<r:require module="jqueryUI"/>
 </head>
 <body>
   <div class="body">

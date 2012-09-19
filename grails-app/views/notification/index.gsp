@@ -5,7 +5,7 @@
         <meta name="layout" content="main"/>
         <title><g:message code="notification.administration.title"/></title>
         <jqDT:resources type="js"/>
-        <r:require module="jquery-ui"/>
+        <r:require module="jqueryUI"/>
     </head>
 <body>
     <div class="body">

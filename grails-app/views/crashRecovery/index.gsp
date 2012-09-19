@@ -4,10 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
 <title>Crash Recovery</title>
-<!-- TODO: use resources -->
-<link rel='stylesheet' href='http://www.datatables.net//release-datatables/media/css/demo_table.css' />
-<jqDT:resources type="js"/>
-<g:javascript library="jquery.dataTables" />
+<r:require module="jqueryDatatables"/>
 <r:require module="crashRecovery"/>
 </head>
 <body>
