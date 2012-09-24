@@ -4,7 +4,7 @@ import de.dkfz.tbi.otp.ngsdata.Project
 
 class ProcessingOptionService {
 
-    public ProcessingOption create(String name, String type, Project project, String value, String comment) {
+    public ProcessingOption createOrUpdate(String name, String type, Project project, String value, String comment) {
         ProcessingOption option = findStrict(name, type, project)
         if (option) {
             obsoleteOption(option)
