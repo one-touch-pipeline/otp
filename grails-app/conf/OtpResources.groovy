@@ -9,20 +9,30 @@ modules = {
         resource url: '/js/jquery/jquery.i18n.properties-min-1.0.9.js'
         resource url: '/js/otp.js'
     }
+    jqueryUI {
+        dependsOn 'jquery'
+        resource url: '/js/jquery/jquery-ui.js'
+        resource url: '/css/jquery/jquery-ui.css'
+    }
+    jqueryDatatables {
+        dependsOn 'jquery'
+        resource url: '/js/jquery/dataTables.js'
+        resource url: '/css/jquery/demo_table.css'
+    }
     editorSwitch {
         dependsOn 'core'
         resource url: '/js/editorswitch.js'
     }
     changeLog {
-        dependsOn 'jquery-ui, core'
+        dependsOn 'jqueryUI, core'
         resource url: '/js/changelog.js'
     }
     crashRecovery {
-        dependsOn 'jquery-ui, core'
+        dependsOn 'jqueryUI, core'
         resource url: '/js/crashrecovery.js'
     }
     userAdministration {
-        dependsOn 'jquery-ui, core'
+        dependsOn 'jqueryUI, core'
         resource url: '/js/useradministration.js'
     }
     graphDracula {
@@ -41,17 +51,7 @@ modules = {
     }
     lightbox {
         dependsOn 'jquery'
-        resource url: '/js/lightbox/js/lightbox.js'
-        resource url: '/js/lightbox/css/lightbox.css'
-        resource url: '/js/lightbox/images/close.png'
-        resource url: '/js/lightbox/images/loading.gif'
-        resource url: '/js/lightbox/images/next.png'
-        resource url: '/js/lightbox/images/prev.png'
-        resource url: '/js/lightbox/images/bg-checker.png'
-        resource url: '/js/lightbox/images/box.png'
-        resource url: '/js/lightbox/images/bullet.gif'
-        resource url: '/js/lightbox/images/donate.png'
-        resource url: '/js/lightbox/images/speech-bubbles.png'
-        resource url: '/js/lightbox/images/favicon.gif'
+        resource url: '/js/jquery/lightbox.js'
+        resource url: '/css/jquery/lightbox.css'
     }
 }
