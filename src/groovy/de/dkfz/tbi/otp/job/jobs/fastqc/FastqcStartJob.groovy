@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.fastqc
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.job.processing.*
@@ -16,6 +17,9 @@ class FastqcStartJob extends AbstractStartJobImpl {
 
     @Autowired
     SeqTrackService seqTrackService
+
+    @Autowired
+    ProcessingOptionService optionService
 
     final int MAX_RUNNING = 4
 
@@ -38,6 +42,7 @@ class FastqcStartJob extends AbstractStartJobImpl {
             return false
         }
         int n = Process.countByFinishedAndJobExecutionPlan(false, jep)
-        return (n < MAX_RUNNING)
+        long maxRunning = optionService.findOptionAsNumber("numberOfJobs", "FastqcWorkflow", null, MAX_RUNNING)
+        return (n < maxRunning)
     }
 }

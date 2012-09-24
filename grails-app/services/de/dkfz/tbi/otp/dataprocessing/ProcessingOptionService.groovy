@@ -4,7 +4,7 @@ import de.dkfz.tbi.otp.ngsdata.Project
 
 class ProcessingOptionService {
 
-    public void create(String name, String type, Project project, String value, String comment) {
+    public ProcessingOption create(String name, String type, Project project, String value, String comment) {
         ProcessingOption option = findStrict(name, type, project)
         if (option) {
             obsoleteOption(option)
@@ -17,6 +17,7 @@ class ProcessingOptionService {
             comment: comment
         )
         assert(option.save(flush: true))
+        return option
     }
 
     private void obsoleteOption(ProcessingOption option) {
@@ -71,5 +72,18 @@ class ProcessingOptionService {
     public String findOptionSafe(String name, String type, Project project) {
         ProcessingOption option = findOptionObject(name, type, project)
         return (option) ? option.value : ""
+    }
+
+    /**
+     * Return numerical value of the option or default value if option value
+     * can not be cast to a number.
+     */
+    public long findOptionAsNumber(String name, String type, Project project, long defaultValue) {
+        String value = findOptionSafe(name, type, project)
+        try {
+            return (new Long(value)).longValue
+        } catch(NumberFormatException e) {
+            return defaultValue
+        }
     }
 }

@@ -2,6 +2,13 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.Project
 
+/**
+ * ProcessingOption stores options for external programs processing data
+ * depending on project and additional string parameters. The Options are
+ * stored in a database and can be modified at runtime.
+ *
+ */
+
 class ProcessingOption {
 
     String name
