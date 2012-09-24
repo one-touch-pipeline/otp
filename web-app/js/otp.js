@@ -513,10 +513,10 @@ $.otp.addIndividual = {
         var samplesArray = [], samples = "";
         $.each($("tr.sample").not("tr.sample:hidden"), function (index, value) {
             var sample = { };
-            sample.id = [];
+            sample.identifier = [];
             sample.type = ($("select option:selected", value).val());
-            $(value).next().find("input").each(function (idx, v) {
-                sample.id.push($(v).val());
+            $(value).next().find("input").each( function(idx, v) {
+                sample.identifier.push($(v).val());
             });
             samplesArray.push(sample);
         });
@@ -543,7 +543,6 @@ $.otp.addIndividual = {
                 message += "</ul>";
                 $.otp.warningMessage(message);
             } else if (data.success) {
-                console.log(("juhu"));
                 $.otp.infoMessage($.i18n.prop("individual.insert.add.success", data.individual));
             }
         }).error(function (jqXHR) {

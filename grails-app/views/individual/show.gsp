@@ -4,6 +4,9 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
 <title><g:message code="individual.show.title"/></title>
+<r:require module="editorSwitch"/>
+<r:require module="editSamples"/>
+<r:require module="changeLog"/>
 </head>
 <body>
   <div class="body">
@@ -19,6 +22,7 @@
 
     <h1><g:message code="individual.show.title"/></h1>
     <div class="tableBlock">
+    <input type="hidden" name="individualId" value="${ind.id}"/>
     <table>
        <tr> 
             <td class="myKey"><g:message code="individual.show.details.pid"/></td>
@@ -26,15 +30,15 @@
        </tr>
        <tr>
             <td class="myKey"><g:message code="individual.show.details.mockPid"/></td>
-            <td class="myValue">${ind.mockPid}</td>
+            <td class="myValue"><otp:editorSwitch roles="ROLE_OPERATOR" link="${g.createLink(controller: 'individual', action: 'updateField', id: ind.id, params: [key: 'mockPid'])}" value="${ind.mockPid}"/></td>
        </tr>
        <tr>
             <td class="myKey"><g:message code="individual.show.details.mockFullName"/></td>
-            <td class="myValue">${ind.mockFullName}</td>
+            <td class="myValue"><otp:editorSwitch roles="ROLE_OPERATOR" link="${g.createLink(controller: 'individual', action: 'updateField', id: ind.id, params: [key: 'mockFullName'])}" value="${ind.mockFullName}"/></td>
        </tr>
        <tr>
             <td class="myKey"><g:message code="individual.show.details.type"/></td>
-            <td class="myValue">${ind.type}</td>
+            <td class="myValue typeDropDown"><otp:editorSwitch roles="ROLE_OPERATOR" template="dropDown" link="${g.createLink(controller: 'individual', action: 'updateField', id: ind.id, params: [key: 'type'])}" value="${ind.type}"/></td>
        </tr>
        <tr>
             <td class="myKey"><g:message code="individual.show.details.project"/></td>
@@ -44,12 +48,14 @@
     </div>
 
     <h1><g:message code="individual.show.samples"/></h1>
+    <h1 id="samples" style="display:inline-block">Samples <otp:editorSwitch roles="ROLE_OPERATOR" template="newValue" link="${g.createLink(controller: 'individual', action: 'newSampleType', id: ind.id)}" value="${ind.type}"/></h1>
     <div class="tableBlock">
     <table>
         <g:each var="sample" in="${ind.samples}">
             <tr>
                 <td class="myKey">${sample.sampleType.name}</td>
-                <td class="myValue">${sample.sampleIdentifiers}</td>
+                <td class="myValue sample"><otp:editorSwitch roles="ROLE_OPERATOR" template="sampleIdentifier" link="${g.createLink(controller: 'individual', action: 'updateSamples', id: ind.id)}" value="${sample.sampleIdentifiers}"/></td>
+                <input type="hidden" name="sampleIdentifiersIds" value="${sample.sampleIdentifiers.id}"/>
             </tr>
         </g:each>
     </table>

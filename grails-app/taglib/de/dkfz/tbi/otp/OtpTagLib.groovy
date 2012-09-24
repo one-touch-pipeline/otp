@@ -29,11 +29,13 @@ class OtpTagLib {
      * @attr link REQUIRED The link to update the data
      * @attr value REQUIRED The data to render
      * @attr roles optional comma delimited String of role names to check the users role against
+     * @attr template optional The template to be used, if null the default one is taken
      */
     def editorSwitch = { attrs ->
+        String template = editorSwitchTemplate(attrs.template)
         if (attrs.roles) {
             if (SpringSecurityUtils.ifAnyGranted(attrs.roles)) {
-                out << render(template: "/templates/editorSwitch", model: [link: attrs.link, value: attrs.value])
+                out << render(template: template, model: [link: attrs.link, value: attrs.value])
             } else {
                 // read only
                 out << "<div>"
@@ -42,7 +44,7 @@ class OtpTagLib {
             }
         } else {
             // no roles passed in, just render
-            out << render(template: "/templates/editorSwitch", model: [link: attrs.link, value: attrs.value])
+            out << render(template: template, model: [link: attrs.link, value: attrs.value])
         }
     }
 
@@ -103,5 +105,18 @@ class OtpTagLib {
      */
     def dataTable = { attrs ->
         out << render(template: "/templates/dataTable", model: [id: attrs.id, codes: attrs.codes])
+    }
+
+    private String editorSwitchTemplate(String template) {
+        switch (template) {
+            case "dropDown":
+                return "/templates/editorSwitchDropDown"
+            case "newValue":
+                return "/templates/editorSwitchNewValue"
+            case "sampleIdentifier":
+                return "/templates/editSampleIdentifiers"
+            default:
+                return "/templates/editorSwitch"
+        }
     }
 }

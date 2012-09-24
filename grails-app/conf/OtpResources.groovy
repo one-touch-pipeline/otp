@@ -65,4 +65,8 @@ modules = {
         dependsOn 'jqueryDatatables, core, graphDracula, jqueryUI'
         resource url: '/js/workflows.js'
     }
+    editSamples {
+        dependsOn 'core'
+        resource url: '/js/editsamples.js'
+    }
 }

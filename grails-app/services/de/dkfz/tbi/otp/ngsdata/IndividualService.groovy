@@ -7,6 +7,10 @@ import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.core.userdetails.UserDetails
 
+import de.dkfz.tbi.otp.utils.ReferencedClass
+
+import groovy.json.JsonSlurper
+
 class IndividualService {
     def springSecurityService
     def sampleTypeService
@@ -352,16 +356,7 @@ OR lower(i.type) like :filter
         if (!individual.save(flush: true)) {
             throw new IndividualCreationException("Individual could not be saved.")
         }
-        command.parseSamples().each { key, value ->
-            SampleType sampleType = createSampleType(key)
-            if (!sampleType) {
-                throw new IndividualCreationException("SampleType could not be found nor created.")
-            }
-            Sample sample = createSample(individual, sampleType)
-            value.each { String name ->
-                SampleIdentifier sampleIdentifier = createSampleIdentifier(name, sample)
-            }
-        }
+        createOrUpdateSamples(individual, command.samples)
         return individual
     }
 
@@ -393,27 +388,132 @@ OR lower(i.type) like :filter
     }
 
     /**
-     * Creates a new Sample if not existing
-     * @param individual the Individual to be associated
-     * @param sampleType the SampleType to be associated
-     * @return the Sample
+     * Fetches all SampleIdentifiers belonging to the given {@link Individual} and of the {@link SampleType}
+     * @param individualId The id of the {@link Individual} the {@link SampleIdentifier} shall be retrieved
+     * @param sType The {@link SampleType}'s name of which {@link SampleIdentifier}s are fetched
+     * @return List of SampleIdentifiers
+     */
+    @PostFilter("hasPermission(filterObject.sample.individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
+    public List<SampleIdentifier> getSampleIdentifiers(Long individualId, String sType) {
+        List<SampleIdentifier> sampleIdentifiers = SampleIdentifier.withCriteria {
+            sample {
+                and {
+                    individual {
+                        eq('id', individualId)
+                    }
+                    sampleType {
+                        ilike("name", sType)
+                    }
+                }
+            }
+        }
+        return sampleIdentifiers
+    }
+
+    /**
+     * Updates the given Individual with the new given value.
+     * Creates a ChangeLog entry for this update.
+     * @param individual The Individual to update
+     * @param key The key to be updated
+     * @param value The new value to set
+     * @throws ChangelogException In case the Changelog Entry could not be created
+     * @throws IndividualUpdateException In case the Individual could not be updated
+     */
+    @PreAuthorize("((#individual != null) and hasPermission(#individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Individual', write)) or hasRole('ROLE_OPERATOR')")
+    void updateField(Individual individual, String key, String value) throws ChangelogException, IndividualUpdateException {
+        ReferencedClass clazz = ReferencedClass.findOrSaveByClassName(individual.class.getName())
+        // To check if the key handed over matches the field name
+        // value is not used later because the method returns upper case name
+        if (!individual.getDomainClass().getFieldName(key)) {
+            throw new IndividualUpdateException(individual)
+        }
+        ChangeLog changelog = new ChangeLog(rowId: individual.id, referencedClass: clazz, columnName: key, fromValue: "${individual[key]}", toValue: value, comment: "-", source: ChangeLog.Source.MANUAL)
+        if (!changelog.save()) {
+            throw new ChangelogException("Creation of changelog failed, errors: " + changelog.errors.toString())
+        }
+        individual[key] = value
+        if (!individual.save(flush: true)) {
+            throw new IndividualUpdateException(individual)
+        }
+    }
+
+    /**
+     * Creates and updates all given aspects of Samples
+     *
+     * The Samples are handed over as {@link SamplesParser}.
+     * Then there is extracted the information, which is
+     * for new Samples the identifier and the type and for
+     * Samples to be updated the id as well. As the parameter
+     * String can be mixed from new and to be updated the method
+     * handles both cases.
+     *
+     * @param individual The {@link Individual} the Samples are to be associated
+     * @param parsedSample SamplesParser containing the Samples
+     */
+    @PreAuthorize("hasPermission(#individual, 'write') or hasRole('ROLE_OPERATOR')")
+    void createOrUpdateSamples(Individual individual, SamplesParser parsedSamples) {
+        SampleType sampleType = createSampleType(parsedSamples.type)
+        if (!sampleType) {
+            throw new IndividualCreationException("SampleType could not be found nor created.")
+        }
+        Sample sample = createSample(individual, sampleType)
+        for (entry in parsedSamples.updateEntries) {
+            updateSampleIdentifier(entry.value, entry.key as long)
+        }
+        parsedSamples.newEntries.each { String sampleIdentifier ->
+            createSampleIdentifier(sampleIdentifier, sample)
+        }
+    }
+
+    /**
+     * Triggers the creation of a new {@link Sample} if not yet existent
+     * @param individual The {@link Individual} to which the new {@link Sample} belongs to
+     * @param type The type of the new {@link Sample}
+     */
+    @PreAuthorize("hasPermission(#individual, 'write') or hasRole('ROLE_OPERATOR')")
+    void createSample(Individual individual, String type) {
+        SampleType sampleType = createSampleType(type)
+        createSample(individual, sampleType)
+    }
+
+    /**
+     * Creates a new {@link Sample} if not existing, otherwise the existent {@link Sample} is returned
+     * @param individual the {@link Individual} to be associated
+     * @param sampleType the {@link SampleType} to be associated
+     * @return the {@link Sample}
      */
     private Sample createSample(Individual individual, SampleType sampleType) {
         return Sample.findOrSaveByIndividualAndSampleType(individual, sampleType)
     }
 
     /**
-     * Creates a new SampleIdentifier if not existing
-     * @param name Name of the new Sample
-     * @param sample Sample to be associated
-     * @return the SampleIdentifier
+     * Creates a new {@link SampleIdentifier} if not existing, otherwise the existent {@link SampleIdentifier} is returned
+     * @param name Name of the new {@link Sample}
+     * @param sample {@link Sample} to be associated
+     * @return the {@link SampleIdentifier}
      */
     private SampleIdentifier createSampleIdentifier(String name, Sample sample) {
         return SampleIdentifier.findOrSaveByNameAndSample(name, sample)
     }
 
     /**
-     * Creates a new SampleType if not existing
+     * Updates the {@link SampleIdentifier} identified by the given id
+     * @param name Name of the {@link Sample} to be updated
+     * @param sample Sample to be associated
+     * @param id The id of the {@link SampleIdentifier} to be updated
+     * @return the updated {@link SampleIdentifier}
+     */
+    private SampleIdentifier updateSampleIdentifier(String name, long id) {
+        SampleIdentifier sampleIdentifier = SampleIdentifier.get(id)
+        if (sampleIdentifier) {
+            sampleIdentifier.name = name
+            sampleIdentifier.save(flush: true)
+        }
+        return sampleIdentifier
+    }
+
+    /**
+     * Creates a new SampleType if not existing, otherwise the existent {@link SampleType} is returned
      * @param name Name of the new SampleType
      * @return the SampleType
      */

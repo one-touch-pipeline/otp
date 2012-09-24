@@ -75,7 +75,7 @@ class IndividualController {
         render "downloding ..."
     }
 
-    def insert = {
+    def insert() {
         List<Project> projects = projectService.getAllProjects()
         List<Individual.Type> individualTypes = Individual.Type.values()
         List<String> sampleTypes = individualService.getSampleTypeNames()
@@ -83,7 +83,7 @@ class IndividualController {
         [projects: projects, individualTypes: individualTypes, sampleTypes: sampleTypes, sampleIdentifiers: sampleIdentifiers]
     }
 
-    def save = { IndividualCommand cmd ->
+    def save(IndividualCommand cmd) {
         if (cmd.hasErrors()) {
             render cmd.errors as JSON
             return
@@ -97,6 +97,76 @@ class IndividualController {
             render data as JSON
         }
     }
+
+    def updateField(UpdateFieldCommand cmd) {
+        Individual individual = individualService.getIndividual(cmd.id)
+        if (!individual) {
+            def data = [error: g.message(code: "individual.update.notFound", args: [cmd.id])]
+            render data as JSON
+            return
+        }
+        def data = [:]
+        try {
+            individualService.updateField(individual, cmd.key, cmd.value)
+            data.put("success", true)
+        } catch (IndividualUpdateException e) {
+            data.put("error", g.message(code: "individual.update.error"))
+        } catch (ChangelogException e) {
+            data.put("error", g.message(code: "individual.update.changelog.error"))
+        }
+        render data as JSON
+    }
+
+    def updateSamples(UpdateSamplesCommand cmd) {
+        Individual individual = individualService.getIndividual(cmd.id)
+        if (!individual) {
+            def data = [error: g.message(code: "individual.update.notFound", args: [cmd.id])]
+            render data as JSON
+            return
+        }
+        def data = [:]
+        try {
+            SamplesParser parsedSamples = new SamplesParser().fromJSON(cmd.samples)
+            individualService.createOrUpdateSamples(individual, parsedSamples)
+            data.put("success", true)
+        } catch (IndividualUpdateException e) {
+            data.put("error", g.message(code: "individual.update.error"))
+        } catch (ChangelogException e) {
+            data.put("error", g.message(code: "individual.update.changelog.error"))
+        }
+        render data as JSON
+    }
+
+    def newSampleType(UpdateFieldCommand cmd) {
+        Individual individual = individualService.getIndividual(cmd.id)
+        if (!individual) {
+            def data = [error: g.message(code: "individual.update.notFound", args: [cmd.id])]
+            render data as JSON
+            return
+        }
+        def data = [:]
+        try {
+            individualService.createSample(individual, cmd.value)
+            data.put("success", true)
+        } catch (IndividualUpdateException e) {
+            data.put("error", g.message(code: "individual.update.error"))
+        } catch (ChangelogException e) {
+            data.put("error", g.message(code: "individual.update.changelog.error"))
+        }
+        render data as JSON
+    }
+
+    def typeDropDown() {
+        render Individual.Type.values() as JSON
+    }
+
+    def sampleTypeDropDown() {
+        render individualService.getSampleTypeNames() as JSON
+    }
+
+    def retrieveSampleIdentifiers(RetrieveSampleIdentifiersCommand cmd) {
+        render individualService.getSampleIdentifiers(cmd.id, cmd.sampleType) as JSON
+    }
 }
 
 class IndividualCommand {
@@ -109,15 +179,6 @@ class IndividualCommand {
     Individual.Type individualType
     String samples
 
-    Map<String, List<String>> parseSamples() {
-        def jSonObj = new JsonSlurper().parseText(this.samples)
-        Map<String, List<String>> samplesMap = [:]
-        jSonObj.each {
-            samplesMap.put(it.type, it.id)
-        }
-        return samplesMap
-    }
-
     static constraints = {
         pid(blank: false, validator: { val, obj ->
             return val && !obj.individualService.individualExists(val)
@@ -127,5 +188,77 @@ class IndividualCommand {
         project(min: 0L, validator: { val, obj ->
             return val && (obj.projectService.getProject(val) != null)
         })
+    }
+}
+
+class UpdateFieldCommand {
+    def individualService
+    Long id
+    String key
+    String value
+
+    static constraints = {
+        id(min: 0L, validator: { val, obj ->
+            return val && (obj.individualService.getIndividual(val) != null)
+        })
+        key(blank: false)
+        value(blank: false)
+    }
+}
+
+class RetrieveSampleIdentifiersCommand {
+    def individualService
+    Long id
+    String sampleType
+
+    static constraints = {
+        id(min: 0L, validator: { val, obj ->
+            return val && (obj.individualService.getIndividual(val) != null)
+        })
+        sampleType(blank: false)
+    }
+}
+
+class UpdateSamplesCommand {
+    def individualService
+    Long id
+    String samples
+
+    static constraints = {
+        id(min: 0L, validator: { val, obj ->
+            return val && (obj.individualService.getIndividual(val) != null)
+        })
+        samples(blank: false)
+    }
+}
+
+class SamplesParser {
+    Map<String, String> updateEntries = [:]
+    List<String> newEntries = []
+    String type
+
+    private SamplesParser fromJSON(String json) {
+        if (!json) {
+            return null
+        }
+        def slurper = new JsonSlurper()
+        SamplesParser samplesParser = new SamplesParser()
+        slurper.parseText(json).eachWithIndex { value, index ->
+            if (index == 0) {
+                samplesParser.type = value.type
+            }
+            if (!value.type) {
+                return // next sample
+            }
+            if (!value.identifier) {
+                return // next sample
+            }
+            if (value.id) {
+                samplesParser.updateEntries.put(value.id.get(0), value.identifier.get(0))
+            } else {
+                samplesParser.newEntries << value.identifier.get(0)
+            }
+        }
+        return samplesParser
     }
 }
