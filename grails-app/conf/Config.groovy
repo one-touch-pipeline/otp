@@ -250,7 +250,7 @@ grails.plugins.springsecurity.controllerAnnotations.staticRules = [
         "/js/**":                ["permitAll"],
         "/igvSessionFiles/**":   ["permitAll"],
         "/console/**":           ['ROLE_ADMIN'],
-        "/j_spring_security_switch_user": ['ROLE_ADMIN', 'IS_AUTHENTICATED_FULLY'],
+        "/j_spring_security_switch_user": ['ROLE_SWITCH_USER', 'IS_AUTHENTICATED_FULLY'],
         "/**":                   ['ROLE_USER']
         ]
 
@@ -258,6 +258,7 @@ grails.plugins.springsecurity.controllerAnnotations.staticRules = [
 grails.plugins.springsecurity.roleHierarchy = '''
     ROLE_ADMIN > ROLE_OPERATOR
     ROLE_OPERATOR > ROLE_USER
+    ROLE_ADMIN > ROLE_SWITCH_USER
 '''
 
 grails.plugins.springsecurity.useSwitchUserFilter = true

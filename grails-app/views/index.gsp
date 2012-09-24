@@ -19,6 +19,13 @@
                     </ul>
                 </div>
             </sec:ifAnyGranted>
+            <sec:ifAnyGranted roles="ROLE_SWITCH_USER">
+                <div>
+                    <ul>
+                        <li><g:link controller="switchUser"><g:message code="otp.welcome.administration.switchUser"/></g:link></li>
+                    </ul>
+                </div>
+            </sec:ifAnyGranted>
         </div>
     </body>
 </html>
