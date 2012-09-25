@@ -4,7 +4,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
         <title><g:message code="individual.list.title"/></title>
-        <jqDT:resources type="js"/>
+        <r:require module="jqueryDatatables"/>
     </head>
 <body>
     <div class="body">
