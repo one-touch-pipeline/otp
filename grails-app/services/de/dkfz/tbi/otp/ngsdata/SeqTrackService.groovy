@@ -5,6 +5,118 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 class SeqTrackService {
 
     def fileTypeService
+    /**
+     * Dependency Injection of Project Service.
+     *
+     * Needed for access control on data protected by Projects.
+     */
+    def projectService
+
+    /**
+     * Retrieves the Sequences matching the given filtering the user has access to.
+     * The access restriction is done through the Projects the user has access to.
+     * @param offset Offset in data
+     * @param max Maximum number of elements, capped at 100
+     * @param sortOrder true for ascending, false for descending
+     * @param column The column to perform the sorting on
+     * @param filtering Filtering restrictions
+     * @return List of matching Sequences
+     */
+    public List<Sequence> listSequences(int offset, int max, boolean sortOrder, SequenceSortColumn column, SequenceFiltering filtering) {
+        if (max > 100) {
+            max = 100
+        }
+        String columnName = "projectId"
+        if (filtering.enabled) {
+            def c = Sequence.createCriteria()
+            return c.list {
+                'in'('projectId', projectService.getAllProjects().collect { it.id })
+                if (filtering.project) {
+                    'in'('projectId', filtering.project)
+                }
+                if (filtering.individual) {
+                    or {
+                        filtering.individual.each {
+                            ilike('mockPid', "%${it}%")
+                        }
+                    }
+                }
+                if (filtering.sampleType) {
+                    'in'('sampleTypeId', filtering.sampleType)
+                }
+                if (filtering.seqType) {
+                    'in'('seqTypeName', filtering.seqType)
+                }
+                if (filtering.libraryLayout) {
+                    'in'('libraryLayout', filtering.libraryLayout)
+                }
+                if (filtering.seqCenter) {
+                    'in'('seqCenterId', filtering.seqCenter)
+                }
+                if (filtering.run) {
+                    or {
+                        filtering.run.each {
+                            ilike('name', "%${it}%")
+                        }
+                    }
+                }
+                maxResults(max)
+                firstResult(offset)
+                order(column.columnName, sortOrder ? "asc" : "desc")
+            }
+        } else {
+            return Sequence.findAllByProjectIdInList(projectService.getAllProjects().collect { it.id }, [offset: offset, max: max, sort: column.columnName, order: sortOrder ? "asc" : "desc"])
+        }
+    }
+
+    /**
+     * Counts the Sequences the User has access to by applying the provided filtering.
+     * @param filtering The filters to apply on the data
+     * @return Number of Sequences matching the filtering
+     */
+    public int countSequences(SequenceFiltering filtering) {
+        if (filtering.enabled) {
+            def c = Sequence.createCriteria()
+            return c.get {
+                'in'('projectId', projectService.getAllProjects().collect { it.id })
+                if (filtering.project) {
+                    'in'('projectId', filtering.project)
+                }
+                if (filtering.individual) {
+                    or {
+                        filtering.individual.each {
+                            ilike('mockPid', "%${it}%")
+                        }
+                    }
+                }
+                if (filtering.sampleType) {
+                    'in'('sampleTypeId', filtering.sampleType)
+                }
+                if (filtering.seqType) {
+                    'in'('seqTypeName', filtering.seqType)
+                }
+                if (filtering.libraryLayout) {
+                    'in'('libraryLayout', filtering.libraryLayout)
+                }
+                if (filtering.seqCenter) {
+                    'in'('seqCenterId', filtering.seqCenter)
+                }
+                if (filtering.run) {
+                    or {
+                        filtering.run.each {
+                            ilike('name', "%${it}%")
+                        }
+                    }
+                }
+                projections {
+                    count('mockPid')
+                }
+            }
+        } else {
+            // shortcut for unfiltered results
+            return Sequence.countByProjectIdInList(projectService.getAllProjects().collect { it.id })
+        }
+    }
 
     public void setRunReadyForFastqc(Run run) {
         def unknown = SeqTrack.DataProcessingState.UNKNOWN

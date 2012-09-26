@@ -106,6 +106,172 @@ $.otp.runList = function () {
     $.otp.genericList('#runTable', "/run/show/");
 };
 
+/*jslint unparam: true */
+$.otp.sequence = {
+    formatProject: function (project) {
+        "use strict";
+        var result;
+        if (project === "PROJECT_NAME") {
+            result = "mb";
+        } else if (project === "astrocytome") {
+            result = "pa";
+        } else {
+            result = project;
+        }
+        return result;
+    },
+    formatRun: function (run) {
+        "use strict";
+        var result;
+        if (run.length > 7) {
+            result = run.substr(0, 6) + "…";
+        } else {
+            result = run;
+        }
+        return result;
+    },
+    register: function () {
+        "use strict";
+        $("#sequenceTable").dataTable({
+            bFilter: false,
+            bProcessing: true,
+            bServerSide: true,
+            bSort: true,
+            bJQueryUI: false,
+            bAutoWidth: false,
+            sAjaxSource: $.otp.contextPath + '/sequence/dataTableSource',
+            bScrollInfinite: true,
+            bScrollCollapse: true,
+            sScrollY: "600px",
+            bDeferRender: true,
+            fnServerData: function (sSource, aoData, fnCallback) {
+                aoData.push({
+                    name: "filtering",
+                    value: JSON.stringify($.otp.sequence.searchCriteria())
+                });
+                $.ajax({
+                    "dataType": 'json',
+                    "type": "POST",
+                    "url": sSource,
+                    "data": aoData,
+                    "error": function () {
+                        // clear the table
+                        fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
+                    },
+                    "success": function (json) {
+                        var i, rowData, row;
+                        for (i = 0; i < json.aaData.length; i += 1) {
+                            row = json.aaData[i];
+                            rowData = [
+                                '<span title="' + row.projectName + '">' + $.otp.sequence.formatProject(row.projectName) + '</span>',
+                                '<a href="' + $.otp.contextPath + '/individual/show/' + row.individualId + '">' + row.mockPid + '</a>',
+                                row.sampleTypeName,
+                                row.seqTypeName,
+                                row.libraryLayout,
+                                row.seqCenterName,
+                                '<a href="' + $.otp.contextPath + '/run/show/' + row.runId + '" title="' + row.name + '">' + $.otp.sequence.formatRun(row.name) + '</a>',
+                                row.laneId,
+                                row.fastqcState.name,
+                                row.alignmentState.name,
+                                row.hasOriginalBam,
+                                (new Date(row.dateCreated)).toDateString()
+                            ];
+                            json.aaData[i] = rowData;
+                        }
+                        fnCallback(json);
+                    }
+                });
+            },
+            fnRowCallback: function (nRow) {
+                var fastqc, alignment, origAlignment;
+                fastqc = $("td:eq(8)", nRow);
+                fastqc.attr("title", fastqc.text());
+                if (fastqc.text() === "FINISHED") {
+                    fastqc.addClass("true");
+                } else {
+                    fastqc.addClass("false");
+                }
+                fastqc.text("");
+
+                alignment = $("td:eq(9)", nRow);
+                alignment.attr("title", alignment.text());
+                if (alignment.text() === "FINISHED") {
+                    alignment.addClass("true");
+                } else {
+                    alignment.addClass("false");
+                }
+                alignment.text("");
+
+                origAlignment = $("td:eq(10)", nRow);
+                origAlignment.addClass(origAlignment.text());
+                origAlignment.text("");
+            }
+        });
+        // search criteria
+        $("#searchCriteriaTable tr td:eq(0) select").change($.otp.sequence.searchCriteriaChangeHandler);
+        $("#searchCriteriaTable tr td:eq(2) input[type=button]").click($.otp.sequence.searchCriteriaAddRow);
+        $("#searchCriteriaTable tr td:eq(1) select").change(function () {
+            $("#sequenceTable").dataTable().fnDraw();
+        });
+        $("#searchCriteriaTable tr td:eq(1) input[type=text]").change(function () {
+            $("#sequenceTable").dataTable().fnDraw();
+        });
+        $("#searchCriteriaTable tr td:eq(1) input[type=text]").keydown(function () {
+            $("#sequenceTable").dataTable().fnDraw();
+        });
+    },
+    searchCriteriaChangeHandler: function () {
+        "use strict";
+        var tr = $(this).parent().parent();
+        $("td:eq(1) *", tr).hide();
+        $("td:eq(2) input", tr).hide();
+        if ($(this).val() !== "none") {
+            $("td select[name=" + $(this).val() + "]", tr).show();
+            $("td select[name=" + $(this).val() + "] option", tr).show();
+            $("td input[name=" + $(this).val() + "]", tr).show();
+            $("td:eq(2) input", tr).show();
+        } else {
+            // decide whether to delete this element
+            if ($("tr", tr.parent()).size() > 1) {
+                tr.detach();
+            }
+        }
+        $("#sequenceTable").dataTable().fnDraw();
+    },
+    searchCriteriaAddRow: function () {
+        "use strict";
+        var tr, cloned;
+        tr = $(this).parent().parent();
+        cloned = tr.clone();
+        $("td:eq(1) *", cloned).hide();
+        $("td:eq(2) input", cloned).hide();
+        $("td:eq(0) select", cloned).val("none");
+        cloned = cloned.appendTo($("#searchCriteriaTable"));
+        $("td:eq(0) select", cloned).change($.otp.sequence.searchCriteriaChangeHandler);
+        $("td:eq(2) input[type=button]", cloned).click($.otp.sequence.searchCriteriaAddRow);
+        $("td:eq(1) select", cloned).change(function () {
+            $("#sequenceTable").dataTable().fnDraw();
+        });
+        $("td:eq(1) input[type=text]", cloned).change(function () {
+            $("#sequenceTable").dataTable().fnDraw();
+        });
+        $("td:eq(1) input[type=text]", cloned).keydown(function () {
+            $("#sequenceTable").dataTable().fnDraw();
+        });
+    },
+    searchCriteria: function () {
+        "use strict";
+        var result = [];
+        $("#searchCriteriaTable tr").each(function (index, element) {
+            var selection = $("td:eq(0) select", element).val();
+            if (selection !== "none") {
+                result.push({type: selection, value: $("td select[name=" + selection + "], td input[name=" + selection + "]", element).val()});
+            }
+        });
+        return result;
+    }
+};
+
 $.otp.addIndividual = {
     addSample: function (event) {
         "use strict";

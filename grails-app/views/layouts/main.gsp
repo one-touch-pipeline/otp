@@ -32,6 +32,7 @@
                         <li><g:link controller="overviewMB" action="index">Overview</g:link></li>
                     </sec:ifAllGranted>
                     <li><g:link controller="individual" action="list">Individuals</g:link></li>
+                    <li><g:link controller="sequence" action="index">Sequences</g:link></li>
                     <li><g:link controller="run" action="list">Runs</g:link></li>
                     <sec:ifAllGranted roles="ROLE_OPERATOR">
                         <li><g:link controller="projectProgress" action="progress">Progress</g:link></li>
