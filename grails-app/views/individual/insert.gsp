@@ -65,7 +65,7 @@
                                 <label for="sampleIdentifier"><g:message code="individual.insert.sampleIdentifier"/></label>
                             </td>
                             <td valign="top" class="value ${hasErrors(bean:individual,field:'sampleIdentifier','errors')}">
-                                <input type="text" name="sampleIdentifier" />
+                                <input type="text" name="sampleIdentifier" class="newSampleIdentifier" />
                                 <div class="newSampleIdentifier">
                                     <button class="buttons"><g:message code="individual.insert.newSampleIdentifier"/></button>
                                 </div>
@@ -100,7 +100,6 @@
             </div>
             <div class="buttons">
                 <input type="submit" value="${g.message(code: 'individual.insert.save')}"/>
-                <%--<g:submitButton name="save" value="Save" /> --%>
             </div>
         </form>
     </div>
