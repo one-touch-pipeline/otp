@@ -17,7 +17,6 @@ modules = {
     jqueryDatatables {
         dependsOn 'jquery'
         resource url: '/js/jquery/dataTables.js'
-        resource url: '/js/jquery/dataTables.scroller.min.js'
         resource url: '/css/jquery/demo_table.css'
     }
     editorSwitch {

@@ -66,7 +66,6 @@ $.otp.genericList = function (selector, showLink) {
         bScrollInfinite: true,
         bScrollCollapse: true,
         sScrollY: "600px",
-        sDom: "lfrtSip",
         bDeferRender: true,
         fnServerData: function (sSource, aoData, fnCallback) {
             $.ajax({
@@ -144,7 +143,6 @@ $.otp.sequence = {
             bScrollInfinite: true,
             bScrollCollapse: true,
             sScrollY: "600px",
-            sDom: "lfrtSip",
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
                 aoData.push({
@@ -509,7 +507,6 @@ OTP.prototype.createListView = function (selector, sourcePath, sortOrder, jsonCa
         bScrollInfinite: true,
         bScrollCollapse: true,
         sScrollY: "600px",
-        sDom: "lfrtSip",
         sAjaxSource: sourcePath,
         fnServerData: function (sSource, aoData, fnCallback) {
             var i;
@@ -1132,7 +1129,6 @@ $.otp.notificationAdministration = {
             bScrollInfinite: true,
             bScrollCollapse: true,
             sScrollY: "600px",
-            sDom: "lfrtSip",
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
                 $.ajax({
