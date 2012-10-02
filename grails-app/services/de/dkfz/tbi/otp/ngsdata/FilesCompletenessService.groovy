@@ -56,7 +56,8 @@ class FilesCompletenessService {
         boolean allExists = true
         def stats = [
             RunSegment.FilesStatus.PROCESSING_CHECKING,
-            RunSegment.FilesStatus.PROCESSING_INSTALLATION
+            RunSegment.FilesStatus.PROCESSING_INSTALLATION,
+            RunSegment.FilesStatus.FILES_MISSING
         ]
         List<RunSegment> segments = RunSegment.findAllByRunAndFilesStatusInList(run, stats)
         for (RunSegment segment in segments) {
