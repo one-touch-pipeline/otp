@@ -1,8 +1,20 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.Project
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.springframework.security.acls.domain.BasePermission
+import org.springframework.security.core.userdetails.UserDetails
 
 class ProcessingOptionService {
+
+    /**
+     * Dependency injection of Project service
+     */
+    def projectService
+    /**
+     * Dependency Injection of Spring Security Service - needed for ACL checks
+     */
+    def springSecurityService
 
     public ProcessingOption createOrUpdate(String name, String type, Project project, String value, String comment) {
         ProcessingOption option = findStrict(name, type, project)
@@ -82,5 +94,59 @@ class ProcessingOptionService {
             return value.toLong()
         }
         return defaultValue
+    }
+
+    /**
+     * Retrieves the ProcessingOption if a user has access to at least one Project.
+     * @param offset Offset in data
+     * @param max Maximum number of elements, capped at 100
+     * @return List of matching ProcessingOption
+     */
+    public List<ProcessingOption> listProcessingOptions(int offset, int max) {
+        if (!projectService.projectsAvailable()) {
+            return []
+        }
+        max = Math.min(max, 100)
+        return ProcessingOption.withCriteria {
+            maxResults(max)
+            firstResult(offset)
+        }
+    }
+
+    /**
+     * Counts ProcessingOptions which are available to the user.
+     * @return The number of ProcessingOptions
+     */
+    public int countProcessingOption() {
+        if (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR")) {
+            // shortcut for operator
+            return ProcessingOption.count()
+        }
+        // for normal users
+        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
+        if (springSecurityService.isLoggedIn()) {
+            // anonymous users do not have a principal
+            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
+        }
+        String query = '''
+SELECT count(p.id) FROM ProcessingOption AS p, AclEntry AS ace
+JOIN ace.aclObjectIdentity AS aoi
+JOIN aoi.aclClass AS ac
+JOIN ace.sid AS sid
+WHERE
+aoi.objectId = p.id
+AND sid.sid IN (:roles)
+AND ace.mask IN (:permissions)
+AND ace.granting = true
+'''
+        Map params = [
+            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
+            roles: roles
+        ]
+        List result = Project.executeQuery(query, params)
+        if (!result) {
+            return 0
+        }
+        return result[0]
     }
 }
