@@ -40,7 +40,6 @@ class BwaAlignmentJob extends AbstractJobImpl {
             realm = configService.getRealmDataProcessing(file.project)
             ProcessedSaiFile saiFile = processedSaiFileService.createSaiFile(alignmentPass, file)
             pbsIds << sendAlignmentScript(realm, saiFile)
-            log.debug realm
         }
         addOutputParameter("__pbsIds", pbsIds.join(","))
         addOutputParameter("__pbsRealm", realm.id.toString())
