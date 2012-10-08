@@ -210,15 +210,9 @@ $.otp.sequence = {
         // search criteria
         $("#searchCriteriaTable tr td:eq(0) select").change($.otp.sequence.searchCriteriaChangeHandler);
         $("#searchCriteriaTable tr td:eq(2) input[type=button]").click($.otp.sequence.searchCriteriaAddRow);
-        $("#searchCriteriaTable tr td:eq(1) select").change(function () {
-            $("#sequenceTable").dataTable().fnDraw();
-        });
-        $("#searchCriteriaTable tr td:eq(1) input[type=text]").change(function () {
-            $("#sequenceTable").dataTable().fnDraw();
-        });
-        $("#searchCriteriaTable tr td:eq(1) input[type=text]").keydown(function () {
-            $("#sequenceTable").dataTable().fnDraw();
-        });
+        $("#searchCriteriaTable tr td:eq(1) select").change($.otp.sequence.updateSearchCriteria);
+        $("#searchCriteriaTable tr td:eq(1) input[type=text]").change($.otp.sequence.updateSearchCriteria);
+        $("#searchCriteriaTable tr td:eq(1) input[type=text]").keydown($.otp.sequence.updateSearchCriteria);
     },
     searchCriteriaChangeHandler: function () {
         "use strict";
@@ -236,7 +230,7 @@ $.otp.sequence = {
                 tr.detach();
             }
         }
-        $("#sequenceTable").dataTable().fnDraw();
+        $.otp.sequence.updateSearchCriteria();
     },
     searchCriteriaAddRow: function () {
         "use strict";
@@ -249,15 +243,9 @@ $.otp.sequence = {
         cloned = cloned.appendTo($("#searchCriteriaTable"));
         $("td:eq(0) select", cloned).change($.otp.sequence.searchCriteriaChangeHandler);
         $("td:eq(2) input[type=button]", cloned).click($.otp.sequence.searchCriteriaAddRow);
-        $("td:eq(1) select", cloned).change(function () {
-            $("#sequenceTable").dataTable().fnDraw();
-        });
-        $("td:eq(1) input[type=text]", cloned).change(function () {
-            $("#sequenceTable").dataTable().fnDraw();
-        });
-        $("td:eq(1) input[type=text]", cloned).keydown(function () {
-            $("#sequenceTable").dataTable().fnDraw();
-        });
+        $("td:eq(1) select", cloned).change($.otp.sequence.updateSearchCriteria);
+        $("td:eq(1) input[type=text]", cloned).change($.otp.sequence.updateSearchCriteria);
+        $("td:eq(1) input[type=text]", cloned).keydown($.otp.sequence.updateSearchCriteria);
     },
     searchCriteria: function () {
         "use strict";
@@ -269,6 +257,10 @@ $.otp.sequence = {
             }
         });
         return result;
+    },
+    updateSearchCriteria: function () {
+        $("#sequenceTable").dataTable().fnDraw();
+        $("#export-csv").attr("href", $.otp.contextPath + "/sequence/exportCsv?filtering=" + JSON.stringify($.otp.sequence.searchCriteria()));
     }
 };
 

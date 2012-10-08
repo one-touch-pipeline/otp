@@ -72,6 +72,9 @@
             </tfoot>
         </table>
     </div>
+    <div class="buttons" style="clear: both">
+        <a href="exportCsv" id="export-csv"><g:message code="sequence.list.export.csv"/></a>
+    </div>
     <r:script>
 $(function() {
     $.otp.sequence.register();

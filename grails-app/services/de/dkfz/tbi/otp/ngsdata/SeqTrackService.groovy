@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import groovy.xml.MarkupBuilder
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 
 class SeqTrackService {
@@ -11,6 +12,12 @@ class SeqTrackService {
      * Needed for access control on data protected by Projects.
      */
     def projectService
+    /**
+     * Dependency Injection of LSDF File Service.
+     *
+     * Required for exporting the view by pid path of a datafile
+     */
+    def lsdfFilesService
 
     /**
      * Retrieves the Sequences matching the given filtering the user has access to.
@@ -116,6 +123,108 @@ class SeqTrackService {
             // shortcut for unfiltered results
             return Sequence.countByProjectIdInList(projectService.getAllProjects().collect { it.id })
         }
+    }
+
+    /**
+     * Performs an export to XML with the applied filtering.
+     * @param filtering
+     * @return
+     */
+    public String performXMLExport(SequenceFiltering filtering) {
+        StringWriter writer = new StringWriter()
+        MarkupBuilder builder = new MarkupBuilder(writer)
+
+        def c = Sequence.createCriteria()
+        List<Sequence> sequences = c.list {
+            'in'('projectId', projectService.getAllProjects().collect { it.id })
+            if (filtering.project) {
+                'in'('projectId', filtering.project)
+            }
+            if (filtering.individual) {
+                or {
+                    filtering.individual.each {
+                        ilike('mockPid', "%${it}%")
+                    }
+                }
+            }
+            if (filtering.sampleType) {
+                'in'('sampleTypeId', filtering.sampleType)
+            }
+            if (filtering.seqType) {
+                'in'('seqTypeName', filtering.seqType)
+            }
+            if (filtering.libraryLayout) {
+                'in'('libraryLayout', filtering.libraryLayout)
+            }
+            if (filtering.seqCenter) {
+                'in'('seqCenterId', filtering.seqCenter)
+            }
+            if (filtering.run) {
+                or {
+                    filtering.run.each {
+                        ilike('name', "%${it}%")
+                    }
+                }
+            }
+        }
+        sequences.first()
+        String dataFileQuery = "SELECT df FROM DataFile AS df INNER JOIN df.seqTrack AS s WHERE s.id = :seqTrackId"
+
+        builder.sequences() {
+            sequences.each { Sequence p ->
+                sequence() {
+                    seqTrack(id: p.seqTrackId, finalBam: p.hasFinalBam, originalBam: p.hasOriginalBam, usingOriginalBam: p.usingOriginalBam) {
+                        laneId(p.laneId)
+                        numberBasePairs(p.nBasePairs)
+                        numberReads(p.nReads)
+                        insertSize(p.insertSize)
+                        qualityEncoding(p.qualityEncoding)
+                        alignmentState(p.alignmentState)
+                        fastqcState(p.fastqcState)
+                    }
+                    run(id: p.runId, blacklisted: p.blacklisted, multipleSource: p.multipleSource, qualityEvaluated: p.qualityEvaluated) {
+                        name(p.name)
+                        dateExecuted(p.dateExecuted)
+                        dateCreated(p.dateCreated)
+                        storageRealm(p.storageRealm)
+                        dataQuality(p.dataQuality)
+                    }
+                    seqPlatform(id: p.seqPlatformId) {
+                        name(p.seqPlatformName)
+                        model(p.model)
+                    }
+                    seqType(id: p.seqTypeId) {
+                        name(p.seqTypeName)
+                        libraryLayout(p.libraryLayout)
+                        dirName(p.dirName)
+                    }
+                    individual(id: p.individualId) {
+                        pid(p.pid)
+                        mockPid(p.mockPid)
+                        mockFullName(p.mockFullName)
+                        type(p.type)
+                        sample(id: p.sampleId) {
+                            sampleType(id: p.sampleTypeId, p.sampleTypeName)
+                        }
+                    }
+                    project(id: p.projectId) {
+                        name(p.projectName)
+                        dirName(p.projectDirName)
+                        realm(p.realmName)
+                    }
+                    seqCenter(id: p.seqCenterId) {
+                        name(p.seqCenterName)
+                        dirName(p.seqCenterDirName)
+                    }
+                    dataFiles() {
+                        DataFile.executeQuery(dataFileQuery, [seqTrackId: p.seqTrackId]).each { DataFile df ->
+                            path(lsdfFilesService.getFileViewByPidPath(df, p))
+                        }
+                    }
+                }
+            }
+        }
+        return writer.toString()
     }
 
     public void setRunReadyForFastqc(Run run) {

@@ -1,5 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import javax.xml.transform.Transformer
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.stream.StreamResult
+import javax.xml.transform.stream.StreamSource
+
 import grails.converters.JSON
 import groovy.json.JsonSlurper
 
@@ -7,6 +12,7 @@ import groovy.json.JsonSlurper
 class SequenceController {
     def seqTrackService
     def projectService
+    def servletContext
 
     def index() {
         List<SeqType> seqTypes = SeqType.list()
@@ -45,6 +51,22 @@ class SequenceController {
 
         dataToRender.aaData = seqTrackService.listSequences(start, length, params.sSortDir_0 == "asc", SequenceSortColumn.fromDataTable(column), filtering)
         render dataToRender as JSON
+    }
+
+    def exportCsv = {
+        SequenceFiltering filtering = SequenceFiltering.fromJSON(params.filtering)
+        String xml = seqTrackService.performXMLExport(filtering)
+
+        // transform XML into CSV
+        TransformerFactory factory = TransformerFactory.newInstance()
+        Transformer transformer = factory.newTransformer(new StreamSource(new File(servletContext.getRealPath("xslt/sequencetocsv.xslt"))))
+        StringWriter plainText = new StringWriter()
+        transformer.transform(new StreamSource(new StringReader(xml)), new StreamResult(plainText))
+
+        // make response a file for download
+        response.setContentType("application/octet-stream")
+        response.setHeader("Content-disposition", "filename=sequence_export.csv")
+        response.outputStream << plainText.toString().bytes
     }
 }
 

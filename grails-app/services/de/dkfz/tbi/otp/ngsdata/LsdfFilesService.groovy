@@ -120,12 +120,12 @@ class LsdfFilesService {
      * @param DataFile
      * @return path to view by pid file, or null if vbp does not apply
      */
-    String getFileViewByPidPath(DataFile file) {
+    String getFileViewByPidPath(DataFile file, Sequence sequence = null) {
         if (!checkFinalPathDefined(file)) {
             return null
         }
         String basePath = configService.getProjectSequencePath(file.project)
-        String relativePath = getFileViewByPidRelativePath(file)
+        String relativePath = getFileViewByPidRelativePath(file, sequence)
         return "${basePath}/${relativePath}"
     }
 
@@ -138,11 +138,11 @@ class LsdfFilesService {
         return "${basePath}/${relativePath}"
     }
 
-    String getFileViewByPidRelativePath(DataFile file) {
+    String getFileViewByPidRelativePath(DataFile file, Sequence sequence = null) {
         if (!checkFinalPathDefined(file)) {
             return null
         }
-        String directory = getFileViewByPidRelativeDirectory(file)
+        String directory = sequence ? getFileViewByPidRelativeDirectory(file, sequence) : getFileViewByPidRelativeDirectory(file)
         return "${directory}/${file.vbpFileName}"
     }
 
@@ -156,9 +156,20 @@ class LsdfFilesService {
         String pid = seqTrack.sample.individual.pid
         String sampleType = seqTrack.sample.sampleType.name.toLowerCase()
         String library = seqTrack.seqType.libraryLayout.toLowerCase()
-        String path =
-            "${seqTypeDir}/view-by-pid/${pid}/${sampleType}/${library}/run${file.run.name}/${file.fileType.vbpPath}"
-        return path
+        return getFileViewByPidRelativeDirectory(seqTypeDir, pid, sampleType, library, file.run.name, file.fileType.vbpPath)
+    }
+
+    private String getFileViewByPidRelativeDirectory(DataFile file, Sequence sequence) {
+        return getFileViewByPidRelativeDirectory(sequence.dirName,
+            sequence.pid,
+            sequence.sampleTypeName.toLowerCase(),
+            sequence.libraryLayout.toLowerCase(),
+            sequence.name,
+            file.fileType.vbpPath)
+    }
+
+    private String getFileViewByPidRelativeDirectory(String seqTypeDir, String pid, String sampleType, String library, String runName, String vbpPath) {
+        return "${seqTypeDir}/view-by-pid/${pid}/${sampleType}/${library}/run${runName}/${vbpPath}"
     }
 
     /**
