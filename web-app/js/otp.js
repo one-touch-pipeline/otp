@@ -446,7 +446,7 @@ OTP.prototype.renderDate = function (value) {
         if (isInLast24Hours(date)) {
             text += date.toLocaleTimeString();
         } else {
-            text += date.toLocaleString();
+            text += date.toDateString();
         }
         text += '</span>';
         return  text;
