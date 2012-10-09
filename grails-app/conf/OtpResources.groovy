@@ -48,6 +48,7 @@ modules = {
     testSuite {
         dependsOn 'qunit, userAdministration'
         resource url: '/js/test/group-creation-dialog-tests.js'
+        resource url: '/js/test/format-timespan-tests.js'
     }
     lightbox {
         dependsOn 'jquery'

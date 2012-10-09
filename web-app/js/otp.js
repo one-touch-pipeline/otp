@@ -467,23 +467,23 @@ OTP.prototype.formatTimespan = function (msec) {
     if (msec < 1000) {
         return msec + " msec";
     }
-    sec = Math.round(msec / 1000);
+    sec = msec / 1000;
     msec = msec % 1000;
     if (sec < 60) {
-        return sec + " sec " + msec + " msec";
+        return Math.floor(sec) + " sec " + msec + " msec";
     }
-    min = msec / 60;
-    sec = Math.round(sec % 60);
+    min = sec / 60;
+    sec = Math.floor(sec % 60);
     if (min < 60) {
-        return min + " min " + sec + " sec";
+        return Math.floor(min) + " min " + sec + " sec";
     }
     hour = min / 60;
-    min = Math.round(min % 60);
+    min = Math.floor(min % 60);
     if (hour < 24) {
-        return hour + " h " + min + " min";
+        return Math.floor(hour) + " h " + min + " min";
     }
-    day = Math.round(hour / 24);
-    hour = hour % 24;
+    day = Math.floor(hour / 24);
+    hour = Math.floor(hour % 24);
     return day + " day(s) " + hour + " h";
 };
 
