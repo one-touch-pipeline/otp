@@ -2,6 +2,8 @@ package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.plan.PlanInformation
+
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.access.prepost.PostFilter
@@ -350,106 +352,12 @@ AND u.id IN (
 
     /**
      * Generates some information about the given Plan.
-     * Returns a Map with three elements "jobs", "connections" and "name".
-     * Jobs is a List containing the information about each Job in this plan as a map with the following fields:
-     * <ul>
-     * <li>id (long)</li>
-     * <li>name (string)</li>
-     * <li>startJob (boolean)</li>
-     * <li>endStateAware (boolean)</li>
-     * <li>pbsJob (boolean)</li>
-     * <li>constantParameters (list)</li>
-     * <li>inputParameters (list)</li>
-     * <li>outputParameters (list)</li>
-     * <li>passthroughParameters (list)</li>
-     * </ul>
-     *
-     * The lists of parameters contain objects of the following structure:
-     * <ul>
-     * <li>id (long) (only provided for constant parameter)</li>
-     * <li>value (string) (only provided for constant parameter)</li>
-     * <li>type (map)</li>
-     * <li>mapping (long) (only provided for input and passthrough parameter)</li>
-     * </ul>
-     *
-     * The type is a complex structure consiting of the following fields:
-     * <ul>
-     * <li>id (long) (referrenced by mapping)</li>
-     * <li>name (string)</li>
-     * <li>description (string)</li>
-     * <li>className (string)</li>
-     * </ul>
-     *
-     * Connections is a List containing the connections between two jobs as a map with fields "from" and "to"
-     * taking just the id of the Job in the "jobs" field.
      * @param plan The JobExecutionPlan for which the information should be extracted.
      * @return Plan Information in a JSON ready format
      */
     @PreAuthorize("hasPermission(#plan, read) or hasRole('ROLE_OPERATOR')")
-    public Map planInformation(JobExecutionPlan plan) {
-        List jobs = []
-        List connections = []
-        def addToJobs = { job ->
-            def bean = grailsApplication.mainContext.getBean(job.bean)
-            boolean startJob = (bean instanceof StartJob)
-            boolean endStateAware = (bean instanceof EndStateAwareJob)
-            boolean pbsJob = (bean instanceof PbsJob)
-            List constantParameters = []
-            List outputParameters = []
-            List inputParameters = []
-            List passthroughParameters = []
-            List parameterMappings = []
-            def typeToMap = {
-                [
-                    id: it.id,
-                    name: it.name,
-                    description: it.description,
-                    className: it.className
-                ]
-            }
-            job.constantParameters.each { param ->
-                constantParameters << [
-                    id: param.id,
-                    value: param.value,
-                    type: typeToMap(param.type)
-                ]
-            }
-            ParameterType.findAllByJobDefinitionAndParameterUsage(job, ParameterUsage.INPUT).each {
-                inputParameters << [type: typeToMap(it), mapping: ParameterMapping.findByJobAndTo(job, it)?.from?.id]
-            }
-            ParameterType.findAllByJobDefinitionAndParameterUsage(job, ParameterUsage.OUTPUT).each {
-                outputParameters << [type: typeToMap(it)]
-            }
-            ParameterType.findAllByJobDefinitionAndParameterUsage(job, ParameterUsage.PASSTHROUGH).each {
-                passthroughParameters << [type: typeToMap(it), mapping: ParameterMapping.findByJobAndTo(job, it)?.from?.id]
-            }
-            jobs << [
-                id: job.id,
-                name: job.name,
-                startJob: startJob,
-                endStateAware: endStateAware,
-                pbsJob: pbsJob,
-                bean: job.bean,
-                constantParameters: constantParameters,
-                inputParameters: inputParameters,
-                outputParameters: outputParameters,
-                passthroughParameters: passthroughParameters
-            ]
-        }
-        def addConnection = { from, to ->
-            connections << [from: from.id, to: to.id]
-        }
-        addToJobs(plan.startJob)
-        addConnection(plan.startJob, plan.firstJob)
-        JobDefinition job = plan.firstJob
-        while (job) {
-            addToJobs(job)
-            if (job.next) {
-                addConnection(job, job.next)
-            }
-            job = job.next
-        }
-        return [jobs: jobs, connections: connections, name: plan.name]
+    public PlanInformation planInformation(JobExecutionPlan plan) {
+        return PlanInformation.fromPlan(plan)
     }
 
     /**

@@ -6,6 +6,8 @@ import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.core.context.SecurityContextHolder
 
+import de.dkfz.tbi.otp.job.plan.PlanInformation
+
 /**
  * Service providing methods to access information about Processes.
  *
@@ -343,8 +345,8 @@ ORDER BY u.id desc
      * @see JobExecutionPlanService.planInformation
      **/
     @PreAuthorize("hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_OPERATOR')")
-    public Map processInformation(Process process) {
-        Map plan = jobExecutionPlanService.planInformation(process.jobExecutionPlan)
+    public PlanInformation processInformation(Process process) {
+        PlanInformation plan = jobExecutionPlanService.planInformation(process.jobExecutionPlan)
         List<ProcessingStep> processingSteps = ProcessingStep.findAllByProcess(process)
         List<Long> jobIdsOfProcessingSteps = processingSteps.collect { it.jobDefinition.id }
         plan.jobs.each { job ->
@@ -371,13 +373,6 @@ ORDER BY u.id desc
                         }
                     }
                 }
-            } else {
-                job.processingStep = null
-                job.created = false
-                job.started = false
-                job.finished = false
-                job.succeeded = false
-                job.failed = false
             }
         }
         return plan
