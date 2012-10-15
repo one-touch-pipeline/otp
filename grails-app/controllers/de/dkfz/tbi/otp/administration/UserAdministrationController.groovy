@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.security.Group
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.user.RoleNotFoundException
 import de.dkfz.tbi.otp.user.UserNotFoundException
+import de.dkfz.tbi.otp.utils.DataTableCommand
 import de.dkfz.tbi.otp.OtpException
 
 /**
@@ -40,24 +41,13 @@ class UserAdministrationController {
     /**
      * Action returning the DataTable content as JSON
      */
-    def dataTableSource = {
-        println "dataTableSource"
-        int start = 0
-        int length = 10
-        if (params.iDisplayStart) {
-            start = params.iDisplayStart as int
-        }
-        if (params.iDisplayLength) {
-            length = Math.min(100, params.iDisplayLength as int)
-        }
-        def dataToRender = [:]
-        dataToRender.sEcho = params.sEcho
-        dataToRender.aaData = []
+    def dataTableSource(DataTableCommand cmd) {
+        Map dataToRender = cmd.dataToRender()
 
         dataToRender.iTotalRecords = userService.getUserCount()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-        List users = userService.getAllUsers(start, length)
+        List users = userService.getAllUsers(cmd.iDisplayStart, cmd.iDisplayLength)
         users.each { user ->
             dataToRender.aaData << [user.id, user.username, user.email, user.jabberId, user.enabled, user.accountExpired, user.accountLocked, user.passwordExpired]
         }

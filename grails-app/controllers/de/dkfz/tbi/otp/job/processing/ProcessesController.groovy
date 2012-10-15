@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.utils.DataTableCommand
 import grails.converters.JSON
 import grails.util.GrailsNameUtils
 import org.springframework.security.core.context.SecurityContextHolder
@@ -48,26 +49,12 @@ class ProcessesController {
     def list() {
     }
 
-    def listData() {
-        // input validation
-        int start = 0
-        int length = 10
-        if (params.iDisplayStart) {
-            start = params.iDisplayStart as int
-        }
-        if (params.iDisplayLength) {
-            length = Math.min(100, params.iDisplayLength as int)
-        }
-        def dataToRender = [:]
-        dataToRender.sEcho = params.sEcho
-        dataToRender.aaData = []
+    def listData(DataTableCommand cmd) {
+        Map dataToRender = cmd.dataToRender()
 
         List<JobExecutionPlan> plans = jobExecutionPlanService.getAllJobExecutionPlans()
         dataToRender.iTotalRecords = plans.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.offset = start
-        dataToRender.iSortCol_0 = params.iSortCol_0
-        dataToRender.sSortDir_0 = params.sSortDir_0
 
         List futures = []
         def auth = SecurityContextHolder.context.authentication
@@ -107,7 +94,7 @@ class ProcessesController {
         // fetch the data with multiple queries, that means we cannot sort in the query directly
         // so we have to sort the fetched data
         dataToRender.aaData.sort { a, b ->
-            switch (dataToRender.iSortCol_0 as Integer) {
+            switch (cmd.iSortCol_0) {
             case 0: // status
                 return a[0] <=> b[0]
             case 1: // succeeded/finished
@@ -136,7 +123,7 @@ class ProcessesController {
             }
         }
         // reverse sort order if descending
-        if (params.sSortDir_0 == "desc") {
+        if (!cmd.sortOrder) {
             dataToRender.aaData = dataToRender.aaData.reverse()
         }
         render dataToRender as JSON
@@ -147,25 +134,10 @@ class ProcessesController {
         [name: plan.name, id: plan.id, failed: Boolean.parseBoolean(params.failed), enabled: plan.enabled]
     }
 
-    def planData() {
-        // input validation
-        int start = 0
-        int length = 10
-        if (params.iDisplayStart) {
-            start = params.iDisplayStart as int
-        }
-        if (params.iDisplayLength) {
-            length = Math.min(100, params.iDisplayLength as int)
-        }
-        def dataToRender = [:]
-        dataToRender.sEcho = params.sEcho
-        dataToRender.aaData = []
-        int sortColumn = 0
-        if (params.iSortCol_0) {
-            sortColumn = params.iSortCol_0
-        }
+    def planData(DataTableCommand cmd) {
+        Map dataToRender = cmd.dataToRender()
         String sort
-        switch (sortColumn) {
+        switch (cmd.iSortCol_0) {
         case 2:
             sort = "started"
             break
@@ -174,26 +146,15 @@ class ProcessesController {
             sort = "id"
             break
         }
-        boolean sortOrder = false
-        if (params.sSortDir_0) {
-            if (params.sSortDir_0 == "asc") {
-                sortOrder = true
-            } else if (params.sSortDir_0 == "desc") {
-                sortOrder = false
-            }
-        }
 
         JobExecutionPlan plan = jobExecutionPlanService.getPlan(params.id as long)
         ExecutionState restriction = null
         if (Boolean.parseBoolean(params.failed)) {
             restriction = ExecutionState.FAILURE
         }
-        Map<Process, ProcessingStepUpdate> processes = jobExecutionPlanService.getLatestUpdatesForPlan(plan, length, start, sort, sortOrder, restriction)
+        Map<Process, ProcessingStepUpdate> processes = jobExecutionPlanService.getLatestUpdatesForPlan(plan, cmd.iDisplayLength, cmd.iDisplayStart, sort, cmd.sortOrder, restriction)
         dataToRender.iTotalRecords = jobExecutionPlanService.getNumberOfProcesses(plan, restriction)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.offset = start
-        dataToRender.iSortCol_0 = sortColumn
-        dataToRender.sSortDir_0 = sortOrder ? "asc" : "desc"
 
         processes.each { Process process, ProcessingStepUpdate latest ->
             String parameterData = processParameterData(process)
@@ -233,35 +194,13 @@ class ProcessesController {
         [name: process.jobExecutionPlan.name, id: process.id, planId: process.jobExecutionPlan.id, parameter: processParameterData(process)]
     }
 
-    def processData() {
-        // input validation
-        int start = 0
-        int length = 10
-        if (params.iDisplayStart) {
-            start = params.iDisplayStart as int
-        }
-        if (params.iDisplayLength) {
-            length = Math.min(100, params.iDisplayLength as int)
-        }
-        def dataToRender = [:]
-        dataToRender.sEcho = params.sEcho
-        dataToRender.aaData = []
-        boolean sortOrder = false
-        if (params.sSortDir_0) {
-            if (params.sSortDir_0 == "asc") {
-                sortOrder = true
-            } else if (params.sSortDir_0 == "desc") {
-                sortOrder = false
-            }
-        }
+    def processData(DataTableCommand cmd) {
+        Map dataToRender = cmd.dataToRender()
 
         Process process = processService.getProcess(params.id as long)
-        List<ProcessingStep> steps = processService.getAllProcessingSteps(process, length, start, "id", sortOrder)
+        List<ProcessingStep> steps = processService.getAllProcessingSteps(process, cmd.iDisplayLength, cmd.iDisplayStart, "id", cmd.sortOrder)
         dataToRender.iTotalRecords = processService.getNumberOfProcessessingSteps(process)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.offset = start
-        dataToRender.iSortCol_0 = 0
-        dataToRender.sSortDir_0 = sortOrder ? "asc" : "desc"
         List futures = []
         def auth = SecurityContextHolder.context.authentication
         steps.each { ProcessingStep step ->
@@ -328,35 +267,13 @@ class ProcessesController {
         render data as JSON
     }
 
-    def processingStepDate() {
-        // input validation
-        int start = 0
-        int length = 10
-        if (params.iDisplayStart) {
-            start = params.iDisplayStart as int
-        }
-        if (params.iDisplayLength) {
-            length = Math.min(100, params.iDisplayLength as int)
-        }
-        def dataToRender = [:]
-        dataToRender.sEcho = params.sEcho
-        dataToRender.aaData = []
-        boolean sortOrder = false
-        if (params.sSortDir_0) {
-            if (params.sSortDir_0 == "asc") {
-                sortOrder = true
-            } else if (params.sSortDir_0 == "desc") {
-                sortOrder = false
-            }
-        }
+    def processingStepDate(DataTableCommand cmd) {
+        Map dataToRender = cmd.dataToRender()
 
         ProcessingStep step = processService.getProcessingStep(params.id as long)
-        List<ProcessingStepUpdate> updates = processService.getAllUpdates(step, length, start, "id", sortOrder)
+        List<ProcessingStepUpdate> updates = processService.getAllUpdates(step, cmd.iDisplayLength, cmd.iDisplayStart, "id", cmd.sortOrder)
         dataToRender.iTotalRecords = processService.getNumberOfUpdates(step)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.offset = start
-        dataToRender.iSortCol_0 = 0
-        dataToRender.sSortDir_0 = sortOrder ? "asc" : "desc"
         updates.each { ProcessingStepUpdate update ->
             dataToRender.aaData << [
                 update.id,
@@ -368,27 +285,8 @@ class ProcessesController {
         render dataToRender as JSON
     }
 
-    def parameterData() {
-        // input validation
-        int start = 0
-        int length = 10
-        if (params.iDisplayStart) {
-            start = params.iDisplayStart as int
-        }
-        if (params.iDisplayLength) {
-            length = Math.min(100, params.iDisplayLength as int)
-        }
-        def dataToRender = [:]
-        dataToRender.sEcho = params.sEcho
-        dataToRender.aaData = []
-        boolean sortOrder = true
-        if (params.sSortDir_0) {
-            if (params.sSortDir_0 == "asc") {
-                sortOrder = true
-            } else if (params.sSortDir_0 == "desc") {
-                sortOrder = false
-            }
-        }
+    def parameterData(DataTableCommand cmd) {
+        Map dataToRender = cmd.dataToRender()
         boolean input = Boolean.parseBoolean(params.input)
 
         ProcessingStep step = processService.getProcessingStep(params.id as long)
@@ -399,14 +297,11 @@ class ProcessesController {
         } else {
             parameters = step.output.toList().sort { it.id }
         }
-        if (!sortOrder) {
+        if (!cmd.sortOrder) {
             parameters = parameters.reverse()
         }
         dataToRender.iTotalRecords = parameters.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.offset = start
-        dataToRender.iSortCol_0 = 0
-        dataToRender.sSortDir_0 = sortOrder ? "asc" : "desc"
         parameters.each { Parameter param ->
             dataToRender.aaData << [
                 param.id,

@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.administration
 
+import de.dkfz.tbi.otp.utils.DataTableCommand
 import grails.converters.JSON
 import grails.plugins.springsecurity.Secured
 
@@ -27,26 +28,12 @@ class CrashRecoveryController {
         }
     }
 
-    def datatable() {
-        // input validation
-        int start = 0
-        int length = 10
-        if (params.iDisplayStart) {
-            start = params.iDisplayStart as int
-        }
-        if (params.iDisplayLength) {
-            length = Math.min(100, params.iDisplayLength as int)
-        }
-        def dataToRender = [:]
-        dataToRender.sEcho = params.sEcho
-        dataToRender.aaData = []
+    def datatable(DataTableCommand cmd) {
+        Map dataToRender = cmd.dataToRender()
 
         List crashedJobs = crashRecoveryService.crashedJobs()
         dataToRender.iTotalRecords = crashedJobs.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.offset = start
-        dataToRender.iSortCol_0 = params.iSortCol_0
-        dataToRender.sSortDir_0 = params.sSortDir_0
 
         // TODO: sorting
         crashedJobs.each { step ->

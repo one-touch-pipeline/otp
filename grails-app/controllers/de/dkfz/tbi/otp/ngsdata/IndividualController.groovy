@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.utils.DataTableCommand
 import grails.converters.JSON
 import groovy.json.JsonSlurper
 
@@ -34,30 +35,13 @@ class IndividualController {
     def list = {
     }
 
-    def dataTableSource = {
-        int start = 0
-        int length = 10
-        if (params.iDisplayStart) {
-            start = params.iDisplayStart as int
-        }
-        if (params.iDisplayLength) {
-            length = Math.min(100, params.iDisplayLength as int)
-        }
-        int column = 0
-        if (params.iSortCol_0) {
-            column = params.iSortCol_0 as int
-        }
-        def dataToRender = [:]
-        dataToRender.sEcho = params.sEcho
-        dataToRender.aaData = []
+    def dataTableSource(DataTableCommand cmd) {
+        Map dataToRender = cmd.dataToRender()
 
-        dataToRender.offset = start
-        dataToRender.iSortCol_0 = params.iSortCol_0
-        dataToRender.sSortDir_0 = params.sSortDir_0
-        dataToRender.iTotalRecords = individualService.countIndividual(params.sSearch)
+        dataToRender.iTotalRecords = individualService.countIndividual(cmd.sSearch)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-        individualService.listIndividuals(start, length, params.sSortDir_0 == "asc", column, params.sSearch).each { individual ->
+        individualService.listIndividuals(cmd.iDisplayStart, cmd.iDisplayLength, cmd.sortOrder, cmd.iSortCol_0, cmd.sSearch).each { individual ->
             dataToRender.aaData << [
                 [id: individual.id, text: individual.pid],
                 individual.mockFullName,

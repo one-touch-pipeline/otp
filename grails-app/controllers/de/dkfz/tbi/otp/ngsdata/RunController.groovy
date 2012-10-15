@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.utils.DataTableCommand
 import grails.converters.JSON
 
 class RunController {
@@ -43,30 +44,13 @@ class RunController {
     def list = {
     }
 
-    def dataTableSource = {
-        int start = 0
-        int length = 10
-        if (params.iDisplayStart) {
-            start = params.iDisplayStart as int
-        }
-        if (params.iDisplayLength) {
-            length = Math.min(100, params.iDisplayLength as int)
-        }
-        int column = 0
-        if (params.iSortCol_0) {
-            column = params.iSortCol_0 as int
-        }
-        def dataToRender = [:]
-        dataToRender.sEcho = params.sEcho
-        dataToRender.aaData = []
+    def dataTableSource(DataTableCommand cmd) {
+        Map dataToRender = cmd.dataToRender()
 
-        dataToRender.offset = start
-        dataToRender.iSortCol_0 = params.iSortCol_0
-        dataToRender.sSortDir_0 = params.sSortDir_0
-        dataToRender.iTotalRecords = runService.countRun(params.sSearch)
+        dataToRender.iTotalRecords = runService.countRun(cmd.sSearch)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-        runService.listRuns(start, length, params.sSortDir_0 == "asc", column, params.sSearch).each { run ->
+        runService.listRuns(cmd.iDisplayStart, cmd.iDisplayLength, cmd.sortOrder, cmd.iSortCol_0, cmd.sSearch).each { run ->
             dataToRender.aaData << [
                 [id: run.id, text: run.name],
                 run.seqCenter.name.toLowerCase(),

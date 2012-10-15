@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.notification.NotificationMedium
 import de.dkfz.tbi.otp.notification.NotificationTemplate
 import de.dkfz.tbi.otp.notification.NotificationType
 import de.dkfz.tbi.otp.notification.Trigger
+import de.dkfz.tbi.otp.utils.DataTableCommand
 import grails.converters.JSON
 import grails.plugins.springsecurity.Secured
 import grails.util.GrailsNameUtils
@@ -23,32 +24,10 @@ class NotificationController {
         [workflows: jobExecutionPlanService.getAllJobExecutionPlans()]
     }
 
-    def dataTableSource() {
-        // input validation
-        int start = 0
-        int length = 10
-        if (params.iDisplayStart) {
-            start = params.iDisplayStart as int
-        }
-        if (params.iDisplayLength) {
-            length = Math.min(100, params.iDisplayLength as int)
-        }
-        def dataToRender = [:]
-        dataToRender.sEcho = params.sEcho
-        dataToRender.aaData = []
-        boolean sortOrder = false
-        if (params.sSortDir_0) {
-            if (params.sSortDir_0 == "asc") {
-                sortOrder = true
-            } else if (params.sSortDir_0 == "desc") {
-                sortOrder = false
-            }
-        }
+    def dataTableSource(DataTableCommand cmd) {
+        Map dataToRender = cmd.dataToRender()
         dataToRender.iTotalRecords = Notification.count()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.offset = start
-        dataToRender.iSortCol_0 = 0
-        dataToRender.sSortDir_0 = sortOrder ? "asc" : "desc"
 
         notificationService.getAllNotifications().each {
             dataToRender.aaData << [

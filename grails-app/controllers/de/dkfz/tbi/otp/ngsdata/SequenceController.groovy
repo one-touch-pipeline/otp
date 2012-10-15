@@ -5,6 +5,7 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.stream.StreamResult
 import javax.xml.transform.stream.StreamSource
 
+import de.dkfz.tbi.otp.utils.DataTableCommand
 import grails.converters.JSON
 import groovy.json.JsonSlurper
 
@@ -24,32 +25,15 @@ class SequenceController {
             ]
     }
 
-    def dataTableSource = {
-        int start = 0
-        int length = 10
-        if (params.iDisplayStart) {
-            start = params.iDisplayStart as int
-        }
-        if (params.iDisplayLength) {
-            length = Math.min(100, params.iDisplayLength as int)
-        }
-        int column = 0
-        if (params.iSortCol_0) {
-            column = params.iSortCol_0 as int
-        }
-        def dataToRender = [:]
-        dataToRender.sEcho = params.sEcho
-        dataToRender.aaData = []
+    def dataTableSource(DataTableCommand cmd) {
+        Map dataToRender = cmd.dataToRender()
 
         SequenceFiltering filtering = SequenceFiltering.fromJSON(params.filtering)
 
-        dataToRender.offset = start
-        dataToRender.iSortCol_0 = params.iSortCol_0
-        dataToRender.sSortDir_0 = params.sSortDir_0
         dataToRender.iTotalRecords = seqTrackService.countSequences(filtering)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-        dataToRender.aaData = seqTrackService.listSequences(start, length, params.sSortDir_0 == "asc", SequenceSortColumn.fromDataTable(column), filtering)
+        dataToRender.aaData = seqTrackService.listSequences(cmd.iDisplayStart, cmd.iDisplayLength, cmd.sortOrder, SequenceSortColumn.fromDataTable(cmd.iSortCol_0), filtering)
         render dataToRender as JSON
     }
 
