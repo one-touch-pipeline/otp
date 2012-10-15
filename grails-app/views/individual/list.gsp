@@ -9,27 +9,13 @@
 <body>
     <div class="body">
         <h1><g:message code="individual.list.title"/></h1>
-        <table id="individualTable">
-            <thead>
-            <tr>
-                <th><g:message code="individual.list.pid"/></th>
-                <th><g:message code="individual.list.mockName"/></th>
-                <th><g:message code="individual.list.mockPid"/></th>
-                <th><g:message code="individual.list.project"/></th>
-                <th><g:message code="individual.list.type"/></th>
-            </tr>
-            </thead>
-            <tbody></tbody>
-            <tfoot>
-            <tr>
-                <th><g:message code="individual.list.pid"/></th>
-                <th><g:message code="individual.list.mockName"/></th>
-                <th><g:message code="individual.list.mockPid"/></th>
-                <th><g:message code="individual.list.project"/></th>
-                <th><g:message code="individual.list.type"/></th>
-            </tr>
-            </tfoot>
-        </table>
+        <otp:dataTable codes="${[
+                'individual.list.pid',
+                'individual.list.mockName',
+                'individual.list.mockPid',
+                'individual.list.project',
+                'individual.list.type'
+            ] }" id="individualTable"/>
     </div>
     <r:script>
 $(function() {

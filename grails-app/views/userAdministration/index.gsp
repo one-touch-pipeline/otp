@@ -12,35 +12,17 @@
         <form id="switch-user-form" action="${request.contextPath}/j_spring_security_switch_user" method="POST">
             <input type="hidden" name="j_username"/>
         </form>
-        <table id="userTable">
-            <thead>
-            <tr>
-                <th><g:message code="user.administration.list.id"/></th>
-                <th><g:message code="user.administration.list.username"/></th>
-                <th><g:message code="user.administration.list.email"/></th>
-                <th><g:message code="user.administration.list.jabber"/></th>
-                <th><g:message code="user.administration.list.enabled"/></th>
-                <th><g:message code="user.administration.list.accountExpired"/></th>
-                <th><g:message code="user.administration.list.accountLocked"/></th>
-                <th><g:message code="user.administration.list.passwordExpired"/></th>
-                <th>&nbsp;</th>
-            </tr>
-            </thead>
-            <tbody></tbody>
-            <tfoot>
-            <tr>
-                <th><g:message code="user.administration.list.id"/></th>
-                <th><g:message code="user.administration.list.username"/></th>
-                <th><g:message code="user.administration.list.email"/></th>
-                <th><g:message code="user.administration.list.jabber"/></th>
-                <th><g:message code="user.administration.list.enabled"/></th>
-                <th><g:message code="user.administration.list.accountExpired"/></th>
-                <th><g:message code="user.administration.list.accountLocked"/></th>
-                <th><g:message code="user.administration.list.passwordExpired"/></th>
-                <th>&nbsp;</th>
-            </tr>
-            </tfoot>
-        </table>
+        <otp:dataTable codes="${[
+                'user.administration.list.id',
+                'user.administration.list.username',
+                'user.administration.list.email',
+                'user.administration.list.jabber',
+                'user.administration.list.enabled',
+                'user.administration.list.accountExpired',
+                'user.administration.list.accountLocked',
+                'user.administration.list.passwordExpired',
+                'otp.blank'
+            ]}" id="userTable"/>
         </div>
         <r:script>
 $(function() {

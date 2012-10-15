@@ -94,4 +94,14 @@ class OtpTagLib {
             out << Environment.getCurrent().name
         }
     }
+
+    /**
+     * Renders the markup for a datatable consisting of a header and footer section.
+     *
+     * @attr id REQUIRED The id for the datatable
+     * @attr codes REQUIRED List of message codes to be used as table headers
+     */
+    def dataTable = { attrs ->
+        out << render(template: "/templates/dataTable", model: [id: attrs.id, codes: attrs.codes])
+    }
 }

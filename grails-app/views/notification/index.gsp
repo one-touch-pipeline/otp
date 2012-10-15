@@ -42,29 +42,14 @@
             <option value="JABBER"><g:message code="notification.administration.medium.jabber"/></option>
         </select>
         <h1><g:message code="notification.administration.list.header"/></h1>
-        <table id="notificationsTable">
-            <thead>
-            <tr>
-                <th><g:message code="notification.administration.list.headers.enabled"/></th>
-                <th><g:message code="notification.administration.list.headers.type"/></th>
-                <th><g:message code="notification.administration.list.headers.medium"/></th>
-                <th><g:message code="notification.administration.list.headers.trigger"/></th>
-                <th><g:message code="notification.administration.list.headers.subject"/></th>
-                <th><g:message code="notification.administration.list.headers.message"/></th>
-            </tr>
-            </thead>
-            <tbody></tbody>
-            <tfoot>
-            <tr>
-                <th><g:message code="notification.administration.list.headers.enabled"/></th>
-                <th><g:message code="notification.administration.list.headers.type"/></th>
-                <th><g:message code="notification.administration.list.headers.medium"/></th>
-                <th><g:message code="notification.administration.list.headers.trigger"/></th>
-                <th><g:message code="notification.administration.list.headers.subject"/></th>
-                <th><g:message code="notification.administration.list.headers.message"/></th>
-            </tr>
-            </tfoot>
-        </table>
+        <otp:dataTable codes="${[
+                'notification.administration.list.headers.enabled',
+                'notification.administration.list.headers.type',
+                'notification.administration.list.headers.medium',
+                'notification.administration.list.headers.trigger',
+                'notification.administration.list.headers.subject',
+                'notification.administration.list.headers.message'
+            ]}" id="notificationsTable"/>
     </div>
 <r:script>
 $(function() {

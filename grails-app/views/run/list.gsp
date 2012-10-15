@@ -9,33 +9,15 @@
 <body>
     <div class="body">
         <h1><g:message code="run.list.title"/></h1>
-        <table id="runTable">
-            <thead>
-            <tr>
-                <th><g:message code="run.list.name"/></th>
-                <th><g:message code="run.list.seqCenter"/></th>
-                <th><g:message code="run.list.storageRealm"/></th>
-                <th><g:message code="run.list.dateCreated"/></th>
-                <th><g:message code="run.list.dateExecuted"/></th>
-                <th><g:message code="run.list.blacklisted"/></th>
-                <th><g:message code="run.list.multipleSource"/></th>
-                <th><g:message code="run.list.fastqcState"/></th>
-            </tr>
-            </thead>
-            <tbody></tbody>
-            <tfoot>
-            <tr>
-                <th><g:message code="run.list.name"/></th>
-                <th><g:message code="run.list.seqCenter"/></th>
-                <th><g:message code="run.list.storageRealm"/></th>
-                <th><g:message code="run.list.dateCreated"/></th>
-                <th><g:message code="run.list.dateExecuted"/></th>
-                <th><g:message code="run.list.blacklisted"/></th>
-                <th><g:message code="run.list.multipleSource"/></th>
-                <th><g:message code="run.list.fastqcState"/></th>
-            </tr>
-            </tfoot>
-        </table>
+        <otp:dataTable codes="${['run.list.name',
+            'run.list.seqCenter',
+            'run.list.storageRealm',
+            'run.list.dateCreated',
+            'run.list.dateExecuted',
+            'run.list.blacklisted',
+            'run.list.multipleSource',
+            'run.list.fastqcState'
+            ] }" id="runTable"/>
     </div>
     <r:script>
 $(function() {

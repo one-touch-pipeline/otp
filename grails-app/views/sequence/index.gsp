@@ -36,41 +36,20 @@
                 </td>
             </tr>
         </table>
-        <table id="sequenceTable">
-            <thead>
-                <tr>
-                    <th><g:message code="sequence.list.headers.project"/></th>
-                    <th><g:message code="sequence.list.headers.individual"/></th>
-                    <th><g:message code="sequence.list.headers.sampleType"/></th>
-                    <th><g:message code="sequence.list.headers.seqType"/></th>
-                    <th><g:message code="sequence.list.headers.libLayout"/></th>
-                    <th><g:message code="sequence.list.headers.seqCenter"/></th>
-                    <th><g:message code="sequence.list.headers.run"/></th>
-                    <th><g:message code="sequence.list.headers.lane"/></th>
-                    <th><g:message code="sequence.list.headers.fastqc"/></th>
-                    <th><g:message code="sequence.list.headers.otpAlignment"/></th>
-                    <th><g:message code="sequence.list.headers.origAlignment"/></th>
-                    <th><g:message code="sequence.list.headers.date"/></th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-            <tfoot>
-                <tr>
-                    <th><g:message code="sequence.list.headers.project"/></th>
-                    <th><g:message code="sequence.list.headers.individual"/></th>
-                    <th><g:message code="sequence.list.headers.sampleType"/></th>
-                    <th><g:message code="sequence.list.headers.seqType"/></th>
-                    <th><g:message code="sequence.list.headers.libLayout"/></th>
-                    <th><g:message code="sequence.list.headers.seqCenter"/></th>
-                    <th><g:message code="sequence.list.headers.run"/></th>
-                    <th><g:message code="sequence.list.headers.lane"/></th>
-                    <th><g:message code="sequence.list.headers.fastqc"/></th>
-                    <th><g:message code="sequence.list.headers.otpAlignment"/></th>
-                    <th><g:message code="sequence.list.headers.origAlignment"/></th>
-                    <th><g:message code="sequence.list.headers.date"/></th>
-                </tr>
-            </tfoot>
-        </table>
+        <otp:dataTable codes="${[
+                    'sequence.list.headers.project',
+                    'sequence.list.headers.individual',
+                    'sequence.list.headers.sampleType',
+                    'sequence.list.headers.seqType',
+                    'sequence.list.headers.libLayout',
+                    'sequence.list.headers.seqCenter',
+                    'sequence.list.headers.run',
+                    'sequence.list.headers.lane',
+                    'sequence.list.headers.fastqc',
+                    'sequence.list.headers.otpAlignment',
+                    'sequence.list.headers.origAlignment',
+                    'sequence.list.headers.date'
+            ]}" id="sequenceTable"/>
     </div>
     <div class="buttons" style="clear: both">
         <a href="exportCsv" id="export-csv"><g:message code="sequence.list.export.csv"/></a>
