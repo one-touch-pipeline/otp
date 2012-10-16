@@ -119,6 +119,14 @@ class SchedulerService {
                             log.error("ProcessingStep ${step.id} could not be resumed")
                         }
                         processesToRestart << step
+                    } else if (last.state == ExecutionState.RESTARTED) {
+                        // look whether there is a RestartedProcessingStep which has a link to step
+                        RestartedProcessingStep restarted = RestartedProcessingStep.findByOriginal(step)
+                        if (!restarted) {
+                            status.setRollbackOnly()
+                            ok = false
+                            log.error("Error during startup: ProcessingStep ${step.id} is in state ${last.state}, but no RestartedProcessingStep exists")
+                        }
                     } else {
                         status.setRollbackOnly()
                         ok = false
