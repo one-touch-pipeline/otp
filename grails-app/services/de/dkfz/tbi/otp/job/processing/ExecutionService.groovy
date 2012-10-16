@@ -257,7 +257,6 @@ class ExecutionService {
                     }
                 } catch (Exception e) {
                     // catch all exceptions and assume the job is still running
-                    log.debug e.stackTrace()
                     stats.put(pbsId, true)
                 }
             }
