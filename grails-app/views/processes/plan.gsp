@@ -4,10 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
 <title>List of ${failed ? 'failed' : ''} Processes for Workflow ${name}</title>
-<r:require module="jqueryDatatables"/>
-<g:javascript src="jquery.timeago.js"/>
-<r:require module="graphDracula"/>
-<r:require module="jqueryUI"/>
+<r:require module="workflows"/>
 </head>
 <body>
   <div class="body">
@@ -52,7 +49,7 @@
     </div>
     <g:javascript>
        $(document).ready(function() {
-            $.otp.createProcessListView("#workflowOverviewTable", ${id}, ${failed ? 'true' : 'false'});
+            $.otp.workflows.registerProcesses("#workflowOverviewTable", ${id}, ${failed ? 'true' : 'false'});
         });
     </g:javascript>
   </div>

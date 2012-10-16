@@ -4,8 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
 <title>Processing Step ${step.jobDefinition.name} (# ${step.id})</title>
-<r:require module="jqueryDatatables"/>
-<g:javascript src="jquery.timeago.js"/>
+<r:require module="workflows"/>
 </head>
 <body>
   <div class="body">
@@ -64,11 +63,6 @@
             'workflow.paramater.table.headers.description',
             'workflow.paramater.table.headers.value'
         ]}" id="inputParametersList"/>
-    <g:javascript>
-        $(document).ready(function() {
-            $.otp.createParameterListView('#inputParametersList', ${step.id}, true);
-        });
-    </g:javascript>
     </div>
     <h2>Output Parameters</h2>
     <div>
@@ -78,11 +72,6 @@
             'workflow.paramater.table.headers.description',
             'workflow.paramater.table.headers.value'
         ]}" id="outputParametersList"/>
-    <g:javascript>
-        $(document).ready(function() {
-            $.otp.createParameterListView('#outputParametersList', ${step.id}, false);
-        });
-    </g:javascript>
     </div>
     <h2>Updates</h2>
     <div>
@@ -93,11 +82,11 @@
             'workflow.processingstep.update.table.headers.error'
         ]}" id="processingStepUpdatesList"/>
     </div>
-    <g:javascript>
+    <r:script>
        $(document).ready(function() {
-            $.otp.createProcessingStepUpdatesListView('#processingStepUpdatesList', ${step.id});
+            $.otp.workflows.processingStep.register('#processingStepUpdatesList', '#inputParametersList', '#outputParametersList', ${step.id});
         });
-    </g:javascript>
+    </r:script>
   </div>
 </body>
 </html>

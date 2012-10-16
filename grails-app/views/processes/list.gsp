@@ -4,8 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
 <title>List of Workflows</title>
-<r:require module="jqueryDatatables"/>
-<g:javascript src="jquery.timeago.js"/>
+<r:require module="workflows"/>
 </head>
 <body>
   <div class="body">
@@ -24,7 +23,7 @@
     </div>
     <g:javascript>
        $(document).ready(function() {
-            $.otp.createJobExecutionPlanListView('#workflowOverviewTable');
+            $.otp.workflows.registerJobExecutionPlan('#workflowOverviewTable');
         });
     </g:javascript>
   </div>

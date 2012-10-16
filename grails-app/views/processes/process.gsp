@@ -4,9 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
 <title>List of Processing Steps for Process # ${id} for Workflow ${name}</title>
-<r:require module="jqueryDatatables"/>
-<g:javascript src="jquery.timeago.js"/>
-<r:require module="graphDracula"/>
+<r:require module="workflows"/>
 </head>
 <body>
   <div class="body">
@@ -35,7 +33,7 @@
     </div>
     <g:javascript>
        $(document).ready(function() {
-            $.otp.createProcessingStepListView("#processOverviewTable", ${id});
+            $.otp.workflows.registerProcessingStep("#processOverviewTable", ${id});
         });
     </g:javascript>
   </div>

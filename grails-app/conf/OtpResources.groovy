@@ -46,7 +46,7 @@ modules = {
         resource url: '/js/qunit.js'
     }
     testSuite {
-        dependsOn 'qunit, userAdministration'
+        dependsOn 'qunit, userAdministration, workflows'
         resource url: '/js/test/group-creation-dialog-tests.js'
         resource url: '/js/test/format-timespan-tests.js'
     }
@@ -54,5 +54,9 @@ modules = {
         dependsOn 'jquery'
         resource url: '/js/jquery/lightbox.js'
         resource url: '/css/jquery/lightbox.css'
+    }
+    workflows {
+        dependsOn 'jqueryDatatables, core, graphDracula, jqueryUI'
+        resource url: '/js/workflows.js'
     }
 }
