@@ -39,22 +39,16 @@
         <button id="generate-dsl">Generate Plan Markup</button>
     </div>
     <div id="workflowOverview">
-        <table id="workflowOverviewTable">
-            <thead>
-                <tr>
-                    <th>&nbsp;</th>
-                    <th>&nbsp;</th>
-                    <th>Operates on</th>
-                    <th>Creation Date</th>
-                    <th>Last Update</th>
-                    <th>Current Processing Step</th>
-                    <th>Status</th>
-                    <th>&nbsp;</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+        <otp:dataTable codes="${[
+            'otp.blank',
+            'otp.blank',
+            'workflow.plan.table.headers.operatesOn',
+            'workflow.plan.table.headers.creationDate',
+            'workflow.plan.table.headers.lastUpdate',
+            'workflow.plan.table.headers.processingStep',
+            'workflow.plan.table.headers.status',
+            'otp.blank'
+            ]}" id="workflowOverviewTable"/>
     </div>
     <g:javascript>
        $(document).ready(function() {

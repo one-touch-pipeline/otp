@@ -21,23 +21,17 @@
         <button id="hide-visualization" style="display: none">Hide Process Visualization</button>
     </div>
     <div id="processOverview">
-      <table id="processOverviewTable">
-        <thead>
-            <tr>
-                <th>&nbsp;</th>
-                <th>&nbsp;</th>
-                <th>Processing Step</th>
-                <th>Job</th>
-                <th>Creation Date</th>
-                <th>Last Update</th>
-                <th>Duration</th>
-                <th>Status</th>
-                <th>&nbsp;</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
+        <otp:dataTable codes="${[
+            'otp.blank',
+            'otp.blank',
+            'workflow.process.table.headers.processingStep',
+            'workflow.process.table.headers.job',
+            'workflow.process.table.headers.creationDate',
+            'workflow.process.table.headers.lastUpdate',
+            'workflow.process.table.headers.duration',
+            'workflow.process.table.headers.status',
+            'otp.blank'
+            ]}" id="processOverviewTable"/>
     </div>
     <g:javascript>
        $(document).ready(function() {

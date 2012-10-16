@@ -58,18 +58,12 @@
     </table>
     <h2>Input Parameters</h2>
     <div>
-    <table id="inputParametersList">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+    <otp:dataTable codes="${[
+            'otp.blank',
+            'workflow.paramater.table.headers.name',
+            'workflow.paramater.table.headers.description',
+            'workflow.paramater.table.headers.value'
+        ]}" id="inputParametersList"/>
     <g:javascript>
         $(document).ready(function() {
             $.otp.createParameterListView('#inputParametersList', ${step.id}, true);
@@ -78,18 +72,12 @@
     </div>
     <h2>Output Parameters</h2>
     <div>
-    <table id="outputParametersList">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+    <otp:dataTable codes="${[
+            'otp.blank',
+            'workflow.paramater.table.headers.name',
+            'workflow.paramater.table.headers.description',
+            'workflow.paramater.table.headers.value'
+        ]}" id="outputParametersList"/>
     <g:javascript>
         $(document).ready(function() {
             $.otp.createParameterListView('#outputParametersList', ${step.id}, false);
@@ -98,18 +86,12 @@
     </div>
     <h2>Updates</h2>
     <div>
-    <table id="processingStepUpdatesList">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Date</th>
-                <th>State</th>
-                <th>Error Message</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+    <otp:dataTable codes="${[
+            'otp.blank',
+            'workflow.processingstep.update.table.headers.date',
+            'workflow.processingstep.update.table.headers.state',
+            'workflow.processingstep.update.table.headers.error'
+        ]}" id="processingStepUpdatesList"/>
     </div>
     <g:javascript>
        $(document).ready(function() {

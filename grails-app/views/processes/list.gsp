@@ -11,22 +11,16 @@
   <div class="body">
     <otp:autoRefresh/>
     <div id="workflowOverview">
-        <table id="workflowOverviewTable">
-            <thead>
-                <tr>
-                    <th>&nbsp;</th>
-                    <th>&nbsp;</th>
-                    <th>Workflow</th>
-                    <th>#</th>
-                    <th># of Failed</th>
-                    <th>Last Success</th>
-                    <th>Last Failure</th>
-                    <th>Duration</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+        <otp:dataTable codes="${[
+            'otp.blank',
+            'otp.blank',
+            'workflow.list.table.headers.workflow',
+            'workflow.list.table.headers.count',
+            'workflow.list.table.headers.countFailed',
+            'workflow.list.table.headers.lastSuccess',
+            'workflow.list.table.headers.lastFailure',
+            'workflow.list.table.headers.duration'
+            ]}" id="workflowOverviewTable"/>
     </div>
     <g:javascript>
        $(document).ready(function() {
