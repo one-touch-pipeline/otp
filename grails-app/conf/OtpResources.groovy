@@ -43,7 +43,7 @@ modules = {
     }
     qunit {
         resource url: '/css/qunit.css'
-        resource url: '/js/qunit.js'
+        resource url: '/js/jquery/qunit.js'
     }
     testSuite {
         dependsOn 'qunit, userAdministration, workflows'
