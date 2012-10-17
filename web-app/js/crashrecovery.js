@@ -1,4 +1,5 @@
 /*global $*/
+/*jslint devel: true */
 
 $.otp.crashRecovery = {};
 $.otp.crashRecovery.processingStepId = function () {
@@ -28,7 +29,7 @@ $.otp.crashRecovery.createListView = function () {
             rowData[1] = '<a href="' + $.otp.contextPath +  '/processes/plan/' + rowData[1].id + '">' + rowData[1].name + '</a>';
             rowData[2] = '<a href="' + $.otp.contextPath + '/processes/process/' + rowData[2] + '">' + rowData[2] + '</a>';
             rowData[3] = '<a href="' + $.otp.contextPath +  '/processes/processingStep/' + rowData[3].id + '">' + rowData[3].name + '</a>';
-            rowData[4] = rowData[4].class + '<br/>' + rowData[4].version;
+            rowData[4] = rowData[4]['class'] + '<br/>' + rowData[4].version;
         }
     });
 };
@@ -61,12 +62,13 @@ $.otp.crashRecovery.showParametersDialog = function (id, target) {
 };
 
 $.otp.crashRecovery.showFailedJobDialog = function (id, target) {
+    "use strict";
     $("#dialog-error-message-job").dialog({
         modal: true,
         buttons: {
             "Mark Job as Failed": function () {
                 var message = $("input", $(this)).val();
-                if (!message || message == "") {
+                if (!message || message === "") {
                     message = null;
                     return;
                 }
