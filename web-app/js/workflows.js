@@ -1,3 +1,5 @@
+/*jslint continue: true */
+/*global $, Graph */
 $.otp.workflows = {
     /**
      * Creates the HTML markup for the status image.
@@ -136,8 +138,7 @@ $.otp.workflows = {
     restartProcessingStep: function (id, selector) {
         "use strict";
         $.getJSON($.otp.contextPath + "/processes/restartStep/" + id, function (data) {
-            // TODO: proper notification.
-            alert(data.success);
+            $.otp.infoMessage(data.success);
             $(selector).dataTable().fnDraw();
         });
     },
@@ -151,17 +152,11 @@ $.otp.workflows = {
         var imageLink = $.otp.contextPath + "/images/redo.png";
         return '<a onclick="$.otp.workflows.restartProcessingStep(' + id + ', \'' + dataTable + '\');" href="#" title="Restart" ><img src="' + imageLink + '"/></a>';
     },
-    /**
-     * Renders a graph representing a JobExecutionPlan or Process.
-     * @param idName Name of the element id where to render the graph to
-     * @param data JSON data structure containing jobs and connections
-     **/
-    renderJobExecutionPlanGraph: function (idName, data) {
-        "use strict";
-        var i, g, job, c, layouter, renderer;
-        var render = function (r, n) {
-            var element, textElement, i, param, addNewline, attr;
-            var parameters = "";
+    planGraph: {
+        render: function (r, n) {
+            "use strict";
+            var element, textElement, i, param, addNewline, attr, parameters;
+            parameters = "";
             addNewline = false;
             if (n.constantParameters.length > 0) {
                 parameters = "Constant Parameters:\n";
@@ -245,44 +240,54 @@ $.otp.workflows = {
             }
             element.attr(attr);
             return r.set().push(element, textElement);
-        };
-        g = new Graph();
-        g.edgeFactory.template.style.directed = true;
-        for (i = 0; i < data.jobs.length; i += 1) {
-            job = data.jobs[i];
-            job.render = render;
-            job.label = job.name;
-            g.addNode(job.id, job);
-        }
-        for (i = 0; i < data.connections.length; i += 1) {
-            c = data.connections[i];
-            var test = function () {
-                var j;
-                var fromValid = false;
-                var toValid = false;
-                for (j = 0; j < data.jobs.length; j += 1) {
-                    if (j === 0 && data.jobs[j].id === c.from) {
-                        fromValid = true;
-                        continue;
-                    }
-                    if (data.jobs[j].id === c.from) {
-                        fromValid = data.jobs[j].processingStep !== null;
-                    }
-                    if (data.jobs[j].id === c.to) {
-                        toValid = data.jobs[j].processingStep !== null;
-                    }
+        },
+        testEdgeValid: function (data, c) {
+            "use strict";
+            var j, fromValid, toValid;
+            fromValid = false;
+            toValid = false;
+            for (j = 0; j < data.jobs.length; j += 1) {
+                if (j === 0 && data.jobs[j].id === c.from) {
+                    fromValid = true;
+                    continue;
                 }
-                return fromValid && toValid;
-            };
-            g.addEdge(c.from, c.to, {
-                stroke: test() ? "red" : "black"
-            });
+                if (data.jobs[j].id === c.from) {
+                    fromValid = data.jobs[j].processingStep !== null;
+                }
+                if (data.jobs[j].id === c.to) {
+                    toValid = data.jobs[j].processingStep !== null;
+                }
+            }
+            return fromValid && toValid;
+        },
+        /**
+         * Renders a graph representing a JobExecutionPlan or Process.
+         * @param idName Name of the element id where to render the graph to
+         * @param data JSON data structure containing jobs and connections
+         **/
+        setup: function (idName, data) {
+            "use strict";
+            var i, g, job, c, layouter, renderer;
+            g = new Graph();
+            g.edgeFactory.template.style.directed = true;
+            for (i = 0; i < data.jobs.length; i += 1) {
+                job = data.jobs[i];
+                job.render = $.otp.workflows.planGraph.render;
+                job.label = job.name;
+                g.addNode(job.id, job);
+            }
+            for (i = 0; i < data.connections.length; i += 1) {
+                c = data.connections[i];
+                g.addEdge(c.from, c.to, {
+                    stroke: $.otp.workflows.planGraph.testEdgeValid(data, c) ? "red" : "black"
+                });
+            }
+            layouter = new Graph.Layout.Spring(g);
+            layouter.layout();
+            renderer = new Graph.Renderer.Raphael(idName, g, $("#" + idName).parent().width() - 20, 600);
+            renderer.draw();
+            $("#" + idName).data("graph", {layouter: layouter, renderer: renderer});
         }
-        layouter = new Graph.Layout.Spring(g);
-        layouter.layout();
-        renderer = new Graph.Renderer.Raphael(idName, g, $("#" + idName).parent().width() - 20, 600);
-        renderer.draw();
-        $("#" + idName).data("graph", {layouter: layouter, renderer: renderer});
     },
     /**
      * Generates the JobExecutionPlan DSL for the given plan.
@@ -452,7 +457,7 @@ $.otp.workflows = {
                 rowData = json.aaData[i];
                 rowData[0] = '<a href="' + $.otp.contextPath + '/processes/process/' + rowData[0] + '">' + rowData[0] + '</a>';
                 rowData[1] = $.otp.workflows.statusImageHtml(rowData[1].name);
-                rowData[2] = rowData[2] ? rowData[2] : "-";
+                rowData[2] = rowData[2] || "-";
                 rowData[3] = $.otp.workflows.renderDate(rowData[3]);
                 rowData[4] = $.otp.workflows.renderDate(rowData[4]);
                 stepId = rowData[6].id;
@@ -520,7 +525,7 @@ $.otp.workflows = {
                 return;
             }
             $.getJSON($.otp.contextPath + "/processes/planVisualization/" + planId, function (data) {
-                $.otp.workflows.renderJobExecutionPlanGraph("plan-visualization", data);
+                $.otp.workflows.planGraph.setup("plan-visualization", data);
             });
         });
         $("#hide-visualization").click(function () {
@@ -598,7 +603,7 @@ $.otp.workflows = {
                 return;
             }
             $.getJSON($.otp.contextPath + "/processes/processVisualization/" + processId, function (data) {
-                $.otp.workflows.renderJobExecutionPlanGraph("process-visualization", data);
+                $.otp.workflows.planGraph.setup("process-visualization", data);
             });
         });
         $("#hide-visualization").click(function () {
@@ -653,6 +658,7 @@ $.otp.workflows = {
             ], [{"name": "input", "value": inputOrOutput}]);
         },
         register: function (updatesSelector, inputParamSelector, outputParamSelector, stepId) {
+            "use strict";
             $.otp.workflows.processingStep.processingStepId = stepId;
             $.otp.workflows.processingStep.processingStepUpdates(updatesSelector);
             $.otp.workflows.processingStep.parameters(inputParamSelector, true);
