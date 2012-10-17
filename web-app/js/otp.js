@@ -1,10 +1,12 @@
 /*jslint browser: true, devel: true */
 /*global $, Graph */
-$.otp = {};
+$.otp = {
+    contextPath: $("head meta[name=contextPath]").attr("content")
+};
 
 $.i18n.properties({
     name: 'messages',
-    path: '/otp/js/i18n/',
+    path: $.otp.contextPath + '/js/i18n/',
     mode: "map"
 });
 

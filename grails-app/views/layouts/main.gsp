@@ -9,14 +9,12 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 		<title><g:layoutTitle default="Grails"/></title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="contextPath" content="${request.contextPath}">
 		<link rel="shortcut icon" href="${resource(dir: 'images', file: 'favicon.ico')}" type="image/x-icon">
         <r:require module="style"/>
         <r:require module="core"/>
         <r:layoutResources/>
         <g:layoutHead/>
-        <r:script>
-        $.otp.contextPath = '${request.contextPath}';
-        </r:script>
 	</head>
 	<body>
 <%--		<div id="grailsLogo" role="banner"><a href="http://grails.org"><img src="${resource(dir: 'images', file: 'grails_logo.png')}" alt="Grails"/></a></div>--%>
