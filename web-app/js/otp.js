@@ -1,8 +1,7 @@
-/*jslint todo: true, browser: true, devel: true */
+/*jslint browser: true, devel: true */
 /*global $, Graph */
 $.otp = {};
 
-// TODO: create proper links
 $.i18n.properties({
     name: 'messages',
     path: '/otp/js/i18n/',
