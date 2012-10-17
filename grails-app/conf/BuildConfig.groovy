@@ -74,6 +74,12 @@ codenarc.reports = {
 }
 codenarc.extraIncludeDirs=['ast']
 
+codenarc.properties = {
+    // Each property definition is of the form:  RULE.PROPERTY-NAME = PROPERTY-VALUE
+    GrailsPublicControllerMethod.enabled = false
+    GrailsDomainHasEquals.enabled = false
+    GrailsDomainHasToString.enabled = false
+}
 grails.tomcat.jvmArgs = ["-Xmx1024m", "-XX:MaxPermSize=256m"]
 
 // As OTP is now productive the application's name should be clean from any version numbering
