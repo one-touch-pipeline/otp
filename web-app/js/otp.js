@@ -1,12 +1,6 @@
-/**
- * Constructor for OTP object.
- * @param contextPath The contextPath which is used to create links.
- * @returns
- */
-function OTP() {
-}
-
-$.otp = new OTP();
+/*jslint todo: true, browser: true, devel: true */
+/*global $, Graph */
+$.otp = {};
 
 // TODO: create proper links
 $.i18n.properties({
@@ -259,6 +253,7 @@ $.otp.sequence = {
         return result;
     },
     updateSearchCriteria: function () {
+        "use strict";
         $("#sequenceTable").dataTable().fnDraw();
         $("#export-csv").attr("href", $.otp.contextPath + "/sequence/exportCsv?filtering=" + JSON.stringify($.otp.sequence.searchCriteria()));
     }
@@ -305,7 +300,7 @@ $.otp.addIndividual = {
             var sample = { };
             sample.id = [];
             sample.type = ($("select option:selected", value).val());
-            $(value).next().find("input").each( function(idx, v) {
+            $(value).next().find("input").each(function (idx, v) {
                 sample.id.push($(v).val());
             });
             samplesArray.push(sample);
@@ -354,7 +349,7 @@ $.otp.addIndividual = {
  * @param columnDefs (optional) Array of column definitions, can be used to enable/disable sorting of columns
  * @param postData (optional) Array of additional data to be added to the POST requests
  */
-OTP.prototype.createListView = function (selector, sourcePath, sortOrder, jsonCallback, columnDefs, postData) {
+$.otp.createListView = function (selector, sourcePath, sortOrder, jsonCallback, columnDefs, postData) {
     "use strict";
     $(selector).dataTable({
         sPaginationType: "full_numbers",
@@ -369,7 +364,7 @@ OTP.prototype.createListView = function (selector, sourcePath, sortOrder, jsonCa
         fnServerData: function (sSource, aoData, fnCallback) {
             var i;
             if (postData) {
-                for (i = 0; i < postData.length; i++) {
+                for (i = 0; i < postData.length; i += 1) {
                     aoData.push(postData[i]);
                 }
             }

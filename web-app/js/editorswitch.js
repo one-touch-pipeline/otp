@@ -21,7 +21,7 @@ $("div.edit-switch p.edit-switch-editor button.save").click(function () {
         success: function (data) {
             if (data.success) {
                 $.otp.infoMessage($.i18n.prop("editorswitch.notifiation.success"));
-                $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val())
+                $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val());
             } else {
                 $.otp.warningMessage(data.error);
                 $("input:text[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
