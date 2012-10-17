@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.job.jobs.examplePBS
 
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
+import de.dkfz.tbi.otp.job.processing.RestartableJob
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
+@RestartableJob
 class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl {
 
     @Autowired
