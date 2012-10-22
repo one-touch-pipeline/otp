@@ -17,6 +17,7 @@ import java.util.regex.Pattern
  * 
  */
 class ExecutionService {
+    private JSch jsch = new JSch()
 
     /**
      * Dependency injection of grailsApplication
@@ -127,8 +128,8 @@ class ExecutionService {
         if (!password) {
             throw new ProcessingException("No password for remote connection specified.")
         }
+        Channel channel = null
         try {
-            JSch jsch = new JSch()
             Session session = jsch.getSession(username, host, port)
             session.setPassword(password)
             session.setTimeout(timeout)
@@ -136,7 +137,7 @@ class ExecutionService {
             config.put("StrictHostKeyChecking", "no")
             session.setConfig(config)
             session.connect()
-            Channel channel = session.openChannel("exec")
+            channel = session.openChannel("exec")
             if (command) {
                 ((ChannelExec)channel).setCommand(command)
             } else if (script) {
@@ -153,22 +154,14 @@ class ExecutionService {
                 // TODO: How to handle this?
                 throw new ProcessingException("test!")
             }
-            disconnectSsh(channel)
             return values
         } catch (Exception e) {
             throw new ProcessingException(e.toString())
+        } finally {
+            if (channel) {
+                channel.disconnect()
+            }
         }
-    }
-
-    /**
-     * Disconnects channel and session to have a clear disconnect
-     * from the remote host
-     *
-     * @param channel The channel to be disconnected
-     */
-    private void disconnectSsh(Channel channel) {
-        channel.session.disconnect()
-        channel.disconnect()
     }
 
     /**
