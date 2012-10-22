@@ -8,13 +8,15 @@ class MetaDataRegistrationService {
     * and register files that could be meta-data files
     *
     * @param runId - database id or the Run object
+    * @return true if at least one meta-data file was found, false otherwise
     */
-    void registerInputFiles(long runId) {
+    boolean registerInputFiles(long runId) {
         Run run = Run.get(runId)
         List<RunSegment> segments =
             RunSegment.findAllByRunAndMetaDataStatus(run, RunSegment.Status.BLOCKED)
+        int nFiles = 0
         for (RunSegment segment in segments) {
-            registerInputFilesForPath(segment)
+            nFiles += registerInputFilesForPath(segment)
             segment.metaDataStatus = RunSegment.Status.PROCESSING
             segment.save(flush: true)
         }
@@ -22,11 +24,12 @@ class MetaDataRegistrationService {
             run.multipleSource = true
         }
         run.save(flush: true)
+        return (nFiles > 0) ? true : false
     }
 
-    private void registerInputFilesForPath(RunSegment path) {
+    private int registerInputFilesForPath(RunSegment path) {
         File dir = getMetaDataDirectory(path.mdPath, path.run.name)
-        processDirectory(path, dir)
+        return processDirectory(path, dir)
     }
 
     private File getMetaDataDirectory(String path, String runName) {
@@ -41,11 +44,11 @@ class MetaDataRegistrationService {
        throw new DirectoryNotReadableException(path)
     }
 
-    private void processDirectory(RunSegment segment, File dir) {
+    private int processDirectory(RunSegment segment, File dir) {
+        int counter = 0
         MetaDataFile metaDataFile
         List<String> fileNames = dir.list()
         for (String fileName in fileNames) {
-            //println  fileName
             if (fileBlacklisted(fileName)) {
                 continue
             }
@@ -63,10 +66,11 @@ class MetaDataRegistrationService {
                     used: false
                 )
                 metaDataFile.validate()
-                //println metaDataFile.errors
                 metaDataFile.save(flush: true)
+                counter++
             }
         }
+        return counter
     }
 
     private boolean fileBlacklisted(String fileName) {
