@@ -39,6 +39,22 @@ class UserAdministrationController {
     }
 
     /**
+     * Action to show the create User view
+     */
+    def create() {
+        [roles: userService.getAllRoles(), groups: groupService.availableGroups()]
+    }
+
+    def createUser(CreateUserCommand cmd) {
+        if (cmd.hasErrors()) {
+            render cmd as JSON
+            return
+        }
+        def data = [success: true, user: userService.createUser(cmd).sanitizedUser()]
+        render data as JSON
+    }
+
+    /**
      * Action returning the DataTable content as JSON
      */
     def dataTableSource(DataTableCommand cmd) {

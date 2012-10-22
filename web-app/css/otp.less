@@ -430,7 +430,7 @@ div.message {
 
 /* form fields with errors */
 
-.error input, .error select, .error textarea {
+.error input, .error select, .error textarea, input.error {
     background: #fff3f3;
     border-color: #ffaaaa;
     color: #cc0000;
@@ -463,6 +463,9 @@ table {
         td {
             white-space: nowrap;
         }
+    }
+    &.form {
+        width: auto;
     }
 }
 
@@ -497,6 +500,19 @@ td, th {
     padding: 0.1em 0.1em;
     text-align: left;
     vertical-align: middle;
+
+    &.error {
+        width: 22px;
+        padding: 0px;
+        border: 0px;
+        background: transparent url(./images/error.png) 0 50% no-repeat;
+    }
+    &.valid {
+        width: 22px;
+        padding: 0px;
+        border: 0px;
+        background: transparent url(./images/ok.png) 0 50% no-repeat;
+    }
 }
 
 th {
@@ -624,6 +640,7 @@ td {
     padding: 0.3em;
     margin: 0.1em 0 0 0;
     border: none;
+    clear: both;
     input, a {
         .border-radius(0.3em);
         background-color: transparent;

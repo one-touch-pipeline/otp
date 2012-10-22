@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.administration
 
+import de.dkfz.tbi.otp.security.Group
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserRole
@@ -29,6 +30,10 @@ class UserService {
      * Dependency injection of mail Service provided by the Mail plugin
      */
     def mailService
+    /**
+     * Dependency injection for Group Service
+     */
+    def groupService
     /**
      * Dependency injection of grails Application
      */
@@ -93,6 +98,30 @@ class UserService {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     int getUserCount() {
         return User.count()
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    User createUser(CreateUserCommand command) throws RegistrationException {
+        User user = new User(username: command.username,
+                             email: command.email,
+                             jabberId: command.jabber,
+                             enabled: true,
+                             accountExpired: false,
+                             accountLocked: false,
+                             passwordExpired: false,
+                             password: "*")
+        if (!user.validate()) {
+            throw new RegistrationException(command.username)
+        }
+        user = user.save()
+        command.role.each {
+            addRoleToUser(user.id, it)
+        }
+        command.group.each {
+            Group group = groupService.getGroup(it)
+            groupService.addUserToGroup(user, group)
+        }
+        return user
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")

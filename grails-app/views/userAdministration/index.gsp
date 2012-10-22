@@ -24,6 +24,10 @@
                 'otp.blank'
             ]}" id="userTable"/>
         </div>
+        <div class="buttons">
+            <g:link action="create"><g:message code="user.administration.createUser"/></g:link>
+        </div>
+        </form>
         <r:script>
 $(function() {
     $.otp.userAdministration.loadUserList();

@@ -7,6 +7,7 @@ modules = {
     core {
         dependsOn 'jquery'
         resource url: '/js/jquery/jquery.i18n.properties-min-1.0.9.js'
+        resource url: '/js/jquery/jquery.form.js'
         resource url: '/js/otp.js'
     }
     jqueryUI {
@@ -18,6 +19,10 @@ modules = {
         dependsOn 'jquery'
         resource url: '/js/jquery/dataTables.js'
         resource url: '/css/jquery/demo_table.css'
+    }
+    jqueryValidation {
+        dependsOn 'jquery'
+        resource url: '/js/jquery/validation/jquery.validate.min.js'
     }
     editorSwitch {
         dependsOn 'core'
@@ -32,7 +37,7 @@ modules = {
         resource url: '/js/crashrecovery.js'
     }
     userAdministration {
-        dependsOn 'jqueryUI, core'
+        dependsOn 'jqueryUI, jqueryValidation, core'
         resource url: '/js/useradministration.js'
     }
     graphDracula {

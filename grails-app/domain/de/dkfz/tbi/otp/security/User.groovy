@@ -44,7 +44,9 @@ class User {
     }
 
     protected void encodePassword() {
-        password = springSecurityService.encodePassword(password)
+        // Password is set to a character which does not map to any character in an SHA sum
+        // Set to invalid as password is in ldap
+        password = "*"
     }
 
     /**
