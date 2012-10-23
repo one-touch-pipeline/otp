@@ -1,32 +1,34 @@
 package de.dkfz.tbi.otp.job.jobs.examplePBS
 
-import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
-import de.dkfz.tbi.otp.job.processing.Parameter
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.Realm
 import org.springframework.beans.factory.annotation.Autowired
 
 class SendSleepJob extends AbstractJobImpl {
 
-    final int N_JOBS = 5
+    final int nJobs = 4
 
+    @Autowired
+    ExecutionService executionService
+
+    @Override
     public void execute() throws Exception {
-        /*
-        String listOfPids = ""
-        for(int i=0; i<N_JOBS; i++) {
-            File cmdFile = File.createTempFile("test-", ".tmp", new File(System.getProperty("user.home")))
-            cmdFile.setText("""#! /bin/bash
-                                date
-                                sleep 600
-                             """)
-            cmdFile.setExecutable(true)
-            // Make executable file a pbs job
-            //String cmd = "qsub ${cmdFile.name}"
-            //String response = pbsService.sendPbsJob(cmd)
-            List<String> extractedPbsIds = pbsService.extractPbsIds(response)
-            log.debug extractedPbsIds
-            listOfPids += extractedPbsIds.get(0) + ","
+        String cmd = "date; sleep 600"
+        Realm realm = Realm.list().get(0)
+        List<String> pbsIDs = []
+        for(int i=0; i<nJobs; i++) {
+            pbsIDs.add(sendScript(realm, cmd))
         }
-        //addOutputParameter("pbsIds", listOfPids)
-         */
-        addOutputParameter("pbsIds", "1,")
+        addOutputParameter("__pbsIds", pbsIDs.join(","))
+        addOutputParameter("__pbsRealm", realm.id.toString())
+    }
+
+    private String sendScript(Realm realm, String text) {
+        String pbsResponse = executionService.executeJob(realm, text)
+        List<String> extractedPbsIds = executionService.extractPbsIds(pbsResponse)
+        if (extractedPbsIds.size() != 1) {
+            log.debug "Number of PBS jobs is = ${extractedPbsIds.size()}"
+        }
+        return extractedPbsIds.get(0)
     }
 }
