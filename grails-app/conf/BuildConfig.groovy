@@ -35,16 +35,12 @@ grails.project.dependency.resolution = {
 
         // runtime 'mysql:mysql-connector-java:5.1.16'
         //git
-        compile 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r' {
-            excludes "jsch"
-        }
+        compile 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
         runtime "commons-jexl:commons-jexl:1.1"
         // XMPP
         compile "jivesoftware:smack:3.1.0"
         // jdbc
         runtime "postgresql:postgresql:9.1-901.jdbc4"
-        // jsch
-        compile 'com.jcraft:jsch:0.1.48'
     }
 
     plugins {
