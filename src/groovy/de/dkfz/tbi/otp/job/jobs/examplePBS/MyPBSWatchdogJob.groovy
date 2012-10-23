@@ -20,30 +20,38 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl {
     public void execute() throws Exception {
         String jobIds = getParameterValueOrClass("__pbsIds")
         List<String> listJobIds = parseInputString(jobIds)
-        while(!checkIfAllFinished(listJobIds)) {
+        while (!listJobIds.empty && !checkIfAllFinished(listJobIds)) {
             sleep(optionService.findOptionAsNumber("watchdogTimeout", null, null, defaultTimeout))
         }
         succeed()
     }
 
     private boolean checkIfAllFinished(List<String> listJobIds) {
+        if (!listJobIds) {
+            return true
+        }
         boolean finished = true
         Map<String, Boolean> validatedIds = executionService.validate(listJobIds)
         validatedIds.each {String job, boolean isRunning ->
             log.debug "${job} ${isRunning}"
             if (isRunning) {
                 finished = false
+            } else {
+                listJobIds.remove(job)
             }
         }
         return finished
     }
 
-    void sleep(int time) {
+    private void sleep(int time) {
+        long start = System.currentTimeMillis()
         try {
             Thread.sleep(time * 1000)
         } catch (InterruptedException e) {
             // do nothing
+            println "Sleep interrupted"
         }
+        println "Sleep took: " + (System.currentTimeMillis() - start)
     }
 
     private List<String> parseInputString(String jobIds) {

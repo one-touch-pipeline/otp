@@ -248,20 +248,48 @@ class ExecutionService {
         for (String pbsId in pbsIds) {
             stats.put(pbsId, false)
             for (Realm realm in realms) {
-                try {
-                    String cmd = "qstat ${pbsId}"
-                    String tmpStat = executeCommand(realm, cmd)
-                    Boolean running = isRunning(tmpStat)
-                    if (running) {
-                        stats.put(pbsId, true)
-                    }
-                } catch (Exception e) {
-                    // catch all exceptions and assume the job is still running
+                if (checkRunning(pbsId, realm)) {
                     stats.put(pbsId, true)
+                    // no need to query further Realms, it's running
+                    break
                 }
             }
         }
         return stats
+    }
+
+    /**
+     * Checks whether the given PBS Ids are running on the given PBS Realm.
+     * @param pbsIds The list of PBS Ids to query for
+     * @param realm The PBS Realm which should be checked
+     * @return Map of pbs ids with associated validation identifiers, which are Boolean values
+     */
+    public Map<String, Boolean> checkRunning(List<String> pbsIds, Realm realm) {
+        if (!pbsIds) {
+            throw new InvalidStateException("No pbs ids handed over to be validated.")
+        }
+        Map<String, Boolean> stats = [:]
+        for (String pbsId in pbsIds) {
+            stats.put(pbsId, checkRunning(pbsId, realm))
+        }
+        return stats
+    }
+
+    /**
+     * Checks whether the given pbsId is running on the given Realm
+     * @param pbsId The PBS Job Id to check whether it is still running
+     * @param realm The PBS Realm on which it should be checked whether the Job is running
+     * @return true if still running, false otherwise
+     */
+    private boolean checkRunning(String pbsId, Realm realm) {
+        boolean retVal = false
+        try {
+            retVal = isRunning(executeCommand(realm, "qstat ${pbsId}"))
+        } catch (Exception e) {
+            // catch all exceptions and assume the job is still running
+            retVal = true
+        }
+        return retVal
     }
 
     /**
