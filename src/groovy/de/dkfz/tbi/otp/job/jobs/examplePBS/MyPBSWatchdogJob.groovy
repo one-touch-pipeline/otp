@@ -43,12 +43,15 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl {
         return finished
     }
 
-    void sleep(int time) {
+    private void sleep(int time) {
+        long start = System.currentTimeMillis()
         try {
             Thread.sleep(time * 1000)
         } catch (InterruptedException e) {
             // do nothing
+            println "Sleep interrupted"
         }
+        println "Sleep took: " + (System.currentTimeMillis() - start)
     }
 
     private List<String> parseInputString(String jobIds) {
