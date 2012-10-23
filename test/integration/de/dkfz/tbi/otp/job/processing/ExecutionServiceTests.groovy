@@ -4,16 +4,18 @@ import static org.junit.Assert.*
 import org.junit.*
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.Realm.OperationType;
 
 class ExecutionServiceTests extends AbstractIntegrationTest {
 
     def executionService
     def grailsApplication
 
-    @SuppressWarnings("EmptyMethod")
+    Realm realm
+
     @Before
     void setUp() {
-        // Setup logic here
+        realm = new Realm(name: "DKFZ", env: "development", operationType: OperationType.DATA_MANAGEMENT, rootPath: "/", processingRootPath: "/test", programsRootPath: "/testPrograms", webHost: "http://test.me", host: "headnode", port: 22, unixUser: "unixUser", timeout: 100, pbsOptions: "")
     }
 
     @SuppressWarnings("EmptyMethod")
@@ -22,11 +24,9 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         // Tear down logic here
     }
 
-    @Ignore
     @Test
     void testExecuteCommand() {
         println("testExecuteCommand")
-        Realm realm = new Realm(name: "test", rootPath: "/", webHost: "http://test.me", host: "127.0.0.1", port: 12345, unixUser: "test", timeout: 100, pbsOptions: "")
         assertNotNull(realm.save())
         // Neither a command nor a script specified to be run remotely.
         shouldFail(ProcessingException) {
@@ -64,12 +64,10 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         assertEquals(extractedPbsId, extractedPbsId_qstat)
     }
 
-    @Ignore
     @Test
     void testExecuteJobScript() {
         println("testExecuteJobScript")
         // No file path specified.
-        Realm realm = new Realm(name: "test", rootPath: "/", webHost: "http://test.me", host: "127.0.0.1", port: 12345, unixUser: "test", timeout: 100, pbsOptions: "")
         shouldFail(ProcessingException) {
             executionService.executeJobScript(realm, null)
         }
@@ -102,12 +100,10 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         assertEquals(extractedPbsId, extractedPbsId_qstat)
     }
 
-    @Ignore
     @Test
     void testExecuteJob() {
         println("testExecuteJob")
         // No job specified.
-        Realm realm = new Realm(name: "test", rootPath: "/", webHost: "http://test.me", host: "127.0.0.1", port: 12345, unixUser: "test", timeout: 100, pbsOptions: "")
         shouldFail(ProcessingException) {
             executionService.executeJob(realm, null)
         }
