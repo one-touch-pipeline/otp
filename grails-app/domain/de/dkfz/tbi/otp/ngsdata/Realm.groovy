@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class Realm {
+class Realm implements Serializable {
 
     String name                        // name of the realm
     String env                         // environment from grails

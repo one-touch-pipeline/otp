@@ -248,7 +248,7 @@ class ExecutionService {
         for (String pbsId in pbsIds) {
             stats.put(pbsId, false)
             for (Realm realm in realms) {
-                if (checkRunning(pbsId, realm)) {
+                if (checkRunningJob(pbsId, realm)) {
                     stats.put(pbsId, true)
                     // no need to query further Realms, it's running
                     break
@@ -270,7 +270,7 @@ class ExecutionService {
         }
         Map<String, Boolean> stats = [:]
         for (String pbsId in pbsIds) {
-            stats.put(pbsId, checkRunning(pbsId, realm))
+            stats.put(pbsId, checkRunningJob(pbsId, realm))
         }
         return stats
     }
@@ -281,7 +281,7 @@ class ExecutionService {
      * @param realm The PBS Realm on which it should be checked whether the Job is running
      * @return true if still running, false otherwise
      */
-    private boolean checkRunning(String pbsId, Realm realm) {
+    public boolean checkRunningJob(String pbsId, Realm realm) {
         boolean retVal = false
         try {
             retVal = isRunning(executeCommand(realm, "qstat ${pbsId}"))
