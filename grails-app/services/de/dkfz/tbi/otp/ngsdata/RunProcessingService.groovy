@@ -165,4 +165,19 @@ class RunProcessingService {
         }
         return true
     }
+
+    public List<RunSegment> runSegmentsWithFilesInProcessing(Run run) {
+        List<RunSegment> segments = RunSegment.withCriteria {
+            and{
+                eq("run", run)
+                eq("filesStatus", RunSegment.FilesStatus.PROCESSING_INSTALLATION)
+            }
+        }
+        return segments
+    }
+
+    public List<DataFile> dataFilesForProcessing(Run run) {
+        List<RunSegment> segments = runSegmentsWithFilesInProcessing(run)
+        return DataFile.findAllByRunSegmentInListAndUsed(segments, true)
+    }
 }

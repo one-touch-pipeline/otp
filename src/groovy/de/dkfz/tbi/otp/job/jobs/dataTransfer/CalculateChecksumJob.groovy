@@ -2,85 +2,50 @@ package de.dkfz.tbi.otp.job.jobs.dataTransfer
 
 import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
 import org.springframework.beans.factory.annotation.Autowired
-import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.ConfigService
-import de.dkfz.tbi.otp.ngsdata.Run
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.Realm
-
+import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
+import de.dkfz.tbi.otp.ngsdata.*
 
 public class CalculateChecksumJob extends AbstractJobImpl {
 
     final String paramName = "__pbsIds"
 
     @Autowired
-    LsdfFilesService lsdfFilesService
+    ChecksumFileService checksumFileService
 
     @Autowired
-    ExecutionService executionService
+    ExecutionHelperService executionHelperService
 
     @Autowired
     ConfigService configService
 
-    String suffix = ".md5sum"
+    @Autowired
+    RunProcessingService runProcessingService
 
     @Override
     public void execute() throws Exception {
-        long runId = Long.parseLong(getProcessParameterValue())
-        Run run = Run.get(runId)
-        List<DataFile> files =  DataFile.findAllByRunAndProjectIsNotNull(run)
+        Run run = Run.get(Long.parseLong(getProcessParameterValue()))
+        List<DataFile> files = runProcessingService.dataFilesForProcessing(run)
 
-        String pbsIds = "1,"
-        files.each {DataFile file ->
-            if (md5sumFileExists(file)) {
-                log.debug "checksum file already exists"
-                return
+        List<String> pbsIds = ["1"]
+        for (DataFile file in files) {
+            if (checksumFileService.md5sumFileExists(file)) {
+                log.debug "checksum file already exists for file ${file}"
+                continue
             }
             String cmd = scriptText(file)
             Realm realm = configService.getRealmDataManagement(file.project)
-            String jobId = sendScript(realm, cmd)
+            String jobId = executionHelperService.sendScript(realm, cmd)
             log.debug "Job ${jobId} submitted to PBS"
-            pbsIds += jobId + ","
+            pbsIds << jobId
         }
-        addOutputParameter(paramName, pbsIds)
+        addOutputParameter(paramName, pbsIds.join(","))
     }
 
-    private String dirToMd5File(DataFile file) {
-        String path = lsdfFilesService.getFileFinalPath(file)
-        String dirPath = path.substring(0, path.lastIndexOf("/")+1)
-        return dirPath
-    }
-
-    private String pathToMd5File(DataFile file) {
-        String path = lsdfFilesService.getFileFinalPath(file)
-        String md5file = path + suffix
-        return md5file
-    }
-
-    private boolean md5sumFileExists(DataFile file) {
-        String path = pathToMd5File(file)
-        File md5file = new File(path)
-        if (md5file.canRead()) {
-            return true
-        }
-        return false
-    }
-
-    private scriptText(DataFile file) {
-        String directory = dirToMd5File(file)
+    private String scriptText(DataFile file) {
+        String directory = checksumFileService.dirToMd5File(file)
         String fileName = file.fileName
-        String md5FileName = fileName + suffix
+        String md5FileName = checksumFileService.md5FileName(file)
         String text = "cd ${directory};md5sum ${fileName} > ${md5FileName};chmod 440 ${md5FileName}"
         return text
-    }
-
-    private String sendScript(Realm realm, String text) {
-        String pbsResponse = executionService.executeJob(realm, text)
-        List<String> extractedPbsIds = executionService.extractPbsIds(pbsResponse)
-        if (extractedPbsIds.size() != 1) {
-            log.debug "Number of PBS jos is = ${extractedPbsIds.size()}"
-        }
-        return extractedPbsIds.get(0)
     }
 }

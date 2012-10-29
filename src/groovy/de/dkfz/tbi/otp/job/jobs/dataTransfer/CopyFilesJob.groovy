@@ -12,41 +12,33 @@ class CopyFilesJob extends AbstractJobImpl {
     LsdfFilesService lsdfFilesService
 
     @Autowired
-    ExecutionService executionService
+    ConfigService configService
 
     @Autowired
-    ConfigService configService
+    RunProcessingService runProcessingService
+
+    @Autowired
+    ExecutionHelperService executionHelperService
 
     @Override
     public void execute() throws Exception {
+        Run run = Run.get(Long.parseLong(getProcessParameterValue()))
+        List<DataFile> files = runProcessingService.dataFilesForProcessing(run)
 
-        long runId = Long.parseLong(getProcessParameterValue())
-        Run run = Run.get(runId)
-        List<DataFile> files = DataFile.findAllByRunAndProjectIsNotNull(run)
-
-        String pbsIds = "1,"
-        files.each {DataFile file ->
+        List<String> pbsIds = []
+        files.each { DataFile file ->
             String cmd = scriptText(file)
             Realm realm = configService.getRealmDataManagement(file.project)
-            String jobId = sendScript(realm, cmd)
+            String jobId = executionHelperService.sendScript(realm, cmd)
             log.debug "Job ${jobId} submitted to PBS"
-            pbsIds += jobId + ","
+            pbsIds << jobId
         }
-        addOutputParameter(paramName, pbsIds)
+        addOutputParameter(paramName, pbsIds.join(","))
     }
 
     private String scriptText(DataFile file) {
         String from = lsdfFilesService.getFileInitialPath(file)
         String to = lsdfFilesService.getFileFinalPath(file)
         return "echo \$HOST;cp ${from} ${to};chmod 440 ${to}"
-    }
-
-    private String sendScript(Realm realm, String text) {
-        String pbsResponse = executionService.executeJob(realm, text)
-        List<String> extractedPbsIds = executionService.extractPbsIds(pbsResponse)
-        if (extractedPbsIds.size() != 1) {
-            log.debug "Number of PBS jobs is = ${extractedPbsIds.size()}"
-        }
-        return extractedPbsIds.get(0)
     }
 }

@@ -6,6 +6,7 @@ class FilesCompletenessService {
 
     def lsdfFilesService
     def fileTypeService
+    def runProcessingService
     /**
      * Dependency injection of Grails Application
      */
@@ -20,25 +21,19 @@ class FilesCompletenessService {
      * @param run
      */
     public boolean checkInitialSequenceFiles(Run run) {
-        boolean allExists = true
-        def c = RunSegment.createCriteria()
-        List<RunSegment> segments = c.list {
-            and{
-                eq("run", run)
-                eq("filesStatus", RunSegment.FilesStatus.PROCESSING_INSTALLATION)
+        List<DataFile> dataFiles = runProcessingService.dataFilesForProcessing(run)
+        if (!dataFiles) {
+            log.debug "No files in processing for run ${run}"
+            return false
+        }
+        for (DataFile file in dataFiles) {
+            String path = lsdfFilesService.getFileInitialPath(file)
+            if (!lsdfFilesService.fileExists(path)) {
+                log.debug "missing file ${path}"
+                return false
             }
         }
-        for (RunSegment segment in segments) {
-            List<DataFile> files = DataFile.findAllByRunSegment(segment)
-            for (DataFile file in files) {
-                String path = lsdfFilesService.getFileInitialPath(file)
-                if (!lsdfFilesService.fileExists(path)) {
-                    allExists = false
-                    println "missing file ${path}"
-                }
-            }
-        }
-        return allExists
+        return true
     }
 
     /**
@@ -61,7 +56,6 @@ class FilesCompletenessService {
         ]
         List<RunSegment> segments = RunSegment.findAllByRunAndFilesStatusInList(run, stats)
         for (RunSegment segment in segments) {
-            segment.filesStatus = RunSegment.FilesStatus.FILES_CORRECT
             List<DataFile> dataFiles = DataFile.findAllByRunSegment(segment)
             for (DataFile dataFile in dataFiles) {
                 if (!lsdfFilesService.checkFinalPathDefined(dataFile)) {
@@ -72,21 +66,21 @@ class FilesCompletenessService {
                 if (!exists) {
                     allExists = false
                     segment.filesStatus = RunSegment.FilesStatus.FILES_MISSING
+                    segment.save(flush: true)
                 }
             }
-            segment.save(flush: true)
         }
         return allExists
     }
 
     private boolean fileExistsInFinalLocation(DataFile dataFile) {
-        String path = lsdfFilesService.getFileFinalPath(dataFile.id)
+        String path = lsdfFilesService.getFileFinalPath(dataFile)
         return lsdfFilesService.fileExists(path)
     }
 
     /**
      * Fill statistics from the file system in the DataFile in a database
-     * data size and data of file creation are filed only if file exists 
+     * data size and data of file creation are filed only if file exists
      * in the file system
      * @param dataFile
      * @param exists
@@ -94,7 +88,7 @@ class FilesCompletenessService {
     private void fillFileStatistics(DataFile dataFile, boolean exists) {
         dataFile.fileExists = exists
         if (exists) {
-            String path = lsdfFilesService.getFileFinalPath(dataFile.id)
+            String path = lsdfFilesService.getFileFinalPath(dataFile)
             dataFile.fileSize = lsdfFilesService.fileSize(path)
             dataFile.dateFileSystem = lsdfFilesService.fileCreationDate(path)
         }
@@ -110,26 +104,32 @@ class FilesCompletenessService {
      * @return
      */
     boolean checkViewByPid(Run run) {
-        boolean allLinked = true
-        List<DataFile> dataFiles = DataFile.findAllByRun(run)
-        if(dataFiles.empty) {
-            throw new ProcessingException("No data file provided for the given run.")
-        }
-        dataFiles.each {DataFile dataFile ->
-            //println dataFile.fileName
-            String path = lsdfFilesService.getFileViewByPidPath(dataFile)
-            if (path == null) {
-                return // continue
+        boolean allExists = true
+        def stats = [
+            RunSegment.FilesStatus.PROCESSING_CHECKING,
+            RunSegment.FilesStatus.PROCESSING_INSTALLATION,
+            RunSegment.FilesStatus.FILES_MISSING
+        ]
+        List<RunSegment> segments = RunSegment.findAllByRunAndFilesStatusInList(run, stats)
+        for (RunSegment segment in segments) {
+            segment.filesStatus = RunSegment.FilesStatus.FILES_CORRECT
+            List<DataFile> dataFiles = DataFile.findAllByRunSegment(segment)
+            for (DataFile dataFile in dataFiles) {
+                String path = lsdfFilesService.getFileViewByPidPath(dataFile)
+                if (!path) {
+                    continue
+                }
+                boolean exists = lsdfFilesService.fileExists(path)
+                dataFile.fileLinked = exists
+                dataFile.save(flush: true)
+                if (!exists) {
+                    allExists = false
+                    segment.filesStatus = RunSegment.FilesStatus.FILES_MISSING
+                }
             }
-            boolean exists = lsdfFilesService.fileExists(path)
-            if (!exists) {
-                allLinked = false
-            }
-            dataFile.fileLinked = exists
-            dataFile.save(flush: true)
-            //println dataFile.fileName + " " + path  + " " + exists
+            segment.save(flush: true)
         }
-        return allLinked
+        return allExists
     }
 
     /**

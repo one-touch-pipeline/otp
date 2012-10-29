@@ -28,7 +28,7 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
                 String cmd = "mkdir -p " + line
                 Realm realm = configService.getRealmDataManagement(project)
                 String exitCode = executionService.executeCommand(realm, cmd)
-                log.debug "creating directory finished with exit code " + exitCode
+                log.debug "creating directory [${line}].  exit code [${exitCode}]"
             }
         }
     }
@@ -36,7 +36,7 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
     private Set<Project> projects(Run run) {
         Set<Project> projects = new HashSet<Project>()
         List<DataFile> files = DataFile.findAllByRun(run)
-        for(DataFile file in files) {
+        for (DataFile file in files) {
             if (file.project) {
                 projects << file.project
             }

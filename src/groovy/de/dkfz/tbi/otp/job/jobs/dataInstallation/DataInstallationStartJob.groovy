@@ -28,7 +28,7 @@ class DataInstallationStartJob extends AbstractStartJobImpl {
         if (run) {
             runProcessingService.blockInstallation(run)
             createProcess(new ProcessParameter(value: run.id.toString(), className: run.class.name))
-            println "Installing Run: ${run.name}"
+            log.debug "Installing Run: ${run.name}"
         }
     }
 

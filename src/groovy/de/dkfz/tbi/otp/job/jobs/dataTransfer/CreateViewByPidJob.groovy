@@ -1,10 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.dataTransfer
 
-import de.dkfz.tbi.otp.ngsdata.Run
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.ConfigService
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -19,14 +15,14 @@ class CreateViewByPidJob extends AbstractJobImpl {
     @Autowired
     ConfigService configService
 
+    @Autowired
+    RunProcessingService runProcessingService
+
     @Override
     public void execute() throws Exception {
-
-        long runId = Long.parseLong(getProcessParameterValue())
-        Run run = Run.get(runId)
-
-        List<DataFile> dataFiles = DataFile.findAllByRunAndProjectIsNotNull(run)
-        for(DataFile dataFile in dataFiles) {
+        Run run = Run.get(Long.parseLong(getProcessParameterValue()))
+        List<DataFile> files = runProcessingService.dataFilesForProcessing(run)
+        for (DataFile dataFile in files) {
             log.debug dataFile.fileName + " " + dataFile.project
             linkDataFile(dataFile)
         }
