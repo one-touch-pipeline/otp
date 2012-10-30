@@ -244,6 +244,7 @@ if ((otpConfig.otp.jabber.enabled instanceof ConfigObject) || !Boolean.parseBool
 
 // protect everything for role user
 grails.plugins.springsecurity.controllerAnnotations.staticRules = [
+        "/grails-errorhandler/**": ['IS_AUTHENTICATED_ANONYMOUSLY'],
         "/login/**":             ['IS_AUTHENTICATED_ANONYMOUSLY'],
         "/css/**":               ["permitAll"],
         "/images/**":            ["permitAll"],
