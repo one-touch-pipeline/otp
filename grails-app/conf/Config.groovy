@@ -158,6 +158,7 @@ log4j = {
                     'grails.app.taglib.de.dkfz.tbi.otp'
                     ],
           jobs: ['de.dkfz.tbi.otp.example',
+                 'de.dkfz.tbi.otp.job.jobs',
                  'de.dkfz.tbi.otp.jobs']
 }
 
