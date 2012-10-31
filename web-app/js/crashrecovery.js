@@ -1,5 +1,4 @@
 /*global $*/
-/*jslint devel: true */
 
 $.otp.crashRecovery = {};
 $.otp.crashRecovery.processingStepId = function () {
@@ -49,7 +48,7 @@ $.otp.crashRecovery.showParametersDialog = function (id, target) {
                     });
                     $.getJSON($.otp.contextPath + target + id, 'parameters=' + JSON.stringify(parameters), function (data) {
                         $("#crashRecoveryTable").dataTable().fnDraw();
-                        alert(data.success);
+                        $.otp.infoMessage(data.success);
                     });
                     $(this).dialog("close");
                 },
@@ -75,7 +74,7 @@ $.otp.crashRecovery.showFailedJobDialog = function (id, target) {
                 $(this).dialog("close");
                 $.getJSON($.otp.contextPath + target + id, {message: message}, function (data) {
                     $("#crashRecoveryTable").dataTable().fnDraw();
-                    alert(data.success);
+                    $.otp.infoMessage(data.success);
                 });
             },
             Cancel: function () {
@@ -125,10 +124,10 @@ $.otp.crashRecovery.startSchedulerButton = function () {
     "use strict";
     $.getJSON($.otp.contextPath + "/crashRecovery/startScheduler/", function (data) {
         if (data.success) {
-            alert("Scheduler successfully restarted");
+            $.otp.infoMessage("Scheduler successfully restarted");
         } else {
             $("#crashRecoveryTable").dataTable().fnDraw();
-            alert("Scheduler could not be restarted, check that all Jobs have been triaged");
+            $.otp.warningMessage("Scheduler could not be restarted, check that all Jobs have been triaged");
         }
     });
 };
