@@ -111,8 +111,13 @@ class PbsMonitorService {
         List<Realm> realms = Realm.list()
 
         Map<MonitoringJob, List<PbsJobInfo>> removal = [:]
+        // we create a copy of the queuedJobs as a different thread might append elements to
+        // queuedJobs which might end up in concurrency issues
         (new HashMap(queuedJobs)).each { MonitoringJob pbsMonitor, List<PbsJobInfo> pbsInfos ->
+            // for each of the queuedJobs we go over the pbsInfos and check whether the job on the
+            // PBS systems is still running
             List<PbsJobInfo> finishedJobs = []
+            // again a copy for thread safety
             (new ArrayList(pbsInfos)).each { PbsJobInfo info ->
                 log.debug("Checking pbs id ${info.pbsId}")
                 boolean running = false
@@ -130,29 +135,46 @@ class PbsMonitorService {
                 if (!running) {
                     log.info("${info.pbsId} finished on Realm ${info.realm}")
                     try {
+                        // in case the PBS job finished we inform the MonitoringJob about this
                         pbsMonitor.finished(info.pbsId, info.realm)
                     } catch (Exception e) {
                         // catching all exception thrown in the Job to not have it influence our own code
                         log.error(e.message, e)
                     }
+                    // and add the JobInfo to a list of finished jobs
                     finishedJobs.add(info)
                 }
             }
             if (!finishedJobs.empty) {
+                // we put the finished jobs into a temporary Map of the Monitors and List of finished Jobs
+                // same data structure as the queuedJobs
                 removal.put(pbsMonitor, finishedJobs)
             }
         }
 
         if (!removal.empty) {
+            // in case that some Jobs finished we need to remove them from our queue
+            // for thread safety reasons we have operated on a copy of the list, so we
+            // need to transfer it on the real object
+            // this needs to be thread safe (other threads might add new elements),
+            // therefore it is in a locked area
             List<MonitoringJob> finishedMonitors = []
             lock.lock()
             try {
                 removal.each { MonitoringJob pbsMonitor, List<PbsJobInfo> pbsInfos ->
+                    // we get the list of PbsJobs for the monitor
+                    // and remove the finished pbsJob Info
                     List<PbsJobInfo> existing = queuedJobs.get(pbsMonitor)
                     existing.removeAll(pbsInfos)
-                    finishedMonitors << pbsMonitor
+                    if (existing.empty) {
+                        // in case the list is after removal of the pbsJob Info empty
+                        // the Monitor has served it's purpose and can be scheduled for
+                        // complete removal
+                        finishedMonitors << pbsMonitor
+                    }
                 }
                 if (!finishedMonitors.empty) {
+                    // some Monitors don't have any pbsJobs to monitor, so they can be removed
                     finishedMonitors.each {
                         log.debug("Finished one MonitoringJob")
                         queuedJobs.remove(it)
