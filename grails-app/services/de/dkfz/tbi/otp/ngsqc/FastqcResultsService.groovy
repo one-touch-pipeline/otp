@@ -71,6 +71,26 @@ or hasRole('ROLE_OPERATOR')
         return results
     }
 
+    /**
+     * Retrieves the FastQC {@link DataFile}s for the given {@link Sequence}s.
+     *
+     * The returned list includes the found DataFiles but does not order them by
+     * Sequences. If a mapping to the Sequence is needed it's the task of the
+     * callee to perform this operation.
+     * @param sequences The Sequences for which the FastQC DataFiles should be retrieved
+     * @return The FastQC DataFiles found by the Sequences
+     */
+    public List<DataFile> fastQCFiles(List<Sequence> sequences) {
+        String query = '''
+SELECT df FROM FastqcProcessedFile AS fqc
+INNER JOIN fqc.dataFile AS df
+WHERE
+df.run.id in (:runIds)
+AND df.seqTrack.id in (:seqTrackIds)
+'''
+        return DataFile.executeQuery(query, [runIds: sequences.collect{ it.runId }, seqTrackIds: sequences.collect{ it.seqTrackId }])
+    }
+
     private String fastqcSummaryForDataFile(FastqcProcessedFile fastqc) {
         final List statusList = [
             FastqcModuleStatus.Status.PASS,

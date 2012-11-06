@@ -14,6 +14,7 @@ class SequenceController {
     def seqTrackService
     def projectService
     def servletContext
+    def fastqcResultsService
 
     def index() {
         List<SeqType> seqTypes = SeqType.list()
@@ -33,7 +34,30 @@ class SequenceController {
         dataToRender.iTotalRecords = seqTrackService.countSequences(filtering)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-        dataToRender.aaData = seqTrackService.listSequences(cmd.iDisplayStart, cmd.iDisplayLength, cmd.sortOrder, SequenceSortColumn.fromDataTable(cmd.iSortCol_0), filtering)
+        List<Sequence> sequences = seqTrackService.listSequences(cmd.iDisplayStart, cmd.iDisplayLength, cmd.sortOrder, SequenceSortColumn.fromDataTable(cmd.iSortCol_0), filtering)
+        List<DataFile> dataFiles = fastqcResultsService.fastQCFiles(sequences)
+        // need to add an additional field to the sequences
+        // if added as dynamic property, it is not included during the JSON conversion
+        // because of that, we just copy all properties into a map
+        sequences.each { Sequence seq ->
+            Map data = [:]
+            seq.domainClass.persistentProperties.each {
+                data.put(it.name, seq[it.name])
+            }
+            dataToRender.aaData << data
+        }
+        // add the DataFiles to the sequences
+        dataFiles.each { DataFile df ->
+            for (def sequence in dataToRender.aaData) {
+                if (df.seqTrack.id == sequence.seqTrackId && df.run.id == sequence.runId) {
+                    if (sequence.containsKey("fastQCFiles")) {
+                        sequence.fastQCFiles << df
+                    } else {
+                        sequence.fastQCFiles = [df]
+                    }
+                }
+            }
+        }
         render dataToRender as JSON
     }
 

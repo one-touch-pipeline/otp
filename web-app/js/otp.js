@@ -154,9 +154,20 @@ $.otp.sequence = {
                         fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
                     },
                     "success": function (json) {
-                        var i, rowData, row;
+                        var i, j, rowData, row, fastQC;
                         for (i = 0; i < json.aaData.length; i += 1) {
                             row = json.aaData[i];
+                            if (row.fastQCFiles !== undefined) {
+                                fastQC = "<ul>";
+                                for (j = 0; j < row.fastQCFiles.length; j += 1) {
+                                    fastQC += "<li>";
+                                    fastQC += '<a href="' + $.otp.contextPath + '/fastqcResults/show/' + row.fastQCFiles[j].id + '">' + $.i18n.prop("sequence.list.numberedFastQCFile", (j + 1)) + '</a>';
+                                    fastQC += "</li>";
+                                }
+                                fastQC += "</ul>";
+                            } else {
+                                fastQC = row.fastqcState.name;
+                            }
                             rowData = [
                                 '<span title="' + row.projectName + '">' + $.otp.sequence.formatProject(row.projectName) + '</span>',
                                 '<a href="' + $.otp.contextPath + '/individual/show/' + row.individualId + '">' + row.mockPid + '</a>',
@@ -166,7 +177,7 @@ $.otp.sequence = {
                                 row.seqCenterName,
                                 '<a href="' + $.otp.contextPath + '/run/show/' + row.runId + '" title="' + row.name + '">' + $.otp.sequence.formatRun(row.name) + '</a>',
                                 row.laneId,
-                                row.fastqcState.name,
+                                fastQC,
                                 row.alignmentState.name,
                                 row.hasOriginalBam,
                                 (new Date(row.dateCreated)).toDateString()
@@ -180,13 +191,13 @@ $.otp.sequence = {
             fnRowCallback: function (nRow) {
                 var fastqc, alignment, origAlignment;
                 fastqc = $("td:eq(8)", nRow);
-                fastqc.attr("title", fastqc.text());
-                if (fastqc.text() === "FINISHED") {
+                if ($("ul li", fastqc).length > 0) {
                     fastqc.addClass("true");
                 } else {
+                    fastqc.attr("title", fastqc.text());
                     fastqc.addClass("false");
+                    fastqc.text("");
                 }
-                fastqc.text("");
 
                 alignment = $("td:eq(9)", nRow);
                 alignment.attr("title", alignment.text());
