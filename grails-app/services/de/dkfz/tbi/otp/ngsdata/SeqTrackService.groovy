@@ -167,7 +167,6 @@ class SeqTrackService {
                 }
             }
         }
-        sequences.first()
         String dataFileQuery = "SELECT df FROM DataFile AS df INNER JOIN df.seqTrack AS s WHERE s.id = :seqTrackId"
 
         builder.sequences() {
