@@ -746,12 +746,36 @@ $.otp.workflows = {
                 controller: 'processes',
                 action: 'parameterData',
                 id: $.otp.workflows.processingStep.processingStepId + '/'
-            }), true, null, [
+            }), true, function (data) {
+                var i, j, rowData, ids;
+                for (i = 0; i < data.aaData.length; i += 1) {
+                    rowData = data.aaData[i];
+                    if (rowData[1] === "__pbsIds") {
+                        ids = rowData[3].split(',');
+                        rowData[3] = "<ul>";
+                        for (j = 0; j < ids.length; j += 1) {
+                            rowData[3] += "<li";
+                            if (j > 4) {
+                                rowData[3] += ' style="display: none;"';
+                            }
+                            rowData[3] += ">" + ids[j] + "</li>";
+                        }
+                        if (ids.length >= 5) {
+                            rowData[3] += '<li><a href="#">...</a></li>';
+                        }
+                        rowData[3] += "</ul>";
+                    }
+                }
+            }, [
                 { "bSortable": true,  "aTargets": [0] },
                 { "bSortable": false, "aTargets": [1] },
                 { "bSortable": false, "aTargets": [2] },
                 { "bSortable": false, "aTargets": [3] }
             ], [{"name": "input", "value": inputOrOutput}]);
+            $(selector).on("click", "tbody tr td ul li a", function () {
+                $("li", $(this).parent().parent()).show();
+                $(this).parent().hide();
+            });
         },
         register: function (updatesSelector, inputParamSelector, outputParamSelector, stepId) {
             "use strict";
