@@ -37,7 +37,10 @@ $.otp.userAdministration.loadUserList = function () {
         bScrollCollapse: true,
         sScrollY: "600px",
         sPaginationType: "full_numbers",
-        sAjaxSource: $.otp.contextPath + '/userAdministration/dataTableSource',
+        sAjaxSource: $.otp.createLink({
+            controller: 'userAdministration',
+            action: 'dataTableSource'
+        }),
         "fnServerData": function (sSource, aoData, fnCallback) {
             $.ajax({
                 "dataType": 'json',
@@ -53,7 +56,12 @@ $.otp.userAdministration.loadUserList = function () {
                     for (i = 0; i < json.aaData.length; i += 1) {
                         rowData = json.aaData[i];
                         id = rowData[0];
-                        rowData[0] = "<a href=\"" + $.otp.contextPath + "/userAdministration/show/" + id + "\">" + id + "</a>";
+                        rowData[0] = $.otp.createLinkMarkup({
+                            controller: 'userAdministration',
+                            action: 'show',
+                            id: id,
+                            text: id
+                        });
                         rowData[4] = createUserChangeMarkup(id, 'enable', rowData[4]);
                         rowData[5] = createUserChangeMarkup(id, 'expireAccount', rowData[5]);
                         rowData[6] = createUserChangeMarkup(id, 'lockAccount', rowData[6]);
@@ -88,7 +96,14 @@ $.otp.userAdministration.editUser = {
         action = $($("input", container)[1]).val();
         $.ajax({
             type: 'GET',
-            url: $.otp.contextPath + "/userAdministration/" + action + "/" + id + "?userId=" + userId,
+            url: $.otp.createLink({
+                controller: 'userAdministration',
+                action: action,
+                id: id,
+                parameters: {
+                    userId: userId
+                }
+            }),
             dataType: 'json',
             cache: 'false',
             success: function (data) {
@@ -123,7 +138,14 @@ $.otp.userAdministration.editUser = {
         action = $($("input", container)[1]).val();
         $.ajax({
             type: 'GET',
-            url: $.otp.contextPath + "/userAdministration/" + action + "/" + id + "?userId=" + userId,
+            url: $.otp.createLink({
+                controller: 'userAdministration',
+                action: action,
+                id: id,
+                parameters: {
+                    userId: userId
+                }
+            }),
             dataType: 'json',
             cache: 'false',
             success: function (data) {
@@ -243,7 +265,10 @@ $.otp.userAdministration.editUser = {
                     }, {
                         text: $.i18n.prop("default.button.create.label"),
                         click: function () {
-                            $.getJSON($.otp.contextPath + "/userAdministration/createGroup", $("form", $(this)).serialize(), function (data) {
+                            $.getJSON($.otp.createLink({
+                                controller: 'userAdministration',
+                                action: 'createGroup'
+                            }), $("form", $(this)).serialize(), function (data) {
                                 var object = $.otp.userAdministration.editUser.newGroupDialog;
                                 object.processResults.call(object, data);
                             });
@@ -257,7 +282,10 @@ $.otp.userAdministration.editUser = {
         event.preventDefault();
         $.ajax({
             type: 'GET',
-            url: $.otp.contextPath + "/userAdministration/editUser",
+            url: $.otp.createLink({
+                controller: 'userAdministration',
+                action: 'editUser'
+            }),
             dataType: 'json',
             cache: 'false',
             data: {

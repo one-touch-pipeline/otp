@@ -54,6 +54,7 @@ modules = {
         dependsOn 'qunit, userAdministration, workflows'
         resource url: '/js/test/group-creation-dialog-tests.js'
         resource url: '/js/test/format-timespan-tests.js'
+        resource url: '/js/test/create-link-tests.js'
     }
     lightbox {
         dependsOn 'jquery'

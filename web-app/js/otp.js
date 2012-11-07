@@ -1,12 +1,125 @@
 /*jslint browser: true, devel: true */
 /*global $, Graph */
 $.otp = {
-    contextPath: $("head meta[name=contextPath]").attr("content")
+    contextPath: $("head meta[name=contextPath]").attr("content"),
+    /**
+     * Helper method to extend the given link by a further component.
+     * Ensures that there is exactly one slash between the link and the further
+     * component.
+     * @param link The original link
+     * @param component The new component to add
+     * @returns link + '/' + component
+     */
+    addLinkComponent: function (link, component) {
+        "use strict";
+        if (component === undefined || !component) {
+            return link;
+        }
+        if (!isNaN(link)) {
+            link = link.toString();
+        }
+        if (!isNaN(component)) {
+            component = component.toString();
+        }
+        if (link.charAt(link.length - 1) !== "/" && component.charAt(0) !== "/") {
+            link += "/";
+        } else if (link.charAt(link.length - 1) === "/" && component.charAt(0) === "/") {
+            component = component.substring(1);
+        }
+        link += component;
+        return link;
+    },
+    /**
+     * Creates an URL from the passed in options in the same way as the Grails
+     * createLink tag. The options is an object with the following attributes:
+     * <ul>
+     * <li>controller</li>
+     * <li>action</li>
+     * <li>id</li>
+     * <li>parameters</li>
+     * </ul>
+     *
+     * All elements are optional. Parameters is an object which gets serialized
+     * into key/value pairs for the query part of the URL.
+     *
+     * If all elements are provided the following link structure is generated:
+     * <strong>/applicationContextPath/controller/action/id?key1=value1&key2=value2</strong>
+     * @param options The URL parts to construct the link from
+     * @returns an URL to be used in e.g. href element of an a-attribute
+     */
+    createLink: function (options) {
+        "use strict";
+        var link, parameter, counter;
+        link = $.otp.contextPath;
+        if (options === undefined || !options) {
+            return link;
+        }
+        link = $.otp.addLinkComponent(link, options.controller);
+        link = $.otp.addLinkComponent(link, options.action);
+        link = $.otp.addLinkComponent(link, options.id);
+        if (options.parameters !== undefined && options.parameters && Object.keys(options.parameters).length > 0) {
+            link += "?";
+            counter = 0;
+            for (parameter in options.parameters) {
+                if (options.parameters.hasOwnProperty(parameter)) {
+                    if (counter > 0) {
+                        link += "&";
+                    }
+                    link += parameter + "=" + options.parameters[parameter];
+                    counter += 1;
+                }
+            }
+        }
+        return link;
+    },
+    /**
+     * Creates the HTML markup for an a element from the passed in options.
+     * For the actual link (href) the same attributes in options are supported
+     * as in {@link $.otp.createLink}. In addition the following attributes in
+     * options are supported:
+     * <ul>
+     * <li>title</li>
+     * <li>text</li>
+     * <li>target</li>
+     * </ul>
+     *
+     * Title is used for the title attribute of the a-attribute and text is used
+     * for the innerHTML element of the a-attribute
+     * @param options The options defining the hyperlink
+     * @returns {String} Markup for HTML element a
+     */
+    createLinkMarkup: function (options) {
+        "use strict";
+        var link, text, title, target;
+        link = '<a href="' + $.otp.createLink(options) + '"';
+        text = "";
+        if (options !== undefined && options) {
+            if (options.text !== undefined && options.text) {
+                text = options.text;
+            }
+            if (options.title !== undefined && options.title) {
+                title = options.title;
+            }
+            if (options.target !== undefined && options.target) {
+                target = options.target;
+            }
+        }
+        if (title !== undefined) {
+            link += ' title="' + title + '"';
+        }
+        if (target !== undefined) {
+            link += ' target="' + target + '"';
+        }
+        return link + '>' + text + '</a>';
+    }
 };
 
 $.i18n.properties({
     name: 'messages',
-    path: $.otp.contextPath + '/js/i18n/',
+    path: $.otp.createLink({
+        controller: 'js',
+        action: 'i18n/'
+    }),
     mode: "map"
 });
 
@@ -76,7 +189,11 @@ $.otp.genericList = function (selector, showLink) {
                     var i, rowData;
                     for (i = 0; i < json.aaData.length; i += 1) {
                         rowData = json.aaData[i];
-                        rowData[0] = "<a href=\"" + $.otp.contextPath + showLink + rowData[0].id + "\">" + rowData[0].text + "</a>";
+                        rowData[0] = $.otp.createLinkMarkup({
+                            controller: showLink,
+                            id: rowData[0].id,
+                            text: rowData[0].text
+                        });
                     }
                     fnCallback(json);
                 }
@@ -134,7 +251,10 @@ $.otp.sequence = {
             bSort: true,
             bJQueryUI: false,
             bAutoWidth: false,
-            sAjaxSource: $.otp.contextPath + '/sequence/dataTableSource',
+            sAjaxSource: $.otp.createLink({
+                controller: 'sequence',
+                action: 'dataTableSource'
+            }),
             bScrollInfinite: true,
             bScrollCollapse: true,
             sScrollY: "600px",
@@ -161,7 +281,12 @@ $.otp.sequence = {
                                 fastQC = "<ul>";
                                 for (j = 0; j < row.fastQCFiles.length; j += 1) {
                                     fastQC += "<li>";
-                                    fastQC += '<a href="' + $.otp.contextPath + '/fastqcResults/show/' + row.fastQCFiles[j].id + '">' + $.i18n.prop("sequence.list.numberedFastQCFile", (j + 1)) + '</a>';
+                                    fastQC += $.otp.createLinkMarkup({
+                                        controller: 'fastqcResults',
+                                        action: 'show',
+                                        id: row.fastQCFiles[j].id,
+                                        text: $.i18n.prop("sequence.list.numberedFastQCFile", (j + 1))
+                                    });
                                     fastQC += "</li>";
                                 }
                                 fastQC += "</ul>";
@@ -170,12 +295,23 @@ $.otp.sequence = {
                             }
                             rowData = [
                                 '<span title="' + row.projectName + '">' + $.otp.sequence.formatProject(row.projectName) + '</span>',
-                                '<a href="' + $.otp.contextPath + '/individual/show/' + row.individualId + '">' + row.mockPid + '</a>',
+                                $.otp.createLinkMarkup({
+                                    controller: 'individual',
+                                    action: 'show',
+                                    id: row.individualId,
+                                    text: row.mockPid
+                                }),
                                 row.sampleTypeName,
                                 row.seqTypeName,
                                 row.libraryLayout,
                                 row.seqCenterName,
-                                '<a href="' + $.otp.contextPath + '/run/show/' + row.runId + '" title="' + row.name + '">' + $.otp.sequence.formatRun(row.name) + '</a>',
+                                $.otp.createLinkMarkup({
+                                    controller: 'run',
+                                    action: 'show',
+                                    id: row.runId,
+                                    title: row.name,
+                                    text: $.otp.sequence.formatRun(row.name)
+                                }),
                                 row.laneId,
                                 fastQC,
                                 row.alignmentState.name,
@@ -267,7 +403,13 @@ $.otp.sequence = {
     updateSearchCriteria: function () {
         "use strict";
         $("#sequenceTable").dataTable().fnDraw();
-        $("#export-csv").attr("href", $.otp.contextPath + "/sequence/exportCsv?filtering=" + JSON.stringify($.otp.sequence.searchCriteria()));
+        $("#export-csv").attr("href", $.otp.createLink({
+            controller: 'sequence',
+            action: 'exportCsv',
+            parameters: {
+                filtering: JSON.stringify($.otp.sequence.searchCriteria())
+            }
+        }));
     }
 };
 
@@ -318,7 +460,10 @@ $.otp.addIndividual = {
             samplesArray.push(sample);
         });
         samples = JSON.stringify(samplesArray);
-        $.getJSON($.otp.contextPath + "/individual/save", {
+        $.getJSON($.otp.createLink({
+            controller: 'individual',
+            action: 'save'
+        }), {
             pid: $("#pid").val(),
             project: $("#project").val(),
             mockPid: $("#mockPid").val(),
@@ -456,7 +601,10 @@ $.otp.notificationAdministration = {
             bSort: true,
             bJQueryUI: false,
             bAutoWidth: false,
-            sAjaxSource: $.otp.contextPath + '/notification/dataTableSource',
+            sAjaxSource: $.otp.createLink({
+                controller: 'notification',
+                action: 'dataTableSource'
+            }),
             bScrollInfinite: true,
             bScrollCollapse: true,
             sScrollY: "600px",
@@ -511,7 +659,11 @@ $.otp.notificationAdministration = {
                 cell.empty();
                 selection.appendTo(cell).change(function () {
                     var selection = $(this);
-                    $.getJSON($.otp.contextPath + "/notification/updateType/" + selection.attr("name"),
+                    $.getJSON($.otp.createLink({
+                        controller: 'notification',
+                        action: 'updateType',
+                        id: selection.attr("name")
+                    }),
                             {type: $("option:selected", selection).val()},
                             $.otp.notificationAdministration.notificationUpdate)
                             .error($.otp.notificationAdministration.errorHandler);
@@ -527,7 +679,11 @@ $.otp.notificationAdministration = {
                 cell.empty();
                 selection.appendTo(cell).change(function () {
                     var selection = $(this);
-                    $.getJSON($.otp.contextPath + "/notification/updateMedium/" + selection.attr("name"),
+                    $.getJSON($.otp.createLink({
+                        controller: 'notification',
+                        action: 'updateMedium',
+                        id: selection.attr("name")
+                    }),
                             {medium: $("option:selected", selection).val()},
                             $.otp.notificationAdministration.notificationUpdate)
                             .error($.otp.notificationAdministration.errorHandler);
@@ -545,7 +701,11 @@ $.otp.notificationAdministration = {
                         // it's a job execution plan
                         $("select[name=jobExecutionPlan] option[value=" + triggerId + "]", dialog).attr("selected", true);
                     } else if ($("input:hidden[name=className]", cell).val() === "de.dkfz.tbi.otp.job.plan.JobDefinition") {
-                        $.getJSON($.otp.contextPath + "/notification/jobDefinition/" + $("input:hidden[name=triggerId]", cell).val(), function (data) {
+                        $.getJSON($.otp.createLink({
+                            controller: 'notification',
+                            action: 'jobDefinition',
+                            id: $("input:hidden[name=triggerId]", cell).val()
+                        }), function (data) {
                             $("select[name=jobExecutionPlan] option[value=" + data.jobExecutionPlan + "]", dialog).attr("selected", true);
                             $.otp.notificationAdministration.createJobOptions($("select[name=jobDefinition]", dialog), data.jobs);
                             $("option[value=" + triggerId + "]", dialog).attr("selected", true);
@@ -558,7 +718,11 @@ $.otp.notificationAdministration = {
                         var jobSelection = $("select[name=jobDefinition]", dialog);
                         if ($(this).attr("checked")) {
                             jobSelection.show();
-                            $.getJSON($.otp.contextPath + "/notification/jobDefinitions/" + $("select[name=jobExecutionPlan] option:selected", dialog).val(), function (data) {
+                            $.getJSON($.otp.createLink({
+                                controller: 'notification',
+                                action: 'jobDefinitions',
+                                id: $("select[name=jobExecutionPlan] option:selected", dialog).val()
+                            }), function (data) {
                                 $.otp.notificationAdministration.createJobOptions(jobSelection, data.jobs);
                             }).error($.otp.notificationAdministration.errorHandler);
                         } else {
@@ -571,7 +735,11 @@ $.otp.notificationAdministration = {
                         if ($("input:checkbox", dialog).attr("checked") === "checked") {
                             var jobSelection = $("select[name=jobDefinition]", dialog);
                             jobSelection.empty();
-                            $.getJSON($.otp.contextPath + "/notification/jobDefinitions/" + $("select[name=jobExecutionPlan] option:selected", dialog).val(), function (data) {
+                            $.getJSON($.otp.createLink({
+                                controller: 'notification',
+                                action: 'jobDefinitions',
+                                id: $("select[name=jobExecutionPlan] option:selected", dialog).val()
+                            }), function (data) {
                                 $.otp.notificationAdministration.createJobOptions(jobSelection, data.jobs);
                             }).error($.otp.notificationAdministration.errorHandler);
                         }
@@ -582,7 +750,11 @@ $.otp.notificationAdministration = {
                             "Save": function () {
                                 var dialog;
                                 dialog = $(this);
-                                $.getJSON($.otp.contextPath + "/notification/updateTrigger/" + $("input:hidden", dialog).val(),
+                                $.getJSON($.otp.createLink({
+                                    controller: 'notification',
+                                    action: 'updateTrigger',
+                                    id: $("input:hidden", dialog).val()
+                                }),
                                         {
                                         jobExecutionPlan: $("select[name=jobExecutionPlan] option:selected", dialog).val(),
                                         jobDefinition: $("select[name=jobDefinition] option:selected", dialog).val()
@@ -642,7 +814,11 @@ $.otp.notificationAdministration = {
             dialog.dialog({
                 buttons: {
                     "Save": function () {
-                        $.getJSON($.otp.contextPath + "/notification/updateTemplate/" + $("input:hidden", dialog).val(),
+                        $.getJSON($.otp.createLink({
+                            controller: 'notification',
+                            action: 'updateTemplate',
+                            id: $("input:hidden", dialog).val()
+                        }),
                                 {text: $("textarea", dialog).val()}, $.otp.notificationAdministration.notificationUpdate)
                                 .error($.otp.notificationAdministration.errorHandler);
                         $(this).dialog("close");
@@ -696,7 +872,11 @@ $.otp.notificationAdministration = {
     enableNotification: function () {
         "use strict";
         var checkBox = $(this);
-        $.getJSON($.otp.contextPath + "/notification/enableNotification/" + checkBox.attr("name"),
+        $.getJSON($.otp.createLink({
+            controller: 'notification',
+            action: 'enableNotification',
+            id: checkBox.attr("name")
+        }),
                 {enabled: checkBox.attr("checked") === "checked"}, $.otp.notificationAdministration.notificationUpdate)
                 .error($.otp.notificationAdministration.errorHandler);
     },

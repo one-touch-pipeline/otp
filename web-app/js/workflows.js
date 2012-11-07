@@ -17,7 +17,11 @@ $.otp.workflows = {
      */
     statusImageHtml: function (status) {
         "use strict";
-        return '<img src="' + $.otp.contextPath + '/images/status/' + $.otp.workflows.statusToImage(status) + '" alt="' + status + '" title="' + status + '"/>';
+        return '<img src="' + $.otp.createLink({
+            controller: 'images',
+            action: 'status',
+            id: $.otp.workflows.statusToImage(status)
+        }) + '" alt="' + status + '" title="' + status + '"/>';
     },
     /**
      * Creates the HTML markup for the health image.
@@ -41,7 +45,11 @@ $.otp.workflows = {
             image = "health-80plus.png";
         }
         title = succeeded + ' of ' + finished + ' Processes finished successfully';
-        return '<img src="' + $.otp.contextPath + '/images/status/' + image + '" alt="' + title + '" title="' + title + '"/>';
+        return '<img src="' + $.otp.createLink({
+            controller: 'images',
+            action: 'status',
+            id: image
+        }) + '" alt="' + title + '" title="' + title + '"/>';
     },
     /**
      * Converts the status name into the image name which is used to represent the status.
@@ -137,7 +145,11 @@ $.otp.workflows = {
      **/
     restartProcessingStep: function (id, selector) {
         "use strict";
-        $.getJSON($.otp.contextPath + "/processes/restartStep/" + id, function (data) {
+        $.getJSON($.otp.createLink({
+            controller: 'processes',
+            action: 'restartStep',
+            id: id
+        }), function (data) {
             $.otp.infoMessage(data.success);
             $(selector).dataTable().fnDraw();
         });
@@ -149,7 +161,10 @@ $.otp.workflows = {
      **/
     createRestartProcessingStepLink: function (id, dataTable) {
         "use strict";
-        var imageLink = $.otp.contextPath + "/images/redo.png";
+        var imageLink = $.otp.createLink({
+            controller: 'images',
+            action: 'redo.png'
+        });
         return '<a onclick="$.otp.workflows.restartProcessingStep(' + id + ', \'' + dataTable + '\');" href="#" title="Restart" ><img src="' + imageLink + '"/></a>';
     },
     planGraph: {
@@ -235,7 +250,11 @@ $.otp.workflows = {
                     attr.fill = 'lightblue';
                 }
                 textElement.attr({
-                    href: $.otp.contextPath + "/processes/processingStep/" + n.processingStep
+                    href: $.otp.createLink({
+                        controller: 'processes',
+                        action: 'processingStep',
+                        id: n.processingStep
+                    })
                 });
             }
             element.attr(attr);
@@ -420,7 +439,10 @@ $.otp.workflows = {
      */
     registerJobExecutionPlan: function (selector) {
         "use strict";
-        $.otp.createListView(selector, $.otp.contextPath + '/processes/listData', true, function (json) {
+        $.otp.createListView(selector, $.otp.createLink({
+            controller: 'processes',
+            action: 'listData'
+        }), true, function (json) {
             var i, processId, rowData;
             for (i = 0; i < json.aaData.length; i += 1) {
                 rowData = json.aaData[i];
@@ -431,8 +453,21 @@ $.otp.workflows = {
                 } else {
                     rowData[1] = "-";
                 }
-                rowData[2] = '<a href="' + $.otp.contextPath +  '/processes/plan/' + processId + '">' + rowData[2].name + '</a>';
-                rowData[4] = '<a href="' + $.otp.contextPath + '/processes/plan/' + processId + '?failed=true">' + rowData[4] + '</a>';
+                rowData[2] = $.otp.createLinkMarkup({
+                    controller: 'processes',
+                    action: 'plan',
+                    id: processId,
+                    text: rowData[2].name
+                });
+                rowData[4] = $.otp.createLinkMarkup({
+                    controller: 'processes',
+                    action: 'plan',
+                    id: processId,
+                    parameters: {
+                        failed: true
+                    },
+                    text: rowData[4]
+                });
                 rowData[5] = $.otp.workflows.renderDate(rowData[5]);
                 rowData[6] = $.otp.workflows.renderDate(rowData[6]);
                 if (rowData[7]) {
@@ -451,18 +486,36 @@ $.otp.workflows = {
      */
     registerProcesses: function (selector, planId, failed) {
         "use strict";
-        $.otp.createListView(selector, $.otp.contextPath + '/processes/planData/' +  planId + '/?failed=' + failed, false, function (json) {
+        $.otp.createListView(selector, $.otp.createLink({
+            controller: 'processes',
+            action: 'planData',
+            id: planId,
+            parameters: {
+                failed: failed
+            }
+        }), false, function (json) {
             var i, j, rowData, stepId, actions;
             for (i = 0; i < json.aaData.length; i += 1) {
                 rowData = json.aaData[i];
-                rowData[0] = '<a href="' + $.otp.contextPath + '/processes/process/' + rowData[0] + '">' + rowData[0] + '</a>';
+                rowData[0] = $.otp.createLinkMarkup({
+                    controller: 'processes',
+                    action: 'process',
+                    id: rowData[0],
+                    text: rowData[0]
+                });
                 rowData[1] = $.otp.workflows.statusImageHtml(rowData[1].name);
                 rowData[2] = rowData[2] || "-";
                 rowData[3] = $.otp.workflows.renderDate(rowData[3]);
                 rowData[4] = $.otp.workflows.renderDate(rowData[4]);
                 stepId = rowData[6].id;
                 if (rowData[6].error) {
-                    rowData[6] = '<a href="' + $.otp.contextPath + '/processes/processingStep/' + rowData[6].id + '" title="' + rowData[6].error + '">' + rowData[6].state.name + '</a>';
+                    rowData[6] = $.otp.createLinkMarkup({
+                        controller: 'processes',
+                        action: 'processingStep',
+                        id: rowData[6].id,
+                        title: rowData[6].error,
+                        text: rowData[6].state.name
+                    });
                 } else {
                     rowData[6] = rowData[6].state.name;
                 }
@@ -490,7 +543,11 @@ $.otp.workflows = {
             { "bSortable": false, "aTargets": [7] }
         ]);
         $("#enable-workflow-button").click(function () {
-            $.get($.otp.contextPath + "/processes/enablePlan/" + planId, function (data) {
+            $.get($.otp.createLink({
+                controller: 'processes',
+                action: 'enablePlan',
+                id: planId
+            }), function (data) {
                 if (data !== "true") {
                     $.otp.warningMessage("Could not enable Workflow");
                     return;
@@ -503,7 +560,11 @@ $.otp.workflows = {
             });
         });
         $("#disable-workflow-button").click(function () {
-            $.get($.otp.contextPath + "/processes/disablePlan/" + planId, function (data) {
+            $.get($.otp.createLink({
+                controller: 'processes',
+                action: 'disablePlan',
+                id: planId
+            }), function (data) {
                 if (data !== "false") {
                     $.otp.warningMessage("Could not disable Workflow");
                     return;
@@ -524,7 +585,11 @@ $.otp.workflows = {
                 $("#plan-visualization").data("graph").renderer.draw();
                 return;
             }
-            $.getJSON($.otp.contextPath + "/processes/planVisualization/" + planId, function (data) {
+            $.getJSON($.otp.createLink({
+                controller: 'processes',
+                action: 'planVisualization',
+                id: planId
+            }), function (data) {
                 $.otp.workflows.planGraph.setup("plan-visualization", data);
             });
         });
@@ -534,7 +599,11 @@ $.otp.workflows = {
             $(this).hide();
         });
         $("#generate-dsl").click(function () {
-            $.getJSON($.otp.contextPath + "/processes/planVisualization/" + planId, $.otp.workflows.generatePlanDSL);
+            $.getJSON($.otp.createLink({
+                controller: 'processes',
+                action: 'planVisualization',
+                id: planId
+            }), $.otp.workflows.generatePlanDSL);
         });
     },
     /**
@@ -544,12 +613,21 @@ $.otp.workflows = {
      */
     registerProcessingStep: function (selector, processId) {
         "use strict";
-        $.otp.createListView(selector, $.otp.contextPath + '/processes/processData/' +  processId + '/', false, function (json) {
+        $.otp.createListView(selector, $.otp.createLink({
+            controller: 'processes',
+            action: 'processData',
+            id: processId + '/'
+        }), false, function (json) {
             var i, j, rowData, stepId, actions;
             for (i = 0; i < json.aaData.length; i += 1) {
                 rowData = json.aaData[i];
                 stepId = rowData[0];
-                rowData[0] = '<a href="' + $.otp.contextPath + '/processes/processingStep/' + stepId + '">' + stepId + '</a>';
+                rowData[0] = $.otp.createLinkMarkup({
+                    controller: 'processes',
+                    action: 'processingStep',
+                    id: stepId,
+                    text: stepId
+                });
                 rowData[1] = $.otp.workflows.statusImageHtml(rowData[1].name);
                 if (rowData[3]) {
                     rowData[3] = '<span title="' + rowData[3].name + '">' + rowData[3].name.substr(rowData[3].name.lastIndexOf('.') + 1) + "</span><br/>" +
@@ -602,7 +680,11 @@ $.otp.workflows = {
                 $("#process-visualization").data("graph").renderer.draw();
                 return;
             }
-            $.getJSON($.otp.contextPath + "/processes/processVisualization/" + processId, function (data) {
+            $.getJSON($.otp.createLink({
+                controller: 'processes',
+                action: 'processVisualization',
+                id: processId
+            }), function (data) {
                 $.otp.workflows.planGraph.setup("process-visualization", data);
             });
         });
@@ -620,7 +702,11 @@ $.otp.workflows = {
          */
         processingStepUpdates: function (selector) {
             "use strict";
-            $.otp.createListView(selector, $.otp.contextPath + '/processes/processingStepDate/' +  $.otp.workflows.processingStep.processingStepId + '/', false, function (json) {
+            $.otp.createListView(selector, $.otp.createLink({
+                controller: 'processes',
+                action: 'processingStepDate',
+                id: $.otp.workflows.processingStep.processingStepId + '/'
+            }), false, function (json) {
                 var i, rowData;
                 for (i = 0; i < json.aaData.length; i += 1) {
                     rowData = json.aaData[i];
@@ -630,7 +716,13 @@ $.otp.workflows = {
                         rowData[3] = "-";
                     } else {
                         if (rowData[3].stackTraceIdentifier) {
-                            rowData[3] = '<a href="' + $.otp.contextPath + "/processes/getProcessingErrorStackTrace/" + rowData[3].id + '" target="_blank">' + rowData[3].errorMessage + '</a>';
+                            rowData[3] = $.otp.createLinkMarkup({
+                                controller: 'processes',
+                                action: 'getProcessingErrorStackTrace',
+                                id: rowData[3].id,
+                                target: "_blank",
+                                text: rowData[3].errorMessage
+                            });
                         } else {
                             rowData[3] = rowData[3].errorMessage;
                         }
@@ -650,7 +742,11 @@ $.otp.workflows = {
          */
         parameters: function (selector, inputOrOutput) {
             "use strict";
-            $.otp.createListView(selector, $.otp.contextPath + '/processes/parameterData/' +  $.otp.workflows.processingStep.processingStepId + '/', true, null, [
+            $.otp.createListView(selector, $.otp.createLink({
+                controller: 'processes',
+                action: 'parameterData',
+                id: $.otp.workflows.processingStep.processingStepId + '/'
+            }), true, null, [
                 { "bSortable": true,  "aTargets": [0] },
                 { "bSortable": false, "aTargets": [1] },
                 { "bSortable": false, "aTargets": [2] },
