@@ -45,18 +45,18 @@ grails.project.dependency.resolution = {
 
     plugins {
         compile ":hibernate:$grailsVersion"
-        compile ":jquery:1.8.0"
-        runtime ":resources:1.2-RC1"
+        compile ":jquery:1.8.2"
+        runtime ":resources:1.2.RC2"
         compile ":executor:0.3"
-        compile ":spring-security-core:1.2.7.2"
-        compile ":spring-security-ldap:1.0.5"
-        compile ":spring-security-acl:1.1"
+        compile ":spring-security-core:1.2.7.3"
+        compile ":spring-security-ldap:1.0.6"
+        compile ":spring-security-acl:1.1.1"
         compile ":console:1.2"
         compile ":perf4j:0.1.1"
-        compile ":mail:1.0-SNAPSHOT"
+        compile ":mail:1.0"
         compile ":codenarc:0.17"
         compile ":lesscss-resources:1.3.0.3"
-        runtime ":database-migration:1.1"
+        runtime ":database-migration:1.2"
 
         build ":tomcat:$grailsVersion"
     }
