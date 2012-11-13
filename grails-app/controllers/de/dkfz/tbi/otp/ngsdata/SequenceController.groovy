@@ -49,7 +49,7 @@ class SequenceController {
         // add the DataFiles to the sequences
         dataFiles.each { DataFile df ->
             for (def sequence in dataToRender.aaData) {
-                if (df.seqTrack.id == sequence.seqTrackId && df.run.id == sequence.runId) {
+                if (df.seqTrack.id == sequence.seqTrackId) {
                     if (sequence.containsKey("fastQCFiles")) {
                         sequence.fastQCFiles << df
                     } else {

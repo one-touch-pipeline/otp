@@ -85,10 +85,9 @@ or hasRole('ROLE_OPERATOR')
 SELECT df FROM FastqcProcessedFile AS fqc
 INNER JOIN fqc.dataFile AS df
 WHERE
-df.run.id in (:runIds)
-AND df.seqTrack.id in (:seqTrackIds)
+df.seqTrack.id in (:seqTrackIds)
 '''
-        return DataFile.executeQuery(query, [runIds: sequences.collect{ it.runId }, seqTrackIds: sequences.collect{ it.seqTrackId }])
+        return DataFile.executeQuery(query, [seqTrackIds: sequences.collect{ it.seqTrackId }])
     }
 
     private String fastqcSummaryForDataFile(FastqcProcessedFile fastqc) {
