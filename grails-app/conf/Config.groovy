@@ -202,6 +202,18 @@ if (otpConfig.otp.pbs.ssh.password instanceof ConfigObject) {
 } else {
 	otp.pbs.ssh.password = otpConfig.otp.pbs.ssh.password
 }
+// pbs unixUser
+if (otpConfig.otp.pbs.ssh.unixUser instanceof ConfigObject) {
+    otp.pbs.ssh.unixUser = ""
+} else {
+    otp.pbs.ssh.unixUser = otpConfig.otp.pbs.ssh.unixUser
+}
+// pbs host
+if (otpConfig.otp.pbs.ssh.host instanceof ConfigObject) {
+    otp.pbs.ssh.host = ""
+} else {
+    otp.pbs.ssh.host = otpConfig.otp.pbs.ssh.host
+}
 
 // Added by the Spring Security Core plugin:
 grails.plugins.springsecurity.userLookup.userDomainClassName = 'de.dkfz.tbi.otp.security.User'

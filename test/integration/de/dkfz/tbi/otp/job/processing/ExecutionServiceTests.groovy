@@ -4,7 +4,7 @@ import static org.junit.Assert.*
 import org.junit.*
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.Realm.OperationType;
+import de.dkfz.tbi.otp.ngsdata.Realm.OperationType
 
 class ExecutionServiceTests extends AbstractIntegrationTest {
 
@@ -15,7 +15,20 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
 
     @Before
     void setUp() {
-        realm = new Realm(name: "DKFZ", env: "development", operationType: OperationType.DATA_MANAGEMENT, rootPath: "/", processingRootPath: "/test", programsRootPath: "/testPrograms", webHost: "http://test.me", host: "headnode", port: 22, unixUser: "unixUser", timeout: 100, pbsOptions: "")
+        realm = new Realm(
+            name: "DKFZ",
+            env: "development",
+            operationType: OperationType.DATA_MANAGEMENT,
+            rootPath: "/",
+            processingRootPath: "/test",
+            programsRootPath: "/testPrograms",
+            webHost: "http://test.me",
+            host: grailsApplication.config.otp.pbs.ssh.host,
+            port: 22,
+            unixUser: grailsApplication.config.otp.pbs.ssh.unixUser,
+            timeout: 100,
+            pbsOptions: ""
+        )
     }
 
     @SuppressWarnings("EmptyMethod")
