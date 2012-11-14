@@ -37,6 +37,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         // Tear down logic here
     }
 
+    @Ignore
     @Test
     void testExecuteCommand() {
         println("testExecuteCommand")
@@ -77,6 +78,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         assertEquals(extractedPbsId, extractedPbsId_qstat)
     }
 
+    @Ignore
     @Test
     void testExecuteJobScript() {
         println("testExecuteJobScript")
@@ -113,6 +115,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         assertEquals(extractedPbsId, extractedPbsId_qstat)
     }
 
+    @Ignore
     @Test
     void testExecuteJob() {
         println("testExecuteJob")
