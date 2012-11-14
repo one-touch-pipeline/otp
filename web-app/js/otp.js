@@ -458,13 +458,13 @@ $.otp.option = {
                             row = json.aaData[i];
                             option = row.option;
                             rowData = [
-                                       option.name,
-                                       option.type,
-                                       '<a href="#" title="' + option.value + '">' + $.otp.option.formatValue(option.value) + '</a>',
-                                       row.project,
-                                       option.dateCreated,
-                                       option.dateObsoleted,
-                                       option.comment
+                                option.name,
+                                option.type,
+                                '<a href="#" title="' + option.value + '">' + $.otp.option.formatValue(option.value) + '</a>',
+                                row.project,
+                                option.dateCreated,
+                                option.dateObsoleted,
+                                option.comment
                             ];
                             json.aaData[i] = rowData;
                         }
