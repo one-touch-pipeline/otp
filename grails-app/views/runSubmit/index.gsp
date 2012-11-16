@@ -3,32 +3,32 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
-<title>Run Registration</title>
+<title><g:message code="runSubmit.title"/></title>
 </head>
 <body>
   <div class="body">
-     <h1>Run registration</h1>
+     <h1><g:message code="runSubmit.title"/></h1>
 
     <g:form controller="runSubmit" action="submit">
     <table>
         <tr>
-            <td class="myKey">run name</td>
+            <td class="myKey"><g:message code="runSubmit.runName"/></td>
             <td><g:textField name="runName"size="30"/></td>
         </tr>
         <tr>
-            <td class="myKey">sequencing center</td>
+            <td class="myKey"><g:message code="runSubmit.sequencingCenter"/></td>
             <td><g:select name="seqCenter" from="${centers}" /></td>
         </tr>
         <tr>
-            <td class="myKey">sequencing platform</td>
+            <td class="myKey"><g:message code="runSubmit.sequencingPlatform"/></td>
             <td><g:select name="seqPlatform" from="${seqPlatform}" /></td>
         </tr>
         <tr>
-            <td class="myKey">data location</td>
+            <td class="myKey"><g:message code="runSubmit.dataLocation"/></td>
             <td><g:textField name="dataPath" size="80" /></td>
         </tr>
         <tr>
-             <td class="myKey">format of the initial data</td>
+             <td class="myKey"><g:message code="runSubmit.formatInitialData"/></td>
              <td><g:select name="initialFormat" from="${de.dkfz.tbi.otp.ngsdata.RunSegment.DataFormat}"/></td>
         </tr>
         <tr>

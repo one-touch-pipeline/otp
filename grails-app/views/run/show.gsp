@@ -3,10 +3,11 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
-<title>Run details</title>
+<title><g:message code="run.show.title"/></title>
 </head>
 <body>
   <div class="body">
+    <h1><g:message code="run.show.title"/></h1>
     <ul>
         <g:if test="${nextRun}">
             <li class="button"><g:link action="show" id="${nextRun.id}">next run</g:link></li>
@@ -17,23 +18,23 @@
     </ul>
 
 
-    <h1>General</h1>
+    <h1><g:message code="run.show.general"/></h1>
 
     <table>
        <tr>
-            <td class="myKey">name</td>
+            <td class="myKey"><g:message code="run.show.general.name"/></td>
             <td class="myValue">${run.name}</td>
        </tr>
        <tr>
-            <td class="myKey">sequencing center</td>
+            <td class="myKey"><g:message code="run.show.general.sequencingCenter"/></td>
             <td class="myValue">${run.seqCenter.name.toLowerCase()}</td>
        </tr>
        <tr>
-            <td class="myKey">sequencing technology</td>
+            <td class="myKey"><g:message code="run.show.general.sequencingTechnology"/></td>
             <td class="myValue">${run.seqPlatform}</td>
        </tr>
        <tr>
-            <td class="myKey">date executed</td>
+            <td class="myKey"><g:message code="run.show.general.dateExecuted"/></td>
             <td class="myValue">
                 <g:if test="${run.dateExecuted != null}">
                     ${(new Date(run.dateExecuted.getTime())).format("yyyy-MM-dd")}
@@ -41,15 +42,15 @@
             </td>
        </tr>
        <tr>
-            <td class="myKey">date created</td>
+            <td class="myKey"><g:message code="run.show.general.dateCreated"/></td>
             <td class="myValue">${run.dateCreated}</td>
        </tr>
        <tr>
-            <td class="myKey">meta data path</td>
+            <td class="myKey"><g:message code="run.show.general.metaDataPath"/></td>
             <td class="myValue">${run.initialMDPaths()}</td>
        </tr>
        <tr>
-            <td class="myKey">final locations</td>
+            <td class="myKey"><g:message code="run.show.general.finalLocations"/></td>
             <td class="myValue">
                 <g:each var="path" in="${finalPaths}">
                     ${path} <br/>
@@ -58,13 +59,13 @@
        </tr>
     </table>
 
-    <h1>Processing</h1>
+    <h1><g:message code="run.show.processing"/></h1>
     <table>
         <g:each var="processParameter" in="${processParameters}">
         <tr>
             <td class="myKey">${processParameter.process.jobExecutionPlan.name}</td>
             <td><g:link controller="processes" action="process" id="${processParameter.process.id}">
-                show details
+                <g:message code="run.show.processing.showDetails"/>
             </g:link></td>
         </tr>
         </g:each>
@@ -72,7 +73,7 @@
 
 
     <div class="tableBlock">
-        <h1>Data Files</h1>
+        <h1><g:message code="run.show.dataFiles"/></h1>
         <table>
             <g:each var="file" in="${metaDataFiles}">
             <tbody>
@@ -107,7 +108,7 @@
                     <td>${file.dateFileSystem ? (new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd") : '&nbsp;' }</td>
                     <td>
                         <g:if test="${fastqcLinks.get(file.id)}">
-                            <g:link controller="fastqcResults" action="show" id="${file.id}">fastqc</g:link>
+                            <g:link controller="fastqcResults" action="show" id="${file.id}"><g:message code="run.show.fastqc"/></g:link>
                             ${fastqcSummary.get(file.id)}
                         </g:if>
                     </td>
@@ -135,7 +136,7 @@
         <table>
             <thead>
                 <tr>
-                    <td colspan="4">Files not used:</td>
+                    <td colspan="4"><g:message code="run.show.filesNotUsed"/></td>
                 </tr>
             </thead>
             <tbody>
@@ -144,7 +145,7 @@
                     <td><g:link controller="dataFile" action="showDetails" id="${file.id}">${file.fileName}</g:link></td>
                     <td>${de.dkfz.tbi.otp.ngsdata.MetaDataEntry.findByDataFileAndKey(file, keys[0]).value}</td>
                     <td>${de.dkfz.tbi.otp.ngsdata.MetaDataEntry.findAllByDataFileAndKey(file, keys[1])}</td>
-                    <td class="${file.metaDataValid}">meta-data</td>
+                    <td class="${file.metaDataValid}"><g:message code="run.show.metaData"/></td>
                 </tr>
             </g:each>
             </tbody>
