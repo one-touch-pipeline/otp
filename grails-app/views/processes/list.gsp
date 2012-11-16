@@ -3,11 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
-<title>List of Workflows</title>
+<title><g:message code="processes.list.title"/></title>
 <r:require module="workflows"/>
 </head>
 <body>
   <div class="body">
+    <h1><g:message code="processes.list.title"/></h1>
     <otp:autoRefresh/>
     <div id="workflowOverview">
         <otp:dataTable codes="${[

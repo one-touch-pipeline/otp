@@ -3,20 +3,20 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
-<title>List of Processing Steps for Process # ${id} for Workflow ${name}</title>
+<title><g:message code="processes.process.title.listOfProcessingSteps" args="${ [id] }"/> <g:message code="processes.process.title.workflow" args="${ [name] }"/></title>
 <r:require module="workflows"/>
 </head>
 <body>
   <div class="body">
     <otp:autoRefresh/>
-    <h1>List of Processing Steps for Process # ${id} for <g:link action="plan" id="${planId}">Workflow ${name}</g:link></h1>
+    <h1><g:message code="processes.process.title.listOfProcessingSteps" args="${ [id] }"/>  <g:link action="plan" id="${planId}"><g:message code="processes.process.title.workflow" args="${ [name] }"/></g:link></h1>
     <g:if test="${parameter}">
-    <p>Process operates on ${parameter}</p>
+    <p><g:message code="processes.process.operatesOn" args="${ [parameter] }"/></p>
     </g:if>
     <div>
         <div id="process-visualization" style="display: none"></div>
-        <button id="show-visualization">Show Process Visualization</button>
-        <button id="hide-visualization" style="display: none">Hide Process Visualization</button>
+        <button id="show-visualization"><g:message code="processes.process.showProcessVisualization"/></button>
+        <button id="hide-visualization" style="display: none"><g:message code="processes.process.hideProcessVisualization"/></button>
     </div>
     <div id="processOverview">
         <otp:dataTable codes="${[

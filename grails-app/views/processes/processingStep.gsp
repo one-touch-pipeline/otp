@@ -3,59 +3,60 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
-<title>Processing Step ${step.jobDefinition.name} (# ${step.id})</title>
+<title><g:message code="processes.processingStep.title" args="${ [step.jobDefinition.name, step.id] }"/></title>
+
 <r:require module="workflows"/>
 </head>
 <body>
   <div class="body">
-    <h1>Processing Step ${step.jobDefinition.name} (# ${step.id})</h1>
+    <h1><g:message code="processes.processingStep.title" args="${ [step.jobDefinition.name, step.id] }"/></h1>
     <table>
         <thead></thead>
         <tbody>
             <tr>
-                <td>Process:</td>
-                <td><g:link action="process" id="${step.process.id}"># ${step.process.id}</g:link> of <g:link action="plan" id="${step.process.jobExecutionPlan.id}">Workflow ${step.process.jobExecutionPlan.name}</g:link></td>
+                <td><g:message code="processes.processingStep.workflow.process"/></td>
+                <td><g:link action="process" id="${step.process.id}"><g:message code="processes.processingStep.workflow.number"/> ${step.process.id}</g:link> <g:message code="processes.processingStep.workflow.of"/> <g:link action="plan" id="${step.process.jobExecutionPlan.id}"><g:message code="processes.processingStep.workflow"/> ${step.process.jobExecutionPlan.name}</g:link></td>
             </tr>
             <tr>
-                <td>Job:</td>
+                <td><g:message code="processes.processingStep.job"/></td>
                 <td>${step.jobClass}</td>
             </tr>
             <tr>
-                <td>Version:</td>
+                <td><g:message code="processes.processingStep.version"/></td>
                 <td>${step.jobVersion}</td>
             </tr>
             <g:if test="${step.previous}">
             <tr>
-                <td>Previous:</td>
+                <td><g:message code="processes.processingStep.previous"/></td>
                 <td><g:link action="processingStep" id="${step.previous.id}">${step.previous.jobDefinition.name}</g:link></td>
             </tr>
             </g:if>
             <g:if test="${step.next}">
             <tr>
-                <td>Next:</td>
+                <td><g:message code="processes.processingStep.next"/></td>
                 <td><g:link action="processingStep" id="${step.next.id}">${step.next.jobDefinition.name}</g:link></td>
             </tr>
             </g:if>
             <g:if test="${step instanceof de.dkfz.tbi.otp.job.processing.RestartedProcessingStep}">
             <tr>
-                <td>Previously failed Step:</td>
+                <td><g:message code="processes.processingStep.previouslyFailedStep"/></td>
                 <td><g:link action="processingStep" id="${step.original.id}"># ${step.original.id}</g:link></td>
             </tr>
             </g:if>
             <tr>
-                <td>Log:</td>
+                <td><g:message code="processes.processingStep.log"/></td>
                 <td>
                     <g:if test="${hasLog}">
-                        <g:link action="processingStepLog" id="${step.id}">Show Log file</g:link>
+                        <g:link action="processingStepLog" id="${step.id}"><g:message code="processes.processingStep.log.showFile"/></g:link>
                     </g:if>
                     <g:else>
-                        No Log file
+                        <g:message code="processes.processingStep.log.noFile"/>
                     </g:else>
                 </td>
             </tr>
         </tbody>
     </table>
-    <h2>Input Parameters</h2>
+    <h2><g:message code="processes.processingStep.inputParameters"/></h2>
     <div>
     <otp:dataTable codes="${[
             'otp.blank',
@@ -64,7 +65,7 @@
             'workflow.paramater.table.headers.value'
         ]}" id="inputParametersList"/>
     </div>
-    <h2>Output Parameters</h2>
+    <h2><g:message code="processes.processingStep.outputParameters"/></h2>
     <div>
     <otp:dataTable codes="${[
             'otp.blank',
@@ -73,7 +74,7 @@
             'workflow.paramater.table.headers.value'
         ]}" id="outputParametersList"/>
     </div>
-    <h2>Updates</h2>
+    <h2><g:message code="processes.processingStep.updates"/></h2>
     <div>
     <otp:dataTable codes="${[
             'otp.blank',
