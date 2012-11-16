@@ -3,11 +3,11 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
-<title>New Runs</title>
+<title><g:message code="projectProgress.progress.title"/></title>
 </head>
 <body>
   <div class="body">
-    <h1>Runs from: ${projects} since: <g:formatDate format="yyyy-MM-dd" date="${startDate}"/></h1>
+    <h1><g:message code="projectProgress.progress.runsFrom" args="${ [projects] }"/> <g:formatDate format="yyyy-MM-dd" date="${startDate}"/></h1>
 
     <g:form>
         <td><g:datePicker name="startDate" value="${startDate}" precision="day" years="${2010..Calendar.getInstance().get(Calendar.YEAR)}"/>
@@ -25,9 +25,9 @@
     <table>
         <tr>
             <th></th>
-            <th>center</th>
-            <th>name</th>
-            <th>samples</th>
+            <th><g:message code="projectProgress.progress.center"/></th>
+            <th><g:message code="projectProgress.progress.name"/></th>
+            <th><g:message code="projectProgress.progress.samples"/></th>
         </tr>
     <g:each var="row" in="${data}">
         <tr>
