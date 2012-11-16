@@ -3,17 +3,17 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
-<title>Details of Sequencing Scan</title>
+<title><g:message code="seqScan.title"/></title>
 </head>
 <body>
   <div class="body">
-
-    <H1>General</H1>
+    <h1><g:message code="seqScan.title"/></h1>
+    <h2><g:message code="seqScan.general"/></h2>
 
     <div class="tableBlock">
     <table>
        <tr>
-            <td class="myKey">individual</td>
+            <td class="myKey"><g:message code="seqScan.general.individual"/></td>
             <td>
             <g:link
                     controller="individual" 
@@ -24,66 +24,66 @@
             </g:link>
             </td>
        <tr> 
-            <td class="myKey">sample</td>
+            <td class="myKey"><g:message code="seqScan.general.sample"/></td>
             <td class="myValue">${scan.sample}</td>
        </tr>  
        <tr> 
-            <td class="myKey">sequencing type</td>
+            <td class="myKey"><g:message code="seqScan.general.sequencingType"/></td>
             <td class="myValue">${scan.seqType}</td>
        </tr>
        <tr> 
-            <td class="myKey">technology platform</td>
+            <td class="myKey"><g:message code="seqScan.general.technologyPlatform"/></td>
             <td class="myValue">${scan.seqPlatform}</td>
        </tr>
        <tr>
-            <td class="myKey">date</td>
+            <td class="myKey"><g:message code="seqScan.general.date"/></td>
             <td>${scan.dateCreated}</td>
        </tr>
     </table>
     </div>
 
-    <h1>Status</h1>   
+    <h2><g:message code="seqScan.status"/></h2>
 
     <div class="tableBlock">
     <table>
       <tr>
-        <td class="myKey">status</td>
+        <td class="myKey"><g:message code="seqScan.status"/></td>
         <td>${scan.state}</td>
       </tr> 
       <tr>
-        <td class="myKey">quality status</td>
+        <td class="myKey"><g:message code="seqScan.status.qualityStatus"/></td>
         <td>${scan.qcState}</td>
       </tr>
     </table>
     </div>
 
-    <h1>Sequencing tracks</h1>
+    <h2><g:message code="seqScan.status.sequencingTracks"/></h2>
 
     <div class="tableBlock">
     <table>
         <tr>
-            <td class="myKey">number of lanes</td>
+            <td class="myKey"><g:message code="seqScan.status.numberOfLanes"/></td>
             <td>${scan.nLanes}</td>
         </tr>
         <tr>
-            <td class="myKey">number of base pairs</td>
+            <td class="myKey"><g:message code="seqScan.status.numberOfBasePairs"/></td>
             <td>${scan.basePairsString()}</td>
         </tr>
         <tr>
-            <td class="myKey">coverage</td>
+            <td class="myKey"><g:message code="seqScan.status.coverage"/></td>
             <td>${scan.coverage}</td>
         </tr>
     </table>
     </div>
 
-    <h1>Runs, Lanes, Merging</h1>
+    <h2><g:message code="seqScan.runsLanesMerging"/></h2>
 
     <g:each var="run" in="${runs}">
 
         <div class="tableBlock">
-            <h1>
+            <h3>
                 <g:link controller="run" action="display" id="${run}">${run}</g:link>
-            </h1>
+            </h3>
             <table>
                 <tbody>
                 <g:each var="track" in="${tracks}">
@@ -94,7 +94,7 @@
                         <td>${track.seqTrack.nBaseString()}</td>
                         <td>${track.seqTrack.insertSize}</td>
                         <g:if test="${de.dkfz.tbi.otp.ngsdata.AlignmentLog.countBySeqTrack(track.seqTrack) == 0}">
-                            <td>no alignment</td>
+                            <td><g:message code="seqScan.runsLanesMerging.noAlignment"/></td>
                         </g:if>
                         <g:else>
                             <td>
@@ -114,7 +114,7 @@
     </g:each>
 
     <div class="tableBlock">
-        <h1>Merged alignment files</h1>
+        <h2><g:message code="seqScan.mergedAlignmentFiles"/></h2>
         <table>
             <tbody>
             <g:each var="log" in="${de.dkfz.tbi.otp.ngsdata.MergingLog.findAllBySeqScan(scan)}">
@@ -122,7 +122,7 @@
                     <tr>
                         <td><g:link controller="mergedAlignmentDataFile" action="show" id="${dataFile.id}">${dataFile.fileName}</g:link></td>
                         <td>${dataFile.fileSizeString()}</td>
-                        <td class="dataFile.indexFileExists">indexed</td>
+                        <td class="dataFile.indexFileExists"><g:message code="seqScan.mergedAlignmentFiles.indexed"/></td>
                         <td>${log.executedBy}</td>
                         <td>${log.status}</td>
                         <td>${log.alignmentParams}</td>
