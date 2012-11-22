@@ -10,8 +10,8 @@ class ProcessingOptionController {
     def datatable(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
 
-        List processingOptions = processingOptionService.listProcessingOptions(cmd.iDisplayStart, cmd.iDisplayLength)
-        dataToRender.iTotalRecords = processingOptions.size()
+        List<ProcessingOption> processingOptions = processingOptionService.listProcessingOptions(cmd.iDisplayStart, cmd.iDisplayLength)
+        dataToRender.iTotalRecords = processingOptionService.countProcessingOption()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
         processingOptions.each { processingOption ->
