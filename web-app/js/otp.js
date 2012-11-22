@@ -485,7 +485,7 @@ $.otp.addIndividual = {
         existingSamples = $("tr.sample").not(".hidden");
         placeOfLastSampleInTable = existingSamples.last();
         sampleBoxes = $("tr.hidden").clone().removeClass("hidden");
-        sampleBoxes.find("button").click($.otp.plusButtonClickHandler);
+        sampleBoxes.find("button").click($.otp.addIndividual.addSampleIdentifier);
         sampleBoxes.appendTo(placeOfLastSampleInTable.parent());
         newSampleRow = $("tr.newSample");
         newSampleRow.appendTo(sampleBoxes.last().parent());
