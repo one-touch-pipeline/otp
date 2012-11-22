@@ -8,6 +8,7 @@
 </head>
 <body>
     <div class="body">
+        <h1><g:message code="sequence.title"/></h1>
         <table id="searchCriteriaTable">
             <tr>
                 <td>
