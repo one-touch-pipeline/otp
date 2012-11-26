@@ -278,18 +278,16 @@ $.otp.sequence = {
                         for (i = 0; i < json.aaData.length; i += 1) {
                             row = json.aaData[i];
                             if (row.fastQCFiles !== undefined) {
-                                fastQC = "<ul>";
+                                fastQC = "";
                                 for (j = 0; j < row.fastQCFiles.length; j += 1) {
-                                    fastQC += "<li>";
                                     fastQC += $.otp.createLinkMarkup({
                                         controller: 'fastqcResults',
                                         action: 'show',
                                         id: row.fastQCFiles[j].id,
                                         text: $.i18n.prop("sequence.list.numberedFastQCFile", (j + 1))
                                     });
-                                    fastQC += "</li>";
+                                    fastQC += " ";
                                 }
-                                fastQC += "</ul>";
                             } else {
                                 fastQC = row.fastqcState.name;
                             }
@@ -327,7 +325,7 @@ $.otp.sequence = {
             fnRowCallback: function (nRow) {
                 var fastqc, alignment, origAlignment;
                 fastqc = $("td:eq(8)", nRow);
-                if ($("ul li", fastqc).length > 0) {
+                if ($("a", fastqc).length > 0) {
                     fastqc.addClass("true");
                 } else {
                     fastqc.attr("title", fastqc.text());
