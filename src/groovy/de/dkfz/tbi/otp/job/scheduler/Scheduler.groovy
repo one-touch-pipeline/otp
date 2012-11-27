@@ -191,9 +191,14 @@ class Scheduler {
         try {
             errorHash = errorLogService.log(e)
         } catch (Exception ex) {
-            throw new LoggingException("Could not write error log file properly", ex.cause)
+            // do nothing
+            //throw new LoggingException("Could not write error log file properly", ex.cause)
         }
-        ProcessingError error = new ProcessingError(errorMessage: e.message ? e.message.substring(0, Math.min(e.message.length(), 255)) : "No Exception message", processingStepUpdate: update, stackTraceIdentifier: errorHash)
+        ProcessingError error = new ProcessingError(
+            errorMessage: e.message ? e.message.substring(0, Math.min(e.message.length(), 255)) : "No Exception message",
+            processingStepUpdate: update,
+            stackTraceIdentifier: errorHash
+        )
         error.save()
         update.error = error
         if (!update.save(flush: true)) {
