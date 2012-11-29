@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
-
 import de.dkfz.tbi.otp.utils.ReferencedClass
 
 class MetaDataValidationService {
+
+    def hipoIndividualService
 
     private final Lock validateMetaDataLock = new ReentrantLock()
 
@@ -59,6 +60,7 @@ class MetaDataValidationService {
                 entry.status = (run.name == entry.value) ? valid : invalid
                 break
             case "SAMPLE_ID":
+                hipoIndividualService.createHipoIndividual(entry.value)
                 SampleIdentifier sample = SampleIdentifier.findByName(entry.value)
                 entry.status = (sample != null) ? valid : invalid
                 break
