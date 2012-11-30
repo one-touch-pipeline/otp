@@ -34,6 +34,12 @@ class RunProcessingService {
         }
     }
 
+    public List<DataFile> dataFilesWithMetaDataInProcessing(Run run) {
+        List<RunSegment> segments =
+            RunSegment.findAllByRunAndMetaDataStatus(run, RunSegment.Status.PROCESSING)
+        return DataFile.findAllByRunSegmentInList(segments)
+    }
+
     void setMetaDataComplete(Run run) {
         List<RunSegment> segments =
             RunSegment.findAllByRunAndMetaDataStatus(run, RunSegment.Status.PROCESSING)

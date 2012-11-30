@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.job.jobs.metaData
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.job.processing.AbstractJobImpl;
-import de.dkfz.tbi.otp.ngsdata.SeqTrackService
+import de.dkfz.tbi.otp.ngsdata.*
 
 class BuildSequenceTracksJob extends AbstractJobImpl {
 
@@ -13,9 +13,17 @@ class BuildSequenceTracksJob extends AbstractJobImpl {
     @Autowired
     SeqTrackService seqTrackService
 
+    @Autowired
+    MultiplexingService multiplexingService
+
     @Override
     public void execute() throws Exception {
         long runId = Long.parseLong(getProcessParameterValue())
+        Run run = Run.get(runId)
+        if (multiplexingService.needsMultiplexingHandling(run)) {
+            multiplexingService.executeMultiplexing(run)
+            log.debug "Multiplexing service started for run ${run.name}"
+        }
         seqTrackService.buildSequenceTracks(runId)
     }
 }
