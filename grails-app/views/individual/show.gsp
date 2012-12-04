@@ -56,14 +56,15 @@
     </div>
 
 <%--    ${mergedBams}--%>
-
-    <H1><g:message code="individual.show.sequencingScans"/></H1>
+    <g:if test="${ind.seqTypes}">
+        <H1><g:message code="individual.show.sequencingScans"/></H1>
+    </g:if>
     <g:form>
 
     <g:each var="type" in="${ind.seqTypes}">
 
         <div class="tableBlock">
-            <h1>${type}</h1>
+            <h2>${type}</h2>
             <table>
                 <thead>
                 <tr>
@@ -120,7 +121,6 @@
     <h1><g:message code="individual.show.dataAccess"/></h1>
         <div class="buttons">
             <g:actionSubmit class="button" value="Start IGV" action="igvStart"/>
-<%--            <g:actionSubmit class="button" value="Get IGV Session File" action="igvDownload"/>--%>
         </div>
     </g:form>
 
