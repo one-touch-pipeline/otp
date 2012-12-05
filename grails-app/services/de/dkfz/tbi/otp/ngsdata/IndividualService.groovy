@@ -348,7 +348,7 @@ OR lower(i.type) like :filter
      * @throws IndividualCreationException
      */
     @PreAuthorize("hasPermission(#project, 'write') or hasRole('ROLE_OPERATOR')")
-    public Individual createIndividual(Project project, IndividualCommand command) throws IndividualCreationException {
+    public Individual createIndividual(Project project, IndividualCommand command, List<SamplesParser> parsedSamples) throws IndividualCreationException {
         Individual individual = new Individual(pid: command.pid, mockPid: command.mockPid, mockFullName: command.mockFullName, type: command.individualType, project: project)
         if (!individual.validate()) {
             throw new IndividualCreationException("Individual does not validate")
@@ -356,7 +356,7 @@ OR lower(i.type) like :filter
         if (!individual.save(flush: true)) {
             throw new IndividualCreationException("Individual could not be saved.")
         }
-        createOrUpdateSamples(individual, command.samples)
+        createOrUpdateSamples(individual, parsedSamples)
         return individual
     }
 
@@ -440,7 +440,7 @@ OR lower(i.type) like :filter
     /**
      * Creates and updates all given aspects of Samples
      *
-     * The Samples are handed over as {@link SamplesParser}.
+     * The Samples are handed over as List of {@link SamplesParser}.
      * Then there is extracted the information, which is
      * for new Samples the identifier and the type and for
      * Samples to be updated the id as well. As the parameter
@@ -448,20 +448,22 @@ OR lower(i.type) like :filter
      * handles both cases.
      *
      * @param individual The {@link Individual} the Samples are to be associated
-     * @param parsedSample SamplesParser containing the Samples
+     * @param parsedSamples List of SamplesParser containing the Samples
      */
     @PreAuthorize("hasPermission(#individual, 'write') or hasRole('ROLE_OPERATOR')")
-    void createOrUpdateSamples(Individual individual, SamplesParser parsedSamples) {
-        SampleType sampleType = createSampleType(parsedSamples.type)
-        if (!sampleType) {
-            throw new IndividualCreationException("SampleType could not be found nor created.")
-        }
-        Sample sample = createSample(individual, sampleType)
-        for (entry in parsedSamples.updateEntries) {
-            updateSampleIdentifier(entry.value, entry.key as long)
-        }
-        parsedSamples.newEntries.each { String sampleIdentifier ->
-            createSampleIdentifier(sampleIdentifier, sample)
+    void createOrUpdateSamples(Individual individual, List<SamplesParser> parsedSamples) {
+        parsedSamples.each { SamplesParser parsedSample ->
+            SampleType sampleType = createSampleType(parsedSample.type)
+            if (!sampleType) {
+                throw new IndividualCreationException("SampleType could not be found nor created.")
+            }
+            Sample sample = createSample(individual, sampleType)
+            for (entry in parsedSample.updateEntries) {
+                updateSampleIdentifier(entry.value, entry.key as long)
+            }
+            parsedSample.newEntries.each { String sampleIdentifier ->
+                createSampleIdentifier(sampleIdentifier, sample)
+            }
         }
     }
 

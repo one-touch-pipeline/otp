@@ -89,10 +89,11 @@ class IndividualController {
             return
         }
         try {
-            individualService.createIndividual(projectService.getProject(cmd.project), cmd)
+            List<SamplesParser> parsedSamples = new SamplesParser().insertSamplesFromJSON(cmd.samples)
+            individualService.createIndividual(projectService.getProject(cmd.project), cmd, parsedSamples)
             def data = [success: true]
             render data as JSON
-        } catch (IndividualCreationException e) {
+        } catch (Exception e) {
             def data = [error: e.message]
             render data as JSON
         }
@@ -126,8 +127,8 @@ class IndividualController {
         }
         def data = [:]
         try {
-            SamplesParser parsedSamples = new SamplesParser().fromJSON(cmd.samples)
-            individualService.createOrUpdateSamples(individual, parsedSamples)
+            SamplesParser parsedSamples = new SamplesParser().modifySamplesFromJSON(cmd.samples)
+            individualService.createOrUpdateSamples(individual, [parsedSamples])
             data.put("success", true)
         } catch (IndividualUpdateException e) {
             data.put("error", g.message(code: "individual.update.error"))
@@ -148,10 +149,8 @@ class IndividualController {
         try {
             individualService.createSample(individual, cmd.value)
             data.put("success", true)
-        } catch (IndividualUpdateException e) {
-            data.put("error", g.message(code: "individual.update.error"))
-        } catch (ChangelogException e) {
-            data.put("error", g.message(code: "individual.update.changelog.error"))
+        } catch (Exception e) {
+            data = [error: e.message]
         }
         render data as JSON
     }
@@ -237,7 +236,7 @@ class SamplesParser {
     List<String> newEntries = []
     String type
 
-    private SamplesParser fromJSON(String json) {
+    private SamplesParser modifySamplesFromJSON(String json) {
         if (!json) {
             return null
         }
@@ -247,11 +246,8 @@ class SamplesParser {
             if (index == 0) {
                 samplesParser.type = value.type
             }
-            if (!value.type) {
-                return // next sample
-            }
-            if (!value.identifier) {
-                return // next sample
+            if (!isValues(value)) {
+                return // next Sample
             }
             if (value.id) {
                 samplesParser.updateEntries.put(value.id.get(0), value.identifier.get(0))
@@ -260,5 +256,38 @@ class SamplesParser {
             }
         }
         return samplesParser
+    }
+
+    private List<SamplesParser> insertSamplesFromJSON(String json) {
+        if (!json) {
+            return null
+        }
+        def slurper = new JsonSlurper()
+        List<SamplesParser> parsedSamples = []
+        SamplesParser samplesParser
+        slurper.parseText(json).eachWithIndex { value, index ->
+            if (!isValues(value)) {
+                return // next Sample
+            }
+            if (index == 0 || !(parsedSamples.get(index - 1).type.equals(value.type))) {
+                samplesParser = new SamplesParser()
+                samplesParser.type = value.type
+                parsedSamples.add(samplesParser)
+            }
+            value.identifier.each { String v ->
+                    samplesParser.newEntries << v
+            }
+        }
+        return parsedSamples
+    }
+
+    private boolean isValues(Map value) {
+        if (!value.type) {
+            return false
+        }
+        if (!value.identifier) {
+            return false
+        }
+        return true
     }
 }
