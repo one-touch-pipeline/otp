@@ -229,9 +229,21 @@ class SeqTrackService {
     public void setRunReadyForFastqc(Run run) {
         def unknown = SeqTrack.DataProcessingState.UNKNOWN
         SeqTrack.findAllByRunAndFastqcState(run, unknown).each { SeqTrack seqTrack ->
-            seqTrack.fastqcState = SeqTrack.DataProcessingState.NOT_STARTED
-            assert(seqTrack.save(flush: true))
+            if (fastqcReady(seqTrack)) {
+                seqTrack.fastqcState = SeqTrack.DataProcessingState.NOT_STARTED
+                assert(seqTrack.save(flush: true))
+            }
         }
+    }
+
+    private boolean fastqcReady(SeqTrack track) {
+        List<DataFile> files = DataFile.findAllBySeqTrack(track)
+        for (DataFile file in files) {
+            if (!fileTypeService.fastqcReady(file)) {
+                return false
+            }
+        }
+        return true
     }
 
     public SeqTrack getSeqTrackReadyForFastqcProcessing() {

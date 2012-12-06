@@ -2,6 +2,13 @@ package de.dkfz.tbi.otp.ngsdata
 
 class FileTypeService {
 
+    boolean fastqcReady(DataFile file) {
+        if (file.fileName.endsWith(".bz2")) {
+            return false
+        }
+        return true
+    }
+
     boolean isRawDataFile(DataFile dataFile) {
         switch(dataFile.fileType.type) {
             case "SEQUENCE" :
