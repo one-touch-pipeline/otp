@@ -47,8 +47,7 @@
     </table>
     </div>
 
-    <h1><g:message code="individual.show.samples"/></h1>
-    <h1 id="samples" style="display:inline-block">Samples <otp:editorSwitch roles="ROLE_OPERATOR" template="newValue" link="${g.createLink(controller: 'individual', action: 'newSampleType', id: ind.id)}" value="${ind.type}"/></h1>
+    <h1 id="samples" style="display:inline-block"><g:message code="individual.show.samples"/> <otp:editorSwitch roles="ROLE_OPERATOR" template="newValue" link="${g.createLink(controller: 'individual', action: 'newSampleType', id: ind.id)}" value="${ind.type}"/></h1>
     <div class="tableBlock">
     <table>
         <g:each var="sample" in="${ind.samples}">
@@ -126,7 +125,7 @@
 
     <h1><g:message code="individual.show.dataAccess"/></h1>
         <div class="buttons">
-            <g:actionSubmit class="button" value="Start IGV" action="igvStart"/>
+            <g:actionSubmit class="button" value="${message(code:'individual.show.sequencingScans.startIgv')}" action="igvStart"/>
         </div>
     </g:form>
 
