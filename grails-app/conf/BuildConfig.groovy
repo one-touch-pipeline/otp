@@ -54,9 +54,9 @@ grails.project.dependency.resolution = {
         compile ":console:1.2"
         compile ":perf4j:0.1.1"
         compile ":mail:1.0.1"
-        compile ":codenarc:0.17"
+        compile ":codenarc:0.18"
         compile ":lesscss-resources:1.3.0.3"
-        runtime ":database-migration:1.2.2"
+        runtime ":database-migration:1.3.2"
 
         build ":tomcat:$grailsVersion"
     }
