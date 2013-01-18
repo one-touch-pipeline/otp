@@ -16,7 +16,7 @@ class CheckSequenceTracksJob extends AbstractEndStateAwareJobImpl {
     @Override
     public void execute() throws Exception {
         long runId = Long.parseLong(getProcessParameterValue())
-        seqTrackService.checkSequenceTracks(runId)
-        succeed()
+        boolean allUsed = seqTrackService.checkSequenceTracks(runId)
+        allUsed ? succeed() : fail()
     }
 }
