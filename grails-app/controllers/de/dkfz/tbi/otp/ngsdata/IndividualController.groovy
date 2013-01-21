@@ -90,8 +90,8 @@ class IndividualController {
         }
         try {
             List<SamplesParser> parsedSamples = new SamplesParser().insertSamplesFromJSON(cmd.samples)
-            individualService.createIndividual(projectService.getProject(cmd.project), cmd, parsedSamples)
-            def data = [success: true]
+            Individual individual = individualService.createIndividual(projectService.getProject(cmd.project), cmd, parsedSamples)
+            def data = [success: true, id: individual.id]
             render data as JSON
         } catch (Exception e) {
             def data = [error: e.message]
