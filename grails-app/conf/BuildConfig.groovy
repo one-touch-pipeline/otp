@@ -41,6 +41,9 @@ grails.project.dependency.resolution = {
         compile "jivesoftware:smack:3.1.0"
         // jdbc
         runtime "postgresql:postgresql:9.1-901.jdbc4"
+        // ngstools
+        compile "gson:gson:2.2.2"
+        compile "sam:sam:1.78"
     }
 
     plugins {
