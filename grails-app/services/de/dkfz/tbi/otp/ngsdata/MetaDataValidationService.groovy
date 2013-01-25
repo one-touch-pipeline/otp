@@ -114,14 +114,25 @@ class MetaDataValidationService {
         if (value.isInteger()) {
             return true
         }
-        if (value.contains("n/a")) {
+        List<String> allowedFillers = ["n/a", "N/A"]
+        if (allowedFillers.contains(value.contains)) {
             return true // essentially shall be false
         }
         return false
     }
 
+    /**
+     * Recovers insert size number in a notation: 230bp
+     *
+     * @param entry meta data entry
+     * @return true if recovery successful, false otherwise
+     */
     private boolean tryToRecoverInsertSize(MetaDataEntry entry) {
-        String substring = entry.value.substring(0, entry.value.indexOf("b"))
+        int idx = entry.value.indexOf("b")
+        if (idx < 0) {
+            return false
+        }
+        String substring = entry.value.substring(0, idx)
         if (substring.isInteger()) {
             changeInsertSizeValue(entry, substring)
             return true
@@ -136,6 +147,7 @@ class MetaDataValidationService {
         changeLog.save(flush: true)
         entry.value = substring
         entry.source = MetaDataEntry.Source.SYSTEM
+        entry.save(flush: true)
     }
 
     private boolean checkAndCorrectSequencingType(MetaDataEntry entry) {
