@@ -79,7 +79,10 @@ class BamHeaderParsingService {
             }
         }
         println "${runName} ${lane}"
-        return getSeqTrack(runName, lane)
+        if (runName && lane) {
+            return getSeqTrack(runName, lane)
+        }
+        return null
     }
 
     private SeqTrack parseTokensV4(List<String> tokens) {
