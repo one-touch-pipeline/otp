@@ -2,7 +2,6 @@ package de.dkfz.tbi.ngstools.coverageQc
 
 import net.sf.samtools.SAMRecord
 
-
 /**
  * This class mirror database structure and holds quality assessments for single chromosome
  */
@@ -61,7 +60,7 @@ import net.sf.samtools.SAMRecord
     }
 
      void increaseQcBases(long value) {
-        qcBases = qcBases+value
+        qcBases = qcBases + value
     }
 
      void incrementMappedLowQuality(SAMRecord rec) {

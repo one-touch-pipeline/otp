@@ -15,7 +15,7 @@ import com.google.gson.Gson
      * @return
      */
      boolean containsChromosome(String name) {
-        return chromosoms.containsKey(name)
+        return chromosomes.containsKey(name)
     }
 
     void putChromosome(String key, ReferenceChromosome chr) {

@@ -58,9 +58,9 @@ import net.sf.samtools.*
         }
         CoverageQc qc = new CoverageQc(args[0])
         qc.setResults(new File(args[1]))
-        qc.setMinAlignedRecordLength(new Integer(args[2]))
-        qc.setMinMeanBaseQuality(new Integer(args[3]))
-        qc.setMappingQuality(new Integer(args[4]))
+        qc.minAlignedRecordLength = args[2] as int
+        qc.minMeanBaseQuality = args[3] as int
+        qc.mappingQuality = args[4] as int
         qc.countCoverage()
         qc.results << qc.genome.genome2JSON()
     }
