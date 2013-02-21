@@ -69,6 +69,12 @@ class FilesCompletenessService {
                     segment.save(flush: true)
                 }
             }
+            // go back to processing state in case the state was files_missing
+            // and files are now in the right location
+            if (allExists && segment.filesStatus == RunSegment.FilesStatus.FILES_MISSING) {
+                segment.filesStatus = RunSegment.FilesStatus.PROCESSING_INSTALLATION
+                segment.save(flush: true)
+            }
         }
         return allExists
     }
