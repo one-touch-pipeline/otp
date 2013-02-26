@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.ngsdata.Project
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.access.prepost.PreAuthorize
 
 class ProcessingOptionService {
 
@@ -16,6 +17,7 @@ class ProcessingOptionService {
      */
     def springSecurityService
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public ProcessingOption createOrUpdate(String name, String type, Project project, String value, String comment) {
         ProcessingOption option = findStrict(name, type, project)
         if (option) {

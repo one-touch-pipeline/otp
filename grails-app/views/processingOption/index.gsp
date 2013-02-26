@@ -9,6 +9,9 @@
 <body>
     <div class="body">
         <h1><g:message code="processingOption.title"/></h1>
+        <div class="linkButton">
+            <button class="buttons"><g:message code="processingOption.list.newProcessingOption"/></button>
+        </div>
         <table id="optionTable">
             <thead>
                 <tr>

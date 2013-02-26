@@ -44,6 +44,10 @@ class ProjectService {
         return Project.get(id)
     }
 
+    public Project getProjectByName(String name) {
+        return Project.findByName(name)
+    }
+
     /**
      * Creates a Project and grants permissions to Groups which have read/write privileges for Projects.
      * @param name
