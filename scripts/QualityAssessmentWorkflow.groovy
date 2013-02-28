@@ -9,7 +9,7 @@ plan("QualityAssessmentWorkflow") {
     job("executeBamFileQaAnalysisWatchdog", "myPBSWatchdogJob") {
         inputParameter("__pbsIds", "executeBamFileQaAnalysis", "__pbsIds")
     }
-    job("qaOutputFileValidation", "qaOutopuFileValidationJob")
+    job("qaOutputFileValidation", "qaOutputFileValidationJob")
     job("parseQaStatistics", "parseQaStatisticsJob")
     job("createInsertSizePlot","createInsertSizePlotJob")
     job("insertSizePlotValidation", "insertSizePlotValidationJob")

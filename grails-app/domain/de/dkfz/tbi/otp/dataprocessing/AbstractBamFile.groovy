@@ -7,17 +7,19 @@ class AbstractBamFile {
         RMDUP
     }
 
-    enum StatsFileStatus {
-        NOT_EXISTING,
-        EXISTING,
-        UPLOADED
+    enum QaProcessingStatus {
+        UNKNOWN,
+        NOT_STARTED,
+        IN_PROGRESS,
+        FINISHED
     }
 
     BamType type = null
     boolean hasIndexFile = false
-    StatsFileStatus flagstats = StatsFileStatus.NOT_EXISTING
-    StatsFileStatus coverageStats = StatsFileStatus.NOT_EXISTING
-    StatsFileStatus insertSizeStats = StatsFileStatus.NOT_EXISTING
+    boolean hasCoveragePlot = false
+    boolean hasInsertSizePlot = false
+
+    QaProcessingStatus qualityAssessmentStatus = QaProcessingStatus.UNKNOWN
 
     double insertSizeMean
     double insertSizeRMS

@@ -1,0 +1,47 @@
+package de.dkfz.tbi.otp.job.jobs.qualityAssessment
+
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.plan.StartJobDefinition
+import de.dkfz.tbi.otp.job.processing.*
+import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
+import org.springframework.beans.factory.annotation.Autowired
+
+@Component("qualityAssessmentStartJob")
+@Scope("singleton")
+class QualityAssessmentStartJob extends AbstractStartJobImpl {
+
+    @Autowired
+    QualityAssessmentProcessingService qualityAssessmentProcessingService
+
+    @Autowired
+    ProcessingOptionService optionService
+
+    final int MAX_RUNNING = 4
+
+    @Scheduled(fixedRate=10000l)
+    void execute() {
+        if (!hasFreeSlot()) {
+            return
+        }
+        AbstractBamFile abstractBamFile = qualityAssessmentProcessingService.bamFileReadyForQa()
+        if (abstractBamFile) {
+            log.debug "Creating alignment quality assurance process for ${abstractBamFile}"
+            qualityAssessmentProcessingService.setQaInProcessing(abstractBamFile)
+            createProcess(new ProcessParameter(value: abstractBamFile.id.toString(), className: abstractBamFile.class.name))
+        }
+    }
+
+    private boolean hasFreeSlot() {
+        JobExecutionPlan jep = getExecutionPlan()
+        if (!jep || !jep.enabled) {
+            return false
+        }
+        int n = Process.countByFinishedAndJobExecutionPlan(false, jep)
+        long maxRunning = optionService.findOptionAsNumber("numberOfJobs", "QualityAssessmentWorkflow", null, MAX_RUNNING)
+        return (n < maxRunning)
+    }
+}
