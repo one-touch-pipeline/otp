@@ -113,6 +113,8 @@ class OtpTagLib {
                 return "/templates/editorSwitchDropDown"
             case "newValue":
                 return "/templates/editorSwitchNewValue"
+            case "newFreeTextValue":
+                return "/templates/editorSwitchNewFreeTextValue"
             case "sampleIdentifier":
                 return "/templates/editSampleIdentifiers"
             default:

@@ -43,6 +43,14 @@ $("div.edit-switch-new-value p.edit-switch-new-value-label button.insert").click
     });
 });
 
+$("div.edit-switch-new-free-text-value p.edit-switch-new-free-text-value-label button.insert").click(function () {
+    "use strict";
+    var outerContainer;
+    outerContainer = $(this).parent().parent();
+    $("p.edit-switch-new-free-text-value-editor", outerContainer).show();
+    $("p.edit-switch-new-free-text-value-label", outerContainer).hide();
+});
+
 /*jslint unparam: true */
 $("div.edit-switch p.edit-switch-editor button.save").click(function () {
     "use strict";
@@ -124,6 +132,35 @@ $("div.edit-switch-new-value p.edit-switch-new-value-editor button.save").click(
     window.setTimeout('location.reload()', 300); //reloads page after 0.3 seconds
 });
 
+/*jslint unparam: true */
+$("div.edit-switch-new-free-text-value p.edit-switch-new-free-text-value-editor button.save").click(function () {
+    "use strict";
+    var container, outerContainer;
+    container = $(this).parent();
+    outerContainer = container.parent();
+    $.ajax({
+        url: $("input:hidden[name=target]", container).val(),
+        dataType: 'json',
+        data: {value: $("input:text[name=value]", container).val()},
+        success: function (data) {
+            if (data.success) {
+                $.otp.infoMessage($.i18n.prop("editorswitch.notification.success"));
+                $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val());
+            } else {
+                $.otp.warningMessage(data.error);
+                $("input:text[name=value]", container).val($("p.edit-switch-new-free-text-value-label span", outerContainer).text());
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            $.otp.warningMessage($.i18n.prop("editorswitch.notification.error", textStatus, errorThrown));
+            $("input:text[name=value]", container).val($("p.edit-switch-new-free-text-value-label span", outerContainer).text());
+        }
+    });
+    $("p.edit-switch-new-free-text-value-editor", outerContainer).hide();
+    $("p.edit-switch-new-free-text-value-label", outerContainer).show();
+    window.setTimeout('location.reload()', 300); //reloads page after 0.3 seconds
+});
+
 $("div.edit-switch p.edit-switch-editor button.cancel").click(function () {
     "use strict";
     var outerContainer = $(this).parent().parent();
@@ -142,4 +179,10 @@ $("div.edit-switch-new-value p.edit-switch-new-value-editor button.cancel").clic
     var outerContainer = $(this).parent().parent();
     $("p.edit-switch-new-value-editor", outerContainer).hide();
     $("p.edit-switch-new-value-label", outerContainer).show();
+});
+$("div.edit-switch-new-free-text-value p.edit-switch-new-free-text-value-editor button.cancel").click(function () {
+    "use strict";
+    var outerContainer = $(this).parent().parent();
+    $("p.edit-switch-new-free-text-value-editor", outerContainer).hide();
+    $("p.edit-switch-new-free-text-value-label", outerContainer).show();
 });
