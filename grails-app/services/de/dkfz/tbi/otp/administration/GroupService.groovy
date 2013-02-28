@@ -63,6 +63,20 @@ class GroupService {
         return groups
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    Map<Group, List<User>> usersByGroup() {
+        List<Group> groups = availableGroups()
+        def groupUsers = [:]
+        groups.each { Group group ->
+            List users = []
+            UserRole.findAllByRole(group.role).collect { it.user }.each { User user ->
+                users.add(user)
+            }
+            groupUsers.put(group, users)
+        }
+        return groupUsers
+    }
+
     /**
      * Creates a Group for the given GroupCommand if possible.
      * Together with the Group the corresponding Role is created and
