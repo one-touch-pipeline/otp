@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.job.jobs.qualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.*
-
 import org.springframework.beans.factory.annotation.Autowired
 
 class CreateQaOutputDirectoryJob extends AbstractJobImpl {
@@ -22,7 +21,7 @@ class CreateQaOutputDirectoryJob extends AbstractJobImpl {
         long processedBamFileId = Long.parseLong(getProcessParameterValue())
         ProcessedBamFile processedBamFile = ProcessedBamFile.get(processedBamFileId)
         String dir = processedBamFileQaFileService.directoryPath(processedBamFile)
-        Realm realm = configService.getRealmDataProcessing(processedBamFile.seqTrack.sample.individual.project)
+        Realm realm = configService.getRealmDataProcessing(processedBamFile.alignmentPass.seqTrack.sample.individual.project)
         execute(dir, realm)
     }
 

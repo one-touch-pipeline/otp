@@ -16,13 +16,14 @@ class AbstractBamFile {
 
     BamType type = null
     boolean hasIndexFile = false
-    boolean hasCoveragePlot = false
-    boolean hasInsertSizePlot = false
+    Boolean hasCoveragePlot = false
+    Boolean hasInsertSizePlot = false
 
     QaProcessingStatus qualityAssessmentStatus = QaProcessingStatus.UNKNOWN
 
-    double insertSizeMean
-    double insertSizeMedian
-    double insertSizeRMS
-    double insertSizeFractionAboveThreshold
+    static constraints = {
+        hasCoveragePlot(nullable: true)
+        hasInsertSizePlot(nullable: true)
+        qualityAssessmentStatus(nullable: true)
+    }
 }

@@ -29,7 +29,7 @@ class QualityAssessmentStartJob extends AbstractStartJobImpl {
         }
         ProcessedBamFile processedBamFile = qualityAssessmentProcessingService.bamFileReadyForQa()
         if (processedBamFile) {
-            log.debug "Creating alignment quality assurance process for ${abstractBamFile}"
+            log.debug "Creating alignment quality assessment process for ${processedBamFile}"
             qualityAssessmentProcessingService.setQaInProcessing(processedBamFile)
             createProcess(new ProcessParameter(value: processedBamFile.id.toString(), className: processedBamFile.class.name))
         }

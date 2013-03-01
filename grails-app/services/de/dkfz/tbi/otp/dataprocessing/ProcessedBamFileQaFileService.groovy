@@ -22,15 +22,27 @@ class ProcessedBamFileQaFileService {
         return "${dir}/${filename}"
     }
 
-    public String sortedcoverageDataFilePath(ProcessedBamFile bamFile) {
+    public String sortedCoverageDataFilePath(ProcessedBamFile bamFile) {
         String dir = directoryPath(bamFile)
-        String filename = coverageDataFileName(bamFile)
+        String filename = sortedCoverageDataFileName(bamFile)
         return "${dir}/${filename}"
     }
 
     public String coveragePlotFilePath(ProcessedBamFile bamFile) {
         String dir = directoryPath(bamFile)
         String filename = coveragePlotFileName(bamFile)
+        return "${dir}/${filename}"
+    }
+
+    public String insertSizeDataFilePath(ProcessedBamFile bamFile) {
+        String dir = directoryPath(bamFile)
+        String filename = insertSizeDataFileName(bamFile)
+        return "${dir}/${filename}"
+    }
+
+    public String insertSizePlotFilePath(ProcessedBamFile bamFile) {
+        String dir = directoryPath(bamFile)
+        String filename = insertSizePlotFileName(bamFile)
         return "${dir}/${filename}"
     }
 
@@ -44,13 +56,23 @@ class ProcessedBamFileQaFileService {
         return "${fileName}_coverage.tsv"
     }
 
-    public String sortedcoverageDataFileName(ProcessedBamFile bamFile) {
+    public String sortedCoverageDataFileName(ProcessedBamFile bamFile) {
         String fileName = processedBamFileService.getFileNameNoSuffix(bamFile)
-        return "${fileName}_sorted_coverage.tsv"
+        return "${fileName}_filtered_and_sorted_coverage.tsv"
     }
 
     public String coveragePlotFileName(ProcessedBamFile bamFile) {
         String fileName = processedBamFileService.getFileNameNoSuffix(bamFile)
         return "${fileName}_coveragePlot.png"
+    }
+
+    public String insertSizeDataFileName(ProcessedBamFile bamFile) {
+        String fileName = processedBamFileService.getFileNameNoSuffix(bamFile)
+        return "${fileName}_quality_distribution.hst"
+    }
+
+    public String insertSizePlotFileName(ProcessedBamFile bamFile) {
+        String fileName = processedBamFileService.getFileNameNoSuffix(bamFile)
+        return "${fileName}_insertSizePlot.png"
     }
 }

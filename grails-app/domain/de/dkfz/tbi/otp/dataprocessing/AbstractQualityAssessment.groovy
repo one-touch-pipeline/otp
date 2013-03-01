@@ -1,10 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-class AlignmentQualityPerChromosome {
+class AbstractQualityAssessment {
 
-    //0 will be all and 1-24 standard chromosome 1-22, X and Y 25 M and 26... unknown sequences
-    int chromosomeNumber
-    String chromosomeName
+//    //0 will be all and 1-24 standard chromosome 1-22, X and Y 25 M and 26... unknown sequences
+
     long referenceLength
     long duplicateR1
     long duplicateR2
@@ -35,6 +34,11 @@ class AlignmentQualityPerChromosome {
     long withMateMappedToDifferentChr
     long withMateMappedToDifferentChrMaq
     long singletons
+
+    double insertSizeMean
+    double insertSizeSD
+    double insertSizeMedian
+    double insertSizeRMS
 
     static belongsTo = [
         abstractBamFile: AbstractBamFile

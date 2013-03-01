@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 class ProcessedBamFileService {
 
     def processedAlignmentFileService
+    def configService
 
     public String getFilePath(ProcessedBamFile bamFile) {
         String dir = getDirectory(bamFile)
@@ -102,6 +103,11 @@ class ProcessedBamFileService {
         bamFile.hasIndexFile = true
         assertSave(bamFile)
         return true
+    }
+
+    public Realm realm(ProcessedBamFile processedBamFile) {
+        Project project = processedBamFile.alignmentPass.seqTrack.sample.individual.project
+        return configService.getRealmDataProcessing(project)
     }
 
     private def assertSave(def object) {
