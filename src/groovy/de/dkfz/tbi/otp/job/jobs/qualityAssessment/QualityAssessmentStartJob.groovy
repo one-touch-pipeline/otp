@@ -27,11 +27,11 @@ class QualityAssessmentStartJob extends AbstractStartJobImpl {
         if (!hasFreeSlot()) {
             return
         }
-        AbstractBamFile abstractBamFile = qualityAssessmentProcessingService.bamFileReadyForQa()
-        if (abstractBamFile) {
+        ProcessedBamFile processedBamFile = qualityAssessmentProcessingService.bamFileReadyForQa()
+        if (processedBamFile) {
             log.debug "Creating alignment quality assurance process for ${abstractBamFile}"
-            qualityAssessmentProcessingService.setQaInProcessing(abstractBamFile)
-            createProcess(new ProcessParameter(value: abstractBamFile.id.toString(), className: abstractBamFile.class.name))
+            qualityAssessmentProcessingService.setQaInProcessing(processedBamFile)
+            createProcess(new ProcessParameter(value: processedBamFile.id.toString(), className: processedBamFile.class.name))
         }
     }
 

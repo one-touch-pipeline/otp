@@ -4,12 +4,12 @@ import de.dkfz.tbi.otp.ngsdata.SavingException
 
 class QualityAssessmentProcessingService {
 
-    AbstractBamFile bamFileReadyForQa() {
+    ProcessedBamFile bamFileReadyForQa() {
         def status = AbstractBamFile.QaProcessingStatus.NOT_STARTED
-        return AbstractBamFile.findByQualityAssessmentStatus(status)
+        return ProcessedBamFile.findByQualityAssessmentStatus(status)
     }
 
-    void setQaInProcessing(AbstractBamFile bamFile) {
+    void setQaInProcessing(ProcessedBamFile bamFile) {
         def status = AbstractBamFile.QaProcessingStatus.IN_PROGRESS
         bamFile.qualityAssessmentStatus = status
         safeSave(bamFile)
