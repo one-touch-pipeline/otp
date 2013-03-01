@@ -2,6 +2,11 @@ package de.dkfz.tbi.otp.ngsdata
 
 import groovy.xml.MarkupBuilder
 import de.dkfz.tbi.otp.job.processing.ProcessingException
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.access.prepost.PostAuthorize
+import org.springframework.security.acls.domain.BasePermission
+import org.springframework.security.core.userdetails.UserDetails
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 
 class SeqTrackService {
 
@@ -18,6 +23,10 @@ class SeqTrackService {
      * Required for exporting the view by pid path of a datafile
      */
     def lsdfFilesService
+    /**
+     * Dependency Injection of Spring Security Service.
+     */
+    def springSecurityService
 
     /**
      * Retrieves the Sequences matching the given filtering the user has access to.
@@ -636,5 +645,115 @@ AND entry.value = :value
             return entry.value as long
         }
         return 0
+    }
+
+    @PostAuthorize("(returnObject == null) or hasPermission(returnObject.sample.individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
+    public SeqTrack getSeqTrack(String identifier) {
+        if (!identifier) {
+            return null
+        }
+        SeqTrack seqTrack = null
+        if (identifier.isLong()) {
+            seqTrack = SeqTrack.get(identifier as Long)
+        }
+        return seqTrack
+    }
+
+    /**
+     * Retrieves the previous SeqTrack by database id if present.
+     * @param seqTrack The SeqTrack for which the predecessor has to be retrieved
+     * @return Previous SeqTrack if present, otherwise null
+     **/
+    @PreAuthorize("(returnObject == null) or hasPermission(#seqTrack.sample.individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
+    SeqTrack previousSeqTrack(SeqTrack seqTrack) {
+        if (!seqTrack) {
+            return null
+        }
+        if (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR")) {
+            // shortcut for operator
+            return SeqTrack.findByIdLessThan(seqTrack.id, [sort: "id", order: "desc"])
+        }
+        // for normal users
+        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
+        if (springSecurityService.isLoggedIn()) {
+            // anonymous users do not have a principal
+            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
+        }
+        String query = '''
+SELECT MAX(i.id) FROM SeqTrack AS st, AclEntry AS ace
+JOIN st.sample AS s
+JOIN s.individual AS i
+JOIN i.project AS p
+JOIN ace.aclObjectIdentity AS aoi
+JOIN aoi.aclClass AS ac
+JOIN ace.sid AS sid
+WHERE
+aoi.objectId = p.id
+AND ac.className = :className
+AND sid.sid IN (:roles)
+AND ace.mask IN (:permissions)
+AND ace.granting = true
+AND i.id < :seqTrackId
+'''
+        Map params = [
+            className: Project.class.getName(),
+            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
+            roles: roles,
+            seqTrackId: seqTrack.id
+        ]
+        List result = Individual.executeQuery(query, params)
+        if (!result) {
+            return null
+        }
+        return SeqTrack.get(result[0] as Long)
+    }
+
+    /**
+     * Retrieves the next SeqTrack by database id if present.
+     * @param seqTrack The SeqTrack for which the successor has to be retrieved
+     * @return Next SeqTrack if present, otherwise null
+     **/
+    @PreAuthorize("(returnObject == null) or hasPermission(#seqTrack.sample.individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
+    SeqTrack nextSeqTrack(SeqTrack seqTrack) {
+        if (!seqTrack) {
+            return null
+        }
+        if (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR")) {
+            // shortcut for operator
+            return SeqTrack.findByIdGreaterThan(seqTrack.id, [sort: "id", order: "asc"])
+        }
+        // for normal users
+        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
+        if (springSecurityService.isLoggedIn()) {
+            // anonymous users do not have a principal
+            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
+        }
+        String query = '''
+SELECT MIN(i.id) FROM SeqTrack AS st, AclEntry AS ace
+JOIN st.sample AS s
+JOIN s.individual AS i
+JOIN i.project AS p
+JOIN ace.aclObjectIdentity AS aoi
+JOIN aoi.aclClass AS ac
+JOIN ace.sid AS sid
+WHERE
+aoi.objectId = p.id
+AND ac.className = :className
+AND sid.sid IN (:roles)
+AND ace.mask IN (:permissions)
+AND ace.granting = true
+AND i.id > :seqTrackId
+'''
+        Map params = [
+            className: Project.class.getName(),
+            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
+            roles: roles,
+            seqTrackId: seqTrack.id
+        ]
+        List result = SeqTrack.executeQuery(query, params)
+        if (!result) {
+            return null
+        }
+        return SeqTrack.get(result[0] as Long)
     }
 }
