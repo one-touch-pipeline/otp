@@ -82,7 +82,7 @@
 
         <div class="tableBlock">
             <h3>
-                <g:link controller="run" action="display" id="${run}">${run}</g:link>
+                <g:link controller="run" action="show" id="${run}">${run}</g:link>
             </h3>
             <table>
                 <tbody>
