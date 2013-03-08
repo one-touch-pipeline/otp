@@ -115,7 +115,7 @@ class MetaDataValidationService {
             return true
         }
         List<String> allowedFillers = ["n/a", "N/A"]
-        if (allowedFillers.contains(value.contains)) {
+        if (allowedFillers.contains(value)) {
             return true // essentially shall be false
         }
         return false
