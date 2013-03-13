@@ -1,17 +1,15 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-class ProcessedBamFile extends AbstractBamFile {
+class ProcessedBamFile extends AbstractFileSystemBamFile {
 
-    boolean fileExists
-    Date dateCreated = new Date()
-    Date dateFromFileSystem
-    long fileSize = -1
+    enum MergingBlock {
+        NOT_STARTED,
+        IN_PROGRESS
+    }
+
+    MergingBlock mergingBlock = MergingBlock.NOT_STARTED
 
     static belongsTo = [
         alignmentPass: AlignmentPass
     ]
-
-    static constraints = {
-        dateFromFileSystem(nullable: true)
-    }
 }

@@ -1,5 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import static org.springframework.util.Assert.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
+import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
 
 class ProcessedBamFileService {
@@ -45,6 +48,9 @@ class ProcessedBamFileService {
                 break
             case AbstractBamFile.BamType.RMDUP:
                 suffix = ".sorted.rmdup"
+                break
+            case AbstractBamFile.BamType.MDUP:
+                suffix = ".sorted.mdup"
                 break
         }
         return "${sampleType}_${runName}_s_${lane}_${layout}${suffix}"
@@ -122,6 +128,41 @@ class ProcessedBamFileService {
         return processedBamFile.alignmentPass.seqTrack.seqType
     }
 
+    /**
+     * @return the first available {@link ProcessedBamFile}, which needs to be merged and was sorted in the alignment workflow
+     */
+    ProcessedBamFile processedBamFileNeedsProcessing() {
+        ProcessedBamFile processedBamFile = ProcessedBamFile.findByStatusAndTypeAndWithdrawn(State.NEEDS_PROCESSING, BamType.SORTED, false)
+        return processedBamFile
+    }
+
+    /**
+     * @param bamFile, which is in progress to be assigned to a {@link MergingSet}
+     */
+    void blockedForAssigningToMergingSet(ProcessedBamFile bamFile) {
+        notNull(bamFile, "the input bam file for the method blockedForAssigningToMergingSet is null")
+        bamFile.status = State.INPROGRESS
+        assertSave(bamFile)
+    }
+
+    /**
+     * @param bamFile, which was assigned to a {@link MergingSet}
+     */
+    void assignedToMergingSet(ProcessedBamFile bamFile) {
+        notNull(bamFile, "the input bam file for the method assignedToMergingSet is null")
+        bamFile.status = State.PROCESSED
+        assertSave(bamFile)
+    }
+
+    /**
+     * @param bamFile, {@link ProcessedBamFile}, which shall be merged
+     * @return true, if the bamFile is not already assigned to a MergingSet, otherwise false
+     */
+    boolean notAssignedToMergingSet(ProcessedBamFile bamFile) {
+        notNull(bamFile, "the input bam file for the method notAssignedToMergingSet is null")
+        return !MergingSetAssignment.findByBamFile(bamFile)
+    }
+
     private def assertSave(def object) {
         object = object.save(flush: true)
         if (!object) {
@@ -129,4 +170,15 @@ class ProcessedBamFileService {
         }
         return object
     }
+
+    public List<ProcessedBamFile> findByMergingSet(MergingSet mergingSet) {
+        notNull(mergingSet, "The parameter merging set is not allowed to be null")
+        return MergingSetAssignment.findAllByMergingSet(mergingSet)*.bamFile
+    }
+
+    public List<ProcessedBamFile> findByProcessedMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {
+        notNull(processedMergedBamFile, "The parameter processedMergedBamFile is not allowed to be null")
+        return findByMergingSet(processedMergedBamFile.mergingPass.mergingSet)
+    }
+
 }

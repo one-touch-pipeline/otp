@@ -14,12 +14,15 @@ class AbstractBamFile {
         FINISHED
     }
 
+    enum QualityControl {NOT_DONE, PASSED, FAILED}
+
     BamType type = null
     boolean hasIndexFile = false
     Boolean hasCoveragePlot = false
     Boolean hasInsertSizePlot = false
 
     QaProcessingStatus qualityAssessmentStatus = QaProcessingStatus.UNKNOWN
+    QualityControl qualityControl = QualityControl.NOT_DONE
 
     static constraints = {
         hasCoveragePlot(nullable: true)
