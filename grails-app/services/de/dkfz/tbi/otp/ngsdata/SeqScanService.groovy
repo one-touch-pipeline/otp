@@ -1,6 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
+
 class SeqScanService {
+
+    // locks for operation that are not tread safe
+    private final Lock buildSeqScanLock = new ReentrantLock()
 
     /**
      *
@@ -16,14 +22,35 @@ class SeqScanService {
     }
 
     /**
-     *
      * Build one SeqScan based on parameters in
      * the input SeqTrack. If SeqTrack is already used in other
-     * SeqScan no new SeqScan will be created
+     * SeqScan no new SeqScan will be created.
+     *
+     * Its prove synchronizing multiple {@link Thread}s for the helper
+     * {@link #buildSeqScanPrivate(SeqTrack)}
      *
      * @param seqTrack - new Sequencing Track
      */
     void buildSeqScan(SeqTrack seqTrack) {
+        buildSeqScanLock.lock()
+        try {
+            buildSeqScanPrivate(seqTrack)
+        } finally {
+            buildSeqScanLock.unlock()
+        }
+    }
+
+    /**
+     * Build one SeqScan based on parameters in
+     * the input SeqTrack. If SeqTrack is already used in other
+     * SeqScan no new SeqScan will be created.
+     *
+     * This method should never used directly, but only about
+     * {@link #buildSeqScan(SeqTrack)} for synchronizing multiple {@link Thread}s
+     *
+     * @param seqTrack - new Sequencing Track
+     */
+    private void buildSeqScanPrivate(SeqTrack seqTrack) {
         // maybe track already consumed
         if (MergingAssignment.countBySeqTrack(seqTrack) > 0) {
             log.debug("seqTrack ${seqTrack} already used")
@@ -83,12 +110,25 @@ class SeqScanService {
     }
 
     /**
-     *
-     * @param tracks
-     * @param alignParams
-     * @return
+     * Its prove synchronizing multiple {@link Thread}s for the helper
+     * {@link #buildSeqScanPrivate(SeqTrack)}
      */
     SeqScan buildSeqScan(List<SeqTrack> tracks, AlignmentParams alignParams) {
+        buildSeqScanLock.lock()
+        try {
+            return buildSeqScanPrivate(tracks, alignParams)
+        } finally {
+            buildSeqScanLock.unlock()
+        }
+    }
+
+    /**
+     * This method should never used directly, but only about
+     * {@link #buildSeqScan(List, AlignmentParams)} for synchronizing multiple {@link Thread}s
+     *
+     * @param seqTrack - new Sequencing Track
+     */
+    SeqScan buildSeqScanPrivate(List<SeqTrack> tracks, AlignmentParams alignParams) {
         // take parameters
         SeqTrack seqTrack = tracks.get(0)
         Sample sample = seqTrack.sample
