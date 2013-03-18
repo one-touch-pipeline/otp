@@ -54,6 +54,10 @@ class MergingService {
     }
     */
 
+    void discoverMergedBams(long indId) {
+        discoverMergedBams(Individual.get(indId))
+    }
+
     /**
      *
      * This function discovers all files in a directory for

@@ -24,10 +24,10 @@ class MergedBamDiscoveryWorkkflow extends AbstractStartJobImpl  {
         }
         println "Discovering merged bam-files"
         println getExecutionPlan()
-        List<Individual> inds = Individual.list()
-        for(Individual ind in inds) {
-            println ind
-            mergingService.discoverMergedBams(ind)
+        List<Long> indIds = Individual.list().collect { it.id }
+        for(long indId in indIds) {
+            println indId
+            mergingService.discoverMergedBams(indId)
         }
     }
 }
