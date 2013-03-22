@@ -50,7 +50,7 @@ class UserAdministrationController {
             render cmd as JSON
             return
         }
-        def data = [success: true, user: userService.createUser(cmd).sanitizedUser()]
+        def data = [success: true, user: userService.createUser(cmd).sanitizedUserMap()]
         render data as JSON
     }
 

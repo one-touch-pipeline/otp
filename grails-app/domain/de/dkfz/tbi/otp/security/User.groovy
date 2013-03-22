@@ -56,4 +56,12 @@ class User {
     User sanitizedUser() {
         return new User(id: this.id, username: this.username, jabberId: this.jabberId, email: this.email)
     }
+
+    /**
+     *
+     * @return Map with information about User without any security relevant information.
+     */
+    Map sanitizedUserMap() {
+        return [id: this.id, username: this.username, jabberId: this.jabberId, email: this.email]
+    }
 }
