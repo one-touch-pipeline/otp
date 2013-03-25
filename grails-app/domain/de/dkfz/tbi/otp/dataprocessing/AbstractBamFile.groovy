@@ -22,5 +22,7 @@ class AbstractBamFile {
     QaProcessingStatus qualityAssessmentStatus = QaProcessingStatus.UNKNOWN
 
     double insertSizeMean
+    double insertSizeMedian
     double insertSizeRMS
+    double insertSizeFractionAboveThreshold
 }
