@@ -259,6 +259,7 @@ if ((otpConfig.otp.jabber.enabled instanceof ConfigObject) || !Boolean.parseBool
 grails.plugins.springsecurity.controllerAnnotations.staticRules = [
         "/grails-errorhandler/**": ['IS_AUTHENTICATED_ANONYMOUSLY'],
         "/seqTrackDataProvider/**": ['IS_AUTHENTICATED_ANONYMOUSLY'],
+        "/fastqFilePathDataProvider/**": ['IS_AUTHENTICATED_ANONYMOUSLY'],
         "/login/**":             ['IS_AUTHENTICATED_ANONYMOUSLY'],
         "/css/**":               ["permitAll"],
         "/images/**":            ["permitAll"],
