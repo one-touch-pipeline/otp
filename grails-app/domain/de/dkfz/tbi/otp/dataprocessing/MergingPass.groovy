@@ -15,4 +15,9 @@ class MergingPass {
 	static constraints = {
 		description(nullable: true)
 	}
+
+    public String getDirectory() {
+        return "pass${identifier}"
+    }
+
 }

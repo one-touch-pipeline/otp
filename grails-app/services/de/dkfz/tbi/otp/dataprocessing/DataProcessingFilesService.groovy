@@ -9,6 +9,7 @@ class DataProcessingFilesService {
     public enum OutputDirectories {
         BASE,
         ALIGNMENT,
+        MERGING,
         COVERAGE,
         FASTX_QC,
         FLAGSTATS,

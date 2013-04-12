@@ -1,12 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.util.Assert
 
-import grails.gorm.DetachedCriteria;
+import grails.gorm.DetachedCriteria
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.*
-
 
 class MergingSetService {
 
@@ -21,7 +20,7 @@ class MergingSetService {
 
     private final String getByBamFilesList = "select ma.mergingSet from MergingSetAssigment ma group by ma.mergingSet having ma.bamFile in (:bamFiles) and count(ma.bamFile) == :count" // TODO: to be proved
 
-    void createMergingSet(long bamFileId) {
+    public void createMergingSet(long bamFileId) {
         Assert.notNull(bamFileId)
         ProcessedBamFile bamFile = ProcessedBamFile.getById(bamFileId)
         Assert.notNull(bamFile) // really exists in the db
@@ -29,7 +28,7 @@ class MergingSetService {
         Assert.isTrue(processedBamFileService.isValid4Merging(bamFile))
 
         mergingCriteriaService.getCriterias(bamFile).each {criteria ->
-            Sample sample = bamFile.alignmentPass.seqTrack.sample;
+            Sample sample = bamFile.alignmentPass.seqTrack.sample
             MergingWorkPackage workPackage = MergingWorkPackage.findBySampleAndMergingCriteria(sample, criteria)
             if (!workPackage) {
                 workPackage = mergingWorkPackageService.createWorkPackge(sample, criteria)
@@ -43,7 +42,7 @@ class MergingSetService {
      * creates {@link MergingSet} for the given list of
      * {@link ProcessedBamFile}s if such {@link MergingSet} does not exists
      */
-    void createMergingSet(List<ProcessedBamFile> bamFiles2Merge, MergingWorkPackage workPackage) {
+    public void createMergingSet(List<ProcessedBamFile> bamFiles2Merge, MergingWorkPackage workPackage) {
         Assert.notEmpty(bamFiles2Merge)
         Assert.notNull(workPackage)
         MergingSet existingMergingSet = MergingSetAssignment.find(getByBamFilesList) // TODO: apply params
@@ -65,8 +64,8 @@ class MergingSetService {
     Long getNextIdentifier(MergingWorkPackage workPackage) {
         MergingSet.countByMergingWorkPackage(workPackage)
     }
-    
-        private MergingSet assertSave(MergingSet mergingSet) {
+
+    private MergingSet assertSave(MergingSet mergingSet) {
         if (!mergingCriteriaService.validateBamFiles(mergingSet)) {
             throw new SavingException(mergingSet.toString())
         }
@@ -79,4 +78,19 @@ class MergingSetService {
         }
         return object
     }
+
+    MergingSet getNextMergingSet() {
+        return MergingSet.findByStatus(MergingSet.State.DECLARED)
+    }
+
+    void blockForMerging(MergingSet mergingSet) {
+        mergingSet.status = MergingSet.State.INPROGRESS
+        assertObjectSave(mergingSet)
+    }
+
+    public void mergingSetFinished(MergingSet mergingSet) {
+        mergingSet.status = MergingSet.State.PROCESSED
+        assertObjectSave(mergingPass)
+    }
+
 }

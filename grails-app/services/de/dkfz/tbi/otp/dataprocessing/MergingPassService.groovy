@@ -6,10 +6,20 @@ import de.dkfz.tbi.otp.job.processing.*
 
 class MergingPassService {
 
-    void create(MergingSet mergingSet) {
-        MergingPass mergingPass = new MergingPass(identifier: TODO, MergingSet: mergingSet)
-        assertSave(mergingPass)
-        log.debug("created a new mergingPass ${mergingPass} for mergingSet ${mergingSet}")
+    ConfigService configService
+
+    MergingSetService mergingSetService
+
+    MergingPass create() {
+        MergingSet mergingSet = mergingSetService.getNextMergingSet()
+        if (mergingSet) {
+            int pass = MergingPass.countByMergingSet(mergingSet)
+            MergingPass mergingPass = new MergingPass(identifier: pass, mergingSet: mergingSet)
+            assertSave(mergingPass)
+            log.debug("created a new mergingPass ${mergingPass} for mergingSet ${mergingSet}")
+            return mergingPass
+        }
+        return null
     }
 
     // TODO: discuss to move this method to some generic service,
@@ -21,4 +31,19 @@ class MergingPassService {
         }
         return object
     }
+
+    public Realm realmForDataProcessing(MergingPass mergingPass) {
+        return configService.getRealmDataProcessing(project(mergingPass))
+    }
+
+    public Project project(MergingPass mergingPass) {
+        return mergingPass.mergingSet.mergingWorkPackage.sample.individual.project
+    }
+
+    public void mergingPassFinished(MergingPass mergingPass) {
+        mergingPass.status = MergingPass.State.SUCCEED
+        assertSave(mergingPass)
+        mergingSetService.mergingSetFinished(mergingPass.mergingSet)
+    }
+
 }
