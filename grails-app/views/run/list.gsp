@@ -8,21 +8,25 @@
     </head>
 <body>
     <div class="body">
-        <h1><g:message code="run.list.title"/></h1>
-        <otp:dataTable codes="${['run.list.name',
-            'run.list.seqCenter',
-            'run.list.storageRealm',
-            'run.list.dateCreated',
-            'run.list.dateExecuted',
-            'run.list.blacklisted',
-            'run.list.multipleSource',
-            'run.list.fastqcState'
-            ] }" id="runTable"/>
+        <div class="dataTable_searchContainer">
+            <g:message code="run.list.search"/>: <input type="text" class="dataTable_search" onKeyUp='$.otp.simpleSearch.search(this, "runTable");'>
+        </div>
+        <div class="dataTables_container" id="runTable_containe">
+            <otp:dataTable codes="${['run.list.name',
+                'run.list.seqCenter',
+                'run.list.storageRealm',
+                'run.list.dateCreated',
+                'run.list.dateExecuted',
+                'run.list.blacklisted',
+                'run.list.multipleSource',
+                'run.list.fastqcState'
+                ] }" id="runTable"/>
+        </div>
     </div>
     <r:script>
-$(function() {
-    $.otp.runList();
-});
+        $(function() {
+            $.otp.runList();
+        });
     </r:script>
 </body>
 </html>

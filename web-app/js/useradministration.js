@@ -33,10 +33,9 @@ $.otp.userAdministration.loadUserList = function () {
         bProcessing: true,
         bServerSide: true,
         bJQueryUI: false,
-        bScrollInfinite: true,
+        bPaginate: false,
         bScrollCollapse: true,
-        sScrollY: "600px",
-        sPaginationType: "full_numbers",
+        sScrollY: ($(window).height() - 440),
         sAjaxSource: $.otp.createLink({
             controller: 'userAdministration',
             action: 'dataTableSource'
@@ -83,6 +82,7 @@ $.otp.userAdministration.loadUserList = function () {
             return nRow;
         }
     });
+    $.otp.resizeBodyInit('#userTable', 180);
 };
 
 $.otp.userAdministration.editUser = {

@@ -39,9 +39,9 @@
         </table>
     </div>
     <r:script>
-$(function() {
-    $.otp.option.register();
-});
+        $(function() {
+            $.otp.option.register();
+        });
     </r:script>
 </body>
 </html>

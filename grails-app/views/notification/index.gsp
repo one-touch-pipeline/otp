@@ -1,12 +1,12 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-        <meta name="layout" content="main"/>
-        <title><g:message code="notification.administration.title"/></title>
-        <r:require module="jqueryDatatables"/>
-        <r:require module="jqueryUI"/>
-    </head>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="layout" content="main"/>
+    <title><g:message code="notification.administration.title"/></title>
+    <r:require module="jqueryDatatables"/>
+    <r:require module="jqueryUI"/>
+</head>
 <body>
     <div class="body">
         <div id="template-dialog" title="${g.message(code: 'notification.administration.template.title') }" style="display: none;">
@@ -19,13 +19,13 @@
             <p><g:message code="notification.administration.trigger.workflow"/></p>
             <div>
                 <select name="jobExecutionPlan">
-                <g:each in="${workflows}">
-                    <option value="${it.id}">${it.name}</option>
-                </g:each>
+                    <g:each in="${workflows}">
+                        <option value="${it.id}">${it.name}</option>
+                    </g:each>
                 </select>
             </div>
-            <div>
-                <p><input type="checkbox" name="definition"><g:message code="notification.administration.trigger.processingStep"/></p>
+             <div>
+                 <p><input type="checkbox" name="definition"><g:message code="notification.administration.trigger.processingStep"/></p>
                 <select name="jobDefinition" style="display: none;"></select>
             </div>
         </div>
@@ -49,12 +49,12 @@
                 'notification.administration.list.headers.trigger',
                 'notification.administration.list.headers.subject',
                 'notification.administration.list.headers.message'
-            ]}" id="notificationsTable"/>
+        ]}" id="notificationsTable"/>
     </div>
-<r:script>
-$(function() {
-    $.otp.notificationAdministration.setup();
-});
-</r:script>
+    <r:script>
+        $(function() {
+            $.otp.notificationAdministration.setup();
+        });
+    </r:script>
 </body>
 </html>

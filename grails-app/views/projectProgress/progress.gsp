@@ -6,9 +6,7 @@
 <title><g:message code="projectProgress.progress.title"/></title>
 </head>
 <body>
-  <div class="body">
-    <h1><g:message code="projectProgress.progress.runsFrom" args="${ [projects] }"/> <g:formatDate format="yyyy-MM-dd" date="${startDate}"/></h1>
-
+  <div class="body_grow">
     <g:form>
         <td><g:datePicker name="startDate" value="${startDate}" precision="day" years="${2010..Calendar.getInstance().get(Calendar.YEAR)}"/>
         <g:select
@@ -42,4 +40,9 @@
     </table>
   </div>
 </body>
+<r:script>
+    $(function() {
+        $.otp.growBodyInit(240);
+    });
+</r:script>
 </html>

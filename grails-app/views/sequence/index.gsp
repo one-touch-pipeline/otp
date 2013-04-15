@@ -1,14 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-<meta name="layout" content="main"/>
-<title><g:message code="sequence.title"/></title>
-<r:require module="jqueryDatatables"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="layout" content="main"/>
+    <title><g:message code="sequence.title"/></title>
+    <r:require module="jqueryDatatables"/>
 </head>
 <body>
     <div class="body">
-        <h1><g:message code="sequence.title"/></h1>
+        <div class="searchCriteriaTable_label"><g:message code="sequence.list.search"/>:</div>
         <table id="searchCriteriaTable">
             <tr>
                 <td>
@@ -52,13 +52,10 @@
                     'sequence.list.headers.date'
             ]}" id="sequenceTable"/>
     </div>
-    <div class="buttons" style="clear: both">
-        <a href="exportCsv" id="export-csv"><g:message code="sequence.list.export.csv"/></a>
-    </div>
     <r:script>
-$(function() {
-    $.otp.sequence.register();
-});
+        $(function() {
+            $.otp.sequence.register();
+        });
     </r:script>
 </body>
 </html>

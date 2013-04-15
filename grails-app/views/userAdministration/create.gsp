@@ -53,9 +53,9 @@
         </form>
     </div>
     <r:script>
-$(function () {
-    $.otp.userAdministration.create.register();
-});
+        $(function () {
+            $.otp.userAdministration.create.register();
+        });
     </r:script>
 </body>
 </html>

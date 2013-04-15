@@ -20,7 +20,6 @@ class OverviewMBController {
             List<String> text = new ArrayList<String>()
             int nRuns = Run.countBySeqCenter(center)
             int nNew = Run.countBySeqCenterAndDateExecutedGreaterThan(center, date)
-            println "${center} ${nRuns} ${nNew}"
             text << center
             text << nRuns
             text << nNew
@@ -42,7 +41,6 @@ class OverviewMBController {
             List<String> text = new ArrayList<String>()
             int nTracks = SeqTrack.countBySeqType(type)
             int nTracksNew = countNewSeqTracks(type)
-            println "${type} ${nTracks} ${nTracksNew}"
             text << type
             text << nTracks
             text << nTracksNew

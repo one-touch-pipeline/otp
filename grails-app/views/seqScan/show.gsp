@@ -6,7 +6,7 @@
 <title><g:message code="seqScan.title"/></title>
 </head>
 <body>
-  <div class="body">
+  <div class="body_grow">
     <h1><g:message code="seqScan.title"/></h1>
     <h2><g:message code="seqScan.general"/></h2>
 
@@ -134,4 +134,9 @@
     </div>
   </div>
 </body>
+<r:script>
+    $(function() {
+        $.otp.growBodyInit(240);
+    });
+</r:script>
 </html>

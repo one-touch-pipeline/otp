@@ -7,10 +7,8 @@
 </head>
 <body>
   <div class="body">
-     <h1><g:message code="runSubmit.title"/></h1>
-
     <g:form controller="runSubmit" action="submit">
-    <table>
+    <table class="runSubmit_table">
         <tr>
             <td class="myKey"><g:message code="runSubmit.runName"/></td>
             <td><g:textField name="runName"size="100"/></td>

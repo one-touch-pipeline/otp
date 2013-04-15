@@ -1,9 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-<meta name="layout" content="main"/>
-<title>Insert title here</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="layout" content="main"/>
+    <title>Insert title here</title>
 </head>
 <body>
     <div class="body">
@@ -14,7 +14,7 @@
                     <g:each var="line" in="${centers}">
                         <tr>
                             <g:each var="token" in="${line}">
-                                <td>${token}</td>
+                                <td class="overview_td">${token}</td>
                             </g:each>
                         </tr>
                     </g:each>
@@ -28,7 +28,7 @@
                     <g:each var="line" in="${types}">
                         <tr>
                             <g:each var="token" in="${line}">
-                                <td>${token}</td>
+                                <td class="overview_td"">${token}</td>
                             </g:each>
                         </tr>
                     </g:each>

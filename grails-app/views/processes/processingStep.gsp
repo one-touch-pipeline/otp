@@ -1,14 +1,13 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-<meta name="layout" content="main"/>
-<title><g:message code="processes.processingStep.title" args="${ [step.jobDefinition.name, step.id] }"/></title>
-
-<r:require module="workflows"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="layout" content="main"/>
+    <title><g:message code="processes.processingStep.title" args="${ [step.jobDefinition.name, step.id] }"/></title>
+    <r:require module="workflows"/>
 </head>
 <body>
-  <div class="body">
+    <div class="body_grow">
     <h1><g:message code="processes.processingStep.title" args="${ [step.jobDefinition.name, step.id] }"/></h1>
     <table>
         <thead></thead>
@@ -65,6 +64,7 @@
             'workflow.paramater.table.headers.value'
         ]}" id="inputParametersList"/>
     </div>
+    <br>
     <h2><g:message code="processes.processingStep.outputParameters"/></h2>
     <div>
     <otp:dataTable codes="${[
@@ -74,6 +74,7 @@
             'workflow.paramater.table.headers.value'
         ]}" id="outputParametersList"/>
     </div>
+    <br>
     <h2><g:message code="processes.processingStep.updates"/></h2>
     <div>
     <otp:dataTable codes="${[
@@ -90,4 +91,9 @@
     </r:script>
   </div>
 </body>
+<r:script>
+    $(function() {
+        $.otp.growBodyInit(355);
+    });
+</r:script>
 </html>

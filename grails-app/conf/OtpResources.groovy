@@ -19,6 +19,10 @@ modules = {
         dependsOn 'jquery'
         resource url: '/js/jquery/dataTables.js'
         resource url: '/css/jquery/demo_table.css'
+        resource url: '/js/jquery/tableTools/media/js/TableTools.js'
+        resource url: '/js/jquery/tableTools/media/js/ZeroClipboard.js'
+        resource url: '/js/jquery/tableTools/media/css/TableTools.css'
+        resource url: '/js/jquery/tableTools/media/css/TableTools_JUI.css'
     }
     jqueryValidation {
         dependsOn 'jquery'

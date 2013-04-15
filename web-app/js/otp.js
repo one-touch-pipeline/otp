@@ -164,6 +164,11 @@ $.otp.warningMessage = function (message) {
 $.otp.genericList = function (selector, showLink) {
     "use strict";
     $(selector).dataTable({
+        sDom: 'T<"clear">lfrtip',
+        oTableTools: {
+            sSwfPath : $.otp.contextPath + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
+            aButtons : ["csv", "xls", "pdf"]
+        },
         bFilter: true,
         bProcessing: true,
         bServerSide: true,
@@ -171,9 +176,9 @@ $.otp.genericList = function (selector, showLink) {
         bJQueryUI: false,
         bAutoWidth: false,
         sAjaxSource: 'dataTableSource',
-        bScrollInfinite: true,
+        bPaginate: false,
         bScrollCollapse: true,
-        sScrollY: "600px",
+        sScrollY: ($(window).height() - 440),
         bDeferRender: true,
         fnServerData: function (sSource, aoData, fnCallback) {
             $.ajax({
@@ -208,6 +213,7 @@ $.otp.genericList = function (selector, showLink) {
 $.otp.individualList = function () {
     "use strict";
     $.otp.genericList('#individualTable', "/individual/show/");
+    $.otp.resizeBodyInit('#individualTable', 180);
 };
 
 /**
@@ -216,6 +222,7 @@ $.otp.individualList = function () {
 $.otp.runList = function () {
     "use strict";
     $.otp.genericList('#runTable', "/run/show/");
+    $.otp.resizeBodyInit('#runTable', 180);
 };
 
 /*jslint unparam: true */
@@ -244,7 +251,12 @@ $.otp.sequence = {
     },
     register: function () {
         "use strict";
-        $("#sequenceTable").dataTable({
+            $("#sequenceTable").dataTable({
+            sDom: 'T<"clear">lfrtip',
+            oTableTools: {
+                sSwfPath : $.otp.contextPath + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
+                aButtons : ["csv", "xls", "pdf"]
+            },
             bFilter: false,
             bProcessing: true,
             bServerSide: true,
@@ -255,9 +267,8 @@ $.otp.sequence = {
                 controller: 'sequence',
                 action: 'dataTableSource'
             }),
-            bScrollInfinite: true,
             bScrollCollapse: true,
-            sScrollY: "600px",
+            iDisplayLength: Math.round(($('.body').height() - 210) / 23),
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
                 aoData.push({
@@ -270,7 +281,6 @@ $.otp.sequence = {
                     "url": sSource,
                     "data": aoData,
                     "error": function () {
-                        // clear the table
                         fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
                     },
                     "success": function (json) {
@@ -332,7 +342,6 @@ $.otp.sequence = {
                     fastqc.addClass("false");
                     fastqc.text("");
                 }
-
                 alignment = $("td:eq(9)", nRow);
                 alignment.attr("title", alignment.text());
                 if (alignment.text() === "FINISHED") {
@@ -341,7 +350,6 @@ $.otp.sequence = {
                     alignment.addClass("false");
                 }
                 alignment.text("");
-
                 origAlignment = $("td:eq(10)", nRow);
                 origAlignment.addClass(origAlignment.text());
                 origAlignment.text("");
@@ -441,9 +449,10 @@ $.otp.option = {
                 controller: 'processingOption',
                 action: 'datatable'
             }),
-            bScrollInfinite: true,
+            bScrollInfinite: false,
+            bPaginate: false,
             bScrollCollapse: true,
-            sScrollY: "600px",
+            sScrollY: ($(window).height() - 450),
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
                 $.ajax({
@@ -476,6 +485,7 @@ $.otp.option = {
                 });
             }
         });
+        $.otp.resizeBodyInit('#optionTable', 450);
         $(".linkButton").click(this.newProcessingOption);
     }
 };
@@ -521,7 +531,7 @@ $.otp.addIndividual = {
             var sample = { };
             sample.identifier = [];
             sample.type = ($("select option:selected", value).val());
-            $(value).next().find("input").each( function(idx, v) {
+            $(value).next().find("input").each(function(idx, v) {
                 sample.identifier.push($(v).val());
             });
             samplesArray.push(sample);
@@ -575,14 +585,16 @@ $.otp.addIndividual = {
 $.otp.createListView = function (selector, sourcePath, sortOrder, jsonCallback, columnDefs, postData) {
     "use strict";
     $(selector).dataTable({
-        sPaginationType: "full_numbers",
         bFilter: false,
         bJQueryUI: false,
+        bSort: true,
         bProcessing: true,
         bServerSide: true,
-        bScrollInfinite: true,
+        bAutoWidth: false,
         bScrollCollapse: true,
-        sScrollY: "600px",
+        sScrollY: ($('.body').height() - 140),
+        bPaginate: false,
+        bDeferRender: true,
         sAjaxSource: sourcePath,
         fnServerData: function (sSource, aoData, fnCallback) {
             var i;
@@ -612,6 +624,97 @@ $.otp.createListView = function (selector, sourcePath, sortOrder, jsonCallback, 
             $(selector).dataTable().fnDraw();
         }
     }, 10000);
+    $.otp.resizeBodyInit(selector, 140);
+};
+
+$.otp.workFlow = function (selector, sourcePath, sortOrder, jsonCallback, columnDefs, postData) {
+    "use strict";
+    $(selector).dataTable({
+        bFilter: false,
+        bJQueryUI: false,
+        bSort: true,
+        bProcessing: true,
+        bServerSide: true,
+        bAutoWidth: false,
+        bScrollCollapse: true,
+        sScrollY: ($('.body').height() - 240),
+        bPaginate: false,
+        bDeferRender: true,
+        sAjaxSource: sourcePath,
+        fnServerData: function (sSource, aoData, fnCallback) {
+            var i;
+            if (postData) {
+                for (i = 0; i < postData.length; i += 1) {
+                    aoData.push(postData[i]);
+                }
+            }
+            $.ajax({
+                "dataType": 'json',
+                "type": "POST",
+                "url": sSource,
+                "data": aoData,
+                "success": function (json) {
+                    if (jsonCallback) {
+                        jsonCallback(json);
+                    }
+                    fnCallback(json);
+                }
+            });
+        },
+        aoColumnDefs: columnDefs,
+        aaSorting: [[0, sortOrder ? "asc" : "desc"]]
+    });
+    window.setInterval(function () {
+        if ($.otp.autorefresh.enabled) {
+            $(selector).dataTable().fnDraw();
+        }
+    }, 10000);
+    $.otp.resizeBodyInit(selector, 240);
+};
+
+$.otp.registerStep = function (selector, sourcePath, sortOrder, jsonCallback, columnDefs, postData) {
+    "use strict";
+    $(selector).dataTable({
+        bFilter: false,
+        bJQueryUI: false,
+        bSort: true,
+        bProcessing: true,
+        bServerSide: true,
+        bAutoWidth: false,
+        bScrollCollapse: true,
+        sScrollY: ($('.body').height() - 230),
+        bPaginate: false,
+        bDeferRender: true,
+        sAjaxSource: sourcePath,
+        fnServerData: function (sSource, aoData, fnCallback) {
+            var i;
+            if (postData) {
+                for (i = 0; i < postData.length; i += 1) {
+                    aoData.push(postData[i]);
+                }
+            }
+            $.ajax({
+                "dataType": 'json',
+                "type": "POST",
+                "url": sSource,
+                "data": aoData,
+                "success": function (json) {
+                    if (jsonCallback) {
+                        jsonCallback(json);
+                    }
+                    fnCallback(json);
+                }
+            });
+        },
+        aoColumnDefs: columnDefs,
+        aaSorting: [[0, sortOrder ? "asc" : "desc"]]
+    });
+    window.setInterval(function () {
+        if ($.otp.autorefresh.enabled) {
+            $(selector).dataTable().fnDraw();
+        }
+    }, 10000);
+    $.otp.resizeBodyInit(selector, 230);
 };
 
 /**
@@ -671,9 +774,9 @@ $.otp.notificationAdministration = {
                 controller: 'notification',
                 action: 'dataTableSource'
             }),
-            bScrollInfinite: true,
+            bPaginate: false,
             bScrollCollapse: true,
-            sScrollY: "600px",
+            sScrollY: ($(window).height() - 410),
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
                 $.ajax({
@@ -734,7 +837,6 @@ $.otp.notificationAdministration = {
                             $.otp.notificationAdministration.notificationUpdate)
                             .error($.otp.notificationAdministration.errorHandler);
                 });
-
                 // set the medium select
                 cell = $('td:eq(2)', nRow);
                 selection = $("#mediumSelection-Protoype").clone();
@@ -754,7 +856,6 @@ $.otp.notificationAdministration = {
                             $.otp.notificationAdministration.notificationUpdate)
                             .error($.otp.notificationAdministration.errorHandler);
                 });
-
                 // add the trigger edit button
                 $('<button class="edit"></button>').appendTo($("td:eq(3)", nRow)).click(function () {
                     var cell, dialog, triggerId;
@@ -834,13 +935,13 @@ $.otp.notificationAdministration = {
                         }
                     });
                 });
-
                 // adjust the subject and message
                 $.otp.notificationAdministration.template($('td:eq(4)', nRow));
                 $.otp.notificationAdministration.template($('td:eq(5)', nRow));
                 return nRow;
             }
         });
+        $.otp.resizeBodyInit('#notificationsTable', 190);
     },
     /**
      * Creates options out of the jobs and appends them to the jobSelection.
@@ -1026,4 +1127,221 @@ $.otp.addProcessingOption = {
         "use strict";
         $("#add-processingOption-form").submit(this.submitProcessingOption);
     }
+};
+
+$.otp.simpleSearch = {
+    search: function (element, table) {
+        $('#' + table).dataTable().fnFilter($(element).val());
+    }
+}
+
+$.otp.highlight = function(path) {
+    var pathSplit = path.split("/");
+    if(pathSplit.length > 3){
+        var mode = "/" + pathSplit[1] + "/";
+        var element = new Array();
+        element["individual"] = "individual";
+        element["sequence"] = "sequence";
+        element["run"] = "runs";
+        element["processes"] = "processes";
+        element["overviewMB"] = "overview";
+        element["projectOverview"] = "overview";
+        element["projectProgress"] = "progress";
+        element["runSubmit"] = "submit";
+        element["userAdministration"] = "admin";
+        element["crashRecovery"] = "admin";
+        element["shutdown"] = "admin";
+        element["notification"] = "admin";
+        element["processingOption"] = "admin";
+        element["switchUser"] = "switch";
+        $('.menuContainer #' + element[pathSplit[2]] + ' a').attr('style', 'color: #fafafa;');
+    }
+    else{
+        $('.menuContainer #home a').attr('style', 'color: #fafafa;');
+    }
+}
+
+$.otp.projectOverviewTable = {
+        register: function () {
+            "use strict";
+            var oTable = $("#projectOverviewTable").dataTable({
+                sDom: 'T<"clear">lfrtip',
+                oTableTools: {
+                    sSwfPath : $.otp.contextPath + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
+                    aButtons : ["csv", "xls", "pdf"]
+                },
+                bFilter: true,
+                bProcessing: true,
+                bServerSide: false,
+                bSort: true,
+                bJQueryUI: false,
+                bAutoWidth: false,
+                sAjaxSource: $.otp.createLink({
+                    controller: 'projectOverview',
+                    action: 'dataTableSource'
+                }),
+                bScrollCollapse: true,
+                sScrollY: ($('.body').height() - 200),
+                bPaginate:false,
+                bDeferRender: true,
+                fnServerData: function (sSource, aoData, fnCallback) {
+                    aoData.push({
+                        name: "project",
+                        value: $('#project_select').val()
+                    });
+                    $.ajax({
+                        "dataType": 'json',
+                        "type": "POST",
+                        "url": sSource,
+                        "data": aoData,
+                        "error": function () {
+                            // clear the table
+                            fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
+                            oTable.fnSettings().oFeatures.bServerSide = false;
+                        },
+                        "success": function (json) {
+                            fnCallback(json);
+                            oTable.fnSettings().oFeatures.bServerSide = false;
+                        }
+                    });
+                }
+            });
+            $('#project_select').change(function(){
+                var oSettings = oTable.fnSettings();
+                console.log(oSettings);
+                oSettings.oFeatures.bServerSide = true;
+                oTable.fnDraw();
+            });
+            $("#searchCriteriaTable tr td:eq(0) select").change($.otp.projectOverviewTable.searchCriteriaChangeHandler);
+            $("#searchCriteriaTable tr td:eq(2) input[type=button]").click($.otp.projectOverviewTable.searchCriteriaAddRow);
+            $("#searchCriteriaTable tr td:eq(1) select").change($.otp.projectOverviewTable.updateSearchCriteria);
+            $("#searchCriteriaTable tr td:eq(1) input[type=text]").change($.otp.projectOverviewTable.updateSearchCriteria);
+            $("#searchCriteriaTable tr td:eq(1) input[type=text]").keydown($.otp.projectOverviewTable.updateSearchCriteria);
+            $('.overviewContainer').height($(window).height()-300);
+            $(window).resize(function(){
+                $('.overviewContainer').height($(window).height()-300);
+                $('#projectOverviewTable_wrapper .dataTables_scrollBody').height(($('.body').height()-200));
+            })
+        },
+        searchCriteriaChangeHandler: function () {
+            "use strict";
+            var tr = $(this).parent().parent();
+            $("td:eq(1) *", tr).hide();
+            $("td:eq(2) input", tr).hide();
+            if ($(this).val() !== "none") {
+                $("td select[name=" + $(this).val() + "]", tr).show();
+                $("td select[name=" + $(this).val() + "] option", tr).show();
+                $("td input[name=" + $(this).val() + "]", tr).show();
+                $("td:eq(2) input", tr).show();
+            } else {
+                if ($("tr", tr.parent()).size() > 1) {
+                    tr.detach();
+                }
+            }
+            $.otp.projectOverview.updateSearchCriteria();
+        },
+        searchCriteriaAddRow: function () {
+            "use strict";
+            var tr, cloned;
+            tr = $(this).parent().parent();
+            cloned = tr.clone();
+            $("td:eq(1) *", cloned).hide();
+            $("td:eq(2) input", cloned).hide();
+            $("td:eq(0) select", cloned).val("none");
+            cloned = cloned.appendTo($("#searchCriteriaTable"));
+            $("td:eq(0) select", cloned).change($.otp.projectOverviewTable.searchCriteriaChangeHandler);
+            $("td:eq(2) input[type=button]", cloned).click($.otp.projectOverviewTable.searchCriteriaAddRow);
+            $("td:eq(1) select", cloned).change($.otp.projectOverviewTable.updateSearchCriteria);
+            $("td:eq(1) input[type=text]", cloned).change($.otp.projectOverviewTable.updateSearchCriteria);
+            $("td:eq(1) input[type=text]", cloned).keydown($.otp.projectOverviewTable.updateSearchCriteria);
+        },
+        searchCriteria: function () {
+            "use strict";
+            var result = [];
+            $("#searchCriteriaTable tr").each(function (index, element) {
+                var selection = $("td:eq(0) select", element).val();
+                if (selection !== "none") {
+                    result.push({type: selection, value: $("td select[name=" + selection + "], td input[name=" + selection + "]", element).val()});
+                }
+            });
+            return result;
+        },
+        updateSearchCriteria: function () {
+            "use strict";
+            $("#sequenceTable").dataTable().fnDraw();
+            $("#export-csv").attr("href", $.otp.createLink({
+                controller: 'projectOverview',
+                action: 'exportCsv',
+                parameters: {
+                    project: $('#project_select').val()
+                }
+            }));
+        }
+}
+
+$.otp.createListViewProcessingStep = function (selector, sourcePath, sortOrder, jsonCallback, columnDefs, postData) {
+    "use strict";
+    $(selector).dataTable({
+        bFilter: false,
+        bJQueryUI: false,
+        bSort: true,
+        bProcessing: true,
+        bServerSide: true,
+        bAutoWidth: false,
+        bScrollCollapse: true,
+        bPaginate:false,
+        bDeferRender: true,
+        sAjaxSource: sourcePath,
+        fnServerData: function (sSource, aoData, fnCallback) {
+            var i;
+            if (postData) {
+                for (i = 0; i < postData.length; i += 1) {
+                    aoData.push(postData[i]);
+                }
+            }
+            $.ajax({
+                "dataType": 'json',
+                "type": "POST",
+                "url": sSource,
+                "data": aoData,
+                "success": function (json) {
+                    if (jsonCallback) {
+                        jsonCallback(json);
+                    }
+                    fnCallback(json);
+                }
+            });
+        },
+        aoColumnDefs: columnDefs,
+        aaSorting: [[0, sortOrder ? "asc" : "desc"]]
+    });
+    window.setInterval(function () {
+        if ($.otp.autorefresh.enabled) {
+            $(selector).dataTable().fnDraw();
+        }
+    }, 10000);
+};
+
+$.otp.resizeBodyInit = function (table, margin) {
+    $(window).resize(function(){
+        $(table + '_wrapper' + ' .dataTables_scrollBody').height(($('.body').height() - margin));
+    })
+}
+
+$.otp.growBodyInit = function(margin){
+    var grow_body_h = $('.body_grow').height();
+    if(grow_body_h > ($(window).height() - margin)){
+        $('body').attr('style','overflow-y:scroll');
+        $('.body_position').attr('style','margin-left:' + ((($(window).width() - $('.body_grow').width()) / 2) - 11) + 'px;');
+    }
+    $(window).resize(function(){
+        if(grow_body_h > ($(window).height() - margin)){
+            $('body').attr('style','overflow-y:scroll');
+            $('.body_position').attr('style','margin-left:' + ((($(window).width() - $('.body_grow').width()) / 2) - 11) + 'px;');
+        }
+        else{
+            $('body').attr('style','overflow-y:hidden');
+            $('.body_position').attr('style','margin-left:auto;');
+        }
+    });
 };

@@ -6,12 +6,14 @@
 <title>Server Shutdown</title>
 </head>
 <body>
-<!-- TODO: global info messages -->
-    <p style="display: none" id="shutdownInfo"></p>
-    <p>
-        <label for="shutdownReason">Reason for Shutdown:</label><input type="text" id="shutdownReason"/>
-        <button id="planShutdown">Plan Shutdown</button>
-    </p>
+    <div class="body">
+        <h1><g:message code="serverShutdown.title"/></h1>
+        <p style="display: none" id="shutdownInfo"></p>
+        <p>
+            <label for="shutdownReason">Reason for Shutdown:</label><input type="text" id="shutdownReason"/>
+            <button id="planShutdown">Plan Shutdown</button>
+        </p>
+    </div>
     <r:script>
     $("#planShutdown").click(function () {
         $.getJSON("${g.createLink(action: 'planShutdown')}", {reason: $("#shutdownReason").val()}, function (data) {

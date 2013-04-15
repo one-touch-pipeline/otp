@@ -6,7 +6,7 @@
 <title><g:message code="run.show.title"/></title>
 </head>
 <body>
-  <div class="body">
+  <div class="body_grow">
     <h1><g:message code="run.show.title"/></h1>
     <ul>
         <g:if test="${nextRun}">
@@ -153,4 +153,9 @@
     </div>
   </div>
 </body>
+<r:script>
+    $(function() {
+        $.otp.growBodyInit(240);
+    });
+</r:script>
 </html>

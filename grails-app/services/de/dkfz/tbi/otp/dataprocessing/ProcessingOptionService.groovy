@@ -100,19 +100,13 @@ class ProcessingOptionService {
 
     /**
      * Retrieves the ProcessingOption if a user has access to at least one Project.
-     * @param offset Offset in data
-     * @param max Maximum number of elements, capped at 100
      * @return List of matching ProcessingOption
      */
-    public List<ProcessingOption> listProcessingOptions(int offset, int max) {
+    public List<ProcessingOption> listProcessingOptions() {
         if (!projectService.projectsAvailable()) {
             return []
         }
-        max = Math.min(max, 100)
-        return ProcessingOption.withCriteria {
-            maxResults(max)
-            firstResult(offset)
-        }
+        return ProcessingOption.getAll()
     }
 
     /**

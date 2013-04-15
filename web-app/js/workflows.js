@@ -486,7 +486,7 @@ $.otp.workflows = {
      */
     registerProcesses: function (selector, planId, failed) {
         "use strict";
-        $.otp.createListView(selector, $.otp.createLink({
+        $.otp.workFlow(selector, $.otp.createLink({
             controller: 'processes',
             action: 'planData',
             id: planId,
@@ -613,7 +613,7 @@ $.otp.workflows = {
      */
     registerProcessingStep: function (selector, processId) {
         "use strict";
-        $.otp.createListView(selector, $.otp.createLink({
+        $.otp.registerStep(selector, $.otp.createLink({
             controller: 'processes',
             action: 'processData',
             id: processId + '/'
@@ -689,7 +689,7 @@ $.otp.workflows = {
             });
         });
         $("#hide-visualization").click(function () {
-            $("#plan-visualization").hide();
+            $("#process-visualization").hide();
             $("#show-visualization").show();
             $(this).hide();
         });
@@ -702,7 +702,7 @@ $.otp.workflows = {
          */
         processingStepUpdates: function (selector) {
             "use strict";
-            $.otp.createListView(selector, $.otp.createLink({
+            $.otp.createListViewProcessingStep(selector, $.otp.createLink({
                 controller: 'processes',
                 action: 'processingStepDate',
                 id: $.otp.workflows.processingStep.processingStepId + '/'
@@ -742,7 +742,7 @@ $.otp.workflows = {
          */
         parameters: function (selector, inputOrOutput) {
             "use strict";
-            $.otp.createListView(selector, $.otp.createLink({
+            $.otp.createListViewProcessingStep(selector, $.otp.createLink({
                 controller: 'processes',
                 action: 'parameterData',
                 id: $.otp.workflows.processingStep.processingStepId + '/'

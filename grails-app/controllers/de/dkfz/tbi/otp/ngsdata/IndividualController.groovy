@@ -54,8 +54,6 @@ class IndividualController {
     }
 
     def igvStart = {
-        println params
-        println flash
 
         // TODO: this code is crashy and cannot be protected
         List<SeqScan> scans = new ArrayList<SeqScan>()
@@ -66,12 +64,10 @@ class IndividualController {
             }
         }
         String url = igvSessionFileService.buildSessionFile(scans)
-        println "Redirecting: ${url}"
         redirect(url: url)
     }
 
     def igvDownload = {
-        println "Download"
         render "downloding ..."
     }
 
