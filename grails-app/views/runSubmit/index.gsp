@@ -13,7 +13,7 @@
     <table>
         <tr>
             <td class="myKey"><g:message code="runSubmit.runName"/></td>
-            <td><g:textField name="runName"size="30"/></td>
+            <td><g:textField name="runName"size="100"/></td>
         </tr>
         <tr>
             <td class="myKey"><g:message code="runSubmit.sequencingCenter"/></td>
@@ -25,7 +25,7 @@
         </tr>
         <tr>
             <td class="myKey"><g:message code="runSubmit.dataLocation"/></td>
-            <td><g:textField name="dataPath" size="80" /></td>
+            <td><g:textField name="dataPath" size="120" /></td>
         </tr>
         <tr>
              <td class="myKey"><g:message code="runSubmit.formatInitialData"/></td>
