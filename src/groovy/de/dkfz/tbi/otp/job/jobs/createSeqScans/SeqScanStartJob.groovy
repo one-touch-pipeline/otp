@@ -18,7 +18,23 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
     final String name = "seqScanWorkflow"
     final String hql = "FROM SeqTrack as track WHERE track.id not in (SELECT seqTrack.id from MergingAssignment)"
 
-    @Scheduled(fixedRate=1000l)
+    /*
+     * Use of FixedDalay to avoid the problem of invocation of the method
+     * multiple times parallel. With FixedRate the method can be executed by
+     * two thread parallel, because the execution time can take more then one
+     * second and therefore the next execution is already triggered before the
+     * first execution is finished.
+     * And if the second thread execute the numberOfRunningProcesses method in
+     * the hasOpenSlot method before the first thread has execute the
+     * createProcess method, the second thread pass the check, because the slot
+     * is still free. Only after createProcess has finished, the slot is not
+     * longer free, but at that time the second thread already has pass the
+     * check. And because the HQL query return the same SeqTrack, both threads
+     * create for the same seqTrack a process.
+     * Using of FixedDelay fix that problem, because the next execution is
+     * always after the previous execution has finished.
+     */
+    @Scheduled(fixedDelay=1000l)
     void execute() {
         if (!hasOpenSlots()) {
             return
