@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.job.processing
 import static org.junit.Assert.*
 import org.junit.*
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption;
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.Realm.OperationType
 
@@ -19,6 +20,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
             name: "DKFZ",
             env: "development",
             operationType: OperationType.DATA_MANAGEMENT,
+            cluster: Realm.Cluster.DKFZ,
             rootPath: "/",
             processingRootPath: "/test",
             programsRootPath: "/testPrograms",
@@ -27,7 +29,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
             port: 22,
             unixUser: grailsApplication.config.otp.pbs.ssh.unixUser,
             timeout: 100,
-            pbsOptions: ""
+            pbsOptions: "{-l: {nodes: '1:lsdf', walltime: '00:00:30'}}"
         )
     }
 
@@ -147,5 +149,30 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         String extractedPbsId_qstat = extractedPbsIds.get(0)
         // Assert if the two extracted pbs ids are equal
         assertEquals(extractedPbsId, extractedPbsId_qstat)
+
+        ProcessingOption processingOption = new ProcessingOption(
+            name: PbsOptionMergingService.PBS_PREFIX + "job",
+            type: Realm.Cluster.DKFZ.toString(),
+            value: "{-l: {walltime: '00:01:00'}}",
+            comment: 'comment'
+        )
+        assertNotNull(processingOption.save())
+        // Send script to pbs
+        response = executionService.executeJob(realm, script, "job")
+        // Extract pbs ids
+        extractedPbsIds = executionService.extractPbsIds(response)
+        assertNotNull(extractedPbsIds)
+        // Only one pbs id is set
+        extractedPbsId = extractedPbsIds.get(0)
+        // Make new pbs command to verify whether pbs job still is running
+        cmd = "qstat ${extractedPbsId}"
+        // Send verifying command with recent pbs id to pbs
+        check = executionService.executeCommand(realm, cmd)
+        extractedPbsIds = executionService.extractPbsIds(check)
+        assertNotNull(extractedPbsIds)
+        extractedPbsId_qstat = extractedPbsIds.get(0)
+        // Assert if the two extracted pbs ids are equal
+        assertEquals(extractedPbsId, extractedPbsId_qstat)
+
     }
 }

@@ -29,6 +29,8 @@ class ExecutionService {
     @SuppressWarnings("GrailsStatelessService")
     def configService
 
+    PbsOptionMergingService pbsOptionMergingService
+
     /**
      * Executes a command on a specified host
      *
@@ -47,17 +49,26 @@ class ExecutionService {
     }
 
     /**
-     * Executes a job on a specified host
+     * Executes a job on a specified host.
+     * It uses {@link PbsOptionMergingService#mergePbsOptions(Realm, String)}
+     * with the given realm and jobIdentifier to create the merged PBS options String to pass to qsub command.
+     * If a job key is given, a {@link ProcessingOption} for the cluster defined by the realm
+     * has to exist, otherwise a {@link NullPointerException} is thrown.
      *
      * @param realm The realm which identifies the host
      * @param text The script to be run a pbs system
+     * @param jobIdentifier the name of a job to take job-cluster specific parameters
      * @return what the server sends back
+     * @throws NullPointerException if a job identifier is provided, but no PBS option is defined for this
+     *          job identifier and the cluster ({@link Realm#cluster}) of the {@link Realm}
+     * @see PbsOptionMergingService#mergePbsOptions(Realm, String)
      */
-    public String executeJob(Realm realm, String text) {
+    public String executeJob(Realm realm, String text, String jobIdentifier = null) {
         if (!text) {
             throw new ProcessingException("No job text specified.")
         }
-        String command = "echo '${text}' | qsub " + realm.pbsOptions
+        String pbsOptions = pbsOptionMergingService.mergePbsOptions(realm, jobIdentifier)
+        String command = "echo '${text}' | qsub " + pbsOptions
         List<String> values = executeRemoteJob(realm, command)
         return concatResults(values)
     }
