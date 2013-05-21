@@ -4,6 +4,7 @@
     <meta name="layout" content="main"/>
     <title><g:message code="otp.welcome.title"/></title>
     <r:require module="lightbox"/>
+    <r:require module="graph"/>
 </head>
 <body>
     <div class="body">
@@ -22,11 +23,23 @@
             </table>
         </div>
         <br>
+        <div class="homeGraph">
+            <div style="float: left;">
+                <canvas id="projectCountPerDate" width="540" height="380">[No canvas support]</canvas>
+            </div>
+            <div style="float: right;">
+                <canvas id="laneCountPerDate" width="540" height="380">[No canvas support]</canvas>
+            </div>
+            <div style="float: left;">
+                <canvas id="projectCountPerSequenceTypePie" width="540" height="360">[No canvas support]</canvas>
+            </div>
+            <div style="float: right;">
+                <canvas id="projectCountPerSequenceTypeBar" width="540" height="440">[No canvas support]</canvas>
+            </div>
+        </div>
     </div>
     <r:script>
-        $(function() {
-            $.otp.resizeBodyInit_nTable(".homeTable", 20);
-        });
+        $.otp.graph.overview.init();
     </r:script>
 </body>
 </html>

@@ -9,7 +9,7 @@ class OverviewMBController {
     def index() {
 
         Calendar cal = Calendar.getInstance()
-        cal.set(2011, 11, 1)
+        cal.add(Calendar.MONTH, -6)
         Date date = cal.getTime()
 
         List stringCenters = new ArrayList()
@@ -51,7 +51,7 @@ class OverviewMBController {
 
     private int countNewSeqTracks(SeqType type) {
         Calendar cal = Calendar.getInstance()
-        cal.set(2011, 11, 1)
+        cal.add(Calendar.MONTH, -6)
         Date date = cal.getTime()
 
         int N = 0;

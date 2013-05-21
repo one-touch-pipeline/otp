@@ -25,4 +25,14 @@ class ProjectOverviewController {
         dataToRender.aaData = data
         render dataToRender as JSON
     }
+
+    JSON dataTableSourcePatientsAndSamplesGBCountPerProject(DataTableCommand cmd) {
+        Project project = projectService.getProjectByName(params.project)
+        Map dataToRender = cmd.dataToRender()
+        List data = projectOverviewService.patientsAndSamplesGBCountPerProject(project)
+        dataToRender.iTotalRecords = data.size()
+        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+        dataToRender.aaData = data
+        render dataToRender as JSON
+    }
 }

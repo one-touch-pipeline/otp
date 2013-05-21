@@ -1,6 +1,6 @@
 /*jslint browser: true, devel: true */
-var tableTools_button_options = [{"sExtends":"csv", "bFooter": false},{"sExtends":"xls","bFooter": false},{"sExtends":"pdf","bFooter": false}];
 /*global $, Graph */
+var tableTools_button_options = [{"sExtends":"csv", "bFooter": false},{"sExtends":"pdf","bFooter": false}];
 $.otp = {
     contextPath: $("head meta[name=contextPath]").attr("content"),
     /**
@@ -269,7 +269,6 @@ $.otp.sequence = {
                 action: 'dataTableSource'
             }),
             bScrollCollapse: true,
-            //iDisplayLength: 25,
             iDisplayLength: Math.round(($('.body').height() - 200) / 23),
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
@@ -640,7 +639,6 @@ $.otp.workFlow = function (selector, sourcePath, sortOrder, jsonCallback, column
         bAutoWidth: false,
         bScrollCollapse: true,
         sScrollY: ($('.body').height() - 240),
-        //bPaginate: false,
         bScrollInfinite: true,
         bDeferRender: true,
         sAjaxSource: sourcePath,
@@ -1144,7 +1142,7 @@ $.otp.highlight = function(path) {
         var mode = "/" + pathSplit[1] + "/";
         var element = new Array();
         $('.menuContainer #' + pathSplit[2] + ' a').attr('style', 'color: #fafafa;');
-        if(pathSplit[2] == "overviewMB" || pathSplit[2] == "projectOverview"){
+        if(pathSplit[2] == "overviewMB" || pathSplit[2] == "projectOverview" || pathSplit[2] == "projectStatistic"){
             $('.menuContainer #overview a:first').attr('style', 'color: #fafafa;');
         }
         else if(pathSplit[2] == "userAdministration" || pathSplit[2] == "group" || pathSplit[2] == "crashRecovery" || pathSplit[2] == "shutdown" || pathSplit[2] == "notification" || pathSplit[2] == "processingOption" || pathSplit[2] == "softwareTool"){
@@ -1157,7 +1155,7 @@ $.otp.highlight = function(path) {
 }
 
 $.otp.projectOverviewTable = {
-        register: function () {
+        registerProjectOverview: function () {
             "use strict";
             var oTable = $("#projectOverviewTable").dataTable({
                 sDom: 'T<"clear">lfrtip',
@@ -1176,7 +1174,7 @@ $.otp.projectOverviewTable = {
                     action: 'dataTableSource'
                 }),
                 bScrollCollapse: true,
-                sScrollY: ($('.body').height() - 200),
+                sScrollY: 200,
                 bPaginate:false,
                 bDeferRender: true,
                 fnServerData: function (sSource, aoData, fnCallback) {
@@ -1201,76 +1199,78 @@ $.otp.projectOverviewTable = {
                     });
                 }
             });
-            $('#project_select').change(function(){
-                var oSettings = oTable.fnSettings();
-                console.log(oSettings);
-                oSettings.oFeatures.bServerSide = true;
-                oTable.fnDraw();
-            });
-            $("#searchCriteriaTable tr td:eq(0) select").change($.otp.projectOverviewTable.searchCriteriaChangeHandler);
-            $("#searchCriteriaTable tr td:eq(2) input[type=button]").click($.otp.projectOverviewTable.searchCriteriaAddRow);
-            $("#searchCriteriaTable tr td:eq(1) select").change($.otp.projectOverviewTable.updateSearchCriteria);
-            $("#searchCriteriaTable tr td:eq(1) input[type=text]").change($.otp.projectOverviewTable.updateSearchCriteria);
-            $("#searchCriteriaTable tr td:eq(1) input[type=text]").keydown($.otp.projectOverviewTable.updateSearchCriteria);
-            $('.overviewContainer').height($(window).height()-300);
-            $(window).resize(function(){
-                $('.overviewContainer').height($(window).height()-300);
-                $('#projectOverviewTable_wrapper .dataTables_scrollBody').height(($('.body').height()-200));
-            })
+            return oTable;
         },
-        searchCriteriaChangeHandler: function () {
+
+        registerProjectOverviewSequnceTypeTable: function () {
             "use strict";
-            var tr = $(this).parent().parent();
-            $("td:eq(1) *", tr).hide();
-            $("td:eq(2) input", tr).hide();
-            if ($(this).val() !== "none") {
-                $("td select[name=" + $(this).val() + "]", tr).show();
-                $("td select[name=" + $(this).val() + "] option", tr).show();
-                $("td input[name=" + $(this).val() + "]", tr).show();
-                $("td:eq(2) input", tr).show();
-            } else {
-                if ($("tr", tr.parent()).size() > 1) {
-                    tr.detach();
-                }
-            }
-            $.otp.projectOverview.updateSearchCriteria();
-        },
-        searchCriteriaAddRow: function () {
-            "use strict";
-            var tr, cloned;
-            tr = $(this).parent().parent();
-            cloned = tr.clone();
-            $("td:eq(1) *", cloned).hide();
-            $("td:eq(2) input", cloned).hide();
-            $("td:eq(0) select", cloned).val("none");
-            cloned = cloned.appendTo($("#searchCriteriaTable"));
-            $("td:eq(0) select", cloned).change($.otp.projectOverviewTable.searchCriteriaChangeHandler);
-            $("td:eq(2) input[type=button]", cloned).click($.otp.projectOverviewTable.searchCriteriaAddRow);
-            $("td:eq(1) select", cloned).change($.otp.projectOverviewTable.updateSearchCriteria);
-            $("td:eq(1) input[type=text]", cloned).change($.otp.projectOverviewTable.updateSearchCriteria);
-            $("td:eq(1) input[type=text]", cloned).keydown($.otp.projectOverviewTable.updateSearchCriteria);
-        },
-        searchCriteria: function () {
-            "use strict";
-            var result = [];
-            $("#searchCriteriaTable tr").each(function (index, element) {
-                var selection = $("td:eq(0) select", element).val();
-                if (selection !== "none") {
-                    result.push({type: selection, value: $("td select[name=" + selection + "], td input[name=" + selection + "]", element).val()});
+            var oTable2 = $("#patientsAndSamplesGBCountPerProject").dataTable({
+                sDom: 'T<"clear">lfrtip',
+                oTableTools: {
+                    sSwfPath : $.otp.contextPath + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
+                    aButtons : tableTools_button_options
+                },
+                bFilter: true,
+                bProcessing: true,
+                bServerSide: false,
+                bSort: true,
+                bJQueryUI: false,
+                bAutoWidth: false,
+                sAjaxSource: $.otp.createLink({
+                    controller: 'projectOverview',
+                    action: 'dataTableSourcePatientsAndSamplesGBCountPerProject'
+                }),
+                bScrollCollapse: true,
+                sScrollY: 200,
+                bPaginate:false,
+                bDeferRender: true,
+                fnServerData: function (sSource, aoData, fnCallback) {
+                    aoData.push({
+                        name: "project",
+                        value: $('#project_select').val()
+                    });
+                    $.ajax({
+                        "dataType": 'json',
+                        "type": "POST",
+                        "url": sSource,
+                        "data": aoData,
+                        "error": function () {
+                            // clear the table
+                            fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
+                            oTable2.fnSettings().oFeatures.bServerSide = false;
+                        },
+                        "success": function (json) {
+                            fnCallback(json);
+                            oTable2.fnSettings().oFeatures.bServerSide = false;
+                        }
+                    });
                 }
             });
-            return result;
+            return oTable2;
         },
-        updateSearchCriteria: function () {
+
+        register: function () {
             "use strict";
-            $("#sequenceTable").dataTable().fnDraw();
-            $("#export-csv").attr("href", $.otp.createLink({
-                controller: 'projectOverview',
-                action: 'exportCsv',
-                parameters: {
-                    project: $('#project_select').val()
-                }
-            }));
+            var oTable1 = $.otp.projectOverviewTable.registerProjectOverview();
+            var oTable2 = $.otp.projectOverviewTable.registerProjectOverviewSequnceTypeTable();
+            $('#project_select').change(function() {
+                var oSettings1 = oTable1.fnSettings();
+                oSettings1.oFeatures.bServerSide = true;
+                oTable1.fnDraw();
+                var oSettings2 = oTable2.fnSettings();
+                oSettings2.oFeatures.bServerSide = true;
+                oTable2.fnDraw();
+                $.otp.graph.project.init();
+            });
+        },
+}
+
+$.otp.projectOverviewStatistic = {
+        register: function () {
+            "use strict";
+            $('#project_select').change(function() {
+                $.otp.graph.projectStatistic.init();
+            });
         }
 }
 

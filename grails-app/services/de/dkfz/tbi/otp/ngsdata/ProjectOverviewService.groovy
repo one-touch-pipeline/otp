@@ -32,9 +32,34 @@ class ProjectOverviewService {
                 SeqType.get(track[3]).libraryLayout,
                 track[5],
                 SeqPlatform.get(track[4]).toString(),
-                Math.floor(track[6]/1e9)
+                Math.floor(track[6] / 1e9)
             ]
             queryList.add(queryListSingleRow)
+        }
+        return queryList
+    }
+
+    public List patientsAndSamplesGBCountPerProject(Project project) {
+        List seq = Sequence.withCriteria {
+            eq("projectId", project.id)
+            projections {
+                groupProperty("seqTypeName")
+                countDistinct("mockFullName")
+                count("sampleId")
+                sum("nBasePairs")
+            }
+            order ("seqTypeName")
+        }
+        List queryList = []
+
+        for (def track in seq) {
+            def queryListSingl = [
+                track[0],
+                track[1],
+                track[2],
+                Math.floor(track[3] / 1e9)
+            ]
+            queryList.add(queryListSingl)
         }
         return queryList
     }

@@ -73,4 +73,26 @@ modules = {
         dependsOn 'core'
         resource url: '/js/editsamples.js'
     }
+    rGraph {
+        dependsOn 'core'
+        resource url:'/js/rgraph/RGraph.bar.js'
+        resource url:'/js/rgraph/RGraph.common.annotate.js'
+        resource url:'/js/rgraph/RGraph.common.context.js'
+        resource url:'/js/rgraph/RGraph.common.core.js'
+        resource url:'/js/rgraph/RGraph.common.dynamic.js'
+        resource url:'/js/rgraph/RGraph.common.effects.js'
+        resource url:'/js/rgraph/RGraph.common.key.js'
+        resource url:'/js/rgraph/RGraph.common.resizing.js'
+        resource url:'/js/rgraph/RGraph.common.tooltips.js'
+        resource url:'/js/rgraph/RGraph.common.zoom.js'
+        resource url:'/js/rgraph/RGraph.hbar.js'
+        resource url:'/js/rgraph/RGraph.line.js'
+        resource url:'/js/rgraph/RGraph.pie.js'
+        resource url:'/js/rgraph/RGraph.scatter.js'
+        resource url:'/js/rgraph/RGraph.waterfall.js'
+    }
+    graph {
+        dependsOn 'rGraph'
+        resource url:'/js/graph.js'
+    }
 }

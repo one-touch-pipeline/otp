@@ -20,7 +20,7 @@ class ProjectService {
      * Dependency Injection for aclUtilService
      */
     def aclUtilService
-   /**
+    /**
      * Dependency Injection of Spring Security Service - needed for ACL checks
      */
     def springSecurityService
@@ -103,7 +103,10 @@ AND ace.mask IN (:permissions)
 AND ace.granting = true
 '''
         Map params = [
-            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
+            permissions: [
+                BasePermission.READ.getMask(),
+                BasePermission.ADMINISTRATION.getMask()
+            ],
             roles: roles
         ]
         List result = Project.executeQuery(query, params)
