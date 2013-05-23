@@ -1,0 +1,55 @@
+package de.dkfz.tbi.ngstools.qualityAssessment
+
+import de.dkfz.tbi.ngstools.qualityAssessment.GenomeStatistic.ChromosomeDto
+import net.sf.samtools.SAMFileHeader
+import net.sf.samtools.SAMFileReader
+import net.sf.samtools.SAMRecord
+import net.sf.samtools.SAMRecordIterator
+import net.sf.samtools.SAMSequenceRecord
+
+class SAMBamFileReaderImpl implements BamFileReader<SAMRecord> {
+
+    private Parameters parameters
+
+    private GenomeStatisticFactory<SAMRecord> factory
+
+    @Override
+    public void setParameters(Parameters parameters) {
+        this.parameters = parameters
+    }
+
+    @Override
+    public void setGenomeStatisticFactory(GenomeStatisticFactory<SAMRecord> factory) {
+        this.factory = factory
+    }
+
+    @Override
+    GenomeStatistic<SAMRecord> read(File bamFile, File indexFile) {
+        if (!bamFile.canRead()) throw new RuntimeException("can not read file ${bamFile}")
+        if (!indexFile.canRead()) throw new RuntimeException("can not read file ${indexFile}")
+
+        SAMFileReader.setDefaultValidationStringency(SAMFileReader.ValidationStringency.SILENT)
+        SAMFileReader samFileReader = new SAMFileReader(bamFile, indexFile)
+        SAMFileHeader header = samFileReader.getFileHeader()
+        GenomeStatistic<SAMRecord> genomeStatistic = this.initGenomeStatistic(header)
+        SAMRecordIterator iterator = samFileReader.iterator()
+        genomeStatistic.preProcess()
+        while (iterator.hasNext()) {
+            SAMRecord record = iterator.next()
+            String chromosomeName = record.getReferenceName()
+            genomeStatistic.process(chromosomeName, record)
+        }
+        genomeStatistic.postProcess()
+        return genomeStatistic
+    }
+
+    private GenomeStatistic<SAMRecord> initGenomeStatistic(SAMFileHeader header) {
+        List<SAMSequenceRecord> seqRecords = header.getSequenceDictionary().getSequences()
+        List<ChromosomeDto> chromosomeDtos = []
+        seqRecords.each { SAMSequenceRecord seqRecord ->
+            ChromosomeDto dto = new ChromosomeDto(chromosomeName: seqRecord.getSequenceName(), chromosomeLength: seqRecord.getSequenceLength() as long)
+            chromosomeDtos.add(dto)
+        }
+        return this.factory.create(chromosomeDtos, this.parameters)
+    }
+}
