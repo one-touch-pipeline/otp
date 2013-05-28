@@ -3,80 +3,41 @@ package de.dkfz.tbi.otp.job.jobs.qualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import org.springframework.beans.factory.annotation.Autowired
 
 class ReorderCoverageTableJob extends AbstractEndStateAwareJobImpl {
 
     @Autowired
+    ChromosomeIdentifierProcessingService chromosomeIdentifierProcessingService
+
+    @Autowired
     ProcessedBamFileQaFileService processedBamFileQaFileService
 
-    @Autowired
-    ChromosomeMappingService chromosomeMappingService
+    /**
+     * ENUM for the chromosome names
+     */
+    /*
+     public enum Chromosomes {
+     CHROMOSOME_1(1), CHROMOSOME_2(2), CHROMOSOME_3(3), CHROMOSOME_4(4), CHROMOSOME_5(5), CHROMOSOME_6(6), CHROMOSOME_7(7),
+     CHROMOSOME_8(8), CHROMOSOME_9(9), CHROMOSOME_10(10), CHROMOSOME_11(11), CHROMOSOME_12(12), CHROMOSOME_13(13), CHROMOSOME_14(14),
+     CHROMOSOME_15(15), CHROMOSOME_16(16), CHROMOSOME_17(17), CHROMOSOME_18(18), CHROMOSOME_19(19), CHROMOSOME_20(20), CHROMOSOME_21(21),
+     CHROMOSOME_22(22), CHROMOSOME_X("X"), CHROMOSOME_Y("Y"), CHROMOSOME_M("M"), CHROMOSOME_ASTERISK("*"),
+     CHROMOSOME_ALL([1..22, "X", "Y", "M", "*"]), CHROMOSOME_NUMERIC(1..22), CHROMOSOME_CHARACTER(["X", "Y", "M", "*"])
+     }
+     */
 
-    @Autowired
-    ProcessingOptionService processingOptionService
-
+    /**
+     * Method which calls several services to
+     * -map the reference genome identifiers for the chromosomes to general identifiers
+     * -to sort the identifier of the chromosomes
+     * -to filter the identifier
+     * -to write the filtered and sorted coverage data to a file
+     */
     @Override
     public void execute() throws Exception {
         long processedBamFileId = Long.parseLong(getProcessParameterValue())
         ProcessedBamFile processedBamFile = ProcessedBamFile.get(processedBamFileId)
-        Project project = processedBamFile.alignmentPass.seqTrack.sample.individual.project
-        String coverageDataFilePath = processedBamFileQaFileService.coverageDataFilePath(processedBamFile)
-        String sortedCoverageDataFilePath = processedBamFileQaFileService.sortedCoverageDataFilePath(processedBamFile)
-        Map<String, StringBuilder> chromosome = readAndFilterCoverageData(coverageDataFilePath, project)
-        boolean isSortedAndFilteredFileCreated = writeSortedCoverageDataToFile(chromosome, sortedCoverageDataFilePath)
-        isSortedAndFilteredFileCreated ? succeed() : fail()
-    }
-
-    /**
-     * Read and filter the coverage data acording to the project reference genome used
-     * It renames the first column(name of the chromosome) and sorting it
-     * Only the first column is sorted (The window size is not ordered is taken as it is)
-     * Only chromosomes that are mapped at the reference will be considered
-     * @param coverageDataFilePath
-     * @param project
-     * @return Returns a map with coverage data for each chromosome
-     */
-    private Map readAndFilterCoverageData(String coverageDataFilePath, Project project) {
-        String referenceGenomeMapping = processingOptionService.findOption("chromosomeMapping", null, project)
-        if (!referenceGenomeMapping) {
-            throw new ProcessingException("Undefined reference genome mapping for project ${project.name}")
-        }
-        Map referenceGenomeMap = chromosomeMappingService."$referenceGenomeMapping"
-        File coverageRawDataFile = new File(coverageDataFilePath)
-        Map<Integer, StringBuilder> chromosome = [:]
-        Integer newChromosomeKey
-        coverageRawDataFile.eachLine { String line ->
-            List data = line.split("\t", 2)
-            newChromosomeKey = referenceGenomeMap[data[0]]
-            if (newChromosomeKey) {
-                if (!chromosome[newChromosomeKey]) {
-                    chromosome[newChromosomeKey] = new StringBuilder()
-                }
-                chromosome[newChromosomeKey] << "${newChromosomeKey}\t${data[1]}\n"
-            }
-        }
-        return chromosome
-    }
-
-    /**
-     * Writes the coverage data in a sorted way to a file
-     * @param chromosome Mapping of each chromosome to its coverage data
-     * @param sortedCoverageDataFilePath Path to where the sorted coverage data will be written
-     * @return Returns true if the sorted file was created
-     */
-    private boolean writeSortedCoverageDataToFile(Map chromosome, String sortedCoverageDataFilePath) {
-        List<Integer> sortedChromosomes = chromosome.keySet().sort()
-        File sortedCoverageDataFile = new File(sortedCoverageDataFilePath)
-        if (sortedCoverageDataFile.exists()) {
-                sortedCoverageDataFile.delete()
-        }
-        sortedCoverageDataFile.createNewFile()
-        sortedChromosomes.each { Integer ChromosomeKey ->
-            String stats = chromosome.get(ChromosomeKey).toString()
-            log.debug "writing chromosome " + ChromosomeKey
-            sortedCoverageDataFile << stats
-        }
-        return (sortedCoverageDataFile.canRead() && sortedCoverageDataFile.size() != 0)
+        chromosomeIdentifierProcessingService.execute(processedBamFile)
     }
 }
