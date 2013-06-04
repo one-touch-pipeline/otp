@@ -1,4 +1,5 @@
 /*jslint browser: true, devel: true */
+var tableTools_button_options = [{"sExtends":"csv", "bFooter": false},{"sExtends":"xls","bFooter": false},{"sExtends":"pdf","bFooter": false}];
 /*global $, Graph */
 $.otp = {
     contextPath: $("head meta[name=contextPath]").attr("content"),
@@ -167,7 +168,7 @@ $.otp.genericList = function (selector, showLink) {
         sDom: 'T<"clear">lfrtip',
         oTableTools: {
             sSwfPath : $.otp.contextPath + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
-            aButtons : ["csv", "xls", "pdf"]
+            aButtons : tableTools_button_options
         },
         bFilter: true,
         bProcessing: true,
@@ -255,7 +256,7 @@ $.otp.sequence = {
             sDom: 'T<"clear">lfrtip',
             oTableTools: {
                 sSwfPath : $.otp.contextPath + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
-                aButtons : ["csv", "xls", "pdf"]
+                aButtons : tableTools_button_options
             },
             bFilter: false,
             bProcessing: true,
@@ -268,7 +269,8 @@ $.otp.sequence = {
                 action: 'dataTableSource'
             }),
             bScrollCollapse: true,
-            iDisplayLength: Math.round(($('.body').height() - 210) / 23),
+            //iDisplayLength: 25,
+            iDisplayLength: Math.round(($('.body').height() - 200) / 23),
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
                 aoData.push({
@@ -485,7 +487,7 @@ $.otp.option = {
                 });
             }
         });
-        $.otp.resizeBodyInit('#optionTable', 450);
+        $.otp.resizeBodyInit('#optionTable', 190);
         $(".linkButton").click(this.newProcessingOption);
     }
 };
@@ -638,7 +640,8 @@ $.otp.workFlow = function (selector, sourcePath, sortOrder, jsonCallback, column
         bAutoWidth: false,
         bScrollCollapse: true,
         sScrollY: ($('.body').height() - 240),
-        bPaginate: false,
+        //bPaginate: false,
+        bScrollInfinite: true,
         bDeferRender: true,
         sAjaxSource: sourcePath,
         fnServerData: function (sSource, aoData, fnCallback) {
@@ -1140,21 +1143,13 @@ $.otp.highlight = function(path) {
     if(pathSplit.length > 3){
         var mode = "/" + pathSplit[1] + "/";
         var element = new Array();
-        element["individual"] = "individual";
-        element["sequence"] = "sequence";
-        element["run"] = "runs";
-        element["processes"] = "processes";
-        element["overviewMB"] = "overview";
-        element["projectOverview"] = "overview";
-        element["projectProgress"] = "progress";
-        element["runSubmit"] = "submit";
-        element["userAdministration"] = "admin";
-        element["crashRecovery"] = "admin";
-        element["shutdown"] = "admin";
-        element["notification"] = "admin";
-        element["processingOption"] = "admin";
-        element["switchUser"] = "switch";
-        $('.menuContainer #' + element[pathSplit[2]] + ' a').attr('style', 'color: #fafafa;');
+        $('.menuContainer #' + pathSplit[2] + ' a').attr('style', 'color: #fafafa;');
+        if(pathSplit[2] == "overviewMB" || pathSplit[2] == "projectOverview"){
+            $('.menuContainer #overview a:first').attr('style', 'color: #fafafa;');
+        }
+        else if(pathSplit[2] == "userAdministration" || pathSplit[2] == "group" || pathSplit[2] == "crashRecovery" || pathSplit[2] == "shutdown" || pathSplit[2] == "notification" || pathSplit[2] == "processingOption" || pathSplit[2] == "softwareTool"){
+            $('.menuContainer #admin a:first').attr('style', 'color: #fafafa;');
+        }
     }
     else{
         $('.menuContainer #home a').attr('style', 'color: #fafafa;');
@@ -1168,7 +1163,7 @@ $.otp.projectOverviewTable = {
                 sDom: 'T<"clear">lfrtip',
                 oTableTools: {
                     sSwfPath : $.otp.contextPath + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
-                    aButtons : ["csv", "xls", "pdf"]
+                    aButtons : tableTools_button_options
                 },
                 bFilter: true,
                 bProcessing: true,
@@ -1325,6 +1320,13 @@ $.otp.createListViewProcessingStep = function (selector, sourcePath, sortOrder, 
 $.otp.resizeBodyInit = function (table, margin) {
     $(window).resize(function(){
         $(table + '_wrapper' + ' .dataTables_scrollBody').height(($('.body').height() - margin));
+    })
+}
+
+$.otp.resizeBodyInit_nTable = function (table, margin) {
+    $(table).height(($('.body').height() - margin));
+    $(window).resize(function() {
+        $(table).height(($('.body').height() - margin));
     })
 }
 

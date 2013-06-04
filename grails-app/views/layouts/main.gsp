@@ -45,42 +45,47 @@
                     <sec:ifLoggedIn>
                         <li class="menuContainerLCss" id="individual"><g:link controller="individual" action="list"><g:message code="otp.menu.individuals"/></g:link></li>
                         <li class="menuContainerLCss" id="sequence"><g:link controller="sequence" action="index"><g:message code="otp.menu.sequences"/></g:link></li>
-                        <li class="menuContainerLCss" id="runs"><g:link controller="run" action="list"><g:message code="otp.menu.runs"/></g:link></li>
+                        <li class="menuContainerLCss" id="run"><g:link controller="run" action="list"><g:message code="otp.menu.runs"/></g:link></li>
                         <li class="menuContainerLCss" id="processes"><g:link controller="processes" action="list"><g:message code="otp.menu.processes"/></g:link></li>
                         <li class="overview_nav menuContainerLCss">
                             <ul>
                                 <li class="overview_nav_container" id="overview"><g:link ><g:message code="otp.menu.overview"/> &#9661;</g:link>
-                                       <ul>
-                                           <sec:ifAllGranted roles="ROLE_OPERATOR">
-                                               <li class="allGranted_general"><g:link controller="overviewMB" action="index"><g:message code="otp.menu.generalStatistics"/></g:link></li><br>
+                                    <ul>
+                                        <sec:ifAllGranted roles="ROLE_OPERATOR">
+                                            <li class="allGranted_general" id="overviewMB"><g:link controller="overviewMB" action="index"><g:message code="otp.menu.generalStatistics"/></g:link></li><br>
                                         </sec:ifAllGranted>
-                                        <li><g:link controller="projectOverview" action="index"><g:message code="otp.menu.projectSpecificStatistics"/></g:link></li><br>
+                                        <li id="projectOverview"><g:link controller="projectOverview" action="index"><g:message code="otp.menu.projectSpecificStatistics"/></g:link></li><br>
                                     </ul>
                                 </li>
                             </ul>
                         </li>
                         <sec:ifAllGranted roles="ROLE_OPERATOR">
-                            <li class="allGranted menuContainerLCss" id="progress"><g:link controller="projectProgress" action="progress"><g:message code="otp.menu.progress"/></g:link></li>
-                            <li class="allGranted menuContainerLCss" id="submit"><g:link controller="runSubmit" action="index"><g:message code="otp.menu.runSubmit"/></g:link></li>
+                            <li class="allGranted menuContainerLCss" id="projectProgress"><g:link controller="projectProgress" action="progress"><g:message code="otp.menu.progress"/></g:link></li>
+                            <li class="allGranted menuContainerLCss" id="runSubmit"><g:link controller="runSubmit" action="index"><g:message code="otp.menu.runSubmit"/></g:link></li>
                         </sec:ifAllGranted>
                         <sec:ifAnyGranted roles="ROLE_ADMIN">
                             <li class="admin_nav menuContainerLCss">
                                 <ul>
                                     <li class="allGranted admin_nav_container" id="admin"><g:link><g:message code="otp.menu.adminSection"/> &#9661;</g:link>
                                         <ul>
-                                            <li><g:link controller="userAdministration"><g:message code="otp.menu.userAdministration"/></g:link></li><br>
-                                            <li><g:link controller="crashRecovery"><g:message code="otp.menu.crashRecovery"/></g:link></li><br>
-                                            <li><g:link controller="shutdown"><g:message code="otp.menu.planServerShutdown"/></g:link></li><br>
-                                            <li><g:link controller="notification"><g:message code="otp.menu.manageNotifications"/></g:link></li><br>
-                                            <li><g:link controller="processingOption"><g:message code="otp.menu.processingOptions"/></g:link></li><br>
+                                            <li id="userAdministration"><g:link controller="userAdministration"><g:message code="otp.menu.userAdministration"/></g:link></li><br>
+                                            <li id="group"><g:link controller="group"><g:message code="otp.menu.groupAdministration"/></g:link></li><br>
+                                            <li id="crashRecovery"><g:link controller="crashRecovery"><g:message code="otp.menu.crashRecovery"/></g:link></li><br>
+                                            <li id="shutdown"><g:link controller="shutdown"><g:message code="otp.menu.planServerShutdown"/></g:link></li><br>
+                                            <li id="notification"><g:link controller="notification"><g:message code="otp.menu.manageNotifications"/></g:link></li><br>
+                                            <li id="processingOption"><g:link controller="processingOption"><g:message code="otp.menu.processingOptions"/></g:link></li><br>
+                                            <li id="softwareTool"><g:link controller="softwareTool" action="list"><g:message code="otp.menu.softwareTool"/></g:link></li><br>
                                         </ul>
                                      </li>
                                 </ul>
                             </li>
                         </sec:ifAnyGranted>
                         <sec:ifAnyGranted roles="ROLE_SWITCH_USER">
-                            <li class="switchUserRight menuContainerLCss" id="switch"><g:link controller="switchUser"><g:message code="otp.menu.switchUser"/></g:link></li>
+                            <li class="switchUserRight menuContainerLCss" id="switchUser"><g:link controller="switchUser"><g:message code="otp.menu.switchUser"/></g:link></li>
                         </sec:ifAnyGranted>
+                        <sec:ifSwitched>
+                            <li><a href='${request.contextPath}/j_spring_security_exit_user'>Resume as <sec:switchedUserOriginalUsername/></a></li>
+                        </sec:ifSwitched>
                     </sec:ifLoggedIn>
                 </ul>
             </div>
@@ -88,7 +93,7 @@
             <div class="menuContainer menuContainerR">
                 <ul>
                     <sec:ifLoggedIn>
-                        <li><g:link controller="logout" action="index"><g:message code="otp.menu.logout"/></g:link></li>
+                        <li id="logout"><g:link controller="logout" action="index"><g:message code="otp.menu.logout"/></g:link></li>
                         <li id="home"><g:link url="${request.contextPath}/"><g:message code="otp.menu.home"/></g:link></li>
                     </sec:ifLoggedIn>
                 </ul>

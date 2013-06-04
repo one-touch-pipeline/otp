@@ -6,7 +6,7 @@
     <r:require module="lightbox"/>
 </head>
 <body>
-    <div class="body_grow">
+    <div class="body">
         <div class="homeTable">
             <table>
                 <tr>
@@ -23,14 +23,10 @@
         </div>
         <br>
     </div>
-</body>
-<g:javascript>
-    $(function() {
-        $('body').attr('style','overflow-y:scroll');
-        $('.body_position').attr('style','margin-left:'+((($(window).width()-$('.body_grow').width())/2)-11)+'px;');
-        $('.fullScreen').click(function(){
-            $(this).parent().parent().parent().children('a').click();
+    <r:script>
+        $(function() {
+            $.otp.resizeBodyInit_nTable(".homeTable", 20);
         });
-    });
-</g:javascript>
+    </r:script>
+</body>
 </html>
