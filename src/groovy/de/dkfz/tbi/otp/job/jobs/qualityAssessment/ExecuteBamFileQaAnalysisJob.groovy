@@ -29,7 +29,8 @@ class ExecuteBamFileQaAnalysisJob extends AbstractJobImpl {
         String coverageDataFilePath = processedBamFileQaFileService.coverageDataFilePath(processedBamFile)
         String qualityAssessmentFilePath = processedBamFileQaFileService.qualityAssessmentDataFilePath(processedBamFile)
         String insertSizeDataFilePath = processedBamFileQaFileService.insertSizeDataFilePath(processedBamFile)
-        boolean override = false
+        boolean overrideOutput = false
+        String allChromosomeName = "ALL"
         int minAlignedRecordLength = 36
         int minMeanBaseQuality = 25
         int mappingQuality = 0
@@ -41,11 +42,9 @@ class ExecuteBamFileQaAnalysisJob extends AbstractJobImpl {
 //        Realm realm = configService.getRealmDataProcessing(processedBamFile.alignmentPass.seqTrack.sample.individual.project)
         // TODO Maybe these numerical parameters should go to options framework or at least be written as variable names to be more clear..
 //        String cmd = "QualityAssessment.sh ${processedBamFilePath} ${qualityAssessmentFilePath} ${coverageDataFilePath} ${insertSizeDataFilePath} 36 25 0 1 1000 10"
-        String cmd = "QualityAssessment.sh ${processedBamFilePath} ${processedBaiFilePath} ${qualityAssessmentFilePath} ${coverageDataFilePath} ${insertSizeDataFilePath} ${override} ${minAlignedRecordLength} ${minMeanBaseQuality} ${mappingQuality} ${coverageMappingQualityThreshold} ${windowsSize} ${insertSizeCountHistogramBin} ${test}"
+        String cmd = "QualityAssessment.sh ${processedBamFilePath} ${processedBaiFilePath} ${qualityAssessmentFilePath} ${coverageDataFilePath} ${insertSizeDataFilePath} ${overrideOutput} ${allChromosomeName} ${minAlignedRecordLength} ${minMeanBaseQuality} ${mappingQuality} ${coverageMappingQualityThreshold} ${windowsSize} ${insertSizeCountHistogramBin} ${test}"
 //        Realm realm = configService.getRealmDataProcessing(processedBamFile.alignmentPass.seqTrack.sample.individual.project)
-
         Realm realm = ProcessedBamFileService.realm(processedBamFile)
-
 
         String pbsID = sendScript(realm, cmd)
         addOutputParameter("__pbsIds", pbsID)
