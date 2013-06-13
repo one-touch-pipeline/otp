@@ -63,16 +63,20 @@ Writing the output files has failed:
      * @param args
      */
     public static void main(String[] args) {
-        parseParameters(args)
-        validateInput()
-        manageOutputFiles()
-        GenomeStatistic<?> genomeStatistic = runProcessing()
-        writeOutput(genomeStatistic)
+        try{
+            parseParameters(args)
+            validateInput()
+            manageOutputFiles()
+            GenomeStatistic<?> genomeStatistic = runProcessing()
+            writeOutput(genomeStatistic)
+        }catch(Exception e){
+            exitWithError(e.getMessage())
+        }
     }
 
     private static void parseParameters(String[] args) {
         if (args.length < PARAMETER_COUNT) {
-            exitWithError(PARAM_NUM_ERROR)
+            throw new RuntimeException(PARAM_NUM_ERROR)
         }
         ParameterUtils.INSTANCE.parse(fileParameters, "pathBamFile", args[0])
         ParameterUtils.INSTANCE.parse(fileParameters, "pathBamIndexFile", args[1])
@@ -97,7 +101,7 @@ Writing the output files has failed:
             fileParameters.validateFiles()
         } catch (ValidationException e) {
             e.printStackTrace()
-            exitWithError("${PARAMS_VALIDATION_FAILED} ${e.getMessage()}")
+            throw new RuntimeException("${PARAMS_VALIDATION_FAILED} ${e.getMessage()}")
         }
     }
 
@@ -110,12 +114,12 @@ Writing the output files has failed:
     private static void manageOutputFile(String path, boolean overrideOutput) {
         File file = new File(path)
         if (!overrideOutput && file.exists()) {
-            exitWithError("${OUTPUT_FILE_EXISTS} ${path}")
+            throw new RuntimeException("${OUTPUT_FILE_EXISTS} ${path}")
         }
         if (overrideOutput && file.exists()) {
             Boolean deleted = file.delete()
             if (!deleted) {
-                exitWithError("${CAN_NOT_DELETE_OUTPUT_FILE} ${path}")
+                throw new RuntimeException("${CAN_NOT_DELETE_OUTPUT_FILE} ${path}")
             }
         }
     }
@@ -131,7 +135,7 @@ Writing the output files has failed:
             return reader.read(bamFile, indexFile)
         } catch (Exception e) {
             e.printStackTrace()
-            exitWithError("${PROCESSING_FAILED}: ${e.getMessage()}")
+            throw new RuntimeException("${PROCESSING_FAILED}: ${e.getMessage()}")
         }
     }
 
@@ -155,7 +159,7 @@ Writing the output files has failed:
             statisticWriter.write(file, genomeStatistic)
         } catch (Exception e) {
             e.printStackTrace()
-            exitWithError("${OUTPUT_FAILED}: ${e.getMessage()}")
+            throw new RuntimeException("${OUTPUT_FAILED}: ${e.getMessage()}")
         }
     }
 
