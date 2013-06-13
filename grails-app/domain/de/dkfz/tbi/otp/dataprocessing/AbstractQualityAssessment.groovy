@@ -2,8 +2,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 class AbstractQualityAssessment {
 
-//    //0 will be all and 1-24 standard chromosome 1-22, X and Y 25 M and 26... unknown sequences
-
     long referenceLength
     long duplicateR1
     long duplicateR2

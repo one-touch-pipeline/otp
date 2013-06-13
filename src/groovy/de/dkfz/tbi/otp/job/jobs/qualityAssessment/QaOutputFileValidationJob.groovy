@@ -15,7 +15,6 @@ class QaOutputFileValidationJob extends AbstractEndStateAwareJobImpl {
         String coverateDataFilePath = processedBamFileQaFileService.coverageDataFilePath(processedBamFile)
         String qualityAssessmentFilePath = processedBamFileQaFileService.qualityAssessmentDataFilePath(processedBamFile)
         String insertSizeDataFilePath = processedBamFileQaFileService.insertSizeDataFilePath(processedBamFile)
-        // TODO Should be done here or should be in service ?
         boolean coverageDataFileExists = validateFile(coverateDataFilePath)
         boolean qualityAssessmentFileExists = validateFile(qualityAssessmentFilePath)
         boolean insertSizeDataFileExists = validateFile(insertSizeDataFilePath)

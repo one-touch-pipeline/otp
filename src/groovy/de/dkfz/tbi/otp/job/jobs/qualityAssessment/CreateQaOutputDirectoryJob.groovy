@@ -18,10 +18,12 @@ class CreateQaOutputDirectoryJob extends AbstractJobImpl {
 
     @Override
     public void execute() throws Exception {
-        long processedBamFileId = Long.parseLong(getProcessParameterValue())
+//        long processedBamFileId = Long.parseLong(getProcessParameterValue())
+        long processedBamFileId = getProcessParameterValue() as long
         ProcessedBamFile processedBamFile = ProcessedBamFile.get(processedBamFileId)
         String dir = processedBamFileQaFileService.directoryPath(processedBamFile)
-        Realm realm = configService.getRealmDataProcessing(processedBamFile.alignmentPass.seqTrack.sample.individual.project)
+//        Realm realm = configService.getRealmDataProcessing(processedBamFile.alignmentPass.seqTrack.sample.individual.project)
+        Realm realm = ProcessedBamFileService.realm(processedBamFile)
         execute(dir, realm)
     }
 

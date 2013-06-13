@@ -25,14 +25,14 @@ plan("QualityAssessmentWorkflow") {
         inputParameter("__pbsRealm", "createCoveragePlot", "__pbsRealm")
     }
     job("coveragePlotValidation", "coveragePlotValidationJob")
-//    job("createInsertSizePlot", "createInsertSizePlotJob") {
-//        outputParameter("__pbsIds")
-//        outputParameter("__pbsRealm")
-//    }
-//    job("createInsertSizePlotWatchdog", "myPBSWatchdogJob") {
-//        inputParameter("__pbsIds", "createInsertSizePlot", "__pbsIds")
-//        inputParameter("__pbsRealm", "createInsertSizePlot", "__pbsRealm")
-//    }
-//    job("insertSizePlotValidation", "insertSizePlotValidationJob")
+    job("createInsertSizePlot", "createInsertSizePlotJob") {
+        outputParameter("__pbsIds")
+        outputParameter("__pbsRealm")
+    }
+    job("createInsertSizePlotWatchdog", "myPBSWatchdogJob") {
+        inputParameter("__pbsIds", "createInsertSizePlot", "__pbsIds")
+        inputParameter("__pbsRealm", "createInsertSizePlot", "__pbsRealm")
+    }
+    job("insertSizePlotValidation", "insertSizePlotValidationJob")
     job("assignQaFlag", "assignQaFlagJob")
 }
