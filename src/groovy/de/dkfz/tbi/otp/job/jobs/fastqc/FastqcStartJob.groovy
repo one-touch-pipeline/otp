@@ -23,7 +23,7 @@ class FastqcStartJob extends AbstractStartJobImpl {
 
     final int MAX_RUNNING = 4
 
-    @Scheduled(fixedRate=10000l)
+    @Scheduled(fixedDelay=10000l)
     void execute() {
         if (!hasFreeSlot()) {
             return

@@ -19,7 +19,7 @@ class DataLocationStartJob extends AbstractStartJobImpl {
 
     final int MAX_RUNNING = 1
 
-    @Scheduled(fixedRate=3000l)
+    @Scheduled(fixedDelay=3000l)
     void execute() {
         if (!hasOpenSlots()) {
             return

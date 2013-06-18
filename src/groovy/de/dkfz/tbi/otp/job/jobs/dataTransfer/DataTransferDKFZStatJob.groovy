@@ -15,7 +15,7 @@ class DataTransferDKFZStatJob extends AbstractStartJobImpl  {
 
     final int MAX_RUNNING = 4
 
-    @Scheduled(fixedRate=6000l)
+    @Scheduled(fixedDelay=6000l)
     void execute() {
         if (!hasSlot()) {
             return

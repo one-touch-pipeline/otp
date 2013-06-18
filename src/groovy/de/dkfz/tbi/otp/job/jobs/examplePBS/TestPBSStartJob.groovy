@@ -17,7 +17,7 @@ class TestPBSStartJob extends AbstractStartJobImpl  {
     @Autowired
     ProcessingOptionService optionService
 
-    @Scheduled(fixedRate=10000l)
+    @Scheduled(fixedDelay=10000l)
     void execute() {
         if (!hasFreeSlot()) {
             return

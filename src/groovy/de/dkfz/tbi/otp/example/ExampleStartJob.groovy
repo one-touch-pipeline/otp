@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 class ExampleStartJob extends AbstractStartJobImpl {
     boolean performed = false
 
-    @Scheduled(fixedRate=10000l)
+    @Scheduled(fixedDelay=10000l)
     void execute() {
         if (performed) {
             return

@@ -15,7 +15,7 @@ class IndexSingleBamStartJob extends AbstractStartJobImpl {
 
     final int MAX_RUNNING = 1
 
-    @Scheduled(fixedRate=10000l)
+    @Scheduled(fixedDelay=10000l)
     void execute() {
         if (!getExecutionPlan() || !getExecutionPlan().enabled) {
             return

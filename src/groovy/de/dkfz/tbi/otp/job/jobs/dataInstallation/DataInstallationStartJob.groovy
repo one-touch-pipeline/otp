@@ -19,7 +19,7 @@ class DataInstallationStartJob extends AbstractStartJobImpl {
 
     final int MAX_RUNNING = 2
 
-    @Scheduled(fixedRate=5000l)
+    @Scheduled(fixedDelay=5000l)
     void execute() {
         if (!hasOpenSlots()) {
             return
