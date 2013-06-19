@@ -18,14 +18,19 @@ class MetaDataStartJob extends AbstractStartJobImpl {
 
     @Scheduled(fixedDelay=5000l)
     void execute() {
+        log.debug "start"
         if (!hasOpenSlot()) {
+            log.debug "no open slots"
             return
         }
+        log.debug "open slots"
         Run run = runProcessingService.runWithNewMetaData()
+        log.debug "found run : ${run?.name}"
         if (run) {
             runProcessingService.blockMetaData(run)
+            log.debug "run blocked"
             createProcess(new ProcessParameter(value: run.id.toString(), className: run.class.name))
-            println "MetaDataWorkflow started for: ${run.toString()}"
+            log.debug "MetaDataWorkflow started for: ${run.toString()}"
         }
     }
 

@@ -28,9 +28,12 @@ class RunProcessingService {
                 ne("currentFormat", RunSegment.DataFormat.TAR)
             }
         }
+        log.debug "found segment count: ${segments.size()}"
         for (RunSegment segment in segments) {
+            log.debug "    found segment: ${segment.mdPath}"
             segment.metaDataStatus = RunSegment.Status.BLOCKED
             segment.save(flush: true)
+            log.debug "    save segment: ${segment.mdPath}"
         }
     }
 
