@@ -9,23 +9,13 @@ package de.dkfz.tbi.otp.dataprocessing
 
 class ChromosomeIdentifierFilteringService {
 
-    /**
-     * Defines the Chromosomes, which are not needed for the coverage and calls the filtering method
-     * @param Map<String, List> sortedIdentifierCoverageData
-     *
-     */
-    public Map<String, List> filteringCoverage(Map<String, List> sortedIdentifierCoverageData) {
-        List filterCondition = ["M", "*"]
+    public Map<String, List> filteringCoverage(Map<String, List<String>> sortedIdentifierCoverageData) {
+        List<String> filterCondition = Chromosomes.filterConditions()
         return filter(filterCondition, sortedIdentifierCoverageData)
     }
 
-    /**
-     * Filters the chromosomes, by the given chromosome identifiers
-     *
-     * @return
-     */
-    private Map<String, List> filter(List filterCondition, Map<String, List> sortedIdentifierCoverageData) {
-        Map<String, List> filteredIdentifierCoverageData = sortedIdentifierCoverageData.findAll { chromosomeIdentifier ->
+    private Map<String, List<String>> filter(List<String> filterCondition, Map<String, List<String>> sortedIdentifierCoverageData) {
+        Map<String, List<String>> filteredIdentifierCoverageData = sortedIdentifierCoverageData.findAll { chromosomeIdentifier ->
             !filterCondition.contains(chromosomeIdentifier.key)
         }
         return filteredIdentifierCoverageData

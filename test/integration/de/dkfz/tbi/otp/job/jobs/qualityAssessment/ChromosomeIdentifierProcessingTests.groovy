@@ -114,6 +114,7 @@ class ChromosomeIdentifierProcessingTests {
         processedBamFile.save(flush: true)
         assertTrue(processedBamFile.validate())
 
+
         ReferenceGenome referenceGenome = new ReferenceGenome()
         referenceGenome.name = "hg19_1_24"
         referenceGenome.filePath = "bla"
@@ -122,8 +123,6 @@ class ChromosomeIdentifierProcessingTests {
 
 
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = new ReferenceGenomeProjectSeqType()
-        referenceGenomeProjectSeqType.dateCreated = new Date()
-        referenceGenomeProjectSeqType.deprecatedDate = new Date()
         referenceGenomeProjectSeqType.project = project
         referenceGenomeProjectSeqType.seqType = seqType
         referenceGenomeProjectSeqType.referenceGenome = referenceGenome

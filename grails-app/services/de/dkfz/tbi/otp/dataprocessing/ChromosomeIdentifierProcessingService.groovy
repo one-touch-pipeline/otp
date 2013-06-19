@@ -15,10 +15,8 @@ class ChromosomeIdentifierProcessingService {
     ProcessedBamFileQaFileService processedBamFileQaFileService
     ProcessingOptionService processingOptionService
     ChromosomeIdentifierMappingService chromosomeIdentifierMappingService
-    ChromosomeIdentifierReplacingService chromosomeIdentifierReplacingService
     ChromosomeIdentifierSortingService chromosomeIdentifierSortingService
     ChromosomeIdentifierFilteringService chromosomeIdentifierFilteringService
-    WriteSortedAndFilteredCoverageDataInFileService writeSortedAndFilteredCoverageDataInFileService
 
     /**
      * @param processedBamFile
@@ -26,15 +24,51 @@ class ChromosomeIdentifierProcessingService {
      * sorted and filtered chromosome identifiers were written in a file
      */
     public boolean execute(ProcessedBamFile processedBamFile) {
-
         Project project = processedBamFile.alignmentPass.seqTrack.sample.individual.project
         SeqType seqType = processedBamFile.alignmentPass.seqTrack.seqType
         Map<String, String> chromosomeIdentifierMap = chromosomeIdentifierMappingService.mappingAll(project, seqType)
         String coverageDataFilePath = processedBamFileQaFileService.coverageDataFilePath(processedBamFile)
-        Map<String, List> changedIdentifierCoverageData = chromosomeIdentifierReplacingService.change(coverageDataFilePath, chromosomeIdentifierMap)
-        Map<String, List> filteredCoverageData = chromosomeIdentifierFilteringService.filteringCoverage(changedIdentifierCoverageData)
-        Map<String, List> sortedAndFilteredIdentifierCoverageData = chromosomeIdentifierSortingService.sort(filteredCoverageData)
+        Map<String, List<String>> changedIdentifierCoverageData = change(coverageDataFilePath, chromosomeIdentifierMap)
+        Map<String, List<String>> filteredCoverageData = chromosomeIdentifierFilteringService.filteringCoverage(changedIdentifierCoverageData)
+        Map<String, List<String>> sortedAndFilteredIdentifierCoverageData = chromosomeIdentifierSortingService.sort(filteredCoverageData)
         String sortedAndFilteredCoverageDataFilePath = processedBamFileQaFileService.sortedCoverageDataFilePath(processedBamFile)
-        return writeSortedAndFilteredCoverageDataInFileService.write(sortedAndFilteredIdentifierCoverageData, sortedAndFilteredCoverageDataFilePath)
+        return write(sortedAndFilteredIdentifierCoverageData, sortedAndFilteredCoverageDataFilePath)
+    }
+
+    private Map<String, List<String>> change(String coverageDataFilePath, Map<String, String> chromosomeIdentifierMap) {
+        Map<String, List<String>> changedIdentifierCoverageData = [:]
+        File coverageRawDataFile = new File(coverageDataFilePath)
+        coverageRawDataFile.eachLine { String line ->
+            List<String> coverageDataPerChromosomePerWindow = line.split("\t", 2)
+            if (chromosomeIdentifierMap.containsKey(coverageDataPerChromosomePerWindow[0])) {
+                String newIdentifier = chromosomeIdentifierMap[coverageDataPerChromosomePerWindow[0]]
+                if (changedIdentifierCoverageData.containsKey(newIdentifier)) {
+                    changedIdentifierCoverageData[newIdentifier].add(coverageDataPerChromosomePerWindow[1])
+                } else {
+                    List<String> coverageDataPerChromosome = []
+                    coverageDataPerChromosome.add(coverageDataPerChromosomePerWindow[1])
+                    changedIdentifierCoverageData[newIdentifier] = coverageDataPerChromosome
+                }
+            } else {
+                throw new Exception("Chromosome identifier ${coverageDataPerChromosomePerWindow[0]} is not in the mapping yet")
+            }
+        }
+        return changedIdentifierCoverageData
+    }
+
+    private boolean write(Map<String, List<String>> sortedAndFilteredCoverageData, String sortedAndFilteredCoverageDataFilePath) {
+        File sortedCoverageDataFile = new File(sortedAndFilteredCoverageDataFilePath)
+        StringBuffer stringBuffer = new StringBuffer()
+
+        sortedAndFilteredCoverageData.each { chromosome, coverage ->
+            List<String> coveragePerChromosome = coverage
+            coveragePerChromosome.each() { String coveragePerWindow ->
+                String chromosomeCoverage = chromosome + "\t" + coveragePerWindow + "\n"
+                stringBuffer.append(chromosomeCoverage)
+            }
+        }
+        String sortedAndFilteredCoverageDataAsString = stringBuffer.toString()
+        sortedCoverageDataFile.write(sortedAndFilteredCoverageDataAsString)
+        return (sortedCoverageDataFile.canRead() && sortedCoverageDataFile.size() != 0)
     }
 }
