@@ -14,6 +14,7 @@ class AlignmentPassService {
 
     def configService
     def processingOptionService
+    ReferenceGenomeService referenceGenomeService
 
     public AlignmentPass createAlignmentPass() {
         def state = SeqTrack.DataProcessingState.NOT_STARTED
@@ -49,9 +50,15 @@ class AlignmentPassService {
         return alignmentPass.seqTrack.sample.individual.project
     }
 
+    public SeqType seqType(AlignmentPass alignmentPass) {
+        return alignmentPass.seqTrack.seqType
+    }
+
     public String referenceGenomePath(AlignmentPass alignmentPass) {
         Project project = project(alignmentPass)
-        String path = processingOptionService.findOption("referenceGenome", null, project)
+        SeqType seqType = seqType(alignmentPass)
+        ReferenceGenome referenceGenome = referenceGenomeService.getReferenceGenome(project, seqType)
+        String path = referenceGenomeService.filePathOnlySuffix(project, referenceGenome)
         if (!path) {
             throw new ProcessingException("Undefined path to reference genome for project ${project.name}")
         }
