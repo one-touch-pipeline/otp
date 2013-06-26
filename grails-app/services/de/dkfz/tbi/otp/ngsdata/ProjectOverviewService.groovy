@@ -40,28 +40,17 @@ class ProjectOverviewService {
     }
 
     public List patientsAndSamplesGBCountPerProject(Project project) {
-        List seq = Sequence.withCriteria {
+        List seq = AggregateSequences.withCriteria {
             eq("projectId", project.id)
             projections {
                 groupProperty("seqTypeName")
                 countDistinct("mockFullName")
                 count("sampleId")
-                sum("nBasePairs")
+                sum("sum_N_BasePairsGb")
             }
             order ("seqTypeName")
         }
-        List queryList = []
-
-        for (def track in seq) {
-            def queryListSingl = [
-                track[0],
-                track[1],
-                track[2],
-                Math.floor(track[3] / 1e9)
-            ]
-            queryList.add(queryListSingl)
-        }
-        return queryList
+        return seq
     }
 }
 

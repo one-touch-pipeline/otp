@@ -47,11 +47,11 @@ class StatisticService {
     }
 
     public List sampleTypeCountBySeqType(Project project) {
-        List seq = Sequence.withCriteria {
+        List seq = AggregateSequences.withCriteria {
             eq("projectId", project.id)
             projections {
                 groupProperty("seqTypeName")
-                countDistinct("sampleTypeId")
+                count("sampleId")
             }
             order ("seqTypeName")
         }

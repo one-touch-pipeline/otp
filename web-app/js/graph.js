@@ -58,7 +58,7 @@ $.otp.graph.overview = {
         scatter2.Set('chart.text.angle', 45);
         scatter2.Set('chart.gutter.bottom', 110);
         scatter2.Set('chart.gutter.top', 90);
-        scatter2.Set('chart.gutter.left', 30);
+        scatter2.Set('chart.gutter.left', 40);
         scatter2.Set('chart.gutter.right', 70);
         scatter2.Draw();
     },
@@ -149,7 +149,7 @@ $.otp.graph.project = {
         pie1.Set('chart.title', 'Samples processed by different sequecing type');
         pie1.Set('chart.title.y', 18);
         pie1.Set('chart.title.x', 'center');
-        pie1.Set('chart.title.size', 12);
+        pie1.Set('chart.title.size', 11);
         pie1.Set('chart.title.color', 'black');
         pie1.Set('chart.colors', [ '#858137', '#2D6122', '#373502', '#ACAB90',
                 '#7A5D07', '#5A1B02', '#863312', '#1E5CA4', '#565B7A',
@@ -160,11 +160,11 @@ $.otp.graph.project = {
         pie1.Set('chart.shadow.offsety', 1);
         pie1.Set('chart.shadow.blur', 1);
         pie1.Set('chart.exploded', 1);
-        pie1.Set('chart.text.size', 7);
+        pie1.Set('chart.text.size', 8);
         pie1.Set('chart.labels.sticks.length', 0);
         pie1.Set('chart.gutter.bottom', 130);
         pie1.Set('chart.gutter.top', 70);
-        pie1.Set('chart.gutter.left', 235);
+        pie1.Set('chart.gutter.left', 295);
         pie1.Set('chart.gutter.right', 200);
         pie1.Draw();
         RGraph.Effects.Pie.RoundRobin(pie1, {
@@ -186,15 +186,14 @@ $.otp.graph.project = {
         scatter3.Set('chart.ylabels.count', count);
         scatter3.Set('chart.ymax', json.count);
         scatter3.Set('chart.tickmarks', 'circle');
-        scatter3.Set('chart.title.y', 10);
         scatter3.Set('chart.xmin', 0);
         scatter3.Set('chart.ymin', 0);
         scatter3.Set('chart.ticksize', 7);
         scatter3.Set('chart.title',
                 'Number of sequence lanes registered for ' + $('#project_select').val());
         scatter3.Set('chart.title.color', 'black');
-        scatter3.Set('chart.title.size', 12);
-        scatter3.Set('chart.title.y', 16);
+        scatter3.Set('chart.title.size', 11);
+        scatter3.Set('chart.title.y', 18);
         scatter3.Set('chart.text.size', 8);
         scatter3.Set('chart.xmax', json.daysCount);
         scatter3.Set('chart.background.grid.autofit.numvlines', json.gridCount);
@@ -218,7 +217,7 @@ $.otp.graph.project = {
         hbar.Set('chart.title',
                 'Patients and the number of samples (non-redundant)');
         hbar.Set('chart.title.x', 300);
-        hbar.Set('chart.title.size', 13);
+        hbar.Set('chart.title.size', 12);
         hbar.Set('chart.title.color', 'black');
         hbar.Set('chart.colors', [ '#1E5CA4' ]);
         hbar.Set('chart.shadow', true);
