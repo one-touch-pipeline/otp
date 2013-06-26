@@ -10,8 +10,8 @@ $.otp.graph.overview = {
                 $.otp.graph.overview.projectCountPerDate);
         RGraph.AJAX(url + '/statistic/laneCountPerDate',
                 $.otp.graph.overview.laneCountPerDate);
-        RGraph.AJAX(url + '/statistic/sampleCountBySeqType',
-                $.otp.graph.overview.sampleCountBySeqType);
+        RGraph.AJAX(url + '/statistic/sampleCountPerSequenceType',
+                $.otp.graph.overview.sampleCountPerSequenceType);
         RGraph.AJAX(url + '/statistic/projectCountPerSequenceType',
                 $.otp.graph.overview.projectCountPerSequenceType);
     },
@@ -36,7 +36,7 @@ $.otp.graph.overview = {
         scatter1.Set('chart.background.grid.autofit.numvlines', json.gridCount);
         scatter1.Set('chart.text.angle', 45);
         scatter1.Set('chart.gutter.bottom', 110);
-        scatter1.Set('chart.gutter.top', 90);
+        scatter1.Set('chart.gutter.top', 55);
         scatter1.Draw();
     },
 
@@ -59,17 +59,17 @@ $.otp.graph.overview = {
         scatter2.Set('chart.background.grid.autofit.numvlines', json.gridCount);
         scatter2.Set('chart.text.angle', 45);
         scatter2.Set('chart.gutter.bottom', 110);
-        scatter2.Set('chart.gutter.top', 90);
+        scatter2.Set('chart.gutter.top', 55);
         scatter2.Set('chart.gutter.left', 43);
         scatter2.Set('chart.gutter.right', 70);
         scatter2.Draw();
     },
 
-        sampleCountBySeqType: function() {
+    sampleCountPerSequenceType: function() {
         var json = eval('(' + this.responseText + ')');
         var data = json.value;
-        var pie = new RGraph.Pie('sampleCountBySeqType', json.data);
-        pie.Set('chart.labels', json.labelsProzent);
+        var pie = new RGraph.Pie('sampleCountPerSequenceTypePie', json.data);
+        pie.Set('chart.labels', json.labelsPercentage);
         pie.Set('chart.title', 'Samples processed by sequencing technologies in OTP');
         pie.Set('chart.title.y', 9);
         pie.Set('chart.title.x', 'center');
@@ -98,7 +98,8 @@ $.otp.graph.overview = {
             frames : 335
         });
     },
-        projectCountPerSequenceType : function() {
+
+    projectCountPerSequenceType : function() {
         var json = eval('(' + this.responseText + ')');
         var data = json.value;
         var bar1 = new RGraph.Bar('projectCountPerSequenceTypeBar', json.data);
@@ -150,7 +151,7 @@ $.otp.graph.project = {
         RGraph.Reset(document.getElementById('sampleTypeCountBySeqType'));
         var pie1 = new RGraph.Pie('sampleTypeCountBySeqType', json.data);
         var data = json.value;
-        pie1.Set('chart.labels', json.labelsProzent);
+        pie1.Set('chart.labels', json.labelsPercentage);
         pie1.Set('chart.title', 'Samples processed by different sequencing technologies');
         pie1.Set('chart.title.y', 18);
         pie1.Set('chart.title.x', 'center');
@@ -169,7 +170,7 @@ $.otp.graph.project = {
         pie1.Set('chart.labels.sticks.length', 0);
         pie1.Set('chart.gutter.bottom', 130);
         pie1.Set('chart.gutter.top', 100);
-        pie1.Set('chart.gutter.left', 235);
+        pie1.Set('chart.gutter.left', 220);
         pie1.Set('chart.gutter.right', 200);
         pie1.Draw();
         RGraph.Effects.Pie.RoundRobin(pie1, {

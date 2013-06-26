@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="body">
-    <h3><g:message code="Home.pageTitle"/></h3>
+    <h3><g:message code="home.pageTitle"/></h3>
         <div class="homeTable">
             <table>
                 <tr>
@@ -24,6 +24,8 @@
             </table>
         </div>
         <br>
+        <div style="width: 10px; height: 5px;"></div>
+        <h3><g:message code="home.pageTitle.graph"/></h3>
         <div class="homeGraph">
             <div style="float: left;">
                 <canvas id="projectCountPerDate" width="540" height="380">[No canvas support]</canvas>
@@ -32,7 +34,7 @@
                 <canvas id="laneCountPerDate" width="540" height="380">[No canvas support]</canvas>
             </div>
             <div style="float: left;">
-                <canvas id="sampleCountBySeqType" width="540" height="360">[No canvas support]</canvas>
+                <canvas id="sampleCountPerSequenceTypePie" width="540" height="380">[No canvas support]</canvas>
             </div>
             <div style="float: right;">
                 <canvas id="projectCountPerSequenceTypeBar" width="540" height="440">[No canvas support]</canvas>

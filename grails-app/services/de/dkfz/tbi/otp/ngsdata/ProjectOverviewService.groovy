@@ -6,29 +6,31 @@ class ProjectOverviewService {
         Project project = Project.findByName(projectName)
         List seq = AggregateSequences.withCriteria {
            eq("projectId", project.id)
-               property("individualId")
-               property("mockPid")
-               property("sampleTypeId")
-               property("seqTypeId")
-               property("seqPlatformId")
-               property("seqCenterName")
-               property("laneCount")
-               property("sum_N_BasePairsGb")
-               property("projectName")
-               order ("mockPid")
-               order ("sampleTypeId")
-               order ("seqTypeId")
-               order ("seqPlatformId")
-               order ("seqCenterName")
-               order ("laneCount")
+           property("individualId")
+           property("mockPid")
+           property("sampleTypeName")
+           property("seqTypeName")
+           property("libraryLayout")
+           property("seqPlatformId")
+           property("seqCenterName")
+           property("laneCount")
+           property("sum_N_BasePairsGb")
+           property("projectName")
+           order ("mockPid")
+           order ("sampleTypeName")
+           order ("seqTypeName")
+           order ("libraryLayout")
+           order ("seqPlatformId")
+           order ("seqCenterName")
+           order ("laneCount")
             }
-        List queryList=[]
+        List queryList = []
         for (def track in seq) {
             def queryListSingleRow = [
                 track.mockPid,
-                SampleType.get(track.sampleTypeId).name,
-                SeqType.get(track.seqTypeId).name,
-                SeqType.get(track.seqTypeId).libraryLayout,
+                track.sampleTypeName,
+                track.seqTypeName,
+                track.libraryLayout,
                 track.seqCenterName,
                 SeqPlatform.get(track.seqPlatformId).toString(),
                 track.laneCount,
@@ -44,24 +46,14 @@ class ProjectOverviewService {
             eq("projectId", project.id)
             projections {
                 groupProperty("seqTypeName")
+                groupProperty("libraryLayout")
                 countDistinct("mockFullName")
                 count("sampleId")
                 sum("sum_N_BasePairsGb")
             }
             order ("seqTypeName")
         }
-        List queryList = []
-
-        for (def track in seq) {
-            def queryListSingl = [
-                track[0],
-                track[1],
-                track[2],
-                track[3]
-            ]
-            queryList.add(queryListSingl)
-        }
-        return queryList
+        return seq
     }
 
     public Long individualCountByProject(Project project) {
@@ -75,7 +67,7 @@ class ProjectOverviewService {
     public List sampleTypeNameCountBySample(Project project) {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project.id)
-            projections { 
+            projections {
                 groupProperty("sampleTypeName")
                 countDistinct("sampleId")
             }
@@ -83,5 +75,32 @@ class ProjectOverviewService {
         return seq
     }
 
+    public List centerNameRunId(Project project){
+        List seq = Sequence.withCriteria {
+            eq("projectId", project.id)
+            projections {
+                groupProperty("seqCenterName")
+                count("runId")
+            }
+            order ("seqCenterName")
+        }
+        return seq
+    }
+
+    public List centerNameRunIdLastMonth(Project project){
+        Calendar cal = Calendar.getInstance()
+        cal.add(Calendar.MONTH, -6)
+        Date date = cal.getTime()
+        List seq = Sequence.withCriteria {
+            eq("projectId", project.id)
+            gt("dateExecuted", date)
+            projections {
+                groupProperty("seqCenterName")
+                count("runId")
+            }
+            order("seqCenterName")
+        }
+        return seq
+    }
 }
 

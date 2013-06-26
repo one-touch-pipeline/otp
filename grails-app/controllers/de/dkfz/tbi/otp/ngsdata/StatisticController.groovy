@@ -90,41 +90,42 @@ class StatisticController {
         return (date2.getTimeInMillis() - date1.getTimeInMillis()) / (1000 * 60 * 60 * 24)
     }
 
-    JSON sampleCountBySeqType() {
-
+    JSON sampleCountPerSequenceType() {
         List<String> labels = []
-        List<String> labelsProzent = []
+        List<String> labelsPercentage = []
         List<Integer> values = []
         int projectSequenceCount = 0
 
-        List sampleTypeCount = statisticService.sampleCountBySeqType()
+        List sampleCountBySeqType = statisticService.sampleCountPerSequenceType()
 
-        sampleTypeCount.each {
-            if (it[1]<9)
+        sampleCountBySeqType.each {
+            if (it[1] < 9) {
                 return
+            }
             labels << it[0]
             values << it[1]
             projectSequenceCount += it[1]
         }
 
-        sampleTypeCount.each { 
-            if (it[1]<9)
+        sampleCountBySeqType.each {
+            if (it[1] < 9) {
                 return
-            labelsProzent << "${it[0]} ${Math.round(it[1] * 100 / projectSequenceCount)} %" 
+            }
+            labelsPercentage << "${it[0]} ${Math.round(it[1] * 100 / projectSequenceCount)} %"
         }
 
         Map dataToRender = [
             labels: labels,
-            labelsProzent: labelsProzent,
+            labelsPercentage: labelsPercentage,
             data: values,
             count: values.size()
         ]
         render dataToRender as JSON
     }
 
-   public JSON projectCountPerSequenceType() {
+    public JSON projectCountPerSequenceType() {
         List<String> labels = []
-        List<String> labelsProzent = []
+        List<String> labelsPercentage = []
         List<Integer> values = []
         int projectSequenceCount = 0
 
@@ -136,13 +137,11 @@ class StatisticController {
             projectSequenceCount += it[1]
         }
 
-        projectCountPerSequenceType.each {
-            labelsProzent << "${it[0]} ${Math.round(it[1] * 100 / projectSequenceCount)} %"
-        }
+        projectCountPerSequenceType.each { labelsPercentage << "${it[0]} ${Math.round(it[1] * 100 / projectSequenceCount)} %" }
 
         Map dataToRender = [
             labels: labels,
-            labelsProzent: labelsProzent,
+            labelsPercentage: labelsPercentage,
             data: values,
             count: values.size()
         ]
@@ -153,7 +152,7 @@ class StatisticController {
         Project project = projectService.getProjectByName(command.projectName)
 
         List<String> labels = []
-        List<String> labelsProzent = []
+        List<String> labelsPercentage = []
         List<Integer> values = []
         int projectSequenceCount = 0
 
@@ -165,11 +164,11 @@ class StatisticController {
             projectSequenceCount += it[1]
         }
 
-        sampleTypeCount.each { labelsProzent << "${it[0]} ${Math.round(it[1] * 100 / projectSequenceCount)} %" }
+        sampleTypeCount.each { labelsPercentage << "${it[0]} ${Math.round(it[1] * 100 / projectSequenceCount)} %" }
 
         Map dataToRender = [
             labels: labels,
-            labelsProzent: labelsProzent,
+            labelsPercentage: labelsPercentage,
             data: values,
             count: values.size()
         ]
@@ -180,7 +179,6 @@ class StatisticController {
         Project project = projectService.getProjectByName(command.projectName)
 
         List<String> labels = []
-        List<String> labelsProzent = []
         List<Integer> values = []
 
         statisticService.sampleTypeCountByPatient(project).each {
@@ -247,4 +245,3 @@ class ProjectCommand implements Serializable {
         })
     }
 }
-

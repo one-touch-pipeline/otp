@@ -8,7 +8,7 @@
 <body>
     <div class="body">
         <div class="table">
-            <h3 style="margin-bottom: -5px; margin-left:3px; margin-top: 29px" >Centers Overview</h3>
+            <h3 style="margin-bottom: -5px; margin-left:3px; margin-top: 29px;" >Centers Overview</h3>
             <div style="width: 20px; height: 20px;"></div>
             <table>
                 <thead>
@@ -33,7 +33,7 @@
         </div>
         <div style="width: 20px; height: 20px;"></div>
         <div class="table">
-            <h3 style="margin-bottom: -5px; margin-left:3px; margin-top: 29px" >Sequencing Technologies Overview </h3>
+            <h3 style="margin-bottom: -5px; margin-left:3px; margin-top: 29px;" >Sequencing Technologies Overview </h3>
             <div style="width: 20px; height: 20px;"></div>
             <table>
                 <thead>

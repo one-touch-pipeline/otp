@@ -36,11 +36,12 @@ SELECT DISTINCT type from SeqScan scan
 INNER JOIN scan.sample AS sample
 INNER JOIN scan.seqType as type
 WHERE sample.individual = :ind
+order by type.name asc, type.libraryLayout
         ''', [ind: this])
     }
 
     /**
-     * @return List of SeqScan for this Individual
+     * @return List of SeqScan for this Individual ordered
      **/
     List<SeqScan> getSeqScans() {
         def c = SeqScan.createCriteria()
@@ -50,6 +51,17 @@ WHERE sample.individual = :ind
                     eq("id", this.id)
                 }
             }
+            seqPlatform {
+                order("name")
+                order("model")
+            }
+            sample {
+                sampleType {
+                    order ("name")
+                }
+            }
+            order ("state")
+            order ("nLanes")
         }
     }
 

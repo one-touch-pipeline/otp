@@ -15,7 +15,7 @@ class StatisticService {
         return seq
     }
 
-    public List sampleCountBySeqType() {
+    public List sampleCountPerSequenceType() {
         List seq = AggregateSequences.withCriteria {
             projections {
                 groupProperty("seqTypeName")
@@ -24,6 +24,7 @@ class StatisticService {
             order ("seqTypeName")
         }
     }
+
     public List laneCountPerDay() {
         List seq = Sequence.executeQuery("\
             select year(s.dateCreated) as year, month(s.dateCreated) as month, day(s.dateCreated) as day, count(laneId) as laneCount \

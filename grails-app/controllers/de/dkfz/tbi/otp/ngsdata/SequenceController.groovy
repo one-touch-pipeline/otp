@@ -15,7 +15,6 @@ class SequenceController {
     def projectService
     def servletContext
     def fastqcResultsService
-
     def index() {
         List<SeqType> seqTypes = SeqType.list(sort: "name", order: "asc")
         [projects: projectService.getAllProjects(),

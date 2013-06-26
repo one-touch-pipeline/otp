@@ -8,9 +8,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack.QualityEncoding
 
 /**
  * This domain class represents a database view called "aggregate_sequences".
- 
  */
-
 class AggregateSequences implements Serializable {
     // ids
     long seqTypeId

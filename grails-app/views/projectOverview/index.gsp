@@ -26,50 +26,64 @@
         <div class="table">
             <div style="width: 20px; height: 20px;"></div>
             <h3 class="statisticTableTitle">
-                <g:message code="projectOverview.title.table2" />
+                <g:message code="projectOverview.table.sampletype.title" />
             </h3>
             <div class="dataTableContainer sampleTypeNameCountBySample"
                 style="margin-right: 1%;">
                 <otp:dataTable
                     codes="${[
-                        'projectOverview.index.sampleTypeName',
-                        'projectOverview.index.sampleCount',
-                    ] }"
+                        'projectOverview.table.sampleTypeName',
+                        'projectOverview.table.sampleCount',
+                    ]}"
                     id="sampleTypeNameCountBySample" />
             </div>
             <div style="width: 20px; height: 50px;"></div>
-            <h3 class="statisticTableTitle">
-                <g:message code="projectOverview.title" />
+            <h3 class="statisticTableTitle" >
+                <g:message code="projectOverview.title.centersOverviewTable" />
             </h3>
+           <div class="dataTableContainer centerNameRunId"
+                style="margin-right: 1%;">
+                <otp:dataTable
+                    codes="${[
+                        'overview.statistic.center.name',
+                        'overview.statistic.center.totalCount',
+                        'overview.statistic.center.newCount',
+                    ] }"
+                    id="centerNameRunId" />
+            </div>
+            <div style="width: 20px; height: 50px;"></div>
+            <h3 class="statisticTableTitle">
+                <g:message code="projectOverview.table.statistic.title" /></h3>
             <div class="dataTableContainer projectOverviewTable"
                 style="margin-right: 1%;">
                 <otp:dataTable
                     codes="${[
-                    'projectOverview.index.PID',
-                    'projectOverview.index.sampleType',
-                    'projectOverview.index.sequenceTypeName',
-                    'projectOverview.index.sequenceTypeLibraryLayout',
-                    'projectOverview.index.centerName',
-                    'projectOverview.index.platformId',
-                    'projectOverview.index.laneCount',
-                    'projectOverview.index.gigaBase'
-                ] }"
+                        'projectOverview.index.PID',
+                        'projectOverview.index.sampleType',
+                        'projectOverview.index.sequenceTypeName',
+                        'projectOverview.index.sequenceTypeLibraryLayout',
+                        'projectOverview.index.centerName',
+                        'projectOverview.index.platformId',
+                        'projectOverview.index.laneCount',
+                        'projectOverview.index.gigaBase'
+                    ] }"
                     id="projectOverviewTable" />
             </div>
             <div style="width: 20px; height: 50px;"></div>
             <h3 class="statisticTableTitle">
-                <g:message code="projectOverview.title.table" />
+                <g:message code="projectOverview.table.seqtype.title" />
             </h3>
             <div
                 class="dataTableContainer patientsAndSamplesGBCountPerProject"
                 style="margin-right: 1%;">
                 <otp:dataTable
                     codes="${[
-                    'projectOverview.seqtype.seqName',
-                    'projectOverview.seqtype.individualCount',
-                    'projectOverview.seqtype.sampleCount',
-                    'projectOverview.seqtype.gb'
-                ] }"
+                        'projectOverview.seqtype.seqName',
+                        'projectOverview.seqtype.labreryLayout',
+                        'projectOverview.seqtype.individualCount',
+                        'projectOverview.seqtype.sampleCount',
+                        'projectOverview.seqtype.gb'
+                    ]}"
                     id="patientsAndSamplesGBCountPerProject" />
             </div>
         </div>
