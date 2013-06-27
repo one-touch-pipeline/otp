@@ -8,6 +8,16 @@ class ReferenceGenomeService {
     ConfigService configService
 
     /**
+     * load the {@link ReferenceGenome} with the given id from the database and returns it.
+     *
+     * @param id the id of the {@link ReferenceGenome} to load
+     * @return the loaded {@link ReferenceGenome} or <code>null</code>, if not founded
+     */
+    public ReferenceGenome referenceGenome(long id) {
+        return ReferenceGenome.get(id)
+    }
+
+    /**
      * returns the reference genome depending on the project and the sequencing type
      * @param project the project, to which the reference genome belongs to
      * @param seqType the sequencing type, to which the reference genome belongs to

@@ -71,9 +71,12 @@ class ChromosomeIdentifierSortingService {
         }
     }
 
-    public Map<String, List> sort(Map<String, List> changedIdentifierCoverageData) {
-        Map sortedIdentifierCoverageData = new TreeMap<String, List> (listComparator)
-        sortedIdentifierCoverageData.putAll(changedIdentifierCoverageData)
-        return sortedIdentifierCoverageData
+    /**
+     * Creates a new list with the elements of the given collection sorted by {@link #listComparator}
+     * @param chromosomeIdentifier the chromosome identifiers to sort
+     * @return the sorted chromosome identifiers
+     */
+    public List<String> sortIdentifiers(Collection<String> chromosomeIdentifiers) {
+        return chromosomeIdentifiers.sort(listComparator)
     }
 }

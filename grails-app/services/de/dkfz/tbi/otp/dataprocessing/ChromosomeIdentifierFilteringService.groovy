@@ -9,15 +9,10 @@ package de.dkfz.tbi.otp.dataprocessing
 
 class ChromosomeIdentifierFilteringService {
 
-    public Map<String, List> filteringCoverage(Map<String, List<String>> sortedIdentifierCoverageData) {
-        List<String> filterCondition = Chromosomes.asteriskAndMLabels()
-        return filter(filterCondition, sortedIdentifierCoverageData)
-    }
-
-    private Map<String, List<String>> filter(List<String> filterCondition, Map<String, List<String>> sortedIdentifierCoverageData) {
-        Map<String, List<String>> filteredIdentifierCoverageData = sortedIdentifierCoverageData.findAll { chromosomeIdentifier ->
-            !filterCondition.contains(chromosomeIdentifier.key)
-        }
-        return filteredIdentifierCoverageData
+    /**
+     * returns the chromosome names to filter out for coverage
+     */
+    public List<String> filteringCoverage() {
+        return Chromosomes.filterConditions()
     }
 }

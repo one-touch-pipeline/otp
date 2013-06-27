@@ -14,16 +14,16 @@ class ChromosomeIdentifierMappingService {
     ReferenceGenomeService referenceGenomeService
 
     public Map<String, String> mappingAll(Project project, SeqType seqType) {
-        ReferenceGenome referenceGenome = referenceGenomeService.getReferenceGenome(project, seqType)
+        ReferenceGenome referenceGenome = referenceGenomeService.referenceGenome(project, seqType)
         return mappingAll(referenceGenome)
     }
 
     public Map<String, String> mappingAll(ReferenceGenome referenceGenome) {
         Map<String, String> mappedIdentifier = [ : ]
         String referenceGenomeName = referenceGenome.name
-        if (prefixPerReferenceGenome[referenceGenome.name]) {
+        if (prefixPerReferenceGenome[referenceGenomeName]) {
             String referenceGenomePrefix = prefixPerReferenceGenome.get(referenceGenomeName)
-            Chromosomes.allLabels().each() { chromosome ->
+            Chromosomes.allLabels().each() { Chromosomes chromosome ->
                 mappedIdentifier.put(referenceGenomePrefix + chromosome, chromosome)
             }
         } else {

@@ -1,0 +1,54 @@
+apply plugin: 'groovy'
+apply plugin: 'application'
+
+mainClassName = "de.dkfz.tbi.ngstools.coverage_plot_mfs.CoveragePlotMFS"
+
+baseName = "coverage_plot_mfs"
+
+repositories {
+    maven {
+        url '$ARTIFACTORY_URL'
+    }
+}
+
+dependencies {
+    groovy group: 'org.codehaus.groovy', name: 'groovy-all', version: '1.8.6'
+    compile group: 'gson', name: 'gson', version: '2.2.2'
+    compile group: 'org.hibernate', name: 'hibernate-validator', version: '5.0.1.Final'
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+
+jar {
+    manifest.mainAttributes("Main-Class": mainClassName)
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    version = branchName()
+}
+
+run {
+    Map<String,String> params = [
+        formatingJson: "$HOMEunit-test-otp/coverage-plot-mfs-jar/input/formating-mfs.json",
+        coverageFile: "$HOMEunit-test-otp/coverage-plot-mfs-jar/input/original-coverage.tsv",
+        generatedCoverageFile: "$HOMEunit-test-otp/coverage-plot-mfs-jar/output/generated-coverage.tsv",
+        override: "true"
+    ]
+    args params.values()
+}
+
+task branchName() << {
+    println "branchName: " + branchName()
+}
+
+private String branchName() {
+    String branchName = System.getenv("GIT_BRANCH")
+    if (!branchName) {
+        // not specified through environment - try to resolve through git
+        ext.proc = "git symbolic-ref HEAD".execute()
+        proc.waitFor()
+        branchName = proc.in.text
+    }
+    // remove git path structure and appended line feed
+    if (branchName.contains("/")) {
+        return branchName.substring(branchName.lastIndexOf("/") + 1, branchName.length() - 1)
+    }
+    return branchName
+}
