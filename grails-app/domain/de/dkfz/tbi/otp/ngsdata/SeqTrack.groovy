@@ -27,7 +27,6 @@ class SeqTrack {
     SeqType seqType
     SeqPlatform seqPlatform
     SoftwareTool pipelineVersion
-	boolean isWithdrown = false
 
     QualityEncoding qualityEncoding = QualityEncoding.UNKNOWN
     DataProcessingState alignmentState = DataProcessingState.UNKNOWN

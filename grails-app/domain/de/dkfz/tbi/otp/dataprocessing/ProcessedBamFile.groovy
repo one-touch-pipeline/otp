@@ -2,12 +2,14 @@ package de.dkfz.tbi.otp.dataprocessing
 
 class ProcessedBamFile extends AbstractFileSystemBamFile {
 
-    enum MergingBlock {
-        NOT_STARTED,
-        IN_PROGRESS
-    }
-
-    MergingBlock mergingBlock = MergingBlock.NOT_STARTED
+    /**
+     * this flag is used to block the object for the time
+     * it is being used to create a new {@link MergingSet}.
+     * After this the object must released from block.
+     * If true, the object is being used to create a new
+     * {@link MergingSet}.
+     */
+    boolean isBlockedForNewMergingSet = false
 
     static belongsTo = [
         alignmentPass: AlignmentPass
