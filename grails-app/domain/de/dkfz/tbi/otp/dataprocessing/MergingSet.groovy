@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*;
+import de.dkfz.tbi.otp.ngsdata.*
 
 /**
  * Represents a set of {@link ProcessedBamFile}s to be merged
@@ -12,11 +12,6 @@ import de.dkfz.tbi.otp.ngsdata.*;
  *
  */
 class MergingSet {
-
-    /**
-     * identifier unique within the corresponding {@link MergingWorkPackage}
-     */
-    int identifier
 
     /**
      * state of processing of {@link MergingSet} instance
@@ -44,6 +39,11 @@ class MergingSet {
          */
         PROCESSED
     }
+
+    /**
+     * identifier unique within the corresponding {@link MergingWorkPackage}
+     */
+    int identifier
 
     /**
      * current {@link State} of this instance

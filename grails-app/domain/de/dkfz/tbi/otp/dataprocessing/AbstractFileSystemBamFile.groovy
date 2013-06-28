@@ -1,7 +1,5 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import java.util.Date;
-
 /**
  * Represents bam files stored on the file system.
  * Keeps file-system related properties of a bam file.
@@ -16,7 +14,7 @@ class AbstractFileSystemBamFile extends AbstractBamFile {
     boolean fileExists
 
     /**
-     * date of creation of object in the data base
+     * date of creation of object in the database
      */
     Date dateCreated = new Date()
 

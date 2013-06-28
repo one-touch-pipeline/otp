@@ -8,7 +8,7 @@ import org.junit.*
 /**
  * The DOM has been created long time ago.
  * Here only possibility to create and save DOM is tested
- * 
+ *
  *
  */
 @TestFor(AbstractBamFile)

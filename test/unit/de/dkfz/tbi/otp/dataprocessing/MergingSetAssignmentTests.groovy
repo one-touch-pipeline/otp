@@ -22,7 +22,7 @@ class MergingSetAssignmentTests {
         project.realmName = "def"
         project.save(flush: true)
         assertTrue(project.validate())
-        
+
         Individual individual = new Individual()
         individual.pid = "SOME_PATIENT_ID"
         individual.mockPid = "PUBLIC_PID"
@@ -31,37 +31,37 @@ class MergingSetAssignmentTests {
         individual.project = project
         individual.save(flush: true)
         assertTrue(individual.validate())
-        
+
         SampleType sampleType = new SampleType()
         sampleType.name = "TUMOR"
         sampleType.save(flush: true)
         assertTrue(sampleType.validate())
-        
+
         Sample sample = new Sample()
         sample.individual = individual
         sample.sampleType = sampleType
         sample.save(flush: true)
         assertTrue(sample.validate())
-        
+
         SeqType seqType = new SeqType()
         seqType.name = "WHOLE_GENOME"
         seqType.libraryLayout = "SINGLE"
         seqType.dirName = "whole_genome_sequencing"
         seqType.save(flush: true)
         assertTrue(seqType.validate())
-        
+
         SeqCenter seqCenter = new SeqCenter()
         seqCenter.name = "DKFZ"
         seqCenter.dirName = "core"
         seqCenter.save(flush: true)
         assertTrue(seqCenter.validate())
-        
+
         SeqPlatform seqPlatform = new SeqPlatform()
         seqPlatform.name = "solid"
         seqPlatform.model = "4"
         seqPlatform.save(flush: true)
         assertTrue(seqPlatform.validate())
-        
+
         Run run = new Run()
         run.name = "testname"
         run.seqCenter = seqCenter
@@ -69,7 +69,7 @@ class MergingSetAssignmentTests {
         run.storageRealm = Run.StorageRealm.DKFZ
         run.save(flush: true)
         assertTrue(run.validate())
-        
+
         SoftwareTool softwareTool = new SoftwareTool()
         softwareTool.programName = "SOLID"
         softwareTool.programVersion = "0.4.8"
@@ -77,7 +77,7 @@ class MergingSetAssignmentTests {
         softwareTool.type = SoftwareTool.Type.ALIGNMENT
         softwareTool.save(flush: true)
         assertTrue(softwareTool.validate())
-        
+
         SeqTrack seqTrack = new SeqTrack()
         seqTrack.laneId = "123"
         seqTrack.run = run
@@ -87,14 +87,14 @@ class MergingSetAssignmentTests {
         seqTrack.pipelineVersion = softwareTool
         seqTrack.save(flush: true)
         assertTrue(seqTrack.validate())
-        
+
         AlignmentPass alignmentPass = new AlignmentPass()
         alignmentPass.identifier = 2
         alignmentPass.seqTrack = seqTrack
         alignmentPass.description = "test"
         alignmentPass.save(flush: true)
         assertTrue(alignmentPass.validate())
-        
+
         processedBamFile = new ProcessedBamFile()
         processedBamFile.type = AbstractBamFile.BamType.SORTED
         processedBamFile.fileExists = true
@@ -110,7 +110,7 @@ class MergingSetAssignmentTests {
         this.mergingSet = new MergingSet(
             mergingWorkPackage: workPackage)
         this.mergingSet.save(flush: true)
- 
+
     }
 
     void tearDown() {

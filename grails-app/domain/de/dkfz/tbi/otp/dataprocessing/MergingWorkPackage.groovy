@@ -4,9 +4,9 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 
 /**
- * Represents a "workpackage" to merge all available for a {@link Sample}
- * (currently and in the future) {@link ProcessedBamFile}s satisfying the
- * given {@link MergingCriteria} or custom selection.
+ * Represents a "workpackage" to merge all {@link ProcessedBamFile}s
+ * available for the corresponding {@link Sample} (currently and in the future)
+ * and satisfying the given {@link MergingCriteria} or custom selection.
  *
  *
  */
@@ -41,7 +41,7 @@ class MergingWorkPackage {
          * {@link ProcessedBamFile}s for this sample must be generated
          * from sequencing files with the same {@link SeqPlatform} and {@link SeqType}
          */
-        DEFAULT //
+        DEFAULT
         // e.g. ILLUMINA_2000_2500: illumina 2000 and 2500 and the same seq type
     }
 
