@@ -23,7 +23,7 @@ enum ParameterUtils {
         if (violations) {
             StringBuilder failedMessage = new StringBuilder()
             violations.each { constraintViolation ->
-                failedMessage.append("${failedMessage}\n${constraintViolation.getMessage()}\n\n")
+                failedMessage.append("${constraintViolation.getMessage()}\n\n")
             }
             throw new ValidationException(failedMessage.toString())
         }
@@ -32,7 +32,7 @@ enum ParameterUtils {
     public void parse(Object object, String parameter, String value) {
         MetaProperty metaProperty = object.getClass().getMetaClass().getMetaProperty(parameter)
         if (!metaProperty) {
-            throw new IllegalArgumentException("property ${parameter} is not defined")
+            throw new IllegalArgumentException("The property '${parameter}' is not defined for the object '${object}'")
         }
         this."parseTo${metaProperty.getType().getSimpleName()}"(object, parameter, value)
     }
@@ -45,7 +45,7 @@ enum ParameterUtils {
         try {
             object."${property}" = value as Integer
         } catch (Exception e) {
-            throw new ValidationException("${property} must be a number, but was ${value}")
+            throw new ValidationException("The property '${property}' must be a number, but was '${value}'")
         }
     }
 
@@ -56,12 +56,12 @@ enum ParameterUtils {
         } else if (value.equalsIgnoreCase("false")) {
             bool = Boolean.FALSE
         } else {
-            throw new ValidationException("${property} must be a true or false, but was ${value}")
+            throw new ValidationException("The property '${property}' must be true or false, but was '${value}'")
         }
         try {
             object."${property}" = bool
         } catch (Exception e) {
-            throw new ValidationException("${property} must be a true or false, but was ${value}")
+            throw new ValidationException("The property '${property}' must be true or false, but was '${value}'")
         }
     }
 }

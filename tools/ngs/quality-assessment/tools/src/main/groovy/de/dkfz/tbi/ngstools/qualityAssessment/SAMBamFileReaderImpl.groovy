@@ -25,8 +25,8 @@ class SAMBamFileReaderImpl implements BamFileReader<SAMRecord> {
 
     @Override
     GenomeStatistic<SAMRecord> read(File bamFile, File indexFile) {
-        if (!bamFile.canRead()) throw new RuntimeException("can not read file ${bamFile}")
-        if (!indexFile.canRead()) throw new RuntimeException("can not read file ${indexFile}")
+        if (!bamFile.canRead()) throw new RuntimeException("The bam file '${bamFile}' is not readable")
+        if (!indexFile.canRead()) throw new RuntimeException("The index file '${indexFile}' is not readable")
 
         SAMFileReader.setDefaultValidationStringency(SAMFileReader.ValidationStringency.SILENT)
         SAMFileReader samFileReader = new SAMFileReader(bamFile, indexFile)

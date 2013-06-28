@@ -39,29 +39,29 @@ class FileParameters {
     }
 
     private void validateInputFile(String path) {
-        File bamFile = new File(path)
-        if (!bamFile.canRead()) {
-            throw new ValidationException("can not read file ${path}")
+        File file = new File(path)
+        if (!file.canRead()) {
+            throw new ValidationException("The file ${path} can not be read")
         }
-        if (bamFile.size() == 0) {
-            throw new ValidationException("file is empty: ${path}")
+        if (file.size() == 0) {
+            throw new ValidationException("There is no content in the file ${path}")
         }
     }
 
     private void validateOutputDirecory(String path) {
         File file = new File(path)
         if (file.exists() && !file.isFile()) {
-            throw new ValidationException("${path} is not a normal file")
+            throw new ValidationException("The file ${path} exists, but is not a normal file")
         }
         File dir = file.getParentFile()
         if (!dir.exists()) {
-            throw new ValidationException("output directory ${dir} does not exist")
+            throw new ValidationException("The output directory ${dir}, where the file ${path} should be put, does not exist")
         }
         if (!dir.canRead()) {
-            throw new ValidationException("can not read output directory ${dir}")
+            throw new ValidationException("The output directory ${dir}, where the file ${path} should be put, can not be read")
         }
         if (!dir.canWrite()) {
-            throw new ValidationException("can not write output directory ${dir}")
+            throw new ValidationException("The file ${path} can not be put to the directory ${dir}, since the directory is not writeable")
         }
     }
 }

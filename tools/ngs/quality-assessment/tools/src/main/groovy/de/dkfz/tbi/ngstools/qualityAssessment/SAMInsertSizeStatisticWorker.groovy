@@ -103,6 +103,6 @@ class SAMInsertSizeStatisticWorker extends AbstractStatisticWorker<SAMRecord> {
                 return key
             }
         }
-        throw new ArithmeticException("no position " + position + " available")
+        throw new ArithmeticException("The position " + position + " is not available in the chromosome ${chromosome}")
     }
 }

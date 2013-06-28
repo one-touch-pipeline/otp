@@ -38,7 +38,6 @@ The following parameters are accepted in the following order:
 ${PARAMS_INFO}
 """
 
-
     private final static String PARAMS_VALIDATION_FAILED = """
 Validation of the input parameters has failed:
 """
@@ -48,7 +47,7 @@ The output file exists and overrideOutput is set to FALSE:
 """
 
     private final static String CAN_NOT_DELETE_OUTPUT_FILE = """
-Can not delete the old output file:
+The old output file can not be deleted:
 """
 
     private final static String PROCESSING_FAILED = """
