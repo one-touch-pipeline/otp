@@ -35,11 +35,11 @@ class ReferenceGenomeProjectSeqType {
         // defined for the same combination of project and seqType
         referenceGenome validator: { val, obj ->
             if (!obj.deprecatedDate) {
-                List<ReferenceGenomeProjectSeqType> existingObjs = ReferenceGenomeProjectSeqType
+                List<ReferenceGenomeProjectSeqType> existingObjects = ReferenceGenomeProjectSeqType
                     .findAllByProjectAndSeqTypeAndDeprecatedDateIsNull(obj.project, obj.seqType)
-                if (!existingObjs.size()) {
+                if (existingObjects.isEmpty()) {
                     return true
-                } else if ((existingObjs.size() == 1) && (existingObjs.contains(obj))) {
+                } else if ((existingObjects.size() == 1) && (existingObjects.contains(obj))) {
                     return true
                 } else {
                     return false

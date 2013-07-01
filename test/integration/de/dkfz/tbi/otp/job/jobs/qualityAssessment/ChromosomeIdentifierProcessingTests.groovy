@@ -11,25 +11,59 @@ import de.dkfz.tbi.otp.ngsdata.*
 class ChromosomeIdentifierProcessingTests {
 
     ChromosomeIdentifierProcessingService chromosomeIdentifierProcessingService
+    ProcessedBamFile processedBamFile
+    File root
+    File directory
+    File fileInput
+    File fileOutput
 
     @Before
     void setUp() {
-        // Setup logic here
-    }
 
-    @After
-    void tearDown() {
-        // Tear down logic here
-    }
+        directory = new File("/tmp/results_per_pid/PID/alignment/testname_123/pass2/QualityAssessment/")
+        if (!directory.exists()) {
+            directory.mkdirs()
+        }
 
-    /**
-     * tests if the method execute (including the services mapping, sorting, filtering) works
-     */
-    @Test
-    void testExecution() {
+        fileInput = new File("/tmp/results_per_pid/PID/alignment/testname_123/pass2/QualityAssessment/tumor_testname_s_123_SINGLE.sorted_coverage.tsv")
+        if (!fileInput.exists()) {
+            fileInput.createNewFile()
+            fileInput << "chr1\t0\t0\nchr1\t1000\t5\nchr1\t2000\t7\n"
+            fileInput << "chr10\t0\t0\nchr10\t1000\t1\nchr10\t6000\t55\n"
+            fileInput << "chr11\t0\t0\nchr11\t5000\t0\nchr11\t6000\t55\n"
+            fileInput << "chr12\t1000\t1\nchr12\t2000\t44\n"
+            fileInput << "chr13\t0\t0\nchr13\t4000\t5\nchr13\t6000\t55\n"
+            fileInput << "chr14\t0\t0\nchr14\t6000\t55\n"
+            fileInput << "chr15\t0\t0\nchr15\t6000\t55\n"
+            fileInput << "chr16\t0\t1\nchr16\t1000\t1\n"
+            fileInput << "chr17\t0\t0\nchr17\t1000\t3\nchr17\t2000\t44\n"
+            fileInput << "chr18\t0\t0\nchr18\t6000\t55\n"
+            fileInput << "chr19\t0\t0\n"
+            fileInput << "chr2\t0\t0\nchr2\t6000\t55\n"
+            fileInput << "chr20\t5000\t0\nchr20\t6000\t25\n"
+            fileInput << "chr21\t4000\t5\nchr21\t6000\t55\n"
+            fileInput << "chr22\t5000\t0\nchr22\t6000\t55\n"
+            fileInput << "chr3\t0\t0\nchr3\t1000\t1\n"
+            fileInput << "chr4\t0\t33\nchr4\t1000\t1\n"
+            fileInput << "chr5\t6000\t55\n"
+            fileInput << "chrM\t0\t48\nchrM\t1000\t3\n"
+            fileInput << "chr*\t1000\t1\nchr*\t3000\t23\nchr*\t4000\t5\nchr*\t5000\t0\nchr*\t6000\t55\n"
+            fileInput << "chr6\t1000\t1\nchr6\t6000\t55\n"
+            fileInput << "chr7\t0\t0\nchr7\t1000\t1\nchr7\t2000\t44\n"
+            fileInput << "chr8\t6000\t55\n"
+            fileInput << "chr9\t0\t34\nchr9\t3000\t23\nchr9\t4000\t5\n"
+            fileInput << "chrX\t4000\t5\nchrX\t5000\t0\nchrX\t6000\t55\n"
+            fileInput << "chrY\t0\t0\nchrY\t1000\t1\n"
+        }
+
+        fileOutput = new File("/tmp/results_per_pid/PID/alignment/testname_123/pass2/QualityAssessment/tumor_testname_s_123_SINGLE.sorted_filtered_and_sorted_coverage.tsv")
+        if (!fileOutput.exists()) {
+            fileOutput.createNewFile()
+        }
+
         Project project = new Project()
         project.name = "SOME_PROJECT"
-        project.dirName = "/some/relative/path"
+        project.dirName = "/tmp/"
         project.realmName = "def"
         project.save(flush: true)
         assertTrue(project.validate())
@@ -106,7 +140,7 @@ class ChromosomeIdentifierProcessingTests {
         alignmentPass.save(flush: true)
         assertTrue(alignmentPass.validate())
 
-        ProcessedBamFile processedBamFile = new ProcessedBamFile()
+        processedBamFile = new ProcessedBamFile()
         processedBamFile.type = AbstractBamFile.BamType.SORTED
         processedBamFile.fileExists = true
         processedBamFile.dateFromFileSystem = new Date()
@@ -146,6 +180,20 @@ class ChromosomeIdentifierProcessingTests {
         realm.pbsOptions = ""
         realm.save(flush : true)
         assertTrue(realm.validate())
+    }
+
+    @After
+    void tearDown() {
+        processedBamFile = null
+        fileInput.delete()
+    }
+
+    /**
+     * tests if the method execute (including the services mapping, sorting, filtering) works
+     */
+    @Test
+    void testExecution() {
+
 
         assertTrue(chromosomeIdentifierProcessingService.execute(processedBamFile))
     }

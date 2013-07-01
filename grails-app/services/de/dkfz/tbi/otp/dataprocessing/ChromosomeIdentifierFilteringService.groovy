@@ -10,7 +10,7 @@ package de.dkfz.tbi.otp.dataprocessing
 class ChromosomeIdentifierFilteringService {
 
     public Map<String, List> filteringCoverage(Map<String, List<String>> sortedIdentifierCoverageData) {
-        List<String> filterCondition = Chromosomes.filterConditions()
+        List<String> filterCondition = Chromosomes.asteriskAndMLabels()
         return filter(filterCondition, sortedIdentifierCoverageData)
     }
 
