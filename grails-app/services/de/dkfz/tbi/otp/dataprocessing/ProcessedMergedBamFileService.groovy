@@ -1,47 +1,67 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import static org.springframework.util.Assert.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 class ProcessedMergedBamFileService {
 
+    ProcessedMergingFileService processedMergingFileService
+
     DataProcessingFilesService dataProcessingFilesService
 
-    public String getDirectory(MergingPass mergingPass) {
-        Individual ind = mergingPass.mergingSet.mergingWorkPackage.sample.individual
-        DataProcessingFilesService.OutputDirectories dirType = DataProcessingFilesService.OutputDirectories.MERGING
-        String baseDir = dataProcessingFilesService.getOutputDirectory(ind, dirType)
-        String middleDir = "test" //TODO what to use
-        return "${baseDir}/${middleDir}/${mergingPass.getDirectory()}"
+    MergingPassService mergingPassService
+
+    public String fileNameNoSuffix(ProcessedMergedBamFile mergedBamFile) {
+        notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
+        MergingSet mergingSet = mergedBamFile.mergingPass.mergingSet
+        MergingWorkPackage mergingWorkPackage = mergingSet.mergingWorkPackage
+        Sample sample = mergingWorkPackage.sample
+        Individual individual = sample.individual
+        String seqTypeName = "${mergingWorkPackage.seqType.name}_${mergingWorkPackage.seqType.libraryLayout}"
+        return "${sample.sampleType.name}_${individual.pid}_${seqTypeName}_merged.mdup"
     }
 
-    public String getDirectory(ProcessedMergedBamFile mergedBamFile) {
-        return getDirectory(mergedBamFile.mergingPass)
-    }
-
-    public String getFileNameNoSuffix(ProcessedMergedBamFile mergedBamFile) {
-        //TODO naming, alignment use run and lane, but they not available here
-        return "processedMergedBamFile"
-    }
-
-    public String getFileName(ProcessedMergedBamFile mergedBamFile) {
-        String body = getFileNameNoSuffix(mergedBamFile)
+    public String fileName(ProcessedMergedBamFile mergedBamFile) {
+        notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
+        String body = fileNameNoSuffix(mergedBamFile)
         return "${body}.bam"
     }
 
-    public String getFilePath(ProcessedMergedBamFile mergedBamFile) {
-        String dir = getDirectory(mergedBamFile)
-        String filename = getFileName(mergedBamFile)
+    public String filePath(ProcessedMergedBamFile mergedBamFile) {
+        notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
+        String dir = processedMergingFileService.directory(mergedBamFile)
+        String filename = fileName(mergedBamFile)
         return "${dir}/${filename}"
     }
 
-    public String getFileNameForMetrics(ProcessedMergedBamFile mergedBamFile) {
-        return getFileNameNoSuffix(mergedBamFile) + "_metrics.txt"
+    public String fileNameForMetrics(ProcessedMergedBamFile mergedBamFile) {
+        notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
+        return fileNameNoSuffix(mergedBamFile) + "_metrics.txt"
     }
 
-    public String getFilePathForMetrics(ProcessedMergedBamFile mergedBamFile) {
-        String dir = getDirectory(mergedBamFile)
-        String filename = getFileNameForMetrics(mergedBamFile)
+    public String filePathForMetrics(ProcessedMergedBamFile mergedBamFile) {
+        notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
+        String dir = processedMergingFileService.directory(mergedBamFile)
+        String filename = fileNameForMetrics(mergedBamFile)
         return "${dir}/${filename}"
+    }
+
+    public String fileNameForBai(ProcessedMergedBamFile mergedBamFile) {
+        notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
+        String body = fileName(mergedBamFile)
+        return "${body}.bai"
+    }
+
+    public String filePathForBai(ProcessedMergedBamFile mergedBamFile) {
+        notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
+        String dir = processedMergingFileService.directory(mergedBamFile)
+        String filename = fileNameForBai(mergedBamFile)
+        return "${dir}/${filename}"
+    }
+
+    public ProcessedMergedBamFile save(ProcessedMergedBamFile processedMergedBamFile) {
+        notNull(processedMergedBamFile, "The parameter processedMergedBamFile are not allowed to be null")
+        return assertSave(processedMergedBamFile)
     }
 
     private def assertSave(def object) {
@@ -52,10 +72,23 @@ class ProcessedMergedBamFileService {
         return object
     }
 
+    public ProcessedMergedBamFile createMergedBamFile(MergingPass mergingPass) {
+        notNull(mergingPass, "The parameter mergingPass is not allowed to be null")
+        ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
+                        mergingPass: mergingPass,
+                        type: AbstractBamFile.BamType.MDUP
+                        )
+        return save(processedMergedBamFile)
+    }
+
     public boolean updateBamFile(ProcessedMergedBamFile bamFile) {
-        File file = new File(getFilePath(bamFile))
+        notNull(bamFile, "The parameter bamFile is not allowed to be null")
+        File file = new File(filePath(bamFile))
         if (!file.canRead()) {
-            return false
+            throw new RuntimeException("Can not read the bam file ${file}")
+        }
+        if (!file.size()) {
+            throw new RuntimeException("The bam file ${file} is empty")
         }
         bamFile.fileExists = true
         bamFile.fileSize = file.length()
@@ -64,11 +97,29 @@ class ProcessedMergedBamFileService {
         return bamFile.fileSize
     }
 
-    public boolean updateBamFileIndex(ProcessedMergedBamFile bamFile) {
-        String path = getFilePath(bamFile)
-        File file = new File("${path}.bai")
+    public boolean updateBamMetricsFile(ProcessedMergedBamFile bamFile) {
+        notNull(bamFile, "The parameter bamFile is not allowed to be null")
+        File file = new File(filePathForMetrics(bamFile))
         if (!file.canRead()) {
-            return false
+            throw new RuntimeException("Can not read the metrics file ${file}")
+        }
+        if (!file.size()) {
+            throw new RuntimeException("The metrics file ${file} is empty")
+        }
+        bamFile.hasMetricsFile = true
+        assertSave(bamFile)
+        return true
+    }
+
+    public boolean updateBamFileIndex(ProcessedMergedBamFile bamFile) {
+        notNull(bamFile, "The parameter bamFile is not allowed to be null")
+        String path = filePathForBai(bamFile)
+        File file = new File(path)
+        if (!file.canRead()) {
+            throw new RuntimeException("Can not read the index file ${file}")
+        }
+        if (!file.size()) {
+            throw new RuntimeException("The index file ${file} is empty")
         }
         bamFile.hasIndexFile = true
         assertSave(bamFile)

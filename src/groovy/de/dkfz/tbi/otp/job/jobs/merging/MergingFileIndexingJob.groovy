@@ -11,6 +11,9 @@ class MergingFileIndexingJob extends AbstractJobImpl {
     MergingPassService mergingPassService
 
     @Autowired
+    ProcessedMergingFileService processedMergingFileService
+
+    @Autowired
     ProcessedMergedBamFileService processedMergedBamFileService
 
     @Autowired
@@ -22,15 +25,16 @@ class MergingFileIndexingJob extends AbstractJobImpl {
         MergingPass mergingPass = MergingPass.get(mergingPassId)
         ProcessedMergedBamFile mergedBamFile = ProcessedMergedBamFile.findByMergingPass(mergingPass)
         Realm realm = mergingPassService.realmForDataProcessing(mergingPass)
-        String cmd = createIndexingCommand(bamFile)
+        String cmd = createIndexingCommand(mergedBamFile)
         String pbsId = executionHelperService.sendScript(realm, cmd)
         addOutputParameter("__pbsIds", pbsId)
         addOutputParameter("__pbsRealm", realm.id.toString())
     }
 
     private String createIndexingCommand(ProcessedMergedBamFile bamFile) {
-        String path = processedMergedBamFileService.getDirectory(bamFile)
-        String fileName = processedMergedBamFileService.getFileName(bamFile)
-        return "cd ${path}; samtools index ${fileName}; chmod 440 ${fileName}.bai"
+        String path = processedMergingFileService.directory(bamFile)
+        String fileName = processedMergedBamFileService.fileName(bamFile)
+        String baiFileName = processedMergedBamFileService.fileNameForBai(bamFile)
+        return "cd ${path}; samtools index ${fileName}; chmod 440 ${baiFileName}"
     }
 }

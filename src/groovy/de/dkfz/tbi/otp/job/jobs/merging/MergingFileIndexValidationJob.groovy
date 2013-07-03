@@ -4,7 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.beans.factory.annotation.Autowired
 
-class MergingFileIndexValidationJob  extends AbstractEndStateAwareJobImpl {
+class MergingFileIndexValidationJob extends AbstractEndStateAwareJobImpl {
 
     @Autowired
     MergingPassService mergingPassService

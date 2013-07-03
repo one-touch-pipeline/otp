@@ -127,19 +127,7 @@ class MergingSetService {
         return object
     }
 
-    MergingSet nextMergingSet() {
+    MergingSet mergingSetInStateNeedsProcessing() {
         return MergingSet.findByStatus(MergingSet.State.NEEDS_PROCESSING)
-    }
-
-    void blockForMerging(MergingSet mergingSet) {
-        notNull(mergingSet, "the input mergingSet for the method blockForMerging is null")
-        mergingSet.status = MergingSet.State.INPROGRESS
-        assertSave(mergingSet)
-    }
-
-    void mergingSetFinished(MergingSet mergingSet) {
-        notNull(mergingSet, "the input mergingSet for the method mergingSetFinished is null")
-        mergingSet.status = MergingSet.State.PROCESSED
-        assertSave(mergingSet)
     }
 }

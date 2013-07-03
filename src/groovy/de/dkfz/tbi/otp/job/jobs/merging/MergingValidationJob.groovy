@@ -20,8 +20,7 @@ class MergingValidationJob extends AbstractEndStateAwareJobImpl {
         ProcessedMergedBamFile mergedBamFile = ProcessedMergedBamFile.findByMergingPass(mergingPass)
 
         boolean state = processedMergedBamFileService.updateBamFile(mergedBamFile)
+        state &= processedMergedBamFileService.updateBamMetricsFile(mergedBamFile)
         state ? succeed() : fail()
-
-        //TODO check of metricsPath ? if yes: here or in a separate validation job? if here, how to combine?
     }
 }

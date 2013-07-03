@@ -6,8 +6,8 @@ import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm;
-import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type;
+import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
+import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type
 
 class MergingSetServiceTests {
 
@@ -105,20 +105,20 @@ class MergingSetServiceTests {
         ProcessedBamFile bamFile1 = createBamFile()
         ProcessedBamFile bamFile2 = createBamFile()
         MergingSet mergingSet = new MergingSet(
-            identifier: 0,
-            mergingWorkPackage: workPackage
-            )
+                        identifier: 0,
+                        mergingWorkPackage: workPackage
+                        )
         assertNotNull(mergingSet.save([flush: true, failOnError: true]))
         MergingSetAssignment mergingSetAssignment = new MergingSetAssignment(
-            bamFile: bamFile1,
-            mergingSet: mergingSet
-            )
+                        bamFile: bamFile1,
+                        mergingSet: mergingSet
+                        )
         assertNotNull(mergingSetAssignment.save([flush: true, failOnError: true]))
 
         MergingSetAssignment mergingSetAssignment1 = new MergingSetAssignment(
-            bamFile: bamFile2,
-            mergingSet: mergingSet
-            )
+                        bamFile: bamFile2,
+                        mergingSet: mergingSet
+                        )
         assertNotNull(mergingSetAssignment1.save([flush: true, failOnError: true]))
 
         List<ProcessedBamFile> filesToMerge = [bamFile1, bamFile2]
@@ -137,16 +137,16 @@ class MergingSetServiceTests {
 
     @Test
     void testNextMergingSet() {
-        MergingSet next = mergingSetService.nextMergingSet()
+        MergingSet next = mergingSetService.mergingSetInStateNeedsProcessing()
         assertNull(next)
 
         MergingSet mergingSet = createMergingSet()
-        next = mergingSetService.nextMergingSet()
+        next = mergingSetService.mergingSetInStateNeedsProcessing()
         assertEquals(mergingSet, next)
 
         MergingSet mergingSet2 = createMergingSet()
         MergingSet mergingSet3 = createMergingSet()
-        next = mergingSetService.nextMergingSet()
+        next = mergingSetService.mergingSetInStateNeedsProcessing()
         assertNotNull(next)
         assertTrue(next.equals(mergingSet) || next.equals(mergingSet2) || next.equals(mergingSet3) )
 
@@ -156,20 +156,13 @@ class MergingSetServiceTests {
         mergingSet2.save([flush: true, failOnError: true])
         mergingSet3.status = MergingSet.State.INPROGRESS
         mergingSet3.save([flush: true, failOnError: true])
-        next = mergingSetService.nextMergingSet()
+        next = mergingSetService.mergingSetInStateNeedsProcessing()
         assertNull(next)
 
         MergingSet mergingSet4 = createMergingSet()
-        next = mergingSetService.nextMergingSet()
+        next = mergingSetService.mergingSetInStateNeedsProcessing()
         assertNotNull(next)
         assertTrue(next.equals(mergingSet4))
-    }
-
-    @Test
-    void testBlockForMerging() {
-        MergingSet mergingSet = createMergingSet()
-        mergingSetService.blockForMerging(mergingSet)
-        assertEquals(mergingSet.status, MergingSet.State.INPROGRESS)
     }
 
     @Test(expected = IllegalArgumentException)
@@ -304,6 +297,20 @@ class MergingSetServiceTests {
         mergingSetService.createMergingSet(bamFiles, workPackage)
         assertEquals(State.PROCESSED, bamFile.status)
     }
+
+    @Test(expected = SavingException.class)
+    void testAssertSaveFails() {
+        MergingSet mergingSet = new MergingSet()
+        mergingSet.status = MergingSet.State.PROCESSED
+        mergingSetService.assertSave(mergingSet)
+    }
+
+    @Test
+    void testAssertSave() {
+        MergingSet mergingSet = createMergingSet()
+        assertEquals(mergingSet, mergingSetService.assertSave(mergingSet))
+    }
+
 
     private ProcessedBamFile createBamFile() {
         AlignmentPass alignmentPass = new AlignmentPass(

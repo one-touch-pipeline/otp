@@ -1,13 +1,16 @@
 package de.dkfz.tbi.otp.job.jobs.merging
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
-
+@Component("mergingStartJob")
+@Scope("singleton")
 class MergingStartJob extends AbstractStartJobImpl {
 
     @Autowired
@@ -19,17 +22,17 @@ class MergingStartJob extends AbstractStartJobImpl {
     @Autowired
     MergingPassService mergingPassService
 
-    final int MAX_RUNNING = 1
+    final int MAX_RUNNING = 10
 
-    @Scheduled(fixedRate=60000l)
+    @Scheduled(fixedDelay = 60000l)
     void execute() {
         if (!hasFreeSlot()) {
             return
         }
         MergingPass mergingPass = mergingPassService.create()
         if (mergingPass) {
-            mergingSetService.blockForMerging(mergingPass.mergingSet)
-            createProcess(new ProcessParameter(value: mergingPass.id.toString(), className: MergingPass.class.name))
+            mergingPassService.mergingPassStarted(mergingPass)
+            createProcess(new ProcessParameter(value: mergingPass.id.toString(), className: mergingPass.class.name))
             log.debug "MergingSetStartJob started for: ${mergingPass.toString()}"
         }
     }

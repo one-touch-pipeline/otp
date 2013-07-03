@@ -4,6 +4,7 @@ class AbstractBamFile {
 
     enum BamType {
         SORTED,
+        MDUP,
         RMDUP
     }
 

@@ -13,7 +13,6 @@ class MergingCompleteJob extends AbstractEndStateAwareJobImpl {
     public void execute() throws Exception {
         long mergingPassId = Long.parseLong(getProcessParameterValue())
         MergingPass mergingPass = MergingPass.get(mergingPassId)
-        ProcessedMergedBamFile mergedBamFile = ProcessedMergedBamFile.findByMergingPass(mergingPass)
         mergingPassService.mergingPassFinished(mergingPass)
         succeed()
     }

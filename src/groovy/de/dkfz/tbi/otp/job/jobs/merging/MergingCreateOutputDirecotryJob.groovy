@@ -5,10 +5,10 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
-class MergingCreateOutputDirectoryJob extends AbstractJobImpl {
+class MergingCreateOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
 
     @Autowired
-    ProcessedMergedBamFileService processedMergedBamFileService
+    ProcessedMergingFileService processedMergingFileService
 
     @Autowired
     MergingPassService mergingPassService
@@ -20,17 +20,22 @@ class MergingCreateOutputDirectoryJob extends AbstractJobImpl {
     public void execute() throws Exception {
         long mergingPassId = Long.parseLong(getProcessParameterValue())
         MergingPass mergingPass = MergingPass.get(mergingPassId)
-        String dir = processedMergedBamFileService.getDirectory(mergingPass)
+        String dir = processedMergingFileService.directory(mergingPass)
         Realm realm = mergingPassService.realmForDataProcessing(mergingPass)
         executeOnRealm(dir, realm)
+
+        File file = new File(dir)
+        if (!file.canRead()) {
+            log.debug "directory not readable ${file}".toString()
+            throw new DirectoryNotReadableException("${file}")
+        } else {
+            succeed()
+        }
     }
 
     private void executeOnRealm(String directory, Realm realm) {
         String cmd = "mkdir -p " + directory
         String exitCode = executionService.executeCommand(realm, cmd)
-        log.debug "creating directory finished with exit code " + exitCode
+        log.debug "creating directory finished with the output " + exitCode
     }
 }
-
-
-

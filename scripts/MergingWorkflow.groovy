@@ -1,9 +1,8 @@
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
 plan("MergingWorkflow") {
-    start("start", "MergingStartJob")
+    start("start", "mergingStartJob")
     job("createOutputDirectory", "mergingCreateOutputDirectoryJob")
-    job("checkCreateOutputDirectory", "mergingCheckCreateOutputDirectoryJob")
     job("merging", "mergingJob") {
         outputParameter("__pbsIds")
         outputParameter("__pbsRealm")
@@ -13,14 +12,14 @@ plan("MergingWorkflow") {
         inputParameter("__pbsRealm", "merging", "__pbsRealm")
     }
     job("mergingValidation", "mergingValidationJob")
-    job("mergingIndexing", "mergingIndexingJob") {
+    job("mergingFileIndexing", "mergingFileIndexingJob") {
         outputParameter("__pbsIds")
         outputParameter("__pbsRealm")
     }
-    job("mergingIndexingWatchdog", "myPBSWatchdogJob") {
-        inputParameter("__pbsIds", "mergingIndexing", "__pbsIds")
-        inputParameter("__pbsRealm", "mergingIndexing", "__pbsRealm")
+    job("mergingFileIndexingWatchdog", "myPBSWatchdogJob") {
+        inputParameter("__pbsIds", "mergingFileIndexing", "__pbsIds")
+        inputParameter("__pbsRealm", "mergingFileIndexing", "__pbsRealm")
     }
-    job("mergingIndexValidation", "mergingIndexValidationJob")
+    job("mergingFileIndexValidation", "mergingFileIndexValidationJob")
     job("mergingComplete", "mergingCompleteJob")
 }
