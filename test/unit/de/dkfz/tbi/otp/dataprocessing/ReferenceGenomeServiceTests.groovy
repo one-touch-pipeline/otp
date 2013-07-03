@@ -18,10 +18,24 @@ class ReferenceGenomeServiceTests {
     Project project
     ReferenceGenomeService referenceGenomeService
 
+    File directory
+    File file
+
     @Before
     void setUp() {
         referenceGenomeService = new ReferenceGenomeService()
         referenceGenomeService.configService = new ConfigService()
+
+        directory = new File("/tmp/reference_genomes/referenceGenome/")
+        if (!directory.exists()) {
+            directory.mkdirs()
+        }
+
+        file = new File("/tmp/reference_genomes/referenceGenome/prefixName.fa")
+        if (!file.exists()) {
+            file.createNewFile()
+            file << "test"
+        }
 
         Realm realm = new Realm()
         realm.name = "def"
@@ -57,6 +71,8 @@ class ReferenceGenomeServiceTests {
         referenceGenome = null
         project = null
         referenceGenomeService = null
+        directory.deleteOnExit()
+        file.deleteOnExit()
     }
 
     @Test
