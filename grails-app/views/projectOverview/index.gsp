@@ -1,12 +1,12 @@
 <%@ page contentType="text/html;charset=UTF-8"%>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="layout" content="main" />
-    <title>OTP - project overview</title>
-    <r:require module="core" />
-    <r:require module="jqueryDatatables" />
-    <r:require module="graph" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="layout" content="main" />
+<title>OTP - project overview</title>
+<r:require module="core" />
+<r:require module="jqueryDatatables" />
+<r:require module="graph" />
 </head>
 <body>
     <div class="body">
@@ -17,8 +17,28 @@
                     from='${projects}'></g:select>
             </div>
         </div>
+        <p class=statisticTitle>
+            <b>Number of patients =</b> <span id="patient-count"></span>
+        </p>
         <div class="table">
-            <div style="width: 20px; height: 20px;"></div>
+            <div style="width: 20px; height: 30px;"></div>
+            <h3 class="StatisticTableTitle">
+                <g:message code="projectOverview.title.table2" />
+            </h3>
+            <div class="dataTableContainer sampleTypeNameCountBySample"
+                style="margin-right: 1%;">
+                <otp:dataTable
+                    codes="${[
+                        'projectOverview.index.sampleTypeName',
+                        'projectOverview.index.sampleCount',
+                        
+                    ] }"
+                    id="sampleTypeNameCountBySample" />
+            </div>
+            <div style="width: 20px; height: 50px;"></div>
+            <h3 class="StatisticTableTitle">
+                <g:message code="projectOverview.title" />
+            </h3>
             <div class="dataTableContainer projectOverviewTable"
                 style="margin-right: 1%;">
                 <otp:dataTable
@@ -29,21 +49,25 @@
                     'projectOverview.index.sequenceTypeLibraryLayout',
                     'projectOverview.index.centerName',
                     'projectOverview.index.platformId',
+                    'projectOverview.index.laneCount',
                     'projectOverview.index.gigaBase'
                 ] }"
                     id="projectOverviewTable" />
             </div>
-            <div style="width: 20px; height: 20px;"></div>
+            <div style="width: 20px; height: 50px;"></div>
+            <h3 class="StatisticTableTitle">
+                <g:message code="projectOverview.title.table" />
+            </h3>
             <div
                 class="dataTableContainer patientsAndSamplesGBCountPerProject"
                 style="margin-right: 1%;">
                 <otp:dataTable
                     codes="${[
-                        'projectOverview.seqtype.seqName',
-                        'projectOverview.seqtype.individualCount',
-                        'projectOverview.seqtype.sampleCount',
-                        'projectOverview.seqtype.gb'
-                    ] }"
+                    'projectOverview.seqtype.seqName',
+                    'projectOverview.seqtype.individualCount',
+                    'projectOverview.seqtype.sampleCount',
+                    'projectOverview.seqtype.gb'
+                ] }"
                     id="patientsAndSamplesGBCountPerProject" />
             </div>
         </div>

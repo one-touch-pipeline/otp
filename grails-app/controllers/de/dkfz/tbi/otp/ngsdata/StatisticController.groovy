@@ -90,7 +90,39 @@ class StatisticController {
         return (date2.getTimeInMillis() - date1.getTimeInMillis()) / (1000 * 60 * 60 * 24)
     }
 
-    public JSON projectCountPerSequenceType() {
+    JSON sampleCountBySeqType() {
+
+        List<String> labels = []
+        List<String> labelsProzent = []
+        List<Integer> values = []
+        int projectSequenceCount = 0
+
+        List sampleTypeCount = statisticService.sampleCountBySeqType()
+
+        sampleTypeCount.each {
+            if (it[1]<9)
+                return
+            labels << it[0]
+            values << it[1]
+            projectSequenceCount += it[1]
+        }
+
+        sampleTypeCount.each { 
+            if (it[1]<9)
+                return
+            labelsProzent << "${it[0]} ${Math.round(it[1] * 100 / projectSequenceCount)} %" 
+        }
+
+        Map dataToRender = [
+            labels: labels,
+            labelsProzent: labelsProzent,
+            data: values,
+            count: values.size()
+        ]
+        render dataToRender as JSON
+    }
+
+   public JSON projectCountPerSequenceType() {
         List<String> labels = []
         List<String> labelsProzent = []
         List<Integer> values = []

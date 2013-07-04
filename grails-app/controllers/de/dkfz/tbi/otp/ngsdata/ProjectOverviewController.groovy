@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.utils.DataTableCommand;
+import de.dkfz.tbi.otp.utils.DataTableCommand
 import grails.converters.JSON
 import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
@@ -17,6 +17,12 @@ class ProjectOverviewController {
         return [projects: projectService.getAllProjects()]
     }
 
+    JSON individualCountByProject(String projectName) {
+        Project project = projectService.getProjectByName(projectName)
+        Map dataToRender = [individualCount: projectOverviewService.individualCountByProject(project)]
+        render dataToRender as JSON
+    }
+
     JSON dataTableSource(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
         List data = projectOverviewService.overviewProjectQuery(params.project)
@@ -30,6 +36,16 @@ class ProjectOverviewController {
         Project project = projectService.getProjectByName(params.project)
         Map dataToRender = cmd.dataToRender()
         List data = projectOverviewService.patientsAndSamplesGBCountPerProject(project)
+        dataToRender.iTotalRecords = data.size()
+        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+        dataToRender.aaData = data
+        render dataToRender as JSON
+    }
+
+    JSON dataTableSourceSampleTypeNameCountBySample(DataTableCommand cmd) {
+        Project project = projectService.getProjectByName(params.project)
+        Map dataToRender = cmd.dataToRender()
+        List data = projectOverviewService.sampleTypeNameCountBySample(project)
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data

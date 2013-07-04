@@ -4,35 +4,35 @@ class ProjectOverviewService {
 
     List overviewProjectQuery(projectName) {
         Project project = Project.findByName(projectName)
-
-        List sequenceProjections = Sequence.withCriteria {
-            eq("projectId", project.id)
-            projections {
-                groupProperty("individualId")
-                groupProperty("mockPid")
-                groupProperty("sampleTypeId")
-                groupProperty("seqTypeId")
-                groupProperty("seqPlatformId")
-                groupProperty("seqCenterName")
-                sum("nBasePairs")
-                groupProperty("projectName")
+        List seq = AggregateSequences.withCriteria {
+           eq("projectId", project.id)
+               property("individualId")
+               property("mockPid")
+               property("sampleTypeId")
+               property("seqTypeId")
+               property("seqPlatformId")
+               property("seqCenterName")
+               property("laneCount")
+               property("sum_N_BasePairsGb")
+               property("projectName")
+               order ("mockPid")
+               order ("sampleTypeId")
+               order ("seqTypeId")
+               order ("seqPlatformId")
+               order ("seqCenterName")
+               order ("laneCount")
             }
-            order ("mockPid")
-            order ("sampleTypeId")
-            order ("seqTypeId")
-        }
-
-        List queryList = []
-
-        for (def track in sequenceProjections) {
+        List queryList=[]
+        for (def track in seq) {
             def queryListSingleRow = [
-                track[1],
-                SampleType.get(track[2]).name,
-                SeqType.get(track[3]).name,
-                SeqType.get(track[3]).libraryLayout,
-                track[5],
-                SeqPlatform.get(track[4]).toString(),
-                Math.floor(track[6] / 1e9)
+                track.mockPid,
+                SampleType.get(track.sampleTypeId).name,
+                SeqType.get(track.seqTypeId).name,
+                SeqType.get(track.seqTypeId).libraryLayout,
+                track.seqCenterName,
+                SeqPlatform.get(track.seqPlatformId).toString(),
+                track.laneCount,
+                track.sum_N_BasePairsGb
             ]
             queryList.add(queryListSingleRow)
         }
@@ -50,7 +50,38 @@ class ProjectOverviewService {
             }
             order ("seqTypeName")
         }
+        List queryList = []
+
+        for (def track in seq) {
+            def queryListSingl = [
+                track[0],
+                track[1],
+                track[2],
+                track[3]
+            ]
+            queryList.add(queryListSingl)
+        }
+        return queryList
+    }
+
+    public Long individualCountByProject(Project project) {
+        List seq = AggregateSequences.withCriteria {
+            eq("projectId", project.id)
+            projections { countDistinct("mockFullName") }
+        }
+        return seq[0]
+    }
+
+    public List sampleTypeNameCountBySample(Project project) {
+        List seq = AggregateSequences.withCriteria {
+            eq("projectId", project.id)
+            projections { 
+                groupProperty("sampleTypeName")
+                countDistinct("sampleId")
+            }
+        }
         return seq
     }
+
 }
 
