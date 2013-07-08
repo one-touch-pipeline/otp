@@ -18,7 +18,9 @@ class ReferenceGenome {
     String name
 
     /**
-     * Path to the files containing reference genome information consists of 4 parts:
+     * Reference genome specific directory
+     *
+     * The complete path to the files containing reference genome information consists of 4 parts:
      * ${realmSpecificPath}: depends on the realm and must be generated with some logic.
      * ${allReferenceGenomes}: directory containing all reference genomes at this ${realmSpecificPath}.
      * ${referenceGenomeSpecificPath}: directory, which is specific for the reference genome (is stored in this property).

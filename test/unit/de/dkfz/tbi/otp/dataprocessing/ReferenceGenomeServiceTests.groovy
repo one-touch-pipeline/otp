@@ -20,18 +20,19 @@ class ReferenceGenomeServiceTests {
 
     File directory
     File file
+    String referenceGenomePath = "/tmp/reference_genomes/referenceGenome/"
 
     @Before
     void setUp() {
         referenceGenomeService = new ReferenceGenomeService()
         referenceGenomeService.configService = new ConfigService()
 
-        directory = new File("/tmp/reference_genomes/referenceGenome/")
+        directory = new File(referenceGenomePath)
         if (!directory.exists()) {
             directory.mkdirs()
         }
 
-        file = new File("/tmp/reference_genomes/referenceGenome/prefixName.fa")
+        file = new File("${referenceGenomePath}prefixName.fa")
         if (!file.exists()) {
             file.createNewFile()
             file << "test"
@@ -77,7 +78,7 @@ class ReferenceGenomeServiceTests {
 
     @Test
     void testFilePathToDirectory() {
-        String pathExp = "/tmp/reference_genomes/referenceGenome/"
+        String pathExp = "${referenceGenomePath}"
         String pathAct = referenceGenomeService.filePathToDirectory(project, referenceGenome)
         assertEquals(pathExp, pathAct)
     }
@@ -96,21 +97,21 @@ class ReferenceGenomeServiceTests {
     }
 
     @Test
-    void testFilePathOnlySuffix() {
-        String pathExp = "/tmp/reference_genomes/referenceGenome/prefixName"
-        String pathAct = referenceGenomeService.filePathOnlySuffix(project, referenceGenome)
+    void testFilePathOnlyPrefix() {
+        String pathExp = "${referenceGenomePath}prefixName"
+        String pathAct = referenceGenomeService.prefixOnlyFilePath(project, referenceGenome)
         assertEquals(pathExp, pathAct)
     }
 
     @Test(expected = IllegalArgumentException)
-    void testFilePathOnlySuffixReferenceGenomeIsNull() {
+    void testFilePathOnlyPrefixReferenceGenomeIsNull() {
         referenceGenome = null
-        String pathAct = referenceGenomeService.filePathOnlySuffix(project, referenceGenome)
+        String pathAct = referenceGenomeService.prefixOnlyFilePath(project, referenceGenome)
     }
 
     @Test
     void testFilePath() {
-        String pathExp = "/tmp/reference_genomes/referenceGenome/prefixName.fa"
+        String pathExp = "${referenceGenomePath}prefixName.fa"
         String pathAct = referenceGenomeService.fastaFilePath(project, referenceGenome)
         assertEquals(pathExp, pathAct)
     }

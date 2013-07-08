@@ -20,11 +20,28 @@ class AlignmentPassServiceTests {
     ReferenceGenome referenceGenome
     ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType
 
+    File directory
+    File file
+    String referenceGenomePath
+
     @Before
     void setUp() {
         alignmentPassService = new AlignmentPassService()
         alignmentPassService.referenceGenomeService = new ReferenceGenomeService()
         alignmentPassService.referenceGenomeService.configService = new ConfigService()
+
+        referenceGenomePath = "/tmp/reference_genomes/referenceGenome/"
+
+        directory = new File(referenceGenomePath)
+        if (!directory.exists()) {
+            directory.mkdirs()
+        }
+
+        file = new File("${referenceGenomePath}prefixName.fa")
+        if (!file.exists()) {
+            file.createNewFile()
+            file << "test"
+        }
 
         Realm realm = new Realm()
         realm.name = "def"
@@ -129,6 +146,8 @@ class AlignmentPassServiceTests {
         referenceGenome = null
         referenceGenomeProjectSeqType = null
         alignmentPassService = null
+        directory.deleteOnExit()
+        file.deleteOnExit()
     }
 
     @Test(expected = RuntimeException)
@@ -145,7 +164,7 @@ class AlignmentPassServiceTests {
 
     @Test
     void testReferenceGenomePathAllCorrect() {
-        String pathExp = "/tmp/reference_genomes/referenceGenome/prefixName"
+        String pathExp = "${referenceGenomePath}prefixName"
         String pathAct = alignmentPassService.referenceGenomePath(alignmentPass)
         assertEquals(pathExp, pathAct)
     }

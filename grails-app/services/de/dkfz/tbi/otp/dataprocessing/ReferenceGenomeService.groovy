@@ -44,10 +44,10 @@ class ReferenceGenomeService {
 
     /**
      * returns path to the directory storing given reference genome files followed by the common file name prefix depending on the project
-     * @param reference genome the reference genome for which the path and the suffix are created
+     * @param reference genome the reference genome for which the path and the prefix are created
      * @param project the project, which belongs to the reference genome
      */
-    public String filePathOnlySuffix(Project project, ReferenceGenome referenceGenome) {
+    public String prefixOnlyFilePath(Project project, ReferenceGenome referenceGenome) {
         Assert.notNull(project, "The project is not specified")
         Assert.notNull(referenceGenome, "The reference genome is not specified")
         String refGenomeFileNamePrefix = referenceGenome.fileNamePrefix
@@ -59,7 +59,7 @@ class ReferenceGenomeService {
      * @param the reference genome for which the file path is created and the belonging project
      */
     public String fastaFilePath(Project project, ReferenceGenome referenceGenome) {
-        String referenceGenomeFastaFilePath = filePathOnlySuffix(project, referenceGenome) + ".fa"
+        String referenceGenomeFastaFilePath = prefixOnlyFilePath(project, referenceGenome) + ".fa"
         File file = new File(referenceGenomeFastaFilePath)
         if (file.canRead()) {
             return referenceGenomeFastaFilePath
