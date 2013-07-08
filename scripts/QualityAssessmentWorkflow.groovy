@@ -12,10 +12,18 @@ plan("QualityAssessmentWorkflow") {
         inputParameter("__pbsRealm", "executeBamFileQaAnalysis", "__pbsRealm")
     }
     job("qaOutputFileValidation", "qaOutputFileValidationJob")
-
     job("parseQaStatistics", "parseQaStatisticsJob")
+    job("createChromosomeMappingFile", "createChromosomeMappingFileJob")
+    job("executeMappingFilteringSortingToCoverageTable", "executeMappingFilteringSortingToCoverageTableJob") {
+        outputParameter("__pbsIds")
+        outputParameter("__pbsRealm")
+    }
+    job("executeMappingFilteringSortingToCoverageTableWatchdog", "myPBSWatchdogJob") {
+        inputParameter("__pbsIds", "executeMappingFilteringSortingToCoverageTable", "__pbsIds")
+        inputParameter("__pbsRealm", "executeMappingFilteringSortingToCoverageTable", "__pbsRealm")
+    }
+    job("mappingFilteringSortingOutputFileValidation", "mappingFilteringSortingOutputFileValidationJob")
 
-    job("reorderCoverageTable", "reorderCoverageTableJob")
     job("createCoveragePlot", "createCoveragePlotJob") {
         outputParameter("__pbsIds")
         outputParameter("__pbsRealm")

@@ -38,7 +38,11 @@ class AbstractQualityAssessment {
     double insertSizeMedian
     double insertSizeRMS
 
+    // values not retrieved from the json but calculated afterwards
+    double percentIncorrectPEorientation
+    double percentReadPairsMapToDiffChrom
+
     static belongsTo = [
-        abstractBamFile: AbstractBamFile
+        qualityAssessmentPass: QualityAssessmentPass
     ]
 }

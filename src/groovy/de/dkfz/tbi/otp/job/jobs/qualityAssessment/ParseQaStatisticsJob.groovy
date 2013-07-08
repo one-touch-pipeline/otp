@@ -9,12 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired
 class ParseQaStatisticsJob extends AbstractJobImpl {
 
     @Autowired
-    QualityAssessmentProcessingService qualityAssessmentProcessingService
+    AbstractQualityAssessmentService abstractQualityAssessmentService
 
     @Override
     public void execute() throws Exception {
-        long processedBamFileId = Long.parseLong(getProcessParameterValue())
-        ProcessedBamFile processedBamFile = ProcessedBamFile.get(processedBamFileId)
-        qualityAssessmentProcessingService.parseQaStatistics(processedBamFile)
+        long passId = getProcessParameterValue() as long
+        QualityAssessmentPass pass = QualityAssessmentPass.get(passId)
+        abstractQualityAssessmentService.parseQaStatistics(pass)
     }
 }

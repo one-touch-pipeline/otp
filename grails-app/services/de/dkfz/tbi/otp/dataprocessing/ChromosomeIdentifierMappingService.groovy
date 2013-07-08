@@ -6,10 +6,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  * This service maps the chromosome identifiers of the different reference genomes to OTP identifiers
  *
  */
-
 class ChromosomeIdentifierMappingService {
-
-    final Map<String, String> prefixPerReferenceGenome = ["hg19_1_24" : "chr", "thousandGenomes" : ""]
 
     ReferenceGenomeService referenceGenomeService
 
@@ -19,11 +16,10 @@ class ChromosomeIdentifierMappingService {
     }
 
     public Map<String, String> mappingAll(ReferenceGenome referenceGenome) {
-        Map<String, String> mappedIdentifier = [ : ]
-        String referenceGenomeName = referenceGenome.name
-        if (prefixPerReferenceGenome[referenceGenomeName]) {
-            String referenceGenomePrefix = prefixPerReferenceGenome.get(referenceGenomeName)
-            Chromosomes.allLabels().each() { Chromosomes chromosome ->
+        Map<String, String> mappedIdentifier = [:]
+        String referenceGenomePrefix = referenceGenome.chromosomeNamePrefix
+        if (referenceGenomePrefix) {
+                Chromosomes.allLabels().each() { String chromosome ->
                 mappedIdentifier.put(referenceGenomePrefix + chromosome, chromosome)
             }
         } else {

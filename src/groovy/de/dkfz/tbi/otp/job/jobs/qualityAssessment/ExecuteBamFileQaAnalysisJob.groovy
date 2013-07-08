@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.common.*
 import org.springframework.beans.factory.annotation.Autowired
+import groovy.text.SimpleTemplateEngine
 
 class ExecuteBamFileQaAnalysisJob extends AbstractJobImpl {
 
@@ -12,51 +13,46 @@ class ExecuteBamFileQaAnalysisJob extends AbstractJobImpl {
     ProcessedBamFileQaFileService processedBamFileQaFileService
 
     @Autowired
+    QualityAssessmentPassService qualityAssessmentPassService
+
+    @Autowired
     ProcessedBamFileService processedBamFileService
 
     @Autowired
-    ExecutionService executionService
+    ExecutionHelperService executionHelperService
 
     @Autowired
-    ConfigService configService
+    ProcessingOptionService processingOptionService
 
     @Override
     public void execute() throws Exception {
-        ProcessedBamFile processedBamFile = ProcessedBamFile.get(Long.parseLong(getProcessParameterValue()))
+        long passId = getProcessParameterValue() as long
+        QualityAssessmentPass pass = QualityAssessmentPass.get(passId)
+        ProcessedBamFile processedBamFile = pass.processedBamFile
         String processedBamFilePath = processedBamFileService.getFilePath(processedBamFile)
-        // TODO Replace by apropriate service...
-        String processedBaiFilePath = "${processedBamFilePath}.bai"
-        String coverageDataFilePath = processedBamFileQaFileService.coverageDataFilePath(processedBamFile)
-        String qualityAssessmentFilePath = processedBamFileQaFileService.qualityAssessmentDataFilePath(processedBamFile)
-        String insertSizeDataFilePath = processedBamFileQaFileService.insertSizeDataFilePath(processedBamFile)
-        boolean overrideOutput = false
-        String allChromosomeName = "ALL"
-        int minAlignedRecordLength = 36
-        int minMeanBaseQuality = 25
-        int mappingQuality = 0
-        int coverageMappingQualityThreshold = 1
-        int windowsSize = 1000
-        int insertSizeCountHistogramBin = 10
-        boolean test = true
-
-//        Realm realm = configService.getRealmDataProcessing(processedBamFile.alignmentPass.seqTrack.sample.individual.project)
-        // TODO Maybe these numerical parameters should go to options framework or at least be written as variable names to be more clear..
-//        String cmd = "QualityAssessment.sh ${processedBamFilePath} ${qualityAssessmentFilePath} ${coverageDataFilePath} ${insertSizeDataFilePath} 36 25 0 1 1000 10"
-        String cmd = "QualityAssessment.sh ${processedBamFilePath} ${processedBaiFilePath} ${qualityAssessmentFilePath} ${coverageDataFilePath} ${insertSizeDataFilePath} ${overrideOutput} ${allChromosomeName} ${minAlignedRecordLength} ${minMeanBaseQuality} ${mappingQuality} ${coverageMappingQualityThreshold} ${windowsSize} ${insertSizeCountHistogramBin} ${test}"
-//        Realm realm = configService.getRealmDataProcessing(processedBamFile.alignmentPass.seqTrack.sample.individual.project)
-        Realm realm = ProcessedBamFileService.realm(processedBamFile)
-
-        String pbsID = sendScript(realm, cmd)
+        String processedBaiFilePath = processedBamFileService.baiFilePath(processedBamFile)
+        String qualityAssessmentFilePath = processedBamFileQaFileService.qualityAssessmentDataFilePath(pass)
+        String coverageDataFilePath = processedBamFileQaFileService.coverageDataFilePath(pass)
+        String insertSizeDataFilePath = processedBamFileQaFileService.insertSizeDataFilePath(pass)
+        String allChromosomeName = Chromosomes.overallChromosomesLabel()
+        Project project = processedBamFileService.project(processedBamFile)
+        SeqType seqType = processedBamFileService.seqType(processedBamFile)
+        String seqTypeNaturalId = seqType.getNaturalId()
+        String cmdTemplate = processingOptionService.findOptionSafe("qualityAssessment", seqTypeNaturalId, project)
+        Map binding = [
+            processedBamFilePath: processedBamFilePath,
+            processedBaiFilePath: processedBaiFilePath,
+            qualityAssessmentFilePath: qualityAssessmentFilePath,
+            coverageDataFilePath: coverageDataFilePath,
+            insertSizeDataFilePath: insertSizeDataFilePath,
+            allChromosomeName: allChromosomeName
+        ]
+        SimpleTemplateEngine engine = new SimpleTemplateEngine()
+        String cmd = engine.createTemplate(cmdTemplate).make(binding).toString()
+        Realm realm = qualityAssessmentPassService.realmForDataProcessing(pass)
+        log.debug cmd
+        String pbsID = executionHelperService.sendScript(realm, cmd)
         addOutputParameter("__pbsIds", pbsID)
         addOutputParameter("__pbsRealm", realm.id.toString())
-    }
-
-    private String sendScript(Realm realm, String text) {
-        String pbsResponse = executionService.executeJob(realm, text)
-        List<String> extractedPbsIds = executionService.extractPbsIds(pbsResponse)
-        if (extractedPbsIds.size() != 1) {
-            log.debug "Number of PBS jobs is = ${extractedPbsIds.size()}"
-        }
-        return extractedPbsIds.get(0)
     }
 }

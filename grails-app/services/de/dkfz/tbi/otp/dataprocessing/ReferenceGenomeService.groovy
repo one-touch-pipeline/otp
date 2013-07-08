@@ -22,7 +22,7 @@ class ReferenceGenomeService {
      * @param project the project, to which the reference genome belongs to
      * @param seqType the sequencing type, to which the reference genome belongs to
      */
-    public ReferenceGenome getReferenceGenome(Project project, SeqType seqType) {
+    public ReferenceGenome referenceGenome(Project project, SeqType seqType) {
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = ReferenceGenomeProjectSeqType.
                         findByProjectAndSeqTypeAndDeprecatedDateIsNull(project, seqType)
         Assert.notNull(referenceGenomeProjectSeqType,

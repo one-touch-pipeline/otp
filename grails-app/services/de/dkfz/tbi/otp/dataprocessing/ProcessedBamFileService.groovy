@@ -4,8 +4,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class ProcessedBamFileService {
 
-    def processedAlignmentFileService
-    def configService
+    ProcessedAlignmentFileService processedAlignmentFileService
+    ConfigService configService
 
     public String getFilePath(ProcessedBamFile bamFile) {
         String dir = getDirectory(bamFile)
@@ -17,6 +17,10 @@ class ProcessedBamFileService {
         String dir = getDirectory(bamFile)
         String filename = getFileNameNoSuffix(bamFile)
         return "${dir}/${filename}"
+    }
+
+    public String baiFilePath(ProcessedBamFile bamFile) {
+        return "${getFilePath(bamFile)}.bai"
     }
 
     public String getDirectory(ProcessedBamFile bamFile) {
@@ -95,8 +99,8 @@ class ProcessedBamFileService {
     }
 
     public boolean updateBamFileIndex(ProcessedBamFile bamFile) {
-        String path = getFilePath(bamFile)
-        File file = new File("${path}.bai")
+        String path = baiFilePath(bamFile)
+        File file = new File(path)
         if (!file.canRead()) {
             return false
         }
@@ -106,8 +110,16 @@ class ProcessedBamFileService {
     }
 
     public Realm realm(ProcessedBamFile processedBamFile) {
-        Project project = processedBamFile.alignmentPass.seqTrack.sample.individual.project
+        Project project = project(processedBamFile)
         return configService.getRealmDataProcessing(project)
+    }
+
+    public Project project(ProcessedBamFile processedBamFile) {
+        return processedBamFile.alignmentPass.seqTrack.sample.individual.project
+    }
+
+    public SeqType seqType(ProcessedBamFile processedBamFile) {
+        return processedBamFile.alignmentPass.seqTrack.seqType
     }
 
     private def assertSave(def object) {

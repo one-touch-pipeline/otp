@@ -11,17 +11,9 @@ class InsertSizePlotValidationJob extends AbstractEndStateAwareJobImpl {
 
     @Override
     public void execute() throws Exception {
-        long processedBamFileId = Long.parseLong(getProcessParameterValue())
-        ProcessedBamFile processedBamFile = ProcessedBamFile.get(processedBamFileId)
-        boolean plotCreated = validateAndUpdateProcessedBamFileStatus(processedBamFile)
+        long passId = getProcessParameterValue() as long
+        QualityAssessmentPass pass = QualityAssessmentPass.get(passId)
+        boolean plotCreated = processedBamFileQaFileService.validateInsertSizePlotAndUpdateProcessedBamFileStatus(pass)
         plotCreated ? succeed() : fail()
-    }
-
-    private boolean validateAndUpdateProcessedBamFileStatus(ProcessedBamFile processedBamFile) {
-        String plotFilePath = processedBamFileQaFileService.insertSizePlotFilePath(processedBamFile)
-        File file = new File(plotFilePath)
-        processedBamFile.hasInsertSizePlot = file.canRead() && file.size() != 0
-        processedBamFile.save(flush: true)
-        return processedBamFile.hasInsertSizePlot
     }
 }

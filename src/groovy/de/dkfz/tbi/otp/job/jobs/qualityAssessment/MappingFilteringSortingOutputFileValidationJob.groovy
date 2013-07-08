@@ -4,7 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.beans.factory.annotation.Autowired
 
-class CoveragePlotValidationJob extends AbstractEndStateAwareJobImpl {
+class MappingFilteringSortingOutputFileValidationJob extends AbstractEndStateAwareJobImpl {
 
     @Autowired
     ProcessedBamFileQaFileService processedBamFileQaFileService
@@ -13,7 +13,13 @@ class CoveragePlotValidationJob extends AbstractEndStateAwareJobImpl {
     public void execute() throws Exception {
         long passId = getProcessParameterValue() as long
         QualityAssessmentPass pass = QualityAssessmentPass.get(passId)
-        boolean coveragePlotCreated = processedBamFileQaFileService.validateCoveragePlotAndUpdateProcessedBamFileStatus(pass)
-        coveragePlotCreated ? succeed() : fail()
+        String filepath = processedBamFileQaFileService.mappedFilteredSortedCoverageDataFilePath(pass)
+        boolean fileCreated = validate(filepath)
+        fileCreated ? succeed() : fail()
+    }
+
+    private boolean validate(String filepath) {
+        File file = new File(filepath)
+        return file.canRead() && file.size() != 0
     }
 }

@@ -5,31 +5,36 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.beans.factory.annotation.Autowired
 
-class CreateQaOutputDirectoryJob extends AbstractJobImpl {
+class CreateQaOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
 
     @Autowired
     ProcessedBamFileQaFileService processedBamFileQaFileService
 
     @Autowired
-    ExecutionService executionService
+    QualityAssessmentPassService qualityAssessmentPassService
 
     @Autowired
-    ConfigService configService
+    ExecutionService executionService
 
     @Override
     public void execute() throws Exception {
-//        long processedBamFileId = Long.parseLong(getProcessParameterValue())
-        long processedBamFileId = getProcessParameterValue() as long
-        ProcessedBamFile processedBamFile = ProcessedBamFile.get(processedBamFileId)
-        String dir = processedBamFileQaFileService.directoryPath(processedBamFile)
-//        Realm realm = configService.getRealmDataProcessing(processedBamFile.alignmentPass.seqTrack.sample.individual.project)
-        Realm realm = ProcessedBamFileService.realm(processedBamFile)
+        long passId = getProcessParameterValue() as long
+        QualityAssessmentPass pass = QualityAssessmentPass.get(passId)
+        String dir = processedBamFileQaFileService.directoryPath(pass)
+        Realm realm = qualityAssessmentPassService.realmForDataProcessing(pass)
         execute(dir, realm)
     }
 
     private void execute(String directory, Realm realm) {
         String cmd = "mkdir -p " + directory
+        log.debug cmd
         String exitCode = executionService.executeCommand(realm, cmd)
-        log.debug "creating directory finished with exit code " + exitCode
+        boolean dirCreated = validate(directory)
+        dirCreated ? succeed() : fail()
+    }
+
+    private boolean validate(String dirPath) {
+        File folder = new File(dirPath)
+        return folder.exists()
     }
 }

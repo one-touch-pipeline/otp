@@ -4,20 +4,19 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.beans.factory.annotation.Autowired
-//import org.springframework.stereotype.Component
 
 /**
  */
 class AssignQaFlagJob extends AbstractEndStateAwareJobImpl {
 
     @Autowired
-    QualityAssessmentProcessingService qualityAssessmentProcessingService
+    QualityAssessmentPassService qualityAssessmentPassService
 
     @Override
     public void execute() throws Exception {
-        long processedBamFileId = Long.parseLong(getProcessParameterValue())
-        ProcessedBamFile processedBamFile = ProcessedBamFile.get(processedBamFileId)
-        qualityAssessmentProcessingService.setQaFinished(processedBamFile)
+        long passId = getProcessParameterValue() as long
+        QualityAssessmentPass pass = QualityAssessmentPass.get(passId)
+        qualityAssessmentPassService.passFinished(pass)
         succeed()
     }
 }

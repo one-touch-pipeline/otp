@@ -13,6 +13,6 @@ class ChromosomeIdentifierFilteringService {
      * returns the chromosome names to filter out for coverage
      */
     public List<String> filteringCoverage() {
-        return Chromosomes.filterConditions()
+        return Chromosomes.asteriskAndMLabels()
     }
 }

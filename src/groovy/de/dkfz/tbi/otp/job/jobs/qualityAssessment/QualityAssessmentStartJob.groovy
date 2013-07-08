@@ -15,23 +15,23 @@ import org.springframework.beans.factory.annotation.Autowired
 class QualityAssessmentStartJob extends AbstractStartJobImpl {
 
     @Autowired
-    QualityAssessmentProcessingService qualityAssessmentProcessingService
+    QualityAssessmentPassService qualityAssessmentPassService
 
     @Autowired
     ProcessingOptionService optionService
 
-    final int MAX_RUNNING = 4
+    final int MAX_RUNNING = 2
 
     @Scheduled(fixedDelay=10000l)
     void execute() {
         if (!hasFreeSlot()) {
             return
         }
-        ProcessedBamFile processedBamFile = qualityAssessmentProcessingService.bamFileReadyForQa()
-        if (processedBamFile) {
-            log.debug "Creating alignment quality assessment process for ${processedBamFile}"
-            qualityAssessmentProcessingService.setQaInProcessing(processedBamFile)
-            createProcess(new ProcessParameter(value: processedBamFile.id.toString(), className: processedBamFile.class.name))
+        QualityAssessmentPass qualityAssessmentPass = qualityAssessmentPassService.createPass()
+        if (qualityAssessmentPass) {
+            log.debug "Creating quality assessment process for ${qualityAssessmentPass}"
+            qualityAssessmentPassService.passStarted(qualityAssessmentPass)
+            createProcess(new ProcessParameter(value: qualityAssessmentPass.id.toString(), className: qualityAssessmentPass.class.name))
         }
     }
 

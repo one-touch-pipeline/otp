@@ -1,33 +1,66 @@
-# example call
-# R -f insertSizePlot.R --no-save --no-restore --args "$BQ_ROOTPATH/$USER/insertSizePlot/output.hst" "ALL" "Insert size distribution ALL chromosomes" "Insert size" "frequency" "$BQ_ROOTPATH/$USER/insertSizePlot/output.png" "800" "600"
+#!/usr/bin/env Rscript
 
-cmdArgs = commandArgs(TRUE)
-print(cmdArgs)
-### list of parameters
-# 1. absolute filename for textfile to use as input
-insertSizeInput = cmdArgs[1]
-# 2. which chromosome to plot insertSize for
-chr = cmdArgs[2]
-# 3. main title in plot to be used
-maintitle = cmdArgs[3]
-# 4. xlabel
-xlabel = cmdArgs[4]
-# 5. ylabel
-ylabel = cmdArgs[5]
-# 6. absolute filename, should end with .png
-outputfile = cmdArgs[6]
-# 7. png width
-pngWidth = as.integer(cmdArgs[7])
-# 8. png height
-pngHeight = as.integer(cmdArgs[8])
+suppressPackageStartupMessages(library("optparse"))
+suppressPackageStartupMessages(library("tools"))
 
-insertSizeData <- read.table(insertSizeInput, header = FALSE, sep = "\t")
-png(outputfile, width = pngWidth, height = pngHeight, units = "px")
+# specify our desired options in a list
+# by default OptionParser will add an help option equivalent to
+# make_option(c("-h", "--help"), action="store_true", default=FALSE,
+#                help="Show this help message and exit")
+option_list = list(
+make_option(c("-v", "--verbose"), action="store_true", default = FALSE,
+        help="Print extra output (disabled by default)"),
+make_option(c("-m", "--mainTitle"), default = "Insert size distribution",
+        help="Main title [default '%default']"),
+make_option(c("-x", "--xLabel"), default = "Insert size",
+        help="x axis label [default '%default']"),
+make_option(c("-y", "--yLabel"), default = "Frequency",
+        help="y axis label [default '%default']"),
+make_option(c("-w", "--width"), type="integer", default = 800,
+        help="plot width [default %default]", metavar = "width"),
+make_option(c("-t", "--height"), type="integer", default = 600,
+        help="plot height [default %default]", metavar = "height")
+)
+parser = OptionParser(usage = "%prog [options] inputFile.tsv chromosomeIdentifier outputFile.png", option_list = option_list)
+arguments = parse_args(parser, positional_arguments = TRUE)
+opt = arguments$options
+if (length(arguments$args) != 3) {
+    write("Incorrect number of required positional arguments\n\n", stderr())
+    print_help(parser)
+    stop()
+} else {
+    inputFile = arguments$args[1]
+    chr = arguments$args[2]
+    outputFile = arguments$args[3]
+}
+if (file.access(inputFile) == -1) {
+    stop(write(paste("Specified file (", inputFile ,") does not exist"), stderr()))
+}
+if (file_ext(outputFile) != "png") {
+    stop(write(paste("Specified file (", outputFile ,") has to end with '.png'"), stderr()))
+}
+
+mainTitle = opt$mainTitle
+xLabel = opt$xLabel
+yLabel = opt$yLabel
+pngWidth = as.integer(opt$width)
+pngHeight = as.integer(opt$height)
+# print some progress messages to stderr if "quietly" wasn't requested
+if (opt$verbose) {
+    write("Optional parameters:", stdout())
+    write(paste("mainTitle  : ", mainTitle), stdout())
+    write(paste("xLabel     : ", xLabel), stdout())
+    write(paste("yLabel     : ", yLabel), stdout())
+    write(paste("pngWidth   : ", pngWidth), stdout())
+    write(paste("pngHeight  : ", pngHeight), stdout())
+}
+# load data
+insertSizeData <- read.table(inputFile, header = FALSE, sep = "\t")
+png(outputFile, width = pngWidth, height = pngHeight, units = "px")
 # do ploting
-mp <- barplot(height = insertSizeData[insertSizeData$V1 == "ALL",]$V3, space = 0, main = maintitle, xlab = xlabel, ylab = ylabel)
+mp <- barplot(height = insertSizeData[insertSizeData$V1 == chr,]$V3, space = 0, main = mainTitle, xlab = xLabel, ylab = yLabel)
 # do labeling of bars:
 # adj = c(x,y) controls label positioning
 # cex = scaling factor for fontsize
 text(mp, par("usr")[3], srt = 0, adj = c(0.5, 1), labels = insertSizeData[insertSizeData$V1 == chr,]$V2, xpd = TRUE, cex = 0.8)
 dev.off()
-
