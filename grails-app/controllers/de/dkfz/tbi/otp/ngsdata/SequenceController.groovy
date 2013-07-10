@@ -17,12 +17,12 @@ class SequenceController {
     def fastqcResultsService
 
     def index() {
-        List<SeqType> seqTypes = SeqType.list()
+        List<SeqType> seqTypes = SeqType.list(sort: "name", order: "asc")
         [projects: projectService.getAllProjects(),
-            sampleTypes: SampleType.list(),
+            sampleTypes: SampleType.list(sort: "name", order: "asc"),
             seqTypes: new HashSet(seqTypes.collect { it.name }),
             libraryLayouts: new HashSet(seqTypes.collect { it.libraryLayout }),
-            seqCenters: SeqCenter.list()
+            seqCenters: SeqCenter.list(sort: "name", order: "asc")
             ]
     }
 

@@ -31,7 +31,7 @@ class ProjectService {
      */
     @PostFilter("hasPermission(filterObject, 'read') or hasRole('ROLE_OPERATOR')")
     public List<Project> getAllProjects() {
-        return Project.list()
+        return Project.list(sort: "name", order: "asc")
     }
 
     /**
