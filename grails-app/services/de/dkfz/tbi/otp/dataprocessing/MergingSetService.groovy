@@ -90,7 +90,7 @@ class MergingSetService {
 
     public void mergingSetFinished(MergingSet mergingSet) {
         mergingSet.status = MergingSet.State.PROCESSED
-        assertObjectSave(mergingPass)
+        assertObjectSave(mergingSet)
     }
 
 }

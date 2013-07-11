@@ -20,6 +20,9 @@ class MergingJob extends AbstractJobImpl {
     ProcessedMergedBamFileService processedMergedBamFileService
 
     @Autowired
+    ProcessedBamFileService processedBamFileService
+
+    @Autowired
     MergingSetAssignmentService mergingSetAssignmentService
 
     @Autowired
@@ -29,25 +32,24 @@ class MergingJob extends AbstractJobImpl {
     public void execute() throws Exception {
         long mergingPassId = Long.parseLong(getProcessParameterValue())
         MergingPass mergingPass = MergingPass.get(mergingPassId)
-        ProcessedMergedBamFile bamFile = ProcessedMergedBamFile.findByMergingPass(mergingPass)
+        ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.findByMergingPass(mergingPass)
         Realm realm = mergingPassService.realmForDataProcessing(mergingPass)
-        String cmd = createCommand(alignmentPass)
+        String cmd = createCommand(processedMergedBamFile)
         log.debug cmd
         String pbsId = executionHelperService.sendScript(realm, cmd)
         addOutputParameter("__pbsIds", pbsId)
         addOutputParameter("__pbsRealm", realm.id.toString())
     }
 
-    private String createCommand(ProcessedMergedBamFile mergedBamFile) {
-        String baseDir = processedMergedBamFileService.getDirectory(mergedBamFile)
+    private String createCommand(ProcessedMergedBamFile processedMergedBamFile) {
+        String baseDir = processedMergedBamFileService.getDirectory(processedMergedBamFile)
         String tempDir = "${baseDir}/tmp_picard"
         String createTempDir = "mkdir ${tempDir}"
         String javaOptions = optionService.findOptionSafe("picardJavaSetting", null, null)
         String picard = "picard.sh MarkDuplicates"
-        String inputFilePath = createInputFileString(mergedBamFile)
-        String outputFilePath = processedMergedBamFileService.getFilePath(mergedBamFile)
-        String outputFileNoSuffix = processedMergedBamFileService.getFilePathNoSuffix(mergedBamFile)
-        String metricsPath = processedMergedBamFileService.getFilePathForMetrics(mergedBamFile)
+        String inputFilePath = createInputFileString(processedMergedBamFile)
+        String outputFilePath = processedMergedBamFileService.getFilePath(processedMergedBamFile)
+        String metricsPath = processedMergedBamFileService.getFilePathForMetrics(processedMergedBamFile)
         String picardFiles = "${inputFilePath} OUTPUT=${outputFilePath} METRICS_FILE=${metricsPath} TMP_DIR=${tempDir}"
         String picardOptions = optionService.findOptionSafe("picardRmdup", null, null)
         String chmod = "chmod 440 ${outputFilePath} ${metricsPath}"
@@ -55,12 +57,11 @@ class MergingJob extends AbstractJobImpl {
     }
 
     private String createInputFileString(ProcessedMergedBamFile processedMergedBamFile) {
-        StringBuilder ret = new StringBuilder();
-        mergingSetAssignmentService.findByMergingSet(processedMergedBamFile.mergingPass.mergingSet).each {
+        StringBuilder stringBuilder = new StringBuilder()
+        MergingSetAssignment.findAllByMergingSet(processedMergedBamFile.mergingPass.mergingSet).each {
             String fileName = processedBamFileService.getFilePath(it.bamFile)
-            ret.add(" I=${fileName}")
+            stringBuilder.append(" I=${fileName}")
         }
-        return ret.toString()
+        return stringBuilder.toString()
     }
-
 }
