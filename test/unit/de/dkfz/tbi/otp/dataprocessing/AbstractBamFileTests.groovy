@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.junit.Assert.*
-
 import grails.test.mixin.*
 import org.junit.*
 

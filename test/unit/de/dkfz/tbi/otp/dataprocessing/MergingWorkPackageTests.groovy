@@ -1,11 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.junit.Assert.*
-
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import org.junit.*
-
 import de.dkfz.tbi.otp.ngsdata.*
 
 @TestFor(MergingWorkPackage)
@@ -33,7 +31,7 @@ class MergingWorkPackageTests {
             name: "sample-type")
         sampleType.save(flush: true)
 
-        this.sample = new Sample (
+        this.sample = new Sample(
             individual: individual,
             sampleType: sampleType)
         this.sample.save(flush: true)

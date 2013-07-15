@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.junit.Assert.*
-
 import grails.test.mixin.*
 import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -32,7 +31,7 @@ class MergingPassTests {
             name: "sample-type")
         sampleType.save(flush: true)
 
-        Sample sample = new Sample (
+        Sample sample = new Sample(
             individual: individual,
             sampleType: sampleType)
         sample.save(flush: true)
