@@ -56,7 +56,9 @@ class MergingWorkPackage {
      */
     MergingCriteria mergingCriteria = MergingCriteria.DEFAULT
 
-    static belongsTo = [sample: Sample]
+    static belongsTo = [
+        sample: Sample,
+        seqType: SeqType]
 
     static constraints = {
         mergingCriteria (nullable: true)

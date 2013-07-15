@@ -7,10 +7,11 @@ import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 @TestFor(MergingWorkPackage)
-@Mock([Sample, SampleType, Individual, Project])
+@Mock([Sample, SampleType, Individual, Project, SeqType])
 class MergingWorkPackageTests {
 
     Sample sample = null
+    SeqType seqType = null
 
     void setUp() {
         Project project = new Project(
@@ -35,22 +36,31 @@ class MergingWorkPackageTests {
             individual: individual,
             sampleType: sampleType)
         this.sample.save(flush: true)
+
+        this.seqType = new SeqType(
+            name: "WHOLE_GENOME",
+            libraryLayout: "SINGLE",
+            dirName: "whole_genome_sequencing")
+        seqType.save(flush: true)
     }
 
     void tearDown() {
         this.sample = null
+        this.seqType = null
     }
 
     void testSave() {
         MergingWorkPackage workPackage = new MergingWorkPackage(
-            sample: sample)
+            sample: sample,
+            seqType: seqType)
         Assert.assertTrue(workPackage.validate())
         workPackage.save(flush: true)
     }
 
     void testContraints() {
         // sample is not null
-        MergingWorkPackage workPackage = new MergingWorkPackage()
+        MergingWorkPackage workPackage = new MergingWorkPackage(
+            seqType: seqType)
         Assert.assertFalse(workPackage.validate())
         // processingType is not null
         workPackage.sample = sample
@@ -62,5 +72,8 @@ class MergingWorkPackageTests {
         Assert.assertTrue(workPackage.validate())
         workPackage.mergingCriteria = null
         Assert.assertTrue(workPackage.validate())
+        // seqType can not be null
+        workPackage.seqType = null
+        Assert.assertFalse(workPackage.validate())
     }
 }
