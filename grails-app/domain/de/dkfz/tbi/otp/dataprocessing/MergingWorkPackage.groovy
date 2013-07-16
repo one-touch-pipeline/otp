@@ -4,9 +4,10 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 
 /**
- * Represents a "workpackage" to merge all {@link ProcessedBamFile}s
- * available for the corresponding {@link Sample} (currently and in the future)
- * and satisfying the given {@link MergingCriteria} or custom selection.
+ * Represents a "workpackage" to merge all {@link ProcessedBamFile}s of
+ * the corresponding {@link SeqType}, which are available for the corresponding
+ * {@link Sample} (currently and in the future) and satisfying the given
+ * {@link MergingCriteria} or custom selection.
  *
  *
  */
@@ -38,7 +39,7 @@ class MergingWorkPackage {
      */
     enum MergingCriteria {
         /**
-         * {@link ProcessedBamFile}s for this sample must be generated
+         * {@link ProcessedBamFile}s for this {@link Sample} must be generated
          * from sequencing files with the same {@link SeqPlatform} and {@link SeqType}
          */
         DEFAULT

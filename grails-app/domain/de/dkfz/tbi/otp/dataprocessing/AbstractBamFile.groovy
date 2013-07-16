@@ -14,12 +14,15 @@ class AbstractBamFile {
         FINISHED
     }
 
-    enum QualityControl {NOT_DONE, PASSED, FAILED}
+    enum QualityControl {
+        NOT_DONE, PASSED, FAILED
+    }
 
     BamType type = null
-    boolean hasIndexFile = false
+    Boolean hasIndexFile = false
     Boolean hasCoveragePlot = false
     Boolean hasInsertSizePlot = false
+    Boolean hasMetricsFile = false
 
     QaProcessingStatus qualityAssessmentStatus = QaProcessingStatus.UNKNOWN
     QualityControl qualityControl = QualityControl.NOT_DONE
@@ -27,6 +30,14 @@ class AbstractBamFile {
     static constraints = {
         hasCoveragePlot(nullable: true)
         hasInsertSizePlot(nullable: true)
+        hasMetricsFile(nullable: true)
         qualityAssessmentStatus(nullable: true)
+        hasMetricsFile validator: { val, obj ->
+            if (obj.type == BamType.SORTED) {
+                return !val
+            } else {
+                return true
+            }
+        }
     }
 }
