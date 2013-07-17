@@ -71,7 +71,7 @@ class MergingWorkPackageTests {
         workPackage.processingType = MergingWorkPackage.ProcessingType.SYSTEM
         Assert.assertTrue(workPackage.validate())
         workPackage.mergingCriteria = null
-        Assert.assertTrue(workPackage.validate())
+        Assert.assertFalse(workPackage.validate())
         // seqType can not be null
         workPackage.seqType = null
         Assert.assertFalse(workPackage.validate())

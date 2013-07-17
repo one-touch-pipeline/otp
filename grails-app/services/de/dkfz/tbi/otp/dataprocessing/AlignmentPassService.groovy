@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.*
+import static org.springframework.util.Assert.*
 
 /**
  * Execution of the alignment on the particular data file is called AlignmentPass
@@ -63,5 +64,17 @@ class AlignmentPassService {
             throw new ProcessingException("Undefined path to reference genome for project ${project.name}")
         }
         return path
+    }
+
+    public int maximalIdentifier(ProcessedBamFile processedBamFile) {
+        notNull(processedBamFile, "the input bam file for the method maximalIdentifier is null")
+        SeqTrack seqTrackPerBamFile = processedBamFile.alignmentPass.seqTrack
+        int maxIdentifier = AlignmentPass.createCriteria().get {
+            eq("seqTrack", seqTrackPerBamFile)
+            projections{
+                max("identifier")
+            }
+        }
+        return maxIdentifier
     }
 }

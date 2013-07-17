@@ -35,7 +35,8 @@ class MergingWorkPackage {
     }
 
     /**
-     * a criteria to join {@link ProcessedBamFile}s of one sample into {@link MergingSet}s
+     * A criteria to join {@link ProcessedBamFile}s of one sample into {@link MergingSet}s.
+     * It is not allowed to use overlapping MergingCriteria to merge the same merging set twice
      */
     enum MergingCriteria {
         /**
@@ -59,9 +60,6 @@ class MergingWorkPackage {
 
     static belongsTo = [
         sample: Sample,
-        seqType: SeqType]
-
-    static constraints = {
-        mergingCriteria (nullable: true)
-    }
+        seqType: SeqType
+    ]
 }

@@ -11,7 +11,7 @@ class MergingPassService {
     MergingSetService mergingSetService
 
     MergingPass create() {
-        MergingSet mergingSet = mergingSetService.getNextMergingSet()
+        MergingSet mergingSet = mergingSetService.nextMergingSet()
         if (mergingSet) {
             int pass = MergingPass.countByMergingSet(mergingSet)
             MergingPass mergingPass = new MergingPass(identifier: pass, mergingSet: mergingSet)

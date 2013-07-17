@@ -23,6 +23,7 @@ class AbstractBamFile {
     Boolean hasCoveragePlot = false
     Boolean hasInsertSizePlot = false
     Boolean hasMetricsFile = false
+    Boolean withdrawn = false
 
     QaProcessingStatus qualityAssessmentStatus = QaProcessingStatus.UNKNOWN
     QualityControl qualityControl = QualityControl.NOT_DONE
