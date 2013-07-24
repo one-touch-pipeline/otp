@@ -37,14 +37,14 @@ class Parameters {
     /**
      * WindowSize for the coverage plot
      */
-    @Min(value = 1l)
+    @Min(value = 100l)
     @Max(value = 10000l)
     Integer winSize
 
     /**
      * Basket size for the insert size histogram
      */
-    @Min(value = 0l)
+    @Min(value = 1l)
     @Max(value = 1000000l)
     Integer binSize
 

@@ -21,13 +21,13 @@ Path to insert sizes histogram file (output, for insert size plot)
 remove_output: if true, the existing output files will be removed
         if false and there are exiting output files, the processing will
         be stopped
-Alias for the "ALL" chromosome (whole genome)
-MinAlignedRecordLength - minimun length a read should aligned to the reference
-MinMeanBaseQuality - used to decide if read is mapped with good Quality or low Quality
-MappingQuality - used to decide if read is mapped at all and included into mapping calculation
-Coverage Mapping Quality Threshold - used to decide if read is added for the coverage plot, default 1
-Window Size - WindowSize for the coverage plot in bp
-BinSize - Basket size for the insert size histogram
+Alias for the "ALL" chromosome. It cannot contain empty spaces. (whole genome)
+MinAlignedRecordLength - minimun length a read should aligned to the reference (Integer between 0 and 10000. common value: 36).
+MinMeanBaseQuality - used to decide if read is mapped with good Quality or low Quality (Integer between 0 and 100. common value: 0).
+MappingQuality - used to decide if read is mapped at all and included into mapping calculation (Integer between 0 and 100. common value: 0).
+Coverage Mapping Quality Threshold - used to decide if read is added for the coverage plot. (Integer between 0 and 100. common value: 1).
+Window Size - Window size for the coverage plot in bp. A small window size require higher memory and processing time. (Integer between 100 and 10000. common value: 1000).
+BinSize - Basket size for the insert size histogram (Integer between 1 and 1000000. common value: 10).
 TestMode - Should the test mode be used. In the test mode the COV parameters of some chromosomes (*, m, chrM) are
         filtered out for counting for the "ALL" chromosome
     """
