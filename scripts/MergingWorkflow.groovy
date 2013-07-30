@@ -12,6 +12,7 @@ plan("MergingWorkflow") {
         inputParameter("__pbsRealm", "merging", "__pbsRealm")
     }
     job("mergingValidation", "mergingValidationJob")
+    job("metricsParsing", "metricsParsingJob")
     job("mergingFileIndexing", "mergingFileIndexingJob") {
         outputParameter("__pbsIds")
         outputParameter("__pbsRealm")
