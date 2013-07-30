@@ -59,7 +59,7 @@ class AlignmentPassService {
         Project project = project(alignmentPass)
         SeqType seqType = seqType(alignmentPass)
         ReferenceGenome referenceGenome = referenceGenomeService.referenceGenome(project, seqType)
-        String path = referenceGenomeService.prefixOnlyFilePath(project, referenceGenome)
+        String path = referenceGenomeService.fastaFilePath(project, referenceGenome)
         if (!path) {
             throw new ProcessingException("Undefined path to reference genome for project ${project.name}")
         }

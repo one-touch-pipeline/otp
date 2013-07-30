@@ -16,11 +16,15 @@ class BamFileIndexingJob extends AbstractJobImpl {
     @Autowired
     ExecutionHelperService executionHelperService
 
+    @Autowired
+    ProcessingOptionService optionService
+
     @Override
     public void execute() throws Exception {
         ProcessedBamFile bamFile = parseInput()
         Realm realm = alignmentPassService.realmForDataProcessing(bamFile.alignmentPass)
         String cmd = createIndexingCommand(bamFile)
+        log.debug cmd
         String pbsId = executionHelperService.sendScript(realm, cmd)
         addOutputParameter("__pbsIds", pbsId)
         addOutputParameter("__pbsRealm", realm.id.toString())
@@ -35,7 +39,8 @@ class BamFileIndexingJob extends AbstractJobImpl {
     private String createIndexingCommand(ProcessedBamFile bamFile) {
         String path = processedBamFileService.getDirectory(bamFile)
         String fileName = processedBamFileService.getFileName(bamFile)
-        return "cd ${path}; samtools index ${fileName}; chmod 440 ${fileName}.bai"
+        String baiFilePath = processedBamFileService.baiFilePath(bamFile)
+        String samToolsBinary = optionService.findOptionAssure("samtoolsCommand", null, null)
+        return "cd ${path}; ${samToolsBinary} index ${fileName}; chmod 440 ${baiFilePath}"
     }
-
 }

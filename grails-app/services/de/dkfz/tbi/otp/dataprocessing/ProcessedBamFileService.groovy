@@ -22,6 +22,19 @@ class ProcessedBamFileService {
         return "${dir}/${filename}"
     }
 
+    /**
+     * Retrieves the path to a log file used by bwa sampe
+     * (Although is not Philosophy of OTP to keep track of log files,
+     * it is required by bwa since it produces not empty output files
+     * even when it fails, and so we need to analyse the log file contents too)
+     *
+     * @param saiFile processed bam file object
+     * @return Path to the outputted error file produced by bwa sampe
+     */
+    public String bwaSampeErrorLogFilePath(ProcessedBamFile bamFile) {
+        return "${getFilePath(bamFile)}_bwaSampeErrorLog.txt"
+    }
+
     public String baiFilePath(ProcessedBamFile bamFile) {
         return "${getFilePath(bamFile)}.bai"
     }
@@ -60,10 +73,6 @@ class ProcessedBamFileService {
         return createBamFile(alignmentPass, AbstractBamFile.BamType.SORTED)
     }
 
-    public ProcessedBamFile createRmdupBamFile(AlignmentPass alignmentPass) {
-        return createBamFile(alignmentPass, AbstractBamFile.BamType.RMDUP)
-    }
-
     private ProcessedBamFile createBamFile(AlignmentPass alignmentPass, AbstractBamFile.BamType type) {
         ProcessedBamFile pbf = new ProcessedBamFile(
             alignmentPass: alignmentPass,
@@ -75,11 +84,6 @@ class ProcessedBamFileService {
 
     public ProcessedBamFile findSortedBamFile(AlignmentPass alignmentPass) {
         def type = AbstractBamFile.BamType.SORTED
-        return findBamFile(alignmentPass, type)
-    }
-
-    public ProcessedBamFile findRmdupBamFile(AlignmentPass alignmentPass) {
-        def type = AbstractBamFile.BamType.RMDUP
         return findBamFile(alignmentPass, type)
     }
 

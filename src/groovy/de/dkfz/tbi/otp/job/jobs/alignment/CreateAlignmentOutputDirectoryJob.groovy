@@ -20,6 +20,10 @@ class CreateAlignmentOutputDirectoryJob extends AbstractJobImpl {
     public void execute() throws Exception {
         long alignmentPassId = Long.parseLong(getProcessParameterValue())
         AlignmentPass alignmentPass = AlignmentPass.get(alignmentPassId)
+
+        // TODO remove this hack when multiple start is solved
+        alignmentPassService.alignmentPassStarted(alignmentPass)
+
         String dir = processedAlignmentFileService.getDirectory(alignmentPass)
         Realm realm = alignmentPassService.realmForDataProcessing(alignmentPass)
         execute(dir, realm)
@@ -31,6 +35,3 @@ class CreateAlignmentOutputDirectoryJob extends AbstractJobImpl {
         log.debug "creating directory finished with exit code " + exitCode
     }
 }
-
-
-

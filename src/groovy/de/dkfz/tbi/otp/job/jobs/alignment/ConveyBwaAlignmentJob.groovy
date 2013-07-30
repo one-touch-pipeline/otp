@@ -5,11 +5,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.beans.factory.annotation.Autowired
 
-/*
- * the very first version of bwaAlignment created by Sylwester running with binary bwa.
- * The code is not deleted due to possible usage in the future.
- */
-class BwaAlignmentJob extends AbstractJobImpl {
+class ConveyBwaAlignmentJob extends AbstractJobImpl {
 
     @Autowired
     ExecutionHelperService executionHelperService
@@ -51,31 +47,24 @@ class BwaAlignmentJob extends AbstractJobImpl {
 
     private String sendAlignmentScript(Realm realm, ProcessedSaiFile saiFile) {
         AlignmentPass alignmentPass = saiFile.alignmentPass
-        String bwaCommand = bwaCommand(alignmentPass)
+        Project project = alignmentPassService.project(alignmentPass)
+        String conveyBwaCommand = optionService.findOptionAssure("conveyBwaCommand", null, project)
         String dataFilePath = lsdfFilesService.getFileViewByPidPath(saiFile.dataFile)
         String saiFilePath = processedSaiFileService.getFilePath(saiFile)
         String referenceGenomePath = alignmentPassService.referenceGenomePath(alignmentPass)
         String qaSwitch = qualityEncoding(alignmentPass)
-        String nCores = optionService.findOptionSafe("bwaNumberOfCores", null, null)
-        // TODO: add option for clipping
-        String bwaCmd = "${bwaCommand} aln ${nCores} ${qaSwitch} -f ${saiFilePath} ${referenceGenomePath} ${dataFilePath}"
+        String nCores = optionService.findOptionSafe("conveyBwaNumberOfCores", null, null)
+        String bwaLogFilePath = processedSaiFileService.bwaAlnErrorLogFilePath(saiFile)
+        String bwaCmd = "${conveyBwaCommand} aln ${nCores} ${qaSwitch} ${referenceGenomePath} ${dataFilePath} -f ${saiFilePath} 2> ${bwaLogFilePath}"
+        String bwaErrorCheckingCmd = BwaErrorHelper.failureCheckScript(saiFilePath, bwaLogFilePath)
         String chmodCmd = "chmod 440 ${saiFilePath}"
-        String cmd = "${bwaCmd} ; ${chmodCmd}"
+        String cmd = "${bwaCmd}; ${bwaErrorCheckingCmd}; ${chmodCmd}"
         log.debug cmd
-        return executionHelperService.sendScript(realm, cmd)
-    }
-
-    private String bwaCommand(AlignmentPass alignmentPass) {
-        Project project = alignmentPassService.project(alignmentPass)
-        String cmd = optionService.findOption("bwaCommand", null, project)
-        if (!cmd) {
-            throw new ProcessingException("BWA command undefined for project ${project}")
-        }
-        return cmd
+        return executionHelperService.sendScript(realm, cmd, "conveyBwaAlignmentJob")
     }
 
     private String qualityEncoding(AlignmentPass alignmentPass) {
         String type = alignmentPass.seqTrack.qualityEncoding.toString()
-        return optionService.findOptionSafe("bwaQualityEncoding", type , null )
+        return optionService.findOptionSafe("conveyBwaQualityEncoding", type , null)
     }
 }

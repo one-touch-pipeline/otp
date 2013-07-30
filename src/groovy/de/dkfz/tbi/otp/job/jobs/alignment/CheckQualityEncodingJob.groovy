@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.beans.factory.annotation.Autowired
-
 import java.util.zip.*
 
 class CheckQualityEncodingJob extends AbstractEndStateAwareJobImpl {
@@ -51,7 +50,8 @@ class CheckQualityEncodingJob extends AbstractEndStateAwareJobImpl {
     }
 
     private LineNumberReader openStream(DataFile dataFile) {
-        File file = new File(lsdfFilesService.getFileFinalPath(dataFile))
+        File file = new File(lsdfFilesService.getFileViewByPidPath(dataFile))
+
         if (!file.canRead()) {
             throw new FileNotReadableException(file)
         }

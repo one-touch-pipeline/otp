@@ -12,6 +12,19 @@ class ProcessedSaiFileService {
         return "${dir}/${filename}"
     }
 
+    /**
+     * Retrieves the path to a log file used by bwa aln
+     * (Although is not Philosophy of OTP to keep track of log files,
+     * it is required by bwa since it produces not empty output files
+     * even when it fails, and so we need to analyse the log file contents too)
+     *
+     * @param saiFile processed sai file object
+     * @return Path to the outputted error file produced by bwa aln
+     */
+    public String bwaAlnErrorLogFilePath(ProcessedSaiFile saiFile) {
+        return "${getFilePath(saiFile)}_bwaAlnErrorLog.txt"
+    }
+
     public String getDirectory(ProcessedSaiFile saiFile) {
         return processedAlignmentFileService.getDirectory(saiFile.alignmentPass)
     }

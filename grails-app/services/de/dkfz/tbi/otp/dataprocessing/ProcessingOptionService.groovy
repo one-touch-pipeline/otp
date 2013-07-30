@@ -1,10 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.job.processing.ProcessingException;
 import de.dkfz.tbi.otp.ngsdata.Project
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.util.Assert;
+import static org.springframework.util.Assert.*
 
 class ProcessingOptionService {
 
@@ -84,6 +87,18 @@ class ProcessingOptionService {
     public String findOptionSafe(String name, String type, Project project) {
         ProcessingOption option = findOptionObject(name, type, project)
         return (option) ? option.value : ""
+    }
+
+    /**
+     * @throws ProcessingException if no option has been found
+     */
+    public String findOptionAssure(String name, String type, Project project) {
+        notNull(name, "option name can not be null")
+        ProcessingOption option = findOptionObject(name, type, project)
+        if (!option) {
+            throw new ProcessingException("no option has been found with name ${name} and type ${type} and project ${project}")
+        }
+        return option.value
     }
 
     /**

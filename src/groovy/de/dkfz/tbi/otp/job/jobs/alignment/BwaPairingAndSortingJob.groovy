@@ -36,29 +36,49 @@ class BwaPairingAndSortingJob extends AbstractJobImpl {
         Realm realm = alignmentPassService.realmForDataProcessing(alignmentPass)
         String cmd = createCommand(alignmentPass)
         log.debug cmd
-        String pbsId = executionHelperService.sendScript(realm, cmd)
+        String pbsId = executionHelperService.sendScript(realm, cmd, "bwaPairingAndSortingJob")
         addOutputParameter("__pbsIds", pbsId)
         addOutputParameter("__pbsRealm", realm.id.toString())
     }
 
     private String createCommand(AlignmentPass alignmentPass) {
+        Project project = alignmentPassService.project(alignmentPass)
+        ProcessedBamFile bamFile = processedBamFileService.findSortedBamFile(alignmentPass)
+        String sequenceAndSaiFiles = createSequenceAndSaiFiles(alignmentPass)
         String groupHeader = createGroupHeader(alignmentPass.seqTrack)
         String insertSizeOpt = insertSizeOption(alignmentPass.seqTrack)
         String referenceGenomePath = alignmentPassService.referenceGenomePath(alignmentPass)
-        String sequenceAndSaiFiles = createSequenceAndSaiFiles(alignmentPass)
-        String outFile = getOutputFile(alignmentPass)
+        String outFilePathNoSuffix = processedBamFileService.getFilePathNoSuffix(bamFile)
+        String outFilePath = processedBamFileService.getFilePath(bamFile)
         String samtoolsSortBuffer = optionService.findOptionSafe("samtoolsSortBuffer", null, null)
-        String sampeCmd = "bwa sampe -P ${insertSizeOpt} ${groupHeader} ${referenceGenomePath} ${sequenceAndSaiFiles}"
-        String viewCmd = "samtools view -uSbh - "
-        String sortCmd = "samtools sort ${samtoolsSortBuffer} - ${outFile}"
-        String chmodCmd = "chmod 440 ${outFile}.bam"
-        return "${sampeCmd} | ${viewCmd} | ${sortCmd} ; ${chmodCmd}"
+        String numberOfSampeThreads = optionService.findOptionSafe("numberOfSampeThreads", null, null)
+        String bwaCommand = optionService.findOptionAssure("bwaCommand", null, project)
+        String samToolsBinary = optionService.findOptionAssure("samtoolsCommand", null, null)
+        String numberOfSamToolsSortThreads = optionService.findOptionSafe("numberOfSamToolsSortThreads", null, null)
+        String mbuffer = optionService.findOptionAssure("mbufferPairingSorting", null, null)
+
+        String sampeCmd = "${bwaCommand} sampe -P -T ${numberOfSampeThreads} ${insertSizeOpt} -r \"${groupHeader}\" ${referenceGenomePath} ${sequenceAndSaiFiles}"
+        String viewCmd = "${samToolsBinary} view -uSbh - "
+        String sortCmd = "${samToolsBinary} sort ${numberOfSamToolsSortThreads} ${samtoolsSortBuffer} - ${outFilePathNoSuffix}"
+        String chmodCmd = "chmod 440 ${outFilePath}"
+        String mbufferPart = "mbuffer -q ${mbuffer} -l /dev/null"
+        String bwaLogFilePath = processedBamFileService.bwaSampeErrorLogFilePath(bamFile)
+        String bwaErrorCheckingCmd = BwaErrorHelper.failureCheckScript(outFilePath, bwaLogFilePath)
+        String cmd = "${sampeCmd} 2> ${bwaLogFilePath} | ${mbufferPart} | ${viewCmd} | ${mbufferPart} | ${sortCmd} ; ${bwaErrorCheckingCmd} ;${chmodCmd}"
+        log.debug cmd
+        return cmd
     }
 
     private String createGroupHeader(SeqTrack seqTrack) {
-        String runName = seqTrack.run.name
-        String laneName = seqTrack.laneId
-        return "-r \"@RG\\tID:${runName}\\tLB:${laneName}\""
+        String pid = seqTrack.sample.individual.pid
+        String sampleType = seqTrack.sample.sampleType.name
+        String platformName = seqTrack.seqPlatform.name
+        String sampleName = "${sampleType}_${pid}"
+        String ID = "${seqTrack.run.name}_${seqTrack.laneId}"
+        String SM = "sample_${sampleName}"
+        String LB = sampleName
+        String PL = SAMPlatformLabel.map(platformName).name()
+        return "@RG\\tID:${ID}\\tSM:${SM}\\tLB:${LB}\\tPL:${PL}"
     }
 
     private String insertSizeOption(SeqTrack seqTrack) {
@@ -72,7 +92,7 @@ class BwaPairingAndSortingJob extends AbstractJobImpl {
     private String createSequenceAndSaiFiles(AlignmentPass alignmentPass) {
         List<ProcessedSaiFile> saiFiles = ProcessedSaiFile.findAllByAlignmentPassAndFileExists(alignmentPass, true)
         if (saiFiles.size() != 2) {
-            throw new ProcessingException("Not paired library ${saiFiles.size()}")
+            throw new ProcessingException("Not paired library. Number of sai files: ${saiFiles.size()}")
         }
         String sai1 = processedSaiFileService.getFilePath(saiFiles.get(0))
         String sai2 = processedSaiFileService.getFilePath(saiFiles.get(1))
@@ -80,10 +100,4 @@ class BwaPairingAndSortingJob extends AbstractJobImpl {
         String seq2 = lsdfFilesService.getFileViewByPidPath(saiFiles.get(1).dataFile)
         return "${sai1} ${sai2} ${seq1} ${seq2} "
     }
-
-    private String getOutputFile(AlignmentPass alignmentPass) {
-        ProcessedBamFile bamFile = processedBamFileService.findSortedBamFile(alignmentPass)
-        return processedBamFileService.getFilePathNoSuffix(bamFile)
-    }
-
 }
