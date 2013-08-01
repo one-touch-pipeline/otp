@@ -12,9 +12,9 @@ class ProjectOverviewController {
     def projectService
 
     def projectOverviewService
-
     Map index() {
-        return [projects: projectService.getAllProjects()]
+        String projectName = params.projectName
+        return [projects: projectService.getAllProjects()*.name, project: projectName]
     }
 
     JSON individualCountByProject(String projectName) {

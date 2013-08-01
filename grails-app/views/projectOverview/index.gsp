@@ -11,18 +11,21 @@
 <body>
     <div class="body">
         <div class="overviewMenu">
-            <div class="projectLabel">project:</div>
+            <div class="projectLabel">project: </div>
             <div class="projectSelect">
                 <g:select id="project_select" name='project_select'
-                    from='${projects}'></g:select>
+                    from='${projects}' value='${project}'></g:select>
             </div>
         </div>
-        <p class=statisticTitle>
-            <b>Number of patients =</b> <span id="patient-count"></span>
+         <h3 class="statisticTitle">
+            <g:message code="projectOverview.pageTitle" />
+        </h3>
+        <p class="statisticTitle">
+            <b>Number of Individuals: </b> <span id="patient-count"></span>
         </p>
         <div class="table">
-            <div style="width: 20px; height: 30px;"></div>
-            <h3 class="StatisticTableTitle">
+            <div style="width: 20px; height: 20px;"></div>
+            <h3 class="statisticTableTitle">
                 <g:message code="projectOverview.title.table2" />
             </h3>
             <div class="dataTableContainer sampleTypeNameCountBySample"
@@ -31,12 +34,11 @@
                     codes="${[
                         'projectOverview.index.sampleTypeName',
                         'projectOverview.index.sampleCount',
-                        
                     ] }"
                     id="sampleTypeNameCountBySample" />
             </div>
             <div style="width: 20px; height: 50px;"></div>
-            <h3 class="StatisticTableTitle">
+            <h3 class="statisticTableTitle">
                 <g:message code="projectOverview.title" />
             </h3>
             <div class="dataTableContainer projectOverviewTable"
@@ -55,7 +57,7 @@
                     id="projectOverviewTable" />
             </div>
             <div style="width: 20px; height: 50px;"></div>
-            <h3 class="StatisticTableTitle">
+            <h3 class="statisticTableTitle">
                 <g:message code="projectOverview.title.table" />
             </h3>
             <div

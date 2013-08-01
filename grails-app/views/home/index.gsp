@@ -17,7 +17,7 @@
                 </tr>
                 <g:each var="row" in="${projectQuery}">
                     <tr>
-                        <td><b>${row.key}</b></td>
+                        <td><b><g:link controller="projectOverview" action="index" params="[projectName: row.key]">${row.key}</g:link></b></td>
                         <td><b>${row.value}</b><td>
                     </tr>
                 </g:each>
