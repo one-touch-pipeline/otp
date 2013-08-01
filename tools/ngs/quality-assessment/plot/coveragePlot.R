@@ -5,26 +5,25 @@ fileArgument = "--file="
 scriptPath = dirname(sub(fileArgument, "", cmdArgs[grep(fileArgument, cmdArgs)]))
 # Includes required functions
 source(paste(scriptPath, "coveragePlotGenomeLib.R", sep = "/"))
-numberOfParamsExpected = 3
+numberOfParamsExpected = 2
 # Index needed to only consider the arguments after "--args"
 beginArgsIndexes = which(cmdArgs == "--args")
 numberOfParams = length(cmdArgs) - beginArgsIndexes
-
 if (numberOfParams != numberOfParamsExpected) {
     errorMsg = paste("Incorrect number of arguments (", numberOfParamsExpected," expected): ", numberOfParams, sep="")
-    exampleMsg = paste("Required arguments: pathToData countType windowSize pathToOutputPlot.png",
+    exampleMsg = paste("Required arguments: pathToData pathToOutputPlot.png",
     "",
     "Example: ",
-    "Rscript coveragePlot.R \"./control_PID_merged.bam.rmdup_readCoverage_1kb_windows.txt\" \"read\" \"./control_PID_merged.bam.rmdup_readCoverage_1kb_windows.png\"",
+    "Rscript coveragePlot.R \"./control_PID_merged.bam.rmdup_readCoverage_1kb_windows.txt\" \"./control_PID_merged.bam.rmdup_readCoverage_1kb_windows.png\"",
     sep = "\n")
     fullMsg = cat(errorMsg, exampleMsg, sep = "\n")
     print(fullMsg)
     q()
 }
-
 filename = cmdArgs[beginArgsIndexes + 1]
-countType = cmdArgs[beginArgsIndexes + 2]
-outputPath = cmdArgs[beginArgsIndexes + 3]
+# TODO use optparse to allow optional parameters
+countType = "read"
+outputPath = cmdArgs[beginArgsIndexes + 2]
 sampleName = basename(filename)
 #input coverage data
 sampleRaw = read.table(filename, sep = "\t", as.is = TRUE)
