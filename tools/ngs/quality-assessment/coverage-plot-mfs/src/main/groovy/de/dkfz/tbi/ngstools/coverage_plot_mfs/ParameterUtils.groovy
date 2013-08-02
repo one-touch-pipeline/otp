@@ -14,12 +14,12 @@ enum ParameterUtils {
     INSTANCE
 
     /**
-     * go through all the given parameters and sets the corresponding value to the property of the same
+     * go through all given parameters and set the corresponding value to the property of the same
      * name of the given object. It is required, that size of parameters and values are equal.
      *
-     * @param object the object holding the parameters (properties)
-     * @param parameters the names of the property to set
-     * @param values the values to set to the properties (parameters) using one of the specific parseTo* methods
+     * @param object, the object holding the parameters (properties)
+     * @param parameters, the names of the property to set
+     * @param values, the values, which shall be assigned to the properties (parameters) using one of the specific parseTo* methods
      */
     public void parse(Object object, List<String> parameters, String[] values) {
         if (parameters.size() != values.length) {
@@ -32,11 +32,11 @@ enum ParameterUtils {
     }
 
     /**
-     * checking the existence of the property and call the parseTo* method for the type of the property.
+     * checking the existence of the property and calling the parseTo* method for the type of the property.
      *
-     * @param object the object holding the property
-     * @param parameter the name of the property
-     * @param value the value to set to the property using one of the specific parseTo* methods
+     * @param object, the object holding the property
+     * @param parameter, the name of the property
+     * @param value, the value, which shall be assigned to the property using one of the specific parseTo* methods
      */
     public void parse(Object object, String parameter, String value) {
         MetaProperty metaProperty = object.getClass().getMetaClass().getMetaProperty(parameter)
@@ -47,11 +47,11 @@ enum ParameterUtils {
     }
 
     /**
-     * set the value to the given property.
+     * assign the value to the given property.
      *
-     * @param object the object holding the property
-     * @param property the name of the property
-     * @param value the value, which has to be assigned to the property
+     * @param object, the object holding the property
+     * @param property, the name of the property
+     * @param value, the value, which has to be assigned to the property
      */
     private void parseToString(Object object, String property, String value) {
         object."${property}" = value
@@ -60,9 +60,9 @@ enum ParameterUtils {
     /**
      * parse the value to an integer and assign it to the given property.
      *
-     * @param object the object holding the property
-     * @param property the name of the property
-     * @param value the value, which has to be assigned to the property as integer
+     * @param object, the object holding the property
+     * @param property, the name of the property
+     * @param value, the value, which has to be assigned to the property as integer
      */
     private void parseToInteger(Object object, String property, String value) {
         try {
@@ -75,11 +75,11 @@ enum ParameterUtils {
     }
 
     /**
-     * parse the value to an long and assign it to the given property.
+     * parse the value to a long and assign it to the given property.
      *
-     * @param object the object holding the property
-     * @param property the name of the property
-     * @param value the value, which has to be assigned to the property as long
+     * @param object, the object holding the property
+     * @param property, the name of the property
+     * @param value, the value, which has to be assigned to the property as long
      */
     private void parseToLong(Object object, String property, String value) {
         try {
@@ -92,11 +92,11 @@ enum ParameterUtils {
     }
 
     /**
-     * parse the value to an boolean and assign it to the given property.
+     * parse the value to boolean and assign it to the given property.
      *
-     * @param object the object holding the property
-     * @param property the name of the property
-     * @param value the value, which has to be assigned to the property as boolean
+     * @param object, the object holding the property
+     * @param property, the name of the property
+     * @param value, the value, which has to be assigned to the property as boolean
      */
     private void parseToBoolean(Object object, String property, String value) {
         Boolean bool = null
@@ -119,7 +119,7 @@ enum ParameterUtils {
     /**
      * validates the given object against its validation constraint annotation of the object fields
      *
-     * @throws ValidationException if one or more parameters kept by the object is not valid
+     * @throws ValidationException if the one or more parameters kept by the object is not valid
      */
     public void validate(Object object) {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory()
@@ -141,10 +141,10 @@ enum ParameterUtils {
      * <li>The path needs to exist</li>
      * <li>The path needs to be a normal file (directory or special files are not allowed)</li>
      * <li>The file needs to be readable</li>
-     * <li>The file may not be empty</li>
+     * <li>The file must not be empty</li>
      * </ul>
      *
-     * @param path the path of the file to be checked as input file
+     * @param path, the path of the file to be checked as input file
      */
     public void validateInputFile(String path) {
         File file = new File(path)
@@ -172,7 +172,7 @@ enum ParameterUtils {
      * <li>If a path with the given name exist, the path needs to reference a normal file (directory or special files are not allowed)</li>
      * </ul>
      *
-     * @param path the path of the file to be checked as output directory
+     * @param path, the path of the file to be checked as output directory
      */
     public void validateOutputDirectory(String path) {
         File file = new File(path)
@@ -192,11 +192,11 @@ enum ParameterUtils {
     }
 
     /**
-     * Helper to manage already existing output files depends on the overrideOutput flag.
+     * Helper to manage already existing output files, depending on the overrideOutput flag.
      * If the file exist and the flag is false, an exception is thrown, otherwise the file is deleted.
      * If the delete fails, an {@link Exception} is thrown
      *
-     * @param path The path of the output file to manage
+     * @param path, the path of the output file to manage
      * @param overrideOutput flag, if existing output file should be overridden
      */
     private static void manageOutputFile(String path, boolean overrideOutput) {
