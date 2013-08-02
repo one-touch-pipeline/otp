@@ -23,7 +23,7 @@ enum ParameterUtils {
         if (violations) {
             StringBuilder failedMessage = new StringBuilder()
             violations.each { constraintViolation ->
-                failedMessage.append("${constraintViolation.getMessage()}\n\n")
+                failedMessage.append("${constraintViolation.getPropertyPath()}: ${constraintViolation.getMessage()}\n\n")
             }
             throw new ValidationException(failedMessage.toString())
         }

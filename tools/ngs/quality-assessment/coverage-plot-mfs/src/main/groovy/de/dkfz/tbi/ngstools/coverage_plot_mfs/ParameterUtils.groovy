@@ -41,7 +41,7 @@ enum ParameterUtils {
     public void parse(Object object, String parameter, String value) {
         MetaProperty metaProperty = object.getClass().getMetaClass().getMetaProperty(parameter)
         if (!metaProperty) {
-            throw new MissingPropertyException("property ${parameter} is not defined")
+            throw new MissingPropertyException("The property '${parameter}' is not defined for the object '${object}'")
         }
         this."parseTo${metaProperty.getType().getSimpleName()}"(object, parameter, value)
     }
@@ -70,7 +70,7 @@ enum ParameterUtils {
         } catch (MissingPropertyException e) {
             throw e
         } catch (Exception e) {
-            throw new ValidationException("${property} must be a number, but was ${value}")
+            throw new ValidationException("The property '${property}' must be a number, but was '${value}'")
         }
     }
 
@@ -105,14 +105,14 @@ enum ParameterUtils {
         } else if (value.equalsIgnoreCase("false")) {
             bool = Boolean.FALSE
         } else {
-            throw new ValidationException("${property} must be a true or false, but was ${value}")
+            throw new ValidationException("The property '${property}' must be true or false, but was '${value}'")
         }
         try {
             object."${property}" = bool
         } catch (MissingPropertyException e) {
             throw e
         } catch (Exception e) {
-            throw new ValidationException("${property} must be a true or false, but was ${value}")
+            throw new ValidationException("The property '${property}' must be true or false, but was '${value}'")
         }
     }
 
@@ -149,16 +149,16 @@ enum ParameterUtils {
     public void validateInputFile(String path) {
         File file = new File(path)
         if (!file.exists()) {
-            throw new ValidationException("file ${path} not exist")
+            throw new ValidationException("The file '${path}' does not exist")
         }
         if (!file.isFile()) {
-            throw new ValidationException("file ${path} is no normal file")
+            throw new ValidationException("The file '${path}' is no normal file")
         }
         if (!file.canRead()) {
-            throw new ValidationException("can not read file ${path}")
+            throw new ValidationException("The file '${path}' can not be read")
         }
         if (file.size() == 0) {
-            throw new ValidationException("file is empty: ${path}")
+            throw new ValidationException("There is no content in the file ${path}")
         }
     }
 
@@ -177,17 +177,17 @@ enum ParameterUtils {
     public void validateOutputDirectory(String path) {
         File file = new File(path)
         if (file.exists() && !file.isFile()) {
-            throw new ValidationException("${path} is not a normal file")
+            throw new ValidationException("The file '${path}' exists, but is not a normal file")
         }
         File dir = file.getParentFile()
         if (!dir.exists()) {
-            throw new ValidationException("output directory ${dir} does not exist")
+            throw new ValidationException("The output directory '${dir}', where the file '${path}' should be put, does not exist")
         }
         if (!dir.canRead()) {
-            throw new ValidationException("can not read output directory ${dir}")
+            throw new ValidationException("The output directory '${dir}', where the file '${path}' should be put, can not be read")
         }
         if (!dir.canWrite()) {
-            throw new ValidationException("can not write output directory ${dir}")
+            throw new ValidationException("The file '${path}' can not be put to the directory '${dir}', since the directory is not writeable")
         }
     }
 
@@ -207,7 +207,7 @@ enum ParameterUtils {
         if (overrideOutput && file.exists()) {
             Boolean deleted = file.delete()
             if (!deleted) {
-                throw new RuntimeException("Can not delete the old output file: ${path}")
+                throw new RuntimeException("The old output file can not be deleted: ${path}")
             }
         }
     }
