@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.hipo
 
 import de.dkfz.tbi.otp.ngsdata.*
+import static org.springframework.util.Assert.*
 
 class HipoIndividualService {
 
@@ -29,7 +30,7 @@ class HipoIndividualService {
     }
 
     private boolean checkIfHipoName(String sampleName) {
-        String hipoRegex = /H\d\d\d-\w\w\w\w-[TMSXYBN]1-[DRP]\d/
+        String hipoRegex = /H\d\d\d-\w\w\w\w-[TMSXYBN]\d-[DRP]\d/
         return (sampleName =~ hipoRegex)
     }
 
@@ -39,9 +40,18 @@ class HipoIndividualService {
     }
 
     private String tissueType(String sampleName) {
+        notNull(sampleName, "The input for the method tissueType was null")
         final int TYPE_POS = 10
+        final int SAMPLE_NUMBER_POS = 11
         String tissueKey = sampleName.substring(TYPE_POS, TYPE_POS + 1)
-        return tissueMap.get(tissueKey)
+        int sampleNumber = sampleName.substring(SAMPLE_NUMBER_POS, SAMPLE_NUMBER_POS + 1) as Integer
+        if (sampleNumber == 1) {
+            return "${tissueMap.get(tissueKey)}"
+        } else if (sampleNumber < 10) {
+            return "${tissueMap.get(tissueKey)}0${sampleNumber}"
+        } else {
+            return "${tissueMap.get(tissueKey)}${sampleNumber}"
+        }
     }
 
     private void assureProject(String sampleName) {
