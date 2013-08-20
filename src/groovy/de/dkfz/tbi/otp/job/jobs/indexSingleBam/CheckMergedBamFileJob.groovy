@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.ngsdata.*
 
+//This Job is not used anymore in the workflow "IndexSingleBamWorkflow".
+//It will be kept because of historical reasons and perhaps can be reused later.
+@Deprecated
 class CheckMergedBamFileJob extends AbstractEndStateAwareJobImpl {
 
     SeqScan scan

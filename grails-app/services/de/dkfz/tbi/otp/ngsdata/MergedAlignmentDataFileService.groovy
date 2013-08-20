@@ -51,9 +51,12 @@ class MergedAlignmentDataFileService {
     }
 
     String buildRelativePath(MergingLog mergingLog) {
-        return buildRelativePath(mergingLog.seqScan.seqType, mergingLog.seqScan.sample) 
+        return buildRelativePath(mergingLog.seqScan.seqType, mergingLog.seqScan.sample)
     }
 
+    //This method is not used at the moment but is kept because of historical reasons and may be reused later on.
+    //It is only called in the Job "CreateSingleBamDataFileJob", which is not used anymore
+    @Deprecated
     String buildFileName(MergingLog mergingLog) {
         File dir = fullDirectory(mergingLog)
         int n =  numberOfFiles(dir, ".bam")
@@ -81,6 +84,8 @@ class MergedAlignmentDataFileService {
         return n
     }
 
+    //This method is not used at the moment but is kept because of historical reasons and may be reused later on.
+    @Deprecated
     private String fileName(SeqScan scan, int n) {
         String type = scan.sample.sampleType.name.toLowerCase()
         String pid = scan.sample.individual.pid

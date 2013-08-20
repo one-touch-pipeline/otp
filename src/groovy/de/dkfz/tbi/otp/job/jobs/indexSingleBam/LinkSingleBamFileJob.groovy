@@ -5,6 +5,9 @@ import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.*
 
+//This Job is not used anymore in the workflow "IndexSingleBamWorkflow".
+//It will be kept because of historical reasons and perhaps can be reused later.
+@Deprecated
 class LinkSingleBamFileJob extends AbstractJobImpl {
 
     SeqScan scan

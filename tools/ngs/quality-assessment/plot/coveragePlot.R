@@ -14,7 +14,7 @@ if (numberOfParams != numberOfParamsExpected) {
     exampleMsg = paste("Required arguments: pathToData pathToOutputPlot.png",
     "",
     "Example: ",
-    "Rscript coveragePlot.R \"./control_PID_merged.bam.rmdup_readCoverage_1kb_windows.txt\" \"./control_PID_merged.bam.rmdup_readCoverage_1kb_windows.png\"",
+    "Rscript coveragePlot.R \"./control_PID_merged.bam.mdup_readCoverage_1kb_windows.txt\" \"./control_PID_merged.bam.mdup_readCoverage_1kb_windows.png\"",
     sep = "\n")
     fullMsg = cat(errorMsg, exampleMsg, sep = "\n")
     print(fullMsg)
