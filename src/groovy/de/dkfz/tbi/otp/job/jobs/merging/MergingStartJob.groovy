@@ -22,7 +22,8 @@ class MergingStartJob extends AbstractStartJobImpl {
     @Autowired
     MergingPassService mergingPassService
 
-    final int MAX_RUNNING = 10
+    //Because of bug OTP-397 we restrict the count to one
+    final int MAX_RUNNING = 1
 
     @Scheduled(fixedDelay = 60000l)
     void execute() {

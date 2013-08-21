@@ -20,6 +20,10 @@ class MergingCreateOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
     public void execute() throws Exception {
         long mergingPassId = Long.parseLong(getProcessParameterValue())
         MergingPass mergingPass = MergingPass.get(mergingPassId)
+
+        //Because of bug OTP-397 we set the state again to inprocess
+        mergingPassService.mergingPassStarted(mergingPass)
+
         String dir = processedMergingFileService.directory(mergingPass)
         Realm realm = mergingPassService.realmForDataProcessing(mergingPass)
         executeOnRealm(dir, realm)
