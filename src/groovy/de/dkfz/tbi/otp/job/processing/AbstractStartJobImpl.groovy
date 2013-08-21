@@ -89,7 +89,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
             try {
                 schedulerService.createProcess(this, input, processParameter)
             } catch (Exception e) {
-                log.error e.message
+                println e.message
                 e.printStackTrace()
             }
         } as Callable )
