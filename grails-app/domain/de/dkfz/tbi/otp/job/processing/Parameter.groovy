@@ -5,6 +5,6 @@ class Parameter implements Serializable {
     String value
 
     static constraints = {
-        value(size:0..1000)
+        value(size: 0..10000)
     }
 }
