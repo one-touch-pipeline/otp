@@ -1,10 +1,10 @@
 package de.dkfz.tbi.otp.job.jobs.qualityAssessment
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.job.processing.*
-import org.springframework.beans.factory.annotation.Autowired
 import grails.converters.JSON
+import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
 
 class CreateChromosomeMappingFileJob extends AbstractEndStateAwareJobImpl {
 
@@ -40,8 +40,8 @@ class CreateChromosomeMappingFileJob extends AbstractEndStateAwareJobImpl {
         SeqType seqType = processedBamFileService.seqType(pass.processedBamFile)
         ReferenceGenome referenceGenome = referenceGenomeService.referenceGenome(project, seqType)
         Map<String, String> chromosomeIdentifierMap = chromosomeIdentifierMappingService.mappingAll(referenceGenome)
-        List<String> filterChromosomes = chromosomeIdentifierFilteringService.filteringCoverage()
-        List<String> sortedChromosomeIdentifiers = chromosomeIdentifierSortingService.sortIdentifiers(chromosomeIdentifierMap.values())
+        List<String> filterChromosomes = chromosomeIdentifierFilteringService.filteringCoverage(referenceGenome)
+        List<String> sortedChromosomeIdentifiers = chromosomeIdentifierSortingService.sortIdentifiers(filterChromosomes)
         Map data = [
             chromosomeIdentifierMap: chromosomeIdentifierMap,
             filterChromosomes: filterChromosomes,

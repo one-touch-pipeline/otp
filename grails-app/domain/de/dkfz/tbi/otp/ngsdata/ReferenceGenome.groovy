@@ -36,26 +36,28 @@ class ReferenceGenome {
     String fileNamePrefix
 
     /**
-     * This value stores the prefix common to names of ReferenceChromosome.
-     */
-    String chromosomeNamePrefix = ""
-
-    /**
-     * This value stores the suffix common to names of ReferenceChromosome.
-     */
-    String chromosomeNameSuffix = ""
-
-    /**
      * Total genome size in base pairs.
-     * Is calculated as the sum of all chromosome lengths.
+     * Is calculated as the sum of the lengths of all DNA entries.
      */
     long length
 
     /**
      * Total genome size in base pairs calculated as
-     * the sum of all chromosome lengthWithoutN.
+     * the sum of the lengthWithoutN of all DNA entries.
      */
     long lengthWithoutN
+
+    /**
+     * Number of base pairs of all chromosomes.
+     * Is calculated as the sum of all chromosome lengths.
+     */
+    long lengthRefChromosomes
+
+    /**
+     * Number of base pairs of all chromosomes calculated as
+     * the sum of all chromosomes lengthWithoutN.
+     */
+    long lengthRefChromosomesWithoutN
 
     /**
      * It has to be ensured that there is only one reference genome stored per directory -> unique path

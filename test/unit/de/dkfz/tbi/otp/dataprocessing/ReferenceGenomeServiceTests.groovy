@@ -1,20 +1,23 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.junit.Assert.*
-import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import grails.util.Environment
+import org.junit.Test
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
 /**
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
 @TestFor(ReferenceGenomeService)
 @TestMixin(GrailsUnitTestMixin)
-@Mock([Realm, Project, ReferenceGenome])
+@Mock([Realm, Project, ReferenceGenome, ReferenceGenomeEntry])
 class ReferenceGenomeServiceTests {
 
     ReferenceGenome referenceGenome
+    ReferenceGenomeEntry referenceGenomeEntry
     Project project
     ReferenceGenomeService referenceGenomeService
 
@@ -65,10 +68,27 @@ class ReferenceGenomeServiceTests {
         referenceGenome.path = "referenceGenome"
         referenceGenome.fileNamePrefix = "prefixName"
         referenceGenome.save(flush: true)
+
+        referenceGenomeEntry = new ReferenceGenomeEntry(
+                        name: "chr1",
+                        alias: "1",
+                        classification: Classification.CHROMOSOME,
+                        referenceGenome: referenceGenome
+                        )
+        referenceGenomeEntry.save(flush: true)
+
+        ReferenceGenomeEntry referenceGenomeEntryTwo = new ReferenceGenomeEntry(
+                        name: "chr2",
+                        alias: "2",
+                        classification: Classification.UNDEFINED,
+                        referenceGenome: referenceGenome
+                        )
+        referenceGenomeEntryTwo.save(flush: true)
     }
 
     @After
     void tearDown() {
+        referenceGenomeEntry = null
         referenceGenome = null
         project = null
         referenceGenomeService = null
@@ -120,5 +140,12 @@ class ReferenceGenomeServiceTests {
     void testFilePathProjectIsNull() {
         project = null
         String pathAct = referenceGenomeService.fastaFilePath(project, referenceGenome)
+    }
+
+    @Test
+    void testChromosomesInReferenceGenome() {
+        List<ReferenceGenomeEntry> referenceGenomeEntriesExp = [referenceGenomeEntry]
+        List<ReferenceGenomeEntry> referenceGenomeEntriesAct = referenceGenomeService.chromosomesInReferenceGenome(referenceGenome)
+        assertEquals(referenceGenomeEntriesExp, referenceGenomeEntriesAct)
     }
 }

@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import org.junit.Assert;
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
+import org.junit.Assert
 
 /*
  * the test is split into 2 tests because of a bug in the
@@ -14,77 +16,79 @@ class ReferenceGenomeProjectSeqTypeTests {
     void testUniqueHasDuplication() {
         // create the related objects
         Project project = new Project(
-            name: "project",
-            dirName: "dirName",
-            realmName: "DKFZ")
+                        name: "project",
+                        dirName: "dirName",
+                        realmName: "DKFZ")
         project.save(flush: true)
         SeqType seqType = new SeqType(
-            name: "wgs",
-            libraryLayout: "paired",
-            dirName: "dirName")
+                        name: "wgs",
+                        libraryLayout: "paired",
+                        dirName: "dirName")
         seqType.save(flush: true)
         ReferenceGenome refGenome = new ReferenceGenome(
-            name: "refGen",
-            filePath: "filePath")
+                        name: "refGen",
+                        path: "filePath",
+                        fileNamePrefix: "prefix")
         refGenome.save(flush: true)
 
         // create not deprecated domain
         ReferenceGenomeProjectSeqType currentDomain = new ReferenceGenomeProjectSeqType(
-            project: project,
-            seqType: seqType,
-            referenceGenome: refGenome)
+                        project: project,
+                        seqType: seqType,
+                        referenceGenome: refGenome)
         currentDomain.save(flush: true)
         // create deprecated domain
         ReferenceGenomeProjectSeqType deprecatedDomain = new ReferenceGenomeProjectSeqType(
-            project: project,
-            seqType: seqType,
-            referenceGenome: refGenome,
-            deprecatedDate: new Date())
+                        project: project,
+                        seqType: seqType,
+                        referenceGenome: refGenome,
+                        deprecatedDate: new Date())
         deprecatedDomain.save(flush: true)
         // create new domain for the same project and seqType
         ReferenceGenomeProjectSeqType newDomain = new ReferenceGenomeProjectSeqType(
-            project: project,
-            seqType: seqType,
-            referenceGenome: refGenome)
+                        project: project,
+                        seqType: seqType,
+                        referenceGenome: refGenome)
         Assert.assertTrue !newDomain.validate()
     }
 
     void testUniqueNoDuplications() {
         // create the related objects
         Project project = new Project(
-            name: "project",
-            dirName: "dirName",
-            realmName: "DKFZ")
+                        name: "project",
+                        dirName: "dirName",
+                        realmName: "DKFZ")
         project.save(flush: true)
         SeqType seqType = new SeqType(
-            name: "wgs",
-            libraryLayout: "paired",
-            dirName: "dirName")
+                        name: "wgs",
+                        libraryLayout: "paired",
+                        dirName: "dirName")
         seqType.save(flush: true)
         ReferenceGenome refGenome = new ReferenceGenome(
-            name: "refGen",
-            filePath: "filePath")
+                        name: "refGen",
+                        path: "filePath",
+                        fileNamePrefix: "prefix")
         refGenome.save(flush: true)
 
         // create deprecated domain
         ReferenceGenomeProjectSeqType deprDomain1 = new ReferenceGenomeProjectSeqType(
-            project: project,
-            seqType: seqType,
-            referenceGenome: refGenome,
-            deprecatedDate: new Date())
+                        project: project,
+                        seqType: seqType,
+                        referenceGenome: refGenome,
+                        deprecatedDate: new Date())
         deprDomain1.save(flush: true)
         // create second deprecated domain
         ReferenceGenomeProjectSeqType deprDomain2 = new ReferenceGenomeProjectSeqType(
-            project: project,
-            seqType: seqType,
-            referenceGenome: refGenome,
-            deprecatedDate: new Date())
+                        project: project,
+                        seqType: seqType,
+                        referenceGenome: refGenome,
+                        deprecatedDate: new Date())
         deprDomain2.save(flush: true)
         // create new domain for the same project and seqType
         ReferenceGenomeProjectSeqType newDomain = new ReferenceGenomeProjectSeqType(
-            project: project,
-            seqType: seqType,
-            referenceGenome: refGenome)
+                        project: project,
+                        seqType: seqType,
+                        referenceGenome: refGenome)
         Assert.assertTrue newDomain.validate()
     }
 }

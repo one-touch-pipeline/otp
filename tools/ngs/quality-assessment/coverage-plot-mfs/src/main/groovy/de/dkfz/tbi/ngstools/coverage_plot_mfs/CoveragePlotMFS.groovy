@@ -203,11 +203,11 @@ Writing the output files has failed:
      *
      * @param coverageData the coverage data structure
      * @param filteredChromosomes a map containing the chromosomes, which should be filtered
-     * @return a new map without the chromosome listed in filteredChromosomes
+     * @return a new map only with the chromosome listed in filteredChromosomes
      */
     private Map<String, List<String>> filter(Map<String, List<String>> coverageData, List<String> filteredChromosomes) {
         Map<String, List<String>> filteredCoverageData = coverageData.findAll { Map.Entry<String, List<String>> chromosomeIdentifier ->
-            !filteredChromosomes.contains(chromosomeIdentifier.key)
+            filteredChromosomes.contains(chromosomeIdentifier.key)
         }
         return filteredCoverageData
     }

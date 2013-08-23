@@ -1,13 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import static org.springframework.util.Assert.*
 /**
  * sort the chromosome identifier
  * the sorting is like this: 1..22 X Y M * 23...1000 A..V
  */
 class ChromosomeIdentifierSortingService {
 
-    // the sorting methods are not really part of the service, they also have to be in the closure -> how to do this
-    //use enum method
     final int CHROMOSOME_SIZE = Chromosomes.numberOfNumericChromosomes()
 
     def listComparator = [ compare:
@@ -36,7 +35,7 @@ class ChromosomeIdentifierSortingService {
         if (identifierAsInteger1 <= CHROMOSOME_SIZE) {
             return -1
         } else if (identifierAsString2 == Chromosomes.CHR_X.chr || identifierAsString2 == Chromosomes.CHR_Y.chr ||
-            identifierAsString2 == Chromosomes.CHR_M.chr || identifierAsString2 == Chromosomes.CHR_ASTERISK.chr) {
+        identifierAsString2 == Chromosomes.CHR_M.chr) {
             return 1
         } else {
             return -1
@@ -62,10 +61,6 @@ class ChromosomeIdentifierSortingService {
             return -1
         } else if (identifierAsString2 == Chromosomes.CHR_M.chr) {
             return 1
-        } else if (identifierAsString1 == Chromosomes.CHR_ASTERISK.chr) {
-            return -1
-        } else if (identifierAsString2 == Chromosomes.CHR_ASTERISK.chr) {
-            return 1
         } else {
             return identifierAsString1.compareTo(identifierAsString2)
         }
@@ -77,6 +72,7 @@ class ChromosomeIdentifierSortingService {
      * @return the sorted chromosome identifiers
      */
     public List<String> sortIdentifiers(Collection<String> chromosomeIdentifiers) {
+        notNull(chromosomeIdentifiers, "the input for the method sortIdentifiers is null")
         return chromosomeIdentifiers.sort(listComparator)
     }
 }

@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import org.springframework.util.Assert
+import static org.springframework.util.Assert.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
 class ReferenceGenomeService {
 
@@ -25,8 +26,8 @@ class ReferenceGenomeService {
     public ReferenceGenome referenceGenome(Project project, SeqType seqType) {
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = ReferenceGenomeProjectSeqType.
                         findByProjectAndSeqTypeAndDeprecatedDateIsNull(project, seqType)
-        Assert.notNull(referenceGenomeProjectSeqType,
-            "There is no reference genome defined for the combination of project ${project} and seqType ${seqType}")
+        notNull(referenceGenomeProjectSeqType,
+                        "There is no reference genome defined for the combination of project ${project} and seqType ${seqType}")
         return referenceGenomeProjectSeqType.referenceGenome
     }
 
@@ -36,8 +37,8 @@ class ReferenceGenomeService {
      * @param project the project, which belongs to the reference genome
      */
     public String filePathToDirectory(Project project, ReferenceGenome referenceGenome) {
-        Assert.notNull(project, "The project is not specified")
-        Assert.notNull(referenceGenome, "The reference genome is not specified")
+        notNull(project, "The project is not specified")
+        notNull(referenceGenome, "The reference genome is not specified")
         Realm realm = configService.getRealmDataProcessing(project)
         String realmSpecificPath = realm.processingRootPath
         final String allReferenceGenomes = "reference_genomes"
@@ -58,8 +59,8 @@ class ReferenceGenomeService {
      * @param project the project, which belongs to the reference genome
      */
     public String prefixOnlyFilePath(Project project, ReferenceGenome referenceGenome) {
-        Assert.notNull(project, "The project is not specified")
-        Assert.notNull(referenceGenome, "The reference genome is not specified")
+        notNull(project, "The project is not specified")
+        notNull(referenceGenome, "The reference genome is not specified")
         String refGenomeFileNamePrefix = referenceGenome.fileNamePrefix
         return filePathToDirectory(project, referenceGenome) + "${refGenomeFileNamePrefix}"
     }
@@ -75,7 +76,17 @@ class ReferenceGenomeService {
             return referenceGenomeFastaFilePath
         } else {
             throw new RuntimeException(
-                "The fasta file ${referenceGenomeFastaFilePath} storing the information of the reference genome can not be read")
+            "The fasta file ${referenceGenomeFastaFilePath} storing the information of the reference genome can not be read")
         }
+    }
+
+    /**
+     * returns the entries in the reference genome, which belong to a chromosome
+     * @param referenceGenome, the reference genome, for which the chromosomes shall be returned
+     */
+    public List<ReferenceGenomeEntry> chromosomesInReferenceGenome(ReferenceGenome referenceGenome) {
+        notNull(referenceGenome, "the referenceGenome in method chromosomesInReferenceGenome is null")
+        Classification classification = Classification.CHROMOSOME
+        return ReferenceGenomeEntry.findAllByReferenceGenomeAndClassification(referenceGenome, classification)
     }
 }
