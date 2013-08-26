@@ -4,7 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 /*
  *  This scripts inserts a new ReferenceGenome object
  *  as well as ReferenceChromosome objects obtained from the fasta file
- *  which lives in ${otp.processing.root.path}/reference_genomes/bwa06_hg19_chr
+ *  which lies in ${otp.processing.root.path}/reference_genomes/bwa06_hg19_chr
  *  A python helper script 'scripts/getReferenceGenomeInfo.py' which extracts
  *  information from the fasta file was used to generate the chrList content.
 */
@@ -16,13 +16,11 @@ refGen.fileNamePrefix = "hg19_1-22_X_Y_M"
 refGen.chromosomeNamePrefix = "chr"
 refGen.chromosomeNameSuffix = ""
 refGen.save(flush: true)
-System.out.println("Inserted reference genome: " + refGen)
-
-// insert chromosome length information for reference genome
+println("Inserted reference genome: " + refGen)
 
 // identifier, length, lengthWithoutN
-def chrColumn = ["name":0, "length":1, "lengthWithoutN":2]
-def chrList = [
+Map<String, Integer> chrColumn = ["name":0, "length":1, "lengthWithoutN":2]
+List<List<String, Long, Long>> chrList = [
     ["chr1", 249250621, 225280621],
     ["chr10", 135534747, 131314742],
     ["chr11", 135006516, 131129516],
@@ -51,8 +49,8 @@ def chrList = [
 ]
 
 // init counter for overall length and lengthWithoutN
-    long length = 0
-    long lengthWithoutN = 0
+long length = 0
+long lengthWithoutN = 0
 
 // put chromosome information into database
 chrList.each { chr ->
@@ -62,7 +60,7 @@ chrList.each { chr ->
     refChr.lengthWithoutN = chr[chrColumn.lengthWithoutN]
     refChr.referenceGenome = refGen
     refChr.save(flush: true)
-    System.out.println("Inserted reference chromosome: " + refChr)
+    println("Inserted reference chromosome: " + refChr)
     length += chr[chrColumn.length]
     lengthWithoutN += chr[chrColumn.lengthWithoutN]
 }
