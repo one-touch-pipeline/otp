@@ -47,7 +47,7 @@ class ProjectOverviewService {
             projections {
                 groupProperty("seqTypeName")
                 groupProperty("libraryLayout")
-                countDistinct("mockFullName")
+                countDistinct("mockPid")
                 count("sampleId")
                 sum("sum_N_BasePairsGb")
             }
@@ -59,7 +59,7 @@ class ProjectOverviewService {
     public Long individualCountByProject(Project project) {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project.id)
-            projections { countDistinct("mockFullName") }
+            projections { countDistinct("mockPid") }
         }
         return seq[0]
     }

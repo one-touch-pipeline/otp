@@ -70,10 +70,10 @@ class StatisticService {
         List seq = Sequence.withCriteria {
             eq("projectId", project.id)
             projections {
-                groupProperty("mockFullName")
+                groupProperty("mockPid")
                 countDistinct("sampleId")
             }
-            order ("mockFullName")
+            order ("mockPid")
         }
         return seq
     }
@@ -83,11 +83,11 @@ class StatisticService {
             eq("projectId", project.id)
             eq("seqTypeId", seqType.id)
             projections {
-                groupProperty("mockFullName")
+                groupProperty("mockPid")
                 groupProperty("sampleTypeName")
                 count("laneId")
             }
-            order ("mockFullName")
+            order ("mockPid")
             order ("sampleTypeName")
         }
         return seq

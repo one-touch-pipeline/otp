@@ -8,7 +8,7 @@
 </tr>
       <tr>
     <td class="myKey"><g:message code="seqTrack.show.sampleType"/></td>
-    <td class="myValue">${seqTrack.sample.individual.mockFullName} ${seqTrack.sample.sampleType.name}</td>
+    <td class="myValue">${seqTrack.sample.individual.mockPid} ${seqTrack.sample.sampleType.name}</td>
 </tr>
 <tr>
     <td class="myKey"><g:message code="seqTrack.show.seqType"/></td>

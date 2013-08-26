@@ -57,7 +57,7 @@ class IgvSessionFileService {
             text += mut.chromosome + "\t"
             text += mut.startPosition + "\t"
             text += mut.endPosition + "\t"
-            text += mut.individual.mockFullName + "\t"
+            text += mut.individual.mockPid + "\t"
             text += mut.type + "\n"
         }
         return text
