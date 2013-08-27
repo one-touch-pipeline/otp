@@ -1,26 +1,22 @@
 package de.dkfz.tbi.otp.ngsdata
 
 class HomeService {
+    ProjectService projectService
 
     Map projectQuery() {
-         List query = Sequence.createCriteria().listDistinct() {
-             projections {
-                 groupProperty("projectName")
-             }
-             order ("projectName")
-         }
+         List<String> projectNames = projectService.getAllProjects()*.name
 
          Map queryMap = [:]
 
-         query.each { iter ->
+         projectNames.each { String projectName ->
              List seq = Sequence.createCriteria().listDistinct {
-                 eq("projectName", iter)
+                 eq("projectName", projectName)
                  projections {
                      groupProperty("seqTypeName")
                  }
                  order ("seqTypeName")
              }
-             queryMap[iter] = seq.toListString().replace("[", "").replace("]", "")
+             queryMap[projectName] = seq.toListString().replace("[", "").replace("]", "")
          }
          return queryMap
     }
