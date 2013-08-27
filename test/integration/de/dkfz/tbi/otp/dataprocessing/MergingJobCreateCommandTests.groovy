@@ -131,7 +131,7 @@ class MergingJobCreateCommandTests {
         ProcessingOption processingOption1 = new ProcessingOption(
                         name: "picardMdup",
                         type: null,
-                        value: "VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000",
+                        value: "VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000 CREATE_INDEX=TRUE",
                         project: null,
                         comment: "picard option used in duplicates removal"
                         )
@@ -162,9 +162,10 @@ class MergingJobCreateCommandTests {
         String inputFilePathExp = " I=${basePathAlignment}//run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_libraryLayout.sorted.bam"
         String outputFilePathExp = "${basePathMerging}/name_1_pid_1_seqType_1_library_merged.mdup.bam"
         String metricsPathExp = "${basePathMerging}/name_1_pid_1_seqType_1_library_merged.mdup_metrics.txt"
+        String baiFilePath = "${basePathMerging}/name_1_pid_1_seqType_1_library_merged.mdup.bai"
         String picardFilesExp = "${inputFilePathExp} OUTPUT=${outputFilePathExp} METRICS_FILE=${metricsPathExp} TMP_DIR=${tempDirExp}"
-        String picardOptionsExp = "VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000"
-        String chmodExp = "chmod 440 ${outputFilePathExp} ${metricsPathExp}"
+        String picardOptionsExp = "VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000 CREATE_INDEX=TRUE"
+        String chmodExp = "chmod 440 ${outputFilePathExp} ${metricsPathExp} ${baiFilePath}"
         String createCommandOutputExp = "${createTempDirExp}; ${javaOptionsExp}; ${picardExp} ${picardFilesExp} ${picardOptionsExp}; ${chmodExp}"
         String createCommandOutputAct = mergingJob.createCommand(processedMergedBamFile)
         assertEquals(createCommandOutputExp, createCommandOutputAct)
@@ -180,9 +181,10 @@ class MergingJobCreateCommandTests {
         String inputFilePathExp = " I=${basePathAlignment}//run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_libraryLayout.sorted.bam I=${basePathAlignment}//run_2_laneId_2/pass2/name_1_run_2_s_laneId_2_libraryLayout.sorted.bam"
         String outputFilePathExp = "${basePathMerging}/name_1_pid_1_seqType_1_library_merged.mdup.bam"
         String metricsPathExp = "${basePathMerging}/name_1_pid_1_seqType_1_library_merged.mdup_metrics.txt"
+        String baiFilePath = "${basePathMerging}/name_1_pid_1_seqType_1_library_merged.mdup.bai"
         String picardFilesExp = "${inputFilePathExp} OUTPUT=${outputFilePathExp} METRICS_FILE=${metricsPathExp} TMP_DIR=${tempDirExp}"
-        String picardOptionsExp = "VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000"
-        String chmodExp = "chmod 440 ${outputFilePathExp} ${metricsPathExp}"
+        String picardOptionsExp = "VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000 CREATE_INDEX=TRUE"
+        String chmodExp = "chmod 440 ${outputFilePathExp} ${metricsPathExp} ${baiFilePath}"
         String createCommandOutputExp = "${createTempDirExp}; ${javaOptionsExp}; ${picardExp} ${picardFilesExp} ${picardOptionsExp}; ${chmodExp}"
         String createCommandOutputAct = mergingJob.createCommand(processedMergedBamFile)
         assertEquals(createCommandOutputExp, createCommandOutputAct)

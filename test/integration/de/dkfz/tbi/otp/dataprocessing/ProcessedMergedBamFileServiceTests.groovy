@@ -40,7 +40,7 @@ class ProcessedMergedBamFileServiceTests {
 
         baseDir = new File(directory)
         File bam = new File(basePath + ".bam")
-        File bai = new File(basePath + ".bam.bai")
+        File bai = new File(basePath + ".bai")
         File metrics = new File(basePath + "_metrics.txt")
         assertTrue(baseDir.exists() || baseDir.mkdirs())
         assertTrue(baseDir.setReadable(true))
@@ -179,7 +179,7 @@ class ProcessedMergedBamFileServiceTests {
     void testFilePathForBai() {
         MergingPass mergingPass = createMergingPass()
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
-        String pathExp = basePath + ".bam.bai"
+        String pathExp = basePath + ".bai"
         String pathAct = processedMergedBamFileService.filePathForBai(processedMergedBamFile)
         assertEquals(pathExp, pathAct)
     }
@@ -194,7 +194,7 @@ class ProcessedMergedBamFileServiceTests {
     void testFileNameForBai() {
         MergingPass mergingPass = createMergingPass()
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
-        String nameExp = baseFile + ".bam.bai"
+        String nameExp = baseFile + ".bai"
         String nameAct = processedMergedBamFileService.fileNameForBai(processedMergedBamFile)
         assertEquals(nameExp, nameAct)
     }

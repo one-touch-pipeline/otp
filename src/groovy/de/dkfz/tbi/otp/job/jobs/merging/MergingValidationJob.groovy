@@ -21,6 +21,7 @@ class MergingValidationJob extends AbstractEndStateAwareJobImpl {
 
         boolean state = processedMergedBamFileService.updateBamFile(mergedBamFile)
         state &= processedMergedBamFileService.updateBamMetricsFile(mergedBamFile)
+        state &= processedMergedBamFileService.updateBamFileIndex(mergedBamFile)
         state ? succeed() : fail()
     }
 }

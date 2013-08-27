@@ -49,9 +49,10 @@ class MergingJob extends AbstractJobImpl {
         String inputFilePath = createInputFileString(processedMergedBamFile)
         String outputFilePath = processedMergedBamFileService.filePath(processedMergedBamFile)
         String metricsPath = processedMergedBamFileService.filePathForMetrics(processedMergedBamFile)
+        String baiFilePath = processedMergedBamFileService.filePathForBai(processedMergedBamFile)
         String picardFiles = "${inputFilePath} OUTPUT=${outputFilePath} METRICS_FILE=${metricsPath} TMP_DIR=${tempDir}"
         String picardOptions = optionService.findOptionSafe("picardMdup", null, project)
-        String chmod = "chmod 440 ${outputFilePath} ${metricsPath}"
+        String chmod = "chmod 440 ${outputFilePath} ${metricsPath} ${baiFilePath}"
         return "${createTempDir}; ${javaOptions}; ${picard} ${picardFiles} ${picardOptions}; ${chmod}"
     }
 

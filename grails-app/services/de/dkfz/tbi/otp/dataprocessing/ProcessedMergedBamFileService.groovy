@@ -48,7 +48,7 @@ class ProcessedMergedBamFileService {
 
     public String fileNameForBai(ProcessedMergedBamFile mergedBamFile) {
         notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
-        String body = fileName(mergedBamFile)
+        String body = fileNameNoSuffix(mergedBamFile)
         return "${body}.bai"
     }
 

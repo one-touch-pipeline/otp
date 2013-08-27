@@ -14,15 +14,6 @@ plan("MergingWorkflow") {
     }
     job("mergingValidation", "mergingValidationJob")
     job("metricsParsing", "metricsParsingJob")
-    job("mergingFileIndexing", "mergingFileIndexingJob") {
-        outputParameter("__pbsIds")
-        outputParameter("__pbsRealm")
-    }
-    job("mergingFileIndexingWatchdog", "myPBSWatchdogJob") {
-        inputParameter("__pbsIds", "mergingFileIndexing", "__pbsIds")
-        inputParameter("__pbsRealm", "mergingFileIndexing", "__pbsRealm")
-    }
-    job("mergingFileIndexValidation", "mergingFileIndexValidationJob")
     job("mergingComplete", "mergingCompleteJob")
 }
 
