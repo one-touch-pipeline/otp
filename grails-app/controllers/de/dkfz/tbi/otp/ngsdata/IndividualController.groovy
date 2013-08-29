@@ -33,21 +33,29 @@ class IndividualController {
     }
 
     def list = {
+        Map retValue  = [
+            projects: projectService.getAllProjects(),
+            individualTypes: Individual.Type.values()
+        ]
+        return retValue
     }
 
     def dataTableSource(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
 
-        dataToRender.iTotalRecords = individualService.countIndividual(cmd.sSearch)
+        IndividualFiltering filtering = IndividualFiltering.fromJSON(params.filtering)
+
+        dataToRender.iTotalRecords = individualService.countIndividual(filtering, cmd.sSearch)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-        individualService.listIndividuals(cmd.iDisplayStart, cmd.iDisplayLength, cmd.sortOrder, cmd.iSortCol_0, cmd.sSearch).each { individual ->
+        individualService.listIndividuals(cmd.sortOrder, IndividualSortColumn.fromDataTable(cmd.iSortCol_0), filtering, cmd.sSearch).each { individual ->
             dataToRender.aaData << [
-                [id: individual.id, text: individual.pid],
-                individual.mockFullName,
-                individual.mockPid,
-                individual.project.toString(),
-                individual.type.toString()
+                id: individual.id,
+                pid: individual.pid,
+                mockFullName: individual.mockFullName,
+                mockPid: individual.mockPid,
+                project: individual.project.toString(),
+                type: individual.type.toString()
             ]
         }
         render dataToRender as JSON
@@ -164,6 +172,34 @@ class IndividualController {
     }
 }
 
+enum IndividualSortColumn {
+    PID("pid"),
+    MOCKFULLNAME("mockFullName"),
+    MOCKPID("mockPid"),
+    PROJECT("project"),
+    TYPE("type"),
+
+    private final String columnName
+
+    IndividualSortColumn(String column) {
+        this.columnName = column
+    }
+
+    static IndividualSortColumn fromDataTable(int column) {
+        switch (column) {
+        case 0:
+            return IndividualSortColumn.PID
+        case 1:
+            return IndividualSortColumn.MOCKFULLNAME
+        case 2:
+            return IndividualSortColumn.MOCKPID
+        case 3:
+            return IndividualSortColumn.PROJECT
+        default:
+            return IndividualSortColumn.TYPE
+        }
+    }
+}
 class IndividualCommand {
     def individualService
     def projectService
@@ -285,5 +321,61 @@ class SamplesParser {
             return false
         }
         return true
+    }
+}
+/**
+ * Class describing the various filtering to do on Individual page.
+ *
+ */
+class IndividualFiltering {
+    List<Long> project = []
+    List<String> pid = []
+    List<String> mockPid = []
+    List<String> mockFullName = []
+    List<Individual.Type> type= []
+
+    boolean enabled = false
+
+    static IndividualFiltering fromJSON(String json) {
+        IndividualFiltering filtering = new IndividualFiltering()
+        if (!json) {
+            return filtering
+        }
+        def slurper = new JsonSlurper()
+        slurper.parseText(json).each {
+            switch (it.type) {
+            case "projectSelection":
+                if (it.value.isLong()) {
+                    filtering.project << (it.value as Long)
+                    filtering.enabled = true
+                }
+                break
+            case "pidSearch":
+                if (it.value && it.value.length() >= 3) {
+                    filtering.pid << it.value
+                    filtering.enabled = true
+                }
+                break
+            case "mockFullNameSearch":
+                if (it.value && it.value.length() >= 3) {
+                    filtering.mockFullName << it.value
+                    filtering.enabled = true
+                }
+                break
+            case "mockPidSearch":
+                if (it.value && it.value.length() >= 3) {
+                    filtering.mockPid << it.value
+                    filtering.enabled = true
+                }
+                break
+            case "typeSelection":
+                if (it.value) {
+                    filtering.type << (it.value as Individual.Type)
+                    filtering.enabled = true
+                }
+                break
+            }
+        }
+        return filtering
     }
 }

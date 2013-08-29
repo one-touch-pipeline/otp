@@ -9,7 +9,7 @@
 <body>
     <div class="body">
         <div class="dataTable_searchContainer">
-            <g:message code="run.list.search"/>: <input type="text" class="dataTable_search" onKeyUp='$.otp.simpleSearch.search(this, "runTable");'>
+            <g:message code="run.list.search"/>: <input type="text" class="dataTable_search" onKeyUp='$.otp.simpleSearch.search(this, "runTable");' placeholder="min. 3 characters">
         </div>
         <div class="dataTables_container" id="runTable_containe">
             <otp:dataTable codes="${['run.list.name',

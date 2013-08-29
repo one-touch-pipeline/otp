@@ -25,12 +25,12 @@
                 </td>
                 <td>
                     <g:select name="projectSelection" from="${projects}" optionValue="name" optionKey="id" style="display: none"/>
-                    <input type="text" name="individualSearch" style="display: none"/>
+                    <input type="text" name="individualSearch" style="display: none" placeholder="min. 3 characters"/>
                     <g:select name="sampleTypeSelection" from="${sampleTypes}" optionValue="name" optionKey="id" style="display: none"/>
                     <g:select name="seqTypeSelection" from="${seqTypes}" style="display: none"/>
                     <g:select name="libraryLayoutSelection" from="${libraryLayouts}" style="display: none"/>
                     <g:select name="seqCenterSelection" from="${seqCenters}" optionValue="name" optionKey="id" style="display: none"/>
-                    <input type="text" name="runSearch" style="display: none"/>
+                    <input type="text" name="runSearch" style="display: none" placeholder="min. 3 characters"/>
                 </td>
                 <td>
                     <input type="button" value="+" style="display: none"/>

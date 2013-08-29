@@ -6,9 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.core.userdetails.UserDetails
-
 import de.dkfz.tbi.otp.utils.ReferencedClass
-
 import groovy.json.JsonSlurper
 
 class IndividualService {
@@ -16,6 +14,7 @@ class IndividualService {
     def sampleTypeService
     def sampleService
     def sampleIdentifierService
+    def projectService
 
     /**
      * Retrieves the given Individual.
@@ -151,192 +150,138 @@ AND i.id > :indId
      * Retrieves list of Individual in ACL aware manner.
      * For an admin user all Individuals are returned, for a non-admin user the ACL on Project is
      * used to determine the list of Individuals to return.
-     * The result set can be paginated, sorted and filtered. The filter (search) is only applied if
-     * the filter String has a length of at least three character.
-     * The sorting is applied using the sort order and the column which is an integer identifying the
-     * following columns:
-     * <ul>
-     * <li><strong>0:</strong> pid</li>
-     * <li><strong>1:</strong> mock full name</li>
-     * <li><strong>2:</strong> mock pid</li>
-     * <li><strong>3:</strong> project name</li>
-     * <li><strong>4:</strong> type</li>
-     * </ul>
+     * The result set can be sorted and filtered. The filter (search) is only applied if the filter String has a length of at least three character.
      * by default it is sorted by the pid
-     * @param offset Offset in result list of pagination
-     * @param count The number of Individuals to return in this query
      * @param sortOrder true for ascending, false for descending sorting
-     * @param column the column to sort on, see above for mapping
-     * @param filter The search filter
+     * @param column The column to perform the sorting on
+     * @param filtering Filtering restrictions
+     * @param filter Filter restrictions
      * @return List of Individuals matching the criterias and ACL restricted
      **/
-    List<Individual> listIndividuals(int offset, int count, boolean sortOrder, int column, String filter) {
-        if (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR")) {
+    public List<Individual> listIndividuals(boolean sortOrder, IndividualSortColumn column, IndividualFiltering filtering, String filter) {
+        String columnName = "project"
+        def c = Individual.createCriteria()
+        return c.list {
+            'in'('project', projectService.getAllProjects())
             if (filter.length() >= 3) {
-                String query = '''
-SELECT i FROM Individual as i
-WHERE
-lower(i.pid) like :filter
-OR lower(i.mockFullName) like :filter
-OR lower(i.mockPid) like :filter
-OR lower(i.project.name) like :filter
-OR lower(i.type) like :filter
-'''
-                query = query + "ORDER BY "
-                switch (column) {
-                case 1:
-                    query = query + "i.mockFullName"
-                    break
-                case 2:
-                    query = query + "i.mockPid"
-                    break
-                case 3:
-                    query = query + "i.project.id"
-                    break
-                case 4:
-                    query = query + "i.type"
-                    break
-                case 0:
-                default:
-                    query = query + "i.pid"
-                    break
+                filter = "%${filter}%"
+                or {
+                    ilike("pid", filter)
+                    ilike("mockFullName", filter)
+                    ilike("mockPid", filter)
+                    project {
+                        ilike("name", filter)
+                    }
+                    /**
+                    * sqlRestriction because ilike could be just used for string.
+                    * The parameter type is enum and < ilike("type", filter)> did not work.
+                    **/
+                    sqlRestriction("upper(type) like upper('${filter}')")
                 }
-                query = query + " ${sortOrder ? 'asc' : 'desc'}"
-                Map params = [
-                    filter: "%${filter.toLowerCase()}%",
-                    max: count, offset: offset]
-                return Individual.executeQuery(query, params)
             }
-            List<String> columnNames = ["pid", "mockFullName", "mockPid", "project.id", "type"]
-            String sortColumn = (column >=0 && column < columnNames.size()) ? columnNames.get(column) : "pid"
-            return Individual.list(max: count, offset: offset, sort: sortColumn, order: sortOrder ? "asc" : "desc")
+            if (filtering.project) {
+                project {
+                    'in'('id', filtering.project)
+                }
+            }
+            if (filtering.pid) {
+                or {
+                    filtering.pid.each {
+                        ilike('pid', "%${it}%")
+                    }
+                }
+            }
+            if (filtering.mockFullName) {
+                or {
+                    filtering.mockFullName.each {
+                            ilike('mockFullName', "%${it}%")
+                        }
+                    }
+            }
+            if (filtering.mockPid) {
+                or {
+                    filtering.mockPid.each {
+                        ilike('mockPid', "%${it}%")
+                    }
+                }
+            }
+            if (filtering.type) {
+                'in'('type', filtering.type)
+            }
+            if (column.columnName == "project") {
+                project {
+                    order("name", sortOrder ? "asc" : "desc")
+                }
+            } else {
+                order(column.columnName, sortOrder ? "asc" : "desc")
+            }
         }
-
-        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
-        if (springSecurityService.isLoggedIn()) {
-            // anonymous users do not have a principal
-            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
-        }
-
-        String query = '''
-SELECT i FROM Individual as i, AclEntry AS ace
-JOIN i.project AS p
-JOIN ace.aclObjectIdentity AS aoi
-JOIN aoi.aclClass AS ac
-JOIN ace.sid AS sid
-WHERE
-aoi.objectId = p.id
-AND ac.className = :className
-AND sid.sid IN (:roles)
-AND ace.mask IN (:permissions)
-AND ace.granting = true
-'''
-        if (filter.length() >= 3) {
-            query += '''
-AND (
-lower(i.pid) like :filter
-OR lower(i.mockFullName) like :filter
-OR lower(i.mockPid) like :filter
-OR lower(i.project.name) like :filter
-OR lower(i.type) like :filter
-)
-'''
-        }
-        query = query + "ORDER BY "
-        switch (column) {
-        case 1:
-            query = query + "i.mockFullName"
-            break
-        case 2:
-            query = query + "i.mockPid"
-            break
-        case 3:
-            query = query + "i.project.id"
-            break
-        case 4:
-            query = query + "i.type"
-            break
-        case 0:
-        default:
-            query = query + "i.pid"
-            break
-        }
-        query = query + " ${sortOrder ? 'asc' : 'desc'}"
-        Map params = [
-            className: Project.class.getName(),
-            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
-            roles: roles,
-            max: count, offset: offset]
-        if (filter.length() >= 3) {
-            params.put("filter", "%${filter.toLowerCase()}%");
-        }
-        return Individual.executeQuery(query, params)
-    }
+}
 
     /**
-     * Counts the Individual in an ACL aware manner.
-     * For an admin all individuals are included.
+     * Counts the Individuals the User has access to by applying the provided filtering.
+     * @param filtering The filters to apply on the data
      * @param filter Restrict on this search filter if at least three characters
-     * @return Number of Individuals in ACL aware manner
-     **/
-    int countIndividual(String filter) {
-        if (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR")) {
-            if (filter.length() >= 3) {
-                String query = '''
-SELECT COUNT(DISTINCT i.id) FROM Individual as i
-WHERE
-lower(i.pid) like :filter
-OR lower(i.mockFullName) like :filter
-OR lower(i.mockPid) like :filter
-OR lower(i.project.name) like :filter
-OR lower(i.type) like :filter
-'''
-                Map params = [
-                    filter: "%${filter.toLowerCase()}%"]
-                return Individual.executeQuery(query, params)[0] as Integer
-            }
-            return Individual.count()
-        }
-
-        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
-        if (springSecurityService.isLoggedIn()) {
-            // anonymous users do not have a principal
-            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
-        }
-
-        String query = '''
-SELECT COUNT(DISTINCT i.id) FROM Individual as i, AclEntry AS ace
-JOIN i.project AS p
-JOIN ace.aclObjectIdentity AS aoi
-JOIN aoi.aclClass AS ac
-JOIN ace.sid AS sid
-WHERE
-aoi.objectId = p.id
-AND ac.className = :className
-AND sid.sid IN (:roles)
-AND ace.mask IN (:permissions)
-AND ace.granting = true
-'''
-        if (filter.length() >= 3) {
-            query += '''
-AND (
-lower(i.pid) like :filter
-OR lower(i.mockFullName) like :filter
-OR lower(i.mockPid) like :filter
-OR lower(i.project.name) like :filter
-OR lower(i.type) like :filter
-)
-'''
-        }
-        Map params = [
-            className: Project.class.getName(),
-            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
-            roles: roles]
-
-        if (filter.length() >= 3) {
-            params.put("filter", "%${filter.toLowerCase()}%");
-        }
-        return Individual.executeQuery(query, params)[0] as Integer
+     * @return Number of Individuals matching the filtering
+     */
+     public int countIndividual(IndividualFiltering filtering, String filter) {
+         if (filtering.enabled || filter.length() >= 3) {
+             def c = Individual.createCriteria()
+             return c.get {
+                 'in'('project', projectService.getAllProjects())
+                 if (filter.length() >= 3) {
+                    filter = "%${filter}%"
+                    or {
+                        ilike("pid", filter)
+                        ilike("mockFullName", filter)
+                        ilike("mockPid", filter)
+                        project {
+                            ilike("name", filter)
+                        }
+                        /**
+                         * sqlRestriction because ilike could be just used for string.
+                         * The parameter type is enum and < ilike("type", filter)> did not work.
+                         **/
+                        sqlRestriction("upper(type) like upper('${filter}')")
+                    }
+                }
+                if (filtering.project) {
+                    project {
+                        'in'('id', filtering.project)
+                    }
+                }
+                if (filtering.pid) {
+                    or {
+                        filtering.pid.each {
+                            ilike('pid', "%${it}%")
+                        }
+                    }
+                }
+                if (filtering.mockFullName) {
+                    or {
+                        filtering.mockFullName.each {
+                            ilike('mockFullName', "%${it}%")
+                        }
+                    }
+                 }
+                 if (filtering.mockPid) {
+                     or {
+                         filtering.mockPid.each {
+                             ilike('mockPid', "%${it}%")
+                         }
+                     }
+                 }
+                 if (filtering.type) {
+                     'in'('type', filtering.type)
+                 }
+                 projections {
+                     count('mockPid')
+                 }
+             }
+         } else {
+             // shortcut for unfiltered results
+             return Individual.countByProjectInList(projectService.getAllProjects())
+         }
     }
 
     /**
