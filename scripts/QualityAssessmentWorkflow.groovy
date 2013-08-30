@@ -1,4 +1,6 @@
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.*
 
 plan("QualityAssessmentWorkflow") {
     start("start", "qualityAssessmentStartJob")
@@ -44,3 +46,23 @@ plan("QualityAssessmentWorkflow") {
     job("insertSizePlotValidation", "insertSizePlotValidationJob")
     job("assignQaFlag", "assignQaFlagJob")
 }
+
+// create Quality Assessment jar options for executeBamFileQaAnalysis job
+boolean overrideOutput = false
+String allChromosomeName = Chromosomes.overallChromosomesLabel()
+int minAlignedRecordLength = 36
+int minMeanBaseQuality = 25
+int mappingQuality = 0
+int coverageMappingQualityThreshold = 1
+int windowsSize = 1000
+int insertSizeCountHistogramBin = 10
+boolean testMode = true // TODO better to ask again CO Group
+
+String cmd = "qualityAssessment.sh \${processedBamFilePath} \${processedBaiFilePath} \${qualityAssessmentFilePath} \${coverageDataFilePath} \${insertSizeDataFilePath} ${overrideOutput} \${allChromosomeName} ${minAlignedRecordLength} ${minMeanBaseQuality} ${mappingQuality} ${coverageMappingQualityThreshold} ${windowsSize} ${insertSizeCountHistogramBin} ${testMode}"
+SeqType seqType = SeqType.findByNameAndLibraryLayout("WHOLE_GENOME", "PAIRED")
+ctx.processingOptionService.createOrUpdate(
+  "qualityAssessment",
+  seqType.naturalId,
+  null, // defaults to all projects
+  cmd,
+  "Quality assessment Command and parameters template")

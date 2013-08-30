@@ -38,7 +38,7 @@ class ExecuteBamFileQaAnalysisJob extends AbstractJobImpl {
         Project project = processedBamFileService.project(processedBamFile)
         SeqType seqType = processedBamFileService.seqType(processedBamFile)
         String seqTypeNaturalId = seqType.getNaturalId()
-        String cmdTemplate = processingOptionService.findOptionSafe("qualityAssessment", seqTypeNaturalId, project)
+        String cmdTemplate = processingOptionService.findOptionAssure("qualityAssessment", seqTypeNaturalId, project)
         Map binding = [
             processedBamFilePath: processedBamFilePath,
             processedBaiFilePath: processedBaiFilePath,
