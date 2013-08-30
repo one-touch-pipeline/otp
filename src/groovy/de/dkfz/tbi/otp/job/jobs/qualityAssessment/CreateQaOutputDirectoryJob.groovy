@@ -20,6 +20,10 @@ class CreateQaOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
     public void execute() throws Exception {
         long passId = getProcessParameterValue() as long
         QualityAssessmentPass pass = QualityAssessmentPass.get(passId)
+
+        // TODO remove this hack when multiple start is solved
+        qualityAssessmentPassService.passStarted(pass)
+
         String dir = processedBamFileQaFileService.directoryPath(pass)
         Realm realm = qualityAssessmentPassService.realmForDataProcessing(pass)
         execute(dir, realm)
