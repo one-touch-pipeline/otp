@@ -1,8 +1,9 @@
+
 CREATE VIEW aggregate_sequences AS SELECT
 
-sum(st.n_base_pairs) as sum_n_base_pairs,
-floor(sum(st.n_base_pairs) / 1e9) as sum_n_base_pairs_gb,
-count(st.id) AS lane_count,
+(sum(st.n_base_pairs))::bigint as sum_n_base_pairs,
+(floor(sum(st.n_base_pairs) / 1e9))::bigint as sum_n_base_pairs_gb,
+(count(st.id))::bigint AS lane_count,
 
 st.seq_type_id,
 st.seq_platform_id,
