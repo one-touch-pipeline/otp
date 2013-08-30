@@ -60,10 +60,10 @@ class BwaPairingAndSortingJob extends AbstractJobImpl {
         String sampeCmd = "${bwaCommand} sampe -P -T ${numberOfSampeThreads} ${insertSizeOpt} -r \"${groupHeader}\" ${referenceGenomePath} ${sequenceAndSaiFiles}"
         String viewCmd = "${samToolsBinary} view -uSbh - "
         String sortCmd = "${samToolsBinary} sort ${numberOfSamToolsSortThreads} ${samtoolsSortBuffer} - ${outFilePathNoSuffix}"
-        String chmodCmd = "chmod 440 ${outFilePath}"
         String mbufferPart = "mbuffer -q ${mbuffer} -l /dev/null"
         String bwaLogFilePath = processedBamFileService.bwaSampeErrorLogFilePath(bamFile)
         String bwaErrorCheckingCmd = BwaErrorHelper.failureCheckScript(outFilePath, bwaLogFilePath)
+        String chmodCmd = "chmod 440 ${outFilePath}; chmod 440 ${bwaLogFilePath}"
         String cmd = "${sampeCmd} 2> ${bwaLogFilePath} | ${mbufferPart} | ${viewCmd} | ${mbufferPart} | ${sortCmd} ; ${bwaErrorCheckingCmd} ;${chmodCmd}"
         log.debug cmd
         return cmd
