@@ -57,7 +57,7 @@ class ConveyBwaAlignmentJob extends AbstractJobImpl {
         String bwaLogFilePath = processedSaiFileService.bwaAlnErrorLogFilePath(saiFile)
         String bwaCmd = "${conveyBwaCommand} aln ${nCores} ${qaSwitch} ${referenceGenomePath} ${dataFilePath} -f ${saiFilePath} 2> ${bwaLogFilePath}"
         String bwaErrorCheckingCmd = BwaErrorHelper.failureCheckScript(saiFilePath, bwaLogFilePath)
-        String chmodCmd = "chmod 440 ${saiFilePath}; chmod 440 ${bwaLogFilePath}"
+        String chmodCmd = "chmod 440 ${saiFilePath} ${bwaLogFilePath}"
         String cmd = "${bwaCmd}; ${bwaErrorCheckingCmd}; ${chmodCmd}"
         log.debug cmd
         return executionHelperService.sendScript(realm, cmd, "conveyBwaAlignmentJob")

@@ -291,7 +291,7 @@ class BwaPairingAndSortingJobTests {
         String sampeCmd = "bwa-0.6.2-tpx sampe -P -T -t 8 -a 1000 -r \"${header()}\" ${refGenPath} ${files}"
         String viewCmd = "samtools-0.1.19 view -uSbh - "
         String sortCmd = "samtools-0.1.19 sort -@ 8 -m 30000000000 - ${outFilePathNoSuffix}"
-        String chmodCmd = "chmod 440 ${outFilePath}"
+        String chmodCmd = "chmod 440 ${outFilePath} ${bwaLogFilePath}"
         String mbufferPart = "mbuffer -q -m 2G -l /dev/null"
         String cmd = "${sampeCmd} 2> ${bwaLogFilePath} | ${mbufferPart} | ${viewCmd} | ${mbufferPart} | ${sortCmd} ; ${bwaErrorCheckingCmd} ;${chmodCmd}"
         String result = bwaPairingAndSortingJob.createCommand(pass)

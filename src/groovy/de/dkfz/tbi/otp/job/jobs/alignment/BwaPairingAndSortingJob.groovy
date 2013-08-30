@@ -63,7 +63,7 @@ class BwaPairingAndSortingJob extends AbstractJobImpl {
         String mbufferPart = "mbuffer -q ${mbuffer} -l /dev/null"
         String bwaLogFilePath = processedBamFileService.bwaSampeErrorLogFilePath(bamFile)
         String bwaErrorCheckingCmd = BwaErrorHelper.failureCheckScript(outFilePath, bwaLogFilePath)
-        String chmodCmd = "chmod 440 ${outFilePath}; chmod 440 ${bwaLogFilePath}"
+        String chmodCmd = "chmod 440 ${outFilePath} ${bwaLogFilePath}"
         String cmd = "${sampeCmd} 2> ${bwaLogFilePath} | ${mbufferPart} | ${viewCmd} | ${mbufferPart} | ${sortCmd} ; ${bwaErrorCheckingCmd} ;${chmodCmd}"
         log.debug cmd
         return cmd
