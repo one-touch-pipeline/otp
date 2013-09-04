@@ -31,12 +31,13 @@ sampleRaw = read.table(filename, sep = "\t", as.is = TRUE)
 windowSizeValues = sampleRaw[,2]
 windowSize = sampleRaw[2,2] - sampleRaw[1,2]
 sampleSplitByChromosome = splitsByChromosomeAndNameColumns(sampleRaw)
+# Needed because when data is splitted (using split function) by chromosomes, the input order is lost.
+chromosomesOrderedAsInputFile = unique(sampleRaw[,1])
 # Start PNG device driver to save output to figure.png
 png(outputPath, width = 2100, height = 1000)
 # create a grid for the images and setting number of images ( the total number of images in this case = 3 x 1 = 3, and margins)
 par(mfrow = c(3, 1), mar = c(2, 4, 2, 2))
 # plot coverage for whole genome
-yValue = 17
-plotChromosomes(sampleName, sampleRaw, yValue)
-drawPlotGridAndLabels(sampleSplitByChromosome, yValue)
+plotChromosomes(sampleName, sampleRaw)
+drawPlotGridAndLabels(chromosomesOrderedAsInputFile, sampleSplitByChromosome)
 graphics.off()
