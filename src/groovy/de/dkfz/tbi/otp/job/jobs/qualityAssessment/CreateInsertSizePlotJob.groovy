@@ -25,7 +25,7 @@ class CreateInsertSizePlotJob extends AbstractJobImpl {
         String dataFilePath = processedBamFileQaFileService.insertSizeDataFilePath(pass)
         String plotFilePath = processedBamFileQaFileService.insertSizePlotFilePath(pass)
         String allChromosomeName = Chromosomes.overallChromosomesLabel()
-        String cmd = "insertSizePlot.sh '${dataFilePath}' '${allChromosomeName}' '${plotFilePath}'"
+        String cmd = "insertSizePlot.sh '${dataFilePath}' '${allChromosomeName}' '${plotFilePath}'; chmod 440 ${plotFilePath}"
         log.debug cmd
         String pbsID = executionHelperService.sendScript(realm, cmd)
         addOutputParameter("__pbsIds", pbsID)

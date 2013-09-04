@@ -23,7 +23,7 @@ class CreateCoveragePlotJob extends AbstractJobImpl {
         QualityAssessmentPass pass = QualityAssessmentPass.get(passId)
         String mappedFilteredSortedCoverageDataFilePath = processedBamFileQaFileService.mappedFilteredSortedCoverageDataFilePath(pass)
         String plotFilePath = processedBamFileQaFileService.coveragePlotFilePath(pass)
-        String cmd = "coveragePlot.sh ${mappedFilteredSortedCoverageDataFilePath} ${plotFilePath}"
+        String cmd = "coveragePlot.sh ${mappedFilteredSortedCoverageDataFilePath} ${plotFilePath}; chmod 440 ${plotFilePath}"
         Realm realm = qualityAssessmentPassService.realmForDataProcessing(pass)
         log.debug cmd
         String pbsID = executionHelperService.sendScript(realm, cmd)

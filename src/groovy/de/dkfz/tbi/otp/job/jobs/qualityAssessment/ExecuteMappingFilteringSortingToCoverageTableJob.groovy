@@ -37,6 +37,7 @@ class ExecuteMappingFilteringSortingToCoverageTableJob extends AbstractJobImpl {
         parameters.each { String parameter ->
             cmd += " ${parameter}"
         }
+        cmd += "; chmod 440 ${mappedFilteredSortedCoverageDataFilePath}"
         Realm realm = qualityAssessmentPassService.realmForDataProcessing(pass)
         log.debug cmd
         String pbsID = executionHelperService.sendScript(realm, cmd)
