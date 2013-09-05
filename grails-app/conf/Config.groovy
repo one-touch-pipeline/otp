@@ -285,3 +285,5 @@ if (pluginsToExclude) {
 }
 
 grails.plugin.databasemigration.changelogFileName = 'changelog.xml'
+
+grails.gorm.failOnError=true
