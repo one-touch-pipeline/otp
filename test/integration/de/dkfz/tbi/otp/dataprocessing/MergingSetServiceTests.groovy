@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.junit.Assert.*
+import grails.validation.ValidationException
 import org.junit.*
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
@@ -298,7 +299,7 @@ class MergingSetServiceTests {
         assertEquals(State.PROCESSED, bamFile.status)
     }
 
-    @Test(expected = SavingException.class)
+    @Test(expected = ValidationException.class)
     void testAssertSaveFails() {
         MergingSet mergingSet = new MergingSet()
         mergingSet.status = MergingSet.State.PROCESSED
