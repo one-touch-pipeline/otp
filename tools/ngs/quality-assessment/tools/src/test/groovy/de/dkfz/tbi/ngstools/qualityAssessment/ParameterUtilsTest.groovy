@@ -27,7 +27,7 @@ class ParameterUtilsTest {
         parameter.minAlignedRecordLength = 90
         parameter.minMeanBaseQuality = 5
         parameter.mappingQuality = 5
-        parameter.winSize = 90
+        parameter.winSize = 100
         parameter.binSize = 67895
         parameter.coverageMappingQualityThreshold = 48
 

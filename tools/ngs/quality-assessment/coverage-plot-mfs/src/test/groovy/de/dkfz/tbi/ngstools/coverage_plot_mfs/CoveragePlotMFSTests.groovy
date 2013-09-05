@@ -95,7 +95,7 @@ class CoveragePlotMFSTests {
 
     @Test
     public void testFilter() {
-        List<String> filter = ["M", "*"]
+        List<String> filter = ["1", "2", "3", "X", "Y"]
         Map<String, List<String>> dataOrg = ["1": [], "2": [], "3": [], "X": [], "Y": [], "M": [], "*": []]
         Map<String, List<String>> dataExp = ["1": [], "2": [], "3": [], "X": [], "Y": []]
         Map<String, List<String>> dataFiltered = coveragePlotMFS.filter(dataOrg, filter)

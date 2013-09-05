@@ -165,7 +165,7 @@ class AlignmentPassServiceUnitTests {
 
     @Test
     void testReferenceGenomePathAllCorrect() {
-        String pathExp = "${referenceGenomePath}prefixName"
+        String pathExp = "${referenceGenomePath}prefixName.fa"
         String pathAct = alignmentPassService.referenceGenomePath(alignmentPass)
         assertEquals(pathExp, pathAct)
     }
