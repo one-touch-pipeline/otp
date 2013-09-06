@@ -20,7 +20,7 @@ class BwaAlignmentStartJob extends AbstractStartJobImpl {
     @Autowired
     ProcessingOptionService optionService
 
-    final int MAX_RUNNING = 1
+    final int MAX_RUNNING = 4
 
     @Scheduled(fixedDelay=10000l)
     void execute() {
