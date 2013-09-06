@@ -74,10 +74,9 @@ class MergingSetService {
         if (!mergingCriteriaService.validateBamFiles(mergingSet)) {
             throw new SavingException(mergingSet.toString())
         }
-        //TODO has to be done manually
-        //mergingSet.status = MergingSet.State.NEEDS_PROCESSING
-        //assertSave(mergingSet)
-        //log.debug("created a new mergingSet: ${mergingSet}")
+        mergingSet.status = MergingSet.State.NEEDS_PROCESSING
+        assertSave(mergingSet)
+        log.debug("created a new mergingSet: ${mergingSet}")
     }
 
     /**
