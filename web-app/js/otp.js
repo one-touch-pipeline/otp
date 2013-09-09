@@ -238,7 +238,7 @@ $.otp.individual = {
                 }),
                 bPaginate: false,
                 bScrollCollapse: true,
-                sScrollY: ($(window).height() - 440),
+                sScrollY: ($(window).height() - 570),
                 iDisplayLength: Math.round(($('.body').height() - 200) / 23),
                 bDeferRender: true,
                 fnServerData: function (sSource, aoData, fnCallback) {
@@ -369,7 +369,7 @@ $.otp.run = {
             }),
             bPaginate: false,
             bScrollCollapse: true,
-            sScrollY: ($(window).height() - 550),
+            sScrollY: ($(window).height() - 570),
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
                 aoData.push({
