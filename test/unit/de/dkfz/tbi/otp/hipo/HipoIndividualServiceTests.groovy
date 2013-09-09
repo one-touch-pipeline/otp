@@ -50,5 +50,15 @@ class HipoIndividualServiceTests {
 
         sampleName = "H004-ABCD-T1-D1"
         assertTrue(hipoIndividualService.checkIfHipoName(sampleName))
+
+        sampleName = "H004-BPF4-L4-D1"
+        assertFalse(hipoIndividualService.checkIfHipoName(sampleName))
+
+        sampleName = "P021-EFGH"
+        assertFalse(hipoIndividualService.checkIfHipoName(sampleName))
+
+        sampleName = "P021-EFGH-T1-D1"
+        assertTrue(hipoIndividualService.checkIfHipoName(sampleName))
+
     }
 }

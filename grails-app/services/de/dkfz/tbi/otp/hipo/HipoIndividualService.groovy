@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.hipo
 
-import de.dkfz.tbi.otp.ngsdata.*
 import static org.springframework.util.Assert.*
+import de.dkfz.tbi.otp.ngsdata.*
 
 class HipoIndividualService {
 
-    final static Map<String, String> tissueMap = [
+    final static Map<String, String> TISSUEMAP = [
         "T": "TUMOR",
         "M": "METASTASIS",
         "S": "SPHERE",
@@ -30,7 +30,8 @@ class HipoIndividualService {
     }
 
     private boolean checkIfHipoName(String sampleName) {
-        String hipoRegex = /H\d\d\d-\w\w\w\w-[TMSXYBN]\d-[DRP]\d/
+        String issues = TISSUEMAP.keySet().join()
+        String hipoRegex = /[HP]\d\d\d-\w\w\w\w-[${issues}]\d-[DRP]\d/
         return (sampleName =~ hipoRegex)
     }
 
@@ -46,11 +47,11 @@ class HipoIndividualService {
         String tissueKey = sampleName.substring(TYPE_POS, TYPE_POS + 1)
         int sampleNumber = sampleName.substring(SAMPLE_NUMBER_POS, SAMPLE_NUMBER_POS + 1) as Integer
         if (sampleNumber == 1) {
-            return "${tissueMap.get(tissueKey)}"
+            return "${TISSUEMAP.get(tissueKey)}"
         } else if (sampleNumber < 10) {
-            return "${tissueMap.get(tissueKey)}0${sampleNumber}"
+            return "${TISSUEMAP.get(tissueKey)}0${sampleNumber}"
         } else {
-            return "${tissueMap.get(tissueKey)}${sampleNumber}"
+            return "${TISSUEMAP.get(tissueKey)}${sampleNumber}"
         }
     }
 
@@ -76,12 +77,12 @@ class HipoIndividualService {
             return ind
         }
         ind = new Individual(
-            pid: pid,
-            mockPid: pid,
-            mockFullName: pid,
-            project: findProject(sampleName),
-            type: Individual.Type.REAL
-        )
+                        pid: pid,
+                        mockPid: pid,
+                        mockFullName: pid,
+                        project: findProject(sampleName),
+                        type: Individual.Type.REAL
+                        )
         ind.save(flush: true)
         return ind
     }
