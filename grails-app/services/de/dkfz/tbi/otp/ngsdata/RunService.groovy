@@ -19,6 +19,8 @@ class RunService {
      */
     def springSecurityService
 
+    def seqCenterService
+
     /**
      * Retrieves the given Run.
      * If the parameter can be converted to a Long it is assumed to be the database ID.
@@ -29,6 +31,119 @@ class RunService {
      * @param identifier Name or database Id
      * @return Run
      **/
+
+    public List<Run> listRuns(boolean sortOrder, RunSortColumn column, RunFiltering filtering, String filter) {
+        def c = Run.createCriteria()
+        return c.list {
+            'in'('seqCenter', seqCenterService.allSeqCenters())
+            if (filter.length() >= 3) {
+                filter = "%${filter}%"
+                or  {
+                    ilike("name", filter)
+                    seqCenter {
+                        ilike("name", filter)
+                    }
+                    sqlRestriction("upper(storage_realm) like upper('${filter}')")
+                    }
+                }
+            if (filtering.name) {
+                or {
+                    filtering.name.each {
+                        ilike('name', "%${it}%")
+                    }
+                }
+            }
+            if (filtering.seqCenter) {
+                seqCenter {
+                    'in'('id', filtering.seqCenter)
+                }
+            }
+            if (filtering.storageRealm) {
+                'in'('storageRealm', filtering.storageRealm)
+            }
+            if (filtering.dateCreated) {
+                or {
+                    filtering.dateCreated.each {
+                         between('dateCreated', it[0], it[1])
+                    }
+                }
+            }
+            if (filtering.dateExecuted) {
+                or {
+                    filtering.dateExecuted.each {
+                        between('dateExecuted', it[0], it[1])
+                    }
+                }
+            }
+            if (column.columnName == "seqCenter") {
+                seqCenter {
+                    order("name", sortOrder ? "asc" : "desc")
+                }
+            } else {
+                order(column.columnName, sortOrder ? "asc" : "desc")
+            }
+        }
+    }
+    /**
+     * Counts the Runs the User has access to by applying the provided filtering.
+     * @param filtering The filters to apply on the data
+     * @param filter Restrict on this search filter if at least three characters
+     * @return Number of Runs matching the filtering
+     */
+    public int countRun(RunFiltering filtering, String filter) {
+        if (filtering.enabled) {
+            def c = Run.createCriteria()
+            return c.get {
+                'in'('seqCenter', seqCenterService.allSeqCenters())
+                if (filter.length() >= 3) {
+                    filter = "%${filter}%"
+                    or {
+                        ilike("name", filter)
+                        seqCenter {
+                            ilike("name", filter)
+                        }
+                        sqlRestriction("upper(storage_realm) like upper('${filter}')")
+                        }
+                    }
+                if (filtering.name) {
+                    or {
+                        filtering.name.each {
+                            ilike('name', "%${it}%")
+                        }
+                    }
+                }
+                if (filtering.seqCenter) {
+                    seqCenter {
+                         'in'('id', filtering.seqCenter)
+                     }
+                }
+                if (filtering.storageRealm) {
+                    'in'('storageRealm', filtering.storageRealm)
+                }
+                if (filtering.dateCreated) {
+                    or {
+                        filtering.dateCreated.each {
+                            between('dateCreated', it[0], it[1])
+                        }
+                    }
+                }
+                if (filtering.dateExecuted) {
+                    or {
+                        filtering.dateExecuted.each {
+                            between('dateExecuted', it[0], it[1])
+                        }
+                    }
+                }
+                projections {
+                    count('name')
+                    }
+                }
+            } else {
+             // shortcut for unfiltered results
+             return Run.countBySeqCenterInList(seqCenterService.allSeqCenters())
+            }
+    }
+
     @PostAuthorize("returnObject == null or hasPermission(returnObject.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read) or hasRole('ROLE_OPERATOR')")
     Run getRun(String identifier) {
         if (!identifier) {
@@ -228,182 +343,5 @@ AND r.id > :runId
     @PreAuthorize("#run == null or hasPermission(#run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read) or hasRole('ROLE_OPERATOR')")
     List<DataFile> dataFilesWithError(Run run) {
         return DataFile.findAllByRunAndUsed(run, false, [sort: "fileName"])
-    }
-
-    /**
-     * Retrieves list of Runs with filter applied.
-     *
-     * The result set can be paginated, sorted and filtered. The filter (search) is only applied if the
-     * filter String has a length of at least three characters. It considers the name and storage realm.
-     * The sorting is applied using the sort order and the column which is an integer identifying one of
-     * the following columns:
-     * <ul>
-     * <li><strong>0:</strong> name (sorted by Id)</li>
-     * <li><strong>1:</strong> storage realm</li>
-     * <li><strong>2:</strong> date created</li>
-     * <li><strong>3:</strong> date executed</li>
-     * <li><strong>4:</strong> blacklisted</li>
-     * <li><strong>5:</strong> multiple Source</li>
-     * </ul>
-     * @param offset Offset in result list of pagination
-     * @param count The number of Individuals to return in this query
-     * @param sortOrder true for ascending, false for descending sorting
-     * @param column the column to sort on, see above for mapping
-     * @param filter The search filter
-     * @return List of Runs matching the criteria
-     */
-    List<Run> listRuns(int offset, int count, boolean sortOrder, int column, String filter) {
-        boolean filtering = filter.length() >= 3
-        String order = "${sortOrder ? 'asc' : 'desc'}"
-        String sortColumn = ""
-        switch (column) {
-        case 1:
-            sortColumn = "seqCenter.name"
-            break
-        case 2:
-            sortColumn = "storageRealm"
-            break
-        case 3:
-            sortColumn = "dateCreated"
-            break
-        case 4:
-            sortColumn = "dateExecuted"
-            break
-        case 5:
-            sortColumn = "blacklisted"
-            break
-        case 6:
-            sortColumn = "multipleSource"
-            break
-        case 7:
-            sortColumn = "dataQuality"
-            break
-        case 0:
-        default:
-            sortColumn = "id"
-            break
-        }
-
-        if (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR")) {
-            // shortcut for operator
-            if (filtering) {
-                String query = '''
-SELECT r FROM Run as r
-WHERE
-lower(r.name) like :filter
-OR lower (r.storageRealm) like :filter
-OR lower (r.seqCenter.name) like :filter
-'''
-                query = query + "ORDER BY r.${sortColumn} ${order}"
-                Map params = [
-                    filter: "%${filter.toLowerCase()}%",
-                    max: count, offset: offset
-                ]
-                return Run.executeQuery(query, params)
-            }
-            return Run.list(max: count, offset: offset, sort: sortColumn, order: order)
-        }
-
-        // for normal users
-        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
-        if (springSecurityService.isLoggedIn()) {
-            // anonymous users do not have a principal
-            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
-        }
-        String query = '''
-SELECT r FROM Run AS r, AclEntry AS ace
-JOIN r.seqCenter AS s
-JOIN ace.aclObjectIdentity AS aoi
-JOIN aoi.aclClass AS ac
-JOIN ace.sid AS sid
-WHERE
-aoi.objectId = s.id
-AND ac.className = :className
-AND sid.sid IN (:roles)
-AND ace.mask IN (:permissions)
-AND ace.granting = true
-'''
-        if (filtering) {
-            query += '''
-AND (
-lower(r.name) like :filter
-OR lower (r.storageRealm) like :filter
-OR lower (r.seqCenter.name) like :filter
-)
-'''
-        }
-        query += "ORDER BY r.${sortColumn} ${order}"
-        Map params = [
-            className: SeqCenter.class.getName(),
-            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
-            roles: roles,
-            max: count, offset: offset
-        ]
-        if (filtering) {
-            params.put("filter", "%${filter.toLowerCase()}%")
-        }
-        return Run.executeQuery(query, params)
-   }
-
-    /**
-     * Counts the Runs applying the given filter if present.
-     * @param filter Restrict on this search filter if at least three characters
-     * @return Number of Runs
-     */
-    int countRun(String filter) {
-        boolean filtering = filter.length() >= 3
-        if (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR")) {
-            // shortcut for operator
-            if (filtering) {
-                String query = '''
-SELECT COUNT(DISTINCT r.id) FROM Run as r
-WHERE
-lower(r.name) like :filter
-OR lower (r.storageRealm) like :filter
-OR lower (r.seqCenter.name) like :filter
-'''
-                Map params = [filter: "%${filter.toLowerCase()}%"]
-                return Run.executeQuery(query, params)[0] as Integer
-            } else {
-                return Run.count()
-            }
-        }
-        // for users
-        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
-        if (springSecurityService.isLoggedIn()) {
-            // anonymous users do not have a principal
-            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
-        }
-        String query = '''
-SELECT COUNT(DISTINCT r.id) FROM Run as r, AclEntry AS ace
-JOIN r.seqCenter AS s
-JOIN ace.aclObjectIdentity AS aoi
-JOIN aoi.aclClass AS ac
-JOIN ace.sid AS sid
-WHERE
-aoi.objectId = s.id
-AND ac.className = :className
-AND sid.sid IN (:roles)
-AND ace.mask IN (:permissions)
-AND ace.granting = true
-'''
-        if (filtering) {
-            query += '''
-AND (
-lower(r.name) like :filter
-OR lower (r.storageRealm) like :filter
-OR lower (r.seqCenter.name) like :filter
-)
-'''
-        }
-        Map params = [
-            className: SeqCenter.class.getName(),
-            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
-            roles: roles
-        ]
-        if (filtering) {
-            params.put("filter", "%${filter.toLowerCase()}%")
-        }
-        return Run.executeQuery(query, params)[0] as Integer
     }
 }

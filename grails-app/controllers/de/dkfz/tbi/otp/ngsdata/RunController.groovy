@@ -1,13 +1,17 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import java.text.SimpleDateFormat
+import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
 import de.dkfz.tbi.otp.utils.DataTableCommand
 import grails.converters.JSON
+import groovy.json.JsonSlurper
 
 class RunController {
 
     def lsdfFilesService
     def runService
     def fastqcResultsService
+    def seqCenterService
 
     def display = {
         redirect(action: "show", id: params.id)
@@ -42,27 +46,147 @@ class RunController {
     }
 
     def list = {
+        Map retValue = [
+            seqCenters: seqCenterService.allSeqCenters(),
+            storageRealm: StorageRealm.values()
+        ]
+        return retValue
     }
-
     def dataTableSource(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
 
-        dataToRender.iTotalRecords = runService.countRun(cmd.sSearch)
+        RunFiltering filtering = RunFiltering.fromJSON(params.filtering)
+
+        dataToRender.iTotalRecords = runService.countRun(filtering, cmd.sSearch)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-        runService.listRuns(cmd.iDisplayStart, cmd.iDisplayLength, cmd.sortOrder, cmd.iSortCol_0, cmd.sSearch).each { run ->
+        runService.listRuns(cmd.sortOrder, RunSortColumn.fromDataTable(cmd.iSortCol_0), filtering, cmd.sSearch).each { run ->
             dataToRender.aaData << [
-                [id: run.id, text: run.name],
-                run.seqCenter.name.toLowerCase(),
-                run.storageRealm?.toString()?.toLowerCase(),
-                run.dateCreated?.format("yyyy-MM-dd hh:mm:ss"),
-                run.dateExecuted?.format("yyyy-MM-dd"),
-                run.blacklisted,
-                run.multipleSource,
-                run.qualityEvaluated ? String.format("%.2f", run.dataQuality) : "NaN"
+                id: run.id,
+                name: run.name,
+                seqCenters: run.seqCenter?.toString()?.toLowerCase(),
+                storageRealm: run.storageRealm?.toString()?.toLowerCase(),
+                dateCreated: run.dateCreated?.format("yyyy-MM-dd hh:mm:ss"),
+                dateExecuted: run.dateExecuted?.format("yyyy-MM-dd"),
+                blacklisted: run.blacklisted,
+                multipleSource: run.multipleSource,
+                qualityEvaluated: run.qualityEvaluated ? String.format("%.2f", run.dataQuality) : "NaN"
             ]
         }
         render dataToRender as JSON
     }
+}
 
+enum RunSortColumn {
+    RUN("name"),
+    SEQCENTER("seqCenter"),
+    STORAGEREALM("storageRealm"),
+    DATECREATED("dateCreated"),
+    DATEEXECUTED("dateExecuted"),
+    BLACKLISTED("blacklisted"),
+    MULTIPLESOURCE("multipleSource"),
+    QUALITYEVALUATED("qualityEvaluated"),
+
+    private final String columnName
+
+    RunSortColumn(String column) {
+        this.columnName = column
+    }
+
+    static RunSortColumn fromDataTable(int column) {
+        switch (column) {
+        case 0:
+            return RunSortColumn.RUN
+        case 1:
+            return RunSortColumn.SEQCENTER
+        case 2:
+            return RunSortColumn.STORAGEREALM
+        case 3:
+            return RunSortColumn.DATECREATED
+        case 4:
+            return RunSortColumn.DATEEXECUTED
+        case 5:
+            return RunSortColumn.BLACKLISTED
+        case 6:
+            return RunSortColumn.MULTIPLESOURCE
+        case 7:
+            return RunSortColumn.QUALITYEVALUATED
+        default:
+            return RunSortColumn.RUN
+        }
+    }
+}
+
+/**
+ * Class describing the various filtering to do on WorkPackage.
+ *
+ */
+class RunFiltering {
+    List<String> name = []
+    List<Long> seqCenter = []
+    List<StorageRealm> storageRealm = []
+    List<List<Date>> dateCreated = []
+    List<List<Date>> dateExecuted = []
+    List<Double> qualityEvaluated = []
+
+    boolean enabled = false
+
+    static RunFiltering fromJSON(String json) {
+        RunFiltering filtering = new RunFiltering()
+        if (!json) {
+            return filtering
+        }
+        def slurper = new JsonSlurper()
+        def each = slurper.parseText(json).each {
+            switch (it.type) {
+             case "runSearch":
+                if (it.value && it.value.length() >= 3) {
+                    filtering.name << it.value
+                    filtering.enabled = true
+                }
+                break
+            case "seqCenterSelection":
+                if (it.value.isLong()) {
+                    filtering.seqCenter << (it.value as Long)
+                    filtering.enabled = true
+                }
+                break
+            case "storageRealmSelection":
+                if (it.value) {
+                    filtering.storageRealm << (it.value as StorageRealm)
+                    filtering.enabled = true
+                }
+                break
+            case "dateCreatedSelection":
+                if (it.value) {
+                    int start_day = it.value.start_day as int
+                    int start_month = it.value.start_month as int
+                    int start_year = it.value.start_year as int
+                    Date dateFrom = new Date(start_year - 1900, start_month - 1, start_day)
+                    int end_day = it.value.end_day as int
+                    int end_month = it.value.end_month as int
+                    int end_year = it.value.end_year as int
+                    Date dateTo = new Date(end_year - 1900, end_month - 1, end_day + 1)
+                    filtering.dateCreated << [dateFrom, dateTo]
+                    filtering.enabled = true
+                }
+                break
+            case "dateExecutedSelection":
+                if (it.value) {
+                    int start_day = it.value.start_day as int
+                    int start_month = it.value.start_month as int
+                    int start_year = it.value.start_year as int
+                    Date dateFrom = new Date(start_year - 1900, start_month - 1, start_day)
+                    int end_day = it.value.end_day as int
+                    int end_month = it.value.end_month as int
+                    int end_year = it.value.end_year as int
+                    Date dateTo = new Date(end_year - 1900, end_month - 1, end_day + 1)
+                    filtering.dateExecuted << [dateFrom, dateTo]
+                    filtering.enabled = true
+                }
+                break
+            }
+        }
+        return filtering
+    }
 }
