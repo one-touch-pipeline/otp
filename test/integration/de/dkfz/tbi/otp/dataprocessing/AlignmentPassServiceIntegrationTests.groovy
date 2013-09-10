@@ -9,7 +9,7 @@ import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type
 
 import org.junit.*
 
-class AlignmentPassServiceTests {
+class AlignmentPassServiceIntegrationTests {
 
     AlignmentPassService alignmentPassService
 

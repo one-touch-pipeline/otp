@@ -1,19 +1,19 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static org.junit.Assert.*
-import de.dkfz.tbi.otp.job.processing.ProcessingException
-import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import grails.util.Environment
+import org.junit.Test
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
+import de.dkfz.tbi.otp.ngsdata.*
 
 /**
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
 @TestFor(AlignmentPassService)
 @TestMixin(GrailsUnitTestMixin)
-@Mock([Realm, SeqPlatform, SeqCenter, SoftwareTool, SoftwareTool, Run, Project, AlignmentPassService, Individual, Sample, SeqType, SeqTrack, AlignmentPass, ReferenceGenome, ReferenceGenomeProjectSeqType, SampleType])
-class AlignmentPassServiceTests {
+@Mock([Realm, SeqPlatform, SeqCenter, SoftwareTool, SoftwareTool, Run, Project, AlignmentPassService, Individual, Sample, SeqType, SeqTrack, AlignmentPass, ReferenceGenome, ReferenceGenomeProjectSeqType, SampleType, ProcessedBamFile])
+class AlignmentPassServiceUnitTests {
 
     AlignmentPassService alignmentPassService
     AlignmentPass alignmentPass
@@ -27,6 +27,7 @@ class AlignmentPassServiceTests {
     @Before
     void setUp() {
         alignmentPassService = new AlignmentPassService()
+        alignmentPassService.qualityAssessmentPassService = new QualityAssessmentPassService()
         alignmentPassService.referenceGenomeService = new ReferenceGenomeService()
         alignmentPassService.referenceGenomeService.configService = new ConfigService()
 
@@ -167,5 +168,24 @@ class AlignmentPassServiceTests {
         String pathExp = "${referenceGenomePath}prefixName"
         String pathAct = alignmentPassService.referenceGenomePath(alignmentPass)
         assertEquals(pathExp, pathAct)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testAlignmentPassFinishedNull() {
+        alignmentPass = null
+        alignmentPassService.alignmentPassFinished(alignmentPass)
+    }
+
+    @Test
+    void testAlignmentPassFinished() {
+        ProcessedBamFile bamFile = new ProcessedBamFile(
+                        type: BamType.SORTED,
+                        alignmentPass: alignmentPass,
+                        withdrawn: false,
+                        )
+        bamFile.save(flush: true)
+        alignmentPassService.alignmentPassFinished(alignmentPass)
+        assertEquals(SeqTrack.DataProcessingState.FINISHED, alignmentPass.seqTrack.alignmentState)
+        assertEquals(AbstractBamFile.QaProcessingStatus.NOT_STARTED, bamFile.qualityAssessmentStatus)
     }
 }

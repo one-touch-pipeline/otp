@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.job.processing.*
 import static org.springframework.util.Assert.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
 
 /**
  * Execution of the alignment on the particular data file is called AlignmentPass
@@ -16,6 +16,7 @@ class AlignmentPassService {
     def configService
     def processingOptionService
     ReferenceGenomeService referenceGenomeService
+    QualityAssessmentPassService qualityAssessmentPassService
 
     public AlignmentPass createAlignmentPass() {
         def state = SeqTrack.DataProcessingState.NOT_STARTED
@@ -34,7 +35,10 @@ class AlignmentPassService {
     }
 
     public void alignmentPassFinished(AlignmentPass alignmentPass) {
+        notNull(alignmentPass, "the alignmentPass for the method alignmentPassFinished ist null")
         update(alignmentPass, SeqTrack.DataProcessingState.FINISHED)
+        ProcessedBamFile bamFile = ProcessedBamFile.findByAlignmentPass(alignmentPass)
+        qualityAssessmentPassService.notStarted(bamFile)
     }
 
     private void update(AlignmentPass alignmentPass, SeqTrack.DataProcessingState state) {

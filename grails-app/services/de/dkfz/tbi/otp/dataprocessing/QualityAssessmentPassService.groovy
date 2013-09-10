@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
 
 class QualityAssessmentPassService {
 
@@ -17,6 +17,11 @@ class QualityAssessmentPassService {
         QualityAssessmentPass qualityAssessmentPass = new QualityAssessmentPass(identifier: numberOfpass, processedBamFile: processedBamFile)
         assertSave(qualityAssessmentPass)
         return qualityAssessmentPass
+    }
+
+    public void notStarted(ProcessedBamFile bamFile) {
+        bamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.NOT_STARTED
+        assertSave(bamFile)
     }
 
     public void passStarted(QualityAssessmentPass qualityAssessmentPass) {
