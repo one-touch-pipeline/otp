@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import static org.springframework.util.Assert.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
-import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile.State
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
 
 class ProcessedBamFileService {
@@ -75,9 +75,9 @@ class ProcessedBamFileService {
 
     private ProcessedBamFile createBamFile(AlignmentPass alignmentPass, AbstractBamFile.BamType type) {
         ProcessedBamFile pbf = new ProcessedBamFile(
-            alignmentPass: alignmentPass,
-            type: type
-        )
+                        alignmentPass: alignmentPass,
+                        type: type
+                        )
         assert(pbf.save(flush: true))
         return pbf
     }
@@ -136,8 +136,31 @@ class ProcessedBamFileService {
      * @return the first available {@link ProcessedBamFile}, which needs to be merged and was sorted in the alignment workflow
      */
     ProcessedBamFile processedBamFileNeedsProcessing() {
-        ProcessedBamFile processedBamFile = ProcessedBamFile.findByStatusAndTypeAndWithdrawn(State.NEEDS_PROCESSING, BamType.SORTED, false)
-        return processedBamFile
+        //the oldest bam file will be processed
+        List<ProcessedBamFile> processedBamFiles = ProcessedBamFile.findAllByStatusAndTypeAndWithdrawn(State.NEEDS_PROCESSING, BamType.SORTED, false, [sort: "id"])
+        for (ProcessedBamFile processedBamFile : processedBamFiles) {
+            Sample sample = processedBamFile.alignmentPass.seqTrack.sample
+            SeqType seqType = processedBamFile.alignmentPass.seqTrack.seqType
+            //waiting until all fastq files from the same sample and seqtype are aligned so that they can be merged all together
+            List<SeqTrack> seqTracks = SeqTrack.createCriteria().list {
+                eq("sample", sample)
+                eq("seqType", seqType)
+                'in'("alignmentState", [SeqTrack.DataProcessingState.NOT_STARTED, SeqTrack.DataProcessingState.IN_PROGRESS])
+            }
+            if (seqTracks.isEmpty()) {
+                MergingWorkPackage workPackage = MergingWorkPackage.findBySampleAndSeqType(sample, seqType)
+                if (workPackage) {
+                    //make sure that there is no other merging process with the same sample and seqtype running at the moment
+                    MergingSet mergingSet = MergingSet.findByMergingWorkPackageAndStatusInList(workPackage,
+                                    [MergingSet.State.DECLARED, MergingSet.State.INPROGRESS, MergingSet.State.NEEDS_PROCESSING])
+                    if (!mergingSet) {
+                        return processedBamFile
+                    }
+                } else {
+                    return processedBamFile
+                }
+            }
+        }
     }
 
     /**
@@ -152,7 +175,7 @@ class ProcessedBamFileService {
     /**
      * @param bamFile, which was assigned to a {@link MergingSet}
      */
-    void assignedToMergingSet(ProcessedBamFile bamFile) {
+    void assignedToMergingSet(AbstractBamFile bamFile) {
         notNull(bamFile, "the input bam file for the method assignedToMergingSet is null")
         bamFile.status = State.PROCESSED
         assertSave(bamFile)
@@ -175,7 +198,7 @@ class ProcessedBamFileService {
         return object
     }
 
-    public List<ProcessedBamFile> findByMergingSet(MergingSet mergingSet) {
+    public List<AbstractBamFile> findByMergingSet(MergingSet mergingSet) {
         notNull(mergingSet, "The parameter merging set is not allowed to be null")
         return MergingSetAssignment.findAllByMergingSet(mergingSet)*.bamFile
     }

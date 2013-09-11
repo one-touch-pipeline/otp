@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import static org.junit.Assert.*
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
-import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile.State
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
 import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type
@@ -16,6 +16,10 @@ class ProcessedBamFileServiceTests {
     SeqType seqType
     Sample sample
     SeqPlatform seqPlatform
+    Run run
+    SoftwareTool softwareTool
+    Individual individual
+    SampleType sampleType
 
     @Before
     void setUp() {
@@ -38,7 +42,7 @@ class ProcessedBamFileServiceTests {
                         )
         assertNotNull(seqCenter.save([flush: true, failOnError: true]))
 
-        Run run = new Run(
+        run = new Run(
                         name: "name",
                         seqCenter: seqCenter,
                         seqPlatform: seqPlatform,
@@ -46,7 +50,7 @@ class ProcessedBamFileServiceTests {
                         )
         assertNotNull(run.save([flush: true, failOnError: true]))
 
-        Individual individual = new Individual(
+        individual = new Individual(
                         pid: "pid",
                         mockPid: "mockPid",
                         mockFullName: "mockFullName",
@@ -55,7 +59,7 @@ class ProcessedBamFileServiceTests {
                         )
         assertNotNull(individual.save([flush: true, failOnError: true]))
 
-        SampleType sampleType = new SampleType(
+        sampleType = new SampleType(
                         name: "name"
                         )
         assertNotNull(sampleType.save([flush: true, failOnError: true]))
@@ -73,7 +77,7 @@ class ProcessedBamFileServiceTests {
                         )
         assertNotNull(seqType.save([flush: true, failOnError: true]))
 
-        SoftwareTool softwareTool = new SoftwareTool(
+        softwareTool = new SoftwareTool(
                         programName: "name",
                         programVersion: "version",
                         qualityCode: "quality",
@@ -87,7 +91,8 @@ class ProcessedBamFileServiceTests {
                         sample: sample,
                         seqType: seqType,
                         seqPlatform: seqPlatform,
-                        pipelineVersion: softwareTool
+                        pipelineVersion: softwareTool,
+                        alignmentState: SeqTrack.DataProcessingState.FINISHED
                         )
         assertNotNull(seqTrack.save([flush: true, failOnError: true]))
 
@@ -112,6 +117,10 @@ class ProcessedBamFileServiceTests {
         seqType = null
         sample = null
         seqPlatform = null
+        run = null
+        softwareTool = null
+        individual = null
+        sampleType = null
     }
 
     @Test
@@ -124,6 +133,139 @@ class ProcessedBamFileServiceTests {
         processedBamFile.status = State.DECLARED
         assertNotNull(processedBamFile.save([flush: true, failOnError: true]))
         assertNull(processedBamFileService.processedBamFileNeedsProcessing())
+    }
+
+    @Test
+    void testProcessedBamFileNeedsProcessing() {
+        //no mergingSet exists
+        assertEquals(processedBamFile, processedBamFileService.processedBamFileNeedsProcessing())
+
+        MergingWorkPackage workpackage = new MergingWorkPackage(
+                        sample: sample,
+                        seqType: seqType
+                        )
+        assertNotNull(workpackage.save([flush: true, failOnError: true]))
+
+        MergingSet mergingSet = new MergingSet(
+                        mergingWorkPackage: workpackage,
+                        status: MergingSet.State.DECLARED
+                        )
+        assertNotNull(mergingSet.save([flush: true, failOnError: true]))
+
+        MergingSetAssignment assignment = new MergingSetAssignment(
+                        mergingSet: mergingSet,
+                        bamFile: processedBamFile
+                        )
+        assertNotNull(assignment.save([flush: true, failOnError: true]))
+
+        Sample sample2 = new Sample(
+                        individual: individual,
+                        sampleType: sampleType
+                        )
+        assertNotNull(sample2.save([flush: true, failOnError: true]))
+
+        SeqTrack seqTrack2 = new SeqTrack(
+                        laneId: "laneId",
+                        run: run,
+                        sample: sample2,
+                        seqType: seqType,
+                        seqPlatform: seqPlatform,
+                        pipelineVersion: softwareTool
+                        )
+        assertNotNull(seqTrack2.save([flush: true, failOnError: true]))
+
+        AlignmentPass alignmentPass2 = new AlignmentPass(
+                        identifier: 1,
+                        seqTrack: seqTrack2,
+                        description: "test"
+                        )
+        assertNotNull(alignmentPass2.save([flush: true, failOnError: true]))
+
+        ProcessedBamFile processedBamFile2 = new ProcessedBamFile(
+                        alignmentPass: alignmentPass2,
+                        type: BamType.SORTED,
+                        status: State.NEEDS_PROCESSING
+                        )
+        assertNotNull(processedBamFile2.save([flush: true, failOnError: true]))
+
+        assertEquals(processedBamFile2, processedBamFileService.processedBamFileNeedsProcessing())
+
+        //a mergingSet exists for processedBamFile and is not finished
+        mergingSet.status = MergingSet.State.PROCESSED
+        assertNotNull(mergingSet.save([flush: true, failOnError: true]))
+
+        //a mergingSet exists for processedBamFile and is finished
+        assertEquals(processedBamFile, processedBamFileService.processedBamFileNeedsProcessing())
+    }
+
+    @Test
+    void testProcessedBamFileNeedsProcessingAlignmentNotFinished() {
+        processedBamFile.status = AbstractBamFile.State.PROCESSED
+
+        MergingWorkPackage workpackage = new MergingWorkPackage(
+                        sample: sample,
+                        seqType: seqType
+                        )
+        assertNotNull(workpackage.save([flush: true, failOnError: true]))
+
+        MergingSet mergingSet = new MergingSet(
+                        mergingWorkPackage: workpackage,
+                        status: MergingSet.State.PROCESSED
+                        )
+        assertNotNull(mergingSet.save([flush: true, failOnError: true]))
+
+        MergingSetAssignment assignment = new MergingSetAssignment(
+                        mergingSet: mergingSet,
+                        bamFile: processedBamFile
+                        )
+        assertNotNull(assignment.save([flush: true, failOnError: true]))
+
+        SeqTrack seqTrack2 = new SeqTrack(
+                        laneId: "laneId",
+                        run: run,
+                        sample: sample,
+                        seqType: seqType,
+                        seqPlatform: seqPlatform,
+                        pipelineVersion: softwareTool
+                        )
+        assertNotNull(seqTrack2.save([flush: true, failOnError: true]))
+
+        AlignmentPass alignmentPass2 = new AlignmentPass(
+                        identifier: 1,
+                        seqTrack: seqTrack2,
+                        description: "test"
+                        )
+        assertNotNull(alignmentPass2.save([flush: true, failOnError: true]))
+
+        ProcessedBamFile processedBamFile2 = new ProcessedBamFile(
+                        alignmentPass: alignmentPass2,
+                        type: BamType.SORTED,
+                        status: State.NEEDS_PROCESSING
+                        )
+        assertNotNull(processedBamFile2.save([flush: true, failOnError: true]))
+
+        SeqTrack seqTrack3 = new SeqTrack(
+                        laneId: "laneId",
+                        run: run,
+                        sample: sample,
+                        seqType: seqType,
+                        seqPlatform: seqPlatform,
+                        pipelineVersion: softwareTool,
+                        alignmentState: SeqTrack.DataProcessingState.NOT_STARTED
+                        )
+        assertNotNull(seqTrack3.save([flush: true, failOnError: true]))
+
+        assertNull(processedBamFileService.processedBamFileNeedsProcessing())
+
+        seqTrack3.alignmentState = SeqTrack.DataProcessingState.IN_PROGRESS
+        assertNotNull(seqTrack3.save([flush: true, failOnError: true]))
+
+        assertNull(processedBamFileService.processedBamFileNeedsProcessing())
+
+        seqTrack3.alignmentState = SeqTrack.DataProcessingState.FINISHED
+        assertNotNull(seqTrack3.save([flush: true, failOnError: true]))
+
+        assertEquals(processedBamFile2, processedBamFileService.processedBamFileNeedsProcessing())
     }
 
     @Test

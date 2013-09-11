@@ -1,10 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.springframework.util.Assert.*
-import grails.gorm.DetachedCriteria
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage.MergingCriteria
-import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile.State;
 import de.dkfz.tbi.otp.ngsdata.*
 
 
@@ -21,7 +19,7 @@ class MergingCriteriaService {
      */
     List<MergingCriteria> criterias(ProcessedBamFile bamFile) {
         notNull(bamFile, "the input bam file for the method criterias is null")
-        List<MergingCriteria> mergingCriterias = MergingCriteria.values()
+        List<MergingCriteria> mergingCriterias = [MergingCriteria.DEFAULT]
         return mergingCriterias
     }
 
@@ -39,6 +37,24 @@ class MergingCriteriaService {
             assertSave(processedBamFile)
         }
         return bamFiles2Merge
+    }
+
+    /**
+     * @param workPackage, the mergedBamFile, which shall be merged again has to be produced with this workpackage
+     * @param bamFile, the processed bam file, which needs to be merged
+     * @param mergingCriteria, criteria, which has to be fulfilled by the {@link ProcessedMergedBamFile} to be merged to the input file
+     * @return the processedMergedBamFile, which has to be merged with the processed bam file
+     */
+    ProcessedMergedBamFile mergedBamFile2Merge(MergingWorkPackage workPackage, ProcessedBamFile bamFile, MergingCriteria mergingCriteria) {
+        notNull(workPackage, "the workPackage for the method mergedBamFiles2Merge is null")
+        notNull(bamFile, "the bamFile for the method mergedBamFiles2Merge is null")
+        notNull(mergingCriteria, "the input mergingCriteria for the method mergedBamFiles2Merge is null")
+        ProcessedMergedBamFile processedMergedBamFile = mergingCriteriaSpecificService."mergedBamFileForMergingCriteria${mergingCriteria}"(workPackage, bamFile)
+        if (processedMergedBamFile) {
+            processedMergedBamFile.status = State.INPROGRESS
+            assertSave(processedMergedBamFile)
+        }
+        return processedMergedBamFile
     }
 
     /**

@@ -1,9 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import java.util.concurrent.locks.Lock
-import java.util.concurrent.locks.ReentrantLock
 import org.springframework.context.annotation.Scope
-
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.ReferencedClass
 
 @Scope("prototype")
@@ -116,19 +114,25 @@ class SeqPlatformService {
         if (entry.value != value) {
             ReferencedClass clazz = ReferencedClass.findOrSaveByClassName(MetaDataEntry.class.getName())
             ChangeLog changeLog = new ChangeLog(
-                rowId: entry.id,
-                referencedClass: clazz,
-                columnName: "value",
-                fromValue: entry.value,
-                toValue: value,
-                source: ChangeLog.Source.SYSTEM,
-                comment: "harmonizing sequencing platform name"
-            )
+                            rowId: entry.id,
+                            referencedClass: clazz,
+                            columnName: "value",
+                            fromValue: entry.value,
+                            toValue: value,
+                            source: ChangeLog.Source.SYSTEM,
+                            comment: "harmonizing sequencing platform name"
+                            )
             changeLog.save(flush: true)
             entry.value = value
             entry.source = MetaDataEntry.Source.SYSTEM
         }
         entry.status =  MetaDataEntry.Status.VALID
         entry.save(flush: true)
+    }
+
+    SeqPlatform platformForMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {
+        MergingSet mergingSet = processedMergedBamFile.mergingPass.mergingSet
+        MergingSetAssignment mergingSetAssignment = MergingSetAssignment.findByMergingSet(mergingSet)
+        return mergingSetAssignment.bamFile.alignmentPass.seqTrack.seqPlatform
     }
 }

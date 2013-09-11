@@ -9,8 +9,6 @@ class ProcessedMergedBamFileService {
 
     DataProcessingFilesService dataProcessingFilesService
 
-    MergingPassService mergingPassService
-
     public String fileNameNoSuffix(ProcessedMergedBamFile mergedBamFile) {
         notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
         MergingSet mergingSet = mergedBamFile.mergingPass.mergingSet

@@ -2,10 +2,10 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import static org.junit.Assert.*
 import org.junit.*
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage.ProcessingType
-import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
 import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type
@@ -152,6 +152,7 @@ class MergingCriteriaServiceTests {
 
     @Test
     void testBamFiles2MergeCorrectCriteria() {
+        processedBamFile.status = State.INPROGRESS
         List<ProcessedBamFile> processedBamFilesExp = [processedBamFile]
         List<ProcessedBamFile> processedBamFilesAct = mergingCriteriaService.bamFiles2Merge(processedBamFile, criteria)
         assertEquals(processedBamFilesExp, processedBamFilesAct)
@@ -170,6 +171,8 @@ class MergingCriteriaServiceTests {
 
     @Test
     void testBamFiles2MergeTwoBamFiles() {
+        processedBamFile.status = State.INPROGRESS
+
         SeqTrack seqTrack2 = new SeqTrack(
                         laneId: "laneId",
                         run: run,
@@ -190,13 +193,15 @@ class MergingCriteriaServiceTests {
         ProcessedBamFile processedBamFile2 = new ProcessedBamFile(
                         alignmentPass: alignmentPass2,
                         type: BamType.SORTED,
-                        status: State.DECLARED
+                        status: State.NEEDS_PROCESSING
                         )
         assertNotNull(processedBamFile2.save([flush: true, failOnError: true]))
 
         List<ProcessedBamFile> processedBamFilesExp = [processedBamFile, processedBamFile2]
+        Set<ProcessedBamFile> processedBamFilesSeqExp = new HashSet<ProcessedBamFile>(processedBamFilesExp)
         List<ProcessedBamFile> processedBamFilesAct = mergingCriteriaService.bamFiles2Merge(processedBamFile, criteria)
-        assertEquals(processedBamFilesExp, processedBamFilesAct)
+        Set<ProcessedBamFile> processedBamFilesSetAct = new HashSet<ProcessedBamFile>(processedBamFilesAct)
+        assertEquals(processedBamFilesSeqExp, processedBamFilesSetAct)
         assertEquals(State.INPROGRESS, processedBamFilesAct[0].status)
         assertEquals(State.INPROGRESS, processedBamFilesAct[1].status)
     }
@@ -323,7 +328,7 @@ class MergingCriteriaServiceTests {
     @Test
     void testValidateBamFilesSeqPlatformNotValid() {
         SeqPlatform seqPlatform2 = new SeqPlatform(
-                        name: "name",
+                        name: "name1",
                         model: "model"
                         )
         assertNotNull(seqPlatform2.save([flush: true, failOnError: true]))
@@ -359,5 +364,55 @@ class MergingCriteriaServiceTests {
         assertNotNull(mergingSetAssignment2.save([flush: true, failOnError: true]))
 
         assertFalse(mergingCriteriaService.validateBamFiles(mergingSet))
+    }
+
+    @Test
+    void testMergedBamFile2Merge() {
+        mergingSet.status = MergingSet.State.PROCESSED
+        assertNotNull(mergingSet.save([flush: true, failOnError: true]))
+
+        MergingPass mergingPass = new MergingPass(
+                        mergingSet: mergingSet,
+                        )
+        assertNotNull(mergingPass.save([flush: true, failOnError: true]))
+
+        ProcessedMergedBamFile mergedBamFile = new ProcessedMergedBamFile(
+                        mergingPass: mergingPass,
+                        type: AbstractBamFile.BamType.MDUP,
+                        status: State.PROCESSED
+                        )
+        assertNotNull(mergedBamFile.save([flush: true, failOnError: true]))
+
+        SeqTrack seqTrack2 = new SeqTrack(
+                        laneId: "laneId",
+                        run: run,
+                        sample: sample,
+                        seqType: seqType,
+                        seqPlatform: seqPlatform,
+                        pipelineVersion: softwareTool
+                        )
+        assertNotNull(seqTrack2.save([flush: true, failOnError: true]))
+
+        AlignmentPass alignmentPass2 = new AlignmentPass(
+                        identifier: 2,
+                        seqTrack: seqTrack2,
+                        description: "test"
+                        )
+        assertNotNull(alignmentPass2.save([flush: true, failOnError: true]))
+
+        ProcessedBamFile processedBamFile2 = new ProcessedBamFile(
+                        alignmentPass: alignmentPass2,
+                        type: BamType.SORTED,
+                        status: State.NEEDS_PROCESSING
+                        )
+        assertNotNull(processedBamFile2.save([flush: true, failOnError: true]))
+
+        ProcessedMergedBamFile mergedBamFileAct = mergingCriteriaService.mergedBamFile2Merge(mergingWorkPackage, processedBamFile2, MergingCriteria.DEFAULT)
+        assertEquals(mergedBamFile, mergedBamFileAct)
+
+        mergingSet.status = MergingSet.State.INPROGRESS
+        assertNotNull(mergedBamFile.save([flush: true, failOnError: true]))
+
+        assertNull(mergingCriteriaService.mergedBamFile2Merge(mergingWorkPackage, processedBamFile2, MergingCriteria.DEFAULT))
     }
 }

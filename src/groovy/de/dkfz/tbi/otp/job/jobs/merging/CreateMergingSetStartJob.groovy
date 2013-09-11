@@ -1,15 +1,14 @@
 package de.dkfz.tbi.otp.job.jobs.merging
 
-import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Scope
+import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.job.processing.*
-
-import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.ngsdata.*
 
 @Component("createMergingSetStartJob")
 @Scope("singleton")
@@ -23,7 +22,7 @@ class CreateMergingSetStartJob extends AbstractStartJobImpl {
 
     final int MAX_RUNNING = 1
 
-    @Scheduled(fixedRate=60000l)
+    @Scheduled(fixedDelay = 60000l)
     void execute() {
         if (!hasFreeSlot()) {
             return

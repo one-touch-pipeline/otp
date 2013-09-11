@@ -3,9 +3,8 @@ package de.dkfz.tbi.otp.dataprocessing
 import static org.junit.Assert.*
 import grails.validation.ValidationException
 import org.junit.*
-
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
-import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile.State
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
 import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type
@@ -135,22 +134,109 @@ class MergingSetServiceTests {
         assertTrue(mergingSetService.checkIfMergingSetNotExists(filesToMerge, workPackage))
     }
 
+    @Test
+    void testCheckIfMergingSetNotExistsAlreadyExistWithMergedFile() {
+        MergingWorkPackage workPackage =createMergingWorkPackage()
+
+        ProcessedBamFile bamFile1 = createBamFile()
+
+        MergingSet mergingSet = new MergingSet(
+                        identifier: 0,
+                        mergingWorkPackage: workPackage
+                        )
+        assertNotNull(mergingSet.save([flush: true, failOnError: true]))
+        MergingSetAssignment mergingSetAssignment = new MergingSetAssignment(
+                        bamFile: bamFile1,
+                        mergingSet: mergingSet
+                        )
+        assertNotNull(mergingSetAssignment.save([flush: true, failOnError: true]))
+
+        MergingPass mergingPass  = new MergingPass(
+                        identifier: 1,
+                        mergingSet:mergingSet
+                        )
+        assertNotNull(mergingPass.save([flush: true, failOnError: true]))
+
+        ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
+                        mergingPass: mergingPass,
+                        type: BamType.MDUP,
+                        status: State.PROCESSED
+                        )
+        assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
+
+        ProcessedBamFile bamFile2 = createBamFile()
+
+        MergingSet mergingSet1 = new MergingSet(
+                        identifier: 1,
+                        mergingWorkPackage: workPackage
+                        )
+        assertNotNull(mergingSet1.save([flush: true, failOnError: true]))
+
+        MergingSetAssignment mergingSetAssignment1 = new MergingSetAssignment(
+                        bamFile: bamFile2,
+                        mergingSet: mergingSet1
+                        )
+        assertNotNull(mergingSetAssignment1.save([flush: true, failOnError: true]))
+
+        MergingSetAssignment mergingSetAssignment2 = new MergingSetAssignment(
+                        bamFile: processedMergedBamFile,
+                        mergingSet: mergingSet1
+                        )
+        assertNotNull(mergingSetAssignment2.save([flush: true, failOnError: true]))
+
+        List<ProcessedBamFile> filesToMerge = [processedMergedBamFile, bamFile2]
+        assertFalse(mergingSetService.checkIfMergingSetNotExists(filesToMerge, workPackage))
+    }
+
+    @Test
+    void testCheckIfMergingSetNotExistsExistNotWithMergedFile() {
+        MergingWorkPackage workPackage =createMergingWorkPackage()
+
+        ProcessedBamFile bamFile1 = createBamFile()
+
+        MergingSet mergingSet = new MergingSet(
+                        identifier: 0,
+                        mergingWorkPackage: workPackage
+                        )
+        assertNotNull(mergingSet.save([flush: true, failOnError: true]))
+        MergingSetAssignment mergingSetAssignment = new MergingSetAssignment(
+                        bamFile: bamFile1,
+                        mergingSet: mergingSet
+                        )
+        assertNotNull(mergingSetAssignment.save([flush: true, failOnError: true]))
+
+        MergingPass mergingPass  = new MergingPass(
+                        identifier: 1,
+                        mergingSet:mergingSet
+                        )
+        assertNotNull(mergingPass.save([flush: true, failOnError: true]))
+
+        ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
+                        mergingPass: mergingPass,
+                        type: BamType.MDUP,
+                        status: State.PROCESSED
+                        )
+        assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
+
+        ProcessedBamFile bamFile2 = createBamFile()
+
+        List<ProcessedBamFile> filesToMerge = [processedMergedBamFile, bamFile2]
+        assertTrue(mergingSetService.checkIfMergingSetNotExists(filesToMerge, workPackage))
+    }
+
 
     @Test
     void testNextMergingSet() {
         MergingSet next = mergingSetService.mergingSetInStateNeedsProcessing()
         assertNull(next)
-
         MergingSet mergingSet = createMergingSet()
         next = mergingSetService.mergingSetInStateNeedsProcessing()
         assertEquals(mergingSet, next)
-
         MergingSet mergingSet2 = createMergingSet()
         MergingSet mergingSet3 = createMergingSet()
         next = mergingSetService.mergingSetInStateNeedsProcessing()
         assertNotNull(next)
         assertTrue(next.equals(mergingSet) || next.equals(mergingSet2) || next.equals(mergingSet3) )
-
         mergingSet.status = MergingSet.State.INPROGRESS
         mergingSet.save([flush: true, failOnError: true])
         mergingSet2.status = MergingSet.State.INPROGRESS
@@ -159,7 +245,6 @@ class MergingSetServiceTests {
         mergingSet3.save([flush: true, failOnError: true])
         next = mergingSetService.mergingSetInStateNeedsProcessing()
         assertNull(next)
-
         MergingSet mergingSet4 = createMergingSet()
         next = mergingSetService.mergingSetInStateNeedsProcessing()
         assertNotNull(next)
@@ -174,26 +259,20 @@ class MergingSetServiceTests {
     @Test
     void testNextIdentifier() {
         MergingWorkPackage mergingWorkPackage = createMergingWorkPackage()
-
         assertEquals(0, mergingSetService.nextIdentifier(mergingWorkPackage))
-
         MergingSet mergingSet = new MergingSet(
                         identifier: 0,
                         mergingWorkPackage: mergingWorkPackage
                         )
         assertNotNull(mergingSet.save([flush: true, failOnError: true]))
-
         assertEquals(1, mergingSetService.nextIdentifier(mergingWorkPackage))
-
         MergingSet mergingSet2 = new MergingSet(
                         identifier: 0,
                         mergingWorkPackage: mergingWorkPackage
                         )
         assertNotNull(mergingSet2.save([flush: true, failOnError: true]))
-
         assertEquals(2, mergingSetService.nextIdentifier(mergingWorkPackage))
     }
-
 
     @Test
     void testCreateMergingSetForBamFileMergingPackageNotExists() {
@@ -221,16 +300,74 @@ class MergingSetServiceTests {
     }
 
     @Test
-    void testCreateMergingSetForBamFileMergingPackageExists() {
-        MergingWorkPackage mergingWorkPackage = createMergingWorkPackage()
-        assertEquals(1, MergingWorkPackage.count)
-        assertEquals(0, MergingSet.count)
-        assertEquals(0, MergingSetAssignment.count)
+    void testCreateMergingSetForBamFileMergingPackageAlreadyExists() {
+        MergingSet mergingSet = createMergingSet()
+        mergingSet.status = MergingSet.State.PROCESSED
         ProcessedBamFile bamFile = createBamFile()
-        mergingSetService.createMergingSetForBamFile(bamFile)
+        MergingSetAssignment mergingSetAssignment = new MergingSetAssignment(
+                        mergingSet: mergingSet,
+                        bamFile: bamFile
+                        )
+        assertNotNull(mergingSetAssignment.save([flush: true, failOnError: true]))
+
+        MergingPass mergingPass = new MergingPass(
+                        mergingSet: mergingSet
+                        )
+        assertNotNull(mergingPass.save([flush: true, failOnError: true]))
+
+        ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
+                        mergingPass: mergingPass,
+                        type: AbstractBamFile.BamType.MDUP,
+                        status: State.PROCESSED
+                        )
+        assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
+
+        bamFile.status = State.PROCESSED
+        assertNotNull(bamFile.save([flush: true, failOnError: true]))
+
         assertEquals(1, MergingWorkPackage.count)
         assertEquals(1, MergingSet.count)
         assertEquals(1, MergingSetAssignment.count)
+        ProcessedBamFile bamFile2 = createBamFile()
+        mergingSetService.createMergingSetForBamFile(bamFile)
+        assertEquals(1, MergingWorkPackage.count)
+        assertEquals(2, MergingSet.count)
+        assertEquals(4, MergingSetAssignment.count)
+    }
+
+    @Test
+    void testCreateMergingSetForBamFileMergingPackageAlreadyExistsNotFinished() {
+        MergingSet mergingSet = createMergingSet()
+        ProcessedBamFile bamFile = createBamFile()
+        MergingSetAssignment mergingSetAssignment = new MergingSetAssignment(
+                        mergingSet: mergingSet,
+                        bamFile: bamFile
+                        )
+        assertNotNull(mergingSetAssignment.save([flush: true, failOnError: true]))
+
+        MergingPass mergingPass = new MergingPass(
+                        mergingSet: mergingSet
+                        )
+        assertNotNull(mergingPass.save([flush: true, failOnError: true]))
+
+        ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
+                        mergingPass: mergingPass,
+                        type: AbstractBamFile.BamType.MDUP,
+                        status: State.INPROGRESS
+                        )
+        assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
+
+        bamFile.status = State.PROCESSED
+        assertNotNull(bamFile.save([flush: true, failOnError: true]))
+
+        assertEquals(1, MergingWorkPackage.count)
+        assertEquals(1, MergingSet.count)
+        assertEquals(1, MergingSetAssignment.count)
+        ProcessedBamFile bamFile2 = createBamFile()
+        mergingSetService.createMergingSetForBamFile(bamFile2)
+        assertEquals(1, MergingWorkPackage.count)
+        assertEquals(2, MergingSet.count)
+        assertEquals(2, MergingSetAssignment.count)
     }
 
     @Test
@@ -299,7 +436,7 @@ class MergingSetServiceTests {
         assertEquals(State.PROCESSED, bamFile.status)
     }
 
-    @Test(expected = ValidationException.class)
+    @Test(expected = ValidationException)
     void testAssertSaveFails() {
         MergingSet mergingSet = new MergingSet()
         mergingSet.status = MergingSet.State.PROCESSED
@@ -311,7 +448,6 @@ class MergingSetServiceTests {
         MergingSet mergingSet = createMergingSet()
         assertEquals(mergingSet, mergingSetService.assertSave(mergingSet))
     }
-
 
     private ProcessedBamFile createBamFile() {
         AlignmentPass alignmentPass = new AlignmentPass(
