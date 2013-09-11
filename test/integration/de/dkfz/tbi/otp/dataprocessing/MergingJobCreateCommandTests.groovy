@@ -19,16 +19,19 @@ class MergingJobCreateCommandTests {
     ProcessedBamFile processedBamFile
     SeqPlatform seqPlatform
     SeqType seqType
+    MergingPass mergingPass
 
     String basePath
     String basePathAlignment
     String basePathMerging
+    String basePathMergingOutput
 
     @Before
     void setUp() {
         basePath = "rootPath/dirName/results_per_pid/pid_1"
         basePathAlignment = "${basePath}/alignment"
-        basePathMerging = "${basePath}/merging//name_1/seqType_1/library/DEFAULT/0/pass0"
+        basePathMerging = "${basePath}/merging"
+        basePathMergingOutput = "${basePathMerging}//name_1/seqType_1/library/DEFAULT/0/pass0"
 
         Realm realm = new Realm()
         realm.cluster = Cluster.DKFZ
@@ -105,7 +108,7 @@ class MergingJobCreateCommandTests {
                         )
         assertNotNull(mergingSet.save([flush: true, failOnError: true]))
 
-        MergingPass mergingPass = new MergingPass(
+        mergingPass = new MergingPass(
                         identifier: 0,
                         mergingSet: mergingSet
                         )
@@ -140,12 +143,14 @@ class MergingJobCreateCommandTests {
 
     @After
     void tearDown() {
+        basePath = basePathAlignment = basePathMerging = basePathMergingOutput = null
         processedMergedBamFile = null
         mergingSet = null
         sample = null
         processedBamFile = null
         seqPlatform = null
         seqType = null
+        mergingPass = null
     }
 
     @Test(expected = NullPointerException)
@@ -160,9 +165,9 @@ class MergingJobCreateCommandTests {
         String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
         String picardExp = "picard.sh MarkDuplicates"
         String inputFilePathExp = " I=${basePathAlignment}//run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_libraryLayout.sorted.bam"
-        String outputFilePathExp = "${basePathMerging}/name_1_pid_1_seqType_1_library_merged.mdup.bam"
-        String metricsPathExp = "${basePathMerging}/name_1_pid_1_seqType_1_library_merged.mdup_metrics.txt"
-        String baiFilePath = "${basePathMerging}/name_1_pid_1_seqType_1_library_merged.mdup.bai"
+        String outputFilePathExp = "${basePathMergingOutput}/name_1_pid_1_seqType_1_library_merged.mdup.bam"
+        String metricsPathExp = "${basePathMergingOutput}/name_1_pid_1_seqType_1_library_merged.mdup_metrics.txt"
+        String baiFilePath = "${basePathMergingOutput}/name_1_pid_1_seqType_1_library_merged.mdup.bai"
         String picardFilesExp = "${inputFilePathExp} OUTPUT=${outputFilePathExp} METRICS_FILE=${metricsPathExp} TMP_DIR=${tempDirExp}"
         String picardOptionsExp = "VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000 CREATE_INDEX=TRUE"
         String chmodExp = "chmod 440 ${outputFilePathExp} ${metricsPathExp} ${baiFilePath}"
@@ -173,15 +178,15 @@ class MergingJobCreateCommandTests {
 
     @Test
     void testCreateCommandTwoBamFiles() {
-        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment("2")
+        createMergingSetAssignment("2")
         String tempDirExp = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
         String createTempDirExp = "mkdir -p ${tempDirExp}"
         String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
         String picardExp = "picard.sh MarkDuplicates"
         String inputFilePathExp = " I=${basePathAlignment}//run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_libraryLayout.sorted.bam I=${basePathAlignment}//run_2_laneId_2/pass2/name_1_run_2_s_laneId_2_libraryLayout.sorted.bam"
-        String outputFilePathExp = "${basePathMerging}/name_1_pid_1_seqType_1_library_merged.mdup.bam"
-        String metricsPathExp = "${basePathMerging}/name_1_pid_1_seqType_1_library_merged.mdup_metrics.txt"
-        String baiFilePath = "${basePathMerging}/name_1_pid_1_seqType_1_library_merged.mdup.bai"
+        String outputFilePathExp = "${basePathMergingOutput}/name_1_pid_1_seqType_1_library_merged.mdup.bam"
+        String metricsPathExp = "${basePathMergingOutput}/name_1_pid_1_seqType_1_library_merged.mdup_metrics.txt"
+        String baiFilePath = "${basePathMergingOutput}/name_1_pid_1_seqType_1_library_merged.mdup.bai"
         String picardFilesExp = "${inputFilePathExp} OUTPUT=${outputFilePathExp} METRICS_FILE=${metricsPathExp} TMP_DIR=${tempDirExp}"
         String picardOptionsExp = "VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000 CREATE_INDEX=TRUE"
         String chmodExp = "chmod 440 ${outputFilePathExp} ${metricsPathExp} ${baiFilePath}"
@@ -190,6 +195,44 @@ class MergingJobCreateCommandTests {
         assertEquals(createCommandOutputExp, createCommandOutputAct)
     }
 
+    @Test
+    void testCreateCommandBamFileWithProcessedMergedBamFile() {
+        createMergedMergingSetAssignment("2")
+        String tempDirExp = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
+        String createTempDirExp = "mkdir -p ${tempDirExp}"
+        String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
+        String picardExp = "picard.sh MarkDuplicates"
+        String inputFilePathExp = " I=${basePathAlignment}//run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_libraryLayout.sorted.bam I=${basePathMerging}//name_1/seqType_1/library/DEFAULT/0/pass0/name_1_pid_1_seqType_1_library_merged.mdup.bam"
+        String outputFilePathExp = "${basePathMergingOutput}/name_1_pid_1_seqType_1_library_merged.mdup.bam"
+        String metricsPathExp = "${basePathMergingOutput}/name_1_pid_1_seqType_1_library_merged.mdup_metrics.txt"
+        String baiFilePath = "${basePathMergingOutput}/name_1_pid_1_seqType_1_library_merged.mdup.bai"
+        String picardFilesExp = "${inputFilePathExp} OUTPUT=${outputFilePathExp} METRICS_FILE=${metricsPathExp} TMP_DIR=${tempDirExp}"
+        String picardOptionsExp = "VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000 CREATE_INDEX=TRUE"
+        String chmodExp = "chmod 440 ${outputFilePathExp} ${metricsPathExp} ${baiFilePath}"
+        String createCommandOutputExp = "${createTempDirExp}; ${javaOptionsExp}; ${picardExp} ${picardFilesExp} ${picardOptionsExp}; ${chmodExp}"
+        String createCommandOutputAct = mergingJob.createCommand(processedMergedBamFile)
+        assertEquals(createCommandOutputExp, createCommandOutputAct)
+    }
+
+    @Test
+    void testCreateCommandTwoBamFileWithProcessedMergedBamFile() {
+        createMergingSetAssignment("2")
+        createMergedMergingSetAssignment("3")
+        String tempDirExp = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
+        String createTempDirExp = "mkdir -p ${tempDirExp}"
+        String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
+        String picardExp = "picard.sh MarkDuplicates"
+        String inputFilePathExp = " I=${basePathAlignment}//run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_libraryLayout.sorted.bam I=${basePathAlignment}//run_2_laneId_2/pass2/name_1_run_2_s_laneId_2_libraryLayout.sorted.bam I=${basePathMerging}//name_1/seqType_1/library/DEFAULT/0/pass0/name_1_pid_1_seqType_1_library_merged.mdup.bam"
+        String outputFilePathExp = "${basePathMergingOutput}/name_1_pid_1_seqType_1_library_merged.mdup.bam"
+        String metricsPathExp = "${basePathMergingOutput}/name_1_pid_1_seqType_1_library_merged.mdup_metrics.txt"
+        String baiFilePath = "${basePathMergingOutput}/name_1_pid_1_seqType_1_library_merged.mdup.bai"
+        String picardFilesExp = "${inputFilePathExp} OUTPUT=${outputFilePathExp} METRICS_FILE=${metricsPathExp} TMP_DIR=${tempDirExp}"
+        String picardOptionsExp = "VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000 CREATE_INDEX=TRUE"
+        String chmodExp = "chmod 440 ${outputFilePathExp} ${metricsPathExp} ${baiFilePath}"
+        String createCommandOutputExp = "${createTempDirExp}; ${javaOptionsExp}; ${picardExp} ${picardFilesExp} ${picardOptionsExp}; ${chmodExp}"
+        String createCommandOutputAct = mergingJob.createCommand(processedMergedBamFile)
+        assertEquals(createCommandOutputExp, createCommandOutputAct)
+    }
 
     private MergingSetAssignment createMergingSetAssignment(String identifier) {
         SeqCenter seqCenter = new SeqCenter(
@@ -237,6 +280,20 @@ class MergingJobCreateCommandTests {
         MergingSetAssignment mergingSetAssignment = new MergingSetAssignment(
                         mergingSet: mergingSet,
                         bamFile: processedBamFile
+                        )
+        assertNotNull(mergingSetAssignment.save([flush: true, failOnError: true]))
+    }
+
+    private MergingSetAssignment createMergedMergingSetAssignment(String identifier) {
+        ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
+                        mergingPass: mergingPass,
+                        type: BamType.SORTED
+                        )
+        assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
+
+        MergingSetAssignment mergingSetAssignment = new MergingSetAssignment(
+                        mergingSet: mergingSet,
+                        bamFile: processedMergedBamFile
                         )
         assertNotNull(mergingSetAssignment.save([flush: true, failOnError: true]))
     }

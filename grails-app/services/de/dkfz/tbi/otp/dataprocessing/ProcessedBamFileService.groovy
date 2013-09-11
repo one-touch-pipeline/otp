@@ -173,15 +173,6 @@ class ProcessedBamFileService {
     }
 
     /**
-     * @param bamFile, which was assigned to a {@link MergingSet}
-     */
-    void assignedToMergingSet(AbstractBamFile bamFile) {
-        notNull(bamFile, "the input bam file for the method assignedToMergingSet is null")
-        bamFile.status = State.PROCESSED
-        assertSave(bamFile)
-    }
-
-    /**
      * @param bamFile, {@link ProcessedBamFile}, which shall be merged
      * @return true, if the bamFile is not already assigned to a MergingSet, otherwise false
      */
@@ -197,15 +188,4 @@ class ProcessedBamFileService {
         }
         return object
     }
-
-    public List<AbstractBamFile> findByMergingSet(MergingSet mergingSet) {
-        notNull(mergingSet, "The parameter merging set is not allowed to be null")
-        return MergingSetAssignment.findAllByMergingSet(mergingSet)*.bamFile
-    }
-
-    public List<ProcessedBamFile> findByProcessedMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {
-        notNull(processedMergedBamFile, "The parameter processedMergedBamFile is not allowed to be null")
-        return findByMergingSet(processedMergedBamFile.mergingPass.mergingSet)
-    }
-
 }

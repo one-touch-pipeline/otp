@@ -9,6 +9,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class MergingSetService {
 
+    AbstractBamFileService abstractBamFileService
+
     ProcessedBamFileService processedBamFileService
 
     MergingCriteriaService mergingCriteriaService
@@ -78,7 +80,7 @@ class MergingSetService {
         bamFiles2Merge.each {AbstractBamFile bamFile ->
             MergingSetAssignment mergingAssigment = new MergingSetAssignment(mergingSet: mergingSet, bamFile: bamFile)
             assertSave(mergingAssigment)
-            processedBamFileService.assignedToMergingSet(bamFile)
+            abstractBamFileService.assignedToMergingSet(bamFile)
         }
         if (!mergingCriteriaService.validateBamFiles(mergingSet)) {
             throw new SavingException(mergingSet.toString())
@@ -112,7 +114,7 @@ class MergingSetService {
         //determine, if the found merging sets have also other bam files than the once, which shall be merged in this process
         for (mergingSetId in mergingSetIds) {
             MergingSet mergingSet = MergingSet.get(mergingSetId)
-            if (bamFiles2Merge.size().equals(processedBamFileService.findByMergingSet(mergingSet).size())) {
+            if (bamFiles2Merge.size().equals(abstractBamFileService.findByMergingSet(mergingSet).size())) {
                 return false
             }
         }

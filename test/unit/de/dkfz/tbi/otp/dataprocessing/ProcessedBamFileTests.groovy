@@ -5,7 +5,7 @@ import grails.test.mixin.*
 import grails.test.mixin.support.*
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
-import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile.State
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.Individual.Type
 import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm

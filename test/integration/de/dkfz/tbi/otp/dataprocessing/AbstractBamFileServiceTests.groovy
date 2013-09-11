@@ -2,18 +2,21 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import static org.junit.Assert.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
 import org.junit.*
 
-class ProcessedBamFileServiceTests2 {
+class AbstractBamFileServiceTests {
 
-    ProcessedBamFileService processedBamFileService
+    AbstractBamFileService abstractBamFileService
 
     MergingSet mergingSet
 
     MergingPass mergingPass
 
     AlignmentPass alignmentPass
+
+    ProcessedBamFile processedBamFile
 
     @Before
     void setUp() {
@@ -22,7 +25,7 @@ class ProcessedBamFileServiceTests2 {
                         dirName: "project-dir",
                         realmName: "realmName"
                         )
-        assertNotNull(project.save([flush: true, failOnError: true]))
+        assertNotNull(project.save([flush: true]))
 
         Individual individual = new Individual(
                         pid: "patient",
@@ -31,31 +34,31 @@ class ProcessedBamFileServiceTests2 {
                         type: Individual.Type.UNDEFINED,
                         project: project
                         )
-        assertNotNull(individual.save([flush: true, failOnError: true]))
+        assertNotNull(individual.save([flush: true]))
 
         SampleType sampleType = new SampleType(
                         name: "sample-type"
                         )
-        assertNotNull(sampleType.save([flush: true, failOnError: true]))
+        assertNotNull(sampleType.save([flush: true]))
 
         Sample sample = new Sample(
                         individual: individual,
                         sampleType: sampleType
                         )
-        assertNotNull(sample.save([flush: true, failOnError: true]))
+        assertNotNull(sample.save([flush: true]))
 
         SeqType seqType = new SeqType(
                         name:"seq-type",
                         libraryLayout:"library",
                         dirName: "seq-type-dir"
                         )
-        assertNotNull(seqType.save([flush: true, failOnError: true]))
+        assertNotNull(seqType.save([flush: true]))
 
         SeqCenter seqCenter = new SeqCenter(
                         name: "seq-center",
                         dirName: "seq-center-dir"
                         )
-        assertNotNull(seqCenter.save([flush: true, failOnError: true]))
+        assertNotNull(seqCenter.save([flush: true]))
 
         SoftwareTool softwareTool = new SoftwareTool(
                         programName: "software-tool",
@@ -63,13 +66,13 @@ class ProcessedBamFileServiceTests2 {
                         qualityCode: "software-tool-quality-code",
                         type: SoftwareTool.Type.BASECALLING
                         )
-        assertNotNull(softwareTool.save([flush: true, failOnError: true]))
+        assertNotNull(softwareTool.save([flush: true]))
 
         SeqPlatform seqPlatform = new SeqPlatform(
                         name: "seq-platform",
                         model: "seq-platform-model"
                         )
-        assertNotNull(seqPlatform.save([flush: true, failOnError: true]))
+        assertNotNull(seqPlatform.save([flush: true]))
 
         Run run = new Run(
                         name: "run",
@@ -77,7 +80,7 @@ class ProcessedBamFileServiceTests2 {
                         seqPlatform: seqPlatform,
                         storageRealm: Run.StorageRealm.DKFZ
                         )
-        assertNotNull(run.save([flush: true, failOnError: true]))
+        assertNotNull(run.save([flush: true]))
 
         SeqTrack seqTrack = new SeqTrack(
                         laneId: "0",
@@ -87,34 +90,41 @@ class ProcessedBamFileServiceTests2 {
                         seqPlatform: seqPlatform,
                         pipelineVersion: softwareTool
                         )
-        assertNotNull(seqTrack.save([flush: true, failOnError: true]))
+        assertNotNull(seqTrack.save([flush: true]))
 
 
         MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
                         sample: sample,
                         seqType: seqType
                         )
-        assertNotNull(mergingWorkPackage.save([flush: true, failOnError: true]))
+        assertNotNull(mergingWorkPackage.save([flush: true]))
 
         mergingSet = new MergingSet(
                         identifier: 0,
                         mergingWorkPackage: mergingWorkPackage,
                         status: MergingSet.State.NEEDS_PROCESSING
                         )
-        assertNotNull(mergingSet.save([flush: true, failOnError: true]))
+        assertNotNull(mergingSet.save([flush: true]))
 
         mergingPass = new MergingPass(
                         identifier: 0,
                         mergingSet: mergingSet
                         )
-        assertNotNull(mergingPass.save([flush: true, failOnError: true]))
+        assertNotNull(mergingPass.save([flush: true]))
 
         alignmentPass = new AlignmentPass(
                         identifier: 0,
                         seqTrack: seqTrack,
                         description: "test"
                         )
-        assertNotNull(alignmentPass.save([flush: true, failOnError: true]))
+        assertNotNull(alignmentPass.save([flush: true]))
+
+        processedBamFile = new ProcessedBamFile(
+                        alignmentPass: alignmentPass,
+                        type: BamType.SORTED,
+                        status: State.NEEDS_PROCESSING
+                        )
+        assertNotNull(processedBamFile.save([flush: true]))
     }
 
     @After
@@ -126,103 +136,125 @@ class ProcessedBamFileServiceTests2 {
 
     @Test(expected = IllegalArgumentException)
     void testFindByMergingSetIsNull() {
-        processedBamFileService.findByMergingSet(null)
+        abstractBamFileService.findByMergingSet(null)
     }
 
     @Test
     void testFindByMergingSet() {
-        List<ProcessedBamFile> processedBamFilesExp
-        List<ProcessedBamFile> processedBamFilesAct
+        List<AbstractBamFile> abstractBamFilesExp
+        List<AbstractBamFile> abstractBamFilesAct
 
-        processedBamFilesExp = []
-        processedBamFilesAct = processedBamFileService.findByMergingSet(mergingSet)
-        assertEquals(processedBamFilesExp, processedBamFilesAct)
+        abstractBamFilesExp = []
+        abstractBamFilesAct = abstractBamFileService.findByMergingSet(mergingSet)
+        assertEquals(abstractBamFilesExp, abstractBamFilesAct)
 
         ProcessedBamFile processedBamFile1 = new ProcessedBamFile(
                         alignmentPass: alignmentPass,
-                        type: BamType.MDUP,
+                        type: BamType.SORTED,
                         fileExists: true
                         )
-        assertNotNull(processedBamFile1.save([flush: true, failOnError: true]))
+        assertNotNull(processedBamFile1.save([flush: true]))
 
         MergingSetAssignment mergingSetAssignment1 = new MergingSetAssignment(
                         mergingSet: mergingSet,
                         bamFile: processedBamFile1
                         )
-        assertNotNull(mergingSetAssignment1.save([flush: true, failOnError: true]))
+        assertNotNull(mergingSetAssignment1.save([flush: true]))
 
-        processedBamFilesExp = []
-        processedBamFilesExp.add(processedBamFile1)
-        processedBamFilesAct = processedBamFileService.findByMergingSet(mergingSet)
-        assertEquals(processedBamFilesExp, processedBamFilesAct)
+        abstractBamFilesExp = []
+        abstractBamFilesExp.add(processedBamFile1)
+        abstractBamFilesAct = abstractBamFileService.findByMergingSet(mergingSet)
+        assertEquals(abstractBamFilesExp, abstractBamFilesAct)
 
         ProcessedBamFile processedBamFile2 = new ProcessedBamFile(
                         alignmentPass: alignmentPass,
-                        type: BamType.MDUP,
+                        type: BamType.SORTED,
                         fileExists: true
                         )
 
-        assertNotNull(processedBamFile2.save([flush: true, failOnError: true]))
+        assertNotNull(processedBamFile2.save([flush: true]))
         MergingSetAssignment mergingSetAssignment2 = new MergingSetAssignment(
                         mergingSet: mergingSet,
                         bamFile: processedBamFile2
                         )
-        assertNotNull(mergingSetAssignment2.save([flush: true, failOnError: true]))
+        assertNotNull(mergingSetAssignment2.save([flush: true]))
 
-        processedBamFilesExp.add(processedBamFile2)
-        processedBamFilesAct = processedBamFileService.findByMergingSet(mergingSet)
-        assertEquals(processedBamFilesExp, processedBamFilesAct)
+        abstractBamFilesExp.add(processedBamFile2)
+        abstractBamFilesAct = abstractBamFileService.findByMergingSet(mergingSet)
+        assertEquals(abstractBamFilesExp, abstractBamFilesAct)
+
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
+        MergingSetAssignment mergingSetAssignment3 = new MergingSetAssignment(
+                        mergingSet: mergingSet,
+                        bamFile: processedMergedBamFile
+                        )
+        assertNotNull(mergingSetAssignment3.save([flush: true]))
+
+        abstractBamFilesExp.add(processedMergedBamFile)
+        abstractBamFilesAct = abstractBamFileService.findByMergingSet(mergingSet)
+        assertEquals(abstractBamFilesExp, abstractBamFilesAct)
     }
 
     @Test(expected = IllegalArgumentException)
     void testFindByProcessedMergedBamFileIsNull() {
-        processedBamFileService.findByProcessedMergedBamFile(null)
+        abstractBamFileService.findByProcessedMergedBamFile(null)
     }
 
     @Test
     void testFindByProcessedMergedBamFile() {
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
-        List<ProcessedBamFile> processedBamFilesExp
-        List<ProcessedBamFile> processedBamFilesAct
+        List<AbstractBamFile> abstractBamFilesExp
+        List<AbstractBamFile> abstractBamFilesAct
 
-        processedBamFilesExp = []
-        processedBamFilesAct = processedBamFileService.findByProcessedMergedBamFile(processedMergedBamFile)
-        assertEquals(processedBamFilesExp, processedBamFilesAct)
+        abstractBamFilesExp = []
+        abstractBamFilesAct = abstractBamFileService.findByProcessedMergedBamFile(processedMergedBamFile)
+        assertEquals(abstractBamFilesExp, abstractBamFilesAct)
 
         ProcessedBamFile processedBamFile1 = new ProcessedBamFile(
                         alignmentPass: alignmentPass,
-                        type: BamType.MDUP,
+                        type: BamType.SORTED,
                         fileExists: true
                         )
-        assertNotNull(processedBamFile1.save([flush: true, failOnError: true]))
+        assertNotNull(processedBamFile1.save([flush: true]))
 
         MergingSetAssignment mergingSetAssignment1 = new MergingSetAssignment(
                         mergingSet: mergingSet,
                         bamFile: processedBamFile1
                         )
-        assertNotNull(mergingSetAssignment1.save([flush: true, failOnError: true]))
+        assertNotNull(mergingSetAssignment1.save([flush: true]))
 
-        processedBamFilesExp = []
-        processedBamFilesExp.add(processedBamFile1)
-        processedBamFilesAct = processedBamFileService.findByProcessedMergedBamFile(processedMergedBamFile)
-        assertEquals(processedBamFilesExp, processedBamFilesAct)
+        abstractBamFilesExp = []
+        abstractBamFilesExp.add(processedBamFile1)
+        abstractBamFilesAct = abstractBamFileService.findByProcessedMergedBamFile(processedMergedBamFile)
+        assertEquals(abstractBamFilesExp, abstractBamFilesAct)
 
         ProcessedBamFile processedBamFile2 = new ProcessedBamFile(
                         alignmentPass: alignmentPass,
-                        type: BamType.MDUP,
+                        type: BamType.SORTED,
                         fileExists: true
                         )
 
-        assertNotNull(processedBamFile2.save([flush: true, failOnError: true]))
+        assertNotNull(processedBamFile2.save([flush: true]))
         MergingSetAssignment mergingSetAssignment2 = new MergingSetAssignment(
                         mergingSet: mergingSet,
                         bamFile: processedBamFile2
                         )
-        assertNotNull(mergingSetAssignment2.save([flush: true, failOnError: true]))
+        assertNotNull(mergingSetAssignment2.save([flush: true]))
 
-        processedBamFilesExp.add(processedBamFile2)
-        processedBamFilesAct = processedBamFileService.findByProcessedMergedBamFile(processedMergedBamFile)
-        assertEquals(processedBamFilesExp, processedBamFilesAct)
+        abstractBamFilesExp.add(processedBamFile2)
+        abstractBamFilesAct = abstractBamFileService.findByProcessedMergedBamFile(processedMergedBamFile)
+        assertEquals(abstractBamFilesExp, abstractBamFilesAct)
+
+        ProcessedMergedBamFile processedMergedBamFile2 = createProcessedMergedBamFile()
+        MergingSetAssignment mergingSetAssignment3 = new MergingSetAssignment(
+                        mergingSet: mergingSet,
+                        bamFile: processedMergedBamFile2
+                        )
+        assertNotNull(mergingSetAssignment3.save([flush: true]))
+
+        abstractBamFilesExp.add(processedMergedBamFile2)
+        abstractBamFilesAct = abstractBamFileService.findByProcessedMergedBamFile(processedMergedBamFile)
+        assertEquals(abstractBamFilesExp, abstractBamFilesAct)
     }
 
     private ProcessedMergedBamFile createProcessedMergedBamFile() {
@@ -231,8 +263,16 @@ class ProcessedBamFileServiceTests2 {
                         fileExists: true,
                         type: BamType.MDUP
                         )
-        assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
+        assertNotNull(processedMergedBamFile.save([flush: true]))
         return processedMergedBamFile
     }
-}
 
+    @Test
+    void testAssignedToMergingSet() {
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
+        assertEquals(processedBamFile.status, AbstractBamFile.State.NEEDS_PROCESSING)
+        abstractBamFileService.assignedToMergingSet(processedBamFile)
+        assertEquals(processedBamFile.status, AbstractBamFile.State.PROCESSED)
+    }
+
+}

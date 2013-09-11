@@ -24,6 +24,9 @@ class MergingJob extends AbstractJobImpl {
     ProcessedBamFileService processedBamFileService
 
     @Autowired
+    AbstractBamFileService abstractBamFileService
+
+    @Autowired
     ProcessingOptionService optionService
 
     @Override
@@ -57,11 +60,18 @@ class MergingJob extends AbstractJobImpl {
     }
 
     private String createInputFileString(ProcessedMergedBamFile processedMergedBamFile) {
-        List<ProcessedBamFile> processedBamFiles = processedBamFileService.findByProcessedMergedBamFile(processedMergedBamFile)
-        notEmpty(processedBamFiles, "No ProcessedBamFiles found for ${processedMergedBamFile}")
+        List<AbstractBamFile> abstractBamFiles = abstractBamFileService.findByProcessedMergedBamFile(processedMergedBamFile)
+        notEmpty(abstractBamFiles, "No BamFiles found for ${processedMergedBamFile}")
         StringBuilder stringBuilder = new StringBuilder()
-        processedBamFiles.each { ProcessedBamFile processedBamFile ->
-            String fileName = processedBamFileService.getFilePath(processedBamFile)
+        abstractBamFiles.each { AbstractBamFile abstractBamFile ->
+            String fileName
+            if (abstractBamFile instanceof ProcessedBamFile) {
+                fileName = processedBamFileService.getFilePath(abstractBamFile)
+            } else if (abstractBamFile instanceof ProcessedMergedBamFile) {
+                fileName = processedMergedBamFileService.filePath(abstractBamFile)
+            } else {
+                throw new RuntimeException("service for class ${abstractBamFile.class} is unknown")
+            }
             stringBuilder.append(" I=${fileName}")
         }
         return stringBuilder.toString()

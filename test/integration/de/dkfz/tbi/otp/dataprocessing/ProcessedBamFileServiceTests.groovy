@@ -276,13 +276,6 @@ class ProcessedBamFileServiceTests {
     }
 
     @Test
-    void testAssignedToMergingSet() {
-        assertEquals(processedBamFile.status, State.NEEDS_PROCESSING)
-        processedBamFileService.assignedToMergingSet(processedBamFile)
-        assertEquals(processedBamFile.status, State.PROCESSED)
-    }
-
-    @Test
     void testNotAssignedToMergingSet() {
         assertTrue(processedBamFileService.notAssignedToMergingSet(processedBamFile))
         MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(

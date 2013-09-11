@@ -15,7 +15,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  */
 class MergingCriteriaSpecificService {
 
-    ProcessedBamFileService processedBamFileService
+    AbstractBamFileService abstractBamFileService
 
     AlignmentPassService alignmentPassService
 
@@ -68,7 +68,7 @@ class MergingCriteriaSpecificService {
     boolean validateBamFilesForMergingCriteriaDEFAULT(MergingSet mergingSet) {
         notNull(mergingSet, "the input mergingSet for the method validateBamFilesForMergingCriteriaDEFAULT is null")
         String seqPlatform
-        List<AbstractBamFile> bamFiles = processedBamFileService.findByMergingSet(mergingSet)
+        List<AbstractBamFile> bamFiles = abstractBamFileService.findByMergingSet(mergingSet)
         for (bamFile in bamFiles) {
             if (bamFile instanceof ProcessedBamFile) {
                 //processed bam files
