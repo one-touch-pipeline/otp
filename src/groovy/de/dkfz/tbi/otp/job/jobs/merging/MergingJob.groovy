@@ -42,7 +42,7 @@ class MergingJob extends AbstractJobImpl {
     private String createCommand(ProcessedMergedBamFile processedMergedBamFile) {
         Project project = mergingPassService.project(processedMergedBamFile.mergingPass)
         String baseDir = processedMergingFileService.directory(processedMergedBamFile)
-        String tempDir = "${baseDir}/tmp_picard"
+        String tempDir = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
         String createTempDir = "mkdir -p ${tempDir}"
         String javaOptions = optionService.findOptionSafe("picardJavaSetting", null, project)
         String picard = "picard.sh MarkDuplicates"

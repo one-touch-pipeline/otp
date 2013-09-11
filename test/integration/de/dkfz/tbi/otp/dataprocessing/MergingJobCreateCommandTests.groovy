@@ -155,8 +155,8 @@ class MergingJobCreateCommandTests {
 
     @Test
     void testCreateCommandOneBamFile() {
-        String tempDirExp = "${basePathMerging}/tmp_picard"
-        String createTempDirExp = "mkdir -p ${basePathMerging}/tmp_picard"
+        String tempDirExp = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
+        String createTempDirExp = "mkdir -p ${tempDirExp}"
         String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
         String picardExp = "picard.sh MarkDuplicates"
         String inputFilePathExp = " I=${basePathAlignment}//run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_libraryLayout.sorted.bam"
@@ -174,8 +174,8 @@ class MergingJobCreateCommandTests {
     @Test
     void testCreateCommandTwoBamFiles() {
         MergingSetAssignment mergingSetAssignment = createMergingSetAssignment("2")
-        String tempDirExp = "${basePathMerging}/tmp_picard"
-        String createTempDirExp = "mkdir -p ${basePathMerging}/tmp_picard"
+        String tempDirExp = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
+        String createTempDirExp = "mkdir -p ${tempDirExp}"
         String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
         String picardExp = "picard.sh MarkDuplicates"
         String inputFilePathExp = " I=${basePathAlignment}//run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_libraryLayout.sorted.bam I=${basePathAlignment}//run_2_laneId_2/pass2/name_1_run_2_s_laneId_2_libraryLayout.sorted.bam"
