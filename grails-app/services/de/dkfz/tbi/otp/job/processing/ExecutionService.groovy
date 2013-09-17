@@ -20,6 +20,27 @@ import org.apache.commons.logging.Log
  */
 class ExecutionService {
 
+    enum ClusterJobStatus {
+        COMPLETED("C"),
+        HELD("H"),
+        RUNNING("R"),
+        QUEUED("Q")
+
+        private final String value
+
+        public String value() {
+            return value
+        }
+
+        ClusterJobStatus(String value) {
+            this.value = value
+        }
+
+        public boolean equals(String value) {
+            return this.value == value
+        }
+    }
+
     /**
      * Dependency injection of grailsApplication
      */
@@ -291,15 +312,15 @@ class ExecutionService {
     }
 
     /**
-     * Checks whether the given pbsId is running on the given Realm
-     * @param pbsId The PBS Job Id to check whether it is still running
-     * @param realm The PBS Realm on which it should be checked whether the Job is running
-     * @return true if still running, false otherwise
+     * Checks whether the given pbsId is pending on the given Realm
+     * @param pbsId The PBS Job Id to check whether it is pending
+     * @param realm The PBS Realm on which it should be checked whether the Job pending
+     * @return true if pending, false otherwise
      */
     public boolean checkRunningJob(String pbsId, Realm realm) {
         boolean retVal = false
         try {
-            retVal = isRunning(executeCommand(realm, "qstat ${pbsId}"))
+            retVal = isJobPending(executeCommand(realm, "qstat ${pbsId}"))
         } catch (Exception e) {
             // catch all exceptions and assume the job is still running
             retVal = true
@@ -308,25 +329,41 @@ class ExecutionService {
     }
 
     /**
-     * Verifies if a job is running
+     * Verifies if a job status is still pending (Not completed)
      *
-     * Verifies if a job of the handed over file contains
-     * particular content indicating the job is running.
-     * Returns {@code true} if job is running, otherwise {@code false}.
-     *
-     * @param output List of Strings containing output of a pbs job
-     * @return Indicating if job is running
+     * @param String containing output of a pbs "qstat jobId" command
+     * @return {@code true} if job is pending, otherwise {@code false}.
      */
-    private boolean isRunning(String output) {
+    private boolean isJobPending(String output) {
+        boolean pending = false
+        if (isJobStatusAvailable(output)) {
+            pending = !isExistingJobCompleted(output)
+        }
+        return pending
+    }
+
+    private boolean isJobStatusAvailable(String output) {
         Pattern pattern = Pattern.compile("\\s*Job id\\s*Name\\s*User.*")
-        boolean found = false
+        boolean valid = false
         output.eachLine { String line ->
-            Matcher m = pattern.matcher(line)
+        Matcher m = pattern.matcher(line)
             if (m.find()) {
-                found = true
+                valid = true
             }
         }
-        return found
+        return valid
+    }
+
+    private boolean isExistingJobCompleted(String output) {
+        return ClusterJobStatus.COMPLETED.value == existingJobStatus(output)
+    }
+
+    private String existingJobStatus(String output) {
+        assert(isJobStatusAvailable(output))
+        final int STATUS_INDEX = 4
+        List<String> lines = output.readLines()
+        String jobStatus = lines.last()
+        return jobStatus.split()[STATUS_INDEX]
     }
 
     private void logToJob(String message) {
