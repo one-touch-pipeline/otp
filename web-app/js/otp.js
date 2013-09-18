@@ -348,6 +348,15 @@ $.otp.runList = function () {
     $.otp.resizeBodyInit('#runTable', 180);
 };
 
+$.otp.projectOverviewHome = {
+        register : function() {
+            "use strict";
+            $('#projectGroup_select').change(function() {
+                $.otp.graph.overview.init();
+            });
+        }
+    }
+
 $.otp.run = {
     register: function () {
         "use strict";
@@ -1558,7 +1567,6 @@ $.otp.projectOverviewTable = {
                         name : "project",
                         value : $('#project_select').val()
                     });
-
                     $.ajax({
                         "dataType" : 'json',
                         "type" : "POST",

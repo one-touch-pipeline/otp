@@ -8,17 +8,23 @@ class StatisticController {
 
     StatisticService statisticService
 
+    ProjectGroupService projectGroupService
+
     ProjectService projectService
 
     SeqTypeService seqTypeService
 
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMM yy", Locale.ENGLISH)
 
-    JSON projectCountPerDate() {
+    JSON projectCountPerDate(ProjectGroupCommand command) {
+        ProjectGroup projectGroup
+        if (command.projectGroupName) {
+            projectGroup = projectGroupService.projectGroupByName(command.projectGroupName)
+        }
         List<String> labels = []
         List<Integer> values = []
 
-        List data = statisticService.projectDateSortAfterDate()
+        List data = statisticService.projectDateSortAfterDate(projectGroup)
         Date firstDate = new Date(data[0][1].year, data[0][1].month, 1)
         Date lastDate = new Date(data[data.size() - 1][1].year, data[data.size() - 1][1].month + 1, 1)
         int daysCount = daysBetween(firstDate, lastDate)
@@ -53,11 +59,15 @@ class StatisticController {
     }
 
 
-    JSON laneCountPerDate() {
+    JSON laneCountPerDate(ProjectGroupCommand command) {
+        ProjectGroup projectGroup
+        if (command.projectGroupName) {
+            projectGroup = projectGroupService.projectGroupByName(command.projectGroupName)
+        }
         List<String> labels = []
         List<Integer> values = []
 
-        List data = statisticService.laneCountPerDay()
+        List data = statisticService.laneCountPerDay(projectGroup)
         Calendar firstDate = new GregorianCalendar(data[0][0], data[0][1] - 1, 1)
         Calendar lastDate = new GregorianCalendar(data[data.size() - 1][0], data[data.size() - 1][1], 0)
         int daysCount = daysBetween(firstDate, lastDate)
@@ -90,16 +100,25 @@ class StatisticController {
         return (date2.getTimeInMillis() - date1.getTimeInMillis()) / (1000 * 60 * 60 * 24)
     }
 
-    JSON sampleCountPerSequenceType() {
+    JSON sampleCountPerSequenceType(ProjectGroupCommand command) {
+        ProjectGroup projectGroup
+        if (command.projectGroupName) {
+            projectGroup = projectGroupService.projectGroupByName(command.projectGroupName)
+        }
         List<String> labels = []
         List<String> labelsPercentage = []
         List<Integer> values = []
         int projectSequenceCount = 0
+        int filterCount = 0
 
-        List sampleCountBySeqType = statisticService.sampleCountPerSequenceType()
+        List sampleCountBySeqType = statisticService.sampleCountPerSequenceType(projectGroup)
+
+        if (!projectGroup) {
+            filterCount = 17
+        }
 
         sampleCountBySeqType.each {
-            if (it[1] < 9) {
+            if (it[1] < filterCount) {
                 return
             }
             labels << it[0]
@@ -108,7 +127,7 @@ class StatisticController {
         }
 
         sampleCountBySeqType.each {
-            if (it[1] < 9) {
+            if (it[1] < filterCount) {
                 return
             }
             labelsPercentage << "${it[0]} ${Math.round(it[1] * 100 / projectSequenceCount)} %"
@@ -123,13 +142,48 @@ class StatisticController {
         render dataToRender as JSON
     }
 
-    public JSON projectCountPerSequenceType() {
+    JSON patientsCountPerSequenceType(ProjectGroupCommand command) {
+        ProjectGroup projectGroup
+        if (command.projectGroupName) {
+            projectGroup = projectGroupService.projectGroupByName(command.projectGroupName)
+        }
         List<String> labels = []
         List<String> labelsPercentage = []
         List<Integer> values = []
         int projectSequenceCount = 0
 
-        List projectCountPerSequenceType = statisticService.projectCountPerSequenceType()
+        List patientsCountBySeqType = statisticService.patientsCountPerSequenceType(projectGroup)
+
+        patientsCountBySeqType.each {
+            labels << it[0]
+            values << it[1]
+            projectSequenceCount += it[1]
+        }
+
+        patientsCountBySeqType.each {
+            labelsPercentage << "${it[0]} ${Math.round(it[1] * 100 / projectSequenceCount)} %"
+        }
+
+        Map dataToRender = [
+            labels: labels,
+            labelsPercentage: labelsPercentage,
+            data: values,
+            count: values.size()
+        ]
+        render dataToRender as JSON
+    }
+
+    public JSON projectCountPerSequenceType(ProjectGroupCommand command) {
+        ProjectGroup projectGroup
+        if (command.projectGroupName) {
+            projectGroup = projectGroupService.projectGroupByName(command.projectGroupName)
+        }
+        List<String> labels = []
+        List<String> labelsPercentage = []
+        List<Integer> values = []
+        int projectSequenceCount = 0
+
+        List projectCountPerSequenceType = statisticService.projectCountPerSequenceType(projectGroup)
 
         projectCountPerSequenceType.each {
             labels << it[0]
@@ -245,3 +299,18 @@ class ProjectCommand implements Serializable {
         })
     }
 }
+
+@Validateable
+class ProjectGroupCommand implements Serializable {
+
+    ProjectGroupService projectGroupService
+    String projectGroupName
+
+    static constraints = {
+        projectGroupName(nullable: false, validator: { val, ProjectGroupCommand obj ->
+            return val && (val == "OTP" || (obj.projectGroupService.projectGroupByName(val) != null))
+        })
+    }
+}
+
+

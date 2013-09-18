@@ -48,6 +48,10 @@ class ProjectService {
         return Project.findByName(name)
     }
 
+    public List<Project> projectByProjectGroup(ProjectGroup projectGroup) {
+        return Project.findAllByProjectGroup(projectGroup, [sort: "name", order: "asc"])
+    }
+
     /**
      * Creates a Project and grants permissions to Groups which have read/write privileges for Projects.
      * @param name

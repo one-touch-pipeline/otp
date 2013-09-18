@@ -4,9 +4,17 @@ import grails.validation.Validateable
 
 class StatisticService {
 
-    public List projectDateSortAfterDate() {
+    ProjectGroupService projectGroupService
+
+    ProjectService projectService
+
+    public List projectDateSortAfterDate(ProjectGroup projectGroup) {
         List seq = Sequence.withCriteria {
             projections {
+                if (projectGroup) {
+                    List<Project> projects = projectService.projectByProjectGroup(projectGroup)
+                    'in'("projectId", projects*.id)
+                }
                 groupProperty("projectName")
                 min("dateCreated", "minDate")
             }
@@ -15,28 +23,59 @@ class StatisticService {
         return seq
     }
 
-    public List sampleCountPerSequenceType() {
+    public List sampleCountPerSequenceType(ProjectGroup projectGroup) {
         List seq = AggregateSequences.withCriteria {
             projections {
+                if (projectGroup) {
+                    List<Project> projects = projectService.projectByProjectGroup(projectGroup)
+                    'in'("projectId", projects*.id)
+                }
                 groupProperty("seqTypeName")
                 count("sampleId")
             }
-            order ("seqTypeName")
+            order("seqTypeName")
         }
     }
 
-    public List laneCountPerDay() {
+   public List patientsCountPerSequenceType(ProjectGroup projectGroup) {
+       List seq = AggregateSequences.withCriteria {
+            projections {
+                if (projectGroup) {
+                    List<Project> projects = projectService.projectByProjectGroup(projectGroup)
+                    'in'("projectId", projects*.id)
+                }
+                 groupProperty("seqTypeName")
+                 countDistinct("mockPid")
+            }
+            order("seqTypeName")
+       }
+       return seq
+   }
+
+    public List laneCountPerDay(ProjectGroup projectGroup) {
+        List<Project> projects
+        if (projectGroup) {
+            projects = projectService.projectByProjectGroup(projectGroup)
+        } else {
+            projects = Project.list()
+        }
+
         List seq = Sequence.executeQuery("\
             select year(s.dateCreated) as year, month(s.dateCreated) as month, day(s.dateCreated) as day, count(laneId) as laneCount \
             from Sequence s \
+            where s.projectId in :projectIds \
             group by year(s.dateCreated), month(s.dateCreated), day(s.dateCreated) \
-            order by year, month, day")
+            order by year, month, day", [projectIds: projects*.id])
         return seq
     }
 
-    public List projectCountPerSequenceType() {
+    public List projectCountPerSequenceType(ProjectGroup projectGroup) {
         List seq = Sequence.withCriteria {
             projections {
+                if (projectGroup) {
+                    List<Project> projects = projectService.projectByProjectGroup(projectGroup)
+                    'in'("projectId", projects*.id)
+                }
                 groupProperty("seqTypeName")
                 countDistinct("projectId")
             }

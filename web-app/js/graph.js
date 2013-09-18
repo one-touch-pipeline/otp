@@ -6,42 +6,54 @@ $.otp.graph = {};
 $.otp.graph.overview = {
     init : function() {
         var url = $.otp.contextPath;
-        RGraph.AJAX(url + '/statistic/projectCountPerDate',
-                $.otp.graph.overview.projectCountPerDate);
-        RGraph.AJAX(url + '/statistic/laneCountPerDate',
-                $.otp.graph.overview.laneCountPerDate);
-        RGraph.AJAX(url + '/statistic/sampleCountPerSequenceType',
-                $.otp.graph.overview.sampleCountPerSequenceType);
-        RGraph.AJAX(url + '/statistic/projectCountPerSequenceType',
-                $.otp.graph.overview.projectCountPerSequenceType);
+                var projectGroup = $('#projectGroup_select').val();
+                RGraph.AJAX(url + '/statistic/projectCountPerDate?projectGroupName='
+                        + projectGroup, $.otp.graph.overview.projectCountPerDate);
+                RGraph.AJAX(url + '/statistic/laneCountPerDate?projectGroupName='
+                       + projectGroup, $.otp.graph.overview.laneCountPerDate);
+                RGraph.AJAX(url + '/statistic/sampleCountPerSequenceType?projectGroupName='
+                        + projectGroup, $.otp.graph.overview.sampleCountPerSequenceType);
+                RGraph.AJAX(url + '/statistic/patientsCountPerSequenceType?projectGroupName='
+                        + projectGroup, $.otp.graph.overview.patientsCountPerSequenceType);
+                RGraph.AJAX(url + '/statistic/projectCountPerSequenceType?projectGroupName='
+                        + projectGroup, $.otp.graph.overview.projectCountPerSequenceType);
     },
 
     projectCountPerDate : function() {
         var json = eval('(' + this.responseText + ')');
+        RGraph.Reset(document.getElementById('projectCountPerDate'));
         var data = json.value;
         var scatter1 = new RGraph.Scatter('projectCountPerDate', json.data);
+        var count = json.count;
+        if (count > 10) {
+            count = 10;
+        }
+        scatter1.Set('chart.ylabels.count', count);
         scatter1.Set('chart.defaultcolor', '#1E5CA4');
         scatter1.Set('chart.labels', json.labels);
         scatter1.Set('chart.ymax', json.count);
         scatter1.Set('chart.gutter.left', 70);
         scatter1.Set('chart.tickmarks', 'circle');
-        scatter1.Set('chart.xmin', 1);
-        scatter1.Set('chart.ymin', 1);
+        scatter1.Set('chart.xmin', 0);
+        scatter1.Set('chart.ymin', 0);
         scatter1.Set('chart.ticksize', 7);
         scatter1.Set('chart.text.size', 8);
-        scatter1.Set('chart.title', 'Number of projects in OTP');
+        scatter1.Set('chart.title', 'Number of projects in '+ $('#projectGroup_select').val());
         scatter1.Set('chart.title.color', 'black');
         scatter1.Set('chart.title.size', 11);
+        scatter1.Set('chart.title.y', 39);
         scatter1.Set('chart.xmax', json.daysCount);
         scatter1.Set('chart.background.grid.autofit.numvlines', json.gridCount);
         scatter1.Set('chart.text.angle', 45);
-        scatter1.Set('chart.gutter.bottom', 110);
-        scatter1.Set('chart.gutter.top', 55);
+        scatter1.Set('chart.gutter.bottom', 120);
+        scatter1.Set('chart.gutter.top', 105);
+        scatter1.Set('chart.gutter.right', 70);
         scatter1.Draw();
     },
 
     laneCountPerDate : function() {
         var json = eval('(' + this.responseText + ')');
+        RGraph.Reset(document.getElementById('laneCountPerDate'));
         var data = json.value;
         var scatter2 = new RGraph.Scatter('laneCountPerDate', json.data);
         scatter2.Set('chart.defaultcolor', '#1E5CA4');
@@ -50,28 +62,30 @@ $.otp.graph.overview = {
         scatter2.Set('chart.tickmarks', 'circle');
         scatter2.Set('chart.xmin', 1);
         scatter2.Set('chart.ymin', 0);
+        scatter2.Set('chart.title.y', 40);
         scatter2.Set('chart.text.size', 8);
         scatter2.Set('chart.ticksize', 6);
-        scatter2.Set('chart.title', 'Number of sequence lanes registered in OTP');
+        scatter2.Set('chart.title', 'Number of sequence lanes registered in ' + $('#projectGroup_select').val());
         scatter2.Set('chart.title.color', 'black');
         scatter2.Set('chart.title.size', 11);
         scatter2.Set('chart.xmax', json.daysCount);
         scatter2.Set('chart.background.grid.autofit.numvlines', json.gridCount);
         scatter2.Set('chart.text.angle', 45);
-        scatter2.Set('chart.gutter.bottom', 110);
-        scatter2.Set('chart.gutter.top', 55);
-        scatter2.Set('chart.gutter.left', 43);
+        scatter2.Set('chart.gutter.bottom', 150);
+        scatter2.Set('chart.gutter.top', 85);
+        scatter2.Set('chart.gutter.left', 70);
         scatter2.Set('chart.gutter.right', 70);
         scatter2.Draw();
     },
 
     sampleCountPerSequenceType: function() {
         var json = eval('(' + this.responseText + ')');
+        RGraph.Reset(document.getElementById('sampleCountPerSequenceTypePie'));
         var data = json.value;
         var pie = new RGraph.Pie('sampleCountPerSequenceTypePie', json.data);
         pie.Set('chart.labels', json.labelsPercentage);
-        pie.Set('chart.title', 'Samples processed by sequencing technologies in OTP');
-        pie.Set('chart.title.y', 9);
+        pie.Set('chart.title', 'Samples processed by sequencing technologies in '+ $('#projectGroup_select').val());
+        pie.Set('chart.title.y', 37);
         pie.Set('chart.title.x', 'center');
         pie.Set('chart.title.size', 11);
         pie.Set('chart.title.color', 'black');
@@ -82,32 +96,34 @@ $.otp.graph.overview = {
         pie.Set('chart.strokestyle', 'white');
         pie.Set('chart.labels.sticks', true);
         pie.Set('chart.shadow', true);
-        pie.Set('chart.shadow.offsetx', 2);
+        pie.Set('chart.shadow.offsetx', 12);
         pie.Set('chart.shadow.offsety', 2);
-        pie.Set('chart.shadow.blur', 1);
-        pie.Set('chart.exploded', 2);
+        pie.Set('chart.shadow.blur', 4);
+        pie.Set('chart.exploded', 1);
         pie.Set('chart.text.size', 8);
+        pie.Set('chart.radius', 80);
         pie.Set('chart.labels.sticks.length', 15);
         pie.Set('chart.variant', '3d');
-        pie.Set('chart.gutter.bottom', 90);
-        pie.Set('chart.gutter.top', 90);
-        pie.Set('chart.gutter.left', 100);
+        pie.Set('chart.gutter.bottom', 100);
+        pie.Set('chart.gutter.top', 100);
+        pie.Set('chart.gutter.left', 80);
         pie.Set('chart.gutter.right', 25);
         pie.Draw();
         RGraph.Effects.Pie.RoundRobin(pie, {
-            frames : 335
+            frames : 13
         });
     },
 
     projectCountPerSequenceType : function() {
         var json = eval('(' + this.responseText + ')');
+        RGraph.Reset(document.getElementById('projectCountPerSequenceTypeBar'));
         var data = json.value;
         var bar1 = new RGraph.Bar('projectCountPerSequenceTypeBar', json.data);
         bar1.Set('chart.background.grid', false);
         bar1.Set('chart.labels', json.labels);
         bar1.Set('chart.title',
-                'Number of projects using sequencing technologies in OTP');
-        bar1.Set('chart.title.y', 15);
+                'Number of projects using sequencing technologies in '+ $('#projectGroup_select').val());
+        bar1.Set('chart.title.y', 45);
         bar1.Set('chart.title.x', 'center');
         bar1.Set('chart.title.size', 11);
         bar1.Set('chart.title.color', 'black');
@@ -121,16 +137,51 @@ $.otp.graph.overview = {
         bar1.Set('chart.labels.above', true);
         bar1.Set('chart.xlabels.offset', 9);
         bar1.Set('chart.variant', '3d');
-        bar1.Set('chart.text.size', 8);
+        bar1.Set('chart.text.size', 7.4);
         bar1.Set('chart.hmargin', 9);
         bar1.Set('chart.ticksize', 7);
         bar1.Set('chart.text.angle', 45);
         bar1.Set('chart.labels.above.angle', null);
         bar1.Set('chart.labels.above.size', 9);
         bar1.Set('chart.background.grid.border', false);
-        bar1.Set('chart.gutter.bottom', 220);
-        bar1.Set('chart.gutter.top', 30);
+        bar1.Set('chart.gutter.bottom', 180);
+        bar1.Set('chart.gutter.top', 90);
         bar1.Draw();
+    },
+
+    patientsCountPerSequenceType : function() {
+        var json = eval('(' + this.responseText + ')');
+        RGraph.Reset(document.getElementById('patientsCountPerSequenceType'));
+        var data = json.value;
+        var bar0 = new RGraph.Bar('patientsCountPerSequenceType', json.data);
+        bar0.Set('chart.background.grid', false);
+        bar0.Set('chart.labels', json.labels);
+        bar0.Set('chart.title',
+                'Number of patients using sequencing technologies in '+ $('#projectGroup_select').val());
+        bar0.Set('chart.title.y', 45);
+        bar0.Set('chart.title.x', 'center');
+        bar0.Set('chart.title.size', 11);
+        bar0.Set('chart.title.color', 'black');
+        bar0.Set('chart.colors', [ '#1E5CA4' ]);
+        bar0.Set('chart.shadow', true);
+        bar0.Set('chart.shadow.blur', 10);
+        bar0.Set('chart.shadow.color', '#666');
+        bar0.Set('chart.gutter.left', 40);
+        bar0.Set('chart.gutter.right', 70);
+        bar0.Set('chart.hmargin.grouped', 1);
+        bar0.Set('chart.labels.above', true);
+        bar0.Set('chart.xlabels.offset', 9);
+        bar0.Set('chart.variant', '3d');
+        bar0.Set('chart.text.size', 7.4);
+        bar0.Set('chart.hmargin', 9);
+        bar0.Set('chart.ticksize', 7);
+        bar0.Set('chart.text.angle', 45);
+        bar0.Set('chart.labels.above.angle', null);
+        bar0.Set('chart.labels.above.size', 9);
+        bar0.Set('chart.background.grid.border', false);
+        bar0.Set('chart.gutter.bottom', 180);
+        bar0.Set('chart.gutter.top', 80);
+        bar0.Draw();
     }
 }
 

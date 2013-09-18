@@ -75,7 +75,7 @@ div.tableBlock {
     th {
         color: #aaaaaa;
         font-weight: bold;
-        font-size: 0.8em;
+        font-size: 0.7em;
         border: 0px;
         background-color: #ffffff;
         background-image: none;
@@ -379,7 +379,7 @@ table {
     border-bottom: 1px solid #DFDFDF;
     border-collapse: collapse;
     width: 100%;
-    margin-bottom: 1em;
+    margin-bottom: 0.8em;
     &.dataTable {
         td {
             white-space: nowrap;
@@ -408,7 +408,7 @@ tr {
         display: none;
     }
     &:nth-last-child(2n) {
-        background-color: #D5E0FF;
+        background-color: #CEE3F6;
     }
 }
 tr>td:first-child, tr>th:first-child {
@@ -479,10 +479,6 @@ th {
         background: @image, @webkit-gradient;
         background: @image, @moz-gradient;
     }
-}
-.QA1, .QA2 {
-    background: #ffffaa;
-    background-image: -moz-linear-gradient(right, #ffffff, #ffffaa);
 }
 /* my styles for boolean values */
 td {
@@ -860,15 +856,22 @@ body {
     display: none;
 }
 .dataTables_container {
-    margin-top: 10px;
+    margin-top: -25px;
     length: 70px;
 }
 .homeTable {
     padding-top: 6px;
-    width: 100%;
-    max-height: 152px;
+    width: 98%;
     overflow-y: auto;
     overflow-x: hidden;
+
+}
+.table-body-box{
+    height: 120px;
+    overflow:auto;
+}
+.tableHeaderHome{
+    padding-right: 143px;
 }
 .home_graphics_container {
     margin-top: 25px;
@@ -993,6 +996,7 @@ body {
     margin-top: 20px;
     margin-left: 10px;
 }
+
 #searchCriteriaTable2 {
     width: auto;
     border-collapse: separate;
@@ -1018,6 +1022,21 @@ body {
     border: 2px solid #CCCCCC;
     border-color: #c4d9df #a4c3ca #83afb7;
 }
+#projectsGroupbox {
+    float: left;
+    max-width: auto;
+    background: #eaf8fc;
+    background-image: -moz-linear-gradient(#fff, #d4e8ec);
+    background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0, #d4e8ec),color-stop(1, #fff));
+    -moz-border-radius: 13px;
+    border-radius: 13px;
+    border: 3px solid #CCCCCC;
+    border-color: #c4d9df #a4c3ca #83afb7;
+    height: auto;
+    padding: 4px;
+    margin-top: auto;
+    margin-bottom: 7px;
+}
 #searchbox {
     float: left;
     background: #eaf8fc;
@@ -1040,7 +1059,7 @@ body {
     -moz-border-radius: 12px;
     border-radius: 12px;
     border: 5px solid #CCCCCC;
-    padding: 0.2em 0.3em;
+    padding: 0.1em 0.3em;
 }
 .blue_labelForPlus {
     background-color: #1E90FF;
@@ -1068,6 +1087,7 @@ body {
     width: auto;
     height: auto;
     border: 3px solid #CCCCCC;
+    display:inline-block;
     padding: 0.1em 0.3em;
 }
 .overviewSearchTable {
