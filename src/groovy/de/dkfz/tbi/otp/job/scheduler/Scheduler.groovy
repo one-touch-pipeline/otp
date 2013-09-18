@@ -22,6 +22,7 @@ import de.dkfz.tbi.otp.job.processing.ValidatingJob
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.notification.NotificationEvent
 import de.dkfz.tbi.otp.notification.NotificationType
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import org.apache.commons.logging.LogFactory
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.annotation.AfterReturning
@@ -89,6 +90,7 @@ class Scheduler {
     @Before("@annotation(de.dkfz.tbi.otp.job.scheduler.JobExecution) && this(de.dkfz.tbi.otp.job.processing.Job)")
     public void doCreateCheck(JoinPoint joinPoint) {
         Job job = joinPoint.target as Job
+        LogThreadLocal.setJobLog(job.log)
         try {
             // verify that the Job has a processing Step
             if (!job.processingStep) {
@@ -130,6 +132,7 @@ class Scheduler {
             NotificationEvent event = new NotificationEvent(this, step, NotificationType.PROCESS_STEP_STARTED)
             grailsApplication.mainContext.publishEvent(event)
         } catch (RuntimeException e) {
+            LogThreadLocal.removeJobLog()
             // removing Job from running
             schedulerService.removeRunningJob(job)
             throw new SchedulerException("Could not create @Before annotation for Job of type ${joinPoint.target.class}", e.cause)
@@ -150,6 +153,7 @@ class Scheduler {
      */
     @AfterReturning("@annotation(de.dkfz.tbi.otp.job.scheduler.JobExecution) && this(de.dkfz.tbi.otp.job.processing.Job)")
     public void doEndCheck(JoinPoint joinPoint) {
+        LogThreadLocal.removeJobLog()
         Job job = joinPoint.target as Job
         if (job instanceof MonitoringJob) {
             // These kind of jobs are allowed to finish the execute method before their processing is finished
@@ -174,6 +178,7 @@ class Scheduler {
      */
     @AfterThrowing(pointcut="@annotation(de.dkfz.tbi.otp.job.scheduler.JobExecution) && this(de.dkfz.tbi.otp.job.processing.Job)", throwing="e")
     public void doErrorHandling(JoinPoint joinPoint, Exception e) {
+        LogThreadLocal.removeJobLog()
         Job job = joinPoint.target as Job
         schedulerService.removeRunningJob(job)
         ProcessingStep step = ProcessingStep.get(job.processingStep.id)

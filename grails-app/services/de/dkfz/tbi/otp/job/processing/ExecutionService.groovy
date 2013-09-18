@@ -1,20 +1,22 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import com.jcraft.jsch.Channel
 import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import org.apache.commons.logging.Log
 
 /**
  * @short Helper class providing functionality for remote execution of jobs.
- * 
+ *
  * Provides connection to a remote host via ssh and validation of
  * pbs ids. Specifically the remote hosts are PBS' meaning that a
- * format specific for usage on a PBS is built and executed. 
- * 
+ * format specific for usage on a PBS is built and executed.
+ *
  */
 class ExecutionService {
 
@@ -120,7 +122,7 @@ class ExecutionService {
 
     /**
      * Queries ssh on a pbs infrastructure
-     * 
+     *
      * Opens an ssh connection to a specified host with specific credentials.
      * With the parameter options can options for the command be specified.
      *
@@ -149,12 +151,14 @@ class ExecutionService {
             session.connect()
             Channel channel = session.openChannel("exec")
             if (command) {
+                logToJob("executed command: " + command)
                 ((ChannelExec)channel).setCommand(command)
             } else if (script) {
                 command = "qsub"
                 if (options) {
                     command += " ${options}"
                 }
+                logToJob("executed script: " + script + " with command: " + command)
                 ((ChannelExec)channel).setCommand(command)
                 ((ChannelExec)channel).setInputStream(script.newInputStream())
             }
@@ -323,5 +327,10 @@ class ExecutionService {
             }
         }
         return found
+    }
+
+    private void logToJob(String message) {
+        Log log = LogThreadLocal.getJobLog()
+        log?.debug message
     }
 }

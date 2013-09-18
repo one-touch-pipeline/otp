@@ -46,6 +46,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
         Job job = grailsApplication.mainContext.getBean("testEndStateAwareJob", step, [] as Set) as Job
+        job.log = log
         // There is no Created ProcessingStep update - execution should fail
         shouldFail(RuntimeException) {
             job.execute()
@@ -94,6 +95,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
         Job endStateAwareJob = grailsApplication.mainContext.getBean("testEndStateAwareJob", step, [] as Set) as Job
+        endStateAwareJob.log = log
         // There is no Created ProcessingStep update - execution should fail
         shouldFail(RuntimeException) {
             endStateAwareJob.execute()
@@ -146,6 +148,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
         Job endStateAwareJob = grailsApplication.mainContext.getBean("testFailureEndStateAwareJob", step, [] as Set) as Job
+        endStateAwareJob.log = log
         // There is no Created ProcessingStep update - execution should fail
         shouldFail(RuntimeException) {
             endStateAwareJob.execute()
@@ -188,6 +191,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         ProcessingStep step = new ProcessingStep(process: process, jobDefinition: jobDefinition)
         assertNotNull(step.save())
         Job job = grailsApplication.mainContext.getBean("failingTestJob", step, [] as Set) as Job
+        job.log = log
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.CREATED,
@@ -232,6 +236,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         assertNotNull(update.save(flush: true))
         // run the Job
         Job job = grailsApplication.mainContext.getBean("testJob", step, [] as Set) as Job
+        job.log = log
         job.execute()
         assertEquals(4, ProcessingStepUpdate.countByProcessingStep(step))
         List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
@@ -269,6 +274,7 @@ class SchedulerTests extends AbstractIntegrationTest {
             )
         assertNotNull(update.save(flush: true))
         Job job = grailsApplication.mainContext.getBean("directTestJob", step, [] as Set) as Job
+        job.log = log
         // run the Job
         job.execute()
         assertEquals(4, ProcessingStepUpdate.countByProcessingStep(step))
@@ -294,6 +300,7 @@ class SchedulerTests extends AbstractIntegrationTest {
             )
         assertNotNull(update.save(flush: true))
         job = grailsApplication.mainContext.getBean("directTestJob", step, [] as Set) as Job
+        job.log = log
         // run the Job
         job.execute()
         assertEquals(3, ProcessingStepUpdate.countByProcessingStep(step))
@@ -324,6 +331,7 @@ class SchedulerTests extends AbstractIntegrationTest {
             )
         assertNotNull(update.save(flush: true))
         Job job = grailsApplication.mainContext.getBean("failingPbsTestJob", step, [] as Set) as Job
+        job.log = log
         // run the Job
         job.execute()
         assertEquals(4, ProcessingStepUpdate.countByProcessingStep(step))
@@ -357,6 +365,7 @@ class SchedulerTests extends AbstractIntegrationTest {
             )
         assertNotNull(update.save(flush: true))
         Job job = grailsApplication.mainContext.getBean("pbsTestJob", step, [] as Set) as Job
+        job.log = log
         // run the Job
         job.execute()
         assertEquals(4, ProcessingStepUpdate.countByProcessingStep(step))
