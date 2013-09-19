@@ -157,3 +157,11 @@ ctx.processingOptionService.createOrUpdate(
     '-m 2000000000',
     'Buffer for samtools sorting'
 )
+
+ctx.processingOptionService.createOrUpdate(
+    'bwaQParameter',
+    null,
+    null,
+    '-q 20',
+    'quality threshold for "soft" read trimming down to 35bp'
+)

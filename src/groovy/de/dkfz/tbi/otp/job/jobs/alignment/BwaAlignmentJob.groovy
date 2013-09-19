@@ -57,8 +57,9 @@ class BwaAlignmentJob extends AbstractJobImpl {
         String referenceGenomePath = alignmentPassService.referenceGenomePath(alignmentPass)
         String qaSwitch = qualityEncoding(alignmentPass)
         String nCores = optionService.findOptionSafe("bwaNumberOfCores", null, null)
+        String qParameter = optionService.findOptionSafe("bwaQParameter", alignmentPassService.seqType(alignmentPass), alignmentPassService.project(alignmentPass))
         // TODO: add option for clipping
-        String bwaCmd = "${bwaCommand} aln ${nCores} ${qaSwitch} -f ${saiFilePath} ${referenceGenomePath} ${dataFilePath}"
+        String bwaCmd = "${bwaCommand} aln ${nCores} ${qaSwitch} ${qParameter} -f ${saiFilePath} ${referenceGenomePath} ${dataFilePath}"
         String chmodCmd = "chmod 440 ${saiFilePath}"
         String cmd = "${bwaCmd} ; ${chmodCmd}"
         log.debug cmd
