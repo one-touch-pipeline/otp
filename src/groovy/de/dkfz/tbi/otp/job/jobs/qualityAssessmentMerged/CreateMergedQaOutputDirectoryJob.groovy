@@ -1,17 +1,17 @@
-package de.dkfz.tbi.otp.job.jobs.qualityAssessment
+package de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.beans.factory.annotation.Autowired
 
-class CreateQaOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
+class CreateMergedQaOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
 
     @Autowired
-    ProcessedBamFileQaFileService processedBamFileQaFileService
+    ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
 
     @Autowired
-    QualityAssessmentPassService qualityAssessmentPassService
+    QualityAssessmentMergedPassService qualityAssessmentMergedPassService
 
     @Autowired
     ExecutionService executionService
@@ -19,13 +19,13 @@ class CreateQaOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
     @Override
     public void execute() throws Exception {
         long passId = getProcessParameterValue() as long
-        QualityAssessmentPass pass = QualityAssessmentPass.get(passId)
+        QualityAssessmentMergedPass pass = QualityAssessmentMergedPass.get(passId)
 
         // TODO remove this hack when multiple start is solved
-        qualityAssessmentPassService.passStarted(pass)
+        qualityAssessmentMergedPassService.passStarted(pass)
 
-        String dir = processedBamFileQaFileService.directoryPath(pass)
-        Realm realm = qualityAssessmentPassService.realmForDataProcessing(pass)
+        String dir = processedMergedBamFileQaFileService.directoryPath(pass)
+        Realm realm = qualityAssessmentMergedPassService.realmForDataProcessing(pass)
         execute(dir, realm)
     }
 
@@ -41,3 +41,4 @@ class CreateQaOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
         return folder.exists()
     }
 }
+

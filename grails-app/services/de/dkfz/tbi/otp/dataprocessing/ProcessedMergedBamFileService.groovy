@@ -57,6 +57,14 @@ class ProcessedMergedBamFileService {
         return "${dir}/${filename}"
     }
 
+    public Project project(ProcessedMergedBamFile mergedBamfile) {
+        return mergedBamfile.mergingPass.mergingSet.mergingWorkPackage.sample.individual.project
+    }
+
+    public SeqType seqType(ProcessedMergedBamFile mergedBamFile) {
+        return mergedBamFile.mergingPass.mergingSet.mergingWorkPackage.seqType
+    }
+
     public ProcessedMergedBamFile save(ProcessedMergedBamFile processedMergedBamFile) {
         notNull(processedMergedBamFile, "The parameter processedMergedBamFile are not allowed to be null")
         return assertSave(processedMergedBamFile)

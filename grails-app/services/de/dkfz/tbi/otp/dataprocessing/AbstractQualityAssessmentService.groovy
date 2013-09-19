@@ -8,6 +8,8 @@ class AbstractQualityAssessmentService {
 
     ProcessedBamFileQaFileService processedBamFileQaFileService
 
+    ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
+
     void parseQaStatistics(QualityAssessmentPass qualityAssessmentPass) {
         String qualityAssessmentDataFilePath = processedBamFileQaFileService.qualityAssessmentDataFilePath(qualityAssessmentPass)
         File file = new File(qualityAssessmentDataFilePath)
@@ -23,6 +25,25 @@ class AbstractQualityAssessmentService {
             qualityAssessmentStatistics.percentIncorrectPEorientation = safePercentCalculation(qualityAssessmentStatistics.referenceAgreementStrandConflict, qualityAssessmentStatistics.referenceAgreement)
             qualityAssessmentStatistics.percentReadPairsMapToDiffChrom = safePercentCalculation(qualityAssessmentStatistics.endReadAberration, qualityAssessmentStatistics.totalMappedReadCounter)
             qualityAssessmentStatistics.qualityAssessmentPass = qualityAssessmentPass
+            assertSave(qualityAssessmentStatistics)
+        }
+    }
+
+    void parseQaStatistics(QualityAssessmentMergedPass qualityAssessmentPass) {
+        String qualityAssessmentDataFilePath = processedMergedBamFileQaFileService.qualityAssessmentDataFilePath(qualityAssessmentPass)
+        File file = new File(qualityAssessmentDataFilePath)
+        JSONObject json = JSON.parse(file.text)
+        Iterator chromosomes = json.keys()
+        AbstractQualityAssessment qualityAssessmentStatistics
+        chromosomes.each { String chromosome ->
+            if (chromosome == Chromosomes.overallChromosomesLabel()) {
+                qualityAssessmentStatistics = new OverallQualityAssessmentMerged(json.get(chromosome))
+            } else {
+                qualityAssessmentStatistics = new ChromosomeQualityAssessmentMerged(json.get(chromosome))
+            }
+            qualityAssessmentStatistics.percentIncorrectPEorientation = safePercentCalculation(qualityAssessmentStatistics.referenceAgreementStrandConflict, qualityAssessmentStatistics.referenceAgreement)
+            qualityAssessmentStatistics.percentReadPairsMapToDiffChrom = safePercentCalculation(qualityAssessmentStatistics.endReadAberration, qualityAssessmentStatistics.totalMappedReadCounter)
+            qualityAssessmentStatistics.qualityAssessmentMergedPass = qualityAssessmentPass
             assertSave(qualityAssessmentStatistics)
         }
     }

@@ -19,6 +19,10 @@ class ProcessingOption {
     Date dateObsoleted
     String comment
 
+    static mapping = {
+        value type: 'text'
+    }
+
     static constraints = {
         type(nullable: true)
         project(nullable: true)

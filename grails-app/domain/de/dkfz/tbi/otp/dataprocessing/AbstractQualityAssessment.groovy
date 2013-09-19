@@ -41,8 +41,4 @@ class AbstractQualityAssessment {
     // values not retrieved from the json but calculated afterwards
     double percentIncorrectPEorientation
     double percentReadPairsMapToDiffChrom
-
-    static belongsTo = [
-        qualityAssessmentPass: QualityAssessmentPass
-    ]
 }

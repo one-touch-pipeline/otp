@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
- * Execution of the Quality Assessment Workflow on the particular data file is represented as QualityAssessmentPass.
+ * Each execution of the Quality Assessment Workflow on the particular data file is represented as QualityAssessmentPass.
  */
 class QualityAssessmentPass {
 
@@ -15,7 +15,7 @@ class QualityAssessmentPass {
     }
 
     public String toString() {
-        return "pass: ${identifier} on processedBamFile.id: ${processedBamFile.id}"
+        return "pass: ${identifier} on ${processedBamFile.alignmentPass}"
     }
 
     static belongsTo = [
