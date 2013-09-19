@@ -2,8 +2,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import static org.springframework.util.Assert.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage.MergingCriteria
-import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
@@ -42,8 +40,10 @@ class MergingCriteriaSpecificService {
             alignmentPass {
                 seqTrack {
                     eq("sample", bamFile.alignmentPass.seqTrack.sample)
-                    eq("seqPlatform", bamFile.alignmentPass.seqTrack.seqPlatform)
                     eq("seqType", bamFile.alignmentPass.seqTrack.seqType)
+                    seqPlatform {
+                        eq("name", bamFile.alignmentPass.seqTrack.seqPlatform.name)
+                    }
                 }
             }
         }
