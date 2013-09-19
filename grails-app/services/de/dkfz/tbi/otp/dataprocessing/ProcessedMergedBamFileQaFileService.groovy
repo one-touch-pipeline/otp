@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.SavingException
 import static org.springframework.util.Assert.*
+import de.dkfz.tbi.otp.ngsdata.SavingException
 
 /**
  * Service for {@link ProcessedMergedBamFile}
@@ -12,14 +12,16 @@ class ProcessedMergedBamFileQaFileService {
 
     ProcessedMergedBamFileService processedMergedBamFileService
 
-    ProcessedMergingFileService processedMergingFileService
+    QualityAssessmentMergedPassService qualityAssessmentMergedPassService
+
+    public static final MD5SUM_NAME = 'MD5SUMS'
 
     /**
      * returns the directory for the given {@link QualityAssessmentMergedPass}.
      */
     public String directoryPath(QualityAssessmentMergedPass pass) {
         notNull(pass, "the quality assessment merged pass is null")
-        String baseDir = processedMergingFileService.directory(pass.processedMergedBamFile)
+        String baseDir = processedMergedBamFileService.directory(pass.processedMergedBamFile)
         String qaDir = "QualityAssessment"
         String passDir = passDirectory(pass)
         return "${baseDir}/${qaDir}/${passDir}"
@@ -201,6 +203,16 @@ class ProcessedMergedBamFileQaFileService {
         pass.processedMergedBamFile.hasInsertSizePlot = validateFile(insertSizePlotFilePath(pass))
         assertSave(pass.processedMergedBamFile)
         return pass.processedMergedBamFile.hasInsertSizePlot
+    }
+
+    /**
+     * @param file, the ProcessedMergedBamFile for which the QA results were produced
+     * @return path to the directory where the file with the calculated md5sums for the latest qa results is stored
+     */
+    public String qaResultsMd5sumFile(ProcessedMergedBamFile file) {
+        notNull(file, "the input of the method qaResultDirectory is null")
+        QualityAssessmentMergedPass pass = qualityAssessmentMergedPassService.latestQualityAssessmentMergedPass(file)
+        return directoryPath(pass) + "/" + MD5SUM_NAME
     }
 
     /**

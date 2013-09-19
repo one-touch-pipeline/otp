@@ -1,26 +1,22 @@
 package workflows.mergedQualityAssesment
 
-import static org.junit.Assert.*
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.FileType.Type
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
-import de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged.QualityAssessmentMergedStartJob
-import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.plan.StartJobDefinition
-import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.ngsqc.FastqcModule
-import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
+import static org.junit.Assert.*
+import grails.test.mixin.*
+import grails.test.mixin.domain.*
+import grails.test.mixin.support.*
 import grails.util.Environment
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.junit.*
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-import grails.test.mixin.domain.*
-import org.mozilla.classfile.SuperBlock
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged.QualityAssessmentMergedStartJob
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.processing.ExecutionService
+import de.dkfz.tbi.otp.job.processing.Process
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
+import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 
 
 class QualityAssessmentMergedWorkflowTests extends AbstractIntegrationTest {
@@ -36,8 +32,6 @@ class QualityAssessmentMergedWorkflowTests extends AbstractIntegrationTest {
 
     ProcessingOptionService processingOptionService
 
-    ProcessedMergingFileService processedMergingFileService
-
     ProcessedMergedBamFileService processedMergedBamFileService
 
     QualityAssessmentMergedStartJob qualityAssessmentMergedStartJob
@@ -49,15 +43,15 @@ class QualityAssessmentMergedWorkflowTests extends AbstractIntegrationTest {
     // TODO This paths should be obtained from somewhere else..  maybe from .otpproperties, but I am hardcoding for now..
     String base = "STORAGE_ROOT/dmg/otp_test/workflows/"
     String testDataDir = "${base}/files/merged-quality-assessment/"
-//    String myBase = "${base}/${grailsApplication.config.otp.pbs.ssh.unixUser}"
+    //    String myBase = "${base}/${grailsApplication.config.otp.pbs.ssh.unixUser}"
     String myBase = "${base}/QualityAssessmentMerged"
     String rootPath = "${myBase}/rootPath/"
     String processingRootPath = "${myBase}/processingRootPath/"
 
     // files to be processed by the tests
-//    String orgFileName = "merged-bam-file.mdup.bam"
+    //    String orgFileName = "merged-bam-file.mdup.bam"
     String orgFileName = "seq.bam.bam"
-//    String orgFileName = "bigBam.bam"
+    //    String orgFileName = "bigBam.bam"
 
     String baiOrgFileName = "${orgFileName}.bai"
 
@@ -65,7 +59,7 @@ class QualityAssessmentMergedWorkflowTests extends AbstractIntegrationTest {
         printlnlocal("setup")
         createData()
         printlnlocal("data created")
-        String path = processedMergingFileService.directory(processedMergedBamFile.mergingPass)
+        String path = processedMergedBamFileService.directory(processedMergedBamFile.mergingPass)
         String fileName = processedMergedBamFileService.fileName(processedMergedBamFile)
         String filePath = processedMergedBamFileService.filePath(processedMergedBamFile)
         String baiFilePath = processedMergedBamFileService.filePathForBai(processedMergedBamFile)
@@ -375,7 +369,7 @@ class QualityAssessmentMergedWorkflowTests extends AbstractIntegrationTest {
                             webHost : realmWebHost,
                             host : realmHost,
                             port : realmPort,
-//                            unixUser : grailsApplication.config.otp.pbs.ssh.unixUser,
+                            //                            unixUser : grailsApplication.config.otp.pbs.ssh.unixUser,
                             unixUser : realmDKFZUnixUser,
                             timeout : realmTimeout,
                             pbsOptions : realmPbsOptions,

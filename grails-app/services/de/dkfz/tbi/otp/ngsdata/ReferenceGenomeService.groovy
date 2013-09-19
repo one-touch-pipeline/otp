@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import static org.springframework.util.Assert.*
-import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
 class ReferenceGenomeService {
@@ -24,11 +23,14 @@ class ReferenceGenomeService {
      * @param seqType the sequencing type, to which the reference genome belongs to
      */
     public ReferenceGenome referenceGenome(Project project, SeqType seqType) {
+        notNull(project, "the project of the method referenceGenome is null")
+        notNull(seqType, "the seqType of the method referenceGenome is null")
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = ReferenceGenomeProjectSeqType.
                         findByProjectAndSeqTypeAndDeprecatedDateIsNull(project, seqType)
         notNull(referenceGenomeProjectSeqType,
                         "There is no reference genome defined for the combination of project ${project} and seqType ${seqType}")
-        return referenceGenomeProjectSeqType.referenceGenome
+        ReferenceGenome referenceGenome = referenceGenomeProjectSeqType.referenceGenome
+        return referenceGenome
     }
 
     /**

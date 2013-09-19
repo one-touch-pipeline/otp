@@ -7,6 +7,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
@@ -29,7 +30,6 @@ class AlignmentPassServiceUnitTests {
     @Before
     void setUp() {
         alignmentPassService = new AlignmentPassService()
-        alignmentPassService.qualityAssessmentPassService = new QualityAssessmentPassService()
         alignmentPassService.referenceGenomeService = new ReferenceGenomeService()
         alignmentPassService.referenceGenomeService.configService = new ConfigService()
 
@@ -184,6 +184,7 @@ class AlignmentPassServiceUnitTests {
                         type: BamType.SORTED,
                         alignmentPass: alignmentPass,
                         withdrawn: false,
+                        qualityAssessmentStatus: QaProcessingStatus.NOT_STARTED
                         )
         bamFile.save(flush: true)
         alignmentPassService.alignmentPassFinished(alignmentPass)

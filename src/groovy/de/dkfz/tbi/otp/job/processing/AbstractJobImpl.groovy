@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.job.processing
 
 /**
  * Abstract Base class for all Job implementations.
- * 
+ *
  * This class can be derived by Job implementations which do not need any further
  * customization. By basing an implementation on this class the Job can concentrate on
  * implementing the execute method only. The abstract class takes care of ensuring that
@@ -62,7 +62,7 @@ abstract class AbstractJobImpl implements Job {
     /**
      * Adds an output parameter to the list of output parameters provided
      * by the Job implementation.
-     * 
+     *
      * If a parameter with the same key already exists, this parameter will be
      * replaced.
      * @param name The name of the ParameterType for which the parameter is going to be added
@@ -89,7 +89,7 @@ abstract class AbstractJobImpl implements Job {
     }
 
     /**
-     * 
+     *
      * @return List of input parameters set to the job
      */
     protected final Collection<Parameter> getInputParameters() {
@@ -107,63 +107,63 @@ abstract class AbstractJobImpl implements Job {
     @Override
     public final void start() throws InvalidStateException {
         switch (state) {
-        case ExecutionState.CREATED:
-            state = ExecutionState.STARTED
-            break
-        case ExecutionState.SUSPENDED:
-            state = ExecutionState.RESUMED
-            break
-        default:
-            throw new InvalidStateException("Cannot start the Job from state " + state)
+            case ExecutionState.CREATED:
+                state = ExecutionState.STARTED
+                break
+            case ExecutionState.SUSPENDED:
+                state = ExecutionState.RESUMED
+                break
+            default:
+                throw new InvalidStateException("Cannot start the Job from state " + state)
         }
     }
 
     @Override
     public final void end() throws InvalidStateException {
         switch (state) {
-        case ExecutionState.STARTED:
-        case ExecutionState.RESTARTED:
-        case ExecutionState.RESUMED:
-            state = ExecutionState.FINISHED
-            break
-        default:
-            throw new InvalidStateException("Cannot end the Job from state " + state)
+            case ExecutionState.STARTED:
+            case ExecutionState.RESTARTED:
+            case ExecutionState.RESUMED:
+                state = ExecutionState.FINISHED
+                break
+            default:
+                throw new InvalidStateException("Cannot end the Job from state " + state)
         }
     }
 
     @Override
     public final Set<Parameter> getOutputParameters() throws InvalidStateException {
         switch (state) {
-        case ExecutionState.FINISHED: // fall through
-        case ExecutionState.SUCCESS: // fall through
-        case ExecutionState.FAILURE:
-            return outputParameters
-        default:
-            throw new InvalidStateException("Cannot acces output parameters from state " + state)
+            case ExecutionState.FINISHED: // fall through
+            case ExecutionState.SUCCESS: // fall through
+            case ExecutionState.FAILURE:
+                return outputParameters
+            default:
+                throw new InvalidStateException("Cannot acces output parameters from state " + state)
         }
-        
+
     }
 
     @Override
     public final ProcessingStep getProcessingStep() {
-        return processingStep;
+        return processingStep
     }
 
     @Override
     public String getVersion() {
-        return "";
+        return ""
     }
 
-   /**
-    * Returns the parameter value or the associated class.
-    *
-    * The parameter value is the value of the instance the job has an instance of.
-    * If the associated parameter type has the className value set this one is returned
-    * instead of the parameter value. Therefore the return type of the method is generic.
-    * @param typeName The type name of the type to be returned a value of
-    * @return The parameter value or the class of the instance.
-    * @throws RuntimeException In case the parameter could not be found.
-    */
+    /**
+     * Returns the parameter value or the associated class.
+     *
+     * The parameter value is the value of the instance the job has an instance of.
+     * If the associated parameter type has the className value set this one is returned
+     * instead of the parameter value. Therefore the return type of the method is generic.
+     * @param typeName The type name of the type to be returned a value of
+     * @return The parameter value or the class of the instance.
+     * @throws RuntimeException In case the parameter could not be found.
+     */
     public <T> T getParameterValueOrClass(String typeName) {
         Parameter parameter = processingStep.input.find { it.type.name == typeName }
         if (!parameter) {

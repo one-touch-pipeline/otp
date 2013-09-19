@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import static org.springframework.util.Assert.notNull
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
@@ -17,11 +18,6 @@ class QualityAssessmentPassService {
         QualityAssessmentPass qualityAssessmentPass = new QualityAssessmentPass(identifier: numberOfpass, processedBamFile: processedBamFile)
         assertSave(qualityAssessmentPass)
         return qualityAssessmentPass
-    }
-
-    public void notStarted(ProcessedBamFile bamFile) {
-        bamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.NOT_STARTED
-        assertSave(bamFile)
     }
 
     public void passStarted(QualityAssessmentPass qualityAssessmentPass) {
@@ -52,5 +48,24 @@ class QualityAssessmentPassService {
             throw new SavingException(object.toString())
         }
         return object
+    }
+
+    /**
+     * @param bamFile, for which the qa results were calculated
+     * @return a sorted List in descending order (by identifier) of all QualityAssessmentPass, which were created for this ProcessedBamFile
+     */
+    public List<QualityAssessmentPass> allQualityAssessmentPasses(ProcessedBamFile bamFile) {
+        notNull(bamFile, "the input for the method allQualityAssessmentPasses is null")
+        return QualityAssessmentPass.findAllByProcessedBamFile(bamFile, [sort: "id", order: "desc"])
+    }
+
+    /**
+     * @param bamFile, for which the qa results were calculated
+     * @return the latest QualityAssessmentPass which was created for this ProcessedBamFile
+     */
+    public QualityAssessmentPass latestQualityAssessmentPass(ProcessedBamFile bamFile) {
+        notNull(bamFile, "the input for the method latestQualityAssessmentPasses is null")
+        //the output of allQualityAssessmentPasses needs to be sorted in descending order
+        return allQualityAssessmentPasses(bamFile).first()
     }
 }

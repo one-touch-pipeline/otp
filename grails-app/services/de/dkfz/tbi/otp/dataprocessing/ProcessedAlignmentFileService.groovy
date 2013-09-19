@@ -19,7 +19,7 @@ class ProcessedAlignmentFileService {
         return "${baseDir}/${middleDir}/${alignmentPass.getDirectory()}"
     }
 
-    private String getRunLaneDirectory(SeqTrack seqTrack) {
+    public String getRunLaneDirectory(SeqTrack seqTrack) {
         String runName = seqTrack.run.name
         String lane = seqTrack.laneId
         return "${runName}_${lane}"

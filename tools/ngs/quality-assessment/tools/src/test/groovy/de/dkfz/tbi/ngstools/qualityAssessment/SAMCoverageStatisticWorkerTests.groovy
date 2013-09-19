@@ -1,6 +1,6 @@
 package de.dkfz.tbi.ngstools.qualityAssessment
 
-import groovy.util.GroovyTestCase
+import groovy.util.GroovyTestCase;
 import net.sf.samtools.SAMRecord
 import net.sf.samtools.SAMSequenceRecord
 import org.junit.*
@@ -83,20 +83,20 @@ class SAMCoverageStatisticWorkerTests extends GroovyTestCase {
     @Test
     public void testCountCoverageIncreaseEven() {
         chromosome = new ChromosomeStatisticWrapper("TEST", 0)
-        chromosome.coverageTable = new long[11]
+        chromosome.coverageTable = new int[11]
         recordHeader.setSequenceLength(0)
         record.setDuplicateReadFlag(false)
         record.setMappingQuality(10)
         record.setAlignmentStart(100)
         samCoverageStatisticWorker.countCoverage(chromosome, record)
         List coverageList = chromosome.coverageTable
-        List expCoverageList = [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]
+        List expCoverageList = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
         assertEquals(expCoverageList, coverageList)
     }
 
     @Test
     public void testCountCoverageIncreaseOdd() {
-        chromosome.coverageTable = new long[11]
+        chromosome.coverageTable = new int[11]
         record.setDuplicateReadFlag(false)
         record.setMappingQuality(10)
         record.setAlignmentStart(49)

@@ -9,7 +9,7 @@ class MergedAlignmentDataFileService {
      * This function returns all alignment files (from project folder)
      * belonging to a given SeqScan. Files are selected based on their FileType.
      * List of fileTypes with alignment is provided by FileTypeService
-     * 
+     *
      * @param scan
      * @return
      */
@@ -43,6 +43,8 @@ class MergedAlignmentDataFileService {
     }
 
     String buildRelativePath(SeqType type, Sample sample) {
+        // this method is also used in the ProcessedMergedBamFileService,
+        // if this method is changed make sure that the path in the ProcessedMergedBamFileService is still correct
         String projectDir = sample.individual.project.dirName
         String pid = sample.individual.pid
         String sampleType = sample.sampleType.name.toLowerCase()

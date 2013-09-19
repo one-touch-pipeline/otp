@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.testing
 
-import org.codehaus.groovy.grails.commons.GrailsApplication
 import static org.springframework.util.Assert.*
+
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 /**
  * This is a first version of a class helping to call groovy scripts

@@ -19,10 +19,10 @@ class MergingWorkPackageService {
         notNull(seqType, "the input seqType for the method createWorkPackage is null")
         notNull(criteria, "the input criteria for the method createWorkPackage is null")
         MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
-                        sample: sample,
-                        seqType: seqType,
-                        mergingCriteria: criteria
-                        )
+                sample: sample,
+                seqType: seqType,
+                mergingCriteria: criteria
+                )
         assertSave(mergingWorkPackage)
     }
 
@@ -32,5 +32,13 @@ class MergingWorkPackageService {
             throw new SavingException(object.toString())
         }
         return object
+    }
+
+    /**
+     * @return a list of workpackages, to which the processedMergedBamFiles belong to, which are currently in transfer
+     */
+    List<ProcessedMergedBamFile> workPackagesOfFilesInTransfer() {
+        List<ProcessedMergedBamFile> filesInTransfer = ProcessedMergedBamFile.findAllByFileOperationStatus(AbstractBamFile.FileOperationStatus.INPROGRESS)
+        return filesInTransfer ? filesInTransfer*.mergingPass*.mergingSet*.mergingWorkPackage : []
     }
 }

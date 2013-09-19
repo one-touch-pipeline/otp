@@ -1,0 +1,125 @@
+package de.dkfz.tbi.otp.dataprocessing
+
+import static org.junit.Assert.*
+import grails.util.Environment
+import org.junit.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
+import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
+import de.dkfz.tbi.otp.ngsdata.*
+
+class ProcessedMergedBamFileQaFileServiceTests {
+
+    ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
+
+    final static String directory = "/tmp/otp-unit-test/pmbfs/processing/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0/QualityAssessment/pass1"
+
+    @Test(expected = IllegalArgumentException)
+    void testQaResultsMd5sumFileBamFileNull() {
+        processedMergedBamFileQaFileService.qaResultsMd5sumFile(null)
+    }
+
+    @Test
+    void testQaResultsMd5sumFile() {
+        MergingPass mergingPass = createMergingPass()
+        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
+        String destinationExp = "${directory}/MD5SUMS"
+        String destinationAct = processedMergedBamFileQaFileService.qaResultsMd5sumFile(mergedBamFile)
+        assertEquals(destinationExp, destinationAct)
+    }
+
+    private MergingPass createMergingPass() {
+        Realm realm = new Realm()
+        realm.cluster = Realm.Cluster.DKFZ
+        realm.rootPath = "/tmp/otp-unit-test/pmfs/root"
+        realm.processingRootPath = "/tmp/otp-unit-test/pmbfs/processing"
+        realm.programsRootPath = ""
+        realm.webHost = ""
+        realm.host = ""
+        realm.port = 8080
+        realm.unixUser = ""
+        realm.timeout = 1000
+        realm.pbsOptions = ""
+        realm.name = "realmName"
+        realm.operationType = Realm.OperationType.DATA_PROCESSING
+        realm.env = Environment.getCurrent().getName()
+        realm.save([flush: true])
+
+        Project project = new Project(
+                        name: "project",
+                        dirName: "project-dir",
+                        realmName: "realmName"
+                        )
+        assertNotNull(project.save([flush: true]))
+
+        Individual individual = new Individual(
+                        pid: "patient",
+                        mockPid: "mockPid",
+                        mockFullName: "mockFullName",
+                        type: Individual.Type.UNDEFINED,
+                        project: project
+                        )
+        assertNotNull(individual.save([flush: true]))
+
+        SampleType sampleType = new SampleType(
+                        name: "sample-type"
+                        )
+        assertNotNull(sampleType.save([flush: true]))
+
+        Sample sample = new Sample(
+                        individual: individual,
+                        sampleType: sampleType
+                        )
+        assertNotNull(sample.save([flush: true]))
+
+        SeqType seqType = new SeqType(
+                        name: "seq-type",
+                        libraryLayout: "library",
+                        dirName: "seq-type-dir"
+                        )
+        assertNotNull(seqType.save([flush: true]))
+
+        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+                        sample: sample,
+                        seqType: seqType
+                        )
+        assertNotNull(mergingWorkPackage.save([flush: true]))
+
+        MergingSet mergingSet = new MergingSet(
+                        identifier: 0,
+                        mergingWorkPackage: mergingWorkPackage,
+                        status: State.NEEDS_PROCESSING
+                        )
+        assertNotNull(mergingSet.save([flush: true]))
+
+        MergingPass mergingPass = new MergingPass(
+                        identifier: 0,
+                        mergingSet: mergingSet
+                        )
+        assertNotNull(mergingPass.save([flush: true]))
+        return mergingPass
+    }
+
+    private ProcessedMergedBamFile createProcessedMergedBamFile(MergingPass mergingPass) {
+        ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
+                        mergingPass: mergingPass,
+                        fileExists: true,
+                        type: BamType.MDUP,
+                        qualityAssessmentStatus: QaProcessingStatus.FINISHED,
+                        fileOperationStatus: FileOperationStatus.NEEDS_PROCESSING,
+                        md5sum: null,
+                        status: AbstractBamFile.State.PROCESSED
+                        )
+        assertNotNull(processedMergedBamFile.save([flush: true]))
+
+        QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass(
+                        processedMergedBamFile: processedMergedBamFile,
+                        identifier: 1,
+                        description: 'QualtiyAssessmentMergedPassDescription'
+                        )
+        assertNotNull(qualityAssessmentMergedPass.save([flush: true]))
+
+        return processedMergedBamFile
+    }
+}

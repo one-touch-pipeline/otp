@@ -1,17 +1,13 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.job.processing.ExecutionService.ClusterJobStatus
-import de.dkfz.tbi.otp.ngsdata.Realm
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 import static org.junit.Assert.*
-
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import org.junit.*
+import de.dkfz.tbi.otp.job.processing.ExecutionService.ClusterJobStatus
 
 @TestMixin(GrailsUnitTestMixin)
-class ExecutionServiceTests {
+class ExecutionServiceUnitTests {
 
     ExecutionService executionService = new ExecutionService()
 
@@ -24,12 +20,12 @@ class ExecutionServiceTests {
 
     String qstatOutputForJobFound(ClusterJobStatus clusterJobStatus) {
         return qstatOutputForJobFound(
-            "anyJobId",
-            "anyJobName",
-            "anyUser",
-            "anyTime",
-            clusterJobStatus.value,
-             "anyQueue")
+        "anyJobId",
+        "anyJobName",
+        "anyUser",
+        "anyTime",
+        clusterJobStatus.value,
+        "anyQueue")
     }
 
     String qstatOutputForJobNotFound() {

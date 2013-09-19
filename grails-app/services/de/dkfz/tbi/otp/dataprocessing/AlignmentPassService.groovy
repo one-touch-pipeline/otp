@@ -15,8 +15,7 @@ class AlignmentPassService {
 
     def configService
     def processingOptionService
-    ReferenceGenomeService referenceGenomeService
-    QualityAssessmentPassService qualityAssessmentPassService
+    def referenceGenomeService
 
     public AlignmentPass createAlignmentPass() {
         def state = SeqTrack.DataProcessingState.NOT_STARTED
@@ -35,13 +34,12 @@ class AlignmentPassService {
     }
 
     public void alignmentPassFinished(AlignmentPass alignmentPass) {
-        notNull(alignmentPass, "the alignmentPass for the method alignmentPassFinished ist null")
         update(alignmentPass, SeqTrack.DataProcessingState.FINISHED)
-        ProcessedBamFile bamFile = ProcessedBamFile.findByAlignmentPass(alignmentPass)
-        qualityAssessmentPassService.notStarted(bamFile)
     }
 
     private void update(AlignmentPass alignmentPass, SeqTrack.DataProcessingState state) {
+        notNull(alignmentPass, "The input alignmentPass of the method update is null")
+        notNull(state, "The input state of the method update is null")
         SeqTrack seqTrack = alignmentPass.seqTrack
         seqTrack.alignmentState = state
         assert(seqTrack.save(flush: true))

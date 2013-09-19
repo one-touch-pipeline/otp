@@ -1,11 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.job.processing.ProcessingException
 import grails.util.Environment
 /**
  * This service knows all the configuration parameters like root paths,
  * hosts names, user ids
- * 
+ *
  *
  */
 class ConfigService {

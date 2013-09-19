@@ -1,10 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.junit.Assert.*
+import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
-import org.junit.*
 
 class AbstractBamFileServiceTests {
 
@@ -273,6 +273,11 @@ class AbstractBamFileServiceTests {
         assertEquals(processedBamFile.status, AbstractBamFile.State.NEEDS_PROCESSING)
         abstractBamFileService.assignedToMergingSet(processedBamFile)
         assertEquals(processedBamFile.status, AbstractBamFile.State.PROCESSED)
+    }
+
+    @Test @Ignore
+    void testFindAllByProcessedMergedBamFile() {
+
     }
 
 }

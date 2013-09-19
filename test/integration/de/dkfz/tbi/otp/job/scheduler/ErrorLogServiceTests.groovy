@@ -60,7 +60,7 @@ class ErrorLogServiceTests {
         def timestamps = root.timestamp.findAll{ it }
         timestamps.each {
             // Test whether date stored in file is really a date and as such being parsable as Date
-            SimpleDateFormat sdfToDate = new SimpleDateFormat("E MMM d h:m:s Z yyyy", Locale.ENGLISH)
+            SimpleDateFormat sdfToDate = new SimpleDateFormat("E MMM d h:m:s Z yyyy")
             Date date = sdfToDate.parse(it.text())
             assertSame(new Date().class, date.class)
         }

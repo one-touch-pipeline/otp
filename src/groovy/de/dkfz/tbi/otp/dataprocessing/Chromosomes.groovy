@@ -14,6 +14,10 @@ enum Chromosomes {
         this.chr = chr
     }
 
+    public getAlias() {
+        return chr
+    }
+
     static List<Chromosomes> numeric() {
         List<Chromosomes> numericChromosomes = []
         Chromosomes.values().each { Chromosomes chromosome ->

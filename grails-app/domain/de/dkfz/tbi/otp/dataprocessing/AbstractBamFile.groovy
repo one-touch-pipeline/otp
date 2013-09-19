@@ -25,6 +25,26 @@ class AbstractBamFile {
         PROCESSED
     }
 
+    enum FileOperationStatus {
+        /**
+         * default value -> state of the {@link AbstractBamFile} when it is created (declared)
+         * no processing has been started on the bam file
+         */
+        DECLARED,
+        /**
+         * Files with this status need to be copied, moved or deleted.
+         */
+        NEEDS_PROCESSING,
+        /**
+         * Files are in the process of being moved, copied or deleted.
+         */
+        INPROGRESS,
+        /**
+         * Files are moved, copied or deleted.
+         */
+        PROCESSED
+    }
+
     enum BamType {
         SORTED,
         MDUP,
@@ -49,12 +69,18 @@ class AbstractBamFile {
     boolean hasMetricsFile = false
     boolean withdrawn = false
 
+    /** Time stamp of deletion */
+    Date deletionDate
+
     QaProcessingStatus qualityAssessmentStatus = QaProcessingStatus.UNKNOWN
     QualityControl qualityControl = QualityControl.NOT_DONE
+
     /**
      * this flag stores the actual state of a {@link ProcessedBamFile}
      */
     State status = State.DECLARED
+
+    FileOperationStatus fileOperationStatus = FileOperationStatus.DECLARED
 
     static constraints = {
         hasMetricsFile validator: { val, obj ->
@@ -72,5 +98,6 @@ class AbstractBamFile {
             }
             return true
         }
+        deletionDate(nullable: true)
     }
 }

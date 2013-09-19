@@ -1,16 +1,14 @@
 package de.dkfz.tbi.otp.job.jobs.examplePBS
 
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
+import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.job.processing.MonitoringJob
 import de.dkfz.tbi.otp.job.processing.RestartableJob
 import de.dkfz.tbi.otp.job.scheduler.PbsMonitorService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
-
-import org.springframework.beans.factory.annotation.Autowired
-
-import java.util.concurrent.locks.Lock
-import java.util.concurrent.locks.ReentrantLock
 
 @RestartableJob
 class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob {
@@ -28,7 +26,6 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl implements Monitorin
     public void execute() throws Exception {
         String jobIds = getParameterValueOrClass("__pbsIds")
         queuedJobIds = parseInputString(jobIds)
-
         pbsMonitorService.monitor(queuedJobIds, this)
     }
 

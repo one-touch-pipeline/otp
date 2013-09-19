@@ -25,6 +25,21 @@ class AbstractBamFileService {
         return findByMergingSet(processedMergedBamFile.mergingPass.mergingSet)
     }
 
+    /**
+     * returns a list of all single lane bam files, which are merged in several step to the final processedMergedBamFile.
+     * It is assumed that only new lanes are merged with the old mergedBamFile to a new one.
+     */
+    public List<ProcessedBamFile> findAllByProcessedMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {
+        notNull(processedMergedBamFile, "The parameter processedMergedBamFile is not allowed to be null")
+        List<AbstractBamFile> results = [processedMergedBamFile]
+        while (results.find { it instanceof ProcessedMergedBamFile }) {
+            ProcessedMergedBamFile tempFile = results.find { it instanceof ProcessedMergedBamFile }
+            results = results - tempFile
+            results.addAll(findByProcessedMergedBamFile(tempFile))
+        }
+        return results
+    }
+
     private def assertSave(def object) {
         object = object.save(flush: true)
         if (!object) {
@@ -32,5 +47,4 @@ class AbstractBamFileService {
         }
         return object
     }
-
 }

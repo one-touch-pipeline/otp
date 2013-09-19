@@ -8,7 +8,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 class MergingCreateOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
 
     @Autowired
-    ProcessedMergingFileService processedMergingFileService
+    ProcessedMergedBamFileService processedMergedBamFileService
 
     @Autowired
     MergingPassService mergingPassService
@@ -24,7 +24,7 @@ class MergingCreateOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
         //Because of bug OTP-397 we set the state again to inprocess
         mergingPassService.mergingPassStarted(mergingPass)
 
-        String dir = processedMergingFileService.directory(mergingPass)
+        String dir = processedMergedBamFileService.directory(mergingPass)
         Realm realm = mergingPassService.realmForDataProcessing(mergingPass)
         executeOnRealm(dir, realm)
 

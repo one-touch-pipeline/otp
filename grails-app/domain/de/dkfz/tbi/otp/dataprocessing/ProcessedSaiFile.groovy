@@ -9,6 +9,9 @@ class ProcessedSaiFile {
     Date dateFromFileSystem
     long fileSize = -1
 
+    /** Time stamp of deletion */
+    Date deletionDate
+
     static belongsTo = [
         alignmentPass: AlignmentPass,
         dataFile: DataFile
@@ -16,5 +19,6 @@ class ProcessedSaiFile {
 
     static constraints = {
         dateFromFileSystem(nullable: true)
+        deletionDate(nullable: true)
     }
 }

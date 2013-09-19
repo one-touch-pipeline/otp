@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
+import static org.springframework.util.Assert.notNull
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
 
 class QualityAssessmentMergedPassService {
 
@@ -48,5 +49,24 @@ class QualityAssessmentMergedPassService {
             throw new SavingException(object.toString())
         }
         return object
+    }
+
+    /**
+     * @param bamFile, for which the qa results were calculated
+     * @return a sorted List (by identifier, in descending order) of all QualityAssessmentPass, which were created for this ProcessedMergedBamFile
+     */
+    public List<QualityAssessmentMergedPass> allQualityAssessmentMergedPasses(ProcessedMergedBamFile bamFile) {
+        notNull(bamFile, "the input for the method allQualityAssessmentPasses is null")
+        return QualityAssessmentMergedPass.findAllByProcessedMergedBamFile(bamFile, [sort: "id", order: "desc"])
+    }
+
+    /**
+     * @param bamFile, for which the qa results were calculated
+     * @return the latest QualityAssessmentPass which was created for this ProcessedMergedBamFile
+     */
+    public QualityAssessmentMergedPass latestQualityAssessmentMergedPass(ProcessedMergedBamFile bamFile) {
+        notNull(bamFile, "the input for the method latestQualityAssessmentPasses is null")
+        //the output of allQualityAssessmentPasses needs to be sorted in descending order
+        return allQualityAssessmentMergedPasses(bamFile).first()
     }
 }

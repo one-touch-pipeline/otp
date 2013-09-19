@@ -2,10 +2,10 @@ package de.dkfz.tbi.otp.job.processing
 
 import static org.junit.Assert.*
 import org.junit.*
-import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption;
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.Realm.OperationType
+import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 
 class ExecutionServiceTests extends AbstractIntegrationTest {
 
@@ -17,20 +17,20 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
     @Before
     void setUp() {
         realm = new Realm(
-            name: "DKFZ",
-            env: "development",
-            operationType: OperationType.DATA_MANAGEMENT,
-            cluster: Realm.Cluster.DKFZ,
-            rootPath: "/",
-            processingRootPath: "/test",
-            programsRootPath: "/testPrograms",
-            webHost: "http://test.me",
-            host: grailsApplication.config.otp.pbs.ssh.host,
-            port: 22,
-            unixUser: grailsApplication.config.otp.pbs.ssh.unixUser,
-            timeout: 100,
-            pbsOptions: "{-l: {nodes: '1:lsdf', walltime: '00:00:30'}}"
-        )
+                        name: "DKFZ",
+                        env: "development",
+                        operationType: OperationType.DATA_MANAGEMENT,
+                        cluster: Realm.Cluster.DKFZ,
+                        rootPath: "/",
+                        processingRootPath: "/test",
+                        programsRootPath: "/testPrograms",
+                        webHost: "http://test.me",
+                        host: grailsApplication.config.otp.pbs.ssh.host,
+                        port: 22,
+                        unixUser: grailsApplication.config.otp.pbs.ssh.unixUser,
+                        timeout: 100,
+                        pbsOptions: "{-l: {nodes: '1:lsdf', walltime: '00:00:30'}}"
+                        )
     }
 
     @SuppressWarnings("EmptyMethod")
@@ -151,11 +151,11 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         assertEquals(extractedPbsId, extractedPbsId_qstat)
 
         ProcessingOption processingOption = new ProcessingOption(
-            name: PbsOptionMergingService.PBS_PREFIX + "job",
-            type: Realm.Cluster.DKFZ.toString(),
-            value: "{-l: {walltime: '00:01:00'}}",
-            comment: 'comment'
-        )
+                        name: PbsOptionMergingService.PBS_PREFIX + "job",
+                        type: Realm.Cluster.DKFZ.toString(),
+                        value: "{-l: {walltime: '00:01:00'}}",
+                        comment: 'comment'
+                        )
         assertNotNull(processingOption.save())
         // Send script to pbs
         response = executionService.executeJob(realm, script, "job")

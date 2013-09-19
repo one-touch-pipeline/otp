@@ -9,6 +9,7 @@ class ProcessedBamFileService {
 
     ProcessedAlignmentFileService processedAlignmentFileService
     ConfigService configService
+    AbstractBamFileService abstractBamFileService
 
     public String getFilePath(ProcessedBamFile bamFile) {
         String dir = getDirectory(bamFile)
@@ -130,6 +131,14 @@ class ProcessedBamFileService {
 
     public SeqType seqType(ProcessedBamFile processedBamFile) {
         return processedBamFile.alignmentPass.seqTrack.seqType
+    }
+
+    public SeqTrack seqTrack(ProcessedBamFile processedBamFile) {
+        return processedBamFile.alignmentPass.seqTrack
+    }
+
+    public Sample sample(ProcessedBamFile processedBamFile) {
+        return processedBamFile.alignmentPass.seqTrack.sample
     }
 
     /**
