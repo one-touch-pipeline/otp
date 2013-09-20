@@ -114,7 +114,7 @@ class MetaDataValidationService {
         if (value.isInteger()) {
             return true
         }
-        List<String> allowedFillers = ["n/a", "N/A", "N.A."]
+        List<String> allowedFillers = ["n/a", "N/A", "n.a.", "N.A.", "na", "NA"]
         if (allowedFillers.contains(value)) {
             return true // essentially shall be false
         }
