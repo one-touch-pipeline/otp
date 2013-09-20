@@ -23,4 +23,8 @@ class MergingPass {
     static constraints = {
         description(nullable: true)
     }
+
+    public String toString() {
+       return "pass:${identifier} - ${mergingSet.mergingWorkPackage.seqType} - ${mergingSet.mergingWorkPackage.sample}"
+     }
 }
