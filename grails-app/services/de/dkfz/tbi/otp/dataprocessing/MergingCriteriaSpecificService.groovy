@@ -2,8 +2,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import static org.springframework.util.Assert.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage.MergingCriteria
-import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
@@ -42,8 +40,10 @@ class MergingCriteriaSpecificService {
             alignmentPass {
                 seqTrack {
                     eq("sample", bamFile.alignmentPass.seqTrack.sample)
-                    eq("seqPlatform", bamFile.alignmentPass.seqTrack.seqPlatform)
                     eq("seqType", bamFile.alignmentPass.seqTrack.seqType)
+                    seqPlatform {
+                        eq("name", bamFile.alignmentPass.seqTrack.seqPlatform.name)
+                    }
                 }
             }
         }
@@ -62,16 +62,16 @@ class MergingCriteriaSpecificService {
      */
     boolean validateBamFilesForMergingCriteriaDEFAULT(MergingSet mergingSet) {
         notNull(mergingSet, "the input mergingSet for the method validateBamFilesForMergingCriteriaDEFAULT is null")
-        SeqPlatform seqPlatform = null
+        String seqPlatformName
         List<ProcessedBamFile> processedBamFiles = processedBamFileService.findByMergingSet(mergingSet)
         for (bamFile in processedBamFiles) {
             SeqTrack seqTrack = bamFile.alignmentPass.seqTrack
-            if (seqPlatform) {
-                if (seqPlatform != seqTrack.seqPlatform) {
+            if (seqPlatformName) {
+                if (seqPlatformName != seqTrack.seqPlatform.name) {
                     return false
                 }
             } else {
-                seqPlatform = seqTrack.seqPlatform
+                seqPlatformName = seqTrack.seqPlatform.name
             }
             if (seqTrack.sample != mergingSet.mergingWorkPackage.sample) {
                 return false

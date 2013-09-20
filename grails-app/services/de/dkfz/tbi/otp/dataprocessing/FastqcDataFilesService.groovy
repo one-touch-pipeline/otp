@@ -37,7 +37,7 @@ class FastqcDataFilesService {
 
     private String fastqcFileName(DataFile dataFile) {
         String fileName = dataFile.fileName
-        String body = fileName.substring(0, fileName.indexOf("."))
+        String body = fileName.substring(0, fileName.lastIndexOf(".fastq."))
         return "${body}${fastqcFileSuffix}"
     }
 
