@@ -62,16 +62,16 @@ class MergingCriteriaSpecificService {
      */
     boolean validateBamFilesForMergingCriteriaDEFAULT(MergingSet mergingSet) {
         notNull(mergingSet, "the input mergingSet for the method validateBamFilesForMergingCriteriaDEFAULT is null")
-        SeqPlatform seqPlatform = null
+        String seqPlatformName
         List<ProcessedBamFile> processedBamFiles = processedBamFileService.findByMergingSet(mergingSet)
         for (bamFile in processedBamFiles) {
             SeqTrack seqTrack = bamFile.alignmentPass.seqTrack
-            if (seqPlatform) {
-                if (seqPlatform != seqTrack.seqPlatform) {
+            if (seqPlatformName) {
+                if (seqPlatformName != seqTrack.seqPlatform.name) {
                     return false
                 }
             } else {
-                seqPlatform = seqTrack.seqPlatform
+                seqPlatformName = seqTrack.seqPlatform.name
             }
             if (seqTrack.sample != mergingSet.mergingWorkPackage.sample) {
                 return false

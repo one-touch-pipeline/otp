@@ -436,6 +436,49 @@ class MergingCriteriaSpecificServiceTests {
         assertFalse(mergingCriteriaSpecificService.validateBamFilesForMergingCriteriaDEFAULT(mergingSet))
     }
 
+
+    @Test
+    void testValidateBamFilesForMergingCriteriaDEFAULTUnequalPlatformEqualName() {
+        SeqPlatform seqPlatform2 = new SeqPlatform(
+                        name: "name",
+                        model: "model2"
+                        )
+        assertNotNull(seqPlatform2.save([flush: true, failOnError: true]))
+
+        SeqTrack seqTrack2 = new SeqTrack(
+                        laneId: "laneId",
+                        run: run,
+                        sample: sample,
+                        seqType: seqType,
+                        seqPlatform: seqPlatform2,
+                        pipelineVersion: softwareTool
+                        )
+        assertNotNull(seqTrack2.save([flush: true, failOnError: true]))
+
+        AlignmentPass alignmentPass2 = new AlignmentPass(
+                        identifier: 2,
+                        seqTrack: seqTrack2,
+                        description: "test"
+                        )
+        assertNotNull(alignmentPass2.save([flush: true, failOnError: true]))
+
+        ProcessedBamFile processedBamFile2 = new ProcessedBamFile(
+                        alignmentPass: alignmentPass2,
+                        type: BamType.SORTED,
+                        status: State.NEEDS_PROCESSING
+                        )
+        assertNotNull(processedBamFile2.save([flush: true, failOnError: true]))
+
+        MergingSetAssignment mergingSetAssignment2 = new MergingSetAssignment(
+                        mergingSet: mergingSet,
+                        bamFile: processedBamFile2
+                        )
+        assertNotNull(mergingSetAssignment2.save([flush: true, failOnError: true]))
+
+        assertTrue(mergingCriteriaSpecificService.validateBamFilesForMergingCriteriaDEFAULT(mergingSet))
+    }
+
+
     @Test
     void testValidateBamFilesForMergingCriteriaDEFAULTWrongSample() {
         Sample sample2 = new Sample(
