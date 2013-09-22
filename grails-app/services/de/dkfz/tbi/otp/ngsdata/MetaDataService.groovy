@@ -2,11 +2,10 @@ package de.dkfz.tbi.otp.ngsdata
 
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
-
+import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.access.prepost.PreFilter
-import org.springframework.security.access.prepost.PostAuthorize
-
+import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.utils.ReferencedClass
 
 class MetaDataService {
@@ -130,7 +129,7 @@ class MetaDataService {
             if (file.used) {
                 return
             }
-            log.debug("\tfound md souce file ${file.fileName}")
+            log.debug("\tfound md source file ${file.fileName}")
             processMetaDataFile(file)
             run.save(flush: true)
         }
@@ -231,7 +230,24 @@ class MetaDataService {
             }
             keys << key
         }
+        assertAllNecessaryKeysExist(keys)
         keys
+    }
+
+    /**
+     * Checks, if all necessary columns are provided
+     */
+    private void assertAllNecessaryKeysExist(List<MetaDataKey> metaDataKey) {
+        List<String> stringKeys = metaDataKey*.name
+        List<String> missedKeys = []
+        MetaDataColumn.values().each {
+            if (!stringKeys.contains(it.name())) {
+                missedKeys << it.name()
+            }
+        }
+        if (missedKeys) {
+            throw new ProcessingException("The following keys are missed in the metadata file: ${missedKeys}")
+        }
     }
 
     /**
@@ -387,7 +403,7 @@ class MetaDataService {
     }
 
     /**
-     * Assign a file type object to e given DataFile
+     * Assign a file type object to a given DataFile
      * the assignment is based on two sources of information:
      * file name and if the file comes from "fastq" or "align"
      * meta-data file

@@ -9,7 +9,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 
 class SeqTrackServiceTests extends AbstractIntegrationTest {
 
-    def seqTrackService
+    SeqTrackService seqTrackService
 
     File dataPath
     File mdPath
@@ -17,16 +17,16 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
     @Before
     void setUp() {
         // TODO needs rewritting
-        if(!new File("./target/otp/dataPath").isDirectory()) {
-            new File("./target/otp/dataPath").mkdirs()
-            assertTrue(new File("/tmp/otp/dataPath").isDirectory())
+        dataPath = new File("/tmp/otp/dataPath")
+        mdPath = new File("/tmp/otp/mdPath")
+        if(!dataPath.isDirectory()) {
+            dataPath.mkdirs()
+            assertTrue(dataPath.isDirectory())
         }
-        if(!new File("./target/otp/mdPath").isDirectory()) {
-            new File("./target/otp/mdPath").mkdirs()
-            assertTrue(new File("/tmp/otp/mdPath").isDirectory())
+        if(!mdPath.isDirectory()) {
+            mdPath.mkdirs()
+            assertTrue(mdPath.isDirectory())
         }
-        dataPath = new File("./target/otp/dataPath")
-        mdPath = new File("./target/otp/mdPath")
     }
 
     @After
@@ -177,4 +177,264 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assert(metaDataEntry8.save())
         seqTrackService.buildSequenceTracks(run.id)
     }
+
+    void testAssertConsistentLibraryPreparationKitConsistent() {
+        MetaDataKey metaDataKey = new MetaDataKey(name: "LIB_PREP_KIT")
+        assertNotNull(metaDataKey.save())
+        String libraryPreparationKitSomething = "something"
+        DataFile dataFileR1 = new DataFile(fileName: "1_ACTGTG_L005_R1_complete_filtered.fastq.gz")
+        assertNotNull(dataFileR1.save())
+        MetaDataEntry metaDataEntry = new MetaDataEntry(value: libraryPreparationKitSomething, dataFile: dataFileR1, key: metaDataKey, source: MetaDataEntry.Source.SYSTEM)
+        assertNotNull(metaDataEntry.save())
+        DataFile dataFileR2 = new DataFile(fileName: "1_ACTGTG_L005_R2_complete_filtered.fastq.gz")
+        assertNotNull(dataFileR2.save())
+        metaDataEntry = new MetaDataEntry(value: libraryPreparationKitSomething, dataFile: dataFileR2, key: metaDataKey, source: MetaDataEntry.Source.SYSTEM)
+        assertNotNull(metaDataEntry.save())
+
+        List<DataFile> dataFiles = [dataFileR1, dataFileR2]
+        seqTrackService.assertConsistentLibraryPreparationKit(dataFiles)
+    }
+
+    void testAssertConsistentLibraryPreparationKitNotConsistent() {
+        MetaDataKey metaDataKey = new MetaDataKey(name: "LIB_PREP_KIT")
+        assertNotNull(metaDataKey.save())
+
+        String libraryPreparationKitSomething = "something"
+        DataFile dataFileR1 = new DataFile(fileName: "1_ATCACG_L005_R1_complete_filtered.fastq.gz")
+        assertNotNull(dataFileR1.save())
+        MetaDataEntry metaDataEntry = new MetaDataEntry(value: libraryPreparationKitSomething, dataFile: dataFileR1, key: metaDataKey, source: MetaDataEntry.Source.SYSTEM)
+        assertNotNull(metaDataEntry.save())
+
+        String libraryPreparationKitDifferent = "different"
+        DataFile dataFileR2 = new DataFile(fileName: "1_ATCACG_L005_R2_complete_filtered.fastq.gz")
+        assertNotNull(dataFileR2.save())
+        metaDataEntry = new MetaDataEntry(value: libraryPreparationKitDifferent, dataFile: dataFileR2, key: metaDataKey, source: MetaDataEntry.Source.SYSTEM)
+        assertNotNull(metaDataEntry.save())
+
+        List<DataFile> dataFiles = [dataFileR1, dataFileR2]
+        shouldFail(ProcessingException) {
+            seqTrackService.assertConsistentLibraryPreparationKit(dataFiles)
+        }
+    }
+
+    void testCreateSeqTrackNoExome() {
+        Map data = createData()
+        createMetaData(data.dataFile, "")
+        SeqTrack seqTrack = seqTrackService.createSeqTrack(
+                        data.dataFile,
+                        data.run,
+                        data.sample,
+                        data.seqType,
+                        "1",
+                        data.softwareTool
+                        )
+        assertNotNull(seqTrack)
+        assertEquals(SeqTrack.class, seqTrack.class)
+    }
+
+    void testCreateSeqTrackNoExomeInvalid() {
+        Map data = createData()
+        createMetaData(data.dataFile, "")
+        shouldFail(IllegalArgumentException.class) {
+            seqTrackService.createSeqTrack(
+                            data.dataFile,
+                            data.run,
+                            null,
+                            data.seqType,
+                            "1",
+                            data.softwareTool
+                            )
+        }
+    }
+
+    void testCreateSeqTrackNoExomeNo_LIB_PREP_KIT_MetaData() {
+        Map data = createData()
+        shouldFail(ProcessingException.class) {
+            seqTrackService.createSeqTrack(
+                            data.dataFile,
+                            data.run,
+                            data.sample,
+                            data.seqType,
+                            "1",
+                            data.softwareTool
+                            )
+        }
+    }
+
+    void testCreateSeqTrackExomeByKit() {
+        Map data = createData()
+        createMetaData(data.dataFile, "ExomeEnrichmentKit")
+        data.seqType.name = SeqTypeNames.EXOME.seqTypeName
+        assertNotNull(data.seqType.save([flush: true]))
+
+        SeqTrack seqTrack = seqTrackService.createSeqTrack(
+                        data.dataFile,
+                        data.run,
+                        data.sample,
+                        data.seqType,
+                        "1",
+                        data.softwareTool
+                        )
+        assertNotNull(seqTrack)
+        assertEquals(ExomeSeqTrack.class, seqTrack.class)
+    }
+
+    void testCreateSeqTrackExomeByKitIdentifier() {
+        Map data = createData()
+        createMetaData(data.dataFile, "ExomeEnrichmentKitIdentifier")
+        data.seqType.name = SeqTypeNames.EXOME.seqTypeName
+        assertNotNull(data.seqType.save([flush: true]))
+
+        SeqTrack seqTrack = seqTrackService.createSeqTrack(
+                        data.dataFile,
+                        data.run,
+                        data.sample,
+                        data.seqType,
+                        "1",
+                        data.softwareTool
+                        )
+        assertNotNull(seqTrack)
+        assertEquals(ExomeSeqTrack.class, seqTrack.class)
+    }
+
+    void testCreateSeqTrackExomeUnknownValue() {
+        Map data = createData()
+        createMetaData(data.dataFile, "unknown")
+        data.seqType.name = SeqTypeNames.EXOME.seqTypeName
+        assertNotNull(data.seqType.save([flush: true]))
+
+        shouldFail(IllegalArgumentException.class) {
+            seqTrackService.createSeqTrack(
+                            data.dataFile,
+                            data.run,
+                            data.sample,
+                            data.seqType,
+                            "1",
+                            data.softwareTool
+                            )
+        }
+    }
+
+    void testCreateSeqTrackExomeInvalid() {
+        Map data = createData()
+        createMetaData(data.dataFile)
+        data.seqType.name = SeqTypeNames.EXOME.seqTypeName
+        assertNotNull(data.seqType.save([flush: true]))
+
+        shouldFail(IllegalArgumentException.class) {
+            seqTrackService.createSeqTrack(
+                            data.dataFile,
+                            data.run,
+                            null,
+                            data.seqType,
+                            "1",
+                            data.softwareTool
+                            )
+        }
+    }
+
+    private Map createData() {
+        Map map = [:]
+        Project project = new Project(
+                        name: "name",
+                        dirName: "dirName",
+                        realmName: "realmName"
+                        )
+        assertNotNull(project.save([flush: true]))
+
+        SeqPlatform seqPlatform = new SeqPlatform(
+                        name: "seqplatform",
+                        model: "model"
+                        )
+        assertNotNull(seqPlatform.save([flush: true]))
+
+        SeqCenter seqCenter = new SeqCenter(
+                        name: "seqCenter",
+                        dirName: "dirName"
+                        )
+        assertNotNull(seqCenter.save([flush: true]))
+
+        Run run = new Run(
+                        name: "run",
+                        seqCenter: seqCenter,
+                        seqPlatform: seqPlatform,
+                        storageRealm: Run.StorageRealm.DKFZ
+                        )
+        assertNotNull(run.save([flush: true]))
+
+        Individual individual = new Individual(
+                        pid: "pid",
+                        mockPid: "mockPid",
+                        mockFullName: "mockFullName",
+                        type: de.dkfz.tbi.otp.ngsdata.Individual.Type.REAL,
+                        project: project
+                        )
+        assertNotNull(individual.save([flush: true]))
+
+        SampleType sampleType = new SampleType(
+                        name: "sampletype"
+                        )
+        assertNotNull(sampleType.save([flush: true]))
+
+        Sample sample = new Sample(
+                        individual: individual,
+                        sampleType: sampleType
+                        )
+        assertNotNull(sample.save([flush: true]))
+
+        SeqType seqType = new SeqType(
+                        name: "seqtype",
+                        libraryLayout: "library",
+                        dirName: "dirName"
+                        )
+        assertNotNull(seqType.save([flush: true]))
+
+        SoftwareTool softwareTool = new SoftwareTool(
+                        programName: "softwaretool",
+                        programVersion: "version",
+                        qualityCode: "quality",
+                        type: SoftwareTool.Type.ALIGNMENT
+                        )
+        assertNotNull(softwareTool.save([flush: true]))
+
+        DataFile dataFile = new DataFile(
+                        fileName: "1_barcode_L005_R2_complete_filtered.fastq.gz",
+                        run: run
+                        )
+        assertNotNull(dataFile.save([flush: true]))
+
+        ExomeEnrichmentKit exomeEnrichmentKit = new ExomeEnrichmentKit(
+                        name: "ExomeEnrichmentKit"
+                        )
+        assertNotNull(exomeEnrichmentKit.save([flush: true]))
+
+        ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = new ExomeEnrichmentKitIdentifier(
+                        name: "ExomeEnrichmentKitIdentifier",
+                        exomeEnrichmentKit: exomeEnrichmentKit)
+        assertNotNull(exomeEnrichmentKitIdentifier.save([flush: true]))
+
+        return [
+            dataFile: dataFile,
+            run: run,
+            sample: sample,
+            seqType: seqType,
+            softwareTool: softwareTool
+        ]
+    }
+
+    private void createMetaData(DataFile dataFile, String value = "ExomeEnrichmentKitIdentifier") {
+        MetaDataKey metaDataKey = new MetaDataKey(
+                        name: "LIB_PREP_KIT"
+                        )
+        assertNotNull(metaDataKey.save([flush: true]))
+
+        MetaDataEntry metaDataEntry = new MetaDataEntry(
+                        value: value,
+                        dataFile: dataFile,
+                        key: metaDataKey,
+                        source: MetaDataEntry.Source.SYSTEM
+                        )
+        assertNotNull(metaDataEntry.save())
+    }
+
 }

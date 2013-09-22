@@ -170,7 +170,7 @@ class SeqScanService {
     }
 
     private String getNewType(String oldType, String newType) {
-        final String lower = "EXON"
+        final String lower = SeqTypeNames.EXOME.seqTypeName
         final String higher = "WHOLE_GENOME"
         if (oldType == lower && newType == higher) {
             return higher

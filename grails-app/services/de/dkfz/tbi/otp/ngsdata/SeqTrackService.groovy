@@ -28,6 +28,10 @@ class SeqTrackService {
      */
     def springSecurityService
 
+    MultiplexingService multiplexingService
+
+    ExomeEnrichmentKitService exomeEnrichmentKitService
+
     /**
      * Retrieves the Sequences matching the given filtering the user has access to.
      * The access restriction is done through the Projects the user has access to.
@@ -373,27 +377,29 @@ class SeqTrackService {
         SeqType seqType = getSeqType(dataFiles.get(0))
         assertConsistentSeqType(seqType, dataFiles)
 
+        if (seqType.name == SeqTypeNames.EXOME.seqTypeName) {
+            assertConsistentLibraryPreparationKit(dataFiles)
+        }
+
         SoftwareTool pipeline = getPipeline(dataFiles.get(0))
         assertConsistentPipeline(pipeline, dataFiles)
 
-        SeqTrack seqTrack = new SeqTrack(
-            run : run,
-            sample : sample,
-            seqType : seqType,
-            seqPlatform : run.seqPlatform,
-            laneId : lane,
-            hasFinalBam : false,
-            hasOriginalBam : false,
-            usingOriginalBam : false,
-            pipelineVersion: pipeline
-        )
-        if (!seqTrack.validate()) {
-            println seqTrack.errors
-            throw new ProcessingException("seqTrack could not be validated.")
-        }
-        seqTrack.save(flush: true)
+        SeqTrack seqTrack = createSeqTrack(dataFiles.get(0), run, sample, seqType, lane, pipeline)
+
         consumeDataFiles(dataFiles, seqTrack)
         fillReadsForSeqTrack(seqTrack)
+        seqTrack.save(flush: true)
+        return seqTrack
+    }
+
+    private SeqTrack createSeqTrack(DataFile dataFile, Run run, Sample sample, SeqType seqType, String lane, SoftwareTool pipeline) {
+        SeqTrackBuilder builder = new SeqTrackBuilder(lane, run, sample, seqType, run.seqPlatform, pipeline)
+        builder.setHasFinalBam(false).setHasOriginalBam(false).setUsingOriginalBam(false)
+
+        MetaDataEntry metaDataEntry = metaDataEntry(dataFile, "LIB_PREP_KIT")
+        builder.setExomeEnrichmentKit(exomeEnrichmentKitService.findExomeEnrichmentKitByNameOrAlias(metaDataEntry?.value))
+
+        SeqTrack seqTrack = builder.create()
         seqTrack.save(flush: true)
         return seqTrack
     }
@@ -429,6 +435,16 @@ class SeqTrackService {
             if (!seqType.equals(fileSeqType)) {
                 throw new MetaDataInconsistentException(files, seqType, fileSeqType)
             }
+        }
+    }
+
+    private void assertConsistentLibraryPreparationKit(List<DataFile> files) {
+        List<String> libraryPreparationKits = files.collect { DataFile dataFile ->
+            metaDataValue(dataFile, "LIB_PREP_KIT")
+        }
+        String libraryPreparationKit = libraryPreparationKits.first()
+        if (!libraryPreparationKits.every { it == libraryPreparationKit }) {
+            throw new ProcessingException("Not using the same library preparation kit (files: ${files*.fileName})")
         }
     }
 

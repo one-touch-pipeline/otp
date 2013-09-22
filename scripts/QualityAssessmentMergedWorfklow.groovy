@@ -59,7 +59,7 @@ int insertSizeCountHistogramBin = 10
 boolean testMode = false
 
 String cmd = "qualityAssessment.sh \${processedMergedBamFilePath} \${processedBaiFilePath} \${qualityAssessmentFilePath} \${coverageDataFilePath} \${insertSizeDataFilePath} ${overrideOutput} \${allChromosomeName} ${minAlignedRecordLength} ${minMeanBaseQuality} ${mappingQuality} ${coverageMappingQualityThreshold} ${windowsSize} ${insertSizeCountHistogramBin} ${testMode}"
-SeqType seqType = SeqType.findByNameAndLibraryLayout("EXON", "PAIRED")
+SeqType seqType = SeqType.findByNameAndLibraryLayout(SeqTypeNames.EXOME.seqTypeName, "PAIRED")
 ctx.processingOptionService.createOrUpdate(
   "qualityMergedAssessment",
   seqType.naturalId,

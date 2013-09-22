@@ -7,6 +7,8 @@ class MetaDataValidationService {
 
     def hipoIndividualService
 
+    ExomeEnrichmentKitService exomeEnrichmentKitService
+
     private final Lock validateMetaDataLock = new ReentrantLock()
 
     @SuppressWarnings("GrailsStatelessService")
@@ -89,9 +91,29 @@ class MetaDataValidationService {
                 boolean status = checkSoftwareTool(entry)
                 entry.status = (status) ? valid : invalid
                 break
+            case "LIB_PREP_KIT":
+                Boolean status = checkExomeEnrichmentKit(entry)
+                if (status != null) {
+                    entry.status = status ? valid : invalid
+                }
+                break
         }
         entry.save(flush: true)
         return (entry.status == invalid)? false : true
+    }
+
+    private Boolean checkExomeEnrichmentKit(MetaDataEntry entry) {
+        MetaDataEntry metaDataEntry = metaDataEntry(entry.dataFile, "SEQUENCING_TYPE")
+        boolean isSequenceOfTypeExome = metaDataEntry.value == SeqTypeNames.EXOME.seqTypeName
+        if (isSequenceOfTypeExome) {
+            if (exomeEnrichmentKitService.findExomeEnrichmentKitByNameOrAlias(entry.value)) {
+                return true
+            } else {
+                return false
+            }
+        } else {
+            return null //no EXOME, so value is irrelevant and not checked
+        }
     }
 
     /**
@@ -168,7 +190,7 @@ class MetaDataValidationService {
         SeqType seqType = SeqType.findByDirName(entry.value)
         if(seqType != null) {
             ChangeLog changeLog = buildChangeLog(
-                entry.id, entry.value, seqType.name, 
+                entry.id, entry.value, seqType.name,
                 "seqType recogniozed by directory name"
             )
             changeLog.save(flush: true)
