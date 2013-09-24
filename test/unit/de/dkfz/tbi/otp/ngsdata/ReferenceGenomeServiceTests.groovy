@@ -1,10 +1,11 @@
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.ngsdata
 
+import org.apache.commons.io.FileUtils
 import static org.junit.Assert.*
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import grails.util.Environment
-import org.junit.Test
+import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
@@ -20,6 +21,7 @@ class ReferenceGenomeServiceTests {
     ReferenceGenomeEntry referenceGenomeEntry
     Project project
     ReferenceGenomeService referenceGenomeService
+    Realm realm
 
     File directory
     File file
@@ -41,7 +43,7 @@ class ReferenceGenomeServiceTests {
             file << "test"
         }
 
-        Realm realm = new Realm()
+        realm = new Realm()
         realm.name = "def"
         realm.env = Environment.getCurrent().getName()
         realm.operationType = Realm.OperationType.DATA_PROCESSING
@@ -92,8 +94,41 @@ class ReferenceGenomeServiceTests {
         referenceGenome = null
         project = null
         referenceGenomeService = null
+        realm = null
         directory.deleteOnExit()
         file.deleteOnExit()
+    }
+
+    @Test
+    void testRealmFilePathToDirectoryCorrect() {
+        String pathExp = "${referenceGenomePath}"
+        String pathAct = referenceGenomeService.filePathToDirectory(realm, referenceGenome)
+        assertEquals(pathExp, pathAct)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testRealmFilePathToDirectoryNullRealm() {
+        realm = null
+        String pathAct = referenceGenomeService.filePathToDirectory(realm as Realm, referenceGenome)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testRealmFilePathToDirectoryNullRefGen() {
+        referenceGenome = null
+        String pathAct = referenceGenomeService.filePathToDirectory(realm, referenceGenome)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testRealmFilePathToDirectoryWrongRealmOperationType() {
+        realm.operationType = Realm.OperationType.DATA_MANAGEMENT
+        String pathAct = referenceGenomeService.filePathToDirectory(realm, referenceGenome)
+    }
+
+    @Test(expected = RuntimeException)
+    void testRealmFilePathToDirectoryCanNotReadDirectory() {
+        FileUtils.deleteDirectory(directory)
+        assertFalse directory.exists()
+        String pathAct = referenceGenomeService.filePathToDirectory(realm, referenceGenome)
     }
 
     @Test
@@ -113,6 +148,19 @@ class ReferenceGenomeServiceTests {
     @Test(expected = IllegalArgumentException)
     void testFilePathToDirectoryProjectIsNull() {
         project = null
+        String pathAct = referenceGenomeService.filePathToDirectory(project as Project, referenceGenome)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testFilePathToDirectoryRefGenIsNull() {
+        referenceGenome = null
+        String pathAct = referenceGenomeService.filePathToDirectory(project, referenceGenome)
+    }
+
+    @Test(expected = RuntimeException)
+    void testFilePathToDirectoryCanNotReadDirectory() {
+        FileUtils.deleteDirectory(directory)
+        assertFalse directory.exists()
         String pathAct = referenceGenomeService.filePathToDirectory(project, referenceGenome)
     }
 

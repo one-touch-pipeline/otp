@@ -5,6 +5,7 @@ import grails.test.mixin.support.*
 import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
 @TestFor(ChromosomeIdentifierFilteringService)

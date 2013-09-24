@@ -3,18 +3,16 @@ package de.dkfz.tbi.otp.testing
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import static org.springframework.util.Assert.*
 
-
 /**
- * <p>
  * This is a first version of a class helping to call groovy scripts
  * from integration tests.
  * The tests that need such functionality must extend this class.
  * it is not possible to use this class in the unit tests
  * to call scripts creating domain objects
- * 
+ *
  *
  */
-abstract class GroovyScriptAwareIntergrationTest {
+abstract class GroovyScriptAwareIntegrationTest {
 
     GrailsApplication grailsApplication
 

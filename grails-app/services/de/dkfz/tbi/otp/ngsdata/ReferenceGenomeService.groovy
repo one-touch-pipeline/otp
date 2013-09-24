@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.ngsdata
 
 import static org.springframework.util.Assert.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -40,6 +40,18 @@ class ReferenceGenomeService {
         notNull(project, "The project is not specified")
         notNull(referenceGenome, "The reference genome is not specified")
         Realm realm = configService.getRealmDataProcessing(project)
+        filePathToDirectory(realm, referenceGenome)
+    }
+
+    /**
+     * @param realm - directory path is created relatively to this {@link Realm.OperationType.DATA_PROCESSING} realm
+     * @param referenceGenome - the reference genome for which the directory path is created
+     * @return path to a directory storing files for the given reference genome on the given realm
+     */
+    public String filePathToDirectory(Realm realm, ReferenceGenome referenceGenome) {
+        notNull(realm, "realm is not specified")
+        notNull(referenceGenome, "The reference genome is not specified")
+        isTrue(realm.operationType == Realm.OperationType.DATA_PROCESSING)
         String realmSpecificPath = realm.processingRootPath
         final String allReferenceGenomes = "reference_genomes"
         String referenceGenomeSpecificPath = referenceGenome.path

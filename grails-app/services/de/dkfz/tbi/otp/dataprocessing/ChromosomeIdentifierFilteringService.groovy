@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import static org.springframework.util.Assert.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
 
 /**
  * In this service the chromosomes which are not needed can be filtered. For each case a new method should be written, which includes a

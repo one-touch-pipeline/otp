@@ -1,15 +1,10 @@
 package de.dkfz.tbi.otp.testing
 
-import grails.test.mixin.*
-import grails.test.mixin.support.GrailsUnitTestMixin
-
-import org.codehaus.groovy.grails.commons.GrailsApplication;
 import org.junit.*
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
 
-import de.dkfz.tbi.otp.ngsdata.Project;
-import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntergrationTest;
-
-class TestGroovyScriptAwareIntergrationTest extends GroovyScriptAwareIntergrationTest {
+class TestGroovyScriptAwareIntergrationTest extends GroovyScriptAwareIntegrationTest {
 
     @Test
     void testCreateCorrect() {
