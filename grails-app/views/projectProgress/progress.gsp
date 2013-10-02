@@ -12,7 +12,7 @@
         <g:select
             name="projects"
             value="${projects}"
-            from="${de.dkfz.tbi.otp.ngsdata.Project.list()}"
+            from="${de.dkfz.tbi.otp.ngsdata.Project.list(sort: "name", order: "asc")}"
             optionKey="name"
             multiple="true"
         />
