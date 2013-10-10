@@ -55,7 +55,7 @@ class ConveyBwaAlignmentJob extends AbstractJobImpl {
         String qaSwitch = qualityEncoding(alignmentPass)
         String nCores = optionService.findOptionSafe("conveyBwaNumberOfCores", null, null)
         String bwaLogFilePath = processedSaiFileService.bwaAlnErrorLogFilePath(saiFile)
-        String bwaCmd = "${conveyBwaCommand} aln ${nCores} ${qaSwitch} ${referenceGenomePath} ${dataFilePath} -f ${saiFilePath} 2> ${bwaLogFilePath}"
+        String bwaCmd = "${conveyBwaCommand} aln ${nCores} ${qaSwitch} ${qParameter} ${referenceGenomePath} ${dataFilePath} -f ${saiFilePath} 2> ${bwaLogFilePath}"
         String bwaErrorCheckingCmd = BwaErrorHelper.failureCheckScript(saiFilePath, bwaLogFilePath)
         String chmodCmd = "chmod 440 ${saiFilePath} ${bwaLogFilePath}"
         String cmd = "${bwaCmd}; ${bwaErrorCheckingCmd}; ${chmodCmd}"
