@@ -4,6 +4,10 @@ import net.sf.samtools.SAMRecord
 
 class SAMInsertSizeStatisticWorker extends AbstractStatisticWorker<SAMRecord> {
 
+    public void init() {
+        // does not need any special initialization
+    }
+
     @Override
     public void preProcess(ChromosomeStatisticWrapper chromosome) {
         //no pre processing needed

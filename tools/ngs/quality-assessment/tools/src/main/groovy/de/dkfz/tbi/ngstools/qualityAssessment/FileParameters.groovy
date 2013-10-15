@@ -5,12 +5,16 @@ import javax.validation.constraints.*
 
 class FileParameters {
 
+    Mode inputMode
+
     @NotNull
     @Size(min=1, max=Integer.MAX_VALUE)
+    @FileCanRead
     String pathBamFile
 
     @NotNull
     @Size(min=1, max=Integer.MAX_VALUE)
+    @FileCanRead
     String pathBamIndexFile
 
     @NotNull
@@ -28,35 +32,34 @@ class FileParameters {
     @NotNull
     Boolean overrideOutput = false
 
+    /**
+     * Path to the Bed File containing the coordinates for the target regions
+     */
+    String bedFilePath
+
+    /**
+     * Path to the file, containing the reference genome meta information name, length and lengthWithoutN
+     */
+    String refGenMetaInfoFilePath
+
     void validateFiles() {
-        // validate input files
-        validateInputFile(this.pathBamFile)
-        validateInputFile(this.pathBamIndexFile)
         // validate output directories
         validateOutputDirecory(this.pathQaResulsFile)
         validateOutputDirecory(this.pathCoverateResultsFile)
         validateOutputDirecory(this.pathInsertSizeHistogramFile)
+        // validate case specific file input parameters
+        validateCaseSpecificInput()
     }
 
     /**
-     * Validate the given path as input parameter.
-     * Therefore the following constraints are checked:
-     * <ul>
-     * <li>The path needs to exist</li>
-     * <li>The path needs to be a normal file (directory or special files are not allowed)</li>
-     * <li>The file needs to be readable</li>
-     * <li>The file must not be empty</li>
-     * </ul>
-     *
-     * @param path, the path of the file to be checked as input file
+     * bedFilePath and refGenMetaInfoFilePath are provided only in the case of EXOME.
+     * Hence they must be validate only in the case of EXOME.
+     * This method performs such validation.
      */
-    private void validateInputFile(String path) {
-        File file = new File(path)
-        if (!file.canRead()) {
-            throw new ValidationException("The file '${path}' can not be read")
-        }
-        if (file.size() == 0) {
-            throw new ValidationException("There is no content in the file ${path}")
+    private void validateCaseSpecificInput() {
+        if (inputMode == Mode.EXOME) {
+            FileValidator.canRead(bedFilePath, 'bedFilePath')
+            FileValidator.canRead(refGenMetaInfoFilePath, 'refGenMetaInfoFilePath')
         }
     }
 

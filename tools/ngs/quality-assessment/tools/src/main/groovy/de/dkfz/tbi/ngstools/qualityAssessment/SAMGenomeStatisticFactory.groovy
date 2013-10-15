@@ -9,13 +9,14 @@ import de.dkfz.tbi.ngstools.qualityAssessment.GenomeStatistic.ChromosomeDto
 class SAMGenomeStatisticFactory implements GenomeStatisticFactory<SAMRecord> {
 
     @Override
-    public GenomeStatistic<SAMRecord> create(List<ChromosomeDto> chromosomeDtos, Parameters parameters) {
-        GenomeStatistic<SAMRecord> genomeStatistic = new GenomeStatisticImpl<SAMRecord>(parameters, createStatisticLogics(parameters))
+    public GenomeStatistic<SAMRecord> create(List<ChromosomeDto> chromosomeDtos, Parameters parameters, FileParameters fileParameters) {
+        assert parameters.inputMode == fileParameters.inputMode
+        GenomeStatistic<SAMRecord> genomeStatistic = new GenomeStatisticImpl<SAMRecord>(parameters, createStatisticLogics(parameters, fileParameters))
         genomeStatistic.init(chromosomeDtos)
         return genomeStatistic
     }
 
-    private List<StatisticLogic<SAMRecord>> createStatisticLogics(Parameters parameters) {
+    private List<StatisticLogic<SAMRecord>> createStatisticLogics(Parameters parameters, FileParameters fileParameters) {
         List<StatisticLogic<SAMRecord>> statisticLogics = [
             new SAMCountingStatisticWorker(),
             new SAMCoverageStatisticWorker(),
@@ -23,6 +24,8 @@ class SAMGenomeStatisticFactory implements GenomeStatisticFactory<SAMRecord> {
         ]
         statisticLogics.each { StatisticLogic statisticLogic ->
             statisticLogic.setParameters(parameters)
+            statisticLogic.setFileParameters(fileParameters)
+            statisticLogic.init()
         }
         return statisticLogics
     }

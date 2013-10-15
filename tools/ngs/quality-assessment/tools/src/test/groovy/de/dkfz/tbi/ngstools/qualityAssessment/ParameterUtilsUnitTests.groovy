@@ -1,11 +1,12 @@
 package de.dkfz.tbi.ngstools.qualityAssessment
 
 import javax.validation.*
+
 import org.junit.*
 
-class ParameterUtilsTest {
+class ParameterUtilsUnitTests {
 
-    /**
+    /*
      * objects which are used in the class ParameterUtils are either from the type Parameter or FileParameter
      * properties are the properties of Parameter/FileParameter
      */
@@ -15,13 +16,12 @@ class ParameterUtilsTest {
     File folder
     File fileInputEmpty
     File fileInput
-    File fileOutput
-    File fileOutputNotReadable
 
     @Before
     public void setUp() throws Exception {
         parameter = new Parameters()
         fileParameters = new FileParameters()
+        fileParameters.inputMode = Mode.WGS
         parameter.allChromosomeName = "test"
         parameter.minAlignedRecordLength = 90
         parameter.minMeanBaseQuality = 5
@@ -30,31 +30,22 @@ class ParameterUtilsTest {
         parameter.binSize = 67895
         parameter.coverageMappingQualityThreshold = 48
 
-        fileParameters.pathBamFile = "test"
-        fileParameters.pathBamIndexFile = "test"
         fileParameters.pathQaResulsFile = "test"
         fileParameters.pathCoverateResultsFile = "test"
         fileParameters.pathInsertSizeHistogramFile = "test"
         fileParameters.overrideOutput = true
 
         folder = new File("/tmp/ParameterUtilsTest/")
-        if(folder.exists() == false) {
+        if(!folder.exists()) {
             folder.mkdir()
         }
         fileInputEmpty = new File(folder.path + "/emptyInputFile.txt")
         fileInputEmpty << ""
         fileInput = new File(folder.path + "/testInputFile.txt")
         fileInput << "hello world"
-        fileOutput = new File(folder.path + "/testOutputFile.txt")
-        fileOutput << ""
-        fileOutputNotReadable = new File(folder.path + "/NotReadableOutputFile.jpg")
-        fileOutputNotReadable << ""
 
-        folder.deleteOnExit()
-        fileInputEmpty.deleteOnExit()
-        fileInput.deleteOnExit()
-        fileOutput.deleteOnExit()
-        fileOutputNotReadable.deleteOnExit()
+        fileParameters.pathBamFile = fileInput.path
+        fileParameters.pathBamIndexFile = fileInput.path
     }
 
     @After
@@ -62,10 +53,6 @@ class ParameterUtilsTest {
         parameter = null
         fileParameters = null
         folder.deleteDir()
-        fileInputEmpty.delete()
-        fileInput.delete()
-        fileOutput.delete()
-        fileOutputNotReadable.delete()
     }
 
     /**
@@ -90,11 +77,13 @@ class ParameterUtilsTest {
     @Test
     public void testParseToBooleanTrueAllCorrect() {
         ParameterUtils.INSTANCE.parseToBoolean(fileParameters, "overrideOutput", "true")
+        Assert.assertEquals(Boolean.TRUE, fileParameters.overrideOutput)
     }
 
     @Test
     public void testParseToBooleanFalseAllCorrect() {
         ParameterUtils.INSTANCE.parseToBoolean(fileParameters, "overrideOutput", "false")
+        Assert.assertEquals(Boolean.FALSE, fileParameters.overrideOutput)
     }
 
 
@@ -120,10 +109,11 @@ class ParameterUtilsTest {
     @Test
     public void testParseToIntegerAllCorrect() {
         ParameterUtils.INSTANCE.parseToInteger(parameter, "minAlignedRecordLength", "123")
+        Assert.assertEquals(123, parameter.minAlignedRecordLength)
     }
 
 
-    /**
+    /*
      * tests the method parseToString with different possible input types, like
      * wrong spelled property, string-value
      * in this case the boolean and the integer-value were not tested since the input is always given as a string and therefore,
@@ -137,26 +127,30 @@ class ParameterUtilsTest {
     @Test
     public void testParseToStringAllCorrect() {
         ParameterUtils.INSTANCE.parseToString(parameter, "allChromosomeName", "Chromosome_X")
+        Assert.assertEquals("Chromosome_X", parameter.allChromosomeName)
     }
 
 
-    /**
+    /*
      * tests the method parse with different possible input types, like
      * string-value, integer-value, boolean-value, wrong spelled property, empty parameter, null
      */
     @Test
     public void testParseString() {
         ParameterUtils.INSTANCE.parse(parameter, "allChromosomeName", "Chromosome_X")
+        Assert.assertEquals("Chromosome_X", parameter.allChromosomeName)
     }
 
     @Test
     public void testParseInteger() {
         ParameterUtils.INSTANCE.parse(parameter, "minAlignedRecordLength", "123")
+        Assert.assertEquals(123, parameter.minAlignedRecordLength)
     }
 
     @Test
     public void testParseBoolean() {
         ParameterUtils.INSTANCE.parse(fileParameters, "overrideOutput", "true")
+        Assert.assertEquals(Boolean.TRUE, fileParameters.overrideOutput)
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -176,7 +170,7 @@ class ParameterUtilsTest {
     }
 
 
-    /**
+    /*
      * tests the method validate with different possible input types, like
      * Parameters is null, FileParameters is null
      * after these two cases the different properties of Parameters/FileParameters are tested
@@ -194,10 +188,9 @@ class ParameterUtilsTest {
     }
 
 
-    /**
+    /*
      * validate properties of Parameters
-     */
-    /**
+     *
      * different values of the property "allChromosomeName" are tested:
      * "test", null, empty, name is too long
      * only this property is tested for null, since it is declared as NotNull
@@ -225,7 +218,7 @@ class ParameterUtilsTest {
         ParameterUtils.INSTANCE.validate(parameter)
     }
 
-    /**
+    /*
      * different values of the property "minAlignedRecordLength" are tested:
      * 90, too short (-3), too long (9999999)
      */
@@ -246,7 +239,7 @@ class ParameterUtilsTest {
         ParameterUtils.INSTANCE.validate(parameter)
     }
 
-    /**
+    /*
      * different values of the property "minMeanBaseQuality" are tested:
      * 5, too low (-3), too high (9999999)
      */
@@ -267,7 +260,7 @@ class ParameterUtilsTest {
         ParameterUtils.INSTANCE.validate(parameter)
     }
 
-    /**
+    /*
      * different values of the property "mappingQuality" are tested:
      * 5, too low (-3), too high (9999999)
      */
@@ -288,7 +281,7 @@ class ParameterUtilsTest {
         ParameterUtils.INSTANCE.validate(parameter)
     }
 
-    /**
+    /*
      * different values of the property "winSize" are tested:
      * 90, too short (-3), too long (9999999)
      */
@@ -309,7 +302,7 @@ class ParameterUtilsTest {
         ParameterUtils.INSTANCE.validate(parameter)
     }
 
-    /**
+    /*
      * different values of the property "binSize" are tested:
      * 67895, too short (-3), too long (99999999999)
      */
@@ -330,7 +323,7 @@ class ParameterUtilsTest {
         ParameterUtils.INSTANCE.validate(parameter)
     }
 
-    /**
+    /*
      * different values of the property "coverageMappingQualityThreshold" are tested:
      * 48, too low (-3), too high (99999999999)
      */
@@ -352,10 +345,8 @@ class ParameterUtilsTest {
     }
 
 
-    /**
+    /*
      * validate properties of FileParameters
-     */
-    /**
      * different values of the property "pathBamFile" are tested:
      * "test", empty
      */
@@ -370,7 +361,7 @@ class ParameterUtilsTest {
         ParameterUtils.INSTANCE.validate(fileParameters)
     }
 
-    /**
+    /*
      * different values of the property "pathBamIndexFile" are tested:
      * "test", empty
      */
@@ -385,7 +376,7 @@ class ParameterUtilsTest {
         ParameterUtils.INSTANCE.validate(fileParameters)
     }
 
-    /**
+    /*
      * different values of the property "pathQaResulsFile" are tested:
      * "test", empty
      */
@@ -400,7 +391,7 @@ class ParameterUtilsTest {
         ParameterUtils.INSTANCE.validate(fileParameters)
     }
 
-    /**
+    /*
      * different values of the property "pathCoverateResultsFile" are tested:
      * "test", empty
      */
@@ -415,7 +406,7 @@ class ParameterUtilsTest {
         ParameterUtils.INSTANCE.validate(fileParameters)
     }
 
-    /**
+    /*
      * different values of the property "pathInsertSizeHistogramFile" are tested:
      * "test", empty
      */
@@ -433,99 +424,49 @@ class ParameterUtilsTest {
 
     @Test
     public void testOverrideOutputCorrect() {
+        fileParameters.pathBamFile = fileInput.path
+        fileParameters.pathBamIndexFile = fileInput.path
         ParameterUtils.INSTANCE.validate(fileParameters)
     }
 
 
-    /**
-     * Validation of the input files, with different possibilities:
-     * - empty InputFilePath
-     * - file can not be read
-     * - file is empty
-     * - input file is correct
-     */
-    @Test(expected = ValidationException.class)
-    public void testValidateInputFilePathIsEmpty() {
-        String inputFilePath = ""
-        fileParameters.validateInputFile(inputFilePath)
-    }
+    // fileParameters: PathBamFile tests
 
     @Test(expected = ValidationException.class)
-    public void testValidateInputFileCantBeRead() {
+    public void testValidatePathBamFileCantBeRead() {
         fileInputEmpty.setReadable(false)
-        String inputFilePath = fileInputEmpty.path
-        fileParameters.validateInputFile(inputFilePath)
+        fileParameters.pathBamFile = fileInputEmpty.path
+        ParameterUtils.INSTANCE.validate(fileParameters)
     }
 
     @Test(expected = ValidationException.class)
-    public void testValidateInputFileIsEmpty() {
-        String inputFilePath = fileInputEmpty.path
-        fileParameters.validateInputFile(inputFilePath)
+    public void testValidatePathBamFileIsEmpty() {
+        fileParameters.pathBamFile = fileInputEmpty.path
+        ParameterUtils.INSTANCE.validate(fileParameters)
     }
 
     @Test
-    public void testValidateInputFileCorrect() {
-        String inputFilePath = fileInput.path
-        fileParameters.validateInputFile(inputFilePath)
-    }
-
-
-    /**
-     * Validation of the output files, with different possibilities:
-     * - output file path is null
-     * - output file path is empty
-     * - output file exists, but is no correct file
-     * - output file directory is not readable
-     * - output file directory is not writeable
-     * - output file directory does not exist
-     * - output file is correct
-     */
-    @Test(expected = NullPointerException.class)
-    public void testValidateOutputDirecoryPathIsNull() {
-        String outputFilePath = null
-        fileParameters.validateOutputDirecory(outputFilePath)
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testValidateOutputDirecoryPathIsEmpty() {
-        String outputFilePath = ""
-        fileParameters.validateOutputDirecory(outputFilePath)
+    public void testValidatePathBamFileCorrect() {
+        fileParameters.pathBamFile = fileInput.path
+        ParameterUtils.INSTANCE.validate(fileParameters)
     }
 
     @Test(expected = ValidationException.class)
-    public void testValidateOutputDirecoryFileExistsAndIsNoFile() {
-        String outputFilePath = fileOutputNotReadable.getParentFile().path
-        fileParameters.validateOutputDirecory(outputFilePath)
+    public void testValidatePathBamIndexFileCantBeRead() {
+        fileInputEmpty.setReadable(false)
+        fileParameters.pathBamIndexFile = fileInputEmpty.path
+        ParameterUtils.INSTANCE.validate(fileParameters)
     }
 
     @Test(expected = ValidationException.class)
-    public void testValidateOutputDirecoryNotReadable() {
-        fileOutputNotReadable.getParentFile().setReadable(false)
-        fileOutputNotReadable.getParentFile().setWritable(true)
-        String outputFilePath = fileOutputNotReadable.path
-        fileParameters.validateOutputDirecory(outputFilePath)
-    }
-
-    @Test(expected = ValidationException.class)
-    public void testValidateOutputDirecoryNotWriteable() {
-        fileOutputNotReadable.getParentFile().setReadable(true)
-        fileOutputNotReadable.getParentFile().setWritable(false)
-        String outputFilePath = fileOutputNotReadable.path
-        fileParameters.validateOutputDirecory(outputFilePath)
-    }
-
-    @Test(expected = ValidationException.class)
-    public void testValidateOutputDirecoryPathNotExists(){
-        File tmpFile = new File("PathNotExists/FileNotExists.txt")
-        String outputFilePath = tmpFile.path
-        fileParameters.validateOutputDirecory(outputFilePath)
+    public void testValidatePathBamIndexFileIsEmpty() {
+        fileParameters.pathBamIndexFile = fileInputEmpty.path
+        ParameterUtils.INSTANCE.validate(fileParameters)
     }
 
     @Test
-    public void testValidateOutputDirecoryAllCorrect() {
-        fileOutput.getParentFile().setReadable(true)
-        fileOutput.getParentFile().setWritable(true)
-        String outputFilePath = fileOutput.path
-        fileParameters.validateOutputDirecory(outputFilePath)
+    public void testValidatePathBamIndexFileCorrect() {
+        fileParameters.pathBamIndexFile = fileInput.path
+        ParameterUtils.INSTANCE.validate(fileParameters)
     }
 }

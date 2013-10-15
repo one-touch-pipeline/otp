@@ -9,6 +9,8 @@ import javax.validation.constraints.*
  */
 class Parameters {
 
+    Mode inputMode
+
     /**
      * The name of the "ALL" chromosome.
      */

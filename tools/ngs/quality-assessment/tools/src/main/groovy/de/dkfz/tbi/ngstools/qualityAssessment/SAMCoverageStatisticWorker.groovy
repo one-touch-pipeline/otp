@@ -4,6 +4,10 @@ import net.sf.samtools.SAMRecord
 
 class SAMCoverageStatisticWorker extends AbstractStatisticWorker<SAMRecord> {
 
+    public void init() {
+        // does not need any special initialization
+    }
+
     @Override
     public void preProcess(ChromosomeStatisticWrapper chromosome) {
         int arraySize = Math.ceil(chromosome.chromosome.referenceLength / parameters.winSize)

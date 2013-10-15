@@ -10,9 +10,19 @@ package de.dkfz.tbi.ngstools.qualityAssessment
 interface StatisticLogic<Record> {
 
     /**
+     * initializes instace of this type. Is called after all the setters.
+     */
+    void init()
+
+    /**
      * sets the {@link Parameters} object. That object contains the parsed input parameters.
      */
     void setParameters(Parameters parameters)
+
+    /**
+     * sets the {@link FileParameters} object. That object contains the parsed input fileParameters.
+     */
+    void setFileParameters(FileParameters fileParameters)
 
     /**
      * A method to prepare and initialize data for the given chromosome in {@link ChromosomeStatistic} and in

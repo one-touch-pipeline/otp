@@ -2,12 +2,36 @@ package de.dkfz.tbi.ngstools.qualityAssessment
 
 import net.sf.samtools.AlignmentBlock
 import net.sf.samtools.SAMRecord
+import de.dkfz.tbi.ngstools.bedUtils.*
 
 class SAMCountingStatisticWorker extends AbstractStatisticWorker<SAMRecord> {
 
+    private TargetIntervals targetIntervals
+
+    /**
+     * assumptions:
+     * fileParameters has been successfully validated:
+     * <li> bedFilePath and refGenMetaInfoFilePath is not null and not empty
+     * <li> both bedFile and refGenMetaInfoFile can be read and are not empty
+     */
+    public void init() {
+        if (fileParameters.inputMode != Mode.EXOME) {
+            return
+        }
+        List<String> referenceGenomeEntryNames = []
+        File refGenMetaInfoFile = new File(fileParameters.refGenMetaInfoFilePath)
+        refGenMetaInfoFile.eachLine { String line ->
+            referenceGenomeEntryNames.add(line.split("\t")[0])
+        }
+        targetIntervals = TargetIntervalsFactory.create(fileParameters.bedFilePath, referenceGenomeEntryNames)
+        if (!targetIntervals) {
+            throw new NullPointerException('the external factory has failed to initialize TargetIntervals instance')
+        }
+    }
+
     @Override
     public void preProcess(ChromosomeStatisticWrapper chromosome) {
-        //no pre processing
+        // no pre processing
     }
 
     @Override
@@ -62,6 +86,11 @@ class SAMCountingStatisticWorker extends AbstractStatisticWorker<SAMRecord> {
             allChromosome.withMateMappedToDifferentChr += chromosome.withMateMappedToDifferentChr
             allChromosome.withMateMappedToDifferentChrMaq += chromosome.withMateMappedToDifferentChrMaq
             allChromosome.singletons += chromosome.singletons
+
+            allChromosome.allBasesMapped += chromosome.allBasesMapped
+            if (targetIntervals) {
+                allChromosome.onTargetMappedBases += chromosome.onTargetMappedBases
+            }
         }
     }
 
@@ -69,6 +98,7 @@ class SAMCountingStatisticWorker extends AbstractStatisticWorker<SAMRecord> {
         coverageQc(chromosome, record)
         pairEndReadAberration(chromosome, record)
         flagStat(chromosome, record)
+        countBasesMapped(chromosome, record)
     }
 
     private void coverageQc(ChromosomeStatistic chromosome, SAMRecord record) {
@@ -142,6 +172,35 @@ class SAMCountingStatisticWorker extends AbstractStatisticWorker<SAMRecord> {
             }
             if (!record.getReadUnmappedFlag() && record.getMateUnmappedFlag()) {
                 chromosome.singletons++
+            }
+        }
+    }
+
+    /**
+     * Counting of two values:
+     * - allBasesMapped -> all bases mapped to the reference genome
+     * - onTargetMappedBases -> bases mapped to the target regions
+     *
+     * The calculation is grouped in one method for the case when a filter is used.
+     * It has to be ensured that this filter is the same for both calculations.
+     *
+     * Gaps are not counted.
+     *
+     * @param chromosome (chromosome wrapper), to which the record belongs to
+     * @param record, which contains the read
+     */
+    private void countBasesMapped(ChromosomeStatistic chromosome, SAMRecord record) {
+        if (recordIsQualityMapped(record) && !record.getDuplicateReadFlag() && meanBaseQualityCheck(record)) {
+            List <AlignmentBlock> alignmentBlocks = record.getAlignmentBlocks()
+            alignmentBlocks.each { alignmentBlock ->
+                long alignmentBlockLength = alignmentBlock.length
+                chromosome.allBasesMapped += alignmentBlockLength
+                // check if alignment block overlaps with target interval(s) and count overlap
+                if (targetIntervals) {
+                    long alignmentBlockStart = alignmentBlock.getReferenceStart()
+                    long alignmentBlockEnd = alignmentBlockStart + alignmentBlockLength - 1
+                    chromosome.onTargetMappedBases += targetIntervals.getOverlappingBaseCount(chromosome.chromosomeName, alignmentBlockStart - 1, alignmentBlockEnd)
+                }
             }
         }
     }

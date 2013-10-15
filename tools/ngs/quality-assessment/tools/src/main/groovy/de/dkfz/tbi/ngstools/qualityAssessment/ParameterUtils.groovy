@@ -27,6 +27,7 @@ enum ParameterUtils {
             }
             throw new ValidationException(failedMessage.toString())
         }
+        FileValidator.validate(object)
     }
 
     /**

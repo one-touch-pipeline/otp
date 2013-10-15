@@ -12,8 +12,10 @@ interface GenomeStatisticFactory<Record> {
 
     /**
      * creates fully initialized instance of GenomeStatistic
-     * @param chromosomeDtos see {@link GenomeStatistic} for details
+     * @param chromosomeDtos @see {@link GenomeStatistic} for details
+     * @param parameters @see {@link Parameters} for details
+     * @param fileParameters @see {@link FileParameters} for details
      * @return initialized instance of {@link GenomeStatistic}
      */
-    GenomeStatistic<Record> create(List<ChromosomeDto> chromosomeDtos, Parameters parameters)
+    GenomeStatistic<Record> create(List<ChromosomeDto> chromosomeDtos, Parameters parameters, FileParameters fileParameters)
 }

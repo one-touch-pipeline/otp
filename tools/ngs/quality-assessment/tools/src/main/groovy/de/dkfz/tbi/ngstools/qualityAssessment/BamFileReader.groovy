@@ -19,5 +19,7 @@ interface BamFileReader<Record> {
 
     void setParameters(Parameters parameters)
 
+    void setFileParameters(FileParameters FileParameters)
+
     void setGenomeStatisticFactory(GenomeStatisticFactory<Record> factory)
 }

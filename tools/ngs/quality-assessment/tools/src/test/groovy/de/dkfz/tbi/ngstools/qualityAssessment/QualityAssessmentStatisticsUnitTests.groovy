@@ -1,9 +1,8 @@
 package de.dkfz.tbi.ngstools.qualityAssessment
 
 import org.junit.*
-import de.dkfz.tbi.otp.ngsdata.ExpectedSequenceFile;
 
-class QualityAssessmentStatisticsTest {
+class QualityAssessmentStatisticsUnitTests {
 
     QualityAssessmentStatistics qualityAssessmentStatistics
     File testFile
@@ -20,7 +19,6 @@ class QualityAssessmentStatisticsTest {
     @After
     public void tearDown() throws Exception {
         qualityAssessmentStatistics = null
-        testFile.delete()
         testFile.getParentFile().setWritable(true)
         testFile.getParentFile().deleteDir()
     }

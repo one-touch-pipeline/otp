@@ -4,7 +4,7 @@ import net.sf.samtools.SAMRecord
 import net.sf.samtools.SAMSequenceRecord
 import org.junit.*
 
-class SAMCoverageStatisticWorkerTests extends GroovyTestCase {
+class SAMCoverageStatisticWorkerUnitTests extends GroovyTestCase {
 
     private ChromosomeStatisticWrapper chromosome
 

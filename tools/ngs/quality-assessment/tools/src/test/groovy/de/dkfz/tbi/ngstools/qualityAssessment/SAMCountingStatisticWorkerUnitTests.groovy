@@ -1,11 +1,11 @@
 package de.dkfz.tbi.ngstools.qualityAssessment
 
-
-import net.sf.samtools.*
 import org.junit.*
+import groovy.mock.interceptor.StubFor
+import net.sf.samtools.*
+import de.dkfz.tbi.ngstools.bedUtils.*
 
-class SAMCountingStatisticWorkerTests extends GroovyTestCase {
-
+class SAMCountingStatisticWorkerUnitTests extends GroovyTestCase {
 
     private ChromosomeStatistic chromosome
 
@@ -13,16 +13,29 @@ class SAMCountingStatisticWorkerTests extends GroovyTestCase {
 
     private SAMRecord record
 
+    private SAMRecord exomeRecord
+
     private Parameters parameters
+
+    private FileParameters fileParameters
 
     @Before
     public void setUp() throws Exception {
         chromosome = new ChromosomeStatistic("TEST", 0)
-        samCountingStatisticWorker = new SAMCountingStatisticWorker()
         parameters = new Parameters(winSize: 10, mappingQuality: 5, coverageMappingQualityThreshold: 5, minAlignedRecordLength: 16, minMeanBaseQuality: 4)
         record = new SAMRecord()
         record.setReadPairedFlag(true) //need to be true for read firstOfPairFlag
+        exomeRecord = new SAMRecord()
+        exomeRecord.alignmentStart = 2l
+        exomeRecord.cigarString = "10M"
+        exomeRecord.readUnmappedFlag = false
+        exomeRecord.mappingQuality = 10
+        exomeRecord.duplicateReadFlag = false
+        exomeRecord.baseQualityString = "9999999999"
+        fileParameters = new FileParameters()
+        samCountingStatisticWorker = new SAMCountingStatisticWorker()
         samCountingStatisticWorker.setParameters(parameters)
+        samCountingStatisticWorker.setFileParameters(fileParameters)
     }
 
     @After
@@ -30,8 +43,133 @@ class SAMCountingStatisticWorkerTests extends GroovyTestCase {
         chromosome = null
         samCountingStatisticWorker = null
         record = null
+        exomeRecord = null
         parameters = null
     }
+
+    @Test
+    public void testInitCorrectExome() {
+        fileParameters.inputMode = Mode.EXOME
+        fileParameters.bedFilePath = '/tmp/test-init-bedFile.bed'
+        fileParameters.refGenMetaInfoFilePath = '/tmp/test-init-getMetaInfo.info'
+        File bedFile = new File(fileParameters.bedFilePath)
+        File refGenMetaFile = new File(fileParameters.refGenMetaInfoFilePath)
+        bedFile << 'chr17\t1600\t2000'
+        refGenMetaFile << 'chr17\t3000\t3000'
+        samCountingStatisticWorker.targetIntervals = null
+        try {
+            samCountingStatisticWorker.init()
+            assertNotNull samCountingStatisticWorker.targetIntervals
+        } finally {
+            bedFile.delete()
+            refGenMetaFile.delete()
+        }
+    }
+
+    @Test
+    public void testInitCorrectNotExome() {
+        fileParameters.inputMode = Mode.WGS
+        samCountingStatisticWorker.targetIntervals = null
+        samCountingStatisticWorker.init()
+        assertNull samCountingStatisticWorker.targetIntervals
+    }
+
+    /**
+     * Verifies if the worker under teest correctly detects
+     * when our dependencies (bedUtils/TargetIntervals) are borked.
+     * (so that we quickly know the problem is elsewhere --> failfast!)
+     *
+     * Note: does not actually depend on the dependency (we inject a borken Mock)
+    */
+    @Test
+    public void testInitBrockenFactory() {
+        String refGenomeEntry = 'chr1\t1234'
+        fileParameters.inputMode = Mode.EXOME
+        fileParameters.bedFilePath = 'bedFilePath'
+        fileParameters.refGenMetaInfoFilePath = 'refGenMetaInfoFilePath'
+        def fileMock = new StubFor(File)
+        fileMock.demand.eachLine { closure -> closure(refGenomeEntry) }
+        TargetIntervalsFactory.metaClass.static.create = { bedFilePath, refGenEntryNames -> null }
+        samCountingStatisticWorker.targetIntervals = null
+        shouldFail { fileMock.use { samCountingStatisticWorker.init() } }
+    }
+
+    @Test
+    public void testCountBasesMappedNoAlignmentBlocks() {
+        samCountingStatisticWorker.metaClass.init = {}
+        samCountingStatisticWorker.targetIntervals = {} as TargetIntervals
+        exomeRecord.readUnmappedFlag = false
+        exomeRecord.readString = "TAGATAATTGAATTG"
+        exomeRecord.cigarString = "15D"
+        samCountingStatisticWorker.countBasesMapped(chromosome, exomeRecord)
+        assertEquals(0, chromosome.allBasesMapped)
+        assertEquals(0, chromosome.onTargetMappedBases)
+    }
+
+    // case when all the read pass all the filters
+    @Test
+    public void testCountBasesMappedCorrectExon() {
+        samCountingStatisticWorker.metaClass.init = {}
+        samCountingStatisticWorker.targetIntervals = { name, start, end ->
+            assertEquals('TEST', name)
+            assertEquals(1, start)
+            assertEquals(11, end)
+            return start + end
+        } as TargetIntervals
+        samCountingStatisticWorker.countBasesMapped(chromosome, exomeRecord)
+        assertEquals(10, chromosome.allBasesMapped)
+        assertEquals(12, chromosome.onTargetMappedBases)
+    }
+
+    // case when all the read pass all the filters
+    @Test
+    public void testCountBasesMappedCorrectWgs() {
+        samCountingStatisticWorker.metaClass.init = {}
+        samCountingStatisticWorker.targetIntervals = null
+        samCountingStatisticWorker.countBasesMapped(chromosome, exomeRecord)
+        assertEquals(10, chromosome.allBasesMapped)
+        assertEquals(0, chromosome.onTargetMappedBases)
+    }
+
+     // countBasesMapped(...): cases when read does not fit the filter
+     // failed to create record with alignmentEnd == 0 in the reasonable time, skip this case;
+     // the function calling this methid has been already tested:
+     // 1) see tests for SAMCountingStatisticWorker.coverageQc in this class
+     // 2) comparison tests agains result of running Roddy: see build.gradle: comparisonTest task
+
+    @Test
+    public void testCountBasesMappedReadUnmappedFlagTrue() {
+        exomeRecord.readUnmappedFlag = true
+        runTestReadFilteredOut()
+    }
+
+    @Test
+    public void testCountBasesMappedFilterByMappingQuality() {
+        exomeRecord.mappingQuality = 1
+        runTestReadFilteredOut()
+    }
+
+    @Test
+    public void testCountBasesMappedReadIsDuplicated() {
+        exomeRecord.duplicateReadFlag = true
+        runTestReadFilteredOut()
+    }
+
+    @Test
+    public void testCountBasesMappedFilterByMeanBaseQuality() {
+        parameters.minMeanBaseQuality = 100
+        runTestReadFilteredOut()
+    }
+
+    private void runTestReadFilteredOut() {
+        samCountingStatisticWorker.metaClass.init = {}
+        samCountingStatisticWorker.targetIntervals = {} as TargetIntervals
+        samCountingStatisticWorker.countBasesMapped(chromosome, exomeRecord)
+        assertEquals(0, chromosome.allBasesMapped)
+        assertEquals(0, chromosome.onTargetMappedBases)
+    }
+
+    // other tests for the worker
 
     @Test
     public void testCountIncorrectProperPairs_ProperPairsFlag_False() {

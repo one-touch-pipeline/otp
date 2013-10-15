@@ -139,6 +139,14 @@ class ChromosomeStatistic {
      * root mean square over all insert sizes of proper paired mapped reads
      */
     double insertSizeRMS
+    /**
+     * all bases mapped to the reference genome no filtering applied
+     */
+    long allBasesMapped
+    /**
+     * bases, which were mapped to the specified target regions
+     */
+    long onTargetMappedBases
 
     public ChromosomeStatistic(String chromosomeName, long referenceLength) {
         this.chromosomeName = chromosomeName

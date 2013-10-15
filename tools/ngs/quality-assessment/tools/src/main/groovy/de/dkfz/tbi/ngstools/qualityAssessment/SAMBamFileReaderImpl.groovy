@@ -1,21 +1,28 @@
 package de.dkfz.tbi.ngstools.qualityAssessment
 
-import de.dkfz.tbi.ngstools.qualityAssessment.GenomeStatistic.ChromosomeDto
 import net.sf.samtools.SAMFileHeader
 import net.sf.samtools.SAMFileReader
 import net.sf.samtools.SAMRecord
 import net.sf.samtools.SAMRecordIterator
 import net.sf.samtools.SAMSequenceRecord
+import de.dkfz.tbi.ngstools.qualityAssessment.GenomeStatistic.ChromosomeDto
 
 class SAMBamFileReaderImpl implements BamFileReader<SAMRecord> {
 
     private Parameters parameters
+
+    private FileParameters fileParameters
 
     private GenomeStatisticFactory<SAMRecord> factory
 
     @Override
     public void setParameters(Parameters parameters) {
         this.parameters = parameters
+    }
+
+    @Override
+    public void setFileParameters(FileParameters fileParameters) {
+        this.fileParameters = fileParameters
     }
 
     @Override
@@ -55,6 +62,6 @@ class SAMBamFileReaderImpl implements BamFileReader<SAMRecord> {
             ChromosomeDto dto = new ChromosomeDto(chromosomeName: seqRecord.getSequenceName(), chromosomeLength: seqRecord.getSequenceLength() as long)
             chromosomeDtos.add(dto)
         }
-        return this.factory.create(chromosomeDtos, this.parameters)
+        return this.factory.create(chromosomeDtos, this.parameters, this.fileParameters)
     }
 }
