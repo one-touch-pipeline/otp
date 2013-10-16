@@ -37,7 +37,14 @@ class FastqcDataFilesService {
 
     private String fastqcFileName(DataFile dataFile) {
         String fileName = dataFile.fileName
-        String body = fileName.substring(0, fileName.lastIndexOf(".fastq."))
+        /*
+         * The fastqc tool does not allow to specify the output file name, only the output directory.
+         * To access the file we need code to create the same name for the output file as the fastqc tool.
+         * How the name is created from the input file name is looked up from the fastqc tool. The rule is in:
+         * uk.ac.babraham.FastQC.Analysis.OfflineRunner.analysisComplete
+         */
+        String body = fileName.replaceAll(".gz\$", "").replaceAll(".bz2\$", "").replaceAll(".txt\$", "").
+                        replaceAll(".fastq\$", "").replaceAll(".sam\$", "").replaceAll(".bam\$", "")
         return "${body}${fastqcFileSuffix}"
     }
 
