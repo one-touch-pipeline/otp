@@ -148,6 +148,8 @@ class MetaDataService {
                 // parse the header
                 tokens = tokenize(line, '\t')
                 keys = getKeysFromTokens(tokens)
+            } else if (line.trim().isEmpty()) {
+                return //skip empty lines
             } else {
                 // match values with the header
                 // new entry in MetaData
@@ -172,7 +174,7 @@ class MetaDataService {
         file.save(flush: true)
     }
 
-    private FileType.Type getTypeInMetaDataFile(String fileName) { 
+    private FileType.Type getTypeInMetaDataFile(String fileName) {
         FileType.Type type = FileType.Type.UNKNOWN
         if (fileName.contains("fastq")) {
             type = FileType.Type.SEQUENCE
@@ -340,7 +342,7 @@ class MetaDataService {
         }
         return true
     }
- 
+
     private String readStringFormFileName(String fileName) {
         String readId = "0"
         if (fileName.contains("read1")) {
@@ -472,7 +474,7 @@ class MetaDataService {
     }
 
     /**
-     * return project for a given dataFile or null if a dataFile 
+     * return project for a given dataFile or null if a dataFile
      * does not belong to a specific project (eg. metadata file)
      * @param dataFile
      * @return
@@ -493,7 +495,7 @@ class MetaDataService {
     /**
      * Checks if given run is already assigned to a given project
      * if not a new object is created
-     * 
+     *
      * @param run
      * @param project
      */

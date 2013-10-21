@@ -19,15 +19,21 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     def metaDataService
     def aclUtilService
 
+    File baseDir = new File("/tmp/otp/metadataservice")
+
     @Before
     void setUp() {
         // Setup logic here
         createUserAndRoles()
+        if (!baseDir.exists()) {
+            assertTrue(baseDir.mkdirs())
+        }
     }
 
     @After
     void tearDown() {
         // Tear down logic here
+        assertTrue(baseDir.deleteDir())
     }
 
     /**
@@ -436,6 +442,65 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
             }
         }
     }
+
+
+    void testProcessMetaDataFileEmptyLines() {
+        String runName = "130312_D00133_0018_ADTWTJACXX"
+        String fileName = "${runName}.fastq.tsv"
+        File file = new File(baseDir, fileName)
+        file << """FASTQ_FILE\tMD5\tCENTER_NAME\tRUN_ID\tRUN_DATE\tLANE_NO\tBASE_COUNT\tREAD_COUNT\tCYCLE_COUNT\tSAMPLE_ID\tSEQUENCING_TYPE\tINSTRUMENT_PLATFORM\tINSTRUMENT_MODEL\tPIPELINE_VERSION\tINSERT_SIZE\tLIBRARY_LAYOUT\tWITHDRAWN\tWITHDRAWN_DATE\tCOMMENT\tBARCODE\tLIB_PREP_KIT
+
+example_GATCGA_fileR1.fastq.gz\t5ac314c6113474753364c55d41deff04\tTheSequencingCenter\t130312_D00133_0018_ADTWTJACXX\t2013-03-12\t1\t8781211000\t87812110\t101\tSampleIdentifier\tEXON\tIllumina\tHiSeq2000\tCASAVA-1.8.2\t162\tPAIRED\t0\t\t\t\tAgilent SureSelect V3
+
+example_GATCGA_fileR2.fastq.gz\t5be4751eef9535af3df3f78047cc9137\tTheSequencingCenter\t130312_D00133_0018_ADTWTJACXX\t2013-03-12\t1\t8781211000\t87812110\t101\tSampleIdentifier\tEXON\tIllumina\tHiSeq2000\tCASAVA-1.8.2\t162\tPAIRED\t0\t\t\t\tAgilent SureSelect V3
+
+    """
+
+        FileType fileType = new FileType([
+            signature: ".fastq",
+            sub_Type: "fastq",
+            type: "SEQUENCE",
+            vbp_path: "/sequence/"
+            ])
+        assertNotNull(fileType.save(flush: true))
+
+        SeqPlatform seqPlatform = new SeqPlatform()
+        seqPlatform.name = "platform"
+        seqPlatform.model = "model"
+        assertNotNull(seqPlatform.save(flush: true))
+
+        SeqCenter seqCenter = new SeqCenter(
+                        name: "seqCenter",
+                        dirName: "seqCenter"
+                        )
+        assertNotNull(seqCenter.save([flush: true]))
+
+        Run run = new Run()
+        run.name = runName
+        run.seqCenter = seqCenter
+        run.seqPlatform = seqPlatform
+        run.storageRealm = Run.StorageRealm.DKFZ
+        assertNotNull(run.save([flush: true]))
+
+        RunSegment runSegment = new RunSegment()
+        runSegment.initialFormat = RunSegment.DataFormat.FILES_IN_DIRECTORY
+        runSegment.currentFormat = RunSegment.DataFormat.FILES_IN_DIRECTORY
+        runSegment.dataPath = baseDir.getPath()
+        runSegment.filesStatus = RunSegment.FilesStatus.NEEDS_INSTALLATION
+        runSegment.mdPath = baseDir.getPath()
+        runSegment.run = run
+        assertNotNull(runSegment.save([flush: true]))
+
+        MetaDataFile metaDataFile = new MetaDataFile(
+                        fileName: fileName,
+                        filePath: baseDir.getPath(),
+                        runSegment: runSegment
+                        )
+        assertNotNull(metaDataFile.save([flush: true]))
+
+        metaDataService.processMetaDataFile(metaDataFile)
+    }
+
 
     /**
      * Creates a very simple MetaDataEntry with minimum required fields.

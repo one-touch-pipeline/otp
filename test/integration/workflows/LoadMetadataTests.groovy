@@ -136,7 +136,7 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
         StringBuffer sb = new StringBuffer()
         sb << metaDataTableHeader()
         sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR1Filename, MD5: md5sum(fastqR1Filepath), LANE_NO: laneNo, LIB_PREP_KIT: libraryPreparationKit])) + "\n"
-        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR2Filename, MD5: md5sum(fastqR2Filepath), LANE_NO: laneNo, LIB_PREP_KIT: libraryPreparationKit]))
+        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR2Filename, MD5: md5sum(fastqR2Filepath), LANE_NO: laneNo, LIB_PREP_KIT: libraryPreparationKit])) + "\n"
         return sb.toString()
     }
 
