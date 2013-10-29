@@ -537,6 +537,8 @@ $.otp.sequence = {
                 action: 'dataTableSource'
             }),
             bScrollCollapse: true,
+            bScrollInfinite: true,
+            sScrollY: ($(window).height() - 570),
             iDisplayLength: Math.round(($('.body').height() - 200) / 23),
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
