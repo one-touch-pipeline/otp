@@ -284,6 +284,7 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
         executionService.executeCommand(realm, cleanUpTestFoldersCommand())
     }
 
+    @Ignore
     void testExomeMetadata() {
         run("scripts/ExomeEnrichmentKit/LoadExomeEnrichmentKits.groovy")
         run("scripts/MetaDataWorkflow.groovy")
