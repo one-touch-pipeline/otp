@@ -97,6 +97,13 @@ class MetaDataValidationService {
                     entry.status = status ? valid : invalid
                 }
                 break
+            case "ANTIBODY_TARGET":
+                MetaDataEntry metaDataEntry = metaDataEntry(entry.dataFile, "SEQUENCING_TYPE")
+                boolean isSequenceOfTypeChipSeq = metaDataEntry?.value == SeqTypeNames.CHIP_SEQ.seqTypeName
+                if (isSequenceOfTypeChipSeq) {
+                    entry.status = AntibodyTarget.findByName(entry.value) ? valid : invalid;
+                }
+                break
         }
         entry.save(flush: true)
         return (entry.status == invalid)? false : true

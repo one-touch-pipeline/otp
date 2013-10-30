@@ -8,8 +8,16 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState
 import de.dkfz.tbi.otp.ngsdata.SeqTrack.QualityEncoding
 
 @TestMixin(GrailsUnitTestMixin)
-@Mock([SeqTrack, ExomeSeqTrack])
+@Mock([SeqTrack, ExomeSeqTrack, ChipSeqSeqTrack])
 class SeqTrackBuilderUnitTests {
+
+    final String LANE_ID = "lane"
+    final String ANTIBODY_TARGET_NAME = "antibodyTargetName"
+    final String ANTIBODY_NAME = "antibodyName"
+    final AntibodyTarget ANTIBODY_TARGET = new AntibodyTarget(name: ANTIBODY_TARGET_NAME)
+    final long N_BASE_PAIRS = 5
+    final long N_READS = 6
+    final int INSERT_SIZE = 7
 
     void testCreate() {
         SeqTrackBuilder builder = new SeqTrackBuilder(
@@ -298,6 +306,96 @@ class SeqTrackBuilderUnitTests {
             builder.setQualityEncoding(QualityEncoding.ILLUMINA).setAlignmentState(DataProcessingState.FINISHED).setFastqcState(DataProcessingState.IN_PROGRESS)
             builder.setKitInfoState(ExomeSeqTrack.KitInfoState.KNOWN)
             builder.create()
+        }
+    }
+
+    void testCreateChipSeqWithAntibodyTargetAndNoAntibody() {
+        SeqTrackBuilder builder =  new SeqTrackBuilder(
+                        LANE_ID,
+                        new Run(),
+                        new Sample(),
+                        new SeqType(name: SeqTypeNames.CHIP_SEQ.seqTypeName),
+                        new SeqPlatform(),
+                        new SoftwareTool()
+                        )
+        builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
+        builder.setnBasePairs(N_BASE_PAIRS).setnReads(N_READS).setInsertSize(INSERT_SIZE)
+        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setAlignmentState(DataProcessingState.FINISHED).setFastqcState(DataProcessingState.IN_PROGRESS)
+        builder.setAntibodyTarget(ANTIBODY_TARGET)
+
+        SeqTrack seqTrack = builder.create()
+        assertNotNull(seqTrack)
+        assertEquals(ChipSeqSeqTrack.class, seqTrack.getClass())
+        assertEquals(LANE_ID, seqTrack.laneId)
+        assertEquals(true, seqTrack.hasFinalBam)
+        assertEquals(true, seqTrack.hasOriginalBam)
+        assertEquals(true, seqTrack.usingOriginalBam)
+        assertEquals(N_BASE_PAIRS, seqTrack.nBasePairs)
+        assertEquals(N_READS, seqTrack.nReads)
+        assertEquals(INSERT_SIZE, seqTrack.insertSize)
+        assertNotNull(seqTrack.run)
+        assertNotNull(seqTrack.sample)
+        assertNotNull(seqTrack.seqType)
+        assertNotNull(seqTrack.seqPlatform)
+        assertNotNull(seqTrack.pipelineVersion)
+        assertEquals(QualityEncoding.ILLUMINA, seqTrack.qualityEncoding)
+        assertEquals(DataProcessingState.FINISHED, seqTrack.alignmentState)
+        assertEquals(DataProcessingState.IN_PROGRESS, seqTrack.fastqcState)
+        assertEquals(ANTIBODY_TARGET, seqTrack.antibodyTarget)
+        assertNull(seqTrack.antibody)
+    }
+
+    void testCreateChipSeqWithAntibodyTargetAndAntibody() {
+        SeqTrackBuilder builder =  new SeqTrackBuilder(
+                        LANE_ID,
+                        new Run(),
+                        new Sample(),
+                        new SeqType(name: SeqTypeNames.CHIP_SEQ.seqTypeName),
+                        new SeqPlatform(),
+                        new SoftwareTool()
+                        )
+        builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
+        builder.setnBasePairs(N_BASE_PAIRS).setnReads(N_READS).setInsertSize(INSERT_SIZE)
+        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setAlignmentState(DataProcessingState.FINISHED).setFastqcState(DataProcessingState.IN_PROGRESS)
+        builder.setAntibodyTarget(ANTIBODY_TARGET)
+        builder.setAntibody(ANTIBODY_NAME)
+
+        SeqTrack seqTrack = builder.create()
+        assertNotNull(seqTrack)
+        assertEquals(ChipSeqSeqTrack.class, seqTrack.getClass())
+        assertEquals(LANE_ID, seqTrack.laneId)
+        assertEquals(true, seqTrack.hasFinalBam)
+        assertEquals(true, seqTrack.hasOriginalBam)
+        assertEquals(true, seqTrack.usingOriginalBam)
+        assertEquals(N_BASE_PAIRS, seqTrack.nBasePairs)
+        assertEquals(N_READS, seqTrack.nReads)
+        assertEquals(INSERT_SIZE, seqTrack.insertSize)
+        assertNotNull(seqTrack.run)
+        assertNotNull(seqTrack.sample)
+        assertNotNull(seqTrack.seqType)
+        assertNotNull(seqTrack.seqPlatform)
+        assertNotNull(seqTrack.pipelineVersion)
+        assertEquals(QualityEncoding.ILLUMINA, seqTrack.qualityEncoding)
+        assertEquals(DataProcessingState.FINISHED, seqTrack.alignmentState)
+        assertEquals(DataProcessingState.IN_PROGRESS, seqTrack.fastqcState)
+        assertEquals(ANTIBODY_TARGET, seqTrack.antibodyTarget)
+        assertEquals(ANTIBODY_NAME, seqTrack.antibody)
+    }
+
+    void testCreateChipSeqWithNoAntibodyTarget() {
+        shouldFail(IllegalArgumentException.class) {
+            SeqTrackBuilder builder =  new SeqTrackBuilder(
+                            LANE_ID,
+                            new Run(),
+                            new Sample(),
+                            new SeqType(name: SeqTypeNames.CHIP_SEQ.seqTypeName),
+                            new SeqPlatform(),
+                            new SoftwareTool()
+                            )
+        builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
+        builder.setnBasePairs(N_BASE_PAIRS).setnReads(N_READS).setInsertSize(INSERT_SIZE)
+        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setAlignmentState(DataProcessingState.FINISHED).setFastqcState(DataProcessingState.IN_PROGRESS)
+        builder.create()
         }
     }
 }

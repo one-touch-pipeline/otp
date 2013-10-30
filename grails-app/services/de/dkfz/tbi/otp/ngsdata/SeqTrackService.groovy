@@ -386,7 +386,6 @@ class SeqTrackService {
         assertConsistentPipeline(pipeline, dataFiles)
 
         SeqTrack seqTrack = createSeqTrack(dataFiles.get(0), run, sample, seqType, lane, pipeline)
-
         consumeDataFiles(dataFiles, seqTrack)
         fillReadsForSeqTrack(seqTrack)
         seqTrack.save(flush: true)
@@ -406,6 +405,15 @@ class SeqTrackService {
                 builder.setKitInfoState(ExomeSeqTrack.KitInfoState.UNKNOWN)
             } else {
                 builder.setExomeEnrichmentKit(exomeEnrichmentKitService.findExomeEnrichmentKitByNameOrAlias(metaDataEntry.value))
+            }
+        } else if (seqType.name == SeqTypeNames.CHIP_SEQ.seqTypeName) {
+            MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.ANTIBODY_TARGET.name())
+            MetaDataEntry metaDataEntry = MetaDataEntry.findByDataFileAndKey(dataFile, key)
+            builder.setAntibodyTarget(AntibodyTarget.findByName(metaDataEntry.value))
+            key = MetaDataKey.findByName(MetaDataColumn.ANTIBODY.name())
+            metaDataEntry = MetaDataEntry.findByDataFileAndKey(dataFile, key)
+            if (metaDataEntry) {
+                builder.setAntibody(metaDataEntry.value)
             }
         }
 

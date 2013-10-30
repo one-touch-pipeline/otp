@@ -154,9 +154,15 @@ class LsdfFilesService {
         SeqTrack seqTrack = file.seqTrack ?: file.alignmentLog.seqTrack
         String seqTypeDir = seqTrack.seqType.dirName
         String pid = seqTrack.sample.individual.pid
-        String sampleType = seqTrack.sample.sampleType.name.toLowerCase()
         String library = seqTrack.seqType.libraryLayout.toLowerCase()
-        return getFileViewByPidRelativeDirectory(seqTypeDir, pid, sampleType, library, file.run.name, file.fileType.vbpPath)
+        String sampleTypeDir = seqTrack.sample.sampleType.name.toLowerCase()
+        if (file.seqTrack.seqType.name == SeqTypeNames.CHIP_SEQ.seqTypeName) {
+            ChipSeqSeqTrack chipSeqSeqTrack = seqTrack as ChipSeqSeqTrack
+            AntibodyTarget antibodyTarget = chipSeqSeqTrack.antibodyTarget
+            String antibodyDirNamePart = antibodyTarget.name
+            sampleTypeDir += "-${antibodyDirNamePart}"
+        }
+        return getFileViewByPidRelativeDirectory(seqTypeDir, pid, sampleTypeDir, library, file.run.name, file.fileType.vbpPath)
     }
 
     private String getFileViewByPidRelativeDirectory(DataFile file, Sequence sequence) {

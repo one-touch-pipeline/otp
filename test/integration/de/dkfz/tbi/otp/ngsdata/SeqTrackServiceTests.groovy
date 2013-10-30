@@ -14,6 +14,8 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
     File dataPath
     File mdPath
 
+    static final String ANTIBODY_TARGET_IDENTIFIER = "AntibodyTargetIdentifier123"
+
     @Before
     void setUp() {
         // TODO needs rewritting
@@ -242,7 +244,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     void testCreateSeqTrackNoExome() {
         Map data = createData()
-        createMetaData(data.dataFile, "")
+        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "")
         SeqTrack seqTrack = seqTrackService.createSeqTrack(
                         data.dataFile,
                         data.run,
@@ -257,7 +259,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     void testCreateSeqTrackNoExomeInvalid() {
         Map data = createData()
-        createMetaData(data.dataFile, "")
+        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "")
         shouldFail(IllegalArgumentException.class) {
             seqTrackService.createSeqTrack(
                             data.dataFile,
@@ -286,7 +288,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     void testCreateSeqTrackExomeByKit() {
         Map data = createData()
-        createMetaData(data.dataFile, "ExomeEnrichmentKit")
+        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "ExomeEnrichmentKit")
         data.seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
 
@@ -306,7 +308,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     void testCreateSeqTrackExomeByKitIdentifier() {
         Map data = createData()
-        createMetaData(data.dataFile, "ExomeEnrichmentKitIdentifier")
+        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "ExomeEnrichmentKitIdentifier")
         data.seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
 
@@ -326,7 +328,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     void testCreateSeqTrackExomeByValueUnknown() {
         Map data = createData()
-        createMetaData(data.dataFile, "UNKNOWN")
+        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "UNKNOWN")
         data.seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
 
@@ -347,7 +349,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
     void testCreateSeqTrackExomeInvalidByValueLaterToCheck() {
         //value LATER_TO_CHECK can not given in meta data, so this value should be handled like an unknown value
         Map data = createData()
-        createMetaData(data.dataFile, "LATER_TO_CHECK")
+        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "LATER_TO_CHECK")
         data.seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
 
@@ -365,7 +367,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     void testCreateSeqTrackExomeInvalidUnknownValue() {
         Map data = createData()
-        createMetaData(data.dataFile, "unknown value")
+        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "unknown value")
         data.seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
 
@@ -383,7 +385,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     void testCreateSeqTrackExomeInvalidEmptyValue() {
         Map data = createData()
-        createMetaData(data.dataFile, "")
+        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "")
         data.seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
 
@@ -401,7 +403,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     void testCreateSeqTrackExomeInvalidNoSample() {
         Map data = createData()
-        createMetaData(data.dataFile, "ExomeEnrichmentKit")
+        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "ExomeEnrichmentKit")
         data.seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
 
@@ -456,6 +458,60 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertEquals(ExomeSeqTrack.class, seqTrack.class)
         assertEquals(ExomeSeqTrack.KitInfoState.LATER_TO_CHECK, seqTrack.kitInfoState)
         assertNull(seqTrack.exomeEnrichmentKit)
+    }
+
+    void testCreateSeqTrackChipSeqAntibodyTargetWithUnknownValue() {
+        Map data = createData()
+        createMetaData(data.dataFile, MetaDataColumn.ANTIBODY_TARGET, "unknown value")
+        data.seqType.name = SeqTypeNames.CHIP_SEQ.seqTypeName
+        assertNotNull(data.seqType.save([flush: true]))
+
+        shouldFail(IllegalArgumentException.class) {
+            seqTrackService.createSeqTrack(
+                            data.dataFile,
+                            data.run,
+                            data.sample,
+                            data.seqType,
+                            "1",
+                            data.softwareTool
+                            )
+        }
+    }
+
+    void testCreateSeqTrackChipSeqAntibodyTargetWithEmptyValue() {
+        Map data = createData()
+        createMetaData(data.dataFile, MetaDataColumn.ANTIBODY_TARGET, "")
+        data.seqType.name = SeqTypeNames.CHIP_SEQ.seqTypeName
+        assertNotNull(data.seqType.save([flush: true]))
+
+        shouldFail(IllegalArgumentException.class) {
+            seqTrackService.createSeqTrack(
+                            data.dataFile,
+                            data.run,
+                            data.sample,
+                            data.seqType,
+                            "1",
+                            data.softwareTool
+                            )
+        }
+    }
+
+    void testCreateSeqTrackChipSeqWithValidAntibodyTarget() {
+        Map data = createData()
+        createMetaData(data.dataFile, MetaDataColumn.ANTIBODY_TARGET, ANTIBODY_TARGET_IDENTIFIER)
+        data.seqType.name = SeqTypeNames.CHIP_SEQ.seqTypeName
+        assertNotNull(data.seqType.save([flush: true]))
+
+        SeqTrack seqTrack = seqTrackService.createSeqTrack(
+                        data.dataFile,
+                        data.run,
+                        data.sample,,
+                        data.seqType,
+                        "1",
+                        data.softwareTool
+                        )
+        assertNotNull(seqTrack)
+        assertEquals(ChipSeqSeqTrack.class, seqTrack.class)
     }
 
     private Map createData() {
@@ -538,19 +594,24 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         exomeEnrichmentKit: exomeEnrichmentKit)
         assertNotNull(exomeEnrichmentKitIdentifier.save([flush: true]))
 
+        AntibodyTarget antibodyTarget = new AntibodyTarget(
+            name: ANTIBODY_TARGET_IDENTIFIER)
+        assertNotNull(antibodyTarget.save([flush: true]))
+
         return [
             dataFile: dataFile,
             run: run,
             sample: sample,
             seqType: seqType,
             softwareTool: softwareTool,
-            exomeEnrichmentKit: exomeEnrichmentKit
+            exomeEnrichmentKit: exomeEnrichmentKit,
+            antibodyTarget: antibodyTarget
         ]
     }
 
-    private void createMetaData(DataFile dataFile, String value = "ExomeEnrichmentKitIdentifier") {
+    private void createMetaData(DataFile dataFile, MetaDataColumn column, String value) {
         MetaDataKey metaDataKey = new MetaDataKey(
-                        name: "LIB_PREP_KIT"
+                        name: column as String
                         )
         assertNotNull(metaDataKey.save([flush: true]))
 
@@ -562,5 +623,4 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         )
         assertNotNull(metaDataEntry.save())
     }
-
 }

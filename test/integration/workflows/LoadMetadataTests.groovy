@@ -19,8 +19,8 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
 
     // The scheduler needs to access the created objects while the test is being executed
     boolean transactional = false
-    // TODO want to get rid of this hardcoded.. idea: maybe calculating from the walltime of the cluster jobs..
-    int SLEEPING_TIME_IN_MINUTES = 3
+    // TODO ( jira: OTP-566)  want to get rid of this hardcoded.. idea: maybe calculating from the walltime of the cluster jobs..
+    int SLEEPING_TIME_IN_MINUTES = 60
 
     LsdfFilesService lsdfFilesService
     ExecutionService executionService
@@ -59,25 +59,23 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
     String realmHost = "headnode"
     int realmPort = 22
     String realmWebHost = "https://otp.local/ngsdata/"
-    String realmPbsOptions = '{"-l": {nodes: "1:lsdf", walltime: "00:15:00"}}'
+    String realmPbsOptions = '{"-l": {nodes: "1:lsdf", walltime: "48:00:00"}}'
     int realmTimeout = 0
 
     String seqCenterName = "TheSequencingCenter"
     String sampleID = "SampleIdentifier"
     String projectName = "TheProject"
-    String seqTypeName = SeqTypeNames.EXOME.seqTypeName
     String softwareToolName = "CASAVA"
     String softwareToolVersion = "1.8.2"
     String pipeLineVersion = "${softwareToolName}-${softwareToolVersion}"
     String libraryLayout = "PAIRED"
     String instrumentPlatform = "Illumina"
     String instrumentModel = "HiSeq2000"
-    String libraryPreparationKit = "Agilent SureSelect V3"
-    String libraryPreparationKitIdentifier = "Agilent SureSelect V3 alias"
 
     String laneNoKit = "1"
     String laneNoKitId = "2"
     String laneNoUnknown = "3"
+
     String baseCount = "8781211000"
     String readCount = "87812110"
     String cycleCount = "101"
@@ -90,141 +88,76 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
         return md5sum
     }
 
-    private Map<String, String> metaDataDefault() {
-        Map<String, String> metaDataDefault = [
-            FASTQ_FILE: "",
-            MD5: "",
-            CENTER_NAME: seqCenterName,
-            RUN_ID: runName,
-            RUN_DATE: runDate,
-            LANE_NO: "",
-            BASE_COUNT: baseCount,
-            READ_COUNT: readCount,
-            CYCLE_COUNT: cycleCount,
-            SAMPLE_ID: sampleID,
-            SEQUENCING_TYPE: seqTypeName,
-            INSTRUMENT_PLATFORM: instrumentPlatform,
-            INSTRUMENT_MODEL: instrumentModel,
-            PIPELINE_VERSION: pipeLineVersion,
-            INSERT_SIZE: insertSize,
-            LIBRARY_LAYOUT: libraryLayout,
-            WITHDRAWN: "0",
-            WITHDRAWN_DATE: "",
-            COMMENT: "",
-            BARCODE: "",
-            LIB_PREP_KIT: ""]
+    private Map<MetaDataColumn, String> metaDataDefault() {
+        Map<MetaDataColumn, String> emptyMetaData = MetaDataColumn.values().collectEntries {
+            [(it): ""]
+        }
+        Map<MetaDataColumn, String> metaDataDefault = new HashMap(emptyMetaData)
+        metaDataDefault.putAll([
+                (MetaDataColumn.CENTER_NAME): seqCenterName,
+                (MetaDataColumn.RUN_ID): runName,
+                (MetaDataColumn.RUN_DATE): runDate,
+                (MetaDataColumn.BASE_COUNT): baseCount,
+                (MetaDataColumn.READ_COUNT): readCount,
+                (MetaDataColumn.CYCLE_COUNT): cycleCount,
+                (MetaDataColumn.SAMPLE_ID): sampleID,
+                (MetaDataColumn.INSTRUMENT_PLATFORM): instrumentPlatform,
+                (MetaDataColumn.INSTRUMENT_MODEL): instrumentModel,
+                (MetaDataColumn.PIPELINE_VERSION): pipeLineVersion,
+                (MetaDataColumn.INSERT_SIZE): insertSize,
+                (MetaDataColumn.LIBRARY_LAYOUT): libraryLayout,
+                (MetaDataColumn.WITHDRAWN): "0"])
         return metaDataDefault
     }
 
-    private Map<String, String> metaData(Map<String, String> metaDataToOverride) {
-        // TODO maybe add some validation to not allow wrong keys to be passed..
-        Map<String, String> metaData = metaDataDefault()
-        metaDataToOverride.keySet().each { String key ->
-            metaData[key] = metaDataToOverride.get(key)
-        }
+    private Map<MetaDataColumn, String> metaData(Map<MetaDataColumn, String> metaDataToOverride) {
+        assertTrue((MetaDataColumn.values() as List).containsAll(metaDataToOverride.keySet()))
+        Map<MetaDataColumn, String> metaData = metaDataDefault()
+        metaData.putAll(metaDataToOverride)
         return metaData
     }
 
     private List<MetaDataColumn> metaDataColumns() {
-        return MetaDataColumn.values() as List
+        return MetaDataColumn.values() as List<MetaDataColumn>
     }
 
     private String metaDataTableHeader(List<MetaDataColumn> metaDataColumns = metaDataColumns()) {
         return metaDataColumns.join("\t") + "\n"
     }
 
-    private String metaDataTableEntry(Map<String, String> metaData, List<MetaDataColumn> metaDataColumns = metaDataColumns()) {
-        println metaDataColumns.size()
+    private String metaDataTableEntry(Map<MetaDataColumn, String> metaData, List<MetaDataColumn> metaDataColumns = metaDataColumns()) {
         List<String> values = []
-        metaDataColumns.each {
-            values << metaData[it.name()]
+        metaDataColumns.each { MetaDataColumn column ->
+            values << metaData[column]
         }
         return values.join("\t") + "\n"
     }
 
-    //    // TODO construir o body
-    //    private String metaDataTableBody() {
-    //
-    //    }
-
-    private String metaDataTextWellFormedForExon() {
-        StringBuffer sb = new StringBuffer()
-        sb << metaDataTableHeader()
-        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR1Filename1, MD5: md5sum(fastqR1Filepath), LANE_NO: laneNoKit, LIB_PREP_KIT: libraryPreparationKit]))
-        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR2Filename1, MD5: md5sum(fastqR2Filepath), LANE_NO: laneNoKit, LIB_PREP_KIT: libraryPreparationKit]))
-        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR1Filename2, MD5: md5sum(fastqR1Filepath), LANE_NO: laneNoKitId, LIB_PREP_KIT: libraryPreparationKitIdentifier]))
-        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR2Filename2, MD5: md5sum(fastqR2Filepath), LANE_NO: laneNoKitId, LIB_PREP_KIT: libraryPreparationKitIdentifier]))
-        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR1Filename3, MD5: md5sum(fastqR1Filepath), LANE_NO: laneNoUnknown, LIB_PREP_KIT: ExomeSeqTrack.KitInfoState.UNKNOWN.toString()]))
-        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR2Filename3, MD5: md5sum(fastqR2Filepath), LANE_NO: laneNoUnknown, LIB_PREP_KIT: ExomeSeqTrack.KitInfoState.UNKNOWN.toString()]))
-        return sb.toString()
-    }
-
-    private String metaDataTextForExonNoEnrichmentKit() {
-        List<MetaDataColumn> metaDataColumns = metaDataColumns()
-        metaDataColumns.remove(MetaDataColumn.LIB_PREP_KIT)
-        StringBuffer sb = new StringBuffer()
-        sb << metaDataTableHeader(metaDataColumns)
-        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR1Filename1, MD5: md5sum(fastqR1Filepath), LANE_NO: laneNoKit]), metaDataColumns)
-        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR2Filename1, MD5: md5sum(fastqR2Filepath), LANE_NO: laneNoKit]), metaDataColumns)
-        return sb.toString()
+    private Realm createAndSaveRealm(Realm.OperationType operationType) {
+        realm = new Realm(
+                        name: realmName,
+                        env: Environment.getCurrent().getName(),
+                        operationType: operationType,
+                        cluster: Realm.Cluster.DKFZ,
+                        rootPath: rootPath,
+                        processingRootPath: processingRootPath,
+                        programsRootPath: realmProgramsRootPath,
+                        webHost: realmWebHost,
+                        host: realmHost,
+                        port: realmPort,
+                        unixUser: realmDKFZUnixUser,
+                        timeout: realmTimeout,
+                        pbsOptions: realmPbsOptions
+                        )
+        realm.save(flush: true)
+        return realm
     }
 
     @Before
     void setUp() {
         // Setup logic here
-        realm = new Realm(
-                        name: realmName,
-                        env: Environment.getCurrent().getName(),
-                        operationType: Realm.OperationType.DATA_MANAGEMENT,
-                        cluster: Realm.Cluster.DKFZ,
-                        rootPath: rootPath,
-                        processingRootPath: processingRootPath,
-                        programsRootPath: realmProgramsRootPath,
-                        webHost: realmWebHost,
-                        host: realmHost,
-                        port: realmPort,
-                        unixUser: realmDKFZUnixUser,
-                        timeout: realmTimeout,
-                        pbsOptions: realmPbsOptions
-                        )
-        assertNotNull(realm.save(flush: true))
-
-        realm = new Realm(
-                        name: realmName,
-                        env: Environment.getCurrent().getName(),
-                        operationType: Realm.OperationType.DATA_PROCESSING,
-                        cluster: Realm.Cluster.DKFZ,
-                        rootPath: rootPath,
-                        processingRootPath: processingRootPath,
-                        programsRootPath: realmProgramsRootPath,
-                        webHost: realmWebHost,
-                        host: realmHost,
-                        port: realmPort,
-                        unixUser: realmDKFZUnixUser,
-                        timeout: realmTimeout,
-                        pbsOptions: realmPbsOptions
-                        )
-        assertNotNull(realm.save(flush: true))
-
-        //String metaDataFile = metaDataText(runName)
-        String metaDataFile = metaDataTextWellFormedForExon()
-        //TODO handle different test with data OTP-570
-        metaDataFile = metaDataTextForExonNoEnrichmentKit()
-
-        String path = "${ftpDir}/${runName}"
-        String softLinkFastqR1Filepath1 = "${path}/${fastqR1Filename1}"
-        String softLinkFastqR2Filepath1 = "${path}/${fastqR2Filename1}"
-        String softLinkFastqR1Filepath2 = "${path}/${fastqR1Filename2}"
-        String softLinkFastqR2Filepath2 = "${path}/${fastqR2Filename2}"
-        String softLinkFastqR1Filepath3 = "${path}/${fastqR1Filename3}"
-        String softLinkFastqR2Filepath3 = "${path}/${fastqR2Filename3}"
-
-        // Just to be sure the rootPath and the processingRootPath are clean for new test
-        String cmdCleanUp = cleanUpTestFoldersCommand()
-        String cmdBuildFileStructure = "mkdir -p ${path}"
-        String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath1}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath1}; ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath2}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath2}; ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath3}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath3} "
-        String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
-        executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildFileStructure}; ${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
+        createAndSaveRealm(Realm.OperationType.DATA_MANAGEMENT)
+        createAndSaveRealm(Realm.OperationType.DATA_PROCESSING)
 
         FileType fileType = new FileType()
         fileType.type = FileType.Type.SEQUENCE
@@ -272,12 +205,6 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
         softwareToolIdentifier.softwareTool = softwareTool
         assertNotNull(softwareToolIdentifier.save(flush: true))
 
-        SeqType seqType = new SeqType()
-        seqType.name = seqTypeName
-        seqType.libraryLayout = libraryLayout
-        seqType.dirName = seqTypeName
-        assertNotNull(seqType.save(flush: true))
-
         SeqPlatform seqPlatform = new SeqPlatform()
         seqPlatform.name = instrumentPlatform
         seqPlatform.model = instrumentModel
@@ -292,14 +219,14 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
                         name: seqCenterName,
                         dirName: seqCenterName
                         )
-        assertNotNull(seqCenter.save([flush: true]))
+        assertNotNull(seqCenter.save([flush: true, failOnError: true]))
 
         Run run = new Run()
         run.name = runName
         run.seqCenter = seqCenter
         run.seqPlatform = seqPlatform
         run.storageRealm = Run.StorageRealm.DKFZ
-        assertNotNull(run.save([flush: true]))
+        assertNotNull(run.save([flush: true, failOnError: true]))
 
         RunSegment runSegment = new RunSegment()
         runSegment.initialFormat = RunSegment.DataFormat.FILES_IN_DIRECTORY
@@ -308,29 +235,39 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
         runSegment.filesStatus = RunSegment.FilesStatus.NEEDS_INSTALLATION
         runSegment.mdPath = ftpDir
         runSegment.run = run
-        assertNotNull(runSegment.save([flush: true]))
-
-        println "path : " + (new File(metaDataFilepath)).getAbsolutePath()
-        assertTrue(new File(metaDataFilepath).exists())
+        assertNotNull(runSegment.save([flush: true, failOnError: true]))
     }
 
     @After
     void tearDown() {
-        //executionService.executeCommand(realm, cleanUpTestFoldersCommand())
+        executionService.executeCommand(realm, cleanUpTestFoldersCommand())
     }
 
+    // TODO  (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
+    // so at this moment only one test could be run at moment, all the others have to be commented
     @Ignore
-    void testExomeMetadata() {
-        run("scripts/ExomeEnrichmentKit/LoadExomeEnrichmentKits.groovy")
+    void testWholeGenomeMetadata() {
+        String seqTypeName = SeqTypeNames.WHOLE_GENOME.seqTypeName
+        createAndSaveSeqType(seqTypeName)
+
+        String path = "${ftpDir}/${runName}"
+        String softLinkFastqR1Filepath1 = "${path}/${fastqR1Filename1}"
+        String softLinkFastqR2Filepath1 = "${path}/${fastqR2Filename1}"
+
+        // Just to be sure the rootPath and the processingRootPath are clean for new test
+        String cmdCleanUp = cleanUpTestFoldersCommand()
+        String cmdBuildFileStructure = "mkdir -p ${path}"
+        String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath1}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath1}"
+
+        StringBuffer sb = new StringBuffer()
+        sb << metaDataTableHeader()
+        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR1Filename1, (MetaDataColumn.MD5): md5sum(fastqR1Filepath), (MetaDataColumn.LANE_NO): laneNoKit, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName]))
+        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR2Filename1, (MetaDataColumn.MD5): md5sum(fastqR2Filepath), (MetaDataColumn.LANE_NO): laneNoKit, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName]))
+        String metaDataFile = sb.toString()
+
+        String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
+        executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildFileStructure}; ${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
         run("scripts/MetaDataWorkflow.groovy")
-
-        List<ExomeEnrichmentKit> exomeEnrichmentKit = ExomeEnrichmentKit.list()
-        assertFalse(exomeEnrichmentKit.isEmpty())
-
-        ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = new ExomeEnrichmentKitIdentifier(
-                        name: libraryPreparationKitIdentifier,
-                        exomeEnrichmentKit: exomeEnrichmentKit.first())
-        assertNotNull(exomeEnrichmentKitIdentifier.save([flush: true]))
 
         // there will be only one at the database
         JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
@@ -340,6 +277,156 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
 
         boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
         assertTrue(workflowFinishedSucessfully)
+    }
+
+    // TODO (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
+    // so at this moment only one test could be run at moment, all the others have to be commented
+    @Ignore
+    void testExomeMetadataNoEnrichmentKit() {
+        String seqTypeName = SeqTypeNames.EXOME.seqTypeName
+        createAndSaveSeqType(seqTypeName)
+
+        run("scripts/ExomeEnrichmentKit/LoadExomeEnrichmentKits.groovy")
+        List<ExomeEnrichmentKit> exomeEnrichmentKit = ExomeEnrichmentKit.list()
+        assertFalse(exomeEnrichmentKit.isEmpty())
+
+        String path = "${ftpDir}/${runName}"
+        String softLinkFastqR1Filepath1 = "${path}/${fastqR1Filename1}"
+        String softLinkFastqR2Filepath1 = "${path}/${fastqR2Filename1}"
+        // Just to be sure the rootPath and the processingRootPath are clean for new test
+        String cmdCleanUp = cleanUpTestFoldersCommand()
+        String cmdBuildFileStructure = "mkdir -p ${path}"
+        String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath1}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath1}"
+
+        List<MetaDataColumn> metaDataColumns = metaDataColumns()
+        metaDataColumns.remove(MetaDataColumn.LIB_PREP_KIT)
+        StringBuffer sb = new StringBuffer()
+        sb << metaDataTableHeader(metaDataColumns)
+        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR1Filename1, (MetaDataColumn.MD5): md5sum(fastqR1Filepath), (MetaDataColumn.LANE_NO): laneNoKit, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName]), metaDataColumns)
+        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR2Filename1, (MetaDataColumn.MD5): md5sum(fastqR2Filepath), (MetaDataColumn.LANE_NO): laneNoKit, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName]), metaDataColumns)
+        String metaDataFile = sb.toString()
+
+        String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
+        executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildFileStructure}; ${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
+        assertTrue(new File(metaDataFilepath).exists())
+        run("scripts/MetaDataWorkflow.groovy")
+
+        // there will be only one at the database
+        JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
+
+        // TODO hack to be able to star the workflow
+        metaDataStartJob.setJobExecutionPlan(jobExecutionPlan)
+
+        boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
+        assertTrue(workflowFinishedSucessfully)
+    }
+
+    // TODO (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
+    // so at this moment only one test could be run at moment, all the others have to be commented
+    @Ignore
+    void testExomeMetadataWithEnrichmentKit() {
+        String seqTypeName = SeqTypeNames.EXOME.seqTypeName
+        createAndSaveSeqType(seqTypeName)
+
+        run("scripts/ExomeEnrichmentKit/LoadExomeEnrichmentKits.groovy")
+        List<ExomeEnrichmentKit> exomeEnrichmentKit = ExomeEnrichmentKit.list()
+        assertFalse(exomeEnrichmentKit.isEmpty())
+
+        // this library PreparationKit was chosen to match the one at the script that is supposed to be executed together with the workflow
+        String libraryPreparationKit = "Agilent SureSelect V3"
+        String libraryPreparationKitIdentifier = "Agilent SureSelect V3 alias"
+
+        ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = new ExomeEnrichmentKitIdentifier(
+                        name: libraryPreparationKitIdentifier,
+                        exomeEnrichmentKit: exomeEnrichmentKit.first())
+        assertNotNull(exomeEnrichmentKitIdentifier.save([flush: true]))
+
+        String path = "${ftpDir}/${runName}"
+        String softLinkFastqR1Filepath1 = "${path}/${fastqR1Filename1}"
+        String softLinkFastqR2Filepath1 = "${path}/${fastqR2Filename1}"
+        String softLinkFastqR1Filepath2 = "${path}/${fastqR1Filename2}"
+        String softLinkFastqR2Filepath2 = "${path}/${fastqR2Filename2}"
+        String softLinkFastqR1Filepath3 = "${path}/${fastqR1Filename3}"
+        String softLinkFastqR2Filepath3 = "${path}/${fastqR2Filename3}"
+
+        // Just to be sure the rootPath and the processingRootPath are clean for new test
+        String cmdCleanUp = cleanUpTestFoldersCommand()
+        String cmdBuildFileStructure = "mkdir -p ${path}"
+        String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath1}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath1}; ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath2}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath2}; ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath3}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath3} "
+
+        StringBuffer sb = new StringBuffer()
+        sb << metaDataTableHeader()
+        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR1Filename1, (MetaDataColumn.MD5): md5sum(fastqR1Filepath), (MetaDataColumn.LANE_NO): laneNoKit, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): libraryPreparationKit]))
+        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR2Filename1, (MetaDataColumn.MD5): md5sum(fastqR2Filepath), (MetaDataColumn.LANE_NO): laneNoKit, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): libraryPreparationKit]))
+        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR1Filename2, (MetaDataColumn.MD5): md5sum(fastqR1Filepath), (MetaDataColumn.LANE_NO): laneNoKitId, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): libraryPreparationKitIdentifier]))
+        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR2Filename2, (MetaDataColumn.MD5): md5sum(fastqR2Filepath), (MetaDataColumn.LANE_NO): laneNoKitId, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): libraryPreparationKitIdentifier]))
+        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR1Filename3, (MetaDataColumn.MD5): md5sum(fastqR1Filepath), (MetaDataColumn.LANE_NO): laneNoUnknown, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): ExomeSeqTrack.KitInfoState.UNKNOWN.toString()]))
+        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR2Filename3, (MetaDataColumn.MD5): md5sum(fastqR2Filepath), (MetaDataColumn.LANE_NO): laneNoUnknown, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): ExomeSeqTrack.KitInfoState.UNKNOWN.toString()]))
+        String metaDataFile = sb.toString()
+
+        String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
+        executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildFileStructure}; ${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
+        assertTrue(new File(metaDataFilepath).exists())
+        run("scripts/MetaDataWorkflow.groovy")
+
+        // there will be only one at the database
+        JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
+
+        // TODO hack to be able to star the workflow
+        metaDataStartJob.setJobExecutionPlan(jobExecutionPlan)
+
+        boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
+        assertTrue(workflowFinishedSucessfully)
+    }
+
+    // TODO (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
+    // so at this moment only one test could be run at moment, all the others have to be commented
+//    @Ignore
+    void testChipSeqMetadata() {
+        String seqTypeName = SeqTypeNames.CHIP_SEQ.seqTypeName
+        createAndSaveSeqType(seqTypeName)
+
+        String path = "${ftpDir}/${runName}"
+        String softLinkFastqR1Filepath = "${path}/${fastqR1Filename1}"
+        String softLinkFastqR2Filepath = "${path}/${fastqR2Filename1}"
+
+        // Just to be sure the rootPath and the processingRootPath are clean for new test
+        String cmdCleanUp = cleanUpTestFoldersCommand()
+        String cmdBuildFileStructure = "mkdir -p ${path}"
+        String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath}"
+
+        String ANTIBODY_TARGET_1 = "just4Test1"
+
+        StringBuffer sb = new StringBuffer()
+        sb << metaDataTableHeader()
+        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR1Filename1, (MetaDataColumn.MD5): md5sum(fastqR1Filepath), (MetaDataColumn.LANE_NO): laneNoKit, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.ANTIBODY_TARGET): ANTIBODY_TARGET_1]))
+        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR2Filename1, (MetaDataColumn.MD5): md5sum(fastqR2Filepath), (MetaDataColumn.LANE_NO): laneNoKit, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.ANTIBODY_TARGET): ANTIBODY_TARGET_1]))
+        String metaDataFile = sb.toString()
+
+        String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
+        executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildFileStructure}; ${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
+
+        AntibodyTarget.findOrSaveByName(ANTIBODY_TARGET_1)
+
+        run("scripts/MetaDataWorkflow.groovy")
+
+        // there will be only one at the database
+        JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
+
+        // TODO hack to be able to star the workflow
+        metaDataStartJob.setJobExecutionPlan(jobExecutionPlan)
+
+        boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
+        assertTrue(workflowFinishedSucessfully)
+    }
+
+    private SeqType createAndSaveSeqType(String seqTypeName) {
+        SeqType seqType = new SeqType()
+        seqType.name = seqTypeName
+        seqType.libraryLayout = libraryLayout
+        seqType.dirName = seqTypeName
+        assertNotNull(seqType.save(flush: true))
+        return seqType
     }
 
     /**

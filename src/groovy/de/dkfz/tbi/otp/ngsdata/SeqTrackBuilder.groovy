@@ -61,6 +61,16 @@ class SeqTrackBuilder {
      */
     private ExomeEnrichmentKit exomeEnrichmentKit
 
+    /**
+     * For ChipSeq, this field is optional
+     */
+    private String antibody
+
+    /**
+     * For ChipSeq, this field is required
+     */
+    private AntibodyTarget antibodyTarget
+
     public SeqTrackBuilder(String laneId, Run run, Sample sample,
             SeqType seqType, SeqPlatform seqPlatform,
             SoftwareTool pipelineVersion) {
@@ -146,6 +156,16 @@ class SeqTrackBuilder {
         return this
     }
 
+    public SeqTrackBuilder setAntibody(String antibody) {
+        this.antibody = antibody
+        return this
+    }
+
+    public SeqTrackBuilder setAntibodyTarget(AntibodyTarget antibodyTarget) {
+        this.antibodyTarget = antibodyTarget
+        return this
+    }
+
     public SeqTrack create() {
         SeqTrack seqTrack
         if (seqType.name == SeqTypeNames.EXOME.seqTypeName) {
@@ -158,6 +178,11 @@ class SeqTrackBuilder {
             seqTrack = new ExomeSeqTrack()
             seqTrack.kitInfoState = kitInfoState
             seqTrack.exomeEnrichmentKit = exomeEnrichmentKit
+        } else if (seqType.name == SeqTypeNames.CHIP_SEQ.seqTypeName) {
+            notNull(antibodyTarget, "A seq track needs the antibodyTarget for ChipSeq data")
+            seqTrack = new ChipSeqSeqTrack()
+            seqTrack.antibodyTarget = antibodyTarget
+            seqTrack.antibody = antibody
         } else {
             seqTrack = new SeqTrack()
         }

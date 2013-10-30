@@ -1,0 +1,51 @@
+package de.dkfz.tbi.otp.ngsdata
+
+import static org.junit.Assert.*
+import grails.test.mixin.*
+import grails.test.mixin.support.*
+import org.junit.*
+
+@TestMixin(GrailsUnitTestMixin)
+@TestFor(ChipSeqSeqTrack)
+@Mock([ChipSeqSeqTrack, AntibodyTarget])
+class ChipSeqSeqTrackTests {
+
+    static final String ANTIBODY = "antibodyName"
+
+    static final AntibodyTarget ANTIBODY_TARGET = new AntibodyTarget(name: "antibodyTargetName")
+
+    ChipSeqSeqTrack chipSeqSeqTrack
+
+    @Before
+    public void setUp() throws Exception {
+        chipSeqSeqTrack =  new ChipSeqSeqTrack(
+                        laneId: "lane",
+                        run: new Run(),
+                        sample: new Sample(),
+                        seqType: new SeqType(name: SeqTypeNames.CHIP_SEQ.seqTypeName),
+                        seqPlatform: new SeqPlatform(),
+                        pipelineVersion: new SoftwareTool()
+                        )
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        chipSeqSeqTrack = null
+    }
+
+    void testNullableAntibodyAndValidAntibodyTarget() {
+        chipSeqSeqTrack.antibodyTarget = ANTIBODY_TARGET
+        assertTrue chipSeqSeqTrack.validate()
+    }
+
+    void testNotNullAntibodyAndValidAntibodyTarget() {
+        chipSeqSeqTrack.antibodyTarget = ANTIBODY_TARGET
+        chipSeqSeqTrack.antibody = ANTIBODY
+        assertTrue chipSeqSeqTrack.validate()
+    }
+
+    void testNullAntibodyTarget() {
+        chipSeqSeqTrack.antibody = ANTIBODY
+        assertFalse chipSeqSeqTrack.validate()
+    }
+}
