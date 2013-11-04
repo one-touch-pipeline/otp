@@ -29,8 +29,7 @@ class ReferenceGenomeService {
                         findByProjectAndSeqTypeAndDeprecatedDateIsNull(project, seqType)
         notNull(referenceGenomeProjectSeqType,
                         "There is no reference genome defined for the combination of project ${project} and seqType ${seqType}")
-        ReferenceGenome referenceGenome = referenceGenomeProjectSeqType.referenceGenome
-        return referenceGenome
+        return referenceGenomeProjectSeqType.referenceGenome
     }
 
     /**

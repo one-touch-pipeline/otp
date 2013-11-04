@@ -94,13 +94,13 @@ class ChromosomeIdentifierMappingServiceTests {
     }
 
     void testMappingAllFromReferenceGenome() {
-        Map<String, String> mappingExp = ["chr1":"1", "chr2":"2"]
+        Map<String, String> mappingExp = ["chr1":"1", "chr2":"2", "*": "*"]
         Map<String, String> mappingAct = chromosomeIdentifierMappingService.mappingAll(referenceGenome)
         assertEquals(mappingExp, mappingAct)
     }
 
     void testMappingAllFromProjectAndSeqType() {
-        Map<String, String> mappingExp = ["chr1":"1", "chr2":"2"]
+        Map<String, String> mappingExp = ["chr1":"1", "chr2":"2", "*": "*"]
         Map<String, String> mappingAct = chromosomeIdentifierMappingService.mappingAll(project, seqType)
         assertEquals(mappingExp, mappingAct)
     }

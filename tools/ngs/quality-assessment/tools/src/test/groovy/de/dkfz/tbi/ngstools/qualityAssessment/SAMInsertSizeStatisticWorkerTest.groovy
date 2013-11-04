@@ -3,7 +3,6 @@ package de.dkfz.tbi.ngstools.qualityAssessment
 import net.sf.samtools.SAMRecord
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 
 
 class OnLineStatisticsTests extends GroovyTestCase {
@@ -37,13 +36,13 @@ class OnLineStatisticsTests extends GroovyTestCase {
         record.setInferredInsertSize(15)
         record.setProperPairFlag(true)
         samInsertSizeStatisticWorker.process(chromosomeStatisticWrapper, record)
-        Map histogramExp = [15:1]
+        Map histogramExp = [15l: 1l]
         Map histogramAct = chromosomeStatisticWrapper.insertSizeHistogram
         assertEquals(histogramExp, histogramAct)
     }
 
     void testProcessRecordTrueFilledHist() {
-        Map histogram = [3:10, 10:10, 15:10, 19:10, 20:10, 25:10, 30:10]
+        Map histogram = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
         record.setReadPairedFlag(true)
         record.setMateUnmappedFlag(false)
@@ -53,7 +52,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         record.setInferredInsertSize(15)
         record.setProperPairFlag(true)
         samInsertSizeStatisticWorker.process(chromosomeStatisticWrapper, record)
-        Map histogramExp = [3:10, 10:10, 15:11, 19:10, 20:10, 25:10, 30:10]
+        Map histogramExp = [3l: 10l, 10l: 10l, 15l: 11l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
         Map histogramAct = chromosomeStatisticWrapper.insertSizeHistogram
         assertEquals(histogramExp, histogramAct)
     }
@@ -75,7 +74,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
     }
 
     void testProcessRecordFalseFilledHist() {
-        Map histogram = [3:10, 10:10, 15:10, 19:10, 20:10, 25:10, 30:10]
+        Map histogram = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
         record.setReadPairedFlag(false)
         record.setMateUnmappedFlag(false)
@@ -85,13 +84,13 @@ class OnLineStatisticsTests extends GroovyTestCase {
         record.setInferredInsertSize(15)
         record.setProperPairFlag(true)
         samInsertSizeStatisticWorker.process(chromosomeStatisticWrapper, record)
-        Map histogramExp = [3:10, 10:10, 15:10, 19:10, 20:10, 25:10, 30:10]
+        Map histogramExp = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
         Map histogramAct = chromosomeStatisticWrapper.insertSizeHistogram
         assertEquals(histogramExp, histogramAct)
     }
 
     void testPostProcess() {
-        Map histogram = [9:10, 25:10]
+        Map histogram = [9l: 10l, 25l: 10l]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
         samInsertSizeStatisticWorker.postProcess(chromosomeStatisticWrapper)
         double meanExp = 17
@@ -110,8 +109,8 @@ class OnLineStatisticsTests extends GroovyTestCase {
 
     void testProcessChromosomeAllEmptyCollection() {
         Collection<ChromosomeStatisticWrapper> chromosomeWrappers = []
-        Map histogram = [3:10, 10:10, 15:10, 19:10, 20:10, 25:10, 30:10]
-        Map histogramExp = [3:10, 10:10, 15:10, 19:10, 20:10, 25:10, 30:10]
+        Map histogram = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
+        Map histogramExp = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
         samInsertSizeStatisticWorker.processChromosomeAll(chromosomeWrappers, chromosomeStatisticWrapper)
         Map histogramAct = chromosomeStatisticWrapper.insertSizeHistogram
@@ -124,8 +123,8 @@ class OnLineStatisticsTests extends GroovyTestCase {
         Map histogramEmpty = [:]
         chromosomeStatisticWrapperEmptyHist.insertSizeHistogram = histogramEmpty
         chromosomeWrappers.add(chromosomeStatisticWrapperEmptyHist)
-        Map histogram = [3:10, 10:10, 15:10, 19:10, 20:10, 25:10, 30:10]
-        Map histogramExp = [3:10, 10:10, 15:10, 19:10, 20:10, 25:10, 30:10]
+        Map histogram = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
+        Map histogramExp = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
         samInsertSizeStatisticWorker.processChromosomeAll(chromosomeWrappers, chromosomeStatisticWrapper)
         Map histogramAct = chromosomeStatisticWrapper.insertSizeHistogram
@@ -136,7 +135,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         ChromosomeStatisticWrapper chromosomeStatisticWrapperEmptyHist = new ChromosomeStatisticWrapper("chr", 1000)
         Map histogramEmpty = [:]
         chromosomeStatisticWrapperEmptyHist.insertSizeHistogram = histogramEmpty
-        Map histogram = [3:10, 10:10, 15:10, 19:10, 20:10, 25:10, 30:10]
+        Map histogram = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
         ChromosomeStatisticWrapper chromosomeStatisticWrapperOne = new ChromosomeStatisticWrapper("chr1", 1000)
         chromosomeStatisticWrapperOne.insertSizeHistogram = histogram
         ChromosomeStatisticWrapper chromosomeStatisticWrapperTwo = new ChromosomeStatisticWrapper("chr2", 1000)
@@ -148,16 +147,16 @@ class OnLineStatisticsTests extends GroovyTestCase {
         chromosomeWrappers.add(chromosomeStatisticWrapperTwo)
         chromosomeWrappers.add(chromosomeStatisticWrapperThree)
         samInsertSizeStatisticWorker.processChromosomeAll(chromosomeWrappers, chromosomeStatisticWrapperEmptyHist)
-        Map histogramExp = [3:30, 10:30, 15:30, 19:30, 20:30, 25:30, 30:30]
+        Map histogramExp = [3l: 30l, 10l: 30l, 15l: 30l, 19l: 30l, 20l: 30l, 25l: 30l, 30l: 30l]
         Map histogramAct = chromosomeStatisticWrapperEmptyHist.insertSizeHistogram
         assertEquals(histogramExp, histogramAct)
     }
 
     void testProcessChromosomeAll() {
         ChromosomeStatisticWrapper chromosomeStatisticWrapperAll = new ChromosomeStatisticWrapper("chr", 1000)
-        Map histogramAll = [1:10, 3:10, 10:10, 15:10, 19:10, 20:10, 25:10, 30:10]
+        Map histogramAll = [1l: 10l, 3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
         chromosomeStatisticWrapperAll.insertSizeHistogram = histogramAll
-        Map histogram = [3:10, 10:10, 15:10, 19:10, 20:10, 25:10, 30:10]
+        Map histogram = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
         ChromosomeStatisticWrapper chromosomeStatisticWrapperOne = new ChromosomeStatisticWrapper("chr1", 1000)
         chromosomeStatisticWrapperOne.insertSizeHistogram = histogram
         ChromosomeStatisticWrapper chromosomeStatisticWrapperTwo = new ChromosomeStatisticWrapper("chr2", 1000)
@@ -169,7 +168,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         chromosomeWrappers.add(chromosomeStatisticWrapperTwo)
         chromosomeWrappers.add(chromosomeStatisticWrapperThree)
         samInsertSizeStatisticWorker.processChromosomeAll(chromosomeWrappers, chromosomeStatisticWrapperAll)
-        Map histogramExp = [1:10, 3:40, 10:40, 15:40, 19:40, 20:40, 25:40, 30:40]
+        Map histogramExp = [1l: 10l, 3l: 40l, 10l: 40l, 15l: 40l, 19l: 40l, 20l: 40l, 25l: 40l, 30l: 40l]
         Map histogramAct = chromosomeStatisticWrapperAll.insertSizeHistogram
         assertEquals(histogramExp, histogramAct)
     }
@@ -263,8 +262,8 @@ class OnLineStatisticsTests extends GroovyTestCase {
     }
 
     void testAddZero() {
-        Map histogram = [3:10, 10:10, 15:10, 19:10, 20:10, 25:10, 30:10]
-        Map histogramExp = [3:10, 10:10, 15:10, 19:10, 20:10, 25:10, 30:10, 0:1]
+        Map histogram = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
+        Map histogramExp = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l, 0l: 1l]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
         int value = 0
         samInsertSizeStatisticWorker.addValue(chromosomeStatisticWrapper, value)
@@ -272,8 +271,8 @@ class OnLineStatisticsTests extends GroovyTestCase {
     }
 
     void testAddNegativeValue() {
-        Map histogram = [3:10, 10:10, 15:10, 19:10, 20:10, 25:10, 30:10]
-        Map histogramExp = [3:10, 10:11, 15:10, 19:10, 20:10, 25:10, 30:10]
+        Map histogram = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
+        Map histogramExp = [3l: 10l, 10l: 11l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
         int value = -10
         samInsertSizeStatisticWorker.addValue(chromosomeStatisticWrapper, value)
@@ -281,8 +280,8 @@ class OnLineStatisticsTests extends GroovyTestCase {
     }
 
     void testAddNewValue() {
-        Map histogram = [3:10, 10:10, 15:10, 19:10, 20:10, 25:10, 30:10]
-        Map histogramExp = [3:10, 5:1, 10:10, 15:10, 19:10, 20:10, 25:10, 30:10]
+        Map histogram = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
+        Map histogramExp = [3l: 10l, 5l: 1l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
         int value = 5
         samInsertSizeStatisticWorker.addValue(chromosomeStatisticWrapper, value)
@@ -290,8 +289,8 @@ class OnLineStatisticsTests extends GroovyTestCase {
     }
 
     void testAddValueToAlreadyExists() {
-        Map histogram = [3:10, 10:10, 15:10, 19:10, 20:10, 25:10, 30:10]
-        Map histogramExp = [3:10, 10:11, 15:10, 19:10, 20:10, 25:10, 30:10]
+        Map histogram = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
+        Map histogramExp = [3l: 10l, 10l: 11l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
         int value = 10
         samInsertSizeStatisticWorker.addValue(chromosomeStatisticWrapper, value)
@@ -300,69 +299,69 @@ class OnLineStatisticsTests extends GroovyTestCase {
 
     void testAddValueToEmptyList() {
         Map histogram = [:]
-        Map histogramExp = [10:1]
+        Map histogramExp = [10l: 1l]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
         int value = 10
         samInsertSizeStatisticWorker.addValue(chromosomeStatisticWrapper, value)
         assertEquals(histogramExp, histogram)
     }
 
-     void testMeanOfEmptyList() {
-         Map histogram = [:]
-         chromosomeStatisticWrapper.insertSizeHistogram = histogram
-         samInsertSizeStatisticWorker.calculateInsertSizeStatistics(chromosomeStatisticWrapper)
-         assertEquals(0, chromosomeStatisticWrapper.chromosome.insertSizeMean)
-     }
+    void testMeanOfEmptyList() {
+        Map histogram = [:]
+        chromosomeStatisticWrapper.insertSizeHistogram = histogram
+        samInsertSizeStatisticWorker.calculateInsertSizeStatistics(chromosomeStatisticWrapper)
+        assertEquals(0, chromosomeStatisticWrapper.chromosome.insertSizeMean)
+    }
 
-     void testMedianOfEmptyList() {
-         Map histogram = [:]
-         chromosomeStatisticWrapper.insertSizeHistogram = histogram
-         samInsertSizeStatisticWorker.calculateInsertSizeStatistics(chromosomeStatisticWrapper)
-         assertEquals(0, chromosomeStatisticWrapper.chromosome.insertSizeMedian)
-     }
+    void testMedianOfEmptyList() {
+        Map histogram = [:]
+        chromosomeStatisticWrapper.insertSizeHistogram = histogram
+        samInsertSizeStatisticWorker.calculateInsertSizeStatistics(chromosomeStatisticWrapper)
+        assertEquals(0, chromosomeStatisticWrapper.chromosome.insertSizeMedian)
+    }
 
-     void testRMSOfEmptyList() {
-         Map histogram = [:]
-         chromosomeStatisticWrapper.insertSizeHistogram = histogram
-         samInsertSizeStatisticWorker.calculateInsertSizeStatistics(chromosomeStatisticWrapper)
-         assertEquals(0, chromosomeStatisticWrapper.chromosome.insertSizeRMS)
-     }
+    void testRMSOfEmptyList() {
+        Map histogram = [:]
+        chromosomeStatisticWrapper.insertSizeHistogram = histogram
+        samInsertSizeStatisticWorker.calculateInsertSizeStatistics(chromosomeStatisticWrapper)
+        assertEquals(0, chromosomeStatisticWrapper.chromosome.insertSizeRMS)
+    }
 
-     void testSDOfEmptyList() {
-         Map histogram = [:]
-         chromosomeStatisticWrapper.insertSizeHistogram = histogram
-         samInsertSizeStatisticWorker.calculateInsertSizeStatistics(chromosomeStatisticWrapper)
-         assertEquals(0, chromosomeStatisticWrapper.chromosome.insertSizeSD)
-     }
+    void testSDOfEmptyList() {
+        Map histogram = [:]
+        chromosomeStatisticWrapper.insertSizeHistogram = histogram
+        samInsertSizeStatisticWorker.calculateInsertSizeStatistics(chromosomeStatisticWrapper)
+        assertEquals(0, chromosomeStatisticWrapper.chromosome.insertSizeSD)
+    }
 
-     void testGetElementAtEmptyList() {
-         int position = 3
-         Map histogram = [:]
-         chromosomeStatisticWrapper.insertSizeHistogram = histogram
-         shouldFail(java.lang.ArithmeticException) {
-             samInsertSizeStatisticWorker.getElementAt(chromosomeStatisticWrapper, position)
-         }
-     }
+    void testGetElementAtEmptyList() {
+        int position = 3
+        Map histogram = [:]
+        chromosomeStatisticWrapper.insertSizeHistogram = histogram
+        shouldFail(java.lang.ArithmeticException) {
+            samInsertSizeStatisticWorker.getElementAt(chromosomeStatisticWrapper, position)
+        }
+    }
 
     void testGetElementAt() {
         int position = 12
-        Map histogram = [3:10, 10:10, 15:10]
+        Map histogram = [3l: 10l, 10l: 10l, 15l: 10l]
         int elementExp =10
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
         int elementAct = samInsertSizeStatisticWorker.getElementAt(chromosomeStatisticWrapper, position)
         assertEquals(elementExp, elementAct)
     }
 
-     void testGetMedianEmptyList() {
-         Map histogram = [:]
-         chromosomeStatisticWrapper.insertSizeHistogram = histogram
-         shouldFail(java.lang.ArithmeticException) {
-             samInsertSizeStatisticWorker.getMedian(chromosomeStatisticWrapper)
-         }
-     }
+    void testGetMedianEmptyList() {
+        Map histogram = [:]
+        chromosomeStatisticWrapper.insertSizeHistogram = histogram
+        shouldFail(java.lang.ArithmeticException) {
+            samInsertSizeStatisticWorker.getMedian(chromosomeStatisticWrapper)
+        }
+    }
 
     void testGetMedianUnevenNumber() {
-        Map histogram = [3:11, 10:30, 15:50]
+        Map histogram = [3l: 11l, 10l: 30l, 15l: 50l]
         double medianExp = 15
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
         double medianAct = samInsertSizeStatisticWorker.getMedian(chromosomeStatisticWrapper)
@@ -370,7 +369,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
     }
 
     void testGetMedianEvenNumber() {
-        Map histogram = [3:10, 10:30, 15:50]
+        Map histogram = [3l: 10l, 10l: 30l, 15l: 50l]
         double medianExp = 15
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
         double medianAct = samInsertSizeStatisticWorker.getMedian(chromosomeStatisticWrapper)
@@ -378,7 +377,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
     }
 
     void testGetMedianGroupOfEvenNumber() {
-        Map histogram = [3:40, 10:10, 15:30]
+        Map histogram = [3l: 40l, 10l: 10l, 15l: 30l]
         double medianExp = 6.5
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
         double medianAct = samInsertSizeStatisticWorker.getMedian(chromosomeStatisticWrapper)
@@ -386,7 +385,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
     }
 
     void testMean() {
-        Map histogram = [9:10, 25:10]
+        Map histogram = [9l: 10l, 25l: 10l]
         double insertSizeMeanExp = 17
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
         samInsertSizeStatisticWorker.calculateInsertSizeStatistics(chromosomeStatisticWrapper)
@@ -395,7 +394,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
     }
 
     void testMedian() {
-        Map histogram = [3:10, 10:30, 15:50]
+        Map histogram = [3l: 10l, 10l: 30l, 15l: 50l]
         double insertSizeMedianExp = 15
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
         samInsertSizeStatisticWorker.calculateInsertSizeStatistics(chromosomeStatisticWrapper)
@@ -404,7 +403,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
     }
 
     void testRMS() {
-        Map histogram = [9:10, 25:10]
+        Map histogram = [9l: 10l, 25l: 10l]
         double insertSizeRMSExp = Math.sqrt(353)
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
         samInsertSizeStatisticWorker.calculateInsertSizeStatistics(chromosomeStatisticWrapper)
@@ -413,7 +412,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
     }
 
     void testSD() {
-        Map histogram = [9:10, 25:10]
+        Map histogram = [9l: 10l, 25l: 10l]
         double insertSizeSDExp = 8
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
         samInsertSizeStatisticWorker.calculateInsertSizeStatistics(chromosomeStatisticWrapper)

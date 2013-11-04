@@ -545,18 +545,20 @@ class QAResultStatisticsServiceTests {
     // -> header correct
     // -> map okey
 
-    @Ignore @Test
+    @Test
     void testDefineOutput() {
         Map result = QAResultStatisticsService.defineOutput(processedMergedBamFile)
         String actSmall = result["small"]
         String actExtended = result["extended"]
         String expSmall = """\
-pid\tmock full name\tsample type\trun id\tlane\tCoverage w/o N (3.21Mbp)\tCoverage wN (2.91Mbp)\tChrX Coverage w/o N\tChrY Coverage w/o N\t#QC bases mapped\t#total read count (flagstat)\t#mapped read count (flagstat)\t%mapped reads (flagstat)\t%properly_paired (flagstat)\t%singletons (flagstat)\t%duplicates (picard)\tStandard Deviation PE_insertsize\tMedian PE_insertsize\tMean PE_insertsize
+pid\tmock full name\tsample type\trun id\tlane\tCoverage w/o N (2.91Mbp)\tCoverage wN (3.21Mbp)\tChrX Coverage w/o N\tChrY Coverage w/o N\t#QC bases mapped\t#total read count (flagstat)\t#mapped read count (flagstat)\t%mapped reads (flagstat)\t%properly_paired (flagstat)\t%singletons (flagstat)\t%duplicates (picard)\tStandard Deviation PE_insertsize\tMedian PE_insertsize\tMean PE_insertsize
 pid_1\tmockFullName_1\tcontrol\tall_merged\tall_merged\t0.00\t0.00\t0.16\t0.16\t8\t55\t19\t34.55\t52.27\t49.09\t32.73\t29.00\t30.00\t28.00
+pid_1\tmockFullName_1\tcontrol\t${run.id}\tlaneId\t0.00\t0.00\t0.16\t0.16\t8\t55\t19\t34.55\t52.27\t49.09\t32.73\t29.00\t30.00\t28.00
 """
         String expExtended = """\
-pid\tmock full name\tsample type\trun id\tlane\tCoverage w/o N (3.21Mbp)\tCoverage wN (2.91Mbp)\tChrX Coverage w/o N\tChrY Coverage w/o N\t#QC bases mapped\t#total read count (flagstat)\t#mapped read count (flagstat)\t%mapped reads (flagstat)\t%properly_paired (flagstat)\t%singletons (flagstat)\t%duplicates (picard)\tStandard Deviation PE_insertsize\tMedian PE_insertsize\tMean PE_insertsize\t#duplicates Read1\t#duplicates Read2\t%PE reads mapped on diff chromosomes\t%incorrect PE orientation\tincorrect proper pair\tQC bases/ total bases w/o N\tQC bases/ total bases w N\tmapq=0 read1\tmapq=0 read2\tmapq>0,readlength<minlength read1\tmapq>0,readlength<minlength read2\tmapq>0,BaseQualityMedian<basequalCutoff read1\tmapq>0,BaseQualityMedian<basequalCutoff read2\tmapq>0,BaseQualityMedian>=basequalCutoff read1\tmapq>0,BaseQualityMedian>=basequalCutoff read2
-pid_1\tmockFullName_1\tcontrol\tall_merged\tall_merged\t0.00\t0.00\t0.16\t0.16\t8\t55\t19\t34.55\t52.27\t49.09\t32.73\t29.00\t30.00\t28.00\t1\t2\t33\t32\t8/2910000\t8/3210000\t13\t14\t11\t12\t9\t10\t6\t7
+pid\tmock full name\tsample type\trun id\tlane\tCoverage w/o N (2.91Mbp)\tCoverage wN (3.21Mbp)\tChrX Coverage w/o N\tChrY Coverage w/o N\t#QC bases mapped\t#total read count (flagstat)\t#mapped read count (flagstat)\t%mapped reads (flagstat)\t%properly_paired (flagstat)\t%singletons (flagstat)\t%duplicates (picard)\tStandard Deviation PE_insertsize\tMedian PE_insertsize\tMean PE_insertsize\t#duplicates Read1\t#duplicates Read2\t%PE reads mapped on diff chromosomes\t%incorrect PE orientation\tincorrect proper pair\tQC bases/ total bases w/o N\tQC bases/ total bases w N\tmapq=0 read1\tmapq=0 read2\tmapq>0,readlength<minlength read1\tmapq>0,readlength<minlength read2\tmapq>0,BaseQualityMedian<basequalCutoff read1\tmapq>0,BaseQualityMedian<basequalCutoff read2\tmapq>0,BaseQualityMedian>=basequalCutoff read1\tmapq>0,BaseQualityMedian>=basequalCutoff read2
+pid_1\tmockFullName_1\tcontrol\tall_merged\tall_merged\t0.00\t0.00\t0.16\t0.16\t8\t55\t19\t34.55\t52.27\t49.09\t32.73\t29.00\t30.00\t28.00\t1\t2\t33.0\t32.0\t3\t8/2910000\t8/3210000\t13\t14\t11\t12\t9\t10\t6\t7
+pid_1\tmockFullName_1\tcontrol\t${run.id}\tlaneId\t0.00\t0.00\t0.16\t0.16\t8\t55\t19\t34.55\t52.27\t49.09\t32.73\t29.00\t30.00\t28.00\t1\t2\t33.0\t32.0\t3\t8/2910000\t8/3210000\t13\t14\t11\t12\t9\t10\t6\t7
 """
         assertEquals expSmall, actSmall
         assertEquals expExtended, actExtended

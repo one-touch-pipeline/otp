@@ -2,7 +2,6 @@ package de.dkfz.tbi.ngstools.qualityAssessment
 
 import javax.validation.*
 import org.junit.*
-import de.dkfz.tbi.otp.ngsdata.FilesCompletenessService
 
 class ParameterUtilsTest {
 
@@ -27,7 +26,7 @@ class ParameterUtilsTest {
         parameter.minAlignedRecordLength = 90
         parameter.minMeanBaseQuality = 5
         parameter.mappingQuality = 5
-        parameter.winSize = 90
+        parameter.winSize = 100
         parameter.binSize = 67895
         parameter.coverageMappingQualityThreshold = 48
 
@@ -228,7 +227,7 @@ class ParameterUtilsTest {
 
     /**
      * different values of the property "minAlignedRecordLength" are tested:
-     * 90, too short (-3), too long (9999999) 
+     * 90, too short (-3), too long (9999999)
      */
     @Test
     public void testMinAlignedRecordLengthCorrect() {
