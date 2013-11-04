@@ -8,6 +8,7 @@ class QualityAssessmentMergedPassService {
 
     ConfigService configService
     ProcessingOptionService processingOptionService
+    ProcessedMergedBamFileService processedMergedBamFileService
 
     public QualityAssessmentMergedPass createPass() {
         ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.findByQualityAssessmentStatusAndTypeAndWithdrawn(
@@ -22,24 +23,35 @@ class QualityAssessmentMergedPassService {
     }
 
     public void passStarted(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
+        notNull(qualityAssessmentMergedPass, "The input qualityAssessmentMergedPass of the method passStarted is null")
         update(qualityAssessmentMergedPass, AbstractBamFile.QaProcessingStatus.IN_PROGRESS)
     }
 
+    /**
+     * When the quality assessment of the merged bam files is done, the qaProcessingStatus is set to finished.
+     * Furthermore the fileOperationStatus is set to NEEDS_PROCESSING to trigger the Transfer-Workflow
+     */
     public void passFinished(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
+        notNull(qualityAssessmentMergedPass, "The input qualityAssessmentMergedPass of the method passFinished is null")
         update(qualityAssessmentMergedPass, AbstractBamFile.QaProcessingStatus.FINISHED)
+        processedMergedBamFileService.updateFileOperationStatus(qualityAssessmentMergedPass.processedMergedBamFile, AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING)
     }
 
     private void update(QualityAssessmentMergedPass qualityAssessmentMergedPass, AbstractBamFile.QaProcessingStatus state) {
+        notNull(qualityAssessmentMergedPass, "The input qualityAssessmentMergedPass of the method update is null")
+        notNull(state, "The input state of the method update is null")
         ProcessedMergedBamFile processedMergedBamFile = qualityAssessmentMergedPass.processedMergedBamFile
         processedMergedBamFile.qualityAssessmentStatus = state
         assertSave(processedMergedBamFile)
     }
 
     public Realm realmForDataProcessing(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
+        notNull(qualityAssessmentMergedPass, "The input qualityAssessmentMergedPass of the method realmForDataProcessing is null")
         return configService.getRealmDataProcessing(project(qualityAssessmentMergedPass))
     }
 
     public Project project(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
+        notNull(qualityAssessmentMergedPass, "The input qualityAssessmentMergedPass of the method project is null")
         return qualityAssessmentMergedPass.processedMergedBamFile.mergingPass.mergingSet.mergingWorkPackage.sample.individual.project
     }
 
