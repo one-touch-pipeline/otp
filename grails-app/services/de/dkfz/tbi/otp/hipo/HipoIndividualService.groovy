@@ -5,6 +5,9 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class HipoIndividualService {
 
+    private static final int PROJECT_NUMBER_POS = 1
+    private static final int PROJECT_NUMBER_LENGTH = 3
+
     final static Map<String, String> TISSUEMAP = [
         "T": "TUMOR",
         "M": "METASTASIS",
@@ -12,20 +15,33 @@ class HipoIndividualService {
         "X": "XENOGRAFT",
         "Y": "BIOPSY",
         "B": "BLOOD",
-        "N": "CONTROL"
-    ]
+        "N": "CONTROL",
+        "C": "CELL",
+        "I": "INVASIVE_MARGINS",
+        "P": "PATIENT_DERIVED_CULTURE",
+        "Q": "CULTURE_DERIVED_XENOGRAFT",
+    ].asImmutable()
 
+    /**
+     * Validation if the sampleName is a valid HIPO-Identifier.
+     * Therefore it is checked if the name, the sampleType and the project are valid.
+     * For project HIPO_035 the name is checked twice, since only blood and cell are allowed as sample types.
+     *
+     * @param sampleName, which has to be validated
+     * @return An Individual, when the sampleName is a valid HIPO/POP identifier
+     */
     Individual createHipoIndividual(String sampleName) {
-        if (!checkIfHipoName(sampleName)) {
+        int projectNumber = sampleName.substring(PROJECT_NUMBER_POS ,PROJECT_NUMBER_POS + PROJECT_NUMBER_LENGTH) as Integer
+        if ((!checkIfHipoName(sampleName)) || ((projectNumber == 35) && (!checkIfHipo35Name(sampleName)))) {
             return null
         }
         if (SampleIdentifier.findByName(sampleName)) {
             return null
         }
-        assureSampleType(sampleName)
+        assureSampleType(sampleName, projectNumber)
         assureProject(sampleName)
         Individual individual = createOrReturnIndividual(sampleName)
-        addSample(individual, sampleName)
+        addSample(individual, sampleName, projectNumber)
         return individual
     }
 
@@ -35,23 +51,26 @@ class HipoIndividualService {
         return (sampleName =~ hipoRegex)
     }
 
-    private void assureSampleType(String sampleName) {
-        String tissueType = tissueType(sampleName)
+    private boolean checkIfHipo35Name(String sampleName) {
+        String hipoRegex = /[H]035-\w\w\w[KM]-[BC]\d-[DRP]\d/
+        return (sampleName =~ hipoRegex)
+    }
+
+    private void assureSampleType(String sampleName, int projectNumber) {
+        String tissueType = tissueType(sampleName, projectNumber)
         SampleType.findOrSaveByName(tissueType)
     }
 
-    private String tissueType(String sampleName) {
-        notNull(sampleName, "The input for the method tissueType was null")
+    private String tissueType(String sampleName, int projectNumber) {
+        notNull(sampleName, "The input sampleName for the method tissueType was null")
         final int TYPE_POS = 10
         final int SAMPLE_NUMBER_POS = 11
         String tissueKey = sampleName.substring(TYPE_POS, TYPE_POS + 1)
         int sampleNumber = sampleName.substring(SAMPLE_NUMBER_POS, SAMPLE_NUMBER_POS + 1) as Integer
-        if (sampleNumber == 1) {
+        if (projectNumber != 35 && sampleNumber == 1) {
             return "${TISSUEMAP.get(tissueKey)}"
-        } else if (sampleNumber < 10) {
-            return "${TISSUEMAP.get(tissueKey)}0${sampleNumber}"
         } else {
-            return "${TISSUEMAP.get(tissueKey)}${sampleNumber}"
+            return "${TISSUEMAP.get(tissueKey)}${String.format('%02d', sampleNumber, 'd')}"
         }
     }
 
@@ -63,9 +82,8 @@ class HipoIndividualService {
     }
 
     private Project findProject(String sampleName) {
-        final int NUMBER_POS = 1
-        String number = sampleName.substring(NUMBER_POS, NUMBER_POS + 3)
-        String projectName = "hipo_${number}"
+        String number = sampleName.substring(PROJECT_NUMBER_POS, PROJECT_NUMBER_POS + PROJECT_NUMBER_LENGTH)
+        String projectName = "hipo_" + number
         return Project.findByName(projectName)
     }
 
@@ -87,8 +105,9 @@ class HipoIndividualService {
         return ind
     }
 
-    private void addSample(Individual ind, String sampleName) {
-        SampleType type = SampleType.findByName(tissueType(sampleName))
+    private void addSample(Individual ind, String sampleName, int projectNumber) {
+        notNull(ind, "the input individual of the method addSample is null")
+        SampleType type = SampleType.findByName(tissueType(sampleName, projectNumber))
         Sample sample = Sample.findOrSaveByIndividualAndSampleType(ind, type)
         SampleIdentifier si = new SampleIdentifier(name: sampleName, sample: sample)
         si.save(flush: true)
