@@ -279,8 +279,10 @@ class ProcessedMergedBamFileService {
             mergingPass {
                 mergingSet {
                     not { 'in' ("status", disallowedStatesMergingSet) }
-                    mergingWorkPackage {
-                        not { 'in' ("id", workPackageIdsOfFilesInTransfer) }
+                    if (workPackageIdsOfFilesInTransfer) {
+                        mergingWorkPackage {
+                            not { 'in' ("id", workPackageIdsOfFilesInTransfer) }
+                        }
                     }
                 }
             }
