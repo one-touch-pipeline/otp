@@ -396,8 +396,10 @@ class SeqTrackService {
         SeqTrackBuilder builder = new SeqTrackBuilder(lane, run, sample, seqType, run.seqPlatform, pipeline)
         builder.setHasFinalBam(false).setHasOriginalBam(false).setUsingOriginalBam(false)
 
-        MetaDataEntry metaDataEntry = metaDataEntry(dataFile, "LIB_PREP_KIT")
-        builder.setExomeEnrichmentKit(exomeEnrichmentKitService.findExomeEnrichmentKitByNameOrAlias(metaDataEntry?.value))
+        if (seqType.name == SeqTypeNames.EXOME.seqTypeName) {
+            MetaDataEntry metaDataEntry = metaDataEntry(dataFile, "LIB_PREP_KIT")
+            builder.setExomeEnrichmentKit(exomeEnrichmentKitService.findExomeEnrichmentKitByNameOrAlias(metaDataEntry?.value))
+        }
 
         SeqTrack seqTrack = builder.create()
         seqTrack.save(flush: true)

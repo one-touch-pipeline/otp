@@ -249,16 +249,16 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     void testCreateSeqTrackNoExomeNo_LIB_PREP_KIT_MetaData() {
         Map data = createData()
-        shouldFail(ProcessingException.class) {
-            seqTrackService.createSeqTrack(
-                            data.dataFile,
-                            data.run,
-                            data.sample,
-                            data.seqType,
-                            "1",
-                            data.softwareTool
-                            )
-        }
+        SeqTrack seqTrack = seqTrackService.createSeqTrack(
+                        data.dataFile,
+                        data.run,
+                        data.sample,
+                        data.seqType,
+                        "1",
+                        data.softwareTool
+                        )
+        assertNotNull(seqTrack)
+        assertEquals(SeqTrack.class, seqTrack.class)
     }
 
     void testCreateSeqTrackExomeByKit() {
