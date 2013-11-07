@@ -246,14 +246,7 @@ class ProcessedMergedBamFileService {
      * @return the ProcessedMergedBamFile, which has to be copied to the project folder
      */
     public ProcessedMergedBamFile mergedBamFileWithFinishedQA() {
-        List<MergingSet.State> disallowedStatesMergingSet = [
-            MergingSet.State.DECLARED,
-            MergingSet.State.NEEDS_PROCESSING,
-            MergingSet.State.INPROGRESS
-        ]
-
         List<AbstractBamFile.State> disallowedStatesAbstractBamFile = [
-            AbstractBamFile.State.DECLARED,
             AbstractBamFile.State.NEEDS_PROCESSING,
             AbstractBamFile.State.INPROGRESS
         ]
@@ -270,7 +263,7 @@ class ProcessedMergedBamFileService {
          * - the creation of this mergedBamFile (merging) was finished
          * - no other processedMergedBamFile from the same workpackage is currently in transfer
          */
-        List<ProcessedMergedBamFile> files =  ProcessedMergedBamFile.createCriteria().list {
+        List<ProcessedMergedBamFile> files = ProcessedMergedBamFile.createCriteria().list {
             eq("qualityAssessmentStatus", QaProcessingStatus.FINISHED)
             eq("fileOperationStatus", FileOperationStatus.NEEDS_PROCESSING)
             eq("withdrawn", false)
@@ -278,7 +271,7 @@ class ProcessedMergedBamFileService {
             not { 'in'("status", disallowedStatesAbstractBamFile) }
             mergingPass {
                 mergingSet {
-                    not { 'in' ("status", disallowedStatesMergingSet) }
+                    eq ("status", MergingSet.State.PROCESSED)
                     if (workPackageIdsOfFilesInTransfer) {
                         mergingWorkPackage {
                             not { 'in' ("id", workPackageIdsOfFilesInTransfer) }
