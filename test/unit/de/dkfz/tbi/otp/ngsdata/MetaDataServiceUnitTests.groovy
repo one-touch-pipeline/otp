@@ -46,6 +46,7 @@ class MetaDataServiceUnitTests {
         assertEquals(MetaDataColumn.values().length, metaDataService.getKeysFromTokens(MetaDataColumn.values()*.name()).size())
     }
 
+    @Ignore
     void testGetKeysFromTokensWithMissingKey() {
         shouldFail(ProcessingException.class) {
             metaDataService.getKeysFromTokens(MetaDataColumn.values()*.name().subList(0, 10))

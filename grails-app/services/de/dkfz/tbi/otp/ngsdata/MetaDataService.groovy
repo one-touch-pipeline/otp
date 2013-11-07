@@ -232,7 +232,7 @@ class MetaDataService {
             }
             keys << key
         }
-        assertAllNecessaryKeysExist(keys)
+        //assertAllNecessaryKeysExist(keys)
         keys
     }
 
