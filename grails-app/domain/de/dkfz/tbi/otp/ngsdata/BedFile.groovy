@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.ngsdata
 /**
  * This class represents a Bed file
  *
- *
  */
 class BedFile {
 
@@ -14,9 +13,15 @@ class BedFile {
     String fileName
 
     /**
-     * sum of lengths of all target regions covered by this bed file
+     * Sum of lengths of all target regions covered by this bed file
      */
     long targetSize
+
+    /**
+     * Sum of length values of all unique target regions.
+     * Existing overlapping target regions have been merged.
+     */
+    long mergedTargetSize
 
     /**
      * A BedFile is always associated to a reference genome to know
@@ -24,7 +29,7 @@ class BedFile {
      * are based on.
      * A kit can have multiple BedFiles which specify the target regions
      * the kit has been designed for. The kit can have multiple BedFiles
-     * because of the fact that the target regions specified can be based
+     * because of the fact that the specified target regions can be based
      * on different reference genomes, not on the fact that the kit itself
      * has another version. ( The kit version is included in the name)
      *

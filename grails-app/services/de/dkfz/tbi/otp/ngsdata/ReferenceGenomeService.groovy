@@ -26,9 +26,9 @@ class ReferenceGenomeService {
         notNull(project, "the project of the method referenceGenome is null")
         notNull(seqType, "the seqType of the method referenceGenome is null")
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = ReferenceGenomeProjectSeqType.
-                        findByProjectAndSeqTypeAndDeprecatedDateIsNull(project, seqType)
+                findByProjectAndSeqTypeAndDeprecatedDateIsNull(project, seqType)
         notNull(referenceGenomeProjectSeqType,
-                        "There is no reference genome defined for the combination of project ${project} and seqType ${seqType}")
+                "There is no reference genome defined for the combination of project ${project} and seqType ${seqType}")
         return referenceGenomeProjectSeqType.referenceGenome
     }
 
@@ -101,5 +101,14 @@ class ReferenceGenomeService {
         notNull(referenceGenome, "the referenceGenome in method chromosomesInReferenceGenome is null")
         Classification classification = Classification.CHROMOSOME
         return ReferenceGenomeEntry.findAllByReferenceGenomeAndClassification(referenceGenome, classification)
+    }
+
+    /**
+     * returns the path to the file containing the reference genome meta information (names, length values)
+     */
+    public String referenceGenomeMetaInformationPath(Realm realm, ReferenceGenome referenceGenome) {
+        notNull(realm, "The input realm of the method referenceGenomeMetaInformationPath is null")
+        notNull(referenceGenome, "The input referenceGenome of the method referenceGenomeMetaInformationPath is null")
+        return filePathToDirectory(realm, referenceGenome) + "metaInformation.txt"
     }
 }
