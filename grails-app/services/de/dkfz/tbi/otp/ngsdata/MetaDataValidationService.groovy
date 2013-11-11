@@ -279,14 +279,16 @@ class MetaDataValidationService {
         }
         MetaDataEntry lane = metaDataEntry(file, "LANE_NO")
         String oldValue = lane.value
-        String value = lane.value + "_" + index.value
-        lane.value = value
-        lane.source = MetaDataEntry.Source.SYSTEM
-        lane.save(flush: true)
+        if (!oldValue.endsWith(index.value)) {
+            String value = lane.value + "_" + index.value
+            lane.value = value
+            lane.source = MetaDataEntry.Source.SYSTEM
+            lane.save(flush: true)
 
-        String cmnt = "combinig lane_no and index_no"
-        ChangeLog changeLog = buildChangeLog(lane.id, oldValue, value, cmnt)
-        changeLog.save(flush: true)
+            String cmnt = "combinig lane_no and index_no"
+            ChangeLog changeLog = buildChangeLog(lane.id, oldValue, value, cmnt)
+            changeLog.save(flush: true)
+        }
     }
 
     private ChangeLog buildChangeLog(long rowId, String from, String to, String comment) {
@@ -303,7 +305,7 @@ class MetaDataValidationService {
         return changeLog
     }
 
-    /*
+    /**
      * Returns first found meta data entry from the key names in a list.
      * If no entry was found returns null
      */
