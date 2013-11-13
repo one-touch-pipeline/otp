@@ -29,7 +29,7 @@ public class CalculateChecksumJob extends AbstractJobImpl {
         List<String> pbsIds = ["1"]
         for (DataFile file in files) {
             if (checksumFileService.md5sumFileExists(file)) {
-                log.debug "checksum file already exists for file ${file}"
+                log.debug "checksum file already exists for file ${file}".toString()
                 continue
             }
             String cmd = scriptText(file)
