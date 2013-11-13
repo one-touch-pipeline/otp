@@ -39,16 +39,17 @@ class CalculateFileChecksumMD5Job extends AbstractJobImpl {
         ProcessedMergedBamFile bamFile = ProcessedMergedBamFile.get(id)
         Project project = processedMergedBamFileService.project(bamFile)
         Map<String, String> locations = processedMergedBamFileService.locationsForFileCopying(bamFile)
-        Realm realm = configService.getRealmDataManagement(project)
-        String projectDir = realm.rootPath + "/" + project.dirName
-        String cmd = scriptText(bamFile, locations, projectDir)
+        Map<String, String> clusterPrefix = configService.clusterSpecificCommandPrefixes(project)
+        Realm realm = configService.getRealmForDKFZLSDF(Realm.OperationType.DATA_PROCESSING)
+        String projectDir = configService.getProjectRootPath(project) + "/" + project.dirName
+        String cmd = scriptText(bamFile, locations, projectDir, clusterPrefix)
         String jobId = executionHelperService.sendScript(realm, cmd)
         log.debug "Job " + jobId + " submitted to PBS"
         addOutputParameter(JOB, jobId)
         addOutputParameter(REALM, realm.id.toString())
     }
 
-    private String scriptText(ProcessedMergedBamFile file, Map<String, String> locations, String projectDir) {
+    private String scriptText(ProcessedMergedBamFile file, Map<String, String> locations, String projectDir, Map<String, String> clusterPrefix) {
         QualityAssessmentMergedPass pass = qualityAssessmentMergedPassService.latestQualityAssessmentMergedPass(file)
         String qaResultDirectory = processedMergedBamFileQaFileService.directoryPath(pass)
         String qaResultMd5sumFile = processedMergedBamFileQaFileService.qaResultsMd5sumFile(file)
@@ -68,8 +69,7 @@ class CalculateFileChecksumMD5Job extends AbstractJobImpl {
         String text = """
 set -e
 
-mkdir -p ${tmpDirectory}
-find ${projectDir} -type d -exec chmod 2751 '{}' \\;
+${clusterPrefix.exec} \"mkdir -p ${tmpDirectory}; find ${projectDir} -type d -exec chmod 2751 '{}' \\;\"
 
 cd ${source}
 md5sum ${bamFile} > ${md5Bam}
@@ -89,7 +89,7 @@ sed -i 's,${singleLaneSourceDir},./${singleLaneDestinationDir},' ${qaResultMd5su
 """
         }
         text += "chmod 0640 ${qaResultMd5sumFile} ; "
-        text += "echo ${this.class.name} > ${dirToLog} ; chmod 0644 ${dirToLog}"
+        text += "${clusterPrefix.exec} \"echo ${this.class.name} > ${dirToLog} ; chmod 0644 ${dirToLog}\""
         return text
     }
 }

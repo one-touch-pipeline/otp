@@ -60,7 +60,7 @@ class CheckQaResultsChecksumMD5Job extends AbstractEndStateAwareJobImpl {
 set -e
 
 cd ${temporalqaDestinationDir}
-md5sum -c ${qaResultMd5sumFile}
+md5sum -c ${processedMergedBamFileQaFileService.MD5SUM_NAME}
 """
         text += "echo ${this.class.name} >> ${dirToLog} ; chmod 0644 ${dirToLog}"
         return text

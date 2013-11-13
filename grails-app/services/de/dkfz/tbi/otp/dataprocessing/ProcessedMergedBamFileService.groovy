@@ -335,6 +335,15 @@ class ProcessedMergedBamFileService {
 
     /**
      * @param file, the ProcessedMergedBamFile for which the QA results were produced
+     * @return path to the directory where the qa results for the merged and single lane bam files will be stored
+     */
+    public String qaResultDestinationDirectory(ProcessedMergedBamFile file) {
+        notNull(file, "the input of the method qaResultDestinationDirectory is null")
+        return destinationDirectory(file) + '/' + QUALITY_ASSESSMENT_DIR
+    }
+
+    /**
+     * @param file, the ProcessedMergedBamFile for which the QA results were produced
      * @return path to the directory where the qa results for the merged and single lane bam files will be stored temporarily (during the transfer workflow)
      */
     public String qaResultTempDestinationDirectory(ProcessedMergedBamFile file) {

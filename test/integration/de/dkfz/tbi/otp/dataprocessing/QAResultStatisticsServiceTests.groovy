@@ -322,6 +322,7 @@ class QAResultStatisticsServiceTests {
 
     @Test
     void testFormatToTwoDecimals() {
+        assertEquals "-1.00", QAResultStatisticsService.formatToTwoDecimals(-1)
         assertEquals "0.00", QAResultStatisticsService.formatToTwoDecimals(0)
         assertEquals "2.00", QAResultStatisticsService.formatToTwoDecimals(2)
         assertEquals "3.14", QAResultStatisticsService.formatToTwoDecimals(3.14159)
@@ -345,7 +346,7 @@ class QAResultStatisticsServiceTests {
             (QAResultStatisticsService.REFERENCE_GENOME): referenceGenome,
             (QAResultStatisticsService.INDIVIDUAL): individual,
             (QAResultStatisticsService.SAMPLE): sample,
-            (QAResultStatisticsService.RUN): run.id as String,
+            (QAResultStatisticsService.RUN): 'runName',
             (QAResultStatisticsService.LANE): processedBamFile.alignmentPass.seqTrack.laneId
         ]
         // assertEquals will not DTRT here, we have to use the equals() method
@@ -418,7 +419,7 @@ class QAResultStatisticsServiceTests {
                 (QAResultStatisticsService.PID): 'pid_1',
                 (QAResultStatisticsService.MOCK_FULL_NAME): 'mockFullName_1',
                 (QAResultStatisticsService.SAMPLE_TYPE): 'control',
-                (QAResultStatisticsService.RUN_ID): seqTrack.run.id as String,
+                (QAResultStatisticsService.RUN_ID): 'runName',
                 (QAResultStatisticsService.LANE): 'laneId',
                 (QAResultStatisticsService.COVERAGE_WITHOUT_N): '0.00',
                 (QAResultStatisticsService.COVERAGE_WITH_N): '0.00',
@@ -537,13 +538,10 @@ class QAResultStatisticsServiceTests {
         assertTrue expect == actual
     }
 
-    //defineOutput
     @Test(expected = IllegalArgumentException)
     void testDefineOutputWhenArgumentIsNull() {
         QAResultStatisticsService.defineOutput(null)
     }
-    // -> header correct
-    // -> map okey
 
     @Test
     void testDefineOutput() {
@@ -553,12 +551,12 @@ class QAResultStatisticsServiceTests {
         String expSmall = """\
 pid\tmock full name\tsample type\trun id\tlane\tCoverage w/o N (2.91Mbp)\tCoverage wN (3.21Mbp)\tChrX Coverage w/o N\tChrY Coverage w/o N\t#QC bases mapped\t#total read count (flagstat)\t#mapped read count (flagstat)\t%mapped reads (flagstat)\t%properly_paired (flagstat)\t%singletons (flagstat)\t%duplicates (picard)\tStandard Deviation PE_insertsize\tMedian PE_insertsize\tMean PE_insertsize
 pid_1\tmockFullName_1\tcontrol\tall_merged\tall_merged\t0.00\t0.00\t0.16\t0.16\t8\t55\t19\t34.55\t52.27\t49.09\t32.73\t29.00\t30.00\t28.00
-pid_1\tmockFullName_1\tcontrol\t${run.id}\tlaneId\t0.00\t0.00\t0.16\t0.16\t8\t55\t19\t34.55\t52.27\t49.09\t32.73\t29.00\t30.00\t28.00
+pid_1\tmockFullName_1\tcontrol\trunName\tlaneId\t0.00\t0.00\t0.16\t0.16\t8\t55\t19\t34.55\t52.27\t49.09\t32.73\t29.00\t30.00\t28.00
 """
         String expExtended = """\
 pid\tmock full name\tsample type\trun id\tlane\tCoverage w/o N (2.91Mbp)\tCoverage wN (3.21Mbp)\tChrX Coverage w/o N\tChrY Coverage w/o N\t#QC bases mapped\t#total read count (flagstat)\t#mapped read count (flagstat)\t%mapped reads (flagstat)\t%properly_paired (flagstat)\t%singletons (flagstat)\t%duplicates (picard)\tStandard Deviation PE_insertsize\tMedian PE_insertsize\tMean PE_insertsize\t#duplicates Read1\t#duplicates Read2\t%PE reads mapped on diff chromosomes\t%incorrect PE orientation\tincorrect proper pair\tQC bases/ total bases w/o N\tQC bases/ total bases w N\tmapq=0 read1\tmapq=0 read2\tmapq>0,readlength<minlength read1\tmapq>0,readlength<minlength read2\tmapq>0,BaseQualityMedian<basequalCutoff read1\tmapq>0,BaseQualityMedian<basequalCutoff read2\tmapq>0,BaseQualityMedian>=basequalCutoff read1\tmapq>0,BaseQualityMedian>=basequalCutoff read2
 pid_1\tmockFullName_1\tcontrol\tall_merged\tall_merged\t0.00\t0.00\t0.16\t0.16\t8\t55\t19\t34.55\t52.27\t49.09\t32.73\t29.00\t30.00\t28.00\t1\t2\t33.0\t32.0\t3\t8/2910000\t8/3210000\t13\t14\t11\t12\t9\t10\t6\t7
-pid_1\tmockFullName_1\tcontrol\t${run.id}\tlaneId\t0.00\t0.00\t0.16\t0.16\t8\t55\t19\t34.55\t52.27\t49.09\t32.73\t29.00\t30.00\t28.00\t1\t2\t33.0\t32.0\t3\t8/2910000\t8/3210000\t13\t14\t11\t12\t9\t10\t6\t7
+pid_1\tmockFullName_1\tcontrol\trunName\tlaneId\t0.00\t0.00\t0.16\t0.16\t8\t55\t19\t34.55\t52.27\t49.09\t32.73\t29.00\t30.00\t28.00\t1\t2\t33.0\t32.0\t3\t8/2910000\t8/3210000\t13\t14\t11\t12\t9\t10\t6\t7
 """
         assertEquals expSmall, actSmall
         assertEquals expExtended, actExtended

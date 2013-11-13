@@ -34,6 +34,8 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
      *    sshfs headnode:STORAGE_ROOT/dmg/otp/test/TransferWorkflow STORAGE_ROOT/dmg/otp/test/TransferWorkflow
      *  - Check your PBS (Linux cluster) password in ~/.otp.properties
      *
+     *  - If you test for BioQuant and DKFZ setups, it is *required* to use the *same* passwords in case
+     *    the accounts differ
      */
 
     ProcessingOptionService processingOptionService
@@ -50,8 +52,20 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
     ExecutionService executionService
 
     // TODO This paths should be obtained from somewhere else..  maybe from ~/.otp.properties, but I am hardcoding for now..
-    String rootPath = "STORAGE_ROOT/dmg/otp/test/TransferWorkflow/root_path"
-    String processingRootPath = "STORAGE_ROOT/dmg/otp/test/TransferWorkflow/processing_root_path"
+    String dkfzRootPath = 'WORKFLOW_ROOT/TransferWorkflow/root_path'
+    String dkfzProcessingPath = 'WORKFLOW_ROOT/TransferWorkflow/processing_root_path'
+    String bqRootPath = '$BQ_ROOTPATH/dmg/otp/workflow-tests/TransferWorkflow/root_path'
+    String bqProcessingPath = '$BQ_ROOTPATH/dmg/otp/workflow-tests/TransferWorkflow/processing_root_path'
+
+    // Paths for testing on DKFZ
+    String rootPath = dkfzRootPath
+    String processingRootPath = dkfzProcessingPath
+
+    /*
+     // Paths for testing on BioQuant
+     String rootPath = bqRootPath
+     String processingRootPath = dkfzProcessingPath
+     */
 
     private static final String CHROMOSOME_X_NAME = "CHR_X"
     private static final String CHROMOSOME_Y_NAME = "CHR_Y"
@@ -103,51 +117,124 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         // Run
         String runName = "runName"
         String runDirName = "run${runName}"
-        // Realm
+        // Realm for DKFZ
         String realmName = "DKFZ"
-        String realmBioquantUnixUser = "$USER"
-        String realmDKFZUnixUser = "$USER"
+        // Realm for BioQuant (change if testing there)
+        //String realmName = "BioQuant"
+        String realmBioquantUnixUser = "unixUser2"
+        String realmDKFZUnixUser = "prinz"
 
         String realmProgramsRootPath = "/"
         String realmHost = "headnode"
         int realmPort = 22
         String realmWebHost = "https://otp.local/ngsdata/"
-        String realmPbsOptions = '{"-l": {nodes: "1:lsdf", walltime: "5:00"}}'
+        String realmPbsOptionsDKFZ = '{"-l": {nodes: "1:lsdf", walltime: "5:00"}}'
+        String realmPbsOptionsBQ = '{"-l": {nodes: "1:xeon", walltime: "5:00"}, "-W": {x: "NACCESSPOLICY:SINGLEJOB"}}'
         int realmTimeout = 0
 
+        // Realms for testing on DKFZ
         realm = new Realm(
-                        name: "DKFZ",
-                        env: Environment.getCurrent().getName(),
-                        operationType: Realm.OperationType.DATA_MANAGEMENT,
-                        cluster: Realm.Cluster.DKFZ,
-                        rootPath: "${rootPath}",
-                        processingRootPath: "${processingRootPath}",
-                        programsRootPath: realmProgramsRootPath,
-                        webHost: realmWebHost,
-                        host: realmHost,
-                        port: realmPort,
-                        unixUser: realmDKFZUnixUser,
-                        timeout: realmTimeout,
-                        pbsOptions: realmPbsOptions
-                        )
+                name: "DKFZ",
+                env: Environment.getCurrent().getName(),
+                operationType: Realm.OperationType.DATA_MANAGEMENT,
+                cluster: Realm.Cluster.DKFZ,
+                rootPath: "${rootPath}",
+                processingRootPath: "${processingRootPath}",
+                programsRootPath: realmProgramsRootPath,
+                webHost: realmWebHost,
+                host: realmHost,
+                port: realmPort,
+                unixUser: realmDKFZUnixUser,
+                timeout: realmTimeout,
+                pbsOptions: realmPbsOptionsDKFZ
+                )
         assertNotNull(realm.save(flush: true))
 
         realm = new Realm(
-                        name: "DKFZ",
-                        env: Environment.getCurrent().getName(),
-                        operationType: Realm.OperationType.DATA_PROCESSING,
-                        cluster: Realm.Cluster.DKFZ,
-                        rootPath: "${rootPath}",
-                        processingRootPath: "${processingRootPath}",
-                        programsRootPath: realmProgramsRootPath,
-                        webHost: realmWebHost,
-                        host: realmHost,
-                        port: realmPort,
-                        unixUser: realmDKFZUnixUser,
-                        timeout: realmTimeout,
-                        pbsOptions: realmPbsOptions
-                        )
+                name: "DKFZ",
+                env: Environment.getCurrent().getName(),
+                operationType: Realm.OperationType.DATA_PROCESSING,
+                cluster: Realm.Cluster.DKFZ,
+                rootPath: "${rootPath}",
+                processingRootPath: "${processingRootPath}",
+                programsRootPath: realmProgramsRootPath,
+                webHost: realmWebHost,
+                host: realmHost,
+                port: realmPort,
+                unixUser: realmDKFZUnixUser,
+                timeout: realmTimeout,
+                pbsOptions: realmPbsOptionsDKFZ
+                )
         assertNotNull(realm.save(flush: true))
+
+        /*
+         // Realms for testing on BioQuant
+         realm = new Realm(
+         name: "BioQuant",
+         env: Environment.getCurrent().getName(),
+         operationType: Realm.OperationType.DATA_PROCESSING,
+         cluster: Realm.Cluster.DKFZ, // Data processing for BQ projects is done on DKFZ, this is correct.
+         rootPath:           bqRootPath,
+         processingRootPath: dkfzProcessingPath,
+         programsRootPath: realmProgramsRootPath,
+         webHost: realmWebHost,
+         host: 'headnode',
+         port: 22,
+         unixUser: realmDKFZUnixUser,
+         timeout: realmTimeout,
+         pbsOptions: realmPbsOptionsDKFZ
+         )
+         assertNotNull(realm.save(flush: true))
+         realm = new Realm(
+         name: "BioQuant",
+         env: Environment.getCurrent().getName(),
+         operationType: Realm.OperationType.DATA_MANAGEMENT,
+         cluster: Realm.Cluster.BIOQUANT,
+         rootPath:           bqRootPath,
+         processingRootPath: bqProcessingPath,
+         programsRootPath: realmProgramsRootPath,
+         webHost: realmWebHost,
+         host: "otphost-other.example.org",
+         port: 22,
+         unixUser: realmBioquantUnixUser,
+         timeout: realmTimeout,
+         pbsOptions: realmPbsOptionsBQ
+         )
+         assertNotNull(realm.save(flush: true))
+         realm = new Realm(
+         name: "DKFZ",
+         env: Environment.getCurrent().getName(),
+         operationType: Realm.OperationType.DATA_MANAGEMENT,
+         cluster: Realm.Cluster.DKFZ,
+         rootPath:           dkfzRootPath,
+         processingRootPath: dkfzProcessingPath,
+         programsRootPath: realmProgramsRootPath,
+         webHost: realmWebHost,
+         host: 'headnode',
+         port: 22,
+         unixUser: realmDKFZUnixUser,
+         timeout: realmTimeout,
+         pbsOptions: realmPbsOptionsDKFZ
+         )
+         assertNotNull(realm.save(flush: true))
+         // this will be used to create the directories, so this needs to be last
+         realm = new Realm(
+         name: "DKFZ",
+         env: Environment.getCurrent().getName(),
+         operationType: Realm.OperationType.DATA_PROCESSING,
+         cluster: Realm.Cluster.DKFZ,
+         rootPath:           dkfzRootPath,
+         processingRootPath: dkfzProcessingPath,
+         programsRootPath: realmProgramsRootPath,
+         webHost: realmWebHost,
+         host: 'headnode',
+         port: 22,
+         unixUser: realmDKFZUnixUser,
+         timeout: realmTimeout,
+         pbsOptions: realmPbsOptionsDKFZ
+         )
+         assertNotNull(realm.save(flush: true))
+         */
 
         Project project = new Project(
                         name: projectName,
@@ -472,8 +559,6 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         setProperties(chromosomeYQualityAssessmentMerged1)
         assertNotNull(chromosomeYQualityAssessmentMerged1.save([flush: true, failOnError: true]))
 
-        // super.createUserAndRoles()
-
         /*
          * Setup directories and files for corresponding database objects
          */
@@ -506,7 +591,6 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         // Call "sync" to block termination of script until I/O is done
         executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildDirStructure} && ${cmdBuildFileStructure} && sync")
 
-        // TODO check if file structure was created..
         checkFiles(files)
     }
 
@@ -559,6 +643,8 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
      */
     String cleanUpTestFoldersCommand() {
         return "rm -rf ${rootPath}/* ${processingRootPath}/*"
+        /* When testing on BioQuant, there is no write access. You have to replace the
+         * above line by something like 'return "true"' */
     }
 
     // TODO maybe we can make this a sub class and put this method in parent..
@@ -656,7 +742,7 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
         // has to wait, since the Transfer workflow checks only every minute if there are new files with status NEEDS_PROCESSING
         // without waiting no new process would be in the process list when it is checked
-        sleep(120000)
+        Thread.currentThread().sleep(120000)
         workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
         assertTrue(workflowFinishedSucessfully)
         assertEquals(fileNameMergedBamFile2, mergedBamFile.getText())

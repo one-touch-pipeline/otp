@@ -36,8 +36,9 @@ class TransferMergedBamFileJob extends AbstractEndStateAwareJobImpl {
         if (processStatusService.statusSuccessful(dirToLog, CalculateFileChecksumMD5Job.class.name)) {
             log.debug "Attempting to copy merged BAM file " + locations.get("bamFile") + " (id= " + file + " ) to " + locations.get("destinationDirectory")
             Project project = processedMergedBamFileService.project(file)
-            String cmd = scriptText(locations, temporalDestinationDir, dirToLog)
-            Realm realm = configService.getRealmDataManagement(project)
+            Map<String, String> clusterPrefix = configService.clusterSpecificCommandPrefixes(project)
+            String cmd = scriptText(locations, temporalDestinationDir, dirToLog, clusterPrefix)
+            Realm realm = configService.getRealmDataProcessing(project)
             String jobId = executionHelperService.sendScript(realm, cmd)
             log.debug "Job ${jobId} submitted to PBS"
             addOutputParameter(JOB, jobId)
@@ -49,7 +50,7 @@ class TransferMergedBamFileJob extends AbstractEndStateAwareJobImpl {
         }
     }
 
-    private String scriptText(Map<String, String> locations, String temporalDestinationDir, String dirToLog) {
+    private String scriptText(Map<String, String> locations, String temporalDestinationDir, String dirToLog, Map<String, String> clusterPrefix) {
         String source = locations.get("sourceDirectory")
 
         // FIXME: remove chmod once the ACLs in the file system are in place
@@ -57,10 +58,10 @@ class TransferMergedBamFileJob extends AbstractEndStateAwareJobImpl {
 set -e
 
 cd ${source}
-cp *.bam *.bai *.md5sum ${temporalDestinationDir}
-find ${temporalDestinationDir} -type f -exec chmod 0640 '{}' \\;
+${clusterPrefix.cp} *.bam *.bai *.md5sum ${clusterPrefix.dest}${temporalDestinationDir}
+${clusterPrefix.exec} \"find ${temporalDestinationDir} -type f -exec chmod 0640 '{}' \\;\"
 """
-        text += "echo ${this.class.name} >> ${dirToLog} ; chmod 0644 ${dirToLog}"
+        text += "${clusterPrefix.exec} \"echo ${this.class.name} >> ${dirToLog} ; chmod 0644 ${dirToLog}\""
         return text
     }
 }

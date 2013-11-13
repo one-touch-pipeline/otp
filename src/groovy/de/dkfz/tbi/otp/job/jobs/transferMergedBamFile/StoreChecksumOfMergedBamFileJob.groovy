@@ -25,7 +25,7 @@ class StoreChecksumOfMergedBamFileJob extends AbstractEndStateAwareJobImpl {
         String dest = processedMergedBamFileService.destinationDirectory(file)
         String dirToLog = processStatusService.statusLogFile(dest)
         if (processStatusService.statusSuccessful(dirToLog, MoveFilesToFinalDestinationJob.class.name)) {
-            String md5SumFile = locations.get("sourceDirectory") + "/" + locations.get("md5BamFile")
+            String md5SumFile = locations.get("destinationDirectory") + "/" + locations.get("md5BamFile")
             String md5Bam = checksumFileService.firstMD5ChecksumFromFile(md5SumFile)
             boolean successfulSave = processedMergedBamFileService.storeMD5Digest(file, md5Bam)
             //TODO: processedMergedBamFile somehow has to be stored as MergedAlignmentDataFile or another GUI representation of the files.

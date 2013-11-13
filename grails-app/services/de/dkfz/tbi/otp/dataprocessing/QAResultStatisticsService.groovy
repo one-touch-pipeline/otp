@@ -81,7 +81,7 @@ class QAResultStatisticsService {
         Project project = individual.project
         SeqTrack seqTrack = bamFile.alignmentPass.seqTrack
         SeqType seqType = seqTrack.seqType
-        String run = seqTrack.run.id as String
+        String run = seqTrack.run.name
         String lane = seqTrack.laneId
         ReferenceGenome referenceGenome = referenceGenomeService.referenceGenome(project, seqType)
         ReferenceGenomeEntry referenceGenomeEntryChrX = ReferenceGenomeEntry.findByReferenceGenomeAndAlias(referenceGenome, Chromosomes.CHR_X.alias)
@@ -376,7 +376,7 @@ class QAResultStatisticsService {
         return v.join("\t") + "\n"
     }
 
-    private formatToTwoDecimals(BigDecimal number) {
+    private formatToTwoDecimals(Double number) {
         notNull number, 'the argument "number" of the method "createOutputLine" is null'
         String.format(Locale.ENGLISH, '%.2f', number)
     }

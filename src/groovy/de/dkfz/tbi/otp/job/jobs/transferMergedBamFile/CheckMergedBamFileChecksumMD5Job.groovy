@@ -51,8 +51,6 @@ class CheckMergedBamFileChecksumMD5Job extends AbstractEndStateAwareJobImpl {
     }
 
     private String scriptText(Map<String, String> locations, String temporalDestinationDir, String dirToLog) {
-
-        String source = locations.get("sourceDirectory")
         String md5Bam = locations.get("md5BamFile")
         String md5Bai = locations.get("md5BaiFile")
 
@@ -61,8 +59,8 @@ class CheckMergedBamFileChecksumMD5Job extends AbstractEndStateAwareJobImpl {
 set -e
 
 cd ${temporalDestinationDir}
-md5sum -c ${source}/${md5Bam}
-md5sum -c ${source}/${md5Bai}
+md5sum -c ${md5Bam}
+md5sum -c ${md5Bai}
 """
         text += "echo ${this.class.name} >> ${dirToLog} ; chmod 0644 ${dirToLog}"
         return text

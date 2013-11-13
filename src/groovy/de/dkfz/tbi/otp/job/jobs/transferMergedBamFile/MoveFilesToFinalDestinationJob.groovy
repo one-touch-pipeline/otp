@@ -40,6 +40,7 @@ class MoveFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl {
         String dest = processedMergedBamFileService.destinationDirectory(mergedBamFile)
         String temporalDestinationDir = processedMergedBamFileService.destinationTempDirectory(mergedBamFile)
         String temporalQADestinationDir = processedMergedBamFileService.qaResultTempDestinationDirectory(mergedBamFile)
+        String qaDestinationDirectory = processedMergedBamFileService.qaResultDestinationDirectory(mergedBamFile)
         String dirToLog = processStatusService.statusLogFile(temporalDestinationDir)
         if (processStatusService.statusSuccessful(dirToLog, CreateQAResultStatisticsFileJob.class.name)) {
             log.debug "Attempting to move files from the tmp directory to the final destination"
@@ -48,7 +49,7 @@ class MoveFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl {
             dirToLog = processStatusService.statusLogFile(dest)
             Realm realm = configService.getRealmDataManagement(project)
             String projectDir = realm.rootPath + "/" + project.dirName
-            String cmd = scriptText(dest, temporalDestinationDir, dirToLog, projectDir, temporalQADestinationDir)
+            String cmd = scriptText(dest, temporalDestinationDir, dirToLog, projectDir, temporalQADestinationDir, qaDestinationDirectory)
             String jobId = executionHelperService.sendScript(realm, cmd)
             log.debug "Job ${jobId} submitted to PBS"
             addOutputParameter(JOB, jobId)
@@ -61,13 +62,13 @@ class MoveFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl {
     }
 
     //before moving the files to the final directory it is checked if the files, which are currently at the destination, are in use
-    private String scriptText(String dest, String temporalDestinationDir, String dirToLog, String projectDir, String temporalQADestinationDir) {
+    private String scriptText(String dest, String temporalDestinationDir, String dirToLog, String projectDir, String temporalQADestinationDir, String qaDestinationDirectory) {
         String text = """
 set -e
 
 mkdir -p ${dest}${processedMergedBamFileService.QUALITY_ASSESSMENT_DIR}
 flock -x ${dest} -c \"mv -f ${temporalDestinationDir}/*.bam ${temporalDestinationDir}/*.bai ${temporalDestinationDir}/*.md5sum ${temporalDestinationDir}/*.log ${dest}\"
-flock -x ${dest} -c \"mv -f ${temporalQADestinationDir}/* ${dest}${processedMergedBamFileService.QUALITY_ASSESSMENT_DIR}/\"
+flock -x ${dest} -c \"mv -f ${temporalQADestinationDir}/* ${qaDestinationDirectory}/\"
 rm -rf ${temporalDestinationDir}
 """
         text += "echo ${this.class.name} >> ${dirToLog} ; chmod 0644 ${dirToLog}"

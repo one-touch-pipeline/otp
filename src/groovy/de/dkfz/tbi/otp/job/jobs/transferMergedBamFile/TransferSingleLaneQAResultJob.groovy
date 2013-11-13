@@ -37,9 +37,10 @@ class TransferSingleLaneQAResultJob extends AbstractEndStateAwareJobImpl{
         Map<String, String> singleLaneQAResultsDirectories = processedMergedBamFileService.singleLaneQAResultsDirectories(mergedBamFile)
         String temporalDestinationDir = processedMergedBamFileService.destinationTempDirectory(mergedBamFile)
         String dirToLog = processStatusService.statusLogFile(temporalDestinationDir)
+        Map<String, String> clusterPrefix = configService.clusterSpecificCommandPrefixes(project)
         if (processStatusService.statusSuccessful(dirToLog, TransferMergedQAResultJob.class.name)) {
-            String cmd = scriptText(mergedBamFile, singleLaneQAResultsDirectories, dirToLog)
-            Realm realm = configService.getRealmDataManagement(project)
+            String cmd = scriptText(mergedBamFile, singleLaneQAResultsDirectories, dirToLog, clusterPrefix)
+            Realm realm = configService.getRealmDataProcessing(project)
             String jobId = executionHelperService.sendScript(realm, cmd)
             log.debug "Job ${jobId} submitted to PBS"
             addOutputParameter(JOB, jobId)
@@ -51,23 +52,25 @@ class TransferSingleLaneQAResultJob extends AbstractEndStateAwareJobImpl{
         }
     }
 
-    private String scriptText(ProcessedMergedBamFile file, Map<String, String> directories, String dirToLog) {
+    private String scriptText(ProcessedMergedBamFile file, Map<String, String> directories, String dirToLog, Map<String, String> clusterPrefix) {
         String tmpQADestinationDirectory = processedMergedBamFileService.qaResultTempDestinationDirectory(file)
+        String qaDestinationDirectory = processedMergedBamFileService.qaResultDestinationDirectory(file)
         String text = """
 set -e
 
-cd ${tmpQADestinationDirectory}
 """
 
         for (String directoryName : directories.keySet()) {
             String src = directories.get(directoryName)
             text += """
-mkdir -p -m 0750 ${directoryName}
-cp -r ${src}/* ${directoryName}
-find ${directoryName} -type f -exec chmod 0640 '{}' \\;
+# Remove old QA results directory for single lane BAM files if they exist
+${clusterPrefix.exec} \"rm -r -f ${qaDestinationDirectory}/${directoryName}\"
+${clusterPrefix.exec} \"mkdir -p -m 0750 ${tmpQADestinationDirectory}/${directoryName}\"
+${clusterPrefix.cp} -r ${src}/* ${clusterPrefix.dest}${tmpQADestinationDirectory}/${directoryName}
+${clusterPrefix.exec} \"find ${tmpQADestinationDirectory}/${directoryName} -type f -exec chmod 0640 '{}' \\;\"
 """
         }
-        text += "echo ${this.class.name} >> ${dirToLog} ; chmod 0644 ${dirToLog}"
+        text += "${clusterPrefix.exec} \"echo ${this.class.name} >> ${dirToLog} ; chmod 0644 ${dirToLog}\""
         return text
     }
 }
