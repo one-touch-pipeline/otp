@@ -30,6 +30,7 @@ class AlignmentPassServiceUnitTests {
     @Before
     void setUp() {
         alignmentPassService = new AlignmentPassService()
+        alignmentPassService.qualityAssessmentPassService = new QualityAssessmentPassService()
         alignmentPassService.referenceGenomeService = new ReferenceGenomeService()
         alignmentPassService.referenceGenomeService.configService = new ConfigService()
 

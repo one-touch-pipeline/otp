@@ -20,6 +20,11 @@ class QualityAssessmentPassService {
         return qualityAssessmentPass
     }
 
+    public void notStarted(ProcessedBamFile bamFile) {
+        bamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.NOT_STARTED
+        assertSave(bamFile)
+    }
+
     public void passStarted(QualityAssessmentPass qualityAssessmentPass) {
         update(qualityAssessmentPass, AbstractBamFile.QaProcessingStatus.IN_PROGRESS)
     }
