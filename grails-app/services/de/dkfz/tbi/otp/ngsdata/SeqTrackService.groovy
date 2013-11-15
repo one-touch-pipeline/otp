@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import groovy.xml.MarkupBuilder
 import de.dkfz.tbi.otp.job.processing.ProcessingException
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.acls.domain.BasePermission
@@ -635,6 +636,8 @@ AND entry.value = :value
                     if (!file.used) {
                         segment.allFilesUsed = false
                         allUsed = false
+                        LogThreadLocal.getJobLog()?.error("Datafile " + file + " is not used in a seq track" +
+                            (file.fileWithdrawn ? " (reason: withdrawn)": ""))
                     }
                 }
             }

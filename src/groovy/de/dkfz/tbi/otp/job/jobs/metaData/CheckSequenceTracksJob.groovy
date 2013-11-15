@@ -17,6 +17,11 @@ class CheckSequenceTracksJob extends AbstractEndStateAwareJobImpl {
     public void execute() throws Exception {
         long runId = Long.parseLong(getProcessParameterValue())
         boolean allUsed = seqTrackService.checkSequenceTracks(runId)
-        allUsed ? succeed() : fail()
+        if (allUsed) {
+            succeed()
+        } else {
+            log.error "validation failed, because not all datafiles are used in seq tracks"
+            fail()
+        }
     }
 }
