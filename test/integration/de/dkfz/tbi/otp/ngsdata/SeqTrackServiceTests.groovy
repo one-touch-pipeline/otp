@@ -217,6 +217,29 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         }
     }
 
+    void testAssertConsistentLibraryPreparationKitNoLibPrepKitKey() {
+        DataFile dataFileR1 = new DataFile(fileName: "1_ACTGTG_L005_R1_complete_filtered.fastq.gz")
+        assertNotNull(dataFileR1.save())
+        DataFile dataFileR2 = new DataFile(fileName: "1_ACTGTG_L005_R2_complete_filtered.fastq.gz")
+        assertNotNull(dataFileR2.save())
+
+        List<DataFile> dataFiles = [dataFileR1, dataFileR2]
+        seqTrackService.assertConsistentLibraryPreparationKit(dataFiles)
+    }
+
+    void testAssertConsistentLibraryPreparationKitNoLibPrepKitValue() {
+        MetaDataKey metaDataKey = new MetaDataKey(name: "LIB_PREP_KIT")
+        assertNotNull(metaDataKey.save())
+
+        DataFile dataFileR1 = new DataFile(fileName: "1_ACTGTG_L005_R1_complete_filtered.fastq.gz")
+        assertNotNull(dataFileR1.save())
+        DataFile dataFileR2 = new DataFile(fileName: "1_ACTGTG_L005_R2_complete_filtered.fastq.gz")
+        assertNotNull(dataFileR2.save())
+
+        List<DataFile> dataFiles = [dataFileR1, dataFileR2]
+        seqTrackService.assertConsistentLibraryPreparationKit(dataFiles)
+    }
+
     void testCreateSeqTrackNoExome() {
         Map data = createData()
         createMetaData(data.dataFile, "")
@@ -277,6 +300,8 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         )
         assertNotNull(seqTrack)
         assertEquals(ExomeSeqTrack.class, seqTrack.class)
+        assertEquals(ExomeSeqTrack.KitInfoState.KNOWN, seqTrack.kitInfoState)
+        assertEquals(data.exomeEnrichmentKit, seqTrack.exomeEnrichmentKit)
     }
 
     void testCreateSeqTrackExomeByKitIdentifier() {
@@ -295,11 +320,34 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         )
         assertNotNull(seqTrack)
         assertEquals(ExomeSeqTrack.class, seqTrack.class)
+        assertEquals(ExomeSeqTrack.KitInfoState.KNOWN, seqTrack.kitInfoState)
+        assertEquals(data.exomeEnrichmentKit, seqTrack.exomeEnrichmentKit)
     }
 
-    void testCreateSeqTrackExomeUnknownValue() {
+    void testCreateSeqTrackExomeByValueUnknown() {
         Map data = createData()
-        createMetaData(data.dataFile, "unknown")
+        createMetaData(data.dataFile, "UNKNOWN")
+        data.seqType.name = SeqTypeNames.EXOME.seqTypeName
+        assertNotNull(data.seqType.save([flush: true]))
+
+        SeqTrack seqTrack = seqTrackService.createSeqTrack(
+                        data.dataFile,
+                        data.run,
+                        data.sample,
+                        data.seqType,
+                        "1",
+                        data.softwareTool
+                        )
+        assertNotNull(seqTrack)
+        assertEquals(ExomeSeqTrack.class, seqTrack.class)
+        assertEquals(ExomeSeqTrack.KitInfoState.UNKNOWN, seqTrack.kitInfoState)
+        assertNull(seqTrack.exomeEnrichmentKit)
+    }
+
+    void testCreateSeqTrackExomeInvalidByValueLaterToCheck() {
+        //value LATER_TO_CHECK can not given in meta data, so this value should be handled like an unknown value
+        Map data = createData()
+        createMetaData(data.dataFile, "LATER_TO_CHECK")
         data.seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
 
@@ -315,9 +363,45 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         }
     }
 
-    void testCreateSeqTrackExomeInvalid() {
+    void testCreateSeqTrackExomeInvalidUnknownValue() {
         Map data = createData()
-        createMetaData(data.dataFile)
+        createMetaData(data.dataFile, "unknown value")
+        data.seqType.name = SeqTypeNames.EXOME.seqTypeName
+        assertNotNull(data.seqType.save([flush: true]))
+
+        shouldFail(IllegalArgumentException.class) {
+            seqTrackService.createSeqTrack(
+                            data.dataFile,
+                            data.run,
+                            data.sample,
+                            data.seqType,
+                            "1",
+                            data.softwareTool
+                            )
+        }
+    }
+
+    void testCreateSeqTrackExomeInvalidEmptyValue() {
+        Map data = createData()
+        createMetaData(data.dataFile, "")
+        data.seqType.name = SeqTypeNames.EXOME.seqTypeName
+        assertNotNull(data.seqType.save([flush: true]))
+
+        shouldFail(IllegalArgumentException.class) {
+            seqTrackService.createSeqTrack(
+                            data.dataFile,
+                            data.run,
+                            data.sample,
+                            data.seqType,
+                            "1",
+                            data.softwareTool
+                            )
+        }
+    }
+
+    void testCreateSeqTrackExomeInvalidNoSample() {
+        Map data = createData()
+        createMetaData(data.dataFile, "ExomeEnrichmentKit")
         data.seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
 
@@ -331,6 +415,47 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                             data.softwareTool
                             )
         }
+    }
+
+    void testCreateSeqTrackExomeNoEnrichmentkitColumnKey() {
+        Map data = createData()
+        data.seqType.name = SeqTypeNames.EXOME.seqTypeName
+        assertNotNull(data.seqType.save([flush: true]))
+        SeqTrack seqTrack = seqTrackService.createSeqTrack(
+                        data.dataFile,
+                        data.run,
+                        data.sample,,
+                        data.seqType,
+                        "1",
+                        data.softwareTool
+                        )
+        assertNotNull(seqTrack)
+        assertEquals(ExomeSeqTrack.class, seqTrack.class)
+        assertEquals(ExomeSeqTrack.KitInfoState.LATER_TO_CHECK, seqTrack.kitInfoState)
+        assertNull(seqTrack.exomeEnrichmentKit)
+    }
+
+    void testCreateSeqTrackExomeNoEnrichmentkitColumn() {
+        Map data = createData()
+        data.seqType.name = SeqTypeNames.EXOME.seqTypeName
+        assertNotNull(data.seqType.save([flush: true]))
+        MetaDataKey metaDataKey = new MetaDataKey(
+                        name: "LIB_PREP_KIT"
+                        )
+        assertNotNull(metaDataKey.save([flush: true]))
+
+        SeqTrack seqTrack = seqTrackService.createSeqTrack(
+                        data.dataFile,
+                        data.run,
+                        data.sample,,
+                        data.seqType,
+                        "1",
+                        data.softwareTool
+                        )
+        assertNotNull(seqTrack)
+        assertEquals(ExomeSeqTrack.class, seqTrack.class)
+        assertEquals(ExomeSeqTrack.KitInfoState.LATER_TO_CHECK, seqTrack.kitInfoState)
+        assertNull(seqTrack.exomeEnrichmentKit)
     }
 
     private Map createData() {
@@ -418,7 +543,8 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
             run: run,
             sample: sample,
             seqType: seqType,
-            softwareTool: softwareTool
+            softwareTool: softwareTool,
+            exomeEnrichmentKit: exomeEnrichmentKit
         ]
     }
 

@@ -159,43 +159,49 @@ class MetaDataValidationServiceTests {
         assertEquals("1", getMetaDataEntryValue(dataFile, LANE_NO))
     }
 
-    void testCheckExomeEnrichmentKit_UsingExomeEnrichmentKit() {
+    void testCheckExomeEnrichmentKitForExomeSeqType_UsingExomeEnrichmentKit() {
         ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = createExomeEnrichmentKitIdentifier()
-        Map<String, MetaDataEntry> map = createMetaDataEntry([LIB_PREP_KIT: EXOME_ENRICHMENT_KIT, SEQUENCING_TYPE: SeqTypeNames.EXOME.seqTypeName])
-        assertEquals(Boolean.TRUE, metaDataValidationService.checkExomeEnrichmentKit(map[LIB_PREP_KIT]))
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): EXOME_ENRICHMENT_KIT, (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
+        assertEquals(Boolean.TRUE, metaDataValidationService.checkExomeEnrichmentKitForExomeSeqType(map[(LIB_PREP_KIT)]))
     }
 
-    void testCheckExomeEnrichmentKit_UsingExomeEnrichmentKitIdentifier() {
+    void testCheckExomeEnrichmentKitForExomeSeqType_UsingExomeEnrichmentKitIdentifier() {
         ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = createExomeEnrichmentKitIdentifier()
-        Map<String, MetaDataEntry> map = createMetaDataEntry([LIB_PREP_KIT: EXOME_ENRICHMENT_KIT_IDENTIFIER, SEQUENCING_TYPE: SeqTypeNames.EXOME.seqTypeName])
-        assertEquals(Boolean.TRUE, metaDataValidationService.checkExomeEnrichmentKit(map[LIB_PREP_KIT]))
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): EXOME_ENRICHMENT_KIT_IDENTIFIER, (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
+        assertEquals(Boolean.TRUE, metaDataValidationService.checkExomeEnrichmentKitForExomeSeqType(map[(LIB_PREP_KIT)]))
     }
 
-    void testCheckExomeEnrichmentKit_NotValidEntry() {
+    void testCheckExomeEnrichmentKitForExomeSeqType_UsingUNKNOWN() {
         ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = createExomeEnrichmentKitIdentifier()
-        Map<String, MetaDataEntry> map = createMetaDataEntry([LIB_PREP_KIT: "something", SEQUENCING_TYPE: SeqTypeNames.EXOME.seqTypeName])
-        assertEquals(Boolean.FALSE, metaDataValidationService.checkExomeEnrichmentKit(map[LIB_PREP_KIT]))
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): "UNKNOWN", (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
+        assertEquals(Boolean.TRUE, metaDataValidationService.checkExomeEnrichmentKitForExomeSeqType(map[(LIB_PREP_KIT)]))
     }
 
-    void testCheckExomeEnrichmentKit_NotExome() {
+    void testCheckExomeEnrichmentKitForExomeSeqType_NotValidEntry() {
         ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = createExomeEnrichmentKitIdentifier()
-        Map<String, MetaDataEntry> map = createMetaDataEntry([LIB_PREP_KIT: "something", SEQUENCING_TYPE: "NOT_EXOME"])
-        assertEquals(null, metaDataValidationService.checkExomeEnrichmentKit(map[LIB_PREP_KIT]))
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): "something", (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
+        assertEquals(Boolean.FALSE, metaDataValidationService.checkExomeEnrichmentKitForExomeSeqType(map[(LIB_PREP_KIT)]))
     }
 
-    void testCheckExomeEnrichmentKit_NoSequenceType() {
+    void testCheckExomeEnrichmentKitForExomeSeqType_NotExome() {
         ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = createExomeEnrichmentKitIdentifier()
-        Map<String, MetaDataEntry> map = createMetaDataEntry([LIB_PREP_KIT: "something"])
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): "something", (SEQUENCING_TYPE): "NOT_EXOME"])
+        assertEquals(null, metaDataValidationService.checkExomeEnrichmentKitForExomeSeqType(map[(LIB_PREP_KIT)]))
+    }
+
+    void testCheckExomeEnrichmentKitForExomeSeqType_NoSequenceType() {
+        ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = createExomeEnrichmentKitIdentifier()
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): "something"])
         shouldFail(NullPointerException.class) {
-            metaDataValidationService.checkExomeEnrichmentKit(map[LIB_PREP_KIT])
+            metaDataValidationService.checkExomeEnrichmentKitForExomeSeqType(map[(LIB_PREP_KIT)])
         }
     }
 
     void testValidateMetaDataEntryForLIB_PREP_KIT() {
         Run run = createRun()
         ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = createExomeEnrichmentKitIdentifier()
-        Map<String, MetaDataEntry> map = createMetaDataEntry([LIB_PREP_KIT: EXOME_ENRICHMENT_KIT, SEQUENCING_TYPE: SeqTypeNames.EXOME.seqTypeName])
-        assertTrue(metaDataValidationService.validateMetaDataEntry(run, map[LIB_PREP_KIT]))
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): EXOME_ENRICHMENT_KIT, (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
+        assertTrue(metaDataValidationService.validateMetaDataEntry(run, map[(LIB_PREP_KIT)]))
     }
 
     private Run createRun() {

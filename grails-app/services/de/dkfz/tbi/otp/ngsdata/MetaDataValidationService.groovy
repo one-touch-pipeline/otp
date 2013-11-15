@@ -92,7 +92,7 @@ class MetaDataValidationService {
                 entry.status = (status) ? valid : invalid
                 break
             case "LIB_PREP_KIT":
-                Boolean status = checkExomeEnrichmentKit(entry)
+                Boolean status = checkExomeEnrichmentKitForExomeSeqType(entry)
                 if (status != null) {
                     entry.status = status ? valid : invalid
                 }
@@ -102,15 +102,12 @@ class MetaDataValidationService {
         return (entry.status == invalid)? false : true
     }
 
-    private Boolean checkExomeEnrichmentKit(MetaDataEntry entry) {
+    private Boolean checkExomeEnrichmentKitForExomeSeqType(MetaDataEntry entry) {
         MetaDataEntry metaDataEntry = metaDataEntry(entry.dataFile, "SEQUENCING_TYPE")
         boolean isSequenceOfTypeExome = metaDataEntry.value == SeqTypeNames.EXOME.seqTypeName
         if (isSequenceOfTypeExome) {
-            if (exomeEnrichmentKitService.findExomeEnrichmentKitByNameOrAlias(entry.value)) {
-                return true
-            } else {
-                return false
-            }
+            return exomeEnrichmentKitService.findExomeEnrichmentKitByNameOrAlias(entry.value) ||
+                ExomeSeqTrack.KitInfoState.UNKNOWN.name() == entry.value
         } else {
             return null //no EXOME, so value is irrelevant and not checked
         }

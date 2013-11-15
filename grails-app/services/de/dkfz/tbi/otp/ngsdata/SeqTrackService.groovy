@@ -398,8 +398,15 @@ class SeqTrackService {
         builder.setHasFinalBam(false).setHasOriginalBam(false).setUsingOriginalBam(false)
 
         if (seqType.name == SeqTypeNames.EXOME.seqTypeName) {
-            MetaDataEntry metaDataEntry = metaDataEntry(dataFile, "LIB_PREP_KIT")
-            builder.setExomeEnrichmentKit(exomeEnrichmentKitService.findExomeEnrichmentKitByNameOrAlias(metaDataEntry?.value))
+            MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.LIB_PREP_KIT.name())
+            MetaDataEntry metaDataEntry = MetaDataEntry.findByDataFileAndKey(dataFile, key)
+            if (metaDataEntry == null) {
+                builder.setKitInfoState(ExomeSeqTrack.KitInfoState.LATER_TO_CHECK)
+            } else if (metaDataEntry.value == ExomeSeqTrack.KitInfoState.UNKNOWN.toString()) {
+                builder.setKitInfoState(ExomeSeqTrack.KitInfoState.UNKNOWN)
+            } else {
+                builder.setExomeEnrichmentKit(exomeEnrichmentKitService.findExomeEnrichmentKitByNameOrAlias(metaDataEntry.value))
+            }
         }
 
         SeqTrack seqTrack = builder.create()
@@ -443,7 +450,9 @@ class SeqTrackService {
 
     private void assertConsistentLibraryPreparationKit(List<DataFile> files) {
         List<String> libraryPreparationKits = files.collect { DataFile dataFile ->
-            metaDataValue(dataFile, "LIB_PREP_KIT")
+            MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.LIB_PREP_KIT.name())
+            MetaDataEntry metaDataEntry = MetaDataEntry.findByDataFileAndKey(dataFile, key)
+            return metaDataEntry?.value
         }
         String libraryPreparationKit = libraryPreparationKits.first()
         if (!libraryPreparationKits.every { it == libraryPreparationKit }) {

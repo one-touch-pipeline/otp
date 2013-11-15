@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import static org.springframework.util.Assert.*
 import de.dkfz.tbi.otp.job.processing.ProcessingException
+import de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack.KitInfoState
 import de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState
 import de.dkfz.tbi.otp.ngsdata.SeqTrack.QualityEncoding
 
@@ -52,11 +53,17 @@ class SeqTrackBuilder {
     /**
      * For Exome, this field is also required
      */
+    private ExomeSeqTrack.KitInfoState kitInfoState = ExomeSeqTrack.KitInfoState.LATER_TO_CHECK
+
+    /**
+     * For Exome, this field is required, if the {@link ExomeSeqTrack.KitInfoState} has the value
+     * {@link ExomeSeqTrack.KitInfoState#KNOWN}, otherwise, it has to be <code>null</code>
+     */
     private ExomeEnrichmentKit exomeEnrichmentKit
 
     public SeqTrackBuilder(String laneId, Run run, Sample sample,
-        SeqType seqType, SeqPlatform seqPlatform,
-        SoftwareTool pipelineVersion) {
+            SeqType seqType, SeqPlatform seqPlatform,
+            SoftwareTool pipelineVersion) {
         super()
         notNull(laneId, "A seq track needs a lane id")
         notNull(run, "A seq track needs a run")
@@ -118,17 +125,38 @@ class SeqTrackBuilder {
         return this
     }
 
-    public SeqTrackBuilder setExomeEnrichmentKit(
-                    ExomeEnrichmentKit exomeEnrichmentKit) {
+    /**
+     * Set the {@link KitInfoState} and change {@link #exomeEnrichmentKit} to <code>null</code> if
+     * the kitInfoState is not {@link KitInfoState#KNOWN}
+     */
+    public SeqTrackBuilder setKitInfoState(ExomeSeqTrack.KitInfoState kitInfoState) {
+        this.kitInfoState = kitInfoState
+        if (kitInfoState != KitInfoState.KNOWN) {
+            this.exomeEnrichmentKit = null
+        }
+        return this
+    }
+
+    /**
+     * Set the {@link ExomeEnrichmentKit} and change {@link KitInfoState} to {@link KitInfoState#KNOWN}
+     */
+    public SeqTrackBuilder setExomeEnrichmentKit(ExomeEnrichmentKit exomeEnrichmentKit) {
         this.exomeEnrichmentKit = exomeEnrichmentKit
+        this.kitInfoState =  KitInfoState.KNOWN
         return this
     }
 
     public SeqTrack create() {
         SeqTrack seqTrack
         if (seqType.name == SeqTypeNames.EXOME.seqTypeName) {
-            notNull(exomeEnrichmentKit, "A seq track needs an exome enrichment kit for exome data")
+            notNull(kitInfoState, "A seq track needs the kit info state for exome data")
+            if (kitInfoState == ExomeSeqTrack.KitInfoState.KNOWN) {
+                notNull(exomeEnrichmentKit, "A exome seq track needs an exome enrichment kit when kit info state is KNOWN")
+            } else {
+                isNull(exomeEnrichmentKit, "A exome seq track are not allowed to have an exome enrichment kit when kit info state is not KNOWN")
+            }
             seqTrack = new ExomeSeqTrack()
+            seqTrack.kitInfoState = kitInfoState
             seqTrack.exomeEnrichmentKit = exomeEnrichmentKit
         } else {
             seqTrack = new SeqTrack()

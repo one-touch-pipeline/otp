@@ -41,8 +41,12 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
     String fastqR2Filepath = "${testDataDir}/35-3B_NoIndex_L007_R2_complete_filtered.fastq.gz"
 
     String barcode = "GATCGA"
-    String fastqR1Filename = "example_${barcode}_fileR1.fastq.gz"
-    String fastqR2Filename = "example_${barcode}_fileR2.fastq.gz"
+    String fastqR1Filename1 = "example_${barcode}_fileR1_1.fastq.gz"
+    String fastqR2Filename1 = "example_${barcode}_fileR2_1.fastq.gz"
+    String fastqR1Filename2 = "example_${barcode}_fileR1_2.fastq.gz"
+    String fastqR2Filename2 = "example_${barcode}_fileR2_2.fastq.gz"
+    String fastqR1Filename3 = "example_${barcode}_fileR1_3.fastq.gz"
+    String fastqR2Filename3 = "example_${barcode}_fileR2_3.fastq.gz"
     String runName = "130312_D00133_0018_ADTWTJACXX"
     String runDate = "2013-03-12"
     String metaDataFilepath = "${ftpDir}/${runName}/${runName}.fastq.tsv"
@@ -55,7 +59,7 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
     String realmHost = "headnode"
     int realmPort = 22
     String realmWebHost = "https://otp.local/ngsdata/"
-    String realmPbsOptions = '{"-l": {nodes: "1:lsdf", walltime: "48:00:00"}}'
+    String realmPbsOptions = '{"-l": {nodes: "1:lsdf", walltime: "00:15:00"}}'
     int realmTimeout = 0
 
     String seqCenterName = "TheSequencingCenter"
@@ -69,8 +73,11 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
     String instrumentPlatform = "Illumina"
     String instrumentModel = "HiSeq2000"
     String libraryPreparationKit = "Agilent SureSelect V3"
+    String libraryPreparationKitIdentifier = "Agilent SureSelect V3 alias"
 
-    String laneNo = "1"
+    String laneNoKit = "1"
+    String laneNoKitId = "2"
+    String laneNoUnknown = "3"
     String baseCount = "8781211000"
     String readCount = "87812110"
     String cycleCount = "101"
@@ -118,13 +125,21 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
         return metaData
     }
 
-    private String metaDataTableHeader() {
-        String[] tableHeader = MetaDataColumn.values() as String[]
-        return tableHeader.join("\t") + "\n"
+    private List<MetaDataColumn> metaDataColumns() {
+        return MetaDataColumn.values() as List
     }
 
-    private String metaDataTableEntry(Map<String, String> metaData) {
-        return metaData.values().join("\t")
+    private String metaDataTableHeader(List<MetaDataColumn> metaDataColumns = metaDataColumns()) {
+        return metaDataColumns.join("\t") + "\n"
+    }
+
+    private String metaDataTableEntry(Map<String, String> metaData, List<MetaDataColumn> metaDataColumns = metaDataColumns()) {
+        println metaDataColumns.size()
+        List<String> values = []
+        metaDataColumns.each {
+            values << metaData[it.name()]
+        }
+        return values.join("\t") + "\n"
     }
 
     //    // TODO construir o body
@@ -135,8 +150,22 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
     private String metaDataTextWellFormedForExon() {
         StringBuffer sb = new StringBuffer()
         sb << metaDataTableHeader()
-        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR1Filename, MD5: md5sum(fastqR1Filepath), LANE_NO: laneNo, LIB_PREP_KIT: libraryPreparationKit])) + "\n"
-        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR2Filename, MD5: md5sum(fastqR2Filepath), LANE_NO: laneNo, LIB_PREP_KIT: libraryPreparationKit])) + "\n"
+        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR1Filename1, MD5: md5sum(fastqR1Filepath), LANE_NO: laneNoKit, LIB_PREP_KIT: libraryPreparationKit]))
+        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR2Filename1, MD5: md5sum(fastqR2Filepath), LANE_NO: laneNoKit, LIB_PREP_KIT: libraryPreparationKit]))
+        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR1Filename2, MD5: md5sum(fastqR1Filepath), LANE_NO: laneNoKitId, LIB_PREP_KIT: libraryPreparationKitIdentifier]))
+        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR2Filename2, MD5: md5sum(fastqR2Filepath), LANE_NO: laneNoKitId, LIB_PREP_KIT: libraryPreparationKitIdentifier]))
+        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR1Filename3, MD5: md5sum(fastqR1Filepath), LANE_NO: laneNoUnknown, LIB_PREP_KIT: ExomeSeqTrack.KitInfoState.UNKNOWN.toString()]))
+        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR2Filename3, MD5: md5sum(fastqR2Filepath), LANE_NO: laneNoUnknown, LIB_PREP_KIT: ExomeSeqTrack.KitInfoState.UNKNOWN.toString()]))
+        return sb.toString()
+    }
+
+    private String metaDataTextForExonNoEnrichmentKit() {
+        List<MetaDataColumn> metaDataColumns = metaDataColumns()
+        metaDataColumns.remove(MetaDataColumn.LIB_PREP_KIT)
+        StringBuffer sb = new StringBuffer()
+        sb << metaDataTableHeader(metaDataColumns)
+        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR1Filename1, MD5: md5sum(fastqR1Filepath), LANE_NO: laneNoKit]), metaDataColumns)
+        sb << metaDataTableEntry(metaData([FASTQ_FILE: fastqR2Filename1, MD5: md5sum(fastqR2Filepath), LANE_NO: laneNoKit]), metaDataColumns)
         return sb.toString()
     }
 
@@ -179,15 +208,21 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
 
         //String metaDataFile = metaDataText(runName)
         String metaDataFile = metaDataTextWellFormedForExon()
+        //TODO handle different test with data OTP-570
+        metaDataFile = metaDataTextForExonNoEnrichmentKit()
 
         String path = "${ftpDir}/${runName}"
-        String softLinkFastqR1Filepath = "${path}/${fastqR1Filename}"
-        String softLinkFastqR2Filepath = "${path}/${fastqR2Filename}"
+        String softLinkFastqR1Filepath1 = "${path}/${fastqR1Filename1}"
+        String softLinkFastqR2Filepath1 = "${path}/${fastqR2Filename1}"
+        String softLinkFastqR1Filepath2 = "${path}/${fastqR1Filename2}"
+        String softLinkFastqR2Filepath2 = "${path}/${fastqR2Filename2}"
+        String softLinkFastqR1Filepath3 = "${path}/${fastqR1Filename3}"
+        String softLinkFastqR2Filepath3 = "${path}/${fastqR2Filename3}"
 
         // Just to be sure the rootPath and the processingRootPath are clean for new test
         String cmdCleanUp = cleanUpTestFoldersCommand()
         String cmdBuildFileStructure = "mkdir -p ${path}"
-        String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath}"
+        String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath1}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath1}; ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath2}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath2}; ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath3}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath3} "
         String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
         executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildFileStructure}; ${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
 
@@ -257,14 +292,14 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
                         name: seqCenterName,
                         dirName: seqCenterName
                         )
-        assertNotNull(seqCenter.save([flush: true, failOnError: true]))
+        assertNotNull(seqCenter.save([flush: true]))
 
         Run run = new Run()
         run.name = runName
         run.seqCenter = seqCenter
         run.seqPlatform = seqPlatform
         run.storageRealm = Run.StorageRealm.DKFZ
-        assertNotNull(run.save([flush: true, failOnError: true]))
+        assertNotNull(run.save([flush: true]))
 
         RunSegment runSegment = new RunSegment()
         runSegment.initialFormat = RunSegment.DataFormat.FILES_IN_DIRECTORY
@@ -273,7 +308,7 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
         runSegment.filesStatus = RunSegment.FilesStatus.NEEDS_INSTALLATION
         runSegment.mdPath = ftpDir
         runSegment.run = run
-        assertNotNull(runSegment.save([flush: true, failOnError: true]))
+        assertNotNull(runSegment.save([flush: true]))
 
         println "path : " + (new File(metaDataFilepath)).getAbsolutePath()
         assertTrue(new File(metaDataFilepath).exists())
@@ -281,13 +316,21 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
 
     @After
     void tearDown() {
-        executionService.executeCommand(realm, cleanUpTestFoldersCommand())
+        //executionService.executeCommand(realm, cleanUpTestFoldersCommand())
     }
 
     @Ignore
     void testExomeMetadata() {
         run("scripts/ExomeEnrichmentKit/LoadExomeEnrichmentKits.groovy")
         run("scripts/MetaDataWorkflow.groovy")
+
+        List<ExomeEnrichmentKit> exomeEnrichmentKit = ExomeEnrichmentKit.list()
+        assertFalse(exomeEnrichmentKit.isEmpty())
+
+        ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = new ExomeEnrichmentKitIdentifier(
+                        name: libraryPreparationKitIdentifier,
+                        exomeEnrichmentKit: exomeEnrichmentKit.first())
+        assertNotNull(exomeEnrichmentKitIdentifier.save([flush: true]))
 
         // there will be only one at the database
         JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
