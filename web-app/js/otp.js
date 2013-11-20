@@ -518,6 +518,17 @@ $.otp.sequence = {
         }
         return result;
     },
+    formatSeqType: function (seqTypeName) {
+        "use strict";
+        var result;
+        if (seqTypeName === "EXON") {
+            result = "EXOME";
+        } else {
+            result = seqTypeName;
+        }
+        return result;
+    },
+
     register: function () {
         "use strict";
             $("#sequenceTable").dataTable({
@@ -581,7 +592,7 @@ $.otp.sequence = {
                                     text: row.mockPid
                                 }),
                                 row.sampleTypeName,
-                                row.seqTypeName,
+                                $.otp.sequence.formatSeqType(row.seqTypeName),
                                 row.libraryLayout,
                                 row.seqCenterName,
                                 $.otp.createLinkMarkup({
