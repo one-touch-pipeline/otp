@@ -15,10 +15,29 @@ import de.dkfz.tbi.otp.ngsdata.*
  */
 @TestFor(AlignmentPassService)
 @TestMixin(GrailsUnitTestMixin)
-@Mock([Realm, SeqPlatform, SeqCenter, SoftwareTool, SoftwareTool, Run, Project, AlignmentPassService, Individual, Sample, SeqType, SeqTrack, AlignmentPass, ReferenceGenome, ReferenceGenomeProjectSeqType, SampleType, ProcessedBamFile])
+@Mock([
+    AlignmentPass,
+    AlignmentPassService,
+    DataFile,
+    Individual,
+    ProcessedBamFile,
+    Project,
+    Realm,
+    ReferenceGenome,
+    ReferenceGenomeProjectSeqType,
+    Run,
+    Sample,
+    SampleType,
+    SeqCenter,
+    SeqPlatform,
+    SeqTrack,
+    SeqType,
+    SoftwareTool,
+])
 class AlignmentPassServiceUnitTests {
 
     AlignmentPassService alignmentPassService
+    SeqTrack seqTrack
     AlignmentPass alignmentPass
     ReferenceGenome referenceGenome
     ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType
@@ -116,7 +135,7 @@ class AlignmentPassServiceUnitTests {
         softwareTool.type = SoftwareTool.Type.ALIGNMENT
         softwareTool.save(flush: true)
 
-        SeqTrack seqTrack = new SeqTrack()
+        seqTrack = new SeqTrack()
         seqTrack.laneId = "123"
         seqTrack.seqType = seqType
         seqTrack.sample = sample
@@ -142,6 +161,62 @@ class AlignmentPassServiceUnitTests {
         referenceGenomeProjectSeqType.seqType = seqType
         referenceGenomeProjectSeqType.referenceGenome = referenceGenome
         referenceGenomeProjectSeqType.save(flush: true)
+    }
+
+    @Test
+    void testFindNotStartedSeqTrackWithNonWithdrawnDataFile() {
+        assertNull(alignmentPassService.findNotStartedSeqTrackWithNonWithdrawnDataFile())
+        seqTrack.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+        assertNull(alignmentPassService.findNotStartedSeqTrackWithNonWithdrawnDataFile())
+        DataFile dataFile1 = new DataFile()
+        dataFile1.seqTrack = seqTrack
+        dataFile1.fileWithdrawn = false
+        assertNotNull(dataFile1.save(flush: true))
+        assertEquals(seqTrack, alignmentPassService.findNotStartedSeqTrackWithNonWithdrawnDataFile())
+        dataFile1.fileWithdrawn = true
+        assertNotNull(dataFile1.save(flush: true))
+        assertNull(alignmentPassService.findNotStartedSeqTrackWithNonWithdrawnDataFile())
+        dataFile1.fileWithdrawn = false
+        assertNotNull(dataFile1.save(flush: true))
+        assertEquals(seqTrack, alignmentPassService.findNotStartedSeqTrackWithNonWithdrawnDataFile())
+        seqTrack.alignmentState = SeqTrack.DataProcessingState.IN_PROGRESS
+        assertNull(alignmentPassService.findNotStartedSeqTrackWithNonWithdrawnDataFile())
+        DataFile dataFile2 = new DataFile()
+        dataFile2.seqTrack = seqTrack
+        dataFile2.fileWithdrawn = false
+        assertNotNull(dataFile2.save(flush: true))
+        assertNull(alignmentPassService.findNotStartedSeqTrackWithNonWithdrawnDataFile())
+        seqTrack.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+        assertEquals(seqTrack, alignmentPassService.findNotStartedSeqTrackWithNonWithdrawnDataFile())
+        dataFile2.fileWithdrawn = true
+        assertNotNull(dataFile2.save(flush: true))
+        assertEquals(seqTrack, alignmentPassService.findNotStartedSeqTrackWithNonWithdrawnDataFile())
+        dataFile1.fileWithdrawn = true
+        assertNotNull(dataFile1.save(flush: true))
+        assertNull(alignmentPassService.findNotStartedSeqTrackWithNonWithdrawnDataFile())
+    }
+
+    @Test
+    void testCreateAlignmentPass() {
+        assertNull(alignmentPassService.createAlignmentPass())
+        seqTrack.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+        DataFile dataFile1 = new DataFile()
+        dataFile1.seqTrack = seqTrack
+        dataFile1.fileWithdrawn = false
+        assertNotNull(dataFile1.save(flush: true))
+        AlignmentPass pass1 = alignmentPassService.createAlignmentPass()
+        assertNotNull(pass1)
+        assertEquals(seqTrack, pass1.seqTrack)
+        assertEquals(1, pass1.identifier)  // Should actually be 3, because the maximum existing
+                                           // identifier is already 2 (created in the setup()
+                                           // method of this test class).
+        AlignmentPass pass2 = alignmentPassService.createAlignmentPass()
+        assertNotNull(pass2)
+        assertEquals(seqTrack, pass2.seqTrack)
+        assertEquals(2, pass2.identifier)
+        dataFile1.fileWithdrawn = true
+        assertNotNull(dataFile1.save(flush: true))
+        assertNull(alignmentPassService.createAlignmentPass())
     }
 
     @After

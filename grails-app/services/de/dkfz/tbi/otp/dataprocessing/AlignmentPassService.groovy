@@ -18,9 +18,23 @@ class AlignmentPassService {
     ReferenceGenomeService referenceGenomeService
     QualityAssessmentPassService qualityAssessmentPassService
 
-    public AlignmentPass createAlignmentPass() {
+    /**
+     * Returns any SeqTrack with at least one data file which is not withdrawn. If no such SeqTrack
+     * exists, <code>null</code> is returned.
+     */
+    private SeqTrack findNotStartedSeqTrackWithNonWithdrawnDataFile() {
         def state = SeqTrack.DataProcessingState.NOT_STARTED
-        SeqTrack seqTrack = SeqTrack.findByAlignmentState(state)
+        DataFile dataFile = DataFile.createCriteria().get {
+            eq("fileWithdrawn", false)
+            seqTrack {
+                eq("alignmentState", state)
+            }
+        }
+        return dataFile?.seqTrack
+    }
+
+    public AlignmentPass createAlignmentPass() {
+        SeqTrack seqTrack = findNotStartedSeqTrackWithNonWithdrawnDataFile()
         if (!seqTrack) {
             return null
         }
