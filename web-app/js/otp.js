@@ -286,7 +286,7 @@ $.otp.individual = {
             $("#searchCriteriaTable tr td:eq(2) input[type=button]").click($.otp.individual.searchCriteriaAddRow);
             $("#searchCriteriaTable tr td:eq(1) select").change($.otp.individual.updateSearchCriteria);
             $("#searchCriteriaTable tr td:eq(1) input[type=text]").change($.otp.individual.updateSearchCriteria);
-            $("#searchCriteriaTable tr td:eq(1) input[type=text]").keydown($.otp.individual.updateSearchCriteria);
+            $("#searchCriteriaTable tr td:eq(1) input[type=text]").keyup($.otp.individual.updateSearchCriteria);
         },
         searchCriteriaChangeHandler: function () {
             "use strict";
@@ -319,7 +319,7 @@ $.otp.individual = {
             $("td:eq(2) input[type=button]", cloned).click($.otp.individual.searchCriteriaAddRow);
             $("td:eq(1) select", cloned).change($.otp.individual.updateSearchCriteria);
             $("td:eq(1) input[type=text]", cloned).change($.otp.individual.updateSearchCriteria);
-            $("td:eq(1) input[type=text]", cloned).keydown($.otp.individual.updateSearchCriteria);
+            $("td:eq(1) input[type=text]", cloned).keyup($.otp.individual.updateSearchCriteria);
         },
         searchCriteria: function () {
             "use strict";
@@ -642,7 +642,7 @@ $.otp.sequence = {
         $("#searchCriteriaTable tr td:eq(2) input[type=button]").click($.otp.sequence.searchCriteriaAddRow);
         $("#searchCriteriaTable tr td:eq(1) select").change($.otp.sequence.updateSearchCriteria);
         $("#searchCriteriaTable tr td:eq(1) input[type=text]").change($.otp.sequence.updateSearchCriteria);
-        $("#searchCriteriaTable tr td:eq(1) input[type=text]").keydown($.otp.sequence.updateSearchCriteria);
+        $("#searchCriteriaTable tr td:eq(1) input[type=text]").keyup($.otp.sequence.updateSearchCriteria);
     },
     searchCriteriaChangeHandler: function () {
         "use strict";
@@ -675,7 +675,7 @@ $.otp.sequence = {
         $("td:eq(2) input[type=button]", cloned).click($.otp.sequence.searchCriteriaAddRow);
         $("td:eq(1) select", cloned).change($.otp.sequence.updateSearchCriteria);
         $("td:eq(1) input[type=text]", cloned).change($.otp.sequence.updateSearchCriteria);
-        $("td:eq(1) input[type=text]", cloned).keydown($.otp.sequence.updateSearchCriteria);
+        $("td:eq(1) input[type=text]", cloned).keyup($.otp.sequence.updateSearchCriteria);
     },
     searchCriteria: function () {
         "use strict";
