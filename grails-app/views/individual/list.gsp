@@ -38,7 +38,7 @@
                     <input class="criteria" type="text" name="pidSearch" style="display: none" placeholder="min. 3 characters"/>
                     <input class="criteria" type="text" name="mockFullNameSearch" style="display: none" placeholder="min. 3 characters"/>
                     <input class="criteria" type="text" name="mockPidSearch" style="display: none" placeholder="min. 3 characters"/>
-                    <g:select name="typeSelection" from="${individualTypes}" style="display: none"/>
+                    <g:select class="criteria" name="typeSelection" from="${individualTypes}" style="display: none"/>
                 </td>
                 <td>
                     <input id="button" class="blue_labelForPlus" type="button" value="+" style="display: none"/>

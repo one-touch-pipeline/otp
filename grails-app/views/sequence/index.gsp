@@ -31,12 +31,12 @@
                 </td>
                 <td>
                     <g:select class="criteria" name="projectSelection" from="${projects}" optionValue="name" optionKey="id" style="display: none"/>
-                        <input type="text" name="individualSearch" style="display: none" placeholder="min. 3 characters"/>
-                        <g:select name="sampleTypeSelection" from="${sampleTypes}" optionValue="name" optionKey="id" style="display: none"/>
-                        <g:select name="seqTypeSelection" from="${seqTypes}" style="display: none"/>
-                        <g:select name="libraryLayoutSelection" from="${libraryLayouts}" style="display: none"/>
-                        <g:select name="seqCenterSelection" from="${seqCenters}" optionValue="name" optionKey="id" style="display: none"/>
-                    <input type="text" name="runSearch" style="display: none" placeholder="min. 3 characters"/>
+                        <input class="criteria" type="text" name="individualSearch" style="display: none" placeholder="min. 3 characters"/>
+                        <g:select class="criteria" name="sampleTypeSelection" from="${sampleTypes}" optionValue="name" optionKey="id" style="display: none"/>
+                        <g:select class="criteria" name="seqTypeSelection" from="${seqTypes}" style="display: none"/>
+                        <g:select class="criteria" name="libraryLayoutSelection" from="${libraryLayouts}" style="display: none"/>
+                        <g:select class="criteria" name="seqCenterSelection" from="${seqCenters}" optionValue="name" optionKey="id" style="display: none"/>
+                    <input class="criteria" type="text" name="runSearch" style="display: none" placeholder="min. 3 characters"/>
                 </td>
                 <td>
                     <input id="button" class="blue_labelForPlus" type="button" value="+" style="display: none"/>
