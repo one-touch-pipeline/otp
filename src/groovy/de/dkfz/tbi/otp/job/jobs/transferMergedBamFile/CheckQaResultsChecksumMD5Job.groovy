@@ -57,8 +57,6 @@ class CheckQaResultsChecksumMD5Job extends AbstractEndStateAwareJobImpl {
     private String scriptText(String temporalqaDestinationDir, String qaResultMd5sumFile, String dirToLog) {
         // FIXME: remove chmod once the ACLs in the file system are in place
         String text = """
-set -e
-
 cd ${temporalqaDestinationDir}
 md5sum -c ${processedMergedBamFileQaFileService.MD5SUM_NAME}
 """

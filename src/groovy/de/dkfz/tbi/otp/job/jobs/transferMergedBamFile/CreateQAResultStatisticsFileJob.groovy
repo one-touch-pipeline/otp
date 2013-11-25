@@ -61,8 +61,6 @@ class CreateQAResultStatisticsFileJob extends AbstractEndStateAwareJobImpl {
         // FIXME: This is an ugly hack which should be fixed properly when OTP-504 is resolved
         // FIXME: remove chmod once the ACLs in the file system are in place
         String text = """
-set -e
-
 cd ${temporalDestinationDir}
 cat <<EOD > ${statisticsFiles.small}
 ${results.small}

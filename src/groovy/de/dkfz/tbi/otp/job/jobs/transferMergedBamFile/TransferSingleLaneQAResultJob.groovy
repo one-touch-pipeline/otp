@@ -55,11 +55,7 @@ class TransferSingleLaneQAResultJob extends AbstractEndStateAwareJobImpl{
     private String scriptText(ProcessedMergedBamFile file, Map<String, String> directories, String dirToLog, Map<String, String> clusterPrefix) {
         String tmpQADestinationDirectory = processedMergedBamFileService.qaResultTempDestinationDirectory(file)
         String qaDestinationDirectory = processedMergedBamFileService.qaResultDestinationDirectory(file)
-        String text = """
-set -e
-
-"""
-
+        String text = ''
         for (String directoryName : directories.keySet()) {
             String src = directories.get(directoryName)
             text += """

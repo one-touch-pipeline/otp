@@ -56,8 +56,6 @@ class CheckMergedBamFileChecksumMD5Job extends AbstractEndStateAwareJobImpl {
 
         // FIXME: remove chmod once the ACLs in the file system are in place
         String text = """
-set -e
-
 cd ${temporalDestinationDir}
 md5sum -c ${md5Bam}
 md5sum -c ${md5Bai}

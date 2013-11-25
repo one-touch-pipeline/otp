@@ -55,8 +55,6 @@ class TransferMergedBamFileJob extends AbstractEndStateAwareJobImpl {
 
         // FIXME: remove chmod once the ACLs in the file system are in place
         String text = """
-set -e
-
 cd ${source}
 ${clusterPrefix.cp} *.bam *.bai *.md5sum ${clusterPrefix.dest}${temporalDestinationDir}
 ${clusterPrefix.exec} \"find ${temporalDestinationDir} -type f -exec chmod 0640 '{}' \\;\"

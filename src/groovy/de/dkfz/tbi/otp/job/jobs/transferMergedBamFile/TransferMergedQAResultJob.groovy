@@ -60,8 +60,6 @@ class TransferMergedQAResultJob extends AbstractEndStateAwareJobImpl{
         QualityAssessmentMergedPass pass = qualityAssessmentMergedPassService.latestQualityAssessmentMergedPass(file)
         String sourceQAResultDirectory = processedMergedBamFileQaFileService.directoryPath(pass)
         String text = """
-set -e
-
 ${clusterPrefix.exec} \"mkdir -p -m 0750 ${tmpQADestinationDirectory}\"
 ${clusterPrefix.cp} -r ${sourceQAResultDirectory}/* ${clusterPrefix.dest}${tmpQADestinationDirectory}
 ${clusterPrefix.exec} \"find ${tmpQADestinationDirectory} -type f -exec chmod 0640 '{}' \\;\"
