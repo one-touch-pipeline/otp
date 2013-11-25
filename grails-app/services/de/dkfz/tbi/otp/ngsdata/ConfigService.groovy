@@ -90,7 +90,7 @@ class ConfigService {
     Map<String, String> clusterSpecificCommandPrefixes(Project project) {
         notNull(project, 'In input project for the method clusterSpecificPrefixes is null')
         Realm realm = getRealmDataManagement(project)
-        notNull(realm, "Did not find data processing realm for project ${project}")
+        notNull(realm, "Did not find data management realm for project ${project}")
 
         Map <String, String> prefix = [
             'exec': 'sh -c',

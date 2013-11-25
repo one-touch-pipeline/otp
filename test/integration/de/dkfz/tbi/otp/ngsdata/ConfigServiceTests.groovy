@@ -19,7 +19,7 @@ class ConfigServiceTests {
         Realm realmDKFZ = new Realm(
                 name: "DKFZ",
                 env: Environment.getCurrent().getName(),
-                operationType: Realm.OperationType.DATA_PROCESSING,
+                operationType: Realm.OperationType.DATA_MANAGEMENT,
                 cluster: Realm.Cluster.DKFZ,
                 rootPath: '/rootPath',
                 processingRootPath: '/processingRootPath',
@@ -37,7 +37,7 @@ class ConfigServiceTests {
         Realm realmBQ = new Realm(
                 name: "BioQuant",
                 env: Environment.getCurrent().getName(),
-                operationType: Realm.OperationType.DATA_PROCESSING,
+                operationType: Realm.OperationType.DATA_MANAGEMENT,
                 cluster: Realm.Cluster.BIOQUANT,
                 rootPath: '/rootPath',
                 processingRootPath: '/processingRootPath',
