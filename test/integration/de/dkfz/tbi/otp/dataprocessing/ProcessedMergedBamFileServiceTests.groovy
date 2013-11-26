@@ -307,6 +307,14 @@ class ProcessedMergedBamFileServiceTests {
     }
 
     @Test
+    void testDirectoryByMergingPassWithoutProcessedMergedBamFile() {
+        MergingPass mergingPass = createMergingPass()
+        String pathExp = directory
+        String pathAct = processedMergedBamFileService.directory(mergingPass)
+        assertEquals(pathExp, pathAct)
+    }
+
+    @Test
     void testDirectoryByMergingPass() {
         MergingPass mergingPass = createMergingPass()
         ProcessedMergedBamFile bamFile = createProcessedMergedBamFile(mergingPass)

@@ -47,7 +47,7 @@ class ProcessedMergedBamFileService {
     public String directory(MergingPass mergingPass) {
         notNull(mergingPass, "The parameter mergingPass is not allowed to be null")
         ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.findByMergingPass(mergingPass)
-        if (processedMergedBamFile.md5sum) {
+        if (processedMergedBamFile?.md5sum) {
             return destinationDirectory(processedMergedBamFile)
         } else {
             MergingSet mergingSet = mergingPass.mergingSet
