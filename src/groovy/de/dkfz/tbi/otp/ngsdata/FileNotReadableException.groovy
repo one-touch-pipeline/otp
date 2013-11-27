@@ -9,4 +9,8 @@ public class FileNotReadableException extends ProcessingException {
         super("can not read file: ${fileName}")
         this.fileName = fileName
     }
+
+    public FileNotReadableException(File file) {
+        this(file as String)
+    }
 }
