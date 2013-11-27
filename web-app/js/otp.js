@@ -221,7 +221,7 @@ $.otp.individual = {
         register: function () {
             "use strict";
                 $("#individualTable").dataTable({
-                sDom: 'T<"clear">lfrtip',
+                sDom: '<i> T rt<"clear">',
                 oTableTools: {
                     sSwfPath : $.otp.contextPath + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
                     aButtons : tableTools_button_options
@@ -238,7 +238,7 @@ $.otp.individual = {
                 }),
                 bPaginate: false,
                 bScrollCollapse: true,
-                sScrollY: ($(window).height() - 570),
+                sScrollY: ($(window).height() - 485),
                 iDisplayLength: Math.round(($('.body').height() - 200) / 23),
                 bDeferRender: true,
                 fnServerData: function (sSource, aoData, fnCallback) {
@@ -352,7 +352,7 @@ $.otp.run = {
     register: function () {
         "use strict";
             $("#runTable").dataTable({
-            sDom: 'T<"clear">lfrtip',
+            sDom: '<i> T rt<"clear">',
             oTableTools: {
                 sSwfPath : $.otp.contextPath + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
                 aButtons : tableTools_button_options
@@ -369,7 +369,7 @@ $.otp.run = {
             }),
             bPaginate: false,
             bScrollCollapse: true,
-            sScrollY: ($(window).height() - 570),
+            sScrollY: ($(window).height() - 485),
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
                 aoData.push({
@@ -532,7 +532,7 @@ $.otp.sequence = {
     register: function () {
         "use strict";
             $("#sequenceTable").dataTable({
-            sDom: 'T<"clear">lfrtip',
+            sDom: '<i> T rt<"clear">',
             oTableTools: {
                 sSwfPath : $.otp.contextPath + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
                 aButtons : tableTools_button_options
@@ -549,7 +549,7 @@ $.otp.sequence = {
             }),
             bScrollCollapse: true,
             bScrollInfinite: true,
-            sScrollY: ($(window).height() - 570),
+            sScrollY: ($(window).height() - 485),
             iDisplayLength: Math.round(($('.body').height() - 200) / 23),
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {

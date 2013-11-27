@@ -8,10 +8,5 @@
     </thead>
     <tbody></tbody>
     <tfoot>
-    <tr>
-        <g:each in="${codes}">
-            <th><g:message code="${it}"/></th>
-        </g:each>
-    </tr>
     </tfoot>
 </table>

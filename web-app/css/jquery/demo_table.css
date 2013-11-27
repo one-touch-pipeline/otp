@@ -64,8 +64,9 @@
 }
 
 .dataTables_info {
-	width: 60%;
+	width: 80%;
 	float: left;
+	margin-top: 20px;
 }
 
 .dataTables_paginate {
