@@ -1,14 +1,14 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+import org.apache.commons.logging.Log
 import com.jcraft.jsch.Channel
 import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
-import java.util.regex.Matcher
-import java.util.regex.Pattern
-import org.apache.commons.logging.Log
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 /**
  * @short Helper class providing functionality for remote execution of jobs.
@@ -103,6 +103,7 @@ class ExecutionService {
      * @param filePath The path of the file to be executed
      * @return what the server sends back
      */
+    @Deprecated
     public String executeJobScript(Realm realm, String filePath) {
         if (!filePath || filePath == "") {
             throw new ProcessingException("No file path specified.")
@@ -192,6 +193,7 @@ class ExecutionService {
             disconnectSsh(channel)
             return values
         } catch (Exception e) {
+            log.info(e.toString(), e)
             throw new ProcessingException(e.toString())
         }
     }
@@ -318,12 +320,16 @@ class ExecutionService {
      * @return true if pending, false otherwise
      */
     public boolean checkRunningJob(String pbsId, Realm realm) {
-        boolean retVal = false
+        boolean retVal = true
         try {
             retVal = isJobPending(executeCommand(realm, "qstat ${pbsId}"))
         } catch (Exception e) {
-            // catch all exceptions and assume the job is still running
-            retVal = true
+            /*
+             * Catch all exceptions, which can appear during the check if the job is still running.
+             * If an exception is thrown it is assumed that the job is still running,
+             * since it can appear when it is not possible to connect to the server
+             */
+            log.info("An Exception was thrown in checkRunningJob due to the following reason: ", e)
         }
         return retVal
     }
@@ -346,7 +352,7 @@ class ExecutionService {
         Pattern pattern = Pattern.compile("\\s*Job id\\s*Name\\s*User.*")
         boolean valid = false
         output.eachLine { String line ->
-        Matcher m = pattern.matcher(line)
+            Matcher m = pattern.matcher(line)
             if (m.find()) {
                 valid = true
             }
