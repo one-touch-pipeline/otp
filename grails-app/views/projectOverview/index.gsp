@@ -10,19 +10,17 @@
 </head>
 <body>
     <div class="body">
-        <div class="overviewMenu">
-            <div class="projectLabel">project: </div>
-            <div class="projectSelect">
-                <g:select id="project_select" name='project_select'
-                    from='${projects}' value='${project}'></g:select>
-            </div>
-        </div>
-         <h3 class="statisticTitle">
+        <h3 class="statisticTitle">
             <g:message code="projectOverview.pageTitle" />
         </h3>
-        <p class="statisticTitle">
-            <b>Number of Individuals: </b> <span id="patient-count"></span>
-        </p>
+        <form class="blue_label" id="projectsGroupbox">
+            <span class="blue_label"><g:message code="home.projectfilter"/> :</span>
+            <g:select class="criteria" id="project_select" name='project_select'
+                from='${projects}' value='${project}'></g:select>
+        </form>
+        <h4 class="statisticTitle">
+            <g:message code="projectOverview.numberOfPatient"/>: <span id="patient-count"></span>
+        </h4>
         <div class="table">
             <div style="width: 20px; height: 20px;"></div>
             <h3 class="statisticTableTitle">
