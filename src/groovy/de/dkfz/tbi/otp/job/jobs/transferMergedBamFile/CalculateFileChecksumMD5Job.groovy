@@ -71,7 +71,6 @@ class CalculateFileChecksumMD5Job extends AbstractJobImpl {
         // the md5sums of the qa results for the merged bam file and for the single lane bam files are written to the file "MD5SUMS"
         String text = """
 ${clusterPrefix.exec} \"mkdir -p -m 2750 ${tmpDirectory}; \"
-
 cd ${source}
 md5sum ${bamFile} > ${md5Bam}
 chmod 0640 ${md5Bam}

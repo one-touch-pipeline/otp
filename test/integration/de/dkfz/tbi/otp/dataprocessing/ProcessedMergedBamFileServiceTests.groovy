@@ -23,6 +23,11 @@ class ProcessedMergedBamFileServiceTests {
     MergingSet mergingSet
     Project project
     Individual individual
+    SeqTrack seqTrack
+    SampleType sampleType
+    SoftwareTool softwareTool
+    SeqPlatform seqPlatform
+    Run run
 
     final static String directory = "/tmp/otp-unit-test/pmbfs/processing/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0"
     final static String baseFile = "sample-type_patient_seq-type_library_merged.mdup"
@@ -62,6 +67,68 @@ class ProcessedMergedBamFileServiceTests {
         realm1.env = Environment.getCurrent().getName()
         realm1.save([flush: true])
 
+        project = new Project(
+                        name: "project",
+                        dirName: "project-dir",
+                        realmName: "realmName"
+                        )
+        assertNotNull(project.save([flush: true]))
+
+        individual = new Individual(
+                        pid: "patient",
+                        mockPid: "mockPid",
+                        mockFullName: "mockFullName",
+                        type: Individual.Type.UNDEFINED,
+                        project: project
+                        )
+        assertNotNull(individual.save([flush: true]))
+
+        sampleType = new SampleType(
+                        name: "sample-type"
+                        )
+        assertNotNull(sampleType.save([flush: true]))
+
+        sample = new Sample(
+                        individual: individual,
+                        sampleType: sampleType
+                        )
+        assertNotNull(sample.save([flush: true]))
+
+        seqType = new SeqType(
+                        name: "seq-type",
+                        libraryLayout: "library",
+                        dirName: "seq-type-dir"
+                        )
+        assertNotNull(seqType.save([flush: true]))
+
+        softwareTool = new SoftwareTool(
+                        programName: "name",
+                        programVersion: "version",
+                        qualityCode: "quality",
+                        type: Type.ALIGNMENT
+                        )
+        assertNotNull(softwareTool.save([flush: true]))
+
+        seqPlatform = new SeqPlatform(
+                        name: "name",
+                        model: "model"
+                        )
+        assertNotNull(seqPlatform.save([flush: true]))
+
+        SeqCenter seqCenter = new SeqCenter(
+                        name: "name",
+                        dirName: "dirName"
+                        )
+        assertNotNull(seqCenter.save([flush: true]))
+
+        run = new Run(
+                        name: "name",
+                        seqCenter: seqCenter,
+                        seqPlatform: seqPlatform,
+                        storageRealm: StorageRealm.DKFZ
+                        )
+        assertNotNull(run.save([flush: true]))
+
         baseDir = new File(directory)
         File bam = new File(basePath + ".bam")
         File bai = new File(basePath + ".bai")
@@ -90,6 +157,11 @@ class ProcessedMergedBamFileServiceTests {
         mergingSet = null
         project = null
         individual = null
+        seqTrack = null
+        sampleType = null
+        softwareTool = null
+        seqPlatform = null
+        run = null
     }
 
     @Test(expected = IllegalArgumentException)
@@ -577,6 +649,49 @@ class ProcessedMergedBamFileServiceTests {
         Sample sampleAct = processedMergedBamFileService.sample(mergedBamFile)
     }
 
+    @Test(expected = IllegalArgumentException)
+    void testFastqFilesPerMergedBamFileInputNull() {
+        processedMergedBamFileService.fastqFilesPerMergedBamFile(null)
+    }
+
+    @Test
+    void testFastqFilesPerMergedBamFile() {
+        MergingPass mergingPass = createMergingPass()
+        ProcessedBamFile processedBamFile = createProcessedBamFile()
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        FileType fileType = new FileType(
+                        type: de.dkfz.tbi.otp.ngsdata.FileType.Type.SEQUENCE
+                        )
+        assertNotNull(fileType.save([flush: true]))
+
+        DataFile dataFile = new DataFile(
+                        fileName: "dataFile",
+                        seqTrack: seqTrack,
+                        fileType: fileType
+                        )
+        assertNotNull(dataFile.save([flush: true]))
+        assertEquals([dataFile], processedMergedBamFileService.fastqFilesPerMergedBamFile(processedMergedBamFile))
+    }
+
+    @Test
+    void testFastqFilesPerMergedBamFileNoFastqFiles() {
+        MergingPass mergingPass = createMergingPass()
+        ProcessedBamFile processedBamFile = createProcessedBamFile()
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        FileType fileType = new FileType(
+                        type: de.dkfz.tbi.otp.ngsdata.FileType.Type.ALIGNMENT
+                        )
+        assertNotNull(fileType.save([flush: true]))
+
+        DataFile dataFile = new DataFile(
+                        fileName: "dataFile",
+                        seqTrack: seqTrack,
+                        fileType: fileType
+                        )
+        assertNotNull(dataFile.save([flush: true]))
+        assertTrue(processedMergedBamFileService.fastqFilesPerMergedBamFile(processedMergedBamFile).isEmpty())
+    }
+
     private ProcessedMergedBamFile createProcessedMergedBamFile(MergingPass mergingPass) {
         ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
                         mergingPass: mergingPass,
@@ -592,39 +707,7 @@ class ProcessedMergedBamFileServiceTests {
     }
 
     private MergingPass createMergingPass() {
-        project = new Project(
-                        name: "project",
-                        dirName: "project-dir",
-                        realmName: "realmName"
-                        )
-        assertNotNull(project.save([flush: true]))
 
-        individual = new Individual(
-                        pid: "patient",
-                        mockPid: "mockPid",
-                        mockFullName: "mockFullName",
-                        type: Individual.Type.UNDEFINED,
-                        project: project
-                        )
-        assertNotNull(individual.save([flush: true]))
-
-        SampleType sampleType = new SampleType(
-                        name: "sample-type"
-                        )
-        assertNotNull(sampleType.save([flush: true]))
-
-        sample = new Sample(
-                        individual: individual,
-                        sampleType: sampleType
-                        )
-        assertNotNull(sample.save([flush: true]))
-
-        seqType = new SeqType(
-                        name: "seq-type",
-                        libraryLayout: "library",
-                        dirName: "seq-type-dir"
-                        )
-        assertNotNull(seqType.save([flush: true]))
 
         MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
                         sample: sample,
@@ -648,35 +731,7 @@ class ProcessedMergedBamFileServiceTests {
     }
 
     private ProcessedBamFile createProcessedBamFile() {
-        SoftwareTool softwareTool = new SoftwareTool(
-                        programName: "name",
-                        programVersion: "version",
-                        qualityCode: "quality",
-                        type: Type.ALIGNMENT
-                        )
-        assertNotNull(softwareTool.save([flush: true]))
-
-        SeqPlatform seqPlatform = new SeqPlatform(
-                        name: "name",
-                        model: "model"
-                        )
-        assertNotNull(seqPlatform.save([flush: true]))
-
-        SeqCenter seqCenter = new SeqCenter(
-                        name: "name",
-                        dirName: "dirName"
-                        )
-        assertNotNull(seqCenter.save([flush: true]))
-
-        Run run = new Run(
-                        name: "name",
-                        seqCenter: seqCenter,
-                        seqPlatform: seqPlatform,
-                        storageRealm: StorageRealm.DKFZ
-                        )
-        assertNotNull(run.save([flush: true]))
-
-        SeqTrack seqTrack = new SeqTrack(
+        seqTrack = new SeqTrack(
                         laneId: "laneId",
                         run: run,
                         sample: sample,

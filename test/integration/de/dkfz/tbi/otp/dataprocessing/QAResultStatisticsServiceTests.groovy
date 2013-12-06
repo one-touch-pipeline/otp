@@ -5,7 +5,9 @@ import grails.util.Environment
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
+import de.dkfz.tbi.otp.filehandling.FileNames
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack.KitInfoState
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
 /**
@@ -31,6 +33,10 @@ class QAResultStatisticsServiceTests {
     Run run
     Individual individual
     SeqTrack seqTrack
+    ExomeSeqTrack exomeSeqTrack
+    ExomeEnrichmentKit exomeEnrichmentKit
+    SeqType seqType
+    AlignmentPass alignmentPass
     ProcessedBamFile processedBamFile
     ProcessedMergedBamFile processedMergedBamFile
     ReferenceGenome referenceGenome
@@ -105,8 +111,8 @@ class QAResultStatisticsServiceTests {
                         )
         assertNotNull(sample.save([flush: true]))
 
-        SeqType seqType = new SeqType(
-                        name: "seqTypeName",
+        seqType = new SeqType(
+                        name: SeqTypeNames.WHOLE_GENOME.seqTypeName,
                         libraryLayout: "seqTypeLibrary",
                         dirName: "seqTypeDirName"
                         )
@@ -150,7 +156,24 @@ class QAResultStatisticsServiceTests {
                         )
         assertNotNull(seqTrack.save([flush: true]))
 
-        AlignmentPass alignmentPass = new AlignmentPass(
+        exomeEnrichmentKit = new ExomeEnrichmentKit(
+                        name: "exomeEnrichmentKit"
+                        )
+        assertNotNull(exomeEnrichmentKit.save([flush: true]))
+
+        exomeSeqTrack = new ExomeSeqTrack(
+                        laneId: "laneId",
+                        run: run,
+                        sample: sample,
+                        seqType: seqType,
+                        seqPlatform: seqPlatform,
+                        pipelineVersion: softwareTool,
+                        exomeEnrichmentKit: exomeEnrichmentKit,
+                        kitInfoState: KitInfoState.KNOWN
+                        )
+        assertNotNull(exomeSeqTrack.save([flush: true]))
+
+        alignmentPass = new AlignmentPass(
                         identifier: 1,
                         seqTrack: seqTrack,
                         description: "test"
@@ -247,6 +270,15 @@ class QAResultStatisticsServiceTests {
                         )
         assertNotNull(referenceGenome.save([flush: true]))
 
+        BedFile bedFile = new BedFile(
+                        fileName: "bedFile",
+                        targetSize: 80,
+                        mergedTargetSize: 60,
+                        referenceGenome: referenceGenome,
+                        exomeEnrichmentKit: exomeEnrichmentKit
+                        )
+        assertNotNull(bedFile.save([flush: true]))
+
         referenceGenomeEntryChrX = new ReferenceGenomeEntry(
                         name: "chrX",
                         alias: "X",
@@ -302,6 +334,10 @@ class QAResultStatisticsServiceTests {
         run = null
         individual = null
         seqTrack = null
+        seqType = null
+        exomeSeqTrack = null
+        exomeEnrichmentKit = null
+        alignmentPass = null
         processedBamFile = null
         processedMergedBamFile = null
         referenceGenome = null
@@ -335,7 +371,7 @@ class QAResultStatisticsServiceTests {
     }
 
     @Test
-    void testPrepareFetchingSingleLaneResults() {
+    void testPrepareFetchingSingleLaneResultsWholeGenome() {
         Map actual = QAResultStatisticsService.prepareFetchingSingleLaneResults(processedBamFile)
         Map expect = [
             (QAResultStatisticsService.CHROMOSOME_QUALITY_ASSESSMENT_CHR_X): chromosomeQualityAssessmentChrX,
@@ -347,7 +383,34 @@ class QAResultStatisticsServiceTests {
             (QAResultStatisticsService.INDIVIDUAL): individual,
             (QAResultStatisticsService.SAMPLE): sample,
             (QAResultStatisticsService.RUN): 'runName',
-            (QAResultStatisticsService.LANE): processedBamFile.alignmentPass.seqTrack.laneId
+            (QAResultStatisticsService.LANE): processedBamFile.alignmentPass.seqTrack.laneId,
+            (QAResultStatisticsService.SEQTYPE): seqType,
+            (QAResultStatisticsService.EXOME_ENRICHMENT_KIT): null
+        ]
+        // assertEquals will not DTRT here, we have to use the equals() method
+        assertTrue expect == actual
+    }
+
+    @Test
+    void testPrepareFetchingSingleLaneResultsExome() {
+        alignmentPass.seqTrack = exomeSeqTrack
+        alignmentPass.save([flush: true])
+        seqType.name = SeqTypeNames.EXOME.seqTypeName
+        seqType.save([flush: true])
+        Map actual = QAResultStatisticsService.prepareFetchingSingleLaneResults(processedBamFile)
+        Map expect = [
+            (QAResultStatisticsService.CHROMOSOME_QUALITY_ASSESSMENT_CHR_X): chromosomeQualityAssessmentChrX,
+            (QAResultStatisticsService.CHROMOSOME_QUALITY_ASSESSMENT_CHR_Y): chromosomeQualityAssessmentChrY,
+            (QAResultStatisticsService.OVERALL_QUALITY_ASSESSMENT): overallQualityAssessment,
+            (QAResultStatisticsService.REFERENCE_GENOME_ENTRY_CHR_X): referenceGenomeEntryChrX,
+            (QAResultStatisticsService.REFERENCE_GENOME_ENTRY_CHR_Y): referenceGenomeEntryChrY,
+            (QAResultStatisticsService.REFERENCE_GENOME): referenceGenome,
+            (QAResultStatisticsService.INDIVIDUAL): individual,
+            (QAResultStatisticsService.SAMPLE): sample,
+            (QAResultStatisticsService.RUN): 'runName',
+            (QAResultStatisticsService.LANE): processedBamFile.alignmentPass.seqTrack.laneId,
+            (QAResultStatisticsService.SEQTYPE): seqType,
+            (QAResultStatisticsService.EXOME_ENRICHMENT_KIT): exomeEnrichmentKit
         ]
         // assertEquals will not DTRT here, we have to use the equals() method
         assertTrue expect == actual
@@ -359,7 +422,7 @@ class QAResultStatisticsServiceTests {
     }
 
     @Test
-    void testPrepareFetchingMergedBamFileResults() {
+    void testPrepareFetchingMergedBamFileResultsWholeGenome() {
         Map actual = QAResultStatisticsService.prepareFetchingMergedBamFileResults(processedMergedBamFile)
         Map expect = [
             (QAResultStatisticsService.CHROMOSOME_QUALITY_ASSESSMENT_CHR_X): chromosomeQualityAssessmentMergedChrX,
@@ -372,6 +435,33 @@ class QAResultStatisticsServiceTests {
             (QAResultStatisticsService.SAMPLE): sample,
             (QAResultStatisticsService.LANE): 'all_merged',
             (QAResultStatisticsService.RUN): 'all_merged',
+            (QAResultStatisticsService.SEQTYPE): seqType,
+            (QAResultStatisticsService.EXOME_ENRICHMENT_KIT): null
+        ]
+        // assertEquals will not DTRT here, we have to use the equals() method
+        assertTrue expect == actual
+    }
+
+    @Test
+    void testPrepareFetchingMergedBamFileResultsExome() {
+        alignmentPass.seqTrack = exomeSeqTrack
+        alignmentPass.save([flush: true])
+        seqType.name = SeqTypeNames.EXOME.seqTypeName
+        seqType.save([flush: true])
+        Map actual = QAResultStatisticsService.prepareFetchingMergedBamFileResults(processedMergedBamFile)
+        Map expect = [
+            (QAResultStatisticsService.CHROMOSOME_QUALITY_ASSESSMENT_CHR_X): chromosomeQualityAssessmentMergedChrX,
+            (QAResultStatisticsService.CHROMOSOME_QUALITY_ASSESSMENT_CHR_Y): chromosomeQualityAssessmentMergedChrY,
+            (QAResultStatisticsService.OVERALL_QUALITY_ASSESSMENT): overallQualityAssessmentMerged,
+            (QAResultStatisticsService.REFERENCE_GENOME_ENTRY_CHR_X): referenceGenomeEntryChrX,
+            (QAResultStatisticsService.REFERENCE_GENOME_ENTRY_CHR_Y): referenceGenomeEntryChrY,
+            (QAResultStatisticsService.REFERENCE_GENOME): referenceGenome,
+            (QAResultStatisticsService.INDIVIDUAL): individual,
+            (QAResultStatisticsService.SAMPLE): sample,
+            (QAResultStatisticsService.LANE): 'all_merged',
+            (QAResultStatisticsService.RUN): 'all_merged',
+            (QAResultStatisticsService.SEQTYPE): seqType,
+            (QAResultStatisticsService.EXOME_ENRICHMENT_KIT): exomeEnrichmentKit
         ]
         // assertEquals will not DTRT here, we have to use the equals() method
         assertTrue expect == actual
@@ -383,7 +473,9 @@ class QAResultStatisticsServiceTests {
     }
 
     @Test
-    void testFetchResultsSmall() {
+    void testFetchResultsSmallWholeGenome() {
+        seqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
+        seqType.save([flush: true])
         List<Map> actual = QAResultStatisticsService.fetchResultsSmall(processedMergedBamFile)
         List<Map> expect = [
             // The two maps are (almost) identical. If different values are used, they need
@@ -440,15 +532,82 @@ class QAResultStatisticsServiceTests {
         assertTrue expect == actual
     }
 
+    @Test
+    void testFetchResultsSmallExome() {
+        seqType.name = SeqTypeNames.EXOME.seqTypeName
+        seqType.save([flush: true])
+        alignmentPass.seqTrack = exomeSeqTrack
+        alignmentPass.save([flush: true])
+        List<Map> actual = QAResultStatisticsService.fetchResultsSmall(processedMergedBamFile)
+        List<Map> expect = [
+            // The two maps are (almost) identical. If different values are used, they need
+            // to be changed accordingly.
+            [
+                // Map for ProcessedMergedBamFile
+                (QAResultStatisticsService.REFERENCE_GENOME_LENGTH_WITH_N): '3.21',
+                (QAResultStatisticsService.REFERENCE_GENOME_LENGTH_WITHOUT_N): '2.91',
+                (QAResultStatisticsService.PID): 'pid_1',
+                (QAResultStatisticsService.MOCK_FULL_NAME): 'mockFullName_1',
+                (QAResultStatisticsService.SAMPLE_TYPE): 'control',
+                (QAResultStatisticsService.RUN_ID): 'all_merged',
+                (QAResultStatisticsService.LANE): 'all_merged',
+                (QAResultStatisticsService.COVERAGE_WITHOUT_N): '0.00',
+                (QAResultStatisticsService.COVERAGE_WITH_N): '0.00',
+                (QAResultStatisticsService.COVERAGE_WITHOUT_N_CHR_X): '0.16',
+                (QAResultStatisticsService.COVERAGE_WITHOUT_N_CHR_Y): '0.16',
+                (QAResultStatisticsService.QC_BASES_MAPPED): 8,
+                (QAResultStatisticsService.TOTAL_READ_COUNT): 55,
+                (QAResultStatisticsService.MAPPED_READ_COUNT): 19,
+                (QAResultStatisticsService.PERCENTAGE_MAPPED_READS): '34.55',
+                (QAResultStatisticsService.PROPERLY_PAIRED): '52.27',
+                (QAResultStatisticsService.SINGLETONS): '49.09',
+                (QAResultStatisticsService.DUPLICATES): '32.73',
+                (QAResultStatisticsService.INSERT_SIZE_SD): '29.00',
+                (QAResultStatisticsService.INSERT_SIZE_MEDIAN): '30.00',
+                (QAResultStatisticsService.INSERT_SIZE_MEAN): '28.00',
+                (QAResultStatisticsService.TARGET_COVERAGE): '0.83',
+                (QAResultStatisticsService.ON_TARGET_RATE): '75.76',
+            ],
+            [
+                // Map for ProcessedBamFile
+                (QAResultStatisticsService.REFERENCE_GENOME_LENGTH_WITH_N): '3.21',
+                (QAResultStatisticsService.REFERENCE_GENOME_LENGTH_WITHOUT_N): '2.91',
+                (QAResultStatisticsService.PID): 'pid_1',
+                (QAResultStatisticsService.MOCK_FULL_NAME): 'mockFullName_1',
+                (QAResultStatisticsService.SAMPLE_TYPE): 'control',
+                (QAResultStatisticsService.RUN_ID): 'runName',
+                (QAResultStatisticsService.LANE): 'laneId',
+                (QAResultStatisticsService.COVERAGE_WITHOUT_N): '0.00',
+                (QAResultStatisticsService.COVERAGE_WITH_N): '0.00',
+                (QAResultStatisticsService.COVERAGE_WITHOUT_N_CHR_X): '0.16',
+                (QAResultStatisticsService.COVERAGE_WITHOUT_N_CHR_Y): '0.16',
+                (QAResultStatisticsService.QC_BASES_MAPPED): 8,
+                (QAResultStatisticsService.TOTAL_READ_COUNT): 55,
+                (QAResultStatisticsService.MAPPED_READ_COUNT): 19,
+                (QAResultStatisticsService.PERCENTAGE_MAPPED_READS): '34.55',
+                (QAResultStatisticsService.PROPERLY_PAIRED): '52.27',
+                (QAResultStatisticsService.SINGLETONS): '49.09',
+                (QAResultStatisticsService.DUPLICATES): '32.73',
+                (QAResultStatisticsService.INSERT_SIZE_SD): '29.00',
+                (QAResultStatisticsService.INSERT_SIZE_MEDIAN): '30.00',
+                (QAResultStatisticsService.INSERT_SIZE_MEAN): '28.00',
+                (QAResultStatisticsService.TARGET_COVERAGE): '0.83',
+                (QAResultStatisticsService.ON_TARGET_RATE): '75.76',
+            ],
+        ]
+        assertTrue expect == actual
+    }
+
     @Test(expected = IllegalArgumentException)
     void testFetchResultsExtendedWhenArgumentIsNull() {
         QAResultStatisticsService.fetchResultsExtended(null)
     }
 
     @Test
-    void testFetchResultsExtended() {
-        List<Map> actual = QAResultStatisticsService.fetchResultsExtended(processedMergedBamFile)
-        List<Map> expect = [
+    void testFetchResultsExtendedWholeGenome() {
+        seqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
+        seqType.save([flush: true])
+        final List<Map> EXPECT = [
             // The two maps are (almost) identical. If different values are used, they need
             // to be changed accordingly. They also have a large overlap with the maps in
             // testFetchResultsSmall().
@@ -489,10 +648,64 @@ class QAResultStatisticsServiceTests {
                 (QAResultStatisticsService.MAPPED_QUALITY_LONG_READ_2): 7,
             ],
         ]
-        assertTrue expect == actual
+        List<Map> actual = QAResultStatisticsService.fetchResultsExtended(processedMergedBamFile)
+        assertTrue EXPECT == actual
     }
 
-
+    @Test
+    void testFetchResultsExtendedExome() {
+        seqType.name = SeqTypeNames.EXOME.seqTypeName
+        seqType.save([flush: true])
+        alignmentPass.seqTrack = exomeSeqTrack
+        alignmentPass.save([flush: true])
+        final List<Map> EXPECT = [
+            // The two maps are (almost) identical. If different values are used, they need
+            // to be changed accordingly. They also have a large overlap with the maps in
+            // testFetchResultsSmall().
+            [
+                // Map for ProcessedMergedBamFile
+                (QAResultStatisticsService.DUPLICATES_READ_1): 1,
+                (QAResultStatisticsService.DUPLICATES_READ_2): 2,
+                (QAResultStatisticsService.PE_READS_MAPPED_ON_DIFF_CHR): 33,
+                (QAResultStatisticsService.INCORRECT_PE_ORIENTATION): 32,
+                (QAResultStatisticsService.INCORRECT_PROPER_PAIR): 3,
+                (QAResultStatisticsService.PERCENTAGE_QC_BASES_MAPPED_WITHOUT_N): '8/2910000',
+                (QAResultStatisticsService.PERCENTAGE_QC_BASES_MAPPED_WITH_N): '8/3210000',
+                (QAResultStatisticsService.NOT_MAPPED_READ_1): 13,
+                (QAResultStatisticsService.NOT_MAPPED_READ_2): 14,
+                (QAResultStatisticsService.MAPPED_SHORT_READ_1): 11,
+                (QAResultStatisticsService.MAPPED_SHORT_READ_2): 12,
+                (QAResultStatisticsService.MAPPED_LOW_QUALITY_READ_1): 9,
+                (QAResultStatisticsService.MAPPED_LOW_QUALITY_READ_2): 10,
+                (QAResultStatisticsService.MAPPED_QUALITY_LONG_READ_1): 6,
+                (QAResultStatisticsService.MAPPED_QUALITY_LONG_READ_2): 7,
+                (QAResultStatisticsService.ALL_MAPPED_BASES): 66,
+                (QAResultStatisticsService.TARGET_MAPPED_BASES): 50,
+            ],
+            [
+                // Map for ProcessedBamFile
+                (QAResultStatisticsService.DUPLICATES_READ_1): 1,
+                (QAResultStatisticsService.DUPLICATES_READ_2): 2,
+                (QAResultStatisticsService.PE_READS_MAPPED_ON_DIFF_CHR): 33,
+                (QAResultStatisticsService.INCORRECT_PE_ORIENTATION): 32,
+                (QAResultStatisticsService.INCORRECT_PROPER_PAIR): 3,
+                (QAResultStatisticsService.PERCENTAGE_QC_BASES_MAPPED_WITHOUT_N): '8/2910000',
+                (QAResultStatisticsService.PERCENTAGE_QC_BASES_MAPPED_WITH_N): '8/3210000',
+                (QAResultStatisticsService.NOT_MAPPED_READ_1): 13,
+                (QAResultStatisticsService.NOT_MAPPED_READ_2): 14,
+                (QAResultStatisticsService.MAPPED_SHORT_READ_1): 11,
+                (QAResultStatisticsService.MAPPED_SHORT_READ_2): 12,
+                (QAResultStatisticsService.MAPPED_LOW_QUALITY_READ_1): 9,
+                (QAResultStatisticsService.MAPPED_LOW_QUALITY_READ_2): 10,
+                (QAResultStatisticsService.MAPPED_QUALITY_LONG_READ_1): 6,
+                (QAResultStatisticsService.MAPPED_QUALITY_LONG_READ_2): 7,
+                (QAResultStatisticsService.ALL_MAPPED_BASES): 66,
+                (QAResultStatisticsService.TARGET_MAPPED_BASES): 50,
+            ],
+        ]
+        List<Map> actual = QAResultStatisticsService.fetchResultsExtended(processedMergedBamFile)
+        assertTrue EXPECT == actual
+    }
 
     @Test(expected = IllegalArgumentException)
     void testCreateOutputLineWhenArgumentValuesIsNull() {
@@ -514,8 +727,6 @@ class QAResultStatisticsServiceTests {
         QAResultStatisticsService.createOutputLine(["one":"1", "two":"2"], [])
     }
 
-    // FIXME: Should we also test (in "createOutputLine") if keys of values is a superset of elements in sortOrder?
-
     @Test
     void testCreateOutputLine() {
         def sortOrder = ["first", "second", "third"]
@@ -532,8 +743,8 @@ class QAResultStatisticsServiceTests {
     void testStatisticsFile() {
         Map actual = QAResultStatisticsService.statisticsFile(processedMergedBamFile)
         Map expect = [
-            'small': "${FINAL_PATH_FILE}/QAResultOverview.tsv",
-            'extended': "${FINAL_PATH_FILE}/QAResultOverviewExtended.tsv",
+            'small': "${FINAL_PATH_FILE}/${FileNames.QA_RESULT_OVERVIEW}",
+            'extended': "${FINAL_PATH_FILE}/${FileNames.QA_RESULT_OVERVIEW_EXTENDED}",
         ]
         assertTrue expect == actual
     }
@@ -544,26 +755,358 @@ class QAResultStatisticsServiceTests {
     }
 
     @Test
-    void testDefineOutput() {
+    void testDefineOutputWholeGenome() {
+        seqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
+        seqType.save([flush: true])
         Map result = QAResultStatisticsService.defineOutput(processedMergedBamFile)
         String actSmall = result["small"]
         String actExtended = result["extended"]
-        String expSmall = """\
-pid\tmock full name\tsample type\trun id\tlane\tCoverage w/o N (2.91Mbp)\tCoverage wN (3.21Mbp)\tChrX Coverage w/o N\tChrY Coverage w/o N\t#QC bases mapped\t#total read count (flagstat)\t#mapped read count (flagstat)\t%mapped reads (flagstat)\t%properly_paired (flagstat)\t%singletons (flagstat)\t%duplicates (picard)\tStandard Deviation PE_insertsize\tMedian PE_insertsize\tMean PE_insertsize
-pid_1\tmockFullName_1\tcontrol\tall_merged\tall_merged\t0.00\t0.00\t0.16\t0.16\t8\t55\t19\t34.55\t52.27\t49.09\t32.73\t29.00\t30.00\t28.00
-pid_1\tmockFullName_1\tcontrol\trunName\tlaneId\t0.00\t0.00\t0.16\t0.16\t8\t55\t19\t34.55\t52.27\t49.09\t32.73\t29.00\t30.00\t28.00
-"""
-        String expExtended = """\
-pid\tmock full name\tsample type\trun id\tlane\tCoverage w/o N (2.91Mbp)\tCoverage wN (3.21Mbp)\tChrX Coverage w/o N\tChrY Coverage w/o N\t#QC bases mapped\t#total read count (flagstat)\t#mapped read count (flagstat)\t%mapped reads (flagstat)\t%properly_paired (flagstat)\t%singletons (flagstat)\t%duplicates (picard)\tStandard Deviation PE_insertsize\tMedian PE_insertsize\tMean PE_insertsize\t#duplicates Read1\t#duplicates Read2\t%PE reads mapped on diff chromosomes\t%incorrect PE orientation\tincorrect proper pair\tQC bases/ total bases w/o N\tQC bases/ total bases w N\tmapq=0 read1\tmapq=0 read2\tmapq>0,readlength<minlength read1\tmapq>0,readlength<minlength read2\tmapq>0,BaseQualityMedian<basequalCutoff read1\tmapq>0,BaseQualityMedian<basequalCutoff read2\tmapq>0,BaseQualityMedian>=basequalCutoff read1\tmapq>0,BaseQualityMedian>=basequalCutoff read2
-pid_1\tmockFullName_1\tcontrol\tall_merged\tall_merged\t0.00\t0.00\t0.16\t0.16\t8\t55\t19\t34.55\t52.27\t49.09\t32.73\t29.00\t30.00\t28.00\t1\t2\t33.0\t32.0\t3\t8/2910000\t8/3210000\t13\t14\t11\t12\t9\t10\t6\t7
-pid_1\tmockFullName_1\tcontrol\trunName\tlaneId\t0.00\t0.00\t0.16\t0.16\t8\t55\t19\t34.55\t52.27\t49.09\t32.73\t29.00\t30.00\t28.00\t1\t2\t33.0\t32.0\t3\t8/2910000\t8/3210000\t13\t14\t11\t12\t9\t10\t6\t7
-"""
+        List<String> expSmallHeader = [
+            "pid",
+            "mock full name",
+            "sample type",
+            "run id",
+            "lane",
+            "Coverage w/o N (2.91Mbp)",
+            "Coverage wN (3.21Mbp)",
+            "ChrX Coverage w/o N",
+            "ChrY Coverage w/o N",
+            "#QC bases mapped",
+            "#mapped read count (flagstat)",
+            "%mapped reads (flagstat)",
+            "#total read count (flagstat)",
+            "%properly_paired (flagstat)",
+            "%singletons (flagstat)",
+            "%duplicates (picard)",
+            "Standard Deviation PE_insertsize",
+            "Median PE_insertsize",
+            "Mean PE_insertsize",
+        ]
+        List<String> expSmallMergedBamFile = [
+            "pid_1",
+            "mockFullName_1",
+            "control",
+            "all_merged",
+            "all_merged",
+            "0.00",
+            "0.00",
+            "0.16",
+            "0.16",
+            "8",
+            "19",
+            "34.55",
+            "55",
+            "52.27",
+            "49.09",
+            "32.73",
+            "29.00",
+            "30.00",
+            "28.00",
+        ]
+        List<String> expSmallSingleLaneBamFile = [
+            "pid_1",
+            "mockFullName_1",
+            "control",
+            "runName",
+            "laneId",
+            "0.00",
+            "0.00",
+            "0.16",
+            "0.16",
+            "8",
+            "19",
+            "34.55",
+            "55",
+            "52.27",
+            "49.09",
+            "32.73",
+            "29.00",
+            "30.00",
+            "28.00",
+        ]
+
+        String expSmall = expSmallHeader.join("\t") + "\n" + expSmallMergedBamFile.join("\t") + "\n" + expSmallSingleLaneBamFile.join("\t") + "\n"
+
+        List<String> expExtendedHeader = [
+            "pid",
+            "mock full name",
+            "sample type",
+            "run id",
+            "lane",
+            "Coverage w/o N (2.91Mbp)",
+            "Coverage wN (3.21Mbp)",
+            "ChrX Coverage w/o N",
+            "ChrY Coverage w/o N",
+            "#QC bases mapped",
+            "#mapped read count (flagstat)",
+            "%mapped reads (flagstat)",
+            "#total read count (flagstat)",
+            "%properly_paired (flagstat)",
+            "%singletons (flagstat)",
+            "%duplicates (picard)",
+            "Standard Deviation PE_insertsize",
+            "Median PE_insertsize",
+            "Mean PE_insertsize",
+            "#duplicates Read1",
+            "#duplicates Read2",
+            "%PE reads mapped on diff chromosomes",
+            "%incorrect PE orientation",
+            "incorrect proper pair",
+            "QC bases/ total bases w/o N",
+            "QC bases/ total bases w N",
+            "mapq=0 read1",
+            "mapq=0 read2",
+            "mapq>0,readlength<minlength read1",
+            "mapq>0,readlength<minlength read2",
+            "mapq>0,BaseQualityMedian<basequalCutoff read1",
+            "mapq>0,BaseQualityMedian<basequalCutoff read2",
+            "mapq>0,BaseQualityMedian>=basequalCutoff read1",
+            "mapq>0,BaseQualityMedian>=basequalCutoff read2",
+        ]
+
+        List<String> expExtendedMergedBamFile = [
+            "pid_1",
+            "mockFullName_1",
+            "control",
+            "all_merged",
+            "all_merged",
+            "0.00",
+            "0.00",
+            "0.16",
+            "0.16",
+            "8",
+            "19",
+            "34.55",
+            "55",
+            "52.27",
+            "49.09",
+            "32.73",
+            "29.00",
+            "30.00",
+            "28.00",
+            "1",
+            "2",
+            "33.0",
+            "32.0",
+            "3",
+            "8/2910000",
+            "8/3210000",
+            "13",
+            "14",
+            "11",
+            "12",
+            "9",
+            "10",
+            "6",
+            "7",
+        ]
+
+        List<String> expExtendedSingleLaneBamFile = [
+            "pid_1",
+            "mockFullName_1",
+            "control",
+            "runName",
+            "laneId",
+            "0.00",
+            "0.00",
+            "0.16",
+            "0.16",
+            "8",
+            "19",
+            "34.55",
+            "55",
+            "52.27",
+            "49.09",
+            "32.73",
+            "29.00",
+            "30.00",
+            "28.00",
+            "1",
+            "2",
+            "33.0",
+            "32.0",
+            "3",
+            "8/2910000",
+            "8/3210000",
+            "13",
+            "14",
+            "11",
+            "12",
+            "9",
+            "10",
+            "6",
+            "7",
+        ]
+        String expExtended = expExtendedHeader.join("\t") + "\n" + expExtendedMergedBamFile.join("\t") + "\n" + expExtendedSingleLaneBamFile.join("\t") + "\n"
+
+        assertEquals expSmall, actSmall
+        assertEquals expExtended, actExtended
+    }
+
+    @Test
+    void testDefineOutputExome() {
+        seqType.name = SeqTypeNames.EXOME.seqTypeName
+        seqType.save([flush: true])
+        alignmentPass.seqTrack = exomeSeqTrack
+        alignmentPass.save([flush: true])
+        Map result = QAResultStatisticsService.defineOutput(processedMergedBamFile)
+        String actSmall = result["small"]
+        String actExtended = result["extended"]
+        List<String> expSmallHeader = [
+            "pid",
+            "mock full name",
+            "sample type",
+            "run id",
+            "lane",
+            "%onTarget",
+            "target Coverage",
+            "#total read count (flagstat)",
+            "%properly_paired (flagstat)",
+            "%singletons (flagstat)",
+            "%duplicates (picard)",
+            "Standard Deviation PE_insertsize",
+            "Median PE_insertsize",
+            "Mean PE_insertsize",
+        ]
+        List<String> expSmallMergedBamFile = [
+            "pid_1",
+            "mockFullName_1",
+            "control",
+            "all_merged",
+            "all_merged",
+            "75.76",
+            "0.83",
+            "55",
+            "52.27",
+            "49.09",
+            "32.73",
+            "29.00",
+            "30.00",
+            "28.00",
+        ]
+        List<String> expSmallSingleLaneBamFile = [
+            "pid_1",
+            "mockFullName_1",
+            "control",
+            "runName",
+            "laneId",
+            "75.76",
+            "0.83",
+            "55",
+            "52.27",
+            "49.09",
+            "32.73",
+            "29.00",
+            "30.00",
+            "28.00",
+        ]
+        String expSmall = expSmallHeader.join("\t") + "\n" +expSmallMergedBamFile.join("\t") + "\n" +expSmallSingleLaneBamFile.join("\t") + "\n"
+
+        List<String> expExtendedHeader = [
+            "pid",
+            "mock full name",
+            "sample type",
+            "run id",
+            "lane",
+            "%onTarget",
+            "target Coverage",
+            "#total read count (flagstat)",
+            "%properly_paired (flagstat)",
+            "%singletons (flagstat)",
+            "%duplicates (picard)",
+            "Standard Deviation PE_insertsize",
+            "Median PE_insertsize",
+            "Mean PE_insertsize",
+            "target mapped bases",
+            "all mapped bases",
+            "#duplicates Read1",
+            "#duplicates Read2",
+            "%PE reads mapped on diff chromosomes",
+            "%incorrect PE orientation",
+            "incorrect proper pair",
+            "QC bases/ total bases w/o N",
+            "QC bases/ total bases w N",
+            "mapq=0 read1",
+            "mapq=0 read2",
+            "mapq>0,readlength<minlength read1",
+            "mapq>0,readlength<minlength read2",
+            "mapq>0,BaseQualityMedian<basequalCutoff read1",
+            "mapq>0,BaseQualityMedian<basequalCutoff read2",
+            "mapq>0,BaseQualityMedian>=basequalCutoff read1",
+            "mapq>0,BaseQualityMedian>=basequalCutoff read2",
+        ]
+        List<String> expExpectedMergedBamFile = [
+            "pid_1",
+            "mockFullName_1",
+            "control",
+            "all_merged",
+            "all_merged",
+            "75.76",
+            "0.83",
+            "55",
+            "52.27",
+            "49.09",
+            "32.73",
+            "29.00",
+            "30.00",
+            "28.00",
+            "50",
+            "66",
+            "1",
+            "2",
+            "33.0",
+            "32.0",
+            "3",
+            "8/2910000",
+            "8/3210000",
+            "13",
+            "14",
+            "11",
+            "12",
+            "9",
+            "10",
+            "6",
+            "7",
+        ]
+        List<String> expExpectedSingleLaneBamFile = [
+            "pid_1",
+            "mockFullName_1",
+            "control",
+            "runName",
+            "laneId",
+            "75.76",
+            "0.83",
+            "55",
+            "52.27",
+            "49.09",
+            "32.73",
+            "29.00",
+            "30.00",
+            "28.00",
+            "50",
+            "66",
+            "1",
+            "2",
+            "33.0",
+            "32.0",
+            "3",
+            "8/2910000",
+            "8/3210000",
+            "13",
+            "14",
+            "11",
+            "12",
+            "9",
+            "10",
+            "6",
+            "7",
+        ]
+        String expExtended = expExtendedHeader.join("\t") + "\n" + expExpectedMergedBamFile.join("\t") + "\n" + expExpectedSingleLaneBamFile.join("\t") + "\n"
         assertEquals expSmall, actSmall
         assertEquals expExtended, actExtended
     }
 
     private void setProperties(AbstractQualityAssessment abstractQualityAssessment) {
-        // TODO: more realistic values might be nice, but need changes to the rest of the test
         [
             referenceLength: 1000,
             duplicateR1: 1,
@@ -599,6 +1142,8 @@ pid_1\tmockFullName_1\tcontrol\trunName\tlaneId\t0.00\t0.00\t0.16\t0.16\t8\t55\t
             insertSizeRMS: 31d,
             percentIncorrectPEorientation: 32,
             percentReadPairsMapToDiffChrom: 33,
+            allBasesMapped: 66,
+            onTargetMappedBases: 50,
         ].each { key, value ->
             abstractQualityAssessment."${key}" = value
         }

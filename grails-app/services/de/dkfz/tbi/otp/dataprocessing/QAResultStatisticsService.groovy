@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import static org.springframework.util.Assert.notEmpty
 import static org.springframework.util.Assert.notNull
+import de.dkfz.tbi.otp.filehandling.FileNames
 import de.dkfz.tbi.otp.ngsdata.*
 
 class QAResultStatisticsService {
@@ -27,7 +28,7 @@ class QAResultStatisticsService {
     static final String SAMPLE = 'sample'
     static final String LANE = 'lane'
     static final String RUN = 'run'
-    static final String SEQTRACK = 'seqTrack'
+    static final String SEQTYPE = 'seqType'
     static final String INDIVIDUAL = 'individual'
     static final String REFERENCE_GENOME = 'referenceGenome'
     static final String REFERENCE_GENOME_ENTRY_CHR_X = 'referenceGenomeEntryChrX'
@@ -45,6 +46,10 @@ class QAResultStatisticsService {
     static final String COVERAGE_WITH_N = 'coverageWithN'
     static final String COVERAGE_WITHOUT_N_CHR_X = 'coverageWithoutNChrX'
     static final String COVERAGE_WITHOUT_N_CHR_Y = 'coverageWithoutNChrY'
+    static final String TARGET_COVERAGE = 'targetCoverage'
+    static final String TARGET_MAPPED_BASES = 'targetMappedBases'
+    static final String ALL_MAPPED_BASES = 'allMappedBases'
+    static final String ON_TARGET_RATE = 'onTargetRate'
     static final String QC_BASES_MAPPED = 'qcBasesMapped'
     static final String TOTAL_READ_COUNT = 'totalReadCount'
     static final String MAPPED_READ_COUNT = "mappedReadCount"
@@ -70,6 +75,7 @@ class QAResultStatisticsService {
     static final String MAPPED_LOW_QUALITY_READ_2 = 'mappedLowQualityR2'
     static final String MAPPED_QUALITY_LONG_READ_1 = 'mappedQualityLongR1'
     static final String MAPPED_QUALITY_LONG_READ_2 = 'mappedQualityLongR2'
+    static final String EXOME_ENRICHMENT_KIT = "exomeEnrichmentKit"
 
     /**
      * return the basis for the qa statistic overview for one single lane bam file, from which all desired information can be received
@@ -80,6 +86,10 @@ class QAResultStatisticsService {
         Individual individual = sample.individual
         Project project = individual.project
         SeqTrack seqTrack = bamFile.alignmentPass.seqTrack
+        ExomeEnrichmentKit kit = null
+        if(seqTrack instanceof ExomeSeqTrack) {
+            kit = seqTrack.exomeEnrichmentKit
+        }
         SeqType seqType = seqTrack.seqType
         String run = seqTrack.run.name
         String lane = seqTrack.laneId
@@ -105,6 +115,8 @@ class QAResultStatisticsService {
             (SAMPLE): sample,
             (RUN): run,
             (LANE): lane,
+            (SEQTYPE): seqType,
+            (EXOME_ENRICHMENT_KIT): kit,
         ]
         return preparation
     }
@@ -118,6 +130,10 @@ class QAResultStatisticsService {
         Individual individual = sample.individual
         Project project = individual.project
         SeqType seqType = processedMergedBamFileService.seqType(bamFile)
+        ExomeEnrichmentKit kit = null
+        if (seqType.name == SeqTypeNames.EXOME.seqTypeName) {
+            kit = processedMergedBamFileService.exomeEnrichmentKit(bamFile)
+        }
         String run = 'all_merged'
         String lane = 'all_merged'
         ReferenceGenome referenceGenome = referenceGenomeService.referenceGenome(project, seqType)
@@ -142,7 +158,9 @@ class QAResultStatisticsService {
             (INDIVIDUAL): individual,
             (SAMPLE): sample,
             (RUN): run,
-            (LANE): lane
+            (LANE): lane,
+            (SEQTYPE): seqType,
+            (EXOME_ENRICHMENT_KIT): kit,
         ]
         return preparation
     }
@@ -202,6 +220,14 @@ class QAResultStatisticsService {
                 (INSERT_SIZE_MEDIAN): formatToTwoDecimals(abstractQualityAssessment.insertSizeMedian),
                 (INSERT_SIZE_MEAN): formatToTwoDecimals(abstractQualityAssessment.insertSizeMean),
             ]
+            if (preparation[SEQTYPE].name.equals(SeqTypeNames.EXOME.seqTypeName)) {
+                ExomeEnrichmentKit kit = preparation[EXOME_ENRICHMENT_KIT]
+                BedFile bedFile = BedFile.findByReferenceGenomeAndExomeEnrichmentKit(preparation[REFERENCE_GENOME], kit)
+                statisticResults.put(TARGET_COVERAGE,
+                                formatToTwoDecimals(abstractQualityAssessment.onTargetMappedBases / bedFile.mergedTargetSize))
+                statisticResults.put(ON_TARGET_RATE,
+                                formatToTwoDecimals(abstractQualityAssessment.onTargetMappedBases / abstractQualityAssessment.allBasesMapped * 100.0))
+            }
             resultsSmall << statisticResults
         }
         return resultsSmall
@@ -241,8 +267,12 @@ class QAResultStatisticsService {
                 (MAPPED_LOW_QUALITY_READ_1): abstractQualityAssessment.mappedLowQualityR1,
                 (MAPPED_LOW_QUALITY_READ_2): abstractQualityAssessment.mappedLowQualityR2,
                 (MAPPED_QUALITY_LONG_READ_1): abstractQualityAssessment.mappedQualityLongR1,
-                (MAPPED_QUALITY_LONG_READ_2): abstractQualityAssessment.mappedQualityLongR2
+                (MAPPED_QUALITY_LONG_READ_2): abstractQualityAssessment.mappedQualityLongR2,
             ]
+            if (preparation[SEQTYPE].name.equals(SeqTypeNames.EXOME.seqTypeName)) {
+                statisticResults.put(TARGET_MAPPED_BASES, abstractQualityAssessment.onTargetMappedBases)
+                statisticResults.put(ALL_MAPPED_BASES, abstractQualityAssessment.allBasesMapped)
+            }
             resultsExtended << statisticResults
         }
         return resultsExtended
@@ -255,8 +285,8 @@ class QAResultStatisticsService {
         notNull(processedMergedBamFile, "the input of the method statisticsFile is null")
         String path = processedMergedBamFileService.qaResultTempDestinationDirectory(processedMergedBamFile)
         Map statisticFiles = [
-            'small': path + "/QAResultOverview.tsv",
-            'extended': path + "/QAResultOverviewExtended.tsv"
+            'small': path + "/" + FileNames.QA_RESULT_OVERVIEW,
+            'extended': path + "/" + FileNames.QA_RESULT_OVERVIEW_EXTENDED
         ]
         return statisticFiles
     }
@@ -267,23 +297,43 @@ class QAResultStatisticsService {
      */
     Map<String, String> defineOutput(ProcessedMergedBamFile processedMergedBamFile) {
         notNull(processedMergedBamFile, "the input of the method defineOutput is null")
+        //determine which sequencing type was used for the processed merged bam file
+        SeqType seqType = processedMergedBamFileService.seqType(processedMergedBamFile)
         Map<String, String> statisticFileContent = [:]
         String outputSmall = ""
         String outputExtended = ""
-        List<String> sortOrderSmall = [
+
+        /*
+         * the definition of the sort order is split:
+         * - general information about the bam file
+         * - sequencing type specific statistics
+         * - sequencing type independent statistics
+         */
+        List<String> sortOrderGeneralInformation = [
             PID,
             MOCK_FULL_NAME,
             SAMPLE_TYPE,
             RUN_ID,
-            LANE,
+            LANE
+        ]
+
+        List<String> sortOrderSmallWholeGenomeCoverage = sortOrderGeneralInformation + [
             COVERAGE_WITHOUT_N,
             COVERAGE_WITH_N,
             COVERAGE_WITHOUT_N_CHR_X,
             COVERAGE_WITHOUT_N_CHR_Y,
             QC_BASES_MAPPED,
-            TOTAL_READ_COUNT,
             MAPPED_READ_COUNT,
             PERCENTAGE_MAPPED_READS,
+        ]
+
+        List<String> sortOrderSmallExomeCoverage = sortOrderGeneralInformation + [
+            ON_TARGET_RATE,
+            TARGET_COVERAGE,
+        ]
+
+        List<String> sortOrderGeneralStatistics = [
+            TOTAL_READ_COUNT,
             PROPERLY_PAIRED,
             SINGLETONS,
             DUPLICATES,
@@ -291,7 +341,24 @@ class QAResultStatisticsService {
             INSERT_SIZE_MEDIAN,
             INSERT_SIZE_MEAN
         ]
-        List<String> sortOrderExtended = sortOrderSmall + [
+
+        List<String> sortOrderSmall = []
+        if (seqType.name.equals(SeqTypeNames.EXOME.seqTypeName)) {
+            sortOrderSmall = sortOrderSmallExomeCoverage + sortOrderGeneralStatistics
+        }
+        else if (seqType.name.equals(SeqTypeNames.WHOLE_GENOME.seqTypeName)) {
+            sortOrderSmall = sortOrderSmallWholeGenomeCoverage + sortOrderGeneralStatistics
+        }
+        else {
+            throw new RuntimeException("The statistic file will not be produced for the sequencing type " + seqType.name)
+        }
+
+        List<String> sortOrderExtendedExome = [
+            TARGET_MAPPED_BASES,
+            ALL_MAPPED_BASES
+        ]
+
+        List<String> sortOrderExtendedGeneral = [
             DUPLICATES_READ_1,
             DUPLICATES_READ_2,
             PE_READS_MAPPED_ON_DIFF_CHR,
@@ -308,6 +375,16 @@ class QAResultStatisticsService {
             MAPPED_QUALITY_LONG_READ_1,
             MAPPED_QUALITY_LONG_READ_2
         ]
+        List<String> sortOrderExtended = []
+        if (seqType.name.equals(SeqTypeNames.EXOME.seqTypeName)) {
+            sortOrderExtended = sortOrderSmall + sortOrderExtendedExome + sortOrderExtendedGeneral
+        }
+        else if (seqType.name.equals(SeqTypeNames.WHOLE_GENOME.seqTypeName)) {
+            sortOrderExtended = sortOrderSmall + sortOrderExtendedGeneral
+        }
+        else {
+            throw new RuntimeException("The statistic file will not be produced for the sequencing type " + seqType.name)
+        }
         List<Map> fetchResultsSmall = fetchResultsSmall(processedMergedBamFile)
         List<Map> fetchResultsExtended = fetchResultsExtended(processedMergedBamFile)
         String lengthWithN = fetchResultsSmall.first()."${REFERENCE_GENOME_LENGTH_WITH_N}"
@@ -347,8 +424,13 @@ class QAResultStatisticsService {
             (MAPPED_LOW_QUALITY_READ_1): "mapq>0,BaseQualityMedian<basequalCutoff read1",
             (MAPPED_LOW_QUALITY_READ_2): "mapq>0,BaseQualityMedian<basequalCutoff read2",
             (MAPPED_QUALITY_LONG_READ_1): "mapq>0,BaseQualityMedian>=basequalCutoff read1",
-            (MAPPED_QUALITY_LONG_READ_2): "mapq>0,BaseQualityMedian>=basequalCutoff read2"
+            (MAPPED_QUALITY_LONG_READ_2): "mapq>0,BaseQualityMedian>=basequalCutoff read2",
+            (TARGET_COVERAGE): "target Coverage",
+            (TARGET_MAPPED_BASES): "target mapped bases",
+            (ALL_MAPPED_BASES): "all mapped bases",
+            (ON_TARGET_RATE): "%onTarget",
         ]
+
         // Merge the two maps
         fetchResultsSmall.eachWithIndex { item, pos ->
             fetchResultsExtended[pos] << item

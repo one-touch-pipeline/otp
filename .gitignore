@@ -26,4 +26,7 @@ tools/*/*/*/build/
 tools/*/*/*/.gradle/
 tools/*/*/build/
 tools/*/*/.gradle/
+<<<<<<< HEAD
 
+=======
+>>>>>>> extension of statistic File to add exome statistics & file with fastq files of mergedBamFile

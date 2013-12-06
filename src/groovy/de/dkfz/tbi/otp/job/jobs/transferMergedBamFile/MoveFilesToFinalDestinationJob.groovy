@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.transferMergedBamFile
 
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.filehandling.FileNames
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.job.scheduler.ProcessStatusService
@@ -65,7 +66,7 @@ class MoveFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl {
     private String scriptText(String dest, String temporalDestinationDir, String dirToLog, String projectDir, String temporalQADestinationDir, String qaDestinationDirectory, String inProgressFileName) {
         String text = """
 mkdir -p -m 2750 ${dest}${processedMergedBamFileService.QUALITY_ASSESSMENT_DIR}
-flock -x ${dest} -c \"mv -f ${temporalDestinationDir}/*.bam ${temporalDestinationDir}/*.bai ${temporalDestinationDir}/*.md5sum ${temporalDestinationDir}/*.log ${dest}\"
+flock -x ${dest} -c \"mv -f ${temporalDestinationDir}/*.bam ${temporalDestinationDir}/*.bai ${temporalDestinationDir}/*.md5sum ${temporalDestinationDir}/*.log ${temporalDestinationDir}/${FileNames.FASTQ_FILES_IN_MERGEDBAMFILE} ${dest}\"
 flock -x ${dest} -c \"mv -f ${temporalQADestinationDir}/* ${qaDestinationDirectory}/\"
 rm -rf ${temporalDestinationDir}
 rm -f ${dest}/${inProgressFileName}

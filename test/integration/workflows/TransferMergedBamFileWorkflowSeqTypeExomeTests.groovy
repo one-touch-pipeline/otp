@@ -1,6 +1,5 @@
 package workflows
 
-
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 import static org.junit.Assert.*
 import grails.test.mixin.*
@@ -18,11 +17,12 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack.KitInfoState
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
 
-class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTest {
+class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIntegrationTest {
 
     /*
      * Preparation:
@@ -30,7 +30,7 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
      *  - in conf/spring/resources.groovy: Change line to
      *      if (Environment.getCurrent() == Environment.TEST && false) {
      *              task.executor(id: "taskExecutor", "pool-size": 10) -> 1
-     task.scheduler(id: "taskScheduler", "pool-size": 10) ->
+     task.scheduler(id: "taskScheduler", "pool-size": 10) -> 1
      *    to start scheduler
      *  - Mount LSDF to your local system via sshfs:
      *    sudo mkdir -p STORAGE_ROOT/dmg/otp/test/TransferWorkflow
@@ -75,16 +75,16 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
     private static final String CHROMOSOME_Y_NAME = "CHR_Y"
 
     // files to be processed by the tests: 2 merged bam files, 2 bai files, 2 qa results per merged/single lane
-    String mergingMiddleDir = "${processingRootPath}/project1/results_per_pid/pid_1/merging/control/WHOLE_GENOME/PAIRED/DEFAULT"
+    String mergingMiddleDir = "${processingRootPath}/project1/results_per_pid/pid_1/merging/control/EXON/PAIRED/DEFAULT"
     String alignmentMiddleDir = "${processingRootPath}/project1/results_per_pid/pid_1/alignment"
     String filePathMergedBamFile1 = "${mergingMiddleDir}/0/pass0/"
-    String fileNameMergedBamFile1 = "${filePathMergedBamFile1}control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bam"
+    String fileNameMergedBamFile1 = "${filePathMergedBamFile1}control_pid_1_EXON_PAIRED_merged.mdup.bam"
     String filePathMergedBamFile2 = "${mergingMiddleDir}/1/pass0/"
-    String fileNameMergedBamFile2 = "${filePathMergedBamFile2}control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bam"
+    String fileNameMergedBamFile2 = "${filePathMergedBamFile2}control_pid_1_EXON_PAIRED_merged.mdup.bam"
     String filePathBaiFile1 = "${mergingMiddleDir}/0/pass0/"
-    String fileNameBaiFile1 = "${filePathBaiFile1}control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bai"
+    String fileNameBaiFile1 = "${filePathBaiFile1}control_pid_1_EXON_PAIRED_merged.mdup.bai"
     String filePathBaiFile2 = "${mergingMiddleDir}/1/pass0/"
-    String fileNameBaiFile2 = "${filePathBaiFile2}control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bai"
+    String fileNameBaiFile2 = "${filePathBaiFile2}control_pid_1_EXON_PAIRED_merged.mdup.bai"
     String filePathBamFileQA1 = "${alignmentMiddleDir}/runName_laneId/pass0/QualityAssessment/pass0/"
     String fileNameBamFileQA1 = "${filePathBamFileQA1}/plot.jpg"
     String filePathBamFileQA2 = "${alignmentMiddleDir}/runName_laneId1/pass0/QualityAssessment/pass0/"
@@ -93,13 +93,12 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
     String fileNameMergedBamFileQA1 = "${filePathMergedBamFileQA1}/plot.jpg"
     String filePathMergedBamFileQA2 = "${mergingMiddleDir}/1/pass0/QualityAssessment/pass0/"
     String fileNameMergedBamFileQA2 = "${filePathMergedBamFileQA2}/plot.jpg"
-    String destinationDirMergedBamFile = "${rootPath}/project1/sequencing/whole_genome_sequencing/view-by-pid/pid_1/control/paired/merged-alignment"
-    String destinationFileNameMergedBamFile = "${destinationDirMergedBamFile}/control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bam"
+    String destinationDirMergedBamFile = "${rootPath}/project1/sequencing/exome_sequencing/view-by-pid/pid_1/control/paired/merged-alignment"
+    String destinationFileNameMergedBamFile = "${destinationDirMergedBamFile}/control_pid_1_EXON_PAIRED_merged.mdup.bam"
     String destinationDirQaResults = "${destinationDirMergedBamFile}/QualityAssessment/"
     String qaResultOverviewFile = "${destinationDirQaResults}/${FileNames.QA_RESULT_OVERVIEW}"
     String qaResultOverviewExtendedFile = "${destinationDirQaResults}/${FileNames.QA_RESULT_OVERVIEW_EXTENDED}"
     String fastqFilesInMergedBamFile = "${destinationDirMergedBamFile}/${FileNames.FASTQ_FILES_IN_MERGEDBAMFILE}"
-
     /**
      * Realm necessary to cleanup folder structure
      */
@@ -114,8 +113,8 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         String projectName = "project"
         String projectDirName = "project1"
         // SeqType
-        String seqTypeDirName = "whole_genome_sequencing"
-        String seqTypeName = SeqTypeNames.WHOLE_GENOME.seqTypeName
+        String seqTypeDirName = "exome_sequencing"
+        String seqTypeName = SeqTypeNames.EXOME.seqTypeName
         String seqTypeLibrary = "PAIRED"
         // SeqCenter
         String seqCenterName = "DKFZ"
@@ -276,6 +275,24 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
                         )
         assertNotNull(seqType.save([flush: true, failOnError: true]))
 
+        ReferenceGenome referenceGenome = new ReferenceGenome(
+                        name: "hs37d5",
+                        path: "bwa06_1KGRef",
+                        fileNamePrefix: "hs37d5",
+                        length: 3137454505,
+                        lengthWithoutN: 2900434419,
+                        lengthRefChromosomes: 3095677412,
+                        lengthRefChromosomesWithoutN: 2858658097
+                        )
+        assertNotNull(referenceGenome.save([flush: true, failOnError: true]))
+
+        ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = new ReferenceGenomeProjectSeqType(
+                        project: project,
+                        seqType: seqType,
+                        referenceGenome: referenceGenome,
+                        )
+        assertNotNull(referenceGenomeProjectSeqType.save([flush: true, failOnError: true]))
+
         SeqPlatform seqPlatform = new SeqPlatform(
                         name: "Illumina",
                         model: "model"
@@ -303,13 +320,29 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
                         )
         assertNotNull(softwareTool.save([flush: true, failOnError: true]))
 
-        SeqTrack seqTrack = new SeqTrack(
+        ExomeEnrichmentKit exomeEnrichmentKit  = new ExomeEnrichmentKit(
+                        name: "exomeEnrichmentKit"
+                        )
+        assertNotNull(exomeEnrichmentKit.save([flush: true, failOnError: true]))
+
+        BedFile bedFile = new BedFile(
+                        fileName: "bedFileName",
+                        targetSize: 66,
+                        mergedTargetSize: 50,
+                        referenceGenome: referenceGenome,
+                        exomeEnrichmentKit: exomeEnrichmentKit
+                        )
+        assertNotNull(bedFile.save([flush: true, failOnError: true]))
+
+        ExomeSeqTrack seqTrack = new ExomeSeqTrack(
                         laneId: "laneId",
                         run: run,
                         sample: sample,
                         seqType: seqType,
                         seqPlatform: seqPlatform,
-                        pipelineVersion: softwareTool
+                        pipelineVersion: softwareTool,
+                        exomeEnrichmentKit: exomeEnrichmentKit,
+                        kitInfoState: KitInfoState.KNOWN
                         )
         assertNotNull(seqTrack.save([flush: true, failOnError: true]))
 
@@ -318,19 +351,19 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
                         )
         assertNotNull(fileType.save([flush: true, failOnError: true]))
 
-        DataFile dataFile1 = new DataFile(
+        DataFile dataFile = new DataFile(
                         fileName: "dataFile1",
                         seqTrack: seqTrack,
                         fileType: fileType
                         )
-        assertNotNull(dataFile1.save([flush: true, failOnError: true]))
+        assertNotNull(dataFile.save([flush: true, failOnError: true]))
 
-        DataFile dataFile2 = new DataFile(
+        DataFile dataFile1 = new DataFile(
                         fileName: "dataFile2",
                         seqTrack: seqTrack,
                         fileType: fileType
                         )
-        assertNotNull(dataFile2.save([flush: true, failOnError: true]))
+        assertNotNull(dataFile1.save([flush: true, failOnError: true]))
 
         AlignmentPass alignmentPass = new AlignmentPass(
                         identifier: 0,
@@ -342,7 +375,7 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         ProcessedBamFile processedBamFile = new ProcessedBamFile(
                         alignmentPass: alignmentPass,
                         type: BamType.SORTED,
-                        status: AbstractBamFile.State.NEEDS_PROCESSING,
+                        status: AbstractBamFile.State.PROCESSED,
                         qualityAssessmentStatus: QaProcessingStatus.FINISHED
                         )
         assertNotNull(processedBamFile.save([flush: true, failOnError: true]))
@@ -373,29 +406,31 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         setProperties(overallQualityAssessment)
         assertNotNull(overallQualityAssessment.save([flush: true]))
 
-        SeqTrack seqTrack1 = new SeqTrack(
+        ExomeSeqTrack seqTrack1 = new ExomeSeqTrack(
                         laneId: "laneId1",
                         run: run,
                         sample: sample,
                         seqType: seqType,
                         seqPlatform: seqPlatform,
-                        pipelineVersion: softwareTool
+                        pipelineVersion: softwareTool,
+                        exomeEnrichmentKit: exomeEnrichmentKit,
+                        kitInfoState: KitInfoState.KNOWN
                         )
         assertNotNull(seqTrack1.save([flush: true, failOnError: true]))
 
-        DataFile dataFile3 = new DataFile(
+        DataFile dataFile2 = new DataFile(
                         fileName: "dataFile3",
                         seqTrack: seqTrack1,
                         fileType: fileType
                         )
-        assertNotNull(dataFile3.save([flush: true, failOnError: true]))
+        assertNotNull(dataFile2.save([flush: true, failOnError: true]))
 
-        DataFile dataFile4 = new DataFile(
+        DataFile dataFile3 = new DataFile(
                         fileName: "dataFile4",
                         seqTrack: seqTrack1,
                         fileType: fileType
                         )
-        assertNotNull(dataFile4.save([flush: true, failOnError: true]))
+        assertNotNull(dataFile3.save([flush: true, failOnError: true]))
 
         AlignmentPass alignmentPass1 = new AlignmentPass(
                         identifier: 0,
@@ -407,7 +442,7 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         ProcessedBamFile processedBamFile1 = new ProcessedBamFile(
                         alignmentPass: alignmentPass1,
                         type: BamType.SORTED,
-                        status: AbstractBamFile.State.NEEDS_PROCESSING,
+                        status: AbstractBamFile.State.PROCESSED,
                         qualityAssessmentStatus: QaProcessingStatus.FINISHED
                         )
         assertNotNull(processedBamFile1.save([flush: true, failOnError: true]))
@@ -532,24 +567,6 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         setProperties(overallQualityAssessmentMerged1)
         assertNotNull(overallQualityAssessmentMerged1.save([flush: true, failOnError: true]))
 
-        ReferenceGenome referenceGenome = new ReferenceGenome(
-                        name: "hs37d5",
-                        path: "bwa06_1KGRef",
-                        fileNamePrefix: "hs37d5",
-                        length: 3137454505,
-                        lengthWithoutN: 2900434419,
-                        lengthRefChromosomes: 3095677412,
-                        lengthRefChromosomesWithoutN: 2858658097
-                        )
-        assertNotNull(referenceGenome.save([flush: true, failOnError: true]))
-
-        ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = new ReferenceGenomeProjectSeqType(
-                        project: project,
-                        seqType: seqType,
-                        referenceGenome: referenceGenome,
-                        )
-        assertNotNull(referenceGenomeProjectSeqType.save([flush: true, failOnError: true]))
-
         ReferenceGenomeEntry referenceGenomeEntryChrX = new ReferenceGenomeEntry(
                         alias: Chromosomes.CHR_X.alias,
                         classification: Classification.CHROMOSOME,
@@ -624,9 +641,12 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
             fileNameMergedBamFileQA1,
             fileNameMergedBamFileQA2
         ]
+
         String cmdBuildFileStructure = files.collect {"echo -n \"${it}\" > ${it}"}.join " && "
+
         // Call "sync" to block termination of script until I/O is done
         executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildDirStructure} && ${cmdBuildFileStructure} && sync")
+
         checkFiles(files)
     }
 
@@ -666,7 +686,9 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
             insertSizeMedian: 225.0,
             insertSizeRMS: 224.77537343891422,
             percentIncorrectPEorientation: 0.0038592457709288723,
-            percentReadPairsMapToDiffChrom: 0.11828206222955773
+            percentReadPairsMapToDiffChrom: 0.11828206222955773,
+            onTargetMappedBases: 50,
+            allBasesMapped: 66
         ].each { key, value ->
             abstractQualityAssessment."${key}" = value
         }
@@ -760,7 +782,7 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         processedMergedBamFile.fileOperationStatus = FileOperationStatus.NEEDS_PROCESSING
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
         boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
-        assertTrue("test aborted because workflow-to-test didn't finish in time", workflowFinishedSucessfully)
+        assertTrue(workflowFinishedSucessfully)
         File mergedBamFile = new File(destinationFileNameMergedBamFile)
         assertEquals(fileNameMergedBamFile1, mergedBamFile.getText())
         checkNumberOfStoredMd5sums(1)
@@ -776,7 +798,7 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         // without waiting no new process would be in the process list when it is checked
         Thread.currentThread().sleep(120000)
         workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
-        assertTrue("test aborted because workflow-to-test didn't finish in time", workflowFinishedSucessfully)
+        assertTrue(workflowFinishedSucessfully)
         assertEquals(fileNameMergedBamFile2, mergedBamFile.getText())
         checkNumberOfStoredMd5sums(2)
         checkDestinationFileStructure()
@@ -797,9 +819,9 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
             qaResultOverviewFile,
             qaResultOverviewExtendedFile,
             destinationFileNameMergedBamFile,
-            "${destinationDirMergedBamFile}/control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bai",
-            "${destinationDirMergedBamFile}/control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bam.md5sum",
-            "${destinationDirMergedBamFile}/control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bai.md5sum",
+            "${destinationDirMergedBamFile}/control_pid_1_EXON_PAIRED_merged.mdup.bai",
+            "${destinationDirMergedBamFile}/control_pid_1_EXON_PAIRED_merged.mdup.bam.md5sum",
+            "${destinationDirMergedBamFile}/control_pid_1_EXON_PAIRED_merged.mdup.bai.md5sum",
             "${destinationDirQaResults}/MD5SUMS",
             "${destinationDirQaResults}/plot.jpg",
             "${destinationDirQaResults}runName_laneId/plot.jpg",

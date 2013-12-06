@@ -394,4 +394,22 @@ class ProcessedMergedBamFileService {
         isTrue(wrongSeqTracks.empty, "Different kits were used in the following seqTracks: $wrongSeqTracks, which were used to create $bamFile.")
         return kit
     }
+       
+    /**
+     * returns all fastq files, which are combined in the mergedBamFile
+     */
+    public List<DataFile> fastqFilesPerMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {
+        notNull(processedMergedBamFile, "The input of the method fastqFilesPerMergedBamFile is null")
+        List<ProcessedBamFile> processedBamFiles = abstractBamFileService.findAllByProcessedMergedBamFile(processedMergedBamFile)
+        List<SeqTrack> seqTracks = processedBamFiles*.alignmentPass*.seqTrack
+        if (seqTracks) {
+            return DataFile.createCriteria().list {
+                'in'("seqTrack", seqTracks)
+                fileType {
+                    eq("type", FileType.Type.SEQUENCE)
+                }
+            }
+        }
+        return null
+    }
 }
