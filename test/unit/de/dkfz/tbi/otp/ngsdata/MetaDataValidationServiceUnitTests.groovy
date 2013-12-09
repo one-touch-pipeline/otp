@@ -13,7 +13,7 @@ import de.dkfz.tbi.otp.utils.ReferencedClass
     ReferencedClass, ChangeLog,
     Project, SeqPlatform, SeqCenter, Run,DataFile, MetaDataKey, MetaDataEntry,
     ExomeEnrichmentKit, ExomeEnrichmentKitIdentifier])
-class MetaDataValidationServiceTests {
+class MetaDataValidationServiceUnitTests {
 
     MetaDataValidationService metaDataValidationService
 

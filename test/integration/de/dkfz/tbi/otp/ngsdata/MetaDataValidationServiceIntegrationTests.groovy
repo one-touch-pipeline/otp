@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 import static org.junit.Assert.*
 import org.junit.*
 
-class MetaDataValidationServiceTests {
+class MetaDataValidationServiceIntegrationTests {
 
     MetaDataValidationService metaDataValidationService
     Run run
