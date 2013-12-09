@@ -42,4 +42,16 @@ class ExecutionHelperService {
         }
         return extractedPbsIds.get(0)
     }
+
+    /**
+     * Executes a job on a specified realm. This is a convenience method that accepts a {@link Closure} that
+     * returns a {@link java.lang.String} and calls {@link #sendScript(Realm, String)}.
+     *
+     * @param realm The realm which identifies the host
+     * @param createScript The closure that creates the script to be sent
+     * @return what the server sends back
+     */
+    public String sendScript(Realm realm, String jobIdentifier = null, Closure createScript) {
+        return sendScript(realm, createScript(), jobIdentifier)
+    }
 }
