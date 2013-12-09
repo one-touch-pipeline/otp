@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.springframework.util.Assert.notNull
+import static org.springframework.util.Assert.isTrue
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
@@ -247,6 +248,7 @@ class ProcessedMergedBamFileService {
         assertSave(bamFile)
         return true
     }
+
     /**
      * @return the ProcessedMergedBamFile, which has to be copied to the project folder
      */
@@ -374,5 +376,22 @@ class ProcessedMergedBamFileService {
             }
         }
         return singleLaneQAResultsDirectories
+    }
+
+    public ExomeEnrichmentKit exomeEnrichmentKit(ProcessedMergedBamFile bamFile) {
+        notNull(bamFile, 'bam file must not be null')
+        isTrue(seqType(bamFile).name == SeqTypeNames.EXOME.seqTypeName, 'This method must be called only on exon data')
+        List<ProcessedBamFile> singleLaneBamFiles = abstractBamFileService.findAllByProcessedMergedBamFile(bamFile)
+        boolean hasSingleLaneBamFiles = singleLaneBamFiles
+        isTrue(hasSingleLaneBamFiles, "there are no singleLaneBamFiles corresponding to the given $bamFile")
+        List<SeqTrack> seqTracks = singleLaneBamFiles*.alignmentPass*.seqTrack
+        // The domain ExomeSeqTrack is new, therefore it is possible that there are many bamFiles,
+        // which do not have the connection to the ExomeEnrichtmentKit.
+        List wrongSeqTracks = seqTracks.findAll { it.class != ExomeSeqTrack }
+        isTrue(wrongSeqTracks.empty, "The following seqTracks used to create the given $bamFile have not the type ExomeSeqTrack: $wrongSeqTracks.")
+        ExomeEnrichmentKit kit = seqTracks.first().exomeEnrichmentKit
+        wrongSeqTracks = seqTracks.findAll { it.exomeEnrichmentKit != kit }
+        isTrue(wrongSeqTracks.empty, "Different kits were used in the following seqTracks: $wrongSeqTracks, which were used to create $bamFile.")
+        return kit
     }
 }

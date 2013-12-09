@@ -138,6 +138,14 @@ class AbstractQualityAssessment {
      * root mean square over all insert sizes of proper paired mapped reads
      */
     double insertSizeRMS
+    /**
+     * all bases mapped to the reference genome no filtering applied
+     */
+    Long allBasesMapped
+    /**
+     * bases, which were mapped to the specified target regions
+     */
+    Long onTargetMappedBases
 
     // values not retrieved from the json but calculated afterwards
     /**
@@ -148,4 +156,10 @@ class AbstractQualityAssessment {
      * (endReadAberration / totalMappedReadCounter) * 100
      */
     double percentReadPairsMapToDiffChrom
+
+    static constraints = {
+        // null indicates that these values have not been calculated
+        allBasesMapped(nullable: true)
+        onTargetMappedBases(nullable: true)
+    }
 }

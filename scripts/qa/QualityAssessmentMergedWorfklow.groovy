@@ -2,6 +2,8 @@ import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
+// workflow requires processing options to be injected with the script InjectQualityAssessmentMergedWorkflowOptions.groovy
+
 plan("QualityAssessmentMergedWorkflow") {
     start("start", "qualityAssessmentMergedStartJob")
     job("createMergedQaOutputDirectory", "createMergedQaOutputDirectoryJob")
@@ -46,23 +48,3 @@ plan("QualityAssessmentMergedWorkflow") {
     job("mergedInsertSizePlotValidation", "mergedInsertSizePlotValidationJob")
     job("assignMergedQaFlag", "assignMergedQaFlagJob")
 }
-
-// create Quality Assessment jar options for executeBamFileQaAnalysis job
-boolean overrideOutput = false
-String allChromosomeName = Chromosomes.overallChromosomesLabel()
-int minAlignedRecordLength = 36
-int minMeanBaseQuality = 25
-int mappingQuality = 0
-int coverageMappingQualityThreshold = 1
-int windowsSize = 1000
-int insertSizeCountHistogramBin = 10
-boolean testMode = false
-
-String cmd = "qualityAssessment.sh \${processedMergedBamFilePath} \${processedBaiFilePath} \${qualityAssessmentFilePath} \${coverageDataFilePath} \${insertSizeDataFilePath} ${overrideOutput} \${allChromosomeName} ${minAlignedRecordLength} ${minMeanBaseQuality} ${mappingQuality} ${coverageMappingQualityThreshold} ${windowsSize} ${insertSizeCountHistogramBin} ${testMode}"
-SeqType seqType = SeqType.findByNameAndLibraryLayout(SeqTypeNames.EXOME.seqTypeName, "PAIRED")
-ctx.processingOptionService.createOrUpdate(
-  "qualityMergedAssessment",
-  seqType.naturalId,
-  null, // defaults to all projects
-  cmd,
-  "Merged quality assessment Command and parameters template")
