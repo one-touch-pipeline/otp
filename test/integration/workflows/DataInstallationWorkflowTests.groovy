@@ -236,6 +236,9 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
         return seqType
     }
 
+    // TODO  (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
+    // so at this moment only one test could be run at moment, all the others have to be commented
+    @Ignore
     void testDataInstallation() {
         run("scripts/DataInstallationWorkflow.groovy")
         SeqType seqType = createSeqType("SeqTypeName", "SeqTypeDir")

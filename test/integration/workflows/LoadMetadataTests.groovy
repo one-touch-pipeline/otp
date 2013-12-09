@@ -381,7 +381,7 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
 
     // TODO (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
     // so at this moment only one test could be run at moment, all the others have to be commented
-//    @Ignore
+    @Ignore
     void testChipSeqMetadata() {
         String seqTypeName = SeqTypeNames.CHIP_SEQ.seqTypeName
         createAndSaveSeqType(seqTypeName)
