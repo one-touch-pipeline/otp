@@ -287,3 +287,7 @@ if (pluginsToExclude) {
 grails.plugin.databasemigration.changelogFileName = 'changelog.xml'
 
 grails.gorm.failOnError=true
+
+// Documentation settings
+grails.doc.title = 'The One Touch Pipeline (OTP)'
+grails.doc.authors = 'The OTP Development Team'
