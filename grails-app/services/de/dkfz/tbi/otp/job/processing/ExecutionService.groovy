@@ -91,6 +91,14 @@ class ExecutionService {
             throw new ProcessingException("No job text specified.")
         }
         String pbsOptions = pbsOptionMergingService.mergePbsOptions(realm, jobIdentifier)
+        text = """
+# OTP: Fail on first non-zero exit code
+set -e
+
+# BEGIN ORIGINAL SCRIPT
+${text}
+# END ORIGINAL SCRIPT
+"""
         String command = "echo '${text}' | qsub " + pbsOptions
         List<String> values = executeRemoteJob(realm, command)
         return concatResults(values)
