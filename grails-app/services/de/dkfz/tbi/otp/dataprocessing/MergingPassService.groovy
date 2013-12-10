@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.springframework.util.Assert.*
-import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
 
 class MergingPassService {
 
@@ -45,13 +45,28 @@ class MergingPassService {
         updateMergingSet(mergingPass, MergingSet.State.INPROGRESS)
     }
 
-    public void mergingPassFinished(MergingPass mergingPass) {
+    /**
+     * After the merging is finished the state of the MergingSet is set to PROCESSED
+     * and the mergedQA is triggered automatically.
+     */
+    public void mergingPassFinishedAndStartQA(MergingPass mergingPass) {
         notNull(mergingPass, "The parameter mergingPass is not allowed to be null")
         updateMergingSet(mergingPass, MergingSet.State.PROCESSED)
+        mergedBamFileSetQaNotStarted(mergingPass)
     }
 
     private void updateMergingSet(MergingPass mergingPass, MergingSet.State state) {
         mergingPass.mergingSet.status = state
         assertSave(mergingPass.mergingSet)
+    }
+
+    /**
+     * Change the qualityAssessmentStatus of the processedMergedBamFile, which belongs to the input mergingPass, to NOT_STARTED
+     */
+    public void mergedBamFileSetQaNotStarted(MergingPass mergingPass) {
+        notNull(mergingPass, "The input of the method passNotStarted is null")
+        ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.findByMergingPass(mergingPass)
+        processedMergedBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.NOT_STARTED
+        assertSave(processedMergedBamFile)
     }
 }

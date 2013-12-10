@@ -11,17 +11,52 @@ class MergingPassServiceTests {
     MergingPassService mergingPassService
 
     @Test(expected = IllegalArgumentException)
-    void testMergingPassFinishedMergingPassIsNull() {
+    void testMergingPassFinishedAndStartQAMergingPassIsNull() {
         MergingPass mergingPass = mergingPassService.create()
-        mergingPassService.mergingPassFinished(mergingPass)
+        mergingPassService.mergingPassFinishedAndStartQA(mergingPass)
     }
 
     @Test
-    void testMergingPassFinished() {
+    void testMergingPassFinishedAndStartQA() {
         MergingSet mergingSet = createMergingSet("1")
         MergingPass mergingPass = mergingPassService.create()
-        mergingPassService.mergingPassFinished(mergingPass)
+        ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
+                        mergingPass: mergingPass,
+                        fileExists: true,
+                        type: AbstractBamFile.BamType.MDUP,
+                        qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.UNKNOWN,
+                        fileOperationStatus: AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING,
+                        md5sum: null,
+                        status: AbstractBamFile.State.PROCESSED
+                        )
+        assertNotNull(processedMergedBamFile.save([flush: true]))
+        assertEquals(AbstractBamFile.QaProcessingStatus.UNKNOWN, processedMergedBamFile.qualityAssessmentStatus)
+        mergingPassService.mergingPassFinishedAndStartQA(mergingPass)
         assertEquals(MergingSet.State.PROCESSED, mergingSet.status)
+        assertEquals(AbstractBamFile.QaProcessingStatus.NOT_STARTED, processedMergedBamFile.qualityAssessmentStatus)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testMergedBamFileSetQaNotStartedInputNull() {
+        mergingPassService.mergedBamFileSetQaNotStarted(null)
+    }
+
+    @Test
+    void testMergedBamFileSetQaNotStarted() {
+        MergingPass mergingPass = createMergingPass("0")
+        ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
+                        mergingPass: mergingPass,
+                        fileExists: true,
+                        type: AbstractBamFile.BamType.MDUP,
+                        qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.UNKNOWN,
+                        fileOperationStatus: AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING,
+                        md5sum: null,
+                        status: AbstractBamFile.State.PROCESSED
+                        )
+        assertNotNull(processedMergedBamFile.save([flush: true]))
+        assertEquals(AbstractBamFile.QaProcessingStatus.UNKNOWN, processedMergedBamFile.qualityAssessmentStatus)
+        mergingPassService.mergedBamFileSetQaNotStarted(mergingPass)
+        assertEquals(AbstractBamFile.QaProcessingStatus.NOT_STARTED, processedMergedBamFile.qualityAssessmentStatus)
     }
 
     @Test(expected = IllegalArgumentException)
@@ -107,6 +142,20 @@ class MergingPassServiceTests {
         MergingPass mergingPass = createMergingPass("1")
         mergingPassService.mergingPassStarted(mergingPass)
         assertEquals(mergingPass.mergingSet.status, MergingSet.State.INPROGRESS)
+    }
+
+    @Test
+    void testUpdateMergingSet() {
+        MergingPass mergingPass = createMergingPass("1")
+        assertEquals(MergingSet.State.NEEDS_PROCESSING, mergingPass.mergingSet.status)
+        mergingPassService.updateMergingSet(mergingPass, MergingSet.State.DECLARED)
+        assertEquals(MergingSet.State.DECLARED, mergingPass.mergingSet.status)
+        mergingPassService.updateMergingSet(mergingPass, MergingSet.State.INPROGRESS)
+        assertEquals(MergingSet.State.INPROGRESS, mergingPass.mergingSet.status)
+        mergingPassService.updateMergingSet(mergingPass, MergingSet.State.NEEDS_PROCESSING)
+        assertEquals(MergingSet.State.NEEDS_PROCESSING, mergingPass.mergingSet.status)
+        mergingPassService.updateMergingSet(mergingPass, MergingSet.State.PROCESSED)
+        assertEquals(MergingSet.State.PROCESSED, mergingPass.mergingSet.status)
     }
 
     private MergingSet createMergingSet(String uniqueId) {
