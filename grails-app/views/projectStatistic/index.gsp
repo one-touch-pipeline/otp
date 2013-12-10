@@ -10,14 +10,12 @@
 
 <body>
     <div class="body">
-        <div class="overviewMenu">
-            <div class="projectLabel">project:</div>
-            <div class="projectSelect">
-                <g:select id="project_select" name='project_select'
-                    from='${projects}'></g:select>
-            </div>
-        </div>
-        <h3>
+       <form class="blue_label" id="projectsGroupbox">
+            <span class="blue_label"><g:message code="home.projectfilter"/> :</span>
+            <g:select class="criteria" id="project_select" name='project_select'
+                from='${projects}' value='${project}'></g:select>
+        </form>
+        <h3 class="statisticTitle">
             <g:message code="projectStatistic.pageTitle" />
         </h3>
         <div class="homeGraph">

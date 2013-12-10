@@ -173,6 +173,44 @@ class LsdfFilesServiceTests {
         fileType = null
     }
 
+    void testGetFileViewByPidRelativeDirectorySeqTrackAboutAlignmentLog() {
+        final String SEQ_TYPE = "OtherThanChipSeq"
+        final String SEQ_TYPE_SEQUENCING_DIR = SEQ_TYPE
+        SeqType seqType = createSeqType(SEQ_TYPE, SEQ_TYPE_SEQUENCING_DIR)
+
+        SeqTrack seqTrack = new SeqTrack()
+        seqTrack.laneId = laneNo
+        seqTrack.nBasePairs = baseCount
+        seqTrack.nReads = readCount
+        seqTrack.insertSize = insertSize
+        seqTrack.run = run
+        seqTrack.sample = sample
+        seqTrack.seqType = seqType
+        seqTrack.seqPlatform = seqPlatform
+        seqTrack.pipelineVersion = softwareTool
+        assertNotNull(seqTrack.save([flush: true]))
+        DataFile dataFile = createDataFile(seqTrack, fastqR1Filename)
+
+        AlignmentParams alignmentParams = new AlignmentParams(
+            pipeline: softwareTool
+            )
+        assertNotNull(alignmentParams.save([flush: true]))
+
+        AlignmentLog alignmentLog = new AlignmentLog(
+            alignmentParams: alignmentParams,
+            seqTrack: seqTrack
+            )
+        assertNotNull(alignmentLog.save([flush: true]))
+
+        dataFile.alignmentLog = alignmentLog
+        dataFile.seqTrack = null
+        assertNotNull(dataFile.save([flush: true]))
+
+        String correctPath = "${SEQ_TYPE_SEQUENCING_DIR}/${VIEW_BY_PID_PATH}/${individualPid}/${sampleTypeName.toLowerCase()}/${seqType.libraryLayout.toLowerCase()}/run${runName}/${VBP_PATH}/"
+        String path = lsdfFilesService.getFileViewByPidRelativeDirectory(dataFile)
+        assertEquals(new File(correctPath).path, new File(path).path)
+    }
+
     void testGetFileViewByPidRelativeDirectory() {
         final String SEQ_TYPE = "OtherThanChipSeq"
         final String SEQ_TYPE_SEQUENCING_DIR = SEQ_TYPE
