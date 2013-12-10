@@ -144,6 +144,22 @@ abstract class AbstractJobImpl implements Job {
 
     }
 
+    /**
+     * Retrieves the value of the specified output parameter.
+     *
+     * If the return value is <code>null</code>, this could either mean that the parameter is not set or
+     * the value of the parameter is actually <code>null</code>.
+     *
+     * @param param the name of the output parameter
+     * @return the value of the output parameter, or <code>null</code> if the parameter is not set.
+     */
+    public String getOutputParameterValue(final String param) {
+        Parameter p = outputParameters?.find {
+            it.type.name == param
+        }
+        p?.value
+    }
+
     @Override
     public final ProcessingStep getProcessingStep() {
         return processingStep

@@ -44,6 +44,7 @@ class Realm implements Serializable {
     String rootPath                    // mount path of the file system with data
     String processingRootPath          // mount path for the file system with results data
     String programsRootPath            // location of programs
+    String loggingRootPath             // mount path of the file system with logging data (needs to be read-write)
     String webHost                     // web address
     String host                        // PBS head address
     int port
@@ -52,5 +53,6 @@ class Realm implements Serializable {
     String pbsOptions                  // realm dependent options of the PBS system
 
     static constraints = {
+        loggingRootPath blank:false, nullable:false
     }
 }

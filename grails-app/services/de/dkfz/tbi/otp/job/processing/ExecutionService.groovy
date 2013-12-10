@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
+import static org.springframework.util.Assert.notNull
+
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import org.apache.commons.logging.Log
@@ -53,6 +55,7 @@ class ExecutionService {
     def configService
 
     PbsOptionMergingService pbsOptionMergingService
+    JobStatusLoggingService jobStatusLoggingService
 
     /**
      * Executes a command on a specified host
@@ -81,17 +84,21 @@ class ExecutionService {
      * @param realm The realm which identifies the host
      * @param text The script to be run a pbs system
      * @param jobIdentifier the name of a job to take job-cluster specific parameters
+     * @param processingStep the ProcessingStep of the calling job. If <code>null</code>, job status logging
+     *          is disabled.
      * @return what the server sends back
      * @throws NullPointerException if a job identifier is provided, but no PBS option is defined for this
      *          job identifier and the cluster ({@link Realm#cluster}) of the {@link Realm}
      * @see PbsOptionMergingService#mergePbsOptions(Realm, String)
      */
-    public String executeJob(Realm realm, String text, String jobIdentifier = null) {
+    public String executeJob(Realm realm, String text, String jobIdentifier = null, ProcessingStep processingStep = null) {
         if (!text) {
             throw new ProcessingException("No job text specified.")
         }
+        notNull realm, 'No realm specified.'
+
         String pbsOptions = pbsOptionMergingService.mergePbsOptions(realm, jobIdentifier)
-        text = """
+        String scriptText = """
 # OTP: Fail on first non-zero exit code
 set -e
 
@@ -99,7 +106,21 @@ set -e
 ${text}
 # END ORIGINAL SCRIPT
 """
-        String command = "echo '${text}' | qsub " + pbsOptions
+        /*
+         * Only log job status if a processing step is passed (to be backwards-compatible). Getting a processing
+         * step should always be the case when a closure is used. Other jobs need to be adopted to do this explicitly.
+         * The log file will be locked at the time of writing so concurrent (cluster) jobs will not corrupt the file.
+         */
+        if (processingStep) {
+            String logFile = jobStatusLoggingService.logFileLocation(realm, processingStep)
+            String logMessage = jobStatusLoggingService.constructMessage(processingStep)
+
+            scriptText += """
+touch '${logFile}'
+flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
+"""
+        }
+        String command = "echo '${scriptText}' | qsub " + pbsOptions
         List<String> values = executeRemoteJob(realm, command)
         return concatResults(values)
     }
