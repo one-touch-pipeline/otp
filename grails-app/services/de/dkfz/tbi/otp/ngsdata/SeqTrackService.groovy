@@ -1,8 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import static org.springframework.util.Assert.*
 import groovy.xml.MarkupBuilder
+import de.dkfz.tbi.otp.dataprocessing.AlignmentPassService;
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.acls.domain.BasePermission
@@ -238,6 +241,56 @@ class SeqTrackService {
             }
         }
         return writer.toString()
+    }
+
+    /**
+     * Sets all {@link SeqTrack}s fulfilling the criteria listed below to alignment state
+     * {@link SeqTrack.DataProcessingState#NOT_STARTED}.
+     *
+     * <p>Critieria for the SeqTrack:</p>
+     * <ul>
+     *   <li>It has been done for a sample which has been sequenced in the specified run. (This also
+     *       includes <code>SeqTrack</code>s from other runs, as long as they are done for such a
+     *       sample.)</li>
+     *   <li>It is alignable as defined here: {@link AlignmentPassService#ALIGNABLE_SEQTRACK_HQL}</li>
+     *   <li>It is in alignment state {@link SeqTrack.DataProcessingState#UNKNOWN}.</li>
+     *   <li>It has sequence type WHOLE_GENOME and library layout PAIRED.</li>
+     * </ul>
+     *
+     * @see AlignmentPassService#findAlignableSeqTrack()
+     */
+    public void setRunReadyForAlignment(Run run) {
+        notNull(run, "The run argument must not be null.")
+
+        // Find all samples in this run.
+        List<SeqTrack> seqTracks = SeqTrack.withCriteria {
+             eq("run", run)
+             seqType {
+                 eq("name", SeqTypeNames.WHOLE_GENOME.seqTypeName)
+                 eq("libraryLayout", "PAIRED")
+             }
+        }
+        List<Sample> samples = seqTracks*.sample
+        if (samples.isEmpty()) {
+            return
+        }
+
+        // Find all SeqTracks for these samples.
+        seqTracks = SeqTrack.findAll(AlignmentPassService.ALIGNABLE_SEQTRACK_HQL +
+            "AND seqType.name = :seqTypeName AND seqType.libraryLayout = :seqTypeLibraryLayout " +
+            "AND sample IN (:samples) ",
+            [
+                alignmentState: SeqTrack.DataProcessingState.UNKNOWN,
+                seqTypeName: SeqTypeNames.WHOLE_GENOME.seqTypeName,
+                seqTypeLibraryLayout: "PAIRED",
+                samples: samples,
+            ] << AlignmentPassService.ALIGNABLE_SEQTRACK_QUERY_PARAMETERS)
+
+        // Mark the SeqTracks as being ready for alignment.
+        seqTracks.each {
+           it.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+           it.save(flush: true)
+        }
     }
 
     public void setRunReadyForFastqc(Run run) {

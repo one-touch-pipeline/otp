@@ -623,4 +623,161 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         )
         assertNotNull(metaDataEntry.save())
     }
+
+    public void testSetRunReadyForAlignment() {
+
+        /* The criteria in AlignmentPassService.ALIGNABLE_SEQTRACK_HQL are deeply tested by
+         * AlignmentPassServiceIntegrationTests, so in this method we do not test it again.
+         */
+
+        final TestData testData = new TestData()
+        testData.createObjects()
+
+        final Run run1 = testData.run
+        final Run run2 = new Run()
+        run2.name = "testRun2"
+        run2.seqCenter = testData.seqCenter
+        run2.seqPlatform = testData.seqPlatform
+        assertNotNull(run2.save(flush: true))
+
+        final Sample sampleA = testData.sample
+        final Sample sampleB = new Sample()
+        sampleB.individual = testData.createIndividual()
+        sampleB.individual.pid = "drölf"
+        assertNotNull(sampleB.individual.save(flush: true))
+        sampleB.sampleType = testData.sampleType
+        assertNotNull(sampleB.save(flush: true))
+
+        final SeqType alignableSeqType = new SeqType()
+        alignableSeqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
+        alignableSeqType.libraryLayout = "PAIRED"
+        alignableSeqType.dirName = "seq_type_dir_name"
+        assertNotNull(alignableSeqType.save(flush: true))
+
+        final SeqType nonAlignableSeqType = new SeqType()
+        nonAlignableSeqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
+        nonAlignableSeqType.libraryLayout = "SCREWED"
+        nonAlignableSeqType.dirName = "seq_type_dir_name"
+        assertNotNull(nonAlignableSeqType.save(flush: true))
+
+        testData.seqTrack.delete(flush: true)
+
+        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+
+        // no SeqTracks at all
+        seqTrackService.setRunReadyForAlignment(run1)
+        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+
+        def addDataFile = { SeqTrack seqTrack ->
+            final DataFile dataFile = testData.createDataFile()
+            dataFile.seqTrack = seqTrack
+            assertNotNull(dataFile.save(flush: true))
+        }
+
+        final SeqTrack seqTrack1AY = testData.createSeqTrack()
+        seqTrack1AY.run = run1
+        seqTrack1AY.sample = sampleA
+        seqTrack1AY.seqType = alignableSeqType
+        seqTrack1AY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
+        assertNotNull(seqTrack1AY.save(flush: true))
+        addDataFile(seqTrack1AY)
+        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+
+        // no SeqTrack in this run
+        seqTrackService.setRunReadyForAlignment(run2)
+        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+
+        final SeqTrack seqTrack2AN = testData.createSeqTrack()
+        seqTrack2AN.run = run2
+        seqTrack2AN.sample = sampleA
+        seqTrack2AN.seqType = nonAlignableSeqType
+        seqTrack2AN.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
+        assertNotNull(seqTrack2AN.save(flush: true))
+        addDataFile(seqTrack2AN)
+        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+
+        // no alignable SeqTrack in this run
+        seqTrackService.setRunReadyForAlignment(run2)
+        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+
+        final SeqTrack seqTrack2BY = testData.createSeqTrack()
+        seqTrack2BY.run = run2
+        seqTrack2BY.sample = sampleB
+        seqTrack2BY.seqType = alignableSeqType
+        seqTrack2BY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
+        assertNotNull(seqTrack2BY.save(flush: true))
+        addDataFile(seqTrack2BY)
+        assertEquals(3, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+
+        // alignable SeqTrack, no other alignable SeqTrack for the sample
+        seqTrackService.setRunReadyForAlignment(run2)
+        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2BY.alignmentState)
+
+        // alignable SeqTrack (already NOT_STARTED), no other alignable SeqTrack for the sample
+        seqTrackService.setRunReadyForAlignment(run2)
+        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+
+        final SeqTrack seqTrack2AY = testData.createSeqTrack()
+        seqTrack2AY.run = run2
+        seqTrack2AY.sample = sampleA
+        seqTrack2AY.seqType = alignableSeqType
+        seqTrack2AY.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+        assertNotNull(seqTrack2AY.save(flush: true))
+        addDataFile(seqTrack2AY)
+        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+
+        // alignable SeqTrack (already NOT_STARTED), other alignable SeqTrack for the sample in another run
+        seqTrackService.setRunReadyForAlignment(run2)
+        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(3, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack1AY.alignmentState)
+        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2AY.alignmentState)
+        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2BY.alignmentState)
+
+        def reset = {
+            seqTrack1AY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
+            assertNotNull(seqTrack1AY.save(flush: true))
+            seqTrack2AY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
+            assertNotNull(seqTrack2AY.save(flush: true))
+            seqTrack2BY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
+            assertNotNull(seqTrack2BY.save(flush: true))
+            assertEquals(4, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+            assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+        }
+
+        reset()
+
+        // alignable SeqTrack, other alignable SeqTrack for the sample in another run
+        seqTrackService.setRunReadyForAlignment(run1)
+        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack1AY.alignmentState)
+        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2AY.alignmentState)
+
+        reset()
+
+        // two alignable SeqTracks, other alignable SeqTrack for the sample in another run
+        seqTrackService.setRunReadyForAlignment(run2)
+        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(3, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack1AY.alignmentState)
+        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2AY.alignmentState)
+        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2BY.alignmentState)
+
+        shouldFail(IllegalArgumentException.class) {
+            seqTrackService.setRunReadyForAlignment(null)
+        }
+    }
+
 }
