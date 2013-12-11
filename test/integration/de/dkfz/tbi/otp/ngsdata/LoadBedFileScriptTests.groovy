@@ -121,8 +121,8 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
         run(SCRIPT_PATH)
         BedFile bedFile = BedFile.findByFileName(bedFilesToLoad.first().bedName)
         assertNotNull bedFile
-        assertEquals (33, bedFile.targetSize)
-        assertEquals (27, bedFile.mergedTargetSize)
+        assertEquals (10 + 10 + 10, bedFile.targetSize)
+        assertEquals (10 + 15, bedFile.mergedTargetSize)
     }
 
     @Test(expected = IllegalArgumentException)
@@ -161,8 +161,8 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
         run(SCRIPT_PATH)
         BedFile bedFile = BedFile.findByFileName(bedFilesToLoad.first().bedName)
         assertNotNull bedFile
-        assertEquals (22, bedFile.targetSize)
-        assertEquals (22, bedFile.mergedTargetSize)
+        assertEquals (10 + 10, bedFile.targetSize)
+        assertEquals (10 + 10, bedFile.mergedTargetSize)
     }
 
     @Test(expected = IllegalArgumentException)
