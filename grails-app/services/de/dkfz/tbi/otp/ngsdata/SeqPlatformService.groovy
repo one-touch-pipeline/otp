@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import static org.springframework.util.Assert.*
 import org.springframework.context.annotation.Scope
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.ReferencedClass
@@ -131,8 +132,17 @@ class SeqPlatformService {
     }
 
     SeqPlatform platformForMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {
+        notNull(processedMergedBamFile, "the input processedMergedBamFile for the method platformForMergedBamFile is null")
         MergingSet mergingSet = processedMergedBamFile.mergingPass.mergingSet
         MergingSetAssignment mergingSetAssignment = MergingSetAssignment.findByMergingSet(mergingSet)
-        return mergingSetAssignment.bamFile.alignmentPass.seqTrack.seqPlatform
+        if (!mergingSetAssignment) {
+            throw new RuntimeException("No mergingSetAssignment for the merging set ")
+        }
+        AbstractBamFile bamFile = mergingSetAssignment.bamFile
+        if (bamFile instanceof ProcessedBamFile) {
+            return bamFile.alignmentPass.seqTrack.seqPlatform
+        } else {
+            return platformForMergedBamFile(bamFile)
+        }
     }
 }
