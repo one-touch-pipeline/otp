@@ -260,4 +260,29 @@ class LsdfFilesServiceTests {
         String path = lsdfFilesService.getFileViewByPidRelativeDirectory(dataFile)
         assertEquals(new File(correctPath).path, new File(path).path)
     }
+
+    /**
+     * This test check for compatibility of old chip seq data, which are loaded as normal {@link SeqTrack}
+     */
+    void testGetFileViewByPidRelativeDirectoryChipSeqUsingSeqTrack() {
+        final String SEQ_TYPE = SeqTypeNames.CHIP_SEQ.seqTypeName
+        final String SEQ_TYPE_SEQUENCING_DIR = "chip_seq_sequencing"
+        SeqType seqType = createSeqType(SEQ_TYPE, SEQ_TYPE_SEQUENCING_DIR)
+
+        SeqTrack seqTrack = new SeqTrack()
+        seqTrack.laneId = laneNo
+        seqTrack.nBasePairs = baseCount
+        seqTrack.nReads = readCount
+        seqTrack.insertSize = insertSize
+        seqTrack.run = run
+        seqTrack.sample = sample
+        seqTrack.seqType = seqType
+        seqTrack.seqPlatform = seqPlatform
+        seqTrack.pipelineVersion = softwareTool
+        assertNotNull(seqTrack.save([flush: true]))
+        DataFile dataFile = createDataFile(seqTrack, fastqR1Filename)
+        String correctPath = "${SEQ_TYPE_SEQUENCING_DIR}/${VIEW_BY_PID_PATH}/${individualPid}/${sampleTypeName.toLowerCase()}/${seqType.libraryLayout.toLowerCase()}/run${runName}/${VBP_PATH}/"
+        String path = lsdfFilesService.getFileViewByPidRelativeDirectory(dataFile)
+        assertEquals(new File(correctPath).path, new File(path).path)
+    }
 }
