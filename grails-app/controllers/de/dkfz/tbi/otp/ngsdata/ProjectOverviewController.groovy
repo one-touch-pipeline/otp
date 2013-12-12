@@ -1,21 +1,99 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.utils.DataTableCommand
 import grails.converters.JSON
-import javax.xml.transform.Transformer
-import javax.xml.transform.TransformerFactory
-import javax.xml.transform.stream.StreamResult
-import javax.xml.transform.stream.StreamSource
+import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class ProjectOverviewController {
 
-    def projectService
+    public final String SAMPLE_IDENTIFIER = "sample-identifier"
 
-    def projectOverviewService
+    ProjectService projectService
+
+    ProjectOverviewService projectOverviewService
 
     Map index() {
         String projectName = params.projectName
         return [projects: projectService.getAllProjects()*.name, project: projectName]
+    }
+
+    /**
+     * the basic data for the page projectOverview/laneOverview. The table content are retrieved asynchrony from {@link #dataTableSourceLaneOverview} via JavaScript.
+     */
+    Map laneOverview() {
+        List<String> projects = projectService.getAllProjects()*.name
+        String projectName = params.project ?: projects[0]
+
+        Project project = projectService.getProjectByName(projectName)
+        List<SeqType> seqTypes  = projectOverviewService.seqTypeByProject(project)
+
+        return [
+            projects: projects,
+            project: projectName,
+            seqTypes: seqTypes
+        ]
+    }
+
+    /**
+     * Retreives the data shown in the table of projectOverview/laneOverview.
+     * The data structure is:
+     * <pre>
+     * [[mockPid1, sampleTypeName1, one sample identifier for mockPid1.sampleType1, lane count for seqType1, lane count for seqType2, ...],
+     * [mockPid1, sampleTypeName2, one sample identifier for mockPid1.sampleType2, lane count for seqType1, lane count for seqType2, ...],
+     * [mockPid2, sampleTypeName2, one sample identifier for mockPid1.sampleType2, lane count for seqType1, lane count for seqType2, ...],
+     * ...]
+     * </pre>
+     * The available seqTypes are depend on the selected Project.
+     */
+    JSON dataTableSourceLaneOverview(DataTableCommand cmd) {
+        Project project = projectService.getProjectByName(params.project)
+        List< String> patients = projectOverviewService.mockPidByProject(project)
+        List<List<String>> sampleTypes = projectOverviewService.overviewMockPidSampleType(project)
+        List<SampleIdentifier> sampleIdentifier = projectOverviewService.overviewSampleIdentifier(project)
+        List<SeqType> seqTypes = projectOverviewService.seqTypeByProject(project)
+
+        /*Map<mockPid, Map<sampleType, Map<SeqType / sample identifier constant, LaneCount / SampleIdentifier value>>>*/
+        Map dataLastMap = [:]
+
+        patients.each { String mockPid ->
+            dataLastMap.put(mockPid, [:])
+        }
+
+        sampleTypes.each { mockPidSampleType ->
+            dataLastMap[mockPidSampleType[0]].put(mockPidSampleType[1], [:])
+        }
+
+        sampleIdentifier.each {mockPidSampleTypeMinSampleId ->
+            dataLastMap.get(mockPidSampleTypeMinSampleId[0])?.get(mockPidSampleTypeMinSampleId[1])?.put(SAMPLE_IDENTIFIER, mockPidSampleTypeMinSampleId[2])
+        }
+
+        seqTypes.each { SeqType seqType ->
+            List lanes = projectOverviewService.laneCountPerPatientAndSampleType(project, seqType)
+            lanes.each {mockPidSampleTypeLaneCount ->
+                dataLastMap[mockPidSampleTypeLaneCount[0]][mockPidSampleTypeLaneCount[1]].put(seqType, mockPidSampleTypeLaneCount[2])
+            }
+        }
+
+        List data = []
+        dataLastMap.each {String individual, Map value1 ->
+            value1.each { String sampleType, Map value2 ->
+                List<String> line = [individual, sampleType, value2[SAMPLE_IDENTIFIER]]
+                seqTypes.each { SeqType seqType ->
+                    if (value2.containsKey(seqType)) {
+                        line << value2[seqType]
+                    } else {
+                        line << ""
+                    }
+                }
+                data << line
+            }
+        }
+
+        Map dataToRender = cmd.dataToRender()
+        dataToRender.iTotalRecords = data.size()
+        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+        dataToRender.aaData = data
+
+        render dataToRender as JSON
     }
 
     JSON individualCountByProject(String projectName) {
@@ -54,31 +132,30 @@ class ProjectOverviewController {
     }
 
     JSON dataTableSourceCenterNameRunId(DataTableCommand cmd) {
-       Project project = projectService.getProjectByName(params.project)
-       Map dataToRender = cmd.dataToRender()
-       List data = projectOverviewService.centerNameRunId(project)
-       List dataLast = projectOverviewService.centerNameRunIdLastMonth(project)
+        Project project = projectService.getProjectByName(params.project)
+        Map dataToRender = cmd.dataToRender()
+        List data = projectOverviewService.centerNameRunId(project)
+        List dataLast = projectOverviewService.centerNameRunIdLastMonth(project)
 
-       Map dataLastMap = [:]
-       dataLast.each {
-       dataLastMap.put(it[0], it[1])
-                   }
+        Map dataLastMap = [:]
+        dataLast.each {
+            dataLastMap.put(it[0], it[1])
+        }
 
-       dataToRender.iTotalRecords = data.size()
-       dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-       dataToRender.aaData = []
-       data.each {
-           List line = []
-           line << it[0]
-           line << it[1]
-           if (dataLastMap.containsKey(it[0])) {
-               line << dataLastMap.get(it[0])
-           } else {
-                    line << "0"
-           }
-           dataToRender.aaData << line
-       }
-       render dataToRender as JSON
+        dataToRender.iTotalRecords = data.size()
+        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+        dataToRender.aaData = []
+        data.each {
+            List line = []
+            line << it[0]
+            line << it[1]
+            if (dataLastMap.containsKey(it[0])) {
+                line << dataLastMap.get(it[0])
+            } else {
+                line << "0"
+            }
+            dataToRender.aaData << line
+        }
+        render dataToRender as JSON
     }
-
 }

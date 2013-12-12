@@ -55,6 +55,7 @@
                                             <li class="allGranted_general" id="overviewMB"><g:link controller="overviewMB" action="index"><g:message code="otp.menu.generalStatistics"/></g:link></li><br>
                                         </sec:ifAllGranted>
                                         <li id="projectOverview"><g:link controller="projectOverview" action="index"><g:message code="otp.menu.projectSpecificStatistics"/></g:link></li><br>
+                                        <li id="laneOverview"><g:link controller="projectOverview" action="laneOverview"><g:message code="otp.menu.projectSpecificStatisticsTableOverview"/></g:link></li><br>
                                         <li id="projectStatistic"><g:link controller="projectStatistic" action="index"><g:message code="otp.menu.projectStatistics"/></g:link></li><br>
                                     </ul>
                                 </li>

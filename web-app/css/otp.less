@@ -408,7 +408,7 @@ tr {
         display: none;
     }
     &:nth-last-child(2n) {
-        background-color: #CEE3F6;
+        background-color: #A5D3FF;
     }
 }
 tr>td:first-child, tr>th:first-child {
@@ -480,6 +480,7 @@ th {
         background: @image, @moz-gradient;
     }
 }
+
 /* my styles for boolean values */
 td {
     .background-usage-hint {
@@ -865,6 +866,44 @@ body {
     max-height: 152px;
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+#laneOverviewTable {
+    color:black;
+    padding-top: 6px;
+    width: 100%;
+    border-color: #B4B5B6;
+    table {
+        margin-bottom: -1px;
+        border-color: #C4D9DF #A4C3CA #83AFB7;
+        }
+    td {
+        border-color: #C4D9DF #A4C3CA #83AFB7;
+        text-align: center;
+        padding: 0.1em 0.1em 0.2em 0.2em;
+        border-top:  #FFFFFF;
+        }
+    th {
+        border-color: #C4D9DF #A4C3CA #83AFB7;
+        background-color: #EFEFEF;
+        background-image: -moz-linear-gradient(center bottom , #EFEFEF, #FFFFFF);
+        border-top: 1px solid #ADADAD;
+        color: #666666;
+        font-weight: bold;
+        line-height: 1.7em;
+        text-align: center;
+        padding: 0.1em 0.1em 0.1em 0.1em;
+        margin-bottom:0.1px;
+        white-space: pre-line;
+        }
+    tr.odd { background-color:  #A5D3FF;
+        }
+    tr.even {
+        background-color: white;
+        }
+    tr.odd td.sorting_1 {
+        background-color: #A5D3FF;
+        }
 }
 .table-body-box{
     max-height: 120px;
