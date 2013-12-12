@@ -238,7 +238,7 @@ $.otp.individual = {
                 }),
                 bPaginate: false,
                 bScrollCollapse: true,
-                sScrollY: ($(window).height() - 535),
+                sScrollY: ($(window).height() - 453),
                 iDisplayLength: Math.round(($('.body').height() - 200) / 23),
                 bDeferRender: true,
                 fnServerData: function (sSource, aoData, fnCallback) {
@@ -378,7 +378,7 @@ $.otp.run = {
             }),
             bPaginate: false,
             bScrollCollapse: true,
-            sScrollY: ($(window).height() - 535),
+            sScrollY: ($(window).height() - 453),
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
                 aoData.push({
@@ -558,8 +558,8 @@ $.otp.sequence = {
             }),
             bScrollCollapse: true,
             bScrollInfinite: true,
-            sScrollY: ($(window).height() - 515),
-            iDisplayLength: Math.round(($('.body').height() - 200) / 23),
+            sScrollY: ($(window).height() - 415),
+            iDisplayLength: Math.round(($('.body').height() - 180) / 23),
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
                 aoData.push({
