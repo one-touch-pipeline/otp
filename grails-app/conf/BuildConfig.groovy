@@ -46,8 +46,6 @@ grails.project.dependency.resolution = {
         compile "sam:sam:1.78"
         // bedUtils
         compile 'bedUtils:bedUtils:0.1'
-        // corenlp lib required by bedUtils
-        compile 'edu.stanford.nlp:stanford-corenlp:3.2.0'
     }
 
     plugins {
