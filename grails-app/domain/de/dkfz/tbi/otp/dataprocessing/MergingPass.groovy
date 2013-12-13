@@ -25,6 +25,6 @@ class MergingPass {
     }
 
     public String toString() {
-       return "pass:${identifier} - ${mergingSet.mergingWorkPackage.seqType} - ${mergingSet.mergingWorkPackage.sample}"
+       return "pass:${identifier} - set:${mergingSet.identifier} - ${mergingSet.mergingWorkPackage.seqType} - ${mergingSet.mergingWorkPackage.sample}"
      }
 }

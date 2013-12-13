@@ -6,4 +6,8 @@ class ProcessedBamFile extends AbstractFileSystemBamFile {
         alignmentPass: AlignmentPass
     ]
 
+    @Override
+    public String toString() {
+        return "PBF (${id}) on ${alignmentPass}"
+    }
 }

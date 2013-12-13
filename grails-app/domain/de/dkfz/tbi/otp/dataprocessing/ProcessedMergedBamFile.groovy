@@ -34,4 +34,9 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
         }
         sha256sum(nullable: true)
     }
+
+    @Override
+    public String toString() {
+        return "PMBF (${id}) on ${mergingPass}"
+    }
 }
