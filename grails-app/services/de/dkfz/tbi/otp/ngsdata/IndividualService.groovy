@@ -320,7 +320,7 @@ AND i.id > :indId
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public List<String> getSampleTypeNames() {
-        return SampleType.list().name
+        return SampleType.list([sort: "name", order: "asc"]).name
     }
 
     /**
