@@ -3,12 +3,13 @@ package de.dkfz.tbi.otp.dataprocessing
 import static org.junit.Assert.*
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
 import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type
 
-class ProcessedBamFileServiceTests {
+class ProcessedBamFileServiceTests extends GroovyTestCase {
 
     ProcessedBamFileService processedBamFileService
 
@@ -106,6 +107,7 @@ class ProcessedBamFileServiceTests {
         processedBamFile = new ProcessedBamFile(
                         alignmentPass: alignmentPass,
                         type: BamType.SORTED,
+                        qualityAssessmentStatus: QaProcessingStatus.FINISHED,
                         status: State.NEEDS_PROCESSING
                         )
         assertNotNull(processedBamFile.save([flush: true, failOnError: true]))
@@ -125,6 +127,10 @@ class ProcessedBamFileServiceTests {
 
     @Test
     void testProcessedBamFileNeedsProcessingAllCorrect() {
+        assert !processedBamFileService.isAnyAlignmentNotFinished([processedBamFile.seqTrack])
+        assert !processedBamFileService.isMergingInProgress(processedBamFile.seqTrack)
+        assert !processedBamFileService.isAnyBamFileNotProcessable([processedBamFile.seqTrack])
+        assert processedBamFileService.isMergeable(processedBamFile)
         assertEquals(processedBamFile.id, processedBamFileService.processedBamFileNeedsProcessing().id)
     }
 
@@ -132,12 +138,64 @@ class ProcessedBamFileServiceTests {
     void testProcessedBamFileNeedsProcessingNoBamFileNeedsProcessing() {
         processedBamFile.status = State.DECLARED
         assertNotNull(processedBamFile.save([flush: true, failOnError: true]))
+        assert !processedBamFileService.isAnyAlignmentNotFinished([processedBamFile.seqTrack])
+        assert !processedBamFileService.isMergingInProgress(processedBamFile.seqTrack)
+        assert processedBamFileService.isAnyBamFileNotProcessable([processedBamFile.seqTrack])
+        assert !processedBamFileService.isMergeable(processedBamFile)
+        assertNull(processedBamFileService.processedBamFileNeedsProcessing())
+    }
+
+    @Test
+    void testProcessedBamFileNeedsProcessingQaNotFinished() {
+        processedBamFile.qualityAssessmentStatus = QaProcessingStatus.IN_PROGRESS
+        assertNotNull(processedBamFile.save([flush: true, failOnError: true]))
+        assert !processedBamFileService.isAnyAlignmentNotFinished([processedBamFile.seqTrack])
+        assert !processedBamFileService.isMergingInProgress(processedBamFile.seqTrack)
+        assert processedBamFileService.isAnyBamFileNotProcessable([processedBamFile.seqTrack])
+        assert !processedBamFileService.isMergeable(processedBamFile)
+        assertNull(processedBamFileService.processedBamFileNeedsProcessing())
+    }
+
+    @Test
+    void testRelatedBamFileIsNotProcessable() {
+        final ProcessedBamFile processedBamFile2 = new ProcessedBamFile(
+            alignmentPass: processedBamFile.alignmentPass,
+            type: BamType.SORTED,
+            qualityAssessmentStatus: QaProcessingStatus.FINISHED,
+            status: State.NEEDS_PROCESSING
+        )
+        assert processedBamFile2.save()
+        assert processedBamFile2.id > processedBamFile.id
+
+        assert !processedBamFileService.isAnyAlignmentNotFinished([processedBamFile.seqTrack])
+        assert !processedBamFileService.isMergingInProgress(processedBamFile.seqTrack)
+        assert !processedBamFileService.isAnyBamFileNotProcessable([processedBamFile.seqTrack])
+        assert processedBamFileService.isMergeable(processedBamFile)
+        assertEquals(processedBamFile, processedBamFileService.processedBamFileNeedsProcessing())
+
+        processedBamFile2.status = State.DECLARED
+        assert !processedBamFileService.isAnyAlignmentNotFinished([processedBamFile.seqTrack])
+        assert !processedBamFileService.isMergingInProgress(processedBamFile.seqTrack)
+        assert processedBamFileService.isAnyBamFileNotProcessable([processedBamFile.seqTrack])
+        assert !processedBamFileService.isMergeable(processedBamFile)
+        assertNull(processedBamFileService.processedBamFileNeedsProcessing())
+
+        processedBamFile2.status = State.NEEDS_PROCESSING
+        processedBamFile2.qualityAssessmentStatus = QaProcessingStatus.IN_PROGRESS
+        assert !processedBamFileService.isAnyAlignmentNotFinished([processedBamFile.seqTrack])
+        assert !processedBamFileService.isMergingInProgress(processedBamFile.seqTrack)
+        assert processedBamFileService.isAnyBamFileNotProcessable([processedBamFile.seqTrack])
+        assert !processedBamFileService.isMergeable(processedBamFile)
         assertNull(processedBamFileService.processedBamFileNeedsProcessing())
     }
 
     @Test
     void testProcessedBamFileNeedsProcessing() {
         //no mergingSet exists
+        assert !processedBamFileService.isAnyAlignmentNotFinished([processedBamFile.seqTrack])
+        assert !processedBamFileService.isMergingInProgress(processedBamFile.seqTrack)
+        assert !processedBamFileService.isAnyBamFileNotProcessable([processedBamFile.seqTrack])
+        assert processedBamFileService.isMergeable(processedBamFile)
         assertEquals(processedBamFile, processedBamFileService.processedBamFileNeedsProcessing())
 
         MergingWorkPackage workpackage = new MergingWorkPackage(
@@ -167,6 +225,7 @@ class ProcessedBamFileServiceTests {
         SeqTrack seqTrack2 = new SeqTrack(
                         laneId: "laneId",
                         run: run,
+                        alignmentState: SeqTrack.DataProcessingState.FINISHED,
                         sample: sample2,
                         seqType: seqType,
                         seqPlatform: seqPlatform,
@@ -184,17 +243,34 @@ class ProcessedBamFileServiceTests {
         ProcessedBamFile processedBamFile2 = new ProcessedBamFile(
                         alignmentPass: alignmentPass2,
                         type: BamType.SORTED,
+                        qualityAssessmentStatus: QaProcessingStatus.FINISHED,
                         status: State.NEEDS_PROCESSING
                         )
         assertNotNull(processedBamFile2.save([flush: true, failOnError: true]))
 
+        //a mergingSet exists for processedBamFile and is not finished
+        assert !processedBamFileService.isAnyAlignmentNotFinished([processedBamFile.seqTrack])
+        assert processedBamFileService.isMergingInProgress(processedBamFile.seqTrack)
+        assert !processedBamFileService.isAnyBamFileNotProcessable([processedBamFile.seqTrack])
+        assert !processedBamFileService.isMergeable(processedBamFile)
+        assert !processedBamFileService.isAnyAlignmentNotFinished([seqTrack2])
+        assert !processedBamFileService.isMergingInProgress(processedBamFile2.seqTrack)
+        assert !processedBamFileService.isAnyBamFileNotProcessable([seqTrack2])
+        assert processedBamFileService.isMergeable(processedBamFile2)
         assertEquals(processedBamFile2, processedBamFileService.processedBamFileNeedsProcessing())
 
-        //a mergingSet exists for processedBamFile and is not finished
         mergingSet.status = MergingSet.State.PROCESSED
         assertNotNull(mergingSet.save([flush: true, failOnError: true]))
 
         //a mergingSet exists for processedBamFile and is finished
+        assert !processedBamFileService.isAnyAlignmentNotFinished([processedBamFile.seqTrack])
+        assert !processedBamFileService.isMergingInProgress(processedBamFile.seqTrack)
+        assert !processedBamFileService.isAnyBamFileNotProcessable([processedBamFile.seqTrack])
+        assert processedBamFileService.isMergeable(processedBamFile)
+        assert !processedBamFileService.isAnyAlignmentNotFinished([seqTrack2])
+        assert !processedBamFileService.isMergingInProgress(processedBamFile2.seqTrack)
+        assert !processedBamFileService.isAnyBamFileNotProcessable([seqTrack2])
+        assert processedBamFileService.isMergeable(processedBamFile2)
         assertEquals(processedBamFile, processedBamFileService.processedBamFileNeedsProcessing())
     }
 
@@ -223,6 +299,7 @@ class ProcessedBamFileServiceTests {
         SeqTrack seqTrack2 = new SeqTrack(
                         laneId: "laneId",
                         run: run,
+                        alignmentState: SeqTrack.DataProcessingState.FINISHED,
                         sample: sample,
                         seqType: seqType,
                         seqPlatform: seqPlatform,
@@ -240,6 +317,7 @@ class ProcessedBamFileServiceTests {
         ProcessedBamFile processedBamFile2 = new ProcessedBamFile(
                         alignmentPass: alignmentPass2,
                         type: BamType.SORTED,
+                        qualityAssessmentStatus: QaProcessingStatus.FINISHED,
                         status: State.NEEDS_PROCESSING
                         )
         assertNotNull(processedBamFile2.save([flush: true, failOnError: true]))
@@ -255,16 +333,42 @@ class ProcessedBamFileServiceTests {
                         )
         assertNotNull(seqTrack3.save([flush: true, failOnError: true]))
 
+        final Iterable<SeqTrack> seqTracks = [processedBamFile.seqTrack, seqTrack2, seqTrack3].asImmutable()
+
+        assert processedBamFileService.isAnyAlignmentNotFinished(seqTracks)
+        assert !processedBamFileService.isMergingInProgress(processedBamFile.seqTrack)
+        assert !processedBamFileService.isAnyBamFileNotProcessable(seqTracks)
+        assert !processedBamFileService.isMergeable(processedBamFile)
+        assert processedBamFileService.isAnyAlignmentNotFinished(seqTracks)
+        assert !processedBamFileService.isMergingInProgress(processedBamFile2.seqTrack)
+        assert !processedBamFileService.isAnyBamFileNotProcessable(seqTracks)
+        assert !processedBamFileService.isMergeable(processedBamFile2)
         assertNull(processedBamFileService.processedBamFileNeedsProcessing())
 
         seqTrack3.alignmentState = SeqTrack.DataProcessingState.IN_PROGRESS
         assertNotNull(seqTrack3.save([flush: true, failOnError: true]))
 
+        assert processedBamFileService.isAnyAlignmentNotFinished(seqTracks)
+        assert !processedBamFileService.isMergingInProgress(processedBamFile.seqTrack)
+        assert !processedBamFileService.isAnyBamFileNotProcessable(seqTracks)
+        assert !processedBamFileService.isMergeable(processedBamFile)
+        assert processedBamFileService.isAnyAlignmentNotFinished(seqTracks)
+        assert !processedBamFileService.isMergingInProgress(processedBamFile2.seqTrack)
+        assert !processedBamFileService.isAnyBamFileNotProcessable(seqTracks)
+        assert !processedBamFileService.isMergeable(processedBamFile2)
         assertNull(processedBamFileService.processedBamFileNeedsProcessing())
 
         seqTrack3.alignmentState = SeqTrack.DataProcessingState.FINISHED
         assertNotNull(seqTrack3.save([flush: true, failOnError: true]))
 
+        assert !processedBamFileService.isAnyAlignmentNotFinished(seqTracks)
+        assert !processedBamFileService.isMergingInProgress(processedBamFile.seqTrack)
+        assert !processedBamFileService.isAnyBamFileNotProcessable(seqTracks)
+        assert processedBamFileService.isMergeable(processedBamFile)
+        assert !processedBamFileService.isAnyAlignmentNotFinished(seqTracks)
+        assert !processedBamFileService.isMergingInProgress(processedBamFile2.seqTrack)
+        assert !processedBamFileService.isAnyBamFileNotProcessable(seqTracks)
+        assert processedBamFileService.isMergeable(processedBamFile2)
         assertEquals(processedBamFile2, processedBamFileService.processedBamFileNeedsProcessing())
     }
 
@@ -300,4 +404,43 @@ class ProcessedBamFileServiceTests {
 
         assertFalse(processedBamFileService.notAssignedToMergingSet(processedBamFile))
     }
+
+    @Test
+    void testIsMergeable() {
+        shouldFail IllegalArgumentException.class,
+                { processedBamFileService.isMergeable(null) }
+        // Further tests of isMergeable are included in the test methods above.
+    }
+
+    @Test
+    void testIsAnyAlignmentNotFinished() {
+        shouldFail IllegalArgumentException.class,
+                { processedBamFileService.isAnyAlignmentNotFinished(null) }
+        final SeqTrack finished = new SeqTrack(alignmentState: SeqTrack.DataProcessingState.FINISHED)
+        final SeqTrack unknown = new SeqTrack(alignmentState: SeqTrack.DataProcessingState.UNKNOWN)
+        assert !processedBamFileService.isAnyAlignmentNotFinished([])
+        assert !processedBamFileService.isAnyAlignmentNotFinished([finished])
+        assert processedBamFileService.isAnyAlignmentNotFinished([unknown])
+        assert !processedBamFileService.isAnyAlignmentNotFinished([finished, finished])
+        assert processedBamFileService.isAnyAlignmentNotFinished([finished, unknown])
+        assert processedBamFileService.isAnyAlignmentNotFinished([unknown, finished])
+        assert processedBamFileService.isAnyAlignmentNotFinished([unknown, unknown])
+        // Further tests of isAnyAlignmentNotFinished are included in the test methods above.
+    }
+
+    @Test
+    void testIsMergingInProgress() {
+        shouldFail IllegalArgumentException.class,
+                { processedBamFileService.isMergingInProgress(null) }
+        // Further tests of isMergingInProgress are included in the test methods above.
+    }
+
+    @Test
+    void testIsAnyBamFileNotProcessable() {
+        shouldFail IllegalArgumentException.class,
+                { processedBamFileService.isAnyBamFileNotProcessable(null) }
+        assert !processedBamFileService.isAnyBamFileNotProcessable([])
+        // Further tests of isAnyBamFileNotProcessable are included in the test methods above.
+    }
+
 }

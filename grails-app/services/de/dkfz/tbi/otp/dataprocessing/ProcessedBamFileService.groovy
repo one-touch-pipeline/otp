@@ -142,33 +142,87 @@ class ProcessedBamFileService {
     }
 
     /**
-     * @return the first available {@link ProcessedBamFile}, which needs to be merged and was sorted in the alignment workflow
+     * @return the first available {@link ProcessedBamFile} which needs to be merged and was sorted
+     * in the alignment workflow, or <code>null</code> if no such {@link ProcessedBamFile} exists.
      */
     ProcessedBamFile processedBamFileNeedsProcessing() {
         //the oldest bam file will be processed
         List<ProcessedBamFile> processedBamFiles = ProcessedBamFile.findAllByStatusAndTypeAndWithdrawn(State.NEEDS_PROCESSING, BamType.SORTED, false, [sort: "id"])
-        for (ProcessedBamFile processedBamFile : processedBamFiles) {
-            Sample sample = processedBamFile.alignmentPass.seqTrack.sample
-            SeqType seqType = processedBamFile.alignmentPass.seqTrack.seqType
-            //waiting until all fastq files from the same sample and seqtype are aligned so that they can be merged all together
-            List<SeqTrack> seqTracks = SeqTrack.createCriteria().list {
-                eq("sample", sample)
-                eq("seqType", seqType)
-                'in'("alignmentState", [SeqTrack.DataProcessingState.NOT_STARTED, SeqTrack.DataProcessingState.IN_PROGRESS])
+        return processedBamFiles.find { isMergeable(it) }
+    }
+
+    public boolean isMergeable(ProcessedBamFile processedBamFile) {
+        notNull(processedBamFile)
+
+        final SeqTrack seqTrack = processedBamFile.seqTrack
+        List<SeqTrack> seqTracks = SeqTrack.createCriteria().list {
+            eq("sample", seqTrack.sample)
+            eq("seqType", seqTrack.seqType)
+        }
+        /* At least processedBamFile.alignmentPass.seqTrack must be in the result, so if the result
+         * is empty, something is seriously broken.
+         */
+        assert !seqTracks.isEmpty()
+
+        if (isAnyAlignmentNotFinished(seqTracks)) {
+            return false
+        }
+        if (isMergingInProgress(processedBamFile.seqTrack)) {
+            return false
+        }
+        if (isAnyBamFileNotProcessable(seqTracks)) {
+            return false
+        }
+        return true
+    }
+
+    public boolean isAnyAlignmentNotFinished(Iterable<SeqTrack> seqTracks) {
+        notNull(seqTracks)
+        return seqTracks.find { it.alignmentState != SeqTrack.DataProcessingState.FINISHED }
+    }
+
+    /**
+     * @return whether there is a merging process with the Sample and SeqType of the specified
+     *      SeqTrack running at the moment
+     */
+    public boolean isMergingInProgress(SeqTrack seqTrack) {
+        notNull(seqTrack)
+        Sample sample = seqTrack.sample
+        SeqType seqType = seqTrack.seqType
+        MergingWorkPackage workPackage = MergingWorkPackage.findBySampleAndSeqType(sample, seqType)
+        if (workPackage) {
+            if (MergingSet.findByMergingWorkPackageAndStatusInList(workPackage,
+                            [MergingSet.State.DECLARED, MergingSet.State.INPROGRESS, MergingSet.State.NEEDS_PROCESSING])) {
+                return true
             }
-            if (seqTracks.isEmpty()) {
-                MergingWorkPackage workPackage = MergingWorkPackage.findBySampleAndSeqType(sample, seqType)
-                if (workPackage) {
-                    //make sure that there is no other merging process with the same sample and seqtype running at the moment
-                    MergingSet mergingSet = MergingSet.findByMergingWorkPackageAndStatusInList(workPackage,
-                                    [MergingSet.State.DECLARED, MergingSet.State.INPROGRESS, MergingSet.State.NEEDS_PROCESSING])
-                    if (!mergingSet) {
-                        return processedBamFile
-                    }
-                } else {
-                    return processedBamFile
-                }
+        }
+        return false
+    }
+
+    /**
+     * @return whether a {@link ProcessedBamFile} belonging to any of the given
+     *      {@link SeqTrack}s exists where the QA is not finished or the {@link AbstractBamFile#status}
+     *      is {@link AbstractBamFile.State#DECLARED}.
+     */
+    public boolean isAnyBamFileNotProcessable(Collection<SeqTrack> seqTracks) {
+        notNull(seqTracks)
+        if (seqTracks.isEmpty()) {
+            return false
+        }
+        List<AbstractBamFile.State> allowedMergingStates = [
+            AbstractBamFile.State.NEEDS_PROCESSING,
+            AbstractBamFile.State.INPROGRESS,
+            AbstractBamFile.State.PROCESSED,
+        ]
+        return ProcessedBamFile.createCriteria().get {
+            alignmentPass {
+                'in'("seqTrack", seqTracks)
             }
+            or {
+                ne("qualityAssessmentStatus", AbstractBamFile.QaProcessingStatus.FINISHED)
+                not { 'in'("status", allowedMergingStates) }
+            }
+            maxResults 1
         }
     }
 
