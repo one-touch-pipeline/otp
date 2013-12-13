@@ -5,6 +5,10 @@ import edu.stanford.nlp.util.*
 /**
  * Represents content of a bed file and provides
  * some operations on it
+ * NOTE:
+ * in a bed file the intervals are defined with the following system:
+ * 0 based: start inclusive, end exclusive
+ * Methods of this interface take intervals in the same system.
  *
  */
 interface TargetIntervals {

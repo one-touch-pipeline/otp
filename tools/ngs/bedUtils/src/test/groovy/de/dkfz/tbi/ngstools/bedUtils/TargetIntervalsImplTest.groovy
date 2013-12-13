@@ -1,7 +1,8 @@
 package de.dkfz.tbi.ngstools.bedUtils
 
-import static org.junit.Assert.*
 import org.junit.*
+import static org.junit.Assert.*
+
 import edu.stanford.nlp.util.*
 
 class TargetIntervalsImplTest {
@@ -16,7 +17,7 @@ class TargetIntervalsImplTest {
     public void setUp() throws Exception {
         //creation of the different possible test cases
         bedFilePath = "/tmp/kitname.bed"
-        fileContent = "chr1\t0\t100\nchr2\t32\t105\nchr3\t10000000\t249250621"
+        fileContent = "chr1\t0\t101\nchr2\t32\t106\nchr3\t10000000\t249250622"
         file = new File(bedFilePath)
         file.withWriter { out ->
             out.writeLine(fileContent)
@@ -101,7 +102,7 @@ class TargetIntervalsImplTest {
 
     @Test
     void testParseBedFileEmptyLine() {
-        fileContent += "\n\nchr4\t5\t49"
+        fileContent += "\n\nchr4\t5\t50"
         file.withWriter { out ->
             out.writeLine(fileContent)
         }
@@ -122,7 +123,7 @@ class TargetIntervalsImplTest {
     */
     @Test
     void testParseBedFileNormalOrder() {
-        fileContent += "\nchr1\t150\t300"
+        fileContent += "\nchr1\t150\t301"
         file.withWriter { out ->
             out.writeLine(fileContent)
         }
@@ -143,7 +144,7 @@ class TargetIntervalsImplTest {
     */
     @Test
     void testParseBedFileNeighbourIntervals() {
-        fileContent += "\nchr1\t101\t200"
+        fileContent += "\nchr1\t101\t201"
         file.withWriter { out ->
             out.writeLine(fileContent)
         }
@@ -164,7 +165,7 @@ class TargetIntervalsImplTest {
     */
     @Test
     void testParseBedFileOverlappingIntervals() {
-        fileContent += "\nchr1\t50\t150"
+        fileContent += "\nchr1\t50\t151"
         file.withWriter { out ->
             out.writeLine(fileContent)
         }
@@ -185,7 +186,7 @@ class TargetIntervalsImplTest {
     */
     @Test
     void testParseBedFileIncludedInterval() {
-        fileContent += "\nchr1\t30\t80"
+        fileContent += "\nchr1\t30\t81"
         file.withWriter { out ->
             out.writeLine(fileContent)
         }
@@ -206,7 +207,7 @@ class TargetIntervalsImplTest {
     */
     @Test
     void testParseBedFileWrongOrder() {
-        fileContent += "\nchr4\t200\t90\nchr4\t50\t150"
+        fileContent += "\nchr4\t201\t90\nchr4\t50\t151"
         file.withWriter { out ->
             out.writeLine(fileContent)
         }
@@ -230,7 +231,7 @@ class TargetIntervalsImplTest {
     */
     @Test
     void testParseBedFileMultipleOverlaps() {
-        fileContent += "\nchr1\t100\t200\nchr1\t180\t280\nchr1\t260\t360"
+        fileContent += "\nchr1\t100\t201\nchr1\t180\t281\nchr1\t260\t361"
         file.withWriter { out ->
             out.writeLine(fileContent)
         }
@@ -252,7 +253,7 @@ class TargetIntervalsImplTest {
     */
     @Test
     void testParseBedFileOneOverlapOneSingle() {
-        fileContent += "\nchr1\t50\t150\nchr1\t200\t300"
+        fileContent += "\nchr1\t50\t151\nchr1\t200\t301"
         file.withWriter { out ->
             out.writeLine(fileContent)
         }
@@ -386,7 +387,7 @@ class TargetIntervalsImplTest {
 
     @Test
     void testCalculateBaseCountCase2() {
-        fileContent = "chr1\t1\t100\nchr2\t1000\t3000\nchr3\t10\t20"
+        fileContent = "chr1\t1\t101\nchr2\t1000\t3001\nchr3\t10\t21"
         file.withWriter { out ->
             out.writeLine(fileContent)
         }
@@ -398,7 +399,7 @@ class TargetIntervalsImplTest {
 
     @Test
     void testCalculateBaseCountCase3() {
-        fileContent = "chr1\t1\t100\nchr1\t80\t180"
+        fileContent = "chr1\t1\t101\nchr1\t80\t181"
         file.withWriter { out ->
             out.writeLine(fileContent)
         }
@@ -449,29 +450,29 @@ class TargetIntervalsImplTest {
 
     @Test
     void testGetOverlappingBaseCountCase2() {
-        fileContent = "chr1\t100\t200"
+        fileContent = "chr1\t100\t201"
         file.withWriter { out ->
             out.writeLine(fileContent)
         }
         Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
-        long result = targetIntervalsImpl.getOverlappingBaseCount("chr1", 190l, 280l)
+        long result = targetIntervalsImpl.getOverlappingBaseCount("chr1", 191l, 280l)
         assertEquals(11, result)
     }
 
     @Test
     void testGetOverlappingBaseCountCase3() {
-        fileContent = "chr1\t100\t200\nchr1\t250\t350"
+        fileContent = "chr1\t100\t201\nchr1\t250\t351"
         file.withWriter { out ->
             out.writeLine(fileContent)
         }
         Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
-        long result = targetIntervalsImpl.getOverlappingBaseCount("chr1", 150l, 300l)
+        long result = targetIntervalsImpl.getOverlappingBaseCount("chr1", 151l, 300l)
         assertEquals(51 + 51, result)
     }
 
     @Test
     void testGetOverlappingBaseCountCase4() {
-        fileContent = "chr1\t100\t200\nchr1\t250\t350"
+        fileContent = "chr1\t100\t201\nchr1\t250\t351"
         file.withWriter { out ->
             out.writeLine(fileContent)
         }
@@ -482,7 +483,7 @@ class TargetIntervalsImplTest {
 
     @Test
     void testGetOverlappingBaseCountCase5() {
-        fileContent = "chr1\t100\t200\nchr1\t250\t350"
+        fileContent = "chr1\t100\t201\nchr1\t250\t351"
         file.withWriter { out ->
             out.writeLine(fileContent)
         }
@@ -496,7 +497,7 @@ class TargetIntervalsImplTest {
      */
     @Test
     void testGetUniqueBaseCount() {
-        fileContent = "chr1\t150\t300\nchr1\t250\t350"
+        fileContent = "chr1\t150\t301\nchr1\t250\t351"
         file.withWriter { out ->
             out.writeLine(fileContent)
         }
@@ -509,7 +510,7 @@ class TargetIntervalsImplTest {
      */
     @Test
     void testGetBaseCount() {
-        fileContent = "chr1\t150\t300"
+        fileContent = "chr1\t150\t301"
         file.withWriter { out ->
             out.writeLine(fileContent)
         }
@@ -525,7 +526,7 @@ class TargetIntervalsImplTest {
 
     @Test
     void testHasOverlappingIntervalsCase1() {
-        fileContent = "chr1\t150\t300\nchr1\t400\t500"
+        fileContent = "chr1\t150\t301\nchr1\t400\t501"
         file.withWriter { out ->
             out.writeLine(fileContent)
         }
@@ -535,7 +536,7 @@ class TargetIntervalsImplTest {
 
     @Test
     void testHasOverlappingIntervalsCase2() {
-        fileContent = "chr1\t150\t300\nchr1\t200\t500"
+        fileContent = "chr1\t150\t301\nchr1\t200\t501"
         file.withWriter { out ->
             out.writeLine(fileContent)
         }
@@ -637,7 +638,7 @@ class TargetIntervalsImplTest {
      */
     @Test
     void testCreateTreeMapFromBedFile() {
-        fileContent = "chr1\t100\t200\nchr1\t300\t400\nchr2\t100\t200"
+        fileContent = "chr1\t100\t201\nchr1\t300\t401\nchr2\t100\t201"
         file.withWriter { out ->
             out.writeLine(fileContent)
         }
@@ -668,5 +669,27 @@ class TargetIntervalsImplTest {
         assertTrue(referenceSequenceNames.contains("chr3"))
         assertFalse(referenceSequenceNames.contains("chr4"))
         assertEquals(3, referenceSequenceNames.size())
+    }
+
+    @Test
+    void testToInternalSystemCorrect() {
+        Map expected = [start: 0, end: 10]
+        Map output = TargetIntervalsImpl.toInternalSystem(1, 10)
+        assertEquals(expected.start, output.start)
+        assertEquals(expected.end, output.end)
+        expected = [start: 0, end: 1]
+        output = TargetIntervalsImpl.toInternalSystem(1, 1)
+        assertEquals(expected.start, output.start)
+        assertEquals(expected.end, output.end)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testToInternalSystemWrongStart() {
+        TargetIntervalsImpl.toInternalSystem(0, 10)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testToInternalSystemEndMoreThenStart() {
+        TargetIntervalsImpl.toInternalSystem(10, 1)
     }
 }

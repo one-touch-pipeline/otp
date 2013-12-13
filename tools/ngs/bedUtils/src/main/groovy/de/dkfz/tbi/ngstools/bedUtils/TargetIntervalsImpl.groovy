@@ -102,9 +102,9 @@ class TargetIntervalsImpl implements TargetIntervals {
                 // handle creation of interval and insertion into map
                 Interval interval = null
                 if (start <= end) {
-                    interval = new Interval(start, end, 0)
+                    interval = new Interval(start, end - 1, 0)
                 } else {
-                    interval = new Interval(end, start, 0)
+                    interval = new Interval(end, start - 1, 0) // Charles: "do it"
                     println "Warning: The interval ${interval} is in the wrong order"
                 }
                 if (map.containsKey(refSeqName)) {
@@ -194,10 +194,13 @@ class TargetIntervalsImpl implements TargetIntervals {
         }
     }
 
-    public long getOverlappingBaseCount(String refSeqName, long start, long end) {
+    public long getOverlappingBaseCount(String refSeqName, long startPosition, long endPosition) {
         notNull(refSeqName, "refSeqName in method getOverlappingBaseCount is null")
-        notNull(start, "start in method getOverlappingBaseCount is null")
-        notNull(end, "end in method getOverlappingBaseCount is null")
+        notNull(startPosition, "start in method getOverlappingBaseCount is null")
+        notNull(endPosition, "end in method getOverlappingBaseCount is null")
+        Map interval = toInternalSystem(startPosition, endPosition)
+        long start = interval.start
+        long end = interval.end
         parseBedFileIfRequired()
         long overlappingBaseCount = 0
         if(uniqueMap.containsKey(refSeqName)) {
@@ -279,5 +282,19 @@ class TargetIntervalsImpl implements TargetIntervals {
     public Set<String> getReferenceSequenceNames() {
         parseBedFileIfRequired()
         return treeMap.keySet()
+    }
+
+    /**
+     * utils take input in bed file coordinate system,
+     * this class uses the following system:
+     * base: 0, start: inclusive, end: inclusive
+     * This function converts from bed-file system into
+     * internal system
+     *
+     */
+    private static Map toInternalSystem(long start, long end) {
+        isTrue(start > 0, "start must be more than 0, but was $start")
+        isTrue(end >= start, "end must be more or equal than start, but start = $start and end = $end")
+        return [start: start - 1, end: end]
     }
 }

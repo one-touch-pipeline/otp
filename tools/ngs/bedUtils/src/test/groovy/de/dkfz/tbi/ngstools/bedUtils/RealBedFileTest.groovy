@@ -27,11 +27,13 @@ class RealBedFileTest {
 
     /**
      * checking on basic statistics for bedFile
+     *
+     * The expected value comes from the bedUtils itself for consistency
      */
     @Test
     void testBasicStats() {
-        assertEquals(51374954, targetIntervalsImpl.baseCount)
-        assertEquals(51374954, targetIntervalsImpl.uniqueBaseCount)
+        assertEquals(51189318, targetIntervalsImpl.baseCount)
+        assertEquals(51189318, targetIntervalsImpl.uniqueBaseCount)
     }
 
     /**
