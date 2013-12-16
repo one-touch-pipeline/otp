@@ -455,7 +455,7 @@ class TargetIntervalsImplTest {
             out.writeLine(fileContent)
         }
         Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
-        long result = targetIntervalsImpl.getOverlappingBaseCount("chr1", 191l, 280l)
+        long result = targetIntervalsImpl.getOverlappingBaseCount("chr1", 190l, 281l)
         assertEquals(11, result)
     }
 
@@ -466,7 +466,7 @@ class TargetIntervalsImplTest {
             out.writeLine(fileContent)
         }
         Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
-        long result = targetIntervalsImpl.getOverlappingBaseCount("chr1", 151l, 300l)
+        long result = targetIntervalsImpl.getOverlappingBaseCount("chr1", 150l, 301l)
         assertEquals(51 + 51, result)
     }
 
@@ -673,23 +673,32 @@ class TargetIntervalsImplTest {
 
     @Test
     void testToInternalSystemCorrect() {
-        Map expected = [start: 0, end: 10]
-        Map output = TargetIntervalsImpl.toInternalSystem(1, 10)
-        assertEquals(expected.start, output.start)
+        Interval expected = new Interval(0, 10, 0)
+        Interval output = TargetIntervalsImpl.toInternalSystem(0, 11)
+        assertEquals(expected.begin, output.begin)
         assertEquals(expected.end, output.end)
-        expected = [start: 0, end: 1]
-        output = TargetIntervalsImpl.toInternalSystem(1, 1)
-        assertEquals(expected.start, output.start)
+        expected = new Interval(1, 1, 0)
+        output = TargetIntervalsImpl.toInternalSystem(1, 2)
+        assertEquals(expected.begin, output.begin)
         assertEquals(expected.end, output.end)
     }
 
     @Test(expected = IllegalArgumentException)
-    void testToInternalSystemWrongStart() {
-        TargetIntervalsImpl.toInternalSystem(0, 10)
+    void testToInternalSystemStartEqualsEnd() {
+        TargetIntervalsImpl.toInternalSystem(10, 10)
     }
 
     @Test(expected = IllegalArgumentException)
-    void testToInternalSystemEndMoreThenStart() {
+    void testToInternalSystemEndMoreThanStart() {
         TargetIntervalsImpl.toInternalSystem(10, 1)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testStartEqualsEnd() {
+        fileContent = "chr4\t50\t50"
+        file.withWriter { out ->
+            out.writeLine(fileContent)
+        }
+        targetIntervalsImpl.parseBedFile(bedFilePath)
     }
 }

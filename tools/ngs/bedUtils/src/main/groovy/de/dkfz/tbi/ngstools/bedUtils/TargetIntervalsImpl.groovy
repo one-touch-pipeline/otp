@@ -101,10 +101,10 @@ class TargetIntervalsImpl implements TargetIntervals {
                 isTrue(end >= 0, "The end point of the interval is out of range")
                 // handle creation of interval and insertion into map
                 Interval interval = null
-                if (start <= end) {
-                    interval = new Interval(start, end - 1, 0)
+                if (start < end) {
+                    interval = toInternalSystem(start, end)
                 } else {
-                    interval = new Interval(end, start - 1, 0) // Charles: "do it"
+                    interval = toInternalSystem(end, start) // Charles: "do it"
                     println "Warning: The interval ${interval} is in the wrong order"
                 }
                 if (map.containsKey(refSeqName)) {
@@ -198,8 +198,8 @@ class TargetIntervalsImpl implements TargetIntervals {
         notNull(refSeqName, "refSeqName in method getOverlappingBaseCount is null")
         notNull(startPosition, "start in method getOverlappingBaseCount is null")
         notNull(endPosition, "end in method getOverlappingBaseCount is null")
-        Map interval = toInternalSystem(startPosition, endPosition)
-        long start = interval.start
+        Interval interval = toInternalSystem(startPosition, endPosition)
+        long start = interval.begin
         long end = interval.end
         parseBedFileIfRequired()
         long overlappingBaseCount = 0
@@ -292,9 +292,9 @@ class TargetIntervalsImpl implements TargetIntervals {
      * internal system
      *
      */
-    private static Map toInternalSystem(long start, long end) {
-        isTrue(start > 0, "start must be more than 0, but was $start")
-        isTrue(end >= start, "end must be more or equal than start, but start = $start and end = $end")
-        return [start: start - 1, end: end]
+    private static Interval toInternalSystem(long start, long end) {
+        isTrue(end != start, "end must not be equal start")
+        isTrue(end > start, "end must be more or equal than start, but start = $start and end = $end")
+        return new Interval(start, end - 1, 0)
     }
 }
