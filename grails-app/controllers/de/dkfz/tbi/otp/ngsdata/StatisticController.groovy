@@ -109,13 +109,10 @@ class StatisticController {
         List<String> labelsPercentage = []
         List<Integer> values = []
         int projectSequenceCount = 0
-        int filterCount = 0
 
         List sampleCountBySeqType = statisticService.sampleCountPerSequenceType(projectGroup)
 
-        if (!projectGroup) {
-            filterCount = 17
-        }
+        int filterCount = sampleCountBySeqType.collect {it[1]}.sum() / 100
 
         sampleCountBySeqType.each {
             if (it[1] < filterCount) {
