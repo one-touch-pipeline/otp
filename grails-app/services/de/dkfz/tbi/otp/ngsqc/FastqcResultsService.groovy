@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.ngsqc
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import org.springframework.security.access.prepost.PreAuthorize
+import grails.orm.HibernateCriteriaBuilder
 
 class FastqcResultsService {
 
@@ -27,6 +28,23 @@ or hasRole('ROLE_OPERATOR')
     // Needs ACLs ?
     public boolean isFastqcAvailable(Run run) {
         return !fastqcFilesForRun(run).empty
+    }
+
+    public boolean isFastqcAvailable(SeqTrack seqTrack) {
+        return !fastqcFilesForSeqTrack(seqTrack).empty
+    }
+
+    public List<FastqcProcessedFile> fastqcFilesForSeqTrack(SeqTrack seqTrack) {
+        HibernateCriteriaBuilder c = FastqcProcessedFile.createCriteria()
+        List<FastqcProcessedFile> files = c.list {
+            and {
+                eq("contentUploaded", true)
+                dataFile {
+                    eq("seqTrack", seqTrack)
+                }
+            }
+        }
+        return files
     }
 
     // ACL ?

@@ -16,6 +16,7 @@ class AssignQaFlagJob extends AbstractEndStateAwareJobImpl {
     public void execute() throws Exception {
         long passId = getProcessParameterValue() as long
         QualityAssessmentPass pass = QualityAssessmentPass.get(passId)
+        qualityAssessmentPassService.assertNumberOfReadsIsTheSameAsCalculatedWithFastqc(pass)
         qualityAssessmentPassService.passFinished(pass)
         succeed()
     }
