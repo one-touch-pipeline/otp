@@ -1,7 +1,9 @@
 package de.dkfz.tbi.ngstools.bedUtils
 
 import static org.junit.Assert.*
+
 import org.junit.*
+
 import edu.stanford.nlp.util.*
 
 class RealBedFileTest {
@@ -41,9 +43,8 @@ class RealBedFileTest {
      */
     @Test
     void testTargetBeforeLastInterval() {
-        IntervalTree tree = targetIntervalsImpl.treeMap.get("chr1")
-        Interval target = new Interval(249210499L, 249210599L, 0)
-        List<Interval> overlappingIntervals = targetIntervalsImpl.getOverlappingIntervals("chr1", target.begin, target.end)
+        Interval target = new Interval(249210499L, 249210599L)
+        List<Interval> overlappingIntervals = targetIntervalsImpl.getOverlappingIntervals("chr1", target.from, target.to)
         assertEquals(0, overlappingIntervals.size)
     }
 
@@ -52,9 +53,8 @@ class RealBedFileTest {
      */
     @Test
     void testTargetInLastInterval() {
-        IntervalTree tree = targetIntervalsImpl.treeMap.get("chr1")
-        Interval target = new Interval(249211000L, 249211100L, 0)
-        List<Interval> overlappingIntervals = targetIntervalsImpl.getOverlappingIntervals("chr1", target.begin, target.end)
+        Interval target = new Interval(249211000L, 249211100L)
+        List<Interval> overlappingIntervals = targetIntervalsImpl.getOverlappingIntervals("chr1", target.from, target.to)
         assertEquals(1, overlappingIntervals.size)
     }
 
@@ -63,9 +63,8 @@ class RealBedFileTest {
      */
     @Test
     void testTargetBeyondLastInterval() {
-        IntervalTree tree = targetIntervalsImpl.treeMap.get("chr1")
-        Interval target = new Interval(249212800L, 249212900L, 0)
-        List<Interval> overlappingIntervals = targetIntervalsImpl.getOverlappingIntervals("chr1", target.begin, target.end)
+        Interval target = new Interval(249212800L, 249212900L)
+        List<Interval> overlappingIntervals = targetIntervalsImpl.getOverlappingIntervals("chr1", target.from, target.to)
         assertEquals(0, overlappingIntervals.size)
     }
 }

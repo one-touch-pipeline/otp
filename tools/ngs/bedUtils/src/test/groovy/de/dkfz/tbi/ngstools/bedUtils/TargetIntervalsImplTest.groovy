@@ -1,7 +1,8 @@
 package de.dkfz.tbi.ngstools.bedUtils
 
-import org.junit.*
 import static org.junit.Assert.*
+
+import org.junit.*
 
 import edu.stanford.nlp.util.*
 
@@ -75,7 +76,6 @@ class TargetIntervalsImplTest {
     @Test
     void testTargetIntervalsImplCase4() {
         targetIntervalsImpl = new TargetIntervalsImpl(bedFilePath, referenceGenomeEntryNames)
-        assertTrue(targetIntervalsImpl.treeMap.isEmpty())
         assertEquals(targetIntervalsImpl.bedFilePath, bedFilePath)
         assertEquals(targetIntervalsImpl.referenceGenomeEntryNames, referenceGenomeEntryNames)
     }
@@ -107,10 +107,10 @@ class TargetIntervalsImplTest {
             out.writeLine(fileContent)
         }
         Map<String, List<Interval>> intervalListExp = [
-            "chr1": [new Interval(0l, 100l, 0)],
-            "chr2": [new Interval(32l, 105l, 0)],
-            "chr3": [new Interval(10000000l, 249250621l, 0)],
-            "chr4": [new Interval(5l, 49l, 0)]
+            "chr1": [new Interval(0L, 100L)],
+            "chr2": [new Interval(32L, 105L)],
+            "chr3": [new Interval(10000000L, 249250621L)],
+            "chr4": [new Interval(5L, 49l)]
         ]
         Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
         assertEquals(intervalListExp, intervalListAct)
@@ -128,143 +128,12 @@ class TargetIntervalsImplTest {
             out.writeLine(fileContent)
         }
         Map<String, List<Interval>> intervalListExp = [
-            "chr1": [new Interval(0l, 100l, 0), new Interval(150l, 300l, 0)],
-            "chr2": [new Interval(32l, 105l, 0)],
-            "chr3": [new Interval(10000000l, 249250621l, 0)]
+            "chr1": [new Interval(0L, 100L), new Interval(150L, 300L)],
+            "chr2": [new Interval(32L, 105L)],
+            "chr3": [new Interval(10000000L, 249250621L)]
         ]
         Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
         assertEquals(intervalListExp, intervalListAct)
-    }
-
-
-   /*
-    * ----
-    *    ----
-    * Two non-overlapping intervals but intervals which are next to each other
-    */
-    @Test
-    void testParseBedFileNeighbourIntervals() {
-        fileContent += "\nchr1\t101\t201"
-        file.withWriter { out ->
-            out.writeLine(fileContent)
-        }
-        Map<String, List<Interval>> intervalListExp = [
-            "chr1": [new Interval(0l, 200l, 0)],
-            "chr2": [new Interval(32l, 105l, 0)],
-            "chr3": [new Interval(10000000l, 249250621l, 0)]
-        ]
-        Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
-        Map<String, List<Interval>> intervalListActUnique = targetIntervalsImpl.unique(intervalListAct)
-        assertEquals(intervalListExp, intervalListActUnique)
-    }
-
-   /*
-    * ----
-    *   -----
-    * Two overlapping intervals
-    */
-    @Test
-    void testParseBedFileOverlappingIntervals() {
-        fileContent += "\nchr1\t50\t151"
-        file.withWriter { out ->
-            out.writeLine(fileContent)
-        }
-        Map<String, List<Interval>> intervalListExp = [
-            "chr1": [new Interval(0l, 150l, 0)],
-            "chr2": [new Interval(32l, 105l, 0)],
-            "chr3": [new Interval(10000000l, 249250621l, 0)]
-        ]
-        Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
-        Map<String, List<Interval>> intervalListActUnique = targetIntervalsImpl.unique(intervalListAct)
-        assertEquals(intervalListExp, intervalListActUnique)
-    }
-
-   /*
-    * -------------
-    *     ------
-    * An interval fully spanning another interval
-    */
-    @Test
-    void testParseBedFileIncludedInterval() {
-        fileContent += "\nchr1\t30\t81"
-        file.withWriter { out ->
-            out.writeLine(fileContent)
-        }
-        Map<String, List<Interval>> intervalListExp = [
-            "chr1": [new Interval(0l, 100l, 0)],
-            "chr2": [new Interval(32l, 105l, 0)],
-            "chr3": [new Interval(10000000l, 249250621l, 0)]
-        ]
-        Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
-        Map<String, List<Interval>> intervalListActUnique = targetIntervalsImpl.unique(intervalListAct)
-        assertEquals(intervalListExp, intervalListActUnique)
-    }
-
-   /*
-    * -----
-    *    9---5
-    * One interval in correct order and one interval in reverse order which overlap
-    */
-    @Test
-    void testParseBedFileWrongOrder() {
-        fileContent += "\nchr4\t201\t90\nchr4\t50\t151"
-        file.withWriter { out ->
-            out.writeLine(fileContent)
-        }
-        Map<String, List<Interval>> intervalListExp = [
-            "chr1": [new Interval(0l, 100l, 0)],
-            "chr2": [new Interval(32l, 105l, 0)],
-            "chr3": [new Interval(10000000l, 249250621l, 0)],
-            "chr4": [new Interval(50l, 200l, 0)]
-        ]
-        Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
-        Map<String, List<Interval>> intervalListActUnique = targetIntervalsImpl.unique(intervalListAct)
-        assertEquals(intervalListExp, intervalListActUnique)
-    }
-
-   /*
-    * -
-    *  -----
-    *     ----
-    *        ---
-    * multiple partially overlapping intervals
-    */
-    @Test
-    void testParseBedFileMultipleOverlaps() {
-        fileContent += "\nchr1\t100\t201\nchr1\t180\t281\nchr1\t260\t361"
-        file.withWriter { out ->
-            out.writeLine(fileContent)
-        }
-        Map<String, List<Interval>> intervalListExp = [
-            "chr1": [new Interval(0l, 360l, 0)],
-            "chr2": [new Interval(32l, 105l, 0)],
-            "chr3": [new Interval(10000000l, 249250621l, 0)],
-        ]
-        Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
-        Map<String, List<Interval>> intervalListActUnique = targetIntervalsImpl.unique(intervalListAct)
-        assertEquals(intervalListExp, intervalListActUnique)
-    }
-
-   /*
-    * -----
-    *    ----
-    *         ---
-    * partially overlapping interval and one single interval
-    */
-    @Test
-    void testParseBedFileOneOverlapOneSingle() {
-        fileContent += "\nchr1\t50\t151\nchr1\t200\t301"
-        file.withWriter { out ->
-            out.writeLine(fileContent)
-        }
-        Map<String, List<Interval>> intervalListExp = [
-            "chr1": [new Interval(0l, 150l, 0), new Interval(200l, 300l, 0)],
-            "chr2": [new Interval(32l, 105l, 0)],
-            "chr3": [new Interval(10000000l, 249250621l, 0)],
-        ]
-        Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
-        Map<String, List<Interval>> intervalListActUnique = targetIntervalsImpl.unique(intervalListAct)
-        assertEquals(intervalListExp, intervalListActUnique)
     }
 
    /*
@@ -277,9 +146,9 @@ class TargetIntervalsImplTest {
     @Test(expected = IllegalArgumentException)
     void testValidateBedFileContentCase1() {
         Map<String, List<Interval>> map = [
-            "chr1": [new Interval(0l, 100l, 0), new Interval(150l, 300l, 0)],
-            "chr2": [new Interval(32l, 105l, 0)],
-            "chr3": [new Interval(10000000l, 249250621l, 0)]
+            "chr1": [new Interval(0L, 100L), new Interval(150L, 300L)],
+            "chr2": [new Interval(32L, 105L)],
+            "chr3": [new Interval(10000000L, 249250621L)]
         ]
         targetIntervalsImpl.validateBedFileContent(null, map)
     }
@@ -292,9 +161,9 @@ class TargetIntervalsImplTest {
     @Test
     void testValidateBedFileContentCase3() {
         Map<String, List<Interval>> map = [
-            "chr1": [new Interval(0l, 100l, 0), new Interval(150l, 300l, 0)],
-            "chr2": [new Interval(32l, 105l, 0)],
-            "chr3": [new Interval(10000000l, 249250621l, 0)]
+            "chr1": [new Interval(0L, 100L), new Interval(150L, 300L)],
+            "chr2": [new Interval(32L, 105L)],
+            "chr3": [new Interval(10000000L, 249250621L)]
         ]
        assertTrue(targetIntervalsImpl.validateBedFileContent(referenceGenomeEntryNames, map))
     }
@@ -302,76 +171,12 @@ class TargetIntervalsImplTest {
     @Test
     void testValidateBedFileContentCase4() {
         Map<String, List<Interval>> map = [
-            "chr1": [new Interval(0l, 100l, 0), new Interval(150l, 300l, 0)],
-            "chr2": [new Interval(32l, 105l, 0)],
-            "chr3": [new Interval(10000000l, 249250621l, 0)],
-            "chr6": [new Interval(100l, 200l, 0)]
+            "chr1": [new Interval(0L, 100L), new Interval(150L, 300L)],
+            "chr2": [new Interval(32L, 105L)],
+            "chr3": [new Interval(10000000L, 249250621L)],
+            "chr6": [new Interval(100L, 200L)]
         ]
         assertFalse(targetIntervalsImpl.validateBedFileContent(referenceGenomeEntryNames, map))
-    }
-
-    /*
-     * testUnique
-     * different cases to check:
-     * 1. if input map null - exception
-     * 2. if input map has no overlapping intervals - maps shall be the same
-     * 3. if input map has overlap - maps shall be different
-     */
-    @Test(expected = IllegalArgumentException)
-    void testUniqueCase1() {
-        targetIntervalsImpl.unique(null)
-    }
-
-    @Test
-    void testUniqueCase2() {
-        Map<String, List<Interval>> intervalListExp = [
-            "chr1": [new Interval(0l, 100l, 0)],
-            "chr2": [new Interval(32l, 105l, 0)],
-            "chr3": [new Interval(10000000l, 249250621l, 0)]
-        ]
-        Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
-        Map<String, List<Interval>> intervalListActUnique = targetIntervalsImpl.unique(intervalListAct)
-        assertEquals(intervalListExp, intervalListActUnique)
-    }
-
-    @Test
-    void testUniqueCase3() {
-        Map<String, List<Interval>> intervalListExp = [
-            "chr1": [new Interval(0l, 100l, 0), new Interval(50l, 150l, 0)],
-            "chr2": [new Interval(32l, 105l, 0)],
-            "chr3": [new Interval(10000000l, 249250621l, 0)]
-        ]
-        Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
-        Map<String, List<Interval>> intervalListActUnique = targetIntervalsImpl.unique(intervalListAct)
-        assertFalse(intervalListExp == intervalListActUnique)
-    }
-
-    /*
-     * different cases to be checked:
-     * 1. intervalList is null
-     * 2. 2 overlapping interval - check if merged interval is correct
-     * 3. 2 non-overlapping intervals - check that nothing happened
-     * other cases are checked via testParseBedFile... methods
-     */
-    @Test(expected = IllegalArgumentException)
-    void testMergeOverlappingCase1() {
-        targetIntervalsImpl.mergeOverlapping(null)
-    }
-
-    @Test
-    void testMergeOverlappingCase2() {
-        List<Interval> intervalList = [new Interval(0l, 100l, 0), new Interval(50l, 150l, 0)]
-        List<Interval> intervalListExp = [new Interval(0l, 150l, 0)]
-        List<Interval> intervalListAct = targetIntervalsImpl.mergeOverlapping(intervalList)
-        assertEquals(intervalListExp, intervalListAct)
-    }
-
-    @Test
-    void testMergeOverlappingCase3() {
-        List<Interval> intervalList = [new Interval(0l, 100l, 0), new Interval(200l, 300l, 0)]
-        List<Interval> intervalListExp = [new Interval(0l, 100l, 0), new Interval(200l, 300l, 0)]
-        List<Interval> intervalListAct = targetIntervalsImpl.mergeOverlapping(intervalList)
-        assertEquals(intervalListExp, intervalListAct)
     }
 
     /*
@@ -410,31 +215,6 @@ class TargetIntervalsImplTest {
     }
 
     /*
-     * testCreateTree
-     * 1. null
-     * 2. number of trees in map shall equal number of chromosomes AND
-     *    each tree shall have correct number of intervals
-     */
-    @Test(expected = IllegalArgumentException)
-    void testCreateTreeCase1() {
-        targetIntervalsImpl.createTree(null)
-    }
-
-    @Test
-    void testCreateTreeCase2() {
-        Map<String, List<Interval>> map = [
-            "chr1": [new Interval(0l, 100l, 0), new Interval(200l, 300l, 0)],
-            "chr2": [new Interval(100l, 200l, 0)],
-            "chr3": [new Interval(100l, 200l, 0)]
-        ]
-        targetIntervalsImpl.createTree(map)
-        assertEquals(3, targetIntervalsImpl.treeMap.size())
-        assertEquals(2, targetIntervalsImpl.treeMap.get("chr1").size())
-        assertEquals(1, targetIntervalsImpl.treeMap.get("chr2").size())
-        assertEquals(1, targetIntervalsImpl.treeMap.get("chr3").size())
-    }
-
-    /*
      * testGetOverlappingBaseCount
      * 1. null - exception
      * 2. target interval covered by single interval - check value
@@ -445,7 +225,7 @@ class TargetIntervalsImplTest {
 
     @Test(expected = IllegalArgumentException)
     void testGetOverlappingBaseCountCase1() {
-        targetIntervalsImpl.getOverlappingBaseCount(null, 10l, 20l)
+        targetIntervalsImpl.getOverlappingBaseCount(null, 10L, 20L)
     }
 
     @Test
@@ -455,7 +235,7 @@ class TargetIntervalsImplTest {
             out.writeLine(fileContent)
         }
         Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
-        long result = targetIntervalsImpl.getOverlappingBaseCount("chr1", 190l, 281l)
+        long result = targetIntervalsImpl.getOverlappingBaseCount("chr1", 190L, 281L)
         assertEquals(11, result)
     }
 
@@ -466,8 +246,14 @@ class TargetIntervalsImplTest {
             out.writeLine(fileContent)
         }
         Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
-        long result = targetIntervalsImpl.getOverlappingBaseCount("chr1", 150l, 301l)
-        assertEquals(51 + 51, result)
+
+        List<Interval> overlaps = targetIntervalsImpl.getOverlappingIntervals("chr1", 149L, 300L)
+        assertEquals(2, overlaps.size())
+        assertTrue(overlaps.contains(new Interval(100, 200)))
+        assertTrue(overlaps.contains(new Interval(250, 350)))
+
+        long actualOverlappingBaseCount = targetIntervalsImpl.getOverlappingBaseCount("chr1", 149L, 300L)
+        assertEquals(52 + 50, actualOverlappingBaseCount)
     }
 
     @Test
@@ -477,7 +263,7 @@ class TargetIntervalsImplTest {
             out.writeLine(fileContent)
         }
         Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
-        long result = targetIntervalsImpl.getOverlappingBaseCount("chr1", 500l, 600l)
+        long result = targetIntervalsImpl.getOverlappingBaseCount("chr1", 500L, 600L)
         assertEquals(0, result)
     }
 
@@ -488,7 +274,7 @@ class TargetIntervalsImplTest {
             out.writeLine(fileContent)
         }
         Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
-        long result = targetIntervalsImpl.getOverlappingBaseCount("chr2", 100l, 200l)
+        long result = targetIntervalsImpl.getOverlappingBaseCount("chr2", 100L, 200L)
         assertEquals(0, result)
     }
 
@@ -566,98 +352,6 @@ class TargetIntervalsImplTest {
     }
 
     /*
-     * testLength
-     */
-    @Test(expected = IllegalArgumentException)
-    void testLengthNull() {
-        targetIntervalsImpl.length(null)
-    }
-
-    /*
-     * this test has to fail, since the start and the end have to be specified (edu.stanford.nlp.util Interval API)
-     */
-    @Test(expected = NullPointerException)
-    void testLengthNoLengthInIntervalBoth() {
-        new Interval(null, null, 0)
-    }
-
-    /*
-     * this test has to fail, since the start and the end have to be specified (edu.stanford.nlp.util Interval API)
-     */
-    @Test(expected = NullPointerException)
-    void testLengthNoLengthInIntervalA() {
-        new Interval(null, 3l, 0)
-    }
-
-    /*
-     * this test has to fail, since the start and the end have to be specified (edu.stanford.nlp.util Interval API)
-     */
-    @Test(expected = NullPointerException)
-    void testLengthNoLengthInIntervalB() {
-        new Interval(3l, null, 0)
-    }
-
-    @Test
-    void testLengthEqualStartAndEnd() {
-        Interval interval = new Interval(4l, 4l, 0)
-        assertEquals(1, targetIntervalsImpl.length(interval))
-    }
-
-    @Test
-    void testLengthStartAndEndNextToEachOther() {
-        Interval interval = new Interval(4l, 5l, 0)
-        assertEquals(2, targetIntervalsImpl.length(interval))
-    }
-
-    /*
-     * this test has to fail, since the start and the end have to be specified (edu.stanford.nlp.util Interval API)
-     */
-    @Test(expected = IllegalArgumentException)
-    void testLengthIsNegative() {
-        new Interval(34l, 6l, 0)
-    }
-
-    @Test
-    void testLengthIsVeryBig() {
-        Interval interval = new Interval(0L, 9223372036854775800L, 0)
-        assertEquals(9223372036854775801L, targetIntervalsImpl.length(interval))
-    }
-
-    /*
-     * testCheckBedFileParsed
-     */
-    @Test
-    void testCheckBedFileParsed() {
-        targetIntervalsImpl.treeMap = [:]
-        targetIntervalsImpl.parseBedFileIfRequired()
-        assertTrue(!targetIntervalsImpl.treeMap.isEmpty())
-    }
-
-    /*
-     * testCreateTreeMapFromBedFile
-     */
-    @Test
-    void testCreateTreeMapFromBedFile() {
-        fileContent = "chr1\t100\t201\nchr1\t300\t401\nchr2\t100\t201"
-        file.withWriter { out ->
-            out.writeLine(fileContent)
-        }
-        targetIntervalsImpl.createTreeMapFromBedFile()
-        assertEquals(2, targetIntervalsImpl.treeMap.size())
-
-        Interval interval
-        // check input to output for chr1
-        IntervalTree treeChr1 = targetIntervalsImpl.treeMap.get("chr1")
-        assertTrue(treeChr1.contains(new Interval(100l, 200l, 0)))
-        assertTrue(treeChr1.contains(new Interval(300l, 400l, 0)))
-        // should not be in the tree
-        assertFalse(treeChr1.contains(new Interval(800l, 900l, 0)))
-        // check input to output for chr2
-        IntervalTree treeChr2 = targetIntervalsImpl.treeMap.get("chr2")
-        assertTrue(treeChr2.contains(new Interval(100l, 200l, 0)))
-    }
-
-    /*
      * testGetReferenceSequenceNames
      */
     @Test
@@ -673,14 +367,14 @@ class TargetIntervalsImplTest {
 
     @Test
     void testToInternalSystemCorrect() {
-        Interval expected = new Interval(0, 10, 0)
+        Interval expected = new Interval(0, 10)
         Interval output = TargetIntervalsImpl.toInternalSystem(0, 11)
-        assertEquals(expected.begin, output.begin)
-        assertEquals(expected.end, output.end)
-        expected = new Interval(1, 1, 0)
+        assertEquals(expected.from, output.from)
+        assertEquals(expected.to, output.to)
+        expected = new Interval(1, 1)
         output = TargetIntervalsImpl.toInternalSystem(1, 2)
-        assertEquals(expected.begin, output.begin)
-        assertEquals(expected.end, output.end)
+        assertEquals(expected.from, output.from)
+        assertEquals(expected.to, output.to)
     }
 
     @Test(expected = IllegalArgumentException)

@@ -16,7 +16,7 @@ interface TargetIntervals {
     /**
      * Returns number of bases defined by chromosome refSeqName, start, end
      * which overlap with one or more intervals defined in the bed file.
-     * The method is always run on a set of unique intervals.
+     * The method is always run on a set of sorted and merged intervals.
      * @param refSeqName - name of reference sequence name (e.g. chromosome)
      * @param start - start point in the given reference sequence
      * @param end - end point in the given reference sequence
@@ -37,9 +37,7 @@ interface TargetIntervals {
     long getBaseCount()
 
     /**
-     * @return sum of length of all intervals from the list of unique intervals
-     * which is result of merging of overlapping intervals from the initial
-     * list of intervals.
+     * @return summed length of sorted and merged intervals
      */
     long getUniqueBaseCount()
 

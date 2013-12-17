@@ -1,18 +1,9 @@
 package de.dkfz.tbi.ngstools.bedUtils
 
 import static org.springframework.util.Assert.*
-import edu.stanford.nlp.util.*
 
 class TargetIntervalsImpl implements TargetIntervals {
-
-    /**
-     * contains IntervalTree per reference sequence from
-     * the initial list of intervals. Each IntervalTree
-     * includes only unique intervals (result of merging
-     * of overlapping intervals from the initial list of intervals)
-     * for the corresponding reference sequence.
-     */
-    private Map<String, IntervalTree> treeMap
+    private Map<String, MergingIntervalCollection> intervalsPerSequence
 
     /**
      * cached value of baseCount
@@ -35,17 +26,12 @@ class TargetIntervalsImpl implements TargetIntervals {
     private List<String> referenceGenomeEntryNames
 
     /**
-     * Unique map containing no overlapping intervals
-     */
-    Map<String, List<Interval>> uniqueMap
-
-    /**
      * Initiates the class from the given bedFilePath.
      * The initiation steps:
      * - parse bedFile
      * - check if the content of the BedFile is valid, meaning that the entry names in the bedFile are contained in the referenceGenomeEntryNames
      * - calculation of basic statistics
-     * - create interval tree on unique set of intervals
+     * - create interval tree on sorted and merged set of intervals
      * @param bedFilePath - path to the bed file
      */
     public TargetIntervalsImpl(String bedFilePath, List<String> referenceGenomeEntryNames) {
@@ -59,17 +45,15 @@ class TargetIntervalsImpl implements TargetIntervals {
         isTrue(!referenceGenomeEntryNames.isEmpty(), "the referenceGenomeEntryNames parameter can not be empty")
         this.bedFilePath = bedFilePath
         this.referenceGenomeEntryNames = referenceGenomeEntryNames
-        this.treeMap = [:]
+        this.intervalsPerSequence = [:]
     }
 
     public void createTreeMapFromBedFile() {
         Map<String, List<Interval>> map = parseBedFile(bedFilePath)
         isTrue(validateBedFileContent(referenceGenomeEntryNames, map), "Validation of referenceGenomeEntryNames with bed file failed")
         baseCount = calculateBaseCount(map)
-        Map<String, List<Interval>> uniqueMap = unique(map)
-        uniqueBaseCount = calculateBaseCount(uniqueMap)
-        createTree(uniqueMap)
-        this.uniqueMap = uniqueMap
+        createTrees(map)
+        uniqueBaseCount = calculateBaseCount(intervalsPerSequence)
     }
 
     private Map<String, List<Interval>> parseBedFile(String bedFilePath) {
@@ -100,23 +84,21 @@ class TargetIntervalsImpl implements TargetIntervals {
                 long end = endCol as long
                 isTrue(end >= 0, "The end point of the interval is out of range")
                 // handle creation of interval and insertion into map
-                Interval interval = null
-                if (start < end) {
-                    interval = toInternalSystem(start, end)
-                } else {
-                    interval = toInternalSystem(end, start) // Charles: "do it"
-                    println "Warning: The interval ${interval} is in the wrong order"
+                Interval interval = toInternalSystem(start, end)
+                if (!interval.isAscending()) {
+                    println "Warning: The interval ${interval} is in the wrong order, continuing with correct-ordered version"
+                    interval = interval.asAscending()
                 }
                 if (map.containsKey(refSeqName)) {
-                    map.get(refSeqName).add(interval)
+                    map[refSeqName].add(interval)
                 } else {
-                    List<Interval> list = [interval]
-                    map.put(refSeqName, list)
+                    map.put(refSeqName, [interval])
                 }
             }
         }
         return map
     }
+
     /**
      * @param refGenomeEntryNames, a list which contains all names of the reference genome entries
      * @param map, a map containing a list of all intervals for each reference genome entry
@@ -132,65 +114,31 @@ class TargetIntervalsImpl implements TargetIntervals {
         }
     }
 
-    private Map<String, List<Interval>> unique(Map<String, List<Interval>> map) {
-        notNull(map, "The input of the method unique is null")
-        Map<String, List<Interval>> uniqueMap = [:]
-        map.each { String refSeqName, List<Interval> intervalList ->
-            Collections.sort(intervalList, IntervalComparator.INSTANCE)
-        }
-        map.each { String refSeqName, List<Interval> intervalList ->
-            List<Interval> uniqueList = mergeOverlapping(intervalList)
-            uniqueMap.put(refSeqName, uniqueList)
-        }
-        return uniqueMap
+    private long calculateBaseCount(Map<String, ? extends Iterable<Interval>> intervalsPerRefSeq) {
+        notNull(intervalsPerRefSeq, "The input of the method calculateBaseCount is null")
+
+        return intervalsPerRefSeq*.value.collect { Iterable<Interval> refSeqIntervals ->
+            refSeqIntervals.collect { interval ->
+                interval.length()
+            }.sum()
+        }.sum()
     }
 
     /**
-     * Modified version of getUniqueIntervals() from class IntervalList of Picard
+     * Initialises the internal trees for use.
+     * <p>
+     * Part of the lazy-loading functionality; see {@link #parseBedFileIfRequired()}
+     * </p>
      */
-    private List<Interval> mergeOverlapping(List<Interval> intervalList) {
-        notNull(intervalList, "The input of the method mergeOverlapping is null")
-        if (!intervalList || intervalList.size() == 1) {
-            return intervalList
-        }
-        List<Interval> uniqueList = []
-        Iterator iterator = intervalList.iterator()
-        Interval previous = iterator.next()
-        // the actual merging logic
-        while (iterator.hasNext()) {
-            Interval next = iterator.next()
-            boolean abuts = (previous.getBegin() == next.getEnd() + 1 || next.getBegin() == previous.getEnd() + 1)
-            if (previous.overlaps(next) || abuts) {
-                previous = new Interval(previous.getBegin(), Math.max(previous.getEnd(), next.getEnd()), 0)
-            } else {
-                uniqueList.add(previous)
-                previous = next
-            }
-        }
-        // to store multiple overlaps and last entry
-        if (previous != null) {
-            uniqueList.add(previous)
-        }
-        return uniqueList
-    }
-
-    private long calculateBaseCount(Map<String, List<Interval>> map) {
-        notNull(map, "The input of the method calculateBaseCount is null")
-        long baseCount
-        map.each { String refSeqName, List<Interval> intervalList ->
-            intervalList.each { Interval interval ->
-                baseCount += length(interval)
-            }
-        }
-        return baseCount
-    }
-
-    private void createTree(Map<String, List<Interval>> map) {
+    private void createTrees(Map<String, List<Interval>> map) {
         notNull(map, "The input of the method createTree is null")
         map.each { String refSeqName, List<Interval> intervalList ->
-            IntervalTree tree = new IntervalTree()
-            tree.addAll(intervalList)
-            treeMap.put(refSeqName, tree)
+            // initialise our IntervalTree
+            def intervalTree = new MergingIntervalCollection()
+            intervalList.each { Interval interval ->
+                intervalTree.add(interval)
+            }
+            intervalsPerSequence.put(refSeqName, intervalTree)
         }
     }
 
@@ -198,55 +146,46 @@ class TargetIntervalsImpl implements TargetIntervals {
         notNull(refSeqName, "refSeqName in method getOverlappingBaseCount is null")
         notNull(startPosition, "start in method getOverlappingBaseCount is null")
         notNull(endPosition, "end in method getOverlappingBaseCount is null")
-        Interval interval = toInternalSystem(startPosition, endPosition)
-        long start = interval.begin
-        long end = interval.end
+        Interval internalCoordinateInterval = toInternalSystem(startPosition, endPosition)
+
         parseBedFileIfRequired()
         long overlappingBaseCount = 0
-        if(uniqueMap.containsKey(refSeqName)) {
-            List<Interval> overlappingIntervals = this.getOverlappingIntervals(refSeqName, start, end)
+        if(intervalsPerSequence.containsKey(refSeqName)) {
+            List<Interval> overlappingIntervals = this.getOverlappingIntervals(refSeqName, internalCoordinateInterval.from, internalCoordinateInterval.to)
             // calculate overlapping bases to target
-            Interval target = new Interval(start, end, 0)
             overlappingIntervals.each { Interval overlappingInterval ->
-                Interval intersection = overlappingInterval.intersect(target)
-                overlappingBaseCount += length(intersection)
+                Interval intersection = overlappingInterval.intersect(internalCoordinateInterval)
+                overlappingBaseCount += intersection.length()
             }
         }
         return overlappingBaseCount
     }
 
     /**
-     * workaround to faulty coreNLP library used, see OTP-651
+     * Returns all interval's in the bed-file that are (wholly or partially) in the requested interval.
      */
-    private List<Interval> getOverlappingIntervals(String refSeqName, long start, long end) {
+    private List<Interval> getOverlappingIntervals(String refSeqName, long targetStart, long targetEnd) {
         parseBedFileIfRequired()
-        List<Interval> overlappingIntervals = []
-        // implementation based on simple list
-        if(uniqueMap.containsKey(refSeqName)) {
-            List<Interval> chrIntervalList = uniqueMap.get(refSeqName)
-            // find overlapping intervals
-            // we know the list is sorted and unique
-            Iterator iterator = chrIntervalList.iterator()
-            while(iterator.hasNext()) {
-                Interval interval = iterator.next()
-                // move tail of target along sorted intervals
-                if(end >= interval.getBegin()) {
-                    if(start > interval.getEnd()) {
-                        continue
-                    } else {
-                        overlappingIntervals.add(interval)
-                    }
-                }
-            }
+
+        // failfast if we have no valid chromosome to work on.
+        if (!intervalsPerSequence.containsKey(refSeqName)) {
+            return Collections.emptySet()
         }
-        return overlappingIntervals
+
+        def result = new ArrayList<Interval>()
+        result.addAll(intervalsPerSequence[refSeqName].getOverlappingIntervals(targetStart, targetEnd))
+        return result
     }
 
     /**
-     * treeMap is flag if BedFile has been parsed and treeMap has been created
+     * Checks if the BedFile has already been parsed, if not, parses it.
      */
     private void parseBedFileIfRequired() {
-        if (treeMap.isEmpty()) {
+        // Developer note: This is a primitive form of lazy-loading.
+        // If you are looking at this as an example, please learn about the "@lazy" annotation instead!
+
+        // interval-map doubles as a flag if BedFile has been parsed yet
+        if (intervalsPerSequence.isEmpty()) {
             createTreeMapFromBedFile()
         }
     }
@@ -270,31 +209,27 @@ class TargetIntervalsImpl implements TargetIntervals {
         notNull(refSeqName, "The input of the method contains is null")
         notEmpty(refSeqName, "The input of the method containsReference is empty")
         parseBedFileIfRequired()
-        return treeMap.keySet().contains(refSeqName)
-    }
-
-    private long length(Interval interval) {
-        notNull(interval, "The input of the method length is null")
-        long length = interval.getEnd() - interval.getBegin() + 1
-        return length
+        return intervalsPerSequence.containsKey(refSeqName)
     }
 
     public Set<String> getReferenceSequenceNames() {
         parseBedFileIfRequired()
-        return treeMap.keySet()
+        return intervalsPerSequence.keySet()
     }
 
     /**
-     * utils take input in bed file coordinate system,
+     * This function converts from bed-file system into internal system
+     * <p>
      * this class uses the following system:
      * base: 0, start: inclusive, end: inclusive
-     * This function converts from bed-file system into
-     * internal system
-     *
+     * </p>
+     * <p>
+     * bed-utils differs in that it has the last coordinate <i>exclusive</i>.<br>
+     * </p>
      */
     private static Interval toInternalSystem(long start, long end) {
         isTrue(end != start, "end must not be equal start")
         isTrue(end > start, "end must be more or equal than start, but start = $start and end = $end")
-        return new Interval(start, end - 1, 0)
+        return new Interval(start, end-1)
     }
 }
