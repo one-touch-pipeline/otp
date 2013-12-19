@@ -45,7 +45,7 @@ grails.project.dependency.resolution = {
         compile "gson:gson:2.2.2"
         compile "sam:sam:1.78"
         // bedUtils
-        compile 'bedUtils:bedUtils:0.3'
+        compile 'bedUtils:bedUtils:0.4'
     }
 
     plugins {

@@ -24,4 +24,6 @@ grails-app/views/templates/_version.gsp
 .link_to_grails_plugins
 tools/*/*/*/build/
 tools/*/*/*/.gradle/
+tools/*/*/build/
+tools/*/*/.gradle/
 
