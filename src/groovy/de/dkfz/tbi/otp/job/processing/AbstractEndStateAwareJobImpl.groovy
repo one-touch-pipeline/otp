@@ -176,7 +176,9 @@ abstract public class AbstractEndStateAwareJobImpl implements EndStateAwareJob {
     /**
      * Can be used by an implementing Job to set the Job as failed.
      * @see succeed
+     * @deprecated Throw an exception with a meaningful message instead.
      */
+    @Deprecated
     protected final void fail() {
         this.endState = ExecutionState.FAILURE
     }
