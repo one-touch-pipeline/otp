@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 /**
  * This service is responsible for orchestration of workflows running on Run objects.
- * 
  */
 
 class RunProcessingService {
@@ -72,7 +71,7 @@ class RunProcessingService {
     }
 
     private boolean checkIfAllSegmentsComplete(run) {
-        List<RunSegment> segments = 
+        List<RunSegment> segments =
             RunSegment.findAllByRunAndFilesStatus(run, RunSegment.FilesStatus.NEEDS_CHECKING)
         for (RunSegment segment in segments) {
             if (segment.metaDataStatus != RunSegment.Status.COMPLETE) {

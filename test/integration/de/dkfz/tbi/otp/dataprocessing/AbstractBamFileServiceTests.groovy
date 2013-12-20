@@ -10,12 +10,12 @@ class AbstractBamFileServiceTests {
 
     AbstractBamFileService abstractBamFileService
 
+    SeqCenter seqCenter
+    Run run
+    SeqPlatform seqPlatform
     MergingSet mergingSet
-
     MergingPass mergingPass
-
     AlignmentPass alignmentPass
-
     ProcessedBamFile processedBamFile
 
     @Before
@@ -54,7 +54,7 @@ class AbstractBamFileServiceTests {
                         )
         assertNotNull(seqType.save([flush: true]))
 
-        SeqCenter seqCenter = new SeqCenter(
+        seqCenter = new SeqCenter(
                         name: "seq-center",
                         dirName: "seq-center-dir"
                         )
@@ -68,18 +68,13 @@ class AbstractBamFileServiceTests {
                         )
         assertNotNull(softwareTool.save([flush: true]))
 
-        SeqPlatform seqPlatform = new SeqPlatform(
+        seqPlatform = new SeqPlatform(
                         name: "seq-platform",
                         model: "seq-platform-model"
                         )
         assertNotNull(seqPlatform.save([flush: true]))
 
-        Run run = new Run(
-                        name: "run",
-                        seqCenter: seqCenter,
-                        seqPlatform: seqPlatform,
-                        storageRealm: Run.StorageRealm.DKFZ
-                        )
+        run = createRun("run")
         assertNotNull(run.save([flush: true]))
 
         SeqTrack seqTrack = new SeqTrack(
@@ -125,6 +120,15 @@ class AbstractBamFileServiceTests {
                         status: State.NEEDS_PROCESSING
                         )
         assertNotNull(processedBamFile.save([flush: true]))
+    }
+
+    public Run createRun(String name) {
+        return new Run(
+                name: name,
+                seqCenter: seqCenter,
+                seqPlatform: seqPlatform,
+                storageRealm: Run.StorageRealm.DKFZ
+                )
     }
 
     @After
@@ -257,7 +261,7 @@ class AbstractBamFileServiceTests {
         assertEquals(abstractBamFilesExp, abstractBamFilesAct)
     }
 
-    private ProcessedMergedBamFile createProcessedMergedBamFile() {
+    public ProcessedMergedBamFile createProcessedMergedBamFile() {
         ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
                         mergingPass: mergingPass,
                         fileExists: true,

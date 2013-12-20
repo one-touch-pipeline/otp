@@ -136,6 +136,11 @@ class ProcessedMergedBamFileService {
         return "${dir}/${filename}"
     }
 
+    public String inProgressFileName(ProcessedMergedBamFile mergedBamFile) {
+        notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
+        return "${fileName(mergedBamFile)}.in_progress"
+    }
+
     public String fileNameForMetrics(ProcessedMergedBamFile mergedBamFile) {
         notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
         return fileNameNoSuffix(mergedBamFile) + "_metrics.txt"

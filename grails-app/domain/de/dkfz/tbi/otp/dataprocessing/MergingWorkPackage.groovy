@@ -62,4 +62,8 @@ class MergingWorkPackage {
         sample: Sample,
         seqType: SeqType
     ]
+
+    Project getProject() {
+        return sample.project
+    }
 }

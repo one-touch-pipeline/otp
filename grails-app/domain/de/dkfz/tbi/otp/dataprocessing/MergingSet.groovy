@@ -53,4 +53,8 @@ class MergingSet {
     static belongsTo = [
         mergingWorkPackage: MergingWorkPackage
     ]
+
+    Project getProject() {
+        return mergingWorkPackage.project
+    }
 }

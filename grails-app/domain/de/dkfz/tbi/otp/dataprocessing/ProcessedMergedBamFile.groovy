@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.ngsdata.*;
 
 /**
  * Represents a merged bam file stored on the file system
@@ -33,6 +34,10 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
             return ((val != FileOperationStatus.PROCESSED && obj.md5sum == null) || (val == FileOperationStatus.PROCESSED && obj.md5sum != null))
         }
         sha256sum(nullable: true)
+    }
+
+    Project getProject() {
+        return mergingPass.project
     }
 
     @Override

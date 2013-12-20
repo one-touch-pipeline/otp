@@ -23,4 +23,8 @@ class Sample {
     List<SampleIdentifier> getSampleIdentifiers() {
         return SampleIdentifier.findAllBySample(this)
     }
+
+    Project getProject() {
+        return individual.project
+    }
 }
