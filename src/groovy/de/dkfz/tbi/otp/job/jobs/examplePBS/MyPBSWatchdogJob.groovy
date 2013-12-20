@@ -10,7 +10,11 @@ import de.dkfz.tbi.otp.job.scheduler.PbsMonitorService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
 
-@RestartableJob
+/**
+ * @deprecated This watchdog is deprecated in favor of {@link WatchdogJob} which also provides logging capabilities.
+ *             It was meant only as an example.
+ */
+@Deprecated @RestartableJob
 class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob {
     @Autowired
     PbsMonitorService pbsMonitorService
