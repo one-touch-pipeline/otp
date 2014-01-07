@@ -58,12 +58,16 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
     // TODO This paths should be obtained from somewhere else..  maybe from ~/.otp.properties, but I am hardcoding for now.. -> OTP-570/OTP-672
     String dkfzRootPath = 'WORKFLOW_ROOT/TransferWorkflow/root_path'
     String dkfzProcessingPath = 'WORKFLOW_ROOT/TransferWorkflow/processing_root_path'
+    String dkfzLoggingPath = 'WORKFLOW_ROOT/TransferWorkflow/logging_root_path'
     String bqRootPath = '$BQ_ROOTPATH/dmg/otp/workflow-tests/TransferWorkflow/root_path'
     String bqProcessingPath = '$BQ_ROOTPATH/dmg/otp/workflow-tests/TransferWorkflow/processing_root_path'
+    // There is no final decision on the mount point of the shared directory yet. This may need adjustment.
+    //String bqLoggingPath = '$BQ_ROOTPATH/dmg/otp/workflow-tests/TransferWorkflow/logging_root_path'
 
     // Paths for testing on DKFZ
     String rootPath = dkfzRootPath
     String processingRootPath = dkfzProcessingPath
+    String loggingRootPath = dkfzLoggingPath
 
     /*
      // Paths for testing on BioQuant
