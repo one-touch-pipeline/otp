@@ -142,6 +142,19 @@ class ProcessedBamFileService {
     }
 
     /**
+     * Sets the status of the specified processed BAM file to NEEDS_PROCESSING. This triggers the
+     * CreateMergingSetWorkflow.
+     */
+    public void setNeedsProcessing(final ProcessedBamFile processedBamFile) {
+        notNull processedBamFile
+        assert [AbstractBamFile.State.DECLARED, AbstractBamFile.State.NEEDS_PROCESSING].contains(processedBamFile.status)
+        assert processedBamFile.seqTrack.alignmentState == SeqTrack.DataProcessingState.FINISHED
+        assert processedBamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
+        processedBamFile.status = AbstractBamFile.State.NEEDS_PROCESSING
+        assertSave(processedBamFile)
+    }
+
+    /**
      * @return the first available {@link ProcessedBamFile} which needs to be merged and was sorted
      * in the alignment workflow, or <code>null</code> if no such {@link ProcessedBamFile} exists.
      */

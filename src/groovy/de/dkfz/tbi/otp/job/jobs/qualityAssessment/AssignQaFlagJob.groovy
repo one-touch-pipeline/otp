@@ -12,12 +12,16 @@ class AssignQaFlagJob extends AbstractEndStateAwareJobImpl {
     @Autowired
     QualityAssessmentPassService qualityAssessmentPassService
 
+    @Autowired
+    ProcessedBamFileService processedBamFileService
+
     @Override
     public void execute() throws Exception {
         long passId = getProcessParameterValue() as long
         QualityAssessmentPass pass = QualityAssessmentPass.get(passId)
         qualityAssessmentPassService.assertNumberOfReadsIsTheSameAsCalculatedWithFastqc(pass)
         qualityAssessmentPassService.passFinished(pass)
+        processedBamFileService.setNeedsProcessing(pass.processedBamFile)
         succeed()
     }
 }

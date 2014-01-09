@@ -12,15 +12,29 @@ import org.junit.*
 @Mock([QualityAssessmentPass])
 class AssignQaFlagJobUnitTests {
 
+    private static final int PASS_ID = 1
+
     AssignQaFlagJob job
 
     @Before
     void setUp() {
+        assert new QualityAssessmentPass(identifier: PASS_ID).save(validate: false)
     }
 
     @After
     void tearDown() {
         job == null
+    }
+
+    private void createJob(QualityAssessmentPassService qualityAssessmentPassService) {
+        def processedBamFileService = [
+            setNeedsProcessing: { processedBamFile -> },
+        ] as ProcessedBamFileService
+        job = new AssignQaFlagJob(
+                qualityAssessmentPassService: qualityAssessmentPassService,
+                processedBamFileService: processedBamFileService,
+            )
+        AssignQaFlagJob.metaClass.getProcessParameterValue = { -> PASS_ID as long }
     }
 
     @Test
@@ -30,10 +44,7 @@ class AssignQaFlagJobUnitTests {
             assertNumberOfReadsIsTheSameAsCalculatedWithFastqc: { p -> throw new QualityAssessmentException("counts are different...") }
         ] as QualityAssessmentPassService
 
-        job = new AssignQaFlagJob(
-                qualityAssessmentPassService: qualityAssessmentPassService
-            )
-        AssignQaFlagJob.metaClass.getProcessParameterValue = { -> 1 as long }
+        createJob(qualityAssessmentPassService)
         AssignQaFlagJob.metaClass.getEndState = { -> null }
 
         job.start()
@@ -54,10 +65,7 @@ class AssignQaFlagJobUnitTests {
             passFinished: { p -> },
             assertNumberOfReadsIsTheSameAsCalculatedWithFastqc: { p -> }
         ] as QualityAssessmentPassService
-        job = new AssignQaFlagJob(
-                qualityAssessmentPassService: qualityAssessmentPassService
-            )
-        AssignQaFlagJob.metaClass.getProcessParameterValue = { -> 1 as long }
+        createJob(qualityAssessmentPassService)
 
         job.start()
         job.execute()
