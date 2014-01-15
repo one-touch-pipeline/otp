@@ -76,6 +76,8 @@ class FastqcPerBaseSequenceAnalysis {
         countOfNucleotideG(min: 0D)
         countOfNucleotideT(min: 0D)
         countOfNucleotideN(min: 0D)
-        percentageOfGC(min: 0D, max: 100D)
+        percentageOfGC(validator: { val ->
+            val == Double.NaN || (val >= 0 && val <= 100)
+        })
     }
 }
