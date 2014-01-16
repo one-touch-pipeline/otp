@@ -64,17 +64,9 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
     def springSecurityService
 
     Realm realm
-    String realmName = "DKFZ"
-    String realmDKFZUnixUser = "otptest"
-    String realmProgramsRootPath = "/"
-    String realmHost = "headnode"
-    int realmPort = 22
-    String realmWebHost = "https://otp.local/ngsdata/"
-    String realmPbsOptions = '{"-l": {nodes: "1:lsdf", walltime: "00:05:00"}}'
-    int realmTimeout = 0
 
-    String username = "otptest"
-    String base = "WORKFLOW_ROOT/"
+    // TODO This paths should be obtained from somewhere else..  maybe from .otpproperties, but I am hardcoding for now..
+    String base = "WORKFLOW_ROOT"
     String testDataDir = "${base}/files/merged-quality-assessment/"
     String myBase = "${base}/${username}/QualityAssessment"
     String rootPath = "${myBase}/rootPath/"
@@ -290,48 +282,21 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
     }
 
     private void createData() {
+        super.createUserAndRoles()
+        // Realm
+        Map paths = [
+            rootPath: rootPath,
+            processingRootPath: processingRootPath,
+            programsRootPath: '/',
+            ]
 
-        User admin = new User(
-                username: "admin",
-                password: springSecurityService.encodePassword("1234"),
-                userRealName: "Administrator",
-                email: "admin@test.com",
-                enabled: true,
-                accountExpired: false,
-                accountLocked: false,
-                passwordExpired: false)
-        assertNotNull(admin.save())
-
-        Role userRole = new Role(authority: "ROLE_USER")
-        assertNotNull(userRole.save())
-        Role adminRole = new Role(authority: "ROLE_ADMIN")
-        assertNotNull(adminRole.save())
-        UserRole.create(admin, userRole, false)
-        UserRole.create(admin, adminRole, false)
-
-        Realm.OperationType.values().each { Realm.OperationType operationType ->
-            realm = new Realm(
-                    cluster : Realm.Cluster.DKFZ,
-                    rootPath : rootPath,
-                    processingRootPath : processingRootPath,
-                    programsRootPath : realmProgramsRootPath,
-                    webHost : realmWebHost,
-                    host : realmHost,
-                    port : realmPort,
-                    unixUser : realmDKFZUnixUser,
-                    timeout : realmTimeout,
-                    pbsOptions : realmPbsOptions,
-                    name : "realmName",
-                    operationType : operationType,
-                    env : Environment.getCurrent().getName()
-                    )
-            assertNotNull(realm.save([flush: true]))
-        }
+        realm = DomainFactory.createRealmDataManagementDKFZ(paths).save([flush: true])
+        realm = DomainFactory.createRealmDataProcessingDKFZ(paths).save([flush: true])
 
         Project project = new Project(
                         name: "project",
                         dirName: "project-dir",
-                        realmName: "realmName"
+                        realmName: realm.name
                         )
         assertNotNull(project.save([flush: true]))
 

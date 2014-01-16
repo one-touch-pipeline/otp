@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.test.mixin.*
 import grails.test.mixin.support.GrailsUnitTestMixin
-import grails.util.Environment
 import org.junit.*
 
 @TestFor(BedFileService)
@@ -38,21 +37,9 @@ class BedFileServiceTests {
             bedFileFs << "test"
         }
 
-        realm = new Realm()
-        realm.name = "def"
-        realm.env = Environment.getCurrent().getName()
-        realm.operationType = Realm.OperationType.DATA_PROCESSING
-        realm.cluster = Realm.Cluster.DKFZ
-        realm.rootPath = ""
-        realm.processingRootPath = "tmp"
-        realm.programsRootPath = ""
-        realm.webHost = ""
-        realm.host = ""
-        realm.port = 8080
-        realm.unixUser = ""
-        realm.timeout = 1000000
-        realm.pbsOptions = ""
-        realm.save(flush : true)
+        realm = DomainFactory.createRealmDataProcessingDKFZ([
+            processingRootPath: 'tmp',
+            ])
 
         ReferenceGenome referenceGenome = new ReferenceGenome()
         referenceGenome.name = "hg19_1_24"

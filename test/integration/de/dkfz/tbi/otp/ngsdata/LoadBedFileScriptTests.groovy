@@ -42,21 +42,9 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
 
     @Before
     void setUp() {
-        realm = new Realm()
-        realm.name = "DKFZ"
-        realm.env = Environment.getCurrent().getName()
-        realm.operationType = Realm.OperationType.DATA_PROCESSING
-        realm.cluster = Realm.Cluster.DKFZ
-        realm.rootPath = ""
-        realm.processingRootPath = "tmp"
-        realm.programsRootPath = ""
-        realm.webHost = ""
-        realm.host = ""
-        realm.port = 8080
-        realm.unixUser = ""
-        realm.timeout = 1000000
-        realm.pbsOptions = ""
-        realm.save(flush : true)
+        realm = DomainFactory.createRealmDataProcessingDKFZ([
+            processingRootPath: 'tmp',
+            ]).save(flush : true)
 
         bedFilesToLoad.each { Input input ->
             File directory = new File("${REFERENCE_GENOME_PATH}/${input.refGenName}/${TARGET_REGIONS_PATH}")

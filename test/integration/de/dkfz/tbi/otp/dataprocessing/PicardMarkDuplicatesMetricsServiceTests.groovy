@@ -19,21 +19,11 @@ class PicardMarkDuplicatesMetricsServiceTests {
 
     @Before
     void setUp() {
-        realm = new Realm()
-        realm.cluster = Realm.Cluster.DKFZ
-        realm.rootPath = "/tmp/otp-unit-test/picardMarkDuplicatesMetricsServiceTests/root"
-        realm.processingRootPath = "/tmp/otp-unit-test/picardMarkDuplicatesMetricsServiceTests/processing"
-        realm.programsRootPath = ""
-        realm.webHost = ""
-        realm.host = ""
-        realm.port = 8080
-        realm.unixUser = ""
-        realm.timeout = 1000
-        realm.pbsOptions = ""
-        realm.name = "realmName"
-        realm.operationType = Realm.OperationType.DATA_PROCESSING
-        realm.env = Environment.getCurrent().getName()
-        realm.save([flush: true, failOnError: true])
+
+        realm = DomainFactory.createRealmDataProcessingDKFZ([
+            rootPath: '/tmp/otp-unit-test/picardMarkDuplicatesMetricsServiceTests/root',
+            processingRootPath: '/tmp/otp-unit-test/picardMarkDuplicatesMetricsServiceTests/processing',
+            ]).save([flush: true])
 
         File baseDir = new File(directory)
         metrics = new File(basePath)
@@ -158,7 +148,7 @@ LIBRARY\tUNPAIRED_READS_EXAMINED\tREAD_PAIRS_EXAMINED\tUNMAPPED_READS\tUNPAIRED_
         Project project = new Project(
                         name: "project",
                         dirName: "project-dir",
-                        realmName: "realmName"
+                        realmName: realm.name
                         )
         assertNotNull(project.save([flush: true, failOnError: true]))
 

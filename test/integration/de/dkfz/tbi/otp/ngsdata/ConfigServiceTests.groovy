@@ -16,39 +16,14 @@ class ConfigServiceTests {
     void setUp() {
 
         // Data on DKFZ LDSF, cluster in the DKFZ (regular case)
-        Realm realmDKFZ = new Realm(
-                name: "DKFZ",
-                env: Environment.getCurrent().getName(),
-                operationType: Realm.OperationType.DATA_MANAGEMENT,
-                cluster: Realm.Cluster.DKFZ,
-                rootPath: '/rootPath',
-                processingRootPath: '/processingRootPath',
-                programsRootPath: '/programsRootPath',
-                webHost: '',
-                host: 'localhost',
-                port: '22',
-                unixUser: '!invalid',
-                timeout: 60,
-                pbsOptions: ''
-                )
+        Realm realmDKFZ = DomainFactory.createRealmDataManagementDKFZ()
         assertNotNull(realmDKFZ.save(flush: true))
 
-        // Data on BioQuant LSDF, cluster in the BioQuant (regular case)
-        Realm realmBQ = new Realm(
-                name: "BioQuant",
-                env: Environment.getCurrent().getName(),
-                operationType: Realm.OperationType.DATA_MANAGEMENT,
-                cluster: Realm.Cluster.BIOQUANT,
-                rootPath: '/rootPath',
-                processingRootPath: '/processingRootPath',
-                programsRootPath: '/programsRootPath',
-                webHost: '',
-                host: 'localhost',
-                port: '22',
-                unixUser: '!invalid',
-                timeout: 60,
-                pbsOptions: ''
-                )
+        // Data on BioQuant LSDF, cluster in the BioQuant (regular case); fake values
+        Realm realmBQ = DomainFactory.createRealmDataManagementBioQuant([
+            unixUser: '!invalid',
+            host: 'localhost',
+            ])
         assertNotNull(realmBQ.save(flush: true))
 
         projectDKFZ = new Project(

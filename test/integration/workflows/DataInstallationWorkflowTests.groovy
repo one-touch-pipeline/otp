@@ -47,15 +47,7 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
     String runName = "130312_D00133_0018_ADTWTJACXX"
     String runDate = "2013-03-12"
     Realm realm
-    String realmName = "DKFZ"
-    String realmBioquantUnixUser = "$USER"
-    String realmDKFZUnixUser = "$USER"
     String realmProgramsRootPath = "/"
-    String realmHost = "headnode"
-    int realmPort = 22
-    String realmWebHost = "https://otp.local/ngsdata/"
-    String realmPbsOptions = "{'-l': {nodes: '1:lsdf', walltime: '${PBS_WALLTIME}'}}"
-    int realmTimeout = 0
     String seqCenterName = "TheSequencingCenter"
     String sampleID = "1234_AB_CD_E"
     String projectName = "TheProject"
@@ -90,31 +82,17 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
         return md5sum
     }
 
-    private Realm createAndSaveRealm(Realm.OperationType operationType) {
-        realm = new Realm(
-                        name: realmName,
-                        env: Environment.getCurrent().getName(),
-                        operationType: operationType,
-                        cluster: Realm.Cluster.DKFZ,
-                        rootPath: rootPath,
-                        processingRootPath: processingRootPath,
-                        programsRootPath: realmProgramsRootPath,
-                        webHost: realmWebHost,
-                        host: realmHost,
-                        port: realmPort,
-                        unixUser: realmDKFZUnixUser,
-                        timeout: realmTimeout,
-                        pbsOptions: realmPbsOptions
-                        )
-        realm.save(flush: true)
-        return realm
-    }
-
     @Before
     void setUp() {
         // Setup logic here
-        createAndSaveRealm(Realm.OperationType.DATA_MANAGEMENT)
-        createAndSaveRealm(Realm.OperationType.DATA_PROCESSING)
+        Map paths = [
+            rootPath: rootPath,
+            processingRootPath: processingRootPath,
+            programsRootPath: realmProgramsRootPath,
+        ]
+
+        realm = DomainFactory.createRealmDataManagementDKFZ(paths).save(flush: true)
+        realm = DomainFactory.createRealmDataProcessingDKFZ(paths).save(flush: true)
 
         String path = "${ftpDir}/${runName}"
         String softLinkFastqR1Filepath = "${path}/${fastqR1Filename}"
@@ -141,7 +119,7 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
         project = new Project()
         project.name = projectName
         project.dirName = projectName
-        project.realmName = realmName
+        project.realmName = realm.name
         assertNotNull(project.save(flush: true))
 
         Individual individual = new Individual()

@@ -24,7 +24,7 @@ class BwaPairingAndSortingJobTests {
         Project project = new Project(
             name: "projectName",
             dirName: "dirName",
-            realmName: "realmName"
+            realmName: 'DKFZ',
             )
         assertNotNull(project.save([flush: true, failOnError: true]))
 
@@ -229,38 +229,15 @@ class BwaPairingAndSortingJobTests {
         bamFile.errors
         assertNotNull(bamFile.save(flush: true))
 
-        Realm realm = new Realm(
-            name: "realmName",
-            env: Environment.getCurrent().getName(),
-            operationType: Realm.OperationType.DATA_MANAGEMENT,
-            cluster: Realm.Cluster.DKFZ,
+        Map paths = [
             rootPath: "rootPath",
             processingRootPath: "/tmp/BwaPairingAndSortingJobTests/",
-            programsRootPath: "programsRootPath",
-            webHost: "webHost",
-            host: "host",
-            port: 1111,
-            unixUser: "test",
-            timeout: 10,
-            pbsOptions: "pbsOptions"
-        )
+            ]
+
+        Realm realm = DomainFactory.createRealmDataManagementDKFZ(paths)
         assertNotNull(realm.save(flush: true))
 
-        realm = new Realm(
-            name: "realmName",
-            env: Environment.getCurrent().getName(),
-            operationType: Realm.OperationType.DATA_PROCESSING,
-            cluster: Realm.Cluster.DKFZ,
-            rootPath: "rootPath",
-            processingRootPath: "/tmp/BwaPairingAndSortingJobTests/",
-            programsRootPath: "programsRootPath",
-            webHost: "webHost",
-            host: "host",
-            port: 1111,
-            unixUser: "test",
-            timeout: 10,
-            pbsOptions: "pbsOptions"
-        )
+        realm = DomainFactory.createRealmDataProcessingDKFZ(paths)
         assertNotNull(realm.save(flush: true))
 
         File dirs = new File("/tmp/BwaPairingAndSortingJobTests/reference_genomes/hg19_1_24")

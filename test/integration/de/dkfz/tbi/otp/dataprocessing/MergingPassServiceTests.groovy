@@ -84,21 +84,7 @@ class MergingPassServiceTests {
     void testRealmForDataProcessing() {
         MergingSet mergingSet = createMergingSet("1")
         MergingPass mergingPass = mergingPassService.create()
-        Realm realm = new Realm()
-        realm.cluster = Cluster.DKFZ
-        realm.rootPath = ""
-        realm.processingRootPath = ""
-        realm.programsRootPath = ""
-        realm.webHost = ""
-        realm.host = ""
-        realm.port = 8080
-        realm.unixUser = ""
-        realm.timeout = 1000
-        realm.pbsOptions = "'"
-        realm.name = "realmName"
-        realm.operationType = Realm.OperationType.DATA_PROCESSING
-        realm.env = Environment.getCurrent().getName()
-        realm.save([flush: true, failOnError: true])
+        Realm realm = DomainFactory.createRealmDataProcessingDKFZ().save([flush: true])
         Realm realmAct = mergingPassService.realmForDataProcessing(mergingPass)
         assertEquals(realm, realmAct)
     }
@@ -162,7 +148,7 @@ class MergingPassServiceTests {
         Project project = new Project(
                         name: "name_" + uniqueId,
                         dirName: "dirName",
-                        realmName: "realmName"
+                        realmName: 'DKFZ',
                         )
         assertNotNull(project.save([flush: true, failOnError: true]))
 

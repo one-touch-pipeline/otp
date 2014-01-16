@@ -1,12 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.junit.Assert.*
-import grails.util.Environment
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -25,26 +25,15 @@ class QualityAssessmentMergedPassServiceTests {
 
     @Before
     void setUp() {
-        realm = new Realm()
-        realm.cluster = Realm.Cluster.DKFZ
-        realm.rootPath = "/tmp/otp-unit-test/pmfs/root"
-        realm.processingRootPath = "/tmp/otp-unit-test/pmbfs/processing"
-        realm.programsRootPath = ""
-        realm.webHost = ""
-        realm.host = ""
-        realm.port = 8080
-        realm.unixUser = ""
-        realm.timeout = 1000
-        realm.pbsOptions = ""
-        realm.name = "realmName"
-        realm.operationType = Realm.OperationType.DATA_PROCESSING
-        realm.env = Environment.getCurrent().getName()
-        realm.save([flush: true])
+        realm = DomainFactory.createRealmDataProcessingDKFZ([
+            rootPath: '/tmp/otp-unit-test/pmfs/root',
+            processingRootPath: '/tmp/otp-unit-test/pmbfs/processing',
+            ]).save([flush: true])
 
         project = new Project(
                         name: "project",
                         dirName: "project-dir",
-                        realmName: "realmName"
+                        realmName: 'DKFZ',
                         )
         assertNotNull(project.save([flush: true]))
 

@@ -94,21 +94,10 @@ class PbsOptionMergingServiceIntegrationTests extends AbstractIntegrationTest {
     }
 
     private Realm createRealm(String pbsOptions = "{}", Realm.Cluster cluster = Realm.Cluster.DKFZ) {
-        Realm realm = new Realm(
-                name: "DKFZ",
-                env: "development",
-                operationType: Realm.OperationType.DATA_MANAGEMENT,
-                cluster: cluster,
-                rootPath: "/",
-                processingRootPath: "/test",
-                programsRootPath: "/testPrograms",
-                webHost: "http://test.me",
-                host: "http://test.me",
-                port: 22,
-                unixUser: "testuser",
-                timeout: 100,
-                pbsOptions: pbsOptions
-                )
+        Realm realm = DomainFactory.createRealmDataManagementDKFZ([
+            cluster: cluster,
+            pbsOptions: pbsOptions,
+            ])
         assertNotNull(realm.save())
         return realm
     }

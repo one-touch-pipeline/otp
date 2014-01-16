@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.test.mixin.*
 import grails.test.mixin.support.*
-import grails.util.Environment
 import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
@@ -26,21 +25,7 @@ class ChromosomeIdentifierMappingServiceTests {
         chromosomeIdentifierMappingService = new ChromosomeIdentifierMappingService()
         chromosomeIdentifierMappingService.referenceGenomeService = new ReferenceGenomeService()
 
-        Realm realm = new Realm()
-        realm.name = "def"
-        realm.env = Environment.getCurrent().name()
-        realm.operationType = Realm.OperationType.DATA_PROCESSING
-        realm.cluster = Realm.Cluster.DKFZ
-        realm.rootPath = ""
-        realm.processingRootPath = "tmp"
-        realm.programsRootPath = ""
-        realm.webHost = ""
-        realm.host = ""
-        realm.port = 8080
-        realm.unixUser = ""
-        realm.timeout = 1000000
-        realm.pbsOptions = ""
-        realm.save(flush : true)
+        Realm realm = DomainFactory.createRealmDataProcessingDKFZ()
 
         project = new Project()
         project.name = "SOME_PROJECT"

@@ -46,7 +46,7 @@ class CheckQualityEncodingJobUnitTests {
         Project project = new Project(
                         name: "projectName",
                         dirName: "dirName",
-                        realmName: "realmName"
+                        realmName: 'DKFZ',
                         )
         assertNotNull(project.save([flush: true]))
 
@@ -132,21 +132,7 @@ class CheckQualityEncodingJobUnitTests {
                         )
         assertNotNull(dataFile.save(flush: true))
 
-        Realm realm = new Realm(
-                        cluster : Realm.Cluster.DKFZ,
-                        rootPath : "/tmp/otp-unit-test/",
-                        processingRootPath : "/tmp/otp-unit-test/",
-                        programsRootPath : "/tmp/otp-unit-test/",
-                        webHost : "webhost",
-                        host : "host",
-                        port : 0,
-                        unixUser : "user",
-                        timeout : 0,
-                        pbsOptions : "",
-                        name : "realmName",
-                        operationType : Realm.OperationType.DATA_MANAGEMENT,
-                        env : Environment.getCurrent().getName()
-                        )
+        Realm realm = DomainFactory.createRealmDataManagementDKFZ()
         assertNotNull(realm.save(flush: true, failOnError: true))
 
         file = new File(checkQualityEncodingJob.lsdfFilesService.getFileViewByPidPath(dataFile))

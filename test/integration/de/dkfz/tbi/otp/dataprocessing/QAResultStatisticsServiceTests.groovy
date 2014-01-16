@@ -51,43 +51,18 @@ class QAResultStatisticsServiceTests {
 
     @Before
     void setUp() {
-        Realm realm = new Realm()
-        realm.cluster = Realm.Cluster.DKFZ
-        realm.rootPath = "/tmp/otp-unit-test/pmfs/root"
-        realm.processingRootPath = "/tmp/otp-unit-test/pmbfs/processing"
-        realm.programsRootPath = ""
-        realm.webHost = ""
-        realm.host = ""
-        realm.port = 8080
-        realm.unixUser = ""
-        realm.timeout = 1000
-        realm.pbsOptions = ""
-        realm.name = "realmName"
-        realm.operationType = Realm.OperationType.DATA_PROCESSING
-        realm.env = Environment.getCurrent().getName()
-        realm.save([flush: true])
+        Map paths = [
+            rootPath: '/tmp/otp-unit-test/pmfs/root',
+            processingRootPath: '/tmp/otp-unit-test/pmbfs/processing',
+            ]
 
-        Realm realm1 = new Realm()
-        realm1.cluster = Realm.Cluster.DKFZ
-        realm1.rootPath = "/tmp/otp-unit-test/pmfs/root"
-        realm1.processingRootPath = "/tmp/otp-unit-test/pmbfs/processing"
-        realm1.programsRootPath = ""
-        realm1.webHost = ""
-        realm1.host = ""
-        realm1.port = 8080
-        realm1.unixUser = ""
-        realm1.timeout = 1000
-        realm1.pbsOptions = ""
-        realm1.name = "realmName"
-        realm1.operationType = Realm.OperationType.DATA_MANAGEMENT
-        realm1.env = Environment.getCurrent().getName()
-        realm1.save([flush: true])
-
+        Realm realm = DomainFactory.createRealmDataProcessingDKFZ(paths).save([flush: true])
+        Realm realm1 = DomainFactory.createRealmDataManagementDKFZ(paths).save([flush: true])
 
         project = new Project(
                         name: "projectName",
                         dirName: "projectDirName",
-                        realmName: "realmName"
+                        realmName: 'DKFZ',
                         )
         assertNotNull(project.save([flush: true]))
 

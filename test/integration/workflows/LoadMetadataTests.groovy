@@ -52,15 +52,7 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
     String metaDataFilepath = "${ftpDir}/${runName}/${runName}.fastq.tsv"
 
     Realm realm
-    String realmName = "DKFZ"
-    String realmBioquantUnixUser = "$USER"
-    String realmDKFZUnixUser = "$USER"
     String realmProgramsRootPath = "/"
-    String realmHost = "headnode"
-    int realmPort = 22
-    String realmWebHost = "https://otp.local/ngsdata/"
-    String realmPbsOptions = '{"-l": {nodes: "1:lsdf", walltime: "48:00:00"}}'
-    int realmTimeout = 0
 
     String seqCenterName = "TheSequencingCenter"
     String sampleID = "SampleIdentifier"
@@ -133,31 +125,17 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
         return values.join("\t") + "\n"
     }
 
-    private Realm createAndSaveRealm(Realm.OperationType operationType) {
-        realm = new Realm(
-                        name: realmName,
-                        env: Environment.getCurrent().getName(),
-                        operationType: operationType,
-                        cluster: Realm.Cluster.DKFZ,
-                        rootPath: rootPath,
-                        processingRootPath: processingRootPath,
-                        programsRootPath: realmProgramsRootPath,
-                        webHost: realmWebHost,
-                        host: realmHost,
-                        port: realmPort,
-                        unixUser: realmDKFZUnixUser,
-                        timeout: realmTimeout,
-                        pbsOptions: realmPbsOptions
-                        )
-        realm.save(flush: true)
-        return realm
-    }
-
     @Before
     void setUp() {
         // Setup logic here
-        createAndSaveRealm(Realm.OperationType.DATA_MANAGEMENT)
-        createAndSaveRealm(Realm.OperationType.DATA_PROCESSING)
+        Map paths = [
+            rootPath: rootPath,
+            processingRootPath: processingRootPath,
+            programsRootPath: realmProgramsRootPath,
+            ]
+
+        realm = DomainFactory.createRealmDataManagementDKFZ(paths).save(flush: true)
+        realm = DomainFactory.createRealmDataProcessingDKFZ(paths).save(flush: true)
 
         FileType fileType = new FileType()
         fileType.type = FileType.Type.SEQUENCE
@@ -173,7 +151,7 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
         Project project = new Project()
         project.name = projectName
         project.dirName = projectName
-        project.realmName = realmName
+        project.realmName = realm.name
         assertNotNull(project.save(flush: true))
 
         Individual individual = new Individual()

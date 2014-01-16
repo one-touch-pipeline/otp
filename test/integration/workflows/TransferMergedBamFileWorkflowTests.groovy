@@ -128,49 +128,18 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         // Realm for BioQuant (change if testing there)
         //String realmName = "BioQuant"
         String realmBioquantUnixUser = "unixUser2"
-        String realmDKFZUnixUser = "otptest"
 
-        String realmProgramsRootPath = "/"
-        String realmHost = "headnode"
-        int realmPort = 22
-        String realmWebHost = "https://otp.local/ngsdata/"
-        String realmPbsOptionsDKFZ = '{"-l": {nodes: "1:lsdf", walltime: "5:00"}}'
-        String realmPbsOptionsBQ = '{"-l": {nodes: "1:xeon", walltime: "5:00"}, "-W": {x: "NACCESSPOLICY:SINGLEJOB"}}'
-        int realmTimeout = 0
+        def paths = [
+            rootPath: "${rootPath}",
+            processingRootPath: "${processingRootPath}",
+            programsRootPath: '/',
+        ]
 
         // Realms for testing on DKFZ
-        realm = new Realm(
-                        name: "DKFZ",
-                        env: Environment.getCurrent().getName(),
-                        operationType: Realm.OperationType.DATA_MANAGEMENT,
-                        cluster: Realm.Cluster.DKFZ,
-                        rootPath: "${rootPath}",
-                        processingRootPath: "${processingRootPath}",
-                        programsRootPath: realmProgramsRootPath,
-                        webHost: realmWebHost,
-                        host: realmHost,
-                        port: realmPort,
-                        unixUser: realmDKFZUnixUser,
-                        timeout: realmTimeout,
-                        pbsOptions: realmPbsOptionsDKFZ
-                        )
+        realm = DomainFactory.createRealmDataManagementDKFZ(paths)
         assertNotNull(realm.save(flush: true))
 
-        realm = new Realm(
-                        name: "DKFZ",
-                        env: Environment.getCurrent().getName(),
-                        operationType: Realm.OperationType.DATA_PROCESSING,
-                        cluster: Realm.Cluster.DKFZ,
-                        rootPath: "${rootPath}",
-                        processingRootPath: "${processingRootPath}",
-                        programsRootPath: realmProgramsRootPath,
-                        webHost: realmWebHost,
-                        host: realmHost,
-                        port: realmPort,
-                        unixUser: realmDKFZUnixUser,
-                        timeout: realmTimeout,
-                        pbsOptions: realmPbsOptionsDKFZ
-                        )
+        realm = DomainFactory.createRealmDataProcessingDKFZ(paths)
         assertNotNull(realm.save(flush: true))
 
         /*
@@ -245,7 +214,7 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         Project project = new Project(
                         name: projectName,
                         dirName: projectDirName,
-                        realmName: realmName
+                        realmName: realm.name
                         )
         assertNotNull(project.save([flush: true, failOnError: true]))
 

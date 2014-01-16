@@ -24,14 +24,13 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
     Project project
     Realm realm
     SeqTrack seqTrack
-    final String REALM_NAME = "realmName"
 
     @Before
     void setUp() {
         project = new Project(
                         name: "TheProject",
                         dirName: "project-dir",
-                        realmName: REALM_NAME
+                        realmName: 'DKFZ',
                         )
         assertNotNull(project.save([flush: true]))
 
@@ -199,19 +198,7 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testRealmForDataProcessing() {
-        realm = new Realm()
-        realm.cluster = Realm.Cluster.DKFZ
-        realm.rootPath = ""
-        realm.processingRootPath = ""
-        realm.programsRootPath = ""
-        realm.webHost = ""
-        realm.host = ""
-        realm.unixUser = ""
-        realm.pbsOptions = ""
-        realm.name = REALM_NAME
-        realm.operationType = Realm.OperationType.DATA_PROCESSING
-        realm.env = Environment.getCurrent().getName()
-        realm.save([flush: true])
+        realm = DomainFactory.createRealmDataProcessingDKFZ().save([flush:true])
         assertEquals(realm, qualityAssessmentPassService.realmForDataProcessing(qualityAssessmentPass))
     }
 
