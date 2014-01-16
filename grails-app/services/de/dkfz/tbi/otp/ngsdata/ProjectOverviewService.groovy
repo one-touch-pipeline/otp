@@ -80,7 +80,7 @@ class ProjectOverviewService {
             eq("projectId", project.id)
             projections {
                 groupProperty("seqCenterName")
-                count("runId")
+                countDistinct("runId")
             }
             order ("seqCenterName")
         }
@@ -96,7 +96,7 @@ class ProjectOverviewService {
             gt("dateExecuted", date)
             projections {
                 groupProperty("seqCenterName")
-                count("runId")
+                countDistinct("runId")
             }
             order("seqCenterName")
         }
