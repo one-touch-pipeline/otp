@@ -294,7 +294,13 @@ AND i.id > :indId
      */
     @PreAuthorize("hasPermission(#project, 'write') or hasRole('ROLE_OPERATOR')")
     public Individual createIndividual(Project project, IndividualCommand command, List<SamplesParser> parsedSamples) throws IndividualCreationException {
-        Individual individual = new Individual(pid: command.pid, mockPid: command.mockPid, mockFullName: command.mockFullName, type: command.individualType, project: project)
+        Individual individual = new Individual(
+                pid: command.pid,
+                mockPid: command.mockPid,
+                mockFullName: command.mockFullName,
+                internIdentifier: command.internIdentifier,
+                type: command.individualType, project: project
+                )
         if (!individual.validate()) {
             throw new IndividualCreationException("Individual does not validate")
         }

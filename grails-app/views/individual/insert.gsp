@@ -19,6 +19,8 @@
                             <td valign="top" class="value ${hasErrors(bean:individual,field:'pid','errors')}">
                                 <input type="text" id="pid" name="pid" />
                             </td>
+                            <td>
+                            </td>
                         </tr>
                         <tr class="prop">
                             <td valign="top" class="name">
@@ -26,6 +28,8 @@
                             </td>
                             <td valign="top" class="value ${hasErrors(bean:individual,field:'project','errors')}">
                                 <g:select name="project" from="${projects}" optionKey="id" id="project" />
+                            </td>
+                            <td>
                             </td>
                         </tr>
                         <tr class="prop">
@@ -35,6 +39,8 @@
                             <td valign="top" class="value ${hasErrors(bean:individual,field:'mockPid','errors')}">
                                 <input type="text" id="mockPid" name="mockPid" />
                             </td>
+                            <td>
+                            </td>
                         </tr>
                         <tr class="prop">
                             <td valign="top" class="name">
@@ -42,6 +48,19 @@
                             </td>
                             <td valign="top" class="value ${hasErrors(bean:individual,field:'mockFullName','errors')}">
                                 <input type="text" id="mockFullName" name="mockFullName" />
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
+                        <tr class="prop">
+                            <td valign="top" class="name">
+                                <label for="internIdentifier"><g:message code="individual.insert.internIdentifier"/></label>
+                            </td>
+                            <td valign="top" class="value ${hasErrors(bean:individual,field:'internIdentifier','errors')}">
+                                <input type="text" id="internIdentifier" name="internIdentifier" />
+                            </td>
+                            <td valign="top" class="optional">
+                                <g:message code="otp.optional"/>
                             </td>
                         </tr>
                         <tr class="prop">
@@ -51,6 +70,8 @@
                             <td valign="top" class="value ${hasErrors(bean:individual,field:'individualType','errors')}">
                                 <g:select name="type" from="${individualTypes}" id="individualType" />
                             </td>
+                            <td>
+                            </td>
                         </tr>
                         <tr class="sample">
                             <td valign="top" class="name">
@@ -58,6 +79,8 @@
                             </td>
                             <td valign="top" class="sampleType">
                                 <g:select name="sampleType" from="${sampleTypes}" class="dropDown" />
+                            </td>
+                            <td>
                             </td>
                         </tr>
                         <tr class="sampleIdentifier">
@@ -70,6 +93,8 @@
                                     <button class="buttons"><g:message code="individual.insert.newSampleIdentifier"/></button>
                                 </div>
                             </td>
+                            <td>
+                            </td>
                         </tr>
                         <tr class="sample hidden">
                             <td valign="top" class="name">
@@ -77,6 +102,8 @@
                             </td>
                             <td valign="top" class="sampleType">
                                 <g:select name="sampleType" from="${sampleTypes}" class="dropDown" />
+                            </td>
+                            <td>
                             </td>
                         </tr>
                         <tr class="sampleIdentifier hidden">
@@ -88,6 +115,8 @@
                                 <div class="newSampleIdentifier">
                                     <button class="buttons"><g:message code="individual.insert.newSampleIdentifier"/></button>
                                 </div>
+                            </td>
+                            <td>
                             </td>
                         </tr>
                         <tr class="newSample">

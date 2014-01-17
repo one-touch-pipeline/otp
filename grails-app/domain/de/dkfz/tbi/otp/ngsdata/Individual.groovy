@@ -2,9 +2,29 @@ package de.dkfz.tbi.otp.ngsdata
 
 class Individual {
 
+    /**
+     * Identifier used in the file system. It should never change.
+     * Usually its the same as {@link #mockPid}
+     */
     String pid                 // real pid from iChip
+
+    /**
+     * Identifier used for displaying in tables/graphs.
+     */
     String mockPid             // pid used in the project
+
+    /**
+     * Alternative Identifier. If an individual is renamed, this column can contain the old identifier.
+     * Also it can be used for visible mapping of identifier.
+     */
     String mockFullName        // mnemonic used in the project
+
+    /**
+     * Holds an intern identifier, which shouldn't visible for normal users.
+     * Only admin users are allowed to see this value.
+     */
+    String internIdentifier
+
 
     enum Type {REAL, POOL, CELLLINE, UNDEFINED}
     Type type
@@ -13,10 +33,11 @@ class Individual {
 
     static constraints = {
         pid(unique: true, nullable: false)
+        internIdentifier(nullable: true)
     }
 
     String toString() {
-        "${mockPid} ${mockFullName}"
+        "${mockPid}"
     }
 
     /**

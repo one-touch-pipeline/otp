@@ -207,6 +207,7 @@ class IndividualCommand {
     Long project
     String mockPid
     String mockFullName
+    String internIdentifier
     Individual.Type individualType
     String samples
 
@@ -216,6 +217,7 @@ class IndividualCommand {
         })
         mockPid(blank: false)
         mockFullName(blank: false)
+        internIdentifier(nullable: true, blank: true)
         project(min: 0L, validator: { val, obj ->
             return val && (obj.projectService.getProject(val) != null)
         })

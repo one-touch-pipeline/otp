@@ -836,6 +836,7 @@ $.otp.addIndividual = {
             project: $("#project").val(),
             mockPid: $("#mockPid").val(),
             mockFullName: $("#mockFullName").val(),
+            internIdentifier: $("#internIdentifier").val(),
             individualType: $("#individualType").val(),
             samples: samples
         }, function (data) {

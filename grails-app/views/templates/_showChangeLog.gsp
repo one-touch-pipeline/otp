@@ -1,6 +1,6 @@
 <div class="showChangeLog">
     <input type="hidden" value="${link}"/>
-    <button title="${g.message(code: 'showChangeLog.button.title')}"></button>
+    <button title="${g.message(code: 'showChangeLog.button.title')}">&nbsp;</button>
     <div style="display: none;" title="${g.message(code: 'showChangeLog.dialog.title')}">
         <table>
             <thead>

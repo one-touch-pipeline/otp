@@ -32,8 +32,14 @@
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="individual.show.details.mockFullName"/></td>
-                <td class="myValue"><otp:editorSwitch roles="ROLE_OPERATOR" link="${g.createLink(controller: 'individual', action: 'updateField', id: ind.id, params: [key: 'mockFullName'])}" value="${ind.mockFullName}"/></td>
+                    <td class="myValue"><otp:editorSwitch roles="ROLE_OPERATOR" link="${g.createLink(controller: 'individual', action: 'updateField', id: ind.id, params: [key: 'mockFullName'])}" value="${ind.mockFullName}"/></td>
                 </tr>
+                <sec:ifAllGranted roles="ROLE_ADMIN">
+                    <tr>
+                        <td class="myKey"><g:message code="individual.show.details.internIdentifier"/></td>
+                        <td class="myValue"><otp:editorSwitch roles="ROLE_OPERATOR" link="${g.createLink(controller: 'individual', action: 'updateField', id: ind.id, params: [key: 'internIdentifier'])}" value="${ind.internIdentifier}"/></td>
+                    </tr>
+                </sec:ifAllGranted>
                 <tr>
                     <td class="myKey"><g:message code="individual.show.details.type"/></td>
                     <td class="myValue typeDropDown"><otp:editorSwitch roles="ROLE_OPERATOR" template="dropDown" link="${g.createLink(controller: 'individual', action: 'updateField', id: ind.id, params: [key: 'type'])}" value="${ind.type}"/></td>
@@ -50,8 +56,12 @@
                 <g:each var="sample" in="${ind.samples}">
                     <tr>
                         <td class="myKey">${sample.sampleType.name}</td>
-                        <td class="myValue sample"><otp:editorSwitch roles="ROLE_OPERATOR" template="sampleIdentifier" link="${g.createLink(controller: 'individual', action: 'updateSamples', id: ind.id)}" value="${sample.sampleIdentifiers}"/></td>
-                        <input type="hidden" name="sampleIdentifiersIds" value="${sample.sampleIdentifiers.id}"/>
+                        <td class="myValue sample">
+                            <sec:ifAllGranted roles="ROLE_ADMIN">
+                                <otp:editorSwitch roles="ROLE_OPERATOR" template="sampleIdentifier" link="${g.createLink(controller: 'individual', action: 'updateSamples', id: ind.id)}" value="${sample.sampleIdentifiers}"/>
+                                <input type="hidden" name="sampleIdentifiersIds" value="${sample.sampleIdentifiers.id}"/>
+                            </sec:ifAllGranted>
+                        </td>
                     </tr>
                 </g:each>
             </table>

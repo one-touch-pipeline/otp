@@ -100,8 +100,18 @@
         <g:each var="metaDataEntry" in="${entries}">
             <tr>
                 <td class="myKey">${metaDataEntry.key.name}</td>
-                <td class="myValue"}">
-                    <otp:editorSwitch roles="ROLE_ADMIN" link="${g.createLink(controller: 'dataFile', action: 'updateMetaData', id: metaDataEntry.id)}" value="${metaDataEntry.value}"/>
+                <td class="myValue">
+                    <sec:ifAllGranted roles="ROLE_ADMIN">
+                        <otp:editorSwitch roles="ROLE_ADMIN" link="${g.createLink(controller: 'dataFile', action: 'updateMetaData', id: metaDataEntry.id)}" value="${metaDataEntry.value}"/>
+                    </sec:ifAllGranted>
+                    <sec:ifNotGranted roles="ROLE_ADMIN">
+                        <g:if test="${metaDataEntry.key.name == 'SAMPLE_ID'}">
+                            <g:message code="datafile.showDetails.hiddenSampleIdentifier"/>
+                        </g:if>
+                        <g:else>
+                            ${metaDataEntry.value}
+                        </g:else>
+                    </sec:ifNotGranted>
                 </td>
                 <td class="${metaDataEntry.status}">${metaDataEntry.status}</td>
                 <td>${metaDataEntry.source}</td>
