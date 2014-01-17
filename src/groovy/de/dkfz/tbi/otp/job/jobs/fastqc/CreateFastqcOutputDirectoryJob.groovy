@@ -27,5 +27,8 @@ class CreateFastqcOutputDirectoryJob extends AbstractJobImpl {
         String cmd = "mkdir -p " + directory
         String exitCode = executionService.executeCommand(realm, cmd)
         log.debug "creating directory finished with exit code " + exitCode
+        if (!new File(directory).canRead()) {
+            throw new FileNotReadableException(directory)
+        }
     }
 }
