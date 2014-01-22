@@ -136,6 +136,36 @@ class TargetIntervalsImplTest {
         assertEquals(intervalListExp, intervalListAct)
     }
 
+    @Test
+    void testParseBedFileNormalOrderIntervalWrongOrder() {
+        fileContent += "\nchr1\t301\t150"
+        file.withWriter { out ->
+            out.writeLine(fileContent)
+        }
+        Map<String, List<Interval>> intervalListExp = [
+            "chr1": [new Interval(0L, 100L), new Interval(150L, 300L)],
+            "chr2": [new Interval(32L, 105L)],
+            "chr3": [new Interval(10000000L, 249250621L)]
+        ]
+        Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
+        assertEquals(intervalListExp, intervalListAct)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testParseBedFileNormalOrderIntervalStartEqualsEnd() {
+        fileContent += "\nchr1\t301\t301"
+        file.withWriter { out ->
+            out.writeLine(fileContent)
+        }
+        Map<String, List<Interval>> intervalListExp = [
+            "chr1": [new Interval(0L, 100L), new Interval(301L, 300L)],
+            "chr2": [new Interval(32L, 105L)],
+            "chr3": [new Interval(10000000L, 249250621L)]
+        ]
+        Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
+        assertEquals(intervalListExp, intervalListAct)
+    }
+
    /*
     *  testValidateBedFileContent
     *	1. refGenomeEntryNames = null - exception

@@ -84,10 +84,12 @@ class TargetIntervalsImpl implements TargetIntervals {
                 long end = endCol as long
                 isTrue(end >= 0, "The end point of the interval is out of range")
                 // handle creation of interval and insertion into map
-                Interval interval = toInternalSystem(start, end)
-                if (!interval.isAscending()) {
-                    println "Warning: The interval ${interval} is in the wrong order, continuing with correct-ordered version"
-                    interval = interval.asAscending()
+                Interval interval = null
+                if (start < end) {
+                    interval = toInternalSystem(start, end)
+                } else {
+                    interval = toInternalSystem(end, start)
+                    println "Warning: The interval ${interval} was in the wrong order, continuing with correct-ordered version"
                 }
                 if (map.containsKey(refSeqName)) {
                     map[refSeqName].add(interval)
@@ -229,7 +231,7 @@ class TargetIntervalsImpl implements TargetIntervals {
      */
     private static Interval toInternalSystem(long start, long end) {
         isTrue(end != start, "end must not be equal start")
-        isTrue(end > start, "end must be more or equal than start, but start = $start and end = $end")
+        isTrue(end > start, "end must be more than start, but start = $start and end = $end")
         return new Interval(start, end-1)
     }
 }
