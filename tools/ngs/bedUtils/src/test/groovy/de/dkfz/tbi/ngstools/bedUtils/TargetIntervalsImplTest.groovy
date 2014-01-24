@@ -4,8 +4,6 @@ import static org.junit.Assert.*
 
 import org.junit.*
 
-import edu.stanford.nlp.util.*
-
 class TargetIntervalsImplTest {
 
     TargetIntervalsImpl targetIntervalsImpl

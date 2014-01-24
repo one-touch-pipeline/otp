@@ -1,7 +1,5 @@
 package de.dkfz.tbi.ngstools.bedUtils
 
-import edu.stanford.nlp.util.*
-
 /**
  * Represents content of a bed file and provides
  * some operations on it
