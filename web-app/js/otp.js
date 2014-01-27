@@ -1496,7 +1496,7 @@ $.otp.projectOverviewTable = {
         registerProjectOverviewSequnceTypeTable: function () {
             "use strict";
             var oTable2 = $("#patientsAndSamplesGBCountPerProject").dataTable({
-                sDom: 'T<"clear">lfrtip',
+                sDom: '<i> T rt<"clear">',
                 oTableTools: {
                     sSwfPath : $.otp.contextPath + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
                     aButtons : tableTools_button_options
@@ -1543,7 +1543,7 @@ $.otp.projectOverviewTable = {
         registerSampleTypeNameCountBySample : function() {
             "use strict";
             var oTable4 = $("#sampleTypeNameCountBySample").dataTable({
-                sDom : 'T<"clear">lfrtip',
+                sDom : '<i> T rt<"clear">',
                 oTableTools : {
                     sSwfPath : $.otp.contextPath
                             + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
@@ -1618,7 +1618,7 @@ $.otp.projectOverviewTable = {
         registerCenterNameRunId : function() {
             "use strict";
             var oTable5 = $("#centerNameRunId").dataTable({
-                sDom : 'T<"clear">lfrtip',
+                sDom : '<i> T rt<"clear">',
                 oTableTools : {
                     sSwfPath : $.otp.contextPath
                             + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
