@@ -28,9 +28,17 @@ class ProjectOverviewController {
 
         return [
             projects: projects,
+            hideSampleIdentifier: hideSampleIdentifier(project),
             project: projectName,
             seqTypes: seqTypes
         ]
+    }
+
+    /**
+     * determine, if the column sample identifier should be hide in the view
+     */
+    private boolean hideSampleIdentifier(Project project) {
+        return project.name == "MMML"
     }
 
     /**
@@ -48,8 +56,10 @@ class ProjectOverviewController {
         Project project = projectService.getProjectByName(params.project)
         List< String> patients = projectOverviewService.mockPidByProject(project)
         List<List<String>> sampleTypes = projectOverviewService.overviewMockPidSampleType(project)
-        List<SampleIdentifier> sampleIdentifier = projectOverviewService.overviewSampleIdentifier(project)
         List<SeqType> seqTypes = projectOverviewService.seqTypeByProject(project)
+
+        boolean hideSampleIdentifier = hideSampleIdentifier(project)
+
 
         /*Map<mockPid, Map<sampleType, Map<SeqType / sample identifier constant, LaneCount / SampleIdentifier value>>>*/
         Map dataLastMap = [:]
@@ -62,8 +72,11 @@ class ProjectOverviewController {
             dataLastMap[mockPidSampleType[0]].put(mockPidSampleType[1], [:])
         }
 
-        sampleIdentifier.each {mockPidSampleTypeMinSampleId ->
-            dataLastMap.get(mockPidSampleTypeMinSampleId[0])?.get(mockPidSampleTypeMinSampleId[1])?.put(SAMPLE_IDENTIFIER, mockPidSampleTypeMinSampleId[2])
+        if (!hideSampleIdentifier) {
+            List<SampleIdentifier> sampleIdentifier = projectOverviewService.overviewSampleIdentifier(project)
+            sampleIdentifier.each {mockPidSampleTypeMinSampleId ->
+                dataLastMap.get(mockPidSampleTypeMinSampleId[0])?.get(mockPidSampleTypeMinSampleId[1])?.put(SAMPLE_IDENTIFIER, mockPidSampleTypeMinSampleId[2])
+            }
         }
 
         seqTypes.each { SeqType seqType ->
@@ -76,7 +89,10 @@ class ProjectOverviewController {
         List data = []
         dataLastMap.each {String individual, Map value1 ->
             value1.each { String sampleType, Map value2 ->
-                List<String> line = [individual, sampleType, value2[SAMPLE_IDENTIFIER]]
+                List<String> line = [individual, sampleType]
+                if (!hideSampleIdentifier) {
+                    line << value2[SAMPLE_IDENTIFIER]
+                }
                 seqTypes.each { SeqType seqType ->
                     if (value2.containsKey(seqType)) {
                         line << value2[seqType]

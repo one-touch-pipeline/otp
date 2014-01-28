@@ -20,7 +20,9 @@
                     <tr>
                         <th><g:message code="projectOverview.index.PID"/></th>
                         <th><g:message code="projectOverview.index.sampleType"/></th>
-                        <th><g:message code="projectOverview.index.sampleID"/></th>
+                        <g:if test="${!hideSampleIdentifier}">
+                            <th><g:message code="projectOverview.index.sampleID"/></th>
+                        </g:if>
                         <g:each var="seqType" in="${seqTypes}">
                             <th>${seqType}<br><g:message code="projectOverview.index.laneCount"/></th>
                         </g:each>
