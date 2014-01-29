@@ -27,8 +27,8 @@ class MultiplexingService {
         }
     }
 
-    private String barcode(String fileName) {
-        final String muxRegexp = /_[GATC]{6,6}_/
+    public String barcode(String fileName) {
+        final String muxRegexp = /_[GATC]{6,8}_/
         Matcher m = (fileName =~ muxRegexp)
         if (!m) {
             return null
