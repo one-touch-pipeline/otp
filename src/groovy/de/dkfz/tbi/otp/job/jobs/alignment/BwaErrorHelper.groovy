@@ -34,7 +34,11 @@ then
     exit 32
 fi
 
-success=`grep " fault" ${logFile}`
+# grep returns exit code 1 if it does not find anything. With set -e and without further measures
+# this would result in the script to stop and fail with exit code 1. But grep not finding anything
+# is the *good* case, so the || : is added which prevents the line from failing (the double pipes
+# mean OR and the colon is an alias for true).
+success=`grep " fault" ${logFile} || :`
 if [ ! -z "\$success" ]
 then
     echo Found segfault \$success in logfile! exiting;
@@ -42,7 +46,11 @@ then
     exit 31
 fi
 
-success=`grep -i "error" ${logFile}`
+# grep returns exit code 1 if it does not find anything. With set -e and without further measures
+# this would result in the script to stop and fail with exit code 1. But grep not finding anything
+# is the *good* case, so the || : is added which prevents the line from failing (the double pipes
+# mean OR and the colon is an alias for true).
+success=`grep -i "error" ${logFile} || :`
 if [ ! -z "\$success" ]
 then
     echo Found error \$success in logfile! exiting;
