@@ -915,7 +915,7 @@ $.otp.createListView = function (selector, sourcePath, sortOrder, jsonCallback, 
         if ($.otp.autorefresh.enabled) {
             $(selector).dataTable().fnDraw();
         }
-    }, 10000);
+    }, 60000);
     $.otp.resizeBodyInit(selector, 140);
 };
 
@@ -960,7 +960,7 @@ $.otp.workFlow = function (selector, sourcePath, sortOrder, jsonCallback, column
         if ($.otp.autorefresh.enabled) {
             $(selector).dataTable().fnDraw();
         }
-    }, 10000);
+    }, 60000);
     $.otp.resizeBodyInit(selector, 240);
 };
 
@@ -1005,7 +1005,7 @@ $.otp.registerStep = function (selector, sourcePath, sortOrder, jsonCallback, co
         if ($.otp.autorefresh.enabled) {
             $(selector).dataTable().fnDraw();
         }
-    }, 10000);
+    }, 60000);
     $.otp.resizeBodyInit(selector, 230);
 };
 
@@ -1788,7 +1788,7 @@ $.otp.createListViewProcessingStep = function (selector, sourcePath, sortOrder, 
         if ($.otp.autorefresh.enabled) {
             $(selector).dataTable().fnDraw();
         }
-    }, 10000);
+    }, 60000);
 };
 
 $.otp.resizeBodyInit = function (table, margin) {
