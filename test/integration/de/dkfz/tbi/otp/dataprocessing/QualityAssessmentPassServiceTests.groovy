@@ -319,6 +319,58 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
         assertNotNull(qualityAssessmentPassService.createPass())
     }
 
+    @Test
+    void testCreatePassWithTwoCandidates() {
+        ProcessedBamFile processedBamFile2 = new ProcessedBamFile(
+                        alignmentPass: processedBamFile.alignmentPass,
+                        fileExists: true,
+                        type: BamType.SORTED,
+                        qualityAssessmentStatus: QaProcessingStatus.NOT_STARTED,
+                        fileOperationStatus: FileOperationStatus.DECLARED,
+                        md5sum: null,
+                        withdrawn: false,
+                        status: AbstractBamFile.State.PROCESSED
+                        )
+        assertNotNull(processedBamFile2.save([flush: true]))
+
+        QualityAssessmentPass qualityAssessmentPass2 = new QualityAssessmentPass(
+                        processedBamFile: processedBamFile2,
+                        identifier: 0,
+                        description: 'QualtiyAssessmentPassDescription'
+                        )
+        assertNotNull(qualityAssessmentPass2.save([flush: true]))
+
+        seqTrackService.setFastqcFinished(seqTrack)
+        processedBamFile.qualityAssessmentStatus = QaProcessingStatus.NOT_STARTED
+        assertEquals(2, QualityAssessmentPass.list().size())
+
+        FileType fileType = new FileType(
+                        type: FileType.Type.SEQUENCE,
+                        subType: "fastq",
+                        vbpPath: "/sequence/",
+                        signature: ".fastq"
+                        )
+        assertNotNull(fileType.save(flush: true))
+
+        DataFile dataFile = new DataFile(
+                        fileType: fileType,
+                        seqTrack: seqTrack)
+        assertNotNull(dataFile.save(flush: true))
+
+        FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile(
+                        contentUploaded: true,
+                        dataFile: dataFile)
+        assertNotNull(fastqcProcessedFile.save(flush: true))
+
+        FastqcBasicStatistics fastqcBasicStats = new FastqcBasicStatistics(
+                        fileType: "fileType",
+                        encoding: "encoding",
+                        fastqcProcessedFile: fastqcProcessedFile)
+        assertNotNull(fastqcBasicStats.save(flush: true))
+
+        assertNotNull(qualityAssessmentPassService.createPass())
+    }
+
     private void setUpTestForAssertNumberOfReadsIsTheSameAsCalculatedWithFastqc(long fastqcReadCount, long bamReadCount) {
         final String FILE_TYPE = "fileType"
         final String FILE_ENCODING = "encoding"

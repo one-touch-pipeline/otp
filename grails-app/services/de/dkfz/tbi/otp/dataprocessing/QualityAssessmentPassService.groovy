@@ -25,6 +25,7 @@ class QualityAssessmentPassService {
                     eq("fastqcState", SeqTrack.DataProcessingState.FINISHED)
                 }
             }
+            maxResults(1)
         }
         if (!processedBamFile) {
             return null
