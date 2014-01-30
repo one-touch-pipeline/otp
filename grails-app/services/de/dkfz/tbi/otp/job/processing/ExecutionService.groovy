@@ -357,7 +357,7 @@ ${text}
     }
 
     private boolean isJobStatusAvailable(String output) {
-        Pattern pattern = Pattern.compile("\\s*Job id\\s*Name\\s*User.*")
+        Pattern pattern = Pattern.compile("\\s*Job id\\s*Name\\s*User.*", Pattern.CASE_INSENSITIVE)
         boolean valid = false
         output.eachLine { String line ->
             Matcher m = pattern.matcher(line)

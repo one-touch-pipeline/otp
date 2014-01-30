@@ -13,7 +13,7 @@ class ExecutionServiceUnitTests {
 
     String qstatOutputForJobFound(String jobId, String jobName, String user, String timeUse, String status, String queueName) {
         String outputRunning = """
-        Job id                    Name             User            Time Use S Queue
+        Job ID                    Name             User            Time Use S Queue
         ------------------------- ---------------- --------------- -------- - -----
         ${jobId}           ${jobName}            ${user}         ${timeUse} ${status} ${queueName}"""
     }
