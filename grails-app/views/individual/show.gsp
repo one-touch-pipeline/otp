@@ -93,23 +93,25 @@
                         <tbody>
                             <g:each var="scan" in="${ind.seqScans}">
                                 <g:if test="${scan.seqType.id == type.id}">
-                                    <tr>
-                                        <td><g:link controller="seqScan" action="show" id="${scan.id}"><g:message code="individual.show.sequencingScans.details"/></g:link></td>
-                                        <td><strong>${scan.sample.sampleType.name}</strong></td>
-                                        <td>${scan.seqPlatform}</td>
-                                        <td>${scan.state}</td>
-                                        <td>${scan.seqCenters.toLowerCase()}</td>
-                                        <td>${scan.nLanes}</td>
-                                        <td>${scan.coverage}</td>
-                                        <td>${scan.basePairsString()}</td>
-                                        <td>${scan.insertSize}</td>
-                                        <td class="${scan.merged}"><g:formatBoolean boolean="${scan.merged}" true="merged" false="not merged"/></td>
-                                        <td>
-                                            <g:if test="${igvMap.get(scan.id)}">
-                                                <g:checkBox name="${scan.id}" value="${false}"/>
-                                            </g:if>
-                                        </td>
-                                    </tr>
+                                    <g:if test="${scan.state != de.dkfz.tbi.otp.ngsdata.SeqScan.State.OBSOLETE}">
+                                        <tr>
+                                            <td><g:link controller="seqScan" action="show" id="${scan.id}"><g:message code="individual.show.sequencingScans.details"/></g:link></td>
+                                            <td><strong>${scan.sample.sampleType.name}</strong></td>
+                                            <td>${scan.seqPlatform}</td>
+                                            <td>${scan.state}</td>
+                                            <td>${scan.seqCenters.toLowerCase()}</td>
+                                            <td>${scan.nLanes}</td>
+                                            <td>${scan.coverage}</td>
+                                            <td>${scan.basePairsString()}</td>
+                                            <td>${scan.insertSize}</td>
+                                            <td class="${scan.merged}"><g:formatBoolean boolean="${scan.merged}" true="merged" false="not merged"/></td>
+                                            <td>
+                                                <g:if test="${igvMap.get(scan.id)}">
+                                                    <g:checkBox name="${scan.id}" value="${false}"/>
+                                                </g:if>
+                                            </td>
+                                        </tr>
+                                    </g:if>
                                 </g:if>
                             </g:each>
                         </tbody>
