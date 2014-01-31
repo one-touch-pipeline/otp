@@ -30,7 +30,7 @@ class CreateQaOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
     }
 
     private void execute(String directory, Realm realm) {
-        String cmd = "mkdir -p " + directory
+        String cmd = "mkdir -p -m 0750 " + directory
         String exitCode = executionService.executeCommand(realm, cmd)
         boolean dirCreated = validate(directory)
         dirCreated ? succeed() : fail()

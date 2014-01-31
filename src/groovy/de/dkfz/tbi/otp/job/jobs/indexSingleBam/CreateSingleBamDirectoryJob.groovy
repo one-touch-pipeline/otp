@@ -33,7 +33,7 @@ class CreateSingleBamDirectoryJob extends AbstractJobImpl {
         String basePath = mergedAlignmentDataFileService.pathToHost(scan)
         String filePath = dataFile.filePath
         String path = "${basePath}/${filePath}"
-        String text = "mkdir -p ${path}"
+        String text = "mkdir -p -m 0750 ${path}"
     }
 
     private MergedAlignmentDataFile getDataFile() {

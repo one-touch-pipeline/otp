@@ -64,7 +64,7 @@ class MoveFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl {
     //before moving the files to the final directory it is checked if the files, which are currently at the destination, are in use
     private String scriptText(String dest, String temporalDestinationDir, String dirToLog, String projectDir, String temporalQADestinationDir, String qaDestinationDirectory, String inProgressFileName) {
         String text = """
-mkdir -p ${dest}${processedMergedBamFileService.QUALITY_ASSESSMENT_DIR}
+mkdir -p -m 0750 ${dest}${processedMergedBamFileService.QUALITY_ASSESSMENT_DIR}
 flock -x ${dest} -c \"mv -f ${temporalDestinationDir}/*.bam ${temporalDestinationDir}/*.bai ${temporalDestinationDir}/*.md5sum ${temporalDestinationDir}/*.log ${dest}\"
 flock -x ${dest} -c \"mv -f ${temporalQADestinationDir}/* ${qaDestinationDirectory}/\"
 rm -rf ${temporalDestinationDir}
