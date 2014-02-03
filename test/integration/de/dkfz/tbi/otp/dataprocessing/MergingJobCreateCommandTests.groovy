@@ -161,7 +161,7 @@ class MergingJobCreateCommandTests {
     @Test
     void testCreateCommandOneBamFile() {
         String tempDirExp = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
-        String createTempDirExp = "mkdir -p ${tempDirExp}"
+        String createTempDirExp = "mkdir -p -m 2750 ${tempDirExp}"
         String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
         String picardExp = "picard.sh MarkDuplicates"
         String inputFilePathExp = " I=${basePathAlignment}//run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_libraryLayout.sorted.bam"
@@ -180,7 +180,7 @@ class MergingJobCreateCommandTests {
     void testCreateCommandTwoBamFiles() {
         createMergingSetAssignment("2")
         String tempDirExp = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
-        String createTempDirExp = "mkdir -p ${tempDirExp}"
+        String createTempDirExp = "mkdir -p -m 2750 ${tempDirExp}"
         String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
         String picardExp = "picard.sh MarkDuplicates"
         String inputFilePathExp = " I=${basePathAlignment}//run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_libraryLayout.sorted.bam I=${basePathAlignment}//run_2_laneId_2/pass2/name_1_run_2_s_laneId_2_libraryLayout.sorted.bam"
@@ -199,7 +199,7 @@ class MergingJobCreateCommandTests {
     void testCreateCommandBamFileWithProcessedMergedBamFile() {
         createMergedMergingSetAssignment("2")
         String tempDirExp = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
-        String createTempDirExp = "mkdir -p ${tempDirExp}"
+        String createTempDirExp = "mkdir -p -m 2750 ${tempDirExp}"
         String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
         String picardExp = "picard.sh MarkDuplicates"
         String inputFilePathExp = " I=${basePathAlignment}//run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_libraryLayout.sorted.bam I=${basePathMerging}//name_1/seqType_1/library/DEFAULT/0/pass0/name_1_pid_1_seqType_1_library_merged.mdup.bam"
@@ -219,7 +219,7 @@ class MergingJobCreateCommandTests {
         createMergingSetAssignment("2")
         createMergedMergingSetAssignment("3")
         String tempDirExp = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
-        String createTempDirExp = "mkdir -p ${tempDirExp}"
+        String createTempDirExp = "mkdir -p -m 2750 ${tempDirExp}"
         String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
         String picardExp = "picard.sh MarkDuplicates"
         String inputFilePathExp = " I=${basePathAlignment}//run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_libraryLayout.sorted.bam I=${basePathAlignment}//run_2_laneId_2/pass2/name_1_run_2_s_laneId_2_libraryLayout.sorted.bam I=${basePathMerging}//name_1/seqType_1/library/DEFAULT/0/pass0/name_1_pid_1_seqType_1_library_merged.mdup.bam"

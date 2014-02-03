@@ -25,7 +25,7 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
         projects.each {Project project ->
             String[] dirs = lsdfFilesService.getListOfRunDirecotries(run, project.name)
             dirs.each {String line ->
-                String cmd = "mkdir -p -m 0750 " + line
+                String cmd = "mkdir -p -m 2750 " + line
                 Realm realm = configService.getRealmDataManagement(project)
                 String exitCode = executionService.executeCommand(realm, cmd)
                 log.debug "creating directory [${line}].  exit code [${exitCode}]"

@@ -61,7 +61,7 @@ class TransferSingleLaneQAResultJob extends AbstractEndStateAwareJobImpl{
             text += """
 # Remove old QA results directory for single lane BAM files if they exist
 ${clusterPrefix.exec} \"rm -r -f ${qaDestinationDirectory}/${directoryName}\"
-${clusterPrefix.exec} \"mkdir -p -m 0750 ${tmpQADestinationDirectory}/${directoryName}\"
+${clusterPrefix.exec} \"mkdir -p -m 2750 ${tmpQADestinationDirectory}/${directoryName}\"
 ${clusterPrefix.cp} -r ${src}/* ${clusterPrefix.dest}${tmpQADestinationDirectory}/${directoryName}
 ${clusterPrefix.exec} \"find ${tmpQADestinationDirectory}/${directoryName} -type f -exec chmod 0640 '{}' \\;\"
 """
