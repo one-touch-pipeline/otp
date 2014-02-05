@@ -2,13 +2,13 @@ package de.dkfz.tbi.otp.job.jobs.indexSingleBam
 
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
-import de.dkfz.tbi.otp.job.processing.ExecutionService
+import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.ngsdata.*
 
 class SendIndexingBamJob extends AbstractJobImpl {
 
     @Autowired
-    ExecutionService executionService
+    ExecutionHelperService executionHelperService
 
     @Autowired
     MergedAlignmentDataFileService mergedAlignmentDataFileService
@@ -37,7 +37,7 @@ class SendIndexingBamJob extends AbstractJobImpl {
     private String processFile(DataFile file) {
         Realm realm = file.project.realm
         String text = buildScriptText(file)
-        String jobId = sendScript(realm, text)
+        String jobId = executionHelperService.sendScript(realm, text)
         return jobId
     }
 
@@ -53,15 +53,5 @@ class SendIndexingBamJob extends AbstractJobImpl {
         String cmd = "cd ${path}; samtools index ${inFile} ${outFile}.bai;chmod 440 ${outFile}"
         log.debug cmd
         return cmd
-    }
-
-    private String sendScript(Realm realm, String text) {
-        return "1"
-        String pbsResponse = executionService.executeJob(realm, text)
-        List<String> extractedPbsIds = executionService.extractPbsIds(pbsResponse)
-        if (extractedPbsIds.size() != 1) {
-            log.debug "Number of PBS is = ${extractedPbsIds.size()}"
-        }
-        return extractedPbsIds.get(0)
     }
 }

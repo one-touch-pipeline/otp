@@ -202,7 +202,7 @@ ${text}
             return values
         } catch (Exception e) {
             log.info(e.toString(), e)
-            throw new ProcessingException(e.toString())
+            throw new ProcessingException(e)
         }
     }
 

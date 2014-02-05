@@ -38,7 +38,7 @@ class ExecutionHelperService {
         String pbsResponse = executionService.executeJob(realm, text, jobIdentifier)
         List<String> extractedPbsIds = executionService.extractPbsIds(pbsResponse)
         if (extractedPbsIds.size() != 1) {
-            log.debug "Number of PBS jobs is = ${extractedPbsIds.size()}"
+            throw new ProcessingException("Could not extract a unique PBS ID. The received response is: " + pbsResponse)
         }
         return extractedPbsIds.get(0)
     }
