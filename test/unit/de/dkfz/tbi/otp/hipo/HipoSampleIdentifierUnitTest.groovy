@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.hipo;
+package de.dkfz.tbi.otp.hipo
 
 import static org.junit.Assert.*
 
@@ -30,7 +30,7 @@ class HipoSampleIdentifierUnitTest {
         sampleName = "H004-ABCD-T1-D1"
         assertNotNull(HipoSampleIdentifier.tryParse(sampleName))
 
-        sampleName = "H004-BPF4-L4-D1"
+        sampleName = "H004-BPF4-A4-D1"
         assertNull(HipoSampleIdentifier.tryParse(sampleName))
 
         sampleName = "P021-EFGH"

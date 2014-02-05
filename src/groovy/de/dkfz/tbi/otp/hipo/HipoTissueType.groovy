@@ -15,6 +15,8 @@ public enum HipoTissueType {
     INVASIVE_MARGINS          ('I'),
     PATIENT_DERIVED_CULTURE   ('P'),
     CULTURE_DERIVED_XENOGRAFT ('Q'),
+    LIQUID_BIOPSY             ('L'),
+    MIKRO_RNA                 ('M'),
 
     final char key
 
