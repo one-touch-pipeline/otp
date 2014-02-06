@@ -1,13 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.converters.JSON
+import groovy.json.JsonSlurper
 import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.stream.StreamResult
 import javax.xml.transform.stream.StreamSource
-
 import de.dkfz.tbi.otp.utils.DataTableCommand
-import grails.converters.JSON
-import groovy.json.JsonSlurper
 
 
 class SequenceController {
@@ -22,7 +21,7 @@ class SequenceController {
             seqTypes: new HashSet(seqTypes.collect { it.name }),
             libraryLayouts: new HashSet(seqTypes.collect { it.libraryLayout }),
             seqCenters: SeqCenter.list(sort: "name", order: "asc")
-            ]
+        ]
     }
 
     def dataTableSource(DataTableCommand cmd) {
@@ -88,7 +87,6 @@ enum SequenceSortColumn {
     LANE("laneId"),
     FASTQC("fastqcState"),
     ALIGNMENT("alignmentState"),
-    ORIG_ALIGNMENT("hasOriginalBam"),
     DATE("dateCreated")
 
     private final String columnName
@@ -99,32 +97,30 @@ enum SequenceSortColumn {
 
     static SequenceSortColumn fromDataTable(int column) {
         switch (column) {
-        case 0:
-            return SequenceSortColumn.PROJECT
-        case 1:
-            return SequenceSortColumn.INDIVIDUAL
-        case 2:
-            return SequenceSortColumn.SAMPLE_TYPE
-        case 3:
-            return SequenceSortColumn.SEQ_TYPE
-        case 4:
-            return SequenceSortColumn.LIBRARY_LAYOUT
-        case 5:
-            return SequenceSortColumn.SEQ_CENTER
-        case 6:
-            return SequenceSortColumn.RUN
-        case 7:
-            return SequenceSortColumn.LANE
-        case 8:
-            return SequenceSortColumn.FASTQC
-        case 9:
-            return SequenceSortColumn.ALIGNMENT
-        case 10:
-            return SequenceSortColumn.ORIG_ALIGNMENT
-        case 11:
-            return SequenceSortColumn.DATE
-        default:
-            return SequenceSortColumn.PROJECT
+            case 0:
+                return SequenceSortColumn.PROJECT
+            case 1:
+                return SequenceSortColumn.INDIVIDUAL
+            case 2:
+                return SequenceSortColumn.SAMPLE_TYPE
+            case 3:
+                return SequenceSortColumn.SEQ_TYPE
+            case 4:
+                return SequenceSortColumn.LIBRARY_LAYOUT
+            case 5:
+                return SequenceSortColumn.SEQ_CENTER
+            case 6:
+                return SequenceSortColumn.RUN
+            case 7:
+                return SequenceSortColumn.LANE
+            case 8:
+                return SequenceSortColumn.FASTQC
+            case 9:
+                return SequenceSortColumn.ALIGNMENT
+            case 10:
+                return SequenceSortColumn.DATE
+            default:
+                return SequenceSortColumn.PROJECT
         }
     }
 }
@@ -152,48 +148,48 @@ class SequenceFiltering {
         def slurper = new JsonSlurper()
         slurper.parseText(json).each {
             switch (it.type) {
-            case "projectSelection":
-                if (it.value.isLong()) {
-                    filtering.project << (it.value as Long)
-                    filtering.enabled = true
-                }
-                break
-            case "individualSearch":
-                if (it.value && it.value.length() >= 3) {
-                    filtering.individual << it.value
-                    filtering.enabled = true
-                }
-                break
-            case "sampleTypeSelection":
-                if (it.value.isLong()) {
-                    filtering.sampleType << (it.value as Long)
-                    filtering.enabled = true
-                }
-                break
-            case "seqTypeSelection":
-                if (it.value) {
-                    filtering.seqType << it.value
-                    filtering.enabled = true
-                }
-                break
-            case "libraryLayoutSelection":
-                if (it.value) {
-                    filtering.libraryLayout << it.value
-                    filtering.enabled = true
-                }
-                break
-            case "seqCenterSelection":
-                if (it.value.isLong()) {
-                    filtering.seqCenter << (it.value as Long)
-                    filtering.enabled = true
-                }
-                break
-            case "runSearch":
-                if (it.value && it.value.length() >= 3) {
-                    filtering.run << it.value
-                    filtering.enabled = true
-                }
-                break
+                case "projectSelection":
+                    if (it.value.isLong()) {
+                        filtering.project << (it.value as Long)
+                        filtering.enabled = true
+                    }
+                    break
+                case "individualSearch":
+                    if (it.value && it.value.length() >= 3) {
+                        filtering.individual << it.value
+                        filtering.enabled = true
+                    }
+                    break
+                case "sampleTypeSelection":
+                    if (it.value.isLong()) {
+                        filtering.sampleType << (it.value as Long)
+                        filtering.enabled = true
+                    }
+                    break
+                case "seqTypeSelection":
+                    if (it.value) {
+                        filtering.seqType << it.value
+                        filtering.enabled = true
+                    }
+                    break
+                case "libraryLayoutSelection":
+                    if (it.value) {
+                        filtering.libraryLayout << it.value
+                        filtering.enabled = true
+                    }
+                    break
+                case "seqCenterSelection":
+                    if (it.value.isLong()) {
+                        filtering.seqCenter << (it.value as Long)
+                        filtering.enabled = true
+                    }
+                    break
+                case "runSearch":
+                    if (it.value && it.value.length() >= 3) {
+                        filtering.run << it.value
+                        filtering.enabled = true
+                    }
+                    break
             }
         }
         return filtering

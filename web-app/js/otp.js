@@ -517,16 +517,6 @@ $.otp.sequence = {
         }
         return result;
     },
-    formatRun: function (run) {
-        "use strict";
-        var result;
-        if (run.length > 7) {
-            result = run.substr(0, 6) + "…";
-        } else {
-            result = run;
-        }
-        return result;
-    },
     formatSeqType: function (seqTypeName) {
         "use strict";
         var result;
@@ -557,6 +547,8 @@ $.otp.sequence = {
                 action: 'dataTableSource'
             }),
             bScrollCollapse: true,
+            sScrollX: 'auto',
+            sScrollXInner: "100%",
             bScrollInfinite: true,
             sScrollY: ($(window).height() - 415),
             iDisplayLength: Math.round(($('.body').height() - 180) / 23),
@@ -598,6 +590,7 @@ $.otp.sequence = {
                                     controller: 'individual',
                                     action: 'show',
                                     id: row.individualId,
+                                    title: row.mockPid,
                                     text: row.mockPid
                                 }),
                                 row.sampleTypeName,
@@ -609,12 +602,11 @@ $.otp.sequence = {
                                     action: 'show',
                                     id: row.runId,
                                     title: row.name,
-                                    text: $.otp.sequence.formatRun(row.name)
+                                    text: row.name
                                 }),
                                 row.laneId,
                                 fastQC,
                                 row.alignmentState.name,
-                                row.hasOriginalBam,
                                 (new Date(row.dateCreated)).toDateString()
                             ];
                             json.aaData[i] = rowData;
@@ -624,7 +616,7 @@ $.otp.sequence = {
                 });
             },
             fnRowCallback: function (nRow) {
-                var fastqc, alignment, origAlignment;
+                var fastqc, alignment;
                 fastqc = $("td:eq(8)", nRow);
                 if ($("a", fastqc).length > 0) {
                     fastqc.addClass("true");
@@ -641,9 +633,6 @@ $.otp.sequence = {
                     alignment.addClass("false");
                 }
                 alignment.text("");
-                origAlignment = $("td:eq(10)", nRow);
-                origAlignment.addClass(origAlignment.text());
-                origAlignment.text("");
             }
         });
         // search criteria
