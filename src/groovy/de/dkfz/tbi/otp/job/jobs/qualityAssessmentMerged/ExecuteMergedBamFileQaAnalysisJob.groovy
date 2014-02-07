@@ -59,6 +59,9 @@ class ExecuteMergedBamFileQaAnalysisJob extends AbstractJobImpl {
         isTrue(isSupported, 'This sequencing type and library layout combination can not be processed')
 
         // The map contains all parameter, which are needed to run the qa.jar.
+        // the command parameters (the map keys) have the same names in
+        // both merged and not-merted cases to enable possibilty to
+        // have one option configuring the command in both cases
         Map binding = [
             processedBamFilePath: processedMergedBamFilePath,
             processedBaiFilePath: processedMergedBaiFilePath,
