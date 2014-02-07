@@ -314,7 +314,7 @@ class ProcessesController {
     }
 
     def getProcessingErrorStackTrace() {
-        render processService.getProcessingErrorStackTrace(params.id as long)
+        render text: processService.getProcessingErrorStackTrace(params.id as long), contentType: "text/plain"
     }
 
     private PlanStatus calculateStatus(JobExecutionPlan plan, Process lastSuccess, Process lastFinished) {
