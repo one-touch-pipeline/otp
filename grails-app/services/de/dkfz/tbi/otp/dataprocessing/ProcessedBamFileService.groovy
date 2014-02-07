@@ -97,11 +97,12 @@ class ProcessedBamFileService {
         return ProcessedBamFile.findByAlignmentPassAndType(alignmentPass, type)
     }
 
-    public boolean updateBamFile(ProcessedBamFile bamFile) {
+    /**
+     * @return The size of the BAM file in the file system.
+     */
+    public long updateBamFile(ProcessedBamFile bamFile) {
         File file = new File(getFilePath(bamFile))
-        if (!file.canRead()) {
-            return false
-        }
+        ensureReadable(file)
         bamFile.fileExists = true
         bamFile.fileSize = file.length()
         bamFile.dateFromFileSystem = new Date(file.lastModified())
@@ -109,15 +110,18 @@ class ProcessedBamFileService {
         return bamFile.fileSize
     }
 
-    public boolean updateBamFileIndex(ProcessedBamFile bamFile) {
+    public void updateBamFileIndex(ProcessedBamFile bamFile) {
         String path = baiFilePath(bamFile)
         File file = new File(path)
-        if (!file.canRead()) {
-            return false
-        }
+        ensureReadable(file)
         bamFile.hasIndexFile = true
         assertSave(bamFile)
-        return true
+    }
+
+    private static ensureReadable(final File file) {
+        if (!file.canRead()) {
+            throw new IOException("Cannot read ${file}")
+        }
     }
 
     public Realm realm(ProcessedBamFile processedBamFile) {

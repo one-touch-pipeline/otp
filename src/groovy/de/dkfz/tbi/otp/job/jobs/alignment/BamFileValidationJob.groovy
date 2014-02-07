@@ -12,8 +12,11 @@ class BamFileValidationJob extends AbstractEndStateAwareJobImpl {
     @Override
     public void execute() throws Exception {
         ProcessedBamFile bamFile = parseInput()
-        boolean state = processedBamFileService.updateBamFile(bamFile)
-        state ? succeed() : fail()
+        final long fileSize = processedBamFileService.updateBamFile(bamFile)
+        if (fileSize <= 0L) {
+            throw new RuntimeException("File size of ${bamFile} is ${fileSize}.")
+        }
+        succeed()
     }
 
     private ProcessedBamFile parseInput() {

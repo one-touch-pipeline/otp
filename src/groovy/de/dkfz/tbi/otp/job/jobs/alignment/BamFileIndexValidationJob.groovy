@@ -15,12 +15,8 @@ class BamFileIndexValidationJob  extends AbstractEndStateAwareJobImpl {
     @Override
     public void execute() throws Exception {
         ProcessedBamFile bamFile = parseInput()
-        boolean status = processedBamFileService.updateBamFileIndex(bamFile)
-        if (status) {
-            succeed()
-        } else {
-            fail()
-        }
+        processedBamFileService.updateBamFileIndex(bamFile)
+        succeed()
     }
 
     private ProcessedBamFile parseInput() {
