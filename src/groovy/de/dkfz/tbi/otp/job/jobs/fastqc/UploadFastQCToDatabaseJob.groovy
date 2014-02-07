@@ -44,7 +44,7 @@ class UploadFastQCToDatabaseJob extends AbstractEndStateAwareJobImpl {
 
     private assertFileExists(FastqcProcessedFile fastqc) {
         if (!fastqc.fileExists) {
-            String path = fastqcDataFilesService.fastqcFileName(fastqc.dataFile)
+            String path = fastqcDataFilesService.fastqcOutputFile(fastqc.dataFile)
             throw new FileNotReadableException(path)
         }
     }
