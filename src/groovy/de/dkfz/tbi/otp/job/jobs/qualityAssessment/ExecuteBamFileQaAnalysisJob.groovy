@@ -88,7 +88,6 @@ class ExecuteBamFileQaAnalysisJob extends AbstractJobImpl {
         SimpleTemplateEngine engine = new SimpleTemplateEngine()
         String cmd = engine.createTemplate(cmdTemplate).make(binding).toString().trim()
         cmd += "; chmod 440 ${qualityAssessmentFilePath} ${coverageDataFilePath} ${insertSizeDataFilePath}"
-        log.debug cmd
         String pbsID = executionHelperService.sendScript(realm, cmd)
         addOutputParameter("__pbsIds", pbsID)
         addOutputParameter("__pbsRealm", realm.id.toString())

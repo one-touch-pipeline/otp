@@ -56,9 +56,8 @@ class CreateMergedChromosomeMappingFileJob extends AbstractEndStateAwareJobImpl 
     private void execute(String fileContents, String filepath, Realm realm) {
         String cmd = "echo '${fileContents}' > ${filepath}"
         cmd += "; chmod 440 ${filepath}"
-        log.debug cmd
-        String standartOutput = executionService.executeCommand(realm, cmd)
-        log.debug "creating file finished with standart output " + standartOutput
+        String standardOutput = executionService.executeCommand(realm, cmd)
+        log.debug "creating file finished with standard output " + standardOutput
         boolean fileCreated = validate(filepath)
         fileCreated ? succeed() : fail()
     }

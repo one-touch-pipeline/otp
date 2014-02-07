@@ -24,7 +24,6 @@ class BamFileIndexingJob extends AbstractJobImpl {
         ProcessedBamFile bamFile = parseInput()
         Realm realm = alignmentPassService.realmForDataProcessing(bamFile.alignmentPass)
         String cmd = createIndexingCommand(bamFile)
-        log.debug cmd
         String pbsId = executionHelperService.sendScript(realm, cmd)
         addOutputParameter("__pbsIds", pbsId)
         addOutputParameter("__pbsRealm", realm.id.toString())

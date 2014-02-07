@@ -51,7 +51,6 @@ class SendIndexingBamJob extends AbstractJobImpl {
         String inFile = file.fileName
         String outFile = "${inFile}.bai"
         String cmd = "cd ${path}; samtools index ${inFile} ${outFile}.bai;chmod 440 ${outFile}"
-        log.debug cmd
         return cmd
     }
 }

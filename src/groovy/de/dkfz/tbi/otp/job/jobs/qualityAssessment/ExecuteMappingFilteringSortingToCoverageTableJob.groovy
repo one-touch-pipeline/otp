@@ -39,7 +39,6 @@ class ExecuteMappingFilteringSortingToCoverageTableJob extends AbstractJobImpl {
         }
         cmd += "; chmod 440 ${mappedFilteredSortedCoverageDataFilePath}"
         Realm realm = qualityAssessmentPassService.realmForDataProcessing(pass)
-        log.debug cmd
         String pbsID = executionHelperService.sendScript(realm, cmd)
         addOutputParameter("__pbsIds", pbsID)
         addOutputParameter("__pbsRealm", realm.id.toString())

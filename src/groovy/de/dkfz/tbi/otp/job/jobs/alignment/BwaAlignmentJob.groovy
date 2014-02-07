@@ -62,7 +62,6 @@ class BwaAlignmentJob extends AbstractJobImpl {
         String bwaCmd = "${bwaCommand} aln ${nCores} ${qaSwitch} ${qParameter} -f ${saiFilePath} ${referenceGenomePath} ${dataFilePath}"
         String chmodCmd = "chmod 440 ${saiFilePath}"
         String cmd = "${bwaCmd} ; ${chmodCmd}"
-        log.debug cmd
         return executionHelperService.sendScript(realm, cmd)
     }
 
