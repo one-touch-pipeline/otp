@@ -1,0 +1,7 @@
+Evaluate copyright issues for the following situations: (Search through all the code for LICENSE_ISSUE text, to avoid potential future problems with moving of the code to different locations)
+
+- Due to impossibility to use log4j properly, a java class  (org.apache.log4j.HTMLLayout.java) was refactored into groovy (de.dkfz.tbi.otp.utils.logging.JobHtmlLayout.groovy)
+
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
