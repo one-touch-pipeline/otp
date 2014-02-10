@@ -46,7 +46,7 @@ class ProcessedMergedBamFileServiceTests {
         project = new Project(
                         name: "project",
                         dirName: "project-dir",
-                        realmName: "realmName"
+                        realmName: 'DKFZ',
                         )
         assertNotNull(project.save([flush: true]))
 
@@ -683,34 +683,6 @@ class ProcessedMergedBamFileServiceTests {
     }
 
     private MergingPass createMergingPass() {
-        project = new Project(
-                        name: "project",
-                        dirName: "project-dir",
-                        realmName: 'DKFZ'
-                        )
-        assertNotNull(project.save([flush: true]))
-
-        individual = new Individual(
-                        pid: "patient",
-                        mockPid: "mockPid",
-                        mockFullName: "mockFullName",
-                        type: Individual.Type.UNDEFINED,
-                        project: project
-                        )
-        assertNotNull(individual.save([flush: true]))
-
-        SampleType sampleType = new SampleType(
-                        name: "sample-type"
-                        )
-        assertNotNull(sampleType.save([flush: true]))
-
-        sample = new Sample(
-                        individual: individual,
-                        sampleType: sampleType
-                        )
-        assertNotNull(sample.save([flush: true]))
-
-
         MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
                         sample: sample,
                         seqType: seqType
