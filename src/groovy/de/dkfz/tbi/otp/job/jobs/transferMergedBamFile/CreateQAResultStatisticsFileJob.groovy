@@ -51,7 +51,6 @@ EOD
 cat <<EOD > ${statisticsFiles.extended}
 ${results.extended}
 EOD
-<<<<<<< HEAD
 cat <<EOD > ${FileNames.FASTQ_FILES_IN_MERGEDBAMFILE}
 ${fastqFilesNames}
 EOD
