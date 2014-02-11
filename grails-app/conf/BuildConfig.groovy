@@ -1,9 +1,10 @@
 grails.servlet.version = "2.5" // Change depending on target container compliance (2.5 or 3.0)
-grails.project.source.level = 1.6 // OTP-263: lets go to java-7...
+grails.project.source.level = 1.6 // TODO: OTP-263: lets go to java-7...
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
-//grails.project.war.file = "target/${appName}-${appVersion}.war"
+// As OTP is now productive the application's name should be clean from any version numbering
+grails.project.war.file = "target/otp.war"
 
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
@@ -63,7 +64,6 @@ grails.project.dependency.resolution = {
         compile ":codenarc:0.18.1"
         compile ":lesscss-resources:1.3.3"
         runtime ":database-migration:1.3.2"
-
         build ":tomcat:$grailsVersion"
     }
 }
@@ -79,14 +79,14 @@ codenarc.reports = {
     }
 }
 codenarc.extraIncludeDirs=['ast']
-
 codenarc.properties = {
     // Each property definition is of the form:  RULE.PROPERTY-NAME = PROPERTY-VALUE
     GrailsPublicControllerMethod.enabled = false
     GrailsDomainHasEquals.enabled = false
     GrailsDomainHasToString.enabled = false
 }
-grails.tomcat.jvmArgs = ["-Xmx1024m", "-XX:MaxPermSize=256m"]
 
-// As OTP is now productive the application's name should be clean from any version numbering
-grails.project.war.file = "target/otp.war"
+grails.tomcat.jvmArgs = [
+    "-Xmx1024m",
+    "-XX:MaxPermSize=256m"
+]
