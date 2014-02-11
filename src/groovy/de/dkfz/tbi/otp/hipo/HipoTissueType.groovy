@@ -16,7 +16,7 @@ public enum HipoTissueType {
     PATIENT_DERIVED_CULTURE   ('P'),
     CULTURE_DERIVED_XENOGRAFT ('Q'),
     LIQUID_BIOPSY             ('L'),
-    MIKRO_RNA                 ('M'),
+    BUFFY_COAT                ('F'),
 
     final char key
 

@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.hipo
 
 import groovy.transform.TupleConstructor
-
 import java.util.regex.Matcher
 
 @TupleConstructor  // see http://jeffastorey.blogspot.de/2011/10/final-variables-in-groovy-with-dynamic.html
@@ -32,14 +31,14 @@ class HipoSampleIdentifier {
     final int sampleNumber
 
     /**
-     * Which analyte type was applied to the sample, [DRP] (DNA, RNA or Protein).
+     * Which analyte type was applied to the sample, [DRPM] (DNA, RNA, Protein or miRNA).
      * Always followed by the order number.
      * Example: D1 (DNA, attempt 1)
      */
     final String analyteTypeAndNumber
 
     private final static String REGEX =
-    /^(([HP])(\d\d\d)-\w\w\w(\w))-([${HipoTissueType.values()*.key.join("")}])(\d)-([DRP]\d)$/
+    /^(([HP])(\d\d\d)-\w\w\w(\w))-([${HipoTissueType.values()*.key.join("")}])(\d)-([DRPM]\d)$/
 
     /**
      * Tries to parse a HIPO sample name.
@@ -57,17 +56,17 @@ class HipoSampleIdentifier {
         // Project 35 has even more specific rules.
         if (projectNumber == 35)  {
             if (matcher.group(2) != "H" || !(matcher.group(4) =~ /^[KM]$/)
-                    || ![HipoTissueType.BLOOD, HipoTissueType.CELL].contains(tissueType)) {
+            || ![HipoTissueType.BLOOD, HipoTissueType.CELL].contains(tissueType)) {
                 return null
             }
         }
 
         return new HipoSampleIdentifier(
-                /* projectNumber: */ projectNumber,
-                /* pid: */ matcher.group(1),
-                /* tissueType: */ tissueType,
-                /* sampleNumber: */ Integer.parseInt(matcher.group(6)),
-                /* experiment: */ matcher.group(7),
+        /* projectNumber: */ projectNumber,
+        /* pid: */ matcher.group(1),
+        /* tissueType: */ tissueType,
+        /* sampleNumber: */ Integer.parseInt(matcher.group(6)),
+        /* experiment: */ matcher.group(7),
         )
     }
 
