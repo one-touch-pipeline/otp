@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.job.processing
 
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.access.prepost.PostAuthorize
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.core.context.SecurityContextHolder
 
@@ -49,24 +49,24 @@ class ProcessService {
     }
 
     /**
-    * Retrieves all ProcessingSteps for the given Process.
-    * @param process The Process whose ProcessingSteps should be retrieved
-    * @param max The number of elements to retrieve, default 10
-    * @param offset The offset in the list, default -
-    * @param column The column to search for, default "id"
-    * @param order {@code true} for ascending ordering, {@code false} for descending, default {@code false}
-    * @return List of all ProcessingSteps run for the Process filtered as requested
-    */
+     * Retrieves all ProcessingSteps for the given Process.
+     * @param process The Process whose ProcessingSteps should be retrieved
+     * @param max The number of elements to retrieve, default 10
+     * @param offset The offset in the list, default -
+     * @param column The column to search for, default "id"
+     * @param order {@code true} for ascending ordering, {@code false} for descending, default {@code false}
+     * @return List of all ProcessingSteps run for the Process filtered as requested
+     */
     @PreAuthorize("hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_OPERATOR')")
     public List<ProcessingStep> getAllProcessingSteps(Process process, int max = 10, int offset = 0, String column = "id", boolean order = false) {
         return ProcessingStep.findAllByProcess(process, [max: max, offset: offset, sort: column, order: order ? "asc" : "desc"])
     }
 
     /**
-    * Returns the number of ProcessesingSteps for the given Process.
-    * @param plan The Process for which the number of ProcessingSteps should be returned
-    * @return The number of ProcessingSteps for the given Process
-    */
+     * Returns the number of ProcessesingSteps for the given Process.
+     * @param plan The Process for which the number of ProcessingSteps should be returned
+     * @return The number of ProcessingSteps for the given Process
+     */
     @PreAuthorize("hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_OPERATOR')")
     public int getNumberOfProcessessingSteps(Process process) {
         return ProcessingStep.countByProcess(process)
@@ -154,7 +154,7 @@ class ProcessService {
             throw new IllegalArgumentException("Process is not finished")
         }
         String query =
-'''
+                        '''
 SELECT u.date
 FROM ProcessingStepUpdate AS u
 INNER JOIN u.processingStep AS step
@@ -381,18 +381,21 @@ ORDER BY u.id desc
     /**
      * Retrieves the stacktrace saved for the ProcessingError.
      * @param id The id of the ProcessingError
-     * @return The stacktrace or null if not found
+     * @return The stacktrace or throws an exception if not found
      **/
     public String getProcessingErrorStackTrace(long id) {
         ProcessingError error = ProcessingError.get(id)
+        if(!error) {
+            throw new RuntimeException("No Processing Error could be found for the id: " + id)
+        }
         if (!error.stackTraceIdentifier) {
-            return null
+            throw new RuntimeException("No stackTrace could be found for the processing error: " + id)
         }
         if (aclUtilService.hasPermission(SecurityContextHolder.context.authentication, error.processingStepUpdate.processingStep.process.jobExecutionPlan, BasePermission.READ) ||
-                (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR"))) {
+        (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR"))) {
             return errorLogService.loggedError(error.stackTraceIdentifier)
         }
-        return null
+        throw new RuntimeException("The authentication was not granted for the processing error: " + id)
     }
 
     /**

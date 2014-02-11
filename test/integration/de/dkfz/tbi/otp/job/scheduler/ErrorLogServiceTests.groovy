@@ -3,42 +3,48 @@ package de.dkfz.tbi.otp.job.scheduler
 import static org.junit.Assert.*
 
 import java.text.SimpleDateFormat
-import org.apache.commons.io.FileUtils
 
+import org.apache.commons.io.FileUtils
 import org.junit.*
 
 class ErrorLogServiceTests {
 
-   /**
-    * Dependency Injection of Error log service
-    */
+    /**
+     * Dependency Injection of Error log service
+     */
     def errorLogService
 
-   /**
-    * Dependency injection of grails Application
-    */
+    /**
+     * Dependency injection of grails Application
+     */
     def grailsApplication
 
-   /**
-    * Dependency injection of Servlet Context
-    */
-   def servletContext
+    /**
+     * Dependency injection of Servlet Context
+     */
+    def servletContext
 
-   File exceptionStoringFile
+    File exceptionStoringFile
+    File stacktraceFile
 
-    @SuppressWarnings("EmptyMethod")
+    final static String ARBITRARY_STACKTRACE_IDENTIFIER = "689f127e9492f1e242192288ea870f28"
+    final static String ERROR_MESSAGE = "Exception"
+
     @Before
     void setUp() {
+        File dir = new File(servletContext.getRealPath(grailsApplication.config.otp.errorLogging.stacktraces))
+        stacktraceFile = new File(dir, ARBITRARY_STACKTRACE_IDENTIFIER + ".xml")
     }
 
     @After
     void tearDown() {
         new FileUtils().deleteQuietly(exceptionStoringFile)
+        stacktraceFile.delete()
     }
 
     @Test
     void testLog() {
-        Exception e = new Exception("test message")
+        Exception e = new Exception(ERROR_MESSAGE)
         String path = "/target/stacktraces/testing/"
         String fullPath = servletContext.getRealPath(path)
         // To test whether calling log method produces error
@@ -67,6 +73,37 @@ class ErrorLogServiceTests {
         // Number of timestamps in file
         assertSame(2, timestamps.size())
         // Test if the root node has correct attributes
-        assertTrue(root.@exceptionMessage == "test message")
+        assertTrue(root.@exceptionMessage == ERROR_MESSAGE)
+    }
+
+    @Test(expected = RuntimeException)
+    void testLoggedErrorNoFile() {
+        errorLogService.loggedError("/.|\test/..")
+    }
+
+    @Test(expected = RuntimeException)
+    void testLoggedErrorNoStackTraceContent() {
+        stacktraceFile.createNewFile()
+        errorLogService.loggedError(ARBITRARY_STACKTRACE_IDENTIFIER)
+    }
+
+    @Test(expected = RuntimeException)
+    void testLoggedErrorWithNoXMLContent() {
+        stacktraceFile << ERROR_MESSAGE
+        errorLogService.loggedError(ARBITRARY_STACKTRACE_IDENTIFIER)
+    }
+
+    @Test
+    void testLoggedErrorWithContent() {
+        stacktraceFile <<
+                        """
+<stacktraceElement exceptionMessage='Testing'>
+  <stacktrace>${ERROR_MESSAGE}</stacktrace>
+  <timestamp>
+        Thu Jul 18 11:24:14 CEST 2013
+  </timestamp>
+</stacktraceElement>
+"""
+        assertEquals(ERROR_MESSAGE, errorLogService.loggedError(ARBITRARY_STACKTRACE_IDENTIFIER))
     }
 }

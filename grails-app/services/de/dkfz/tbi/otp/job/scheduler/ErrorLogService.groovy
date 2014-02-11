@@ -62,22 +62,26 @@ class ErrorLogService {
 
     /**
      * Retrieves the stacktrace identified by given identifier.
-     *
-     * If the stacktrace file cannot be found null is returned.
+     * It can happen that the output of this method is null, since the stackTraceIdentifier in the ProcessingError can be null.
      * @param identifier The stacktrace's identifier
-     * @return The stacktrace if found otherwise null
+     * @return The stacktrace if found otherwise an exception is thrown with the reason why the stacktrace can not be returned
      **/
     public String loggedError(String identifier) {
+        //TODO: Jan wants to think deeply about the stackTraceIdentifier, which can be null -> JIRA: OTP-763
         File dir = new File(servletContext.getRealPath(grailsApplication.config.otp.errorLogging.stacktraces))
         if (!dir.isDirectory()) {
-            return null
+            throw new RuntimeException("${dir}, configured in the config, is not a directory")
         }
         File stacktraceFile = new File(dir, identifier + ".xml")
         if (!stacktraceFile.isFile()) {
-            return null
+            throw new RuntimeException("${stacktraceFile.getPath()} is not a file ")
         }
-        def records = new XmlSlurper().parse(stacktraceFile)
-        return records.stacktrace.text()
+        try {
+            def records = new XmlSlurper().parse(stacktraceFile)
+            return records.stacktrace.text()
+        } catch (Exception e) {
+            throw new RuntimeException("The XML file could not be parsed", e)
+        }
     }
 
     /**

@@ -2,19 +2,23 @@ package de.dkfz.tbi.otp.job.processing
 
 import static org.junit.Assert.*
 
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils;
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.junit.*
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.acls.domain.BasePermission;
+import org.springframework.security.*
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.acls.domain.BasePermission
 
-import de.dkfz.tbi.otp.job.plan.JobDefinition;
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan;
-import de.dkfz.tbi.otp.job.plan.StartJobDefinition;
-import de.dkfz.tbi.otp.testing.AbstractIntegrationTest;
+import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.plan.StartJobDefinition
+import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 
 class ProcessServiceTests extends AbstractIntegrationTest {
     def processService
     def aclUtilService
+    def errorLogService
+    def servletContext
+    def grailsApplication
 
     @Before
     void setUp() {
@@ -808,6 +812,52 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         }
     }
 
+    @Test(expected = RuntimeException)
+    void testGetProcessingErrorStackTraceIdNotFound() {
+        processService.getProcessingErrorStackTrace(1)
+    }
+
+    @Test(expected = RuntimeException)
+    void testGetProcessingErrorStackTraceNoStacktrace() {
+        ProcessingError processingError = mockProcessingError()
+        processingError.stackTraceIdentifier = null
+        assertNotNull(processingError.save(flush: true))
+        processService.getProcessingErrorStackTrace(processingError.id)
+    }
+
+    @Test(expected = RuntimeException)
+    void testGetProcessingErrorStackTraceIdFoundAndPermissionsWrong() {
+        ProcessingError processingError = mockProcessingError()
+        SpringSecurityUtils.doWithAuth("testuser") {
+            processService.getProcessingErrorStackTrace(processingError.id)
+        }
+    }
+
+    @Test
+    void testGetProcessingErrorStackTracePermissionIsRoleOperator() {
+        ProcessingError processingError = mockProcessingError()
+        File dir = new File(servletContext.getRealPath(grailsApplication.config.otp.errorLogging.stacktraces))
+        File stacktraceFile = new File(dir, processingError.stackTraceIdentifier + ".xml")
+        stacktraceFile.createNewFile()
+        stacktraceFile <<
+                        """
+<stacktraceElement exceptionMessage='Testing'>
+    <stacktrace>
+        Exception
+  </stacktrace>
+  <timestamp>
+    Thu Jul 18 11:24:14 CEST 2013
+  </timestamp>
+</stacktraceElement>
+"""
+        SpringSecurityUtils.doWithAuth("operator") {
+            String expectedMessage = errorLogService.loggedError(processingError.stackTraceIdentifier)
+            String actualMessage = processService.getProcessingErrorStackTrace(processingError.id)
+            assertEquals(expectedMessage, actualMessage)
+        }
+        stacktraceFile.delete()
+    }
+
     private JobExecutionPlan mockPlan(String name = "test") {
         JobExecutionPlan plan = new JobExecutionPlan(name: name, planVersion: 0, enabled: true)
         assertNotNull(plan.save(flush: true))
@@ -830,5 +880,23 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         ProcessingStepUpdate update = new ProcessingStepUpdate(previous: previous, state: state, date: new Date(), processingStep: step)
         assertNotNull(update.save(flush: true))
         return update
+    }
+
+    private ProcessingError mockProcessingError() {
+        JobExecutionPlan plan = mockPlan()
+        Process process = mockProcess(plan)
+        JobDefinition job = createTestJob("Test", plan)
+        ProcessingStep step = mockProcessingStep(process, job)
+        ProcessingStepUpdate update = mockProcessingStepUpdate(step)
+        update.state = ExecutionState.FAILURE
+        assertNotNull(update.save(flush: true))
+
+        ProcessingError processingError = new ProcessingError(
+                        processingStepUpdate: update,
+                        errorMessage: "errorMessage",
+                        stackTraceIdentifier: "stackTraceIdentifier"
+                        )
+        assertNotNull(processingError.save(flush: true))
+        return processingError
     }
 }
