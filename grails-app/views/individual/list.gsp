@@ -9,10 +9,10 @@
 <body>
     <div class="body">
         <div class="dataTable_searchContainer">
-        <form id="searchbox">
-            <span class="blue_label"><g:message code="simple.quick.search"/> :</span>
-            <input type="text" class="dataTable_search" onKeyUp='$.otp.simpleSearch.search(this, "individualTable");' placeholder="min. 3 characters">
-        </form>
+            <div id="searchbox">
+                <span class="blue_label"><g:message code="simple.quick.search"/> :</span>
+                <input type="text" class="dataTable_search" onKeyUp='$.otp.simpleSearch.search(this, "individualTable");' placeholder="min. 3 characters">
+            </div>
         </div>
            <div class= "searchCriteriaTableSequences">
         <table id="searchCriteriaTable2">
