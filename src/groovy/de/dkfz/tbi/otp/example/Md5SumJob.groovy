@@ -2,9 +2,9 @@ package de.dkfz.tbi.otp.example
 
 import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
 import de.dkfz.tbi.otp.job.processing.Parameter
-import de.dkfz.tbi.otp.job.processing.RestartableJob
+import de.dkfz.tbi.otp.job.processing.ResumableJob
 
-@RestartableJob
+@ResumableJob
 class Md5SumJob extends AbstractJobImpl {
 
     @Override

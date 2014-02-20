@@ -19,16 +19,16 @@ class ShutdownController {
             redirect action: "index"
         }
         List runningJobs = shutdownService.runningJobs
-        List restartableJobs = []
-        List notRestartableJobs = []
+        List resumableJobs = []
+        List notResumableJobs = []
         runningJobs.each {
-            if (shutdownService.isJobRestartable(it)) {
-                restartableJobs << it
+            if (shutdownService.isJobResumable(it)) {
+                resumableJobs << it
             } else {
-                notRestartableJobs << it
+                notResumableJobs << it
             }
         }
-        [shutdown: shutdownInformation, restartableJobs: restartableJobs, notRestartableJobs: notRestartableJobs]
+        [shutdown: shutdownInformation, resumableJobs: resumableJobs, notResumableJobs: notResumableJobs]
     }
 
     def planShutdown() {

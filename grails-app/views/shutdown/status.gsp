@@ -37,7 +37,7 @@
                 </tr>
             </thead>
             <tbody>
-                <g:each var="step" in="${notRestartableJobs}">
+                <g:each var="step" in="${notResumableJobs}">
                     <tr>
                         <td><g:link controller="processes" action="plan" id="${step.process.jobExecutionPlan.id}">${step.process.jobExecutionPlan.name}</g:link></td>
                         <td><g:link controller="processes" action="process" id="${step.process.id}">${step.process.id}</g:link></td>
@@ -58,7 +58,7 @@
                     </tr>
             </thead>
         <tbody>
-            <g:each var="step" in="${restartableJobs}">
+            <g:each var="step" in="${resumableJobs}">
                 <tr>
                     <td><g:link controller="processes" action="plan" id="${step.process.jobExecutionPlan.id}">${step.process.jobExecutionPlan.name}</g:link></td>
                     <td><g:link controller="processes" action="process" id="${step.process.id}">${step.process.id}</g:link></td>

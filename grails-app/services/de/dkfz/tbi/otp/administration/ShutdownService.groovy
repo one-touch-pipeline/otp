@@ -4,7 +4,7 @@ import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
-import de.dkfz.tbi.otp.job.processing.RestartableJob
+import de.dkfz.tbi.otp.job.processing.ResumableJob
 import de.dkfz.tbi.otp.security.User
 import java.util.concurrent.locks.ReentrantLock
 import org.springframework.beans.factory.DisposableBean
@@ -15,7 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize
  * This service can be used to stop the scheduler and to provide information about the current
  * scheduled shutdown process. E.g. which Jobs are still running.
  * Furthermore the service gets notified when the application finally shuts down and suspends all
- * running but restartable jobs. In case of non-restartable Jobs the service will log a warning
+ * running but resumable jobs. In case of non-resumable Jobs the service will log a warning
  * message.
  **/
 class ShutdownService implements DisposableBean {
@@ -55,7 +55,7 @@ class ShutdownService implements DisposableBean {
                 // TODO: check that all jobs have really stopped
                 List<ProcessingStep> runningJobs = retrieveRunningJobs()
                 runningJobs.each { ProcessingStep step ->
-                    if (isJobRestartable(step)) {
+                    if (isJobResumable(step)) {
                         List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(step)
                         ProcessingStepUpdate update = new ProcessingStepUpdate(
                             date: new Date(),
@@ -68,7 +68,7 @@ class ShutdownService implements DisposableBean {
                         }
                         log.info("ProcessingStep ${step.id} has been suspended")
                     } else {
-                        log.warn("ProcessingStep ${step.id} is not restartable, but the server is shutting down")
+                        log.warn("ProcessingStep ${step.id} is not resumable, but the server is shutting down")
                     }
                 }
                 log.info("OTP is shutting down")
@@ -187,13 +187,13 @@ class ShutdownService implements DisposableBean {
     }
 
     /**
-     * Checks whether the given ProcessingStep uses a Job which is restartable.
-     * @param step The ProcessingStep for which it should be checked whether it is restartable
-     * @return whether the Job running for the ProcessingStep is restartable
+     * Checks whether the given ProcessingStep uses a Job which is resumable.
+     * @param step The ProcessingStep for which it should be checked whether it is resumable
+     * @return whether the Job running for the ProcessingStep is resumable
      **/
-    boolean isJobRestartable(ProcessingStep step) {
+    boolean isJobResumable(ProcessingStep step) {
         Class jobClass = grailsApplication.classLoader.loadClass(step.jobClass)
-        return jobClass.isAnnotationPresent(RestartableJob)
+        return jobClass.isAnnotationPresent(ResumableJob)
     }
 
     /**

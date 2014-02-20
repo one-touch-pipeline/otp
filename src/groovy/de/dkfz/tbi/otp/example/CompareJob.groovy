@@ -5,9 +5,9 @@ import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.InvalidStateException
 import de.dkfz.tbi.otp.job.processing.Parameter
-import de.dkfz.tbi.otp.job.processing.RestartableJob
+import de.dkfz.tbi.otp.job.processing.ResumableJob
 
-@RestartableJob
+@ResumableJob
 class CompareJob extends AbstractJobImpl implements EndStateAwareJob {
     private ExecutionState endState = null
 

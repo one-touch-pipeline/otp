@@ -5,7 +5,7 @@ import java.util.concurrent.locks.ReentrantLock
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.job.processing.MonitoringJob
-import de.dkfz.tbi.otp.job.processing.RestartableJob
+import de.dkfz.tbi.otp.job.processing.ResumableJob
 import de.dkfz.tbi.otp.job.scheduler.PbsMonitorService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -14,7 +14,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
  * @deprecated This watchdog is deprecated in favor of {@link WatchdogJob} which also provides logging capabilities.
  *             It was meant only as an example.
  */
-@Deprecated @RestartableJob
+@Deprecated @ResumableJob
 class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob {
     @Autowired
     PbsMonitorService pbsMonitorService

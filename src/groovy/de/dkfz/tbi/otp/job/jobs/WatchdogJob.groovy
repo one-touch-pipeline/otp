@@ -13,7 +13,7 @@ import de.dkfz.tbi.otp.job.processing.JobStatusLoggingService
 import de.dkfz.tbi.otp.job.processing.MonitoringJob
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.job.processing.RestartableJob
+import de.dkfz.tbi.otp.job.processing.ResumableJob
 import de.dkfz.tbi.otp.job.scheduler.PbsMonitorService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -27,7 +27,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
  * @see JobParameterKeys
  *
  */
-@RestartableJob
+@ResumableJob
 class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob {
 
     @Autowired JobStatusLoggingService jobStatusLoggingService
