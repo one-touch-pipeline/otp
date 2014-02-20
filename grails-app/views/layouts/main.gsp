@@ -43,13 +43,14 @@
             <div class="menuContainer menuContainerL">
                 <ul>
                     <sec:ifLoggedIn>
+                        <li class="menuContainerLCss" id="laneOverview"><g:link controller="projectOverview" action="laneOverview"><g:message code="otp.menu.overview"/></g:link></li>
                         <li class="menuContainerLCss" id="individual"><g:link controller="individual" action="list"><g:message code="otp.menu.individuals"/></g:link></li>
                         <li class="menuContainerLCss" id="sequence"><g:link controller="sequence" action="index"><g:message code="otp.menu.sequences"/></g:link></li>
                         <li class="menuContainerLCss" id="run"><g:link controller="run" action="list"><g:message code="otp.menu.runs"/></g:link></li>
                         <li class="menuContainerLCss" id="processes"><g:link controller="processes" action="list"><g:message code="otp.menu.processes"/></g:link></li>
                         <li class="overview_nav menuContainerLCss">
                             <ul>
-                                <li class="overview_nav_container" id="overview"><g:link ><g:message code="otp.menu.overview"/> &#9661;</g:link>
+                                <li class="overview_nav_container" id="overview"><g:link ><g:message code="otp.menu.statistics"/> &#9661;</g:link>
                                     <ul>
                                         <sec:ifAllGranted roles="ROLE_OPERATOR">
                                             <li class="allGranted_general" id="overviewMB"><g:link controller="overviewMB" action="index"><g:message code="otp.menu.generalStatistics"/></g:link></li><br>

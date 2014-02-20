@@ -895,7 +895,36 @@ body {
 }
 .dataTables_scrollBody {
     margin-top: -11px;
+    min-height: 100px;
+    overflow: auto;
 }
+
+.dataTableContainer {
+    border-collapse:collapse;
+    th {
+        background-color: #EFEFEF;
+        background-image: -moz-linear-gradient(center bottom , #EFEFEF, #FFFFFF);
+    }
+    tr.odd {
+        background-color: #A5D3FF;
+    }
+    tr.even {
+        background-color: #F3FAFF;
+    }
+    tr.odd td.sorting_1 {
+        background-color: #A5D3FF;
+    }
+    td {
+        border-color: #C4D9DF #A4C3CA #83AFB7;
+        text-align: left;
+        padding: 0.1em 0.1em 0.2em 0.2em;
+        border-top:  #FFFFFF;
+    }
+    tr.even td.sorting_1 {
+        background-color: #F3FAFF;
+    }
+}
+
 #laneOverviewTable {
     color:black;
     padding-top: 6px;
@@ -927,10 +956,13 @@ body {
         background-color: #A5D3FF;
     }
     tr.even {
-        background-color: white;
+        background-color: #F3FAFF;
     }
     tr.odd td.sorting_1 {
         background-color: #A5D3FF;
+    }
+     tr.even td.sorting_1 {
+        background-color: #F3FAFF;
     }
 }
 .table-body-box{

@@ -35,7 +35,7 @@
                     ]}"
                     id="sampleTypeNameCountBySample" />
             </div>
-            <div style="width: 20px; height: 50px;"></div>
+            <div style="width: 20px; height: 20px;"></div>
             <h3 class="statisticTableTitle" >
                 <g:message code="projectOverview.title.centersOverviewTable" />
             </h3>
@@ -49,7 +49,7 @@
                     ] }"
                     id="centerNameRunId" />
             </div>
-            <div style="width: 20px; height: 50px;"></div>
+            <div style="width: 20px; height: 30px;"></div>
             <h3 class="statisticTableTitle">
                 <g:message code="projectOverview.table.statistic.title" /></h3>
             <div class="dataTableContainer projectOverviewTable"
@@ -67,7 +67,7 @@
                     ] }"
                     id="projectOverviewTable" />
             </div>
-            <div style="width: 20px; height: 50px;"></div>
+            <div style="width: 20px; height: 40px;"></div>
             <h3 class="statisticTableTitle">
                 <g:message code="projectOverview.table.seqtype.title" />
             </h3>
