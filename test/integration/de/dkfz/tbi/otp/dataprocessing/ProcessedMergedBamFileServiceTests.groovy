@@ -1,13 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.junit.Assert.*
-import grails.util.Environment
 import grails.validation.ValidationException
 import org.junit.*
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
+import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
 import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type
@@ -23,7 +24,6 @@ class ProcessedMergedBamFileServiceTests {
     MergingSet mergingSet
     Project project
     Individual individual
-    SeqTrack seqTrack
     SampleType sampleType
     SoftwareTool softwareTool
     SeqPlatform seqPlatform
@@ -38,7 +38,7 @@ class ProcessedMergedBamFileServiceTests {
         Map paths = [
             rootPath: '/tmp/otp-unit-test/pmfs/root',
             processingRootPath: '/tmp/otp-unit-test/pmbfs/processing',
-            ]
+        ]
 
         Realm realm = DomainFactory.createRealmDataProcessingDKFZ(paths).save([flush: true])
         Realm realm1 = DomainFactory.createRealmDataManagementDKFZ(paths).save([flush: true])
@@ -133,7 +133,6 @@ class ProcessedMergedBamFileServiceTests {
         mergingSet = null
         project = null
         individual = null
-        seqTrack = null
         sampleType = null
         softwareTool = null
         seqPlatform = null
@@ -432,7 +431,9 @@ class ProcessedMergedBamFileServiceTests {
     void testMergedBamFileWithFinishedQAWhenSingleLaneQaNotFinished() {
         MergingPass mergingPass = createMergingPass()
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
-        ProcessedBamFile processedBamFile = createProcessedBamFile()
+        SeqTrack seqTrack = createSeqTrack()
+        ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack)
+        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
         processedBamFile.qualityAssessmentStatus = QaProcessingStatus.IN_PROGRESS
         mergingSet.status = State.PROCESSED
         assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA())
@@ -469,7 +470,9 @@ class ProcessedMergedBamFileServiceTests {
         mergingSet.status = State.PROCESSED
         mergedBamFile.fileOperationStatus = FileOperationStatus.PROCESSED
         mergedBamFile.md5sum = "68b329da9893e34099c7d8ad5cb9c940"
-        ProcessedBamFile processedBamFile = createProcessedBamFile()
+        SeqTrack seqTrack = createSeqTrack()
+        ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack)
+        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
         MergingWorkPackage mergingWorkPackage1 = new MergingWorkPackage(
                         sample: sample,
                         seqType: seqType
@@ -526,7 +529,9 @@ class ProcessedMergedBamFileServiceTests {
     void testSingleLaneQAResultsDirectories() {
         MergingPass mergingPass = createMergingPass()
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
-        ProcessedBamFile processedBamFile = createProcessedBamFile()
+        SeqTrack seqTrack = createSeqTrack()
+        ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack)
+        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
         QualityAssessmentPass qualityAssessmentPass = new QualityAssessmentPass(
                         identifier: 1,
                         processedBamFile:processedBamFile
@@ -633,7 +638,9 @@ class ProcessedMergedBamFileServiceTests {
     @Test
     void testFastqFilesPerMergedBamFile() {
         MergingPass mergingPass = createMergingPass()
-        ProcessedBamFile processedBamFile = createProcessedBamFile()
+        SeqTrack seqTrack = createSeqTrack()
+        ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack)
+        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
         FileType fileType = new FileType(
                         type: de.dkfz.tbi.otp.ngsdata.FileType.Type.SEQUENCE
@@ -652,7 +659,9 @@ class ProcessedMergedBamFileServiceTests {
     @Test
     void testFastqFilesPerMergedBamFileNoFastqFiles() {
         MergingPass mergingPass = createMergingPass()
-        ProcessedBamFile processedBamFile = createProcessedBamFile()
+        SeqTrack seqTrack = createSeqTrack()
+        ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack)
+        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
         FileType fileType = new FileType(
                         type: de.dkfz.tbi.otp.ngsdata.FileType.Type.ALIGNMENT
@@ -667,6 +676,143 @@ class ProcessedMergedBamFileServiceTests {
         assertNotNull(dataFile.save([flush: true]))
         assertTrue(processedMergedBamFileService.fastqFilesPerMergedBamFile(processedMergedBamFile).isEmpty())
     }
+
+
+    @Test
+    void testSeqTracksOneSeqTrack() {
+        MergingPass mergingPass = createMergingPass()
+        SeqTrack seqTrack = createSeqTrack()
+        ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack)
+        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        List<SeqTrack> actualSeqTracks = processedMergedBamFileService.seqTracks(processedMergedBamFile)
+        List<SeqTrack> expectedSeqTracks = [seqTrack]
+        assertEquals(actualSeqTracks, expectedSeqTracks)
+    }
+
+
+    @Test
+    void testSeqTracksTwoSeqTracks() {
+        MergingPass mergingPass = createMergingPass()
+        SeqTrack seqTrack1 = createSeqTrack()
+        SeqTrack seqTrack2 = createSeqTrack()
+        ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack1)
+        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        List<SeqTrack> actualSeqTracks = processedMergedBamFileService.seqTracks(processedMergedBamFile)
+        List<SeqTrack> expectedSeqTracks = [seqTrack1, seqTrack2]
+        assertTrue(actualSeqTracks == expectedSeqTracks)
+    }
+
+
+    @Test
+    void testSeqTracksTwoExomeSeqTracks() {
+        MergingPass mergingPass = createMergingPass()
+        SeqTrack seqTrack1 = createExomeSeqTrack("laneId1")
+        SeqTrack seqTrack2 = createExomeSeqTrack("laneId2")
+        ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack1)
+        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        List<SeqTrack> actualSeqTracks = processedMergedBamFileService.seqTracks(processedMergedBamFile)
+        List<SeqTrack> expectedSeqTracks = [seqTrack1, seqTrack2]
+        assertTrue(actualSeqTracks == expectedSeqTracks)
+    }
+
+
+    @Test(expected = IllegalArgumentException)
+    void testGetInferredKitBamFileIsNull() {
+        processedMergedBamFileService.getInferredKit(null)
+    }
+
+
+    @Test
+    void testGetInferredKitBamFileIsNoExome() {
+        MergingPass mergingPass = createMergingPass()
+        SeqTrack seqTrack = createSeqTrack()
+        ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack)
+        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        assertNull(processedMergedBamFileService.getInferredKit(processedMergedBamFile))
+    }
+
+
+    @Test(expected = ProcessingException)
+    void testGetInferredKitBamFileIsExomeButHasTwoDifferentKits() {
+        seqType.name = SeqTypeNames.EXOME.seqTypeName
+        assertNotNull(seqType.save(flush: true))
+        ExomeSeqTrack exomeSeqTrack1 = createExomeSeqTrack("laneId1")
+        ExomeEnrichmentKit exomeEnrichmentKit1 = createExomeEnrichmentKit("Agilent SureSelect V3")
+        addKitToSeqTrack(exomeEnrichmentKit1, exomeSeqTrack1)
+        ExomeSeqTrack exomeSeqTrack2 = createExomeSeqTrack("laneId2")
+        ExomeEnrichmentKit exomeEnrichmentKit2 = createExomeEnrichmentKit("Agilent SureSelect V4")
+        addKitToSeqTrack(exomeEnrichmentKit2, exomeSeqTrack2)
+        MergingPass mergingPass = createMergingPass()
+        ProcessedBamFile processedBamFile1 = createProcessedBamFile(1, exomeSeqTrack1)
+        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile1)
+        ProcessedBamFile processedBamFile2 = createProcessedBamFile(2, exomeSeqTrack2)
+        MergingSetAssignment mergingSetAssignment2 = createMergingSetAssignment(processedBamFile2)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        processedMergedBamFileService.getInferredKit(processedMergedBamFile)
+    }
+
+
+    @Test
+    void testGetInferredKitBamFileIsExomeButAllHaveKits() {
+        seqType.name = SeqTypeNames.EXOME.seqTypeName
+        assertNotNull(seqType.save(flush: true))
+        ExomeSeqTrack exomeSeqTrack1 = createExomeSeqTrack("laneId1")
+        ExomeSeqTrack exomeSeqTrack2 = createExomeSeqTrack("laneId2")
+        ExomeEnrichmentKit exomeEnrichmentKit = createExomeEnrichmentKit("Agilent SureSelect V3")
+        addKitToSeqTrack(exomeEnrichmentKit, exomeSeqTrack1)
+        addKitToSeqTrack(exomeEnrichmentKit, exomeSeqTrack2)
+        MergingPass mergingPass = createMergingPass()
+        ProcessedBamFile processedBamFile1 = createProcessedBamFile(1, exomeSeqTrack1)
+        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile1)
+        ProcessedBamFile processedBamFile2 = createProcessedBamFile(2, exomeSeqTrack2)
+        MergingSetAssignment mergingSetAssignment2 = createMergingSetAssignment(processedBamFile2)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        assertNull(processedMergedBamFileService.getInferredKit(processedMergedBamFile))
+    }
+
+
+    @Test
+    void testGetInferredKitBamFileIsExomeAndOneKitInferred() {
+        seqType.name = SeqTypeNames.EXOME.seqTypeName
+        assertNotNull(seqType.save(flush: true))
+        ExomeSeqTrack exomeSeqTrack1 = createExomeSeqTrack("laneId1")
+        ExomeSeqTrack exomeSeqTrack2 = createExomeSeqTrack("laneId2")
+        ExomeEnrichmentKit exomeEnrichmentKit = createExomeEnrichmentKit("Agilent SureSelect V3")
+        addKitToSeqTrack(exomeEnrichmentKit, exomeSeqTrack1)
+        addKitToSeqTrack(exomeEnrichmentKit, exomeSeqTrack2)
+        exomeSeqTrack2.kitInfoReliability = InformationReliability.INFERRED
+        assertNotNull(exomeSeqTrack2.save(flush: true))
+        MergingPass mergingPass = createMergingPass()
+        ProcessedBamFile processedBamFile1 = createProcessedBamFile(1, exomeSeqTrack1)
+        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile1)
+        ProcessedBamFile processedBamFile2 = createProcessedBamFile(2, exomeSeqTrack2)
+        MergingSetAssignment mergingSetAssignment2 = createMergingSetAssignment(processedBamFile2)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        assertEquals(exomeEnrichmentKit, processedMergedBamFileService.getInferredKit(processedMergedBamFile))
+    }
+
+
+    @Test
+    void testGetInferredKitBamFileOneIsExomeAndOneIsNot() {
+        seqType.name = SeqTypeNames.EXOME.seqTypeName
+        assertNotNull(seqType.save(flush: true))
+        SeqTrack seqTrack = createSeqTrack("laneId1")
+        ExomeSeqTrack exomeSeqTrack = createExomeSeqTrack("laneId2")
+        ExomeEnrichmentKit exomeEnrichmentKit = createExomeEnrichmentKit("Agilent SureSelect V3")
+        addKitToSeqTrack(exomeEnrichmentKit, exomeSeqTrack)
+        MergingPass mergingPass = createMergingPass()
+        ProcessedBamFile processedBamFile1 = createProcessedBamFile(1, seqTrack)
+        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile1)
+        ProcessedBamFile processedBamFile2 = createProcessedBamFile(2, exomeSeqTrack)
+        MergingSetAssignment mergingSetAssignment2 = createMergingSetAssignment(processedBamFile2)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        assertNull(processedMergedBamFileService.getInferredKit(processedMergedBamFile))
+    }
+
 
     private ProcessedMergedBamFile createProcessedMergedBamFile(MergingPass mergingPass) {
         ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
@@ -704,19 +850,9 @@ class ProcessedMergedBamFileServiceTests {
         return mergingPass
     }
 
-    private ProcessedBamFile createProcessedBamFile() {
-        seqTrack = new SeqTrack(
-                        laneId: "laneId",
-                        run: run,
-                        sample: sample,
-                        seqType: seqType,
-                        seqPlatform: seqPlatform,
-                        pipelineVersion: softwareTool
-                        )
-        assertNotNull(seqTrack.save([flush: true]))
-
+    private ProcessedBamFile createProcessedBamFile(int identifier, SeqTrack seqTrack) {
         AlignmentPass alignmentPass = new AlignmentPass(
-                        identifier: 1,
+                        identifier: identifier,
                         seqTrack: seqTrack,
                         description: "test"
                         )
@@ -730,12 +866,62 @@ class ProcessedMergedBamFileServiceTests {
                         )
         assertNotNull(processedBamFile.save([flush: true]))
 
+        return processedBamFile
+    }
+
+
+    MergingSetAssignment createMergingSetAssignment(ProcessedBamFile processedBamFile) {
         MergingSetAssignment mergingSetAssignment = new MergingSetAssignment(
                         mergingSet: mergingSet,
                         bamFile: processedBamFile
                         )
         assertNotNull(mergingSetAssignment.save([flush: true]))
+        return mergingSetAssignment
+    }
 
-        return processedBamFile
+
+
+    SeqTrack createSeqTrack(String laneId = "laneId") {
+        SeqTrack seqTrack = new SeqTrack(
+                        laneId: laneId,
+                        run: run,
+                        sample: sample,
+                        seqType: seqType,
+                        seqPlatform: seqPlatform,
+                        pipelineVersion: softwareTool
+                        )
+        assertNotNull(seqTrack.save([flush: true]))
+        return seqTrack
+    }
+
+
+    ExomeSeqTrack createExomeSeqTrack(String laneId = "laneId") {
+        ExomeSeqTrack exomeSeqTrack = new ExomeSeqTrack(
+                        laneId: laneId,
+                        run: run,
+                        sample: sample,
+                        seqType: seqType,
+                        seqPlatform: seqPlatform,
+                        pipelineVersion: softwareTool,
+                        kitInfoReliability: InformationReliability.UNKNOWN_UNVERIFIED,
+                        exomeEnrichmentKit: null
+                        )
+        assertNotNull(exomeSeqTrack.save([flush: true]))
+        return exomeSeqTrack
+    }
+
+
+    ExomeEnrichmentKit createExomeEnrichmentKit(String name) {
+        ExomeEnrichmentKit exomeEnrichmentKit = new ExomeEnrichmentKit(
+                        name: name
+                        )
+        assertNotNull(exomeEnrichmentKit.save([flush: true]))
+        return exomeEnrichmentKit
+    }
+
+    void addKitToSeqTrack(ExomeEnrichmentKit exomeEnrichmentKit, ExomeSeqTrack exomeSeqTrack) {
+        exomeSeqTrack.exomeEnrichmentKit = exomeEnrichmentKit
+        exomeSeqTrack.kitInfoReliability = InformationReliability.KNOWN
+        assertNotNull(exomeSeqTrack.save(flush: true))
     }
 }

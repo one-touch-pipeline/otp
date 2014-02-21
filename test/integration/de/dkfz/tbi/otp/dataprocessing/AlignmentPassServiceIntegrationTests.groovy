@@ -18,6 +18,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
     @Test
     void testFindAlignableSeqTrack() {
         createObjects()
+        dataFile.delete()
         findAlignableSeqTrackTest(SeqTrack.DataProcessingState.IN_PROGRESS)
         findAlignableSeqTrackTest(SeqTrack.DataProcessingState.NOT_STARTED)
 
@@ -80,9 +81,9 @@ class AlignmentPassServiceIntegrationTests extends TestData {
     }
 
     private void findAlignableSeqTrackTest(
-            final SeqTrack.DataProcessingState state,
-            final int nonWithdrawnDataFiles,
-            final int withdrawnDataFiles) {
+                    final SeqTrack.DataProcessingState state,
+                    final int nonWithdrawnDataFiles,
+                    final int withdrawnDataFiles) {
         seqTrack.alignmentState = state
         Collection<DataFile> dataFiles = new ArrayList<DataFile>()
         for (int i = 0; i < nonWithdrawnDataFiles; i++) {
@@ -93,7 +94,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         }
         assertEquals(nonWithdrawnDataFiles + withdrawnDataFiles, DataFile.count)
         if (state == SeqTrack.DataProcessingState.NOT_STARTED &&
-                nonWithdrawnDataFiles >= 1 && withdrawnDataFiles == 0) {
+        nonWithdrawnDataFiles >= 1 && withdrawnDataFiles == 0) {
             assertEquals(seqTrack, alignmentPassService.findAlignableSeqTrack())
         } else {
             assertNull(alignmentPassService.findAlignableSeqTrack())

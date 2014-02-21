@@ -4,10 +4,10 @@ package de.dkfz.tbi.otp.ngsdata
  * represents different spellings of the {@ling ExomeEnrichmentKit}
  *
  */
-class ExomeEnrichmentKitIdentifier {
+class ExomeEnrichmentKitSynonym {
 
     /**
-     * possible spelling of the related {@ling ExomeEnrichmentKit}
+     * possible spelling of the related {@link ExomeEnrichmentKit}
      */
     String name
 

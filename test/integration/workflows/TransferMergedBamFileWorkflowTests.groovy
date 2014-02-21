@@ -652,7 +652,7 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
      * @return Command to clean up used folders
      */
     String cleanUpTestFoldersCommand() {
-        return "rm -rf ${rootPath}/* ${processingRootPath}/*"
+        return "rm -rf ${rootPath}/* ${processingRootPath}/* ${loggingRootPath}/*"
         /* When testing on BioQuant, there is no write access. You have to replace the
          * above line by something like 'return "true"' */
     }

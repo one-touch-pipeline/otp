@@ -2,9 +2,11 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.test.mixin.*
 import grails.test.mixin.support.*
+
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
@@ -17,6 +19,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 @Mock([
     AlignmentPass,
     AlignmentPassService,
+    DataFile,
     FileType,
     Individual,
     ProcessedBamFile,
@@ -25,6 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.*
     ReferenceGenome,
     ReferenceGenomeProjectSeqType,
     Run,
+    RunSegment,
     Sample,
     SampleType,
     SeqCenter,
@@ -33,6 +37,7 @@ import de.dkfz.tbi.otp.ngsdata.*
     SeqType,
     SoftwareTool,
 ])
+
 class AlignmentPassServiceUnitTests extends TestData {
 
     AlignmentPassService alignmentPassService

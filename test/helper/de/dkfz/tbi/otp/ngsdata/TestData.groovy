@@ -1,7 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
-import grails.util.Environment
+import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.ngsdata.RunSegment.DataFormat
+import de.dkfz.tbi.otp.ngsdata.RunSegment.FilesStatus
 
 class TestData {
 
@@ -15,12 +17,15 @@ class TestData {
     SampleType sampleType
     Sample sample
     SeqType seqType
+    SeqType exomeSeqType
     SeqCenter seqCenter
     SeqPlatform seqPlatform
     Run run
+    RunSegment runSegment
     SoftwareTool softwareTool
     SeqTrack seqTrack
     FileType fileType
+    DataFile dataFile
     ReferenceGenome referenceGenome
     ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType
 
@@ -40,7 +45,7 @@ class TestData {
 
         realm = DomainFactory.createRealmDataProcessingDKFZ([
             processingRootPath: 'tmp',
-            ])
+        ])
         assertNotNull(realm.save(flush: true))
 
         project = new Project()
@@ -63,9 +68,15 @@ class TestData {
 
         seqType = new SeqType()
         seqType.name = "WHOLE_GENOME"
-        seqType.libraryLayout = "SINGLE"
+        seqType.libraryLayout = "PAIRED"
         seqType.dirName = "whole_genome_sequencing"
         assertNotNull(seqType.save(flush: true))
+
+        exomeSeqType = new SeqType()
+        exomeSeqType.name = SeqTypeNames.EXOME.seqTypeName
+        exomeSeqType.libraryLayout = "PAIRED"
+        exomeSeqType.dirName = "exome_sequencing"
+        assertNotNull(exomeSeqType.save(flush: true))
 
         seqCenter = new SeqCenter()
         seqCenter.name = "DKFZ"
@@ -77,12 +88,11 @@ class TestData {
         seqPlatform.model = "4"
         assertNotNull(seqPlatform.save(flush: true))
 
-        run = new Run()
-        run.name = "testname"
-        run.seqCenter = seqCenter
-        run.seqPlatform = seqPlatform
-        run.storageRealm = Run.StorageRealm.DKFZ
+        run = createRun("testname1")
         assertNotNull(run.save(flush: true))
+
+        runSegment = createRunSegment(run)
+        assertNotNull(runSegment.save(flush: true))
 
         softwareTool = new SoftwareTool()
         softwareTool.programName = "SOLID"
@@ -93,6 +103,9 @@ class TestData {
 
         seqTrack = createSeqTrack()
         assertNotNull(seqTrack.save(flush: true))
+
+        dataFile = createDataFile(seqTrack, runSegment)
+        assertNotNull(dataFile.save(flush: true))
 
         fileType = new FileType()
         fileType.type = FileType.Type.SEQUENCE
@@ -129,12 +142,27 @@ class TestData {
         return seqTrack
     }
 
+    DataFile createDataFile(SeqTrack seqTrack, RunSegment runSegment) {
+        DataFile dataFile = new DataFile()
+        dataFile.fileExists = true
+        dataFile.fileSize = 1
+        dataFile.fileType = fileType
+        dataFile.seqTrack = seqTrack
+        dataFile.runSegment = runSegment
+        dataFile.run = run
+        dataFile.fileWithdrawn = false
+        return dataFile
+    }
+
+
     DataFile createDataFile() {
         DataFile dataFile = new DataFile()
         dataFile.fileExists = true
         dataFile.fileSize = 1
         dataFile.fileType = fileType
         dataFile.seqTrack = seqTrack
+        dataFile.runSegment = runSegment
+        dataFile.run = run
         dataFile.fileWithdrawn = false
         return dataFile
     }
@@ -147,4 +175,55 @@ class TestData {
         return referenceGenomeProjectSeqType
     }
 
+    RunSegment createRunSegment(Run run) {
+        RunSegment runSegment = new RunSegment()
+        runSegment.filesStatus = FilesStatus.FILES_CORRECT
+        runSegment.metaDataStatus = RunSegment.Status.COMPLETE
+        runSegment.run = run
+        runSegment.initialFormat = DataFormat.FILES_IN_DIRECTORY
+        runSegment.currentFormat = DataFormat.FILES_IN_DIRECTORY
+        runSegment.dataPath = "dataPath"
+        runSegment.mdPath = "mdPath"
+        return runSegment
+    }
+
+    Run createRun(String name) {
+        Run run = new Run()
+        run.name = name
+        run.seqCenter = seqCenter
+        run.seqPlatform = seqPlatform
+        run.storageRealm = Run.StorageRealm.DKFZ
+        return run
+    }
+
+
+    ExomeSeqTrack createExomeSeqTrack(Run run) {
+        ExomeSeqTrack exomeSeqTrack = new ExomeSeqTrack(
+                        laneId: "laneId",
+                        run: run,
+                        sample: sample,
+                        seqType: exomeSeqType,
+                        seqPlatform: seqPlatform,
+                        pipelineVersion: softwareTool,
+                        exomeEnrichmentKit: null
+                        )
+        assertNotNull(exomeSeqTrack.save())
+        return exomeSeqTrack
+    }
+
+
+    ExomeEnrichmentKit createEnrichmentKit(String name) {
+        ExomeEnrichmentKit exomeEnrichmentKit = new ExomeEnrichmentKit(
+                        name: name
+                        )
+        assertNotNull(exomeEnrichmentKit.save())
+        return exomeEnrichmentKit
+    }
+
+
+    void addKitToExomeSeqTrack(ExomeSeqTrack exomeSeqTrack, ExomeEnrichmentKit sameExomeEnrichmentKit) {
+        exomeSeqTrack.exomeEnrichmentKit = sameExomeEnrichmentKit
+        exomeSeqTrack.kitInfoReliability = InformationReliability.KNOWN
+        assertNotNull(exomeSeqTrack.save(flush: true))
+    }
 }

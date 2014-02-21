@@ -1,13 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.junit.Assert.*
-import grails.util.Environment
+
 import org.junit.*
+
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.filehandling.FileNames
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack.KitInfoState
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
 /**
@@ -54,7 +55,7 @@ class QAResultStatisticsServiceTests {
         Map paths = [
             rootPath: '/tmp/otp-unit-test/pmfs/root',
             processingRootPath: '/tmp/otp-unit-test/pmbfs/processing',
-            ]
+        ]
 
         Realm realm = DomainFactory.createRealmDataProcessingDKFZ(paths).save([flush: true])
         Realm realm1 = DomainFactory.createRealmDataManagementDKFZ(paths).save([flush: true])
@@ -144,7 +145,7 @@ class QAResultStatisticsServiceTests {
                         seqPlatform: seqPlatform,
                         pipelineVersion: softwareTool,
                         exomeEnrichmentKit: exomeEnrichmentKit,
-                        kitInfoState: KitInfoState.KNOWN
+                        kitInfoReliability: InformationReliability.KNOWN
                         )
         assertNotNull(exomeSeqTrack.save([flush: true]))
 

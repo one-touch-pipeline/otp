@@ -5,8 +5,8 @@ import static org.junit.Assert.*
 import grails.test.mixin.*
 import grails.test.mixin.domain.*
 import grails.test.mixin.support.*
-import grails.util.Environment
 import org.junit.*
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
@@ -17,7 +17,6 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack.KitInfoState
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
@@ -58,12 +57,14 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
     // TODO This paths should be obtained from somewhere else..  maybe from ~/.otp.properties, but I am hardcoding for now.. -> OTP-570/OTP-672
     String dkfzRootPath = 'WORKFLOW_ROOT/TransferWorkflow/root_path'
     String dkfzProcessingPath = 'WORKFLOW_ROOT/TransferWorkflow/processing_root_path'
+    String dkfzLoggingPath = 'WORKFLOW_ROOT/TransferWorkflow/logging_root_path'
     String bqRootPath = '$BQ_ROOTPATH/dmg/otp/workflow-tests/TransferWorkflow/root_path'
     String bqProcessingPath = '$BQ_ROOTPATH/dmg/otp/workflow-tests/TransferWorkflow/processing_root_path'
 
     // Paths for testing on DKFZ
     String rootPath = dkfzRootPath
     String processingRootPath = dkfzProcessingPath
+    String loggingRootPath = dkfzLoggingPath
 
     /*
      // Paths for testing on BioQuant
@@ -127,49 +128,19 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
         // Realm for BioQuant (change if testing there)
         //String realmName = "BioQuant"
         String realmBioquantUnixUser = "unixUser2"
-        String realmDKFZUnixUser = "otptest"
 
-        String realmProgramsRootPath = "/"
-        String realmHost = "headnode"
-        int realmPort = 22
-        String realmWebHost = "https://otp.local/ngsdata/"
-        String realmPbsOptionsDKFZ = '{"-l": {nodes: "1:lsdf", walltime: "5:00"}}'
-        String realmPbsOptionsBQ = '{"-l": {nodes: "1:xeon", walltime: "5:00"}, "-W": {x: "NACCESSPOLICY:SINGLEJOB"}}'
-        int realmTimeout = 0
+        def paths = [
+            rootPath: "${rootPath}",
+            processingRootPath: "${processingRootPath}",
+            programsRootPath: '/',
+            loggingRootPath: "${loggingRootPath}"
+        ]
 
         // Realms for testing on DKFZ
-        realm = new Realm(
-                        name: "DKFZ",
-                        env: Environment.getCurrent().getName(),
-                        operationType: Realm.OperationType.DATA_MANAGEMENT,
-                        cluster: Realm.Cluster.DKFZ,
-                        rootPath: "${rootPath}",
-                        processingRootPath: "${processingRootPath}",
-                        programsRootPath: realmProgramsRootPath,
-                        webHost: realmWebHost,
-                        host: realmHost,
-                        port: realmPort,
-                        unixUser: realmDKFZUnixUser,
-                        timeout: realmTimeout,
-                        pbsOptions: realmPbsOptionsDKFZ
-                        )
+        realm = DomainFactory.createRealmDataManagementDKFZ(paths)
         assertNotNull(realm.save(flush: true))
 
-        realm = new Realm(
-                        name: "DKFZ",
-                        env: Environment.getCurrent().getName(),
-                        operationType: Realm.OperationType.DATA_PROCESSING,
-                        cluster: Realm.Cluster.DKFZ,
-                        rootPath: "${rootPath}",
-                        processingRootPath: "${processingRootPath}",
-                        programsRootPath: realmProgramsRootPath,
-                        webHost: realmWebHost,
-                        host: realmHost,
-                        port: realmPort,
-                        unixUser: realmDKFZUnixUser,
-                        timeout: realmTimeout,
-                        pbsOptions: realmPbsOptionsDKFZ
-                        )
+        realm = DomainFactory.createRealmDataProcessingDKFZ(paths)
         assertNotNull(realm.save(flush: true))
 
         /*
@@ -342,7 +313,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
                         seqPlatform: seqPlatform,
                         pipelineVersion: softwareTool,
                         exomeEnrichmentKit: exomeEnrichmentKit,
-                        kitInfoState: KitInfoState.KNOWN
+                        kitInfoReliability: InformationReliability.KNOWN
                         )
         assertNotNull(seqTrack.save([flush: true, failOnError: true]))
 
@@ -414,7 +385,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
                         seqPlatform: seqPlatform,
                         pipelineVersion: softwareTool,
                         exomeEnrichmentKit: exomeEnrichmentKit,
-                        kitInfoState: KitInfoState.KNOWN
+                        kitInfoReliability: InformationReliability.INFERRED
                         )
         assertNotNull(seqTrack1.save([flush: true, failOnError: true]))
 
@@ -646,7 +617,6 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
 
         // Call "sync" to block termination of script until I/O is done
         executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildDirStructure} && ${cmdBuildFileStructure} && sync")
-
         checkFiles(files)
     }
 
@@ -700,7 +670,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
      * @return Command to clean up used folders
      */
     String cleanUpTestFoldersCommand() {
-        return "rm -rf ${rootPath}/* ${processingRootPath}/*"
+        return "rm -rf ${rootPath}/* ${processingRootPath}/* ${loggingRootPath}/*"
         /* When testing on BioQuant, there is no write access. You have to replace the
          * above line by something like 'return "true"' */
     }
@@ -750,7 +720,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
     }
 
     void tearDown() {
-        //executionService.executeCommand(realm, cleanUpTestFoldersCommand())
+        executionService.executeCommand(realm, cleanUpTestFoldersCommand())
         realm = null
     }
 

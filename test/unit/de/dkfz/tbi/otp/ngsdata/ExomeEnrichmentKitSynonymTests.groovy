@@ -5,13 +5,13 @@ import grails.test.mixin.*
 import grails.test.mixin.support.*
 import org.junit.*
 
-@TestFor(ExomeEnrichmentKitIdentifier)
+@TestFor(ExomeEnrichmentKitSynonym)
 @Mock([ExomeEnrichmentKit])
-class ExomeEnrichmentKitIdentifierTests {
+class ExomeEnrichmentKitSynonymTests {
 
     ExomeEnrichmentKit kit
-    ExomeEnrichmentKitIdentifier kitId1
-    ExomeEnrichmentKitIdentifier kitId2
+    ExomeEnrichmentKitSynonym kitId1
+    ExomeEnrichmentKitSynonym kitId2
 
     @Before
     void setUp() {
@@ -19,11 +19,11 @@ class ExomeEnrichmentKitIdentifierTests {
                 name: "kitName1"
                 )
         assertNotNull kit.save(flush: true)
-        kitId1 = new ExomeEnrichmentKitIdentifier(
+        kitId1 = new ExomeEnrichmentKitSynonym(
                 name: "kitID1",
                 exomeEnrichmentKit: kit
                 )
-        kitId2 = new ExomeEnrichmentKitIdentifier(
+        kitId2 = new ExomeEnrichmentKitSynonym(
                 name: "kitID2",
                 exomeEnrichmentKit: kit
                 )

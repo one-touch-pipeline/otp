@@ -2,25 +2,19 @@ package workflows
 
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 import static org.junit.Assert.*
-
 import grails.test.mixin.*
 import grails.test.mixin.domain.*
 import grails.test.mixin.support.*
-import grails.util.Environment
-
 import org.junit.*
-
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
-import de.dkfz.tbi.otp.security.Role
-import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.UserRole
 
 abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareIntegrationTest {
 
@@ -66,6 +60,8 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
     Realm realm
 
     // TODO This paths should be obtained from somewhere else..  maybe from .otpproperties, but I am hardcoding for now..
+
+    String username = "otptest"
     String base = "WORKFLOW_ROOT"
     String testDataDir = "${base}/files/merged-quality-assessment/"
     String myBase = "${base}/${username}/QualityAssessment"
@@ -96,9 +92,8 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
     // it is assumed that only one test from the following two runs at one grails test-app
     // it means that one of the tests must be always @Ignore
     // reason from Cristiano: some conflicts in the domain objects set up of the tests.
-
-    @Test
     @Ignore
+    @Test
     void testExecutionWithProcessingOptionsWgs() {
         createAdditionalWholeGenomeData()
         createDirectoryStructure(inputFilesPath())
@@ -288,7 +283,7 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
             rootPath: rootPath,
             processingRootPath: processingRootPath,
             programsRootPath: '/',
-            ]
+        ]
 
         realm = DomainFactory.createRealmDataManagementDKFZ(paths).save([flush: true])
         realm = DomainFactory.createRealmDataProcessingDKFZ(paths).save([flush: true])
@@ -383,10 +378,10 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
         List<SeqTrack> seqTracks = []
         2.times {
             SeqTrack seqTrack = new ExomeSeqTrack(
-                    seqType: SeqType.findByName('EXON'),
-                    kitInfoState: ExomeSeqTrack.KitInfoState.KNOWN,
-                    exomeEnrichmentKit: kit
-                    )
+                            seqType: SeqType.findByName('EXON'),
+                            kitInfoReliability: InformationReliability.KNOWN,
+                            exomeEnrichmentKit: kit
+                            )
             seqTrack.alignmentState = SeqTrack.DataProcessingState.FINISHED
             seqTracks << seqTrack
         }
@@ -395,12 +390,12 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
 
         ReferenceGenome refGen = ReferenceGenome.findByName('hg19')
         BedFile bedFile = new BedFile(
-                fileName: bedFileName,
-                targetSize: 11111111111,
-                mergedTargetSize: 1111111,
-                referenceGenome: refGen,
-                exomeEnrichmentKit: kit
-                )
+                        fileName: bedFileName,
+                        targetSize: 11111111111,
+                        mergedTargetSize: 1111111,
+                        referenceGenome: refGen,
+                        exomeEnrichmentKit: kit
+                        )
         assertNotNull(bedFile.save([flush: true]))
     }
 

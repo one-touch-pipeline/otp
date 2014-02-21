@@ -1,8 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.utils.ReferencedClass
 
+/**
+ */
 class MetaDataValidationService {
 
     def hipoIndividualService
@@ -15,14 +18,14 @@ class MetaDataValidationService {
     HashMap bugs = ["SBS": "WHOLE_GENOME_BISULFITE"]
 
     /**
-    * Checks if values of MetaDataEntry table are correct
-    *
-    * the following keys are checked
-    * RunID, sample identifier, sequencing center
-    * sequencing type and library layout
-    *
-    * @param runId
-    */
+     * Checks if values of MetaDataEntry table are correct
+     *
+     * the following keys are checked
+     * RunID, sample identifier, sequencing center
+     * sequencing type and library layout
+     *
+     * @param runId
+     */
     boolean validateMetadata(long runId) {
         Run run = Run.get(runId)
         boolean allValid = true
@@ -35,7 +38,7 @@ class MetaDataValidationService {
                     if (!isValid) {
                         dataFile.metaDataValid = false
                         allValid = false
-                   }
+                    }
                 }
                 addMissingEntries(dataFile)
                 combineLaneAndIndex(dataFile)
@@ -47,6 +50,7 @@ class MetaDataValidationService {
         run.save(flush: true)
         return allValid
     }
+
 
     /**
      * Validate individual MetaDataEntry
@@ -101,7 +105,7 @@ class MetaDataValidationService {
                 MetaDataEntry metaDataEntry = metaDataEntry(entry.dataFile, "SEQUENCING_TYPE")
                 boolean isSequenceOfTypeChipSeq = metaDataEntry?.value == SeqTypeNames.CHIP_SEQ.seqTypeName
                 if (isSequenceOfTypeChipSeq) {
-                    entry.status = AntibodyTarget.findByName(entry.value) ? valid : invalid;
+                    entry.status = AntibodyTarget.findByName(entry.value) ? valid : invalid
                 }
                 break
         }
@@ -109,16 +113,28 @@ class MetaDataValidationService {
         return (entry.status == invalid)? false : true
     }
 
+
+    /**
+     * caution: trinary result!
+     *
+     * @return <code>null</code> for non-exome entries;
+     *      for exome entries <code>true/false</code>, signifying if an Enrichment Kit is/isn't available
+     */
     private Boolean checkExomeEnrichmentKitForExomeSeqType(MetaDataEntry entry) {
         MetaDataEntry metaDataEntry = metaDataEntry(entry.dataFile, "SEQUENCING_TYPE")
         boolean isSequenceOfTypeExome = metaDataEntry.value == SeqTypeNames.EXOME.seqTypeName
+
+        /*
+         * Only for the seqType exome an enrichment kit is available and has to be checked.
+         * For other seqTypes null has to be returned.
+         */
         if (isSequenceOfTypeExome) {
             return exomeEnrichmentKitService.findExomeEnrichmentKitByNameOrAlias(entry.value) ||
-                ExomeSeqTrack.KitInfoState.UNKNOWN.name() == entry.value
-        } else {
-            return null //no EXOME, so value is irrelevant and not checked
+            InformationReliability.UNKNOWN_VERIFIED.rawValue == entry.value
         }
+        return null
     }
+
 
     /**
      * Best effort to interpret insdert_size if it is incorrect try to recover
@@ -133,6 +149,7 @@ class MetaDataValidationService {
         return tryToRecoverInsertSize(entry)
     }
 
+
     private boolean checkInsertSize(String value) {
         if (value.isAllWhitespace()) {
             return true
@@ -146,6 +163,7 @@ class MetaDataValidationService {
         }
         return false
     }
+
 
     /**
      * Recovers insert size number in a notation: 230bp
@@ -166,15 +184,17 @@ class MetaDataValidationService {
         return false
     }
 
+
     private void changeInsertSizeValue(MetaDataEntry entry, substring) {
         ChangeLog changeLog = buildChangeLog(
-            entry.id, entry.value, substring, "removing trailing 'bp'",
-        )
+                        entry.id, entry.value, substring, "removing trailing 'bp'",
+                        )
         changeLog.save(flush: true)
         entry.value = substring
         entry.source = MetaDataEntry.Source.SYSTEM
         entry.save(flush: true)
     }
+
 
     private boolean checkAndCorrectSequencingType(MetaDataEntry entry) {
         SeqType seqType = SeqType.findByName(entry.value)
@@ -190,13 +210,14 @@ class MetaDataValidationService {
         return false
     }
 
+
     private boolean tryDirNameBug(MetaDataEntry entry) {
         SeqType seqType = SeqType.findByDirName(entry.value)
         if(seqType != null) {
             ChangeLog changeLog = buildChangeLog(
-                entry.id, entry.value, seqType.name,
-                "seqType recogniozed by directory name"
-            )
+                            entry.id, entry.value, seqType.name,
+                            "seqType recogniozed by directory name"
+                            )
             changeLog.save(flush: true)
             entry.value = seqType.name
             entry.source = MetaDataEntry.Source.SYSTEM
@@ -206,12 +227,13 @@ class MetaDataValidationService {
         return false
     }
 
+
     private boolean tryHashMapBug(MetaDataEntry entry) {
         String value = bugs[entry.value]
         if (value != null) {
             ChangeLog changeLog = buildChangeLog(
-                entry.id, entry.value, value, "fixing known bug"
-            )
+                            entry.id, entry.value, value, "fixing known bug"
+                            )
             changeLog.save(flush: true)
             entry.value = value
             entry.source = MetaDataEntry.Source.SYSTEM
@@ -221,6 +243,7 @@ class MetaDataValidationService {
         return false
     }
 
+
     private boolean checkSoftwareTool(MetaDataEntry entry) {
         SoftwareToolIdentifier idx = SoftwareToolIdentifier.findByName(entry.value)
         if (idx) {
@@ -228,8 +251,8 @@ class MetaDataValidationService {
         }
         if (entry.value.isAllWhitespace()) {
             ChangeLog changeLog = buildChangeLog(
-                entry.id, entry.value, "unknown", "changing blank to unknown"
-            )
+                            entry.id, entry.value, "unknown", "changing blank to unknown"
+                            )
             changeLog.save(flush: true)
             entry.value = "unknown"
             entry.source = MetaDataEntry.Source.SYSTEM
@@ -239,9 +262,11 @@ class MetaDataValidationService {
         return false
     }
 
+
     private void addMissingEntries(DataFile dataFile) {
         addAlignmentToolIfNeeded(dataFile)
     }
+
 
     private void addAlignmentToolIfNeeded(DataFile file) {
         if (file.fileType.type != FileType.Type.ALIGNMENT) {
@@ -253,12 +278,12 @@ class MetaDataValidationService {
             return
         }
         entry = new MetaDataEntry(
-            dataFile: file,
-            key: key,
-            value: "unknown",
-            source: MetaDataEntry.Source.SYSTEM,
-            status: MetaDataEntry.Status.VALID
-        )
+                        dataFile: file,
+                        key: key,
+                        value: "unknown",
+                        source: MetaDataEntry.Source.SYSTEM,
+                        status: MetaDataEntry.Status.VALID
+                        )
         //entry.validate()
         //println entry.errors
         entry.save(flush: true)
@@ -266,6 +291,7 @@ class MetaDataValidationService {
         ChangeLog changeLog = buildChangeLog(entry.id, "", "unknown", cmnt)
         changeLog.save(flush: true)
     }
+
 
     private MetaDataKey getKey(String keyName) {
         MetaDataKey key = MetaDataKey.findByName(keyName)
@@ -275,6 +301,7 @@ class MetaDataValidationService {
         }
         return key
     }
+
 
     private void combineLaneAndIndex(DataFile file) {
         MetaDataEntry index = metaDataEntryFromList(file, ["INDEX_NO", "BARCODE"])
@@ -295,19 +322,21 @@ class MetaDataValidationService {
         }
     }
 
+
     private ChangeLog buildChangeLog(long rowId, String from, String to, String comment) {
         ReferencedClass clazz = ReferencedClass.findOrSaveByClassName(MetaDataEntry.class.getName())
         ChangeLog changeLog = new ChangeLog(
-            rowId : rowId,
-            ReferencedClass: clazz,
-            columnName : "value",
-            fromValue : from,
-            toValue : to,
-            comment : comment,
-            source : ChangeLog.Source.SYSTEM
-        )
+                        rowId : rowId,
+                        ReferencedClass: clazz,
+                        columnName : "value",
+                        fromValue : from,
+                        toValue : to,
+                        comment : comment,
+                        source : ChangeLog.Source.SYSTEM
+                        )
         return changeLog
     }
+
 
     /**
      * Returns first found meta data entry from the key names in a list.
@@ -322,6 +351,7 @@ class MetaDataValidationService {
         }
         return null
     }
+
 
     private MetaDataEntry metaDataEntry(DataFile file, String keyName) {
         MetaDataKey key = MetaDataKey.findByName(keyName)

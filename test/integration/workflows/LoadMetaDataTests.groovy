@@ -1,8 +1,7 @@
 package workflows
 
-import static org.junit.Assert.*
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
-import grails.util.Environment
+import static org.junit.Assert.*
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.jobs.metaData.MetaDataStartJob
@@ -15,12 +14,24 @@ import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
 /**
  * Currently only a test for exome data exist
  */
-class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
+
+/**
+ * To run this workflow test the preparation steps described in the documentation (grails doc) have to be followed.
+ * Additional preparations
+ * The two files:
+ * - fastqR1Filepath
+ * - fastqR2Filepath
+ * have to be created before the test can be started
+ */
+class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
 
     // The scheduler needs to access the created objects while the test is being executed
     boolean transactional = false
     // TODO ( jira: OTP-566)  want to get rid of this hardcoded.. idea: maybe calculating from the walltime of the cluster jobs..
-    int SLEEPING_TIME_IN_MINUTES = 60
+    int SLEEPING_TIME_IN_MINUTES = 10
+
+    // the String "UNKNOWN" is used instead of the enum, because that is how it appears in external input files
+    final String UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE = "UNKNOWN"
 
     LsdfFilesService lsdfFilesService
     ExecutionService executionService
@@ -86,19 +97,19 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
         }
         Map<MetaDataColumn, String> metaDataDefault = new HashMap(emptyMetaData)
         metaDataDefault.putAll([
-                (MetaDataColumn.CENTER_NAME): seqCenterName,
-                (MetaDataColumn.RUN_ID): runName,
-                (MetaDataColumn.RUN_DATE): runDate,
-                (MetaDataColumn.BASE_COUNT): baseCount,
-                (MetaDataColumn.READ_COUNT): readCount,
-                (MetaDataColumn.CYCLE_COUNT): cycleCount,
-                (MetaDataColumn.SAMPLE_ID): sampleID,
-                (MetaDataColumn.INSTRUMENT_PLATFORM): instrumentPlatform,
-                (MetaDataColumn.INSTRUMENT_MODEL): instrumentModel,
-                (MetaDataColumn.PIPELINE_VERSION): pipeLineVersion,
-                (MetaDataColumn.INSERT_SIZE): insertSize,
-                (MetaDataColumn.LIBRARY_LAYOUT): libraryLayout,
-                (MetaDataColumn.WITHDRAWN): "0"])
+            (MetaDataColumn.CENTER_NAME): seqCenterName,
+            (MetaDataColumn.RUN_ID): runName,
+            (MetaDataColumn.RUN_DATE): runDate,
+            (MetaDataColumn.BASE_COUNT): baseCount,
+            (MetaDataColumn.READ_COUNT): readCount,
+            (MetaDataColumn.CYCLE_COUNT): cycleCount,
+            (MetaDataColumn.SAMPLE_ID): sampleID,
+            (MetaDataColumn.INSTRUMENT_PLATFORM): instrumentPlatform,
+            (MetaDataColumn.INSTRUMENT_MODEL): instrumentModel,
+            (MetaDataColumn.PIPELINE_VERSION): pipeLineVersion,
+            (MetaDataColumn.INSERT_SIZE): insertSize,
+            (MetaDataColumn.LIBRARY_LAYOUT): libraryLayout,
+            (MetaDataColumn.WITHDRAWN): "0"])
         return metaDataDefault
     }
 
@@ -132,7 +143,7 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
             rootPath: rootPath,
             processingRootPath: processingRootPath,
             programsRootPath: realmProgramsRootPath,
-            ]
+        ]
 
         realm = DomainFactory.createRealmDataManagementDKFZ(paths).save(flush: true)
         realm = DomainFactory.createRealmDataProcessingDKFZ(paths).save(flush: true)
@@ -314,10 +325,10 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
         String libraryPreparationKit = "Agilent SureSelect V3"
         String libraryPreparationKitIdentifier = "Agilent SureSelect V3 alias"
 
-        ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = new ExomeEnrichmentKitIdentifier(
+        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = new ExomeEnrichmentKitSynonym(
                         name: libraryPreparationKitIdentifier,
                         exomeEnrichmentKit: exomeEnrichmentKit.first())
-        assertNotNull(exomeEnrichmentKitIdentifier.save([flush: true]))
+        assertNotNull(exomeEnrichmentKitSynonym.save([flush: true]))
 
         String path = "${ftpDir}/${runName}"
         String softLinkFastqR1Filepath1 = "${path}/${fastqR1Filename1}"
@@ -338,8 +349,8 @@ class LoadMetadataTests extends GroovyScriptAwareIntegrationTest {
         sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR2Filename1, (MetaDataColumn.MD5): md5sum(fastqR2Filepath), (MetaDataColumn.LANE_NO): laneNoKit, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): libraryPreparationKit]))
         sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR1Filename2, (MetaDataColumn.MD5): md5sum(fastqR1Filepath), (MetaDataColumn.LANE_NO): laneNoKitId, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): libraryPreparationKitIdentifier]))
         sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR2Filename2, (MetaDataColumn.MD5): md5sum(fastqR2Filepath), (MetaDataColumn.LANE_NO): laneNoKitId, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): libraryPreparationKitIdentifier]))
-        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR1Filename3, (MetaDataColumn.MD5): md5sum(fastqR1Filepath), (MetaDataColumn.LANE_NO): laneNoUnknown, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): ExomeSeqTrack.KitInfoState.UNKNOWN.toString()]))
-        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR2Filename3, (MetaDataColumn.MD5): md5sum(fastqR2Filepath), (MetaDataColumn.LANE_NO): laneNoUnknown, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): ExomeSeqTrack.KitInfoState.UNKNOWN.toString()]))
+        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR1Filename3, (MetaDataColumn.MD5): md5sum(fastqR1Filepath), (MetaDataColumn.LANE_NO): laneNoUnknown, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE]))
+        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR2Filename3, (MetaDataColumn.MD5): md5sum(fastqR2Filepath), (MetaDataColumn.LANE_NO): laneNoUnknown, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE]))
         String metaDataFile = sb.toString()
 
         String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"

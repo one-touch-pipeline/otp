@@ -1,9 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import static org.junit.Assert.*
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import org.junit.*
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState
 import de.dkfz.tbi.otp.ngsdata.SeqTrack.QualityEncoding
 
@@ -161,7 +161,7 @@ class SeqTrackBuilderUnitTests {
         assertEquals(QualityEncoding.ILLUMINA, seqTrack.qualityEncoding)
         assertEquals(DataProcessingState.FINISHED, seqTrack.alignmentState)
         assertEquals(DataProcessingState.IN_PROGRESS, seqTrack.fastqcState)
-        assertEquals(ExomeSeqTrack.KitInfoState.LATER_TO_CHECK, seqTrack.kitInfoState)
+        assertEquals(InformationReliability.UNKNOWN_UNVERIFIED, seqTrack.kitInfoReliability)
         assertNull(seqTrack.exomeEnrichmentKit)
     }
 
@@ -197,11 +197,11 @@ class SeqTrackBuilderUnitTests {
         assertEquals(QualityEncoding.ILLUMINA, seqTrack.qualityEncoding)
         assertEquals(DataProcessingState.FINISHED, seqTrack.alignmentState)
         assertEquals(DataProcessingState.IN_PROGRESS, seqTrack.fastqcState)
-        assertEquals(ExomeSeqTrack.KitInfoState.KNOWN, seqTrack.kitInfoState)
+        assertEquals(InformationReliability.KNOWN, seqTrack.kitInfoReliability)
         assertNotNull(seqTrack.exomeEnrichmentKit)
     }
 
-    void testCreateExomeWithKitInfoStateIsUnknown() {
+    void testCreateExomeWithKitInfoReliabilityIsUnknown() {
         SeqTrackBuilder builder = new SeqTrackBuilder(
                         "lane",
                         new Run(),
@@ -213,7 +213,7 @@ class SeqTrackBuilderUnitTests {
         builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
         builder.setnBasePairs(5).setnReads(6).setInsertSize(7)
         builder.setQualityEncoding(QualityEncoding.ILLUMINA).setAlignmentState(DataProcessingState.FINISHED).setFastqcState(DataProcessingState.IN_PROGRESS)
-        builder.setKitInfoState(ExomeSeqTrack.KitInfoState.UNKNOWN)
+        builder.setInformationReliability(InformationReliability.UNKNOWN_VERIFIED)
 
         SeqTrack seqTrack = builder.create()
         assertNotNull(seqTrack)
@@ -233,11 +233,11 @@ class SeqTrackBuilderUnitTests {
         assertEquals(QualityEncoding.ILLUMINA, seqTrack.qualityEncoding)
         assertEquals(DataProcessingState.FINISHED, seqTrack.alignmentState)
         assertEquals(DataProcessingState.IN_PROGRESS, seqTrack.fastqcState)
-        assertEquals(ExomeSeqTrack.KitInfoState.UNKNOWN, seqTrack.kitInfoState)
+        assertEquals(InformationReliability.UNKNOWN_VERIFIED, seqTrack.kitInfoReliability)
         assertNull(seqTrack.exomeEnrichmentKit)
     }
 
-    void testCreateExomeWithKitInfoStateIsLaterToCheck() {
+    void testCreateExomeWithKitInfoReliabilityIsUnknownUnverified() {
         SeqTrackBuilder builder = new SeqTrackBuilder(
                         "lane",
                         new Run(),
@@ -249,7 +249,7 @@ class SeqTrackBuilderUnitTests {
         builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
         builder.setnBasePairs(5).setnReads(6).setInsertSize(7)
         builder.setQualityEncoding(QualityEncoding.ILLUMINA).setAlignmentState(DataProcessingState.FINISHED).setFastqcState(DataProcessingState.IN_PROGRESS)
-        builder.setKitInfoState(ExomeSeqTrack.KitInfoState.LATER_TO_CHECK)
+        builder.setInformationReliability(InformationReliability.UNKNOWN_UNVERIFIED)
 
         SeqTrack seqTrack = builder.create()
         assertNotNull(seqTrack)
@@ -269,7 +269,7 @@ class SeqTrackBuilderUnitTests {
         assertEquals(QualityEncoding.ILLUMINA, seqTrack.qualityEncoding)
         assertEquals(DataProcessingState.FINISHED, seqTrack.alignmentState)
         assertEquals(DataProcessingState.IN_PROGRESS, seqTrack.fastqcState)
-        assertEquals(ExomeSeqTrack.KitInfoState.LATER_TO_CHECK, seqTrack.kitInfoState)
+        assertEquals(InformationReliability.UNKNOWN_UNVERIFIED, seqTrack.kitInfoReliability)
         assertNull(seqTrack.exomeEnrichmentKit)
     }
 
@@ -291,7 +291,7 @@ class SeqTrackBuilderUnitTests {
         }
     }
 
-    void testCreateExomeWithKitInfoStateIsKnownAndNoExomeEnrichmentKit() {
+    void testCreateExomeWithKitInfoReliabilityIsKnownAndNoExomeEnrichmentKit() {
         shouldFail(IllegalArgumentException.class) {
             SeqTrackBuilder builder =  new SeqTrackBuilder(
                             "lane",
@@ -304,7 +304,7 @@ class SeqTrackBuilderUnitTests {
             builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
             builder.setnBasePairs(5).setnReads(6).setInsertSize(7)
             builder.setQualityEncoding(QualityEncoding.ILLUMINA).setAlignmentState(DataProcessingState.FINISHED).setFastqcState(DataProcessingState.IN_PROGRESS)
-            builder.setKitInfoState(ExomeSeqTrack.KitInfoState.KNOWN)
+            builder.setInformationReliability(InformationReliability.KNOWN)
             builder.create()
         }
     }
@@ -392,10 +392,10 @@ class SeqTrackBuilderUnitTests {
                             new SeqPlatform(),
                             new SoftwareTool()
                             )
-        builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
-        builder.setnBasePairs(N_BASE_PAIRS).setnReads(N_READS).setInsertSize(INSERT_SIZE)
-        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setAlignmentState(DataProcessingState.FINISHED).setFastqcState(DataProcessingState.IN_PROGRESS)
-        builder.create()
+            builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
+            builder.setnBasePairs(N_BASE_PAIRS).setnReads(N_READS).setInsertSize(INSERT_SIZE)
+            builder.setQualityEncoding(QualityEncoding.ILLUMINA).setAlignmentState(DataProcessingState.FINISHED).setFastqcState(DataProcessingState.IN_PROGRESS)
+            builder.create()
         }
     }
 }

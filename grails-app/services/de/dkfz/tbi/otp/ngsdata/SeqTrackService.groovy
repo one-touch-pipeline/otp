@@ -2,15 +2,15 @@ package de.dkfz.tbi.otp.ngsdata
 
 import static org.springframework.util.Assert.*
 import groovy.xml.MarkupBuilder
-import de.dkfz.tbi.otp.dataprocessing.AlignmentPassService;
-import de.dkfz.tbi.otp.job.processing.ProcessingException
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
-import org.springframework.security.access.prepost.PreAuthorize
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.prepost.PostAuthorize
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.core.userdetails.UserDetails
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.dataprocessing.AlignmentPassService
+import de.dkfz.tbi.otp.job.processing.ProcessingException
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 class SeqTrackService {
 
@@ -264,11 +264,11 @@ class SeqTrackService {
 
         // Find all samples in this run.
         List<SeqTrack> seqTracks = SeqTrack.withCriteria {
-             eq("run", run)
-             seqType {
-                 eq("name", SeqTypeNames.WHOLE_GENOME.seqTypeName)
-                 eq("libraryLayout", "PAIRED")
-             }
+            eq("run", run)
+            seqType {
+                eq("name", SeqTypeNames.WHOLE_GENOME.seqTypeName)
+                eq("libraryLayout", "PAIRED")
+            }
         }
         List<Sample> samples = seqTracks*.sample
         if (samples.isEmpty()) {
@@ -277,19 +277,19 @@ class SeqTrackService {
 
         // Find all SeqTracks for these samples.
         seqTracks = SeqTrack.findAll(AlignmentPassService.ALIGNABLE_SEQTRACK_HQL +
-            "AND seqType.name = :seqTypeName AND seqType.libraryLayout = :seqTypeLibraryLayout " +
-            "AND sample IN (:samples) ",
-            [
-                alignmentState: SeqTrack.DataProcessingState.UNKNOWN,
-                seqTypeName: SeqTypeNames.WHOLE_GENOME.seqTypeName,
-                seqTypeLibraryLayout: "PAIRED",
-                samples: samples,
-            ] << AlignmentPassService.ALIGNABLE_SEQTRACK_QUERY_PARAMETERS)
+                        "AND seqType.name = :seqTypeName AND seqType.libraryLayout = :seqTypeLibraryLayout " +
+                        "AND sample IN (:samples) ",
+                        [
+                            alignmentState: SeqTrack.DataProcessingState.UNKNOWN,
+                            seqTypeName: SeqTypeNames.WHOLE_GENOME.seqTypeName,
+                            seqTypeLibraryLayout: "PAIRED",
+                            samples: samples,
+                        ] << AlignmentPassService.ALIGNABLE_SEQTRACK_QUERY_PARAMETERS)
 
         // Mark the SeqTracks as being ready for alignment.
         seqTracks.each {
-           it.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
-           it.save(flush: true)
+            it.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+            it.save(flush: true)
         }
     }
 
@@ -421,7 +421,7 @@ class SeqTrackService {
     private SeqTrack buildFastqSeqTrack(Run run, String lane) {
         // find sequence files
         List<DataFile> dataFiles =
-                getRunFilesWithTypeAndLane(run, FileType.Type.SEQUENCE, lane)
+                        getRunFilesWithTypeAndLane(run, FileType.Type.SEQUENCE, lane)
         if (!dataFiles) {
             throw new ProcessingException("No laneDataFiles found.")
         }
@@ -449,30 +449,55 @@ class SeqTrackService {
         SeqTrackBuilder builder = new SeqTrackBuilder(lane, run, sample, seqType, run.seqPlatform, pipeline)
         builder.setHasFinalBam(false).setHasOriginalBam(false).setUsingOriginalBam(false)
 
+        /*
+         * These are two special cases, which need a specific treatment.
+         * For all other cases the default suffices -> no else is needed.
+         */
         if (seqType.name == SeqTypeNames.EXOME.seqTypeName) {
-            MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.LIB_PREP_KIT.name())
-            MetaDataEntry metaDataEntry = MetaDataEntry.findByDataFileAndKey(dataFile, key)
-            if (metaDataEntry == null) {
-                builder.setKitInfoState(ExomeSeqTrack.KitInfoState.LATER_TO_CHECK)
-            } else if (metaDataEntry.value == ExomeSeqTrack.KitInfoState.UNKNOWN.toString()) {
-                builder.setKitInfoState(ExomeSeqTrack.KitInfoState.UNKNOWN)
-            } else {
-                builder.setExomeEnrichmentKit(exomeEnrichmentKitService.findExomeEnrichmentKitByNameOrAlias(metaDataEntry.value))
-            }
+            annotateSeqTrackForExome(dataFile, builder, run, sample)
         } else if (seqType.name == SeqTypeNames.CHIP_SEQ.seqTypeName) {
-            MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.ANTIBODY_TARGET.name())
-            MetaDataEntry metaDataEntry = MetaDataEntry.findByDataFileAndKey(dataFile, key)
-            builder.setAntibodyTarget(AntibodyTarget.findByName(metaDataEntry.value))
-            key = MetaDataKey.findByName(MetaDataColumn.ANTIBODY.name())
-            metaDataEntry = MetaDataEntry.findByDataFileAndKey(dataFile, key)
-            if (metaDataEntry) {
-                builder.setAntibody(metaDataEntry.value)
-            }
+            annotateSeqTrackForChipSeq(dataFile, builder)
         }
 
         SeqTrack seqTrack = builder.create()
         seqTrack.save(flush: true)
         return seqTrack
+    }
+
+
+    private void annotateSeqTrackForExome(DataFile dataFile, SeqTrackBuilder builder, Run run, Sample sample) {
+        notNull(dataFile, "The input dataFile of the method annotateSeqTrackForExome is null")
+        notNull(builder, "The input builder of the method annotateSeqTrackForExome is null")
+        notNull(run, "The input run of the method annotateSeqTrackForExome is null")
+        notNull(sample, "The input sample of the method annotateSeqTrackForExome is null")
+
+        MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.LIB_PREP_KIT.name())
+        MetaDataEntry metaDataEntry = MetaDataEntry.findByDataFileAndKey(dataFile, key)
+        if (metaDataEntry == null) {
+            builder.setInformationReliability(InformationReliability.UNKNOWN_UNVERIFIED)
+        } else if (metaDataEntry.value == InformationReliability.UNKNOWN_VERIFIED.rawValue) {
+            builder.setInformationReliability(InformationReliability.UNKNOWN_VERIFIED)
+        } else {
+            ExomeEnrichmentKit exomeEnrichmentKit = exomeEnrichmentKitService.findExomeEnrichmentKitByNameOrAlias(metaDataEntry.value)
+            notNull(exomeEnrichmentKit, "There is no EnrichmentKit in the DB for the metaDataEntry ${metaDataEntry.value} of run ${run}")
+            exomeEnrichmentKitService.validateExomeEnrichmentKit(sample, exomeEnrichmentKit)
+            builder.setExomeEnrichmentKit(exomeEnrichmentKit)
+        }
+    }
+
+
+    private void annotateSeqTrackForChipSeq(DataFile dataFile, SeqTrackBuilder builder) {
+        notNull(dataFile, "The input dataFile of method annotateSeqTrackForChipSeq is null")
+        notNull(builder, "The input builder of the method annotateSeqTrackForChipSeq is null")
+        MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.ANTIBODY_TARGET.name())
+        MetaDataEntry metaDataEntry = MetaDataEntry.findByDataFileAndKey(dataFile, key)
+        notNull(metaDataEntry, "There is no metaDataEntry for the key " + key + " and the file " + dataFile)
+        builder.setAntibodyTarget(AntibodyTarget.findByName(metaDataEntry.value))
+        key = MetaDataKey.findByName(MetaDataColumn.ANTIBODY.name())
+        metaDataEntry = MetaDataEntry.findByDataFileAndKey(dataFile, key)
+        if (metaDataEntry) {
+            builder.setAntibody(metaDataEntry.value)
+        }
     }
 
     private Sample getSample(DataFile file) {
@@ -551,13 +576,13 @@ class SeqTrackService {
     }
 
     /**
-    *
-    * Fills the numbers in the SeqTrack object using MetaDataEntry
-    * objects from the DataFile objects belonging to this SeqTrack.
-    *
-    * @param seqTrack
-    * @return manipulated seqTrack
-    */
+     *
+     * Fills the numbers in the SeqTrack object using MetaDataEntry
+     * objects from the DataFile objects belonging to this SeqTrack.
+     *
+     * @param seqTrack
+     * @return manipulated seqTrack
+     */
     private void fillReadsForSeqTrack(SeqTrack seqTrack) {
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
         fillInsertSize(seqTrack, dataFiles)
@@ -590,7 +615,7 @@ class SeqTrackService {
     private void appendAlignmentToSeqTrack(SeqTrack seqTrack) {
         // attach alignment to seqTrack
         List<DataFile> alignFiles =
-            getRunFilesWithTypeAndLane(seqTrack.run, FileType.Type.ALIGNMENT, seqTrack.laneId)
+                        getRunFilesWithTypeAndLane(seqTrack.run, FileType.Type.ALIGNMENT, seqTrack.laneId)
         if (alignFiles.size() == 0) {
             return
         }
@@ -604,10 +629,10 @@ class SeqTrackService {
 
             AlignmentParams alignParams = getAlignmentParams(pipeline)
             AlignmentLog alignLog = new AlignmentLog(
-                alignmentParams : alignParams,
-                seqTrack : seqTrack,
-                executedBy : AlignmentLog.Execution.INITIAL
-            )
+                            alignmentParams : alignParams,
+                            seqTrack : seqTrack,
+                            executedBy : AlignmentLog.Execution.INITIAL
+                            )
             alignLog.save(flush: true)
             consumeAlignmentFiles(alignLog, alignFiles, pipeline)
             seqTrack.hasOriginalBam = true
@@ -680,7 +705,7 @@ AND dataFile.used = false
 AND entry.key = :key
 AND entry.value = :value
 ''',
-                [run: run, type: type, key: key, value: lane])
+                        [run: run, type: type, key: key, value: lane])
         return dataFiles
     }
 
@@ -707,7 +732,7 @@ AND entry.value = :value
                         segment.allFilesUsed = false
                         allUsed = false
                         LogThreadLocal.getJobLog()?.error("Datafile " + file + " is not used in a seq track" +
-                            (file.fileWithdrawn ? " (reason: withdrawn)": ""))
+                                        (file.fileWithdrawn ? " (reason: withdrawn)": ""))
                     }
                 }
             }

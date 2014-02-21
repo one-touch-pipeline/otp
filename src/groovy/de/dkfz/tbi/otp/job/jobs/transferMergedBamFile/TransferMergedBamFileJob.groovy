@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.transferMergedBamFile
 
 import org.springframework.beans.factory.annotation.Autowired
-
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*

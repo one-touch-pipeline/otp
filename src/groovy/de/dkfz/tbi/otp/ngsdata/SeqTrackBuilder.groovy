@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import static org.springframework.util.Assert.*
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.job.processing.ProcessingException
-import de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack.KitInfoState
 import de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState
 import de.dkfz.tbi.otp.ngsdata.SeqTrack.QualityEncoding
 
@@ -53,11 +53,11 @@ class SeqTrackBuilder {
     /**
      * For Exome, this field is also required
      */
-    private ExomeSeqTrack.KitInfoState kitInfoState = ExomeSeqTrack.KitInfoState.LATER_TO_CHECK
+    private InformationReliability informationReliability = InformationReliability.UNKNOWN_UNVERIFIED
 
     /**
-     * For Exome, this field is required, if the {@link ExomeSeqTrack.KitInfoState} has the value
-     * {@link ExomeSeqTrack.KitInfoState#KNOWN}, otherwise, it has to be <code>null</code>
+     * For Exome, this field is required, if the {@link InformationReliability} has the value
+     * {@link InformationReliability#KNOWN}, otherwise, it has to be <code>null</code>
      */
     private ExomeEnrichmentKit exomeEnrichmentKit
 
@@ -72,8 +72,8 @@ class SeqTrackBuilder {
     private AntibodyTarget antibodyTarget
 
     public SeqTrackBuilder(String laneId, Run run, Sample sample,
-            SeqType seqType, SeqPlatform seqPlatform,
-            SoftwareTool pipelineVersion) {
+    SeqType seqType, SeqPlatform seqPlatform,
+    SoftwareTool pipelineVersion) {
         super()
         notNull(laneId, "A seq track needs a lane id")
         notNull(run, "A seq track needs a run")
@@ -136,23 +136,23 @@ class SeqTrackBuilder {
     }
 
     /**
-     * Set the {@link KitInfoState} and change {@link #exomeEnrichmentKit} to <code>null</code> if
-     * the kitInfoState is not {@link KitInfoState#KNOWN}
+     * Set the {@link InformationReliability} and change {@link #exomeEnrichmentKit} to <code>null</code> if
+     * the InformationReliability is not {@link InformationReliability#KNOWN}
      */
-    public SeqTrackBuilder setKitInfoState(ExomeSeqTrack.KitInfoState kitInfoState) {
-        this.kitInfoState = kitInfoState
-        if (kitInfoState != KitInfoState.KNOWN) {
+    public SeqTrackBuilder setInformationReliability(InformationReliability reliability) {
+        this.informationReliability = reliability
+        if (reliability != InformationReliability.KNOWN) {
             this.exomeEnrichmentKit = null
         }
         return this
     }
 
     /**
-     * Set the {@link ExomeEnrichmentKit} and change {@link KitInfoState} to {@link KitInfoState#KNOWN}
+     * Set the {@link ExomeEnrichmentKit} and change {@link InformationReliability} to {@link InformationReliability#KNOWN}
      */
     public SeqTrackBuilder setExomeEnrichmentKit(ExomeEnrichmentKit exomeEnrichmentKit) {
         this.exomeEnrichmentKit = exomeEnrichmentKit
-        this.kitInfoState =  KitInfoState.KNOWN
+        this.informationReliability = InformationReliability.KNOWN
         return this
     }
 
@@ -169,14 +169,14 @@ class SeqTrackBuilder {
     public SeqTrack create() {
         SeqTrack seqTrack
         if (seqType.name == SeqTypeNames.EXOME.seqTypeName) {
-            notNull(kitInfoState, "A seq track needs the kit info state for exome data")
-            if (kitInfoState == ExomeSeqTrack.KitInfoState.KNOWN) {
-                notNull(exomeEnrichmentKit, "A exome seq track needs an exome enrichment kit when kit info state is KNOWN")
+            notNull(informationReliability, "A seq track needs the kitInformationReliability for exome data")
+            if (informationReliability == InformationReliability.KNOWN) {
+                notNull(exomeEnrichmentKit, "A exome seq track needs an exome enrichment kit when kitInformationReliability is KNOWN")
             } else {
-                isNull(exomeEnrichmentKit, "A exome seq track are not allowed to have an exome enrichment kit when kit info state is not KNOWN")
+                isNull(exomeEnrichmentKit, "A exome seq track are not allowed to have an exome enrichment kit when kitInformationReliability is not KNOWN")
             }
             seqTrack = new ExomeSeqTrack()
-            seqTrack.kitInfoState = kitInfoState
+            seqTrack.kitInfoReliability = informationReliability
             seqTrack.exomeEnrichmentKit = exomeEnrichmentKit
         } else if (seqType.name == SeqTypeNames.CHIP_SEQ.seqTypeName) {
             notNull(antibodyTarget, "A seq track needs the antibodyTarget for ChipSeq data")

@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
-
 import org.junit.*
-
-import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.job.processing.ProcessingException
+import de.dkfz.tbi.otp.ngsdata.MetaDataEntry.Source
+import de.dkfz.tbi.otp.ngsdata.MetaDataEntry.Status
+import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 
 class SeqTrackServiceTests extends AbstractIntegrationTest {
 
@@ -15,6 +16,10 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
     File mdPath
 
     static final String ANTIBODY_TARGET_IDENTIFIER = "AntibodyTargetIdentifier123"
+    static final String ANTIBODY_IDENTIFIER = "AntibodyIdentifier123"
+
+    // the String "UNKNOWN" is used instead of the enum, because that is how it appears in external input files
+    final String UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE = "UNKNOWN"
 
     @Before
     void setUp() {
@@ -302,13 +307,13 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         )
         assertNotNull(seqTrack)
         assertEquals(ExomeSeqTrack.class, seqTrack.class)
-        assertEquals(ExomeSeqTrack.KitInfoState.KNOWN, seqTrack.kitInfoState)
+        assertEquals(InformationReliability.KNOWN, seqTrack.kitInfoReliability)
         assertEquals(data.exomeEnrichmentKit, seqTrack.exomeEnrichmentKit)
     }
 
     void testCreateSeqTrackExomeByKitIdentifier() {
         Map data = createData()
-        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "ExomeEnrichmentKitIdentifier")
+        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "ExomeEnrichmentKitSynonym")
         data.seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
 
@@ -322,13 +327,14 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         )
         assertNotNull(seqTrack)
         assertEquals(ExomeSeqTrack.class, seqTrack.class)
-        assertEquals(ExomeSeqTrack.KitInfoState.KNOWN, seqTrack.kitInfoState)
+        assertEquals(InformationReliability.KNOWN, seqTrack.kitInfoReliability)
         assertEquals(data.exomeEnrichmentKit, seqTrack.exomeEnrichmentKit)
     }
 
+
     void testCreateSeqTrackExomeByValueUnknown() {
         Map data = createData()
-        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "UNKNOWN")
+        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE)
         data.seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
 
@@ -342,14 +348,14 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         )
         assertNotNull(seqTrack)
         assertEquals(ExomeSeqTrack.class, seqTrack.class)
-        assertEquals(ExomeSeqTrack.KitInfoState.UNKNOWN, seqTrack.kitInfoState)
+        assertEquals(InformationReliability.UNKNOWN_VERIFIED, seqTrack.kitInfoReliability)
         assertNull(seqTrack.exomeEnrichmentKit)
     }
 
-    void testCreateSeqTrackExomeInvalidByValueLaterToCheck() {
-        //value LATER_TO_CHECK can not given in meta data, so this value should be handled like an unknown value
+    void testCreateSeqTrackExomeInvalidByValueUnknownUnverified() {
+        //value UNKNOWN_UNVERIFIED can not given in meta data, so this value should be handled like an unknown value
         Map data = createData()
-        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "LATER_TO_CHECK")
+        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "UNKNOWN_UNVERIFIED")
         data.seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
 
@@ -433,7 +439,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         )
         assertNotNull(seqTrack)
         assertEquals(ExomeSeqTrack.class, seqTrack.class)
-        assertEquals(ExomeSeqTrack.KitInfoState.LATER_TO_CHECK, seqTrack.kitInfoState)
+        assertEquals(InformationReliability.UNKNOWN_UNVERIFIED, seqTrack.kitInfoReliability)
         assertNull(seqTrack.exomeEnrichmentKit)
     }
 
@@ -456,7 +462,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         )
         assertNotNull(seqTrack)
         assertEquals(ExomeSeqTrack.class, seqTrack.class)
-        assertEquals(ExomeSeqTrack.KitInfoState.LATER_TO_CHECK, seqTrack.kitInfoState)
+        assertEquals(InformationReliability.UNKNOWN_UNVERIFIED, seqTrack.kitInfoReliability)
         assertNull(seqTrack.exomeEnrichmentKit)
     }
 
@@ -589,13 +595,13 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         )
         assertNotNull(exomeEnrichmentKit.save([flush: true]))
 
-        ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = new ExomeEnrichmentKitIdentifier(
-                        name: "ExomeEnrichmentKitIdentifier",
+        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = new ExomeEnrichmentKitSynonym(
+                        name: "ExomeEnrichmentKitSynonym",
                         exomeEnrichmentKit: exomeEnrichmentKit)
-        assertNotNull(exomeEnrichmentKitIdentifier.save([flush: true]))
+        assertNotNull(exomeEnrichmentKitSynonym.save([flush: true]))
 
         AntibodyTarget antibodyTarget = new AntibodyTarget(
-            name: ANTIBODY_TARGET_IDENTIFIER)
+                        name: ANTIBODY_TARGET_IDENTIFIER)
         assertNotNull(antibodyTarget.save([flush: true]))
 
         return [
@@ -660,6 +666,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         nonAlignableSeqType.dirName = "seq_type_dir_name"
         assertNotNull(nonAlignableSeqType.save(flush: true))
 
+        testData.dataFile.delete(flush: true)
         testData.seqTrack.delete(flush: true)
 
         assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
@@ -780,4 +787,307 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         }
     }
 
+
+    @Test(expected = IllegalArgumentException)
+    void testAnnotateSeqTrackForExomeDataFileIsNull() {
+        Run run = new Run()
+        String lane = "lane"
+        Sample sample = new Sample()
+        SeqType seqType = new SeqType()
+        SoftwareTool pipeline = new SoftwareTool()
+        SeqPlatform seqPlatform = new SeqPlatform()
+        seqTrackService.annotateSeqTrackForExome(null, new SeqTrackBuilder(lane, run, sample, seqType, seqPlatform, pipeline), run, sample)
+    }
+
+
+    @Test(expected = IllegalArgumentException)
+    void testAnnotateSeqTrackForExomeBuilderIsNull() {
+        Run run = new Run()
+        DataFile dataFile = new DataFile()
+        String lane = "lane"
+        Sample sample = new Sample()
+        seqTrackService.annotateSeqTrackForExome(dataFile, null, run, sample)
+    }
+
+
+    @Test(expected = IllegalArgumentException)
+    void testAnnotateSeqTrackForExomeRunIsNull() {
+        DataFile dataFile = new DataFile()
+        Run run = new Run()
+        String lane = "lane"
+        Sample sample = new Sample()
+        SeqType seqType = new SeqType()
+        SoftwareTool pipeline = new SoftwareTool()
+        SeqPlatform seqPlatform = new SeqPlatform()
+        seqTrackService.annotateSeqTrackForExome(dataFile, new SeqTrackBuilder(lane, run, sample, seqType, seqPlatform, pipeline), null, sample)
+    }
+
+
+    @Test(expected = IllegalArgumentException)
+    void testAnnotateSeqTrackForExomeSampleIsNull() {
+        DataFile dataFile = new DataFile()
+        Run run = new Run()
+        String lane = "lane"
+        Sample sample = new Sample()
+        SeqType seqType = new SeqType()
+        SoftwareTool pipeline = new SoftwareTool()
+        SeqPlatform seqPlatform = new SeqPlatform()
+        seqTrackService.annotateSeqTrackForExome(dataFile, new SeqTrackBuilder(lane, run, sample, seqType, seqPlatform, pipeline), run, null)
+    }
+
+
+    @Test
+    void testAnnotateSeqTrackForExomeMetaDataEntryIsNull() {
+        TestData testData = new TestData()
+        testData.createObjects()
+        String lane = "lane"
+        DataFile dataFile = testData.createDataFile()
+        assertNotNull(dataFile.save(flush: true))
+
+        MetaDataKey metaDataKey = new MetaDataKey(
+                        name: MetaDataColumn.LIB_PREP_KIT.name()
+                        )
+        assertNotNull(metaDataKey.save(flush: true))
+
+        MetaDataEntry metaDataEntry = new MetaDataEntry(
+                        value: "testValue",
+                        dataFile: dataFile,
+                        key: metaDataKey,
+                        status: Status.VALID,
+                        source: Source.MDFILE,
+                        )
+        assertNotNull(metaDataEntry.save(flush: true))
+
+        SeqTrackBuilder seqTrackBuilder = new SeqTrackBuilder(lane, testData.run, testData.sample, testData.seqType, testData.seqPlatform, testData.softwareTool)
+
+        seqTrackService.annotateSeqTrackForExome(testData.dataFile, seqTrackBuilder, testData.run, testData.sample)
+        assertEquals(InformationReliability.UNKNOWN_UNVERIFIED, seqTrackBuilder.informationReliability)
+    }
+
+
+    @Test
+    void testAnnotateSeqTrackForExomeInformationReliabilityIsUNKNOWN_VERIFIED() {
+        TestData testData = new TestData()
+        testData.createObjects()
+        String lane = "lane"
+        MetaDataKey metaDataKey = new MetaDataKey(
+                        name: MetaDataColumn.LIB_PREP_KIT.name()
+                        )
+        assertNotNull(metaDataKey.save(flush: true))
+
+        MetaDataEntry metaDataEntry = new MetaDataEntry(
+                        value: UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE,
+                        dataFile: testData.dataFile,
+                        key: metaDataKey,
+                        status: Status.VALID,
+                        source: Source.MDFILE,
+                        )
+        assertNotNull(metaDataEntry.save(flush: true))
+
+        SeqTrackBuilder seqTrackBuilder = new SeqTrackBuilder(lane, testData.run, testData.sample, testData.seqType, testData.seqPlatform, testData.softwareTool)
+
+        seqTrackService.annotateSeqTrackForExome(testData.dataFile, seqTrackBuilder, testData.run, testData.sample)
+        assertEquals(InformationReliability.UNKNOWN_VERIFIED, seqTrackBuilder.informationReliability)
+    }
+
+
+    @Test(expected = IllegalArgumentException)
+    void testAnnotateSeqTrackForExomeKitIsNull() {
+        TestData testData = new TestData()
+        testData.createObjects()
+        String lane = "lane"
+        MetaDataKey metaDataKey = new MetaDataKey(
+                        name: MetaDataColumn.LIB_PREP_KIT.name()
+                        )
+        assertNotNull(metaDataKey.save(flush: true))
+
+        MetaDataEntry metaDataEntry = new MetaDataEntry(
+                        value: "notExistingKit",
+                        dataFile: testData.dataFile,
+                        key: metaDataKey,
+                        status: Status.VALID,
+                        source: Source.MDFILE,
+                        )
+        assertNotNull(metaDataEntry.save(flush: true))
+
+        SeqTrackBuilder seqTrackBuilder = new SeqTrackBuilder(lane, testData.run, testData.sample, testData.seqType, testData.seqPlatform, testData.softwareTool)
+
+        seqTrackService.annotateSeqTrackForExome(testData.dataFile, seqTrackBuilder, testData.run, testData.sample)
+    }
+
+
+    @Test
+    void testAnnotateSeqTrackForExomeKitAvailableAndVerified() {
+        TestData testData = new TestData()
+        testData.createObjects()
+        String lane = "lane"
+        MetaDataKey metaDataKey = new MetaDataKey(
+                        name: MetaDataColumn.LIB_PREP_KIT.name()
+                        )
+        assertNotNull(metaDataKey.save(flush: true))
+
+        MetaDataEntry metaDataEntry = new MetaDataEntry(
+                        value: "Agilent SureSelect V3",
+                        dataFile: testData.dataFile,
+                        key: metaDataKey,
+                        status: Status.VALID,
+                        source: Source.MDFILE,
+                        )
+        assertNotNull(metaDataEntry.save(flush: true))
+
+        ExomeEnrichmentKit exomeEnrichmentKit = testData.createEnrichmentKit("Agilent SureSelect V3")
+
+        SeqTrackBuilder seqTrackBuilder = new SeqTrackBuilder(lane, testData.run, testData.sample, testData.seqType, testData.seqPlatform, testData.softwareTool)
+
+        assertNull(seqTrackBuilder.exomeEnrichmentKit)
+        assertEquals(InformationReliability.UNKNOWN_UNVERIFIED, seqTrackBuilder.informationReliability)
+        seqTrackService.annotateSeqTrackForExome(testData.dataFile, seqTrackBuilder, testData.run, testData.sample)
+        assertEquals(exomeEnrichmentKit, seqTrackBuilder.exomeEnrichmentKit)
+        assertEquals(InformationReliability.KNOWN, seqTrackBuilder.informationReliability)
+    }
+
+
+    @Test(expected = IllegalArgumentException)
+    void testAnnotateSeqTrackForChipSeqDataFileIsNull() {
+        Run run = new Run()
+        String lane = "lane"
+        Sample sample = new Sample()
+        SeqType seqType = new SeqType()
+        SoftwareTool pipeline = new SoftwareTool()
+        SeqPlatform seqPlatform = new SeqPlatform()
+        SeqTrackBuilder seqTrackBuilder = new SeqTrackBuilder(lane, run, sample, seqType, seqPlatform, pipeline)
+        seqTrackService.annotateSeqTrackForChipSeq(null, seqTrackBuilder)
+    }
+
+
+    @Test(expected = IllegalArgumentException)
+    void testAnnotateSeqTrackForChipSeqBuilderIsNull() {
+        DataFile dataFile = new DataFile()
+        seqTrackService.annotateSeqTrackForChipSeq(dataFile, null)
+    }
+
+
+    @Test(expected = IllegalArgumentException)
+    void testAnnotateSeqTrackForChipSeqMetaDataEntryANTIBODY_TARGETIsNull() {
+        TestData testData = new TestData()
+        testData.createObjects()
+        DataFile dataFile = new DataFile()
+        assertNotNull(dataFile.save(flush: true))
+
+        MetaDataKey metaDataKey = new MetaDataKey(
+                        name: MetaDataColumn.ANTIBODY_TARGET.name()
+                        )
+        assertNotNull(metaDataKey.save(flush: true))
+
+        MetaDataEntry metaDataEntry = new MetaDataEntry(
+                        value: "Agilent SureSelect V3",
+                        dataFile: dataFile,
+                        key: metaDataKey,
+                        status: Status.VALID,
+                        source: Source.MDFILE,
+                        )
+        assertNotNull(metaDataEntry.save(flush: true))
+
+        SeqTrackBuilder seqTrackBuilder = new SeqTrackBuilder("lane", testData.run, testData.sample, testData.seqType, testData.seqPlatform, testData.softwareTool)
+
+        seqTrackService.annotateSeqTrackForChipSeq(testData.dataFile, seqTrackBuilder)
+    }
+
+
+    @Test
+    void testAnnotateSeqTrackForChipSeqMetaDataEntryANTIBODYIsNull() {
+        TestData testData = new TestData()
+        testData.createObjects()
+        DataFile dataFile = new DataFile()
+        assertNotNull(dataFile.save(flush: true))
+
+        MetaDataKey metaDataKey1 = new MetaDataKey(
+                        name: MetaDataColumn.ANTIBODY_TARGET.name()
+                        )
+        assertNotNull(metaDataKey1.save(flush: true))
+
+        MetaDataKey metaDataKey2 = new MetaDataKey(
+                        name: MetaDataColumn.ANTIBODY.name()
+                        )
+        assertNotNull(metaDataKey2.save(flush: true))
+
+        MetaDataEntry metaDataEntry1 = new MetaDataEntry(
+                        value: ANTIBODY_TARGET_IDENTIFIER,
+                        dataFile: testData.dataFile,
+                        key: metaDataKey1,
+                        status: Status.VALID,
+                        source: Source.MDFILE,
+                        )
+        assertNotNull(metaDataEntry1.save(flush: true))
+
+        MetaDataEntry metaDataEntry2 = new MetaDataEntry(
+                        value: ANTIBODY_IDENTIFIER,
+                        dataFile: dataFile,
+                        key: metaDataKey2,
+                        status: Status.VALID,
+                        source: Source.MDFILE,
+                        )
+        assertNotNull(metaDataEntry2.save(flush: true))
+
+        AntibodyTarget antibodyTarget = new AntibodyTarget(
+                        name: ANTIBODY_TARGET_IDENTIFIER
+                        )
+        assertNotNull(antibodyTarget.save(flush: true))
+
+        SeqTrackBuilder seqTrackBuilder = new SeqTrackBuilder("lane", testData.run, testData.sample, testData.seqType, testData.seqPlatform, testData.softwareTool)
+
+        assertNull(seqTrackBuilder.antibody)
+        assertNull(seqTrackBuilder.antibodyTarget)
+        seqTrackService.annotateSeqTrackForChipSeq(testData.dataFile, seqTrackBuilder)
+        assertNull(seqTrackBuilder.antibody)
+        assertEquals(ANTIBODY_TARGET_IDENTIFIER, seqTrackBuilder.antibodyTarget.name)
+    }
+
+
+    @Test
+    void testAnnotateSeqTrackForChipSeqMetaDataEntry() {
+        TestData testData = new TestData()
+        testData.createObjects()
+
+        MetaDataKey metaDataKey1 = new MetaDataKey(
+                        name: MetaDataColumn.ANTIBODY_TARGET.name()
+                        )
+        assertNotNull(metaDataKey1.save(flush: true))
+
+        MetaDataKey metaDataKey2 = new MetaDataKey(
+                        name: MetaDataColumn.ANTIBODY.name()
+                        )
+        assertNotNull(metaDataKey2.save(flush: true))
+
+        MetaDataEntry metaDataEntry1 = new MetaDataEntry(
+                        value: ANTIBODY_TARGET_IDENTIFIER,
+                        dataFile: testData.dataFile,
+                        key: metaDataKey1,
+                        status: Status.VALID,
+                        source: Source.MDFILE,
+                        )
+        assertNotNull(metaDataEntry1.save(flush: true))
+
+        MetaDataEntry metaDataEntry2 = new MetaDataEntry(
+                        value: ANTIBODY_IDENTIFIER,
+                        dataFile: testData.dataFile,
+                        key: metaDataKey2,
+                        status: Status.VALID,
+                        source: Source.MDFILE,
+                        )
+        assertNotNull(metaDataEntry2.save(flush: true))
+
+        AntibodyTarget antibodyTarget = new AntibodyTarget(
+                        name: ANTIBODY_TARGET_IDENTIFIER
+                        )
+        assertNotNull(antibodyTarget.save(flush: true))
+
+        SeqTrackBuilder seqTrackBuilder = new SeqTrackBuilder("lane", testData.run, testData.sample, testData.seqType, testData.seqPlatform, testData.softwareTool)
+
+        assertNull(seqTrackBuilder.antibody)
+        assertNull(seqTrackBuilder.antibodyTarget)
+        seqTrackService.annotateSeqTrackForChipSeq(testData.dataFile, seqTrackBuilder)
+        assertEquals(ANTIBODY_IDENTIFIER, seqTrackBuilder.antibody)
+        assertEquals(ANTIBODY_TARGET_IDENTIFIER, seqTrackBuilder.antibodyTarget.name)
+    }
 }

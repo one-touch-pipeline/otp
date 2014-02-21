@@ -1,48 +1,28 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.InformationReliability
+
 class ExomeSeqTrack extends SeqTrack {
-
-    /**
-     * The possible state for {@link ExomeSeqTrack#kitInfoState}
-     *
-     *
-     */
-    enum KitInfoState {
-        /**
-         * Indicates, that the {@link ExomeEnrichmentKit} is known and present
-         */
-        KNOWN,
-        /**
-         * Indicates, that the {@link ExomeEnrichmentKit} is verified to be unknown
-         */
-        UNKNOWN,
-        /**
-         * Indicates, that {@link ExomeEnrichmentKit} is not available yet and must be asked for.
-         * The value is defined for migration of old data, where the {@link ExomeEnrichmentKit} was not asked for.
-         */
-        LATER_TO_CHECK
-    }
-
     /**
      * Holds the information about the state of {@link #exomeEnrichmentKit}.
-     * If the value is {@link KitInfoState#KNOWN}, the {@link #exomeEnrichmentKit} needs to be there,
+     * If the value is {@link InformationReliability#KNOWN}, the {@link #exomeEnrichmentKit} needs to be there,
      * in any other case the {@link #exomeEnrichmentKit} have to be <code>null</code>.
-     * The default value is {@link KitInfoState#LATER_TO_CHECK}
+     * The default value is {@link InformationReliability#UNKNOWN_UNVERIFIED}
      */
-    KitInfoState kitInfoState = KitInfoState.LATER_TO_CHECK
+    InformationReliability kitInfoReliability = InformationReliability.UNKNOWN_UNVERIFIED
 
     static belongsTo = [
         /**
          * Reference to the used {@link ExomeEnrichmentKit}.
-         * If present, the value of {link #kitInfoState} has to be {@link KitInfoState#KNOWN}
+         * If present, the value of {link #kitInfoReliability} has to be {@link kitInfoReliability#KNOWN}
          */
         exomeEnrichmentKit: ExomeEnrichmentKit
     ]
 
     static constraints = {
-        kitInfoState(nullable: false)
+        kitInfoReliability(nullable: false)
         exomeEnrichmentKit(nullable: true, validator: { ExomeEnrichmentKit val, ExomeSeqTrack obj ->
-            if (obj.kitInfoState == KitInfoState.KNOWN) {
+            if (obj.kitInfoReliability == InformationReliability.KNOWN || obj.kitInfoReliability == InformationReliability.INFERRED) {
                 return val != null
             } else {
                 return val == null
@@ -51,6 +31,6 @@ class ExomeSeqTrack extends SeqTrack {
     }
 
     public String toString() {
-        return "${super.toString()} ${kitInfoState} ${exomeEnrichmentKit}"
+        return "${super.toString()} ${kitInfoReliability} ${exomeEnrichmentKit}"
     }
 }

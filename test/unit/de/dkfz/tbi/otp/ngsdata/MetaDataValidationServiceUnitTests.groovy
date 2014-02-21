@@ -12,7 +12,7 @@ import de.dkfz.tbi.otp.utils.ReferencedClass
 @Mock([MetaDataValidationService, ExomeEnrichmentKitService,
     ReferencedClass, ChangeLog,
     Project, SeqPlatform, SeqCenter, Run,DataFile, MetaDataKey, MetaDataEntry,
-    ExomeEnrichmentKit, ExomeEnrichmentKitIdentifier])
+    ExomeEnrichmentKit, ExomeEnrichmentKitSynonym])
 class MetaDataValidationServiceUnitTests {
 
     MetaDataValidationService metaDataValidationService
@@ -32,7 +32,10 @@ class MetaDataValidationServiceUnitTests {
 
     final static String EXOME_ENRICHMENT_KIT ="ExomeEnrichmentKit"
 
-    final static String EXOME_ENRICHMENT_KIT_IDENTIFIER ="ExomeEnrichmentKitIdentifier"
+    final static String EXOME_ENRICHMENT_KIT_SYNONYM ="ExomeEnrichmentKitSynonym"
+
+    // the String "UNKNOWN" is used instead of the enum, because that is how it appears in external input files
+    final String UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE = "UNKNOWN"
 
     @Before
     public void setUp() throws Exception {
@@ -160,37 +163,37 @@ class MetaDataValidationServiceUnitTests {
     }
 
     void testCheckExomeEnrichmentKitForExomeSeqType_UsingExomeEnrichmentKit() {
-        ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = createExomeEnrichmentKitIdentifier()
+        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = createExomeEnrichmentKitSynonym()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): EXOME_ENRICHMENT_KIT, (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
         assertEquals(Boolean.TRUE, metaDataValidationService.checkExomeEnrichmentKitForExomeSeqType(map[(LIB_PREP_KIT)]))
     }
 
-    void testCheckExomeEnrichmentKitForExomeSeqType_UsingExomeEnrichmentKitIdentifier() {
-        ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = createExomeEnrichmentKitIdentifier()
-        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): EXOME_ENRICHMENT_KIT_IDENTIFIER, (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
+    void testCheckExomeEnrichmentKitForExomeSeqType_UsingExomeEnrichmentKitSynonym() {
+        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = createExomeEnrichmentKitSynonym()
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): EXOME_ENRICHMENT_KIT_SYNONYM, (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
         assertEquals(Boolean.TRUE, metaDataValidationService.checkExomeEnrichmentKitForExomeSeqType(map[(LIB_PREP_KIT)]))
     }
 
     void testCheckExomeEnrichmentKitForExomeSeqType_UsingUNKNOWN() {
-        ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = createExomeEnrichmentKitIdentifier()
-        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): "UNKNOWN", (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
+        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = createExomeEnrichmentKitSynonym()
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE, (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
         assertEquals(Boolean.TRUE, metaDataValidationService.checkExomeEnrichmentKitForExomeSeqType(map[(LIB_PREP_KIT)]))
     }
 
     void testCheckExomeEnrichmentKitForExomeSeqType_NotValidEntry() {
-        ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = createExomeEnrichmentKitIdentifier()
+        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = createExomeEnrichmentKitSynonym()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): "something", (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
         assertEquals(Boolean.FALSE, metaDataValidationService.checkExomeEnrichmentKitForExomeSeqType(map[(LIB_PREP_KIT)]))
     }
 
     void testCheckExomeEnrichmentKitForExomeSeqType_NotExome() {
-        ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = createExomeEnrichmentKitIdentifier()
+        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = createExomeEnrichmentKitSynonym()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): "something", (SEQUENCING_TYPE): "NOT_EXOME"])
         assertEquals(null, metaDataValidationService.checkExomeEnrichmentKitForExomeSeqType(map[(LIB_PREP_KIT)]))
     }
 
     void testCheckExomeEnrichmentKitForExomeSeqType_NoSequenceType() {
-        ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = createExomeEnrichmentKitIdentifier()
+        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = createExomeEnrichmentKitSynonym()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): "something"])
         shouldFail(NullPointerException.class) {
             metaDataValidationService.checkExomeEnrichmentKitForExomeSeqType(map[(LIB_PREP_KIT)])
@@ -199,7 +202,7 @@ class MetaDataValidationServiceUnitTests {
 
     void testValidateMetaDataEntryForLIB_PREP_KIT() {
         Run run = createRun()
-        ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = createExomeEnrichmentKitIdentifier()
+        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = createExomeEnrichmentKitSynonym()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): EXOME_ENRICHMENT_KIT, (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
         assertTrue(metaDataValidationService.validateMetaDataEntry(run, map[(LIB_PREP_KIT)]))
     }
@@ -231,16 +234,16 @@ class MetaDataValidationServiceUnitTests {
         return run
     }
 
-    private ExomeEnrichmentKitIdentifier createExomeEnrichmentKitIdentifier() {
+    private ExomeEnrichmentKitSynonym createExomeEnrichmentKitSynonym() {
         ExomeEnrichmentKit exomeEnrichmentKit = new ExomeEnrichmentKit(
                         name: EXOME_ENRICHMENT_KIT
                         )
         assertNotNull(exomeEnrichmentKit.save([flush: true]))
-        ExomeEnrichmentKitIdentifier exomeEnrichmentKitIdentifier = new ExomeEnrichmentKitIdentifier(
-                        name: EXOME_ENRICHMENT_KIT_IDENTIFIER,
+        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = new ExomeEnrichmentKitSynonym(
+                        name: EXOME_ENRICHMENT_KIT_SYNONYM,
                         exomeEnrichmentKit: exomeEnrichmentKit)
-        assertNotNull(exomeEnrichmentKitIdentifier.save([flush: true]))
-        return exomeEnrichmentKitIdentifier
+        assertNotNull(exomeEnrichmentKitSynonym.save([flush: true]))
+        return exomeEnrichmentKitSynonym
     }
 
     private DataFile createDataFile() {

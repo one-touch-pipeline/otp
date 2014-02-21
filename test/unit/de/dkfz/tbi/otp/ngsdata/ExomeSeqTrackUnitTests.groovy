@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.test.mixin.*
 import grails.test.mixin.support.GrailsUnitTestMixin
 import org.junit.*
+import de.dkfz.tbi.otp.InformationReliability
 
 
 @TestMixin(GrailsUnitTestMixin)
@@ -29,14 +30,20 @@ class ExomeSeqTrackUnitTests {
         exomeSeqTrack = null
     }
 
-    void testValidateWithKitInfoStateIsKnownAndGivenExomeEnrichmentKit() {
-        exomeSeqTrack.kitInfoState= ExomeSeqTrack.KitInfoState.KNOWN
+    void testValidateWithKitInfoReliabilityIsKnownAndGivenExomeEnrichmentKit() {
+        exomeSeqTrack.kitInfoReliability= InformationReliability.KNOWN
         exomeSeqTrack.exomeEnrichmentKit= new ExomeEnrichmentKit()
         assertTrue(exomeSeqTrack.validate())
     }
 
-    void testValidateWithKitInfoStateIsKnownAndNoExomeEnrichmentKit() {
-        exomeSeqTrack.kitInfoState= ExomeSeqTrack.KitInfoState.KNOWN
+    void testValidateWithKitInfoReliabilityIsInferredAndGivenExomeEnrichmentKit() {
+        exomeSeqTrack.kitInfoReliability= InformationReliability.INFERRED
+        exomeSeqTrack.exomeEnrichmentKit= new ExomeEnrichmentKit()
+        assertTrue(exomeSeqTrack.validate())
+    }
+
+    void testValidateWithKitInfoReliabilityIsKnownAndNoExomeEnrichmentKit() {
+        exomeSeqTrack.kitInfoReliability= InformationReliability.KNOWN
         exomeSeqTrack.exomeEnrichmentKit = null
         assertFalse(exomeSeqTrack.validate())
         assertEquals(1, exomeSeqTrack.errors.errorCount)
@@ -45,14 +52,24 @@ class ExomeSeqTrackUnitTests {
         assertNull(exomeSeqTrack.errors.allErrors[0].rejectedValue)
     }
 
-    void testValidateWithKitInfoStateIsUnknownAndNoExomeEnrichmentKit() {
-        exomeSeqTrack.kitInfoState= ExomeSeqTrack.KitInfoState.UNKNOWN
+    void testValidateWithKitInfoReliabilityIsInferredAndNoExomeEnrichmentKit() {
+        exomeSeqTrack.kitInfoReliability= InformationReliability.INFERRED
+        exomeSeqTrack.exomeEnrichmentKit = null
+        assertFalse(exomeSeqTrack.validate())
+        assertEquals(1, exomeSeqTrack.errors.errorCount)
+        assertEquals("de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack", exomeSeqTrack.errors.allErrors[0].objectName)
+        assertEquals("exomeEnrichmentKit", exomeSeqTrack.errors.allErrors[0].field)
+        assertNull(exomeSeqTrack.errors.allErrors[0].rejectedValue)
+    }
+
+    void testValidateWithKitInfoReliabilityIsUnknownAndNoExomeEnrichmentKit() {
+        exomeSeqTrack.kitInfoReliability= InformationReliability.UNKNOWN_VERIFIED
         exomeSeqTrack.exomeEnrichmentKit = null
         assertTrue(exomeSeqTrack.validate())
     }
 
-    void testValidateWithKitInfoStateIsUnknownAndGivenExomeEnrichmentKit() {
-        exomeSeqTrack.kitInfoState= ExomeSeqTrack.KitInfoState.UNKNOWN
+    void testValidateWithKitInfoReliabilityIsUnknownAndGivenExomeEnrichmentKit() {
+        exomeSeqTrack.kitInfoReliability= InformationReliability.UNKNOWN_VERIFIED
         exomeSeqTrack.exomeEnrichmentKit= new ExomeEnrichmentKit()
         assertFalse(exomeSeqTrack.validate())
         assertEquals(1, exomeSeqTrack.errors.errorCount)
@@ -61,14 +78,14 @@ class ExomeSeqTrackUnitTests {
         assertNotNull(exomeSeqTrack.errors.allErrors[0].rejectedValue)
     }
 
-    void testValidateWithKitInfoStateIsLaterToCheckAndNoExomeEnrichmentKit() {
-        exomeSeqTrack.kitInfoState= ExomeSeqTrack.KitInfoState.LATER_TO_CHECK
+    void testValidateWithKitInfoReliabilityIsUnknownUnverifiedAndNoExomeEnrichmentKit() {
+        exomeSeqTrack.kitInfoReliability= InformationReliability.UNKNOWN_UNVERIFIED
         exomeSeqTrack.exomeEnrichmentKit = null
         assertTrue(exomeSeqTrack.validate())
     }
 
-    void testValidateWithKitInfoStateIsLaterToCheckAndGivenExomeEnrichmentKit() {
-        exomeSeqTrack.kitInfoState= ExomeSeqTrack.KitInfoState.LATER_TO_CHECK
+    void testValidateWithKitInfoReliabilityIsUnknownUnverifiedAndGivenExomeEnrichmentKit() {
+        exomeSeqTrack.kitInfoReliability= InformationReliability.UNKNOWN_UNVERIFIED
         exomeSeqTrack.exomeEnrichmentKit= new ExomeEnrichmentKit()
         assertFalse(exomeSeqTrack.validate())
         assertEquals(1, exomeSeqTrack.errors.errorCount)

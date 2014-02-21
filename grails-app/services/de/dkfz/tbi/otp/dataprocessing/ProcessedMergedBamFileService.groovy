@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static org.springframework.util.Assert.notNull
 import static org.springframework.util.Assert.isTrue
+import static org.springframework.util.Assert.notNull
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
+import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
@@ -185,6 +187,11 @@ class ProcessedMergedBamFileService {
     public ProcessedMergedBamFile save(ProcessedMergedBamFile processedMergedBamFile) {
         notNull(processedMergedBamFile, "The parameter processedMergedBamFile are not allowed to be null")
         return assertSave(processedMergedBamFile)
+    }
+
+    public List<SeqTrack> seqTracks(ProcessedMergedBamFile processedMergedBamFile) {
+        Sample sample = sample(processedMergedBamFile)
+        return SeqTrack.findAllBySample(sample)
     }
 
     private def assertSave(def object) {
@@ -378,23 +385,29 @@ class ProcessedMergedBamFileService {
         return singleLaneQAResultsDirectories
     }
 
+
     public ExomeEnrichmentKit exomeEnrichmentKit(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, 'bam file must not be null')
         isTrue(seqType(bamFile).name == SeqTypeNames.EXOME.seqTypeName, 'This method must be called only on exon data')
+
         List<ProcessedBamFile> singleLaneBamFiles = abstractBamFileService.findAllByProcessedMergedBamFile(bamFile)
         boolean hasSingleLaneBamFiles = singleLaneBamFiles
         isTrue(hasSingleLaneBamFiles, "there are no singleLaneBamFiles corresponding to the given $bamFile")
+
         List<SeqTrack> seqTracks = singleLaneBamFiles*.alignmentPass*.seqTrack
         // The domain ExomeSeqTrack is new, therefore it is possible that there are many bamFiles,
         // which do not have the connection to the ExomeEnrichtmentKit.
         List wrongSeqTracks = seqTracks.findAll { it.class != ExomeSeqTrack }
         isTrue(wrongSeqTracks.empty, "The following seqTracks used to create the given $bamFile have not the type ExomeSeqTrack: $wrongSeqTracks.")
-        ExomeEnrichmentKit kit = seqTracks.first().exomeEnrichmentKit
-        wrongSeqTracks = seqTracks.findAll { it.exomeEnrichmentKit != kit }
+
+        ExomeEnrichmentKit firstKit = seqTracks.first().exomeEnrichmentKit
+        wrongSeqTracks = seqTracks.findAll { it.exomeEnrichmentKit != firstKit }
         isTrue(wrongSeqTracks.empty, "Different kits were used in the following seqTracks: $wrongSeqTracks, which were used to create $bamFile.")
-        return kit
+
+        return firstKit
     }
-       
+
+
     /**
      * returns all fastq files, which are combined in the mergedBamFile
      */
@@ -408,6 +421,31 @@ class ProcessedMergedBamFileService {
                 fileType {
                     eq("type", FileType.Type.SEQUENCE)
                 }
+            }
+        }
+        return null
+    }
+
+
+    /**
+     * Checks if the {@link ExomeEnrichmentKit} was inferred at least for one lane within the given {@link ProcessedMergedBamFile}.
+     * This only has to be checked for seqType = Exome
+     */
+    public ExomeEnrichmentKit getInferredKit(ProcessedMergedBamFile processedMergedBamFile) {
+        notNull(processedMergedBamFile, "The input of method getInferredKit is null")
+        SeqType seqType = seqType(processedMergedBamFile)
+        // Only in case of seqtype = exome an enrichment kit can be available, for all other seqTypes null has to be returned
+        if(seqType.name == SeqTypeNames.EXOME.seqTypeName) {
+            List<ExomeSeqTrack> exomeSeqTracks = seqTracks(processedMergedBamFile).findAll { it instanceof ExomeSeqTrack }
+            if(exomeSeqTracks*.exomeEnrichmentKit.unique().size > 1) {
+                throw new ProcessingException("There is no unique kit for the mergedBamFile " + processedMergedBamFile)
+            }
+
+            List<ExomeSeqTrack> seqTracksWithInferredExomeEnrichmentKits = exomeSeqTracks.findAll { it.kitInfoReliability == InformationReliability.INFERRED }
+            if (seqTracksWithInferredExomeEnrichmentKits.empty) {
+                return null
+            }else {
+                return seqTracksWithInferredExomeEnrichmentKits*.exomeEnrichmentKit.first()
             }
         }
         return null

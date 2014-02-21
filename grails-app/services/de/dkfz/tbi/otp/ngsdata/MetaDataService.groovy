@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import static org.springframework.util.Assert.*
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import org.springframework.security.access.prepost.PostAuthorize
@@ -10,6 +11,7 @@ import de.dkfz.tbi.otp.utils.ReferencedClass
 
 class MetaDataService {
 
+
     // locks for operation that are not tread safe
     private final Lock loadMetaDataLock = new ReentrantLock()
 
@@ -18,6 +20,8 @@ class MetaDataService {
      */
     def fileTypeService
     def metaDataFileService
+    ExomeEnrichmentKitService exomeEnrichmentKitService
+
     static transactional = true
 
     /**
@@ -154,11 +158,12 @@ class MetaDataService {
                 // match values with the header
                 // new entry in MetaData
                 dataFile = new DataFile(
-                    run : file.runSegment.run,
-                    runSegment : file.runSegment
-                )
+                                run : file.runSegment.run,
+                                runSegment : file.runSegment
+                                )
                 dataFile.validate()
                 dataFile.save(flush: true)
+
                 values = tokenize(line, '\t')
                 addMetaDataEntries(dataFile, keys, values)
                 // fill-up important fields
@@ -166,7 +171,7 @@ class MetaDataService {
                 fillVbpFileName(dataFile)
                 fillMD5Sum(dataFile)
                 assignFileType(dataFile, type)
-                addKnownMissingMetaData(dataFile)
+                createSeqTypeMetaDataEntryFromDirNameIfNeeded(dataFile)
                 checkIfWithdrawn(dataFile)
             }
         }
@@ -253,24 +258,20 @@ class MetaDataService {
     }
 
     /**
-    * This function loops oven keys and values and attache them
-    * as MetaDataEntries to DataFile object
-    * @param DataFile
-    * @param keys
-    * @param values
-    * @return
-    */
+     * This function loops oven keys and values and attache them
+     * as MetaDataEntries to DataFile object
+     */
     private addMetaDataEntries(DataFile dataFile, List<MetaDataKey> keys, List<String> values) {
-       for (int i=0; i<keys.size(); i++) {
-           MetaDataKey key = keys.getAt(i)
-           MetaDataEntry entry = new MetaDataEntry (
-               value: values.getAt(i) ? values.getAt(i).trim() : "",
-               source: MetaDataEntry.Source.MDFILE,
-               key: key
-           )
-           entry.dataFile = dataFile
-           entry.save(flush: true)
-       }
+        for (int i=0; i<keys.size(); i++) {
+            MetaDataKey key = keys.getAt(i)
+            MetaDataEntry entry = new MetaDataEntry (
+                            value: values.getAt(i) ? values.getAt(i).trim() : "",
+                            source: MetaDataEntry.Source.MDFILE,
+                            key: key
+                            )
+            entry.dataFile = dataFile
+            entry.save(flush: true)
+        }
     }
 
     /**
@@ -279,8 +280,6 @@ class MetaDataService {
      * The file name is in either FASTQ_FILE or ALIGN_FILE
      * column of meta-data.
      * this function also fills MD5 check sum field from meta-data
-     *
-     * @param dataFile
      */
     private void assignFileName(DataFile dataFile) {
         def keyNames = ["FASTQ_FILE", "ALIGN_FILE"]
@@ -299,7 +298,7 @@ class MetaDataService {
             }
             // run name
             if (value.startsWith(dataFile.run.name) ||
-                    value.startsWith("run" + dataFile.run.name)) {
+            value.startsWith("run" + dataFile.run.name)) {
                 int idx = value.indexOf("/")
                 value = value.substring(idx+1)
             }
@@ -313,11 +312,6 @@ class MetaDataService {
         }
     }
 
-    /**
-     *
-     * @param dataFile
-     * @return
-     */
     private void fillVbpFileName(DataFile dataFile) {
         if (needsVBPNameChange(dataFile)) {
             String lane = metaDataValue(dataFile, "LANE_NO")
@@ -353,10 +347,6 @@ class MetaDataService {
         return readId
     }
 
-    /**
-     *
-     * @param dataFile
-     */
     private void fillMD5Sum(DataFile dataFile) {
         MetaDataEntry entry = getMetaDataEntry(dataFile, "MD5")
         dataFile.md5sum = entry?.value
@@ -365,8 +355,6 @@ class MetaDataService {
     /**
      *
      * Mark file, if the file is withdrawn
-     *
-     * @param dataFile
      */
     private void checkIfWithdrawn(DataFile dataFile) {
         MetaDataEntry entry = getMetaDataEntry(dataFile, "WITHDRAWN")
@@ -376,10 +364,6 @@ class MetaDataService {
     /**
      * Returns a meta data entry belonging the a given data file
      * with a key specified by the input parameter
-     *
-     * @param file
-     * @param key
-     * @return
      */
     private MetaDataEntry getMetaDataEntry(DataFile file, MetaDataKey key) {
         return MetaDataEntry.findByDataFileAndKey(file, key)
@@ -388,10 +372,6 @@ class MetaDataService {
     /**
      * Returns a meta data entry belonging the a given data file
      * with a key specified by the input parameter
-     *
-     * @param file
-     * @param key
-     * @return
      */
     private MetaDataEntry getMetaDataEntry(DataFile file, String keyName) {
         MetaDataKey key = MetaDataKey.findByName(keyName)
@@ -409,9 +389,6 @@ class MetaDataService {
      * the assignment is based on two sources of information:
      * file name and if the file comes from "fastq" or "align"
      * meta-data file
-     *
-     * @param dataFile
-     * @param type
      */
     private void assignFileType(DataFile dataFile, FileType.Type type) {
         FileType fileType = fileTypeService.getFileType(dataFile.fileName, type)
@@ -420,40 +397,49 @@ class MetaDataService {
     }
 
     /**
-     *
      * In old meta-data, sequencing type was not included in meta-data
      * in this case the sequencing type is created by the system
      * from directory name
-     *
-     * @param dataFile
      */
-    private void addKnownMissingMetaData(DataFile dataFile) {
-        final String keyName = "SEQUENCING_TYPE"
+    private void createSeqTypeMetaDataEntryFromDirNameIfNeeded(DataFile dataFile) {
+        notNull(dataFile, "param dataFile in MetaDataService.addKnownMissingMetaData() is NULL")
+
+        MetaDataKey key = getOrCreateKey(MetaDataColumn.SEQUENCING_TYPE.name())
+
+        MetaDataEntry entry = getMetaDataEntry(dataFile, MetaDataColumn.SEQUENCING_TYPE.name())
+        if (entry) {
+            return
+        }
+        RunSegment initialPath = dataFile.runSegment
+        for (SeqType seqType in SeqType.list()) {
+            if (initialPath.mdPath.contains(seqType.dirName)) {
+                String value = seqType.name
+                log.debug("\tassiginig to ${value}")
+                entry = new MetaDataEntry (
+                                value: value,
+                                key: key,
+                                source: MetaDataEntry.Source.SYSTEM,
+                                dataFile: dataFile
+                                )
+                entry.save(flush: true)
+                return
+            }
+        }
+    }
+
+    /**
+     * After this call, it is ensured that the specified keyName exists in the Database.
+     */
+    MetaDataKey getOrCreateKey(String keyName) {
+        notNull(keyName, "input keyName in MetaDataService.getOrCreateKey() is NULL")
+
         MetaDataKey key = MetaDataKey.findByName(keyName)
         if (!key) {
             key = new MetaDataKey(name: keyName)
             key.save(flush: true)
         }
-        MetaDataEntry entry = getMetaDataEntry(dataFile, keyName)
-        if (entry) {
-            return
-        }
-        RunSegment initialPath = dataFile.runSegment
-        List<SeqType> types = SeqType.list()
-        for (SeqType type in types) {
-            if (initialPath.mdPath.contains(type.dirName)) {
-                String value = type.name
-                log.debug("\tassiginig to ${value}")
-                entry = new MetaDataEntry (
-                    value: value,
-                    key: key,
-                    source: MetaDataEntry.Source.SYSTEM,
-                    dataFile: dataFile
-                )
-                entry.save(flush: true)
-                return
-            }
-        }
+
+        return key
     }
 
     /**
@@ -462,9 +448,6 @@ class MetaDataService {
      * For example meta-data column which shall be "LANE_NO"
      * for some runs is "lane". The solid standard "SLIDE_NO"
      * is changed to "LANE_NO" to unify key for later processing
-     *
-     * @param token
-     * @return
      */
     private String correctedKey(String token) {
         if (token == "lane" || token == "SLIDE_NO") {
@@ -476,8 +459,6 @@ class MetaDataService {
     /**
      * return project for a given dataFile or null if a dataFile
      * does not belong to a specific project (eg. metadata file)
-     * @param dataFile
-     * @return
      */
     private Project getProjectForDataFile(DataFile dataFile) {
         if (!dataFile.used) {
@@ -495,9 +476,6 @@ class MetaDataService {
     /**
      * Checks if given run is already assigned to a given project
      * if not a new object is created
-     *
-     * @param run
-     * @param project
      */
     private void assignRunToProject(Run run, Project project) {
         RunByProject runByProject = RunByProject.findByRunAndProject(run, project)
@@ -506,4 +484,18 @@ class MetaDataService {
             runByProject.save(flush: true)
         }
     }
+
+    /**
+     * Sometimes information for old lanes can be inferred from new lanes.
+     * This method is the hook point where the specific inferences can be called.
+     */
+    public void enrichOldDataWithNewInformationFrom(Run run) {
+        notNull(run, "The input of the method enrichOldDataWithNewInformationFrom is null")
+
+        List<RunSegment> runSegments = RunSegment.findAllByRun(run)
+        runSegments.each { RunSegment runSegment ->
+            exomeEnrichmentKitService.inferKitInformationForOldLaneFromNewLane(runSegment)
+        }
+    }
+
 }

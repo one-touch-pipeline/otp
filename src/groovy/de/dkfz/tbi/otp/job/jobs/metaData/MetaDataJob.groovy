@@ -6,9 +6,9 @@ import de.dkfz.tbi.otp.ngsdata.MetaDataService
 
 class MetaDataJob extends AbstractJobImpl {
 
-   /**
-    * dependency injection of meta data service
-    */
+    /**
+     * dependency injection of meta data service
+     */
     @Autowired
     MetaDataService metaDataService
 
