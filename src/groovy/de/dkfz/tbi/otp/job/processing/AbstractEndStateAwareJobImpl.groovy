@@ -4,11 +4,7 @@ package de.dkfz.tbi.otp.job.processing
  * Abstract base class for {@link EndStateAwareJob}s.
  * @see EndStateAwareJob
  */
-/*
- * The abstract keyword was removed here because groovy or grails has problems with
- * abstract class extends another abstract class, see OTP-754
- */
-public class AbstractEndStateAwareJobImpl extends AbstractJobImpl implements EndStateAwareJob {
+abstract public class AbstractEndStateAwareJobImpl extends AbstractJobImpl implements EndStateAwareJob {
 
    private ExecutionState endState = null
 
@@ -54,14 +50,5 @@ public class AbstractEndStateAwareJobImpl extends AbstractJobImpl implements End
             throw new InvalidStateException("EndState accessed but not in finished state")
         }
         return endState
-    }
-
-    /*
-     * Because of removing the abstract keyword from the class, this abstract method needs a dummy implementation.
-     * See bug comment on class level.
-     */
-    @Override
-    public void execute() throws Exception {
-        throw new RuntimeException("This method needs to be overridden in the subclass")
     }
 }
