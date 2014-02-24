@@ -1,8 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import org.springframework.security.access.prepost.PreAuthorize
+import de.dkfz.tbi.otp.dataprocessing.*
 
 class ProjectOverviewService {
+
+    OverallQualityAssessmentMergedService overallQualityAssessmentMergedService
+
+    ReferenceGenomeService referenceGenomeService
 
     List overviewProjectQuery(projectName) {
         Project project = Project.findByName(projectName)
@@ -184,25 +189,89 @@ class ProjectOverviewService {
      * fetch and return all combination of {@link Individual} (as mockpid) and of Sample type name with the number of lanes depend of {@link SeqType}
      *as list.
      *<br> Example:[
-     *[patient1, sampleType1, laneCount1],
-     *[patient1, sampleType2, laneCount2],
-     *[patient2, sampleType2, laneCount3],
+     *[mockPid: patient1, sampleTypeName: sampleTypeName1, seqType: sampleType1, laneCount: laneCount1],
+     *[mockPid: patient1, sampleTypeName: sampleTypeName1, seqType: sampleType2, laneCount: laneCount2],
+     *[mockPid: patient1, sampleTypeName: sampleTypeName2, seqType: sampleType1, laneCount: laneCount3],
+     *[mockPid: patient2, sampleTypeName: sampleTypeName1, seqType: sampleType1, laneCount: laneCount4],
      *...]
      * @param project the project for filtering the result
-     * @param seqType the seqType for filtering the result
      * @return all combination of  name of {@link Individual}(mockPid) and sampleTypeName with with the number of lanes depend of {@link SeqType}  as list
      */
-    public List laneCountPerPatientAndSampleType(Project project, SeqType seqType){
-        List lanesPerSeqTypes = AggregateSequences.withCriteria {
+    public List<Map> laneCountForSeqtypesPerPatientAndSampleType(Project project){
+        List lanes = AggregateSequences.withCriteria {
             eq("projectId", project.id)
-            eq("seqTypeId", seqType.id)
             projections {
                 groupProperty("mockPid")
                 groupProperty("sampleTypeName")
+                groupProperty("seqTypeId")
                 sum("laneCount")
             }
         }
-        return lanesPerSeqTypes
+
+        Map<Long, SeqType> seqTypes = [:]
+
+        List<Map> ret = lanes.collect {
+            SeqType seqType = seqTypes[it[2]]
+            if (!seqType) {
+                seqType = SeqType.get(it[2])
+                seqTypes.put(it[2], seqType)
+            }
+            [
+                mockPid: it[0],
+                sampleTypeName: it[1],
+                seqType: seqType,
+                laneCount: it[3],
+            ]
+        }
+        return ret
+    }
+
+    public List coveragePerPatientAndSampleTypeAndSeqType(Project project) {
+        List<OverallQualityAssessmentMerged> overallQualityAssessmentMergedList = OverallQualityAssessmentMerged.executeQuery("""
+select
+        overallQualityAssessmentMerged
+from
+        OverallQualityAssessmentMerged overallQualityAssessmentMerged
+        join overallQualityAssessmentMerged.qualityAssessmentMergedPass qualityAssessmentMergedPass
+        join qualityAssessmentMergedPass.processedMergedBamFile processedMergedBamFile
+        join processedMergedBamFile.mergingPass mergingPass
+        join mergingPass.mergingSet mergingSet
+        join mergingSet.mergingWorkPackage mergingWorkPackage
+        join mergingWorkPackage.sample sample
+        join sample.individual individual
+        join individual.project project
+where
+        project = :project
+        and mergingSet.identifier = (select max(identifier) from MergingSet mergingSet where mergingSet.mergingWorkPackage = mergingWorkPackage)
+        and mergingPass.identifier = (select max(identifier) from MergingPass mergingPass where mergingPass.mergingSet = mergingSet)
+        and qualityAssessmentMergedPass.identifier = (select max(identifier) from QualityAssessmentMergedPass qualityAssessmentMergedPass where qualityAssessmentMergedPass.processedMergedBamFile = processedMergedBamFile)
+""", [project: project])
+
+        Map<SeqType, ReferenceGenome> referenceGenomes = [:]
+
+
+        List coverage = overallQualityAssessmentMergedList.collect { OverallQualityAssessmentMerged overallQualityAssessmentMerged ->
+            MergingWorkPackage mergingWorkPackage = overallQualityAssessmentMerged.qualityAssessmentMergedPass.processedMergedBamFile.mergingPass.mergingSet.mergingWorkPackage
+            Sample sample = mergingWorkPackage.sample
+            Individual individual = sample.individual
+            SeqType seqType = mergingWorkPackage.seqType
+
+            ReferenceGenome referenceGenome = referenceGenomes[seqType]
+            if (!referenceGenome) {
+                referenceGenome = referenceGenomeService.referenceGenome(project, seqType)
+                referenceGenomes.put(seqType, referenceGenome)
+            }
+
+            double coverageWithoutN = overallQualityAssessmentMergedService.calcCoverageWithoutN(overallQualityAssessmentMerged, referenceGenome)
+            return [
+                mockPid: individual.mockPid,
+                sampleTypeName: sample.sampleType.name,
+                seqType: seqType,
+                coverage: coverageWithoutN
+            ]
+        }
+
+        return coverage
     }
 
 
@@ -222,3 +291,4 @@ class ProjectOverviewService {
         return seq
     }
 }
+

@@ -15,7 +15,7 @@
                 from='${projects}' value='${project}' onChange='submit();'></g:select>
         </form>
         <div id="laneOverviewTable">
-            <table id="laneOverviewId" border="1" >
+            <table id="laneOverviewId" border="1">
                 <thead>
                     <tr>
                         <th><g:message code="projectOverview.index.PID"/></th>
@@ -35,7 +35,6 @@
             </table>
         </div>
     </div>
-
     <r:script>
         $(function() {
             $.otp.projectOverviewTable.registerLaneOverviewId();

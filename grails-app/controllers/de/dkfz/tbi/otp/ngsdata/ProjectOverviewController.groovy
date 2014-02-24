@@ -46,8 +46,21 @@ class ProjectOverviewController {
         return project.name == "MMML"
     }
 
+
     /**
-     * Retreives the data shown in the table of projectOverview/laneOverview.
+     * A helper class to collect for a sample the {@link SampleIdentifier}, the lane count for the different {@link SeqType} and the calculated coverage.
+     * It is used for transforming the data received from services to the form needed by dataTable.
+     *
+     *
+     */
+    class InformationOfSamples {
+        String sampleIdentifier
+        Map<SeqType, String> laneCount = [:]
+        Map<SeqType, String> coverage = [:]
+    }
+
+    /**
+     * Retrieves the data shown in the table of projectOverview/laneOverview.
      * The data structure is:
      * <pre>
      * [[mockPid1, sampleTypeName1, one sample identifier for mockPid1.sampleType1, lane count for seqType1, lane count for seqType2, ...],
@@ -58,49 +71,69 @@ class ProjectOverviewController {
      * The available seqTypes are depend on the selected Project.
      */
     JSON dataTableSourceLaneOverview(DataTableCommand cmd) {
-        Project project = projectService.getProjectByName(params.project)
-        List< String> patients = projectOverviewService.mockPidByProject(project)
-        List<List<String>> sampleTypes = projectOverviewService.overviewMockPidSampleType(project)
-        List<SeqType> seqTypes = projectOverviewService.seqTypeByProject(project)
 
+        Project project = projectService.getProjectByName(params.project)
+
+        List<SeqType> seqTypes = projectOverviewService.seqTypeByProject(project)
         boolean hideSampleIdentifier = hideSampleIdentifier(project)
 
 
-        /*Map<mockPid, Map<sampleType, Map<SeqType / sample identifier constant, LaneCount / SampleIdentifier value>>>*/
+        /*Map<mockPid, Map<sampleTypeName, InformationOfSample>>*/
         Map dataLastMap = [:]
 
-        patients.each { String mockPid ->
-            dataLastMap.put(mockPid, [:])
+        /**
+         * returns the InformationOfSamples for the given mock pid and sample type name.
+         * The InformationOfSamples are stored in a map of map structure in the variable dataLastMap.
+         * If no one exist yet, it is created.
+         */
+        def getDataForMockPidAndSampleTypeName = { String mockPid, String sampleTypeName ->
+            Map<String, InformationOfSamples> informationOfSampleMap = dataLastMap[mockPid]
+            if (!informationOfSampleMap) {
+                informationOfSampleMap = [:]
+                dataLastMap.put(mockPid, informationOfSampleMap)
+            }
+            InformationOfSamples informationOfSamples = informationOfSampleMap[sampleTypeName]
+            if (!informationOfSamples) {
+                informationOfSamples = new InformationOfSamples()
+                informationOfSampleMap.put(sampleTypeName, informationOfSamples)
+            }
+            return informationOfSamples
         }
 
-        sampleTypes.each { mockPidSampleType ->
-            dataLastMap[mockPidSampleType[0]].put(mockPidSampleType[1], [:])
+        List lanes = projectOverviewService.laneCountForSeqtypesPerPatientAndSampleType(project)
+        lanes.each {
+            InformationOfSamples informationOfSamples = getDataForMockPidAndSampleTypeName(it.mockPid, it.sampleTypeName)
+            informationOfSamples.laneCount.put(it.seqType, it.laneCount)
+        }
+
+        List coverage = projectOverviewService.coveragePerPatientAndSampleTypeAndSeqType(project)
+        coverage.each {
+            InformationOfSamples informationOfSamples = getDataForMockPidAndSampleTypeName(it.mockPid, it.sampleTypeName)
+            informationOfSamples.coverage.put(it.seqType, it.coverage)
         }
 
         if (!hideSampleIdentifier) {
             List<SampleIdentifier> sampleIdentifier = projectOverviewService.overviewSampleIdentifier(project)
             sampleIdentifier.each {mockPidSampleTypeMinSampleId ->
-                dataLastMap.get(mockPidSampleTypeMinSampleId[0])?.get(mockPidSampleTypeMinSampleId[1])?.put(SAMPLE_IDENTIFIER, mockPidSampleTypeMinSampleId[2])
-            }
-        }
-
-        seqTypes.each { SeqType seqType ->
-            List lanes = projectOverviewService.laneCountPerPatientAndSampleType(project, seqType)
-            lanes.each {mockPidSampleTypeLaneCount ->
-                dataLastMap[mockPidSampleTypeLaneCount[0]][mockPidSampleTypeLaneCount[1]].put(seqType, mockPidSampleTypeLaneCount[2])
+                InformationOfSamples informationOfSample = getDataForMockPidAndSampleTypeName(mockPidSampleTypeMinSampleId[0], mockPidSampleTypeMinSampleId[1])
+                informationOfSample.sampleIdentifier = mockPidSampleTypeMinSampleId[2]
             }
         }
 
         List data = []
-        dataLastMap.each {String individual, Map value1 ->
-            value1.each { String sampleType, Map value2 ->
+        dataLastMap.each {String individual, Map<String, InformationOfSamples> dataMap ->
+            dataMap.each { String sampleType, InformationOfSamples informationOfSamples ->
                 List<String> line = [individual, sampleType]
                 if (!hideSampleIdentifier) {
-                    line << value2[SAMPLE_IDENTIFIER]
+                    line << informationOfSamples.sampleIdentifier
                 }
                 seqTypes.each { SeqType seqType ->
-                    if (value2.containsKey(seqType)) {
-                        line << value2[seqType]
+                    if (informationOfSamples.laneCount[seqType]) {
+                        String value = informationOfSamples.laneCount[seqType]
+                        if (informationOfSamples.coverage[seqType]) {
+                            value += " (coverage = ${Math.floor(informationOfSamples.coverage[seqType] * 100) / 100})"
+                        }
+                        line << value
                     } else {
                         line << ""
                     }
