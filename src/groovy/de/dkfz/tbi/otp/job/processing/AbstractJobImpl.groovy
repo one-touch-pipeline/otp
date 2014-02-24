@@ -68,7 +68,7 @@ abstract class AbstractJobImpl implements Job {
      * @param name The name of the ParameterType for which the parameter is going to be added
      * @param value The value of the parameter
      */
-    protected final void addOutputParameter(String name, String value) {
+    protected void addOutputParameter(String name, String value) {
         Iterator<Parameter> it = outputParameters.iterator()
         while (it.hasNext()) {
             Parameter param = it.next()
@@ -92,7 +92,7 @@ abstract class AbstractJobImpl implements Job {
      *
      * @return List of input parameters set to the job
      */
-    protected final Collection<Parameter> getInputParameters() {
+    protected Collection<Parameter> getInputParameters() {
         return inputParameters
     }
 
@@ -100,12 +100,12 @@ abstract class AbstractJobImpl implements Job {
      *
      * @return The current state of the Job
      */
-    protected final ExecutionState getState() {
+    protected ExecutionState getState() {
         return state
     }
 
     @Override
-    public final void start() throws InvalidStateException {
+    public void start() throws InvalidStateException {
         switch (state) {
             case ExecutionState.CREATED:
                 state = ExecutionState.STARTED
@@ -119,7 +119,7 @@ abstract class AbstractJobImpl implements Job {
     }
 
     @Override
-    public final void end() throws InvalidStateException {
+    public void end() throws InvalidStateException {
         switch (state) {
             case ExecutionState.STARTED:
             case ExecutionState.RESTARTED:
@@ -132,7 +132,7 @@ abstract class AbstractJobImpl implements Job {
     }
 
     @Override
-    public final Set<Parameter> getOutputParameters() throws InvalidStateException {
+    public Set<Parameter> getOutputParameters() throws InvalidStateException {
         switch (state) {
             case ExecutionState.FINISHED: // fall through
             case ExecutionState.SUCCESS: // fall through
@@ -161,7 +161,7 @@ abstract class AbstractJobImpl implements Job {
     }
 
     @Override
-    public final ProcessingStep getProcessingStep() {
+    public ProcessingStep getProcessingStep() {
         return processingStep
     }
 
