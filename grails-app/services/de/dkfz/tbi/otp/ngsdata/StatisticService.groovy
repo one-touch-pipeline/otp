@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.validation.Validateable
 
 class StatisticService {
 
@@ -37,20 +36,20 @@ class StatisticService {
         }
     }
 
-   public List patientsCountPerSequenceType(ProjectGroup projectGroup) {
-       List seq = AggregateSequences.withCriteria {
+    public List patientsCountPerSequenceType(ProjectGroup projectGroup) {
+        List seq = AggregateSequences.withCriteria {
             projections {
                 if (projectGroup) {
                     List<Project> projects = projectService.projectByProjectGroup(projectGroup)
                     'in'("projectId", projects*.id)
                 }
-                 groupProperty("seqTypeName")
-                 countDistinct("mockPid")
+                groupProperty("seqTypeName")
+                countDistinct("mockPid")
             }
             order("seqTypeName")
-       }
-       return seq
-   }
+        }
+        return seq
+    }
 
     public List laneCountPerDay(ProjectGroup projectGroup) {
         List<Project> projects
@@ -113,21 +112,6 @@ class StatisticService {
                 countDistinct("sampleId")
             }
             order ("mockPid")
-        }
-        return seq
-    }
-
-    public List laneNumberByProject(Project project, SeqType seqType) {
-        List seq = Sequence.withCriteria {
-            eq("projectId", project.id)
-            eq("seqTypeId", seqType.id)
-            projections {
-                groupProperty("mockPid")
-                groupProperty("sampleTypeName")
-                count("laneId")
-            }
-            order ("mockPid")
-            order ("sampleTypeName")
         }
         return seq
     }

@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import org.springframework.security.access.prepost.PreAuthorize
+
 class ProjectOverviewService {
 
     List overviewProjectQuery(projectName) {
@@ -203,4 +205,20 @@ class ProjectOverviewService {
         return lanesPerSeqTypes
     }
 
+
+    @PreAuthorize("hasRole('ROLE_MMML_MAPPING')")
+    public List tableForMMMLMapping(){
+        def seq = Individual.withCriteria {
+            project {
+                eq("name", "MMML")
+            }
+            projections {
+                property("id")
+                property("mockFullName")
+                property("internIdentifier")
+            }
+            order("id", "desc")
+        }
+        return seq
+    }
 }

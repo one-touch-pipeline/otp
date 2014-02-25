@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class ProjectOverviewController {
@@ -32,6 +33,10 @@ class ProjectOverviewController {
             project: projectName,
             seqTypes: seqTypes
         ]
+    }
+
+    Map mmmlIdentifierMapping() {
+        return [:]
     }
 
     /**
@@ -174,4 +179,15 @@ class ProjectOverviewController {
         }
         render dataToRender as JSON
     }
+
+    @PreAuthorize("hasRole('ROLE_MMML_MAPPING')")
+    JSON dataTableMMMLMapping(DataTableCommand cmd) {
+        Map dataToRender = cmd.dataToRender()
+        List data = projectOverviewService.tableForMMMLMapping()
+        dataToRender.iTotalRecords = data.size()
+        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+        dataToRender.aaData = data
+        render dataToRender as JSON
+    }
+
 }
