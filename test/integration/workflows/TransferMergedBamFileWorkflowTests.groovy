@@ -137,6 +137,7 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
             rootPath: "${rootPath}",
             processingRootPath: "${processingRootPath}",
             programsRootPath: '/',
+            loggingRootPath: loggingRootPath,
         ]
 
         // Realms for testing on DKFZ
