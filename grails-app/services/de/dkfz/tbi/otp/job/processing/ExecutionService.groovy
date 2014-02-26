@@ -117,6 +117,7 @@ ${text}
 
             scriptText += """
 touch '${logFile}'
+chmod 0640 ${logFile}
 flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
 """
         }
