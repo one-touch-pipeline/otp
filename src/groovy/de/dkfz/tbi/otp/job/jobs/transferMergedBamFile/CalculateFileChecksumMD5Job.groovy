@@ -58,9 +58,9 @@ class CalculateFileChecksumMD5Job extends AbstractJobImpl {
             // the md5sums of the qa results for the merged bam file and for the single lane bam files are written to the file "MD5SUMS"
             String text = """
 # Clean-up old log file
-mkdir -p '${logDir}'; rm -f '${logFile}'
+mkdir -p -m 2750 '${logDir}'; rm -f '${logFile}'
 
-${clusterPrefix.exec} \"mkdir -p -m 2750 ${locations.temporalDestinationDir}\"
+${clusterPrefix.exec} \"mkdir -p -m 2750 ${locations.temporalDestinationDir}; find ${projectDir} -user \${USER} -type d -not -perm 2750 -exec chmod 2750 '{}' \\;\"
 
 cd ${locations.sourceDirectory}
 md5sum ${locations.bamFile} > ${locations.md5BamFile}
