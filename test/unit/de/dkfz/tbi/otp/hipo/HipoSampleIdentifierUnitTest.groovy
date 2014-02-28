@@ -56,6 +56,12 @@ class HipoSampleIdentifierUnitTest {
 
         sampleName = "H035-BPDK-C8-D1"
         assertNotNull(HipoSampleIdentifier.tryParse(sampleName))
+
+        sampleName = "H003-BPDK-C8-A1"
+        assertNotNull(HipoSampleIdentifier.tryParse(sampleName))
+
+        sampleName = "H003-BPDK-C8-M1"
+        assertNull(HipoSampleIdentifier.tryParse(sampleName))
     }
 
     void testSampleTypeDbName() {

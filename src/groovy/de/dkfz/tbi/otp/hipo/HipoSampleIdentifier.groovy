@@ -38,7 +38,7 @@ class HipoSampleIdentifier {
     final String analyteTypeAndNumber
 
     private final static String REGEX =
-    /^(([HP])(\d\d\d)-\w\w\w(\w))-([${HipoTissueType.values()*.key.join("")}])(\d)-([DRPM]\d)$/
+    /^(([HP])(\d\d\d)-\w\w\w(\w))-([${HipoTissueType.values()*.key.join("")}])(\d)-([DRPA]\d)$/
 
     /**
      * Tries to parse a HIPO sample name.
