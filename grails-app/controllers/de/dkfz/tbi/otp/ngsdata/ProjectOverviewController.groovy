@@ -1,7 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+
 import org.springframework.security.access.prepost.PreAuthorize
+
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class ProjectOverviewController {
@@ -131,7 +133,7 @@ class ProjectOverviewController {
                     if (informationOfSamples.laneCount[seqType]) {
                         String value = informationOfSamples.laneCount[seqType]
                         if (informationOfSamples.coverage[seqType]) {
-                            value += " (coverage = ${Math.floor(informationOfSamples.coverage[seqType] * 100) / 100})"
+                            value += " (coverage = ${String.format(Locale.ENGLISH, '%.2f', informationOfSamples.coverage[seqType])})"
                         }
                         line << value
                     } else {
