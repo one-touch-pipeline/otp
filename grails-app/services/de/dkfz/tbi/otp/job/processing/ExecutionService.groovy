@@ -102,6 +102,8 @@ class ExecutionService {
 # OTP: Fail on first non-zero exit code
 set -e
 
+umask 0027
+
 # BEGIN ORIGINAL SCRIPT
 ${text}
 # END ORIGINAL SCRIPT
