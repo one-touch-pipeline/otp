@@ -21,25 +21,10 @@ import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
 
+/**
+ * Preparation for execution: see src/docs/guide/devel/testing/workflowTesting.gdoc
+ */
 class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIntegrationTest {
-
-    /*
-     * Preparation:
-     *
-     *  - in conf/spring/resources.groovy: Change line to
-     *      if (Environment.getCurrent() == Environment.TEST && false) {
-     *              task.executor(id: "taskExecutor", "pool-size": 10) -> 1
-     task.scheduler(id: "taskScheduler", "pool-size": 10) -> 1
-     *    to start scheduler
-     *  - Mount LSDF to your local system via sshfs:
-     *    sudo mkdir -p STORAGE_ROOT/dmg/otp/test/TransferWorkflow
-     *    sudo chown $USER WORKFLOW_ROOT/TransferWorkflow
-     *    sshfs headnode:WORKFLOW_ROOT/TransferWorkflow WORKFLOW_ROOT/TransferWorkflow
-     *  - Check your PBS (Linux cluster) password in ~/.otp.properties
-     *  - remove @Ignore of the test
-     *  - If you test for BioQuant and DKFZ setups, it is *required* to use the *same* passwords in case
-     *    the accounts differ
-     */
 
     ProcessingOptionService processingOptionService
 
