@@ -107,9 +107,7 @@ class TestData {
         dataFile = createDataFile(seqTrack, runSegment)
         assertNotNull(dataFile.save(flush: true))
 
-        fileType = new FileType()
-        fileType.type = FileType.Type.SEQUENCE
-        assertNotNull(fileType.save(flush: true))
+        fileType = createFileType(FileType.Type.SEQUENCE)
 
         referenceGenome = new ReferenceGenome()
         referenceGenome.name = "hg19_1_24"
@@ -142,7 +140,7 @@ class TestData {
         return seqTrack
     }
 
-    DataFile createDataFile(SeqTrack seqTrack, RunSegment runSegment) {
+    DataFile createDataFile(SeqTrack seqTrack, RunSegment runSegment, FileType fileType = this.fileType) {
         DataFile dataFile = new DataFile()
         dataFile.fileExists = true
         dataFile.fileSize = 1
@@ -218,6 +216,15 @@ class TestData {
                         )
         assertNotNull(exomeEnrichmentKit.save())
         return exomeEnrichmentKit
+    }
+
+
+    FileType createFileType(FileType.Type type) {
+        fileType = new FileType(
+                        type: type
+                        )
+        assertNotNull(fileType.save())
+        return fileType
     }
 
 

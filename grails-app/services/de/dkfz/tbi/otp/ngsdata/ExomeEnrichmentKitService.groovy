@@ -57,7 +57,8 @@ class ExomeEnrichmentKitService {
      */
     public void inferKitInformationForOldLaneFromNewLane(RunSegment runSegment) {
         notNull(runSegment, "The input of the method inferKitInformationForOldLaneFromNewLane is null")
-        List<SeqTrack> seqTracksPerSegment = DataFile.findAllByRunSegment(runSegment)*.seqTrack.unique()
+        //get all DataFiles for the RunSegment, get the SeqTracks of them, filter out null elements of the list and make the result unique
+        List<SeqTrack> seqTracksPerSegment = DataFile.findAllByRunSegment(runSegment)*.seqTrack.findAll().unique()
         SeqType exomeSeqType = SeqType.findByNameAndLibraryLayout(SeqTypeNames.EXOME.seqTypeName, "PAIRED")
         List<ExomeSeqTrack> exomeSeqTracksPerSegment = seqTracksPerSegment.findAll { it.seqType == exomeSeqType }
         exomeSeqTracksPerSegment.each { ExomeSeqTrack track ->

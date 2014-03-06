@@ -290,6 +290,20 @@ class ExomeEnrichmentKitServiceUnitTests {
     }
 
 
+    @Test
+    void testInferInformationForOldLaneFromNewLaneRunSegmentContainsBamFiles() {
+        testData.seqTrack.seqType = testData.seqType
+        assertNotNull(testData.seqTrack.save(flush: true))
+
+        FileType fileType = testData.createFileType(FileType.Type.ALIGNMENT)
+
+        DataFile dataFile = testData.createDataFile(null, testData.runSegment, fileType)
+        assertNotNull(dataFile.save(flush: true))
+
+        exomeEnrichmentKitService.inferKitInformationForOldLaneFromNewLane(testData.runSegment)
+    }
+
+
     ExomeEnrichmentKitSynonym createExomeEnrichmentKitSynonym() {
         ExomeEnrichmentKit exomeEnrichmentKit = new ExomeEnrichmentKit(
                         name: EXOME_ENRICHMENT_KIT
