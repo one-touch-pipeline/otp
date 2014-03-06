@@ -900,7 +900,7 @@ $.otp.createListView = function (selector, sourcePath, sortOrder, jsonCallback, 
         aoColumnDefs: columnDefs,
         aaSorting: [[0, sortOrder ? "asc" : "desc"]]
     });
-    $.otp.refreshTable.setup(selector);
+    $.otp.refreshTable.setup(selector, 10000);
     $.otp.resizeBodyInit(selector, 140);
 };
 
@@ -941,7 +941,7 @@ $.otp.workFlow = function (selector, sourcePath, sortOrder, jsonCallback, column
         aoColumnDefs: columnDefs,
         aaSorting: [[0, sortOrder ? "asc" : "desc"]]
     });
-    $.otp.refreshTable.setup(selector);
+    $.otp.refreshTable.setup(selector, 10000);
     $.otp.resizeBodyInit(selector, 240);
 };
 
@@ -982,7 +982,7 @@ $.otp.registerStep = function (selector, sourcePath, sortOrder, jsonCallback, co
         aoColumnDefs: columnDefs,
         aaSorting: [[0, sortOrder ? "asc" : "desc"]]
     });
-    $.otp.refreshTable.setup(selector);
+    $.otp.refreshTable.setup(selector, 10000);
     $.otp.resizeBodyInit(selector, 230);
 };
 
@@ -993,9 +993,9 @@ $.otp.refreshTable = {
     /**
      * Setup the autorefresh of tables.
      * @param selector A jquery selector for a datatable to be refreshed
-     * @param time the time interval for refresh, default is 10 seconds
+     * @param time the time interval for refresh
      */
-    setup: function(selector, time = 10000) {
+    setup: function(selector, time) {
         window.setInterval(function () {
             if ($.otp.autorefresh.enabled && !document.hidden) {
                 $(selector).dataTable().fnDraw();
@@ -1821,7 +1821,7 @@ $.otp.createListViewProcessingStep = function (selector, sourcePath, sortOrder, 
         aoColumnDefs: columnDefs,
         aaSorting: [[0, sortOrder ? "asc" : "desc"]]
     });
-    $.otp.refreshTable.setup(selector);
+    $.otp.refreshTable.setup(selector, 10000);
 };
 
 $.otp.resizeBodyInit = function (table, margin) {
