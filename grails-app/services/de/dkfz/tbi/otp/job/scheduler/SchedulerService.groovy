@@ -325,7 +325,13 @@ class SchedulerService {
             if (queue.isEmpty()) {
                 return
             }
-            Job job = createJob(ProcessingStep.get(queue.peek().id))
+            final ProcessingStep stepFromQueue = queue.peek()
+            final def id = stepFromQueue.id
+            final ProcessingStep stepFromDatabase = ProcessingStep.get(id)
+            if (stepFromDatabase == null) {
+                throw new AssertionError("The ProcessingStep ${stepFromQueue} with id ${id} seems not to exist in the database. That's weird.")
+            }
+            Job job = createJob(stepFromDatabase)
             running.add(job)
             queue.poll()
             return job

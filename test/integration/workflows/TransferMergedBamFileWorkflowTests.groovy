@@ -770,8 +770,8 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
     void checkFiles(List paths) {
         paths.each {
             File file = new File(it)
-            assertTrue(file.canRead())
-            assertTrue(file.size() > 0)
+            assert file.canRead()
+            assert file.size() > 0
         }
     }
 }
