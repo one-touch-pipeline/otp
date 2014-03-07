@@ -23,6 +23,14 @@ public class ProcessingStepUpdate implements Serializable {
      */
     ProcessingError error
 
+
+    static mapping = {
+        date index: 'date_idx'
+        state index: 'state_idx'
+        processingStep index: 'processing_step_idx'
+    }
+
+
     static constraints = {
         processingStep(nullable: false)
         previous(nullable: true, validator: { val, obj ->

@@ -41,6 +41,13 @@ public class Process implements Serializable {
      **/
     boolean finished = false
 
+
+    static mapping = {
+        finished index: 'finished_idx'
+        jobExecutionPlan index: 'job_execution_plan_idx'
+    }
+
+
     static constraints = {
         jobExecutionPlan(nullable: false)
         started(nullable: false)

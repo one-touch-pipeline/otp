@@ -56,6 +56,13 @@ public class ProcessingStep implements Serializable {
      */
     ProcessingStep next
 
+
+    static mapping = {
+        next index: 'next_idx'
+        process index: 'process_idx'
+    }
+
+
     static constraints = {
         jobDefinition(nullable: false)
         jobClass(nullable: true, empty: false)
