@@ -26,6 +26,8 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
      * all the bed files must be on the file system
      */
     List<Input> bedFilesToLoad = [
+        new Input(bedName: "Agilent3withoutUTRs_chr.bed", refGenName: "hg19", kitName: "Agilent SureSelect V3"),
+        new Input(bedName: "Agilent3withoutUTRs_plain.bed", refGenName: "hs37d5", kitName: "Agilent SureSelect V3"),
         new Input(bedName: "Agilent4withoutUTRs_chr.bed", refGenName: "hg19", kitName: "Agilent SureSelect V4"),
         new Input(bedName: "Agilent4withoutUTRs_plain.bed", refGenName: "hs37d5", kitName: "Agilent SureSelect V4"),
         new Input(bedName: "Agilent4withUTRs_plain.bed", refGenName: "hs37d5", kitName: "Agilent SureSelect V4+UTRs"),
