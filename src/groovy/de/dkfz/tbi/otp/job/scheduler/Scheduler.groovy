@@ -188,7 +188,7 @@ class Scheduler {
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.FAILURE,
-            previous: existingUpdates.sort { it.date }.last(),
+            previous: step.latestProcessingStepUpdate,
             processingStep: step
             )
         update.save()

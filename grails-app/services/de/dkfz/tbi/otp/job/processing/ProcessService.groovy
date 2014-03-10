@@ -217,7 +217,7 @@ ORDER BY u.id desc
      */
     @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_OPERATOR')")
     public ExecutionState getState(ProcessingStep step) {
-        return lastUpdate(step).state
+        return step.latestProcessingStepUpdate.state
     }
 
     /**
@@ -243,7 +243,7 @@ ORDER BY u.id desc
      */
     @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_OPERATOR')")
     public String getError(ProcessingStep step) {
-        ProcessingError error = lastUpdate(step).error
+        ProcessingError error = step.latestProcessingStepUpdate.error
         if (!error) {
             return null
         }
@@ -267,7 +267,7 @@ ORDER BY u.id desc
      */
     @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_OPERATOR')")
     public Date getLastUpdate(ProcessingStep step) {
-        return lastUpdate(step).date
+        return step.latestProcessingStepUpdate.date
     }
 
     /**
@@ -277,7 +277,7 @@ ORDER BY u.id desc
      **/
     @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_OPERATOR')")
     public ProcessingStepUpdate getLatestProcessingStepUpdate(ProcessingStep step) {
-        return lastUpdate(step)
+        return step.latestProcessingStepUpdate
     }
 
     /**
@@ -354,7 +354,7 @@ ORDER BY u.id desc
                 ProcessingStep step = processingSteps.find { it.jobDefinition.id == job.id }
                 job.processingStep = step.id
                 job.created = true
-                ProcessingStepUpdate update = lastUpdate(step)
+                ProcessingStepUpdate update = step.latestProcessingStepUpdate
                 job.started = update.state != ExecutionState.CREATED
                 job.finished = (update.state == ExecutionState.FINISHED || update.state == ExecutionState.SUCCESS || update.state == ExecutionState.FAILURE)
                 job.succeeded = update.state == ExecutionState.SUCCESS
@@ -396,15 +396,6 @@ ORDER BY u.id desc
             return errorLogService.loggedError(error.stackTraceIdentifier)
         }
         throw new RuntimeException("The authentication was not granted for the processing error: " + id)
-    }
-
-    /**
-     * Helper function to retrieve the last ProcessingStepUpdate for given ProcessingStep.
-     * @param step
-     * @return
-     */
-    private ProcessingStepUpdate lastUpdate(ProcessingStep step) {
-        return ProcessingStepUpdate.findByProcessingStep(step, [sort: "id", order: "desc"])
     }
 
     /**

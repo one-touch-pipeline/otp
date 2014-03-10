@@ -96,20 +96,7 @@ class CrashRecoveryService {
             // TODO throw proper exception
             throw new RuntimeException("Not in Crash Recovery")
         }
-        List<ProcessingStep> crashed = []
-        List<Process> process = Process.findAllByFinished(false)
-        List<ProcessingStep> lastProcessingSteps = ProcessingStep.findAllByProcessInListAndNextIsNull(process)
-        lastProcessingSteps.each { ProcessingStep step ->
-            List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step)
-            if (updates.isEmpty()) {
-                return
-            }
-            ProcessingStepUpdate last = updates.sort { it.id }.last()
-            if (last.state == ExecutionState.STARTED || last.state == ExecutionState.RESUMED) {
-                crashed << step
-            }
-        }
-        return crashed
+        return schedulerService.retrieveRunningProcessingSteps()
     }
 
     /**
@@ -150,16 +137,6 @@ class CrashRecoveryService {
     }
 
     /**
-     * Helper function to retrieve the last ProcessingStepUpdate for the given ProcessingStep.
-     * @param step The ProcessingStep whose last ProcessingStepUpdate needs to be retrieved
-     * @return The last ProcessingStepUpdate
-     **/
-    private ProcessingStepUpdate getLastUpdate(ProcessingStep step) {
-        List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(step)
-        return existingUpdates.sort { it.date }.last()
-    }
-
-    /**
      * Helper Function to create a new ProcessingStepUpdate.
      * @param step The ProcessingStep for which the Update should be created
      * @param state The ExecutionState for the update
@@ -168,7 +145,7 @@ class CrashRecoveryService {
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: state,
-            previous: getLastUpdate(step),
+            previous: step.latestProcessingStepUpdate,
             processingStep: step
             )
         if (!update.save(flush: true)) {

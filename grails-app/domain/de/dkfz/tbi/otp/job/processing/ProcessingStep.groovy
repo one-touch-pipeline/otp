@@ -163,6 +163,14 @@ public class ProcessingStep implements Serializable {
     }
 
     /**
+     * @return The latest {@link ProcessingStepUpdate} belonging to this {@link ProcessingStep} or
+     * <code>null</code> if this {@link ProcessingStep} has no {@link ProcessingStepUpdate}s.
+     */
+    public ProcessingStepUpdate getLatestProcessingStepUpdate() {
+        return ProcessingStepUpdate.findByProcessingStep(this, [sort: "id", order: "desc"])
+    }
+
+    /**
      * Convenience method to retrieve the non-qualified class name of the {@link Job} used for this {@link ProcessingStep}.
      *
      * @return the non-qualified class name, or <code>null</code> if {@link #jobClass} is <code>null</code>.

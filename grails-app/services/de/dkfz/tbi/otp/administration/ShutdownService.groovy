@@ -53,14 +53,13 @@ class ShutdownService implements DisposableBean {
                     info.error("Succeeded date for Shutdown Information could not be stored")
                 }
                 // TODO: check that all jobs have really stopped
-                List<ProcessingStep> runningJobs = retrieveRunningJobs()
+                List<ProcessingStep> runningJobs = schedulerService.retrieveRunningProcessingSteps()
                 runningJobs.each { ProcessingStep step ->
                     if (isJobResumable(step)) {
-                        List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(step)
                         ProcessingStepUpdate update = new ProcessingStepUpdate(
                             date: new Date(),
                             state: ExecutionState.SUSPENDED,
-                            previous: existingUpdates.sort { it.date }.last(),
+                            previous: step.latestProcessingStepUpdate,
                             processingStep: step
                         )
                         if (!update.save(flush: true)) {
@@ -179,11 +178,11 @@ class ShutdownService implements DisposableBean {
 
     /**
      * Retrieves a list of all currently running ProcessingSteps.
-     * @return The List of currently running processes.
+     * @return The List of currently running processing steps.
      **/
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<ProcessingStep> getRunningJobs() {
-        return retrieveRunningJobs()
+        return schedulerService.retrieveRunningProcessingSteps()
     }
 
     /**
@@ -194,27 +193,5 @@ class ShutdownService implements DisposableBean {
     boolean isJobResumable(ProcessingStep step) {
         Class jobClass = grailsApplication.classLoader.loadClass(step.jobClass)
         return jobClass.isAnnotationPresent(ResumableJob)
-    }
-
-    /**
-     * Retrieves all ProcessingSteps for currently running Jobs.
-     * This are ProcessingSteps with the latest ProcessingStepUpdate in state STARTED or RESUMED.
-     * @return List of running ProcessingSteps
-     **/
-    private List<ProcessingStep> retrieveRunningJobs() {
-        List<ProcessingStep> runningJobs = []
-        List<Process> process = Process.findAllByFinished(false)
-        List<ProcessingStep> lastProcessingSteps = ProcessingStep.findAllByProcessInListAndNextIsNull(process)
-        lastProcessingSteps.each { ProcessingStep step ->
-            List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step)
-            if (updates.isEmpty()) {
-                return
-            }
-            ProcessingStepUpdate last = updates.sort { it.id }.last()
-            if (last.state == ExecutionState.STARTED || last.state == ExecutionState.RESUMED) {
-                runningJobs << step
-            }
-        }
-        return runningJobs
     }
 }

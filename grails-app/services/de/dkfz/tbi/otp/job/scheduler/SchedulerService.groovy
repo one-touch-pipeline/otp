@@ -355,13 +355,11 @@ class SchedulerService {
         job.end()
         removeRunningJob(job)
         ProcessingStep step = ProcessingStep.get(job.processingStep.id)
-        // get the last ProcessingStepUpdate
-        List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(step)
         // add a ProcessingStepUpdate to the ProcessingStep
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.FINISHED,
-            previous: existingUpdates.sort { it.date }.last(),
+            previous: step.latestProcessingStepUpdate,
             processingStep: step
             )
         if (!update.save(flush: true)) {
@@ -494,13 +492,12 @@ class SchedulerService {
                 ValidatingJob validatingJob = job as ValidatingJob
                 // get the last ProcessingStepUpdate
                 ProcessingStep validatedStep = ProcessingStep.get(validatingJob.validatorFor.id)
-                List<ProcessingStepUpdate> existingValidatingUpdates = ProcessingStepUpdate.findAllByProcessingStep(validatedStep)
                 boolean succeeded = validatingJob.hasValidatedJobSucceeded()
 
                 ProcessingStepUpdate validatedUpdate = new ProcessingStepUpdate(
                     date: new Date(),
                     state: succeeded ? ExecutionState.SUCCESS : ExecutionState.FAILURE,
-                    previous: existingValidatingUpdates.sort { it.date }.last(),
+                    previous: validatedStep.latestProcessingStepUpdate,
                     processingStep: validatedStep
                     )
                 validatedUpdate.save()
@@ -635,14 +632,13 @@ class SchedulerService {
     public void restartProcessingStep(ProcessingStep step, boolean schedule = true) {
         RestartedProcessingStep restartedStep = null
         ProcessingStep.withTransaction {
-            List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(step)
-            if (existingUpdates.isEmpty()) {
+            final ProcessingStepUpdate lastUpdate = step.latestProcessingStepUpdate
+            if (lastUpdate == null) {
                 throw new IncorrectProcessingException("ProcessingStep ${step.id} cannot be restarted as it has no updates")
             }
             if (!step.process.finished) {
                 throw new IncorrectProcessingException("ProcessingStep ${step.id} cannot be restarted as its Process is not in finished state")
             }
-            ProcessingStepUpdate lastUpdate = existingUpdates.sort { it.date }.last()
             if (lastUpdate.state != ExecutionState.FAILURE) {
                 throw new IncorrectProcessingException("ProcessingStep ${step.id} cannot be restarted as it is in state ${lastUpdate.state}")
             }
@@ -697,6 +693,27 @@ class SchedulerService {
                 lock.unlock()
             }
         }
+    }
+
+    /**
+     * Retrieves from the database all {@link ProcessingStep}s with the latest
+     * {@link ProcessingStepUpdate} in {@link ProcessingStepUpdate#state state}
+     * {@link ExecutionState#STARTED STARTED} or {@link ExecutionState#RESUMED RESUMED}.
+     **/
+    public List<ProcessingStep> retrieveRunningProcessingSteps() {
+        List<ProcessingStep> runningSteps = []
+        List<Process> process = Process.findAllByFinished(false)
+        List<ProcessingStep> lastProcessingSteps = ProcessingStep.findAllByProcessInListAndNextIsNull(process)
+        lastProcessingSteps.each { ProcessingStep step ->
+            ProcessingStepUpdate last = step.latestProcessingStepUpdate
+            if (last == null) {
+                return
+            }
+            if (last.state == ExecutionState.STARTED || last.state == ExecutionState.RESUMED) {
+                runningSteps << step
+            }
+        }
+        return runningSteps
     }
 
     /**
