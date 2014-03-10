@@ -2,12 +2,8 @@ package de.dkfz.tbi.otp.job.scheduler
 
 import static org.junit.Assert.*
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.Future
-import java.util.concurrent.atomic.AtomicBoolean
-import de.dkfz.tbi.otp.job.jobs.MonitoringTestJob
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.Job
@@ -19,10 +15,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.job.processing.InvalidStateException
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
-import de.dkfz.tbi.otp.testing.SynchronousTestingExecutorService
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.ngsdata.Realm
-import grails.util.Environment
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.junit.*
 
@@ -575,24 +568,5 @@ class SchedulerTests extends AbstractIntegrationTest {
         } finally {
             scheduler.executorService = originalExecutorService
         }
-    }
-
-    static ProcessingStep createTestProcessingStep() {
-        JobExecutionPlan jep = new JobExecutionPlan(name: "DontCare" + sprintf('%016X', new Random().nextLong()), planVersion: 0, startJobBean: "DontCare")
-        assertNotNull(jep.save())
-        JobDefinition jobDefinition = new JobDefinition(name: "DontCare", bean: "DontCare", plan: jep)
-        assertNotNull(jobDefinition.save())
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "DontCare", startJobVersion: "1")
-        assertNotNull(process.save())
-        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
-        assertNotNull(step.save())
-        ProcessingStepUpdate update = new ProcessingStepUpdate(
-                date: new Date(),
-                state: ExecutionState.CREATED,
-                previous: null,
-                processingStep: step
-        )
-        assertNotNull(update.save(flush: true))
-        return step
     }
 }

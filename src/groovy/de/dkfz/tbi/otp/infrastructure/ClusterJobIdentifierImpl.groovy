@@ -16,4 +16,12 @@ public class ClusterJobIdentifierImpl implements ClusterJobIdentifier {
     public String toString() {
         return "Cluster job ${clusterJobId} on realm ${realm}"
     }
+
+    private static Set<ClusterJobIdentifierImpl> asClusterJobIdentifierImplSet(final Collection<? extends ClusterJobIdentifier> c) {
+        return c.collect( { new ClusterJobIdentifierImpl(it.realm, it.clusterJobId) } ).toSet()
+    }
+
+    public static boolean containSame(final Collection<? extends ClusterJobIdentifier> c1, final Collection<? extends ClusterJobIdentifier> c2) {
+        return asClusterJobIdentifierImplSet(c1) == asClusterJobIdentifierImplSet(c2)
+    }
 }

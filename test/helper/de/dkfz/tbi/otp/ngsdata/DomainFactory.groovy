@@ -1,8 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.processing.ExecutionState
+import de.dkfz.tbi.otp.job.processing.Process
+import de.dkfz.tbi.otp.job.processing.ProcessingStep
+import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import grails.util.Environment
-import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
-import de.dkfz.tbi.otp.ngsdata.Realm.OperationType
 
 class DomainFactory {
 
@@ -114,6 +120,45 @@ class DomainFactory {
     public static Realm createRealmDataProcessingDKFZ(Map myProps = [:]) {
         new Realm(REALM_DEFAULTS_DKFZ_CLUSTER + [
             operationType: Realm.OperationType.DATA_PROCESSING,
+        ] + myProps)
+    }
+
+    public static ProcessingStep createAndSaveProcessingStep() {
+        final JobExecutionPlan jep = new JobExecutionPlan(name: "DontCare" + sprintf('%016X', new Random().nextLong()), planVersion: 0, startJobBean: "DontCare")
+        assert jep.save()
+        final JobDefinition jobDefinition = new JobDefinition(name: "DontCare", bean: "DontCare", plan: jep)
+        assert jobDefinition.save()
+        final Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "DontCare", startJobVersion: "1")
+        assert process.save()
+        final ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assert step.save()
+        final ProcessingStepUpdate update = createProcessingStepUpdate(step, ExecutionState.CREATED)
+        assert update.save(flush: true)
+        return step
+    }
+
+    public static ProcessingStepUpdate createProcessingStepUpdate(final ProcessingStep step, final ExecutionState state) {
+        return new ProcessingStepUpdate(
+                date: new Date(),
+                state: state,
+                previous: step.latestProcessingStepUpdate,
+                processingStep: step,
+        )
+    }
+
+    public static ClusterJob createClusterJob(
+            final ProcessingStep processingStep, final ClusterJobIdentifier clusterJobIdentifier,
+            final Map myProps = [
+                    clusterJobName: "testName",
+                    queued: new Date(),
+                    requestedWalltime: 24 * 60 * 60,
+                    requestedCores: 10,
+                    requestedMemory: 1000,
+            ]) {
+        return new ClusterJob([
+                processingStep: processingStep,
+                realm: clusterJobIdentifier.realm,
+                clusterJobId: clusterJobIdentifier.clusterJobId,
         ] + myProps)
     }
 }

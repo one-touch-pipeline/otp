@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.*
+import static de.dkfz.tbi.otp.ngsdata.DomainFactory.createAndSaveProcessingStep
 
 import de.dkfz.tbi.otp.job.jobs.MonitoringTestJob
 import de.dkfz.tbi.otp.job.processing.Job
@@ -31,7 +32,7 @@ class PbsMonitorServiceTests extends AbstractIntegrationTest {
     private MonitoringJob notifyJobAboutFinishedClusterJob(final boolean fail) {
         final boolean executed = false
         final PbsJobInfo pbsJobInfo = new PbsJobInfo([realm: new Realm(), pbsId: ARBITRARY_CLUSTER_JOB_ID])
-        final Job testJob = new MonitoringTestJob(createTestProcessingStep(), null) {
+        final Job testJob = new MonitoringTestJob(createAndSaveProcessingStep(), null) {
             @Override
             void execute() throws Exception {
                 assert schedulerService.jobExecutedByCurrentThread == this

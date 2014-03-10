@@ -22,4 +22,9 @@ class PbsJobInfo implements ClusterJobIdentifier, Serializable {
     public String getClusterJobId() {
         return pbsId
     }
+
+    @Override
+    public String toString() {
+        return "Cluster job ${clusterJobId} on realm ${realm}"
+    }
 }

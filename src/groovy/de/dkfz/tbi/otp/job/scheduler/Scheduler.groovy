@@ -61,6 +61,7 @@ class Scheduler {
      * Calls the job's {@link Job#execute()} method in the context of the job and with error handling.
      */
     public void executeJob(final Job job) {
+        notNull job
         doCreateCheck(job)
         doWithErrorHandling(job, {
             doInJobContext(job, { job.execute() })
@@ -74,15 +75,20 @@ class Scheduler {
      * <p>Note that job code execution should also be wrapped in {@link #doInJobContext(Job, Closure)}.</p>
      *
      * @param closure The part of the job that shall be executed.
-     * @param rethrow Whether an exception shall be rethrown by this method after it has been handled.
+     * @param rethrow Whether an exception shall be rethrown by this method after it has been handled. If false, the
+     * exception will be logged.
      */
     public void doWithErrorHandling(final Job job, final Closure closure, final boolean rethrow = true) {
+        notNull job
+        notNull closure
         try {
             closure()
         } catch (final Throwable e) {
             doErrorHandling(job, e)
             if (rethrow) {
                 throw e
+            } else {
+                log.error "Exception occurred in ${job} with processing step ID ${job.processingStep?.id}.", e
             }
         }
     }
@@ -95,6 +101,8 @@ class Scheduler {
      * @param closure The part of the job that shall be executed.
      */
     public void doInJobContext(final Job job, final Closure closure) {
+        notNull job
+        notNull closure
         schedulerService.startingJobExecutionOnCurrentThread(job)
         try {
             closure()

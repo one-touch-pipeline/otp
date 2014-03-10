@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.infrastructure
 
-import de.dkfz.tbi.otp.job.processing.ProcessingStep;
+import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
+import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
 
@@ -21,7 +22,7 @@ class ClusterJob implements ClusterJobIdentifier{
         RUNNING, FAILED, DONE, COMPLETED
     }
     /**
-     * Used for MultiJobs. TODO: OTP-981
+     * Used for {@link AbstractMultiJob}s. Is set to true after {@link AbstractMultiJob#execute(Collection)} returns.
      */
     boolean validated = false
     /**
@@ -132,6 +133,11 @@ class ClusterJob implements ClusterJobIdentifier{
 
     public Cluster getCluster() {
         return getRealm().cluster
+    }
+
+    @Override
+    public String toString() {
+        return "Cluster job ${clusterJobId} on realm ${realm}"
     }
 }
 
