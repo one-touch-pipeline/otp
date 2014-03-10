@@ -23,6 +23,8 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.job.processing.RestartedProcessingStep
+import de.dkfz.tbi.otp.job.processing.ResumableJob
+import de.dkfz.tbi.otp.job.processing.SometimesResumableJob
 import de.dkfz.tbi.otp.job.processing.StartJob
 import de.dkfz.tbi.otp.job.processing.ValidatingJob
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -176,6 +178,7 @@ class SchedulerService {
             return
         }
         schedulerActive = false
+        forEachRunningSometimesResumableJob { SometimesResumableJob job -> job.planSuspend() }
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -184,6 +187,20 @@ class SchedulerService {
             return
         }
         schedulerActive = true
+        forEachRunningSometimesResumableJob { SometimesResumableJob job -> job.cancelSuspend() }
+    }
+
+    private void forEachRunningSometimesResumableJob(final Closure closure) {
+        lock.lock()
+        try {
+            running.each {
+                if (it instanceof SometimesResumableJob) {
+                    closure((SometimesResumableJob) it)
+                }
+            }
+        } finally {
+            lock.unlock()
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -714,6 +731,33 @@ class SchedulerService {
             }
         }
         return runningSteps
+    }
+
+    /**
+     * Checks whether the Job running for the given ProcessingStep is in a resumable state.
+     * @return <code>true</code> if the Job is annotated with {@link ResumableJob} or the Job
+     * implements {@link SometimesResumableJob} and its {@link SometimesResumableJob#isResumable()}
+     * method returns <code>true</code>. Otherwise <code>false</code>.
+     **/
+    boolean isJobResumable(ProcessingStep step) {
+        Class jobClass = grailsApplication.classLoader.loadClass(step.jobClass)
+        if (jobClass.isAnnotationPresent(ResumableJob)) {
+            return true
+        }
+        if (SometimesResumableJob.class.isAssignableFrom(jobClass)) {
+            final SometimesResumableJob job
+            lock.lock()
+            try {
+                job = (SometimesResumableJob) running.find { it.processingStep == step }
+            } finally {
+                lock.unlock()
+            }
+            if (job == null) {
+                throw new RuntimeException("No running job found for processing step ${step}.")
+            }
+            return job.resumable
+        }
+        return false
     }
 
     /**

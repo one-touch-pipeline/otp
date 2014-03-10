@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
-import de.dkfz.tbi.otp.job.processing.ResumableJob
 import de.dkfz.tbi.otp.security.User
 import java.util.concurrent.locks.ReentrantLock
 import org.springframework.beans.factory.DisposableBean
@@ -55,7 +54,14 @@ class ShutdownService implements DisposableBean {
                 // TODO: check that all jobs have really stopped
                 List<ProcessingStep> runningJobs = schedulerService.retrieveRunningProcessingSteps()
                 runningJobs.each { ProcessingStep step ->
-                    if (isJobResumable(step)) {
+                    boolean jobIsResumable
+                    try {
+                        jobIsResumable = schedulerService.isJobResumable(step)
+                    } catch (final Throwable e) {
+                        log.warn("Failed to determine whether ProcessingStep ${step.id} is resumable. Treating it as not resumable.", e)
+                        jobIsResumable = false
+                    }
+                    if (jobIsResumable) {
                         ProcessingStepUpdate update = new ProcessingStepUpdate(
                             date: new Date(),
                             state: ExecutionState.SUSPENDED,
@@ -123,7 +129,7 @@ class ShutdownService implements DisposableBean {
             ShutdownInformation.withTransaction { status ->
                 ShutdownInformation info = ShutdownInformation.findBySucceededIsNullAndCanceledIsNull()
                 if (!info) {
-                    status.setRollbackOnly();
+                    status.setRollbackOnly()
                     // TODO: throw exception
                 }
                 info.canceledBy = User.findByUsername(springSecurityService.authentication.principal.username)
@@ -186,12 +192,9 @@ class ShutdownService implements DisposableBean {
     }
 
     /**
-     * Checks whether the given ProcessingStep uses a Job which is resumable.
-     * @param step The ProcessingStep for which it should be checked whether it is resumable
-     * @return whether the Job running for the ProcessingStep is resumable
+     * Calls {@link SchedulerService#isJobResumable(ProcessingStep)}.
      **/
     boolean isJobResumable(ProcessingStep step) {
-        Class jobClass = grailsApplication.classLoader.loadClass(step.jobClass)
-        return jobClass.isAnnotationPresent(ResumableJob)
+        return schedulerService.isJobResumable(step)
     }
 }

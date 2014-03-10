@@ -1,6 +1,10 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import static org.junit.Assert.*
+import de.dkfz.tbi.otp.job.jobs.ResumableSometimesResumableTestJob
+import de.dkfz.tbi.otp.job.jobs.ResumableTestJob
+import de.dkfz.tbi.otp.job.jobs.SometimesResumableTestJob
+import de.dkfz.tbi.otp.job.jobs.TestJob
 import de.dkfz.tbi.otp.job.plan.DecidingJobDefinition
 import de.dkfz.tbi.otp.job.plan.DecisionMapping
 import de.dkfz.tbi.otp.job.plan.JobDecision
@@ -17,7 +21,7 @@ import de.dkfz.tbi.otp.job.processing.ParameterMapping
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
 import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessParameter;
+import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.job.processing.RestartedProcessingStep
@@ -35,7 +39,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
     /**
      * Dependency Injection of schedulerService
      */
-    def schedulerService
+    SchedulerService schedulerService
 
     @SuppressWarnings("EmptyMethod")
     @Before
@@ -85,7 +89,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
     }
-    
+
     @Test
     void testCompleteProcess() {
         assertTrue(schedulerService.queue.isEmpty())
@@ -137,7 +141,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertEquals(ExecutionState.CREATED, updates[0].state)
         assertEquals(ExecutionState.STARTED, updates[1].state)
         assertEquals(ExecutionState.FINISHED, updates[2].state)
-        
+
         // after running the second job the Process should be finished
         schedulerService.schedule()
         // TODO: why is that needed?
@@ -1481,6 +1485,42 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertFalse(restartedStep.output.empty)
         assertEquals(1, restartedStep.output.size())
         assertEquals("foo", restartedStep.output[0].value)
+    }
+
+    void testIsJobResumable_notResumable() {
+        final ProcessingStep processingStep = new ProcessingStep(jobClass: TestJob.class.name)
+        assert schedulerService.isJobResumable(processingStep) == false
+    }
+
+    void testIsJobResumable_resumable() {
+        final ProcessingStep processingStep = new ProcessingStep(jobClass: ResumableTestJob.class.name)
+        assert schedulerService.isJobResumable(processingStep) == true
+    }
+
+    void testIsJobResumable_resumableSometimesResumable() {
+        final ProcessingStep processingStep = new ProcessingStep(jobClass: ResumableSometimesResumableTestJob.class.name)
+        assert schedulerService.isJobResumable(processingStep) == true
+    }
+
+    final Closure testIsJobResumable_sometimesResumable = { final boolean resumable ->
+        final ProcessingStep processingStep = new ProcessingStep(jobClass: SometimesResumableTestJob.class.name)
+        final SometimesResumableTestJob job = new SometimesResumableTestJob (processingStep, Collections.emptySet())
+        job.resumable = resumable
+        schedulerService.running << job
+        assert schedulerService.isJobResumable(processingStep) == resumable
+    }
+
+    void testIsJobResumable_sometimesResumable_true() {
+        testIsJobResumable_sometimesResumable true
+    }
+
+    void testIsJobResumable_sometimesResumable_false() {
+        testIsJobResumable_sometimesResumable false
+    }
+
+    void testIsJobResumable_sometimesResumable_noRunningJob() {
+        final ProcessingStep processingStep = new ProcessingStep(jobClass: SometimesResumableTestJob.class.name)
+        shouldFail RuntimeException, { schedulerService.isJobResumable(processingStep) }
     }
 
     private ProcessingStepUpdate mockProcessingStepAsFinished(ProcessingStep step) {

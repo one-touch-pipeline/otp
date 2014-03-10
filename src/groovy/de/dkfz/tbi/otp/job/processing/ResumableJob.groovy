@@ -22,6 +22,8 @@ import java.lang.annotation.Target
  * resumed automatically after a non-clean application shutdown. Examples are jobs which just look
  * for a file and stop processing when the file is available.
  *
+ * @see SometimesResumableJob
+ *
  **/
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
