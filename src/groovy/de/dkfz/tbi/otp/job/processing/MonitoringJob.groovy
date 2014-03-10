@@ -19,8 +19,18 @@ interface MonitoringJob extends EndStateAwareJob {
 
     /**
      * Callback to inform that the tracked PBS job finished on the Realm.
+     *
+     * <p>
      * An implementing class should use this method to have custom code
-     * to handle the finishing of one job.
+     * to handle the finishing of one cluster job.
+     *
+     * <p>
+     * <strong>This method shall return quickly. If it triggers a time consuming operation, it shall
+     * perform that operation asynchronously on a different thread.</strong>
+     *
+     * <p>
+     * If this method throws an exception, this MonitoringJob will be marked as failed and finished.
+     *
      * @param pbsId The ID of the job on the PBS system
      * @param realm The Realm where the Job finished, may be {@code null} if Realm is unknown
      */

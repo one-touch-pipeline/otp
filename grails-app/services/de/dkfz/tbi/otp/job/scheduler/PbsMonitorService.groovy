@@ -1,8 +1,15 @@
 package de.dkfz.tbi.otp.job.scheduler
 
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
+import org.springframework.beans.factory.annotation.Autowired
+
+import de.dkfz.tbi.otp.job.processing.ExecutionService
+import de.dkfz.tbi.otp.job.processing.ExecutionState
+import de.dkfz.tbi.otp.job.processing.InvalidStateException
 import de.dkfz.tbi.otp.job.processing.MonitoringJob
 import de.dkfz.tbi.otp.ngsdata.Realm
 
@@ -17,10 +24,15 @@ import de.dkfz.tbi.otp.ngsdata.Realm
  */
 class PbsMonitorService {
     static transactional = false
-    /**
-     * Dependency Injection of executionService.
-     **/
-    def executionService
+
+    @Autowired
+    ExecutionService executionService
+
+    @Autowired
+    ExecutorService executorService
+
+    @Autowired
+    Scheduler scheduler
 
     /**
      * Map of currently monitored jobs on the PBS (value) ordered
@@ -134,14 +146,20 @@ class PbsMonitorService {
                 log.debug("${info.pbsId} still running: ${running ? 'yes' : 'no'}")
                 if (!running) {
                     log.info("${info.pbsId} finished on Realm ${info.realm}")
+
+                    /* We wanted to move the following try/catch block into the
+                     * notifyJobAboutFinishedClusterJob method completely, not just the part within
+                     * the try. But this made SchedulerServiceTests.testConstantParameterPassing
+                     * fail. Stefan and Jan spent quite some time trying to figure out why, but
+                     * without success. So we decided to keep it inlined.
+                     */
                     try {
-                        // in case the PBS job finished we inform the MonitoringJob about this
-                        pbsMonitor.finished(info.pbsId, info.realm)
-                    } catch (Exception e) {
-                        // catching all exception thrown in the Job to not have it influence our own code
+                        notifyJobAboutFinishedClusterJob(pbsMonitor, info)
+                    } catch (final Throwable e) {
                         log.error(e.message, e)
+                        scheduler.doErrorHandling(pbsMonitor, e)
                     }
-                    // and add the JobInfo to a list of finished jobs
+
                     finishedJobs.add(info)
                 }
             }
@@ -183,6 +201,33 @@ class PbsMonitorService {
             } finally {
                 lock.unlock()
             }
+        }
+    }
+
+    private void notifyJobAboutFinishedClusterJob(final MonitoringJob monitoringJob, final PbsJobInfo clusterJob) {
+        boolean jobHasFinished
+        ExecutionState jobEndState
+        try {
+            jobEndState = monitoringJob.getEndState()
+            jobHasFinished = true
+        } catch (final InvalidStateException e) {
+            // MonitoringJob.getEndState() is specified to throw an InvalidStateException if the
+            // job has not finished yet.
+            jobHasFinished = false
+        }
+        if (jobHasFinished) {
+            if (jobEndState == ExecutionState.FAILURE) {
+                log.info("NOT notifying ${monitoringJob} that cluster job ${clusterJob.pbsId}" +
+                        " has finished on realm ${clusterJob.realm}, because that job has already failed.")
+            } else {
+                throw new RuntimeException("${monitoringJob} is still monitoring cluster job" +
+                        " ${clusterJob.pbsId} on realm ${clusterJob.realm}, although it has" +
+                        " already finished with end state ${jobEndState}.")
+            }
+        } else {
+            log.info("Notifying ${monitoringJob} that cluster job ${clusterJob.pbsId}" +
+                    " has finished on realm ${clusterJob.realm}.")
+            monitoringJob.finished(clusterJob.pbsId, clusterJob.realm)
         }
     }
 }

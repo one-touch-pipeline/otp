@@ -180,6 +180,10 @@ class Scheduler {
     public void doErrorHandling(JoinPoint joinPoint, Exception e) {
         LogThreadLocal.removeJobLog()
         Job job = joinPoint.target as Job
+        doErrorHandling(job, e)
+    }
+
+    public void doErrorHandling(Job job, Throwable e) {
         schedulerService.removeRunningJob(job)
         ProcessingStep step = ProcessingStep.get(job.processingStep.id)
         // get the last ProcessingStepUpdate
@@ -208,11 +212,11 @@ class Scheduler {
         update.error = error
         if (!update.save(flush: true)) {
             // TODO: trigger error handling
-            log.fatal("Could not create a FAILURE Update for Job of type ${joinPoint.target.class}")
+            log.fatal("Could not create a FAILURE Update for Job of type ${job.class}")
             throw new ProcessingException("Could not create a FAILURE Update for Job")
         }
         markProcessAsFailed(step, error.errorMessage)
-        log.debug("doErrorHandling performed for ${joinPoint.getTarget().class} with ProcessingStep ${step.id}")
+        log.debug("doErrorHandling performed for ${job.class} with ProcessingStep ${step.id}")
     }
 
     /**

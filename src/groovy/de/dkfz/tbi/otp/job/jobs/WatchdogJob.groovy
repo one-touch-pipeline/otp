@@ -66,14 +66,16 @@ class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob 
 
     @Override
     void finished(String pbsId, Realm realm) {
+        final boolean allFinished
         lock.lock()
         try {
             queuedClusterJobIds.remove(pbsId)
             log.debug "PBS job ${pbsId} finished"
+            allFinished = queuedClusterJobIds.empty
         } finally {
             lock.unlock()
         }
-        if (queuedClusterJobIds.empty) {
+        if (allFinished) {
             // Since the monitoring service does not always have the correct realm (it's just "guessing"), the value
             // provided in the callback might be null. Passing the realm via job parameters is required, so we fetch
             // the value from the input parameter.

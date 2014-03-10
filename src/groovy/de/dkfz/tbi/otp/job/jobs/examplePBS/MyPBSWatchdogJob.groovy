@@ -34,14 +34,16 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl implements Monitorin
     }
 
     void finished(String pbsId, Realm realm) {
+        final boolean allFinished
         lock.lock()
         try {
             queuedJobIds.remove(pbsId)
             log.debug("${pbsId} finished")
+            allFinished = queuedJobIds.empty
         } finally {
             lock.unlock()
         }
-        if (queuedJobIds.empty) {
+        if (allFinished) {
             succeed()
             schedulerService.doEndCheck(this)
         }
