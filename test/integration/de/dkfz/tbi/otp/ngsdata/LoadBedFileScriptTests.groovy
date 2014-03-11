@@ -30,11 +30,18 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
         new Input(bedName: "Agilent3withoutUTRs_plain.bed", refGenName: "hs37d5", kitName: "Agilent SureSelect V3"),
         new Input(bedName: "Agilent4withoutUTRs_chr.bed", refGenName: "hg19", kitName: "Agilent SureSelect V4"),
         new Input(bedName: "Agilent4withoutUTRs_plain.bed", refGenName: "hs37d5", kitName: "Agilent SureSelect V4"),
+        new Input(bedName: "Agilent4withUTRs_chr.bed", refGenName: "hg19", kitName: "Agilent SureSelect V4+UTRs"),
         new Input(bedName: "Agilent4withUTRs_plain.bed", refGenName: "hs37d5", kitName: "Agilent SureSelect V4+UTRs"),
         new Input(bedName: "Agilent5withoutUTRs_chr.bed", refGenName: "hg19", kitName: "Agilent SureSelect V5"),
         new Input(bedName: "Agilent5withoutUTRs_plain.bed", refGenName: "hs37d5", kitName: "Agilent SureSelect V5"),
         new Input(bedName: "Agilent5withUTRs_chr.bed", refGenName: "hg19", kitName: "Agilent SureSelect V5+UTRs"),
-        new Input(bedName: "Agilent5withUTRs_plain.bed", refGenName: "hs37d5", kitName: "Agilent SureSelect V5+UTRs")
+        new Input(bedName: "Agilent5withUTRs_plain.bed", refGenName: "hs37d5", kitName: "Agilent SureSelect V5+UTRs"),
+        new Input(bedName: "Nimblegen_SeqCap_EZ_Exome_v2_chr.bed", refGenName: "hg19", kitName: "Roche NimbleGen SeqCap EZ Human Exome library v2"),
+        new Input(bedName: "Nimblegen_SeqCap_EZ_Exome_v2_plain.bed", refGenName: "hs37d5", kitName: "Roche NimbleGen SeqCap EZ Human Exome library v2"),
+        new Input(bedName: "Nimblegen_SeqCap_EZ_Exome_v3_chr.bed", refGenName: "hg19", kitName: "Roche NimbleGen SeqCap EZ Human Exome library v3"),
+        new Input(bedName: "Nimblegen_SeqCap_EZ_Exome_v3_plain.bed", refGenName: "hs37d5", kitName: "Roche NimbleGen SeqCap EZ Human Exome library v3"),
+        new Input(bedName: "TruSeqExomeTargetedRegions_chr.bed", refGenName: "hg19", kitName: "Illumina TruSeq Exome Enrichment Kit"),
+        new Input(bedName: "TruSeqExomeTargetedRegions_plain.bed", refGenName: "hs37d5", kitName: "Illumina TruSeq Exome Enrichment Kit"),
     ]
     class Input {
         String bedName
