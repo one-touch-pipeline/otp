@@ -2,7 +2,7 @@
 .project
 .settings
 .idea
-otp.iml
+*.iml
 otp.ipr
 otp.iws
 ast-build/*
