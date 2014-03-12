@@ -261,6 +261,9 @@ grails.plugins.springsecurity.controllerAnnotations.staticRules = [
     "/seqTrackDataProvider/**": ['IS_AUTHENTICATED_ANONYMOUSLY'],
     "/fastqFilePathDataProvider/**": ['IS_AUTHENTICATED_ANONYMOUSLY'],
     "/login/**":             ['IS_AUTHENTICATED_ANONYMOUSLY'],
+    "/logout/**":            ['IS_AUTHENTICATED_ANONYMOUSLY'],
+    "/info/**":              ['permitAll'],
+    "/":                     ['permitAll'],
     "/css/**":               ["permitAll"],
     "/images/**":            ["permitAll"],
     "/js/**":                ["permitAll"],
@@ -279,6 +282,7 @@ grails.plugins.springsecurity.roleHierarchy = '''
 '''
 
 grails.plugins.springsecurity.useSwitchUserFilter = true
+grails.plugins.springsecurity.successHandler.defaultTargetUrl = '/home/index'
 
 // exclude unused plugins
 if (pluginsToExclude) {

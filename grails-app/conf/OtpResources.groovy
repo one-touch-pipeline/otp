@@ -4,6 +4,11 @@ modules = {
     'style' {
         resource url:'/css/otp.less'
     }
+    'info' {
+        dependsOn 'jquery'
+        resource url: '/js/login.js'
+        resource url: '/css/info.less', attrs:[rel: 'stylesheet/less', type:'css']
+    }
     core {
         dependsOn 'jquery'
         resource url: '/js/jquery/jquery.i18n.properties-min-1.0.9.js'

@@ -1,0 +1,112 @@
+.body {
+    position: relative;
+}
+
+/* menu */
+#infoMenu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #777;
+    text-align: center;
+    vertical-align: middle;
+    display: table;
+    margin: 0;
+    padding: 10px;
+}
+.infoMenuButton {
+    background-color: #ddd;
+    border-radius: 100%;
+    float: left;
+    margin-right: 1em;
+    width: 9em;
+    height: 6em;
+    transition: all 2s ease;
+    color: black;
+    font-weight: bold;
+    text-transform: uppercase;
+    position: relative;
+    display: table;
+}
+.infoMenuButton .infoMenuButtonText {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+}
+.infoMenuButton:hover, .infoMenuButtonActive {
+    background-color: #005a9a;
+    color: white;
+}
+
+/* login */
+#loginBox {
+    position: absolute;
+    min-height: 522px;
+    height: 100%;
+    width: 319px;
+    top: 0;
+    right: 0;
+    display: block;
+    float: left;
+    background: #000;
+    font-size: 1.2em;
+}
+.loginButtonBox {
+    position: absolute;
+    top: 264px;
+    right: 0;
+    background: url('../images/login_button.png') #000;
+    height: 258px;
+    width: 318px;
+    cursor: pointer;
+}
+#loginFormBox {
+    position: absolute;
+    background-image: url('../images/login_bg.png');
+    height: 264px;
+    width: 319px;
+    padding-right: 0;
+}
+#loginForm {
+    width: 160px;
+    margin-top: 50px;
+    margin-left: 80px;
+}
+#loginForm input {
+    border: #005a9a solid 1px;
+    box-shadow: 1px 1px 5px #005a9a;
+    width: 150px;
+    background-color: #000;
+    color: #fff;
+    margin-top: 3px;
+    margin-bottom: 10px;
+    padding-left: 5px;
+}
+#loginForm label {
+    width: 150px;
+    color: #fff;
+}
+#loginBox a {
+    color: white;
+    text-decoration: none;
+}
+
+.isInvisible {
+    visibility: hidden;
+}
+
+#content {
+    position: absolute;
+    top: 100px;
+    left: 0;
+    right: 25%;
+    width: 70%;
+    padding: 10px;
+}
+
+.plotContainer {
+    float: left;
+    margin-top: 20px;
+    border: 25px solid #E1F1FF
+}

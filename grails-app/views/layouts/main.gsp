@@ -27,17 +27,20 @@
     <div class="body_position">
         <sec:ifAllGranted roles="ROLE_OPERATOR">
             <div class="header">
-                <img src="${resource(dir: 'images', file: 'header_operator.png')}" alt="Grails"/>
+                <img src="${resource(dir: 'images', file: 'header_operator.png')}" alt="OTP"/>
                 <g:if test="${otp.environmentName() != 'production'}">
                     <p class="environmentName"><otp:environmentName/></p>
                 </g:if>
             </div>
         </sec:ifAllGranted>
         <sec:ifNotGranted roles="ROLE_OPERATOR">
-            <div class="header"><img src="${resource(dir: 'images', file: 'header.png')}" alt="Grails"/></div>
+            <div class="header">
+                <g:if test="${controllerName == "info"}"><h1><g:message code="otp.title" /></h1></g:if>
+                <img src="${resource(dir: 'images', file: 'header.png')}" alt="OTP"/>
+            </div>
         </sec:ifNotGranted>
         <div class="headerGraphic">
-            <img class="headerGraphicImg" src="${resource(dir: 'images', file: 'header_graphic.png')}" alt="Grails"/>
+            <img class="headerGraphicImg" src="${resource(dir: 'images', file: 'header_graphic.png')}" alt=""/>
         </div>
         <div class="menu">
             <div class="menuContainer menuContainerL">
@@ -99,7 +102,7 @@
                 <ul>
                     <sec:ifLoggedIn>
                         <li id="logout"><g:link controller="logout" action="index"><g:message code="otp.menu.logout"/></g:link></li>
-                        <li id="home"><g:link url="${request.contextPath}/"><g:message code="otp.menu.home"/></g:link></li>
+                        <li id="home"><g:link controller="home" action="index"><g:message code="otp.menu.home"/></g:link></li>
                     </sec:ifLoggedIn>
                 </ul>
             </div>

@@ -7,7 +7,7 @@ class UrlMappings {
             }
         }
 
-        "/"(controller:"home", action: "index")
+        "/"(controller:"info", action: "about")
         "403"(controller: "errors", action: "error403")
         "404"(controller: "errors", action: "error404")
         "500"(controller: "errors", action: "error500")
