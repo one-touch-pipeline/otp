@@ -18,14 +18,27 @@ import org.junit.*
     SeqType, ReferenceGenome, ExomeSeqTrack, SeqTrack, AlignmentPass,
     ExomeEnrichmentKit, BedFile])
 class ExecuteMergedBamFileQaAnalysisJobUnitTests {
+
     ExecuteMergedBamFileQaAnalysisJob job
     SeqType seqType
+
+    ExomeEnrichmentKit exomeEnrichmentKit
+
+    ReferenceGenome referenceGenome
 
     @Before
     void setUp() {
 
         Realm realm = new Realm()
+        seqType = new SeqType()
         ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile()
+
+        exomeEnrichmentKit = new ExomeEnrichmentKit(name: "ExomeEnrichmentKit")
+        assertNotNull(exomeEnrichmentKit.save([flush: true, validate: false]))
+
+        referenceGenome = new ReferenceGenome(name: "ReferenceGenome")
+        assertNotNull(referenceGenome.save([flush: true, validate: false]))
+
         QualityAssessmentMergedPass pass = new QualityAssessmentMergedPass(processedMergedBamFile: bamFile)
         assertNotNull(pass.save([flush: true, validate: false]))
         seqType = new SeqType()
@@ -45,7 +58,7 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
             filePathForBai: { 'baiFilePath' },
             project: {},
             seqType: { seqType },
-            exomeEnrichmentKit: {}
+            exomeEnrichmentKit: {exomeEnrichmentKit}
             ] as ProcessedMergedBamFileService
 
         def executionHelperService = [
@@ -57,7 +70,7 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
             ] as ProcessingOptionService
 
         def referenceGenomeService = [
-            referenceGenome: { a1, a2 -> },
+            referenceGenome: { a1, a2 -> referenceGenome},
             referenceGenomeMetaInformationPath: { a1, a2 -> 'referenceGenomeMetaInformationPath' }
             ] as ReferenceGenomeService
 
@@ -83,10 +96,16 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
     }
 
     @Test
-    void testExecuteCorrectExome() {
+    void testExecuteCorrectExomeWithBedFile() {
 
         seqType.name = SeqTypeNames.EXOME.seqTypeName
         seqType.libraryLayout = 'PAIRED'
+
+        BedFile bedfile = new BedFile(
+            referenceGenome: referenceGenome,
+            exomeEnrichmentKit: exomeEnrichmentKit
+            )
+        assertNotNull(bedfile.save([flush: true, validate: false]))
 
         job.executionHelperService = [sendScript: { realm, cmd ->
                 String expCommand = "qualityAssessment.sh processedBamFileFilePath baiFilePath qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath false ${Chromosomes.overallChromosomesLabel()} 36 25 0 1 1000 10 false bedFilePath referenceGenomeMetaInformationPath; chmod 440 qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath"
@@ -95,6 +114,21 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
             }] as ExecutionHelperService
 
         job.execute()
+    }
+
+    @Test
+    void testExecuteCorrectExomeWithoutBedFile() {
+
+        seqType.name = SeqTypeNames.EXOME.seqTypeName
+        seqType.libraryLayout = 'PAIRED'
+
+        job.executionHelperService = [sendScript: { realm, cmd ->
+            assert false //this method should not be executed
+        }] as ExecutionHelperService
+
+        assert "Could not find a bed file for ReferenceGenome and ExomeEnrichmentKit" == shouldFail(ProcessingException) {
+            job.execute()
+        }
     }
 
     @Test

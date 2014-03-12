@@ -81,6 +81,9 @@ class ExecuteMergedBamFileQaAnalysisJob extends AbstractJobImpl {
             ReferenceGenome referenceGenome = referenceGenomeService.referenceGenome(project, seqType)
             ExomeEnrichmentKit exomeEnrichmentKit = processedMergedBamFileService.exomeEnrichmentKit(processedMergedBamFile)
             BedFile bedFile = BedFile.findByReferenceGenomeAndExomeEnrichmentKit(referenceGenome, exomeEnrichmentKit)
+            if (!bedFile) {
+                throw new ProcessingException("Could not find a bed file for ${referenceGenome} and ${exomeEnrichmentKit}")
+            }
             String bedFilePath = bedFileService.filePath(realm, bedFile)
             String refGenMetaInfoFilePath = referenceGenomeService.referenceGenomeMetaInformationPath(realm, referenceGenome)
             binding.bedFilePath = bedFilePath
