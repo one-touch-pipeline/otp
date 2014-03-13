@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.job.jobs.dataInstallation
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
-import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.ngsdata.*
@@ -16,6 +17,9 @@ class DataInstallationStartJob extends AbstractStartJobImpl {
 
     @Autowired
     RunProcessingService runProcessingService
+
+    @Autowired
+    ProcessingOptionService optionService
 
     final int MAX_RUNNING = 2
 
@@ -33,14 +37,13 @@ class DataInstallationStartJob extends AbstractStartJobImpl {
     }
 
     boolean hasOpenSlots() {
-        if (!getExecutionPlan() || !getExecutionPlan().enabled) {
+        JobExecutionPlan jep = getExecutionPlan()
+        if (!jep || !jep.enabled) {
             return false
         }
         int numberOfRunning = numberOfRunningProcesses()
-        if (numberOfRunning >= MAX_RUNNING) {
-            return false
-        }
-        return true
+        long maxRunning = optionService.findOptionAsNumber("numberOfJobs", "DataInstallationWorkflow", null, MAX_RUNNING)
+        return (numberOfRunning < maxRunning)
     }
 
     /**
