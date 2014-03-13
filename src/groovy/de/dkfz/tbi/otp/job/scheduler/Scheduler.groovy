@@ -6,7 +6,7 @@ import de.dkfz.tbi.otp.job.processing.DecisionProcessingStep
 import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.JobExcecutionException
-import de.dkfz.tbi.otp.job.processing.LoggingException;
+import de.dkfz.tbi.otp.job.processing.LoggingException
 import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
@@ -35,13 +35,13 @@ import org.springframework.stereotype.Component
 
 /**
  * Aspect handling the scheduling of Jobs.
- * 
+ *
  * This Aspect controls the execute Method of a {@link Job}. It ensures that a {@link ProcessingStepUpdate} is
  * created when the execute Method is entered and leaved. As well it ensures that the {@link ProcessingStep} is
  * in the correct state when it is called.
  *
  * For technical reasons the Aspect uses the {@link JobExecution} annotation for the pointcut.
- * 
+ *
  * In case the execute method throws an exception this is intercepted and the error handling is invoked. After
  * a Job finished the Aspect takes care of invoking the next to be executed Job and triggers it.
  *
@@ -81,7 +81,7 @@ class Scheduler {
      * gets executed. It will throw a RuntimeException in case that there are severe errors such as
      * the Job does not have a ProcessingStep or there is not at least the CREATED ProcessingStepUpdate
      * available.
-     * 
+     *
      * The Aspect is also responsible for persisting the input parameters passed to the Job at the time
      * of execution.
      *
@@ -135,7 +135,7 @@ class Scheduler {
             LogThreadLocal.removeJobLog()
             // removing Job from running
             schedulerService.removeRunningJob(job)
-            throw new SchedulerException("Could not create @Before annotation for Job of type ${joinPoint.target.class}", e.cause)
+            throw new SchedulerException("doCreateCheck failed for Job of type ${joinPoint.target.class}", e)
         }
     }
 
