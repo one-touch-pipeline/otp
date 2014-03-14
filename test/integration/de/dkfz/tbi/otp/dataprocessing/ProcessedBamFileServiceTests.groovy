@@ -184,6 +184,46 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
     }
 
     @Test
+    //if a processed merged bam file is marked as withdrawn, the state of qa should be ignored
+    void testProcessedBamFileNeedsProcessingAllCorrectWithWithdrawnSeqTrack() {
+        SeqTrack seqTrack2 = new SeqTrack(
+                        laneId: "laneId2",
+                        run: run,
+                        sample: sample,
+                        seqType: seqType,
+                        seqPlatform: seqPlatform,
+                        pipelineVersion: softwareTool,
+                        alignmentState: SeqTrack.DataProcessingState.FINISHED
+                        )
+        assertNotNull(seqTrack2.save([flush: true]))
+
+        AlignmentPass alignmentPass = new AlignmentPass(
+                        identifier: 1,
+                        seqTrack: seqTrack2,
+                        description: "test"
+                        )
+        assertNotNull(alignmentPass.save([flush: true]))
+
+        ProcessedBamFile processedBamFile2 = new ProcessedBamFile(
+                        alignmentPass: alignmentPass,
+                        type: BamType.SORTED,
+                        withdrawn: true,
+                        qualityAssessmentStatus: QaProcessingStatus.IN_PROGRESS,
+                        status: State.PROCESSED
+                        )
+        assertNotNull(processedBamFile2.save([flush: true]))
+        List<SeqTrack> seqTracks = [processedBamFile.seqTrack, processedBamFile2.seqTrack]
+
+        assert !processedBamFileService.isAnyAlignmentNotFinished(seqTracks)
+        assert !processedBamFileService.isMergingInProgress(processedBamFile.seqTrack)
+        assert !processedBamFileService.isMergingInProgress(processedBamFile2.seqTrack)
+        assert !processedBamFileService.isAnyBamFileNotProcessable(seqTracks)
+        assert processedBamFileService.isMergeable(processedBamFile)
+        assert processedBamFileService.isMergeable(processedBamFile2)
+        assertEquals(processedBamFile.id, processedBamFileService.processedBamFileNeedsProcessing().id)
+    }
+
+    @Test
     void testProcessedBamFileNeedsProcessingNoBamFileNeedsProcessing() {
         processedBamFile.status = State.DECLARED
         assertNotNull(processedBamFile.save([flush: true, failOnError: true]))
