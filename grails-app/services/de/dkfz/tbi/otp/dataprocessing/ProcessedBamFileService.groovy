@@ -168,8 +168,26 @@ class ProcessedBamFileService {
         return processedBamFiles.find { isMergeable(it) }
     }
 
+    /**
+     * checks, if the given {@link ProcessedBamFile} is ready for merging.
+     *
+     * Therefore the following requirements needs to be <code>true</code>:
+     * <ul>
+     * <li> The processedBamFile is not withdrawn</li>
+     * <li> All {@link SeqTrack}s (exlude withdrawn) with the same {@link Sample} and {@link SeqType} have finished their
+     *      alignments, see {@link #isAnyAlignmentPending(Iterable)}</li>
+     * <li> No merging is in process for the corresponding {@link Sample} and {@link SeqType}, see
+     *      {@link #isMergingInProgress(SeqTrack)}</li>
+     * <li> All {@link ProcessedBamFile} (exlude withdrawn) for the {SeqTrack}s with the same {@link Sample}
+     *      and {@link SeqType} have to be processable, see {@link #isAnyBamFileNotProcessable(Iterable)}</li>
+     * </ul>
+     */
     public boolean isMergeable(ProcessedBamFile processedBamFile) {
         notNull(processedBamFile)
+
+        if (processedBamFile.withdrawn) {
+            return false
+        }
 
         final SeqTrack seqTrack = processedBamFile.seqTrack
         List<SeqTrack> seqTracks = SeqTrack.createCriteria().list {
@@ -181,7 +199,7 @@ class ProcessedBamFileService {
          */
         assert !seqTracks.isEmpty()
 
-        if (isAnyAlignmentNotFinished(seqTracks)) {
+        if (isAnyAlignmentPending(seqTracks)) {
             return false
         }
         if (isMergingInProgress(processedBamFile.seqTrack)) {
@@ -193,14 +211,22 @@ class ProcessedBamFileService {
         return true
     }
 
-    public boolean isAnyAlignmentNotFinished(Iterable<SeqTrack> seqTracks) {
+    /**
+     * Checks for not finished alignments of the given seqtracks, ignoring withdrawn seq tracks
+     *
+     * A seqtrack is handled as withdrawn, if at least one of the corresponding {@link DataFile}s is withdrawn.
+     *
+     * @param seqTracks the seqTracks to be checked
+     * @return <code>true</code>, if for at least one not withdrawn seqtrack the alignment is not finished yet
+     */
+    public boolean isAnyAlignmentPending(Iterable<SeqTrack> seqTracks) {
         notNull(seqTracks)
-        return seqTracks.find { it.alignmentState != SeqTrack.DataProcessingState.FINISHED }
+        return seqTracks.find { it.alignmentState != SeqTrack.DataProcessingState.FINISHED && !it.withdrawn}
     }
 
     /**
-     * @return whether there is a merging process with the Sample and SeqType of the specified
-     *      SeqTrack running at the moment
+     * @return whether there is a merging process with the {@link Sample} and {@link SeqType} of the specified
+     *      {@link SeqTrack} running at the moment
      */
     public boolean isMergingInProgress(SeqTrack seqTrack) {
         notNull(seqTrack)
@@ -217,7 +243,7 @@ class ProcessedBamFileService {
     }
 
     /**
-     * @return whether a {@link ProcessedBamFile} belonging to any of the given
+     * @return whether a {@link ProcessedBamFile} (exlude withdrawn) belonging to any of the given
      *      {@link SeqTrack}s exists where the QA is not finished or the {@link AbstractBamFile#status}
      *      is {@link AbstractBamFile.State#DECLARED}.
      */

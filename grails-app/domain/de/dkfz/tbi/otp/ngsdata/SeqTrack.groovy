@@ -70,4 +70,12 @@ class SeqTrack {
     String toString() {
         "${laneId} ${sample} ${seqType} "
     }
+
+    /**
+     * Indicates, if at least one {@link DataFile} belongs to this {@link SeqTrack}, which is marked as withdrawn
+     * (see {@link DataFile#fileWithdrawn})
+     */
+    boolean isWithdrawn() {
+        return DataFile.findBySeqTrackAndFileWithdrawn(this, true)
+    }
 }
