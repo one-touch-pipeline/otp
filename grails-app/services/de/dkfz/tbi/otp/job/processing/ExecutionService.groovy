@@ -222,6 +222,7 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
                 // TODO: How to handle this?
                 throw new ProcessingException("test!")
             }
+            logToJob("received response: " + concatResults(values))
             disconnectSsh(channel)
             return values
         } catch (Exception e) {
