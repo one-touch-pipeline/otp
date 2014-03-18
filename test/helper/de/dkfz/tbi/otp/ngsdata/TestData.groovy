@@ -119,79 +119,82 @@ class TestData {
         assertNotNull(referenceGenomeProjectSeqType.save(flush: true))
     }
 
-    Individual createIndividual() {
-        Individual individual = new Individual()
-        individual.pid = "654321"
-        individual.mockPid = "PUBLIC_PID"
-        individual.mockFullName = "PUBLIC_NAME"
-        individual.type = Individual.Type.REAL
-        individual.project = project
-        return individual
+    Individual createIndividual(Map properties = [:]) {
+        return new Individual([
+            pid: "654321",
+            mockPid: "PID",
+            mockPid: "PID",
+            type: Individual.Type.REAL,
+            project: project,
+        ] + properties)
     }
 
-    SeqTrack createSeqTrack() {
-        SeqTrack seqTrack = new SeqTrack()
-        seqTrack.laneId = "123"
-        seqTrack.seqType = seqType
-        seqTrack.sample = sample
-        seqTrack.run = run
-        seqTrack.seqPlatform = seqPlatform
-        seqTrack.pipelineVersion = softwareTool
-        return seqTrack
+    SeqTrack createSeqTrack(Map properties = [:]) {
+        return new SeqTrack([
+            laneId: "123",
+            seqType: seqType,
+            sample: sample,
+            run: run,
+            seqPlatform: seqPlatform,
+            pipelineVersion: softwareTool,
+        ] + properties)
     }
 
     DataFile createDataFile(SeqTrack seqTrack, RunSegment runSegment, FileType fileType = this.fileType) {
-        DataFile dataFile = new DataFile()
-        dataFile.fileExists = true
-        dataFile.fileSize = 1
-        dataFile.fileType = fileType
-        dataFile.seqTrack = seqTrack
-        dataFile.runSegment = runSegment
-        dataFile.run = run
-        dataFile.fileWithdrawn = false
-        return dataFile
+        return createDataFile(
+            seqTrack: seqTrack,
+            runSegment: runSegment,
+            fileType: fileType,
+        )
     }
 
-
-    DataFile createDataFile() {
-        DataFile dataFile = new DataFile()
-        dataFile.fileExists = true
-        dataFile.fileSize = 1
-        dataFile.fileType = fileType
-        dataFile.seqTrack = seqTrack
-        dataFile.runSegment = runSegment
-        dataFile.run = run
-        dataFile.fileWithdrawn = false
-        return dataFile
+    DataFile createDataFile(Map properties = [:]) {
+        return new DataFile([
+            fileExists: true,
+            fileSize: 1,
+            fileType: fileType,
+            seqTrack: seqTrack,
+            runSegment: runSegment,
+            run: run,
+            fileWithdrawn: false,
+        ] + properties)
     }
 
-    ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqType() {
-        ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = new ReferenceGenomeProjectSeqType()
-        referenceGenomeProjectSeqType.project = project
-        referenceGenomeProjectSeqType.seqType = seqType
-        referenceGenomeProjectSeqType.referenceGenome = referenceGenome
-        return referenceGenomeProjectSeqType
+    ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqType(Map properties = [:]) {
+        return new ReferenceGenomeProjectSeqType([
+            project: project,
+            seqType: seqType,
+            referenceGenome: referenceGenome,
+        ] + properties)
     }
 
     RunSegment createRunSegment(Run run) {
-        RunSegment runSegment = new RunSegment()
-        runSegment.filesStatus = FilesStatus.FILES_CORRECT
-        runSegment.metaDataStatus = RunSegment.Status.COMPLETE
-        runSegment.run = run
-        runSegment.initialFormat = DataFormat.FILES_IN_DIRECTORY
-        runSegment.currentFormat = DataFormat.FILES_IN_DIRECTORY
-        runSegment.dataPath = "dataPath"
-        runSegment.mdPath = "mdPath"
-        return runSegment
+        return createRunSegment(run: run)
+    }
+
+    RunSegment createRunSegment(Map properties = [:]) {
+        return new RunSegment([
+            filesStatus: FilesStatus.FILES_CORRECT,
+            metaDataStatus: RunSegment.Status.COMPLETE,
+            run: run,
+            initialFormat: DataFormat.FILES_IN_DIRECTORY,
+            currentFormat: DataFormat.FILES_IN_DIRECTORY,
+            dataPath: "dataPath",
+            mdPath: "mdPath",
+        ] + properties)
     }
 
     Run createRun(String name) {
-        Run run = new Run()
-        run.name = name
-        run.seqCenter = seqCenter
-        run.seqPlatform = seqPlatform
-        run.storageRealm = Run.StorageRealm.DKFZ
-        return run
+        return createRun(name: name)
+    }
+
+    Run createRun(Map properties = [:]) {
+        return new Run([
+            name: "TestRun",
+            seqCenter: seqCenter,
+            seqPlatform: seqPlatform,
+            storageRealm: Run.StorageRealm.DKFZ,
+        ] + properties)
     }
 
 
