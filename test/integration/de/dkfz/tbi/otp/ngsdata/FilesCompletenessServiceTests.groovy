@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
 
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.junit.*
 
 import de.dkfz.tbi.otp.job.processing.ProcessingException
@@ -11,8 +12,8 @@ import de.dkfz.tbi.otp.ngsdata.RunSegment
 class FilesCompletenessServiceTests extends AbstractIntegrationTest {
 
 
-    def filesCompletenessService
-    def grailsApplication
+    FilesCompletenessService filesCompletenessService
+    GrailsApplication grailsApplication
 
     File dataPath
     File mdPath
@@ -118,7 +119,7 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         run.seqPlatform = seqPlatform
         assert(run.save())
         // when no data file is associated it should always throw exception
-        shouldFail(ProcessingException) { filesCompletenessService.checkFinalLocation(run) }
+        shouldFail(ProcessingException) { filesCompletenessService.validateAllFilesAreInFinalLocation(run) }
         SeqType seqType1 = new SeqType(name: "testSeqType", libraryLayout: "testLibraryLayout", dirName: "testDir1")
         assert(seqType1.save())
         SeqType seqType2 = new SeqType(name: "testSeqType", libraryLayout: "testLibraryLayout", dirName: "testDir2")
@@ -156,8 +157,8 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         new File(tmpPath2).mkdirs()
         // fake dataPath normally read from configuration
         grailsApplication.config.otp.dataPath.dkfz = "/tmp/otp/dataPath/"
-        // call the service method and check whether it returns true
-        assertTrue(filesCompletenessService.checkFinalLocation(run))
+        // call the service method and assert that it returns an empty collection
+        assert filesCompletenessService.validateAllFilesAreInFinalLocation(run).empty
     }
 
     @Ignore

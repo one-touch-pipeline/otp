@@ -14,11 +14,17 @@ class BwaAlignmentValidationJob extends AbstractEndStateAwareJobImpl {
         long alignmentPassId = Long.parseLong(getProcessParameterValue())
         AlignmentPass alignmentPass = AlignmentPass.get(alignmentPassId)
         List<ProcessedSaiFile> saiFiles = ProcessedSaiFile.findAllByAlignmentPass(alignmentPass)
-        boolean totalState = true
+        final List<String> problems = []
         for (ProcessedSaiFile saiFile in saiFiles) {
-            boolean state = processedSaiFileService.updateSaiFile(saiFile)
-            totalState = state ? totalState : false
+            final String problem = processedSaiFileService.updateSaiFileInfoFromDisk(saiFile)
+            if (problem != null) {
+                problems << problem
+            }
         }
-        totalState ? succeed() : fail()
+        if (problems.empty) {
+            succeed()
+        } else {
+            throw new RuntimeException(problems.join("\n"))
+        }
     }
 }

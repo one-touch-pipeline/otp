@@ -37,18 +37,19 @@ class FilesCompletenessService {
     }
 
     /**
-     * This function checks if all files with defined final location 
+     * This function checks if all files with defined final location
      * are in the right final location. This function fills statistics
      * fields of DataFile (size and date from the file system)
-     * 
+     *
      * If the file have final location is decided by the lsdfFilesService
-     * 
+     *
      * @param run run to be analyzed
-     * @return true if all files are in the final location
+     * @return A list of problems that this method finds. The list will be empty if all files are in
+     * the final location.
      */
-    boolean checkFinalLocation(Run run) {
+    List<String> validateAllFilesAreInFinalLocation(Run run) {
         // TODO more integration with RunService
-        boolean allExists = true
+        final List<String> problems = []
         def stats = [
             RunSegment.FilesStatus.PROCESSING_CHECKING,
             RunSegment.FilesStatus.PROCESSING_INSTALLATION,
@@ -61,27 +62,31 @@ class FilesCompletenessService {
                 if (!lsdfFilesService.checkFinalPathDefined(dataFile)) {
                     continue
                 }
-                boolean exists = fileExistsInFinalLocation(dataFile)
-                fillFileStatistics(dataFile, exists)
-                if (!exists) {
-                    allExists = false
+                final String problem = validateFileIsInFinalLocation(dataFile)
+                fillFileStatistics(dataFile, problem == null)
+                if (problem != null) {
+                    problems << problem
                     segment.filesStatus = RunSegment.FilesStatus.FILES_MISSING
                     segment.save(flush: true)
                 }
             }
             // go back to processing state in case the state was files_missing
             // and files are now in the right location
-            if (allExists && segment.filesStatus == RunSegment.FilesStatus.FILES_MISSING) {
+            if (problems.empty && segment.filesStatus == RunSegment.FilesStatus.FILES_MISSING) {
                 segment.filesStatus = RunSegment.FilesStatus.PROCESSING_INSTALLATION
                 segment.save(flush: true)
             }
         }
-        return allExists
+        return problems
     }
 
-    private boolean fileExistsInFinalLocation(DataFile dataFile) {
+    /**
+     * @return <code>null</code> if the file exists, otherwise an error message. (It is still
+     * possible that this method throws an exception.)
+     */
+    private String validateFileIsInFinalLocation(DataFile dataFile) {
         String path = lsdfFilesService.getFileFinalPath(dataFile)
-        return lsdfFilesService.fileExists(path)
+        return lsdfFilesService.fileExists(path) ? null : "${path} is not readable."
     }
 
     /**
@@ -105,7 +110,7 @@ class FilesCompletenessService {
      * This function checks if all files are linked in the view by pid
      * structure. Only files with determined view by pid path are checked.
      * Location of the view by pid link is decided by lsdfFilesService
-     * 
+     *
      * @param run
      * @return
      */

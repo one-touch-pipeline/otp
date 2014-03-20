@@ -21,10 +21,11 @@ class CheckFinalLocationJob extends AbstractEndStateAwareJobImpl {
     public void execute() throws Exception {
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
-        if (filesCompletenessService.checkFinalLocation(run)) {
+        final Collection<String> problems = filesCompletenessService.validateAllFilesAreInFinalLocation(run)
+        if (!problems) {
             succeed()
         } else {
-            fail()
+            throw new ProcessingException(problems.join("\n"))
         }
     }
 }

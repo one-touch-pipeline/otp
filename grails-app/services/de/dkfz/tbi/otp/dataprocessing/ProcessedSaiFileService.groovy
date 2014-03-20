@@ -47,16 +47,21 @@ class ProcessedSaiFileService {
         return psf
     }
 
-    public boolean updateSaiFile(ProcessedSaiFile saiFile) {
+    /**
+     * @return <code>null</code> if successful, otherwise an error message. (It is still possible
+     * that this method throws an exception.)
+     */
+    public String updateSaiFileInfoFromDisk(ProcessedSaiFile saiFile) {
         File file = new File(getFilePath(saiFile))
         if (!file.canRead()) {
-            return false
+            return "${file} is not readable."
         }
         saiFile.fileExists = true
         saiFile.fileSize = file.length()
         saiFile.dateFromFileSystem = new Date(file.lastModified())
         assertSave(saiFile)
-        return saiFile.fileSize
+        final def fileSize = saiFile.fileSize
+        return fileSize ? null : "File size of ${file} is ${fileSize}."
     }
 
     private def assertSave(def object) {
