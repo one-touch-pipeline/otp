@@ -242,8 +242,9 @@ class ProcessedBamFileService {
         return false
     }
 
+
     /**
-     * @return whether a {@link ProcessedBamFile} (exlude withdrawn) belonging to any of the given
+     * @return whether a latest {@link ProcessedBamFile} (exlude withdrawn and old passes) belonging to any of the given
      *      {@link SeqTrack}s exists where the QA is not finished or the {@link AbstractBamFile#status}
      *      is {@link AbstractBamFile.State#DECLARED}.
      */
@@ -257,7 +258,7 @@ class ProcessedBamFileService {
             AbstractBamFile.State.INPROGRESS,
             AbstractBamFile.State.PROCESSED,
         ]
-        return ProcessedBamFile.createCriteria().get {
+        List<ProcessedBamFile> processedBamFiles = ProcessedBamFile.createCriteria().list {
             alignmentPass {
                 'in'("seqTrack", seqTracks)
             }
@@ -266,9 +267,13 @@ class ProcessedBamFileService {
                 ne("qualityAssessmentStatus", AbstractBamFile.QaProcessingStatus.FINISHED)
                 not { 'in'("status", allowedMergingStates) }
             }
-            maxResults 1
         }
+
+        //processedBamFiles of old passes should be ignored
+        processedBamFiles = processedBamFiles.findAll {it.mostRecentBamFile}
+        return !processedBamFiles.empty
     }
+
 
     /**
      * @param bamFile, which is in progress to be assigned to a {@link MergingSet}

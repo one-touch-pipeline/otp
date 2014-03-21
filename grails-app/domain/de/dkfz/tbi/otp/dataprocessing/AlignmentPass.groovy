@@ -24,4 +24,17 @@ class AlignmentPass {
     public String toString() {
         return "pass:${identifier} on run:${seqTrack.run.name} lane:${seqTrack.laneId}"
     }
+
+    /**
+     * @return <code>true</code>, if this pass is the latest for the referenced {@link SeqTrack}
+     */
+    public boolean isLatestPass() {
+        int maxIdentifier = AlignmentPass.createCriteria().get {
+            eq("seqTrack", seqTrack)
+            projections{
+                max("identifier")
+            }
+        }
+        return identifier == maxIdentifier
+    }
 }

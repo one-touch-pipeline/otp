@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
 import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.RunSegment.DataFormat
 import de.dkfz.tbi.otp.ngsdata.RunSegment.FilesStatus
 
@@ -236,4 +237,25 @@ class TestData {
         exomeSeqTrack.kitInfoReliability = InformationReliability.KNOWN
         assertNotNull(exomeSeqTrack.save(flush: true))
     }
+
+    AlignmentPass createAlignmentPass(Map properties = [:]) {
+        return new AlignmentPass([
+            identifier: 0,
+            seqTrack: seqTrack,
+            description: "test",
+        ] + properties)
+    }
+
+    /**
+     * No default alignment provided, therefore the alignment needs to be passed always or <code>null</code> is used.
+     */
+    ProcessedBamFile createProcessedBamFile(Map properties = [:]) {
+        return new ProcessedBamFile([
+            type: AbstractBamFile.BamType.SORTED,
+            withdrawn: false,
+            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.NOT_STARTED,
+            status: AbstractBamFile.State.DECLARED
+        ] + properties)
+    }
+
 }

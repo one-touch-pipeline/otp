@@ -231,6 +231,29 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
 
 
     @Test
+    void testProcessedBamFileNeedsProcessingAllCorrectWithOldNotFinishedPass() {
+        AlignmentPass oldAlignmentPassToIgnore = testData.createAlignmentPass(
+                        identifier: 0,
+                        seqTrack: seqTrack,
+                        )
+        assertNotNull(oldAlignmentPassToIgnore.save([flush: true]))
+
+        ProcessedBamFile oldProcessedBamFileToIgnore = testData.createProcessedBamFile(
+                        alignmentPass: oldAlignmentPassToIgnore,
+                        )
+        assertNotNull(oldProcessedBamFileToIgnore.save([flush: true]))
+
+        List<SeqTrack> seqTracks = [processedBamFile.seqTrack]
+
+        assert !processedBamFileService.isAnyAlignmentPending(seqTracks)
+        assert !processedBamFileService.isMergingInProgress(processedBamFile.seqTrack)
+        assert !processedBamFileService.isAnyBamFileNotProcessable(seqTracks)
+        assert processedBamFileService.isMergeable(processedBamFile)
+        assertEquals(processedBamFile.id, processedBamFileService.processedBamFileNeedsProcessing().id)
+    }
+
+
+    @Test
     //if a seq track contains withdrawn data, the state of alignment should be ignored
     void testProcessedBamFileNeedsProcessingAllCorrectWithWithdrawnSeqTrack() {
         SeqTrack seqTrack2 = new SeqTrack(
