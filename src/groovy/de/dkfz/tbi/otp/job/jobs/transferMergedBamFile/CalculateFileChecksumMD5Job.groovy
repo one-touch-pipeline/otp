@@ -60,7 +60,7 @@ class CalculateFileChecksumMD5Job extends AbstractJobImpl {
 # Clean-up old log file
 mkdir -p -m 2750 '${logDir}'; rm -f '${logFile}'
 
-${clusterPrefix.exec} \"mkdir -p -m 2750 ${locations.temporalDestinationDir}; find ${projectDir} -user \${USER} -type d -not -perm 2750 -exec chmod 2750 '{}' \\;\"
+${clusterPrefix.exec} \"mkdir -p -m 2750 ${locations.temporalDestinationDir}; find ${projectDir} -user \\\${USER} -type d -not -perm 2750 -exec chmod 2750 '{}' \\;\"
 
 cd ${locations.sourceDirectory}
 md5sum ${locations.bamFile} > ${locations.md5BamFile}
