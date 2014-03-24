@@ -107,7 +107,15 @@ class RunProcessingService {
         if (!segments) {
             return null
         }
-        return segments.first().run
+        for (final RunSegment segment : segments) {
+            final Run run = segment.run
+            // Make sure that no other instance of the data installation workflow is running for
+            // this run.
+            if (!RunSegment.findByRunAndFilesStatusInList(run, RunSegment.PROCESSING_FILE_STATUSES)) {
+                return run
+            }
+        }
+        return null
     }
 
     void blockInstallation(Run run) {

@@ -16,6 +16,18 @@ class RunSegment {
         FILES_CORRECT,
         FILES_MISSING
     }
+
+    /**
+     * Collection of all {@link FilesStatus}es which indicate that a {@link RunSegment} is being
+     * processed by the data installation workflow.
+     */
+    static final Collection<FilesStatus> PROCESSING_FILE_STATUSES = [
+        FilesStatus.PROCESSING_INSTALLATION,
+        FilesStatus.NEEDS_CHECKING,
+        FilesStatus.PROCESSING_CHECKING,
+        FilesStatus.FILES_MISSING,
+    ].asImmutable()
+
     FilesStatus filesStatus
 
     enum DataFormat {FILES_IN_DIRECTORY, TAR, TAR_IN_DIRECTORY}
