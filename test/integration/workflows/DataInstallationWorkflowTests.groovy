@@ -1,8 +1,7 @@
 package workflows
 
-import static org.junit.Assert.*
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
-import grails.util.Environment
+import static org.junit.Assert.*
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.jobs.dataInstallation.DataInstallationStartJob
@@ -37,6 +36,7 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
     String processingRootPath = "${myBaseDir}/processing_root_path/"
     String testDataDir = "${baseDir}/files/"
     String ftpDir = "${rootPath}/ftp/"
+    String loggingPath = "${myBaseDir}/logging_root_path"
 
     // files to be processed by the tests
     String fastqR1Filepath = "${testDataDir}/35-3B_NoIndex_L007_R1_complete_filtered.fastq.gz"
@@ -72,7 +72,6 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
     SoftwareToolIdentifier softwareToolIdentifier
     RunSegment runSegment
     Project project
-    SeqTrack seqTrack
     FileType fileType
 
     private String md5sum(String filepath) {
@@ -89,6 +88,7 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
             rootPath: rootPath,
             processingRootPath: processingRootPath,
             programsRootPath: realmProgramsRootPath,
+            loggingRootPath: loggingPath,
         ]
 
         realm = DomainFactory.createRealmDataManagementDKFZ(paths).save(flush: true)
@@ -181,6 +181,7 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
         runSegment.filesStatus = RunSegment.FilesStatus.NEEDS_INSTALLATION
         runSegment.mdPath = ftpDir
         runSegment.run = run
+        runSegment.align = true
         assertNotNull(runSegment.save([flush: true]))
     }
 
@@ -201,6 +202,8 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
         dataFile.fileType = fileType
         dataFile.vbpFileName = fastqFilename
         dataFile.pathName = ""  // TODO check what is going on here and why this is needed..
+        dataFile.fileExists = true
+        dataFile.fileSize = 100
         assertNotNull(dataFile.save([flush: true]))
         return dataFile
     }
@@ -219,7 +222,7 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
     @Ignore
     void testDataInstallation() {
         run("scripts/DataInstallationWorkflow.groovy")
-        SeqType seqType = createSeqType("SeqTypeName", "SeqTypeDir")
+        SeqType seqType = createSeqType(SeqTypeNames.WHOLE_GENOME.seqTypeName, "SeqTypeDir")
 
         SeqTrack seqTrack = new SeqTrack()
         seqTrack.laneId = laneNo
@@ -241,7 +244,11 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
         // hack to be able to star the workflow
         dataInstallationStartJob.setJobExecutionPlan(jobExecutionPlan)
         boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
+
+        seqTrack.refresh()
         assertTrue(workflowFinishedSucessfully)
+        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack.alignmentState)
+        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack.fastqcState)
     }
 
     // TODO  (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)

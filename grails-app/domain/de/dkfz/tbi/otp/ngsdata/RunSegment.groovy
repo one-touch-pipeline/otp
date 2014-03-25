@@ -6,6 +6,13 @@ class RunSegment {
     Status metaDataStatus = Status.NEW
     boolean allFilesUsed = false           // all files find relations
 
+
+    /**
+     * This flag specifies if the lanes, which are in this {@link RunSegment} shall be aligned automatically.
+     * Per default they shall be aligned.
+     */
+    Boolean align = true
+
     enum FilesStatus {
         NEEDS_UNPACK,
         PROCESSING_UNPACK,
@@ -41,5 +48,7 @@ class RunSegment {
     static constraints = {
         dataPath()
         mdPath()
+        //the field can be null, since for the old data the information is not needed; only for new incoming runSegments
+        align(nullable: true)
     }
 }

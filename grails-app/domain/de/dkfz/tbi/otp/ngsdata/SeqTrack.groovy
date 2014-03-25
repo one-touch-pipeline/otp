@@ -6,7 +6,8 @@ class SeqTrack {
         UNKNOWN,
         NOT_STARTED,
         IN_PROGRESS,
-        FINISHED
+        FINISHED,
+        INCOMPLETE
     }
 
     enum QualityEncoding {
@@ -77,5 +78,9 @@ class SeqTrack {
      */
     boolean isWithdrawn() {
         return DataFile.findBySeqTrackAndFileWithdrawn(this, true)
+    }
+
+    Project getProject() {
+        return sample.project
     }
 }

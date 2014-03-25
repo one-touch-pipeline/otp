@@ -24,6 +24,7 @@ class ReferenceGenomeProjectSeqType {
      */
     Date deprecatedDate = null
 
+
     static belongsTo = [
         project: Project,
         seqType: SeqType,
@@ -36,7 +37,7 @@ class ReferenceGenomeProjectSeqType {
         referenceGenome validator: { val, obj ->
             if (!obj.deprecatedDate) {
                 List<ReferenceGenomeProjectSeqType> existingObjects = ReferenceGenomeProjectSeqType
-                    .findAllByProjectAndSeqTypeAndDeprecatedDateIsNull(obj.project, obj.seqType)
+                                .findAllByProjectAndSeqTypeAndDeprecatedDateIsNull(obj.project, obj.seqType)
                 if (existingObjects.isEmpty()) {
                     return true
                 } else if ((existingObjects.size() == 1) && (existingObjects.contains(obj))) {

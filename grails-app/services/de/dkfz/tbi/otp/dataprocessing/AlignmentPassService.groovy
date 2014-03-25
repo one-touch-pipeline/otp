@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import static org.springframework.util.Assert.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState
 
 /**
  * Execution of the alignment on the particular data file is called AlignmentPass
@@ -19,6 +20,7 @@ class AlignmentPassService {
     QualityAssessmentPassService qualityAssessmentPassService
 
     private static final String DATA_FILE_CRITERIA = "seqTrack = st AND fileType.type = :fileType"
+
     /**
      * HQL for finding <em>alignable</em> {@link SeqTrack}s.
      *
@@ -33,12 +35,12 @@ class AlignmentPassService {
      * </ul>
      */
     public static final String ALIGNABLE_SEQTRACK_HQL =
-        "FROM SeqTrack st " +
-        "WHERE alignmentState = :alignmentState " +
-        "AND EXISTS (FROM ReferenceGenomeProjectSeqType WHERE project = st.sample.individual.project) " +
-        "AND NOT EXISTS (FROM RunSegment WHERE run = st.run AND metaDataStatus <> :metaDataStatus) " +
-        "AND EXISTS (FROM DataFile WHERE ${DATA_FILE_CRITERIA} AND fileExists = true AND fileSize > 0 AND fileWithdrawn = false) " +
-        "AND NOT EXISTS (FROM DataFile WHERE ${DATA_FILE_CRITERIA} AND fileWithdrawn = true) "
+    "FROM SeqTrack st " +
+    "WHERE alignmentState = :alignmentState " +
+    "AND NOT EXISTS (FROM RunSegment WHERE run = st.run AND metaDataStatus <> :metaDataStatus) " +
+    "AND EXISTS (FROM DataFile WHERE ${DATA_FILE_CRITERIA} AND fileExists = true AND fileSize > 0 AND fileWithdrawn = false) " +
+    "AND NOT EXISTS (FROM DataFile WHERE ${DATA_FILE_CRITERIA} AND fileWithdrawn = true) "
+
     public static final Map ALIGNABLE_SEQTRACK_QUERY_PARAMETERS = Collections.unmodifiableMap([
         metaDataStatus: RunSegment.Status.COMPLETE,
         fileType: FileType.Type.SEQUENCE,
@@ -63,9 +65,60 @@ class AlignmentPassService {
      * project with a reference genome unknown to OTP.)</p>
      */
     private SeqTrack findAlignableSeqTrack() {
-        return SeqTrack.find(ALIGNABLE_SEQTRACK_HQL, [
-                alignmentState: SeqTrack.DataProcessingState.NOT_STARTED
-            ] << ALIGNABLE_SEQTRACK_QUERY_PARAMETERS)
+        SeqTrack seqTrack = SeqTrack.find(ALIGNABLE_SEQTRACK_HQL, [
+            alignmentState: SeqTrack.DataProcessingState.NOT_STARTED
+        ] << ALIGNABLE_SEQTRACK_QUERY_PARAMETERS)
+        if (!seqTrack) {
+            return null
+        }
+        if (isReferenceGenomeAvailable(seqTrack) && !isExomeEnrichmentKitAndBedFileMissing(seqTrack)) {
+            return seqTrack
+        } else {
+            changeDataProcessingStateToInComplete(seqTrack)
+            return null
+        }
+    }
+
+
+    /**
+     * Checks if the {@link ReferenceGenome} is available for this {@link Project} and {@link SeqType}.
+     * If it is missing the method returns false, otherwise true.
+     */
+    public boolean isReferenceGenomeAvailable(SeqTrack seqTrack) {
+        notNull(seqTrack, "The input seqTrack of method isReferenceGenomeAvailable is null")
+        return ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndDeprecatedDate(seqTrack.project, seqTrack.seqType, null)
+    }
+
+
+    /**
+     * Checks if the {@link ExomeEnrichmentKit} and the {@link BedFile} are available for this {@link SeqTrack}.
+     * If it is missing the method returns false, otherwise true.
+     */
+    public boolean isExomeEnrichmentKitAndBedFileMissing(SeqTrack seqTrack) {
+        notNull(seqTrack, "The input seqTrack of method isExomeEnrichmentKitAvailable is null")
+
+        if (seqTrack instanceof ExomeSeqTrack) {
+            ExomeEnrichmentKit exomeEnrichmentKit = seqTrack.exomeEnrichmentKit
+            if (!exomeEnrichmentKit) {
+                return true
+            }
+
+            ReferenceGenome referenceGenome = ReferenceGenomeProjectSeqType.
+                            findByProjectAndSeqTypeAndDeprecatedDate(seqTrack.project, seqTrack.seqType, null).referenceGenome
+            return !(BedFile.findByReferenceGenomeAndExomeEnrichmentKit(referenceGenome, exomeEnrichmentKit))
+        } else {
+            return false
+        }
+    }
+
+
+    /**
+     * If the seqTrack can not be processed because of missing information the {@link DataProcessingState} will be changed to INCOMPLETE.
+     */
+    public void changeDataProcessingStateToInComplete(SeqTrack seqTrack) {
+        notNull(seqTrack, "The input seqTrack of method changeDataProcessingStateToInComplete is null")
+
+        updateSeqTrackDataProcessingState(seqTrack, SeqTrack.DataProcessingState.INCOMPLETE)
     }
 
     public AlignmentPass createAlignmentPass() {
@@ -93,7 +146,15 @@ class AlignmentPassService {
     private void update(AlignmentPass alignmentPass, SeqTrack.DataProcessingState state) {
         notNull(alignmentPass, "The input alignmentPass of the method update is null")
         notNull(state, "The input state of the method update is null")
-        SeqTrack seqTrack = alignmentPass.seqTrack
+
+        updateSeqTrackDataProcessingState(alignmentPass.seqTrack, state)
+    }
+
+
+    private void updateSeqTrackDataProcessingState(SeqTrack seqTrack, SeqTrack.DataProcessingState state) {
+        notNull(seqTrack, "The input seqTrack of the method updateSeqTrackDataProcessingState is null")
+        notNull(state, "The input state of the method updateSeqTrackDataProcessingState is null")
+
         seqTrack.alignmentState = state
         assert(seqTrack.save(flush: true))
     }

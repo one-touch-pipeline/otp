@@ -5,8 +5,6 @@ import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
-import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type
 
 class AlignmentPassServiceIntegrationTests extends TestData {
 
@@ -63,8 +61,113 @@ class AlignmentPassServiceIntegrationTests extends TestData {
 
         referenceGenomeProjectSeqType.delete(flush: true)
         assertNull(alignmentPassService.findAlignableSeqTrack())
+        assertEquals(SeqTrack.DataProcessingState.INCOMPLETE, seqTrack.alignmentState)
+
+        seqTrack.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
         assertNotNull(createReferenceGenomeProjectSeqType().save(flush: true))
         assertEquals(seqTrack, alignmentPassService.findAlignableSeqTrack())
+    }
+
+
+    @Test
+    void testFindAlignableExomeSeqTrackKitANDBedFileANDReferenceGenomeConnectionMissing() {
+        createObjects()
+        dataFile.delete()
+        seqTrack.delete()
+        ExomeSeqTrack exomeSeqTrack = createExomeSeqTrack(run)
+        exomeSeqTrack.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+
+        assertNull(alignmentPassService.findAlignableSeqTrack())
+
+        dataFile = createDataFile([seqTrack: exomeSeqTrack])
+        dataFile.save(flush: true)
+        assertNull(alignmentPassService.findAlignableSeqTrack())
+        assertEquals(SeqTrack.DataProcessingState.INCOMPLETE, exomeSeqTrack.alignmentState)
+    }
+
+
+    @Test
+    void testFindAlignableExomeSeqTrackKitANDBedFileMissing() {
+        ExomeSeqTrack exomeSeqTrack = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+
+        createReferenceGenomeProjectSeqType([seqType: exomeSeqType]).save(flush: true)
+        assertNull(alignmentPassService.findAlignableSeqTrack())
+        assertEquals(SeqTrack.DataProcessingState.INCOMPLETE, exomeSeqTrack.alignmentState)
+    }
+
+
+    @Test
+    void testFindAlignableExomeSeqTrackKitConnectionANDBedFileMissing() {
+        ExomeSeqTrack exomeSeqTrack = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+
+        ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
+        createReferenceGenomeProjectSeqType([seqType: exomeSeqType]).save(flush: true)
+
+        assertNull(alignmentPassService.findAlignableSeqTrack())
+        assertEquals(SeqTrack.DataProcessingState.INCOMPLETE, exomeSeqTrack.alignmentState)
+    }
+
+
+    @Test
+    void testFindAlignableExomeSeqTrackBedFileMissing() {
+        ExomeSeqTrack exomeSeqTrack = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+
+        ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
+        addKitToExomeSeqTrack(exomeSeqTrack, exomeEnrichmentKit)
+        createReferenceGenomeProjectSeqType([seqType: exomeSeqType]).save(flush: true)
+
+        assertNull(alignmentPassService.findAlignableSeqTrack())
+        assertEquals(SeqTrack.DataProcessingState.INCOMPLETE, exomeSeqTrack.alignmentState)
+    }
+
+
+    @Test
+    void testFindAlignableExomeSeqTrackReferenceGenomeAndBedFileMissing() {
+        ExomeSeqTrack exomeSeqTrack = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+
+        ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
+        addKitToExomeSeqTrack(exomeSeqTrack, exomeEnrichmentKit)
+
+        assertNull(alignmentPassService.findAlignableSeqTrack())
+        assertEquals(SeqTrack.DataProcessingState.INCOMPLETE, exomeSeqTrack.alignmentState)
+    }
+
+
+    @Test
+    void testFindAlignableExomeSeqTrackReferenceGenomeAndKitMissing() {
+        ExomeSeqTrack exomeSeqTrack = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+
+        ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
+        createBedFile(referenceGenome, exomeEnrichmentKit)
+
+        assertNull(alignmentPassService.findAlignableSeqTrack())
+        assertEquals(SeqTrack.DataProcessingState.INCOMPLETE, exomeSeqTrack.alignmentState)
+    }
+
+
+    @Test
+    void testFindAlignableExomeSeqTrackReferenceGenomeMissing() {
+        ExomeSeqTrack exomeSeqTrack = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+
+        ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
+        createBedFile(referenceGenome, exomeEnrichmentKit)
+        addKitToExomeSeqTrack(exomeSeqTrack, exomeEnrichmentKit)
+
+        assertNull(alignmentPassService.findAlignableSeqTrack())
+        assertEquals(SeqTrack.DataProcessingState.INCOMPLETE, exomeSeqTrack.alignmentState)
+    }
+
+
+    @Test
+    void testFindAlignableExomeSeqTrackAllInformationAvailable() {
+        ExomeSeqTrack exomeSeqTrack = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+
+        ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
+        createBedFile(referenceGenome, exomeEnrichmentKit)
+        addKitToExomeSeqTrack(exomeSeqTrack, exomeEnrichmentKit)
+        createReferenceGenomeProjectSeqType([seqType: exomeSeqType]).save(flush: true)
+
+        assertEquals(exomeSeqTrack, alignmentPassService.findAlignableSeqTrack())
     }
 
     private void findAlignableSeqTrackTest(final SeqTrack.DataProcessingState state) {
@@ -129,7 +232,8 @@ class AlignmentPassServiceIntegrationTests extends TestData {
 
     @Test
     void testMaximalIdentifier() {
-        SeqTrack seqTrack = createSeqTrack("1")
+        createObjects()
+
         ProcessedBamFile processedBamFile = createProcessedBamFile(seqTrack, 0)
         assertEquals(0, alignmentPassService.maximalIdentifier(processedBamFile))
 
@@ -143,79 +247,86 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         assertEquals(2, alignmentPassService.maximalIdentifier(processedBamFile2))
     }
 
-    private createSeqTrack(String identifier) {
-        Project project = new Project(
-                        name: "name",
-                        dirName: "dirName",
-                        realmName: "realmName"
-                        )
-        assertNotNull(project.save([flush: true, failOnError: true]))
 
-        SeqPlatform seqPlatform = new SeqPlatform(
-                        name: "name",
-                        model: "model"
-                        )
-        assertNotNull(seqPlatform.save([flush: true, failOnError: true]))
+    @Test
+    void testIsReferenceGenomeAvailable() {
+        createObjects()
+        referenceGenomeProjectSeqType.delete()
+        referenceGenome.delete()
 
-        SeqCenter seqCenter = new SeqCenter(
-                        name: "name",
-                        dirName: "dirName"
-                        )
-        assertNotNull(seqCenter.save([flush: true, failOnError: true]))
+        assertFalse(alignmentPassService.isReferenceGenomeAvailable(seqTrack))
 
-        Run run = new Run(
-                        name: "name",
-                        seqCenter: seqCenter,
-                        seqPlatform: seqPlatform,
-                        storageRealm: StorageRealm.DKFZ
-                        )
-        assertNotNull(run.save([flush: true, failOnError: true]))
+        ReferenceGenome referenceGenome = createReferenceGenome()
+        referenceGenome.save(flush: true)
+        assertFalse(alignmentPassService.isReferenceGenomeAvailable(seqTrack))
 
-        Individual individual = new Individual(
-                        pid: "pid",
-                        mockPid: "mockPid",
-                        mockFullName: "mockFullName",
-                        type: de.dkfz.tbi.otp.ngsdata.Individual.Type.REAL,
-                        project: project
-                        )
-        assertNotNull(individual.save([flush: true, failOnError: true]))
+        ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = createReferenceGenomeProjectSeqType([
+            project: seqTrack.project,
+            seqType: seqTrack.seqType,
+            referenceGenome: referenceGenome
+        ])
+        referenceGenomeProjectSeqType.save(flush: true)
 
-        SampleType sampleType = new SampleType(
-                        name: "name"
-                        )
-        assertNotNull(sampleType.save([flush: true, failOnError: true]))
+        assertTrue(alignmentPassService.isReferenceGenomeAvailable(seqTrack))
 
-        Sample sample = new Sample(
-                        individual: individual,
-                        sampleType: sampleType
-                        )
-        assertNotNull(sample.save([flush: true, failOnError: true]))
+        referenceGenomeProjectSeqType.deprecatedDate = new Date()
+        assertNotNull(referenceGenomeProjectSeqType.save(flush: true))
 
-        SeqType seqType = new SeqType(
-                        name: "name",
-                        libraryLayout: "library",
-                        dirName: "dirName"
-                        )
-        assertNotNull(seqType.save([flush: true, failOnError: true]))
+        assertFalse(alignmentPassService.isReferenceGenomeAvailable(seqTrack))
+    }
 
-        SoftwareTool softwareTool = new SoftwareTool(
-                        programName: "name",
-                        programVersion: "version",
-                        qualityCode: "quality",
-                        type: Type.ALIGNMENT
-                        )
-        assertNotNull(softwareTool.save([flush: true, failOnError: true]))
 
-        SeqTrack seqTrack = new SeqTrack(
-                        laneId: "laneId" + identifier,
-                        run: run,
-                        sample: sample,
-                        seqType: seqType,
-                        seqPlatform: seqPlatform,
-                        pipelineVersion: softwareTool
-                        )
-        assertNotNull(seqTrack.save([flush: true, failOnError: true]))
-        return seqTrack
+    @Test
+    void testIsExomeEnrichmentKitAndBedFileMissing() {
+        createObjects()
+        assertFalse(alignmentPassService.isExomeEnrichmentKitAndBedFileMissing(seqTrack))
+
+        ExomeSeqTrack exomeSeqTrack = createExomeSeqTrack(run)
+        assertTrue(alignmentPassService.isExomeEnrichmentKitAndBedFileMissing(exomeSeqTrack))
+
+        createReferenceGenomeProjectSeqType([seqType: exomeSeqType]).save(flush: true)
+        assertTrue(alignmentPassService.isExomeEnrichmentKitAndBedFileMissing(exomeSeqTrack))
+
+        ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
+        addKitToExomeSeqTrack(exomeSeqTrack, exomeEnrichmentKit)
+        assertTrue(alignmentPassService.isExomeEnrichmentKitAndBedFileMissing(exomeSeqTrack))
+
+        createBedFile(referenceGenome, exomeEnrichmentKit)
+        assertFalse(alignmentPassService.isExomeEnrichmentKitAndBedFileMissing(exomeSeqTrack))
+    }
+
+
+    @Test
+    void testUpdateSeqTrackDataProcessingState() {
+        createObjects()
+
+        assertEquals(SeqTrack.DataProcessingState.UNKNOWN, seqTrack.alignmentState)
+
+        alignmentPassService.updateSeqTrackDataProcessingState(seqTrack, SeqTrack.DataProcessingState.IN_PROGRESS)
+        assertEquals(SeqTrack.DataProcessingState.IN_PROGRESS, seqTrack.alignmentState)
+    }
+
+
+    @Test
+    void testChangeDataProcessingStateToInComplete() {
+        createObjects()
+
+        assertEquals(SeqTrack.DataProcessingState.UNKNOWN, seqTrack.alignmentState)
+
+        alignmentPassService.changeDataProcessingStateToInComplete(seqTrack)
+        assertEquals(SeqTrack.DataProcessingState.INCOMPLETE, seqTrack.alignmentState)
+    }
+
+
+    private ExomeSeqTrack deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile() {
+        createObjects()
+        dataFile.delete()
+        seqTrack.delete()
+        ExomeSeqTrack exomeSeqTrack = createExomeSeqTrack(run)
+        exomeSeqTrack.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+        dataFile = createDataFile([seqTrack: exomeSeqTrack])
+        dataFile.save(flush: true)
+        return exomeSeqTrack
     }
 
     private ProcessedBamFile createProcessedBamFile(SeqTrack seqTrack, int identifier) {

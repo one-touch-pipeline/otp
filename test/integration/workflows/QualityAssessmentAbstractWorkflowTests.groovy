@@ -36,6 +36,7 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
      *  - Check your PBS (Linux cluster) password in ~/.otp.properties: must pass for otptest
      *  - $myBase/test-qa.sh which calls the required version of qa.jar
      *    chmod g+x test-qa.sh
+     *  - to make the testing a bit faster, change the fixedDelay-time in the SchedulerService.pbsMonitorCheck() from 180000l to 1000l
      */
 
     /*

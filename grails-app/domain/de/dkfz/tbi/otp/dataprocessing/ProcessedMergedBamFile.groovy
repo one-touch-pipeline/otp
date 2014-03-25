@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.ngsdata.*;
+import de.dkfz.tbi.otp.ngsdata.*
 
 /**
  * Represents a merged bam file stored on the file system

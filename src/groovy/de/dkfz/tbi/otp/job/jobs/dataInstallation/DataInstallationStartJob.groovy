@@ -1,15 +1,15 @@
 package de.dkfz.tbi.otp.job.jobs.dataInstallation
 
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Scope
+import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.ngsdata.*
-import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
-import org.springframework.beans.factory.annotation.Autowired
 
 @Component("dataInstallationStartJob")
 @Scope("singleton")

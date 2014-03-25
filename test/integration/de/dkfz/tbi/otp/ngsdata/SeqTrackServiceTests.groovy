@@ -12,6 +12,8 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     SeqTrackService seqTrackService
 
+    TestData testData
+
     File dataPath
     File mdPath
 
@@ -34,12 +36,15 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
             mdPath.mkdirs()
             assertTrue(mdPath.isDirectory())
         }
+
+        testData = new TestData()
     }
 
     @After
     void tearDown() {
         dataPath.deleteDir()
         mdPath.deleteDir()
+        testData = null
     }
 
     @Ignore
@@ -630,13 +635,19 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertNotNull(metaDataEntry.save())
     }
 
-    public void testSetRunReadyForAlignment() {
 
+    def addDataFile = { SeqTrack seqTrack ->
+        final DataFile dataFile = testData.createDataFile()
+        dataFile.seqTrack = seqTrack
+        assertNotNull(dataFile.save(flush: true))
+    }
+
+
+    public void testSetRunReadyForAlignment() {
         /* The criteria in AlignmentPassService.ALIGNABLE_SEQTRACK_HQL are deeply tested by
          * AlignmentPassServiceIntegrationTests, so in this method we do not test it again.
          */
 
-        final TestData testData = new TestData()
         testData.createObjects()
 
         final Run run1 = testData.run
@@ -660,11 +671,23 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         alignableSeqType.dirName = "seq_type_dir_name"
         assertNotNull(alignableSeqType.save(flush: true))
 
+        final SeqType alignableExomeSeqType = new SeqType()
+        alignableExomeSeqType.name = SeqTypeNames.EXOME.seqTypeName
+        alignableExomeSeqType.libraryLayout = "PAIRED"
+        alignableExomeSeqType.dirName = "seq_type_dir_name"
+        assertNotNull(alignableExomeSeqType.save(flush: true))
+
         final SeqType nonAlignableSeqType = new SeqType()
         nonAlignableSeqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
         nonAlignableSeqType.libraryLayout = "SCREWED"
         nonAlignableSeqType.dirName = "seq_type_dir_name"
         assertNotNull(nonAlignableSeqType.save(flush: true))
+
+        final SeqType nonAlignableExomeSeqType = new SeqType()
+        nonAlignableExomeSeqType.name = SeqTypeNames.EXOME.seqTypeName
+        nonAlignableExomeSeqType.libraryLayout = "SCREWED"
+        nonAlignableExomeSeqType.dirName = "seq_type_dir_name"
+        assertNotNull(nonAlignableExomeSeqType.save(flush: true))
 
         testData.dataFile.delete(flush: true)
         testData.seqTrack.delete(flush: true)
@@ -676,12 +699,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         seqTrackService.setRunReadyForAlignment(run1)
         assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
         assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-
-        def addDataFile = { SeqTrack seqTrack ->
-            final DataFile dataFile = testData.createDataFile()
-            dataFile.seqTrack = seqTrack
-            assertNotNull(dataFile.save(flush: true))
-        }
 
         final SeqTrack seqTrack1AY = testData.createSeqTrack()
         seqTrack1AY.run = run1
@@ -788,6 +805,124 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
     }
 
 
+    public void testSetRunReadyForExomeAlignment() {
+        /* The criteria in AlignmentPassService.ALIGNABLE_SEQTRACK_HQL are deeply tested by
+         * AlignmentPassServiceIntegrationTests, so in this method we do not test it again.
+         */
+
+        testData.createObjects()
+
+        final Run run1 = testData.run
+
+        final Sample sampleA = testData.sample
+
+        final SeqType alignableExomeSeqType = new SeqType()
+        alignableExomeSeqType.name = SeqTypeNames.EXOME.seqTypeName
+        alignableExomeSeqType.libraryLayout = "PAIRED"
+        alignableExomeSeqType.dirName = "seq_type_dir_name"
+        assertNotNull(alignableExomeSeqType.save(flush: true))
+
+        final SeqType nonAlignableExomeSeqType = new SeqType()
+        nonAlignableExomeSeqType.name = SeqTypeNames.EXOME.seqTypeName
+        nonAlignableExomeSeqType.libraryLayout = "SCREWED"
+        nonAlignableExomeSeqType.dirName = "seq_type_dir_name"
+        assertNotNull(nonAlignableExomeSeqType.save(flush: true))
+
+        testData.dataFile.delete(flush: true)
+        testData.seqTrack.delete(flush: true)
+
+        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+
+        // from here on the Exome-seqType is tested
+        final ExomeSeqTrack seqTrack3AY = testData.createExomeSeqTrack(run1)
+        seqTrack3AY.sample = sampleA
+        seqTrack3AY.seqType = alignableExomeSeqType
+        seqTrack3AY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
+        assertNotNull(seqTrack3AY.save(flush: true))
+        addDataFile(seqTrack3AY)
+
+        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+
+        final ExomeSeqTrack seqTrack3AN = testData.createExomeSeqTrack(run1)
+        seqTrack3AN.sample = sampleA
+        seqTrack3AN.seqType = nonAlignableExomeSeqType
+        seqTrack3AN.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
+        assertNotNull(seqTrack3AN.save(flush: true))
+        addDataFile(seqTrack3AN)
+
+        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+
+        // When it is verified that no kit is available for a seqTrack, it will not be aligned -> remains DataProcessingState.UNKNOWN
+        seqTrack3AY.kitInfoReliability = InformationReliability.UNKNOWN_VERIFIED
+        assertNotNull(seqTrack3AY.save(flush: true))
+        seqTrack3AN.kitInfoReliability = InformationReliability.UNKNOWN_VERIFIED
+        assertNotNull(seqTrack3AN.save(flush: true))
+
+        seqTrackService.setRunReadyForAlignment(run1)
+        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+
+        // When it is not verified that there is no kit available for the seqTrack the state changes to DataProcessingState.NOT_STARTED,
+        // so that it can be detected by the Alignment-WF to be "INVALID" (AlignmentPassService.findAlignableSeqTrack()).
+        //Of course it will only be changed if the seqTrack shall be aligned
+        seqTrack3AY.kitInfoReliability = InformationReliability.UNKNOWN_UNVERIFIED
+        assertNotNull(seqTrack3AY.save(flush: true))
+        seqTrack3AN.kitInfoReliability = InformationReliability.UNKNOWN_UNVERIFIED
+        assertNotNull(seqTrack3AN.save(flush: true))
+
+        seqTrackService.setRunReadyForAlignment(run1)
+        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack3AY.alignmentState)
+        assertEquals(SeqTrack.DataProcessingState.UNKNOWN, seqTrack3AN.alignmentState)
+
+        // In the case that there is an EnrichmentKit available for the ExomeSeqTrack it will be aligned.
+        // The kitInfoReliabilityState is not important anymore
+        seqTrack3AY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
+        assertNotNull(seqTrack3AY.save(flush: true))
+        seqTrack3AN.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
+        assertNotNull(seqTrack3AN.save(flush: true))
+
+        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+
+        ExomeEnrichmentKit exomeEnrichmentKit = testData.createEnrichmentKit("Agilent SureSelect V3")
+        testData.addKitToExomeSeqTrack(seqTrack3AY, exomeEnrichmentKit)
+        testData.addKitToExomeSeqTrack(seqTrack3AN, exomeEnrichmentKit)
+
+        seqTrackService.setRunReadyForAlignment(run1)
+        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack3AY.alignmentState)
+        assertEquals(SeqTrack.DataProcessingState.UNKNOWN, seqTrack3AN.alignmentState)
+
+        // Only seqTracks, belonging to a RunSegment which shall be be aligned (align = true), will be aligned
+        seqTrack3AY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
+        assertNotNull(seqTrack3AY.save(flush: true))
+        seqTrack3AN.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
+        assertNotNull(seqTrack3AN.save(flush: true))
+
+        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+
+
+        RunSegment runSegment = testData.runSegment
+        runSegment.align = false
+        assertNotNull(runSegment.save(flush: true))
+
+        seqTrackService.setRunReadyForAlignment(run1)
+        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+
+        shouldFail(IllegalArgumentException.class) {
+            seqTrackService.setRunReadyForAlignment(null)
+        }
+    }
+
+
     @Test(expected = IllegalArgumentException)
     void testAnnotateSeqTrackForExomeDataFileIsNull() {
         Run run = new Run()
@@ -838,7 +973,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testAnnotateSeqTrackForExomeMetaDataEntryIsNull() {
-        TestData testData = new TestData()
         testData.createObjects()
         String lane = "lane"
         DataFile dataFile = testData.createDataFile()
@@ -867,7 +1001,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testAnnotateSeqTrackForExomeInformationReliabilityIsUNKNOWN_VERIFIED() {
-        TestData testData = new TestData()
         testData.createObjects()
         String lane = "lane"
         MetaDataKey metaDataKey = new MetaDataKey(
@@ -893,7 +1026,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     @Test(expected = IllegalArgumentException)
     void testAnnotateSeqTrackForExomeKitIsNull() {
-        TestData testData = new TestData()
         testData.createObjects()
         String lane = "lane"
         MetaDataKey metaDataKey = new MetaDataKey(
@@ -918,7 +1050,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testAnnotateSeqTrackForExomeKitAvailableAndVerified() {
-        TestData testData = new TestData()
         testData.createObjects()
         String lane = "lane"
         MetaDataKey metaDataKey = new MetaDataKey(
@@ -969,7 +1100,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     @Test(expected = IllegalArgumentException)
     void testAnnotateSeqTrackForChipSeqMetaDataEntryANTIBODY_TARGETIsNull() {
-        TestData testData = new TestData()
         testData.createObjects()
         DataFile dataFile = new DataFile()
         assertNotNull(dataFile.save(flush: true))
@@ -996,7 +1126,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testAnnotateSeqTrackForChipSeqMetaDataEntryANTIBODYIsNull() {
-        TestData testData = new TestData()
         testData.createObjects()
         DataFile dataFile = new DataFile()
         assertNotNull(dataFile.save(flush: true))
@@ -1046,7 +1175,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testAnnotateSeqTrackForChipSeqMetaDataEntry() {
-        TestData testData = new TestData()
         testData.createObjects()
 
         MetaDataKey metaDataKey1 = new MetaDataKey(

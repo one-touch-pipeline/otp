@@ -110,10 +110,7 @@ class TestData {
 
         fileType = createFileType(FileType.Type.SEQUENCE)
 
-        referenceGenome = new ReferenceGenome()
-        referenceGenome.name = "hg19_1_24"
-        referenceGenome.path = "referenceGenome"
-        referenceGenome.fileNamePrefix = "prefixName"
+        referenceGenome = createReferenceGenome()
         assertNotNull(referenceGenome.save(flush: true))
 
         referenceGenomeProjectSeqType = createReferenceGenomeProjectSeqType()
@@ -143,14 +140,15 @@ class TestData {
 
     DataFile createDataFile(SeqTrack seqTrack, RunSegment runSegment, FileType fileType = this.fileType) {
         return createDataFile(
-            seqTrack: seqTrack,
-            runSegment: runSegment,
-            fileType: fileType,
+        seqTrack: seqTrack,
+        runSegment: runSegment,
+        fileType: fileType,
         )
     }
 
     DataFile createDataFile(Map properties = [:]) {
         return new DataFile([
+            fileName: "datafile",
             fileExists: true,
             fileSize: 1,
             fileType: fileType,
@@ -160,6 +158,16 @@ class TestData {
             fileWithdrawn: false,
         ] + properties)
     }
+
+
+    public ReferenceGenome createReferenceGenome(Map properties = [:]) {
+        return new ReferenceGenome([
+            name :"hg19_1_24",
+            path: "referenceGenome",
+            fileNamePrefix: "prefixName",
+        ] + properties)
+    }
+
 
     ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqType(Map properties = [:]) {
         return new ReferenceGenomeProjectSeqType([
@@ -222,6 +230,17 @@ class TestData {
         return exomeEnrichmentKit
     }
 
+
+    BedFile createBedFile(ReferenceGenome referenceGenome, ExomeEnrichmentKit exomeEnrichmentKit) {
+        BedFile bedFile = new BedFile (
+                        fileName: "BedFile",
+                        targetSize: 10000000,
+                        referenceGenome: referenceGenome,
+                        exomeEnrichmentKit: exomeEnrichmentKit,
+                        )
+        assertNotNull(bedFile.save())
+        return bedFile
+    }
 
     FileType createFileType(FileType.Type type) {
         fileType = new FileType(
