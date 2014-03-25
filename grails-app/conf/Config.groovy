@@ -90,8 +90,6 @@ environments {
     }
 }
 
-// Folder for putting stacktrace files made by error log service
-otp.errorLogging.stacktraces = "../target/stacktraces/"
 // Folder for data of NGS data files
 otp.ngsdata.bootstrap.dataPath = "$ROOT_PATH/ftp"
 // Folder for meta data files of NGS meta data files
@@ -172,7 +170,7 @@ if (otpConfig.otp.mail.sender instanceof ConfigObject) {
 
 // Folder for putting stacktrace files made by error log service
 if (otpConfig.otp.errorLogging.stacktraces instanceof ConfigObject) {
-    otp.errorLogging.stacktraces = "../target/stacktraces/"
+    otp.errorLogging.stacktraces = "/tmp/otp/stacktraces/"
 } else {
     otp.errorLogging.stacktraces = otpConfig.otp.errorLogging.stacktraces
 }

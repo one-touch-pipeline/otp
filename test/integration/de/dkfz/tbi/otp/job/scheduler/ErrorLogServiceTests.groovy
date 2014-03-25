@@ -5,24 +5,13 @@ import static org.junit.Assert.*
 import java.text.SimpleDateFormat
 
 import org.apache.commons.io.FileUtils
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.junit.*
 
 class ErrorLogServiceTests {
 
-    /**
-     * Dependency Injection of Error log service
-     */
-    def errorLogService
-
-    /**
-     * Dependency injection of grails Application
-     */
-    def grailsApplication
-
-    /**
-     * Dependency injection of Servlet Context
-     */
-    def servletContext
+    ErrorLogService errorLogService
+    GrailsApplication grailsApplication
 
     File exceptionStoringFile
     File stacktraceFile
@@ -32,8 +21,7 @@ class ErrorLogServiceTests {
 
     @Before
     void setUp() {
-        File dir = new File(servletContext.getRealPath(grailsApplication.config.otp.errorLogging.stacktraces))
-        stacktraceFile = new File(dir, ARBITRARY_STACKTRACE_IDENTIFIER + ".xml")
+        stacktraceFile = errorLogService.getStackTracesFile(ARBITRARY_STACKTRACE_IDENTIFIER)
     }
 
     @After
@@ -45,8 +33,7 @@ class ErrorLogServiceTests {
     @Test
     void testLog() {
         Exception e = new Exception(ERROR_MESSAGE)
-        String path = "/target/stacktraces/testing/"
-        String fullPath = servletContext.getRealPath(path)
+        String fullPath = "/tmp/otp/stacktraces/"
         // To test whether calling log method produces error
         errorLogService.log(e)
         // To test if md5 is correctly taken as file name
@@ -55,7 +42,7 @@ class ErrorLogServiceTests {
         // Try to get the file which should be created
         exceptionStoringFile = new File(fullPath, md5Sum + ".xml")
         // Create and store new xml file through service
-        errorLogService.contentToXml(e, fileName, fullPath)
+        errorLogService.contentToXml(e, exceptionStoringFile)
         // Test if it really is a file
         assertTrue(exceptionStoringFile.isFile())
         // Test if the file's path is the expected one

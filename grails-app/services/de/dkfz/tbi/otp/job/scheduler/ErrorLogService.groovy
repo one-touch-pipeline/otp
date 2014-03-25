@@ -1,6 +1,10 @@
 package de.dkfz.tbi.otp.job.scheduler
 
+import static org.springframework.util.Assert.*
 import groovy.xml.MarkupBuilder
+
+import org.apache.commons.io.FileUtils
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 /**
  * Service for logging exceptions to files
@@ -17,17 +21,22 @@ import groovy.xml.MarkupBuilder
  */
 class ErrorLogService {
 
-    /**
-     * Dependency injection of grails Application
-     */
-    @SuppressWarnings("GrailsStatelessService")
-    def grailsApplication
+    GrailsApplication grailsApplication
 
-    /**
-     * Dependency injection of Servlet Context
-     */
-    @SuppressWarnings("GrailsStatelessService")
-    def servletContext
+    public File getStackTracesDirectory() {
+        final String propertyName = 'otp.errorLogging.stacktraces'
+        final String propertyValue = grailsApplication.flatConfig[propertyName]
+        final File dir = new File(propertyValue)
+        if (!dir.absolute) {
+            throw new RuntimeException("${propertyName} is \"${dir}\", but only an absolute path is allowed.")
+        }
+        return dir
+    }
+
+    public File getStackTracesFile(final String stackTraceIdentifier) {
+        notNull stackTraceIdentifier, "stackTraceIdentifier must not be null."
+        return new File(stackTracesDirectory, stackTraceIdentifier + ".xml")
+    }
 
     /**
      * The central method coordinating the service's functionality.
@@ -48,31 +57,22 @@ class ErrorLogService {
             exceptionElements += it.toString()
         }
         String md5sum = (exceptionElements).encodeAsMD5()
-        String fileName = md5sum + ".xml"
-        File exceptionStoringFile = new File(fileName)
-        String dir = servletContext.getRealPath(grailsApplication.config.otp.errorLogging.stacktraces)
-        String exceptionFilePath = "${dir}${File.separatorChar}${exceptionStoringFile}"
-        if (new File(exceptionFilePath).isFile()) {
-            addToXml(new File(exceptionFilePath))
+        final stackTracesFile = getStackTracesFile(md5sum)
+        if (stackTracesFile.isFile()) {
+            addToXml(stackTracesFile)
         } else {
-            contentToXml(thrownException, fileName, dir)
+            contentToXml(thrownException, stackTracesFile)
         }
         return md5sum
     }
 
     /**
      * Retrieves the stacktrace identified by given identifier.
-     * It can happen that the output of this method is null, since the stackTraceIdentifier in the ProcessingError can be null.
      * @param identifier The stacktrace's identifier
      * @return The stacktrace if found otherwise an exception is thrown with the reason why the stacktrace can not be returned
      **/
     public String loggedError(String identifier) {
-        //TODO: Jan wants to think deeply about the stackTraceIdentifier, which can be null -> JIRA: OTP-763
-        File dir = new File(servletContext.getRealPath(grailsApplication.config.otp.errorLogging.stacktraces))
-        if (!dir.isDirectory()) {
-            throw new RuntimeException("${dir}, configured in the config, is not a directory")
-        }
-        File stacktraceFile = new File(dir, identifier + ".xml")
+        File stacktraceFile = getStackTracesFile(identifier)
         if (!stacktraceFile.isFile()) {
             throw new RuntimeException("${stacktraceFile.getPath()} is not a file ")
         }
@@ -125,7 +125,7 @@ class ErrorLogService {
      * @param thrownException The ThrownException to be stored
      * @return String with complete xml file.
      */
-    private void contentToXml(Exception thrownException, String fileName, String path) {
+    private void contentToXml(final Exception thrownException, final File xmlFile) {
         StringWriter writer = new StringWriter()
         MarkupBuilder xml = new MarkupBuilder(writer)
         String stackString = stackToString(thrownException)
@@ -133,9 +133,8 @@ class ErrorLogService {
             stacktrace(stackString)
             timestamp(new Date())
         }
-        new File(path).mkdirs()
-        File file = new File(path, fileName)
-        writeToFile(file, writer.toString())
+        FileUtils.forceMkdir(xmlFile.parentFile)
+        writeToFile(xmlFile, writer.toString())
     }
 
     /**

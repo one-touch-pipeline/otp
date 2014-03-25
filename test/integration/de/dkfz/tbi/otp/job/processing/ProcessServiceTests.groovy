@@ -2,7 +2,10 @@ package de.dkfz.tbi.otp.job.processing
 
 import static org.junit.Assert.*
 
+import org.apache.commons.io.FileUtils
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.grails.plugins.springsecurity.service.acl.AclUtilService
 import org.junit.*
 import org.springframework.security.*
 import org.springframework.security.access.AccessDeniedException
@@ -11,14 +14,14 @@ import org.springframework.security.acls.domain.BasePermission
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.StartJobDefinition
+import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 
 class ProcessServiceTests extends AbstractIntegrationTest {
-    def processService
-    def aclUtilService
-    def errorLogService
-    def servletContext
-    def grailsApplication
+    ProcessService processService
+    AclUtilService aclUtilService
+    ErrorLogService errorLogService
+    GrailsApplication grailsApplication
 
     @Before
     void setUp() {
@@ -836,8 +839,8 @@ class ProcessServiceTests extends AbstractIntegrationTest {
     @Test
     void testGetProcessingErrorStackTracePermissionIsRoleOperator() {
         ProcessingError processingError = mockProcessingError()
-        File dir = new File(servletContext.getRealPath(grailsApplication.config.otp.errorLogging.stacktraces))
-        File stacktraceFile = new File(dir, processingError.stackTraceIdentifier + ".xml")
+        File stacktraceFile = errorLogService.getStackTracesFile(processingError.stackTraceIdentifier)
+        FileUtils.forceMkdir(stacktraceFile.parentFile)
         stacktraceFile.createNewFile()
         stacktraceFile <<
                         """
