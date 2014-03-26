@@ -1,11 +1,16 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import org.joda.time.Days
+import org.joda.time.LocalDate
+import org.joda.time.YearMonth
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormatter
 
 class StatisticService {
 
-    ProjectGroupService projectGroupService
-
     ProjectService projectService
+
+    private DateTimeFormatter simpleDateFormatter = DateTimeFormat.forPattern("MMM yy").withLocale(Locale.ENGLISH)
 
     public List projectDateSortAfterDate(ProjectGroup projectGroup) {
         List seq = Sequence.withCriteria {
@@ -17,7 +22,7 @@ class StatisticService {
                 groupProperty("projectName")
                 min("dateCreated", "minDate")
             }
-            order ("minDate")
+            order("minDate")
         }
         return seq
     }
@@ -34,6 +39,7 @@ class StatisticService {
             }
             order("seqTypeName")
         }
+        return seq
     }
 
     public List patientsCountPerSequenceType(ProjectGroup projectGroup) {
@@ -51,20 +57,17 @@ class StatisticService {
         return seq
     }
 
-    public List laneCountPerDay(ProjectGroup projectGroup) {
-        List<Project> projects
-        if (projectGroup) {
-            projects = projectService.projectByProjectGroup(projectGroup)
-        } else {
-            projects = Project.list()
+    public List laneCountPerDay(List<Project> projects) {
+        List seq = Sequence.withCriteria {
+            projections {
+                if (projects) {
+                    'in'("projectId", projects*.id)
+                }
+                groupProperty("dayCreated")
+                count("laneId")
+            }
+            order("dayCreated")
         }
-
-        List seq = Sequence.executeQuery("\
-            select year(s.dateCreated) as year, month(s.dateCreated) as month, day(s.dateCreated) as day, count(laneId) as laneCount \
-            from Sequence s \
-            where s.projectId in :projectIds \
-            group by year(s.dateCreated), month(s.dateCreated), day(s.dateCreated) \
-            order by year, month, day", [projectIds: projects*.id])
         return seq
     }
 
@@ -78,16 +81,7 @@ class StatisticService {
                 groupProperty("seqTypeName")
                 countDistinct("projectId")
             }
-            order ("seqTypeName")
-        }
-        return seq
-    }
-
-    public List seqTypeByProject(Project project) {
-        List seq = Sequence.withCriteria {
-            eq("projectId", project.id)
-            projections { groupProperty("seqTypeId") }
-            order ("seqTypeId")
+            order("seqTypeName")
         }
         return seq
     }
@@ -99,7 +93,7 @@ class StatisticService {
                 groupProperty("seqTypeName")
                 count("sampleId")
             }
-            order ("seqTypeName")
+            order("seqTypeName")
         }
         return seq
     }
@@ -111,18 +105,76 @@ class StatisticService {
                 groupProperty("mockPid")
                 countDistinct("sampleId")
             }
-            order ("mockPid")
+            order("mockPid")
         }
         return seq
     }
 
-    public List laneCountPerDateByProject(Project project) {
-        List seq = Sequence.executeQuery("\
-            select year(s.dateCreated) as year, month(s.dateCreated) as month, day(s.dateCreated) as day, count(s.laneId) as laneCount \
-            from Sequence s \
-            WHERE s.projectId = ${project.id} \
-            group by year(s.dateCreated), month(s.dateCreated), day(s.dateCreated) \
-            order by year, month, day")
-        return seq
+    /**
+     * Convert creation date of lanes to a format to be used for scatter plots
+     * @param data A list containing lists with two elements, where the first element is a date and the second element is an integer
+     */
+    public Map laneCountPerDate(List data) {
+        List<Integer> values = []
+
+        YearMonth firstDate = new YearMonth(data[0][0])
+        YearMonth lastDate = new YearMonth(data[-1][0]).plusMonths(1)
+        Days daysCount = Days.daysBetween(firstDate, lastDate)
+
+        int count = 0
+        LocalDate firstDateLocal = firstDate.toLocalDate(1)
+        data.each {
+            values << [
+                    Days.daysBetween(firstDateLocal, new LocalDate(it[0])).days,
+                    count += it[1]
+            ]
+        }
+
+        Map dataToRender = [
+                labels: monthLabels(firstDate, lastDate),
+                data: values,
+                count: count,
+                daysCount: daysCount.days
+        ]
+        return dataToRender
+    }
+
+    /**
+     * Convert creation date of projects to a format to be used for scatter plots
+     * @param data A list containing lists with one element which is a date
+     */
+    public Map projectCountPerDate(List data) {
+        List<Integer> values = []
+
+        YearMonth firstDate = new YearMonth(data[0][1])
+        YearMonth lastDate = new YearMonth(data[-1][1]).plusMonths(1)
+        Days daysCount = Days.daysBetween(firstDate, lastDate)
+
+        int count = 1
+        LocalDate firstDateLocal = firstDate.toLocalDate(1)
+        data.each {
+            values << [
+                    Days.daysBetween(firstDateLocal, new LocalDate(it[1])).days,
+                    count++
+            ]
+        }
+
+        Map dataToRender = [
+                labels: monthLabels(firstDate, lastDate),
+                data: values,
+                count: count,
+                daysCount: daysCount.days,
+        ]
+        return dataToRender
+    }
+
+    private List<String> monthLabels(YearMonth firstDate, YearMonth lastDate) {
+        List<String> labels = []
+        YearMonth cal = firstDate
+        while (cal < lastDate) {
+            labels << simpleDateFormatter.print(cal)
+            cal = cal.plusMonths(1)
+        }
+        return labels
     }
 }

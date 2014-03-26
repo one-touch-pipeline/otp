@@ -48,6 +48,8 @@ grails.project.dependency.resolution = {
         compile "sam:sam:1.78"
         // bedUtils
         compile 'bedUtils:bedUtils:0.6'
+        // general dependencies
+        compile "joda-time:joda-time:2.3"
     }
 
     plugins {

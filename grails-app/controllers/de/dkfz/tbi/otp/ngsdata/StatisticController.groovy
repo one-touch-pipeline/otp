@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
 import grails.validation.Validateable
-import java.text.SimpleDateFormat
 
 class StatisticController {
 
@@ -12,92 +11,25 @@ class StatisticController {
 
     ProjectService projectService
 
-    SeqTypeService seqTypeService
-
-    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMM yy", Locale.ENGLISH)
-
     JSON projectCountPerDate(ProjectGroupCommand command) {
-        ProjectGroup projectGroup
+        ProjectGroup projectGroup = null
         if (command.projectGroupName) {
             projectGroup = projectGroupService.projectGroupByName(command.projectGroupName)
         }
-        List<String> labels = []
-        List<Integer> values = []
 
         List data = statisticService.projectDateSortAfterDate(projectGroup)
-        Date firstDate = new Date(data[0][1].year, data[0][1].month, 1)
-        Date lastDate = new Date(data[data.size() - 1][1].year, data[data.size() - 1][1].month + 1, 1)
-        int daysCount = daysBetween(firstDate, lastDate)
-
-        int count = 1
-        data.each {
-            values << [
-                daysBetween(firstDate, it[1]),
-                count++
-            ]
-        }
-
-        Calendar cal = new GregorianCalendar(firstDate.year, firstDate.month, 1)
-        Calendar calend = new GregorianCalendar(lastDate.year, lastDate.month, 0)
-        while (cal <= calend) {
-            labels << simpleDateFormat.format(cal.getTime())
-            cal.add(Calendar.MONTH, 1)
-        }
-
-        Map dataToRender = [
-            labels: labels,
-            data: values,
-            count: count,
-            gridCount: labels.size() * 4,
-            daysCount: daysCount
-        ]
-        render dataToRender as JSON
+        render statisticService.projectCountPerDate(data) as JSON
     }
-
-    private int daysBetween(Date date1, Date date2) {
-        return (date2.getTime() - date1.getTime()) / (1000 * 60 * 60 * 24)
-    }
-
 
     JSON laneCountPerDate(ProjectGroupCommand command) {
-        ProjectGroup projectGroup
+        List<Project> projects = null
         if (command.projectGroupName) {
-            projectGroup = projectGroupService.projectGroupByName(command.projectGroupName)
-        }
-        List<String> labels = []
-        List<Integer> values = []
-
-        List data = statisticService.laneCountPerDay(projectGroup)
-        Calendar firstDate = new GregorianCalendar(data[0][0], data[0][1] - 1, 1)
-        Calendar lastDate = new GregorianCalendar(data[data.size() - 1][0], data[data.size() - 1][1], 0)
-        int daysCount = daysBetween(firstDate, lastDate)
-
-        int count = 0
-        data.each {
-            values << [
-                daysBetween(firstDate, new GregorianCalendar(it[0], it[1] - 1, it[2])),
-                count += it[3]
-            ]
+            ProjectGroup projectGroup = projectGroupService.projectGroupByName(command.projectGroupName)
+            projects = projectService.projectByProjectGroup(projectGroup)
         }
 
-        Calendar cal = firstDate.clone()
-        while (cal <= lastDate) {
-            labels << simpleDateFormat.format(cal.getTime())
-            cal.add(Calendar.MONTH, 1)
-        }
-
-        Map dataToRender = [
-            labels: labels,
-            data: values,
-            count: count,
-            gridCount: labels.size() * 4,
-            daysCount: daysCount
-        ]
-        render dataToRender as JSON
-    }
-
-    private int daysBetween(Calendar date1, Calendar date2) {
-        return (date2.getTimeInMillis() - date1.getTimeInMillis()) / (1000 * 60 * 60 * 24)
+        List data = statisticService.laneCountPerDay(projects)
+        render statisticService.laneCountPerDate(data) as JSON
     }
 
     JSON sampleCountPerSequenceType(ProjectGroupCommand command) {
@@ -249,37 +181,8 @@ class StatisticController {
 
     JSON laneCountPerDateByProject(ProjectCommand command) {
         Project project = projectService.getProjectByName(command.projectName)
-
-        List<String> labels = []
-        List<Integer> values = []
-
-        List data = statisticService.laneCountPerDateByProject(project)
-        Calendar firstDate = new GregorianCalendar(data[0][0], data[0][1]-1, 1)
-        Calendar lastDate = new GregorianCalendar(data[data.size() - 1][0], data[data.size() - 1][1], 0)
-        int daysCount = daysBetween(firstDate, lastDate)
-
-        int count = 0
-        data.each {
-            values << [
-                daysBetween(firstDate, new GregorianCalendar(it[0], it[1] - 1, it[2])),
-                count += it[3]
-            ]
-        }
-
-        Calendar cal = firstDate.clone()
-        while (cal <= lastDate) {
-            labels << simpleDateFormat.format(cal.getTime())
-            cal.add(Calendar.MONTH, 1)
-        }
-
-        Map dataToRender =  [
-            labels: labels,
-            data: values,
-            count: count,
-            gridCount: labels.size() * 4,
-            daysCount: daysCount
-        ]
-        render dataToRender as JSON
+        List data = statisticService.laneCountPerDay([project])
+        render statisticService.laneCountPerDate(data) as JSON
     }
 }
 
@@ -309,5 +212,3 @@ class ProjectGroupCommand implements Serializable {
         })
     }
 }
-
-

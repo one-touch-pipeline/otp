@@ -43,7 +43,7 @@ $.otp.graph.overview = {
         scatter1.Set('chart.title.size', 11);
         scatter1.Set('chart.title.y', 39);
         scatter1.Set('chart.xmax', json.daysCount);
-        scatter1.Set('chart.background.grid.autofit.numvlines', json.gridCount);
+        scatter1.Set('chart.background.grid.autofit.numvlines', json.labels.length * 4);
         scatter1.Set('chart.text.angle', 45);
         scatter1.Set('chart.gutter.bottom', 120);
         scatter1.Set('chart.gutter.top', 105);
@@ -69,7 +69,7 @@ $.otp.graph.overview = {
         scatter2.Set('chart.title.color', 'black');
         scatter2.Set('chart.title.size', 11);
         scatter2.Set('chart.xmax', json.daysCount);
-        scatter2.Set('chart.background.grid.autofit.numvlines', json.gridCount);
+        scatter2.Set('chart.background.grid.autofit.numvlines', json.labels.length * 4);
         scatter2.Set('chart.text.angle', 45);
         scatter2.Set('chart.gutter.bottom', 150);
         scatter2.Set('chart.gutter.top', 85);
@@ -253,7 +253,7 @@ $.otp.graph.project = {
         scatter3.Set('chart.title.y', 18);
         scatter3.Set('chart.text.size', 8);
         scatter3.Set('chart.xmax', json.daysCount);
-        scatter3.Set('chart.background.grid.autofit.numvlines', json.gridCount);
+        scatter3.Set('chart.background.grid.autofit.numvlines', json.labels.length * 4);
         scatter3.Set('chart.text.angle', 65);
         scatter3.Set('chart.gutter.bottom', 170);
         scatter3.Set('chart.gutter.right', 70);

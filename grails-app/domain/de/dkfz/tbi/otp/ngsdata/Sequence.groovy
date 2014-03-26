@@ -100,6 +100,9 @@ class Sequence implements Serializable {
     String seqCenterName
     String seqCenterDirName
 
+    // derived property for calculating the creation date without time
+    Date dayCreated
+
     static mapping = {
         table 'sequences'
         version false
@@ -115,6 +118,7 @@ class Sequence implements Serializable {
         individualId column: 'individual_id'
         projectId column: 'project_id'
         id composite: ['seqTrackId', 'seqTypeId', 'seqPlatformId', 'sampleId', 'runId', 'pipelineVersionId', 'seqCenterId', 'sampleTypeId', 'individualId', 'projectId']
+        dayCreated formula: 'DATE(date_created)'
     }
 
     static constraints = {
