@@ -43,7 +43,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.security.access.prepost.PreAuthorize
 
 class SchedulerService {
-    static transactional = false
+
     /**
      * Dependency Injection of grailsApplication
      */
