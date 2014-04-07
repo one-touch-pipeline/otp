@@ -90,7 +90,7 @@ class Scheduler {
     @Before("@annotation(de.dkfz.tbi.otp.job.scheduler.JobExecution) && this(de.dkfz.tbi.otp.job.processing.Job)")
     public void doCreateCheck(JoinPoint joinPoint) {
         Job job = joinPoint.target as Job
-        LogThreadLocal.setJobLog(job.log)
+        LogThreadLocal.setLog(job.log)
         try {
             // verify that the Job has a processing Step
             if (!job.processingStep) {
@@ -132,7 +132,7 @@ class Scheduler {
             NotificationEvent event = new NotificationEvent(this, step, NotificationType.PROCESS_STEP_STARTED)
             grailsApplication.mainContext.publishEvent(event)
         } catch (RuntimeException e) {
-            LogThreadLocal.removeJobLog()
+            LogThreadLocal.removeLog()
             // removing Job from running
             schedulerService.removeRunningJob(job)
             throw new SchedulerException("doCreateCheck failed for Job of type ${joinPoint.target.class}", e)
@@ -153,7 +153,7 @@ class Scheduler {
      */
     @AfterReturning("@annotation(de.dkfz.tbi.otp.job.scheduler.JobExecution) && this(de.dkfz.tbi.otp.job.processing.Job)")
     public void doEndCheck(JoinPoint joinPoint) {
-        LogThreadLocal.removeJobLog()
+        LogThreadLocal.removeLog()
         Job job = joinPoint.target as Job
         if (job instanceof MonitoringJob) {
             // These kind of jobs are allowed to finish the execute method before their processing is finished
@@ -178,7 +178,7 @@ class Scheduler {
      */
     @AfterThrowing(pointcut="@annotation(de.dkfz.tbi.otp.job.scheduler.JobExecution) && this(de.dkfz.tbi.otp.job.processing.Job)", throwing="e")
     public void doErrorHandling(JoinPoint joinPoint, Exception e) {
-        LogThreadLocal.removeJobLog()
+        LogThreadLocal.removeLog()
         Job job = joinPoint.target as Job
         doErrorHandling(job, e)
     }

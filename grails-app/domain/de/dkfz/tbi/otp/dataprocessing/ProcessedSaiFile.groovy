@@ -21,4 +21,8 @@ class ProcessedSaiFile {
         dateFromFileSystem(nullable: true)
         deletionDate(nullable: true)
     }
+
+    Project getProject() {
+        return alignmentPass.project
+    }
 }

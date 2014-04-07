@@ -1,10 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
+
 import de.dkfz.tbi.otp.ngsdata.*
 
 class ProcessedSaiFileService {
 
-    def processedAlignmentFileService
+    DataProcessingFilesService dataProcessingFilesService
+    ProcessedAlignmentFileService processedAlignmentFileService
 
     public String getFilePath(ProcessedSaiFile saiFile) {
         String dir = getDirectory(saiFile)
@@ -62,6 +66,32 @@ class ProcessedSaiFileService {
         assertSave(saiFile)
         final def fileSize = saiFile.fileSize
         return fileSize ? null : "File size of ${file} is ${fileSize}."
+    }
+
+
+    /**
+     * Deletes the *.sai file and the *.sai_bwaAlnErrorLog.txt file from the "processing" directory on
+     * the file system. Sets {@link ProcessedSaiFile#fileExists} to <code>false</code> and
+     * {@link ProcessedSaiFile#deletionDate} to the current time.
+     *
+     * @return The number of bytes that have been freed on the file system.
+     */
+    // ProcessedBamFileService has a similar method.
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public long deleteProcessingFiles(final ProcessedSaiFile saiFile) {
+        final Project project = saiFile.project
+        final File fsSaiFile = new File(getFilePath(saiFile))
+        if (dataProcessingFilesService.checkConsistencyForDeletion(saiFile, fsSaiFile)) {
+            long freedBytes = 0L
+            freedBytes += dataProcessingFilesService.deleteProcessingFile(project, bwaAlnErrorLogFilePath(saiFile))
+            freedBytes += dataProcessingFilesService.deleteProcessingFile(project, fsSaiFile)
+            saiFile.fileExists = false
+            saiFile.deletionDate = new Date()
+            assertSave saiFile
+            return freedBytes
+        } else {
+            return 0L
+        }
     }
 
     private def assertSave(def object) {

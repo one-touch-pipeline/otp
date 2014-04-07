@@ -37,4 +37,16 @@ class AlignmentPass {
         }
         return identifier == maxIdentifier
     }
+
+    Project getProject() {
+        return seqTrack.project
+    }
+
+    Sample getSample() {
+        return seqTrack.sample
+    }
+
+    SeqType getSeqType() {
+        return seqTrack.seqType
+    }
 }

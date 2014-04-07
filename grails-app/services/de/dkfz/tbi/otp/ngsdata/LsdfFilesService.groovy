@@ -1,10 +1,26 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.job.processing.ExecutionService
+import org.codehaus.groovy.grails.commons.GrailsApplication
+
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getLog
+
 class LsdfFilesService {
 
-    @SuppressWarnings("GrailsStatelessService")
-    def grailsApplication
-    def configService
+    GrailsApplication grailsApplication
+    ConfigService configService
+    ExecutionService executionService
+
+    /**
+     * Similar to {@link Paths.get(String, String...)} from Java 7.
+     */
+    public static File getPath(final String first, final String... more) {
+        File file = new File(first)
+        for (final String part : more) {
+            file = new File(file, part)
+        }
+        return file
+    }
 
     /**
      * This function return path to the initial location
@@ -21,7 +37,7 @@ class LsdfFilesService {
      * This function returns an array of strings to final locations of this runs.
      * Only data files belonging to a given project are considered, because
      * projects are often processed separately.
-     * 
+     *
      * @param run to be processed
      * @param projectName only data files belonging to a given project are used
      * @return
@@ -44,11 +60,6 @@ class LsdfFilesService {
         return (String[])paths.toArray()
     }
 
-    /**
-     *
-     * @param fileId
-     * @return
-     */
     String getFileFinalPath(long fileId) {
         DataFile file = DataFile.get(fileId)
         if (!file) {
@@ -58,9 +69,9 @@ class LsdfFilesService {
     }
 
     /**
-     * Important function. 
+     * Important function.
      * This function knows all naming conventions and data organization
-     * 
+     *
      * @param file
      * @return String with path or null if path can not be established
      */
@@ -68,7 +79,7 @@ class LsdfFilesService {
         if (!checkFinalPathDefined(file)) {
             return null
         }
-        String seqTypeDir = seqTypeDirectory(file);
+        String seqTypeDir = seqTypeDirectory(file)
         if (seqTypeDir == null) {
             return null
         }
@@ -81,10 +92,10 @@ class LsdfFilesService {
 
     boolean checkFinalPathDefined(DataFile dataFile) {
         if (!dataFile) {
-            return false;
+            return false
         }
         if (!dataFile.used) {
-            return false; 
+            return false
         }
         return true
     }
@@ -99,11 +110,6 @@ class LsdfFilesService {
         return null
     }
 
-    /**
-     *
-     * @param fileId
-     * @return
-     */
     String getFileViewByPidPath(long fileId) {
         DataFile file = DataFile.get(fileId)
         if (!file) {
@@ -178,22 +184,11 @@ class LsdfFilesService {
         return "${seqTypeDir}/view-by-pid/${pid}/${sampleType}/${library}/run${runName}/${vbpPath}"
     }
 
-    /**
-     *
-     *
-     * @param path
-     * @return
-     */
     boolean fileExists(String path) {
         File file = new File(path)
         return file.canRead()
     }
 
-    /**
-     *
-     * @param path
-     * @return
-     */
     long fileSize(String path) {
         File file = new File(path)
         if (file.isDirectory()) {
@@ -220,9 +215,35 @@ class LsdfFilesService {
     }
 
     /**
-     *
-     *
+     * Deletes the specified file. Throws an exception if the path is not absolute, if the file does not exist, if the
+     * path points to something different than a file, or if the deletion fails.
      */
+    void deleteFile(final Realm realm, final File file) {
+        assert file.isAbsolute() && file.exists() && file.isFile()
+        try {
+            assert executionService.executeCommand(realm, "rm '${file}'; echo \$?") == "0"
+        } catch (final Throwable e) {
+            throw new RuntimeException("Could not delete file ${file}.", e)
+        }
+        assert !file.exists()
+        log.info "Deleted file ${file}"
+    }
+
+    /**
+     * Deletes the specified empty directory. Throws an exception if the path is not absolute, if the directory does not
+     * exist, if the path points to something different than a directory, or if the deletion fails.
+     */
+    void deleteDirectory(final Realm realm, final File directory) {
+        assert directory.isAbsolute() && directory.exists() && directory.isDirectory()
+        try {
+            assert executionService.executeCommand(realm, "rmdir '${directory}'; echo \$?") == "0"
+        } catch (final Throwable e) {
+            throw new RuntimeException("Could not delete directory ${directory}.", e)
+        }
+        assert !directory.exists()
+        log.info "Deleted directory ${directory}"
+    }
+
     String[] getAllPathsForRun(long runId) {
         Run run = Run.getAt(runId)
         if (!run) {
@@ -231,10 +252,6 @@ class LsdfFilesService {
         return getAllPathsForRun(run)
     }
 
-    /**
-     *
-     *
-     */
     String[] getAllPathsForRun(Run run) {
         if (!run) {
             //exception
@@ -252,16 +269,12 @@ class LsdfFilesService {
         return (String[])paths.toArray()
     }
 
-    /**
-     *
-     *
-     */
     private String getPathToRun(DataFile file) {
         if (!checkFinalPathDefined(file)) {
             return null
         }
         String basePath = configService.getProjectSequencePath(file.project)
-        String seqTypeDir = seqTypeDirectory(file);
+        String seqTypeDir = seqTypeDirectory(file)
         String centerDir = file.run.seqCenter.dirName
         String path = "${basePath}/${seqTypeDir}/${centerDir}/"
         return path

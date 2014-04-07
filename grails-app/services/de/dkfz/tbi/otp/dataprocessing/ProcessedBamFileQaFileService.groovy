@@ -1,19 +1,32 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.SavingException
+import org.springframework.transaction.annotation.Transactional
+import de.dkfz.tbi.otp.ngsdata.*
+import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.getPath
 
 class ProcessedBamFileQaFileService {
 
+    ConfigService configService
+    DataProcessingFilesService dataProcessingFilesService
+    MergedAlignmentDataFileService mergedAlignmentDataFileService
+    ProcessedAlignmentFileService processedAlignmentFileService
     ProcessedBamFileService processedBamFileService
 
+    private static final String QUALITY_ASSESSMENT_DIR_NAME = "QualityAssessment"
+
     public String directoryPath(QualityAssessmentPass pass) {
-        String baseDir = processedBamFileService.getDirectory(pass.processedBamFile)
-        String qaDir = "QualityAssessment"
-        String passDir = passDirectory(pass)
-        return "${baseDir}/${qaDir}/${passDir}"
+        String baseAndQaDir = directoryPath(pass.alignmentPass)
+        String passDir = passDirectoryName(pass)
+        return "${baseAndQaDir}/${passDir}"
     }
 
-    public String passDirectory(QualityAssessmentPass pass) {
+    public String directoryPath(AlignmentPass alignmentPass) {
+        String baseDir = processedAlignmentFileService.getDirectory(alignmentPass)
+        String qaDir = QUALITY_ASSESSMENT_DIR_NAME
+        return "${baseDir}/${qaDir}"
+    }
+
+    public String passDirectoryName(QualityAssessmentPass pass) {
         return "pass${pass.identifier}"
     }
 
@@ -59,6 +72,15 @@ class ProcessedBamFileQaFileService {
         return "${dir}/${filename}"
     }
 
+    public File finalDestinationDirectory(final QualityAssessmentPass pass) {
+        return getPath(
+                configService.getProjectRootPath(pass.project),
+                mergedAlignmentDataFileService.buildRelativePath(pass.seqType, pass.sample),
+                QUALITY_ASSESSMENT_DIR_NAME,
+                processedAlignmentFileService.getRunLaneDirectory(pass.seqTrack),
+        )
+    }
+
     public String qualityAssessmentDataFileName(ProcessedBamFile bamFile) {
         String fileName = processedBamFileService.getFileNameNoSuffix(bamFile)
         return "${fileName}_quality.json"
@@ -94,6 +116,18 @@ class ProcessedBamFileQaFileService {
         return "${fileName}_chromosomeMapping.json"
     }
 
+    public Collection<String> allFileNames(final ProcessedBamFile bamFile) {
+        return [
+            qualityAssessmentDataFileName(bamFile),
+            coverageDataFileName(bamFile),
+            sortedCoverageDataFileName(bamFile),
+            coveragePlotFileName(bamFile),
+            insertSizeDataFileName(bamFile),
+            insertSizePlotFileName(bamFile),
+            chromosomeMappingFileName(bamFile),
+        ]
+    }
+
     public boolean validateQADataFiles(QualityAssessmentPass pass) {
         boolean coverageDataFileExists = validateFile(coverageDataFilePath(pass))
         boolean qualityAssessmentFileExists = validateFile(qualityAssessmentDataFilePath(pass))
@@ -116,6 +150,48 @@ class ProcessedBamFileQaFileService {
     private boolean validateFile(String path) {
         File file = new File(path)
         return file.canRead() && file.size() != 0
+    }
+
+    /**
+     * Deletes the files of the specified QA pass from the "processing" directory on the file system.
+     *
+     * @return The number of bytes that have been freed on the file system.
+     *
+     * @throws FileNotInFinalDestinationException
+     */
+    @Transactional(noRollbackFor = FileNotInFinalDestinationException)
+    public long deleteProcessingFiles(final QualityAssessmentPass pass) throws FileNotInFinalDestinationException {
+        final File passDirectory = new File(directoryPath(pass))
+        final File finalDestinationDirectory = finalDestinationDirectory(pass)
+        final Collection<String> fileNames = allFileNames(pass.processedBamFile)
+        fileNames.each {
+            final File fileToBeDeleted = new File(passDirectory, it)
+            if (fileToBeDeleted.exists()) {
+                final File fileInFinalDest = new File(finalDestinationDirectory, it)
+                if (!fileInFinalDest.exists()) {
+                    throw new FileNotInFinalDestinationException("${fileInFinalDest} does not exist.")
+                }
+                final long fileToBeDeletedSize = fileToBeDeleted.length()
+                final Date fileToBeDeletedDate = new Date(fileToBeDeleted.lastModified())
+                final long fileInFinalDestSize = fileInFinalDest.length()
+                final Date fileInFinalDestDate = new Date(fileInFinalDest.lastModified())
+                // Checking the dates for equality makes no sense because they are always different (seems not to be
+                // preserved when copying).
+                if (fileToBeDeletedSize != fileInFinalDestSize /*|| fileToBeDeletedDate != fileInFinalDestDate */) {
+                    throw new FileNotInFinalDestinationException(
+                            "${fileToBeDeleted} (${fileToBeDeletedSize} bytes, last modified ${fileToBeDeletedDate}) and " +
+                            "${fileInFinalDest} (${fileInFinalDestSize} bytes, last modified ${fileInFinalDestDate}) are different.")
+                }
+            }
+        }
+        final Project project = pass.project
+        long freedBytes = 0L
+        fileNames.each {
+            final File fileToBeDeleted = new File(passDirectory, it)
+            freedBytes += dataProcessingFilesService.deleteProcessingFile(project, fileToBeDeleted)
+        }
+        dataProcessingFilesService.deleteProcessingDirectory(project, passDirectory)
+        return freedBytes
     }
 
     private def assertSave(def object) {

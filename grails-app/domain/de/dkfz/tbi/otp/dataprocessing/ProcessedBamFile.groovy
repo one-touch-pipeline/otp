@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.*
 
 class ProcessedBamFile extends AbstractFileSystemBamFile {
 
@@ -10,6 +10,18 @@ class ProcessedBamFile extends AbstractFileSystemBamFile {
 
     public SeqTrack getSeqTrack() {
         return alignmentPass.seqTrack
+    }
+
+    Sample getSample() {
+        return alignmentPass.sample
+    }
+
+    SeqType getSeqType() {
+        return alignmentPass.seqType
+    }
+
+    Project getProject() {
+        return alignmentPass.project
     }
 
     @Override

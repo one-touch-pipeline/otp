@@ -1,15 +1,19 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.springframework.util.Assert.*
+
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
+
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
 
 class ProcessedBamFileService {
 
+    DataProcessingFilesService dataProcessingFilesService
     ProcessedAlignmentFileService processedAlignmentFileService
     ConfigService configService
-    AbstractBamFileService abstractBamFileService
 
     public String getFilePath(ProcessedBamFile bamFile) {
         String dir = getDirectory(bamFile)
@@ -179,7 +183,7 @@ class ProcessedBamFileService {
      * <li> No merging is in process for the corresponding {@link Sample} and {@link SeqType}, see
      *      {@link #isMergingInProgress(SeqTrack)}</li>
      * <li> All {@link ProcessedBamFile} (exlude withdrawn) for the {SeqTrack}s with the same {@link Sample}
-     *      and {@link SeqType} have to be processable, see {@link #isAnyBamFileNotProcessable(Iterable)}</li>
+     *      and {@link SeqType} have to be processable, see {@link #isAnyBamFileNotProcessable(Collection)}</li>
      * </ul>
      */
     public boolean isMergeable(ProcessedBamFile processedBamFile) {
@@ -291,6 +295,32 @@ class ProcessedBamFileService {
     boolean notAssignedToMergingSet(ProcessedBamFile bamFile) {
         notNull(bamFile, "the input bam file for the method notAssignedToMergingSet is null")
         return !MergingSetAssignment.findByBamFile(bamFile)
+    }
+
+    /**
+     * Deletes the *.bam file, the *.bam.bai file and the *.bam_bwaSampeErrorLog.txt file from the
+     * "processing" directory on the file system. Sets {@link ProcessedBamFile#fileExists} to
+     * <code>false</code> and {@link ProcessedBamFile#deletionDate} to the current time.
+     *
+     * @return The number of bytes that have been freed on the file system.
+     */
+    // ProcessedSaiFileService has a similar method.
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public long deleteProcessingFiles(final ProcessedBamFile bamFile) {
+        final Project project = bamFile.project
+        final File fsBamFile = new File(getFilePath(bamFile))
+        if (dataProcessingFilesService.checkConsistencyForDeletion(bamFile, fsBamFile)) {
+            long freedBytes = 0L
+            freedBytes += dataProcessingFilesService.deleteProcessingFile(project, baiFilePath(bamFile))
+            freedBytes += dataProcessingFilesService.deleteProcessingFile(project, bwaSampeErrorLogFilePath(bamFile))
+            freedBytes += dataProcessingFilesService.deleteProcessingFile(project, fsBamFile)
+            bamFile.fileExists = false
+            bamFile.deletionDate = new Date()
+            assertSave bamFile
+            return freedBytes
+        } else {
+            return 0L
+        }
     }
 
     private def assertSave(def object) {

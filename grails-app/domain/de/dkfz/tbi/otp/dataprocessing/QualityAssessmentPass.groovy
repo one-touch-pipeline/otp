@@ -21,4 +21,24 @@ class QualityAssessmentPass {
     static belongsTo = [
         processedBamFile: ProcessedBamFile
     ]
+
+    AlignmentPass getAlignmentPass() {
+        return processedBamFile.alignmentPass
+    }
+
+    Project getProject() {
+        return processedBamFile.project
+    }
+
+    SeqTrack getSeqTrack() {
+        return processedBamFile.seqTrack
+    }
+
+    Sample getSample() {
+        return processedBamFile.sample
+    }
+
+    SeqType getSeqType() {
+        return processedBamFile.seqType
+    }
 }
