@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import java.util.regex.Matcher
+
 import de.dkfz.tbi.otp.utils.ReferencedClass
 
 class MultiplexingService {
@@ -27,14 +28,32 @@ class MultiplexingService {
         }
     }
 
+
+    /**
+     * find and extract barcodes of the file. It uses the following patterns in the given order:
+     * <ul>
+     * <li><code>/_([GATC]{6,8})_/</code></li>
+     * <li><code>/_[0-9]_([0-9]{3})[\._]/</code></li>
+     * </ul>
+     * The first matching pattern is used and the group 1 is returned as barcode.
+     *
+     * @param fileName the name of the file to check for
+     * @return the extracted barcode or null
+     */
     public String barcode(String fileName) {
-        final String muxRegexp = /_[GATC]{6,8}_/
-        Matcher m = (fileName =~ muxRegexp)
-        if (!m) {
-            return null
+        final List<String> regExpression = [
+            /_([GATC]{6,8})_/ ,
+            /_[0-9]_([0-9]{3})[\._]/ ,
+            ]
+        for (String muxRegexp: regExpression) {
+            Matcher matcher = (fileName =~ muxRegexp)
+            if (matcher) {
+                return matcher.group(1)
+            }
         }
-        return m[0].replace("_", "")
+        return null
     }
+
 
     private void appendBarcode(DataFile file, String barcode) {
         MetaDataKey key = MetaDataKey.findByName("LANE_NO")
