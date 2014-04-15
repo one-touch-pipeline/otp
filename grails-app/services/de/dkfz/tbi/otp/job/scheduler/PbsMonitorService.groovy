@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.job.scheduler
 
+import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
 
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.job.processing.ExecutionState
@@ -23,7 +23,6 @@ import de.dkfz.tbi.otp.ngsdata.Realm
  * finished.
  */
 class PbsMonitorService {
-
     static transactional = false
 
     @Autowired
@@ -32,34 +31,20 @@ class PbsMonitorService {
     @Autowired
     ExecutorService executorService
 
-    /**
-     * The applicationContext to get indirect access to the {@link Scheduler}.
-     *
-     * The {@link Scheduler} cannot be injected here directly, because then the cyclic dependency of the beans
-     * {@link Scheduler}, {@link SchedulerService} and {@link PbsMonitorService} is introduced.
-     *
-     * If all of these beans were not transactional, the injection works fine but if at least on bean is transactional
-     * (in this case {@link SchedulerService}), the cyclic dependency cannot be solved any longer and the injectionmore.
-     *
-     * To resolve this cyclic dependency this bean does not inject the scheduler, instead it injects the {@link ApplicationContext}
-     * which allows to access the {@link Scheduler} bean.
-     */
     @Autowired
-    ApplicationContext applicationContext
+    Scheduler scheduler
 
     /**
      * Map of currently monitored jobs on the PBS (value) ordered
      * by the MonitoringJob which registered it (key).
      */
     private Map<MonitoringJob, List<PbsJobInfo>> queuedJobs = [:]
-
     /**
      * Lock to protect the queuedJobs. Needed because registering a
      * Job and checking the PBS for whether a Job finished might be
      * performed in different thread.
      */
     private final Lock lock = new ReentrantLock()
-
 
     /**
      * Registers the given PBS ID for monitoring.
@@ -172,7 +157,7 @@ class PbsMonitorService {
                         notifyJobAboutFinishedClusterJob(pbsMonitor, info)
                     } catch (final Throwable e) {
                         log.error(e.message, e)
-                        applicationContext.scheduler.doErrorHandling(pbsMonitor, e)
+                        scheduler.doErrorHandling(pbsMonitor, e)
                     }
 
                     finishedJobs.add(info)
@@ -233,15 +218,15 @@ class PbsMonitorService {
         if (jobHasFinished) {
             if (jobEndState == ExecutionState.FAILURE) {
                 log.info("NOT notifying ${monitoringJob} that cluster job ${clusterJob.pbsId}" +
-                                " has finished on realm ${clusterJob.realm}, because that job has already failed.")
+                        " has finished on realm ${clusterJob.realm}, because that job has already failed.")
             } else {
                 throw new RuntimeException("${monitoringJob} is still monitoring cluster job" +
-                " ${clusterJob.pbsId} on realm ${clusterJob.realm}, although it has" +
-                " already finished with end state ${jobEndState}.")
+                        " ${clusterJob.pbsId} on realm ${clusterJob.realm}, although it has" +
+                        " already finished with end state ${jobEndState}.")
             }
         } else {
             log.info("Notifying ${monitoringJob} that cluster job ${clusterJob.pbsId}" +
-                            " has finished on realm ${clusterJob.realm}.")
+                    " has finished on realm ${clusterJob.realm}.")
             monitoringJob.finished(clusterJob.pbsId, clusterJob.realm)
         }
     }
