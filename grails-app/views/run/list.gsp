@@ -36,13 +36,13 @@
                                 <g:select class="criteria" name="seqCenterSelection" from="${seqCenters}" optionValue="name" optionKey="id" style="display: none"/>
                                 <input class="criteria" type="text" name="runSearch" style="display: none"/>
                                 <g:select class="criteria" name="storageRealmSelection" from="${storageRealm}" style="display: none"/>
-                                <span name="dateCreatedSelection" style="display: none">
-                                    <g:message code="search.from.date"/>:<g:datePicker name="dateCreatedSelection" value="${dateCreated}" precision="day" years="${2010..Calendar.getInstance().get(Calendar.YEAR)}"/>
-                                    <g:message code="search.to.date"/>:<g:datePicker name="dateCreatedSelection2" value="${dateCreated}" precision="day" years="${2010..Calendar.getInstance().get(Calendar.YEAR)}"/>
+                                <span id="dateCreatedSelection" class="dateSelection" style="display: none">
+                                    <g:message code="search.from.date"/>:<g:datePicker name="dateCreatedSelection_start" value="${dateCreated}" precision="day" years="${2010..Calendar.getInstance().get(Calendar.YEAR)}"/>
+                                    <g:message code="search.to.date"/>:<g:datePicker name="dateCreatedSelection_end" value="${dateCreated}" precision="day" years="${2010..Calendar.getInstance().get(Calendar.YEAR)}"/>
                                 </span>
-                                <span name="dateExecutedSelection" style="display: none">
-                                    <g:message code="search.from.date"/>:<g:datePicker name="dateExecutedSelection" value="${dateExecuted}" precision="day" years="${2010..Calendar.getInstance().get(Calendar.YEAR)}"/>
-                                    <g:message code="search.to.date"/>:<g:datePicker name="dateExecutedSelection2" value="${dateExecuted}" precision="day" years="${2010..Calendar.getInstance().get(Calendar.YEAR)}"/>
+                                <span id="dateExecutedSelection" class="dateSelection" style="display: none">
+                                    <g:message code="search.from.date"/>:<g:datePicker name="dateExecutedSelection_start" value="${dateExecuted}" precision="day" years="${2010..Calendar.getInstance().get(Calendar.YEAR)}"/>
+                                    <g:message code="search.to.date"/>:<g:datePicker name="dateExecutedSelection_end" value="${dateExecuted}" precision="day" years="${2010..Calendar.getInstance().get(Calendar.YEAR)}"/>
                                 </span>
                         </td>
                         <td>

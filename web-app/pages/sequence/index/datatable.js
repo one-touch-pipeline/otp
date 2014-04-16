@@ -27,6 +27,16 @@ $.otp.sequence = {
 
     register: function () {
         "use strict";
+        var searchCriteria = $.otp.dataTableFilter.register($("#searchCriteriaTable"), $("#sequenceTable"), true, function (searchCriteria) {
+            $("#export-csv").attr("href", $.otp.createLink({
+                controller: 'sequence',
+                action: 'exportCsv',
+                parameters: {
+                    filtering: JSON.stringify(searchCriteria())
+                }
+            }));
+        });
+
         $("#sequenceTable").dataTable({
             sDom: '<i> T rt<"clear">',
             oTableTools: {
@@ -53,7 +63,7 @@ $.otp.sequence = {
             fnServerData: function (sSource, aoData, fnCallback) {
                 aoData.push({
                     name: "filtering",
-                    value: JSON.stringify($.otp.sequence.searchCriteria())
+                    value: JSON.stringify(searchCriteria())
                 });
                 $.ajax({
                     "dataType": 'json',
@@ -132,66 +142,5 @@ $.otp.sequence = {
                 alignment.text("");
             }
         });
-        // search criteria
-        $("#searchCriteriaTable tr td:eq(0) select").change($.otp.sequence.searchCriteriaChangeHandler);
-        $("#searchCriteriaTable tr td:eq(2) input[type=button]").click($.otp.sequence.searchCriteriaAddRow);
-        $("#searchCriteriaTable tr td:eq(1) select").change($.otp.sequence.updateSearchCriteria);
-        $("#searchCriteriaTable tr td:eq(1) input[type=text]").change($.otp.sequence.updateSearchCriteria);
-        $("#searchCriteriaTable tr td:eq(1) input[type=text]").keyup($.otp.sequence.updateSearchCriteria);
-    },
-    searchCriteriaChangeHandler: function () {
-        "use strict";
-        var tr = $(this).parent().parent();
-        $("td:eq(1) *", tr).hide();
-        $("td:eq(2) input", tr).hide();
-        if ($(this).val() !== "none") {
-            $("td select[name=" + $(this).val() + "]", tr).show();
-            $("td select[name=" + $(this).val() + "] option", tr).show();
-            $("td input[name=" + $(this).val() + "]", tr).show();
-            $("td:eq(2) input", tr).show();
-        } else {
-            // decide whether to delete this element
-            if ($("tr", tr.parent()).size() > 1) {
-                tr.detach();
-            }
-        }
-        $.otp.sequence.updateSearchCriteria();
-    },
-    searchCriteriaAddRow: function () {
-        "use strict";
-        var tr, cloned;
-        tr = $(this).parent().parent();
-        cloned = tr.clone();
-        $("td:eq(1) *", cloned).hide();
-        $("td:eq(2) input", cloned).hide();
-        $("td:eq(0) select", cloned).val("none");
-        cloned = cloned.appendTo($("#searchCriteriaTable"));
-        $("td:eq(0) select", cloned).change($.otp.sequence.searchCriteriaChangeHandler);
-        $("td:eq(2) input[type=button]", cloned).click($.otp.sequence.searchCriteriaAddRow);
-        $("td:eq(1) select", cloned).change($.otp.sequence.updateSearchCriteria);
-        $("td:eq(1) input[type=text]", cloned).change($.otp.sequence.updateSearchCriteria);
-        $("td:eq(1) input[type=text]", cloned).keyup($.otp.sequence.updateSearchCriteria);
-    },
-    searchCriteria: function () {
-        "use strict";
-        var result = [];
-        $("#searchCriteriaTable tr").each(function (index, element) {
-            var selection = $("td:eq(0) select", element).val();
-            if (selection !== "none") {
-                result.push({type: selection, value: $("td select[name=" + selection + "], td input[name=" + selection + "]", element).val()});
-            }
-        });
-        return result;
-    },
-    updateSearchCriteria: function () {
-        "use strict";
-        $("#sequenceTable").dataTable().fnDraw();
-        $("#export-csv").attr("href", $.otp.createLink({
-            controller: 'sequence',
-            action: 'exportCsv',
-            parameters: {
-                filtering: JSON.stringify($.otp.sequence.searchCriteria())
-            }
-        }));
     }
 };

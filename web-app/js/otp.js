@@ -325,3 +325,92 @@ $.otp.growBodyInit = function (margin) {
         }
     });
 };
+
+$.otp.dataTableFilter = {
+    /**
+     * Filter for datatables.
+     * @param searchCriteriaTable jQuery object containing the inputs/selectors to filter
+     * @param dataTable jQuery object containing the datatable
+     * @param updateTable boolean deciding whether the datatable should be updated after changes
+     * @param onUpdateFunction function that is executed after changes
+     * @returns searchCriteria function returning an object containing the currently set filters
+     */
+    register : function (searchCriteriaTable, dataTable, updateTable, onUpdateFunction) {
+        "use strict";
+
+        var searchCriteria = function () {
+            var result = [];
+            searchCriteriaTable.find("tr").each(function (index, element) {
+                var selection = $("td:eq(0) select", element).val();
+                if (selection !== "none") {
+                    if ($("td:eq(1) span#" + selection, element).hasClass('dateSelection')) {
+                        result.push({type: selection, value: {
+                            start_day: $("td select[name=" + selection + "_start_day]", element).val(),
+                            start_month: $("td select[name=" + selection + "_start_month]", element).val(),
+                            start_year: $("td select[name=" + selection + "_start_year]", element).val(),
+                            end_day: $("td select[name=" + selection + "_end_day]", element).val(),
+                            end_month: $("td select[name=" + selection + "_end_month]", element).val(),
+                            end_year: $("td select[name=" + selection + "_end_year]", element).val()
+                        }});
+                    } else {
+                        result.push({type: selection, value: $("td select[name=" + selection + "], td input[name=" + selection + "]", element).val()});
+                    }
+                }
+            });
+            return result;
+        };
+
+        var updateSearchCriteria = function () {
+            if (updateTable) {
+                dataTable.dataTable().fnDraw();
+            }
+            if (onUpdateFunction !== undefined) {
+                onUpdateFunction(searchCriteria);
+            }
+        };
+
+        var searchCriteriaChangeHandler = function (event) {
+            var tr = $(event.target).parent().parent();
+            $("td:eq(1) *", tr).hide();
+            $("td:eq(2) input", tr).hide();
+            if ($(event.target).val() !== "none") {
+                $("td select[name=" + $(this).val() + "]", tr).show();
+                $("td select[name=" + $(this).val() + "] option", tr).show();
+                $("td input[name=" + $(this).val() + "]", tr).show();
+                $("td span[id=" + $(this).val() + "]", tr).show();
+                $("td span[id=" + $(this).val() + "] select", tr).show();
+                $("td span[id=" + $(this).val() + "] select option", tr).show();
+                $("td:eq(2) input", tr).show();
+            } else {
+                // decide whether to delete this element
+                if ($("tr", tr.parent()).size() > 1) {
+                    tr.detach();
+                }
+            }
+            updateSearchCriteria();
+        };
+
+        var searchCriteriaAddRow = function (event) {
+            var tr, cloned;
+            tr = $(event.target).parent().parent();
+            cloned = tr.clone();
+            $("td:eq(1) *", cloned).hide();
+            $("td:eq(2) input", cloned).hide();
+            $("td:eq(0) select", cloned).val("none");
+            cloned = cloned.appendTo($("#searchCriteriaTable"));
+            $("td:eq(0) select", cloned).change(searchCriteriaChangeHandler);
+            $("td:eq(2) input[type=button]", cloned).click(searchCriteriaAddRow);
+            $("td:eq(1) select", cloned).change(updateSearchCriteria);
+            $("td:eq(1) input[type=text]", cloned).change(updateSearchCriteria);
+            $("td:eq(1) input[type=text]", cloned).keyup(updateSearchCriteria);
+        };
+
+        searchCriteriaTable.find("tr td:eq(0) select").change(searchCriteriaChangeHandler);
+        searchCriteriaTable.find("tr td:eq(2) input[type=button]").click(searchCriteriaAddRow);
+        searchCriteriaTable.find("tr td:eq(1) select").change(updateSearchCriteria);
+        searchCriteriaTable.find("tr td:eq(1) input[type=text]").change(updateSearchCriteria);
+        searchCriteriaTable.find("tr td:eq(1) input[type=text]").keyup(updateSearchCriteria);
+
+        return searchCriteria;
+    }
+};
