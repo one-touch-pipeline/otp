@@ -2,9 +2,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import static org.springframework.util.Assert.*
 
-import org.springframework.transaction.annotation.Propagation
-import org.springframework.transaction.annotation.Transactional
-
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
@@ -305,7 +302,6 @@ class ProcessedBamFileService {
      * @return The number of bytes that have been freed on the file system.
      */
     // ProcessedSaiFileService has a similar method.
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public long deleteProcessingFiles(final ProcessedBamFile bamFile) {
         final Project project = bamFile.project
         final File fsBamFile = new File(getFilePath(bamFile))

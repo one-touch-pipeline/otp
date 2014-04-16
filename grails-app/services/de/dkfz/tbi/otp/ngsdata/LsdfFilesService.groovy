@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.job.processing.ExecutionService
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getLog
+import static de.dkfz.tbi.otp.utils.ThreadUtils.waitFor
 
 class LsdfFilesService {
 
@@ -221,11 +222,11 @@ class LsdfFilesService {
     void deleteFile(final Realm realm, final File file) {
         assert file.isAbsolute() && file.exists() && file.isFile()
         try {
-            assert executionService.executeCommand(realm, "rm '${file}'; echo \$?") == "0"
+            assert executionService.executeCommand(realm, "rm '${file}'; echo \$?") ==~ /^0\s*$/
         } catch (final Throwable e) {
             throw new RuntimeException("Could not delete file ${file}.", e)
         }
-        assert !file.exists()
+        assert waitFor({!file.exists()}, 1000, 50)
         log.info "Deleted file ${file}"
     }
 
@@ -236,11 +237,11 @@ class LsdfFilesService {
     void deleteDirectory(final Realm realm, final File directory) {
         assert directory.isAbsolute() && directory.exists() && directory.isDirectory()
         try {
-            assert executionService.executeCommand(realm, "rmdir '${directory}'; echo \$?") == "0"
+            assert executionService.executeCommand(realm, "rmdir '${directory}'; echo \$?") ==~ /^0\s*$/
         } catch (final Throwable e) {
             throw new RuntimeException("Could not delete directory ${directory}.", e)
         }
-        assert !directory.exists()
+        assert waitFor({!directory.exists()}, 1000, 50)
         log.info "Deleted directory ${directory}"
     }
 

@@ -13,6 +13,13 @@ import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getLog
  */
 class ProcessedAlignmentFileService {
 
+    /**
+     * deleteOldAlignmentProcessingFiles and deleteProcessingFiles should not be executed transactionally because if the
+     * deletion of one processing file fails, the successfully deleted files should still be marked as deleted in the
+     * database.
+     */
+    static transactional = false
+
     @Autowired
     ApplicationContext applicationContext
     DataProcessingFilesService dataProcessingFilesService
@@ -76,9 +83,12 @@ class ProcessedAlignmentFileService {
      * Deletes the processing files of alignment passes that have already been merged and have been created before the
      * specified date.
      *
+     * @param millisMaxRuntime If more than this number of milliseconds elapse during the execution of this
+     * method, the method will return even if not all alignment passes have been processed.
+     *
      * @return The number of bytes that have been freed on the file system.
      */
-    public long deleteOldAlignmentProcessingFiles(final Date createdBefore) {
+    public long deleteOldAlignmentProcessingFiles(final Date createdBefore, final long millisMaxRuntime = Long.MAX_VALUE) {
         log.info "Deleting processing files of merged alignment passes created before ${createdBefore}."
         final String queryPart =
                 "WHERE (fileExists = true OR deletionDate IS NULL) AND dateCreated < :createdBefore " +
@@ -98,10 +108,15 @@ class ProcessedAlignmentFileService {
                         "            JOIN msa.bamFile pbf " +
                         "            WHERE pbf.alignmentPass = psf.alignmentPass)",
                 params)*.alignmentPass)
+        final long startTimestamp = System.currentTimeMillis()
         long freedBytes = 0L
         long processedPasses = 0L
         try {
             for (final AlignmentPass alignmentPass : alignmentPassesWithOldFiles.unique()) {
+                if (System.currentTimeMillis() - startTimestamp > millisMaxRuntime) {
+                    log.info "Exiting because the maximum runtime (${millisMaxRuntime} ms) has elapsed."
+                    break
+                }
                 if (ProcessedSaiFile.findByAlignmentPassAndDateCreatedGreaterThan(alignmentPass, createdBefore) != null) {
                     // A newer SAI file belongs to the alignment pass.
                     continue

@@ -54,24 +54,29 @@ class DataProcessingFilesService {
      * @return true if there is no serious inconsistency.
      */
     public boolean checkConsistencyForDeletion(final def dbFile, final File fsFile) {
-        boolean consistent = true
         if (!dbFile.fileExists) {
             log.warn "fileExists is already false for ${dbFile} (${fsFile})."
         }
         if (dbFile.deletionDate) {
             log.warn "deletionDate is already set (to ${dbFile.deletionDate}) for ${dbFile} (${fsFile})."
         }
-        final long fsSize = fsFile.length()
-        if (fsSize != dbFile.fileSize) {
-            log.error "File size in database (${dbFile.fileSize}) and on the file system (${fsSize}) are different for ${dbFile} (${fsFile}). Will not delete the file."
-            consistent = false
+        if (fsFile.exists()) {
+            boolean consistent = true
+            final long fsSize = fsFile.length()
+            if (fsSize != dbFile.fileSize) {
+                log.error "File size in database (${dbFile.fileSize}) and on the file system (${fsSize}) are different for ${dbFile} (${fsFile}). Will not delete the file."
+                consistent = false
+            }
+            final Date fsDate = new Date(fsFile.lastModified())
+            if (fsDate != dbFile.dateFromFileSystem) {
+                log.error "File date in database (${dbFile.dateFromFileSystem}) and on the file system (${fsDate}) are different for ${dbFile} (${fsFile}). Will not delete the file."
+                consistent = false
+            }
+            return consistent
+        } else {
+            log.error "File does not exist on the file system: ${dbFile} (${fsFile}). Will not mark the file as deleted in the database."
+            return false
         }
-        final Date fsDate = new Date(fsFile.lastModified())
-        if (fsDate != dbFile.dateFromFileSystem) {
-            log.error "File date in database (${dbFile.dateFromFileSystem}) and on the file system (${fsDate}) are different for ${dbFile} (${fsFile}). Will not delete the file."
-            consistent = false
-        }
-        return consistent
     }
 
     /**

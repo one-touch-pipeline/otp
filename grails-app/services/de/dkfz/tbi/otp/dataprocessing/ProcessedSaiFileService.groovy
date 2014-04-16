@@ -1,8 +1,5 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import org.springframework.transaction.annotation.Propagation
-import org.springframework.transaction.annotation.Transactional
-
 import de.dkfz.tbi.otp.ngsdata.*
 
 class ProcessedSaiFileService {
@@ -77,7 +74,6 @@ class ProcessedSaiFileService {
      * @return The number of bytes that have been freed on the file system.
      */
     // ProcessedBamFileService has a similar method.
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public long deleteProcessingFiles(final ProcessedSaiFile saiFile) {
         final Project project = saiFile.project
         final File fsSaiFile = new File(getFilePath(saiFile))
