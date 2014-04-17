@@ -37,8 +37,11 @@
                         <g:select class="criteria" name="seqCenterSelection" from="${seqCenters}" optionValue="name" optionKey="id" style="display: none"/>
                         <input class="criteria" type="text" name="runSearch" style="display: none" placeholder="min. 3 characters"/>
                     </td>
+                    <td class="remove">
+                        <input class="blue_labelForPlus" type="button" value="${g.message(code: "otp.filter.remove")}" style="display: none"/>
+                    </td>
                     <td class="add">
-                        <input class="blue_labelForPlus" type="button" value="+" style="display: none"/>
+                        <input class="blue_labelForPlus" type="button" value="${g.message(code: "otp.filter.add")}" style="display: none"/>
                     </td>
                 </tr>
             </table>

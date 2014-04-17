@@ -369,6 +369,27 @@ $.otp.dataTableFilter = {
             }
         };
 
+        var removeRowOrHideInputs = function (tr) {
+            // if there's more than one filter row, remove it, otherwise reset it
+            if ($("tr", tr.parent()).size() > 1) {
+                // remove row and determine whether to show an add button
+                var lastTr;
+                if (tr.is(":last-child")) {
+                    lastTr = tr.prev();
+                } else {
+                    lastTr = tr.nextAll().last();
+                }
+                tr.detach();
+                if ($("td.remove input", lastTr).is(":visible")) {
+                    $("td.add input", lastTr).show();
+                }
+            } else {
+                $("td.attribute select").val("none");
+                $("td.add input", tr).hide();
+                $("td.remove input", tr).hide();
+            }
+        };
+
         var searchCriteriaChangeHandler = function (event) {
             var tr = $(event.target).parent().parent();
             $("td.value *", tr).hide();
@@ -381,27 +402,35 @@ $.otp.dataTableFilter = {
                 $("td span[id=" + $(this).val() + "] select", tr).show();
                 $("td span[id=" + $(this).val() + "] select option", tr).show();
                 $("td.add input", tr).show();
+                $("td.remove input", tr).show();
             } else {
-                // decide whether to delete this element
-                if ($("tr", tr.parent()).size() > 1) {
-                    tr.detach();
-                }
+                removeRowOrHideInputs(tr);
             }
             updateSearchCriteria();
         };
 
         var searchCriteriaAddRow = function (event) {
             var tr, cloned;
+            $(event.target).hide();
             tr = $(event.target).parent().parent();
             cloned = tr.clone();
             $("td.value *", cloned).hide();
             $("td.add input", cloned).hide();
+            $("td.remove input", cloned).hide();
             $("td.attribute select", cloned).val("none");
             cloned.appendTo($("#searchCriteriaTable"));
         };
 
+        var searchCriteriaRemoveRow = function () {
+            var tr = $(this).parent().parent();
+            $("td.value *", tr).hide();
+            removeRowOrHideInputs(tr);
+            updateSearchCriteria();
+        };
+
         searchCriteriaTable.on("change", "tr td.attribute select", searchCriteriaChangeHandler);
         searchCriteriaTable.on("click", "tr td.add input[type=button]", searchCriteriaAddRow);
+        searchCriteriaTable.on("click", "tr td.remove input[type=button]", searchCriteriaRemoveRow);
         searchCriteriaTable.on("change", "tr td.value select", updateSearchCriteria);
         searchCriteriaTable.on("change", "tr td.value input[type=text]", updateSearchCriteria);
         searchCriteriaTable.on("keyup", "tr td.value input[type=text]", updateSearchCriteria);

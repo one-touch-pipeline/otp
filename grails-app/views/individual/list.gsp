@@ -39,8 +39,11 @@
                     <input class="criteria" type="text" name="mockPidSearch" style="display: none" placeholder="min. 3 characters"/>
                     <g:select class="criteria" name="typeSelection" from="${individualTypes}" style="display: none"/>
                 </td>
-                 <td class="add">
-                     <input class="blue_labelForPlus" type="button" value="+" style="display: none"/>
+                <td class="remove">
+                    <input class="blue_labelForPlus" type="button" value="${g.message(code: "otp.filter.remove")}" style="display: none"/>
+                </td>
+                <td class="add">
+                    <input class="blue_labelForPlus" type="button" value="${g.message(code: "otp.filter.add")}" style="display: none"/>
                  </td>
             </tr>
         </table>

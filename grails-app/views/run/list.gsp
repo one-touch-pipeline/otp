@@ -45,8 +45,11 @@
                                     <g:message code="search.to.date"/>:<g:datePicker name="dateExecutedSelection_end" value="${dateExecuted}" precision="day" years="${2010..Calendar.getInstance().get(Calendar.YEAR)}"/>
                                 </span>
                         </td>
+                        <td class="remove">
+                            <input class="blue_labelForPlus" type="button" value="${g.message(code: "otp.filter.remove")}" style="display: none"/>
+                        </td>
                         <td class="add">
-                            <input class="blue_labelForPlus" type="button" value="+" style="display: none"/>
+                            <input class="blue_labelForPlus" type="button" value="${g.message(code: "otp.filter.add")}" style="display: none"/>
                         </td>
                     </tr>
                 </table></td></tr>
