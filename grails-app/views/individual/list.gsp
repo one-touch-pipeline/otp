@@ -21,8 +21,8 @@
             </td>
            <td>
          <table id="searchCriteriaTable">
-         <tr>
-                <td>
+            <tr>
+                <td class="attribute">
                     <select class="criteria" name="criteria">
                         <option value="none"><g:message code="individual.search.none"/></option>
                         <option value="projectSelection"><g:message code="individual.search.project"/></option>
@@ -32,16 +32,16 @@
                         <option value="typeSelection"><g:message code="individual.search.type"/></option>
                     </select>
                 </td>
-                <td>
+                <td class="value">
                     <g:select class="criteria" name="projectSelection" from="${projects}" optionValue="name" optionKey="id" style="display: none"/>
                     <input class="criteria" type="text" name="pidSearch" style="display: none" placeholder="min. 3 characters"/>
                     <input class="criteria" type="text" name="mockFullNameSearch" style="display: none" placeholder="min. 3 characters"/>
                     <input class="criteria" type="text" name="mockPidSearch" style="display: none" placeholder="min. 3 characters"/>
                     <g:select class="criteria" name="typeSelection" from="${individualTypes}" style="display: none"/>
                 </td>
-                <td>
-                    <input id="button" class="blue_labelForPlus" type="button" value="+" style="display: none"/>
-                </td>
+                 <td class="add">
+                     <input class="blue_labelForPlus" type="button" value="+" style="display: none"/>
+                 </td>
             </tr>
         </table>
         </td>

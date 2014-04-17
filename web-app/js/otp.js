@@ -341,9 +341,9 @@ $.otp.dataTableFilter = {
         var searchCriteria = function () {
             var result = [];
             searchCriteriaTable.find("tr").each(function (index, element) {
-                var selection = $("td:eq(0) select", element).val();
+                var selection = $("td.attribute select", element).val();
                 if (selection !== "none") {
-                    if ($("td:eq(1) span#" + selection, element).hasClass('dateSelection')) {
+                    if ($("td.value span#" + selection, element).hasClass('dateSelection')) {
                         result.push({type: selection, value: {
                             start_day: $("td select[name=" + selection + "_start_day]", element).val(),
                             start_month: $("td select[name=" + selection + "_start_month]", element).val(),
@@ -371,8 +371,8 @@ $.otp.dataTableFilter = {
 
         var searchCriteriaChangeHandler = function (event) {
             var tr = $(event.target).parent().parent();
-            $("td:eq(1) *", tr).hide();
-            $("td:eq(2) input", tr).hide();
+            $("td.value *", tr).hide();
+            $("td.add input", tr).hide();
             if ($(event.target).val() !== "none") {
                 $("td select[name=" + $(this).val() + "]", tr).show();
                 $("td select[name=" + $(this).val() + "] option", tr).show();
@@ -380,7 +380,7 @@ $.otp.dataTableFilter = {
                 $("td span[id=" + $(this).val() + "]", tr).show();
                 $("td span[id=" + $(this).val() + "] select", tr).show();
                 $("td span[id=" + $(this).val() + "] select option", tr).show();
-                $("td:eq(2) input", tr).show();
+                $("td.add input", tr).show();
             } else {
                 // decide whether to delete this element
                 if ($("tr", tr.parent()).size() > 1) {
@@ -394,22 +394,22 @@ $.otp.dataTableFilter = {
             var tr, cloned;
             tr = $(event.target).parent().parent();
             cloned = tr.clone();
-            $("td:eq(1) *", cloned).hide();
-            $("td:eq(2) input", cloned).hide();
-            $("td:eq(0) select", cloned).val("none");
+            $("td.value *", cloned).hide();
+            $("td.add input", cloned).hide();
+            $("td.attribute select", cloned).val("none");
             cloned = cloned.appendTo($("#searchCriteriaTable"));
-            $("td:eq(0) select", cloned).change(searchCriteriaChangeHandler);
-            $("td:eq(2) input[type=button]", cloned).click(searchCriteriaAddRow);
-            $("td:eq(1) select", cloned).change(updateSearchCriteria);
-            $("td:eq(1) input[type=text]", cloned).change(updateSearchCriteria);
-            $("td:eq(1) input[type=text]", cloned).keyup(updateSearchCriteria);
+            $("td.attribute select", cloned).change(searchCriteriaChangeHandler);
+            $("td.add input[type=button]", cloned).click(searchCriteriaAddRow);
+            $("td.value select", cloned).change(updateSearchCriteria);
+            $("td.value input[type=text]", cloned).change(updateSearchCriteria);
+            $("td.value input[type=text]", cloned).keyup(updateSearchCriteria);
         };
 
-        searchCriteriaTable.find("tr td:eq(0) select").change(searchCriteriaChangeHandler);
-        searchCriteriaTable.find("tr td:eq(2) input[type=button]").click(searchCriteriaAddRow);
-        searchCriteriaTable.find("tr td:eq(1) select").change(updateSearchCriteria);
-        searchCriteriaTable.find("tr td:eq(1) input[type=text]").change(updateSearchCriteria);
-        searchCriteriaTable.find("tr td:eq(1) input[type=text]").keyup(updateSearchCriteria);
+        searchCriteriaTable.find("tr td.attribute select").change(searchCriteriaChangeHandler);
+        searchCriteriaTable.find("tr td.add input[type=button]").click(searchCriteriaAddRow);
+        searchCriteriaTable.find("tr td.value select").change(updateSearchCriteria);
+        searchCriteriaTable.find("tr td.value input[type=text]").change(updateSearchCriteria);
+        searchCriteriaTable.find("tr td.value input[type=text]").keyup(updateSearchCriteria);
 
         return searchCriteria;
     }

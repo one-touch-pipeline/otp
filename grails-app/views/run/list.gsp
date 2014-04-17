@@ -22,7 +22,7 @@
                    <td>
                 <table id="searchCriteriaTable">
                     <tr>
-                        <td>
+                        <td class="attribute">
                             <select class="criteria" name="criteria">
                                 <option value="none"><g:message code="sequence.search.none"/></option>
                                 <option value="seqCenterSelection"><g:message code="run.search.seqCenter"/></option>
@@ -32,7 +32,7 @@
                                 <option value="dateExecutedSelection"><g:message code="run.search.dateExecuted"/></option>
                             </select>
                         </td>
-                        <td>
+                        <td class="value">
                                 <g:select class="criteria" name="seqCenterSelection" from="${seqCenters}" optionValue="name" optionKey="id" style="display: none"/>
                                 <input class="criteria" type="text" name="runSearch" style="display: none"/>
                                 <g:select class="criteria" name="storageRealmSelection" from="${storageRealm}" style="display: none"/>
@@ -45,8 +45,8 @@
                                     <g:message code="search.to.date"/>:<g:datePicker name="dateExecutedSelection_end" value="${dateExecuted}" precision="day" years="${2010..Calendar.getInstance().get(Calendar.YEAR)}"/>
                                 </span>
                         </td>
-                        <td>
-                            <input id="button" class="blue_labelForPlus" type="button" value="+" style="display: none"/>
+                        <td class="add">
+                            <input class="blue_labelForPlus" type="button" value="+" style="display: none"/>
                         </td>
                     </tr>
                 </table></td></tr>

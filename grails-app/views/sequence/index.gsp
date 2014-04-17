@@ -16,7 +16,7 @@
             <td>
             <table id="searchCriteriaTable">
                 <tr>
-                    <td>
+                    <td class="attribute">
                         <select class="criteria" name="criteria">
                             <option value="none"><g:message code="sequence.search.none"/></option>
                             <option value="projectSelection"><g:message code="sequence.search.project"/></option>
@@ -28,7 +28,7 @@
                             <option value="runSearch"><g:message code="sequence.search.run"/></option>
                         </select>
                     </td>
-                    <td>
+                    <td class="value">
                         <g:select class="criteria" name="projectSelection" from="${projects}" optionValue="name" optionKey="id" style="display: none"/>
                         <input class="criteria" type="text" name="individualSearch" style="display: none" placeholder="min. 3 characters"/>
                         <g:select class="criteria" name="sampleTypeSelection" from="${sampleTypes}" optionValue="name" optionKey="id" style="display: none"/>
@@ -37,8 +37,8 @@
                         <g:select class="criteria" name="seqCenterSelection" from="${seqCenters}" optionValue="name" optionKey="id" style="display: none"/>
                         <input class="criteria" type="text" name="runSearch" style="display: none" placeholder="min. 3 characters"/>
                     </td>
-                    <td>
-                        <input id="button" class="blue_labelForPlus" type="button" value="+" style="display: none"/>
+                    <td class="add">
+                        <input class="blue_labelForPlus" type="button" value="+" style="display: none"/>
                     </td>
                 </tr>
             </table>
