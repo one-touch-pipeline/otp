@@ -7,8 +7,8 @@ $.otp.projectOverviewTable = {
         var oTable = $(selector).dataTable({
             sDom: '<i> T rt<"clear">',
             oTableTools: {
-                sSwfPath : $.otp.contextPath + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
-                aButtons : tableTools_button_options
+                sSwfPath: $.otp.contextPath + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
+                aButtons: $.otp.tableTools_button_options
             },
             bFilter: true,
             bProcessing: true,

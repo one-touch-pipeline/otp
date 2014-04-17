@@ -1,8 +1,12 @@
 /*jslint browser: true */
 /*global $ */
 
-var tableTools_button_options = [{"sExtends":"csv", "bFooter": false},{"sExtends":"pdf","bFooter": false}];
 $.otp = {
+    tableTools_button_options: [
+        {"sExtends": "csv", "bFooter": false},
+        {"sExtends": "pdf", "bFooter": false}
+    ],
+
     contextPath: $("head meta[name=contextPath]").attr("content"),
     /**
      * Helper method to extend the given link by a further component.
