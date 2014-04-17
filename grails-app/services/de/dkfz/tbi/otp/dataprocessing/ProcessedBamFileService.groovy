@@ -124,7 +124,7 @@ class ProcessedBamFileService {
 
     private static ensureReadable(final File file) {
         if (!file.canRead()) {
-            throw new IOException("Cannot read ${file}")
+            throw new RuntimeException("Cannot read ${file}")
         }
     }
 
