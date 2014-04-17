@@ -476,7 +476,10 @@ $.otp.workflows = {
                     rowData[7] = "-";
                 }
             }
-        });
+        },
+            undefined,
+            undefined,
+            140);
     },
     /**
      * Creates the datatables view for the list of all Processes for a given JobExecutionPlan
@@ -486,7 +489,7 @@ $.otp.workflows = {
      */
     registerProcesses: function (selector, planId, failed) {
         "use strict";
-        $.otp.workFlow(selector, $.otp.createLink({
+        $.otp.createListView(selector, $.otp.createLink({
             controller: 'processes',
             action: 'planData',
             id: planId,
@@ -541,7 +544,10 @@ $.otp.workflows = {
             { "bSortable": false, "aTargets": [5] },
             { "bSortable": false, "aTargets": [6] },
             { "bSortable": false, "aTargets": [7] }
-        ]);
+        ], undefined, 240, {
+            bScrollInfinite: true,
+            bPaginate: true
+        });
         $("#enable-workflow-button").click(function () {
             $.get($.otp.createLink({
                 controller: 'processes',
@@ -613,7 +619,7 @@ $.otp.workflows = {
      */
     registerProcessingStep: function (selector, processId) {
         "use strict";
-        $.otp.registerStep(selector, $.otp.createLink({
+        $.otp.createListView(selector, $.otp.createLink({
             controller: 'processes',
             action: 'processData',
             id: processId + '/'
@@ -670,7 +676,9 @@ $.otp.workflows = {
             { "bSortable": false, "aTargets": [6] },
             { "bSortable": false, "aTargets": [7] },
             { "bSortable": false, "aTargets": [8] }
-        ]);
+        ],
+            undefined,
+            140);
         $("#show-visualization").click(function () {
             $("#process-visualization").show();
             $("#hide-visualization").show();
@@ -702,7 +710,7 @@ $.otp.workflows = {
          */
         processingStepUpdates: function (selector) {
             "use strict";
-            $.otp.createListViewProcessingStep(selector, $.otp.createLink({
+            $.otp.createListView(selector, $.otp.createLink({
                 controller: 'processes',
                 action: 'processingStepDate',
                 id: $.otp.workflows.processingStep.processingStepId + '/'
@@ -742,7 +750,7 @@ $.otp.workflows = {
          */
         parameters: function (selector, inputOrOutput) {
             "use strict";
-            $.otp.createListViewProcessingStep(selector, $.otp.createLink({
+            $.otp.createListView(selector, $.otp.createLink({
                 controller: 'processes',
                 action: 'parameterData',
                 id: $.otp.workflows.processingStep.processingStepId + '/'

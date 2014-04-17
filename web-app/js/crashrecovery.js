@@ -48,7 +48,10 @@ $.otp.crashRecovery.createListView = function () {
             });
             rowData[4] = rowData[4]['class'] + '<br/>' + rowData[4].version;
         }
-    });
+    },
+        undefined,
+        undefined,
+        140);
 };
 
 $.otp.crashRecovery.showParametersDialog = function (id, target) {

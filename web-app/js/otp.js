@@ -163,10 +163,12 @@ $.otp.warningMessage = function (message) {
  * @param jsonCallback (optional) the callback to invoke when json data has been returned. Gets one argument json
  * @param columnDefs (optional) Array of column definitions, can be used to enable/disable sorting of columns
  * @param postData (optional) Array of additional data to be added to the POST requests
+ * @param height (optional) height in pixels
+ * @param dataTableArguments (optional) map with additional arguments for initialization of dataTable
  */
-$.otp.createListView = function (selector, sourcePath, sortOrder, jsonCallback, columnDefs, postData) {
+$.otp.createListView = function (selector, sourcePath, sortOrder, jsonCallback, columnDefs, postData, height, dataTableArguments) {
     "use strict";
-    $(selector).dataTable({
+    var config = {
         bFilter: false,
         bJQueryUI: false,
         bSort: true,
@@ -174,7 +176,6 @@ $.otp.createListView = function (selector, sourcePath, sortOrder, jsonCallback, 
         bServerSide: true,
         bAutoWidth: false,
         bScrollCollapse: true,
-        sScrollY: ($('.body').height() - 140),
         bPaginate: false,
         bDeferRender: true,
         sAjaxSource: sourcePath,
@@ -200,91 +201,16 @@ $.otp.createListView = function (selector, sourcePath, sortOrder, jsonCallback, 
         },
         aoColumnDefs: columnDefs,
         aaSorting: [[0, sortOrder ? "asc" : "desc"]]
-    });
+    };
+    if (height !== undefined) {
+        config.sScrollY = ($('.body').height() - height);
+    }
+    $.extend(config, dataTableArguments);
+    $(selector).dataTable(config);
     $.otp.refreshTable.setup(selector, 10000);
-    $.otp.resizeBodyInit(selector, 140);
-};
-
-$.otp.workFlow = function (selector, sourcePath, sortOrder, jsonCallback, columnDefs, postData) {
-    "use strict";
-    $(selector).dataTable({
-        bFilter: false,
-        bJQueryUI: false,
-        bSort: true,
-        bProcessing: true,
-        bServerSide: true,
-        bAutoWidth: false,
-        bScrollCollapse: true,
-        sScrollY: ($('.body').height() - 240),
-        bScrollInfinite: true,
-        bDeferRender: true,
-        sAjaxSource: sourcePath,
-        fnServerData: function (sSource, aoData, fnCallback) {
-            var i;
-            if (postData) {
-                for (i = 0; i < postData.length; i += 1) {
-                    aoData.push(postData[i]);
-                }
-            }
-            $.ajax({
-                "dataType": 'json',
-                "type": "POST",
-                "url": sSource,
-                "data": aoData,
-                "success": function (json) {
-                    if (jsonCallback) {
-                        jsonCallback(json);
-                    }
-                    fnCallback(json);
-                }
-            });
-        },
-        aoColumnDefs: columnDefs,
-        aaSorting: [[0, sortOrder ? "asc" : "desc"]]
-    });
-    $.otp.refreshTable.setup(selector, 10000);
-    $.otp.resizeBodyInit(selector, 240);
-};
-
-$.otp.registerStep = function (selector, sourcePath, sortOrder, jsonCallback, columnDefs, postData) {
-    "use strict";
-    $(selector).dataTable({
-        bFilter: false,
-        bJQueryUI: false,
-        bSort: true,
-        bProcessing: true,
-        bServerSide: true,
-        bAutoWidth: false,
-        bScrollCollapse: true,
-        sScrollY: ($('.body').height() - 230),
-        bPaginate: false,
-        bDeferRender: true,
-        sAjaxSource: sourcePath,
-        fnServerData: function (sSource, aoData, fnCallback) {
-            var i;
-            if (postData) {
-                for (i = 0; i < postData.length; i += 1) {
-                    aoData.push(postData[i]);
-                }
-            }
-            $.ajax({
-                "dataType": 'json',
-                "type": "POST",
-                "url": sSource,
-                "data": aoData,
-                "success": function (json) {
-                    if (jsonCallback) {
-                        jsonCallback(json);
-                    }
-                    fnCallback(json);
-                }
-            });
-        },
-        aoColumnDefs: columnDefs,
-        aaSorting: [[0, sortOrder ? "asc" : "desc"]]
-    });
-    $.otp.refreshTable.setup(selector, 10000);
-    $.otp.resizeBodyInit(selector, 230);
+    if (height !== undefined) {
+        $.otp.resizeBodyInit(selector, height);
+    }
 };
 
 /**
@@ -369,45 +295,6 @@ $.otp.highlight = function (path) {
     } else {
         $('.menuContainer #home a').attr('style', 'color: #fafafa;');
     }
-};
-
-$.otp.createListViewProcessingStep = function (selector, sourcePath, sortOrder, jsonCallback, columnDefs, postData) {
-    "use strict";
-    $(selector).dataTable({
-        bFilter: false,
-        bJQueryUI: false,
-        bSort: true,
-        bProcessing: true,
-        bServerSide: true,
-        bAutoWidth: false,
-        bScrollCollapse: true,
-        bPaginate: false,
-        bDeferRender: true,
-        sAjaxSource: sourcePath,
-        fnServerData: function (sSource, aoData, fnCallback) {
-            var i;
-            if (postData) {
-                for (i = 0; i < postData.length; i += 1) {
-                    aoData.push(postData[i]);
-                }
-            }
-            $.ajax({
-                "dataType": 'json',
-                "type": "POST",
-                "url": sSource,
-                "data": aoData,
-                "success": function (json) {
-                    if (jsonCallback) {
-                        jsonCallback(json);
-                    }
-                    fnCallback(json);
-                }
-            });
-        },
-        aoColumnDefs: columnDefs,
-        aaSorting: [[0, sortOrder ? "asc" : "desc"]]
-    });
-    $.otp.refreshTable.setup(selector, 10000);
 };
 
 $.otp.resizeBodyInit = function (table, margin) {

@@ -2,7 +2,7 @@
 /*global $ */
 
 $.otp.projectOverviewTable = {
-    registerProjectOverview: function (selector, url) {
+    registerDataTable: function (selector, url) {
         "use strict";
         var oTable = $(selector).dataTable({
             sDom: '<i> T rt<"clear">',
@@ -16,10 +16,7 @@ $.otp.projectOverviewTable = {
             bSort: true,
             bJQueryUI: false,
             bAutoWidth: false,
-            sAjaxSource: $.otp.createLink({
-                controller: 'projectOverview',
-                action: 'dataTableSource'
-            }),
+            sAjaxSource: url,
             bScrollCollapse: true,
             sScrollY: 200,
             bPaginate: false,
@@ -47,101 +44,6 @@ $.otp.projectOverviewTable = {
             }
         });
         return oTable;
-    },
-
-    registerProjectOverviewSequnceTypeTable: function () {
-        "use strict";
-        var oTable2 = $("#patientsAndSamplesGBCountPerProject").dataTable({
-            sDom: '<i> T rt<"clear">',
-            oTableTools: {
-                sSwfPath : $.otp.contextPath + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
-                aButtons : tableTools_button_options
-            },
-            bFilter: true,
-            bProcessing: true,
-            bServerSide: false,
-            bSort: true,
-            bJQueryUI: false,
-            bAutoWidth: false,
-            sAjaxSource: $.otp.createLink({
-                controller: 'projectOverview',
-                action: 'dataTableSourcePatientsAndSamplesGBCountPerProject'
-            }),
-            bScrollCollapse: true,
-            sScrollY: 200,
-            bPaginate:false,
-            bDeferRender: true,
-            fnServerData: function (sSource, aoData, fnCallback) {
-                aoData.push({
-                    name: "project",
-                    value: $('#project_select').val()
-                });
-                $.ajax({
-                    "dataType": 'json',
-                    "type": "POST",
-                    "url": sSource,
-                    "data": aoData,
-                    "error": function () {
-                        // clear the table
-                        fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
-                        oTable2.fnSettings().oFeatures.bServerSide = false;
-                    },
-                    "success": function (json) {
-                        fnCallback(json);
-                        oTable2.fnSettings().oFeatures.bServerSide = false;
-                    }
-                });
-            }
-        });
-        return oTable2;
-    },
-
-    registerSampleTypeNameCountBySample : function() {
-        "use strict";
-        var oTable4 = $("#sampleTypeNameCountBySample").dataTable({
-            sDom : '<i> T rt<"clear">',
-            oTableTools : {
-                sSwfPath : $.otp.contextPath
-                    + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
-                aButtons : tableTools_button_options
-            },
-            bFilter : true,
-            bProcessing : true,
-            bServerSide : false,
-            bSort : true,
-            bJQueryUI : false,
-            bAutoWidth : false,
-            sAjaxSource : $.otp.createLink({
-                controller : 'projectOverview',
-                action : 'dataTableSourceSampleTypeNameCountBySample'
-            }),
-            bScrollCollapse : true,
-            sScrollY : 200,
-            bPaginate : false,
-            bDeferRender : true,
-            fnServerData : function(sSource, aoData, fnCallback) {
-                aoData.push({
-                    name : "project",
-                    value : $('#project_select').val()
-                });
-                $.ajax({
-                    "dataType" : 'json',
-                    "type" : "POST",
-                    "url" : sSource,
-                    "data" : aoData,
-                    "error" : function() {
-                        // clear the table
-                        fnCallback({aaData : [], iTotalRecords : 0, iTotalDisplayRecords : 0});
-                        oTable4.fnSettings().oFeatures.bServerSide = false;
-                    },
-                    "success" : function(json) {
-                        fnCallback(json);
-                        oTable4.fnSettings().oFeatures.bServerSide = false;
-                    }
-                });
-            }
-        });
-        return oTable4;
     },
 
     updatePatientCount: function () {
@@ -172,62 +74,36 @@ $.otp.projectOverviewTable = {
         });
     },
 
-    registerCenterNameRunId : function() {
-        "use strict";
-        var oTable5 = $("#centerNameRunId").dataTable({
-            sDom : '<i> T rt<"clear">',
-            oTableTools : {
-                sSwfPath : $.otp.contextPath
-                    + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
-                aButtons : tableTools_button_options
-            },
-            bFilter : true,
-            bProcessing : true,
-            bServerSide : false,
-            bSort : true,
-            bJQueryUI : false,
-            bAutoWidth : false,
-            sAjaxSource : $.otp.createLink({
-                controller : 'projectOverview',
-                action : 'dataTableSourceCenterNameRunId'}),
-            bScrollCollapse : true,
-            sScrollY : 200,
-            bPaginate : false,
-            bDeferRender : true,
-            fnServerData : function(sSource, aoData, fnCallback) {
-                aoData.push({
-                    name : "project",
-                    value : $('#project_select').val()
-                });
-                $.ajax({
-                    "dataType" : 'json',
-                    "type" : "POST",
-                    "url" : sSource,
-                    "data" : aoData,
-                    "error" : function() {
-                        // clear the table
-                        fnCallback({aaData : [], iTotalRecords : 0, iTotalDisplayRecords : 0});
-                        oTable5.fnSettings().oFeatures.bServerSide = false;
-                    },
-                    "success" : function(json) {
-                        fnCallback(json);
-                        oTable5.fnSettings().oFeatures.bServerSide = false;
-                    }
-                });
-            }
-        });
-        return oTable5;
-    },
-
     register: function () {
         "use strict";
-        var oTable1 = $.otp.projectOverviewTable.registerProjectOverview();
-        var oTable2 = $.otp.projectOverviewTable
-            .registerProjectOverviewSequnceTypeTable();
-        var oTable4 = $.otp.projectOverviewTable
-            .registerSampleTypeNameCountBySample();
-        var oTable5 = $.otp.projectOverviewTable
-            .registerCenterNameRunId();
+        var oTable1 = $.otp.projectOverviewTable.registerDataTable(
+            '#projectOverviewTable',
+            $.otp.createLink({
+                controller: 'projectOverview',
+                action: 'dataTableSource'
+            })
+        );
+        var oTable2 = $.otp.projectOverviewTable.registerDataTable(
+            '#patientsAndSamplesGBCountPerProject',
+            $.otp.createLink({
+                controller: 'projectOverview',
+                action: 'dataTableSourcePatientsAndSamplesGBCountPerProject'
+            })
+        );
+        var oTable4 = $.otp.projectOverviewTable.registerDataTable(
+            '#sampleTypeNameCountBySample',
+            $.otp.createLink({
+                controller : 'projectOverview',
+                action : 'dataTableSourceSampleTypeNameCountBySample'
+            })
+        );
+        var oTable5 = $.otp.projectOverviewTable.registerDataTable(
+            "#centerNameRunId",
+            $.otp.createLink({
+                controller : 'projectOverview',
+                action : 'dataTableSourceCenterNameRunId'
+            })
+        );
         $.otp.projectOverviewTable.updatePatientCount();
         $('#project_select').change(function () {
             var oSettings1 = oTable1.fnSettings();
