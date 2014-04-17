@@ -47,6 +47,28 @@ $.otp.projectOverviewTable = {
                 });
             }
         });
+
+        $.otp.dataTableFilter.register($('#searchCriteriaTable'), oTableLaneOverview, false, function () {
+            var tableSize = $('#laneOverviewId').find('thead > tr > th').size(),
+                ignoredColumns = $('#laneOverviewId').data('ignore-filter-columns'),
+                result = [],
+                i;
+
+            $('#searchCriteriaTable').find('tr').each(function (index, element) {
+                var idx = $('td.attribute select', element)[0].selectedIndex;
+                if (idx !== 0) {
+                    result.push(idx + ignoredColumns - 1);
+                }
+            });
+
+            for (i = 0; i < tableSize; i += 1) {
+                if (result.indexOf(i) !== -1) {
+                    oTableLaneOverview.fnFilter('.+', i, true);
+                } else {
+                    oTableLaneOverview.fnFilter('', i);
+                }
+            }
+        });
         return oTableLaneOverview;
     }
 };
