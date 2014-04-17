@@ -56,6 +56,7 @@ grails.project.dependency.resolution = {
         compile ":hibernate:$grailsVersion"
         compile ":jquery:1.8.3"
         runtime ":resources:1.2.RC2"
+        runtime ":page-resources:0.2.3"
         compile ":executor:0.3"
         compile ":spring-security-core:1.2.7.3"
         compile ":spring-security-ldap:1.0.6"

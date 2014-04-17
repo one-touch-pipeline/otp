@@ -4,8 +4,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="layout" content="main" />
 <title>OTP - project overview</title>
-<r:require module="core" />
-<r:require module="jqueryDatatables" />
 </head>
 <body>
     <div class="body">

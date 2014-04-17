@@ -100,4 +100,10 @@ modules = {
         dependsOn 'rGraph'
         resource url:'/js/graph.js'
     }
+    defaultPageDependencies {
+        dependsOn 'core'
+        dependsOn 'jquery'
+        dependsOn 'jqueryDatatables'
+        dependsOn 'jqueryUI'
+    }
 }
