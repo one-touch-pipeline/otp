@@ -156,60 +156,6 @@ $.otp.warningMessage = function (message) {
 };
 
 /**
- * Generates a generic datatable.
- * The datatable expects an ajax source at "dataTableSource" which provides a JSON response.
- * The first column of the data source is expected to be a complex datatabe consisting of <em>id</em>
- * and a descriptive <em>text</em>.
- * @param selector The jQuery selector of the table
- * @param showLink The link to the controller/action to show more details of an element
- */
-$.otp.genericList = function (selector, showLink) {
-    "use strict";
-    $(selector).dataTable({
-        sDom: 'T<"clear">lfrtip',
-        oTableTools: {
-            sSwfPath : $.otp.contextPath + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
-            aButtons : tableTools_button_options
-        },
-        bFilter: true,
-        bProcessing: true,
-        bServerSide: true,
-        bSort: true,
-        bJQueryUI: false,
-        bAutoWidth: false,
-        sAjaxSource: 'dataTableSource',
-        bPaginate: false,
-        bScrollCollapse: true,
-        sScrollY: ($(window).height() - 440),
-        bDeferRender: true,
-        fnServerData: function (sSource, aoData, fnCallback) {
-            $.ajax({
-                "dataType": 'json',
-                "type": "POST",
-                "url": sSource,
-                "data": aoData,
-                "error": function () {
-                    // clear the table
-                    fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
-                },
-                "success": function (json) {
-                    var i, rowData;
-                    for (i = 0; i < json.aaData.length; i += 1) {
-                        rowData = json.aaData[i];
-                        rowData[0] = $.otp.createLinkMarkup({
-                            controller: showLink,
-                            id: rowData[0].id,
-                            text: rowData[0].text
-                        });
-                    }
-                    fnCallback(json);
-                }
-            });
-        }
-    });
-};
-
-/**
  * Shared definition for a datatables view.
  * @param selector The JQuery selector for the table to create the datatable into
  * @param sourcePath The path to the ajax resource
@@ -425,15 +371,6 @@ $.otp.highlight = function (path) {
     }
 };
 
-$.otp.projectOverviewStatistic = {
-    register : function() {
-        "use strict";
-        $('#project_select').change(function() {
-            $.otp.graph.projectStatistic.init();
-        });
-    }
-};
-
 $.otp.createListViewProcessingStep = function (selector, sourcePath, sortOrder, jsonCallback, columnDefs, postData) {
     "use strict";
     $(selector).dataTable({
@@ -479,12 +416,7 @@ $.otp.resizeBodyInit = function (table, margin) {
         $(table + '_wrapper' + ' .dataTables_scrollBody').height(($('.body').height() - margin));
     });
 };
-$.otp.resizeBodyInit_nTable = function (table, margin) {
-    $(table).height(($('.body').height() - margin));
-    $(window).resize(function() {
-        $(table).height(($('.body').height() - margin));
-    })
-}
+
 $.otp.growBodyInit = function (margin) {
     "use strict";
     var grow_body_h = $('.body_grow').height();
