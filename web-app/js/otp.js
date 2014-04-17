@@ -397,19 +397,14 @@ $.otp.dataTableFilter = {
             $("td.value *", cloned).hide();
             $("td.add input", cloned).hide();
             $("td.attribute select", cloned).val("none");
-            cloned = cloned.appendTo($("#searchCriteriaTable"));
-            $("td.attribute select", cloned).change(searchCriteriaChangeHandler);
-            $("td.add input[type=button]", cloned).click(searchCriteriaAddRow);
-            $("td.value select", cloned).change(updateSearchCriteria);
-            $("td.value input[type=text]", cloned).change(updateSearchCriteria);
-            $("td.value input[type=text]", cloned).keyup(updateSearchCriteria);
+            cloned.appendTo($("#searchCriteriaTable"));
         };
 
-        searchCriteriaTable.find("tr td.attribute select").change(searchCriteriaChangeHandler);
-        searchCriteriaTable.find("tr td.add input[type=button]").click(searchCriteriaAddRow);
-        searchCriteriaTable.find("tr td.value select").change(updateSearchCriteria);
-        searchCriteriaTable.find("tr td.value input[type=text]").change(updateSearchCriteria);
-        searchCriteriaTable.find("tr td.value input[type=text]").keyup(updateSearchCriteria);
+        searchCriteriaTable.on("change", "tr td.attribute select", searchCriteriaChangeHandler);
+        searchCriteriaTable.on("click", "tr td.add input[type=button]", searchCriteriaAddRow);
+        searchCriteriaTable.on("change", "tr td.value select", updateSearchCriteria);
+        searchCriteriaTable.on("change", "tr td.value input[type=text]", updateSearchCriteria);
+        searchCriteriaTable.on("keyup", "tr td.value input[type=text]", updateSearchCriteria);
 
         return searchCriteria;
     }
