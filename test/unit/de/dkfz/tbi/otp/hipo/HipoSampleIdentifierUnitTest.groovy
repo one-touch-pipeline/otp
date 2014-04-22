@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.hipo
 
-import static org.junit.Assert.*
+import grails.test.mixin.*
 
 class HipoSampleIdentifierUnitTest {
 
@@ -18,7 +18,7 @@ class HipoSampleIdentifierUnitTest {
         HipoSampleIdentifier identifier = HipoSampleIdentifier.tryParse(sampleName)
         assertNotNull(identifier)
 
-        assertEquals(4, identifier.projectNumber)
+        assertEquals("456", identifier.projectNumber)
         assertEquals("H456-ABCD", identifier.pid)
         assertEquals(HipoTissueType.TUMOR, identifier.tissueType)
         assertEquals(3, identifier.sampleNumber)
@@ -62,6 +62,12 @@ class HipoSampleIdentifierUnitTest {
 
         sampleName = "H003-BPDK-C8-M1"
         assertNull(HipoSampleIdentifier.tryParse(sampleName))
+
+        sampleName = "H00B-BPD1-T1-D1"
+        assertNotNull(HipoSampleIdentifier.tryParse(sampleName))
+
+        sampleName = "H00A-BPD1-T1-D1"
+        assertNotNull(HipoSampleIdentifier.tryParse(sampleName))
     }
 
     void testSampleTypeDbName() {

@@ -44,7 +44,7 @@ class HipoIndividualService {
     }
 
     private Project findProject(HipoSampleIdentifier identifier) {
-        String projectName = "hipo_" + String.format("%03d", identifier.projectNumber)
+        String projectName = "hipo_" + identifier.projectNumber
         return Project.findByName(projectName)
     }
 
@@ -54,12 +54,12 @@ class HipoIndividualService {
             return ind
         }
         ind = new Individual(
-                pid: identifier.pid,
-                mockPid: identifier.pid,
-                mockFullName: identifier.pid,
-                project: findProject(identifier),
-                type: Individual.Type.REAL
-                )
+                        pid: identifier.pid,
+                        mockPid: identifier.pid,
+                        mockFullName: identifier.pid,
+                        project: findProject(identifier),
+                        type: Individual.Type.REAL
+                        )
         ind.save(flush: true)
         return ind
     }

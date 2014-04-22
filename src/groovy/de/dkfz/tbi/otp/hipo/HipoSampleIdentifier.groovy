@@ -8,9 +8,9 @@ class HipoSampleIdentifier {
 
     /**
      * The HIPO project number.
-     * Example: 4
+     * Example: 004
      */
-    final int projectNumber
+    final String projectNumber
 
     /**
      * The patient ID.
@@ -38,7 +38,7 @@ class HipoSampleIdentifier {
     final String analyteTypeAndNumber
 
     private final static String REGEX =
-    /^(([HP])(\d\d\d)-\w\w\w(\w))-([${HipoTissueType.values()*.key.join("")}])(\d)-([DRPA]\d)$/
+    /^(([HP])(\d\d\w)-\w\w\w(\w))-([${HipoTissueType.values()*.key.join("")}])(\d)-([DRPA]\d)$/
 
     /**
      * Tries to parse a HIPO sample name.
@@ -50,11 +50,11 @@ class HipoSampleIdentifier {
         if (!matcher.matches()) {
             return null
         }
-        int projectNumber = Integer.parseInt(matcher.group(3))
+        String projectNumber = matcher.group(3)
         HipoTissueType tissueType = HipoTissueType.fromKey(matcher.group(5))
 
         // Project 35 has even more specific rules.
-        if (projectNumber == 35)  {
+        if (projectNumber == "035") {
             if (matcher.group(2) != "H" || !(matcher.group(4) =~ /^[KM]$/)
             || ![HipoTissueType.BLOOD, HipoTissueType.CELL].contains(tissueType)) {
                 return null
@@ -87,7 +87,7 @@ class HipoSampleIdentifier {
         String dbName = tissueType.name()
         // 'default' sample number is 1, only make explicit when not 1
         // except project 35, which always makes it explicit, see sampleType JavaDoc
-        if (sampleNumber != 1 || projectNumber == 35) {
+        if (sampleNumber != 1 || projectNumber == "035") {
             dbName += String.format('%02d', sampleNumber)
         }
         return dbName
