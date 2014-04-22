@@ -3,8 +3,8 @@
 .settings
 .idea
 *.iml
-otp.ipr
-otp.iws
+*.ipr
+*.iws
 ast-build/*
 target/*
 target-eclipse/*
