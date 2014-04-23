@@ -21,7 +21,7 @@ class LogThreadLocal {
      *
      * @return the connected {@link Log} or null, if no {@link Log} is connected
      */
-    public static Log getLog() {
+    public static Log getThreadLog() {
         return jobLogHolder.get()
     }
 
@@ -30,7 +30,7 @@ class LogThreadLocal {
      *
      * @param log the {@link Log} to add to this {@link Thread}
      */
-    public static void setLog(Log log) {
+    public static void setThreadLog(Log log) {
         notNull(log, "The log may not be null")
         jobLogHolder.set(log)
     }
@@ -38,7 +38,7 @@ class LogThreadLocal {
     /**
      * remove the {@link Log} connected to this {@link Thread}, if any.
      */
-    public static void removeLog() {
+    public static void removeThreadLog() {
         jobLogHolder.remove()
     }
 }

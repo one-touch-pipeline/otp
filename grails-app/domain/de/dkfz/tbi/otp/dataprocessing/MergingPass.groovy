@@ -47,6 +47,9 @@ class MergingPass {
                "project: ${mergingSet.mergingWorkPackage.project}"
      }
 
+    /**
+     * @return Whether this is the most recent merging pass on the referenced {@link MergingSet}.
+     */
     public boolean isLatestPass() {
         int maxIdentifier = createCriteria().get {
             eq("mergingSet", mergingSet)

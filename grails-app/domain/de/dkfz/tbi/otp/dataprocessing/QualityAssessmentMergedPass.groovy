@@ -28,6 +28,9 @@ class QualityAssessmentMergedPass {
                 "project: ${mergingWorkPackage.project}"
     }
 
+    /**
+     * @return Whether this is the most recent QA pass on the referenced {@link ProcessedMergedBamFile}.
+     */
     public boolean isLatestPass() {
         int maxIdentifier = createCriteria().get {
             eq("processedMergedBamFile", processedMergedBamFile)
@@ -44,5 +47,17 @@ class QualityAssessmentMergedPass {
 
     static mapping = {
         processedMergedBamFile index: "quality_assessment_merged_pass_processed_merged_bam_file_idx"
+    }
+
+    Project getProject() {
+        return processedMergedBamFile.project
+    }
+
+    MergingPass getMergingPass() {
+        return processedMergedBamFile.mergingPass
+    }
+
+    MergingSet getMergingSet() {
+        return processedMergedBamFile.mergingSet
     }
 }

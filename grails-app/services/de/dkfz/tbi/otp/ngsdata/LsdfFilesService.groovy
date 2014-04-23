@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getLog
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 import static de.dkfz.tbi.otp.utils.ThreadUtils.waitFor
 
 class LsdfFilesService {
@@ -227,7 +227,7 @@ class LsdfFilesService {
             throw new RuntimeException("Could not delete file ${file}.", e)
         }
         assert waitFor({!file.exists()}, 1000, 50)
-        log.info "Deleted file ${file}"
+        threadLog.info "Deleted file ${file}"
     }
 
     /**
@@ -242,7 +242,7 @@ class LsdfFilesService {
             throw new RuntimeException("Could not delete directory ${directory}.", e)
         }
         assert waitFor({!directory.exists()}, 1000, 50)
-        log.info "Deleted directory ${directory}"
+        threadLog.info "Deleted directory ${directory}"
     }
 
     String[] getAllPathsForRun(long runId) {

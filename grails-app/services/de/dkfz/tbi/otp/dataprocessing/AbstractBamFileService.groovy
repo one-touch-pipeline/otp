@@ -7,6 +7,24 @@ import de.dkfz.tbi.otp.ngsdata.*
 class AbstractBamFileService {
 
     /**
+     * Same criteria as in {@link #hasBeenQualityAssessedAndMerged(AbstractBamFile, Date)}.
+     */
+    public static final String QUALITY_ASSESSED_AND_MERGED_QUERY =
+        "qualityAssessmentStatus = :qaStatus AND status = :status AND EXISTS (" +
+            "FROM MergingSetAssignment msa " +
+            "WHERE msa.mergingSet.status = :mergingSetStatus " +
+            "AND msa.bamFile = bf1 AND EXISTS (" +
+                "FROM ProcessedMergedBamFile bf3 " +
+                // Make sure that the PMBF (bf3) which this BAM file (bf1) has been merged into has already been
+                // quality assessed and is old enough.
+                "WHERE bf3.qualityAssessmentStatus = :qaStatus " +
+                "AND bf3.dateCreated < :createdBefore " +
+                // If this BAM file (bf1) is withdrawn, don't care whether bf3 is withdrawn. If bf1 is *not* withdrawn,
+                // require bf3 not to be withdrawn.
+                "AND (bf1.withdrawn = true OR bf3.withdrawn = false) " +
+                "AND bf3.mergingPass.mergingSet = msa.mergingSet))"
+
+    /**
      * @param bamFile, which was assigned to a {@link MergingSet}
      */
     void assignedToMergingSet(AbstractBamFile bamFile) {
@@ -38,6 +56,35 @@ class AbstractBamFileService {
             results.addAll(findByProcessedMergedBamFile(tempFile))
         }
         return results
+    }
+
+    /**
+     * There is no unit or integration test for this method.
+     *
+     * Same criteria as in {@link #QUALITY_ASSESSED_AND_MERGED_QUERY}.
+     */
+    public boolean hasBeenQualityAssessedAndMerged(final AbstractBamFile bamFile, final Date before) {
+        notNull bamFile
+        if (bamFile.qualityAssessmentStatus != AbstractBamFile.QaProcessingStatus.FINISHED ||
+                bamFile.status != AbstractBamFile.State.PROCESSED) {
+            return false
+        }
+        final Collection<MergingSet> processedMergingSets =
+                MergingSetAssignment.findAllByBamFile(bamFile)*.mergingSet.findAll { it.status == MergingSet.State.PROCESSED }
+        if (processedMergingSets.empty) {
+            return false
+        }
+        return ProcessedMergedBamFile.createCriteria().get {
+            eq("qualityAssessmentStatus", AbstractBamFile.QaProcessingStatus.FINISHED)
+            lt("dateCreated", before)
+            if (!bamFile.withdrawn) {
+                eq("withdrawn", false)
+            }
+            mergingPass {
+                'in'("mergingSet", processedMergingSets)
+            }
+            maxResults(1)
+        } != null
     }
 
     private def assertSave(def object) {

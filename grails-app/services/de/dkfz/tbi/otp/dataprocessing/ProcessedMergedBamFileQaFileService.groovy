@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import static org.springframework.util.Assert.*
 import de.dkfz.tbi.otp.ngsdata.SavingException
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 /**
  * Service for {@link ProcessedMergedBamFile}
@@ -10,10 +11,11 @@ import de.dkfz.tbi.otp.ngsdata.SavingException
  */
 class ProcessedMergedBamFileQaFileService {
 
+    DataProcessingFilesService dataProcessingFilesService
     ProcessedMergedBamFileService processedMergedBamFileService
-
     QualityAssessmentMergedPassService qualityAssessmentMergedPassService
 
+    public static final String QUALITY_ASSESSMENT_DIR_NAME = "QualityAssessment"
     public static final MD5SUM_NAME = 'MD5SUMS'
 
     /**
@@ -22,9 +24,17 @@ class ProcessedMergedBamFileQaFileService {
     public String directoryPath(QualityAssessmentMergedPass pass) {
         notNull(pass, "the quality assessment merged pass is null")
         String baseDir = processedMergedBamFileService.directory(pass.processedMergedBamFile)
-        String qaDir = "QualityAssessment"
+        String qaDir = QUALITY_ASSESSMENT_DIR_NAME
         String passDir = passDirectory(pass)
         return "${baseDir}/${qaDir}/${passDir}"
+    }
+
+    public File qaProcessingDirectory(final MergingPass mergingPass) {
+        return new File(processedMergedBamFileService.processingDirectory(mergingPass), QUALITY_ASSESSMENT_DIR_NAME)
+    }
+
+    public File qaPassProcessingDirectory(final QualityAssessmentMergedPass pass) {
+        return new File(qaProcessingDirectory(pass.mergingPass), passDirectory(pass))
     }
 
     /**
@@ -168,6 +178,19 @@ class ProcessedMergedBamFileQaFileService {
         return "${fileName}_chromosomeMapping.json"
     }
 
+    public Collection<String> allFileNames(final ProcessedMergedBamFile bamFile) {
+        return [
+                qualityAssessmentDataFileName(bamFile),
+                coverageDataFileName(bamFile),
+                sortedCoverageDataFileName(bamFile),
+                coveragePlotFileName(bamFile),
+                insertSizeDataFileName(bamFile),
+                insertSizePlotFileName(bamFile),
+                chromosomeMappingFileName(bamFile),
+                MD5SUM_NAME,
+        ]
+    }
+
     /**
      * validates the existence (read access and size bigger zero) of the QA data files.
      *
@@ -213,6 +236,47 @@ class ProcessedMergedBamFileQaFileService {
         notNull(file, "the input of the method qaResultDirectory is null")
         QualityAssessmentMergedPass pass = qualityAssessmentMergedPassService.latestQualityAssessmentMergedPass(file)
         return directoryPath(pass) + "/" + MD5SUM_NAME
+    }
+
+    /**
+     * There is no unit or integration test for this method.
+     *
+     * Checks consistency for {@link #deleteProcessingFiles(QualityAssessmentMergedPass)}.
+     *
+     * If there are inconsistencies, details are logged to the thread log (see {@link LogThreadLocal}).
+     *
+     * @return true if there is no serious inconsistency.
+     */
+    public boolean checkConsistencyForProcessingFilesDeletion(final QualityAssessmentMergedPass pass) {
+        notNull pass
+        if (!pass.isLatestPass() || !pass.mergingPass.isLatestPass() || !pass.mergingSet.isLatestSet()) {
+            // The QA results of this pass are outdated, so in the final location they will have been overwritten with
+            // the results of a later pass. Hence, checking if the files of this pass are in the final location does not
+            // make sense.
+            return true
+        }
+        return dataProcessingFilesService.checkConsistencyWithFinalDestinationForDeletion(
+                qaPassProcessingDirectory(pass),
+                new File(processedMergedBamFileService.qaResultDestinationDirectory(pass.processedMergedBamFile)),
+                allFileNames(pass.processedMergedBamFile))
+    }
+
+    /**
+     * There is no unit or integration test for this method.
+     *
+     * Deletes the files of the specified QA pass from the "processing" directory on the file system.
+     *
+     * @return The number of bytes that have been freed on the file system.
+     */
+    public long deleteProcessingFiles(final QualityAssessmentMergedPass pass) {
+        notNull pass
+        if (!checkConsistencyForProcessingFilesDeletion(pass)) {
+            return 0L
+        }
+        return dataProcessingFilesService.deleteProcessingFilesAndDirectory(
+                pass.project,
+                qaPassProcessingDirectory(pass),
+                allFileNames(pass.processedMergedBamFile))
     }
 
     /**

@@ -406,7 +406,7 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
     }
 
     private void logToJob(String message) {
-        Log log = LogThreadLocal.getLog()
+        Log log = LogThreadLocal.getThreadLog()
         log?.debug message
     }
 }

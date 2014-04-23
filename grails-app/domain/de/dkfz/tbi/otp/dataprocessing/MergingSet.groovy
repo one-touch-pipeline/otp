@@ -58,6 +58,9 @@ class MergingSet {
         return mergingWorkPackage.project
     }
 
+    /**
+     * @return Whether this is the most recent merging set on the referenced {@link MergingWorkPackage}.
+     */
     public boolean isLatestSet() {
         int maxIdentifier = createCriteria().get {
             eq("mergingWorkPackage", mergingWorkPackage)

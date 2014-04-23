@@ -7,6 +7,9 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 
 /**
  *
@@ -53,18 +56,23 @@ class ProcessedMergedBamFileService {
         if (processedMergedBamFile?.md5sum) {
             return destinationDirectory(processedMergedBamFile)
         } else {
-            MergingSet mergingSet = mergingPass.mergingSet
-            MergingWorkPackage mergingWorkPackage = mergingSet.mergingWorkPackage
-            Sample sample = mergingWorkPackage.sample
-            Individual individual = sample.individual
-            DataProcessingFilesService.OutputDirectories dirType = DataProcessingFilesService.OutputDirectories.MERGING
-            String baseDir = dataProcessingFilesService.getOutputDirectory(individual, dirType)
-            String seqTypeName = "${mergingWorkPackage.seqType.name}/${mergingWorkPackage.seqType.libraryLayout}"
-            String workPackageCriteraPart = "${(mergingWorkPackage.processingType == MergingWorkPackage.ProcessingType.SYSTEM ? mergingWorkPackage.mergingCriteria : MergingWorkPackage.ProcessingType.MANUAL)}"
-            String workPackageNamePart = "${seqTypeName}/${workPackageCriteraPart}"
-            String dir = "${sample.sampleType.name}/${workPackageNamePart}/${mergingSet.identifier}/pass${mergingPass.identifier}"
-            return "${baseDir}/${dir}"
+            return processingDirectory(mergingPass)
         }
+    }
+
+    public String processingDirectory(MergingPass mergingPass) {
+        notNull mergingPass
+        MergingSet mergingSet = mergingPass.mergingSet
+        MergingWorkPackage mergingWorkPackage = mergingSet.mergingWorkPackage
+        Sample sample = mergingWorkPackage.sample
+        Individual individual = sample.individual
+        DataProcessingFilesService.OutputDirectories dirType = DataProcessingFilesService.OutputDirectories.MERGING
+        String baseDir = dataProcessingFilesService.getOutputDirectory(individual, dirType)
+        String seqTypeName = "${mergingWorkPackage.seqType.name}/${mergingWorkPackage.seqType.libraryLayout}"
+        String workPackageCriteraPart = "${(mergingWorkPackage.processingType == MergingWorkPackage.ProcessingType.SYSTEM ? mergingWorkPackage.mergingCriteria : MergingWorkPackage.ProcessingType.MANUAL)}"
+        String workPackageNamePart = "${seqTypeName}/${workPackageCriteraPart}"
+        String dir = "${sample.sampleType.name}/${workPackageNamePart}/${mergingSet.identifier}/pass${mergingPass.identifier}"
+        return "${baseDir}/${dir}"
     }
 
     public String directory(ProcessedMergedBamFile mergedBamFile) {
@@ -167,6 +175,28 @@ class ProcessedMergedBamFileService {
         String dir = directory(mergedBamFile)
         String filename = fileNameForBai(mergedBamFile)
         return "${dir}/${filename}"
+    }
+
+    /**
+     * Names of additional files that are both in the processing directory and in the final destination project
+     * directory.
+     */
+    public Collection<String> additionalFileNames(final ProcessedMergedBamFile bamFile) {
+        return [
+                fileNameForBai(bamFile),
+                checksumFileService.md5FileName(fileNameForBai(bamFile)),
+                checksumFileService.md5FileName(fileName(bamFile)),
+        ]
+    }
+
+    /**
+     * Names of additional files that are in the processing directory but not in the final destination project
+     * directory.
+     */
+    public Collection<String> additionalFileNamesProcessingDirOnly(final ProcessedMergedBamFile bamFile) {
+        return [
+                fileNameForMetrics(bamFile),
+        ]
     }
 
     public Project project(ProcessedMergedBamFile mergedBamFile) {
@@ -449,5 +479,71 @@ class ProcessedMergedBamFileService {
             }
         }
         return null
+    }
+
+    /**
+     * There is no unit or integration test for this method.
+     *
+     * Checks consistency for {@link #deleteProcessingFiles(ProcessedMergedBamFile)}.
+     *
+     * If there are inconsistencies, details are logged to the thread log (see {@link LogThreadLocal}).
+     *
+     * @return true if there is no serious inconsistency.
+     */
+    public boolean checkConsistencyForProcessingFilesDeletion(final ProcessedMergedBamFile bamFile) {
+        notNull bamFile
+        final File directory = new File(processingDirectory(bamFile.mergingPass))
+        final String fileName = fileName(bamFile)
+        final File fsBamFile = new File(directory, fileName)
+        if (!dataProcessingFilesService.checkConsistencyWithDatabaseForDeletion(bamFile, fsBamFile)) {
+            return false
+        }
+        if (!bamFile.mergingPass.isLatestPass() || !bamFile.mergingSet.isLatestSet()) {
+            // The merging results of this pass are outdated, so in the final location they will have been overwritten with
+            // the results of a later pass. Hence, checking if the files of this pass are in the final location does not
+            // make sense.
+            return true
+        }
+        if (bamFile.md5sum == null) {
+            threadLog.error "ProcessedMergedBamFile ${bamFile} does not have its md5sum set, although it belongs to the latest MergingPass of the latest MergingSet for its MergingWorkpackage."
+            return false
+        }
+        dataProcessingFilesService.checkConsistencyWithFinalDestinationForDeletion(
+                directory,
+                new File(destinationDirectory(bamFile)),
+                additionalFileNames(bamFile) << fileName)
+    }
+
+    /**
+     * There is no unit or integration test for this method.
+     *
+     * Deletes the files listed below from the "processing" directory on the file system.
+     * Sets {@link ProcessedMergedBamFile#fileExists} to <code>false</code> and
+     * {@link ProcessedMergedBamFile#deletionDate} to the current time.
+     *
+     * <p>
+     * The following files are deleted:
+     * <ul>
+     *     <li>.bam</li>
+     *     <li>.bam.md5sum</li>
+     *     <li>.bai</li>
+     *     <li>.bai.md5sum</li>
+     *     <li>_metrics.txt</li>
+     * </ul>
+     *
+     * @return The number of bytes that have been freed on the file system.
+     */
+    public long deleteProcessingFiles(final ProcessedMergedBamFile bamFile) {
+        notNull bamFile
+        if (!checkConsistencyForProcessingFilesDeletion(bamFile)) {
+            return 0L
+        }
+        final File directory = new File(processingDirectory(bamFile.mergingPass))
+        final Collection<String> allAdditionalFileNames = additionalFileNames(bamFile) + additionalFileNamesProcessingDirOnly(bamFile)
+        return dataProcessingFilesService.deleteProcessingFiles(
+                bamFile,
+                new File(directory, fileName(bamFile)),
+                allAdditionalFileNames.collect { new File(directory, it) }.toArray(new File[0])
+        )
     }
 }

@@ -14,7 +14,7 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
 
     /**
      * Checksum to verify success of copying.
-     * When the file is copied its checksum is stored in this property.
+     * When the file - and all other files handled by the transfer workflow - are copied, its checksum is stored in this property.
      * Otherwise it is null.
      */
     String md5sum

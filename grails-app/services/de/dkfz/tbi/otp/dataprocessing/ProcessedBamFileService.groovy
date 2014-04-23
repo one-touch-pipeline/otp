@@ -5,6 +5,7 @@ import static org.springframework.util.Assert.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 class ProcessedBamFileService {
 
@@ -295,28 +296,36 @@ class ProcessedBamFileService {
     }
 
     /**
+     * There is no unit or integration test for this method.
+     *
+     * Checks consistency for {@link #deleteProcessingFiles(ProcessedBamFile)}.
+     *
+     * If there are inconsistencies, details are logged to the thread log (see {@link LogThreadLocal}).
+     *
+     * @return true if there is no serious inconsistency.
+     */
+    public boolean checkConsistencyForProcessingFilesDeletion(final ProcessedBamFile bamFile) {
+        notNull bamFile
+        return dataProcessingFilesService.checkConsistencyWithDatabaseForDeletion(bamFile, new File(getFilePath(bamFile)))
+    }
+
+    /**
+     * There is no unit or integration test for this method.
+     *
      * Deletes the *.bam file, the *.bam.bai file and the *.bam_bwaSampeErrorLog.txt file from the
      * "processing" directory on the file system. Sets {@link ProcessedBamFile#fileExists} to
      * <code>false</code> and {@link ProcessedBamFile#deletionDate} to the current time.
      *
      * @return The number of bytes that have been freed on the file system.
      */
-    // ProcessedSaiFileService has a similar method.
     public long deleteProcessingFiles(final ProcessedBamFile bamFile) {
-        final Project project = bamFile.project
-        final File fsBamFile = new File(getFilePath(bamFile))
-        if (dataProcessingFilesService.checkConsistencyForDeletion(bamFile, fsBamFile)) {
-            long freedBytes = 0L
-            freedBytes += dataProcessingFilesService.deleteProcessingFile(project, baiFilePath(bamFile))
-            freedBytes += dataProcessingFilesService.deleteProcessingFile(project, bwaSampeErrorLogFilePath(bamFile))
-            freedBytes += dataProcessingFilesService.deleteProcessingFile(project, fsBamFile)
-            bamFile.fileExists = false
-            bamFile.deletionDate = new Date()
-            assertSave bamFile
-            return freedBytes
-        } else {
-            return 0L
-        }
+        notNull bamFile
+        return dataProcessingFilesService.deleteProcessingFiles(
+                bamFile,
+                new File(getFilePath(bamFile)),
+                new File(baiFilePath(bamFile)),
+                new File(bwaSampeErrorLogFilePath(bamFile)),
+        )
     }
 
     private def assertSave(def object) {

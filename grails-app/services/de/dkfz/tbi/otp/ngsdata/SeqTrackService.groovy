@@ -745,7 +745,7 @@ AND entry.value = :value
                     if (!file.used) {
                         segment.allFilesUsed = false
                         allUsed = false
-                        LogThreadLocal.getLog()?.error("Datafile " + file + " is not used in a seq track" +
+                        LogThreadLocal.getThreadLog()?.error("Datafile " + file + " is not used in a seq track" +
                                         (file.fileWithdrawn ? " (reason: withdrawn)": ""))
                     }
                 }

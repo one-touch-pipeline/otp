@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getLog
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
+import static org.springframework.util.Assert.notNull
 
 /**
  * This service implements alignment files organization convention
@@ -22,6 +24,7 @@ class ProcessedAlignmentFileService {
 
     @Autowired
     ApplicationContext applicationContext
+    AbstractBamFileService abstractBamFileService
     DataProcessingFilesService dataProcessingFilesService
 
     public String getDirectory(AlignmentPass alignmentPass) {
@@ -39,6 +42,8 @@ class ProcessedAlignmentFileService {
     }
 
     /**
+     * There is no unit or integration test for this method.
+     *
      * Deletes the files of the specified alignment pass from the "processing" directory on the file system.
      *
      * These will be deleted:
@@ -53,35 +58,60 @@ class ProcessedAlignmentFileService {
      * @return The number of bytes that have been freed on the file system.
      */
     public long deleteProcessingFiles(final AlignmentPass alignmentPass) {
+        notNull alignmentPass
         final Project project = alignmentPass.project
         long freedBytes = 0L
         final Collection<ProcessedBamFile> bamFiles = ProcessedBamFile.findAllByAlignmentPass(alignmentPass)
         if (bamFiles.size() == 1) {
             final ProcessedBamFile bamFile = bamFiles.first()
-            try {
-                for (final QualityAssessmentPass qaPass : QualityAssessmentPass.findAllByProcessedBamFile(bamFile)) {
-                    freedBytes += applicationContext.processedBamFileQaFileService.deleteProcessingFiles(qaPass)
+            final Collection<QualityAssessmentPass> qaPasses = QualityAssessmentPass.findAllByProcessedBamFile(bamFile)
+            final Collection<ProcessedSaiFile> saiFiles = ProcessedSaiFile.findAllByAlignmentPass(alignmentPass)
+            boolean consistent = true
+            qaPasses.each {
+                if (!applicationContext.processedBamFileQaFileService.checkConsistencyForProcessingFilesDeletion(it)) {
+                    consistent = false
+                }
+            }
+            if (!applicationContext.processedBamFileService.checkConsistencyForProcessingFilesDeletion(bamFile)) {
+                consistent = false
+            }
+            saiFiles.each {
+                if (!applicationContext.processedSaiFileService.checkConsistencyForProcessingFilesDeletion(it)) {
+                    consistent = false
+                }
+            }
+            if (consistent) {
+                qaPasses.each {
+                    freedBytes += applicationContext.processedBamFileQaFileService.deleteProcessingFiles(it)
                 }
                 dataProcessingFilesService.deleteProcessingDirectory(project,
                         applicationContext.processedBamFileQaFileService.directoryPath(alignmentPass))
                 freedBytes += applicationContext.processedBamFileService.deleteProcessingFiles(bamFile)
-                for (final ProcessedSaiFile saiFile : ProcessedSaiFile.findAllByAlignmentPass(alignmentPass)) {
-                    freedBytes += applicationContext.processedSaiFileService.deleteProcessingFiles(saiFile)
+                saiFiles.each {
+                    freedBytes += applicationContext.processedSaiFileService.deleteProcessingFiles(it)
                 }
                 dataProcessingFilesService.deleteProcessingDirectory(project, getDirectory(alignmentPass))
-                log.debug "${freedBytes} bytes have been freed for alignment pass ${alignmentPass}."
-            } catch (final FileNotInFinalDestinationException e) {
-                log.error "The single lane QA files of alignment pass ${alignmentPass} are not in their final destination as expected: ${e.message} Skipping that alignment pass."
+                threadLog.debug "${freedBytes} bytes have been freed for alignment pass ${alignmentPass}."
+            } else {
+                threadLog.error "There was at least one inconsistency (see earlier log message(s)) for alignment pass ${alignmentPass}. Skipping that alignment pass."
             }
         } else {
-            log.error "Found ${bamFiles.size()} ProcessedBamFiles for AlignmentPass ${alignmentPass}. That's weird. Skipping that alignment pass."
+            threadLog.error "Found ${bamFiles.size()} ProcessedBamFiles for AlignmentPass ${alignmentPass}. That's weird. Skipping that alignment pass."
         }
         return freedBytes
     }
 
     /**
-     * Deletes the processing files of alignment passes that have already been merged and have been created before the
-     * specified date.
+     * There is no unit or integration test for this method.
+     *
+     * Deletes the processing files of alignment passes that have been created before the specified date and satisfy at
+     * least one of the following criteria:
+     * <ul>
+     *     <li>For the same SeqTrack there is a later alignment pass that has been processed.</li>
+     *     <li>The resulting BAM file has been merged.</li>
+     * </ul>
+     *
+     * See {@link #deleteProcessingFiles(AlignmentPass)} for details about which files are deleted.
      *
      * @param millisMaxRuntime If more than this number of milliseconds elapse during the execution of this
      * method, the method will return even if not all alignment passes have been processed.
@@ -89,61 +119,82 @@ class ProcessedAlignmentFileService {
      * @return The number of bytes that have been freed on the file system.
      */
     public long deleteOldAlignmentProcessingFiles(final Date createdBefore, final long millisMaxRuntime = Long.MAX_VALUE) {
-        log.info "Deleting processing files of merged alignment passes created before ${createdBefore}."
-        final String queryPart =
-                "WHERE (fileExists = true OR deletionDate IS NULL) AND dateCreated < :createdBefore " +
-                        "AND EXISTS (FROM MergingSetAssignment msa " +
-                        "            JOIN msa.mergingSet ms WITH ms.status = :processed "
-        final Map params = [
-                createdBefore: createdBefore,
-                processed: MergingSet.State.PROCESSED,
-        ]
-        final Collection<AlignmentPass> alignmentPassesWithOldFiles = []
-        alignmentPassesWithOldFiles.addAll(ProcessedBamFile.findAll(
-                "FROM ProcessedBamFile pbf " + queryPart +
-                        "            WHERE msa.bamFile = pbf)",
-                params)*.alignmentPass)
-        alignmentPassesWithOldFiles.addAll(ProcessedSaiFile.findAll(
-                "FROM ProcessedSaiFile psf " + queryPart +
-                        "            JOIN msa.bamFile pbf " +
-                        "            WHERE pbf.alignmentPass = psf.alignmentPass)",
-                params)*.alignmentPass)
-        final long startTimestamp = System.currentTimeMillis()
-        long freedBytes = 0L
-        long processedPasses = 0L
-        try {
-            for (final AlignmentPass alignmentPass : alignmentPassesWithOldFiles.unique()) {
-                if (System.currentTimeMillis() - startTimestamp > millisMaxRuntime) {
-                    log.info "Exiting because the maximum runtime (${millisMaxRuntime} ms) has elapsed."
-                    break
-                }
-                if (ProcessedSaiFile.findByAlignmentPassAndDateCreatedGreaterThan(alignmentPass, createdBefore) != null) {
-                    // A newer SAI file belongs to the alignment pass.
-                    continue
-                }
-                for (final ProcessedBamFile bamFile : ProcessedBamFile.findAllByAlignmentPass(alignmentPass)) {
-                    if (bamFile.dateCreated >= createdBefore) {
-                        // A newer BAM file belongs to the alignment pass.
-                        continue
-                    }
-                    final Collection<MergingSetAssignment> mergingSetAssignments = MergingSetAssignment.findAllByBamFile(bamFile)
-                    if (mergingSetAssignments.empty) {
-                        // The BAM file is not assigned to any merging set, specifically not to any processed merging set.
-                        // TODO: Nevertheless we might delete it if it is withdrawn. -> OTP-711
-                        continue
-                    }
-                    if (mergingSetAssignments.find {it.mergingSet.status != MergingSet.State.PROCESSED}) {
-                        // The BAM file is assigned to a merging set which has not been processed yet.
-                        // TODO: It might be sufficient to ensure that the latest merging set for the BAM file is in state PROCESSED. -> OTP-711
-                        continue
-                    }
-                }
-                freedBytes += deleteProcessingFiles(alignmentPass)
-                processedPasses++
-            }
-        } finally {
-            log.info "${freedBytes} bytes have been freed by deleting the processing files of ${processedPasses} merged alignment passes created before ${createdBefore}."
+        notNull createdBefore
+        return dataProcessingFilesService.deleteOldProcessingFiles(this, "alignment", createdBefore, millisMaxRuntime, {
+            final String query1 =
+                "FROM ProcessedBamFile bf1 WHERE " +
+                "((" +
+                    // later pass has been processed
+                    "bf1.alignmentPass.seqTrack.alignmentState = :alignmentState AND EXISTS (" +
+                        "FROM ProcessedBamFile bf2 " +
+                        "WHERE bf2.qualityAssessmentStatus = :qaStatus " +
+                        "AND bf2.dateCreated < :createdBefore " +
+                        "AND (bf2.withdrawn = false OR bf1.withdrawn = true) " +
+                        "AND bf2.alignmentPass.seqTrack = bf1.alignmentPass.seqTrack " +
+                        "AND bf2.alignmentPass.identifier > bf1.alignmentPass.identifier)" +
+                ") OR (" +
+                    // merged
+                    AbstractBamFileService.QUALITY_ASSESSED_AND_MERGED_QUERY +
+                "))"
+            final String query2 = " AND (fileExists = true OR deletionDate IS NULL) AND dateCreated < :createdBefore"
+            final Map params = [
+                    createdBefore: createdBefore,
+                    qaStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
+                    mergingSetStatus: MergingSet.State.PROCESSED,
+                    status: AbstractBamFile.State.PROCESSED,
+                    alignmentState: SeqTrack.DataProcessingState.FINISHED,
+            ]
+            final Collection<AlignmentPass> passes = []
+            passes.addAll(ProcessedBamFile.findAll(
+                    query1 + query2,
+                    params)*.alignmentPass)
+            passes.addAll(ProcessedSaiFile.findAll(
+                    "FROM ProcessedSaiFile sf WHERE EXISTS (" + query1 + " AND bf1.alignmentPass = sf.alignmentPass)" + query2,
+                    params)*.alignmentPass)
+            passes.unique()
+        })
+    }
+
+    /**
+     * There is no unit or integration test for this method.
+     */
+    public boolean mayProcessingFilesBeDeleted(final AlignmentPass pass, final Date createdBefore) {
+        notNull pass
+        notNull createdBefore
+        // The ProcessedBamFile and all ProcessedSaiFiles of one alignment pass should have the same dateCreated, but
+        // the database does not enforce this. So, to be safe, check the dates of all SAI files and the BAM file.
+        if (ProcessedSaiFile.findByAlignmentPassAndDateCreatedGreaterThan(pass, createdBefore) != null) {
+            // A newer SAI file belongs to the alignment pass.
+            return false
         }
-        return freedBytes
+        final Collection<ProcessedBamFile> bamFiles = ProcessedBamFile.findAllByAlignmentPass(pass)
+        if (bamFiles.size() != 1) {
+            threadLog.error "Found ${bamFiles.size()} ProcessedBamFiles for AlignmentPass ${pass}. That's weird."
+            return false
+        }
+        final ProcessedBamFile bamFile = bamFiles.first()
+        if (bamFile.dateCreated >= createdBefore) {
+            // The BAM file is not old enough.
+            return false
+        }
+        if (pass.seqTrack.alignmentState == SeqTrack.DataProcessingState.FINISHED) {
+            if (ProcessedBamFile.createCriteria().get {
+                eq("qualityAssessmentStatus", QaProcessingStatus.FINISHED)
+                lt("dateCreated", createdBefore)
+                eq("withdrawn", false)
+                alignmentPass {
+                    eq("seqTrack", pass.seqTrack)
+                    gt("identifier", pass.identifier)
+                }
+                maxResults(1)
+            } != null) {
+                // For the same SeqTrack there is a later alignment pass that has been processed.
+                return true
+            }
+        }
+        if (abstractBamFileService.hasBeenQualityAssessedAndMerged(bamFile, createdBefore)) {
+            return true
+        }
+        return false
     }
 }

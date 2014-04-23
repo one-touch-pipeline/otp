@@ -76,10 +76,13 @@ class AbstractBamFile {
     QualityControl qualityControl = QualityControl.NOT_DONE
 
     /**
-     * this flag stores the actual state of a {@link ProcessedBamFile}
+     * Whether this has been assigned to a merging set.
      */
     State status = State.DECLARED
 
+    /**
+     * Used for {@link ProcessedMergedBamFile}s, not for {@link ProcessedBamFile}s.
+     */
     FileOperationStatus fileOperationStatus = FileOperationStatus.DECLARED
 
     static constraints = {

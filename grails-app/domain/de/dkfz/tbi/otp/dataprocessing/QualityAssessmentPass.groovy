@@ -24,6 +24,9 @@ class QualityAssessmentPass {
                 "project: ${processedBamFile.project}"
     }
 
+    /**
+     * @return Whether this is the most recent QA pass on the referenced {@link ProcessedBamFile}.
+     */
     public boolean isLatestPass() {
         int maxIdentifier = createCriteria().get {
             eq("processedBamFile", processedBamFile)

@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import org.springframework.transaction.annotation.Transactional
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.getPath
+import static org.springframework.util.Assert.notNull
 
 class ProcessedBamFileQaFileService {
 
@@ -153,45 +154,44 @@ class ProcessedBamFileQaFileService {
     }
 
     /**
+     * There is no unit or integration test for this method.
+     *
+     * Checks consistency for {@link #deleteProcessingFiles(QualityAssessmentPass)}.
+     *
+     * If there are inconsistencies, details are logged to the thread log (see {@link LogThreadLocal}).
+     *
+     * @return true if there is no serious inconsistency.
+     */
+    public boolean checkConsistencyForProcessingFilesDeletion(final QualityAssessmentPass pass) {
+        notNull pass
+        if (!pass.isLatestPass() || !pass.alignmentPass.isLatestPass()) {
+            // The QA results of this pass are outdated, so in the final location they will have been overwritten with
+            // the results of a later pass. Hence, checking if the files of this pass are in the final location does not
+            // make sense.
+            return true
+        }
+        return dataProcessingFilesService.checkConsistencyWithFinalDestinationForDeletion(
+                new File(directoryPath(pass)),
+                finalDestinationDirectory(pass),
+                allFileNames(pass.processedBamFile))
+    }
+
+    /**
+     * There is no unit or integration test for this method.
+     *
      * Deletes the files of the specified QA pass from the "processing" directory on the file system.
      *
      * @return The number of bytes that have been freed on the file system.
-     *
-     * @throws FileNotInFinalDestinationException
      */
-    @Transactional(noRollbackFor = FileNotInFinalDestinationException)
-    public long deleteProcessingFiles(final QualityAssessmentPass pass) throws FileNotInFinalDestinationException {
-        final File passDirectory = new File(directoryPath(pass))
-        final File finalDestinationDirectory = finalDestinationDirectory(pass)
-        final Collection<String> fileNames = allFileNames(pass.processedBamFile)
-        fileNames.each {
-            final File fileToBeDeleted = new File(passDirectory, it)
-            if (fileToBeDeleted.exists()) {
-                final File fileInFinalDest = new File(finalDestinationDirectory, it)
-                if (!fileInFinalDest.exists()) {
-                    throw new FileNotInFinalDestinationException("${fileInFinalDest} does not exist.")
-                }
-                final long fileToBeDeletedSize = fileToBeDeleted.length()
-                final Date fileToBeDeletedDate = new Date(fileToBeDeleted.lastModified())
-                final long fileInFinalDestSize = fileInFinalDest.length()
-                final Date fileInFinalDestDate = new Date(fileInFinalDest.lastModified())
-                // Checking the dates for equality makes no sense because they are always different (seems not to be
-                // preserved when copying).
-                if (fileToBeDeletedSize != fileInFinalDestSize /*|| fileToBeDeletedDate != fileInFinalDestDate */) {
-                    throw new FileNotInFinalDestinationException(
-                            "${fileToBeDeleted} (${fileToBeDeletedSize} bytes, last modified ${fileToBeDeletedDate}) and " +
-                            "${fileInFinalDest} (${fileInFinalDestSize} bytes, last modified ${fileInFinalDestDate}) are different.")
-                }
-            }
+    public long deleteProcessingFiles(final QualityAssessmentPass pass) {
+        notNull pass
+        if (!checkConsistencyForProcessingFilesDeletion(pass)) {
+            return 0L
         }
-        final Project project = pass.project
-        long freedBytes = 0L
-        fileNames.each {
-            final File fileToBeDeleted = new File(passDirectory, it)
-            freedBytes += dataProcessingFilesService.deleteProcessingFile(project, fileToBeDeleted)
-        }
-        dataProcessingFilesService.deleteProcessingDirectory(project, passDirectory)
-        return freedBytes
+        return dataProcessingFilesService.deleteProcessingFilesAndDirectory(
+                pass.project,
+                new File(directoryPath(pass)),
+                allFileNames(pass.processedBamFile))
     }
 
     private def assertSave(def object) {

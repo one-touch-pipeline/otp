@@ -1,6 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+
+import static org.springframework.util.Assert.notNull
 
 class ProcessedSaiFileService {
 
@@ -65,29 +68,36 @@ class ProcessedSaiFileService {
         return fileSize ? null : "File size of ${file} is ${fileSize}."
     }
 
+    /**
+     * There is no unit or integration test for this method.
+     *
+     * Checks consistency for {@link #deleteProcessingFiles(ProcessedSaiFile)}.
+     *
+     * If there are inconsistencies, details are logged to the thread log (see {@link LogThreadLocal}).
+     *
+     * @return true if there is no serious inconsistency.
+     */
+    public boolean checkConsistencyForProcessingFilesDeletion(final ProcessedSaiFile saiFile) {
+        notNull saiFile
+        return dataProcessingFilesService.checkConsistencyWithDatabaseForDeletion(saiFile, new File(getFilePath(saiFile)))
+    }
 
     /**
+     * There is no unit or integration test for this method.
+     *
      * Deletes the *.sai file and the *.sai_bwaAlnErrorLog.txt file from the "processing" directory on
      * the file system. Sets {@link ProcessedSaiFile#fileExists} to <code>false</code> and
      * {@link ProcessedSaiFile#deletionDate} to the current time.
      *
      * @return The number of bytes that have been freed on the file system.
      */
-    // ProcessedBamFileService has a similar method.
     public long deleteProcessingFiles(final ProcessedSaiFile saiFile) {
-        final Project project = saiFile.project
-        final File fsSaiFile = new File(getFilePath(saiFile))
-        if (dataProcessingFilesService.checkConsistencyForDeletion(saiFile, fsSaiFile)) {
-            long freedBytes = 0L
-            freedBytes += dataProcessingFilesService.deleteProcessingFile(project, bwaAlnErrorLogFilePath(saiFile))
-            freedBytes += dataProcessingFilesService.deleteProcessingFile(project, fsSaiFile)
-            saiFile.fileExists = false
-            saiFile.deletionDate = new Date()
-            assertSave saiFile
-            return freedBytes
-        } else {
-            return 0L
-        }
+        notNull saiFile
+        return dataProcessingFilesService.deleteProcessingFiles(
+                saiFile,
+                new File(getFilePath(saiFile)),
+                new File(bwaAlnErrorLogFilePath(saiFile)),
+        )
     }
 
     private def assertSave(def object) {
