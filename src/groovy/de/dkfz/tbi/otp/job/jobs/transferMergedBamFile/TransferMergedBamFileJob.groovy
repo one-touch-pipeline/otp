@@ -29,11 +29,10 @@ class TransferMergedBamFileJob extends AbstractJobImpl {
         Project project = processedMergedBamFileService.project(file)
         Map<String, String> clusterPrefix = configService.clusterSpecificCommandPrefixes(project)
         Realm realm = configService.getRealmDataProcessing(project)
-        String jobId = executionHelperService.sendScript(realm) { """
+        executionHelperService.sendScript(realm) { """
 cd ${locations.sourceDirectory}
 ${clusterPrefix.cp} *.bam *.bai *.md5sum ${clusterPrefix.dest}${temporalDestinationDir}
 ${clusterPrefix.exec} \"find ${temporalDestinationDir} -type f -exec chmod 0640 '{}' \\;\"
 """ }
-        log.debug "Job ${jobId} submitted to PBS"
     }
 }

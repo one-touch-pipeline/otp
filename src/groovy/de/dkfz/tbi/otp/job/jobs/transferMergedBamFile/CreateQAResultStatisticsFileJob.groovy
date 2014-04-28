@@ -56,7 +56,7 @@ The kit ${inferredKit} was inferred to be used.\n\n
         Project project = processedMergedBamFileService.project(mergedBamFile)
         Realm realm = configService.getRealmDataManagement(project)
 
-        String jobId = executionHelperService.sendScript(realm) { // FIXME: This is an ugly hack which should be fixed properly when OTP-504 is resolved
+        executionHelperService.sendScript(realm) { // FIXME: This is an ugly hack which should be fixed properly when OTP-504 is resolved
             // FIXME: remove chmod once the ACLs in the file system are in place
             """
 cd ${temporalDestinationDir}
@@ -73,7 +73,5 @@ ${fastqFilesNames}
 EOD
 chmod 0440 ${statisticsFiles.small} ${statisticsFiles.extended} ${FileNames.FASTQ_FILES_IN_MERGEDBAMFILE}
 """ }
-
-        log.debug "Job ${jobId} submitted to PBS"
     }
 }

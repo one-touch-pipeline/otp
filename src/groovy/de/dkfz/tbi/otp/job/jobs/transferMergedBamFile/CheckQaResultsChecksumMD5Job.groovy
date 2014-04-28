@@ -33,10 +33,9 @@ class CheckQaResultsChecksumMD5Job extends AbstractJobImpl {
         log.debug "Attempting to check copied qa results"
         Project project = processedMergedBamFileService.project(file)
         Realm realm = configService.getRealmDataManagement(project)
-        String jobId = executionHelperService.sendScript(realm) { """
+        executionHelperService.sendScript(realm) { """
 cd ${temporalqaDestinationDir}
 md5sum -c ${processedMergedBamFileQaFileService.MD5SUM_NAME}
 """ }
-        log.debug "Job ${jobId} submitted to PBS"
     }
 }

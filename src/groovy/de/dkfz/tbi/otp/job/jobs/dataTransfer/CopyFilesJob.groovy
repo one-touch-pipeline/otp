@@ -41,7 +41,6 @@ printf "A new lane is currently in progress for this sample.\\nThe merged BAM fi
 """
             Realm realm = configService.getRealmDataManagement(it.project)
             String jobId = executionHelperService.sendScript(realm, cmd)
-            log.debug "Job ${jobId} submitted to PBS"
             pbsIds << jobId
         }
 
@@ -50,7 +49,6 @@ printf "A new lane is currently in progress for this sample.\\nThe merged BAM fi
             String cmd = scriptText(file)
             Realm realm = configService.getRealmDataManagement(file.project)
             String jobId = executionHelperService.sendScript(realm, cmd)
-            log.debug "Job ${jobId} submitted to PBS"
             pbsIds << jobId
         }
 

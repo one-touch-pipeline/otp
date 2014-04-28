@@ -34,7 +34,7 @@ class TransferSingleLaneQAResultJob extends AbstractJobImpl{
         String tmpQADestinationDirectory = processedMergedBamFileService.qaResultTempDestinationDirectory(mergedBamFile)
         String qaDestinationDirectory = processedMergedBamFileService.qaResultDestinationDirectory(mergedBamFile)
         Realm realm = configService.getRealmDataProcessing(project)
-        String jobId = executionHelperService.sendScript(realm) {
+        executionHelperService.sendScript(realm) {
             String text = ""
             for (String directoryName : singleLaneQAResultsDirectories.keySet()) {
                 String src = singleLaneQAResultsDirectories.get(directoryName)
@@ -48,6 +48,5 @@ ${clusterPrefix.exec} \"find ${tmpQADestinationDirectory}/${directoryName} -type
             }
             return text
         }
-        log.debug "Job ${jobId} submitted to PBS"
     }
 }

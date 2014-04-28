@@ -29,11 +29,10 @@ class CheckMergedBamFileChecksumMD5Job extends AbstractJobImpl {
         Realm realm = configService.getRealmDataManagement(project)
 
         log.debug "Attempting to check copied merged BAM file " + locations.get("bamFile") + " (id= " + file + ")"
-        String jobId = executionHelperService.sendScript(realm) { """
+        executionHelperService.sendScript(realm) { """
 cd ${temporalDestinationDir}
 md5sum -c ${locations.md5BamFile}
 md5sum -c ${locations.md5BaiFile}
 """ }
-        log.debug "Job ${jobId} submitted to PBS"
     }
 }

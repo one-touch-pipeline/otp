@@ -37,11 +37,10 @@ class TransferMergedQAResultJob extends AbstractJobImpl{
         QualityAssessmentMergedPass pass = qualityAssessmentMergedPassService.latestQualityAssessmentMergedPass(bamFile)
         String sourceQAResultDirectory = processedMergedBamFileQaFileService.directoryPath(pass)
         Realm realm = configService.getRealmDataProcessing(project)
-        String jobId = executionHelperService.sendScript(realm) { """
+        executionHelperService.sendScript(realm) { """
 ${clusterPrefix.exec} \"mkdir -p -m 2750 ${tmpQADestinationDirectory}\"
 ${clusterPrefix.cp} -r ${sourceQAResultDirectory}/* ${clusterPrefix.dest}${tmpQADestinationDirectory}
 ${clusterPrefix.exec} \"find ${tmpQADestinationDirectory} -type f -exec chmod 0640 '{}' \\;\"
 """ }
-        log.debug "Job ${jobId} submitted to PBS"
     }
 }

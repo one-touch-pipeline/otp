@@ -40,11 +40,10 @@ class MoveFilesToFinalDestinationJob extends AbstractJobImpl {
         Realm realm = configService.getRealmDataManagement(project)
         String projectDir = realm.rootPath + "/" + project.dirName
         // before moving the files to the final directory it is checked if the files, which are currently at the destination, are in use
-        String jobId = executionHelperService.sendScript(realm) { """
+        executionHelperService.sendScript(realm) { """
 mkdir -p ${dest}${processedMergedBamFileService.QUALITY_ASSESSMENT_DIR}
 flock -x ${dest} -c \"mv -f ${temporalDestinationDir}/*.bam ${temporalDestinationDir}/*.bai ${temporalDestinationDir}/*.md5sum ${temporalDestinationDir}/${FileNames.FASTQ_FILES_IN_MERGEDBAMFILE} ${dest} && mv -f ${temporalQADestinationDir}/* ${qaDestinationDirectory}/\"
 rm -rf ${temporalDestinationDir}
 """ }
-        log.debug "Job ${jobId} submitted to PBS"
     }
 }

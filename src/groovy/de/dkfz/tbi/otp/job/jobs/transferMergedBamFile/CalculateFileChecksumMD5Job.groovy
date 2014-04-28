@@ -51,7 +51,7 @@ class CalculateFileChecksumMD5Job extends AbstractJobImpl {
         String qaResultMd5sumFile = processedMergedBamFileQaFileService.qaResultsMd5sumFile(bamFile)
         Map<String, String> singleLaneQAResultsDirectories = processedMergedBamFileService.singleLaneQAResultsDirectories(bamFile)
 
-        String jobId = executionHelperService.sendScript(realm) {
+        executionHelperService.sendScript(realm) {
             // FIXME: remove chmod once the ACLs in the file system are in place
             // the md5sum of the merged bam file is written to the file md5BamFile
             // the md5sum of the bai file is written to the file md5BaiFile
@@ -82,6 +82,5 @@ sed -i 's,${singleLaneSourceDir},./${singleLaneDestinationDir},' ${qaResultMd5su
             text += "chmod 0640 ${qaResultMd5sumFile}"
             return text
         }
-        log.debug "Job " + jobId + " submitted to PBS"
     }
 }
