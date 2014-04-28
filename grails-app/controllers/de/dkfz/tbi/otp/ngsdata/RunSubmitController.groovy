@@ -13,8 +13,17 @@ class RunSubmitController {
         [centers: centers, seqPlatform: seqPlatform]
     }
 
-    def submit() {
-        long runId = runSubmitService.submit(params)
+    def submit(SubmitCommand cmd) {
+        long runId = runSubmitService.submit(cmd.runName, cmd.seqPlatform, cmd.seqCenter,
+                cmd.initialFormat, cmd.dataPath)
         redirect(controller: "run", action: "show", id: runId)
     }
+}
+
+class SubmitCommand implements Serializable {
+    String runName
+    String seqPlatform
+    String seqCenter
+    String initialFormat
+    String dataPath
 }

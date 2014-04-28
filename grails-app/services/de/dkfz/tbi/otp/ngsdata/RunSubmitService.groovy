@@ -2,33 +2,33 @@ package de.dkfz.tbi.otp.ngsdata
 
 class RunSubmitService {
 
-    long submit(def params) {
-        Run run = findOrCreateRun(params)
+    long submit(String runName, String seqPlatform, String seqCenter, String initialFormat, String dataPath) {
+        Run run = findOrCreateRun(runName, seqPlatform, seqCenter)
         safeSave(run)
-        RunSegment segment = createSegment(params, run)
+        RunSegment segment = createSegment(initialFormat, dataPath, run)
         safeSave(segment)
         return run.id
     }
 
-    private Run findOrCreateRun(def params) {
-        Run run = Run.findByName(params.runName)
+    private static Run findOrCreateRun(String runName, String seqPlatform, String seqCenter) {
+        Run run = Run.findByName(runName)
         if (run) {
             return run
         }
-        SeqPlatform platform = getPlatform(params.seqPlatform)
+        SeqPlatform platform = getPlatform(seqPlatform)
         run = new Run(
-            name: params.runName,
-            seqCenter: SeqCenter.findByName(params.seqCenter),
+            name: runName,
+            seqCenter: SeqCenter.findByName(seqCenter),
             seqPlatform: platform
         )
         return run
     }
 
-    private RunSegment createSegment(def params, Run run) {
-        RunSegment.DataFormat format = RunSegment.DataFormat."${params.initialFormat}"
+    private RunSegment createSegment(String initialFormat, String dataPath, Run run) {
+        RunSegment.DataFormat format = RunSegment.DataFormat."${initialFormat}"
         RunSegment segment = new RunSegment(
-            dataPath: params.dataPath,
-            mdPath: params.dataPath,
+            dataPath: dataPath,
+            mdPath: dataPath,
             metaDataStatus: RunSegment.Status.NEW,
             initialFormat: format,
             currentFormat: format,
@@ -50,14 +50,14 @@ class RunSubmitService {
         throw new Exception("Unknown files format")
     }
 
-    private SeqPlatform getPlatform(String fullName) {
+    private static SeqPlatform getPlatform(String fullName) {
         int idx = fullName.indexOf(" ")
         String name = fullName.substring(0, idx)
         String model = fullName.substring(idx+1)
         return SeqPlatform.findByNameAndModel(name, model)
     }
 
-    private boolean safeSave(Object obj) {
+    private static boolean safeSave(Object obj) {
         if (obj.validate() && obj.save(flush: true)) {
             return true
         } else {
@@ -66,4 +66,3 @@ class RunSubmitService {
         }
     }
 }
-
