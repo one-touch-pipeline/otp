@@ -2,10 +2,10 @@ package de.dkfz.tbi.otp.ngsdata
 
 class RunSubmitService {
 
-    long submit(String runName, String seqPlatform, String seqCenter, String initialFormat, String dataPath) {
+    long submit(String runName, String seqPlatform, String seqCenter, String initialFormat, String dataPath, boolean align) {
         Run run = findOrCreateRun(runName, seqPlatform, seqCenter)
         safeSave(run)
-        RunSegment segment = createSegment(initialFormat, dataPath, run)
+        RunSegment segment = createSegment(initialFormat, dataPath, align, run)
         safeSave(segment)
         return run.id
     }
@@ -24,7 +24,7 @@ class RunSubmitService {
         return run
     }
 
-    private RunSegment createSegment(String initialFormat, String dataPath, Run run) {
+    private RunSegment createSegment(String initialFormat, String dataPath, boolean align, Run run) {
         RunSegment.DataFormat format = RunSegment.DataFormat."${initialFormat}"
         RunSegment segment = new RunSegment(
             dataPath: dataPath,
@@ -33,7 +33,8 @@ class RunSubmitService {
             initialFormat: format,
             currentFormat: format,
             filesStatus: defineFilesStatus(format.toString()),
-            run: run
+            run: run,
+            align: align,
         )
         return segment
     }

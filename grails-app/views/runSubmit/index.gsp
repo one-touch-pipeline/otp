@@ -30,6 +30,10 @@
              <td><g:select name="initialFormat" from="${de.dkfz.tbi.otp.ngsdata.RunSegment.DataFormat}"/></td>
         </tr>
         <tr>
+            <td class="myKey"><g:message code="runSubmit.align"/></td>
+            <td><g:checkBox name="align" checked="true" /></td>
+        </tr>
+        <tr>
             <td></td><td><g:submitButton name="submit" value="Submit" ondblclick="return false;"/></td>
         </tr>
 
