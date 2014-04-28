@@ -37,7 +37,7 @@ class CopyFilesJob extends AbstractJobImpl {
         bamFiles.each {
             String cmd = """
 mkdir -p -m 2750 ${processedMergedBamFileService.destinationDirectory(it)}
-echo "A new lane is currently in progress for this sample.\\nThe merged BAM file will be created/updated as soon as processing is complete." > ${processedMergedBamFileService.destinationDirectory(it)}/${processedMergedBamFileService.inProgressFileName(it)};
+printf "A new lane is currently in progress for this sample.\\nThe merged BAM file will be created/updated as soon as processing is complete.\\n" > ${processedMergedBamFileService.destinationDirectory(it)}/${processedMergedBamFileService.inProgressFileName(it)};
 """
             Realm realm = configService.getRealmDataManagement(it.project)
             String jobId = executionHelperService.sendScript(realm, cmd)
