@@ -10,21 +10,31 @@ class RunSubmitController {
     def index() {
         def centers = SeqCenter.list()
         def seqPlatform = SeqPlatform.list()*.fullName()
-        [centers: centers, seqPlatform: seqPlatform]
+        return [centers: centers, seqPlatform: seqPlatform, cmd: flash.params]
     }
 
     def submit(SubmitCommand cmd) {
-        long runId = runSubmitService.submit(cmd.runName, cmd.seqPlatform, cmd.seqCenter,
-                cmd.initialFormat, cmd.dataPath, cmd.align)
-        redirect(controller: "run", action: "show", id: runId)
+        if(cmd.hasErrors()) {
+            flash.params = cmd
+            redirect(action: "index")
+        } else {
+            long runId = runSubmitService.submit(cmd.name, cmd.seqPlatform, cmd.seqCenter,
+                    cmd.initialFormat, cmd.dataPath, cmd.align)
+            redirect(controller: "run", action: "show", id: runId)
+        }
     }
 }
 
 class SubmitCommand implements Serializable {
-    String runName
+    String name
     String seqPlatform
     String seqCenter
     String initialFormat
     String dataPath
     boolean align
+
+    static constraints = {
+        importFrom Run, include: ["name", "seqPlatform", "seqCenter"]
+        importFrom RunSegment, include: ["initialFormat", "dataPath", "align"]
+    }
 }
