@@ -50,7 +50,9 @@
                 </tr>
             </table>
         </div>
-        <h1 id="samples" style="display:inline-block"><g:message code="individual.show.samples"/> <otp:editorSwitch roles="ROLE_OPERATOR" template="newValue" link="${g.createLink(controller: 'individual', action: 'newSampleType', id: ind.id)}" value="${ind.type}"/></h1>
+        <h1 id="samples" style="display:inline-block"><g:message code="individual.show.samples"/>
+            <otp:editorSwitch roles="ROLE_OPERATOR" template="newValue" link="${g.createLink(controller: 'individual', action: 'newSampleType', id: ind.id)}" value="${ind.type}"/>
+        </h1>
         <div class="tableBlock">
             <table>
                 <g:each var="sample" in="${ind.samples}">
