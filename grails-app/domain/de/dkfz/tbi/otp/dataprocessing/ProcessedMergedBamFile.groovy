@@ -40,6 +40,14 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
         return mergingPass.project
     }
 
+    Individual getIndividual() {
+        return mergingPass.individual
+    }
+
+    SeqType getSeqType() {
+        return mergingPass.seqType
+    }
+
     @Override
     public String toString() {
         MergingWorkPackage mergingWorkPackage = mergingPass.mergingSet.mergingWorkPackage

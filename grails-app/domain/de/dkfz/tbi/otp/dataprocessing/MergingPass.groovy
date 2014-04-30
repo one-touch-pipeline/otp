@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*;
+import de.dkfz.tbi.otp.ngsdata.*
 
 /**
  * Instance of this class represent instance of merging process
@@ -28,6 +28,14 @@ class MergingPass {
 
     Project getProject() {
         return mergingSet.project
+    }
+
+    Individual getIndividual() {
+        return mergingSet.individual
+    }
+
+    SeqType getSeqType() {
+        return mergingSet.seqType
     }
 
     public String toString() {

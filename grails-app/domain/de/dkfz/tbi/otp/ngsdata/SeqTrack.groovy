@@ -7,7 +7,7 @@ class SeqTrack {
         NOT_STARTED,
         IN_PROGRESS,
         FINISHED,
-        INCOMPLETE
+        INCOMPLETE,
     }
 
     enum QualityEncoding {

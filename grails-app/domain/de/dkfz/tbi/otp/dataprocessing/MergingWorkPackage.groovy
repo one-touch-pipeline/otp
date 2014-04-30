@@ -66,4 +66,8 @@ class MergingWorkPackage {
     Project getProject() {
         return sample.project
     }
+
+    Individual getIndividual() {
+        return sample.individual
+    }
 }

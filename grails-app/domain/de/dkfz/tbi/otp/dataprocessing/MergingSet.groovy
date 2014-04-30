@@ -58,6 +58,7 @@ class MergingSet {
         return mergingWorkPackage.project
     }
 
+
     public boolean isLatestSet() {
         int maxIdentifier = createCriteria().get {
             eq("mergingWorkPackage", mergingWorkPackage)
@@ -66,5 +67,13 @@ class MergingSet {
             }
         }
         return identifier == maxIdentifier
+    }
+
+    Individual getIndividual() {
+        return mergingWorkPackage.individual
+    }
+
+    SeqType getSeqType() {
+        return mergingWorkPackage.seqType
     }
 }

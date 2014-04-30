@@ -49,22 +49,20 @@ class TestData {
         ])
         assertNotNull(realm.save(flush: true))
 
-        project = new Project()
-        project.name = "otp_test_project"
-        project.dirName = "/tmp/alignmentPassService/"
-        project.realmName = realm.name
+        project = createProject([
+            name : "otp_test_project",
+            dirName : "/tmp/alignmentPassService/",
+            realmName : realm.name,
+        ])
         assertNotNull(project.save(flush: true))
 
         individual = createIndividual()
         assertNotNull(individual.save(flush: true))
 
-        sampleType = new SampleType()
-        sampleType.name = "TUMOR"
+        sampleType = createSampleType()
         assertNotNull(sampleType.save(flush: true))
 
-        sample = new Sample()
-        sample.individual = individual
-        sample.sampleType = sampleType
+        sample = createSample()
         assertNotNull(sample.save(flush: true))
 
         seqType = new SeqType()
@@ -117,6 +115,14 @@ class TestData {
         assertNotNull(referenceGenomeProjectSeqType.save(flush: true))
     }
 
+    Project createProject(Map properties = [:]) {
+        return new Project([
+            name: "project",
+            dirName: "dirName",
+            realmName: "DKFZ"
+        ] + properties)
+    }
+
     Individual createIndividual(Map properties = [:]) {
         return new Individual([
             pid: "654321",
@@ -124,6 +130,29 @@ class TestData {
             mockPid: "PID",
             type: Individual.Type.REAL,
             project: project,
+        ] + properties)
+    }
+
+    SampleType createSampleType(Map properties = [:]) {
+        return new SampleType([
+            name: "TUMOR",
+        ] + properties)
+    }
+
+
+    Sample createSample(Map properties = [:]) {
+        return new Sample([
+            individual: individual,
+            sampleType: sampleType,
+        ] + properties)
+    }
+
+
+    SeqType createSeqType(Map properties = [:]) {
+        return new SeqType([
+            name : "WHOLE_GENOME",
+            libraryLayout : "PAIRED",
+            dirName : "whole_genome_sequencing",
         ] + properties)
     }
 
@@ -274,6 +303,29 @@ class TestData {
             withdrawn: false,
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.NOT_STARTED,
             status: AbstractBamFile.State.DECLARED
+        ] + properties)
+    }
+
+
+    MergingWorkPackage createMergingWorkPackage(Map properties = [:]) {
+        return new MergingWorkPackage([
+            sample: sample,
+            seqType: seqType,
+        ] + properties)
+    }
+
+
+    MergingSet createMergingSet(Map properties = [:]) {
+        return new MergingSet([
+            identifier: 0,
+        ] + properties)
+    }
+
+
+    MergingPass createMergingPass(Map properties = [:]) {
+        return new MergingPass([
+            identifier: 0,
+            description: "mergingPass",
         ] + properties)
     }
 
