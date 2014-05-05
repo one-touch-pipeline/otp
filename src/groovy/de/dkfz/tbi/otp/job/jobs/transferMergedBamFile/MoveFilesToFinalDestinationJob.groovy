@@ -44,6 +44,7 @@ class MoveFilesToFinalDestinationJob extends AbstractJobImpl {
 mkdir -p ${dest}${processedMergedBamFileService.QUALITY_ASSESSMENT_DIR}
 flock -x ${dest} -c \"mv -f ${temporalDestinationDir}/*.bam ${temporalDestinationDir}/*.bai ${temporalDestinationDir}/*.md5sum ${temporalDestinationDir}/${FileNames.FASTQ_FILES_IN_MERGEDBAMFILE} ${dest} && mv -f ${temporalQADestinationDir}/* ${qaDestinationDirectory}/\"
 rm -rf ${temporalDestinationDir}
+rm -f ${dest}/${processedMergedBamFileService.inProgressFileName(mergedBamFile)}
 """ }
     }
 }
