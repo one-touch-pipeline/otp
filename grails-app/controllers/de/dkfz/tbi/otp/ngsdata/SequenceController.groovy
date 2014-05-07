@@ -14,12 +14,13 @@ class SequenceController {
     def projectService
     def servletContext
     def fastqcResultsService
+
     def index() {
         List<SeqType> seqTypes = SeqType.list(sort: "name", order: "asc")
         [projects: projectService.getAllProjects(),
             sampleTypes: SampleType.list(sort: "name", order: "asc"),
-            seqTypes: new HashSet(seqTypes.collect { it.name }),
-            libraryLayouts: new HashSet(seqTypes.collect { it.libraryLayout }),
+            seqTypes: new TreeSet(seqTypes.collect { it.name }),
+            libraryLayouts: new TreeSet(seqTypes.collect { it.libraryLayout }),
             seqCenters: SeqCenter.list(sort: "name", order: "asc")
         ]
     }
