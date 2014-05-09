@@ -40,13 +40,15 @@ grails.mime.types = [ html: [
 ]
 
 // What URL patterns should be processed by the resources plugin
-grails.resources.adhoc.patterns = [
-    '/images/*',
-    '/css/*',
-    '/js/*',
-    '/plugins/*'
+// (prevent disclosure of configuration and code (CVE-2014-0053))
+grails.resources.adhoc.includes = [
+    '/images/**',
+    '/css/**',
+    '/js/**',
+    '/plugins/**',
+    '/pages/**',
+    '/xslt/**',
 ]
-
 
 // The default codec used to encode data with ${}
 grails.views.default.codec = "none" // none, html, base64
