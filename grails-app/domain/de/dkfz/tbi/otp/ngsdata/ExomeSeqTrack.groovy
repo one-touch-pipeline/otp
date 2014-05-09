@@ -31,6 +31,6 @@ class ExomeSeqTrack extends SeqTrack {
     }
 
     public String toString() {
-        return "${super.toString()} ${kitInfoReliability} ${exomeEnrichmentKit}"
+        return "${super.toString()} {kitInfoReliability} ${exomeEnrichmentKit}"
     }
 }

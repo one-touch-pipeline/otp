@@ -69,7 +69,8 @@ class SeqTrack {
     }
 
     String toString() {
-        "${laneId} ${sample} ${seqType} "
+        return "lane: ${laneId} run: ${run.name} " +
+                "<br>sample: ${sample} seqType: ${seqType} project: ${project}<br>"
     }
 
     /**

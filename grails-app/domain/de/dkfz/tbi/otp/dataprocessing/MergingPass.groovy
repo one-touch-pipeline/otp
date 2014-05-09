@@ -31,6 +31,21 @@ class MergingPass {
     }
 
     public String toString() {
-       return "pass:${identifier} - set:${mergingSet.identifier} - ${mergingSet.mergingWorkPackage.seqType} - ${mergingSet.mergingWorkPackage.sample}"
+       return "id: ${mergingSet.identifier} " +
+               "pass: ${identifier} " + (latestPass ? "(latest) " : "") +
+               "set: ${mergingSet.identifier} " + (mergingSet.latestSet ? "(latest) " : "") +
+               "<br>sample: ${mergingSet.mergingWorkPackage.sample} " +
+               "seqType: ${mergingSet.mergingWorkPackage.seqType} " +
+               "project: ${mergingSet.mergingWorkPackage.project}"
      }
+
+    public boolean isLatestPass() {
+        int maxIdentifier = createCriteria().get {
+            eq("mergingSet", mergingSet)
+            projections{
+                max("identifier")
+            }
+        }
+        return identifier == maxIdentifier
+    }
 }

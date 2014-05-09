@@ -538,7 +538,7 @@ $.otp.workflows = {
         }, [
             { "bSortable": true,  "aTargets": [0] },
             { "bSortable": false, "aTargets": [1] },
-            { "bSortable": false, "aTargets": [2] },
+            { "bSortable": false, "sWidth": "530px", "aTargets": [2] },
             { "bSortable": true,  "aTargets": [3] },
             { "bSortable": false, "aTargets": [4] },
             { "bSortable": false, "aTargets": [5] },

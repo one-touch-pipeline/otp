@@ -15,7 +15,23 @@ class QualityAssessmentPass {
     }
 
     public String toString() {
-        return "pass: ${identifier} on ${processedBamFile.alignmentPass}"
+        return "id: ${processedBamFile.id} " +
+                "pass: ${identifier} " + (latestPass ? "(latest) " : "") +
+                "alignmentPass: ${processedBamFile.alignmentPass.identifier} " +
+                (processedBamFile.alignmentPass.latestPass ? "(latest) " : "") +
+                "<br>sample: ${processedBamFile.sample} " +
+                "seqType: ${processedBamFile.seqType} " +
+                "project: ${processedBamFile.project}"
+    }
+
+    public boolean isLatestPass() {
+        int maxIdentifier = createCriteria().get {
+            eq("processedBamFile", processedBamFile)
+            projections{
+                max("identifier")
+            }
+        }
+        return identifier == maxIdentifier
     }
 
     static belongsTo = [

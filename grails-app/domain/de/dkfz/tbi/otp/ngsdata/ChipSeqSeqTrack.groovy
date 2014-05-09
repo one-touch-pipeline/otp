@@ -20,6 +20,6 @@ class ChipSeqSeqTrack extends SeqTrack {
     ]
 
     public String toString() {
-        return "${super.toString()} ${antibodyTarget}"
+        return "${super.toString()} {antibodyTarget}"
     }
 }

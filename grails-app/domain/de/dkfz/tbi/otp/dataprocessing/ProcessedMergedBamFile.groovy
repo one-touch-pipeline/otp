@@ -42,6 +42,12 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
 
     @Override
     public String toString() {
-        return "PMBF (${id}) on ${mergingPass}"
+        MergingWorkPackage mergingWorkPackage = mergingPass.mergingSet.mergingWorkPackage
+        return "pass: ${mergingPass.identifier} " + (mergingPass.latestPass ? "(latest) " : "") +
+                "id: ${id} " +
+                "set: ${mergingPass.mergingSet.identifier} " + (mergingPass.mergingSet.latestSet ? "(latest) " : "") +
+                "<br>sample: ${mergingWorkPackage.sample} " +
+                "seqType: ${mergingWorkPackage.seqType} " +
+                "project: ${mergingWorkPackage.project}"
     }
 }

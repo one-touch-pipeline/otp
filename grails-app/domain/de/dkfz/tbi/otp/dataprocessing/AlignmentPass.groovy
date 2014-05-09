@@ -22,7 +22,12 @@ class AlignmentPass {
     }
 
     public String toString() {
-        return "pass:${identifier} on run:${seqTrack.run.name} lane:${seqTrack.laneId}"
+        return "seqTrack id: ${seqTrack.id} " +
+                "pass: ${identifier} " + (latestPass ? "(latest) " : "") +
+                "lane: ${seqTrack.laneId} run: ${seqTrack.run.name} " +
+                "<br>sample: ${seqTrack.sample} " +
+                "seqType: ${seqTrack.seqType} " +
+                "project: ${seqTrack.project}"
     }
 
     /**

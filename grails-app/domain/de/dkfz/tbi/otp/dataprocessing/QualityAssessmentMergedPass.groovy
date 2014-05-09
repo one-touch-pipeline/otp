@@ -17,7 +17,25 @@ class QualityAssessmentMergedPass {
 
     public String toString() {
         MergingWorkPackage mergingWorkPackage = processedMergedBamFile.mergingPass.mergingSet.mergingWorkPackage
-        return "pass: ${identifier} on ${mergingWorkPackage.seqType} - ${mergingWorkPackage.sample}"
+        return "id: ${processedMergedBamFile.id} " +
+                "pass: ${identifier} " + (latestPass ? "(latest) " : "") +
+                "mergingPass: ${processedMergedBamFile.mergingPass.identifier} " +
+                (processedMergedBamFile.mergingPass.latestPass ? "(latest) " : "") +
+                "set: ${processedMergedBamFile.mergingPass.mergingSet.identifier} " +
+                (processedMergedBamFile.mergingPass.mergingSet.latestSet ? "(latest) " : "") +
+                "<br>sample: ${mergingWorkPackage.sample} " +
+                "seqType: ${mergingWorkPackage.seqType} " +
+                "project: ${mergingWorkPackage.project}"
+    }
+
+    public boolean isLatestPass() {
+        int maxIdentifier = createCriteria().get {
+            eq("processedMergedBamFile", processedMergedBamFile)
+            projections{
+                max("identifier")
+            }
+        }
+        return identifier == maxIdentifier
     }
 
     static belongsTo = [
