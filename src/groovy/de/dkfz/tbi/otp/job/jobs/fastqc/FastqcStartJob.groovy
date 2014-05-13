@@ -28,11 +28,13 @@ class FastqcStartJob extends AbstractStartJobImpl {
         if (!hasFreeSlot()) {
             return
         }
-        SeqTrack seqTrack = seqTrackService.getSeqTrackReadyForFastqcProcessing()
-        if (seqTrack) {
-            log.debug "Creating fastqc process for seTrack ${seqTrack}"
-            seqTrackService.setFastqcInProgress(seqTrack)
-            createProcess(new ProcessParameter(value: seqTrack.id.toString(), className: seqTrack.class.name))
+        SeqTrack.withTransaction {
+            SeqTrack seqTrack = seqTrackService.getSeqTrackReadyForFastqcProcessing()
+            if (seqTrack) {
+                log.debug "Creating fastqc process for seTrack ${seqTrack}"
+                seqTrackService.setFastqcInProgress(seqTrack)
+                createProcess(new ProcessParameter(value: seqTrack.id.toString(), className: seqTrack.class.name))
+            }
         }
     }
 

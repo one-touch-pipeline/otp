@@ -27,11 +27,13 @@ class QualityAssessmentStartJob extends AbstractStartJobImpl {
         if (!hasFreeSlot()) {
             return
         }
-        QualityAssessmentPass qualityAssessmentPass = qualityAssessmentPassService.createPass()
-        if (qualityAssessmentPass) {
-            log.debug "Creating quality assessment process for ${qualityAssessmentPass}"
-            qualityAssessmentPassService.passStarted(qualityAssessmentPass)
-            createProcess(new ProcessParameter(value: qualityAssessmentPass.id.toString(), className: qualityAssessmentPass.class.name))
+        QualityAssessmentPass.withTransaction {
+            QualityAssessmentPass qualityAssessmentPass = qualityAssessmentPassService.createPass()
+            if (qualityAssessmentPass) {
+                log.debug "Creating quality assessment process for ${qualityAssessmentPass}"
+                qualityAssessmentPassService.passStarted(qualityAssessmentPass)
+                createProcess(new ProcessParameter(value: qualityAssessmentPass.id.toString(), className: qualityAssessmentPass.class.name))
+            }
         }
     }
 

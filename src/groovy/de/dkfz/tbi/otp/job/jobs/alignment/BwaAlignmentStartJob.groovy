@@ -27,11 +27,13 @@ class BwaAlignmentStartJob extends AbstractStartJobImpl {
         if (!hasFreeSlot()) {
             return
         }
-        AlignmentPass alignmentPass = alignmentPassService.createAlignmentPass()
-        if (alignmentPass) {
-            log.debug "Creating Alignment process for AlignmentPass ${alignmentPass}"
-            alignmentPassService.alignmentPassStarted(alignmentPass)
-            createProcess(new ProcessParameter(value: alignmentPass.id.toString(), className: alignmentPass.class.name))
+        AlignmentPass.withTransaction {
+            AlignmentPass alignmentPass = alignmentPassService.createAlignmentPass()
+            if (alignmentPass) {
+                log.debug "Creating Alignment process for AlignmentPass ${alignmentPass}"
+                alignmentPassService.alignmentPassStarted(alignmentPass)
+                createProcess(new ProcessParameter(value: alignmentPass.id.toString(), className: alignmentPass.class.name))
+            }
         }
     }
 

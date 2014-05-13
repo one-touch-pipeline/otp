@@ -26,11 +26,13 @@ class TransferMergedBamFileStartJob extends AbstractStartJobImpl {
         if (!hasFreeSlot()) {
             return
         }
-        ProcessedMergedBamFile file = processedMergedBamFileService.mergedBamFileWithFinishedQA()
-        if (file) {
-            log.debug 'Starting to transfer merged BAM file ' + file
-            processedMergedBamFileService.updateFileOperationStatus(file, AbstractBamFile.FileOperationStatus.INPROGRESS)
-            createProcess(new ProcessParameter(value: file.id.toString(), className: file.class.name))
+        ProcessedMergedBamFile.withTransaction {
+            ProcessedMergedBamFile file = processedMergedBamFileService.mergedBamFileWithFinishedQA()
+            if (file) {
+                log.debug 'Starting to transfer merged BAM file ' + file
+                processedMergedBamFileService.updateFileOperationStatus(file, AbstractBamFile.FileOperationStatus.INPROGRESS)
+                createProcess(new ProcessParameter(value: file.id.toString(), className: file.class.name))
+            }
         }
     }
 

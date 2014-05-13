@@ -27,11 +27,13 @@ class CreateMergingSetStartJob extends AbstractStartJobImpl {
         if (!hasFreeSlot()) {
             return
         }
-        ProcessedBamFile bamFile2Merge = processedBamFileService.processedBamFileNeedsProcessing()
-        if (bamFile2Merge) {
-            processedBamFileService.blockedForAssigningToMergingSet(bamFile2Merge)
-            createProcess(new ProcessParameter(value: bamFile2Merge.id.toString(), className: ProcessedBamFile.class.name))
-            println "CreateMergingSetStartJob started for: ${bamFile2Merge.toString()}"
+        ProcessedBamFile.withTransaction {
+            ProcessedBamFile bamFile2Merge = processedBamFileService.processedBamFileNeedsProcessing()
+            if (bamFile2Merge) {
+                processedBamFileService.blockedForAssigningToMergingSet(bamFile2Merge)
+                createProcess(new ProcessParameter(value: bamFile2Merge.id.toString(), className: ProcessedBamFile.class.name))
+                println "CreateMergingSetStartJob started for: ${bamFile2Merge.toString()}"
+            }
         }
     }
 

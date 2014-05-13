@@ -29,11 +29,13 @@ class MergingStartJob extends AbstractStartJobImpl {
         if (!hasFreeSlot()) {
             return
         }
-        MergingPass mergingPass = mergingPassService.create()
-        if (mergingPass) {
-            mergingPassService.mergingPassStarted(mergingPass)
-            createProcess(new ProcessParameter(value: mergingPass.id.toString(), className: mergingPass.class.name))
-            log.debug "MergingSetStartJob started for: ${mergingPass.toString()}"
+        MergingPass.withTransaction {
+            MergingPass mergingPass = mergingPassService.create()
+            if (mergingPass) {
+                mergingPassService.mergingPassStarted(mergingPass)
+                createProcess(new ProcessParameter(value: mergingPass.id.toString(), className: mergingPass.class.name))
+                log.debug "MergingSetStartJob started for: ${mergingPass.toString()}"
+            }
         }
     }
 

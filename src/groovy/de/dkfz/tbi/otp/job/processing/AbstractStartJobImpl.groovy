@@ -85,20 +85,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
     }
 
     protected void createProcess(List<Parameter> input, ProcessParameter processParameter = null) {
-        executorService.submit({
-            try {
-                Thread.currentThread().sleep(1000)
-            } catch (Exception e) {
-                println e.message
-                e.printStackTrace()
-            }
-            try {
-                schedulerService.createProcess(this, input, processParameter)
-            } catch (Exception e) {
-                println e.message
-                e.printStackTrace()
-            }
-        } as Callable )
+        schedulerService.createProcess(this, input, processParameter)
     }
 
     protected void createProcess(ProcessParameter processParameter) {
