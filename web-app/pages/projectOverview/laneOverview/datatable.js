@@ -41,6 +41,28 @@ $.otp.projectOverviewTable = {
                         oTableLaneOverview.fnSettings().oFeatures.bServerSide = false;
                     },
                     "success" : function (json) {
+                        var i, j, rowData, row;
+                        for (i = 0; i < json.aaData.length; i += 1) {
+                            row = json.aaData[i];
+                            if ($('#project').val()!= "MMML") {
+                                row[2] = $.otp.createLinkMarkup({
+                                    controller: 'individual',
+                                    action: 'show',
+                                    text: row[2],
+                                    parameters: {
+                                        mockPid: row[0]
+                                    }
+                                });
+                            }
+                            row[0] = $.otp.createLinkMarkup({
+                                    controller: 'individual',
+                                    action: 'show',
+                                    text: row[0],
+                                    parameters: {
+                                        mockPid: row[0]
+                                    }
+                                });
+                        }
                         fnCallback(json);
                         oTableLaneOverview.fnSettings().oFeatures.bServerSide = false;
                     }

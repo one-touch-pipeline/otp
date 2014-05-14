@@ -2,7 +2,15 @@
 /*global $ */
 
 $.otp.projectOverviewTable = {
-    registerDataTable: function (selector, url) {
+        /*
+         * The function return only the passed value.
+         * It can be used for not modified output.
+         */
+         returnParameterUnchanged: function (json) {
+                return json;
+         },
+
+    registerDataTable: function (selector, url, successUpdate) {
         "use strict";
         var oTable = $(selector).dataTable({
             sDom: '<i> T rt<"clear">',
@@ -37,6 +45,7 @@ $.otp.projectOverviewTable = {
                         oTable.fnSettings().oFeatures.bServerSide = false;
                     },
                     "success": function (json) {
+                        json = successUpdate(json)
                         fnCallback(json);
                         oTable.fnSettings().oFeatures.bServerSide = false;
                     }
@@ -81,28 +90,46 @@ $.otp.projectOverviewTable = {
             $.otp.createLink({
                 controller: 'projectOverview',
                 action: 'dataTableSource'
-            })
+            }),
+            function (json) {
+                var i, j, rowData, row;
+                for (i = 0; i < json.aaData.length; i += 1) {
+                    row = json.aaData[i];
+                    row[0] = $.otp.createLinkMarkup({
+                            controller: 'individual',
+                            action: 'show',
+                            text: row[0],
+                            parameters: {
+                                mockPid: row[0]
+                            }
+                        });
+                }
+                return json;
+            }
         );
         var oTable2 = $.otp.projectOverviewTable.registerDataTable(
             '#patientsAndSamplesGBCountPerProject',
             $.otp.createLink({
                 controller: 'projectOverview',
                 action: 'dataTableSourcePatientsAndSamplesGBCountPerProject'
-            })
+            }),
+            $.otp.projectOverviewTable.returnParameterUnchanged
         );
         var oTable4 = $.otp.projectOverviewTable.registerDataTable(
             '#sampleTypeNameCountBySample',
             $.otp.createLink({
                 controller : 'projectOverview',
                 action : 'dataTableSourceSampleTypeNameCountBySample'
-            })
+            }),
+            $.otp.projectOverviewTable.returnParameterUnchanged
         );
         var oTable5 = $.otp.projectOverviewTable.registerDataTable(
             "#centerNameRunId",
             $.otp.createLink({
                 controller : 'projectOverview',
                 action : 'dataTableSourceCenterNameRunId'
-            })
+            }),
+            $.otp.projectOverviewTable.returnParameterUnchanged
         );
         $.otp.projectOverviewTable.updatePatientCount();
         $('#project_select').change(function () {

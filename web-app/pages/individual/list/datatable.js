@@ -64,9 +64,26 @@ $.otp.individual = {
                                     id: row.id,
                                     text: row.pid
                                 }),
-                                row.mockFullName,
-                                row.mockPid,
-                                row.project,
+                                $.otp.createLinkMarkup({
+                                    controller: 'individual',
+                                    action: 'show',
+                                    id: row.id,
+                                    text: row.mockFullName
+                                }),
+                                $.otp.createLinkMarkup({
+                                    controller: 'individual',
+                                    action: 'show',
+                                    id: row.id,
+                                    text:row.mockPid
+                                }),
+                                $.otp.createLinkMarkup({
+                                    controller: 'projectOverview',
+                                    action: 'index',
+                                    parameters: {
+                                                projectName: row.project
+                                    },
+                                    text: row.project
+                                }),
                                 row.type
                             ];
                             json.aaData[i] = rowData;

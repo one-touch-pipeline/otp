@@ -100,7 +100,7 @@
                     <td>-</td>
                     <td>s</td>
                     <td><g:link controller="dataFile" action="showDetails" id="${file.id}">${file.fileName}</g:link></td>
-                    <td>${file.project}</td>
+                    <td><b><g:link controller="projectOverview" action="index" params="[projectName: file.project]">${file.project}</g:link></b></td>
                     <td class="${file.metaDataValid}">meta-data</td>
                     <td class="${file.fileExists}">lsdf</td>
                     <td class="${file.fileLinked}">linked</td>

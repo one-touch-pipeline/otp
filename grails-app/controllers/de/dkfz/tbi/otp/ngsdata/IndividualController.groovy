@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.utils.DataTableCommand
 import grails.converters.JSON
 import groovy.json.JsonSlurper
+import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class IndividualController {
 
@@ -15,10 +15,14 @@ class IndividualController {
     }
 
     def show = {
-        if (!params.id) {
-            params.id = "0"
+        Individual ind
+        if (params.id) {
+            ind = individualService.getIndividual(params.id)
+        } else if (params.mockPid) {
+            ind = individualService.getIndividualByMockPid(params.mockPid)
+        } else {
+            //neither id not mockpid given.
         }
-        Individual ind = individualService.getIndividual(params.id)
         if (!ind) {
             response.sendError(404)
             return
@@ -187,16 +191,16 @@ enum IndividualSortColumn {
 
     static IndividualSortColumn fromDataTable(int column) {
         switch (column) {
-        case 0:
-            return IndividualSortColumn.PID
-        case 1:
-            return IndividualSortColumn.MOCKFULLNAME
-        case 2:
-            return IndividualSortColumn.MOCKPID
-        case 3:
-            return IndividualSortColumn.PROJECT
-        default:
-            return IndividualSortColumn.TYPE
+            case 0:
+                return IndividualSortColumn.PID
+            case 1:
+                return IndividualSortColumn.MOCKFULLNAME
+            case 2:
+                return IndividualSortColumn.MOCKPID
+            case 3:
+                return IndividualSortColumn.PROJECT
+            default:
+                return IndividualSortColumn.TYPE
         }
     }
 }
@@ -309,7 +313,7 @@ class SamplesParser {
                 parsedSamples.add(samplesParser)
             }
             value.identifier.each { String v ->
-                    samplesParser.newEntries << v
+                samplesParser.newEntries << v
             }
         }
         return parsedSamples
@@ -346,36 +350,36 @@ class IndividualFiltering {
         def slurper = new JsonSlurper()
         slurper.parseText(json).each {
             switch (it.type) {
-            case "projectSelection":
-                if (it.value.isLong()) {
-                    filtering.project << (it.value as Long)
-                    filtering.enabled = true
-                }
-                break
-            case "pidSearch":
-                if (it.value && it.value.length() >= 3) {
-                    filtering.pid << it.value
-                    filtering.enabled = true
-                }
-                break
-            case "mockFullNameSearch":
-                if (it.value && it.value.length() >= 3) {
-                    filtering.mockFullName << it.value
-                    filtering.enabled = true
-                }
-                break
-            case "mockPidSearch":
-                if (it.value && it.value.length() >= 3) {
-                    filtering.mockPid << it.value
-                    filtering.enabled = true
-                }
-                break
-            case "typeSelection":
-                if (it.value) {
-                    filtering.type << (it.value as Individual.Type)
-                    filtering.enabled = true
-                }
-                break
+                case "projectSelection":
+                    if (it.value.isLong()) {
+                        filtering.project << (it.value as Long)
+                        filtering.enabled = true
+                    }
+                    break
+                case "pidSearch":
+                    if (it.value && it.value.length() >= 3) {
+                        filtering.pid << it.value
+                        filtering.enabled = true
+                    }
+                    break
+                case "mockFullNameSearch":
+                    if (it.value && it.value.length() >= 3) {
+                        filtering.mockFullName << it.value
+                        filtering.enabled = true
+                    }
+                    break
+                case "mockPidSearch":
+                    if (it.value && it.value.length() >= 3) {
+                        filtering.mockPid << it.value
+                        filtering.enabled = true
+                    }
+                    break
+                case "typeSelection":
+                    if (it.value) {
+                        filtering.type << (it.value as Individual.Type)
+                        filtering.enabled = true
+                    }
+                    break
             }
         }
         return filtering

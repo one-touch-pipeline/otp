@@ -1,13 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PostFilter
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.core.userdetails.UserDetails
 import de.dkfz.tbi.otp.utils.ReferencedClass
-import groovy.json.JsonSlurper
 
 class IndividualService {
     def springSecurityService
@@ -40,6 +39,16 @@ class IndividualService {
         }
         return individual
     }
+
+    @PostAuthorize("(returnObject == null) or hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
+    Individual getIndividualByMockPid(String mockPid) {
+        if (!mockPid) {
+            return null
+        }
+        Individual individual = Individual.findByMockPid(mockPid)
+        return individual
+    }
+
 
     /**
      * Retrieves the given Individual.
@@ -173,9 +182,9 @@ AND i.id > :indId
                         ilike("name", filter)
                     }
                     /**
-                    * sqlRestriction because ilike could be just used for string.
-                    * The parameter type is enum and < ilike("type", filter)> did not work.
-                    **/
+                     * sqlRestriction because ilike could be just used for string.
+                     * The parameter type is enum and < ilike("type", filter)> did not work.
+                     **/
                     sqlRestriction("upper(type) like upper('${filter}')")
                 }
             }
@@ -194,9 +203,9 @@ AND i.id > :indId
             if (filtering.mockFullName) {
                 or {
                     filtering.mockFullName.each {
-                            ilike('mockFullName', "%${it}%")
-                        }
+                        ilike('mockFullName', "%${it}%")
                     }
+                }
             }
             if (filtering.mockPid) {
                 or {
@@ -216,7 +225,7 @@ AND i.id > :indId
                 order(column.columnName, sortOrder ? "asc" : "desc")
             }
         }
-}
+    }
 
     /**
      * Counts the Individuals the User has access to by applying the provided filtering.
@@ -224,12 +233,12 @@ AND i.id > :indId
      * @param filter Restrict on this search filter if at least three characters
      * @return Number of Individuals matching the filtering
      */
-     public int countIndividual(IndividualFiltering filtering, String filter) {
-         if (filtering.enabled || filter.length() >= 3) {
-             def c = Individual.createCriteria()
-             return c.get {
-                 'in'('project', projectService.getAllProjects())
-                 if (filter.length() >= 3) {
+    public int countIndividual(IndividualFiltering filtering, String filter) {
+        if (filtering.enabled || filter.length() >= 3) {
+            def c = Individual.createCriteria()
+            return c.get {
+                'in'('project', projectService.getAllProjects())
+                if (filter.length() >= 3) {
                     filter = "%${filter}%"
                     or {
                         ilike("pid", filter)
@@ -263,25 +272,25 @@ AND i.id > :indId
                             ilike('mockFullName', "%${it}%")
                         }
                     }
-                 }
-                 if (filtering.mockPid) {
-                     or {
-                         filtering.mockPid.each {
-                             ilike('mockPid', "%${it}%")
-                         }
-                     }
-                 }
-                 if (filtering.type) {
-                     'in'('type', filtering.type)
-                 }
-                 projections {
-                     count('mockPid')
-                 }
-             }
-         } else {
-             // shortcut for unfiltered results
-             return Individual.countByProjectInList(projectService.getAllProjects())
-         }
+                }
+                if (filtering.mockPid) {
+                    or {
+                        filtering.mockPid.each {
+                            ilike('mockPid', "%${it}%")
+                        }
+                    }
+                }
+                if (filtering.type) {
+                    'in'('type', filtering.type)
+                }
+                projections {
+                    count('mockPid')
+                }
+            }
+        } else {
+            // shortcut for unfiltered results
+            return Individual.countByProjectInList(projectService.getAllProjects())
+        }
     }
 
     /**
@@ -295,12 +304,12 @@ AND i.id > :indId
     @PreAuthorize("hasPermission(#project, 'write') or hasRole('ROLE_OPERATOR')")
     public Individual createIndividual(Project project, IndividualCommand command, List<SamplesParser> parsedSamples) throws IndividualCreationException {
         Individual individual = new Individual(
-                pid: command.pid,
-                mockPid: command.mockPid,
-                mockFullName: command.mockFullName,
-                internIdentifier: command.internIdentifier,
-                type: command.individualType, project: project
-                )
+                        pid: command.pid,
+                        mockPid: command.mockPid,
+                        mockFullName: command.mockFullName,
+                        internIdentifier: command.internIdentifier,
+                        type: command.individualType, project: project
+                        )
         if (!individual.validate()) {
             throw new IndividualCreationException("Individual does not validate")
         }

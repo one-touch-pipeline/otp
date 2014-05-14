@@ -2,18 +2,6 @@
 /*global $ */
 
 $.otp.sequence = {
-    formatProject: function (project) {
-        "use strict";
-        var result;
-        if (project === "PROJECT_NAME") {
-            result = "mb";
-        } else if (project === "astrocytome") {
-            result = "pa";
-        } else {
-            result = project;
-        }
-        return result;
-    },
     formatSeqType: function (seqTypeName) {
         "use strict";
         var result;
@@ -92,7 +80,16 @@ $.otp.sequence = {
                                 fastQC = row.fastqcState.name;
                             }
                             rowData = [
-                                '<span title="' + row.projectName + '">' + $.otp.sequence.formatProject(row.projectName) + '</span>',
+                                $.otp.createLinkMarkup({
+                                    controller: 'projectOverview',
+                                    action: 'index',
+                                    parameters: {
+                                                projectName: row.projectName
+                                    },
+                                    text: row.projectName,
+                                    title: row.projectName
+                                }),
+
                                 $.otp.createLinkMarkup({
                                     controller: 'individual',
                                     action: 'show',

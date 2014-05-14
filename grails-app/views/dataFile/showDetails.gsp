@@ -14,7 +14,7 @@
         <table>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.runName"/></td>
-                <td class="myValue"><b>${dataFile.run.name}</b></td>
+                <td class="myValue"><b><g:link controller="run" action="show" params="[id:  dataFile.run.name]">${dataFile.run.name}</g:link></b></td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.fileName"/></td>
@@ -80,7 +80,7 @@
         <table>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.metaDataStatus.project"/></td>
-                <td class="myValue">${dataFile.project}</td>
+                <td class="myValue"><g:link controller="projectOverview" action="index" params="[projectName: dataFile.project]">${dataFile.project}</g:link></td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.metaDataStatus.isFileUsed"/></td>
