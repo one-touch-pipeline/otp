@@ -41,6 +41,15 @@
     background-image: url(images/document-edit.png);
     float: right;
 }
+.comment-button {
+    border: 1px solid grey;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    &:focus, &:hover {
+        cursor: pointer;
+        border: 1px solid black;
+    }
+}
 /* FONT STACK */
 body,
 input, select, textarea {
@@ -1226,4 +1235,64 @@ body {
 .optional {
     color: blue;
     text-align:right;
+}
+
+#processInfoBox {
+    float: left;
+    width: 850px;
+    height: 125px;
+}
+
+#processCommentBox {
+    float: left;
+    width: 300px;
+    height: 125px;
+}
+
+.commentBox {
+    width: 290px;
+    height: 75px;
+    resize: none;
+    margin-top: 10px;
+}
+
+#commentWrite {
+    display: none;
+}
+
+.commentButtonArea {
+    float: left;
+    width: 130px;
+}
+
+.commentDateLabel {
+    float: right;
+    width: 170px;
+    text-align: right;
+    margin-top: 2px;
+}
+
+#saveComment {
+    background-image: url(../images/skin/database_save.png);
+    .comment-button;
+}
+
+#editComment {
+    background-image: url(images/document-edit.png);
+    .comment-button;
+}
+
+#cancelComment {
+    .comment-button;
+}
+
+.commentSet {
+    background-image: url(images/document-edit.png);
+    background-color: transparent;
+    background-repeat: no-repeat;
+    border: 0px;
+}
+
+#commentLabel {
+    font-size: 15px;
 }

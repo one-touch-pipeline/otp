@@ -118,6 +118,13 @@ class ProcessService {
         schedulerService.restartProcessingStep(step)
     }
 
+    @PreAuthorize("hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', write) or hasRole('ROLE_OPERATOR')")
+    public void saveComment(Process process, String comment, Date date) {
+        process.comment = comment
+        process.commentDate = date
+        process.save(flush: true)
+    }
+
     /**
      * Retrieves all ProcessingStepUpdates for the given ProcessingStep.
      * @param step The ProcessingStep whose Updates should be retrieved

@@ -40,6 +40,14 @@ public class Process implements Serializable {
      * Whether there are Jobs still running (false) for this process or not (true).
      **/
     boolean finished = false
+    /**
+     * Comment of this process
+     */
+    String comment
+    /**
+     * Date, comment has been submitted
+     */
+    Date commentDate
 
 
     static mapping = {
@@ -53,5 +61,7 @@ public class Process implements Serializable {
         started(nullable: false)
         startJobClass(nullable: false, blank: false)
         startJobVersion(nullable: false, blank: false)
+        commentDate(nullable: true)
+        comment(nullable: true)
     }
 }

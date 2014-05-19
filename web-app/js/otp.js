@@ -438,3 +438,32 @@ $.otp.dataTableFilter = {
         return searchCriteria;
     }
 };
+
+$.otp.initCommentBox = function (processId) {
+    "use strict";
+    var cBoxRead = $('#commentRead .commentBox');
+    var cBoxWrite = $('#commentWrite .commentBox');
+    $('#editComment').click(function () {
+        $('#commentRead').hide();
+        cBoxWrite.val(cBoxRead.val());
+        $('#commentWrite').show();
+    });
+    $('#saveComment').click(function () {
+        var processComment = cBoxWrite.val();
+        var promise = $.otp.workflows.saveProcessComment(processId, processComment);
+        promise.success(function (data) {
+            $('.commentDateLabel').html(data.date);
+            cBoxRead.val(cBoxWrite.val());
+            $('#commentWrite').hide();
+            $('#commentRead').show();
+        });
+        promise.error(function () {
+            $.otp.warningMessage($.i18n.prop("processes.process.error"));
+        });
+    });
+    $('#cancelComment').click(function () {
+        $('#commentWrite').hide();
+        $('#commentRead').show();
+        cBoxWrite.val("");
+    });
+};

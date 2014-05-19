@@ -48,8 +48,9 @@
                 'workflow.plan.table.headers.creationDate',
                 'workflow.plan.table.headers.lastUpdate',
                 'workflow.plan.table.headers.processingStep',
-                 'workflow.plan.table.headers.status',
-                'otp.blank'
+                'workflow.plan.table.headers.status',
+                'otp.blank',
+				'otp.blank'
             ]}" id="workflowOverviewTable"/>
         </div>
         <g:javascript>

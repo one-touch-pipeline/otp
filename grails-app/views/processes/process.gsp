@@ -8,11 +8,31 @@
 </head>
 <body>
     <div class="body">
-        <otp:autoRefresh/>
-        <h1><g:message code="processes.process.title.listOfProcessingSteps" args="${ [id] }"/>  <g:link action="plan" id="${planId}"><g:message code="processes.process.title.workflow" args="${ [name] }"/></g:link></h1>
-        <g:if test="${parameter}">
-            <p><g:message code="processes.process.operatesOn" args="${ [parameter] }"/></p>
-        </g:if>
+        <div id="processInfoBox">
+            <otp:autoRefresh/>
+            <h1><g:message code="processes.process.title.listOfProcessingSteps" args="${ [id] }"/>  <g:link action="plan" id="${planId}"><g:message code="processes.process.title.workflow" args="${ [name] }"/></g:link></h1>
+            <g:if test="${parameter}">
+                <p><g:message code="processes.process.operatesOn" args="${ [parameter] }"/></p>
+            </g:if>
+        </div>
+        <div id="processCommentBox">
+            <div id="commentLabel">Comment:</div>
+            <div id="commentRead">
+                <textarea class="commentBox" readonly>${comment.encodeAsHTML()}</textarea>
+                <div class="commentButtonArea">
+                    <button id="editComment">&nbsp;&nbsp;&nbsp;<g:message code="processes.process.edit" /></button>
+                </div>
+                <div class="commentDateLabel">${commentDate}</div>
+            </div>
+            <div id="commentWrite">
+                <textarea class="commentBox"></textarea>
+                <div class="commentButtonArea">
+                    <button id="saveComment">&nbsp;&nbsp;&nbsp;<g:message code="processes.process.save" /></button>
+                    <button id="cancelComment"><g:message code="processes.process.cancel" /></button>
+                </div>
+                <div class="commentDateLabel">${commentDate}</div>
+            </div>
+        </div>
         <div>
             <div id="process-visualization" style="display: none"></div>
             <button id="show-visualization"><g:message code="processes.process.showProcessVisualization"/></button>
@@ -34,6 +54,7 @@
         <g:javascript>
             $(document).ready(function() {
                 $.otp.workflows.registerProcessingStep("#processOverviewTable", ${id});
+                $.otp.initCommentBox(${id});
             });
         </g:javascript>
     </div>

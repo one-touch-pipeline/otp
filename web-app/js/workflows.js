@@ -522,12 +522,18 @@ $.otp.workflows = {
                 } else {
                     rowData[6] = rowData[6].state.name;
                 }
-                actions = rowData[7].actions;
-                rowData[7] = "";
+                if(rowData[7] != null && rowData[7].length > 0) {
+                    rowData[7] = '<div class="commentSet" title=' + $.i18n.prop("workflow.plan.table.commentSet") + '>&nbsp;</div>';
+                }
+                else {
+                    rowData[7] = "";
+                }
+                actions = rowData[8].actions;
+                rowData[8] = "";
                 for (j = 0; j < actions.length; j += 1) {
                     switch (actions[j]) {
                     case "restart":
-                        rowData[7] += $.otp.workflows.createRestartProcessingStepLink(stepId, selector);
+                        rowData[8] += $.otp.workflows.createRestartProcessingStepLink(stepId, selector);
                         break;
                     default:
                         // nothing
@@ -538,12 +544,13 @@ $.otp.workflows = {
         }, [
             { "bSortable": true,  "aTargets": [0] },
             { "bSortable": false, "aTargets": [1] },
-            { "bSortable": false, "sWidth": "530px", "aTargets": [2] },
-            { "bSortable": true,  "aTargets": [3] },
+            { "bSortable": false, "aTargets": [2] },
+            { "bSortable": true, "aTargets": [3] },
             { "bSortable": false, "aTargets": [4] },
             { "bSortable": false, "aTargets": [5] },
             { "bSortable": false, "aTargets": [6] },
-            { "bSortable": false, "aTargets": [7] }
+            { "bSortable": false, "aTargets": [7] },
+            { "bSortable": false, "aTargets": [8] }
         ], undefined, 240, {
             bScrollInfinite: true,
             bPaginate: true
@@ -792,5 +799,17 @@ $.otp.workflows = {
             $.otp.workflows.processingStep.parameters(inputParamSelector, true);
             $.otp.workflows.processingStep.parameters(outputParamSelector, false);
         }
+    },
+
+    saveProcessComment: function (processId, processComment) {
+        "use strict";
+        var url = $.otp.createLink({controller: 'processes', action: 'saveProcessComment'});
+        return $.ajax({
+            type: "POST",
+            encoding:"UTF-8",
+            url: url,
+            dataType: "json",
+            data: {processId: processId, processComment: processComment}
+        });
     }
 };

@@ -6,7 +6,6 @@ import grails.converters.JSON
 import grails.util.GrailsNameUtils
 import org.springframework.security.core.context.SecurityContextHolder
 
-
 @SuppressWarnings("GrailsPublicControllerMethod")
 class ProcessesController {
     private enum PlanStatus {
@@ -170,6 +169,7 @@ class ProcessesController {
                 latest.date,
                 latest.processingStep.jobDefinition.name,
                 [state: latest.state, error: latest.error ? latest.error.errorMessage : null, id: latest.processingStep.id],
+                process.comment,
                 [actions: actions]
             ]
         }
@@ -191,12 +191,11 @@ class ProcessesController {
 
     def process() {
         Process process = processService.getProcess(params.id as long)
-        [name: process.jobExecutionPlan.name, id: process.id, planId: process.jobExecutionPlan.id, parameter: processParameterData(process)]
+        [name: process.jobExecutionPlan.name, id: process.id, planId: process.jobExecutionPlan.id, parameter: processParameterData(process), comment: process.comment, commentDate: process.commentDate?.format('EEE, d MMM yyyy HH:mm')]
     }
 
     def processData(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
-
         Process process = processService.getProcess(params.id as long)
         List<ProcessingStep> steps = processService.getAllProcessingSteps(process, cmd.iDisplayLength, cmd.iDisplayStart, "id", cmd.sortOrder)
         dataToRender.iTotalRecords = processService.getNumberOfProcessessingSteps(process)
@@ -358,4 +357,18 @@ class ProcessesController {
         }
         return parameterData
     }
+
+    // params.processId, params.processComment, date
+    def saveProcessComment(CommentCommand cmd) {
+        def date = new Date()
+        Process process = processService.getProcess(cmd.processId)
+        processService.saveComment(process, cmd.processComment, date)
+        def dataToRender = [date: date?.format('EEE, d MMM yyyy HH:mm')]
+        render dataToRender as JSON
+    }
+}
+
+class CommentCommand implements Serializable {
+    long processId
+    String processComment
 }
