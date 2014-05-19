@@ -92,4 +92,8 @@ order by type.name asc, type.libraryLayout
     List<Mutation> getMutations() {
         return Mutation.findAllByIndividual(this)
     }
+
+    static mapping = {
+        project index: "individual_project_idx"
+    }
 }

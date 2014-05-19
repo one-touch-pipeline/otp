@@ -25,4 +25,8 @@ class FastqcProcessedFile {
     static constraints = {
         dateFromFileSystem(nullable: true)
     }
+
+    static mapping = {
+        dataFile index: "fastqc_processed_file_data_file_idx"
+    }
 }

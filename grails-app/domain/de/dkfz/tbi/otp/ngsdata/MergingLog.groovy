@@ -27,4 +27,8 @@ class MergingLog {
         "${alignmentParams} ${dataFiles}"
     }
 
+    static mapping = {
+        alignmentParams index: "merging_log_alignment_params_idx"
+        seqScan index: "merging_log_seq_scan_idx"
+    }
 }

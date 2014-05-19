@@ -58,4 +58,8 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
                 "seqType: ${mergingWorkPackage.seqType} " +
                 "project: ${mergingWorkPackage.project}"
     }
+
+    static mapping = {
+        mergingPass index: "abstract_bam_file_merging_pass_idx"
+    }
 }

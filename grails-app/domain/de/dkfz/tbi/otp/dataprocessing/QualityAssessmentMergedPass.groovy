@@ -41,4 +41,8 @@ class QualityAssessmentMergedPass {
     static belongsTo = [
         processedMergedBamFile: ProcessedMergedBamFile
     ]
+
+    static mapping = {
+        processedMergedBamFile index: "quality_assessment_merged_pass_processed_merged_bam_file_idx"
+    }
 }

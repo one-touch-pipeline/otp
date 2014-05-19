@@ -21,4 +21,9 @@ class AlignmentLog {
         List<DataFile> dataFiles = DataFile.findAllByAlignmentLog(this)
         "${alignmentParams} ${dataFiles}"
     }
+
+    static mapping = {
+        alignmentParams index: "alignment_log_alignment_param_idx"
+        seqTrack index: "alignment_log_seq_track_idx"
+    }
 }

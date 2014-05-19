@@ -54,4 +54,8 @@ class AlignmentPass {
     SeqType getSeqType() {
         return seqTrack.seqType
     }
+
+    static mapping = {
+        seqTrack index: "alignment_pass_seq_track_idx"
+    }
 }

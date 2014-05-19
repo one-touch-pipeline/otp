@@ -41,4 +41,8 @@ class ProcessedBamFile extends AbstractFileSystemBamFile {
     public boolean isMostRecentBamFile() {
         return alignmentPass.isLatestPass()
     }
+
+    static mapping = {
+        alignmentPass index: "abstract_bam_file_alignment_pass_idx"
+    }
 }

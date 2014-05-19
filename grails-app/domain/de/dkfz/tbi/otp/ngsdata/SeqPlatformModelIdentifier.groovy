@@ -7,4 +7,8 @@ class SeqPlatformModelIdentifier {
     static constraints = {
         name(nullable: false)
     }
+
+    static mapping = {
+        seqPlatform index: "seq_platform_model_identifier_seq_platform_idx"
+    }
 }

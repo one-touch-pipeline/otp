@@ -13,4 +13,8 @@ class SampleIdentifier {
     String toString() {
         name
     }
+
+    static mapping = {
+        sample index: "sample_identifier_sample_idx"
+    }
 }

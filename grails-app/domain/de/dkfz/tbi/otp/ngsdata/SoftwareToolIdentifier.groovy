@@ -7,4 +7,8 @@ class SoftwareToolIdentifier {
     static constraints = {
         name()
     }
+
+    static mapping = {
+        softwareTool index: "software_tool_identifier_software_tool_idx"
+    }
 }

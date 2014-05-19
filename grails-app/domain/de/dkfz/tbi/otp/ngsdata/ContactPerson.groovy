@@ -11,4 +11,8 @@ class ContactPerson {
         fullName(blank: false)
         email(email:true)
     }
+
+    static mapping = {
+        seqCenter index: "contact_person_seq_center_idx"
+    }
 }

@@ -53,4 +53,10 @@ class ReferenceGenomeProjectSeqType {
     String toString() {
         return "deprecatedDate: ${deprecatedDate}, project: ${project}, seqType: ${seqType}, referenceGenome: ${referenceGenome}"
     }
+
+    static mapping = {
+        project index: "reference_genome_project_seq_type_project_idx"
+        seqType index: "reference_genome_project_seq_type_seq_type_idx"
+        referenceGenome index: "reference_genome_project_seq_type_reference_genome_idx"
+    }
 }

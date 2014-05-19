@@ -18,4 +18,8 @@ class ExomeEnrichmentKitSynonym {
     static constraints = {
         name(unique: true, blank: false)
     }
+
+    static mapping = {
+        exomeEnrichmentKit index: "exome_enrichment_kit_synonym_exome_enrichment_kit_idx"
+    }
 }

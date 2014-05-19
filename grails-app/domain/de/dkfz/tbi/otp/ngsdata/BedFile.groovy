@@ -53,4 +53,9 @@ class BedFile {
     public String toString() {
         return "${fileName} for genome ${referenceGenome} and kit ${exomeEnrichmentKit}"
     }
+
+    static mapping = {
+        referenceGenome index: "bed_file_reference_genome_idx"
+        exomeEnrichmentKit index: "bed_file_exome_enrichment_kit_idx"
+    }
 }

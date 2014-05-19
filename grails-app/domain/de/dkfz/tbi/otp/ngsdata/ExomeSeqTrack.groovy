@@ -33,4 +33,8 @@ class ExomeSeqTrack extends SeqTrack {
     public String toString() {
         return "${super.toString()} {kitInfoReliability} ${exomeEnrichmentKit}"
     }
+
+    static mapping = {
+        exomeEnrichmentKit index: "seq_track_exome_enrichment_kit_idx"
+    }
 }

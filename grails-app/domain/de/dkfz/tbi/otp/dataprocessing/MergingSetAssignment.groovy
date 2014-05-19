@@ -11,4 +11,9 @@ class MergingSetAssignment {
         mergingSet: MergingSet,
         bamFile: AbstractBamFile
     ]
+
+    static mapping = {
+        mergingSet index: "merging_set_assignment_merging_set_idx"
+        bamFile index: "merging_set_assignment_bam_file_idx"
+    }
 }

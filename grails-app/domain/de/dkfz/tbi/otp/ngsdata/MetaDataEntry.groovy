@@ -42,4 +42,9 @@ class MetaDataEntry {
     def onLoad = {
         //println "loading MDE"
     }
+
+    static mapping = {
+        dataFile index: "meta_data_entry_data_file_idx"
+        key index: "meta_data_entry_key_idx"
+    }
 }

@@ -22,4 +22,8 @@ class ChipSeqSeqTrack extends SeqTrack {
     public String toString() {
         return "${super.toString()} {antibodyTarget}"
     }
+
+    static mapping = {
+        antibodyTarget index: "seq_track_antibody_target_idx"
+    }
 }

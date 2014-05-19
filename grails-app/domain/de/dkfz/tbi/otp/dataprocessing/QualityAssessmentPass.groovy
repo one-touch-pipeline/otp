@@ -57,4 +57,8 @@ class QualityAssessmentPass {
     SeqType getSeqType() {
         return processedBamFile.seqType
     }
+
+    static mapping = {
+        processedBamFile index: "quality_assessment_pass_processed_bam_file_idx"
+    }
 }

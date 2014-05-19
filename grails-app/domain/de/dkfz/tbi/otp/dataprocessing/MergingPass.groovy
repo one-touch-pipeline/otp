@@ -56,4 +56,8 @@ class MergingPass {
         }
         return identifier == maxIdentifier
     }
+
+    static mapping = {
+        mergingSet index: "merging_pass_merging_set_idx"
+    }
 }

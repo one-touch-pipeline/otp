@@ -15,4 +15,9 @@ class Mutation {
 
     static constraints = {
     }
+
+    static mapping = {
+        individual index: "mutation_individual_idx"
+        resultsDataFile index: "mutation_results_data_file_idx"
+    }
 }

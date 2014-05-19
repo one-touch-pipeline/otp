@@ -25,4 +25,9 @@ class ProcessedSaiFile {
     Project getProject() {
         return alignmentPass.project
     }
+
+    static mapping = {
+        alignmentPass index: "processed_sai_file_alignemt_pass_idx"
+        dataFile index: "processed_sai_file_data_file_idx"
+    }
 }

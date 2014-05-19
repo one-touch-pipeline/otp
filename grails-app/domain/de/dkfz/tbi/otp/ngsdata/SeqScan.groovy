@@ -51,4 +51,9 @@ class SeqScan {
         return (MergingLog.countBySeqScan(this) != 0)
     }
 
+    static mapping = {
+        sample index: "seq_scan_sample_idx"
+        seqType index: "seq_scan_seq_type_idx"
+        seqPlatform index: "seq_scan_seq_platform_idx"
+    }
 }

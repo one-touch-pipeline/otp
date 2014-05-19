@@ -19,4 +19,8 @@ class Project {
     String toString() {
         name
     }
+
+    static mapping = {
+        projectGroup index: "project_project_group_idx"
+    }
 }

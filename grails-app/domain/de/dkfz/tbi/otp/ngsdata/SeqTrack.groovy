@@ -84,4 +84,11 @@ class SeqTrack {
     Project getProject() {
         return sample.project
     }
+
+    static mapping = {
+        run index: "seq_track_run_idx"
+        sample index: "seq_track_sample_idx"
+        seqType index: "seq_track_seq_type_idx"
+        seqPlatform index: "seq_track_seq_platform_idx"
+    }
 }

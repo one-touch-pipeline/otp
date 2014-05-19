@@ -49,4 +49,9 @@ class Run {
         RunSegment.findAllByRun(this).each {paths += it.mdPath + " "}
         return paths
     }
+
+    static mapping = {
+        seqCenter index: "run_seq_center_idx"
+        seqPlatform index: "run_seq_platform_idx"
+    }
 }

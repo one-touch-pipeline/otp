@@ -10,4 +10,8 @@ class OverallQualityAssessmentMerged extends AbstractQualityAssessment {
     static belongsTo = [
         qualityAssessmentMergedPass: QualityAssessmentMergedPass
     ]
+
+    static mapping = {
+        qualityAssessmentMergedPass index: "abstract_quality_assessment_quality_assessment_merged_pass_idx"
+    }
 }

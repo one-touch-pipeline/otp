@@ -58,7 +58,6 @@ class MergingSet {
         return mergingWorkPackage.project
     }
 
-
     public boolean isLatestSet() {
         int maxIdentifier = createCriteria().get {
             eq("mergingWorkPackage", mergingWorkPackage)
@@ -75,5 +74,9 @@ class MergingSet {
 
     SeqType getSeqType() {
         return mergingWorkPackage.seqType
+    }
+
+    static mapping = {
+        mergingWorkPackage index: "merging_set_merging_work_package_idx"
     }
 }

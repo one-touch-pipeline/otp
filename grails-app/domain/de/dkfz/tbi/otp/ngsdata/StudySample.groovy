@@ -9,4 +9,9 @@ class StudySample {
     static constraints = {
         individual(nullable: true)
     }
+
+    static mapping = {
+        study index: "study_sample_study_idx"
+        individual index: "study_sample_individual_idx"
+    }
 }

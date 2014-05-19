@@ -27,4 +27,9 @@ class Sample {
     Project getProject() {
         return individual.project
     }
+
+    static mapping = {
+        individual index: "sample_individual_idx"
+        sampleType index: "sample_sample_type_idx"
+    }
 }

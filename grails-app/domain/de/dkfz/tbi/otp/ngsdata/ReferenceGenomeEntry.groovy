@@ -72,4 +72,8 @@ class ReferenceGenomeEntry {
     String toString() {
         return name
     }
+
+    static mapping = {
+        referenceGenome index: "reference_genome_entry_reference_genome_idx"
+    }
 }

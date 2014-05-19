@@ -31,4 +31,8 @@ class PicardMarkDuplicatesMetrics {
         metricsClass(blank: false)
         library(blank: false)
     }
+
+    static mapping = {
+        abstractBamFile index: "picard_mark_duplicates_metrics_abstract_bam_file_idx"
+    }
 }

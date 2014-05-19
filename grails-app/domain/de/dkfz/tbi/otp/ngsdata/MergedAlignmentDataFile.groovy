@@ -32,4 +32,8 @@ class MergedAlignmentDataFile {
         if (fileSize > 1e3) return String.format("%.2f kB", fileSize/1e3)
         return fileSize
     }
+
+    static mapping = {
+        mergingLog index: "merged_alignment_data_file_merging_log_idx"
+    }
 }
