@@ -31,14 +31,14 @@ class HipoSampleIdentifier {
     final int sampleNumber
 
     /**
-     * Which analyte type was applied to the sample, [DRPM] (DNA, RNA, Protein or miRNA).
+     * Which analyte type was applied to the sample, [DRPAC] (DNA, RNA, Protein, miRNA or ChiPSeq).
      * Always followed by the order number.
      * Example: D1 (DNA, attempt 1)
      */
     final String analyteTypeAndNumber
 
     private final static String REGEX =
-    /^(([HP])(\d\d\w)-\w\w\w(\w))-([${HipoTissueType.values()*.key.join("")}])(\d)-([DRPA]\d)$/
+    /^(([HP])(\d\d\w)-\w\w\w(\w))-([${HipoTissueType.values()*.key.join("")}])(\d)-(([DRPAC])(\d{1,2}))$/
 
     /**
      * Tries to parse a HIPO sample name.
@@ -59,6 +59,12 @@ class HipoSampleIdentifier {
             || ![HipoTissueType.BLOOD, HipoTissueType.CELL].contains(tissueType)) {
                 return null
             }
+        }
+
+        // if the analyte type is ChiP (C) there shall be two digits behind. For all other cases only one digit is allowed.
+        final int expectedAnalyteNumberDigits = (matcher.group(8) == "C") ? 2 : 1
+        if (matcher.group(9).size() != expectedAnalyteNumberDigits) {
+            return null
         }
 
         return new HipoSampleIdentifier(

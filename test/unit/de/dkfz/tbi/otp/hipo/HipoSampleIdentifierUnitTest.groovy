@@ -17,7 +17,6 @@ class HipoSampleIdentifierUnitTest {
         sampleName = "H456-ABCD-T3-D1"
         HipoSampleIdentifier identifier = HipoSampleIdentifier.tryParse(sampleName)
         assertNotNull(identifier)
-
         assertEquals("456", identifier.projectNumber)
         assertEquals("H456-ABCD", identifier.pid)
         assertEquals(HipoTissueType.TUMOR, identifier.tissueType)
@@ -67,6 +66,18 @@ class HipoSampleIdentifierUnitTest {
         assertNotNull(HipoSampleIdentifier.tryParse(sampleName))
 
         sampleName = "H00A-BPD1-T1-D1"
+        assertNotNull(HipoSampleIdentifier.tryParse(sampleName))
+
+        sampleName = "H003-BPDK-C8-D01"
+        assertNull(HipoSampleIdentifier.tryParse(sampleName))
+
+        sampleName = "H003-BPDK-C8-C1"
+        assertNull(HipoSampleIdentifier.tryParse(sampleName))
+
+        sampleName = "H003-BPDK-C8-C10"
+        assertNotNull(HipoSampleIdentifier.tryParse(sampleName))
+
+        sampleName = "H003-BPDK-C8-C02"
         assertNotNull(HipoSampleIdentifier.tryParse(sampleName))
     }
 
