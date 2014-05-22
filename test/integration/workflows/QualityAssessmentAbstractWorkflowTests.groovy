@@ -1,10 +1,6 @@
 package workflows
 
-import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 import static org.junit.Assert.*
-import grails.test.mixin.*
-import grails.test.mixin.domain.*
-import grails.test.mixin.support.*
 import org.junit.*
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -53,10 +49,6 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
     int SLEEPING_TIME_IN_MINUTES = 200
 
     ExecutionService executionService
-    ProcessingOptionService processingOptionService
-    BedFileService bedFileService
-    ReferenceGenomeService referenceGenomeService
-    def springSecurityService
 
     Realm realm
 

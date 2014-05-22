@@ -13,7 +13,7 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
  *
  *
  */
-abstract class GroovyScriptAwareIntegrationTest {
+abstract class GroovyScriptAwareIntegrationTest extends AbstractIntegrationTest {
 
     GrailsApplication grailsApplication
 
