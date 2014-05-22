@@ -13,12 +13,12 @@ class ProjectProgressService {
         return runs
     }
 
-    Set<String> getSamples(Run run) {
-        Set<String> samples = []
+    Set<SampleIdentifier> getSampleIdentifier(Run run) {
+        Set<SampleIdentifier> sampleIdentifiers = []
         SeqTrack.findAllByRun(run).each { SeqTrack track ->
             Sample sample = track.sample
-            samples << SampleIdentifier.findBySample(sample)
+            sampleIdentifiers << SampleIdentifier.findBySample(sample)
         }
-        return samples
+        return sampleIdentifiers
     }
 }

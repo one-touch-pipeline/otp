@@ -6,7 +6,7 @@
 <title><g:message code="projectProgress.progress.title" /></title>
 </head>
 <body>
-  <div class="body_grow">
+  <div class="body">
     <g:form>
         <g:datePicker name="startDate" value="${startDate}" precision="day" years="${2010..Calendar.getInstance().get(Calendar.YEAR)}"/>
         <g:select
@@ -18,24 +18,28 @@
         />
         <g:submitButton name="progress" value=" Display " action="progress" />
     </g:form>
-    <table>
-        <tr>
-            <th><g:message code="projectProgress.progress.runs" /> </th>
-            <th><g:message code="projectProgress.progress.center"/></th>
-            <th><g:message code="projectProgress.progress.name"/></th>
-            <th><g:message code="projectProgress.progress.samples"/></th>
-        </tr>
+
+     <div id="laneOverviewTable">
+    <table border="1">
+        <thead>
+            <tr>
+                <th><g:message code="projectProgress.progress.runs"/></th>
+                <th><g:message code="projectProgress.progress.center"/></th>
+                <th><g:message code="projectProgress.progress.samples"/></th>
+            </tr>
+        </thead>
     <g:each var="row" in="${data}">
         <tr>
-            <td><b>${row.get(3)}</b></td>
+            <td><b><g:link controller="run" action="show" id="${row.get(0)}">${row.get(3)}</g:link></b></td>
             <td>${row.get(2)}</td>
-            <td><g:link controller="run" action="show" id="${row.get(0)}">${row.get(3)}</g:link></td>
             <td>
-                <g:each var="sample" in="${row.get(4)}">${sample}, </g:each>
+                <g:each var="sampleIdentifier" in="${row.get(4)}">
+                <g:link controller="individual" action="show" id="${sampleIdentifier.sample.individual.id}"> ${sampleIdentifier.name},</g:link></g:each>
             </td>
         </tr>
     </g:each>
     </table>
+     </div>
   </div></body>
 <r:script>
     $(function() {

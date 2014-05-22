@@ -31,7 +31,7 @@ class ProjectProgressController {
         int n=1
         for (Run run in runs) {
             List line = []
-            Set<String> samples = projectProgressService.getSamples(run)
+            Set<String> samples = projectProgressService.getSampleIdentifier(run)
             line << run.id
             line << n++
             line << run.seqCenter.toString().toLowerCase()
