@@ -28,7 +28,7 @@ class VcfFile {
 
 
     static belongsTo = [
-        snvCallingRun: SnvCallingInstance
+        snvCallingInstance: SnvCallingInstance
     ]
 
     static constraints = {
