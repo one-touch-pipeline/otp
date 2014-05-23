@@ -13,7 +13,7 @@ class VcfFileUnitTests {
         VcfFile vcfFile = new VcfFile(
                         fileName: "someRandomProcessedVcfFile.vcf",
                         step: SnvCallingStep.SNV_CALL,
-                        snvCallingRun: new SnvCallingInstance(),
+                        snvCallingInstance: new SnvCallingInstance(),
                         processingState: SnvProcessingStates.IN_PROGRESS,
                         )
         assert vcfFile.validate()
