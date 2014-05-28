@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.ngsdata;
+package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
@@ -15,6 +15,6 @@ class LoadExomeEnrichmentKitsScriptTests extends GroovyScriptAwareIntegrationTes
         assertNotNull kit
         run("scripts/ExomeEnrichmentKit/LoadExomeEnrichmentKits.groovy")
         List kits = ExomeEnrichmentKit.list()
-        assertTrue (kits.size == 11)
+        assertTrue (kits.size == 12)
     }
 }

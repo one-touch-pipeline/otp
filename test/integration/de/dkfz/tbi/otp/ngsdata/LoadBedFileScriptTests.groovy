@@ -1,9 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.*
-import grails.util.Environment
-import org.junit.*
 import static org.junit.Assert.*
+import grails.test.mixin.*
+import org.junit.*
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
 
 /**
@@ -42,6 +41,7 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
         new Input(bedName: "Nimblegen_SeqCap_EZ_Exome_v3_plain.bed", refGenName: "hs37d5", kitName: "Roche NimbleGen SeqCap EZ Human Exome library v3"),
         new Input(bedName: "TruSeqExomeTargetedRegions_chr.bed", refGenName: "hg19", kitName: "Illumina TruSeq Exome Enrichment Kit"),
         new Input(bedName: "TruSeqExomeTargetedRegions_plain.bed", refGenName: "hs37d5", kitName: "Illumina TruSeq Exome Enrichment Kit"),
+        new Input(bedName: "Agilent_S0447132_Covered.bed", refGenName: "hs37d5", kitName: "Agilent S0447132"),
     ]
     class Input {
         String bedName
@@ -53,7 +53,7 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
     void setUp() {
         realm = DomainFactory.createRealmDataProcessingDKFZ([
             processingRootPath: 'tmp',
-            ]).save(flush : true)
+        ]).save(flush : true)
 
         bedFilesToLoad.each { Input input ->
             File directory = new File("${REFERENCE_GENOME_PATH}/${input.refGenName}/${TARGET_REGIONS_PATH}")
@@ -79,27 +79,27 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
                 referenceGenome.save(flush: true)
 
                 ReferenceGenomeEntry entry = new ReferenceGenomeEntry(
-                        name: "chr1",
-                        alias: "chr1Alias",
-                        length: 50 as long,
-                        referenceGenome: referenceGenome
-                        )
+                                name: "chr1",
+                                alias: "chr1Alias",
+                                length: 50 as long,
+                                referenceGenome: referenceGenome
+                                )
                 entry.save(flush: true)
 
                 entry = new ReferenceGenomeEntry(
-                        name: "chr2",
-                        alias: "chr2Alias",
-                        length: 50 as long,
-                        referenceGenome: referenceGenome
-                        )
+                                name: "chr2",
+                                alias: "chr2Alias",
+                                length: 50 as long,
+                                referenceGenome: referenceGenome
+                                )
                 entry.save(flush: true)
             }
 
             ExomeEnrichmentKit existingKit = ExomeEnrichmentKit.findByName(input.kitName)
             if (!existingKit) {
                 ExomeEnrichmentKit kit = new ExomeEnrichmentKit(
-                        name: input.kitName
-                        )
+                                name: input.kitName
+                                )
                 kit.save(flush: true)
             }
         }
