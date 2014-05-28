@@ -417,7 +417,7 @@ AND i.id > :indId
             if (!sampleType) {
                 throw new IndividualCreationException("SampleType could not be found nor created.")
             }
-            Sample sample = createSample(individual, sampleType)
+            Sample sample = Sample.findOrSaveByIndividualAndSampleType(individual, sampleType)
             for (entry in parsedSample.updateEntries) {
                 updateSampleIdentifier(entry.value, entry.key as long)
             }
@@ -435,17 +435,7 @@ AND i.id > :indId
     @PreAuthorize("hasPermission(#individual, 'write') or hasRole('ROLE_OPERATOR')")
     void createSample(Individual individual, String type) {
         SampleType sampleType = createSampleType(type)
-        createSample(individual, sampleType)
-    }
-
-    /**
-     * Creates a new {@link Sample} if not existing, otherwise the existent {@link Sample} is returned
-     * @param individual the {@link Individual} to be associated
-     * @param sampleType the {@link SampleType} to be associated
-     * @return the {@link Sample}
-     */
-    private Sample createSample(Individual individual, SampleType sampleType) {
-        return Sample.findOrSaveByIndividualAndSampleType(individual, sampleType)
+        Sample.findOrSaveByIndividualAndSampleType(individual, sampleType)
     }
 
     /**

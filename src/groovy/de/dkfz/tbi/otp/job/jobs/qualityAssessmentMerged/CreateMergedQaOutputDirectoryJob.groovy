@@ -24,12 +24,8 @@ class CreateMergedQaOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
         // TODO remove this hack when multiple start is solved
         qualityAssessmentMergedPassService.passStarted(pass)
 
-        String dir = processedMergedBamFileQaFileService.directoryPath(pass)
+        String directory = processedMergedBamFileQaFileService.directoryPath(pass)
         Realm realm = qualityAssessmentMergedPassService.realmForDataProcessing(pass)
-        execute(dir, realm)
-    }
-
-    private void execute(String directory, Realm realm) {
         String cmd = "mkdir -p -m 2750 " + directory
         String exitCode = executionService.executeCommand(realm, cmd)
         boolean dirCreated = validate(directory)

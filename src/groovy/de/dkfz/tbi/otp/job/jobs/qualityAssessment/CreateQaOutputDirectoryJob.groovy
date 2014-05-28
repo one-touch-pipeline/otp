@@ -24,12 +24,8 @@ class CreateQaOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
         // TODO remove this hack when multiple start is solved
         qualityAssessmentPassService.passStarted(pass)
 
-        String dir = processedBamFileQaFileService.directoryPath(pass)
+        String directory = processedBamFileQaFileService.directoryPath(pass)
         Realm realm = qualityAssessmentPassService.realmForDataProcessing(pass)
-        execute(dir, realm)
-    }
-
-    private void execute(String directory, Realm realm) {
         String cmd = "mkdir -p -m 2750 " + directory
         String exitCode = executionService.executeCommand(realm, cmd)
         boolean dirCreated = validate(directory)

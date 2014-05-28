@@ -18,12 +18,8 @@ class CreateFastqcOutputDirectoryJob extends AbstractJobImpl {
     public void execute() throws Exception {
         long seqTrackId = Long.parseLong(getProcessParameterValue())
         SeqTrack seqTrack = SeqTrack.get(seqTrackId)
-        String dir = fastqcDataFilesService.fastqcOutputDirectory(seqTrack)
+        String directory = fastqcDataFilesService.fastqcOutputDirectory(seqTrack)
         Realm realm = fastqcDataFilesService.fastqcRealm(seqTrack)
-        execute(dir, realm)
-    }
-
-    private void execute(String directory, Realm realm) {
         String cmd = "mkdir -p -m 2750 " + directory
         String exitCode = executionService.executeCommand(realm, cmd)
         log.debug "creating directory finished with exit code " + exitCode

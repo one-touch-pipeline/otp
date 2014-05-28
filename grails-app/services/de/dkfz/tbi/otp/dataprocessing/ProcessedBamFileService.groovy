@@ -87,10 +87,6 @@ class ProcessedBamFileService {
 
     public ProcessedBamFile findSortedBamFile(AlignmentPass alignmentPass) {
         def type = AbstractBamFile.BamType.SORTED
-        return findBamFile(alignmentPass, type)
-    }
-
-    private ProcessedBamFile findBamFile(AlignmentPass alignmentPass, AbstractBamFile.BamType type) {
         return ProcessedBamFile.findByAlignmentPassAndType(alignmentPass, type)
     }
 

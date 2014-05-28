@@ -111,7 +111,7 @@ class SeqScanService {
 
     /**
      * Its prove synchronizing multiple {@link Thread}s for the helper
-     * {@link #buildSeqScanPrivate(SeqTrack)}
+     * {@link #buildSeqScanPrivate(List<SeqTrack>, AlignmentParams)}
      */
     SeqScan buildSeqScan(List<SeqTrack> tracks, AlignmentParams alignParams) {
         buildSeqScanLock.lock()
@@ -128,7 +128,7 @@ class SeqScanService {
      *
      * @param seqTrack - new Sequencing Track
      */
-    SeqScan buildSeqScanPrivate(List<SeqTrack> tracks, AlignmentParams alignParams) {
+    private SeqScan buildSeqScanPrivate(List<SeqTrack> tracks, AlignmentParams alignParams) {
         // take parameters
         SeqTrack seqTrack = tracks.get(0)
         Sample sample = seqTrack.sample

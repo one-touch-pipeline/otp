@@ -129,7 +129,6 @@ class JobAppender extends AppenderSkeleton {
         return appender
     }
 
-    @Override
     public void setLogDirectory(File logDirectory) {
         // creates the log directory if it does not yet exist
         if (!logDirectory.exists()) {

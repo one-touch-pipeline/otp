@@ -1,18 +1,5 @@
 package de.dkfz.tbi.otp.ngsdata
 
-private class SplittedPath {
-    String root
-    String relative
-    String fileName
-    String dirPath() {
-        return "${root}/${relative}"
-    }
-    String filePath() {
-        return "${dirPath()}/${fileName}"
-    }
-}
-
-
 class MergingService {
     /**
      * Dependency injection of SeqScanService
@@ -471,6 +458,20 @@ class MergingService {
         } else {
             println obj
             println obj.errors
+        }
+    }
+
+    private static class SplittedPath {
+        String root
+        String relative
+        String fileName
+
+        String dirPath() {
+            return "${root}/${relative}"
+        }
+
+        String filePath() {
+            return "${dirPath()}/${fileName}"
         }
     }
 }

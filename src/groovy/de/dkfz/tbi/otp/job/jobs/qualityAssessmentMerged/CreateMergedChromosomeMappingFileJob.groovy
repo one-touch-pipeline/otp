@@ -47,18 +47,14 @@ class CreateMergedChromosomeMappingFileJob extends AbstractEndStateAwareJobImpl 
             filterChromosomes: filterChromosomes,
             sortedChromosomeIdentifiers: sortedChromosomeIdentifiers
         ]
-        String chromosomeMappingFileContents = (data as JSON).toString(true)
-        String chromosomeMappingFilePath = processedMergedBamFileQaFileService.chromosomeMappingFilePath(pass)
+        String fileContents = (data as JSON).toString(true)
+        String filePath = processedMergedBamFileQaFileService.chromosomeMappingFilePath(pass)
         Realm realm = qualityAssessmentMergedPassService.realmForDataProcessing(pass)
-        execute(chromosomeMappingFileContents, chromosomeMappingFilePath, realm)
-    }
-
-    private void execute(String fileContents, String filepath, Realm realm) {
-        String cmd = "echo '${fileContents}' > ${filepath}"
-        cmd += "; chmod 440 ${filepath}"
+        String cmd = "echo '${fileContents}' > ${filePath}"
+        cmd += "; chmod 440 ${filePath}"
         String standardOutput = executionService.executeCommand(realm, cmd)
         log.debug "creating file finished with standard output " + standardOutput
-        boolean fileCreated = validate(filepath)
+        boolean fileCreated = validate(filePath)
         fileCreated ? succeed() : fail()
     }
 

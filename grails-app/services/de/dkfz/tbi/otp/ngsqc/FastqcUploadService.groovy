@@ -18,7 +18,7 @@ class FastqcUploadService {
         String pathToFile = fastqcDataFilesService.fastqcOutputFile(fastqc.dataFile)
         final String dataFileName = "fastqc_data.txt"
         try {
-            uploadFileContentsToDataBase(fastqc, fastqcDataFilesService.getInputStreamFromZip(pathToFile, dataFileName).text)
+            uploadFileContentsToDataBasePrivate(fastqc, fastqcDataFilesService.getInputStreamFromZip(pathToFile, dataFileName).text)
         } catch (final Throwable t) {
             throw new RuntimeException("Failed to load data from ${dataFileName} inside ${pathToFile} into the database.", t)
         }
@@ -29,7 +29,7 @@ class FastqcUploadService {
      * @param fastqc String containing the contents of the fastqc file
      * @param fastqDataFile reference to the fastq dataFile the fastQC was generated from
      */
-    private void uploadFileContentsToDataBase(FastqcProcessedFile fastqDataFile, String fastqc) {
+    private void uploadFileContentsToDataBasePrivate(FastqcProcessedFile fastqDataFile, String fastqc) {
         log.debug("Start parsing the data...")
         String myRegularExpression = /(?s)>>.*?>>END_MODULE/
         Matcher matcher = ( fastqc =~ myRegularExpression )
