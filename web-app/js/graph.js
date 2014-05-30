@@ -305,8 +305,17 @@ $.otp.graph.project = {
         hbar.Set('chart.gutter.bottom', 150);
         hbar.Set('chart.gutter.left', 175);
         hbar.Set('chart.gutter.top', 70);
+        hbar.Set('toolTips',json.labels);
+        hbar.Set('events.mousemove', function (e, HBar) {e.target.style.cursor = 'pointer';});
+        function myClick (e, bar)
+        {
+            var idx = bar[5];
+            location.href = $.otp.contextPath + '/individual/show/' + json.labels[idx];
+        }
+        hbar.Set('events.click', myClick);
         hbar.Draw();
     }
+
 };
 
 $.otp.graph.info = {
