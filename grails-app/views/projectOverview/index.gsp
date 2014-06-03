@@ -95,7 +95,6 @@
             </div>
             <div style="margin-top: 80px"></div>
             <div style="text-align: center;">
-
                 <canvas id="sampleTypeCountByPatient" width="550">[No canvas support]</canvas>
          </div>
         </div>

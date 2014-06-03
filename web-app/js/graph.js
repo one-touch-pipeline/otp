@@ -222,7 +222,7 @@ $.otp.graph.project = {
         pie1.Set('chart.shadow', true);
         pie1.Set('chart.shadow.offsetx', 2);
         pie1.Set('chart.shadow.offsety', 2);
-        pie1.Set('chart.shadow.blur', 1);
+        pie1.Set('chart.shadow.blur', 2);
         pie1.Set('chart.exploded', 1);
         pie1.Set('chart.text.size', 8);
         pie1.Set('chart.labels.sticks.length', 0);
@@ -305,17 +305,14 @@ $.otp.graph.project = {
         hbar.Set('chart.gutter.bottom', 150);
         hbar.Set('chart.gutter.left', 175);
         hbar.Set('chart.gutter.top', 70);
-        hbar.Set('toolTips',json.labels);
         hbar.Set('events.mousemove', function (e, HBar) {e.target.style.cursor = 'pointer';});
-        function myClick (e, bar)
-        {
+        function myClick (e, bar){
             var idx = bar[5];
             location.href = $.otp.contextPath + '/individual/show/' + json.labels[idx];
         }
         hbar.Set('events.click', myClick);
         hbar.Draw();
     }
-
 };
 
 $.otp.graph.info = {
