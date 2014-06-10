@@ -92,9 +92,8 @@ $.otp.projectOverviewTable = {
                 action: 'dataTableSource'
             }),
             function (json) {
-                var i, j, rowData, row;
-                for (i = 0; i < json.aaData.length; i += 1) {
-                    row = json.aaData[i];
+                for (var i = 0; i < json.aaData.length; i += 1) {
+                    var row = json.aaData[i];
                     row[0] = $.otp.createLinkMarkup({
                             controller: 'individual',
                             action: 'show',

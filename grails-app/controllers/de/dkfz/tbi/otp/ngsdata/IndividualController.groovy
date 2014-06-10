@@ -21,7 +21,9 @@ class IndividualController {
         } else if (params.mockPid) {
             ind = individualService.getIndividualByMockPid(params.mockPid)
         } else {
-            //neither id not mockpid given.
+            //neither id not mockPid given, give up
+            response.sendError(404)
+            return
         }
         if (!ind) {
             response.sendError(404)

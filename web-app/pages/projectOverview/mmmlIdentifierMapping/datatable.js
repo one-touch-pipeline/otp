@@ -36,31 +36,31 @@ $.otp.projectOverviewTable = {
                         fnCallback({aaData : [], iTotalRecords : 0, iTotalDisplayRecords : 0});
                     },
                     "success" : function (json) {
-                        var i, j, rowData, row;
-                        for (i = 0; i < json.aaData.length; i += 1) {
-                            row = json.aaData[i];
-                            row[2] = $.otp.createLinkMarkup({
-                                controller: 'individual',
-                                action: 'show',
-                                text: row[2],
-                                parameters: {
-                                    mockPid: row[1]
-                                }
-                            });
+                        for (var i = 0; i < json.aaData.length; i += 1) {
+                            var row = json.aaData[i];
+                            var mockPid = row[1];
                             row[0] = $.otp.createLinkMarkup({
                                 controller: 'individual',
                                 action: 'show',
                                 text: row[0],
                                 parameters: {
-                                    mockPid: row[1]
+                                    mockPid: mockPid
                                 }
                             });
                             row[1] = $.otp.createLinkMarkup({
+                                controller: 'individual',
+                                action: 'show',
+                                text: row[1],
+                                parameters: {
+                                    mockPid: mockPid
+                                }
+                            });
+                            row[2] = $.otp.createLinkMarkup({
                                     controller: 'individual',
                                     action: 'show',
-                                    text: row[1],
+                                    text: row[2],
                                     parameters: {
-                                        mockPid: row[1]
+                                        mockPid: mockPid
                                     }
                                 });
                         }
