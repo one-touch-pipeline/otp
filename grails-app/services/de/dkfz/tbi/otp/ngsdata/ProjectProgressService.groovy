@@ -6,8 +6,8 @@ class ProjectProgressService {
         return Project.findAllByNameInList(projectNames)
     }
 
-    List<Run> getListOfRuns(List<Project> projects, Date date) {
-        List<DataFile> files = DataFile.findAllByProjectInListAndDateFileSystemGreaterThan(projects, date)
+    List<Run> getListOfRuns(List<Project> projects, Date startDate, Date endDate) {
+        List<DataFile> files = DataFile.findAllByProjectInListAndDateFileSystemBetween(projects, startDate, endDate)
         List<String> runNames = files*.run.name
         List<Run> runs = Run.findAllByNameInList(runNames, [sort: "seqCenter"])
         return runs

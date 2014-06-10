@@ -12,7 +12,6 @@
             <g:select class="criteria" id="project" name='project'
                 from='${projects}' value='${project}' onChange='submit();'></g:select>
         </form>
-
         <div class= "searchCriteriaTableSequences">
             <table id="searchCriteriaTable2">
                 <tr>

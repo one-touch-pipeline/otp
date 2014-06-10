@@ -3,7 +3,8 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.plugins.springsecurity.Secured
 
 class ProjectProgressCommand {
-    Date startDate
+    Date startDate = new Date().minus(8)
+    Date endDate
     List projects
 
     void validate() {
@@ -21,9 +22,9 @@ class ProjectProgressController {
     def progress(ProjectProgressCommand ppc) {
         ppc.validate()
         List<Project> projects = projectProgressService.getProjectsFromNameList(ppc.projects)
-        List<Run> runs = projectProgressService.getListOfRuns(projects, ppc.startDate)
+        List<Run> runs = projectProgressService.getListOfRuns(projects, ppc.startDate, ppc.endDate)
         List data = fillTable(runs)
-        [data: data, startDate: ppc.startDate, projects: ppc.projects]
+        [data: data, startDate: ppc.startDate, endDate: ppc.endDate, projects: ppc.projects]
     }
 
     private List fillTable(List<Run> runs) {
