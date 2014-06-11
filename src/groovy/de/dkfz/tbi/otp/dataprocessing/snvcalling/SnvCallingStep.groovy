@@ -22,8 +22,6 @@ enum SnvCallingStep {
      * - somatic mutations in the complete genome
      * - somatic and germline mutations in the coding regions
      * - mutatation, which changes the protein structure
-     *
-     * TODO: discuss with CO group if a general FILTER flag is enough or if the different filter methods should be named here -> OTP-916
      */
     FILTER,
 }

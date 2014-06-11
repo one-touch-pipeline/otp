@@ -14,6 +14,8 @@ class VcfFile {
 
     Date lastUpdated
 
+    boolean withdrawn = false
+
     /**
      * Specifies the last step that was processed with this
      */
