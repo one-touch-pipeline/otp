@@ -1,35 +1,27 @@
 package de.dkfz.tbi.otp.ngsqc
 
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.ngsdata.FileNotReadableException
 import java.util.regex.*
 
 /**
  * Service providing methods to parse FastQC files and saving the parsed data to the database
  */
 class FastqcUploadService {
-    /**
-     * Dependency Injection of dataProcessingFilesService
-     */
-    def fastqcDataFilesService
+
+    FastqcDataFilesService fastqcDataFilesService
 
     /**
      * Uploads the fastQC file contents generated from the fastq file to the database
-     * @param dataFile DataFile with sequence file
      */
     public void uploadFileContentsToDataBase(FastqcProcessedFile fastqc) {
-        uploadFileContentsToDataBase(fastqc, getFastQCFileContents(fastqc.dataFile))
-    }
-
-    /**
-     * Get FastQC file contents from the fastq id
-     * @param fastqID Id from the fastq file, it returns the fastQC file contents from
-     * @return String with the contents of the fastQC file
-     */
-    private String getFastQCFileContents(DataFile dataFile) {
-        String pathToFile = fastqcDataFilesService.fastqcOutputFile(dataFile)
-        return fastqcDataFilesService.getInputStreamFromZip(pathToFile, "fastqc_data.txt").text
+        String pathToFile = fastqcDataFilesService.fastqcOutputFile(fastqc.dataFile)
+        final String dataFileName = "fastqc_data.txt"
+        try {
+            uploadFileContentsToDataBase(fastqc, fastqcDataFilesService.getInputStreamFromZip(pathToFile, dataFileName).text)
+        } catch (final Throwable t) {
+            throw new RuntimeException("Failed to load data from ${dataFileName} inside ${pathToFile} into the database.", t)
+        }
     }
 
     /**
