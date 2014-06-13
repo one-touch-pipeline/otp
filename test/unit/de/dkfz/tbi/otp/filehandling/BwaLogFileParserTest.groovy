@@ -2,11 +2,13 @@ package de.dkfz.tbi.otp.filehandling
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import org.junit.Test
 
 /**
  */
 class BwaLogFileParserTest extends GroovyTestCase {
 
+    @Test
     void testParseReadNumberFromLog_WhenContainsCorrectLines_ShouldReturnReadNumber() {
 
         File testDirectory = TestCase.createEmptyTestDirectory()
@@ -38,6 +40,7 @@ cnybwa overall time  162.99 sec
         }
     }
 
+    @Test
     void testParseReadNumberFromLog_WhenContainsNoMatchingLines_ShouldThrowException() {
 
         File testDirectory = TestCase.createEmptyTestDirectory()

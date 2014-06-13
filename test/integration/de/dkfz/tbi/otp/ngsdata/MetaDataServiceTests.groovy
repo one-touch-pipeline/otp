@@ -2,22 +2,11 @@ package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
 
-import org.grails.plugins.springsecurity.service.acl.AclUtilService
+import grails.plugin.springsecurity.acl.AclUtilService
 import org.junit.*
-
-import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.UserRole
-import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
-
-import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.context.SecurityContextHolder
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.acls.domain.BasePermission
-import org.springframework.security.authentication.AnonymousAuthenticationToken
-import org.springframework.security.core.authority.GrantedAuthorityImpl
 
 class MetaDataServiceTests extends AbstractIntegrationTest {
     MetaDataService metaDataService

@@ -14,6 +14,7 @@ import org.junit.*
 @TestFor(ParameterMapping)
 class ParameterMappingTests {
 
+    @Test
     void testConstraints() {
        ParameterMapping mapping = new ParameterMapping()
        assertFalse(mapping.validate())

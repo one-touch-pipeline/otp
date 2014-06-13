@@ -5,7 +5,7 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.joda.time.Duration
 import org.junit.Before
 import org.junit.Ignore
@@ -135,7 +135,6 @@ class MergingWorkflowTests extends WorkflowTestCase {
     /**
      * Test execution of the workflow without any processing options defined
      */
-    @Ignore
     @Test
     void testExecutionWithoutProcessingOptions() {
         assertEquals(singleLaneBamFile, processedBamFileService.getFilePath(processedBamFile))

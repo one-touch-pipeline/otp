@@ -56,6 +56,7 @@ class CrashRecoveryServiceUnitTests {
 
 
 
+    @After
     void tearDown() {
         parameterTypeList = null
         processingSteps = null
@@ -119,12 +120,14 @@ class CrashRecoveryServiceUnitTests {
 
 
 
+    @Test
     void test_isCrashRecovery_shouldReturn_true() {
         createServices(false)
 
         assert service.isCrashRecovery()
     }
 
+    @Test
     void test_isCrashRecovery_shouldReturn_false() {
         createServices(true)
 
@@ -133,6 +136,7 @@ class CrashRecoveryServiceUnitTests {
 
 
 
+    @Test
     void test_markJobsAsFinished_processingStepsGivenByIdShouldBeMarkedAsFinishedAndHaveNoParameters() {
         createServices(false, true)
         createProcessingSteps()
@@ -148,6 +152,7 @@ class CrashRecoveryServiceUnitTests {
         assert COUNT_OF_ELEMENTS == callCreateNextProcessingStepCount
     }
 
+    @Test
     void test_markJobsAsFinished_processingStepsGivenByIdShouldBeMarkedAsFinishedAndHaveParameters() {
         createServices(false, true)
         createProcessingSteps(true)
@@ -169,6 +174,7 @@ class CrashRecoveryServiceUnitTests {
         assert COUNT_OF_ELEMENTS == callCreateNextProcessingStepCount
     }
 
+    @Test
     void test_markJobsAsFinished_ShouldFailBecauseNoIdsAreGiven() {
         createServices()
 
@@ -177,6 +183,7 @@ class CrashRecoveryServiceUnitTests {
         }.contains("ids")
     }
 
+    @Test
     void test_markJobsAsFinished_ShouldFailBecauseNoParametersAreGiven() {
         createServices()
         List ids = [ProcessingStep.build().id]
@@ -187,6 +194,7 @@ class CrashRecoveryServiceUnitTests {
         }.contains("parameters")
     }
 
+    @Test
     void test_markJobsAsFinished_ShouldFailBecauseIdsAreUnknown() {
         createServices()
         List ids = [1]
@@ -197,6 +205,7 @@ class CrashRecoveryServiceUnitTests {
         }.contains("No ProcessingStep")
     }
 
+    @Test
     void test_markJobsAsFinished_ShouldFailBecauseCrashRecoveryNotActive() {
         createServices(true)
         List ids = [ProcessingStep.build().id]
@@ -207,6 +216,7 @@ class CrashRecoveryServiceUnitTests {
         } == "The system is not in Crash Recovery"
     }
 
+    @Test
     void test_markJobsAsFinished_ShouldFailBecauseProcessingStepAlreadyRestarted() {
         createServices()
         ProcessingStep step1 = ProcessingStep.build()
@@ -228,6 +238,7 @@ class CrashRecoveryServiceUnitTests {
         } == "ProcessingStep ${ids[0]} has already been restarted"
     }
 
+    @Test
     void test_markJobsAsFinished_ShouldFailBecauseNoParameterMapForProcessingStep() {
         createServices()
         createProcessingSteps(true)
@@ -239,6 +250,7 @@ class CrashRecoveryServiceUnitTests {
         } == "Parameter for type ${parameterTypeList[0].id} has not been set"
     }
 
+    @Test
     void test_markJobsAsFinished_ShouldFailBecauseMissingParameterForOneProcessingStep() {
         createServices()
         createProcessingSteps(true)
@@ -250,6 +262,7 @@ class CrashRecoveryServiceUnitTests {
         } == "Parameter for type ${parameterTypeList[0].id} has not been set"
     }
 
+    @Test
     void test_markJobsAsFinished_ShouldFailBecauseParameterHasWrongJobDefinition() {
         createServices()
         createProcessingSteps(true)
@@ -260,6 +273,7 @@ class CrashRecoveryServiceUnitTests {
         } == "ParameterType with id ${parameterTypeList[0].id} does not belong to ProcessingStep with id ${processingSteps[0].id}"
     }
 
+    @Test
     void test_markJobsAsFinished_ShouldFailBecauseParameterHasWrongParameterUsage() {
         createServices()
         createProcessingSteps(true)
@@ -270,6 +284,7 @@ class CrashRecoveryServiceUnitTests {
         } == "ParameterType with id ${parameterTypeList[0].id} is not an output Parameter"
     }
 
+    @Test
     void test_markJobsAsFinished_ShouldFailBecauseParameterHasNullAsValue() {
         createServices()
         createProcessingSteps(true)
@@ -280,6 +295,7 @@ class CrashRecoveryServiceUnitTests {
         } == "Parameter with type id ${parameterTypeList[0].id} and value null cannot be stored"
     }
 
+    @Test
     void test_markJobsAsFinished_ShouldFailBecauseProcessingStepUpdateFail() {
         createServices()
         ProcessingStep processingStep = ProcessingStep.build()
@@ -291,6 +307,7 @@ class CrashRecoveryServiceUnitTests {
 
 
 
+    @Test
     void test_markJobsAsSucceeded_ProcessingStepsGivenByIdShouldBeMarkedAsFinishedAndHaveNoParameters() {
         createServices(false, true)
         createProcessingSteps()
@@ -306,6 +323,7 @@ class CrashRecoveryServiceUnitTests {
         assert COUNT_OF_ELEMENTS == callCreateNextProcessingStepCount
     }
 
+    @Test
     void test_markJobsAsSucceeded_processingStepsGivenByIdShouldBeMarkedAsFinishedAndHaveParameters() {
         createServices(false, true)
         createProcessingSteps(true)
@@ -328,6 +346,7 @@ class CrashRecoveryServiceUnitTests {
         assert COUNT_OF_ELEMENTS == callCreateNextProcessingStepCount
     }
 
+    @Test
     void test_markJobsAsSucceeded_ShouldFailBecauseNoIdsAreGiven() {
         createServices()
 
@@ -336,6 +355,7 @@ class CrashRecoveryServiceUnitTests {
         }.contains("ids")
     }
 
+    @Test
     void test_markJobsAsSucceeded_ShouldFailBecauseNoParametersAreGiven() {
         createServices()
         List ids = [ProcessingStep.build().id]
@@ -346,6 +366,7 @@ class CrashRecoveryServiceUnitTests {
         }.contains("parameters")
     }
 
+    @Test
     void test_markJobsAsSucceeded_ShouldFailBecauseIdsAreUnknown() {
         createServices()
         List ids = [1]
@@ -356,6 +377,7 @@ class CrashRecoveryServiceUnitTests {
         }.contains("No ProcessingStep")
     }
 
+    @Test
     void test_markJobsAsSucceeded_ShouldFailBecauseCrashRecoveryNotActive() {
         createServices(true)
         List ids = [ProcessingStep.build().id]
@@ -366,6 +388,7 @@ class CrashRecoveryServiceUnitTests {
         } == "The system is not in Crash Recovery"
     }
 
+    @Test
     void test_markJobsAsSucceeded_ShouldFailBecauseProcessingStepAlreadyRestarted() {
         createServices()
         ProcessingStep step1 = ProcessingStep.build()
@@ -387,6 +410,7 @@ class CrashRecoveryServiceUnitTests {
         } == "ProcessingStep ${ids[0]} has already been restarted"
     }
 
+    @Test
     void test_markJobsAsSucceeded_ShouldFailBecauseNoParameterMapForProcessingStep() {
         createServices()
         createProcessingSteps(true)
@@ -398,6 +422,7 @@ class CrashRecoveryServiceUnitTests {
         } == "Parameter for type ${parameterTypeList[0].id} has not been set"
     }
 
+    @Test
     void test_markJobsAsSucceeded_ShouldFailBecauseMissingParameterForOneProcessingStep() {
         createServices()
         createProcessingSteps(true)
@@ -409,6 +434,7 @@ class CrashRecoveryServiceUnitTests {
         } == "Parameter for type ${parameterTypeList[0].id} has not been set"
     }
 
+    @Test
     void test_markJobsAsSucceeded_ShouldFailBecauseParameterHasWrongJobDefinition() {
         createServices()
         createProcessingSteps(true)
@@ -419,6 +445,7 @@ class CrashRecoveryServiceUnitTests {
         } == "ParameterType with id ${parameterTypeList[0].id} does not belong to ProcessingStep with id ${processingSteps[0].id}"
     }
 
+    @Test
     void test_markJobsAsSucceeded_ShouldFailBecauseParameterHasWrongParameterUsage() {
         createServices()
         createProcessingSteps(true)
@@ -429,6 +456,7 @@ class CrashRecoveryServiceUnitTests {
         } == "ParameterType with id ${parameterTypeList[0].id} is not an output Parameter"
     }
 
+    @Test
     void test_markJobsAsSucceeded_ShouldFailBecauseParameterHasNullAsValue() {
         createServices()
         createProcessingSteps(true)
@@ -439,6 +467,7 @@ class CrashRecoveryServiceUnitTests {
         } == "Parameter with type id ${parameterTypeList[0].id} and value null cannot be stored"
     }
 
+    @Test
     void test_markJobsAsSucceeded_ShouldFailBecauseProcessingStepUpdateFail() {
         createServices()
         ProcessingStep processingStep = ProcessingStep.build()
@@ -450,6 +479,7 @@ class CrashRecoveryServiceUnitTests {
 
 
 
+    @Test
     void test_markJobsAsFailed_processingStepsGivenByIdShouldBeMarkedAsFailed() {
         createServices(false, false, true)
         createProcessingSteps()
@@ -464,6 +494,7 @@ class CrashRecoveryServiceUnitTests {
         }
     }
 
+    @Test
     void test_markJobsAsFailed_ShouldFailBecauseNoIdsAreGiven() {
         createServices()
 
@@ -472,6 +503,7 @@ class CrashRecoveryServiceUnitTests {
         }.contains("ids")
     }
 
+    @Test
     void test_markJobsAsFailed_ShouldFailBecauseNoReasonAreGiven() {
         createServices()
         List ids = [ProcessingStep.build().id]
@@ -482,6 +514,7 @@ class CrashRecoveryServiceUnitTests {
         }.contains("reason")
     }
 
+    @Test
     void test_markJobsAsFailed_ShouldFailBecauseIdsAreUnknown() {
         createServices()
         List ids = [1]
@@ -491,6 +524,7 @@ class CrashRecoveryServiceUnitTests {
         }.contains("No ProcessingStep")
     }
 
+    @Test
     void test_markJobsAsFailed_ShouldFailBecauseCrashRecoveryNotActive() {
         createServices(true)
         List ids = [ProcessingStep.build().id]
@@ -500,6 +534,7 @@ class CrashRecoveryServiceUnitTests {
         } == "The system is not in Crash Recovery"
     }
 
+    @Test
     void test_markJobsAsFailed_ShouldFailBecauseProcesingStepAlreadyRestarted() {
         createServices()
         ProcessingStep step1 = ProcessingStep.build()
@@ -521,6 +556,7 @@ class CrashRecoveryServiceUnitTests {
         } == "ProcessingStep ${ids[0]} has already been restarted"
     }
 
+    @Test
     void test_markJobsAsFailed_ShouldFailBecauseProcessingStepUpdateFail() {
         createServices()
         ProcessingStep processingStep = ProcessingStep.build()
@@ -532,6 +568,7 @@ class CrashRecoveryServiceUnitTests {
 
 
 
+    @Test
     void test_restartJobs_processingStepsGivenByIdShouldBeMarkedAsFailed() {
         createServices(false, false, true)
         createProcessingSteps()
@@ -548,6 +585,7 @@ class CrashRecoveryServiceUnitTests {
         assert COUNT_OF_ELEMENTS == callRestartProcessingStepCount
     }
 
+    @Test
     void test_restartJobs_ShouldFailBecauseNoIdsAreGiven() {
         createServices()
 
@@ -556,6 +594,7 @@ class CrashRecoveryServiceUnitTests {
         }.contains("ids")
     }
 
+    @Test
     void test_restartJobs_ShouldFailBecauseNoReasonAreGiven() {
         createServices()
         List ids = [ProcessingStep.build().id]
@@ -566,6 +605,7 @@ class CrashRecoveryServiceUnitTests {
         }.contains("reason")
     }
 
+    @Test
     void test_restartJobs_ShouldFailBecauseIdsAreUnknown() {
         createServices()
         List ids = [1]
@@ -576,6 +616,7 @@ class CrashRecoveryServiceUnitTests {
         }.contains("No ProcessingStep")
     }
 
+    @Test
     void test_restartJobs_ShouldFailBecauseCrashRecoveryNotActive() {
         createServices(true)
         List ids = [ProcessingStep.build().id]
@@ -586,6 +627,7 @@ class CrashRecoveryServiceUnitTests {
         } == "The system is not in Crash Recovery"
     }
 
+    @Test
     void test_restartJobs_ShouldFailBecauseProcesingStepAlreadyRestarted() {
         createServices()
         ProcessingStep step1 = ProcessingStep.build()
@@ -607,6 +649,7 @@ class CrashRecoveryServiceUnitTests {
         } == "ProcessingStep ${ids[0]} has already been restarted"
     }
 
+    @Test
     void test_restartJobs_ShouldFailBecauseProcessingStepUpdateFail() {
         createServices()
         ProcessingStep processingStep = ProcessingStep.build()
@@ -618,6 +661,7 @@ class CrashRecoveryServiceUnitTests {
 
 
 
+    @Test
     void test_crashJobs_shouldReturnProcessingSteps() {
         createProcessingSteps()
         service.schedulerService = [
@@ -628,6 +672,7 @@ class CrashRecoveryServiceUnitTests {
         assert processingSteps == service.crashedJobs()
     }
 
+    @Test
     void test_crashJobs_ShouldFailBecauseCrashRecoveryNotActive() {
         createServices(true)
         ProcessingStep processingStep = ProcessingStep.build()
@@ -637,6 +682,7 @@ class CrashRecoveryServiceUnitTests {
 
 
 
+    @Test
     void test_getOutputParametersOfJobs_shouldReturnTheOutputParametersOfTheGivenProcessingStepIdsHavingNoParameters() {
         createServices()
         createProcessingSteps()
@@ -648,6 +694,7 @@ class CrashRecoveryServiceUnitTests {
         assert expected == values
     }
 
+    @Test
     void test_getOutputParametersOfJobs_shouldReturnTheOutputParametersOfTheGivenProcessingStepIdsHavingParameters() {
         createServices()
         createProcessingSteps(true)
@@ -659,12 +706,14 @@ class CrashRecoveryServiceUnitTests {
         assert expected == values
     }
 
+    @Test
     void test_getOutputParametersOfJobs_ShouldFailBecauseNoIdsAreGiven() {
         createServices()
 
         assert shouldFail(PowerAssertionError) { service.getOutputParametersOfJobs(null) }.contains("ids")
     }
 
+    @Test
     void test_getOutputParametersOfJobs_ShouldFailBecauseIdsAreUnknown() {
         createServices()
         List ids = [1]
@@ -673,6 +722,7 @@ class CrashRecoveryServiceUnitTests {
         assert shouldFail(RuntimeException) { service.getOutputParametersOfJobs(ids) }.contains("No ProcessingStep")
     }
 
+    @Test
     void test_getOutputParametersOfJobs_ShouldFailBecauseCrashRecoveryNotActive() {
         createServices(true)
         List ids = [ProcessingStep.build().id]

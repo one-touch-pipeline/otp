@@ -24,6 +24,7 @@ class ProjectOverviewServiceUnitTest {
 
 
 
+    @Test
     void test_listReferenceGenome_oneData() {
         Project project = Project.build()
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = ReferenceGenomeProjectSeqType.build(
@@ -35,6 +36,7 @@ class ProjectOverviewServiceUnitTest {
         assert referenceGenomeProjectSeqType == list[0]
     }
 
+    @Test
     void test_listReferenceGenome_noData_wrongProject() {
         Project project = Project.build()
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = ReferenceGenomeProjectSeqType.build()
@@ -43,6 +45,7 @@ class ProjectOverviewServiceUnitTest {
         assert 0 == list.size()
     }
 
+    @Test
     void test_listReferenceGenome_noData_dateDeprecated() {
         Project project = Project.build()
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = ReferenceGenomeProjectSeqType.build(
@@ -54,6 +57,7 @@ class ProjectOverviewServiceUnitTest {
         assert 0 == list.size()
     }
 
+    @Test
     void test_listReferenceGenome_multipleData() {
         Project project = Project.build()
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType1 = ReferenceGenomeProjectSeqType.build(

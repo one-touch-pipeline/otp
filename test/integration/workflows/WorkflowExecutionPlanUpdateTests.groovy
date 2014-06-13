@@ -16,7 +16,6 @@ import org.junit.Test
 
 class WorkflowExecutionPlanUpdateTests extends DataInstallationWorkflowTests {
 
-    @Ignore
     @Test
     void testUpdateOfJobExecutionPlan() {
         SeqTrack seqTrack = furtherDataBaseSetup()

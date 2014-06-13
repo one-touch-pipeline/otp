@@ -2,9 +2,11 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.TestCase
 import grails.validation.ValidationException
+import org.junit.Test
 
 class SampleTypePerProjectTests extends TestCase {
 
+    @Test
     void testUniqueConstraint() {
         Project project = TestData.createProject(
                         name: "project",
@@ -35,6 +37,7 @@ class SampleTypePerProjectTests extends TestCase {
         }
     }
 
+    @Test
     void testFindMissingCombinations() {
         final SeqType wholeGenome = SeqType.build(name: SeqTypeNames.WHOLE_GENOME.seqTypeName, libraryLayout: 'PAIRED')
         final SeqType exome =  SeqType.build(name: SeqTypeNames.EXOME.seqTypeName, libraryLayout: 'PAIRED')

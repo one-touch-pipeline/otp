@@ -15,6 +15,7 @@ class BedFileTests {
     BedFile bedFile1
     BedFile bedFile2
 
+    @Before
     void setUp() {
         refGen = new ReferenceGenome(
                 name: "refGen",
@@ -48,6 +49,7 @@ class BedFileTests {
                 )
     }
 
+    @After
     void tearDown() {
         refGen = null
         kit1 = null
@@ -56,6 +58,7 @@ class BedFileTests {
         bedFile2 = null
     }
 
+    @Test
     void testCreateCorrect() {
         assertTrue bedFile1.validate()
         assertNotNull bedFile1.save(flush: true)
@@ -65,28 +68,33 @@ class BedFileTests {
         assertTrue !bedFile2.toString().empty
     }
 
+    @Test
     void testFileNameNull() {
         bedFile1.fileName = null
         assertFalse bedFile1.validate()
     }
 
+    @Test
     void testFileNameEmpty() {
         bedFile1.fileName = ""
         assertFalse bedFile1.validate()
     }
 
+    @Test
     void testFileNameNotUnique() {
         assertNotNull bedFile1.save(flush: true)
         bedFile2.fileName = "fileName1"
         assertFalse bedFile2.validate()
     }
 
+    @Test
     void testGenomeKitPrimaryKey() {
         assertNotNull bedFile1.save(flush: true)
         bedFile2.libraryPreparationKit = kit1
         assertFalse bedFile2.validate()
     }
 
+    @Test
     void testMinTargetSize() {
         bedFile1.targetSize = 0
         assertFalse bedFile1.validate()

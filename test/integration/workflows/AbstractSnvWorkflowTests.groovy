@@ -158,6 +158,7 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
         )
     }
 
+
     void fileSystemSetup() {
         File inputDiseaseBamFile = new File(getWorkflowDirectory(), "inputFiles/tumor_SOMEPID_merged.mdup.bam")
         File inputDiseaseBaiFile = new File(getWorkflowDirectory(), "inputFiles/tumor_SOMEPID_merged.mdup.bam.bai")
@@ -208,6 +209,7 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
         bamFileControl.fileSize = inputControlBamFile.size()
         assertNotNull(bamFileControl.save(flush: true))
     }
+
 
     void createSnvSpecificSetup() {
         SampleTypePerProject.build(
@@ -409,4 +411,4 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
     Duration getTimeout() {
         Duration.standardMinutes(30)
     }
-}
+ }

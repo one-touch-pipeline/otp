@@ -187,6 +187,7 @@ class LsdfFilesServiceTests extends GroovyTestCase {
         fileType = null
     }
 
+    @Test
     void testGetFileViewByPidRelativeDirectorySeqTrackAboutAlignmentLog() {
         final String SEQ_TYPE = "OtherThanChipSeq"
         final String SEQ_TYPE_SEQUENCING_DIR = SEQ_TYPE
@@ -225,6 +226,7 @@ class LsdfFilesServiceTests extends GroovyTestCase {
         assertEquals(new File(correctPath).path, new File(path).path)
     }
 
+    @Test
     void testGetFileViewByPidRelativeDirectory() {
         final String SEQ_TYPE = "OtherThanChipSeq"
         final String SEQ_TYPE_SEQUENCING_DIR = SEQ_TYPE
@@ -247,6 +249,7 @@ class LsdfFilesServiceTests extends GroovyTestCase {
         assertEquals(new File(correctPath).path, new File(path).path)
     }
 
+    @Test
     void testGetFileViewByPidRelativeDirectoryChipSeq() {
         final String SEQ_TYPE = SeqTypeNames.CHIP_SEQ.seqTypeName
         final String CHIP_SEQ_SEQUENCING_DIR = "chip_seq_sequencing"
@@ -278,6 +281,7 @@ class LsdfFilesServiceTests extends GroovyTestCase {
     /**
      * This test check for compatibility of old chip seq data, which are loaded as normal {@link SeqTrack}
      */
+    @Test
     void testGetFileViewByPidRelativeDirectoryChipSeqUsingSeqTrack() {
         final String SEQ_TYPE = SeqTypeNames.CHIP_SEQ.seqTypeName
         final String SEQ_TYPE_SEQUENCING_DIR = "chip_seq_sequencing"

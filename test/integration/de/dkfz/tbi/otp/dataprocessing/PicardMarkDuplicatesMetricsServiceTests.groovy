@@ -57,6 +57,7 @@ class PicardMarkDuplicatesMetricsServiceTests {
         }
     }
 
+    @Test
     void testParseAndLoadMetricsForProcessedMergedBamFile() {
         metrics << """## net.sf.picard.metrics.StringHeader
 # net.sf.picard.sam.MarkDuplicates INPUT=[...]

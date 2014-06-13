@@ -20,6 +20,7 @@ class SampleIdentifierUnitTest {
 
 
 
+    @Before
     void setUp() {
         sampleIdentifier = new SampleIdentifier(
             name: CORRECT_NAME,
@@ -29,6 +30,7 @@ class SampleIdentifierUnitTest {
 
 
 
+    @Test
     void test_validate_fail_nameIsNull() {
         sampleIdentifier.name = null
 
@@ -36,6 +38,7 @@ class SampleIdentifierUnitTest {
     }
 
 
+    @Test
     void test_validate_fail_sampleIsNull() {
         sampleIdentifier.sample = null
 
@@ -43,6 +46,7 @@ class SampleIdentifierUnitTest {
     }
 
 
+    @Test
     void test_validate_fail_nameIsEmpty() {
         sampleIdentifier.name = ''
 
@@ -50,6 +54,7 @@ class SampleIdentifierUnitTest {
     }
 
 
+    @Test
     void test_validate_fail_nameIsTooShort() {
         final String name = '12'
         sampleIdentifier.name = name
@@ -58,6 +63,7 @@ class SampleIdentifierUnitTest {
     }
 
 
+    @Test
     void test_validate_fail_nameIsNotUnique() {
         assert sampleIdentifier.save(flush: true)
         SampleIdentifier sampleIdentifier2 = new SampleIdentifier(
@@ -67,6 +73,7 @@ class SampleIdentifierUnitTest {
         TestCase.assertValidateError(sampleIdentifier2, 'name', 'unique', CORRECT_NAME)
     }
 
+    @Test
     void test_validate_fail_nameStartsWithSpace() {
         final String name = ' aname'
         sampleIdentifier.name = name
@@ -74,6 +81,7 @@ class SampleIdentifierUnitTest {
         TestCase.assertValidateError(sampleIdentifier, 'name', 'validator.invalid', name)
     }
 
+    @Test
     void test_validate_fail_nameEndsWithSpace() {
         final String name = 'aname '
         sampleIdentifier.name = name
@@ -90,12 +98,14 @@ class SampleIdentifierUnitTest {
         ).save(failOnError: true)
     }
 
+    @Test
     void test_validate_pass_regexIsSet() {
         createRegex(sampleIdentifier.sample.project)
 
         assert sampleIdentifier.validate()
     }
 
+    @Test
     void test_validate_fail_regexIsSet() {
         createRegex(sampleIdentifier.sample.project)
         final String name = 'toolong'
@@ -104,6 +114,7 @@ class SampleIdentifierUnitTest {
         TestCase.assertValidateError(sampleIdentifier, 'name', 'validator.invalid', name)
     }
 
+    @Test
     void test_validate_pass_regexIsSetForOtherProject() {
         createRegex(Project.build())
         final String name = 'toolong'

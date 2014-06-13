@@ -2,11 +2,13 @@ package scripts.updates
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
+import org.junit.Test
 
 class AddReadNumberIntoDataFilesTests extends GroovyScriptAwareTestCase {
 
     static final String SCRIPT_NAME = "scripts/updates/AddReadNumberIntoDataFiles.groovy"
 
+    @Test
     void testUpdateDataFile_SpecialRun() {
         Run run = Run.build(name: '140930_XY123_0815_D2748ACXX')
         DataFile dataFile = DataFile.build(run: run)
@@ -15,6 +17,7 @@ class AddReadNumberIntoDataFilesTests extends GroovyScriptAwareTestCase {
         assert dataFile.readNumber == null
     }
 
+    @Test
     void testUpdateDataFile_NoSeqTrack() {
         Run run = Run.build()
         DataFile dataFile = DataFile.build(run: run)
@@ -24,6 +27,7 @@ class AddReadNumberIntoDataFilesTests extends GroovyScriptAwareTestCase {
         assert dataFile.readNumber == 2
     }
 
+    @Test
     void testUpdateDataFile_SingleEnd() {
         SeqTrack seqTrack = SeqTrack.build()
         Run run = Run.build()
@@ -33,6 +37,7 @@ class AddReadNumberIntoDataFilesTests extends GroovyScriptAwareTestCase {
         assert dataFile.readNumber == 1
     }
 
+    @Test
     void testUpdateDataFile_PairedEnd() {
         SeqTrack seqTrack = SeqTrack.build()
         Run run = Run.build()
@@ -43,6 +48,7 @@ class AddReadNumberIntoDataFilesTests extends GroovyScriptAwareTestCase {
         assert dataFile.readNumber == 2
     }
 
+    @Test
     void testUpdateDataFile_NoMatch() {
         SeqTrack seqTrack = SeqTrack.build()
         Run run = Run.build()

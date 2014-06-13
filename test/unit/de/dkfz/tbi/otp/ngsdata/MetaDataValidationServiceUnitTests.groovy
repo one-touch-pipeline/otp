@@ -65,6 +65,7 @@ class MetaDataValidationServiceUnitTests {
         metaDataValidationService = null
     }
 
+    @Test
     void testCombineLaneAndIndexUsingIndex() {
         DataFile dataFile = createDataFile()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LANE_NO): "1", (INDEX_NO): "AAAAAA"], dataFile)
@@ -72,6 +73,7 @@ class MetaDataValidationServiceUnitTests {
         assertEquals("1_AAAAAA", getMetaDataEntryValue(dataFile, LANE_NO))
     }
 
+    @Test
     void testCombineLaneAndIndexUsingBarcode() {
         DataFile dataFile = createDataFile()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LANE_NO): "1", (BARCODE): "AAAAAA"], dataFile)
@@ -79,6 +81,7 @@ class MetaDataValidationServiceUnitTests {
         assertEquals("1_AAAAAA", getMetaDataEntryValue(dataFile, LANE_NO))
     }
 
+    @Test
     void testCombineLaneAndIndexUsingIndexNoValue() {
         DataFile dataFile = createDataFile()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LANE_NO): "1", (INDEX_NO): ""], dataFile)
@@ -86,6 +89,7 @@ class MetaDataValidationServiceUnitTests {
         assertEquals("1", getMetaDataEntryValue(dataFile, LANE_NO))
     }
 
+    @Test
     void testCombineLaneAndIndexUsingBarcodeNoValue() {
         DataFile dataFile = createDataFile()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LANE_NO): "1", (BARCODE): ""], dataFile)
@@ -93,6 +97,7 @@ class MetaDataValidationServiceUnitTests {
         assertEquals("1", getMetaDataEntryValue(dataFile, LANE_NO))
     }
 
+    @Test
     void testCombineLaneAndIndexUsingIndexOnlySpaces() {
         DataFile dataFile = createDataFile()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LANE_NO): "1", (INDEX_NO): "  "], dataFile)
@@ -100,6 +105,7 @@ class MetaDataValidationServiceUnitTests {
         assertEquals("1", getMetaDataEntryValue(dataFile, LANE_NO))
     }
 
+    @Test
     void testCombineLaneAndIndexUsingBarcodeOnlySpaces() {
         DataFile dataFile = createDataFile()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LANE_NO): "1", (BARCODE): "  "], dataFile)
@@ -107,6 +113,7 @@ class MetaDataValidationServiceUnitTests {
         assertEquals("1", getMetaDataEntryValue(dataFile, LANE_NO))
     }
 
+    @Test
     void testCombineLaneAndIndexNeitherIndexNorBarcode() {
         DataFile dataFile = createDataFile()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LANE_NO): "1"], dataFile)
@@ -114,6 +121,7 @@ class MetaDataValidationServiceUnitTests {
         assertEquals("1", getMetaDataEntryValue(dataFile, LANE_NO))
     }
 
+    @Test
     void testCombineLaneAndIndexUsingIndexTwoTimes() {
         DataFile dataFile = createDataFile()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LANE_NO): "1", (INDEX_NO): "AAAAAA"], dataFile)
@@ -122,6 +130,7 @@ class MetaDataValidationServiceUnitTests {
         assertEquals("1_AAAAAA", getMetaDataEntryValue(dataFile, LANE_NO))
     }
 
+    @Test
     void testCombineLaneAndIndexUsingBarcodeTwoTimes() {
         DataFile dataFile = createDataFile()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LANE_NO): "1", (BARCODE): "AAAAAA"], dataFile)
@@ -130,12 +139,14 @@ class MetaDataValidationServiceUnitTests {
         assertEquals("1_AAAAAA", getMetaDataEntryValue(dataFile, LANE_NO))
     }
 
+    @Test
     void testCombineLaneAndIndexUsingBarcodeNoLaneNo() {
         DataFile dataFile = createDataFile()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(BARCODE): "AAAAAA"], dataFile)
         shouldFail(NullPointerException) { metaDataValidationService.combineLaneAndIndex(dataFile) }
     }
 
+    @Test
     void testCombineLaneAndIndexUsingIndexAndBarCodeBothCorrect() {
         DataFile dataFile = createDataFile()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LANE_NO): "1", (INDEX_NO): "AAAAAA", (BARCODE): "BBBBBB"], dataFile)
@@ -143,6 +154,7 @@ class MetaDataValidationServiceUnitTests {
         assertEquals("1_AAAAAA", getMetaDataEntryValue(dataFile, LANE_NO))
     }
 
+    @Test
     void testCombineLaneAndIndexUsingIndexAndBarCodeWhereIndexNoIsEmpty() {
         DataFile dataFile = createDataFile()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LANE_NO): "1", (INDEX_NO): "", (BARCODE): "BBBBBB"], dataFile)
@@ -150,6 +162,7 @@ class MetaDataValidationServiceUnitTests {
         assertEquals("1", getMetaDataEntryValue(dataFile, LANE_NO))
     }
 
+    @Test
     void testCombineLaneAndIndexUsingIndexAndBarCodeWhereBarcodeIsEmpty() {
         DataFile dataFile = createDataFile()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LANE_NO): "1", (INDEX_NO): "AAAAAA", (BARCODE): ""], dataFile)
@@ -157,6 +170,7 @@ class MetaDataValidationServiceUnitTests {
         assertEquals("1_AAAAAA", getMetaDataEntryValue(dataFile, LANE_NO))
     }
 
+    @Test
     void testCombineLaneAndIndexUsingIndexAndBarCodeWhereIndexNoHasWhiteSpaces() {
         DataFile dataFile = createDataFile()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LANE_NO): "1", (INDEX_NO): "  ", (BARCODE): "BBBBBB"], dataFile)
@@ -164,6 +178,7 @@ class MetaDataValidationServiceUnitTests {
         assertEquals("1", getMetaDataEntryValue(dataFile, LANE_NO))
     }
 
+    @Test
     void testCombineLaneAndIndexUsingIndexAndBarCodeWhereBarcodeHasWhiteSpaces() {
         DataFile dataFile = createDataFile()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LANE_NO): "1", (INDEX_NO): "AAAAAA", (BARCODE): "  "], dataFile)
@@ -171,6 +186,7 @@ class MetaDataValidationServiceUnitTests {
         assertEquals("1_AAAAAA", getMetaDataEntryValue(dataFile, LANE_NO))
     }
 
+    @Test
     void testCombineLaneAndIndexUsingIndexAndBarCodeWhereBothAreEmpty() {
         DataFile dataFile = createDataFile()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LANE_NO): "1", (INDEX_NO): "", (BARCODE): ""], dataFile)
@@ -180,6 +196,7 @@ class MetaDataValidationServiceUnitTests {
 
 
 
+    @Test
     void testCheckLibraryPreparationKit_UsingLibraryPreparationKit_shouldBeValid() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): LIBRARY_PREPARATION_KIT, (SEQUENCING_TYPE): SEQUENCE_TYPE_ANY])
@@ -187,6 +204,7 @@ class MetaDataValidationServiceUnitTests {
         assert metaDataValidationService.checkLibraryPreparationKit(map[(LIB_PREP_KIT)])
     }
 
+    @Test
     void testCheckLibraryPreparationKit_UsingLibraryPreparationKitSynonym_shouldBeValid() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): LIBRARY_PREPARATION_KIT_SYNONYM, (SEQUENCING_TYPE): SEQUENCE_TYPE_ANY])
@@ -194,6 +212,7 @@ class MetaDataValidationServiceUnitTests {
         assert metaDataValidationService.checkLibraryPreparationKit(map[(LIB_PREP_KIT)])
     }
 
+    @Test
     void testCheckLibraryPreparationKit_UsingSpecialValueUNKNOWN_ForExome_shouldBeValid() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE, (SEQUENCING_TYPE): SEQUENCE_TYPE_EXOME])
@@ -201,6 +220,7 @@ class MetaDataValidationServiceUnitTests {
         assert metaDataValidationService.checkLibraryPreparationKit(map[(LIB_PREP_KIT)])
     }
 
+    @Test
     void testCheckLibraryPreparationKit_UsingSpecialValueUNKNOWN_ForNonExome_shouldBeInvalid() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE, (SEQUENCING_TYPE): SEQUENCE_TYPE_ANY])
@@ -208,6 +228,7 @@ class MetaDataValidationServiceUnitTests {
         assert !metaDataValidationService.checkLibraryPreparationKit(map[(LIB_PREP_KIT)])
     }
 
+    @Test
     void testCheckLibraryPreparationKit_UsingEmptyValue_ForExome_shouldBeInvalid() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): '', (SEQUENCING_TYPE): SEQUENCE_TYPE_EXOME])
@@ -215,6 +236,7 @@ class MetaDataValidationServiceUnitTests {
         assert !metaDataValidationService.checkLibraryPreparationKit(map[(LIB_PREP_KIT)])
     }
 
+    @Test
     void testCheckLibraryPreparationKit_UsingEmptyValue_ForNonExome_shouldBeValid() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): '', (SEQUENCING_TYPE): SEQUENCE_TYPE_ANY])
@@ -222,6 +244,7 @@ class MetaDataValidationServiceUnitTests {
         assert metaDataValidationService.checkLibraryPreparationKit(map[(LIB_PREP_KIT)])
     }
 
+    @Test
     void testCheckLibraryPreparationKit_UsingInvalidEntry_shouldBeInvalid() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): "something", (SEQUENCING_TYPE): SEQUENCE_TYPE_ANY])
@@ -230,6 +253,7 @@ class MetaDataValidationServiceUnitTests {
     }
 
 
+    @Test
     void testCheckLibraryPreparationKit_NoSequenceType() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): "something"])
@@ -240,6 +264,7 @@ class MetaDataValidationServiceUnitTests {
 
 
 
+    @Test
     void testValidateMetaDataEntryForLIB_PREP_KIT() {
         Run run = createRun()
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
@@ -248,6 +273,7 @@ class MetaDataValidationServiceUnitTests {
     }
 
 
+    @Test
     void testValidateMetaDataEntryForSEQUENCING_KIT() {
         Run run = createRun()
         createSequencingKitLabel()
@@ -255,6 +281,7 @@ class MetaDataValidationServiceUnitTests {
         assertTrue(metaDataValidationService.validateMetaDataEntry(run, map[(MetaDataColumn.SEQUENCING_KIT.name())]))
     }
 
+    @Test
     void testValidateMetaDataEntryForSEQUENCING_KIT_MetadataUseSynonymValue() {
         Run run = createRun()
         createSequencingKitLabel()
@@ -262,6 +289,7 @@ class MetaDataValidationServiceUnitTests {
         assertTrue(metaDataValidationService.validateMetaDataEntry(run, map[(MetaDataColumn.SEQUENCING_KIT.name())]))
     }
 
+    @Test
     void testValidateMetaDataEntryForSEQUENCING_KIT_MetadataValueDoesNotExistInDB_IsFalse() {
         Run run = createRun()
         createSequencingKitLabel()
@@ -271,18 +299,22 @@ class MetaDataValidationServiceUnitTests {
 
 
 
+    @Test
     void testCheckSampleIdentifier_correct() {
         assert metaDataValidationService.checkSampleIdentifier('CorrectName')
     }
 
+    @Test
     void testCheckSampleIdentifier_correct_minLength() {
         assert metaDataValidationService.checkSampleIdentifier('123')
     }
 
+    @Test
     void testCheckSampleIdentifier_wrong_empty() {
         assert !metaDataValidationService.checkSampleIdentifier('')
     }
 
+    @Test
     void testCheckSampleIdentifier_wrong_tooShort() {
         assert !metaDataValidationService.checkSampleIdentifier('12')
     }

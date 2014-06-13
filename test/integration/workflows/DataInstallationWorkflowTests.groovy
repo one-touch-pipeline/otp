@@ -200,7 +200,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         return seqType
     }
 
-    @Ignore
     @Test
     void testDataInstallation_FilesHaveToBeCopied() {
         SeqTrack seqTrack = createWholeGenomeSetup()
@@ -210,7 +209,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         checkThatWorkflowWasSuccessful(seqTrack)
     }
 
-    @Ignore
     @Test
     void testDataInstallation_FilesHaveToBeLinked() {
         SeqTrack seqTrack = createWholeGenomeSetup()
@@ -222,7 +220,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         checkThatWorkflowWasSuccessful(seqTrack)
     }
 
-    @Ignore
     @Test
     void testChipSeqInstallation() {
         SeqType seqType = createSeqType(SeqTypeNames.CHIP_SEQ.seqTypeName, "chip_seq_sequencing")
@@ -252,7 +249,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         checkThatWorkflowWasSuccessful(seqTrack)
     }
 
-    @Ignore
     @Test
     void testDataInstallationWithFastTrack() {
         project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY

@@ -12,18 +12,21 @@ class AntibodyTargetTests {
 
     static final String INVALID_NAME = "a1Az2Z/"
 
+    @Test
     void testValidName() {
         AntibodyTarget antibodyTarget = new AntibodyTarget(
             name: VALID_NAME)
         assertTrue antibodyTarget.validate()
     }
 
+    @Test
     void testInvalidName() {
         AntibodyTarget antibodyTarget = new AntibodyTarget(
             name: INVALID_NAME)
         assertFalse antibodyTarget.validate()
     }
 
+    @Test
     void testUniqueName() {
         AntibodyTarget antibodyTarget = new AntibodyTarget(
             name: VALID_NAME)
@@ -34,12 +37,14 @@ class AntibodyTargetTests {
         assertFalse antibodyTarget.validate()
     }
 
+    @Test
     void testBlankName() {
         AntibodyTarget antibodyTarget = new AntibodyTarget(
             name: "")
         assertFalse antibodyTarget.validate()
     }
 
+    @Test
     void testNullName() {
         AntibodyTarget antibodyTarget = new AntibodyTarget()
         assertFalse antibodyTarget.validate()

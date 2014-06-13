@@ -13,7 +13,7 @@ class SeqTypeServiceUnitTest {
     }
 
     @Test
-     void testAlignableSeqTypes() {
+    void testAlignableSeqTypes() {
         DomainFactory.createAlignableSeqTypes()
 
         List<SeqType> alignableSeqTypes = SeqTypeService.alignableSeqTypes()

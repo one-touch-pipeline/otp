@@ -12,6 +12,7 @@ class ExternalScriptUnitTests {
     final String SCRIPT_IDENTIFIER = "TEST"
     final String SCRIPT_FILE_PATH = "/tmp/testfolder/testScript.sh"
 
+    @Test
     void testConstraintScriptIdentifier() {
         ExternalScript externalScript = createExternalScript([scriptIdentifier: null])
         assertFalse(externalScript.validate())
@@ -21,6 +22,7 @@ class ExternalScriptUnitTests {
         assertTrue(externalScript.validate())
     }
 
+    @Test
     void testConstraintFilePathUnique() {
         ExternalScript externalScriptFirst = createExternalScript()
         assertTrue(externalScriptFirst.validate())
@@ -33,6 +35,7 @@ class ExternalScriptUnitTests {
         assertTrue(externalScriptSecond.validate())
     }
 
+    @Test
     void testScriptIdentifierAndDeprecatedDate() {
         ExternalScript externalScript1 = createExternalScript()
         assertTrue(externalScript1.validate())
@@ -50,6 +53,7 @@ class ExternalScriptUnitTests {
         assertTrue(externalScript3.validate())
     }
 
+    @Test
     void testConstraintFilePath() {
         ExternalScript externalScript = createExternalScript([filePath: null])
         assertFalse(externalScript.validate())
@@ -61,6 +65,7 @@ class ExternalScriptUnitTests {
         assertTrue(externalScript.validate())
     }
 
+    @Test
     void testConstraintAuthor() {
         ExternalScript externalScript = createExternalScript([author: null])
         assertFalse(externalScript.validate())
@@ -70,6 +75,7 @@ class ExternalScriptUnitTests {
         assertTrue(externalScript.validate())
     }
 
+    @Test
     void testIsDeprecated() {
         ExternalScript externalScript1 = createExternalScript()
         assertFalse(externalScript1.isDeprecated())
@@ -78,6 +84,7 @@ class ExternalScriptUnitTests {
     }
 
 
+    @Test
     void testToString() {
         Date deprecatedDate = new Date()
         ExternalScript externalScript1 = createExternalScript()
@@ -86,6 +93,7 @@ class ExternalScriptUnitTests {
         assertEquals(externalScript1.toString(), expectedString)
     }
 
+    @Test
     void testNotMoreThanOneNotWithdrawnExternalScript() {
         ExternalScript externalScript1 = createExternalScript()
         externalScript1.save()
@@ -93,6 +101,7 @@ class ExternalScriptUnitTests {
         assertFalse(externalScript2.validate())
     }
 
+    @Test
     void testStoreTwoVersionsForOneIdentifier() {
         ExternalScript externalScript1 = createExternalScript()
         externalScript1.save()

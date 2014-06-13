@@ -57,12 +57,14 @@ class ExecutionHelperServiceUnitTests {
         ] as ExecutionService
     }
 
+    @Test
     void testSendScriptWithRealmIsNull() {
         shouldFail(NullPointerException) { service.sendScript(null, ARBITRARY_JOB_IDENTFIER) }
     }
 
     // Script via closure
 
+    @Test
     void testSendScriptWithClosureWhenJobIdentifierIsNotGiven() {
         service.executionService = createFakeExecutionService()
         Realm fakeRealm = new Realm()
@@ -70,6 +72,7 @@ class ExecutionHelperServiceUnitTests {
         assert FIRST_PBS_ID == output
     }
 
+    @Test
     void testSendScriptWithClosureWhenJobIdentifierIsGiven() {
         service.executionService = createFakeExecutionService()
         Realm fakeRealm = new Realm()
@@ -77,11 +80,13 @@ class ExecutionHelperServiceUnitTests {
         assert FIRST_PBS_ID == output
     }
 
+    @Test
     void testSendScriptWithClosureWhenMoreThanOnePBSIDIsReturned() {
         service.executionService = createFakeExecutionServiceSeveralPBSIDs()
         shouldFail ProcessingException, { service.sendScript(new Realm(), ARBITRARY_JOB_IDENTFIER) { SCRIPT_CONTENT } }
     }
 
+    @Test
     void testSendScriptWithClosureWhenPBSIDisEmpty() {
         service.executionService = createFakeExecutionServicePBSisNull()
         shouldFail ProcessingException, { service.sendScript(new Realm(), ARBITRARY_JOB_IDENTFIER) { SCRIPT_CONTENT } }
@@ -89,6 +94,7 @@ class ExecutionHelperServiceUnitTests {
 
     // Script as String
 
+    @Test
     void testSendScriptWithStringWhenJobIdentifierIsNotGiven() {
         service.executionService = createFakeExecutionService()
         Realm fakeRealm = new Realm()
@@ -96,6 +102,7 @@ class ExecutionHelperServiceUnitTests {
         assert FIRST_PBS_ID == output
     }
 
+    @Test
     void testSendScriptWithStringWhenJobIdentifierIsGiven() {
         service.executionService = createFakeExecutionService()
         Realm fakeRealm = new Realm()
@@ -103,16 +110,19 @@ class ExecutionHelperServiceUnitTests {
         assert FIRST_PBS_ID == output
     }
 
+    @Test
     void testSendScriptWithStringWhenMoreThanOnePBSIDIsReturned() {
         service.executionService = createFakeExecutionServiceSeveralPBSIDs()
         shouldFail ProcessingException, { service.sendScript(new Realm(), ARBITRARY_JOB_IDENTFIER) { SCRIPT_CONTENT } }
     }
 
+    @Test
     void testSendScriptWithStringWhenPBSIDisEmpty() {
         service.executionService = createFakeExecutionServicePBSisNull()
         shouldFail ProcessingException, { service.sendScript(new Realm(), ARBITRARY_JOB_IDENTFIER) { SCRIPT_CONTENT } }
     }
 
+    @Test
     void testSendScriptWithQsubParameter() {
         service.executionService = createFakeExecutionService()
         String output = service.sendScript(new Realm(), SCRIPT_CONTENT, ARBITRARY_JOB_IDENTFIER, QSUB_PARAMETERS)

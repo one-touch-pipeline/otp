@@ -17,6 +17,7 @@ class GroupCommandTests {
         mockCommandObject(GroupCommand)
     }
 
+    @Test
     void testWriteProjectConstraint() {
         GroupCommand group = new GroupCommand(writeProject: true, name: "test", description: "")
         // write project is enabled, but read project is disabled - should not validate
@@ -33,6 +34,7 @@ class GroupCommandTests {
         assertTrue(group.validate())
     }
 
+    @Test
     void testWriteJobSystemConstraint() {
         GroupCommand group = new GroupCommand(writeJobSystem: true, name: "test", description: "")
         // write job system is enabled, but read job system is disabled - should not validate
@@ -49,6 +51,7 @@ class GroupCommandTests {
         assertTrue(group.validate())
     }
 
+    @Test
     void testWriteSequenceCenterConstraint() {
         GroupCommand group = new GroupCommand(writeSequenceCenter: true, name: "test", description: "")
         // write sequence center is enabled, but read sequence center is disabled - should not validate
@@ -65,6 +68,7 @@ class GroupCommandTests {
         assertTrue(group.validate())
     }
 
+    @Test
     void testNameConstraint() {
         Role role = new Role(authority: "GROUP_TEST")
         role.save(flush: true)

@@ -17,6 +17,7 @@ class ProcessedMergedBamFileTests {
     MergingSet mergingSet = null
     MergingWorkPackage workPackage = null
 
+    @Before
     void setUp() {
         Project project = TestData.createProject(
                 name: "project",
@@ -57,18 +58,21 @@ class ProcessedMergedBamFileTests {
         this.mergingPass.save(flush: true)
     }
 
+    @After
     void tearDown() {
         mergingPass = null
         mergingSet = null
         workPackage = null
     }
 
+    @Test
     void testSave() {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass)
         Assert.assertTrue(bamFile.validate())
         bamFile.save(flush: true)
     }
 
+    @Test
     void testSaveWithNumberOfLanes() {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                 numberOfMergedLanes: 3,
@@ -77,6 +81,7 @@ class ProcessedMergedBamFileTests {
         bamFile.save(flush: true)
     }
 
+    @Test
     void testConstraints() {
         // mergingPass must not be null
         ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile(
@@ -84,6 +89,7 @@ class ProcessedMergedBamFileTests {
         Assert.assertFalse(bamFile.validate())
     }
 
+    @Test
     void testMergingWorkPackageConstraint_NoWorkpackage_ShouldFail() {
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                 type: AbstractBamFile.BamType.MDUP,
@@ -92,6 +98,7 @@ class ProcessedMergedBamFileTests {
         TestCase.assertValidateError(processedMergedBamFile, "workPackage", "nullable", null)
     }
 
+    @Test
     void testIsMostRecentBamFile() {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass)
         bamFile.save(flush: true)

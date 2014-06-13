@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.job.jobs.alignment
 import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFileService
 import org.junit.After
+import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 import static de.dkfz.tbi.TestCase.removeMetaClass
@@ -19,6 +20,7 @@ class BamFileValidationJobTests extends GroovyTestCase {
         removeMetaClass(ProcessedBamFileService, processedBamFileService)
     }
 
+    @Test
     void testValidateNumberOfReads_SameResult() {
         ProcessedBamFile processedBamFile = ProcessedBamFile.build()
 
@@ -28,6 +30,7 @@ class BamFileValidationJobTests extends GroovyTestCase {
         bamFileValidationJob.validateNumberOfReads(processedBamFile)
     }
 
+    @Test
     void testValidateNumberOfReads_DifferentResult() {
         ProcessedBamFile processedBamFile = ProcessedBamFile.build()
 

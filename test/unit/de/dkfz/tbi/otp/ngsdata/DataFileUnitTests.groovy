@@ -20,6 +20,7 @@ class DataFileUnitTests {
 
 
 
+    @Test
     void testReadConstraint_Alignment() {
         FileType fileType = FileType.build([type: FileType.Type.ALIGNMENT])
         DataFile dataFile = new DataFile(fileType: fileType)
@@ -27,6 +28,7 @@ class DataFileUnitTests {
         assert dataFile.validate()
     }
 
+    @Test
     void testReadConstraint_SequenceButNotFastq() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: 'SomeOtherDirectory'])
         DataFile dataFile = new DataFile(fileType: fileType)
@@ -34,6 +36,7 @@ class DataFileUnitTests {
         assert dataFile.validate()
     }
 
+    @Test
     void testReadConstraint_SequenceFastq_OK_ReadIsOne() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
         DataFile dataFile = new DataFile(fileType: fileType, readNumber: 1)
@@ -41,6 +44,7 @@ class DataFileUnitTests {
         assert dataFile.validate()
     }
 
+    @Test
     void testReadConstraint_SequenceFastq_OK_ReadIsTwo() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
         DataFile dataFile = new DataFile(fileType: fileType, readNumber: 2)
@@ -48,6 +52,7 @@ class DataFileUnitTests {
         assert dataFile.validate()
     }
 
+    @Test
     void testReadConstraint_SequenceFastq_NoReadNumber() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
         DataFile dataFile = new DataFile(fileType: fileType, readNumber: null)
@@ -55,6 +60,7 @@ class DataFileUnitTests {
         TestCase.assertValidateError(dataFile, "readNumber", "validator.invalid", null)
     }
 
+    @Test
     void testReadConstraint_SequenceFastq_ReadNumberIsZero() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
         DataFile dataFile = new DataFile(fileType: fileType, readNumber: 0)
@@ -62,6 +68,7 @@ class DataFileUnitTests {
         TestCase.assertValidateError(dataFile, "readNumber", "validator.invalid", 0)
     }
 
+    @Test
     void testReadConstraint_SequenceFastq_ReadNumberIsToBig() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
         DataFile dataFile = new DataFile(fileType: fileType, readNumber: 3)

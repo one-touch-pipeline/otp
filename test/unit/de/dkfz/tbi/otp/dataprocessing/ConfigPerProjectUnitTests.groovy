@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.TestData
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import org.junit.Test
 
 // !! This class is only to test the abstract class ConfigPerProject
 class ConfigPerProjectImpl extends ConfigPerProject { }
@@ -15,6 +16,7 @@ class ConfigPerProjectUnitTests {
 
     String configuration = "configuration"
 
+    @Test
     void testSaveWithoutProject_shouldFail() {
         ConfigPerProject configPerProject = new ConfigPerProjectImpl(
                 )
@@ -24,6 +26,7 @@ class ConfigPerProjectUnitTests {
         assertTrue(configPerProject.validate())
     }
 
+    @Test
     void testSaveWithObsoleteDate() {
         ConfigPerProject configPerProject = new ConfigPerProjectImpl(
                 project: TestData.createProject(),
@@ -32,6 +35,7 @@ class ConfigPerProjectUnitTests {
         assertTrue(configPerProject.validate())
     }
 
+    @Test
     void testSaveWithReferenceToPreviousConfigWithoutObsolete_shouldFail() {
         ConfigPerProject validConfigPerProject = new ConfigPerProjectImpl(
                 project: TestData.createProject(),

@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.utils
 
-import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclClass
-import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
+import grails.plugin.springsecurity.acl.AclClass
+import grails.plugin.springsecurity.acl.AclSid
 
 import de.dkfz.tbi.otp.notification.Notification
 import de.dkfz.tbi.otp.notification.NotificationMedium

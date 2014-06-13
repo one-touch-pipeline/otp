@@ -4,17 +4,20 @@ import de.dkfz.tbi.otp.ngsdata.Sample
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import grails.buildtestdata.mixin.Build
+import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
+import org.junit.Test
 
-import static org.junit.Assert.*
-
-import grails.test.mixin.*
-import grails.test.mixin.support.*
+import static org.junit.Assert.assertFalse
+import static org.junit.Assert.assertTrue
 
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(FastqSet)
 @Build([Sample, SeqTrack, SeqType])
 class FastqSetUnitTests {
 
+    @Test
     void testConstraints() {
         Sample sample = Sample.build()
         SeqType seqType1 = SeqType.build()

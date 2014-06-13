@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugins.springsecurity.Secured
-import de.dkfz.tbi.otp.ngsdata.WorkPackagesDSL
+import grails.plugin.springsecurity.annotation.Secured
 
 @Secured(['ROLE_OPERATOR'])
 class OverviewMBController {

@@ -4,10 +4,9 @@ import static org.junit.Assert.*
 
 import org.apache.commons.io.FileUtils
 import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
-import org.grails.plugins.springsecurity.service.acl.AclUtilService
+import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.acl.AclUtilService
 import org.junit.*
-import org.springframework.security.*
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.domain.BasePermission
 

@@ -135,6 +135,7 @@ class SnvConfigUnitTests {
         assertTrue(snvConfig.validate())
     }
 
+    @Test
     void testSaveWithoutConfig_shouldFail() {
         SnvConfig snvConfig = new SnvConfig(
             project: TestData.createProject(),
@@ -147,6 +148,7 @@ class SnvConfigUnitTests {
         assertTrue(snvConfig.validate())
     }
 
+    @Test
     void testSaveWithEmptyConfig_shouldFail() {
         SnvConfig snvConfig = new SnvConfig(
             project: TestData.createProject(),

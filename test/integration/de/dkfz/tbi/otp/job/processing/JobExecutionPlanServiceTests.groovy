@@ -8,11 +8,7 @@ import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 import de.dkfz.tbi.otp.testing.TestSingletonStartJob
 
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-import grails.test.mixin.domain.*
-
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.junit.*
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.domain.BasePermission
@@ -20,7 +16,6 @@ import org.springframework.security.acls.domain.BasePermission
 class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
     def jobExecutionPlanService
     def grailsApplication
-    def aclUtilService
 
     void setUp() {
         createUserAndRoles()

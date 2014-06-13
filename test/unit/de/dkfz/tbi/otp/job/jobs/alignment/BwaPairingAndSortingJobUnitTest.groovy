@@ -65,6 +65,7 @@ class BwaPairingAndSortingJobUnitTest {
     }
 
 
+    @Test
     void testCreateSequenceAndSaiFiles_correctOrder() {
         ProcessedSaiFile.metaClass.static.findAllByAlignmentPassAndFileExists = { AlignmentPass pass, boolean exists ->
             return [processedSaiFile1, processedSaiFile2]
@@ -78,6 +79,7 @@ class BwaPairingAndSortingJobUnitTest {
         assert FILE_READ2 == files[3]
     }
 
+    @Test
     void testCreateSequenceAndSaiFiles_wrongOrder() {
         ProcessedSaiFile.metaClass.static.findAllByAlignmentPassAndFileExists = { AlignmentPass pass, boolean exists ->
             return [processedSaiFile2, processedSaiFile1]
@@ -91,6 +93,7 @@ class BwaPairingAndSortingJobUnitTest {
         assert FILE_READ2 == files[3]
     }
 
+    @Test
     void testCreateSequenceAndSaiFiles_tooFew() {
         ProcessedSaiFile.metaClass.static.findAllByAlignmentPassAndFileExists = { AlignmentPass pass, boolean exists ->
             return [processedSaiFile1]
@@ -101,6 +104,7 @@ class BwaPairingAndSortingJobUnitTest {
         }
     }
 
+    @Test
     void testCreateSequenceAndSaiFiles_tooMany() {
         ProcessedSaiFile processedSaiFile3 = ProcessedSaiFile.build(alignmentPass: alignmentPass)
         ProcessedSaiFile.metaClass.static.findAllByAlignmentPassAndFileExists = { AlignmentPass pass, boolean exists ->

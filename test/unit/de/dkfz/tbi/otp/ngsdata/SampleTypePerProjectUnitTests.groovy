@@ -12,6 +12,7 @@ import org.junit.*
 @TestFor(SampleTypePerProject)
 class SampleTypePerProjectUnitTests {
 
+    @Test
     void testSaveSampleTypePerProject() {
         SampleTypePerProject sampleTypePerProject = new SampleTypePerProject()
         sampleTypePerProject.project = TestData.createProject()
@@ -21,6 +22,7 @@ class SampleTypePerProjectUnitTests {
     }
 
 
+    @Test
     void testSaveSampleTypePerProjectOnlyProject() {
         SampleTypePerProject sampleTypePerProject = new SampleTypePerProject()
 
@@ -29,6 +31,7 @@ class SampleTypePerProjectUnitTests {
     }
 
 
+    @Test
     void testSaveSampleTypePerProjectOnlySampleType() {
         SampleTypePerProject sampleTypePerProject = new SampleTypePerProject()
 

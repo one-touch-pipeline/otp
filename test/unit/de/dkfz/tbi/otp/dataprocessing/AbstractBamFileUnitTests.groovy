@@ -20,18 +20,21 @@ import org.junit.*
 @Build([FileType, DataFile, ProcessedBamFile])
 class AbstractBamFileUnitTests {
 
+    @Test
     void testSave() {
         AbstractBamFile bamFile = new MockAbstractBamFile(type: AbstractBamFile.BamType.SORTED)
         Assert.assertTrue(bamFile.validate())
         bamFile.save(flush: true)
     }
 
+    @Test
     void testQualityControlIsNotNull() {
         AbstractBamFile bamFile = new MockAbstractBamFile(type: AbstractBamFile.BamType.SORTED)
         bamFile.qualityControl =  null
         Assert.assertFalse(bamFile.validate())
     }
 
+    @Test
     void testhasMetricsFileTrueBamTypeSorted() {
         AbstractBamFile bamFile = new MockAbstractBamFile(
                 type: AbstractBamFile.BamType.SORTED,
@@ -40,6 +43,7 @@ class AbstractBamFileUnitTests {
         Assert.assertFalse(bamFile.validate())
     }
 
+    @Test
     void testhasMetricsFileFalseBamTypeSorted() {
         AbstractBamFile bamFile = new MockAbstractBamFile(
                 type: AbstractBamFile.BamType.SORTED,
@@ -49,6 +53,7 @@ class AbstractBamFileUnitTests {
         bamFile.save(flush: true)
     }
 
+    @Test
     void testhasMetricsFileTrueBamTypeRmdup() {
         AbstractBamFile bamFile = new MockAbstractBamFile(
                 type: AbstractBamFile.BamType.RMDUP,
@@ -58,6 +63,7 @@ class AbstractBamFileUnitTests {
         bamFile.save(flush: true)
     }
 
+    @Test
     void testhasMetricsFileFalseBamTypeRmdup() {
         AbstractBamFile bamFile = new MockAbstractBamFile(
                 type: AbstractBamFile.BamType.RMDUP,
@@ -67,6 +73,7 @@ class AbstractBamFileUnitTests {
         bamFile.save(flush: true)
     }
 
+    @Test
     void testSaveCoverageNotNull() {
         AbstractBamFile bamFile = new MockAbstractBamFile(type: AbstractBamFile.BamType.SORTED)
         bamFile.coverage = 30.0

@@ -1,9 +1,6 @@
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
-
 import static org.junit.Assert.*
-import java.util.Map;
 import org.junit.*
 import de.dkfz.tbi.TestCase
 
@@ -11,6 +8,7 @@ class ExternalScriptTests {
 
     final String SCRIPT_IDENTIFIER = "TEST"
 
+    @Test
     void testGetLatestVersionOfScript() {
         final File testDir = TestCase.uniqueNonExistentPath
 

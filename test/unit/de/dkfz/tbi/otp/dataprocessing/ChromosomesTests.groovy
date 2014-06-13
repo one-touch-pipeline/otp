@@ -16,6 +16,7 @@ class ChromosomesTests {
     List<String> numericChromosomesLabels
     List<String> characterChromosomesLabels
 
+    @Before
     void setUp() {
         allChromosomes = [
             Chromosomes.CHR_1, Chromosomes.CHR_2, Chromosomes.CHR_3, Chromosomes.CHR_4, Chromosomes.CHR_5,
@@ -47,6 +48,7 @@ class ChromosomesTests {
 
     }
 
+    @After
     void tearDown() {
         allChromosomes = null
         numericChromosomes = null
@@ -56,31 +58,37 @@ class ChromosomesTests {
         characterChromosomesLabels = null
     }
 
+    @Test
     void testNumeric() {
         List<Chromosomes> numericChromosomesAct = Chromosomes.numeric()
         assertEquals(numericChromosomes, numericChromosomesAct)
     }
 
+    @Test
     void testCharacter() {
         List<Chromosomes> characterChromosomesAct = Chromosomes.character()
         assertEquals(characterChromosomes, characterChromosomesAct)
     }
 
+    @Test
     void testAll() {
         List<Chromosomes> allChromosomesAct = Chromosomes.all()
         assertEquals(allChromosomes, allChromosomesAct)
     }
 
+    @Test
     void testNumericLabels() {
         List<Chromosomes> numericLabelsAct = Chromosomes.numericLabels()
         assertEquals(numericChromosomesLabels, numericLabelsAct)
     }
 
+    @Test
     void testCharacterLabels() {
         List<Chromosomes> characterLabelsAct = Chromosomes.characterLabels()
         assertEquals(characterChromosomesLabels, characterLabelsAct)
     }
 
+    @Test
     void testAllLabels() {
         List<Chromosomes> allLabelsAct = Chromosomes.allLabels()
         assertEquals(allChromosomesLabels, allLabelsAct)

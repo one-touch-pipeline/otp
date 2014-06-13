@@ -12,8 +12,8 @@ import grails.plugin.mail.MailService
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
 import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
-import org.grails.plugins.springsecurity.service.acl.AclUtilService
+import grails.plugin.springsecurity.acl.AclSid
+import grails.plugin.springsecurity.acl.AclUtilService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.context.ApplicationEvent

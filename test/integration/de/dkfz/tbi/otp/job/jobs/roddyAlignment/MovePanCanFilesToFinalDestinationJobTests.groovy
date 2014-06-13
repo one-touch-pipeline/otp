@@ -302,6 +302,7 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
     void testMoveResultFiles_InputRealmIsNull_ShouldFail() {
         roddyBamFile.workDirectoryName = null
         roddyBamFile.save(flush: true, failOnError: true)
+        realm.delete()
         shouldFail (AssertionError) {
             movePanCanFilesToFinalDestinationJob.moveResultFiles(roddyBamFile, null)
         }
@@ -395,6 +396,7 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
     void testDeleteTemporaryDirectory_InputRealmIsNull_ShouldFail() {
         roddyBamFile.workDirectoryName = null
         roddyBamFile.save(flush: true, failOnError: true)
+        realm.delete()
         shouldFail (AssertionError) {
             movePanCanFilesToFinalDestinationJob.deleteTemporaryDirectory(roddyBamFile, null)
         }

@@ -2,8 +2,6 @@ package de.dkfz.tbi.otp.ngsqc
 
 import static org.junit.Assert.*
 import org.junit.*
-import grails.test.mixin.*
-import grails.test.mixin.support.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 
@@ -96,6 +94,7 @@ class FastqcResultsServiceTests {
 
     }
 
+    @Test
     void testIsFastqcAvailable() {
         DataFile dataFile = new DataFile(
             seqTrack: seqTrack)
@@ -107,6 +106,7 @@ class FastqcResultsServiceTests {
         assertTrue(fastqcResultsService.isFastqcAvailable(seqTrack))
     }
 
+    @Test
     void testFastqcFilesForSeqTrack() {
         DataFile dataFile = new DataFile(
             seqTrack: seqTrack)

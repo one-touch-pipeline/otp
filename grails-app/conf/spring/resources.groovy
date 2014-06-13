@@ -31,4 +31,8 @@ beans = {
             password = grailsApplication.config.otp.jabber.password
         }
     }
+
+    aclCacheManager(org.springframework.cache.ehcache.EhCacheManagerFactoryBean) {
+        shared = true
+    }
 }

@@ -23,12 +23,14 @@ class ProcessingOptionServiceTests extends GroovyTestCase {
         assertNotNull(option.save(flush: true))
     }
 
+    @Test
     void testFindOptionAssureSuccessed() {
         createProcessingOption()
         String result = processingOptionService.findOptionAssure(NAME, null, null)
         assertEquals(VALUE, result)
     }
 
+    @Test
     void testFindOptionAssureNullName() {
         createProcessingOption()
         shouldFail(IllegalArgumentException) {
@@ -36,6 +38,7 @@ class ProcessingOptionServiceTests extends GroovyTestCase {
         }
     }
 
+    @Test
     void testFindOptionAssureNotFound() {
         createProcessingOption()
         shouldFail(ProcessingException) {

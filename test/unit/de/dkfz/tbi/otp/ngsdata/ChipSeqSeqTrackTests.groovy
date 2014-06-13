@@ -33,17 +33,20 @@ class ChipSeqSeqTrackTests {
         chipSeqSeqTrack = null
     }
 
+    @Test
     void testNullableAntibodyAndValidAntibodyTarget() {
         chipSeqSeqTrack.antibodyTarget = ANTIBODY_TARGET
         assertTrue chipSeqSeqTrack.validate()
     }
 
+    @Test
     void testNotNullAntibodyAndValidAntibodyTarget() {
         chipSeqSeqTrack.antibodyTarget = ANTIBODY_TARGET
         chipSeqSeqTrack.antibody = ANTIBODY
         assertTrue chipSeqSeqTrack.validate()
     }
 
+    @Test
     void testNullAntibodyTarget() {
         chipSeqSeqTrack.antibody = ANTIBODY
         assertFalse chipSeqSeqTrack.validate()

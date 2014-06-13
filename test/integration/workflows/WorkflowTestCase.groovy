@@ -19,7 +19,7 @@ import grails.util.Environment
 import grails.util.Holders
 import groovy.sql.Sql
 import groovy.util.logging.Log4j
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.hibernate.SessionFactory
 import org.joda.time.Duration
 import org.joda.time.format.PeriodFormat

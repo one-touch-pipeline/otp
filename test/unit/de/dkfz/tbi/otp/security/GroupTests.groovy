@@ -15,6 +15,7 @@ import de.dkfz.tbi.otp.administration.GroupCommand
 @Build([Role])
 class GroupTests {
 
+    @Test
     void testWriteProjectConstraint() {
         // create required Role
         Role role = new Role(authority: "GROUP_TEST")
@@ -35,6 +36,7 @@ class GroupTests {
         assertTrue(group.validate())
     }
 
+    @Test
     void testWriteJobSystemConstraint() {
         // create required Role
         Role role = new Role(authority: "GROUP_TEST")
@@ -55,6 +57,7 @@ class GroupTests {
         assertTrue(group.validate())
     }
 
+    @Test
     void testWriteSequenceCenterConstraint() {
         // create required Role
         Role role = new Role(authority: "GROUP_TEST")
@@ -75,6 +78,7 @@ class GroupTests {
         assertTrue(group.validate())
     }
 
+    @Test
     void testRoleConstraint() {
         Role role = new Role(authority: "STARTSWITHGROUP")
         Role role2 = new Role(authority: "GROUP_WHITE SPACE")
@@ -101,6 +105,7 @@ class GroupTests {
         assertEquals("nullable", group.errors["role"])
     }
 
+    @Test
     void testRoleUniqueConstraint() {
         Role role = Role.build(authority: "GROUP_TEST")
         Group group = new Group(name: "test", role: role, description: "").save(flush: true)
@@ -110,6 +115,7 @@ class GroupTests {
         assertEquals("unique", group2.errors["role"].code)
     }
 
+    @Test
     void testGroupFromCommandObject() {
         Role role = new Role(authority: "GROUP_TEST")
         mockDomain(Role, [role])

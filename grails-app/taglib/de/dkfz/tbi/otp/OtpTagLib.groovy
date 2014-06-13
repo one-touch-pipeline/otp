@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp
 
 import grails.util.Environment
 
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.SpringSecurityUtils
 
 class OtpTagLib {
     static namespace = "otp"

@@ -1,14 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static de.dkfz.tbi.otp.dataprocessing.RoddyBamFile.*
-
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateJobStateLogFileHelper
+import grails.buildtestdata.mixin.Build
 import org.junit.After
 import org.junit.Before
-import grails.buildtestdata.mixin.Build
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder

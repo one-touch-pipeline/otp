@@ -6,6 +6,7 @@ grails.project.test.reports.dir = "target/test-reports"
 // As OTP is now productive the application's name should be clean from any version numbering
 grails.project.war.file = "target/otp.war"
 
+grails.project.dependency.resolver = "maven" // or ivy
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
@@ -18,24 +19,11 @@ grails.project.dependency.resolution = {
     repositories {
         inherits true // Whether to inherit repository definitions from plugins
         mavenRepo "$ARTIFACTORY_URL"
-        grailsRepo "$ARTIFACTORY_URL/svn.codehaus.org_grails-plugins"
-        //grailsPlugins()
-        //grailsHome()
-        //grailsCentral()
-        //mavenCentral()
-
-        // uncomment these to enable remote dependency resolution from public Maven repositories
-        //mavenCentral()
-        //mavenLocal()
-        //mavenRepo "http://snapshots.repository.codehaus.org"
-        //mavenRepo "http://repository.codehaus.org"
-        //mavenRepo "http://download.java.net/maven/2/"
-        //mavenRepo "http://repository.jboss.com/maven2/"
     }
-    dependencies {
-        // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
-        // runtime 'mysql:mysql-connector-java:5.1.16'
+    dependencies {
+        // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes
+
         //git
         compile 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
         runtime "commons-jexl:commons-jexl:1.1"
@@ -50,27 +38,38 @@ grails.project.dependency.resolution = {
         compile 'bedUtils:bedUtils:0.6'
         // general dependencies
         compile "joda-time:joda-time:2.3"
-        compile "org.jadira.usertype:usertype.jodatime:1.9"
+        compile "org.jadira.usertype:usertype.jodatime:2.0.1"
         // dependencies for the flowControl API
         compile "fcClient:fcClient:0.1"
     }
 
     plugins {
-        compile ":hibernate:$grailsVersion"
-        compile ":jquery:1.8.3"
-        runtime ":resources:1.2.RC2" //TODO: update
-        runtime ":page-resources:0.2.3"
+        // core plugins
+        build ":tomcat:7.0.53"
+        runtime ":hibernate4:4.3.8.1"
+
+        // plugins for the compile step
+        compile ":spring-security-core:2.0-RC5"
+        compile ":spring-security-ldap:2.0-RC2"
+        compile ":spring-security-acl:2.0-RC2"
         compile ":executor:0.3"
-        compile ":spring-security-core:1.2.7.3"
-        compile ":spring-security-ldap:1.0.6"
-        compile ":spring-security-acl:1.1.1"
-        compile ":console:1.2"
-        compile ":mail:1.0.1"
-        compile ":codenarc:0.18.1"
+        compile ":console:1.3"
+        compile ":mail:1.0.5"
+        // used by jenkins
+        compile ":codenarc:0.21"
+        compile ":code-coverage:1.2.7"
+
+        // plugins needed at runtime
+        runtime ":database-migration:1.4.0"
+        // jQuery
+        runtime ":jquery:1.11.1"
+        runtime ":jquery-ui:1.10.4"
+
+        // resources
+        runtime ":resources:1.2.14"
+        runtime ":page-resources:0.2.5"
         compile ":lesscss-resources:1.3.3"
-        compile ":build-test-data:2.1.2" //http://grails.org/plugin/build-test-data
-        runtime ":database-migration:1.3.2"
-        build ":tomcat:$grailsVersion"
+        compile ":build-test-data:2.4.0" //http://grails.org/plugin/build-test-data
     }
 }
 

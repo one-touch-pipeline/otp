@@ -16,6 +16,7 @@ class ReferenceGenomeEntryTests {
 
     final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
 
+    @Test
     void testConstraints() {
         ReferenceGenome referenceGenome = new ReferenceGenome(
                         name: "refGen",

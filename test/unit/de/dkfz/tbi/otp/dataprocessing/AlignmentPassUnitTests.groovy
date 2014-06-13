@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import org.junit.Ignore
+import org.junit.*
 
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
@@ -11,6 +11,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 @Build([MergingWorkPackage, SeqTrack])
 class AlignmentPassUnitTests {
 
+    @Test
     void testIsLatestPass_1Pass() {
         //preparation
         AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass()
@@ -20,6 +21,7 @@ class AlignmentPassUnitTests {
     }
 
 
+    @Test
     void testIsLatestPass_2Passes() {
         //preparation
         SeqTrack seqTrack = SeqTrack.build()
@@ -33,6 +35,7 @@ class AlignmentPassUnitTests {
 
     @Ignore  // TODO OTP-1401: Un-ignore this test as soon as the constraints on MergingWorkPackage allow multiple
              // instances for the same Sample and SeqType.
+    @Test
     void testIsLatestPass_2PassesDifferentWorkPackages() {
         //preparation
         SeqTrack seqTrack = SeqTrack.build()

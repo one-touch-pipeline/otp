@@ -121,6 +121,7 @@ class ProcessedBamFileUnitTests {
         testData = null
     }
 
+    @Test
     void testSave() {
         ProcessedBamFile bamFile = new ProcessedBamFile(
             type: BamType.SORTED,

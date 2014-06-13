@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
+import org.junit.*
 
 
 @TestFor(ChromosomeQualityAssessmentMergedService)
@@ -21,6 +22,7 @@ class ChromosomeQualityAssessmentMergedServiceUnitTest {
 
 
 
+    @Before
     void setUp() {
         chromosomeQualityAssessmentMergedService = new ChromosomeQualityAssessmentMergedService()
 
@@ -50,6 +52,7 @@ class ChromosomeQualityAssessmentMergedServiceUnitTest {
 
 
 
+    @Test
     void testQualityAssessmentMergedForSpecificChromosomes() {
         List<ChromosomeQualityAssessmentMerged> expected = chromosomeQualityAssessmentMergedList
 
@@ -58,6 +61,7 @@ class ChromosomeQualityAssessmentMergedServiceUnitTest {
     }
 
 
+    @Test
     void testQualityAssessmentMergedForSpecificChromosomes_emptyChromosomesList() {
         List<ChromosomeQualityAssessmentMerged> expected = []
 
@@ -66,6 +70,7 @@ class ChromosomeQualityAssessmentMergedServiceUnitTest {
     }
 
 
+    @Test
     void testQualityAssessmentMergedForSpecificChromosomes_emptyQualityAssessmentMergedPassesList() {
         List<ChromosomeQualityAssessmentMerged> expected = []
 
@@ -74,6 +79,7 @@ class ChromosomeQualityAssessmentMergedServiceUnitTest {
     }
 
 
+    @Test
     void testQualityAssessmentMergedForSpecificChromosomes_ChromosomesListIsNull() {
         List<ChromosomeQualityAssessmentMerged> expected = []
 
@@ -83,6 +89,7 @@ class ChromosomeQualityAssessmentMergedServiceUnitTest {
     }
 
 
+    @Test
     void testQualityAssessmentMergedForSpecificChromosomes_QualityAssessmentMergedPassesListIsNull() {
         List<ChromosomeQualityAssessmentMerged> expected = []
 
@@ -92,6 +99,7 @@ class ChromosomeQualityAssessmentMergedServiceUnitTest {
     }
 
 
+    @Test
     void testQualityAssessmentMergedForSpecificChromosomes_NoQaAvailable() {
         chromosomeQualityAssessmentMergedList*.delete()
         List<ChromosomeQualityAssessmentMerged> expected = []

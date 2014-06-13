@@ -4,7 +4,7 @@ import de.dkfz.tbi.TestCase
 
 import static org.junit.Assert.*
 
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.junit.*
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.domain.BasePermission
@@ -13,7 +13,6 @@ import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 
 class IndividualServiceTests extends AbstractIntegrationTest {
     def individualService
-    def aclUtilService
 
     @Before
     void setUp() {

@@ -216,7 +216,6 @@ class LoadMetaDataTests extends WorkflowTestCase {
 
 
     @Test
-    @Ignore
     void testWholeGenomeMetadata() {
         String seqTypeName = SeqTypeNames.WHOLE_GENOME.seqTypeName
 
@@ -243,7 +242,6 @@ class LoadMetaDataTests extends WorkflowTestCase {
     }
 
     @Test
-    @Ignore
     void testExomeMetadataNoLibraryPreparationKit() {
         String seqTypeName = SeqTypeNames.EXOME.seqTypeName
 
@@ -277,7 +275,6 @@ class LoadMetaDataTests extends WorkflowTestCase {
     }
 
     @Test
-    @Ignore
     void testExomeMetadataWithLibraryPreparationKit() {
         String seqTypeName = SeqTypeNames.EXOME.seqTypeName
 
@@ -331,7 +328,6 @@ class LoadMetaDataTests extends WorkflowTestCase {
     }
 
     @Test
-    @Ignore
     void testChipSeqMetadata() {
         String seqTypeName = SeqTypeNames.CHIP_SEQ.seqTypeName
 

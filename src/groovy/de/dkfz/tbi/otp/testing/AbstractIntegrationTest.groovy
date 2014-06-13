@@ -12,9 +12,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.authority.GrantedAuthorityImpl
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
-import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
-import org.grails.plugins.springsecurity.service.acl.AclUtilService;
+import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.acl.AclUtilService
+import grails.plugin.springsecurity.acl.AclSid
 
 /**
  * Abstract base class for all tests to have some shared functionality.

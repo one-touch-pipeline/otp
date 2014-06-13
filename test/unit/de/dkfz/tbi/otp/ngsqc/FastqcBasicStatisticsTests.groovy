@@ -14,6 +14,7 @@ import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 class FastqcBasicStatisticsTests {
 
 
+    @Test
     void testFileType() {
         FastqcBasicStatistics fastqcBasicStatistics = createFastqcBasicStatistics()
         assertTrue(fastqcBasicStatistics.validate())
@@ -22,6 +23,7 @@ class FastqcBasicStatisticsTests {
         assertFalse(fastqcBasicStatistics.validate())
     }
 
+    @Test
     void testEncoding() {
         FastqcBasicStatistics fastqcBasicStatistics = createFastqcBasicStatistics()
         assertTrue(fastqcBasicStatistics.validate())
@@ -30,6 +32,7 @@ class FastqcBasicStatisticsTests {
         assertFalse(fastqcBasicStatistics.validate())
     }
 
+    @Test
     void testSequenceLength() {
         FastqcBasicStatistics fastqcBasicStatistics = createFastqcBasicStatistics()
         assertTrue(fastqcBasicStatistics.validate())

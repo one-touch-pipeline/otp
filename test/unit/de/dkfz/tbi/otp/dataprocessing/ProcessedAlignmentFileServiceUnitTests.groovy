@@ -12,7 +12,7 @@ import de.dkfz.tbi.otp.utils.CheckedLogger
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestFor
-import org.junit.After
+import org.junit.*
 import org.springframework.context.ApplicationContext
 
 @Build([
@@ -33,12 +33,13 @@ class ProcessedAlignmentFileServiceUnitTests {
 
 
 
+    @Before
     public void setUp() {
         checkedLogger = new CheckedLogger()
         LogThreadLocal.setThreadLog(checkedLogger)
     }
 
-    @After //Naming Convention does not work, need annotation
+    @After
     public void tearDown() {
         LogThreadLocal.removeThreadLog()
         checkedLogger.assertAllMessagesConsumed()
@@ -101,6 +102,7 @@ class ProcessedAlignmentFileServiceUnitTests {
 
 
 
+    @Test
     void testDeleteProcessingFiles() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForDeleteProcessingFiles()
         AlignmentPass alignmentPass = createTestDataForDeleteProcessingFiles()
@@ -110,6 +112,7 @@ class ProcessedAlignmentFileServiceUnitTests {
         assert expectedSize == processedAlignmentFileService.deleteProcessingFiles(alignmentPass)
     }
 
+    @Test
     void testDeleteProcessingFiles_AlignmentPassIsNull() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForDeleteProcessingFiles()
 
@@ -118,6 +121,7 @@ class ProcessedAlignmentFileServiceUnitTests {
         }
     }
 
+    @Test
     void testDeleteProcessingFiles_NoBamFile() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForDeleteProcessingFiles()
         AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass()
@@ -126,6 +130,7 @@ class ProcessedAlignmentFileServiceUnitTests {
         assert 0 == processedAlignmentFileService.deleteProcessingFiles(alignmentPass)
     }
 
+    @Test
     void testDeleteProcessingFiles_NoQAPasses() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForDeleteProcessingFiles()
         AlignmentPass alignmentPass = createTestDataForDeleteProcessingFiles(0)
@@ -135,6 +140,7 @@ class ProcessedAlignmentFileServiceUnitTests {
         assert expectedSize == processedAlignmentFileService.deleteProcessingFiles(alignmentPass)
     }
 
+    @Test
     void testDeleteProcessingFiles_FiveQAPasses() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForDeleteProcessingFiles()
         AlignmentPass alignmentPass = createTestDataForDeleteProcessingFiles(5)
@@ -144,6 +150,7 @@ class ProcessedAlignmentFileServiceUnitTests {
         assert expectedSize == processedAlignmentFileService.deleteProcessingFiles(alignmentPass)
     }
 
+    @Test
     void testDeleteProcessingFiles_NoSaiFile() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForDeleteProcessingFiles()
         AlignmentPass alignmentPass = createTestDataForDeleteProcessingFiles(1, 0)
@@ -153,6 +160,7 @@ class ProcessedAlignmentFileServiceUnitTests {
         assert expectedSize == processedAlignmentFileService.deleteProcessingFiles(alignmentPass)
     }
 
+    @Test
     void testDeleteProcessingFiles_FiveSaiFiles() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForDeleteProcessingFiles()
         AlignmentPass alignmentPass = createTestDataForDeleteProcessingFiles(1, 5)
@@ -162,6 +170,7 @@ class ProcessedAlignmentFileServiceUnitTests {
         assert expectedSize == processedAlignmentFileService.deleteProcessingFiles(alignmentPass)
     }
 
+    @Test
     void testDeleteProcessingFiles_QaNotConsistent() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForDeleteProcessingFiles()
         AlignmentPass alignmentPass = createTestDataForDeleteProcessingFiles()
@@ -171,6 +180,7 @@ class ProcessedAlignmentFileServiceUnitTests {
         assert 0 == processedAlignmentFileService.deleteProcessingFiles(alignmentPass)
     }
 
+    @Test
     void testDeleteProcessingFiles_BamNotConsistent() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForDeleteProcessingFiles()
         AlignmentPass alignmentPass = createTestDataForDeleteProcessingFiles()
@@ -180,6 +190,7 @@ class ProcessedAlignmentFileServiceUnitTests {
         assert 0 == processedAlignmentFileService.deleteProcessingFiles(alignmentPass)
     }
 
+    @Test
     void testDeleteProcessingFiles_SaiNotConsistent() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForDeleteProcessingFiles()
         AlignmentPass alignmentPass = createTestDataForDeleteProcessingFiles()
@@ -226,6 +237,7 @@ class ProcessedAlignmentFileServiceUnitTests {
 
 
 
+    @Test
     void testMayProcessingFilesBeDeleted() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForMayProcessingFilesBeDeleted()
         AlignmentPass alignmentPass = createTestDataForMayProcessingFilesBeDeleted()
@@ -234,6 +246,7 @@ class ProcessedAlignmentFileServiceUnitTests {
         assert processedAlignmentFileService.mayProcessingFilesBeDeleted(alignmentPass, createdBefore)
     }
 
+    @Test
     void testMayProcessingFilesBeDeleted_NoAlignmentPass() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForMayProcessingFilesBeDeleted()
         Date createdBefore = new Date().plus(1)
@@ -243,6 +256,7 @@ class ProcessedAlignmentFileServiceUnitTests {
         }
     }
 
+    @Test
     void testMayProcessingFilesBeDeleted_NoDateCreatedBefore() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForMayProcessingFilesBeDeleted()
         AlignmentPass alignmentPass = createTestDataForMayProcessingFilesBeDeleted()
@@ -252,6 +266,7 @@ class ProcessedAlignmentFileServiceUnitTests {
         }
     }
 
+    @Test
     void testMayProcessingFilesBeDeleted_WithSaiFileCreatedBefore() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForMayProcessingFilesBeDeleted()
         AlignmentPass alignmentPass = createTestDataForMayProcessingFilesBeDeleted(true, true)
@@ -260,6 +275,7 @@ class ProcessedAlignmentFileServiceUnitTests {
         assert processedAlignmentFileService.mayProcessingFilesBeDeleted(alignmentPass, createdBefore)
     }
 
+    @Test
     void testMayProcessingFilesBeDeleted_WithSaiFileCreatedAfter() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForMayProcessingFilesBeDeleted()
         AlignmentPass alignmentPass = createTestDataForMayProcessingFilesBeDeleted(true, true)
@@ -268,6 +284,7 @@ class ProcessedAlignmentFileServiceUnitTests {
         assert !processedAlignmentFileService.mayProcessingFilesBeDeleted(alignmentPass, createdBefore)
     }
 
+    @Test
     void testMayProcessingFilesBeDeleted_NoProcessedBamFile() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForMayProcessingFilesBeDeleted()
         AlignmentPass alignmentPass = createTestDataForMayProcessingFilesBeDeleted(false)
@@ -277,6 +294,7 @@ class ProcessedAlignmentFileServiceUnitTests {
         assert !processedAlignmentFileService.mayProcessingFilesBeDeleted(alignmentPass, createdBefore)
     }
 
+    @Test
     void testMayProcessingFilesBeDeleted_ProcessedBamFileToYoung() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForMayProcessingFilesBeDeleted()
         AlignmentPass alignmentPass = createTestDataForMayProcessingFilesBeDeleted()
@@ -285,6 +303,7 @@ class ProcessedAlignmentFileServiceUnitTests {
         assert !processedAlignmentFileService.mayProcessingFilesBeDeleted(alignmentPass, createdBefore)
     }
 
+    @Test
     void testMayProcessingFilesBeDeleted_HasNotBeenQualityAndMerged() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForMayProcessingFilesBeDeleted(false)
         AlignmentPass alignmentPass = createTestDataForMayProcessingFilesBeDeleted()
@@ -297,6 +316,7 @@ class ProcessedAlignmentFileServiceUnitTests {
 
 
 
+    @Test
     void testDeleteOldAlignmentProcessingFiles() {
         final int MAX_RUNTIME = 1000
         final int SOME_FILE_SIZE = 10
@@ -315,6 +335,7 @@ class ProcessedAlignmentFileServiceUnitTests {
         assert SOME_FILE_SIZE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate, MAX_RUNTIME)
     }
 
+    @Test
     void testDeleteOldAlignmentProcessingFiles_WithDefault() {
         final int SOME_FILE_SIZE = 10
         Date createdBeforeDate = new Date()
@@ -332,6 +353,7 @@ class ProcessedAlignmentFileServiceUnitTests {
         assert SOME_FILE_SIZE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
     }
 
+    @Test
     void testDeleteOldAlignmentProcessingFiles_NoDateCreatedBefore() {
         final int MAX_RUNTIME = 1000
         final int SOME_FILE_SIZE = 10

@@ -2,31 +2,26 @@ package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
 
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.junit.*
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.domain.BasePermission
 
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.ExecutionState
-import de.dkfz.tbi.otp.job.processing.Job
-import de.dkfz.tbi.otp.job.processing.Parameter
-import de.dkfz.tbi.otp.job.processing.ParameterType
-import de.dkfz.tbi.otp.job.processing.ParameterUsage
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 
 class RunServiceTests extends AbstractIntegrationTest {
     def runService
-    def aclUtilService
 
     @Before
     void setUp() {
         createUserAndRoles()
     }
 
+    @Test
     void testGetRunWithoutRun() {
         SpringSecurityUtils.doWithAuth("testuser") {
             assertNull(runService.getRun(null))
@@ -36,6 +31,7 @@ class RunServiceTests extends AbstractIntegrationTest {
         }
     }
 
+    @Test
     void testGetRunByIdentifier() {
         Run run = mockRun("test")
         SpringSecurityUtils.doWithAuth("testuser") {
@@ -70,6 +66,7 @@ class RunServiceTests extends AbstractIntegrationTest {
         }
     }
 
+    @Test
     void testGetRunByName() {
         Run run = mockRun("test")
         SpringSecurityUtils.doWithAuth("testuser") {
@@ -99,6 +96,7 @@ class RunServiceTests extends AbstractIntegrationTest {
         }
     }
 
+    @Test
     void testGetRunByNameAsIdentifier() {
         Run run = mockRun("2")
         SpringSecurityUtils.doWithAuth("operator") {
@@ -112,6 +110,7 @@ class RunServiceTests extends AbstractIntegrationTest {
         }
     }
 
+    @Test
     void testRetrieveProcessParameterEmpty() {
         SpringSecurityUtils.doWithAuth("testuser") {
             // any user has access with no run
@@ -146,6 +145,7 @@ class RunServiceTests extends AbstractIntegrationTest {
         }
     }
 
+    @Test
     void testRetrieveProcessParameter() {
         // create JobExecutionPlan
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
@@ -214,6 +214,7 @@ class RunServiceTests extends AbstractIntegrationTest {
         }
     }
 
+    @Test
     void testPreviousRun() {
         // no Run yet, should be null
         SpringSecurityUtils.doWithAuth("testuser") {
@@ -260,6 +261,7 @@ class RunServiceTests extends AbstractIntegrationTest {
         }
     }
 
+    @Test
     void testNextRun() {
         // no Run yet, should be null for any user
         SpringSecurityUtils.doWithAuth("testuser") {
@@ -307,6 +309,7 @@ class RunServiceTests extends AbstractIntegrationTest {
     }
 
     @Ignore
+    @Test
     void testMDFilesByInitialPathIsEmpty() {
         assertTrue(runService.retrieveMetaDataFilesByInitialPath(null).empty)
         Run run = mockRun("test")
@@ -324,6 +327,7 @@ class RunServiceTests extends AbstractIntegrationTest {
     }
 
     @Ignore
+    @Test
     void testMDFilesByInitialPath() {
         Run run = mockRun("test")
         RunSegment segment1 = mockRunSegment(run, "test")
@@ -373,6 +377,7 @@ class RunServiceTests extends AbstractIntegrationTest {
     }
 
     @Ignore
+    @Test
     void testRetrieveSequenceTrackInformationIsEmpty() {
         assertTrue(runService.retrieveSequenceTrackInformation(null).isEmpty())
         Run run = mockRun("test")
@@ -413,6 +418,7 @@ class RunServiceTests extends AbstractIntegrationTest {
     }
 
     @Ignore
+    @Test
     void testRetrieveSequenceTrackInformation() {
         Run run = mockRun("test")
         SeqTrack seqTrack = mockSeqTrack(run, "test", "test")

@@ -6,7 +6,6 @@ import grails.test.mixin.support.*
 
 import org.junit.*
 
-import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.ExecutionService.ClusterJobStatus
 
@@ -33,24 +32,28 @@ class ExecutionServiceUnitTests {
         "anyQueue")
     }
 
+    @Test
     void testExistingJobStatusWithStatusHeld() {
         ClusterJobStatus clusterJobStatus = ClusterJobStatus.HELD
         String output = qstatOutputForJobFound(clusterJobStatus)
         assertTrue(executionService.existingJobStatus(output) == clusterJobStatus.value)
     }
 
+    @Test
     void testExistingJobStatusWithStatusRunning() {
         ClusterJobStatus clusterJobStatus = ClusterJobStatus.RUNNING
         String output = qstatOutputForJobFound(clusterJobStatus)
         assertTrue(executionService.existingJobStatus(output) == clusterJobStatus.value)
     }
 
+    @Test
     void testExistingJobStatusWithStatusCompleted() {
         ClusterJobStatus clusterJobStatus = ClusterJobStatus.COMPLETED
         String output = qstatOutputForJobFound(clusterJobStatus)
         assertTrue(executionService.existingJobStatus(output) == clusterJobStatus.value)
     }
 
+    @Test
     void testExistingJobStatusWithStatusQueued() {
         ClusterJobStatus clusterJobStatus = ClusterJobStatus.QUEUED
         String output = qstatOutputForJobFound(clusterJobStatus)

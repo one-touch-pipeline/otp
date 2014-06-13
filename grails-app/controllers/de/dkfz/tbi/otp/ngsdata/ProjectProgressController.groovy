@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
-import grails.plugins.springsecurity.Secured
+import grails.plugin.springsecurity.annotation.Secured
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class ProjectProgressDataTableCommand extends DataTableCommand {

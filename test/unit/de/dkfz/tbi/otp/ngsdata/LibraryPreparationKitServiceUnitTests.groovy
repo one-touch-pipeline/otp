@@ -48,24 +48,28 @@ class LibraryPreparationKitServiceUnitTests {
     }
 
 
+    @Test
     void testFindLibraryPreparationKitByNameOrAliasUsingKitName() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
         assertEquals(libraryPreparationKitSynonym.libraryPreparationKit, libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(LIBRARY_PREPARATION_KIT))
     }
 
 
+    @Test
     void testFindLibraryPreparationKitByNameOrAliasUsingAliasName() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
         assertEquals(libraryPreparationKitSynonym.libraryPreparationKit, libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(LIBRARY_PREPARATION_KIT_NAME))
     }
 
 
+    @Test
     void testFindLibraryPreparationKitByNameOrAliasUsingUnknownName() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
         assertNull(libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias("UNKNOWN"))
     }
 
 
+    @Test
     void testFindLibraryPreparationKitByNameOrAliasUsingNull() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
         shouldFail(IllegalArgumentException) { libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(null) }

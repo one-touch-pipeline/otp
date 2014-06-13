@@ -19,6 +19,7 @@ class SeqTrackBuilderUnitTests {
     final long N_READS = 6
     final int INSERT_SIZE = 7
 
+    @Test
     void testCreate() {
         SeqTrackBuilder builder = new SeqTrackBuilder(
                         "lane",
@@ -51,6 +52,7 @@ class SeqTrackBuilderUnitTests {
         assertEquals(DataProcessingState.IN_PROGRESS, seqTrack.fastqcState)
     }
 
+    @Test
     void testCreateNoLane() {
         shouldFail(IllegalArgumentException.class) {
             new SeqTrackBuilder(
@@ -64,6 +66,7 @@ class SeqTrackBuilderUnitTests {
         }
     }
 
+    @Test
     void testCreateNoRun() {
         shouldFail(IllegalArgumentException.class) {
             new SeqTrackBuilder(
@@ -77,6 +80,7 @@ class SeqTrackBuilderUnitTests {
         }
     }
 
+    @Test
     void testCreateNoSample() {
         shouldFail(IllegalArgumentException.class) {
             new SeqTrackBuilder(
@@ -90,6 +94,7 @@ class SeqTrackBuilderUnitTests {
         }
     }
 
+    @Test
     void testCreateNoSeqType() {
         shouldFail(IllegalArgumentException.class) {
             new SeqTrackBuilder(
@@ -103,6 +108,7 @@ class SeqTrackBuilderUnitTests {
         }
     }
 
+    @Test
     void testCreateNoSeqPlatform() {
         shouldFail(IllegalArgumentException.class) {
             new SeqTrackBuilder(
@@ -116,6 +122,7 @@ class SeqTrackBuilderUnitTests {
         }
     }
 
+    @Test
     void testCreateNoSoftwareTool() {
         shouldFail(IllegalArgumentException.class) {
             new SeqTrackBuilder(
@@ -129,6 +136,7 @@ class SeqTrackBuilderUnitTests {
         }
     }
 
+    @Test
     void testCreateSeqTrack() {
         SeqTrackBuilder builder = createSeqTrackBuilderWithDefaultValues()
         .setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
@@ -156,6 +164,7 @@ class SeqTrackBuilderUnitTests {
         assertNull(seqTrack.libraryPreparationKit)
     }
 
+    @Test
     void testCreateSeqTrackWithLibraryPreparationKit() {
         SeqTrackBuilder builder = createSeqTrackBuilderWithDefaultValues()
         .setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
@@ -184,6 +193,7 @@ class SeqTrackBuilderUnitTests {
         assertNotNull(seqTrack.libraryPreparationKit)
     }
 
+    @Test
     void testCreateSeqTrackWithKitInfoReliabilityIsUnknownVerified() {
         SeqTrackBuilder builder = createSeqTrackBuilderWithDefaultValues()
         .setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
@@ -212,6 +222,7 @@ class SeqTrackBuilderUnitTests {
         assertNull(seqTrack.libraryPreparationKit)
     }
 
+    @Test
     void testCreateSeqTrackWithKitInfoReliabilityIsUnknownUnverified() {
         SeqTrackBuilder builder = createSeqTrackBuilderWithDefaultValues()
         .setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
@@ -242,12 +253,14 @@ class SeqTrackBuilderUnitTests {
 
     // Exome
 
+    @Test
     void testCreateSeqTrackWithLibraryPreparationKitIsNull() {
         shouldFail(IllegalArgumentException.class) {
             createSeqTrackBuilderWithDefaultValuesForExome().setLibraryPreparationKit(null).create()
         }
     }
 
+    @Test
     void testCreateSeqTrackWithKitInfoReliabilityIsKnownAndNoLibraryPreparationKit() {
         shouldFail(IllegalArgumentException.class) {
             createSeqTrackBuilderWithDefaultValuesForExome().setInformationReliability(InformationReliability.KNOWN).create()
@@ -256,6 +269,7 @@ class SeqTrackBuilderUnitTests {
 
     // ChipSeq
 
+    @Test
     void testCreateChipSeqWithAntibodyTargetAndNoAntibody() {
         SeqTrackBuilder builder = createSeqTrackBuilderWithDefaultValuesForChipSeq().setAntibodyTarget(ANTIBODY_TARGET)
 
@@ -280,6 +294,7 @@ class SeqTrackBuilderUnitTests {
         assertNull(seqTrack.antibody)
     }
 
+    @Test
     void testCreateChipSeqWithAntibodyTargetAndAntibody() {
         SeqTrackBuilder builder = createSeqTrackBuilderWithDefaultValuesForChipSeq().setAntibodyTarget(ANTIBODY_TARGET).setAntibody(ANTIBODY_NAME)
 
@@ -304,6 +319,7 @@ class SeqTrackBuilderUnitTests {
         assertEquals(ANTIBODY_NAME, seqTrack.antibody)
     }
 
+    @Test
     void testCreateChipSeqWithNoAntibodyTarget() {
         shouldFail(IllegalArgumentException.class) {
             createSeqTrackBuilderWithDefaultValuesForChipSeq().create()

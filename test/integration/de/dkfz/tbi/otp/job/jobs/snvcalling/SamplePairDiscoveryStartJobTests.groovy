@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
