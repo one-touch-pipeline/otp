@@ -28,11 +28,13 @@ class FastqcJob extends AbstractJobImpl {
         List<DataFile> seqFiles = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
 
         List<String> pbsIDs = []
-        seqFiles.each { seqFile ->
-            String rawSeq = lsdfFilesService.getFileFinalPath(seqFile)
-            String cmd = "fastqc ${rawSeq} --noextract --nogroup -o ${outDir};chmod -R 440 ${outDir}/*.zip"
-            pbsIDs.add(executionHelperService.sendScript(realm, cmd))
-            fastqcDataFilesService.createFastqcProcessedFile(seqFile)
+        FastqcProcessedFile.withTransaction {
+            seqFiles.each { seqFile ->
+                String rawSeq = lsdfFilesService.getFileFinalPath(seqFile)
+                String cmd = "fastqc ${rawSeq} --noextract --nogroup -o ${outDir};chmod -R 440 ${outDir}/*.zip"
+                pbsIDs.add(executionHelperService.sendScript(realm, cmd))
+                fastqcDataFilesService.createFastqcProcessedFile(seqFile)
+            }
         }
         addOutputParameter("__pbsIds", pbsIDs.join(","))
         addOutputParameter("__pbsRealm", realm.id.toString())

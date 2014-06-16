@@ -31,15 +31,17 @@ class ConveyBwaAlignmentJob extends AbstractJobImpl {
     @Override
     public void execute() throws Exception {
         long alignmentPassId = Long.parseLong(getProcessParameterValue())
-        AlignmentPass alignmentPass = AlignmentPass.get(alignmentPassId)
-        Realm realm = null
-        List<String> pbsIds = []
-        SeqTrack seqTrack = alignmentPass.seqTrack
-        List<DataFile> files = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
-        for (DataFile file in files) {
-            realm = configService.getRealmDataProcessing(file.project)
-            ProcessedSaiFile saiFile = processedSaiFileService.createSaiFile(alignmentPass, file)
-            pbsIds << sendAlignmentScript(realm, saiFile)
+        AlignmentPass.withTransaction {
+            AlignmentPass alignmentPass = AlignmentPass.get(alignmentPassId)
+            Realm realm = null
+            List<String> pbsIds = []
+            SeqTrack seqTrack = alignmentPass.seqTrack
+            List<DataFile> files = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
+            for (DataFile file in files) {
+                realm = configService.getRealmDataProcessing(file.project)
+                ProcessedSaiFile saiFile = processedSaiFileService.createSaiFile(alignmentPass, file)
+                pbsIds << sendAlignmentScript(realm, saiFile)
+            }
         }
         addOutputParameter("__pbsIds", pbsIds.join(","))
         addOutputParameter("__pbsRealm", realm.id.toString())
