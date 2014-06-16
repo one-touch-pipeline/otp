@@ -23,6 +23,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.notification.NotificationEvent
 import de.dkfz.tbi.otp.notification.NotificationType
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.infrastructure.ProcessingStepThreadLocal
 import org.apache.commons.logging.LogFactory
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.annotation.AfterReturning
@@ -98,6 +99,7 @@ class Scheduler {
                 throw new ProcessingException("Job executed without a ProcessingStep being set")
             }
             ProcessingStep step = ProcessingStep.get(job.processingStep.id)
+            ProcessingStepThreadLocal.setProcessingStep(step)
             // get the last ProcessingStepUpdate
             List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(step)
             if (existingUpdates.isEmpty()) {
@@ -133,6 +135,7 @@ class Scheduler {
             grailsApplication.mainContext.publishEvent(event)
         } catch (RuntimeException e) {
             LogThreadLocal.removeThreadLog()
+            ProcessingStepThreadLocal.removeProcessingStep()
             // removing Job from running
             schedulerService.removeRunningJob(job)
             throw new SchedulerException("doCreateCheck failed for Job of type ${joinPoint.target.class}", e)
@@ -154,6 +157,7 @@ class Scheduler {
     @AfterReturning("@annotation(de.dkfz.tbi.otp.job.scheduler.JobExecution) && this(de.dkfz.tbi.otp.job.processing.Job)")
     public void doEndCheck(JoinPoint joinPoint) {
         LogThreadLocal.removeThreadLog()
+        ProcessingStepThreadLocal.removeProcessingStep()
         Job job = joinPoint.target as Job
         if (job instanceof MonitoringJob) {
             // These kind of jobs are allowed to finish the execute method before their processing is finished
@@ -179,6 +183,7 @@ class Scheduler {
     @AfterThrowing(pointcut="@annotation(de.dkfz.tbi.otp.job.scheduler.JobExecution) && this(de.dkfz.tbi.otp.job.processing.Job)", throwing="e")
     public void doErrorHandling(JoinPoint joinPoint, Exception e) {
         LogThreadLocal.removeThreadLog()
+        ProcessingStepThreadLocal.removeProcessingStep()
         Job job = joinPoint.target as Job
         doErrorHandling(job, e)
     }

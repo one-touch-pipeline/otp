@@ -11,6 +11,9 @@ import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.infrastructure.ProcessingStepThreadLocal
+import grails.util.Environment
+import static org.springframework.util.Assert.*
 
 /**
  * @short Helper class providing functionality for remote execution of jobs.
@@ -91,14 +94,21 @@ class ExecutionService {
      *          job identifier and the cluster ({@link Realm#cluster}) of the {@link Realm}
      * @see PbsOptionMergingService#mergePbsOptions(Realm, String)
      */
-    public String executeJob(Realm realm, String text, String jobIdentifier = null, ProcessingStep processingStep = null) {
+    public String executeJob(Realm realm, String text, String jobIdentifier = null, ProcessingStep processingStep) {
         if (!text) {
             throw new ProcessingException("No job text specified.")
         }
         notNull realm, 'No realm specified.'
 
+        if (!processingStep) {
+            processingStep = ProcessingStepThreadLocal.getProcessingStep()
+        }
+
         String pbsOptions = pbsOptionMergingService.mergePbsOptions(realm, jobIdentifier)
         String scriptText = """
+#PBS -S /bin/bash
+#PBS -N ${pbsJobDescription(processingStep)}
+
 # OTP: Fail on first non-zero exit code
 set -e
 
@@ -166,6 +176,7 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
      *
      * @return List of Strings containing the output of the triggered remote job
      */
+
     private List<String> executeRemoteJob(Realm realm, String command = null, File script = null) {
         if (!command && !script) {
             throw new ProcessingException("Neither a command nor a script specified to be run remotely.")
@@ -409,4 +420,14 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
         Log log = LogThreadLocal.getThreadLog()
         log?.debug message
     }
+
+    String pbsJobDescription(ProcessingStep processingStep) {
+        notNull(processingStep, "Missing processing step in pbsJobDescription method")
+        String env = Environment.current == Environment.PRODUCTION ? 'prod' : 'devel'
+        String psId  = processingStep.id
+        String psClass = processingStep.getNonQualifiedJobClass()
+        String psWorkflow = processingStep.process.jobExecutionPlan.toString()
+        return ['otp', env, psWorkflow, psId, psClass].findAll().join('_')
+    }
+
 }

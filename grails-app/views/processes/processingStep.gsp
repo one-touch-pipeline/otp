@@ -71,7 +71,7 @@
             'otp.blank',
             'workflow.paramater.table.headers.name',
             'workflow.paramater.table.headers.description',
-            'workflow.paramater.table.headers.value'
+            'workflow.paramater.table.headers.value',
         ]}" id="outputParametersList"/>
     </div>
     <br>

@@ -39,6 +39,7 @@ class ProcessesController {
      */
     def jobExecutionPlanService
     def processService
+    def executionService
 
     def index() {
         redirect(action: 'list')
@@ -287,8 +288,8 @@ class ProcessesController {
     def parameterData(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
         boolean input = Boolean.parseBoolean(params.input)
-
         ProcessingStep step = processService.getProcessingStep(params.id as long)
+        String jobName = executionService.pbsJobDescription(step)
         // TODO: move into service
         List<Parameter> parameters = []
         if (input) {
@@ -306,7 +307,8 @@ class ProcessesController {
                 param.id,
                 param.type.name,
                 param.type.description,
-                param.value
+                param.value,
+                jobName
             ]
         }
         render dataToRender as JSON

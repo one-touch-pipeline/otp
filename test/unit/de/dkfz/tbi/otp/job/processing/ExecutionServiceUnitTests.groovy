@@ -3,10 +3,15 @@ package de.dkfz.tbi.otp.job.processing
 import static org.junit.Assert.*
 import grails.test.mixin.*
 import grails.test.mixin.support.*
+
 import org.junit.*
+
+import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.ExecutionService.ClusterJobStatus
 
 @TestMixin(GrailsUnitTestMixin)
+@Mock([JobExecutionPlan, Process, ProcessingStep])
 class ExecutionServiceUnitTests {
 
     ExecutionService executionService = new ExecutionService()
@@ -91,6 +96,27 @@ class ExecutionServiceUnitTests {
         ClusterJobStatus.values().each { ClusterJobStatus clusterJobStatus ->
             output = qstatOutputForJobFound(clusterJobStatus)
             assertTrue(executionService.isJobStatusAvailable(output))
+        }
+    }
+
+    void testPbsJobDescription() {
+        JobExecutionPlan jobExecutionPlan = new JobExecutionPlan(
+                name: "testWorkFlow"
+            )
+        Process process = new Process(
+                jobExecutionPlan: jobExecutionPlan
+            )
+        ProcessingStep step = new ProcessingStep(
+                id: 9999999,
+                jobClass: "foo",
+                process: process,
+            )
+        assertEquals(executionService.pbsJobDescription(step), "otp_devel_testWorkFlow_9999999_foo")
+    }
+
+    void testPbsJobDescriptionNull() {
+        shouldFail() {
+            executionService.pbsJobDescription(null)
         }
     }
 }
