@@ -7,6 +7,7 @@ class SeqTrack {
         NOT_STARTED,
         IN_PROGRESS,
         FINISHED,
+        @Deprecated
         INCOMPLETE,
     }
 

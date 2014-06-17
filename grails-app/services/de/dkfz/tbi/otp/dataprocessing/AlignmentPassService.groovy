@@ -65,18 +65,9 @@ class AlignmentPassService {
      * project with a reference genome unknown to OTP.)</p>
      */
     private SeqTrack findAlignableSeqTrack() {
-        SeqTrack seqTrack = SeqTrack.find(ALIGNABLE_SEQTRACK_HQL, [
+        return SeqTrack.find(ALIGNABLE_SEQTRACK_HQL, [
             alignmentState: SeqTrack.DataProcessingState.NOT_STARTED
         ] << ALIGNABLE_SEQTRACK_QUERY_PARAMETERS)
-        if (!seqTrack) {
-            return null
-        }
-        if (isReferenceGenomeAvailable(seqTrack) && !isExomeEnrichmentKitAndBedFileMissing(seqTrack)) {
-            return seqTrack
-        } else {
-            changeDataProcessingStateToInComplete(seqTrack)
-            return null
-        }
     }
 
 
@@ -94,7 +85,7 @@ class AlignmentPassService {
      * Checks if the {@link ExomeEnrichmentKit} and the {@link BedFile} are available for this {@link SeqTrack}.
      * If it is missing the method returns false, otherwise true.
      */
-    public boolean isExomeEnrichmentKitAndBedFileMissing(SeqTrack seqTrack) {
+    public boolean isExomeEnrichmentKitOrBedFileMissing(SeqTrack seqTrack) {
         notNull(seqTrack, "The input seqTrack of method isExomeEnrichmentKitAvailable is null")
 
         if (seqTrack instanceof ExomeSeqTrack) {
@@ -111,15 +102,6 @@ class AlignmentPassService {
         }
     }
 
-
-    /**
-     * If the seqTrack can not be processed because of missing information the {@link DataProcessingState} will be changed to INCOMPLETE.
-     */
-    public void changeDataProcessingStateToInComplete(SeqTrack seqTrack) {
-        notNull(seqTrack, "The input seqTrack of method changeDataProcessingStateToInComplete is null")
-
-        updateSeqTrackDataProcessingState(seqTrack, SeqTrack.DataProcessingState.INCOMPLETE)
-    }
 
     public AlignmentPass createAlignmentPass() {
         SeqTrack seqTrack = findAlignableSeqTrack()
