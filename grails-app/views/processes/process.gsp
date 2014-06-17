@@ -18,7 +18,7 @@
         <div id="processCommentBox">
             <div id="commentLabel">Comment:</div>
             <div id="commentRead">
-                <textarea class="commentBox" readonly>${comment.encodeAsHTML()}</textarea>
+                <textarea class="commentBox" readonly>${comment?.encodeAsHTML()}</textarea>
                 <div class="commentButtonArea">
                     <button id="editComment">&nbsp;&nbsp;&nbsp;<g:message code="processes.process.edit" /></button>
                 </div>

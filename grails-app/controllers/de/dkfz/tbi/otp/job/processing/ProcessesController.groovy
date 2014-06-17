@@ -169,7 +169,7 @@ class ProcessesController {
                 latest.date,
                 latest.processingStep.jobDefinition.name,
                 [state: latest.state, error: latest.error ? latest.error.errorMessage : null, id: latest.processingStep.id],
-                process.comment,
+                process.comment?.encodeAsHTML(),
                 [actions: actions]
             ]
         }
