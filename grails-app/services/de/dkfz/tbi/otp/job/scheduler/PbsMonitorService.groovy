@@ -1,7 +1,5 @@
 package de.dkfz.tbi.otp.job.scheduler
 
-import java.util.concurrent.Callable
-import java.util.concurrent.ExecutorService
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
@@ -27,9 +25,6 @@ class PbsMonitorService {
 
     @Autowired
     ExecutionService executionService
-
-    @Autowired
-    ExecutorService executorService
 
     @Autowired
     Scheduler scheduler

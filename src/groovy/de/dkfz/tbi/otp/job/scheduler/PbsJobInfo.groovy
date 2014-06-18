@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.job.scheduler
 
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.ngsdata.Realm
 
 /**
  * Encapsulation class for storing the information about one
  * job running on a PBS system.
  */
-class PbsJobInfo implements Serializable {
+class PbsJobInfo implements ClusterJobIdentifier, Serializable {
     /**
      * The ID of the job on the PBS system.
      */
@@ -16,4 +17,9 @@ class PbsJobInfo implements Serializable {
      * PBS system the job is running. All systems need to be queried.
      */
     Realm realm
+
+    @Override
+    public String getClusterJobId() {
+        return pbsId
+    }
 }

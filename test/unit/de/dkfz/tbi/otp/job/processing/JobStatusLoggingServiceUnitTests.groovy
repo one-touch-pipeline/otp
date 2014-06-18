@@ -1,8 +1,11 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl
 import grails.test.mixin.*
 import grails.test.mixin.support.*
-
+import org.apache.commons.io.FileUtils
 import org.junit.*
 
 import de.dkfz.tbi.otp.job.plan.JobDefinition
@@ -16,17 +19,18 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 @TestFor(JobStatusLoggingService)
 @TestMixin(GrailsUnitTestMixin)
 @Mock([JobDefinition, JobExecutionPlan, Process, ProcessingStep, Realm])
-class JobStatusLoggingServiceUnitTests extends GroovyTestCase {
+class JobStatusLoggingServiceUnitTests extends TestCase {
 
     final static String LOGGING_ROOT_PATH = '/fakeRootPath'
     final static String EXPECTED_BASE_PATH = '/fakeRootPath/log/status'
-    final static String EXPECTED_LOGFILE_PATH = '/fakeRootPath/log/status/joblog_12345.log'
+    final static String EXPECTED_LOGFILE_PATH = "/fakeRootPath/log/status/joblog_${ARBITRARY_PROCESS_ID}_${ARBITRARY_REALM_ID}.log"
 
     final static Long ARBITRARY_ID = 23
+    final static Long ARBITRARY_REALM_ID = 987
     final static Long ARBITRARY_PROCESS_ID = 12345
     final static String ARBITRARY_PBS_ID = '4711'
 
-    private ProcessingStep createFakeProcessingStep() {
+    static ProcessingStep createFakeProcessingStep() {
         ProcessingStep processingStep = new ProcessingStep([id: ARBITRARY_ID])
         processingStep.with {
             jobDefinition = new JobDefinition()
@@ -61,7 +65,7 @@ class JobStatusLoggingServiceUnitTests extends GroovyTestCase {
 
     @Test
     void testLogFileBaseDir() {
-        Realm realm = new Realm([loggingRootPath: LOGGING_ROOT_PATH])
+        Realm realm = new Realm([id: ARBITRARY_REALM_ID, loggingRootPath: LOGGING_ROOT_PATH])
         ProcessingStep processingStep = createFakeProcessingStep()
         def actual = service.logFileBaseDir(realm, processingStep)
         assert EXPECTED_BASE_PATH == actual
@@ -69,7 +73,7 @@ class JobStatusLoggingServiceUnitTests extends GroovyTestCase {
 
     @Test
     void testLogFileLocation() {
-        Realm realm = new Realm([loggingRootPath: LOGGING_ROOT_PATH])
+        Realm realm = new Realm([id: ARBITRARY_REALM_ID, loggingRootPath: LOGGING_ROOT_PATH])
         ProcessingStep processingStep = createFakeProcessingStep()
         def actual = service.logFileLocation(realm, processingStep)
         assert EXPECTED_LOGFILE_PATH == actual
