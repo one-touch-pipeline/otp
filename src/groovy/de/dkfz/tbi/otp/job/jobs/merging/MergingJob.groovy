@@ -58,6 +58,11 @@ class MergingJob extends AbstractJobImpl {
     private String createInputFileString(ProcessedMergedBamFile processedMergedBamFile) {
         List<AbstractBamFile> abstractBamFiles = abstractBamFileService.findByProcessedMergedBamFile(processedMergedBamFile)
         notEmpty(abstractBamFiles, "No BamFiles found for ${processedMergedBamFile}")
+        if (abstractBamFiles.size() == 1) {
+            if (abstractBamFiles.get(0) instanceof ProcessedMergedBamFile) {
+                throw new RuntimeException("Merging set ${processedMergedBamFile.mergingSet} contains a single merged BAM file only. This makes no sense.")
+            }
+        }
         StringBuilder stringBuilder = new StringBuilder()
         abstractBamFiles.each { AbstractBamFile abstractBamFile ->
             String fileName
