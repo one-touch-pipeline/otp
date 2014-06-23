@@ -29,7 +29,6 @@ class TransferSingleLaneQAResultJob extends AbstractJobImpl{
         ProcessedMergedBamFile mergedBamFile = ProcessedMergedBamFile.get(id)
         Project project = processedMergedBamFileService.project(mergedBamFile)
         Map<String, String> singleLaneQAResultsDirectories = processedMergedBamFileService.singleLaneQAResultsDirectories(mergedBamFile)
-        String temporalDestinationDir = processedMergedBamFileService.destinationTempDirectory(mergedBamFile)
         Map<String, String> clusterPrefix = configService.clusterSpecificCommandPrefixes(project)
         String tmpQADestinationDirectory = processedMergedBamFileService.qaResultTempDestinationDirectory(mergedBamFile)
         String qaDestinationDirectory = processedMergedBamFileService.qaResultDestinationDirectory(mergedBamFile)
@@ -45,6 +44,13 @@ ${clusterPrefix.exec} \"mkdir -p -m 2750 ${tmpQADestinationDirectory}/${director
 ${clusterPrefix.cp} -r ${src}/* ${clusterPrefix.dest}${tmpQADestinationDirectory}/${directoryName}
 ${clusterPrefix.exec} \"find ${tmpQADestinationDirectory}/${directoryName} -type f -exec chmod 0640 '{}' \\;\"
 """
+            }
+            if (!text) {
+                assert singleLaneQAResultsDirectories.empty
+                // This happens if only merged BAM files but no single lane BAM files have been merged.
+                // Submit a script text containing just a space, otherwise ExecutionService would complain.
+                // (Just exiting here is not an option, because the mandatory output parameters __pbsRealm and __pbsIds have to be set.)
+                text = " "
             }
             return text
         }
