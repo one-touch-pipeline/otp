@@ -26,8 +26,6 @@ class ProcessedMergedBamFileService {
 
     DataProcessingFilesService dataProcessingFilesService
 
-    MergingPassService mergingPassService
-
     ChecksumFileService checksumFileService
 
     MergedAlignmentDataFileService mergedAlignmentDataFileService
