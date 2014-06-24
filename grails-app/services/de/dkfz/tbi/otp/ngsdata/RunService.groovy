@@ -5,7 +5,6 @@ import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.core.userdetails.UserDetails
-
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 
 /**
@@ -44,8 +43,8 @@ class RunService {
                         ilike("name", filter)
                     }
                     sqlRestriction("upper(storage_realm) like upper('${filter}')")
-                    }
                 }
+            }
             if (filtering.name) {
                 or {
                     filtering.name.each {
@@ -64,7 +63,7 @@ class RunService {
             if (filtering.dateCreated) {
                 or {
                     filtering.dateCreated.each {
-                         between('dateCreated', it[0], it[1])
+                        between('dateCreated', it[0], it[1])
                     }
                 }
             }
@@ -103,8 +102,8 @@ class RunService {
                             ilike("name", filter)
                         }
                         sqlRestriction("upper(storage_realm) like upper('${filter}')")
-                        }
                     }
+                }
                 if (filtering.name) {
                     or {
                         filtering.name.each {
@@ -114,8 +113,8 @@ class RunService {
                 }
                 if (filtering.seqCenter) {
                     seqCenter {
-                         'in'('id', filtering.seqCenter)
-                     }
+                        'in'('id', filtering.seqCenter)
+                    }
                 }
                 if (filtering.storageRealm) {
                     'in'('storageRealm', filtering.storageRealm)
@@ -136,12 +135,12 @@ class RunService {
                 }
                 projections {
                     count('name')
-                    }
                 }
-            } else {
-             // shortcut for unfiltered results
-             return Run.countBySeqCenterInList(seqCenterService.allSeqCenters())
             }
+        } else {
+            // shortcut for unfiltered results
+            return Run.countBySeqCenterInList(seqCenterService.allSeqCenters())
+        }
     }
 
     @PostAuthorize("returnObject == null or hasPermission(returnObject.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read) or hasRole('ROLE_OPERATOR')")

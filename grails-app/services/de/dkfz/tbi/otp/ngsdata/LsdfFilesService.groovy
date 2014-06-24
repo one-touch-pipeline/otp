@@ -1,10 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.job.processing.ExecutionService
-import org.codehaus.groovy.grails.commons.GrailsApplication
-
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 import static de.dkfz.tbi.otp.utils.ThreadUtils.waitFor
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import de.dkfz.tbi.otp.job.processing.ExecutionService
 
 class LsdfFilesService {
 
@@ -86,8 +85,7 @@ class LsdfFilesService {
         }
         String centerDir = file.run.seqCenter.dirName
         String basePath = configService.getProjectSequencePath(file.project)
-        String path =
-            "${basePath}/${seqTypeDir}/${centerDir}/run${file.run.name}/${file.pathName}/${file?.fileName}"
+        String path = "${basePath}/${seqTypeDir}/${centerDir}/run${file.run.name}/${file.pathName}/${file?.fileName}"
         return path
     }
 
@@ -174,11 +172,11 @@ class LsdfFilesService {
 
     private String getFileViewByPidRelativeDirectory(DataFile file, Sequence sequence) {
         return getFileViewByPidRelativeDirectory(sequence.dirName,
-            sequence.pid,
-            sequence.sampleTypeName.toLowerCase(),
-            sequence.libraryLayout.toLowerCase(),
-            sequence.name,
-            file.fileType.vbpPath)
+        sequence.pid,
+        sequence.sampleTypeName.toLowerCase(),
+        sequence.libraryLayout.toLowerCase(),
+        sequence.name,
+        file.fileType.vbpPath)
     }
 
     private String getFileViewByPidRelativeDirectory(String seqTypeDir, String pid, String sampleType, String library, String runName, String vbpPath) {
@@ -245,22 +243,22 @@ class LsdfFilesService {
         threadLog.info "Deleted directory ${directory}"
     }
 
-    String[] getAllPathsForRun(long runId) {
+    String[] getAllPathsForRun(long runId, boolean fullPath = false) {
         Run run = Run.getAt(runId)
         if (!run) {
             return null
         }
-        return getAllPathsForRun(run)
+        return getAllPathsForRun(run, fullPath)
     }
 
-    String[] getAllPathsForRun(Run run) {
+    String[] getAllPathsForRun(Run run, boolean fullPath = false) {
         if (!run) {
             //exception
             return null
         }
         Set<String> paths = new HashSet<String>()
         DataFile.findAllByRun(run).each { DataFile file ->
-            String path = getPathToRun(file)
+            String path = getPathToRun(file, fullPath)
             if (path) {
                 paths << path
             } else  {
@@ -270,7 +268,7 @@ class LsdfFilesService {
         return (String[])paths.toArray()
     }
 
-    private String getPathToRun(DataFile file) {
+    private String getPathToRun(DataFile file, boolean fullPath = false) {
         if (!checkFinalPathDefined(file)) {
             return null
         }
@@ -278,6 +276,11 @@ class LsdfFilesService {
         String seqTypeDir = seqTypeDirectory(file)
         String centerDir = file.run.seqCenter.dirName
         String path = "${basePath}/${seqTypeDir}/${centerDir}/"
+        if (fullPath) {
+            String runName = file.run.name
+            String pathWithRunName = "${path}run${runName}"
+            return pathWithRunName
+        }
         return path
     }
 }

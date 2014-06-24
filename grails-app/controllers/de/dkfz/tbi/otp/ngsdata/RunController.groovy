@@ -1,10 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import java.text.SimpleDateFormat
-import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
-import de.dkfz.tbi.otp.utils.DataTableCommand
+
 import grails.converters.JSON
 import groovy.json.JsonSlurper
+import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
+import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class RunController {
 
@@ -32,7 +32,7 @@ class RunController {
 
         return [
             run: run,
-            finalPaths: lsdfFilesService.getAllPathsForRun(run),
+            finalPaths: lsdfFilesService.getAllPathsForRun(run, true),
             keys: keys,
             processParameters: runService.retrieveProcessParameters(run),
             metaDataFiles: runService.retrieveMetaDataFilesByInitialPath(run),
@@ -95,24 +95,24 @@ enum RunSortColumn {
 
     static RunSortColumn fromDataTable(int column) {
         switch (column) {
-        case 0:
-            return RunSortColumn.RUN
-        case 1:
-            return RunSortColumn.SEQCENTER
-        case 2:
-            return RunSortColumn.STORAGEREALM
-        case 3:
-            return RunSortColumn.DATECREATED
-        case 4:
-            return RunSortColumn.DATEEXECUTED
-        case 5:
-            return RunSortColumn.BLACKLISTED
-        case 6:
-            return RunSortColumn.MULTIPLESOURCE
-        case 7:
-            return RunSortColumn.QUALITYEVALUATED
-        default:
-            return RunSortColumn.RUN
+            case 0:
+                return RunSortColumn.RUN
+            case 1:
+                return RunSortColumn.SEQCENTER
+            case 2:
+                return RunSortColumn.STORAGEREALM
+            case 3:
+                return RunSortColumn.DATECREATED
+            case 4:
+                return RunSortColumn.DATEEXECUTED
+            case 5:
+                return RunSortColumn.BLACKLISTED
+            case 6:
+                return RunSortColumn.MULTIPLESOURCE
+            case 7:
+                return RunSortColumn.QUALITYEVALUATED
+            default:
+                return RunSortColumn.RUN
         }
     }
 }
@@ -139,52 +139,52 @@ class RunFiltering {
         def slurper = new JsonSlurper()
         def each = slurper.parseText(json).each {
             switch (it.type) {
-             case "runSearch":
-                if (it.value && it.value.length() >= 3) {
-                    filtering.name << it.value
-                    filtering.enabled = true
-                }
-                break
-            case "seqCenterSelection":
-                if (it.value.isLong()) {
-                    filtering.seqCenter << (it.value as Long)
-                    filtering.enabled = true
-                }
-                break
-            case "storageRealmSelection":
-                if (it.value) {
-                    filtering.storageRealm << (it.value as StorageRealm)
-                    filtering.enabled = true
-                }
-                break
-            case "dateCreatedSelection":
-                if (it.value) {
-                    int start_day = it.value.start_day as int
-                    int start_month = it.value.start_month as int
-                    int start_year = it.value.start_year as int
-                    Date dateFrom = new Date(start_year - 1900, start_month - 1, start_day)
-                    int end_day = it.value.end_day as int
-                    int end_month = it.value.end_month as int
-                    int end_year = it.value.end_year as int
-                    Date dateTo = new Date(end_year - 1900, end_month - 1, end_day + 1)
-                    filtering.dateCreated << [dateFrom, dateTo]
-                    filtering.enabled = true
-                }
-                break
-            case "dateExecutedSelection":
-                if (it.value) {
-                    int start_day = it.value.start_day as int
-                    int start_month = it.value.start_month as int
-                    int start_year = it.value.start_year as int
-                    Date dateFrom = new Date(start_year - 1900, start_month - 1, start_day)
-                    int end_day = it.value.end_day as int
-                    int end_month = it.value.end_month as int
-                    int end_year = it.value.end_year as int
-                    Date dateTo = new Date(end_year - 1900, end_month - 1, end_day + 1)
-                    filtering.dateExecuted << [dateFrom, dateTo]
-                    filtering.enabled = true
-                }
-                break
+                case "runSearch":
+                    if (it.value && it.value.length() >= 3) {
+                        filtering.name << it.value
+                        filtering.enabled = true
+                    }
+                    break
+                case "seqCenterSelection":
+                    if (it.value.isLong()) {
+                        filtering.seqCenter << (it.value as Long)
+                        filtering.enabled = true
+                    }
+                    break
+                case "storageRealmSelection":
+                    if (it.value) {
+                        filtering.storageRealm << (it.value as StorageRealm)
+                        filtering.enabled = true
+                    }
+                    break
+                case "dateCreatedSelection":
+                    if (it.value) {
+                        int start_day = it.value.start_day as int
+                        int start_month = it.value.start_month as int
+                        int start_year = it.value.start_year as int
+                        Date dateFrom = new Date(start_year - 1900, start_month - 1, start_day)
+                        int end_day = it.value.end_day as int
+                        int end_month = it.value.end_month as int
+                        int end_year = it.value.end_year as int
+                        Date dateTo = new Date(end_year - 1900, end_month - 1, end_day + 1)
+                        filtering.dateCreated << [dateFrom, dateTo]
+                        filtering.enabled = true
+                    }
+                    break
+                case "dateExecutedSelection":
+                    if (it.value) {
+                        int start_day = it.value.start_day as int
+                        int start_month = it.value.start_month as int
+                        int start_year = it.value.start_year as int
+                        Date dateFrom = new Date(start_year - 1900, start_month - 1, start_day)
+                        int end_day = it.value.end_day as int
+                        int end_month = it.value.end_month as int
+                        int end_year = it.value.end_year as int
+                        Date dateTo = new Date(end_year - 1900, end_month - 1, end_day + 1)
+                        filtering.dateExecuted << [dateFrom, dateTo]
+                        filtering.enabled = true
+                    }
+                    break
             }
         }
         return filtering

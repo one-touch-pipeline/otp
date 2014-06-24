@@ -22,7 +22,7 @@
               </tr>
                 <tr>
                   <td><g:message code="fastqc.show.filename"/></td>
-                  <td>${fileName}</td>
+                    <td>${fileName}</td>
                 </tr>
                 <tr>
                   <td><g:message code="fastqc.show.fileType"/></td>

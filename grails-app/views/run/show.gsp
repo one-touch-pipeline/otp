@@ -52,8 +52,8 @@
        <tr>
             <td class="myKey"><g:message code="run.show.general.finalLocations"/></td>
             <td class="myValue">
-                <g:each var="path" in="${finalPaths}">
-                    ${path} <br/>
+                <g:each var="pathWithRunName" in="${finalPaths}">
+                    ${pathWithRunName}<br/>
                 </g:each>
             </td>
        </tr>
@@ -78,7 +78,7 @@
             <g:each var="file" in="${metaDataFiles}">
             <tbody>
                 <tr>
-                    <td>${file.fileName}</td>
+                    <td>${file.filePath}/${file.fileName}</td>
                     <td>${(new Date(file.dateCreated.getTime())).format("yyyy-MM-dd")}</td>
                     <td>${file.used}</td>
                 </tr>
