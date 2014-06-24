@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.infrastructure
 
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
+import static org.springframework.util.Assert.*
 
 class ProcessingStepThreadLocal {
 
