@@ -58,6 +58,18 @@ class MergingSet {
         return mergingWorkPackage.project
     }
 
+    Individual getIndividual() {
+        return mergingWorkPackage.individual
+    }
+
+    Sample getSample() {
+        return mergingWorkPackage.sample
+    }
+
+    SeqType getSeqType() {
+        return mergingWorkPackage.seqType
+    }
+
     /**
      * @return Whether this is the most recent merging set on the referenced {@link MergingWorkPackage}.
      */
@@ -69,14 +81,6 @@ class MergingSet {
             }
         }
         return identifier == maxIdentifier
-    }
-
-    Individual getIndividual() {
-        return mergingWorkPackage.individual
-    }
-
-    SeqType getSeqType() {
-        return mergingWorkPackage.seqType
     }
 
     static mapping = {

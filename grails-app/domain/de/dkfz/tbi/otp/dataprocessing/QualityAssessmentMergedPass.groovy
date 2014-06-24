@@ -53,11 +53,19 @@ class QualityAssessmentMergedPass {
         return processedMergedBamFile.project
     }
 
-    MergingPass getMergingPass() {
-        return processedMergedBamFile.mergingPass
+    Individual getIndividual() {
+        return processedMergedBamFile.individual
+    }
+
+    Sample getSample() {
+        return processedMergedBamFile.sample
     }
 
     MergingSet getMergingSet() {
         return processedMergedBamFile.mergingSet
+    }
+
+    MergingPass getMergingPass() {
+        return processedMergedBamFile.mergingPass
     }
 }
