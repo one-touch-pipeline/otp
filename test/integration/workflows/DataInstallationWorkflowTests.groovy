@@ -2,6 +2,7 @@ package workflows
 
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 import static org.junit.Assert.*
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.jobs.dataInstallation.DataInstallationStartJob
@@ -84,6 +85,8 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
     @Before
     void setUp() {
         // Setup logic here
+        super.createUserAndRoles()
+
         Map paths = [
             rootPath: rootPath,
             processingRootPath: processingRootPath,
@@ -221,7 +224,9 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
     // so at this moment only one test could be run at moment, all the others have to be commented
     @Ignore
     void testDataInstallation() {
-        run("scripts/DataInstallationWorkflow.groovy")
+        SpringSecurityUtils.doWithAuth("admin") {
+            run("scripts/DataInstallationWorkflow.groovy")
+        }
         SeqType seqType = createSeqType(SeqTypeNames.WHOLE_GENOME.seqTypeName, "SeqTypeDir")
 
         SeqTrack seqTrack = new SeqTrack()
@@ -255,7 +260,9 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
     // so at this moment only one test could be run at moment, all the others have to be commented
     @Ignore
     void testChipSeqInstallation() {
-        run("scripts/DataInstallationWorkflow.groovy")
+        SpringSecurityUtils.doWithAuth("admin") {
+            run("scripts/DataInstallationWorkflow.groovy")
+        }
         SeqType seqType = createSeqType(SeqTypeNames.CHIP_SEQ.seqTypeName, "chip_seq_sequencing")
 
         // creating required Antibody target objects

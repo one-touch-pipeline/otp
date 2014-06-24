@@ -1,12 +1,11 @@
 package de.dkfz.tbi.otp.job.jobs.dataTransfer
 
 import static org.springframework.util.Assert.*
-import java.util.List;
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFileService;
-import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFileService
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
 
 class CopyFilesJob extends AbstractJobImpl {
 
@@ -40,7 +39,7 @@ mkdir -p -m 2750 ${processedMergedBamFileService.destinationDirectory(it)}
 printf "A new lane is currently in progress for this sample.\\nThe merged BAM file will be created/updated as soon as processing is complete.\\n" > ${processedMergedBamFileService.destinationDirectory(it)}/${processedMergedBamFileService.inProgressFileName(it)};
 """
             Realm realm = configService.getRealmDataManagement(it.project)
-            String jobId = executionHelperService.sendScript(realm, cmd)
+            String jobId = executionHelperService.sendScript(realm, cmd, this.getClass().simpleName)
             pbsIds << jobId
         }
 
@@ -48,7 +47,7 @@ printf "A new lane is currently in progress for this sample.\\nThe merged BAM fi
         files.each { DataFile file ->
             String cmd = scriptText(file)
             Realm realm = configService.getRealmDataManagement(file.project)
-            String jobId = executionHelperService.sendScript(realm, cmd)
+            String jobId = executionHelperService.sendScript(realm, cmd, this.getClass().simpleName)
             pbsIds << jobId
         }
 
