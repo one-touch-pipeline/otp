@@ -5,8 +5,8 @@ import java.util.concurrent.Future
 import java.util.concurrent.FutureTask
 
 /**
- * Simple Wrapper to provide an executor service which does not
- * create threads. It is used during Integration Tests and not meant
+ * Simple Wrapper to provide an executor service which executes synchronously <strong>on
+ * the same thread</strong>. It is used during Integration Tests and not meant
  * for productive usage.
  *
  */

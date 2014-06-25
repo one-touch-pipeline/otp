@@ -28,6 +28,8 @@ class LogThreadLocal {
     /**
      * set the given {@link Log} to this {@link Thread}
      *
+     * <p><strong>Make sure that you call {@link #removeThreadLog()} when done (best in a finally block).</strong></p>
+     *
      * @param log the {@link Log} to add to this {@link Thread}
      */
     public static void setThreadLog(Log log) {

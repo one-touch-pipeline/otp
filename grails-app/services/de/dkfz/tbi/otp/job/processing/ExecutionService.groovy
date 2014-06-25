@@ -9,9 +9,9 @@ import com.jcraft.jsch.Channel
 import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import de.dkfz.tbi.otp.infrastructure.ProcessingStepThreadLocal
 import grails.util.Environment
 import static org.springframework.util.Assert.*
 
@@ -59,6 +59,7 @@ class ExecutionService {
 
     PbsOptionMergingService pbsOptionMergingService
     JobStatusLoggingService jobStatusLoggingService
+    SchedulerService schedulerService
 
     /**
      * Executes a command on a specified host
@@ -101,7 +102,7 @@ class ExecutionService {
         notNull realm, 'No realm specified.'
 
         if (!processingStep) {
-            processingStep = ProcessingStepThreadLocal.getProcessingStep()
+            processingStep = schedulerService.jobExecutedByCurrentThread.processingStep
         }
 
         String pbsOptions = pbsOptionMergingService.mergePbsOptions(realm, jobIdentifier)

@@ -1,5 +1,10 @@
 package de.dkfz.tbi.otp.job.scheduler
 
+import static org.springframework.util.Assert.*
+
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Future
 import de.dkfz.tbi.otp.job.plan.ValidatingJobDefinition
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.MonitoringJob
@@ -11,8 +16,7 @@ import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.ValidatingJob
 import de.dkfz.tbi.otp.notification.NotificationEvent
 import de.dkfz.tbi.otp.notification.NotificationType
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import de.dkfz.tbi.otp.infrastructure.ProcessingStepThreadLocal
+import de.dkfz.tbi.otp.utils.ExceptionUtils
 import org.apache.commons.logging.LogFactory
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,34 +39,67 @@ import org.springframework.stereotype.Component
 @Component("scheduler")
 @SuppressWarnings(["CatchException", "CatchRuntimeException"])
 class Scheduler {
-    /**
-     * Dependency Injection of Scheduler Service
-     */
+
     @Autowired
     SchedulerService schedulerService
-    /**
-     * Dependency Injection of Error Log Service
-     */
+
     @Autowired
     ErrorLogService errorLogService
-    /**
-     * Dependency Injection of grailsApplication
-     */
+
+    @Autowired
+    ExecutorService executorService
+
     @Autowired
     GrailsApplication grailsApplication
+
     /**
      * Log for this class.
      */
     private static final log = LogFactory.getLog(this)
 
+    /**
+     * Calls the job's {@link Job#execute()} method in the context of the job and with error handling.
+     */
     public void executeJob(final Job job) {
         doCreateCheck(job)
-        try {
-            job.execute()
+        doWithErrorHandling(job, {
+            doInJobContext(job, { job.execute() })
             doEndCheck(job)
+        })
+    }
+
+    /**
+     * Executes part of a {@link Job} with error handling.
+     *
+     * <p>Note that job code execution should also be wrapped in {@link #doInJobContext(Job, Closure)}.</p>
+     *
+     * @param closure The part of the job that shall be executed.
+     * @param rethrow Whether an exception shall be rethrown by this method after it has been handled.
+     */
+    public void doWithErrorHandling(final Job job, final Closure closure, final boolean rethrow = true) {
+        try {
+            closure()
         } catch (final Throwable e) {
-            doErrorHandlingForExecute(job, e)
-            throw e
+            doErrorHandling(job, e)
+            if (rethrow) {
+                throw e
+            }
+        }
+    }
+
+    /**
+     * Executes part of a {@link Job} in the context of the job.
+     *
+     * <p>Note that job code execution should also be wrapped in {@link #doWithErrorHandling(Job, Closure)}.</p>
+     *
+     * @param closure The part of the job that shall be executed.
+     */
+    public void doInJobContext(final Job job, final Closure closure) {
+        schedulerService.startingJobExecutionOnCurrentThread(job)
+        try {
+            closure()
+        } finally {
+            schedulerService.finishedJobExecutionOnCurrentThread(job)
         }
     }
 
@@ -77,8 +114,7 @@ class Scheduler {
      * This method is also responsible for persisting the input parameters passed to the Job at the time
      * of execution.
      */
-    public void doCreateCheck(final Job job) {
-        LogThreadLocal.setThreadLog(job.log)
+    private void doCreateCheck(final Job job) {
         try {
             // verify that the Job has a processing Step
             if (!job.processingStep) {
@@ -86,7 +122,6 @@ class Scheduler {
                 throw new ProcessingException("Job executed without a ProcessingStep being set")
             }
             ProcessingStep step = ProcessingStep.get(job.processingStep.id)
-            ProcessingStepThreadLocal.setProcessingStep(step)
             // get the last ProcessingStepUpdate
             List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(step)
             if (existingUpdates.isEmpty()) {
@@ -121,8 +156,6 @@ class Scheduler {
             NotificationEvent event = new NotificationEvent(this, step, NotificationType.PROCESS_STEP_STARTED)
             grailsApplication.mainContext.publishEvent(event)
         } catch (RuntimeException e) {
-            LogThreadLocal.removeThreadLog()
-            ProcessingStepThreadLocal.removeProcessingStep()
             // removing Job from running
             schedulerService.removeRunningJob(job)
             throw new SchedulerException("doCreateCheck failed for Job of type ${job.class}", e)
@@ -139,9 +172,7 @@ class Scheduler {
      * This method takes also care of persisting the output parameters provided by the Job and will invoke
      * the next Job of the JobExecutionPlan.
      */
-    public void doEndCheck(final Job job) {
-        LogThreadLocal.removeThreadLog()
-        ProcessingStepThreadLocal.removeProcessingStep()
+    private void doEndCheck(final Job job) {
         if (job instanceof MonitoringJob) {
             // These kind of jobs are allowed to finish the execute method before their processing is finished
             // They will invoke the doEndCheck in the SchedulerService by themselves.
@@ -156,17 +187,28 @@ class Scheduler {
      * This method logs the exception, and stores a failure update for the ProcessingStep. As well it triggers the error
      * handling process for the Job's JobExecutionPlan.
      */
-    public void doErrorHandlingForExecute(final Job job, final Throwable e) {
-        LogThreadLocal.removeThreadLog()
-        ProcessingStepThreadLocal.removeProcessingStep()
-        doErrorHandling(job, e)
+    private void doErrorHandling(Job job, Throwable exceptionToBeHandled) {
+        try {
+            doUnsafeErrorHandling(job, exceptionToBeHandled)
+        } catch (final Throwable exceptionDuringExceptionHandling) {
+            final String identifier = System.currentTimeMillis() + "-" + sprintf('%016X', new Random().nextLong())
+            log.error "An exception was thrown during exception handling. The original exception (ID ${identifier}), " +
+                      "which triggered the exception handling, is:\n${ExceptionUtils.getStackTrace(exceptionToBeHandled)}\n" +
+                      "And the exception which was thrown during exception handling is:\n" +
+                      "${ExceptionUtils.getStackTrace(exceptionDuringExceptionHandling)}"
+            throw new RuntimeException(
+                      "An exception was thrown during exception handling. See the log for the original exception (ID ${identifier}).",
+                      exceptionDuringExceptionHandling)
+        }
     }
 
-    public void doErrorHandling(Job job, Throwable e) {
+    /**
+     * The error handling done in this method may fail. If you do not expect exceptions to be thrown from error
+     * handling, use {@link #doErrorHandling(Job, Throwable)} instead.
+     */
+    private void doUnsafeErrorHandling(Job job, Throwable e) {
         schedulerService.removeRunningJob(job)
         ProcessingStep step = ProcessingStep.get(job.processingStep.id)
-        // get the last ProcessingStepUpdate
-        List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(step)
         // add a ProcessingStepUpdate to the ProcessingStep
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
@@ -205,18 +247,5 @@ class Scheduler {
      */
     private void markProcessAsFailed(ProcessingStep step, String error) {
         schedulerService.markProcessAsFailed(step, error)
-    }
-
-    /**
-     * Helper method to create a ProcessingError and add it to given ProcessingStep.
-     * Includes creating the Failure ProcessingStepUpdate.
-     * @param step The ProcessingStep for which the Error needs to be created.
-     * @param previous The ProcessingStepUpdate which should be used as the previous update
-     * @param errorMessage The message to be stored for the Error
-     * @param jobClass The Job Class to use in logging in case of severe error
-     * @throws ProcessingException In case the ProcessingError cannot be saved.
-     **/
-    private void createError(ProcessingStep step, ProcessingStepUpdate previous, String errorMessage, Class jobClass) {
-        schedulerService.createError(step, previous, errorMessage, jobClass)
     }
 }

@@ -141,20 +141,7 @@ class PbsMonitorService {
                 log.debug("${info.pbsId} still running: ${running ? 'yes' : 'no'}")
                 if (!running) {
                     log.info("${info.pbsId} finished on Realm ${info.realm}")
-
-                    /* We wanted to move the following try/catch block into the
-                     * notifyJobAboutFinishedClusterJob method completely, not just the part within
-                     * the try. But this made SchedulerServiceTests.testConstantParameterPassing
-                     * fail. Stefan and Jan spent quite some time trying to figure out why, but
-                     * without success. So we decided to keep it inlined.
-                     */
-                    try {
-                        notifyJobAboutFinishedClusterJob(pbsMonitor, info)
-                    } catch (final Throwable e) {
-                        log.error(e.message, e)
-                        scheduler.doErrorHandling(pbsMonitor, e)
-                    }
-
+                    notifyJobAboutFinishedClusterJob(pbsMonitor, info)
                     finishedJobs.add(info)
                 }
             }
@@ -200,29 +187,33 @@ class PbsMonitorService {
     }
 
     private void notifyJobAboutFinishedClusterJob(final MonitoringJob monitoringJob, final PbsJobInfo clusterJob) {
-        boolean jobHasFinished
-        ExecutionState jobEndState
-        try {
-            jobEndState = monitoringJob.getEndState()
-            jobHasFinished = true
-        } catch (final InvalidStateException e) {
-            // MonitoringJob.getEndState() is specified to throw an InvalidStateException if the
-            // job has not finished yet.
-            jobHasFinished = false
-        }
-        if (jobHasFinished) {
-            if (jobEndState == ExecutionState.FAILURE) {
-                log.info("NOT notifying ${monitoringJob} that cluster job ${clusterJob.pbsId}" +
-                        " has finished on realm ${clusterJob.realm}, because that job has already failed.")
-            } else {
-                throw new RuntimeException("${monitoringJob} is still monitoring cluster job" +
-                        " ${clusterJob.pbsId} on realm ${clusterJob.realm}, although it has" +
-                        " already finished with end state ${jobEndState}.")
+        scheduler.doWithErrorHandling(monitoringJob, {
+            boolean jobHasFinished
+            ExecutionState jobEndState
+            try {
+                jobEndState = monitoringJob.getEndState()
+                jobHasFinished = true
+            } catch (final InvalidStateException e) {
+                // MonitoringJob.getEndState() is specified to throw an InvalidStateException if the
+                // job has not finished yet.
+                jobHasFinished = false
             }
-        } else {
-            log.info("Notifying ${monitoringJob} that cluster job ${clusterJob.pbsId}" +
-                    " has finished on realm ${clusterJob.realm}.")
-            monitoringJob.finished(clusterJob.pbsId, clusterJob.realm)
-        }
+            if (jobHasFinished) {
+                if (jobEndState == ExecutionState.FAILURE) {
+                    log.info("NOT notifying ${monitoringJob} that cluster job ${clusterJob.pbsId}" +
+                            " has finished on realm ${clusterJob.realm}, because that job has already failed.")
+                } else {
+                    throw new RuntimeException("${monitoringJob} is still monitoring cluster job" +
+                            " ${clusterJob.pbsId} on realm ${clusterJob.realm}, although it has" +
+                            " already finished with end state ${jobEndState}.")
+                }
+            } else {
+                log.info("Notifying ${monitoringJob} that cluster job ${clusterJob.pbsId}" +
+                        " has finished on realm ${clusterJob.realm}.")
+                scheduler.doInJobContext(monitoringJob, {
+                    monitoringJob.finished(clusterJob.pbsId, clusterJob.realm)
+                })
+            }
+        }, false)
     }
 }

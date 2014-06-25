@@ -34,7 +34,7 @@ abstract class AbstractIntegrationTest {
     protected def shouldFail = { exception, code ->
         try {
             code.call()
-            fail("Exception of type ${exception} was expected")
+            fail("Exception of type ${exception} expected, but none was thrown.")
         } catch (Exception e) {
             boolean foundException = false
             if (exception.isAssignableFrom(e.class)) {
@@ -48,7 +48,7 @@ abstract class AbstractIntegrationTest {
                 cause = cause.getCause()
             }
             if (!foundException) {
-                fail("Exception of type ${exception} expected but got ${e.class}")
+                throw new Error("Exception of type ${exception} expected, but got ${e.class}.", e)
             }
         }
     }

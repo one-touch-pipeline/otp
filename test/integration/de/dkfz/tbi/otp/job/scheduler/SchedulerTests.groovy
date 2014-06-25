@@ -1,8 +1,14 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import static org.junit.Assert.*
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Future
+import java.util.concurrent.atomic.AtomicBoolean
+import de.dkfz.tbi.otp.job.jobs.MonitoringTestJob
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
+import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.Parameter
@@ -13,16 +19,21 @@ import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.job.processing.InvalidStateException
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
+import de.dkfz.tbi.otp.testing.SynchronousTestingExecutorService
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.ngsdata.Realm
+import grails.util.Environment
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.junit.*
 
 class SchedulerTests extends AbstractIntegrationTest {
-    /**
-     * Dependency Injection of Grails Application
-     */
-    def grailsApplication
 
+    static final String ARBITRARY_MESSAGE = 'The job hit its toe on a comma-shaped stone.'
+
+    GrailsApplication grailsApplication
+    PbsMonitorService pbsMonitorService
     Scheduler scheduler
+    SchedulerService schedulerService
 
     @SuppressWarnings("EmptyMethod")
     @Before
@@ -523,5 +534,65 @@ class SchedulerTests extends AbstractIntegrationTest {
         assertEquals("1,2,3", params[0].value)
         assertEquals("__pbsRealm", params[1].type.name)
         assertEquals("${realm.id}".toString(), params[1].value)
+    }
+
+    static void assertFailed(final Job job, final String expectedErrorMessage, final boolean twice = false) {
+        final ProcessingStep step = job.processingStep
+        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
+        assert updates.size() == twice ? 4 : 3
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FAILURE, updates[2].state)
+        assertNotNull(updates[2].error)
+        assert updates[2].error.errorMessage.contains(expectedErrorMessage)
+        if (twice) {
+            // We get the failure twice because the exception is caught and handled on the other thread and then rethrown
+            // (from the Future.get() method), such that it is thrown from the job's execute() method as well.
+            assertEquals(ExecutionState.FAILURE, updates[3].state)
+            assertNotNull(updates[3].error)
+            assert updates[3].error.errorMessage.contains(expectedErrorMessage)
+        }
+        assertTrue(step.process.finished)
+    }
+
+    static void assertSucceeded(final EndStateAwareJob job) {
+        assertEquals(ExecutionState.SUCCESS, job.endState)
+        final ProcessingStep step = job.processingStep
+        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
+        assert updates.size() == 4
+        assertEquals(ExecutionState.CREATED, updates[0].state)
+        assertEquals(ExecutionState.STARTED, updates[1].state)
+        assertEquals(ExecutionState.FINISHED, updates[2].state)
+        assertEquals(ExecutionState.SUCCESS, updates[3].state)
+        assertTrue(step.process.finished)
+    }
+
+    private void doWithTrueExecutorService(final Closure closure) {
+        final ExecutorService originalExecutorService = scheduler.executorService
+        scheduler.executorService = grailsApplication.mainContext.trueExecutorService
+        try {
+            closure()
+        } finally {
+            scheduler.executorService = originalExecutorService
+        }
+    }
+
+    static ProcessingStep createTestProcessingStep() {
+        JobExecutionPlan jep = new JobExecutionPlan(name: "DontCare" + sprintf('%016X', new Random().nextLong()), planVersion: 0, startJobBean: "DontCare")
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = new JobDefinition(name: "DontCare", bean: "DontCare", plan: jep)
+        assertNotNull(jobDefinition.save())
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "DontCare", startJobVersion: "1")
+        assertNotNull(process.save())
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        assertNotNull(step.save())
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+                date: new Date(),
+                state: ExecutionState.CREATED,
+                previous: null,
+                processingStep: step
+        )
+        assertNotNull(update.save(flush: true))
+        return step
     }
 }

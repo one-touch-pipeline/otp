@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.job.scheduler.PbsMonitorService
+import de.dkfz.tbi.otp.job.scheduler.Scheduler
 import de.dkfz.tbi.otp.ngsdata.Realm
 
 /**
@@ -26,7 +27,8 @@ interface MonitoringJob extends EndStateAwareJob {
      *
      * <p>
      * <strong>This method shall return quickly. If it triggers a time consuming operation, it shall
-     * perform that operation asynchronously on a different thread.</strong>
+     * perform that operation asynchronously on a different thread by calling
+     * {@link Scheduler#doOnOtherThread(Job, Closure)}.</strong>
      *
      * <p>
      * If this method throws an exception, this MonitoringJob will be marked as failed and finished.

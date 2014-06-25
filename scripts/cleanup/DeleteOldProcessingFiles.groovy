@@ -11,14 +11,19 @@ final Log log = new SimpleLog("ScriptLog") {
         out.println(buffer.toString())
     }
 }
+assert LogThreadLocal.threadLog == null
 LogThreadLocal.setThreadLog(log)
-final ReadableInstant someTimeAgo = new Interval(Period.weeks(8), Instant.now()).start
 try {
-    long freedBytes = 0L
-    freedBytes += ctx.processedAlignmentFileService.deleteOldAlignmentProcessingFiles(someTimeAgo.toDate(), Duration.standardMinutes(60).millis)
-    freedBytes += ctx.mergingPassService.deleteOldMergingProcessingFiles(someTimeAgo.toDate(), Duration.standardMinutes(60).millis)
-    log.info "${freedBytes} have been freed in total."
-} catch (final Throwable e) {
-    e.printStackTrace(out)
-    e.printStackTrace(System.out)
+    final ReadableInstant someTimeAgo = new Interval(Period.weeks(8), Instant.now()).start
+    try {
+        long freedBytes = 0L
+        freedBytes += ctx.processedAlignmentFileService.deleteOldAlignmentProcessingFiles(someTimeAgo.toDate(), Duration.standardMinutes(60).millis)
+        freedBytes += ctx.mergingPassService.deleteOldMergingProcessingFiles(someTimeAgo.toDate(), Duration.standardMinutes(60).millis)
+        log.info "${freedBytes} have been freed in total."
+    } catch (final Throwable e) {
+        e.printStackTrace(out)
+        e.printStackTrace(System.out)
+    }
+} finally {
+    LogThreadLocal.removeThreadLog()
 }
