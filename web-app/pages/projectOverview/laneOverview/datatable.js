@@ -21,7 +21,7 @@ $.otp.projectOverviewTable = {
                 action : 'dataTableSourceLaneOverview'
             }),
             bPaginate : false,
-            sScrollY:  410,
+            sScrollY:  'auto',
             sScrollX: 'auto',
             bScrollCollapse : false,
             bDeferRender : true,
