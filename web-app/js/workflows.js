@@ -553,6 +553,7 @@ $.otp.workflows = {
             { "bSortable": false, "aTargets": [8] }
         ], undefined, 240, {
             bScrollInfinite: true,
+            iDisplayLength: 100,
             bPaginate: true
         });
         $("#enable-workflow-button").click(function () {

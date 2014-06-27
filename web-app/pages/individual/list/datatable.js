@@ -34,7 +34,6 @@ $.otp.individual = {
             bPaginate: false,
             bScrollCollapse: true,
             sScrollY: ($(window).height() - 453),
-            iDisplayLength: Math.round(($('.body').height() - 200) / 23),
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
                 aoData.push({
