@@ -27,7 +27,6 @@ import de.dkfz.tbi.otp.job.processing.ResumableJob
 import de.dkfz.tbi.otp.job.processing.SometimesResumableJob
 import de.dkfz.tbi.otp.job.processing.StartJob
 import de.dkfz.tbi.otp.job.processing.ValidatingJob
-import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.notification.NotificationEvent
 import de.dkfz.tbi.otp.notification.NotificationType
@@ -54,6 +53,11 @@ class SchedulerService {
      * Dependency Injection of ExecutorService
      */
     def executorService
+    /**
+     * Dependency Injection of PersistenceContextInterceptor
+     */
+    @SuppressWarnings("GrailsStatelessService")
+    PersistenceContextInterceptor persistenceInterceptor
     /**
      * Dependency Injection of PbsMonitorService
      */
@@ -291,8 +295,12 @@ class SchedulerService {
             return
         }
         Job job = null
-        Project.withTransaction {
+        persistenceInterceptor.init()
+        try {
             job = doSchedule()
+        } finally {
+            persistenceInterceptor.flush()
+            persistenceInterceptor.destroy()
         }
 
         if (job) {
@@ -313,8 +321,12 @@ class SchedulerService {
             return
         }
         // method to proxy the invocation of PbsMonitorService::check() to workaround strange behavior of Spring
-        Project.withTransaction {
+        persistenceInterceptor.init()
+        try {
             pbsMonitorService.check()
+        } finally {
+            persistenceInterceptor.flush()
+            persistenceInterceptor.destroy()
         }
     }
 
