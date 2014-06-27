@@ -21,7 +21,7 @@ class QualityAssessmentPass {
                 (processedBamFile.alignmentPass.latestPass ? "(latest) " : "") +
                 "<br>sample: ${processedBamFile.sample} " +
                 "seqType: ${processedBamFile.seqType} " +
-                "project: ${processedBamFile.project}"
+                "<br>project: ${processedBamFile.project}"
     }
 
     /**

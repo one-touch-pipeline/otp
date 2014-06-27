@@ -28,10 +28,10 @@ class ProcessedBamFile extends AbstractFileSystemBamFile {
     public String toString() {
         return "id: ${id} " +
                 "pass: ${alignmentPass.identifier} " + (isMostRecentBamFile() ? "(latest) " : "") +
-                "lane: ${alignmentPass.seqTrack.laneId} run: ${alignmentPass.seqTrack.run.name} " +
-                "<br>sample: ${alignmentPass.sample} " +
-                "seqType: ${alignmentPass.seqType} " +
-                "project: ${alignmentPass.project}"
+                "lane: ${seqTrack.laneId} run: ${seqTrack.run.name} " +
+                "<br>sample: ${sample} " +
+                "seqType: ${seqType} " +
+                "<br>project: ${project}"
     }
 
     /**

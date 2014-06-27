@@ -43,12 +43,12 @@ class MergingPass {
     }
 
     public String toString() {
-       return "id: ${mergingSet.identifier} " +
+       return "id: ${mergingSet.id} " +
                "pass: ${identifier} " + (latestPass ? "(latest) " : "") +
                "set: ${mergingSet.identifier} " + (mergingSet.latestSet ? "(latest) " : "") +
-               "<br>sample: ${mergingSet.mergingWorkPackage.sample} " +
-               "seqType: ${mergingSet.mergingWorkPackage.seqType} " +
-               "project: ${mergingSet.mergingWorkPackage.project}"
+               "<br>sample: ${sample} " +
+               "seqType: ${seqType} " +
+               "<br>project: ${project}"
      }
 
     /**

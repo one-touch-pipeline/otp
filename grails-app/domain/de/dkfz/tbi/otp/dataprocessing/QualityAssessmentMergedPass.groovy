@@ -19,13 +19,11 @@ class QualityAssessmentMergedPass {
         MergingWorkPackage mergingWorkPackage = processedMergedBamFile.mergingPass.mergingSet.mergingWorkPackage
         return "id: ${processedMergedBamFile.id} " +
                 "pass: ${identifier} " + (latestPass ? "(latest) " : "") +
-                "mergingPass: ${processedMergedBamFile.mergingPass.identifier} " +
-                (processedMergedBamFile.mergingPass.latestPass ? "(latest) " : "") +
-                "set: ${processedMergedBamFile.mergingPass.mergingSet.identifier} " +
-                (processedMergedBamFile.mergingPass.mergingSet.latestSet ? "(latest) " : "") +
-                "<br>sample: ${mergingWorkPackage.sample} " +
+                "mergingPass: ${mergingPass.identifier} " + (mergingPass.latestPass ? "(latest) " : "") +
+                "set: ${mergingSet.identifier} " + (mergingSet.latestSet ? "(latest) " : "") +
+                "<br>sample: ${sample} " +
                 "seqType: ${mergingWorkPackage.seqType} " +
-                "project: ${mergingWorkPackage.project}"
+                "<br>project: ${project}"
     }
 
     /**
