@@ -3,8 +3,9 @@ package de.dkfz.tbi.otp.job.processing
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
+import grails.util.Environment
+
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.Callable
 
 import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 import org.springframework.beans.factory.annotation.Autowired
@@ -52,8 +53,38 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
         this.plan = plan
     }
 
+    /**
+     * This method initializes the job execution plan if it is not set.
+     * If looks for the start job definition based on the name of the current start job class,
+     * then for the job execution plan by that job definition.
+     */
+    private initializeJobExecutionPlan() {
+        if (plan == null && Environment.current != Environment.TEST) {
+            try {
+                String className = this.getClass().getSimpleName().toString()
+                StartJobDefinition startJobDefinition = StartJobDefinition.findByBean(className)
+                if (!startJobDefinition) {
+                    //The bean names aren't saved consistently in the database:
+                    //sometimes the first letter is uppercase, sometimes it isn't
+                    String classNameLowerCase = Character.toLowerCase(className.charAt(0)).toString() + (className.length() > 1 ? className.substring(1) : "")
+                    startJobDefinition = StartJobDefinition.findByBean(classNameLowerCase)
+                }
+                if (!startJobDefinition) {
+                    //if there is no start job definition, no plan will be found either
+                    return
+                }
+                //only set the plan if it's not obsoleted
+                plan = JobExecutionPlan.findByStartJobAndObsoleted(startJobDefinition, false)
+            } catch (MissingMethodException ignored) {
+                //This happens if this method is called before Grails created dynamic finders
+                //in the domain classes. It doesn't matter because this method will be called later again.
+            }
+        }
+    }
+
     @Override
     public JobExecutionPlan getExecutionPlan() {
+        initializeJobExecutionPlan()
         if (planNeedsRefresh) {
             plan = JobExecutionPlan.get(plan.id)
             planNeedsRefresh = false
@@ -67,7 +98,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
     }
 
     void onApplicationEvent(JobExecutionPlanChangedEvent event) {
-        if (this.plan && event.planId == this.plan.id) {
+        if (getExecutionPlan() && event.planId == this.plan.id) {
             planNeedsRefresh = true
         }
     }
