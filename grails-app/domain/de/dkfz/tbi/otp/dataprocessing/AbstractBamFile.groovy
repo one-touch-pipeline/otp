@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-class AbstractBamFile {
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+
+abstract class AbstractBamFile {
 
     /**
      * This ENUM declares the different states a {@link AbstractBamFile} can have while it is assigned to a {@link MergingSet}
@@ -80,10 +82,7 @@ class AbstractBamFile {
      */
     State status = State.DECLARED
 
-    /**
-     * Used for {@link ProcessedMergedBamFile}s, not for {@link ProcessedBamFile}s.
-     */
-    FileOperationStatus fileOperationStatus = FileOperationStatus.DECLARED
+    public abstract Set<SeqTrack> getContainedSeqTracks()
 
     static constraints = {
         hasMetricsFile validator: { val, obj ->

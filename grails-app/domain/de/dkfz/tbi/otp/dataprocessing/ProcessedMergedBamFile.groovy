@@ -1,7 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.Individual
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.Sample
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqType
 
 /**
  * Represents a merged bam file stored on the file system
@@ -12,28 +15,23 @@ import de.dkfz.tbi.otp.ngsdata.*
  */
 class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
 
-    /**
-     * Checksum to verify success of copying.
-     * When the file - and all other files handled by the transfer workflow - are copied, its checksum is stored in this property.
-     * Otherwise it is null.
-     */
-    String md5sum
-
-    /** Additional digest, may be used in the future (to verify xz compression) */
-    String sha256sum
+    static transients = ["abstractBamFileService"]
+    AbstractBamFileService abstractBamFileService
 
     static belongsTo = [
         mergingPass: MergingPass
     ]
 
+    FileOperationStatus fileOperationStatus = FileOperationStatus.DECLARED
+
     static constraints = {
-        md5sum nullable: true , validator: { val, obj ->
+        md5sum nullable: true, validator: { val, obj ->
             return (!val || (val && obj.fileOperationStatus == FileOperationStatus.PROCESSED))
         }
         fileOperationStatus validator: { val, obj ->
             return ((val != FileOperationStatus.PROCESSED && obj.md5sum == null) || (val == FileOperationStatus.PROCESSED && obj.md5sum != null))
         }
-        sha256sum(nullable: true)
+        mergingPass nullable: false
     }
 
     Project getProject() {
@@ -78,5 +76,12 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
 
     static mapping = {
         mergingPass index: "abstract_bam_file_merging_pass_idx"
+    }
+
+    @Override
+    /** Beware: This method calls a method of a service */
+    Set<SeqTrack> getContainedSeqTracks() {
+        List<ProcessedBamFile> processedBamFiles = abstractBamFileService.findAllByProcessedMergedBamFile(this)
+        return processedBamFiles*.alignmentPass*.seqTrack as Set<SeqTrack>
     }
 }

@@ -6,7 +6,17 @@ package de.dkfz.tbi.otp.dataprocessing
  *
  *
  */
-class AbstractFileSystemBamFile extends AbstractBamFile {
+abstract class AbstractFileSystemBamFile extends AbstractBamFile {
+
+    /**
+     * Checksum to verify success of copying.
+     * When the file - and all other files handled by the transfer workflow - are copied, its checksum is stored in this property.
+     * Otherwise it is null.
+     */
+    String md5sum
+
+    /** Additional digest, may be used in the future (to verify xz compression) */
+    String sha256sum
 
     /**
      * is true if file exists on the file system
@@ -30,5 +40,7 @@ class AbstractFileSystemBamFile extends AbstractBamFile {
 
     static constraints = {
         dateFromFileSystem(nullable: true)
+        md5sum nullable: true
+        sha256sum nullable: true
     }
 }

@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+
 import static org.junit.Assert.*
 import grails.test.mixin.*
 import org.junit.*
@@ -10,23 +12,24 @@ import org.junit.*
  *
  *
  */
-@TestFor(AbstractBamFile)
+@TestFor(MockAbstractBamFile)
+@Mock([MockAbstractBamFile])
 class AbstractBamFileTests {
 
     void testSave() {
-        AbstractBamFile bamFile = new AbstractBamFile(type: AbstractBamFile.BamType.SORTED)
+        AbstractBamFile bamFile = new MockAbstractBamFile(type: AbstractBamFile.BamType.SORTED)
         Assert.assertTrue(bamFile.validate())
         bamFile.save(flush: true)
     }
 
     void testQualityControlIsNotNull() {
-        AbstractBamFile bamFile = new AbstractBamFile(type: AbstractBamFile.BamType.SORTED)
+        AbstractBamFile bamFile = new MockAbstractBamFile(type: AbstractBamFile.BamType.SORTED)
         bamFile.qualityControl =  null
         Assert.assertFalse(bamFile.validate())
     }
 
     void testhasMetricsFileTrueBamTypeSorted() {
-        AbstractBamFile bamFile = new AbstractBamFile(
+        AbstractBamFile bamFile = new MockAbstractBamFile(
                         type: AbstractBamFile.BamType.SORTED,
                         hasMetricsFile: true
                         )
@@ -34,7 +37,7 @@ class AbstractBamFileTests {
     }
 
     void testhasMetricsFileFalseBamTypeSorted() {
-        AbstractBamFile bamFile = new AbstractBamFile(
+        AbstractBamFile bamFile = new MockAbstractBamFile(
                         type: AbstractBamFile.BamType.SORTED,
                         hasMetricsFile: false
                         )
@@ -43,7 +46,7 @@ class AbstractBamFileTests {
     }
 
     void testhasMetricsFileTrueBamTypeRmdup() {
-        AbstractBamFile bamFile = new AbstractBamFile(
+        AbstractBamFile bamFile = new MockAbstractBamFile(
                         type: AbstractBamFile.BamType.RMDUP,
                         hasMetricsFile: true
                         )
@@ -52,11 +55,19 @@ class AbstractBamFileTests {
     }
 
     void testhasMetricsFileFalseBamTypeRmdup() {
-        AbstractBamFile bamFile = new AbstractBamFile(
+        AbstractBamFile bamFile = new MockAbstractBamFile(
                         type: AbstractBamFile.BamType.RMDUP,
                         hasMetricsFile: false
                         )
         Assert.assertTrue(bamFile.validate())
         bamFile.save(flush: true)
+    }
+}
+
+
+class MockAbstractBamFile extends AbstractBamFile {
+    @Override
+    Set<SeqTrack> getContainedSeqTracks() {
+        return null
     }
 }

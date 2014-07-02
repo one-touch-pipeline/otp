@@ -42,6 +42,11 @@ class ProcessedBamFile extends AbstractFileSystemBamFile {
         return alignmentPass.isLatestPass()
     }
 
+    @Override
+    Set<SeqTrack> getContainedSeqTracks() {
+        return new HashSet<SeqTrack>([alignmentPass.seqTrack])
+    }
+
     static mapping = {
         alignmentPass index: "abstract_bam_file_alignment_pass_idx"
     }

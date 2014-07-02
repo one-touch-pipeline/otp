@@ -435,14 +435,21 @@ class ProcessedMergedBamFileService {
         return firstKit
     }
 
+    /**
+     * @deprecated Replaced by {@link ProcessedMergedBamFile#getContainedSeqTracks()}
+     * @return all seq tracks for the merged bam file
+     */
+    @Deprecated
+    public List<SeqTrack> seqTracksPerMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {
+        return processedMergedBamFile.getContainedSeqTracks() as List<SeqTrack>
+    }
 
     /**
      * returns all fastq files, which are combined in the mergedBamFile
      */
     public List<DataFile> fastqFilesPerMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {
         notNull(processedMergedBamFile, "The input of the method fastqFilesPerMergedBamFile is null")
-        List<ProcessedBamFile> processedBamFiles = abstractBamFileService.findAllByProcessedMergedBamFile(processedMergedBamFile)
-        List<SeqTrack> seqTracks = processedBamFiles*.alignmentPass*.seqTrack
+        Set<SeqTrack> seqTracks = processedMergedBamFile.getContainedSeqTracks()
         if (seqTracks) {
             return DataFile.createCriteria().list {
                 'in'("seqTrack", seqTracks)

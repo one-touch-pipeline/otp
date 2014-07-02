@@ -4,13 +4,16 @@ import static org.junit.Assert.*
 import grails.test.mixin.*
 import org.junit.*
 
+
 @TestFor(PicardMarkDuplicatesMetrics)
-@Mock([AbstractBamFile])
+@Mock([MockAbstractBamFile])
 class PicardMarkDuplicatesMetricsTests {
+
+
 
     @Test
     void testMetricsClassEmpty() {
-        AbstractBamFile bamFile = new AbstractBamFile(
+        AbstractBamFile bamFile = new MockAbstractBamFile(
                         type: AbstractBamFile.BamType.SORTED
                         )
         bamFile.save(flush: true)
@@ -25,7 +28,7 @@ class PicardMarkDuplicatesMetricsTests {
 
     @Test
     void testLibraryEmpty() {
-        AbstractBamFile bamFile = new AbstractBamFile(
+        AbstractBamFile bamFile = new MockAbstractBamFile(
                         type: AbstractBamFile.BamType.SORTED
                         )
         bamFile.save(flush: true)
@@ -50,7 +53,7 @@ class PicardMarkDuplicatesMetricsTests {
 
     @Test
     void testAllCorrect() {
-        AbstractBamFile bamFile = new AbstractBamFile(
+        AbstractBamFile bamFile = new MockAbstractBamFile(
                         type: AbstractBamFile.BamType.SORTED
                         )
         bamFile.save(flush: true)
@@ -64,3 +67,4 @@ class PicardMarkDuplicatesMetricsTests {
         picardMarkDuplicatesMetrics.save(flush: true)
     }
 }
+

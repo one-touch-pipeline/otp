@@ -813,6 +813,16 @@ class ProcessedMergedBamFileServiceTests {
         assertNull(processedMergedBamFileService.getInferredKit(processedMergedBamFile))
     }
 
+    @Test
+    void testSeqTracksPerMergedBamFile() {
+        SeqTrack seqTrack = createSeqTrack("lane x")
+        ProcessedBamFile processedBamFile = createProcessedBamFile(12, seqTrack)
+        MergingPass mergingPass = createMergingPass()
+        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        List<SeqTrack> seqTracks = processedMergedBamFileService.seqTracksPerMergedBamFile(processedMergedBamFile)
+        assertTrue(seqTracks.size() == 1 && seqTracks.contains(seqTrack))
+    }
 
     private ProcessedMergedBamFile createProcessedMergedBamFile(MergingPass mergingPass) {
         ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
