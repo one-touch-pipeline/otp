@@ -22,37 +22,22 @@
             optionKey="name"
             multiple="true"
         />
-        <g:submitButton class="blue_label" name="progress" value=" Display " action="progress" />
+
+        <input id="display" type="button" class="blue_label" name="progress" value=" Display "/>
     </form>
-
-    <div id="laneOverviewTable">
-        <table border="1">
-        <thead>
-            <tr>
-                <th><g:message code="projectProgress.progress.runs"/></th>
-                <th><g:message code="projectProgress.progress.center"/></th>
-                <th><g:message code="projectProgress.progress.samples"/></th>
-            </tr>
-        </thead>
-        <g:each var="row" in="${data}">
-            <tr>
-                <td><b><g:link controller="run" action="show" id="${row.get(0)}">${row.get(3)}</g:link></b></td>
-                <td>${row.get(2)}</td>
-                <td>
-                    <g:each var="sampleIdentifier" in="${row.get(4)}">
-                    <g:link controller="individual" action="show" id="${sampleIdentifier.sample.individual.id}"> ${sampleIdentifier.name},</g:link></g:each>
-                </td>
-            </tr>
-        </g:each>
-        </table>
-     </div>
-  </div>
-
+  <div class="progressId laneOverviewTable" >
+        <otp:dataTable codes="${[
+                    'projectProgress.progress.runs',
+                    'projectProgress.progress.center',
+                    'projectProgress.progress.samples', ]}"
+                    id="progressId"/>
+</div>
+</div>
 
 <r:script>
-    $(function() {
-        $.otp.growBodyInit(240);
+        $(function() {
+            $.otp.projectProgressTable.registerProjectProgressId();
     });
 </r:script>
-  </body>
+</body>
 </html>

@@ -284,6 +284,7 @@ select {
 }
 select[multiple] {
     vertical-align: auto;
+      color: #1E90FF;
 }
 textarea {
     width: 250px;
@@ -903,6 +904,29 @@ body {
     overflow-x: hidden;
 }
 
+#progressId{
+    margin-top: 2px;
+    max-height: 490px;
+    overflow: auto;
+    width: 100%;
+    td {
+        text-align: left;
+        padding: 0.1em 0.1em 0.3em 0.3em;
+    }
+    tr.odd td.sorting_1 {
+    background-color: #A5D3FF;
+    }
+    tr.even td.sorting_1 {
+    background-color: #FFFFFF;
+    }
+    tr.even {
+        background-color: white;
+    }
+    tr.odd {
+        background-color: #A5D3FF;
+    }
+}
+
 .dataTable td {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -949,9 +973,12 @@ body {
         border-color: #C4D9DF #A4C3CA #83AFB7;
         text-align: left;
         padding: 0.1em 0.1em 0.2em 0.2em;
-        border-top:  #FFFFFF;
+        border-top: #FFFFFF;
     }
     tr.even td.sorting_1 {
+        background-color:  #F3FAFF;
+    }
+     tr.even {
         background-color: #F3FAFF;
     }
 }
@@ -978,7 +1005,7 @@ body {
         line-height: 1.7em;
         text-align: center;
         padding: 0.1em 0.1em 0.1em 0.1em;
-        margin-bottom:0.1px;
+        margin-bottom: 0.1px;
         white-space: pre-line;
         }
     tr.odd {
@@ -988,8 +1015,8 @@ body {
         background-color: #F3FAFF;
     }
     tr.odd td.sorting_1 {
-        background-color: #A5D3FF;
-    }
+    background-color: #A5D3FF;
+}
      tr.even td.sorting_1 {
         background-color: #F3FAFF;
     }
@@ -1194,6 +1221,7 @@ body {
     margin-top:-25px;
     margin-left: 14px;
     margin-bottom:-10px;
+    background-color: #FCFCFC;
 }
 .blue_labelForPlus {
     background-color: #1E90FF;
