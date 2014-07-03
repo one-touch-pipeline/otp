@@ -52,7 +52,7 @@ class StartJobTransformation extends AbstractJobTransformation implements
                 return
             }
             if (inheritsAbstractJob) {
-                println "Inherits AbstractStartJobImpl"
+                println "Applying StartJobTransformation to ${classNode}"  // log.debug instead of println does not produce any output on stdout
                 // add generic Constructor
                 classNode.addConstructor(new ConstructorNode(Opcodes.ACC_PUBLIC, new BlockStatement()))
                 // add constructor with one arguments calling the super class constructor

@@ -71,6 +71,7 @@ class JobTransformation extends AbstractJobTransformation implements ASTTransfor
                 return
             }
             if (inheritsAbstractJob) {
+                println "Applying JobTransformations to ${classNode}"  // log.debug instead of println does not produce any output on stdout
                 // add generic Constructor
                 classNode.addConstructor(new ConstructorNode(Opcodes.ACC_PUBLIC, new BlockStatement()))
                 // add constructor with two arguments calling the super class constructor
