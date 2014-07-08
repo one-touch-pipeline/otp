@@ -12,7 +12,7 @@ import de.dkfz.tbi.otp.job.scheduler.Scheduler
  *
  * The actual task of the groovy.de.dkfz.tbi.otp.job.processing.Job needs to be done in the {@link execute()} method. This method has to
  * implement all the logic, when the control flow exits the method no more operations of the task
- * may be performed! There is an aspect ({@link Scheduler}) watching the execution of the groovy.de.dkfz.tbi.otp.job.processing.Job, updating the state of the
+ * may be performed! {@link Scheduler} watches the execution of the groovy.de.dkfz.tbi.otp.job.processing.Job, updating the state of the
  * groovy.de.dkfz.tbi.otp.job.processing.Job automatically. If the method throws an exception the groovy.de.dkfz.tbi.otp.job.processing.Job will be set to failed.
  *
  * The groovy.de.dkfz.tbi.otp.job.processing.Job has to generate a set of output parameters which will be passed to the next groovy.de.dkfz.tbi.otp.job.processing.Job(s) which
@@ -50,7 +50,7 @@ public interface Job {
      * not be passed to the outside world as an exception leaving this method will trigger the error
      * handling.
      *
-     * @throws Exception The execution of the groovy.de.dkfz.tbi.otp.job.processing.Job may throw any exception. It is handled by an Aspect ({@link Scheduler#doErrorHandling(org.aspectj.lang.JoinPoint, Exception)}).
+     * @throws Exception The execution of the groovy.de.dkfz.tbi.otp.job.processing.Job may throw any exception. It is handled by {@link Scheduler#doErrorHandling(Job, Throwable)}.
      **/
     public void execute() throws Exception;
     /**

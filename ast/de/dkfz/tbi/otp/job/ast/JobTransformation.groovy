@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.job.ast
 
 import groovyjarjarasm.asm.Opcodes
-import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ASTNode
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.ConstructorNode
@@ -13,29 +12,19 @@ import org.codehaus.groovy.ast.expr.VariableExpression
 import org.codehaus.groovy.ast.stmt.ReturnStatement
 import org.codehaus.groovy.ast.stmt.BlockStatement
 import org.codehaus.groovy.ast.stmt.ExpressionStatement
-import org.codehaus.groovy.ast.stmt.Statement
 import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.control.SourceUnit
 import org.codehaus.groovy.transform.ASTTransformation
 import org.codehaus.groovy.transform.GroovyASTTransformation
 
 /**
- * AST Transformation adding the JobExecution annotation to the Job's execute method.
- * 
- * This transformation finds all classes implementing the Job interface and annotates
- * the execute method with the {@link JobExecution} annotation, so that implementers of
- * this interface do not have to care about it.
- *
- * Additionally the transformation generates the version method by looking at the git
+ * This transformation generates the version method by looking at the git
  * history of the source file for the Job implementation. The latest git commit becomes
  * the unique version number of the Job.
  *
  * If the Job Implementation class inherits the AbstractJobImpl class the transformation
  * also adds the required constructors.
  *
- * The annotation JobExecution is required by the Aspect intercepting the JobExecution.
- *
- * @see JobExecution
  */
 @GroovyASTTransformation(phase=CompilePhase.SEMANTIC_ANALYSIS)
 class JobTransformation extends AbstractJobTransformation implements ASTTransformation {
@@ -91,9 +80,6 @@ class JobTransformation extends AbstractJobTransformation implements ASTTransfor
 
             // add the Annotation to the execute method and generates the version
             classNode.getMethods().each { method ->
-                if (method.getName() == "execute") {
-                    method.addAnnotation(new AnnotationNode(new ClassNode(this.class.classLoader.loadClass("de.dkfz.tbi.otp.job.scheduler.JobExecution"))))
-                }
                 createGetVersion(method)
             }
         }

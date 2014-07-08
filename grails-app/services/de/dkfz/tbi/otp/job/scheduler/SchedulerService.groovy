@@ -305,7 +305,7 @@ class SchedulerService {
 
         if (job) {
             // start the Job in an own thread
-            executorService.submit({job.execute()} as Callable)
+            executorService.submit({grailsApplication.mainContext.scheduler.executeJob(job)} as Callable)
         }
     }
 
@@ -600,7 +600,7 @@ class SchedulerService {
     }
 
     /**
-     * Called by the Scheduler aspect when a Job finished or failed.
+     * Called by the Scheduler when a Job finished or failed.
      * Removes the Job from the list of running jobs.
      * @param job The Job which finished
      */

@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.job.ast
 
 import groovyjarjarasm.asm.Opcodes
-import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ASTNode
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.ConstructorNode
@@ -13,7 +12,6 @@ import org.codehaus.groovy.ast.expr.VariableExpression
 import org.codehaus.groovy.ast.stmt.ReturnStatement
 import org.codehaus.groovy.ast.stmt.BlockStatement
 import org.codehaus.groovy.ast.stmt.ExpressionStatement
-import org.codehaus.groovy.ast.stmt.Statement
 import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.control.SourceUnit
 import org.codehaus.groovy.transform.ASTTransformation
@@ -24,7 +22,6 @@ import org.codehaus.groovy.transform.GroovyASTTransformation
  *
  * Same as JobTransformation, just for a different target.
  *
- * @see JobExecution
  * @see JobTransformation
  */
 @GroovyASTTransformation(phase=CompilePhase.SEMANTIC_ANALYSIS)
@@ -78,9 +75,6 @@ class DecisionJobTransformation extends AbstractJobTransformation implements AST
 
             // add the Annotation to the execute method and generates the version
             classNode.getMethods().each { method ->
-                if (method.getName() == "execute") {
-                    method.addAnnotation(new AnnotationNode(new ClassNode(this.class.classLoader.loadClass("de.dkfz.tbi.otp.job.scheduler.JobExecution"))))
-                }
                 createGetVersion(method)
             }
         }
