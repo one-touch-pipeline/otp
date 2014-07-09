@@ -46,19 +46,21 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
     String dkfzLoggingPath = 'WORKFLOW_ROOT/TransferWorkflow/logging_root_path'
     String bqRootPath = '$BQ_ROOTPATH/dmg/otp/workflow-tests/TransferWorkflow/root_path'
     String bqProcessingPath = '$BQ_ROOTPATH/dmg/otp/workflow-tests/TransferWorkflow/processing_root_path'
-    // There is no final decision on the mount point of the shared directory yet. This may need adjustment.
-    //String bqLoggingPath = '$BQ_ROOTPATH/dmg/otp/workflow-tests/TransferWorkflow/logging_root_path'
+    String bqLoggingPath = '$BQ_ROOTPATH/dmg/otp/workflow-tests/TransferWorkflow/logging_root_path'
 
     // Paths for testing on DKFZ
+    //*
     String rootPath = dkfzRootPath
     String processingRootPath = dkfzProcessingPath
     String loggingRootPath = dkfzLoggingPath
+    //*/
 
     /*
-     // Paths for testing on BioQuant
-     String rootPath = bqRootPath
-     String processingRootPath = dkfzProcessingPath
-     */
+    // Paths for testing on BioQuant
+    String rootPath = bqRootPath
+    String processingRootPath = dkfzProcessingPath
+    String loggingRootPath = bqLoggingPath
+    //*/
 
     private static final String CHROMOSOME_X_NAME = "CHR_X"
     private static final String CHROMOSOME_Y_NAME = "CHR_Y"
@@ -116,7 +118,6 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         String realmName = "DKFZ"
         // Realm for BioQuant (change if testing there)
         //String realmName = "BioQuant"
-        String realmBioquantUnixUser = "unixUser2"
 
         def paths = [
             rootPath: "${rootPath}",
@@ -132,7 +133,20 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         realm = DomainFactory.createRealmDataProcessingDKFZ(paths)
         assertNotNull(realm.save(flush: true))
 
+
         /*
+        //Variables needed for bioquant test
+        String realmBioquantUnixUser = "unixUser2"
+        String realmDkfzUnixUser = "unixUser"
+        String realmProgramsRootPath = "/"
+        String realmHost = "headnode"
+        int realmPort = 22
+        String realmWebHost = "https://otp.local/ngsdata/"
+        String realmPbsOptionsDKFZ = '{"-l": {nodes: "1:lsdf", walltime: "5:00"}}'
+        String realmPbsOptionsBQ = '{"-l": {nodes: "1:xeon", walltime: "5:00"}, "-W": {x: "NACCESSPOLICY:SINGLEJOB"}}'
+        int realmTimeout = 0
+        realmName = "BioQuant"
+
          // Realms for testing on BioQuant
          realm = new Realm(
          name: "BioQuant",
@@ -141,11 +155,12 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
          cluster: Realm.Cluster.DKFZ, // Data processing for BQ projects is done on DKFZ, this is correct.
          rootPath:           bqRootPath,
          processingRootPath: dkfzProcessingPath,
-         programsRootPath: realmProgramsRootPath,
+         programsRootPath: '/',
+         loggingRootPath: dkfzLoggingPath,
          webHost: realmWebHost,
          host: 'headnode',
          port: 22,
-         unixUser: realmDKFZUnixUser,
+         unixUser: realmDkfzUnixUser,
          timeout: realmTimeout,
          pbsOptions: realmPbsOptionsDKFZ
          )
@@ -157,7 +172,8 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
          cluster: Realm.Cluster.BIOQUANT,
          rootPath:           bqRootPath,
          processingRootPath: bqProcessingPath,
-         programsRootPath: realmProgramsRootPath,
+         programsRootPath: '/',
+         loggingRootPath: bqLoggingPath,
          webHost: realmWebHost,
          host: "otphost-other.example.org",
          port: 22,
@@ -173,11 +189,12 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
          cluster: Realm.Cluster.DKFZ,
          rootPath:           dkfzRootPath,
          processingRootPath: dkfzProcessingPath,
-         programsRootPath: realmProgramsRootPath,
+         programsRootPath: '/',
+         loggingRootPath: dkfzLoggingPath,
          webHost: realmWebHost,
          host: 'headnode',
          port: 22,
-         unixUser: realmDKFZUnixUser,
+         unixUser: realmDkfzUnixUser,
          timeout: realmTimeout,
          pbsOptions: realmPbsOptionsDKFZ
          )
@@ -190,21 +207,22 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
          cluster: Realm.Cluster.DKFZ,
          rootPath:           dkfzRootPath,
          processingRootPath: dkfzProcessingPath,
-         programsRootPath: realmProgramsRootPath,
+         programsRootPath: '/',
+         loggingRootPath: dkfzLoggingPath,
          webHost: realmWebHost,
          host: 'headnode',
          port: 22,
-         unixUser: realmDKFZUnixUser,
+         unixUser: realmDkfzUnixUser,
          timeout: realmTimeout,
          pbsOptions: realmPbsOptionsDKFZ
          )
          assertNotNull(realm.save(flush: true))
-         */
+         //*/
 
         Project project = new Project(
                         name: projectName,
                         dirName: projectDirName,
-                        realmName: realm.name
+                        realmName: realmName
                         )
         assertNotNull(project.save([flush: true, failOnError: true]))
 
@@ -570,7 +588,8 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
             filePathBamFileQA1,
             filePathBamFileQA2,
             filePathMergedBamFileQA1,
-            filePathMergedBamFileQA2
+            filePathMergedBamFileQA2,
+            loggingRootPath + "/log/status/",
         ].collect { "mkdir -p ${it}" }.join " && "
 
         List<String> files = [
@@ -651,10 +670,10 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         int timeCount = 0
         boolean finished = false
         while (!finished && (timeCount < timeout)) {
-            finished = areAllProcessFinished()
             println "waiting ... "
             timeCount++
             sleep(60000)
+            finished = areAllProcessFinished()
         }
         return finished
     }
@@ -694,7 +713,7 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
     /**
      * Test execution of the workflow without any processing options defined
      */
-    @Ignore
+    //@Ignore
     @Test
     void testExecutionWithoutProcessingOptions() {
         // Import workflow from script file

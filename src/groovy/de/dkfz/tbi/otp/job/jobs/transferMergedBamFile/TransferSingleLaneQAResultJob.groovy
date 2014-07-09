@@ -4,9 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.scheduler.ProcessStatusService
 import de.dkfz.tbi.otp.ngsdata.*
 
-class TransferSingleLaneQAResultJob extends AbstractJobImpl{
+class TransferSingleLaneQAResultJob extends AbstractEndStateAwareJobImpl{
+
+    final String JOB = "__pbsIds"
+    final String REALM = "__pbsRealm"
 
     @Autowired
     ChecksumFileService checksumFileService
@@ -23,36 +27,47 @@ class TransferSingleLaneQAResultJob extends AbstractJobImpl{
     @Autowired
     ProcessedBamFileService processedBamFileService
 
+    @Autowired
+    ProcessStatusService processStatusService
+
     @Override
     public void execute() throws Exception {
         long id = Long.parseLong(getProcessParameterValue())
         ProcessedMergedBamFile mergedBamFile = ProcessedMergedBamFile.get(id)
         Project project = processedMergedBamFileService.project(mergedBamFile)
         Map<String, String> singleLaneQAResultsDirectories = processedMergedBamFileService.singleLaneQAResultsDirectories(mergedBamFile)
+        String temporalDestinationDir = processedMergedBamFileService.destinationTempDirectory(mergedBamFile)
+        String dirToLog = processStatusService.statusLogFile(temporalDestinationDir)
         Map<String, String> clusterPrefix = configService.clusterSpecificCommandPrefixes(project)
-        String tmpQADestinationDirectory = processedMergedBamFileService.qaResultTempDestinationDirectory(mergedBamFile)
-        String qaDestinationDirectory = processedMergedBamFileService.qaResultDestinationDirectory(mergedBamFile)
-        Realm realm = configService.getRealmDataProcessing(project)
-        executionHelperService.sendScript(realm) {
-            String text = ""
-            for (String directoryName : singleLaneQAResultsDirectories.keySet()) {
-                String src = singleLaneQAResultsDirectories.get(directoryName)
-                text += """
-# Remove old QA results directory for single lane BAM files if they exist
+        if (processStatusService.statusSuccessful(dirToLog, TransferMergedQAResultJob.class.name)) {
+            String cmd = scriptText(mergedBamFile, singleLaneQAResultsDirectories, dirToLog, clusterPrefix)
+            Realm realm = configService.getRealmDataProcessing(project)
+            String jobId = executionHelperService.sendScript(realm, cmd)
+            log.debug "Job ${jobId} submitted to PBS"
+            addOutputParameter(JOB, jobId)
+            addOutputParameter(REALM, realm.id.toString())
+            succeed()
+        } else {
+            log.debug "the job ${TransferMergedQAResultJob.class.name} failed"
+            fail()
+        }
+    }
+
+    private String scriptText(ProcessedMergedBamFile file, Map<String, String> directories, String dirToLog, Map<String, String> clusterPrefix) {
+        String tmpQADestinationDirectory = processedMergedBamFileService.qaResultTempDestinationDirectory(file)
+        String qaDestinationDirectory = processedMergedBamFileService.qaResultDestinationDirectory(file)
+        String text = ''
+        for (String directoryName : directories.keySet()) {
+            String src = directories.get(directoryName)
+            text += """
+# Remove old QA results directory for single lane BAM files if they exist and should be copied by this command
 ${clusterPrefix.exec} \"rm -r -f ${qaDestinationDirectory}/${directoryName}\"
 ${clusterPrefix.exec} \"mkdir -p -m 2750 ${tmpQADestinationDirectory}/${directoryName}\"
 ${clusterPrefix.cp} -r ${src}/* ${clusterPrefix.dest}${tmpQADestinationDirectory}/${directoryName}
 ${clusterPrefix.exec} \"find ${tmpQADestinationDirectory}/${directoryName} -type f -exec chmod 0640 '{}' \\;\"
 """
-            }
-            if (!text) {
-                assert singleLaneQAResultsDirectories.empty
-                // This happens if only merged BAM files but no single lane BAM files have been merged.
-                // Submit a script text containing just a space, otherwise ExecutionService would complain.
-                // (Just exiting here is not an option, because the mandatory output parameters __pbsRealm and __pbsIds have to be set.)
-                text = " "
-            }
-            return text
         }
+        text += "${clusterPrefix.exec} \"echo ${this.class.name} >> ${dirToLog} ; chmod 0644 ${dirToLog}\""
+        return text
     }
 }
