@@ -713,7 +713,7 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
     /**
      * Test execution of the workflow without any processing options defined
      */
-    //@Ignore
+    @Ignore
     @Test
     void testExecutionWithoutProcessingOptions() {
         // Import workflow from script file
