@@ -21,13 +21,19 @@ modules = {
         resource url: '/css/jquery/jquery-ui.css'
     }
     jqueryDatatables {
+        //DataTables 1.10.0
         dependsOn 'jquery'
-        resource url: '/js/jquery/dataTables.js'
-        resource url: '/css/jquery/demo_table.css'
-        resource url: '/js/jquery/tableTools/media/js/TableTools.js'
-        resource url: '/js/jquery/tableTools/media/js/ZeroClipboard.js'
-        resource url: '/js/jquery/tableTools/media/css/TableTools.css'
-        resource url: '/js/jquery/tableTools/media/css/TableTools_JUI.css'
+        resource url: '/css/dataTable/jquery.dataTables.css'
+        resource url: '/css/dataTable/jquery.dataTables_themeroller.css'
+        resource url: '/css/dataTable/dataTables.fixedColumns.css'
+        resource url: '/css/dataTable/dataTables.fixedHeader.css'
+        resource url: '/css/dataTable/dataTables.scroller.css'
+        resource url: '/css/dataTable/dataTables.tableTools.css'
+        resource url: '/js/dataTable/jquery.dataTables.js'
+        resource url: '/js/dataTable/dataTables.fixedColumns.js'
+        resource url: '/js/dataTable/dataTables.fixedHeader.js'
+        resource url: '/js/dataTable/dataTables.scroller.js'
+        resource url: '/js/dataTable/dataTables.tableTools.js'
     }
     jqueryValidation {
         dependsOn 'jquery'
