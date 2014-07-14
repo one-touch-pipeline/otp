@@ -14,7 +14,7 @@ class ExternalScript {
     String scriptName
 
     /**
-     * Absolut path where the script is located in the file system.
+     * Absolute path where the script is located in the file system.
      */
     String location
 
@@ -25,8 +25,14 @@ class ExternalScript {
      */
     String comment
 
+    /**
+     * This property is handled automatically by grails.
+     */
     Date dateCreated
 
+    /**
+     * This property is handled automatically by grails.
+     */
     Date lastUpdated
 
     Date deprecatedDate
