@@ -48,4 +48,9 @@ class MergingStartJob extends AbstractStartJobImpl {
         long maxRunning = optionService.findOptionAsNumber("numberOfJobs", "MergingWorkflow", null, MAX_RUNNING)
         return (n < maxRunning)
     }
+
+    @Override
+    protected String getJobExecutionPlanName() {
+        return "MergingWorkflow"
+    }
 }

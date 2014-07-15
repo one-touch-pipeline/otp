@@ -45,4 +45,9 @@ class TransferMergedBamFileStartJob extends AbstractStartJobImpl {
         long maxRunning = optionService.findOptionAsNumber("numberOfJobs", "TransferMergedBamFileWorkflow", null, MAX_RUNNING)
         return (n < maxRunning)
     }
+
+    @Override
+    protected String getJobExecutionPlanName() {
+        return "transferMergedBamFileWorkflow"
+    }
 }

@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 import org.springframework.beans.factory.annotation.Autowired
 
-
 @Component("mergedBamDiscoveryStartJob")
 @Scope("singleton")
 class MergedBamDiscoveryWorkkflow extends AbstractStartJobImpl  {
@@ -29,5 +28,10 @@ class MergedBamDiscoveryWorkkflow extends AbstractStartJobImpl  {
             println indId
             mergingService.discoverMergedBams(indId)
         }
+    }
+
+    @Override
+    protected String getJobExecutionPlanName() {
+        return "mergedBamDiscoveryWorkflow"
     }
 }

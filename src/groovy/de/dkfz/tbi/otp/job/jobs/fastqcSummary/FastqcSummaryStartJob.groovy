@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.job.jobs.fastqcSummary
 
-
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -38,5 +37,10 @@ class FastqcSummaryStartJob extends AbstractStartJobImpl{
         }
         int n = Process.countByFinishedAndJobExecutionPlan(false, jep)
         return (n < MAX_RUNNING)
+    }
+
+    @Override
+    protected String getJobExecutionPlanName() {
+        return "FastqcSummaryWorkflow"
     }
 }

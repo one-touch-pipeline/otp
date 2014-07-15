@@ -26,4 +26,9 @@ class ThrottlingStartJob extends AbstractStartJobImpl {
     private int numberOfRunningProcesses() {
         return Process.countByFinishedAndJobExecutionPlan(false, getExecutionPlan())
     }
+
+    @Override
+    protected String getJobExecutionPlanName() {
+        return null
+    }
 }

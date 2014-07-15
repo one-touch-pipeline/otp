@@ -46,4 +46,9 @@ class QualityAssessmentStartJob extends AbstractStartJobImpl {
         long maxRunning = optionService.findOptionAsNumber("numberOfJobs", "QualityAssessmentWorkflow", null, MAX_RUNNING)
         return (n < maxRunning)
     }
+
+    @Override
+    protected String getJobExecutionPlanName() {
+        return "QualityAssessmentWorkflow"
+    }
 }

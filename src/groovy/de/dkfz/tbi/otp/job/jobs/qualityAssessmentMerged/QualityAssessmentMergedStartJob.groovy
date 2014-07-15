@@ -46,4 +46,9 @@ class QualityAssessmentMergedStartJob extends AbstractStartJobImpl {
         long maxRunning = optionService.findOptionAsNumber("numberOfJobs", "QualityAssessmentMergedWorkflow", null, MAX_RUNNING)
         return (n < maxRunning)
     }
+
+    @Override
+    protected String getJobExecutionPlanName() {
+        return "QualityAssessmentMergedWorkflow"
+    }
 }

@@ -17,4 +17,9 @@ class TestStartJob extends AbstractStartJobImpl {
     @SuppressWarnings("EmptyMethod")
     void execute() {
     }
+
+    @Override
+    protected String getJobExecutionPlanName() {
+        return null
+    }
 }

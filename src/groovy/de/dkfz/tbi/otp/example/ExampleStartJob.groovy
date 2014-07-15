@@ -49,4 +49,9 @@ class ExampleStartJob extends AbstractStartJobImpl {
         }
         performed = true
     }
+
+    @Override
+    protected String getJobExecutionPlanName() {
+        return null
+    }
 }
