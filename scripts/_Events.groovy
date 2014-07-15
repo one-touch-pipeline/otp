@@ -10,7 +10,6 @@ eventSetClasspath = { rootLoader ->
     ant.groovyc(srcdir: "./ast", destdir: buildDir)
     ant.jar(destfile: astLib, basedir: buildDir) {
         ant.service(type: "org.codehaus.groovy.transform.ASTTransformation") {
-            ant.provider(classname: "de.dkfz.tbi.otp.job.ast.DecisionJobTransformation")
             ant.provider(classname: "de.dkfz.tbi.otp.job.ast.JobTransformation")
             ant.provider(classname: "de.dkfz.tbi.otp.job.ast.StartJobTransformation")
         }

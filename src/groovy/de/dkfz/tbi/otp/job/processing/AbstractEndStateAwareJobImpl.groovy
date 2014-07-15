@@ -8,21 +8,6 @@ abstract public class AbstractEndStateAwareJobImpl extends AbstractJobImpl imple
 
    private ExecutionState endState = null
 
-   /**
-    * Empty default constructor. Required by Spring.
-    */
-   protected AbstractEndStateAwareJobImpl() {
-   }
-
-   /**
-    * Constructor used by the factory method. Each implementing sub-class gets a matching Constructor injected.
-    * @param processingStep The processing step for this Job
-    * @param inputParameters The input parameters for this Job
-    */
-   protected AbstractEndStateAwareJobImpl(ProcessingStep processingStep, Collection<Parameter> inputParameters) {
-       super(processingStep, inputParameters)
-   }
-
     /**
      * Can be used by an implementing Job to set the Job as failed.
      * @see succeed

@@ -8,18 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired
  */
 abstract public class AbstractPbsJobImpl extends AbstractJobImpl implements PbsJob {
 
-
-    /**
-     * Default empty constructor
-     */
-    public AbstractPbsJobImpl() {}
-    public AbstractPbsJobImpl(ProcessingStep processingStep, Collection<Parameter> inputParameters) {
-        super(processingStep, inputParameters)
-    }
-
     /**
      * Triggers connection to PBS via ssh and returns List of PBS ids
-     * 
+     *
      * To connect parameters set in properties file are used.
      * @return List of String with PBS ids
      */

@@ -10,15 +10,6 @@ abstract public class AbstractDecisionJobImpl extends AbstractEndStateAwareJobIm
     private JobDecision decision
 
     /**
-     * Default empty constructor
-     */
-    public AbstractDecisionJobImpl() {
-    }
-    public AbstractDecisionJobImpl(ProcessingStep processingStep, Collection<Parameter> inputParameters) {
-        super(processingStep, inputParameters)
-    }
-
-    /**
      * Has to be called by an implementing Job to set the decision the
      * Job decided on. Automatically sets the Job as succeeded. If {@code decision}
      * is {@code null} the Job is set to failed.

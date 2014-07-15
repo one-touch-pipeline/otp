@@ -32,35 +32,34 @@ class JobTransformation extends AbstractJobTransformation implements ASTTransfor
     @Override
     public void visit(ASTNode[] astNodes, SourceUnit sourceUnit) {
         List classNodes = sourceUnit.getAST()?.getClasses()
-        
+
         classNodes.each { ClassNode classNode ->
             if (classNode.isInterface()) {
                 // skip interfaces
                 return
             }
-            if ((classNode.modifiers & Opcodes.ACC_ABSTRACT) > 0) {
-                // skip abstract classes
-                return
-            }
-            // test whether the class implements the Job interface
+            final boolean isAbstract = (classNode.modifiers & Opcodes.ACC_ABSTRACT) > 0
             boolean isJob = false
             boolean inheritsAbstractJob = false
-            classNode.getAllInterfaces().each {
-                if (it.name == "de.dkfz.tbi.otp.job.processing.Job" || it.name == "de.dkfz.tbi.otp.job.processing.EndStateAwareJob") {
+            for (ClassNode clazz = classNode; clazz != null; clazz = clazz.superClass) {
+                // getAllInterfaces returns the interfaces which the class implements *directly* and all its
+                // superinterfaces, but not any interfaces which the class implements indirectly through its
+                // superclasses. Therefore it is not sufficient to call it on classNode only, but it has to be called
+                // for every superclass as well.
+                if (clazz.allInterfaces.find { it.name == "de.dkfz.tbi.otp.job.processing.Job" }) {
                     isJob = true
                 }
+                if (clazz.superClass?.name == "de.dkfz.tbi.otp.job.processing.AbstractJobImpl") {
+                    isJob = true
+                    inheritsAbstractJob = true
+                    break
+                }
             }
-            if (classNode.superClass.name == "de.dkfz.tbi.otp.job.processing.AbstractJobImpl" ||
-                    classNode.superClass.name == "de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl" ||
-                    classNode.superClass.name == "de.dkfz.tbi.otp.job.processing.AbstractValidatingJobImpl") {
-                isJob = true
-                inheritsAbstractJob = true
-            }
-            if (!isJob) {
+            if (!isJob || (isAbstract && !inheritsAbstractJob)) {
                 return
             }
+            println "Applying JobTransformation to ${classNode}"  // log.debug instead of println does not produce any output on stdout
             if (inheritsAbstractJob) {
-                println "Applying JobTransformations to ${classNode}"  // log.debug instead of println does not produce any output on stdout
                 // add generic Constructor
                 classNode.addConstructor(new ConstructorNode(Opcodes.ACC_PUBLIC, new BlockStatement()))
                 // add constructor with two arguments calling the super class constructor
@@ -70,17 +69,21 @@ class JobTransformation extends AbstractJobTransformation implements ASTTransfor
                 BlockStatement stmt = new BlockStatement()
                 stmt.addStatement(new ExpressionStatement(new ConstructorCallExpression(ClassNode.SUPER, new ArgumentListExpression(new VariableExpression("a"), new VariableExpression("b")))))
                 classNode.addConstructor(Opcodes.ACC_PUBLIC, params, ClassNode.EMPTY_ARRAY, stmt)
-                // add getVersion method - actual code will be generated below
-                classNode.addMethod("getVersion", Opcodes.ACC_PUBLIC, new ClassNode(String), Parameter.EMPTY_ARRAY, ClassNode.EMPTY_ARRAY, new ReturnStatement(new ConstantExpression("")))
+                if (!isAbstract) {
+                    // add getVersion method - actual code will be generated below
+                    classNode.addMethod("getVersion", Opcodes.ACC_PUBLIC, new ClassNode(String), Parameter.EMPTY_ARRAY, ClassNode.EMPTY_ARRAY, new ReturnStatement(new ConstantExpression("")))
+                }
             }
-            addLog(classNode)
-            // add annotation nodes for scope
-            addScopeAnnotation(classNode)
-            addComponentAnnotation(classNode)
+            if (!isAbstract) {
+                addLog(classNode)
+                // add annotation nodes for scope
+                addScopeAnnotation(classNode)
+                addComponentAnnotation(classNode)
 
-            // add the Annotation to the execute method and generates the version
-            classNode.getMethods().each { method ->
-                createGetVersion(method)
+                // add the Annotation to the execute method and generates the version
+                classNode.getMethods().each { method ->
+                    createGetVersion(method)
+                }
             }
         }
     }

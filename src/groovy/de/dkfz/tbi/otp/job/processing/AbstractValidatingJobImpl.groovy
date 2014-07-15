@@ -9,21 +9,6 @@ abstract public class AbstractValidatingJobImpl extends AbstractEndStateAwareJob
     private Boolean validatedStepSucceeded = null
 
     /**
-     * Default empty constructor
-     */
-    public AbstractValidatingJobImpl() {
-    }
-
-    /**
-     * Constructor used by the factory method. Each implementing sub-class gets a matching Constructor injected.
-     * @param processingStep The processing step for this Job
-     * @param inputParameters The input parameters for this Job
-     */
-    protected AbstractValidatingJobImpl(ProcessingStep processingStep, Collection<Parameter> inputParameters) {
-        super(processingStep, inputParameters)
-    }
-
-    /**
      * Implementing sub-classes can use this method to mark the validated job as succeeded or failed.
      * @param succeeded true for success, false for failure
      **/
