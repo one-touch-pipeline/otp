@@ -7,8 +7,6 @@ class SeqTrack {
         NOT_STARTED,
         IN_PROGRESS,
         FINISHED,
-        @Deprecated
-        INCOMPLETE,
     }
 
     enum QualityEncoding {
@@ -71,7 +69,7 @@ class SeqTrack {
 
     String toString() {
         return "lane: ${laneId} run: ${run.name} " +
-                "<br>sample: ${sample} seqType: ${seqType} <br>project: ${project}<br>"
+        "<br>sample: ${sample} seqType: ${seqType} <br>project: ${project}<br>"
     }
 
     /**
