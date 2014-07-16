@@ -34,4 +34,9 @@ class TestPBSStartJob extends AbstractStartJobImpl  {
         long maxRunning = optionService.findOptionAsNumber("numberOfJobs", "TestPBSWorkflow", null, MAX_RUNNING)
         return (n < maxRunning)
     }
+
+    @Override
+    protected String getJobExecutionPlanName() {
+        return null
+    }
 }

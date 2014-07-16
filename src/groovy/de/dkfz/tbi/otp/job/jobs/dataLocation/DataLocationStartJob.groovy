@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 import org.springframework.beans.factory.annotation.Autowired
+
 @Component("dataLocationStartJob")
 @Scope("singleton")
 class DataLocationStartJob extends AbstractStartJobImpl {
@@ -51,5 +52,10 @@ class DataLocationStartJob extends AbstractStartJobImpl {
      */
     private int numberOfRunningProcesses() {
         return Process.countByFinishedAndJobExecutionPlan(false, getExecutionPlan())
+    }
+
+    @Override
+    protected String getJobExecutionPlanName() {
+        return "DataLocationWorkflow"
     }
 }

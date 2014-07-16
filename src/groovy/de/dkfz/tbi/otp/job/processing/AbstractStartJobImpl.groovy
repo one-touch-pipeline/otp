@@ -41,6 +41,8 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
         this.plan = plan
     }
 
+    protected abstract String getJobExecutionPlanName()
+
     /**
      * Sets the JobExecutionPlan of this StartJob if not already set.
      * @param plan The JobExecutionPlan this Job belongs to
@@ -60,24 +62,25 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
      */
     private initializeJobExecutionPlan() {
         if (plan == null && Environment.current != Environment.TEST) {
+            final String name = jobExecutionPlanName
+            if (name == null) {
+                return
+            }
+            final Collection<JobExecutionPlan> plans
             try {
-                String className = this.getClass().getSimpleName().toString()
-                StartJobDefinition startJobDefinition = StartJobDefinition.findByBean(className)
-                if (!startJobDefinition) {
-                    //The bean names aren't saved consistently in the database:
-                    //sometimes the first letter is uppercase, sometimes it isn't
-                    String classNameLowerCase = Character.toLowerCase(className.charAt(0)).toString() + (className.length() > 1 ? className.substring(1) : "")
-                    startJobDefinition = StartJobDefinition.findByBean(classNameLowerCase)
-                }
-                if (!startJobDefinition) {
-                    //if there is no start job definition, no plan will be found either
-                    return
-                }
-                //only set the plan if it's not obsoleted
-                plan = JobExecutionPlan.findByStartJobAndObsoleted(startJobDefinition, false)
+                plans = JobExecutionPlan.findAllByNameAndObsoleted(name, false)
             } catch (MissingMethodException ignored) {
                 //This happens if this method is called before Grails created dynamic finders
                 //in the domain classes. It doesn't matter because this method will be called later again.
+                return
+            }
+            final int planCount = plans.size()
+            if (planCount == 1) {
+                plan = plans.first()
+            } else if (planCount == 0) {
+                log.info "No non-obsolete JobExecutionPlan found for name ${name}."
+            } else {
+                throw new RuntimeException("${planCount} non-obsoleted JobExecutionPlans found for name ${name}. Expected 1.")
             }
         }
     }

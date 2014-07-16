@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 import org.springframework.beans.factory.annotation.Autowired
+
 @Component("seqScanStartJob")
 @Scope("singleton")
 class SeqScanStartJob extends AbstractStartJobImpl  {
@@ -67,5 +68,10 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
      */
     private int numberOfRunningProcesses() {
         return Process.countByFinishedAndJobExecutionPlan(false, getExecutionPlan())
+    }
+
+    @Override
+    protected String getJobExecutionPlanName() {
+        return "createSeqScan"
     }
 }

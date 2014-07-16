@@ -47,4 +47,9 @@ class FastqcStartJob extends AbstractStartJobImpl {
         long maxRunning = optionService.findOptionAsNumber("numberOfJobs", "FastqcWorkflow", null, MAX_RUNNING)
         return (n < maxRunning)
     }
+
+    @Override
+    protected String getJobExecutionPlanName() {
+        return "FastqcWorkflow"
+    }
 }

@@ -15,7 +15,8 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
  **/
 public interface StartJob {
     /**
-     * @return The JobExecutionPlan which is triggered by this StartJob.
+     * @return The JobExecutionPlan which is triggered by this StartJob. May be null (for example when Grails is not
+     * fully initialized yet).
      **/
     public JobExecutionPlan getExecutionPlan()
 

@@ -21,4 +21,9 @@ class DataFileStatusStartJob extends AbstractStartJobImpl {
         )
         log.debug "FileSystemConsistencyWorkflow: job started"
     }
+
+    @Override
+    protected String getJobExecutionPlanName() {
+        return null
+    }
 }
