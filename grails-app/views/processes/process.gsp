@@ -39,17 +39,19 @@
             <button id="hide-visualization" style="display: none"><g:message code="processes.process.hideProcessVisualization"/></button>
         </div>
         <div id="processOverview">
-            <otp:dataTable codes="${[
-                'otp.blank',
-                'otp.blank',
-                'workflow.process.table.headers.processingStep',
-                'workflow.process.table.headers.job',
-                'workflow.process.table.headers.creationDate',
-                'workflow.process.table.headers.lastUpdate',
-                'workflow.process.table.headers.duration',
-                'workflow.process.table.headers.status',
-                'otp.blank'
-            ]}" id="processOverviewTable"/>
+            <div class="otpDataTables">
+                <otp:dataTable codes="${[
+                    'otp.blank',
+                    'otp.blank',
+                    'workflow.process.table.headers.processingStep',
+                    'workflow.process.table.headers.job',
+                    'workflow.process.table.headers.creationDate',
+                    'workflow.process.table.headers.lastUpdate',
+                    'workflow.process.table.headers.duration',
+                    'workflow.process.table.headers.status',
+                    'otp.blank'
+                ]}" id="processOverviewTable"/>
+            </div>
         </div>
         <g:javascript>
             $(document).ready(function() {

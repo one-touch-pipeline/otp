@@ -2,12 +2,13 @@
 /*global $ */
 
 $.otp = {
+    contextPath: $("head meta[name=contextPath]").attr("content"),
+
     tableTools_button_options: [
         {"sExtends": "csv", "bFooter": false},
         {"sExtends": "pdf", "bFooter": false}
     ],
 
-    contextPath: $("head meta[name=contextPath]").attr("content"),
     /**
      * Helper method to extend the given link by a further component.
      * Ensures that there is exactly one slash between the link and the further
@@ -216,6 +217,58 @@ $.otp.createListView = function (selector, sourcePath, sortOrder, jsonCallback, 
         $.otp.resizeBodyInit(selector, height);
     }
 };
+$.otp.createInfinityScrollListView = function (selector, sourcePath, sortOrder, jsonCallback, columnDefs, postData, height, dataTableArguments) {
+    "use strict";
+    var config = {
+        sDom: '<i> T rt<"clear">S',
+        bFilter: false,
+        bJQueryUI: false,
+        bSort: true,
+        bProcessing: true,
+        bServerSide: true,
+        bAutoWidth: false,
+        bScrollCollapse: true,
+        bPaginate: false,
+        bDeferRender: true,
+        sAjaxSource: sourcePath,
+        fnServerData: function (sSource, aoData, fnCallback) {
+            var i;
+            if (postData) {
+                for (i = 0; i < postData.length; i += 1) {
+                    aoData.push(postData[i]);
+                }
+            }
+            $.ajax({
+                "dataType": 'json',
+                "type": "POST",
+                "url": sSource,
+                "data": aoData,
+                scroller: {
+                    loadingIndicator: true
+                },
+                "success": function (json) {
+                    if (jsonCallback) {
+                        jsonCallback(json);
+                    }
+                    fnCallback(json);
+                }
+            });
+        },
+        aoColumnDefs: columnDefs,
+        aaSorting: [[0, sortOrder ? "asc" : "desc"]]
+    };
+    if (height !== undefined) {
+        config.sScrollY = ($('.body').height() - height);
+    }
+    $.extend(config, dataTableArguments);
+    $(selector).dataTable(config);
+    $.otp.refreshTable.setup(selector, 10000);
+    if (height !== undefined) {
+        $.otp.resizeBodyInit(selector, height);
+    }
+};
+
+
 
 /**
  * Handles auto refresh of tables.
@@ -466,4 +519,10 @@ $.otp.initCommentBox = function (processId) {
         $('#commentRead').show();
         cBoxWrite.val("");
     });
+};
+
+
+$.otp.tableTools = {
+    sSwfPath: $.otp.contextPath + "/js/dataTable/swf/copy_csv_xls_pdf.swf",
+    aButtons: $.otp.tableTools_button_options
 };

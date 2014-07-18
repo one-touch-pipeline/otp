@@ -30,11 +30,9 @@ $.otp.option = {
                 controller: 'processingOption',
                 action: 'datatable'
             }),
-            bScrollInfinite: false,
             bPaginate: false,
             bScrollCollapse: true,
-            sScrollY: ($(window).height() - 450),
-            bDeferRender: true,
+            sScrollY: 'auto',
             fnServerData: function (sSource, aoData, fnCallback) {
                 $.ajax({
                     "dataType": 'json',

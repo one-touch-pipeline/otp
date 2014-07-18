@@ -48,7 +48,8 @@
             </td>
             </tr>
         </table>
-       </div>
+        </div>
+        <div class="otpDataTables">
         <otp:dataTable codes="${[
                     'sequence.list.headers.project',
                     'sequence.list.headers.individual',
@@ -62,6 +63,7 @@
                     'sequence.list.headers.otpAlignment',
                     'sequence.list.headers.date'
             ]}" id="sequenceTable"/>
+        </div>
     </div>
     <r:script>
         $(function() {

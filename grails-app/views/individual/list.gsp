@@ -51,7 +51,7 @@
         </tr>
         </table>
         </div>
-        <div class="dataTables_container" id="individualTable_container">
+        <div class="otpDataTables">
         <otp:dataTable codes="${[
                     'individual.list.pid',
                     'individual.list.mockName',

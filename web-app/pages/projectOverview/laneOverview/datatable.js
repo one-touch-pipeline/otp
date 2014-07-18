@@ -6,10 +6,7 @@ $.otp.projectOverviewTable = {
         "use strict";
         var oTableLaneOverview = $("#laneOverviewId").dataTable({
             sDom: '<i> T rt<"clear">',
-            oTableTools : {
-                sSwfPath: $.otp.contextPath + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
-                aButtons: $.otp.tableTools_button_options
-            },
+            oTableTools : $.otp.tableTools,
             bFilter : true,
             bProcessing : true,
             bServerSide : false,
@@ -20,10 +17,10 @@ $.otp.projectOverviewTable = {
                 controller : 'projectOverview',
                 action : 'dataTableSourceLaneOverview'
             }),
-            bPaginate : false,
-            sScrollY:  'auto',
+            sScrollY: 'auto',
             sScrollX: 'auto',
-            bScrollCollapse : false,
+            bScrollCollapse: false,
+            bPaginate: false,
             bDeferRender : true,
             fnServerData : function (sSource, aoData, fnCallback) {
                 aoData.push({

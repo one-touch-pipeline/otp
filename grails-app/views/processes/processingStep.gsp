@@ -56,40 +56,40 @@
         </tbody>
     </table>
     <h2><g:message code="processes.processingStep.inputParameters"/></h2>
-    <div>
-    <otp:dataTable codes="${[
-            'otp.blank',
-            'workflow.paramater.table.headers.name',
-            'workflow.paramater.table.headers.description',
-            'workflow.paramater.table.headers.value'
-        ]}" id="inputParametersList"/>
+    <div class="otpDataTables" >
+        <otp:dataTable codes="${[
+                'otp.blank',
+                'workflow.paramater.table.headers.name',
+                'workflow.paramater.table.headers.description',
+                'workflow.paramater.table.headers.value'
+            ]}" id="inputParametersList"/>
     </div>
     <br>
     <h2><g:message code="processes.processingStep.outputParameters"/></h2>
-    <div>
-    <otp:dataTable codes="${[
-            'otp.blank',
-            'workflow.paramater.table.headers.name',
-            'workflow.paramater.table.headers.description',
-            'workflow.paramater.table.headers.value',
-        ]}" id="outputParametersList"/>
+    <div class="otpDataTables" >
+        <otp:dataTable codes="${[
+                'otp.blank',
+                'workflow.paramater.table.headers.name',
+                'workflow.paramater.table.headers.description',
+                'workflow.paramater.table.headers.value',
+            ]}" id="outputParametersList"/>
     </div>
     <br>
     <h2><g:message code="processes.processingStep.updates"/></h2>
-    <div>
-    <otp:dataTable codes="${[
-            'otp.blank',
-            'workflow.processingstep.update.table.headers.date',
-            'workflow.processingstep.update.table.headers.state',
-            'workflow.processingstep.update.table.headers.error'
-        ]}" id="processingStepUpdatesList"/>
+    <div class="otpDataTables">
+        <otp:dataTable codes="${[
+                'otp.blank',
+                'workflow.processingstep.update.table.headers.date',
+                'workflow.processingstep.update.table.headers.state',
+                'workflow.processingstep.update.table.headers.error'
+            ]}" id="processingStepUpdatesList"/>
     </div>
     <r:script>
        $(document).ready(function() {
             $.otp.workflows.processingStep.register('#processingStepUpdatesList', '#inputParametersList', '#outputParametersList', ${step.id});
         });
     </r:script>
-  </div>
+    </div>
 </body>
 <r:script>
     $(function() {

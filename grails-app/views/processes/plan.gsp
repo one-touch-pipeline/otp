@@ -41,17 +41,19 @@
             <button id="generate-dsl"><g:message code="processes.plan.generatePlanMarkup"/></button>
         </div>
         <div id="workflowOverview">
-            <otp:dataTable codes="${[
-                'otp.blank',
-                'otp.blank',
-                'workflow.plan.table.headers.operatesOn',
-                'workflow.plan.table.headers.creationDate',
-                'workflow.plan.table.headers.lastUpdate',
-                'workflow.plan.table.headers.processingStep',
-                'workflow.plan.table.headers.status',
-                'otp.blank',
-				'otp.blank'
-            ]}" id="workflowOverviewTable"/>
+            <div class="otpDataTables">
+                <otp:dataTable codes="${[
+                    'otp.blank',
+                    'otp.blank',
+                    'workflow.plan.table.headers.operatesOn',
+                    'workflow.plan.table.headers.creationDate',
+                    'workflow.plan.table.headers.lastUpdate',
+                    'workflow.plan.table.headers.processingStep',
+                    'workflow.plan.table.headers.status',
+                    'otp.blank',
+                    'otp.blank'
+                ]}" id="workflowOverviewTable"/>
+            </div>
         </div>
         <g:javascript>
             $(document).ready(function() {

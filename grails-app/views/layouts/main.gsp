@@ -23,7 +23,7 @@
     <r:layoutResources/>
     <g:layoutHead/>
 </head>
-<body>
+<body id="otp">
     <div class="body_position">
         <sec:ifAllGranted roles="ROLE_OPERATOR">
             <div class="header">

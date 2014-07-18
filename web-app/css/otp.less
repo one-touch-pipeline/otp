@@ -904,28 +904,6 @@ body {
     overflow-x: hidden;
 }
 
-#progressId{
-    margin-top: 2px;
-    max-height: 490px;
-    overflow: auto;
-    width: 100%;
-    td {
-        text-align: left;
-        padding: 0.1em 0.1em 0.3em 0.3em;
-    }
-    tr.odd td.sorting_1 {
-    background-color: #A5D3FF;
-    }
-    tr.even td.sorting_1 {
-    background-color: #FFFFFF;
-    }
-    tr.even {
-        background-color: white;
-    }
-    tr.odd {
-        background-color: #A5D3FF;
-    }
-}
 
 .dataTable td {
     overflow: hidden;
@@ -942,59 +920,26 @@ body {
     td:nth-child(8) {
        padding-left: 1em;
     }
-    tr.odd {
-        background-color: #A5D3FF;
-    }
-    tr.even {
-        background-color: white;
-    }
-    tr.odd td.sorting_1 {
-        background-color: #A5D3FF;
-    }
 }
+
 .dataTables_scrollBody {
-    margin-top: -11px;
-    min-height: 100px;
-    max-height:420px;
-    overflow: auto;
+    max-height:550px;
+    overflow-y: auto;
 }
 
-.dataTableContainer {
-    tr.odd {
-        background-color: #A5D3FF;
-    }
-    tr.even {
-        background-color: #F3FAFF;
-    }
-    tr.odd td.sorting_1 {
-        background-color: #A5D3FF;
-    }
-    td {
-        border-color: #C4D9DF #A4C3CA #83AFB7;
-        text-align: left;
-        padding: 0.1em 0.1em 0.2em 0.2em;
-        border-top: #FFFFFF;
-    }
-    tr.even td.sorting_1 {
-        background-color:  #F3FAFF;
-    }
-     tr.even {
-        background-color: #F3FAFF;
-    }
-}
-
-#laneOverviewTable {
+#otp .otpDataTables{
     color:black;
     padding-top: 6px;
-    width: 100%;
+    overflow: auto;
+    width:100%;
     border-color: #B4B5B6;
     table {
         border-color: #C4D9DF #A4C3CA #83AFB7;
         }
     td {
         border-color: #C4D9DF #A4C3CA #83AFB7;
-        text-align: center;
-        padding: 0.1em 0.1em 0.2em 0.2em;
+        text-align: left;
+        padding: 0.1em 0.1em 0.2em 0.3em;
         border-top:  #FFFFFF;
         }
     th {
@@ -1003,10 +948,13 @@ body {
         color: #666666;
         font-weight: bold;
         line-height: 1.7em;
-        text-align: center;
-        padding: 0.1em 0.1em 0.1em 0.1em;
+        text-align: left;
+        padding: 0.1em 0.1em 0.2em 0.3em;
         margin-bottom: 0.1px;
         white-space: pre-line;
+        &.sorting_asc, &.sorting_desc {
+        background-color:#F2F2F2;
+        }
         }
     tr.odd {
         background-color: #A5D3FF;
@@ -1014,12 +962,12 @@ body {
     tr.even {
         background-color: #F3FAFF;
     }
-    tr.odd td.sorting_1 {
-    background-color: #A5D3FF;
 }
-     tr.even td.sorting_1 {
-        background-color: #F3FAFF;
-    }
+#otp .otpDataTables .dataTables_wrapper.no-footer .dataTables_scrollBody {
+    border-bottom: none;
+}
+#otp .otpDataTables .dataTables_wrapper .dataTables_info {
+     padding-top: 2.55em;
 }
 
 .table-body-box{

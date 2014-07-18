@@ -17,10 +17,7 @@ $.otp.individual = {
 
         $("#individualTable").dataTable({
             sDom: '<i> T rt<"clear">',
-            oTableTools: {
-                sSwfPath: $.otp.contextPath + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
-                aButtons: $.otp.tableTools_button_options
-            },
+            oTableTools : $.otp.tableTools,
             bFilter: true,
             bProcessing: true,
             bServerSide: true,
@@ -31,9 +28,8 @@ $.otp.individual = {
                 controller: 'individual',
                 action: 'dataTableSource'
             }),
-            bPaginate: false,
             bScrollCollapse: true,
-            sScrollY: ($(window).height() - 453),
+            sScrollY:'auto',
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
                 aoData.push({

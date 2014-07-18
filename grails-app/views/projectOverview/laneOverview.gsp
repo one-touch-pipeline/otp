@@ -39,8 +39,8 @@
             </table>
         </div>
 
-        <div id="laneOverviewTable">
-            <table id="laneOverviewId" border="1" data-ignore-filter-columns="${hideSampleIdentifier ? 2 : 3}">
+        <div class="otpDataTables">
+            <table id="laneOverviewId"  data-ignore-filter-columns="${hideSampleIdentifier ? 2 : 3}">
                 <thead>
                     <tr>
                         <th><g:message code="projectOverview.index.PID"/></th>

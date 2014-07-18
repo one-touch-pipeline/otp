@@ -55,7 +55,7 @@
                 </table></td></tr>
             </table>
         </div>
-        <div class="dataTables_container" id="runTable_containe">
+        <div class="otpDataTables">
             <otp:dataTable codes="${['run.list.name',
                 'run.list.seqCenter',
                 'run.list.storageRealm',

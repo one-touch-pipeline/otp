@@ -24,8 +24,7 @@
             <h3 class="statisticTableTitle">
                 <g:message code="projectOverview.table.sampletype.title" />
             </h3>
-            <div class="dataTableContainer sampleTypeNameCountBySample"
-                style="margin-right: 1%;">
+            <div class="otpDataTables">
                 <otp:dataTable
                     codes="${[
                         'projectOverview.table.sampleTypeName',
@@ -37,8 +36,7 @@
             <h3 class="statisticTableTitle" >
                 <g:message code="projectOverview.title.centersOverviewTable" />
             </h3>
-           <div class="dataTableContainer centerNameRunId"
-                style="margin-right: 1%;">
+           <div class="otpDataTables">
                 <otp:dataTable
                     codes="${[
                         'overview.statistic.center.name',
@@ -50,8 +48,7 @@
             <div style="width: 20px; height: 30px;"></div>
             <h3 class="statisticTableTitle">
                 <g:message code="projectOverview.table.statistic.title" /></h3>
-            <div class="dataTableContainer projectOverviewTable"
-                style="margin-right: 1%;">
+            <div class="otpDataTables">
                 <otp:dataTable
                     codes="${[
                         'projectOverview.index.PID',
@@ -69,9 +66,7 @@
             <h3 class="statisticTableTitle">
                 <g:message code="projectOverview.table.seqtype.title" />
             </h3>
-            <div
-                class="dataTableContainer patientsAndSamplesGBCountPerProject"
-                style="margin-right: 1%;">
+            <div class="otpDataTables">
                 <otp:dataTable
                     codes="${[
                         'projectOverview.seqtype.seqName',

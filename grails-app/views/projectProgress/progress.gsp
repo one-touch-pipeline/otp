@@ -25,7 +25,7 @@
 
         <input id="display" type="button" class="blue_label" name="progress" value=" Display "/>
     </form>
-  <div class="progressId laneOverviewTable" >
+  <div class="otpDataTables" >
         <otp:dataTable codes="${[
                     'projectProgress.progress.runs',
                     'projectProgress.progress.center',

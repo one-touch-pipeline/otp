@@ -8,8 +8,7 @@
 
 <body>
     <div class="body">
-        <div class="dataTableContainer overviewTableMMMLMappingId"
-            style="margin-right: 1%;">
+        <div class="otpDataTables">
             <otp:dataTable
                 codes="${[
                     'projectOverview.index.dataBaseID',

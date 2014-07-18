@@ -6,10 +6,7 @@ $.otp.projectOverviewTable = {
         "use strict";
         var oTableMMMLMapping = $("#overviewTableMMMLMappingId").dataTable({
             sDom: '<i> T rt<"clear">',
-            oTableTools : {
-                sSwfPath: $.otp.contextPath + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
-                aButtons: $.otp.tableTools_button_options
-            },
+            oTableTools : $.otp.tableTools,
             bFilter : true,
             bProcessing : true,
             bServerSide : false,

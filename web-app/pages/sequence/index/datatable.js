@@ -26,11 +26,8 @@ $.otp.sequence = {
         });
 
         $("#sequenceTable").dataTable({
-            sDom: '<i> T rt<"clear">',
-            oTableTools: {
-                sSwfPath: $.otp.contextPath + "/js/jquery/tableTools/media/swf/copy_cvs_xls_pdf.swf",
-                aButtons: $.otp.tableTools_button_options
-            },
+            sDom: '<i> T rt<"clear">S',
+            oTableTools : $.otp.tableTools,
             bFilter: false,
             bProcessing: true,
             bServerSide: true,
@@ -44,8 +41,7 @@ $.otp.sequence = {
             bScrollCollapse: true,
             sScrollX: 'auto',
             sScrollXInner: "100%",
-            bScrollInfinite: true,
-            sScrollY: ($(window).height() - 415),
+            sScrollY: 490,
             iDisplayLength: 100,
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
@@ -58,6 +54,9 @@ $.otp.sequence = {
                     "type": "POST",
                     "url": sSource,
                     "data": aoData,
+                    scroller: {
+                        loadingIndicator: true
+                    },
                     "error": function () {
                         fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
                     },

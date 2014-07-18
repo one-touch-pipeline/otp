@@ -10,7 +10,7 @@
     <div class="body">
         <otp:autoRefresh/>
         <div id="workflowOverview">
-            <div class="dataTables_container" id="processesTable_container">
+            <div class="otpDataTables">
                 <otp:dataTable codes="${[
                     'otp.blank',
                     'otp.blank',
