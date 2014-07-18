@@ -46,7 +46,7 @@ $.otp.sequence = {
             sScrollXInner: "100%",
             bScrollInfinite: true,
             sScrollY: ($(window).height() - 415),
-            iDisplayLength: 1000,
+            iDisplayLength: 100,
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
                 aoData.push({

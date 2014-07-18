@@ -47,9 +47,6 @@ class SeqTrackService {
      * @return List of matching Sequences
      */
     public List<Sequence> listSequences(int offset, int max, boolean sortOrder, SequenceSortColumn column, SequenceFiltering filtering) {
-        if (max > 100) {
-            max = 100
-        }
         String columnName = "projectId"
         if (filtering.enabled) {
             def c = Sequence.createCriteria()
