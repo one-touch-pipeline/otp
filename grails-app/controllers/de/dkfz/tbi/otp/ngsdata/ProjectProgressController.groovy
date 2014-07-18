@@ -5,14 +5,11 @@ import grails.plugins.springsecurity.Secured
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class ProjectProgressDataTableCommand extends DataTableCommand {
-    int startDate_day
-    int startDate_month
-    int startDate_year
-    int endDate_day
-    int endDate_month
-    int endDate_year
-    Date startDate = new Date(startDate_year - 1900, startDate_month - 1, startDate_day)
-    Date endDate = new Date(endDate_year - 1900, endDate_month - 1, endDate_day + 1)
+
+    //spring set the year, month, day direct in the date object, so no temporar int var are needed
+    Date startDate = new Date()
+    Date endDate = new Date()
+
     String projects
 
     List<String> getProjectNames() {
@@ -44,7 +41,8 @@ class ProjectProgressController {
         Map dataToRender = cmd.dataToRender()
         List<Project> projects = projectProgressService.getProjectsFromNameList(cmd.projectNames)
 
-        List<Run> runs = projectProgressService.getListOfRuns(projects, cmd.startDate, cmd.endDate)
+        //the end date is increased by one day, since the check consider also the time
+        List<Run> runs = projectProgressService.getListOfRuns(projects, cmd.startDate, cmd.endDate.plus(1))
         List data = fillTable(runs)
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
