@@ -56,15 +56,24 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
         return mergingPass.mergingSet
     }
 
+    /**
+     * @return <code>true</code>, if this {@link ProcessedMergedBamFile} is from the latest merging
+     * @see MergingPass#isLatestPass()
+     */
+    public boolean isMostRecentBamFile() {
+        return (mergingPass.isLatestPass() && mergingSet.isLatestSet())
+    }
+
+
     @Override
     public String toString() {
         MergingWorkPackage mergingWorkPackage = mergingPass.mergingSet.mergingWorkPackage
         return "id: ${id} " +
-                "pass: ${mergingPass.identifier} " + (mergingPass.latestPass ? "(latest) " : "") +
-                "set: ${mergingSet.identifier} " + (mergingSet.latestSet ? "(latest) " : "") +
-                "<br>sample: ${mergingWorkPackage.sample} " +
-                "seqType: ${mergingWorkPackage.seqType} " +
-                "<br>project: ${mergingWorkPackage.project}"
+        "pass: ${mergingPass.identifier} " + (mergingPass.latestPass ? "(latest) " : "") +
+        "set: ${mergingSet.identifier} " + (mergingSet.latestSet ? "(latest) " : "") +
+        "<br>sample: ${mergingWorkPackage.sample} " +
+        "seqType: ${mergingWorkPackage.seqType} " +
+        "<br>project: ${mergingWorkPackage.project}"
     }
 
     static mapping = {
