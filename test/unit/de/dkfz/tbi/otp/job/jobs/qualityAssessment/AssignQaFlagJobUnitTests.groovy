@@ -52,7 +52,7 @@ class AssignQaFlagJobUnitTests {
             job.execute()
         } catch (QualityAssessmentException e) {
             job.end()
-            boolean isJobFinished = job.getState() == ExecutionState.FINISHED
+            boolean isJobFinished = job.getState() == AbstractJobImpl.State.FINISHED
             assertTrue(isJobFinished)
             boolean isJobStateSucessfull = job.endState == ExecutionState.SUCCESS
             assertTrue(!isJobStateSucessfull)
@@ -71,7 +71,7 @@ class AssignQaFlagJobUnitTests {
         job.execute()
         job.end()
 
-        boolean isJobFinished = job.getState() == ExecutionState.FINISHED
+        boolean isJobFinished = job.getState() == AbstractJobImpl.State.FINISHED
         boolean isJobStateSucessfull = job.endState == ExecutionState.SUCCESS
         assertTrue(isJobFinished)
         assertTrue(isJobStateSucessfull)

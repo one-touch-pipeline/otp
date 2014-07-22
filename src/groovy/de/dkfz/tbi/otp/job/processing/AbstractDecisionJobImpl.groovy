@@ -41,7 +41,7 @@ abstract public class AbstractDecisionJobImpl extends AbstractEndStateAwareJobIm
 
     @Override
     public final JobDecision getDecision() throws InvalidStateException {
-        if (getState() != ExecutionState.FINISHED && endState != ExecutionState.SUCCESS) {
+        if (getState() != AbstractJobImpl.State.FINISHED && endState != ExecutionState.SUCCESS) {
             throw new InvalidStateException("Decision accessed, but not in succeeded state")
         }
         return decision

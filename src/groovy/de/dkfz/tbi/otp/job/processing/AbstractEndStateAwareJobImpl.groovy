@@ -31,7 +31,7 @@ abstract public class AbstractEndStateAwareJobImpl extends AbstractJobImpl imple
         if (!endState) {
             throw new InvalidStateException("EndState accessed without end state being set")
         }
-        if (getState() != ExecutionState.FINISHED && getState() != ExecutionState.SUCCESS) {
+        if (getState() != State.FINISHED) {
             throw new InvalidStateException("EndState accessed but not in finished state")
         }
         return endState

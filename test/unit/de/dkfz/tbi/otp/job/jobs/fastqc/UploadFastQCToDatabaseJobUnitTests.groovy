@@ -82,7 +82,7 @@ class UploadFastQCToDatabaseJobUnitTests {
     }
 
     private boolean isJobFinished(def job) {
-        return job.getState() == ExecutionState.FINISHED
+        return job.getState() == AbstractJobImpl.State.FINISHED
     }
 
     private boolean isJobStateSucessfull(def job) {
