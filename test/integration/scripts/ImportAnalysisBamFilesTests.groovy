@@ -1,0 +1,473 @@
+package scripts
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.FastqSet
+import de.dkfz.tbi.otp.dataprocessing.MergingSet
+import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
+import grails.util.Environment
+import groovy.sql.Sql
+import groovy.util.logging.Log4j
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+
+import javax.sql.DataSource
+
+import static junit.framework.Assert.*
+
+@Log4j
+class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
+    DataSource dataSource
+    CreateClusterScriptService createClusterScriptService
+    final shouldFail = new GroovyTestCase().&shouldFail
+
+    Sample sample
+    SeqType seqType
+    MergingSet mergingSet
+    Project project
+    Individual individual
+    SampleType sampleType
+    SoftwareTool softwareTool
+    SeqPlatform seqPlatform
+    Run run1
+
+    static final String SCRIPT_NAME = "scripts/ImportAnalysisBamFiles.groovy"
+
+    static final String projectName = "PROJECT_NAME"
+    static final String metadataFileName = "bam_metadata_test.csv"
+    static final String individualPid = PID
+    static final String mockPid = "PID"
+    static final String refGenomeName = "asdfasdf"
+    static final String sampleTypeName = "CONTROL"
+    static final String bamType = "RMDUP"
+    static final String fileName = "/tumor_PID_merged.bam.rmdup.bam"
+    static final String md5sum = "12345678901234567890123456789012"
+    static final long fileSize = 123456
+    static final List<Long> lanes1 = [184245L, 186982L, 585992L]
+    static final List<Long> lanes2 = [12345L, 23456L, 34567L]
+
+
+    String correctHeader = """"File","Errors","InExcludeList","Size","PID","IndOTP","RefGenome","SampleType","BamType","Lanes","LanesInOTP","MissingLanes","WithdrawnLanes","Md5Sum"
+"""
+    String wrongHeader = """"asdf","Errors","InExcludeList","Size","PID","IndOTP","RefGenome","SampleType","BamType","Lanes","LanesInOTP","MissingLanes","WithdrawnLanes","Md5Sum"
+"""
+    String correctData = """"${fileName}","","no","${fileSize}","${mockPid}",${individualPid},"${refGenomeName}","${sampleTypeName}","${bamType}","111129_SN952_0063_AC0A53ACXX_L005","${lanes1.join(" ")}","","","${md5sum}"
+"""
+    String skipData = """"${fileName}","asdfasdf","YES","${fileSize}","${mockPid}",${individualPid},"${refGenomeName}","${sampleTypeName}","${bamType}","111129_SN952_0063_AC0A53ACXX_L005","${lanes2.join(" ")}","","","${md5sum}"
+"""
+    String wrongData = """"${fileName}","","no","${fileSize}","INVALID_PID",${individualPid},"${refGenomeName}","${sampleTypeName}","${bamType}","111129_SN952_0063_AC0A53ACXX_L005","${lanes2.join(" ")}","","","${md5sum}"
+"""
+    Map<String, String> correctDataMap = [absoluteFilePath: fileName, errors: "", inExcludeList: "no", fileSize: fileSize.toString(),
+            mockPid: mockPid, pid: individualPid, refGenome: refGenomeName, sampleType: sampleTypeName, bamType: bamType,
+            lanes: "-----", seqTrackIds: lanes1.join(" "), missingLanes: "", withdrawnLanes: "", md5sum: md5sum]
+
+
+    @Before
+    void setUp() {
+        ReferenceGenome refGenome = ReferenceGenome.build(
+                name: "${refGenomeName}",
+                length: 1000,
+                lengthWithoutN: 10000000,
+                lengthRefChromosomes: 32,
+                lengthRefChromosomesWithoutN: 7,
+        )
+
+        Realm copyScriptRealm = Realm.build(
+                name: 'BioQuant',
+                cluster: Realm.Cluster.BIOQUANT,
+                env: Environment.current.name,
+                operationType: Realm.OperationType.DATA_MANAGEMENT,
+        )
+
+        Realm realm = Realm.build(
+                name: 'DKFZ',
+                cluster: Realm.Cluster.DKFZ,
+                env: 'test',
+                operationType: Realm.OperationType.DATA_MANAGEMENT,
+        )
+
+        project = Project.build(
+                name: "${projectName}",
+                realmName: 'DKFZ',
+        )
+
+        individual = Individual.build(
+                pid: "${individualPid}",
+                mockPid: "${mockPid}",
+                project: project,
+        )
+
+        sampleType = SampleType.build(
+                name: "${sampleTypeName}"
+        )
+
+        sample = Sample.build(
+                individual: individual,
+                sampleType: sampleType,
+        )
+
+        seqType = SeqType.build()
+        softwareTool = SoftwareTool.build()
+        seqPlatform = SeqPlatform.build()
+
+        run1 = Run.build(
+                storageRealm: Run.StorageRealm.DKFZ
+        )
+    }
+
+    @After
+    public void tearDown() {
+        TestCase.removeMetaClass(CreateClusterScriptService, createClusterScriptService)
+        new File("${projectName}-import.sh").delete()
+    }
+
+
+    private void createData() {
+        lanes1.each { Long lane ->
+            createSeqTrack(lane.toString(), lane)
+        }
+        lanes2.each { Long lane ->
+            createSeqTrack(lane.toString(), lane)
+        }
+    }
+
+    private void checkArgumentsForCreateTransferScript() {
+        createClusterScriptService.metaClass.createTransferScript = { List<File> sourceLocations, List<File> targetLocations, List<File> linkLocations, boolean move = false ->
+            assert sourceLocations == linkLocations
+            assert sourceLocations[0].equals(new File(fileName))
+            assert targetLocations == [new ExternallyProcessedMergedBamFile(
+                    fastqSet: new FastqSet(seqTracks: [SeqTrack.get(lanes1[0])]),
+                    fileName: new File(fileName).name,
+                    source: "analysisImport",
+                    referenceGenome: ReferenceGenome.findByName(refGenomeName)
+            ).getFilePath().getAbsoluteDataManagementPath()]
+            assert move
+            return ""
+        }
+    }
+
+    private static void checkSuccess() {
+        List<FastqSet> fss = FastqSet.withCriteria {
+            seqTracks {
+                eq("laneId", lanes1.first().toString())
+            }
+        }
+        assert(!fss.empty)
+
+        List<FastqSet> fss2 = FastqSet.withCriteria {
+            seqTracks {
+                eq("laneId", lanes2.first().toString())
+            }
+        }
+        assert(fss2.empty)
+
+        FastqSet fastqSet = fss.first()
+        assertNotNull(fastqSet)
+        assert fastqSet.seqTracks*.id.containsAll(lanes1)
+
+        ExternallyProcessedMergedBamFile bamFile = ExternallyProcessedMergedBamFile.findByFastqSet(fastqSet)
+        assertNotNull(bamFile)
+        assert bamFile.type == AbstractBamFile.BamType.RMDUP
+        assert bamFile.md5sum == md5sum
+        assert bamFile.fileName == new File(fileName).name
+        assert bamFile.fileSize == fileSize
+        assert bamFile.source == "analysisImport"
+        assert bamFile.referenceGenome.name == refGenomeName
+        assertTrue(new File("${projectName}-import.sh").exists())
+    }
+
+
+    @Test
+    void testSuccess() {
+        createData()
+        writeMetadataFile(correctHeader + correctData)
+        checkArgumentsForCreateTransferScript()
+
+        run(SCRIPT_NAME, ["project": "${projectName}", "metadata": "${metadataFileName}"])
+
+       checkSuccess()
+    }
+
+    @Test
+    void testSuccessAfterSkippedNotIncluded() {
+        createData()
+        writeMetadataFile(correctHeader + skipData + correctData)
+        checkArgumentsForCreateTransferScript()
+
+        run(SCRIPT_NAME, ["project": "${projectName}", "metadata": "${metadataFileName}"])
+
+        checkSuccess()
+    }
+
+    @Test
+    void testSuccessAfterSkippedError() {
+        createData()
+        writeMetadataFile(correctHeader + wrongData + correctData)
+        checkArgumentsForCreateTransferScript()
+
+        run(SCRIPT_NAME, ["project": "${projectName}", "metadata": "${metadataFileName}"])
+
+        checkSuccess()
+    }
+
+
+
+    @Test
+    void testReadFile() {
+        writeMetadataFile(correctHeader + correctData)
+        LinkedHashMap<String, String> header = [absoluteFilePath: "File", errors: "Errors", inExcludeList: "InExcludeList", fileSize: "Size", mockPid: "PID", pid: "IndOTP",
+         refGenome: "RefGenome", sampleType: "SampleType", bamType: "BamType", lanes: "Lanes",
+         seqTrackIds: "LanesInOTP", missingLanes: "MissingLanes", withdrawnLanes: "WithdrawnLanes",
+         md5sum: "Md5Sum"]
+        List<Map<String, String>> ret = invokeMethod(new File(SCRIPT_NAME), "readFile",
+                [new File(metadataFileName), header], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        assert ret == [[absoluteFilePath: "/tumor_PID_merged.bam.rmdup.bam", errors:"", inExcludeList:"no", fileSize:"123456", mockPid:"PID",
+                        pid:PID, refGenome:"asdfasdf", sampleType:"CONTROL", bamType:"RMDUP", lanes:"111129_SN952_0063_AC0A53ACXX_L005",
+                        seqTrackIds:"184245 186982 585992", missingLanes:"", withdrawnLanes:"", md5sum:"12345678901234567890123456789012"]]
+    }
+
+    @Test
+    void testWrongHeader() {
+        writeMetadataFile(wrongHeader + correctData)
+
+        assert shouldFail (AssertionError.class, { run(SCRIPT_NAME,
+                ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        }) =~ /^Error: Wrong headers/
+    }
+
+    @Test
+    void testWrongHeadersSize() {
+        String wrongHeader = """"asdf","Errors","InExcludeList","Size","PID","IndOTP","RefGenome","SampleType","BamType","Lanes","LanesInOTP","MissingLanes","WithdrawnLanes"
+"""
+        writeMetadataFile(wrongHeader)
+        assert shouldFail (AssertionError.class, { run(SCRIPT_NAME,
+                ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        }) =~ /^Error: File must have/
+    }
+
+
+
+    @Test
+    void testInvalidMd5() {
+        correctDataMap.md5sum = "-----"
+        assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        }) =~ /^Ignored .*, because of invalid MD5: .*\./
+    }
+
+    @Test
+    void testIndividualNotFound() {
+        correctDataMap.pid = "-----"
+        assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        }) =~ /^Ignored .*: Individual not found\./
+    }
+
+    @Test
+    void testPidNotFound() {
+        correctDataMap.mockPid = "-----"
+        assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        }) =~ /^Ignored .*: Individual not found\./
+   }
+
+    @Test
+    void testWrongProject() {
+        Project project2 = Project.build(
+                name: "asdfasdf",
+                realmName: 'DKFZ',
+        )
+        individual.project = project2
+        individual.save(flush: true)
+        assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        }) =~ /^Ignored .*: Wrong project\./
+    }
+
+    @Test
+    void testSampleTypeNotFound() {
+        correctDataMap.sampleType = "-----"
+        assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        }) =~ /^Ignored .*: SampleType .* not found\./
+    }
+
+    @Test
+    void testIndividualDoesntContainSampleType() {
+        individual.samples.first().sampleType = SampleType.build(
+                name: "ASDF"
+        )
+        assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        }) =~ /^Ignored .*: Individual does not contain sampleType .*\./
+    }
+
+    @Test
+    void testRefGenNotFound() {
+        correctDataMap.refGenome= "-----"
+        assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        }) =~ /^Ignored .*: RefGenome .* not found\./
+    }
+
+    @Test
+    void testSeqTrackNotFound() {
+        createData()
+        correctDataMap.seqTrackIds = correctDataMap.seqTrackIds + " 900000"
+        assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        }) =~ /^Ignored .*: SeqTrack .* not found\./
+    }
+
+    @Test
+    void testIndividualInvalid() {
+        createData()
+        String pid = "PID"
+        String mockPid = "MOPID"
+        Individual individual2 = Individual.build(
+                pid: pid,
+                mockPid: mockPid,
+                project: project,
+        )
+        correctDataMap.pid = pid
+        correctDataMap.mockPid = mockPid
+        Sample sample1 = Sample.build(
+                individual: individual2,
+                sampleType: sampleType,
+        )
+        assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        }) =~ /^Ignored .*: Individual invalid\./
+    }
+
+    @Test
+    void testWrongProject2() {
+        createData()
+        Project project2 = Project.build(
+                name: "asdfasdf",
+                realmName: 'DKFZ',
+        )
+        Individual individual2 = SeqTrack.get(lanes1.first()).sample.individual
+        individual2.project = project2
+        individual2.save(flush: true)
+
+        assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        }) =~ /^Ignored .*: Wrong project\./
+    }
+
+    @Test
+    void testNoSeqTracks() {
+        correctDataMap.seqTrackIds = ""
+        assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        }) =~ /^Ignored .*: No SeqTracks\./
+    }
+
+    @Test
+    void testInvalidBamType() {
+        createData()
+        correctDataMap.bamType = "---"
+        assert shouldFail (IllegalArgumentException.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        }) =~ /^No enum const class .*/
+    }
+
+
+
+    @Test
+    void testNoMDFile() {
+        assert shouldFail (AssertionError.class, { run(SCRIPT_NAME,
+                ["project": "${projectName}", metadata: ""])
+        }) =~ /Error: Metadata file not given\./
+    }
+    @Test
+    void testMDFileNotReadable() {
+        assert shouldFail (AssertionError.class, { run(SCRIPT_NAME,
+                ["project": "${projectName}", "metadata": "asdfasdf"])
+        }) =~ /Error: Metadata file .* doesn't exist or is not readable\./
+    }
+    @Test
+    void testNoProject() {
+        assert shouldFail (AssertionError.class, { run(SCRIPT_NAME,
+                [project: "",  "metadata": "${metadataFileName}"])
+        }) =~ /Error: Project name not given\./
+    }
+    @Test
+    void testProjectNotFound() {
+        assert shouldFail (AssertionError.class, { run(SCRIPT_NAME,
+                ["project": "asdf", "metadata": "${metadataFileName}"])
+        }) =~ /Error: Project .* not found\./
+    }
+    @Test
+    void testOutputFileExists() {
+        new File("${projectName}-import.sh").createNewFile()
+        assert shouldFail (AssertionError.class, { run(SCRIPT_NAME,
+                ["project": "${projectName}", metadata: "${metadataFileName}"])
+        }) =~ /Error: Output file .* exists, please move it\./
+    }
+
+
+
+    @Test
+    void testExcluded() {
+
+        correctDataMap.inExcludeList = "YES"
+        assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "includes",
+                [correctDataMap], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        }) =~ /^Ignored .*, set to be excluded\./
+    }
+
+    @Test
+    void testErrors() {
+        correctDataMap.errors = "Fatal Error"
+        assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "includes",
+                [correctDataMap], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        }) =~ /^Ignored .*, because of errors: .*\./
+    }
+
+    @Test
+    void testMissingLanes() {
+        correctDataMap.missingLanes = "123456"
+        assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "includes",
+                [correctDataMap], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+
+        }) =~ /^Ignored .*, because of missing lanes: .*\./
+    }
+
+    @Test
+    void testWithdrawnLanes() {
+        correctDataMap.withdrawnLanes = "456789"
+        assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "includes",
+                [correctDataMap], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+
+        }) =~ /^Ignored .*, because of withdrawn lanes: .*\./
+    }
+
+
+
+    private static void writeMetadataFile(String content) {
+        new File(metadataFileName).withWriter { Writer writer ->
+            writer.append(content)
+        }
+    }
+
+    private SeqTrack createSeqTrack(String laneId = "laneId", long id) {
+        // it's not possible to set the id when using domain objects
+        Sql sql = new Sql(dataSource.connection)
+        sql.executeInsert("insert into seq_track (id, version, lane_id, run_id, sample_id, " +
+                "seq_type_id, seq_platform_id, pipeline_version_id, alignment_state, " +
+                "fastqc_state, has_final_bam, has_original_bam, insert_size, n_base_pairs, " +
+                "n_reads, using_original_bam, quality_encoding, class)" +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [id, 0, laneId, run1.id, sample.id, seqType.id, seqPlatform.id, softwareTool.id,
+                 "UNKNOWN", "UNKNOWN", false, false, -1, 0, 0, false, "UNKNOWN",
+                 "de.dkfz.tbi.otp.ngsdata.SeqTrack"]
+        )
+        return SeqTrack.get(id)
+    }
+}

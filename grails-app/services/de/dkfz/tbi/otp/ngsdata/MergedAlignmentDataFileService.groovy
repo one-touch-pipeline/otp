@@ -42,7 +42,7 @@ class MergedAlignmentDataFileService {
         return configService.getProjectRootPath(scan.sample.project)
     }
 
-    String buildRelativePath(SeqType type, Sample sample) {
+    static String buildRelativePath(SeqType type, Sample sample) {
         // this method is also used in the ProcessedMergedBamFileService,
         // if this method is changed make sure that the path in the ProcessedMergedBamFileService is still correct
         String sampleType = sample.sampleType.dirName

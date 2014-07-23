@@ -98,6 +98,9 @@ abstract class AbstractBamFile {
      */
     State status = State.DECLARED
 
+    /** the reference genome used to produce this bam file */
+    ReferenceGenome referenceGenome
+
     public abstract Set<SeqTrack> getContainedSeqTracks()
     public abstract AbstractQualityAssessment getOverallQualityAssessment()
     public abstract SeqType getSeqType()
@@ -121,14 +124,7 @@ abstract class AbstractBamFile {
         deletionDate(nullable: true)
         coverage(nullable: true)
         coverageWithN(nullable: true)
-    }
-
-    /**
-     * TODO: OTP-1112: This returns the <strong>configured</strong> reference genome. This might be different from the
-     * reference genome which was actually used to produce this BAM file.
-     */
-    ReferenceGenome getReferenceGenome() {
-        this.containedSeqTracks*.configuredReferenceGenome?.find()
+        referenceGenome nullable: true
     }
 
     boolean isQualityAssessed() {

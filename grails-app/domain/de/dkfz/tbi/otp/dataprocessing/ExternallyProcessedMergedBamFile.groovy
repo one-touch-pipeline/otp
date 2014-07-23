@@ -13,6 +13,10 @@ class ExternallyProcessedMergedBamFile extends AbstractFileSystemBamFile {
         fastqSet: FastqSet
     ]
 
+    /** source of the file, eg. workflow or import name; used to construct the path of the file */
+    String source
+    String fileName
+
     Project getProject() {
         return fastqSet.project
     }
@@ -45,6 +49,20 @@ class ExternallyProcessedMergedBamFile extends AbstractFileSystemBamFile {
     @Override
     public AbstractQualityAssessment getOverallQualityAssessment() {
         throw new MissingPropertyException('Quality assessment is not implemented for externally imported BAM files')
+    }
+
+
+    public OtpPath getFilePath() {
+        String relative = MergedAlignmentDataFileService.buildRelativePath(seqType, sample)
+        return new OtpPath(project, relative, "nonOTP",
+                "${source}_${referenceGenome}", fileName)
+    }
+
+
+    static constraints = {
+        referenceGenome nullable: false
+        source blank: false
+        fileName blank: false
     }
 
     static mapping = {
