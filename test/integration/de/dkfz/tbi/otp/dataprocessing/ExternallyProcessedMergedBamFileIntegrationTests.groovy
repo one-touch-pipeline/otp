@@ -110,7 +110,9 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
                 fastqSet: fastqSet
         )
         assertNotNull(bamFile2.save([flush: true]))
-        assertEquals("id: 1 (external) <br>sample: mockPid sample-type seqType: seq-type library <br>project: project", bamFile2.toString())
+        String expected = /id: \d+ \(external\) <br>sample: mockPid sample-type seqType: seq-type library <br>project: project/
+        String actual = bamFile2.toString()
+        assertTrue("Expected string matching '" + expected + "'. Got: " + actual, actual.matches(expected))
     }
 
 

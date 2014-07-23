@@ -152,7 +152,10 @@ class ProcessedMergedBamFileIntegrationTests {
                 mergingPass: mergingPass,
         )
         assertNotNull(bamFile.save([flush: true]))
-        assertEquals("id: 3 pass: 0 (latest) set: 0 (latest) <br>sample: mockPid sample-type seqType: seq-type library <br>project: project", bamFile.toString())
+
+        String expected = /id: \d+ pass: 0 \(latest\) set: 0 \(latest\) <br>sample: mockPid sample-type seqType: seq-type library <br>project: project/
+        String actual = bamFile.toString()
+        assertTrue("Expected string matching '" + expected + "'. Got: " + actual, actual.matches(expected))
     }
 
 

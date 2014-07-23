@@ -169,7 +169,6 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
     @Test
     void testPassFinished() {
         assertEquals(QaProcessingStatus.UNKNOWN, processedBamFile.qualityAssessmentStatus)
-        assertEquals(FileOperationStatus.DECLARED, processedBamFile.fileOperationStatus)
         qualityAssessmentPassService.passFinished(qualityAssessmentPass)
         assertEquals(QaProcessingStatus.FINISHED, processedBamFile.qualityAssessmentStatus)
     }
