@@ -34,10 +34,10 @@ class StatisticService {
                     List<Project> projects = projectService.projectByProjectGroup(projectGroup)
                     'in'("projectId", projects*.id)
                 }
-                groupProperty("seqTypeName")
+                groupProperty("seqTypeAliasOrName")
                 count("sampleId")
             }
-            order("seqTypeName")
+            order("seqTypeAliasOrName")
         }
         return seq
     }
@@ -49,10 +49,10 @@ class StatisticService {
                     List<Project> projects = projectService.projectByProjectGroup(projectGroup)
                     'in'("projectId", projects*.id)
                 }
-                groupProperty("seqTypeName")
+                groupProperty("seqTypeAliasOrName")
                 countDistinct("mockPid")
             }
-            order("seqTypeName")
+            order("seqTypeAliasOrName")
         }
         return seq
     }
@@ -78,10 +78,10 @@ class StatisticService {
                     List<Project> projects = projectService.projectByProjectGroup(projectGroup)
                     'in'("projectId", projects*.id)
                 }
-                groupProperty("seqTypeName")
+                groupProperty("seqTypeAliasOrName")
                 countDistinct("projectId")
             }
-            order("seqTypeName")
+            order("seqTypeAliasOrName")
         }
         return seq
     }
@@ -90,10 +90,10 @@ class StatisticService {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project.id)
             projections {
-                groupProperty("seqTypeName")
+                groupProperty("seqTypeAliasOrName")
                 count("sampleId")
             }
-            order("seqTypeName")
+            order("seqTypeAliasOrName")
         }
         return seq
     }
@@ -125,16 +125,16 @@ class StatisticService {
         LocalDate firstDateLocal = firstDate.toLocalDate(1)
         data.each {
             values << [
-                    Days.daysBetween(firstDateLocal, new LocalDate(it[0])).days,
-                    count += it[1]
+                Days.daysBetween(firstDateLocal, new LocalDate(it[0])).days,
+                count += it[1]
             ]
         }
 
         Map dataToRender = [
-                labels: monthLabels(firstDate, lastDate),
-                data: values,
-                count: count,
-                daysCount: daysCount.days
+            labels: monthLabels(firstDate, lastDate),
+            data: values,
+            count: count,
+            daysCount: daysCount.days
         ]
         return dataToRender
     }
@@ -154,16 +154,16 @@ class StatisticService {
         LocalDate firstDateLocal = firstDate.toLocalDate(1)
         data.each {
             values << [
-                    Days.daysBetween(firstDateLocal, new LocalDate(it[1])).days,
-                    count++
+                Days.daysBetween(firstDateLocal, new LocalDate(it[1])).days,
+                count++
             ]
         }
 
         Map dataToRender = [
-                labels: monthLabels(firstDate, lastDate),
-                data: values,
-                count: count,
-                daysCount: daysCount.days,
+            labels: monthLabels(firstDate, lastDate),
+            data: values,
+            count: count,
+            daysCount: daysCount.days,
         ]
         return dataToRender
     }

@@ -70,6 +70,8 @@ class Sequence implements Serializable {
 
     // fields from SeqType
     String seqTypeName
+    String seqTypeAlias
+    String seqTypeAliasOrName
     String libraryLayout
     String dirName
 
@@ -129,5 +131,8 @@ class Sequence implements Serializable {
         qualityEvaluated(nullable: true)
         // nullable constraints from SeqPlatform
         model(nullable: true)
+        // nullable constraints from SeqType
+        seqTypeAlias(nullable: true)
+        seqTypeAliasOrName(nullable: true)
     }
 }

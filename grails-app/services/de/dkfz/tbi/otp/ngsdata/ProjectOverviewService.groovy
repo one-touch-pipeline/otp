@@ -16,7 +16,7 @@ class ProjectOverviewService {
             property("individualId")
             property("mockPid")
             property("sampleTypeName")
-            property("seqTypeName")
+            property("seqTypeAliasOrName")
             property("libraryLayout")
             property("seqPlatformId")
             property("seqCenterName")
@@ -25,7 +25,7 @@ class ProjectOverviewService {
             property("projectName")
             order ("mockPid")
             order ("sampleTypeName")
-            order ("seqTypeName")
+            order ("seqTypeAliasOrName")
             order ("libraryLayout")
             order ("seqPlatformId")
             order ("seqCenterName")
@@ -36,7 +36,7 @@ class ProjectOverviewService {
             def queryListSingleRow = [
                 track.mockPid,
                 track.sampleTypeName,
-                track.seqTypeName,
+                track.seqTypeAliasOrName,
                 track.libraryLayout,
                 track.seqCenterName,
                 SeqPlatform.get(track.seqPlatformId).toString(),
@@ -52,13 +52,13 @@ class ProjectOverviewService {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project.id)
             projections {
-                groupProperty("seqTypeName")
+                groupProperty("seqTypeAliasOrName")
                 groupProperty("libraryLayout")
                 countDistinct("mockPid")
                 count("sampleId")
                 sum("sum_N_BasePairsGb")
             }
-            order ("seqTypeName")
+            order ("seqTypeAliasOrName")
         }
         return seq
     }
@@ -75,7 +75,7 @@ class ProjectOverviewService {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project.id)
             projections {
-                groupProperty("sampleTypeName")
+                groupProperty("seqTypeAliasOrName")
                 countDistinct("sampleId")
             }
         }

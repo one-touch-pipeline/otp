@@ -77,8 +77,8 @@ $.otp.graph.overview = {
         scatter2.Set('chart.xmax', json.daysCount);
         scatter2.Set('chart.background.grid.autofit.numvlines', json.labels.length * 4);
         scatter2.Set('chart.text.angle', 45);
-        scatter2.Set('chart.gutter.bottom', 150);
-        scatter2.Set('chart.gutter.top', 85);
+        scatter2.Set('chart.gutter.bottom', 100);
+        scatter2.Set('chart.gutter.top', 110);
         scatter2.Set('chart.gutter.left', 70);
         scatter2.Set('chart.gutter.right', 70);
         scatter2.Draw();
@@ -110,9 +110,9 @@ $.otp.graph.overview = {
         pie.Set('chart.radius', 80);
         pie.Set('chart.labels.sticks.length', 15);
         pie.Set('chart.variant', '3d');
-        pie.Set('chart.gutter.bottom', 100);
-        pie.Set('chart.gutter.top', 100);
-        pie.Set('chart.gutter.left', 80);
+        pie.Set('chart.gutter.bottom', 80);
+        pie.Set('chart.gutter.top', 80);
+        pie.Set('chart.gutter.left', 60);
         pie.Set('chart.gutter.right', 25);
         pie.Draw();
         RGraph.Effects.Pie.RoundRobin(pie, {
@@ -150,8 +150,8 @@ $.otp.graph.overview = {
         bar1.Set('chart.labels.above.angle', null);
         bar1.Set('chart.labels.above.size', 9);
         bar1.Set('chart.background.grid.border', false);
-        bar1.Set('chart.gutter.bottom', 180);
-        bar1.Set('chart.gutter.top', 90);
+        bar1.Set('chart.gutter.bottom', 120);
+        bar1.Set('chart.gutter.top', 110);
         bar1.Draw();
     },
 
@@ -185,8 +185,8 @@ $.otp.graph.overview = {
         bar0.Set('chart.labels.above.angle', null);
         bar0.Set('chart.labels.above.size', 9);
         bar0.Set('chart.background.grid.border', false);
-        bar0.Set('chart.gutter.bottom', 180);
-        bar0.Set('chart.gutter.top', 80);
+        bar0.Set('chart.gutter.bottom', 140);
+        bar0.Set('chart.gutter.top', 110);
         bar0.Draw();
     }
 };
@@ -228,8 +228,8 @@ $.otp.graph.project = {
         pie1.Set('chart.labels.sticks.length', 0);
         pie1.Set('chart.gutter.bottom', 130);
         pie1.Set('chart.gutter.top', 100);
-        pie1.Set('chart.gutter.left', 220);
-        pie1.Set('chart.gutter.right', 200);
+        pie1.Set('chart.gutter.left', 200);
+        pie1.Set('chart.gutter.right', 180);
         pie1.Draw();
         RGraph.Effects.Pie.RoundRobin(pie1, {
             frames : 335
@@ -262,10 +262,10 @@ $.otp.graph.project = {
         scatter3.Set('chart.xmax', json.daysCount);
         scatter3.Set('chart.background.grid.autofit.numvlines', json.labels.length * 4);
         scatter3.Set('chart.text.angle', 65);
-        scatter3.Set('chart.gutter.bottom', 170);
+        scatter3.Set('chart.gutter.bottom', 110);
         scatter3.Set('chart.gutter.right', 70);
         scatter3.Set('chart.gutter.left', 90);
-        scatter3.Set('chart.gutter.top', 50);
+        scatter3.Set('chart.gutter.top', 100);
         scatter3.Draw();
     },
 

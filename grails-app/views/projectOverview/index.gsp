@@ -79,14 +79,14 @@
             </div>
         </div>
         <div class="homeGraph">
-            <div style="margin-top: 80px"></div>
-            <div style="float: left;">
-                <canvas id="sampleTypeCountBySeqType" width="660"
-                    height="380">[No canvas support]</canvas>
+            <div style="margin-top: 60px"></div>
+            <div style="float: left; border: 25px solid #E1F1FF;">
+                <canvas id="sampleTypeCountBySeqType" width="530"
+                    height="400">[No canvas support]</canvas>
             </div>
-            <div style="float: right;">
-                <canvas id="laneCountPerDateByProject" width="500"
-                    height="440">[No canvas support]</canvas>
+            <div style="float: right; border: 25px solid #E1F1FF;">
+                <canvas id="laneCountPerDateByProject" width="530"
+                    height="400">[No canvas support]</canvas>
             </div>
             <div style="margin-top: 80px"></div>
             <div style="text-align: center;">
