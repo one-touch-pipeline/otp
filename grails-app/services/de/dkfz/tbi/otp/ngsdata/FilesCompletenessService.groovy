@@ -4,9 +4,8 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 
 class FilesCompletenessService {
 
-    def lsdfFilesService
-    def fileTypeService
-    def runProcessingService
+    LsdfFilesService lsdfFilesService
+    RunProcessingService runProcessingService
     /**
      * Dependency injection of Grails Application
      */
@@ -14,26 +13,24 @@ class FilesCompletenessService {
     def grailsApplication
 
     /**
-     *
      * This function loops over files from a run, registered in meta-data
      * and check if they exists in the initial location
-     *
-     * @param run
      */
-    public boolean checkInitialSequenceFiles(Run run) {
+    public void checkInitialSequenceFiles(Run run) {
         List<DataFile> dataFiles = runProcessingService.dataFilesForProcessing(run)
         if (!dataFiles) {
-            log.debug "No files in processing for run ${run}"
-            return false
+            throw new ProcessingException("No files in processing for run ${run}")
         }
+        final Collection<String> missingPaths = []
         for (DataFile file in dataFiles) {
             String path = lsdfFilesService.getFileInitialPath(file)
             if (!lsdfFilesService.fileExists(path)) {
-                log.debug "missing file ${path}"
-                return false
+                missingPaths.add(path)
             }
         }
-        return true
+        if (!missingPaths.empty) {
+            throw new ProcessingException("The following ${missingPaths.size()} files are missing:\n${missingPaths.join("\n")}")
+        }
     }
 
     /**

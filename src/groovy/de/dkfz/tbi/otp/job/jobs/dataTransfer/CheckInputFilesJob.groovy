@@ -4,28 +4,21 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.beans.factory.annotation.Autowired
 
-class CheckInputFilesJob extends AbstractEndStateAwareJobImpl {
+class CheckInputFilesJob extends AbstractJobImpl {
 
-    /**
-     * dependency injection of meta data service
-     */
     @Autowired
     FilesCompletenessService filesCompletenessService
 
     /**
      * Check if all sequence files belonging to this run are
      * present in the initial location. The job is delegated to service
-     * 
+     *
      * @throws Exception
      */
     @Override
     public void execute() throws Exception {
         long runId = Long.parseLong(getProcessParameterValue())
         Run run = Run.get(runId)
-        if (filesCompletenessService.checkInitialSequenceFiles(run)) {
-            succeed()
-        } else {
-            fail()
-        }
+        filesCompletenessService.checkInitialSequenceFiles(run)
     }
 }
