@@ -193,10 +193,10 @@ class TargetIntervalsImplTest {
             "chr2": [new Interval(32L, 105L)],
             "chr3": [new Interval(10000000L, 249250621L)]
         ]
-       assertTrue(targetIntervalsImpl.validateBedFileContent(referenceGenomeEntryNames, map))
+        targetIntervalsImpl.validateBedFileContent(referenceGenomeEntryNames, map)
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException)
     void testValidateBedFileContentCase4() {
         Map<String, List<Interval>> map = [
             "chr1": [new Interval(0L, 100L), new Interval(150L, 300L)],
@@ -204,7 +204,7 @@ class TargetIntervalsImplTest {
             "chr3": [new Interval(10000000L, 249250621L)],
             "chr6": [new Interval(100L, 200L)]
         ]
-        assertFalse(targetIntervalsImpl.validateBedFileContent(referenceGenomeEntryNames, map))
+        targetIntervalsImpl.validateBedFileContent(referenceGenomeEntryNames, map)
     }
 
     /*

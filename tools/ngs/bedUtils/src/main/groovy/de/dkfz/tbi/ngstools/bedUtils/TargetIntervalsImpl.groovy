@@ -50,7 +50,7 @@ class TargetIntervalsImpl implements TargetIntervals {
 
     public void createTreeMapFromBedFile() {
         Map<String, List<Interval>> map = parseBedFile(bedFilePath)
-        isTrue(validateBedFileContent(referenceGenomeEntryNames, map), "Validation of referenceGenomeEntryNames with bed file failed")
+        validateBedFileContent(referenceGenomeEntryNames, map)
         baseCount = calculateBaseCount(map)
         createTrees(map)
         uniqueBaseCount = calculateBaseCount(intervalsPerSequence)
@@ -102,17 +102,20 @@ class TargetIntervalsImpl implements TargetIntervals {
     }
 
     /**
+     * Ensures that all reference genome entries in the bed file are included in the reference genome.
+     *
      * @param refGenomeEntryNames, a list which contains all names of the reference genome entries
      * @param map, a map containing a list of all intervals for each reference genome entry
-     * @return true if all reference genome entries in the bed file are included in the reference genome
      */
-    private boolean validateBedFileContent(List<String> refGenomeEntryNames, Map<String, List<Interval>> map) {
+    private void validateBedFileContent(List<String> refGenomeEntryNames, Map<String, List<Interval>> map) {
         notNull(refGenomeEntryNames, "The input of the method validateBedFileContent is null")
         notEmpty(refGenomeEntryNames, "The input of the method validateBedFileContent is empty")
         notNull(map, "The input of the method validateBedFileContent is null")
         notEmpty(map, "The input of the method validateBedFileContent is empty")
-        return map.keySet().every { String key ->
-            refGenomeEntryNames.contains(key)
+        map.keySet().each { String key ->
+            if (!refGenomeEntryNames.contains(key)) {
+                throw new IllegalArgumentException("The BED file references entry ${key}, which does not exist in the reference genome.")
+            }
         }
     }
 
