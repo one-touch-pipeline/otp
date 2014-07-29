@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+
 import de.dkfz.tbi.otp.InformationReliability
 
 class ExomeSeqTrack extends SeqTrack {
@@ -28,6 +30,20 @@ class ExomeSeqTrack extends SeqTrack {
                 return val == null
             }
         })
+    }
+
+    /**
+     * @return The {@link BedFile}, or <code>null</code> if it is unknown.
+     */
+    BedFile getBedFile() {
+        if (!exomeEnrichmentKit) {
+            return null
+        }
+        final ReferenceGenome refGenome = referenceGenome
+        if (!refGenome) {
+            return null
+        }
+        return atMostOneElement(BedFile.findAllByReferenceGenomeAndExomeEnrichmentKit(refGenome, exomeEnrichmentKit))
     }
 
     public String toString() {

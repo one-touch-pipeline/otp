@@ -21,7 +21,10 @@ class ReferenceGenomeService {
      * returns the reference genome depending on the project and the sequencing type
      * @param project the project, to which the reference genome belongs to
      * @param seqType the sequencing type, to which the reference genome belongs to
+     * @deprecated The {@link ReferenceGenome} will not depend on {@link Project} and {@link SeqType} alone in the
+     * future (see OTP-905 for example). Use {@link SeqTrack#getReferenceGenome()} instead.
      */
+    @Deprecated
     public ReferenceGenome referenceGenome(Project project, SeqType seqType) {
         notNull(project, "the project of the method referenceGenome is null")
         notNull(seqType, "the seqType of the method referenceGenome is null")

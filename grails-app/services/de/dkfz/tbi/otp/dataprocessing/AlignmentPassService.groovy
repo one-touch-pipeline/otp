@@ -74,10 +74,13 @@ class AlignmentPassService {
     /**
      * Checks if the {@link ReferenceGenome} is available for this {@link Project} and {@link SeqType}.
      * If it is missing the method returns false, otherwise true.
+     *
+     * @deprecated Just check whether <code>seqTrack.referenceGenome</code> is <code>null</code>.
      */
+    @Deprecated
     public boolean isReferenceGenomeAvailable(SeqTrack seqTrack) {
         notNull(seqTrack, "The input seqTrack of method isReferenceGenomeAvailable is null")
-        return ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndDeprecatedDate(seqTrack.project, seqTrack.seqType, null)
+        return seqTrack.referenceGenome != null
     }
 
 
@@ -89,14 +92,7 @@ class AlignmentPassService {
         notNull(seqTrack, "The input seqTrack of method isExomeEnrichmentKitAvailable is null")
 
         if (seqTrack instanceof ExomeSeqTrack) {
-            ExomeEnrichmentKit exomeEnrichmentKit = seqTrack.exomeEnrichmentKit
-            if (!exomeEnrichmentKit) {
-                return true
-            }
-
-            ReferenceGenome referenceGenome = ReferenceGenomeProjectSeqType.
-                            findByProjectAndSeqTypeAndDeprecatedDate(seqTrack.project, seqTrack.seqType, null).referenceGenome
-            return !(BedFile.findByReferenceGenomeAndExomeEnrichmentKit(referenceGenome, exomeEnrichmentKit))
+            return seqTrack.exomeEnrichmentKit == null || seqTrack.bedFile == null
         } else {
             return false
         }

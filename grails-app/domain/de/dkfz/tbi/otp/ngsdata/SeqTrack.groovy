@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+
 class SeqTrack {
 
     enum DataProcessingState {
@@ -82,6 +84,15 @@ class SeqTrack {
 
     Project getProject() {
         return sample.project
+    }
+
+    /**
+     * @return The {@link ReferenceGenome}, or <code>null</code> if it is unknown.
+     */
+    ReferenceGenome getReferenceGenome() {
+        return atMostOneElement(
+                ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndDeprecatedDateIsNull(project, seqType)
+        )?.referenceGenome
     }
 
     static mapping = {
