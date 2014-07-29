@@ -759,6 +759,9 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         checkNumberOfStoredMd5sums(2)
         checkDestinationFileStructure()
 
+        /* TODO: Test for work-around for OTP-1018. Unfortunately, there is no way to test for
+           readability for "other" since Java 6 does not have PosixFilePermission of the java.nio
+           library. The test can only be implemented after the upgrade to versions >= 7. */
     }
 
     //check if the md5sum was stored properly in the database

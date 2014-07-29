@@ -74,6 +74,11 @@ flock -x ${dest} -c \"mv -f ${temporalQADestinationDir}/* ${qaDestinationDirecto
 rm -rf ${temporalDestinationDir}
 rm -f ${dest}/${inProgressFileName}
 """
+        // Work-around for OTP-1018: Add read permissions to BAM and BAI files to work around a bug
+        // in the CREST tool. The files are still protected by the permissions of the parent directory.
+        text += "chmod o+r ${dest}/*.bam ${dest}/*.bai\n"
+        // End of work-around
+
         text += "echo ${this.class.name} >> ${dirToLog} ; chmod 0644 ${dirToLog}"
         return text
     }
