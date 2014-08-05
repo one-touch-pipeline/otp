@@ -26,8 +26,7 @@ $.otp.sequence = {
         });
 
         $("#sequenceTable").dataTable({
-            sDom: '<i> T rt<"clear">S',
-            oTableTools : $.otp.tableTools,
+            sDom: '<i> rt<"clear">S',
             bFilter: false,
             bProcessing: true,
             bServerSide: true,
