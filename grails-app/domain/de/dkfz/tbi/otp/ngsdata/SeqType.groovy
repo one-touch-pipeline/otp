@@ -22,6 +22,8 @@ class SeqType {
         libraryLayout(blank: false)
         dirName(blank: false)
         alias(nullable: true, blank: false)
+        //For unknown reason the object creation fail, if it is not set as nullable
+        aliasOrName(nullable: true, blank: false)
     }
 
     static mapping = {

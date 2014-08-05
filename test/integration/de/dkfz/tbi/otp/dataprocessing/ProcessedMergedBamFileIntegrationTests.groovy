@@ -61,6 +61,7 @@ class ProcessedMergedBamFileIntegrationTests {
                         dirName: "seq-type-dir"
                         )
         assertNotNull(seqType.save([flush: true]))
+        seqType.refresh()
 
         softwareTool = new SoftwareTool(
                         programName: "name",
