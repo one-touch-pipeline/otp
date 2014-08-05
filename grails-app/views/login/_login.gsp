@@ -1,5 +1,5 @@
 <div id="loginBox">
-    <div id="loginFormBox">
+    <div id="loginFormBox" style="position: absolute;">
         <form id="loginForm" method="POST" action="${createLink(controller: 'j_spring_security_check')}">
 
             <label for="account">${g.message(code: "login.account")}</label>  <br/>
@@ -13,5 +13,5 @@
         </form>
     </div>
 
-    <div class="loginButtonBox"></div>
+    <div class="loginButtonBox" style="position: absolute; top: 250px; left: 0px;"></div>
 </div>

@@ -34,7 +34,7 @@
         <g:render template="/login/login"/>
     </sec:ifNotLoggedIn>
 
-    <div id="content">
+    <div id="content" style="position: absolute; top: 80px; left: 0px;" >
         <g:layoutBody/>
     </div>
 </div>
