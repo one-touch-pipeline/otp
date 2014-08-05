@@ -129,9 +129,7 @@ class SeqTrackService {
                         }
                     }
                 }
-                projections {
-                    count('mockPid')
-                }
+                projections { count('mockPid') }
             }
         } else {
             // shortcut for unfiltered results
@@ -262,44 +260,45 @@ class SeqTrackService {
         notNull(run, "The run argument must not be null.")
 
         // List of seqType names which have to be aligned
-        List<String> seqTypesToAlign = [SeqTypeNames.WHOLE_GENOME.seqTypeName, SeqTypeNames.EXOME.seqTypeName]
+        List<String> seqTypesToAlign = [
+            SeqTypeNames.WHOLE_GENOME.seqTypeName,
+            SeqTypeNames.EXOME.seqTypeName
+        ]
 
         // Find all samples in this run.
-        List<SeqTrack> seqTracks = SeqTrack.withCriteria {
+        List<SeqTrack> seqTracksPerRun = SeqTrack.withCriteria {
             eq("run", run)
             seqType {
                 'in'("name", seqTypesToAlign)
                 eq("libraryLayout", "PAIRED")
             }
         }
-        List<Sample> samples = seqTracks*.sample
-        if (samples.isEmpty()) {
-            return
-        }
-        // Find all SeqTracks for these samples.
-        seqTracks = SeqTrack.findAll(AlignmentPassService.ALIGNABLE_SEQTRACK_HQL +
-                        "AND seqType.name IN (:seqTypesToAlign) AND seqType.libraryLayout = :seqTypeLibraryLayout " +
-                        "AND sample IN (:samples) " +
-                        "AND NOT EXISTS (FROM DataFile WHERE seqTrack = st AND runSegment.align = false)",
-                        [
-                            alignmentState: SeqTrack.DataProcessingState.UNKNOWN,
-                            seqTypesToAlign: seqTypesToAlign,
-                            seqTypeLibraryLayout: "PAIRED",
-                            samples: samples,
-                        ] << AlignmentPassService.ALIGNABLE_SEQTRACK_QUERY_PARAMETERS)
-        /*
-         * ExomeSeqTracks with the kitInfoState "UNKNOWN_VERIFIED" and no kit must not be aligned.
-         */
-        seqTracks = seqTracks.findAll { SeqTrack seqTrack ->
-            !(seqTrack instanceof ExomeSeqTrack) ||
-                            seqTrack.exomeEnrichmentKit ||
-                            seqTrack.kitInfoReliability == InformationReliability.UNKNOWN_UNVERIFIED
-        }
 
-        // Mark the SeqTracks as being ready for alignment.
-        seqTracks.each {
-            it.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
-            it.save(flush: true)
+        seqTracksPerRun.each { SeqTrack seqTrack ->
+            // Find all SeqTracks belonging to the same sample and seqType as the seqTrack in the run which can be aligned.
+            List<SeqTrack> seqTracks = SeqTrack.findAll(AlignmentPassService.ALIGNABLE_SEQTRACK_HQL +
+                            "AND seqType.name =:seqTypeOfSeqTrack AND seqType.libraryLayout = :seqTypeLibraryLayout " +
+                            "AND sample =:sampleOfSeqTrack " +
+                            "AND NOT EXISTS (FROM DataFile WHERE seqTrack = st AND runSegment.align = false)",
+                            [
+                                alignmentState: SeqTrack.DataProcessingState.UNKNOWN,
+                                seqTypeOfSeqTrack: seqTrack.seqType.name,
+                                seqTypeLibraryLayout: "PAIRED",
+                                sampleOfSeqTrack: seqTrack.sample,
+                            ] << AlignmentPassService.ALIGNABLE_SEQTRACK_QUERY_PARAMETERS)
+
+            // ExomeSeqTracks with the kitInfoState "UNKNOWN_VERIFIED" and no kit must not be aligned.
+            seqTracks = seqTracks.findAll {
+                !(it instanceof ExomeSeqTrack) ||
+                                it.exomeEnrichmentKit ||
+                                it.kitInfoReliability == InformationReliability.UNKNOWN_UNVERIFIED
+            }
+
+            // Mark the SeqTracks as being ready for alignment.
+            seqTracks.each {
+                it.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+                it.save(flush: true)
+            }
         }
     }
 
@@ -363,9 +362,7 @@ class SeqTrackService {
         List<SeqTrack> tracks = SeqTrack.withCriteria {
             and {
                 eq("fastqcState", SeqTrack.DataProcessingState.FINISHED)
-                run {
-                    eq("qualityEvaluated", false)
-                }
+                run { eq("qualityEvaluated", false) }
             }
         }
         return tracks*.run
@@ -824,7 +821,10 @@ AND i.id < :seqTrackId
 '''
         Map params = [
             className: Project.class.getName(),
-            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
+            permissions: [
+                BasePermission.READ.getMask(),
+                BasePermission.ADMINISTRATION.getMask()
+            ],
             roles: roles,
             seqTrackId: seqTrack.id
         ]
@@ -873,7 +873,10 @@ AND i.id > :seqTrackId
 '''
         Map params = [
             className: Project.class.getName(),
-            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
+            permissions: [
+                BasePermission.READ.getMask(),
+                BasePermission.ADMINISTRATION.getMask()
+            ],
             roles: roles,
             seqTrackId: seqTrack.id
         ]

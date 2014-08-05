@@ -769,6 +769,26 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2AY.alignmentState)
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2BY.alignmentState)
 
+
+        final ExomeSeqTrack exomeSeqTrack3AY = testData.createExomeSeqTrack(run1)
+        exomeSeqTrack3AY.run = run1
+        exomeSeqTrack3AY.sample = sampleA
+        exomeSeqTrack3AY.seqType = alignableExomeSeqType
+        exomeSeqTrack3AY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
+        assertNotNull(exomeSeqTrack3AY.save(flush: true))
+        addDataFile(exomeSeqTrack3AY)
+
+        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(3, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+
+        seqTrackService.setRunReadyForAlignment(run2)
+        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(3, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack1AY.alignmentState)
+        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2AY.alignmentState)
+        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2BY.alignmentState)
+        assertEquals(SeqTrack.DataProcessingState.UNKNOWN, exomeSeqTrack3AY.alignmentState)
+
         def reset = {
             seqTrack1AY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
             assertNotNull(seqTrack1AY.save(flush: true))
@@ -776,7 +796,12 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
             assertNotNull(seqTrack2AY.save(flush: true))
             seqTrack2BY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
             assertNotNull(seqTrack2BY.save(flush: true))
-            assertEquals(4, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+            seqTrack2AN.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
+            assertNotNull(seqTrack2AN.save(flush: true))
+            exomeSeqTrack3AY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
+            assertNotNull(exomeSeqTrack3AY.save(flush: true))
+            println SeqTrack.findByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN)
+            assertEquals(5, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
             assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
         }
 
@@ -785,7 +810,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         // alignable SeqTrack, other alignable SeqTrack for the sample in another run
         seqTrackService.setRunReadyForAlignment(run1)
         assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
+        assertEquals(3, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack1AY.alignmentState)
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2AY.alignmentState)
 
@@ -793,7 +818,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
         // two alignable SeqTracks, other alignable SeqTrack for the sample in another run
         seqTrackService.setRunReadyForAlignment(run2)
-        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
+        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
         assertEquals(3, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack1AY.alignmentState)
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2AY.alignmentState)
