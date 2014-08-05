@@ -1,9 +1,6 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import static org.junit.Assert.*
-
-import java.text.SimpleDateFormat
-
 import org.apache.commons.io.FileUtils
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.junit.*
@@ -35,32 +32,15 @@ class ErrorLogServiceTests {
         Exception e = new Exception(ERROR_MESSAGE)
         String fullPath = "/tmp/otp/stacktraces/"
         // To test whether calling log method produces error
-        errorLogService.log(e)
-        // To test if md5 is correctly taken as file name
-        String md5Sum = (e.toString()).encodeAsMD5()
-        String fileName = md5Sum + ".xml"
-        // Try to get the file which should be created
-        exceptionStoringFile = new File(fullPath, md5Sum + ".xml")
-        // Create and store new xml file through service
-        errorLogService.contentToXml(e, exceptionStoringFile)
-        // Test if it really is a file
+        String md5SumCalculatedInMethod = errorLogService.log(e)
+        File exceptionStoringFile = new File(fullPath, md5SumCalculatedInMethod + ".xml")
+        // Test if the file exists
         assertTrue(exceptionStoringFile.isFile())
-        // Test if the file's path is the expected one
-        assertEquals(fullPath + fileName , exceptionStoringFile.path)
-        // Modify the xml file
-        errorLogService.addToXml(exceptionStoringFile)
-        def root = new XmlParser().parse(exceptionStoringFile)
-        def timestamps = root.timestamp.findAll{ it }
-        timestamps.each {
-            // Test whether date stored in file is really a date and as such being parsable as Date
-            SimpleDateFormat sdfToDate = new SimpleDateFormat("E MMM d h:m:s Z yyyy", Locale.ENGLISH)
-            Date date = sdfToDate.parse(it.text())
-            assertSame(new Date().class, date.class)
-        }
-        // Number of timestamps in file
-        assertSame(2, timestamps.size())
-        // Test if the root node has correct attributes
-        assertTrue(root.@exceptionMessage == ERROR_MESSAGE)
+        //Test if the content of the file is correct
+        def contentOfFile = new XmlParser().parse(exceptionStoringFile)
+        def timestamps = contentOfFile.timestamp.findAll{ it }
+        assertEquals(1, timestamps.size())
+        assertTrue(contentOfFile.@exceptionMessage == ERROR_MESSAGE)
     }
 
     @Test(expected = RuntimeException)

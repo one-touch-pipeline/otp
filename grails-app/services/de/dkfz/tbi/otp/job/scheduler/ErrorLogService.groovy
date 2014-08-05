@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.job.scheduler
 
 import static org.springframework.util.Assert.*
 import groovy.xml.MarkupBuilder
-
 import org.apache.commons.io.FileUtils
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
@@ -42,8 +41,8 @@ class ErrorLogService {
      * The central method coordinating the service's functionality.
      *
      * The method makes the functionality the service provides publicly available.
-     * The MD5 sum is calculated and taken as name of the file storing
-     * the stacktraces of occurred exceptions.
+     * The MD5 sum of the stacktrace and the error message is calculated and taken as name of the file storing
+     * the stacktrace of occurred exception.
      * Here are the methods triggered forming the xml around contents to be stored
      * and writing the file to the file system.
      *
@@ -52,17 +51,12 @@ class ErrorLogService {
      * @return Unique hash of caught exception.
      */
     public String log(Exception thrownException) {
-        String exceptionElements = ""
+        String exceptionElements = thrownException.getMessage()
         thrownException.stackTrace.each {
             exceptionElements += it.toString()
         }
         String md5sum = (exceptionElements).encodeAsMD5()
-        final stackTracesFile = getStackTracesFile(md5sum)
-        if (stackTracesFile.isFile()) {
-            addToXml(stackTracesFile)
-        } else {
-            contentToXml(thrownException, stackTracesFile)
-        }
+        contentToXml(thrownException, getStackTracesFile(md5sum))
         return md5sum
     }
 
@@ -135,19 +129,5 @@ class ErrorLogService {
         }
         FileUtils.forceMkdir(xmlFile.parentFile)
         writeToFile(xmlFile, writer.toString())
-    }
-
-    /**
-     * Adds a new timestamp to an existent xml file
-     *
-     * @param exceptionFile The exceptionFile to be modified
-     * @return String containing the edited xml file
-     */
-    private void addToXml(File exceptionFile) {
-        def root = new XmlParser().parse(exceptionFile)
-        root.appendNode('timestamp', new Date().toString())
-        StringWriter writer = new StringWriter()
-        new XmlNodePrinter(new PrintWriter(writer)).print(root)
-        writeToFile(exceptionFile, writer.toString())
     }
 }
