@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.ngsqc
 
+import java.util.regex.*
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import java.util.regex.*
 
 /**
  * Service providing methods to parse FastQC files and saving the parsed data to the database
@@ -290,7 +290,7 @@ class FastqcUploadService {
                     fastqcBasicStats.filteredSequences = fields[1] as long
                     break
                 case "Sequence length":
-                    fastqcBasicStats.sequenceLength = fields[1] as int
+                    fastqcBasicStats.sequenceLength = fields[1]
                     break
             }
         }

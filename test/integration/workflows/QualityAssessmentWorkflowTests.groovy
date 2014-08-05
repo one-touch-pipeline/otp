@@ -1,14 +1,12 @@
 package workflows
 
 import static org.junit.Assert.*
-
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
-
-import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
-import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.jobs.qualityAssessment.QualityAssessmentStartJob
+import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
 
 class QualityAssessmentWorkflowTests extends QualityAssessmentAbstractWorkflowTests {
 
@@ -49,32 +47,33 @@ class QualityAssessmentWorkflowTests extends QualityAssessmentAbstractWorkflowTe
             assertNotNull(dataFile.save(flush: true))
 
             FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile(
-                    contentUploaded: true,
-                    dataFile: dataFile)
+                            contentUploaded: true,
+                            dataFile: dataFile)
             assertNotNull(fastqcProcessedFile.save(flush: true))
 
             fastqcBasicStats = new FastqcBasicStatistics(
-                    fileType: "fileType",
-                    encoding: "encoding",
-                    fastqcProcessedFile: fastqcProcessedFile)
+                            fileType: "fileType",
+                            encoding: "encoding",
+                            sequenceLength: "101",
+                            fastqcProcessedFile: fastqcProcessedFile)
             assertNotNull(fastqcBasicStats.save(flush: true))
         }
 
         fastqcBasicStats.totalSequences = totalSequences
 
         AlignmentPass alignmentPass = new AlignmentPass(
-                identifier: 1,
-                seqTrack: seqTrack,
-                description: "test"
-                )
+                        identifier: 1,
+                        seqTrack: seqTrack,
+                        description: "test"
+                        )
         assertNotNull(alignmentPass.save([flush: true]))
 
         ProcessedBamFile processedBamFile = new ProcessedBamFile(
-                alignmentPass: alignmentPass,
-                type: AbstractBamFile.BamType.SORTED,
-                status: AbstractBamFile.State.NEEDS_PROCESSING,
-                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.NOT_STARTED
-                )
+                        alignmentPass: alignmentPass,
+                        type: AbstractBamFile.BamType.SORTED,
+                        status: AbstractBamFile.State.NEEDS_PROCESSING,
+                        qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.NOT_STARTED
+                        )
         assertNotNull(processedBamFile.save([flush: true]))
     }
 

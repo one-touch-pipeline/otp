@@ -1,15 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import static org.junit.Assert.*
 import grails.test.mixin.*
 import grails.test.mixin.support.*
-import grails.test.mixin.domain.DomainClassUnitTestMixin
-import static org.junit.Assert.*
 import org.junit.*
-import grails.util.Environment
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
-import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
@@ -99,18 +96,18 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
         assertNotNull(run.save([flush: true, failOnError: true]))
 
         seqTrack = new SeqTrack(
-            laneId: 0,
-            run: run,
-            sample: sample,
-            seqType: seqType,
-            seqPlatform: seqPlatform,
-            pipelineVersion: softwareTool)
+                        laneId: 0,
+                        run: run,
+                        sample: sample,
+                        seqType: seqType,
+                        seqPlatform: seqPlatform,
+                        pipelineVersion: softwareTool)
         assertNotNull(seqTrack.save([flush: true]))
 
         AlignmentPass alignmentPass = new AlignmentPass(
-            identifier: 0,
-            seqTrack: seqTrack,
-            description: "firstPass")
+                        identifier: 0,
+                        seqTrack: seqTrack,
+                        description: "firstPass")
         assertNotNull(alignmentPass.save([flush: true]))
 
         processedBamFile = new ProcessedBamFile(
@@ -287,19 +284,20 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
         assertNotNull(fileType.save(flush: true))
 
         DataFile dataFile = new DataFile(
-            fileType: fileType,
-            seqTrack: seqTrack)
+                        fileType: fileType,
+                        seqTrack: seqTrack)
         assertNotNull(dataFile.save(flush: true))
 
-       FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile(
-            contentUploaded: true,
-            dataFile: dataFile)
+        FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile(
+                        contentUploaded: true,
+                        dataFile: dataFile)
         assertNotNull(fastqcProcessedFile.save(flush: true))
 
         FastqcBasicStatistics fastqcBasicStats = new FastqcBasicStatistics(
-            fileType: "fileType",
-            encoding: "encoding",
-            fastqcProcessedFile: fastqcProcessedFile)
+                        fileType: "fileType",
+                        encoding: "encoding",
+                        sequenceLength: "101",
+                        fastqcProcessedFile: fastqcProcessedFile)
         assertNotNull(fastqcBasicStats.save(flush: true))
 
         assertNotNull(qualityAssessmentPassService.createPass())
@@ -351,6 +349,7 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
         FastqcBasicStatistics fastqcBasicStats = new FastqcBasicStatistics(
                         fileType: "fileType",
                         encoding: "encoding",
+                        sequenceLength: "101",
                         fastqcProcessedFile: fastqcProcessedFile)
         assertNotNull(fastqcBasicStats.save(flush: true))
 
@@ -369,43 +368,45 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
         assertNotNull(fileType.save(flush: true))
 
         DataFile dataFile = new DataFile(
-            fileType: fileType,
-            seqTrack: seqTrack)
+                        fileType: fileType,
+                        seqTrack: seqTrack)
         assertNotNull(dataFile.save(flush: true))
 
-       FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile(
-            contentUploaded: true,
-            dataFile: dataFile)
+        FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile(
+                        contentUploaded: true,
+                        dataFile: dataFile)
         assertNotNull(fastqcProcessedFile.save(flush: true))
 
         FastqcBasicStatistics fastqcBasicStats = new FastqcBasicStatistics(
-            fileType: FILE_TYPE,
-            encoding: FILE_ENCODING,
-            totalSequences: (fastqcReadCount / 2),
-            fastqcProcessedFile: fastqcProcessedFile)
+                        fileType: FILE_TYPE,
+                        encoding: FILE_ENCODING,
+                        sequenceLength: "101",
+                        totalSequences: (fastqcReadCount / 2),
+                        fastqcProcessedFile: fastqcProcessedFile)
         assertNotNull(fastqcBasicStats.save(flush: true))
 
         dataFile = new DataFile(
-            fileType: fileType,
-            seqTrack: seqTrack)
+                        fileType: fileType,
+                        seqTrack: seqTrack)
         assertNotNull(dataFile.save(flush: true))
 
         fastqcProcessedFile = new FastqcProcessedFile(
-            contentUploaded: true,
-            dataFile: dataFile)
+                        contentUploaded: true,
+                        dataFile: dataFile)
         assertNotNull(fastqcProcessedFile.save(flush: true))
 
         fastqcBasicStats = new FastqcBasicStatistics(
-            fileType: FILE_TYPE,
-            encoding: FILE_ENCODING,
-            totalSequences: (fastqcReadCount / 2),
-            fastqcProcessedFile: fastqcProcessedFile)
+                        fileType: FILE_TYPE,
+                        encoding: FILE_ENCODING,
+                        sequenceLength: "101",
+                        totalSequences: (fastqcReadCount / 2),
+                        fastqcProcessedFile: fastqcProcessedFile)
         assertNotNull(fastqcBasicStats.save(flush: true))
 
         AbstractQualityAssessment qualityAssessmentStatistics = new OverallQualityAssessment(
-            totalReadCounter: bamReadCount,
-            qualityAssessmentPass: qualityAssessmentPass
-        )
+                        totalReadCounter: bamReadCount,
+                        qualityAssessmentPass: qualityAssessmentPass
+                        )
         assertNotNull(qualityAssessmentStatistics.save(flush: true))
     }
 

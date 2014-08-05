@@ -12,7 +12,7 @@ class FastqcBasicStatistics {
     String encoding
     long totalSequences
     long filteredSequences
-    int sequenceLength
+    String sequenceLength
 
     /**
      * This field is in the 'Sequence Duplication Levels' module at the FastQC file
@@ -22,6 +22,7 @@ class FastqcBasicStatistics {
     static constraints = {
         fileType(blank: false)
         encoding(blank: false)
+        sequenceLength(blank: false)
     }
 
     static belongsTo = [
