@@ -1,4 +1,4 @@
-<div id="loginBox">
+<div id="loginBox" style="position: absolute;">
     <div id="loginFormBox" style="position: absolute;">
         <form id="loginForm" method="POST" action="${createLink(controller: 'j_spring_security_check')}">
 
