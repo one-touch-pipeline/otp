@@ -5,15 +5,18 @@ class Project {
     String dirName
     String realmName
 
-   static belongsTo = [
-                   projectGroup: ProjectGroup
-               ]
+    String emailAddressOfContactPerson
+
+    static belongsTo = [
+        projectGroup: ProjectGroup
+    ]
 
     static constraints = {
         name(blank: false, unique: true)
         dirName(blank: false)
         realmName(blank: false)
         projectGroup(nullable: true)
+        emailAddressOfContactPerson (nullable: true)
     }
 
     String toString() {
