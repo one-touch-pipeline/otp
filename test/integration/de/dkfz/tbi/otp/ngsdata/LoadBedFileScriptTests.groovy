@@ -40,6 +40,7 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
         new Input(bedName: "Agilent5withUTRs_chr.bed", refGenName: "hg19", kitName: "Agilent SureSelect V5+UTRs"),
         new Input(bedName: "Agilent5withUTRs_plain.bed", refGenName: "hs37d5", kitName: "Agilent SureSelect V5+UTRs"),
         new Input(bedName: "Agilent5withUTRs_plain_xenograft.bed", refGenName: "hs37d5+mouse", kitName: "Agilent SureSelect V5+UTRs"),
+        new Input(bedName: "nexterarapidcapture_exome_targetedregions.bed", refGenName: "hs37d5", kitName: "Illumina Nextera Rapid"),
         new Input(bedName: "Nimblegen_SeqCap_EZ_Exome_v2_chr.bed", refGenName: "hg19", kitName: "Roche NimbleGen SeqCap EZ Human Exome library v2"),
         new Input(bedName: "Nimblegen_SeqCap_EZ_Exome_v2_plain.bed", refGenName: "hs37d5", kitName: "Roche NimbleGen SeqCap EZ Human Exome library v2"),
         new Input(bedName: "Nimblegen_SeqCap_EZ_Exome_v2_plain_xenograft.bed", refGenName: "hs37d5+mouse", kitName: "Roche NimbleGen SeqCap EZ Human Exome library v2"),
