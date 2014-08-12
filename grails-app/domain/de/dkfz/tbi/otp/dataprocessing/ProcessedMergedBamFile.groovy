@@ -32,7 +32,7 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
         fileOperationStatus validator: { val, obj ->
             return ((val != FileOperationStatus.PROCESSED && obj.md5sum == null) || (val == FileOperationStatus.PROCESSED && obj.md5sum != null))
         }
-        mergingPass nullable: false
+        mergingPass nullable: false, unique: true
     }
 
     Project getProject() {

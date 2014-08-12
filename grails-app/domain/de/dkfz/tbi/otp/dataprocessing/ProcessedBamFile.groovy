@@ -8,6 +8,10 @@ class ProcessedBamFile extends AbstractFileSystemBamFile {
         alignmentPass: AlignmentPass
     ]
 
+    static constraints = {
+        alignmentPass nullable: false, unique: true
+    }
+
     public SeqTrack getSeqTrack() {
         return alignmentPass.seqTrack
     }

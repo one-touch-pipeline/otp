@@ -305,8 +305,14 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testCreatePassWithTwoCandidates() {
+        AlignmentPass alignmentPass1 = new AlignmentPass(
+                identifier: 1,
+                seqTrack: seqTrack,
+                description: "firstPass")
+        assertNotNull(alignmentPass1.save([flush: true]))
+
         ProcessedBamFile processedBamFile2 = new ProcessedBamFile(
-                        alignmentPass: processedBamFile.alignmentPass,
+                        alignmentPass: alignmentPass1,
                         fileExists: true,
                         type: BamType.SORTED,
                         qualityAssessmentStatus: QaProcessingStatus.NOT_STARTED,

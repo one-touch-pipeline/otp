@@ -165,6 +165,9 @@ class MergingJobCreateCommandTests {
         assertEquals(createCommandOutputExp, createCommandOutputAct)
     }
 
+    /**
+     * Merging set contains two {@link ProcessedBamFile}s.
+     */
     @Test
     void testCreateCommandTwoBamFiles() {
         createMergingSetAssignment("2")
@@ -184,14 +187,17 @@ class MergingJobCreateCommandTests {
         assertEquals(createCommandOutputExp, createCommandOutputAct)
     }
 
+    /**
+     * Merging set contains one {@link ProcessedBamFile} and one {@link ProcessedMergedBamFile}.
+     */
     @Test
     void testCreateCommandBamFileWithProcessedMergedBamFile() {
-        createMergedMergingSetAssignment("2")
+        final ProcessedMergedBamFile pmbf = createMergedMergingSetAssignment(mergingSet, 2).bamFile  // Any dummy merging set could be used as the argument instead of mergingSet.
         String tempDirExp = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
         String createTempDirExp = "mkdir -p -m 2750 ${tempDirExp}"
         String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
         String picardExp = "picard.sh MarkDuplicates"
-        String inputFilePathExp = " I=${basePathAlignment}//run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_libraryLayout.sorted.bam I=${basePathMerging}//name_1/seqType_1/library/DEFAULT/0/pass0/name_1_pid_1_seqType_1_library_merged.mdup.bam"
+        String inputFilePathExp = " I=${basePathAlignment}//run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_libraryLayout.sorted.bam I=${basePathMerging}//name_1/seqType_1/library/DEFAULT/0/pass${pmbf.mergingPass.identifier}/name_1_pid_1_seqType_1_library_merged.mdup.bam"
         String outputFilePathExp = "${basePathMergingOutput}/name_1_pid_1_seqType_1_library_merged.mdup.bam"
         String metricsPathExp = "${basePathMergingOutput}/name_1_pid_1_seqType_1_library_merged.mdup_metrics.txt"
         String baiFilePath = "${basePathMergingOutput}/name_1_pid_1_seqType_1_library_merged.mdup.bai"
@@ -203,15 +209,18 @@ class MergingJobCreateCommandTests {
         assertEquals(createCommandOutputExp, createCommandOutputAct)
     }
 
+    /**
+     * Merging set contains two {@link ProcessedBamFile}s and one {@link ProcessedMergedBamFile}.
+     */
     @Test
     void testCreateCommandTwoBamFileWithProcessedMergedBamFile() {
         createMergingSetAssignment("2")
-        createMergedMergingSetAssignment("3")
+        final ProcessedMergedBamFile pmbf = createMergedMergingSetAssignment(mergingSet, 3).bamFile  // Any dummy merging set could be used as the argument instead of mergingSet.
         String tempDirExp = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
         String createTempDirExp = "mkdir -p -m 2750 ${tempDirExp}"
         String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
         String picardExp = "picard.sh MarkDuplicates"
-        String inputFilePathExp = " I=${basePathAlignment}//run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_libraryLayout.sorted.bam I=${basePathAlignment}//run_2_laneId_2/pass2/name_1_run_2_s_laneId_2_libraryLayout.sorted.bam I=${basePathMerging}//name_1/seqType_1/library/DEFAULT/0/pass0/name_1_pid_1_seqType_1_library_merged.mdup.bam"
+        String inputFilePathExp = " I=${basePathAlignment}//run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_libraryLayout.sorted.bam I=${basePathAlignment}//run_2_laneId_2/pass2/name_1_run_2_s_laneId_2_libraryLayout.sorted.bam I=${basePathMerging}//name_1/seqType_1/library/DEFAULT/0/pass${pmbf.mergingPass.identifier}/name_1_pid_1_seqType_1_library_merged.mdup.bam"
         String outputFilePathExp = "${basePathMergingOutput}/name_1_pid_1_seqType_1_library_merged.mdup.bam"
         String metricsPathExp = "${basePathMergingOutput}/name_1_pid_1_seqType_1_library_merged.mdup_metrics.txt"
         String baiFilePath = "${basePathMergingOutput}/name_1_pid_1_seqType_1_library_merged.mdup.bai"
@@ -273,17 +282,32 @@ class MergingJobCreateCommandTests {
         assertNotNull(mergingSetAssignment.save([flush: true, failOnError: true]))
     }
 
-    private MergingSetAssignment createMergedMergingSetAssignment(String identifier) {
+    /**
+     * Creates a new {@link MergingPass} and a new {@link ProcessedMergedBamFile} and assigns the latter to
+     * {@link #mergingSet}.
+     *
+     * @param mergingSet The merging set that the new merging pass belongs to.
+     * @param identifier The identifier of the new merging pass.
+     */
+    private MergingSetAssignment createMergedMergingSetAssignment(MergingSet mergingSet, int identifier) {
+        MergingPass mergingPass1 = new MergingPass(
+                identifier: identifier,
+                mergingSet: mergingSet
+        )
+        assertNotNull(mergingPass1.save([flush: true, failOnError: true]))
+
         ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
-                        mergingPass: mergingPass,
+                        mergingPass: mergingPass1,
                         type: BamType.SORTED
                         )
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
 
         MergingSetAssignment mergingSetAssignment = new MergingSetAssignment(
-                        mergingSet: mergingSet,
+                        mergingSet: this.mergingSet,
                         bamFile: processedMergedBamFile
                         )
         assertNotNull(mergingSetAssignment.save([flush: true, failOnError: true]))
+
+        return mergingSetAssignment
     }
 }

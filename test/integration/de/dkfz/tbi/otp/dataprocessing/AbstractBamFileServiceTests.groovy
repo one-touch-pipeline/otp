@@ -12,9 +12,9 @@ class AbstractBamFileServiceTests {
 
     SeqCenter seqCenter
     Run run
+    SeqTrack seqTrack
     SeqPlatform seqPlatform
     MergingSet mergingSet
-    MergingPass mergingPass
     AlignmentPass alignmentPass
     ProcessedBamFile processedBamFile
 
@@ -77,7 +77,7 @@ class AbstractBamFileServiceTests {
         run = createRun("run")
         assertNotNull(run.save([flush: true]))
 
-        SeqTrack seqTrack = new SeqTrack(
+        seqTrack = new SeqTrack(
                         laneId: "0",
                         run: run,
                         sample: sample,
@@ -101,18 +101,13 @@ class AbstractBamFileServiceTests {
                         )
         assertNotNull(mergingSet.save([flush: true]))
 
-        mergingPass = new MergingPass(
+        MergingPass mergingPass = new MergingPass(
                         identifier: 0,
                         mergingSet: mergingSet
                         )
         assertNotNull(mergingPass.save([flush: true]))
 
-        alignmentPass = new AlignmentPass(
-                        identifier: 0,
-                        seqTrack: seqTrack,
-                        description: "test"
-                        )
-        assertNotNull(alignmentPass.save([flush: true]))
+        alignmentPass = createAndSaveAlignmentPass(0)
 
         processedBamFile = new ProcessedBamFile(
                         alignmentPass: alignmentPass,
@@ -134,7 +129,6 @@ class AbstractBamFileServiceTests {
     @After
     void tearDown() {
         mergingSet = null
-        mergingPass = null
         alignmentPass = null
     }
 
@@ -153,7 +147,7 @@ class AbstractBamFileServiceTests {
         assertEquals(abstractBamFilesExp, abstractBamFilesAct)
 
         ProcessedBamFile processedBamFile1 = new ProcessedBamFile(
-                        alignmentPass: alignmentPass,
+                        alignmentPass: createAndSaveAlignmentPass(1),
                         type: BamType.SORTED,
                         fileExists: true
                         )
@@ -171,7 +165,7 @@ class AbstractBamFileServiceTests {
         assertEquals(abstractBamFilesExp, abstractBamFilesAct)
 
         ProcessedBamFile processedBamFile2 = new ProcessedBamFile(
-                        alignmentPass: alignmentPass,
+                        alignmentPass: createAndSaveAlignmentPass(2),
                         type: BamType.SORTED,
                         fileExists: true
                         )
@@ -215,7 +209,7 @@ class AbstractBamFileServiceTests {
         assertEquals(abstractBamFilesExp, abstractBamFilesAct)
 
         ProcessedBamFile processedBamFile1 = new ProcessedBamFile(
-                        alignmentPass: alignmentPass,
+                        alignmentPass: createAndSaveAlignmentPass(1),
                         type: BamType.SORTED,
                         fileExists: true
                         )
@@ -233,7 +227,7 @@ class AbstractBamFileServiceTests {
         assertEquals(abstractBamFilesExp, abstractBamFilesAct)
 
         ProcessedBamFile processedBamFile2 = new ProcessedBamFile(
-                        alignmentPass: alignmentPass,
+                        alignmentPass: createAndSaveAlignmentPass(2),
                         type: BamType.SORTED,
                         fileExists: true
                         )
@@ -262,8 +256,14 @@ class AbstractBamFileServiceTests {
     }
 
     public ProcessedMergedBamFile createProcessedMergedBamFile() {
+        MergingPass mergingPass1 = new MergingPass(
+                identifier: 1,
+                mergingSet: mergingSet
+        )
+        assertNotNull(mergingPass1.save([flush: true]))
+
         ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
-                        mergingPass: mergingPass,
+                        mergingPass: mergingPass1,
                         fileExists: true,
                         type: BamType.MDUP
                         )
@@ -284,4 +284,13 @@ class AbstractBamFileServiceTests {
 
     }
 
+    private AlignmentPass createAndSaveAlignmentPass(final int identifier) {
+        final AlignmentPass alignmentPass = new AlignmentPass(
+                identifier: identifier,
+                seqTrack: seqTrack,
+                description: "test"
+        )
+        assertNotNull(alignmentPass.save([flush: true]))
+        return alignmentPass
+    }
 }

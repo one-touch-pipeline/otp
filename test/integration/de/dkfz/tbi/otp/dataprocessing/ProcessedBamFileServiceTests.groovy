@@ -305,8 +305,14 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
 
     @Test
     void testRelatedBamFileIsNotProcessable() {
+        final AlignmentPass alignmentPass2 = new AlignmentPass(
+                identifier: 2,
+                seqTrack: seqTrack,
+                description: "test"
+        )
+        assertNotNull(alignmentPass2.save([flush: true, failOnError: true]))
         final ProcessedBamFile processedBamFile2 = new ProcessedBamFile(
-            alignmentPass: processedBamFile.alignmentPass,
+            alignmentPass: alignmentPass2,
             type: BamType.SORTED,
             qualityAssessmentStatus: QaProcessingStatus.FINISHED,
             status: State.NEEDS_PROCESSING
