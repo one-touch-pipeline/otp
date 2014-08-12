@@ -10,60 +10,88 @@ import de.dkfz.tbi.otp.ngsdata.*
  */
 class ConfigPerProjectAndSeqType {
 
-    /**
-     * This domain is very general and can be used for many different purposes.
-     * Therefore the purpose for the config files has to be defined.
-     * The possible purposes are listed in this enum.
-     */
-    enum Purpose {
-        SNV
-    }
+	/**
+	 * This domain is very general and can be used for many different purposes.
+	 * Therefore the purpose for the config files has to be defined.
+	 * The possible purposes are listed in this enum.
+	 */
+	enum Purpose {
+		SNV
+	}
 
 
-    static belongsTo = [
-        project: Project,
-        seqType: SeqType
-    ]
+	static belongsTo = [
+		project: Project,
+		seqType: SeqType
+	]
 
-    /**
-     * In this String the complete content of the config file is stored.
-     * This solution was chosen to be as flexible as possible in case the style of the config file changes.
-     */
-    String configuration
+	/**
+	 * In this String the complete content of the config file is stored.
+	 * This solution was chosen to be as flexible as possible in case the style of the config file changes.
+	 */
+	String configuration
 
-    /**
-     * The specification of the purpose of this config file.
-     */
-    Purpose purpose
+	/**
+	 * The specification of the purpose of this config file.
+	 */
+	Purpose purpose
 
-    /**
-     * These properties are handled automatically by grails.
-     */
-    Date dateCreated
-    Date lastUpdated
+	/**
+	 * These properties are handled automatically by grails.
+	 */
+	Date dateCreated
+	Date lastUpdated
 
-    /**
-     * When changes appear in the configuration, a new ConfigPerProjectAndSeqType entry is created and the old entry is set to obsolete.
-     */
-    Date obsoleteDate
-    /**
-     * When a previous config files exists, it should be referred here.
-     * This is needed for tracking.
-     */
-    ConfigPerProjectAndSeqType previousConfig
+	/**
+	 * When changes appear in the configuration, a new ConfigPerProjectAndSeqType entry is created and the old entry is set to obsolete.
+	 */
+	Date obsoleteDate
+	/**
+	 * When a previous config files exists, it should be referred here.
+	 * This is needed for tracking.
+	 */
+	ConfigPerProjectAndSeqType previousConfig
 
-    static constraints = {
-        previousConfig nullable: true, validator: { val, obj ->
-            return (val == null || val != null && val.obsoleteDate != null)
-        }
-        obsoleteDate nullable: true
-        configuration blank: false
-    }
+	static constraints = {
+		previousConfig nullable: true, validator: { val, obj ->
+			return (val == null || val != null && val.obsoleteDate != null)
+		}
+		obsoleteDate nullable: true
+		configuration blank: false
+	}
 
-    static mapping = {
-        configuration type: 'text'
-        project index: 'config_per_project_and_seq_type_project_idx'
-        seqType index: 'config_per_project_and_seq_type_seq_type_idx'
-        previousConfig index: 'config_per_project_and_seq_type_previous_config_idx'
-    }
+	static mapping = {
+		configuration type: 'text'
+		project index: 'config_per_project_and_seq_type_project_idx'
+		seqType index: 'config_per_project_and_seq_type_seq_type_idx'
+		previousConfig index: 'config_per_project_and_seq_type_previous_config_idx'
+	}
+
+	/**
+	 * Creates a ConfigPerProjectAndSeqType for the specified project, seqType, purpose which holds
+	 * the content of the configFile in the property configuration
+	 *
+	 * This method has to be called in the groovy console:
+	 * <pre>
+	 * import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+	 * import de.dkfz.tbi.otp.ngsdata.*
+	 * import de.dkfz.tbi.otp.dataprocessing.snvcalling.ConfigPerProjectAndSeqType.Purpose
+	 *
+	 * Project project = Project.findByName("projectName")
+	 * SeqType seqType = SeqType.findByNameAndLibraryLayout("SeqTypeName", "PAIRED")
+	 * File configFile = new File("PathToConfigFile")
+	 *
+	 * ConfigPerProjectAndSeqType.createFromFile(project, seqType, Purpose.SNV, configFile)
+	 * </pre>
+	 */
+	static ConfigPerProjectAndSeqType createFromFile(Project project, SeqType seqType, Purpose purpose, File configFile) {
+		ConfigPerProjectAndSeqType configPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
+				project: project,
+				seqType: seqType,
+				purpose: purpose,
+				configuration: configFile.text
+				)
+		configPerProjectAndSeqType.save(flush: true)
+		return configPerProjectAndSeqType
+	}
 }
