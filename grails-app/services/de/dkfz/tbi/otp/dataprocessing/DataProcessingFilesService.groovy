@@ -1,10 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 import static org.springframework.util.Assert.notNull
+import de.dkfz.tbi.otp.ngsdata.*
 
 class DataProcessingFilesService {
 
@@ -51,9 +49,6 @@ class DataProcessingFilesService {
         return "${outputBaseDir}/results_per_pid/${individual.pid}/${postfix}"
     }
 
-    /**
-     * There is no unit or integration test for this method.
-     */
     public long deleteOldProcessingFiles(final Object passService, final String passTypeName, final Date createdBefore, final long millisMaxRuntime, final Closure<Collection> passesFunc) {
         notNull passService
         notNull passTypeName
@@ -85,8 +80,6 @@ class DataProcessingFilesService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * If there are inconsistencies, details are logged to the thread log (see {@link LogThreadLocal}).
      *
      * @param dbFile Any object with properties fileExists, deletionDate and dateFromFileSystem.
@@ -121,8 +114,6 @@ class DataProcessingFilesService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Checks consistency between the files in the processing directory and the files in the final destination (= project
      * folder) as a preparation for deleting the files in the processing directory.
      *
@@ -163,8 +154,6 @@ class DataProcessingFilesService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Deletes processing files. Sets fileExists to <code>false</code> and deletionDate to the current time.
      *
      * @param dbFile The database object representing the processing file that shall be deleted. Must have
@@ -198,8 +187,6 @@ class DataProcessingFilesService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * @return The number of bytes that have been freed on the file system.
      */
     public long deleteProcessingFiles(final Project project, final File processingDirectory, final Collection<String> fileNames) {
@@ -214,8 +201,6 @@ class DataProcessingFilesService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * @return The number of bytes that have been freed on the file system.
      */
     public long deleteProcessingFilesAndDirectory(final Project project, final File processingDirectory, final Collection<String> fileNames) {
@@ -228,8 +213,6 @@ class DataProcessingFilesService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Deletes the specified file if it exists. Otherwise logs a warning.
      * @return The number of freed bytes (i.e. the size of the file if it existed, otherwise 0).
      */
@@ -240,8 +223,6 @@ class DataProcessingFilesService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Deletes the specified file if it exists. Otherwise logs a warning.
      * @return The number of freed bytes (i.e. the size of the file if it existed, otherwise 0).
      */
@@ -259,8 +240,6 @@ class DataProcessingFilesService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Deletes the specified directory if it exists and is empty. If it does not exist, logs a warning. If it is not
      * empty, logs an error.
      */
@@ -271,8 +250,6 @@ class DataProcessingFilesService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Deletes the specified directory if it exists and is empty. If it does not exist, logs a warning. If it is not
      * empty, logs an error.
      */
