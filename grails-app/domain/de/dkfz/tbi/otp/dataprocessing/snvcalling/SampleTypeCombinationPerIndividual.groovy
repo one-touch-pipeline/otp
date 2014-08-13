@@ -24,6 +24,13 @@ class SampleTypeCombinationPerIndividual {
     SampleType sampleType2
 
     /**
+     * This flag shows that a pair of two sample types has to be processed.
+     * When creating an SampleTypeCombinationPerIndividual instance for one pair it is set to true per default.
+     * To rerun the processing for one pair it has to be set to true again.
+     */
+    boolean needsProcessing = true
+
+    /**
      * These properties are handled automatically by grails.
      */
     Date dateCreated
@@ -37,7 +44,5 @@ class SampleTypeCombinationPerIndividual {
         sampleType2 validator: { val, obj ->
             return val != obj.sampleType1
         }
-
-
     }
 }

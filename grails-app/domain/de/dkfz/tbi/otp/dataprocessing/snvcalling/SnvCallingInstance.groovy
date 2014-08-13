@@ -16,9 +16,13 @@ class SnvCallingInstance {
     /**
      * Name of the config file which contains the configuration for this snv-calling instance.
      * It is located next to the results of the snv-calling for which it was the base.
-     * TODO: how to store it exactly -> OTP-827
      */
     String configFileName
+
+    /**
+     * Refers to the config file which is stored in the database and is used as a basis for all the files in the filesystem.
+     */
+    ConfigPerProjectAndSeqType config
 
     ProcessedMergedBamFile tumorBamFile
 
@@ -40,7 +44,6 @@ class SnvCallingInstance {
 
 
     File getConfigFile() {
-        //TODO OTP-827: update this method once we are sure where the config-file ends up after doing the options-framework changes
         return new File(configFileName)
     }
 

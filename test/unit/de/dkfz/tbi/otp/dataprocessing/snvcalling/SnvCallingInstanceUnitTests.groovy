@@ -14,7 +14,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  */
 @TestFor(SnvCallingInstance)
 @Mock([MergingPass, MergingSet, MergingWorkPackage,
-    Sample, SampleType, SeqType, Individual, Project, ProcessedMergedBamFile])
+    Sample, SampleType, SeqType, Individual, Project, ProcessedMergedBamFile, ConfigPerProjectAndSeqType])
 class SnvCallingInstanceUnitTests {
 
     TestData testData = new TestData()
@@ -53,7 +53,8 @@ class SnvCallingInstanceUnitTests {
 
     @Test
     void testConstraintsAllFine() {
-        SnvCallingInstance instance = createSnvCallingInstance([tumorBamFile: bamFileTumor, controlBamFile: bamFileControl])
+        SnvCallingInstance instance = createSnvCallingInstance([tumorBamFile: bamFileTumor,
+            controlBamFile: bamFileControl, config: new ConfigPerProjectAndSeqType()])
         assert instance.validate()
     }
 
@@ -62,7 +63,8 @@ class SnvCallingInstanceUnitTests {
     void testSeqTypeConstraint() {
         bamFileTumor.mergingPass.mergingSet.mergingWorkPackage.seqType = new SeqType()
 
-        SnvCallingInstance differentSeqTypeInstance = createSnvCallingInstance([tumorBamFile: bamFileTumor, controlBamFile: bamFileControl])
+        SnvCallingInstance differentSeqTypeInstance = createSnvCallingInstance([tumorBamFile: bamFileTumor,
+            controlBamFile: bamFileControl, config: new ConfigPerProjectAndSeqType()])
         assert !differentSeqTypeInstance.validate()
     }
 
@@ -71,10 +73,18 @@ class SnvCallingInstanceUnitTests {
     void testIndividualConstraint() {
         bamFileTumor.mergingPass.mergingSet.mergingWorkPackage.sample.individual = new Individual()
 
-        SnvCallingInstance differentIndividualInstance = createSnvCallingInstance([tumorBamFile: bamFileTumor, controlBamFile: bamFileControl])
+        SnvCallingInstance differentIndividualInstance = createSnvCallingInstance([tumorBamFile: bamFileTumor,
+            controlBamFile: bamFileControl, config: new ConfigPerProjectAndSeqType()])
         assert !differentIndividualInstance.validate()
     }
 
+
+    @Test
+    void testNoConfigPerProjectAndSeqType() {
+        SnvCallingInstance instance = createSnvCallingInstance([tumorBamFile: bamFileTumor,
+            controlBamFile: bamFileControl])
+        assert !instance.validate()
+    }
 
     SnvCallingInstance createSnvCallingInstance(Map properties = [:]) {
         return new SnvCallingInstance([
@@ -87,30 +97,30 @@ class SnvCallingInstanceUnitTests {
 
     ProcessedMergedBamFile createProcessedMergedBamFile(Individual individual, SeqType seqType) {
         SampleType sampleType = new SampleType(
-                        name: "tumor")
+                name: "tumor")
         sampleType.save(flush: true)
 
         Sample sample = new Sample (
-                        individual: individual,
-                        sampleType: sampleType)
+                individual: individual,
+                sampleType: sampleType)
         sample.save(flush: true)
 
         MergingWorkPackage workPackage = new MergingWorkPackage(
-                        sample: sample)
+                sample: sample)
         workPackage.save(flush: true)
 
         MergingSet mergingSet = new MergingSet(
-                        mergingWorkPackage: workPackage)
+                mergingWorkPackage: workPackage)
         mergingSet.save(flush: true)
 
         MergingPass mergingPass = new MergingPass(
-                        identifier: 1,
-                        mergingSet: mergingSet)
+                identifier: 1,
+                mergingSet: mergingSet)
         mergingPass.save(flush: true)
 
         ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile(
-                        type: AbstractBamFile.BamType.SORTED,
-                        mergingPass: mergingPass)
+                type: AbstractBamFile.BamType.SORTED,
+                mergingPass: mergingPass)
         bamFile.save(flush: true)
 
         return bamFile
