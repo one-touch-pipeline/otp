@@ -942,7 +942,7 @@ class SchedulerService {
      *      any job.
      */
     public Job getJobExecutedByCurrentThread() {
-        return jobByThread.get()
+		return jobByThread.get()
     }
 
     /**

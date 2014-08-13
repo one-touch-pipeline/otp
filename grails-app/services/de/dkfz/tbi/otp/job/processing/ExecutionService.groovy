@@ -88,24 +88,22 @@ class ExecutionService {
      * @param realm The realm which identifies the host
      * @param text The script to be run a pbs system
      * @param jobIdentifier the name of a job to take job-cluster specific parameters
-     * @param processingStep the ProcessingStep of the calling job. If <code>null</code>, job status logging
-     *          is disabled.
+     * @param qsubParameter The parameter which are needed for some qsub commands and can not be included in the text parameter
+     * The qsubParameter must be in JSON format!
      * @return what the server sends back
      * @throws NullPointerException if a job identifier is provided, but no PBS option is defined for this
      *          job identifier and the cluster ({@link Realm#cluster}) of the {@link Realm}
      * @see PbsOptionMergingService#mergePbsOptions(Realm, String)
      */
-    public String executeJob(Realm realm, String text, String jobIdentifier = null, ProcessingStep processingStep) {
+    public String executeJob(Realm realm, String text, String jobIdentifier = null, String qsubParameters = "") {
         if (!text) {
             throw new ProcessingException("No job text specified.")
         }
         notNull realm, 'No realm specified.'
 
-        if (!processingStep) {
-            processingStep = schedulerService.jobExecutedByCurrentThread.processingStep
-        }
+        ProcessingStep processingStep = schedulerService.jobExecutedByCurrentThread.processingStep
 
-        String pbsOptions = pbsOptionMergingService.mergePbsOptions(realm, jobIdentifier)
+        String pbsOptions = pbsOptionMergingService.mergePbsOptions(realm, jobIdentifier, qsubParameters)
         String scriptText = """
 #PBS -S /bin/bash
 #PBS -N ${pbsJobDescription(processingStep)}
@@ -265,7 +263,7 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
         channel.connect()
         byte[] tmp = new byte[1024]
         List<String> values = []
-        while (true){
+        while (true) {
             while (inputStream.available() > 0) {
                 int i = inputStream.read(tmp, 0, 1024)
                 if (i < 0) {
@@ -428,7 +426,13 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
         String psId  = processingStep.id
         String psClass = processingStep.getNonQualifiedJobClass()
         String psWorkflow = processingStep.process.jobExecutionPlan.toString()
-        return ['otp', env, psWorkflow, psId, psClass].findAll().join('_')
+        return [
+            'otp',
+            env,
+            psWorkflow,
+            psId,
+            psClass
+        ].findAll().join('_')
     }
 
 }

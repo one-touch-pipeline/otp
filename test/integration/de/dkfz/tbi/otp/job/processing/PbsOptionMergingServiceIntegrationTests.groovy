@@ -13,6 +13,9 @@ class PbsOptionMergingServiceIntegrationTests extends AbstractIntegrationTest {
 
     ProcessingOptionService processingOptionService
 
+
+    final String QSUB_PARAMETERS = "{-l: {nodes: '1:ppn=6:lsdf', walltime: '50:00:00', mem: '3g'}, -q: convey}"
+
     @Before
     void setUp() {
     }
@@ -91,13 +94,22 @@ class PbsOptionMergingServiceIntegrationTests extends AbstractIntegrationTest {
         realm = createRealm("{}", Realm.Cluster.DKFZ)
         processingOption = createProcessingOption("job_bq", "{}", Realm.Cluster.BIOQUANT)
         shouldFail(IllegalArgumentException.class, { pbsOptionMergingService.mergePbsOptions(realm, "job_bq") })
+
+        processingOption = createProcessingOption("job_dkfz", "{}", Realm.Cluster.DKFZ)
+        assertEquals("-q convey -a b -l nodes=1:ppn=6:lsdf -l mem=3g -l walltime=50:00:00 ", pbsOptionMergingService.mergePbsOptions(realm_dkfz, "job_dkfz", QSUB_PARAMETERS))
+
+        processingOption = createProcessingOption("job_dkfz", "{-a: c}", Realm.Cluster.DKFZ)
+        assertEquals("-q convey -a c -l nodes=1:ppn=6:lsdf -l mem=3g -l walltime=50:00:00 ", pbsOptionMergingService.mergePbsOptions(realm_dkfz, "job_dkfz", QSUB_PARAMETERS))
+
+        processingOption = createProcessingOption("job_dkfz", "{-q: other_convey}", Realm.Cluster.DKFZ)
+        assertEquals("-q convey -a b -l nodes=1:ppn=6:lsdf -l mem=3g -l walltime=50:00:00 ", pbsOptionMergingService.mergePbsOptions(realm_dkfz, "job_dkfz", QSUB_PARAMETERS))
     }
 
     private Realm createRealm(String pbsOptions = "{}", Realm.Cluster cluster = Realm.Cluster.DKFZ) {
         Realm realm = DomainFactory.createRealmDataManagementDKFZ([
             cluster: cluster,
             pbsOptions: pbsOptions,
-            ])
+        ])
         assertNotNull(realm.save())
         return realm
     }

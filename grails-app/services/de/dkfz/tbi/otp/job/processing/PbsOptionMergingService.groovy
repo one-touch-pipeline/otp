@@ -41,21 +41,27 @@ class PbsOptionMergingService {
      * @param realm the realm the default PBS option should be take from
      * @param jobIdentifier the job name, if the job needs specific PBS options for execution,
      *          or null, if the default PBS option of the realm is sufficient for the job.
+     * @param qsubParameter The parameter which are needed for some qsub commands and can not be included in the text parameter
+     * The qsubParameter must be in JSON format!
      * @return the created PBS option String.
      * @throws NullPointerException if a job identifier is provided, but no PBS option is defined for this
      *          job identifier and the cluster ({@link Realm#cluster}) of the {@link Realm}
      */
-    public String mergePbsOptions(Realm realm, String jobIdentifier = null) {
-        Map mapRealm = jsonStringToMap(realm.pbsOptions)
+    public String mergePbsOptions(Realm realm, String jobIdentifier = null, String qsubParameters = "") {
+        Map allParameter = jsonStringToMap(realm.pbsOptions)
         if (jobIdentifier != null) {
             String key = PBS_PREFIX + jobIdentifier
             String cluster = realm.cluster
             ProcessingOption processingOption = processingOptionService.findOptionObject(key, cluster, null)
             Assert.notNull(processingOption, "No processing option is defined for job ${key} and cluster ${cluster}")
             Map mapJob = jsonStringToMap(processingOption.value)
-            this.mergeHelper(mapRealm, mapJob)
+            allParameter = this.mergeHelper(allParameter, mapJob)
         }
-        String ret = mapToPbsOptions(mapRealm)
+        if (qsubParameters) {
+            Map mapQsubParameter = jsonStringToMap(qsubParameters)
+            allParameter = this.mergeHelper(allParameter, mapQsubParameter)
+        }
+        String ret = mapToPbsOptions(allParameter)
         return ret
     }
 

@@ -130,7 +130,7 @@ class DomainFactory {
         assert jobDefinition.save()
         final Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "DontCare", startJobVersion: "1")
         assert process.save()
-        final ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        final ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process, jobClass: "de.dkfz.tbi.otp.job.jobs.alignment.BwaPairingAndSortingJob")
         assert step.save()
         final ProcessingStepUpdate update = createProcessingStepUpdate(step, ExecutionState.CREATED)
         assert update.save(flush: true)
