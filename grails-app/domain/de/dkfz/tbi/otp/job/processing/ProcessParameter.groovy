@@ -6,6 +6,7 @@ class ProcessParameter {
     Process process
 
     static constraints = {
+        process(nullable: false, unique: true)
         className(nullable: true)
     }
 
