@@ -36,9 +36,9 @@ class SampleTypeCombinationPerIndividualUnitTests {
     void testSaveSnvCombinationPerIndividual() {
         SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual()
         sampleCombinationPerIndividual.individual = new Individual()
+        sampleCombinationPerIndividual.seqType = new SeqType()
         sampleCombinationPerIndividual.sampleType1 = new SampleType()
         sampleCombinationPerIndividual.sampleType2 = new SampleType()
-        sampleCombinationPerIndividual.seqType = new SeqType()
         assertTrue(sampleCombinationPerIndividual.validate())
     }
 }

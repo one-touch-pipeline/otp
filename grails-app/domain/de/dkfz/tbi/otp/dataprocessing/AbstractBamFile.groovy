@@ -70,6 +70,10 @@ abstract class AbstractBamFile {
     boolean hasInsertSizePlot = false
     boolean hasMetricsFile = false
     boolean withdrawn = false
+
+    /**
+     * Coverage without N of the BamFile
+     */
     // Has to be from Type Double so that it can be nullable
     Double coverage
 

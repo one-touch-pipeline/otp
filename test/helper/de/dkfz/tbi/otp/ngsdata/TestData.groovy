@@ -3,6 +3,9 @@ package de.dkfz.tbi.otp.ngsdata
 import static org.junit.Assert.*
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType;
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus;
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual;
 import de.dkfz.tbi.otp.ngsdata.RunSegment.DataFormat
 import de.dkfz.tbi.otp.ngsdata.RunSegment.FilesStatus
 
@@ -238,14 +241,14 @@ class TestData {
 
     ExomeSeqTrack createExomeSeqTrack(Run run) {
         ExomeSeqTrack exomeSeqTrack = new ExomeSeqTrack(
-                        laneId: "laneId",
-                        run: run,
-                        sample: sample,
-                        seqType: exomeSeqType,
-                        seqPlatform: seqPlatform,
-                        pipelineVersion: softwareTool,
-                        exomeEnrichmentKit: null
-                        )
+                laneId: "laneId",
+                run: run,
+                sample: sample,
+                seqType: exomeSeqType,
+                seqPlatform: seqPlatform,
+                pipelineVersion: softwareTool,
+                exomeEnrichmentKit: null
+                )
         assertNotNull(exomeSeqTrack.save())
         return exomeSeqTrack
     }
@@ -253,8 +256,8 @@ class TestData {
 
     ExomeEnrichmentKit createEnrichmentKit(String name) {
         ExomeEnrichmentKit exomeEnrichmentKit = new ExomeEnrichmentKit(
-                        name: name
-                        )
+                name: name
+                )
         assertNotNull(exomeEnrichmentKit.save())
         return exomeEnrichmentKit
     }
@@ -262,19 +265,19 @@ class TestData {
 
     BedFile createBedFile(ReferenceGenome referenceGenome, ExomeEnrichmentKit exomeEnrichmentKit) {
         BedFile bedFile = new BedFile (
-                        fileName: "BedFile",
-                        targetSize: 10000000,
-                        referenceGenome: referenceGenome,
-                        exomeEnrichmentKit: exomeEnrichmentKit,
-                        )
+                fileName: "BedFile",
+                targetSize: 10000000,
+                referenceGenome: referenceGenome,
+                exomeEnrichmentKit: exomeEnrichmentKit,
+                )
         assertNotNull(bedFile.save())
         return bedFile
     }
 
     FileType createFileType(FileType.Type type) {
         fileType = new FileType(
-                        type: type
-                        )
+                type: type
+                )
         assertNotNull(fileType.save())
         return fileType
     }
@@ -329,4 +332,14 @@ class TestData {
         ] + properties)
     }
 
+    ProcessedMergedBamFile createProcessedMergedBamFile(Map properties = [:]) {
+        return new ProcessedMergedBamFile([
+            md5sum: "12345",
+            type: BamType.MDUP,
+            coverage: 30.0,
+            qualityAssessmentStatus:QaProcessingStatus.NOT_STARTED,
+            status: AbstractBamFile.State.DECLARED,
+            numberOfMergedLanes: 3
+        ] + properties)
+    }
 }

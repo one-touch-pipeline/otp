@@ -10,5 +10,4 @@ class OverallQualityAssessmentMergedService {
         double coverageWithoutN = qcBasesMapped / referenceGenomeLengthWithoutN
         return coverageWithoutN
     }
-
 }

@@ -1,11 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.Sample
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 /**
  * Represents a merged bam file stored on the file system
@@ -25,6 +22,9 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
 
     FileOperationStatus fileOperationStatus = FileOperationStatus.DECLARED
 
+    /**
+     * Holds the number of lanes which were merged in this ProcessedMergedBamFile
+     */
     // Has to be from Type Integer so that it can be nullable
     Integer numberOfMergedLanes
 
@@ -57,6 +57,10 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
 
     MergingSet getMergingSet() {
         return mergingPass.mergingSet
+    }
+
+    MergingWorkPackage getMergingWorkPackage() {
+        return mergingPass.mergingWorkPackage
     }
 
     /**

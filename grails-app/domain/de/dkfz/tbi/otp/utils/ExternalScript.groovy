@@ -11,6 +11,12 @@ package de.dkfz.tbi.otp.utils
  */
 class ExternalScript {
 
+    /**
+     * Identifier which is used in the code. This must stay the same for all script files for one purpose.
+     * Otherwise also the code has to be changed.
+     */
+    String scriptIdentifier
+
     String scriptName
 
     /**
@@ -55,9 +61,7 @@ class ExternalScript {
             }
             //I tried to do this in one step like 'findAllByScriptNameAndDeprecatedDateIsNull' but it did not work
             List<ExternalScript> externalScripts = ExternalScript.findAllByScriptName(val)
-            List<ExternalScript> externalScriptsNotDeprecated = externalScripts.findAll() {
-                it.deprecatedDate == null
-            }
+            List<ExternalScript> externalScriptsNotDeprecated = externalScripts.findAll() { it.deprecatedDate == null }
 
             if (externalScriptsNotDeprecated.empty) {
                 return true
@@ -71,7 +75,7 @@ class ExternalScript {
         location blank: false, validator: { val, obj ->
             return val.startsWith("/")
         }
-
+        scriptIdentifier blank: false
         author blank: false
         comment blank: true, nullable: true
         deprecatedDate nullable: true

@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.ngsdata.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 /**
  * For each individual disease/control pairs are compared in the SNV pipeline. These pairs are defined in the GUI and stored in this domain.
@@ -40,11 +42,32 @@ class SampleTypeCombinationPerIndividual {
 
     static constraints = {
         sampleType1 validator: {val, obj ->
-            return (SampleTypeCombinationPerIndividual.findAllByIndividualAndSampleType1AndSampleType2(obj.individual, obj.sampleType2, val).isEmpty() &&
-            SampleTypeCombinationPerIndividual.findAllByIndividualAndSampleType1AndSampleType2(obj.individual, val, obj.sampleType2).isEmpty())
+            return (SampleTypeCombinationPerIndividual.findAllByIndividualAndSampleType1AndSampleType2AndSeqType(obj.individual, obj.sampleType2, val, obj.seqType).isEmpty() &&
+            SampleTypeCombinationPerIndividual.findAllByIndividualAndSampleType1AndSampleType2AndSeqType(obj.individual, val, obj.sampleType2, obj.seqType).isEmpty())
         }
         sampleType2 validator: { val, obj ->
             return val != obj.sampleType1
         }
+    }
+
+    /**
+     * Returns the latest ProcessedMergedBamFile which belongs to the given {@link SampleType}
+     * for this {@link SampleTypeCombinationPerIndividual}, if available and not withdrawn, otherwise null.
+     */
+    ProcessedMergedBamFile getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(SampleType sampleType) {
+        return atMostOneElement(ProcessedMergedBamFile.createCriteria().list {
+            eq("withdrawn", false)
+            mergingPass {
+                mergingSet {
+                    mergingWorkPackage {
+                        eq ("seqType", seqType)
+                        sample {
+                            eq ("sampleType", sampleType)
+                            eq ("individual", individual)
+                        }
+                    }
+                }
+            }
+        }?.findAll {it.isMostRecentBamFile() })
     }
 }

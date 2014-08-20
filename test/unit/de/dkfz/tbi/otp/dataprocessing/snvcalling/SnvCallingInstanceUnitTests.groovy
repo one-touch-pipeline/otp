@@ -88,8 +88,6 @@ class SnvCallingInstanceUnitTests {
 
     SnvCallingInstance createSnvCallingInstance(Map properties = [:]) {
         return new SnvCallingInstance([
-            pipelineVersion: "pipeline1.0",
-            configFileName: "config1.0",
             processingState: SnvProcessingStates.IN_PROGRESS,
         ] + properties)
     }

@@ -22,9 +22,7 @@ class MergingPass {
         mergingSet: MergingSet
     ]
 
-    static constraints = {
-        description(nullable: true)
-    }
+    static constraints = { description(nullable: true) }
 
     Project getProject() {
         return mergingSet.project
@@ -42,14 +40,18 @@ class MergingPass {
         return mergingSet.seqType
     }
 
+    MergingWorkPackage getMergingWorkPackage() {
+        return mergingSet.mergingWorkPackage
+    }
+
     public String toString() {
-       return "id: ${mergingSet.id} " +
-               "pass: ${identifier} " + (latestPass ? "(latest) " : "") +
-               "set: ${mergingSet.identifier} " + (mergingSet.latestSet ? "(latest) " : "") +
-               "<br>sample: ${sample} " +
-               "seqType: ${seqType} " +
-               "<br>project: ${project}"
-     }
+        return "id: ${mergingSet.id} " +
+        "pass: ${identifier} " + (latestPass ? "(latest) " : "") +
+        "set: ${mergingSet.identifier} " + (mergingSet.latestSet ? "(latest) " : "") +
+        "<br>sample: ${sample} " +
+        "seqType: ${seqType} " +
+        "<br>project: ${project}"
+    }
 
     /**
      * @return Whether this is the most recent merging pass on the referenced {@link MergingSet}.
@@ -57,14 +59,10 @@ class MergingPass {
     public boolean isLatestPass() {
         int maxIdentifier = createCriteria().get {
             eq("mergingSet", mergingSet)
-            projections{
-                max("identifier")
-            }
+            projections{ max("identifier") }
         }
         return identifier == maxIdentifier
     }
 
-    static mapping = {
-        mergingSet index: "merging_pass_merging_set_idx"
-    }
+    static mapping = { mergingSet index: "merging_pass_merging_set_idx" }
 }

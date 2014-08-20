@@ -9,16 +9,6 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
  *
  */
 class SnvCallingInstance {
-
-    /** Shows the version control id of the vcf pipeline, which was used for this snv workflow instance. */
-    String pipelineVersion
-
-    /**
-     * Name of the config file which contains the configuration for this snv-calling instance.
-     * It is located next to the results of the snv-calling for which it was the base.
-     */
-    String configFileName
-
     /**
      * Refers to the config file which is stored in the database and is used as a basis for all the files in the filesystem.
      */
@@ -41,11 +31,6 @@ class SnvCallingInstance {
      * (e.g. because the control-sample is bad, parts of it are withdrawn, etc.)
      */
     SnvProcessingStates processingState = SnvProcessingStates.IN_PROGRESS
-
-
-    File getConfigFile() {
-        return new File(configFileName)
-    }
 
     static constraints = {
         tumorBamFile validator: { val, obj ->

@@ -10,6 +10,15 @@ import org.junit.*
 @Mock([ExternalScript])
 class ExternalScriptTests {
 
+    void testConstraintScriptIdentifier() {
+        ExternalScript externalScript = createExternalScript([scriptIdentifier: null])
+        assertFalse(externalScript.validate())
+        externalScript.scriptIdentifier = ""
+        assertFalse(externalScript.validate())
+        externalScript.scriptIdentifier = "TEST"
+        assertTrue(externalScript.validate())
+    }
+
     void testConstraintScriptName() {
         ExternalScript externalScript = createExternalScript([scriptName: null])
         assertFalse(externalScript.validate())
@@ -75,6 +84,7 @@ class ExternalScriptTests {
 
     private ExternalScript createExternalScript(Map properties = [:]) {
         return new ExternalScript([
+            scriptIdentifier: "TEST",
             scriptName :"testScript",
             location: "/tmp/testfolder",
             author: "testUser",
