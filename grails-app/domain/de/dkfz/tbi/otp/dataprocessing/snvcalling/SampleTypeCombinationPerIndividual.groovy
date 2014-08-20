@@ -23,6 +23,8 @@ class SampleTypeCombinationPerIndividual {
     SampleType sampleType1
     SampleType sampleType2
 
+    SeqType seqType
+
     /**
      * This flag shows that a pair of two sample types has to be processed.
      * When creating an SampleTypeCombinationPerIndividual instance for one pair it is set to true per default.

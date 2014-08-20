@@ -25,6 +25,9 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
 
     FileOperationStatus fileOperationStatus = FileOperationStatus.DECLARED
 
+    // Has to be from Type Integer so that it can be nullable
+    Integer numberOfMergedLanes
+
     static constraints = {
         md5sum nullable: true, validator: { val, obj ->
             return (!val || (val && obj.fileOperationStatus == FileOperationStatus.PROCESSED))
@@ -33,6 +36,7 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
             return ((val != FileOperationStatus.PROCESSED && obj.md5sum == null) || (val == FileOperationStatus.PROCESSED && obj.md5sum != null))
         }
         mergingPass nullable: false, unique: true
+        numberOfMergedLanes nullable: true
     }
 
     Project getProject() {
@@ -75,9 +79,7 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
         "<br>project: ${mergingWorkPackage.project}"
     }
 
-    static mapping = {
-        mergingPass index: "abstract_bam_file_merging_pass_idx"
-    }
+    static mapping = { mergingPass index: "abstract_bam_file_merging_pass_idx" }
 
     @Override
     /** Beware: This method calls a method of a service */

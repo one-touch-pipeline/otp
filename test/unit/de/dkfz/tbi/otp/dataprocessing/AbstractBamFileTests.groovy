@@ -30,35 +30,42 @@ class AbstractBamFileTests {
 
     void testhasMetricsFileTrueBamTypeSorted() {
         AbstractBamFile bamFile = new MockAbstractBamFile(
-                        type: AbstractBamFile.BamType.SORTED,
-                        hasMetricsFile: true
-                        )
+                type: AbstractBamFile.BamType.SORTED,
+                hasMetricsFile: true
+                )
         Assert.assertFalse(bamFile.validate())
     }
 
     void testhasMetricsFileFalseBamTypeSorted() {
         AbstractBamFile bamFile = new MockAbstractBamFile(
-                        type: AbstractBamFile.BamType.SORTED,
-                        hasMetricsFile: false
-                        )
+                type: AbstractBamFile.BamType.SORTED,
+                hasMetricsFile: false
+                )
         Assert.assertTrue(bamFile.validate())
         bamFile.save(flush: true)
     }
 
     void testhasMetricsFileTrueBamTypeRmdup() {
         AbstractBamFile bamFile = new MockAbstractBamFile(
-                        type: AbstractBamFile.BamType.RMDUP,
-                        hasMetricsFile: true
-                        )
+                type: AbstractBamFile.BamType.RMDUP,
+                hasMetricsFile: true
+                )
         Assert.assertTrue(bamFile.validate())
         bamFile.save(flush: true)
     }
 
     void testhasMetricsFileFalseBamTypeRmdup() {
         AbstractBamFile bamFile = new MockAbstractBamFile(
-                        type: AbstractBamFile.BamType.RMDUP,
-                        hasMetricsFile: false
-                        )
+                type: AbstractBamFile.BamType.RMDUP,
+                hasMetricsFile: false
+                )
+        Assert.assertTrue(bamFile.validate())
+        bamFile.save(flush: true)
+    }
+
+    void testSaveCoverageNotNull() {
+        AbstractBamFile bamFile = new MockAbstractBamFile(type: AbstractBamFile.BamType.SORTED)
+        bamFile.coverage = 30.0
         Assert.assertTrue(bamFile.validate())
         bamFile.save(flush: true)
     }

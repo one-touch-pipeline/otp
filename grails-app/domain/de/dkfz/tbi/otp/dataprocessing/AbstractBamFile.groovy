@@ -70,6 +70,8 @@ abstract class AbstractBamFile {
     boolean hasInsertSizePlot = false
     boolean hasMetricsFile = false
     boolean withdrawn = false
+    // Has to be from Type Double so that it can be nullable
+    Double coverage
 
     /** Time stamp of deletion */
     Date deletionDate
@@ -101,5 +103,6 @@ abstract class AbstractBamFile {
             return true
         }
         deletionDate(nullable: true)
+        coverage(nullable: true)
     }
 }

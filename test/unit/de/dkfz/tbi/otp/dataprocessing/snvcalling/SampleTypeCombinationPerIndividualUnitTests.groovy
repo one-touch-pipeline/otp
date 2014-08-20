@@ -6,7 +6,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 
 @TestFor(SampleTypeCombinationPerIndividual)
-@Mock([Individual, SampleType])
+@Mock([Individual, SampleType, SeqType])
 class SampleTypeCombinationPerIndividualUnitTests {
 
     void testSaveSnvCombinationPerIndividualOnlyIndividual() {
@@ -27,11 +27,18 @@ class SampleTypeCombinationPerIndividualUnitTests {
         assertFalse(sampleCombinationPerIndividual.validate())
     }
 
+    void testSaveSnvCombinationPerIndividualOnlySeqType() {
+        SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual()
+        sampleCombinationPerIndividual.seqType = new SeqType()
+        assertFalse(sampleCombinationPerIndividual.validate())
+    }
+
     void testSaveSnvCombinationPerIndividual() {
         SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual()
         sampleCombinationPerIndividual.individual = new Individual()
         sampleCombinationPerIndividual.sampleType1 = new SampleType()
         sampleCombinationPerIndividual.sampleType2 = new SampleType()
+        sampleCombinationPerIndividual.seqType = new SeqType()
         assertTrue(sampleCombinationPerIndividual.validate())
     }
 }
