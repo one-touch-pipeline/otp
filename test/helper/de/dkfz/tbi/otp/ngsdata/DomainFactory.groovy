@@ -123,14 +123,14 @@ class DomainFactory {
         ] + myProps)
     }
 
-    public static ProcessingStep createAndSaveProcessingStep() {
+    public static ProcessingStep createAndSaveProcessingStep(String jobClass = "some.dummy.jobClass") {
         final JobExecutionPlan jep = new JobExecutionPlan(name: "DontCare" + sprintf('%016X', new Random().nextLong()), planVersion: 0, startJobBean: "DontCare")
         assert jep.save()
         final JobDefinition jobDefinition = new JobDefinition(name: "DontCare", bean: "DontCare", plan: jep)
         assert jobDefinition.save()
         final Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "DontCare", startJobVersion: "1")
         assert process.save()
-        final ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process, jobClass: "de.dkfz.tbi.otp.job.jobs.alignment.BwaPairingAndSortingJob")
+        final ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process, jobClass: jobClass)
         assert step.save()
         final ProcessingStepUpdate update = createProcessingStepUpdate(step, ExecutionState.CREATED)
         assert update.save(flush: true)

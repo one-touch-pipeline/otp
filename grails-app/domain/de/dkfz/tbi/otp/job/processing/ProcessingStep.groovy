@@ -178,4 +178,15 @@ public class ProcessingStep implements Serializable {
     String getNonQualifiedJobClass() {
         jobClass?.split('\\.')?.last()
     }
+
+    /**
+     * Returns the object with the specified ID or throws an exception if no such object exists.
+     */
+    static ProcessingStep getInstance(final long id) {
+        final ProcessingStep instance = ProcessingStep.get(id)
+        if (instance == null) {
+            throw new RuntimeException("No ProcessingStep with ID ${id} found in database.")
+        }
+        return instance
+    }
 }

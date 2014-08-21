@@ -25,6 +25,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.job.processing.RestartedProcessingStep
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.job.processing.StartJob
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
@@ -1503,7 +1504,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
     }
 
     final Closure testIsJobResumable_sometimesResumable = { final boolean resumable ->
-        final ProcessingStep processingStep = new ProcessingStep(jobClass: SometimesResumableTestJob.class.name)
+        final ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep(SometimesResumableTestJob.class.name)
         final SometimesResumableTestJob job = new SometimesResumableTestJob (processingStep, Collections.emptySet())
         job.resumable = resumable
         schedulerService.running << job

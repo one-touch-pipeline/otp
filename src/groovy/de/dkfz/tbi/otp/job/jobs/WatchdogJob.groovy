@@ -34,8 +34,10 @@ class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob 
     @Autowired PbsMonitorService pbsMonitorService
     @Autowired SchedulerService schedulerService
 
-    /** a reference to the processing step that is monitored */
-    private ProcessingStep monitoredProcessingStep
+    // See comment on AbstractJobImpl.processingStepId for explanation why we store the ID instead of a reference to the
+    // ProcessingStep instance here.
+    /** ID of the processing step that is monitored */
+    private long monitoredProcessingStepId
 
     /** the (non-qualified) class name of the monitored job */
     private String monitoredJobClass
@@ -46,7 +48,7 @@ class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob 
     /** the list of queued cluster jobs that are monitored */
     private List<String> queuedClusterJobIds = []
 
-    /** a lock to prevent race conditions when modifying {@link queuedClusterJobIds} */
+    /** a lock to prevent race conditions when modifying {@link #queuedClusterJobIds} */
     private final Lock lock = new ReentrantLock()
 
     @PostConstruct
@@ -55,8 +57,13 @@ class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob 
         // But our AST transformations do weird things, such as creating constructors, apparently.
         queuedClusterJobIds = getParameterValueOrClass("${JobParameterKeys.PBS_ID_LIST}").tokenize(',')
         allClusterJobIds = queuedClusterJobIds.clone().asImmutable()
-        monitoredProcessingStep = this.processingStep.previous
+        final ProcessingStep monitoredProcessingStep = this.processingStep.previous
+        monitoredProcessingStepId = monitoredProcessingStep.id
         monitoredJobClass = monitoredProcessingStep.nonQualifiedJobClass
+    }
+
+    private ProcessingStep getMonitoredProcessingStep() {
+        return ProcessingStep.getInstance(monitoredProcessingStepId)
     }
 
     @Override
