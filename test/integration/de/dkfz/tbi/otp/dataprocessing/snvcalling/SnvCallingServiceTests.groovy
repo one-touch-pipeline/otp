@@ -41,7 +41,7 @@ class SnvCallingServiceTests {
         individual = testData.createIndividual([project: project, pid: "testPid"])
         individual.save()
 
-        seqType = testData.createSeqType([dirName: 'TEST_SEQTYPE'])
+        seqType = testData.createSeqType([name: 'TEST_SEQTYPE', dirName: 'test_seqtype'])
         assert seqType.save()
 
         snvConfig = new SnvConfig(

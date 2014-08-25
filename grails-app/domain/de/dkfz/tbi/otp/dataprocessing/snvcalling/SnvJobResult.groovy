@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
+import de.dkfz.tbi.otp.utils.ExternalScript
 
 /**
  * Represents all results (particularly VCF (variant call format) files) of one job for the comparison of disease and control.
@@ -35,6 +36,10 @@ class SnvJobResult {
      */
     SnvProcessingStates processingState = SnvProcessingStates.IN_PROGRESS
 
+    /**
+     * The script which was used to produce these results
+     */
+    ExternalScript externalScript
 
     static belongsTo = [
         snvCallingInstance: SnvCallingInstance
@@ -45,10 +50,13 @@ class SnvJobResult {
             return val != SnvProcessingStates.IGNORED
         }
         step unique: 'snvCallingInstance'
+        withdrawn validator: { boolean withdrawn, SnvJobResult result ->
+            return withdrawn ||
+                    !result.snvCallingInstance.tumorBamFile.withdrawn &&
+                    !result.snvCallingInstance.controlBamFile.withdrawn &&
+                    !result.inputResult?.withdrawn
+        }
         inputResult validator: { val, obj ->
-            if (val != null && val.withdrawn == true && obj.withdrawn != true) {
-                return false
-            }
             if (val != null && val.processingState != SnvProcessingStates.FINISHED) {
                 return false
             }
@@ -59,6 +67,13 @@ class SnvJobResult {
 
             return (obj.step == SnvCallingStep.CALLING ? val == null : val != null)
         }
+        externalScript validator: {val, obj ->
+            obj.step.externalScriptIdentifier == val.scriptIdentifier
+        }
+    }
+
+    static mapping = {
+        snvCallingInstance index: "snv_job_result_snv_calling_instance_idx"
     }
 
     ProcessedMergedBamFile getTumorBamFile() {

@@ -46,6 +46,7 @@ class DomainFactory {
         processingRootPath: '/dev/null/otp-test/fakeRealm/processing',
         loggingRootPath:    '/dev/null/otp-test/fakeRealm/log',
         programsRootPath:   '/dev/null/otp-test/fakeRealm/programs',
+        stagingRootPath:    '/dev/null/otp-test/fakeRealm/staging',
         webHost: DEFAULT_HOST,
         host: DEFAULT_HOST,
         port: DEFAULT_PORT,

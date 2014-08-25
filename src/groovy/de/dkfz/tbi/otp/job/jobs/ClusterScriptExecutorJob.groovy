@@ -22,15 +22,17 @@ class ClusterScriptExecutorJob extends AbstractMaybeSubmitWaitValidateJob {
         assert script != null : 'No script passed as input parameter'
 
         String realmID = getParameterValueOrClass("${REALM}")
-        assert realmID: 'No realm passed as input parameter'
+        assert realmID != null: 'No realm passed as input parameter'
+
+        if (script.empty && realmID.empty) {
+            // Silently ignore empty scripts and move on to the next job.
+            return NextAction.SUCCEED
+        } else if (script.empty || realmID.empty) {
+            throw new RuntimeException("Either both ${SCRIPT} and ${REALM} must be provided or none.")
+        }
 
         Realm realm = Realm.findById(Long.parseLong(realmID))
         assert realm: "No realm found for id ${realmID}"
-
-        // Silently ignore empty scripts and move on to the next job.
-        if (script.empty) {
-            return NextAction.SUCCEED
-        }
 
         executionHelperService.sendScript(realm, script) // Will NOT add output parameters
         return NextAction.WAIT_FOR_CLUSTER_JOBS

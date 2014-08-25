@@ -56,7 +56,7 @@ class TestData {
 
         project = createProject([
             name : "otp_test_project",
-            dirName : "/tmp/alignmentPassService/",
+            dirName : "otp_test_project",
             realmName : realm.name,
         ])
         assertNotNull(project.save(flush: true))

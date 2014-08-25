@@ -51,4 +51,18 @@ class TestCase extends GroovyTestCase {
     public static String getUniqueString() {
         return "${System.currentTimeMillis()}-${sprintf('%016X', random.nextLong())}"
     }
+
+    public static File getUniqueNonExistentPath() {
+        return new File("/dev/null/otp-test/${uniqueString}")
+    }
+
+    /**
+     * You should delete the returned directory using Groovy's File.deleteDir() method as
+     * soon as you do not need it anymore.
+     */
+    public static File createEmptyTestDirectory() {
+        final File dir = new File("/tmp/otp-test/${uniqueString}")
+        assert dir.mkdirs()  // This will fail if the directory already exists or if it could not be created.
+        return dir
+    }
 }
