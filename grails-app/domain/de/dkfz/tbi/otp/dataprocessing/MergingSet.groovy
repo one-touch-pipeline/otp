@@ -66,6 +66,10 @@ class MergingSet {
         return mergingWorkPackage.sample
     }
 
+    SampleType getSampleType() {
+        return mergingWorkPackage.sampleType
+    }
+
     SeqType getSeqType() {
         return mergingWorkPackage.seqType
     }

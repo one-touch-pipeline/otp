@@ -1,5 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
 import grails.test.mixin.*
 import de.dkfz.tbi.otp.ngsdata.*
 
@@ -8,6 +11,27 @@ import de.dkfz.tbi.otp.ngsdata.*
 class ConfigPerProjectAndSeqTypeUnitTests {
 
     String configuration = "configuration"
+    String filePath = "/tmp/otp/otp-test/tempConfigFile.txt"
+    File configFile
+    ConfigPerProjectAndSeqType validConfigPerProjectAndSeqType
+
+    @Before
+    void setUp() {
+        configFile = new File(filePath)
+
+        validConfigPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
+            project: new Project(),
+            seqType: new SeqType(),
+            configuration: configuration,
+            )
+        validConfigPerProjectAndSeqType.save()
+    }
+
+    @After
+    void tearDown() {
+        configFile.delete()
+        validConfigPerProjectAndSeqType.delete()
+    }
 
     void testSaveWithoutProject() {
         ConfigPerProjectAndSeqType configPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
@@ -65,24 +89,37 @@ class ConfigPerProjectAndSeqTypeUnitTests {
     }
 
     void testSaveWithReferenceToPreviousConfigWithoutObsolete() {
-        ConfigPerProjectAndSeqType oldConfigPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
-                project: new Project(),
-                seqType: new SeqType(),
-                configuration: configuration,
-                )
-        assertTrue(oldConfigPerProjectAndSeqType.validate())
-
-
         ConfigPerProjectAndSeqType newConfigPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
                 project: new Project(),
                 seqType: new SeqType(),
                 configuration: configuration,
-                previousConfig: oldConfigPerProjectAndSeqType,
+                previousConfig: validConfigPerProjectAndSeqType,
                 )
         assertFalse(newConfigPerProjectAndSeqType.validate())
 
-        oldConfigPerProjectAndSeqType.obsoleteDate = new Date()
-        assertTrue(oldConfigPerProjectAndSeqType.validate())
+        validConfigPerProjectAndSeqType.obsoleteDate = new Date()
+        assertTrue(validConfigPerProjectAndSeqType.validate())
         assertTrue(newConfigPerProjectAndSeqType.validate())
+    }
+
+    void testWriteToFile() {
+        validConfigPerProjectAndSeqType.writeToFile(configFile, true)
+        assertEquals(configFile.text, configuration)
+    }
+
+    @Test
+    void testWriteToFileNoAbsolutePath() {
+        shouldFail AssertionError, {
+            validConfigPerProjectAndSeqType.writeToFile(new File("tempConfigFile.txt"), false)
+        }
+    }
+
+    @Test
+    void testWriteToFileExistsAlready() {
+        validConfigPerProjectAndSeqType.writeToFile(configFile, false)
+        assertEquals(configFile.text, configuration)
+        shouldFail RuntimeException, {
+            validConfigPerProjectAndSeqType.writeToFile(configFile, false)
+        }
     }
 }

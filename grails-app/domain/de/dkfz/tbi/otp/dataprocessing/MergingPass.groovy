@@ -36,6 +36,10 @@ class MergingPass {
         return mergingSet.sample
     }
 
+    SampleType getSampleType() {
+        return mergingSet.sampleType
+    }
+
     SeqType getSeqType() {
         return mergingSet.seqType
     }

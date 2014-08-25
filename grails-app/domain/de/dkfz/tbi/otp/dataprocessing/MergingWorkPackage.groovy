@@ -71,6 +71,10 @@ class MergingWorkPackage {
         return sample.individual
     }
 
+    SampleType getSampleType() {
+        return sample.sampleType
+    }
+
     static mapping = {
         sample index: "merging_work_package_sample_idx"
         seqType index: "merging_work_package_seq_type_idx"

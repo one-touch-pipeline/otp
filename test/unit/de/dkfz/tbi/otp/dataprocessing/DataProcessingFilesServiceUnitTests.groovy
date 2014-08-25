@@ -7,7 +7,9 @@ import grails.test.mixin.support.*
 import org.junit.*
 
 import de.dkfz.tbi.TestConstants
+import de.dkfz.tbi.otp.dataprocessing.DataProcessingFilesService.OutputDirectories
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.Realm.OperationType;
 import de.dkfz.tbi.otp.utils.CheckedLogger
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
@@ -17,6 +19,7 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
     Project,
     ProcessedBamFile,
     Realm,
+    Individual
 ])
 class DataProcessingFilesServiceUnitTests {
 
@@ -697,5 +700,44 @@ class DataProcessingFilesServiceUnitTests {
         assert 0 == dataProcessingFilesService.deleteOldProcessingFiles(passService, PASS_TYPE_NAME, createdBefore, TIME, passClosure)
     }
 
+    @Test
+    void testGetOutputDirectory() {
+        Realm realm = Realm.build([
+            operationType: OperationType.DATA_PROCESSING
+        ])
 
+        Project project = Project.build([
+            name: "projectName",
+            realmName: realm.name
+        ]
+        )
+
+        Individual individual = Individual.build([
+            project: project
+        ])
+
+        String pid = individual.pid
+        String projectDir = project.dirName
+        String realmDir = realm.processingRootPath
+        //!dir || dir == OutputDirectories.BASE) ? "" : "${dir.toString().toLowerCase() -> postfix
+        //${outputBaseDir}/results_per_pid/${individual.pid}/${postfix}"
+        // rpPath = realm.processingRootPath
+        //String pdName = project.dirName
+        //return "${rpPath}/${pdName}"
+        String expectedPath = "${realmDir}/${projectDir}/results_per_pid/${pid}/"
+        String actualPath = dataProcessingFilesService.getOutputDirectory(individual, null)
+        assertEquals(expectedPath, actualPath)
+
+        expectedPath = "${realmDir}/${projectDir}/results_per_pid/${pid}/"
+        actualPath = dataProcessingFilesService.getOutputDirectory(individual, OutputDirectories.BASE)
+        assertEquals(expectedPath, actualPath)
+
+        expectedPath = "${realmDir}/${projectDir}/results_per_pid/${pid}/alignment/"
+        actualPath = dataProcessingFilesService.getOutputDirectory(individual, OutputDirectories.ALIGNMENT)
+        assertEquals(expectedPath, actualPath)
+
+        expectedPath = "${realmDir}/${projectDir}/results_per_pid/${pid}/fastx_qc/"
+        actualPath = dataProcessingFilesService.getOutputDirectory(individual, OutputDirectories.FASTX_QC)
+        assertEquals(expectedPath, actualPath)
+    }
 }

@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile;
-
+import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 
 /**
  * Represents all results (particularly VCF (variant call format) files) of one job for the comparison of disease and control.
@@ -25,6 +24,7 @@ class SnvJobResult {
     /**
      * Specifies the result which was produced by a previous job
      * and is the input for the current job which produces this SnvJobResult.
+     * <code>null</code> if this is a result for {@link SnvCallingStep#CALLING}.
      */
     SnvJobResult inputResult
 
@@ -44,6 +44,7 @@ class SnvJobResult {
         processingState validator: { val, obj ->
             return val != SnvProcessingStates.IGNORED
         }
+        step unique: 'snvCallingInstance'
         inputResult validator: { val, obj ->
             if (val != null && val.withdrawn == true && obj.withdrawn != true) {
                 return false

@@ -13,6 +13,8 @@ class TestCase extends GroovyTestCase {
 
     final List<Throwable> failures = []
 
+    static Random random = new Random()
+
     // Implements OTP-686.
     /**
      * Performs an assertion and collects the {@link AssertionError} if the assertion fails. Then
@@ -44,5 +46,9 @@ class TestCase extends GroovyTestCase {
 
     public static void assertEquals(final GString expected, final String actual) {
         Assert.assertEquals(expected.toString(), actual)
+    }
+
+    public static String getUniqueString() {
+        return "${System.currentTimeMillis()}-${sprintf('%016X', random.nextLong())}"
     }
 }

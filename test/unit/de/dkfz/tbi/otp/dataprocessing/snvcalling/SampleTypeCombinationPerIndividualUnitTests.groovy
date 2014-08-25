@@ -2,11 +2,12 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import grails.test.mixin.*
 import org.junit.*
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.*
 
 
 @TestFor(SampleTypeCombinationPerIndividual)
-@Mock([Individual, SampleType, SeqType])
+@Mock([Realm, Project, Individual, SampleType, SeqType])
 class SampleTypeCombinationPerIndividualUnitTests {
 
     void testSaveSnvCombinationPerIndividualOnlyIndividual() {
@@ -40,5 +41,35 @@ class SampleTypeCombinationPerIndividualUnitTests {
         sampleCombinationPerIndividual.sampleType1 = new SampleType()
         sampleCombinationPerIndividual.sampleType2 = new SampleType()
         assertTrue(sampleCombinationPerIndividual.validate())
+        //println sampleCombinationPerIndividual.errors
+    }
+
+    void testGetSampleTypeCombinationPath() {
+        TestData testData = new TestData()
+        Realm realm = DomainFactory.createRealmDataManagementDKFZ()
+        Project project = testData.createProject([realmName: realm.name])
+        project.save(flush: true)
+        Individual individual = testData.createIndividual([project: project])
+        individual.save(flush: true)
+        SeqType seqType = testData.createSeqType()
+        seqType.save(flush: true)
+        SampleType sampleType1 = testData.createSampleType([name: "TUMOR"])
+        sampleType1.save(flush: true)
+        SampleType sampleType2 = testData.createSampleType([name: "CONTROL"])
+        sampleType2.save(flush: true)
+
+        SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
+            individual: individual,
+            seqType: seqType,
+            sampleType1: sampleType1,
+            sampleType2: sampleType2
+            )
+        sampleCombinationPerIndividual.save(flush: true)
+        String path = "dirName/sequencing/whole_genome_sequencing/view-by-pid/654321/snv_results/paired/tumor_control"
+        File expectedExtension = new File(path)
+
+        OtpPath sampleTypeCombinationPath = sampleCombinationPerIndividual.getSampleTypeCombinationPath()
+        assertEquals(expectedExtension, sampleTypeCombinationPath.relativePath)
+        assertEquals(project, sampleTypeCombinationPath.project)
     }
 }

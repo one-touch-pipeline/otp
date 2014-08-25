@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
@@ -41,13 +41,31 @@ class SampleTypeCombinationPerIndividual {
     Date lastUpdated
 
     static constraints = {
-        sampleType1 validator: {val, obj ->
-            return (SampleTypeCombinationPerIndividual.findAllByIndividualAndSampleType1AndSampleType2AndSeqType(obj.individual, obj.sampleType2, val, obj.seqType).isEmpty() &&
-            SampleTypeCombinationPerIndividual.findAllByIndividualAndSampleType1AndSampleType2AndSeqType(obj.individual, val, obj.sampleType2, obj.seqType).isEmpty())
-        }
         sampleType2 validator: { val, obj ->
             return val != obj.sampleType1
         }
+        sampleType1 validator: { val, obj ->
+            final SampleTypeCombinationPerIndividual sameOrderObj = obj.findForSameIndividualAndSeqType(val, obj.sampleType2)
+            final SampleTypeCombinationPerIndividual otherOrderObj = obj.findForSameIndividualAndSeqType(obj.sampleType2, val)
+            if (obj.id) {
+                // change an already existing object
+                return (!sameOrderObj || sameOrderObj.id == obj.id) && (!otherOrderObj || otherOrderObj.id == obj.id)
+            } else {
+                // save a new object
+                return !sameOrderObj && !otherOrderObj
+            }
+        }
+    }
+
+    private SampleTypeCombinationPerIndividual findForSameIndividualAndSeqType(final SampleType sampleType1, final SampleType sampleType2) {
+        return atMostOneElement(SampleTypeCombinationPerIndividual.findAllByIndividualAndSeqTypeAndSampleType1AndSampleType2(individual, seqType, sampleType1, sampleType2))
+    }
+
+    /**
+     * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control
+     */
+    OtpPath getSampleTypeCombinationPath() {
+        return new OtpPath(individual.getViewByPidPath(seqType), 'snv_results', seqType.libraryLayoutDirName, "${sampleType1.dirName}_${sampleType2.dirName}")
     }
 
     Project getProject() {

@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.utils
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+
 /**
  * The goal is not to write the names or paths of the used scripts in the code, but to store them in the database.
  * This provides more flexibility in cases where the name or paths of the scripts change.
@@ -20,7 +22,7 @@ class ExternalScript {
     String scriptName
 
     /**
-     * Absolute path where the script is located in the file system.
+     * Absolute path of the directory where the script is located in the file system.
      */
     String location
 
@@ -45,6 +47,10 @@ class ExternalScript {
 
     boolean isDeprecated() {
         return deprecatedDate != null
+    }
+
+    File getScriptFilePath() {
+        return new File(location, scriptName)
     }
 
     @Override
@@ -79,5 +85,9 @@ class ExternalScript {
         author blank: false
         comment blank: true, nullable: true
         deprecatedDate nullable: true
+    }
+
+    static ExternalScript getLatestVersionOfScript(final String scriptIdentifier) {
+        return exactlyOneElement(ExternalScript.findAllByScriptIdentifierAndDeprecatedDateIsNull(scriptIdentifier))
     }
 }

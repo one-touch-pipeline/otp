@@ -39,4 +39,17 @@ class MergedAlignmentDataFileServiceTests {
             //}
         }
     }
+
+    @Test
+    void testBuildRelativePath() {
+        TestData testData = new TestData()
+        testData.createObjects()
+        SeqType seqType = testData.seqType
+        Sample sample = testData.sample
+
+        String expectedPath = "/tmp/alignmentPassService/sequencing/whole_genome_sequencing/view-by-pid/654321/tumor/paired/merged-alignment/"
+        String actualPath = mergedAlignmentDataFileService.buildRelativePath(seqType, sample)
+
+        assertEquals(expectedPath, actualPath)
+    }
 }

@@ -668,25 +668,25 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         final SeqType alignableSeqType = new SeqType()
         alignableSeqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
         alignableSeqType.libraryLayout = "PAIRED"
-        alignableSeqType.dirName = "seq_type_dir_name"
+        alignableSeqType.dirName = "alignable_wgs"
         assertNotNull(alignableSeqType.save(flush: true))
 
         final SeqType alignableExomeSeqType = new SeqType()
         alignableExomeSeqType.name = SeqTypeNames.EXOME.seqTypeName
         alignableExomeSeqType.libraryLayout = "PAIRED"
-        alignableExomeSeqType.dirName = "seq_type_dir_name"
+        alignableExomeSeqType.dirName = "alignable_exome"
         assertNotNull(alignableExomeSeqType.save(flush: true))
 
         final SeqType nonAlignableSeqType = new SeqType()
         nonAlignableSeqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
         nonAlignableSeqType.libraryLayout = "SCREWED"
-        nonAlignableSeqType.dirName = "seq_type_dir_name"
+        nonAlignableSeqType.dirName = "non_alignable_wgs"
         assertNotNull(nonAlignableSeqType.save(flush: true))
 
         final SeqType nonAlignableExomeSeqType = new SeqType()
         nonAlignableExomeSeqType.name = SeqTypeNames.EXOME.seqTypeName
         nonAlignableExomeSeqType.libraryLayout = "SCREWED"
-        nonAlignableExomeSeqType.dirName = "seq_type_dir_name"
+        nonAlignableExomeSeqType.dirName = "non_alignable_exome"
         assertNotNull(nonAlignableExomeSeqType.save(flush: true))
 
         testData.dataFile.delete(flush: true)
@@ -844,13 +844,13 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         final SeqType alignableExomeSeqType = new SeqType()
         alignableExomeSeqType.name = SeqTypeNames.EXOME.seqTypeName
         alignableExomeSeqType.libraryLayout = "PAIRED"
-        alignableExomeSeqType.dirName = "seq_type_dir_name"
+        alignableExomeSeqType.dirName = "alignable_seq_type_dir_name"
         assertNotNull(alignableExomeSeqType.save(flush: true))
 
         final SeqType nonAlignableExomeSeqType = new SeqType()
         nonAlignableExomeSeqType.name = SeqTypeNames.EXOME.seqTypeName
         nonAlignableExomeSeqType.libraryLayout = "SCREWED"
-        nonAlignableExomeSeqType.dirName = "seq_type_dir_name"
+        nonAlignableExomeSeqType.dirName = "non_alignable_seq_type_dir_name"
         assertNotNull(nonAlignableExomeSeqType.save(flush: true))
 
         testData.dataFile.delete(flush: true)

@@ -65,4 +65,20 @@ class MergingPassTests {
         pass.description = null
         Assert.assertTrue(pass.validate())
     }
+
+    void testIsLatestPass() {
+        MergingPass pass = new MergingPass(
+            identifier: 1,
+            mergingSet: mergingSet)
+        pass.save(flush: true)
+        assertTrue(pass.isLatestPass())
+
+        MergingPass pass2 = new MergingPass(
+            identifier: 2,
+            mergingSet: mergingSet)
+        pass2.save(flush: true)
+        assertTrue(pass2.isLatestPass())
+
+        assertFalse(pass.isLatestPass())
+    }
 }

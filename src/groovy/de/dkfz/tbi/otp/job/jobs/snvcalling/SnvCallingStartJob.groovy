@@ -43,6 +43,7 @@ class SnvCallingStartJob extends AbstractStartJobImpl {
                         )
 
                 SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
+                        sampleTypeCombination: sampleTypeCombinationPerIndividual,
                         config: config,
                         tumorBamFile: tumorBamFile,
                         controlBamFile: controlBamFile

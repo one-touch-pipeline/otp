@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+
 /**
  * Abstract Base class for all Job implementations.
  *
@@ -192,6 +194,14 @@ abstract class AbstractJobImpl implements Job {
             return grailsApplication.getClassForName(parameter.type.className).get(parameter.value.toLong())
         }
         return parameter.value
+    }
+
+    public def getProcessParameterObject() {
+        def object = atMostOneElement(ProcessParameter.findAllByProcess(processingStep.process))?.toObject()
+        if (object == null) {
+            log.info "Object referenced by ProcessParameter was not found."
+        }
+        return object
     }
 
     public String getProcessParameterValue() {

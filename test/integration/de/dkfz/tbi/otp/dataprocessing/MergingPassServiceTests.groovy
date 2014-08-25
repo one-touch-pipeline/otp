@@ -181,7 +181,7 @@ class MergingPassServiceTests {
         SeqType seqType = new SeqType(
                         name:"seqType_" + uniqueId,
                         libraryLayout:"library",
-                        dirName: "dir"
+                        dirName: "dir_" + uniqueId
                         )
         assertNotNull(seqType.save([flush: true, failOnError: true]))
 

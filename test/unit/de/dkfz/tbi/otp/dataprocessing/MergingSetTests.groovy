@@ -7,7 +7,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 
 @TestFor(MergingSet)
-@Mock([MergingWorkPackage, Sample, SampleType, Individual, Project])
+@Mock([MergingWorkPackage, Sample, SampleType, Individual, Project, SeqType])
 class MergingSetTests {
 
     MergingWorkPackage workPackage = null
@@ -37,7 +37,8 @@ class MergingSetTests {
         sample.save(flush: true)
 
         this.workPackage = new MergingWorkPackage(
-            sample: sample)
+            sample: sample,
+            seqType: new SeqType())
         this.workPackage.save(flush: true)
     }
 
@@ -64,5 +65,23 @@ class MergingSetTests {
         Assert.assertTrue(mergingSet.validate())
         mergingSet.mergingWorkPackage = null
         Assert.assertFalse(mergingSet.validate())
+    }
+
+    void testIsLatestSet() {
+        MergingSet mergingSet = new MergingSet(
+            identifier: 1,
+            status: MergingSet.State.DECLARED,
+            mergingWorkPackage: workPackage)
+        mergingSet.save(flush: true)
+        assertTrue(mergingSet.isLatestSet())
+
+        MergingSet mergingSet2 = new MergingSet(
+            identifier: 2,
+            status: MergingSet.State.DECLARED,
+            mergingWorkPackage: workPackage)
+        mergingSet2.save(flush: true)
+        assertTrue(mergingSet2.isLatestSet())
+
+        assertFalse(mergingSet.isLatestSet())
     }
 }

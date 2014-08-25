@@ -7,15 +7,16 @@ import org.junit.*
 
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(ExternalScript)
-@Mock([ExternalScript])
-class ExternalScriptTests {
+class ExternalScriptUnitTests {
+
+    final String SCRIPT_IDENTIFIER = "TEST"
 
     void testConstraintScriptIdentifier() {
         ExternalScript externalScript = createExternalScript([scriptIdentifier: null])
         assertFalse(externalScript.validate())
         externalScript.scriptIdentifier = ""
         assertFalse(externalScript.validate())
-        externalScript.scriptIdentifier = "TEST"
+        externalScript.scriptIdentifier = SCRIPT_IDENTIFIER
         assertTrue(externalScript.validate())
     }
 
@@ -81,10 +82,16 @@ class ExternalScriptTests {
         assertEquals(externalScript1.toString(), expectedString)
     }
 
+    void testNotMoreThanOneNotWithdrawnExternalScript() {
+        ExternalScript externalScript1 = createExternalScript()
+        externalScript1.save()
+        ExternalScript externalScript2 = createExternalScript()
+        assertFalse(externalScript2.validate())
+    }
 
     private ExternalScript createExternalScript(Map properties = [:]) {
         return new ExternalScript([
-            scriptIdentifier: "TEST",
+            scriptIdentifier: SCRIPT_IDENTIFIER,
             scriptName :"testScript",
             location: "/tmp/testfolder",
             author: "testUser",

@@ -22,6 +22,8 @@ class SnvCallingServiceTests {
     Individual individual
     SeqType seqType
 
+    final static String ARBITRARY_INSTANCE_NAME = '2014-08-25_15h32'
+
     final static double COVERAGE_THRESHOLD = 30.0
     final static double COVERAGE_TOO_LOW = 20.0
 
@@ -39,8 +41,8 @@ class SnvCallingServiceTests {
         individual = testData.createIndividual([project: project, pid: "testPid"])
         individual.save()
 
-        seqType = testData.createSeqType()
-        seqType.save()
+        seqType = testData.createSeqType([dirName: 'TEST_SEQTYPE'])
+        assert seqType.save()
 
         snvConfig = new SnvConfig(
                 project: project,
@@ -103,6 +105,8 @@ class SnvCallingServiceTests {
     @Test
     void testSamplePairForSnvProcessingAlreadyInProcess() {
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
+                instanceName: ARBITRARY_INSTANCE_NAME,
+                sampleTypeCombination: sampleTypeCombinationPerIndividual,
                 config: snvConfig,
                 tumorBamFile: processedMergedBamFile1,
                 controlBamFile: processedMergedBamFile2
@@ -115,6 +119,8 @@ class SnvCallingServiceTests {
     @Test
     void testSamplePairForSnvProcessingWasProcessed() {
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
+                instanceName: ARBITRARY_INSTANCE_NAME,
+                sampleTypeCombination: sampleTypeCombinationPerIndividual,
                 config: snvConfig,
                 tumorBamFile: processedMergedBamFile1,
                 controlBamFile: processedMergedBamFile2,
@@ -128,6 +134,8 @@ class SnvCallingServiceTests {
     @Test
     void testSamplePairForSnvProcessingHasToBeIgnored() {
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
+                instanceName: ARBITRARY_INSTANCE_NAME,
+                sampleTypeCombination: sampleTypeCombinationPerIndividual,
                 config: snvConfig,
                 tumorBamFile: processedMergedBamFile1,
                 controlBamFile: processedMergedBamFile2,
@@ -143,7 +151,17 @@ class SnvCallingServiceTests {
         ProcessedMergedBamFile otherProcessedMergedBamFile = createProcessedMergedBamFile("3")
         otherProcessedMergedBamFile.save()
 
+        SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual1 = new SampleTypeCombinationPerIndividual(
+                individual: individual,
+                sampleType1: processedMergedBamFile1.sample.sampleType,
+                sampleType2: otherProcessedMergedBamFile.sample.sampleType,
+                seqType: seqType
+                )
+        sampleTypeCombinationPerIndividual1.save()
+
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
+                instanceName: ARBITRARY_INSTANCE_NAME,
+                sampleTypeCombination: sampleTypeCombinationPerIndividual1,
                 config: snvConfig,
                 tumorBamFile: processedMergedBamFile1,
                 controlBamFile: otherProcessedMergedBamFile
@@ -183,6 +201,8 @@ class SnvCallingServiceTests {
         sampleTypeCombinationPerIndividual2.save()
 
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
+                instanceName: ARBITRARY_INSTANCE_NAME,
+                sampleTypeCombination: sampleTypeCombinationPerIndividual2,
                 config: snvConfig,
                 tumorBamFile: processedMergedBamFile3,
                 controlBamFile: processedMergedBamFile4
@@ -232,6 +252,8 @@ class SnvCallingServiceTests {
         sampleTypeCombinationPerIndividual2.save()
 
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
+                instanceName: ARBITRARY_INSTANCE_NAME,
+                sampleTypeCombination: sampleTypeCombinationPerIndividual2,
                 config: snvConfig,
                 tumorBamFile: processedMergedBamFile3,
                 controlBamFile: processedMergedBamFile4
@@ -291,7 +313,7 @@ class SnvCallingServiceTests {
 
     @Test
     void testBamFilesHaveOtherSeqType() {
-        SeqType differentSeqType = testData.createSeqType([name: "DIFFERENT"])
+        SeqType differentSeqType = testData.createSeqType([name: "DIFFERENT", dirName: "DIFFERENT_SEQUENCING"])
         differentSeqType.save()
 
         sampleTypeCombinationPerIndividual.seqType = differentSeqType
