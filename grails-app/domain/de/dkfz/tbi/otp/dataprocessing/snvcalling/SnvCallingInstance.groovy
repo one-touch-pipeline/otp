@@ -52,9 +52,17 @@ class SnvCallingInstance {
     }
 
     static constraints = {
-        tumorBamFile validator: {val , obj -> isConsistentWithSampleTypeCombination(val, obj, obj.sampleTypeCombination.sampleType1)}
-        controlBamFile validator: {val , obj -> isConsistentWithSampleTypeCombination(val, obj, obj.sampleTypeCombination.sampleType2)}
+        tumorBamFile validator: {val, obj ->
+            obj.sampleTypeCombination && isConsistentWithSampleTypeCombination(val, obj, obj.sampleTypeCombination.sampleType1)}
+        controlBamFile validator: {val, obj ->
+            obj.sampleTypeCombination && isConsistentWithSampleTypeCombination(val, obj, obj.sampleTypeCombination.sampleType2)}
         instanceName blank: false, unique: 'sampleTypeCombination'
+    }
+
+    static mapping = {
+        tumorBamFile index: "snv_calling_instance_tumor_bam_file_idx"
+        controlBamFile index: "snv_calling_instance_control_bam_file_idx"
+        sampleTypeCombination index: "snv_calling_instance_sample_type_combination_idx"
     }
 
     Project getProject() {
@@ -81,5 +89,53 @@ class SnvCallingInstance {
      */
     OtpPath getConfigFilePath() {
         return new OtpPath(snvInstancePath, "config.txt")
+    }
+
+    /**
+     * Returns the path of the result file for the CALLING step of the SNV pipeline.
+     *
+     * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control/2014-08-25_15h32/snvs_${pid}_raw.vcf.gz
+     */
+    OtpPath getSnvCallingFileFinalPath() {
+        return new OtpPath(snvInstancePath, SnvCallingStep.CALLING.getResultFileName(individual, null))
+    }
+
+    /**
+     * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/paired/snv_results/tumor_control/config_calling_2014-08-25_15h32.txt
+     */
+    OtpPath getStepConfigFileLinkedPath(final SnvCallingStep step) {
+        return new OtpPath(sampleTypeCombination.sampleTypeCombinationPath, "config_${step.configFileNameSuffix}_${instanceName}.txt")
+    }
+
+    /**
+     * Returns the non-withdrawn, finished {@link SnvJobResult} for the specified {@link SnvCallingStep} belonging to
+     * the latest {@link SnvCallingInstance} that has such a result and is based on the same BAM files as this instance;
+     * <code>null</code> if no such {@link SnvCallingInstance} exists.
+     */
+    SnvJobResult findLatestResultForSameBamFiles(final SnvCallingStep step) {
+        assert step
+        final SnvJobResult result = atMostOneElement(SnvJobResult.createCriteria().list {
+            eq 'step', step
+            eq 'withdrawn', false
+            eq 'processingState', SnvProcessingStates.FINISHED
+            snvCallingInstance {
+                tumorBamFile {
+                    eq 'id', tumorBamFile.id
+                }
+                controlBamFile {
+                    eq 'id', controlBamFile.id
+                }
+            }
+            order('snvCallingInstance.id', 'desc')
+            maxResults(1)
+        })
+        if (result != null) {
+            assert result.step == step
+            assert !result.withdrawn
+            assert result.processingState == SnvProcessingStates.FINISHED
+            assert result.tumorBamFile == tumorBamFile
+            assert result.controlBamFile == controlBamFile
+        }
+        return result
     }
 }

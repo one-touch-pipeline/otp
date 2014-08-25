@@ -4,88 +4,67 @@ import grails.test.mixin.*
 import org.apache.commons.jexl.junit.Asserter;
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
+import de.dkfz.tbi.otp.utils.ExternalScript
 
 @TestFor(SnvJobResult)
-@Mock([SnvCallingInstance, ProcessedMergedBamFile])
+@Mock([SnvCallingInstance, ProcessedMergedBamFile, ExternalScript])
 class SnvJobResultUnitTests {
 
     @Test
-    void testSavingOfSnvJobResultNoInputFileButCalling() {
+    void testSavingOfSnvJobResultNoInputFileButCallingStep() {
         SnvJobResult snvJobResult = new SnvJobResult(
                 step: SnvCallingStep.CALLING,
-                snvCallingInstance: new SnvCallingInstance(),
+                snvCallingInstance: createSnvCallingInstance(),
                 processingState: SnvProcessingStates.IN_PROGRESS,
+                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier),
                 )
         assert snvJobResult.validate()
         assert snvJobResult.save()
     }
 
+
     @Test
-    void testSavingOfSnvJobResultNoInputFileNotCalling() {
+    void testSavingOfSnvJobResultNoExternalScript() {
         SnvJobResult snvJobResult = new SnvJobResult(
-                step: SnvCallingStep.SNV_ANNOTATION,
-                snvCallingInstance: new SnvCallingInstance(),
-                processingState: SnvProcessingStates.IN_PROGRESS,
+                step: SnvCallingStep.CALLING,
+                snvCallingInstance: createSnvCallingInstance(),
+                processingState: SnvProcessingStates.IN_PROGRESS
                 )
         assert !snvJobResult.validate()
     }
 
     @Test
-    void testSavingOfSnvJobResultInputFileNotCalling() {
-
-        SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
-                tumorBamFile: new ProcessedMergedBamFile(),
-                controlBamFile: new ProcessedMergedBamFile()
+    void testSavingOfSnvJobResultWrongExternalScript() {
+        SnvJobResult snvJobResult = new SnvJobResult(
+                step: SnvCallingStep.CALLING,
+                snvCallingInstance: createSnvCallingInstance(),
+                processingState: SnvProcessingStates.IN_PROGRESS,
+                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier),
                 )
+        assert !snvJobResult.validate()
+    }
 
-        SnvJobResult oldSnvJobResult = new SnvJobResult(
-                processingState: SnvProcessingStates.FINISHED,
-                snvCallingInstance: snvCallingInstance
-                )
 
+    @Test
+    void testSavingOfSnvJobResultNoInputFileNotCallingStep() {
         SnvJobResult snvJobResult = new SnvJobResult(
                 step: SnvCallingStep.SNV_ANNOTATION,
-                snvCallingInstance: snvCallingInstance,
+                snvCallingInstance: createSnvCallingInstance(),
                 processingState: SnvProcessingStates.IN_PROGRESS,
-                inputResult: oldSnvJobResult
+                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier),
                 )
-        assert snvJobResult.validate()
-        assert snvJobResult.save()
+        assert !snvJobResult.validate()
     }
 
     @Test
-    void testSavingOfSnvJobResultInputWithdrawnResultNotWithdrawn() {
-        SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
-                tumorBamFile: new ProcessedMergedBamFile(),
-                controlBamFile: new ProcessedMergedBamFile()
-                )
+    void testSavingOfSnvJobResultInputFileNotCallingStep() {
+
+        SnvCallingInstance snvCallingInstance = createSnvCallingInstance()
 
         SnvJobResult oldSnvJobResult = new SnvJobResult(
                 processingState: SnvProcessingStates.FINISHED,
                 snvCallingInstance: snvCallingInstance,
-                withdrawn: true
-                )
-
-        SnvJobResult snvJobResult = new SnvJobResult(
-                step: SnvCallingStep.SNV_ANNOTATION,
-                snvCallingInstance: snvCallingInstance,
-                processingState: SnvProcessingStates.IN_PROGRESS,
-                inputResult: oldSnvJobResult
-                )
-        assertFalse snvJobResult.validate()
-    }
-
-    @Test
-    void testSavingOfSnvJobResultInputWithdrawnResultWithdrawn() {
-        SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
-                tumorBamFile: new ProcessedMergedBamFile(),
-                controlBamFile: new ProcessedMergedBamFile()
-                )
-
-        SnvJobResult oldSnvJobResult = new SnvJobResult(
-                processingState: SnvProcessingStates.FINISHED,
-                snvCallingInstance: snvCallingInstance,
-                withdrawn: true
+                externalScript: new ExternalScript()
                 )
 
         SnvJobResult snvJobResult = new SnvJobResult(
@@ -93,7 +72,51 @@ class SnvJobResultUnitTests {
                 snvCallingInstance: snvCallingInstance,
                 processingState: SnvProcessingStates.IN_PROGRESS,
                 inputResult: oldSnvJobResult,
-                withdrawn: true
+                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier),
+                )
+        assert snvJobResult.validate()
+        assert snvJobResult.save()
+    }
+
+    @Test
+    void testSavingOfSnvJobResultInputWithdrawnResultNotWithdrawn() {
+        SnvCallingInstance snvCallingInstance = createSnvCallingInstance()
+
+        SnvJobResult oldSnvJobResult = new SnvJobResult(
+                processingState: SnvProcessingStates.FINISHED,
+                snvCallingInstance: snvCallingInstance,
+                withdrawn: true,
+                externalScript: new ExternalScript(),
+                )
+
+        SnvJobResult snvJobResult = new SnvJobResult(
+                step: SnvCallingStep.SNV_ANNOTATION,
+                snvCallingInstance: snvCallingInstance,
+                processingState: SnvProcessingStates.IN_PROGRESS,
+                inputResult: oldSnvJobResult,
+                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier),
+                )
+        assertFalse snvJobResult.validate()
+    }
+
+    @Test
+    void testSavingOfSnvJobResultInputWithdrawnResultWithdrawn() {
+        SnvCallingInstance snvCallingInstance = createSnvCallingInstance()
+
+        SnvJobResult oldSnvJobResult = new SnvJobResult(
+                processingState: SnvProcessingStates.FINISHED,
+                snvCallingInstance: snvCallingInstance,
+                withdrawn: true,
+                externalScript: new ExternalScript(),
+                )
+
+        SnvJobResult snvJobResult = new SnvJobResult(
+                step: SnvCallingStep.SNV_ANNOTATION,
+                snvCallingInstance: snvCallingInstance,
+                processingState: SnvProcessingStates.IN_PROGRESS,
+                inputResult: oldSnvJobResult,
+                withdrawn: true,
+                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier),
                 )
         assert snvJobResult.validate()
     }
@@ -116,6 +139,7 @@ class SnvJobResultUnitTests {
         SnvJobResult oldSnvJobResult = new SnvJobResult(
                 processingState: SnvProcessingStates.FINISHED,
                 snvCallingInstance: snvCallingInstance1,
+                externalScript: new ExternalScript(),
                 )
 
         SnvJobResult snvJobResult = new SnvJobResult(
@@ -123,6 +147,7 @@ class SnvJobResultUnitTests {
                 snvCallingInstance: snvCallingInstance2,
                 processingState: SnvProcessingStates.IN_PROGRESS,
                 inputResult: oldSnvJobResult,
+                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier),
                 )
         assertFalse snvJobResult.validate()
     }
@@ -144,6 +169,7 @@ class SnvJobResultUnitTests {
         SnvJobResult oldSnvJobResult = new SnvJobResult(
                 processingState: SnvProcessingStates.FINISHED,
                 snvCallingInstance: snvCallingInstance1,
+                externalScript: new ExternalScript(),
                 )
 
         SnvJobResult snvJobResult = new SnvJobResult(
@@ -151,6 +177,7 @@ class SnvJobResultUnitTests {
                 snvCallingInstance: snvCallingInstance2,
                 processingState: SnvProcessingStates.IN_PROGRESS,
                 inputResult: oldSnvJobResult,
+                externalScript: new ExternalScript(),
                 )
         assertFalse snvJobResult.validate()
     }
@@ -168,6 +195,7 @@ class SnvJobResultUnitTests {
                 step: SnvCallingStep.CALLING,
                 snvCallingInstance: snvCallingInstance,
                 processingState: SnvProcessingStates.IN_PROGRESS,
+                externalScript: new ExternalScript(),
                 )
 
         assertEquals(pmbf, snvJobResult.getTumorBamFile())
@@ -186,8 +214,16 @@ class SnvJobResultUnitTests {
                 step: SnvCallingStep.CALLING,
                 snvCallingInstance: snvCallingInstance,
                 processingState: SnvProcessingStates.IN_PROGRESS,
+                externalScript: new ExternalScript(),
                 )
 
         assertEquals(pmbf, snvJobResult.getControlBamFile())
+    }
+
+    private SnvCallingInstance createSnvCallingInstance(final Map properties = [:]) {
+        return new SnvCallingInstance([
+                tumorBamFile: new ProcessedMergedBamFile(),
+                controlBamFile: new ProcessedMergedBamFile()
+        ] + properties)
     }
 }

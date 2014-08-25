@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import static org.junit.Assert.*
 import org.junit.*
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.Individual;
 import de.dkfz.tbi.otp.ngsdata.TestData;
 import de.dkfz.tbi.otp.utils.ExternalScript
@@ -27,54 +28,36 @@ class SnvCallingStepTests extends GroovyTestCase {
 
     @Test
     void testGetExternalScript_CALLING() {
-        ExternalScript externalScript = createExternalScript("SnvCallingStep.CALLING")
-        assert externalScript.save()
-        assertEquals(externalScript, SnvCallingStep.CALLING.getExternalScript())
-
-        externalScript.deprecatedDate = new Date()
-        assert externalScript.save()
-        ExternalScript externalScript2 = createExternalScript("SnvCallingStep.CALLING")
-        assert externalScript2.save()
-        assertEquals(externalScript2, SnvCallingStep.CALLING.getExternalScript())
+        testGetExternalScript(SnvCallingStep.CALLING)
     }
 
     @Test
     void testGetExternalScript_FILTER() {
-        ExternalScript externalScript = createExternalScript("SnvCallingStep.FILTER_VCF")
-        assert externalScript.save()
-        assertEquals(externalScript, SnvCallingStep.FILTER_VCF.getExternalScript())
-
-        externalScript.deprecatedDate = new Date()
-        assert externalScript.save()
-        ExternalScript externalScript2 = createExternalScript("SnvCallingStep.FILTER_VCF")
-        assert externalScript2.save()
-        assertEquals(externalScript2, SnvCallingStep.FILTER_VCF.getExternalScript())
+        testGetExternalScript(SnvCallingStep.FILTER_VCF)
     }
 
     @Test
     void testGetExternalScript_ANNOTATION() {
-        ExternalScript externalScript = createExternalScript("SnvCallingStep.SNV_ANNOTATION")
-        assert externalScript.save()
-        assertEquals(externalScript, SnvCallingStep.SNV_ANNOTATION.getExternalScript())
-
-        externalScript.deprecatedDate = new Date()
-        assert externalScript.save()
-        ExternalScript externalScript2 = createExternalScript("SnvCallingStep.SNV_ANNOTATION")
-        assert externalScript2.save()
-        assertEquals(externalScript2, SnvCallingStep.SNV_ANNOTATION.getExternalScript())
+        testGetExternalScript(SnvCallingStep.SNV_ANNOTATION)
     }
 
     @Test
     void testGetExternalScript_DEEP_ANNOTATION() {
-        ExternalScript externalScript = createExternalScript("SnvCallingStep.SNV_DEEPANNOTATION")
+        testGetExternalScript(SnvCallingStep.SNV_DEEPANNOTATION)
+    }
+
+    void testGetExternalScript(SnvCallingStep step) {
+        final File testDir = TestCase.uniqueNonExistentPath
+
+        ExternalScript externalScript = createExternalScript("SnvCallingStep.${step.name()}", new File(testDir, 'script_v1.sh').path)
         assert externalScript.save()
-        assertEquals(externalScript, SnvCallingStep.SNV_DEEPANNOTATION.getExternalScript())
+        assertEquals(externalScript, step.getExternalScript())
 
         externalScript.deprecatedDate = new Date()
         assert externalScript.save()
-        ExternalScript externalScript2 = createExternalScript("SnvCallingStep.SNV_DEEPANNOTATION")
+        ExternalScript externalScript2 = createExternalScript("SnvCallingStep.${step.name()}", new File(testDir, 'script_v2.sh').path)
         assert externalScript2.save()
-        assertEquals(externalScript2, SnvCallingStep.SNV_DEEPANNOTATION.getExternalScript())
+        assertEquals(externalScript2, step.getExternalScript())
     }
 
     @Test
@@ -115,11 +98,10 @@ class SnvCallingStepTests extends GroovyTestCase {
         //TODO: test for filter -> OTP-989"
     }
 
-    private ExternalScript createExternalScript(String identifier) {
+    private ExternalScript createExternalScript(String identifier, String path = "/tmp/testfolder/testScript.sh") {
         return new ExternalScript(
         scriptIdentifier: identifier,
-        scriptName :"testScript",
-        location: "/tmp/testfolder",
+        filePath: path,
         author: "testUser",
         comment: "lets see if it works ;)",
         )

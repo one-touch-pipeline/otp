@@ -1,27 +1,15 @@
 package de.dkfz.tbi.otp.job.jobs.utils
 
 /**
- * An {@link Enum} that contains all valid keys for job input and output parameters.
+ * A class that contains some valid keys for job input and output parameters.
  *
  */
-enum JobParameterKeys {
+class JobParameterKeys {
 
-    /* The key names have to be unique. */
-    PBS_ID_LIST ('__pbsIds'),
-    REALM       ('__pbsRealm'),
-    SCRIPT      ('__script'),
+    // The values of all constants should be unique. Non-unique values might lead to confusion and bad things happening.
 
-    private final String name
+    static final String PBS_ID_LIST = '__pbsIds'
+    static final String REALM = '__pbsRealm'
+    static final String SCRIPT = 'SCRIPT'
 
-    private JobParameterKeys(String name) {
-        this.name = name
-    }
-
-    /**
-     * Convenience method that returns the key name for use in {@link GString}s.
-     */
-    @Override
-    String toString() {
-        return this.name
-    }
 }
