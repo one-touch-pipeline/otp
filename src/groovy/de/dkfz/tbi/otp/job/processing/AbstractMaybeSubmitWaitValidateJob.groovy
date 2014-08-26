@@ -14,11 +14,7 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
     @Override
     protected final NextAction execute(final Collection<? extends ClusterJobIdentifier> finishedClusterJobs) throws Throwable {
         if (finishedClusterJobs == null) {
-            if (maybeSubmit()) {
-                return NextAction.WAIT_FOR_CLUSTER_JOBS
-            } else {
-                return NextAction.SUCCEED
-            }
+            return maybeSubmit()
         } else {
             def failedClusterJobs = jobStatusLoggingService.failedOrNotFinishedClusterJobs(processingStep, finishedClusterJobs)
             if (failedClusterJobs.empty) {
@@ -34,13 +30,14 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
     /**
      * Called when the job is started.
      *
-     * @return Whether cluster jobs were submitted during the execution of this method. If <code>true</code>, the job
-     * system will wait for the submitted cluster jobs to finish and then call the {@link #validate()} method. Otherwise
-     * this job will succeed and finish.
+     * @return What should be done next. If cluster jobs were submitted during the execution of this method, the method
+     * must return {@link NextAction#WAIT_FOR_CLUSTER_JOBS}, otherwise it must return {@link NextAction#SUCCEED}.
+     * In case of {@link NextAction#WAIT_FOR_CLUSTER_JOBS}, the job system will notify this job about the cluster jobs
+     * having finished by calling the {@link #validate()} method.
      *
      * @throws Throwable Throwing will make this job fail.
      */
-    protected abstract boolean maybeSubmit() throws Throwable
+    protected abstract NextAction maybeSubmit() throws Throwable
 
     /**
      * Called when <em>all</em> of the cluster jobs which were submitted by {@link #maybeSubmit()} have finished

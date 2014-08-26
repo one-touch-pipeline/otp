@@ -22,7 +22,7 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
          */
         SUCCEED,
         /**
-         * Wait for the submitted cluster jobs and then call {@link AbstractMultiJob#execute(Collection)} again.
+         * Wait for the submitted cluster jobs to finish and then notify this job.
          */
         WAIT_FOR_CLUSTER_JOBS,
     }
@@ -211,6 +211,8 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
      *
      * @return What should be done next. If cluster jobs were submitted during the execution of this method, the method
      * must return {@link NextAction#WAIT_FOR_CLUSTER_JOBS}, otherwise it must return {@link NextAction#SUCCEED}.
+     * In case of {@link NextAction#WAIT_FOR_CLUSTER_JOBS}, the job system will notify this job about the cluster jobs
+     * having finished by calling this method again.
      *
      * @throws Throwable Throwing will make this job fail.
      */

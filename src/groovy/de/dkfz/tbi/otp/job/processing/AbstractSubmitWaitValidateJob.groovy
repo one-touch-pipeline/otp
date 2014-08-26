@@ -7,9 +7,9 @@ package de.dkfz.tbi.otp.job.processing
 abstract class AbstractSubmitWaitValidateJob extends AbstractMaybeSubmitWaitValidateJob {
 
     @Override
-    protected final boolean maybeSubmit() throws Throwable {
+    protected final NextAction maybeSubmit() throws Throwable {
         submit()
-        return true
+        return NextAction.WAIT_FOR_CLUSTER_JOBS
     }
 
     /**
