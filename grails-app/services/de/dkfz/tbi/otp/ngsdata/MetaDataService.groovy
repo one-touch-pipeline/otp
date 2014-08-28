@@ -229,7 +229,7 @@ class MetaDataService {
     private List<MetaDataKey> getKeysFromTokens(List tokens) {
         List<MetaDataKey> keys = []
         tokens.each { mdKey ->
-            String token = correctedKey(mdKey)
+            String token = correctedKey(mdKey).trim()
             MetaDataKey key = MetaDataKey.findByName(token)
             if (!key) {
                 key = new MetaDataKey(name: token)

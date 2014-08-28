@@ -143,7 +143,7 @@
             <g:each var="file" in="${errorFiles}">
                 <tr>
                     <td><g:link controller="dataFile" action="showDetails" id="${file.id}">${file.fileName}</g:link></td>
-                    <td>${de.dkfz.tbi.otp.ngsdata.MetaDataEntry.findByDataFileAndKey(file, keys[0]).value}</td>
+                    <td>${de.dkfz.tbi.otp.ngsdata.MetaDataEntry.findByDataFileAndKey(file, keys[0])?.value}</td>
                     <td>${de.dkfz.tbi.otp.ngsdata.MetaDataEntry.findAllByDataFileAndKey(file, keys[1])}</td>
                     <td class="${file.metaDataValid}"><g:message code="run.show.metaData"/></td>
                 </tr>
