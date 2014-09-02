@@ -52,6 +52,14 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
         new Input(bedName: "TruSeqExomeTargetedRegions_plain_xenograft.bed", refGenName: "hs37d5+mouse", kitName: "Illumina TruSeq Exome Enrichment Kit"),
         new Input(bedName: "Agilent_S0447132_Covered.bed", refGenName: "hs37d5", kitName: "Agilent S0447132"),
         new Input(bedName: "Agilent_S0447132_Covered_xenograft.bed", refGenName: "hs37d5+mouse", kitName: "Agilent S0447132"),
+
+        new Input(bedName: "SureSelect50MbV4_chr.bed", refGenName: "hg19", kitName: "SureSelect50MbV4"),
+        new Input(bedName: "SureSelect50MbV4_plain.bed", refGenName: "hs37d5", kitName: "SureSelect50MbV4"),
+        new Input(bedName: "SureSelect50MbV4_plain_xenograft.bed", refGenName: "hs37d5+mouse", kitName: "SureSelect50MbV4"),
+
+        new Input(bedName: "SureSelect50MbV5_chr.bed", refGenName: "hg19", kitName: "SureSelect50MbV5"),
+        new Input(bedName: "SureSelect50MbV5_plain.bed", refGenName: "hs37d5", kitName: "SureSelect50MbV5"),
+        new Input(bedName: "SureSelect50MbV5_plain_xenograft.bed", refGenName: "hs37d5+mouse", kitName: "SureSelect50MbV5"),
     ]
     class Input {
         String bedName
