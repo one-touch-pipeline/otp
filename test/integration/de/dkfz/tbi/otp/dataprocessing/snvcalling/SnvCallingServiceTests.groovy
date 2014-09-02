@@ -6,7 +6,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.ConfigPerProjectAndSeqType.Purpose
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 
@@ -16,7 +15,7 @@ class SnvCallingServiceTests {
     SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual
 
     SnvCallingService snvCallingService
-    ConfigPerProjectAndSeqType configPerProjectAndSeqType
+    SnvConfig snvConfig
     ProcessedMergedBamFile processedMergedBamFile1
     ProcessedMergedBamFile processedMergedBamFile2
     Project project
@@ -43,13 +42,12 @@ class SnvCallingServiceTests {
         seqType = testData.createSeqType()
         seqType.save()
 
-        configPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
+        snvConfig = new SnvConfig(
                 project: project,
                 seqType: seqType,
-                purpose: Purpose.SNV,
                 configuration: "configuration"
                 )
-        configPerProjectAndSeqType.save()
+        snvConfig.save()
 
         processedMergedBamFile1 = createProcessedMergedBamFile("1")
         processedMergedBamFile1.save()
@@ -69,7 +67,7 @@ class SnvCallingServiceTests {
     @After
     void tearDown() {
         sampleTypeCombinationPerIndividual = null
-        configPerProjectAndSeqType = null
+        snvConfig = null
         processedMergedBamFile1 = null
         processedMergedBamFile2 = null
         project = null
@@ -83,21 +81,21 @@ class SnvCallingServiceTests {
     }
 
     @Test
-    void testConfigPerProjectAndSeqTypeIsNullOtherProject() {
+    void testSnvConfigIsNullOtherProject() {
         Project otherProject = new Project(name: "otherProject", dirName: "/tmp", realmName: "DKFZ")
         otherProject.save()
 
-        configPerProjectAndSeqType.project = otherProject
-        configPerProjectAndSeqType.save()
+        snvConfig.project = otherProject
+        snvConfig.save()
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test
-    void testConfigPerProjectAndSeqTypeIsNullOtherSeqType() {
+    void testSnvConfigIsNullOtherSeqType() {
 
-        configPerProjectAndSeqType.seqType = testData.exomeSeqType
-        configPerProjectAndSeqType.save()
+        snvConfig.seqType = testData.exomeSeqType
+        snvConfig.save()
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
@@ -105,7 +103,7 @@ class SnvCallingServiceTests {
     @Test
     void testSamplePairForSnvProcessingAlreadyInProcess() {
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
-                config: configPerProjectAndSeqType,
+                config: snvConfig,
                 tumorBamFile: processedMergedBamFile1,
                 controlBamFile: processedMergedBamFile2
                 )
@@ -117,7 +115,7 @@ class SnvCallingServiceTests {
     @Test
     void testSamplePairForSnvProcessingWasProcessed() {
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
-                config: configPerProjectAndSeqType,
+                config: snvConfig,
                 tumorBamFile: processedMergedBamFile1,
                 controlBamFile: processedMergedBamFile2,
                 processingState: SnvProcessingStates.FINISHED
@@ -130,7 +128,7 @@ class SnvCallingServiceTests {
     @Test
     void testSamplePairForSnvProcessingHasToBeIgnored() {
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
-                config: configPerProjectAndSeqType,
+                config: snvConfig,
                 tumorBamFile: processedMergedBamFile1,
                 controlBamFile: processedMergedBamFile2,
                 processingState: SnvProcessingStates.IGNORED
@@ -146,7 +144,7 @@ class SnvCallingServiceTests {
         otherProcessedMergedBamFile.save()
 
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
-                config: configPerProjectAndSeqType,
+                config: snvConfig,
                 tumorBamFile: processedMergedBamFile1,
                 controlBamFile: otherProcessedMergedBamFile
                 )
@@ -185,7 +183,7 @@ class SnvCallingServiceTests {
         sampleTypeCombinationPerIndividual2.save()
 
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
-                config: configPerProjectAndSeqType,
+                config: snvConfig,
                 tumorBamFile: processedMergedBamFile3,
                 controlBamFile: processedMergedBamFile4
                 )
@@ -234,7 +232,7 @@ class SnvCallingServiceTests {
         sampleTypeCombinationPerIndividual2.save()
 
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
-                config: configPerProjectAndSeqType,
+                config: snvConfig,
                 tumorBamFile: processedMergedBamFile3,
                 controlBamFile: processedMergedBamFile4
                 )

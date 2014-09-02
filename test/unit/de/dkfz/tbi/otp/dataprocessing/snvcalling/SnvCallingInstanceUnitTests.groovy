@@ -14,7 +14,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  */
 @TestFor(SnvCallingInstance)
 @Mock([MergingPass, MergingSet, MergingWorkPackage,
-    Sample, SampleType, SeqType, Individual, Project, ProcessedMergedBamFile, ConfigPerProjectAndSeqType])
+    Sample, SampleType, SeqType, Individual, Project, ProcessedMergedBamFile, SnvConfig])
 class SnvCallingInstanceUnitTests {
 
     TestData testData = new TestData()
@@ -54,7 +54,7 @@ class SnvCallingInstanceUnitTests {
     @Test
     void testConstraintsAllFine() {
         SnvCallingInstance instance = createSnvCallingInstance([tumorBamFile: bamFileTumor,
-            controlBamFile: bamFileControl, config: new ConfigPerProjectAndSeqType()])
+            controlBamFile: bamFileControl, config: new SnvConfig()])
         assert instance.validate()
     }
 
@@ -64,7 +64,7 @@ class SnvCallingInstanceUnitTests {
         bamFileTumor.mergingPass.mergingSet.mergingWorkPackage.seqType = new SeqType()
 
         SnvCallingInstance differentSeqTypeInstance = createSnvCallingInstance([tumorBamFile: bamFileTumor,
-            controlBamFile: bamFileControl, config: new ConfigPerProjectAndSeqType()])
+            controlBamFile: bamFileControl, config: new SnvConfig()])
         assert !differentSeqTypeInstance.validate()
     }
 
@@ -74,13 +74,13 @@ class SnvCallingInstanceUnitTests {
         bamFileTumor.mergingPass.mergingSet.mergingWorkPackage.sample.individual = new Individual()
 
         SnvCallingInstance differentIndividualInstance = createSnvCallingInstance([tumorBamFile: bamFileTumor,
-            controlBamFile: bamFileControl, config: new ConfigPerProjectAndSeqType()])
+            controlBamFile: bamFileControl, config: new SnvConfig()])
         assert !differentIndividualInstance.validate()
     }
 
 
     @Test
-    void testNoConfigPerProjectAndSeqType() {
+    void testNoSnvConfig() {
         SnvCallingInstance instance = createSnvCallingInstance([tumorBamFile: bamFileTumor,
             controlBamFile: bamFileControl])
         assert !instance.validate()

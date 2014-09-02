@@ -7,7 +7,6 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.ConfigPerProjectAndSeqType.Purpose
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
@@ -27,15 +26,12 @@ class SnvCallingStartJob extends AbstractStartJobImpl {
         if (!hasFreeSlot()) {
             return
         }
-        ConfigPerProjectAndSeqType.withTransaction {
+        SnvConfig.withTransaction {
             SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual = snvCallingService.samplePairForSnvProcessing()
             if (sampleTypeCombinationPerIndividual) {
-                ConfigPerProjectAndSeqType configPerProjectAndSeqType = exactlyOneElement(
-                        ConfigPerProjectAndSeqType.findAllByProjectAndSeqTypeAndPurpose(
-                        sampleTypeCombinationPerIndividual.individual.project,
-                        sampleTypeCombinationPerIndividual.seqType,
-                        Purpose.SNV
-                        )
+                SnvConfig config = SnvConfig.getLatest(
+                        sampleTypeCombinationPerIndividual.project,
+                        sampleTypeCombinationPerIndividual.seqType
                         )
 
                 ProcessedMergedBamFile tumorBamFile = sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(
@@ -47,7 +43,7 @@ class SnvCallingStartJob extends AbstractStartJobImpl {
                         )
 
                 SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
-                        config: configPerProjectAndSeqType,
+                        config: config,
                         tumorBamFile: tumorBamFile,
                         controlBamFile: controlBamFile
                         )

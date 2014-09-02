@@ -50,6 +50,10 @@ class SampleTypeCombinationPerIndividual {
         }
     }
 
+    Project getProject() {
+        return individual.project
+    }
+
     /**
      * Returns the latest ProcessedMergedBamFile which belongs to the given {@link SampleType}
      * for this {@link SampleTypeCombinationPerIndividual}, if available and not withdrawn, otherwise null.

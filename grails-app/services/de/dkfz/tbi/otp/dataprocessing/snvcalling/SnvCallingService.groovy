@@ -62,10 +62,9 @@ class SnvCallingService {
                 "WHERE stc.needsProcessing = true " +
 
                 //check that the config file is available
-                "AND EXISTS (FROM ConfigPerProjectAndSeqType cps " +
+                "AND EXISTS (FROM SnvConfig cps " +
                 "   WHERE cps.project = stc.individual.project " +
-                "   AND cps.seqType = stc.seqType " +
-                "   AND cps.purpose = 'SNV') " +
+                "   AND cps.seqType = stc.seqType) " +
 
                 //check that this combination is not in process
                 "AND NOT EXISTS (FROM SnvCallingInstance sci " +

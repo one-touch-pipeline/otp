@@ -56,7 +56,7 @@ class SnvJobResult {
                 return false
             }
 
-            return (obj.step == SnvCallingStep.SNV_CALL ? val == null : val != null)
+            return (obj.step == SnvCallingStep.CALLING ? val == null : val != null)
         }
     }
 

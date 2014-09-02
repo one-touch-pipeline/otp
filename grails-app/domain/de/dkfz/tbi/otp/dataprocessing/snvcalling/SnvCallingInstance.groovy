@@ -12,7 +12,7 @@ class SnvCallingInstance {
     /**
      * Refers to the config file which is stored in the database and is used as a basis for all the files in the filesystem.
      */
-    ConfigPerProjectAndSeqType config
+    SnvConfig config
 
     ProcessedMergedBamFile tumorBamFile
 

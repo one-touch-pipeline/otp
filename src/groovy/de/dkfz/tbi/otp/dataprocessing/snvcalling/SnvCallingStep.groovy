@@ -8,7 +8,7 @@ enum SnvCallingStep {
     /**
      * Running SamTools to call SNVs
      */
-    SNV_CALL,
+    CALLING,
     /**
      * Annotates SNVs with biological context
      */
@@ -16,12 +16,19 @@ enum SnvCallingStep {
     /**
      * adds even MORE context.
      */
-    DEEP_ANNOTATION,
+    DEEPANNOTATION,
     /**
      * The snv file can be filtered in three different ways:
      * - somatic mutations in the complete genome
      * - somatic and germline mutations in the coding regions
      * - mutatation, which changes the protein structure
      */
-    FILTER,
+    FILTER_VCF
+
+    /**
+     * Used to match the variables in the config file offered by the CO group.
+     */
+    String getConfigExecuteFlagVariableName() {
+        return "RUN_${name()}"
+    }
 }

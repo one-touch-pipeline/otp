@@ -12,7 +12,7 @@ class SnvJobResultUnitTests {
     @Test
     void testSavingOfSnvJobResultNoInputFileButCalling() {
         SnvJobResult snvJobResult = new SnvJobResult(
-                step: SnvCallingStep.SNV_CALL,
+                step: SnvCallingStep.CALLING,
                 snvCallingInstance: new SnvCallingInstance(),
                 processingState: SnvProcessingStates.IN_PROGRESS,
                 )
