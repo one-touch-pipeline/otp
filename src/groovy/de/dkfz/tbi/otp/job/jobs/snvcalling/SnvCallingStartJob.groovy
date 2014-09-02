@@ -1,16 +1,16 @@
-package de.dkfz.tbi.otp.dataprocessing.snvcalling
+package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import de.dkfz.tbi.otp.dataprocessing.MergingPassService
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.ConfigPerProjectAndSeqType.Purpose;
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.ConfigPerProjectAndSeqType.Purpose
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 @Component("snvStartJob")
 @Scope("singleton")
