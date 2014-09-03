@@ -83,23 +83,25 @@ class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob 
             lock.unlock()
         }
         if (allFinished) {
-            // Since the monitoring service does not always have the correct realm (it's just "guessing"), the value
-            // provided in the callback might be null. Passing the realm via job parameters is required, so we fetch
-            // the value from the input parameter.
-            Realm realmFromJob = Realm.findById(Long.parseLong(getParameterValueOrClass("${JobParameterKeys.REALM}")))
+            ProcessingStep.withTransaction {
+                // Since the monitoring service does not always have the correct realm (it's just "guessing"), the value
+                // provided in the callback might be null. Passing the realm via job parameters is required, so we fetch
+                // the value from the input parameter.
+                Realm realmFromJob = Realm.findById(Long.parseLong(getParameterValueOrClass("${JobParameterKeys.REALM}")))
 
-            def failedClusterJobs = jobStatusLoggingService.failedOrNotFinishedClusterJobs(monitoredProcessingStep, realmFromJob, allClusterJobIds)
+                def failedClusterJobs = jobStatusLoggingService.failedOrNotFinishedClusterJobs(monitoredProcessingStep, realmFromJob, allClusterJobIds)
 
-            // Output and finish
-            if (failedClusterJobs.empty) {
-                log.debug 'All PBS jobs of ' + monitoredJobClass + ' were logged, calling succeed()'
-                succeed()
+                // Output and finish
+                if (failedClusterJobs.empty) {
+                    log.debug 'All PBS jobs of ' + monitoredJobClass + ' were logged, calling succeed()'
+                    succeed()
+                }
+                else {
+                    log.error 'Some PBS jobs of ' + monitoredJobClass + ' seem to have failed: ' + failedClusterJobs.collect { it.clusterJobId }
+                    throw new ProcessingException("${monitoredProcessingStep} failed. PBS IDs with problems: ${failedClusterJobs.collect { it.clusterJobId }}")
+                }
+                schedulerService.doEndCheck(this)
             }
-            else {
-                log.error 'Some PBS jobs of ' + monitoredJobClass + ' seem to have failed: ' + failedClusterJobs.collect { it.clusterJobId }
-                throw new ProcessingException("${monitoredProcessingStep} failed. PBS IDs with problems: ${failedClusterJobs.collect { it.clusterJobId }}")
-            }
-            schedulerService.doEndCheck(this)
         }
     }
 }
