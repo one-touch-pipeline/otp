@@ -65,7 +65,7 @@ class JobStatusLoggingService {
         notNull processingStep, 'No processing step specified.'
         String message = [
             processingStep.jobDefinition.plan.name,
-            processingStep.jobClass.split('\\.')[-1],
+            processingStep.getNonQualifiedJobClass(),
             processingStep.id,
             pbsId ?: SHELL_SNIPPET_GET_NUMERIC_PBS_ID,
         ].join(',')
