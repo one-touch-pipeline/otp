@@ -289,13 +289,15 @@ class ProcessesController {
         Map dataToRender = cmd.dataToRender()
         boolean input = Boolean.parseBoolean(params.input)
         ProcessingStep step = processService.getProcessingStep(params.id as long)
-        String jobName = executionService.pbsJobDescription(step)
+        String jobName
         // TODO: move into service
         List<Parameter> parameters = []
         if (input) {
             parameters = step.input.toList().sort { it.id }
+            jobName = executionService.pbsJobDescription(step.previous)
         } else {
             parameters = step.output.toList().sort { it.id }
+            jobName = executionService.pbsJobDescription(step)
         }
         if (!cmd.sortOrder) {
             parameters = parameters.reverse()
