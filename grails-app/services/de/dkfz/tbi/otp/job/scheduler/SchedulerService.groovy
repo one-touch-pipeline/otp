@@ -304,7 +304,7 @@ class SchedulerService {
         Job job = null
         persistenceInterceptor.init()
         try {
-            job = doSchedule()
+            ProcessingStep.withTransaction { job = doSchedule() }
         } finally {
             persistenceInterceptor.flush()
             persistenceInterceptor.destroy()
