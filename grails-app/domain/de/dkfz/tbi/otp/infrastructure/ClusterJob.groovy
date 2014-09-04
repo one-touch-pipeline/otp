@@ -82,6 +82,8 @@ class ClusterJob implements ClusterJobIdentifier{
     Integer requestedCores
     /**
      * cores used for processing the job
+     *
+     * currently default null, because the API gives no exact information about used cores
      */
     Integer usedCores
     /**
@@ -103,18 +105,18 @@ class ClusterJob implements ClusterJobIdentifier{
         clusterJobId(blank: false, nullable: false)
         clusterJobName(blank: false, nullable: false, validator: { clusterJobName, clusterJob -> clusterJobName.endsWith("_${clusterJob.jobClass}") } )
         jobClass(blank: false, nullable: false, validator: { jobClass, clusterJob -> jobClass == clusterJob.processingStep.nonQualifiedJobClass } )
-        seqType(nullable: true)                         // gets filled after initialization, must be nullable
-        exitStatus(nullable: true)                      // gets filled after initialization, must be nullable
-        exitCode(nullable: true)                        // gets filled after initialization, must be nullable
+        seqType(nullable: true)                                 // gets filled after initialization, must be nullable
+        exitStatus(nullable: true)                              // gets filled after initialization, must be nullable
+        exitCode(nullable: true)                                // gets filled after initialization, must be nullable
         queued(nullable: false)
-        started(nullable: true)                         // gets filled after initialization, must be nullable
-        ended(nullable: true)                           // gets filled after initialization, must be nullable
-        requestedWalltime(nullable: false, min: new Duration(1))
-        requestedCores(nullable: false, min: 1)
-        usedCores(nullable:true)                        // gets filled after initialization, must be nullable
-        cpuTime(nullable: true)                         // gets filled after initialization, must be nullable
-        requestedMemory(nullable: false, min: 1L)
-        usedMemory(nullable: true)                      // gets filled after initialization, must be nullable
+        started(nullable: true)                                 // gets filled after initialization, must be nullable
+        ended(nullable: true)                                   // gets filled after initialization, must be nullable
+        requestedWalltime(nullable: true, min: new Duration(1)) // gets filled after initialization, must be nullable
+        requestedCores(nullable: true, min: 1)                  // gets filled after initialization, must be nullable
+        usedCores(nullable:true)                                // gets filled after initialization, must be nullable
+        cpuTime(nullable: true)                                 // gets filled after initialization, must be nullable
+        requestedMemory(nullable: true, min: 1L)                // gets filled after initialization, must be nullable
+        usedMemory(nullable: true)                              // gets filled after initialization, must be nullable
     }
 
     static mapping = {
@@ -124,6 +126,8 @@ class ClusterJob implements ClusterJobIdentifier{
         ended type: PersistentDateTime
         requestedWalltime type: PersistentDurationAsString
         cpuTime type: PersistentDurationAsString
+
+        clusterJobId index: "cluster_job_cluster_job_id_idx"
     }
 
     public Cluster getCluster() {

@@ -25,6 +25,6 @@ class PbsJobInfo implements ClusterJobIdentifier, Serializable {
 
     @Override
     public String toString() {
-        return "Cluster job ${clusterJobId} on realm ${realm}"
+        return "Cluster job ${clusterJobId} on ${realm}"
     }
 }

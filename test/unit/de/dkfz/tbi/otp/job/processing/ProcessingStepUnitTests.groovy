@@ -13,7 +13,7 @@ import org.junit.*
  */
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(ProcessingStep)
-class ProcessingStepTests {
+class ProcessingStepUnitTests {
 
     @SuppressWarnings("EmptyMethod")
     void setUp() {
@@ -32,7 +32,7 @@ class ProcessingStepTests {
         mockDomain(Process, [process])
         mockDomain(JobDefinition, [jobDefinition, jobDefinition2])
         mockForConstraintsTests(ProcessingStep, [])
-        
+
         ProcessingStep step = new ProcessingStep(jobClass: "foo",
             jobVersion: "bar",
             process: process,
@@ -293,5 +293,28 @@ class ProcessingStepTests {
         assertEquals("jobExecutionPlan", step.errors["process"])
         process.jobExecutionPlan = plan1
         assertTrue(step.validate())
+    }
+
+    @Test
+    void testPbsJobDescription() {
+        JobExecutionPlan jobExecutionPlan = new JobExecutionPlan(
+                name: "testWorkFlow"
+        )
+        Process process = new Process(
+                jobExecutionPlan: jobExecutionPlan
+        )
+        ProcessingStep step = new ProcessingStep(
+                id: 9999999,
+                jobClass: "foo",
+                process: process,
+        )
+        assertEquals(step.getPbsJobDescription(), "otp_TEST_testWorkFlow_9999999_foo")
+    }
+
+    @Test
+    void testPbsJobDescriptionNull() {
+        shouldFail() {
+            null.getPbsJobDescription()
+        }
     }
 }

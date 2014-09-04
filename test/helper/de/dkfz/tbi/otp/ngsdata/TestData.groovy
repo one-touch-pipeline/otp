@@ -153,7 +153,7 @@ class TestData {
     }
 
 
-    SeqType createSeqType(Map properties = [:]) {
+    static SeqType createSeqType(Map properties = [:]) {
         return new SeqType([
             name : "WHOLE_GENOME",
             libraryLayout : "PAIRED",

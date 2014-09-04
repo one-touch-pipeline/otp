@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.scheduler
 
+import de.dkfz.tbi.otp.infrastructure.ClusterJobService
+
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
@@ -22,6 +24,9 @@ import de.dkfz.tbi.otp.ngsdata.Realm
  */
 class PbsMonitorService {
     static transactional = false
+
+    @Autowired
+    ClusterJobService clusterJobService
 
     @Autowired
     ExecutionService executionService
@@ -141,6 +146,11 @@ class PbsMonitorService {
                 log.debug("${info.pbsId} still running: ${running ? 'yes' : 'no'}")
                 if (!running) {
                     log.info("${info.pbsId} finished on Realm ${info.realm}")
+                    try {
+                        clusterJobService.completeClusterJob(info)
+                    } catch (Throwable e) {
+                        log.warn("Failed to fill in runtime statistics for ${info}", e)
+                    }
                     notifyJobAboutFinishedClusterJob(pbsMonitor, info)
                     finishedJobs.add(info)
                 }

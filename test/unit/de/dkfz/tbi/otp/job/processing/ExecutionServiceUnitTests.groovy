@@ -98,25 +98,4 @@ class ExecutionServiceUnitTests {
             assertTrue(executionService.isJobStatusAvailable(output))
         }
     }
-
-    void testPbsJobDescription() {
-        JobExecutionPlan jobExecutionPlan = new JobExecutionPlan(
-                name: "testWorkFlow"
-            )
-        Process process = new Process(
-                jobExecutionPlan: jobExecutionPlan
-            )
-        ProcessingStep step = new ProcessingStep(
-                id: 9999999,
-                jobClass: "foo",
-                process: process,
-            )
-        assertEquals(executionService.pbsJobDescription(step), "otp_devel_testWorkFlow_9999999_foo")
-    }
-
-    void testPbsJobDescriptionNull() {
-        shouldFail() {
-            executionService.pbsJobDescription(null)
-        }
-    }
 }

@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.Process
+import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import grails.util.Environment
@@ -146,6 +147,14 @@ class DomainFactory {
                 state: state,
                 previous: step.latestProcessingStepUpdate,
                 processingStep: step,
+        )
+    }
+
+    public static ProcessParameter createProcessParameter(final Process process, final Object parameterValue) {
+        return new ProcessParameter(
+                process: process,
+                className: parameterValue.class.name,
+                value: parameterValue.id.toString(),
         )
     }
 

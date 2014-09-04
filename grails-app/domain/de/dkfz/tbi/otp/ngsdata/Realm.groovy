@@ -53,9 +53,25 @@ class Realm implements Serializable {
     int timeout
     String pbsOptions                  // realm dependent options of the PBS system
 
+    /**
+     * {@link de.dkfz.tbi.flowcontrol.ws.client.FlowControlClient.Builder#clientKeys}
+     */
+    String flowControlKey
+    /**
+     * {@link de.dkfz.tbi.flowcontrol.ws.client.FlowControlClient.Builder#hostName}
+     */
+    String flowControlHost
+    /**
+     * {@link de.dkfz.tbi.flowcontrol.ws.client.FlowControlClient.Builder#portNumber}
+     */
+    Integer flowControlPort
+
     static constraints = {
         loggingRootPath blank:false, nullable:false
         stagingRootPath blank:true, nullable:true
+        flowControlKey blank:true, nullable:true
+        flowControlHost blank:true, nullable:true
+        flowControlPort nullable:true
     }
 
     @Override

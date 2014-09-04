@@ -48,6 +48,13 @@ class PbsOptionMergingService {
      *          job identifier and the cluster ({@link Realm#cluster}) of the {@link Realm}
      */
     public String mergePbsOptions(Realm realm, String jobIdentifier = null, String qsubParameters = "") {
+        return mapToPbsOptions(mergePbsOptionsToMap(realm, jobIdentifier, qsubParameters))
+    }
+
+    /**
+     * Same as {@link #mergePbsOptions(Realm, String, String)}, but returns a Map.
+     */
+    public Map mergePbsOptionsToMap(Realm realm, String jobIdentifier = null, String qsubParameters = "") {
         Map allParameter = jsonStringToMap(realm.pbsOptions)
         if (jobIdentifier != null) {
             String key = PBS_PREFIX + jobIdentifier
@@ -61,8 +68,7 @@ class PbsOptionMergingService {
             Map mapQsubParameter = jsonStringToMap(qsubParameters)
             allParameter = this.mergeHelper(allParameter, mapQsubParameter)
         }
-        String ret = mapToPbsOptions(allParameter)
-        return ret
+        return allParameter
     }
 
     /**
@@ -90,7 +96,7 @@ class PbsOptionMergingService {
      * @param map the map to convert
      * @return the string of the PBS options
      */
-    private String mapToPbsOptions(Map map) {
+    public String mapToPbsOptions(Map map) {
         Assert.notNull(map, "The map is a null pointer")
         if (!(map instanceof Map)) {
             throw new RuntimeException("The parameter 'map' is not of type Map")

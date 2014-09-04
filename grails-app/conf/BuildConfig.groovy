@@ -51,6 +51,8 @@ grails.project.dependency.resolution = {
         // general dependencies
         compile "joda-time:joda-time:2.3"
         compile "org.jadira.usertype:usertype.jodatime:1.9"
+        // dependencies for the flowControl API
+        compile "fcClient:fcClient:0.1"
     }
 
     plugins {

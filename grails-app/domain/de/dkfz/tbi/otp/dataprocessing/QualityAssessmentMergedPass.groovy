@@ -81,4 +81,8 @@ class QualityAssessmentMergedPass {
     MergingPass getMergingPass() {
         return processedMergedBamFile.mergingPass
     }
+
+    SeqType getSeqType() {
+        return processedMergedBamFile.seqType
+    }
 }

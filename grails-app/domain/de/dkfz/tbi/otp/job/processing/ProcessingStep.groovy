@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.job.plan.JobDefinition
+import grails.util.Environment
 
 /**
  * A ProcessingStep represents one execution of a groovy.de.dkfz.tbi.otp.job.processing.Job for a JobDefinition.
@@ -189,4 +190,29 @@ public class ProcessingStep implements Serializable {
         }
         return instance
     }
+
+    public String getPbsJobDescription() {
+        String env
+        switch (Environment.current) {
+            case Environment.PRODUCTION:
+                env = 'prod'
+                break
+            case Environment.DEVELOPMENT:
+                env = 'devel'
+                break
+            default:
+                env = Environment.current.name()
+        }
+        String psId  = this.id
+        String psClass = this.getNonQualifiedJobClass()
+        String psWorkflow = this.process.jobExecutionPlan.toString()
+        return [
+                'otp',
+                env,
+                psWorkflow,
+                psId,
+                psClass
+        ].findAll().join('_')
+    }
+
 }

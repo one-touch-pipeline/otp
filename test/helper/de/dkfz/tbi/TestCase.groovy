@@ -106,5 +106,13 @@ class TestCase extends GroovyTestCase {
         assert fieldError.field == failedField
         assert fieldError.code == failedConstraint
         assert fieldError.rejectedValue == rejectedValue
-    }    
+    }
+
+    public static void removeMetaClass(final Class clazz, final Object object) {
+        // Both of the following statements are necessary. See http://stackoverflow.com/a/15953102
+        // But their order does not matter.
+        // Replacing the clazz parameter with object.class does not work because of Spring's magic wrapper classes.
+        GroovySystem.metaClassRegistry.removeMetaClass(clazz)
+        object.metaClass = null
+    }
 }

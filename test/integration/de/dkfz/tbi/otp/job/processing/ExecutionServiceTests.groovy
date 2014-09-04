@@ -1,5 +1,9 @@
 package de.dkfz.tbi.otp.job.processing
 
+
+import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
+import de.dkfz.tbi.TestCase
+
 import static org.junit.Assert.*
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.junit.*
@@ -33,8 +37,9 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
                 env: "development",
                 operationType: OperationType.DATA_MANAGEMENT,
                 cluster: Realm.Cluster.DKFZ,
-                rootPath: "/",
-                processingRootPath: "/test",
+                rootPath: "/dev/null/otp-test/project/",
+                processingRootPath: "/dev/null/otp-test/processing/",
+                loggingRootPath: "/dev/null/otp-test/logging/",
                 programsRootPath: "/testPrograms",
                 webHost: "http://test.me",
                 host: grailsApplication.config.otp.pbs.ssh.host,
@@ -43,15 +48,15 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
                 timeout: 100,
                 pbsOptions: "{-l: {nodes: '1:lsdf', walltime: '00:00:30'}}"
                 )
+        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options -> return ['1234.example.pbs.server.invalid'] }
     }
 
-    @SuppressWarnings("EmptyMethod")
     @After
     void tearDown() {
-        // Tear down logic here
+        TestCase.removeMetaClass(ExecutionService, executionService)
     }
 
-    @Ignore
+
     @Test
     void testExecuteCommand() {
         assertNotNull(realm.save())
@@ -86,7 +91,6 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
     }
 
     @Deprecated
-    @Ignore
     @Test
     void testExecuteJobScript() {
         // Create temporary file to be executed on pbs. The file is stored on user's home.
@@ -112,10 +116,11 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         assertEquals(extractedPbsId, extractedPbsId_qstat)
     }
 
-    @Ignore
+
     @Test
     void testExecuteJobOnlyScript() {
-        TestJob testJob = createTestJobWithProcessingStep()
+        assertNotNull(realm.save())
+        TestJob testJob = createTestJobWithProcessingStep(AlignmentPass.build())
         testJob.log = log
         schedulerService.startingJobExecutionOnCurrentThread(testJob)
         try {
@@ -140,10 +145,11 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
     }
 
 
-    @Ignore
+
     @Test
     void testExecuteJobScriptAndJobIdentifier() {
-        TestJob testJob = createTestJobWithProcessingStep()
+        assertNotNull(realm.save())
+        TestJob testJob = createTestJobWithProcessingStep(AlignmentPass.build())
         testJob.log = log
         schedulerService.startingJobExecutionOnCurrentThread(testJob)
         try {
@@ -174,10 +180,11 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         }
     }
 
-    @Ignore
+
     @Test
     void testExecuteJobScriptAndJobIdentifierAndQsubParameter() {
-        TestJob testJob = createTestJobWithProcessingStep()
+        assertNotNull(realm.save())
+        TestJob testJob = createTestJobWithProcessingStep(AlignmentPass.build())
         testJob.log = log
         schedulerService.startingJobExecutionOnCurrentThread(testJob)
         try {
@@ -210,7 +217,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
 
 
 
-    @Ignore
+
     @Test
     void testExecuteCommandCheckFrequently() {
         // Create temporary file to be executed on pbs. The file is stored on user's home.
@@ -234,7 +241,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         }
     }
 
-    @Ignore
+    @Ignore("OTP-1106")
     @Test(expected = ProcessingException)
     void testExecuteCommandConnectionFailed() {
         realm.host = "GROUP"
@@ -250,7 +257,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         String response = executionService.executeCommand(realm, cmd)
     }
 
-    @Ignore
+    @Ignore("OTP-1106")
     @Test
     void testCheckRunningJob() {
         // Create temporary file to be executed on pbs. The file is stored on user's home.
@@ -269,7 +276,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         }
     }
 
-    @Ignore
+    @Ignore("OTP-1106")
     @Test
     void testCheckRunningJobConnectionFailed() {
         // Create temporary file to be executed on pbs. The file is stored on user's home.

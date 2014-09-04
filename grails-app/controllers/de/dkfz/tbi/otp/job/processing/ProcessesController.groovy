@@ -294,10 +294,10 @@ class ProcessesController {
         List<Parameter> parameters = []
         if (input) {
             parameters = step.input.toList().sort { it.id }
-            jobName = executionService.pbsJobDescription(step.previous)
+            jobName = step.previous.getPbsJobDescription()
         } else {
             parameters = step.output.toList().sort { it.id }
-            jobName = executionService.pbsJobDescription(step)
+            jobName = step.getPbsJobDescription()
         }
         if (!cmd.sortOrder) {
             parameters = parameters.reverse()

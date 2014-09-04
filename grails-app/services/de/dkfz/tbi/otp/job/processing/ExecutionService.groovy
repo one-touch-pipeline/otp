@@ -9,11 +9,14 @@ import com.jcraft.jsch.Channel
 import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import grails.util.Environment
 import static org.springframework.util.Assert.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 /**
  * @short Helper class providing functionality for remote execution of jobs.
@@ -60,6 +63,7 @@ class ExecutionService {
     PbsOptionMergingService pbsOptionMergingService
     JobStatusLoggingService jobStatusLoggingService
     SchedulerService schedulerService
+    ClusterJobService clusterJobService
 
     /**
      * Executes a command on a specified host
@@ -104,9 +108,11 @@ class ExecutionService {
         ProcessingStep processingStep = schedulerService.jobExecutedByCurrentThread.processingStep
 
         String pbsOptions = pbsOptionMergingService.mergePbsOptions(realm, jobIdentifier, qsubParameters)
+
+        String pbsJobDescription = processingStep.getPbsJobDescription()
         String scriptText = """
 #PBS -S /bin/bash
-#PBS -N ${pbsJobDescription(processingStep)}
+#PBS -N ${pbsJobDescription}
 
 # OTP: Fail on first non-zero exit code
 set -e
@@ -134,7 +140,15 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
         }
         String command = "echo '${scriptText}' | qsub " + pbsOptions
         List<String> values = executeRemoteJob(realm, command)
-        return concatResults(values)
+
+        SeqType seqType = atMostOneElement(ProcessParameter.findAllByProcess(processingStep.process))?.toObject()?.seqType
+
+        String concatenatedValues = concatResults(values)
+
+        String pbsId = exactlyOneElement(extractPbsIds(concatenatedValues))
+        ClusterJob clusterJob = clusterJobService.createClusterJob(realm, pbsId, processingStep, seqType, pbsJobDescription)
+
+        return concatenatedValues
     }
 
     /**
@@ -419,20 +433,4 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
         Log log = LogThreadLocal.getThreadLog()
         log?.debug message
     }
-
-    String pbsJobDescription(ProcessingStep processingStep) {
-        notNull(processingStep, "Missing processing step in pbsJobDescription method")
-        String env = Environment.current == Environment.PRODUCTION ? 'prod' : 'devel'
-        String psId  = processingStep.id
-        String psClass = processingStep.getNonQualifiedJobClass()
-        String psWorkflow = processingStep.process.jobExecutionPlan.toString()
-        return [
-            'otp',
-            env,
-            psWorkflow,
-            psId,
-            psClass
-        ].findAll().join('_')
-    }
-
 }

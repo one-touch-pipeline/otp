@@ -11,9 +11,11 @@ import static de.dkfz.tbi.otp.ngsdata.DomainFactory.*
  */
 class TestJobHelper {
 
-    public static TestJob createTestJobWithProcessingStep() {
+    public static TestJob createTestJobWithProcessingStep(final Object processParameterValue = null) {
         ProcessingStep processingStep = createAndSaveProcessingStep()
-
+        if (processParameterValue != null) {
+            assert createProcessParameter(processingStep.process, processParameterValue).save(failOnError: true)
+        }
         TestJob testJob = new TestJob(processingStep, [])
         return testJob
     }

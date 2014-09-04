@@ -50,6 +50,20 @@ class Run {
         return paths
     }
 
+    /*
+     * is used in ExecutionService to create Cluster Jobs,
+     * returns null if a run has more than one sequencing type,
+     * because this case is unusable for creating Cluster Jobs
+     */
+    SeqType getSeqType() {
+        List<SeqType> seqTypes = SeqTrack.findAllByRun(this)*.seqType
+        if (seqTypes.unique().size() == 1) {
+            return seqTypes.get(0)
+        } else {
+            return null
+        }
+    }
+
     static mapping = {
         seqCenter index: "run_seq_center_idx"
         seqPlatform index: "run_seq_platform_idx"
