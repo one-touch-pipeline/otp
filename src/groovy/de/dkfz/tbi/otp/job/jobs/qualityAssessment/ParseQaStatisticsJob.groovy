@@ -15,5 +15,6 @@ class ParseQaStatisticsJob extends AbstractJobImpl {
         long passId = getProcessParameterValue() as long
         QualityAssessmentPass pass = QualityAssessmentPass.get(passId)
         abstractQualityAssessmentService.parseQaStatistics(pass)
+        abstractQualityAssessmentService.saveCoverageToProcessedBamFile(pass)
     }
 }

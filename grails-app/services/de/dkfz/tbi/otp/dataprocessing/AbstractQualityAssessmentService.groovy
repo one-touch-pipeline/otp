@@ -6,6 +6,8 @@ import grails.converters.JSON
 
 class AbstractQualityAssessmentService {
 
+    AbstractBamFileService abstractBamFileService
+
     ProcessedBamFileQaFileService processedBamFileQaFileService
 
     ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
@@ -46,6 +48,20 @@ class AbstractQualityAssessmentService {
             qualityAssessmentStatistics.qualityAssessmentMergedPass = qualityAssessmentPass
             assertSave(qualityAssessmentStatistics)
         }
+    }
+
+    void saveCoverageToProcessedBamFile(QualityAssessmentPass qualityAssessmentPass) {
+        ProcessedBamFile processedBamFile = qualityAssessmentPass.processedBamFile
+        processedBamFile.coverage = abstractBamFileService.calculateCoverageWithoutN(processedBamFile)
+        processedBamFile.coverageWithN = abstractBamFileService.calculateCoverageWithN(processedBamFile)
+        assertSave(processedBamFile)
+    }
+
+    void saveCoverageToProcessedMergedBamFile(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
+        ProcessedMergedBamFile processedMergedBamFile = qualityAssessmentMergedPass.processedMergedBamFile
+        processedMergedBamFile.coverage = abstractBamFileService.calculateCoverageWithoutN(processedMergedBamFile)
+        processedMergedBamFile.coverageWithN = abstractBamFileService.calculateCoverageWithN(processedMergedBamFile)
+        assertSave(processedMergedBamFile)
     }
 
     private double safePercentCalculation(double numerator, double denominator) {
