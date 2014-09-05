@@ -78,6 +78,11 @@ abstract class AbstractBamFile {
     // Has to be from Type Double so that it can be nullable
     Double coverage
 
+    /**
+     * Coverage with N of the BAM file
+     */
+    Double coverageWithN
+
     /** Time stamp of deletion */
     Date deletionDate
 
@@ -110,6 +115,7 @@ abstract class AbstractBamFile {
         }
         deletionDate(nullable: true)
         coverage(nullable: true)
+        coverageWithN(nullable: true)
     }
 
     ReferenceGenome getReferenceGenome() {
