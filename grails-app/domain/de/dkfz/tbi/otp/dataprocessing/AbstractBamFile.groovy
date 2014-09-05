@@ -89,6 +89,7 @@ abstract class AbstractBamFile {
     State status = State.DECLARED
 
     public abstract Set<SeqTrack> getContainedSeqTracks()
+    public abstract AbstractQualityAssessment getOverallQualityAssessment()
 
     static constraints = {
         hasMetricsFile validator: { val, obj ->

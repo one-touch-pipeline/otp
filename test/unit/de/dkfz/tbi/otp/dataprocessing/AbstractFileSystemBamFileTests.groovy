@@ -40,4 +40,9 @@ class MockAbstractFileSystemBamFile extends AbstractFileSystemBamFile {
     Set<SeqTrack> getContainedSeqTracks() {
         return null
     }
+
+    @Override
+    AbstractQualityAssessment getOverallQualityAssessment() {
+        return null
+    }
 }

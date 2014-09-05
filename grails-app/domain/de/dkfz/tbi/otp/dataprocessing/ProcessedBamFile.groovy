@@ -51,6 +51,16 @@ class ProcessedBamFile extends AbstractFileSystemBamFile {
         return new HashSet<SeqTrack>([alignmentPass.seqTrack])
     }
 
+    @Override
+    AbstractQualityAssessment getOverallQualityAssessment() {
+        OverallQualityAssessment.createCriteria().get {
+            qualityAssessmentPass {
+                eq 'processedBamFile', this
+            }
+            order 'id', 'desc'
+            maxResults 1
+        }
+    }
     static mapping = {
         alignmentPass index: "abstract_bam_file_alignment_pass_idx"
     }

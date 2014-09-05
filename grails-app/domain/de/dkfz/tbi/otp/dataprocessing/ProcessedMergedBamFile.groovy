@@ -91,4 +91,15 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
         List<ProcessedBamFile> processedBamFiles = abstractBamFileService.findAllByProcessedMergedBamFile(this)
         return processedBamFiles*.alignmentPass*.seqTrack as Set<SeqTrack>
     }
+
+    @Override
+    AbstractQualityAssessment getOverallQualityAssessment() {
+        OverallQualityAssessmentMerged.createCriteria().get {
+            qualityAssessmentMergedPass {
+                eq 'processedMergedBamFile', this
+            }
+            order 'id', 'desc'
+            maxResults 1
+        }
+    }
 }

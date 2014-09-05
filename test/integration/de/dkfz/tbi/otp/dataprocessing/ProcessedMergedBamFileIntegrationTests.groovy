@@ -159,6 +159,32 @@ class ProcessedMergedBamFileIntegrationTests {
         assertTrue("Expected string matching '" + expected + "'. Got: " + actual, actual.matches(expected))
     }
 
+    @Test
+    void test_getOverallQualityAssessment_WhenOnePassExists_ShouldReturnThis() {
+
+        final Long ARBITRARY_IDENTIFIER = 42
+
+        def processedMergedBamFile = createProcessedMergedBamFile()
+        def oqa = createOverallQualityAssessment(processedMergedBamFile, ARBITRARY_IDENTIFIER)
+
+        assert processedMergedBamFile.overallQualityAssessment == oqa
+    }
+
+    @Test
+    void test_getOverallQualityAssessment_WhenMultiplePassesExists_ShouldReturnLatest() {
+
+        final Long IDENTIFIER_FORMER = 100
+        final Long IDENTIFIER_LATER = 200
+
+        assert IDENTIFIER_FORMER < IDENTIFIER_LATER
+
+        def processedMergedBamFile = createProcessedMergedBamFile()
+        def oqaFormer = createOverallQualityAssessment(processedMergedBamFile, IDENTIFIER_FORMER)
+        def oqaLater = createOverallQualityAssessment(processedMergedBamFile, IDENTIFIER_LATER)
+
+        assert processedMergedBamFile.overallQualityAssessment == oqaLater
+        assert processedMergedBamFile.overallQualityAssessment != oqaFormer
+    }
 
     private MergingPass createMergingPass() {
         MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
@@ -229,5 +255,39 @@ class ProcessedMergedBamFileIntegrationTests {
                         )
         assertNotNull(seqTrack.save([flush: true]))
         return seqTrack
+    }
+
+    private ProcessedMergedBamFile createProcessedMergedBamFile() {
+
+        MergingPass mergingPass = createMergingPass()
+
+        ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile([
+                type                   : BamType.SORTED,
+                mergingPass            : mergingPass,
+                withdrawn              : false,
+                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
+                status                 : AbstractBamFile.State.PROCESSED,
+        ])
+        assert processedMergedBamFile.save([flush: true])
+
+        return processedMergedBamFile
+    }
+
+    private static OverallQualityAssessmentMerged createOverallQualityAssessment(ProcessedMergedBamFile processedMergedBamFile, Long identifier) {
+
+        assert processedMergedBamFile: 'processedMergedBamFile must not be null'
+
+        QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass([
+                processedMergedBamFile: processedMergedBamFile,
+        ])
+        assert qualityAssessmentMergedPass.save([flush: true])
+
+        OverallQualityAssessmentMerged overallQualityAssessmentMerged = new OverallQualityAssessmentMerged([
+                id                   : identifier,
+                qualityAssessmentMergedPass: qualityAssessmentMergedPass,
+        ])
+        assert overallQualityAssessmentMerged.save([flush: true])
+
+        return overallQualityAssessmentMerged
     }
 }

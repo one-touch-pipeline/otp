@@ -41,6 +41,11 @@ class ExternallyProcessedMergedBamFile extends AbstractFileSystemBamFile {
         return fastqSet.seqTracks
     }
 
+    @Override
+    public AbstractQualityAssessment getOverallQualityAssessment() {
+        throw new MissingPropertyException('Quality assessment is not implemented for externally imported BAM files')
+    }
+
     static mapping = {
         fastqSet index: "abstract_bam_file_fastq_set_idx"
     }
