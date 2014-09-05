@@ -142,11 +142,11 @@ class AlignmentPassService {
     }
 
     public Project project(AlignmentPass alignmentPass) {
-        return alignmentPass.seqTrack.sample.individual.project
+        return alignmentPass.project
     }
 
     public SeqType seqType(AlignmentPass alignmentPass) {
-        return alignmentPass.seqTrack.seqType
+        return alignmentPass.seqType
     }
 
     public String referenceGenomePath(AlignmentPass alignmentPass) {

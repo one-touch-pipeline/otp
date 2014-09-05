@@ -465,10 +465,10 @@ class MetaDataService {
             return null
         }
         if (dataFile.fileType.type == FileType.Type.SEQUENCE) {
-            return dataFile.seqTrack.sample.individual.project
+            return dataFile.seqTrack.project
         }
         if (dataFile.fileType.type == FileType.Type.ALIGNMENT) {
-            return dataFile.alignmentLog.seqTrack.sample.individual.project
+            return dataFile.alignmentLog.seqTrack.project
         }
         return null
     }

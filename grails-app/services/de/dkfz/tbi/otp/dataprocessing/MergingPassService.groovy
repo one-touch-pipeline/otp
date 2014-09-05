@@ -52,7 +52,7 @@ class MergingPassService {
     @Transactional
     public Project project(MergingPass mergingPass) {
         notNull(mergingPass, "The parameter mergingPass is not allowed to be null")
-        return mergingPass.mergingSet.mergingWorkPackage.sample.individual.project
+        return mergingPass.project
     }
 
     @Transactional

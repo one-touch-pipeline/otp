@@ -69,7 +69,7 @@ class MergingPassServiceTests {
     void testProject() {
         MergingSet mergingSet = createMergingSet("1")
         MergingPass mergingPass = mergingPassService.create()
-        Project projectExp = mergingPass.mergingSet.mergingWorkPackage.sample.individual.project
+        Project projectExp = mergingPass.project
         Project projectAct = mergingPassService.project(mergingPass)
         assertEquals(projectExp, projectAct)
     }

@@ -39,13 +39,13 @@ class MergedAlignmentDataFileService {
     }
 
     String pathToHost(SeqScan scan) {
-        return configService.getProjectRootPath(scan.sample.individual.project)
+        return configService.getProjectRootPath(scan.sample.project)
     }
 
     String buildRelativePath(SeqType type, Sample sample) {
         // this method is also used in the ProcessedMergedBamFileService,
         // if this method is changed make sure that the path in the ProcessedMergedBamFileService is still correct
-        String projectDir = sample.individual.project.dirName
+        String projectDir = sample.project.dirName
         String pid = sample.individual.pid
         String sampleType = sample.sampleType.name.toLowerCase()
         String layout = type.libraryLayout.toLowerCase()

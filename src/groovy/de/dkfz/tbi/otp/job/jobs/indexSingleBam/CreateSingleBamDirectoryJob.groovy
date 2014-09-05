@@ -22,7 +22,7 @@ class CreateSingleBamDirectoryJob extends AbstractJobImpl {
     public void execute() throws Exception {
         long scanId = Long.parseLong(getProcessParameterValue())
         scan = SeqScan.get(scanId)
-        Realm realm = scan.sample.individual.project.realm
+        Realm realm = scan.sample.project.realm
         String text = buildScriptText()
         log.debug text
         executionService.executeCommand(realm, text)

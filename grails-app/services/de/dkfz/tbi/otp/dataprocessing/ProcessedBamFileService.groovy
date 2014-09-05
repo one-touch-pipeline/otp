@@ -128,19 +128,19 @@ class ProcessedBamFileService {
     }
 
     public Project project(ProcessedBamFile processedBamFile) {
-        return processedBamFile.alignmentPass.seqTrack.sample.individual.project
+        return processedBamFile.project
     }
 
     public SeqType seqType(ProcessedBamFile processedBamFile) {
-        return processedBamFile.alignmentPass.seqTrack.seqType
+        return processedBamFile.seqType
     }
 
     public SeqTrack seqTrack(ProcessedBamFile processedBamFile) {
-        return processedBamFile.alignmentPass.seqTrack
+        return processedBamFile.seqTrack
     }
 
     public Sample sample(ProcessedBamFile processedBamFile) {
-        return processedBamFile.alignmentPass.seqTrack.sample
+        return processedBamFile.sample
     }
 
     /**

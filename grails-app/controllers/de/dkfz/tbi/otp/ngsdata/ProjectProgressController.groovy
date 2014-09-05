@@ -61,7 +61,7 @@ class ProjectProgressController {
             line << n++
             line << run.name
             line << run.seqCenter.toString().toLowerCase()
-            line << samples.sort{it.sample.individual.project.name + " "  + it.name }.collect {[it.sample.individual.id, it.name]}
+            line << samples.sort{it.sample.project.name + " "  + it.name }.collect {[it.sample.individual.id, it.name]}
             data << line
         }
         return data

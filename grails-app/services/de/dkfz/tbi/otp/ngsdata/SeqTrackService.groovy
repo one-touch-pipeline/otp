@@ -577,7 +577,7 @@ class SeqTrackService {
     private void consumeDataFiles(List<DataFile> files, SeqTrack seqTrack) {
         files.each {DataFile dataFile ->
             dataFile.seqTrack = seqTrack
-            dataFile.project = seqTrack.sample.individual.project
+            dataFile.project = seqTrack.project
             dataFile.used = true
             dataFile.save(flush: true)
         }
@@ -683,7 +683,7 @@ class SeqTrackService {
         for(DataFile file in files) {
             SoftwareTool filePipeline = getAlignmentPipeline(file)
             if (pipeline.equals(filePipeline)) {
-                file.project = alignLog.seqTrack.sample.individual.project
+                file.project = alignLog.seqTrack.project
                 file.alignmentLog = alignLog
                 file.used = true
                 file.save(flush: true)

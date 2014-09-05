@@ -170,7 +170,7 @@ class IgvSessionFileService {
     }
 
     private String dataWebServer(SeqScan scan) {
-        Realm realm = configService.getRealmDataManagement(scan.sample.individual.project)
+        Realm realm = configService.getRealmDataManagement(scan.sample.project)
         return realm.webHost
     }
 }

@@ -52,7 +52,7 @@ class QualityAssessmentMergedPassService {
 
     public Project project(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
         notNull(qualityAssessmentMergedPass, "The input qualityAssessmentMergedPass of the method project is null")
-        return qualityAssessmentMergedPass.processedMergedBamFile.mergingPass.mergingSet.mergingWorkPackage.sample.individual.project
+        return qualityAssessmentMergedPass.project
     }
 
     private def assertSave(def object) {

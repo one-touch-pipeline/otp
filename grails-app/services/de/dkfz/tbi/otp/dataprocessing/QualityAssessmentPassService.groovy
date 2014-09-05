@@ -66,7 +66,7 @@ class QualityAssessmentPassService {
 
     public Project project(QualityAssessmentPass qualityAssessmentPass) {
         notNull(qualityAssessmentPass, "The input qualityAssessmentPass of the method project is null")
-        return qualityAssessmentPass.processedBamFile.alignmentPass.seqTrack.sample.individual.project
+        return qualityAssessmentPass.project
     }
 
     private def assertSave(def object) {

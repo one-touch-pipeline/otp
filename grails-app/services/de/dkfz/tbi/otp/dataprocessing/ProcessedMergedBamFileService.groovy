@@ -199,17 +199,17 @@ class ProcessedMergedBamFileService {
 
     public Project project(ProcessedMergedBamFile mergedBamFile) {
         notNull(mergedBamFile, 'The parameter mergedBamFile are not allowed to be null')
-        return mergedBamFile.mergingPass.mergingSet.mergingWorkPackage.sample.individual.project
+        return mergedBamFile.project
     }
 
     public Sample sample(ProcessedMergedBamFile processedMergedBamFile) {
         notNull(processedMergedBamFile, "the processedMergedBamFile of the method sample is null")
-        return processedMergedBamFile.mergingPass.mergingSet.mergingWorkPackage.sample
+        return processedMergedBamFile.sample
     }
 
     public SeqType seqType(ProcessedMergedBamFile mergedBamFile) {
         notNull(mergedBamFile, 'The parameter mergedBamFile are not allowed to be null')
-        return mergedBamFile.mergingPass.mergingSet.mergingWorkPackage.seqType
+        return mergedBamFile.seqType
     }
 
     public ProcessedMergedBamFile save(ProcessedMergedBamFile processedMergedBamFile) {

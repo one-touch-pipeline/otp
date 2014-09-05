@@ -49,7 +49,7 @@ class FastqcDataFilesService {
     }
 
     public Realm fastqcRealm(SeqTrack seqTrack) {
-        Project project = seqTrack.sample.individual.project
+        Project project = seqTrack.project
         return configService.getRealmDataProcessing(project)
     }
 
