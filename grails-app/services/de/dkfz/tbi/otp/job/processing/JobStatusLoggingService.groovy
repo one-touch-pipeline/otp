@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.job.processing
 
-import java.util.regex.Pattern
-
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 import static org.springframework.util.Assert.notNull
+
+import java.util.regex.Pattern
+
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -104,9 +105,10 @@ class JobStatusLoggingService {
         notNull processingStep
         notNull clusterJobs
         def invalidInput = clusterJobs.findAll( { it == null || it.realm == null || it.clusterJobId == null } )
-        assert invalidInput == [] : "clusterJobs argument contains null values: ${invalidInput}"
-        final Map<Realm, Collection<String>> map = clusterJobs.groupBy( {it.realm} ).collectEntries {
-                realm, clusterJob -> [(realm): clusterJob.clusterJobId] }
+        assert invalidInput == []: "clusterJobs argument contains null values: ${invalidInput}"
+        final Map<Realm, Collection<String>> map = clusterJobs.groupBy( {it.realm} ).collectEntries { realm, clusterJob ->
+            [(realm): clusterJob.clusterJobId]
+        }
         assert map.values().sum { it.size() } == clusterJobs.size()
         return failedOrNotFinishedClusterJobs(processingStep, map)
     }
