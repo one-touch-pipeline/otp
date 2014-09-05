@@ -115,4 +115,10 @@ abstract class AbstractBamFile {
     ReferenceGenome getReferenceGenome() {
         this.containedSeqTracks*.referenceGenome?.find()
     }
+
+    boolean isQualityAssessed() {
+        status == State.PROCESSED &&
+        qualityControl == QualityControl.PASSED &&
+        qualityAssessmentStatus == QaProcessingStatus.FINISHED
+    }
 }
