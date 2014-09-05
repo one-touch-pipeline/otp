@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
+
 import org.junit.*
 
 class ChecksumFileServiceTests {
@@ -14,11 +15,12 @@ class ChecksumFileServiceTests {
     void setUp() {
         file = new File(filename)
         file.createNewFile()
+        assertTrue(file.exists())
     }
 
     @After
     void tearDown() {
-        file.deleteOnExit()
+        file.delete()
     }
 
     @Test
