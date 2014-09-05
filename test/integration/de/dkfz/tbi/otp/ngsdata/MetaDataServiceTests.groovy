@@ -1,11 +1,15 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
+
+import org.grails.plugins.springsecurity.service.acl.AclUtilService;
 import org.junit.*
+
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserRole
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
+
 import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
@@ -16,8 +20,8 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.core.authority.GrantedAuthorityImpl
 
 class MetaDataServiceTests extends AbstractIntegrationTest {
-    def metaDataService
-    def aclUtilService
+    MetaDataService metaDataService
+    AclUtilService aclUtilService
 
     File baseDir = new File("/tmp/otp/metadataservice")
 
@@ -43,6 +47,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testGetMetaDataEntryByIdNoProjectAnonymous() {
         MetaDataEntry entry = mockEntry()
+
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
             metaDataService.getMetaDataEntryById(entry.id)
@@ -58,6 +63,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testGetMetaDataEntryByIdNoProjectUser() {
         MetaDataEntry entry = mockEntry()
+
         SpringSecurityUtils.doWithAuth("testuser") {
             shouldFail(AccessDeniedException) {
                 metaDataService.getMetaDataEntryById(entry.id)
@@ -74,6 +80,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testGetMetaDataEntryByIdNoProjectOperator() {
         MetaDataEntry entry = mockEntry()
+
         SpringSecurityUtils.doWithAuth("operator") {
             assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
             // accessing a non-existing id should still work
@@ -88,6 +95,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testGetMetaDataEntryByIdNoProjectAdmin() {
         MetaDataEntry entry = mockEntry()
+
         SpringSecurityUtils.doWithAuth("admin") {
             assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
             // accessing a non-existing id should still work
@@ -104,10 +112,12 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
         Project project = mockProject()
         entry.dataFile.project = project
         assertNotNull(entry.dataFile.save(flush: true))
+
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
             metaDataService.getMetaDataEntryById(entry.id)
         }
+
         // accessing a non-existing id should still work
         assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
     }
@@ -122,6 +132,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
         Project project = mockProject()
         entry.dataFile.project = project
         assertNotNull(entry.dataFile.save(flush: true))
+
         SpringSecurityUtils.doWithAuth("testuser") {
             shouldFail(AccessDeniedException) {
                 metaDataService.getMetaDataEntryById(entry.id)
@@ -129,14 +140,18 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
             // accessing a non-existing id should still work
             assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
         }
+
         // now create ACL for this user on the Project
-        aclUtilService.addPermission(project, "testuser", BasePermission.READ)
+        SpringSecurityUtils.doWithAuth("admin") {
+            aclUtilService.addPermission(project, "testuser", BasePermission.READ)
+        }
         SpringSecurityUtils.doWithAuth("testuser") {
             // now our test user should have access
             assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
             // accessing a non-existing id should still work
             assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
         }
+
         // but another user should not have
         SpringSecurityUtils.doWithAuth("user") {
             shouldFail(AccessDeniedException) {
@@ -157,6 +172,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
         Project project = mockProject()
         entry.dataFile.project = project
         assertNotNull(entry.dataFile.save(flush: true))
+
         SpringSecurityUtils.doWithAuth("operator") {
             assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
             // accessing a non-existing id should still work
@@ -174,6 +190,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
         Project project = mockProject()
         entry.dataFile.project = project
         assertNotNull(entry.dataFile.save(flush: true))
+
         SpringSecurityUtils.doWithAuth("admin") {
             assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
             // accessing a non-existing id should still work
