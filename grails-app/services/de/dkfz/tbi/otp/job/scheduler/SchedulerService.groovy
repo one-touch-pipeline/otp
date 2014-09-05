@@ -164,14 +164,9 @@ class SchedulerService {
             schedulerActive = true
             lock.lock()
             try {
-                processesToRestart.each { ProcessingStep step ->
-                    for (ProcessingStep queued in queue) {
-                        if (queue.id == step.id) {
-                            return
-                        }
-                    }
-                    queue << step
-                }
+                Set<ProcessingStep> toReQueueJobs = new HashSet<ProcessingStep>(processesToRestart)
+                toReQueueJobs.removeAll(queue)
+                queue.addAll(toReQueueJobs)
             } finally {
                 lock.unlock()
             }
