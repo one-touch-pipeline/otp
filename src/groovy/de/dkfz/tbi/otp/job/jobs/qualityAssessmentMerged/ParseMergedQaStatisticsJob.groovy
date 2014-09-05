@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged
 
-import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.common.*
 import de.dkfz.tbi.otp.job.processing.*

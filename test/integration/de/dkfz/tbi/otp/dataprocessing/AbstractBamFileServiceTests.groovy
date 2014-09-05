@@ -15,8 +15,18 @@ class AbstractBamFileServiceTests {
     SeqTrack seqTrack
     SeqPlatform seqPlatform
     MergingSet mergingSet
+    MergingPass mergingPass
     AlignmentPass alignmentPass
     ProcessedBamFile processedBamFile
+    ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType
+    ReferenceGenome referenceGenome
+
+    static final Long ARBITRARY_NUMBER_OF_READS = 42
+    static final Long ARBITRARY_GENOME_LENGTH_FOR_COVERAGE_WITHOUT_N = 4
+    static final Double EXPECTED_COVERAGE_FOR_COVERAGE_WITHOUT_N = 10.5
+    static final Long ARBITRARY_GENOME_LENGTH_FOR_COVERAGE_WITH_N = 5
+    static final Double EXPECTED_COVERAGE_FOR_COVERAGE_WITH_N = 8.4
+    static final Long ARBITRARY_UNUSED_VALUE = 1
 
     @Before
     void setUp() {
@@ -101,10 +111,10 @@ class AbstractBamFileServiceTests {
                         )
         assertNotNull(mergingSet.save([flush: true]))
 
-        MergingPass mergingPass = new MergingPass(
-                        identifier: 0,
-                        mergingSet: mergingSet
-                        )
+        mergingPass = new MergingPass(
+                identifier: 0,
+                mergingSet: mergingSet
+        )
         assertNotNull(mergingPass.save([flush: true]))
 
         alignmentPass = createAndSaveAlignmentPass(0)
@@ -115,6 +125,37 @@ class AbstractBamFileServiceTests {
                         status: State.NEEDS_PROCESSING
                         )
         assertNotNull(processedBamFile.save([flush: true]))
+
+        referenceGenome = new ReferenceGenome([
+                name                        : 'Arbitrary Reference Genome Name',
+                path                        : '/nonexistent',
+                fileNamePrefix              : 'somePrefix',
+                length                      : ARBITRARY_GENOME_LENGTH_FOR_COVERAGE_WITH_N,
+                lengthWithoutN              : ARBITRARY_GENOME_LENGTH_FOR_COVERAGE_WITHOUT_N,
+                lengthRefChromosomes        : ARBITRARY_UNUSED_VALUE,
+                lengthRefChromosomesWithoutN: ARBITRARY_UNUSED_VALUE,
+        ])
+        assert referenceGenome.save([flush: true])
+
+        referenceGenomeProjectSeqType = new ReferenceGenomeProjectSeqType([
+                project        : project,
+                seqType        : seqType,
+                referenceGenome: referenceGenome,
+        ])
+        assert referenceGenomeProjectSeqType.save([flush: true])
+
+        // QC values for ProcessedBamFile
+
+        QualityAssessmentPass qualityAssessmentPass = new QualityAssessmentPass([
+                processedBamFile: processedBamFile,
+        ])
+        assert qualityAssessmentPass.save([flush: true])
+
+        OverallQualityAssessment overallQualityAssessment = new OverallQualityAssessment([
+                qualityAssessmentPass: qualityAssessmentPass,
+                qcBasesMapped: ARBITRARY_NUMBER_OF_READS,
+        ])
+        assert overallQualityAssessment.save([flush: true])
     }
 
     public Run createRun(String name) {
@@ -129,7 +170,10 @@ class AbstractBamFileServiceTests {
     @After
     void tearDown() {
         mergingSet = null
+        mergingPass = null
         alignmentPass = null
+        referenceGenomeProjectSeqType = null
+        referenceGenome = null
     }
 
     @Test(expected = IllegalArgumentException)
@@ -284,6 +328,108 @@ class AbstractBamFileServiceTests {
 
     }
 
+    // Test calculateCoverageWithoutN() for ProcessedBamFiles
+
+    @Test(expected = AssertionError)
+    void test_calculateCoverageWithoutN_WhenBamFileIsNull() {
+        abstractBamFileService.calculateCoverageWithoutN(null)
+    }
+
+    @Test
+    void test_calculateCoverageWithoutN_WhenBamFileIsProcessedBamFile() {
+        changeStateOfBamFileToHavingPassedQC(processedBamFile)
+        assert abstractBamFileService.calculateCoverageWithoutN(processedBamFile) == EXPECTED_COVERAGE_FOR_COVERAGE_WITHOUT_N
+    }
+
+    @Test(expected = AssertionError)
+    void test_calculateCoverageWithoutN_WhenBamFileIsProcessedBamFile_AndReferenceGenomeIsNull() {
+        changeStateOfBamFileToHavingPassedQC(processedBamFile)
+        assert referenceGenomeProjectSeqType.delete([flush: true])
+        abstractBamFileService.calculateCoverageWithoutN(processedBamFile)
+    }
+
+    @Test(expected = AssertionError)
+    void test_calculateCoverageWithoutN_WhenBamFileIsProcessedBamFile_AndFileIsNotQualityAssessed() {
+        assert !processedBamFile.isQualityAssessed()
+        abstractBamFileService.calculateCoverageWithoutN(processedBamFile)
+    }
+
+    // Test calculateCoverageWithoutN() for ProcessedMergedBamFiles
+    //   -> Technically not needed, as they are AbstractBamFiles too.
+
+    @Test
+    void test_calculateCoverageWithoutN_WhenBamFileIsProcessedMergedBamFile() {
+        ProcessedMergedBamFile processedMergedBamFile = createAndSaveProcessedMergedBamFileAndDependentObjects()
+        changeStateOfBamFileToHavingPassedQC(processedMergedBamFile)
+        assert abstractBamFileService.calculateCoverageWithoutN(processedMergedBamFile) == EXPECTED_COVERAGE_FOR_COVERAGE_WITHOUT_N
+    }
+
+    @Test(expected = AssertionError)
+    void test_calculateCoverageWithoutN_WhenBamFileIsProcessedMergedBamFile_AndReferenceGenomeIsNull() {
+        ProcessedMergedBamFile processedMergedBamFile = createAndSaveProcessedMergedBamFileAndDependentObjects()
+        changeStateOfBamFileToHavingPassedQC(processedMergedBamFile)
+        assert referenceGenomeProjectSeqType.delete([flush: true])
+        abstractBamFileService.calculateCoverageWithoutN(processedMergedBamFile)
+    }
+
+    @Test(expected = AssertionError)
+    void test_calculateCoverageWithoutN_WhenBamFileIsProcessedMergedBamFile_AndFileIsNotQualityAssessed() {
+        ProcessedMergedBamFile processedMergedBamFile = createAndSaveProcessedMergedBamFileAndDependentObjects()
+        assert !processedMergedBamFile.isQualityAssessed()
+        abstractBamFileService.calculateCoverageWithoutN(processedMergedBamFile)
+    }
+
+    // Test calculateCoverageWithN() for ProcessedBamFiles
+
+    @Test(expected = AssertionError)
+    void test_calculateCoverageWithN_WhenBamFileIsNull() {
+        abstractBamFileService.calculateCoverageWithN(null)
+    }
+
+    @Test
+    void test_calculateCoverageWithN_WhenBamFileIsProcessedBamFile() {
+        changeStateOfBamFileToHavingPassedQC(processedBamFile)
+        assert abstractBamFileService.calculateCoverageWithN(processedBamFile) == EXPECTED_COVERAGE_FOR_COVERAGE_WITH_N
+    }
+
+    @Test(expected = AssertionError)
+    void test_calculateCoverageWithN_WhenBamFileIsProcessedBamFile_AndReferenceGenomeIsNull() {
+        changeStateOfBamFileToHavingPassedQC(processedBamFile)
+        assert referenceGenomeProjectSeqType.delete([flush: true])
+        abstractBamFileService.calculateCoverageWithN(processedBamFile)
+    }
+
+    @Test(expected = AssertionError)
+    void test_calculateCoverageWithN_WhenBamFileIsProcessedBamFile_AndFileIsNotQualityAssessed() {
+        assert !processedBamFile.isQualityAssessed()
+        abstractBamFileService.calculateCoverageWithN(processedBamFile)
+    }
+
+    // Test calculateCoverageWithN() for ProcessedMergedBamFiles
+    //   -> Technically not needed, as they are AbstractBamFiles too.
+
+    @Test
+    void test_calculateCoverageWithN_WhenBamFileIsProcessedMergedBamFile() {
+        ProcessedMergedBamFile processedMergedBamFile = createAndSaveProcessedMergedBamFileAndDependentObjects()
+        changeStateOfBamFileToHavingPassedQC(processedMergedBamFile)
+        assert abstractBamFileService.calculateCoverageWithN(processedMergedBamFile) == EXPECTED_COVERAGE_FOR_COVERAGE_WITH_N
+    }
+
+    @Test(expected = AssertionError)
+    void test_calculateCoverageWithN_WhenBamFileIsProcessedMergedBamFile_AndReferenceGenomeIsNull() {
+        ProcessedMergedBamFile processedMergedBamFile = createAndSaveProcessedMergedBamFileAndDependentObjects()
+        changeStateOfBamFileToHavingPassedQC(processedMergedBamFile)
+        assert referenceGenomeProjectSeqType.delete([flush: true])
+        abstractBamFileService.calculateCoverageWithN(processedMergedBamFile)
+    }
+
+    @Test(expected = AssertionError)
+    void test_calculateCoverageWithN_WhenBamFileIsProcessedMergedBamFile_AndFileIsNotQualityAssessed() {
+        ProcessedMergedBamFile processedMergedBamFile = createAndSaveProcessedMergedBamFileAndDependentObjects()
+        assert !processedMergedBamFile.isQualityAssessed()
+        abstractBamFileService.calculateCoverageWithN(processedMergedBamFile)
+    }
+
     private AlignmentPass createAndSaveAlignmentPass(final int identifier) {
         final AlignmentPass alignmentPass = new AlignmentPass(
                 identifier: identifier,
@@ -292,5 +438,43 @@ class AbstractBamFileServiceTests {
         )
         assertNotNull(alignmentPass.save([flush: true]))
         return alignmentPass
+    }
+
+    private ProcessedMergedBamFile createAndSaveProcessedMergedBamFileAndDependentObjects() {
+        MergingSetAssignment mergingSetAssignment = new MergingSetAssignment(
+                mergingSet: mergingSet,
+                bamFile: processedBamFile,
+        )
+        assert mergingSetAssignment.save([flush: true])
+
+        // Do not create as QC'ed in order to test assertions if no QC data exists. Tests explicitly change it if needed.
+        ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile([
+                mergingPass  : mergingPass,
+                alignmentPass: alignmentPass,
+                type         : BamType.SORTED,
+                status       : State.NEEDS_PROCESSING,
+        ])
+        assert processedMergedBamFile.save([flush: true])
+
+        QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass([
+                processedMergedBamFile: processedMergedBamFile,
+        ])
+        assert qualityAssessmentMergedPass.save([flush: true])
+
+        OverallQualityAssessmentMerged overallQualityAssessmentMerged = new OverallQualityAssessmentMerged([
+                qualityAssessmentMergedPass: qualityAssessmentMergedPass,
+                qcBasesMapped              : ARBITRARY_NUMBER_OF_READS,
+        ])
+        assert overallQualityAssessmentMerged.save([flush: true])
+
+        return processedMergedBamFile
+    }
+
+    private static void changeStateOfBamFileToHavingPassedQC(AbstractBamFile bamFile) {
+        bamFile.with {
+            setQualityControl AbstractBamFile.QualityControl.PASSED
+            setQualityAssessmentStatus AbstractBamFile.QaProcessingStatus.FINISHED
+        }
+        assert bamFile.save([flush: true])
     }
 }

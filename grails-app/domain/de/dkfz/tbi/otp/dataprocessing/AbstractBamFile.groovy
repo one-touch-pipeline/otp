@@ -123,7 +123,6 @@ abstract class AbstractBamFile {
     }
 
     boolean isQualityAssessed() {
-        status == State.PROCESSED &&
         qualityControl == QualityControl.PASSED &&
         qualityAssessmentStatus == QaProcessingStatus.FINISHED
     }

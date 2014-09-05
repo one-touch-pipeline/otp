@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.springframework.util.Assert.*
+
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
 
@@ -85,6 +86,30 @@ class AbstractBamFileService {
             }
             maxResults(1)
         } != null
+    }
+
+    Double calculateCoverageWithoutN(AbstractBamFile bamFile) {
+        calculateCoverage(bamFile, 'lengthWithoutN')
+    }
+
+    Double calculateCoverageWithN(AbstractBamFile bamFile) {
+        calculateCoverage(bamFile, 'length')
+    }
+
+    private Double calculateCoverage(AbstractBamFile bamFile, String property) {
+        assert bamFile : 'Parameter bamFile must not be null'
+        assert bamFile.isQualityAssessed() : "Cannot calculate coverage! The BAM file ${bamFile} has not passed the QC yet"
+
+        ReferenceGenome referenceGenome = bamFile.referenceGenome
+
+        assert referenceGenome : "Unable to find a reference genome for the BAM file ${bamFile}"
+
+        Long qcBasesMapped = bamFile.overallQualityAssessment.qcBasesMapped
+        Long length = referenceGenome."${property}"
+
+        assert length > 0 : "The property '${property}' of the reference genome '${referenceGenome}' is 0 or negative."
+
+        return qcBasesMapped / length
     }
 
     private def assertSave(def object) {
