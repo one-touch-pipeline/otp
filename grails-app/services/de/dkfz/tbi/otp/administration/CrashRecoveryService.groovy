@@ -123,11 +123,7 @@ class CrashRecoveryService {
             // TODO throw proper exception
             throw new RuntimeException("Not in Crash Recovery")
         }
-        ProcessingStep step = ProcessingStep.get(id)
-        if (!step) {
-            // TODO: throw proper exception
-            throw new RuntimeException("ProcessingStep not found")
-        }
+        ProcessingStep step = ProcessingStep.getInstance(id)
         if (step.next) {
             // TODO: throw proper exception
             throw new RuntimeException("ProcessingStep has already been restarted")

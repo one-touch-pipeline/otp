@@ -120,7 +120,7 @@ class NotificationListener implements ApplicationListener {
         if (!(event.payload instanceof ProcessingStep) && (!event.payload instanceof Map)) {
             return
         }
-        ProcessingStep step = ProcessingStep.get((event.payload instanceof ProcessingStep) ? event.payload.id : event.payload.processingStep.id)
+        ProcessingStep step = ProcessingStep.getInstance((event.payload instanceof ProcessingStep) ? event.payload.id : event.payload.processingStep.id)
         // for a ProcessingStep the Trigger is the JobExecutionPlan
         List<Notification> notifications = resolveNotifications(JobExecutionPlan.class.getName(), step.process.jobExecutionPlan.id, event.type)
         if (notifications.isEmpty()) {

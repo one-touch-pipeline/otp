@@ -129,7 +129,7 @@ class Scheduler {
                 log.fatal("Job of type ${job.class} executed without a ProcessingStep being set")
                 throw new ProcessingException("Job executed without a ProcessingStep being set")
             }
-            ProcessingStep step = ProcessingStep.get(job.processingStep.id)
+            ProcessingStep step = ProcessingStep.getInstance(job.processingStep.id)
             // get the last ProcessingStepUpdate
             List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(step)
             if (existingUpdates.isEmpty()) {
@@ -216,7 +216,7 @@ class Scheduler {
      */
     private void doUnsafeErrorHandling(Job job, Throwable e) {
         schedulerService.removeRunningJob(job)
-        ProcessingStep step = ProcessingStep.get(job.processingStep.id)
+        ProcessingStep step = ProcessingStep.getInstance(job.processingStep.id)
         // add a ProcessingStepUpdate to the ProcessingStep
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),

@@ -351,10 +351,7 @@ class SchedulerService {
             }
             final ProcessingStep stepFromQueue = queue.peek()
             final def id = stepFromQueue.id
-            final ProcessingStep stepFromDatabase = ProcessingStep.get(id)
-            if (stepFromDatabase == null) {
-                throw new AssertionError("The ProcessingStep ${stepFromQueue} with id ${id} seems not to exist in the database. That's weird.")
-            }
+            final ProcessingStep stepFromDatabase = ProcessingStep.getInstance(id)
             Job job = createJob(stepFromDatabase)
             running.add(job)
             queue.poll()
@@ -830,9 +827,9 @@ class SchedulerService {
     private ProcessingStep createProcessingStep(Process process, JobDefinition jobDefinition, Collection<Parameter> input, ProcessingStep previous = null) {
         ProcessingStep step = null
         if (jobDefinition instanceof DecidingJobDefinition) {
-            step = new DecisionProcessingStep(jobDefinition: JobDefinition.get(jobDefinition.id), process: Process.get(process.id), previous: previous ? ProcessingStep.get(previous.id) : null)
+            step = new DecisionProcessingStep(jobDefinition: JobDefinition.get(jobDefinition.id), process: Process.get(process.id), previous: previous ? ProcessingStep.getInstance(previous.id) : null)
         } else {
-            step = new ProcessingStep(jobDefinition: JobDefinition.get(jobDefinition.id), process: Process.get(process.id), previous: previous ? ProcessingStep.get(previous.id) : null)
+            step = new ProcessingStep(jobDefinition: JobDefinition.get(jobDefinition.id), process: Process.get(process.id), previous: previous ? ProcessingStep.getInstance(previous.id) : null)
         }
         if (input && !step.save()) {
             // we have to save the next processing step as the ParameterMapping references the JobDefinition
