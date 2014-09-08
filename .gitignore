@@ -5,9 +5,9 @@
 *.iml
 *.ipr
 *.iws
-ast-build/*
-target/*
-target-eclipse/*
+ast-build
+target
+target-eclipse
 logs/*
 web-app/js/i18n/*
 .groovy/*
