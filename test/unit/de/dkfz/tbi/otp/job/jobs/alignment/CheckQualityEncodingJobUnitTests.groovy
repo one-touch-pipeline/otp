@@ -132,7 +132,7 @@ class CheckQualityEncodingJobUnitTests {
                         )
         assertNotNull(dataFile.save(flush: true))
 
-        Realm realm = DomainFactory.createRealmDataManagementDKFZ()
+        Realm realm = DomainFactory.createRealmDataManagementDKFZ([rootPath: '/tmp/otp/otp-test/fakeRealm/root'])
         assertNotNull(realm.save(flush: true, failOnError: true))
 
         file = new File(checkQualityEncodingJob.lsdfFilesService.getFileViewByPidPath(dataFile))

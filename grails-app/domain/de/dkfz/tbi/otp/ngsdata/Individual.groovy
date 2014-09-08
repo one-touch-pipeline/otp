@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
+
 class Individual {
 
     /**
@@ -91,6 +93,20 @@ order by type.name asc, type.libraryLayout
      **/
     List<Mutation> getMutations() {
         return Mutation.findAllByIndividual(this)
+    }
+
+    /**
+     * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}
+     */
+    OtpPath getViewByPidPath(final SeqType seqType) {
+        return new OtpPath(project, project.dirName, 'sequencing', seqType.dirName, 'view-by-pid', pid)
+    }
+
+    /**
+     * Example: ${project}/results_per_pid/${pid}
+     */
+    OtpPath getResultsPerPidPath() {
+        return new OtpPath(project, project.dirName, 'results_per_pid', pid)
     }
 
     static mapping = {

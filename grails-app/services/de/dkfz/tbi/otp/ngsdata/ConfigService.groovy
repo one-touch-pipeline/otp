@@ -17,7 +17,7 @@ class ConfigService {
     def grailsApplication
     def servletContext
 
-    Realm getRealm(Project project, Realm.OperationType operationType) {
+    static Realm getRealm(Project project, Realm.OperationType operationType) {
         def c = Realm.createCriteria()
         Realm realm = c.get {
             and {

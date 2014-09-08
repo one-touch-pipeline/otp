@@ -45,6 +45,7 @@ class Realm implements Serializable {
     String processingRootPath          // mount path for the file system with results data
     String programsRootPath            // location of programs
     String loggingRootPath             // mount path of the file system with logging data (needs to be read-write)
+    String stagingRootPath             // path where OTP is able to write
     String webHost                     // web address
     String host                        // PBS head address
     int port
@@ -54,5 +55,11 @@ class Realm implements Serializable {
 
     static constraints = {
         loggingRootPath blank:false, nullable:false
+        stagingRootPath blank:true, nullable:true
+    }
+
+    @Override
+    String toString() {
+        return "Realm ${id} ${name} ${operationType} ${env}"
     }
 }

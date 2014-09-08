@@ -28,15 +28,13 @@ class MergingJobCreateCommandTests {
 
     @Before
     void setUp() {
-        basePath = "rootPath/dirName/results_per_pid/pid_1"
+        Realm realm = DomainFactory.createRealmDataProcessingDKFZ()
+        assertNotNull(realm.save([flush: true, failOnError: true]))
+
+        basePath = "${realm.processingRootPath}/dirName/results_per_pid/pid_1"
         basePathAlignment = "${basePath}/alignment"
         basePathMerging = "${basePath}/merging"
         basePathMergingOutput = "${basePathMerging}//name_1/seqType_1/library/DEFAULT/0/pass0"
-
-        Realm realm = DomainFactory.createRealmDataProcessingDKFZ([
-            processingRootPath: 'rootPath',
-            ])
-        assertNotNull(realm.save([flush: true, failOnError: true]))
 
         seqPlatform = new SeqPlatform(
                         name: "seqPlatform_name",

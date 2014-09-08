@@ -41,4 +41,8 @@ class TestCase extends GroovyTestCase {
             throw new MultipleFailureException(failures)
         }
     }
+
+    public static void assertEquals(final GString expected, final String actual) {
+        Assert.assertEquals(expected.toString(), actual)
+    }
 }

@@ -21,20 +21,6 @@ class DataProcessingFilesService {
         STRUCTURAL_VARIATION
     }
 
-    private String getOutputRoot(Individual individual) {
-        if (!individual) {
-            throw new IllegalArgumentException("individual must not be null")
-        }
-        Project project = individual.project
-        Realm realm = configService.getRealmDataProcessing(project)
-        if (realm == null) {
-            throw new RuntimeException("Cannot determine output root for individual ${individual}. ConfigService returned null as the realm for project ${project}.")
-        }
-        String rpPath = realm.processingRootPath
-        String pdName = project.dirName
-        return "${rpPath}/${pdName}"
-    }
-
     public String getOutputDirectory(Individual individual) {
         return getOutputDirectory(individual, OutputDirectories.BASE)
     }
@@ -44,9 +30,8 @@ class DataProcessingFilesService {
     }
 
     public String getOutputDirectory(Individual individual, OutputDirectories dir) {
-        String outputBaseDir = getOutputRoot(individual)
         String postfix = (!dir || dir == OutputDirectories.BASE) ? "" : "${dir.toString().toLowerCase()}/"
-        return "${outputBaseDir}/results_per_pid/${individual.pid}/${postfix}"
+        return "${individual.resultsPerPidPath.absoluteDataProcessingPath}/${postfix}"
     }
 
     public long deleteOldProcessingFiles(final Object passService, final String passTypeName, final Date createdBefore, final long millisMaxRuntime, final Closure<Collection> passesFunc) {
