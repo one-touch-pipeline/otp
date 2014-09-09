@@ -3,8 +3,9 @@ package de.dkfz.tbi.otp.dataprocessing
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 import static org.springframework.util.Assert.*
 
-import de.dkfz.tbi.otp.ngsdata.*
 import org.springframework.transaction.annotation.Transactional
+
+import de.dkfz.tbi.otp.ngsdata.*
 
 class MergingPassService {
 
@@ -89,8 +90,6 @@ class MergingPassService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Deletes the files of the specified merging pass from the "processing" directory on the file system.
      *
      * These will be deleted:
@@ -139,8 +138,6 @@ class MergingPassService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Deletes the processing files of merging passes that have been created before the specified date and satisfy at
      * least one of the following criteria:
      * <ul>
@@ -189,9 +186,6 @@ class MergingPassService {
         })
     }
 
-    /**
-     * There is no unit or integration test for this method.
-     */
     public boolean mayProcessingFilesBeDeleted(final MergingPass pass, final Date createdBefore) {
         notNull pass
         notNull createdBefore
