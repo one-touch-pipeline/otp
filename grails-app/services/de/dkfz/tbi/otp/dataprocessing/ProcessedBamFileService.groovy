@@ -292,8 +292,6 @@ class ProcessedBamFileService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Checks consistency for {@link #deleteProcessingFiles(ProcessedBamFile)}.
      *
      * If there are inconsistencies, details are logged to the thread log (see {@link LogThreadLocal}).
@@ -306,8 +304,6 @@ class ProcessedBamFileService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Deletes the *.bam file, the *.bam.bai file and the *.bam_bwaSampeErrorLog.txt file from the
      * "processing" directory on the file system. Sets {@link ProcessedBamFile#fileExists} to
      * <code>false</code> and {@link ProcessedBamFile#deletionDate} to the current time.
