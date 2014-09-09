@@ -239,8 +239,6 @@ class ProcessedMergedBamFileQaFileService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Checks consistency for {@link #deleteProcessingFiles(QualityAssessmentMergedPass)}.
      *
      * If there are inconsistencies, details are logged to the thread log (see {@link LogThreadLocal}).
@@ -262,8 +260,6 @@ class ProcessedMergedBamFileQaFileService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Deletes the files of the specified QA pass from the "processing" directory on the file system.
      *
      * @return The number of bytes that have been freed on the file system.
