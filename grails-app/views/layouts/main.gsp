@@ -67,6 +67,9 @@
                                 </li>
                             </ul>
                         </li>
+                         <sec:ifAnyGranted roles="ROLE_ADMIN">
+                            <li id="snv"><g:link controller="snv"  action="index"><g:message code="otp.menu.snv"/></g:link></li>
+                        </sec:ifAnyGranted>
                         <sec:ifAllGranted roles="ROLE_OPERATOR">
                             <li class="allGranted menuContainerLCss" id="projectProgress"><g:link controller="projectProgress" action="progress"><g:message code="otp.menu.progress"/></g:link></li>
                             <li class="allGranted menuContainerLCss" id="runSubmit"><g:link controller="runSubmit" action="index"><g:message code="otp.menu.runSubmit"/></g:link></li>

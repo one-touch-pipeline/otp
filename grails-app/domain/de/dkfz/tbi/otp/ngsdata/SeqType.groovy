@@ -1,5 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import groovy.transform.EqualsAndHashCode
+
+
+@EqualsAndHashCode
 class SeqType {
 
     /**

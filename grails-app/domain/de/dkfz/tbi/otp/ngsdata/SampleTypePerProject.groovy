@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import groovy.transform.ToString
+
 
 /**
  * To receive more structure in the sample types it was decided to ask for the samples types which are expected to occur within a project.
@@ -8,6 +10,7 @@ package de.dkfz.tbi.otp.ngsdata
  * This information will be requested via the SNV-GUI.
  *
  */
+@ToString
 class SampleTypePerProject {
 
     Project project

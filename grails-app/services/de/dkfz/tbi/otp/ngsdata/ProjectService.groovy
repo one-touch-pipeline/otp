@@ -8,7 +8,6 @@ import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.acls.domain.GrantedAuthoritySid
 import org.springframework.security.acls.model.Sid
 import org.springframework.security.core.userdetails.UserDetails
-
 import de.dkfz.tbi.otp.security.Group
 
 /**
@@ -44,6 +43,7 @@ class ProjectService {
         return Project.get(id)
     }
 
+    @PostAuthorize("returnObject == null or hasPermission(returnObject, 'read') or hasRole('ROLE_OPERATOR')")
     public Project getProjectByName(String name) {
         return Project.findByName(name)
     }

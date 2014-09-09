@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import groovy.transform.ToString
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
@@ -9,6 +10,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  * At least one of the two properties have to be filled in.
  *
  */
+@ToString
 class ProcessingThresholds {
 
     Project project
