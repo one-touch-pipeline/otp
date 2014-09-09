@@ -60,8 +60,6 @@ class AbstractBamFileService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Same criteria as in {@link #QUALITY_ASSESSED_AND_MERGED_QUERY}.
      */
     public boolean hasBeenQualityAssessedAndMerged(final AbstractBamFile bamFile, final Date before) {
