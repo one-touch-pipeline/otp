@@ -72,6 +72,7 @@ public class CheckedLogger implements Log {
     /**
      * Flag to indicate that an exception was already thrown. In that case no further messages should be processed,
      * because the order or the messages itself could be changed by that event.
+     * Also the check {@link #assertAllMessagesConsumed()} is then disabled.
      */
     private boolean hasAlreadyThrownAnException = false
 
@@ -128,9 +129,13 @@ public class CheckedLogger implements Log {
 
 
     /**
-     * ensures that all expected messages were used for checks
+     * ensures that all expected messages were used for checks.
+     * If a check has thrown an exception, no further check is done.
      */
     void assertAllMessagesConsumed() {
+        if (hasAlreadyThrownAnException) {
+            return
+        }
         assert expectedMessages.empty
     }
 
