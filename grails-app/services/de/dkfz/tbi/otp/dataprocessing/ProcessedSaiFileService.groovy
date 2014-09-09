@@ -69,8 +69,6 @@ class ProcessedSaiFileService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Checks consistency for {@link #deleteProcessingFiles(ProcessedSaiFile)}.
      *
      * If there are inconsistencies, details are logged to the thread log (see {@link LogThreadLocal}).
@@ -83,8 +81,6 @@ class ProcessedSaiFileService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Deletes the *.sai file and the *.sai_bwaAlnErrorLog.txt file from the "processing" directory on
      * the file system. Sets {@link ProcessedSaiFile#fileExists} to <code>false</code> and
      * {@link ProcessedSaiFile#deletionDate} to the current time.
