@@ -1,9 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.getPath
 import static org.springframework.util.Assert.notNull
+import de.dkfz.tbi.otp.ngsdata.*
 
 class ProcessedBamFileQaFileService {
 
@@ -154,8 +153,6 @@ class ProcessedBamFileQaFileService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Checks consistency for {@link #deleteProcessingFiles(QualityAssessmentPass)}.
      *
      * If there are inconsistencies, details are logged to the thread log (see {@link LogThreadLocal}).
@@ -177,8 +174,6 @@ class ProcessedBamFileQaFileService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Deletes the files of the specified QA pass from the "processing" directory on the file system.
      *
      * @return The number of bytes that have been freed on the file system.
