@@ -1,19 +1,34 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import grails.test.mixin.support.*
+
 import org.junit.*
+
+import de.dkfz.tbi.TestConstants
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CheckedLogger
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+
 
 
 @TestFor(ProcessedMergedBamFileService)
-@Mock([MergingPass, MergingSet, MergingWorkPackage,
-    Sample, SampleType, SeqType, Individual, Project, ProcessedMergedBamFile])
+@Build([
+    ProcessedMergedBamFile
+])
 class ProcessedMergedBamFileServiceUnitTests {
+
+    private final static String SOME_MD5SUM_VALUE = "1234567890" //contant doesn't matter, only not empty requiered
+
+    private final static long SOME_FILE_LENGTH = 10  //Content should only be positive
+
+
 
     TestData testData = new TestData()
 
-    Sample sample
+
 
     @Test
     void testExomeEnrichmentKitCorrect() {
@@ -47,7 +62,7 @@ class ProcessedMergedBamFileServiceUnitTests {
         ProcessedMergedBamFile mergedBamFile = new ProcessedMergedBamFile()
         Map input = createKitAndSingleLaneBamFiles(SeqTypeNames.EXOME.seqTypeName, ExomeSeqTrack, mergedBamFile)
         def abstractBamFileService = [
-            findAllByProcessedMergedBamFile: { [] }
+            findAllByProcessedMergedBamFile: { []}
         ] as AbstractBamFileService
         service.abstractBamFileService = abstractBamFileService
         service.exomeEnrichmentKit(mergedBamFile)
@@ -138,4 +153,184 @@ class ProcessedMergedBamFileServiceUnitTests {
         processedMergedBamFile.fileExists = true
         processedMergedBamFile.dateFromFileSystem = new Date()
     }
+
+
+
+    private def createDataForDeleteChecking(Boolean valueForDataBaseConsistence = null, Boolean valueForDestinationConsistence = null) {
+        ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.build([
+            md5sum: SOME_MD5SUM_VALUE,
+            fileOperationStatus: FileOperationStatus.PROCESSED
+        ])
+
+        ProcessedMergedBamFileService processedMergedBamFileService = new ProcessedMergedBamFileService()
+
+        processedMergedBamFileService.configService = [
+            getProjectRootPath: { Project project -> return TestConstants.BASE_TEST_DIRECTORY},
+        ] as ConfigService
+
+        processedMergedBamFileService.mergedAlignmentDataFileService = [
+            buildRelativePath: { SeqType type, Sample sample -> return "RelativeDirectory"},
+        ] as MergedAlignmentDataFileService
+
+
+        processedMergedBamFileService.checksumFileService = [:] as ChecksumFileService
+
+
+        processedMergedBamFileService.dataProcessingFilesService = [
+            getOutputDirectory: { Individual individual, DataProcessingFilesService.OutputDirectories dir ->
+                return TestConstants.BASE_TEST_DIRECTORY
+            },
+
+            checkConsistencyWithDatabaseForDeletion: { final def dbFile, final File fsFile ->
+                if (valueForDataBaseConsistence == null) {
+                    fail "checkConsistencyWithDatabaseForDeletion was called when it shouldn't be. Method under test should have failed earlier."
+                } else {
+                    File directory = processedMergedBamFileService.processingDirectory(processedMergedBamFile.mergingPass) as File
+                    File fileName = new File(directory, processedMergedBamFileService.fileName(processedMergedBamFile))
+                    assert processedMergedBamFile == dbFile
+                    assert fileName == fsFile
+                    return valueForDataBaseConsistence.value
+                }
+            },
+
+            checkConsistencyWithFinalDestinationForDeletion: {final File processingDirectory, final File finalDestinationDirectory, final Collection<String> fileNames ->
+                File expectedProcessingDirectory = processedMergedBamFileService.processingDirectory(processedMergedBamFile.mergingPass) as File
+                File expectedFinalDestinationDirectory = processedMergedBamFileService.destinationDirectory(processedMergedBamFile) as File
+                Collection<String> expectedAdditionalFiles = processedMergedBamFileService.additionalFileNames(processedMergedBamFile)
+                expectedAdditionalFiles << processedMergedBamFileService.fileName(processedMergedBamFile)
+                assert expectedProcessingDirectory == processingDirectory
+                assert expectedFinalDestinationDirectory == finalDestinationDirectory
+                assert expectedAdditionalFiles == fileNames
+                if (valueForDestinationConsistence == null) {
+                    fail "checkConsistencyWithFinalDestinationForDeletion was called when it shouldn't be. Method under test should have failed earlier."
+                } else {
+                    return valueForDestinationConsistence.value
+                }
+            },
+
+            deleteProcessingFiles: { final def dbFile, final File fsFile, final File... additionalFiles ->
+                File directory = processedMergedBamFileService.processingDirectory(processedMergedBamFile.mergingPass) as File
+                File expectedFile = new File(directory, processedMergedBamFileService.fileName(processedMergedBamFile))
+                File[] expectedAdditionalFiles = [
+                    processedMergedBamFileService.additionalFileNames(processedMergedBamFile),
+                    processedMergedBamFileService.additionalFileNamesProcessingDirOnly(processedMergedBamFile)
+                ].flatten().collect {
+                    new File(directory, it)
+                } as File[]
+                assert processedMergedBamFile == dbFile
+                assert expectedFile == fsFile
+                assert expectedAdditionalFiles == additionalFiles
+                return SOME_FILE_LENGTH
+            },
+        ] as DataProcessingFilesService
+
+
+        return [
+            processedMergedBamFile,
+            processedMergedBamFileService
+        ]
+    }
+
+
+
+    public void testCheckConsistencyForProcessingFilesDeletion() {
+        ProcessedMergedBamFile processedMergedBamFile
+        ProcessedMergedBamFileService processedMergedBamFileService
+        (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking(true, true)
+
+        assert processedMergedBamFileService.checkConsistencyForProcessingFilesDeletion(processedMergedBamFile)
+    }
+
+    public void testCheckConsistencyForProcessingFilesDeletion_NoProcessedMergedBamFile() {
+        ProcessedMergedBamFile processedMergedBamFile
+        ProcessedMergedBamFileService processedMergedBamFileService
+        (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking()
+
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+            processedMergedBamFileService.checkConsistencyForProcessingFilesDeletion(null) //
+        }
+    }
+
+    public void testCheckConsistencyForProcessingFilesDeletion_DataBaseNotConsistent() {
+        ProcessedMergedBamFile processedMergedBamFile
+        ProcessedMergedBamFileService processedMergedBamFileService
+        (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking(false)
+
+        assert !processedMergedBamFileService.checkConsistencyForProcessingFilesDeletion(processedMergedBamFile)
+    }
+
+    public void testCheckConsistencyForProcessingFilesDeletion_NotLatestMergingPass() {
+        ProcessedMergedBamFile processedMergedBamFile
+        ProcessedMergedBamFileService processedMergedBamFileService
+        (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking(true)
+        MergingPass.metaClass.isLatestPass= {false}
+
+        assert processedMergedBamFileService.checkConsistencyForProcessingFilesDeletion(processedMergedBamFile)
+    }
+
+    public void testCheckConsistencyForProcessingFilesDeletion_NotLatestSet() {
+        ProcessedMergedBamFile processedMergedBamFile
+        ProcessedMergedBamFileService processedMergedBamFileService
+        (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking(true)
+        MergingSet.metaClass.isLatestSet= {false}
+
+        assert processedMergedBamFileService.checkConsistencyForProcessingFilesDeletion(processedMergedBamFile)
+    }
+
+    public void testCheckConsistencyForProcessingFilesDeletion_md5SumIsNull() {
+        ProcessedMergedBamFile processedMergedBamFile
+        ProcessedMergedBamFileService processedMergedBamFileService
+        (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking(true)
+        processedMergedBamFile.md5sum = null
+        processedMergedBamFile.fileOperationStatus = FileOperationStatus.DECLARED
+        CheckedLogger checkedLogger = new CheckedLogger()
+        checkedLogger.addError("ProcessedMergedBamFile ${processedMergedBamFile} does not have its md5sum set, although it belongs to the latest MergingPass of the latest MergingSet for its MergingWorkpackage.")
+        try {
+            LogThreadLocal.setThreadLog(checkedLogger)
+
+            assert !processedMergedBamFileService.checkConsistencyForProcessingFilesDeletion(processedMergedBamFile)
+
+            checkedLogger.assertAllMessagesConsumed()
+        } finally {
+            LogThreadLocal.removeThreadLog()
+        }
+    }
+
+    public void testCheckConsistencyForProcessingFilesDeletion_FinalDestinationNotConsistent() {
+        ProcessedMergedBamFile processedMergedBamFile
+        ProcessedMergedBamFileService processedMergedBamFileService
+        (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking(true, false)
+
+        assert !processedMergedBamFileService.checkConsistencyForProcessingFilesDeletion(processedMergedBamFile)
+    }
+
+
+
+    public void testDeleteProcessingFiles() {
+        ProcessedMergedBamFile processedMergedBamFile
+        ProcessedMergedBamFileService processedMergedBamFileService
+        (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking(true, true)
+
+        assert SOME_FILE_LENGTH == processedMergedBamFileService.deleteProcessingFiles(processedMergedBamFile)
+    }
+
+
+    public void testDeleteProcessingFiles_NoProcessedMergedBamFile() {
+        ProcessedMergedBamFile processedMergedBamFile
+        ProcessedMergedBamFileService processedMergedBamFileService
+        (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking(true, true)
+
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+            processedMergedBamFileService.deleteProcessingFiles(null) //
+        }
+    }
+
+    public void testDeleteProcessingFiles_ConsistentCheckFail() {
+        ProcessedMergedBamFile processedMergedBamFile
+        ProcessedMergedBamFileService processedMergedBamFileService
+        (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking(false)
+
+        assert 0 == processedMergedBamFileService.deleteProcessingFiles(processedMergedBamFile)
+    }
+
 }

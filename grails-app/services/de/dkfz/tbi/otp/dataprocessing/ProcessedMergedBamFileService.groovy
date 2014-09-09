@@ -487,8 +487,6 @@ class ProcessedMergedBamFileService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Checks consistency for {@link #deleteProcessingFiles(ProcessedMergedBamFile)}.
      *
      * If there are inconsistencies, details are logged to the thread log (see {@link LogThreadLocal}).
@@ -520,8 +518,6 @@ class ProcessedMergedBamFileService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Deletes the files listed below from the "processing" directory on the file system.
      * Sets {@link ProcessedMergedBamFile#fileExists} to <code>false</code> and
      * {@link ProcessedMergedBamFile#deletionDate} to the current time.
