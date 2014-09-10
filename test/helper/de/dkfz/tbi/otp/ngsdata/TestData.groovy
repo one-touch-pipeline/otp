@@ -11,6 +11,8 @@ import de.dkfz.tbi.otp.ngsdata.RunSegment.FilesStatus
 
 class TestData {
 
+    final static ARBITRARY_LENGTH_FOR_REFERENCE_GENOME = 100
+
     String referenceGenomePath
     File directory
     File file
@@ -197,6 +199,10 @@ class TestData {
             name :"hg19_1_24",
             path: "referenceGenome",
             fileNamePrefix: "prefixName",
+            length: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
+            lengthWithoutN: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
+            lengthRefChromosomes: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
+            lengthRefChromosomesWithoutN: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
         ] + properties)
     }
 

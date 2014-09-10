@@ -17,6 +17,8 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 @Mock([Realm, Project, ReferenceGenome, ReferenceGenomeEntry])
 class ReferenceGenomeServiceTests {
 
+    final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
+
     ReferenceGenome referenceGenome
     ReferenceGenomeEntry referenceGenomeEntry
     Project project
@@ -57,6 +59,10 @@ class ReferenceGenomeServiceTests {
         referenceGenome.name = "hg19_1_24"
         referenceGenome.path = "referenceGenome"
         referenceGenome.fileNamePrefix = "prefixName"
+        referenceGenome.length = ARBITRARY_REFERENCE_GENOME_LENGTH
+        referenceGenome.lengthWithoutN = ARBITRARY_REFERENCE_GENOME_LENGTH
+        referenceGenome.lengthRefChromosomes = ARBITRARY_REFERENCE_GENOME_LENGTH
+        referenceGenome.lengthRefChromosomesWithoutN = ARBITRARY_REFERENCE_GENOME_LENGTH
         referenceGenome.save(flush: true)
 
         referenceGenomeEntry = new ReferenceGenomeEntry(

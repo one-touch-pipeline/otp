@@ -7,6 +7,8 @@ import org.junit.*
 @Mock([ReferenceGenome, ExomeEnrichmentKit])
 class BedFileTests {
 
+    final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
+
     ReferenceGenome refGen
     ExomeEnrichmentKit kit1
     ExomeEnrichmentKit kit2
@@ -17,7 +19,11 @@ class BedFileTests {
         refGen = new ReferenceGenome(
                 name: "refGen",
                 path: "filePath",
-                fileNamePrefix: "prefix"
+                fileNamePrefix: "prefix",
+                length: ARBITRARY_REFERENCE_GENOME_LENGTH,
+                lengthWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
+                lengthRefChromosomes: ARBITRARY_REFERENCE_GENOME_LENGTH,
+                lengthRefChromosomesWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
                 )
         assertNotNull refGen.save(flush: true)
         kit1 = new ExomeEnrichmentKit(

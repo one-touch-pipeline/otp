@@ -14,11 +14,17 @@ import org.junit.*
 @Mock([ReferenceGenomeEntry, ReferenceGenome])
 class ReferenceGenomeEntryTests {
 
+    final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
+
     void testConstraints() {
         ReferenceGenome referenceGenome = new ReferenceGenome(
                         name: "refGen",
                         path: "filePath",
-                        fileNamePrefix: "prefix"
+                        fileNamePrefix: "prefix",
+                        length: ARBITRARY_REFERENCE_GENOME_LENGTH,
+                        lengthWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
+                        lengthRefChromosomes: ARBITRARY_REFERENCE_GENOME_LENGTH,
+                        lengthRefChromosomesWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
                         )
         referenceGenome.save(flush: true)
 

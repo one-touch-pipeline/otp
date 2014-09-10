@@ -295,6 +295,11 @@ grails.plugin.databasemigration.changelogFileName = 'changelog.xml'
 
 grails.gorm.failOnError=true
 
+// Shared constraints
+grails.gorm.default.constraints = {
+    greaterThanZero validator: { val, obj -> val > 0 }
+}
+
 // Documentation settings
 grails.doc.title = 'The One Touch Pipeline (OTP)'
 grails.doc.authors = 'The OTP Development Team'

@@ -19,6 +19,7 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
     private final static String SCRIPT_PATH = "scripts/ExomeEnrichmentKit/LoadBedFiles.groovy"
     private final static String REFERENCE_GENOME_PATH = "/tmp/reference_genomes/"
     private final static String TARGET_REGIONS_PATH = "targetRegions"
+    private final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
     /*
      * the db must contain all the kits mentioned in the script
      * the db must contain all the reference genomes mentioned in the script
@@ -93,7 +94,10 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
                 referenceGenome.name = input.refGenName
                 referenceGenome.path = "${input.refGenName}"
                 referenceGenome.fileNamePrefix = "prefixName"
-                referenceGenome.length = 100
+                referenceGenome.length = ARBITRARY_REFERENCE_GENOME_LENGTH
+                referenceGenome.lengthWithoutN = ARBITRARY_REFERENCE_GENOME_LENGTH
+                referenceGenome.lengthRefChromosomes = ARBITRARY_REFERENCE_GENOME_LENGTH
+                referenceGenome.lengthRefChromosomesWithoutN = ARBITRARY_REFERENCE_GENOME_LENGTH
                 referenceGenome.save(flush: true)
 
                 ReferenceGenomeEntry entry = new ReferenceGenomeEntry(

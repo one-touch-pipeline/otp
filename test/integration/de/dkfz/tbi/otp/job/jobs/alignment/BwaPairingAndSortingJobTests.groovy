@@ -11,6 +11,8 @@ import org.apache.commons.logging.Log
 
 class BwaPairingAndSortingJobTests {
 
+    final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
+
     BwaPairingAndSortingJob bwaPairingAndSortingJob
     AlignmentPassService alignmentPassService
     ProcessedBamFileService processedBamFileService
@@ -164,7 +166,11 @@ class BwaPairingAndSortingJobTests {
         ReferenceGenome refGenome = new ReferenceGenome(
             name: "hg19_1_24",
             path: "hg19_1_24",
-            fileNamePrefix: "preffix_hg19_1_24"
+            fileNamePrefix: "preffix_hg19_1_24",
+            length: ARBITRARY_REFERENCE_GENOME_LENGTH,
+            lengthWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
+            lengthRefChromosomes: ARBITRARY_REFERENCE_GENOME_LENGTH,
+            lengthRefChromosomesWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
         )
         assertNotNull(refGenome.save(flush: true))
 

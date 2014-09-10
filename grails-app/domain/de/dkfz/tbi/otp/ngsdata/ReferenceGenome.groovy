@@ -66,6 +66,10 @@ class ReferenceGenome {
         name(unique: true, blank: false)
         path(unique: true, blank: false)
         fileNamePrefix(blank: false)
+        length shared: 'greaterThanZero'
+        lengthWithoutN shared: 'greaterThanZero'
+        lengthRefChromosomes shared: 'greaterThanZero'
+        lengthRefChromosomesWithoutN shared: 'greaterThanZero'
     }
 
     String toString() {

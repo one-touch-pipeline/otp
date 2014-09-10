@@ -15,6 +15,8 @@ class ChromosomeIdentifierFilteringServiceTests {
 
     ChromosomeIdentifierFilteringService chromosomeIdentifierFilteringService
 
+    final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
+
     ReferenceGenome referenceGenome
     ReferenceGenomeEntry referenceGenomeEntry
 
@@ -26,7 +28,11 @@ class ChromosomeIdentifierFilteringServiceTests {
         referenceGenome = new ReferenceGenome(
                         name: "hg19_1_24",
                         path: "referenceGenome",
-                        fileNamePrefix: "prefixName"
+                        fileNamePrefix: "prefixName",
+                        length: ARBITRARY_REFERENCE_GENOME_LENGTH,
+                        lengthWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
+                        lengthRefChromosomes: ARBITRARY_REFERENCE_GENOME_LENGTH,
+                        lengthRefChromosomesWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
                         )
         referenceGenome.save(flush: true, failOnError: true)
 
