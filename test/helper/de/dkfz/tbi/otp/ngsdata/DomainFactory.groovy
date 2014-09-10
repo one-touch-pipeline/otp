@@ -9,6 +9,8 @@ import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import grails.util.Environment
+import org.joda.time.DateTime
+import org.joda.time.Duration
 
 class DomainFactory {
 
@@ -149,9 +151,10 @@ class DomainFactory {
     public static ClusterJob createClusterJob(
             final ProcessingStep processingStep, final ClusterJobIdentifier clusterJobIdentifier,
             final Map myProps = [
-                    clusterJobName: "testName",
-                    queued: new Date(),
-                    requestedWalltime: 24 * 60 * 60,
+                    clusterJobName: "testName_testClass",
+                    jobClass: "testClass",
+                    queued: new DateTime(),
+                    requestedWalltime: new Duration(24 * 60 * 60),
                     requestedCores: 10,
                     requestedMemory: 1000,
             ]) {

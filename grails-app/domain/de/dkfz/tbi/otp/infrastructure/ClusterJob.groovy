@@ -3,7 +3,11 @@ package de.dkfz.tbi.otp.infrastructure
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
+import org.jadira.usertype.dateandtime.joda.*
+import org.joda.time.DateTime
+import org.joda.time.Duration
 
 /**
  * A ClusterJob represents a single submitted or finished job on the cluster.
@@ -15,11 +19,13 @@ import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
  * in the PbsMonitorService as soon as the cluster job is finished.
  **/
 class ClusterJob implements ClusterJobIdentifier{
+
+    public static final String JOB_INFO_NOT_SET_MESSAGE = "Job info is not set (yet)."
+
     static belongsTo = [processingStep: ProcessingStep]
 
-    // TODO check for API's own enum
     enum Status {
-        RUNNING, FAILED, DONE, COMPLETED
+        FAILED, COMPLETED
     }
     /**
      * Used for {@link AbstractMultiJob}s. Is set to true after {@link AbstractMultiJob#execute(Collection)} returns.
@@ -38,6 +44,14 @@ class ClusterJob implements ClusterJobIdentifier{
      */
     String clusterJobName
     /**
+     * class of the {@link Job} that submitted this cluster job
+     */
+    String jobClass
+    /**
+     * sequence type used for this cluster job
+     */
+    SeqType seqType
+    /**
      * exit status of job
      */
     Status exitStatus
@@ -48,43 +62,31 @@ class ClusterJob implements ClusterJobIdentifier{
     /**
      * date, job was submitted
      */
-    Date queued
+    DateTime queued
     /**
      * date, job started
      */
-    Date started
+    DateTime started
     /**
      * date, job ended
      */
-    Date ended
+    DateTime ended
     /**
-     * requested walltime for the job in milliseconds
+     * requested walltime for the job
      */
-    Long requestedWalltime
+    Duration requestedWalltime
     /**
-     * elapsed walltime for the job in milliseconds
-     */
-    Long elapsedWalltime
-    /**
-     * difference of requested and elapsed walltime in milliseconds
-     */
-    Long walltimeDiff
-    /**
-     * cores used for processing the job
+     * cores requested for processing the job
      */
     Integer requestedCores
     /**
-     * time, all cpu's used to process the job in milliseconds
+     * cores used for processing the job
      */
-    Long cpuTime
+    Integer usedCores
     /**
-     * cpu time per core in milliseconds
+     * time, all cpu's used to process the job
      */
-    Long cpuTimePerCore
-    /**
-     * average cpu cores utilized
-     */
-    Double cpuAvgUtilised
+    Duration cpuTime
     /**
      * requested memory in KiB
      */
@@ -93,46 +95,93 @@ class ClusterJob implements ClusterJobIdentifier{
      * actually used memory to process the job in KiB
      */
     Long usedMemory
-    /**
-     * describes how efficient the memory was used
-     * {@link #usedMemory} divided by {@link #requestedMemory}
-     */
-    Double memoryEfficiency
 
     static constraints = {
         validated(nullable:false)
         realm(nullable: false)
         clusterJobId(blank: false, nullable: false)
-        clusterJobName(blank: false, nullable: false)
+        clusterJobName(blank: false, nullable: false, validator: { clusterJobName, clusterJob -> clusterJobName.endsWith("_${clusterJob.jobClass}") } )
+        jobClass(blank: false, nullable: false)
+        seqType(nullable: true)                         // gets filled after initialization, must be nullable
         exitStatus(nullable: true)                      // gets filled after initialization, must be nullable
         exitCode(nullable: true)                        // gets filled after initialization, must be nullable
         queued(nullable: false)
         started(nullable: true)                         // gets filled after initialization, must be nullable
         ended(nullable: true)                           // gets filled after initialization, must be nullable
-        requestedWalltime(nullable: false)
-        elapsedWalltime(nullable: true)                 // gets filled after initialization, must be nullable
-        walltimeDiff(nullable: true)                    // gets filled after initialization, must be nullable
-        requestedCores(nullable: false)
+        requestedWalltime(nullable: false, min: new Duration(1))
+        requestedCores(nullable: false, min: 1)
+        usedCores(nullable:true)                        // gets filled after initialization, must be nullable
         cpuTime(nullable: true)                         // gets filled after initialization, must be nullable
-        cpuTimePerCore(nullable: true)
-        cpuAvgUtilised(nullable: true)                  // gets filled after initialization, must be nullable
-        requestedMemory(nullable: false)
+        requestedMemory(nullable: false, min: 1L)
         usedMemory(nullable: true)                      // gets filled after initialization, must be nullable
-        memoryEfficiency(nullable: true)                // gets filled after initialization, must be nullable
     }
 
-    private static final String elapsedWalltimeFormula = "(CASE WHEN ended IS NOT NULL THEN DATEDIFF('MILLISECOND', started, ended) ELSE DATEDIFF('MILLISECOND', started, CURRENT_DATE()) END)"
-
     static mapping = {
-        memoryEfficiency formula: '(used_memory * 1.0/ requested_memory)'
-        cpuTimePerCore formula: '(cpu_time / requested_cores)'
-        cpuAvgUtilised formula: "(cpu_time * 1.0 / DATEDIFF('MILLISECOND', started, ended))"
-        elapsedWalltime formula: elapsedWalltimeFormula
-        walltimeDiff formula: "(requested_walltime - " + elapsedWalltimeFormula + ")"
+        queued type: PersistentDateTime
+        started type: PersistentDateTime
+        ended type: PersistentDateTime
+        requestedWalltime type: PersistentDurationAsString
+        cpuTime type: PersistentDurationAsString
     }
 
     public Cluster getCluster() {
         return getRealm().cluster
+    }
+
+    /**
+     * describes how efficient the memory was used
+     * {@link #usedMemory} divided by {@link #requestedMemory}
+     */
+    public double getMemoryEfficiency () {
+        if (usedMemory != null && requestedMemory != null) {
+             return usedMemory * 1.0 / requestedMemory
+        } else {
+            throw new IllegalStateException(JOB_INFO_NOT_SET_MESSAGE)
+        }
+    }
+
+    /**
+     * cpu time per core
+     */
+    public double getCpuTimePerCore () {
+        if (cpuTime != null && usedCores != null) {
+            return cpuTime.millis / usedCores
+        } else {
+            throw new IllegalStateException(JOB_INFO_NOT_SET_MESSAGE)
+        }
+    }
+
+    /**
+     * average cpu cores utilized
+     */
+    public double getCpuAvgUtilised () {
+        if (cpuTime != null) {
+            (cpuTime.millis * 1.0) / getElapsedWalltime().millis
+        } else {
+            throw new IllegalStateException(JOB_INFO_NOT_SET_MESSAGE)
+        }
+    }
+
+    /**
+     * elapsed walltime for the job
+     */
+    public Duration getElapsedWalltime() {
+        if (ended != null && started != null) {
+            return new Duration(started, ended)
+        } else {
+            throw new IllegalStateException(JOB_INFO_NOT_SET_MESSAGE)
+        }
+    }
+
+    /**
+     * difference of requested and elapsed walltime
+     */
+    public Duration getWalltimeDiff () {
+        if (requestedWalltime != null) {
+            return requestedWalltime.minus(elapsedWalltime)
+        } else {
+            throw new IllegalStateException(JOB_INFO_NOT_SET_MESSAGE)
+        }
     }
 
     @Override

@@ -50,6 +50,7 @@ grails.project.dependency.resolution = {
         compile 'bedUtils:bedUtils:0.6'
         // general dependencies
         compile "joda-time:joda-time:2.3"
+        compile "org.jadira.usertype:usertype.jodatime:1.9"
     }
 
     plugins {

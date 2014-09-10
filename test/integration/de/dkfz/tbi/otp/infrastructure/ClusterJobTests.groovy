@@ -10,11 +10,24 @@ import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
+import org.joda.time.DateTime
+import org.joda.time.Duration
 
 class ClusterJobTests {
 
+    public static final int REQUESTED_MEMORY = 1000
+    public static final int USED_MEMORY = 800
+    public static final int CPU_TIME = 12 * 60 * 60 * 1000
+    public static final int REQUESTED_CORES = 10
+    public static final int USED_CORES = 10
+    public static final int REQUESTED_WALLTIME = 24 * 60 * 60 * 1000
+    public static final int ELAPSED_WALLTIME = 24 * 60 * 60 * 1000
+    public static final DateTime QUEUED = new DateTime(1993, 5, 15, 12, 0, 0)
+    public static final DateTime STARTED = QUEUED.plusDays(1)
+    public static final DateTime ENDED = STARTED.plusDays(1)
+
     @Test
-    public void testFormula () {
+    public void testGetter () {
 
         JobExecutionPlan plan = new JobExecutionPlan(name: "testFormula", obsoleted: true, planVersion: 0)
 
@@ -36,35 +49,35 @@ class ClusterJobTests {
 
         assertNotNull(realm.save(flush: true))
 
-        Date queued = new Date()
-        Date started = new Date(queued.getTime() + 1 * 24 * 60 * 60 * 1000)
-        Date ended = new Date(started.getTime() + 1 * 24 * 60 * 60 * 1000)
         ClusterJob clusterJob = new ClusterJob(
                                                     processingStep: step,
                                                     realm: realm,
                                                     clusterJobId: "testID",
-                                                    clusterJobName: "testName",
-                                                    queued: queued,
-                                                    started: started,
-                                                    ended: ended,
-                                                    requestedWalltime: 24*60*60*1000,
-                                                    requestedCores: 10,
-                                                    cpuTime: 12*60*60*1000,
-                                                    requestedMemory: 1000,
-                                                    usedMemory: 800
+                                                    clusterJobName: "testName_testClass",
+                                                    jobClass: "testClass",
+                                                    queued: QUEUED,
+                                                    started: STARTED,
+                                                    ended: ENDED,
+                                                    requestedWalltime: new Duration(REQUESTED_WALLTIME),
+                                                    requestedCores: REQUESTED_CORES,
+                                                    usedCores: USED_CORES,
+                                                    cpuTime: new Duration(CPU_TIME),
+                                                    requestedMemory: REQUESTED_MEMORY,
+                                                    usedMemory: USED_MEMORY
                                               )
 
         assertNotNull(clusterJob.save(flush: true))
 
         clusterJob.refresh()
 
-        assertEquals(clusterJob.memoryEfficiency, (800 / 1000), 0)
-        assertEquals(clusterJob.cpuTimePerCore, ((12 * 60 * 60 * 1000) / 10), 0)
-        assertEquals(clusterJob.cpuAvgUtilised, ((12 * 60 * 60 * 1000) / (24 * 60 * 60 * 1000)), 0)
-        assertEquals(clusterJob.elapsedWalltime, ((24 * 60 * 60) * 1000), 0)
-        assertEquals(clusterJob.walltimeDiff, ((24 * 60 * 60 * 1000) - (24 * 60 * 60 * 1000)), 0)
+        assertEquals(clusterJob.memoryEfficiency, (USED_MEMORY / REQUESTED_MEMORY), 0d)
+        assertEquals(clusterJob.cpuTimePerCore, ((CPU_TIME) / USED_CORES), 0d)
+        assertEquals(clusterJob.cpuAvgUtilised, ((CPU_TIME) / ELAPSED_WALLTIME), 0d)
+        assertEquals(clusterJob.elapsedWalltime.millis, (ELAPSED_WALLTIME), 0)
+        assertEquals(clusterJob.walltimeDiff.millis, (REQUESTED_WALLTIME - ELAPSED_WALLTIME), 0)
     }
 
+    @Test
     public void testNullable () {
 
         JobExecutionPlan plan = new JobExecutionPlan(name: "testFormula", obsoleted: true, planVersion: 0)
@@ -92,14 +105,13 @@ class ClusterJobTests {
                                                     realm: null,
                                                     clusterJobId: null,
                                                     clusterJobName: null,
+                                                    jobClass: null,
                                                     queued: null,
                                                     started: null,
                                                     ended: null,
                                                     requestedWalltime: null,
                                                     requestedCores: null,
-                                                    cpuTime: null,
                                                     requestedMemory: null,
-                                                    usedMemory: null
                                               )
 
         assertFalse(clusterJob.validate())
@@ -108,21 +120,20 @@ class ClusterJobTests {
                                                     processingStep: step,
                                                     realm: realm,
                                                     clusterJobId: "testID",
-                                                    clusterJobName: "testName",
-                                                    queued: new Date(),
-                                                    requestedWalltime: 24*60*60,
-                                                    requestedCores: 10,
-                                                    requestedMemory: 1000,
+                                                    clusterJobName: "testName_testClass",
+                                                    jobClass: "testClass",
+                                                    seqType: null,
                                                     exitStatus: null,
                                                     exitCode: null,
+                                                    queued: QUEUED,
                                                     started: null,
                                                     ended: null,
-                                                    elapsedWalltime: null,
-                                                    walltimeDiff: null,
-                                                    cpuTime: null,
-                                                    cpuAvgUtilised: null,
+                                                    requestedWalltime: new Duration (REQUESTED_WALLTIME),
+                                                    requestedCores: 10,
+                                                    usedCores: null,
+                                                    cpuTime: new Duration(CPU_TIME),
+                                                    requestedMemory: 1000,
                                                     usedMemory: null,
-                                                    memoryEfficiency: null
                                               )
 
         assertTrue(clusterJob2.validate())
