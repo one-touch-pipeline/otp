@@ -42,8 +42,6 @@ class ProcessedAlignmentFileService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Deletes the files of the specified alignment pass from the "processing" directory on the file system.
      *
      * These will be deleted:
@@ -102,8 +100,6 @@ class ProcessedAlignmentFileService {
     }
 
     /**
-     * There is no unit or integration test for this method.
-     *
      * Deletes the processing files of alignment passes that have been created before the specified date and satisfy at
      * least one of the following criteria:
      * <ul>
@@ -155,9 +151,6 @@ class ProcessedAlignmentFileService {
         })
     }
 
-    /**
-     * There is no unit or integration test for this method.
-     */
     public boolean mayProcessingFilesBeDeleted(final AlignmentPass pass, final Date createdBefore) {
         notNull pass
         notNull createdBefore

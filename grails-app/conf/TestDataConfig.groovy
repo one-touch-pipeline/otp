@@ -1,4 +1,5 @@
 import grails.util.Environment
+import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
@@ -39,6 +40,11 @@ testDataConfig {
         }
         'de.dkfz.tbi.otp.ngsdata.SampleType' {
             name = {'sampleTypeName_' + (counter++)}
+        }
+        'de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment' {
+            //Ensure to use this subclass of AbstractBamFileEnsure
+            //Otherwise the plugin tries to create an ExternallyProcessedMergedBamFile, but it fails to create the FastqSet
+            bamFile = {ProcessedBamFile.build()}
         }
     }
 }
