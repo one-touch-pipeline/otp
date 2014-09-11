@@ -192,7 +192,7 @@ class TestData {
     }
 
 
-    public ReferenceGenome createReferenceGenome(Map properties = [:]) {
+    public static ReferenceGenome createReferenceGenome(Map properties = [:]) {
         return new ReferenceGenome([
             name :"hg19_1_24",
             path: "referenceGenome",
