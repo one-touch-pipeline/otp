@@ -74,7 +74,7 @@ class MergingSet {
      * @return Whether this is the most recent merging set on the referenced {@link MergingWorkPackage}.
      */
     public boolean isLatestSet() {
-        int maxIdentifier = createCriteria().get {
+        Integer maxIdentifier = MergingSet.createCriteria().get {
             eq("mergingWorkPackage", mergingWorkPackage)
             projections{
                 max("identifier")

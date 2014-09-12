@@ -34,7 +34,7 @@ class AlignmentPass {
      * @return <code>true</code>, if this pass is the latest for the referenced {@link SeqTrack}
      */
     public boolean isLatestPass() {
-        int maxIdentifier = AlignmentPass.createCriteria().get {
+        Integer maxIdentifier = AlignmentPass.createCriteria().get {
             eq("seqTrack", seqTrack)
             projections{
                 max("identifier")

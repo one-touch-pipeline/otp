@@ -57,7 +57,7 @@ class MergingPass {
      * @return Whether this is the most recent merging pass on the referenced {@link MergingSet}.
      */
     public boolean isLatestPass() {
-        int maxIdentifier = createCriteria().get {
+        Integer maxIdentifier = MergingPass.createCriteria().get {
             eq("mergingSet", mergingSet)
             projections{ max("identifier") }
         }

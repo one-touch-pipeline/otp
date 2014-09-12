@@ -30,7 +30,7 @@ class QualityAssessmentMergedPass {
      * @return Whether this is the most recent QA pass on the referenced {@link ProcessedMergedBamFile}.
      */
     public boolean isLatestPass() {
-        int maxIdentifier = createCriteria().get {
+        Integer maxIdentifier = QualityAssessmentMergedPass.createCriteria().get {
             eq("processedMergedBamFile", processedMergedBamFile)
             projections{
                 max("identifier")
