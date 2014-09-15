@@ -102,7 +102,7 @@ class ClusterJob implements ClusterJobIdentifier{
         realm(nullable: false)
         clusterJobId(blank: false, nullable: false)
         clusterJobName(blank: false, nullable: false, validator: { clusterJobName, clusterJob -> clusterJobName.endsWith("_${clusterJob.jobClass}") } )
-        jobClass(blank: false, nullable: false)
+        jobClass(blank: false, nullable: false, validator: { jobClass, clusterJob -> jobClass == clusterJob.processingStep.nonQualifiedJobClass } )
         seqType(nullable: true)                         // gets filled after initialization, must be nullable
         exitStatus(nullable: true)                      // gets filled after initialization, must be nullable
         exitCode(nullable: true)                        // gets filled after initialization, must be nullable

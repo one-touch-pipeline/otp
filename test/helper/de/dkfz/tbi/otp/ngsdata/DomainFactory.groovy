@@ -125,7 +125,7 @@ class DomainFactory {
         ] + myProps)
     }
 
-    public static ProcessingStep createAndSaveProcessingStep(String jobClass = "some.dummy.jobClass") {
+    public static ProcessingStep createAndSaveProcessingStep(String jobClass = "de.dkfz.tbi.otp.test.job.jobs.NonExistentDummyJob") {
         final JobExecutionPlan jep = new JobExecutionPlan(name: "DontCare" + sprintf('%016X', new Random().nextLong()), planVersion: 0, startJobBean: "DontCare")
         assert jep.save()
         final JobDefinition jobDefinition = new JobDefinition(name: "DontCare", bean: "DontCare", plan: jep)
@@ -151,10 +151,10 @@ class DomainFactory {
     public static ClusterJob createClusterJob(
             final ProcessingStep processingStep, final ClusterJobIdentifier clusterJobIdentifier,
             final Map myProps = [
-                    clusterJobName: "testName_testClass",
-                    jobClass: "testClass",
+                    clusterJobName: "testName_${processingStep.nonQualifiedJobClass}",
+                    jobClass: processingStep.nonQualifiedJobClass,
                     queued: new DateTime(),
-                    requestedWalltime: new Duration(24 * 60 * 60),
+                    requestedWalltime: Duration.standardMinutes(5),
                     requestedCores: 10,
                     requestedMemory: 1000,
             ]) {

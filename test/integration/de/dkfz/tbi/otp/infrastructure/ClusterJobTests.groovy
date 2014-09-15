@@ -26,8 +26,11 @@ class ClusterJobTests {
     public static final DateTime STARTED = QUEUED.plusDays(1)
     public static final DateTime ENDED = STARTED.plusDays(1)
 
-    @Test
-    public void testGetter () {
+    ProcessingStep step
+    Realm realm
+
+    @Before
+    void before() {
 
         JobExecutionPlan plan = new JobExecutionPlan(name: "testFormula", obsoleted: true, planVersion: 0)
 
@@ -41,20 +44,24 @@ class ClusterJobTests {
 
         assertNotNull(jobDefinition.save(flush: true))
 
-        ProcessingStep step = new ProcessingStep(id: 1, process: process, jobDefinition: jobDefinition)
+        step = new ProcessingStep(id: 1, process: process, jobDefinition: jobDefinition, jobClass: 'de.dkfz.tbi.otp.test.job.jobs.NonExistentDummyJob')
 
         assertNotNull(step.save(flush: true))
 
-        Realm realm = DomainFactory.createRealmDataManagementBioQuant()
+        realm = DomainFactory.createRealmDataManagementBioQuant()
 
         assertNotNull(realm.save(flush: true))
+    }
+
+    @Test
+    public void testGetter () {
 
         ClusterJob clusterJob = new ClusterJob(
                                                     processingStep: step,
                                                     realm: realm,
                                                     clusterJobId: "testID",
-                                                    clusterJobName: "testName_testClass",
-                                                    jobClass: "testClass",
+                                                    clusterJobName: "testName_${step.nonQualifiedJobClass}",
+                                                    jobClass: step.nonQualifiedJobClass,
                                                     queued: QUEUED,
                                                     started: STARTED,
                                                     ended: ENDED,
@@ -80,26 +87,6 @@ class ClusterJobTests {
     @Test
     public void testNullable () {
 
-        JobExecutionPlan plan = new JobExecutionPlan(name: "testFormula", obsoleted: true, planVersion: 0)
-
-        assertNotNull(plan.save(flush: true))
-
-        Process process = new Process(finished: true, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-
-        assertNotNull(process.save(flush: true))
-
-        JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "foo", plan: plan)
-
-        assertNotNull(jobDefinition.save(flush: true))
-
-        ProcessingStep step = new ProcessingStep(id: 1, process: process, jobDefinition: jobDefinition)
-
-        assertNotNull(step.save(flush: true))
-
-        Realm realm = DomainFactory.createRealmDataManagementBioQuant()
-
-        assertNotNull(realm.save(flush: true))
-
         ClusterJob clusterJob = new ClusterJob(
                                                     processingStep: null,
                                                     realm: null,
@@ -120,8 +107,8 @@ class ClusterJobTests {
                                                     processingStep: step,
                                                     realm: realm,
                                                     clusterJobId: "testID",
-                                                    clusterJobName: "testName_testClass",
-                                                    jobClass: "testClass",
+                                                    clusterJobName: "testName_${step.nonQualifiedJobClass}",
+                                                    jobClass: step.nonQualifiedJobClass,
                                                     seqType: null,
                                                     exitStatus: null,
                                                     exitCode: null,
