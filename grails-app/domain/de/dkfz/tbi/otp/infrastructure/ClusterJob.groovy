@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.infrastructure
 
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
+import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
@@ -117,6 +118,7 @@ class ClusterJob implements ClusterJobIdentifier{
     }
 
     static mapping = {
+        processingStep index: "cluster_job_processing_step_idx"
         queued type: PersistentDateTime
         started type: PersistentDateTime
         ended type: PersistentDateTime
