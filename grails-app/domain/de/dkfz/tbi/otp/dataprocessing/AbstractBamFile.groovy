@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 abstract class AbstractBamFile {
@@ -109,5 +110,9 @@ abstract class AbstractBamFile {
         }
         deletionDate(nullable: true)
         coverage(nullable: true)
+    }
+
+    ReferenceGenome getReferenceGenome() {
+        this.containedSeqTracks*.referenceGenome?.find()
     }
 }
