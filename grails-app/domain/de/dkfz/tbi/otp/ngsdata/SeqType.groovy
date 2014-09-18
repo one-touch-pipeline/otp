@@ -38,6 +38,13 @@ class SeqType {
         return "${name}_${libraryLayout}"
     }
 
+    String getLibraryLayoutDirName() {
+        return getLibraryLayoutDirName(libraryLayout)
+    }
+
+    static String getLibraryLayoutDirName(final String libraryLayout) {
+        return libraryLayout.toLowerCase()
+    }
 
     String toString() {
         "${aliasOrName} ${libraryLayout}"

@@ -159,8 +159,8 @@ class LsdfFilesService {
         SeqTrack seqTrack = file.seqTrack ?: file.alignmentLog.seqTrack
         String seqTypeDir = seqTrack.seqType.dirName
         String pid = seqTrack.sample.individual.pid
-        String library = seqTrack.seqType.libraryLayout.toLowerCase()
-        String sampleTypeDir = seqTrack.sample.sampleType.name.toLowerCase()
+        String library = seqTrack.seqType.libraryLayoutDirName
+        String sampleTypeDir = seqTrack.sample.sampleType.dirName
         if (seqTrack instanceof ChipSeqSeqTrack) {
             ChipSeqSeqTrack chipSeqSeqTrack = seqTrack as ChipSeqSeqTrack
             AntibodyTarget antibodyTarget = chipSeqSeqTrack.antibodyTarget
@@ -174,7 +174,7 @@ class LsdfFilesService {
         return getFileViewByPidRelativeDirectory(sequence.dirName,
         sequence.pid,
         sequence.sampleTypeName.toLowerCase(),
-        sequence.libraryLayout.toLowerCase(),
+        sequence.libraryLayoutDirName,
         sequence.name,
         file.fileType.vbpPath)
     }

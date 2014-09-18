@@ -53,7 +53,7 @@ class ProcessedBamFileService {
 
     public String getFileNameNoSuffix(ProcessedBamFile bamFile) {
         SeqTrack seqTrack = bamFile.alignmentPass.seqTrack
-        String sampleType = seqTrack.sample.sampleType.name.toLowerCase()
+        String sampleType = seqTrack.sample.sampleType.dirName
         String runName = seqTrack.run.name
         String lane = seqTrack.laneId
         String layout = seqTrack.seqType.libraryLayout

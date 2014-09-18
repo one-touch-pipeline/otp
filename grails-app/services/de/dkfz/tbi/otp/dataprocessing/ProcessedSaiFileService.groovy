@@ -35,7 +35,7 @@ class ProcessedSaiFileService {
 
     public String getFileName(ProcessedSaiFile saiFile) {
         SeqTrack seqTrack = saiFile.alignmentPass.seqTrack
-        String sampleType = seqTrack.sample.sampleType.name.toLowerCase()
+        String sampleType = seqTrack.sample.sampleType.dirName
         String runName = seqTrack.run.name
         String filename = saiFile.dataFile.fileName
         filename = filename.substring(0, filename.lastIndexOf("."))

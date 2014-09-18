@@ -27,7 +27,7 @@ class MergingService {
             Sample.findAllByIndividual(ind).each { Sample sample ->
                 String path = baseDir + type.dirName + "/view-by-pid/" +
                         ind.pid + "/" + sample.type.toString().toLowerCase() +
-                        "/" + type.libraryLayout.toLowerCase() +
+                        "/" + type.libraryLayoutDirName +
                         "/merged-alignment/"
                 File mergedDir = new File(path)
                 mergedDir.list().each { String fileName ->

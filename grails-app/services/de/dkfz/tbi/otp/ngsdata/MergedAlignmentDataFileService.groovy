@@ -45,8 +45,8 @@ class MergedAlignmentDataFileService {
     String buildRelativePath(SeqType type, Sample sample) {
         // this method is also used in the ProcessedMergedBamFileService,
         // if this method is changed make sure that the path in the ProcessedMergedBamFileService is still correct
-        String sampleType = sample.sampleType.name.toLowerCase()
-        String layout = type.libraryLayout.toLowerCase()
+        String sampleType = sample.sampleType.dirName
+        String layout = type.libraryLayoutDirName
         return "${sample.individual.getViewByPidPath(type).relativePath}/${sampleType}/${layout}/merged-alignment/"
     }
 
@@ -87,7 +87,7 @@ class MergedAlignmentDataFileService {
     //This method is not used at the moment but is kept because of historical reasons and may be reused later on.
     @Deprecated
     private String fileName(SeqScan scan, int n) {
-        String type = scan.sample.sampleType.name.toLowerCase()
+        String type = scan.sample.sampleType.dirName
         String pid = scan.sample.individual.pid
         return "v${n}.${type}_${pid}_merged.bam.rmdup.bam"
     }

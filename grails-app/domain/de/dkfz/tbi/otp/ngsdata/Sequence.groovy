@@ -135,4 +135,8 @@ class Sequence implements Serializable {
         seqTypeAlias(nullable: true)
         seqTypeAliasOrName(nullable: true)
     }
+
+    String getLibraryLayoutDirName() {
+        return SeqType.getLibraryLayoutDirName(libraryLayout)
+    }
 }

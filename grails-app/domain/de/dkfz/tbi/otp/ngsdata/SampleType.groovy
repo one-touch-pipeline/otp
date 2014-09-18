@@ -6,4 +6,8 @@ class SampleType {
     static constraints = {
         name(unique: true)
     }
+
+    String getDirName() {
+        return name.toLowerCase()
+    }
 }
