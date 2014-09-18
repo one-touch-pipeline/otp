@@ -128,6 +128,10 @@ class JobStatusLoggingService {
         notNull processingStep
         notNull clusterJobs
 
+        // OTP-967: try to figure out why processingStep sometimes returns NULL for .jobClass
+        // lets try explicitly reconnecting it..
+        processingStep.refresh()
+
         final Collection<ClusterJobIdentifier> failedOrNotFinishedClusterJobs = []
         clusterJobs.each { Realm realm, Collection<String> clusterJobIds ->
             notNull realm

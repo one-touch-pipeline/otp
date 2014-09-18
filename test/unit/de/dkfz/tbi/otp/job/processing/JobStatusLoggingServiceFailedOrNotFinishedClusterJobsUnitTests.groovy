@@ -1,14 +1,17 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl
+import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import grails.test.mixin.support.*
+
 import org.apache.commons.io.FileUtils
 import org.junit.*
 
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl
 import de.dkfz.tbi.otp.ngsdata.Realm
+
 
 /**
  * Unit tests for the {@link JobStatusLoggingService}.
@@ -16,6 +19,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
  */
 @TestFor(JobStatusLoggingService)
 @TestMixin(GrailsUnitTestMixin)
+@Build([ProcessingStep])
 class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends TestCase {
 
     final static Long ARBITRARY_REALM_ID = 987
@@ -51,6 +55,7 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
         tempDirectory = new File('/tmp/otp-test/' + System.currentTimeMillis() + '-' + sprintf('%016X', new Random().nextLong()) + '/')
 
         processingStep = JobStatusLoggingServiceUnitTests.createFakeProcessingStep()
+        assert processingStep.save(flush: true)
 
         int realmId = ARBITRARY_REALM_ID
         realm1 = new Realm([id: realmId++, name: 'realm1', loggingRootPath: new File(tempDirectory, '1').path])
