@@ -23,7 +23,7 @@ class StatisticController {
 
     JSON laneCountPerDate(ProjectGroupCommand command) {
         List<Project> projects = null
-        if (command.projectGroupName) {
+        if (command.projectGroupName && !command.projectGroupName == "OTP") {
             ProjectGroup projectGroup = projectGroupService.projectGroupByName(command.projectGroupName)
             projects = projectService.projectByProjectGroup(projectGroup)
         }
