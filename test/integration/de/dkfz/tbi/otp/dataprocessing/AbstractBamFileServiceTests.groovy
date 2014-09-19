@@ -472,7 +472,6 @@ class AbstractBamFileServiceTests {
 
     private static void changeStateOfBamFileToHavingPassedQC(AbstractBamFile bamFile) {
         bamFile.with {
-            setQualityControl AbstractBamFile.QualityControl.PASSED
             setQualityAssessmentStatus AbstractBamFile.QaProcessingStatus.FINISHED
         }
         assert bamFile.save([flush: true])

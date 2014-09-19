@@ -66,7 +66,6 @@ class AbstractQualityAssessmentServiceTests {
                 type                   : AbstractBamFile.BamType.SORTED,
                 withdrawn              : false,
                 qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-                qualityControl         : AbstractBamFile.QualityControl.PASSED,
                 status                 : AbstractBamFile.State.PROCESSED,
                 alignmentPass          : alignmentPass,
         ])
@@ -119,7 +118,6 @@ class AbstractQualityAssessmentServiceTests {
                 type                   : AbstractBamFile.BamType.SORTED,
                 withdrawn              : false,
                 qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-                qualityControl         : AbstractBamFile.QualityControl.PASSED,
                 status                 : AbstractBamFile.State.PROCESSED,
                 mergingPass            : mergingPass,
                 alignmentPass          : processedBamFile.alignmentPass,
