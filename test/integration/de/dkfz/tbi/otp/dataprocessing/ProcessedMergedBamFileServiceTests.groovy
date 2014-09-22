@@ -824,6 +824,126 @@ class ProcessedMergedBamFileServiceTests {
         assertTrue(seqTracks.size() == 1 && seqTracks.contains(seqTrack))
     }
 
+    @Test(expected = AssertionError)
+    void test_saveNumberOfMergedLanes_WhenProcessedMergedBamFileIsNull_ShouldFail() {
+        processedMergedBamFileService.updateNumberOfMergedLanes(null)
+    }
+
+    @Test
+    void test_saveNumberOfMergedLanes_WhenOneMergingPassExist_ShouldSetValueToNumberOfLanes() {
+
+        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+                sample: sample,
+                seqType: seqType,
+        )
+        assert mergingWorkPackage.save([flush: true])
+
+        MergingSet mergingSet = new MergingSet(
+                mergingWorkPackage: mergingWorkPackage,
+                status: State.PROCESSED,
+        )
+        assert mergingSet.save([flush: true])
+
+        MergingPass mergingPass = new MergingPass([mergingSet: mergingSet])
+        assert mergingPass.save([flush: true])
+
+
+        (1..2).each { id ->
+            // Create SeqTrack and lane (BAM file)
+            SeqTrack seqTrack = createSeqTrack("lane_${id}")
+            ProcessedBamFile bamFile = createProcessedBamFile(id, seqTrack)
+            // Connect the lane with the merging set
+            MergingSetAssignment mergingSetAssignment = new MergingSetAssignment([
+                    mergingSet: mergingSet,
+                    bamFile   : bamFile,
+            ])
+            assert mergingSetAssignment.save([flush: true])
+        }
+
+        // Create a new processed BAM file
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+
+        // Calculate and update the number of merged lanes
+        assert !processedMergedBamFile.numberOfMergedLanes
+        processedMergedBamFileService.updateNumberOfMergedLanes(processedMergedBamFile)
+        assert processedMergedBamFile.numberOfMergedLanes == 2
+    }
+
+    @Test
+    void test_saveNumberOfMergedLanes_WhenTwoMergingPassesExist_ShouldSetValueToNumberOfLanesOfLatest() {
+
+        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+                sample: sample,
+                seqType: seqType,
+        )
+        assert mergingWorkPackage.save([flush: true])
+
+        MergingSet mergingSet = new MergingSet(
+                mergingWorkPackage: mergingWorkPackage,
+                status: State.PROCESSED,
+        )
+        assert mergingSet.save([flush: true])
+
+        MergingPass mergingPass = new MergingPass([mergingSet: mergingSet])
+        assert mergingPass.save([flush: true])
+
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+
+        // A new merging set with an additional lane
+
+        MergingSet mergingSetLater = new MergingSet(
+                mergingWorkPackage: mergingWorkPackage,
+                status: State.PROCESSED,
+        )
+        assert mergingSetLater.save([flush: true])
+
+        MergingPass mergingPassLater = new MergingPass([mergingSet: mergingSetLater])
+        assert mergingPassLater.save([flush: true])
+
+        // Connect the first two lanes to both merging sets
+        (1..2).each { id ->
+            // Create SeqTrack and lane (BAM file)
+            SeqTrack seqTrack = createSeqTrack("lane_${id}")
+            ProcessedBamFile bamFile = createProcessedBamFile(id, seqTrack)
+            // Connect the lane with the merging set
+            MergingSetAssignment mergingSetAssignment = new MergingSetAssignment([
+                    mergingSet: mergingSet,
+                    bamFile   : bamFile,
+            ])
+            assert mergingSetAssignment.save([flush: true])
+            MergingSetAssignment mergingSetAssignmentLater = new MergingSetAssignment([
+                    mergingSet: mergingSetLater,
+                    bamFile   : bamFile,
+            ])
+            assert mergingSetAssignmentLater.save([flush: true])
+        }
+
+        // Connect the "new" lane to the later merging set
+        SeqTrack seqTrack3 = createSeqTrack('lane_3')
+        ProcessedBamFile processedBamFile3 = createProcessedBamFile(3, seqTrack3)
+
+        MergingSetAssignment mergingSetAssignment3 = new MergingSetAssignment([
+                mergingSet: mergingSetLater,
+                bamFile   : processedBamFile3,
+        ])
+        assert mergingSetAssignment3.save([flush: true])
+
+        // Create a new merged BAM file
+        ProcessedMergedBamFile processedMergedBamFileLater = createProcessedMergedBamFile(mergingPassLater)
+
+        // Calculate and update the number of merged lanes for both
+        assert !processedMergedBamFile.numberOfMergedLanes
+        assert !processedMergedBamFileLater.numberOfMergedLanes
+        processedMergedBamFileService.updateNumberOfMergedLanes(processedMergedBamFile)
+        processedMergedBamFileService.updateNumberOfMergedLanes(processedMergedBamFileLater)
+        assert processedMergedBamFile.numberOfMergedLanes == 2
+        assert processedMergedBamFileLater.numberOfMergedLanes == 3
+    }
+
+    //
+    // Helper methods
+    //
+
     private ProcessedMergedBamFile createProcessedMergedBamFile(MergingPass mergingPass) {
         ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
                         mergingPass: mergingPass,
