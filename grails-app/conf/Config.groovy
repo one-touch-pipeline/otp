@@ -293,6 +293,10 @@ if (pluginsToExclude) {
 
 grails.plugin.databasemigration.changelogFileName = 'changelog.xml'
 
+// WARNING: This setting (same as this entire Config.groovy) has no effect on unit tests. See:
+// * OTP-1126
+// * http://grails.1312388.n4.nabble.com/unit-testing-grails-gorm-failOnError-true-td4231435.html
+// * http://grails.1312388.n4.nabble.com/Unit-testing-with-failOnError-true-td2718543.html
 grails.gorm.failOnError=true
 
 // Shared constraints
