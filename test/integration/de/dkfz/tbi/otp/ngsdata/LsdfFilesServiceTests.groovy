@@ -11,7 +11,8 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 
-class LsdfFilesServiceTests {
+
+class LsdfFilesServiceTests extends GroovyTestCase {
 
     LsdfFilesService lsdfFilesService
 
@@ -192,14 +193,14 @@ class LsdfFilesServiceTests {
         DataFile dataFile = createDataFile(seqTrack, fastqR1Filename)
 
         AlignmentParams alignmentParams = new AlignmentParams(
-            pipeline: softwareTool
-            )
+                pipeline: softwareTool
+                )
         assertNotNull(alignmentParams.save([flush: true]))
 
         AlignmentLog alignmentLog = new AlignmentLog(
-            alignmentParams: alignmentParams,
-            seqTrack: seqTrack
-            )
+                alignmentParams: alignmentParams,
+                seqTrack: seqTrack
+                )
         assertNotNull(alignmentLog.save([flush: true]))
 
         dataFile.alignmentLog = alignmentLog
@@ -284,5 +285,52 @@ class LsdfFilesServiceTests {
         String correctPath = "${SEQ_TYPE_SEQUENCING_DIR}/${VIEW_BY_PID_PATH}/${individualPid}/${sampleTypeName.toLowerCase()}/${seqType.libraryLayout.toLowerCase()}/run${runName}/${VBP_PATH}/"
         String path = lsdfFilesService.getFileViewByPidRelativeDirectory(dataFile)
         assertEquals(new File(correctPath).path, new File(path).path)
+    }
+
+
+    @Test
+    void testEnsureFileIsReadableAndNotEmpty_AllCorrect() {
+        File file = new File("/tmp/testFile.txt")
+        file << "content"
+        file.deleteOnExit()
+        LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
+    }
+
+    @Test
+    void testEnsureFileIsReadableAndNotEmpty_IsNotAbsolute() {
+        File file = new File("testFile.txt")
+        assert shouldFail(AssertionError, {LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)}) =~ /(?i)isAbsolute/
+    }
+
+    @Test
+    void testEnsureFileIsReadableAndNotEmpty_DoesNotExist() {
+        //file must be absolute to make sure that the test fails the 'exists?' assertion
+        assert shouldFail(AssertionError, {LsdfFilesService.ensureFileIsReadableAndNotEmpty(new File("/test.txt"))}) =~ /(?i)exists/
+    }
+
+    @Test
+    void testEnsureFileIsReadableAndNotEmpty_IsNotAFile() {
+        File file = new File("/tmp/testFile/")
+        file.mkdirs()
+        assert shouldFail(AssertionError, {LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)}) =~ /(?i)isFile/
+        file.deleteDir()
+    }
+
+    @Test
+    void testEnsureFileIsReadableAndNotEmpty_CanNotRead() {
+        File file = new File("/tmp/testFile.txt")
+        file << "content"
+        file.setReadable(false)
+        assert shouldFail(AssertionError, {LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)}) =~ /(?i)canRead/
+        file.setReadable(true)
+        file.delete()
+    }
+
+    @Test
+    void testEnsureFileIsReadableAndNotEmpty_IsEmpty() {
+        File file = new File("/tmp/testFile.txt")
+        file.createNewFile()
+        assert shouldFail(AssertionError, {LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)}) =~ /(?i)length/
+        file.delete()
     }
 }

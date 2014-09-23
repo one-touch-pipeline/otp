@@ -196,6 +196,14 @@ class LsdfFilesService {
         return file.length()
     }
 
+    static void ensureFileIsReadableAndNotEmpty(final File file) {
+        assert file.isAbsolute()
+        assert file.exists()
+        assert file.isFile()
+        assert file.canRead()
+        assert file.length() > 0L
+    }
+
     /**
      *
      * @param path
