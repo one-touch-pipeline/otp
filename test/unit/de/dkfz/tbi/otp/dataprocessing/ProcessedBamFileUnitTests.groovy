@@ -12,7 +12,7 @@ import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
 
 @TestFor(ProcessedBamFile)
 @Mock([Project, SeqPlatform, SeqCenter, Run, Individual, SampleType, Sample, SoftwareTool, SeqTrack, AlignmentPass, SeqType])
-class ProcessedBamFileTests {
+class ProcessedBamFileUnitTests {
 
     AlignmentPass alignmentPass
 
