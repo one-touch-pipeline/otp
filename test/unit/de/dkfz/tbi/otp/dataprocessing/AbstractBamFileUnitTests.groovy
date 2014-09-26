@@ -14,7 +14,7 @@ import org.junit.*
  */
 @TestFor(MockAbstractBamFile)
 @Mock([MockAbstractBamFile])
-class AbstractBamFileTests {
+class AbstractBamFileUnitTests {
 
     void testSave() {
         AbstractBamFile bamFile = new MockAbstractBamFile(type: AbstractBamFile.BamType.SORTED)
