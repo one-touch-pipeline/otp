@@ -6,8 +6,10 @@ package de.dkfz.tbi.otp.job.jobs.utils
  */
 enum JobParameterKeys {
 
+    /* The key names have to be unique. */
     PBS_ID_LIST ('__pbsIds'),
     REALM       ('__pbsRealm'),
+    SCRIPT      ('__script'),
 
     private final String name
 
