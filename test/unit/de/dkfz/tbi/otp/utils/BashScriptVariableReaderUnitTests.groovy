@@ -32,12 +32,13 @@ EO_MAIL_OPTS="-o \$CLUSTER_EO -j oe -M \$EMAIL -m a"
     void testExecuteAndGetVariableValues_failingStatement() {
         try {
             BashScriptVariableReader.executeAndGetVariableValues("""
+LANG=C
 missing_dummy_command
 """, new HashSet(['HELLO']))
             throw new AssertionError('Expected exception has not been thrown.')
         } catch (final RuntimeException e) {
             assert e.message.startsWith('Script failed with exit code 127. Error output:\n' +
-                    'bash: line 2: missing_dummy_command: command not found')
+                    'bash: line 3: missing_dummy_command: command not found')
         }
     }
 
@@ -59,6 +60,7 @@ echo foo
         try {
             BashScriptVariableReader.executeAndGetVariableValues("""
 set -e
+LANG=C
 missing_dummy_command
 HELLO=WORLD
 echo foo
@@ -66,7 +68,7 @@ echo foo
             throw new AssertionError('Expected exception has not been thrown.')
         } catch (final RuntimeException e) {
             assert e.message.startsWith('Script failed with exit code 127. Error output:\n' +
-                    'bash: line 3: missing_dummy_command: command not found')
+                    'bash: line 4: missing_dummy_command: command not found')
         }
     }
 }

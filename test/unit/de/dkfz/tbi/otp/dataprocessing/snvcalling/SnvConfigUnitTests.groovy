@@ -51,7 +51,7 @@ class SnvConfigUnitTests extends TestCase {
 
     @Test
     void testFailingConfigScript() {
-        testWithIllegalConfig("${LEGAL_CONFIG}\nmissing_dummy_command", 'Script failed with exit code 127. Error output:\nbash: line 6: missing_dummy_command: command not found\n')
+        testWithIllegalConfig("LANG=C\n${LEGAL_CONFIG}\nmissing_dummy_command", 'Script failed with exit code 127. Error output:\nbash: line 7: missing_dummy_command: command not found\n')
     }
 
     @Test
