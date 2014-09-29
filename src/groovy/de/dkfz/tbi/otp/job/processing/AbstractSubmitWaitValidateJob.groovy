@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
+
 /**
  * Base class for jobs which submit cluster jobs, wait for them to finish, and then validate their results.
  *
