@@ -1,9 +1,13 @@
 package de.dkfz.tbi.otp.job.processing
 
+import static de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl
 import de.dkfz.tbi.otp.job.scheduler.PbsMonitorService
 import de.dkfz.tbi.otp.job.scheduler.Scheduler
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
@@ -35,8 +39,8 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
     SchedulerService schedulerService
 
     final Object lockForJobCollections = new Object()
-    Collection<ClusterJob> monitoredClusterJobs = null
-    Collection<ClusterJob> finishedClusterJobs = null
+    Collection<ClusterJobIdentifierImpl> monitoredClusterJobs = null
+    Collection<ClusterJobIdentifierImpl> finishedClusterJobs = null
 
     private final Object lockForResumable = new Object()
     private boolean suspendPlanned = false
@@ -47,7 +51,7 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
         synchronized (lockForJobCollections) {
             assert monitoredClusterJobs == null
             assert finishedClusterJobs == null
-            monitoredClusterJobs = ClusterJob.findAllByProcessingStepAndValidated(processingStep, false)
+            monitoredClusterJobs = asClusterJobIdentifierImplList(ClusterJob.findAllByProcessingStepAndValidated(processingStep, false))
             final List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(
                     processingStep, [sort: "id", order: "desc", max: 2])
             assert updates[0].state == ExecutionState.STARTED
@@ -77,9 +81,8 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
         final boolean allFinished
         final int finishedCount
         synchronized (lockForJobCollections) {
-            final ClusterJob finishedClusterJob = monitoredClusterJobs.find { it.clusterJobId == clusterJobId && it.realm == realm }
-            if (finishedClusterJob) {
-                monitoredClusterJobs.remove(finishedClusterJob)
+            final ClusterJobIdentifierImpl finishedClusterJob = new ClusterJobIdentifierImpl(realm, clusterJobId)
+            if (monitoredClusterJobs.remove(finishedClusterJob)) {
                 finishedClusterJobs << finishedClusterJob
             } else {
                 throw new RuntimeException("Received a notification that cluster job ${clusterJobId}" +
@@ -93,7 +96,7 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
             /* The specification of {@link MonitoringJob#finished(String, Realm)} says that this
              * finished() method shall return quickly. So call callExecute() asynchronously.
              */
-            // if (OTP-1024 is resolved) {
+            // if (OTP-1036 is resolved) {
             //     TODO: scheduler.doOnOtherThread(this, { callExecute() } )
             // } else {
             //     // Workaround: Hope. Hope that this job does not perform any time-consuming operation.
@@ -127,14 +130,16 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
             final NextAction action = execute(finishedClusterJobs)
             ClusterJob.withTransaction {
                 finishedClusterJobs.each {
-                    final ClusterJob finishedClusterJob = ClusterJob.get(it.id)
+                    final ClusterJob finishedClusterJob =
+                            exactlyOneElement(ClusterJob.findAllByRealmAndClusterJobId(it.realm, it.clusterJobId))
+                    assert finishedClusterJob.processingStep == processingStep
                     assert !finishedClusterJob.validated
                     finishedClusterJob.validated = true
                     assert finishedClusterJob.save(flush: true)
                 }
                 final Collection<ClusterJob> submittedClusterJobs = ClusterJob.findAllByProcessingStepAndValidated(processingStep, false)
                 synchronized (lockForJobCollections) {
-                    monitoredClusterJobs = submittedClusterJobs
+                    monitoredClusterJobs = asClusterJobIdentifierImplList(submittedClusterJobs)
                     finishedClusterJobs = []
                 }
                 performAction(action)
@@ -196,10 +201,13 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
      * by the previous call of this method have finished (independent of whether they succeeded or failed).
      *
      * <p>
-     * <strong>This method might be called on a <em>different</em> instance of the implementing
-     * class than the instance that the previous {@link #execute(Collection)} call was made on. So
-     * you cannot rely on instance variables for transferring information between the method
-     * calls.</strong>
+     * <strong>This method may be called on a different thread, with a different persistence context and on another
+     * instance of the implementing class than the instance that the previous {@link #execute(Collection)} call was
+     * made on.</strong> So:
+     * <ul>
+     *     <li>Do not share domain objects between invocations of this method.</li>
+     *     <li>Do not rely on instance variables for sharing information between invocations of this method.</li>
+     * </ul>
      *
      * <p>
      * <strong>TODO: As long as OTP-1026 is not resolved, this method must return quickly if the finishedClusterJobs
