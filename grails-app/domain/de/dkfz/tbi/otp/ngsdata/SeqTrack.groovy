@@ -87,7 +87,9 @@ class SeqTrack {
     }
 
     /**
-     * @return The {@link ReferenceGenome}, or <code>null</code> if it is unknown.
+     * Returns the {@link ReferenceGenome} which is configured to be used for aligning this SeqTrack, or
+     * <code>null</code> if it is unknown.
+     * Note that the configuration may change in the future.
      */
     ReferenceGenome getReferenceGenome() {
         return atMostOneElement(
