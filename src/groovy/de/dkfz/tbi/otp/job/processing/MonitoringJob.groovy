@@ -31,6 +31,11 @@ interface MonitoringJob extends EndStateAwareJob {
      * {@link Scheduler#doOnOtherThread(Job, Closure)}.</strong>
      *
      * <p>
+     * <strong>This method may be called on a different thread and with a different persistence context than the
+     * {@link #execute()} method or other invocations of this method.</strong> So do not share domain objects between
+     * method invocations.
+     *
+     * <p>
      * If this method throws an exception, this MonitoringJob will be marked as failed and finished.
      *
      * @param pbsId The ID of the job on the PBS system
