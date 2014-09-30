@@ -62,14 +62,14 @@ class SnvController {
             processingThresholds*.sampleType,
         ].flatten().unique().sort {it.name}
         List<SeqType> alignableSeqType = seqTypeService.alignableSeqTypes()
-        Map groupDesieseType = sampleTypePerProjects.groupBy{it.sampleType}
-        Map groupdThresholds = processingThresholds.groupBy([{it.sampleType}, {it.seqType}])
+        Map groupedDiseaseTypes = sampleTypePerProjects.groupBy{it.sampleType.id}
+        Map groupedThresholds = processingThresholds.groupBy([{it.sampleType.id}, {it.seqType.id}])
         return [
             categories: SampleTypePerProject.Category.values(),
             sampleTypes: sampleTypes,
             alignableSeqType: alignableSeqType,
-            groupDesieseType: groupDesieseType,
-            groupdThresholds: groupdThresholds
+            groupedDiseaseTypes: groupedDiseaseTypes,
+            groupedThresholds: groupedThresholds
         ]
     }
 

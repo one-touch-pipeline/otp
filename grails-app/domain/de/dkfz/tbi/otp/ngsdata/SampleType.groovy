@@ -1,11 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
-
-
-@EqualsAndHashCode
 @ToString()
 class SampleType {
 
