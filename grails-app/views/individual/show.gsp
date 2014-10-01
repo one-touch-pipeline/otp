@@ -85,10 +85,8 @@
                                 <th><g:message code="individual.show.sequencingScans.status"/></th>
                                 <th><g:message code="individual.show.sequencingScans.center"/></th>
                                 <th><g:message code="individual.show.sequencingScans.numberOfLanes"/></th>
-                                <th><g:message code="individual.show.sequencingScans.coverage"/></th>
                                 <th><g:message code="individual.show.sequencingScans.numberOfBases"/></th>
                                 <th><g:message code="individual.show.sequencingScans.insertSize"/></th>
-                                <th><g:message code="individual.show.sequencingScans.merging"/></th>
                                 <th><g:message code="individual.show.sequencingScans.igv"/></th>
                             </tr>
                         </thead>
@@ -103,10 +101,8 @@
                                             <td>${scan.state}</td>
                                             <td>${scan.seqCenters.toLowerCase()}</td>
                                             <td>${scan.nLanes}</td>
-                                            <td>${scan.coverage}</td>
                                             <td>${scan.basePairsString()}</td>
                                             <td>${scan.insertSize}</td>
-                                            <td class="${scan.merged}"><g:formatBoolean boolean="${scan.merged}" true="merged" false="not merged"/></td>
                                             <td>
                                                 <g:if test="${igvMap.get(scan.id)}">
                                                     <g:checkBox name="${scan.id}" value="${false}"/>
