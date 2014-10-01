@@ -45,12 +45,9 @@ abstract class AbstractSubmitWaitValidateJob extends AbstractMaybeSubmitWaitVali
      * <strong>TODO: As long as OTP-1026 is not resolved, this method must return quickly.</strong>
      *
      * <p>
-     * <strong>This method may be called on a different thread, with a different persistence context and on another
-     * instance of the implementing class than the {@link #submit()} method.</strong> So:
-     * <ul>
-     *     <li>Do not share domain objects between the methods.</li>
-     *     <li>Do not rely on instance variables for sharing information between the methods.</li>
-     * </ul>
+     * <strong>This method might be called on a <em>different</em> instance of the implementing
+     * class than the instance that the {@link #submit()} call was made on. So you cannot rely on instance
+     * variables for transferring information between the method calls.</strong>
      *
      * @throws Throwable Throwing will make this job fail.
      */

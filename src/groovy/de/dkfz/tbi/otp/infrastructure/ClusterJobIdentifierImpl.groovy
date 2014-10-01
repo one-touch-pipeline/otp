@@ -12,22 +12,13 @@ public class ClusterJobIdentifierImpl implements ClusterJobIdentifier {
 
     final String clusterJobId
 
-    public ClusterJobIdentifierImpl(final ClusterJobIdentifier identifier) {
-        this.realm = identifier.realm
-        this.clusterJobId = identifier.clusterJobId
-    }
-
     @Override
     public String toString() {
-        return "Cluster job ${clusterJobId} on ${realm}"
-    }
-
-    public static List<ClusterJobIdentifierImpl> asClusterJobIdentifierImplList(final Collection<? extends ClusterJobIdentifier> c) {
-        return c.collect( { new ClusterJobIdentifierImpl(it) } )
+        return "Cluster job ${clusterJobId} on realm ${realm}"
     }
 
     private static Set<ClusterJobIdentifierImpl> asClusterJobIdentifierImplSet(final Collection<? extends ClusterJobIdentifier> c) {
-        return asClusterJobIdentifierImplList(c).toSet()
+        return c.collect( { new ClusterJobIdentifierImpl(it.realm, it.clusterJobId) } ).toSet()
     }
 
     public static boolean containSame(final Collection<? extends ClusterJobIdentifier> c1, final Collection<? extends ClusterJobIdentifier> c2) {
