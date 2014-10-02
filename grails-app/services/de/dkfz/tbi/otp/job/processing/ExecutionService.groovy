@@ -200,7 +200,7 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
      * @param options The options To make the command more specific
      * @return List of Strings containing the output of the executed job
      */
-    private List<String> querySsh(String host, int port, int timeout, String username, String password, String command, File script, String options) {
+    private List<String> querySsh(String host, int port, int timeout, String username, String password, String command = null, File script = null, String options) {
         if (!password) {
             throw new ProcessingException("No password for remote connection specified.")
         }

@@ -15,7 +15,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  */
 class ExecutionHelperService {
 
-    ExecutionService executionService
+    def executionService
 
     /**
      * Executes a job on a specified realm. It is a helper to simplify the using of {@link ExecutionService}.

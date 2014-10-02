@@ -19,10 +19,12 @@ class ExternalScript {
      */
     String scriptIdentifier
 
+    String scriptName
+
     /**
-     * Absolute path of the script file in the file system.
+     * Absolute path of the directory where the script is located in the file system.
      */
-    String filePath
+    String location
 
     String author
 
@@ -48,23 +50,23 @@ class ExternalScript {
     }
 
     File getScriptFilePath() {
-        return new File(filePath)
+        return new File(location, scriptName)
     }
 
     @Override
     public String toString() {
-        return "external script identifier: ${scriptIdentifier}, path: ${filePath}, deprecatedDate: ${deprecatedDate}"
+        return "external script name: ${scriptName}, path: ${location}, deprecatedDate: ${deprecatedDate}"
     }
 
     static constraints = {
-        //A script identifier should be unique, but in case of a new version the old version can be set to deprecated by adding a value to deprecatedDate.
-        //In this case it is fine to have two entries with the same scriptIdentifier.
-        scriptIdentifier blank: false, validator: { val, obj ->
+        //A script name should be unique, but in case of a new version the old version can be set to deprecated by adding a value to deprecatedDate.
+        //In this case it is fine to have two entries with the same scriptName.
+        scriptName blank: false, validator: { val, obj ->
             if (obj.deprecatedDate) {
                 return true
             }
-            //I tried to do this in one step like 'findAllByScriptIdentifierAndDeprecatedDateIsNull' but it did not work
-            List<ExternalScript> externalScripts = ExternalScript.findAllByScriptIdentifier(val)
+            //I tried to do this in one step like 'findAllByScriptNameAndDeprecatedDateIsNull' but it did not work
+            List<ExternalScript> externalScripts = ExternalScript.findAllByScriptName(val)
             List<ExternalScript> externalScriptsNotDeprecated = externalScripts.findAll() { it.deprecatedDate == null }
 
             if (externalScriptsNotDeprecated.empty) {
@@ -76,16 +78,13 @@ class ExternalScript {
             }
         }
 
-        filePath blank: false, unique: true, validator: { val, obj ->
-            return new File(val).isAbsolute()
+        location blank: false, validator: { val, obj ->
+            return val.startsWith("/")
         }
+        scriptIdentifier blank: false
         author blank: false
         comment blank: true, nullable: true
         deprecatedDate nullable: true
-    }
-
-    static mapping = {
-        scriptIdentifier index: "external_script_identifier_idx"
     }
 
     static ExternalScript getLatestVersionOfScript(final String scriptIdentifier) {

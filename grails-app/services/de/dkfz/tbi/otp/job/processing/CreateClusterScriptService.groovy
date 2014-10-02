@@ -198,25 +198,4 @@ rm -f ${target.parent}/${MD5SUM_NAME}${suffixDependingOnLocation};
     Realm getBioquantRealm() {
         return Realm.findByNameAndClusterAndEnv('BioQuant', Realm.Cluster.BIOQUANT, Environment.current.name)
     }
-
-    static String ensureFileDoesNotExistScript(final File file) {
-        assert file.isAbsolute()
-        return """
-if [ -e "${file}" ]; then
-    echo "File ${file} already exists."
-    exit 1
-fi
-"""
-    }
-
-    static String ensureFileHasExpectedSizeScript(final File file, final long expectedSize) {
-        assert file.isAbsolute()
-        return """
-ACTUAL_FILE_SIZE=\$(stat -c '%s' "$file")
-if [ \$ACTUAL_FILE_SIZE -ne ${expectedSize} ]; then
-    echo "File ${file} has size \$ACTUAL_FILE_SIZE bytes. Expected ${expectedSize} bytes."
-    exit 1
-fi
-"""
-    }
 }

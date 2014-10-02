@@ -10,10 +10,6 @@ class ProcessParameter {
         className(nullable: true)
     }
 
-    static mapping = {
-        process index: "process_parameter_process_idx"
-    }
-
     /**
      * Retrieves the domain object instance this ProcessParameter points to in case className is not null.
      *

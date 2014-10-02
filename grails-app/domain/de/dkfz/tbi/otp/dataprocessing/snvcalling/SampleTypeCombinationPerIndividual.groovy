@@ -61,17 +61,6 @@ class SampleTypeCombinationPerIndividual {
         return atMostOneElement(SampleTypeCombinationPerIndividual.findAllByIndividualAndSeqTypeAndSampleType1AndSampleType2(individual, seqType, sampleType1, sampleType2))
     }
 
-    static mapping = {
-        individual index: 'sample_type_combination_per_individual_individual_idx'
-        sampleType1 index: 'sample_type_combination_per_individual_sample_type1_idx'
-        sampleType2 index: 'sample_type_combination_per_individual_sample_type2_idx'
-        seqType index: 'sample_type_combination_per_individual_seq_type_idx'
-    }
-
-    Project getProject() {
-        return individual.project
-    }
-
     /**
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control
      */
@@ -79,13 +68,8 @@ class SampleTypeCombinationPerIndividual {
         return new OtpPath(individual.getViewByPidPath(seqType), 'snv_results', seqType.libraryLayoutDirName, "${sampleType1.dirName}_${sampleType2.dirName}")
     }
 
-    /**
-     * Returns the path of the symlink to the result file for the CALLING step of the SNV pipeline.
-     *
-     * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control/snvs_${pid}_raw.vcf.gz
-     */
-    OtpPath getSnvCallingFileLinkedPath() {
-        return new OtpPath(sampleTypeCombinationPath, SnvCallingStep.CALLING.getResultFileName(individual, null))
+    Project getProject() {
+        return individual.project
     }
 
     /**

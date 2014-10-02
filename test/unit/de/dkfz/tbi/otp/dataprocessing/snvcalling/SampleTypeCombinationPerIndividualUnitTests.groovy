@@ -72,35 +72,4 @@ class SampleTypeCombinationPerIndividualUnitTests {
         assertEquals(expectedExtension, sampleTypeCombinationPath.relativePath)
         assertEquals(project, sampleTypeCombinationPath.project)
     }
-
-    void testGetSnvCallingFileLinkedPath() {
-        TestData testData = new TestData()
-        Realm realm = DomainFactory.createRealmDataManagementDKFZ()
-        Project project = testData.createProject([realmName: realm.name])
-        project.save(flush: true)
-        Individual individual = testData.createIndividual([project: project])
-        individual.save(flush: true)
-        SeqType seqType = testData.createSeqType()
-        seqType.save(flush: true)
-        SampleType sampleType1 = testData.createSampleType([name: "TUMOR"])
-        sampleType1.save(flush: true)
-        SampleType sampleType2 = testData.createSampleType([name: "CONTROL"])
-        sampleType2.save(flush: true)
-
-        SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
-            individual: individual,
-            seqType: seqType,
-            sampleType1: sampleType1,
-            sampleType2: sampleType2
-            )
-        sampleCombinationPerIndividual.save(flush: true)
-
-        String path = "dirName/sequencing/whole_genome_sequencing/view-by-pid/654321/snv_results/paired/tumor_control"
-        String file = "snvs_654321_raw.vcf.gz"
-        File expectedExtension = new File("${path}/${file}")
-
-        OtpPath snvCallingFileLinkedPath = sampleCombinationPerIndividual.getSnvCallingFileLinkedPath()
-        assertEquals(expectedExtension, snvCallingFileLinkedPath.relativePath)
-        assertEquals(project, snvCallingFileLinkedPath.project)
-    }
 }

@@ -21,22 +21,11 @@ class ClusterScriptExecutorJobUnitTests extends GroovyTestCase {
         shouldFail AssertionError, { clusterScriptExecutorJob.maybeSubmit() }
     }
 
-    void test_maybeSubmit_WhenOnlyScriptIsEmpty_ShouldFail() {
+    void test_maybeSubmit_WhenScriptIsEmpty_ShouldSucceed() {
         ClusterScriptExecutorJob clusterScriptExecutorJob = createClusterScriptExecutorJobWithRealmIdAndScript(ARBITRARY_REALM_ID, '')
-
-        shouldFail RuntimeException, { clusterScriptExecutorJob.maybeSubmit() }
-    }
-
-    void test_maybeSubmit_WhenScriptAndRealmAreEmpty_ShouldSucceed() {
-        ClusterScriptExecutorJob clusterScriptExecutorJob = createClusterScriptExecutorJobWithRealmIdAndScript('', '')
+        Realm.metaClass.static.findById = { new Realm() }
 
         assert clusterScriptExecutorJob.maybeSubmit() == AbstractMultiJob.NextAction.SUCCEED
-    }
-
-    void test_maybeSubmit_WhenOnlyRealmIsEmpty_ShouldFail() {
-        ClusterScriptExecutorJob clusterScriptExecutorJob = createClusterScriptExecutorJobWithRealmIdAndScript('', ARBITRARY_DUMMY_SCRIPT)
-
-        shouldFail RuntimeException, { clusterScriptExecutorJob.maybeSubmit() }
     }
 
     void test_maybeSubmit_WhenRealmIsNull_ShouldFail() {
