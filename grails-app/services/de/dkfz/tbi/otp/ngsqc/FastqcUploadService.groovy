@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsqc
 
 import java.util.regex.*
+
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 
@@ -317,7 +318,7 @@ class FastqcUploadService {
         body.eachLine {String line ->
             fields = line.split('\t')
             fastqcSeqLengDist = new FastqcSequenceLengthDistribution()
-            fastqcSeqLengDist.length = fields[0] as int
+            fastqcSeqLengDist.length = fields[0]
             fastqcSeqLengDist.countSequences = fields[1] as double
             fastqcSeqLengDist.fastqcProcessedFile = fastqc
             fastqcSeqLengDist.save(flush: true)

@@ -9,9 +9,10 @@ import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 class FastqcSequenceLengthDistribution {
 
     /**
-     * Length of the sequences (Column Label in fastqc file is 'length')
+     * Length of the sequences (Column Label in fastqc file is 'length').
+     * Length can be a range, therefore a String is used.
      */
-    int length
+    String length
 
     /**
      * Number of sequences with same length (Column label in fastqc file is 'Count' which is a reserved word)
@@ -21,4 +22,8 @@ class FastqcSequenceLengthDistribution {
     static belongsTo = [
         fastqcProcessedFile: FastqcProcessedFile
     ]
+
+    static constraints = {
+        length nullable: false, blank: false
+    }
 }

@@ -4,6 +4,8 @@ import java.util.concurrent.Callable
 
 import org.junit.*
 import org.junit.runners.model.MultipleFailureException
+import org.springframework.validation.Errors
+import org.springframework.validation.FieldError
 
 /**
  * A default base class for test cases. This provides some helper methods.
@@ -65,4 +67,32 @@ class TestCase extends GroovyTestCase {
         assert dir.mkdirs()  // This will fail if the directory already exists or if it could not be created.
         return dir
     }
+
+    /**
+     * Helper to check that a validation failed for the given constraint on the given field with the given value.
+     * The assert fails if
+     * <ul>
+     * <li>The validate method return true</li>
+     * <li>There is more then one error</li>
+     * <li>The error is not of type {@link FieldError} </li>
+     * <li>The {@link FieldError} is not caused by the given field</li>
+     * <li>The {@link FieldError} is not caused by the given constraint</li>
+     * <li>The {@link FieldError} is not caused by the given value</li>
+     * </ul>
+     *
+     * @param objectToCheck the object which validate should be failed
+     * @param fieldToCheck the name of the property the check fails for
+     * @param failedConstraint the name of the constraint the check fails for
+     * @param rejectedValue the value which is rejected by the check
+     */
+    static void assertValidateError(def objectToCheck, String failedField, String failedConstraint, def rejectedValue) {
+        assert !objectToCheck.validate()
+        Errors errors = objectToCheck.errors
+        assert errors.errorCount == 1
+        assert errors.fieldErrorCount == 1
+        FieldError fieldError = errors.fieldError
+        assert fieldError.field == failedField
+        assert fieldError.code == failedConstraint
+        assert fieldError.rejectedValue == rejectedValue
+    }    
 }
