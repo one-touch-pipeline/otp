@@ -36,7 +36,7 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
             return ((val != FileOperationStatus.PROCESSED && obj.md5sum == null) || (val == FileOperationStatus.PROCESSED && obj.md5sum != null))
         }
         mergingPass nullable: false, unique: true
-        numberOfMergedLanes nullable: true
+        numberOfMergedLanes nullable: true, min: 1
     }
 
     Project getProject() {
