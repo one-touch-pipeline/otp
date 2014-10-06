@@ -5,10 +5,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
 
 class ProjectOverviewService {
 
-    OverallQualityAssessmentMergedService overallQualityAssessmentMergedService
-
-    ReferenceGenomeService referenceGenomeService
-
     List overviewProjectQuery(projectName) {
         Project project = Project.findByName(projectName)
         List seq = AggregateSequences.withCriteria {
@@ -227,13 +223,11 @@ class ProjectOverviewService {
     }
 
     public List coveragePerPatientAndSampleTypeAndSeqType(Project project) {
-        List<OverallQualityAssessmentMerged> overallQualityAssessmentMergedList = OverallQualityAssessmentMerged.executeQuery("""
+        List<ProcessedMergedBamFile> processedMergedBamFileList = ProcessedMergedBamFile.executeQuery("""
 select
-        overallQualityAssessmentMerged
+        processedMergedBamFile
 from
-        OverallQualityAssessmentMerged overallQualityAssessmentMerged
-        join overallQualityAssessmentMerged.qualityAssessmentMergedPass qualityAssessmentMergedPass
-        join qualityAssessmentMergedPass.processedMergedBamFile processedMergedBamFile
+        ProcessedMergedBamFile processedMergedBamFile
         join processedMergedBamFile.mergingPass mergingPass
         join mergingPass.mergingSet mergingSet
         join mergingSet.mergingWorkPackage mergingWorkPackage
@@ -244,30 +238,19 @@ where
         project = :project
         and mergingSet.identifier = (select max(identifier) from MergingSet mergingSet where mergingSet.mergingWorkPackage = mergingWorkPackage)
         and mergingPass.identifier = (select max(identifier) from MergingPass mergingPass where mergingPass.mergingSet = mergingSet)
-        and qualityAssessmentMergedPass.identifier = (select max(identifier) from QualityAssessmentMergedPass qualityAssessmentMergedPass where qualityAssessmentMergedPass.processedMergedBamFile = processedMergedBamFile)
 """, [project: project])
 
-        Map<SeqType, ReferenceGenome> referenceGenomes = [:]
-
-
-        List coverage = overallQualityAssessmentMergedList.collect { OverallQualityAssessmentMerged overallQualityAssessmentMerged ->
-            MergingWorkPackage mergingWorkPackage = overallQualityAssessmentMerged.qualityAssessmentMergedPass.processedMergedBamFile.mergingPass.mergingSet.mergingWorkPackage
+        List coverage = processedMergedBamFileList.collect { ProcessedMergedBamFile processedMergedBamFile ->
+            MergingWorkPackage mergingWorkPackage = processedMergedBamFile.mergingPass.mergingSet.mergingWorkPackage
             Sample sample = mergingWorkPackage.sample
             Individual individual = sample.individual
             SeqType seqType = mergingWorkPackage.seqType
 
-            ReferenceGenome referenceGenome = referenceGenomes[seqType]
-            if (!referenceGenome) {
-                referenceGenome = referenceGenomeService.referenceGenome(project, seqType)
-                referenceGenomes.put(seqType, referenceGenome)
-            }
-
-            double coverageWithoutN = overallQualityAssessmentMergedService.calcCoverageWithoutN(overallQualityAssessmentMerged, referenceGenome)
             return [
                 mockPid: individual.mockPid,
                 sampleTypeName: sample.sampleType.name,
                 seqType: seqType,
-                coverage: coverageWithoutN
+                coverage: processedMergedBamFile.coverage
             ]
         }
 
