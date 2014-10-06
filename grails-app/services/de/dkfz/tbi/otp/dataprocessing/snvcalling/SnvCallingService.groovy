@@ -68,12 +68,12 @@ class SnvCallingService {
 
                 //check that this combination is not in process
                 "AND NOT EXISTS (FROM SnvCallingInstance sci " +
-                "   WHERE sci.tumorBamFile.${SAMPLE_TYPE} IN (stc.sampleType1, stc.sampleType2) " +
-                "   AND sci.controlBamFile.${SAMPLE_TYPE} IN (stc.sampleType1, stc.sampleType2) " +
-                "   AND sci.tumorBamFile.${INDIVIDUAL} = stc.individual " +
-                "   AND sci.controlBamFile.${INDIVIDUAL} = stc.individual " +
-                "   AND sci.tumorBamFile.${SEQ_TYPE} = stc.seqType " +
-                "   AND sci.controlBamFile.${SEQ_TYPE} = stc.seqType " +
+                "   WHERE sci.sampleType1BamFile.${SAMPLE_TYPE} IN (stc.sampleType1, stc.sampleType2) " +
+                "   AND sci.sampleType2BamFile.${SAMPLE_TYPE} IN (stc.sampleType1, stc.sampleType2) " +
+                "   AND sci.sampleType1BamFile.${INDIVIDUAL} = stc.individual " +
+                "   AND sci.sampleType2BamFile.${INDIVIDUAL} = stc.individual " +
+                "   AND sci.sampleType1BamFile.${SEQ_TYPE} = stc.seqType " +
+                "   AND sci.sampleType2BamFile.${SEQ_TYPE} = stc.seqType " +
                 "   AND sci.processingState IN (:processingStates) " +
                 ") " +
 

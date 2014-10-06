@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import grails.test.mixin.*
-import org.apache.commons.jexl.junit.Asserter;
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.utils.ExternalScript
@@ -123,17 +122,17 @@ class SnvJobResultUnitTests {
 
 
     @Test
-    void testSavingOfSnvJobResultTumorBamDifferentFromInputFile() {
+    void testSavingOfSnvJobResultSampleType1BamDifferentFromInputFile() {
         ProcessedMergedBamFile control = new ProcessedMergedBamFile()
 
         SnvCallingInstance snvCallingInstance1 = new SnvCallingInstance(
-                tumorBamFile: new ProcessedMergedBamFile(),
-                controlBamFile: control
+                sampleType1BamFile: new ProcessedMergedBamFile(),
+                sampleType2BamFile: control
                 )
 
         SnvCallingInstance snvCallingInstance2 = new SnvCallingInstance(
-                tumorBamFile: new ProcessedMergedBamFile(),
-                controlBamFile: control
+                sampleType1BamFile: new ProcessedMergedBamFile(),
+                sampleType2BamFile: control
                 )
 
         SnvJobResult oldSnvJobResult = new SnvJobResult(
@@ -153,17 +152,17 @@ class SnvJobResultUnitTests {
     }
 
     @Test
-    void testSavingOfSnvJobResultControlBamDifferentFromInputFile() {
+    void testSavingOfSnvJobResultSampleType2BamDifferentFromInputFile() {
         ProcessedMergedBamFile tumor = new ProcessedMergedBamFile()
 
         SnvCallingInstance snvCallingInstance1 = new SnvCallingInstance(
-                tumorBamFile: tumor,
-                controlBamFile: new ProcessedMergedBamFile()
+                sampleType1BamFile: tumor,
+                sampleType2BamFile: new ProcessedMergedBamFile()
                 )
 
         SnvCallingInstance snvCallingInstance2 = new SnvCallingInstance(
-                tumorBamFile: tumor,
-                controlBamFile: new ProcessedMergedBamFile()
+                sampleType1BamFile: tumor,
+                sampleType2BamFile: new ProcessedMergedBamFile()
                 )
 
         SnvJobResult oldSnvJobResult = new SnvJobResult(
@@ -183,12 +182,12 @@ class SnvJobResultUnitTests {
     }
 
     @Test
-    void testGetTumorBamFile() {
+    void testGetSampleType1BamFile() {
         ProcessedMergedBamFile pmbf = new ProcessedMergedBamFile()
 
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
-                tumorBamFile: pmbf,
-                controlBamFile: new ProcessedMergedBamFile()
+                sampleType1BamFile: pmbf,
+                sampleType2BamFile: new ProcessedMergedBamFile()
                 )
 
         SnvJobResult snvJobResult = new SnvJobResult(
@@ -198,16 +197,16 @@ class SnvJobResultUnitTests {
                 externalScript: new ExternalScript(),
                 )
 
-        assertEquals(pmbf, snvJobResult.getTumorBamFile())
+        assertEquals(pmbf, snvJobResult.getSampleType1BamFile())
     }
 
     @Test
-    void testGetControlBamFile() {
+    void testGetSampleType2BamFile() {
         ProcessedMergedBamFile pmbf = new ProcessedMergedBamFile()
 
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
-                tumorBamFile: new ProcessedMergedBamFile(),
-                controlBamFile: pmbf
+                sampleType1BamFile: new ProcessedMergedBamFile(),
+                sampleType2BamFile: pmbf
                 )
 
         SnvJobResult snvJobResult = new SnvJobResult(
@@ -217,13 +216,13 @@ class SnvJobResultUnitTests {
                 externalScript: new ExternalScript(),
                 )
 
-        assertEquals(pmbf, snvJobResult.getControlBamFile())
+        assertEquals(pmbf, snvJobResult.getSampleType2BamFile())
     }
 
     private SnvCallingInstance createSnvCallingInstance(final Map properties = [:]) {
         return new SnvCallingInstance([
-                tumorBamFile: new ProcessedMergedBamFile(),
-                controlBamFile: new ProcessedMergedBamFile()
+                sampleType1BamFile: new ProcessedMergedBamFile(),
+                sampleType2BamFile: new ProcessedMergedBamFile()
         ] + properties)
     }
 }

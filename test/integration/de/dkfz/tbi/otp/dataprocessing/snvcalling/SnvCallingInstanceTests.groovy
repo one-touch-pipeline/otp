@@ -16,7 +16,7 @@ class SnvCallingInstanceTests {
         final SnvCallingInstance tumor1InstanceA = testData.createAndSaveSnvCallingInstance()
         // Using a different (does not matter if "earlier" or "later") instance name, because instance names have to be unique for the same sample type combination.
         final SnvCallingInstance tumor1InstanceB = testData.createAndSaveSnvCallingInstance(instanceName: '2014-09-24_15h04')
-        final SnvCallingInstance tumor2Instance = testData.createAndSaveSnvCallingInstance(tumorBamFile: testData.bamFileTumor2, sampleTypeCombination: testData.sampleTypeCombination2)
+        final SnvCallingInstance tumor2Instance = testData.createAndSaveSnvCallingInstance(sampleType1BamFile: testData.bamFileTumor2, sampleTypeCombination: testData.sampleTypeCombination2)
 
         // no result at all
         assert tumor1InstanceA.findLatestResultForSameBamFiles(SnvCallingStep.SNV_ANNOTATION) == null

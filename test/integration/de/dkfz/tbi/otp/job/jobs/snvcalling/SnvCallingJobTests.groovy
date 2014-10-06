@@ -99,16 +99,16 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvCallingInstance = new SnvCallingInstance(
                 instanceName: SOME_INSTANCE_NAME,
                 config: snvConfig,
-                tumorBamFile: processedMergedBamFile1,
-                controlBamFile: processedMergedBamFile2,
+                sampleType1BamFile: processedMergedBamFile1,
+                sampleType2BamFile: processedMergedBamFile2,
                 sampleTypeCombination: sampleTypeCombinationPerIndividual)
         assert snvCallingInstance.save()
 
         snvCallingInstance2 = new SnvCallingInstance(
                 instanceName: OTHER_INSTANCE_NAME,
                 config: snvConfig,
-                tumorBamFile: processedMergedBamFile1,
-                controlBamFile: processedMergedBamFile2,
+                sampleType1BamFile: processedMergedBamFile1,
+                sampleType2BamFile: processedMergedBamFile2,
                 sampleTypeCombination: sampleTypeCombinationPerIndividual)
         assert snvCallingInstance2.save()
 

@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled
@@ -34,19 +33,19 @@ class SnvCallingStartJob extends AbstractStartJobImpl {
                         sampleTypeCombinationPerIndividual.seqType
                         )
 
-                ProcessedMergedBamFile tumorBamFile = sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(
+                ProcessedMergedBamFile sampleType1BamFile = sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(
                         sampleTypeCombinationPerIndividual.sampleType1
                         )
 
-                ProcessedMergedBamFile controlBamFile = sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(
+                ProcessedMergedBamFile sampleType2BamFile = sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(
                         sampleTypeCombinationPerIndividual.sampleType2
                         )
 
                 SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
                         sampleTypeCombination: sampleTypeCombinationPerIndividual,
                         config: config,
-                        tumorBamFile: tumorBamFile,
-                        controlBamFile: controlBamFile
+                        sampleType1BamFile: sampleType1BamFile,
+                        sampleType2BamFile: sampleType2BamFile
                         )
                 snvCallingInstance.save(flush: true)
 

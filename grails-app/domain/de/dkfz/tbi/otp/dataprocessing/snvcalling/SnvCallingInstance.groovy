@@ -17,9 +17,9 @@ class SnvCallingInstance {
      */
     SnvConfig config
 
-    ProcessedMergedBamFile tumorBamFile
+    ProcessedMergedBamFile sampleType1BamFile
 
-    ProcessedMergedBamFile controlBamFile
+    ProcessedMergedBamFile sampleType2BamFile
 
     /**
      * Used to construct paths in {@link #getSnvInstancePath()} and {@link #getConfigFilePath()}.
@@ -52,16 +52,16 @@ class SnvCallingInstance {
     }
 
     static constraints = {
-        tumorBamFile validator: {val, obj ->
+        sampleType1BamFile validator: {val, obj ->
             obj.sampleTypeCombination && isConsistentWithSampleTypeCombination(val, obj, obj.sampleTypeCombination.sampleType1)}
-        controlBamFile validator: {val, obj ->
+        sampleType2BamFile validator: {val, obj ->
             obj.sampleTypeCombination && isConsistentWithSampleTypeCombination(val, obj, obj.sampleTypeCombination.sampleType2)}
         instanceName blank: false, unique: 'sampleTypeCombination'
     }
 
     static mapping = {
-        tumorBamFile index: "snv_calling_instance_tumor_bam_file_idx"
-        controlBamFile index: "snv_calling_instance_control_bam_file_idx"
+        sampleType1BamFile index: "snv_calling_instance_sample_type_1_bam_file_idx"
+        sampleType2BamFile index: "snv_calling_instance_sample_type_2_bam_file_idx"
         sampleTypeCombination index: "snv_calling_instance_sample_type_combination_idx"
     }
 
@@ -119,11 +119,11 @@ class SnvCallingInstance {
             eq 'withdrawn', false
             eq 'processingState', SnvProcessingStates.FINISHED
             snvCallingInstance {
-                tumorBamFile {
-                    eq 'id', tumorBamFile.id
+                sampleType1BamFile {
+                    eq 'id', sampleType1BamFile.id
                 }
-                controlBamFile {
-                    eq 'id', controlBamFile.id
+                sampleType2BamFile {
+                    eq 'id', sampleType2BamFile.id
                 }
             }
             order('snvCallingInstance.id', 'desc')
@@ -133,8 +133,8 @@ class SnvCallingInstance {
             assert result.step == step
             assert !result.withdrawn
             assert result.processingState == SnvProcessingStates.FINISHED
-            assert result.tumorBamFile == tumorBamFile
-            assert result.controlBamFile == controlBamFile
+            assert result.sampleType1BamFile == sampleType1BamFile
+            assert result.sampleType2BamFile == sampleType2BamFile
         }
         return result
     }

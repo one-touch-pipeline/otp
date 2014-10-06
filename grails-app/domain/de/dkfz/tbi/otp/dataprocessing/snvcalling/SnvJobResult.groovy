@@ -52,8 +52,8 @@ class SnvJobResult {
         step unique: 'snvCallingInstance'
         withdrawn validator: { boolean withdrawn, SnvJobResult result ->
             return withdrawn ||
-                    !result.snvCallingInstance.tumorBamFile.withdrawn &&
-                    !result.snvCallingInstance.controlBamFile.withdrawn &&
+                    !result.snvCallingInstance.sampleType1BamFile.withdrawn &&
+                    !result.snvCallingInstance.sampleType2BamFile.withdrawn &&
                     !result.inputResult?.withdrawn
         }
         inputResult validator: { val, obj ->
@@ -61,7 +61,7 @@ class SnvJobResult {
                 return false
             }
 
-            if (val != null && (val.tumorBamFile != obj.tumorBamFile || val.controlBamFile != obj.controlBamFile)) {
+            if (val != null && (val.sampleType1BamFile != obj.sampleType1BamFile || val.sampleType2BamFile != obj.sampleType2BamFile)) {
                 return false
             }
 
@@ -76,11 +76,11 @@ class SnvJobResult {
         snvCallingInstance index: "snv_job_result_snv_calling_instance_idx"
     }
 
-    ProcessedMergedBamFile getTumorBamFile() {
-        return snvCallingInstance.tumorBamFile
+    ProcessedMergedBamFile getSampleType1BamFile() {
+        return snvCallingInstance.sampleType1BamFile
     }
 
-    ProcessedMergedBamFile getControlBamFile() {
-        return snvCallingInstance.controlBamFile
+    ProcessedMergedBamFile getSampleType2BamFile() {
+        return snvCallingInstance.sampleType2BamFile
     }
 }

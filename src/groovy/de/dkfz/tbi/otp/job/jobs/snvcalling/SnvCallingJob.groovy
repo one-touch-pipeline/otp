@@ -46,14 +46,14 @@ class SnvCallingJob extends AbstractSnvCallingJob {
             final File configFileInStagingDirectory = writeConfigFile(instance)
 
             //create the parameters for calling the SnvCalling.sh per chromosome
-            final File tumorBamFilePath = getExistingBamFilePath(instance.tumorBamFile)
-            final File controlBamFilePath = getExistingBamFilePath(instance.controlBamFile)
+            final File sampleType1BamFilePath = getExistingBamFilePath(instance.sampleType1BamFile)
+            final File sampleType2BamFilePath = getExistingBamFilePath(instance.sampleType2BamFile)
             final String qsubParametersGeneral =
                     "CONFIG_FILE=${configFileInStagingDirectory}," +
                     "pid=${instance.individual.pid}," +
                     "PID=${instance.individual.pid}," +
-                    "TUMOR_BAMFILE_FULLPATH_BP=${tumorBamFilePath}," +
-                    "CONTROL_BAMFILE_FULLPATH_BP=${controlBamFilePath}"
+                    "TUMOR_BAMFILE_FULLPATH_BP=${sampleType1BamFilePath}," +
+                    "CONTROL_BAMFILE_FULLPATH_BP=${sampleType2BamFilePath}"
 
             //submit one SnvCalling run per chromosome
             final List<String> chromosomeFilePaths = []
@@ -70,8 +70,8 @@ class SnvCallingJob extends AbstractSnvCallingJob {
                         "'-v': '${qsubParametersGeneral},${qsubParametersChromosomeSpecific}'" +
                         "}"
                 final String script =
-                        ensureFileHasExpectedSizeScript(tumorBamFilePath, instance.tumorBamFile.fileSize) +
-                        ensureFileHasExpectedSizeScript(controlBamFilePath, instance.controlBamFile.fileSize) +
+                        ensureFileHasExpectedSizeScript(sampleType1BamFilePath, instance.sampleType1BamFile.fileSize) +
+                        ensureFileHasExpectedSizeScript(sampleType2BamFilePath, instance.sampleType2BamFile.fileSize) +
                         ensureFileDoesNotExistScript(chromosomeResultFile) +
                         step.externalScript.scriptFilePath
                 executedClusterJobsPerChromosome.add(executionHelperService.sendScript(realm, script, null, qsubParameters))
@@ -94,8 +94,8 @@ class SnvCallingJob extends AbstractSnvCallingJob {
                     "'-v': '${qsubParametersGeneral},${qsubParametersToMergeVcfs}'" +
                     "}"
             final String script =
-                    ensureFileHasExpectedSizeScript(tumorBamFilePath, instance.tumorBamFile.fileSize) +
-                    ensureFileHasExpectedSizeScript(controlBamFilePath, instance.controlBamFile.fileSize) +
+                    ensureFileHasExpectedSizeScript(sampleType1BamFilePath, instance.sampleType1BamFile.fileSize) +
+                    ensureFileHasExpectedSizeScript(sampleType2BamFilePath, instance.sampleType2BamFile.fileSize) +
                     ensureFileDoesNotExistScript(vcfRawFile) +
                     externalScriptJoining.scriptFilePath.path
             executionHelperService.sendScript(realm, script, null, qsubParameters)
@@ -142,8 +142,8 @@ class SnvCallingJob extends AbstractSnvCallingJob {
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(resultFile.absoluteStagingPath)
 
         try {
-            getExistingBamFilePath(instance.tumorBamFile)
-            getExistingBamFilePath(instance.controlBamFile)
+            getExistingBamFilePath(instance.sampleType1BamFile)
+            getExistingBamFilePath(instance.sampleType2BamFile)
         } catch (final AssertionError e) {
             throw new RuntimeException('The input BAM files have changed on the file system while this job processed them.', e)
         }

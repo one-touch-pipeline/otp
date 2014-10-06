@@ -82,8 +82,8 @@ class SnvCallingInstanceTestData extends TestData {
     SnvCallingInstance createSnvCallingInstance(Map properties = [:]) {
         return new SnvCallingInstance([
             processingState: SnvProcessingStates.IN_PROGRESS,
-            tumorBamFile: bamFileTumor,
-            controlBamFile: bamFileControl,
+            sampleType1BamFile: bamFileTumor,
+            sampleType2BamFile: bamFileControl,
             config: snvConfig,
             instanceName: "2014-08-25_15h32",
             sampleTypeCombination: sampleTypeCombination

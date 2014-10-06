@@ -108,8 +108,8 @@ class SnvCallingServiceTests {
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 sampleTypeCombination: sampleTypeCombinationPerIndividual,
                 config: snvConfig,
-                tumorBamFile: processedMergedBamFile1,
-                controlBamFile: processedMergedBamFile2
+                sampleType1BamFile: processedMergedBamFile1,
+                sampleType2BamFile: processedMergedBamFile2
                 )
         snvCallingInstance.save()
 
@@ -122,8 +122,8 @@ class SnvCallingServiceTests {
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 sampleTypeCombination: sampleTypeCombinationPerIndividual,
                 config: snvConfig,
-                tumorBamFile: processedMergedBamFile1,
-                controlBamFile: processedMergedBamFile2,
+                sampleType1BamFile: processedMergedBamFile1,
+                sampleType2BamFile: processedMergedBamFile2,
                 processingState: SnvProcessingStates.FINISHED
                 )
         snvCallingInstance.save()
@@ -137,8 +137,8 @@ class SnvCallingServiceTests {
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 sampleTypeCombination: sampleTypeCombinationPerIndividual,
                 config: snvConfig,
-                tumorBamFile: processedMergedBamFile1,
-                controlBamFile: processedMergedBamFile2,
+                sampleType1BamFile: processedMergedBamFile1,
+                sampleType2BamFile: processedMergedBamFile2,
                 processingState: SnvProcessingStates.IGNORED
                 )
         snvCallingInstance.save()
@@ -163,8 +163,8 @@ class SnvCallingServiceTests {
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 sampleTypeCombination: sampleTypeCombinationPerIndividual1,
                 config: snvConfig,
-                tumorBamFile: processedMergedBamFile1,
-                controlBamFile: otherProcessedMergedBamFile
+                sampleType1BamFile: processedMergedBamFile1,
+                sampleType2BamFile: otherProcessedMergedBamFile
                 )
         snvCallingInstance.save()
 
@@ -204,8 +204,8 @@ class SnvCallingServiceTests {
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 sampleTypeCombination: sampleTypeCombinationPerIndividual2,
                 config: snvConfig,
-                tumorBamFile: processedMergedBamFile3,
-                controlBamFile: processedMergedBamFile4
+                sampleType1BamFile: processedMergedBamFile3,
+                sampleType2BamFile: processedMergedBamFile4
                 )
         snvCallingInstance.save()
 
@@ -255,8 +255,8 @@ class SnvCallingServiceTests {
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 sampleTypeCombination: sampleTypeCombinationPerIndividual2,
                 config: snvConfig,
-                tumorBamFile: processedMergedBamFile3,
-                controlBamFile: processedMergedBamFile4
+                sampleType1BamFile: processedMergedBamFile3,
+                sampleType2BamFile: processedMergedBamFile4
                 )
         snvCallingInstance.save()
 

@@ -17,8 +17,8 @@ abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob 
         SnvCallingInstance.withTransaction {
             final SnvCallingInstance instance = getProcessParameterObject()
             assert instance.processingState == SnvProcessingStates.IN_PROGRESS
-            assert !instance.tumorBamFile.withdrawn
-            assert !instance.controlBamFile.withdrawn
+            assert !instance.sampleType1BamFile.withdrawn
+            assert !instance.sampleType2BamFile.withdrawn
             return maybeSubmit(instance)
         }
     }
