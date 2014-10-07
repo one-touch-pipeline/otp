@@ -1,32 +1,66 @@
 package de.dkfz.tbi.otp.job.jobs.dataTransfer
 
 import org.junit.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.ngsdata.*
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileServiceTests
-import de.dkfz.tbi.otp.ngsdata.Run
 
 class CopyFilesJobTests extends GroovyTestCase {
 
     CopyFilesJob job = new CopyFilesJob()
+    TestData testData
 
     @Test
     void testProcessedMergedBamFilesForRun() {
 
         shouldFail(IllegalArgumentException.class, { job.processedMergedBamFilesForRun(null)})
 
-        final AbstractBamFileServiceTests testData = new AbstractBamFileServiceTests()
+        testData = new TestData()
+        testData.createObjects()
+        Run run1 = testData.run
 
-        testData.setUp()
-        assertEquals(0, job.processedMergedBamFilesForRun(testData.run).size())
+        assertEquals(0, job.processedMergedBamFilesForRun(run1).size())
 
-        testData.createProcessedMergedBamFile()
-        assertEquals(1, job.processedMergedBamFilesForRun(testData.run).size())
+        ProcessedMergedBamFile pmbf1 = createMergedBamFileForRun(run1, testData.sample)
+
+        assertEquals(1, job.processedMergedBamFilesForRun(run1).size())
 
         final Run run2 = testData.createRun("run2")
         assertNotNull(run2.save(flush: true))
         assertEquals(0, job.processedMergedBamFilesForRun(run2).size())
 
-        testData.createProcessedMergedBamFile()
-        assertEquals(2, job.processedMergedBamFilesForRun(testData.run).size())
+        ProcessedMergedBamFile pmbf2 = createMergedBamFileForRun(run1, testData.sample)
+        assertEquals(2, job.processedMergedBamFilesForRun(run1).size())
+    }
+
+    private ProcessedMergedBamFile createMergedBamFileForRun(Run run, Sample sample) {
+        SeqTrack seqTrack = testData.createSeqTrack([run: run, sample: sample])
+        assert seqTrack.save()
+
+        AlignmentPass alignmentPass = testData.createAlignmentPass([seqTrack: seqTrack])
+        assert alignmentPass.save()
+
+        ProcessedBamFile processedBamFile = testData.createProcessedBamFile([alignmentPass: alignmentPass])
+        assert processedBamFile.save()
+
+        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage([sample: sample])
+        assertNotNull(mergingWorkPackage.save([flush: true]))
+
+        MergingSet mergingSet = testData.createMergingSet([
+            identifier: 0,
+            mergingWorkPackage: mergingWorkPackage,
+            status: MergingSet.State.NEEDS_PROCESSING
+        ])
+        assertNotNull(mergingSet.save([flush: true]))
+
+        MergingPass mergingPass = testData.createMergingPass([mergingSet: mergingSet])
+        assertNotNull(mergingPass.save([flush: true]))
+
+        ProcessedMergedBamFile processedMergedBamFile = testData.createProcessedMergedBamFile([
+            mergingPass: mergingPass,
+            fileOperationStatus: FileOperationStatus.PROCESSED
+            ])
+        assert processedMergedBamFile.save()
     }
 }

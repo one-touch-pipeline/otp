@@ -25,6 +25,7 @@ class ExternallyProcessedMergedBamFile extends AbstractFileSystemBamFile {
         return fastqSet.sample
     }
 
+    @Override
     SeqType getSeqType() {
         return fastqSet.seqType
     }

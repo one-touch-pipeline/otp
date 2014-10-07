@@ -55,6 +55,7 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
         return mergingPass.sampleType
     }
 
+    @Override
     SeqType getSeqType() {
         return mergingPass.seqType
     }

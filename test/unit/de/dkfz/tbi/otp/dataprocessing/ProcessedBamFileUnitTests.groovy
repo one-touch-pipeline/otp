@@ -4,6 +4,7 @@ import static org.junit.Assert.*
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import org.junit.*
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
@@ -11,21 +12,30 @@ import de.dkfz.tbi.otp.ngsdata.Individual.Type
 import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
 
 @TestFor(ProcessedBamFile)
-@Mock([Project, SeqPlatform, SeqCenter, Run, Individual, SampleType, Sample, SoftwareTool, SeqTrack, AlignmentPass, SeqType])
+@Mock([Project, SeqPlatform, SeqCenter, Run, Individual, SampleType, Sample, SoftwareTool, SeqTrack, AlignmentPass, SeqType,
+    ReferenceGenome, ReferenceGenomeProjectSeqType, ExomeEnrichmentKit, BedFile, ExomeSeqTrack])
 class ProcessedBamFileUnitTests {
 
     AlignmentPass alignmentPass
+    Project project
+    Sample sample
+    Run run
+    SoftwareTool softwareTool
+    SeqPlatform seqPlatform
+    TestData testData
 
     @Before
     void setUp() {
-        Project project = new Project(
+        testData = new TestData()
+
+        project = new Project(
             name: "name",
             dirName: "dirName",
             realmName: "realmName"
             )
         assertNotNull(project.save([flush: true, failOnError: true]))
 
-        SeqPlatform seqPlatform = new SeqPlatform(
+        seqPlatform = new SeqPlatform(
             name: "name",
             model: "model"
             )
@@ -37,7 +47,7 @@ class ProcessedBamFileUnitTests {
             )
         assertNotNull(seqCenter.save([flush: true, failOnError: true]))
 
-        Run run = new Run(
+        run = new Run(
             name: "name",
             seqCenter: seqCenter,
             seqPlatform: seqPlatform,
@@ -59,7 +69,7 @@ class ProcessedBamFileUnitTests {
             )
         assertNotNull(sampleType.save([flush: true, failOnError: true]))
 
-        Sample sample = new Sample(
+        sample = new Sample(
             individual: individual,
             sampleType: sampleType
         )
@@ -72,7 +82,7 @@ class ProcessedBamFileUnitTests {
             )
         assertNotNull(seqType.save([flush: true, failOnError: true]))
 
-        SoftwareTool softwareTool = new SoftwareTool(
+        softwareTool = new SoftwareTool(
             programName: "name",
             programVersion: "version",
             qualityCode: "quality",
@@ -101,6 +111,12 @@ class ProcessedBamFileUnitTests {
     @After
     void tearDown() {
         alignmentPass = null
+        project = null
+        sample = null
+        run = null
+        softwareTool = null
+        seqPlatform = null
+        testData = null
     }
 
     void testSave() {
@@ -126,5 +142,72 @@ class ProcessedBamFileUnitTests {
 
         bamFile.type = BamType.RMDUP
         assertFalse(bamFile.validate())
+    }
+
+    @Test
+    void testGetBedFile_ExomeBamFile() {
+        SeqType exomeSeqType = new SeqType(
+                name: SeqTypeNames.EXOME.seqTypeName,
+                libraryLayout: "library",
+                dirName: "exomeDirName"
+                )
+        assertNotNull(exomeSeqType.save([flush: true, failOnError: true]))
+
+        ReferenceGenome referenceGenome = testData.createReferenceGenome()
+        assert referenceGenome.save([flush: true])
+
+        ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = new ReferenceGenomeProjectSeqType([
+            project : project,
+            seqType: exomeSeqType,
+            referenceGenome: referenceGenome,
+        ])
+        assert referenceGenomeProjectSeqType.save([flush: true])
+
+        ExomeEnrichmentKit exomeEnrichmentKit = testData.createEnrichmentKit("kit")
+        assertNotNull(exomeEnrichmentKit.save([flush: true]))
+
+        BedFile bedFile = testData.createBedFile(referenceGenome, exomeEnrichmentKit)
+        assert bedFile.save([flush: true])
+
+        ExomeSeqTrack exomeSeqTrack = new ExomeSeqTrack(
+                laneId: "laneId",
+                run: run,
+                sample: sample,
+                seqType: exomeSeqType,
+                seqPlatform: seqPlatform,
+                pipelineVersion: softwareTool,
+                exomeEnrichmentKit: exomeEnrichmentKit,
+                kitInfoReliability: InformationReliability.KNOWN
+                )
+        assertNotNull(exomeSeqTrack.save([flush: true, failOnError: true]))
+
+        AlignmentPass exomeAlignmentPass = new AlignmentPass(
+                identifier: 1,
+                seqTrack: exomeSeqTrack,
+                description: "test"
+                )
+        assertNotNull(exomeAlignmentPass.save([flush: true, failOnError: true]))
+
+        ProcessedBamFile exomeBamFile = new ProcessedBamFile(
+                type: BamType.SORTED,
+                alignmentPass: exomeAlignmentPass,
+                withdrawn: false,
+                status: State.DECLARED
+                )
+        assertNotNull(exomeBamFile.save([flush: true, failOnError: true]))
+
+        assert exomeBamFile.bedFile == bedFile
+    }
+
+    @Test
+    void testGetBedFile_WholeGenomeBamFile() {
+        ProcessedBamFile bamFile = new ProcessedBamFile(
+            type: BamType.SORTED,
+            alignmentPass: alignmentPass,
+            withdrawn: false,
+            status: State.DECLARED
+        )
+        assertNotNull(bamFile.save([flush: true, failOnError: true]))
+        assert shouldFail(AssertionError, { bamFile.bedFile }).contains("A BedFile is only available when the sequencing type is exome")
     }
 }

@@ -1,7 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.BedFile
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeNames;
 
 abstract class AbstractBamFile {
 
@@ -79,7 +82,8 @@ abstract class AbstractBamFile {
     Double coverage
 
     /**
-     * Coverage with N of the BAM file
+     * Coverage with N of the BAM file.
+     * In case of Exome sequencing this value stays 'null' since there is no differentiation between 'with N' and 'without N'.
      */
     Double coverageWithN
 
@@ -96,6 +100,7 @@ abstract class AbstractBamFile {
 
     public abstract Set<SeqTrack> getContainedSeqTracks()
     public abstract AbstractQualityAssessment getOverallQualityAssessment()
+    public abstract SeqType getSeqType()
 
     static constraints = {
         hasMetricsFile validator: { val, obj ->
@@ -124,5 +129,15 @@ abstract class AbstractBamFile {
 
     boolean isQualityAssessed() {
         qualityAssessmentStatus == QaProcessingStatus.FINISHED
+    }
+
+    public BedFile getBedFile() {
+        assert seqType.name == SeqTypeNames.EXOME.seqTypeName : "A BedFile is only available when the sequencing type is exome."
+        List<SeqTrack> seqTracks = containedSeqTracks as List
+
+        assert seqTracks.size() > 0
+        BedFile bedFileToCompare = seqTracks.first().bedFile
+        assert containedSeqTracks.each { it.bedFile == bedFileToCompare }
+        return bedFileToCompare
     }
 }

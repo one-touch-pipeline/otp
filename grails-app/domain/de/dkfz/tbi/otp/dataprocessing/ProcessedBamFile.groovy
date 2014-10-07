@@ -20,6 +20,7 @@ class ProcessedBamFile extends AbstractFileSystemBamFile {
         return alignmentPass.sample
     }
 
+    @Override
     SeqType getSeqType() {
         return alignmentPass.seqType
     }

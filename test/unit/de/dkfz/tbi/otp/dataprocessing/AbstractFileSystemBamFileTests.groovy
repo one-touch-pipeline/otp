@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqType
 
 import static org.junit.Assert.*
 import grails.test.mixin.*
@@ -43,6 +44,11 @@ class MockAbstractFileSystemBamFile extends AbstractFileSystemBamFile {
 
     @Override
     AbstractQualityAssessment getOverallQualityAssessment() {
+        return null
+    }
+
+    @Override
+    SeqType getSeqType() {
         return null
     }
 }

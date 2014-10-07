@@ -87,28 +87,59 @@ class AbstractBamFileService {
     }
 
     Double calculateCoverageWithoutN(AbstractBamFile bamFile) {
-        calculateCoverage(bamFile, 'lengthWithoutN')
+        assert bamFile : 'Parameter bamFile must not be null'
+
+        if ([SeqTypeNames.WHOLE_GENOME.seqTypeName, SeqTypeNames.EXOME.seqTypeName].contains(bamFile.seqType.name)) {
+            calculateCoverage(bamFile, 'lengthWithoutN')
+        } else {
+            throw new RuntimeException("The 'without N' coverage calculation for seq Type ${bamFile.seqType.name} is not possible yet.")
+        }
     }
 
+
     Double calculateCoverageWithN(AbstractBamFile bamFile) {
-        calculateCoverage(bamFile, 'length')
+        assert bamFile : 'Parameter bamFile must not be null'
+
+        if (bamFile.seqType.name == SeqTypeNames.WHOLE_GENOME.seqTypeName) {
+            calculateCoverage(bamFile, 'length')
+        } else if (bamFile.seqType.name == SeqTypeNames.EXOME.seqTypeName) {
+            //In case of Exome sequencing this value stays 'null' since there is no differentiation between 'with N' and 'without N'
+            return null
+        } else {
+            throw new RuntimeException("The 'with N' coverage calculation for seq Type ${bamFile.seqType.name} is not possible yet.")
+        }
     }
+
 
     private Double calculateCoverage(AbstractBamFile bamFile, String property) {
         assert bamFile : 'Parameter bamFile must not be null'
         assert bamFile.isQualityAssessed() : "Cannot calculate coverage! The BAM file ${bamFile} has not passed the QC yet"
 
-        ReferenceGenome referenceGenome = bamFile.referenceGenome
+        Long length
+        Long basesMapped
 
-        assert referenceGenome : "Unable to find a reference genome for the BAM file ${bamFile}"
+        if (bamFile.seqType.name == SeqTypeNames.WHOLE_GENOME.seqTypeName) {
+            ReferenceGenome referenceGenome = bamFile.referenceGenome
+            assert referenceGenome : "Unable to find a reference genome for the BAM file ${bamFile}"
 
-        Long qcBasesMapped = bamFile.overallQualityAssessment.qcBasesMapped
-        Long length = referenceGenome."${property}"
+            length = referenceGenome."${property}"
+            assert length > 0 : "The property '${property}' of the reference genome '${referenceGenome}' is 0 or negative."
 
-        assert length > 0 : "The property '${property}' of the reference genome '${referenceGenome}' is 0 or negative."
+            basesMapped = bamFile.overallQualityAssessment.qcBasesMapped
+        } else if (bamFile.seqType.name == SeqTypeNames.EXOME.seqTypeName) {
+            BedFile bedFile = bamFile.bedFile
+            assert bedFile : "Unable to find a bed file for the BAM file ${bamFile}"
 
-        return qcBasesMapped / length
+            length = bedFile.mergedTargetSize
+            assert length > 0 : "The length of the targets in the bed file ${bedFile} is 0 or negative."
+
+            basesMapped = bamFile.overallQualityAssessment.onTargetMappedBases
+        } else {
+            throw new RuntimeException("The coverage calculation for seq Type ${bamFile.seqType.name} is not possible yet.")
+        }
+        return basesMapped / length
     }
+
 
     private def assertSave(def object) {
         object = object.save(flush: true)
