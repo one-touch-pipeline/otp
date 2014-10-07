@@ -49,7 +49,7 @@ class MergingPass {
     }
 
     public String toString() {
-        return "id: ${mergingSet.id} " +
+        return "id: ${this.id} " +
         "pass: ${identifier} " + (latestPass ? "(latest) " : "") +
         "set: ${mergingSet.identifier} " + (mergingSet.latestSet ? "(latest) " : "") +
         "<br>sample: ${sample} " +
