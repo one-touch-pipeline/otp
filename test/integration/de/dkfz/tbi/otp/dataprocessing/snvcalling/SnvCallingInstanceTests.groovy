@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import org.junit.*
 
-class SnvCallingInstanceTests {
+class SnvCallingInstanceTests extends GroovyTestCase {
 
     SnvCallingInstanceTestData testData = new SnvCallingInstanceTestData()
 
@@ -68,5 +68,26 @@ class SnvCallingInstanceTests {
         assert tumor1AnnotationResultB.save(failOnError: true)
         assert tumor1InstanceA.findLatestResultForSameBamFiles(SnvCallingStep.SNV_ANNOTATION) == tumor1AnnotationResultA
         assert tumor1InstanceB.findLatestResultForSameBamFiles(SnvCallingStep.SNV_ANNOTATION) == tumor1AnnotationResultA
+    }
+
+    @Test
+    void test_updateProcessingState_WhenStateIsNull_ShouldFail() {
+        SnvCallingInstance snvCallingInstance = testData.createAndSaveSnvCallingInstance()
+        def msg = shouldFail AssertionError, { snvCallingInstance.updateProcessingState(null) }
+        assert msg =~ /not allowed to be null/
+    }
+
+    @Test
+    void test_updateProcessingState_WhenStateIsChangedToSame_ShouldSucceed() {
+        SnvCallingInstance snvCallingInstance = testData.createAndSaveSnvCallingInstance([processingState: SnvProcessingStates.IN_PROGRESS])
+        snvCallingInstance.updateProcessingState(SnvProcessingStates.IN_PROGRESS)
+        assert snvCallingInstance.processingState == SnvProcessingStates.IN_PROGRESS
+    }
+
+    @Test
+    void test_updateProcessingState_WhenStateIsChangedToDifferent_ShouldSucceed() {
+        SnvCallingInstance snvCallingInstance = testData.createAndSaveSnvCallingInstance([processingState: SnvProcessingStates.IN_PROGRESS])
+        snvCallingInstance.updateProcessingState(SnvProcessingStates.FINISHED)
+        assert snvCallingInstance.processingState == SnvProcessingStates.FINISHED
     }
 }

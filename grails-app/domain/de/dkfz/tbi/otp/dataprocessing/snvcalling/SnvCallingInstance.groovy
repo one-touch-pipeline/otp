@@ -129,4 +129,12 @@ class SnvCallingInstance {
         }
         return result
     }
+
+    void updateProcessingState(SnvProcessingStates state) {
+        assert state : 'The argument "state" is not allowed to be null'
+        if (processingState != state) {
+            processingState = state
+            this.save([flush: true])
+        }
+    }
 }
