@@ -29,6 +29,7 @@ plan("SnvWorkflow") {
         inputParameter("${REALM}", "filterVcf", "${REALM}")
         inputParameter("${SCRIPT}", "filterVcf", "${SCRIPT}")
     }
+    job("snvCompletion", "snvCompletionJob")
 }
 
 
