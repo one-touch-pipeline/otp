@@ -284,6 +284,17 @@ class AbstractBamFileServiceTests {
         assert abstractBamFileService.calculateCoverageWithoutN(exomeProcessedBamFile) == EXPECTED_COVERAGE_FOR_COVERAGE_WITHOUT_N_EXOME
     }
 
+    @Test
+    void test_calculateCoverageWithoutN_WhenBamFileIsProcessedBamFile_Exome_onTragetBasesMappedNotFilled() {
+        changeStateOfBamFileToHavingPassedQC(exomeProcessedBamFile)
+        assert abstractBamFileService.calculateCoverageWithoutN(exomeProcessedBamFile) == EXPECTED_COVERAGE_FOR_COVERAGE_WITHOUT_N_EXOME
+        QualityAssessmentPass qualityAssessmentPass = QualityAssessmentPass.findByProcessedBamFile(exomeProcessedBamFile)
+        OverallQualityAssessment overallQualityAssessment = OverallQualityAssessment.findByQualityAssessmentPass(qualityAssessmentPass)
+        overallQualityAssessment.onTargetMappedBases = null
+        overallQualityAssessment.save()
+        assert abstractBamFileService.calculateCoverageWithoutN(exomeProcessedBamFile) == null
+    }
+
     @Test(expected = AssertionError)
     void test_calculateCoverageWithoutN_WhenBamFileIsProcessedBamFile_SeqTypeWholeGenome_AndReferenceGenomeIsNull() {
         changeStateOfBamFileToHavingPassedQC(processedBamFile)
@@ -327,6 +338,18 @@ class AbstractBamFileServiceTests {
         ProcessedMergedBamFile processedMergedBamFile = createAndSaveProcessedMergedBamFileAndDependentObjects(exomeMergingSet)
         changeStateOfBamFileToHavingPassedQC(processedMergedBamFile)
         assert abstractBamFileService.calculateCoverageWithoutN(processedMergedBamFile) == EXPECTED_COVERAGE_FOR_COVERAGE_WITHOUT_N_EXOME
+    }
+
+    @Test
+    void test_calculateCoverageWithoutN_WhenBamFileIsProcessedMergedBamFile_Exome_onTragetBasesMappedNotFilled() {
+        assignToMergingSet(exomeMergingSet, exomeProcessedBamFile)
+        ProcessedMergedBamFile processedMergedBamFile = createAndSaveProcessedMergedBamFileAndDependentObjects(exomeMergingSet)
+        changeStateOfBamFileToHavingPassedQC(processedMergedBamFile)
+        QualityAssessmentMergedPass qualityAssessmentMergedPass = QualityAssessmentMergedPass.findByProcessedMergedBamFile(processedMergedBamFile)
+        OverallQualityAssessmentMerged overallQualityAssessmentMerged = OverallQualityAssessmentMerged.findByQualityAssessmentMergedPass(qualityAssessmentMergedPass)
+        overallQualityAssessmentMerged.onTargetMappedBases = null
+        overallQualityAssessmentMerged.save()
+        assert abstractBamFileService.calculateCoverageWithoutN(processedMergedBamFile) == null
     }
 
     @Test(expected = AssertionError)
