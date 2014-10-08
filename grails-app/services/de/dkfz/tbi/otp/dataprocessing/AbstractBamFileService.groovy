@@ -133,7 +133,16 @@ class AbstractBamFileService {
             length = bedFile.mergedTargetSize
             assert length > 0 : "The length of the targets in the bed file ${bedFile} is 0 or negative."
 
-            basesMapped = bamFile.overallQualityAssessment.onTargetMappedBases
+            /*
+             * In the beginning of the exome alignments we calculated the QA the same way as for whole genome.
+             * Therefore for old data we do not have the field onTargetMappedBases filled in.
+             * To prevent displaying wrong values nothing is shown in the GUI (null is returned).
+             */
+            if (bamFile.overallQualityAssessment.onTargetMappedBases) {
+                basesMapped = bamFile.overallQualityAssessment.onTargetMappedBases
+            } else {
+                return null
+            }
         } else {
             throw new RuntimeException("The coverage calculation for seq Type ${bamFile.seqType.name} is not possible yet.")
         }
