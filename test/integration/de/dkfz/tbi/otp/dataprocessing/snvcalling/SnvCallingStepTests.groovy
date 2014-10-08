@@ -3,8 +3,11 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 import static org.junit.Assert.*
 import org.junit.*
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.ngsdata.Individual;
-import de.dkfz.tbi.otp.ngsdata.TestData;
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
+import de.dkfz.tbi.otp.ngsdata.Individual
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.TestData
 import de.dkfz.tbi.otp.utils.ExternalScript
 
 class SnvCallingStepTests extends GroovyTestCase {
@@ -96,6 +99,43 @@ class SnvCallingStepTests extends GroovyTestCase {
         assertEquals("snvs_${pid}.vcf.gz", SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(individual))
 
         //TODO: test for filter -> OTP-989"
+    }
+
+    @Test
+    void testGetCheckpointFilePath() {
+        final String SOME_INSTANCE_NAME = "2014-09-01_15h32"
+
+        SnvCallingInstanceTestData testData = new SnvCallingInstanceTestData()
+        testData.createSnvObjects()
+
+        ProcessedMergedBamFile processedMergedBamFile1 = testData.bamFileTumor
+        ProcessedMergedBamFile processedMergedBamFile2 = testData.bamFileControl
+
+        SnvCallingInstance snvCallingInstance1 = testData.createSnvCallingInstance([
+                sampleType1BamFile: processedMergedBamFile1,
+                sampleType2BamFile: processedMergedBamFile2,
+                instanceName      : SOME_INSTANCE_NAME,
+        ])
+        assert snvCallingInstance1.save()
+
+        OtpPath expectedParentPath = snvCallingInstance1.snvInstancePath
+        Project expectedProject = testData.project
+
+        OtpPath actualPathCalling = SnvCallingStep.CALLING.getCheckpointFilePath(snvCallingInstance1)
+        assert actualPathCalling.project == expectedProject
+        assert actualPathCalling.relativePath.path == "${expectedParentPath.relativePath}/CALLING_checkpoint"
+
+        OtpPath actualPathAnnotation = SnvCallingStep.SNV_ANNOTATION.getCheckpointFilePath(snvCallingInstance1)
+        assert actualPathAnnotation.project == expectedProject
+        assert actualPathAnnotation.relativePath.path == "${expectedParentPath.relativePath}/SNV_ANNOTATION_checkpoint"
+
+        OtpPath actualPathDeepAnnotation = SnvCallingStep.SNV_DEEPANNOTATION.getCheckpointFilePath(snvCallingInstance1)
+        assert actualPathDeepAnnotation.project == expectedProject
+        assert actualPathDeepAnnotation.relativePath.path == "${expectedParentPath.relativePath}/SNV_DEEPANNOTATION_checkpoint"
+
+        OtpPath actualPathFilter = SnvCallingStep.FILTER_VCF.getCheckpointFilePath(snvCallingInstance1)
+        assert actualPathFilter.project == expectedProject
+        assert actualPathFilter.relativePath.path == "${expectedParentPath.relativePath}/FILTER_VCF_checkpoint"
     }
 
     private ExternalScript createExternalScript(String identifier, String path = "/tmp/testfolder/testScript.sh") {

@@ -46,7 +46,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob {
              * Input which is needed for the Annotation script. It is just for Roddy intern job system handling.
              * File can be deleted afterwards. Delete it if it exists already.
              */
-            final File checkpointFile = new OtpPath(instance.snvInstancePath, step.checkpointFileName).absoluteStagingPath
+            final File checkpointFile = step.getCheckpointFilePath(instance).absoluteStagingPath
             deleteResultFileIfExists(checkpointFile)
 
             // Get path of the snv annotation result file
@@ -89,7 +89,8 @@ class SnvAnnotationJob extends AbstractSnvCallingJob {
         final OtpPath resultFile = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual))
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(resultFile.absoluteStagingPath)
         // check that the checkpoint file, produced by the script exists
-        final File checkpointFile = new OtpPath(instance.snvInstancePath, step.checkpointFileName).absoluteStagingPath
+        final File checkpointFile = step.getCheckpointFilePath(instance).absoluteStagingPath
+
         assert checkpointFile.exists()
         assert checkpointFile.delete()
 

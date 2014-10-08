@@ -73,7 +73,7 @@ class SampleTypeCombinationPerIndividualUnitTests {
         assertEquals(project, sampleTypeCombinationPath.project)
     }
 
-    void testGetSnvCallingFileLinkedPath() {
+    void testGetResultFileLinkedPath() {
         TestData testData = new TestData()
         Realm realm = DomainFactory.createRealmDataManagementDKFZ()
         Project project = testData.createProject([realmName: realm.name])
@@ -96,11 +96,18 @@ class SampleTypeCombinationPerIndividualUnitTests {
         sampleCombinationPerIndividual.save(flush: true)
 
         String path = "dirName/sequencing/whole_genome_sequencing/view-by-pid/654321/snv_results/paired/tumor_control"
-        String file = "snvs_654321_raw.vcf.gz"
-        File expectedExtension = new File("${path}/${file}")
+        String fileCalling = "snvs_654321_raw.vcf.gz"
+        File expectedExtension = new File("${path}/${fileCalling}")
 
-        OtpPath snvCallingFileLinkedPath = sampleCombinationPerIndividual.getSnvCallingFileLinkedPath()
-        assertEquals(expectedExtension, snvCallingFileLinkedPath.relativePath)
-        assertEquals(project, snvCallingFileLinkedPath.project)
+        OtpPath snvCallingResultFileLinkedPath = sampleCombinationPerIndividual.getResultFileLinkedPath(SnvCallingStep.CALLING)
+        assertEquals(expectedExtension, snvCallingResultFileLinkedPath.relativePath)
+        assertEquals(project, snvCallingResultFileLinkedPath.project)
+
+        String fileDeepAnnotation = "snvs_654321.vcf.gz"
+        File expectedExtensionDeepAnnotation = new File("${path}/${fileDeepAnnotation}")
+
+        OtpPath snvDeepAnnotationResultFileLinkedPath = sampleCombinationPerIndividual.getResultFileLinkedPath(SnvCallingStep.SNV_DEEPANNOTATION)
+        assertEquals(expectedExtensionDeepAnnotation, snvDeepAnnotationResultFileLinkedPath.relativePath)
+        assertEquals(project, snvDeepAnnotationResultFileLinkedPath.project)
     }
 }

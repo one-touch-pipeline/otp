@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.utils.ExternalScript
 
@@ -69,6 +70,10 @@ enum SnvCallingStep {
      */
     String getCheckpointFileName() {
         return "${name()}_checkpoint"
+    }
+
+    OtpPath getCheckpointFilePath(final SnvCallingInstance snvCallingInstance) {
+        return new OtpPath(snvCallingInstance.snvInstancePath, checkpointFileName)
     }
 
     /**

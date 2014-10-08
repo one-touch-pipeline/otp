@@ -84,8 +84,14 @@ class SampleTypeCombinationPerIndividual {
      *
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control/snvs_${pid}_raw.vcf.gz
      */
-    OtpPath getSnvCallingFileLinkedPath() {
-        return new OtpPath(sampleTypeCombinationPath, SnvCallingStep.CALLING.getResultFileName(individual, null))
+    OtpPath getResultFileLinkedPath(SnvCallingStep step) {
+        if (step == SnvCallingStep.CALLING) {
+            return new OtpPath(sampleTypeCombinationPath, step.getResultFileName(individual, null))
+        } else if (step == SnvCallingStep.FILTER_VCF) {
+            throw new UnsupportedOperationException("TODO -> OTP-989")
+        } else {
+            return new OtpPath(sampleTypeCombinationPath, step.getResultFileName(individual))
+        }
     }
 
     /**

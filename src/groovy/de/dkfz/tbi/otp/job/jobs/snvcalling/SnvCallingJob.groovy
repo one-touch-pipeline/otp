@@ -140,7 +140,7 @@ class SnvCallingJob extends AbstractSnvCallingJob {
             resultFile.absoluteDataManagementPath
         ]
         List<File> linkLocation = [
-            instance.sampleTypeCombination.snvCallingFileLinkedPath.absoluteDataManagementPath
+            instance.sampleTypeCombination.getResultFileLinkedPath(SnvCallingStep.CALLING).absoluteDataManagementPath
         ]
         //path for the config file
         sourceLocation.add(instance.configFilePath.absoluteStagingPath)
