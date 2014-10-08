@@ -2,11 +2,13 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import grails.test.mixin.*
 import org.junit.*
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExternalScript
 
 @TestFor(SnvJobResult)
-@Mock([SnvCallingInstance, ProcessedMergedBamFile, ExternalScript])
+@Mock([SnvCallingInstance, ProcessedMergedBamFile, ExternalScript, Individual, Project])
 class SnvJobResultUnitTests {
 
     @Test
@@ -217,6 +219,75 @@ class SnvJobResultUnitTests {
                 )
 
         assertEquals(pmbf, snvJobResult.getSampleType2BamFile())
+    }
+
+    @Test
+    void testGetResultFilePath_Calling_RawVcfFile() {
+
+       Map preparedObjects = preparationForGetResultFilePath(SnvCallingStep.CALLING)
+
+        assert preparedObjects.project == preparedObjects.snvJobResult.getResultFilePath().project
+        assert "testPath/snvs_${preparedObjects.individual.pid}_raw.vcf.gz" == preparedObjects.snvJobResult.getResultFilePath().relativePath.path
+    }
+
+    @Test
+    void testGetResultFilePath_Calling_ChromosomeVcfFile() {
+        Map preparedObjects = preparationForGetResultFilePath(SnvCallingStep.CALLING)
+
+        assert preparedObjects.project == preparedObjects.snvJobResult.getResultFilePath("2").project
+        assert "testPath/snvs_${preparedObjects.individual.pid}.2.vcf" == preparedObjects.snvJobResult.getResultFilePath("2").relativePath.path
+    }
+
+    @Test
+    void testGetResultFilePath_Annotation() {
+        Map preparedObjects = preparationForGetResultFilePath(SnvCallingStep.SNV_ANNOTATION)
+
+        assert preparedObjects.project == preparedObjects.snvJobResult.getResultFilePath().project
+        assert "testPath/snvs_${preparedObjects.individual.pid}_annotation.vcf.gz" == preparedObjects.snvJobResult.getResultFilePath().relativePath.path
+    }
+
+    @Test
+    void testGetResultFilePath_DeepAnnotation() {
+        Map preparedObjects = preparationForGetResultFilePath(SnvCallingStep.SNV_DEEPANNOTATION)
+
+        assert preparedObjects.project == preparedObjects.snvJobResult.getResultFilePath().project
+        assert "testPath/snvs_${preparedObjects.individual.pid}.vcf.gz" == preparedObjects.snvJobResult.getResultFilePath().relativePath.path
+    }
+
+    @Test
+    void testGetResultFilePath_Filter() {
+        Map preparedObjects = preparationForGetResultFilePath(SnvCallingStep.FILTER_VCF)
+
+        shouldFail(UnsupportedOperationException, { preparedObjects.snvJobResult.getResultFilePath()})
+    }
+
+    Map preparationForGetResultFilePath(SnvCallingStep step) {
+        Project project = new Project(
+            dirName: "/tmp/project/"
+            )
+
+        OtpPath path = new OtpPath(project, "testPath/")
+        SnvCallingInstance.metaClass.getSnvInstancePath = { return path }
+
+        Individual individual = new Individual(
+                pid: "pid"
+                )
+
+        SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
+                individual: individual,
+                )
+
+        SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
+                sampleType1BamFile: new ProcessedMergedBamFile(),
+                sampleType2BamFile: new ProcessedMergedBamFile(),
+                sampleTypeCombination: sampleCombinationPerIndividual
+                )
+
+        SnvJobResult snvJobResult = new SnvJobResult(
+                step: step,
+                snvCallingInstance: snvCallingInstance,
+                )
+        return ["project": project, "individual": individual, "snvJobResult": snvJobResult]
     }
 
     private SnvCallingInstance createSnvCallingInstance(final Map properties = [:]) {

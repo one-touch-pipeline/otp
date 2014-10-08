@@ -92,15 +92,6 @@ class SnvCallingInstance {
     }
 
     /**
-     * Returns the path of the result file for the CALLING step of the SNV pipeline.
-     *
-     * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control/2014-08-25_15h32/snvs_${pid}_raw.vcf.gz
-     */
-    OtpPath getSnvCallingFileFinalPath() {
-        return new OtpPath(snvInstancePath, SnvCallingStep.CALLING.getResultFileName(individual, null))
-    }
-
-    /**
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/paired/snv_results/tumor_control/config_calling_2014-08-25_15h32.txt
      */
     OtpPath getStepConfigFileLinkedPath(final SnvCallingStep step) {

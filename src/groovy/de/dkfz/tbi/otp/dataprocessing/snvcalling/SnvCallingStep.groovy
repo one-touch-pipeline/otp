@@ -65,6 +65,13 @@ enum SnvCallingStep {
     }
 
     /**
+     * File which is just for Roddy internal job system handling.
+     */
+    String getCheckpointFileName() {
+        return "${name()}_checkpoint"
+    }
+
+    /**
      * Example: "SnvCallingStep.SNV_ANNOTATION"
      *
      * @see ExternalScript#scriptIdentifier

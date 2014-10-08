@@ -115,16 +115,6 @@ class SnvCallingInstanceUnitTests {
     }
 
     @Test
-    void testGetSnvCallingFileFinalPath() {
-        SnvCallingInstance instance = createSnvCallingInstance()
-        OtpPath snvCallingFileFinalPath = instance.getSnvCallingFileFinalPath()
-
-        assertEquals(instance.project, snvCallingFileFinalPath.project)
-        File expectedRelativePath = new File("${getSnvInstancePathHelper(testData.sampleTypeCombination, instance)}/snvs_654321_raw.vcf.gz")
-        assertEquals(expectedRelativePath, snvCallingFileFinalPath.relativePath)
-    }
-
-    @Test
     void testGetStepConfigFileLinkedPath() {
         SnvCallingInstance instance = createSnvCallingInstance()
         OtpPath stepConfigFileLinkedPath= instance.getStepConfigFileLinkedPath(SnvCallingStep.CALLING)

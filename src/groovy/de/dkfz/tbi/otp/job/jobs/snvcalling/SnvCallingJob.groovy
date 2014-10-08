@@ -104,29 +104,11 @@ class SnvCallingJob extends AbstractSnvCallingJob {
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {
-            // This SNV workflow instance is configured not to do the SNV calling. Make sure there already is a result
-            // that subsequent jobs can use as input.
-            final boolean instanceWithResultExists = instance.findLatestResultForSameBamFiles(step) != null
-            if (instanceWithResultExists) {
-                log.info "This SNV workflow instance is configured not to do the SNV calling. Subsequent jobs will use the results of a previous SNV calling run as input."
-                addOutputParameter(REALM, "")
-                addOutputParameter(SCRIPT, "")
-                return NextAction.SUCCEED
-            } else {
-                throw new RuntimeException("This SNV workflow instance is configured not to do the SNV calling and no non-withdrawn SNV calling was done before, so subsequent jobs will have no input.")
-            }
+            checkIfResultFilesExistsOrThrowException(instance, true)
+            return NextAction.SUCCEED
         }
     }
 
-    private File getExistingBamFilePath(final ProcessedMergedBamFile bamFile) {
-        final File file = new File(processedMergedBamFileService.destinationDirectory(bamFile), processedMergedBamFileService.fileName(bamFile))
-        assert bamFile.fileExists
-        assert bamFile.md5sum ==~ /^[0-9a-fA-F]{32}$/
-        assert bamFile.fileSize > 0L
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
-        assert file.length() == bamFile.fileSize
-        return file
-    }
 
     @Override
     protected void validate(final SnvCallingInstance instance) throws Throwable {

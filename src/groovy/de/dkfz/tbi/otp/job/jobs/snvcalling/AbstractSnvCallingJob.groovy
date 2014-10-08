@@ -1,14 +1,23 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
+import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static org.springframework.util.Assert.*
+import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFileService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.AbstractMaybeSubmitWaitValidateJob
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.utils.ExternalScript
 
 abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob {
+
+    @Autowired
+    ProcessedMergedBamFileService processedMergedBamFileService
 
     abstract SnvCallingStep getStep()
 
@@ -87,12 +96,45 @@ abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob 
     void changeProcessingStateOfJobResult(final SnvCallingInstance instance, SnvProcessingStates newState) {
         notNull(instance)
         notNull(newState)
+        SnvJobResult result = getSnvJobResult(instance)
+
+        result.processingState = newState
+        assert result.save()
+    }
+
+    SnvJobResult getSnvJobResult(SnvCallingInstance instance) {
+        notNull(instance)
         SnvJobResult result = exactlyOneElement(
                 SnvJobResult.findAllBySnvCallingInstanceAndStepAndWithdrawn(instance, step, false)
                 )
         assert result.processingState == SnvProcessingStates.IN_PROGRESS
+        return result
+    }
 
-        result.processingState = newState
-        assert result.save()
+    protected File getExistingBamFilePath(final ProcessedMergedBamFile bamFile) {
+        final File file = new File(processedMergedBamFileService.destinationDirectory(bamFile), processedMergedBamFileService.fileName(bamFile))
+        assert bamFile.fileExists
+        assert bamFile.md5sum ==~ /^[0-9a-fA-F]{32}$/
+        assert bamFile.fileSize > 0L
+        LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
+        assert file.length() == bamFile.fileSize
+        return file
+    }
+
+    /**
+     * This SNV workflow instance is configured not to do the SNV calling.
+     * Make sure there already is a result that subsequent jobs can use as input.
+     */
+    protected void checkIfResultFilesExistsOrThrowException(SnvCallingInstance instance, boolean addBlankOutputParameters) {
+        final boolean instanceWithResultExists = instance.findLatestResultForSameBamFiles(step) != null
+        if (instanceWithResultExists) {
+            log.info "This SNV workflow instance is configured not to do the SNV ${step.name()}. Subsequent jobs will use the results of a previous run as input."
+            if (addBlankOutputParameters) {
+                addOutputParameter(REALM, "")
+                addOutputParameter(SCRIPT, "")
+            }
+        } else {
+            throw new RuntimeException("This SNV workflow instance is configured not to do the SNV ${step.name()} and no non-withdrawn SNV ${step.name()} was done before, so subsequent jobs will have no input.")
+        }
     }
 }

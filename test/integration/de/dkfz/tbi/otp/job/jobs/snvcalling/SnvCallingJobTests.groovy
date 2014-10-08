@@ -1,7 +1,9 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import static org.junit.Assert.*
+import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
+import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static org.junit.Assert.*
 import org.junit.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -11,8 +13,11 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
-import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.job.processing.ExecutionService
+import de.dkfz.tbi.otp.job.processing.ParameterType
+import de.dkfz.tbi.otp.job.processing.ParameterUsage
+import de.dkfz.tbi.otp.job.processing.ProcessingStep
+import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExternalScript
@@ -48,6 +53,7 @@ class SnvCallingJobTests extends GroovyTestCase{
     ExternalScript externalScript_Calling
     SnvJobResult snvJobResult
     SnvCallingJob snvCallingJob
+    SnvCallingInstanceTestData snvCallingTestData
 
     final String CONFIGURATION ="""
 RUN_CALLING=1
@@ -64,6 +70,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         testDirectory = TestCase.createEmptyTestDirectory()
         testData = new TestData()
         testData.createObjects()
+        snvCallingTestData = new SnvCallingInstanceTestData()
         realm_processing = testData.realm
         realm_processing.stagingRootPath = "${testDirectory}/staging"
         assert realm_processing.save()
@@ -134,13 +141,30 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         assert snvJobResult.save()
 
         snvCallingJob = applicationContext.getBean('snvCallingJob',
-                DomainFactory.createAndSaveProcessingStep(SnvCallingJob.toString()), [])
+            DomainFactory.createAndSaveProcessingStep(SnvCallingJob.toString()), [])
         snvCallingJob.log = log
+
+        ParameterType typeRealm = new ParameterType(
+                name: REALM,
+                className: "${SnvCallingJob.class}",
+                jobDefinition: snvCallingJob.getProcessingStep().jobDefinition,
+                parameterUsage: ParameterUsage.OUTPUT
+                )
+        assert typeRealm.save()
+
+        ParameterType typeScript = new ParameterType(
+                name: SCRIPT,
+                className: "${SnvCallingJob.class}",
+                jobDefinition: snvCallingJob.getProcessingStep().jobDefinition,
+                parameterUsage: ParameterUsage.OUTPUT
+                )
+        assert typeScript.save()
     }
 
     @After
     void tearDown() {
         testData = null
+        snvCallingTestData = null
         individual = null
         project = null
         seqType = null
@@ -214,21 +238,20 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testValidateWithSnvCallingInput() {
-        File configFile = new File(snvCallingInstance.configFilePath.absoluteStagingPath.path)
-        File configDir = configFile.parentFile
-        configDir.mkdirs()
-        if (configFile.exists()) {
-            configFile.delete()
-        }
-        configFile << CONFIGURATION
-        configFile.deleteOnExit()
+        File configFile = snvCallingTestData.createConfigFileWithContentInFileSystem(
+            snvCallingInstance.configFilePath.absoluteStagingPath,
+            CONFIGURATION)
+
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> return true }
         createClusterScriptService.metaClass.createTransferScript = { List<File> sourceLocations, List<File> targetLocations, List<File> linkLocations, boolean move ->
             return "some bash commands to copy the files and link them"
         }
         snvCallingJob.metaClass.addOutputParameter = { String name, String value -> }
-        snvCallingJob.validate(snvCallingInstance)
-        configDir.deleteDir()
+        try {
+            snvCallingJob.validate(snvCallingInstance)
+        } finally {
+            configFile.parentFile.deleteDir()
+        }
     }
 
     @Test
@@ -238,17 +261,16 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testWriteConfigFile_FileExistsAlready() {
-        File file = snvCallingInstance.configFilePath.absoluteStagingPath
-        File dir = file.parentFile
-        dir.mkdirs()
-        if (file.exists()) {
-            file.delete()
+        File configFile = snvCallingTestData.createConfigFileWithContentInFileSystem(
+            snvCallingInstance.configFilePath.absoluteStagingPath,
+            CONFIGURATION)
+
+        assertEquals(configFile, snvCallingJob.writeConfigFile(snvCallingInstance))
+        try {
+            assert configFile.text == snvCallingInstance.config.configuration
+        } finally {
+            configFile.parentFile.deleteDir()
         }
-        file.text = snvCallingInstance.config.configuration
-        file.deleteOnExit()
-        assertEquals(file, snvCallingJob.writeConfigFile(snvCallingInstance))
-        assert file.text == snvCallingInstance.config.configuration
-        dir.deleteDir()
     }
 
     @Test
@@ -258,7 +280,11 @@ CHROMOSOME_INDICES=( {1..21} XY)
             file.delete()
         }
         assertEquals(file, snvCallingJob.writeConfigFile(snvCallingInstance))
-        assert file.text == CONFIGURATION
+        try {
+            assert file.text == CONFIGURATION
+        } finally {
+            assert file.delete()
+        }
     }
 
     @Test
@@ -283,7 +309,48 @@ CHROMOSOME_INDICES=( {1..21} XY)
          assert snvJobResult.processingState == SnvProcessingStates.FINISHED
      }
 
+    @Test
+    void testCheckIfResultFilesExistsOrThrowException_NoResults_NoPbsOut() {
+        /*
+         * In this test the method 'addOutputParameter' shall not be called since pbsOutput == false.
+         * To make sure that it can be recognized if the method would be called it is overwritten to throw an exception.
+         */
+        snvCallingJob.metaClass.addOutputParameter = { String name, String value -> throw new RuntimeException()}
+        snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return null }
+        assert shouldFail(RuntimeException, {
+            snvCallingJob.checkIfResultFilesExistsOrThrowException(snvCallingInstance2, false)
+        }).contains(SnvCallingStep.CALLING.name())
+    }
 
+    @Test
+    void testCheckIfResultFilesExistsOrThrowException_NoResults_WithPbsOut() {
+        snvCallingJob.metaClass.addOutputParameter = { String name, String value -> }
+        snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return null }
+
+        assert shouldFail(RuntimeException, {
+            snvCallingJob.checkIfResultFilesExistsOrThrowException(snvCallingInstance2, false)
+        }).contains(SnvCallingStep.CALLING.name())
+    }
+
+    @Test
+    void testCheckIfResultFilesExistsOrThrowException_WithResults_NoPbsOut() {
+        final String errorMessage = "No Pbs output"
+        /*
+         * In this test the method 'addOutputParameter' shall not be called since pbsOutput == false.
+         * To make sure that it can be recognized if the method would be called it is overwritten to throw an exception.
+         */
+        snvCallingJob.metaClass.addOutputParameter = { String name, String value -> throw new RuntimeException(errorMessage) }
+        snvCallingInstance.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResult }
+
+        snvCallingJob.checkIfResultFilesExistsOrThrowException(snvCallingInstance, false)
+    }
+
+    @Test
+    void testCheckIfResultFilesExistsOrThrowException_WithResults_WithPbsOut() {
+        snvCallingInstance.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResult }
+
+        snvCallingJob.checkIfResultFilesExistsOrThrowException(snvCallingInstance, true)
+    }
 
     private ProcessedMergedBamFile createProcessedMergedBamFile(String identifier) {
         SampleType sampleType = testData.createSampleType([name: "SampleType"+identifier])

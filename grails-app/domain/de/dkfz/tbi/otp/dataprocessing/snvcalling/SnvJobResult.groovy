@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.utils.ExternalScript
 
@@ -82,5 +83,22 @@ class SnvJobResult {
 
     ProcessedMergedBamFile getSampleType2BamFile() {
         return snvCallingInstance.sampleType2BamFile
+    }
+
+    /**
+     * Returns the path of the SnvJobResult.
+     * ! Be aware that for the SnvFilterJob there is more than one result file, which is why the directory will be returned here!
+     *
+     * Example for Calling without given chromosome name
+     * ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control/2014-08-25_15h32/snvs_${pid}_raw.vcf.gz
+     */
+    OtpPath getResultFilePath(String chromosomeName = null) {
+        if (step == SnvCallingStep.CALLING) {
+            return new OtpPath(snvCallingInstance.snvInstancePath, step.getResultFileName(snvCallingInstance.individual, chromosomeName))
+        } else if (step == SnvCallingStep.FILTER_VCF) {
+            throw new UnsupportedOperationException("TODO -> OTP-989")
+        } else {
+            return new OtpPath(snvCallingInstance.snvInstancePath, step.getResultFileName(snvCallingInstance.individual))
+        }
     }
 }

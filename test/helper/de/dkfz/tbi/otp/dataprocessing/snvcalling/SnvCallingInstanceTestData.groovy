@@ -123,4 +123,15 @@ class SnvCallingInstanceTestData extends TestData {
 
         return bamFile
     }
+
+    File createConfigFileWithContentInFileSystem(File configFile, String configuration) {
+        File configDir = configFile.parentFile
+        configDir.mkdirs()
+        if (configFile.exists()) {
+            configFile.delete()
+        }
+        configFile << configuration
+        configFile.deleteOnExit()
+        return configFile
+    }
 }
