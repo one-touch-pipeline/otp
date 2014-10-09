@@ -880,6 +880,7 @@ class ProcessedMergedBamFileServiceTests {
 
         MergingSet mergingSet = new MergingSet(
                 mergingWorkPackage: mergingWorkPackage,
+                identifier: MergingSet.nextIdentifier(mergingWorkPackage),
                 status: State.PROCESSED,
         )
         assert mergingSet.save([flush: true])
@@ -893,6 +894,7 @@ class ProcessedMergedBamFileServiceTests {
 
         MergingSet mergingSetLater = new MergingSet(
                 mergingWorkPackage: mergingWorkPackage,
+                identifier: MergingSet.nextIdentifier(mergingWorkPackage),
                 status: State.PROCESSED,
         )
         assert mergingSetLater.save([flush: true])

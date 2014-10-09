@@ -75,7 +75,7 @@ class MergingCriteriaSpecificServiceTests {
         ProcessedBamFile processedBamFile = createProcessedbamFile(alignmentPass)
         processedBamFile.status = State.INPROGRESS
         SeqTrack seqTrack2 = createSeqTrack(run, sample, seqType, seqPlatform, softwareTool)
-        AlignmentPass alignmentPass2 = createAlignmentPass(seqTrack2, ,0)
+        AlignmentPass alignmentPass2 = createAlignmentPass(seqTrack2, 0)
         ProcessedBamFile processedBamFile2 = createProcessedbamFile(alignmentPass2)
         AlignmentPass alignmentPass3 = createAlignmentPass(seqTrack2, 1)
         ProcessedBamFile processedBamFile3 = createProcessedbamFile(alignmentPass3)
@@ -217,7 +217,7 @@ class MergingCriteriaSpecificServiceTests {
         MergingWorkPackage mergingWorkPackage = createMergingWorkPackage(sample, seqType)
         MergingSet mergingSet = createMergingSet(mergingWorkPackage, 0)
         MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(mergingSet, processedBamFile)
-        AlignmentPass alignmentPass2 = createAlignmentPass(seqTrack, 0)
+        AlignmentPass alignmentPass2 = createAlignmentPass(seqTrack, 1)
         ProcessedBamFile processedBamFile2 = createProcessedbamFile(alignmentPass2)
         MergingSetAssignment mergingSetAssignment2 = createMergingSetAssignment(mergingSet, processedBamFile2)
 
@@ -523,21 +523,21 @@ class MergingCriteriaSpecificServiceTests {
         MergingPass mergingPass = createMergingPass(mergingSet, 0)
         ProcessedMergedBamFile processedMergedBamFile = createMergedBamFile(mergingPass)
 
-        AlignmentPass alignmentPass2 = createAlignmentPass(seqTrack, 0)
+        AlignmentPass alignmentPass2 = createAlignmentPass(seqTrack, 1)
         ProcessedBamFile processedBamFile2 = createProcessedbamFile(alignmentPass2)
         MergingSet mergingSet2 = createMergingSet(mergingWorkPackage, 1)
         MergingSetAssignment mergingSetAssignment2 = createMergingSetAssignment(mergingSet2, processedBamFile2)
         MergingPass mergingPass2 = createMergingPass(mergingSet2, 0)
         ProcessedMergedBamFile processedMergedBamFile2 = createMergedBamFile(mergingPass2)
 
-        AlignmentPass alignmentPass3 = createAlignmentPass(seqTrack, 0)
+        AlignmentPass alignmentPass3 = createAlignmentPass(seqTrack, 2)
         ProcessedBamFile processedBamFile3 = createProcessedbamFile(alignmentPass3)
         MergingSet mergingSet3 = createMergingSet(mergingWorkPackage, 2)
         MergingSetAssignment mergingSetAssignment3 = createMergingSetAssignment(mergingSet3, processedBamFile3)
         MergingPass mergingPass3 = createMergingPass(mergingSet3, 0)
         ProcessedMergedBamFile processedMergedBamFile3 = createMergedBamFile(mergingPass3)
 
-        AlignmentPass alignmentPass4 = createAlignmentPass(seqTrack, 0)
+        AlignmentPass alignmentPass4 = createAlignmentPass(seqTrack, 3)
         ProcessedBamFile processedBamFile4 = createProcessedbamFile(alignmentPass4)
         MergingSetAssignment mergingSetAssignment4 = createMergingSetAssignment(mergingSet3, processedBamFile4)
         MergingPass mergingPass4 = createMergingPass(mergingSet3, 1)

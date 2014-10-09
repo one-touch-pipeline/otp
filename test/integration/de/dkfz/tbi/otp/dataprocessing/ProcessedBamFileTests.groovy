@@ -62,6 +62,7 @@ class ProcessedBamFileTests {
 
         QualityAssessmentPass qualityAssessmentPass = new QualityAssessmentPass([
                 processedBamFile: processedBamFile,
+                identifier      : QualityAssessmentPass.nextIdentifier(processedBamFile)
         ])
         assert qualityAssessmentPass.save([flush: true])
 

@@ -279,6 +279,7 @@ class ProcessedMergedBamFileIntegrationTests {
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass([
                 processedMergedBamFile: processedMergedBamFile,
+                identifier: QualityAssessmentMergedPass.nextIdentifier(processedMergedBamFile),
         ])
         assert qualityAssessmentMergedPass.save([flush: true])
 

@@ -75,7 +75,7 @@ class MergingSetService {
             log.info("The merging set for the criteria ${workPackage.mergingCriteria} already exists".toString())
             return
         }
-        MergingSet mergingSet = new MergingSet(identifier: nextIdentifier(workPackage), mergingWorkPackage: workPackage)
+        MergingSet mergingSet = new MergingSet(identifier: MergingSet.nextIdentifier(workPackage), mergingWorkPackage: workPackage)
         assertSave(mergingSet)
         bamFiles2Merge.each {AbstractBamFile bamFile ->
             MergingSetAssignment mergingAssigment = new MergingSetAssignment(mergingSet: mergingSet, bamFile: bamFile)
@@ -119,15 +119,6 @@ class MergingSetService {
             }
         }
         return true
-    }
-
-    /**
-     * @param workPackage, {@link MergingWorkPackage} for which the number of belonging {@link MergingSet}s shall be account
-     * @return the number of MergingSets, which belong to this workPackage
-     */
-    Long nextIdentifier(MergingWorkPackage workPackage) {
-        notNull(workPackage, "the input work package for the method nextIdentifier is null")
-        return MergingSet.countByMergingWorkPackage(workPackage)
     }
 
     private def assertSave(def object) {

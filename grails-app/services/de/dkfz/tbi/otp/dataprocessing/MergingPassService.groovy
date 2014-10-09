@@ -27,8 +27,10 @@ class MergingPassService {
     MergingPass create() {
         MergingSet mergingSet = mergingSetService.mergingSetInStateNeedsProcessing()
         if (mergingSet) {
-            int mergingPassCount = MergingPass.countByMergingSet(mergingSet)
-            MergingPass mergingPass = new MergingPass(identifier: mergingPassCount, mergingSet: mergingSet)
+            MergingPass mergingPass = new MergingPass(
+                    mergingSet: mergingSet,
+                    identifier: MergingPass.nextIdentifier(mergingSet),
+            )
             assertSave(mergingPass)
             log.debug("created a new mergingPass ${mergingPass} for mergingSet ${mergingSet}")
             return mergingPass

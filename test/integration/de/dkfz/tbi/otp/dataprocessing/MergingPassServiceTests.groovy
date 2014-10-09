@@ -299,7 +299,8 @@ class MergingPassServiceTests {
         Date createdBefore
         ProcessedMergedBamFile processedMergedBamFileNew
         (mergingPassService, mergingPass, createdBefore, processedMergedBamFileNew) = createDataForMayProcessingFilesBeDeleted()
-        processedMergedBamFileNew.mergingPass.mergingSet = MergingSet.build(mergingWorkPackage: processedMergedBamFileNew.mergingSet.mergingWorkPackage)
+        MergingWorkPackage mergingWorkPackage = processedMergedBamFileNew.mergingSet.mergingWorkPackage
+        processedMergedBamFileNew.mergingPass.mergingSet = MergingSet.build(mergingWorkPackage: mergingWorkPackage, identifier: MergingSet.nextIdentifier(mergingWorkPackage))
 
         assert !mergingPassService.mayProcessingFilesBeDeleted(mergingPass, createdBefore)
     }

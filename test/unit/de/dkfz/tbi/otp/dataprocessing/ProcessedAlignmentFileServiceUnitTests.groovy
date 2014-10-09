@@ -82,7 +82,8 @@ class ProcessedAlignmentFileServiceUnitTests {
 
         countQaFiles.times {
             QualityAssessmentPass.build([
-                processedBamFile: processedBamFile
+                processedBamFile: processedBamFile,
+                identifier: QualityAssessmentPass.nextIdentifier(processedBamFile),
             ])
         }
 

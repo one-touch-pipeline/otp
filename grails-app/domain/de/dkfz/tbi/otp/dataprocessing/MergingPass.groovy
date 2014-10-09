@@ -22,7 +22,10 @@ class MergingPass {
         mergingSet: MergingSet
     ]
 
-    static constraints = { description(nullable: true) }
+    static constraints = {
+        identifier(unique: 'mergingSet')
+        description(nullable: true)
+    }
 
     Project getProject() {
         return mergingSet.project
@@ -61,11 +64,27 @@ class MergingPass {
      * @return Whether this is the most recent merging pass on the referenced {@link MergingSet}.
      */
     public boolean isLatestPass() {
-        Integer maxIdentifier = MergingPass.createCriteria().get {
+        return identifier == maxIdentifier(mergingSet)
+    }
+
+    public static Integer maxIdentifier(final MergingSet mergingSet) {
+        assert mergingSet
+        return MergingPass.createCriteria().get {
             eq("mergingSet", mergingSet)
-            projections{ max("identifier") }
+            projections {
+                max("identifier")
+            }
         }
-        return identifier == maxIdentifier
+    }
+
+    public static int nextIdentifier(final MergingSet mergingSet) {
+        assert mergingSet
+        final Integer maxIdentifier = maxIdentifier(mergingSet)
+        if (maxIdentifier == null) {
+            return 0
+        } else {
+            return maxIdentifier + 1
+        }
     }
 
     static mapping = { mergingSet index: "merging_pass_merging_set_idx" }

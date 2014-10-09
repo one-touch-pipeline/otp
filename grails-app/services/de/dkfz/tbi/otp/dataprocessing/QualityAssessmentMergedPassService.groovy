@@ -16,8 +16,10 @@ class QualityAssessmentMergedPassService {
         if (!processedMergedBamFile) {
             return null
         }
-        int numberOfpass = QualityAssessmentMergedPass.countByProcessedMergedBamFile(processedMergedBamFile)
-        QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass(identifier: numberOfpass, processedMergedBamFile: processedMergedBamFile)
+        QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass(
+                processedMergedBamFile: processedMergedBamFile,
+                identifier: QualityAssessmentMergedPass.nextIdentifier(processedMergedBamFile),
+        )
         assertSave(qualityAssessmentMergedPass)
         return qualityAssessmentMergedPass
     }

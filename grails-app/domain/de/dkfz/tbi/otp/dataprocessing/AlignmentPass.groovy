@@ -13,7 +13,7 @@ class AlignmentPass {
     ]
 
     static constraints = {
-        // seqTrack and identifier are unique
+        identifier(unique: 'seqTrack')
         description(nullable: true)
     }
 
@@ -34,13 +34,27 @@ class AlignmentPass {
      * @return <code>true</code>, if this pass is the latest for the referenced {@link SeqTrack}
      */
     public boolean isLatestPass() {
-        Integer maxIdentifier = AlignmentPass.createCriteria().get {
+        return identifier == maxIdentifier(seqTrack)
+    }
+
+    public static Integer maxIdentifier(final SeqTrack seqTrack) {
+        assert seqTrack
+        return AlignmentPass.createCriteria().get {
             eq("seqTrack", seqTrack)
-            projections{
+            projections {
                 max("identifier")
             }
         }
-        return identifier == maxIdentifier
+    }
+
+    public static int nextIdentifier(final SeqTrack seqTrack) {
+        assert seqTrack
+        final Integer maxIdentifier = maxIdentifier(seqTrack)
+        if (maxIdentifier == null) {
+            return 0
+        } else {
+            return maxIdentifier + 1
+        }
     }
 
     Project getProject() {

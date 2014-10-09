@@ -78,13 +78,31 @@ class MergingSet {
      * @return Whether this is the most recent merging set on the referenced {@link MergingWorkPackage}.
      */
     public boolean isLatestSet() {
-        Integer maxIdentifier = MergingSet.createCriteria().get {
+        return identifier == maxIdentifier(mergingWorkPackage)
+    }
+
+    public static Integer maxIdentifier(final MergingWorkPackage mergingWorkPackage) {
+        assert mergingWorkPackage
+        return MergingSet.createCriteria().get {
             eq("mergingWorkPackage", mergingWorkPackage)
             projections{
                 max("identifier")
             }
         }
-        return identifier == maxIdentifier
+    }
+
+    public static int nextIdentifier(final MergingWorkPackage mergingWorkPackage) {
+        assert mergingWorkPackage
+        final Integer maxIdentifier = maxIdentifier(mergingWorkPackage)
+        if (maxIdentifier == null) {
+            return 0
+        } else {
+            return maxIdentifier + 1
+        }
+    }
+
+    static constraints = {
+        identifier(unique: 'mergingWorkPackage')
     }
 
     static mapping = {

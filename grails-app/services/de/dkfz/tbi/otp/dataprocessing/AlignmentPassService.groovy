@@ -104,7 +104,7 @@ class AlignmentPassService {
         if (!seqTrack) {
             return null
         }
-        int pass = AlignmentPass.countBySeqTrack(seqTrack)
+        int pass = AlignmentPass.nextIdentifier(seqTrack)
         AlignmentPass alignmentPass = new AlignmentPass(identifier: pass, seqTrack: seqTrack)
         assert(alignmentPass.save(flush: true))
         return alignmentPass
@@ -163,12 +163,6 @@ class AlignmentPassService {
     public int maximalIdentifier(ProcessedBamFile processedBamFile) {
         notNull(processedBamFile, "the input bam file for the method maximalIdentifier is null")
         SeqTrack seqTrackPerBamFile = processedBamFile.alignmentPass.seqTrack
-        int maxIdentifier = AlignmentPass.createCriteria().get {
-            eq("seqTrack", seqTrackPerBamFile)
-            projections{
-                max("identifier")
-            }
-        }
-        return maxIdentifier
+        return AlignmentPass.maxIdentifier(seqTrackPerBamFile)
     }
 }

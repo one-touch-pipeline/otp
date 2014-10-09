@@ -11,6 +11,7 @@ class QualityAssessmentPass {
     String description
 
     static constraints = {
+        identifier(unique: 'processedBamFile')
         description(nullable: true)
     }
 
@@ -28,13 +29,27 @@ class QualityAssessmentPass {
      * @return Whether this is the most recent QA pass on the referenced {@link ProcessedBamFile}.
      */
     public boolean isLatestPass() {
-        Integer maxIdentifier = QualityAssessmentPass.createCriteria().get {
+        return identifier == maxIdentifier(processedBamFile)
+    }
+
+    public static Integer maxIdentifier(final ProcessedBamFile processedBamFile) {
+        assert processedBamFile
+        return QualityAssessmentPass.createCriteria().get {
             eq("processedBamFile", processedBamFile)
             projections{
                 max("identifier")
             }
         }
-        return identifier == maxIdentifier
+    }
+
+    public static int nextIdentifier(final ProcessedBamFile processedBamFile) {
+        assert processedBamFile
+        final Integer maxIdentifier = maxIdentifier(processedBamFile)
+        if (maxIdentifier == null) {
+            return 0
+        } else {
+            return maxIdentifier + 1
+        }
     }
 
     static belongsTo = [

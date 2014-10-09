@@ -30,8 +30,10 @@ class QualityAssessmentPassService {
         if (!processedBamFile) {
             return null
         }
-        int numberOfpass = QualityAssessmentPass.countByProcessedBamFile(processedBamFile)
-        QualityAssessmentPass qualityAssessmentPass = new QualityAssessmentPass(identifier: numberOfpass, processedBamFile: processedBamFile)
+        QualityAssessmentPass qualityAssessmentPass = new QualityAssessmentPass(
+                processedBamFile: processedBamFile,
+                identifier: QualityAssessmentPass.nextIdentifier(processedBamFile),
+        )
         assertSave(qualityAssessmentPass)
         return qualityAssessmentPass
     }

@@ -1,6 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.junit.Assert.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+
+import de.dkfz.tbi.TestCase
 import grails.validation.ValidationException
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
@@ -16,6 +19,7 @@ class MergingSetServiceTests {
     Sample sample
     SeqType seqType
     SeqTrack seqTrack
+    SeqTrack seqTrack2
 
     @Before
     void setUp() {
@@ -90,6 +94,15 @@ class MergingSetServiceTests {
                         pipelineVersion: softwareTool
                         )
         assertNotNull(seqTrack.save([flush: true, failOnError: true]))
+        seqTrack2 = new SeqTrack(
+                        laneId: "laneId2",
+                        run: run,
+                        sample: sample,
+                        seqType: seqType,
+                        seqPlatform: seqPlatform,
+                        pipelineVersion: softwareTool
+        )
+        assertNotNull(seqTrack2.save([flush: true, failOnError: true]))
     }
 
     @After
@@ -251,27 +264,27 @@ class MergingSetServiceTests {
         assertTrue(next.equals(mergingSet4))
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testNextIdentifierIdentifierNull() {
-        mergingSetService.nextIdentifier(null)
+        MergingSet.nextIdentifier(null)
     }
 
     @Test
     void testNextIdentifier() {
         MergingWorkPackage mergingWorkPackage = createMergingWorkPackage()
-        assertEquals(0, mergingSetService.nextIdentifier(mergingWorkPackage))
+        assertEquals(0, MergingSet.nextIdentifier(mergingWorkPackage))
         MergingSet mergingSet = new MergingSet(
                         identifier: 0,
                         mergingWorkPackage: mergingWorkPackage
                         )
         assertNotNull(mergingSet.save([flush: true, failOnError: true]))
-        assertEquals(1, mergingSetService.nextIdentifier(mergingWorkPackage))
+        assertEquals(1, MergingSet.nextIdentifier(mergingWorkPackage))
         MergingSet mergingSet2 = new MergingSet(
-                        identifier: 0,
+                        identifier: 1,
                         mergingWorkPackage: mergingWorkPackage
                         )
         assertNotNull(mergingSet2.save([flush: true, failOnError: true]))
-        assertEquals(2, mergingSetService.nextIdentifier(mergingWorkPackage))
+        assertEquals(2, MergingSet.nextIdentifier(mergingWorkPackage))
     }
 
     @Test
@@ -287,7 +300,7 @@ class MergingSetServiceTests {
     }
 
     @Test
-    void testCreateMergingSetForBamFileMergingPackageNotExistsTwoBamFiles() {
+    void testCreateMergingSetForBamFileMergingPackageNotExistsTwoBamFiles_sameSeqTrack() {
         assertEquals(0, MergingWorkPackage.count)
         assertEquals(0, MergingSet.count)
         assertEquals(0, MergingSetAssignment.count)
@@ -296,6 +309,22 @@ class MergingSetServiceTests {
         mergingSetService.createMergingSetForBamFile(bamFile)
         assertEquals(1, MergingWorkPackage.count)
         assertEquals(1, MergingSet.count)
+        // Only the latest BAM file for one SeqTrack is merged.
+        assert TestCase.containSame(MergingSetAssignment.list()*.bamFile, [bamFile2])
+        assertEquals(1, MergingSetAssignment.count)
+    }
+
+    @Test
+    void testCreateMergingSetForBamFileMergingPackageNotExistsTwoBamFiles_differentSeqTracks() {
+        assertEquals(0, MergingWorkPackage.count)
+        assertEquals(0, MergingSet.count)
+        assertEquals(0, MergingSetAssignment.count)
+        ProcessedBamFile bamFile = createBamFile()
+        ProcessedBamFile bamFile2 = createBamFile(seqTrack2)
+        mergingSetService.createMergingSetForBamFile(bamFile)
+        assertEquals(1, MergingWorkPackage.count)
+        assertEquals(1, MergingSet.count)
+        assert TestCase.containSame(MergingSetAssignment.list()*.bamFile, [bamFile, bamFile2])
         assertEquals(2, MergingSetAssignment.count)
     }
 
@@ -328,10 +357,18 @@ class MergingSetServiceTests {
         assertEquals(1, MergingWorkPackage.count)
         assertEquals(1, MergingSet.count)
         assertEquals(1, MergingSetAssignment.count)
-        ProcessedBamFile bamFile2 = createBamFile()
+        ProcessedBamFile bamFile2 = createBamFile(seqTrack2)
         mergingSetService.createMergingSetForBamFile(bamFile)
         assertEquals(1, MergingWorkPackage.count)
-        assertEquals(2, MergingSet.count)
+        final Collection<MergingSet> mergingSets = MergingSet.list()
+        assertEquals(2, mergingSets.size())
+        final MergingSet mergingSetCreatedByServiceMethod = exactlyOneElement(mergingSets - mergingSet)
+        assert TestCase.containSame(MergingSetAssignment.findAllByMergingSet(mergingSet)*.bamFile, [bamFile])
+        // TODO: Actually bamFile should not be assigned to the merging set, because processedMergedBamFile already
+        //       contains all data from bamFile. This might be the reason why sometimes the merging workflow fails
+        //       because a merging set contains a SeqTrack more than once. -> OTP-1161
+        assert TestCase.containSame(MergingSetAssignment.findAllByMergingSet(mergingSetCreatedByServiceMethod)*.bamFile,
+                [bamFile, processedMergedBamFile, bamFile2])
         assertEquals(4, MergingSetAssignment.count)
     }
 
@@ -449,9 +486,9 @@ class MergingSetServiceTests {
         assertEquals(mergingSet, mergingSetService.assertSave(mergingSet))
     }
 
-    private ProcessedBamFile createBamFile() {
+    private ProcessedBamFile createBamFile(final SeqTrack seqTrack = this.seqTrack) {
         AlignmentPass alignmentPass = new AlignmentPass(
-                        identifier: 1,
+                        identifier: AlignmentPass.nextIdentifier(seqTrack),
                         seqTrack: seqTrack,
                         description: "test"
                         )
