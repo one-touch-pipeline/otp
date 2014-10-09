@@ -14,7 +14,9 @@ class ParseMergedQaStatisticsJob extends AbstractJobImpl {
     public void execute() throws Exception {
         long passId = getProcessParameterValue() as long
         QualityAssessmentMergedPass pass = QualityAssessmentMergedPass.get(passId)
-        abstractQualityAssessmentService.parseQaStatistics(pass)
-        abstractQualityAssessmentService.saveCoverageToProcessedMergedBamFile(pass)
+        QualityAssessmentMergedPass.withTransaction {
+            abstractQualityAssessmentService.parseQaStatistics(pass)
+            abstractQualityAssessmentService.saveCoverageToProcessedMergedBamFile(pass)
+        }
     }
 }

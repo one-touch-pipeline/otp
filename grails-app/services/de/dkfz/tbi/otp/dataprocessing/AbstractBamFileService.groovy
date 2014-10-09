@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.springframework.util.Assert.*
-
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
 
@@ -113,7 +112,6 @@ class AbstractBamFileService {
 
     private Double calculateCoverage(AbstractBamFile bamFile, String property) {
         assert bamFile : 'Parameter bamFile must not be null'
-        assert bamFile.isQualityAssessed() : "Cannot calculate coverage! The BAM file ${bamFile} has not passed the QC yet"
 
         Long length
         Long basesMapped
