@@ -22,7 +22,7 @@
                         <table id="searchCriteriaTable">
                             <tr>
                                 <td class="attribute">
-                                    <g:select class="criteria" name="criteria" from="${seqTypes}" optionKey="naturalId" noSelection="${["none": message(code:"otp.filter.none")]}"/>
+                                    <g:select class="criteria" name="criteria" from="${seqTypes}" optionKey="id" noSelection="${["none": message(code:"otp.filter.none")]}"/>
                                 </td>
                                 <td class="value">
                                 </td>
