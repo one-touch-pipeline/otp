@@ -18,7 +18,7 @@ class MergingCompleteJob extends AbstractEndStateAwareJobImpl {
     public void execute() throws Exception {
         long mergingPassId = Long.parseLong(getProcessParameterValue())
         MergingPass mergingPass = MergingPass.get(mergingPassId)
-        ProcessedMergedBamFile processedMergedBamFile = exactlyOneElement(ProcessedMergedBamFile.findByMergingPass(mergingPass))
+        ProcessedMergedBamFile processedMergedBamFile = exactlyOneElement(ProcessedMergedBamFile.findAllByMergingPass(mergingPass))
         // Update the property "numberOfMergedLanes" in the BAM file
         processedMergedBamFileService.updateNumberOfMergedLanes(processedMergedBamFile)
         // Set state for the next steps
