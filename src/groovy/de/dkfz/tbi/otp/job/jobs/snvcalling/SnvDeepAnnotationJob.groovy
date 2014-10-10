@@ -64,14 +64,14 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob {
             /*
              * The snv deep annotation script does not use the output vcf parameter but just overrides the input file.
              * Therefore the snv annotation file has to be copied so that it has the correct naming.
-             * It was decided not to override the snv annotation file to be on the save side.
+             * It was decided not to override the anv annotation file to be on the save side.
              */
             assert ! deepAnnotationResultFile.exists()
             deepAnnotationResultFile.createNewFile()
             deepAnnotationResultFile.text = inputResultFile.text
 
             final Realm realm = configService.getRealmDataProcessing(instance.project)
-//TODO: check that script is correct -> see JIRA
+
             final String qsubParameters="{ '-v': '"+
                     "CONFIG_FILE=${configFileInStagingDirectory}," +
                     "pid=${instance.individual.pid}," +
@@ -85,9 +85,8 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob {
                     "'}"
             final String script =
                     ensureFileDoesNotExistScript(deepAnnotationResultFile) +
-                    step.externalScript.scriptFilePath
-
-            executionHelperService.sendScript(realm, script, null, qsubParameters)
+                    step.externalScript.scriptFilePath +
+                    executionHelperService.sendScript(realm, script, null, qsubParameters)
             createAndSaveSnvJobResult(instance, step.externalScript, inputResult)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
@@ -108,7 +107,6 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob {
 
     @Override
     protected void validate(final SnvCallingInstance instance) throws Throwable {
-        //TODO: check that config file is correct -> see reivew annotation job
         // check if the final vcf result file exists
         final OtpPath resultFile = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual))
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(resultFile.absoluteStagingPath)
@@ -126,7 +124,6 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob {
         // mark the result of the snv deep annotation step as finished
         changeProcessingStateOfJobResult(instance, SnvProcessingStates.FINISHED)
 
-        //TODO: check if copy script is correct
         //paths for the result file
         List<File> sourceLocation = [
             resultFile.absoluteStagingPath
