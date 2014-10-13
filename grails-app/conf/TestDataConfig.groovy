@@ -38,8 +38,15 @@ testDataConfig {
         'de.dkfz.tbi.otp.ngsdata.Individual' {
             pid = {'pid_' + (counter++)}
         }
+        'de.dkfz.tbi.otp.ngsdata.Run' {
+            name = {'runName_' + (counter++)}
+        }
         'de.dkfz.tbi.otp.ngsdata.SampleType' {
             name = {'sampleTypeName_' + (counter++)}
+        }
+        'de.dkfz.tbi.otp.ngsdata.SeqCenter' {
+            name = {'seqCenterName_' + (counter++)}
+            dirName  = {'seqCenterDirName_' + (counter++)}
         }
         'de.dkfz.tbi.otp.ngsdata.SeqType' {
             name = {'seqTypeName_' + (counter++)}

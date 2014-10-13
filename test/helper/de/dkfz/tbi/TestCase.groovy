@@ -69,6 +69,18 @@ class TestCase extends GroovyTestCase {
     }
 
     /**
+     * Returns whether two collections contain the same set of elements. Each collection must not contain any two
+     * elements which are equal.
+     */
+    public static <T> boolean containSame(final Collection<? extends T> c1, final Collection<? extends T> c2) {
+        final c1Set = c1.toSet()
+        assert c1Set.size() == c1.size() : "c1 contains elements which are equal."
+        final c2Set = c2.toSet()
+        assert c2Set.size() == c2.size() : "c2 contains elements which are equal."
+        return c1Set == c2Set
+    }
+
+    /**
      * Helper to check that a validation failed for the given constraint on the given field with the given value.
      * The assert fails if
      * <ul>

@@ -7,7 +7,7 @@ class SeqTypeService {
         return SeqType.get(id)
     }
 
-    List<SeqType> alignableSeqTypes() {
+    static List<SeqType> alignableSeqTypes() {
         final List<String> alignableSeqTypeNames = [
             SeqTypeNames.EXOME,
             SeqTypeNames.WHOLE_GENOME,

@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.AlignmentPassService
 import groovy.transform.ToString
 
 
@@ -45,5 +46,21 @@ class SampleTypePerProject {
         UNKNOWN,
         DISEASE,
         CONTROL
+    }
+
+    /**
+     * Finds distinct pairs of [project, sampleType] with this criteria:
+     * <ul>
+     *     <li>At least one non-withdrawn SeqTrack exists for that combination with a sequencing type which OTP can process.</li>
+     *     <li>No SampleTypePerProject exists for that combination.</li>
+     * </ul>
+     */
+    static Collection findMissingCombinations() {
+        return SampleTypePerProject.executeQuery(
+            "SELECT DISTINCT st.sample.individual.project as project, st.sample.sampleType as sampleType FROM SeqTrack st " +
+            "WHERE st.seqType IN (:seqTypes) " +
+            "AND NOT EXISTS (FROM DataFile WHERE ${AlignmentPassService.DATA_FILE_CRITERIA} AND fileWithdrawn = true) " +
+            "AND NOT EXISTS (FROM SampleTypePerProject stpp WHERE stpp.project = st.sample.individual.project AND stpp.sampleType = st.sample.sampleType)",
+            [seqTypes: SeqTypeService.alignableSeqTypes(), fileType: FileType.Type.SEQUENCE], [readOnly: true])
     }
 }

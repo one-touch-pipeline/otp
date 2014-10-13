@@ -5,7 +5,9 @@ package de.dkfz.tbi.otp.ngsdata
 class SeqType {
 
     /**
-     * Used in file system paths. Also used in the GUI unless {@link #alias} is set.
+     * One of {@link SeqTypeNames#seqTypeName}.
+     * Used in file system paths, for example by ProcessedMergedBamFileService.fileNameNoSuffix(ProcessedMergedBamFile).
+     * Used in the GUI unless {@link #alias} is set.
      */
     String name
     String libraryLayout

@@ -19,7 +19,7 @@ class AlignmentPassService {
     ReferenceGenomeService referenceGenomeService
     QualityAssessmentPassService qualityAssessmentPassService
 
-    private static final String DATA_FILE_CRITERIA = "seqTrack = st AND fileType.type = :fileType"
+    static final String DATA_FILE_CRITERIA = "seqTrack = st AND fileType.type = :fileType"
 
     /**
      * HQL for finding <em>alignable</em> {@link SeqTrack}s.
