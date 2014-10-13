@@ -20,6 +20,7 @@ abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob 
     ProcessedMergedBamFileService processedMergedBamFileService
 
     abstract SnvCallingStep getStep()
+    abstract SnvCallingStep getPreviousStep()
 
     @Override
     protected final NextAction maybeSubmit() throws Throwable {

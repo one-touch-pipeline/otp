@@ -4,9 +4,12 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingJob
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.ExternalScript
 
 class SnvCallingInstanceTestData extends TestData {
+
+    ProcessedMergedBamFileService processedMergedBamFileService
 
     ProcessedMergedBamFile bamFileTumor
     ProcessedMergedBamFile bamFileTumor2
@@ -17,6 +20,10 @@ class SnvCallingInstanceTestData extends TestData {
     ExternalScript externalScript_Joining
 
     void createSnvObjects() {
+        processedMergedBamFileService = new ProcessedMergedBamFileService()
+        processedMergedBamFileService.configService = new ConfigService()
+        processedMergedBamFileService.mergedAlignmentDataFileService = new MergedAlignmentDataFileService()
+
         project = createProject()
         assert project.save(flush: true, failOnError: true)
 
@@ -175,5 +182,36 @@ class SnvCallingInstanceTestData extends TestData {
         configFile << configuration
         configFile.deleteOnExit()
         return configFile
+    }
+
+    private void createInputResultFile_Staging(SnvCallingInstance instance, SnvCallingStep step) {
+        File inputResultFile = createInputResultFile(instance, step).absoluteStagingPath
+        CreateFileHelper.createFile(inputResultFile)
+    }
+
+    private void createInputResultFile_Production(SnvCallingInstance instance, SnvCallingStep step) {
+        File inputResultFile = createInputResultFile(instance, step).absoluteDataManagementPath
+        CreateFileHelper.createFile(inputResultFile)
+    }
+
+    private OtpPath createInputResultFile(SnvCallingInstance instance, SnvCallingStep step) {
+        OtpPath file
+        if (step == SnvCallingStep.CALLING) {
+            file = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual, null))
+        } else if (step == SnvCallingStep.FILTER_VCF) {
+            file = new OtpPath(instance.snvInstancePath, step.getResultFileName())
+        } else {
+            file = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual))
+        }
+        return file
+    }
+
+    File createBamFile(ProcessedMergedBamFile processedMergedBamFile) {
+        File file = new File(processedMergedBamFileService.destinationDirectory(processedMergedBamFile), processedMergedBamFileService.fileName(processedMergedBamFile))
+        CreateFileHelper.createFile(file)
+
+        processedMergedBamFile.fileSize = file.size()
+        assert processedMergedBamFile.save(flush: true, failOnError: true)
+        return file
     }
 }

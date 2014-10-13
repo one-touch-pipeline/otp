@@ -98,7 +98,7 @@ class SnvCallingStepTests extends GroovyTestCase {
 
         assertEquals("snvs_${pid}.vcf.gz", SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(individual))
 
-        //TODO: test for filter -> OTP-989"
+        assertEquals("", SnvCallingStep.FILTER_VCF.getResultFileName())
     }
 
     @Test
@@ -114,8 +114,7 @@ class SnvCallingStepTests extends GroovyTestCase {
         assertEquals('snvs_654321_raw.vcf.gz.tbi', SnvCallingStep.CALLING.getIndexFileName(individual))
         assertEquals('snvs_654321_annotation.vcf.gz.tbi', SnvCallingStep.SNV_ANNOTATION.getIndexFileName(individual))
         assertEquals('snvs_654321.vcf.gz.tbi', SnvCallingStep.SNV_DEEPANNOTATION.getIndexFileName(individual))
-
-        //TODO: test for filter -> OTP-989"
+        assertEquals('snvs_654321.vcf.gz.tbi', SnvCallingStep.FILTER_VCF.getIndexFileName(individual))
     }
 
     @Test

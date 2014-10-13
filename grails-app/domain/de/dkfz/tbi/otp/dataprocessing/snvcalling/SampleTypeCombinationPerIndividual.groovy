@@ -97,7 +97,10 @@ class SampleTypeCombinationPerIndividual {
     }
 
     /**
-     * Returns the path of the symlink to the result file for the CALLING step of the SNV pipeline.
+     * Returns the path of the symlink to the result file for current step of the SNV pipeline.
+     * !Attention: since there is more then one result for the filter step,
+     * and it is possible that even more results will come up, only the path to these results are returned in case of
+     * the filter step
      *
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control/snvs_${pid}_raw.vcf.gz
      */
@@ -105,7 +108,7 @@ class SampleTypeCombinationPerIndividual {
         if (step == SnvCallingStep.CALLING) {
             return new OtpPath(sampleTypeCombinationPath, step.getResultFileName(individual, null))
         } else if (step == SnvCallingStep.FILTER_VCF) {
-            throw new UnsupportedOperationException("TODO -> OTP-989")
+            return sampleTypeCombinationPath
         } else {
             return new OtpPath(sampleTypeCombinationPath, step.getResultFileName(individual))
         }

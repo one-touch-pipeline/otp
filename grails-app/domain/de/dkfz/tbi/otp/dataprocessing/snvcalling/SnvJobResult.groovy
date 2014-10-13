@@ -106,7 +106,7 @@ class SnvJobResult {
         if (step == SnvCallingStep.CALLING) {
             return new OtpPath(snvCallingInstance.snvInstancePath, step.getResultFileName(snvCallingInstance.individual, chromosomeName))
         } else if (step == SnvCallingStep.FILTER_VCF) {
-            throw new UnsupportedOperationException("TODO -> OTP-989")
+            return new OtpPath(snvCallingInstance.snvInstancePath, step.getResultFileName())
         } else {
             return new OtpPath(snvCallingInstance.snvInstancePath, step.getResultFileName(snvCallingInstance.individual))
         }

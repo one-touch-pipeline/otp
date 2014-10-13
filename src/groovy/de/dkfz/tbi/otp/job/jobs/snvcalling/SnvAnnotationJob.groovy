@@ -22,6 +22,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob {
         return SnvCallingStep.SNV_ANNOTATION
     }
 
+    @Override
     SnvCallingStep getPreviousStep() {
         return SnvCallingStep.CALLING
     }

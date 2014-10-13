@@ -298,7 +298,8 @@ class SnvJobResultUnitTests {
     void testGetResultFilePath_Filter() {
         Map preparedObjects = preparationForGetResultFilePath(SnvCallingStep.FILTER_VCF)
 
-        shouldFail(UnsupportedOperationException, { preparedObjects.snvJobResult.getResultFilePath()})
+        assert preparedObjects.project == preparedObjects.snvJobResult.getResultFilePath().project
+        assert "testPath" == preparedObjects.snvJobResult.getResultFilePath().relativePath.path
     }
 
     Map preparationForGetResultFilePath(SnvCallingStep step) {

@@ -36,6 +36,11 @@ class SnvCallingJob extends AbstractSnvCallingJob {
     }
 
     @Override
+    public SnvCallingStep getPreviousStep() {
+        return null
+    }
+
+    @Override
     protected NextAction maybeSubmit(final SnvCallingInstance instance) throws Throwable {
         final SnvConfig config = instance.config.evaluate()
         if (config.getExecuteStepFlag(step)) {

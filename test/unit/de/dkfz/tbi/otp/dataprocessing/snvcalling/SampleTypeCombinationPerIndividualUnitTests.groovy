@@ -115,5 +115,9 @@ class SampleTypeCombinationPerIndividualUnitTests {
         OtpPath snvDeepAnnotationResultFileLinkedPath = sampleCombinationPerIndividual.getResultFileLinkedPath(SnvCallingStep.SNV_DEEPANNOTATION)
         assertEquals(expectedExtensionDeepAnnotation, snvDeepAnnotationResultFileLinkedPath.relativePath)
         assertEquals(project, snvDeepAnnotationResultFileLinkedPath.project)
+
+        OtpPath filterResultFilesLinkedPath = sampleCombinationPerIndividual.getResultFileLinkedPath(SnvCallingStep.FILTER_VCF)
+        assertEquals(new File(path), filterResultFilesLinkedPath.relativePath)
+        assertEquals(project, filterResultFilesLinkedPath.project)
     }
 }
