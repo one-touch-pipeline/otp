@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+
 class Sample {
 
     static belongsTo = [
@@ -26,6 +28,13 @@ class Sample {
 
     Project getProject() {
         return individual.project
+    }
+
+    /**
+     * @return The category of this sample's type or <code>null</code> if it is not configured.
+     */
+    SampleType.Category getSampleTypeCategory() {
+        return sampleType.getCategory(project)
     }
 
     static mapping = {

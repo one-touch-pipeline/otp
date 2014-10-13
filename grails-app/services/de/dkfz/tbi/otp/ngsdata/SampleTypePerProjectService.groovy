@@ -13,7 +13,7 @@ class SampleTypePerProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    SampleTypePerProject createOrUpdate(Project project, SampleType sampleType, SampleTypePerProject.Category category) {
+    SampleTypePerProject createOrUpdate(Project project, SampleType sampleType, SampleType.Category category) {
         SampleTypePerProject sampleTypePerProject = SampleTypePerProject.findByProjectAndSampleType(project, sampleType)
         if (sampleTypePerProject) {
             sampleTypePerProject.category = category

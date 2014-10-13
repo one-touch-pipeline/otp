@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import org.springframework.validation.Errors
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
@@ -44,15 +45,30 @@ class SampleTypeCombinationPerIndividual {
         sampleType2 validator: { val, obj ->
             return val != obj.sampleType1
         }
-        sampleType1 validator: { val, obj ->
+        sampleType1 validator: { SampleType val, SampleTypeCombinationPerIndividual obj, Errors errors ->
+            if (!obj.individual) {
+                errors.reject(null, 'Cannot validate sampleType1 without individual being set.')
+                return
+            }
+            final SampleType.Category category = val.getCategory(obj.individual.project)
+            if (category != SampleType.Category.DISEASE) {
+                errors.reject(null, "Category of sampleType1 is ${category}. Expected ${SampleType.Category.DISEASE}.")
+                return
+            }
             final SampleTypeCombinationPerIndividual sameOrderObj = obj.findForSameIndividualAndSeqType(val, obj.sampleType2)
             final SampleTypeCombinationPerIndividual otherOrderObj = obj.findForSameIndividualAndSeqType(obj.sampleType2, val)
             if (obj.id) {
                 // change an already existing object
-                return (!sameOrderObj || sameOrderObj.id == obj.id) && (!otherOrderObj || otherOrderObj.id == obj.id)
+                if ((sameOrderObj && sameOrderObj.id != obj.id) || (otherOrderObj && otherOrderObj.id != obj.id)) {
+                    errors.reject(null, 'A SampleTypeCombinationPerIndividual for that combination already exists.')
+                    return
+                }
             } else {
                 // save a new object
-                return !sameOrderObj && !otherOrderObj
+                if (sameOrderObj || otherOrderObj) {
+                    errors.reject(null, 'A SampleTypeCombinationPerIndividual for that combination already exists.')
+                    return
+                }
             }
         }
     }

@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
@@ -7,7 +8,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 
 @TestFor(SampleTypeCombinationPerIndividual)
-@Mock([Realm, Project, Individual, SampleType, SeqType])
+@Build([Realm, Individual, SampleTypePerProject, SeqType])
 class SampleTypeCombinationPerIndividualUnitTests {
 
     void testSaveSnvCombinationPerIndividualOnlyIndividual() {
@@ -35,10 +36,13 @@ class SampleTypeCombinationPerIndividualUnitTests {
     }
 
     void testSaveSnvCombinationPerIndividual() {
+        final Individual individual = Individual.build()
+        final SampleType sampleType1 = SampleType.build()
+        SampleTypePerProject.build(project: individual.project, sampleType: sampleType1, category: SampleType.Category.DISEASE)
         SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual()
-        sampleCombinationPerIndividual.individual = new Individual()
+        sampleCombinationPerIndividual.individual = individual
         sampleCombinationPerIndividual.seqType = new SeqType()
-        sampleCombinationPerIndividual.sampleType1 = new SampleType()
+        sampleCombinationPerIndividual.sampleType1 = sampleType1
         sampleCombinationPerIndividual.sampleType2 = new SampleType()
         assertTrue(sampleCombinationPerIndividual.validate())
         //println sampleCombinationPerIndividual.errors
@@ -57,6 +61,7 @@ class SampleTypeCombinationPerIndividualUnitTests {
         sampleType1.save(flush: true)
         SampleType sampleType2 = testData.createSampleType([name: "CONTROL"])
         sampleType2.save(flush: true)
+        SampleTypePerProject.build(project: project, sampleType: sampleType1, category: SampleType.Category.DISEASE)
 
         SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
             individual: individual,
@@ -86,6 +91,7 @@ class SampleTypeCombinationPerIndividualUnitTests {
         sampleType1.save(flush: true)
         SampleType sampleType2 = testData.createSampleType([name: "CONTROL"])
         sampleType2.save(flush: true)
+        SampleTypePerProject.build(project: project, sampleType: sampleType1, category: SampleType.Category.DISEASE)
 
         SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
             individual: individual,

@@ -96,6 +96,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 configuration: CONFIGURATION)
         assert snvConfig.save()
 
+        SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile1.sampleType, category: SampleType.Category.DISEASE)
+
         SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
                 individual: individual,
                 sampleType1: processedMergedBamFile1.sampleType,

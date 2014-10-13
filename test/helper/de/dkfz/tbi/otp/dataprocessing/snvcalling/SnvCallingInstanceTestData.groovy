@@ -28,6 +28,9 @@ class SnvCallingInstanceTestData extends TestData {
         bamFileTumor2 = createProcessedMergedBamFile(individual, seqType)
         bamFileControl = createProcessedMergedBamFile(individual, seqType)
 
+        SampleTypePerProject.build(project: project, sampleType: bamFileTumor.sampleType, category: SampleType.Category.DISEASE)
+        SampleTypePerProject.build(project: project, sampleType: bamFileTumor2.sampleType, category: SampleType.Category.DISEASE)
+
         sampleTypeCombination = new SampleTypeCombinationPerIndividual(
                 individual: individual,
                 sampleType1: bamFileTumor.sampleType,

@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.ProcessingThresholds.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject.Category
+import de.dkfz.tbi.otp.ngsdata.SampleType.Category
 
 class SnvController {
 
@@ -65,7 +65,7 @@ class SnvController {
         Map groupedDiseaseTypes = sampleTypePerProjects.groupBy{it.sampleType.id}
         Map groupedThresholds = processingThresholds.groupBy([{it.sampleType.id}, {it.seqType.id}])
         return [
-            categories: SampleTypePerProject.Category.values(),
+            categories: SampleType.Category.values(),
             sampleTypes: sampleTypes,
             alignableSeqType: alignableSeqType,
             groupedDiseaseTypes: groupedDiseaseTypes,

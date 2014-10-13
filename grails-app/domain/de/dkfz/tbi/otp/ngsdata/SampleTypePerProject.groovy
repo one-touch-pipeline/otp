@@ -21,7 +21,7 @@ class SampleTypePerProject {
     /**
      * Holds the information if the specified sampleType is a DISEASE or a CONTROL in this project.
      */
-    Category category = Category.UNKNOWN
+    SampleType.Category category = SampleType.Category.UNKNOWN
 
     /**
      * This property is handled automatically by grails.
@@ -36,16 +36,6 @@ class SampleTypePerProject {
 
     static constraints = {
         sampleType unique: 'project'
-    }
-
-    /**
-     * This enum specifies if the sample type belongs to a disease or a control.
-     * In the beginning this information is not available in OTP, therefore it is set to UNKNOWN
-     */
-    enum Category {
-        UNKNOWN,
-        DISEASE,
-        CONTROL
     }
 
     /**

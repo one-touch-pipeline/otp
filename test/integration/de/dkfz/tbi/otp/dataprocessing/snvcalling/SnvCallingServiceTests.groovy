@@ -57,6 +57,8 @@ class SnvCallingServiceTests {
         processedMergedBamFile2 = createProcessedMergedBamFile("2")
         processedMergedBamFile2.save()
 
+        SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile1.sample.sampleType, category: SampleType.Category.DISEASE)
+
         sampleTypeCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
                 individual: individual,
                 sampleType1: processedMergedBamFile1.sample.sampleType,
@@ -192,6 +194,8 @@ class SnvCallingServiceTests {
         assertFalse(processedMergedBamFile1.individual == processedMergedBamFile3.individual)
         assertFalse(processedMergedBamFile2.individual == processedMergedBamFile4.individual)
 
+        SampleTypePerProject.build(project: otherIndividual.project, sampleType: processedMergedBamFile3.sample.sampleType, category: SampleType.Category.DISEASE)
+
         SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual2 = new SampleTypeCombinationPerIndividual(
                 individual: otherIndividual,
                 sampleType1: processedMergedBamFile3.sample.sampleType,
@@ -293,6 +297,8 @@ class SnvCallingServiceTests {
     void testBamFile1HasOtherSampleType() {
         SampleType differentSampleType = testData.createSampleType([name: "DIFFERENT"])
         differentSampleType.save()
+
+        SampleTypePerProject.build(project: project, sampleType: differentSampleType, category: SampleType.Category.DISEASE)
 
         sampleTypeCombinationPerIndividual.sampleType1 = differentSampleType
         sampleTypeCombinationPerIndividual.save()
@@ -508,6 +514,8 @@ class SnvCallingServiceTests {
         ProcessedMergedBamFile processedMergedBamFile4 = createProcessedMergedBamFile("4")
         processedMergedBamFile4.save()
 
+        SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile3.sample.sampleType, category: SampleType.Category.DISEASE)
+
         SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual1 = new SampleTypeCombinationPerIndividual(
                 individual: individual,
                 sampleType1: processedMergedBamFile3.sample.sampleType,
@@ -523,6 +531,8 @@ class SnvCallingServiceTests {
 
         ProcessedMergedBamFile processedMergedBamFile6 = createProcessedMergedBamFile("6")
         processedMergedBamFile6.save()
+
+        SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile5.sample.sampleType, category: SampleType.Category.DISEASE)
 
         SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual2 = new SampleTypeCombinationPerIndividual(
                 individual: individual,

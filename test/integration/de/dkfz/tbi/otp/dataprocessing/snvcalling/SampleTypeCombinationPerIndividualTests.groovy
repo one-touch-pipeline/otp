@@ -46,6 +46,8 @@ class SampleTypeCombinationPerIndividualTests {
                 )
         sampleType1.save()
 
+        SampleTypePerProject.build(project: project, sampleType: sampleType1, category: SampleType.Category.DISEASE)
+
         sampleType2 = new SampleType(
                 name: "CONTROL"
                 )
@@ -136,6 +138,8 @@ class SampleTypeCombinationPerIndividualTests {
 
         SampleType sampleType1 = processedMergedBamFile1_A.sample.sampleType
         SampleType sampleType2 = processedMergedBamFile2.sample.sampleType
+
+        SampleTypePerProject.build(project: project, sampleType: sampleType1, category: SampleType.Category.DISEASE)
 
         SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
                 individual: individual,
@@ -230,6 +234,8 @@ class SampleTypeCombinationPerIndividualTests {
         processedMergedBamFile2_B.sample.sampleType = sampleTypeB
         processedMergedBamFile2_B.sample.save()
 
+        SampleTypePerProject.build(project: project, sampleType: sampleTypeA, category: SampleType.Category.DISEASE)
+
         SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
                 individual: individual,
                 seqType: seqType,
@@ -278,6 +284,8 @@ class SampleTypeCombinationPerIndividualTests {
         processedMergedBamFile2_B.sample.individual = otherIndividual
         processedMergedBamFile2_B.save()
 
+        SampleTypePerProject.build(project: project, sampleType: sampleTypeA, category: SampleType.Category.DISEASE)
+
         SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
                 individual: individual,
                 seqType: seqType,
@@ -288,6 +296,8 @@ class SampleTypeCombinationPerIndividualTests {
 
         assertEquals(processedMergedBamFile1_A, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeA))
         assertEquals(processedMergedBamFile1_B, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeB))
+
+        SampleTypePerProject.build(project: otherIndividual.project, sampleType: sampleTypeA, category: SampleType.Category.DISEASE)
 
         sampleTypeCombinationPerIndividual.individual = otherIndividual
         sampleTypeCombinationPerIndividual.save()
