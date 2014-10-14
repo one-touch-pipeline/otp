@@ -66,7 +66,7 @@ class SeqTrackService {
                     'in'('sampleTypeId', filtering.sampleType)
                 }
                 if (filtering.seqType) {
-                    'in'('seqTypeName', filtering.seqType)
+                    'in'('seqTypeAliasOrName', filtering.seqType)
                 }
                 if (filtering.libraryLayout) {
                     'in'('libraryLayout', filtering.libraryLayout)
@@ -114,7 +114,7 @@ class SeqTrackService {
                     'in'('sampleTypeId', filtering.sampleType)
                 }
                 if (filtering.seqType) {
-                    'in'('seqTypeName', filtering.seqType)
+                    'in'('seqTypeAliasOrName', filtering.seqType)
                 }
                 if (filtering.libraryLayout) {
                     'in'('libraryLayout', filtering.libraryLayout)

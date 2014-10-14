@@ -344,7 +344,8 @@ $.otp.highlight = function (path) {
     var pathSplit = path.split("/");
     if (pathSplit.length > 3) {
         $('.menuContainer #' + pathSplit[2] + ' a').attr('style', 'color: #fafafa;');
-        if (pathSplit[2] === "overviewMB" || pathSplit[2] === "projectOverview" || pathSplit[2] === "projectStatistic") {
+        $('.menuContainer #' + pathSplit[3] + ' a').attr('style', 'color: #fafafa;');
+        if (pathSplit[2] === "overviewMB" || pathSplit[3] === "projectOverview" || pathSplit[3] === "laneOverview"|| pathSplit[3] === "mmmlIdentifierMapping") {
             $('.menuContainer #overview a:first').attr('style', 'color: #fafafa;');
         } else if (pathSplit[2] === "userAdministration" || pathSplit[2] === "group" || pathSplit[2] === "crashRecovery" || pathSplit[2] === "shutdown" || pathSplit[2] === "notification" || pathSplit[2] === "processingOption" || pathSplit[2] === "softwareTool") {
             $('.menuContainer #admin a:first').attr('style', 'color: #fafafa;');

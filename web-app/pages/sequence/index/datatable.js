@@ -2,16 +2,6 @@
 /*global $ */
 
 $.otp.sequence = {
-    formatSeqType: function (seqTypeName) {
-        "use strict";
-        var result;
-        if (seqTypeName === "EXON") {
-            result = "EXOME";
-        } else {
-            result = seqTypeName;
-        }
-        return result;
-    },
 
     register: function () {
         "use strict";
@@ -96,7 +86,7 @@ $.otp.sequence = {
                                     text: row.mockPid
                                 }),
                                 row.sampleTypeName,
-                                $.otp.sequence.formatSeqType(row.seqTypeName),
+                                row.seqTypeAliasOrName,
                                 row.libraryLayout,
                                 row.seqCenterName,
                                 $.otp.createLinkMarkup({

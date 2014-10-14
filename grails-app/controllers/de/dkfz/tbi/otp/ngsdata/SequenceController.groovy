@@ -19,7 +19,7 @@ class SequenceController {
         List<SeqType> seqTypes = SeqType.list(sort: "name", order: "asc")
         [projects: projectService.getAllProjects(),
             sampleTypes: SampleType.list(sort: "name", order: "asc"),
-            seqTypes: new TreeSet(seqTypes.collect { it.name }),
+            seqTypes: new TreeSet(seqTypes.collect { it.aliasOrName }),
             libraryLayouts: new TreeSet(seqTypes.collect { it.libraryLayout }),
             seqCenters: SeqCenter.list(sort: "name", order: "asc")
         ]
