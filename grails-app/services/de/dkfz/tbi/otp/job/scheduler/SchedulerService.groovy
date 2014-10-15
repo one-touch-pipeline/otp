@@ -821,34 +821,36 @@ class SchedulerService {
     // TODO: comment me
     private ProcessingStep createProcessingStep(Process process, JobDefinition jobDefinition, Collection<Parameter> input, ProcessingStep previous = null) {
         ProcessingStep step = null
-        if (jobDefinition instanceof DecidingJobDefinition) {
-            step = new DecisionProcessingStep(jobDefinition: JobDefinition.get(jobDefinition.id), process: Process.get(process.id), previous: previous ? ProcessingStep.getInstance(previous.id) : null)
-        } else {
-            step = new ProcessingStep(jobDefinition: JobDefinition.get(jobDefinition.id), process: Process.get(process.id), previous: previous ? ProcessingStep.getInstance(previous.id) : null)
-        }
-        if (input && !step.save()) {
-            // we have to save the next processing step as the ParameterMapping references the JobDefinition
-            throw new SchedulerPersistencyException("Could not create new ProcessingStep for Process ${process.id}")
-        }
-        Parameter failedConstantParameter = mapInputParamatersToStep(step, input)
-        step = step.save(flush: true)
-        if (!step) {
-            throw new SchedulerPersistencyException("Could not save the ProcessingStep for Process ${process.id}")
-        }
-        ProcessingStepUpdate created = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: step)
-        if (!created.save(flush: true)) {
-            throw new SchedulerPersistencyException("Could not save the first ProcessingStep for Process ${process.id}")
-        }
-        if (failedConstantParameter) {
-            if (!created.save()) {
-                throw new SchedulerPersistencyException("Could not save ProcessingStepUpdate for Process ${process.id}")
+        ProcessingStep.withTransaction {
+            if (jobDefinition instanceof DecidingJobDefinition) {
+                step = new DecisionProcessingStep(jobDefinition: JobDefinition.get(jobDefinition.id), process: Process.get(process.id), previous: previous ? ProcessingStep.getInstance(previous.id) : null)
+            } else {
+                step = new ProcessingStep(jobDefinition: JobDefinition.get(jobDefinition.id), process: Process.get(process.id), previous: previous ? ProcessingStep.getInstance(previous.id) : null)
             }
-            ProcessingStepUpdate failure = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: new Date(), previous: created, processingStep: step)
-            ProcessingError error = new ProcessingError(errorMessage: "Failed to add constant input parameter ${failedConstantParameter.id} of type ${failedConstantParameter.type.name} to new processing step",
-                 processingStepUpdate: failure)
-            failure.error = error
-            if (!failure.save()) {
+            if (input && !step.save()) {
+                // we have to save the next processing step as the ParameterMapping references the JobDefinition
+                throw new SchedulerPersistencyException("Could not create new ProcessingStep for Process ${process.id}")
+            }
+            Parameter failedConstantParameter = mapInputParamatersToStep(step, input)
+            step = step.save(flush: true)
+            if (!step) {
                 throw new SchedulerPersistencyException("Could not save the ProcessingStep for Process ${process.id}")
+            }
+            ProcessingStepUpdate created = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: step)
+            if (!created.save(flush: true)) {
+                throw new SchedulerPersistencyException("Could not save the first ProcessingStep for Process ${process.id}")
+            }
+            if (failedConstantParameter) {
+                if (!created.save()) {
+                    throw new SchedulerPersistencyException("Could not save ProcessingStepUpdate for Process ${process.id}")
+                }
+                ProcessingStepUpdate failure = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: new Date(), previous: created, processingStep: step)
+                ProcessingError error = new ProcessingError(errorMessage: "Failed to add constant input parameter ${failedConstantParameter.id} of type ${failedConstantParameter.type.name} to new processing step",
+                        processingStepUpdate: failure)
+                failure.error = error
+                if (!failure.save()) {
+                    throw new SchedulerPersistencyException("Could not save the ProcessingStep for Process ${process.id}")
+                }
             }
         }
         return step
