@@ -22,7 +22,7 @@ class ReferenceGenomeService {
      * @param project the project, to which the reference genome belongs to
      * @param seqType the sequencing type, to which the reference genome belongs to
      * @deprecated The {@link ReferenceGenome} will not depend on {@link Project} and {@link SeqType} alone in the
-     * future (see OTP-905 for example). Use {@link SeqTrack#getReferenceGenome()} instead.
+     * future (see OTP-905 for example). Use {@link SeqTrack#getConfiguredReferenceGenome()} instead.
      */
     @Deprecated
     public ReferenceGenome referenceGenome(Project project, SeqType seqType) {

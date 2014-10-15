@@ -33,13 +33,15 @@ class ExomeSeqTrack extends SeqTrack {
     }
 
     /**
-     * @return The {@link BedFile}, or <code>null</code> if it is unknown.
+     * Returns the {@link BedFile} which is configured to be used for aligning this SeqTrack, or
+     * <code>null</code> if it is unknown.
+     * Note that the configuration may change in the future.
      */
-    BedFile getBedFile() {
+    BedFile getConfiguredBedFile() {
         if (!exomeEnrichmentKit) {
             return null
         }
-        final ReferenceGenome refGenome = referenceGenome
+        final ReferenceGenome refGenome = configuredReferenceGenome
         if (!refGenome) {
             return null
         }

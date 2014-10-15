@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.dataprocessing
 import static org.springframework.util.Assert.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState
 
 /**
  * Execution of the alignment on the particular data file is called AlignmentPass
@@ -75,12 +74,12 @@ class AlignmentPassService {
      * Checks if the {@link ReferenceGenome} is available for this {@link Project} and {@link SeqType}.
      * If it is missing the method returns false, otherwise true.
      *
-     * @deprecated Just check whether <code>seqTrack.referenceGenome</code> is <code>null</code>.
+     * @deprecated Just check whether <code>seqTrack.configuredReferenceGenome</code> is <code>null</code>.
      */
     @Deprecated
     public boolean isReferenceGenomeAvailable(SeqTrack seqTrack) {
         notNull(seqTrack, "The input seqTrack of method isReferenceGenomeAvailable is null")
-        return seqTrack.referenceGenome != null
+        return seqTrack.configuredReferenceGenome != null
     }
 
 
@@ -92,7 +91,7 @@ class AlignmentPassService {
         notNull(seqTrack, "The input seqTrack of method isExomeEnrichmentKitAvailable is null")
 
         if (seqTrack instanceof ExomeSeqTrack) {
-            return seqTrack.exomeEnrichmentKit == null || seqTrack.bedFile == null
+            return seqTrack.exomeEnrichmentKit == null || seqTrack.configuredBedFile == null
         } else {
             return false
         }

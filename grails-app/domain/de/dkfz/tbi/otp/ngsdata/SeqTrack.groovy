@@ -91,7 +91,7 @@ class SeqTrack {
      * <code>null</code> if it is unknown.
      * Note that the configuration may change in the future.
      */
-    ReferenceGenome getReferenceGenome() {
+    ReferenceGenome getConfiguredReferenceGenome() {
         return atMostOneElement(
                 ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndDeprecatedDateIsNull(project, seqType)
         )?.referenceGenome

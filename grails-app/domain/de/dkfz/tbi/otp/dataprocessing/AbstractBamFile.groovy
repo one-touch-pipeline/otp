@@ -123,21 +123,29 @@ abstract class AbstractBamFile {
         coverageWithN(nullable: true)
     }
 
+    /**
+     * TODO: OTP-1112: This returns the <strong>configured</strong> reference genome. This might be different from the
+     * reference genome which was actually used to produce this BAM file.
+     */
     ReferenceGenome getReferenceGenome() {
-        this.containedSeqTracks*.referenceGenome?.find()
+        this.containedSeqTracks*.configuredReferenceGenome?.find()
     }
 
     boolean isQualityAssessed() {
         qualityAssessmentStatus == QaProcessingStatus.FINISHED
     }
 
+    /**
+     * TODO: OTP-1112: This returns the <strong>configured</strong> BED file. This might be different from the
+     * BED file which was actually used to produce this BAM file.
+     */
     public BedFile getBedFile() {
         assert seqType.name == SeqTypeNames.EXOME.seqTypeName : "A BedFile is only available when the sequencing type is exome."
         List<SeqTrack> seqTracks = containedSeqTracks as List
 
         assert seqTracks.size() > 0
-        BedFile bedFileToCompare = seqTracks.first().bedFile
-        assert containedSeqTracks.each { it.bedFile == bedFileToCompare }
+        BedFile bedFileToCompare = seqTracks.first().configuredBedFile
+        assert containedSeqTracks.each { it.configuredBedFile == bedFileToCompare }
         return bedFileToCompare
     }
 }
