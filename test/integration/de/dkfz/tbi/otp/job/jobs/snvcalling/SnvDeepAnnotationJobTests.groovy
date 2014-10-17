@@ -176,7 +176,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvCallingInstance2 = null
         processedMergedBamFile1 = null
         // Reset meta classes
-        snvDeepAnnotationJob.executionHelperService.executionService.metaClass = null
+        executionService.metaClass = null
         createClusterScriptService.metaClass = null
         LsdfFilesService.metaClass = null
         // Clean-up
@@ -231,7 +231,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         SnvCallingStep step = SnvCallingStep.SNV_DEEPANNOTATION
         snvDeepAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         snvDeepAnnotationJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult -> }
-        snvDeepAnnotationJob.executionHelperService.executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options ->
+        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options ->
 
             String scriptCommandPart = "# BEGIN ORIGINAL SCRIPT\n" +
                     "/tmp/scriptLocation/deepAnnotation.sh\n" +
@@ -272,7 +272,6 @@ CHROMOSOME_INDICES=( {1..21} X Y)
             assert annotationFile.text == deepAnnotationFile.text
         } finally {
             schedulerService.finishedJobExecutionOnCurrentThread(snvDeepAnnotationJob)
-            snvDeepAnnotationJob.executionHelperService.executionService.metaClass = null
         }
     }
 

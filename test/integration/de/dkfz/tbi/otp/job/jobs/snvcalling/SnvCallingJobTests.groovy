@@ -174,7 +174,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         externalScript_Calling = null
         snvJobResult = null
         createClusterScriptService.metaClass = null
-        snvCallingJob.executionHelperService.executionService.metaClass = null
+        executionService.metaClass = null
         LsdfFilesService.metaClass = null
         assert testDirectory.deleteDir()
     }
@@ -225,7 +225,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
         snvCallingJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult ->
             return true
         }
-        snvCallingJob.executionHelperService.executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options ->
+        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options ->
             return [PBS_ID]
         }
         schedulerService.startingJobExecutionOnCurrentThread(snvCallingJob)
@@ -233,7 +233,6 @@ CHROMOSOME_INDICES=( {1..21} XY)
             assertEquals(NextAction.WAIT_FOR_CLUSTER_JOBS, snvCallingJob.maybeSubmit(snvCallingInstance))
         } finally {
             schedulerService.finishedJobExecutionOnCurrentThread(snvCallingJob)
-            snvCallingJob.executionHelperService.executionService.metaClass = null
         }
     }
 

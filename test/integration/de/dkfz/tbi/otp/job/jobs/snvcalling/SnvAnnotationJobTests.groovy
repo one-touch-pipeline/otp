@@ -136,7 +136,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvCallingInstance2 = null
         snvJobResultInput = null
         processedMergedBamFile1 = null
-        snvAnnotationJob.executionHelperService.executionService.metaClass = null
+        executionService.metaClass = null
         LsdfFilesService.metaClass = null
         assert testDirectory.deleteDir()
     }
@@ -188,11 +188,9 @@ CHROMOSOME_INDICES=( {1..21} XY)
         snvAnnotationJob.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
             return new File(processedMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
         }
-        snvAnnotationJob.executionHelperService.executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options ->
+        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options ->
             return [PBS_ID]
         }
-
-
         snvCallingInstance.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResultInput }
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> return true }
 
@@ -202,7 +200,6 @@ CHROMOSOME_INDICES=( {1..21} XY)
             assertEquals(NextAction.WAIT_FOR_CLUSTER_JOBS, snvAnnotationJob.maybeSubmit(snvCallingInstance2))
         } finally {
             schedulerService.finishedJobExecutionOnCurrentThread(snvAnnotationJob)
-            snvAnnotationJob.executionHelperService.executionService.metaClass = null
         }
     }
 
