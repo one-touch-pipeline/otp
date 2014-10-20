@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import static de.dkfz.tbi.TestCase.*
 import static org.junit.Assert.*
 import org.junit.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -136,7 +137,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvCallingInstance2 = null
         snvJobResultInput = null
         processedMergedBamFile1 = null
-        executionService.metaClass = null
+        removeMetaClass(ExecutionService, executionService)
         LsdfFilesService.metaClass = null
         assert testDirectory.deleteDir()
     }

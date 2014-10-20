@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import static de.dkfz.tbi.TestCase.*
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
@@ -175,8 +176,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvCallingInstance2 = null
         externalScript_Calling = null
         snvJobResult = null
-        createClusterScriptService.metaClass = null
-        executionService.metaClass = null
+        removeMetaClass(CreateClusterScriptService, createClusterScriptService)
+        removeMetaClass(ExecutionService, executionService)
         LsdfFilesService.metaClass = null
         assert testDirectory.deleteDir()
     }

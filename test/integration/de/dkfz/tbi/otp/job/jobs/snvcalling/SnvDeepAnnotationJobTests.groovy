@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import static de.dkfz.tbi.TestCase.*
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
 import static org.junit.Assert.*
@@ -176,8 +177,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvCallingInstance2 = null
         processedMergedBamFile1 = null
         // Reset meta classes
-        executionService.metaClass = null
-        createClusterScriptService.metaClass = null
+        removeMetaClass(ExecutionService, executionService)
+        removeMetaClass(CreateClusterScriptService, createClusterScriptService)
         LsdfFilesService.metaClass = null
         // Clean-up
         assert testDirectory.deleteDir()
@@ -232,7 +233,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvDeepAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         snvDeepAnnotationJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult -> }
         executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options ->
-/*
+
             String scriptCommandPart = "# BEGIN ORIGINAL SCRIPT\n" +
                     "/tmp/scriptLocation/deepAnnotation.sh\n" +
                     "# END ORIGINAL SCRIPT"
@@ -249,7 +250,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
             assert command.contains(scriptCommandPart)
             assert command.contains(qsubParameterCommandPart)
-*/
+
             return [PBS_ID]
         }
         snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep snvCallingStep -> return snvJobResult_Annotation }
