@@ -14,7 +14,7 @@ class SampleType {
      * @see #getCategory(Project)
      */
     enum Category {
-        UNKNOWN,
+        UNKNOWN,  // TODO: OTP-1169
         DISEASE,
         CONTROL
     }

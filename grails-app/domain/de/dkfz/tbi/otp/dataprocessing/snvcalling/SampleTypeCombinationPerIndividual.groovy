@@ -110,6 +110,11 @@ class SampleTypeCombinationPerIndividual {
         }
     }
 
+    @Override
+    String toString() {
+        return "STCPI ${id} ${individual.pid} ${sampleType1.name} ${sampleType2.name} ${seqType.name} ${seqType.libraryLayout}"
+    }
+
     /**
      * Returns the latest ProcessedMergedBamFile which belongs to the given {@link SampleType}
      * for this {@link SampleTypeCombinationPerIndividual}, if available and not withdrawn, otherwise null.
@@ -129,5 +134,63 @@ class SampleTypeCombinationPerIndividual {
                 }
             }
         }?.findAll {it.isMostRecentBamFile() })
+    }
+
+    /**
+     * Finds distinct combinations of [individual, sampleType1, sampleType2, seqType] with this criteria:
+     * <ul>
+     *     <li>A pair of non-withdrawn SeqTracks exists for that combination and sampleType1 has category
+     *         {@link SampleType.Category#DISEASE} and sampleType2 has category {@link SampleType.Category#CONTROL}.</li>
+     *     <li>The seqType is processable by OTP.</li>
+     *     <li>No SampleTypeCombinationPerIndividual exists for that combination.</li>
+     * </ul>
+     * The results are returned as SampleTypeCombinationPerIndividual instances, <em>which have not been persisted yet</em>.
+     */
+    static Collection<SampleTypeCombinationPerIndividual> findMissingDiseaseControlCombinations() {
+        final Collection queryResults = SampleTypeCombinationPerIndividual.executeQuery("""
+            SELECT DISTINCT
+              st1.sample.individual,
+              st1.sample.sampleType,
+              st2.sample.sampleType,
+              st1.seqType
+            FROM
+              SeqTrack st1,
+              SeqTrack st2,
+              SampleTypePerProject stpp1,
+              SampleTypePerProject stpp2
+            WHERE
+              st1.seqType IN (:seqTypes) AND
+              st2.seqType = st1.seqType AND
+              st2.sample.individual = st1.sample.individual AND
+              stpp1.project = st1.sample.individual.project AND
+              stpp2.project = st1.sample.individual.project AND
+              stpp1.sampleType = st1.sample.sampleType AND
+              stpp2.sampleType = st2.sample.sampleType AND
+              stpp1.category = :disease AND
+              stpp2.category = :control AND
+              NOT EXISTS (FROM DataFile WHERE seqTrack = st1 AND fileType.type = :fileType AND fileWithdrawn = true) AND
+              NOT EXISTS (FROM DataFile WHERE seqTrack = st2 AND fileType.type = :fileType AND fileWithdrawn = true) AND
+              NOT EXISTS (
+                FROM
+                  SampleTypeCombinationPerIndividual
+                WHERE
+                  individual = st1.sample.individual AND
+                  sampleType1 = st1.sample.sampleType AND
+                  sampleType2 = st2.sample.sampleType AND
+                  seqType = st1.seqType)
+            """, [
+                seqTypes: SeqTypeService.alignableSeqTypes(),
+                disease: SampleType.Category.DISEASE,
+                control: SampleType.Category.CONTROL,
+                fileType: FileType.Type.SEQUENCE
+            ], [readOnly: true])
+        return queryResults.collect {
+            new SampleTypeCombinationPerIndividual(
+                individual: it[0],
+                sampleType1: it[1],
+                sampleType2: it[2],
+                seqType: it[3],
+            )
+        }
     }
 }
