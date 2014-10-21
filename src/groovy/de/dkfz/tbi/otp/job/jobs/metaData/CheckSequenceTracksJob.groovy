@@ -21,7 +21,7 @@ class CheckSequenceTracksJob extends AbstractEndStateAwareJobImpl {
             succeed()
         } else {
             log.error "validation failed, because not all datafiles are used in seq tracks"
-            fail()
+            throw new RuntimeException('Validation failed. See the job log for details.')
         }
     }
 }
