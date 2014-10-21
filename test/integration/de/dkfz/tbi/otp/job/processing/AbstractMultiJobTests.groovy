@@ -113,14 +113,14 @@ class AbstractMultiJobTests extends TestCase {
                     if (withResuming) {
                         assert suspendCancelled.get()
                     }
-                    assert ClusterJobIdentifierImpl.containSame(finishedClusterJobs, clusterJobs1)
+                    assert containSame(finishedClusterJobs, clusterJobs1)
                     assert !job.resumable
                     clusterJobs2.each {
                         assert createClusterJob(step, it).save(flush: true)
                     }
                     return NextAction.WAIT_FOR_CLUSTER_JOBS
                 case 3:
-                    assert ClusterJobIdentifierImpl.containSame(finishedClusterJobs, clusterJobs2)
+                    assert containSame(finishedClusterJobs, clusterJobs2)
                     assert !job.resumable
                     return NextAction.SUCCEED
                 default:
@@ -136,7 +136,7 @@ class AbstractMultiJobTests extends TestCase {
         assert step.latestProcessingStepUpdate.state == ExecutionState.STARTED
         assert job.resumable
         monitoredJobs = pbsMonitorService.queuedJobs[job]
-        assert ClusterJobIdentifierImpl.containSame(monitoredJobs, clusterJobs1)
+        assert containSame(monitoredJobs, clusterJobs1)
         pbsMonitorService.queuedJobs = [:]
 
         if (withResuming) {
@@ -172,7 +172,7 @@ class AbstractMultiJobTests extends TestCase {
         assert step.latestProcessingStepUpdate.state == ExecutionState.STARTED
         assert job.resumable
         monitoredJobs = pbsMonitorService.queuedJobs[job]
-        assert ClusterJobIdentifierImpl.containSame(monitoredJobs, clusterJobs2)
+        assert containSame(monitoredJobs, clusterJobs2)
         pbsMonitorService.queuedJobs = [:]
 
         if (withResuming) {
@@ -191,7 +191,7 @@ class AbstractMultiJobTests extends TestCase {
             assert step.latestProcessingStepUpdate.state == ExecutionState.STARTED
             assert job.resumable
             monitoredJobs = pbsMonitorService.queuedJobs[job]
-            assert ClusterJobIdentifierImpl.containSame(monitoredJobs, clusterJobs2)
+            assert containSame(monitoredJobs, clusterJobs2)
             pbsMonitorService.queuedJobs = [:]
         }
 
@@ -262,5 +262,11 @@ class AbstractMultiJobTests extends TestCase {
         assert atomicPhase.get() == 2
 
         assertFailed(job, ARBITRARY_MESSAGE)
+    }
+
+    static boolean containSame(final Collection<? extends ClusterJobIdentifier> c1, final Collection<? extends ClusterJobIdentifier> c2) {
+        return TestCase.containSame(
+                ClusterJobIdentifierImpl.asClusterJobIdentifierImplList(c1),
+                ClusterJobIdentifierImpl.asClusterJobIdentifierImplList(c2))
     }
 }
