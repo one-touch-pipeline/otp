@@ -116,7 +116,8 @@
                     </table>
                 </div>
             </g:each>
-            <g:if test="${ind.mutations}">
+            <h1><g:link controller="sampleTypeCombinationPerIndividual" action="index" params="[mockPid: ind.mockPid]"><g:message code="individual.snv.detail"/></g:link></h1>
+             <g:if test="${ind.mutations}">
                 <h1><g:message code="individual.show.analysisResults"/></h1>
                 <div class="tableBlock">
                     <g:each var="mutation" in="${ind.mutations}">

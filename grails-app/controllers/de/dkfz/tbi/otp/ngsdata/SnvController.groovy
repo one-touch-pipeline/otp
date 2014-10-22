@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.converters.JSON
 import de.dkfz.tbi.otp.ProcessingThresholds.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.SampleType.Category
+import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class SnvController {
 
@@ -11,6 +13,7 @@ class SnvController {
     SampleTypeService sampleTypeService
     SeqTypeService seqTypeService
     ProcessingThresholdsService processingThresholdsService
+    IndividualService individualService
 
     Map index() {
         String projectName = params.projectName
@@ -71,6 +74,16 @@ class SnvController {
             groupedDiseaseTypes: groupedDiseaseTypes,
             groupedThresholds: groupedThresholds
         ]
+    }
+
+    JSON dataTableSourceForIndividuals(DataTableCommand cmd) {
+        Map dataToRender = cmd.dataToRender()
+        Project project = projectService.getProjectByName(params.project)
+        List data = individualService.findAllMockPidsByProject(project)
+        dataToRender.iTotalRecords = data.size()
+        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+        dataToRender.aaData = data.collect{[it]}
+        render dataToRender as JSON
     }
 
 }
