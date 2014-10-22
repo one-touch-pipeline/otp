@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.utils.DataTableCommand
 import grails.converters.JSON
 import grails.util.GrailsNameUtils
 import org.springframework.security.core.context.SecurityContextHolder
+import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.utils.DataTableCommand
 
 @SuppressWarnings("GrailsPublicControllerMethod")
 class ProcessesController {
@@ -95,31 +96,31 @@ class ProcessesController {
         // so we have to sort the fetched data
         dataToRender.aaData.sort { a, b ->
             switch (cmd.iSortCol_0) {
-            case 0: // status
-                return a[0] <=> b[0]
-            case 1: // succeeded/finished
-                if (a[1] && b[1]) {
-                    return a[1].succeeded/a[1].finished <=> b[1].succeeded/b[1].finished
-                } else if (a[1]) {
-                    return 1
-                } else if (b[1]) {
-                    return -1
-                } else {
-                    return 0
-                }
-            case 3: // number of processes
-                return a[3] <=> b[3]
-            case 4: // number of failed
-                return a[4] <=> b[4]
-            case 5: // last succeeded
-                return a[5] <=> b[5]
-            case 6: // last failed
-                return a[6] <=> b[6]
-            case 7: // duration
-                return a[7] <=> b[7]
-            case 2: // id -> default
-            default:
-                return a[2].id <=> b[2].id
+                case 0: // status
+                    return a[0] <=> b[0]
+                case 1: // succeeded/finished
+                    if (a[1] && b[1]) {
+                        return a[1].succeeded/a[1].finished <=> b[1].succeeded/b[1].finished
+                    } else if (a[1]) {
+                        return 1
+                    } else if (b[1]) {
+                        return -1
+                    } else {
+                        return 0
+                    }
+                case 3: // number of processes
+                    return a[3] <=> b[3]
+                case 4: // number of failed
+                    return a[4] <=> b[4]
+                case 5: // last succeeded
+                    return a[5] <=> b[5]
+                case 6: // last failed
+                    return a[6] <=> b[6]
+                case 7: // duration
+                    return a[7] <=> b[7]
+                case 2: // id -> default
+                default:
+                    return a[2].id <=> b[2].id
             }
         }
         // reverse sort order if descending
@@ -138,13 +139,13 @@ class ProcessesController {
         Map dataToRender = cmd.dataToRender()
         String sort
         switch (cmd.iSortCol_0) {
-        case 2:
-            sort = "started"
-            break
-        case 0:
-        default:
-            sort = "id"
-            break
+            case 2:
+                sort = "started"
+                break
+            case 0:
+            default:
+                sort = "id"
+                break
         }
 
         JobExecutionPlan plan = jobExecutionPlanService.getPlan(params.id as long)
@@ -309,11 +310,19 @@ class ProcessesController {
                 param.id,
                 param.type.name,
                 param.type.description,
-                param.value,
+                formatParamValue(param),
                 jobName
             ]
         }
         render dataToRender as JSON
+    }
+
+    String formatParamValue(Parameter param) {
+        if (param.type.name == JobParameterKeys.SCRIPT) {
+            return "<pre>${param.value?.encodeAsHTML()}</pre>"
+        } else {
+            return param.value?.encodeAsHTML()
+        }
     }
 
     def getProcessingErrorStackTrace() {
