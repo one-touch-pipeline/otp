@@ -193,4 +193,16 @@ class SampleTypeCombinationPerIndividual {
             )
         }
     }
+
+    /**
+     * Sets {@link #needsProcessing} of all specified instances to the specified value and saves the instances.
+     */
+    static void setNeedsProcessing(final Collection<SampleTypeCombinationPerIndividual> combinations, final boolean needsProcessing) {
+        SampleTypeCombinationPerIndividual.withTransaction {
+            combinations.each {
+                it.needsProcessing = needsProcessing
+                assert it.save()
+            }
+        }
+    }
 }

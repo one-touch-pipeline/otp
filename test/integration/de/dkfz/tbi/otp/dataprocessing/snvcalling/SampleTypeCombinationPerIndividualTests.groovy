@@ -9,7 +9,7 @@ import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.Individual.Type
 
-class SampleTypeCombinationPerIndividualTests {
+class SampleTypeCombinationPerIndividualTests extends GroovyTestCase {
 
     Project project
     Individual individual
@@ -82,7 +82,7 @@ class SampleTypeCombinationPerIndividualTests {
         sampleCombinationPerIndividual.save()
     }
 
-    @Test(expected= ValidationException)
+    @Test
     void testPairsWithSameSampleTypes() {
         SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
                 individual: individual,
@@ -90,10 +90,12 @@ class SampleTypeCombinationPerIndividualTests {
                 sampleType2: sampleType1,
                 seqType: seqType
                 )
-        sampleCombinationPerIndividual.save()
+        shouldFail ValidationException, {
+            sampleCombinationPerIndividual.save()
+        }
     }
 
-    @Test(expected= ValidationException)
+    @Test
     void testPairsUniquePerIndividual() {
         SampleTypeCombinationPerIndividual sampleCombinationPerIndividual1 = new SampleTypeCombinationPerIndividual(
                 individual: individual,
@@ -108,10 +110,12 @@ class SampleTypeCombinationPerIndividualTests {
                 sampleType2: sampleType2,
                 seqType: seqType
                 )
-        sampleCombinationPerIndividual2.save()
+        shouldFail ValidationException, {
+            sampleCombinationPerIndividual2.save()
+        }
     }
 
-    @Test(expected= ValidationException)
+    @Test
     void testPairsUniquePerIndividualInBothDirections() {
         SampleTypeCombinationPerIndividual sampleCombinationPerIndividual1 = new SampleTypeCombinationPerIndividual(
                 individual: individual,
@@ -126,7 +130,9 @@ class SampleTypeCombinationPerIndividualTests {
                 sampleType2: sampleType1,
                 seqType: seqType
                 )
-        sampleCombinationPerIndividual2.save()
+        shouldFail ValidationException, {
+            sampleCombinationPerIndividual2.save()
+        }
     }
 
     @Test
@@ -305,6 +311,40 @@ class SampleTypeCombinationPerIndividualTests {
         assertEquals(processedMergedBamFile2_A, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeA))
         assertEquals(processedMergedBamFile2_B, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeB))
 
+    }
+
+    @Test
+    void testSetNeedsProcessingTrue() {
+        testSetNeedsProcessing(true)
+    }
+
+    @Test
+    void testSetNeedsProcessingFalse() {
+        testSetNeedsProcessing(false)
+    }
+
+    private void testSetNeedsProcessing(final boolean needsProcessing) {
+        final SampleTypeCombinationPerIndividual nonPersistedCombination = new SampleTypeCombinationPerIndividual(
+                individual: individual,
+                sampleType1: sampleType1,
+                sampleType2: sampleType2,
+                seqType: seqType,
+                needsProcessing: needsProcessing,  // Tests that the instance is persisted even if it already has the correct value.
+        )
+        final SampleTypeCombinationPerIndividual persistedCombination = new SampleTypeCombinationPerIndividual(
+                individual: individual,
+                sampleType1: sampleType1,
+                sampleType2: sampleType2,
+                seqType: SeqType.build(),
+                needsProcessing: !needsProcessing,
+        )
+        assert persistedCombination.save()
+
+        SampleTypeCombinationPerIndividual.setNeedsProcessing([nonPersistedCombination, persistedCombination], needsProcessing)
+
+        assert nonPersistedCombination.needsProcessing == needsProcessing
+        assert nonPersistedCombination.id
+        assert persistedCombination.needsProcessing == needsProcessing
     }
 
     private ProcessedMergedBamFile createProcessedMergedBamFile(String identifier) {
