@@ -50,8 +50,13 @@ ${CHROMOSOME_NAMES_VARIABLE_NAME}=\${CHROMOSOME_INDICES[@]}
      * <p>
      * On the other hand, later steps can use the output if earlier steps <em>from an earlier
      * {@link SnvCallingInstance}</em>, so in some situations it makes sense to have the execute flag of early steps to 0.
+     *
+     * <p>
+     * Due to implementation details, the Deep Annotation step can not be run without doing the normal Annotation first.
+     * This because the Annotation step intermediate results are not stored.
      */
     private void ensureExecuteFlagsAreConsistent() {
+        // sanity check 1: once we do a step, (re)do all steps following it
         boolean anyExecuteFlagSet = false
         SnvCallingStep.values().each {
             final boolean flag = getExecuteStepFlag(it)
@@ -61,6 +66,12 @@ ${CHROMOSOME_NAMES_VARIABLE_NAME}=\${CHROMOSOME_INDICES[@]}
             if (flag) {
                 anyExecuteFlagSet = true
             }
+        }
+
+        // sanity check 2: doing deep-annotation requires doing annotation first,
+        // to prepare the (transient) annotation-results to deep-annotate.
+        if (getExecuteStepFlag(SnvCallingStep.SNV_DEEPANNOTATION) && !getExecuteStepFlag(SnvCallingStep.SNV_ANNOTATION)) {
+            throw new RuntimeException("Illegal config, trying to do DeepAnnotation without the required Annotation step.")
         }
     }
 

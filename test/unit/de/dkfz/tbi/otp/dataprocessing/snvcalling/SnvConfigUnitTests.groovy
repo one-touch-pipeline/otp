@@ -14,10 +14,10 @@ import grails.test.mixin.TestFor
 class SnvConfigUnitTests extends TestCase {
 
     static final String LEGAL_EXECUTE_FLAGS =
-            "RUN_CALLING=0\n" +
-            "RUN_SNV_ANNOTATION=0\n" +
-            "RUN_SNV_DEEPANNOTATION=1\n" +
-            "RUN_FILTER_VCF=1"
+    "RUN_CALLING=0\n" +
+    "RUN_SNV_ANNOTATION=1\n" +
+    "RUN_SNV_DEEPANNOTATION=1\n" +
+    "RUN_FILTER_VCF=1"
     static final String LEGAL_CHROMOSOME_INDICES =
             "CHROMOSOME_INDICES=( {8..11} A BC )"
     static final String LEGAL_CONFIG =
@@ -37,11 +37,21 @@ class SnvConfigUnitTests extends TestCase {
     @Test
     void testPreviousStepExecuteFlagIsNotSet() {
         testWithIllegalConfig(
-            'RUN_CALLING=1\n' +
-            'RUN_SNV_ANNOTATION=0\n' +
-            'RUN_SNV_DEEPANNOTATION=0\n' +
-            'RUN_FILTER_VCF=0',
-            "Illegal config. ${SnvCallingStep.SNV_ANNOTATION} is configured not to be executed, but a previous step is.")
+                'RUN_CALLING=1\n' +
+                'RUN_SNV_ANNOTATION=0\n' +
+                'RUN_SNV_DEEPANNOTATION=0\n' +
+                'RUN_FILTER_VCF=0',
+                "Illegal config. ${SnvCallingStep.SNV_ANNOTATION} is configured not to be executed, but a previous step is.")
+    }
+
+    @Test
+    void testDeepAnnotationRequiresAnnotation() {
+        testWithIllegalConfig(
+                'RUN_CALLING=0\n' +
+                'RUN_SNV_ANNOTATION=0\n' +
+                'RUN_SNV_DEEPANNOTATION=1\n' +
+                'RUN_FILTER_VCF=1',
+                "Illegal config, trying to do DeepAnnotation without the required Annotation step.")
     }
 
     @Test
@@ -125,7 +135,7 @@ class SnvConfigUnitTests extends TestCase {
 
     void assertCorrectValues(final SnvConfig config) {
         assert !config.getExecuteStepFlag(CALLING)
-        assert !config.getExecuteStepFlag(SNV_ANNOTATION)
+        assert config.getExecuteStepFlag(SNV_ANNOTATION)
         assert config.getExecuteStepFlag(SNV_DEEPANNOTATION)
         assert config.getExecuteStepFlag(FILTER_VCF)
         assert config.chromosomeNames == ['8', '9', '10', '11', 'A', 'BC']

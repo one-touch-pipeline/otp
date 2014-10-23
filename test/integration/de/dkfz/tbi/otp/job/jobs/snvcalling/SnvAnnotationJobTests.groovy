@@ -153,7 +153,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvCallingInstance2.config.configuration = """
 RUN_CALLING=0
 RUN_SNV_ANNOTATION=0
-RUN_SNV_DEEPANNOTATION=1
+RUN_SNV_DEEPANNOTATION=0
 RUN_FILTER_VCF=1
 CHROMOSOME_INDICES=( {1..21} XY)
 """
@@ -171,7 +171,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
         snvCallingInstance2.config.configuration = """
 RUN_CALLING=0
 RUN_SNV_ANNOTATION=0
-RUN_SNV_DEEPANNOTATION=1
+RUN_SNV_DEEPANNOTATION=0
 RUN_FILTER_VCF=1
 CHROMOSOME_INDICES=( {1..21} XY)
 """
@@ -179,7 +179,11 @@ CHROMOSOME_INDICES=( {1..21} XY)
         snvAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         snvAnnotationJob.metaClass.addOutputParameter = { String name, String value -> }
         snvAnnotationJob.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return null }
+        assert (
         shouldFail(RuntimeException, { snvAnnotationJob.maybeSubmit(snvCallingInstance2) })
+        ==
+        "This SNV workflow instance is configured not to do the SNV SNV_ANNOTATION and no non-withdrawn SNV SNV_ANNOTATION was done before, so subsequent jobs will have no input."
+        )
     }
 
     @Test
@@ -218,7 +222,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
             return new File(processedMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
         }
         try {
-            snvAnnotationJob.validate(snvCallingInstance2)
+            assertNull(snvAnnotationJob.validate(snvCallingInstance2))
         } finally {
             configFile.parentFile.deleteDir()
             checkpointFile.delete()
