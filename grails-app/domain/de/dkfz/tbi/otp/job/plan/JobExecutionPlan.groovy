@@ -43,6 +43,7 @@ class JobExecutionPlan implements Serializable {
      */
     ProcessParameter processParameter
     /**
+     * TODO: OTP-1189: Probably remove this field.
      * The number of Processes can be limited to a certain values if needed.
      * If the value is negative there is no limit.
      * The default value is -1, indicating that there is no limitation.
