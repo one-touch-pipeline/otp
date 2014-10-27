@@ -256,7 +256,7 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
 
         String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
         executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildFileStructure}; ${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
-        run("scripts/MetaDataWorkflow.groovy")
+        run("scripts/workflows/MetaDataWorkflow.groovy")
 
         // there will be only one at the database
         JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
@@ -298,7 +298,7 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
         String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
         executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildFileStructure}; ${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
         assertTrue(new File(metaDataFilepath).exists())
-        run("scripts/MetaDataWorkflow.groovy")
+        run("scripts/workflows/MetaDataWorkflow.groovy")
 
         // there will be only one at the database
         JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
@@ -356,7 +356,7 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
         String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
         executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildFileStructure}; ${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
         assertTrue(new File(metaDataFilepath).exists())
-        run("scripts/MetaDataWorkflow.groovy")
+        run("scripts/workflows/MetaDataWorkflow.groovy")
 
         // there will be only one at the database
         JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
@@ -397,7 +397,7 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
 
         AntibodyTarget.findOrSaveByName(ANTIBODY_TARGET_1)
 
-        run("scripts/MetaDataWorkflow.groovy")
+        run("scripts/workflows/MetaDataWorkflow.groovy")
 
         // there will be only one at the database
         JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()

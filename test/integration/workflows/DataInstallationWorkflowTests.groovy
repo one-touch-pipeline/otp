@@ -225,7 +225,7 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
     @Ignore
     void testDataInstallation() {
         SpringSecurityUtils.doWithAuth("admin") {
-            run("scripts/DataInstallationWorkflow.groovy")
+            run("scripts/workflows/DataInstallationWorkflow.groovy")
         }
         SeqType seqType = createSeqType(SeqTypeNames.WHOLE_GENOME.seqTypeName, "SeqTypeDir")
 
@@ -261,7 +261,7 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
     @Ignore
     void testChipSeqInstallation() {
         SpringSecurityUtils.doWithAuth("admin") {
-            run("scripts/DataInstallationWorkflow.groovy")
+            run("scripts/workflows/DataInstallationWorkflow.groovy")
         }
         SeqType seqType = createSeqType(SeqTypeNames.CHIP_SEQ.seqTypeName, "chip_seq_sequencing")
 

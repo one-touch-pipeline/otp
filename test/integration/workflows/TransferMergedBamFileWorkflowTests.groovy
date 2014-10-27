@@ -717,7 +717,7 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
     @Test
     void testExecutionWithoutProcessingOptions() {
         // Import workflow from script file
-        run("scripts/TransferMergedBamFileWorkflow.groovy")
+        run("scripts/workflows/TransferMergedBamFileWorkflow.groovy")
 
         // there will be only one at the database
         JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
