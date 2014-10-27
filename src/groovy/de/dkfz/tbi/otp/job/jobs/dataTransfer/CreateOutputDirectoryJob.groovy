@@ -24,11 +24,11 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
         Set<Project> projects = projects(run)
         projects.each {Project project ->
             String[] dirs = lsdfFilesService.getListOfRunDirecotries(run, project.name)
-            dirs.each {String line ->
-                String cmd = "mkdir -p -m 2750 " + line
+            dirs.each {String directoryPath ->
+                String cmd = "mkdir -p -m 2750 ${directoryPath}; echo \$?"
                 Realm realm = configService.getRealmDataManagement(project)
-                String exitCode = executionService.executeCommand(realm, cmd)
-                log.debug "creating directory [${line}].  exit code [${exitCode}]"
+                assert executionService.executeCommand(realm, cmd) ==~ /^0\s*$/
+                assert new File(directoryPath).isDirectory()
             }
         }
     }
