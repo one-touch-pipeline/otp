@@ -17,14 +17,18 @@ public class CompareChecksumJob extends AbstractEndStateAwareJobImpl {
         Run run = Run.get(Long.parseLong(getProcessParameterValue()))
         List<DataFile> files = runProcessingService.dataFilesForProcessing(run)
 
+        boolean allOk = true
         for (DataFile file in files) {
             log.debug "Checking ${file.fileName} ${file.md5sum}"
             if (!checksumFileService.compareMd5(file)) {
-                log.debug "md5sum inconsistent for file: ${file.fileName}"
-                fail()
-                return
+                allOk = false
+                log.error "md5sum is inconsistent for file: ${file.fileName}"
             }
         }
-        succeed()
+        if (allOk) {
+            succeed()
+        } else {
+            throw new RuntimeException('At least one md5sum is incorrect. See the job log for details.')
+        }
     }
 }
