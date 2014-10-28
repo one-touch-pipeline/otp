@@ -105,6 +105,9 @@ class PbsMonitorService {
      * @param pbsMonitor The monitoring Job to notify when the job finished on the PBS
      */
     void monitor(List<String> pbsIds, Realm realm, MonitoringJob pbsMonitor) {
+        if (!pbsIds) {
+            throw new IllegalArgumentException('No cluster job IDs specified.')
+        }
         lock.lock()
         try {
             pbsIds.each { String pbsId ->
