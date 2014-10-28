@@ -2,25 +2,26 @@ package de.dkfz.tbi.otp.job.scheduler
 
 import static org.springframework.util.Assert.*
 
-import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.Future
+
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
+
 import de.dkfz.tbi.otp.job.plan.ValidatingJobDefinition
+import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.MonitoringJob
 import de.dkfz.tbi.otp.job.processing.ProcessingError
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
-import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.ValidatingJob
 import de.dkfz.tbi.otp.notification.NotificationEvent
 import de.dkfz.tbi.otp.notification.NotificationType
 import de.dkfz.tbi.otp.utils.ExceptionUtils
-import org.apache.commons.logging.LogFactory
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
 
 /**
  * Class handling the scheduling of Jobs.
@@ -55,7 +56,7 @@ class Scheduler {
     /**
      * Log for this class.
      */
-    private static final log = LogFactory.getLog(this)
+    private static final Log log = LogFactory.getLog(this)
 
     /**
      * Calls the job's {@link Job#execute()} method in the context of the job and with error handling.
@@ -137,7 +138,7 @@ class Scheduler {
                 throw new ProcessingException("Job executed before entering the CREATED state")
             } else if (existingUpdates.size() > 1) {
                 if (existingUpdates.sort{ it.id }.last().state == ExecutionState.FAILURE ||
-                    existingUpdates.sort{ it.id }.last().state == ExecutionState.RESTARTED) {
+                existingUpdates.sort{ it.id }.last().state == ExecutionState.RESTARTED) {
                     // scheduler is already in failed state - no reason to process
                     throw new ProcessingException("Job already in failed condition before execution")
                 }
@@ -149,11 +150,11 @@ class Scheduler {
             }
             // add a ProcessingStepUpdate to the ProcessingStep
             ProcessingStepUpdate update = new ProcessingStepUpdate(
-                date: new Date(),
-                state: ExecutionState.STARTED,
-                previous: existingUpdates.sort { it.date }.last(),
-                processingStep: step
-                )
+                    date: new Date(),
+                    state: ExecutionState.STARTED,
+                    previous: existingUpdates.sort { it.date }.last(),
+                    processingStep: step
+                    )
             if (!update.save(flush: true)) {
                 log.fatal("Could not create a STARTED Update for Job of type ${job.class}")
                 throw new ProcessingException("Could not create a STARTED Update for Job")
@@ -201,12 +202,13 @@ class Scheduler {
         } catch (final Throwable exceptionDuringExceptionHandling) {
             final String identifier = System.currentTimeMillis() + "-" + sprintf('%016X', new Random().nextLong())
             log.error "An exception was thrown during exception handling. The original exception (ID ${identifier}), " +
-                      "which triggered the exception handling, is:\n${ExceptionUtils.getStackTrace(exceptionToBeHandled)}\n" +
-                      "And the exception which was thrown during exception handling is:\n" +
-                      "${ExceptionUtils.getStackTrace(exceptionDuringExceptionHandling)}"
+                    "which triggered the exception handling, is:\n" +
+                    "${ExceptionUtils.getStackTrace(exceptionToBeHandled)}\n" +
+                    "And the exception which was thrown during exception handling is:\n" +
+                    "${ExceptionUtils.getStackTrace(exceptionDuringExceptionHandling)}"
             throw new RuntimeException(
-                      "An exception was thrown during exception handling. See the log for the original exception (ID ${identifier}).",
-                      exceptionDuringExceptionHandling)
+            "An exception was thrown during exception handling. See the log for the original exception (ID ${identifier}).",
+            exceptionDuringExceptionHandling)
         }
     }
 
@@ -214,29 +216,32 @@ class Scheduler {
      * The error handling done in this method may fail. If you do not expect exceptions to be thrown from error
      * handling, use {@link #doErrorHandling(Job, Throwable)} instead.
      */
-    private void doUnsafeErrorHandling(Job job, Throwable e) {
+    private void doUnsafeErrorHandling(Job job, Throwable exceptionToBeHandled) {
         schedulerService.removeRunningJob(job)
         ProcessingStep step = ProcessingStep.getInstance(job.processingStep.id)
         // add a ProcessingStepUpdate to the ProcessingStep
         ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.FAILURE,
-            previous: step.latestProcessingStepUpdate,
-            processingStep: step
-            )
+                date: new Date(),
+                state: ExecutionState.FAILURE,
+                previous: step.latestProcessingStepUpdate,
+                processingStep: step
+                )
         update.save()
         String errorHash = null
         try {
-            errorHash = errorLogService.log(e)
-        } catch (Exception ex) {
-            // do nothing
-            //throw new LoggingException("Could not write error log file properly", ex.cause)
+            errorHash = errorLogService.log(exceptionToBeHandled)
+        } catch (Exception exceptionDuringLogging) {
+            log.error "Another exception occured trying to log an exception for ProcessingStepUpdate ${update.id}\n" +
+                    "original exception:\n" +
+                    "${ExceptionUtils.getStackTrace(exceptionToBeHandled)}\n" +
+                    "exception during exception logging:\n" +
+                    "${ExceptionUtils.getStackTrace(exceptionDuringLogging)}"
         }
         ProcessingError error = new ProcessingError(
-            errorMessage: e.message ? e.message.substring(0, Math.min(e.message.length(), 255)) : "No Exception message",
-            processingStepUpdate: update,
-            stackTraceIdentifier: errorHash
-        )
+                errorMessage: exceptionToBeHandled.message ? exceptionToBeHandled.message.substring(0, Math.min(exceptionToBeHandled.message.length(), 255)) : "No Exception message",
+                processingStepUpdate: update,
+                stackTraceIdentifier: errorHash
+                )
         error.save()
         update.error = error
         if (!update.save(flush: true)) {

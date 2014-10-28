@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.scheduler
 
 import static org.springframework.util.Assert.*
 import groovy.xml.MarkupBuilder
+
 import org.apache.commons.io.FileUtils
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
@@ -50,7 +51,7 @@ class ErrorLogService {
      * @param thrownException The thrown exception
      * @return Unique hash of caught exception.
      */
-    public String log(Exception thrownException) {
+    public String log(Throwable thrownException) {
         String exceptionElements = thrownException.getMessage()
         thrownException.stackTrace.each {
             exceptionElements += it.toString()
@@ -97,7 +98,7 @@ class ErrorLogService {
      * @param thrownException The exception to store
      * @return String containing the Exception
      */
-    private String stackToString(Exception thrownException) {
+    private String stackToString(Throwable thrownException) {
         try {
             StringWriter sw = new StringWriter()
             PrintWriter pw = new PrintWriter(sw)
@@ -119,7 +120,7 @@ class ErrorLogService {
      * @param thrownException The ThrownException to be stored
      * @return String with complete xml file.
      */
-    private void contentToXml(final Exception thrownException, final File xmlFile) {
+    private void contentToXml(final Throwable thrownException, final File xmlFile) {
         StringWriter writer = new StringWriter()
         MarkupBuilder xml = new MarkupBuilder(writer)
         String stackString = stackToString(thrownException)
