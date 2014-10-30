@@ -82,6 +82,10 @@ class SeqTrack {
         return DataFile.findBySeqTrackAndFileWithdrawn(this, true)
     }
 
+    Individual getIndividual() {
+        return sample.individual
+    }
+
     Project getProject() {
         return sample.project
     }
