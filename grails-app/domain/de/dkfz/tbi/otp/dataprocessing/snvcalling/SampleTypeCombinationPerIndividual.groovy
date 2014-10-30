@@ -78,10 +78,11 @@ class SampleTypeCombinationPerIndividual {
     }
 
     static mapping = {
-        individual index: 'sample_type_combination_per_individual_individual_idx'
-        sampleType1 index: 'sample_type_combination_per_individual_sample_type1_idx'
-        sampleType2 index: 'sample_type_combination_per_individual_sample_type2_idx'
-        seqType index: 'sample_type_combination_per_individual_seq_type_idx'
+        individual      index: 'sample_type_combination_per_individual_idx1,sample_type_combination_per_individual_idx2'
+        sampleType1     index: 'sample_type_combination_per_individual_idx1,sample_type_combination_per_individual_idx2'
+        sampleType2     index: 'sample_type_combination_per_individual_idx1,sample_type_combination_per_individual_idx2'
+        seqType         index: 'sample_type_combination_per_individual_idx1,sample_type_combination_per_individual_idx2'
+        needsProcessing index: 'sample_type_combination_per_individual_idx1'
     }
 
     Project getProject() {
