@@ -39,7 +39,7 @@
                 <g:each var="sampleType" in="${sampleTypes}">
                     <tr>
                         <td>${sampleType.name}</td>
-                        <td width="3em"> <g:select  name="${project}!${sampleType.name}" from='${categories}' value='${groupedDiseaseTypes[sampleType.id] ? groupedDiseaseTypes[sampleType.id][0].category : de.dkfz.tbi.otp.ngsdata.SampleType.Category.UNKNOWN }' class="dropDown"/> </td>
+                        <td width="3em"> <g:select  name="${project}!${sampleType.name}" from='${categories}' value='${groupedDiseaseTypes[sampleType.id] ? groupedDiseaseTypes[sampleType.id][0].category : de.dkfz.tbi.otp.ngsdata.SampleType.Category.IGNORED }' class="dropDown"/> </td>
                         <g:each var="seqType" in="${alignableSeqType}">
                             <td width="1em"><g:textField onkeypress="return numberCheck(event);" name="${project}!${sampleType.name}!${seqType.name}!${seqType.libraryLayout}!numberOfLanes" value="${groupedThresholds.get(sampleType.id)?.get(seqType.id)?.get(0)?.numberOfLanes}"/></td>
                             <td width="1em"><g:textField onkeypress="return numberCheck(event);" name="${project}!${sampleType.name}!${seqType.name}!${seqType.libraryLayout}!coverage" value="${groupedThresholds.get(sampleType.id)?.get(seqType.id)?.get(0)?.coverage}"/></td>

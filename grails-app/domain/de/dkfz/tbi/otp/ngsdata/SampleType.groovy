@@ -9,12 +9,18 @@ class SampleType {
 
     /**
      * This enum specifies if the sample type belongs to a disease or a control.
-     * In the beginning this information is not available in OTP, therefore it is set to UNKNOWN
      *
      * @see #getCategory(Project)
      */
     enum Category {
-        UNKNOWN,  // TODO: OTP-1169
+        /**
+         * Sample types with their category configured as IGNORED should be silently ignored and not be processed by
+         * workflows for which the category is relevant.
+         * In contrast, if no category is configured (i.e. no {@link SampleTypePerProject} instance exists for a
+         * combination of project and sample type), such workflows should warn about the sample type category being
+         * unknown.
+         */
+        IGNORED,
         DISEASE,
         CONTROL
     }

@@ -155,14 +155,14 @@ class SampleTypeCombinationPerIndividualFindMissingDiseaseControlCombinationsTes
 
     @Test
     void testDiseaseStppSampleTypeCategoryIgnored() {
-        diseaseStpp.category = SampleType.Category.UNKNOWN
+        diseaseStpp.category = SampleType.Category.IGNORED
         assert diseaseStpp.save()
         assertFindsNothing()
     }
 
     @Test
     void testControlStppSampleTypeCategoryIgnored() {
-        controlStpp.category = SampleType.Category.UNKNOWN
+        controlStpp.category = SampleType.Category.IGNORED
         assert controlStpp.save()
         assertFindsNothing()
     }

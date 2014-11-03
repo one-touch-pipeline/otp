@@ -21,7 +21,7 @@ class SampleTypePerProject {
     /**
      * Holds the information if the specified sampleType is a DISEASE or a CONTROL in this project.
      */
-    SampleType.Category category = SampleType.Category.UNKNOWN
+    SampleType.Category category
 
     /**
      * This property is handled automatically by grails.
@@ -42,7 +42,8 @@ class SampleTypePerProject {
      * Finds distinct pairs of [project, sampleType] with this criteria:
      * <ul>
      *     <li>At least one non-withdrawn SeqTrack exists for that combination with a sequencing type which OTP can process.</li>
-     *     <li>No SampleTypePerProject exists for that combination.</li>
+     *     <li>The category of the sample type is unknown (but not {@link SampleType.Category#IGNORED}) for the project,
+     *         i.e. no SampleTypePerProject instance exists for that combination.</li>
      * </ul>
      */
     static Collection findMissingCombinations() {
