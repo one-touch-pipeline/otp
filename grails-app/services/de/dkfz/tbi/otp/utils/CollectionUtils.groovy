@@ -34,7 +34,7 @@ class CollectionUtils {
         notNull collection
         final int size = collection.size()
         if (size == 1) {
-            return collection.first()
+            return collection.iterator().next()
         } else if (size == 0 && allowNone) {
             return null
         } else {
