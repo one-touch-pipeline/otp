@@ -35,9 +35,14 @@ class ChecksumFileService {
         if (!md5File.canRead()) {
             return false
         }
-        List<String> lines = md5File.readLines()
-        List<String> tokens = lines.get(0).tokenize()
-        String md5sum = tokens.get(0)
+        String md5sum
+        try {
+            List<String> lines = md5File.readLines()
+            List<String> tokens = lines.get(0).tokenize()
+            md5sum = tokens.get(0)
+        } catch (final Exception e) {
+            throw new RuntimeException("Failed to parse MD5 file ${path}", e)
+        }
         return (md5sum.trim() == file.md5sum.trim())
     }
 
