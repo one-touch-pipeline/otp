@@ -16,6 +16,7 @@ class SampleTypePerProjectUnitTests {
         SampleTypePerProject sampleTypePerProject = new SampleTypePerProject()
         sampleTypePerProject.project = new Project()
         sampleTypePerProject.sampleType = new SampleType()
+        sampleTypePerProject.category = SampleType.Category.DISEASE
         assertTrue(sampleTypePerProject.validate())
     }
 

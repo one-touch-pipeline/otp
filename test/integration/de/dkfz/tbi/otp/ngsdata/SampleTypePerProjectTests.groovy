@@ -20,13 +20,15 @@ class SampleTypePerProjectTests extends TestCase {
 
         SampleTypePerProject sampleTypePerProject = new SampleTypePerProject(
                         project: project,
-                        sampleType: sampleType
+                        sampleType: sampleType,
+                        category: SampleType.Category.DISEASE,
                         )
         assert sampleTypePerProject.save(flush: true)
 
         SampleTypePerProject sampleTypePerProject1 = new SampleTypePerProject(
                         project: project,
-                        sampleType: sampleType
+                        sampleType: sampleType,
+                        category: SampleType.Category.CONTROL,
                         )
         shouldFail ValidationException, {
             sampleTypePerProject1.save(flush: true)
