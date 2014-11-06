@@ -6,7 +6,12 @@ class SampleIdentifier {
     static belongsTo = [sample: Sample]
 
     static constraints = {
-        name(unique: true)    // should be unique
+        name(unique: true, nullable: false,blank: false, minSize: 3,
+            validator: {String val ->
+                //should neither start nor end with a space
+                return !val.startsWith(' ') && !val.endsWith(' ')
+            }
+        )
         sample()
     }
 
