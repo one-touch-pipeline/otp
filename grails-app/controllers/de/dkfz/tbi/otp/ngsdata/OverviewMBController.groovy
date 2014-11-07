@@ -33,7 +33,6 @@ class OverviewMBController {
             seqType("WHOLE_GENOME", "MATE_PAIR")
             seqType("RNA", "PAIRED")
             seqType("MI_RNA", "SINGLE")
-            seqType("mi_rna_sequencing", "SINGLE")
         }
 
         List stringTypes = new ArrayList()
