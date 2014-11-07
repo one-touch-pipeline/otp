@@ -552,7 +552,7 @@ $.otp.workflows = {
             { "bSortable": false, "aTargets": [7] },
             { "bSortable": false, "aTargets": [8] }
         ], undefined, 240, {
-            iDisplayLength: 100,
+            iDisplayLength: 25,
             bPaginate: true
         });
         $("#enable-workflow-button").click(function () {
