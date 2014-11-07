@@ -3,6 +3,7 @@ import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.utils.ReferencedClass
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 /**
  */
@@ -66,9 +67,13 @@ class MetaDataValidationService {
                 entry.status = (run.name == entry.value) ? valid : invalid
                 break
             case "SAMPLE_ID":
-                hipoIndividualService.createHipoIndividual(entry.value)
-                SampleIdentifier sample = SampleIdentifier.findByName(entry.value)
-                entry.status = (sample != null) ? valid : invalid
+                if (checkSampleIdentifier(entry.value)) {
+                    hipoIndividualService.createHipoIndividual(entry.value)
+                    SampleIdentifier sample = SampleIdentifier.findByName(entry.value)
+                    entry.status = (sample != null) ? valid : invalid
+                } else {
+                    entry.status = invalid
+                }
                 break
             case "CENTER_NAME":
                 entry.status = invalid
@@ -113,6 +118,19 @@ class MetaDataValidationService {
         return (entry.status == invalid)? false : true
     }
 
+
+    private boolean checkSampleIdentifier(String value) {
+        //values are trimed during upload
+        if (!value) {
+            LogThreadLocal.getThreadLog()?.error('Sample Identifier may not be empty')
+            return false
+        } else if (value.size() < 3) {
+            LogThreadLocal.getThreadLog()?.error('Sample Identifier should have at least three characters')
+            return false
+        } else {
+            return true
+        }
+    }
 
     /**
      * caution: trinary result!

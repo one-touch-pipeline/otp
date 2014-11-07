@@ -207,6 +207,26 @@ class MetaDataValidationServiceUnitTests {
         assertTrue(metaDataValidationService.validateMetaDataEntry(run, map[(LIB_PREP_KIT)]))
     }
 
+
+
+    void testCheckSampleIdentifier_correct() {
+        assert metaDataValidationService.checkSampleIdentifier('CorrectName')
+    }
+
+    void testCheckSampleIdentifier_correct_minLength() {
+        assert metaDataValidationService.checkSampleIdentifier('123')
+    }
+
+    void testCheckSampleIdentifier_wrong_empty() {
+        assert !metaDataValidationService.checkSampleIdentifier('')
+    }
+
+    void testCheckSampleIdentifier_wrong_tooShort() {
+        assert !metaDataValidationService.checkSampleIdentifier('12')
+    }
+
+
+
     private Run createRun() {
         Project project = new Project(
                         name: "projectname",
