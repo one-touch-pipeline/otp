@@ -95,7 +95,7 @@ $.otp.projectProgressTable = {
         $('#display').click(function () {
             var oSettings1 = oTableProgress.fnSettings();
             oSettings1.oFeatures.bServerSide = true;
-            location.reload();
+            oTableProgress.dataTable().fnDraw();
         });
     }
 };
