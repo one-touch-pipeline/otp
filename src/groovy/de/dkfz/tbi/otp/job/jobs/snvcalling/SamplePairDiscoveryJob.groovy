@@ -2,9 +2,11 @@ package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
+import de.dkfz.tbi.otp.job.processing.ResumableJob
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
 
+@ResumableJob
 class SamplePairDiscoveryJob extends AbstractEndStateAwareJobImpl {
 
     @Override
