@@ -19,7 +19,7 @@ try {
         long freedBytes = 0L
         freedBytes += ctx.processedAlignmentFileService.deleteOldAlignmentProcessingFiles(someTimeAgo.toDate(), Duration.standardMinutes(60).millis)
         freedBytes += ctx.mergingPassService.deleteOldMergingProcessingFiles(someTimeAgo.toDate(), Duration.standardMinutes(60).millis)
-        log.info "${freedBytes} have been freed in total."
+        log.info "${freedBytes} bytes have been freed in total."
     } catch (final Throwable e) {
         e.printStackTrace(out)
         e.printStackTrace(System.out)
