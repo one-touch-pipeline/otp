@@ -60,6 +60,43 @@ class SequenceController {
         render dataToRender as JSON
     }
 
+    def exportAll(DataTableCommand cmd) {
+        SequenceFiltering filtering = SequenceFiltering.fromJSON(params.filtering)
+
+        List<Sequence> sequences = seqTrackService.listSequences(0, -1, cmd.sortOrder, SequenceSortColumn.fromDataTable(cmd.iSortCol_0), filtering)
+
+        def contentBody = sequences.collect { def row ->
+            [
+                row.projectName,
+                row.mockPid,
+                row.sampleTypeName,
+                row.seqTypeAliasOrName,
+                row.libraryLayout,
+                row.seqCenterName,
+                row.name,
+                row.laneId,
+                row.alignmentState.toString(),
+                row.dateCreated?.format('EEE MMM dd yyyy')
+            ].join(",")
+        }.join("\n")
+        def contentHeader = [
+                'Project',
+                'Individual',
+                'Sample Type',
+                'Sequence Type',
+                'Library Layout',
+                'Sequence Center',
+                'Run',
+                'Lane',
+                'OTP Alignment',
+                'Run Date'
+                ].join(',')
+        def content = "${contentHeader}\n${contentBody}\n"
+        response.setContentType("application/octet-stream")
+        response.setHeader("Content-disposition", "filename=sequence_export.csv")
+        response.outputStream << content.toString().bytes
+    }
+
     def exportCsv = {
         SequenceFiltering filtering = SequenceFiltering.fromJSON(params.filtering)
         String xml = seqTrackService.performXMLExport(filtering)

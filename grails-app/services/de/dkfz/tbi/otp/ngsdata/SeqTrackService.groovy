@@ -81,7 +81,9 @@ class SeqTrackService {
                         }
                     }
                 }
-                maxResults(max)
+                if (max != -1) { //-1 indicate in jquery datatable, that no paging is used. Therefore in that case no maxResult are set
+                    maxResults(max)
+                }
                 firstResult(offset)
                 order(column.columnName, sortOrder ? "asc" : "desc")
             }
