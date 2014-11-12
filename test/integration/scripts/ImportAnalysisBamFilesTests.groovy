@@ -34,11 +34,13 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     SoftwareTool softwareTool
     SeqPlatform seqPlatform
     Run run1
+    File testDirectory
+    File metaDataFile
+    File importShellScriptFile
 
     static final String SCRIPT_NAME = "scripts/ImportAnalysisBamFiles.groovy"
 
     static final String projectName = "PROJECT_NAME"
-    static final String metadataFileName = "bam_metadata_test.csv"
     static final String individualPid = PID
     static final String mockPid = "PID"
     static final String refGenomeName = "asdfasdf"
@@ -51,17 +53,17 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     static final List<Long> lanes2 = [12345L, 23456L, 34567L]
 
 
-    String correctHeader = """"File","Errors","InExcludeList","Size","PID","IndOTP","RefGenome","SampleType","BamType","Lanes","LanesInOTP","MissingLanes","WithdrawnLanes","Md5Sum"
+    static final String correctHeader = """"File","Errors","InExcludeList","Size","PID","IndOTP","RefGenome","SampleType","BamType","Lanes","LanesInOTP","MissingLanes","WithdrawnLanes","Md5Sum"
 """
-    String wrongHeader = """"asdf","Errors","InExcludeList","Size","PID","IndOTP","RefGenome","SampleType","BamType","Lanes","LanesInOTP","MissingLanes","WithdrawnLanes","Md5Sum"
+    static final String wrongHeader = """"asdf","Errors","InExcludeList","Size","PID","IndOTP","RefGenome","SampleType","BamType","Lanes","LanesInOTP","MissingLanes","WithdrawnLanes","Md5Sum"
 """
-    String correctData = """"${fileName}","","no","${fileSize}","${mockPid}",${individualPid},"${refGenomeName}","${sampleTypeName}","${bamType}","111129_SN952_0063_AC0A53ACXX_L005","${lanes1.join(" ")}","","","${md5sum}"
+    static final String correctData = """"${fileName}","","no","${fileSize}","${mockPid}",${individualPid},"${refGenomeName}","${sampleTypeName}","${bamType}","111129_SN952_0063_AC0A53ACXX_L005","${lanes1.join(" ")}","","","${md5sum}"
 """
-    String skipData = """"${fileName}","asdfasdf","YES","${fileSize}","${mockPid}",${individualPid},"${refGenomeName}","${sampleTypeName}","${bamType}","111129_SN952_0063_AC0A53ACXX_L005","${lanes2.join(" ")}","","","${md5sum}"
+    static final String skipData = """"${fileName}","asdfasdf","YES","${fileSize}","${mockPid}",${individualPid},"${refGenomeName}","${sampleTypeName}","${bamType}","111129_SN952_0063_AC0A53ACXX_L005","${lanes2.join(" ")}","","","${md5sum}"
 """
-    String wrongData = """"${fileName}","","no","${fileSize}","INVALID_PID",${individualPid},"${refGenomeName}","${sampleTypeName}","${bamType}","111129_SN952_0063_AC0A53ACXX_L005","${lanes2.join(" ")}","","","${md5sum}"
+    static final String wrongData = """"${fileName}","","no","${fileSize}","INVALID_PID",${individualPid},"${refGenomeName}","${sampleTypeName}","${bamType}","111129_SN952_0063_AC0A53ACXX_L005","${lanes2.join(" ")}","","","${md5sum}"
 """
-    Map<String, String> correctDataMap = [absoluteFilePath: fileName, errors: "", inExcludeList: "no", fileSize: fileSize.toString(),
+    final Map<String, String> correctDataMap = [absoluteFilePath: fileName, errors: "", inExcludeList: "no", fileSize: fileSize.toString(),
             mockPid: mockPid, pid: individualPid, refGenome: refGenomeName, sampleType: sampleTypeName, bamType: bamType,
             lanes: "-----", seqTrackIds: lanes1.join(" "), missingLanes: "", withdrawnLanes: "", md5sum: md5sum]
 
@@ -117,12 +119,16 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
         run1 = Run.build(
                 storageRealm: Run.StorageRealm.DKFZ
         )
+
+        testDirectory = TestCase.createEmptyTestDirectory()
+        metaDataFile = new File(testDirectory, "bam_metadata_test.csv")
+        importShellScriptFile = new File(testDirectory, "${projectName}-import.sh")
     }
 
     @After
     public void tearDown() {
         TestCase.removeMetaClass(CreateClusterScriptService, createClusterScriptService)
-        new File("${projectName}-import.sh").delete()
+        metaDataFile.parentFile.deleteDir()
     }
 
 
@@ -150,7 +156,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
         }
     }
 
-    private static void checkSuccess() {
+    private void checkSuccess() {
         List<FastqSet> fss = FastqSet.withCriteria {
             seqTracks {
                 eq("laneId", lanes1.first().toString())
@@ -177,7 +183,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
         assert bamFile.fileSize == fileSize
         assert bamFile.source == "analysisImport"
         assert bamFile.referenceGenome.name == refGenomeName
-        assertTrue(new File("${projectName}-import.sh").exists())
+        assertTrue(importShellScriptFile.exists())
     }
 
 
@@ -187,7 +193,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
         writeMetadataFile(correctHeader + correctData)
         checkArgumentsForCreateTransferScript()
 
-        run(SCRIPT_NAME, ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        run(SCRIPT_NAME, ["project": "${projectName}", "metadata": "${metaDataFile}"])
 
        checkSuccess()
     }
@@ -198,7 +204,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
         writeMetadataFile(correctHeader + skipData + correctData)
         checkArgumentsForCreateTransferScript()
 
-        run(SCRIPT_NAME, ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        run(SCRIPT_NAME, ["project": "${projectName}", "metadata": "${metaDataFile}"])
 
         checkSuccess()
     }
@@ -209,7 +215,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
         writeMetadataFile(correctHeader + wrongData + correctData)
         checkArgumentsForCreateTransferScript()
 
-        run(SCRIPT_NAME, ["project": "${projectName}", "metadata": "${metadataFileName}"])
+        run(SCRIPT_NAME, ["project": "${projectName}", "metadata": "${metaDataFile}"])
 
         checkSuccess()
     }
@@ -224,7 +230,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
          seqTrackIds: "LanesInOTP", missingLanes: "MissingLanes", withdrawnLanes: "WithdrawnLanes",
          md5sum: "Md5Sum"]
         List<Map<String, String>> ret = invokeMethod(new File(SCRIPT_NAME), "readFile",
-                [new File(metadataFileName), header], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+                [metaDataFile, header], ["project": "${projectName}", "metadata": "${metaDataFile}"])
         assert ret == [[absoluteFilePath: "/tumor_PID_merged.bam.rmdup.bam", errors:"", inExcludeList:"no", fileSize:"123456", mockPid:"PID",
                         pid:PID, refGenome:"asdfasdf", sampleType:"CONTROL", bamType:"RMDUP", lanes:"111129_SN952_0063_AC0A53ACXX_L005",
                         seqTrackIds:"184245 186982 585992", missingLanes:"", withdrawnLanes:"", md5sum:"12345678901234567890123456789012"]]
@@ -235,7 +241,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
         writeMetadataFile(wrongHeader + correctData)
 
         assert shouldFail (AssertionError.class, { run(SCRIPT_NAME,
-                ["project": "${projectName}", "metadata": "${metadataFileName}"])
+                ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^Error: Wrong headers/
     }
 
@@ -245,7 +251,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
 """
         writeMetadataFile(wrongHeader)
         assert shouldFail (AssertionError.class, { run(SCRIPT_NAME,
-                ["project": "${projectName}", "metadata": "${metadataFileName}"])
+                ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^Error: File must have/
     }
 
@@ -255,7 +261,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     void testInvalidMd5() {
         correctDataMap.md5sum = "-----"
         assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
-                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^Ignored .*, because of invalid MD5: .*\./
     }
 
@@ -263,7 +269,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     void testIndividualNotFound() {
         correctDataMap.pid = "-----"
         assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
-                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^Ignored .*: Individual not found\./
     }
 
@@ -271,7 +277,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     void testPidNotFound() {
         correctDataMap.mockPid = "-----"
         assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
-                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^Ignored .*: Individual not found\./
    }
 
@@ -284,7 +290,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
         individual.project = project2
         individual.save(flush: true)
         assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
-                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^Ignored .*: Wrong project\./
     }
 
@@ -292,7 +298,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     void testSampleTypeNotFound() {
         correctDataMap.sampleType = "-----"
         assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
-                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^Ignored .*: SampleType .* not found\./
     }
 
@@ -302,7 +308,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
                 name: "ASDF"
         )
         assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
-                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^Ignored .*: Individual does not contain sampleType .*\./
     }
 
@@ -310,7 +316,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     void testRefGenNotFound() {
         correctDataMap.refGenome= "-----"
         assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
-                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^Ignored .*: RefGenome .* not found\./
     }
 
@@ -319,7 +325,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
         createData()
         correctDataMap.seqTrackIds = correctDataMap.seqTrackIds + " 900000"
         assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
-                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^Ignored .*: SeqTrack .* not found\./
     }
 
@@ -340,7 +346,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
                 sampleType: sampleType,
         )
         assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
-                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^Ignored .*: Individual invalid\./
     }
 
@@ -356,7 +362,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
         individual2.save(flush: true)
 
         assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
-                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^Ignored .*: Wrong project\./
     }
 
@@ -364,7 +370,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     void testNoSeqTracks() {
         correctDataMap.seqTrackIds = ""
         assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
-                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^Ignored .*: No SeqTracks\./
     }
 
@@ -373,7 +379,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
         createData()
         correctDataMap.bamType = "---"
         assert shouldFail (IllegalArgumentException.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
-                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^No enum const class .*/
     }
 
@@ -393,21 +399,24 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     }
     @Test
     void testNoProject() {
+        writeMetadataFile('')
         assert shouldFail (AssertionError.class, { run(SCRIPT_NAME,
-                [project: "",  "metadata": "${metadataFileName}"])
+                [project: "",  "metadata": "${metaDataFile}"])
         }) =~ /Error: Project name not given\./
     }
     @Test
     void testProjectNotFound() {
+        writeMetadataFile('')
         assert shouldFail (AssertionError.class, { run(SCRIPT_NAME,
-                ["project": "asdf", "metadata": "${metadataFileName}"])
+                ["project": "asdf", "metadata": "${metaDataFile}"])
         }) =~ /Error: Project .* not found\./
     }
     @Test
     void testOutputFileExists() {
-        new File("${projectName}-import.sh").createNewFile()
+        writeMetadataFile('')
+        importShellScriptFile.createNewFile()
         assert shouldFail (AssertionError.class, { run(SCRIPT_NAME,
-                ["project": "${projectName}", metadata: "${metadataFileName}"])
+                ["project": "${projectName}", metadata: "${metaDataFile}"])
         }) =~ /Error: Output file .* exists, please move it\./
     }
 
@@ -418,7 +427,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
 
         correctDataMap.inExcludeList = "YES"
         assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "includes",
-                [correctDataMap], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+                [correctDataMap], ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^Ignored .*, set to be excluded\./
     }
 
@@ -426,7 +435,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     void testErrors() {
         correctDataMap.errors = "Fatal Error"
         assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "includes",
-                [correctDataMap], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+                [correctDataMap], ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^Ignored .*, because of errors: .*\./
     }
 
@@ -434,7 +443,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     void testMissingLanes() {
         correctDataMap.missingLanes = "123456"
         assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "includes",
-                [correctDataMap], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+                [correctDataMap], ["project": "${projectName}", "metadata": "${metaDataFile}"])
 
         }) =~ /^Ignored .*, because of missing lanes: .*\./
     }
@@ -443,15 +452,15 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     void testWithdrawnLanes() {
         correctDataMap.withdrawnLanes = "456789"
         assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "includes",
-                [correctDataMap], ["project": "${projectName}", "metadata": "${metadataFileName}"])
+                [correctDataMap], ["project": "${projectName}", "metadata": "${metaDataFile}"])
 
         }) =~ /^Ignored .*, because of withdrawn lanes: .*\./
     }
 
 
 
-    private static void writeMetadataFile(String content) {
-        new File(metadataFileName).withWriter { Writer writer ->
+    private void writeMetadataFile(String content) {
+        metaDataFile.withWriter { Writer writer ->
             writer.append(content)
         }
     }
