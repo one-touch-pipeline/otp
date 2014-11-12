@@ -2,6 +2,9 @@ package de.dkfz.tbi.otp.ngsdata
 
 import static de.dkfz.tbi.otp.utils.ThreadUtils.waitFor
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
+
+import java.util.regex.Pattern
+
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 
@@ -15,11 +18,22 @@ class LsdfFilesService {
      * Similar to {@link Paths.get(String, String...)} from Java 7.
      */
     public static File getPath(final String first, final String... more) {
+        validatePathSegment(first, "first")
         File file = new File(first)
-        for (final String part : more) {
-            file = new File(file, part)
+        for (int i = 0; i < more.length; i++) {
+            validatePathSegment(more[i], "more[${i}]")
+            file = new File(file, more[i])
         }
         return file
+    }
+
+    private static void validatePathSegment(final String segment, final String segmentPosition) {
+        if (!segment) {
+            throw new IllegalArgumentException("${segmentPosition} is blank")
+        }
+        if (segment =~ /(?:^|${Pattern.quote(File.separator)})\.{1,2}(?:${Pattern.quote(File.separator)}|$)/) {
+            throw new IllegalArgumentException("${segmentPosition} contains '.' or '..': ${segment}")
+        }
     }
 
     /**
