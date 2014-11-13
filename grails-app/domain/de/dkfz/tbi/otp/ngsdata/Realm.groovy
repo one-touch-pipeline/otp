@@ -69,7 +69,7 @@ class Realm implements Serializable {
     static constraints = {
         loggingRootPath blank:false, nullable:false
         stagingRootPath blank:true, nullable:true
-        flowControlKey blank:true, nullable:true
+        flowControlKey blank:true, nullable:true, maxSize: 3072
         flowControlHost blank:true, nullable:true
         flowControlPort nullable:true
     }
