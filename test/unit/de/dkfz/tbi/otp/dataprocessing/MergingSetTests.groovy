@@ -1,13 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.junit.Assert.*
+import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 
 @TestFor(MergingSet)
-@Mock([MergingWorkPackage, Sample, SampleType, Individual, Project, SeqType])
+@Build([MergingSet, MergingSetAssignment, ProcessedBamFile])
 class MergingSetTests {
 
     MergingWorkPackage workPackage = null
@@ -83,5 +84,49 @@ class MergingSetTests {
         assertTrue(mergingSet2.isLatestSet())
 
         assertFalse(mergingSet.isLatestSet())
+    }
+
+    @Test
+    void testGetContainedSeqTracks() {
+
+        final SeqTrack seqTrack1 = SeqTrack.build()
+        final SeqTrack seqTrack2 = SeqTrack.build()
+        final SeqTrack seqTrack3 = SeqTrack.build()
+
+        final Set<SeqTrack> seqTracks1 = [seqTrack1, seqTrack2].toSet()
+        final Set<SeqTrack> seqTracks2 = [seqTrack3].toSet()
+        final Set<SeqTrack> allSeqTracks = seqTracks1 + seqTracks2
+        assert allSeqTracks.size() == 3
+
+        final ProcessedBamFile bamFile1 = ProcessedBamFile.build()
+        bamFile1.metaClass.getContainedSeqTracks = { seqTracks1 }
+        final ProcessedBamFile bamFile2 = ProcessedBamFile.build()
+        bamFile2.metaClass.getContainedSeqTracks = { seqTracks2 }
+
+        final MergingSet mergingSet = MergingSet.build()
+        assert mergingSet.containedSeqTracks == Collections.emptySet()
+
+        MergingSetAssignment.build(mergingSet: mergingSet, bamFile: bamFile1)
+        assert mergingSet.containedSeqTracks == seqTracks1
+
+        MergingSetAssignment.build(mergingSet: mergingSet, bamFile: bamFile2)
+        assert mergingSet.containedSeqTracks == allSeqTracks
+    }
+
+    @Test
+    void testGetContainedSeqTracks_containedTwice() {
+
+        final Set<SeqTrack> seqTracks = [SeqTrack.build()].toSet()
+
+        final ProcessedBamFile bamFile1 = ProcessedBamFile.build()
+        bamFile1.metaClass.getContainedSeqTracks = { seqTracks }
+        final ProcessedBamFile bamFile2 = ProcessedBamFile.build()
+        bamFile2.metaClass.getContainedSeqTracks = { seqTracks }
+
+        final MergingSet mergingSet = MergingSet.build()
+        MergingSetAssignment.build(mergingSet: mergingSet, bamFile: bamFile1)
+        MergingSetAssignment.build(mergingSet: mergingSet, bamFile: bamFile2)
+
+        assert shouldFail(IllegalStateException, { mergingSet.containedSeqTracks }).contains('more than once')
     }
 }

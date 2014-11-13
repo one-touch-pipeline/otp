@@ -1,5 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
+import de.dkfz.tbi.otp.dataprocessing.MergingSet
+import de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment
+import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.plan.JobDefinition
@@ -125,6 +131,35 @@ class DomainFactory {
         new Realm(REALM_DEFAULTS_DKFZ_CLUSTER + [
             operationType: Realm.OperationType.DATA_PROCESSING,
         ] + myProps)
+    }
+
+    public static ProcessedBamFile assignNewProcessedBamFile(final MergingSet mergingSet) {
+
+        final SeqTrack seqTrack = SeqTrack.build(sample: mergingSet.sample, seqType: mergingSet.seqType)
+
+        DataFile.build(
+                seqTrack: seqTrack,
+                fileType: FileType.findByType(FileType.Type.SEQUENCE) ?: FileType.build(type: FileType.Type.SEQUENCE),
+                dateCreated: new Date(),  // In unit tests Grails (sometimes) does not automagically set dateCreated.
+        )
+
+        final ProcessedBamFile bamFile = ProcessedBamFile.build(
+                alignmentPass: AlignmentPass.build(seqTrack: seqTrack),
+                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
+                status: AbstractBamFile.State.PROCESSED,
+        )
+
+        MergingSetAssignment.build(mergingSet: mergingSet, bamFile: bamFile)
+
+        return bamFile
+    }
+
+    public static SnvCallingInstance createSnvCallingInstance(Map properties) {
+        if (!properties.containsKey('latestDataFileCreationDate')) {
+            properties += [latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(
+                    properties.sampleType1BamFile, properties.sampleType2BamFile)]
+        }
+        return new SnvCallingInstance(properties)
     }
 
     public static ProcessingStep createAndSaveProcessingStep(String jobClass = "de.dkfz.tbi.otp.test.job.jobs.NonExistentDummyJob") {

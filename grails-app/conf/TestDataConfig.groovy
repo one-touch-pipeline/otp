@@ -38,6 +38,13 @@ testDataConfig {
         'de.dkfz.tbi.otp.ngsdata.Individual' {
             pid = {'pid_' + (counter++)}
         }
+        'de.dkfz.tbi.otp.ngsdata.ReferenceGenome' {
+            name = {'referenceGenomeName_' + (counter++)}
+            length = 789
+            lengthWithoutN = 567
+            lengthRefChromosomes = 345
+            lengthRefChromosomesWithoutN = 123
+        }
         'de.dkfz.tbi.otp.ngsdata.Run' {
             name = {'runName_' + (counter++)}
         }

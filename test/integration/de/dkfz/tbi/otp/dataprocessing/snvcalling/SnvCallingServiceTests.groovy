@@ -106,7 +106,7 @@ class SnvCallingServiceTests {
 
     @Test
     void testSamplePairForSnvProcessingAlreadyInProcess() {
-        SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 sampleTypeCombination: sampleTypeCombinationPerIndividual,
                 config: snvConfig,
@@ -120,7 +120,7 @@ class SnvCallingServiceTests {
 
     @Test
     void testSamplePairForSnvProcessingWasProcessed() {
-        SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 sampleTypeCombination: sampleTypeCombinationPerIndividual,
                 config: snvConfig,
@@ -135,7 +135,7 @@ class SnvCallingServiceTests {
 
     @Test
     void testSamplePairForSnvProcessingHasToBeIgnored() {
-        SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 sampleTypeCombination: sampleTypeCombinationPerIndividual,
                 config: snvConfig,
@@ -161,7 +161,7 @@ class SnvCallingServiceTests {
                 )
         sampleTypeCombinationPerIndividual1.save()
 
-        SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 sampleTypeCombination: sampleTypeCombinationPerIndividual1,
                 config: snvConfig,
@@ -204,7 +204,7 @@ class SnvCallingServiceTests {
                 )
         sampleTypeCombinationPerIndividual2.save()
 
-        SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 sampleTypeCombination: sampleTypeCombinationPerIndividual2,
                 config: snvConfig,
@@ -255,7 +255,7 @@ class SnvCallingServiceTests {
                 )
         sampleTypeCombinationPerIndividual2.save()
 
-        SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 sampleTypeCombination: sampleTypeCombinationPerIndividual2,
                 config: snvConfig,

@@ -71,7 +71,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 seqType: seqType)
         assert sampleTypeCombinationPerIndividual.save()
 
-        snvCallingInstance = new SnvCallingInstance(
+        snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: SOME_INSTANCE_NAME,
                 config: snvConfig,
                 sampleType1BamFile: processedMergedBamFile1,

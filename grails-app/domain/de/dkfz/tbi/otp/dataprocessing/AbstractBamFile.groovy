@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.BedFile
+import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.FileType
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
@@ -143,5 +145,29 @@ abstract class AbstractBamFile {
         BedFile bedFileToCompare = seqTracks.first().configuredBedFile
         assert containedSeqTracks.each { it.configuredBedFile == bedFileToCompare }
         return bedFileToCompare
+    }
+
+    /**
+     * The maximum value of {@link DataFile#dateCreated} of all {@link DataFile}s that have been merged into one of
+     * the specified BAM files, or <code>null</code> if no such {@link DataFile} exists.
+     */
+    static Date getLatestSequenceDataFileCreationDate(final AbstractBamFile... bamFiles) {
+        if (!bamFiles) {
+            throw new IllegalArgumentException('No BAM files specified.')
+        }
+        if (bamFiles.contains(null)) {
+            throw new IllegalArgumentException('At least one of the specified BAM files is null.')
+        }
+        return DataFile.createCriteria().get {
+            seqTrack {
+                'in'('id', bamFiles.sum{it.containedSeqTracks}*.id)
+            }
+            fileType {
+                eq('type', FileType.Type.SEQUENCE)
+            }
+            projections {
+                max('dateCreated')
+            }
+        }
     }
 }

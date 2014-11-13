@@ -22,6 +22,12 @@ class SnvCallingInstance {
     ProcessedMergedBamFile sampleType2BamFile
 
     /**
+     * The maximum value of {@link DataFile#dateCreated} of all {@link DataFile}s that have been merged into one of
+     * {@link #sampleType1BamFile} and {@link #sampleType2BamFile}.
+     */
+    Date latestDataFileCreationDate
+
+    /**
      * Used to construct paths in {@link #getSnvInstancePath()} and {@link #getConfigFilePath()}.
      * For example 2014-08-25_15h32.
      */
@@ -56,6 +62,9 @@ class SnvCallingInstance {
             obj.sampleTypeCombination && isConsistentWithSampleTypeCombination(val, obj, obj.sampleTypeCombination.sampleType1)}
         sampleType2BamFile validator: {val, obj ->
             obj.sampleTypeCombination && isConsistentWithSampleTypeCombination(val, obj, obj.sampleTypeCombination.sampleType2)}
+        latestDataFileCreationDate validator: { Date latestDataFileCreationDate, SnvCallingInstance instance ->
+            latestDataFileCreationDate == AbstractBamFile.getLatestSequenceDataFileCreationDate(instance.sampleType1BamFile, instance.sampleType2BamFile)
+        }
         instanceName blank: false, unique: 'sampleTypeCombination'
     }
 

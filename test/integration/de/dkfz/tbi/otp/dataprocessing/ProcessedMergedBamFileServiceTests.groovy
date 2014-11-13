@@ -236,6 +236,7 @@ class ProcessedMergedBamFileServiceTests {
     @Test
     void testCreateMergedBamFile() {
         MergingPass mergingPass = createMergingPass()
+        DomainFactory.assignNewProcessedBamFile(mergingPass.mergingSet)
         ProcessedMergedBamFile processedMergedBamFile = processedMergedBamFileService.createMergedBamFile(mergingPass)
         assertNotNull(processedMergedBamFile)
     }
@@ -674,7 +675,7 @@ class ProcessedMergedBamFileServiceTests {
                         fileType: fileType
                         )
         assertNotNull(dataFile.save([flush: true]))
-        assertTrue(processedMergedBamFileService.fastqFilesPerMergedBamFile(processedMergedBamFile).isEmpty())
+        assert processedMergedBamFileService.fastqFilesPerMergedBamFile(processedMergedBamFile).isEmpty()
     }
 
 
@@ -821,7 +822,7 @@ class ProcessedMergedBamFileServiceTests {
         MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
         List<SeqTrack> seqTracks = processedMergedBamFileService.seqTracksPerMergedBamFile(processedMergedBamFile)
-        assertTrue(seqTracks.size() == 1 && seqTracks.contains(seqTrack))
+        assert seqTracks == [seqTrack]
     }
 
     @Test(expected = AssertionError)

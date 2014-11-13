@@ -13,9 +13,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
  */
 class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
 
-    static transients = ["abstractBamFileService"]
-    AbstractBamFileService abstractBamFileService
-
     static belongsTo = [
         mergingPass: MergingPass
     ]
@@ -95,10 +92,12 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
     static mapping = { mergingPass index: "abstract_bam_file_merging_pass_idx" }
 
     @Override
-    /** Beware: This method calls a method of a service */
     Set<SeqTrack> getContainedSeqTracks() {
-        List<ProcessedBamFile> processedBamFiles = abstractBamFileService.findAllByProcessedMergedBamFile(this)
-        return processedBamFiles*.alignmentPass*.seqTrack as Set<SeqTrack>
+        final Set<SeqTrack> seqTracks = mergingSet.containedSeqTracks
+        if (seqTracks.empty) {
+            throw new IllegalStateException("MergingSet ${mergingSet} is empty.")
+        }
+        return seqTracks
     }
 
     @Override

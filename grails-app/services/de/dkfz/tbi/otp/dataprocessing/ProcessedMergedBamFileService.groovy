@@ -234,7 +234,8 @@ class ProcessedMergedBamFileService {
         notNull(mergingPass, "The parameter mergingPass is not allowed to be null")
         ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
                         mergingPass: mergingPass,
-                        type: AbstractBamFile.BamType.MDUP
+                        type: AbstractBamFile.BamType.MDUP,
+                        numberOfMergedLanes: mergingPass.mergingSet.containedSeqTracks.size(),
                         )
         return save(processedMergedBamFile)
     }

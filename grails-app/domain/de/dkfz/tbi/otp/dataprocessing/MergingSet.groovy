@@ -74,6 +74,23 @@ class MergingSet {
         return mergingWorkPackage.seqType
     }
 
+    Set<SeqTrack> getContainedSeqTracks() {
+        final Set<SeqTrack> seqTracks = new HashSet<SeqTrack>()
+        MergingSetAssignment.findAllByMergingSet(this).each {
+            final Set<SeqTrack> seqTracksInIt = it.bamFile.containedSeqTracks
+            if (!seqTracksInIt) {
+                throw new RuntimeException("BAM file ${it.bamFile} has reported not to contain any SeqTracks.")
+            }
+            final Collection<SeqTrack> intersection = seqTracks.intersect(seqTracksInIt)
+            if (!intersection.empty) {
+                throw new IllegalStateException(
+                        "MergingSet ${this} contains at least the following SeqTracks more than once:\n${intersection.join('\n')}")
+            }
+            assert seqTracks.addAll(seqTracksInIt)
+        }
+        return seqTracks
+    }
+
     /**
      * @return Whether this is the most recent merging set on the referenced {@link MergingWorkPackage}.
      */

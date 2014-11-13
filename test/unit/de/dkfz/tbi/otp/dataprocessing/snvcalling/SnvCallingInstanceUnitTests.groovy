@@ -12,7 +12,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
  */
 @TestFor(SnvCallingInstance)
-@Build([DataFile, MergingSetAssignment, ProcessedBamFile, SampleTypePerProject, SnvJobResult])
+@Build([DataFile, FileType, MergingSetAssignment, ProcessedBamFile, SampleTypePerProject, SnvJobResult])
 class SnvCallingInstanceUnitTests {
 
     SnvCallingInstanceTestData testData = new SnvCallingInstanceTestData()
@@ -37,7 +37,7 @@ class SnvCallingInstanceUnitTests {
     @Test
     void testConstraintsAllFine() {
         SnvCallingInstance instance = createSnvCallingInstance()
-        assert instance.validate()
+        assert instance.save(failOnError: true)
     }
 
     @Test
@@ -72,8 +72,7 @@ class SnvCallingInstanceUnitTests {
     @Test
     void testInstanceNameNotUnique() {
         SnvCallingInstance instance = createSnvCallingInstance()
-        assert instance.validate()
-        assert instance.save()
+        assert instance.save(failOnError: true)
 
         SnvCallingInstance instanceSameName = createSnvCallingInstance([instanceName: instance.instanceName,
             sampleTypeCombination: instance.sampleTypeCombination])

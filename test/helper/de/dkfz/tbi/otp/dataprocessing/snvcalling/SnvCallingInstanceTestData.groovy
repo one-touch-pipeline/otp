@@ -102,7 +102,7 @@ class SnvCallingInstanceTestData extends TestData {
     }
 
     SnvCallingInstance createSnvCallingInstance(Map properties = [:]) {
-        return new SnvCallingInstance([
+        return DomainFactory.createSnvCallingInstance([
             processingState: SnvProcessingStates.IN_PROGRESS,
             sampleType1BamFile: bamFileTumor,
             sampleType2BamFile: bamFileControl,
@@ -132,26 +132,7 @@ class SnvCallingInstanceTestData extends TestData {
                 mergingWorkPackage: workPackage)
         assert mergingSet.save(flush: true, failOnError: true)
 
-        SeqTrack seqTrack = SeqTrack.build(sample: sample, seqType: seqType)
-
-        DataFile.build(
-                seqTrack: seqTrack,
-                fileType: fileType,
-                dateCreated: new Date(),  // In unit tests Grails (sometimes) does not automagically set dateCreated.
-        )
-
-        AlignmentPass alignmentPass = AlignmentPass.build(seqTrack: seqTrack)
-
-        ProcessedBamFile processedBamFile = ProcessedBamFile.build(
-                alignmentPass: alignmentPass,
-                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-                status: AbstractBamFile.State.PROCESSED,
-        )
-
-        MergingSetAssignment mergingSetAssignment = MergingSetAssignment.build(
-                mergingSet: mergingSet,
-                bamFile: processedBamFile,
-        )
+        DomainFactory.assignNewProcessedBamFile(mergingSet)
 
         MergingPass mergingPass = new MergingPass(
                 identifier: 1,
