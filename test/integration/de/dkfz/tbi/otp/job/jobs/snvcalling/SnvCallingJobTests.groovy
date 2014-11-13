@@ -17,7 +17,6 @@ import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -48,14 +47,13 @@ class SnvCallingJobTests extends GroovyTestCase{
     Project project
     SeqType seqType
     Individual individual
-    TestData testData
     SnvCallingInstance snvCallingInstance
     SnvCallingInstance snvCallingInstance2
     ExternalScript externalScript_Calling
     ExternalScript externalScript_Joining
     SnvJobResult snvJobResult
     SnvCallingJob snvCallingJob
-    SnvCallingInstanceTestData snvCallingTestData
+    SnvCallingInstanceTestData testData
 
     final String CONFIGURATION ="""
 RUN_CALLING=1
@@ -74,9 +72,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         testDirectory = new File("/tmp/otp-test/${UNIQUE_PATH}")
         assert testDirectory.mkdirs()  // This will fail if the directory already exists or if it could not be created.
 
-        testData = new TestData()
+        testData = new SnvCallingInstanceTestData()
         testData.createObjects()
-        snvCallingTestData = new SnvCallingInstanceTestData()
         realm_processing = testData.realm
         realm_processing.stagingRootPath = "${testDirectory}/staging"
         assert realm_processing.save()
@@ -173,7 +170,6 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     @After
     void tearDown() {
         testData = null
-        snvCallingTestData = null
         individual = null
         project = null
         seqType = null
@@ -252,7 +248,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testValidateWithSnvCallingInput() {
-        File configFile = snvCallingTestData.createConfigFileWithContentInFileSystem(
+        File configFile = testData.createConfigFileWithContentInFileSystem(
             snvCallingInstance.configFilePath.absoluteStagingPath,
             CONFIGURATION)
 
@@ -304,7 +300,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testWriteConfigFile_FileExistsAlready() {
-        File configFile = snvCallingTestData.createConfigFileWithContentInFileSystem(
+        File configFile = testData.createConfigFileWithContentInFileSystem(
             snvCallingInstance.configFilePath.absoluteStagingPath,
             CONFIGURATION)
 
@@ -397,47 +393,12 @@ CHROMOSOME_INDICES=( {1..21} XY)
     }
 
     private ProcessedMergedBamFile createProcessedMergedBamFile(String identifier) {
-        SampleType sampleType = testData.createSampleType([name: "SampleType"+identifier])
-        assert sampleType.save(flush: true)
-
-        Sample sample = testData.createSample([individual: individual, sampleType: sampleType])
-        assert sample.save(flush: true)
-
-        SeqTrack seqTrack = testData.createSeqTrack([sample: sample, seqType: seqType])
-        assert seqTrack.save(flush: true)
-
-        AlignmentPass alignmentPass = testData.createAlignmentPass([seqTrack: seqTrack])
-        assert alignmentPass.save(flush: true)
-
-        ProcessedBamFile processedBamFile = testData.createProcessedBamFile([alignmentPass: alignmentPass,
-            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-            status: AbstractBamFile.State.PROCESSED])
-        assert processedBamFile.save(flush: true)
-
-        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage([sample: sample, seqType: seqType])
-        assert mergingWorkPackage.save(flush: true)
-
-        MergingSet mergingSet = testData.createMergingSet([mergingWorkPackage: mergingWorkPackage, status: State.PROCESSED])
-        assert mergingSet.save(flush: true)
-
-        MergingSetAssignment mergingSetAssignment = new MergingSetAssignment(
-                mergingSet: mergingSet,
-                bamFile: processedBamFile
-                )
-        assert mergingSetAssignment.save(flush: true)
-
-        MergingPass mergingPass = testData.createMergingPass([mergingSet: mergingSet])
-        mergingPass.save(flush: true)
 
         final String bamFileContent = 'I am a test BAM file. Nice to meet you. :)'
 
-        final ProcessedMergedBamFile bamFile = testData.createProcessedMergedBamFile([mergingPass: mergingPass,
-            fileExists: true,
-            fileSize: bamFileContent.length(),
-            md5sum: '0123456789ABCDEF0123456789ABCDEF',
-            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-            status: AbstractBamFile.State.PROCESSED,
-            fileOperationStatus: FileOperationStatus.PROCESSED])
+        final ProcessedMergedBamFile bamFile = testData.createProcessedMergedBamFile(individual, seqType, identifier)
+        bamFile.fileSize = bamFileContent.length()
+        assert bamFile.save(failOnError: true)
 
         final File file = new File(processedMergedBamFileService.destinationDirectory(bamFile), processedMergedBamFileService.fileName(bamFile))
         assert file.path.startsWith(testDirectory.path)

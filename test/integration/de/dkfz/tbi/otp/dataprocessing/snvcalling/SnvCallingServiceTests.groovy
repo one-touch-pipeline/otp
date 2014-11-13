@@ -11,7 +11,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class SnvCallingServiceTests {
 
-    TestData testData
+    SnvCallingInstanceTestData testData
     SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual
 
     SnvCallingService snvCallingService
@@ -32,7 +32,7 @@ class SnvCallingServiceTests {
 
     @Before
     void setUp() {
-        testData = new TestData()
+        testData = new SnvCallingInstanceTestData()
         testData.createObjects()
 
         project = testData.createProject()
@@ -581,53 +581,21 @@ class SnvCallingServiceTests {
     }
 
     private ProcessedMergedBamFile createProcessedMergedBamFile(String identifier) {
-        SampleType sampleType = testData.createSampleType([name: "SampleType"+identifier])
-        sampleType.save()
 
-        Sample sample = testData.createSample([individual: individual, sampleType: sampleType])
-        sample.save()
-
-        SeqTrack seqTrack = testData.createSeqTrack([sample: sample, seqType: seqType])
-        seqTrack.save()
-
-        AlignmentPass alignmentPass = testData.createAlignmentPass([seqTrack: seqTrack])
-        alignmentPass.save()
-
-        ProcessedBamFile processedBamFile = testData.createProcessedBamFile([alignmentPass: alignmentPass,
-            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-            status: AbstractBamFile.State.PROCESSED])
-        processedBamFile.save()
-
-        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage([sample: sample, seqType: seqType])
-        mergingWorkPackage.save()
-
-        MergingSet mergingSet = testData.createMergingSet([mergingWorkPackage: mergingWorkPackage, status: State.PROCESSED])
-        mergingSet.save()
-
-        MergingSetAssignment mergingSetAssignment = new MergingSetAssignment(
-                mergingSet: mergingSet,
-                bamFile: processedBamFile
-                )
-        mergingSetAssignment.save()
-
-        MergingPass mergingPass = testData.createMergingPass([mergingSet: mergingSet])
-        mergingPass.save()
+        final ProcessedMergedBamFile bamFile = testData.createProcessedMergedBamFile(individual, seqType, identifier)
+        bamFile.coverage = COVERAGE_THRESHOLD
+        bamFile.numberOfMergedLanes = LANE_THRESHOLD
+        assert bamFile.save(failOnError: true)
 
         ProcessingThresholds processingThresholds1 = new ProcessingThresholds(
                 project: project,
                 seqType: seqType,
-                sampleType: sampleType,
+                sampleType: bamFile.sampleType,
                 coverage: COVERAGE_THRESHOLD,
                 numberOfLanes: LANE_THRESHOLD
-                )
-        processingThresholds1.save()
+        )
+        assert processingThresholds1.save(failOnError: true)
 
-        return  testData.createProcessedMergedBamFile([
-            mergingPass: mergingPass,
-            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-            status: AbstractBamFile.State.PROCESSED,
-            fileOperationStatus: FileOperationStatus.PROCESSED,
-            fileExists: true
-        ])
+        return bamFile
     }
 }

@@ -2,12 +2,12 @@ package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import de.dkfz.tbi.TestCase
 import org.junit.After
-import org.junit.Ignore
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstanceTestData
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
 import de.dkfz.tbi.otp.ngsdata.*
@@ -26,7 +26,7 @@ class SnvCompletionJobTests extends GroovyTestCase {
     SeqType seqType
     SnvCallingInstance snvCallingInstance
     SnvCompletionJob snvCompletionJob
-    TestData testData
+    SnvCallingInstanceTestData testData
 
     public static final String SOME_INSTANCE_NAME = "2014-08-25_15h32"
     public final String CONFIGURATION = """
@@ -41,7 +41,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     void setUp() {
         testDirectory = TestCase.createEmptyTestDirectory()
 
-        testData = new TestData()
+        testData = new SnvCallingInstanceTestData()
         testData.createObjects()
         realm_processing = testData.realm
         realm_processing.stagingRootPath = "${testDirectory}/staging"
@@ -51,9 +51,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         individual = testData.individual
         seqType = testData.seqType
 
-        ProcessedMergedBamFile processedMergedBamFile1 = createProcessedMergedBamFile("1")
+        ProcessedMergedBamFile processedMergedBamFile1 = createProcessedMergedBamFile()
         assert processedMergedBamFile1.save()
-        ProcessedMergedBamFile processedMergedBamFile2 = createProcessedMergedBamFile("2")
+        ProcessedMergedBamFile processedMergedBamFile2 = createProcessedMergedBamFile()
         assert processedMergedBamFile2.save()
 
         SnvConfig snvConfig = new SnvConfig(
@@ -165,53 +165,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         dummyFile2 << 'some other content'
     }
 
-    private ProcessedMergedBamFile createProcessedMergedBamFile(String identifier) {
-        SampleType sampleType = testData.createSampleType([name: "SampleType" + identifier])
-        assert sampleType.save(flush: true)
-
-        Sample sample = testData.createSample([individual: individual, sampleType: sampleType])
-        assert sample.save(flush: true)
-
-        SeqTrack seqTrack = testData.createSeqTrack([sample: sample, seqType: seqType])
-        assert seqTrack.save(flush: true)
-
-        AlignmentPass alignmentPass = testData.createAlignmentPass([seqTrack: seqTrack])
-        assert alignmentPass.save(flush: true)
-
-        ProcessedBamFile processedBamFile = testData.createProcessedBamFile([
-                alignmentPass          : alignmentPass,
-                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-                status                 : AbstractBamFile.State.PROCESSED,
-        ])
-        assert processedBamFile.save(flush: true)
-
-        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage([sample: sample, seqType: seqType])
-        assert mergingWorkPackage.save(flush: true)
-
-        MergingSet mergingSet = testData.createMergingSet([mergingWorkPackage: mergingWorkPackage, status: MergingSet.State.PROCESSED])
-        assert mergingSet.save(flush: true)
-
-        MergingSetAssignment mergingSetAssignment = new MergingSetAssignment(
-                mergingSet: mergingSet,
-                bamFile: processedBamFile,
-        )
-        assert mergingSetAssignment.save(flush: true)
-
-        MergingPass mergingPass = testData.createMergingPass([mergingSet: mergingSet])
-        mergingPass.save(flush: true)
-
-        final String ARBITRARY_SIZE = 1234
-
-        final ProcessedMergedBamFile bamFile = testData.createProcessedMergedBamFile([
-                mergingPass            : mergingPass,
-                fileExists             : true,
-                fileSize               : ARBITRARY_SIZE,
-                md5sum                 : '0123456789ABCDEF0123456789ABCDEF',
-                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-                status                 : AbstractBamFile.State.PROCESSED,
-                fileOperationStatus    : AbstractBamFile.FileOperationStatus.PROCESSED,
-        ])
-
-        return bamFile
+    private ProcessedMergedBamFile createProcessedMergedBamFile() {
+        return testData.createProcessedMergedBamFile(individual, seqType)
     }
 }

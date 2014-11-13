@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment
+import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import org.junit.*
@@ -10,7 +12,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
  */
 @TestFor(SnvCallingInstance)
-@Build([SampleTypePerProject, SnvJobResult])
+@Build([DataFile, MergingSetAssignment, ProcessedBamFile, SampleTypePerProject, SnvJobResult])
 class SnvCallingInstanceUnitTests {
 
     SnvCallingInstanceTestData testData = new SnvCallingInstanceTestData()

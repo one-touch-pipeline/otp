@@ -105,10 +105,9 @@ class SnvCallingInstanceTestData extends TestData {
         ] + properties)
     }
 
-
-    ProcessedMergedBamFile createProcessedMergedBamFile(Individual individual, SeqType seqType) {
+    ProcessedMergedBamFile createProcessedMergedBamFile(Individual individual, SeqType seqType, String sampleTypeIdentifier = TestCase.uniqueString) {
         SampleType sampleType = new SampleType(
-                name: "sampleType${TestCase.uniqueString}")
+                name: "SampleType${sampleTypeIdentifier}")
         assert sampleType.save(flush: true, failOnError: true)
 
         Sample sample = new Sample (
@@ -126,6 +125,27 @@ class SnvCallingInstanceTestData extends TestData {
                 mergingWorkPackage: workPackage)
         assert mergingSet.save(flush: true, failOnError: true)
 
+        SeqTrack seqTrack = SeqTrack.build(sample: sample, seqType: seqType)
+
+        DataFile.build(
+                seqTrack: seqTrack,
+                fileType: fileType,
+                dateCreated: new Date(),  // In unit tests Grails (sometimes) does not automagically set dateCreated.
+        )
+
+        AlignmentPass alignmentPass = AlignmentPass.build(seqTrack: seqTrack)
+
+        ProcessedBamFile processedBamFile = ProcessedBamFile.build(
+                alignmentPass: alignmentPass,
+                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
+                status: AbstractBamFile.State.PROCESSED,
+        )
+
+        MergingSetAssignment mergingSetAssignment = MergingSetAssignment.build(
+                mergingSet: mergingSet,
+                bamFile: processedBamFile,
+        )
+
         MergingPass mergingPass = new MergingPass(
                 identifier: 1,
                 mergingSet: mergingSet)
@@ -133,7 +153,14 @@ class SnvCallingInstanceTestData extends TestData {
 
         ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile(
                 type: AbstractBamFile.BamType.SORTED,
-                mergingPass: mergingPass)
+                mergingPass: mergingPass,
+                fileExists: true,
+                fileSize: 123456,
+                md5sum: '0123456789ABCDEF0123456789ABCDEF',
+                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
+                status: AbstractBamFile.State.PROCESSED,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
+        )
         assert bamFile.save(flush: true, failOnError: true)
 
         return bamFile
