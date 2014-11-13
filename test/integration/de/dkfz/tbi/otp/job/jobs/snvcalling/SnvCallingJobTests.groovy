@@ -52,6 +52,7 @@ class SnvCallingJobTests extends GroovyTestCase{
     SnvCallingInstance snvCallingInstance
     SnvCallingInstance snvCallingInstance2
     ExternalScript externalScript_Calling
+    ExternalScript externalScript_Joining
     SnvJobResult snvJobResult
     SnvCallingJob snvCallingJob
     SnvCallingInstanceTestData snvCallingTestData
@@ -129,7 +130,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 )
         assert externalScript_Calling.save()
 
-        ExternalScript externalScript_Joining = new ExternalScript(
+        externalScript_Joining = new ExternalScript(
                 scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
                 filePath: "/tmp/scriptLocation/joining.sh",
                 author: "otptest",
@@ -139,7 +140,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvJobResult = new SnvJobResult(
                 step: SnvCallingStep.CALLING,
                 snvCallingInstance: snvCallingInstance,
-                externalScript: externalScript_Calling
+                externalScript: externalScript_Calling,
+                chromosomeJoinExternalScript: externalScript_Joining,
                 )
         assert snvJobResult.save()
 
@@ -175,6 +177,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         realm_processing = null
         snvCallingInstance2 = null
         externalScript_Calling = null
+        externalScript_Joining = null
         snvJobResult = null
         removeMetaClass(CreateClusterScriptService, createClusterScriptService)
         removeMetaClass(ExecutionService, executionService)
@@ -234,6 +237,10 @@ CHROMOSOME_INDICES=( {1..21} XY)
         schedulerService.startingJobExecutionOnCurrentThread(snvCallingJob)
         try {
             assertEquals(NextAction.WAIT_FOR_CLUSTER_JOBS, snvCallingJob.maybeSubmit(snvCallingInstance))
+            List<SnvJobResult> result = SnvJobResult.findAllBySnvCallingInstance(snvCallingInstance)
+            assert result.size() == 1
+            assert result.first().chromosomeJoinExternalScript == externalScript_Joining
+
         } finally {
             schedulerService.finishedJobExecutionOnCurrentThread(snvCallingJob)
         }
@@ -294,12 +301,13 @@ CHROMOSOME_INDICES=( {1..21} XY)
     void testCreateAndSaveSnvJobResult() {
         snvJobResult.delete()
         assert SnvJobResult.count() == 0
-        snvCallingJob.createAndSaveSnvJobResult(snvCallingInstance, externalScript_Calling)
+        snvCallingJob.createAndSaveSnvJobResult(snvCallingInstance, externalScript_Calling, externalScript_Joining)
         final SnvJobResult snvJobResult = exactlyOneElement(SnvJobResult.findAll())
         assert snvJobResult.snvCallingInstance == snvCallingInstance
         assert snvJobResult.processingState == SnvProcessingStates.IN_PROGRESS
         assert snvJobResult.step == SnvCallingStep.CALLING
         assert snvJobResult.externalScript == externalScript_Calling
+        assert snvJobResult.chromosomeJoinExternalScript == externalScript_Joining
     }
 
     @Test

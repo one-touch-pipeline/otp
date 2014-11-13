@@ -104,7 +104,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 step: SnvCallingStep.CALLING,
                 snvCallingInstance: snvCallingInstance,
                 externalScript: externalScript_Calling,
-                processingState: SnvProcessingStates.FINISHED
+                processingState: SnvProcessingStates.FINISHED,
+                chromosomeJoinExternalScript: testData.externalScript_Joining,
                 )
         assert snvJobResultInput.save()
 

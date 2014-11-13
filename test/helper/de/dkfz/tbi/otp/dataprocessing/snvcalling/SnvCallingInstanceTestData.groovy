@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingJob
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExternalScript
 
@@ -13,6 +14,7 @@ class SnvCallingInstanceTestData extends TestData {
     SampleTypeCombinationPerIndividual sampleTypeCombination
     SampleTypeCombinationPerIndividual sampleTypeCombination2
     SnvConfig snvConfig
+    ExternalScript externalScript_Joining
 
     void createSnvObjects() {
         project = createProject()
@@ -53,6 +55,13 @@ class SnvCallingInstanceTestData extends TestData {
                 configuration: "testConfig"
         )
         assert snvConfig.save()
+
+        externalScript_Joining = new ExternalScript(
+                scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
+                filePath: "/tmp/scriptLocation/joining.sh",
+                author: "otptest",
+        )
+        assert externalScript_Joining.save()
     }
 
     SnvJobResult createAndSaveSnvJobResult(SnvCallingInstance instance, SnvCallingStep step, SnvJobResult inputResult = null, SnvProcessingStates processingState = SnvProcessingStates.FINISHED, boolean withdrawn = false) {
@@ -72,6 +81,9 @@ class SnvCallingInstanceTestData extends TestData {
             withdrawn: withdrawn,
             externalScript: externalScript
         ])
+        if (step == SnvCallingStep.CALLING) {
+            result.chromosomeJoinExternalScript = externalScript_Joining
+        }
         assert result.save(failOnError: true)
         return result
     }

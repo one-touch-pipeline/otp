@@ -100,7 +100,7 @@ class SnvCallingJob extends AbstractSnvCallingJob {
                     externalScriptJoining.scriptFilePath.path
             executionHelperService.sendScript(realm, script, null, qsubParameters)
 
-            createAndSaveSnvJobResult(instance, step.externalScript)
+            createAndSaveSnvJobResult(instance, step.externalScript, externalScriptJoining)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {

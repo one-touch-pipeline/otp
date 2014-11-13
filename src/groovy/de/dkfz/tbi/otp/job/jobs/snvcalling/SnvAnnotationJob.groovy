@@ -72,7 +72,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob {
                     step.externalScript.scriptFilePath
             executionHelperService.sendScript(realm, script, null, qsubParameters)
 
-            createAndSaveSnvJobResult(instance, step.externalScript, inputResult)
+            createAndSaveSnvJobResult(instance, step.externalScript, null, inputResult)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {

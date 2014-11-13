@@ -42,6 +42,13 @@ class SnvJobResult {
      */
     ExternalScript externalScript
 
+    /**
+     * Stores the script which was used to join the vcf files of all chromosomes.
+     * This script is only used in the CallingJob.
+     * Therefore it shall only be set when then step = {@link SnvCallingStep#CALLING}
+     */
+    ExternalScript chromosomeJoinExternalScript
+
     static belongsTo = [
         snvCallingInstance: SnvCallingInstance
     ]
@@ -70,6 +77,9 @@ class SnvJobResult {
         }
         externalScript validator: {val, obj ->
             obj.step.externalScriptIdentifier == val.scriptIdentifier
+        }
+        chromosomeJoinExternalScript nullable: true, validator: { val, obj ->
+               return  (obj.step == SnvCallingStep.CALLING) == (val != null)
         }
     }
 

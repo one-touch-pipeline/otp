@@ -67,7 +67,7 @@ abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob 
         return configFileInStagingDirectory
     }
 
-    void createAndSaveSnvJobResult(final SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult = null) {
+    void createAndSaveSnvJobResult(final SnvCallingInstance instance, ExternalScript externalScript, ExternalScript externalScriptJoining, SnvJobResult inputResult = null) {
         // In case the validation step failed there exists already one result file for this instance. This has to be reused.
         SnvJobResult resultInProgress = atMostOneElement(
                 SnvJobResult.findAllBySnvCallingInstanceAndStep(instance, step)
@@ -80,6 +80,7 @@ abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob 
             assert resultInProgress.inputResult == inputResult
 
             resultInProgress.externalScript = externalScript
+            resultInProgress.chromosomeJoinExternalScript = externalScriptJoining
             assert resultInProgress.save()
         } else {
             final SnvJobResult result = new SnvJobResult(
@@ -87,7 +88,8 @@ abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob 
                     step: step,
                     inputResult: inputResult,
                     processingState: SnvProcessingStates.IN_PROGRESS,
-                    externalScript: externalScript
+                    externalScript: externalScript,
+                    chromosomeJoinExternalScript: externalScriptJoining
                     )
             assert result.save()
         }

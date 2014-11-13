@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingJob
 import grails.test.mixin.*
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
@@ -18,6 +19,7 @@ class SnvJobResultUnitTests {
                 snvCallingInstance: createSnvCallingInstance(),
                 processingState: SnvProcessingStates.IN_PROGRESS,
                 externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier),
+                chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER)
                 )
         assert snvJobResult.validate()
         assert snvJobResult.save()
@@ -29,7 +31,8 @@ class SnvJobResultUnitTests {
         SnvJobResult snvJobResult = new SnvJobResult(
                 step: SnvCallingStep.CALLING,
                 snvCallingInstance: createSnvCallingInstance(),
-                processingState: SnvProcessingStates.IN_PROGRESS
+                processingState: SnvProcessingStates.IN_PROGRESS,
+                chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER)
                 )
         assert !snvJobResult.validate()
     }
@@ -41,10 +44,45 @@ class SnvJobResultUnitTests {
                 snvCallingInstance: createSnvCallingInstance(),
                 processingState: SnvProcessingStates.IN_PROGRESS,
                 externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier),
+                chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER)
                 )
         assert !snvJobResult.validate()
     }
 
+    @Test
+    void testSavingOfSnvJobResultCallingButNoJoiningExternalScript() {
+        SnvJobResult snvJobResult = new SnvJobResult(
+                step: SnvCallingStep.CALLING,
+                snvCallingInstance: createSnvCallingInstance(),
+                processingState: SnvProcessingStates.IN_PROGRESS,
+                chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER)
+        )
+        assert !snvJobResult.validate()
+    }
+
+    @Test
+    void testSavingOfSnvJobResultNotCallingNoJoiningScript() {
+
+        SnvCallingInstance snvCallingInstance = createSnvCallingInstance()
+
+        SnvJobResult callingSnvJobResult = new SnvJobResult(
+                step: SnvCallingStep.CALLING,
+                processingState: SnvProcessingStates.FINISHED,
+                snvCallingInstance: snvCallingInstance,
+                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier),
+                chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER)
+        )
+
+        SnvJobResult snvJobResult = new SnvJobResult(
+                step: SnvCallingStep.SNV_ANNOTATION,
+                snvCallingInstance: snvCallingInstance,
+                processingState: SnvProcessingStates.IN_PROGRESS,
+                inputResult: callingSnvJobResult,
+                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier),
+        )
+        assert snvJobResult.validate()
+        assert snvJobResult.save()
+    }
 
     @Test
     void testSavingOfSnvJobResultNoInputFileNotCallingStep() {
@@ -197,6 +235,7 @@ class SnvJobResultUnitTests {
                 snvCallingInstance: snvCallingInstance,
                 processingState: SnvProcessingStates.IN_PROGRESS,
                 externalScript: new ExternalScript(),
+                chromosomeJoinExternalScript: new ExternalScript(),
                 )
 
         assertEquals(pmbf, snvJobResult.getSampleType1BamFile())
@@ -216,6 +255,7 @@ class SnvJobResultUnitTests {
                 snvCallingInstance: snvCallingInstance,
                 processingState: SnvProcessingStates.IN_PROGRESS,
                 externalScript: new ExternalScript(),
+                chromosomeJoinExternalScript: new ExternalScript(),
                 )
 
         assertEquals(pmbf, snvJobResult.getSampleType2BamFile())
