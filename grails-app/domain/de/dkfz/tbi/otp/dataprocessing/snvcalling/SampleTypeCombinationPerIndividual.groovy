@@ -213,6 +213,64 @@ class SampleTypeCombinationPerIndividual {
     }
 
     /**
+     * Finds existing SampleTypeCombinationPerIndividuals with these criteria:
+     * <ul>
+     *     <li>{@link #needsProcessing} is set to <code>false</code>.</li>
+     *     <li>{@link #sampleType1} (still) has category {@link SampleType.Category#DISEASE}.</li>
+     *     <li>No {@link SnvCallingInstance} exists which belongs to the sample pair and fulfills these criteria:
+     *     <ul>
+     *         <li>The BAM files that the {@link SnvCallingInstance} is based on contain all non-withdrawn
+     *             {@link DataFile}s matching the SampleTypeCombinationPerIndividual.</li>
+     *         <li>No {@link SnvJobResult} belonging to the {@link SnvCallingInstance} is withdrawn.</li>
+     *     </ul>
+     * </ul>
+     */
+    static Collection<SampleTypeCombinationPerIndividual> findCombinationsForSettingNeedsProcessing() {
+        return SampleTypeCombinationPerIndividual.executeQuery("""
+            FROM
+              SampleTypeCombinationPerIndividual stcpi
+            WHERE
+              stcpi.needsProcessing = false AND
+              EXISTS (
+                FROM
+                  SampleTypePerProject
+                WHERE
+                  project = stcpi.individual.project AND
+                  sampleType = stcpi.sampleType1 AND
+                  category = :disease
+              ) AND
+              NOT EXISTS (
+                FROM
+                  SnvCallingInstance sci
+                WHERE
+                  sampleTypeCombination = stcpi AND
+                  NOT EXISTS (
+                    FROM
+                      SnvJobResult
+                    WHERE
+                      snvCallingInstance = sci AND
+                      withdrawn = true
+                  ) AND
+                  latestDataFileCreationDate >= (
+                    SELECT
+                      MAX(dateCreated)
+                    FROM
+                      DataFile
+                    WHERE
+                      fileType.type = :fileType AND
+                      fileWithdrawn = false AND
+                      seqTrack.sample.individual = stcpi.individual AND
+                      seqTrack.sample.sampleType IN (stcpi.sampleType1, stcpi.sampleType2) AND
+                      seqTrack.seqType = stcpi.seqType
+                  )
+              )
+            """, [
+                disease: SampleType.Category.DISEASE,
+                fileType: FileType.Type.SEQUENCE
+        ], [readOnly: true])
+    }
+
+    /**
      * Sets {@link #needsProcessing} of all specified instances to the specified value and saves the instances.
      */
     static void setNeedsProcessing(final Collection<SampleTypeCombinationPerIndividual> combinations, final boolean needsProcessing) {

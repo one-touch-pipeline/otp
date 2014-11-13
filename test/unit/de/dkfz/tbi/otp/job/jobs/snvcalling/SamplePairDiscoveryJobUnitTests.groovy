@@ -59,24 +59,38 @@ class SamplePairDiscoveryJobUnitTests {
     }
 
     @Test
-    void testCreateMissingDiseaseControlCombinations() {
+    void testSetExistingCombinationsToNeedsProcessing() {
+        Collection<SampleTypeCombinationPerIndividual> theCombinations = [new SampleTypeCombinationPerIndividual()]
+        testMethodWhichCallsSetNeedsProcessing(theCombinations, {
+            SampleTypeCombinationPerIndividual.metaClass.static.findCombinationsForSettingNeedsProcessing = {
+                return theCombinations
+            }
+            job.setExistingCombinationsToNeedsProcessing()
+        })
+    }
 
+    @Test
+    void testCreateMissingDiseaseControlCombinations() {
         Collection<SampleTypeCombinationPerIndividual> missingCombinations = [new SampleTypeCombinationPerIndividual()]
-        try {
+        testMethodWhichCallsSetNeedsProcessing(missingCombinations, {
             SampleTypeCombinationPerIndividual.metaClass.static.findMissingDiseaseControlCombinations = { final Date minDate ->
                 assert minDate == new LocalDate(2014, 12, 1).toDate()
                 return missingCombinations
             }
+            job.createMissingDiseaseControlCombinations()
+        })
+    }
+
+    private void testMethodWhichCallsSetNeedsProcessing(final Collection expectedCombinations, final Closure call) {
+        try {
             boolean setNeedsProcessingCalled = false
             SampleTypeCombinationPerIndividual.metaClass.static.setNeedsProcessing = {
                 final Collection<SampleTypeCombinationPerIndividual> combinations, final boolean needsProcessing ->
-                    assert combinations.is(missingCombinations)
+                    assert combinations.is(expectedCombinations)
                     assert needsProcessing
                     setNeedsProcessingCalled = true
             }
-
-            job.createMissingDiseaseControlCombinations()
-
+            call()
             assert setNeedsProcessingCalled
         } finally {
             SampleTypeCombinationPerIndividual.metaClass = null
@@ -86,29 +100,38 @@ class SamplePairDiscoveryJobUnitTests {
     @Test
     void testExecute_sampleTypesNeedCategorization() {
         boolean logUncategorizedSampleTypesCalled = false
-        boolean createMissingDiseaseControlCombinationsCalled = false
-        job.metaClass.logUncategorizedSampleTypes = { logUncategorizedSampleTypesCalled = true; return true }
-        job.metaClass.createMissingDiseaseControlCombinations = { createMissingDiseaseControlCombinationsCalled = true }
+        testExecute {
+            job.metaClass.logUncategorizedSampleTypes = { logUncategorizedSampleTypesCalled = true; return true }
 
-        assert shouldFail { job.execute() } == 'Some sample types are not categorized. See the job log for details.'
-
+            assert shouldFail { job.execute() } == 'Some sample types are not categorized. See the job log for details.'
+        }
         assert logUncategorizedSampleTypesCalled == true
-        assert createMissingDiseaseControlCombinationsCalled == true
     }
 
     @Test
     void testExecute_noSampleTypeNeedsCategorization() {
         boolean logUncategorizedSampleTypesCalled = false
+        testExecute {
+            job.metaClass.logUncategorizedSampleTypes = { logUncategorizedSampleTypesCalled = true; return false }
+
+            job.start()
+            job.execute()
+            job.end()
+
+            assert job.endState == ExecutionState.SUCCESS
+        }
+        assert logUncategorizedSampleTypesCalled == true
+    }
+
+    private void testExecute(final Closure code) {
+        boolean setExistingCombinationsToNeedsProcessingCalled = false
+        job.metaClass.setExistingCombinationsToNeedsProcessing = { setExistingCombinationsToNeedsProcessingCalled = true }
         boolean createMissingDiseaseControlCombinationsCalled = false
-        job.metaClass.logUncategorizedSampleTypes = { logUncategorizedSampleTypesCalled = true; return false }
         job.metaClass.createMissingDiseaseControlCombinations = { createMissingDiseaseControlCombinationsCalled = true }
 
-        job.start()
-        job.execute()
-        job.end()
+        code()
 
-        assert job.endState == ExecutionState.SUCCESS
-        assert logUncategorizedSampleTypesCalled == true
+        assert setExistingCombinationsToNeedsProcessingCalled == true
         assert createMissingDiseaseControlCombinationsCalled == true
     }
 }

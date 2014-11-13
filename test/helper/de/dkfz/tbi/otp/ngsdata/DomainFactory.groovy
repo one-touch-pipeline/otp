@@ -15,6 +15,7 @@ import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
+import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import grails.util.Environment
 import org.joda.time.DateTime
 import org.joda.time.Duration
@@ -137,11 +138,7 @@ class DomainFactory {
 
         final SeqTrack seqTrack = SeqTrack.build(sample: mergingSet.sample, seqType: mergingSet.seqType)
 
-        DataFile.build(
-                seqTrack: seqTrack,
-                fileType: FileType.findByType(FileType.Type.SEQUENCE) ?: FileType.build(type: FileType.Type.SEQUENCE),
-                dateCreated: new Date(),  // In unit tests Grails (sometimes) does not automagically set dateCreated.
-        )
+        buildSequenceDataFile(seqTrack: seqTrack)
 
         final ProcessedBamFile bamFile = ProcessedBamFile.build(
                 alignmentPass: AlignmentPass.build(seqTrack: seqTrack),
@@ -152,6 +149,13 @@ class DomainFactory {
         MergingSetAssignment.build(mergingSet: mergingSet, bamFile: bamFile)
 
         return bamFile
+    }
+
+    public static DataFile buildSequenceDataFile(final Map properties = [:]) {
+        return DataFile.build([
+                fileType: FileType.findByType(Type.SEQUENCE) ?: FileType.build(type: Type.SEQUENCE),
+                dateCreated: new Date(),  // In unit tests Grails (sometimes) does not automagically set dateCreated.
+        ] + properties)
     }
 
     public static SnvCallingInstance createSnvCallingInstance(Map properties) {

@@ -16,6 +16,7 @@ class SamplePairDiscoveryJob extends AbstractEndStateAwareJobImpl {
 
         final boolean sampleTypesNeedCategorization = logUncategorizedSampleTypes()
 
+        setExistingCombinationsToNeedsProcessing()
         createMissingDiseaseControlCombinations()
 
         if (sampleTypesNeedCategorization) {
@@ -53,6 +54,13 @@ class SamplePairDiscoveryJob extends AbstractEndStateAwareJobImpl {
                 }
         }
         return buffer.toString()
+    }
+
+    void setExistingCombinationsToNeedsProcessing() {
+        final Collection<SampleTypeCombinationPerIndividual> combinations =
+                SampleTypeCombinationPerIndividual.findCombinationsForSettingNeedsProcessing()
+        log.info "Setting needsProcessing to true for ${combinations.size()} existing ${SampleTypeCombinationPerIndividual.simpleName} instance(s)."
+        SampleTypeCombinationPerIndividual.setNeedsProcessing(combinations, true)
     }
 
     void createMissingDiseaseControlCombinations() {
