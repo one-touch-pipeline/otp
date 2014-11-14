@@ -77,6 +77,19 @@ enum SnvCallingStep {
     }
 
     /**
+     * Returns the name of the index file, produced by each step in the SNV pipeline
+     */
+    String getIndexFileName(Individual individual) {
+        if (this == SnvCallingStep.CALLING) {
+            return "${this.getResultFileName(individual, null)}.tbi"
+        } else if (this == SnvCallingStep.FILTER_VCF) {
+            throw new UnsupportedOperationException("TODO -> OTP-989")
+        } else {
+            return "${this.getResultFileName(individual)}.tbi"
+        }
+    }
+
+    /**
      * Example: "SnvCallingStep.SNV_ANNOTATION"
      *
      * @see ExternalScript#scriptIdentifier

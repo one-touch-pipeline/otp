@@ -66,10 +66,14 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 """
 
     final String PBS_ID = "123456"
+    String UNIQUE_PATH = TestCase.getUniqueString()
 
     @Before
     void setUp() {
-        testDirectory = TestCase.createEmptyTestDirectory()
+
+        testDirectory = new File("/tmp/otp-test/${UNIQUE_PATH}")
+        assert testDirectory.mkdirs()  // This will fail if the directory already exists or if it could not be created.
+
         testData = new TestData()
         testData.createObjects()
         snvCallingTestData = new SnvCallingInstanceTestData()
@@ -254,7 +258,36 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> return true }
         createClusterScriptService.metaClass.createTransferScript = { List<File> sourceLocations, List<File> targetLocations, List<File> linkLocations, boolean move ->
-            return "some bash commands to copy the files and link them"
+
+            // test that source files are correct
+            File stagingBase = new File("${testDirectory}/staging/")
+            File individualPathStaging = new File(stagingBase, "otp_test_project/sequencing/whole_genome_sequencing/view-by-pid/654321/")
+            File sampleTypeCombinationPathStaging = new File(individualPathStaging, "snv_results/paired/sampletype1_sampletype2/")
+            File instancePathStaging = new File(sampleTypeCombinationPathStaging, "2014-08-25_15h32/")
+
+            assert sourceLocations.size() == 3
+            assert sourceLocations.contains(new File(instancePathStaging, "snvs_654321_raw.vcf.gz"))
+            assert sourceLocations.contains(new File(instancePathStaging, "snvs_654321_raw.vcf.gz.tbi"))
+            assert sourceLocations.contains(new File(instancePathStaging, "config.txt"))
+
+            // test that target files are correct
+            File rootBase = new File("${testDirectory}/root/")
+            File individualPathRoot = new File(rootBase, "otp_test_project/sequencing/whole_genome_sequencing/view-by-pid/654321/")
+            File sampleTypeCombinationPathRoot = new File(individualPathRoot, "snv_results/paired/sampletype1_sampletype2/")
+            File instancePathRoot = new File(sampleTypeCombinationPathRoot, "2014-08-25_15h32/")
+
+            assert targetLocations.size() == 3
+            assert targetLocations.contains(new File(instancePathRoot, "snvs_654321_raw.vcf.gz"))
+            assert targetLocations.contains(new File(instancePathRoot, "snvs_654321_raw.vcf.gz.tbi"))
+            assert targetLocations.contains(new File(instancePathRoot, "config.txt"))
+
+            // test that linked files are correct
+            assert linkLocations.size() == 3
+            assert linkLocations.contains(new File(sampleTypeCombinationPathRoot, "snvs_654321_raw.vcf.gz"))
+            assert linkLocations.contains(new File(sampleTypeCombinationPathRoot, "snvs_654321_raw.vcf.gz.tbi"))
+            assert linkLocations.contains(new File(sampleTypeCombinationPathRoot, "config_calling_2014-08-25_15h32.txt"))
+
+            return "#some script"
         }
         snvCallingJob.metaClass.addOutputParameter = { String name, String value -> }
         try {

@@ -122,11 +122,19 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob {
         // paths for the result file
         List<File> sourceLocation = [ resultFile.absoluteStagingPath ]
         List<File> targetLocation = [ resultFile.absoluteDataManagementPath ]
-        List<File> linkLocation = [ instance.sampleTypeCombination.getResultFileLinkedPath(SnvCallingStep.SNV_DEEPANNOTATION).absoluteDataManagementPath ]
+        List<File> linkLocation = [ instance.sampleTypeCombination.getResultFileLinkedPath(step).absoluteDataManagementPath ]
+
+        // path for index files
+        OtpPath indexFile = new OtpPath(instance.snvInstancePath, step.getIndexFileName(instance.individual))
+        sourceLocation.add(indexFile.absoluteStagingPath)
+        targetLocation.add(indexFile.absoluteDataManagementPath)
+        linkLocation.add(instance.sampleTypeCombination.getIndexFileLinkedPath(step).absoluteDataManagementPath)
+
         //path for the config file
         sourceLocation.add(instance.configFilePath.absoluteStagingPath)
         targetLocation.add(instance.configFilePath.absoluteDataManagementPath)
         linkLocation.add(instance.getStepConfigFileLinkedPath(step).absoluteDataManagementPath)
+
         String transferClusterScript = createClusterScriptService.createTransferScript(sourceLocation, targetLocation, linkLocation, true)
         // parameter for copying job
         final Realm realm = configService.getRealmDataProcessing(instance.project)

@@ -59,10 +59,13 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 """
 
     final String PBS_ID = "123456"
+    String UNIQUE_PATH = TestCase.getUniqueString()
 
     @Before
     void setUp() {
-        testDirectory = TestCase.createEmptyTestDirectory()
+
+        testDirectory = new File("/tmp/otp-test/${UNIQUE_PATH}")
+        assert testDirectory.mkdirs()  // This will fail if the directory already exists or if it could not be created.
 
         testData = new SnvCallingInstanceTestData()
         testData.createSnvObjects()
@@ -82,6 +85,13 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         processedMergedBamFile1 = testData.bamFileTumor
         ProcessedMergedBamFile processedMergedBamFile2 = testData.bamFileControl
+
+        SampleType sampleType1 = processedMergedBamFile1.sample.sampleType
+        sampleType1.name = "sampleType1"
+        assert sampleType1.save(flush: true)
+        SampleType sampleType2 = processedMergedBamFile2.sample.sampleType
+        sampleType2.name = "sampleType2"
+        assert sampleType2.save(flush: true)
 
         SnvConfig snvConfig = testData.snvConfig
         snvConfig.configuration = CONFIGURATION
@@ -302,29 +312,32 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         createClusterScriptService.metaClass.createTransferScript = { List<File> sourceLocations, List<File> targetLocations, List<File> linkLocations, boolean move ->
 
             // test that source files are correct
-            File stagingBase = new File("/tmp/otp-test/1413266694657-DFA32A1558DFE7F8/staging/")
+            File stagingBase = new File("/tmp/otp-test/${UNIQUE_PATH}/staging/")
             File individualPathStaging = new File(stagingBase, "dirName/sequencing/whole_genome_sequencing/view-by-pid/654321/")
-            File sampleTypeCombinationPathStaging = new File(individualPathStaging, "snv_results/paired/sampletype1413266694685-2a0ca11a6d69c634_sampletype1413266694789-5b0ea282d0c2d3ac/")
+            File sampleTypeCombinationPathStaging = new File(individualPathStaging, "snv_results/paired/sampletype1_sampletype2/")
             File instancePathStaging = new File(sampleTypeCombinationPathStaging, "2014-09-01_15h32/")
 
-            assert sourceLocations.size() == 2
-            sourceLocations.contains(new File(instancePathStaging, "snvs_654321.vcf.gz"))
-            sourceLocations.contains(new File(instancePathStaging, "config.txt"))
+            assert sourceLocations.size() == 3
+            assert sourceLocations.contains(new File(instancePathStaging, "snvs_654321.vcf.gz"))
+            assert sourceLocations.contains(new File(instancePathStaging, "snvs_654321.vcf.gz.tbi"))
+            assert sourceLocations.contains(new File(instancePathStaging, "config.txt"))
 
             // test that target files are correct
-            File rootBase = new File("/tmp/otp-test/1413266694657-DFA32A1558DFE7F8/root/")
+            File rootBase = new File("/tmp/otp-test/${UNIQUE_PATH}/root/")
             File individualPathRoot = new File(rootBase, "dirName/sequencing/whole_genome_sequencing/view-by-pid/654321/")
-            File sampleTypeCombinationPathRoot = new File(individualPathRoot, "snv_results/paired/sampletype1413266694685-2a0ca11a6d69c634_sampletype1413266694789-5b0ea282d0c2d3ac/")
+            File sampleTypeCombinationPathRoot = new File(individualPathRoot, "snv_results/paired/sampletype1_sampletype2/")
             File instancePathRoot = new File(sampleTypeCombinationPathRoot, "2014-09-01_15h32/")
 
-            assert targetLocations.size() == 2
-            targetLocations.contains(new File(instancePathRoot, "snvs_654321.vcf.gz"))
-            targetLocations.contains(new File(instancePathRoot, "config.txt"))
+            assert targetLocations.size() == 3
+            assert targetLocations.contains(new File(instancePathRoot, "snvs_654321.vcf.gz"))
+            assert targetLocations.contains(new File(instancePathRoot, "snvs_654321.vcf.gz.tbi"))
+            assert targetLocations.contains(new File(instancePathRoot, "config.txt"))
 
             // test that linked files are correct
-            assert linkLocations.size() == 2
-            linkLocations.contains(new File(sampleTypeCombinationPathRoot, "snvs_654321.vcf.gz"))
-            linkLocations.contains(new File(sampleTypeCombinationPathRoot, "config_snv_deepannotation_2014-09-01_15h32.txt"))
+            assert linkLocations.size() == 3
+            assert linkLocations.contains(new File(sampleTypeCombinationPathRoot, "snvs_654321.vcf.gz"))
+            assert linkLocations.contains(new File(sampleTypeCombinationPathRoot, "snvs_654321.vcf.gz.tbi"))
+            assert linkLocations.contains(new File(sampleTypeCombinationPathRoot, "config_snv_deepannotation_2014-09-01_15h32.txt"))
 
             "#some script"
         }

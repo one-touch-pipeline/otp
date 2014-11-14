@@ -58,7 +58,7 @@ class SnvCallingJob extends AbstractSnvCallingJob {
             //submit one SnvCalling run per chromosome
             final List<String> chromosomeFilePaths = []
             config.chromosomeNames.each { String chromosome ->
-                final File chromosomeResultFile = new OtpPath(instance.snvInstancePath, SnvCallingStep.CALLING.getResultFileName(instance.individual, chromosome)).absoluteStagingPath
+                final File chromosomeResultFile = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual, chromosome)).absoluteStagingPath
                 // In case the file exists already from an earlier -not successful- run it should be deleted first
                 deleteResultFileIfExists(chromosomeResultFile)
                 chromosomeFilePaths.add(chromosomeResultFile)
@@ -79,7 +79,7 @@ class SnvCallingJob extends AbstractSnvCallingJob {
 
             //if all SnvCallings per chromosome are finished they can be merged together
             ExternalScript externalScriptJoining = ExternalScript.getLatestVersionOfScript(CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER)
-            File vcfRawFile = new OtpPath(instance.snvInstancePath, SnvCallingStep.CALLING.getResultFileName(instance.individual, null)).absoluteStagingPath
+            File vcfRawFile = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual, null)).absoluteStagingPath
             // In case the file exists already from an earlier -not successful- run it should be deleted first
             deleteResultFileIfExists(vcfRawFile)
             String allChromosomeFilePaths = chromosomeFilePaths.join(" ")
@@ -116,11 +116,11 @@ class SnvCallingJob extends AbstractSnvCallingJob {
         final SnvConfig config = instance.config.evaluate()
         // check if the chromosome vcf result file exist
         config.chromosomeNames.each { String chromosome ->
-            final OtpPath resultFilePerChromosome = new OtpPath(instance.snvInstancePath, SnvCallingStep.CALLING.getResultFileName(instance.individual, chromosome))
+            final OtpPath resultFilePerChromosome = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual, chromosome))
             LsdfFilesService.ensureFileIsReadableAndNotEmpty(resultFilePerChromosome.absoluteStagingPath)
         }
         // check if the final vcf result file exists
-        final OtpPath resultFile = new OtpPath(instance.snvInstancePath, SnvCallingStep.CALLING.getResultFileName(instance.individual, null))
+        final OtpPath resultFile = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual, null))
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(resultFile.absoluteStagingPath)
 
         try {
@@ -140,12 +140,20 @@ class SnvCallingJob extends AbstractSnvCallingJob {
             resultFile.absoluteDataManagementPath
         ]
         List<File> linkLocation = [
-            instance.sampleTypeCombination.getResultFileLinkedPath(SnvCallingStep.CALLING).absoluteDataManagementPath
+            instance.sampleTypeCombination.getResultFileLinkedPath(step).absoluteDataManagementPath
         ]
+
+        // path for index files
+        OtpPath indexFile = new OtpPath(instance.snvInstancePath, step.getIndexFileName(instance.individual))
+        sourceLocation.add(indexFile.absoluteStagingPath)
+        targetLocation.add(indexFile.absoluteDataManagementPath)
+        linkLocation.add(instance.sampleTypeCombination.getIndexFileLinkedPath(step).absoluteDataManagementPath)
+
         //path for the config file
         sourceLocation.add(instance.configFilePath.absoluteStagingPath)
         targetLocation.add(instance.configFilePath.absoluteDataManagementPath)
         linkLocation.add(instance.getStepConfigFileLinkedPath(step).absoluteDataManagementPath)
+
         String transferClusterScript = createClusterScriptService.createTransferScript(sourceLocation, targetLocation, linkLocation, true)
         //parameter for copying job
         final Realm realm = configService.getRealmDataProcessing(instance.project)

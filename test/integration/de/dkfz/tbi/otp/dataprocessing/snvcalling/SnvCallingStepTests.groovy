@@ -102,6 +102,23 @@ class SnvCallingStepTests extends GroovyTestCase {
     }
 
     @Test
+    void testGetIndexFileName() {
+        TestData testData = new TestData()
+        testData.createObjects()
+
+        Individual individual = testData.individual
+        final String pid = '654321'
+        individual.pid = pid
+        assert individual.save(failOnError: true)
+
+        assertEquals('snvs_654321_raw.vcf.gz.tbi', SnvCallingStep.CALLING.getIndexFileName(individual))
+        assertEquals('snvs_654321_annotation.vcf.gz.tbi', SnvCallingStep.SNV_ANNOTATION.getIndexFileName(individual))
+        assertEquals('snvs_654321.vcf.gz.tbi', SnvCallingStep.SNV_DEEPANNOTATION.getIndexFileName(individual))
+
+        //TODO: test for filter -> OTP-989"
+    }
+
+    @Test
     void testGetCheckpointFilePath() {
         final String SOME_INSTANCE_NAME = "2014-09-01_15h32"
 

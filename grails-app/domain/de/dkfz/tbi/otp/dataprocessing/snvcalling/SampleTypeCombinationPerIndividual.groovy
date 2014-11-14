@@ -111,6 +111,10 @@ class SampleTypeCombinationPerIndividual {
         }
     }
 
+    OtpPath getIndexFileLinkedPath(SnvCallingStep step) {
+        return new OtpPath(sampleTypeCombinationPath, step.getIndexFileName(individual))
+    }
+
     @Override
     String toString() {
         return "STCPI ${id} ${individual.pid} ${sampleType1.name} ${sampleType2.name} ${seqType.name} ${seqType.libraryLayout}"
