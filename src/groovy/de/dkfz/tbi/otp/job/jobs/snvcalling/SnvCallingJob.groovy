@@ -89,7 +89,7 @@ class SnvCallingJob extends AbstractSnvCallingJob {
             deleteResultFileIfExists(vcfRawFile)
             String allChromosomeFilePaths = chromosomeFilePaths.join(" ")
 
-            final String qsubParametersDependency = "{'depend': 'afterok:${executedClusterJobsPerChromosome.join(",")}'}"
+            final String qsubParametersDependency = "{'depend': 'afterok:${executedClusterJobsPerChromosome.join(":")}'}"
             final String qsubParametersToMergeVcfs =
                     "TOOL_ID=snvVcfJoin," +
                     "FILENAME_VCF_RAW=${vcfRawFile}," +

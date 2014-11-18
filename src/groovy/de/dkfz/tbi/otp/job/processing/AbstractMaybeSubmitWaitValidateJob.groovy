@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * Base class for jobs which maybe submit cluster jobs, wait for them to finish, and then validate their results.
@@ -9,6 +10,7 @@ import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
  */
 abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
 
+    @Autowired
     JobStatusLoggingService jobStatusLoggingService
 
     @Override

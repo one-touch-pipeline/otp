@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.job.processing.AbstractMaybeSubmitWaitValidateJob
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.ngsdata.Realm
+import org.springframework.beans.factory.annotation.Autowired
 
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
@@ -13,6 +14,7 @@ import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
  */
 class ClusterScriptExecutorJob extends AbstractMaybeSubmitWaitValidateJob {
 
+    @Autowired
     ExecutionHelperService executionHelperService
 
     @Override
