@@ -63,8 +63,8 @@ class SnvAnnotationJob extends AbstractSnvCallingJob {
                     "PID=${instance.individual.pid}," +
                     "TUMOR_BAMFILE_FULLPATH_BP=${sampleType1BamFile}," +
                     "TOOL_ID=snvAnnotation," +
-                    "FILENAME_VCF_IN=${inputResultFile}" +
-                    "FILENAME_VCF_OUT=${annotationResultFile}" +
+                    "FILENAME_VCF_IN=${inputResultFile}," +
+                    "FILENAME_VCF_OUT=${annotationResultFile}," +
                     "FILENAME_CHECKPOINT=${checkpointFile}" +
                     "'}"
             final String script =
