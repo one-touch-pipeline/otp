@@ -59,7 +59,7 @@ class DomainFactory {
         host: DEFAULT_HOST,
         port: DEFAULT_PORT,
         unixUser: '!fakeuser',
-        timeout: 60,
+        timeout: 0,
         pbsOptions: '',
     ]
 
@@ -80,7 +80,7 @@ class DomainFactory {
         host: 'headnode',
         port: DEFAULT_PORT,
         unixUser: 'otptest',
-        pbsOptions: '{"-l": {nodes: "1:lsdf", walltime: "5:00"}}',
+        pbsOptions: '{"-l": {nodes: "1:lsdf", walltime: "30:00"}}',
     ]
 
     /**

@@ -150,6 +150,7 @@ class SnvCallingInstanceTestData extends TestData {
                 qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
                 status: AbstractBamFile.State.PROCESSED,
                 fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
+                coverage: 1,
         )
         assert bamFile.save(flush: true, failOnError: true)
 
