@@ -64,8 +64,8 @@ class ClusterJobServiceTests {
         jobInfo.setWalltimeRequestedMS(4000000L)
 
         TestCase.removeMetaClass(ClusterJobService, clusterJobService)
-        ClusterJobService.metaClass.getClusterJobInformation = { ClusterJobIdentifier c ->
-            assert c == clusterJobIdentifier
+        ClusterJobService.metaClass.getClusterJobInformation = { ClusterJob j ->
+            assert j == job
             return jobInfo
         }
 

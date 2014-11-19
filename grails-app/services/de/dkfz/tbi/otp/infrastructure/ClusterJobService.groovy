@@ -42,8 +42,11 @@ class ClusterJobService {
      * with the missing attributes via flowcontrol API
      */
     public void completeClusterJob(ClusterJobIdentifier jobIdentifier) {
-        ClusterJob job = exactlyOneElement(ClusterJob.findAllByRealmAndClusterJobId(jobIdentifier.realm, jobIdentifier.clusterJobId))
-        JobInfo info = getClusterJobInformation(jobIdentifier)
+        ClusterJob job = atMostOneElement(ClusterJob.findAllByRealmAndClusterJobId(jobIdentifier.realm, jobIdentifier.clusterJobId))
+        if(job == null) {
+            job = exactlyOneElement(ClusterJob.findAllByClusterJobId(jobIdentifier.clusterJobId))
+        }
+        JobInfo info = getClusterJobInformation(job)
         if (info) {
             job.exitStatus = Status.valueOf(info.getState() as String)
             job.exitCode = info.getExitcode()
@@ -67,13 +70,13 @@ class ClusterJobService {
     *
     * @return JobInfo object
     */
-    public JobInfo getClusterJobInformation(ClusterJobIdentifier jobIdentifier) {
-        FlowControlClient client = getFlowControlClient(jobIdentifier.realm)
+    public JobInfo getClusterJobInformation(ClusterJob clusterJob) {
+        FlowControlClient client = getFlowControlClient(clusterJob.realm)
         if (client == null) {
             return null
         }
-        JobInfos infos = client.requestJobInfos(jobIdentifier.clusterJobId)
-        JobInfo info = infos.getJobInfo(jobIdentifier.clusterJobId)
+        JobInfos infos = client.requestJobInfos(clusterJob.clusterJobId)
+        JobInfo info = infos.getJobInfo(clusterJob.clusterJobId)
         if (info == null) {
             throw new RuntimeException("FlowControl returned no information for ${jobIdentifier}.")
         }
