@@ -64,6 +64,13 @@ class Run {
         }
     }
 
+    /**
+     * It returns the highest priority of the corresponding projects.
+     */
+    short getProcessingPriority() {
+        return DataFile.findAllByRun(this)*.project*.processingPriority.max()
+    }
+
     static mapping = {
         seqCenter index: "run_seq_center_idx"
         seqPlatform index: "run_seq_platform_idx"

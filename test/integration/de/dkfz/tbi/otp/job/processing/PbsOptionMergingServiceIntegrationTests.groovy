@@ -1,7 +1,9 @@
 package de.dkfz.tbi.otp.job.processing
 
 import static org.junit.Assert.*
+
 import org.junit.*
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
@@ -103,6 +105,24 @@ class PbsOptionMergingServiceIntegrationTests extends AbstractIntegrationTest {
 
         processingOption = createProcessingOption("job_dkfz", "{-q: other_convey}", Realm.Cluster.DKFZ)
         assertEquals("-q convey -a b -l nodes=1:ppn=6:lsdf -l mem=3g -l walltime=50:00:00 ", pbsOptionMergingService.mergePbsOptions(realm_dkfz, "job_dkfz", QSUB_PARAMETERS))
+
+        realm = createRealm()
+        assertEquals("-A FASTTRACK ", pbsOptionMergingService.mergePbsOptions(realm, null, '{"-A": "FASTTRACK"}'))
+
+        realm = createRealm("{-a: b}")
+        assertEquals("-a b -A FASTTRACK ", pbsOptionMergingService.mergePbsOptions(realm, null, '{"-A": "FASTTRACK"}'))
+
+        realm = createRealm("{-a: b}")
+        processingOption = createProcessingOption("job_dkfz", "{}", Realm.Cluster.DKFZ)
+        assertEquals("-a b -A FASTTRACK ", pbsOptionMergingService.mergePbsOptions(realm, "job_dkfz", '{"-A": "FASTTRACK"}'))
+
+        realm = createRealm("{-a: b}")
+        processingOption = createProcessingOption("job_dkfz", '{"-q": "other_convey"}', Realm.Cluster.DKFZ)
+        assertEquals("-q other_convey -a b -A FASTTRACK ", pbsOptionMergingService.mergePbsOptions(realm, "job_dkfz", '{"-A": "FASTTRACK"}'))
+
+        realm = createRealm("{-a: b}")
+        processingOption = createProcessingOption("job_dkfz", '{"-q": "other_convey"}', Realm.Cluster.DKFZ)
+        assertEquals("-q convey -a b -A FASTTRACK -l nodes=1:ppn=6:lsdf -l mem=3g -l walltime=50:00:00 ", pbsOptionMergingService.mergePbsOptions(realm, "job_dkfz", QSUB_PARAMETERS, '{"-A": "FASTTRACK"}'))
     }
 
     private Realm createRealm(String pbsOptions = "{}", Realm.Cluster cluster = Realm.Cluster.DKFZ) {

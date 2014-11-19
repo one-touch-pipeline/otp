@@ -29,6 +29,10 @@ class ProcessedBamFile extends AbstractFileSystemBamFile {
         return alignmentPass.project
     }
 
+    short getProcessingPriority() {
+        return project.processingPriority
+    }
+
     @Override
     public String toString() {
         return "id: ${id} " +

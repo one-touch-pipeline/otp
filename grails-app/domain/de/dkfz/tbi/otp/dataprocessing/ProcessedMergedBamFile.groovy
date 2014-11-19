@@ -43,6 +43,10 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
         return mergingPass.project
     }
 
+    short getProcessingPriority() {
+        return project.processingPriority
+    }
+
     Individual getIndividual() {
         return mergingPass.individual
     }

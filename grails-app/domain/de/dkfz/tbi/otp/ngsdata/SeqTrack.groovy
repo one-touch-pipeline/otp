@@ -90,6 +90,10 @@ class SeqTrack {
         return sample.project
     }
 
+    short getProcessingPriority() {
+        return project.processingPriority
+    }
+
     /**
      * Returns the {@link ReferenceGenome} which is configured to be used for aligning this SeqTrack, or
      * <code>null</code> if it is unknown.

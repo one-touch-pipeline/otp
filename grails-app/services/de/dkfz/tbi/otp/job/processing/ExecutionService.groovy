@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import static org.springframework.util.Assert.notNull
+import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -106,8 +107,19 @@ class ExecutionService {
         notNull realm, 'No realm specified.'
 
         ProcessingStep processingStep = schedulerService.jobExecutedByCurrentThread.processingStep
+        def domainObject = atMostOneElement(ProcessParameter.findAllByProcess(processingStep.process))?.toObject()
 
-        String pbsOptions = pbsOptionMergingService.mergePbsOptions(realm, jobIdentifier, qsubParameters)
+        SeqType seqType = domainObject?.seqType
+        short processingPriority = domainObject?.processingPriority ?: ProcessingPriority.NORMAL_PRIORITY
+
+
+        // check if the project has FASTTRACK priority
+        String fastTrackParameter
+        if (processingPriority >= ProcessingPriority.FAST_TRACK_PRIORITY) {
+            fastTrackParameter = '{"-A": "FASTTRACK"}'
+        }
+
+        String pbsOptions = pbsOptionMergingService.mergePbsOptions(realm, jobIdentifier, qsubParameters, fastTrackParameter)
 
         String pbsJobDescription = processingStep.getPbsJobDescription()
         String scriptText = """
@@ -141,7 +153,6 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
         String command = "echo '${scriptText}' | qsub " + pbsOptions
         List<String> values = executeRemoteJob(realm, command)
 
-        SeqType seqType = atMostOneElement(ProcessParameter.findAllByProcess(processingStep.process))?.toObject()?.seqType
 
         String concatenatedValues = concatResults(values)
 

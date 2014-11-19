@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.job.processing
 
+import grails.converters.JSON
+
 import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.util.Assert
-import grails.converters.JSON
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.Realm
 
 /**
@@ -47,14 +48,14 @@ class PbsOptionMergingService {
      * @throws NullPointerException if a job identifier is provided, but no PBS option is defined for this
      *          job identifier and the cluster ({@link Realm#cluster}) of the {@link Realm}
      */
-    public String mergePbsOptions(Realm realm, String jobIdentifier = null, String qsubParameters = "") {
-        return mapToPbsOptions(mergePbsOptionsToMap(realm, jobIdentifier, qsubParameters))
+    public String mergePbsOptions(Realm realm, String jobIdentifier = null, String... parameters) {
+        return mapToPbsOptions(mergePbsOptionsToMap(realm, jobIdentifier, parameters))
     }
 
     /**
      * Same as {@link #mergePbsOptions(Realm, String, String)}, but returns a Map.
      */
-    public Map mergePbsOptionsToMap(Realm realm, String jobIdentifier = null, String qsubParameters = "") {
+    public Map mergePbsOptionsToMap(Realm realm, String jobIdentifier = null, String... parameters) {
         Map allParameter = jsonStringToMap(realm.pbsOptions)
         if (jobIdentifier != null) {
             String key = PBS_PREFIX + jobIdentifier
@@ -64,9 +65,11 @@ class PbsOptionMergingService {
             Map mapJob = jsonStringToMap(processingOption.value)
             allParameter = this.mergeHelper(allParameter, mapJob)
         }
-        if (qsubParameters) {
-            Map mapQsubParameter = jsonStringToMap(qsubParameters)
-            allParameter = this.mergeHelper(allParameter, mapQsubParameter)
+        parameters.each {
+            if (it) {
+                Map mapQsubParameter = jsonStringToMap(it)
+                allParameter = this.mergeHelper(allParameter, mapQsubParameter)
+            }
         }
         return allParameter
     }

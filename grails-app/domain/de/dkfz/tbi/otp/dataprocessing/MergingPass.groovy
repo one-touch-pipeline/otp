@@ -31,6 +31,10 @@ class MergingPass {
         return mergingSet.project
     }
 
+    short getProcessingPriority() {
+        return project.processingPriority
+    }
+
     Individual getIndividual() {
         return mergingSet.individual
     }

@@ -61,6 +61,10 @@ class AlignmentPass {
         return seqTrack.project
     }
 
+    short getProcessingPriority() {
+        return project.processingPriority
+    }
+
     Sample getSample() {
         return seqTrack.sample
     }

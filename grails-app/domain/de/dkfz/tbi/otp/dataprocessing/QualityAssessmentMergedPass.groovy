@@ -85,4 +85,9 @@ class QualityAssessmentMergedPass {
     SeqType getSeqType() {
         return processedMergedBamFile.seqType
     }
+
+    short getProcessingPriority() {
+        return project.processingPriority
+    }
+
 }

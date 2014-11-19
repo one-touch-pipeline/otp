@@ -64,6 +64,10 @@ class QualityAssessmentPass {
         return processedBamFile.project
     }
 
+    short getProcessingPriority() {
+        return project.processingPriority
+    }
+
     SeqTrack getSeqTrack() {
         return processedBamFile.seqTrack
     }
