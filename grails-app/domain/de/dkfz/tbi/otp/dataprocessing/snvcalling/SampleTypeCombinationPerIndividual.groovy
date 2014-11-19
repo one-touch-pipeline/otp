@@ -125,8 +125,7 @@ class SampleTypeCombinationPerIndividual {
      * for this {@link SampleTypeCombinationPerIndividual}, if available and not withdrawn, otherwise null.
      */
     ProcessedMergedBamFile getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(SampleType sampleType) {
-        return atMostOneElement(ProcessedMergedBamFile.createCriteria().list {
-            eq("withdrawn", false)
+        final ProcessedMergedBamFile bamFile = ProcessedMergedBamFile.createCriteria().get {
             mergingPass {
                 mergingSet {
                     mergingWorkPackage {
@@ -136,9 +135,17 @@ class SampleTypeCombinationPerIndividual {
                             eq ("individual", individual)
                         }
                     }
+                    order("identifier", "desc")
                 }
+                order("identifier", "desc")
             }
-        }?.findAll {it.isMostRecentBamFile() })
+            maxResults(1)
+        }
+        if (bamFile && !bamFile.withdrawn) {
+            return bamFile
+        } else {
+            return null
+        }
     }
 
     /**

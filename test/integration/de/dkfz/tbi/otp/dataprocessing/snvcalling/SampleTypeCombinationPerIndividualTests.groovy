@@ -155,7 +155,9 @@ class SampleTypeCombinationPerIndividualTests extends GroovyTestCase {
                 )
         sampleTypeCombinationPerIndividual.save()
 
+        assert processedMergedBamFile1_A.isMostRecentBamFile()
         assertEquals(processedMergedBamFile1_A, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType1))
+        assert processedMergedBamFile2.isMostRecentBamFile()
         assertEquals(processedMergedBamFile2, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType2))
 
 
@@ -191,12 +193,25 @@ class SampleTypeCombinationPerIndividualTests extends GroovyTestCase {
             fileOperationStatus: FileOperationStatus.PROCESSED])
         processedMergedBamFile1_B.save()
 
+        assert processedMergedBamFile1_B.isMostRecentBamFile()
         assertEquals(processedMergedBamFile1_B, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType1))
+        assert processedMergedBamFile2.isMostRecentBamFile()
         assertEquals(processedMergedBamFile2, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType2))
 
-        processedMergedBamFile1_B.withdrawn = true
+        final MergingSet mergingSet3 = MergingSet.build(mergingWorkPackage: processedMergedBamFile1_A.mergingWorkPackage, identifier: 1)
+        final MergingPass mergingPass3 = MergingPass.build(mergingSet: mergingSet3, identifier: 0)
+        final ProcessedMergedBamFile bamFile3 = ProcessedMergedBamFile.build(mergingPass: mergingPass3)
+
+        assert bamFile3.mergingPass.identifier < processedMergedBamFile1_B.mergingPass.identifier
+        assert bamFile3.mergingSet.identifier > processedMergedBamFile1_B.mergingSet.identifier
+        assert !processedMergedBamFile1_B.isMostRecentBamFile()
+        assert bamFile3.isMostRecentBamFile()
+        assertEquals(bamFile3, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType1))
+
+        bamFile3.withdrawn = true
 
         assertNull(sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType1))
+        assert processedMergedBamFile2.isMostRecentBamFile()
         assertEquals(processedMergedBamFile2, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType2))
     }
 
@@ -250,13 +265,17 @@ class SampleTypeCombinationPerIndividualTests extends GroovyTestCase {
                 )
         sampleTypeCombinationPerIndividual.save()
 
+        assert processedMergedBamFile1_A.isMostRecentBamFile()
         assertEquals(processedMergedBamFile1_A, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeA))
+        assert processedMergedBamFile1_B.isMostRecentBamFile()
         assertEquals(processedMergedBamFile1_B, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeB))
 
         sampleTypeCombinationPerIndividual.seqType = otherSeqType
         sampleTypeCombinationPerIndividual.save()
 
+        assert processedMergedBamFile2_A.isMostRecentBamFile()
         assertEquals(processedMergedBamFile2_A, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeA))
+        assert processedMergedBamFile2_B.isMostRecentBamFile()
         assertEquals(processedMergedBamFile2_B, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeB))
     }
 
@@ -300,7 +319,9 @@ class SampleTypeCombinationPerIndividualTests extends GroovyTestCase {
                 )
         sampleTypeCombinationPerIndividual.save()
 
+        assert processedMergedBamFile1_A.isMostRecentBamFile()
         assertEquals(processedMergedBamFile1_A, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeA))
+        assert processedMergedBamFile1_B.isMostRecentBamFile()
         assertEquals(processedMergedBamFile1_B, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeB))
 
         SampleTypePerProject.build(project: otherIndividual.project, sampleType: sampleTypeA, category: SampleType.Category.DISEASE)
@@ -308,7 +329,9 @@ class SampleTypeCombinationPerIndividualTests extends GroovyTestCase {
         sampleTypeCombinationPerIndividual.individual = otherIndividual
         sampleTypeCombinationPerIndividual.save()
 
+        assert processedMergedBamFile2_A.isMostRecentBamFile()
         assertEquals(processedMergedBamFile2_A, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeA))
+        assert processedMergedBamFile2_B.isMostRecentBamFile()
         assertEquals(processedMergedBamFile2_B, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeB))
 
     }
