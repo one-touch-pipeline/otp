@@ -54,7 +54,7 @@ class SnvCallingInstance {
     static boolean isConsistentWithSampleTypeCombination(ProcessedMergedBamFile bamFile, SnvCallingInstance instance, SampleType sampleType) {
         return (bamFile.individual == instance.individual &&
                 bamFile.seqType == instance.seqType &&
-                bamFile.sampleType == sampleType)
+                bamFile.sampleType.id == sampleType.id)
     }
 
     static constraints = {
@@ -133,8 +133,8 @@ class SnvCallingInstance {
             assert result.step == step
             assert !result.withdrawn
             assert result.processingState == SnvProcessingStates.FINISHED
-            assert result.sampleType1BamFile == sampleType1BamFile
-            assert result.sampleType2BamFile == sampleType2BamFile
+            assert result.sampleType1BamFile.id == sampleType1BamFile.id
+            assert result.sampleType2BamFile.id == sampleType2BamFile.id
         }
         return result
     }
