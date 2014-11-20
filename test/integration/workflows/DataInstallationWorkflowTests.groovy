@@ -103,7 +103,7 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
 
         // Just to be sure the rootPath and the processingRootPath are clean for new test
         String cmdCleanUp = cleanUpTestFoldersCommand()
-        String cmdBuildFileStructure = "mkdir -p ${path}"
+        String cmdBuildFileStructure = "mkdir -p ${path} ${loggingPath}/log/status/"
         String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath}"
 
         executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildFileStructure}; ${cmdBuildSoftLinkToFileToBeProcessed}")
@@ -299,7 +299,7 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
      * @return Command to clean up used folders
      */
     String cleanUpTestFoldersCommand() {
-        return "rm -rf ${rootPath}/* ${processingRootPath}/*"
+        return "rm -rf ${rootPath} ${processingRootPath} ${loggingPath}"
     }
 
     /**

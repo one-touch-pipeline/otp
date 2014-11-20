@@ -33,7 +33,7 @@ class ChecksumFileService {
         String path = pathToMd5File(file)
         File md5File = new File(path)
         if (!md5File.canRead()) {
-            return false
+            throw new RuntimeException("Can not read md5sum file ${md5File}")
         }
         String md5sum
         try {
