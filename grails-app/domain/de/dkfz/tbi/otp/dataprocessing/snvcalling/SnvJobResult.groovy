@@ -106,7 +106,7 @@ class SnvJobResult {
         if (step == SnvCallingStep.CALLING) {
             return new OtpPath(snvCallingInstance.snvInstancePath, step.getResultFileName(snvCallingInstance.individual, chromosomeName))
         } else if (step == SnvCallingStep.FILTER_VCF) {
-            return new OtpPath(snvCallingInstance.snvInstancePath, step.getResultFileName())
+            return snvCallingInstance.snvInstancePath
         } else {
             return new OtpPath(snvCallingInstance.snvInstancePath, step.getResultFileName(snvCallingInstance.individual))
         }
