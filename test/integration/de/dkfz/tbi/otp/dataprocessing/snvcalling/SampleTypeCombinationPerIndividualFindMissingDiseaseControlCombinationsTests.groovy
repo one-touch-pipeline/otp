@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+import org.joda.time.LocalDate
 import org.junit.Before
 import org.junit.Test
 import de.dkfz.tbi.otp.ngsdata.*
@@ -23,6 +24,7 @@ class SampleTypeCombinationPerIndividualFindMissingDiseaseControlCombinationsTes
     Sample controlSample
     SeqTrack diseaseSeqTrack
     SeqTrack controlSeqTrack
+    DataFile dataFile
 
     @Before
     void before() {
@@ -41,6 +43,7 @@ class SampleTypeCombinationPerIndividualFindMissingDiseaseControlCombinationsTes
         controlSample = Sample.build(individual: individual, sampleType: controlSampleType)
         diseaseSeqTrack = SeqTrack.build(sample: diseaseSample, seqType: wholeGenome)
         controlSeqTrack = SeqTrack.build(sample: controlSample, seqType: wholeGenome)
+        dataFile = DataFile.build(seqTrack: SeqTrack.build(sample: Sample.build(individual: individual)))
     }
 
     @Test
@@ -182,6 +185,11 @@ class SampleTypeCombinationPerIndividualFindMissingDiseaseControlCombinationsTes
     }
 
     @Test
+    void testNoRecentDataFileForIndividual() {
+        assert SampleTypeCombinationPerIndividual.findMissingDiseaseControlCombinations(dataFile.dateCreated.plus(1)).empty
+    }
+
+    @Test
     void testDiseaseSeqTrackWithdrawn() {
         DataFile.build(seqTrack: diseaseSeqTrack, fileType: sequenceFileType, fileWithdrawn: true)
         assertFindsNothing()
@@ -268,19 +276,19 @@ class SampleTypeCombinationPerIndividualFindMissingDiseaseControlCombinationsTes
         SeqTrack.build(sample: diseaseSample, seqType: exome)
         SeqTrack.build(sample: controlSample, seqType: exome)
         final List<SampleTypeCombinationPerIndividual> combinations =
-                SampleTypeCombinationPerIndividual.findMissingDiseaseControlCombinations().sort { it.seqType.name }
+                SampleTypeCombinationPerIndividual.findMissingDiseaseControlCombinations(dataFile.dateCreated).sort { it.seqType.name }
         assert combinations.size() == 2
         assertEqualsAndNotPersisted(combinations[0], individual, diseaseSampleType, controlSampleType, exome)
         assertEqualsAndNotPersisted(combinations[1], individual, diseaseSampleType, controlSampleType, wholeGenome)
     }
 
     void assertFindsNothing() {
-        assert SampleTypeCombinationPerIndividual.findMissingDiseaseControlCombinations().empty
+        assert SampleTypeCombinationPerIndividual.findMissingDiseaseControlCombinations(dataFile.dateCreated).empty
     }
 
     void assertFindsOne() {
         assertEqualsAndNotPersisted(
-                exactlyOneElement(SampleTypeCombinationPerIndividual.findMissingDiseaseControlCombinations()),
+                exactlyOneElement(SampleTypeCombinationPerIndividual.findMissingDiseaseControlCombinations(dataFile.dateCreated)),
                 individual, diseaseSampleType, controlSampleType, wholeGenome)
     }
 

@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import org.apache.commons.logging.impl.NoOpLog
+import org.joda.time.LocalDate
 import org.junit.Before
 import org.junit.Test
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual
@@ -62,7 +63,8 @@ class SamplePairDiscoveryJobUnitTests {
 
         Collection<SampleTypeCombinationPerIndividual> missingCombinations = [new SampleTypeCombinationPerIndividual()]
         try {
-            SampleTypeCombinationPerIndividual.metaClass.static.findMissingDiseaseControlCombinations = {
+            SampleTypeCombinationPerIndividual.metaClass.static.findMissingDiseaseControlCombinations = { final Date minDate ->
+                assert minDate == new LocalDate(2014, 12, 1).toDate()
                 return missingCombinations
             }
             boolean setNeedsProcessingCalled = false

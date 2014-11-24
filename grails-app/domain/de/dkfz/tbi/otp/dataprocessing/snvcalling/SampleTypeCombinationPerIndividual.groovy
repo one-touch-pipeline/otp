@@ -152,16 +152,17 @@ class SampleTypeCombinationPerIndividual {
     }
 
     /**
-     * Finds distinct combinations of [individual, sampleType1, sampleType2, seqType] with this criteria:
+     * Finds distinct combinations of [individual, sampleType1, sampleType2, seqType] with these criteria:
      * <ul>
      *     <li>A pair of non-withdrawn SeqTracks exists for that combination and sampleType1 has category
      *         {@link SampleType.Category#DISEASE} and sampleType2 has category {@link SampleType.Category#CONTROL}.</li>
+     *     <li>New {@link DataFile}s were added for the individual since <code>minDate</code>.</li>
      *     <li>The seqType is processable by OTP.</li>
      *     <li>No SampleTypeCombinationPerIndividual exists for that combination.</li>
      * </ul>
      * The results are returned as SampleTypeCombinationPerIndividual instances, <em>which have not been persisted yet</em>.
      */
-    static Collection<SampleTypeCombinationPerIndividual> findMissingDiseaseControlCombinations() {
+    static Collection<SampleTypeCombinationPerIndividual> findMissingDiseaseControlCombinations(final Date minDate) {
         final Collection queryResults = SampleTypeCombinationPerIndividual.executeQuery("""
             SELECT DISTINCT
               st1.sample.individual,
@@ -183,6 +184,7 @@ class SampleTypeCombinationPerIndividual {
               stpp2.sampleType = st2.sample.sampleType AND
               stpp1.category = :disease AND
               stpp2.category = :control AND
+              EXISTS (FROM DataFile WHERE seqTrack.sample.individual = st1.sample.individual AND dateCreated >= :minDate) AND
               NOT EXISTS (FROM DataFile WHERE seqTrack = st1 AND fileType.type = :fileType AND fileWithdrawn = true) AND
               NOT EXISTS (FROM DataFile WHERE seqTrack = st2 AND fileType.type = :fileType AND fileWithdrawn = true) AND
               NOT EXISTS (
@@ -197,6 +199,7 @@ class SampleTypeCombinationPerIndividual {
                 seqTypes: SeqTypeService.alignableSeqTypes(),
                 disease: SampleType.Category.DISEASE,
                 control: SampleType.Category.CONTROL,
+                minDate: minDate,
                 fileType: FileType.Type.SEQUENCE
             ], [readOnly: true])
         return queryResults.collect {

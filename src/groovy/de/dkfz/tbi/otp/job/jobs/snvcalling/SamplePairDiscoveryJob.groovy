@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import org.joda.time.LocalDate
+
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.job.processing.ResumableJob
@@ -54,7 +56,8 @@ class SamplePairDiscoveryJob extends AbstractEndStateAwareJobImpl {
     }
 
     void createMissingDiseaseControlCombinations() {
-        final Collection<SampleTypeCombinationPerIndividual> combinations = SampleTypeCombinationPerIndividual.findMissingDiseaseControlCombinations()
+        final Collection<SampleTypeCombinationPerIndividual> combinations =
+                SampleTypeCombinationPerIndividual.findMissingDiseaseControlCombinations(new LocalDate(2014, 12, 1).toDate())
         log.info "Creating ${combinations.size()} new ${SampleTypeCombinationPerIndividual.simpleName} instance(s)."
         SampleTypeCombinationPerIndividual.setNeedsProcessing(combinations, true)
     }
