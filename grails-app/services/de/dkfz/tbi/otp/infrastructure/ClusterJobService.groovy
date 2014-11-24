@@ -42,8 +42,10 @@ class ClusterJobService {
      * with the missing attributes via flowcontrol API
      */
     public void completeClusterJob(ClusterJobIdentifier jobIdentifier) {
-        ClusterJob job = atMostOneElement(ClusterJob.findAllByRealmAndClusterJobId(jobIdentifier.realm, jobIdentifier.clusterJobId))
-        if(job == null) {
+        ClusterJob job
+        if (jobIdentifier.realm != null) {
+            job = exactlyOneElement(ClusterJob.findAllByRealmAndClusterJobId(jobIdentifier.realm, jobIdentifier.clusterJobId))
+        } else {
             job = exactlyOneElement(ClusterJob.findAllByClusterJobId(jobIdentifier.clusterJobId))
         }
         JobInfo info = getClusterJobInformation(job)
