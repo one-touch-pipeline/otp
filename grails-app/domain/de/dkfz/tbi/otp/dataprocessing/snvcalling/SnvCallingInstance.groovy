@@ -78,6 +78,10 @@ class SnvCallingInstance {
         return sampleTypeCombination.project
     }
 
+    short getProcessingPriority() {
+        return project.processingPriority
+    }
+
     Individual getIndividual() {
         return sampleTypeCombination.individual
     }
