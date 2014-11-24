@@ -12,6 +12,7 @@ import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.InvalidStateException
 import de.dkfz.tbi.otp.job.processing.MonitoringJob
 import de.dkfz.tbi.otp.ngsdata.Realm
+import grails.util.Environment
 
 /**
  * This service is able to track the execution of jobs on the PBS.
@@ -123,7 +124,7 @@ class PbsMonitorService {
             return
         }
 
-        List<Realm> realms = Realm.list()
+        List<Realm> realms = Realm.findAllByEnv(Environment.current.name)
 
         Map<MonitoringJob, List<PbsJobInfo>> removal = [:]
         // we create a copy of the queuedJobs as a different thread might append elements to
