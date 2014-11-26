@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.TestCase
+
 import static org.junit.Assert.*
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 import grails.util.Environment
@@ -51,6 +53,24 @@ class LsdfFilesServiceTests extends GroovyTestCase {
     Project project
     SeqTrack seqTrack
     FileType fileType
+
+    def static mockCreateDirectory(LsdfFilesService lsdfFilesService) {
+        lsdfFilesService.metaClass.createDirectory = { File file, Project project1 ->
+            file.mkdirs()
+        }
+    }
+
+    def static mockDeleteDirectory(Object lsdfFilesService) {
+        lsdfFilesService.metaClass.deleteDirectoryRecursive = { Realm realm, File dir ->
+            if (!dir.deleteDir()) {
+                throw new IOException("Unable to delete path '${dir}'.")
+            }
+        }
+    }
+
+    def static removeMockFileService(LsdfFilesService lsdfFilesService) {
+        TestCase.removeMetaClass(LsdfFilesService, lsdfFilesService)
+    }
 
     @Before
     void setUp() {

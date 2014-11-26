@@ -7,6 +7,10 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static org.springframework.util.Assert.*
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
+import de.dkfz.tbi.otp.job.processing.ExecutionService
+import de.dkfz.tbi.otp.ngsdata.ConfigService
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFileService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -19,6 +23,14 @@ abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob 
 
     @Autowired
     ProcessedMergedBamFileService processedMergedBamFileService
+    @Autowired
+    ExecutionService executionService
+    @Autowired
+    ConfigService configService
+    @Autowired
+    CreateClusterScriptService scriptService
+    @Autowired
+    LsdfFilesService lsdfFilesService
 
     abstract SnvCallingStep getStep()
     abstract SnvCallingStep getPreviousStep()
@@ -62,7 +74,7 @@ abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob 
         notNull(instance, "The input for method writeConfigFile is null")
         final File configFileInStagingDirectory = instance.configFilePath.absoluteStagingPath
         if (!configFileInStagingDirectory.exists()) {
-            configFileInStagingDirectory.parentFile.mkdirs()
+            lsdfFilesService.createDirectory(configFileInStagingDirectory.parentFile, instance.project)
             WaitingFileUtils.waitForFile(configFileInStagingDirectory.parentFile)
             instance.config.writeToFile(configFileInStagingDirectory)
         }

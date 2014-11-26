@@ -1,7 +1,13 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
+import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
+import de.dkfz.tbi.otp.job.processing.ExecutionService
+import de.dkfz.tbi.otp.ngsdata.ConfigService
+import de.dkfz.tbi.otp.ngsdata.Realm
 
 import static de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates.FINISHED
 
@@ -13,6 +19,14 @@ import static de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates.FINI
  * </p>
  */
 class SnvCompletionJob extends AbstractEndStateAwareJobImpl {
+    @Autowired
+    ExecutionService executionService
+    @Autowired
+    ConfigService configService
+    @Autowired
+    CreateClusterScriptService scriptService
+    @Autowired
+    LsdfFilesService filesService
 
     @Override
     void execute() throws Exception {
@@ -30,8 +44,7 @@ class SnvCompletionJob extends AbstractEndStateAwareJobImpl {
         File stagingPath = instance.snvInstancePath.absoluteStagingPath
         File parentPath = stagingPath.parentFile
 
-        if (!parentPath.deleteDir()) {
-            throw new IOException("Unable to delete path '${parentPath}' for SnvCallingInstance '${instance}'")
-        }
+        Realm realm = configService.getRealmDataProcessing(instance.project)
+        filesService.deleteDirectoryRecursive(realm, parentPath)
     }
 }

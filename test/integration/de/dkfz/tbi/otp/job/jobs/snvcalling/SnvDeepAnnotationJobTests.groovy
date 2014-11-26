@@ -40,6 +40,9 @@ class SnvDeepAnnotationJobTests extends GroovyTestCase {
     @Autowired
     CreateClusterScriptService createClusterScriptService
 
+    @Autowired
+    LsdfFilesService lsdfFilesService
+
     File testDirectory
     SnvDeepAnnotationJob snvDeepAnnotationJob
     SnvCallingInstance snvCallingInstance1
@@ -244,6 +247,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
     @Test
     void testMaybeSubmit() {
+        LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
         SnvCallingStep step = SnvCallingStep.SNV_DEEPANNOTATION
         snvDeepAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         snvDeepAnnotationJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult -> }
@@ -292,6 +296,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
             assert annotationFile.text == deepAnnotationFile.text
         } finally {
             schedulerService.finishedJobExecutionOnCurrentThread(snvDeepAnnotationJob)
+            LsdfFilesServiceTests.removeMockFileService(lsdfFilesService)
         }
     }
 

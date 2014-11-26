@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.job.processing.ExecutionService
 import org.junit.After
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -18,6 +19,12 @@ class SnvCompletionJobTests extends GroovyTestCase {
 
     @Autowired
     ApplicationContext applicationContext
+    @Autowired
+    ConfigService configService
+    @Autowired
+    ExecutionService executionService
+    @Autowired
+    LsdfFilesService lsdfFilesService
 
     File testDirectory
     Individual individual
@@ -36,6 +43,7 @@ RUN_SNV_DEEPANNOTATION=1
 RUN_FILTER_VCF=1
 CHROMOSOME_INDICES=( {1..21} X Y)
 """
+
 
     @Before
     void setUp() {
@@ -114,20 +122,27 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     @Test
     void test_execute_WhenRunAndDirectoryIsClean_ShouldDeleteDirectory() {
         // Given:
+        LsdfFilesServiceTests.mockDeleteDirectory(lsdfFilesService)
+        LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
         snvCompletionJob.metaClass.getProcessParameterObject = { snvCallingInstance }
         File stagingPath = snvCallingInstance.snvInstancePath.absoluteStagingPath
         createFakeResultFiles(stagingPath)
         // When:
         snvCompletionJob.execute()
         // Then:
-        assert !stagingPath.exists()
-        assert !stagingPath.parentFile.exists()
-        assert stagingPath.parentFile.parentFile.exists()
+        try {
+            assert !stagingPath.exists()
+            assert !stagingPath.parentFile.exists()
+            assert stagingPath.parentFile.parentFile.exists()
+        } finally {
+            LsdfFilesServiceTests.removeMockFileService(lsdfFilesService)
+        }
     }
 
     @Test
     void test_execute_WhenRunAndDirectoryIsDirtyContainingFile_ShouldDeleteDirectory() {
         // Given:
+        LsdfFilesServiceTests.mockDeleteDirectory(lsdfFilesService)
         snvCompletionJob.metaClass.getProcessParameterObject = { snvCallingInstance }
         File stagingPath = snvCallingInstance.snvInstancePath.absoluteStagingPath
         createFakeResultFiles(stagingPath)
@@ -136,14 +151,20 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         // When:
         snvCompletionJob.execute()
         // Then:
-        assert !stagingPath.exists()
-        assert !stagingPath.parentFile.exists()
-        assert stagingPath.parentFile.parentFile.exists()
+        try {
+            assert !stagingPath.exists()
+            assert !stagingPath.parentFile.exists()
+            assert stagingPath.parentFile.parentFile.exists()
+        } finally {
+            LsdfFilesServiceTests.removeMockFileService(lsdfFilesService)
+        }
     }
 
     @Test
     void test_execute_WhenRunAndDirectoryIsDirtyContainingDirectory_ShouldDeleteDirectory() {
         // Given:
+        LsdfFilesServiceTests.mockDeleteDirectory(lsdfFilesService)
+        LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
         snvCompletionJob.metaClass.getProcessParameterObject = { snvCallingInstance }
         File stagingPath = snvCallingInstance.snvInstancePath.absoluteStagingPath
         createFakeResultFiles(stagingPath)
@@ -152,9 +173,13 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         // When:
         snvCompletionJob.execute()
         // Then:
-        assert !stagingPath.exists()
-        assert !stagingPath.parentFile.exists()
-        assert stagingPath.parentFile.parentFile.exists()
+        try {
+            assert !stagingPath.exists()
+            assert !stagingPath.parentFile.exists()
+            assert stagingPath.parentFile.parentFile.exists()
+        } finally {
+            LsdfFilesServiceTests.removeMockFileService(lsdfFilesService)
+        }
     }
 
     // Helper methods

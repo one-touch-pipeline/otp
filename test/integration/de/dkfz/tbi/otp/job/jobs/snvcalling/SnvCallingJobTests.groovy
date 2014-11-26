@@ -6,14 +6,11 @@ import de.dkfz.tbi.otp.utils.HelperUtils
 import static de.dkfz.tbi.TestCase.*
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static org.junit.Assert.*
 import org.junit.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.ExecutionService
@@ -45,6 +42,9 @@ class SnvCallingJobTests extends GroovyTestCase{
 
     @Autowired
     SchedulerService schedulerService
+
+    @Autowired
+    LsdfFilesService lsdfFilesService
 
     File testDirectory
     Realm realm_processing
@@ -236,6 +236,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testMaybeSubmitWithSnvCallingInput() {
+        LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
         snvJobResult.delete()
         snvCallingJob.metaClass.getProcessParameterObject = { return snvCallingInstance }
         snvCallingJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult ->
@@ -281,6 +282,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         } finally {
             schedulerService.finishedJobExecutionOnCurrentThread(snvCallingJob)
+            LsdfFilesServiceTests.removeMockFileService(lsdfFilesService)
         }
     }
 
@@ -355,6 +357,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testWriteConfigFile() {
+        LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
         File file = snvCallingInstance.configFilePath.absoluteStagingPath
         if (file.exists()) {
             file.delete()
@@ -364,6 +367,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
             assert file.text == CONFIGURATION
         } finally {
             assert file.delete()
+            LsdfFilesServiceTests.removeMockFileService(lsdfFilesService)
         }
     }
 

@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFileService
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 import static de.dkfz.tbi.TestCase.removeMetaClass
@@ -32,6 +31,9 @@ class FilterVcfJobTests extends GroovyTestCase {
 
     @Autowired
     CreateClusterScriptService createClusterScriptService
+
+    @Autowired
+    LsdfFilesService lsdfFilesService
 
     File testDirectory
     FilterVcfJob filterVcfJob
@@ -263,6 +265,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testMaybeSubmit_InputFileExists() {
+        LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
         filterVcfJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         filterVcfJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult ->
             return true
@@ -309,6 +312,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         } finally {
             schedulerService.finishedJobExecutionOnCurrentThread(filterVcfJob)
+            LsdfFilesServiceTests.removeMockFileService(lsdfFilesService)
         }
     }
 
@@ -325,6 +329,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testValidate() {
+        LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
         snvCallingInstance2.config.configuration = """
 RUN_CALLING=0
 RUN_SNV_ANNOTATION=0
@@ -392,6 +397,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
         } finally {
             configFile.parentFile.deleteDir()
             checkpointFile.delete()
+            LsdfFilesServiceTests.removeMockFileService(lsdfFilesService)
         }
     }
 
