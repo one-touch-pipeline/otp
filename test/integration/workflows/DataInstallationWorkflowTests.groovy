@@ -67,7 +67,6 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
 
     Run run
     Sample sample
-    SeqType seqType
     SeqPlatform seqPlatform
     SoftwareTool softwareTool
     SoftwareToolIdentifier softwareToolIdentifier
@@ -84,6 +83,8 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
 
     @Before
     void setUp() {
+
+
         // Setup logic here
         super.createUserAndRoles()
 
@@ -229,31 +230,13 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
         }
         SeqType seqType = createSeqType(SeqTypeNames.WHOLE_GENOME.seqTypeName, "SeqTypeDir")
 
-        SeqTrack seqTrack = new SeqTrack()
-        seqTrack.laneId = laneNo
-        seqTrack.nBasePairs = baseCount
-        seqTrack.nReads = readCount
-        seqTrack.insertSize = insertSize
-        seqTrack.run = run
-        seqTrack.sample = sample
-        seqTrack.seqType = seqType
-        seqTrack.seqPlatform = seqPlatform
-        seqTrack.pipelineVersion = softwareTool
-        assertNotNull(seqTrack.save([flush: true]))
+        SeqTrack seqTrack = createSeqTrack(seqType)
+        createDataFiles(seqTrack)
 
-        createDataFile(seqTrack, fastqR1Filename, fastqR1Filepath)
-        createDataFile(seqTrack, fastqR2Filename, fastqR2Filepath)
-
-        // there will be only one at the database
-        JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
-        // hack to be able to star the workflow
-        dataInstallationStartJob.setJobExecutionPlan(jobExecutionPlan)
+        setExecutionPlan()
         boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
 
-        seqTrack.refresh()
-        assertTrue(workflowFinishedSucessfully)
-        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack.alignmentState)
-        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack.fastqcState)
+        checkThatWorkflowWasSuccessful(seqTrack, workflowFinishedSucessfully)
     }
 
     // TODO  (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
@@ -283,15 +266,30 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
         seqTrack.pipelineVersion = softwareTool
         assertNotNull(seqTrack.save([flush: true]))
 
-        createDataFile(seqTrack, fastqR1Filename, fastqR1Filepath)
-        createDataFile(seqTrack, fastqR2Filename, fastqR2Filepath)
+        createDataFiles(seqTrack)
 
-        // there will be only one at the database
-        JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
-        //hack to be able to star the workflow
-        dataInstallationStartJob.setJobExecutionPlan(jobExecutionPlan)
+        setExecutionPlan()
         boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
         assertTrue(workflowFinishedSucessfully)
+    }
+
+    @Ignore
+    void testDataInstallationWithFastTrack() {
+        SpringSecurityUtils.doWithAuth("admin") {
+            run("scripts/workflows/DataInstallationWorkflow.groovy")
+        }
+        project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
+        assert project.save(flush: true)
+
+        SeqType seqType = createSeqType(SeqTypeNames.WHOLE_GENOME.seqTypeName, "SeqTypeDir")
+
+        SeqTrack seqTrack = createSeqTrack(seqType)
+        createDataFiles(seqTrack)
+
+        setExecutionPlan()
+        boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
+
+        checkThatWorkflowWasSuccessful(seqTrack, workflowFinishedSucessfully)
     }
 
     /**
@@ -336,4 +334,40 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
         }
         return finished
     }
+
+    private SeqTrack createSeqTrack(SeqType seqType) {
+        SeqTrack seqTrack = new SeqTrack()
+        seqTrack.laneId = laneNo
+        seqTrack.nBasePairs = baseCount
+        seqTrack.nReads = readCount
+        seqTrack.insertSize = insertSize
+        seqTrack.run = run
+        seqTrack.sample = sample
+        seqTrack.seqType = seqType
+        seqTrack.seqPlatform = seqPlatform
+        seqTrack.pipelineVersion = softwareTool
+        assertNotNull(seqTrack.save([flush: true]))
+        return seqTrack
+    }
+
+    private void checkThatWorkflowWasSuccessful(SeqTrack seqTrack, boolean workflowFinished) {
+        assertTrue(workflowFinished)
+
+        seqTrack.refresh()
+        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack.alignmentState)
+        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack.fastqcState)
+    }
+
+    private void createDataFiles(SeqTrack seqTrack) {
+        createDataFile(seqTrack, fastqR1Filename, fastqR1Filepath)
+        createDataFile(seqTrack, fastqR2Filename, fastqR2Filepath)
+    }
+
+    private void setExecutionPlan() {
+        // there will be only one at the database
+        JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
+        // hack to be able to star the workflow
+        dataInstallationStartJob.setJobExecutionPlan(jobExecutionPlan)
+    }
+
 }
