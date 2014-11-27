@@ -85,7 +85,8 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob {
                     "FILENAME_VCF_SNVS=${deepAnnotationResultFile}," +
                     "FILENAME_CHECKPOINT=${checkpointFile}," +
                     "'}"
-            final String script = step.externalScript.scriptFilePath
+            final String script = "${step.externalScript.scriptFilePath}; " +
+                    "md5sum ${deepAnnotationResultFile} > ${deepAnnotationResultFile}.md5sum"
 
             executionHelperService.sendScript(realm, script, null, qsubParameters)
             createAndSaveSnvJobResult(instance, step.externalScript, null, inputResult)

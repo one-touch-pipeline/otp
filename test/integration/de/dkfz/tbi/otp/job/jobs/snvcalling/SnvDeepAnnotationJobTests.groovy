@@ -20,6 +20,7 @@ import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExternalScript
+import static de.dkfz.tbi.otp.utils.CreateFileHelper.*
 
 class SnvDeepAnnotationJobTests extends GroovyTestCase {
 
@@ -131,6 +132,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 externalScript: externalScript_Calling,
                 processingState: SnvProcessingStates.FINISHED,
                 chromosomeJoinExternalScript: testData.externalScript_Joining,
+                fileSize: 1234l,
+                md5sum: "123543464vsfd4",
                 )
         assert snvJobResult_Calling.save()
 
@@ -245,9 +248,12 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvDeepAnnotationJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult -> }
         executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options ->
 
+            File snvFile = new OtpPath(snvCallingInstance2.snvInstancePath, step.getResultFileName(snvCallingInstance2.individual)).absoluteStagingPath
+            File md5sumFile = createMD5SUMFile(snvCallingInstance2, SnvCallingStep.SNV_DEEPANNOTATION)
+
             String scriptCommandPart = "# BEGIN ORIGINAL SCRIPT\n" +
-                    "/tmp/scriptLocation/deepAnnotation.sh\n" +
-                    "# END ORIGINAL SCRIPT"
+                    "/tmp/scriptLocation/deepAnnotation.sh; " +
+                    "md5sum ${snvFile} > ${md5sumFile}"
 
             String qsubParameterCommandPart = "-v CONFIG_FILE=" +
                     "${snvCallingInstance2.configFilePath.absoluteStagingPath}," +
@@ -255,9 +261,10 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                     "PID=654321," +
                     "TOOL_ID=snvDeepAnnotation," +
                     "PIPENAME=SNV_DEEPANNOTATION," +
-                    "FILENAME_VCF=${new OtpPath(snvCallingInstance2.snvInstancePath, step.getResultFileName(snvCallingInstance2.individual)).absoluteStagingPath}," +
-                    "FILENAME_VCF_SNVS=${new OtpPath(snvCallingInstance2.snvInstancePath, step.getResultFileName(snvCallingInstance2.individual)).absoluteStagingPath}," +
+                    "FILENAME_VCF=${snvFile}," +
+                    "FILENAME_VCF_SNVS=${snvFile}," +
                     "FILENAME_CHECKPOINT=${step.getCheckpointFilePath(snvCallingInstance2).absoluteStagingPath},"
+
 
             assert command.contains(scriptCommandPart)
             assert command.contains(qsubParameterCommandPart)
@@ -307,6 +314,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         File checkpointFile = SnvCallingStep.SNV_DEEPANNOTATION.getCheckpointFilePath(snvCallingInstance1).absoluteStagingPath
         checkpointFile.createNewFile()
+        createResultFile(snvCallingInstance1, SnvCallingStep.SNV_DEEPANNOTATION)
+        createMD5SUMFile(snvCallingInstance1, SnvCallingStep.SNV_DEEPANNOTATION)
 
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> }
         createClusterScriptService.metaClass.createTransferScript = { List<File> sourceLocations, List<File> targetLocations, List<File> linkLocations, boolean move ->
@@ -396,13 +405,5 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         }
 
         assert shouldFail(AssertionError, { snvDeepAnnotationJob.validate(snvCallingInstance1) }).contains("Not readable")
-    }
-
-    // Helper methods
-
-    private void createResultFile(SnvCallingInstance instance, SnvCallingStep previousStep) {
-        File inputResultFile = new OtpPath(instance.snvInstancePath, previousStep.getResultFileName(instance.individual)).absoluteStagingPath
-        assert inputResultFile.parentFile.mkdirs()
-        inputResultFile << 'some dummy content'
     }
 }

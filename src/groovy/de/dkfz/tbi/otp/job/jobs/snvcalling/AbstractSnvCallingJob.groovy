@@ -100,9 +100,18 @@ abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob 
         notNull(instance)
         notNull(newState)
         SnvJobResult result = getSnvJobResult(instance)
-
+        if ([SnvCallingStep.CALLING, SnvCallingStep.SNV_DEEPANNOTATION].contains(step)) {
+            addFileInformationToJobResult(result)
+        }
         result.processingState = newState
         assert result.save()
+    }
+
+    void addFileInformationToJobResult(SnvJobResult result) {
+        File resultFile = result.getResultFilePath().absoluteStagingPath
+        File md5sumFile = new File("${resultFile.path}.md5sum")
+        result.fileSize = resultFile.size()
+        result.md5sum = md5sumFile.text.split(" ")[0]
     }
 
     SnvJobResult getSnvJobResult(SnvCallingInstance instance) {

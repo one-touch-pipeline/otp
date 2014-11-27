@@ -141,7 +141,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 snvCallingInstance: snvCallingInstance1,
                 externalScript: externalScript_Calling,
                 processingState: SnvProcessingStates.FINISHED,
-                chromosomeJoinExternalScript: testData.externalScript_Joining
+                chromosomeJoinExternalScript: testData.externalScript_Joining,
+                md5sum: "jyq34btr89g23",
+                fileSize: 235l,
                 )
         assert snvJobResultCalling1.save()
 
@@ -159,7 +161,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 snvCallingInstance: snvCallingInstance1,
                 externalScript: externalScript_DeepAnnotation,
                 inputResult: snvJobResultAnnotation1,
-                processingState: SnvProcessingStates.FINISHED
+                processingState: SnvProcessingStates.FINISHED,
+                md5sum: "jyq34btr89g23",
+                fileSize: 235l,
                 )
         assert snvJobResultDeepAnnotation1.save()
 

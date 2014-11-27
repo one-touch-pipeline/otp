@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
+import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.utils.ExternalScript
 
 /**
@@ -49,6 +50,10 @@ class SnvJobResult {
      */
     ExternalScript chromosomeJoinExternalScript
 
+    String md5sum
+
+    long fileSize
+
     static belongsTo = [
         snvCallingInstance: SnvCallingInstance
     ]
@@ -81,7 +86,23 @@ class SnvJobResult {
         chromosomeJoinExternalScript nullable: true, validator: { val, obj ->
                return  (obj.step == SnvCallingStep.CALLING) == (val != null)
         }
+        md5sum nullable: true, validator: { val, obj ->
+            validateFileInformation (val, obj)
+        }
+
+        fileSize nullable: true, validator: { val, obj ->
+            validateFileInformation (val, obj)
+        }
     }
+
+    private static boolean validateFileInformation(def val, def obj) {
+        if (obj.processingState == SnvProcessingStates.FINISHED && [SnvCallingStep.CALLING, SnvCallingStep.SNV_DEEPANNOTATION].contains(obj.step)) {
+            return val
+        } else {
+            return true
+        }
+    }
+
 
     static mapping = {
         snvCallingInstance index: "snv_job_result_snv_calling_instance_idx"

@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.utils.CreateFileHelper
+
 import static de.dkfz.tbi.TestCase.*
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
@@ -21,6 +23,8 @@ import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExternalScript
+import static de.dkfz.tbi.otp.utils.CreateFileHelper.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class SnvCallingJobTests extends GroovyTestCase{
 
@@ -54,6 +58,8 @@ class SnvCallingJobTests extends GroovyTestCase{
     SnvJobResult snvJobResult
     SnvCallingJob snvCallingJob
     SnvCallingInstanceTestData testData
+    ProcessedMergedBamFile processedMergedBamFile1
+    ProcessedMergedBamFile processedMergedBamFile2
 
     final String CONFIGURATION ="""
 RUN_CALLING=1
@@ -88,9 +94,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         individual = testData.individual
         seqType = testData.seqType
 
-        ProcessedMergedBamFile processedMergedBamFile1 = createProcessedMergedBamFile("1")
+        processedMergedBamFile1 = createProcessedMergedBamFile("1")
         assert processedMergedBamFile1.save()
-        ProcessedMergedBamFile processedMergedBamFile2 = createProcessedMergedBamFile("2")
+        processedMergedBamFile2 = createProcessedMergedBamFile("2")
         assert processedMergedBamFile2.save()
 
         SnvConfig snvConfig = new SnvConfig(
@@ -143,6 +149,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 snvCallingInstance: snvCallingInstance,
                 externalScript: externalScript_Calling,
                 chromosomeJoinExternalScript: externalScript_Joining,
+                fileSize: 1234l,
+                md5sum: "123543464vsfd4",
                 )
         assert snvJobResult.save()
 
@@ -179,6 +187,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         externalScript_Calling = null
         externalScript_Joining = null
         snvJobResult = null
+        processedMergedBamFile1 = null
+        processedMergedBamFile2 = null
         removeMetaClass(CreateClusterScriptService, createClusterScriptService)
         removeMetaClass(ExecutionService, executionService)
         LsdfFilesService.metaClass = null
@@ -232,6 +242,34 @@ CHROMOSOME_INDICES=( {1..21} XY)
             return true
         }
         executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options ->
+            if (command.contains('PARM_CHR_INDEX=')) {
+                String chromosome = command.split('PARM_CHR_INDEX=')[1].split(',')[0]
+                File snvFile = new OtpPath(snvCallingInstance.snvInstancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, chromosome)).absoluteStagingPath
+                File tumorBamFile = new File(processedMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
+                File controlBamFile = new File(processedMergedBamFileService.destinationDirectory(processedMergedBamFile2), processedMergedBamFileService.fileName(processedMergedBamFile2))
+
+                String scriptCommandPart = "/tmp/scriptLocation/calling.sh"
+
+                String qsubParameterCommandPart = "-v CONFIG_FILE=" +
+                        "${snvCallingInstance.configFilePath.absoluteStagingPath}," +
+                        "pid=654321," +
+                        "PID=654321," +
+                        "TUMOR_BAMFILE_FULLPATH_BP=${tumorBamFile}," +
+                        "CONTROL_BAMFILE_FULLPATH_BP=${controlBamFile}," +
+                        "TOOL_ID=snvCalling," +
+                        "PARM_CHR_INDEX=${chromosome}," +
+                        "FILENAME_VCF_SNVS=${snvFile}"
+
+                assert command.contains(scriptCommandPart)
+                assert command.contains(qsubParameterCommandPart)
+
+            } else {
+                File snvFile = new OtpPath(snvCallingInstance.snvInstancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, null)).absoluteStagingPath
+                String scriptCommandPart = "/tmp/scriptLocation/joining.sh; " +
+                        "md5sum ${snvFile} > ${snvFile}.md5sum"
+                assert command.contains(scriptCommandPart)
+            }
+
             return [PBS_ID]
         }
         schedulerService.startingJobExecutionOnCurrentThread(snvCallingJob)
@@ -251,6 +289,9 @@ CHROMOSOME_INDICES=( {1..21} XY)
         File configFile = testData.createConfigFileWithContentInFileSystem(
             snvCallingInstance.configFilePath.absoluteStagingPath,
             CONFIGURATION)
+
+        createResultFile(snvCallingInstance, SnvCallingStep.CALLING)
+        createMD5SUMFile(snvCallingInstance, SnvCallingStep.CALLING)
 
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> return true }
         createClusterScriptService.metaClass.createTransferScript = { List<File> sourceLocations, List<File> targetLocations, List<File> linkLocations, boolean move ->
@@ -341,6 +382,8 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
      void testChangeProcessingStateOfJobResult() {
+         createResultFile(snvCallingInstance, SnvCallingStep.CALLING)
+         createMD5SUMFile(snvCallingInstance, SnvCallingStep.CALLING)
          List<SnvJobResult> results = SnvJobResult.findAllBySnvCallingInstanceAndStep(snvCallingInstance, SnvCallingStep.CALLING)
          assert results.size == 1
          assert results.first() == snvJobResult
@@ -348,6 +391,17 @@ CHROMOSOME_INDICES=( {1..21} XY)
          snvCallingJob.changeProcessingStateOfJobResult(snvCallingInstance, SnvProcessingStates.FINISHED)
          assert snvJobResult.processingState == SnvProcessingStates.FINISHED
      }
+
+    @Test
+    void testAddFileInformationToJobResult() {
+        File file = createResultFile(snvCallingInstance, SnvCallingStep.CALLING)
+        File md5sum = createMD5SUMFile(snvCallingInstance, SnvCallingStep.CALLING)
+        SnvJobResult results = exactlyOneElement(SnvJobResult.findAllBySnvCallingInstanceAndStep(snvCallingInstance, SnvCallingStep.CALLING))
+
+        snvCallingJob.addFileInformationToJobResult(results)
+        assert results.fileSize == file.size()
+        assert results.md5sum == CreateFileHelper.MD5SUM
+    }
 
     @Test
     void testCheckIfResultFilesExistsOrThrowException_NoResults_NoPbsOut() {
@@ -391,6 +445,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         snvCallingJob.checkIfResultFilesExistsOrThrowException(snvCallingInstance, true)
     }
+
 
     private ProcessedMergedBamFile createProcessedMergedBamFile(String identifier) {
 

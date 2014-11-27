@@ -86,7 +86,9 @@ class SnvCallingInstanceTestData extends TestData {
             inputResult: inputResult,
             processingState: processingState,
             withdrawn: withdrawn,
-            externalScript: externalScript
+            externalScript: externalScript,
+            md5sum: "235sfd54wyx",
+            fileSize: 1234l,
         ])
         if (step == SnvCallingStep.CALLING) {
             result.chromosomeJoinExternalScript = externalScript_Joining

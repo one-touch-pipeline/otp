@@ -99,10 +99,11 @@ class SnvCallingJob extends AbstractSnvCallingJob {
                     "'-v': '${qsubParametersGeneral},${qsubParametersToMergeVcfs}'" +
                     "}"
             final String script =
-                    ensureFileHasExpectedSizeScript(sampleType1BamFilePath, instance.sampleType1BamFile.fileSize) +
-                    ensureFileHasExpectedSizeScript(sampleType2BamFilePath, instance.sampleType2BamFile.fileSize) +
-                    ensureFileDoesNotExistScript(vcfRawFile) +
-                    externalScriptJoining.scriptFilePath.path
+                    "${ensureFileHasExpectedSizeScript(sampleType1BamFilePath, instance.sampleType1BamFile.fileSize)}" +
+                    "${ensureFileHasExpectedSizeScript(sampleType2BamFilePath, instance.sampleType2BamFile.fileSize)}" +
+                    "${ensureFileDoesNotExistScript(vcfRawFile)}" +
+                    "${externalScriptJoining.scriptFilePath.path}; " +
+                    "md5sum ${vcfRawFile} > ${vcfRawFile}.md5sum"
             executionHelperService.sendScript(realm, script, null, qsubParameters)
 
             createAndSaveSnvJobResult(instance, step.externalScript, externalScriptJoining)

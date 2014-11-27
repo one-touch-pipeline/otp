@@ -12,6 +12,9 @@ import de.dkfz.tbi.otp.utils.ExternalScript
 @Mock([SnvCallingInstance, ProcessedMergedBamFile, ExternalScript, Individual, Project])
 class SnvJobResultUnitTests {
 
+    final String MD5SUM = "2354jv34598g"
+    final long FILE_SIZE = 1234l
+
     @Test
     void testSavingOfSnvJobResultNoInputFileButCallingStep() {
         SnvJobResult snvJobResult = new SnvJobResult(
@@ -302,6 +305,42 @@ class SnvJobResultUnitTests {
         assert "testPath" == preparedObjects.snvJobResult.getResultFilePath().relativePath.path
     }
 
+    @Test
+    void testSaveMd5sum() {
+        SnvJobResult snvJobResult = new SnvJobResult(
+                step: SnvCallingStep.CALLING,
+                snvCallingInstance: createSnvCallingInstance(),
+                processingState: SnvProcessingStates.FINISHED,
+                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier),
+                chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER),
+                md5sum: null,
+                fileSize: FILE_SIZE,
+        )
+        assertFalse snvJobResult.validate()
+
+        snvJobResult.md5sum = MD5SUM
+        assert snvJobResult.validate()
+        assert snvJobResult.save(flush: true)
+    }
+
+    @Test
+    void testSaveFileSize() {
+        SnvJobResult snvJobResult = new SnvJobResult(
+                step: SnvCallingStep.CALLING,
+                snvCallingInstance: createSnvCallingInstance(),
+                processingState: SnvProcessingStates.FINISHED,
+                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier),
+                chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER),
+                md5sum: MD5SUM,
+        )
+        assertFalse snvJobResult.validate()
+
+        snvJobResult.fileSize = FILE_SIZE
+        assert snvJobResult.validate()
+        assert snvJobResult.save(flush: true)
+    }
+
+
     Map preparationForGetResultFilePath(SnvCallingStep step) {
         Project project = new Project(
             dirName: "/tmp/project/"
@@ -333,8 +372,8 @@ class SnvJobResultUnitTests {
 
     private SnvCallingInstance createSnvCallingInstance(final Map properties = [:]) {
         return new SnvCallingInstance([
-                sampleType1BamFile: new ProcessedMergedBamFile(),
-                sampleType2BamFile: new ProcessedMergedBamFile()
+                sampleType1BamFile: new ProcessedMergedBamFile([withdrawn: false]),
+                sampleType2BamFile: new ProcessedMergedBamFile([withdrawn: false])
         ] + properties)
     }
 }
