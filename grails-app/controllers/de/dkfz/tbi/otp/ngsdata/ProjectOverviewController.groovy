@@ -1,7 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+
 import org.springframework.security.access.prepost.PreAuthorize
+
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class ProjectOverviewController {
@@ -222,6 +224,5 @@ class ProjectOverviewController {
         dataToRender.aaData = data
         render dataToRender as JSON
     }
-
 
 }

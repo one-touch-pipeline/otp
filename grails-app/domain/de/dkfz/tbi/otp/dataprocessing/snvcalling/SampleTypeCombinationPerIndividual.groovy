@@ -2,8 +2,8 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import org.springframework.validation.Errors
 import de.dkfz.tbi.otp.dataprocessing.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import de.dkfz.tbi.otp.ngsdata.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 /**
  * For each individual disease/control pairs are compared in the SNV pipeline. These pairs are defined in the GUI and stored in this domain.
@@ -209,9 +209,11 @@ class SampleTypeCombinationPerIndividual {
                 sampleType2: it[2],
                 seqType: it[3],
             )
-              seqType: it[3],
-                            )
-} of all specified instances to the specified value and saves the instances.
+        }
+    }
+
+    /**
+     * Sets {@link #needsProcessing} of all specified instances to the specified value and saves the instances.
      */
     static void setNeedsProcessing(final Collection<SampleTypeCombinationPerIndividual> combinations, final boolean needsProcessing) {
         SampleTypeCombinationPerIndividual.withTransaction {

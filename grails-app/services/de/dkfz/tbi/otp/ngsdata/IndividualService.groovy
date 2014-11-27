@@ -472,18 +472,4 @@ AND i.id > :indId
     private SampleType createSampleType(String name) {
         return SampleType.findOrSaveByName(name)
     }
-    /**
-     * show the List of Individual per Project
-     */
-    @PreAuthorize("hasPermission(#project, 'read') or hasRole('ROLE_OPERATOR')")
-    public List findAllMockPidsByProject(Project project) {
-        List seq = Sequence.withCriteria {
-            eq("projectId", project.id)
-            projections {
-                groupProperty("mockPid")
-            }
-            order("mockPid")
-        }
-        return seq
-    }
 }

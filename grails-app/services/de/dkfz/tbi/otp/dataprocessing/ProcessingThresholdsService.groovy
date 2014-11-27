@@ -33,9 +33,4 @@ class ProcessingThresholdsService {
         processingThresholds.save()
         return processingThresholds
     }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    ProcessingThresholds findByProjectAndSampleTypeAndSeqType(Project project, SampleType sampleType, SeqType seqType) {
-        return ProcessingThresholds.findByProjectAndSampleTypeAndSeqType(project, sampleType, seqType)
-    }
 }
