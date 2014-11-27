@@ -854,7 +854,8 @@ body {
     display: block;
     position: relative;
     float: left;
-    width: 85px;
+    max-width: 8.5em;
+    min-width:5.2em;
     background-color: #222;
     z-index: 10;
 }
@@ -925,8 +926,29 @@ body {
 .dataTables_scrollBody {
     max-height:450px;
     overflow-y: auto;
+    overflow-x: auto;
 }
-
+#otp .listOfIndividualsForSNV {
+    width:35%;
+    background-color: #1E90FF;
+    font-size: 13px;
+    font-family: Helvetica,Arial,sans-serif;
+    -moz-border-radius: 12px;
+    border-radius: 12px;
+    border: 5px solid #CCCCCC;
+    padding: 0.1em 0.3em;
+    th { color:#FFFFFF;
+     }
+    tr.odd {
+        background-color: #A5D3FF;
+    }
+    tr.even {
+        background-color: #F3FAFF;
+    }
+    .dataTables_wrapper.no-footer .dataTables_scrollBody {
+    border-bottom: 1px solid #B4B5B6;
+    }
+}
 #otp .otpDataTables{
     color:black;
     padding-top: 6px;

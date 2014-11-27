@@ -17,11 +17,12 @@
     <div  style="clear: both">
     <g:form >
         <input name="projectName" type="hidden" value="${project}"/>
+        <h3> <g:message code="snv.title.configuration"/></h3>
         <table border="2" class="blue_label">
             <thead>
                 <tr>
-                    <th colspan="2"><g:message
-                            code="overview.statistic.seq.name" /></th>
+                    <th colspan="2">
+                            </th>
                         <g:each var="seqType" in="${alignableSeqType}">
                             <th colspan="2">${seqType}</th>
                         </g:each>
@@ -60,6 +61,20 @@
         };
 </script>
     </div>
+    <div style="width: 20px; height: 20px;"></div>
+    <h3><g:message code="snv.individual.table"/></h3>
+    <div class=" listOfIndividualsForSNV otp">
+                     <otp:dataTable
+                    codes="${[
+                        'snv.index.individual',
+                    ] }"
+                        id="projectCombinationPerIndividuals" />
+        </div>
+     <r:script>
+      $(function() {
+            $.otp.Snv.registerIndividualIds();
+        });
+    </r:script>
     </div>
 </body>
 </html>
