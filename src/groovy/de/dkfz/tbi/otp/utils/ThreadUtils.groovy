@@ -9,7 +9,7 @@ class ThreadUtils {
     static boolean waitFor(final Closure condition, final long millisTimeout, final long millisBetweenRetries) {
         final long startTimestamp = System.currentTimeMillis()
         while (true) {
-            if (condition) {
+            if (condition()) {
                 return true
             }
             if (System.currentTimeMillis() - startTimestamp > millisTimeout) {
