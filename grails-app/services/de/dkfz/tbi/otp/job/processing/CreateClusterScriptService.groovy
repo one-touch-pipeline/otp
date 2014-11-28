@@ -128,10 +128,10 @@ cp ${source.parent}/${MD5SUM_NAME} ${target.parent}/${MD5SUM_NAME}${suffixDepend
 
         prefixDependingOnLocation = targetAtDKFZ ? "" : "${CONNECT_TO_BQ} \""
         suffixDependingOnLocation = targetAtDKFZ ? "" : "\""
-        // if the name of the copied file changed between source and target, the new name has to be inserted in the md5sum-file
+        // if the path of the copied file changed between source and target, the new path has to be inserted in the md5sum-file
         if (source.isFile()) {
             copyScript << """\
-${prefixDependingOnLocation}sed -i 's/${source.getName()}/${target.getName()}/' ${target.parent}/${MD5SUM_NAME}${suffixDependingOnLocation};
+${prefixDependingOnLocation}sed -i 's#${source.absolutePath}#${target.absolutePath}#' ${target.parent}/${MD5SUM_NAME}${suffixDependingOnLocation};
 """
         }
 

@@ -4,7 +4,7 @@ class Parameter implements Serializable {
     ParameterType type
     String value
 
-    static constraints = {
-        value(size: 0..10000)
+    static mapping = {
+        value type: 'text'
     }
 }
