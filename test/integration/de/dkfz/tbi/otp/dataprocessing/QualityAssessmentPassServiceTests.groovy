@@ -285,7 +285,8 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
 
         DataFile dataFile = new DataFile(
                         fileType: fileType,
-                        seqTrack: seqTrack)
+                        seqTrack: seqTrack,
+                        readNumber: 1)
         assertNotNull(dataFile.save(flush: true))
 
         FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile(
@@ -344,7 +345,8 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
 
         DataFile dataFile = new DataFile(
                         fileType: fileType,
-                        seqTrack: seqTrack)
+                        seqTrack: seqTrack,
+                        readNumber: 1)
         assertNotNull(dataFile.save(flush: true))
 
         FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile(
@@ -375,7 +377,8 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
 
         DataFile dataFile = new DataFile(
                         fileType: fileType,
-                        seqTrack: seqTrack)
+                        seqTrack: seqTrack,
+                        readNumber: 1)
         assertNotNull(dataFile.save(flush: true))
 
         FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile(
@@ -393,7 +396,8 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
 
         dataFile = new DataFile(
                         fileType: fileType,
-                        seqTrack: seqTrack)
+                        seqTrack: seqTrack,
+                        readNumber: 1)
         assertNotNull(dataFile.save(flush: true))
 
         fastqcProcessedFile = new FastqcProcessedFile(

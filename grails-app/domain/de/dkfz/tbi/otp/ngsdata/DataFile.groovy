@@ -24,6 +24,8 @@ class DataFile {
     long fileSize = 0              // size of the file
 
 
+    Integer readNumber
+
     static belongsTo = [
         run : Run,
         runSegment : RunSegment,
@@ -58,6 +60,14 @@ class DataFile {
         mergingLog(nullable: true)
         alignmentLog(nullable: true)
         runSegment(nullable: true)
+
+        readNumber nullable: true, validator: { val, obj ->
+            if (obj.fileType && obj.fileType.type == FileType.Type.SEQUENCE && obj.fileType.subType == "fastq") {
+                return (val == 1 || val == 2)
+            } else {
+                return true
+            }
+        }
     }
 
     String fileSizeString() {
