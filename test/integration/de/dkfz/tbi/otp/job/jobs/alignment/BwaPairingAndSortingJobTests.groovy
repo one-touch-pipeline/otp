@@ -195,10 +195,10 @@ class BwaPairingAndSortingJobTests {
             used: true,
             project: project,
             fileType: fileType,
+            readNumber: 1,
             vbpFileName: "dataFile1.fastq"
         )
         dataFile1.validate()
-        println dataFile1.errors
         assertNotNull(dataFile1.save(flush: true))
 
         DataFile dataFile2 = new DataFile(
@@ -209,6 +209,7 @@ class BwaPairingAndSortingJobTests {
             used: true,
             project: project,
             fileType: fileType,
+            readNumber: 2,
             vbpFileName: "dataFile2.fastq"
         )
         assertNotNull(dataFile2.save(flush: true))

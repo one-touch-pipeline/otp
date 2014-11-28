@@ -92,6 +92,11 @@ class BwaPairingAndSortingJob extends AbstractJobImpl {
         if (saiFiles.size() != 2) {
             throw new ProcessingException("Not paired library. Number of sai files: ${saiFiles.size()}")
         }
+        saiFiles = saiFiles.sort {
+            it.dataFile.readNumber
+        }
+        assert 1 == saiFiles.get(0).dataFile.readNumber
+        assert 2 == saiFiles.get(1).dataFile.readNumber
         String sai1 = processedSaiFileService.getFilePath(saiFiles.get(0))
         String sai2 = processedSaiFileService.getFilePath(saiFiles.get(1))
         String seq1 = lsdfFilesService.getFileViewByPidPath(saiFiles.get(0).dataFile)
