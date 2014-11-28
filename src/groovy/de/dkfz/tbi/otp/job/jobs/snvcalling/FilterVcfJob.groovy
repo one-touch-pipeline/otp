@@ -48,8 +48,10 @@ class FilterVcfJob extends AbstractSnvCallingJob {
 
             // All files, which are currently in the staging folder are not needed anymore -> delete them
             File instancePath = instance.snvInstancePath.absoluteStagingPath
-            instancePath.eachFileRecurse (FileType.FILES) { File file ->
-                assert file.delete()
+            if(instancePath.exists()) {
+                instancePath.eachFileRecurse (FileType.FILES) { File file ->
+                    assert file.delete()
+                }
             }
 
             final File configFileInStagingDirectory = writeConfigFile(instance)
