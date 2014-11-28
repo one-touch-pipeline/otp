@@ -108,7 +108,7 @@ class SnvCallingService {
         Set<SeqTrack> containedSeqTracks = processedMergedBamFile.getContainedSeqTracks()
         Set<SeqTrack> availableSeqTracks = SeqTrack.findAllBySampleAndSeqType(processedMergedBamFile.sample,
                 processedMergedBamFile.seqType).findAll{!it.isWithdrawn()} as Set<SeqTrack>
-        return containedSeqTracks == availableSeqTracks
+        return containedSeqTracks*.id == availableSeqTracks*.id
     }
 
 }
