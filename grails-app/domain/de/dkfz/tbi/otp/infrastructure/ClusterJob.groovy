@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
 
 import org.joda.time.Duration
 import org.joda.time.DateTime
+// all timestamps using joda-time , e.g. DateTime queued, get saved as UTC-timezone
 import org.jadira.usertype.dateandtime.joda.*
 import org.joda.time.Period
 import org.joda.time.format.PeriodFormat

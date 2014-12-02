@@ -1,6 +1,27 @@
 /*jslint browser: true */
 /*global $ */
 
+$.otp.clusterJobGeneral = {
+    register: function () {
+        "use strict";
+        $.otp.clusterJobGeneralTable.register();
+        $.otp.clusterJobGeneralGraph.register();
+        $.otp.clusterJobGeneralProgress.register();
+
+        $('.datePicker').datepicker(
+            {
+                dateFormat: 'yy-mm-dd',
+                onSelect: function () {
+                    $.otp.clusterJobGeneralGraph.update();
+                    $.otp.clusterJobGeneralProgress.update();
+                    $.otp.clusterJobGeneralTable.update();
+                },
+                maxDate: $('#dpTo').val()
+            }
+        );
+    }
+}
+
 $.otp.clusterJobGeneralTable = {
     register : function () {
         "use strict";
@@ -15,7 +36,8 @@ $.otp.clusterJobGeneralTable = {
             pageLength : 10,
             sAjaxSource : $.otp.createLink({
                 controller : 'clusterJobGeneral',
-                action : 'getAllClusterJobs'
+                action : 'findAllClusterJobsByDateBetween',
+                parameters : {'from': $('#dpFrom').val(), 'to': $('#dpTo').val()}
             }),
             sScrollY: 'auto',
             aaSorting: [[3, 'desc']],
@@ -52,6 +74,11 @@ $.otp.clusterJobGeneralTable = {
                 });
             }
         });
+    },
+
+    update: function () {
+        $("#clusterJobGeneralTable").DataTable().destroy();
+        $.otp.clusterJobGeneralTable.register();
     }
 }
 
@@ -61,16 +88,22 @@ $.otp.clusterJobGeneralGraph = {
 
     register : function () {
         "use strict";
+
+        var from = $('#dpFrom').val();
+        var to = $('#dpTo').val();
+
         RGraph.AJAX($.otp.createLink({
             controller : 'clusterJobGeneral',
-            action : 'getAllExitCodes'
+            action : 'getAllExitCodes',
+            parameters: {'from': from, 'to': to}
         }), function () {
             $.otp.clusterJobGeneralGraph.generatePieGraphic('generalGraphExitCode', this);
         });
 
         RGraph.AJAX($.otp.createLink({
             controller : 'clusterJobGeneral',
-            action : 'getAllExitStatuses'
+            action : 'getAllExitStatuses',
+            parameters: {'from': from, 'to': to}
         }), function () {
             $.otp.clusterJobGeneralGraph.generatePieGraphic('generalGraphExitStatus', this);
         });
@@ -78,7 +111,7 @@ $.otp.clusterJobGeneralGraph = {
         RGraph.AJAX($.otp.createLink({
             controller : 'clusterJobGeneral',
             action : 'getAllFailed',
-            parameters: {'from': $('.graphTimeSpanContainer#queuedStartedEnded [name=dpFrom]').val(), 'to': $('.graphTimeSpanContainer#queuedStartedEnded [name=dpTo]').val()}
+            parameters: {'from': from, 'to': to}
         }), function () {
             $.otp.clusterJobGeneralGraph.generateLineGraphic('generalGraphFailed', this);
         });
@@ -86,7 +119,7 @@ $.otp.clusterJobGeneralGraph = {
         RGraph.AJAX($.otp.createLink({
             controller : 'clusterJobGeneral',
             action : 'getAllStates',
-            parameters: {'from': $('.graphTimeSpanContainer#queuedStartedEnded [name=dpFrom]').val(), 'to': $('.graphTimeSpanContainer#queuedStartedEnded [name=dpTo]').val()}
+            parameters: {'from': from, 'to': to}
         }), function () {
             $.otp.clusterJobGeneralGraph.generateLineGraphic('generalGraphStates', this);
         });
@@ -94,7 +127,7 @@ $.otp.clusterJobGeneralGraph = {
         RGraph.AJAX($.otp.createLink({
             controller : 'clusterJobGeneral',
             action : 'getAllAvgCoreUsage',
-            parameters: {'from': $('.graphTimeSpanContainer#coreUsage [name=dpFrom]').val(), 'to': $('.graphTimeSpanContainer#coreUsage [name=dpTo]').val()}
+            parameters: {'from': from, 'to': to}
         }), function () {
             $.otp.clusterJobGeneralGraph.generateLineGraphic('generalGraphCores', this);
         });
@@ -102,71 +135,16 @@ $.otp.clusterJobGeneralGraph = {
         RGraph.AJAX($.otp.createLink({
             controller : 'clusterJobGeneral',
             action : 'getAllMemoryUsage',
-            parameters: {'from': $('.graphTimeSpanContainer#memoryUsage [name=dpFrom]').val(), 'to': $('.graphTimeSpanContainer#memoryUsage [name=dpTo]').val()}
+            parameters: {'from': from, 'to': to}
         }),function () {
             $.otp.clusterJobGeneralGraph.generateLineGraphic('generalGraphMemory', this);
         });
-
-        $('.datePicker').each(function(){
-            $(this).datepicker(
-                {
-                    dateFormat: 'yy-mm-dd',
-                    onSelect: function () {
-                        var labels = ['from', 'to'];
-                        var dates = {};
-                        $(this).parents('.graphTimeSpanContainer').find('.datePicker').each(function (index) {
-                            dates[labels[index]] = $(this).val()
-                        });
-                        $.otp.clusterJobGeneralGraph.update($(this).parents('.lineGraphContainer').find('canvas').attr('id'), dates);
-                    }
-                }
-            );
-        })
     },
 
     update: function (id, data) {
         "use strict";
         RGraph.Clear($('#' + id).get(0));
-        switch (id) {
-            case 'generalGraphFailed':
-                RGraph.AJAX($.otp.createLink({
-                    controller : 'clusterJobGeneral',
-                    action : 'getAllFailed',
-                    parameters : data
-                }), function () {
-                    $.otp.clusterJobGeneralGraph.generateLineGraphic('generalGraphFailed', this);
-                });
-                break;
-            case 'generalGraphStates':
-                RGraph.AJAX($.otp.createLink({
-                    controller : 'clusterJobGeneral',
-                    action : 'getAllStates',
-                    parameters : data
-                }), function () {
-                    $.otp.clusterJobGeneralGraph.generateLineGraphic('generalGraphStates', this);
-                });
-                break;
-
-            case 'generalGraphCores':
-                RGraph.AJAX($.otp.createLink({
-                    controller : 'clusterJobGeneral',
-                    action : 'getAllAvgCoreUsage',
-                    parameters : data
-                }), function () {
-                    $.otp.clusterJobGeneralGraph.generateLineGraphic('generalGraphCores', this);
-                });
-                break;
-
-            case 'generalGraphMemory':
-                RGraph.AJAX($.otp.createLink({
-                    controller : 'clusterJobGeneral',
-                    action : 'getAllMemoryUsage',
-                    parameters : data
-                }), function () {
-                    $.otp.clusterJobGeneralGraph.generateLineGraphic('generalGraphMemory', this);
-                });
-                break;
-        }
+        $.otp.clusterJobGeneralGraph.register();
     },
 
     generatePieGraphic : function (id, data) {
@@ -174,8 +152,6 @@ $.otp.clusterJobGeneralGraph = {
         var json = JSON.parse(data.response);
         RGraph.Reset($('#' + id).get(0));
         var graph = new RGraph.Pie(id, json.data);
-        graph.Set('chart.labels', json.labels);
-        graph.Set('chart.labels.sticks', true);
         graph.Set('chart.shadow.offsetx', 5);
         graph.Set('chart.shadow.offsety', 5);
         graph.Set('chart.shadow.blur', 15);
@@ -183,6 +159,10 @@ $.otp.clusterJobGeneralGraph = {
         graph.Set('chart.linewidth', 2);
         graph.Set('chart.exploded', 3);
         graph.Set('chart.radius', 80);
+        graph.Set('key', json.labels);
+        graph.Set('key.colors', $.otp.clusterJobGeneralGraph.getColors(json.data.length));
+        graph.Set('key.rounded', false);
+        graph.Set('centerx', 120);
         graph.Draw();
     },
 
@@ -213,7 +193,7 @@ $.otp.clusterJobGeneralGraph = {
         var newLabels = labels.filter( function (value_ignored, index) { return index % step === 0 } )
         return newLabels;
     }
- }
+}
 
 $.otp.clusterJobGeneralProgress = {
     register : function () {
@@ -221,6 +201,7 @@ $.otp.clusterJobGeneralProgress = {
         RGraph.AJAX($.otp.createLink({
             controller : 'clusterJobGeneral',
             action : 'getAllStatesTimeDistribution',
+            parameters: {'from': $('#dpFrom').val(), 'to': $('#dpTo').val()}
         }), function () {
             $.otp.clusterJobGeneralProgress.generateProgress('generalGraphQueuedStartedEndedProgress', this);
         });
@@ -228,7 +209,9 @@ $.otp.clusterJobGeneralProgress = {
 
     update : function () {
         "use strict";
-        $('.multiProgress').multiprogressbar('destroy');
+        // .multiprogressbar('destroy') does not work properly
+        $('#generalGraphQueuedStartedEndedProgress').remove();
+        $('<div id="generalGraphQueuedStartedEndedProgress" class="multiProgress"></div>').appendTo('#progressBarContainer_generalGraphQueuedStartedEndedProgress')
         $.otp.clusterJobGeneralProgress.register();
     },
 
@@ -236,8 +219,8 @@ $.otp.clusterJobGeneralProgress = {
         "use strict";
         var json = JSON.parse(data.response);
         $("#" + id).multiprogressbar ({
-            parts: [{value: json.data['queue'][0], text: json.data['queue'][0] + "% (" + json.data['queue'][1] + ")", barClass: "progressBarQueue", textClass: "progressTextQueue"},
-                    {value: json.data['process'][0], text: json.data['process'][0] + "% (" + json.data['process'][1] + ")", barClass: "progressBarProcess", textClass: "progressTextProcess"}]
+            parts: [{value: json.data['queue'][0], text: json.data['queue'][0] + "% (" + json.data['queue'][1] + " hours)", barClass: "progressBarQueue", textClass: "progressTextQueue"},
+                    {value: json.data['process'][0], text: json.data['process'][0] + "% (" + json.data['process'][1] + " hours)", barClass: "progressBarProcess", textClass: "progressTextProcess"}]
         });
     }
 }

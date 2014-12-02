@@ -9,8 +9,11 @@
 </head>
 <body>
     <div class="body">
-        <h1><g:message code="jobstats.general.title"></g:message></h1>
-        <br>
+        <h1><g:message code="jobstats.general.title"></g:message></h1><br><br>
+        <div id="optionsContainer">
+            <p>from: <input type="text" class="datePicker" id="dpFrom" value="${latestDate}"></p>
+            <p>to: <input type="text" class="datePicker" id="dpTo" value="${latestDate}"></p>
+        </div><br><br><br>
         <div id="clusterJobGeneralTableContainer">
             <div class="otpDataTables">
                  <otp:dataTable
@@ -26,7 +29,7 @@
              </div>
         </div>
         <br>
-        <div class="progressBarContainer">
+        <div class="progressBarContainer" id="progressBarContainer_generalGraphQueuedStartedEndedProgress">
             <div class="graphDescription">delay</div>
             <div class="toolTipContainer">
                <span class="toolTip"><g:message code="jobstats.general.graphs.toolTip.progressBar.QueueProcess"/></span>
@@ -59,10 +62,6 @@
                <span class="toolTip"><g:message code="jobstats.general.graphs.toolTip.queuedStartedEnded"/></span>
            </div>
            <br>
-           <div class="graphTimeSpanContainer" id="queuedStartedEnded">
-               <p>from: <input type="text" class="datePicker" name="dpFrom" value="${latestDate}"></p>
-               <p>to: <input type="text" class="datePicker" name="dpTo" value="${today}"></p>
-           </div>
            <canvas id="generalGraphStates" class="lineChart" width=1000px height=300px></canvas>
         </div>
         <br>
@@ -72,10 +71,6 @@
                <span class="toolTip"><g:message code="jobstats.general.graphs.toolTip.failed"/></span>
            </div>
            <br>
-           <div class="graphTimeSpanContainer" id="failed">
-               <p>from: <input type="text" class="datePicker" name="dpFrom" value="${latestDate}"></p>
-               <p>to: <input type="text" class="datePicker" name="dpTo" value="${today}"></p>
-           </div>
            <canvas id="generalGraphFailed" class="lineChart" width=1000px height=300px></canvas>
         </div>
         <br>
@@ -85,10 +80,6 @@
                <span class="toolTip"><g:message code="jobstats.general.graphs.toolTip.coreUsage"/></span>
            </div>
            <br>
-           <div class="graphTimeSpanContainer" id="coreUsage">
-               <p>from: <input type="text" class="datePicker" name="dpFrom" value="${latestDate}"></p>
-               <p>to: <input type="text" class="datePicker" name="dpTo" value="${today}"></p>
-           </div>
            <canvas id="generalGraphCores" class="lineChart" width=1000px height=300px></canvas>
         </div>
         <br>
@@ -98,18 +89,12 @@
                <span class="toolTip"><g:message code="jobstats.general.graphs.toolTip.memoryUsage"/></span>
            </div>
            <br>
-           <div class="graphTimeSpanContainer" id="memoryUsage">
-               <p>from: <input type="text" class="datePicker" name="dpFrom" value="${latestDate}"></p>
-               <p>to: <input type="text" class="datePicker" name="dpTo" value="${today}"></p>
-           </div>
            <canvas id="generalGraphMemory" class="lineChart" width=1000px height=300px></canvas>
         </div>
     </div>
     <r:script>
         $(function() {
-            $.otp.clusterJobGeneralTable.register();
-            $.otp.clusterJobGeneralGraph.register();
-            $.otp.clusterJobGeneralProgress.register();
+            $.otp.clusterJobGeneral.register();
         });
     </r:script>
 </body>

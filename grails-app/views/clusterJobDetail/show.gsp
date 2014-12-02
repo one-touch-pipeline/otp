@@ -180,7 +180,6 @@ on the general cluster job page
             </div>
             <br>
             <table>
-
                 <col class="columnColors">
                 <col class="columnSpace">
                 <col class="columnProperty">

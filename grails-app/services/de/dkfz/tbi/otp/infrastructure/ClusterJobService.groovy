@@ -15,7 +15,6 @@ import org.joda.time.Duration
 import org.joda.time.LocalDate
 import org.joda.time.Period
 import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.PeriodFormat
 
 import javax.xml.ws.soap.SOAPFaultException
 
@@ -140,37 +139,54 @@ class ClusterJobService {
      * return the specific Individual to a cluster job
      * @return Individual or null
      */
-    public Individual getIndividualByClusterJob(ClusterJob job) {
-        Individual individual = atMostOneElement(ProcessParameter.findAllByProcess(job.processingStep.process))?.toObject()?.individual
-        return individual
+    public Individual findIndividualByClusterJob(ClusterJob job) {
+        return atMostOneElement(ProcessParameter.findAllByProcess(job.processingStep.process))?.toObject()?.individual
     }
 
     /**
-     * returns an ArrayList of exit codes and their appearance over all cluster jobs
-     * @return ArrayList [[exitCode, number of occurrences], ...]
+     * returns a List of Cluster Jobs in a specific time span
+     * @return List [clusterJob1, clusterJob2, ...]
      */
-    public List getAllExitCodes() {
-        return groupAndCountBy('exitCode')
+    public List findAllClusterJobsByDateBetween(LocalDate sDate, LocalDate eDate) {
+        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+
+        return ClusterJob.createCriteria().list {
+            order('queued', 'asc')
+            ge('queued', startDate)
+            le('ended', endDate)
+        }
     }
 
     /**
-     * returns an ArrayList of exit statuses and their appearance over all cluster jobs
-     * @return ArrayList [[exitStatus, number of occurrences], ...]
+     * returns a unique list of job classes in a specific time-span
+     * existing in the Cluster Job table
      */
-    public List getAllExitStatuses() {
-        return groupAndCountBy('exitStatus')
-    }
-
-    private List groupAndCountBy(String property) {
-        def c = ClusterJob.createCriteria()
-        def result = c.list {
-            order(property, 'asc')
+    public List findAllJobClassesByDateBetween(LocalDate sDate, LocalDate eDate) {
+        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+        return ClusterJob.createCriteria().list {
+            ge('queued', startDate)
+            lt('ended', endDate)
             projections {
-                groupProperty(property)
-                count('id')
+                distinct ('jobClass')
+                order('jobClass', 'asc')
             }
         }
-        return result
+    }
+
+    /**
+     * returns a List of exit codes and their occurrence in a specific time span
+     * @return ArrayList [[exitCode, number of occurrences], ...]
+     */
+    public List findAllExitCodesByDateBetween(LocalDate sDate, LocalDate eDate) {
+        return findAllByPropertyAndDateBetween("exitCode", sDate, eDate)
+    }
+
+    /**
+     * returns a List of exit statuses and their occurrence in a specific time span
+     * @return ArrayList [[exitStatus, number of occurrences], ...]
+     */
+    public List findAllExitStatusesByDateBetween(LocalDate sDate, LocalDate eDate) {
+        return findAllByPropertyAndDateBetween("exitStatus", sDate, eDate)
     }
 
     /**
@@ -178,33 +194,25 @@ class ClusterJobService {
      * @return map [days: ['2000-01-01 00:00:00', ...], data: [4, ...]]
      * => at January 1st 2000, between 00:00:00 and 01:00:00, 4 jobs failed processing
      */
-    public Map getAllFailedByDate(LocalDate sDate, LocalDate eDate) {
+    public Map findAllFailedByDateBetween(LocalDate sDate, LocalDate eDate) {
         def (DateTime startDate, DateTime endDate, ArrayList<String> hourBuckets) = parseArgs(sDate, eDate)
-        def results = ClusterJob.createCriteria().list {
+        def dateTimeFormatter = DateTimeFormat.forPattern(FORMAT_STRING)
+
+        def result = ClusterJob.createCriteria().list {
             ge('queued', startDate)
             lt('ended', endDate)
             eq('exitStatus', Status.FAILED)
         }
-        def dateTimeFormatter = DateTimeFormat.forPattern(FORMAT_STRING)
+
         def data = hourBuckets.collect { cHour ->
             DateTime currentHour = dateTimeFormatter.parseDateTime(cHour);
-            def nextHour = currentHour.plusHours(1)
+            DateTime nextHour = currentHour.plusHours(1)
 
-            def jobsThisHour = []
-            def iter = results.iterator() // use plain-old java version, so we can do it.remove for optimisation
-            while (iter.hasNext()) {
-                def job = iter.next()
-
-                // jobs ended in this bucket must be counted
-                // and can be ignored for subsequent buckets
-                if (currentHour <= job.ended && job.ended < nextHour) {
-                    jobsThisHour << job
-                    iter.remove() // reduce search space for next hourbucket
-                }
+            return result.count {
+                currentHour <= it.ended && it.ended < nextHour
             }
-
-            return jobsThisHour.size()
         }
+
         return ["days": hourBuckets, "data": data]
     }
 
@@ -213,10 +221,11 @@ class ClusterJobService {
      * @return map [days: ['2000-01-01 00:00:00', ...], data: ['queued': [0, ...], 'started': [1, ...], 'ended': [0, ...]]]
      * => at January 1st 2000, between 00:00:00 and 01:00:00, 0 jobs have been queued, 1 job has been started and 0 jobs have been ended
      */
-    public Map getAllStatesByDate(LocalDate sDate, LocalDate eDate) {
+    public Map findAllStatesByDateBetween(LocalDate sDate, LocalDate eDate) {
         def (DateTime startDate, DateTime endDate, ArrayList<String> hourBuckets) = parseArgs(sDate, eDate)
         Map data = ["queued":[], "started":[], "ended":[]]
         def dateTimeFormatter = DateTimeFormat.forPattern(FORMAT_STRING)
+
         data.keySet().each { state ->
             def results = ClusterJob.createCriteria().list {
                 ge(state, startDate)
@@ -231,6 +240,7 @@ class ClusterJobService {
                 return jobsThisHour.size()
             }))
         }
+
         return ["days": hourBuckets, "data": data]
     }
 
@@ -239,7 +249,7 @@ class ClusterJobService {
      * @return map [days: ['2000-01-01 00:00:00', ...], data: [4, ...]]
      * => at January 1st 2000, between 00:00:00 and 01:00:00, 4 cores were used to process the jobs
      */
-    public Map getAllAvgCoreUsageByDate(LocalDate sDate, LocalDate eDate) {
+    public Map findAllAvgCoreUsageByDateBetween(LocalDate sDate, LocalDate eDate) {
         return groupAndAnalyseClusterJobsByHour(sDate, eDate, {jobList -> jobList*.getCpuAvgUtilised().sum() as Integer ?: 0})
     }
 
@@ -248,85 +258,51 @@ class ClusterJobService {
      * @return map [days: ['2000-01-01 00:00:00', ...], data: [2048, ...]]
      * => at January 1st 2000, between 00:00:00 and 01:00:00, 2048 mb memory was used to process the jobs
      */
-    public Map getAllMemoryUsageByDate(LocalDate sDate, LocalDate eDate) {
+    public Map findAllMemoryUsageByDateBetween(LocalDate sDate, LocalDate eDate) {
         return groupAndAnalyseClusterJobsByHour(sDate, eDate, {jobList -> jobList ? (jobList*.usedMemory.sum().div(1024 * 1024)) as Integer : 0})
     }
 
-    private LinkedHashMap<String, ArrayList<String>> groupAndAnalyseClusterJobsByHour(LocalDate sDate, LocalDate eDate, Closure analysis) {
-        def (DateTime startDate, DateTime endDate, ArrayList<String> hourBuckets) = parseArgs(sDate, eDate)
-        def results = clusterJobsInsideInterval(startDate, endDate)
-        def dateTimeFormatter = DateTimeFormat.forPattern(FORMAT_STRING)
-        def data = hourBuckets.collect { cHour ->
-            DateTime currentHour = dateTimeFormatter.parseDateTime(cHour)
-            def nextHour = currentHour.plusHours(1)
+    public Map findAllStatesTimeDistributionByDateBetween(LocalDate sDate, LocalDate eDate) {
+        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
 
-            def jobsThisHour = []
-            def iter = results.iterator() // use plain-old java version, so we can do it.remove for optimisation
-            while (iter.hasNext()) {
-                def job = iter.next()
-
-                // jobs ended in this bucket must be counted
-                // and can be ignored for subsequent buckets
-                if (currentHour <= job.ended && job.ended < nextHour) {
-                    jobsThisHour << job
-                    iter.remove() // reduce search space for next hourbucket
-                }
-
-                // jobs running and/or started now, but not ending now must be counted
-                // but cannot be removed, because they need to be counted again in next hour
-                if (job.started < nextHour && nextHour < job.ended) {
-                    jobsThisHour << job
-                }
-            }
-
-            return analysis(jobsThisHour)
-        }
-        return ["days": hourBuckets, "data": data]
-    }
-
-    private List<ClusterJob> clusterJobsInsideInterval(DateTime startDate, DateTime endDate) {
-        return ClusterJob.createCriteria().list {
-            ge('queued', startDate)
-            lt('ended', endDate)
-        }
-    }
-
-    /**
-     * returns the time in queue and the processing time as sum of all jobs
-     * @return map ["queue": [percentQueue, queueFormatted], "process": [percentProcess, processFormatted]]
-     */
-    public Map getAllStatesTimeDistribution() {
-        def results = ClusterJob.createCriteria().list {
+        def result = ClusterJob.createCriteria().list {
             isNotNull('started')
             isNotNull('ended')
+            ge('queued', startDate)
+            lt('ended', endDate)
         }
 
         long queue = 0
         long process = 0
 
-        results.each { job ->
-            queue += new Duration(job.queued, job.started).getMillis()
-            process += new Duration(job.started, job.ended).getMillis()
+        result.each {
+            queue += new Duration(it.queued, it.started).getMillis()
+            process += new Duration(it.started, it.ended).getMillis()
         }
 
-        int percentQueue = Math.round(100/ (queue + process) * queue)
-        int percentProcess = 100 - percentQueue
+        int percentQueue = 0
+        int percentProcess = 0
 
-        String queueFormatted = new Period(queue).getHours().toString() + " hours"
-        String processFormatted = new Period(process).getHours().toString() + " hours"
-        Map result = ["queue": [percentQueue, queueFormatted], "process": [percentProcess, processFormatted]]
-        return result
+        if(queue != 0 && process != 0) {
+            percentQueue = Math.round(100 / (queue + process) * queue)
+            percentProcess = 100 - percentQueue
+        }
+
+        String queuePeriod = new Period(queue).getHours().toString()
+        String processPeriod = new Period(process).getHours().toString()
+
+        return ["queue": [percentQueue, queuePeriod], "process": [percentProcess, processPeriod]]
     }
 
     /**
      * returns a unique list of sequencing types
      * existing in the Cluster Job table
      */
-    public List getSeqTypes(String jobClass, LocalDate sDate, LocalDate eDate) {
-        DateTime startDate = sDate.toDateTimeAtStartOfDay()
-        DateTime endDate = eDate.plusDays(1).toDateTimeAtStartOfDay()
-        def result = ClusterJob.createCriteria().list {
-            ge('started', startDate)
+    public List findJobClassSpecificSeqTypesByDateBetween(String jobClass, LocalDate sDate, LocalDate eDate) {
+        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+
+        return ClusterJob.createCriteria().list {
+            ge('queued', startDate)
             lt('ended', endDate)
             eq('jobClass', jobClass)
             projections {
@@ -334,25 +310,6 @@ class ClusterJobService {
                 order('seqType', 'asc')
             }
         }
-        return result
-    }
-
-    /**
-     * returns a unique list of job classes
-     * existing in the Cluster Job table
-     */
-    public List getJobClasses(String sDate, String eDate) {
-        DateTime startDate = LocalDate.parse(sDate).toDateTimeAtStartOfDay()
-        DateTime endDate = LocalDate.parse(eDate).plusDays(1).toDateTimeAtStartOfDay()
-        def result = ClusterJob.createCriteria().list {
-            ge('started', startDate)
-            lt('ended', endDate)
-            projections {
-                distinct ('jobClass')
-                order('jobClass', 'asc')
-            }
-        }
-        return result
     }
 
     /**
@@ -362,7 +319,7 @@ class ClusterJobService {
      * [0] = exitCode
      * [1] = count of exitCode
      */
-    public List getJobTypeSpecificExitCodes(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
+    public List findJobClassAndSeqTypeSpecificExitCodesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
         return groupClusterJobsBetweenByProperty(sDate, eDate, jobClass, seqType, 'exitCode')
     }
 
@@ -370,28 +327,11 @@ class ClusterJobService {
      * returns a list of exit statuses and their count of
      * a specific job class and sequencing type, in a specific time span
      * @return list of arrays containing the exitStatuses and its count
-     * [0] = exitCode
+     * [0] = exitStatus
      * [1] = count of exitCode
      */
-    public List getJobTypeSpecificExitStatuses(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
+    public List findJobClassAndSeqTypeSpecificExitStatusesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
         return groupClusterJobsBetweenByProperty(sDate, eDate, jobClass, seqType, 'exitStatus')
-    }
-
-    private def groupClusterJobsBetweenByProperty(LocalDate sDate, LocalDate eDate, String jobClass, SeqType seqType, String property) {
-        DateTime startDate = sDate.toDateTimeAtStartOfDay()
-        DateTime endDate = eDate.plusDays(1).toDateTimeAtStartOfDay()
-        def results = ClusterJob.createCriteria().list {
-            eq('jobClass', jobClass)
-            eq('seqType', seqType)
-            ge('queued', startDate)
-            lt('ended', endDate)
-            order(property, 'asc')
-            projections {
-                groupProperty(property)
-                count('id')
-            }
-        }
-        return results
     }
 
     /**
@@ -399,9 +339,10 @@ class ClusterJobService {
      * and array of all dates (per hour) existing in the given time span
      * @return ["days": [day1Hour0, day2Hour1, ...], "data": ["queued": [...], "started": [...], "ended":[...]]]
      */
-    public Map getJobTypeSpecificStates(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
+    public Map findJobClassAndSeqTypeSpecificStatesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
         def (DateTime startDate, DateTime endDate, ArrayList<String> hourBuckets) = parseArgs(sDate, eDate)
         Map data = ["queued":[], "started":[], "ended":[]]
+
         data.keySet().each { state ->
             def results = ClusterJob.createCriteria().list {
                 eq('jobClass', jobClass)
@@ -419,8 +360,8 @@ class ClusterJobService {
                 return jobsThisHour.size()
             }))
         }
-        Map result = ["days": hourBuckets, "data": data]
-        return result
+
+        return ["days": hourBuckets, "data": data]
     }
 
     /**
@@ -428,7 +369,7 @@ class ClusterJobService {
      * the maximum values for both, to align the graphics and
      * aligned labels for the graphic
      */
-    public Map getJobTypeSpecificWalltimes(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
+    public Map findJobClassAndSeqTypeSpecificWalltimesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
         List<ClusterJob> results = clusterJobsInsideIntervalBy(jobClass, seqType, sDate, eDate)
 
         def finalResults = results.collect ({
@@ -446,7 +387,7 @@ class ClusterJobService {
      * the maximum values for both, to align the graphics and
      * aligned labels for the graphic
      */
-    public Map getJobTypeSpecificMemories(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
+    public Map findJobClassAndSeqTypeSpecificMemoriesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
         List<ClusterJob> results = clusterJobsInsideIntervalBy(jobClass, seqType, sDate, eDate)
 
         def finalResults = results.collect ({
@@ -463,32 +404,20 @@ class ClusterJobService {
      * returns the average core usage of a specific jobclass and seq type
      * @return double
      */
-    public double getJobTypeSpecificAvgCoreUsage(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
+    public double findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
         List<ClusterJob> results = clusterJobsInsideIntervalBy(jobClass, seqType, sDate, eDate)
 
-        double avgCpuUsage = results*.getCpuAvgUtilised().sum()/results.size()
+        double avgCpuUsage = results ? results*.getCpuAvgUtilised().sum() / results.size() : 0
 
         return avgCpuUsage.round(2)
-    }
-
-    private List<ClusterJob> clusterJobsInsideIntervalBy(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
-        DateTime startDate = sDate.toDateTimeAtStartOfDay()
-        DateTime endDate = eDate.plusDays(1).toDateTimeAtStartOfDay()
-        return ClusterJob.createCriteria().list {
-            eq('jobClass', jobClass)
-            eq('seqType', seqType)
-            ge('queued', startDate)
-            lt('ended', endDate)
-        }
     }
 
     /**
      * return the average memory usage of a specific jobclass and seqtype
      * @return int
      */
-    public int getJobTypeSpecificAvgMemory(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
-        DateTime startDate = sDate.toDateTimeAtStartOfDay()
-        DateTime endDate = eDate.plusDays(1).toDateTimeAtStartOfDay()
+    public int findJobClassAndSeqTypeSpecificAvgMemoryByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
+        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
 
         def result = ClusterJob.createCriteria().list {
             eq('jobClass', jobClass)
@@ -500,14 +429,14 @@ class ClusterJobService {
             }
         }
 
-        return Math.round(result[0])
+        return Math.round(result[0] ?: 0)
     }
 
     /**
      * returns the average time in queue and average processing time for a specific jobclass and seqtype
      * @return map ["avgQueue": avgQueue, "avgProcess": avgProcess]
      */
-    public Map getJobTypeSpecificAvgStatesTimeDistribution(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
+    public Map findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
         List<ClusterJob> results = clusterJobsInsideIntervalBy(jobClass, seqType, sDate, eDate)
 
         def queue = 0
@@ -519,10 +448,10 @@ class ClusterJobService {
         }
 
         // prevents negative values that could appear cause of rounding errors with milliseconds values
-        if (queue < 0) queue = 0
+        // OTP-1304, queued gets set through OTP, started & ended gets set by the cluster
 
-        def avgQueue = PeriodFormat.getDefault().print(new Period(Math.round(queue/results.size())))
-        def avgProcess = PeriodFormat.getDefault().print(new Period(Math.round(process/results.size())))
+        def avgQueue = Math.max(0, Math.round(queue / results.size()))
+        def avgProcess = Math.max(0, Math.round(process / results.size()))
 
         return ["avgQueue": avgQueue, "avgProcess": avgProcess]
     }
@@ -531,28 +460,25 @@ class ClusterJobService {
      * returns the time in queue and the processing time of a specific job
      * @return map ["queue": [percentQueue, queueFormatted], "process": [percentProcess, processFormatted]]
      */
-    public Map getJobSpecificStatesTimeDistribution (int id) {
+    public Map findJobSpecificStatesTimeDistributionByJobId(Long id) {
         ClusterJob job = ClusterJob.get(id)
+        if(!job) {return null}
+
         Duration queue = new Duration(job.queued, job.started)
         Duration process = new Duration(job.started, job.ended)
 
-        int queueMillis = queue.getMillis()
-        int processMillis = process.getMillis()
-
         // prevents negative values that could appear cause of rounding errors with milliseconds values
-        if(queueMillis < 0) { queueMillis = 0 }
-        if(processMillis < 0) { processMillis = 0}
+        // OTP-1304, queued gets set through OTP, started & ended gets set by the cluster
+
+        def queueMillis = Math.max(0, queue.getMillis())
+        def processMillis = Math.max(0, process.getMillis())
 
         long total = queueMillis + processMillis
 
         int percentProcess = Math.round(100/ total * processMillis)
         int percentQueue = 100 - percentProcess
 
-        String queueFormatted = PeriodFormat.getDefault().print(new Period(queueMillis))
-        String processFormatted = PeriodFormat.getDefault().print(new Period(processMillis))
-
-        Map result = ["queue": [percentQueue, queueFormatted], "process": [percentProcess, processFormatted]]
-        return result
+        return ["queue": [percentQueue, queueMillis], "process": [percentProcess, processMillis]]
     }
 
     /**
@@ -560,40 +486,136 @@ class ClusterJobService {
      * e.g startDate = 2000-01-01, endDate = 2000-01-02
      * result = [2000-01-01 00:00:00, 2000-01-01 01:00:00, 2000-01-01 02:00:00, ... , 2000-03-01 00:00:00]
      */
-    public List getDaysAndHoursBetween(LocalDate startDate, LocalDate endDate) {
+    public List getDaysAndHoursBetween(LocalDate sDate, LocalDate eDate) {
         def daysArr = []
 
-        DateTime startD = startDate.toDateTimeAtStartOfDay()
-        DateTime endD = endDate.toDateTimeAtStartOfDay()
+        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
 
-        while (startD < endD.plusDays(1).plusHours(1)) {
-            daysArr << startD.toString(FORMAT_STRING)
-            startD = startD.plusHours(1)
+        while (startDate < endDate.plusHours(1)) {
+            daysArr << startDate.toString(FORMAT_STRING)
+            startDate = startDate.plusHours(1)
         }
+
         return daysArr
     }
 
     /**
-     * returns the latest Job Date as formatted String
+     * returns the latest Job Date
+     * @return latest Job Date (queued)
      */
-    public String getLatestJobDate() {
+    public LocalDate getLatestJobDate() {
         def result = ClusterJob.createCriteria().list {
             order('queued', 'desc')
             maxResults(1)
         }
-        return result.first().queued.toString("yyyy-MM-dd")
+
+        return result ? new LocalDate(result.first().queued) : null
     }
 
     /**
      * returns an amount of labels aligned for scatter RGraphs in dependence to a given maximum value
-     * e.g. max = 8000 and quot = 10, return = [800, 1600, 2400, ... , 8000]
+     * @return List of dates as Strings and Integer-values
+     * e.g. max = 8000 and quot = 10, return = [["800", "1600", "2400", ... , "8000"], [800, 1600, 2400, ... , 8000] ]
      */
-    public List getLabels(max, quot) {
+    public List getLabels(Long max, int quot) {
         def labels = (1..quot).collect {
             (max/quot*it).toDouble().round(2)
         }
         def labelsAsString = labels*.toString()
+
         return [labelsAsString, labels]
+    }
+
+    /**
+     * returns a List of property-values and their occurrence in a specific time span
+     * @return List of property-values and their occurence
+     * e.g. exitStatus => ["completed": 5, "failed": 2]
+     */
+    private List findAllByPropertyAndDateBetween(String property, LocalDate sDate, LocalDate eDate) {
+        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+
+        return ClusterJob.createCriteria().list {
+            ge('queued', startDate)
+            lt('ended', endDate)
+            order(property, 'asc')
+            projections {
+                groupProperty(property)
+                count('id')
+            }
+        }
+    }
+
+    /**
+     * returns a map that contains a list of 24 formatted hour labels between sDate and eDate and a List with the occurence
+     * of jobs in this time-span dependent of the analysis-closure
+     * @return Map["days": [], "data": []]
+     * days = list of 24 formatted hour labels
+     * data = list with the occurence of jobs
+     */
+    private Map<String, ArrayList<String>> groupAndAnalyseClusterJobsByHour(LocalDate sDate, LocalDate eDate, Closure analysis) {
+        def (DateTime startDate, DateTime endDate, ArrayList<String> hourBuckets) = parseArgs(sDate, eDate)
+        def results = clusterJobsInsideInterval(startDate, endDate)
+        def dateTimeFormatter = DateTimeFormat.forPattern(FORMAT_STRING)
+
+        def data = hourBuckets.collect { cHour ->
+            DateTime currentHour = dateTimeFormatter.parseDateTime(cHour)
+            def nextHour = currentHour.plusHours(1)
+
+            def jobsThisHour = results.findAll {
+                currentHour <= it.ended && it.ended < nextHour || it.started < nextHour && nextHour < it.ended
+            }
+
+            return analysis(jobsThisHour)
+        }
+
+        return ["days": hourBuckets, "data": data]
+    }
+
+    /**
+     * returns a list of ClusterJobs that queued later startDate and ended before endDate
+     * @return List of ClusterJobs
+     */
+    private List<ClusterJob> clusterJobsInsideInterval(DateTime startDate, DateTime endDate) {
+        return ClusterJob.createCriteria().list {
+            ge('queued', startDate)
+            lt('ended', endDate)
+        }
+    }
+
+    /**
+     * returns a list of ClusterJobs that queued later startDate and ended before endDate dependent on jobClass and seqType
+     * @return List of ClusterJobs
+     */
+    private List<ClusterJob> clusterJobsInsideIntervalBy(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
+        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+
+        return ClusterJob.createCriteria().list {
+            eq('jobClass', jobClass)
+            eq('seqType', seqType)
+            ge('queued', startDate)
+            lt('ended', endDate)
+        }
+    }
+
+    /**
+     * returns a list of property-values and their occurence of clusterJobs that queued later startDate and ended before endDate dependent on jobClass and sequencing type
+     * @return List of property-values and their occurence
+     * e.g. exitStatuses => ["completed": 5, "failed": 2]
+     */
+    private def groupClusterJobsBetweenByProperty(LocalDate sDate, LocalDate eDate, String jobClass, SeqType seqType, String property) {
+        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+
+        return ClusterJob.createCriteria().list {
+            eq('jobClass', jobClass)
+            eq('seqType', seqType)
+            ge('queued', startDate)
+            lt('ended', endDate)
+            order(property, 'asc')
+            projections {
+                groupProperty(property)
+                count('id')
+            }
+        }
     }
 
     /**
@@ -603,8 +625,20 @@ class ClusterJobService {
      */
     private List parseArgs(LocalDate sDate, LocalDate eDate) {
         ArrayList<String> hourBuckets = getDaysAndHoursBetween(sDate, eDate)
+        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+
+        return [startDate, endDate, hourBuckets]
+    }
+
+    /**
+     * parses arguments for methods with dates
+     * @return list containing the Datetime-objects for startDate and endDate
+     */
+
+    private List parseDateArgs(LocalDate sDate, LocalDate eDate) {
         DateTime startDate = sDate.toDateTimeAtStartOfDay()
         DateTime endDate = eDate.plusDays(1).toDateTimeAtStartOfDay()
-        return [startDate, endDate, hourBuckets]
+
+        return [startDate, endDate]
     }
 }

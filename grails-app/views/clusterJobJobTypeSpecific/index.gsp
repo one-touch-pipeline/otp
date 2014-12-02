@@ -14,7 +14,7 @@
             <p>jobclass: <g:select name="jobClassSelect" id="jobClassSelect" from="${jobClasses}"/></p>
             <p>seqType: <select name="seqTypeSelect" id="seqTypeSelect"></select></p>
             <p>from: <input type="text" class="datePicker" id="dpFrom" value="${latestDate}"></p>
-            <p>to: <input type="text" class="datePicker" id="dpTo" value="${today}"></p>
+            <p>to: <input type="text" class="datePicker" id="dpTo" value="${latestDate}"></p>
         </div>
         <div id="jobTypeSpecificAverageValues">
             <table>

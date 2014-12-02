@@ -22,6 +22,6 @@ $.otp.clusterJobDetailProgress = {
             parts: [{value: data['queue'][0], text: data['queue'][0] + "% (" + data['queue'][1] + ")", barClass: "progressBarQueue", textClass: "progressTextQueue"},
                     {value: data['process'][0], text: data['process'][0] + "% (" + data['process'][1] + ")", barClass: "progressBarProcess", textClass: "progressTextProcess"}]
         });
-    },
+    }
 }
 

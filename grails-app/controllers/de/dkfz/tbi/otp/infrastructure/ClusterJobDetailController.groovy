@@ -2,6 +2,8 @@ package de.dkfz.tbi.otp.infrastructure
 
 import de.dkfz.tbi.otp.ngsdata.Individual
 import grails.converters.JSON
+import org.joda.time.Period
+import org.joda.time.format.PeriodFormat
 
 class ClusterJobDetailController {
 
@@ -9,15 +11,19 @@ class ClusterJobDetailController {
 
     def show () {
         ClusterJob job = ClusterJob.get(params.id)
-        Individual individual = clusterJobService.getIndividualByClusterJob(job)
+        Individual individual = clusterJobService.findIndividualByClusterJob(job)
+
         ['job': job, 'individual': individual]
     }
 
     def getStatesTimeDistribution () {
-        def jobId = params.id
         Map dataToRender = [:]
-        def data = clusterJobService.getJobSpecificStatesTimeDistribution(Integer.parseInt(jobId))
-        dataToRender.data = data
+
+        def data = clusterJobService.findJobSpecificStatesTimeDistributionByJobId(Integer.parseInt(params.id))
+
+        dataToRender.data = [queue: [data.queue.first(), PeriodFormat.getDefault().print(new Period(data.queue.last()))],
+                             process: [data.process.first(), PeriodFormat.getDefault().print(new Period(data.process.last()))]]
+
         render dataToRender as JSON
     }
 }

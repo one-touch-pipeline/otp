@@ -4,35 +4,44 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import grails.converters.JSON
 
 import org.joda.time.LocalDate
+import org.joda.time.Period
+import org.joda.time.format.PeriodFormat
 
 class ClusterJobJobTypeSpecificController {
 
     ClusterJobService clusterJobService
 
     def index() {
-        def date = clusterJobService.getLatestJobDate()
-        def today = new LocalDate().toString()
-        def jobClasses = clusterJobService.getJobClasses(date, today)
-        return [jobClasses: jobClasses, latestDate: date, today: today]
+        LocalDate date = clusterJobService.getLatestJobDate()
+        def jobClasses = clusterJobService.findAllJobClassesByDateBetween(date, date)
+        return [jobClasses: jobClasses, latestDate: date.toString("yyyy-MM-dd")]
     }
 
     def getJobTypeSpecificAvgCoreUsage() {
-        renderDataAsJSON(clusterJobService.&getJobTypeSpecificAvgCoreUsage)
+        renderDataAsJSON(clusterJobService.&findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween)
     }
 
     def getJobTypeSpecificAvgMemory() {
-        renderDataAsJSON(clusterJobService.&getJobTypeSpecificAvgMemory)
+        renderDataAsJSON(clusterJobService.&findJobClassAndSeqTypeSpecificAvgMemoryByDateBetween)
     }
 
     def getJobTypeSpecificStatesTimeDistribution() {
-        renderDataAsJSON(clusterJobService.&getJobTypeSpecificAvgStatesTimeDistribution)
+        Map dataToRender = [:]
+
+        LocalDate startDate = LocalDate.parse(params.from)
+        LocalDate endDate = LocalDate.parse(params.to)
+        SeqType seqType = SeqType.get(Long.parseLong(params.seqType))
+
+        def data = clusterJobService.findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween(params.jobClass, seqType, startDate, endDate)
+        dataToRender.data = ['avgQueue': PeriodFormat.getDefault().print(new Period(data.avgQueue)), 'avgProcess': PeriodFormat.getDefault().print(new Period(data.avgProcess))]
+
+        render dataToRender as JSON
     }
 
     def getJobClassesByDate() {
         Map dataToRender = [:]
 
-        def jobClasses = clusterJobService.getJobClasses(params.from, params.to)
-        dataToRender.data = jobClasses
+        dataToRender.data = clusterJobService.findAllJobClassesByDateBetween(new LocalDate(params.from), new LocalDate(params.to))
 
         render dataToRender as JSON
     }
@@ -44,18 +53,17 @@ class ClusterJobJobTypeSpecificController {
         LocalDate endDate = LocalDate.parse(params.to)
         String jobClass = params.jobClass
 
-        def seqTypes = clusterJobService.getSeqTypes(jobClass, startDate, endDate)
-        dataToRender.data = seqTypes
+        dataToRender.data  = clusterJobService.findJobClassSpecificSeqTypesByDateBetween(jobClass, startDate, endDate)
 
         render dataToRender as JSON
     }
 
     def getJobTypeSpecificExitCodes() {
-        renderPieDataAsJSON(clusterJobService.&getJobTypeSpecificExitCodes)
+        renderPieDataAsJSON(clusterJobService.&findJobClassAndSeqTypeSpecificExitCodesByDateBetween)
     }
 
     def getJobTypeSpecificExitStatuses() {
-        renderPieDataAsJSON(clusterJobService.&getJobTypeSpecificExitStatuses)
+        renderPieDataAsJSON(clusterJobService.&findJobClassAndSeqTypeSpecificExitStatusesByDateBetween)
     }
 
     def getJobTypeSpecificStates() {
@@ -65,7 +73,7 @@ class ClusterJobJobTypeSpecificController {
         LocalDate endDate = LocalDate.parse(params.to)
         SeqType seqType = SeqType.get(Long.parseLong(params.seqType))
 
-        def result = clusterJobService.getJobTypeSpecificStates(params.jobClass, seqType, startDate, endDate)
+        def result = clusterJobService.findJobClassAndSeqTypeSpecificStatesByDateBetween(params.jobClass, seqType, startDate, endDate)
         def keys = ['queued', 'started', 'ended']
         keys.each { k ->
             dataToRender.data << result.data.get(k)
@@ -77,11 +85,11 @@ class ClusterJobJobTypeSpecificController {
     }
 
     def getJobTypeSpecificWalltimes() {
-        renderDiagramDataAsJSON(clusterJobService.&getJobTypeSpecificWalltimes)
+        renderDiagramDataAsJSON(clusterJobService.&findJobClassAndSeqTypeSpecificWalltimesByDateBetween)
     }
 
     def getJobTypeSpecificMemories() {
-        renderDiagramDataAsJSON(clusterJobService.&getJobTypeSpecificMemories)
+        renderDiagramDataAsJSON(clusterJobService.&findJobClassAndSeqTypeSpecificMemoriesByDateBetween)
     }
 
     private renderDataAsJSON (Closure method) {
@@ -91,8 +99,7 @@ class ClusterJobJobTypeSpecificController {
         LocalDate endDate = LocalDate.parse(params.to)
         SeqType seqType = SeqType.get(Long.parseLong(params.seqType))
 
-        def result = method(params.jobClass, seqType, startDate, endDate)
-        dataToRender.data = result
+        dataToRender.data = method(params.jobClass, seqType, startDate, endDate)
 
         render dataToRender as JSON
     }

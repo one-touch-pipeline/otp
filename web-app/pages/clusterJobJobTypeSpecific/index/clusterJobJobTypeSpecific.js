@@ -13,7 +13,8 @@ $.otp.clusterJobJobTypeSpecific = {
                 onSelect: function () {
                     $.otp.clusterJobJobTypeSpecificGraph.update();
                     $.otp.clusterJobJobTypeSpecific.updateJobClassSelect();
-                }
+                },
+                maxDate: $('#dpTo').val()
             }
         );
         $('#jobClassSelect').change(function () {
@@ -120,7 +121,6 @@ $.otp.clusterJobJobTypeSpecific = {
 $.otp.clusterJobJobTypeSpecificGraph = {
     register : function () {
         "use strict";
-
         var startDate = $('#dpFrom').val();
         var endDate = $('#dpTo').val();
 
@@ -201,8 +201,6 @@ $.otp.clusterJobJobTypeSpecificGraph = {
         var json = JSON.parse(data.response);
         RGraph.Reset($('#' + id).get(0));
         var graph = new RGraph.Pie(id, json.data);
-        graph.Set('chart.labels', json.labels);
-        graph.Set('chart.labels.sticks', true);
         graph.Set('chart.shadow.offsetx', 5);
         graph.Set('chart.shadow.offsety', 5);
         graph.Set('chart.shadow.blur', 15);
@@ -210,6 +208,10 @@ $.otp.clusterJobJobTypeSpecificGraph = {
         graph.Set('chart.linewidth', 2);
         graph.Set('chart.exploded', 3);
         graph.Set('chart.radius', 80);
+        graph.Set('key', json.labels);
+        graph.Set('key.colors', $.otp.clusterJobJobTypeSpecific.getColors(json.data.length));
+        graph.Set('key.rounded', false);
+        graph.Set('centerx', 120);
         graph.Draw();
     },
 
@@ -262,4 +264,3 @@ $.otp.clusterJobJobTypeSpecificGraph = {
         graph.Draw();
     }
 };
-

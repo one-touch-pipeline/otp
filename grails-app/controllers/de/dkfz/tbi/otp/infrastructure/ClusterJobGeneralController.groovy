@@ -12,13 +12,16 @@ class ClusterJobGeneralController {
 
     def index() {
         def date = clusterJobService.getLatestJobDate()
-        def today = new LocalDate().toString()
-        return [latestDate: date, today: today]
+        return [latestDate: date]
     }
 
-    def getAllClusterJobs(DataTableCommand cmd) {
+    def findAllClusterJobsByDateBetween(DataTableCommand cmd) {
         Map dataToRender = [:]
-        def clusterJobs = ClusterJob.getAll()
+
+        LocalDate startDate = LocalDate.parse(params.from)
+        LocalDate endDate = LocalDate.parse(params.to)
+
+        def clusterJobs = clusterJobService.findAllClusterJobsByDateBetween(startDate, endDate)
         def data = clusterJobs.collect {
             return [it.clusterJobId, it.clusterJobName, it.exitStatus?.toString(), it.queued?.toString(FORMAT_STRING), it.started?.toString(FORMAT_STRING), it.ended?.toString(FORMAT_STRING), it.id]
         }
@@ -29,40 +32,46 @@ class ClusterJobGeneralController {
     }
 
     def getAllExitCodes() {
-        renderPieDataAsJSON(clusterJobService.&getAllExitCodes)
+        renderPieDataAsJSON(clusterJobService.&findAllExitCodesByDateBetween)
     }
 
     def getAllExitStatuses() {
-        renderPieDataAsJSON(clusterJobService.&getAllExitStatuses)
+        renderPieDataAsJSON(clusterJobService.&findAllExitStatusesByDateBetween)
     }
 
     def getAllFailed() {
-        renderDataAsJSON(clusterJobService.&getAllFailedByDate, ['failed'])
+        renderDataAsJSON(clusterJobService.&findAllFailedByDateBetween, ['failed'])
     }
 
     def getAllStates() {
-        renderDataAsJSON(clusterJobService.&getAllStatesByDate, ['queued', 'started', 'ended'])
+        renderDataAsJSON(clusterJobService.&findAllStatesByDateBetween, ['queued', 'started', 'ended'])
     }
 
     def getAllStatesTimeDistribution() {
         Map dataToRender = [:]
-        def result = clusterJobService.getAllStatesTimeDistribution()
-        dataToRender.data = result
+
+        LocalDate startDate = LocalDate.parse(params.from)
+        LocalDate endDate = LocalDate.parse(params.to)
+
+        dataToRender.data = clusterJobService.findAllStatesTimeDistributionByDateBetween(startDate, endDate)
+
         render dataToRender as JSON
     }
 
     def getAllAvgCoreUsage() {
-        renderDataAsJSON(clusterJobService.&getAllAvgCoreUsageByDate, ['cores'])
+        renderDataAsJSON(clusterJobService.&findAllAvgCoreUsageByDateBetween, ['cores'])
     }
 
     def getAllMemoryUsage() {
-        renderDataAsJSON(clusterJobService.&getAllMemoryUsageByDate, ['memory'])
+        renderDataAsJSON(clusterJobService.&findAllMemoryUsageByDateBetween, ['memory'])
     }
 
     private renderDataAsJSON (Closure method, keys) {
         Map dataToRender = [data: [], labels: [], keys: []]
+
         LocalDate startDate = LocalDate.parse(params.from)
         LocalDate endDate = LocalDate.parse(params.to)
+
         def results = method(startDate, endDate)
         if (keys.size() > 1) {
             keys.each { k ->
@@ -73,16 +82,22 @@ class ClusterJobGeneralController {
         }
         dataToRender.labels = results.days
         dataToRender.keys = keys
+
         render dataToRender as JSON
     }
 
     private renderPieDataAsJSON (Closure method) {
         Map dataToRender = [data: [], labels: []]
-        def results = method()
+
+        LocalDate startDate = LocalDate.parse(params.from)
+        LocalDate endDate = LocalDate.parse(params.to)
+
+        def results = method(startDate, endDate)
         results.each {
             dataToRender.data << it[1]
             dataToRender.labels << it[0].toString().replace("null", "UNKNOWN") + " (" + it[1].toString() + ")"
         }
+
         render dataToRender as JSON
     }
 }
