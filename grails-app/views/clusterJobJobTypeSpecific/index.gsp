@@ -1,0 +1,112 @@
+<%@ page contentType="text/html;charset=UTF-8" %>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="layout" content="main"/>
+    <title><g:message code="jobstats.jobTypeSpecific.title"/></title>
+    <r:require module="graph"/>
+    <r:require module="jqueryUI"/>
+</head>
+<body>
+    <div class="body">
+        <h1><g:message code="jobstats.jobTypeSpecific.title"/></h1><br><br>
+        <div id="optionsContainer">
+            <p>jobclass: <g:select name="jobClassSelect" id="jobClassSelect" from="${jobClasses}"/></p>
+            <p>seqType: <select name="seqTypeSelect" id="seqTypeSelect"></select></p>
+            <p>from: <input type="text" class="datePicker" id="dpFrom" value="${latestDate}"></p>
+            <p>to: <input type="text" class="datePicker" id="dpTo" value="${today}"></p>
+        </div>
+        <div id="jobTypeSpecificAverageValues">
+            <table>
+                <tr>
+                    <td>
+                        <div class="jobTypSpecificValue"><g:message code="jobstats.jobTypeSpecific.averageTable.averageDelay"/></div>
+                        <div class="toolTipContainer  jobTypSpecificValueToolTip">
+                            <span class="toolTip"><g:message code="jobstats.jobTypeSpecific.averageTable.toolTip.averageDelay"/></span>
+                        </div>
+                    </td>
+                    <td id="jobTypeSpecificAvgDelay">0</td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="jobTypSpecificValue"><g:message code="jobstats.jobTypeSpecific.averageTable.averageProcessingTime"/></div>
+                        <div class="toolTipContainer  jobTypSpecificValueToolTip">
+                            <span class="toolTip"><g:message code="jobstats.jobTypeSpecific.averageTable.toolTip.averageProcessingTime"/></span>
+                        </div>
+                    </td>
+                    <td id="jobTypeSpecificAvgProcessing">0</td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="jobTypSpecificValue"><g:message code="jobstats.jobTypeSpecific.averageTable.averageCpuUsedInCores"/></div>
+                        <div class="toolTipContainer  jobTypSpecificValueToolTip">
+                            <span class="toolTip"><g:message code="jobstats.jobTypeSpecific.averageTable.toolTip.averageCpuUsed"/></span>
+                        </div>
+                    </td>
+                    <td id="jobTypeSpecificAvgCPU"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="jobTypSpecificValue"><g:message code="jobstats.jobTypeSpecific.averageTable.averageMemoryUsedInKiB"/></div>
+                        <div class="toolTipContainer  jobTypSpecificValueToolTip">
+                            <span class="toolTip"><g:message code="jobstats.jobTypeSpecific.averageTable.toolTip.averageMemoryUsed"/></span>
+                        </div>
+                    </td>
+                    <td id="jobTypeSpecificAvgMemory"></td>
+                </tr>
+            </table>
+        </div>
+        <div id="pieGraphicContainer">
+            <div class="pieGraphContainer">
+                <div class="graphDescription"><g:message code="jobstats.jobTypeSpecific.graphs.exitCodes"/></div>
+                <div class="toolTipContainer">
+                   <span class="toolTip"><g:message code="jobstats.jobTypeSpecific.graphs.toolTip.exitCodes"/></span>
+                </div>
+                <canvas id="jobTypeSpecificGraphExitCode" class="pieChart" width=450px height=225px></canvas>
+            </div>
+            <div class="pieGraphContainer" id="pieGraphContainerSecond">
+                <div class="graphDescription"><g:message code="jobstats.jobTypeSpecific.graphs.exitStatuses"/></div>
+                <div class="toolTipContainer">
+                   <span class="toolTip"><g:message code="jobstats.jobTypeSpecific.graphs.toolTip.exitStatuses"/></span>
+                </div>
+                <canvas id="jobTypeSpecificGraphExitStatus" class="pieChart" width=450px height=225px></canvas>
+            </div>
+        </div>
+        <div id="lineGraphicContainer">
+            <div class="lineGraphContainer">
+                <div class="graphDescription"><g:message code="jobstats.jobTypeSpecific.graphs.queuedStartedEnded"/></div>
+                <div class="toolTipContainer">
+                    <span class="toolTip"><g:message code="jobstats.jobTypeSpecific.graphs.toolTip.queuedStartedEnded"/></span>
+                </div>
+                <br>
+                <canvas id="jobTypeSpecificGraphStates" class="lineChart" width=1000px height=300px></canvas>
+            </div>
+        </div>
+        <div id="scatterGraphicContainer">
+            <div class="scatterGraphContainer">
+                <div class="graphDescription"><g:message code="jobstats.jobTypeSpecific.graphs.walltimes"/></div>
+                <div class="toolTipContainer">
+                    <span class="toolTip"><g:message code="jobstats.jobTypeSpecific.graphs.toolTip.walltimes"/></span>
+                </div>
+                <br>
+                <canvas id="jobTypeSpecificGraphWalltimes" class="scatterChart" width=1000px height=500px></canvas>
+            </div>
+            <div class="scatterGraphContainer">
+                <div class="graphDescription"><g:message code="jobstats.jobTypeSpecific.graphs.memoryUsage"/></div>
+                <div class="toolTipContainer">
+                    <span class="toolTip"><g:message code="jobstats.jobTypeSpecific.graphs.toolTip.memoryUsage"/></span>
+                </div>
+                <br>
+                <canvas id="jobTypeSpecificGraphMemories" class="scatterChart" width=1000px height=500px></canvas>
+            </div>
+        </div>
+        <br>
+    </div>
+    <r:script>
+        $(function() {
+            $.otp.clusterJobJobTypeSpecific.register();
+            $.otp.clusterJobJobTypeSpecific.updateSeqTypeSelect();
+        });
+    </r:script>
+</body>
+</html>

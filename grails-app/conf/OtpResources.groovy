@@ -112,4 +112,10 @@ modules = {
         dependsOn 'jqueryDatatables'
         dependsOn 'jqueryUI'
     }
+    multiprogressbar {
+        dependsOn 'jqueryUI'
+        resource url:'/js/jquery/jquery-ui-multiprogressbar/jquery-outerhtml-master/jquery.outerhtml.js'
+        resource url:'/js/jquery/jquery-ui-multiprogressbar/src/jquery.ui.multiprogressbar.js'
+        resource url:'/js/jquery/jquery-ui-multiprogressbar/src/jquery.ui.multiprogressbar.css'
+    }
 }
