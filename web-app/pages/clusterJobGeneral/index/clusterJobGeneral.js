@@ -237,7 +237,7 @@ $.otp.clusterJobGeneralProgress = {
     },
 
     generateProgress : function (id, data) {
-        "use strict";
+        "use strict";e
         var json = JSON.parse(data.response);
         console.log(json);
         $("#" + id).multiprogressbar ({

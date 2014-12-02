@@ -175,7 +175,6 @@ class ClusterJobService {
     /**
      * returns all failed jobs and their number of occurrences per hour at a given time span
      * @return map [days: ['2000-01-01 00:00:00', ...], data: [4, ...]]
-<<<<<<< HEAD
      * => at January 1st 2000, between 00:00:00 and 01:00:00, 4 jobs failed processing
      */
     public Map getAllFailedByDate(LocalDate sDate, LocalDate eDate) {
@@ -314,7 +313,6 @@ class ClusterJobService {
 
         String queueFormatted = new Period(queue).getHours().toString() + " hours"
         String processFormatted = new Period(process).getHours().toString() + " hours"
-
         Map result = ["queue": [percentQueue, queueFormatted], "process": [percentProcess, processFormatted]]
         return result
     }

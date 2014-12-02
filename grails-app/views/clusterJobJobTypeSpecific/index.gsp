@@ -17,9 +17,9 @@
             <p>to: <input type="text" class="datePicker" id="dpTo" value="${today}"></p>
         </div>
         <div id="jobTypeSpecificAverageValues">
-            <col class="columnProperty">
-            <col class="columnValue">
             <table>
+                <col class="columnProperty">
+                <col class="columnValue">
                 <tr>
                     <td>
                         <div class="jobTypSpecificValue">Average Delay</div>

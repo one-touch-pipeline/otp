@@ -6,6 +6,11 @@
 <title><g:message code="jobstats.detail.title"/></title>
 <r:require module="multiprogressbar"/>
 </head>
+<!--
+This page is just available for cluster jobs with filled properties
+Cluster Jobs without filled properties have no link to this page in the datatable
+on the general cluster job page
+-->
 <body>
     <div class="body">
         <h1><g:message code="jobstats.jobSpecific.detail.title"/></h1>
@@ -22,6 +27,7 @@
                 <col class="columnProperty">
                 <col class="columnValue">
                 <tr>
+                    <!-- these empty td-elements are used to define the colored element and the space on the left of each table -->
                     <td></td>
                     <td></td>
                     <td><g:message code="jobstats.jobSpecific.detail.table.attribute.id"/></td>
@@ -43,19 +49,31 @@
                     <td></td>
                     <td></td>
                     <td><g:message code="jobstats.jobSpecific.detail.table.attribute.seqType"/></td>
-                    <td>${job.seqType.toString()}</td>
+                    <td>
+                        <g:if test="${job.seqType != null}">
+                            ${job.seqType.toString()}
+                        </g:if>
+                    </td>
                 </tr>
                 <tr>
                     <td></td>
                     <td></td>
                     <td><g:message code="jobstats.jobSpecific.detail.table.attribute.project"/></td>
-                    <td><g:link controller="projectOverview" action="index" params="[projectName: individual.project]">${individual.project}</g:link></td>
+                    <td>
+                        <g:if test="${individual != null}">
+                            <g:link controller="projectOverview" action="index" params="[projectName: individual.project]">${individual.project}</g:link>
+                        </g:if>
+                    </td>
                 </tr>
                 <tr>
                     <td></td>
                     <td></td>
                     <td><g:message code="jobstats.jobSpecific.detail.table.attribute.individual"/></td>
-                    <td><g:link controller="individual" action="show" params="[mockPid: individual.mockPid]">${individual.mockPid}</g:link></td>
+                    <td>
+                        <g:if test="${individual != null}">
+                            <g:link controller="individual" action="show" params="[mockPid: individual.mockPid]">${individual.mockPid}</g:link>
+                        </g:if>
+                    </td>
                 </tr>
                 <tr>
                     <td></td>
@@ -96,6 +114,7 @@
                 <span class="toolTip"><g:message code="jobstats.jobSpecific.detail.table.toolTip.time"/></span>
             </div>
             <br>
+            <g:set var="formatDateString" value="${"yyyy-MM-dd hh:mm:ss"}"/>
             <table>
                 <col class="columnColors">
                 <col class="columnSpace">
@@ -105,19 +124,19 @@
                     <td></td>
                     <td></td>
                     <td><g:message code="jobstats.jobSpecific.detail.table.attribute.queued"/></td>
-                    <td>${job.queued.toString("yyyy-MM-dd hh:mm:ss")}</td>
+                    <td>${job.queued.toString(formatDateString)}</td>
                 </tr>
                 <tr>
                     <td></td>
                     <td></td>
                     <td><g:message code="jobstats.jobSpecific.detail.table.attribute.started"/></td>
-                    <td>${job.started?.toString("yyyy-MM-dd hh:mm:ss")}</td>
+                    <td>${job.started?.toString(formatDateString)}</td>
                 </tr>
                 <tr>
                     <td></td>
                     <td></td>
                     <td><g:message code="jobstats.jobSpecific.detail.table.attribute.ended"/></td>
-                    <td>${job.ended?.toString("yyyy-MM-dd hh:mm:ss")}</td>
+                    <td>${job.ended?.toString(formatDateString)}</td>
                 </tr>
                 <tr>
                     <td></td>
@@ -159,6 +178,7 @@
             </div>
             <br>
             <table>
+
                 <col class="columnColors">
                 <col class="columnSpace">
                 <col class="columnProperty">
