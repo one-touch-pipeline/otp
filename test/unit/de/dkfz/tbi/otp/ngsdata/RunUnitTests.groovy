@@ -39,4 +39,39 @@ class RunUnitTests {
 
         assertNull(run.getSeqType())
     }
+
+    void testGetIndividual() {
+
+        Run run = Run.build()
+
+        Individual individual1 = Individual.build()
+        Individual individual2 = Individual.build()
+
+        Sample sample1 = Sample.build(
+            individual: individual1
+        )
+
+        Sample sample2 = Sample.build(
+            individual: individual2
+        )
+
+        SeqTrack.build(
+            run: run,
+            sample: sample1
+        )
+
+        SeqTrack.build(
+            run: run,
+            sample: sample1
+        )
+
+        assertEquals(individual1, run.getIndividual())
+
+        SeqTrack.build (
+            run: run,
+            sample: sample2
+        )
+
+        assertNull(run.getIndividual())
+    }
 }

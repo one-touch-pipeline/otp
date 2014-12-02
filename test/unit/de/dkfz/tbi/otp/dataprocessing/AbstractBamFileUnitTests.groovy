@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.FileType
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.Individual
 
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
@@ -127,6 +128,11 @@ class MockAbstractBamFile extends AbstractBamFile {
 
     @Override
     SeqType getSeqType() {
+        return null
+    }
+
+    @Override
+    Individual getIndividual() {
         return null
     }
 }

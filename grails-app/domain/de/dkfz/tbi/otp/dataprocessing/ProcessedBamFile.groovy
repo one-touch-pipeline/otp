@@ -25,6 +25,11 @@ class ProcessedBamFile extends AbstractFileSystemBamFile {
         return alignmentPass.seqType
     }
 
+    @Override
+    Individual getIndividual() {
+        return alignmentPass.individual
+    }
+
     Project getProject() {
         return alignmentPass.project
     }

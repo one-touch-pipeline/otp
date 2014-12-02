@@ -64,6 +64,19 @@ class Run {
         }
     }
 
+    /*
+     * returns the individual being sequenced in this run
+     * returns null if a run has more than one individual
+     */
+    Individual getIndividual() {
+        List<Individual> individuals = SeqTrack.findAllByRun(this)*.individual
+        if (individuals.unique().size() == 1) {
+            return individuals.first()
+        } else {
+            return null
+        }
+    }
+
     /**
      * It returns the highest priority of the corresponding projects.
      */

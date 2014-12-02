@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
@@ -49,6 +50,11 @@ class MockAbstractFileSystemBamFile extends AbstractFileSystemBamFile {
 
     @Override
     SeqType getSeqType() {
+        return null
+    }
+
+    @Override
+    Individual getIndividual() {
         return null
     }
 }

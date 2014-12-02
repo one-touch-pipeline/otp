@@ -80,6 +80,10 @@ class QualityAssessmentPass {
         return processedBamFile.seqType
     }
 
+    Individual getIndividual() {
+        return processedBamFile.individual
+    }
+
     static mapping = {
         processedBamFile index: "quality_assessment_pass_processed_bam_file_idx"
     }

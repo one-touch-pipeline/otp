@@ -73,6 +73,10 @@ class AlignmentPass {
         return seqTrack.seqType
     }
 
+    Individual getIndividual() {
+        return seqTrack.individual
+    }
+
     static mapping = {
         seqTrack index: "alignment_pass_seq_track_idx"
     }
