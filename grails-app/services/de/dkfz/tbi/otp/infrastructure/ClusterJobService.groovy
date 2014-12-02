@@ -14,7 +14,6 @@ import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.LocalDate
 import org.joda.time.Period
-import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.PeriodFormat
 
 import javax.xml.ws.soap.SOAPFaultException
@@ -176,6 +175,7 @@ class ClusterJobService {
     /**
      * returns all failed jobs and their number of occurrences per hour at a given time span
      * @return map [days: ['2000-01-01 00:00:00', ...], data: [4, ...]]
+<<<<<<< HEAD
      * => at January 1st 2000, between 00:00:00 and 01:00:00, 4 jobs failed processing
      */
     public Map getAllFailedByDate(LocalDate sDate, LocalDate eDate) {

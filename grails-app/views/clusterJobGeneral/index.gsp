@@ -21,7 +21,7 @@
                          'jobstats.general.table.queued',
                          'jobstats.general.table.started',
                          'jobstats.general.table.ended'
-                     ] }"
+                     ]}"
                      id="clusterJobGeneralTable" />
              </div>
         </div>

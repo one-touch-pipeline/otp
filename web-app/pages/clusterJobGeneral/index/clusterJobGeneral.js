@@ -56,6 +56,9 @@ $.otp.clusterJobGeneralTable = {
 }
 
 $.otp.clusterJobGeneralGraph = {
+
+    colors : ['#81BEF7', '#A9BCF5', '#5882FA', '#0431B4', '#00BFFF', '#A9F5F2', '#088A85', '#9F81F7'],
+
     register : function () {
         "use strict";
         RGraph.AJAX($.otp.createLink({
@@ -88,7 +91,6 @@ $.otp.clusterJobGeneralGraph = {
             $.otp.clusterJobGeneralGraph.generateLineGraphic('generalGraphStates', this);
         });
 
-
         RGraph.AJAX($.otp.createLink({
             controller : 'clusterJobGeneral',
             action : 'getAllAvgCoreUsage',
@@ -96,7 +98,6 @@ $.otp.clusterJobGeneralGraph = {
         }), function () {
             $.otp.clusterJobGeneralGraph.generateLineGraphic('generalGraphCores', this);
         });
-
 
         RGraph.AJAX($.otp.createLink({
             controller : 'clusterJobGeneral',
@@ -124,6 +125,7 @@ $.otp.clusterJobGeneralGraph = {
     },
 
     update: function (id, data) {
+        "use strict";
         RGraph.Clear($('#' + id).get(0));
         switch (id) {
             case 'generalGraphFailed':
@@ -200,10 +202,26 @@ $.otp.clusterJobGeneralGraph = {
         graph.Set('key', json.keys);
         graph.Draw();
     },
-}
+
+    getColors : function (elementCount) {
+        "use strict";
+        return this.colors.slice(0, elementCount);
+    },
+
+    normalizeLabels : function (labels, id) {
+        "use strict";
+        var quot = labels.length / 24;
+        var newLabels = [];
+        for (var i = 0; i <= labels.length - 1; i = i + quot) {
+            newLabels.push(labels[i]);
+        }
+        return newLabels;
+    }
+ }
 
 $.otp.clusterJobGeneralProgress = {
     register : function () {
+        "use strict";
         RGraph.AJAX($.otp.createLink({
             controller : 'clusterJobGeneral',
             action : 'getAllStatesTimeDistribution',
@@ -213,11 +231,13 @@ $.otp.clusterJobGeneralProgress = {
     },
 
     update : function () {
+        "use strict";
         $('.multiProgress').multiprogressbar('destroy');
         $.otp.clusterJobGeneralProgress.register();
     },
 
     generateProgress : function (id, data) {
+        "use strict";
         var json = JSON.parse(data.response);
         console.log(json);
         $("#" + id).multiprogressbar ({
@@ -225,27 +245,4 @@ $.otp.clusterJobGeneralProgress = {
                     {value: json.data['process'][0], text: json.data['process'][0] + "% (" + json.data['process'][1] + ")", barClass: "progressBarProcess", textClass: "progressTextProcess"}]
         });
     }
-}
-
-function getColors(elements) {
-    var c = new Array();
-    var colors = new Array('#81BEF7','#A9BCF5','#5882FA','#0431B4','#00BFFF','#A9F5F2','#088A85','#9F81F7');
-    for (var i = 0; i <= elements - 1; i++) {
-        c[i] = colors[i];
-    }
-    return c;
-}
-
-function getToday() {
-    var date = new Date();
-    return (date.getFullYear().toString()) + "-" + ("0" + (date.getMonth() + 1).toString()).substr(-2) + "-" + ("0" + date.getDate().toString()).substr(-2);
-}
-
-function normalizeLabels(labels, id) {
-    var quot = labels.length / 24;
-    var newLabels = [];
-    for (var i = 0; i <= labels.length - 1; i = i + quot) {
-        newLabels.push(labels[i]);
-    }
-    return newLabels;
 }
