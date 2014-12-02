@@ -10,7 +10,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 @Mock([MetaDataKey, Realm, Project, Individual, SampleType, Sample, SeqType, SeqCenter,
     SeqPlatform, Run, RunSegment, SoftwareTool, SeqTrack, FileType, DataFile,
     ReferenceGenome, ReferenceGenomeProjectSeqType, ExomeSeqTrack, ExomeEnrichmentKit,
-    ExomeEnrichmentKitService])
+    ExomeEnrichmentKitService, MetaDataEntry])
 
 class MetaDataServiceUnitTests {
 
@@ -23,6 +23,7 @@ class MetaDataServiceUnitTests {
     public void setUp() throws Exception {
         metaDataService = new MetaDataService()
         metaDataService.exomeEnrichmentKitService = new ExomeEnrichmentKitService()
+        metaDataService.fileTypeService = new FileTypeService()
         testData = new TestData()
         testData.createObjects()
     }
@@ -158,5 +159,76 @@ class MetaDataServiceUnitTests {
     void testFindOutReadNumberIfSingleEndOrByFileName_FromFileName() {
         def file = 'SOMEPID_L001_R2.fastq.gz'
         assertEquals(2, MetaDataService.findOutReadNumberIfSingleEndOrByFileName(file, false))
+    }
+
+    @Test
+    void testGetLibraryLayoutFromMetadata() {
+        final String LAYOUT = "SINGLE"
+
+        DataFile dataFile = new DataFile(fileName: "testFile.txt")
+        assert dataFile.save(flush: true)
+
+        createMetadataEntry(dataFile, MetaDataColumn.LIBRARY_LAYOUT.name(), LAYOUT)
+
+        assert metaDataService.getLibraryLayoutFromMetadata(dataFile) == LAYOUT
+    }
+
+    @Test
+    void testAddReadNumberFileTypeNeedsNoReadInfo() {
+        testData.fileType.delete()
+        FileType.Type type = FileType.Type.ALIGNMENT
+        DataFile dataFile = createDataFileAndMetadataEntry(type, "s_101202_7_2.bam", "SINGLE")
+
+        assert dataFile.readNumber == null
+        metaDataService.addReadNumber(dataFile, type)
+        assert dataFile.readNumber == null
+    }
+
+    @Test
+    void testAddReadNumberLibraryIsSingle() {
+        testData.fileType.delete()
+        FileType.Type type = FileType.Type.SEQUENCE
+        DataFile dataFile = createDataFileAndMetadataEntry(type, "s_101202_7_2.fastq.gz", "SINGLE")
+        metaDataService.addReadNumber(dataFile, type)
+        assert dataFile.readNumber == 1
+    }
+
+    @Test
+    void testAddReadNumberLibraryIsPaired() {
+        testData.fileType.delete()
+        FileType.Type type = FileType.Type.SEQUENCE
+        DataFile dataFile = createDataFileAndMetadataEntry(type, "s_101202_7_2.fastq.gz", "PAIRED")
+
+        metaDataService.addReadNumber(dataFile, type)
+        assert dataFile.readNumber == 2
+    }
+
+    // Helper
+    private DataFile createDataFileAndMetadataEntry(FileType.Type type, String fileName, String libraryLayout) {
+        FileType fileType = new FileType(type: type, subType: "fastq")
+        assert fileType.save(flush: true)
+
+        DataFile dataFile = new DataFile(fileName:fileName)
+        assert dataFile.save(flush: true)
+
+        createMetadataEntry(dataFile, MetaDataColumn.LIBRARY_LAYOUT.name(), libraryLayout)
+
+        return dataFile
+    }
+
+    private MetaDataEntry createMetadataEntry(DataFile dataFile, String key, String value) {
+        MetaDataKey metaDataKey = new MetaDataKey(name: key)
+        assert metaDataKey.save(flush: true)
+
+        MetaDataEntry metaDataEntry = new MetaDataEntry(
+                value: value,
+                dataFile: dataFile,
+                key: metaDataKey,
+                status: MetaDataEntry.Status.VALID,
+                source: MetaDataEntry.Source.MDFILE,
+        )
+        assert metaDataEntry.validate()
+        assert metaDataEntry.save(flush: true)
+        return metaDataEntry
     }
 }

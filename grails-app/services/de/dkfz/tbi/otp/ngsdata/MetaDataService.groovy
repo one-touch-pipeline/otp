@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import static org.springframework.util.Assert.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import org.springframework.security.access.prepost.PostAuthorize
@@ -170,6 +171,7 @@ class MetaDataService {
                 assignFileName(dataFile)
                 fillVbpFileName(dataFile)
                 fillMD5Sum(dataFile)
+                addReadNumber(dataFile, type)
                 assignFileType(dataFile, type)
                 createSeqTypeMetaDataEntryFromDirNameIfNeeded(dataFile)
                 checkIfWithdrawn(dataFile)
@@ -394,6 +396,22 @@ class MetaDataService {
         FileType fileType = fileTypeService.getFileType(dataFile.fileName, type)
         dataFile.fileType = fileType
         dataFile.save(flush: true)
+    }
+
+    private String getLibraryLayoutFromMetadata(DataFile dataFile) {
+        return metaDataValue(dataFile, MetaDataColumn.LIBRARY_LAYOUT.name())
+    }
+
+
+    private void addReadNumber(DataFile dataFile, FileType.Type type) {
+        FileType fileType = fileTypeService.getFileType(dataFile.fileName, type)
+        if (fileType.type == FileType.Type.SEQUENCE && fileType.subType == "fastq") {
+            String fileName = dataFile.fileName
+            String libraryLayout = getLibraryLayoutFromMetadata(dataFile)
+            boolean isSingle = libraryLayout == "SINGLE"
+            dataFile.readNumber = findOutReadNumberIfSingleEndOrByFileName(fileName, isSingle)
+            assert dataFile.save(flush: true)
+        }
     }
 
     /**
