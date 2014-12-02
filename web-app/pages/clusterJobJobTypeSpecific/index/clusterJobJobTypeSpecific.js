@@ -27,6 +27,7 @@ $.otp.clusterJobJobTypeSpecific = {
 
     updateAvgValues : function () {
         "use strict";
+
         var startDate = $('#dpFrom').val();
         var endDate = $('#dpTo').val();
 
@@ -120,6 +121,7 @@ $.otp.clusterJobJobTypeSpecific = {
 $.otp.clusterJobJobTypeSpecificGraph = {
     register : function () {
         "use strict";
+
         var startDate = $('#dpFrom').val();
         var endDate = $('#dpTo').val();
 
@@ -261,3 +263,26 @@ $.otp.clusterJobJobTypeSpecificGraph = {
         graph.Draw();
     }
 };
+
+function getColors(elements) {
+    var c = new Array();
+    var colors = new Array('#81BEF7','#A9BCF5','#5882FA','#0431B4','#00BFFF','#A9F5F2','#088A85','#9F81F7');
+    for (var i = 0; i <= elements - 1; i++) {
+        c[i] = colors[i];
+    }
+    return c;
+}
+
+function getToday() {
+    var date = new Date();
+    return (date.getFullYear().toString()) + "-" + ("0" + (date.getMonth() + 1).toString()).substr(-2) + "-" + ("0" + date.getDate().toString()).substr(-2);
+}
+
+function normalizeLabels(labels) {
+    var quot = labels.length / 24;
+    var newLabels = [];
+    for (var i = 0; i <= labels.length - 1; i = i + quot) {
+        newLabels.push(labels[i]);
+    }
+    return newLabels;
+}

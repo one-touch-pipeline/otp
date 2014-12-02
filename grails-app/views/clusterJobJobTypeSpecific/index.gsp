@@ -17,10 +17,12 @@
             <p>to: <input type="text" class="datePicker" id="dpTo" value="${today}"></p>
         </div>
         <div id="jobTypeSpecificAverageValues">
+            <col class="columnProperty">
+            <col class="columnValue">
             <table>
                 <tr>
                     <td>
-                        <div class="jobTypSpecificValue"><g:message code="jobstats.jobTypeSpecific.averageTable.averageDelay"/></div>
+                        <div class="jobTypSpecificValue">Average Delay</div>
                         <div class="toolTipContainer  jobTypSpecificValueToolTip">
                             <span class="toolTip"><g:message code="jobstats.jobTypeSpecific.averageTable.toolTip.averageDelay"/></span>
                         </div>

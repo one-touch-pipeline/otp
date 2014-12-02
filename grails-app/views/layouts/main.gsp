@@ -57,6 +57,8 @@
                                     <ul>
                                         <sec:ifAllGranted roles="ROLE_OPERATOR">
                                             <li class="allGranted_general" id="overviewMB"><g:link controller="overviewMB" action="index"><g:message code="otp.menu.generalStatistics"/></g:link></li><br>
+                                            <li id="clusterJobGeneral"><g:link controller="clusterJobGeneral" action="index"><g:message code="otp.menu.jobstats.general"/></g:link></li><br>
+                                            <li id="clusterJobJobTypeSpecific"><g:link controller="clusterJobJobTypeSpecific" action="index"><g:message code="otp.menu.jobstats.jobTypeSpecific"/></g:link></li><br>
                                         </sec:ifAllGranted>
                                         <li id="index"><g:link controller="projectOverview" action="index"><g:message code="otp.menu.projectSpecificStatistics"/></g:link></li><br>
                                         <li id="laneOverview"><g:link controller="projectOverview" action="laneOverview"><g:message code="otp.menu.projectSpecificStatisticsTableOverview"/></g:link></li><br>

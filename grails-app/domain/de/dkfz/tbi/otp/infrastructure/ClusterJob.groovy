@@ -6,9 +6,12 @@ import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
-import org.jadira.usertype.dateandtime.joda.*
-import org.joda.time.DateTime
+
 import org.joda.time.Duration
+import org.joda.time.DateTime
+import org.jadira.usertype.dateandtime.joda.*
+import org.joda.time.Period
+import org.joda.time.format.PeriodFormat
 
 /**
  * A ClusterJob represents a single submitted or finished job on the cluster.
@@ -171,7 +174,7 @@ class ClusterJob implements ClusterJobIdentifier{
     /**
      * elapsed walltime for the job
      */
-    public Duration getElapsedWalltime() {
+    public Duration getElapsedWalltime () {
         if (ended != null && started != null) {
             return new Duration(started, ended)
         } else {
@@ -188,6 +191,30 @@ class ClusterJob implements ClusterJobIdentifier{
         } else {
             throw new IllegalStateException(JOB_INFO_NOT_SET_MESSAGE)
         }
+    }
+
+    public String getRequestedWalltimeAsISO () {
+        return formatPeriodAsISOString(requestedWalltime.getMillis())
+    }
+
+    public String getElapsedWalltimeAsISO () {
+        return formatPeriodAsISOString(elapsedWalltime.getMillis())
+    }
+
+    public String getWalltimeDiffAsISO () {
+        return formatPeriodAsISOString(walltimeDiff.getMillis())
+    }
+
+    public String getCpuTimeAsISO () {
+        return formatPeriodAsISOString(cpuTime.getMillis())
+    }
+
+    public String getCpuTimePerCoreAsISO () {
+        return formatPeriodAsISOString(new Duration(Math.round(cpuTimePerCore)))
+    }
+
+    private String formatPeriodAsISOString (value) {
+        return PeriodFormat.getDefault().print(new Period(value))
     }
 
     @Override
