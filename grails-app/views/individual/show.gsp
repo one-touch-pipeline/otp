@@ -125,10 +125,12 @@
                     </g:each>
                 </div>
             </g:if>
+            <!-- Start IGV feature does not work. See OTP-1203.
             <h1><g:message code="individual.show.dataAccess"/></h1>
             <div class="buttons show_button">
                 <g:actionSubmit class="button" value="${message(code:'individual.show.sequencingScans.startIgv')}" action="igvStart"/>
             </div>
+            -->
         </g:form>
     </div>
 </body>
