@@ -133,7 +133,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 processingState: SnvProcessingStates.FINISHED,
                 chromosomeJoinExternalScript: testData.externalScript_Joining,
                 fileSize: 1234l,
-                md5sum: "123543464vsfd4",
+                md5sum: "a841c64c5825e986c4709ac7298e9366",
                 )
         assert snvJobResult_Calling.save()
 

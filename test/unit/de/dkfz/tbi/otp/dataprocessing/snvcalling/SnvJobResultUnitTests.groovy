@@ -12,7 +12,7 @@ import de.dkfz.tbi.otp.utils.ExternalScript
 @Mock([SnvCallingInstance, ProcessedMergedBamFile, ExternalScript, Individual, Project])
 class SnvJobResultUnitTests {
 
-    final String MD5SUM = "2354jv34598g"
+    final String MD5SUM = "a841c64c5825e986c4709ac7298e9366"
     final long FILE_SIZE = 1234l
 
     @Test
@@ -313,7 +313,24 @@ class SnvJobResultUnitTests {
                 processingState: SnvProcessingStates.FINISHED,
                 externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier),
                 chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER),
-                md5sum: null,
+                fileSize: FILE_SIZE,
+        )
+        assertFalse snvJobResult.validate()
+
+        snvJobResult.md5sum = MD5SUM
+        assert snvJobResult.validate()
+        assert snvJobResult.save(flush: true)
+    }
+
+    @Test
+    void testSaveMd5sumWrongMd5sum() {
+        SnvJobResult snvJobResult = new SnvJobResult(
+                step: SnvCallingStep.CALLING,
+                snvCallingInstance: createSnvCallingInstance(),
+                processingState: SnvProcessingStates.FINISHED,
+                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier),
+                chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER),
+                md5sum: "1234",
                 fileSize: FILE_SIZE,
         )
         assertFalse snvJobResult.validate()
@@ -332,6 +349,24 @@ class SnvJobResultUnitTests {
                 externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier),
                 chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER),
                 md5sum: MD5SUM,
+        )
+        assertFalse snvJobResult.validate()
+
+        snvJobResult.fileSize = FILE_SIZE
+        assert snvJobResult.validate()
+        assert snvJobResult.save(flush: true)
+    }
+
+    @Test
+    void testSaveFileSizeWrongFileSize() {
+        SnvJobResult snvJobResult = new SnvJobResult(
+                step: SnvCallingStep.CALLING,
+                snvCallingInstance: createSnvCallingInstance(),
+                processingState: SnvProcessingStates.FINISHED,
+                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier),
+                chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER),
+                md5sum: MD5SUM,
+                fileSize:0,
         )
         assertFalse snvJobResult.validate()
 

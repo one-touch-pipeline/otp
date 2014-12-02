@@ -52,7 +52,7 @@ class SnvJobResult {
 
     String md5sum
 
-    long fileSize
+    Long fileSize
 
     static belongsTo = [
         snvCallingInstance: SnvCallingInstance
@@ -87,17 +87,17 @@ class SnvJobResult {
                return  (obj.step == SnvCallingStep.CALLING) == (val != null)
         }
         md5sum nullable: true, validator: { val, obj ->
-            validateFileInformation (val, obj)
+            return validateFileInformation (val, obj, { val ==~ /^[0-9a-fA-F]{32}$/ })
         }
 
         fileSize nullable: true, validator: { val, obj ->
-            validateFileInformation (val, obj)
+            return validateFileInformation (val, obj, { val > 0 })
         }
     }
 
-    private static boolean validateFileInformation(def val, def obj) {
+    private static boolean validateFileInformation(def val, def obj, def closure) {
         if (obj.processingState == SnvProcessingStates.FINISHED && [SnvCallingStep.CALLING, SnvCallingStep.SNV_DEEPANNOTATION].contains(obj.step)) {
-            return val
+            return val && closure()
         } else {
             return true
         }

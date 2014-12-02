@@ -87,7 +87,7 @@ class SnvCallingInstanceTestData extends TestData {
             processingState: processingState,
             withdrawn: withdrawn,
             externalScript: externalScript,
-            md5sum: "235sfd54wyx",
+            md5sum: "a841c64c5825e986c4709ac7298e9366",
             fileSize: 1234l,
         ])
         if (step == SnvCallingStep.CALLING) {

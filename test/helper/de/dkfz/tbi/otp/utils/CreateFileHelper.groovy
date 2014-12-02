@@ -8,7 +8,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
  */
 class CreateFileHelper {
 
-    static final String MD5SUM = "agf789ayregfbalre89"
+    static final String MD5SUM = "a841c64c5825e986c4709ac7298e9366"
 
     static File createFile(File file, String content = "some content") {
         if (! file.parentFile.exists()) {
