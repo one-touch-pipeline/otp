@@ -841,7 +841,11 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         ProcessingError processingError = mockProcessingError()
         File stacktraceFile = errorLogService.getStackTracesFile(processingError.stackTraceIdentifier)
         FileUtils.forceMkdir(stacktraceFile.parentFile)
-        stacktraceFile.createNewFile()
+        if (stacktraceFile.exists()) {
+            assert stacktraceFile.delete()
+        }
+        assert stacktraceFile.createNewFile()
+        stacktraceFile.deleteOnExit()
         stacktraceFile <<
                         """
 <stacktraceElement exceptionMessage='Testing'>
