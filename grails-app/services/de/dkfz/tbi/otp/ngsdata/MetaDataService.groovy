@@ -498,4 +498,68 @@ class MetaDataService {
         }
     }
 
+    // such method exists because of the current desing of meta data workflow
+    // (dataFile.fileType is set before dataFile.seqType).
+    // the method is to keep findOutReadNumber(..) clean.
+    /**
+     * tries to find out read number of fastq files but returns 1 if the library layout is single end.
+     * @param dataFileName name of fastq file
+     * @param isSingleEnd is true if the library layout is single end, otherwise - false
+     * @return read number, 1 or 2
+     * @throws RuntimeException if the read number cannot be found.
+     */
+    private static int findOutReadNumberIfSingleEndOrByFileName(String dataFileName, boolean isSingleEnd) {
+	if (isSingleEnd) {
+	    return 1
+	} else {
+	    return findOutReadNumber(dataFileName)
+	}
+    }
+
+    /**
+     * tries to find out read number of a fastq file.
+     * @param dataFileName name of fastq file
+     * @return read number, 1 or 2
+     * @throws RuntimeException if the read number cannot be found.
+     */
+    private static int findOutReadNumber(String dataFileName) {
+	assert dataFileName, "for non single-read fastq files, file name must be provided"
+        def patterns = [
+            //SOMEPID_L001_R2.fastq.gz
+            [regExpr: /.+_L00\d{1,2}.R([12]).+/, readGroupNumber: 1],
+            // s_101202_7_1.fastq.gz
+            // s_101202_7_2.fastq.gz
+            // s_110421_3.read2.fastq.gz
+            [regExpr: /^s_\d{6}_\d{1,2}(_|\.read)([12]).+/, readGroupNumber: 2],
+            //AB-1234_CDE_EFGH_091_lib14837_1189_7_1.fastq.tar.bz
+            //AB-1234_5647_lib12345_1_sequence.fastq.bz2
+            //CD-2345_6789_lib234567_7890_1.fastq.bz2
+            [regExpr: /^[A-Z]{2}-\d{4}_.+_lib\d{5}(_\d{4})?(_\d{1,2})?_([12])(_sequence)?\.fastq.+/, readGroupNumber: 3],
+            //NB_E_789_R.1.fastq.gz
+            //NB_E_789_R.2.fastq.gz
+            //NB_E_234_R5.2.fastq.gz
+            //NB_E_345_T1S.2.fastq.gz
+            //NB_E_456_O_lane5.2.fastq.gz
+            [regExpr: /NB_E_\d{3}_[A-Z0-9]{1,3}(_lane\d)?\.([12])\.fastq.+/, readGroupNumber: 2],
+            //00_MCF10A_GHI_JKL_WGBS_I.A34002.137487.C2RT2ACXX.1.1.fastq.gz
+            //00_MCF10A_GHI_JKL_H3K4me1_I.IX1239-A26685-ACTTGA.134224.D2B0LACXX.2.1.fastq.gz
+            [regExpr: /00_MCF10A.+\.\d{6}\.[A-Z0-9]{9}\.\d{1,2}\.([12])\.fastq.+/, readGroupNumber: 1],
+            //
+            [regExpr: /RB\d{1,2}_(Blut|Tumor)_R([12])\.fastq.+/, readGroupNumber: 2],
+            //P021_WXYZ_L1_Rep3_2.fastq.gz
+            //H019_ASDF_L1_lib54321_1.fastq.gz
+            //FE-0100_H021_WXYZ_L1_5_1.fastq.gz
+            [regExpr: /.*[HP]\d\d[A-Z0-9]_[A-Z0-9]{4}_L\d_.+_([12])\.fastq.+/, readGroupNumber: 1],
+        ]
+
+        def readNumbers = patterns.collect { pattern ->
+            def matches = dataFileName =~ pattern.regExpr
+            matches ? matches[0][pattern.readGroupNumber] : null
+        }.findAll { it }
+        if (!readNumbers) {
+	    throw new RuntimeException("cannot find readNumber for $dataFileName")
+	}
+        assert readNumbers.size() == 1, "$dataFileName matches to more then one pattern"
+        return readNumbers.first() as int // without the "as" the conversion is wrong
+    }
 }
