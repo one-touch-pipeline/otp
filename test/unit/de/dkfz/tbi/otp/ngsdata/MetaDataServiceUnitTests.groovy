@@ -87,6 +87,7 @@ class MetaDataServiceUnitTests {
         return keys
     }
 
+
     @Test
     void testEnrichOldDataWithNewInformationFrom() {
         ExomeSeqTrack exomeSeqTrack1 = testData.createExomeSeqTrack(testData.run)
@@ -105,58 +106,5 @@ class MetaDataServiceUnitTests {
         assertNull(exomeSeqTrack1.exomeEnrichmentKit)
         metaDataService.enrichOldDataWithNewInformationFrom(testData.run)
         assertEquals(exomeEnrichmentKit, exomeSeqTrack1.exomeEnrichmentKit)
-    }
-
-    @Test
-    void testFindOutReadNumber_RegExprMatches() {
-        def files = [
-            [name: 'SOMEPID_L001_R2.fastq.gz', readNumber: 2],
-            [name: 's_101202_7_1.fastq.gz', readNumber: 1],
-            [name: 's_110421_3.read2.fastq.gz', readNumber: 2],
-            [name: 'AB-1234_CDE_EFGH_091_lib14837_1189_7_1.fastq.tar.bz', readNumber: 1],
-            [name: 'AB-1234_5647_lib12345_1_sequence.fastq.bz2', readNumber: 1],
-            [name: 'CD-2345_6789_lib234567_7890_1.fastq.bz2', readNumber: 1],
-            [name: 'NB_E_789_R.2.fastq.gz', readNumber: 2],
-            [name: 'NB_E_234_R5.2.fastq.gz', readNumber: 2],
-            [name: 'NB_E_345_T1S.2.fastq.gz', readNumber: 2],
-            [name: 'NB_E_456_O_lane5.2.fastq.gz', readNumber: 2],
-            [name: '00_MCF10A_GHI_JKL_WGBS_I.A34002.137487.C2RT2ACXX.1.1.fastq.gz', readNumber: 1],
-            [name: '00_MCF10A_GHI_JKL_H3K4me1_I.IX1239-A26685-ACTTGA.134224.D2B0LACXX.2.1.fastq.gz', readNumber: 1],
-            [name: 'RB7_Blut_R1.fastq.gz', readNumber: 1],
-            [name: 'P021_WXYZ_L1_Rep3_2.fastq.gz', readNumber: 2],
-            [name: 'H019_ASDF_L1_lib54321_1.fastq.gz', readNumber: 1],
-            [name: 'FE-0100_H021_WXYZ_L1_5_1.fastq.gz', readNumber: 1],
-        ]
-        files.each { file ->
-            assertEquals(file.readNumber, MetaDataService.findOutReadNumber(file.name))
-        }
-    }
-
-    @Test
-    void testFindOutReadNumber_RegExprNotMatches() {
-        def files = [
-            'D0DDVABXX_lane4.fastq.gz',
-        ]
-        files.each { file ->
-            assert shouldFail(RuntimeException, { MetaDataService.findOutReadNumber(file) }) ==~ /cannot\sfind.*/
-        }
-    }
-
-    @Test
-    void testFindOutReadNumber_InvalidInput() {
-        assert shouldFail(AssertionError, { MetaDataService.findOutReadNumber(null) }) ==~ /.*file\sname\smust\sbe\sprovided.*/
-    }
-
-    @Test
-    void testFindOutReadNumberIfSingleEndOrByFileName_SingleEnd() {
-        def file = 'D0DDVABXX_lane4.fastq.gz'
-        assertEquals(1, MetaDataService.findOutReadNumberIfSingleEndOrByFileName(file, true))
-        assertEquals(1, MetaDataService.findOutReadNumberIfSingleEndOrByFileName(null, true))
-    }
-
-    @Test
-    void testFindOutReadNumberIfSingleEndOrByFileName_FromFileName() {
-        def file = 'SOMEPID_L001_R2.fastq.gz'
-        assertEquals(2, MetaDataService.findOutReadNumberIfSingleEndOrByFileName(file, false))
     }
 }
