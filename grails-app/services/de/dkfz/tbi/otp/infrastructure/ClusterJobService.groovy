@@ -11,6 +11,8 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import org.joda.time.DateTime
 import org.joda.time.Duration
 
+import javax.xml.ws.soap.SOAPFaultException
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class ClusterJobService {
@@ -73,6 +75,20 @@ class ClusterJobService {
     * @return JobInfo object
     */
     public JobInfo getClusterJobInformation(ClusterJob clusterJob) {
+        JobInfo info
+        try {
+            info = getClusterJobInfo(clusterJob)
+        } catch (SOAPFaultException e) {
+            def cacheKey = Collections.unmodifiableList([clusterJob.realm.flowControlHost, clusterJob.realm.flowControlPort, clusterJob.realm.flowControlKey])
+            synchronized (clientCache) {
+                clientCache.remove(cacheKey)
+            }
+            info = getClusterJobInfo(clusterJob)
+        }
+        return info
+    }
+
+    private JobInfo getClusterJobInfo(ClusterJob clusterJob) {
         FlowControlClient client = getFlowControlClient(clusterJob.realm)
         if (client == null) {
             return null

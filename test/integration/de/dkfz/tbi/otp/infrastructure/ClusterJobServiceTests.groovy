@@ -10,12 +10,19 @@ import org.joda.time.Duration
 
 import de.dkfz.tbi.flowcontrol.cluster.api.JobState;
 import de.dkfz.tbi.flowcontrol.ws.api.pbs.JobInfo;
+import de.dkfz.tbi.flowcontrol.ws.api.response.JobInfos
 import de.dkfz.tbi.flowcontrol.ws.client.FlowControlClient
+
+import javax.xml.namespace.QName
+import javax.xml.soap.SOAPConstants
+import javax.xml.soap.SOAPFactory
+import javax.xml.soap.SOAPFault
+import javax.xml.ws.soap.SOAPFaultException
 
 import static org.junit.Assert.*
 import org.junit.*
 
-class ClusterJobServiceTests {
+class ClusterJobServiceTests extends GroovyTestCase {
 
     public static final String TEST_KEY_1 = "testKey_1"
     public static final String TEST_HOST_1 = "testHost_1"
@@ -29,27 +36,12 @@ class ClusterJobServiceTests {
     @After
     void tearDown() {
         TestCase.removeMetaClass(ClusterJobService, clusterJobService)
+        clusterJobService.clientCache.clear()
     }
 
     @Test
     void testCreateClusterJobAndCompleteClusterJob() {
-        Realm realm = DomainFactory.createRealmDataProcessingDKFZ()
-
-        assertNotNull(realm.save([flush: true, failOnError: true]))
-
-        String clusterJobId = "testId"
-        ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep("testClass")
-        SeqType seqType = new SeqType(
-                name: "seqTypeName",
-                libraryLayout: "library",
-                dirName: "dirName"
-        )
-
-        assertNotNull(seqType.save([flush: true, failOnError: true]))
-
-        ClusterJob job = clusterJobService.createClusterJob(realm, clusterJobId, processingStep, seqType)
-
-        assertNotNull(job.save([flush: true, failOnError: true]))
+        ClusterJob job = createMockedClusterJob()
 
         ClusterJobIdentifier clusterJobIdentifier = new ClusterJobIdentifierImpl(job.realm, job.clusterJobId)
         JobInfo jobInfo = new JobInfo()
@@ -135,4 +127,82 @@ class ClusterJobServiceTests {
 
         assert fcc1 == fcc3
     }
+
+    @Test
+    void testClientSessionExpiredException() {
+        ClusterJob job = createMockedClusterJob()
+
+        clusterJobService.metaClass.getFlowControlClient = { Realm r ->
+            FlowControlClient client =  new FlowControlClient.Builder().build()
+            client.metaClass.requestJobInfos = { String i ->
+                SOAPFault soapFault = createSoapFault()
+                throw new SOAPFaultException(soapFault)
+            }
+            return client
+        }
+
+        shouldFail (SOAPFaultException) {
+            clusterJobService.getClusterJobInformation(job)
+        }
+    }
+
+    @Test
+    void testClientSessionExpiredReconstruct() {
+        ClusterJob job = createMockedClusterJob()
+
+        int callCount = 0
+        clusterJobService.metaClass.getFlowControlClient = { Realm r ->
+            FlowControlClient client =  new
+                    FlowControlClient.Builder().build()
+            if (callCount == 0) {
+                client.metaClass.requestJobInfos = { String i ->
+                    SOAPFault soapFault = createSoapFault()
+                    throw new SOAPFaultException(soapFault)
+                }
+            } else if (callCount == 1) {
+                client.metaClass.requestJobInfos = { String i ->
+                    return new JobInfos([testId: new JobInfo()])
+                }
+            } else {
+                assert false
+            }
+            callCount++
+            return client
+        }
+
+        assertNotNull(clusterJobService.getClusterJobInformation(job))
+        assert callCount == 2
+    }
+
+
+    private ClusterJob createMockedClusterJob() {
+        Realm realm = DomainFactory.createRealmDataProcessingDKFZ()
+
+        assertNotNull(realm.save([flush: true, failOnError: true]))
+
+        String clusterJobId = "testId"
+        ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep("testClass")
+        SeqType seqType = new SeqType(
+                name: "seqTypeName",
+                libraryLayout: "library",
+                dirName: "dirName"
+        )
+
+        assertNotNull(seqType.save([flush: true, failOnError: true]))
+
+        ClusterJob job = clusterJobService.createClusterJob(realm, clusterJobId, processingStep, seqType)
+
+        assertNotNull(job.save([flush: true, failOnError: true]))
+
+        return job
+    }
+
+    private SOAPFault createSoapFault() {
+        SOAPFault soapFault = SOAPFactory.newInstance().createFault();
+        soapFault.setFaultString("fault message");
+        soapFault.setFaultCode(new QName(SOAPConstants.URI_NS_SOAP_ENVELOPE, "Sender"));
+        soapFault.setFaultActor("START AP");
+        return soapFault
+    }
+
 }
