@@ -80,7 +80,7 @@ class ClusterJobService {
         JobInfos infos = client.requestJobInfos(clusterJob.clusterJobId)
         JobInfo info = infos.getJobInfo(clusterJob.clusterJobId)
         if (info == null) {
-            throw new RuntimeException("FlowControl returned no information for ${jobIdentifier}.")
+            throw new RuntimeException("FlowControl returned no information for ${clusterJob}.")
         }
         return info
     }
