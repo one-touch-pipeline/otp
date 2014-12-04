@@ -199,9 +199,13 @@ class AlignmentQualityOverviewController {
                     ]
                     break
                 case SeqTypeNames.EXOME.seqTypeName:
+                    double onTargetRate = it.onTargetMappedBases / it.allBasesMapped * 100.0
                     map << [
-                        onTargetRate: FormatHelper.formatToTwoDecimalsNullSave(it.onTargetMappedBases / it.allBasesMapped * 100.0),//on target ratio
+                        onTargetRate: FormatHelper.formatToTwoDecimalsNullSave(onTargetRate),//on target ratio
                         targetCoverage: FormatHelper.formatToTwoDecimalsNullSave(processedMergedBamFile.coverage), //coverage
+
+                        //warning for onTargetRate
+                        onTargetRateWarning: warningLevelForOnTargetRate(onTargetRate).styleClass,
                     ]
                     break
                 default:
@@ -239,6 +243,15 @@ class AlignmentQualityOverviewController {
         if(median < 2.2 * readLength){
             return WarningLevel.WarningLevel2
         } else if(median < 2.5 * readLength) {
+            return WarningLevel.WarningLevel1
+        } else {
+            return WarningLevel.NO
+        }
+    }
+    private static WarningLevel warningLevelForOnTargetRate(Double onTargetRate) {
+        if (onTargetRate < 60) {
+            return WarningLevel.WarningLevel2
+        } else if (onTargetRate < 70) {
             return WarningLevel.WarningLevel1
         } else {
             return WarningLevel.NO

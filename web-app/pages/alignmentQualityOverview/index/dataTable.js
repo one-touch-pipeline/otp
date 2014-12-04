@@ -65,7 +65,7 @@ $.otp.alignmentQualityOverviewTable = {
                                 ];
                             } else if (seqType == 'EXOME') {
                                 coverage = [
-                                        row.onTargetRate,
+                                        "<span class='" + row.onTargetRateWarning+"'>" + row.onTargetRate + " </span>",
                                         row.targetCoverage,
                                 ];
                             }
