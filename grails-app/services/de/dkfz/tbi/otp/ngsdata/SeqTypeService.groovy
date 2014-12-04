@@ -4,10 +4,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 class SeqTypeService {
 
-    SeqType getSeqType(Long id) {
-        return SeqType.get(id)
-    }
-
     static List<SeqType> alignableSeqTypes() {
         final List<String> alignableSeqTypeNames = [
             SeqTypeNames.EXOME,
