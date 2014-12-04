@@ -213,4 +213,14 @@ class DomainFactory {
                 clusterJobId: clusterJobIdentifier.clusterJobId,
         ] + myProps)
     }
+
+    static List<SeqType> createAlignableSeqTypes() {
+        [
+            SeqTypeNames.EXOME,
+            SeqTypeNames.WHOLE_GENOME
+        ].collect {
+            SeqType.build(name: it.seqTypeName, libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
+        }
+    }
+
 }

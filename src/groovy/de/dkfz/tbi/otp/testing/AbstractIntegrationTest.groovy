@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.authority.GrantedAuthorityImpl
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
+import org.grails.plugins.springsecurity.service.acl.AclUtilService;
 
 /**
  * Abstract base class for all tests to have some shared functionality.
@@ -29,6 +30,10 @@ abstract class AbstractIntegrationTest {
      * Dependency injection of Spring security service
      */
     def springSecurityService
+
+    AclUtilService aclUtilService
+
+
 
     @SuppressWarnings("CatchException")
     protected def shouldFail = { exception, code ->

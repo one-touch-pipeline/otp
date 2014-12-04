@@ -18,21 +18,24 @@ class ReferenceGenomeService {
     }
 
     /**
-     * returns the reference genome depending on the project and the sequencing type
+     * @return the reference genome depending on the project and the sequencing type
      * @param project the project, to which the reference genome belongs to
      * @param seqType the sequencing type, to which the reference genome belongs to
+     * @param checkSingleResult Flag to indicate that an exception should be thrown if no reference genome is found. Defaults to <code>true</code>.
      * @deprecated The {@link ReferenceGenome} will not depend on {@link Project} and {@link SeqType} alone in the
      * future (see OTP-905 for example). Use {@link SeqTrack#getConfiguredReferenceGenome()} instead.
      */
     @Deprecated
-    public ReferenceGenome referenceGenome(Project project, SeqType seqType) {
+    public ReferenceGenome referenceGenome(Project project, SeqType seqType, boolean checkSingleResult = true) {
         notNull(project, "the project of the method referenceGenome is null")
         notNull(seqType, "the seqType of the method referenceGenome is null")
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = ReferenceGenomeProjectSeqType.
                 findByProjectAndSeqTypeAndDeprecatedDateIsNull(project, seqType)
-        notNull(referenceGenomeProjectSeqType,
-                "There is no reference genome defined for the combination of project ${project} and seqType ${seqType}")
-        return referenceGenomeProjectSeqType.referenceGenome
+        if (checkSingleResult) {
+            notNull(referenceGenomeProjectSeqType,
+                            "There is no reference genome defined for the combination of project ${project} and seqType ${seqType}")
+        }
+        return referenceGenomeProjectSeqType?.referenceGenome
     }
 
     /**

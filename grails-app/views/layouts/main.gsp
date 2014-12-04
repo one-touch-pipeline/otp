@@ -63,6 +63,7 @@
                                         <sec:ifAllGranted roles="ROLE_MMML_MAPPING">
                                             <li id="mmmlIdentifierMapping"><g:link controller="projectOverview" action="mmmlIdentifierMapping"><g:message code="otp.menu.mmmlIdentifierMapping"/></g:link></li><br>
                                         </sec:ifAllGranted>
+                                        <li id="index"><g:link controller="alignmentQualityOverview" action="index"><g:message code="otp.menu.alignmentQuality"/></g:link></li><br>
                                     </ul>
                                 </li>
                             </ul>

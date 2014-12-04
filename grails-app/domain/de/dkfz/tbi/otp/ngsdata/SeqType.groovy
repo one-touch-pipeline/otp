@@ -4,6 +4,12 @@ package de.dkfz.tbi.otp.ngsdata
 
 class SeqType {
 
+    final static LIBRARYLAYOUT_PAIRED = "PAIRED"
+
+    final static LIBRARYLAYOUT_SINGLE = "SINGLE"
+
+    final static LIBRARYLAYOUT_MATE_PAIRED = "MATE_PAIRED"
+
     /**
      * One of {@link SeqTypeNames#seqTypeName}.
      * Used in file system paths, for example by ProcessedMergedBamFileService.fileNameNoSuffix(ProcessedMergedBamFile).

@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import org.springframework.util.Assert
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
 
 class ChromosomeQualityAssessmentMergedService {
@@ -14,4 +15,21 @@ class ChromosomeQualityAssessmentMergedService {
         }
         return chromosomeQualityAssessment
     }
+
+
+
+    List<ChromosomeQualityAssessmentMerged> qualityAssessmentMergedForSpecificChromosomes(List<Chromosomes> chromosomes, List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses) {
+        Assert.notNull(chromosomes, 'Parameter "chromosomes" may not be null')
+        Assert.notNull(qualityAssessmentMergedPasses, 'Parameter "qualityAssessmentMergedPasses" may not be null')
+
+        if (chromosomes && qualityAssessmentMergedPasses) {
+            List<ChromosomeQualityAssessmentMerged> chromosomeQualityAssessments = ChromosomeQualityAssessmentMerged.createCriteria().list {
+                'in'("chromosomeName", chromosomes*.alias)
+                'in'('qualityAssessmentMergedPass', qualityAssessmentMergedPasses)
+            }
+            return chromosomeQualityAssessments
+        }
+        return []
+    }
+
 }

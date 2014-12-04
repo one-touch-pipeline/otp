@@ -74,8 +74,16 @@ class QualityAssessmentMergedPass {
         return processedMergedBamFile.sample
     }
 
+    SampleType getSampleType() {
+        return processedMergedBamFile.sampleType
+    }
+
     MergingSet getMergingSet() {
         return processedMergedBamFile.mergingSet
+    }
+
+    MergingWorkPackage getMergingWorkPackage() {
+        return processedMergedBamFile.mergingWorkPackage
     }
 
     MergingPass getMergingPass() {
