@@ -108,9 +108,9 @@ class CreateClusterScriptService {
 
         // transfer files ("target" will be overwritten if it exists already)
         if (sourceAtDKFZ && !targetAtDKFZ) {
-            copyScript << "scp -p ${BQPort} ${COPY_PARAMETER} ${source} ${BQHostname}:${target};\n"
+            copyScript << "scp -P ${BQPort} ${COPY_PARAMETER} ${source} ${BQHostname}:${target};\n"
             copyScript << "${CONNECT_TO_BQ} \"chmod ${ACCESS_PERMISSION} ${target}\";\n"
-            copyScript << "scp -p ${BQPort} ${COPY_PARAMETER} ${source.parent}/${MD5SUM_NAME} ${BQHostname}:${target.parent}/${MD5SUM_NAME};\n"
+            copyScript << "scp -P ${BQPort} ${COPY_PARAMETER} ${source.parent}/${MD5SUM_NAME} ${BQHostname}:${target.parent}/${MD5SUM_NAME};\n"
         } else {
             if (!sourceAtDKFZ && targetAtDKFZ) {
                 prefixDependingOnLocation = ""

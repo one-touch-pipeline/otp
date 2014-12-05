@@ -606,9 +606,9 @@ set -e
 if [ -f ${SOURCE_FILE_1} ]; then
 md5sum ${SOURCE_FILE_1} > ${SOURCE_DIR_1}/${MD5SUM_NAME};
 ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${TARGET_DIR_2}\";
-scp -p ${port}  ${SOURCE_FILE_1} ${hostname}:${TARGET_FILE_3};
+scp -P ${port}  ${SOURCE_FILE_1} ${hostname}:${TARGET_FILE_3};
 ssh -p ${port} ${hostname} \"chmod 640 ${TARGET_FILE_3}\";
-scp -p ${port}  ${SOURCE_DIR_1}/${MD5SUM_NAME} ${hostname}:${TARGET_DIR_2}/${MD5SUM_NAME};
+scp -P ${port}  ${SOURCE_DIR_1}/${MD5SUM_NAME} ${hostname}:${TARGET_DIR_2}/${MD5SUM_NAME};
 ssh -p ${port} ${hostname} \"sed -i 's#${SOURCE_FILE_1}#${TARGET_FILE_3}#' ${TARGET_DIR_2}/${MD5SUM_NAME}\";
 ssh -p ${port} ${hostname} \"md5sum -c ${TARGET_DIR_2}/${MD5SUM_NAME};
 rm -f ${TARGET_DIR_2}/${MD5SUM_NAME}\";
@@ -634,9 +634,9 @@ set -e
 if [ -f ${SOURCE_DIR_1} ]; then
 find ${SOURCE_DIR_1} -type f -exec md5sum '{}' \\; >> ${SOURCE_BASE_1}/${MD5SUM_NAME};
 ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${TARGET_BASE_2}\";
-scp -p ${port} -r ${SOURCE_DIR_1} ${hostname}:${TARGET_DIR_2};
+scp -P ${port} -r ${SOURCE_DIR_1} ${hostname}:${TARGET_DIR_2};
 ssh -p ${port} ${hostname} \"chmod 2750 ${TARGET_DIR_2}\";
-scp -p ${port} -r ${SOURCE_BASE_1}/${MD5SUM_NAME} ${hostname}:${TARGET_BASE_2}/${MD5SUM_NAME};
+scp -P ${port} -r ${SOURCE_BASE_1}/${MD5SUM_NAME} ${hostname}:${TARGET_BASE_2}/${MD5SUM_NAME};
 ssh -p ${port} ${hostname} \"md5sum -c ${TARGET_BASE_2}/${MD5SUM_NAME};
 rm -f ${TARGET_BASE_2}/${MD5SUM_NAME}\";
 rm -r -f ${SOURCE_DIR_1};
@@ -660,9 +660,9 @@ set -e
 if [ -f ${SOURCE_DIR_1} ]; then
 find ${SOURCE_DIR_1} -type f -exec md5sum '{}' \\; >> ${SOURCE_BASE_1}/${MD5SUM_NAME};
 ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${TARGET_BASE_2}\";
-scp -p ${port} -r ${SOURCE_DIR_1} ${hostname}:${TARGET_DIR_2};
+scp -P ${port} -r ${SOURCE_DIR_1} ${hostname}:${TARGET_DIR_2};
 ssh -p ${port} ${hostname} \"chmod 2750 ${TARGET_DIR_2}\";
-scp -p ${port} -r ${SOURCE_BASE_1}/${MD5SUM_NAME} ${hostname}:${TARGET_BASE_2}/${MD5SUM_NAME};
+scp -P ${port} -r ${SOURCE_BASE_1}/${MD5SUM_NAME} ${hostname}:${TARGET_BASE_2}/${MD5SUM_NAME};
 ssh -p ${port} ${hostname} \"md5sum -c ${TARGET_BASE_2}/${MD5SUM_NAME};
 rm -f ${TARGET_BASE_2}/${MD5SUM_NAME}\";
 rm -f ${SOURCE_BASE_1}/${MD5SUM_NAME};
@@ -685,9 +685,9 @@ set -e
 if [ -f ${SOURCE_FILE_1} ]; then
 md5sum ${SOURCE_FILE_1} > ${SOURCE_DIR_1}/${MD5SUM_NAME};
 ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${TARGET_DIR_2}\";
-scp -p ${port}  ${SOURCE_FILE_1} ${hostname}:${TARGET_FILE_3};
+scp -P ${port}  ${SOURCE_FILE_1} ${hostname}:${TARGET_FILE_3};
 ssh -p ${port} ${hostname} \"chmod 640 ${TARGET_FILE_3}\";
-scp -p ${port}  ${SOURCE_DIR_1}/${MD5SUM_NAME} ${hostname}:${TARGET_DIR_2}/${MD5SUM_NAME};
+scp -P ${port}  ${SOURCE_DIR_1}/${MD5SUM_NAME} ${hostname}:${TARGET_DIR_2}/${MD5SUM_NAME};
 ssh -p ${port} ${hostname} \"sed -i 's#${SOURCE_FILE_1}#${TARGET_FILE_3}#' ${TARGET_DIR_2}/${MD5SUM_NAME}\";
 ssh -p ${port} ${hostname} \"md5sum -c ${TARGET_DIR_2}/${MD5SUM_NAME};
 rm -f ${TARGET_DIR_2}/${MD5SUM_NAME}\";
