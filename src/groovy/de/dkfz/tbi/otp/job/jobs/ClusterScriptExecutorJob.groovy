@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.job.processing.AbstractMaybeSubmitWaitValidateJob
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.HelperUtils
 import org.springframework.beans.factory.annotation.Autowired
 
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
@@ -36,6 +37,20 @@ class ClusterScriptExecutorJob extends AbstractMaybeSubmitWaitValidateJob {
         Realm realm = Realm.findById(Long.parseLong(realmID))
         assert realm: "No realm found for id ${realmID}"
 
+        // copy script because some scripts are too long for the Jsch library
+        assert realm.stagingRootPath
+        File stagingPath = new File(realm.stagingRootPath)
+        assert stagingPath.isAbsolute()
+        File scriptFolder = new File(stagingPath, "clusterScriptExecutorScripts")
+        scriptFolder.mkdirs()
+        File scriptFile = new File(scriptFolder, "${processingStep.id}-${HelperUtils.uniqueString}.sh")
+        scriptFile.withWriter {
+            it.write(script)
+        }
+
+        script = """
+bash ${scriptFile.absolutePath}
+"""
         executionHelperService.sendScript(realm, script) // Will NOT add output parameters
         return NextAction.WAIT_FOR_CLUSTER_JOBS
     }
