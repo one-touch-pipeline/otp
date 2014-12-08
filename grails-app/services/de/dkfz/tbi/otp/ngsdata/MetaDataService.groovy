@@ -405,7 +405,7 @@ class MetaDataService {
 
     private void addReadNumber(DataFile dataFile, FileType.Type type) {
         FileType fileType = fileTypeService.getFileType(dataFile.fileName, type)
-        if (fileType.type == FileType.Type.SEQUENCE && fileType.subType == "fastq") {
+        if (fileType.type == FileType.Type.SEQUENCE && fileType.vbpPath == "/sequence/") {
             String fileName = dataFile.fileName
             String libraryLayout = getLibraryLayoutFromMetadata(dataFile)
             boolean isSingle = libraryLayout == "SINGLE"
