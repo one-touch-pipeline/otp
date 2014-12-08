@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import org.junit.*
@@ -11,13 +12,21 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
     SeqPlatform, Run, RunSegment, SoftwareTool, SeqTrack, FileType, DataFile,
     ReferenceGenome, ReferenceGenomeProjectSeqType, ExomeSeqTrack, ExomeEnrichmentKit,
     ExomeEnrichmentKitService, MetaDataEntry])
-
+@Build([
+    FileType,
+    ])
 class MetaDataServiceUnitTests {
 
     MetaDataService metaDataService
     TestData testData
 
     final static String EXOME_ENRICHMENT_KIT_NAME = "ExomeEnrichmentKitName"
+
+    final static String FASTQ_SEQUENCE_DIRECTORY = '/sequence/'
+
+    final static String NO_FASTQC_SEQUENCE_DIRECTORY = '/Something other/'
+
+
 
     @Before
     public void setUp() throws Exception {
@@ -163,7 +172,7 @@ class MetaDataServiceUnitTests {
 
     @Test
     void testGetLibraryLayoutFromMetadata() {
-        final String LAYOUT = "SINGLE"
+        final String LAYOUT = SeqType.LIBRARYLAYOUT_SINGLE
 
         DataFile dataFile = new DataFile(fileName: "testFile.txt")
         assert dataFile.save(flush: true)
@@ -173,41 +182,63 @@ class MetaDataServiceUnitTests {
         assert metaDataService.getLibraryLayoutFromMetadata(dataFile) == LAYOUT
     }
 
+
+
     @Test
     void testAddReadNumberFileTypeNeedsNoReadInfo() {
         testData.fileType.delete()
-        FileType.Type type = FileType.Type.ALIGNMENT
-        DataFile dataFile = createDataFileAndMetadataEntry(type, "s_101202_7_2.bam", "SINGLE")
+        FileType fileType = FileType.build(type: FileType.Type.ALIGNMENT, signature: "bam", vbpPath: NO_FASTQC_SEQUENCE_DIRECTORY)
+        DataFile dataFile = createDataFileAndMetadataEntry("s_101202_7_2.bam", SeqType.LIBRARYLAYOUT_SINGLE)
 
         assert dataFile.readNumber == null
-        metaDataService.addReadNumber(dataFile, type)
+        metaDataService.addReadNumber(dataFile, fileType.type)
         assert dataFile.readNumber == null
     }
 
     @Test
-    void testAddReadNumberLibraryIsSingle() {
+    void testAddReadNumberLibraryIsSingleAndFastqSequenceType() {
         testData.fileType.delete()
-        FileType.Type type = FileType.Type.SEQUENCE
-        DataFile dataFile = createDataFileAndMetadataEntry(type, "s_101202_7_2.fastq.gz", "SINGLE")
-        metaDataService.addReadNumber(dataFile, type)
+        FileType fileType = FileType.build(type: FileType.Type.SEQUENCE, signature: "fastq", vbpPath: FASTQ_SEQUENCE_DIRECTORY)
+        DataFile dataFile = createDataFileAndMetadataEntry("s_101202_7_2.fastq.gz", SeqType.LIBRARYLAYOUT_SINGLE)
+
+        metaDataService.addReadNumber(dataFile, fileType.type)
         assert dataFile.readNumber == 1
     }
 
     @Test
-    void testAddReadNumberLibraryIsPaired() {
+    void testAddReadNumberLibraryIsPairedAndFastqSequenceType() {
         testData.fileType.delete()
-        FileType.Type type = FileType.Type.SEQUENCE
-        DataFile dataFile = createDataFileAndMetadataEntry(type, "s_101202_7_2.fastq.gz", "PAIRED")
+        FileType fileType = FileType.build(type: FileType.Type.SEQUENCE, signature: "fastq", vbpPath: FASTQ_SEQUENCE_DIRECTORY)
+        DataFile dataFile = createDataFileAndMetadataEntry("s_101202_7_2.fastq.gz", SeqType.LIBRARYLAYOUT_PAIRED)
 
-        metaDataService.addReadNumber(dataFile, type)
+        metaDataService.addReadNumber(dataFile, fileType.type)
         assert dataFile.readNumber == 2
     }
 
-    // Helper
-    private DataFile createDataFileAndMetadataEntry(FileType.Type type, String fileName, String libraryLayout) {
-        FileType fileType = new FileType(type: type, subType: "fastq")
-        assert fileType.save(flush: true)
+    @Test
+    void testAddReadNumberLibraryIsSingleAndNotFastqSequenceType() {
+        testData.fileType.delete()
+        FileType fileType = FileType.build(type: FileType.Type.SEQUENCE, signature: "fastq", vbpPath: NO_FASTQC_SEQUENCE_DIRECTORY)
+        DataFile dataFile = createDataFileAndMetadataEntry("s_101202_7_2.fastq.gz", SeqType.LIBRARYLAYOUT_SINGLE)
 
+        metaDataService.addReadNumber(dataFile, fileType.type)
+        assert dataFile.readNumber == null
+    }
+
+    @Test
+    void testAddReadNumberLibraryIsPairedAndNotFastqSequenceType() {
+        testData.fileType.delete()
+        FileType fileType = FileType.build(type: FileType.Type.SEQUENCE, signature: "fastq", vbpPath: NO_FASTQC_SEQUENCE_DIRECTORY)
+        DataFile dataFile = createDataFileAndMetadataEntry("s_101202_7_2.fastq.gz", SeqType.LIBRARYLAYOUT_PAIRED)
+
+        metaDataService.addReadNumber(dataFile, fileType.type)
+        assert dataFile.readNumber == null
+    }
+
+
+
+    // Helper
+    private DataFile createDataFileAndMetadataEntry(String fileName, String libraryLayout) {
         DataFile dataFile = new DataFile(fileName:fileName)
         assert dataFile.save(flush: true)
 
