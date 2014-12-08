@@ -62,7 +62,7 @@ class DataFile {
         runSegment(nullable: true)
 
         readNumber nullable: true, validator: { val, obj ->
-            if (obj.fileType && obj.fileType.type == FileType.Type.SEQUENCE && obj.fileType.subType == "fastq") {
+            if (obj.fileType && obj.fileType.type == FileType.Type.SEQUENCE && obj.fileType.vbpPath == "/sequence/") {
                 return (val == 1 || val == 2)
             } else {
                 return true
