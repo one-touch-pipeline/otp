@@ -1,8 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.*
 import grails.buildtestdata.mixin.Build
+import grails.test.mixin.*
+
 import org.junit.*
+
+import de.dkfz.tbi.TestCase
 
 /**
  */
@@ -11,24 +14,60 @@ import org.junit.*
 @TestFor(DataFile)
 class DataFileUnitTests {
 
-    @Test
-    void testReadConstraint() {
-        FileType fileTypeReadsHaveToBeSet = FileType.build([type: FileType.Type.SEQUENCE, subType: "fastq"])
-        FileType fileTypeReadsHaveNOTtoBeSet = FileType.build([type: FileType.Type.ALIGNMENT])
 
-        DataFile dataFileReadsHaveNOTtoBeSet = new DataFile(fileType: fileTypeReadsHaveNOTtoBeSet)
-        assertTrue dataFileReadsHaveNOTtoBeSet.validate()
 
-        DataFile dataFileReadsHaveToBeSet = new DataFile(fileType: fileTypeReadsHaveToBeSet)
-        assertFalse dataFileReadsHaveToBeSet.validate()
+    private final static String SEQUENCE_DIRECTORY = '/sequence/'
 
-        dataFileReadsHaveToBeSet.readNumber = 8
-        assertFalse dataFileReadsHaveToBeSet.validate()
 
-        dataFileReadsHaveToBeSet.readNumber = 1
-        assertTrue dataFileReadsHaveToBeSet.validate()
 
-        dataFileReadsHaveToBeSet.readNumber = 2
-        assertTrue dataFileReadsHaveToBeSet.validate()
+    void testReadConstraint_Alignment() {
+        FileType fileType = FileType.build([type: FileType.Type.ALIGNMENT])
+        DataFile dataFile = new DataFile(fileType: fileType)
+
+        assert dataFile.validate()
     }
+
+    void testReadConstraint_SequenceButNotFastq() {
+        FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: 'SomeOtherDirectory'])
+        DataFile dataFile = new DataFile(fileType: fileType)
+
+        assert dataFile.validate()
+    }
+
+    void testReadConstraint_SequenceFastq_OK_ReadIsOne() {
+        FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
+        DataFile dataFile = new DataFile(fileType: fileType, readNumber: 1)
+
+        assert dataFile.validate()
+    }
+
+    void testReadConstraint_SequenceFastq_OK_ReadIsTwo() {
+        FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
+        DataFile dataFile = new DataFile(fileType: fileType, readNumber: 2)
+
+        assert dataFile.validate()
+    }
+
+    void testReadConstraint_SequenceFastq_NoReadNumber() {
+        FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
+        DataFile dataFile = new DataFile(fileType: fileType, readNumber: null)
+
+        TestCase.assertValidateError(dataFile, "readNumber", "validator.invalid", null)
+    }
+
+    void testReadConstraint_SequenceFastq_ReadNumberIsZero() {
+        FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
+        DataFile dataFile = new DataFile(fileType: fileType, readNumber: 0)
+
+        TestCase.assertValidateError(dataFile, "readNumber", "validator.invalid", 0)
+    }
+
+    void testReadConstraint_SequenceFastq_ReadNumberIsToBig() {
+        FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
+        DataFile dataFile = new DataFile(fileType: fileType, readNumber: 3)
+
+        TestCase.assertValidateError(dataFile, "readNumber", "validator.invalid", 3)
+    }
+
+
 }
