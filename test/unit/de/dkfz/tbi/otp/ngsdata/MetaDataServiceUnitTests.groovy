@@ -123,6 +123,11 @@ class MetaDataServiceUnitTests {
             [name: 'SOMEPID_L001_R2.fastq.gz', readNumber: 2],
             [name: 's_101202_7_1.fastq.gz', readNumber: 1],
             [name: 's_110421_3.read2.fastq.gz', readNumber: 2],
+            [name: 's_3_1_sequence.txt.gz', readNumber: 1],
+            [name: 's_140304_3_001_2_sequence.txt.gz', readNumber: 2],
+            [name: 's_111201_2a_1_sequence.txt.gz', readNumber: 1],
+            [name: 'SOMEPID_s_6_2_sequence.txt.gz', readNumber: 2],
+            [name: 'SOMEPID_s_3_1_sequence.txt.gz', readNumber: 1],
             [name: 'AB-1234_CDE_EFGH_091_lib14837_1189_7_1.fastq.tar.bz', readNumber: 1],
             [name: 'AB-1234_5647_lib12345_1_sequence.fastq.bz2', readNumber: 1],
             [name: 'CD-2345_6789_lib234567_7890_1.fastq.bz2', readNumber: 1],
@@ -136,6 +141,11 @@ class MetaDataServiceUnitTests {
             [name: 'P021_WXYZ_L1_Rep3_2.fastq.gz', readNumber: 2],
             [name: 'H019_ASDF_L1_lib54321_1.fastq.gz', readNumber: 1],
             [name: 'FE-0100_H021_WXYZ_L1_5_1.fastq.gz', readNumber: 1],
+            [name: 'lane6mp25PE2_2_sequence.txt.gz', readNumber: 2],
+            [name: 'lane211s003107_1_sequence.txt.gz', readNumber: 1],
+            [name: 'lane8wwmp44PE2_1_sequence.txt.gz', readNumber: 1],
+            [name: 'SOMEPID_lane511s003237_1_sequence.txt.gz', readNumber: 1],
+            [name: '180824_I234_ABCDEFGHIJK_L5_WHAIPI000042-43_2.raw.fq.gz', readNumber: 2],
         ]
         files.each { file ->
             assertEquals(file.readNumber, MetaDataService.findOutReadNumber(file.name))
