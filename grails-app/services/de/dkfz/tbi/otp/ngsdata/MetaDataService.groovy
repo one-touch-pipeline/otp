@@ -545,10 +545,15 @@ class MetaDataService {
         def patterns = [
             //SOMEPID_L001_R2.fastq.gz
             [regExpr: /.+_L00\d{1,2}.R([12]).+/, readGroupNumber: 1],
-            // s_101202_7_1.fastq.gz
-            // s_101202_7_2.fastq.gz
-            // s_110421_3.read2.fastq.gz
-            [regExpr: /^s_\d{6}_\d{1,2}(_|\.read)([12]).+/, readGroupNumber: 2],
+            //s_101202_7_1.fastq.gz
+            //s_101202_7_2.fastq.gz
+            //s_110421_3.read2.fastq.gz
+            //s_3_1_sequence.txt.gz
+            //s_140304_3_001_2_sequence.txt.gz
+            //s_111201_2a_1_sequence.txt.gz
+            //SOMEPID_s_6_1_sequence.txt.gz
+            //SOMEPID_s_3_1_sequence.txt.gz
+            [regExpr: /.*s(_\d{6})?_\d{1,2}([a-z])?(_|\.read|_\d{3}_)([12]).+/, readGroupNumber: 4],
             //AB-1234_CDE_EFGH_091_lib14837_1189_7_1.fastq.tar.bz
             //AB-1234_5647_lib12345_1_sequence.fastq.bz2
             //CD-2345_6789_lib234567_7890_1.fastq.bz2
@@ -558,16 +563,23 @@ class MetaDataService {
             //NB_E_234_R5.2.fastq.gz
             //NB_E_345_T1S.2.fastq.gz
             //NB_E_456_O_lane5.2.fastq.gz
-            [regExpr: /NB_E_\d{3}_[A-Z0-9]{1,3}(_lane\d)?\.([12])\.fastq.+/, readGroupNumber: 2],
+            [regExpr: /^NB_E_\d{3}_[A-Z0-9]{1,3}(_lane\d)?\.([12])\.fastq.+/, readGroupNumber: 2],
             //00_MCF10A_GHI_JKL_WGBS_I.A34002.137487.C2RT2ACXX.1.1.fastq.gz
             //00_MCF10A_GHI_JKL_H3K4me1_I.IX1239-A26685-ACTTGA.134224.D2B0LACXX.2.1.fastq.gz
-            [regExpr: /00_MCF10A.+\.\d{6}\.[A-Z0-9]{9}\.\d{1,2}\.([12])\.fastq.+/, readGroupNumber: 1],
+            [regExpr: /^00_MCF10A.+\.\d{6}\.[A-Z0-9]{9}\.\d{1,2}\.([12])\.fastq.+/, readGroupNumber: 1],
             //
-            [regExpr: /RB\d{1,2}_(Blut|Tumor)_R([12])\.fastq.+/, readGroupNumber: 2],
+            [regExpr: /^RB\d{1,2}_(Blut|Tumor)_R([12])\.fastq.+/, readGroupNumber: 2],
             //P021_WXYZ_L1_Rep3_2.fastq.gz
             //H019_ASDF_L1_lib54321_1.fastq.gz
             //FE-0100_H021_WXYZ_L1_5_1.fastq.gz
             [regExpr: /.*[HP]\d\d[A-Z0-9]_[A-Z0-9]{4}_L\d_.+_([12])\.fastq.+/, readGroupNumber: 1],
+            //lane6mp25PE2_2_sequence.txt.gz
+            //lane211s003107_1_sequence.txt.gz
+            //lane8wwmp44PE2_1_sequence.txt.gz
+            //SOMEPID_lane511s003237_1_sequence.txt.gz
+            [regExpr: /.*[Ll]ane\d.+_([12])_sequence.txt.gz$/, readGroupNumber: 1],
+            //180824_I234_ABCDEFGHIJK_L5_WHAIPI000042-43_2.raw.fq.gz
+            [regExpr: /^\d{6}_I\d{3}_[A-Z0-9]{11}_L\d_WHAIPI\d{6}-\d{2}(\+1)?_([12]).raw.fq.gz$/, readGroupNumber: 2]
         ]
 
         def readNumbers = patterns.collect { pattern ->
