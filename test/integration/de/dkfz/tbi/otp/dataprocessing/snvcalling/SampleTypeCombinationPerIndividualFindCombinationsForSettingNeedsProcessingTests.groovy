@@ -6,6 +6,7 @@ import org.junit.Before
 import org.junit.Test
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ThreadUtils
 
@@ -23,7 +24,7 @@ class SampleTypeCombinationPerIndividualFindCombinationsForSettingNeedsProcessin
         testData.createSnvObjects()
 
         samplePair = testData.sampleTypeCombination
-        samplePair.needsProcessing = false
+        samplePair.processingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
         assert samplePair.save(failOnError: true, flush: true)
 
         project = samplePair.project
@@ -32,8 +33,15 @@ class SampleTypeCombinationPerIndividualFindCombinationsForSettingNeedsProcessin
     }
 
     @Test
-    void testNeedsProcessingAlreadyTrue() {
-        samplePair.needsProcessing = true
+    void testProcessingStatusAlreadyNeedsProcessing() {
+        samplePair.processingStatus = ProcessingStatus.NEEDS_PROCESSING
+        assert samplePair.save(failOnError: true)
+        assertFindsNothing()
+    }
+
+    @Test
+    void testProcessingStatusDisabled() {
+        samplePair.processingStatus = ProcessingStatus.DISABLED
         assert samplePair.save(failOnError: true)
         assertFindsNothing()
     }
@@ -68,7 +76,7 @@ class SampleTypeCombinationPerIndividualFindCombinationsForSettingNeedsProcessin
 
     @Test
     void testTwoResults() {
-        testData.sampleTypeCombination2.needsProcessing = false
+        testData.sampleTypeCombination2.processingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
         assert testData.sampleTypeCombination2.save(failOnError: true)
         assert TestCase.containSame(
                 SampleTypeCombinationPerIndividual.findCombinationsForSettingNeedsProcessing(),

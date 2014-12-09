@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual.ProcessingStatus
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.Process
@@ -60,7 +61,7 @@ class SnvCallingStartJob extends AbstractStartJobImpl {
                         )
                 snvCallingInstance.save(flush: true)
 
-                sampleTypeCombinationPerIndividual.needsProcessing = false
+                sampleTypeCombinationPerIndividual.processingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
                 sampleTypeCombinationPerIndividual.save()
 
                 createProcess(new ProcessParameter(value: snvCallingInstance.id.toString(), className: SnvCallingInstance.class.name))

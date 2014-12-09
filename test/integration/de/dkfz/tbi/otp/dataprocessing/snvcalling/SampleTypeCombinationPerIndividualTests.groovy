@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import static org.junit.Assert.*
+
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual.ProcessingStatus
 import grails.validation.ValidationException
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -337,37 +339,42 @@ class SampleTypeCombinationPerIndividualTests extends GroovyTestCase {
     }
 
     @Test
-    void testSetNeedsProcessingTrue() {
-        testSetNeedsProcessing(true)
+    void testSetProcessingStatusNeedsProcessing() {
+        testSetNeedsProcessing(ProcessingStatus.NEEDS_PROCESSING)
     }
 
     @Test
-    void testSetNeedsProcessingFalse() {
-        testSetNeedsProcessing(false)
+    void testSetProcessingStatusNoProcessingNeeded() {
+        testSetNeedsProcessing(ProcessingStatus.NO_PROCESSING_NEEDED)
     }
 
-    private void testSetNeedsProcessing(final boolean needsProcessing) {
+    @Test
+    void testSetProcessingStatusDisabled() {
+        testSetNeedsProcessing(ProcessingStatus.DISABLED)
+    }
+
+    private void testSetNeedsProcessing(final ProcessingStatus processingStatus) {
         final SampleTypeCombinationPerIndividual nonPersistedCombination = new SampleTypeCombinationPerIndividual(
                 individual: individual,
                 sampleType1: sampleType1,
                 sampleType2: sampleType2,
                 seqType: seqType,
-                needsProcessing: needsProcessing,  // Tests that the instance is persisted even if it already has the correct value.
+                processingStatus: processingStatus,  // Tests that the instance is persisted even if it already has the correct value.
         )
         final SampleTypeCombinationPerIndividual persistedCombination = new SampleTypeCombinationPerIndividual(
                 individual: individual,
                 sampleType1: sampleType1,
                 sampleType2: sampleType2,
                 seqType: SeqType.build(),
-                needsProcessing: !needsProcessing,
+                processingStatus: processingStatus == ProcessingStatus.NEEDS_PROCESSING ? ProcessingStatus.NO_PROCESSING_NEEDED : ProcessingStatus.NEEDS_PROCESSING,
         )
         assert persistedCombination.save()
 
-        SampleTypeCombinationPerIndividual.setNeedsProcessing([nonPersistedCombination, persistedCombination], needsProcessing)
+        SampleTypeCombinationPerIndividual.setProcessingStatus([nonPersistedCombination, persistedCombination], processingStatus)
 
-        assert nonPersistedCombination.needsProcessing == needsProcessing
+        assert nonPersistedCombination.processingStatus == processingStatus
         assert nonPersistedCombination.id
-        assert persistedCombination.needsProcessing == needsProcessing
+        assert persistedCombination.processingStatus == processingStatus
     }
 
     private ProcessedMergedBamFile createProcessedMergedBamFile(String identifier) {

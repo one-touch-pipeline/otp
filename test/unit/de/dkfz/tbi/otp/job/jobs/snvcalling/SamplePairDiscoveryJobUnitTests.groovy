@@ -5,6 +5,7 @@ import org.joda.time.LocalDate
 import org.junit.Before
 import org.junit.Test
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual.ProcessingStatus
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SampleType
@@ -61,7 +62,7 @@ class SamplePairDiscoveryJobUnitTests {
     @Test
     void testSetExistingCombinationsToNeedsProcessing() {
         Collection<SampleTypeCombinationPerIndividual> theCombinations = [new SampleTypeCombinationPerIndividual()]
-        testMethodWhichCallsSetNeedsProcessing(theCombinations, {
+        testMethodWhichCallsSetProcessingStatus(theCombinations, {
             SampleTypeCombinationPerIndividual.metaClass.static.findCombinationsForSettingNeedsProcessing = {
                 return theCombinations
             }
@@ -72,7 +73,7 @@ class SamplePairDiscoveryJobUnitTests {
     @Test
     void testCreateMissingDiseaseControlCombinations() {
         Collection<SampleTypeCombinationPerIndividual> missingCombinations = [new SampleTypeCombinationPerIndividual()]
-        testMethodWhichCallsSetNeedsProcessing(missingCombinations, {
+        testMethodWhichCallsSetProcessingStatus(missingCombinations, {
             SampleTypeCombinationPerIndividual.metaClass.static.findMissingDiseaseControlCombinations = { final Date minDate ->
                 assert minDate == new LocalDate(2014, 12, 1).toDate()
                 return missingCombinations
@@ -81,17 +82,17 @@ class SamplePairDiscoveryJobUnitTests {
         })
     }
 
-    private void testMethodWhichCallsSetNeedsProcessing(final Collection expectedCombinations, final Closure call) {
+    private void testMethodWhichCallsSetProcessingStatus(final Collection expectedCombinations, final Closure call) {
         try {
-            boolean setNeedsProcessingCalled = false
-            SampleTypeCombinationPerIndividual.metaClass.static.setNeedsProcessing = {
-                final Collection<SampleTypeCombinationPerIndividual> combinations, final boolean needsProcessing ->
+            boolean setProcessingStatusCalled = false
+            SampleTypeCombinationPerIndividual.metaClass.static.setProcessingStatus = {
+                final Collection<SampleTypeCombinationPerIndividual> combinations, final ProcessingStatus processingStatus ->
                     assert combinations.is(expectedCombinations)
-                    assert needsProcessing
-                    setNeedsProcessingCalled = true
+                    assert processingStatus == ProcessingStatus.NEEDS_PROCESSING
+                    setProcessingStatusCalled = true
             }
             call()
-            assert setNeedsProcessingCalled
+            assert setProcessingStatusCalled
         } finally {
             SampleTypeCombinationPerIndividual.metaClass = null
         }

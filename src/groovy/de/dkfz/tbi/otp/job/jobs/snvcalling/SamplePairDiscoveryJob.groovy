@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.job.jobs.snvcalling
 import org.joda.time.LocalDate
 
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual.ProcessingStatus
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.job.processing.ResumableJob
 import de.dkfz.tbi.otp.ngsdata.Project
@@ -59,14 +60,14 @@ class SamplePairDiscoveryJob extends AbstractEndStateAwareJobImpl {
     void setExistingCombinationsToNeedsProcessing() {
         final Collection<SampleTypeCombinationPerIndividual> combinations =
                 SampleTypeCombinationPerIndividual.findCombinationsForSettingNeedsProcessing()
-        log.info "Setting needsProcessing to true for ${combinations.size()} existing ${SampleTypeCombinationPerIndividual.simpleName} instance(s)."
-        SampleTypeCombinationPerIndividual.setNeedsProcessing(combinations, true)
+        log.info "Setting processingStatus to ${ProcessingStatus.NEEDS_PROCESSING} for ${combinations.size()} existing ${SampleTypeCombinationPerIndividual.simpleName} instance(s)."
+        SampleTypeCombinationPerIndividual.setProcessingStatus(combinations, ProcessingStatus.NEEDS_PROCESSING)
     }
 
     void createMissingDiseaseControlCombinations() {
         final Collection<SampleTypeCombinationPerIndividual> combinations =
                 SampleTypeCombinationPerIndividual.findMissingDiseaseControlCombinations(new LocalDate(2014, 12, 1).toDate())
         log.info "Creating ${combinations.size()} new ${SampleTypeCombinationPerIndividual.simpleName} instance(s)."
-        SampleTypeCombinationPerIndividual.setNeedsProcessing(combinations, true)
+        SampleTypeCombinationPerIndividual.setProcessingStatus(combinations, ProcessingStatus.NEEDS_PROCESSING)
     }
 }

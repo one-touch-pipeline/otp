@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual.ProcessingStatus
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -63,7 +64,7 @@ public class SnvCallingStartJobTests extends GroovyScriptAwareIntegrationTest {
 
             // Sample pair + service-mocks to make sure it is found by the startJob
             mockSamplePair = new SampleTypeCombinationPerIndividual(
-                    needsProcessing: true,
+                    processingStatus: ProcessingStatus.NEEDS_PROCESSING,
                     individual: individual,
                     sampleType1: sampleType1,
                     sampleType2: sampleType2,
@@ -117,6 +118,8 @@ public class SnvCallingStartJobTests extends GroovyScriptAwareIntegrationTest {
             assert processParameter.className == SnvCallingInstance.class.name
             assert processParameter.value == snvCallingInstance.id.toString()
             assert processParameter.process == process
+
+            assert mockSamplePair.processingStatus == ProcessingStatus.NO_PROCESSING_NEEDED
 
         } finally {
             TestCase.removeMetaClass(SnvCallingService.class, snvCallingService)

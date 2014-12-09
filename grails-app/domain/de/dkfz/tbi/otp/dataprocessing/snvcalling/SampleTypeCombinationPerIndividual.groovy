@@ -15,6 +15,28 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
  */
 class SampleTypeCombinationPerIndividual {
 
+    static enum ProcessingStatus {
+
+        /**
+         * The sample pair needs to be processed as soon as conditions are satisfied (coverage is high enough etc).
+         */
+        NEEDS_PROCESSING,
+
+        /**
+         * The sample pair does not have to be processed, because there already is an {@link SnvCallingInstance} which
+         * is up-to-date. If this is no longer true,
+         * {@link SampleTypeCombinationPerIndividual#findCombinationsForSettingNeedsProcessing()} will find the sample
+         * pair.
+         */
+        NO_PROCESSING_NEEDED,
+
+        /**
+         * The sample pair shall not be processed (again), for example because there was a notice from the responsible
+         * bioinformatician to exclude it.
+         */
+        DISABLED,
+    }
+
     /**
      * The sampleType pair shall be processed for this individual
      */
@@ -28,12 +50,7 @@ class SampleTypeCombinationPerIndividual {
 
     SeqType seqType
 
-    /**
-     * This flag shows that a pair of two sample types has to be processed.
-     * When creating an SampleTypeCombinationPerIndividual instance for one pair it is set to true per default.
-     * To rerun the processing for one pair it has to be set to true again.
-     */
-    boolean needsProcessing = true
+    ProcessingStatus processingStatus = ProcessingStatus.NEEDS_PROCESSING
 
     /**
      * These properties are handled automatically by grails.
@@ -78,11 +95,11 @@ class SampleTypeCombinationPerIndividual {
     }
 
     static mapping = {
-        individual      index: 'sample_type_combination_per_individual_idx1,sample_type_combination_per_individual_idx2'
-        sampleType1     index: 'sample_type_combination_per_individual_idx1,sample_type_combination_per_individual_idx2'
-        sampleType2     index: 'sample_type_combination_per_individual_idx1,sample_type_combination_per_individual_idx2'
-        seqType         index: 'sample_type_combination_per_individual_idx1,sample_type_combination_per_individual_idx2'
-        needsProcessing index: 'sample_type_combination_per_individual_idx1'
+        individual       index: 'sample_type_combination_per_individual_idx1,sample_type_combination_per_individual_idx2'
+        sampleType1      index: 'sample_type_combination_per_individual_idx1,sample_type_combination_per_individual_idx2'
+        sampleType2      index: 'sample_type_combination_per_individual_idx1,sample_type_combination_per_individual_idx2'
+        seqType          index: 'sample_type_combination_per_individual_idx1,sample_type_combination_per_individual_idx2'
+        processingStatus index: 'sample_type_combination_per_individual_idx1'
     }
 
     Project getProject() {
@@ -215,7 +232,7 @@ class SampleTypeCombinationPerIndividual {
     /**
      * Finds existing SampleTypeCombinationPerIndividuals with these criteria:
      * <ul>
-     *     <li>{@link #needsProcessing} is set to <code>false</code>.</li>
+     *     <li>{@link #processingStatus} is set to {@link ProcessingStatus#NO_PROCESSING_NEEDED}.</li>
      *     <li>{@link #sampleType1} (still) has category {@link SampleType.Category#DISEASE}.</li>
      *     <li>No {@link SnvCallingInstance} exists which belongs to the sample pair and fulfills these criteria:
      *     <ul>
@@ -230,7 +247,7 @@ class SampleTypeCombinationPerIndividual {
             FROM
               SampleTypeCombinationPerIndividual stcpi
             WHERE
-              stcpi.needsProcessing = false AND
+              stcpi.processingStatus = :noProcessingNeeded AND
               EXISTS (
                 FROM
                   SampleTypePerProject
@@ -265,18 +282,23 @@ class SampleTypeCombinationPerIndividual {
                   )
               )
             """, [
+                noProcessingNeeded: ProcessingStatus.NO_PROCESSING_NEEDED,
                 disease: SampleType.Category.DISEASE,
                 fileType: FileType.Type.SEQUENCE
         ], [readOnly: true])
     }
 
     /**
-     * Sets {@link #needsProcessing} of all specified instances to the specified value and saves the instances.
+     * Sets {@link #processingStatus} of all specified instances to the specified value and saves the instances.
      */
-    static void setNeedsProcessing(final Collection<SampleTypeCombinationPerIndividual> combinations, final boolean needsProcessing) {
+    static void setProcessingStatus(final Collection<SampleTypeCombinationPerIndividual> combinations,
+                                    final ProcessingStatus processingStatus) {
+        if (processingStatus == null) {
+            throw new IllegalArgumentException()
+        }
         SampleTypeCombinationPerIndividual.withTransaction {
             combinations.each {
-                it.needsProcessing = needsProcessing
+                it.processingStatus = processingStatus
                 assert it.save()
             }
         }

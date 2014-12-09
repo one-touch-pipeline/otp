@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 import static org.junit.Assert.*
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
@@ -82,6 +83,20 @@ class SnvCallingServiceTests {
     @Test
     void testSamplePairForSnvProcessingAllCorrect() {
         assertEquals(sampleTypeCombinationPerIndividual, snvCallingService.samplePairForSnvProcessing())
+    }
+
+    @Test
+    void testSamplePairNoProcessingNeeded() {
+        sampleTypeCombinationPerIndividual.processingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
+        assert sampleTypeCombinationPerIndividual.save()
+        assertNull(snvCallingService.samplePairForSnvProcessing())
+    }
+
+    @Test
+    void testSamplePairDisabled() {
+        sampleTypeCombinationPerIndividual.processingStatus = ProcessingStatus.DISABLED
+        assert sampleTypeCombinationPerIndividual.save()
+        assertNull(snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test

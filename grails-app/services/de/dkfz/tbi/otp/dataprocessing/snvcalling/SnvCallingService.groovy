@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
-import de.dkfz.tbi.otp.ngsdata.Sample
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import static org.springframework.util.Assert.*
 
@@ -59,7 +59,7 @@ class SnvCallingService {
         String pairForSnvProcessing =
                 "FROM SampleTypeCombinationPerIndividual stc " +
                 //check that combination shall be processed
-                "WHERE stc.needsProcessing = true " +
+                "WHERE stc.processingStatus = :needsProcessing " +
 
                 //check that the config file is available
                 "AND EXISTS (FROM SnvConfig cps " +
@@ -81,7 +81,11 @@ class SnvCallingService {
                 "ORDER BY stc.dateCreated"
 
         List<SampleTypeCombinationPerIndividual> sampleTypeCombinationPerIndividuals = SampleTypeCombinationPerIndividual.findAll(
-                pairForSnvProcessing, [ processingStates: unallowedProcessingStates ])
+                pairForSnvProcessing,
+                [
+                        needsProcessing: ProcessingStatus.NEEDS_PROCESSING,
+                        processingStates: unallowedProcessingStates,
+                ])
 
         if (sampleTypeCombinationPerIndividuals) {
             return sampleTypeCombinationPerIndividuals.find {

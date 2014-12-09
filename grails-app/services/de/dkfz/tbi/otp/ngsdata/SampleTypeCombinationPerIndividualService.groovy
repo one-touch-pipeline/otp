@@ -1,25 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-import static org.springframework.util.Assert.*
 import org.springframework.security.access.prepost.PreAuthorize
-import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual.ProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.Sample.*
-import de.dkfz.tbi.otp.ngsdata.SeqTrack.*
-
-
-
-
 
 class SampleTypeCombinationPerIndividualService {
 
-
-    //TODO handle of ignored SNv-status according to OTP-1224
     @PreAuthorize("hasPermission(#individual.project, read) or hasRole('ROLE_OPERATOR')")
     Map<String, SampleTypeCombinationPerIndividual> samplePairsBySnvProcessingState(Individual individual) {
         assert individual
@@ -32,23 +20,24 @@ class SampleTypeCombinationPerIndividualService {
 
         List<SampleTypeCombinationPerIndividual> sampleTypeCombinationPerIndividuals = SampleTypeCombinationPerIndividual.findAllByIndividual(individual)
         sampleTypeCombinationPerIndividuals.each {
-            List<SnvCallingInstance> snvCallingInstances = SnvCallingInstance.findAllBySampleTypeCombination(it)
-            if (snvCallingInstances) {
-                if (snvCallingInstances.find { it.processingState == SnvProcessingStates.FINISHED }) {
-                    finishedSampleTypeCombinationPerIndividuals << it
-                }
-                if (snvCallingInstances.find { it.processingState == SnvProcessingStates.IN_PROGRESS }) {
-                    progressingSampleTypeCombinationPerIndividuals << it
-                }
-                if (it.needsProcessing) {
+            switch (it.processingStatus) {
+                case ProcessingStatus.NEEDS_PROCESSING:
                     notStarted << it
-                }
-            } else {
-                if (it.needsProcessing) {
-                    notStarted << it
-                } else {
+                    break
+                case ProcessingStatus.DISABLED:
                     processingDisabled << it
-                }
+                    break
+                case ProcessingStatus.NO_PROCESSING_NEEDED:
+                    break
+                default:
+                    throw new UnsupportedOperationException("Handling processing status ${it.processingStatus} is not implemented.")
+            }
+            List<SnvCallingInstance> snvCallingInstances = SnvCallingInstance.findAllBySampleTypeCombination(it)
+            if (snvCallingInstances.find { it.processingState == SnvProcessingStates.FINISHED }) {
+                finishedSampleTypeCombinationPerIndividuals << it
+            }
+            if (snvCallingInstances.find { it.processingState == SnvProcessingStates.IN_PROGRESS }) {
+                progressingSampleTypeCombinationPerIndividuals << it
             }
         }
 
