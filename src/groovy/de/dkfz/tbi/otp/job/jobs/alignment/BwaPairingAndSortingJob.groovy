@@ -95,12 +95,16 @@ class BwaPairingAndSortingJob extends AbstractJobImpl {
         saiFiles = saiFiles.sort {
             it.dataFile.readNumber
         }
-        assert 1 == saiFiles.get(0).dataFile.readNumber
-        assert 2 == saiFiles.get(1).dataFile.readNumber
-        String sai1 = processedSaiFileService.getFilePath(saiFiles.get(0))
-        String sai2 = processedSaiFileService.getFilePath(saiFiles.get(1))
-        String seq1 = lsdfFilesService.getFileViewByPidPath(saiFiles.get(0).dataFile)
-        String seq2 = lsdfFilesService.getFileViewByPidPath(saiFiles.get(1).dataFile)
+        def (ProcessedSaiFile saiFile1, ProcessedSaiFile saiFile2) = saiFiles
+        def (DataFile dataFile1, DataFile dataFile2) = saiFiles*.dataFile
+        assert 1 == dataFile1.readNumber
+        assert 2 == dataFile2.readNumber
+        MetaDataService.ensurePairedSequenceFileNameConsistency(dataFile1.fileName, dataFile2.fileName)
+        MetaDataService.ensurePairedSequenceFileNameConsistency(dataFile1.vbpFileName, dataFile2.vbpFileName)
+        String sai1 = processedSaiFileService.getFilePath(saiFile1)
+        String sai2 = processedSaiFileService.getFilePath(saiFile2)
+        String seq1 = lsdfFilesService.getFileViewByPidPath(dataFile1)
+        String seq2 = lsdfFilesService.getFileViewByPidPath(dataFile2)
         return "${sai1} ${sai2} ${seq1} ${seq2} "
     }
 }

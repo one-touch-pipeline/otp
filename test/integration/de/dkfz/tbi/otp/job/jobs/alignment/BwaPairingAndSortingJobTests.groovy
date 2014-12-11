@@ -202,7 +202,7 @@ class BwaPairingAndSortingJobTests {
         assertNotNull(dataFile1.save(flush: true))
 
         DataFile dataFile2 = new DataFile(
-            fileName: "dataFile1.fastq",
+            fileName: "dataFile2.fastq",
             pathName: "testPath",
             run: run,
             seqTrack: seqTrack,

@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import static de.dkfz.tbi.otp.ngsdata.MetaDataService.*
+
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import grails.test.mixin.support.*
@@ -18,7 +20,6 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 class MetaDataServiceUnitTests {
 
     MetaDataService metaDataService
-    TestData testData
 
     final static String EXOME_ENRICHMENT_KIT_NAME = "ExomeEnrichmentKitName"
 
@@ -33,14 +34,11 @@ class MetaDataServiceUnitTests {
         metaDataService = new MetaDataService()
         metaDataService.exomeEnrichmentKitService = new ExomeEnrichmentKitService()
         metaDataService.fileTypeService = new FileTypeService()
-        testData = new TestData()
-        testData.createObjects()
     }
 
     @After
     public void tearDown() throws Exception {
         metaDataService = null
-        testData = null
     }
 
 
@@ -99,6 +97,9 @@ class MetaDataServiceUnitTests {
 
     @Test
     void testEnrichOldDataWithNewInformationFrom() {
+        final TestData testData = new TestData()
+        testData.createObjects()
+
         ExomeSeqTrack exomeSeqTrack1 = testData.createExomeSeqTrack(testData.run)
         testData.dataFile.seqTrack = exomeSeqTrack1
         assertNotNull(testData.dataFile.save(flush: true))
@@ -115,6 +116,46 @@ class MetaDataServiceUnitTests {
         assertNull(exomeSeqTrack1.exomeEnrichmentKit)
         metaDataService.enrichOldDataWithNewInformationFrom(testData.run)
         assertEquals(exomeEnrichmentKit, exomeSeqTrack1.exomeEnrichmentKit)
+    }
+
+    @Test
+    void testEnsurePairedSequenceFileNameConsistency_okay() {
+        ensurePairedSequenceFileNameConsistency('abc1abc.fastq', 'abc2abc.fastq')
+    }
+
+    @Test
+    void testEnsurePairedSequenceFileNameConsistency_differentLengths() {
+        shouldFail { ensurePairedSequenceFileNameConsistency('abc1abc.fastq', 'abc2abcd.fastq') }
+    }
+
+    @Test
+    void testEnsurePairedSequenceFileNameConsistency_same() {
+        shouldFail { ensurePairedSequenceFileNameConsistency('abc1abc.fastq', 'abc1abc.fastq') }
+    }
+
+    @Test
+    void testEnsurePairedSequenceFileNameConsistency_incorrectOrder() {
+        shouldFail { ensurePairedSequenceFileNameConsistency('abc2abc.fastq', 'abc1abc.fastq') }
+    }
+
+    @Test
+    void testEnsurePairedSequenceFileNameConsistency_illegalReadNumber1() {
+        shouldFail { ensurePairedSequenceFileNameConsistency('abc0abc.fastq', 'abc2abc.fastq') }
+    }
+
+    @Test
+    void testEnsurePairedSequenceFileNameConsistency_illegalReadNumber2() {
+        shouldFail { ensurePairedSequenceFileNameConsistency('abc1abc.fastq', 'abc3abc.fastq') }
+    }
+
+    @Test
+    void testEnsurePairedSequenceFileNameConsistency_tooManyDifferences() {
+        shouldFail { ensurePairedSequenceFileNameConsistency('abc1abc1.fastq', 'abc2abc2.fastq') }
+    }
+
+    @Test
+    void testEnsurePairedSequenceFileNameConsistency_tooLongDifference() {
+        shouldFail { ensurePairedSequenceFileNameConsistency('abc11abc.fastq', 'abc22abc.fastq') }
     }
 
     @Test
@@ -196,7 +237,6 @@ class MetaDataServiceUnitTests {
 
     @Test
     void testAddReadNumberFileTypeNeedsNoReadInfo() {
-        testData.fileType.delete()
         FileType fileType = FileType.build(type: FileType.Type.ALIGNMENT, signature: "bam", vbpPath: NO_FASTQC_SEQUENCE_DIRECTORY)
         DataFile dataFile = createDataFileAndMetadataEntry("s_101202_7_2.bam", SeqType.LIBRARYLAYOUT_SINGLE)
 
@@ -207,7 +247,6 @@ class MetaDataServiceUnitTests {
 
     @Test
     void testAddReadNumberLibraryIsSingleAndFastqSequenceType() {
-        testData.fileType.delete()
         FileType fileType = FileType.build(type: FileType.Type.SEQUENCE, signature: "fastq", vbpPath: FASTQ_SEQUENCE_DIRECTORY)
         DataFile dataFile = createDataFileAndMetadataEntry("s_101202_7_2.fastq.gz", SeqType.LIBRARYLAYOUT_SINGLE)
 
@@ -217,7 +256,6 @@ class MetaDataServiceUnitTests {
 
     @Test
     void testAddReadNumberLibraryIsPairedAndFastqSequenceType() {
-        testData.fileType.delete()
         FileType fileType = FileType.build(type: FileType.Type.SEQUENCE, signature: "fastq", vbpPath: FASTQ_SEQUENCE_DIRECTORY)
         DataFile dataFile = createDataFileAndMetadataEntry("s_101202_7_2.fastq.gz", SeqType.LIBRARYLAYOUT_PAIRED)
 
@@ -227,7 +265,6 @@ class MetaDataServiceUnitTests {
 
     @Test
     void testAddReadNumberLibraryIsSingleAndNotFastqSequenceType() {
-        testData.fileType.delete()
         FileType fileType = FileType.build(type: FileType.Type.SEQUENCE, signature: "fastq", vbpPath: NO_FASTQC_SEQUENCE_DIRECTORY)
         DataFile dataFile = createDataFileAndMetadataEntry("s_101202_7_2.fastq.gz", SeqType.LIBRARYLAYOUT_SINGLE)
 
@@ -237,7 +274,6 @@ class MetaDataServiceUnitTests {
 
     @Test
     void testAddReadNumberLibraryIsPairedAndNotFastqSequenceType() {
-        testData.fileType.delete()
         FileType fileType = FileType.build(type: FileType.Type.SEQUENCE, signature: "fastq", vbpPath: NO_FASTQC_SEQUENCE_DIRECTORY)
         DataFile dataFile = createDataFileAndMetadataEntry("s_101202_7_2.fastq.gz", SeqType.LIBRARYLAYOUT_PAIRED)
 
