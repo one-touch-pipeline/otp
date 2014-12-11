@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.access.prepost.PreFilter
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.utils.ReferencedClass
+import de.dkfz.tbi.otp.utils.StringUtils
 
 class MetaDataService {
 
@@ -513,6 +514,23 @@ class MetaDataService {
         List<RunSegment> runSegments = RunSegment.findAllByRun(run)
         runSegments.each { RunSegment runSegment ->
             exomeEnrichmentKitService.inferKitInformationForOldLaneFromNewLane(runSegment)
+        }
+    }
+
+    /**
+     * Ensures that the two file names are equal except for one character, and that this character is '1' for the first
+     * file name and '2' for the second file name.
+     */
+    static void ensurePairedSequenceFileNameConsistency(final String read1FileName, final String read2FileName) {
+        try {
+            assert read1FileName.length() == read2FileName.length()
+            final int readNumberCharIndex = StringUtils.commonPrefixLength(read1FileName, read2FileName)
+            assert readNumberCharIndex < read1FileName.length()
+            assert read1FileName.charAt(readNumberCharIndex) == '1'
+            assert read2FileName.charAt(readNumberCharIndex) == '2'
+            assert read1FileName.substring(readNumberCharIndex + 1) == read2FileName.substring(readNumberCharIndex + 1)
+        } catch (final AssertionError e) {
+            throw new RuntimeException("${read1FileName} and ${read2FileName} are not consistent as paired sequence file names.", e)
         }
     }
 

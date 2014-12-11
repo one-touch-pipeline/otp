@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.alignment
 
+import org.junit.Test
+
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
@@ -44,8 +46,8 @@ class BwaPairingAndSortingJobUnitTest {
             ] as LsdfFilesService
 
         alignmentPass = AlignmentPass.build()
-        DataFile dataFile1 = DataFile.build(fileName: FILE_READ1, readNumber: 1)
-        DataFile dataFile2 = DataFile.build(fileName: FILE_READ2, readNumber: 2)
+        DataFile dataFile1 = DataFile.build(fileName: FILE_READ1, vbpFileName: FILE_READ1, readNumber: 1)
+        DataFile dataFile2 = DataFile.build(fileName: FILE_READ2, vbpFileName: FILE_READ2, readNumber: 2)
         processedSaiFile1 = ProcessedSaiFile.build(alignmentPass: alignmentPass, dataFile: dataFile1)
         processedSaiFile2 = ProcessedSaiFile.build(alignmentPass: alignmentPass, dataFile: dataFile2)
     }
@@ -97,5 +99,17 @@ class BwaPairingAndSortingJobUnitTest {
         shouldFail(ProcessingException) {
             String ret = bwaPairingAndSortingJob.createSequenceAndSaiFiles(alignmentPass)
         }
+    }
+
+    @Test
+    void testCreateSequenceAndSaiFiles_illegalFileName() {
+        processedSaiFile2.dataFile.fileName = "file_R3_abc.fastq.gz"
+        shouldFail { bwaPairingAndSortingJob.createSequenceAndSaiFiles(alignmentPass) }
+    }
+
+    @Test
+    void testCreateSequenceAndSaiFiles_illegalVbpFileName() {
+        processedSaiFile2.dataFile.vbpFileName = "file_R3_abc.fastq.gz"
+        shouldFail { bwaPairingAndSortingJob.createSequenceAndSaiFiles(alignmentPass) }
     }
 }
