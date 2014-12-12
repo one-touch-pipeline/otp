@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
+
 import static de.dkfz.tbi.otp.utils.ThreadUtils.waitFor
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 
@@ -212,7 +214,7 @@ class LsdfFilesService {
 
     static void ensureFileIsReadableAndNotEmpty(final File file) {
         assert file.isAbsolute()
-        assert file.exists()
+        WaitingFileUtils.waitForFile(file)
         assert file.isFile()
         assert file.canRead()
         assert file.length() > 0L

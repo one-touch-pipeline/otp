@@ -5,6 +5,7 @@ import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static org.springframework.util.Assert.*
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFileService
@@ -62,6 +63,7 @@ abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob 
         final File configFileInStagingDirectory = instance.configFilePath.absoluteStagingPath
         if (!configFileInStagingDirectory.exists()) {
             configFileInStagingDirectory.parentFile.mkdirs()
+            WaitingFileUtils.waitForFile(configFileInStagingDirectory.parentFile)
             instance.config.writeToFile(configFileInStagingDirectory)
         }
         assert configFileInStagingDirectory.text == instance.config.configuration

@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
 class SnvAnnotationJob extends AbstractSnvCallingJob {
 
@@ -91,8 +92,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob {
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(resultFile.absoluteStagingPath)
         // check that the checkpoint file, produced by the script exists
         final File checkpointFile = step.getCheckpointFilePath(instance).absoluteStagingPath
-
-        assert checkpointFile.exists()
+        WaitingFileUtils.waitForFile(checkpointFile)
         assert checkpointFile.delete()
 
         try {
