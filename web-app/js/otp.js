@@ -5,8 +5,24 @@ $.otp = {
     contextPath: $("head meta[name=contextPath]").attr("content"),
 
     tableTools_button_options: [
-        {"sExtends": "csv", "bFooter": false},
-        {"sExtends": "pdf", "bFooter": false}
+        {
+            "sExtends": "csv",
+            "bFooter": false,
+            "bSelectedOnly": true,
+            "oSelectorOpts": {
+                "filter": "applied",
+                "order": "current"
+            }
+        },
+        {
+            "sExtends": "pdf",
+            "bFooter": false,
+            "bSelectedOnly": true,
+            "oSelectorOpts": {
+                "filter": "applied",
+                "order": "current"
+            }
+        }
     ],
 
     /**
