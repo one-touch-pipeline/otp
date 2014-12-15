@@ -10,13 +10,15 @@ class AlignmentPassServiceIntegrationTests extends TestData {
 
     AlignmentPassService alignmentPassService
 
-    /* SeqTrackServiceTests.testSetRunReadyForAlignment() relies on the criteria in
+    /* SeqTrackServiceTests.testSetReadyForAlignment() relies on the criteria in
      * AlignmentPassService.ALIGNABLE_SEQTRACK_HQL being deeply tested here.
      */
     @Test
     void testFindAlignableSeqTrack() {
         createObjects()
         dataFile.delete()
+        seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
+
         findAlignableSeqTrackTest(SeqTrack.DataProcessingState.IN_PROGRESS)
         findAlignableSeqTrackTest(SeqTrack.DataProcessingState.NOT_STARTED)
 
@@ -68,6 +70,18 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         assertEquals(seqTrack, alignmentPassService.findAlignableSeqTrack())
     }
 
+    @Test
+    void testFindAlignableSeqTrack_fastqcMustBeFinished() {
+        createObjects()
+        createDataFile(false)
+        seqTrack.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+
+        seqTrack.fastqcState = SeqTrack.DataProcessingState.IN_PROGRESS
+        assertNull(alignmentPassService.findAlignableSeqTrack())
+
+        seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
+        assertEquals(seqTrack, alignmentPassService.findAlignableSeqTrack())
+    }
 
     @Test
     void testFindAlignableExomeSeqTrackKitANDBedFileANDReferenceGenomeConnectionMissing() {
@@ -76,6 +90,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         seqTrack.delete()
         ExomeSeqTrack exomeSeqTrack = createExomeSeqTrack(run)
         exomeSeqTrack.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+        exomeSeqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
 
         assertNull(alignmentPassService.findAlignableSeqTrack())
 
@@ -217,6 +232,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         createObjects()
         assertNull(alignmentPassService.createAlignmentPass())
         seqTrack.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+        seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
         DataFile dataFile1 = createDataFile(false)
         AlignmentPass pass1 = alignmentPassService.createAlignmentPass()
         assertNotNull(pass1)
@@ -313,6 +329,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         seqTrack.delete()
         ExomeSeqTrack exomeSeqTrack = createExomeSeqTrack(run)
         exomeSeqTrack.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+        exomeSeqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
         dataFile = createDataFile([seqTrack: exomeSeqTrack])
         dataFile.save(flush: true)
         return exomeSeqTrack

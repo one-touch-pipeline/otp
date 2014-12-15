@@ -21,6 +21,7 @@ import static org.junit.Assert.*
 ])
 class UploadFastQCToDatabaseJobUnitTests {
 
+    SeqTrack seqTrack
     UploadFastQCToDatabaseJob job
 
     @Before
@@ -51,41 +52,47 @@ class UploadFastQCToDatabaseJobUnitTests {
             )
         job.log = this.log
 
-        UploadFastQCToDatabaseJob.metaClass.getProcessParameterValue = { -> "1" }
+        final long seqTrackId = 526065890
+        job.metaClass.getProcessParameterValue = { -> Long.toString(seqTrackId) }
+        SeqTrack.metaClass.static.get = { id -> assert id == seqTrackId; return seqTrack }
     }
 
     @After
     void tearDown() {
+        SeqTrack.metaClass = null
         job == null
     }
 
     void testExecuteFailureByFileDoesNotExist() {
-        UploadFastQCToDatabaseJob.metaClass.getEndState = { -> null }
-        UploadFastQCToDatabaseJob.metaClass.getFastqcProcessedFile = { DataFile dataFile2 -> throw new FileNotReadableException("pathToTheFile") }
+        job.metaClass.getEndState = { -> null }
+        job.metaClass.getFastqcProcessedFile = { DataFile dataFile2 -> throw new FileNotReadableException("pathToTheFile") }
         job.start()
         try {
             job.execute()
         } catch (FileNotReadableException e) {
             job.end()
             assertTrue(isJobFinished(job))
-            assertTrue(!isJobStateSucessfull(job))
+            assertTrue(!isJobStateSuccessful(job))
         }
     }
 
-    void testExecuteSucess() {
-        UploadFastQCToDatabaseJob.metaClass.getFastqcProcessedFile = { DataFile dataFile2 -> }
+    void testExecuteSuccess() {
+        int setReadyForAlignmentCalls = 0
+        job.metaClass.getFastqcProcessedFile = { DataFile dataFile2 -> }
+        job.seqTrackService.metaClass.setReadyForAlignment = { SeqTrack s -> assert s == seqTrack; setReadyForAlignmentCalls++ }
         job.start()
         job.execute()
         job.end()
         assertTrue(isJobFinished(job))
-        assertTrue(isJobStateSucessfull(job))
+        assertTrue(isJobStateSuccessful(job))
+        assert setReadyForAlignmentCalls == 1
     }
 
     private boolean isJobFinished(def job) {
         return job.getState() == AbstractJobImpl.State.FINISHED
     }
 
-    private boolean isJobStateSucessfull(def job) {
+    private boolean isJobStateSuccessful(def job) {
         return job.endState == ExecutionState.SUCCESS
     }
 }

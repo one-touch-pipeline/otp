@@ -26,7 +26,7 @@ class AlignmentPassService {
      * <p>A SeqTrack is considered <em>alignable</em> if and only if all of these criteria are
      * fulfilled:</p>
      * <ul>
-     *   <li>It belongs to a project with a reference genome known to OTP.</li>
+     *   <li>Its {@link SeqTrack#fastqcState} is {@link SeqTrack.DataProcessingState#FINISHED}.</li>
      *   <li>No {@link RunSegment} in a state other than {@link RunSegment.Status#COMPLETE} belongs
      *       to it.</li>
      *   <li>At least one non-withdrawn data file belongs to it.</li>
@@ -36,11 +36,13 @@ class AlignmentPassService {
     public static final String ALIGNABLE_SEQTRACK_HQL =
     "FROM SeqTrack st " +
     "WHERE alignmentState = :alignmentState " +
+    "AND fastqcState = :finished " +
     "AND NOT EXISTS (FROM RunSegment WHERE run = st.run AND metaDataStatus <> :metaDataStatus) " +
     "AND EXISTS (FROM DataFile WHERE ${DATA_FILE_CRITERIA} AND fileExists = true AND fileSize > 0 AND fileWithdrawn = false) " +
     "AND NOT EXISTS (FROM DataFile WHERE ${DATA_FILE_CRITERIA} AND fileWithdrawn = true) "
 
     public static final Map ALIGNABLE_SEQTRACK_QUERY_PARAMETERS = Collections.unmodifiableMap([
+        finished: SeqTrack.DataProcessingState.FINISHED,
         metaDataStatus: RunSegment.Status.COMPLETE,
         fileType: FileType.Type.SEQUENCE,
     ])
@@ -53,7 +55,7 @@ class AlignmentPassService {
      * <p>If no such SeqTrack exists, <code>null</code> is returned.</p>
      *
      * <p>Note that all these criteria have already been checked in
-     * {@link SeqTrackService#setRunReadyForAlignment(Run)}. As opposed to that method, the sequence
+     * {@link SeqTrackService#setReadyForAlignment(SeqTrack)}. As opposed to that method, the sequence
      * type is <em>not</em> checked in this method because the alignment workflow might be extended
      * such that it can process further sequencing types, and it shall be possible to trigger those
      * alignments manually although they are not triggered automatically by the mentioned method.</p>

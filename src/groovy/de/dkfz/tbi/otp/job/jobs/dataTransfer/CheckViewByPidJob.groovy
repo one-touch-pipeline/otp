@@ -26,7 +26,6 @@ class CheckViewByPidJob extends AbstractEndStateAwareJobImpl {
         Run run = Run.get(runId)
         if (filesCompletenessService.checkViewByPid(run)) {
             SeqTrack.withTransaction {
-                seqTrackService.setRunReadyForAlignment(run)
                 seqTrackService.setRunReadyForFastqc(run)
             }
             succeed()

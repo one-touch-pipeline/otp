@@ -244,63 +244,49 @@ class SeqTrackService {
      * Sets all {@link SeqTrack}s fulfilling the criteria listed below to alignment state
      * {@link SeqTrack.DataProcessingState#NOT_STARTED}.
      *
-     * <p>Critieria for the SeqTrack:</p>
+     * <p>Criteria for the SeqTrack:</p>
      * <ul>
-     *   <li>It has been done for a sample which has been sequenced in the specified run. (This also
-     *       includes <code>SeqTrack</code>s from other runs, as long as they are done for such a
-     *       sample.)</li>
+     *   <li>It belongs to the same sample and same sequencing type as the argument of this method.</li>
      *   <li>It is alignable as defined here: {@link AlignmentPassService#ALIGNABLE_SEQTRACK_HQL}</li>
      *   <li>It is in alignment state {@link SeqTrack.DataProcessingState#UNKNOWN}.</li>
-     *   <li>It has sequence type WHOLE_GENOME or EXOME and library layout PAIRED.</li>
-     *   <li>It has a corresponding {@link RunSegment} where align is set to true .</li>
-     *   <li>For {@link SeqType} Exome, the BED file must be available. </li>
+     *   <li>Its {@link SeqTrack#seqType} is in {@link SeqTypeService#alignableSeqTypes()}.</li>
+     *   <li>It does not have a corresponding {@link RunSegment} where {@link RunSegment#align} is set to false.</li>
+     *   <li>For {@link ExomeSeqTrack}s, the {@link ExomeSeqTrack#exomeEnrichmentKit} must be specified or
+     *       {@link ExomeSeqTrack#kitInfoReliability} must be {@link InformationReliability#UNKNOWN_UNVERIFIED}.</li>
      * </ul>
      *
      * @see AlignmentPassService#findAlignableSeqTrack()
      */
-    public void setRunReadyForAlignment(Run run) {
-        notNull(run, "The run argument must not be null.")
+    void setReadyForAlignment(SeqTrack seqTrack) {
+        notNull(seqTrack)
 
-        // List of seqType names which have to be aligned
-        List<String> seqTypesToAlign = [
-            SeqTypeNames.WHOLE_GENOME.seqTypeName,
-            SeqTypeNames.EXOME.seqTypeName
-        ]
-
-        // Find all samples in this run.
-        List<SeqTrack> seqTracksPerRun = SeqTrack.withCriteria {
-            eq("run", run)
-            seqType {
-                'in'("name", seqTypesToAlign)
-                eq("libraryLayout", "PAIRED")
-            }
+        if (!SeqTypeService.alignableSeqTypes()*.id.contains(seqTrack.seqType.id)) {
+            return
         }
 
-        seqTracksPerRun.each { SeqTrack seqTrack ->
-            // Find all SeqTracks belonging to the same sample and seqType as the seqTrack in the run which can be aligned.
-            List<SeqTrack> seqTracks = SeqTrack.findAll(AlignmentPassService.ALIGNABLE_SEQTRACK_HQL +
-                            "AND seqType.name =:seqTypeOfSeqTrack AND seqType.libraryLayout = :seqTypeLibraryLayout " +
-                            "AND sample =:sampleOfSeqTrack " +
-                            "AND NOT EXISTS (FROM DataFile WHERE seqTrack = st AND runSegment.align = false)",
-                            [
-                                alignmentState: SeqTrack.DataProcessingState.UNKNOWN,
-                                seqTypeOfSeqTrack: seqTrack.seqType.name,
-                                seqTypeLibraryLayout: "PAIRED",
-                                sampleOfSeqTrack: seqTrack.sample,
-                            ] << AlignmentPassService.ALIGNABLE_SEQTRACK_QUERY_PARAMETERS)
+        // Find all SeqTracks belonging to the same sample and seqType as the seqTrack which can be aligned.
+        List<SeqTrack> seqTracks = SeqTrack.findAll(AlignmentPassService.ALIGNABLE_SEQTRACK_HQL +
+                        "AND seqType.name =:seqTypeOfSeqTrack AND seqType.libraryLayout = :seqTypeLibraryLayout " +
+                        "AND sample =:sampleOfSeqTrack " +
+                        "AND NOT EXISTS (FROM DataFile WHERE seqTrack = st AND runSegment.align = false)",
+                        [
+                            alignmentState: SeqTrack.DataProcessingState.UNKNOWN,
+                            seqTypeOfSeqTrack: seqTrack.seqType.name,
+                            seqTypeLibraryLayout: "PAIRED",
+                            sampleOfSeqTrack: seqTrack.sample,
+                        ] << AlignmentPassService.ALIGNABLE_SEQTRACK_QUERY_PARAMETERS)
 
-            // ExomeSeqTracks with the kitInfoState "UNKNOWN_VERIFIED" and no kit must not be aligned.
-            seqTracks = seqTracks.findAll {
-                !(it instanceof ExomeSeqTrack) ||
-                                it.exomeEnrichmentKit ||
-                                it.kitInfoReliability == InformationReliability.UNKNOWN_UNVERIFIED
-            }
+        // ExomeSeqTracks with the kitInfoState "UNKNOWN_VERIFIED" and no kit must not be aligned.
+        seqTracks = seqTracks.findAll {
+            !(it instanceof ExomeSeqTrack) ||
+                            it.exomeEnrichmentKit ||
+                            it.kitInfoReliability == InformationReliability.UNKNOWN_UNVERIFIED
+        }
 
-            // Mark the SeqTracks as being ready for alignment.
-            seqTracks.each {
-                it.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
-                it.save(flush: true)
-            }
+        // Mark the SeqTracks as being ready for alignment.
+        seqTracks.each {
+            it.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+            it.save(flush: true)
         }
     }
 
