@@ -19,7 +19,9 @@ abstract class AbstractFileSystemBamFile extends AbstractBamFile {
     String sha256sum
 
     /**
-     * is true if file exists on the file system
+     * Is true if file exists on the file system in the processing directory.
+     * If the file is only stored in the project directory and was deleted in the processing directory it is marked
+     * as fileExists = false!
      */
     boolean fileExists
 

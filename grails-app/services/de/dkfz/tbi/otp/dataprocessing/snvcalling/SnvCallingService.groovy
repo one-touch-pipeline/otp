@@ -36,10 +36,8 @@ class SnvCallingService {
 
         def testIfBamFileFulfillCriteria = { String number ->
             return "AND EXISTS (FROM ProcessedMergedBamFile pmbf${number} " +
-            //check that the file exists in OTP
-            "       WHERE pmbf${number}.fileExists = true " +
             // check that the file is not withdrawn
-            "       AND pmbf${number}.withdrawn = false " +
+            "       WHERE pmbf${number}.withdrawn = false " +
             //check that the bam file belongs to the sample type, seq type and individual from the SampleTypeCombinationPerIndividual
             "       AND pmbf${number}.${INDIVIDUAL} = stc.individual " +
             "       AND pmbf${number}.${SAMPLE_TYPE} = stc.sampleType${number} " +

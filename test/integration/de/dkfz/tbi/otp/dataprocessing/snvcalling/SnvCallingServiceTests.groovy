@@ -480,25 +480,6 @@ class SnvCallingServiceTests {
         assertEquals(sampleTypeCombinationPerIndividual, snvCallingService.samplePairForSnvProcessing())
     }
 
-    @Test
-    void testBamFile1DoesNotExist() {
-        assertEquals(sampleTypeCombinationPerIndividual, snvCallingService.samplePairForSnvProcessing())
-
-        processedMergedBamFile1.fileExists = false
-        processedMergedBamFile1.save()
-
-        assertNull(snvCallingService.samplePairForSnvProcessing())
-    }
-
-    @Test
-    void testBamFile2DoesNotExist() {
-        assertEquals(sampleTypeCombinationPerIndividual, snvCallingService.samplePairForSnvProcessing())
-
-        processedMergedBamFile2.fileExists = false
-        processedMergedBamFile2.save()
-
-        assertNull(snvCallingService.samplePairForSnvProcessing())
-    }
 
     @Test
     void testBamFile1IsWithdrawn() {

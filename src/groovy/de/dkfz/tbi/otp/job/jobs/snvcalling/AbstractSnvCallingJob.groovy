@@ -125,7 +125,6 @@ abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob 
 
     protected File getExistingBamFilePath(final ProcessedMergedBamFile bamFile) {
         final File file = new File(processedMergedBamFileService.destinationDirectory(bamFile), processedMergedBamFileService.fileName(bamFile))
-        assert bamFile.fileExists
         assert bamFile.md5sum ==~ /^[0-9a-fA-F]{32}$/
         assert bamFile.fileSize > 0L
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
