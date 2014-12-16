@@ -165,6 +165,9 @@ h1 {
     font-size: 1.25em;
     margin: 0.8em 0em 0.3em 0.5em;
 }
+.otpExtraTopMargin {
+    margin-top: 2em;
+}
 ul {
     &.one-to-many {
         display: inline-block;
@@ -958,6 +961,12 @@ body {
     border-bottom: 1px solid #B4B5B6;
     }
 }
+
+#otp .otpDataTableWithFreeSpaceTopLeft {
+    /* Move table up so that there is not that much empty space to the left of the export buttons. */
+    margin-top: -40px
+}
+
 #otp .otpDataTables{
     color:black;
     padding-top: 6px;
