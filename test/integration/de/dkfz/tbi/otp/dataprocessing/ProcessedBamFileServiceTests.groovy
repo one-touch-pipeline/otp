@@ -1,5 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.filehandling.BwaLogFileParser
+import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
+
 import static org.junit.Assert.*
 
 import org.junit.*
@@ -26,13 +29,22 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
     SeqTrack seqTrack
     Individual individual
     SampleType sampleType
+    AlignmentPass alignmentPass
+    RunSegment runSegment
+
+    static final long READ_NUMBER = 12345
 
     @Before
     void setUp() {
+        testData = new TestData()
+
+        Realm realm = DomainFactory.createRealmDataProcessingDKFZ()
+        assertNotNull(realm.save([flush: true, failOnError: true]))
+
         Project project = new Project(
                         name: "name",
                         dirName: "dirName",
-                        realmName: "realmName"
+                        realmName: realm.name,
                         )
         assertNotNull(project.save([flush: true, failOnError: true]))
 
@@ -55,6 +67,9 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
                         storageRealm: StorageRealm.DKFZ
                         )
         assertNotNull(run.save([flush: true, failOnError: true]))
+
+        runSegment = testData.createRunSegment(run)
+        assertNotNull(runSegment.save([flush: true, failOnError: true]))
 
         individual = new Individual(
                         pid: "pid",
@@ -102,7 +117,26 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
                         )
         assertNotNull(seqTrack.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass = new AlignmentPass(
+        DataFile datafile = testData.createDataFile([
+                fileName: "datafile1.fastq",
+                fileType: testData.createFileType(FileType.Type.SEQUENCE),
+                seqTrack: seqTrack,
+                runSegment: runSegment,
+                run: run,
+        ])
+        assertNotNull(datafile.save([flush: true, failOnError: true]))
+
+
+        FastqcProcessedFile fastqcProcessedFile = testData.createFastqcProcessedFile([dataFile: datafile])
+        assertNotNull(fastqcProcessedFile.save([flush: true, failOnError: true]))
+
+        FastqcBasicStatistics fastqcBasicStatistics = testData.createFastqcBasicStatistics([
+                totalSequences: READ_NUMBER,
+                fastqcProcessedFile: fastqcProcessedFile
+        ])
+        assertNotNull(fastqcBasicStatistics.save([flush: true, failOnError: true]))
+
+        alignmentPass = new AlignmentPass(
                         identifier: 1,
                         seqTrack: seqTrack,
                         description: "test"
@@ -117,7 +151,25 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
                         )
         assertNotNull(processedBamFile.save([flush: true, failOnError: true]))
 
-        testData = new TestData()
+        ProcessedSaiFile processedSaiFile = testData.createProcessedSaiFile([
+                alignmentPass: alignmentPass,
+                dataFile: datafile,
+        ])
+        assertNotNull(processedSaiFile.save([flush: true, failOnError: true]))
+    }
+
+    @After
+    void tearDown() {
+        processedBamFile = null
+        seqType = null
+        sample = null
+        seqPlatform = null
+        softwareTool = null
+        run = null
+        individual = null
+        sampleType = null
+        runSegment = null
+        alignmentPass = null
     }
 
     private void prepareSetNeedsProcessing(
@@ -166,18 +218,6 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
             AbstractBamFile.QaProcessingStatus.FINISHED, SeqTrack.DataProcessingState.IN_PROGRESS)
         shouldFail AssertionError, { processedBamFileService.setNeedsProcessing(processedBamFile) }
         assertEquals(AbstractBamFile.State.DECLARED, processedBamFile.status)
-    }
-
-    @After
-    void tearDown() {
-        processedBamFile = null
-        seqType = null
-        sample = null
-        seqPlatform = null
-        run = null
-        softwareTool = null
-        individual = null
-        sampleType = null
     }
 
     @Test
@@ -614,6 +654,72 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
                 { processedBamFileService.isAnyBamFileNotProcessable(null) }
         assert !processedBamFileService.isAnyBamFileNotProcessable([])
         // Further tests of isAnyBamFileNotProcessable are included in the test methods above.
+    }
+
+    void testGetAlignmentReadLength_ProcessedBamFileIsNull() {
+        shouldFail(IllegalArgumentException, { processedBamFileService.getAlignmentReadLength(null) })
+    }
+
+    void testGetAlignmentReadLength_LibrarySingle() {
+        BwaLogFileParser.metaClass.static.parseReadNumberFromLog = { File file -> READ_NUMBER }
+
+        try {
+            assert READ_NUMBER == processedBamFileService.getAlignmentReadLength(processedBamFile)
+        } finally {
+            BwaLogFileParser.metaClass.static.parseReadNumberFromLog = null
+        }
+    }
+
+    void testGetAlignmentReadLength_LibraryPaired() {
+        BwaLogFileParser.metaClass.static.parseReadNumberFromLog = { File file -> READ_NUMBER }
+
+        DataFile datafile2 = testData.createDataFile([
+                fileName: "datafile2.fastq",
+                fileType: testData.createFileType(FileType.Type.SEQUENCE),
+                seqTrack: seqTrack,
+                runSegment: runSegment,
+                run: run,
+        ])
+        assertNotNull(datafile2.save([flush: true, failOnError: true]))
+
+        ProcessedSaiFile processedSaiFile2 = testData.createProcessedSaiFile([
+                alignmentPass: alignmentPass,
+                dataFile: datafile2,])
+        assertNotNull(processedSaiFile2.save([flush: true, failOnError: true]))
+
+        try {
+            assert READ_NUMBER * 2 == processedBamFileService.getAlignmentReadLength(processedBamFile)
+        } finally {
+            BwaLogFileParser.metaClass.static.parseReadNumberFromLog = null
+        }
+    }
+
+    void testGetFastQCReadLength_ProcessedBamFileIsNull() {
+        shouldFail(IllegalArgumentException, {processedBamFileService.getFastQCReadLength(null)})
+    }
+
+    void testGetFastQCReadLength_LibrarySingle() {
+        assert READ_NUMBER == processedBamFileService.getFastQCReadLength(processedBamFile)
+    }
+
+    void testGetFastQCReadLength_LibraryPaired() {
+
+        DataFile datafile2 = testData.createDataFile([
+                fileName: "datafile2.fastq",
+                fileType: testData.createFileType(FileType.Type.SEQUENCE),
+                seqTrack: seqTrack,
+                runSegment: runSegment,
+                run: run,
+        ])
+        assertNotNull(datafile2.save([flush: true, failOnError: true]))
+
+        FastqcProcessedFile fastqcProcessedFile2 = testData.createFastqcProcessedFile([dataFile: datafile2])
+        assertNotNull(fastqcProcessedFile2.save([flush: true, failOnError: true]))
+
+        FastqcBasicStatistics fastqcBasicStatistics2 = testData.createFastqcBasicStatistics([totalSequences: READ_NUMBER, fastqcProcessedFile: fastqcProcessedFile2])
+        assertNotNull(fastqcBasicStatistics2.save([flush: true, failOnError: true]))
+
+        assert READ_NUMBER * 2 == processedBamFileService.getFastQCReadLength(processedBamFile)
     }
 
 }

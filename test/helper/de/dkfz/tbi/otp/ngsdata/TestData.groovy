@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
+
 import static org.junit.Assert.*
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -172,6 +174,24 @@ class TestData {
         ] + properties)
     }
 
+    FastqcProcessedFile createFastqcProcessedFile(Map properties = [:]) {
+        return new FastqcProcessedFile([
+                fileExists: true,
+                contentUploaded: true,
+                dataFile: dataFile,
+        ] + properties)
+    }
+
+    FastqcBasicStatistics createFastqcBasicStatistics(Map properties = [:]) {
+        return new FastqcBasicStatistics([
+                fileType         : 'Conventional base calls',
+                encoding         : 'Sanger / Illumina 1.9',
+                totalSequences   : 1,
+                filteredSequences: 1,
+                sequenceLength   : 1,
+        ] + properties)
+    }
+
     DataFile createDataFile(SeqTrack seqTrack, RunSegment runSegment, FileType fileType = this.fileType) {
         return createDataFile(
         seqTrack: seqTrack,
@@ -300,6 +320,13 @@ class TestData {
             identifier: 0,
             seqTrack: seqTrack,
             description: "test",
+        ] + properties)
+    }
+
+    ProcessedSaiFile createProcessedSaiFile(Map properties = [:]) {
+        return new ProcessedSaiFile([
+                fileExists: true,
+                dataFile: dataFile,
         ] + properties)
     }
 

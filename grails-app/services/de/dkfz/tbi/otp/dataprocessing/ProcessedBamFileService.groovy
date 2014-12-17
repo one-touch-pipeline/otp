@@ -1,5 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.filehandling.BwaLogFileParser
+import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
+import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
+
 import static org.springframework.util.Assert.*
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
@@ -12,6 +16,8 @@ class ProcessedBamFileService {
     DataProcessingFilesService dataProcessingFilesService
     ProcessedAlignmentFileService processedAlignmentFileService
     ConfigService configService
+    ProcessedSaiFileService processedSaiFileService
+    FastqcResultsService fastqcResultsService
 
     public String getFilePath(ProcessedBamFile bamFile) {
         String dir = getDirectory(bamFile)
@@ -330,11 +336,29 @@ class ProcessedBamFileService {
 
     public ExomeEnrichmentKit exomeEnrichmentKit(ProcessedBamFile bamFile) {
         notNull(bamFile, 'bam file must not be null')
-        SeqTrack seqTrack = bamFile.alignmentPass.seqTrack
+        SeqTrack seqTrack = bamFile.seqTrack
         isTrue(seqTrack.seqType.name == SeqTypeNames.EXOME.seqTypeName, 'This method must not be called on not exon data')
         // The domain ExomeSeqTrack is new, therefore it is possible that there are many bamFiles,
         // which do not have the connection to the ExomeEnrichtmentKit.
         isInstanceOf(ExomeSeqTrack, seqTrack, "The ExomeEnrichtmentKit is not defined which means that the data were included in OTP as SeqTrack, not as ExomeSeqTrack.")
         return seqTrack.exomeEnrichmentKit
+    }
+
+    long getAlignmentReadLength(ProcessedBamFile processedBamFile) {
+        notNull(processedBamFile, 'processedBamFile must not be null')
+        List<ProcessedSaiFile> saiFiles = ProcessedSaiFile.findAllByAlignmentPass(processedBamFile.alignmentPass)
+        return saiFiles.collect { saiFile ->
+            String bwaLogFilePath = processedSaiFileService.bwaAlnErrorLogFilePath(saiFile)
+            BwaLogFileParser.parseReadNumberFromLog(new File(bwaLogFilePath))
+        }.sum()
+    }
+
+    long getFastQCReadLength(ProcessedBamFile processedBamFile) {
+        notNull(processedBamFile, 'processedBamFile must not be null')
+        SeqTrack seqTrack = processedBamFile.alignmentPass.seqTrack
+        List<FastqcProcessedFile> fastqcProcessedFiles = fastqcResultsService.fastqcFilesForSeqTrack(seqTrack)
+        return fastqcProcessedFiles.collect { FastqcProcessedFile fastqcProcessedFile ->
+            FastqcBasicStatistics.findByFastqcProcessedFile(fastqcProcessedFile).totalSequences
+        }.sum()
     }
 }
