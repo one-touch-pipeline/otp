@@ -57,6 +57,13 @@ class FilterVcfJob extends AbstractSnvCallingJob {
 
             final File configFileInStagingDirectory = writeConfigFile(instance)
 
+            // the filter script of the CO group writes its output in the same folder where its input is,
+            // so we copy the input file to output folder
+            File inputFileCopy = new File(instance.snvInstancePath.absoluteStagingPath, inputResultFile.name)
+            // TODO: replace with Files.createSymbolicLink() in Java 7 (OTP-933)
+            Process process = Runtime.getRuntime().exec(["ln", "-s", inputResultFile.absolutePath, inputFileCopy.absolutePath] as String[])
+            assert process.waitFor() == 0
+
             final File checkpointFile = step.getCheckpointFilePath(instance).absoluteStagingPath
 
             final Realm realm = configService.getRealmDataProcessing(instance.project)
@@ -68,7 +75,7 @@ class FilterVcfJob extends AbstractSnvCallingJob {
                     "TOOL_ID=snvFilter," +
                     "SNVFILE_PREFIX=snvs_," +
                     "TUMOR_BAMFILE_FULLPATH_BP=${getExistingBamFilePath(instance.sampleType1BamFile)}," +
-                    "FILENAME_VCF=${inputResultFile}," +
+                    "FILENAME_VCF=${inputFileCopy}," +
                     "FILENAME_CHECKPOINT=${checkpointFile}" +
                     "'}"
 
@@ -119,8 +126,11 @@ class FilterVcfJob extends AbstractSnvCallingJob {
         List<File> targetLocation = []
         List<File> linkLocation = []
         instancePath.eachFileRecurse (FileType.FILES) { File resultFile ->
-            // one file (snvs_${pid}_intermutation_distance_conf_8_to_10.txt), which is only used as input for a plot shall not be copied
-            if (!(resultFile =~ /intermutation_distance(.*)\.txt$/ || resultFile =~ /\.tbi/)) {
+            // snvs_${pid}_intermutation_distance_conf_8_to_10.txt, which is only used as input for a plot,
+            // and the input file shall not be copied
+            if (!(resultFile =~ /intermutation_distance(.*)\.txt$/ ||
+                    resultFile =~ /.*vcf\.gz$/ ||
+                    resultFile =~ /\.tbi/)) {
                 OtpPath resultFilePath = new OtpPath(instance.snvInstancePath, resultFile.getName())
                 sourceLocation.add(resultFilePath.absoluteStagingPath)
                 targetLocation.add(resultFilePath.absoluteDataManagementPath)

@@ -44,6 +44,14 @@ class SnvAnnotationJob extends AbstractSnvCallingJob {
             // Write the config file in the staging directory or if exists already checks that content is correct
             final File configFileInStagingDirectory = writeConfigFile(instance)
 
+            // the annotation script of the CO group writes a temporary file in the same folder where its input is
+            // which caused a permission problem when when using the BQ LSDF,
+            // so we copy the input file to output folder
+            File inputFileCopy = new File(instance.snvInstancePath.absoluteStagingPath, inputResultFile.name)
+            // TODO: replace with Files.createSymbolicLink() in Java 7 (OTP-933)
+            java.lang.Process process = Runtime.getRuntime().exec(["ln", "-s", inputResultFile.absolutePath, inputFileCopy.absolutePath] as String[])
+            assert process.waitFor() == 0
+
             /*
              * Input which is needed for the Annotation script. It is just for Roddy intern job system handling.
              * File can be deleted afterwards. Delete it if it exists already.
@@ -64,7 +72,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob {
                     "PID=${instance.individual.pid}," +
                     "TUMOR_BAMFILE_FULLPATH_BP=${sampleType1BamFile}," +
                     "TOOL_ID=snvAnnotation," +
-                    "FILENAME_VCF_IN=${inputResultFile}," +
+                    "FILENAME_VCF_IN=${inputFileCopy}," +
                     "FILENAME_VCF_OUT=${annotationResultFile}," +
                     "FILENAME_CHECKPOINT=${checkpointFile}" +
                     "'}"

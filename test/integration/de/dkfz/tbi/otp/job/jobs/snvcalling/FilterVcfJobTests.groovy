@@ -284,7 +284,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
                     "TOOL_ID=snvFilter," +
                     "SNVFILE_PREFIX=snvs_," +
                     "TUMOR_BAMFILE_FULLPATH_BP=${pmbf1.absolutePath}," +
-                    "FILENAME_VCF=${new OtpPath(snvCallingInstance1.snvInstancePath, SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(snvCallingInstance1.individual)).absoluteDataManagementPath}," +
+                    "FILENAME_VCF=${new OtpPath(snvCallingInstance2.snvInstancePath, SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(snvCallingInstance1.individual)).absoluteStagingPath}," +
                     "FILENAME_CHECKPOINT=${SnvCallingStep.FILTER_VCF.getCheckpointFilePath(snvCallingInstance2).absoluteStagingPath}"
 
             assert command.contains(scriptCommandPart)
@@ -345,6 +345,8 @@ CHROMOSOME_INDICES=( {1..21} XY)
         testFile2_shouldNotBeCopied << "testContent"
         File testFile3_shouldNotBeCopied = new OtpPath(snvCallingInstance2.snvInstancePath, "Something.tbi").absoluteStagingPath
         testFile3_shouldNotBeCopied << "testContent"
+        File testFile4_shouldBeCopied = new OtpPath(snvCallingInstance2.snvInstancePath, "Something_intermutation_distance.txt.png").absoluteStagingPath
+        testFile4_shouldBeCopied << "testContent"
 
 
         File checkpointFile = new OtpPath(snvCallingInstance2.snvInstancePath, SnvCallingStep.FILTER_VCF.checkpointFileName).absoluteStagingPath
@@ -361,7 +363,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
             File instancePathStaging = new File(sampleTypeCombinationPathStaging, "2014-09-01_15h32/")
 
             assert sourceLocations.size() == 3
-            assert sourceLocations.contains(new File(instancePathStaging, "snvs_654321.vcf.gz"))
+            assert sourceLocations.contains(new File(instancePathStaging, "Something_intermutation_distance.txt.png"))
             assert sourceLocations.contains(new File(instancePathStaging, "SomeTestFile.txt"))
             assert sourceLocations.contains(new File(instancePathStaging, "config.txt"))
 
@@ -372,13 +374,13 @@ CHROMOSOME_INDICES=( {1..21} XY)
             File instancePathRoot = new File(sampleTypeCombinationPathRoot, "2014-09-01_15h32/")
 
             assert targetLocations.size() == 3
-            assert targetLocations.contains(new File(instancePathRoot, "snvs_654321.vcf.gz"))
+            assert targetLocations.contains(new File(instancePathRoot, "Something_intermutation_distance.txt.png"))
             assert targetLocations.contains(new File(instancePathRoot, "SomeTestFile.txt"))
             assert targetLocations.contains(new File(instancePathRoot, "config.txt"))
 
             // test that linked files are correct
             assert linkLocations.size() == 3
-            assert linkLocations.contains(new File(sampleTypeCombinationPathRoot, "snvs_654321.vcf.gz"))
+            assert linkLocations.contains(new File(sampleTypeCombinationPathRoot, "Something_intermutation_distance.txt.png"))
             assert linkLocations.contains(new File(sampleTypeCombinationPathRoot, "SomeTestFile.txt"))
             assert linkLocations.contains(new File(sampleTypeCombinationPathRoot, "config_filter_vcf_2014-09-01_15h32.txt"))
 
