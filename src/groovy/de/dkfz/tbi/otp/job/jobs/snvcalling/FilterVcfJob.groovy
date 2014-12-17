@@ -56,13 +56,6 @@ class FilterVcfJob extends AbstractSnvCallingJob {
 
             final File configFileInStagingDirectory = writeConfigFile(instance)
 
-            // the filter script of the CO group writes its output in the same folder where its input is,
-            // so we copy the input file to output folder
-            File inputFileCopy = new File(instance.snvInstancePath.absoluteStagingPath, inputResultFile.name)
-            // TODO: replace with Files.createSymbolicLink() in Java 7 (OTP-933)
-            Process process = Runtime.getRuntime().exec(["ln", "-s", inputResultFile.absolutePath, inputFileCopy.absolutePath] as String[])
-            assert process.waitFor() == 0
-
             final File checkpointFile = step.getCheckpointFilePath(instance).absoluteStagingPath
 
             final Realm realm = configService.getRealmDataProcessing(instance.project)
@@ -74,7 +67,7 @@ class FilterVcfJob extends AbstractSnvCallingJob {
                     "TOOL_ID=snvFilter," +
                     "SNVFILE_PREFIX=snvs_," +
                     "TUMOR_BAMFILE_FULLPATH_BP=${getExistingBamFilePath(instance.sampleType1BamFile)}," +
-                    "FILENAME_VCF=${inputFileCopy}," +
+                    "FILENAME_VCF=${inputResultFile}," +
                     "FILENAME_CHECKPOINT=${checkpointFile}" +
                     "'}"
 
