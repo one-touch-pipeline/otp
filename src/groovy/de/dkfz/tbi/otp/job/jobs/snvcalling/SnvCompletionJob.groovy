@@ -30,14 +30,6 @@ class SnvCompletionJob extends AbstractEndStateAwareJobImpl {
         File stagingPath = instance.snvInstancePath.absoluteStagingPath
         File parentPath = stagingPath.parentFile
 
-        // Check if the parent directory contains any objects that are not part of the current instance
-        def isDirty = parentPath.listFiles().toList().find { it != stagingPath }
-
-        // TODO: Use proper exceptions when switching to Java 7 or later (OTP-1145)
-        if (isDirty) {
-            throw new IOException("The parent directory of path '${stagingPath}' for SnvCallingInstance '${instance}' contains unknown files. This should not happen. Please resolve manually.")
-        }
-
         if (!parentPath.deleteDir()) {
             throw new IOException("Unable to delete path '${parentPath}' for SnvCallingInstance '${instance}'")
         }
