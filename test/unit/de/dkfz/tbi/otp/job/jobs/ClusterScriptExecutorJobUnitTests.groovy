@@ -1,9 +1,12 @@
 package de.dkfz.tbi.otp.job.jobs
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
+import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.Realm
 import grails.test.mixin.Mock
+import org.apache.commons.io.FileUtils
 
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
@@ -47,9 +50,21 @@ class ClusterScriptExecutorJobUnitTests extends GroovyTestCase {
 
     void test_maybeSubmit_WhenAllOK_ShouldReturnWaitForClusterJobs() {
         ClusterScriptExecutorJob clusterScriptExecutorJob = createClusterScriptExecutorJobWithRealmIdAndScript(ARBITRARY_REALM_ID, ARBITRARY_DUMMY_SCRIPT)
-        Realm.metaClass.static.findById = { new Realm() }
+        def testDir = TestCase.createEmptyTestDirectory()
+        def realm = new Realm()
+        realm.stagingRootPath = testDir
+        Realm.metaClass.static.findById = { Long id ->
+            return realm
+        }
+        clusterScriptExecutorJob.metaClass.getProcessingStep = { return new ProcessingStep(id: 1) }
 
-        assert clusterScriptExecutorJob.maybeSubmit() == AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
+        try {
+            assert clusterScriptExecutorJob.maybeSubmit() == AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
+        } finally {
+            testDir.deleteDir()
+            TestCase.removeMetaClass(ClusterScriptExecutorJob, clusterScriptExecutorJob)
+            TestCase.removeMetaClass(Realm, realm)
+        }
     }
 
     // Helper methods

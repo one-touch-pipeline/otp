@@ -1,10 +1,9 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.utils.HelperUtils
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
-
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.job.jobs.TestStartJob2
@@ -28,14 +27,14 @@ class AbstractStartJobImplTests extends AbstractIntegrationTest {
 
     @Test
     void testGetConfiguredSlotCount_notConfigured() {
-        final String optionName = TestCase.uniqueString
+        final String optionName = HelperUtils.uniqueString
         final JobExecutionPlan plan = JobExecutionPlan.build()
         assert testStartJob.getConfiguredSlotCount(plan, optionName, SLOT_COUNT_1) == SLOT_COUNT_1
     }
 
     @Test
     void testGetConfiguredSlotCount_properlyConfigured() {
-        final String optionName = "option${TestCase.uniqueString}"
+        final String optionName = "option${HelperUtils.uniqueString}"
         final JobExecutionPlan plan = JobExecutionPlan.build()
         createUserAndRoles()
         SpringSecurityUtils.doWithAuth('operator') {
@@ -46,7 +45,7 @@ class AbstractStartJobImplTests extends AbstractIntegrationTest {
 
     @Test
     void testGetConfiguredSlotCount_notANumber() {
-        final String optionName = "option${TestCase.uniqueString}"
+        final String optionName = "option${HelperUtils.uniqueString}"
         final JobExecutionPlan plan = JobExecutionPlan.build()
         createUserAndRoles()
         SpringSecurityUtils.doWithAuth('operator') {
@@ -59,7 +58,7 @@ class AbstractStartJobImplTests extends AbstractIntegrationTest {
 
     @Test
     void testGetConfiguredSlotCount_negative() {
-        final String optionName = "option${TestCase.uniqueString}"
+        final String optionName = "option${HelperUtils.uniqueString}"
         final JobExecutionPlan plan = JobExecutionPlan.build()
         createUserAndRoles()
         SpringSecurityUtils.doWithAuth('operator') {
