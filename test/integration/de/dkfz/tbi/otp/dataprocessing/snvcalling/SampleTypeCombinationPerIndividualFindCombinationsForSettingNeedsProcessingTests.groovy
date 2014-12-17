@@ -1,7 +1,5 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import de.dkfz.tbi.otp.utils.HelperUtils
-
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 import org.junit.Before
@@ -114,7 +112,7 @@ class SampleTypeCombinationPerIndividualFindCombinationsForSettingNeedsProcessin
         // one SnvCallingInstance with one non-withdrawn and one withdrawn SnvJobResult
         assertFindsOne()
 
-        testData.createAndSaveSnvCallingInstance(instanceName: HelperUtils.uniqueString)
+        testData.createAndSaveSnvCallingInstance(instanceName: TestCase.uniqueString)
         // one SnvCallingInstance with one non-withdrawn and one withdrawn SnvJobResult and one without any SnvJobResult
         assertFindsNothing()
     }

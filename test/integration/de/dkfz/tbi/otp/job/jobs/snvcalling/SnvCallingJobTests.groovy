@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import de.dkfz.tbi.otp.utils.CreateFileHelper
-import de.dkfz.tbi.otp.utils.HelperUtils
 
 import static de.dkfz.tbi.TestCase.*
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
@@ -11,6 +10,7 @@ import static org.junit.Assert.*
 import org.junit.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
@@ -70,7 +70,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 """
 
     final String PBS_ID = "123456"
-    String UNIQUE_PATH = HelperUtils.getUniqueString()
+    String UNIQUE_PATH = TestCase.getUniqueString()
 
     @Before
     void setUp() {

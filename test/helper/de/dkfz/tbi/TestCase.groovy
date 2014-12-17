@@ -1,7 +1,5 @@
 package de.dkfz.tbi
 
-import de.dkfz.tbi.otp.utils.HelperUtils
-
 import java.util.concurrent.Callable
 
 import org.junit.*
@@ -16,6 +14,8 @@ import org.springframework.validation.FieldError
 class TestCase extends GroovyTestCase {
 
     final List<Throwable> failures = []
+
+    static Random random = new Random()
 
     // Implements OTP-686.
     /**
@@ -50,8 +50,12 @@ class TestCase extends GroovyTestCase {
         Assert.assertEquals(expected.toString(), actual)
     }
 
+    public static String getUniqueString() {
+        return "${System.currentTimeMillis()}-${sprintf('%016X', random.nextLong())}"
+    }
+
     public static File getUniqueNonExistentPath() {
-        return new File("/dev/null/otp-test/${HelperUtils.uniqueString}")
+        return new File("/dev/null/otp-test/${uniqueString}")
     }
 
     /**
@@ -59,7 +63,7 @@ class TestCase extends GroovyTestCase {
      * soon as you do not need it anymore.
      */
     public static File createEmptyTestDirectory() {
-        final File dir = new File("/tmp/otp-test/${HelperUtils.uniqueString}")
+        final File dir = new File("/tmp/otp-test/${uniqueString}")
         assert dir.mkdirs()  // This will fail if the directory already exists or if it could not be created.
         return dir
     }

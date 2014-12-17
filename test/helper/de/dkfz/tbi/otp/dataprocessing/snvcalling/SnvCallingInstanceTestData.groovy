@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingJob
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.ExternalScript
-import de.dkfz.tbi.otp.utils.HelperUtils
 
 class SnvCallingInstanceTestData extends TestData {
 
@@ -114,7 +114,7 @@ class SnvCallingInstanceTestData extends TestData {
         ] + properties)
     }
 
-    ProcessedMergedBamFile createProcessedMergedBamFile(Individual individual, SeqType seqType, String sampleTypeIdentifier = HelperUtils.uniqueString) {
+    ProcessedMergedBamFile createProcessedMergedBamFile(Individual individual, SeqType seqType, String sampleTypeIdentifier = TestCase.uniqueString) {
         SampleType sampleType = new SampleType(
                 name: "SampleType${sampleTypeIdentifier}")
         assert sampleType.save(flush: true, failOnError: true)

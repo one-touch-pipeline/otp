@@ -1,9 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.utils.HelperUtils
-
 import static org.junit.Assert.*
 
+import de.dkfz.tbi.TestCase
 import grails.validation.ValidationException
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
@@ -622,9 +621,9 @@ class MergingCriteriaSpecificServiceTests {
 
     SeqType createSeqType() {
         SeqType seqType = new SeqType(
-                        name: "name${HelperUtils.uniqueString}",
+                        name: "name${TestCase.uniqueString}",
                         libraryLayout: "library",
-                        dirName: "dirName${HelperUtils.uniqueString}"
+                        dirName: "dirName${TestCase.uniqueString}"
                         )
         assertNotNull(seqType.save([flush: true, failOnError: true]))
         return seqType
