@@ -126,7 +126,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     }
 
     @Test
-    void test_execute_WhenRunAndDirectoryIsDirtyContainingFile_ShouldThrowException() {
+    void test_execute_WhenRunAndDirectoryIsDirtyContainingFile_ShouldDeleteDirectory() {
         // Given:
         snvCompletionJob.metaClass.getProcessParameterObject = { snvCallingInstance }
         File stagingPath = snvCallingInstance.snvInstancePath.absoluteStagingPath
@@ -134,13 +134,15 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         File fileNotSupposedToBeThere = new File(snvCallingInstance.snvInstancePath.absoluteStagingPath.parentFile, 'someFile.txt')
         fileNotSupposedToBeThere << 'dummy content'
         // When:
-        def msg = shouldFail IOException, { snvCompletionJob.execute() }
+        snvCompletionJob.execute()
         // Then:
-        assert msg =~ /contains unknown files/
+        assert !stagingPath.exists()
+        assert !stagingPath.parentFile.exists()
+        assert stagingPath.parentFile.parentFile.exists()
     }
 
     @Test
-    void test_execute_WhenRunAndDirectoryIsDirtyContainingDirectory_ShouldThrowException() {
+    void test_execute_WhenRunAndDirectoryIsDirtyContainingDirectory_ShouldDeleteDirectory() {
         // Given:
         snvCompletionJob.metaClass.getProcessParameterObject = { snvCallingInstance }
         File stagingPath = snvCallingInstance.snvInstancePath.absoluteStagingPath
@@ -148,9 +150,11 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         File dirNotSupposedToBeThere = new File(snvCallingInstance.snvInstancePath.absoluteStagingPath.parentFile, 'someDir')
         assert dirNotSupposedToBeThere.mkdirs()
         // When:
-        def msg = shouldFail IOException, { snvCompletionJob.execute() }
+        snvCompletionJob.execute()
         // Then:
-        assert msg =~ /contains unknown files/
+        assert !stagingPath.exists()
+        assert !stagingPath.parentFile.exists()
+        assert stagingPath.parentFile.parentFile.exists()
     }
 
     // Helper methods
