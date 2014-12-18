@@ -268,7 +268,6 @@ class ProcessedBamFileService {
             }
             eq("withdrawn", false) //withdrawn files should be ignored
             or {
-                ne("qualityAssessmentStatus", AbstractBamFile.QaProcessingStatus.FINISHED)
                 not { 'in'("status", allowedMergingStates) }
             }
         }
