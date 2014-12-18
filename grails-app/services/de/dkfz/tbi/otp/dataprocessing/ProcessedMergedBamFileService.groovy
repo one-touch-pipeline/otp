@@ -327,17 +327,11 @@ class ProcessedMergedBamFileService {
         }
         /**
          * a mergedBamFile will only be moved when
-         * - the qa-workflow for the single lane bam files, which build this merged bam file, is finished
          * - it is not currently used in another merging process
          */
         for (file in files) {
-            List<ProcessedBamFile> bamFiles = abstractBamFileService.findByProcessedMergedBamFile(file).findAll { it instanceof ProcessedBamFile }
-            List<MergingSetAssignment> mergingSetAssignments = MergingSetAssignment.findAllByBamFile(file)
-
-            if (bamFiles.every { it.qualityAssessmentStatus == QaProcessingStatus.FINISHED }) {
-                if (mergingSetAssignments.every { it.mergingSet.status == MergingSet.State.PROCESSED }) {
-                    return file
-                }
+            if (MergingSetAssignment.findAllByBamFile(file).every { it.mergingSet.status == MergingSet.State.PROCESSED }) {
+                return file
             }
         }
         return null

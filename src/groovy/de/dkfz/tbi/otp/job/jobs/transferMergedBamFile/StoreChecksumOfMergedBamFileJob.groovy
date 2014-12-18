@@ -14,29 +14,22 @@ class StoreChecksumOfMergedBamFileJob extends AbstractEndStateAwareJobImpl {
     @Autowired
     ChecksumFileService checksumFileService
 
-    @Autowired
-    ProcessStatusService processStatusService
-
     @Override
     public void execute() throws Exception {
         long id = Long.parseLong(getProcessParameterValue())
         ProcessedMergedBamFile file = ProcessedMergedBamFile.get(id)
         Map<String, String> locations = processedMergedBamFileService.locationsForFileCopying(file)
-        String dest = processedMergedBamFileService.destinationDirectory(file)
-        String dirToLog = processStatusService.statusLogFile(dest)
-        if (processStatusService.statusSuccessful(dirToLog, MoveFilesToFinalDestinationJob.class.name)) {
-            String md5SumFile = locations.get("destinationDirectory") + "/" + locations.get("md5BamFile")
-            String md5Bam = checksumFileService.firstMD5ChecksumFromFile(md5SumFile)
-            boolean successfulSave = processedMergedBamFileService.storeMD5Digest(file, md5Bam)
-            //TODO: processedMergedBamFile somehow has to be stored as MergedAlignmentDataFile or another GUI representation of the files.
-            //This can not be done now, since the db structure can not be used as it is now
-            log.debug "Stored MD5 digest for merged BAM file " + locations.get("bamFile") + " (id= " + file + " ) in database"
-            successfulSave ? succeed() : fail()
+
+        String md5SumFile = locations.get("destinationDirectory") + "/" + locations.get("md5BamFile")
+        String md5Bam = checksumFileService.firstMD5ChecksumFromFile(md5SumFile)
+        boolean successfulSave = processedMergedBamFileService.storeMD5Digest(file, md5Bam)
+        //TODO: processedMergedBamFile somehow has to be stored as MergedAlignmentDataFile or another GUI representation of the files.
+        //This can not be done now, since the db structure can not be used as it is now
+        log.debug "Stored MD5 digest for merged BAM file " + locations.get("bamFile") + " (id= " + file + " ) in database"
+        if (successfulSave) {
+            succeed()
         } else {
-            addOutputParameter(JOB, "")
-            addOutputParameter(REALM, "")
-            log.debug "the job ${MoveFilesToFinalDestinationJob.class.name} failed"
-            fail()
+            throw new RuntimeException("The md5sums in ${md5SumFile} are not equal to the md5sums in the final folder")
         }
     }
 }

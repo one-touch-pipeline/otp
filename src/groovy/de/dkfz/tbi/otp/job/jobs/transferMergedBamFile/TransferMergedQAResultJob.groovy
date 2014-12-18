@@ -37,25 +37,19 @@ class TransferMergedQAResultJob extends AbstractEndStateAwareJobImpl{
         long id = Long.parseLong(getProcessParameterValue())
         ProcessedMergedBamFile bamFile = ProcessedMergedBamFile.get(id)
         Project project = processedMergedBamFileService.project(bamFile)
-        String temporalDestinationDir = processedMergedBamFileService.destinationTempDirectory(bamFile)
-        String dirToLog = processStatusService.statusLogFile(temporalDestinationDir)
         Map<String, String> clusterPrefix = configService.clusterSpecificCommandPrefixes(project)
 
-        if (processStatusService.statusSuccessful(dirToLog, CheckMergedBamFileChecksumMD5Job.class.name)) {
-            String cmd = scriptText(bamFile, dirToLog, clusterPrefix)
-            Realm realm = configService.getRealmDataProcessing(project)
-            String jobId = executionHelperService.sendScript(realm, cmd)
-            log.debug "Job ${jobId} submitted to PBS"
-            addOutputParameter(JOB, jobId)
-            addOutputParameter(REALM, realm.id.toString())
-            succeed()
-        } else {
-            log.debug "the job ${CheckMergedBamFileChecksumMD5Job.class.name} failed"
-            fail()
-        }
+        String cmd = scriptText(bamFile, clusterPrefix)
+        Realm realm = configService.getRealmDataProcessing(project)
+        String jobId = executionHelperService.sendScript(realm, cmd)
+        log.debug "Job ${jobId} submitted to PBS"
+
+        addOutputParameter(JOB, jobId)
+        addOutputParameter(REALM, realm.id.toString())
+        succeed()
     }
 
-    private String scriptText(ProcessedMergedBamFile file, String dirToLog, Map<String, String> clusterPrefix) {
+    private String scriptText(ProcessedMergedBamFile file, Map<String, String> clusterPrefix) {
         String tmpQADestinationDirectory = processedMergedBamFileService.qaResultTempDestinationDirectory(file)
         QualityAssessmentMergedPass pass = qualityAssessmentMergedPassService.latestQualityAssessmentMergedPass(file)
         String sourceQAResultDirectory = processedMergedBamFileQaFileService.directoryPath(pass)
@@ -64,7 +58,6 @@ ${clusterPrefix.exec} \"mkdir -p -m 2750 ${tmpQADestinationDirectory}\"
 ${clusterPrefix.cp} -r ${sourceQAResultDirectory}/* ${clusterPrefix.dest}${tmpQADestinationDirectory}
 ${clusterPrefix.exec} \"find ${tmpQADestinationDirectory} -type f -exec chmod 0640 '{}' \\;\"
 """
-        text += "${clusterPrefix.exec} \"echo ${this.class.name} >> ${dirToLog} ; chmod 0644 ${dirToLog}\""
         return text
     }
 }

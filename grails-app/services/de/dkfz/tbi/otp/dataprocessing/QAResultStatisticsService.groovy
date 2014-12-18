@@ -78,50 +78,6 @@ class QAResultStatisticsService {
     static final String EXOME_ENRICHMENT_KIT = "exomeEnrichmentKit"
 
     /**
-     * return the basis for the qa statistic overview for one single lane bam file, from which all desired information can be received
-     */
-    Map prepareFetchingSingleLaneResults(ProcessedBamFile bamFile) {
-        notNull(bamFile, "the input of the method prepareFetchingSingleLaneResults is null")
-        Sample sample = processedBamFileService.sample(bamFile)
-        Individual individual = sample.individual
-        Project project = individual.project
-        SeqTrack seqTrack = bamFile.alignmentPass.seqTrack
-        ExomeEnrichmentKit kit = null
-        if(seqTrack instanceof ExomeSeqTrack) {
-            kit = seqTrack.exomeEnrichmentKit
-        }
-        SeqType seqType = seqTrack.seqType
-        String run = seqTrack.run.name
-        String lane = seqTrack.laneId
-        ReferenceGenome referenceGenome = referenceGenomeService.referenceGenome(project, seqType)
-        ReferenceGenomeEntry referenceGenomeEntryChrX = ReferenceGenomeEntry.findByReferenceGenomeAndAlias(referenceGenome, Chromosomes.CHR_X.alias)
-        ReferenceGenomeEntry referenceGenomeEntryChrY = ReferenceGenomeEntry.findByReferenceGenomeAndAlias(referenceGenome, Chromosomes.CHR_Y.alias)
-        long latestQualityAssessmentPassId = qualityAssessmentPassService.latestQualityAssessmentPass(bamFile).id
-        OverallQualityAssessment overallQualityAssessment = OverallQualityAssessment.createCriteria().get {
-            qualityAssessmentPass { eq("id", latestQualityAssessmentPassId) }
-        }
-        ChromosomeQualityAssessment chromosomeQualityAssessmentXChr = chromosomeQualityAssessmentService.
-                        qualityAssessmentForSpecificChromosome(referenceGenomeEntryChrX, latestQualityAssessmentPassId)
-        ChromosomeQualityAssessment chromosomeQualityAssessmentYChr = chromosomeQualityAssessmentService.
-                        qualityAssessmentForSpecificChromosome(referenceGenomeEntryChrY, latestQualityAssessmentPassId)
-        Map preparation = [
-            (CHROMOSOME_QUALITY_ASSESSMENT_CHR_X): chromosomeQualityAssessmentXChr,
-            (CHROMOSOME_QUALITY_ASSESSMENT_CHR_Y): chromosomeQualityAssessmentYChr,
-            (OVERALL_QUALITY_ASSESSMENT): overallQualityAssessment,
-            (REFERENCE_GENOME_ENTRY_CHR_X): referenceGenomeEntryChrX,
-            (REFERENCE_GENOME_ENTRY_CHR_Y): referenceGenomeEntryChrY,
-            (REFERENCE_GENOME): referenceGenome,
-            (INDIVIDUAL): individual,
-            (SAMPLE): sample,
-            (RUN): run,
-            (LANE): lane,
-            (SEQTYPE): seqType,
-            (EXOME_ENRICHMENT_KIT): kit,
-        ]
-        return preparation
-    }
-
-    /**
      * return the basis for the qa statistic overview for the merged bam file, from which all desired information can be received
      */
     Map prepareFetchingMergedBamFileResults(ProcessedMergedBamFile bamFile) {
@@ -170,112 +126,86 @@ class QAResultStatisticsService {
      */
     List<Map> fetchResultsSmall(ProcessedMergedBamFile processedMergedBamFile) {
         notNull(processedMergedBamFile, "the input of the method fetchResultsSmall is null")
-        List<Map> resultsSmall = []
-        List<AbstractBamFile> singleLaneBamFiles = abstractBamFileService.findAllByProcessedMergedBamFile(processedMergedBamFile)
-        singleLaneBamFiles.sort { -it.id }
-        singleLaneBamFiles.add(0, processedMergedBamFile)
-        singleLaneBamFiles.each { AbstractBamFile bamFile ->
-            Map preparation = [:]
-            if (bamFile instanceof ProcessedBamFile) {
-                preparation = prepareFetchingSingleLaneResults(bamFile)
-            } else if (bamFile instanceof ProcessedMergedBamFile) {
-                preparation = prepareFetchingMergedBamFileResults(bamFile)
-            } else {
-                throw new IllegalArgumentException("Instance of AbstractBamFile is of unknown class")
-            }
-            AbstractQualityAssessment abstractQualityAssessment = preparation[OVERALL_QUALITY_ASSESSMENT]
-            long qcBasesMapped = abstractQualityAssessment.qcBasesMapped
-            long referenceGenomeLengthWithN = preparation[REFERENCE_GENOME].length
-            long referenceGenomeLengthWithoutN = preparation[REFERENCE_GENOME].lengthWithoutN
-            long chromosomeXLengthWithoutN = preparation[REFERENCE_GENOME_ENTRY_CHR_X].lengthWithoutN
-            long chromosomeYLengthWithoutN = preparation[REFERENCE_GENOME_ENTRY_CHR_Y].lengthWithoutN
-            long qcBasesMappedXChromosome = preparation[CHROMOSOME_QUALITY_ASSESSMENT_CHR_X].qcBasesMapped
-            long qcBasesMappedYChromosome = preparation[CHROMOSOME_QUALITY_ASSESSMENT_CHR_Y].qcBasesMapped
-            long totalReadCounter = abstractQualityAssessment.totalReadCounter
-            long totalMappedReadCounter = abstractQualityAssessment.totalMappedReadCounter
-            long properlyPaired = abstractQualityAssessment.properlyPaired
-            long pairedInSequencing = abstractQualityAssessment.pairedInSequencing
-            long singletons = abstractQualityAssessment.singletons
-            long duplicates = abstractQualityAssessment.duplicates
-            Map statisticResults = [
-                (REFERENCE_GENOME_LENGTH_WITH_N): formatToTwoDecimals(referenceGenomeLengthWithN / 1e6),
-                (REFERENCE_GENOME_LENGTH_WITHOUT_N): formatToTwoDecimals(referenceGenomeLengthWithoutN / 1e6),
-                (PID): preparation[INDIVIDUAL].pid,
-                (MOCK_FULL_NAME): preparation[INDIVIDUAL].mockFullName,
-                (SAMPLE_TYPE): preparation[SAMPLE].sampleType.name,
-                (RUN_ID): preparation[RUN],
-                (LANE): preparation[LANE],
-                (COVERAGE_WITHOUT_N): formatToTwoDecimals(qcBasesMapped / referenceGenomeLengthWithoutN),
-                (COVERAGE_WITH_N): formatToTwoDecimals(qcBasesMapped / referenceGenomeLengthWithN),
-                (COVERAGE_WITHOUT_N_CHR_X): formatToTwoDecimals(qcBasesMappedXChromosome / chromosomeXLengthWithoutN),
-                (COVERAGE_WITHOUT_N_CHR_Y): formatToTwoDecimals(qcBasesMappedYChromosome / chromosomeYLengthWithoutN),
-                (QC_BASES_MAPPED): qcBasesMapped,
-                (TOTAL_READ_COUNT): totalReadCounter,
-                (MAPPED_READ_COUNT): totalMappedReadCounter,
-                (PERCENTAGE_MAPPED_READS): formatToTwoDecimals(totalMappedReadCounter / (totalReadCounter as Double) * 100.0),
-                (PROPERLY_PAIRED): formatToTwoDecimals(properlyPaired / pairedInSequencing * 100.0),
-                (SINGLETONS): formatToTwoDecimals(singletons / totalReadCounter * 100.0),
-                (DUPLICATES): formatToTwoDecimals(duplicates / totalReadCounter * 100.0),
-                (INSERT_SIZE_SD): formatToTwoDecimals(abstractQualityAssessment.insertSizeSD),
-                (INSERT_SIZE_MEDIAN): formatToTwoDecimals(abstractQualityAssessment.insertSizeMedian),
-                (INSERT_SIZE_MEAN): formatToTwoDecimals(abstractQualityAssessment.insertSizeMean),
-            ]
-            if (preparation[SEQTYPE].name.equals(SeqTypeNames.EXOME.seqTypeName)) {
-                ExomeEnrichmentKit kit = preparation[EXOME_ENRICHMENT_KIT]
-                BedFile bedFile = BedFile.findByReferenceGenomeAndExomeEnrichmentKit(preparation[REFERENCE_GENOME], kit)
-                statisticResults.put(TARGET_COVERAGE,
-                                formatToTwoDecimals(abstractQualityAssessment.onTargetMappedBases / bedFile.mergedTargetSize))
-                statisticResults.put(ON_TARGET_RATE,
-                                formatToTwoDecimals(abstractQualityAssessment.onTargetMappedBases / abstractQualityAssessment.allBasesMapped * 100.0))
-            }
-            resultsSmall << statisticResults
+        Map preparation = prepareFetchingMergedBamFileResults(processedMergedBamFile)
+
+        AbstractQualityAssessment abstractQualityAssessment = preparation[OVERALL_QUALITY_ASSESSMENT]
+        long qcBasesMapped = abstractQualityAssessment.qcBasesMapped
+        long referenceGenomeLengthWithN = preparation[REFERENCE_GENOME].length
+        long referenceGenomeLengthWithoutN = preparation[REFERENCE_GENOME].lengthWithoutN
+        long chromosomeXLengthWithoutN = preparation[REFERENCE_GENOME_ENTRY_CHR_X].lengthWithoutN
+        long chromosomeYLengthWithoutN = preparation[REFERENCE_GENOME_ENTRY_CHR_Y].lengthWithoutN
+        long qcBasesMappedXChromosome = preparation[CHROMOSOME_QUALITY_ASSESSMENT_CHR_X].qcBasesMapped
+        long qcBasesMappedYChromosome = preparation[CHROMOSOME_QUALITY_ASSESSMENT_CHR_Y].qcBasesMapped
+        long totalReadCounter = abstractQualityAssessment.totalReadCounter
+        long totalMappedReadCounter = abstractQualityAssessment.totalMappedReadCounter
+        long properlyPaired = abstractQualityAssessment.properlyPaired
+        long pairedInSequencing = abstractQualityAssessment.pairedInSequencing
+        long singletons = abstractQualityAssessment.singletons
+        long duplicates = abstractQualityAssessment.duplicates
+        Map statisticResults = [
+            (REFERENCE_GENOME_LENGTH_WITH_N): formatToTwoDecimals(referenceGenomeLengthWithN / 1e6),
+            (REFERENCE_GENOME_LENGTH_WITHOUT_N): formatToTwoDecimals(referenceGenomeLengthWithoutN / 1e6),
+            (PID): preparation[INDIVIDUAL].pid,
+            (MOCK_FULL_NAME): preparation[INDIVIDUAL].mockFullName,
+            (SAMPLE_TYPE): preparation[SAMPLE].sampleType.name,
+            (RUN_ID): preparation[RUN],
+            (LANE): preparation[LANE],
+            (COVERAGE_WITHOUT_N): formatToTwoDecimals(qcBasesMapped / referenceGenomeLengthWithoutN),
+            (COVERAGE_WITH_N): formatToTwoDecimals(qcBasesMapped / referenceGenomeLengthWithN),
+            (COVERAGE_WITHOUT_N_CHR_X): formatToTwoDecimals(qcBasesMappedXChromosome / chromosomeXLengthWithoutN),
+            (COVERAGE_WITHOUT_N_CHR_Y): formatToTwoDecimals(qcBasesMappedYChromosome / chromosomeYLengthWithoutN),
+            (QC_BASES_MAPPED): qcBasesMapped,
+            (TOTAL_READ_COUNT): totalReadCounter,
+            (MAPPED_READ_COUNT): totalMappedReadCounter,
+            (PERCENTAGE_MAPPED_READS): formatToTwoDecimals(totalMappedReadCounter / (totalReadCounter as Double) * 100.0),
+            (PROPERLY_PAIRED): formatToTwoDecimals(properlyPaired / pairedInSequencing * 100.0),
+            (SINGLETONS): formatToTwoDecimals(singletons / totalReadCounter * 100.0),
+            (DUPLICATES): formatToTwoDecimals(duplicates / totalReadCounter * 100.0),
+            (INSERT_SIZE_SD): formatToTwoDecimals(abstractQualityAssessment.insertSizeSD),
+            (INSERT_SIZE_MEDIAN): formatToTwoDecimals(abstractQualityAssessment.insertSizeMedian),
+            (INSERT_SIZE_MEAN): formatToTwoDecimals(abstractQualityAssessment.insertSizeMean),
+        ]
+        if (preparation[SEQTYPE].name.equals(SeqTypeNames.EXOME.seqTypeName)) {
+            ExomeEnrichmentKit kit = preparation[EXOME_ENRICHMENT_KIT]
+            BedFile bedFile = BedFile.findByReferenceGenomeAndExomeEnrichmentKit(preparation[REFERENCE_GENOME], kit)
+            statisticResults.put(TARGET_COVERAGE,
+                            formatToTwoDecimals(abstractQualityAssessment.onTargetMappedBases / bedFile.mergedTargetSize))
+            statisticResults.put(ON_TARGET_RATE,
+                            formatToTwoDecimals(abstractQualityAssessment.onTargetMappedBases / abstractQualityAssessment.allBasesMapped * 100.0))
         }
-        return resultsSmall
+        return [statisticResults]
     }
 
     List<Map> fetchResultsExtended(ProcessedMergedBamFile processedMergedBamFile) {
         notNull(processedMergedBamFile, "the input of the method fetchResultsSmall is null")
-        List<Map> resultsExtended = []
-        List<AbstractBamFile> singleLaneBamFiles = abstractBamFileService.findAllByProcessedMergedBamFile(processedMergedBamFile)
-        singleLaneBamFiles.sort { -it.id }
-        singleLaneBamFiles.add(0, processedMergedBamFile)
-        singleLaneBamFiles.each { AbstractBamFile bamFile ->
-            Map preparation = [:]
-            if (bamFile instanceof ProcessedBamFile) {
-                preparation = prepareFetchingSingleLaneResults(bamFile)
-            } else if (bamFile instanceof ProcessedMergedBamFile) {
-                preparation = prepareFetchingMergedBamFileResults(bamFile)
-            } else {
-                throw new IllegalArgumentException("Instance of AbstractBamFile is of unknown class")
-            }
-            AbstractQualityAssessment abstractQualityAssessment = preparation[OVERALL_QUALITY_ASSESSMENT]
-            long qcBasesMapped = abstractQualityAssessment.qcBasesMapped
-            long referenceGenomeLengthWithN = preparation[REFERENCE_GENOME].length
-            long referenceGenomeLengthWithoutN = preparation[REFERENCE_GENOME].lengthWithoutN
-            Map statisticResults = [
-                (DUPLICATES_READ_1): abstractQualityAssessment.duplicateR1,
-                (DUPLICATES_READ_2): abstractQualityAssessment.duplicateR2,
-                (PE_READS_MAPPED_ON_DIFF_CHR): abstractQualityAssessment.percentReadPairsMapToDiffChrom,
-                (INCORRECT_PE_ORIENTATION): abstractQualityAssessment.percentIncorrectPEorientation,
-                (INCORRECT_PROPER_PAIR): abstractQualityAssessment.properPairStrandConflict,
-                (PERCENTAGE_QC_BASES_MAPPED_WITHOUT_N): "${qcBasesMapped}/${referenceGenomeLengthWithoutN}",
-                (PERCENTAGE_QC_BASES_MAPPED_WITH_N): "${qcBasesMapped}/${referenceGenomeLengthWithN}",
-                (NOT_MAPPED_READ_1): abstractQualityAssessment.notMappedR1,
-                (NOT_MAPPED_READ_2): abstractQualityAssessment.notMappedR2,
-                (MAPPED_SHORT_READ_1): abstractQualityAssessment.mappedShortR1,
-                (MAPPED_SHORT_READ_2): abstractQualityAssessment.mappedShortR2,
-                (MAPPED_LOW_QUALITY_READ_1): abstractQualityAssessment.mappedLowQualityR1,
-                (MAPPED_LOW_QUALITY_READ_2): abstractQualityAssessment.mappedLowQualityR2,
-                (MAPPED_QUALITY_LONG_READ_1): abstractQualityAssessment.mappedQualityLongR1,
-                (MAPPED_QUALITY_LONG_READ_2): abstractQualityAssessment.mappedQualityLongR2,
-            ]
-            if (preparation[SEQTYPE].name.equals(SeqTypeNames.EXOME.seqTypeName)) {
-                statisticResults.put(TARGET_MAPPED_BASES, abstractQualityAssessment.onTargetMappedBases)
-                statisticResults.put(ALL_MAPPED_BASES, abstractQualityAssessment.allBasesMapped)
-            }
-            resultsExtended << statisticResults
+
+        Map preparation = prepareFetchingMergedBamFileResults(processedMergedBamFile)
+        AbstractQualityAssessment abstractQualityAssessment = preparation[OVERALL_QUALITY_ASSESSMENT]
+        long qcBasesMapped = abstractQualityAssessment.qcBasesMapped
+        long referenceGenomeLengthWithN = preparation[REFERENCE_GENOME].length
+        long referenceGenomeLengthWithoutN = preparation[REFERENCE_GENOME].lengthWithoutN
+        Map statisticResults = [
+            (DUPLICATES_READ_1): abstractQualityAssessment.duplicateR1,
+            (DUPLICATES_READ_2): abstractQualityAssessment.duplicateR2,
+            (PE_READS_MAPPED_ON_DIFF_CHR): abstractQualityAssessment.percentReadPairsMapToDiffChrom,
+            (INCORRECT_PE_ORIENTATION): abstractQualityAssessment.percentIncorrectPEorientation,
+            (INCORRECT_PROPER_PAIR): abstractQualityAssessment.properPairStrandConflict,
+            (PERCENTAGE_QC_BASES_MAPPED_WITHOUT_N): "${qcBasesMapped}/${referenceGenomeLengthWithoutN}",
+            (PERCENTAGE_QC_BASES_MAPPED_WITH_N): "${qcBasesMapped}/${referenceGenomeLengthWithN}",
+            (NOT_MAPPED_READ_1): abstractQualityAssessment.notMappedR1,
+            (NOT_MAPPED_READ_2): abstractQualityAssessment.notMappedR2,
+            (MAPPED_SHORT_READ_1): abstractQualityAssessment.mappedShortR1,
+            (MAPPED_SHORT_READ_2): abstractQualityAssessment.mappedShortR2,
+            (MAPPED_LOW_QUALITY_READ_1): abstractQualityAssessment.mappedLowQualityR1,
+            (MAPPED_LOW_QUALITY_READ_2): abstractQualityAssessment.mappedLowQualityR2,
+            (MAPPED_QUALITY_LONG_READ_1): abstractQualityAssessment.mappedQualityLongR1,
+            (MAPPED_QUALITY_LONG_READ_2): abstractQualityAssessment.mappedQualityLongR2,
+        ]
+        if (preparation[SEQTYPE].name.equals(SeqTypeNames.EXOME.seqTypeName)) {
+            statisticResults.put(TARGET_MAPPED_BASES, abstractQualityAssessment.onTargetMappedBases)
+            statisticResults.put(ALL_MAPPED_BASES, abstractQualityAssessment.allBasesMapped)
         }
-        return resultsExtended
+        return [statisticResults]
     }
 
     /**

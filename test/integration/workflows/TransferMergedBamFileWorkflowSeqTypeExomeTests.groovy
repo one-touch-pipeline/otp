@@ -71,10 +71,6 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
     String fileNameBaiFile1 = "${filePathBaiFile1}control_pid_1_EXON_PAIRED_merged.mdup.bai"
     String filePathBaiFile2 = "${mergingMiddleDir}/1/pass0/"
     String fileNameBaiFile2 = "${filePathBaiFile2}control_pid_1_EXON_PAIRED_merged.mdup.bai"
-    String filePathBamFileQA1 = "${alignmentMiddleDir}/runName_laneId/pass0/QualityAssessment/pass0/"
-    String fileNameBamFileQA1 = "${filePathBamFileQA1}/plot.jpg"
-    String filePathBamFileQA2 = "${alignmentMiddleDir}/runName_laneId1/pass0/QualityAssessment/pass0/"
-    String fileNameBamFileQA2 = "${filePathBamFileQA2}/plot.jpg"
     String filePathMergedBamFileQA1 = "${mergingMiddleDir}/0/pass0/QualityAssessment/pass0/"
     String fileNameMergedBamFileQA1 = "${filePathMergedBamFileQA1}/plot.jpg"
     String filePathMergedBamFileQA2 = "${mergingMiddleDir}/1/pass0/QualityAssessment/pass0/"
@@ -581,8 +577,6 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
             filePathMergedBamFile2,
             filePathBaiFile1,
             filePathBaiFile2,
-            filePathBamFileQA1,
-            filePathBamFileQA2,
             filePathMergedBamFileQA1,
             filePathMergedBamFileQA2
         ].collect { "mkdir -p ${it}" }.join " && "
@@ -592,8 +586,6 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
             fileNameMergedBamFile2,
             fileNameBaiFile1,
             fileNameBaiFile2,
-            fileNameBamFileQA1,
-            fileNameBamFileQA2,
             fileNameMergedBamFileQA1,
             fileNameMergedBamFileQA2
         ]
@@ -779,8 +771,6 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
             "${destinationDirMergedBamFile}/control_pid_1_EXON_PAIRED_merged.mdup.bai.md5sum",
             "${destinationDirQaResults}/MD5SUMS",
             "${destinationDirQaResults}/plot.jpg",
-            "${destinationDirQaResults}runName_laneId/plot.jpg",
-            "${destinationDirQaResults}runName_laneId1/plot.jpg",
             fastqFilesInMergedBamFile
         ])
     }

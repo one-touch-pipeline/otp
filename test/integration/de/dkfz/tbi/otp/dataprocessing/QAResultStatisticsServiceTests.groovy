@@ -341,56 +341,6 @@ class QAResultStatisticsServiceTests {
         assertEquals "123.46", QAResultStatisticsService.formatToTwoDecimals(123456789 / 1e6)
     }
 
-    @Test(expected = IllegalArgumentException)
-    void testPrepareFetchingSingleLaneResultsWhenArgumentIsNull() {
-        QAResultStatisticsService.prepareFetchingSingleLaneResults(null)
-    }
-
-    @Test
-    void testPrepareFetchingSingleLaneResultsWholeGenome() {
-        Map actual = QAResultStatisticsService.prepareFetchingSingleLaneResults(processedBamFile)
-        Map expect = [
-            (QAResultStatisticsService.CHROMOSOME_QUALITY_ASSESSMENT_CHR_X): chromosomeQualityAssessmentChrX,
-            (QAResultStatisticsService.CHROMOSOME_QUALITY_ASSESSMENT_CHR_Y): chromosomeQualityAssessmentChrY,
-            (QAResultStatisticsService.OVERALL_QUALITY_ASSESSMENT): overallQualityAssessment,
-            (QAResultStatisticsService.REFERENCE_GENOME_ENTRY_CHR_X): referenceGenomeEntryChrX,
-            (QAResultStatisticsService.REFERENCE_GENOME_ENTRY_CHR_Y): referenceGenomeEntryChrY,
-            (QAResultStatisticsService.REFERENCE_GENOME): referenceGenome,
-            (QAResultStatisticsService.INDIVIDUAL): individual,
-            (QAResultStatisticsService.SAMPLE): sample,
-            (QAResultStatisticsService.RUN): 'runName',
-            (QAResultStatisticsService.LANE): processedBamFile.alignmentPass.seqTrack.laneId,
-            (QAResultStatisticsService.SEQTYPE): seqType,
-            (QAResultStatisticsService.EXOME_ENRICHMENT_KIT): null
-        ]
-        // assertEquals will not DTRT here, we have to use the equals() method
-        assertTrue expect == actual
-    }
-
-    @Test
-    void testPrepareFetchingSingleLaneResultsExome() {
-        alignmentPass.seqTrack = exomeSeqTrack
-        alignmentPass.save([flush: true])
-        seqType.name = SeqTypeNames.EXOME.seqTypeName
-        seqType.save([flush: true])
-        Map actual = QAResultStatisticsService.prepareFetchingSingleLaneResults(processedBamFile)
-        Map expect = [
-            (QAResultStatisticsService.CHROMOSOME_QUALITY_ASSESSMENT_CHR_X): chromosomeQualityAssessmentChrX,
-            (QAResultStatisticsService.CHROMOSOME_QUALITY_ASSESSMENT_CHR_Y): chromosomeQualityAssessmentChrY,
-            (QAResultStatisticsService.OVERALL_QUALITY_ASSESSMENT): overallQualityAssessment,
-            (QAResultStatisticsService.REFERENCE_GENOME_ENTRY_CHR_X): referenceGenomeEntryChrX,
-            (QAResultStatisticsService.REFERENCE_GENOME_ENTRY_CHR_Y): referenceGenomeEntryChrY,
-            (QAResultStatisticsService.REFERENCE_GENOME): referenceGenome,
-            (QAResultStatisticsService.INDIVIDUAL): individual,
-            (QAResultStatisticsService.SAMPLE): sample,
-            (QAResultStatisticsService.RUN): 'runName',
-            (QAResultStatisticsService.LANE): processedBamFile.alignmentPass.seqTrack.laneId,
-            (QAResultStatisticsService.SEQTYPE): seqType,
-            (QAResultStatisticsService.EXOME_ENRICHMENT_KIT): exomeEnrichmentKit
-        ]
-        // assertEquals will not DTRT here, we have to use the equals() method
-        assertTrue expect == actual
-    }
 
     @Test(expected = IllegalArgumentException)
     void testPrepareFetchingMergedBamFileResultsWhenArgumentIsNull() {
@@ -480,30 +430,6 @@ class QAResultStatisticsServiceTests {
                 (QAResultStatisticsService.INSERT_SIZE_MEDIAN): '30.00',
                 (QAResultStatisticsService.INSERT_SIZE_MEAN): '28.00',
             ],
-            [
-                // Map for ProcessedBamFile
-                (QAResultStatisticsService.REFERENCE_GENOME_LENGTH_WITH_N): '3.21',
-                (QAResultStatisticsService.REFERENCE_GENOME_LENGTH_WITHOUT_N): '2.91',
-                (QAResultStatisticsService.PID): 'pid_1',
-                (QAResultStatisticsService.MOCK_FULL_NAME): 'mockFullName_1',
-                (QAResultStatisticsService.SAMPLE_TYPE): 'control',
-                (QAResultStatisticsService.RUN_ID): 'runName',
-                (QAResultStatisticsService.LANE): 'laneId',
-                (QAResultStatisticsService.COVERAGE_WITHOUT_N): '0.00',
-                (QAResultStatisticsService.COVERAGE_WITH_N): '0.00',
-                (QAResultStatisticsService.COVERAGE_WITHOUT_N_CHR_X): '0.16',
-                (QAResultStatisticsService.COVERAGE_WITHOUT_N_CHR_Y): '0.16',
-                (QAResultStatisticsService.QC_BASES_MAPPED): 8,
-                (QAResultStatisticsService.TOTAL_READ_COUNT): 55,
-                (QAResultStatisticsService.MAPPED_READ_COUNT): 19,
-                (QAResultStatisticsService.PERCENTAGE_MAPPED_READS): '34.55',
-                (QAResultStatisticsService.PROPERLY_PAIRED): '52.27',
-                (QAResultStatisticsService.SINGLETONS): '49.09',
-                (QAResultStatisticsService.DUPLICATES): '32.73',
-                (QAResultStatisticsService.INSERT_SIZE_SD): '29.00',
-                (QAResultStatisticsService.INSERT_SIZE_MEDIAN): '30.00',
-                (QAResultStatisticsService.INSERT_SIZE_MEAN): '28.00',
-            ],
         ]
         assertTrue expect == actual
     }
@@ -527,32 +453,6 @@ class QAResultStatisticsServiceTests {
                 (QAResultStatisticsService.SAMPLE_TYPE): 'control',
                 (QAResultStatisticsService.RUN_ID): 'all_merged',
                 (QAResultStatisticsService.LANE): 'all_merged',
-                (QAResultStatisticsService.COVERAGE_WITHOUT_N): '0.00',
-                (QAResultStatisticsService.COVERAGE_WITH_N): '0.00',
-                (QAResultStatisticsService.COVERAGE_WITHOUT_N_CHR_X): '0.16',
-                (QAResultStatisticsService.COVERAGE_WITHOUT_N_CHR_Y): '0.16',
-                (QAResultStatisticsService.QC_BASES_MAPPED): 8,
-                (QAResultStatisticsService.TOTAL_READ_COUNT): 55,
-                (QAResultStatisticsService.MAPPED_READ_COUNT): 19,
-                (QAResultStatisticsService.PERCENTAGE_MAPPED_READS): '34.55',
-                (QAResultStatisticsService.PROPERLY_PAIRED): '52.27',
-                (QAResultStatisticsService.SINGLETONS): '49.09',
-                (QAResultStatisticsService.DUPLICATES): '32.73',
-                (QAResultStatisticsService.INSERT_SIZE_SD): '29.00',
-                (QAResultStatisticsService.INSERT_SIZE_MEDIAN): '30.00',
-                (QAResultStatisticsService.INSERT_SIZE_MEAN): '28.00',
-                (QAResultStatisticsService.TARGET_COVERAGE): '0.83',
-                (QAResultStatisticsService.ON_TARGET_RATE): '75.76',
-            ],
-            [
-                // Map for ProcessedBamFile
-                (QAResultStatisticsService.REFERENCE_GENOME_LENGTH_WITH_N): '3.21',
-                (QAResultStatisticsService.REFERENCE_GENOME_LENGTH_WITHOUT_N): '2.91',
-                (QAResultStatisticsService.PID): 'pid_1',
-                (QAResultStatisticsService.MOCK_FULL_NAME): 'mockFullName_1',
-                (QAResultStatisticsService.SAMPLE_TYPE): 'control',
-                (QAResultStatisticsService.RUN_ID): 'runName',
-                (QAResultStatisticsService.LANE): 'laneId',
                 (QAResultStatisticsService.COVERAGE_WITHOUT_N): '0.00',
                 (QAResultStatisticsService.COVERAGE_WITH_N): '0.00',
                 (QAResultStatisticsService.COVERAGE_WITHOUT_N_CHR_X): '0.16',
@@ -605,24 +505,6 @@ class QAResultStatisticsServiceTests {
                 (QAResultStatisticsService.MAPPED_QUALITY_LONG_READ_1): 6,
                 (QAResultStatisticsService.MAPPED_QUALITY_LONG_READ_2): 7,
             ],
-            [
-                // Map for ProcessedBamFile
-                (QAResultStatisticsService.DUPLICATES_READ_1): 1,
-                (QAResultStatisticsService.DUPLICATES_READ_2): 2,
-                (QAResultStatisticsService.PE_READS_MAPPED_ON_DIFF_CHR): 33,
-                (QAResultStatisticsService.INCORRECT_PE_ORIENTATION): 32,
-                (QAResultStatisticsService.INCORRECT_PROPER_PAIR): 3,
-                (QAResultStatisticsService.PERCENTAGE_QC_BASES_MAPPED_WITHOUT_N): '8/2910000',
-                (QAResultStatisticsService.PERCENTAGE_QC_BASES_MAPPED_WITH_N): '8/3210000',
-                (QAResultStatisticsService.NOT_MAPPED_READ_1): 13,
-                (QAResultStatisticsService.NOT_MAPPED_READ_2): 14,
-                (QAResultStatisticsService.MAPPED_SHORT_READ_1): 11,
-                (QAResultStatisticsService.MAPPED_SHORT_READ_2): 12,
-                (QAResultStatisticsService.MAPPED_LOW_QUALITY_READ_1): 9,
-                (QAResultStatisticsService.MAPPED_LOW_QUALITY_READ_2): 10,
-                (QAResultStatisticsService.MAPPED_QUALITY_LONG_READ_1): 6,
-                (QAResultStatisticsService.MAPPED_QUALITY_LONG_READ_2): 7,
-            ],
         ]
         List<Map> actual = QAResultStatisticsService.fetchResultsExtended(processedMergedBamFile)
         assertTrue EXPECT == actual
@@ -640,26 +522,6 @@ class QAResultStatisticsServiceTests {
             // testFetchResultsSmall().
             [
                 // Map for ProcessedMergedBamFile
-                (QAResultStatisticsService.DUPLICATES_READ_1): 1,
-                (QAResultStatisticsService.DUPLICATES_READ_2): 2,
-                (QAResultStatisticsService.PE_READS_MAPPED_ON_DIFF_CHR): 33,
-                (QAResultStatisticsService.INCORRECT_PE_ORIENTATION): 32,
-                (QAResultStatisticsService.INCORRECT_PROPER_PAIR): 3,
-                (QAResultStatisticsService.PERCENTAGE_QC_BASES_MAPPED_WITHOUT_N): '8/2910000',
-                (QAResultStatisticsService.PERCENTAGE_QC_BASES_MAPPED_WITH_N): '8/3210000',
-                (QAResultStatisticsService.NOT_MAPPED_READ_1): 13,
-                (QAResultStatisticsService.NOT_MAPPED_READ_2): 14,
-                (QAResultStatisticsService.MAPPED_SHORT_READ_1): 11,
-                (QAResultStatisticsService.MAPPED_SHORT_READ_2): 12,
-                (QAResultStatisticsService.MAPPED_LOW_QUALITY_READ_1): 9,
-                (QAResultStatisticsService.MAPPED_LOW_QUALITY_READ_2): 10,
-                (QAResultStatisticsService.MAPPED_QUALITY_LONG_READ_1): 6,
-                (QAResultStatisticsService.MAPPED_QUALITY_LONG_READ_2): 7,
-                (QAResultStatisticsService.ALL_MAPPED_BASES): 66,
-                (QAResultStatisticsService.TARGET_MAPPED_BASES): 50,
-            ],
-            [
-                // Map for ProcessedBamFile
                 (QAResultStatisticsService.DUPLICATES_READ_1): 1,
                 (QAResultStatisticsService.DUPLICATES_READ_2): 2,
                 (QAResultStatisticsService.PE_READS_MAPPED_ON_DIFF_CHR): 33,
@@ -779,29 +641,8 @@ class QAResultStatisticsServiceTests {
             "30.00",
             "28.00",
         ]
-        List<String> expSmallSingleLaneBamFile = [
-            "pid_1",
-            "mockFullName_1",
-            "control",
-            "runName",
-            "laneId",
-            "0.00",
-            "0.00",
-            "0.16",
-            "0.16",
-            "8",
-            "19",
-            "34.55",
-            "55",
-            "52.27",
-            "49.09",
-            "32.73",
-            "29.00",
-            "30.00",
-            "28.00",
-        ]
 
-        String expSmall = expSmallHeader.join("\t") + "\n" + expSmallMergedBamFile.join("\t") + "\n" + expSmallSingleLaneBamFile.join("\t") + "\n"
+        String expSmall = expSmallHeader.join("\t") + "\n" + expSmallMergedBamFile.join("\t") + "\n"
 
         List<String> expExtendedHeader = [
             "pid",
@@ -876,44 +717,7 @@ class QAResultStatisticsServiceTests {
             "6",
             "7",
         ]
-
-        List<String> expExtendedSingleLaneBamFile = [
-            "pid_1",
-            "mockFullName_1",
-            "control",
-            "runName",
-            "laneId",
-            "0.00",
-            "0.00",
-            "0.16",
-            "0.16",
-            "8",
-            "19",
-            "34.55",
-            "55",
-            "52.27",
-            "49.09",
-            "32.73",
-            "29.00",
-            "30.00",
-            "28.00",
-            "1",
-            "2",
-            "33.0",
-            "32.0",
-            "3",
-            "8/2910000",
-            "8/3210000",
-            "13",
-            "14",
-            "11",
-            "12",
-            "9",
-            "10",
-            "6",
-            "7",
-        ]
-        String expExtended = expExtendedHeader.join("\t") + "\n" + expExtendedMergedBamFile.join("\t") + "\n" + expExtendedSingleLaneBamFile.join("\t") + "\n"
+        String expExtended = expExtendedHeader.join("\t") + "\n" + expExtendedMergedBamFile.join("\t") + "\n"
 
         assertEquals expSmall, actSmall
         assertEquals expExtended, actExtended
@@ -960,23 +764,7 @@ class QAResultStatisticsServiceTests {
             "30.00",
             "28.00",
         ]
-        List<String> expSmallSingleLaneBamFile = [
-            "pid_1",
-            "mockFullName_1",
-            "control",
-            "runName",
-            "laneId",
-            "75.76",
-            "0.83",
-            "55",
-            "52.27",
-            "49.09",
-            "32.73",
-            "29.00",
-            "30.00",
-            "28.00",
-        ]
-        String expSmall = expSmallHeader.join("\t") + "\n" +expSmallMergedBamFile.join("\t") + "\n" +expSmallSingleLaneBamFile.join("\t") + "\n"
+        String expSmall = expSmallHeader.join("\t") + "\n" +expSmallMergedBamFile.join("\t") + "\n"
 
         List<String> expExtendedHeader = [
             "pid",
@@ -1044,40 +832,8 @@ class QAResultStatisticsServiceTests {
             "6",
             "7",
         ]
-        List<String> expExpectedSingleLaneBamFile = [
-            "pid_1",
-            "mockFullName_1",
-            "control",
-            "runName",
-            "laneId",
-            "75.76",
-            "0.83",
-            "55",
-            "52.27",
-            "49.09",
-            "32.73",
-            "29.00",
-            "30.00",
-            "28.00",
-            "50",
-            "66",
-            "1",
-            "2",
-            "33.0",
-            "32.0",
-            "3",
-            "8/2910000",
-            "8/3210000",
-            "13",
-            "14",
-            "11",
-            "12",
-            "9",
-            "10",
-            "6",
-            "7",
-        ]
-        String expExtended = expExtendedHeader.join("\t") + "\n" + expExpectedMergedBamFile.join("\t") + "\n" + expExpectedSingleLaneBamFile.join("\t") + "\n"
+
+        String expExtended = expExtendedHeader.join("\t") + "\n" + expExpectedMergedBamFile.join("\t") + "\n"
         assertEquals expSmall, actSmall
         assertEquals expExtended, actExtended
     }

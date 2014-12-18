@@ -23,36 +23,27 @@ class TransferMergedBamFileJob extends AbstractEndStateAwareJobImpl {
     @Autowired
     ChecksumFileService checksumFileService
 
-    @Autowired
-    ProcessStatusService processStatusService
-
     @Override
     public void execute() throws Exception {
         long id = Long.parseLong(getProcessParameterValue())
         ProcessedMergedBamFile file = ProcessedMergedBamFile.get(id)
         Map<String, String> locations = processedMergedBamFileService.locationsForFileCopying(file)
         String temporalDestinationDir = locations.get("temporalDestinationDir")
-        String dirToLog = processStatusService.statusLogFile(temporalDestinationDir)
-        if (processStatusService.statusSuccessful(dirToLog, CalculateFileChecksumMD5Job.class.name)) {
-            log.debug "Attempting to copy merged BAM file " + locations.get("bamFile") + " (id= " + file + " ) to " + locations.get("destinationDirectory")
-            Project project = processedMergedBamFileService.project(file)
-            Map<String, String> clusterPrefix = configService.clusterSpecificCommandPrefixes(project)
-            String cmd = scriptText(locations, temporalDestinationDir, dirToLog, clusterPrefix)
-            Realm realm = configService.getRealmDataProcessing(project)
-            String jobId = executionHelperService.sendScript(realm, cmd)
-            log.debug "Job ${jobId} submitted to PBS"
-            addOutputParameter(JOB, jobId)
-            addOutputParameter(REALM, realm.id.toString())
-            succeed()
-        } else {
-            addOutputParameter(JOB, "")
-            addOutputParameter(REALM, "")
-            log.debug "the job ${CalculateFileChecksumMD5Job.class.name} failed"
-            fail()
-        }
+
+        log.debug "Attempting to copy merged BAM file " + locations.get("bamFile") + " (id= " + file + " ) to " + locations.get("destinationDirectory")
+        Project project = processedMergedBamFileService.project(file)
+        Map<String, String> clusterPrefix = configService.clusterSpecificCommandPrefixes(project)
+        String cmd = scriptText(locations, temporalDestinationDir, clusterPrefix)
+        Realm realm = configService.getRealmDataProcessing(project)
+        String jobId = executionHelperService.sendScript(realm, cmd)
+        log.debug "Job ${jobId} submitted to PBS"
+
+        addOutputParameter(JOB, jobId)
+        addOutputParameter(REALM, realm.id.toString())
+        succeed()
     }
 
-    private String scriptText(Map<String, String> locations, String temporalDestinationDir, String dirToLog, Map<String, String> clusterPrefix) {
+    private String scriptText(Map<String, String> locations, String temporalDestinationDir, Map<String, String> clusterPrefix) {
         String source = locations.get("sourceDirectory")
 
         // FIXME: remove chmod once the ACLs in the file system are in place
@@ -61,7 +52,6 @@ cd ${source}
 ${clusterPrefix.cp} *.bam *.bai *.md5sum ${clusterPrefix.dest}${temporalDestinationDir}
 ${clusterPrefix.exec} \"find ${temporalDestinationDir} -type f -exec chmod 0640 '{}' \\;\"
 """
-        text += "${clusterPrefix.exec} \"echo ${this.class.name} >> ${dirToLog} ; chmod 0644 ${dirToLog}\""
         return text
     }
 }

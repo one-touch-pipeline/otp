@@ -25,9 +25,6 @@ class CalculateFileChecksumMD5Job extends AbstractJobImpl {
     ProcessedMergedBamFileService processedMergedBamFileService
 
     @Autowired
-    ProcessStatusService processStatusService
-
-    @Autowired
     ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
 
     @Autowired
@@ -63,9 +60,7 @@ class CalculateFileChecksumMD5Job extends AbstractJobImpl {
         String md5Bam = locations.get("md5BamFile")
         String md5Bai = locations.get("md5BaiFile")
         String tmpDirectory = locations.get("temporalDestinationDir")
-        String dirToLog = processStatusService.statusLogFile(tmpDirectory)
 
-        Map<String, String> singleLaneQAResultsDirectories = processedMergedBamFileService.singleLaneQAResultsDirectories(file)
         // the md5sum of the merged bam file is written to the file md5Bam
         // the md5sum of the bai file is written to the file md5Bai
         // the md5sums of the qa results for the merged bam file and for the single lane bam files are written to the file "MD5SUMS"
@@ -80,16 +75,7 @@ cd ${qaResultDirectory}
 rm -f ${qaResultMd5sumFile}
 find . -type f -a -not -name ${processedMergedBamFileQaFileService.MD5SUM_NAME} -exec md5sum '{}' \\; >> ${qaResultMd5sumFile}
 """
-        // since the full source path of the qa results for the single lane bam files is stored in the MD5SUMS file,
-        // we replace them with the relative path in the destination directory
-        for (String singleLaneDestinationDir : singleLaneQAResultsDirectories.keySet()) {
-            String singleLaneSourceDir = singleLaneQAResultsDirectories.get(singleLaneDestinationDir)
-            text += """find ${singleLaneSourceDir} -type f -exec md5sum '{}' \\; >> ${qaResultMd5sumFile}
-sed -i 's,${singleLaneSourceDir},./${singleLaneDestinationDir},' ${qaResultMd5sumFile}
-"""
-        }
         text += "chmod 0640 ${qaResultMd5sumFile} ; "
-        text += "${clusterPrefix.exec} \"echo ${this.class.name} > ${dirToLog} ; chmod 0644 ${dirToLog}\""
         return text
     }
 }

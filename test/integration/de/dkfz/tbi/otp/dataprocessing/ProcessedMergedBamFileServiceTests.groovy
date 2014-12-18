@@ -377,7 +377,7 @@ class ProcessedMergedBamFileServiceTests {
     }
 
     @Test
-    void testMergedBamFileWithFinishedQAWhenQualityAssessmentStatusFalse() {
+    void testMergedBamFileWithFinishedQAWhenQualityAssessmentStatusIsFalse() {
         MergingPass mergingPass = createMergingPass()
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
         mergedBamFile.qualityAssessmentStatus = QaProcessingStatus.IN_PROGRESS
@@ -437,7 +437,7 @@ class ProcessedMergedBamFileServiceTests {
         MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
         processedBamFile.qualityAssessmentStatus = QaProcessingStatus.IN_PROGRESS
         mergingSet.status = State.PROCESSED
-        assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA())
+        assertEquals(mergedBamFile, processedMergedBamFileService.mergedBamFileWithFinishedQA())
     }
 
     @Test

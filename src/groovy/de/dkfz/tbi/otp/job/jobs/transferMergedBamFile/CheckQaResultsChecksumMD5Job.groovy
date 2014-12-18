@@ -25,44 +25,32 @@ class CheckQaResultsChecksumMD5Job extends AbstractEndStateAwareJobImpl {
     ChecksumFileService checksumFileService
 
     @Autowired
-    ProcessStatusService processStatusService
-
-    @Autowired
     ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
 
     @Override
     public void execute() throws Exception {
         long id = Long.parseLong(getProcessParameterValue())
         ProcessedMergedBamFile file = ProcessedMergedBamFile.get(id)
-        String qaResultMd5sumFile = processedMergedBamFileQaFileService.qaResultsMd5sumFile(file)
         String temporalqaDestinationDir = processedMergedBamFileService.qaResultTempDestinationDirectory(file)
-        String temporalDestinationDir = processedMergedBamFileService.destinationTempDirectory(file)
-        String dirToLog = processStatusService.statusLogFile(temporalDestinationDir)
-        if (processStatusService.statusSuccessful(dirToLog, TransferSingleLaneQAResultJob.class.name)) {
-            log.debug "Attempting to check copied qa results"
-            Project project = processedMergedBamFileService.project(file)
-            String cmd = scriptText(temporalqaDestinationDir, qaResultMd5sumFile, dirToLog)
-            Realm realm = configService.getRealmDataManagement(project)
-            String jobId = executionHelperService.sendScript(realm, cmd)
-            log.debug "Job ${jobId} submitted to PBS"
-            addOutputParameter(JOB, jobId)
-            addOutputParameter(REALM, realm.id.toString())
-            succeed()
-        } else {
-            addOutputParameter(JOB, "")
-            addOutputParameter(REALM, "")
-            log.debug "the job ${TransferSingleLaneQAResultJob.class.name} failed"
-            fail()
-        }
+
+        log.debug "Attempting to check copied qa results"
+        Project project = processedMergedBamFileService.project(file)
+        String cmd = scriptText(temporalqaDestinationDir)
+        Realm realm = configService.getRealmDataManagement(project)
+        String jobId = executionHelperService.sendScript(realm, cmd)
+        log.debug "Job ${jobId} submitted to PBS"
+
+        addOutputParameter(JOB, jobId)
+        addOutputParameter(REALM, realm.id.toString())
+        succeed()
     }
 
-    private String scriptText(String temporalqaDestinationDir, String qaResultMd5sumFile, String dirToLog) {
-        // FIXME: remove chmod once the ACLs in the file system are in place
+    private String scriptText(String temporalqaDestinationDir) {
+
         String text = """
 cd ${temporalqaDestinationDir}
 md5sum -c ${processedMergedBamFileQaFileService.MD5SUM_NAME}
 """
-        text += "echo ${this.class.name} >> ${dirToLog} ; chmod 0644 ${dirToLog}"
         return text
     }
 }

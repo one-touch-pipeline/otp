@@ -31,9 +31,6 @@ class MoveFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl {
     @Autowired
     QAResultStatisticsService qaResultFromDatabaseService
 
-    @Autowired
-    ProcessStatusService processStatusService
-
     @Override
     public void execute() throws Exception {
         long id = Long.parseLong(getProcessParameterValue())
@@ -43,33 +40,24 @@ class MoveFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl {
         String temporalQADestinationDir = processedMergedBamFileService.qaResultTempDestinationDirectory(mergedBamFile)
         String qaDestinationDirectory = processedMergedBamFileService.qaResultDestinationDirectory(mergedBamFile)
 
-        String dirToLog = processStatusService.statusLogFile(temporalDestinationDir)
-        if (processStatusService.statusSuccessful(dirToLog, CreateQAResultStatisticsFileJob.class.name)) {
-            log.debug "Attempting to move files from the tmp directory to the final destination"
-            Project project = processedMergedBamFileService.project(mergedBamFile)
-            //has to be changed since the location of the log file moved from the .tmp folder to the final destination
-            dirToLog = processStatusService.statusLogFile(dest)
-            Realm realm = configService.getRealmDataManagement(project)
-            String projectDir = realm.rootPath + "/" + project.dirName
-            String cmd = scriptText(dest, temporalDestinationDir, dirToLog, projectDir, temporalQADestinationDir, qaDestinationDirectory, processedMergedBamFileService.inProgressFileName(mergedBamFile))
-            String jobId = executionHelperService.sendScript(realm, cmd)
-            log.debug "Job ${jobId} submitted to PBS"
-            addOutputParameter(JOB, jobId)
-            addOutputParameter(REALM, realm.id.toString())
-            succeed()
-        } else {
-            addOutputParameter(JOB, "")
-            addOutputParameter(REALM, "")
-            log.debug "the job ${CreateQAResultStatisticsFileJob.class.name} failed"
-            fail()
-        }
+        log.debug "Attempting to move files from the tmp directory to the final destination"
+        Project project = processedMergedBamFileService.project(mergedBamFile)
+        //has to be changed since the location of the log file moved from the .tmp folder to the final destination
+        Realm realm = configService.getRealmDataManagement(project)
+        String cmd = scriptText(dest, temporalDestinationDir, temporalQADestinationDir, qaDestinationDirectory, processedMergedBamFileService.inProgressFileName(mergedBamFile))
+        String jobId = executionHelperService.sendScript(realm, cmd)
+        log.debug "Job ${jobId} submitted to PBS"
+
+        addOutputParameter(JOB, jobId)
+        addOutputParameter(REALM, realm.id.toString())
+        succeed()
     }
 
     //before moving the files to the final directory it is checked if the files, which are currently at the destination, are in use
-    private String scriptText(String dest, String temporalDestinationDir, String dirToLog, String projectDir, String temporalQADestinationDir, String qaDestinationDirectory, String inProgressFileName) {
+    private String scriptText(String dest, String temporalDestinationDir, String temporalQADestinationDir, String qaDestinationDirectory, String inProgressFileName) {
         String text = """
 mkdir -p -m 2750 ${dest}${processedMergedBamFileService.QUALITY_ASSESSMENT_DIR}
-flock -x ${dest} -c \"mv -f ${temporalDestinationDir}/*.bam ${temporalDestinationDir}/*.bai ${temporalDestinationDir}/*.md5sum ${temporalDestinationDir}/*.log ${temporalDestinationDir}/${FileNames.FASTQ_FILES_IN_MERGEDBAMFILE} ${dest}\"
+flock -x ${dest} -c \"mv -f ${temporalDestinationDir}/*.bam ${temporalDestinationDir}/*.bai ${temporalDestinationDir}/*.md5sum ${temporalDestinationDir}/${FileNames.FASTQ_FILES_IN_MERGEDBAMFILE} ${dest}\"
 flock -x ${dest} -c \"mv -f ${temporalQADestinationDir}/* ${qaDestinationDirectory}/\"
 rm -rf ${temporalDestinationDir}
 rm -f ${dest}/${inProgressFileName}
@@ -79,7 +67,6 @@ rm -f ${dest}/${inProgressFileName}
         text += "chmod o+r ${dest}/*.bam ${dest}/*.bai\n"
         // End of work-around
 
-        text += "echo ${this.class.name} >> ${dirToLog} ; chmod 0644 ${dirToLog}"
         return text
     }
 }
