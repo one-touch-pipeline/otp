@@ -327,9 +327,9 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
         assertNotNull(processedBamFile.save([flush: true, failOnError: true]))
         assert !processedBamFileService.isAnyAlignmentPending([processedBamFile.seqTrack])
         assert !processedBamFileService.isMergingInProgress(processedBamFile.seqTrack)
-        assert !processedBamFileService.isAnyBamFileNotProcessable([processedBamFile.seqTrack])
-        assert processedBamFileService.isMergeable(processedBamFile)
-        assertEquals(processedBamFile.id, processedBamFileService.processedBamFileNeedsProcessing().id)
+        assert processedBamFileService.isAnyBamFileNotProcessable([processedBamFile.seqTrack])
+        assert !processedBamFileService.isMergeable(processedBamFile)
+        assertNull(processedBamFileService.processedBamFileNeedsProcessing())
     }
 
     @Test
@@ -338,9 +338,9 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
         assertNotNull(processedBamFile.save([flush: true, failOnError: true]))
         assert !processedBamFileService.isAnyAlignmentPending([processedBamFile.seqTrack])
         assert !processedBamFileService.isMergingInProgress(processedBamFile.seqTrack)
-        assert processedBamFileService.isAnyBamFileNotProcessable([processedBamFile.seqTrack])
-        assert !processedBamFileService.isMergeable(processedBamFile)
-        assertNull(processedBamFileService.processedBamFileNeedsProcessing())
+        assert !processedBamFileService.isAnyBamFileNotProcessable([processedBamFile.seqTrack])
+        assert processedBamFileService.isMergeable(processedBamFile)
+        assertEquals(processedBamFile.id, processedBamFileService.processedBamFileNeedsProcessing().id)
     }
 
     @Test
