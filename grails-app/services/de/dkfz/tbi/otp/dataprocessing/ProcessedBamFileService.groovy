@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.filehandling.BwaLogFileParser
 import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static org.springframework.util.Assert.*
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
@@ -356,7 +357,7 @@ class ProcessedBamFileService {
         SeqTrack seqTrack = processedBamFile.alignmentPass.seqTrack
         List<FastqcProcessedFile> fastqcProcessedFiles = fastqcResultsService.fastqcFilesForSeqTrack(seqTrack)
         return fastqcProcessedFiles.collect { FastqcProcessedFile fastqcProcessedFile ->
-            FastqcBasicStatistics.findByFastqcProcessedFile(fastqcProcessedFile).totalSequences
+            exactlyOneElement(FastqcBasicStatistics.findAllByFastqcProcessedFile(fastqcProcessedFile)).totalSequences
         }.sum()
     }
 }
