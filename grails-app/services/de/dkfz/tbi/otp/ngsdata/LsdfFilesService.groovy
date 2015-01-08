@@ -248,7 +248,7 @@ class LsdfFilesService {
         } catch (final Throwable e) {
             throw new RuntimeException("Could not delete file ${file}.", e)
         }
-        assert waitFor({!file.exists()}, 1000, 50)
+        assert waitFor({ !file.canRead() && !file.exists() }, 1000, 50)
         threadLog.info "Deleted file ${file}"
     }
 
@@ -263,7 +263,7 @@ class LsdfFilesService {
         } catch (final Throwable e) {
             throw new RuntimeException("Could not delete directory ${directory}.", e)
         }
-        assert waitFor({!directory.exists()}, 1000, 50)
+        assert waitFor({ !directory.canRead() && !directory.exists() }, 1000, 50)
         threadLog.info "Deleted directory ${directory}"
     }
 
