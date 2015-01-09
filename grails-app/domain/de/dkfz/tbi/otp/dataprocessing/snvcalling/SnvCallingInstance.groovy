@@ -150,4 +150,9 @@ class SnvCallingInstance {
             this.save([flush: true])
         }
     }
+
+    @Override
+    public String toString() {
+        return "SnvCallingInstance: ${id}, ${sampleTypeCombination}"
+    }
 }
