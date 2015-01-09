@@ -7,12 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import static de.dkfz.tbi.TestCase.removeMetaClass
 
-class BwaAlignmentValidationJobTests extends GroovyTestCase {
+class BamFileValidationJobTests extends GroovyTestCase {
 
     @Autowired
     ProcessedBamFileService processedBamFileService
 
-    BwaAlignmentValidationJob bwaAlignmentValidationJob = new BwaAlignmentValidationJob()
+    BamFileValidationJob bamFileValidationJob = new BamFileValidationJob()
 
     @After
     void tearDown() {
@@ -25,7 +25,7 @@ class BwaAlignmentValidationJobTests extends GroovyTestCase {
         processedBamFileService.metaClass.getAlignmentReadLength = { ProcessedBamFile processedBamFile1 -> 1234 }
         processedBamFileService.metaClass.getFastQCReadLength = { ProcessedBamFile processedBamFile1 -> 1234 }
 
-        bwaAlignmentValidationJob.validateNumberOfReads(processedBamFile)
+        bamFileValidationJob.validateNumberOfReads(processedBamFile)
     }
 
     void testValidateNumberOfReads_DifferentResult() {
@@ -34,6 +34,6 @@ class BwaAlignmentValidationJobTests extends GroovyTestCase {
         processedBamFileService.metaClass.getAlignmentReadLength = { ProcessedBamFile processedBamFile1 -> 1234 }
         processedBamFileService.metaClass.getFastQCReadLength = { ProcessedBamFile processedBamFile1 -> 4321 }
 
-        shouldFail(AssertionError, { bwaAlignmentValidationJob.validateNumberOfReads(processedBamFile) })
+        shouldFail(AssertionError, { bamFileValidationJob.validateNumberOfReads(processedBamFile) })
     }
 }

@@ -12,6 +12,9 @@ class BamFileValidationJob extends AbstractEndStateAwareJobImpl {
     @Override
     public void execute() throws Exception {
         ProcessedBamFile bamFile = parseInput()
+
+        validateNumberOfReads(bamFile)
+
         final long fileSize = processedBamFileService.updateBamFile(bamFile)
         if (fileSize <= 0L) {
             throw new RuntimeException("File size of ${bamFile} is ${fileSize}.")
@@ -24,4 +27,13 @@ class BamFileValidationJob extends AbstractEndStateAwareJobImpl {
         String type = getParameterValueOrClass("BamType")
         return processedBamFileService.findBamFile(alignmentPassId, type)
     }
+
+
+    void validateNumberOfReads(ProcessedBamFile processedBamFile) {
+        long fastQCReadLength = processedBamFileService.getFastQCReadLength(processedBamFile)
+        long alignmentReadLength = processedBamFileService.getAlignmentReadLength(processedBamFile)
+
+        assert fastQCReadLength == alignmentReadLength: "Number of reads differs between FastQC (${fastQCReadLength}) and alignment (${alignmentReadLength})"
+    }
+
 }
