@@ -157,7 +157,6 @@ class ProcessedBamFileService {
         notNull processedBamFile
         assert [AbstractBamFile.State.DECLARED, AbstractBamFile.State.NEEDS_PROCESSING].contains(processedBamFile.status)
         assert processedBamFile.seqTrack.alignmentState == SeqTrack.DataProcessingState.FINISHED
-        assert processedBamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
         processedBamFile.status = AbstractBamFile.State.NEEDS_PROCESSING
         assertSave(processedBamFile)
     }

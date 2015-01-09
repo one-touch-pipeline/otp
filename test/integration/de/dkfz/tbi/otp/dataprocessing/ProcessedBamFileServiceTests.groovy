@@ -174,10 +174,8 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
 
     private void prepareSetNeedsProcessing(
             AbstractBamFile.State bamFileStatus,
-            AbstractBamFile.QaProcessingStatus qualityAssessmentStatus,
             SeqTrack.DataProcessingState alignmentState) {
         processedBamFile.status = bamFileStatus
-        processedBamFile.qualityAssessmentStatus =qualityAssessmentStatus
         assertNotNull processedBamFile.save(flush: true)
         seqTrack.alignmentState = alignmentState
         assertNotNull seqTrack.save(flush: true)
@@ -194,28 +192,19 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
         assertEquals(seqTrack, processedBamFile.alignmentPass.seqTrack)
         assertEquals(seqTrack, processedBamFile.seqTrack)
 
-        prepareSetNeedsProcessing(AbstractBamFile.State.DECLARED,
-                AbstractBamFile.QaProcessingStatus.FINISHED, SeqTrack.DataProcessingState.FINISHED)
+        prepareSetNeedsProcessing(AbstractBamFile.State.DECLARED, SeqTrack.DataProcessingState.FINISHED)
         processedBamFileService.setNeedsProcessing(processedBamFile)
         assertEquals(AbstractBamFile.State.NEEDS_PROCESSING, processedBamFile.status)
 
-        prepareSetNeedsProcessing(AbstractBamFile.State.NEEDS_PROCESSING,
-                AbstractBamFile.QaProcessingStatus.FINISHED, SeqTrack.DataProcessingState.FINISHED)
+        prepareSetNeedsProcessing(AbstractBamFile.State.NEEDS_PROCESSING, SeqTrack.DataProcessingState.FINISHED)
         processedBamFileService.setNeedsProcessing(processedBamFile)
         assertEquals(AbstractBamFile.State.NEEDS_PROCESSING, processedBamFile.status)
 
-        prepareSetNeedsProcessing(AbstractBamFile.State.INPROGRESS,
-                AbstractBamFile.QaProcessingStatus.FINISHED, SeqTrack.DataProcessingState.FINISHED)
+        prepareSetNeedsProcessing(AbstractBamFile.State.INPROGRESS, SeqTrack.DataProcessingState.FINISHED)
         shouldFail AssertionError, { processedBamFileService.setNeedsProcessing(processedBamFile) }
         assertEquals(AbstractBamFile.State.INPROGRESS, processedBamFile.status)
 
-        prepareSetNeedsProcessing(AbstractBamFile.State.DECLARED,
-            AbstractBamFile.QaProcessingStatus.IN_PROGRESS, SeqTrack.DataProcessingState.FINISHED)
-        shouldFail AssertionError, { processedBamFileService.setNeedsProcessing(processedBamFile) }
-        assertEquals(AbstractBamFile.State.DECLARED, processedBamFile.status)
-
-        prepareSetNeedsProcessing(AbstractBamFile.State.DECLARED,
-            AbstractBamFile.QaProcessingStatus.FINISHED, SeqTrack.DataProcessingState.IN_PROGRESS)
+        prepareSetNeedsProcessing(AbstractBamFile.State.DECLARED, SeqTrack.DataProcessingState.IN_PROGRESS)
         shouldFail AssertionError, { processedBamFileService.setNeedsProcessing(processedBamFile) }
         assertEquals(AbstractBamFile.State.DECLARED, processedBamFile.status)
     }
