@@ -69,7 +69,6 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
 
     // files to be processed by the tests: 2 merged bam files, 2 bai files, 2 qa results per merged/single lane
     String mergingMiddleDir = "${processingRootPath}/project1/results_per_pid/pid_1/merging/control/WHOLE_GENOME/PAIRED/DEFAULT"
-    String alignmentMiddleDir = "${processingRootPath}/project1/results_per_pid/pid_1/alignment"
     String filePathMergedBamFile1 = "${mergingMiddleDir}/0/pass0/"
     String fileNameMergedBamFile1 = "${filePathMergedBamFile1}control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bam"
     String filePathMergedBamFile2 = "${mergingMiddleDir}/1/pass0/"
@@ -598,10 +597,14 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         ]
         String cmdBuildFileStructure = files.collect {"echo -n \"${it}\" > ${it}"}.join " && "
         // Call "sync" to block termination of script until I/O is done
-        executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildDirStructure} && ${cmdBuildFileStructure} && sync")
+        executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildDirStructure} && ${cmdBuildFileStructure} && ${createMd5SumFile(fileNameMergedBamFile1)} && ${createMd5SumFile(fileNameMergedBamFile2)} && sync")
         checkFiles(files)
     }
 
+    // only the hash code of the md5sum output is needed since picard also only provides the hash code
+    private String createMd5SumFile(String fileName) {
+        return "md5sum ${fileName} | awk '{ print \$1 }' > ${fileName}.md5"
+    }
 
     private void setProperties(AbstractQualityAssessment abstractQualityAssessment) {
         [

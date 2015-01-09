@@ -20,8 +20,18 @@ class ChecksumFileService {
         return "${file.fileName}.md5sum"
     }
 
+    /**
+     * example: BLOOD_SomePid_WHOLE_GENOME_PAIRED_merged.mdup.bam.md5sum
+    */
     public String md5FileName(String fileName) {
         return "${fileName}.md5sum"
+    }
+
+    /**
+     * example: BLOOD_SomePid_WHOLE_GENOME_PAIRED_merged.mdup.bam.md5
+     */
+    public String picardMd5FileName(String fileName) {
+        return "${fileName}.md5"
     }
 
     public boolean md5sumFileExists(DataFile file) {

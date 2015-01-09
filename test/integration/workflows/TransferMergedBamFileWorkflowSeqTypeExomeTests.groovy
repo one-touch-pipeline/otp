@@ -40,9 +40,10 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
     ExecutionService executionService
 
     // TODO This paths should be obtained from somewhere else..  maybe from ~/.otp.properties, but I am hardcoding for now.. -> OTP-570/OTP-672
-    String dkfzRootPath = 'WORKFLOW_ROOT/TransferWorkflow/root_path'
-    String dkfzProcessingPath = 'WORKFLOW_ROOT/TransferWorkflow/processing_root_path'
-    String dkfzLoggingPath = 'WORKFLOW_ROOT/TransferWorkflow/logging_root_path'
+    String basePath = "WORKFLOW_ROOT/WESTransferWorkflow"
+    String dkfzRootPath = "${basePath}/root_path"
+    String dkfzProcessingPath = "${basePath}/processing_root_path"
+    String dkfzLoggingPath = "${basePath}/logging_root_path"
     String bqRootPath = '$BQ_ROOTPATH/dmg/otp/workflow-tests/TransferWorkflow/root_path'
     String bqProcessingPath = '$BQ_ROOTPATH/dmg/otp/workflow-tests/TransferWorkflow/processing_root_path'
 
@@ -62,7 +63,6 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
 
     // files to be processed by the tests: 2 merged bam files, 2 bai files, 2 qa results per merged/single lane
     String mergingMiddleDir = "${processingRootPath}/project1/results_per_pid/pid_1/merging/control/EXON/PAIRED/DEFAULT"
-    String alignmentMiddleDir = "${processingRootPath}/project1/results_per_pid/pid_1/alignment"
     String filePathMergedBamFile1 = "${mergingMiddleDir}/0/pass0/"
     String fileNameMergedBamFile1 = "${filePathMergedBamFile1}control_pid_1_EXON_PAIRED_merged.mdup.bam"
     String filePathMergedBamFile2 = "${mergingMiddleDir}/1/pass0/"
@@ -578,7 +578,8 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
             filePathBaiFile1,
             filePathBaiFile2,
             filePathMergedBamFileQA1,
-            filePathMergedBamFileQA2
+            filePathMergedBamFileQA2,
+            loggingRootPath + "/log/status/",
         ].collect { "mkdir -p ${it}" }.join " && "
 
         List<String> files = [
@@ -593,8 +594,12 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
         String cmdBuildFileStructure = files.collect {"echo -n \"${it}\" > ${it}"}.join " && "
 
         // Call "sync" to block termination of script until I/O is done
-        executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildDirStructure} && ${cmdBuildFileStructure} && sync")
+        executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildDirStructure} && ${cmdBuildFileStructure} && ${createMd5SumFile(fileNameMergedBamFile1)} && ${createMd5SumFile(fileNameMergedBamFile2)} && sync")
         checkFiles(files)
+    }
+
+    private String createMd5SumFile(String fileName) {
+            return "md5sum ${fileName} | awk '{ print \$1 }' > ${fileName}.md5"
     }
 
 

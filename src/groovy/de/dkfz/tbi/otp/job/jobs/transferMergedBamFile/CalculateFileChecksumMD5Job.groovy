@@ -58,6 +58,7 @@ class CalculateFileChecksumMD5Job extends AbstractJobImpl {
         String bamFile = locations.get("bamFile")
         String baiFile = locations.get("baiFile")
         String md5Bam = locations.get("md5BamFile")
+        String picardMd5 = checksumFileService.picardMd5FileName(bamFile)
         String md5Bai = locations.get("md5BaiFile")
         String tmpDirectory = locations.get("temporalDestinationDir")
 
@@ -67,7 +68,11 @@ class CalculateFileChecksumMD5Job extends AbstractJobImpl {
         String text = """
 ${clusterPrefix.exec} \"mkdir -p -m 2750 ${tmpDirectory};  find ${projectDir} -user \\\${USER} -type d -not -perm 2750 -exec chmod 2750 '{}' \\;\"
 cd ${source}
-md5sum ${bamFile} > ${md5Bam}
+# The md5sum file produced by PICARD does not contain the name of the bam file.
+# Therefore the bam file name is added to the md5 sum.
+# To be consistent in the naming the md5sum file is renamed.
+sed -e "s,\$,  ${bamFile}," -i ${picardMd5}
+mv ${picardMd5} ${md5Bam}
 chmod 0640 ${md5Bam}
 md5sum ${baiFile} > ${md5Bai}
 chmod 0640 ${md5Bai}

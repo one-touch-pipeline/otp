@@ -35,14 +35,14 @@ class MergingJob extends AbstractJobImpl {
             Realm realm = mergingPassService.realmForDataProcessing(mergingPass)
             String cmd = createCommand(processedMergedBamFile)
             String pbsId = executionHelperService.sendScript(realm, cmd, "mergingJob")
+
+            addOutputParameter("__pbsIds", pbsId)
+            addOutputParameter("__pbsRealm", realm.id.toString())
         }
-        addOutputParameter("__pbsIds", pbsId)
-        addOutputParameter("__pbsRealm", realm.id.toString())
     }
 
     private String createCommand(ProcessedMergedBamFile processedMergedBamFile) {
         Project project = mergingPassService.project(processedMergedBamFile.mergingPass)
-        String baseDir = processedMergedBamFileService.directory(processedMergedBamFile)
         String tempDir = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
         String createTempDir = "mkdir -p -m 2750 ${tempDir}"
         String javaOptions = optionService.findOptionSafe("picardJavaSetting", null, project)

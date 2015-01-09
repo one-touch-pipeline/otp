@@ -18,7 +18,6 @@ class MergingValidationJob extends AbstractEndStateAwareJobImpl {
         long mergingPassId = Long.parseLong(getProcessParameterValue())
         MergingPass mergingPass = MergingPass.get(mergingPassId)
         ProcessedMergedBamFile mergedBamFile = ProcessedMergedBamFile.findByMergingPass(mergingPass)
-
         boolean state = processedMergedBamFileService.updateBamFile(mergedBamFile)
         state &= processedMergedBamFileService.updateBamMetricsFile(mergedBamFile)
         state &= processedMergedBamFileService.updateBamFileIndex(mergedBamFile)
