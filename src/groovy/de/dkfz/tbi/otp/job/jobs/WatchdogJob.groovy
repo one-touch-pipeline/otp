@@ -34,6 +34,11 @@ class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob 
     @Autowired PbsMonitorService pbsMonitorService
     @Autowired SchedulerService schedulerService
 
+    /**
+     * Constant to indicate that no cluster job has executed such that the watchdog should not wait.
+     */
+    static final SKIP_WATCHDOG = "SKIP_WATCHDOG"
+
     // See comment on AbstractJobImpl.processingStepId for explanation why we store the ID instead of a reference to the
     // ProcessingStep instance here.
     /** ID of the processing step that is monitored */
@@ -68,7 +73,13 @@ class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob 
 
     @Override
     void execute() throws Exception {
-        pbsMonitorService.monitor(queuedClusterJobIds, this)
+        if ([SKIP_WATCHDOG] == queuedClusterJobIds) {
+            log.debug "Skip watchdog"
+            succeed()
+            schedulerService.doEndCheck(this)
+        } else {
+            pbsMonitorService.monitor(queuedClusterJobIds, this)
+        }
     }
 
     @Override

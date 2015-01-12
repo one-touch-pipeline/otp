@@ -2,11 +2,13 @@ package de.dkfz.tbi.otp.job.jobs.transferMergedBamFile
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFileService
+import de.dkfz.tbi.otp.job.jobs.WatchdogJob
 import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.Realm
+
 import org.springframework.beans.factory.annotation.Autowired
 
 class TransferSingleLaneQAResultJob extends AbstractEndStateAwareJobImpl{
@@ -26,11 +28,7 @@ class TransferSingleLaneQAResultJob extends AbstractEndStateAwareJobImpl{
         Project project = processedMergedBamFileService.project(mergedBamFile)
 
         Realm realm = configService.getRealmDataProcessing(project)
-        /*
-         * In the old WF this job executed a job on the cluster which was checked by the watchdog afterwards.
-         * To simulate the watchdog that the job has already finished on cluster a very low job ID is used.
-         */
-        addOutputParameter(JobParameterKeys.PBS_ID_LIST, "1")
+        addOutputParameter(JobParameterKeys.PBS_ID_LIST, WatchdogJob.SKIP_WATCHDOG)
         addOutputParameter(JobParameterKeys.REALM, realm.id.toString())
         succeed()
     }
