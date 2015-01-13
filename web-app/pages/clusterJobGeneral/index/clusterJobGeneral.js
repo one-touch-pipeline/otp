@@ -179,12 +179,11 @@ $.otp.clusterJobGeneralGraph = {
         graph.Set('chart.shadow.offsetx', 5);
         graph.Set('chart.shadow.offsety', 5);
         graph.Set('chart.shadow.blur', 15);
-        graph.Set('chart.colors', getColors(json.data.length));
+        graph.Set('chart.colors', $.otp.clusterJobGeneralGraph.getColors(json.data.length));
         graph.Set('chart.linewidth', 2);
         graph.Set('chart.exploded', 3);
         graph.Set('chart.radius', 80);
         graph.Draw();
-
     },
 
     generateLineGraphic : function (id, data) {
@@ -192,7 +191,7 @@ $.otp.clusterJobGeneralGraph = {
         var json = JSON.parse(data.response);
         RGraph.Reset($('#' + id).get(0));
         var graph = new RGraph.Line(id, json.data);
-        graph.Set('labels', normalizeLabels(json.labels, '#' + id));
+        graph.Set('labels', $.otp.clusterJobGeneralGraph.normalizeLabels(json.labels));
         graph.Set('text.angle', 45);
         graph.Set('text.size', 8);
         graph.Set('numxticks', json.labels.length - 1);
@@ -208,13 +207,10 @@ $.otp.clusterJobGeneralGraph = {
         return this.colors.slice(0, elementCount);
     },
 
-    normalizeLabels : function (labels, id) {
+    normalizeLabels : function (labels) {
         "use strict";
-        var quot = labels.length / 24;
-        var newLabels = [];
-        for (var i = 0; i <= labels.length - 1; i = i + quot) {
-            newLabels.push(labels[i]);
-        }
+        var step = Math.floor(labels.length / 24)
+        var newLabels = labels.filter( function (value_ignored, index) { return index % step === 0 } )
         return newLabels;
     }
  }
@@ -237,9 +233,8 @@ $.otp.clusterJobGeneralProgress = {
     },
 
     generateProgress : function (id, data) {
-        "use strict";e
+        "use strict";
         var json = JSON.parse(data.response);
-        console.log(json);
         $("#" + id).multiprogressbar ({
             parts: [{value: json.data['queue'][0], text: json.data['queue'][0] + "% (" + json.data['queue'][1] + ")", barClass: "progressBarQueue", textClass: "progressTextQueue"},
                     {value: json.data['process'][0], text: json.data['process'][0] + "% (" + json.data['process'][1] + ")", barClass: "progressBarProcess", textClass: "progressTextProcess"}]

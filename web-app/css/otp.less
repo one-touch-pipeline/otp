@@ -1364,7 +1364,13 @@ body {
     table {
         margin-top: 10px;
     }
-    .columColors {
+    tr {
+        background-color: rgba(0,0,0,0.0);
+    }
+    tr:nth-last-child(2n) td:nth-last-child(2), tr:nth-last-child(2n) td:nth-last-child(1) {
+        background-color: #A5D3FF;
+    }
+    .columnColors {
         width: 10px;
     }
     .columnSpace {
@@ -1378,21 +1384,26 @@ body {
     .columnValue {
         width: 600px;
     }
-    #general .columnColors {
-        background-color: white;
-    }
-    #status .columColors {
-        background-color: #585858;
-    }
-    #time .columColors {
-        background-color: #F5DA81;
-    }
-    #cpu .columColors {
-        background-color: #A9F5A9;
-    }
-    #memory .columColors {
-        background-color: @darkblue;
-    }
+}
+
+#general.detailContainer .columnColors {
+    background-color: white;
+}
+
+#status.detailContainer .columnColors {
+    background-color: #585858;
+}
+
+#time.detailContainer .columnColors {
+    background-color: #F5DA81;
+}
+
+#cpu.detailContainer .columnColors {
+    background-color: #A9F5A9;
+}
+
+#memory.detailContainer .columnColors {
+    background-color: @darkblue;
 }
 
 .detailContainerTitle {
@@ -1587,4 +1598,12 @@ body {
 
 .jobTypSpecificValueToolTip {
     margin-top: 2px;
+}
+
+#jobClassSelect {
+    width: 375px;
+}
+
+#seqTypeSelect {
+    width: 250px;
 }

@@ -25,7 +25,7 @@ class ClusterJobGeneralController {
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
-        return dataToRender as JSON
+        render dataToRender as JSON
     }
 
     def getAllExitCodes() {
@@ -64,19 +64,25 @@ class ClusterJobGeneralController {
         LocalDate startDate = LocalDate.parse(params.from)
         LocalDate endDate = LocalDate.parse(params.to)
         def results = method(startDate, endDate)
-        dataToRender.data = results.data
+        if (keys.size() > 1) {
+            keys.each { k ->
+                dataToRender.data << results.data.get(k)
+            }
+        } else {
+            dataToRender.data = results.data
+        }
         dataToRender.labels = results.days
         dataToRender.keys = keys
-        return dataToRender as JSON
+        render dataToRender as JSON
     }
 
     private renderPieDataAsJSON (Closure method) {
         Map dataToRender = [data: [], labels: []]
         def results = method()
         results.each {
-            dataToRender.data << it[0].toString().replace("null", "UNKNOWN") + " (" + it[1].toString() + ")"
-            dataToRender.labels << it[1]
+            dataToRender.data << it[1]
+            dataToRender.labels << it[0].toString().replace("null", "UNKNOWN") + " (" + it[1].toString() + ")"
         }
-        return dataToRender as JSON
+        render dataToRender as JSON
     }
 }

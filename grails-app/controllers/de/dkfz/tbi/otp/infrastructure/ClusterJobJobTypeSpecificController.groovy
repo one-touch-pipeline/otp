@@ -40,9 +40,11 @@ class ClusterJobJobTypeSpecificController {
     def getSeqTypesByJobClass() {
         Map dataToRender = [:]
 
+        LocalDate startDate = LocalDate.parse(params.from)
+        LocalDate endDate = LocalDate.parse(params.to)
         String jobClass = params.jobClass
 
-        def seqTypes = clusterJobService.getSeqTypes(jobClass)
+        def seqTypes = clusterJobService.getSeqTypes(jobClass, startDate, endDate)
         dataToRender.data = seqTypes
 
         render dataToRender as JSON

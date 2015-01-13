@@ -14,6 +14,7 @@ import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.LocalDate
 import org.joda.time.Period
+import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.PeriodFormat
 
 import javax.xml.ws.soap.SOAPFaultException
@@ -321,9 +322,12 @@ class ClusterJobService {
      * returns a unique list of sequencing types
      * existing in the Cluster Job table
      */
-    public List getSeqTypes(String jobClass) {
-        def c = ClusterJob.createCriteria()
-        def result = c.list {
+    public List getSeqTypes(String jobClass, LocalDate sDate, LocalDate eDate) {
+        DateTime startDate = sDate.toDateTimeAtStartOfDay()
+        DateTime endDate = eDate.plusDays(1).toDateTimeAtStartOfDay()
+        def result = ClusterJob.createCriteria().list {
+            ge('started', startDate)
+            lt('ended', endDate)
             eq('jobClass', jobClass)
             projections {
                 distinct("seqType")
@@ -446,7 +450,7 @@ class ClusterJobService {
         List<ClusterJob> results = clusterJobsInsideIntervalBy(jobClass, seqType, sDate, eDate)
 
         def finalResults = results.collect ({
-            return [(it.usedMemory.div(1024 * 1024) as double).round(2), (it.requestedMemory.div(1024 * 1024) as double).round(2), it.id]
+            return [it.usedMemory, it.requestedMemory, it.id]
         })
 
         def xAxisMax = finalResults ? finalResults*.get(0).max() : 0
@@ -577,7 +581,7 @@ class ClusterJobService {
             order('queued', 'desc')
             maxResults(1)
         }
-        return result.first().queued.toString(FORMAT_STRING)
+        return result.first().queued.toString("yyyy-MM-dd")
     }
 
     /**

@@ -16,16 +16,18 @@ on the general cluster job page
         <h1><g:message code="jobstats.jobSpecific.detail.title"/></h1>
         <br>
         <div class="detailContainer" id="general">
-            <div class="detailContainerTitel"><g:message code="jobstats.jobSpecific.detail.table.general"/></div>
+            <div class="detailContainerTitle"><g:message code="jobstats.jobSpecific.detail.table.general"/></div>
             <div class="toolTipContainer">
                 <span class="toolTip"><g:message code="jobstats.jobSpecific.detail.table.toolTip.general"/></span>
             </div>
             <br>
             <table>
-                <col class="columnColors">
-                <col class="columnSpace">
-                <col class="columnProperty">
-                <col class="columnValue">
+                <colgroup>
+                    <col class="columnColors">
+                    <col class="columnSpace">
+                    <col class="columnProperty">
+                    <col class="columnValue">
+                </colgroup>
                 <tr>
                     <!-- these empty td-elements are used to define the colored element and the space on the left of each table -->
                     <td></td>
@@ -109,7 +111,7 @@ on the general cluster job page
             </table>
         </div>
         <div class="detailContainer" id="time">
-            <div class="detailContainerTitel"><g:message code="jobstats.jobSpecific.detail.table.time"/></div>
+            <div class="detailContainerTitle"><g:message code="jobstats.jobSpecific.detail.table.time"/></div>
             <div class="toolTipContainer">
                 <span class="toolTip"><g:message code="jobstats.jobSpecific.detail.table.toolTip.time"/></span>
             </div>
@@ -172,7 +174,7 @@ on the general cluster job page
         </div>
 
         <div class="detailContainer" id="cpu">
-            <div class="detailContainerTitel"><g:message code="jobstats.jobSpecific.detail.table.cpu"/></div>
+            <div class="detailContainerTitle"><g:message code="jobstats.jobSpecific.detail.table.cpu"/></div>
             <div class="toolTipContainer">
                 <span class="toolTip"><g:message code="jobstats.jobSpecific.detail.table.toolTip.cpu"/></span>
             </div>
@@ -204,7 +206,7 @@ on the general cluster job page
             </table>
         </div>
         <div class="detailContainer" id="memory">
-            <div class="detailContainerTitel"><g:message code="jobstats.jobSpecific.detail.table.memory"/></div>
+            <div class="detailContainerTitle"><g:message code="jobstats.jobSpecific.detail.table.memory"/></div>
             <div class="toolTipContainer">
                 <span class="toolTip"><g:message code="jobstats.jobSpecific.detail.table.toolTip.memory"/></span>
             </div>
