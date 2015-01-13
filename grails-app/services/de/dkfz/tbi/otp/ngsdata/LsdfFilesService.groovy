@@ -245,10 +245,12 @@ class LsdfFilesService {
         assert file.isAbsolute() && file.exists() && file.isFile()
         try {
             assert executionService.executeCommand(realm, "rm '${file}'; echo \$?") ==~ /^0\s*$/
+            // It looks like exists() is cached (in NFS?). The cache can be cleared by calling canRead() - at least in
+            // the cases that we observed.
+            assert waitFor({ file.canRead(); !file.exists() }, 1000, 50)
         } catch (final Throwable e) {
             throw new RuntimeException("Could not delete file ${file}.", e)
         }
-        assert waitFor({ !file.canRead() && !file.exists() }, 1000, 50)
         threadLog.info "Deleted file ${file}"
     }
 
@@ -260,10 +262,12 @@ class LsdfFilesService {
         assert directory.isAbsolute() && directory.exists() && directory.isDirectory()
         try {
             assert executionService.executeCommand(realm, "rmdir '${directory}'; echo \$?") ==~ /^0\s*$/
+            // It looks like exists() is cached (in NFS?). The cache can be cleared by calling list() (for directories
+            // canRead() does not clear the cache in all cases) - at least in the cases that we observed.
+            assert waitFor({ directory.list(); !directory.exists() }, 1000, 50)
         } catch (final Throwable e) {
             throw new RuntimeException("Could not delete directory ${directory}.", e)
         }
-        assert waitFor({ !directory.canRead() && !directory.exists() }, 1000, 50)
         threadLog.info "Deleted directory ${directory}"
     }
 
