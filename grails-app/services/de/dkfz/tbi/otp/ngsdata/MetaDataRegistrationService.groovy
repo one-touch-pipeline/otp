@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.job.processing.ProcessingException
+
 class MetaDataRegistrationService {
 
     /**
@@ -34,14 +36,14 @@ class MetaDataRegistrationService {
 
     private File getMetaDataDirectory(String path, String runName) {
        List<String> separators = ["/run", "/"]
-       for (String separator in separators) {
-           String runDir = path + separator + runName
+       List<String> paths = separators.collect {path + it + runName}
+       for (String runDir in paths) {
            File dir = new File(runDir)
            if (dir.canRead() && dir.isDirectory()) {
                return dir
            }
        }
-       throw new DirectoryNotReadableException(path)
+       throw new ProcessingException("None of following directories can be accessed: ${paths}")
     }
 
     private int processDirectory(RunSegment segment, File dir) {
