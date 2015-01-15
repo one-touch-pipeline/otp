@@ -1,9 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
-import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
-import static de.dkfz.tbi.otp.utils.ThreadUtils.waitFor
+import static de.dkfz.tbi.otp.utils.WaitingFileUtils.*
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 
 import java.util.regex.Pattern
@@ -216,7 +215,7 @@ class LsdfFilesService {
 
     static void ensureFileIsReadableAndNotEmpty(final File file) {
         assert file.isAbsolute()
-        WaitingFileUtils.waitForFile(file)
+        assert confirmExists(file)
         assert file.isFile()
         assert file.canRead()
         assert file.length() > 0L
@@ -247,9 +246,7 @@ class LsdfFilesService {
         assert file.isAbsolute() && file.exists() && file.isFile()
         try {
             assert executionService.executeCommand(realm, "rm '${file}'; echo \$?") ==~ /^0\s*$/
-            // It looks like exists() is cached (in NFS?). The cache can be cleared by calling canRead() - at least in
-            // the cases that we observed.
-            assert waitFor({ file.canRead(); !file.exists() }, 1000, 50)
+            assert confirmDeleted(file)
         } catch (final Throwable e) {
             throw new RuntimeException("Could not delete file ${file}.", e)
         }
@@ -264,9 +261,7 @@ class LsdfFilesService {
         assert directory.isAbsolute() && directory.exists() && directory.isDirectory()
         try {
             assert executionService.executeCommand(realm, "rmdir '${directory}'; echo \$?") ==~ /^0\s*$/
-            // It looks like exists() is cached (in NFS?). The cache can be cleared by calling list() (for directories
-            // canRead() does not clear the cache in all cases) - at least in the cases that we observed.
-            assert waitFor({ directory.list(); !directory.exists() }, 1000, 50)
+            assert confirmDeleted(directory)
         } catch (final Throwable e) {
             throw new RuntimeException("Could not delete directory ${directory}.", e)
         }
@@ -321,6 +316,7 @@ class LsdfFilesService {
     }
 
     public deleteDirectoryRecursive(Realm realm, File dir) {
+        assert confirmExists(dir)
         String cmd = createClusterScriptService.removeDirs([dir], CreateClusterScriptService.RemoveOption.RECURSIVE)
         int exitCode = executionService.executeCommand(realm, cmd).toInteger()
         if(exitCode != 0) {

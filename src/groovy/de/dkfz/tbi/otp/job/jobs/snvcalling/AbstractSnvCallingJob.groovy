@@ -5,7 +5,7 @@ import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static org.springframework.util.Assert.*
-import de.dkfz.tbi.otp.utils.WaitingFileUtils
+import static de.dkfz.tbi.otp.utils.WaitingFileUtils.confirmExists
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.ExecutionService
@@ -75,9 +75,10 @@ abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob 
         final File configFileInStagingDirectory = instance.configFilePath.absoluteStagingPath
         if (!configFileInStagingDirectory.exists()) {
             lsdfFilesService.createDirectory(configFileInStagingDirectory.parentFile, instance.project)
-            WaitingFileUtils.waitForFile(configFileInStagingDirectory.parentFile)
+            assert confirmExists(configFileInStagingDirectory.parentFile)
             instance.config.writeToFile(configFileInStagingDirectory)
         }
+        assert confirmExists(configFileInStagingDirectory)
         assert configFileInStagingDirectory.text == instance.config.configuration
         return configFileInStagingDirectory
     }

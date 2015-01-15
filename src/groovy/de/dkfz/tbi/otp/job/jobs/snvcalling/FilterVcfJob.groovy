@@ -5,6 +5,7 @@ import groovy.io.FileType
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
 import static de.dkfz.tbi.otp.job.processing.CreateClusterScriptService.*
+import static de.dkfz.tbi.otp.utils.WaitingFileUtils.confirmExists
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -12,7 +13,6 @@ import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
 class FilterVcfJob extends AbstractSnvCallingJob {
 
@@ -108,7 +108,7 @@ class FilterVcfJob extends AbstractSnvCallingJob {
 
         // check that the checkpoint file, produced by the script exists
         final File checkpointFile = step.getCheckpointFilePath(instance).absoluteStagingPath
-        WaitingFileUtils.waitForFile(checkpointFile)
+        assert confirmExists(checkpointFile)
         assert checkpointFile.delete()
 
         try {

@@ -1,13 +1,13 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import static de.dkfz.tbi.otp.job.processing.CreateClusterScriptService.*
+import static de.dkfz.tbi.otp.utils.WaitingFileUtils.confirmExists
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
 class SnvAnnotationJob extends AbstractSnvCallingJob {
 
@@ -100,7 +100,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob {
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(resultFile.absoluteStagingPath)
         // check that the checkpoint file, produced by the script exists
         final File checkpointFile = step.getCheckpointFilePath(instance).absoluteStagingPath
-        WaitingFileUtils.waitForFile(checkpointFile)
+        assert confirmExists(checkpointFile)
         assert checkpointFile.delete()
 
         try {
