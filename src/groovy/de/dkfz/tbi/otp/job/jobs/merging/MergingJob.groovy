@@ -30,10 +30,12 @@ class MergingJob extends AbstractJobImpl {
     public void execute() throws Exception {
         long mergingPassId = Long.parseLong(getProcessParameterValue())
         MergingPass mergingPass = MergingPass.get(mergingPassId)
-        ProcessedMergedBamFile processedMergedBamFile = processedMergedBamFileService.createMergedBamFile(mergingPass)
-        Realm realm = mergingPassService.realmForDataProcessing(mergingPass)
-        String cmd = createCommand(processedMergedBamFile)
-        String pbsId = executionHelperService.sendScript(realm, cmd, "mergingJob")
+        ProcessedMergedBamFile.withTransaction {
+            ProcessedMergedBamFile processedMergedBamFile = processedMergedBamFileService.createMergedBamFile(mergingPass)
+            Realm realm = mergingPassService.realmForDataProcessing(mergingPass)
+            String cmd = createCommand(processedMergedBamFile)
+            String pbsId = executionHelperService.sendScript(realm, cmd, "mergingJob")
+        }
         addOutputParameter("__pbsIds", pbsId)
         addOutputParameter("__pbsRealm", realm.id.toString())
     }
