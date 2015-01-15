@@ -120,11 +120,7 @@ class SnvCallingJob extends AbstractSnvCallingJob {
     protected void validate(final SnvCallingInstance instance) throws Throwable {
         assert instance.configFilePath.absoluteStagingPath.text == instance.config.configuration
         final SnvConfig config = instance.config.evaluate()
-        // check if the chromosome vcf result file exist
-        config.chromosomeNames.each { String chromosome ->
-            final OtpPath resultFilePerChromosome = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual, chromosome))
-            LsdfFilesService.ensureFileIsReadableAndNotEmpty(resultFilePerChromosome.absoluteStagingPath)
-        }
+
         // check if the final vcf result file exists
         final OtpPath resultFile = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual, null))
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(resultFile.absoluteStagingPath)
