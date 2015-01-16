@@ -311,8 +311,35 @@ class SeqTrackService {
         return true
     }
 
-    public SeqTrack getSeqTrackReadyForFastqcProcessing() {
-        return SeqTrack.findByFastqcState(SeqTrack.DataProcessingState.NOT_STARTED)
+    /**
+     * returns the oldest alignable {@link Seqtrack} waiting for fastqc if possible,
+     * otherwise the oldest {@link Seqtrack} waiting waiting for fastqc.
+     *
+     * @return a seqTrack without fastqc
+     * @see SeqTypeService#alignableSeqTypes
+     */
+    public SeqTrack getSeqTrackReadyForFastqcProcessingPreferAlignable() {
+        return getSeqTrackReadyForFastqcProcessing(true) ?: getSeqTrackReadyForFastqcProcessing()
+    }
+
+    /**
+     * returns the oldest {@link Seqtrack} waiting for fastqc.
+     *
+     * @param onlyAlignable if true, only alignable {@link Seqtrack}s are searched, else all {@link Seqtrack}s.
+     * @return a seqTrack without fastqc
+     * @see SeqTypeService#alignableSeqTypes
+     */
+    public SeqTrack getSeqTrackReadyForFastqcProcessing(boolean onlyAlignable = false) {
+        return SeqTrack.createCriteria().get {
+            eq('fastqcState', SeqTrack.DataProcessingState.NOT_STARTED)
+            if (onlyAlignable) {
+                seqType {
+                    'in'('id', SeqTypeService.alignableSeqTypes()*.id)
+                }
+            }
+            order('id', 'asc')
+            maxResults(1)
+        }
     }
 
     public void setFastqcInProgress(SeqTrack seqTrack) {
