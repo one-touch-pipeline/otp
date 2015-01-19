@@ -357,7 +357,11 @@ class ProcessedBamFileService {
         SeqTrack seqTrack = processedBamFile.alignmentPass.seqTrack
         List<FastqcProcessedFile> fastqcProcessedFiles = fastqcResultsService.fastqcFilesForSeqTrack(seqTrack)
         return fastqcProcessedFiles.collect { FastqcProcessedFile fastqcProcessedFile ->
-            exactlyOneElement(FastqcBasicStatistics.findAllByFastqcProcessedFile(fastqcProcessedFile)).totalSequences
+            try {
+                exactlyOneElement(FastqcBasicStatistics.findAllByFastqcProcessedFile(fastqcProcessedFile)).totalSequences
+            } catch (AssertionError e) {
+                throw new RuntimeException("Fail to fetch exactly one FastqcBasicStatistics for ${fastqcProcessedFile}", e)
+            }
         }.sum()
     }
 }

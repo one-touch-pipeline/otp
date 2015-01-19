@@ -31,6 +31,7 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
     SampleType sampleType
     AlignmentPass alignmentPass
     RunSegment runSegment
+    FastqcProcessedFile fastqcProcessedFile
 
     static final long READ_NUMBER = 12345
 
@@ -127,7 +128,7 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
         assertNotNull(datafile.save([flush: true, failOnError: true]))
 
 
-        FastqcProcessedFile fastqcProcessedFile = testData.createFastqcProcessedFile([dataFile: datafile])
+        fastqcProcessedFile = testData.createFastqcProcessedFile([dataFile: datafile])
         assertNotNull(fastqcProcessedFile.save([flush: true, failOnError: true]))
 
         FastqcBasicStatistics fastqcBasicStatistics = testData.createFastqcBasicStatistics([
@@ -709,6 +710,16 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
         assertNotNull(fastqcBasicStatistics2.save([flush: true, failOnError: true]))
 
         assert READ_NUMBER * 2 == processedBamFileService.getFastQCReadLength(processedBamFile)
+    }
+
+    void testGetFastQCReadLength_LibrarySingle_WrongCountofStatistic() {
+        FastqcBasicStatistics fastqcBasicStatistics2 = testData.createFastqcBasicStatistics([totalSequences: READ_NUMBER, fastqcProcessedFile: fastqcProcessedFile])
+        assertNotNull(fastqcBasicStatistics2.save([flush: true, failOnError: true]))
+
+        String message = shouldFail (RuntimeException) {
+            processedBamFileService.getFastQCReadLength(processedBamFile)
+        }
+        assert message.startsWith('Fail to fetch exactly one FastqcBasicStatistics for ')
     }
 
 }
