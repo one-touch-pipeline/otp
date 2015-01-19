@@ -65,7 +65,6 @@ grails.project.dependency.resolution = {
         compile ":spring-security-ldap:1.0.6"
         compile ":spring-security-acl:1.1.1"
         compile ":console:1.2"
-        compile ":perf4j:0.1.1"
         compile ":mail:1.0.1"
         compile ":codenarc:0.18.1"
         compile ":lesscss-resources:1.3.3"
