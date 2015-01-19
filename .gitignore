@@ -1,26 +1,47 @@
-.classpath
-.project
-.settings
-.idea
-*.iml
-*.ipr
-*.iws
-ast-build
-target
-target-eclipse
+# General
+## Log files
 logs/*
-web-app/js/i18n/*
-.groovy/*
-*~
 *.log
-CodeNarcReport.html
-cobertura.ser
+## Temporary files
+*~
+\#*\#
+## Stale NFS handles
+.nfs*
+
+# OTP
+## Main application
+ast-build
+web-app/js/i18n/*
 web-app/WEB-INF/tld/c.tld
 web-app/WEB-INF/tld/fmt.tld
-.nfs*
 grails-app/views/templates/_version.gsp
-.link_to_grails_plugins
+## Intependent tools
 tools/*/*/*/build/
 tools/*/*/*/.gradle/
 tools/*/*/build/
 tools/*/*/.gradle/
+
+# Grails
+.groovy/*
+target
+
+# Third-party tools
+## CodeNarc
+CodeNarcReport.html
+## Codertura
+cobertura.ser
+
+# IDEs
+## Eclipse
+.classpath
+.project
+.settings
+.link_to_grails_plugins
+target-eclipse
+
+## IntelliJ
+.idea
+*.iml
+*.ipr
+*.iws
+out
