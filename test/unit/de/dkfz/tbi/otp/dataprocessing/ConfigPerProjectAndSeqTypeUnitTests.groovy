@@ -1,10 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.TestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import grails.test.mixin.*
 import de.dkfz.tbi.otp.ngsdata.*
+
+import static de.dkfz.tbi.TestCase.createEmptyTestDirectory
 
 @TestFor(ConfigPerProjectAndSeqType)
 @Mock([Project, SeqType])
@@ -12,13 +15,10 @@ class ConfigPerProjectAndSeqTypeUnitTests {
 
     String configuration = "configuration"
     String filePath = "/tmp/otp/otp-test/tempConfigFile.txt"
-    File configFile
     ConfigPerProjectAndSeqType validConfigPerProjectAndSeqType
 
     @Before
     void setUp() {
-        configFile = new File(filePath)
-
         validConfigPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
             project: new Project(),
             seqType: new SeqType(),
@@ -29,7 +29,6 @@ class ConfigPerProjectAndSeqTypeUnitTests {
 
     @After
     void tearDown() {
-        configFile.delete()
         validConfigPerProjectAndSeqType.delete()
     }
 
@@ -102,9 +101,31 @@ class ConfigPerProjectAndSeqTypeUnitTests {
         assertTrue(newConfigPerProjectAndSeqType.validate())
     }
 
-    void testWriteToFile() {
-        validConfigPerProjectAndSeqType.writeToFile(configFile, true)
-        assertEquals(configFile.text, configuration)
+    void testWriteToFile_WhenFileDoesNotExistAndOverwriteIsSet_ShouldCreateFile() {
+        File configDir = createEmptyTestDirectory()
+        File configFile = new File(configDir, 'tempConfigFile.txt')
+
+        try {
+            validConfigPerProjectAndSeqType.writeToFile(configFile, true)
+            assertEquals(configFile.text, configuration)
+        } finally {
+            configFile.delete()
+            configDir.delete()
+        }
+    }
+
+    void testWriteToFile_WhenFileDoesExistAndOverwriteIsSet_ShouldCreateFile() {
+        File configDir = createEmptyTestDirectory()
+        File configFile = new File(configDir, 'tempConfigFile.txt')
+        configFile << 'something different'
+
+        try {
+            validConfigPerProjectAndSeqType.writeToFile(configFile, true)
+            assertEquals(configFile.text, configuration)
+        } finally {
+            configFile.delete()
+            configDir.delete()
+        }
     }
 
     @Test
@@ -116,10 +137,18 @@ class ConfigPerProjectAndSeqTypeUnitTests {
 
     @Test
     void testWriteToFileExistsAlready() {
-        validConfigPerProjectAndSeqType.writeToFile(configFile, false)
-        assertEquals(configFile.text, configuration)
-        shouldFail RuntimeException, {
+        File configDir = createEmptyTestDirectory()
+        File configFile = new File(configDir, 'tempConfigFile.txt')
+
+        try {
             validConfigPerProjectAndSeqType.writeToFile(configFile, false)
+            assertEquals(configFile.text, configuration)
+            shouldFail RuntimeException, {
+                validConfigPerProjectAndSeqType.writeToFile(configFile, false)
+            }
+        } finally {
+            configFile.delete()
+            configDir.delete()
         }
     }
 }
