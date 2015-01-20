@@ -129,8 +129,8 @@ class FilterVcfJob extends AbstractSnvCallingJob {
             // snvs_${pid}_intermutation_distance_conf_8_to_10.txt, which is only used as input for a plot,
             // and the input file shall not be copied
             if (!(resultFile =~ /intermutation_distance(.*)\.txt$/ ||
-                    resultFile =~ /.*vcf\.gz$/ ||
-                    resultFile =~ /\.tbi/)) {
+                    resultFile =~ /\.vcf\.gz$/ ||
+                    resultFile =~ /\.tbi$/)) {
                 OtpPath resultFilePath = new OtpPath(instance.snvInstancePath, resultFile.getName())
                 sourceLocation.add(resultFilePath.absoluteStagingPath)
                 targetLocation.add(resultFilePath.absoluteDataManagementPath)
