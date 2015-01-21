@@ -156,7 +156,12 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
 
         String concatenatedValues = concatResults(values)
 
-        String pbsId = exactlyOneElement(extractPbsIds(concatenatedValues))
+        String pbsId
+        try {
+            pbsId = exactlyOneElement(extractPbsIds(concatenatedValues))
+        } catch (AssertionError e) {
+            throw new RuntimeException("Could not extract exactly one pbs id from '${concatenatedValues}'", e)
+        }
         ClusterJob clusterJob = clusterJobService.createClusterJob(realm, pbsId, processingStep, seqType, pbsJobDescription)
 
         return concatenatedValues

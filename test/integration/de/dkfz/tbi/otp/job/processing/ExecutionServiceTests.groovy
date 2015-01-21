@@ -147,6 +147,27 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
 
 
     @Test
+    void testExecuteJob_failForPbsId() {
+        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options -> return [] }
+        assertNotNull(realm.save())
+        TestJob testJob = createTestJobWithProcessingStep(AlignmentPass.build())
+        testJob.log = log
+        schedulerService.startingJobExecutionOnCurrentThread(testJob)
+        try {
+            String script = SCRIPT_CONTENT
+            String message = new GroovyTestCase().shouldFail(RuntimeException) {
+                executionService.executeJob(realm, script)
+            }
+            assert "Could not extract exactly one pbs id from ''" == message
+        }
+        finally {
+            schedulerService.finishedJobExecutionOnCurrentThread(testJob)
+        }
+    }
+
+
+
+    @Test
     void testExecuteJobScriptAndJobIdentifier() {
         assertNotNull(realm.save())
         TestJob testJob = createTestJobWithProcessingStep(AlignmentPass.build())
