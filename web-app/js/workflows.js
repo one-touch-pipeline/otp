@@ -489,7 +489,7 @@ $.otp.workflows = {
      */
     registerProcesses: function (selector, planId, failed) {
         "use strict";
-        $.otp.createInfinityScrollListView(selector, $.otp.createLink({
+        $.otp.createListView(selector, $.otp.createLink({
             controller: 'processes',
             action: 'planData',
             id: planId,
