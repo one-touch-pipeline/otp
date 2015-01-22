@@ -4,15 +4,15 @@ import org.apache.commons.logging.impl.NoOpLog
 import org.joda.time.LocalDate
 import org.junit.Before
 import org.junit.Test
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual.ProcessingStatus
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
 import grails.buildtestdata.mixin.Build
 
-@Build([SampleTypeCombinationPerIndividual])
+@Build([SamplePair])
 class SamplePairDiscoveryJobUnitTests {
 
     SamplePairDiscoveryJob job
@@ -60,41 +60,41 @@ class SamplePairDiscoveryJobUnitTests {
     }
 
     @Test
-    void testSetExistingCombinationsToNeedsProcessing() {
-        Collection<SampleTypeCombinationPerIndividual> theCombinations = [new SampleTypeCombinationPerIndividual()]
-        testMethodWhichCallsSetProcessingStatus(theCombinations, {
-            SampleTypeCombinationPerIndividual.metaClass.static.findCombinationsForSettingNeedsProcessing = {
-                return theCombinations
+    void testSetExistingSamplePairsToNeedsProcessing() {
+        Collection<SamplePair> samplePairs = [new SamplePair()]
+        testMethodWhichCallsSetProcessingStatus(samplePairs, {
+            SamplePair.metaClass.static.findSamplePairsForSettingNeedsProcessing = {
+                return samplePairs
             }
-            job.setExistingCombinationsToNeedsProcessing()
+            job.setExistingSamplePairsToNeedsProcessing()
         })
     }
 
     @Test
-    void testCreateMissingDiseaseControlCombinations() {
-        Collection<SampleTypeCombinationPerIndividual> missingCombinations = [new SampleTypeCombinationPerIndividual()]
-        testMethodWhichCallsSetProcessingStatus(missingCombinations, {
-            SampleTypeCombinationPerIndividual.metaClass.static.findMissingDiseaseControlCombinations = { final Date minDate ->
+    void testCreateMissingDiseaseControlSamplePairs() {
+        Collection<SamplePair> missingSamplePairs = [new SamplePair()]
+        testMethodWhichCallsSetProcessingStatus(missingSamplePairs, {
+            SamplePair.metaClass.static.findMissingDiseaseControlSamplePairs = { final Date minDate ->
                 assert minDate == new LocalDate(2014, 12, 1).toDate()
-                return missingCombinations
+                return missingSamplePairs
             }
-            job.createMissingDiseaseControlCombinations()
+            job.createMissingDiseaseControlSamplePairs()
         })
     }
 
-    private void testMethodWhichCallsSetProcessingStatus(final Collection expectedCombinations, final Closure call) {
+    private void testMethodWhichCallsSetProcessingStatus(final Collection expectedSamplePairs, final Closure call) {
         try {
             boolean setProcessingStatusCalled = false
-            SampleTypeCombinationPerIndividual.metaClass.static.setProcessingStatus = {
-                final Collection<SampleTypeCombinationPerIndividual> combinations, final ProcessingStatus processingStatus ->
-                    assert combinations.is(expectedCombinations)
+            SamplePair.metaClass.static.setProcessingStatus = {
+                final Collection<SamplePair> samplePairs, final ProcessingStatus processingStatus ->
+                    assert samplePairs.is(expectedSamplePairs)
                     assert processingStatus == ProcessingStatus.NEEDS_PROCESSING
                     setProcessingStatusCalled = true
             }
             call()
             assert setProcessingStatusCalled
         } finally {
-            SampleTypeCombinationPerIndividual.metaClass = null
+            SamplePair.metaClass = null
         }
     }
 
@@ -125,14 +125,14 @@ class SamplePairDiscoveryJobUnitTests {
     }
 
     private void testExecute(final Closure code) {
-        boolean setExistingCombinationsToNeedsProcessingCalled = false
-        job.metaClass.setExistingCombinationsToNeedsProcessing = { setExistingCombinationsToNeedsProcessingCalled = true }
-        boolean createMissingDiseaseControlCombinationsCalled = false
-        job.metaClass.createMissingDiseaseControlCombinations = { createMissingDiseaseControlCombinationsCalled = true }
+        boolean setExistingSamplePairsToNeedsProcessingCalled = false
+        job.metaClass.setExistingSamplePairsToNeedsProcessing = { setExistingSamplePairsToNeedsProcessingCalled = true }
+        boolean createMissingDiseaseControlSamplePairsCalled = false
+        job.metaClass.createMissingDiseaseControlSamplePairs = { createMissingDiseaseControlSamplePairsCalled = true }
 
         code()
 
-        assert setExistingCombinationsToNeedsProcessingCalled == true
-        assert createMissingDiseaseControlCombinationsCalled == true
+        assert setExistingSamplePairsToNeedsProcessingCalled == true
+        assert createMissingDiseaseControlSamplePairsCalled == true
     }
 }

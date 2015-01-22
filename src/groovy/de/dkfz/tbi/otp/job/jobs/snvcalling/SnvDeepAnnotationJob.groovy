@@ -125,13 +125,13 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob {
         // paths for the result file
         List<File> sourceLocation = [ resultFile.absoluteStagingPath ]
         List<File> targetLocation = [ resultFile.absoluteDataManagementPath ]
-        List<File> linkLocation = [ instance.sampleTypeCombination.getResultFileLinkedPath(step).absoluteDataManagementPath ]
+        List<File> linkLocation = [ instance.samplePair.getResultFileLinkedPath(step).absoluteDataManagementPath ]
 
         // path for index files
         OtpPath indexFile = new OtpPath(instance.snvInstancePath, step.getIndexFileName(instance.individual))
         sourceLocation.add(indexFile.absoluteStagingPath)
         targetLocation.add(indexFile.absoluteDataManagementPath)
-        linkLocation.add(instance.sampleTypeCombination.getIndexFileLinkedPath(step).absoluteDataManagementPath)
+        linkLocation.add(instance.samplePair.getIndexFileLinkedPath(step).absoluteDataManagementPath)
 
         //path for the config file
         sourceLocation.add(instance.configFilePath.absoluteStagingPath)

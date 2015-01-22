@@ -14,8 +14,8 @@ class SnvCallingInstanceTestData extends TestData {
     ProcessedMergedBamFile bamFileTumor
     ProcessedMergedBamFile bamFileTumor2
     ProcessedMergedBamFile bamFileControl
-    SampleTypeCombinationPerIndividual sampleTypeCombination
-    SampleTypeCombinationPerIndividual sampleTypeCombination2
+    SamplePair samplePair1
+    SamplePair samplePair2
     SnvConfig snvConfig
     ExternalScript externalScript_Joining
 
@@ -40,21 +40,21 @@ class SnvCallingInstanceTestData extends TestData {
         SampleTypePerProject.build(project: project, sampleType: bamFileTumor.sampleType, category: SampleType.Category.DISEASE)
         SampleTypePerProject.build(project: project, sampleType: bamFileTumor2.sampleType, category: SampleType.Category.DISEASE)
 
-        sampleTypeCombination = new SampleTypeCombinationPerIndividual(
+        samplePair1 = new SamplePair(
                 individual: individual,
                 sampleType1: bamFileTumor.sampleType,
                 sampleType2: bamFileControl.sampleType,
                 seqType: seqType
                 )
-        assert sampleTypeCombination.save()
+        assert samplePair1.save()
 
-        sampleTypeCombination2 = new SampleTypeCombinationPerIndividual(
+        samplePair2 = new SamplePair(
                 individual: individual,
                 sampleType1: bamFileTumor2.sampleType,
                 sampleType2: bamFileControl.sampleType,
                 seqType: seqType
                 )
-        assert sampleTypeCombination2.save()
+        assert samplePair2.save()
 
         snvConfig = new SnvConfig(
                 project: project,
@@ -110,7 +110,7 @@ class SnvCallingInstanceTestData extends TestData {
             sampleType2BamFile: bamFileControl,
             config: snvConfig,
             instanceName: "2014-08-25_15h32",
-            sampleTypeCombination: sampleTypeCombination
+            samplePair: samplePair1
         ] + properties)
     }
 

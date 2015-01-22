@@ -2,8 +2,8 @@ package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import org.joda.time.LocalDate
 
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual.ProcessingStatus
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.job.processing.ResumableJob
 import de.dkfz.tbi.otp.ngsdata.Project
@@ -17,8 +17,8 @@ class SamplePairDiscoveryJob extends AbstractEndStateAwareJobImpl {
 
         final boolean sampleTypesNeedCategorization = logUncategorizedSampleTypes()
 
-        setExistingCombinationsToNeedsProcessing()
-        createMissingDiseaseControlCombinations()
+        setExistingSamplePairsToNeedsProcessing()
+        createMissingDiseaseControlSamplePairs()
 
         if (sampleTypesNeedCategorization) {
             throw new RuntimeException('Some sample types are not categorized. See the job log for details.')
@@ -57,17 +57,17 @@ class SamplePairDiscoveryJob extends AbstractEndStateAwareJobImpl {
         return buffer.toString()
     }
 
-    void setExistingCombinationsToNeedsProcessing() {
-        final Collection<SampleTypeCombinationPerIndividual> combinations =
-                SampleTypeCombinationPerIndividual.findCombinationsForSettingNeedsProcessing()
-        log.info "Setting processingStatus to ${ProcessingStatus.NEEDS_PROCESSING} for ${combinations.size()} existing ${SampleTypeCombinationPerIndividual.simpleName} instance(s)."
-        SampleTypeCombinationPerIndividual.setProcessingStatus(combinations, ProcessingStatus.NEEDS_PROCESSING)
+    void setExistingSamplePairsToNeedsProcessing() {
+        final Collection<SamplePair> samplePairs =
+                SamplePair.findSamplePairsForSettingNeedsProcessing()
+        log.info "Setting processingStatus to ${ProcessingStatus.NEEDS_PROCESSING} for ${samplePairs.size()} existing ${SamplePair.simpleName} instance(s)."
+        SamplePair.setProcessingStatus(samplePairs, ProcessingStatus.NEEDS_PROCESSING)
     }
 
-    void createMissingDiseaseControlCombinations() {
-        final Collection<SampleTypeCombinationPerIndividual> combinations =
-                SampleTypeCombinationPerIndividual.findMissingDiseaseControlCombinations(new LocalDate(2014, 12, 1).toDate())
-        log.info "Creating ${combinations.size()} new ${SampleTypeCombinationPerIndividual.simpleName} instance(s)."
-        SampleTypeCombinationPerIndividual.setProcessingStatus(combinations, ProcessingStatus.NEEDS_PROCESSING)
+    void createMissingDiseaseControlSamplePairs() {
+        final Collection<SamplePair> samplePairs =
+                SamplePair.findMissingDiseaseControlSamplePairs(new LocalDate(2014, 12, 1).toDate())
+        log.info "Creating ${samplePairs.size()} new ${SamplePair.simpleName} instance(s)."
+        SamplePair.setProcessingStatus(samplePairs, ProcessingStatus.NEEDS_PROCESSING)
     }
 }

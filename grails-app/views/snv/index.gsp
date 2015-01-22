@@ -68,7 +68,7 @@
                     codes="${[
                         'snv.index.individual',
                     ] }"
-                        id="projectCombinationPerIndividuals" />
+                        id="individualsPerProject" />
         </div>
      <r:script>
       $(function() {

@@ -7,48 +7,47 @@ import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.*
 
 
-@TestFor(SampleTypeCombinationPerIndividual)
+@TestFor(SamplePair)
 @Build([Realm, Individual, SampleTypePerProject, SeqType])
-class SampleTypeCombinationPerIndividualUnitTests {
+class SamplePairUnitTests {
 
-    void testSaveSnvCombinationPerIndividualOnlyIndividual() {
-        SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual()
-        sampleCombinationPerIndividual.individual = new Individual()
-        assertFalse(sampleCombinationPerIndividual.validate())
+    void testSaveSamplePairOnlyIndividual() {
+        SamplePair samplePair = new SamplePair()
+        samplePair.individual = new Individual()
+        assertFalse(samplePair.validate())
     }
 
-    void testSaveSnvCombinationPerIndividualOnlySampleType1() {
-        SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual()
-        sampleCombinationPerIndividual.sampleType1 = new SampleType()
-        assertFalse(sampleCombinationPerIndividual.validate())
+    void testSaveSamplePairOnlySampleType1() {
+        SamplePair samplePair = new SamplePair()
+        samplePair.sampleType1 = new SampleType()
+        assertFalse(samplePair.validate())
     }
 
-    void testSaveSnvCombinationPerIndividualOnlySampleType2() {
-        SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual()
-        sampleCombinationPerIndividual.sampleType2 = new SampleType()
-        assertFalse(sampleCombinationPerIndividual.validate())
+    void testSaveSamplePairOnlySampleType2() {
+        SamplePair samplePair = new SamplePair()
+        samplePair.sampleType2 = new SampleType()
+        assertFalse(samplePair.validate())
     }
 
-    void testSaveSnvCombinationPerIndividualOnlySeqType() {
-        SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual()
-        sampleCombinationPerIndividual.seqType = new SeqType()
-        assertFalse(sampleCombinationPerIndividual.validate())
+    void testSaveSamplePairOnlySeqType() {
+        SamplePair samplePair = new SamplePair()
+        samplePair.seqType = new SeqType()
+        assertFalse(samplePair.validate())
     }
 
-    void testSaveSnvCombinationPerIndividual() {
+    void testSaveSamplePair() {
         final Individual individual = Individual.build()
         final SampleType sampleType1 = SampleType.build()
         SampleTypePerProject.build(project: individual.project, sampleType: sampleType1, category: SampleType.Category.DISEASE)
-        SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual()
-        sampleCombinationPerIndividual.individual = individual
-        sampleCombinationPerIndividual.seqType = new SeqType()
-        sampleCombinationPerIndividual.sampleType1 = sampleType1
-        sampleCombinationPerIndividual.sampleType2 = new SampleType()
-        assertTrue(sampleCombinationPerIndividual.validate())
-        //println sampleCombinationPerIndividual.errors
+        SamplePair samplePair = new SamplePair()
+        samplePair.individual = individual
+        samplePair.seqType = new SeqType()
+        samplePair.sampleType1 = sampleType1
+        samplePair.sampleType2 = new SampleType()
+        assertTrue(samplePair.validate())
     }
 
-    void testGetSampleTypeCombinationPath() {
+    void testGetSamplePairPath() {
         TestData testData = new TestData()
         Realm realm = DomainFactory.createRealmDataManagementDKFZ()
         Project project = testData.createProject([realmName: realm.name])
@@ -63,19 +62,19 @@ class SampleTypeCombinationPerIndividualUnitTests {
         sampleType2.save(flush: true)
         SampleTypePerProject.build(project: project, sampleType: sampleType1, category: SampleType.Category.DISEASE)
 
-        SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
+        SamplePair samplePair = new SamplePair(
             individual: individual,
             seqType: seqType,
             sampleType1: sampleType1,
             sampleType2: sampleType2
             )
-        sampleCombinationPerIndividual.save(flush: true)
+        samplePair.save(flush: true)
         String path = "dirName/sequencing/whole_genome_sequencing/view-by-pid/654321/snv_results/paired/tumor_control"
         File expectedExtension = new File(path)
 
-        OtpPath sampleTypeCombinationPath = sampleCombinationPerIndividual.getSampleTypeCombinationPath()
-        assertEquals(expectedExtension, sampleTypeCombinationPath.relativePath)
-        assertEquals(project, sampleTypeCombinationPath.project)
+        OtpPath samplePairPath = samplePair.getSamplePairPath()
+        assertEquals(expectedExtension, samplePairPath.relativePath)
+        assertEquals(project, samplePairPath.project)
     }
 
     void testGetResultFileLinkedPath() {
@@ -93,30 +92,30 @@ class SampleTypeCombinationPerIndividualUnitTests {
         sampleType2.save(flush: true)
         SampleTypePerProject.build(project: project, sampleType: sampleType1, category: SampleType.Category.DISEASE)
 
-        SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
+        SamplePair samplePair = new SamplePair(
             individual: individual,
             seqType: seqType,
             sampleType1: sampleType1,
             sampleType2: sampleType2
             )
-        sampleCombinationPerIndividual.save(flush: true)
+        samplePair.save(flush: true)
 
         String path = "dirName/sequencing/whole_genome_sequencing/view-by-pid/654321/snv_results/paired/tumor_control"
         String fileCalling = "snvs_654321_raw.vcf.gz"
         File expectedExtension = new File("${path}/${fileCalling}")
 
-        OtpPath snvCallingResultFileLinkedPath = sampleCombinationPerIndividual.getResultFileLinkedPath(SnvCallingStep.CALLING)
+        OtpPath snvCallingResultFileLinkedPath = samplePair.getResultFileLinkedPath(SnvCallingStep.CALLING)
         assertEquals(expectedExtension, snvCallingResultFileLinkedPath.relativePath)
         assertEquals(project, snvCallingResultFileLinkedPath.project)
 
         String fileDeepAnnotation = "snvs_654321.vcf.gz"
         File expectedExtensionDeepAnnotation = new File("${path}/${fileDeepAnnotation}")
 
-        OtpPath snvDeepAnnotationResultFileLinkedPath = sampleCombinationPerIndividual.getResultFileLinkedPath(SnvCallingStep.SNV_DEEPANNOTATION)
+        OtpPath snvDeepAnnotationResultFileLinkedPath = samplePair.getResultFileLinkedPath(SnvCallingStep.SNV_DEEPANNOTATION)
         assertEquals(expectedExtensionDeepAnnotation, snvDeepAnnotationResultFileLinkedPath.relativePath)
         assertEquals(project, snvDeepAnnotationResultFileLinkedPath.project)
 
-        OtpPath filterResultFilesLinkedPath = sampleCombinationPerIndividual.getResultFileLinkedPath(SnvCallingStep.FILTER_VCF)
+        OtpPath filterResultFilesLinkedPath = samplePair.getResultFileLinkedPath(SnvCallingStep.FILTER_VCF)
         assertEquals(new File(path), filterResultFilesLinkedPath.relativePath)
         assertEquals(project, filterResultFilesLinkedPath.project)
     }

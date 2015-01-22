@@ -1,14 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual.ProcessingStatus
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import static org.springframework.util.Assert.*
 
 class SnvCallingService {
 
     /**
-     * The method goes through the list of sample type combinations and checks if there is a disease/control pair
+     * The method goes through the list of sample pairs and checks if there is a disease/control pair
      * which can be processed and returns it.
      * Criteria to pass before being processed are:
      * - bam & bai file available for disease and control
@@ -16,12 +16,12 @@ class SnvCallingService {
      * - if lane number threshold is given: lane number has reached lane number threshold
      * - processing of disease & control files finished -> transfer completed
      * - all not withdrawn lanes for these samples, available in OTP, are already merged in the bam files
-     * - disease/control pair listed in {@link SampleTypeCombinationPerIndividual}
+     * - disease/control pair listed in {@link SamplePair}
      * - pair is not set to IGNORED
      * - pair is not already in processing
      * - config file is available
      */
-    SampleTypeCombinationPerIndividual samplePairForSnvProcessing() {
+    SamplePair samplePairForSnvProcessing() {
 
         List<SnvProcessingStates> unallowedProcessingStates = [
             SnvProcessingStates.IGNORED,
@@ -38,10 +38,10 @@ class SnvCallingService {
             return "AND EXISTS (FROM ProcessedMergedBamFile pmbf${number} " +
             // check that the file is not withdrawn
             "       WHERE pmbf${number}.withdrawn = false " +
-            //check that the bam file belongs to the sample type, seq type and individual from the SampleTypeCombinationPerIndividual
-            "       AND pmbf${number}.${INDIVIDUAL} = stc.individual " +
-            "       AND pmbf${number}.${SAMPLE_TYPE} = stc.sampleType${number} " +
-            "       AND pmbf${number}.${SEQ_TYPE} = stc.seqType " +
+            //check that the bam file belongs to the sample type, seq type and individual from the SamplePair
+            "       AND pmbf${number}.${INDIVIDUAL} = sp.individual " +
+            "       AND pmbf${number}.${SAMPLE_TYPE} = sp.sampleType${number} " +
+            "       AND pmbf${number}.${SEQ_TYPE} = sp.seqType " +
             //check that transfer workflow is finished
             "       AND pmbf${number}.md5sum IS NOT NULL " +
             //check that coverage is high enough & number of lanes are enough
@@ -55,18 +55,18 @@ class SnvCallingService {
         }
 
         String pairForSnvProcessing =
-                "FROM SampleTypeCombinationPerIndividual stc " +
-                //check that combination shall be processed
-                "WHERE stc.processingStatus = :needsProcessing " +
+                "FROM SamplePair sp " +
+                //check that sample pair shall be processed
+                "WHERE sp.processingStatus = :needsProcessing " +
 
                 //check that the config file is available
                 "AND EXISTS (FROM SnvConfig cps " +
-                "   WHERE cps.project = stc.individual.project " +
-                "   AND cps.seqType = stc.seqType) " +
+                "   WHERE cps.project = sp.individual.project " +
+                "   AND cps.seqType = sp.seqType) " +
 
-                //check that this combination is not in process
+                //check that this sample pair is not in process
                 "AND NOT EXISTS (FROM SnvCallingInstance sci " +
-                "   WHERE sci.sampleTypeCombination = stc " +
+                "   WHERE sci.samplePair = sp " +
                 "   AND sci.processingState IN (:processingStates) " +
                 ") " +
 
@@ -76,17 +76,17 @@ class SnvCallingService {
                 //check that the second bam file fulfill the criteria
                 testIfBamFileFulfillCriteria("2") +
 
-                "ORDER BY stc.dateCreated"
+                "ORDER BY sp.dateCreated"
 
-        List<SampleTypeCombinationPerIndividual> sampleTypeCombinationPerIndividuals = SampleTypeCombinationPerIndividual.findAll(
+        List<SamplePair> samplePairs = SamplePair.findAll(
                 pairForSnvProcessing,
                 [
                         needsProcessing: ProcessingStatus.NEEDS_PROCESSING,
                         processingStates: unallowedProcessingStates,
                 ])
 
-        if (sampleTypeCombinationPerIndividuals) {
-            return sampleTypeCombinationPerIndividuals.find {
+        if (samplePairs) {
+            return samplePairs.find {
 
                 //get the latest ProcessedMergedBamFiles for both sample Types
                 ProcessedMergedBamFile processedMergedBamFile1 = it.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(it.sampleType1)

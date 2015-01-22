@@ -7,7 +7,7 @@ import org.junit.Before
 import org.junit.Test
 import de.dkfz.tbi.otp.ngsdata.*
 
-class SampleTypeCombinationPerIndividualFindMissingDiseaseControlCombinationsTests {
+class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     SeqType wholeGenome
     SeqType exome
@@ -186,7 +186,7 @@ class SampleTypeCombinationPerIndividualFindMissingDiseaseControlCombinationsTes
 
     @Test
     void testNoRecentDataFileForIndividual() {
-        assert SampleTypeCombinationPerIndividual.findMissingDiseaseControlCombinations(dataFile.dateCreated.plus(1)).empty
+        assert SamplePair.findMissingDiseaseControlSamplePairs(dataFile.dateCreated.plus(1)).empty
     }
 
     @Test
@@ -208,8 +208,8 @@ class SampleTypeCombinationPerIndividualFindMissingDiseaseControlCombinationsTes
     }
 
     @Test
-    void testMatchingStcpiAlreadyExists() {
-        SampleTypeCombinationPerIndividual.build(
+    void testMatchingSamplePairAlreadyExists() {
+        SamplePair.build(
                 individual: individual,
                 sampleType1: diseaseSampleType,
                 sampleType2: controlSampleType,
@@ -219,8 +219,8 @@ class SampleTypeCombinationPerIndividualFindMissingDiseaseControlCombinationsTes
     }
 
     @Test
-    void testStcpiWithOtherIndividualExists() {
-        SampleTypeCombinationPerIndividual.build(
+    void testSamplePairWithOtherIndividualExists() {
+        SamplePair.build(
                 individual: Individual.build(project: project),
                 sampleType1: diseaseSampleType,
                 sampleType2: controlSampleType,
@@ -230,10 +230,10 @@ class SampleTypeCombinationPerIndividualFindMissingDiseaseControlCombinationsTes
     }
 
     @Test
-    void testStcpiWithOtherSampleType1Exists() {
+    void testSamplePairWithOtherSampleType1Exists() {
         final SampleType sampleType1 = SampleType.build()
         SampleTypePerProject.build(project: project, sampleType: sampleType1, category: SampleType.Category.DISEASE)
-        SampleTypeCombinationPerIndividual.build(
+        SamplePair.build(
                 individual: individual,
                 sampleType1: sampleType1,
                 sampleType2: controlSampleType,
@@ -243,8 +243,8 @@ class SampleTypeCombinationPerIndividualFindMissingDiseaseControlCombinationsTes
     }
 
     @Test
-    void testStcpiWithOtherSampleType2Exists() {
-        SampleTypeCombinationPerIndividual.build(
+    void testSamplePairWithOtherSampleType2Exists() {
+        SamplePair.build(
                 individual: individual,
                 sampleType1: diseaseSampleType,
                 sampleType2: SampleType.build(),
@@ -254,8 +254,8 @@ class SampleTypeCombinationPerIndividualFindMissingDiseaseControlCombinationsTes
     }
 
     @Test
-    void testStcpiWithOtherSeqTypeExists() {
-        SampleTypeCombinationPerIndividual.build(
+    void testSamplePairWithOtherSeqTypeExists() {
+        SamplePair.build(
                 individual: individual,
                 sampleType1: diseaseSampleType,
                 sampleType2: controlSampleType,
@@ -275,29 +275,29 @@ class SampleTypeCombinationPerIndividualFindMissingDiseaseControlCombinationsTes
     void testFindTwo() {
         SeqTrack.build(sample: diseaseSample, seqType: exome)
         SeqTrack.build(sample: controlSample, seqType: exome)
-        final List<SampleTypeCombinationPerIndividual> combinations =
-                SampleTypeCombinationPerIndividual.findMissingDiseaseControlCombinations(dataFile.dateCreated).sort { it.seqType.name }
-        assert combinations.size() == 2
-        assertEqualsAndNotPersisted(combinations[0], individual, diseaseSampleType, controlSampleType, exome)
-        assertEqualsAndNotPersisted(combinations[1], individual, diseaseSampleType, controlSampleType, wholeGenome)
+        final List<SamplePair> samplePairs =
+                SamplePair.findMissingDiseaseControlSamplePairs(dataFile.dateCreated).sort { it.seqType.name }
+        assert samplePairs.size() == 2
+        assertEqualsAndNotPersisted(samplePairs[0], individual, diseaseSampleType, controlSampleType, exome)
+        assertEqualsAndNotPersisted(samplePairs[1], individual, diseaseSampleType, controlSampleType, wholeGenome)
     }
 
     void assertFindsNothing() {
-        assert SampleTypeCombinationPerIndividual.findMissingDiseaseControlCombinations(dataFile.dateCreated).empty
+        assert SamplePair.findMissingDiseaseControlSamplePairs(dataFile.dateCreated).empty
     }
 
     void assertFindsOne() {
         assertEqualsAndNotPersisted(
-                exactlyOneElement(SampleTypeCombinationPerIndividual.findMissingDiseaseControlCombinations(dataFile.dateCreated)),
+                exactlyOneElement(SamplePair.findMissingDiseaseControlSamplePairs(dataFile.dateCreated)),
                 individual, diseaseSampleType, controlSampleType, wholeGenome)
     }
 
-    void assertEqualsAndNotPersisted(final SampleTypeCombinationPerIndividual combination, final Individual individual,
+    void assertEqualsAndNotPersisted(final SamplePair samplePair, final Individual individual,
                           final SampleType sampleType1, final SampleType sampleType2, final SeqType seqType) {
-        assert combination.individual  == individual &&
-               combination.sampleType1 == sampleType1 &&
-               combination.sampleType2 == sampleType2 &&
-               combination.seqType     == seqType &&
-               combination.id          == null
+        assert samplePair.individual  == individual &&
+               samplePair.sampleType1 == sampleType1 &&
+               samplePair.sampleType2 == sampleType2 &&
+               samplePair.seqType     == seqType &&
+               samplePair.id          == null
     }
 }

@@ -16,22 +16,22 @@ import de.dkfz.tbi.otp.ngsdata.*
 class SnvCallingInstanceUnitTests {
 
     SnvCallingInstanceTestData testData = new SnvCallingInstanceTestData()
-    String sampleCombinationPath
+    String samplePairPath
 
     @Before
     void setUp() {
         testData.createSnvObjects()
 
-        sampleCombinationPath = "${testData.sampleTypeCombination.sampleType1.name}_${testData.sampleTypeCombination.sampleType2.name}"
+        samplePairPath = "${testData.samplePair1.sampleType1.name}_${testData.samplePair1.sampleType2.name}"
 
-        SampleTypeCombinationPerIndividual.metaClass.getSampleTypeCombinationPath = {
-            return new OtpPath(testData.project, sampleCombinationPath)
+        SamplePair.metaClass.getSamplePairPath = {
+            return new OtpPath(testData.project, samplePairPath)
         }
     }
 
     @After
     void after() {
-        SampleTypeCombinationPerIndividual.metaClass = null
+        SamplePair.metaClass = null
     }
 
     @Test
@@ -75,24 +75,24 @@ class SnvCallingInstanceUnitTests {
         assert instance.save(failOnError: true)
 
         SnvCallingInstance instanceSameName = createSnvCallingInstance([instanceName: instance.instanceName,
-            sampleTypeCombination: instance.sampleTypeCombination])
+            samplePair: instance.samplePair])
         assert !instanceSameName.validate()
     }
 
     @Test
-    void testInstanceNoSampleTypeCombination() {
+    void testInstanceNoSamplePair() {
         SnvCallingInstance instance = createSnvCallingInstance()
-        instance.sampleTypeCombination = null
+        instance.samplePair = null
         assert !instance.validate()
     }
 
     @Test
-    void testIsConsistentWithSampleTypeCombination() {
+    void testIsConsistentWithSamplePair() {
         SnvCallingInstance instance = createSnvCallingInstance()
-        SampleType sampleType1 = instance.sampleTypeCombination.sampleType1
-        SampleType sampleType2 = instance.sampleTypeCombination.sampleType2
-        assert SnvCallingInstance.isConsistentWithSampleTypeCombination(testData.bamFileControl, instance, sampleType2)
-        assert SnvCallingInstance.isConsistentWithSampleTypeCombination(testData.bamFileTumor, instance, sampleType1)
+        SampleType sampleType1 = instance.samplePair.sampleType1
+        SampleType sampleType2 = instance.samplePair.sampleType2
+        assert SnvCallingInstance.isConsistentWithSamplePair(testData.bamFileControl, instance, sampleType2)
+        assert SnvCallingInstance.isConsistentWithSamplePair(testData.bamFileTumor, instance, sampleType1)
     }
 
     @Test
@@ -101,7 +101,7 @@ class SnvCallingInstanceUnitTests {
         OtpPath snvInstancePath = instance.getSnvInstancePath()
 
         assertEquals(instance.project, snvInstancePath.project)
-        File expectedRelativePath = new File(getSnvInstancePathHelper(testData.sampleTypeCombination, instance))
+        File expectedRelativePath = new File(getSnvInstancePathHelper(testData.samplePair1, instance))
         assertEquals(expectedRelativePath, snvInstancePath.relativePath)
     }
 
@@ -111,7 +111,7 @@ class SnvCallingInstanceUnitTests {
         OtpPath configFilePath = instance.getConfigFilePath()
 
         assertEquals(instance.project, configFilePath.project)
-        File expectedRelativePath = new File("${getSnvInstancePathHelper(testData.sampleTypeCombination, instance)}/config.txt")
+        File expectedRelativePath = new File("${getSnvInstancePathHelper(testData.samplePair1, instance)}/config.txt")
         assertEquals(expectedRelativePath, configFilePath.relativePath)
     }
 
@@ -121,12 +121,12 @@ class SnvCallingInstanceUnitTests {
         OtpPath stepConfigFileLinkedPath= instance.getStepConfigFileLinkedPath(SnvCallingStep.CALLING)
 
         assertEquals(instance.project, stepConfigFileLinkedPath.project)
-        File expectedRelativePath = new File("${sampleCombinationPath}/config_${SnvCallingStep.CALLING.configFileNameSuffix}_${instance.instanceName}.txt")
+        File expectedRelativePath = new File("${samplePairPath}/config_${SnvCallingStep.CALLING.configFileNameSuffix}_${instance.instanceName}.txt")
         assertEquals(expectedRelativePath, stepConfigFileLinkedPath.relativePath)
     }
 
-    String getSnvInstancePathHelper(SampleTypeCombinationPerIndividual combination, SnvCallingInstance instance) {
-        return "${sampleCombinationPath}/${instance.instanceName}"
+    String getSnvInstancePathHelper(SamplePair samplePair, SnvCallingInstance instance) {
+        return "${samplePairPath}/${instance.instanceName}"
     }
 
     /**
@@ -136,7 +136,7 @@ class SnvCallingInstanceUnitTests {
     @Test
     void testFindLatestResultForSameBamFiles_correctOrder() {
         final SnvCallingInstance tumor1InstanceA = testData.createAndSaveSnvCallingInstance()
-        // Using a different (does not matter if "earlier" or "later") instance name, because instance names have to be unique for the same sample type combination.
+        // Using a different (does not matter if "earlier" or "later") instance name, because instance names have to be unique for the same sample pair.
         final SnvCallingInstance tumor1InstanceB = testData.createAndSaveSnvCallingInstance(instanceName: '2014-09-24_15h04')
         final SnvJobResult tumor1CallingResultB = testData.createAndSaveSnvJobResult(tumor1InstanceB, SnvCallingStep.CALLING)
         final SnvJobResult tumor1CallingResultA = testData.createAndSaveSnvJobResult(tumor1InstanceA, SnvCallingStep.CALLING)

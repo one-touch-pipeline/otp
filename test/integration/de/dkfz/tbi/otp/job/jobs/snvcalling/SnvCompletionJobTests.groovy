@@ -6,7 +6,7 @@ import org.junit.After
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstanceTestData
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
@@ -72,19 +72,19 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile1.sampleType, category: SampleType.Category.DISEASE)
 
-        SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
+        SamplePair samplePair = new SamplePair(
                 individual: individual,
                 sampleType1: processedMergedBamFile1.sampleType,
                 sampleType2: processedMergedBamFile2.sampleType,
                 seqType: seqType)
-        assert sampleTypeCombinationPerIndividual.save()
+        assert samplePair.save()
 
         snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: SOME_INSTANCE_NAME,
                 config: snvConfig,
                 sampleType1BamFile: processedMergedBamFile1,
                 sampleType2BamFile: processedMergedBamFile2,
-                sampleTypeCombination: sampleTypeCombinationPerIndividual)
+                samplePair: samplePair)
         assert snvCallingInstance.save()
 
         snvCompletionJob = applicationContext.getBean('snvCompletionJob',

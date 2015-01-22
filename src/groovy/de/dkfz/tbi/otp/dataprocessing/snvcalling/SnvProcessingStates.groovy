@@ -16,8 +16,8 @@ public enum SnvProcessingStates {
      */
     FINISHED,
     /**
-     * It might happen that some tumor-control combinations shall not be processed with the snv-calling workflow.
-     * To avoid that these combinations are picked again and again by the start job, a ${@link SnvCallingInstance} is created
+     * It might happen that some tumor-control sample pairs shall not be processed with the snv-calling workflow.
+     * To avoid that these sample pairs are picked again and again by the start job, a ${@link SnvCallingInstance} is created
      * and set to "IGNORED".
      */
     IGNORED,

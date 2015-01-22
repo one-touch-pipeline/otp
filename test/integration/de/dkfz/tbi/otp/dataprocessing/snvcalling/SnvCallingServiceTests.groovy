@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 import static org.junit.Assert.*
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual.ProcessingStatus
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
@@ -13,7 +13,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 class SnvCallingServiceTests {
 
     SnvCallingInstanceTestData testData
-    SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual
+    SamplePair samplePair
 
     SnvCallingService snvCallingService
     SnvConfig snvConfig
@@ -60,18 +60,18 @@ class SnvCallingServiceTests {
 
         SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile1.sample.sampleType, category: SampleType.Category.DISEASE)
 
-        sampleTypeCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
+        samplePair = new SamplePair(
                 individual: individual,
                 sampleType1: processedMergedBamFile1.sample.sampleType,
                 sampleType2: processedMergedBamFile2.sample.sampleType,
                 seqType: seqType
                 )
-        sampleTypeCombinationPerIndividual.save()
+        samplePair.save()
     }
 
     @After
     void tearDown() {
-        sampleTypeCombinationPerIndividual = null
+        samplePair = null
         snvConfig = null
         processedMergedBamFile1 = null
         processedMergedBamFile2 = null
@@ -82,20 +82,20 @@ class SnvCallingServiceTests {
 
     @Test
     void testSamplePairForSnvProcessingAllCorrect() {
-        assertEquals(sampleTypeCombinationPerIndividual, snvCallingService.samplePairForSnvProcessing())
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test
     void testSamplePairNoProcessingNeeded() {
-        sampleTypeCombinationPerIndividual.processingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
-        assert sampleTypeCombinationPerIndividual.save()
+        samplePair.processingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
+        assert samplePair.save()
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test
     void testSamplePairDisabled() {
-        sampleTypeCombinationPerIndividual.processingStatus = ProcessingStatus.DISABLED
-        assert sampleTypeCombinationPerIndividual.save()
+        samplePair.processingStatus = ProcessingStatus.DISABLED
+        assert samplePair.save()
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
 
@@ -123,7 +123,7 @@ class SnvCallingServiceTests {
     void testSamplePairForSnvProcessingAlreadyInProcess() {
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
-                sampleTypeCombination: sampleTypeCombinationPerIndividual,
+                samplePair: samplePair,
                 config: snvConfig,
                 sampleType1BamFile: processedMergedBamFile1,
                 sampleType2BamFile: processedMergedBamFile2
@@ -137,7 +137,7 @@ class SnvCallingServiceTests {
     void testSamplePairForSnvProcessingWasProcessed() {
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
-                sampleTypeCombination: sampleTypeCombinationPerIndividual,
+                samplePair: samplePair,
                 config: snvConfig,
                 sampleType1BamFile: processedMergedBamFile1,
                 sampleType2BamFile: processedMergedBamFile2,
@@ -145,14 +145,14 @@ class SnvCallingServiceTests {
                 )
         snvCallingInstance.save()
 
-        assertEquals(sampleTypeCombinationPerIndividual, snvCallingService.samplePairForSnvProcessing())
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test
     void testSamplePairForSnvProcessingHasToBeIgnored() {
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
-                sampleTypeCombination: sampleTypeCombinationPerIndividual,
+                samplePair: samplePair,
                 config: snvConfig,
                 sampleType1BamFile: processedMergedBamFile1,
                 sampleType2BamFile: processedMergedBamFile2,
@@ -168,24 +168,24 @@ class SnvCallingServiceTests {
         ProcessedMergedBamFile otherProcessedMergedBamFile = createProcessedMergedBamFile("3")
         otherProcessedMergedBamFile.save()
 
-        SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual1 = new SampleTypeCombinationPerIndividual(
+        SamplePair samplePair2 = new SamplePair(
                 individual: individual,
                 sampleType1: processedMergedBamFile1.sample.sampleType,
                 sampleType2: otherProcessedMergedBamFile.sample.sampleType,
                 seqType: seqType
                 )
-        sampleTypeCombinationPerIndividual1.save()
+        samplePair2.save()
 
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
-                sampleTypeCombination: sampleTypeCombinationPerIndividual1,
+                samplePair: samplePair2,
                 config: snvConfig,
                 sampleType1BamFile: processedMergedBamFile1,
                 sampleType2BamFile: otherProcessedMergedBamFile
                 )
         snvCallingInstance.save()
 
-        assertEquals(sampleTypeCombinationPerIndividual, snvCallingService.samplePairForSnvProcessing())
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test
@@ -211,24 +211,24 @@ class SnvCallingServiceTests {
 
         SampleTypePerProject.build(project: otherIndividual.project, sampleType: processedMergedBamFile3.sample.sampleType, category: SampleType.Category.DISEASE)
 
-        SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual2 = new SampleTypeCombinationPerIndividual(
+        SamplePair samplePair2 = new SamplePair(
                 individual: otherIndividual,
                 sampleType1: processedMergedBamFile3.sample.sampleType,
                 sampleType2: processedMergedBamFile4.sample.sampleType,
                 seqType: seqType
                 )
-        sampleTypeCombinationPerIndividual2.save()
+        samplePair2.save()
 
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
-                sampleTypeCombination: sampleTypeCombinationPerIndividual2,
+                samplePair: samplePair2,
                 config: snvConfig,
                 sampleType1BamFile: processedMergedBamFile3,
                 sampleType2BamFile: processedMergedBamFile4
                 )
         snvCallingInstance.save()
 
-        assertEquals(sampleTypeCombinationPerIndividual, snvCallingService.samplePairForSnvProcessing())
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test
@@ -262,29 +262,29 @@ class SnvCallingServiceTests {
         assertFalse(processedMergedBamFile2.seqType == processedMergedBamFile4.seqType)
 
 
-        SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual2 = new SampleTypeCombinationPerIndividual(
+        SamplePair samplePair2 = new SamplePair(
                 individual: individual,
                 sampleType1: processedMergedBamFile3.sample.sampleType,
                 sampleType2: processedMergedBamFile4.sample.sampleType,
                 seqType: otherSeqType
                 )
-        sampleTypeCombinationPerIndividual2.save()
+        samplePair2.save()
 
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
-                sampleTypeCombination: sampleTypeCombinationPerIndividual2,
+                samplePair: samplePair2,
                 config: snvConfig,
                 sampleType1BamFile: processedMergedBamFile3,
                 sampleType2BamFile: processedMergedBamFile4
                 )
         snvCallingInstance.save()
 
-        assertEquals(sampleTypeCombinationPerIndividual, snvCallingService.samplePairForSnvProcessing())
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test
     void testBamFile1DoesNotContainAllSeqTracks() {
-        assertEquals(sampleTypeCombinationPerIndividual, snvCallingService.samplePairForSnvProcessing())
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
 
         SeqTrack newSeqTrack = testData.createSeqTrack([
             sample: processedMergedBamFile1.sample,
@@ -297,7 +297,7 @@ class SnvCallingServiceTests {
 
     @Test
     void testBamFile2DoesNotContainAllSeqTracks() {
-        assertEquals(sampleTypeCombinationPerIndividual, snvCallingService.samplePairForSnvProcessing())
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
 
         SeqTrack newSeqTrack = testData.createSeqTrack([
             sample: processedMergedBamFile2.sample,
@@ -315,8 +315,8 @@ class SnvCallingServiceTests {
 
         SampleTypePerProject.build(project: project, sampleType: differentSampleType, category: SampleType.Category.DISEASE)
 
-        sampleTypeCombinationPerIndividual.sampleType1 = differentSampleType
-        sampleTypeCombinationPerIndividual.save()
+        samplePair.sampleType1 = differentSampleType
+        samplePair.save()
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
@@ -326,8 +326,8 @@ class SnvCallingServiceTests {
         SampleType differentSampleType = testData.createSampleType([name: "DIFFERENT"])
         differentSampleType.save()
 
-        sampleTypeCombinationPerIndividual.sampleType2 = differentSampleType
-        sampleTypeCombinationPerIndividual.save()
+        samplePair.sampleType2 = differentSampleType
+        samplePair.save()
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
@@ -337,8 +337,8 @@ class SnvCallingServiceTests {
         SeqType differentSeqType = testData.createSeqType([name: "DIFFERENT", dirName: "DIFFERENT_SEQUENCING"])
         differentSeqType.save()
 
-        sampleTypeCombinationPerIndividual.seqType = differentSeqType
-        sampleTypeCombinationPerIndividual.save()
+        samplePair.seqType = differentSeqType
+        samplePair.save()
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
 
@@ -346,8 +346,8 @@ class SnvCallingServiceTests {
     void testSamplePairFromOtherIndividual() {
         Individual otherIndividual = testData.createIndividual([project: project, pid: "testPid2"])
         otherIndividual.save()
-        sampleTypeCombinationPerIndividual.individual = otherIndividual
-        sampleTypeCombinationPerIndividual.save()
+        samplePair.individual = otherIndividual
+        samplePair.save()
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
@@ -466,7 +466,7 @@ class SnvCallingServiceTests {
         processingThreshold.coverage = null
         processingThreshold.save()
 
-        assertEquals(sampleTypeCombinationPerIndividual, snvCallingService.samplePairForSnvProcessing())
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test
@@ -477,13 +477,13 @@ class SnvCallingServiceTests {
         processingThreshold.numberOfLanes = null
         processingThreshold.save()
 
-        assertEquals(sampleTypeCombinationPerIndividual, snvCallingService.samplePairForSnvProcessing())
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
     }
 
 
     @Test
     void testBamFile1IsWithdrawn() {
-        assertEquals(sampleTypeCombinationPerIndividual, snvCallingService.samplePairForSnvProcessing())
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
 
         processedMergedBamFile1.withdrawn = true
         processedMergedBamFile1.save()
@@ -493,7 +493,7 @@ class SnvCallingServiceTests {
 
     @Test
     void testBamFile2IsWithdrawn() {
-        assertEquals(sampleTypeCombinationPerIndividual, snvCallingService.samplePairForSnvProcessing())
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
 
         processedMergedBamFile2.withdrawn = true
         processedMergedBamFile2.save()
@@ -512,15 +512,15 @@ class SnvCallingServiceTests {
 
         SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile3.sample.sampleType, category: SampleType.Category.DISEASE)
 
-        SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual1 = new SampleTypeCombinationPerIndividual(
+        SamplePair samplePair1 = new SamplePair(
                 individual: individual,
                 sampleType1: processedMergedBamFile3.sample.sampleType,
                 sampleType2: processedMergedBamFile4.sample.sampleType,
                 seqType: seqType
                 )
-        sampleTypeCombinationPerIndividual1.save()
+        samplePair1.save()
 
-        assertEquals(sampleTypeCombinationPerIndividual, snvCallingService.samplePairForSnvProcessing())
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
 
         ProcessedMergedBamFile processedMergedBamFile5 = createProcessedMergedBamFile("5")
         processedMergedBamFile5.save()
@@ -530,15 +530,15 @@ class SnvCallingServiceTests {
 
         SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile5.sample.sampleType, category: SampleType.Category.DISEASE)
 
-        SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual2 = new SampleTypeCombinationPerIndividual(
+        SamplePair samplePair2 = new SamplePair(
                 individual: individual,
                 sampleType1: processedMergedBamFile5.sample.sampleType,
                 sampleType2: processedMergedBamFile6.sample.sampleType,
                 seqType: seqType
                 )
-        sampleTypeCombinationPerIndividual2.save()
+        samplePair2.save()
 
-        assertEquals(sampleTypeCombinationPerIndividual, snvCallingService.samplePairForSnvProcessing())
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test

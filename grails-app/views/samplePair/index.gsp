@@ -19,7 +19,7 @@
                 'snv.sampleType2',
                 'snv.seqType',
                 'snv.lastUpdated',
-                'snv.sampleTypeCombinationPath',
+                'snv.samplePairPath',
             ] }"
                 id="samplePairForSnvProcessingSnvFinished" />
         </div>
@@ -47,7 +47,7 @@
                         'snv.index.availableRequestedCoverage2',
                         'snv.seqType',
                     ] }"
-                        id="notStartedsamplePairs" />
+                        id="notStartedSamplePairs" />
         </div>
         <h3 class="otpExtraTopMargin"><g:message code="snv.diasablesSample" /></h3>
         <div class="otpDataTables otpDataTableWithFreeSpaceTopLeft">
@@ -55,7 +55,7 @@
                     codes="${[
                         'snv.sampleType1',
                         'snv.sampleType2',
-                         'snv.seqType',
+                        'snv.seqType',
                     ] }"
                         id="disabledSamplePairs" />
         </div>
@@ -63,7 +63,7 @@
     </div>
     <r:script>
         $(function() {
-            $.otp.sampleTypeCombinationPerIndividual.register();
+            $.otp.samplePair.register();
             });
     </r:script>
 </body>

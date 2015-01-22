@@ -388,14 +388,14 @@ class SnvJobResultUnitTests {
                 pid: "pid"
                 )
 
-        SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
+        SamplePair samplePair = new SamplePair(
                 individual: individual,
                 )
 
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
                 sampleType1BamFile: new ProcessedMergedBamFile(),
                 sampleType2BamFile: new ProcessedMergedBamFile(),
-                sampleTypeCombination: sampleCombinationPerIndividual
+                samplePair: samplePair
                 )
 
         SnvJobResult snvJobResult = new SnvJobResult(

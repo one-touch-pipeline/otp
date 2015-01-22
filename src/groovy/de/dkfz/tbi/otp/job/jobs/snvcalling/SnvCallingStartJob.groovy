@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual.ProcessingStatus
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.Process
@@ -36,23 +36,23 @@ class SnvCallingStartJob extends AbstractStartJobImpl {
             return
         }
         SnvConfig.withTransaction {
-            SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual = snvCallingService.samplePairForSnvProcessing()
-            if (sampleTypeCombinationPerIndividual) {
+            SamplePair samplePair = snvCallingService.samplePairForSnvProcessing()
+            if (samplePair) {
                 SnvConfig config = SnvConfig.getLatest(
-                        sampleTypeCombinationPerIndividual.project,
-                        sampleTypeCombinationPerIndividual.seqType
+                        samplePair.project,
+                        samplePair.seqType
                         )
 
-                ProcessedMergedBamFile sampleType1BamFile = sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(
-                        sampleTypeCombinationPerIndividual.sampleType1
+                ProcessedMergedBamFile sampleType1BamFile = samplePair.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(
+                        samplePair.sampleType1
                         )
 
-                ProcessedMergedBamFile sampleType2BamFile = sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(
-                        sampleTypeCombinationPerIndividual.sampleType2
+                ProcessedMergedBamFile sampleType2BamFile = samplePair.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(
+                        samplePair.sampleType2
                         )
 
                 SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
-                        sampleTypeCombination: sampleTypeCombinationPerIndividual,
+                        samplePair: samplePair,
                         instanceName: DateTimeFormat.forPattern("yyyy-MM-dd_HH'h'mm_Z").withZone(DateTimeZone.getDefault()).print(Instant.now()),
                         config: config,
                         sampleType1BamFile: sampleType1BamFile,
@@ -61,8 +61,8 @@ class SnvCallingStartJob extends AbstractStartJobImpl {
                         )
                 snvCallingInstance.save(flush: true)
 
-                sampleTypeCombinationPerIndividual.processingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
-                sampleTypeCombinationPerIndividual.save()
+                samplePair.processingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
+                samplePair.save()
 
                 createProcess(new ProcessParameter(value: snvCallingInstance.id.toString(), className: SnvCallingInstance.class.name))
                 log.debug "SnvCallingStartJob started for: ${snvCallingInstance.toString()}"

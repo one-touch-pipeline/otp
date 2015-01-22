@@ -3,7 +3,7 @@ package workflows
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFileService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstanceTestData
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
@@ -63,7 +63,7 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
     Individual individual
     ProcessedMergedBamFile bamFileTumor
     ProcessedMergedBamFile bamFileControl
-    SampleTypeCombinationPerIndividual sampleTypeCombination
+    SamplePair samplePair
     SeqType seqType
     Project project
     SnvConfig snvConfig
@@ -190,8 +190,8 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
                 category: SampleType.Category.CONTROL,
         )
 
-        sampleTypeCombination = SampleTypeCombinationPerIndividual.build(
-                processingStatus: SampleTypeCombinationPerIndividual.ProcessingStatus.NEEDS_PROCESSING,
+        samplePair = SamplePair.build(
+                processingStatus: SamplePair.ProcessingStatus.NEEDS_PROCESSING,
                 sampleType1: sampleTypeTumor,
                 sampleType2: sampleTypeControl,
                 individual: individual,
@@ -329,7 +329,7 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
                 sampleType2BamFile: bamFileControl,
                 config: snvConfig,
                 instanceName: "2014-08-25_15h32",
-                sampleTypeCombination: sampleTypeCombination,
+                samplePair: samplePair,
                 latestDataFileCreationDate: DataFile.createCriteria().get {
                     seqTrack {
                         'in'('id', [bamFileTumor, bamFileControl].sum { it.containedSeqTracks }*.id)

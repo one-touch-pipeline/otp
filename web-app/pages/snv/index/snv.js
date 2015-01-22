@@ -33,7 +33,7 @@ return r;
 $.otp.Snv= {
 registerIndividualIds: function () {
     "use strict";
-    var oTable = $("#projectCombinationPerIndividuals").dataTable({
+    var oTable = $("#individualsPerProject").dataTable({
         bFilter: false,
         bProcessing: true,
         bServerSide: false,
@@ -68,7 +68,7 @@ registerIndividualIds: function () {
                         var row = json.aaData[i];
                         var mockPid = row[0];
                             row[0] = $.otp.createLinkMarkup({
-                                controller: 'sampleTypeCombinationPerIndividual',
+                                controller: 'samplePair',
                                 action: 'index',
                                 text: row[0],
                                 parameters: {

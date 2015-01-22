@@ -137,7 +137,7 @@ class FilterVcfJob extends AbstractSnvCallingJob {
                 if (resultFile.getName() == configFile.getName()) {
                     linkLocation.add(instance.getStepConfigFileLinkedPath(step).absoluteDataManagementPath)
                 } else {
-                    linkLocation.add(new OtpPath(instance.sampleTypeCombination.getResultFileLinkedPath(SnvCallingStep.FILTER_VCF), resultFile.getName()).absoluteDataManagementPath)
+                    linkLocation.add(new OtpPath(instance.samplePair.getResultFileLinkedPath(SnvCallingStep.FILTER_VCF), resultFile.getName()).absoluteDataManagementPath)
                 }
             }
         }

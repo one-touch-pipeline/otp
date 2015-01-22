@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import static org.junit.Assert.*
 
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual.ProcessingStatus
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import grails.validation.ValidationException
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -11,7 +11,7 @@ import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.Individual.Type
 
-class SampleTypeCombinationPerIndividualTests extends GroovyTestCase {
+class SamplePairTests extends GroovyTestCase {
 
     Project project
     Individual individual
@@ -75,65 +75,65 @@ class SampleTypeCombinationPerIndividualTests extends GroovyTestCase {
 
     @Test
     void testAllCorrect() {
-        SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
+        SamplePair samplePair = new SamplePair(
                 individual: individual,
                 sampleType1: sampleType1,
                 sampleType2: sampleType2,
                 seqType: seqType
                 )
-        sampleCombinationPerIndividual.save()
+        samplePair.save()
     }
 
     @Test
     void testPairsWithSameSampleTypes() {
-        SampleTypeCombinationPerIndividual sampleCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
+        SamplePair samplePair = new SamplePair(
                 individual: individual,
                 sampleType1: sampleType1,
                 sampleType2: sampleType1,
                 seqType: seqType
                 )
         shouldFail ValidationException, {
-            sampleCombinationPerIndividual.save()
+            samplePair.save()
         }
     }
 
     @Test
     void testPairsUniquePerIndividual() {
-        SampleTypeCombinationPerIndividual sampleCombinationPerIndividual1 = new SampleTypeCombinationPerIndividual(
+        SamplePair samplePair1 = new SamplePair(
                 individual: individual,
                 sampleType1: sampleType1,
                 sampleType2: sampleType2,
                 seqType: seqType
                 )
-        sampleCombinationPerIndividual1.save()
-        SampleTypeCombinationPerIndividual sampleCombinationPerIndividual2 = new SampleTypeCombinationPerIndividual(
+        samplePair1.save()
+        SamplePair samplePair2 = new SamplePair(
                 individual: individual,
                 sampleType1: sampleType1,
                 sampleType2: sampleType2,
                 seqType: seqType
                 )
         shouldFail ValidationException, {
-            sampleCombinationPerIndividual2.save()
+            samplePair2.save()
         }
     }
 
     @Test
     void testPairsUniquePerIndividualInBothDirections() {
-        SampleTypeCombinationPerIndividual sampleCombinationPerIndividual1 = new SampleTypeCombinationPerIndividual(
+        SamplePair samplePair1 = new SamplePair(
                 individual: individual,
                 sampleType1: sampleType1,
                 sampleType2: sampleType2,
                 seqType: seqType
                 )
-        sampleCombinationPerIndividual1.save()
-        SampleTypeCombinationPerIndividual sampleCombinationPerIndividual2 = new SampleTypeCombinationPerIndividual(
+        samplePair1.save()
+        SamplePair samplePair2 = new SamplePair(
                 individual: individual,
                 sampleType1: sampleType2,
                 sampleType2: sampleType1,
                 seqType: seqType
                 )
         shouldFail ValidationException, {
-            sampleCombinationPerIndividual2.save()
+            samplePair2.save()
         }
     }
 
@@ -149,18 +149,18 @@ class SampleTypeCombinationPerIndividualTests extends GroovyTestCase {
 
         SampleTypePerProject.build(project: project, sampleType: sampleType1, category: SampleType.Category.DISEASE)
 
-        SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
+        SamplePair samplePair = new SamplePair(
                 individual: individual,
                 seqType: seqType,
                 sampleType1: sampleType1,
                 sampleType2: sampleType2
                 )
-        sampleTypeCombinationPerIndividual.save()
+        samplePair.save()
 
         assert processedMergedBamFile1_A.isMostRecentBamFile()
-        assertEquals(processedMergedBamFile1_A, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType1))
+        assertEquals(processedMergedBamFile1_A, samplePair.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType1))
         assert processedMergedBamFile2.isMostRecentBamFile()
-        assertEquals(processedMergedBamFile2, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType2))
+        assertEquals(processedMergedBamFile2, samplePair.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType2))
 
 
         SeqTrack seqTrack1_B = testData.createSeqTrack([sample: processedMergedBamFile1_A.sample, seqType: seqType])
@@ -196,9 +196,9 @@ class SampleTypeCombinationPerIndividualTests extends GroovyTestCase {
         processedMergedBamFile1_B.save()
 
         assert processedMergedBamFile1_B.isMostRecentBamFile()
-        assertEquals(processedMergedBamFile1_B, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType1))
+        assertEquals(processedMergedBamFile1_B, samplePair.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType1))
         assert processedMergedBamFile2.isMostRecentBamFile()
-        assertEquals(processedMergedBamFile2, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType2))
+        assertEquals(processedMergedBamFile2, samplePair.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType2))
 
         final MergingSet mergingSet3 = MergingSet.build(mergingWorkPackage: processedMergedBamFile1_A.mergingWorkPackage, identifier: 1)
         final MergingPass mergingPass3 = MergingPass.build(mergingSet: mergingSet3, identifier: 0)
@@ -208,13 +208,13 @@ class SampleTypeCombinationPerIndividualTests extends GroovyTestCase {
         assert bamFile3.mergingSet.identifier > processedMergedBamFile1_B.mergingSet.identifier
         assert !processedMergedBamFile1_B.isMostRecentBamFile()
         assert bamFile3.isMostRecentBamFile()
-        assertEquals(bamFile3, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType1))
+        assertEquals(bamFile3, samplePair.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType1))
 
         bamFile3.withdrawn = true
 
-        assertNull(sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType1))
+        assertNull(samplePair.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType1))
         assert processedMergedBamFile2.isMostRecentBamFile()
-        assertEquals(processedMergedBamFile2, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType2))
+        assertEquals(processedMergedBamFile2, samplePair.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleType2))
     }
 
 
@@ -259,26 +259,26 @@ class SampleTypeCombinationPerIndividualTests extends GroovyTestCase {
 
         SampleTypePerProject.build(project: project, sampleType: sampleTypeA, category: SampleType.Category.DISEASE)
 
-        SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
+        SamplePair samplePair = new SamplePair(
                 individual: individual,
                 seqType: seqType,
                 sampleType1: sampleTypeA,
                 sampleType2: sampleTypeB
                 )
-        sampleTypeCombinationPerIndividual.save()
+        samplePair.save()
 
         assert processedMergedBamFile1_A.isMostRecentBamFile()
-        assertEquals(processedMergedBamFile1_A, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeA))
+        assertEquals(processedMergedBamFile1_A, samplePair.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeA))
         assert processedMergedBamFile1_B.isMostRecentBamFile()
-        assertEquals(processedMergedBamFile1_B, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeB))
+        assertEquals(processedMergedBamFile1_B, samplePair.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeB))
 
-        sampleTypeCombinationPerIndividual.seqType = otherSeqType
-        sampleTypeCombinationPerIndividual.save()
+        samplePair.seqType = otherSeqType
+        samplePair.save()
 
         assert processedMergedBamFile2_A.isMostRecentBamFile()
-        assertEquals(processedMergedBamFile2_A, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeA))
+        assertEquals(processedMergedBamFile2_A, samplePair.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeA))
         assert processedMergedBamFile2_B.isMostRecentBamFile()
-        assertEquals(processedMergedBamFile2_B, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeB))
+        assertEquals(processedMergedBamFile2_B, samplePair.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeB))
     }
 
 
@@ -313,28 +313,28 @@ class SampleTypeCombinationPerIndividualTests extends GroovyTestCase {
 
         SampleTypePerProject.build(project: project, sampleType: sampleTypeA, category: SampleType.Category.DISEASE)
 
-        SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
+        SamplePair samplePair = new SamplePair(
                 individual: individual,
                 seqType: seqType,
                 sampleType1: sampleTypeA,
                 sampleType2: sampleTypeB
                 )
-        sampleTypeCombinationPerIndividual.save()
+        samplePair.save()
 
         assert processedMergedBamFile1_A.isMostRecentBamFile()
-        assertEquals(processedMergedBamFile1_A, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeA))
+        assertEquals(processedMergedBamFile1_A, samplePair.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeA))
         assert processedMergedBamFile1_B.isMostRecentBamFile()
-        assertEquals(processedMergedBamFile1_B, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeB))
+        assertEquals(processedMergedBamFile1_B, samplePair.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeB))
 
         SampleTypePerProject.build(project: otherIndividual.project, sampleType: sampleTypeA, category: SampleType.Category.DISEASE)
 
-        sampleTypeCombinationPerIndividual.individual = otherIndividual
-        sampleTypeCombinationPerIndividual.save()
+        samplePair.individual = otherIndividual
+        samplePair.save()
 
         assert processedMergedBamFile2_A.isMostRecentBamFile()
-        assertEquals(processedMergedBamFile2_A, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeA))
+        assertEquals(processedMergedBamFile2_A, samplePair.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeA))
         assert processedMergedBamFile2_B.isMostRecentBamFile()
-        assertEquals(processedMergedBamFile2_B, sampleTypeCombinationPerIndividual.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeB))
+        assertEquals(processedMergedBamFile2_B, samplePair.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(sampleTypeB))
 
     }
 
@@ -354,27 +354,27 @@ class SampleTypeCombinationPerIndividualTests extends GroovyTestCase {
     }
 
     private void testSetNeedsProcessing(final ProcessingStatus processingStatus) {
-        final SampleTypeCombinationPerIndividual nonPersistedCombination = new SampleTypeCombinationPerIndividual(
+        final SamplePair nonPersistedSamplePair = new SamplePair(
                 individual: individual,
                 sampleType1: sampleType1,
                 sampleType2: sampleType2,
                 seqType: seqType,
                 processingStatus: processingStatus,  // Tests that the instance is persisted even if it already has the correct value.
         )
-        final SampleTypeCombinationPerIndividual persistedCombination = new SampleTypeCombinationPerIndividual(
+        final SamplePair persistedSamplePair = new SamplePair(
                 individual: individual,
                 sampleType1: sampleType1,
                 sampleType2: sampleType2,
                 seqType: SeqType.build(),
                 processingStatus: processingStatus == ProcessingStatus.NEEDS_PROCESSING ? ProcessingStatus.NO_PROCESSING_NEEDED : ProcessingStatus.NEEDS_PROCESSING,
         )
-        assert persistedCombination.save()
+        assert persistedSamplePair.save()
 
-        SampleTypeCombinationPerIndividual.setProcessingStatus([nonPersistedCombination, persistedCombination], processingStatus)
+        SamplePair.setProcessingStatus([nonPersistedSamplePair, persistedSamplePair], processingStatus)
 
-        assert nonPersistedCombination.processingStatus == processingStatus
-        assert nonPersistedCombination.id
-        assert persistedCombination.processingStatus == processingStatus
+        assert nonPersistedSamplePair.processingStatus == processingStatus
+        assert nonPersistedSamplePair.id
+        assert persistedSamplePair.processingStatus == processingStatus
     }
 
     private ProcessedMergedBamFile createProcessedMergedBamFile(String identifier) {

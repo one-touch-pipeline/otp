@@ -92,7 +92,7 @@ abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob 
         if (resultInProgress) {
             assert resultInProgress.processingState == SnvProcessingStates.IN_PROGRESS
             assert !resultInProgress.withdrawn
-            // It can not happen that another SnvCallingInstance for this SampleTypeCombination starts while this one is not finished.
+            // It can not happen that another SnvCallingInstance for this sample pair starts while this one is not finished.
             assert resultInProgress.inputResult == inputResult
 
             resultInProgress.externalScript = externalScript

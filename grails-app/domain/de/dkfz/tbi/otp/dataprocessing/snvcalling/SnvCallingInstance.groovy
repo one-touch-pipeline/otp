@@ -38,7 +38,7 @@ class SnvCallingInstance {
     Date lastUpdated
 
     static belongsTo = [
-        sampleTypeCombination: SampleTypeCombinationPerIndividual
+        samplePair: SamplePair
     ]
 
     /**
@@ -46,12 +46,12 @@ class SnvCallingInstance {
      * Because the SNV StartJob creates an instance of a SnvCallingInstance immediately when starting it, this will always start
      * as {@link SnvProcessingStates.IN_PROGRESS}.
      *
-     * {@link SnvProcessingStates.IGNORED} has a special meaning for SnvCallingInstance, it means this combination should NOT be run.
+     * {@link SnvProcessingStates.IGNORED} has a special meaning for SnvCallingInstance, it means this sample pair should NOT be run.
      * (e.g. because the control-sample is bad, parts of it are withdrawn, etc.)
      */
     SnvProcessingStates processingState = SnvProcessingStates.IN_PROGRESS
 
-    static boolean isConsistentWithSampleTypeCombination(ProcessedMergedBamFile bamFile, SnvCallingInstance instance, SampleType sampleType) {
+    static boolean isConsistentWithSamplePair(ProcessedMergedBamFile bamFile, SnvCallingInstance instance, SampleType sampleType) {
         return (bamFile.individual == instance.individual &&
                 bamFile.seqType == instance.seqType &&
                 bamFile.sampleType.id == sampleType.id)
@@ -59,23 +59,23 @@ class SnvCallingInstance {
 
     static constraints = {
         sampleType1BamFile validator: {val, obj ->
-            obj.sampleTypeCombination && isConsistentWithSampleTypeCombination(val, obj, obj.sampleTypeCombination.sampleType1)}
+            obj.samplePair && isConsistentWithSamplePair(val, obj, obj.samplePair.sampleType1)}
         sampleType2BamFile validator: {val, obj ->
-            obj.sampleTypeCombination && isConsistentWithSampleTypeCombination(val, obj, obj.sampleTypeCombination.sampleType2)}
+            obj.samplePair && isConsistentWithSamplePair(val, obj, obj.samplePair.sampleType2)}
         latestDataFileCreationDate validator: { Date latestDataFileCreationDate, SnvCallingInstance instance ->
             latestDataFileCreationDate == AbstractBamFile.getLatestSequenceDataFileCreationDate(instance.sampleType1BamFile, instance.sampleType2BamFile)
         }
-        instanceName blank: false, unique: 'sampleTypeCombination'
+        instanceName blank: false, unique: 'samplePair'
     }
 
     static mapping = {
         sampleType1BamFile index: "snv_calling_instance_sample_type_1_bam_file_idx"
         sampleType2BamFile index: "snv_calling_instance_sample_type_2_bam_file_idx"
-        sampleTypeCombination index: "snv_calling_instance_sample_type_combination_idx"
+        samplePair index: "snv_calling_instance_sample_pair_idx"
     }
 
     Project getProject() {
-        return sampleTypeCombination.project
+        return samplePair.project
     }
 
     short getProcessingPriority() {
@@ -83,18 +83,18 @@ class SnvCallingInstance {
     }
 
     Individual getIndividual() {
-        return sampleTypeCombination.individual
+        return samplePair.individual
     }
 
     SeqType getSeqType() {
-        return sampleTypeCombination.seqType
+        return samplePair.seqType
     }
 
     /**
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control/2014-08-25_15h32
      */
     OtpPath getSnvInstancePath() {
-        return new OtpPath(sampleTypeCombination.sampleTypeCombinationPath, instanceName)
+        return new OtpPath(samplePair.samplePairPath, instanceName)
     }
 
     /**
@@ -108,7 +108,7 @@ class SnvCallingInstance {
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/paired/snv_results/tumor_control/config_calling_2014-08-25_15h32.txt
      */
     OtpPath getStepConfigFileLinkedPath(final SnvCallingStep step) {
-        return new OtpPath(sampleTypeCombination.sampleTypeCombinationPath, "config_${step.configFileNameSuffix}_${instanceName}.txt")
+        return new OtpPath(samplePair.samplePairPath, "config_${step.configFileNameSuffix}_${instanceName}.txt")
     }
 
     /**
@@ -153,6 +153,6 @@ class SnvCallingInstance {
 
     @Override
     public String toString() {
-        return "SnvCallingInstance: ${id}, ${sampleTypeCombination}"
+        return "SnvCallingInstance: ${id}, ${samplePair}"
     }
 }

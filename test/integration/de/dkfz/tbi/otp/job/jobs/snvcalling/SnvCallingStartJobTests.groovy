@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual.ProcessingStatus
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -39,7 +39,7 @@ public class SnvCallingStartJobTests extends GroovyScriptAwareIntegrationTest {
         SpringSecurityUtils.doWithAuth('admin') { run('scripts/workflows/SnvWorkflow.groovy') }
         snvTestData = new SnvCallingInstanceTestData()
 
-        SampleTypeCombinationPerIndividual mockSamplePair
+        SamplePair mockSamplePair
         try {
             // arrange: create basic objects / mock required services
             Project project = snvTestData.createProject()
@@ -63,7 +63,7 @@ public class SnvCallingStartJobTests extends GroovyScriptAwareIntegrationTest {
             SampleType sampleType2 = mockBam2.sampleType
 
             // Sample pair + service-mocks to make sure it is found by the startJob
-            mockSamplePair = new SampleTypeCombinationPerIndividual(
+            mockSamplePair = new SamplePair(
                     processingStatus: ProcessingStatus.NEEDS_PROCESSING,
                     individual: individual,
                     sampleType1: sampleType1,
@@ -110,7 +110,7 @@ public class SnvCallingStartJobTests extends GroovyScriptAwareIntegrationTest {
             SnvCallingInstance snvCallingInstance = exactlyOneElement(SnvCallingInstance.findAll())
             assert snvCallingInstance.sampleType1BamFile == mockBam1
             assert snvCallingInstance.sampleType2BamFile == mockBam2
-            assert snvCallingInstance.sampleTypeCombination == mockSamplePair
+            assert snvCallingInstance.samplePair == mockSamplePair
             assert snvCallingInstance.config == config
             assert snvCallingInstance.instanceName == DateTimeFormat.forPattern("yyyy-MM-dd_HH'h'mm_Z").print(ARBITRARY_TIMESTAMP)
 

@@ -107,19 +107,19 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile1.sampleType, category: SampleType.Category.DISEASE)
 
-        SampleTypeCombinationPerIndividual sampleTypeCombinationPerIndividual = new SampleTypeCombinationPerIndividual(
+        SamplePair samplePair = new SamplePair(
                 individual: individual,
                 sampleType1: processedMergedBamFile1.sampleType,
                 sampleType2: processedMergedBamFile2.sampleType,
                 seqType: seqType)
-        assert sampleTypeCombinationPerIndividual.save()
+        assert samplePair.save()
 
         snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: SOME_INSTANCE_NAME,
                 config: snvConfig,
                 sampleType1BamFile: processedMergedBamFile1,
                 sampleType2BamFile: processedMergedBamFile2,
-                sampleTypeCombination: sampleTypeCombinationPerIndividual)
+                samplePair: samplePair)
         assert snvCallingInstance.save()
 
         snvCallingInstance2 = DomainFactory.createSnvCallingInstance(
@@ -127,7 +127,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 config: snvConfig,
                 sampleType1BamFile: processedMergedBamFile1,
                 sampleType2BamFile: processedMergedBamFile2,
-                sampleTypeCombination: sampleTypeCombinationPerIndividual)
+                samplePair: samplePair)
         assert snvCallingInstance2.save()
 
         externalScript_Calling = new ExternalScript(
@@ -301,8 +301,8 @@ CHROMOSOME_INDICES=( {1..21} XY)
             // test that source files are correct
             File stagingBase = new File("${testDirectory}/staging/")
             File individualPathStaging = new File(stagingBase, "otp_test_project/sequencing/whole_genome_sequencing/view-by-pid/654321/")
-            File sampleTypeCombinationPathStaging = new File(individualPathStaging, "snv_results/paired/sampletype1_sampletype2/")
-            File instancePathStaging = new File(sampleTypeCombinationPathStaging, "2014-08-25_15h32/")
+            File samplePairPathStaging = new File(individualPathStaging, "snv_results/paired/sampletype1_sampletype2/")
+            File instancePathStaging = new File(samplePairPathStaging, "2014-08-25_15h32/")
 
             assert sourceLocations.size() == 3
             assert sourceLocations.contains(new File(instancePathStaging, "snvs_654321_raw.vcf.gz"))
@@ -312,8 +312,8 @@ CHROMOSOME_INDICES=( {1..21} XY)
             // test that target files are correct
             File rootBase = new File("${testDirectory}/root/")
             File individualPathRoot = new File(rootBase, "otp_test_project/sequencing/whole_genome_sequencing/view-by-pid/654321/")
-            File sampleTypeCombinationPathRoot = new File(individualPathRoot, "snv_results/paired/sampletype1_sampletype2/")
-            File instancePathRoot = new File(sampleTypeCombinationPathRoot, "2014-08-25_15h32/")
+            File samplePairPathRoot = new File(individualPathRoot, "snv_results/paired/sampletype1_sampletype2/")
+            File instancePathRoot = new File(samplePairPathRoot, "2014-08-25_15h32/")
 
             assert targetLocations.size() == 3
             assert targetLocations.contains(new File(instancePathRoot, "snvs_654321_raw.vcf.gz"))
@@ -322,9 +322,9 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
             // test that linked files are correct
             assert linkLocations.size() == 3
-            assert linkLocations.contains(new File(sampleTypeCombinationPathRoot, "snvs_654321_raw.vcf.gz"))
-            assert linkLocations.contains(new File(sampleTypeCombinationPathRoot, "snvs_654321_raw.vcf.gz.tbi"))
-            assert linkLocations.contains(new File(sampleTypeCombinationPathRoot, "config_calling_2014-08-25_15h32.txt"))
+            assert linkLocations.contains(new File(samplePairPathRoot, "snvs_654321_raw.vcf.gz"))
+            assert linkLocations.contains(new File(samplePairPathRoot, "snvs_654321_raw.vcf.gz.tbi"))
+            assert linkLocations.contains(new File(samplePairPathRoot, "config_calling_2014-08-25_15h32.txt"))
 
             return "#some script"
         }

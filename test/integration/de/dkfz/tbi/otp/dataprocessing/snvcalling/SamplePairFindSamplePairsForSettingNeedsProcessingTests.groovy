@@ -8,14 +8,14 @@ import org.junit.Before
 import org.junit.Test
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual.ProcessingStatus
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ThreadUtils
 
-class SampleTypeCombinationPerIndividualFindCombinationsForSettingNeedsProcessingTests {
+class SamplePairFindSamplePairsForSettingNeedsProcessingTests {
 
     SnvCallingInstanceTestData testData
-    SampleTypeCombinationPerIndividual samplePair
+    SamplePair samplePair
     Project project
     SampleType sampleType1
     SampleTypePerProject sampleType1Stpp
@@ -25,12 +25,12 @@ class SampleTypeCombinationPerIndividualFindCombinationsForSettingNeedsProcessin
         testData = new SnvCallingInstanceTestData()
         testData.createSnvObjects()
 
-        samplePair = testData.sampleTypeCombination
+        samplePair = testData.samplePair1
         samplePair.processingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
         assert samplePair.save(failOnError: true, flush: true)
 
         project = samplePair.project
-        sampleType1 = testData.sampleTypeCombination.sampleType1
+        sampleType1 = testData.samplePair1.sampleType1
         sampleType1Stpp = exactlyOneElement(SampleTypePerProject.findAllWhere(project: project, sampleType: sampleType1))
     }
 
@@ -78,18 +78,18 @@ class SampleTypeCombinationPerIndividualFindCombinationsForSettingNeedsProcessin
 
     @Test
     void testTwoResults() {
-        testData.sampleTypeCombination2.processingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
-        assert testData.sampleTypeCombination2.save(failOnError: true)
+        testData.samplePair2.processingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
+        assert testData.samplePair2.save(failOnError: true)
         assert TestCase.containSame(
-                SampleTypeCombinationPerIndividual.findCombinationsForSettingNeedsProcessing(),
-                [samplePair, testData.sampleTypeCombination2]
+                SamplePair.findSamplePairsForSettingNeedsProcessing(),
+                [samplePair, testData.samplePair2]
         )
     }
 
     @Test
     void testSnvCallingInstanceForOtherSamplePairExists() {
         testData.createAndSaveSnvCallingInstance(
-                sampleTypeCombination: testData.sampleTypeCombination2,
+                samplePair: testData.samplePair2,
                 sampleType1BamFile: testData.bamFileTumor2,
         )
         assertFindsOne()
@@ -183,10 +183,10 @@ class SampleTypeCombinationPerIndividualFindCombinationsForSettingNeedsProcessin
     }
 
     void assertFindsNothing() {
-        assert SampleTypeCombinationPerIndividual.findCombinationsForSettingNeedsProcessing().empty
+        assert SamplePair.findSamplePairsForSettingNeedsProcessing().empty
     }
 
     void assertFindsOne() {
-        assert exactlyOneElement(SampleTypeCombinationPerIndividual.findCombinationsForSettingNeedsProcessing()) == samplePair
+        assert exactlyOneElement(SamplePair.findSamplePairsForSettingNeedsProcessing()) == samplePair
     }
 }

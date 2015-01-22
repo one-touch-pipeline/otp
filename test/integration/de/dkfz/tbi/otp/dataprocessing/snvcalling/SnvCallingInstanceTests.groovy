@@ -14,9 +14,9 @@ class SnvCallingInstanceTests extends GroovyTestCase {
     @Test
     void testFindLatestResultForSameBamFiles() {
         final SnvCallingInstance tumor1InstanceA = testData.createAndSaveSnvCallingInstance()
-        // Using a different (does not matter if "earlier" or "later") instance name, because instance names have to be unique for the same sample type combination.
+        // Using a different (does not matter if "earlier" or "later") instance name, because instance names have to be unique for the same sample pair.
         final SnvCallingInstance tumor1InstanceB = testData.createAndSaveSnvCallingInstance(instanceName: '2014-09-24_15h04')
-        final SnvCallingInstance tumor2Instance = testData.createAndSaveSnvCallingInstance(sampleType1BamFile: testData.bamFileTumor2, sampleTypeCombination: testData.sampleTypeCombination2)
+        final SnvCallingInstance tumor2Instance = testData.createAndSaveSnvCallingInstance(sampleType1BamFile: testData.bamFileTumor2, samplePair: testData.samplePair2)
 
         // no result at all
         assert tumor1InstanceA.findLatestResultForSameBamFiles(SnvCallingStep.SNV_ANNOTATION) == null

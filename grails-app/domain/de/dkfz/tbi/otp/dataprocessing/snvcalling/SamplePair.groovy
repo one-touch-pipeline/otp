@@ -13,7 +13,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
  * The sample pairs can also be used for other purposes i.e. coverage combination between disease and control
  *
  */
-class SampleTypeCombinationPerIndividual {
+class SamplePair {
 
     static enum ProcessingStatus {
 
@@ -25,7 +25,7 @@ class SampleTypeCombinationPerIndividual {
         /**
          * The sample pair does not have to be processed, because there already is an {@link SnvCallingInstance} which
          * is up-to-date. If this is no longer true,
-         * {@link SampleTypeCombinationPerIndividual#findCombinationsForSettingNeedsProcessing()} will find the sample
+         * {@link SamplePair#findSamplePairsForSettingNeedsProcessing()} will find the sample
          * pair.
          */
         NO_PROCESSING_NEEDED,
@@ -62,7 +62,7 @@ class SampleTypeCombinationPerIndividual {
         sampleType2 validator: { val, obj ->
             return val != obj.sampleType1
         }
-        sampleType1 validator: { SampleType val, SampleTypeCombinationPerIndividual obj, Errors errors ->
+        sampleType1 validator: { SampleType val, SamplePair obj, Errors errors ->
             if (!obj.individual) {
                 errors.reject(null, 'Cannot validate sampleType1 without individual being set.')
                 return
@@ -72,34 +72,34 @@ class SampleTypeCombinationPerIndividual {
                 errors.reject(null, "Category of sampleType1 is ${category}. Expected ${SampleType.Category.DISEASE}.")
                 return
             }
-            final SampleTypeCombinationPerIndividual sameOrderObj = obj.findForSameIndividualAndSeqType(val, obj.sampleType2)
-            final SampleTypeCombinationPerIndividual otherOrderObj = obj.findForSameIndividualAndSeqType(obj.sampleType2, val)
+            final SamplePair sameOrderObj = obj.findForSameIndividualAndSeqType(val, obj.sampleType2)
+            final SamplePair otherOrderObj = obj.findForSameIndividualAndSeqType(obj.sampleType2, val)
             if (obj.id) {
                 // change an already existing object
                 if ((sameOrderObj && sameOrderObj.id != obj.id) || (otherOrderObj && otherOrderObj.id != obj.id)) {
-                    errors.reject(null, 'A SampleTypeCombinationPerIndividual for that combination already exists.')
+                    errors.reject(null, 'A SamplePair for that combination already exists.')
                     return
                 }
             } else {
                 // save a new object
                 if (sameOrderObj || otherOrderObj) {
-                    errors.reject(null, 'A SampleTypeCombinationPerIndividual for that combination already exists.')
+                    errors.reject(null, 'A SamplePair for that combination already exists.')
                     return
                 }
             }
         }
     }
 
-    private SampleTypeCombinationPerIndividual findForSameIndividualAndSeqType(final SampleType sampleType1, final SampleType sampleType2) {
-        return atMostOneElement(SampleTypeCombinationPerIndividual.findAllByIndividualAndSeqTypeAndSampleType1AndSampleType2(individual, seqType, sampleType1, sampleType2))
+    private SamplePair findForSameIndividualAndSeqType(final SampleType sampleType1, final SampleType sampleType2) {
+        return atMostOneElement(SamplePair.findAllByIndividualAndSeqTypeAndSampleType1AndSampleType2(individual, seqType, sampleType1, sampleType2))
     }
 
     static mapping = {
-        individual       index: 'sample_type_combination_per_individual_idx1,sample_type_combination_per_individual_idx2'
-        sampleType1      index: 'sample_type_combination_per_individual_idx1,sample_type_combination_per_individual_idx2'
-        sampleType2      index: 'sample_type_combination_per_individual_idx1,sample_type_combination_per_individual_idx2'
-        seqType          index: 'sample_type_combination_per_individual_idx1,sample_type_combination_per_individual_idx2'
-        processingStatus index: 'sample_type_combination_per_individual_idx1'
+        individual       index: 'sample_pair_idx1,sample_pair_idx2'
+        sampleType1      index: 'sample_pair_idx1,sample_pair_idx2'
+        sampleType2      index: 'sample_pair_idx1,sample_pair_idx2'
+        seqType          index: 'sample_pair_idx1,sample_pair_idx2'
+        processingStatus index: 'sample_pair_idx1'
     }
 
     Project getProject() {
@@ -109,7 +109,7 @@ class SampleTypeCombinationPerIndividual {
     /**
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control
      */
-    OtpPath getSampleTypeCombinationPath() {
+    OtpPath getSamplePairPath() {
         return new OtpPath(individual.getViewByPidPath(seqType), 'snv_results', seqType.libraryLayoutDirName, "${sampleType1.dirName}_${sampleType2.dirName}")
     }
 
@@ -123,26 +123,26 @@ class SampleTypeCombinationPerIndividual {
      */
     OtpPath getResultFileLinkedPath(SnvCallingStep step) {
         if (step == SnvCallingStep.CALLING) {
-            return new OtpPath(sampleTypeCombinationPath, step.getResultFileName(individual, null))
+            return new OtpPath(samplePairPath, step.getResultFileName(individual, null))
         } else if (step == SnvCallingStep.FILTER_VCF) {
-            return sampleTypeCombinationPath
+            return samplePairPath
         } else {
-            return new OtpPath(sampleTypeCombinationPath, step.getResultFileName(individual))
+            return new OtpPath(samplePairPath, step.getResultFileName(individual))
         }
     }
 
     OtpPath getIndexFileLinkedPath(SnvCallingStep step) {
-        return new OtpPath(sampleTypeCombinationPath, step.getIndexFileName(individual))
+        return new OtpPath(samplePairPath, step.getIndexFileName(individual))
     }
 
     @Override
     String toString() {
-        return "STCPI ${id} ${individual.pid} ${sampleType1.name} ${sampleType2.name} ${seqType.name} ${seqType.libraryLayout}"
+        return "SP ${id} ${individual.pid} ${sampleType1.name} ${sampleType2.name} ${seqType.name} ${seqType.libraryLayout}"
     }
 
     /**
      * Returns the latest ProcessedMergedBamFile which belongs to the given {@link SampleType}
-     * for this {@link SampleTypeCombinationPerIndividual}, if available and not withdrawn, otherwise null.
+     * for this {@link SamplePair}, if available and not withdrawn, otherwise null.
      */
     ProcessedMergedBamFile getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(SampleType sampleType) {
         final ProcessedMergedBamFile bamFile = ProcessedMergedBamFile.createCriteria().get {
@@ -175,12 +175,12 @@ class SampleTypeCombinationPerIndividual {
      *         {@link SampleType.Category#DISEASE} and sampleType2 has category {@link SampleType.Category#CONTROL}.</li>
      *     <li>New {@link DataFile}s were added for the individual since <code>minDate</code>.</li>
      *     <li>The seqType is processable by OTP.</li>
-     *     <li>No SampleTypeCombinationPerIndividual exists for that combination.</li>
+     *     <li>No SamplePair exists for that combination.</li>
      * </ul>
-     * The results are returned as SampleTypeCombinationPerIndividual instances, <em>which have not been persisted yet</em>.
+     * The results are returned as SamplePair instances, <em>which have not been persisted yet</em>.
      */
-    static Collection<SampleTypeCombinationPerIndividual> findMissingDiseaseControlCombinations(final Date minDate) {
-        final Collection queryResults = SampleTypeCombinationPerIndividual.executeQuery("""
+    static Collection<SamplePair> findMissingDiseaseControlSamplePairs(final Date minDate) {
+        final Collection queryResults = SamplePair.executeQuery("""
             SELECT DISTINCT
               st1.sample.individual,
               st1.sample.sampleType,
@@ -206,7 +206,7 @@ class SampleTypeCombinationPerIndividual {
               NOT EXISTS (FROM DataFile WHERE seqTrack = st2 AND fileType.type = :fileType AND fileWithdrawn = true) AND
               NOT EXISTS (
                 FROM
-                  SampleTypeCombinationPerIndividual
+                  SamplePair
                 WHERE
                   individual = st1.sample.individual AND
                   sampleType1 = st1.sample.sampleType AND
@@ -220,7 +220,7 @@ class SampleTypeCombinationPerIndividual {
                 fileType: FileType.Type.SEQUENCE
             ], [readOnly: true])
         return queryResults.collect {
-            new SampleTypeCombinationPerIndividual(
+            new SamplePair(
                 individual: it[0],
                 sampleType1: it[1],
                 sampleType2: it[2],
@@ -230,37 +230,37 @@ class SampleTypeCombinationPerIndividual {
     }
 
     /**
-     * Finds existing SampleTypeCombinationPerIndividuals with these criteria:
+     * Finds existing SamplePairs with these criteria:
      * <ul>
      *     <li>{@link #processingStatus} is set to {@link ProcessingStatus#NO_PROCESSING_NEEDED}.</li>
      *     <li>{@link #sampleType1} (still) has category {@link SampleType.Category#DISEASE}.</li>
      *     <li>No {@link SnvCallingInstance} exists which belongs to the sample pair and fulfills these criteria:
      *     <ul>
      *         <li>The BAM files that the {@link SnvCallingInstance} is based on contain all non-withdrawn
-     *             {@link DataFile}s matching the SampleTypeCombinationPerIndividual.</li>
+     *             {@link DataFile}s matching the SamplePair.</li>
      *         <li>No {@link SnvJobResult} belonging to the {@link SnvCallingInstance} is withdrawn.</li>
      *     </ul>
      * </ul>
      */
-    static Collection<SampleTypeCombinationPerIndividual> findCombinationsForSettingNeedsProcessing() {
-        return SampleTypeCombinationPerIndividual.executeQuery("""
+    static Collection<SamplePair> findSamplePairsForSettingNeedsProcessing() {
+        return SamplePair.executeQuery("""
             FROM
-              SampleTypeCombinationPerIndividual stcpi
+              SamplePair sp
             WHERE
-              stcpi.processingStatus = :noProcessingNeeded AND
+              sp.processingStatus = :noProcessingNeeded AND
               EXISTS (
                 FROM
                   SampleTypePerProject
                 WHERE
-                  project = stcpi.individual.project AND
-                  sampleType = stcpi.sampleType1 AND
+                  project = sp.individual.project AND
+                  sampleType = sp.sampleType1 AND
                   category = :disease
               ) AND
               NOT EXISTS (
                 FROM
                   SnvCallingInstance sci
                 WHERE
-                  sampleTypeCombination = stcpi AND
+                  sci.samplePair = sp AND
                   NOT EXISTS (
                     FROM
                       SnvJobResult
@@ -276,9 +276,9 @@ class SampleTypeCombinationPerIndividual {
                     WHERE
                       fileType.type = :fileType AND
                       fileWithdrawn = false AND
-                      seqTrack.sample.individual = stcpi.individual AND
-                      seqTrack.sample.sampleType IN (stcpi.sampleType1, stcpi.sampleType2) AND
-                      seqTrack.seqType = stcpi.seqType
+                      seqTrack.sample.individual = sp.individual AND
+                      seqTrack.sample.sampleType IN (sp.sampleType1, sp.sampleType2) AND
+                      seqTrack.seqType = sp.seqType
                   )
               )
             """, [
@@ -291,13 +291,13 @@ class SampleTypeCombinationPerIndividual {
     /**
      * Sets {@link #processingStatus} of all specified instances to the specified value and saves the instances.
      */
-    static void setProcessingStatus(final Collection<SampleTypeCombinationPerIndividual> combinations,
+    static void setProcessingStatus(final Collection<SamplePair> samplePairs,
                                     final ProcessingStatus processingStatus) {
         if (processingStatus == null) {
             throw new IllegalArgumentException()
         }
-        SampleTypeCombinationPerIndividual.withTransaction {
-            combinations.each {
+        SamplePair.withTransaction {
+            samplePairs.each {
                 it.processingStatus = processingStatus
                 assert it.save()
             }

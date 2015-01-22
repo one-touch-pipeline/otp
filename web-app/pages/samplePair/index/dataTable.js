@@ -1,14 +1,14 @@
 /*jslint browser: true */
 /*global $ */
 
-$.otp.sampleTypeCombinationPerIndividual = {
+$.otp.samplePair = {
         /*
          * The function return only the passed value.
          * It can be used for not modified output.
          */
-    registersamplePairForSnvProcessingSNV : function (selector, url, successUpdate) {
+    registerSamplePairForSnvProcessingSNV : function (selector, url, successUpdate) {
         "use strict";
-        var oTablesamplePairForSnvProcessingSNV = $(selector).dataTable({
+        var oTableSamplePairForSnvProcessingSNV = $(selector).dataTable({
             sDom: '<i> T rt<"clear">',
             oTableTools : $.otp.tableTools,
             bFilter : true,
@@ -46,10 +46,10 @@ $.otp.sampleTypeCombinationPerIndividual = {
     },
     register: function () {
          "use strict";
-         $.otp.sampleTypeCombinationPerIndividual.registersamplePairForSnvProcessingSNV(
+         $.otp.samplePair.registerSamplePairForSnvProcessingSNV(
                  '#samplePairForSnvProcessingSnvFinished',
                  $.otp.createLink({
-                     controller: 'sampleTypeCombinationPerIndividual',
+                     controller: 'samplePair',
                      action: 'dataTableSNVFinishedSamplePairs'
                  }),
                  function (json) {
@@ -61,17 +61,17 @@ $.otp.sampleTypeCombinationPerIndividual = {
                              row.sampleType2,
                              row.seqType,
                              row.lastUpdated,
-                             row.sampleTypeCombinationPath,
+                             row.samplePairPath,
                          ];
                          json.aaData[i] = rowData;
                      }
                      return json
                  }
              );
-         $.otp.sampleTypeCombinationPerIndividual.registersamplePairForSnvProcessingSNV(
+         $.otp.samplePair.registerSamplePairForSnvProcessingSNV(
                  '#samplePairForSnvProcessingSNVInProgress',
                  $.otp.createLink({
-                     controller: 'sampleTypeCombinationPerIndividual',
+                     controller: 'samplePair',
                      action: 'dataTableSNVInprogressSamplePairs'
                  }),
                  function (json) {
@@ -89,10 +89,10 @@ $.otp.sampleTypeCombinationPerIndividual = {
                      return json
                  }
              );
-         $.otp.sampleTypeCombinationPerIndividual.registersamplePairForSnvProcessingSNV(
-                 '#notStartedsamplePairs',
+         $.otp.samplePair.registerSamplePairForSnvProcessingSNV(
+                 '#notStartedSamplePairs',
                  $.otp.createLink({
-                     controller: 'sampleTypeCombinationPerIndividual',
+                     controller: 'samplePair',
                      action: 'dataTableSNVNotStartedSamplePairs'
                  }),
                  function (json) {
@@ -113,10 +113,10 @@ $.otp.sampleTypeCombinationPerIndividual = {
                      return json
                  }
              );
-         $.otp.sampleTypeCombinationPerIndividual.registersamplePairForSnvProcessingSNV(
+         $.otp.samplePair.registerSamplePairForSnvProcessingSNV(
                  '#disabledSamplePairs',
                  $.otp.createLink({
-                     controller: 'sampleTypeCombinationPerIndividual',
+                     controller: 'samplePair',
                      action: 'dataTableSNVProcessingDisabledSamplePairs'
                  }),
                  function (json) {

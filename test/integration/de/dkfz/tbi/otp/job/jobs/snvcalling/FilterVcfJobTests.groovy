@@ -364,8 +364,8 @@ CHROMOSOME_INDICES=( {1..21} XY)
             // test that source files are correct
             File stagingBase = new File("${testDirectory}/staging/")
             File individualPathStaging = new File(stagingBase, "dirName/sequencing/whole_genome_sequencing/view-by-pid/654321/")
-            File sampleTypeCombinationPathStaging = new File(individualPathStaging, "snv_results/paired/${sampleType1.name}_${sampleType2.name}/")
-            File instancePathStaging = new File(sampleTypeCombinationPathStaging, "2014-09-01_15h32/")
+            File samplePairPathStaging = new File(individualPathStaging, "snv_results/paired/${sampleType1.name}_${sampleType2.name}/")
+            File instancePathStaging = new File(samplePairPathStaging, "2014-09-01_15h32/")
 
             assert sourceLocations.size() == 3
             assert sourceLocations.contains(new File(instancePathStaging, "Something_intermutation_distance.txt.png"))
@@ -375,8 +375,8 @@ CHROMOSOME_INDICES=( {1..21} XY)
             // test that target files are correct
             File rootBase = new File("${testDirectory}/root/")
             File individualPathRoot = new File(rootBase, "dirName/sequencing/whole_genome_sequencing/view-by-pid/654321/")
-            File sampleTypeCombinationPathRoot = new File(individualPathRoot, "snv_results/paired/${sampleType1.name}_${sampleType2.name}/")
-            File instancePathRoot = new File(sampleTypeCombinationPathRoot, "2014-09-01_15h32/")
+            File samplePairPathRoot = new File(individualPathRoot, "snv_results/paired/${sampleType1.name}_${sampleType2.name}/")
+            File instancePathRoot = new File(samplePairPathRoot, "2014-09-01_15h32/")
 
             assert targetLocations.size() == 3
             assert targetLocations.contains(new File(instancePathRoot, "Something_intermutation_distance.txt.png"))
@@ -385,9 +385,9 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
             // test that linked files are correct
             assert linkLocations.size() == 3
-            assert linkLocations.contains(new File(sampleTypeCombinationPathRoot, "Something_intermutation_distance.txt.png"))
-            assert linkLocations.contains(new File(sampleTypeCombinationPathRoot, "SomeTestFile.txt"))
-            assert linkLocations.contains(new File(sampleTypeCombinationPathRoot, "config_filter_vcf_2014-09-01_15h32.txt"))
+            assert linkLocations.contains(new File(samplePairPathRoot, "Something_intermutation_distance.txt.png"))
+            assert linkLocations.contains(new File(samplePairPathRoot, "SomeTestFile.txt"))
+            assert linkLocations.contains(new File(samplePairPathRoot, "config_filter_vcf_2014-09-01_15h32.txt"))
 
             return "some bash commands to copy the files and link them"
         }

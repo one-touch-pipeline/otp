@@ -5,9 +5,8 @@ import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
 import static org.junit.Assert.*
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType;
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus;
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SampleTypeCombinationPerIndividual;
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.RunSegment.DataFormat
 import de.dkfz.tbi.otp.ngsdata.RunSegment.FilesStatus
 
