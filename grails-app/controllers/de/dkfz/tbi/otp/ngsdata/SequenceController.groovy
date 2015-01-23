@@ -28,6 +28,7 @@ class SequenceController {
     def dataTableSource(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
 
+
         SequenceFiltering filtering = SequenceFiltering.fromJSON(params.filtering)
 
         dataToRender.iTotalRecords = seqTrackService.countSequences(filtering)
@@ -50,7 +51,7 @@ class SequenceController {
             for (def sequence in dataToRender.aaData) {
                 if (df.seqTrack.id == sequence.seqTrackId) {
                     if (sequence.containsKey("fastQCFiles")) {
-                        sequence.fastQCFiles << df
+                        df.readNumber == 1 ? sequence.fastQCFiles = [df, sequence.fastQCFiles].flatten() : sequence.fastQCFiles << df
                     } else {
                         sequence.fastQCFiles = [df]
                     }
@@ -80,17 +81,17 @@ class SequenceController {
             ].join(",")
         }.join("\n")
         def contentHeader = [
-                'Project',
-                'Individual',
-                'Sample Type',
-                'Sequence Type',
-                'Library Layout',
-                'Sequence Center',
-                'Run',
-                'Lane',
-                'OTP Alignment',
-                'Run Date'
-                ].join(',')
+            'Project',
+            'Individual',
+            'Sample Type',
+            'Sequence Type',
+            'Library Layout',
+            'Sequence Center',
+            'Run',
+            'Lane',
+            'OTP Alignment',
+            'Run Date'
+        ].join(',')
         def content = "${contentHeader}\n${contentBody}\n"
         response.setContentType("application/octet-stream")
         response.setHeader("Content-disposition", "filename=sequence_export.csv")
