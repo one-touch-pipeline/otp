@@ -1,8 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
-
+import org.junit.Test
 
 @Build([SeqType])
 class SeqTypeServiceUnitTest {
@@ -13,8 +12,7 @@ class SeqTypeServiceUnitTest {
         seqTypeService = new SeqTypeService()
     }
 
-
-
+    @Test
      void testAlignableSeqTypes() {
         DomainFactory.createAlignableSeqTypes()
 

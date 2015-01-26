@@ -1,18 +1,16 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
-import static org.springframework.util.Assert.notNull
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
-
-import org.junit.After
-import org.springframework.context.ApplicationContext
-
 import de.dkfz.tbi.TestConstants
 import de.dkfz.tbi.otp.dataprocessing.DataProcessingFilesService.OutputDirectories
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.Individual
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CheckedLogger
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.TestFor
+import org.junit.After
+import org.springframework.context.ApplicationContext
 
 @Build([
     AlignmentPass,
@@ -20,6 +18,7 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
     QualityAssessmentPass,
     ProcessedSaiFile,
 ])
+@TestFor(ProcessedAlignmentFileService)
 class ProcessedAlignmentFileServiceUnitTests {
 
     private static final FILE_LENGTH_QUALITYFILE = 10

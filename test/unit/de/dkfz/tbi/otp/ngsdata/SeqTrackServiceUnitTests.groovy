@@ -1,18 +1,16 @@
-
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
+import grails.test.mixin.Mock
+import org.junit.Test
 
 @Mock([SeqTypeService])
 @Build([SeqTrack])
 class SeqTrackServiceUnitTests {
 
-
     SeqTrackService seqTrackService
 
     SeqType alignableSeqType
-
 
 
     void setUp() throws Exception {
@@ -21,7 +19,7 @@ class SeqTrackServiceUnitTests {
     }
 
 
-
+    @Test
     void testGetSeqTrackReadyForFastqcProcessing_getAll_noReadySeqTrackAvailable() {
         SeqTrack seqTrack = SeqTrack.build(
                         fastqcState: SeqTrack.DataProcessingState.UNKNOWN
@@ -31,6 +29,7 @@ class SeqTrackServiceUnitTests {
         assert null == ret
     }
 
+    @Test
     void testGetSeqTrackReadyForFastqcProcessing_getAll_oneReadySeqTrackAvailable() {
         SeqTrack seqTrack = SeqTrack.build (
                         fastqcState: SeqTrack.DataProcessingState.NOT_STARTED
@@ -40,9 +39,7 @@ class SeqTrackServiceUnitTests {
         assert seqTrack == ret
     }
 
-
-
-
+    @Test
     void testGetSeqTrackReadyForFastqcProcessing_getAlignable_noReadySeqTrackAvailable() {
         SeqTrack seqTrack = SeqTrack.build (
                         fastqcState: SeqTrack.DataProcessingState.UNKNOWN,
@@ -53,6 +50,7 @@ class SeqTrackServiceUnitTests {
         assert null == ret
     }
 
+    @Test
     void testGetSeqTrackReadyForFastqcProcessing_getAlignable_onlyNotAlignableSeqTracksAvailable() {
         SeqTrack seqTrack = SeqTrack.build (
                         fastqcState: SeqTrack.DataProcessingState.NOT_STARTED
@@ -62,6 +60,7 @@ class SeqTrackServiceUnitTests {
         assert null == ret
     }
 
+    @Test
     void testGetSeqTrackReadyForFastqcProcessing_getAlignable_withReadyAlignableSeqTrack() {
         SeqTrack seqTrack = SeqTrack.build (
                         fastqcState: SeqTrack.DataProcessingState.NOT_STARTED,
@@ -72,8 +71,7 @@ class SeqTrackServiceUnitTests {
         assert seqTrack == ret
     }
 
-
-
+    @Test
     void testGetSeqTrackReadyForFastqcProcessingPreferAlignable_NoReadySeqTrackAvailable() {
         SeqTrack seqTrack = SeqTrack.build (
                         fastqcState: SeqTrack.DataProcessingState.UNKNOWN
@@ -83,6 +81,7 @@ class SeqTrackServiceUnitTests {
         assert null == ret
     }
 
+    @Test
     void testGetSeqTrackReadyForFastqcProcessingPreferAlignable_SeqTrackAvailable() {
         SeqTrack seqTrack = SeqTrack.build (
                         fastqcState: SeqTrack.DataProcessingState.NOT_STARTED
@@ -92,6 +91,7 @@ class SeqTrackServiceUnitTests {
         assert seqTrack == ret
     }
 
+    @Test
     void testGetSeqTrackReadyForFastqcProcessingPreferAlignable_TakeFirstAlignableSeqTrack() {
         SeqTrack seqTrack = SeqTrack.build (
                         fastqcState: SeqTrack.DataProcessingState.NOT_STARTED
@@ -104,6 +104,7 @@ class SeqTrackServiceUnitTests {
         assert seqTrack == ret
     }
 
+    @Test
     void testGetSeqTrackReadyForFastqcProcessingPreferAlignable_TakeOlderSeqTrack() {
         SeqTrack seqTrack = SeqTrack.build (
                         fastqcState: SeqTrack.DataProcessingState.NOT_STARTED
@@ -114,5 +115,4 @@ class SeqTrackServiceUnitTests {
         SeqTrack ret = seqTrackService.getSeqTrackReadyForFastqcProcessingPreferAlignable()
         assert seqTrack == ret
     }
-
 }

@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.utils
 
-class FormatHelperUnitTest {
-
+class FormatHelperUnitTest extends GroovyTestCase {
 
     void testFormatToTwoDecimalsNullSave_hasAlreadyTwoDigits() {
         Double d = new Double(2.67)
@@ -37,8 +36,6 @@ class FormatHelperUnitTest {
         String value = FormatHelper.formatToTwoDecimalsNullSave(d)
         assert expected == value
     }
-
-
 
     void testFormatGroupsNullSave_noGroup() {
         Long l = new Long(234)

@@ -1,18 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-
-import org.junit.*
-
 import de.dkfz.tbi.TestConstants
-import de.dkfz.tbi.otp.ngsdata.ConfigService
-import de.dkfz.tbi.otp.ngsdata.MergedAlignmentDataFileService
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.Sample
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
+import grails.buildtestdata.mixin.Build
+import org.junit.Test
 
 @Build([
     QualityAssessmentPass
@@ -24,7 +15,6 @@ class ProcessedBamFileQaFileServiceUnitTests {
         QualityAssessmentPass.metaClass.isLatestPass = {true}
         AlignmentPass.metaClass.isLatestPass = {true}
     }
-
 
 
     private ProcessedBamFileQaFileService createProcessedBamFileQaFileService() {
@@ -46,7 +36,7 @@ class ProcessedBamFileQaFileServiceUnitTests {
     }
 
 
-
+    @Test
     public void testCheckConsistencyForProcessingFilesDeletion() {
         QualityAssessmentPass qualityAssessmentPass = QualityAssessmentPass.build()
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()
@@ -65,6 +55,7 @@ class ProcessedBamFileQaFileServiceUnitTests {
         assert processedBamFileQaFileService.checkConsistencyForProcessingFilesDeletion(qualityAssessmentPass)
     }
 
+    @Test
     public void testCheckConsistencyForProcessingFilesDeletion_QualityAssessmentPassIsNull() {
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()
         processedBamFileQaFileService.dataProcessingFilesService = [
@@ -78,6 +69,7 @@ class ProcessedBamFileQaFileServiceUnitTests {
         }
     }
 
+    @Test
     public void testCheckConsistencyForProcessingFilesDeletion_notLastQualityAsssesmentPass() {
         QualityAssessmentPass qualityAssessmentPass = QualityAssessmentPass.build()
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()
@@ -91,6 +83,7 @@ class ProcessedBamFileQaFileServiceUnitTests {
         assert processedBamFileQaFileService.checkConsistencyForProcessingFilesDeletion(qualityAssessmentPass)
     }
 
+    @Test
     public void testCheckConsistencyForProcessingFilesDeletion_notLastAlignmentPass() {
         QualityAssessmentPass qualityAssessmentPass = QualityAssessmentPass.build()
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()
@@ -104,8 +97,7 @@ class ProcessedBamFileQaFileServiceUnitTests {
         assert processedBamFileQaFileService.checkConsistencyForProcessingFilesDeletion(qualityAssessmentPass)
     }
 
-
-
+    @Test
     public void testDeleteProcessingFiles() {
         final int FILE_LENGTH = 10
         QualityAssessmentPass qualityAssessmentPass = QualityAssessmentPass.build()
@@ -124,6 +116,7 @@ class ProcessedBamFileQaFileServiceUnitTests {
         assert FILE_LENGTH == processedBamFileQaFileService.deleteProcessingFiles(qualityAssessmentPass)
     }
 
+    @Test
     public void testDeleteProcessingFiles_QualityAssessmentPassIsNull() {
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()
         processedBamFileQaFileService.dataProcessingFilesService = [
@@ -137,6 +130,7 @@ class ProcessedBamFileQaFileServiceUnitTests {
         }
     }
 
+    @Test
     public void testDeleteProcessingFiles_NotConsistent() {
         QualityAssessmentPass qualityAssessmentPass = QualityAssessmentPass.build()
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()

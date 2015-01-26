@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.Run
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import grails.buildtestdata.mixin.Build
+import org.junit.Test
 
 @Build([
     QualityAssessmentPass,
@@ -22,36 +22,42 @@ class ProcessingPriorityUnitTest {
     }
 
 
-
+    @Test
     void testGetProcessingPriorityForAlignmentPass() {
         assertPriority(AlignmentPass.build())
     }
 
+    @Test
     void testGetProcessingPriorityForSeqtrack() {
         assertPriority(SeqTrack.build())
     }
 
+    @Test
     void testGetProcessingPriorityForMergingPass() {
         assertPriority(MergingPass.build())
     }
 
+    @Test
     void testGetProcessingPriorityForQualityAssessmentPass() {
         assertPriority(QualityAssessmentPass.build())
     }
 
+    @Test
     void testGetProcessingPriorityForQualityAssessmentMergedPass() {
         assertPriority(QualityAssessmentMergedPass.build())
     }
 
+    @Test
     void testGetProcessingPriorityForProcessedBamFile() {
         assertPriority(ProcessedBamFile.build())
     }
 
+    @Test
     void testGetProcessingPriorityForProcessedMergedBamFile() {
         assertPriority(ProcessedMergedBamFile.build())
     }
 
-
+    @Test
     void testGetProcessingPriority() {
         Project project = Project.build(processingPriority: ProcessingPriority.NORMAL_PRIORITY)
         Run run = Run.build()
@@ -64,6 +70,4 @@ class ProcessingPriorityUnitTest {
 
         assert ProcessingPriority.FAST_TRACK_PRIORITY == run.processingPriority
     }
-
-
 }

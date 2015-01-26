@@ -1,14 +1,18 @@
 package de.dkfz.tbi.otp.job.jobs.fastqc
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.dataprocessing.DataProcessingFilesService
+import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
+import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsqc.FastqcUploadService
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-import org.apache.commons.logging.Log
-import org.junit.*
-import static org.junit.Assert.*
+import grails.test.mixin.Mock
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+
+import static org.junit.Assert.assertTrue
 
 @Mock([FastqcDataFilesService,
         SeqTrackService,
@@ -63,6 +67,7 @@ class UploadFastQCToDatabaseJobUnitTests {
         job == null
     }
 
+    @Test
     void testExecuteFailureByFileDoesNotExist() {
         job.metaClass.getEndState = { -> null }
         job.metaClass.getFastqcProcessedFile = { DataFile dataFile2 -> throw new FileNotReadableException("pathToTheFile") }
@@ -76,6 +81,7 @@ class UploadFastQCToDatabaseJobUnitTests {
         }
     }
 
+    @Test
     void testExecuteSuccess() {
         int setReadyForAlignmentCalls = 0
         job.metaClass.getFastqcProcessedFile = { DataFile dataFile2 -> }

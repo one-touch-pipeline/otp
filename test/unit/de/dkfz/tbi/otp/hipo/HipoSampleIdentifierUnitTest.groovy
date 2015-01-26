@@ -1,9 +1,15 @@
 package de.dkfz.tbi.otp.hipo
 
-import grails.test.mixin.*
+import org.junit.Test
+
+import static junit.framework.TestCase.assertEquals
+import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.assertNull
+
 
 class HipoSampleIdentifierUnitTest {
 
+    @Test
     void testTryParse() {
         String sampleName = "H004-ABCD-T1"
         assertNull(HipoSampleIdentifier.tryParse(sampleName))
@@ -81,6 +87,7 @@ class HipoSampleIdentifierUnitTest {
         assertNotNull(HipoSampleIdentifier.tryParse(sampleName))
     }
 
+    @Test
     void testSampleTypeDbName() {
         String sampleName = "H004-ABCD-T1-D1"
         String tissueTypeExp = "TUMOR"

@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import org.junit.Test
+
 import static org.springframework.util.Assert.*
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
@@ -61,6 +63,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
 
 
 
+    @Test
     public void testCheckConsistencyForProcessingFilesDeletion() {
         QualityAssessmentMergedPass qualityAssessmentMergedPass
         ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
@@ -69,6 +72,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
         assert processedMergedBamFileQaFileService.checkConsistencyForProcessingFilesDeletion(qualityAssessmentMergedPass)
     }
 
+    @Test
     public void testCheckConsistencyForProcessingFilesDeletion_NoQualityAssessmentMergedPass() {
         ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService = new ProcessedMergedBamFileQaFileService()
 
@@ -77,6 +81,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
         }
     }
 
+    @Test
     public void testCheckConsistencyForProcessingFilesDeletion_NotLatestQualityAssessmentMergedPass() {
         QualityAssessmentMergedPass qualityAssessmentMergedPass
         ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
@@ -86,6 +91,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
         assert processedMergedBamFileQaFileService.checkConsistencyForProcessingFilesDeletion(qualityAssessmentMergedPass)
     }
 
+    @Test
     public void testCheckConsistencyForProcessingFilesDeletion_NotLatestMergingPass() {
         QualityAssessmentMergedPass qualityAssessmentMergedPass
         ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
@@ -95,6 +101,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
         assert processedMergedBamFileQaFileService.checkConsistencyForProcessingFilesDeletion(qualityAssessmentMergedPass)
     }
 
+    @Test
     public void testCheckConsistencyForProcessingFilesDeletion_NotLatestMergingSet() {
         QualityAssessmentMergedPass qualityAssessmentMergedPass
         ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
@@ -104,8 +111,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
         assert processedMergedBamFileQaFileService.checkConsistencyForProcessingFilesDeletion(qualityAssessmentMergedPass)
     }
 
-
-
+    @Test
     public void testDeleteProcessingFiles() {
         QualityAssessmentMergedPass qualityAssessmentMergedPass
         ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
@@ -114,6 +120,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
         assert SOME_FILE_LENGTH == processedMergedBamFileQaFileService.deleteProcessingFiles(qualityAssessmentMergedPass)
     }
 
+    @Test
     public void testDeleteProcessingFiles_NoQualityAssessmentMergedPass() {
         ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService = new ProcessedMergedBamFileQaFileService()
 
@@ -122,6 +129,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
         }
     }
 
+    @Test
     public void testDeleteProcessingFiles_CheckConsistenceIsWrong() {
         QualityAssessmentMergedPass qualityAssessmentMergedPass
         ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService

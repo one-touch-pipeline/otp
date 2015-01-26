@@ -1,16 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-
-import org.junit.*
+import grails.test.mixin.TestFor
 
 @Build([
     ProcessedBamFile,
     MergingSetAssignment,
     ProcessedMergedBamFile,
 ])
+@TestFor(AbstractBamFileService)
 class AbstractBamFileServiceUnitTests {
 
     AbstractBamFileService abstractBamFileService
