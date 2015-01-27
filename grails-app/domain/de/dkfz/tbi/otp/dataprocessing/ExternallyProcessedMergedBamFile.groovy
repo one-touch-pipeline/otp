@@ -17,6 +17,8 @@ class ExternallyProcessedMergedBamFile extends AbstractFileSystemBamFile {
     String source
     String fileName
 
+    ReferenceGenome referenceGenome
+
     Project getProject() {
         return fastqSet.project
     }

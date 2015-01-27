@@ -137,7 +137,7 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
         ])
         assertNotNull(fastqcBasicStatistics.save([flush: true, failOnError: true]))
 
-        alignmentPass = new AlignmentPass(
+        alignmentPass = testData.createAlignmentPass(
                         identifier: 1,
                         seqTrack: seqTrack,
                         description: "test"
@@ -233,7 +233,7 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
                         )
         assertNotNull(seqTrack2.save([flush: true]))
 
-        AlignmentPass alignmentPass = new AlignmentPass(
+        AlignmentPass alignmentPass = testData.createAlignmentPass(
                         identifier: 1,
                         seqTrack: seqTrack2,
                         description: "test"
@@ -335,7 +335,7 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
 
     @Test
     void testRelatedBamFileIsNotProcessable() {
-        final AlignmentPass alignmentPass2 = new AlignmentPass(
+        final AlignmentPass alignmentPass2 = testData.createAlignmentPass(
                 identifier: 2,
                 seqTrack: seqTrack,
                 description: "test"
@@ -381,7 +381,7 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
         assert processedBamFileService.isMergeable(processedBamFile)
         assertEquals(processedBamFile, processedBamFileService.processedBamFileNeedsProcessing())
 
-        MergingWorkPackage workpackage = new MergingWorkPackage(
+        MergingWorkPackage workpackage = testData.createMergingWorkPackage(
                         sample: sample,
                         seqType: seqType
                         )
@@ -416,7 +416,7 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
                         )
         assertNotNull(seqTrack2.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass2 = new AlignmentPass(
+        AlignmentPass alignmentPass2 = testData.createAlignmentPass(
                         identifier: 1,
                         seqTrack: seqTrack2,
                         description: "test"
@@ -461,7 +461,7 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
     void testProcessedBamFileNeedsProcessingAlignmentNotFinished() {
         processedBamFile.status = AbstractBamFile.State.PROCESSED
 
-        MergingWorkPackage workpackage = new MergingWorkPackage(
+        MergingWorkPackage workpackage = testData.createMergingWorkPackage(
                         sample: sample,
                         seqType: seqType
                         )
@@ -490,7 +490,7 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
                         )
         assertNotNull(seqTrack2.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass2 = new AlignmentPass(
+        AlignmentPass alignmentPass2 = testData.createAlignmentPass(
                         identifier: 1,
                         seqTrack: seqTrack2,
                         description: "test"
@@ -565,7 +565,7 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
     @Test
     void testNotAssignedToMergingSet() {
         assertTrue(processedBamFileService.notAssignedToMergingSet(processedBamFile))
-        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                         seqType: seqType,
                         sample: sample,
                         seqPlatform: seqPlatform

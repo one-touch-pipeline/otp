@@ -16,6 +16,7 @@ class MergingSetServiceTests {
 
     MergingSetService mergingSetService
 
+    TestData testData = new TestData()
     Sample sample
     SeqType seqType
     SeqTrack seqTrack
@@ -487,7 +488,7 @@ class MergingSetServiceTests {
     }
 
     private ProcessedBamFile createBamFile(final SeqTrack seqTrack = this.seqTrack) {
-        AlignmentPass alignmentPass = new AlignmentPass(
+        AlignmentPass alignmentPass = testData.createAlignmentPass(
                         identifier: AlignmentPass.nextIdentifier(seqTrack),
                         seqTrack: seqTrack,
                         description: "test"
@@ -505,7 +506,7 @@ class MergingSetServiceTests {
 
 
     private MergingWorkPackage createMergingWorkPackage() {
-        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                         sample: sample,
                         seqType: seqType
                         )

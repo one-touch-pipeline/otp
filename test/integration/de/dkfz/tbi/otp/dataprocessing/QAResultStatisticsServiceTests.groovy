@@ -29,6 +29,7 @@ class QAResultStatisticsServiceTests {
     final static PATH_TO_STAT_FILE = '/tmp/otp-unit-test/pmbfs/processing/projectDirName/results_per_pid/pid_1/merging//control/seqTypeName/seqTypeLibrary/DEFAULT/0/pass0/QualityAssessment/pass1'
     final static FINAL_PATH_FILE = '/tmp/otp-unit-test/pmfs/root/projectDirName/sequencing/seqTypeDirName/view-by-pid/pid_1/control/seqtypelibrary/merged-alignment/.tmp/QualityAssessment'
 
+    TestData testData = new TestData()
     Project project
     Sample sample
     Run run
@@ -149,7 +150,7 @@ class QAResultStatisticsServiceTests {
                         )
         assertNotNull(exomeSeqTrack.save([flush: true]))
 
-        alignmentPass = new AlignmentPass(
+        alignmentPass = testData.createAlignmentPass(
                         identifier: 1,
                         seqTrack: seqTrack,
                         description: "test"
@@ -192,7 +193,7 @@ class QAResultStatisticsServiceTests {
         setProperties(overallQualityAssessment)
         assertNotNull(overallQualityAssessment.save([flush: true]))
 
-        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                         sample: sample,
                         seqType: seqType
                         )

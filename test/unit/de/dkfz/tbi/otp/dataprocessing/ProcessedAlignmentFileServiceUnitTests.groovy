@@ -4,6 +4,7 @@ import de.dkfz.tbi.TestConstants
 import de.dkfz.tbi.otp.dataprocessing.DataProcessingFilesService.OutputDirectories
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CheckedLogger
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
@@ -17,6 +18,7 @@ import org.springframework.context.ApplicationContext
     ProcessedBamFile,
     QualityAssessmentPass,
     ProcessedSaiFile,
+    ReferenceGenome,
 ])
 @TestFor(ProcessedAlignmentFileService)
 class ProcessedAlignmentFileServiceUnitTests {

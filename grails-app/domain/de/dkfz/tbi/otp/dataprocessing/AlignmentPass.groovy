@@ -8,6 +8,12 @@ class AlignmentPass {
     SeqTrack seqTrack
     String description
 
+    /**
+     * The reference genome which is/was used by this alignment pass. This value does not change (in contrast to the
+     * return value of {@link SeqTrack#getConfiguredReferenceGenome()} when the configuration changes).
+     */
+    ReferenceGenome referenceGenome
+
     static belongsTo = [
         seqTrack: SeqTrack
     ]
@@ -15,6 +21,9 @@ class AlignmentPass {
     static constraints = {
         identifier(unique: 'seqTrack')
         description(nullable: true)
+        referenceGenome(nullable: true)  // Nullable, because the AlignmentPass is created by the StartJob, but the
+                                         // value is not set before the AlignmentJob, because the StartJob is not a
+                                         // good point to fail if the reference genome is not configured.
     }
 
     public String getDirectory() {

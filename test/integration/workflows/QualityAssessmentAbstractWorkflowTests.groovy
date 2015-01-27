@@ -50,6 +50,8 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
 
     ExecutionService executionService
 
+    TestData testData = new TestData()
+
     Realm realm
 
     // TODO This paths should be obtained from somewhere else..  maybe from .otpproperties, but I am hardcoding for now..
@@ -174,23 +176,18 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
         return classification
     }
 
-    protected void createReferenceGenome(Project project, SeqType seqType) {
+    protected ReferenceGenome createReferenceGenome(Project project, SeqType seqType) {
         // get list of all standard chromosomes which is: 1..22, X, Y
         List<String> standardChromosomes = Chromosomes.allLabels()
         standardChromosomes.remove("M")
         assert standardChromosomes.size() == 24
 
-        ReferenceGenome refGen = new ReferenceGenome()
-        refGen.name = "hg19"
-        refGen.path = "bwa06_hg19_chr"
-        refGen.fileNamePrefix = "hg19_1-22_X_Y_M"
-        if (refGen.validate()) {
-            refGen.save(flush: true)
-        } else {
-            refGen.errors.allErrors.each {
-                log.debug it
-            }
-        }
+        ReferenceGenome refGen = testData.createReferenceGenome(
+            name: "hg19",
+            path: "bwa06_hg19_chr",
+            fileNamePrefix: "hg19_1-22_X_Y_M",
+        )
+        refGen.save(failOnError: true)
 
         // list which holds information about all entries in the ref. genome fasta file
         Map<String, Integer> fastaEntriesColumn = ["name":0, "alias":1, "length":2, "lengthWithoutN":3, "classification":4]
@@ -267,6 +264,8 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
         referenceGenomeProjectSeqType.seqType = seqType
         referenceGenomeProjectSeqType.referenceGenome = refGen
         referenceGenomeProjectSeqType.save(flush: true)
+
+        return refGen
     }
 
     private void createData() {

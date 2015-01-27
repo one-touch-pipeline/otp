@@ -13,6 +13,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.Sample
 import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.TestData
 
 class QualityAssessmentMergedPassServiceTests {
 
@@ -64,7 +65,7 @@ class QualityAssessmentMergedPassServiceTests {
                         )
         assertNotNull(seqType.save([flush: true]))
 
-        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+        MergingWorkPackage mergingWorkPackage = new TestData().createMergingWorkPackage(
                         sample: sample,
                         seqType: seqType
                         )

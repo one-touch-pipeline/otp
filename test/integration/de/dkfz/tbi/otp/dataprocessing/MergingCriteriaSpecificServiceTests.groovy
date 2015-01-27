@@ -16,6 +16,7 @@ import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type
 class MergingCriteriaSpecificServiceTests {
 
     MergingCriteriaSpecificService mergingCriteriaSpecificService
+    TestData testData = new TestData()
 
     @Test
     void testBamFilesForMergingCriteriaDEFAULT() {
@@ -655,7 +656,7 @@ class MergingCriteriaSpecificServiceTests {
     }
 
     AlignmentPass createAlignmentPass(SeqTrack seqTrack, int identifier) {
-        AlignmentPass alignmentPass = new AlignmentPass(
+        AlignmentPass alignmentPass = testData.createAlignmentPass(
                         identifier: identifier,
                         seqTrack: seqTrack,
                         description: "test"
@@ -675,7 +676,7 @@ class MergingCriteriaSpecificServiceTests {
     }
 
     MergingWorkPackage createMergingWorkPackage(Sample sample, SeqType seqType) {
-        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                         sample: sample,
                         seqType: seqType
                         )

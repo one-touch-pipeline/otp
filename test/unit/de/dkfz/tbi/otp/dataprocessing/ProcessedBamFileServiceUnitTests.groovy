@@ -11,7 +11,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 @TestFor(ProcessedBamFileService)
 @Build([
-    ProcessedBamFile
+    ProcessedBamFile,
+    ReferenceGenome,
 ])
 class ProcessedBamFileServiceUnitTests {
 

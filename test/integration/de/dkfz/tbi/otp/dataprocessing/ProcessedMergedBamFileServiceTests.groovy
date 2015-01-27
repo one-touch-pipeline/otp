@@ -18,6 +18,7 @@ class ProcessedMergedBamFileServiceTests {
     ProcessedMergedBamFileService processedMergedBamFileService
     DataProcessingFilesService dataProcessingFilesService
 
+    TestData testData = new TestData()
     File baseDir
     Sample sample
     SeqType seqType
@@ -445,7 +446,7 @@ class ProcessedMergedBamFileServiceTests {
         MergingPass mergingPass = createMergingPass()
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
         mergingSet.status = State.PROCESSED
-        MergingWorkPackage mergingWorkPackage1 = new MergingWorkPackage(
+        MergingWorkPackage mergingWorkPackage1 = testData.createMergingWorkPackage(
                         sample: sample,
                         seqType: seqType
                         )
@@ -474,7 +475,7 @@ class ProcessedMergedBamFileServiceTests {
         SeqTrack seqTrack = createSeqTrack()
         ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack)
         MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
-        MergingWorkPackage mergingWorkPackage1 = new MergingWorkPackage(
+        MergingWorkPackage mergingWorkPackage1 = testData.createMergingWorkPackage(
                         sample: sample,
                         seqType: seqType
                         )
@@ -833,7 +834,7 @@ class ProcessedMergedBamFileServiceTests {
     @Test
     void test_saveNumberOfMergedLanes_WhenOneMergingPassExist_ShouldSetValueToNumberOfLanes() {
 
-        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                 sample: sample,
                 seqType: seqType,
         )
@@ -873,7 +874,7 @@ class ProcessedMergedBamFileServiceTests {
     @Test
     void test_saveNumberOfMergedLanes_WhenTwoMergingPassesExist_ShouldSetValueToNumberOfLanesOfLatest() {
 
-        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                 sample: sample,
                 seqType: seqType,
         )
@@ -962,7 +963,7 @@ class ProcessedMergedBamFileServiceTests {
     }
 
     private MergingPass createMergingPass() {
-        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                         sample: sample,
                         seqType: seqType
                         )
@@ -984,7 +985,7 @@ class ProcessedMergedBamFileServiceTests {
     }
 
     private ProcessedBamFile createProcessedBamFile(int identifier, SeqTrack seqTrack) {
-        AlignmentPass alignmentPass = new AlignmentPass(
+        AlignmentPass alignmentPass = testData.createAlignmentPass(
                         identifier: identifier,
                         seqTrack: seqTrack,
                         description: "test"

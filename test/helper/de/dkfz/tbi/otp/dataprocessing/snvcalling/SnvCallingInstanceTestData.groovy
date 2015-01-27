@@ -124,7 +124,7 @@ class SnvCallingInstanceTestData extends TestData {
                 sampleType: sampleType)
         assert sample.save(flush: true, failOnError: true)
 
-        MergingWorkPackage workPackage = new MergingWorkPackage(
+        MergingWorkPackage workPackage = createMergingWorkPackage(
                 sample: sample,
                 seqType: seqType
                 )

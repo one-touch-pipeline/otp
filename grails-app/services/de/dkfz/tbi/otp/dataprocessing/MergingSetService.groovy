@@ -38,7 +38,7 @@ class MergingSetService {
             SeqType seqType = bamFile.alignmentPass.seqTrack.seqType
             MergingWorkPackage workPackage = MergingWorkPackage.findBySampleAndSeqTypeAndMergingCriteria(sample, seqType, criteria)
             if (!workPackage) {
-                workPackage = mergingWorkPackageService.createWorkPackage(sample, seqType, criteria)
+                workPackage = mergingWorkPackageService.createWorkPackage(bamFile, criteria)
                 isTrue(workPackage.processingType.equals(ProcessingType.SYSTEM), "The processing type of this merging workpackage is not SYSTEM")
             } else {
                 isTrue(workPackage.processingType.equals(ProcessingType.SYSTEM), "The processing type of this merging workpackage is not SYSTEM")

@@ -40,6 +40,7 @@ testDataConfig {
         }
         'de.dkfz.tbi.otp.ngsdata.ReferenceGenome' {
             name = {'referenceGenomeName_' + (counter++)}
+            path = {'referenceGenomePath_' + (counter++)}
             length = 789
             lengthWithoutN = 567
             lengthRefChromosomes = 345
@@ -59,6 +60,9 @@ testDataConfig {
             name = {'seqTypeName_' + (counter++)}
             libraryLayout  = {'seqTypelibraryLayout_' + (counter++)}
             dirName  = {'seqTypeDirName_' + (counter++)}
+        }
+        'de.dkfz.tbi.otp.dataprocessing.AlignmentPass' {
+            referenceGenome = {ReferenceGenome.build()}
         }
         'de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment' {
             //Ensure to use this subclass of AbstractBamFile

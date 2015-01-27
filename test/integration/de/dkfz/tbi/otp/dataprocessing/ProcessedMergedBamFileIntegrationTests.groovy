@@ -14,6 +14,7 @@ import static org.junit.Assert.*
 
 class ProcessedMergedBamFileIntegrationTests {
 
+    TestData testData = new TestData()
     Sample sample
     SeqType seqType
     MergingSet mergingSet
@@ -187,7 +188,7 @@ class ProcessedMergedBamFileIntegrationTests {
     }
 
     private MergingPass createMergingPass() {
-        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                         sample: sample,
                         seqType: seqType
                         )
@@ -216,8 +217,8 @@ class ProcessedMergedBamFileIntegrationTests {
         return fastqSet
     }
 
-    private static ProcessedBamFile createProcessedBamFile(int identifier, SeqTrack seqTrack) {
-        AlignmentPass alignmentPass = new AlignmentPass(
+    private ProcessedBamFile createProcessedBamFile(int identifier, SeqTrack seqTrack) {
+        AlignmentPass alignmentPass = testData.createAlignmentPass(
                         identifier: identifier,
                         seqTrack: seqTrack,
                         description: "test"

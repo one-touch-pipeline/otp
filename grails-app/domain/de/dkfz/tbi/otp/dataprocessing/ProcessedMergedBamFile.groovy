@@ -92,6 +92,11 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
     static mapping = { mergingPass index: "abstract_bam_file_merging_pass_idx" }
 
     @Override
+    ReferenceGenome getReferenceGenome() {
+        return mergingWorkPackage.referenceGenome
+    }
+
+    @Override
     Set<SeqTrack> getContainedSeqTracks() {
         final Set<SeqTrack> seqTracks = mergingSet.containedSeqTracks
         if (seqTracks.empty) {

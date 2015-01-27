@@ -15,6 +15,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
     MergingSetAssignment,
     ProcessedBamFile,
     ProcessedMergedBamFile,
+    ReferenceGenome,
     SeqPlatform,
     SeqTrack,
 ])
@@ -59,7 +60,7 @@ class SeqPlatformServiceUnitTests {
                         )
         assertNotNull(mergingSet.save([flush: true]))
 
-        AlignmentPass alignmentPass = new AlignmentPass(
+        AlignmentPass alignmentPass = new TestData().createAlignmentPass(
                         identifier: 0,
                         seqTrack: seqTrack,
                         description: "test"

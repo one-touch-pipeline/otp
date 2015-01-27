@@ -6,7 +6,8 @@ import grails.buildtestdata.mixin.Build
 import org.junit.Test
 
 @Build([
-    QualityAssessmentPass
+    QualityAssessmentPass,
+    ReferenceGenome,
 ])
 class ProcessedBamFileQaFileServiceUnitTests {
 

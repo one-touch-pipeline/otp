@@ -50,10 +50,7 @@ class AlignmentPassServiceUnitTests extends TestData {
         alignmentPassService.referenceGenomeService = new ReferenceGenomeService()
         alignmentPassService.referenceGenomeService.configService = new ConfigService()
         createObjects()
-        alignmentPass = new AlignmentPass()
-        alignmentPass.identifier = 2
-        alignmentPass.seqTrack = seqTrack
-        alignmentPass.description = "test"
+        alignmentPass = createAlignmentPass(identifier: 2)
         alignmentPass.save(flush: true)
     }
 
@@ -90,6 +87,37 @@ class AlignmentPassServiceUnitTests extends TestData {
     void testAlignmentPassFinishedNull() {
         alignmentPass = null
         alignmentPassService.alignmentPassFinished(alignmentPass)
+    }
+
+    @Test
+    void testSetReferenceGenomeAsConfigured_notConfigured() {
+        referenceGenomeProjectSeqType.delete()
+        alignmentPass.referenceGenome = null
+        assert shouldFail(RuntimeException, { alignmentPassService.setReferenceGenomeAsConfigured(
+                alignmentPass) }).startsWith("Reference genome is not configured for SeqTrack")
+        assert alignmentPass.referenceGenome == null
+    }
+
+    @Test
+    void testSetReferenceGenomeAsConfigured_notSetYet() {
+        alignmentPass.referenceGenome = null
+        alignmentPassService.setReferenceGenomeAsConfigured(alignmentPass)
+        assert alignmentPass.referenceGenome == referenceGenome
+    }
+
+    @Test
+    void testSetReferenceGenomeAsConfigured_alreadySetToSame() {
+        alignmentPass.referenceGenome = referenceGenome
+        alignmentPassService.setReferenceGenomeAsConfigured(alignmentPass)
+        assert alignmentPass.referenceGenome == referenceGenome
+    }
+
+    @Test
+    void testSetReferenceGenomeAsConfigured_alreadySetToOther() {
+        final ReferenceGenome otherReferenceGenome = createReferenceGenome()
+        alignmentPass.referenceGenome = otherReferenceGenome
+        assert shouldFail(AssertionError, { alignmentPassService.setReferenceGenomeAsConfigured(alignmentPass) })
+        assert alignmentPass.referenceGenome == otherReferenceGenome
     }
 
     @Test

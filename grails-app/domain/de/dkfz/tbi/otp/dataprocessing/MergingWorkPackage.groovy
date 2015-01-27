@@ -60,7 +60,8 @@ class MergingWorkPackage {
 
     static belongsTo = [
         sample: Sample,
-        seqType: SeqType
+        seqType: SeqType,
+        referenceGenome: ReferenceGenome,
     ]
 
     Project getProject() {

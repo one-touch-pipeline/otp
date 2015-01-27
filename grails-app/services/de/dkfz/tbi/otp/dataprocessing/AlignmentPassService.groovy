@@ -73,19 +73,6 @@ class AlignmentPassService {
 
 
     /**
-     * Checks if the {@link ReferenceGenome} is available for this {@link Project} and {@link SeqType}.
-     * If it is missing the method returns false, otherwise true.
-     *
-     * @deprecated Just check whether <code>seqTrack.configuredReferenceGenome</code> is <code>null</code>.
-     */
-    @Deprecated
-    public boolean isReferenceGenomeAvailable(SeqTrack seqTrack) {
-        notNull(seqTrack, "The input seqTrack of method isReferenceGenomeAvailable is null")
-        return seqTrack.configuredReferenceGenome != null
-    }
-
-
-    /**
      * Checks if the {@link ExomeEnrichmentKit} and the {@link BedFile} are available for this {@link SeqTrack}.
      * If it is missing the method returns false, otherwise true.
      */
@@ -113,6 +100,15 @@ class AlignmentPassService {
 
     public void alignmentPassStarted(AlignmentPass alignmentPass) {
         update(alignmentPass, SeqTrack.DataProcessingState.IN_PROGRESS)
+    }
+
+    public void setReferenceGenomeAsConfigured(final AlignmentPass alignmentPass) {
+        final ReferenceGenome referenceGenome = alignmentPass.seqTrack.configuredReferenceGenome
+        if (referenceGenome == null) {
+            throw new RuntimeException("Reference genome is not configured for SeqTrack ${alignmentPass.seqTrack}.")
+        }
+        assert alignmentPass.referenceGenome == null || alignmentPass.referenceGenome.id == referenceGenome.id
+        alignmentPass.referenceGenome = referenceGenome
     }
 
     public void alignmentPassFinished(AlignmentPass alignmentPass) {

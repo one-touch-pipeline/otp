@@ -12,6 +12,7 @@ import org.junit.*
 
 class MergingJobCreateCommandTests {
 
+    TestData testData = new TestData()
     MergingJob mergingJob
     ProcessedMergedBamFile processedMergedBamFile
     MergingSet mergingSet
@@ -83,7 +84,7 @@ class MergingJobCreateCommandTests {
                         )
         assertNotNull(seqType.save([flush: true, failOnError: true]))
 
-        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                         sample: sample,
                         seqType: seqType
                         )
@@ -261,7 +262,7 @@ class MergingJobCreateCommandTests {
                         )
         assertNotNull(seqTrack.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass = new AlignmentPass(
+        AlignmentPass alignmentPass = testData.createAlignmentPass(
                         identifier: identifier,
                         seqTrack: seqTrack
                         )

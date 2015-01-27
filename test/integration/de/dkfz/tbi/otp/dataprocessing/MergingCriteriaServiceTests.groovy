@@ -14,6 +14,7 @@ class MergingCriteriaServiceTests {
 
     MergingCriteriaService mergingCriteriaService
 
+    TestData testData = new TestData()
     MergingCriteria criteria
     ProcessedBamFile processedBamFile
     SeqTrack seqTrack
@@ -103,7 +104,7 @@ class MergingCriteriaServiceTests {
                         )
         assertNotNull(seqTrack.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass = new AlignmentPass(
+        AlignmentPass alignmentPass = testData.createAlignmentPass(
                         identifier: 1,
                         seqTrack: seqTrack,
                         description: "test"
@@ -117,7 +118,7 @@ class MergingCriteriaServiceTests {
                         )
         assertNotNull(processedBamFile.save([flush: true, failOnError: true]))
 
-        mergingWorkPackage = new MergingWorkPackage(
+        mergingWorkPackage = testData.createMergingWorkPackage(
                         sample: sample,
                         seqType: seqType
                         )
@@ -183,7 +184,7 @@ class MergingCriteriaServiceTests {
                         )
         assertNotNull(seqTrack2.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass2 = new AlignmentPass(
+        AlignmentPass alignmentPass2 = testData.createAlignmentPass(
                         identifier: 2,
                         seqTrack: seqTrack2,
                         description: "test"
@@ -219,7 +220,7 @@ class MergingCriteriaServiceTests {
 
     @Test
     void testValidateBamFilesTwoFiles() {
-        AlignmentPass alignmentPass2 = new AlignmentPass(
+        AlignmentPass alignmentPass2 = testData.createAlignmentPass(
                         identifier: 2,
                         seqTrack: seqTrack,
                         description: "test"
@@ -261,7 +262,7 @@ class MergingCriteriaServiceTests {
                         )
         assertNotNull(seqTrack2.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass2 = new AlignmentPass(
+        AlignmentPass alignmentPass2 = testData.createAlignmentPass(
                         identifier: 2,
                         seqTrack: seqTrack2,
                         description: "test"
@@ -302,7 +303,7 @@ class MergingCriteriaServiceTests {
                         )
         assertNotNull(seqTrack2.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass2 = new AlignmentPass(
+        AlignmentPass alignmentPass2 = testData.createAlignmentPass(
                         identifier: 2,
                         seqTrack: seqTrack2,
                         description: "test"
@@ -343,7 +344,7 @@ class MergingCriteriaServiceTests {
                         )
         assertNotNull(seqTrack2.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass2 = new AlignmentPass(
+        AlignmentPass alignmentPass2 = testData.createAlignmentPass(
                         identifier: 2,
                         seqTrack: seqTrack2,
                         description: "test"
@@ -393,7 +394,7 @@ class MergingCriteriaServiceTests {
                         )
         assertNotNull(seqTrack2.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass2 = new AlignmentPass(
+        AlignmentPass alignmentPass2 = testData.createAlignmentPass(
                         identifier: 2,
                         seqTrack: seqTrack2,
                         description: "test"

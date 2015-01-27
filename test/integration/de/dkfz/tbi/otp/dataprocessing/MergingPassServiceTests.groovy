@@ -14,6 +14,7 @@ class MergingPassServiceTests {
 
     MergingPassService mergingPassService
 
+    TestData testData = new TestData()
 
 
     @Test(expected = IllegalArgumentException)
@@ -185,7 +186,7 @@ class MergingPassServiceTests {
                         )
         assertNotNull(seqType.save([flush: true, failOnError: true]))
 
-        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                         sample: sample,
                         seqType: seqType
                         )

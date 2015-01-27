@@ -5,7 +5,7 @@ import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 @TestFor(ProcessedMergedBamFile)
-@Mock([MergingPass, MergingSet, MergingWorkPackage,
+@Mock([MergingPass, MergingSet, MergingWorkPackage, ReferenceGenome,
     Sample, SampleType, Individual, Project, SeqType])
 class ProcessedMergedBamFileTests {
 
@@ -37,7 +37,7 @@ class ProcessedMergedBamFileTests {
                 sampleType: sampleType)
         sample.save(flush: true)
 
-        this.workPackage = new MergingWorkPackage(
+        this.workPackage = new TestData().createMergingWorkPackage(
                 sample: sample,
                 seqType: new SeqType())
         this.workPackage.save(flush: true)

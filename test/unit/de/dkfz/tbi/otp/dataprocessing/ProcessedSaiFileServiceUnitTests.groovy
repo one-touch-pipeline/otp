@@ -12,6 +12,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 @TestFor(ProcessedSaiFileService)
 @Build([
     ProcessedSaiFile,
+    ReferenceGenome,
 ])
 class ProcessedSaiFileServiceUnitTests {
 

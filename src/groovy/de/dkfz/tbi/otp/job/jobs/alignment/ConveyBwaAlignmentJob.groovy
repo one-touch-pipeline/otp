@@ -36,9 +36,7 @@ class ConveyBwaAlignmentJob extends AbstractJobImpl {
         AlignmentPass.withTransaction {
             AlignmentPass alignmentPass = AlignmentPass.get(alignmentPassId)
             SeqTrack seqTrack = alignmentPass.seqTrack
-            if (!alignmentPassService.isReferenceGenomeAvailable(seqTrack)) {
-                throw new RuntimeException("Reference genome is not set for SeqTrack ${seqTrack}.")
-            }
+            alignmentPassService.setReferenceGenomeAsConfigured(alignmentPass)
             if (alignmentPassService.isExomeEnrichmentKitOrBedFileMissing(seqTrack)) {
                 throw new RuntimeException("Exome enrichment kit is not set or BED file is missing for SeqTrack ${seqTrack}.")
             }

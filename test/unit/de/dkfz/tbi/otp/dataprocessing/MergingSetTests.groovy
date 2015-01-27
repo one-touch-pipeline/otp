@@ -37,7 +37,7 @@ class MergingSetTests {
             sampleType: sampleType)
         sample.save(flush: true)
 
-        this.workPackage = new MergingWorkPackage(
+        this.workPackage = new TestData().createMergingWorkPackage(
             sample: sample,
             seqType: new SeqType())
         this.workPackage.save(flush: true)

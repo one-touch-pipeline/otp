@@ -265,34 +265,6 @@ class AlignmentPassServiceIntegrationTests extends TestData {
 
 
     @Test
-    void testIsReferenceGenomeAvailable() {
-        createObjects()
-        referenceGenomeProjectSeqType.delete()
-        referenceGenome.delete()
-
-        assertFalse(alignmentPassService.isReferenceGenomeAvailable(seqTrack))
-
-        ReferenceGenome referenceGenome = createReferenceGenome()
-        referenceGenome.save(flush: true)
-        assertFalse(alignmentPassService.isReferenceGenomeAvailable(seqTrack))
-
-        ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = createReferenceGenomeProjectSeqType([
-            project: seqTrack.project,
-            seqType: seqTrack.seqType,
-            referenceGenome: referenceGenome
-        ])
-        referenceGenomeProjectSeqType.save(flush: true)
-
-        assertTrue(alignmentPassService.isReferenceGenomeAvailable(seqTrack))
-
-        referenceGenomeProjectSeqType.deprecatedDate = new Date()
-        assertNotNull(referenceGenomeProjectSeqType.save(flush: true))
-
-        assertFalse(alignmentPassService.isReferenceGenomeAvailable(seqTrack))
-    }
-
-
-    @Test
     void testIsExomeEnrichmentKitOrBedFileMissing() {
         createObjects()
         assertFalse(alignmentPassService.isExomeEnrichmentKitOrBedFileMissing(seqTrack))
@@ -336,7 +308,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
     }
 
     private ProcessedBamFile createProcessedBamFile(SeqTrack seqTrack, int identifier) {
-        AlignmentPass alignmentPass = new AlignmentPass(
+        AlignmentPass alignmentPass = createAlignmentPass(
                         identifier: identifier,
                         seqTrack: seqTrack,
                         description: "test"

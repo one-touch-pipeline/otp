@@ -6,9 +6,23 @@ import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 @TestFor(MergingSetAssignment)
-@Mock([Project, Individual, SampleType, Sample, SeqType,
-    SeqCenter, SeqPlatform, Run, SoftwareTool, SeqTrack,
-    AlignmentPass, ProcessedBamFile, MergingSet, MergingWorkPackage])
+@Mock([
+    AlignmentPass,
+    Individual,
+    MergingSet,
+    MergingWorkPackage,
+    ProcessedBamFile,
+    Project,
+    ReferenceGenome,
+    Run,
+    Sample,
+    SampleType,
+    SeqCenter,
+    SeqPlatform,
+    SeqTrack,
+    SeqType,
+    SoftwareTool,
+])
 class MergingSetAssignmentTests {
 
     MergingSet mergingSet = null
@@ -87,10 +101,10 @@ class MergingSetAssignmentTests {
         seqTrack.save(flush: true)
         assertTrue(seqTrack.validate())
 
-        AlignmentPass alignmentPass = new AlignmentPass()
-        alignmentPass.identifier = 2
-        alignmentPass.seqTrack = seqTrack
-        alignmentPass.description = "test"
+        AlignmentPass alignmentPass = new TestData().createAlignmentPass(
+            identifier: 2,
+            seqTrack: seqTrack,
+        )
         alignmentPass.save(flush: true)
         assertTrue(alignmentPass.validate())
 

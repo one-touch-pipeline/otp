@@ -30,9 +30,10 @@ class QualityAssessmentMergedWorkflowTests extends QualityAssessmentAbstractWork
     protected void createAdditionalTestData(List<SeqTrack> seqTracks) {
 
         SeqType seqType = seqTracks.first().seqType
-        createReferenceGenome(Project.list().first(), seqType)
+        ReferenceGenome referenceGenome = createReferenceGenome(Project.list().first(), seqType)
 
         MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+                        referenceGenome: referenceGenome,
                         sample: Sample.list().first(),
                         seqType: seqType
                         )
@@ -60,6 +61,7 @@ class QualityAssessmentMergedWorkflowTests extends QualityAssessmentAbstractWork
             assertNotNull(seqTrack.save([flush: true]))
 
             AlignmentPass alignmentPass = new AlignmentPass(
+                            referenceGenome: referenceGenome,
                             identifier: i,
                             seqTrack: seqTrack,
                             description: "test"

@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.alignment
 
 import org.junit.Test
 
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
@@ -12,7 +13,7 @@ import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 
 
-@Build([AlignmentPass, ProcessedSaiFile])
+@Build([AlignmentPass, ProcessedSaiFile, ReferenceGenome])
 class BwaPairingAndSortingJobUnitTest {
 
     static final String FILE_READ1 = "file_R1_abc.fastq.gz"

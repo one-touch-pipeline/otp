@@ -17,6 +17,7 @@ class BwaPairingAndSortingJobTests {
     AlignmentPassService alignmentPassService
     ProcessedBamFileService processedBamFileService
 
+    private TestData testData = new TestData()
     private AlignmentPass pass
     private ProcessedBamFile bamFile
 
@@ -94,7 +95,19 @@ class BwaPairingAndSortingJobTests {
             )
         assertNotNull(seqTrack.save([flush: true, failOnError: true]))
 
-        pass = new AlignmentPass(
+        ReferenceGenome refGenome = new ReferenceGenome(
+            name: "hg19_1_24",
+            path: "hg19_1_24",
+            fileNamePrefix: "preffix_hg19_1_24",
+            length: ARBITRARY_REFERENCE_GENOME_LENGTH,
+            lengthWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
+            lengthRefChromosomes: ARBITRARY_REFERENCE_GENOME_LENGTH,
+            lengthRefChromosomesWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
+        )
+        assertNotNull(refGenome.save(flush: true))
+
+        pass = testData.createAlignmentPass(
+            referenceGenome: refGenome,
             identifier: 0,
             seqTrack: seqTrack
             )
@@ -162,17 +175,6 @@ class BwaPairingAndSortingJobTests {
             comment: 'samtoolsSortBuffer'
         )
         assertNotNull(option.save(flush: true))
-
-        ReferenceGenome refGenome = new ReferenceGenome(
-            name: "hg19_1_24",
-            path: "hg19_1_24",
-            fileNamePrefix: "preffix_hg19_1_24",
-            length: ARBITRARY_REFERENCE_GENOME_LENGTH,
-            lengthWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
-            lengthRefChromosomes: ARBITRARY_REFERENCE_GENOME_LENGTH,
-            lengthRefChromosomesWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
-        )
-        assertNotNull(refGenome.save(flush: true))
 
         ReferenceGenomeProjectSeqType refGenomeProjectSeqType = new ReferenceGenomeProjectSeqType(
             project: project,

@@ -69,7 +69,7 @@ class ProcessedMergedBamFileQaFileServiceTests {
                         )
         assertNotNull(seqType.save([flush: true]))
 
-        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+        MergingWorkPackage mergingWorkPackage = new TestData().createMergingWorkPackage(
                         sample: sample,
                         seqType: seqType
                         )

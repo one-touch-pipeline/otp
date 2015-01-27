@@ -8,19 +8,18 @@ import de.dkfz.tbi.otp.ngsdata.*
 class MergingWorkPackageService {
 
     /**
-     * @param sample, {@link ProcessedBamFile}s, which belong to one {@link MergingWorkPackage} and shell be merged are from this sample
-     * @param seqType, BamFiles, which belong to one workPackage and shell be merged are from this seqType
+     * @param bamFile The properties of the work package will be based on the properties of this BAM file.
      * @param criteria, the MergingCriteria defines, which criteria the {@link ProcessedBamFile}s have to fulfill to be merged
      * @return the new created workPackage, containing the information, which BamFiles are
      * available for the corresponding {@link Sample} and {@link SeqType} and satisfy the given {@link MergingCriteria} or custom selection.
      */
-    MergingWorkPackage createWorkPackage(Sample sample, SeqType seqType, MergingCriteria criteria) {
-        notNull(sample, "the input sample for the method createWorkPackage is null")
-        notNull(seqType, "the input seqType for the method createWorkPackage is null")
+    MergingWorkPackage createWorkPackage(ProcessedBamFile bamFile, MergingCriteria criteria) {
+        notNull(bamFile, "the input bamFile for the method createWorkPackage is null")
         notNull(criteria, "the input criteria for the method createWorkPackage is null")
         MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
-                sample: sample,
-                seqType: seqType,
+                sample: bamFile.sample,
+                seqType: bamFile.seqType,
+                referenceGenome: bamFile.referenceGenome,
                 mergingCriteria: criteria
                 )
         assertSave(mergingWorkPackage)

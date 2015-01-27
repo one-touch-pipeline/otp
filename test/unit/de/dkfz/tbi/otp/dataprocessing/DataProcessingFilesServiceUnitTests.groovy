@@ -16,10 +16,11 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 //In the test the semantic "null as Type" is used to get grails to use a specific overloaded method signutare.
 @TestMixin(GrailsUnitTestMixin)
 @Build([
-    Project,
+    Individual,
     ProcessedBamFile,
+    Project,
     Realm,
-    Individual
+    ReferenceGenome,
 ])
 class DataProcessingFilesServiceUnitTests {
 

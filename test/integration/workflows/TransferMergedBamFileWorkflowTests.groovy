@@ -306,7 +306,19 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
                         )
         assertNotNull(dataFile2.save([flush: true, failOnError: true]))
 
+        ReferenceGenome referenceGenome = new ReferenceGenome(
+                        name: "hs37d5",
+                        path: "bwa06_1KGRef",
+                        fileNamePrefix: "hs37d5",
+                        length: 3137454505,
+                        lengthWithoutN: 2900434419,
+                        lengthRefChromosomes: 3095677412,
+                        lengthRefChromosomesWithoutN: 2858658097
+                        )
+        assertNotNull(referenceGenome.save([flush: true, failOnError: true]))
+
         AlignmentPass alignmentPass = new AlignmentPass(
+                        referenceGenome: referenceGenome,
                         identifier: 0,
                         seqTrack: seqTrack,
                         description: "test"
@@ -372,6 +384,7 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         assertNotNull(dataFile4.save([flush: true, failOnError: true]))
 
         AlignmentPass alignmentPass1 = new AlignmentPass(
+                        referenceGenome: referenceGenome,
                         identifier: 0,
                         seqTrack: seqTrack1,
                         description: "test"
@@ -413,6 +426,7 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
         assertNotNull(overallQualityAssessment1.save([flush: true]))
 
         MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+                        referenceGenome: referenceGenome,
                         sample: sample,
                         seqType: seqType
                         )
@@ -505,17 +519,6 @@ class TransferMergedBamFileWorkflowTests extends GroovyScriptAwareIntegrationTes
                         )
         setProperties(overallQualityAssessmentMerged1)
         assertNotNull(overallQualityAssessmentMerged1.save([flush: true, failOnError: true]))
-
-        ReferenceGenome referenceGenome = new ReferenceGenome(
-                        name: "hs37d5",
-                        path: "bwa06_1KGRef",
-                        fileNamePrefix: "hs37d5",
-                        length: 3137454505,
-                        lengthWithoutN: 2900434419,
-                        lengthRefChromosomes: 3095677412,
-                        lengthRefChromosomesWithoutN: 2858658097
-                        )
-        assertNotNull(referenceGenome.save([flush: true, failOnError: true]))
 
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = new ReferenceGenomeProjectSeqType(
                         project: project,

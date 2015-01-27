@@ -117,7 +117,7 @@ class AbstractBamFileService {
         Long basesMapped
 
         if (bamFile.seqType.name == SeqTypeNames.WHOLE_GENOME.seqTypeName) {
-            ReferenceGenome referenceGenome = bamFile.referenceGenome ?: bamFile.containedSeqTracks*.configuredReferenceGenome?.find()
+            ReferenceGenome referenceGenome = bamFile.referenceGenome
             assert referenceGenome : "Unable to find a reference genome for the BAM file ${bamFile}"
 
             length = referenceGenome."${property}"

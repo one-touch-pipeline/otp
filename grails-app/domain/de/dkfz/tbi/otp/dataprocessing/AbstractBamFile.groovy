@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+
 import de.dkfz.tbi.otp.ngsdata.BedFile
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.FileType
@@ -101,9 +103,6 @@ abstract class AbstractBamFile {
      */
     State status = State.DECLARED
 
-    /** the reference genome used to produce this bam file */
-    ReferenceGenome referenceGenome
-
     public abstract Set<SeqTrack> getContainedSeqTracks()
     public abstract AbstractQualityAssessment getOverallQualityAssessment()
     public abstract SeqType getSeqType()
@@ -128,7 +127,6 @@ abstract class AbstractBamFile {
         deletionDate(nullable: true)
         coverage(nullable: true)
         coverageWithN(nullable: true)
-        referenceGenome nullable: true
     }
 
     boolean isQualityAssessed() {
@@ -136,17 +134,19 @@ abstract class AbstractBamFile {
     }
 
     /**
-     * TODO: OTP-1112: This returns the <strong>configured</strong> BED file. This might be different from the
-     * BED file which was actually used to produce this BAM file.
+     * @return The reference genome which was used to produce this BAM file.
      */
+    abstract ReferenceGenome getReferenceGenome()
+
     public BedFile getBedFile() {
         assert seqType.name == SeqTypeNames.EXOME.seqTypeName : "A BedFile is only available when the sequencing type is exome."
         List<SeqTrack> seqTracks = containedSeqTracks as List
 
         assert seqTracks.size() > 0
-        BedFile bedFileToCompare = seqTracks.first().configuredBedFile
-        assert containedSeqTracks.each { it.configuredBedFile == bedFileToCompare }
-        return bedFileToCompare
+        return exactlyOneElement(BedFile.findAllWhere(
+                referenceGenome: referenceGenome,
+                exomeEnrichmentKit: exactlyOneElement(seqTracks*.exomeEnrichmentKit.unique()),
+        ))
     }
 
     /**

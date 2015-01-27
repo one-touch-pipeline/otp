@@ -7,7 +7,7 @@ import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 @TestFor(MergingWorkPackage)
-@Mock([Sample, SampleType, Individual, Project, SeqType])
+@Mock([Individual, Project, ReferenceGenome, Sample, SampleType, SeqType])
 class MergingWorkPackageTests {
 
     Sample sample = null
@@ -50,7 +50,7 @@ class MergingWorkPackageTests {
     }
 
     void testSave() {
-        MergingWorkPackage workPackage = new MergingWorkPackage(
+        MergingWorkPackage workPackage = new TestData().createMergingWorkPackage(
             sample: sample,
             seqType: seqType)
         Assert.assertTrue(workPackage.validate())
@@ -59,7 +59,7 @@ class MergingWorkPackageTests {
 
     void testContraints() {
         // sample is not null
-        MergingWorkPackage workPackage = new MergingWorkPackage(
+        MergingWorkPackage workPackage = new TestData().createMergingWorkPackage(
             seqType: seqType)
         Assert.assertFalse(workPackage.validate())
         // processingType is not null

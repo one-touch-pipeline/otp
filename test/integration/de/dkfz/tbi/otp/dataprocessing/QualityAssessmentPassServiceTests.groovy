@@ -16,6 +16,7 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
     QualityAssessmentPassService qualityAssessmentPassService
     SeqTrackService SeqTrackService
 
+    TestData testData = new TestData()
     QualityAssessmentPass qualityAssessmentPass
     ProcessedBamFile processedBamFile
     Project project
@@ -104,7 +105,7 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
                         pipelineVersion: softwareTool)
         assertNotNull(seqTrack.save([flush: true]))
 
-        AlignmentPass alignmentPass = new AlignmentPass(
+        AlignmentPass alignmentPass = testData.createAlignmentPass(
                         identifier: 0,
                         seqTrack: seqTrack,
                         description: "firstPass")
@@ -306,7 +307,7 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testCreatePassWithTwoCandidates() {
-        AlignmentPass alignmentPass1 = new AlignmentPass(
+        AlignmentPass alignmentPass1 = testData.createAlignmentPass(
                 identifier: 1,
                 seqTrack: seqTrack,
                 description: "firstPass")

@@ -31,7 +31,7 @@ class QualityAssessmentWorkflowTests extends QualityAssessmentAbstractWorkflowTe
         // in this test case we do not need 2 processed bam files
         SeqTrack seqTrack = seqTracks.first()
         Project project = Project.list().first()
-        createReferenceGenome(project, seqTrack.seqType)
+        ReferenceGenome referenceGenome = createReferenceGenome(project, seqTrack.seqType)
 
         seqTrack.laneId = "laneId"
         seqTrack.run = Run.list().first()
@@ -62,6 +62,7 @@ class QualityAssessmentWorkflowTests extends QualityAssessmentAbstractWorkflowTe
         fastqcBasicStats.totalSequences = totalSequences
 
         AlignmentPass alignmentPass = new AlignmentPass(
+                        referenceGenome: referenceGenome,
                         identifier: 1,
                         seqTrack: seqTrack,
                         description: "test"

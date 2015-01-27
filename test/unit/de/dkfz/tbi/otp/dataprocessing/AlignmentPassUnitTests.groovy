@@ -7,7 +7,7 @@ import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 @TestFor(AlignmentPass)
-@Mock([SeqTrack])
+@Mock([ReferenceGenome, SeqTrack])
 class AlignmentPassUnitTests {
 
     TestData testData

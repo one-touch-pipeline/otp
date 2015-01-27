@@ -315,11 +315,14 @@ class TestData {
     }
 
     AlignmentPass createAlignmentPass(Map properties = [:]) {
-        return new AlignmentPass([
+        final AlignmentPass alignmentPass = new AlignmentPass([
             identifier: 0,
             seqTrack: seqTrack,
             description: "test",
+            referenceGenome: referenceGenome,
         ] + properties)
+        setReferenceGenomeIfNotSet(alignmentPass)
+        return alignmentPass
     }
 
     ProcessedSaiFile createProcessedSaiFile(Map properties = [:]) {
@@ -343,10 +346,13 @@ class TestData {
 
 
     MergingWorkPackage createMergingWorkPackage(Map properties = [:]) {
-        return new MergingWorkPackage([
+        final MergingWorkPackage mergingWorkPackage = new MergingWorkPackage([
             sample: sample,
             seqType: seqType,
+            referenceGenome: referenceGenome,
         ] + properties)
+        setReferenceGenomeIfNotSet(mergingWorkPackage)
+        return mergingWorkPackage
     }
 
 
@@ -373,5 +379,13 @@ class TestData {
             status: AbstractBamFile.State.DECLARED,
             numberOfMergedLanes: 3
         ] + properties)
+    }
+
+    void setReferenceGenomeIfNotSet(final Object object) {
+        if (object.referenceGenome == null) {
+            referenceGenome = createReferenceGenome()
+            assert referenceGenome.save(failOnError: true)
+            object.referenceGenome = referenceGenome
+        }
     }
 }

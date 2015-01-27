@@ -7,7 +7,7 @@ import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 @TestFor(ProcessedBamFile)
-@Mock([AlignmentPass, SeqTrack])
+@Mock([AlignmentPass, ReferenceGenome, SeqTrack])
 class ProcessedBamFile_isMostRecentBamFile_UnitTests {
 
     TestData testData

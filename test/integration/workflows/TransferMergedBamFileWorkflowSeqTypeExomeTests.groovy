@@ -318,6 +318,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
         assertNotNull(dataFile1.save([flush: true, failOnError: true]))
 
         AlignmentPass alignmentPass = new AlignmentPass(
+                        referenceGenome: referenceGenome,
                         identifier: 0,
                         seqTrack: seqTrack,
                         description: "test"
@@ -385,6 +386,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
         assertNotNull(dataFile3.save([flush: true, failOnError: true]))
 
         AlignmentPass alignmentPass1 = new AlignmentPass(
+                        referenceGenome: referenceGenome,
                         identifier: 0,
                         seqTrack: seqTrack1,
                         description: "test"
@@ -426,6 +428,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
         assertNotNull(overallQualityAssessment1.save([flush: true]))
 
         MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+                        referenceGenome: referenceGenome,
                         sample: sample,
                         seqType: seqType
                         )

@@ -9,7 +9,9 @@ class ProcessedBamFile extends AbstractFileSystemBamFile {
     ]
 
     static constraints = {
-        alignmentPass nullable: false, unique: true
+        alignmentPass nullable: false, unique: true, validator: { AlignmentPass alignmentPass ->
+            return alignmentPass.referenceGenome != null
+        }
     }
 
     public SeqTrack getSeqTrack() {
@@ -54,6 +56,11 @@ class ProcessedBamFile extends AbstractFileSystemBamFile {
      */
     public boolean isMostRecentBamFile() {
         return alignmentPass.isLatestPass()
+    }
+
+    @Override
+    ReferenceGenome getReferenceGenome() {
+        return alignmentPass.referenceGenome
     }
 
     @Override

@@ -11,7 +11,7 @@ class AbstractBamFileServiceTests {
 
     AbstractBamFileService abstractBamFileService
 
-
+    TestData testData = new TestData()
     SeqTrack seqTrack
     ExomeSeqTrack exomeSeqTrack
     MergingSet mergingSet
@@ -170,9 +170,9 @@ class AbstractBamFileServiceTests {
 
         exomeProcessedBamFile = createAndSaveProcessedBamFileAndQAObjects(exomeSeqTrack, "2")
 
-        mergingSet = createMergingSetAndDependentObjects(sample, wholeGenomeSeqType)
+        mergingSet = createMergingSetAndDependentObjects(seqTrack)
 
-        exomeMergingSet = createMergingSetAndDependentObjects(sample, exomeSeqType)
+        exomeMergingSet = createMergingSetAndDependentObjects(exomeSeqTrack)
     }
 
 
@@ -298,14 +298,14 @@ class AbstractBamFileServiceTests {
     @Test(expected = AssertionError)
     void test_calculateCoverageWithoutN_WhenBamFileIsProcessedBamFile_SeqTypeWholeGenome_AndReferenceGenomeIsNull() {
         changeStateOfBamFileToHavingPassedQC(processedBamFile)
-        assert referenceGenomeProjectSeqType.delete([flush: true])
+        processedBamFile.alignmentPass.referenceGenome = null
         abstractBamFileService.calculateCoverageWithoutN(processedBamFile)
     }
 
     @Test(expected = AssertionError)
     void test_calculateCoverageWithoutN_WhenBamFileIsProcessedBamFile_SeqTypeExome_AndReferenceGenomeIsNull() {
         changeStateOfBamFileToHavingPassedQC(exomeProcessedBamFile)
-        assert referenceGenomeProjectSeqTypeForExome.delete([flush: true])
+        exomeProcessedBamFile.alignmentPass.referenceGenome = null
         abstractBamFileService.calculateCoverageWithoutN(exomeProcessedBamFile)
     }
 
@@ -357,7 +357,7 @@ class AbstractBamFileServiceTests {
         assignToMergingSet(mergingSet, processedBamFile)
         ProcessedMergedBamFile processedMergedBamFile = createAndSaveProcessedMergedBamFileAndDependentObjects(mergingSet)
         changeStateOfBamFileToHavingPassedQC(processedMergedBamFile)
-        assert referenceGenomeProjectSeqType.delete([flush: true])
+        processedMergedBamFile.mergingWorkPackage.referenceGenome = null
         abstractBamFileService.calculateCoverageWithoutN(processedMergedBamFile)
     }
 
@@ -408,7 +408,7 @@ class AbstractBamFileServiceTests {
     @Test(expected = AssertionError)
     void test_calculateCoverageWithN_WhenBamFileIsProcessedBamFile_WholeGenome_AndReferenceGenomeIsNull() {
         changeStateOfBamFileToHavingPassedQC(processedBamFile)
-        assert referenceGenomeProjectSeqType.delete([flush: true])
+        processedBamFile.alignmentPass.referenceGenome = null
         abstractBamFileService.calculateCoverageWithN(processedBamFile)
     }
 
@@ -455,7 +455,7 @@ class AbstractBamFileServiceTests {
         assignToMergingSet(mergingSet, processedBamFile)
         ProcessedMergedBamFile processedMergedBamFile = createAndSaveProcessedMergedBamFileAndDependentObjects(mergingSet)
         changeStateOfBamFileToHavingPassedQC(processedMergedBamFile)
-        assert referenceGenomeProjectSeqType.delete([flush: true])
+        processedMergedBamFile.mergingWorkPackage.referenceGenome = null
         abstractBamFileService.calculateCoverageWithN(processedMergedBamFile)
     }
 
@@ -532,7 +532,8 @@ class AbstractBamFileServiceTests {
     }
 
     private ProcessedBamFile createAndSaveProcessedBamFileAndQAObjects(SeqTrack seqTrack, String identifier) {
-        AlignmentPass alignmentPass = new AlignmentPass(
+        AlignmentPass alignmentPass = testData.createAlignmentPass(
+                referenceGenome: seqTrack.configuredReferenceGenome,
                 identifier: identifier,
                 seqTrack: seqTrack,
                 description: "test"
@@ -561,10 +562,11 @@ class AbstractBamFileServiceTests {
         return processedBamFile
     }
 
-    private MergingSet createMergingSetAndDependentObjects(Sample sample, SeqType seqType) {
-        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
-                sample: sample,
-                seqType: seqType
+    private MergingSet createMergingSetAndDependentObjects(SeqTrack seqTrack) {
+        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
+                referenceGenome: seqTrack.configuredReferenceGenome,
+                sample: seqTrack.sample,
+                seqType: seqTrack.seqType
                 )
         assertNotNull(mergingWorkPackage.save([flush: true]))
 
