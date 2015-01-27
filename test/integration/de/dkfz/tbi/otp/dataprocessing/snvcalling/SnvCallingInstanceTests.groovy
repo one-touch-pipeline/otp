@@ -90,4 +90,41 @@ class SnvCallingInstanceTests extends GroovyTestCase {
         snvCallingInstance.updateProcessingState(SnvProcessingStates.FINISHED)
         assert snvCallingInstance.processingState == SnvProcessingStates.FINISHED
     }
+
+    private def createSnvCallingInstanceAndSnvJobResults(boolean oneSnvJobResultWithdrawn = false) {
+        SnvCallingInstance instance = testData.createAndSaveSnvCallingInstance()
+        SnvJobResult snvJobResultCalling = testData.createAndSaveSnvJobResult(instance, SnvCallingStep.CALLING)
+        if (oneSnvJobResultWithdrawn) {
+            testData.createAndSaveSnvJobResult(instance, SnvCallingStep.SNV_ANNOTATION, snvJobResultCalling, SnvProcessingStates.FINISHED, true)
+        } else {
+            testData.createAndSaveSnvJobResult(instance, SnvCallingStep.SNV_ANNOTATION, snvJobResultCalling)
+        }
+        return instance
+    }
+
+    @Test
+    void testProcessingStateIsFailedAndNoWithdrawnSnvJobResults() {
+        def instance = createSnvCallingInstanceAndSnvJobResults()
+        instance.processingState = SnvProcessingStates.FAILED
+        assert !instance.validate()
+    }
+
+    @Test
+    void testProcessingStateIsFailedAndThereIsWithdrawnSnvJobResults() {
+        def instance = createSnvCallingInstanceAndSnvJobResults(true)
+        instance.processingState = SnvProcessingStates.FAILED
+        assert instance.validate()
+    }
+
+    @Test
+    void testProcessingStateNotFailedAndNoWithdrawnSnvJobResults() {
+        def instance = createSnvCallingInstanceAndSnvJobResults()
+        assert instance.validate()
+    }
+
+    @Test
+    void testProcessingStateNotFailedAndThereIsWithdrawnSnvJobResults() {
+        def instance = createSnvCallingInstanceAndSnvJobResults(true)
+        assert instance.validate()
+    }
 }

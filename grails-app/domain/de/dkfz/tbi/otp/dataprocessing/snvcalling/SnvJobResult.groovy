@@ -34,7 +34,8 @@ class SnvJobResult {
     /**
      * The overall processing state of this vcf file.
      * At the moment, when the file is created a job is already working on it, which is why it always starts
-     * as {@link SnvProcessingStates.IN_PROGRESS}.
+     * as {@link SnvProcessingStates#IN_PROGRESS}.
+     * @see also {@link SnvProcessingStates#FAILED}
      */
     SnvProcessingStates processingState = SnvProcessingStates.IN_PROGRESS
 
@@ -60,7 +61,7 @@ class SnvJobResult {
 
     static constraints = {
         processingState validator: { val, obj ->
-            return val != SnvProcessingStates.IGNORED
+            return val != SnvProcessingStates.FAILED
         }
         step unique: 'snvCallingInstance'
         withdrawn validator: { boolean withdrawn, SnvJobResult result ->

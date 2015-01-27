@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.Realm
 
+import static de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates.IN_PROGRESS
 import static de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates.FINISHED
 
 /**
@@ -32,7 +33,7 @@ class SnvCompletionJob extends AbstractEndStateAwareJobImpl {
     void execute() throws Exception {
         final SnvCallingInstance snvCallingInstance = getProcessParameterObject()
 
-        assert snvCallingInstance
+        assert snvCallingInstance.processingState == IN_PROGRESS
 
         deleteStagingDirectory snvCallingInstance
         snvCallingInstance.updateProcessingState FINISHED

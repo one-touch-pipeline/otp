@@ -3,6 +3,8 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static org.springframework.util.Assert.*
 
 class SnvCallingService {
@@ -24,7 +26,6 @@ class SnvCallingService {
     SamplePair samplePairForSnvProcessing() {
 
         List<SnvProcessingStates> unallowedProcessingStates = [
-            SnvProcessingStates.IGNORED,
             SnvProcessingStates.IN_PROGRESS
         ]
 
@@ -111,6 +112,16 @@ class SnvCallingService {
         Set<SeqTrack> availableSeqTracks = SeqTrack.findAllBySampleAndSeqType(processedMergedBamFile.sample,
                 processedMergedBamFile.seqType).findAll{!it.isWithdrawn()} as Set<SeqTrack>
         return containedSeqTracks*.id as Set == availableSeqTracks*.id as Set
+    }
+
+    void markSnvCallingInstanceAsFailed(SnvCallingInstance instance, List<SnvCallingStep> stepsToWithdrawSnvJobResults) {
+        assert stepsToWithdrawSnvJobResults : 'at least one of SnvCallingStep must be provided'
+        stepsToWithdrawSnvJobResults.each { step ->
+            def snvJobResult = exactlyOneElement(SnvJobResult.findAllBySnvCallingInstanceAndStep(instance, step))
+            snvJobResult.withdrawn = true
+            assert snvJobResult.save([flush: true])
+        }
+        instance.updateProcessingState(SnvProcessingStates.FAILED)
     }
 
 }

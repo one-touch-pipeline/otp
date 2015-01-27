@@ -28,6 +28,15 @@ class SnvJobResultUnitTests {
         assert snvJobResult.save()
     }
 
+    @Test
+    void testSavingOfSnvJobResultInFailedState() {
+        SnvJobResult snvJobResult = new SnvJobResult(
+                step: SnvCallingStep.CALLING,
+                snvCallingInstance: createSnvCallingInstance(),
+                processingState: SnvProcessingStates.FAILED,
+        )
+        assert !snvJobResult.validate()
+    }
 
     @Test
     void testSavingOfSnvJobResultNoExternalScript() {

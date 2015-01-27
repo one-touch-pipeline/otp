@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -45,9 +45,6 @@ class SnvCallingInstance {
      * The overall processing state of this SNV calling run.
      * Because the SNV StartJob creates an instance of a SnvCallingInstance immediately when starting it, this will always start
      * as {@link SnvProcessingStates.IN_PROGRESS}.
-     *
-     * {@link SnvProcessingStates.IGNORED} has a special meaning for SnvCallingInstance, it means this sample pair should NOT be run.
-     * (e.g. because the control-sample is bad, parts of it are withdrawn, etc.)
      */
     SnvProcessingStates processingState = SnvProcessingStates.IN_PROGRESS
 
@@ -66,6 +63,15 @@ class SnvCallingInstance {
             latestDataFileCreationDate == AbstractBamFile.getLatestSequenceDataFileCreationDate(instance.sampleType1BamFile, instance.sampleType2BamFile)
         }
         instanceName blank: false, unique: 'samplePair'
+        processingState validator: {val, obj ->
+            // there must be at least one withdrawn {@link SnvJobResult}
+            // if {@link this#processingState} is {@link SnvProcessingStates#FAILED}
+            if (obj.processingState == SnvProcessingStates.FAILED) {
+                return !SnvJobResult.findAllBySnvCallingInstanceAndWithdrawn(obj, true).empty
+            } else {
+                return true
+            }
+        }
     }
 
     static mapping = {
@@ -113,7 +119,7 @@ class SnvCallingInstance {
 
     /**
      * Returns the non-withdrawn, finished {@link SnvJobResult} for the specified {@link SnvCallingStep} belonging to
-     * the latest {@link SnvCallingInstance} that has such a result and is based on the same BAM files as this instance;
+     * the latest (even {@link SnvProcessingStates#FAILED}) {@link SnvCallingInstance} that has such a result and is based on the same BAM files as this instance;
      * <code>null</code> if no such {@link SnvCallingInstance} exists.
      */
     SnvJobResult findLatestResultForSameBamFiles(final SnvCallingStep step) {

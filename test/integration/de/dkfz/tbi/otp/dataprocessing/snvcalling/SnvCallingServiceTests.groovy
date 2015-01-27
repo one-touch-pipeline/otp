@@ -1,16 +1,18 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingJob
+import de.dkfz.tbi.otp.utils.ExternalScript
+
 import static org.junit.Assert.*
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 
-class SnvCallingServiceTests {
+class SnvCallingServiceTests extends GroovyTestCase {
 
     SnvCallingInstanceTestData testData
     SamplePair samplePair
@@ -53,10 +55,10 @@ class SnvCallingServiceTests {
         snvConfig.save()
 
         processedMergedBamFile1 = createProcessedMergedBamFile("1")
-        processedMergedBamFile1.save()
+        processedMergedBamFile1.save(flush: true)
 
         processedMergedBamFile2 = createProcessedMergedBamFile("2")
-        processedMergedBamFile2.save()
+        processedMergedBamFile2.save(flush: true)
 
         SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile1.sample.sampleType, category: SampleType.Category.DISEASE)
 
@@ -66,7 +68,14 @@ class SnvCallingServiceTests {
                 sampleType2: processedMergedBamFile2.sample.sampleType,
                 seqType: seqType
                 )
-        samplePair.save()
+        samplePair.save(flush: true)
+
+        testData.externalScript_Joining = new ExternalScript(
+                scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
+                filePath: "/tmp/scriptLocation/joining.sh",
+                author: "otptest",
+        )
+        assert testData.externalScript_Joining.save()
     }
 
     @After
@@ -149,18 +158,10 @@ class SnvCallingServiceTests {
     }
 
     @Test
-    void testSamplePairForSnvProcessingHasToBeIgnored() {
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
-                instanceName: ARBITRARY_INSTANCE_NAME,
-                samplePair: samplePair,
-                config: snvConfig,
-                sampleType1BamFile: processedMergedBamFile1,
-                sampleType2BamFile: processedMergedBamFile2,
-                processingState: SnvProcessingStates.IGNORED
-                )
-        snvCallingInstance.save()
-
-        assertNull(snvCallingService.samplePairForSnvProcessing())
+    void testSamplePairForSnvProcessingHasFailed() {
+        SnvCallingInstance snvCallingInstance = createAndSaveSnvCallingInstanceAndSnvJobResults()
+        snvCallingService.markSnvCallingInstanceAsFailed(snvCallingInstance, [SnvCallingStep.SNV_ANNOTATION])
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test
@@ -593,5 +594,42 @@ class SnvCallingServiceTests {
         assert processingThresholds1.save(failOnError: true)
 
         return bamFile
+    }
+
+    @Test
+    void testMarkAsFailed_Correct() {
+        def instance = createAndSaveSnvCallingInstanceAndSnvJobResults()
+        snvCallingService.markSnvCallingInstanceAsFailed(instance, [SnvCallingStep.SNV_ANNOTATION])
+        assert instance.processingState == SnvProcessingStates.FAILED
+        def callingResult = SnvJobResult.findAllBySnvCallingInstanceAndStep(instance, SnvCallingStep.CALLING).first()
+        def annotationResult = SnvJobResult.findAllBySnvCallingInstanceAndStep(instance, SnvCallingStep.SNV_ANNOTATION).first()
+        assert callingResult.withdrawn == false
+        assert annotationResult.withdrawn == true
+    }
+
+    @Test
+    void testMarkAsFailed_NotExistingSnvJobResult() {
+        def instance = createAndSaveSnvCallingInstanceAndSnvJobResults()
+        shouldFail { snvCallingService.markSnvCallingInstanceAsFailed(instance, [SnvCallingStep.SNV_DEEPANNOTATION]) }
+    }
+
+    @Test
+    void testMarkAsFailed_WrongInput() {
+        shouldFail { snvCallingService.markSnvCallingInstanceAsFailed([]) }
+    }
+
+    private def createAndSaveSnvCallingInstanceAndSnvJobResults() {
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
+                instanceName: ARBITRARY_INSTANCE_NAME,
+                samplePair: samplePair,
+                config: snvConfig,
+                sampleType1BamFile: processedMergedBamFile1,
+                sampleType2BamFile: processedMergedBamFile2,
+                processingState: SnvProcessingStates.IN_PROGRESS
+        )
+        snvCallingInstance.save(flush: true)
+        SnvJobResult callingResult = testData.createAndSaveSnvJobResult(snvCallingInstance, SnvCallingStep.CALLING)
+        testData.createAndSaveSnvJobResult(snvCallingInstance, SnvCallingStep.SNV_ANNOTATION, callingResult)
+        return  snvCallingInstance
     }
 }

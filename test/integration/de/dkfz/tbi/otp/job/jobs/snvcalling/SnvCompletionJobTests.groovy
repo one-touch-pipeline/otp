@@ -107,6 +107,17 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     }
 
     @Test
+    void test_execute_WhenRunAndInstanceIsNotInProgress_ShouldFail() {
+        // Given:
+        snvCallingInstance.processingState = SnvProcessingStates.FAILED
+        snvCompletionJob.metaClass.getProcessParameterObject = { snvCallingInstance }
+        // Mock deletion, so it does not get in the way of this test
+        snvCompletionJob.metaClass.deleteStagingDirectory = { SnvCallingInstance instance -> }
+        // When:
+        shouldFail { snvCompletionJob.execute() }
+    }
+
+    @Test
     void test_execute_WhenRun_ShouldSetProcessingStateToFinished() {
         // Given:
         snvCompletionJob.metaClass.getProcessParameterObject = { snvCallingInstance }
