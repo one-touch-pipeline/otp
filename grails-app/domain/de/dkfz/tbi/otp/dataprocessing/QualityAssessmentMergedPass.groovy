@@ -98,4 +98,8 @@ class QualityAssessmentMergedPass {
         return project.processingPriority
     }
 
+    ReferenceGenome getReferenceGenome() {
+        return processedMergedBamFile.referenceGenome
+    }
+
 }

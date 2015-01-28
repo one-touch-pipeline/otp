@@ -4,19 +4,24 @@ package de.dkfz.tbi.otp.job.jobs.qualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-
+import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 
 import org.apache.commons.logging.Log
 
 import static org.junit.Assert.*
+
 import org.junit.*
 
 @TestFor(ReferenceGenome)
 @Mock([QualityAssessmentPass, ProcessedBamFile, Realm, Project,
     SeqType, ReferenceGenome, ExomeSeqTrack, SeqTrack, AlignmentPass,
     ExomeEnrichmentKit, BedFile])
+@Build([
+    ProcessedBamFile,
+    ReferenceGenome,
+    ])
 class ExecuteBamFileQaAnalysisJobUnitTests {
 
     ExecuteBamFileQaAnalysisJob job
@@ -30,14 +35,12 @@ class ExecuteBamFileQaAnalysisJobUnitTests {
     void setUp() {
 
         Realm realm = new Realm()
-        seqType = new SeqType()
-        ProcessedBamFile processedBamFile = new ProcessedBamFile()
+        ProcessedBamFile processedBamFile = ProcessedBamFile.build()
+        seqType = processedBamFile.seqType
+        referenceGenome = processedBamFile.referenceGenome
 
         exomeEnrichmentKit = new ExomeEnrichmentKit(name: "ExomeEnrichmentKit")
         assertNotNull(exomeEnrichmentKit.save([flush: true, validate: false]))
-
-        referenceGenome = new ReferenceGenome(name: "ReferenceGenome")
-        assertNotNull(referenceGenome.save([flush: true, validate: false]))
 
         QualityAssessmentPass pass = new QualityAssessmentPass(processedBamFile: processedBamFile)
         assertNotNull(pass.save([flush: true, validate: false]))
@@ -125,7 +128,7 @@ class ExecuteBamFileQaAnalysisJobUnitTests {
             assert false //this method should not be executed
         }] as ExecutionHelperService
 
-        assert "Could not find a bed file for ReferenceGenome and ExomeEnrichmentKit" == shouldFail(ProcessingException) {
+        assert "Could not find a bed file for ${referenceGenome} and ExomeEnrichmentKit" == shouldFail(ProcessingException) {
             job.execute()
         }
     }

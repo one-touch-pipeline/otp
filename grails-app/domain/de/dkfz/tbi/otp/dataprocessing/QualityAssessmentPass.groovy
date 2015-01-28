@@ -84,6 +84,10 @@ class QualityAssessmentPass {
         return processedBamFile.individual
     }
 
+    ReferenceGenome getReferenceGenome() {
+        return processedBamFile.referenceGenome
+    }
+
     static mapping = {
         processedBamFile index: "quality_assessment_pass_processed_bam_file_idx"
     }

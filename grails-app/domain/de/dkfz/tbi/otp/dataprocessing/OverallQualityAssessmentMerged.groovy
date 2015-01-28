@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
@@ -50,6 +51,10 @@ class OverallQualityAssessmentMerged extends AbstractQualityAssessment {
 
     ProcessedMergedBamFile getProcessedMergedBamFile() {
         return qualityAssessmentMergedPass.processedMergedBamFile
+    }
+
+    ReferenceGenome getReferenceGenome() {
+        return qualityAssessmentMergedPass.referenceGenome
     }
 
 }

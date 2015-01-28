@@ -90,18 +90,6 @@ class ChromosomeIdentifierMappingServiceTests {
         assertEquals(mappingExp, mappingAct)
     }
 
-    void testMappingAllFromProjectAndSeqType() {
-        Map<String, String> mappingExp = ["chr1":"1", "chr2":"2", "*": "*"]
-        Map<String, String> mappingAct = chromosomeIdentifierMappingService.mappingAll(project, seqType)
-        assertEquals(mappingExp, mappingAct)
-    }
-
-    void testMappingOneFromProjectAndSeqType() {
-        String mappingExp = "1"
-        String mappingAct = chromosomeIdentifierMappingService.mappingOne("chr1", project, seqType)
-        assertEquals(mappingExp, mappingAct)
-    }
-
     void testMappingOneFromReferenceGenome() {
         String mappingExp = "1"
         String mappingAct = chromosomeIdentifierMappingService.mappingOne("chr1", referenceGenome)

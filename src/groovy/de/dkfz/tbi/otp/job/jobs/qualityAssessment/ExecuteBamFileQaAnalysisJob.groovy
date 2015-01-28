@@ -75,7 +75,7 @@ class ExecuteBamFileQaAnalysisJob extends AbstractJobImpl {
         // BedFile and File containing the names of the reference genome entries
         boolean isExonePaired = (seqType.name == SeqTypeNames.EXOME.seqTypeName && seqType.libraryLayout == 'PAIRED')
         if (isExonePaired) {
-            ReferenceGenome referenceGenome = referenceGenomeService.referenceGenome(project, seqType)
+            ReferenceGenome referenceGenome = pass.referenceGenome
             ExomeEnrichmentKit exomeEnrichmentKit = processedBamFileService.exomeEnrichmentKit(processedBamFile)
             BedFile bedFile = BedFile.findByReferenceGenomeAndExomeEnrichmentKit(referenceGenome, exomeEnrichmentKit)
             if (!bedFile) {

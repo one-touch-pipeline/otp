@@ -142,6 +142,7 @@ class TestData {
     SampleType createSampleType(Map properties = [:]) {
         return new SampleType([
             name: "TUMOR",
+            specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
         ] + properties)
     }
 

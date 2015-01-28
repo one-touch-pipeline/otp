@@ -134,17 +134,13 @@ class AlignmentQualityOverviewController {
                         'libraryLayout': "PAIRED"
                         )
 
-        // During resolving OTP-905 this needs to be adapt. But it shouldn't do an database
-        // query for each row, so some caching should be done
-        ReferenceGenome referenceGenome = referenceGenomeService.referenceGenome(project, seqType, false)
-        Long referenceGenomeLengthWithoutN = referenceGenome != null ?  referenceGenome.lengthWithoutN : 0
 
         List<OverallQualityAssessmentMerged> dataOverall = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(project, seqType)
         List<ChromosomeQualityAssessmentMerged> dataChromosomeXY = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes, dataOverall*.qualityAssessmentMergedPass)
         Map chromosomeMapXY = dataChromosomeXY.groupBy ([{it.qualityAssessmentMergedPass.id}, {it.chromosomeName}])
 
-        List sequenceLengths = overallQualityAssessmentMergedService.findSequenceLengthForOverallQualityAssessmentMerged(dataOverall)
-        Map sequenceLengthMap = sequenceLengths.groupBy{it[0]}
+        List sequenceLengthsAndReferenceGenomeLengthWithoutN = overallQualityAssessmentMergedService.findSequenceLengthAndReferenceGenomeLengthWithoutNForOverallQualityAssessmentMerged(dataOverall)
+        Map sequenceLengthsAndReferenceGenomeLengthWithoutNMap = sequenceLengthsAndReferenceGenomeLengthWithoutN.groupBy{it[0]}
 
         dataToRender.iTotalRecords = dataOverall.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
@@ -152,7 +148,7 @@ class AlignmentQualityOverviewController {
             ProcessedMergedBamFile processedMergedBamFile = it.processedMergedBamFile
             double duplicates = it.duplicates / it.totalReadCounter * 100.0 //%duplicates (picard)
             double properlyPaired = it.properlyPaired / it.pairedInSequencing * 100.0
-            double readLength = sequenceLengthMap[it.id][0][1] as double
+            double readLength = sequenceLengthsAndReferenceGenomeLengthWithoutNMap[it.id][0][1] as double
 
             Map map = [
                 mockPid: it.individual.mockPid,
@@ -180,6 +176,7 @@ class AlignmentQualityOverviewController {
 
             switch (seqType.name) {
                 case SeqTypeNames.WHOLE_GENOME.seqTypeName:
+                    long referenceGenomeLengthWithoutN = sequenceLengthsAndReferenceGenomeLengthWithoutNMap[it.id][0][2] as long
                     Double coverageX
                     Double coverageY
                     if (referenceGenomeLengthWithoutN) {

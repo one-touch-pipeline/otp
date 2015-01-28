@@ -193,9 +193,21 @@ class QAResultStatisticsServiceTests {
         setProperties(overallQualityAssessment)
         assertNotNull(overallQualityAssessment.save([flush: true]))
 
+        referenceGenome = new ReferenceGenome(
+            name: "referenceGenome",
+            path: "pathToReferenceGenome",
+            fileNamePrefix: "referenceGenomePrefix",
+            length: 3210000,
+            lengthWithoutN: 2910000,
+            lengthRefChromosomes: 800,
+            lengthRefChromosomesWithoutN: 750
+            )
+        assertNotNull(referenceGenome.save([flush: true]))
+
         MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                         sample: sample,
-                        seqType: seqType
+                        seqType: seqType,
+                        referenceGenome: referenceGenome,
                         )
         assertNotNull(mergingWorkPackage.save([flush: true]))
 
@@ -235,17 +247,6 @@ class QAResultStatisticsServiceTests {
                         processedMergedBamFile: processedMergedBamFile
                         )
         assertNotNull(qualityAssessmentMergedPass.save([flush: true]))
-
-        referenceGenome = new ReferenceGenome(
-                        name: "referenceGenome",
-                        path: "pathToReferenceGenome",
-                        fileNamePrefix: "referenceGenomePrefix",
-                        length: 3210000,
-                        lengthWithoutN: 2910000,
-                        lengthRefChromosomes: 800,
-                        lengthRefChromosomesWithoutN: 750
-                        )
-        assertNotNull(referenceGenome.save([flush: true]))
 
         BedFile bedFile = new BedFile(
                         fileName: "bedFile",

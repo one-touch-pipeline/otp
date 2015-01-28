@@ -25,7 +25,31 @@ class SampleType {
         CONTROL
     }
 
+    /**
+     * enum to define, if the  {@link Project} default or a {@link SampleType} specific {@link ReferenceGenome} should be used.
+     *
+     *
+     */
+    enum SpecificReferenceGenome {
+        /**
+         * For this {@link SampleType} the {@link Project} {@link SeqType} default {@link ReferenceGenome} should be used.
+         */
+        USE_PROJECT_DEFAULT,
+        /**
+         * For this {@link SampleType} the {@link Project} {@link SeqType} {@link SampleType} specific {@link ReferenceGenome} should be used.
+         */
+        USE_SAMPLE_TYPE_SPECIFIC,
+        /**
+         * For this {@link SampleType} it is not defined yet. It should be used only for automatically created {@link SampleType}s
+         * and needs to be changed later.
+         */
+        UNKNOWN
+    }
+
     String name
+
+    SpecificReferenceGenome specificReferenceGenome = SpecificReferenceGenome.UNKNOWN
+
     static constraints = {
         name(unique: true)
         // TODO: OTP-1122: unique constraint for dirName

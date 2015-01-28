@@ -92,7 +92,7 @@ class QAResultStatisticsService {
         }
         String run = 'all_merged'
         String lane = 'all_merged'
-        ReferenceGenome referenceGenome = referenceGenomeService.referenceGenome(project, seqType)
+        ReferenceGenome referenceGenome = bamFile.referenceGenome
         ReferenceGenomeEntry referenceGenomeEntryChrX = ReferenceGenomeEntry.findByReferenceGenomeAndAlias(referenceGenome, Chromosomes.CHR_X.alias)
         ReferenceGenomeEntry referenceGenomeEntryChrY = ReferenceGenomeEntry.findByReferenceGenomeAndAlias(referenceGenome, Chromosomes.CHR_Y.alias)
         long latestQualityAssessmentMergedPassId = qualityAssessmentMergedPassService.latestQualityAssessmentMergedPass(bamFile).id

@@ -28,16 +28,17 @@ class ReferenceGenomeProjectSeqType {
     static belongsTo = [
         project: Project,
         seqType: SeqType,
+        sampleType: SampleType,
         referenceGenome: ReferenceGenome
     ]
 
     static constraints = {
         // there must be no 2 current (not deprecated) reference genomes
-        // defined for the same combination of project and seqType
+        // defined for the same combination of project and seqType and sampleType
         referenceGenome validator: { val, obj ->
             if (!obj.deprecatedDate) {
                 List<ReferenceGenomeProjectSeqType> existingObjects = ReferenceGenomeProjectSeqType
-                                .findAllByProjectAndSeqTypeAndDeprecatedDateIsNull(obj.project, obj.seqType)
+                            .findAllByProjectAndSeqTypeAndSampleTypeAndDeprecatedDateIsNull(obj.project, obj.seqType, obj.sampleType)
                 if (existingObjects.isEmpty()) {
                     return true
                 } else if ((existingObjects.size() == 1) && (existingObjects.contains(obj))) {
@@ -47,16 +48,18 @@ class ReferenceGenomeProjectSeqType {
                 }
             }
         }
+        sampleType(nullable: true)
         deprecatedDate(nullable: true)
     }
 
     String toString() {
-        return "deprecatedDate: ${deprecatedDate}, project: ${project}, seqType: ${seqType}, referenceGenome: ${referenceGenome}"
+        return "deprecatedDate: ${deprecatedDate}, project: ${project}, seqType: ${seqType}, sampleType: ${sampleType}, referenceGenome: ${referenceGenome}"
     }
 
     static mapping = {
         project index: "reference_genome_project_seq_type_project_idx"
         seqType index: "reference_genome_project_seq_type_seq_type_idx"
+        sampleType index: "reference_genome_project_seq_type_sample_type_idx"
         referenceGenome index: "reference_genome_project_seq_type_reference_genome_idx"
     }
 }

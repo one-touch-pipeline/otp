@@ -38,7 +38,7 @@ class CreateMergedChromosomeMappingFileJob extends AbstractEndStateAwareJobImpl 
         QualityAssessmentMergedPass pass = QualityAssessmentMergedPass.get(passId)
         Project project = processedMergedBamFileService.project(pass.processedMergedBamFile)
         SeqType seqType = processedMergedBamFileService.seqType(pass.processedMergedBamFile)
-        ReferenceGenome referenceGenome = referenceGenomeService.referenceGenome(project, seqType)
+        ReferenceGenome referenceGenome = pass.referenceGenome
         Map<String, String> chromosomeIdentifierMap = chromosomeIdentifierMappingService.mappingAll(referenceGenome)
         List<String> filterChromosomes = chromosomeIdentifierFilteringService.filteringCoverage(referenceGenome)
         List<String> sortedChromosomeIdentifiers = chromosomeIdentifierSortingService.sortIdentifiers(filterChromosomes)

@@ -38,7 +38,7 @@ class CreateChromosomeMappingFileJob extends AbstractEndStateAwareJobImpl {
         QualityAssessmentPass pass = QualityAssessmentPass.get(passId)
         Project project = processedBamFileService.project(pass.processedBamFile)
         SeqType seqType = processedBamFileService.seqType(pass.processedBamFile)
-        ReferenceGenome referenceGenome = referenceGenomeService.referenceGenome(project, seqType)
+        ReferenceGenome referenceGenome = pass.referenceGenome
         Map<String, String> chromosomeIdentifierMap = chromosomeIdentifierMappingService.mappingAll(referenceGenome)
         List<String> filterChromosomes = chromosomeIdentifierFilteringService.filteringCoverage(referenceGenome)
         List<String> sortedChromosomeIdentifiers = chromosomeIdentifierSortingService.sortIdentifiers(filterChromosomes)

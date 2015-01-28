@@ -49,13 +49,15 @@ class OverallQualityAssessmentMergedService {
     }
 
 
-    List findSequenceLengthForOverallQualityAssessmentMerged(List<OverallQualityAssessmentMerged> overallQualityAssessmentMergedList) {
+    List findSequenceLengthAndReferenceGenomeLengthWithoutNForOverallQualityAssessmentMerged(List<OverallQualityAssessmentMerged> overallQualityAssessmentMergedList) {
         if (!overallQualityAssessmentMergedList) {
             return []
         }
         final String HQL = '''
             select distinct
-                overallQualityAssessmentMerged.id, fastqcBasicStatistics.sequenceLength
+                overallQualityAssessmentMerged.id,
+                fastqcBasicStatistics.sequenceLength,
+                overallQualityAssessmentMerged.qualityAssessmentMergedPass.processedMergedBamFile.mergingPass.mergingSet.mergingWorkPackage.referenceGenome.lengthWithoutN
             from
                 OverallQualityAssessmentMerged overallQualityAssessmentMerged,
                 MergingSetAssignment mergingSetAssignment,

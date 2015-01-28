@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 
+import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -64,8 +65,9 @@ class AlignmentPassServiceUnitTests extends TestData {
         file.deleteOnExit()
     }
 
-    @Test(expected = RuntimeException)
-    void testReferenceGenomeNoReferenceGenomeForProjectAndSeqType() {
+    @Test
+    void testReferenceGenomePath_referenceGenomeNotSet() {
+        alignmentPass.referenceGenome = null
         Project project2 = new Project()
         project2.name = "test"
         project2.dirName = "/tmp/test"
@@ -73,7 +75,9 @@ class AlignmentPassServiceUnitTests extends TestData {
         project2.save(flush: true)
         referenceGenomeProjectSeqType.project = project2
         referenceGenomeProjectSeqType.save(flush: true)
-        alignmentPassService.referenceGenomePath(alignmentPass)
+        shouldFail(PowerAssertionError) {
+            alignmentPassService.referenceGenomePath(alignmentPass)
+        }
     }
 
     @Test
@@ -91,6 +95,9 @@ class AlignmentPassServiceUnitTests extends TestData {
 
     @Test
     void testSetReferenceGenomeAsConfigured_notConfigured() {
+        seqTrack.metaClass.getConfiguredReferenceGenome = {
+            return null
+        }
         referenceGenomeProjectSeqType.delete()
         alignmentPass.referenceGenome = null
         assert shouldFail(RuntimeException, { alignmentPassService.setReferenceGenomeAsConfigured(
@@ -100,6 +107,9 @@ class AlignmentPassServiceUnitTests extends TestData {
 
     @Test
     void testSetReferenceGenomeAsConfigured_notSetYet() {
+        seqTrack.metaClass.getConfiguredReferenceGenome = {
+            return referenceGenome
+        }
         alignmentPass.referenceGenome = null
         alignmentPassService.setReferenceGenomeAsConfigured(alignmentPass)
         assert alignmentPass.referenceGenome == referenceGenome
@@ -107,6 +117,9 @@ class AlignmentPassServiceUnitTests extends TestData {
 
     @Test
     void testSetReferenceGenomeAsConfigured_alreadySetToSame() {
+        seqTrack.metaClass.getConfiguredReferenceGenome = {
+            return referenceGenome
+        }
         alignmentPass.referenceGenome = referenceGenome
         alignmentPassService.setReferenceGenomeAsConfigured(alignmentPass)
         assert alignmentPass.referenceGenome == referenceGenome
@@ -114,6 +127,9 @@ class AlignmentPassServiceUnitTests extends TestData {
 
     @Test
     void testSetReferenceGenomeAsConfigured_alreadySetToOther() {
+        seqTrack.metaClass.getConfiguredReferenceGenome = {
+            return referenceGenome
+        }
         final ReferenceGenome otherReferenceGenome = createReferenceGenome()
         alignmentPass.referenceGenome = otherReferenceGenome
         assert shouldFail(AssertionError, { alignmentPassService.setReferenceGenomeAsConfigured(alignmentPass) })

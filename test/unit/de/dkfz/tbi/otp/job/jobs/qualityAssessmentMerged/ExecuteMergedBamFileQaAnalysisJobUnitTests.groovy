@@ -4,6 +4,7 @@ package de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 
@@ -17,6 +18,10 @@ import org.junit.*
 @Mock([QualityAssessmentMergedPass, ProcessedMergedBamFile, Realm, Project,
     SeqType, ReferenceGenome, ExomeSeqTrack, SeqTrack, AlignmentPass,
     ExomeEnrichmentKit, BedFile])
+@Build([
+    ProcessedMergedBamFile,
+    ReferenceGenome,
+    ])
 class ExecuteMergedBamFileQaAnalysisJobUnitTests {
 
     ExecuteMergedBamFileQaAnalysisJob job
@@ -30,14 +35,12 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
     void setUp() {
 
         Realm realm = new Realm()
-        seqType = new SeqType()
-        ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile = ProcessedMergedBamFile.build()
+        seqType = bamFile.seqType
+        referenceGenome = bamFile.referenceGenome
 
         exomeEnrichmentKit = new ExomeEnrichmentKit(name: "ExomeEnrichmentKit")
         assertNotNull(exomeEnrichmentKit.save([flush: true, validate: false]))
-
-        referenceGenome = new ReferenceGenome(name: "ReferenceGenome")
-        assertNotNull(referenceGenome.save([flush: true, validate: false]))
 
         QualityAssessmentMergedPass pass = new QualityAssessmentMergedPass(processedMergedBamFile: bamFile)
         assertNotNull(pass.save([flush: true, validate: false]))
@@ -126,7 +129,7 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
             assert false //this method should not be executed
         }] as ExecutionHelperService
 
-        assert "Could not find a bed file for ReferenceGenome and ExomeEnrichmentKit" == shouldFail(ProcessingException) {
+        assert "Could not find a bed file for ${referenceGenome} and ExomeEnrichmentKit" == shouldFail(ProcessingException) {
             job.execute()
         }
     }

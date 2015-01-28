@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SeqTrack {
 
@@ -90,6 +91,10 @@ class SeqTrack {
         return sample.project
     }
 
+    SampleType getSampleType() {
+        return sample.sampleType
+    }
+
     short getProcessingPriority() {
         return project.processingPriority
     }
@@ -100,9 +105,38 @@ class SeqTrack {
      * Note that the configuration may change in the future.
      */
     ReferenceGenome getConfiguredReferenceGenome() {
-        return atMostOneElement(
-                ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndDeprecatedDateIsNull(project, seqType)
-        )?.referenceGenome
+        switch (sampleType.specificReferenceGenome) {
+            case SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT:
+                return getConfiguredReferenceGenomeUsingProjectDefault()
+            case SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC:
+                return getConfiguredReferenceGenomeUsingSampleTypeSpecific()
+            case SampleType.SpecificReferenceGenome.UNKNOWN:
+                    throw new RuntimeException("For sample type '${sampleType} the way to fetch the reference genome is not defined.")
+            default:
+                    throw new RuntimeException("The value ${sampleType.specificReferenceGenome} for specific reference genome is not known")
+        }
+    }
+
+    private ReferenceGenome getConfiguredReferenceGenomeUsingProjectDefault() {
+        assert SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT == sampleType.specificReferenceGenome
+        try {
+            return CollectionUtils.atMostOneElement(
+                            ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType)
+                            )?.referenceGenome
+        } catch (AssertionError e) {
+            throw new RuntimeException("Could not find a reference genome for project '${project}' and '${seqType}'", e)
+        }
+    }
+
+    private ReferenceGenome getConfiguredReferenceGenomeUsingSampleTypeSpecific() {
+        assert SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC == sampleType.specificReferenceGenome
+        try {
+            return CollectionUtils.atMostOneElement(
+                            ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeAndDeprecatedDateIsNull(project, seqType, sampleType)
+                            )?.referenceGenome
+        } catch (AssertionError e) {
+            throw new RuntimeException("Could not find a reference genome for project '${project}' and '${seqType}' and '${sampleType}'", e)
+        }
     }
 
     static mapping = {

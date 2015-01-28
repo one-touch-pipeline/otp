@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.InformationReliability;
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
 
 class AbstractBamFileServiceTests {
 
@@ -81,7 +82,8 @@ class AbstractBamFileServiceTests {
         assertNotNull(individual.save([flush: true]))
 
         SampleType sampleType = new SampleType(
-                name: "sample-type"
+                name: "sample-type",
+                specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
                 )
         assertNotNull(sampleType.save([flush: true]))
 
