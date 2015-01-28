@@ -80,7 +80,11 @@ class AlignmentPassService {
         notNull(seqTrack, "The input seqTrack of method isExomeEnrichmentKitAvailable is null")
 
         if (seqTrack instanceof ExomeSeqTrack) {
-            return seqTrack.exomeEnrichmentKit == null || seqTrack.configuredBedFile == null
+            return seqTrack.exomeEnrichmentKit == null || seqTrack.configuredReferenceGenome == null ||
+                   BedFile.findWhere(
+                       exomeEnrichmentKit: seqTrack.exomeEnrichmentKit,
+                       referenceGenome: seqTrack.configuredReferenceGenome,
+                   ) == null
         } else {
             return false
         }
