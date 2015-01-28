@@ -71,6 +71,9 @@ grails.project.dependency.resolution = {
         compile ":build-test-data:2.1.2" //http://grails.org/plugin/build-test-data
         runtime ":database-migration:1.3.2"
         build ":tomcat:$grailsVersion"
+        // Enable Spock test. This plug-in is integrated into Grails in later versions and can be safely removed
+        // after upgrading.
+        test ":spock:0.7"
     }
 }
 
