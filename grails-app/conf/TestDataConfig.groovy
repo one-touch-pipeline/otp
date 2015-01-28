@@ -12,6 +12,16 @@ def counter = 0
 
 testDataConfig {
     sampleData {
+        'de.dkfz.tbi.otp.ngsdata.DataFile' {
+            fileName = 'DataFileFileName.gz'
+            vbpFileName = 'DataFileVbpFileName.gz'
+        }
+        'de.dkfz.tbi.otp.ngsdata.Individual' {
+            pid = {'pid_' + (counter++)}
+        }
+        'de.dkfz.tbi.otp.ngsdata.Project' {
+            name = {'projectName_' + (counter++)}
+        }
         'de.dkfz.tbi.otp.ngsdata.Realm' {
             name = 'FakeRealm'
             env = Environment.current.name
@@ -27,16 +37,6 @@ testDataConfig {
             pbsOptions = ''
             name = 'DKFZ'
             cluster = Realm.Cluster.DKFZ
-        }
-        'de.dkfz.tbi.otp.ngsdata.DataFile' {
-            fileName = 'DataFileFileName.gz'
-            vbpFileName = 'DataFileVbpFileName.gz'
-        }
-        'de.dkfz.tbi.otp.ngsdata.Project' {
-            name = {'projectName_' + (counter++)}
-        }
-        'de.dkfz.tbi.otp.ngsdata.Individual' {
-            pid = {'pid_' + (counter++)}
         }
         'de.dkfz.tbi.otp.ngsdata.ReferenceGenome' {
             name = {'referenceGenomeName_' + (counter++)}
