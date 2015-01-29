@@ -53,7 +53,7 @@ class ProcessingOptionService {
      * @param project project to which processing object belongs
      * @return ProcessingOption object
      */
-    public ProcessingOption findOptionObject(String name, String type, Project project) {
+    public static ProcessingOption findOptionObject(String name, String type, Project project) {
         ProcessingOption option = findStrict(name, type, project)
         if (option) {
             return option
@@ -70,7 +70,7 @@ class ProcessingOptionService {
         return option
     }
 
-    private ProcessingOption findStrict(String name, String type, Project project) {
+    private static ProcessingOption findStrict(String name, String type, Project project) {
         return ProcessingOption.findWhere(
             name: name,
             type: type,
@@ -79,7 +79,7 @@ class ProcessingOptionService {
         )
     }
 
-    public String findOption(String name, String type, Project project) {
+    public static String findOption(String name, String type, Project project) {
         ProcessingOption option = findOptionObject(name, type, project)
         return (option) ? option.value : null
     }

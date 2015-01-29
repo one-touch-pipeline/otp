@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 
@@ -9,7 +11,7 @@ import de.dkfz.tbi.TestCase
 
 
 @TestMixin(GrailsUnitTestMixin)
-@Mock([SampleIdentifier])
+@Build([ProcessingOption, SampleIdentifier])
 class SampleIdentifierUnitTest {
 
     static private String CORRECT_NAME = 'name'
@@ -21,7 +23,7 @@ class SampleIdentifierUnitTest {
     void setUp() {
         sampleIdentifier = new SampleIdentifier(
             name: CORRECT_NAME,
-            sample: new Sample())
+            sample: Sample.build())
         assert sampleIdentifier.validate()
     }
 
@@ -48,7 +50,7 @@ class SampleIdentifierUnitTest {
     }
 
 
-    void test_validate_fail_nameIsToShortNull() {
+    void test_validate_fail_nameIsTooShort() {
         final String name = '12'
         sampleIdentifier.name = name
 
@@ -60,7 +62,7 @@ class SampleIdentifierUnitTest {
         assert sampleIdentifier.save(flush: true)
         SampleIdentifier sampleIdentifier2 = new SampleIdentifier(
             name: CORRECT_NAME,
-            sample: new Sample())
+            sample: Sample.build())
 
         TestCase.assertValidateError(sampleIdentifier2, 'name', 'unique', CORRECT_NAME)
     }
@@ -79,4 +81,34 @@ class SampleIdentifierUnitTest {
         TestCase.assertValidateError(sampleIdentifier, 'name', 'validator.invalid', name)
     }
 
+    private void createRegex(final Project project) {
+        assert new ProcessingOption(
+                name: SampleIdentifier.REGEX_OPTION_NAME,
+                project: project,
+                value: '[a-z]{4}',
+                comment: '',
+        ).save(failOnError: true)
+    }
+
+    void test_validate_pass_regexIsSet() {
+        createRegex(sampleIdentifier.sample.project)
+
+        assert sampleIdentifier.validate()
+    }
+
+    void test_validate_fail_regexIsSet() {
+        createRegex(sampleIdentifier.sample.project)
+        final String name = 'toolong'
+        sampleIdentifier.name = name
+
+        TestCase.assertValidateError(sampleIdentifier, 'name', 'validator.invalid', name)
+    }
+
+    void test_validate_pass_regexIsSetForOtherProject() {
+        createRegex(Project.build())
+        final String name = 'toolong'
+        sampleIdentifier.name = name
+
+        assert sampleIdentifier.validate()
+    }
 }
