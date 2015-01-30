@@ -71,7 +71,7 @@ class ProjectOverviewService {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project.id)
             projections {
-                groupProperty("seqTypeAliasOrName")
+                groupProperty("sampleTypeName")
                 countDistinct("sampleId")
             }
         }
