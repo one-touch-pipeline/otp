@@ -153,7 +153,7 @@ class ClusterJobService {
         return ClusterJob.createCriteria().list {
             order('queued', 'asc')
             ge('queued', startDate)
-            le('ended', endDate)
+            lt('ended', endDate)
         }
     }
 
@@ -450,8 +450,8 @@ class ClusterJobService {
         // prevents negative values that could appear cause of rounding errors with milliseconds values
         // OTP-1304, queued gets set through OTP, started & ended gets set by the cluster
 
-        def avgQueue = Math.max(0, Math.round(queue / results.size()))
-        def avgProcess = Math.max(0, Math.round(process / results.size()))
+        def avgQueue = results.size() != 0 ? Math.max(0, Math.round(queue / results.size())) : 0
+        def avgProcess = results.size() != 0 ? Math.max(0, Math.round(process / results.size())) : 0
 
         return ["avgQueue": avgQueue, "avgProcess": avgProcess]
     }
