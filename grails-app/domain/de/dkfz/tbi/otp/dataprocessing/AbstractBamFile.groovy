@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.FileType
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.Sample
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
@@ -107,6 +108,7 @@ abstract class AbstractBamFile {
     public abstract AbstractQualityAssessment getOverallQualityAssessment()
     public abstract SeqType getSeqType()
     public abstract Individual getIndividual()
+    public abstract Sample getSample()
 
     static constraints = {
         hasMetricsFile validator: { val, obj ->

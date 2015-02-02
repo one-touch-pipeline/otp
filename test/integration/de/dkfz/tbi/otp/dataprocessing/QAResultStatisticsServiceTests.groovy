@@ -150,9 +150,21 @@ class QAResultStatisticsServiceTests {
                         )
         assertNotNull(exomeSeqTrack.save([flush: true]))
 
+        referenceGenome = new ReferenceGenome(
+                name: "referenceGenome",
+                path: "pathToReferenceGenome",
+                fileNamePrefix: "referenceGenomePrefix",
+                length: 3210000,
+                lengthWithoutN: 2910000,
+                lengthRefChromosomes: 800,
+                lengthRefChromosomesWithoutN: 750
+        )
+        assertNotNull(referenceGenome.save([flush: true]))
+
         alignmentPass = testData.createAlignmentPass(
                         identifier: 1,
                         seqTrack: seqTrack,
+                        referenceGenome: referenceGenome,
                         description: "test"
                         )
         assertNotNull(alignmentPass.save([flush: true]))
@@ -192,17 +204,6 @@ class QAResultStatisticsServiceTests {
                         )
         setProperties(overallQualityAssessment)
         assertNotNull(overallQualityAssessment.save([flush: true]))
-
-        referenceGenome = new ReferenceGenome(
-            name: "referenceGenome",
-            path: "pathToReferenceGenome",
-            fileNamePrefix: "referenceGenomePrefix",
-            length: 3210000,
-            lengthWithoutN: 2910000,
-            lengthRefChromosomes: 800,
-            lengthRefChromosomesWithoutN: 750
-            )
-        assertNotNull(referenceGenome.save([flush: true]))
 
         MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                         sample: sample,

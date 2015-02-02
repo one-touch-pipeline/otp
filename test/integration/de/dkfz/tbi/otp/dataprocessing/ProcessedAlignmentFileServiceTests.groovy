@@ -1,8 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
-import static org.springframework.util.Assert.notNull
-import grails.test.mixin.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -232,6 +231,7 @@ class ProcessedAlignmentFileServiceTests {
         ] + bamFileMap)
 
         MergingSet mergedSet = MergingSet.build([
+            mergingWorkPackage: DomainFactory.createMergingWorkPackage(processedBamFile),
             status: MergingSet.State.PROCESSED
         ] + mergingSetMap)
 
@@ -453,9 +453,9 @@ class ProcessedAlignmentFileServiceTests {
 
     void testDeleteOldMergingProcessingFiles_ConditionMerged_MergingSetAssignmentHasWrongMergingSet() {
         Date createdBeforeDate = new Date().plus(1)
-        ProcessedBamFile processedBamFile = createProcessedBamFileWhichIsMerged(
-                        mergingSetAssignmentMap: [mergingSet: MergingSet.build()]
-                        )
+        ProcessedBamFile processedBamFile = createProcessedBamFileWhichIsMerged()
+        MergingSetAssignment msa = exactlyOneElement(MergingSetAssignment.findAllByBamFile(processedBamFile))
+        msa.mergingSet = DomainFactory.createMergingSet(msa.mergingSet.mergingWorkPackage)
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -463,9 +463,9 @@ class ProcessedAlignmentFileServiceTests {
 
     void testDeleteOldMergingProcessingFiles_ConditionMerged_MergingSetAssignmentHasWrongBamFile() {
         Date createdBeforeDate = new Date().plus(1)
-        ProcessedBamFile processedBamFile = createProcessedBamFileWhichIsMerged(
-                        mergingSetAssignmentMap: [bamFile: ProcessedMergedBamFile.build()]
-                        )
+        ProcessedBamFile processedBamFile = createProcessedBamFileWhichIsMerged()
+        MergingSetAssignment msa = exactlyOneElement(MergingSetAssignment.findAllByBamFile(processedBamFile))
+        msa.bamFile = DomainFactory.createProcessedMergedBamFile(msa.mergingSet.mergingWorkPackage)
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -730,9 +730,9 @@ class ProcessedAlignmentFileServiceTests {
 
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionMerged_MergingSetAssignmentHasWrongMergingSet() {
         Date createdBeforeDate = new Date().plus(1)
-        ProcessedBamFile processedBamFile = createProcessedBamFileWithSaiFileWhichIsMerged(
-                        mergingSetAssignmentMap: [mergingSet: MergingSet.build()]
-                        )
+        ProcessedBamFile processedBamFile = createProcessedBamFileWithSaiFileWhichIsMerged()
+        MergingSetAssignment msa = exactlyOneElement(MergingSetAssignment.findAllByBamFile(processedBamFile))
+        msa.mergingSet = DomainFactory.createMergingSet(msa.mergingSet.mergingWorkPackage)
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -740,9 +740,9 @@ class ProcessedAlignmentFileServiceTests {
 
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionMerged_MergingSetAssignmentHasWrongBamFile() {
         Date createdBeforeDate = new Date().plus(1)
-        ProcessedBamFile processedBamFile = createProcessedBamFileWithSaiFileWhichIsMerged(
-                        mergingSetAssignmentMap: [bamFile: ProcessedMergedBamFile.build()]
-                        )
+        ProcessedBamFile processedBamFile = createProcessedBamFileWithSaiFileWhichIsMerged()
+        MergingSetAssignment msa = exactlyOneElement(MergingSetAssignment.findAllByBamFile(processedBamFile))
+        msa.bamFile = DomainFactory.createProcessedMergedBamFile(msa.mergingSet.mergingWorkPackage)
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)

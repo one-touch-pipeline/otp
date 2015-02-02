@@ -64,7 +64,10 @@ class MergingCriteriaSpecificService {
     /**
      * @param mergingSet, {@link MergingSet} which has to be validated
      * @return true if the {@link ProcessedBamFile}s of the MergingSet fulfill the {@link MergingCriteria}
+     * @deprecated This method validates a merging set when it has already been created. That is too late. Should be
+     * done in the validator of {@link MergingSetAssignment}.
      */
+    @Deprecated
     boolean validateBamFilesForMergingCriteriaDEFAULT(MergingSet mergingSet) {
         notNull(mergingSet, "the input mergingSet for the method validateBamFilesForMergingCriteriaDEFAULT is null")
         String seqPlatform

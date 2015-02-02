@@ -301,7 +301,9 @@ class MergingCriteriaSpecificServiceTests {
         SeqTrack seqTrack2 = createSeqTrack(run, sample2, seqType, seqPlatform, softwareTool)
         AlignmentPass alignmentPass2 = createAlignmentPass(seqTrack2, 0)
         ProcessedBamFile processedBamFile2 = createProcessedbamFile(alignmentPass2)
+        mergingWorkPackage.sample = sample2
         MergingSetAssignment mergingSetAssignment2 = createMergingSetAssignment(mergingSet, processedBamFile2)
+        mergingWorkPackage.sample = sample
 
         assertFalse(mergingCriteriaSpecificService.validateBamFilesForMergingCriteriaDEFAULT(mergingSet))
     }
@@ -327,7 +329,9 @@ class MergingCriteriaSpecificServiceTests {
         SeqTrack seqTrack2 = createSeqTrack(run, sample, seqType2, seqPlatform, softwareTool)
         AlignmentPass alignmentPass2 = createAlignmentPass(seqTrack2, 0)
         ProcessedBamFile processedBamFile2 = createProcessedbamFile(alignmentPass2)
+        mergingWorkPackage.seqType = seqType2
         MergingSetAssignment mergingSetAssignment2 = createMergingSetAssignment(mergingSet, processedBamFile2)
+        mergingWorkPackage.seqType = seqType
 
         assertFalse(mergingCriteriaSpecificService.validateBamFilesForMergingCriteriaDEFAULT(mergingSet))
     }

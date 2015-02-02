@@ -60,7 +60,10 @@ class MergingCriteriaService {
     /**
      * @param mergingSet, for the {@link ProcessedBamFile}s in this mergingSet it is tested if they fulfill the {@link MergingCriteria}
      * @return true, if all BamFiles are valid, false otherwise
+     * @deprecated This method validates a merging set when it has already been created. That is too late. Should be
+     * done in the validator of {@link MergingSetAssignment}.
      */
+    @Deprecated
     boolean validateBamFiles(MergingSet mergingSet) {
         notNull(mergingSet, "the input mergingSet for the method validateBamFiles is null")
         MergingCriteria mergingCriteria = mergingSet.mergingWorkPackage.mergingCriteria

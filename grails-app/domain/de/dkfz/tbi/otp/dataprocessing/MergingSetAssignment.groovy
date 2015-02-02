@@ -13,10 +13,13 @@ class MergingSetAssignment {
     ]
 
     static constraints = {
-        bamFile validator: {field, inst ->
+        bamFile validator: { AbstractBamFile bamFile, MergingSetAssignment msa ->
+            if (!msa.mergingSet?.mergingWorkPackage?.satisfiesMergingCriteria(bamFile)) {
+                return false
+            }
             /** Before you remove this constraint, make sure that all existing code
                 correctly handles other types of {@link AbstractBamFile}s in a merging set. */
-            field instanceof ProcessedBamFile || field instanceof ProcessedMergedBamFile
+            return bamFile instanceof ProcessedBamFile || bamFile instanceof ProcessedMergedBamFile
         }
     }
 

@@ -280,7 +280,9 @@ class MergingCriteriaServiceTests {
                         mergingSet: mergingSet,
                         bamFile: processedBamFile2
                         )
+        mergingSet.mergingWorkPackage.seqType = seqType2
         assertNotNull(mergingSetAssignment2.save([flush: true, failOnError: true]))
+        mergingSet.mergingWorkPackage.seqType = seqType
 
         assertFalse(mergingCriteriaService.validateBamFiles(mergingSet))
     }
@@ -321,7 +323,9 @@ class MergingCriteriaServiceTests {
                         mergingSet: mergingSet,
                         bamFile: processedBamFile2
                         )
+        mergingSet.mergingWorkPackage.sample = sample2
         assertNotNull(mergingSetAssignment2.save([flush: true, failOnError: true]))
+        mergingSet.mergingWorkPackage.sample = sample
 
         assertFalse(mergingCriteriaService.validateBamFiles(mergingSet))
     }

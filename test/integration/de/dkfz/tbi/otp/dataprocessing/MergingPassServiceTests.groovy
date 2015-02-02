@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static org.junit.Assert.*
 
 import org.junit.*
@@ -372,6 +373,7 @@ class MergingPassServiceTests {
         ] + bamFileMap)
 
         MergingSet furtherMergedSet = MergingSet.build([
+            mergingWorkPackage: DomainFactory.createMergingWorkPackage(processedMergedBamFile),
             status: MergingSet.State.PROCESSED
         ] + furtherMergedSetMap)
 
@@ -560,11 +562,9 @@ class MergingPassServiceTests {
 
     public void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_WrongFurtherBamFile() {
         Date createdBeforeDate = new Date().plus(1)
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileWithFurtherMerged(
-                        [:], [:], [:],
-                        [:], [:], [:],
-                        [bamFile: ProcessedMergedBamFile.build()]
-                        )
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileWithFurtherMerged()
+        MergingSetAssignment msa = exactlyOneElement(MergingSetAssignment.findAllByBamFile(processedMergedBamFile))
+        msa.bamFile = DomainFactory.createProcessedMergedBamFile(msa.mergingSet.mergingWorkPackage)
         createMergingPassService()
 
         assert LENGTH_NO_BAMFILE == mergingPassService.deleteOldMergingProcessingFiles(createdBeforeDate)

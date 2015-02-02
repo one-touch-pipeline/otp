@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
+import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import org.junit.*
@@ -8,16 +9,10 @@ import de.dkfz.tbi.otp.dataprocessing.*
 
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(SeqPlatformService)
-@Mock([
-    AlignmentPass,
-    MergingPass,
-    MergingSet,
+@Build([
     MergingSetAssignment,
     ProcessedBamFile,
     ProcessedMergedBamFile,
-    ReferenceGenome,
-    SeqPlatform,
-    SeqTrack,
 ])
 class SeqPlatformServiceUnitTests {
 
@@ -52,14 +47,6 @@ class SeqPlatformServiceUnitTests {
                         )
         assertNotNull(seqTrack.save([flush: true]))
 
-        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage()
-
-        MergingSet mergingSet = new MergingSet(
-                        identifier: 0,
-                        mergingWorkPackage: mergingWorkPackage
-                        )
-        assertNotNull(mergingSet.save([flush: true]))
-
         AlignmentPass alignmentPass = new TestData().createAlignmentPass(
                         identifier: 0,
                         seqTrack: seqTrack,
@@ -73,6 +60,15 @@ class SeqPlatformServiceUnitTests {
                         status: AbstractBamFile.State.NEEDS_PROCESSING
                         )
         assertNotNull(processedBamFile.save([flush: true]))
+
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage(processedBamFile)
+        assert mergingWorkPackage.save(failOnError: true)
+
+        MergingSet mergingSet = new MergingSet(
+                identifier: 0,
+                mergingWorkPackage: mergingWorkPackage
+        )
+        assertNotNull(mergingSet.save([flush: true]))
 
         MergingSetAssignment mergingSetAssignment = new MergingSetAssignment(
                         bamFile: processedBamFile,
@@ -97,7 +93,7 @@ class SeqPlatformServiceUnitTests {
         assertEquals(seqPlatform, seqPlatformService.platformForMergedBamFile(processedMergedBamFile))
 
         mergingSet = new MergingSet(
-                        identifier: 0,
+                        identifier: 1,
                         mergingWorkPackage: mergingWorkPackage
                         )
         assertNotNull(mergingSet.save([flush: true]))
@@ -126,7 +122,7 @@ class SeqPlatformServiceUnitTests {
         assertEquals(seqPlatform, seqPlatformService.platformForMergedBamFile(processedMergedBamFile))
 
         mergingSet = new MergingSet(
-                        identifier: 0,
+                        identifier: 2,
                         mergingWorkPackage: mergingWorkPackage
                         )
         assertNotNull(mergingSet.save([flush: true]))

@@ -1,27 +1,15 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.junit.Assert.*
+import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 @TestFor(MergingSetAssignment)
-@Mock([
-    AlignmentPass,
-    Individual,
+@Build([
     MergingSet,
-    MergingWorkPackage,
     ProcessedBamFile,
-    Project,
-    ReferenceGenome,
-    Run,
-    Sample,
-    SampleType,
-    SeqCenter,
-    SeqPlatform,
-    SeqTrack,
-    SeqType,
-    SoftwareTool,
 ])
 class MergingSetAssignmentTests {
 
@@ -116,8 +104,7 @@ class MergingSetAssignmentTests {
         processedBamFile.save(flush: true)
         assertTrue(processedBamFile.validate())
 
-        MergingWorkPackage workPackage = new MergingWorkPackage(
-            sample: sample)
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(processedBamFile)
         workPackage.save(flush: true)
 
         this.mergingSet = new MergingSet(

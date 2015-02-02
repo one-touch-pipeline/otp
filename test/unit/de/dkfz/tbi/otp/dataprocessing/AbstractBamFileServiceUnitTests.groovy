@@ -1,11 +1,19 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+
+import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.FileType
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestFor
 
 @Build([
+    DataFile,
+    FileType,
     ProcessedBamFile,
     MergingSetAssignment,
+    MergingWorkPackage,
     ProcessedMergedBamFile,
 ])
 @TestFor(AbstractBamFileService)
@@ -29,6 +37,7 @@ class AbstractBamFileServiceUnitTests {
             status: AbstractBamFile.State.PROCESSED,
         ] + processedBamFileMap)
         MergingSet mergingSet = MergingSet.build([
+            mergingWorkPackage: DomainFactory.createMergingWorkPackage(processedBamFile),
             status: MergingSet.State.PROCESSED
         ] + mergingSetMap)
         MergingSetAssignment mergingSetAssignment = MergingSetAssignment.build([
@@ -68,9 +77,10 @@ class AbstractBamFileServiceUnitTests {
     }
 
     void testHasBeenQualityAssessedAndMerged_BamFileIsNotInMergingSet() {
-        ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged([:], [:], [
-            bamFile: ProcessedBamFile.build()
-        ])
+        ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged()
+        MergingSetAssignment msa = exactlyOneElement(MergingSetAssignment.findAllByBamFile(processedBamFile))
+        msa.bamFile = DomainFactory.createProcessedBamFile(msa.mergingSet.mergingWorkPackage)
+        assert msa.save(failOnError: true)
 
         assert !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }

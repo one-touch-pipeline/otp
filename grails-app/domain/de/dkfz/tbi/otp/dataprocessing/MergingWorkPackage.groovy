@@ -76,6 +76,12 @@ class MergingWorkPackage {
         return sample.sampleType
     }
 
+    boolean satisfiesMergingCriteria(final AbstractBamFile bamFile) {
+        return  bamFile.sample.id == sample.id &&
+                bamFile.seqType.id == seqType.id &&
+                bamFile.referenceGenome.id == referenceGenome.id
+    }
+
     static mapping = {
         sample index: "merging_work_package_sample_idx"
         seqType index: "merging_work_package_seq_type_idx"

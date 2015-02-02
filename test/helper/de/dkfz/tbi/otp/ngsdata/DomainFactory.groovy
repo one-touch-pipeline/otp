@@ -2,9 +2,13 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
+import de.dkfz.tbi.otp.dataprocessing.MergingPass
 import de.dkfz.tbi.otp.dataprocessing.MergingSet
 import de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile
+import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
@@ -134,19 +138,53 @@ class DomainFactory {
         ] + myProps)
     }
 
-    public static ProcessedBamFile assignNewProcessedBamFile(final MergingSet mergingSet) {
+    public static MergingWorkPackage createMergingWorkPackage(
+            final AbstractBamFile bamFile, final MergingCriteria criteria = MergingCriteria.DEFAULT) {
+        final MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+                sample: bamFile.sample,
+                seqType: bamFile.seqType,
+                referenceGenome: bamFile.referenceGenome,
+                mergingCriteria: criteria
+        )
+        assert mergingWorkPackage.save(failOnError: true)
+        return mergingWorkPackage
+    }
 
-        final SeqTrack seqTrack = SeqTrack.build(sample: mergingSet.sample, seqType: mergingSet.seqType)
+    public static MergingSet createMergingSet(final MergingWorkPackage mergingWorkPackage) {
+        return MergingSet.build(
+                mergingWorkPackage: mergingWorkPackage,
+                identifier: MergingSet.nextIdentifier(mergingWorkPackage),
+        )
+    }
+
+    public static ProcessedMergedBamFile createProcessedMergedBamFile(final MergingWorkPackage mergingWorkPackage) {
+        return ProcessedMergedBamFile.build(
+                mergingPass: MergingPass.build(
+                        mergingSet: createMergingSet(mergingWorkPackage)
+                )
+        )
+    }
+
+    public static ProcessedBamFile assignNewProcessedBamFile(final MergingSet mergingSet) {
+        final ProcessedBamFile bamFile = createProcessedBamFile(mergingSet.mergingWorkPackage)
+        MergingSetAssignment.build(mergingSet: mergingSet, bamFile: bamFile)
+        return bamFile
+    }
+
+    public static ProcessedBamFile createProcessedBamFile(final MergingWorkPackage mergingWorkPackage) {
+
+        final SeqTrack seqTrack = SeqTrack.build(sample: mergingWorkPackage.sample, seqType: mergingWorkPackage.seqType)
 
         buildSequenceDataFile(seqTrack: seqTrack)
 
         final ProcessedBamFile bamFile = ProcessedBamFile.build(
-                alignmentPass: AlignmentPass.build(seqTrack: seqTrack),
+                alignmentPass: AlignmentPass.build(
+                        seqTrack: seqTrack,
+                        referenceGenome: mergingWorkPackage.referenceGenome,
+                ),
                 qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
                 status: AbstractBamFile.State.PROCESSED,
         )
-
-        MergingSetAssignment.build(mergingSet: mergingSet, bamFile: bamFile)
 
         return bamFile
     }

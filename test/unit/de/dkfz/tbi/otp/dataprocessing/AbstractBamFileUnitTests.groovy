@@ -5,6 +5,7 @@ import org.joda.time.DateTime
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.FileType
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.Sample
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.Individual
@@ -134,6 +135,11 @@ class MockAbstractBamFile extends AbstractBamFile {
 
     @Override
     Individual getIndividual() {
+        return null
+    }
+
+    @Override
+    Sample getSample() {
         return null
     }
 

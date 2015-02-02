@@ -5,6 +5,8 @@ import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.grails.plugins.springsecurity.service.acl.AclUtilService
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.domain.BasePermission
+
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
@@ -35,8 +37,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
 
 
     private void prepareFindSequenceLengthAndReferenceGenomeLengthWithoutNForOverallQualityAssessmentMerged() {
-        ProcessedBamFile processedBamFile = ProcessedBamFile .build()
-        MergingSetAssignment mergingSetAssignment = MergingSetAssignment.build(mergingSet: overallQualityAssessmentMerged.mergingSet, bamFile: processedBamFile)
+        ProcessedBamFile processedBamFile = DomainFactory.assignNewProcessedBamFile(overallQualityAssessmentMerged.mergingSet)
         [1..3].each {
             FastqcBasicStatistics fastqcBasicStatistics = FastqcBasicStatistics.build(sequenceLength: SEQUENCE_LENGTH)
             fastqcBasicStatistics.fastqcProcessedFile.dataFile.seqTrack = processedBamFile.seqTrack
