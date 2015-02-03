@@ -15,8 +15,6 @@ import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingStartJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.job.processing.ProcessingError
-import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.FileType
 import de.dkfz.tbi.otp.ngsdata.Individual
@@ -25,6 +23,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.ExternalScript
@@ -46,7 +45,6 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
     boolean transactional = false
 
     ProcessedMergedBamFileService processedMergedBamFileService
-    ErrorLogService errorLogService
     ExecutionService executionService
     CreateClusterScriptService createClusterScriptService
 
@@ -161,7 +159,7 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
         )
 
         seqType = SeqType.build(
-                name: "EXOME",
+                name: SeqTypeNames.EXOME.seqTypeName,
                 libraryLayout: "PAIRED",
                 dirName: "tmp",
         )
@@ -269,7 +267,6 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
         prepare(Realm.Cluster.DKFZ)
         snvConfig = SnvConfig.createFromFile(project, seqType, new File(baseDirDKFZ, "configFile/runtimeConfig.sh"))
         assertNotNull(snvConfig.save(flush: true))
-
         execute()
         check(SnvCallingStep.CALLING)
 

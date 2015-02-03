@@ -46,7 +46,7 @@ class SnvCallingJob extends AbstractSnvCallingJob {
         if (config.getExecuteStepFlag(step)) {
             final List<String> executedClusterJobsPerChromosome = []
             final Realm realm = configService.getRealmDataProcessing(instance.project)
-
+            final String pbsOptionName = getSnvPBSOptionsNameSeqTypeSpecific(instance.seqType)
             // write the config file in the staging directory
             final File configFileInStagingDirectory = writeConfigFile(instance)
 
@@ -79,7 +79,7 @@ class SnvCallingJob extends AbstractSnvCallingJob {
                         ensureFileHasExpectedSizeScript(sampleType2BamFilePath, instance.sampleType2BamFile.fileSize) +
                         ensureFileDoesNotExistScript(chromosomeResultFile) +
                         step.externalScript.scriptFilePath
-                executedClusterJobsPerChromosome.add(executionHelperService.sendScript(realm, script, null, qsubParameters))
+                executedClusterJobsPerChromosome.add(executionHelperService.sendScript(realm, script, pbsOptionName, qsubParameters))
             }
 
             //if all SnvCallings per chromosome are finished they can be merged together
@@ -104,7 +104,7 @@ class SnvCallingJob extends AbstractSnvCallingJob {
                     "${ensureFileDoesNotExistScript(vcfRawFile)}" +
                     "${externalScriptJoining.scriptFilePath.path}; " +
                     "md5sum ${vcfRawFile} > ${vcfRawFile}.md5sum"
-            executionHelperService.sendScript(realm, script, null, qsubParameters)
+            executionHelperService.sendScript(realm, script, pbsOptionName, qsubParameters)
 
             createAndSaveSnvJobResult(instance, step.externalScript, externalScriptJoining)
 

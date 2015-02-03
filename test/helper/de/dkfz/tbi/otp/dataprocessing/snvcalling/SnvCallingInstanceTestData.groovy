@@ -20,6 +20,25 @@ class SnvCallingInstanceTestData extends TestData {
     ExternalScript externalScript_Joining
 
     void createSnvObjects() {
+
+        ProcessingOption processingOptionWGS = new ProcessingOption(
+                name:"PBS_snvPipeline_WGS",
+                type: "DKFZ",
+                value:'{"-l": {walltime: "20:00:00"}}',
+                dateCreated: new Date(),
+                comment:"according to the CO group (Ivo) 20h is enough for the snv WGS jobs",
+        )
+        assert processingOptionWGS.save()
+
+        ProcessingOption processingOptionWES = new ProcessingOption(
+                name:"PBS_snvPipeline_WES",
+                type: "DKFZ",
+                value:'{"-l": {walltime: "5:00:00"}}',
+                dateCreated: new Date(),
+                comment:"according to the CO group (Ivo) 5h is enough for the snv WES jobs",
+        )
+        assert processingOptionWES.save()
+
         processedMergedBamFileService = new ProcessedMergedBamFileService()
         processedMergedBamFileService.configService = new ConfigService()
         processedMergedBamFileService.mergedAlignmentDataFileService = new MergedAlignmentDataFileService()

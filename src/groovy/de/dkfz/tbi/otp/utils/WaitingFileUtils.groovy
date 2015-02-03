@@ -12,7 +12,7 @@ class WaitingFileUtils {
     public static boolean confirmExists(File file) {
         return ThreadUtils.waitFor({ file.list() || file.canRead(); file.exists() }, 1000, 50)
     }
-    public static boolean confirmDeleted(File file) {
+    public static boolean confirmDoesNotExist(File file) {
         return ThreadUtils.waitFor({ file.list() || file.canRead(); !file.exists() }, 1000, 50)
     }
 }

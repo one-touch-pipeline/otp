@@ -65,6 +65,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob {
             deleteResultFileIfExists(annotationResultFile)
 
             final Realm realm = configService.getRealmDataProcessing(instance.project)
+            final String pbsOptionName = getSnvPBSOptionsNameSeqTypeSpecific(instance.seqType)
 
             final String qsubParameters="{ '-v': '"+
                     "CONFIG_FILE=${configFileInStagingDirectory}," +
@@ -80,7 +81,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob {
                     ensureFileHasExpectedSizeScript(sampleType1BamFile, instance.sampleType1BamFile.fileSize) +
                     ensureFileDoesNotExistScript(annotationResultFile) +
                     step.externalScript.scriptFilePath
-            executionHelperService.sendScript(realm, script, null, qsubParameters)
+            executionHelperService.sendScript(realm, script, pbsOptionName, qsubParameters)
 
             createAndSaveSnvJobResult(instance, step.externalScript, null, inputResult)
 

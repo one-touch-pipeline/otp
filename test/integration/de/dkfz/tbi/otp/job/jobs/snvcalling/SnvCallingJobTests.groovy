@@ -90,6 +90,25 @@ CHROMOSOME_INDICES=( {1..21} X Y)
             stagingRootPath: null
         ])
         assert realm_management.save()
+
+        ProcessingOption processingOptionWGS = new ProcessingOption(
+                name:"PBS_snvPipeline_WGS",
+                type: "DKFZ",
+                value:'{"-l": {walltime: "20:00:00"}}',
+                dateCreated: new Date(),
+                comment:"according to the CO group (Ivo) 20h is enough for the snv WGS jobs",
+        )
+        assert processingOptionWGS.save()
+
+        ProcessingOption processingOptionWES = new ProcessingOption(
+                name:"PBS_snvPipeline_WES",
+                type: "DKFZ",
+                value:'{"-l": {walltime: "5:00:00"}}',
+                dateCreated: new Date(),
+                comment:"according to the CO group (Ivo) 5h is enough for the snv WES jobs",
+        )
+        assert processingOptionWES.save()
+
         project = testData.project
         individual = testData.individual
         seqType = testData.seqType
@@ -448,6 +467,39 @@ CHROMOSOME_INDICES=( {1..21} XY)
         snvCallingInstance.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResult }
 
         snvCallingJob.checkIfResultFilesExistsOrThrowException(snvCallingInstance, true)
+    }
+
+
+    @Test
+    void testGetSnvPBSOptionsNameSeqTypeSpecific_InputIsNull() {
+        assert shouldFail(IllegalArgumentException,{
+            snvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(null)
+        }).contains("The input seqType must not be null in method getSnvPBSOptionsNameSeqTypeSpecific")
+    }
+
+    @Test
+    void testGetSnvPBSOptionsNameSeqTypeSpecific_ExomeSeqType() {
+            assert "snvPipeline_WES" == snvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(testData.exomeSeqType)
+
+    }
+
+    @Test
+    void testGetSnvPBSOptionsNameSeqTypeSpecific_WholeGenomeSeqType() {
+            assert "snvPipeline_WGS" == snvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(testData.seqType)
+
+    }
+
+    @Test
+    void testGetSnvPBSOptionsNameSeqTypeSpecific_OtherSeqType() {
+        SeqType otherSeqType = new SeqType(
+        name: "ChIP Seq",
+        libraryLayout: "PAIRED",
+        dirName: "chip_seq_sequencing")
+        assert otherSeqType.save(flush: true)
+
+        assert shouldFail(RuntimeException,{
+            snvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(otherSeqType)
+        }).contains("There are no PBS Options available for the SNV pipeline for seqtype")
     }
 
 

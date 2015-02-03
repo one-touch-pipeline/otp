@@ -246,7 +246,7 @@ class LsdfFilesService {
         assert file.isAbsolute() && file.exists() && file.isFile()
         try {
             assert executionService.executeCommand(realm, "rm '${file}'; echo \$?") ==~ /^0\s*$/
-            assert confirmDeleted(file)
+            assert confirmDoesNotExist(file)
         } catch (final Throwable e) {
             throw new RuntimeException("Could not delete file ${file}.", e)
         }
@@ -261,7 +261,7 @@ class LsdfFilesService {
         assert directory.isAbsolute() && directory.exists() && directory.isDirectory()
         try {
             assert executionService.executeCommand(realm, "rmdir '${directory}'; echo \$?") ==~ /^0\s*$/
-            assert confirmDeleted(directory)
+            assert confirmDoesNotExist(directory)
         } catch (final Throwable e) {
             throw new RuntimeException("Could not delete directory ${directory}.", e)
         }

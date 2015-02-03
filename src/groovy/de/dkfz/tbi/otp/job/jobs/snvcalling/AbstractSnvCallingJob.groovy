@@ -1,11 +1,14 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
+
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static org.springframework.util.Assert.*
-import static de.dkfz.tbi.otp.utils.WaitingFileUtils.confirmExists
+import static de.dkfz.tbi.otp.utils.WaitingFileUtils.*
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.ExecutionService
@@ -73,6 +76,7 @@ abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob 
     File writeConfigFile(final SnvCallingInstance instance) {
         notNull(instance, "The input for method writeConfigFile is null")
         final File configFileInStagingDirectory = instance.configFilePath.absoluteStagingPath
+        confirmDoesNotExist(configFileInStagingDirectory)
         if (!configFileInStagingDirectory.exists()) {
             lsdfFilesService.createDirectory(configFileInStagingDirectory.parentFile, instance.project)
             assert confirmExists(configFileInStagingDirectory.parentFile)
@@ -163,4 +167,16 @@ abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob 
             throw new RuntimeException("This SNV workflow instance is configured not to do the SNV ${step.name()} and no non-withdrawn SNV ${step.name()} was done before, so subsequent jobs will have no input.")
         }
     }
+
+    protected String getSnvPBSOptionsNameSeqTypeSpecific(SeqType seqType) {
+        notNull(seqType, "The input seqType must not be null in method getSnvPBSOptionsNameSeqTypeSpecific")
+        if (seqType.name == SeqTypeNames.WHOLE_GENOME.seqTypeName) {
+            return "snvPipeline_WGS"
+        } else if (seqType.name == SeqTypeNames.EXOME.seqTypeName) {
+            return "snvPipeline_WES"
+        } else {
+            throw new RuntimeException("There are no PBS Options available for the SNV pipeline for seqtype ${seqType}")
+        }
+    }
+
 }

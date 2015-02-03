@@ -67,6 +67,7 @@ class FilterVcfJob extends AbstractSnvCallingJob {
             final File checkpointFile = step.getCheckpointFilePath(instance).absoluteStagingPath
 
             final Realm realm = configService.getRealmDataProcessing(instance.project)
+            final String pbsOptionName = getSnvPBSOptionsNameSeqTypeSpecific(instance.seqType)
 
             final String qsubParameters="{ '-v': '"+
                     "CONFIG_FILE=${configFileInStagingDirectory}," +
@@ -81,7 +82,7 @@ class FilterVcfJob extends AbstractSnvCallingJob {
 
             final String script = step.externalScript.scriptFilePath
 
-            executionHelperService.sendScript(realm, script, null, qsubParameters)
+            executionHelperService.sendScript(realm, script, pbsOptionName, qsubParameters)
 
             createAndSaveSnvJobResult(instance, step.externalScript, null, inputResult)
 

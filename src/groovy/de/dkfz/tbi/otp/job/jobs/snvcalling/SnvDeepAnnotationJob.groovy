@@ -76,6 +76,7 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob {
             FileUtils.copyFile(inputResultFile, deepAnnotationResultFile)
 
             final Realm realm = configService.getRealmDataProcessing(instance.project)
+            final String pbsOptionName = getSnvPBSOptionsNameSeqTypeSpecific(instance.seqType)
 
             final String qsubParameters="{ '-v': '"+
                     "CONFIG_FILE=${configFileInStagingDirectory}," +
@@ -90,7 +91,7 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob {
             final String script = "${step.externalScript.scriptFilePath}; " +
                     "md5sum ${deepAnnotationResultFile} > ${deepAnnotationResultFile}.md5sum"
 
-            executionHelperService.sendScript(realm, script, null, qsubParameters)
+            executionHelperService.sendScript(realm, script, pbsOptionName, qsubParameters)
             createAndSaveSnvJobResult(instance, step.externalScript, null, inputResult)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
