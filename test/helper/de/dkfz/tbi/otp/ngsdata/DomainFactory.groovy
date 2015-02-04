@@ -70,7 +70,7 @@ class DomainFactory {
         host: 'otphost-other.example.org',
         port: DEFAULT_PORT,
         unixUser: 'unixUser2',
-        pbsOptions: '{"-l": {nodes: "1:xeon", walltime: "5:00"}, "-W": {x: "NACCESSPOLICY:SINGLEJOB"}}',
+        pbsOptions: '{"-l": {nodes: "1:xeon", walltime: "5:00"}}',
     ]
 
     /** Default settings for the DKFZ cluster. These include the {@link #REALM_DEFAULTS}. */
