@@ -62,6 +62,7 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
     String myBase = "${base}/${username}/QualityAssessment"
     String rootPath = "${myBase}/rootPath/"
     String processingRootPath = "${myBase}/processingRootPath/"
+    String loggingRootPath = "${myBase}/logging_root_path"
 
     // files to be processed by the tests
     // files are the same for both merged and not-merged workflows tests
@@ -147,7 +148,7 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
         String softLinkBaiFilepath = "${testDataDir}/${baiOrgFileName}"
         // Just to be sure the rootPath and the processingRootPath are clean for new test
         String cmdCleanUp = cleanUpTestFoldersCommand()
-        String cmdBuildFileStructure = "mkdir -p ${input.path}"
+        String cmdBuildFileStructure = "mkdir -p ${input.path} ${loggingRootPath}/log/status"
         String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${softLinkFilepath} ${input.filePath}"
         String cmdBuildSoftLinkToBaiFileToBeProcessed = "ln -s ${softLinkBaiFilepath} ${input.baiFilePath}"
         executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildFileStructure}; ${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdBuildSoftLinkToBaiFileToBeProcessed}")
@@ -275,6 +276,7 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
             rootPath: rootPath,
             processingRootPath: processingRootPath,
             programsRootPath: '/',
+            loggingRootPath: loggingRootPath,
         ]
 
         realm = DomainFactory.createRealmDataManagementDKFZ(paths).save([flush: true])
@@ -434,6 +436,6 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
      * @return Command to clean up used folders
      */
     String cleanUpTestFoldersCommand() {
-        return "rm -rf ${rootPath}/* ${processingRootPath}/*"
+        return "rm -rf ${rootPath}/* ${processingRootPath}/* ${loggingRootPath}"
     }
 }

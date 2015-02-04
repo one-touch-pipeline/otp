@@ -1,4 +1,6 @@
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged.ExecuteMergedBamFileQaAnalysisJob;
+import de.dkfz.tbi.otp.job.processing.PbsOptionMergingService;
 import de.dkfz.tbi.otp.ngsdata.*
 
 
@@ -32,3 +34,12 @@ ctx.processingOptionService.createOrUpdate(
   null, // defaults to all projects
   cmd,
   "Quality assessment Command and parameters template for exome")
+
+
+println ctx.processingOptionService.createOrUpdate(
+    PbsOptionMergingService.PBS_PREFIX + ExecuteMergedBamFileQaAnalysisJob.class.simpleName,
+    "DKFZ",
+    null,
+    '{"-l": {walltime: "100:00:00", mem: "10g"}}',
+    "time for merged QA"
+)

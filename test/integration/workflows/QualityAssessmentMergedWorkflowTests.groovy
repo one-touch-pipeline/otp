@@ -8,11 +8,14 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged.QualityAssessmentMergedStartJob
+import de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged.ExecuteMergedBamFileQaAnalysisJob
+import de.dkfz.tbi.otp.job.processing.PbsOptionMergingService
 
 class QualityAssessmentMergedWorkflowTests extends QualityAssessmentAbstractWorkflowTests {
 
     QualityAssessmentMergedStartJob qualityAssessmentMergedStartJob
     ProcessedMergedBamFileService processedMergedBamFileService
+    ProcessingOptionService processingOptionService
 
     protected AbstractStartJobImpl getJob() {
         return qualityAssessmentMergedStartJob
@@ -97,6 +100,20 @@ class QualityAssessmentMergedWorkflowTests extends QualityAssessmentAbstractWork
         run('scripts/qa/QualityAssessmentMergedWorfklow.groovy')
         SpringSecurityUtils.doWithAuth("admin") {
             run('scripts/qa/InjectQualityAssessmentMergedWorkflowOptions.groovy')
+        }
+        // check, that cluster option are set
+        String key = PbsOptionMergingService.PBS_PREFIX + ExecuteMergedBamFileQaAnalysisJob.class.simpleName
+        ProcessingOption processingOption = processingOptionService.findOptionObject(key, "DKFZ", null)
+        assert processingOption
+        //modify cluster option so the test stay in the fast queue
+        SpringSecurityUtils.doWithAuth("admin") {
+            processingOptionService.createOrUpdate(
+                key,
+                "DKFZ",
+                null,
+                '{"-l": {walltime: "10:00", mem: "100m"}}',
+                "time for merged QA"
+            )
         }
     }
 }

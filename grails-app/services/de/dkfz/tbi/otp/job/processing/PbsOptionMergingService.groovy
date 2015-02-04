@@ -26,7 +26,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
  */
 class PbsOptionMergingService {
 
-    private static final String PBS_PREFIX = "PBS_"
+    static final String PBS_PREFIX = "PBS_"
 
     ProcessingOptionService processingOptionService
 

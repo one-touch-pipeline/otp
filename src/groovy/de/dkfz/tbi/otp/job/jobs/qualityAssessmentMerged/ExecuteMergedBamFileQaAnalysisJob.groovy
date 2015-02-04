@@ -94,7 +94,7 @@ class ExecuteMergedBamFileQaAnalysisJob extends AbstractJobImpl {
         SimpleTemplateEngine engine = new SimpleTemplateEngine()
         String cmd = engine.createTemplate(cmdTemplate).make(binding).toString().trim()
         cmd += "; chmod 440 ${qualityAssessmentFilePath} ${coverageDataFilePath} ${insertSizeDataFilePath}"
-        String pbsID = executionHelperService.sendScript(realm, cmd)
+        String pbsID = executionHelperService.sendScript(realm, cmd, getClass().simpleName)
         addOutputParameter("__pbsIds", pbsID)
         addOutputParameter("__pbsRealm", realm.id.toString())
     }
