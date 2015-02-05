@@ -15,7 +15,8 @@ class ValidatePlatformJob extends AbstractEndStateAwareJobImpl {
         if (seqPlatformService.validateSeqPlatform(runId)) {
             succeed()
         } else {
-            fail()
+            log.error "validation failed, because not all platforms and models could be verificated"
+            throw new RuntimeException('Validation failed. See the job log for details.')
         }
     }
 }

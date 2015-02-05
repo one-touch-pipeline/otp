@@ -4,6 +4,7 @@ import static org.springframework.util.Assert.*
 import org.springframework.context.annotation.Scope
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.ReferencedClass
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 @Scope("prototype")
 class SeqPlatformService {
@@ -60,13 +61,19 @@ class SeqPlatformService {
     private boolean validateForFile(DataFile file) {
         setupEntries(file)
         if (platformEntry == null || modelEntry == null) {
+            LogThreadLocal.getThreadLog()?.error("Platform or model are not given for '${file}")
             return false
         }
         if (validateWithEntries(platformEntry, modelEntry)) {
             return true
         }
         // known bug of swapped meta data entries
-        return validateWithEntries(modelEntry, platformEntry)
+        if (validateWithEntries(modelEntry, platformEntry)) {
+            return true
+        }
+
+        LogThreadLocal.getThreadLog()?.error("Could not find a SeqPlatform for '${platformEntry}' and '${modelEntry}' (requested by file ${file}")
+        return false
     }
 
     private void setupEntries(DataFile file) {
