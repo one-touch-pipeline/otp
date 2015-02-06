@@ -694,29 +694,59 @@ class ProcessedMergedBamFileServiceTests {
 
 
     @Test
-    void testSeqTracksTwoSeqTracks() {
+    void testSeqTracksTwoSeqTracks_BothMerged() {
+        MergingPass mergingPass = createMergingPass()
+        SeqTrack seqTrack1 = createSeqTrack()
+        SeqTrack seqTrack2 = createSeqTrack()
+        ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack1)
+        ProcessedBamFile processedBamFile2 = createProcessedBamFile(2, seqTrack2)
+        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
+        MergingSetAssignment mergingSetAssignment2 = createMergingSetAssignment(processedBamFile2)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        Set<SeqTrack> actualSeqTracks = processedMergedBamFileService.seqTracks(processedMergedBamFile) as Set
+        Set<SeqTrack> expectedSeqTracks = [seqTrack1, seqTrack2] as Set
+        assertTrue(actualSeqTracks == expectedSeqTracks)
+    }
+
+    @Test
+    void testSeqTracksTwoSeqTracks_OnlyOneMerged() {
         MergingPass mergingPass = createMergingPass()
         SeqTrack seqTrack1 = createSeqTrack()
         SeqTrack seqTrack2 = createSeqTrack()
         ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack1)
         MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
-        List<SeqTrack> actualSeqTracks = processedMergedBamFileService.seqTracks(processedMergedBamFile)
-        List<SeqTrack> expectedSeqTracks = [seqTrack1, seqTrack2]
+        Set<SeqTrack> actualSeqTracks = processedMergedBamFileService.seqTracks(processedMergedBamFile) as Set
+        Set<SeqTrack> expectedSeqTracks = [seqTrack1] as Set
         assertTrue(actualSeqTracks == expectedSeqTracks)
     }
 
 
     @Test
-    void testSeqTracksTwoExomeSeqTracks() {
+    void testSeqTracksTwoExomeSeqTracks_BothMerged() {
+        MergingPass mergingPass = createMergingPass()
+        SeqTrack seqTrack1 = createExomeSeqTrack("laneId1")
+        SeqTrack seqTrack2 = createExomeSeqTrack("laneId2")
+        ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack1)
+        ProcessedBamFile processedBamFile2 = createProcessedBamFile(2, seqTrack2)
+        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
+        MergingSetAssignment mergingSetAssignment2 = createMergingSetAssignment(processedBamFile2)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        Set<SeqTrack> actualSeqTracks = processedMergedBamFileService.seqTracks(processedMergedBamFile) as Set
+        Set<SeqTrack> expectedSeqTracks = [seqTrack1, seqTrack2] as Set
+        assertTrue(actualSeqTracks == expectedSeqTracks)
+    }
+
+    @Test
+    void testSeqTracksTwoExomeSeqTracks_OnlyOneMerged() {
         MergingPass mergingPass = createMergingPass()
         SeqTrack seqTrack1 = createExomeSeqTrack("laneId1")
         SeqTrack seqTrack2 = createExomeSeqTrack("laneId2")
         ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack1)
         MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
-        List<SeqTrack> actualSeqTracks = processedMergedBamFileService.seqTracks(processedMergedBamFile)
-        List<SeqTrack> expectedSeqTracks = [seqTrack1, seqTrack2]
+        Set<SeqTrack> actualSeqTracks = processedMergedBamFileService.seqTracks(processedMergedBamFile) as Set
+        Set<SeqTrack> expectedSeqTracks = [seqTrack1] as Set
         assertTrue(actualSeqTracks == expectedSeqTracks)
     }
 

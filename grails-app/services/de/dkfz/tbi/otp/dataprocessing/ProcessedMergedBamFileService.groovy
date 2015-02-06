@@ -217,9 +217,9 @@ class ProcessedMergedBamFileService {
         return assertSave(processedMergedBamFile)
     }
 
+    @Deprecated
     public List<SeqTrack> seqTracks(ProcessedMergedBamFile processedMergedBamFile) {
-        Sample sample = sample(processedMergedBamFile)
-        return SeqTrack.findAllBySample(sample)
+        return processedMergedBamFile.containedSeqTracks as List
     }
 
     private def assertSave(def object) {
