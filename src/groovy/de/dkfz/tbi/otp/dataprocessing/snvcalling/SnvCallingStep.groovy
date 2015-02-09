@@ -103,7 +103,7 @@ enum SnvCallingStep {
         return "${getClass().simpleName}.${name()}"
     }
 
-    ExternalScript getExternalScript() {
-        return ExternalScript.getLatestVersionOfScript(externalScriptIdentifier)
+    ExternalScript getExternalScript(String externalScriptVersion) {
+        return ExternalScript.getLatestVersionOfScript(externalScriptIdentifier, externalScriptVersion)
     }
 }

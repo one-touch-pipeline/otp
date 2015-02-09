@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.ExternalScript
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static org.springframework.util.Assert.*
@@ -60,10 +61,15 @@ class SnvCallingService {
                 //check that sample pair shall be processed
                 "WHERE sp.processingStatus = :needsProcessing " +
 
-                //check that the config file is available
+                //check that the config file is available with at least on script with same version
                 "AND EXISTS (FROM SnvConfig cps " +
                 "   WHERE cps.project = sp.individual.project " +
-                "   AND cps.seqType = sp.seqType) " +
+                "   AND cps.seqType = sp.seqType " +
+                "   AND EXISTS (from ExternalScript es " +
+                "       where es.scriptVersion = cps.externalScriptVersion " +
+                "       and es.deprecatedDate is null " +
+                "   ) " +
+                ") " +
 
                 //check that this sample pair is not in process
                 "AND NOT EXISTS (FROM SnvCallingInstance sci " +

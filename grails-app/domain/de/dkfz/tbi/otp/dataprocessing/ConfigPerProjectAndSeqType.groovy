@@ -21,6 +21,11 @@ class ConfigPerProjectAndSeqType {
      */
     String configuration
 
+    /**
+     * Defines which version of the external scripts has to be used for this project and seqType.
+     */
+    String externalScriptVersion
+
     // The following two properties are automatically maintained by Grails.
     // See http://grails.org/doc/latest/ref/Database%20Mapping/autoTimestamp.html
     Date dateCreated
@@ -42,6 +47,7 @@ class ConfigPerProjectAndSeqType {
         }
         obsoleteDate nullable: true
         configuration blank: false
+        externalScriptVersion blank: false
     }
 
     static mapping = {
@@ -49,6 +55,7 @@ class ConfigPerProjectAndSeqType {
         project index: 'config_per_project_and_seq_type_project_idx'
         seqType index: 'config_per_project_and_seq_type_seq_type_idx'
         previousConfig index: 'config_per_project_and_seq_type_previous_config_idx'
+        externalScriptVersion index: 'config_per_project_and_seq_type_external_script_version_idx'
     }
 
     void writeToFile(final File file, final boolean overwriteIfExists = false) {

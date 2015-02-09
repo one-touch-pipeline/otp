@@ -80,11 +80,11 @@ class FilterVcfJob extends AbstractSnvCallingJob {
                     "FILENAME_CHECKPOINT=${checkpointFile}" +
                     "'}"
 
-            final String script = step.externalScript.scriptFilePath
+            final String script = step.getExternalScript(config.externalScriptVersion).scriptFilePath
 
             executionHelperService.sendScript(realm, script, pbsOptionName, qsubParameters)
 
-            createAndSaveSnvJobResult(instance, step.externalScript, null, inputResult)
+            createAndSaveSnvJobResult(instance, step.getExternalScript(config.externalScriptVersion), null, inputResult)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {

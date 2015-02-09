@@ -78,12 +78,12 @@ class SnvCallingJob extends AbstractSnvCallingJob {
                         ensureFileHasExpectedSizeScript(sampleType1BamFilePath, instance.sampleType1BamFile.fileSize) +
                         ensureFileHasExpectedSizeScript(sampleType2BamFilePath, instance.sampleType2BamFile.fileSize) +
                         ensureFileDoesNotExistScript(chromosomeResultFile) +
-                        step.externalScript.scriptFilePath
+                        step.getExternalScript(config.externalScriptVersion).scriptFilePath
                 executedClusterJobsPerChromosome.add(executionHelperService.sendScript(realm, script, pbsOptionName, qsubParameters))
             }
 
             //if all SnvCallings per chromosome are finished they can be merged together
-            ExternalScript externalScriptJoining = ExternalScript.getLatestVersionOfScript(CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER)
+            ExternalScript externalScriptJoining = ExternalScript.getLatestVersionOfScript(CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER, config.externalScriptVersion)
             File vcfRawFile = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual, null)).absoluteStagingPath
             // In case the file exists already from an earlier -not successful- run it should be deleted first
             deleteResultFileIfExists(vcfRawFile)
@@ -106,7 +106,7 @@ class SnvCallingJob extends AbstractSnvCallingJob {
                     "md5sum ${vcfRawFile} > ${vcfRawFile}.md5sum"
             executionHelperService.sendScript(realm, script, pbsOptionName, qsubParameters)
 
-            createAndSaveSnvJobResult(instance, step.externalScript, externalScriptJoining)
+            createAndSaveSnvJobResult(instance, step.getExternalScript(config.externalScriptVersion), externalScriptJoining)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {

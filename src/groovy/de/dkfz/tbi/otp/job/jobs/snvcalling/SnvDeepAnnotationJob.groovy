@@ -88,11 +88,11 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob {
                     "FILENAME_VCF_SNVS=${deepAnnotationResultFile}," +
                     "FILENAME_CHECKPOINT=${checkpointFile}," +
                     "'}"
-            final String script = "${step.externalScript.scriptFilePath}; " +
+            final String script = "${step.getExternalScript(config.externalScriptVersion).scriptFilePath}; " +
                     "md5sum ${deepAnnotationResultFile} > ${deepAnnotationResultFile}.md5sum"
 
             executionHelperService.sendScript(realm, script, pbsOptionName, qsubParameters)
-            createAndSaveSnvJobResult(instance, step.externalScript, null, inputResult)
+            createAndSaveSnvJobResult(instance, step.getExternalScript(config.externalScriptVersion), null, inputResult)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {

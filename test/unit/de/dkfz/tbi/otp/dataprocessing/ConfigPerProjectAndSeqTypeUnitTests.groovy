@@ -23,6 +23,7 @@ class ConfigPerProjectAndSeqTypeUnitTests {
             project: new Project(),
             seqType: new SeqType(),
             configuration: configuration,
+            externalScriptVersion: "v1"
             )
         validConfigPerProjectAndSeqType.save()
     }
@@ -36,6 +37,7 @@ class ConfigPerProjectAndSeqTypeUnitTests {
         ConfigPerProjectAndSeqType configPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
                 seqType: new SeqType(),
                 configuration: configuration,
+                externalScriptVersion: "v1",
                 )
         assertFalse(configPerProjectAndSeqType.validate())
 
@@ -47,6 +49,7 @@ class ConfigPerProjectAndSeqTypeUnitTests {
         ConfigPerProjectAndSeqType configPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
                 project: new Project(),
                 configuration: configuration,
+                externalScriptVersion: "v1",
                 )
         assertFalse(configPerProjectAndSeqType.validate())
 
@@ -58,6 +61,7 @@ class ConfigPerProjectAndSeqTypeUnitTests {
         ConfigPerProjectAndSeqType configPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
                 project: new Project(),
                 seqType: new SeqType(),
+                externalScriptVersion: "v1",
                 )
         assertFalse(configPerProjectAndSeqType.validate())
 
@@ -70,6 +74,7 @@ class ConfigPerProjectAndSeqTypeUnitTests {
                 project: new Project(),
                 seqType: new SeqType(),
                 configuration: "",
+                externalScriptVersion: "v1",
                 )
         assertFalse(configPerProjectAndSeqType.validate())
 
@@ -83,7 +88,33 @@ class ConfigPerProjectAndSeqTypeUnitTests {
                 seqType: new SeqType(),
                 configuration: configuration,
                 obsoleteDate: new Date(),
+                externalScriptVersion: "v1",
                 )
+        assertTrue(configPerProjectAndSeqType.validate())
+    }
+
+    void testSave_noScriptVersion_shouldNotValidate() {
+        ConfigPerProjectAndSeqType configPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
+                project: new Project(),
+                seqType: new SeqType(),
+                configuration: configuration,
+        )
+        assertFalse(configPerProjectAndSeqType.validate())
+
+        configPerProjectAndSeqType.externalScriptVersion = "v1"
+        assertTrue(configPerProjectAndSeqType.validate())
+    }
+
+    void testSave_emptyScriptVersion_shouldNotValidate() {
+        ConfigPerProjectAndSeqType configPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
+                project: new Project(),
+                seqType: new SeqType(),
+                configuration: configuration,
+                externalScriptVersion: ""
+        )
+        assertFalse(configPerProjectAndSeqType.validate())
+
+        configPerProjectAndSeqType.externalScriptVersion = "v1"
         assertTrue(configPerProjectAndSeqType.validate())
     }
 
@@ -93,6 +124,7 @@ class ConfigPerProjectAndSeqTypeUnitTests {
                 seqType: new SeqType(),
                 configuration: configuration,
                 previousConfig: validConfigPerProjectAndSeqType,
+                externalScriptVersion: "v1",
                 )
         assertFalse(newConfigPerProjectAndSeqType.validate())
 

@@ -80,10 +80,10 @@ class SnvAnnotationJob extends AbstractSnvCallingJob {
             final String script =
                     ensureFileHasExpectedSizeScript(sampleType1BamFile, instance.sampleType1BamFile.fileSize) +
                     ensureFileDoesNotExistScript(annotationResultFile) +
-                    step.externalScript.scriptFilePath
+                    step.getExternalScript(config.externalScriptVersion).scriptFilePath
             executionHelperService.sendScript(realm, script, pbsOptionName, qsubParameters)
 
-            createAndSaveSnvJobResult(instance, step.externalScript, null, inputResult)
+            createAndSaveSnvJobResult(instance, step.getExternalScript(config.externalScriptVersion), null, inputResult)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {

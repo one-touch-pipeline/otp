@@ -78,7 +78,8 @@ class SnvCallingInstanceTestData extends TestData {
         snvConfig = new SnvConfig(
                 project: project,
                 seqType: seqType,
-                configuration: "testConfig"
+                configuration: "testConfig",
+                externalScriptVersion: "v1",
         )
         assert snvConfig.save()
 

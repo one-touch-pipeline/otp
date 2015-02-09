@@ -121,7 +121,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         SnvConfig snvConfig = new SnvConfig(
                 project: project,
                 seqType: seqType,
-                configuration: CONFIGURATION)
+                configuration: CONFIGURATION,
+                externalScriptVersion: "v1",
+        )
         assert snvConfig.save()
 
         SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile1.sampleType, category: SampleType.Category.DISEASE)

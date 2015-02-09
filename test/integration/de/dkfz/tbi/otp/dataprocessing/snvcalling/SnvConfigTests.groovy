@@ -41,6 +41,7 @@ class SnvConfigTests {
                 project: project,
                 seqType: seqType,
                 configuration: "testConfig",
+                externalScriptVersion: "v1",
                 )
         assert config.save()
 
@@ -50,6 +51,7 @@ class SnvConfigTests {
                 project: project2,
                 seqType: seqType2,
                 configuration: "testConfig",
+                externalScriptVersion: "v1",
                 )
         assert config2.save()
         assertEquals(config, SnvConfig.getLatest(project, seqType))

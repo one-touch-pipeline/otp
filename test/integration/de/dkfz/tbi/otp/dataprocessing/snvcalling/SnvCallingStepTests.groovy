@@ -54,13 +54,17 @@ class SnvCallingStepTests extends GroovyTestCase {
 
         ExternalScript externalScript = createExternalScript("SnvCallingStep.${step.name()}", new File(testDir, 'script_v1.sh').path)
         assert externalScript.save()
-        assertEquals(externalScript, step.getExternalScript())
+        assertEquals(externalScript, step.getExternalScript("v1"))
 
         externalScript.deprecatedDate = new Date()
         assert externalScript.save()
         ExternalScript externalScript2 = createExternalScript("SnvCallingStep.${step.name()}", new File(testDir, 'script_v2.sh').path)
         assert externalScript2.save()
-        assertEquals(externalScript2, step.getExternalScript())
+        assertEquals(externalScript2, step.getExternalScript("v1"))
+    }
+
+    void testGetExternalScript_NoScriptVersion_shouldFail() {
+        shouldFail(AssertionError, {SnvCallingStep.SNV_DEEPANNOTATION.getExternalScript(null)})
     }
 
     @Test

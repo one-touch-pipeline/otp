@@ -126,11 +126,12 @@ ${CHROMOSOME_NAMES_VARIABLE_NAME}=\${CHROMOSOME_INDICES[@]}
      * SnvConfig.createFromFile(project, seqType, configFile)
      * </pre>
      */
-    static SnvConfig createFromFile(Project project, SeqType seqType, File configFile) {
+    static SnvConfig createFromFile(Project project, SeqType seqType, File configFile, String externalScriptVersion) {
         final SnvConfig config = new SnvConfig(
                 project: project,
                 seqType: seqType,
-                configuration: configFile.text
+                configuration: configFile.text,
+                externalScriptVersion: externalScriptVersion,
         ).evaluate()
         assert config.save(flush: true)
         return config

@@ -50,9 +50,10 @@ class SnvCallingServiceTests extends GroovyTestCase {
         snvConfig = new SnvConfig(
                 project: project,
                 seqType: seqType,
-                configuration: "configuration"
+                configuration: "configuration",
+                externalScriptVersion: "v1",
                 )
-        snvConfig.save()
+        assert snvConfig.save()
 
         processedMergedBamFile1 = createProcessedMergedBamFile("1")
         processedMergedBamFile1.save(flush: true)
@@ -128,6 +129,15 @@ class SnvCallingServiceTests extends GroovyTestCase {
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
+
+    @Test
+    void testSamplePairForSnvProcessing_NoCorrespondingExternalScriptInDatabase_shouldReturnNull() {
+        testData.externalScript_Joining.scriptVersion = "v2"
+        assert testData.externalScript_Joining.save()
+
+        assertNull(snvCallingService.samplePairForSnvProcessing())
+    }
+
 
     @Test
     void testSamplePairForSnvProcessingAlreadyInProcess() {

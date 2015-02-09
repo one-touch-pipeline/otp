@@ -88,6 +88,7 @@ public class SnvCallingStartJobTests extends GroovyScriptAwareIntegrationTest {
                     project: project,
                     seqType: seqType,
                     configuration: "testConfig",
+                    externalScriptVersion: "v1"
                     )
             assert config.save(flush: true)
 

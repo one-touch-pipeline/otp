@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.otp.ngsdata.TestData
+
 import static de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep.*
 
 import org.junit.Test
@@ -70,6 +72,13 @@ class SnvConfigUnitTests extends TestCase {
         assertCorrectValues(config)
     }
 
+
+    @Test
+    void testCreateFromFile_NoScriptVersion_ShouldFail() {
+        shouldFail(AssertionError) {testCreateFromFile(LEGAL_CONFIG, null)}
+    }
+
+
     @Test
     void testEvaluate_legalConfig() {
         final SnvConfig config = testCreateNormally(LEGAL_CONFIG)
@@ -100,13 +109,14 @@ class SnvConfigUnitTests extends TestCase {
             project: new Project(),
             seqType: new SeqType(),
             configuration: configuration,
+            externalScriptVersion: "v1",
         )
         assert config.save()
         assertNotEvaluated(config)
         return config
     }
 
-    SnvConfig testCreateFromFile(final String configuration) {
+    SnvConfig testCreateFromFile(final String configuration, String version = "v1") {
         File dir = new File("/tmp/otp/otp-unit-test")
         assert dir.exists() || dir.mkdirs()
 
@@ -115,7 +125,7 @@ class SnvConfigUnitTests extends TestCase {
 
         try {
             final SnvConfig config = SnvConfig.createFromFile(new Project(),
-                    new SeqType(), configFile)
+                    new SeqType(), configFile, version)
             assertNotNull(config)
             assertEquals(configuration, config.configuration)
             return config

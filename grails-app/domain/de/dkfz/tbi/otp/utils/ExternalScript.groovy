@@ -95,7 +95,9 @@ class ExternalScript {
         scriptVersion index: "external_script_version_idx"
     }
 
-    static ExternalScript getLatestVersionOfScript(final String scriptIdentifier) {
-        return exactlyOneElement(ExternalScript.findAllByScriptIdentifierAndDeprecatedDateIsNull(scriptIdentifier))
+    static ExternalScript getLatestVersionOfScript(final String scriptIdentifier, String externalScriptVersion) {
+        assert scriptIdentifier : "The scriptIdentifier shall not be null in getLatestVersionOfScript()"
+        assert externalScriptVersion : "The externalScriptVersion shall not be null in getLatestVersionOfScript()"
+        return exactlyOneElement(ExternalScript.findAllByScriptIdentifierAndScriptVersionAndDeprecatedDateIsNull(scriptIdentifier, externalScriptVersion))
     }
 }
