@@ -151,7 +151,7 @@ $.otp.sequence = {
                                 row.laneId,
                                 fastQC,
                                 row.alignmentState.name,
-                                (new Date(row.dateCreated)).toDateString()
+                                (new Date(row.dateCreated)).toLocaleFormat('%Y-%m-%d')
                             ];
                             json.aaData[i] = rowData;
                         }

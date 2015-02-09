@@ -66,7 +66,7 @@ class RunController {
                 name: run.name,
                 seqCenters: run.seqCenter?.toString()?.toLowerCase(),
                 storageRealm: run.storageRealm?.toString()?.toLowerCase(),
-                dateCreated: run.dateCreated?.format("yyyy-MM-dd hh:mm:ss"),
+                dateCreated: run.dateCreated?.format("yyyy-MM-dd"),
                 dateExecuted: run.dateExecuted?.format("yyyy-MM-dd"),
                 blacklisted: run.blacklisted,
                 multipleSource: run.multipleSource,

@@ -77,7 +77,7 @@ class SequenceController {
                 row.name,
                 row.laneId,
                 row.alignmentState.toString(),
-                row.dateCreated?.format('EEE MMM dd yyyy')
+                row.dateCreated?.format("yyyy-MM-dd"),
             ].join(",")
         }.join("\n")
         def contentHeader = [

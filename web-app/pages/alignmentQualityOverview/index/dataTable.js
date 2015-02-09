@@ -79,6 +79,7 @@ $.otp.alignmentQualityOverviewTable = {
                                 row.standardDeviationPE_Insertsize,
                                 "<span class='" + row.medianWarning+"'>" + row.medianPE_insertsize + " </span>",
                                 row.meanPE_Insertsize,
+                                row.dateFromFileSystem,
                             ];
                             var rowdata = identifier.concat(coverage, general);
                             json.aaData[i] = rowdata;

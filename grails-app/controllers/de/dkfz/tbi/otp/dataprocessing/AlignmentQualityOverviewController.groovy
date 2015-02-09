@@ -45,6 +45,7 @@ class AlignmentQualityOverviewController {
         'alignment.quality.standardDeviationPE_Insertsize',
         'alignment.quality.medianPE_insertsize',
         'alignment.quality.meanPE_Insertsize',
+        'datafile.showDetails.dates.fileSystemDate',
     ].asImmutable()
 
     private static final List<String> HEADER_EXOME = [
@@ -60,6 +61,7 @@ class AlignmentQualityOverviewController {
         'alignment.quality.standardDeviationPE_Insertsize',
         'alignment.quality.medianPE_insertsize',
         'alignment.quality.meanPE_Insertsize',
+        'datafile.showDetails.dates.fileSystemDate',
     ].asImmutable()
 
 
@@ -86,8 +88,8 @@ class AlignmentQualityOverviewController {
         List<String> seqTypes = seqTypeService.alignableSeqTypesByProject(project)*.aliasOrName
         String seqTypeName = (params.seqType && seqTypes.contains(params.seqType)) ? params.seqType : seqTypes[0]
         SeqType seqType = SeqType.findWhere(
-                        'aliasOrName': seqTypeName
-                        )
+                'aliasOrName': seqTypeName
+                )
 
         List<String> header = null
         switch (seqType?.name) {
@@ -130,9 +132,9 @@ class AlignmentQualityOverviewController {
 
         Project project = projectService.getProjectByName(projectName)
         SeqType seqType = SeqType.findWhere(
-                        'aliasOrName': seqTypeName,
-                        'libraryLayout': "PAIRED"
-                        )
+                'aliasOrName': seqTypeName,
+                'libraryLayout': "PAIRED"
+                )
 
 
         List<OverallQualityAssessmentMerged> dataOverall = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(project, seqType)
@@ -161,7 +163,7 @@ class AlignmentQualityOverviewController {
                 standardDeviationPE_Insertsize: FormatHelper.formatToTwoDecimalsNullSave(it.insertSizeSD), //Standard Deviation PE_insertsize
                 medianPE_insertsize: FormatHelper.formatToTwoDecimalsNullSave(it.insertSizeMedian), //Median PE_insertsize
                 meanPE_Insertsize: FormatHelper.formatToTwoDecimalsNullSave(it.insertSizeMean), //Mean PE_insertsize
-
+                dateFromFileSystem:it.processedMergedBamFile.dateFromFileSystem?.format("yyyy-MM-dd"),
                 //warning for duplicates
                 duplicateWarning: warningLevelForDuplicates(duplicates).styleClass,
 
