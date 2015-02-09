@@ -72,6 +72,7 @@ class SnvCallingServiceTests extends GroovyTestCase {
 
         testData.externalScript_Joining = new ExternalScript(
                 scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
+                scriptVersion: 'v1',
                 filePath: "/tmp/scriptLocation/joining.sh",
                 author: "otptest",
         )

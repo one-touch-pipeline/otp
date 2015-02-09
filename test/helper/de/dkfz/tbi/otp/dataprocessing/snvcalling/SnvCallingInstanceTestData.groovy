@@ -84,6 +84,7 @@ class SnvCallingInstanceTestData extends TestData {
 
         externalScript_Joining = new ExternalScript(
                 scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
+                scriptVersion: 'v1',
                 filePath: "/tmp/scriptLocation/joining.sh",
                 author: "otptest",
         )
@@ -93,6 +94,7 @@ class SnvCallingInstanceTestData extends TestData {
     SnvJobResult createAndSaveSnvJobResult(SnvCallingInstance instance, SnvCallingStep step, SnvJobResult inputResult = null, SnvProcessingStates processingState = SnvProcessingStates.FINISHED, boolean withdrawn = false) {
         final ExternalScript externalScript = ExternalScript.findOrSaveWhere(
             scriptIdentifier: step.externalScriptIdentifier,
+            scriptVersion: 'v1',
             deprecatedDate: null,
             filePath: "/dev/null/otp-test/${step.externalScriptIdentifier}",
             author: "otptest",

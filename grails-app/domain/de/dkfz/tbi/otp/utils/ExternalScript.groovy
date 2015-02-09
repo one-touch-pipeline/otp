@@ -20,6 +20,11 @@ class ExternalScript {
     String scriptIdentifier
 
     /**
+     * Defines the version of the script. Needed to have different scripts versions for one scriptIdentifier
+     */
+    String scriptVersion
+
+    /**
      * Absolute path of the script file in the file system.
      */
     String filePath
@@ -64,7 +69,7 @@ class ExternalScript {
                 return true
             }
             //I tried to do this in one step like 'findAllByScriptIdentifierAndDeprecatedDateIsNull' but it did not work
-            List<ExternalScript> externalScripts = ExternalScript.findAllByScriptIdentifier(val)
+            List<ExternalScript> externalScripts = ExternalScript.findAllByScriptIdentifierAndScriptVersion(val, obj.scriptVersion)
             List<ExternalScript> externalScriptsNotDeprecated = externalScripts.findAll() { it.deprecatedDate == null }
 
             if (externalScriptsNotDeprecated.empty) {
@@ -82,10 +87,12 @@ class ExternalScript {
         author blank: false
         comment blank: true, nullable: true
         deprecatedDate nullable: true
+        scriptVersion blank: false
     }
 
     static mapping = {
         scriptIdentifier index: "external_script_identifier_idx"
+        scriptVersion index: "external_script_version_idx"
     }
 
     static ExternalScript getLatestVersionOfScript(final String scriptIdentifier) {

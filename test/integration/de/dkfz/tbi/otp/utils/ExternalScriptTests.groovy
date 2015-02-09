@@ -26,6 +26,7 @@ class ExternalScriptTests {
     private ExternalScript createExternalScript(Map properties = [:]) {
         return new ExternalScript([
             scriptIdentifier: SCRIPT_IDENTIFIER,
+            scriptVersion: 'v1',
             author: "testUser",
             comment: "lets see if it works ;)",
         ] + properties)

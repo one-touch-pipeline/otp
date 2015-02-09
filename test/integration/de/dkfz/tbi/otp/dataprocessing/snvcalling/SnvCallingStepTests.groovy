@@ -157,6 +157,7 @@ class SnvCallingStepTests extends GroovyTestCase {
     private ExternalScript createExternalScript(String identifier, String path = "/tmp/testfolder/testScript.sh") {
         return new ExternalScript(
         scriptIdentifier: identifier,
+        scriptVersion: 'v1',
         filePath: path,
         author: "testUser",
         comment: "lets see if it works ;)",

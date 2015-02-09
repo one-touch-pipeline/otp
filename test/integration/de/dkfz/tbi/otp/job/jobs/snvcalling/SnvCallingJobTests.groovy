@@ -151,6 +151,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         externalScript_Calling = new ExternalScript(
                 scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier,
+                scriptVersion: 'v1',
                 filePath: "/tmp/scriptLocation/calling.sh",
                 author: "otptest",
                 )
@@ -158,6 +159,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         externalScript_Joining = new ExternalScript(
                 scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
+                scriptVersion: 'v1',
                 filePath: "/tmp/scriptLocation/joining.sh",
                 author: "otptest",
                 )

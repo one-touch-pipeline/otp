@@ -93,6 +93,14 @@ class ExternalScriptUnitTests {
         assertFalse(externalScript2.validate())
     }
 
+    void testStoreTwoVersionsForOneIdentifier() {
+        ExternalScript externalScript1 = createExternalScript()
+        externalScript1.save()
+        ExternalScript externalScript2 = createExternalScript([scriptVersion: "v2", filePath: "/tmp/other_testfolder/testScript.sh"])
+        assert(externalScript2.save(failOnError: true))
+    }
+
+
     @Test
     void testGetScriptFilePath() {
         ExternalScript externalScript = createExternalScript()
@@ -104,6 +112,7 @@ class ExternalScriptUnitTests {
     private ExternalScript createExternalScript(Map properties = [:]) {
         return new ExternalScript([
             scriptIdentifier: SCRIPT_IDENTIFIER,
+            scriptVersion: "v1",
             filePath: SCRIPT_FILE_PATH,
             author: "testUser",
             comment: "lets see if it works ;)",

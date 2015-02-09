@@ -98,6 +98,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         ExternalScript externalScript_Calling = new ExternalScript(
                 scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier,
+                scriptVersion: 'v1',
                 filePath: "/tmp/scriptLocation/calling.sh",
                 author: "otptest",
                 )
@@ -117,6 +118,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         ExternalScript externalScript_Annotation = new ExternalScript(
                 scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier,
+                scriptVersion: 'v1',
                 filePath: "/tmp/scriptLocation/annotation.sh",
                 author: "otptest",
                 )
