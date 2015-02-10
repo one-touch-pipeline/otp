@@ -13,10 +13,18 @@
             <g:select class="criteria" id="project" name='project'
                 from='${projects}' value='${project}' onChange='submit();'></g:select>
             <span class="blue_label"><g:message code="alignment.quality.seqType"/> :</span>
-            <g:select class="criteria" id="seqType" name='seqType'
+            <g:if test="${seqTypes.size>1}">
+                <g:select class="criteria" id="seqType" name='seqType'
                 from='${seqTypes}' value='${seqType}' onChange='submit();'></g:select>
+            </g:if>
+            <g:else>
+                <span class="blue_label">
+                ${seqType}
+                </span>
+                <input type='hidden' id='seqType' name='seqType' value='${seqType}'/>
+            </g:else>
         </form>
-        <div class="otpDataTables">
+        <div class="otpDataTables alignmentQualityOverviewTable">
             <otp:dataTable
                 codes="${header}"
                 id="overviewTableProcessedMergedBMF"/>
