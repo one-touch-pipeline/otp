@@ -142,8 +142,9 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     }
 
     private void checkArgumentsForCreateTransferScript() {
-        createClusterScriptService.metaClass.createTransferScript = { List<File> sourceLocations, List<File> targetLocations, List<File> linkLocations, boolean move = false ->
+        createClusterScriptService.metaClass.createTransferScript = { List<File> sourceLocations, List<File> targetLocations, List<File> linkLocations, List<String> md5sums, boolean move = false ->
             assert sourceLocations == linkLocations
+            assert sourceLocations.size() == md5sums.size()
             assert sourceLocations[0].equals(new File(fileName))
             assert targetLocations == [new ExternallyProcessedMergedBamFile(
                     fastqSet: new FastqSet(seqTracks: [SeqTrack.get(lanes1[0])]),
