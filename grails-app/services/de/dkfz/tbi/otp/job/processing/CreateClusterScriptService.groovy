@@ -39,11 +39,25 @@ class CreateClusterScriptService {
      * @return A bash script which can be executed via OTP
      */
     String createTransferScript(List<File> sourceLocations, List<File> targetLocations, List<File> linkLocations, boolean move = false) {
+        return createTransferScript(sourceLocations, targetLocations, linkLocations, null, move)
+    }
+
+    /**
+     * Method to copy and/or link files.
+     * The difference to the method createTransferScript(List<File> sourceLocations, List<File> targetLocations, List<File> linkLocations, boolean move = false)
+     * is that it is possible to provide a list of md5Sums as input. This list has to have the same length as all other input lists.
+     * In case the md5Sums are provided they are not calculated anymore but just validated after transferring the files.
+     * It is possible to have a mixture of md5sums and 'null' in this list.
+     */
+    String createTransferScript(List<File> sourceLocations, List<File> targetLocations, List<File> linkLocations, List<String> md5Sums, boolean move = false) {
         notNull(sourceLocations)
         notNull(targetLocations)
         notNull(linkLocations)
+
+
         assert(sourceLocations.size() == targetLocations.size())
         assert(sourceLocations.size() == linkLocations.size())
+        assert(!md5Sums || sourceLocations.size() == md5Sums.size())
 
         final String CONNECT_TO_BQ = connectToBQCommand()
         StringBuilder copyScript = StringBuilder.newInstance()
@@ -53,13 +67,14 @@ class CreateClusterScriptService {
             File source = sourceLocations.get(i)
             File target = targetLocations.get(i)
             File link = linkLocations.get(i)
+            String md5Sum = md5Sums ? md5Sums.get(i) : null
 
             String prefixDependingOnLocation
             String suffixDependingOnLocation
 
             // source and target are given -> file shall be copied
             if (source && target) {
-                copyScript << createCopyScript(source, target, move)
+                copyScript << createCopyScript(source, target, md5Sum, move)
             }
             // link files if needed
             if (link) {
@@ -70,7 +85,7 @@ class CreateClusterScriptService {
         return copyScript
     }
 
-    String createCopyScript(File source, File target, boolean move = false) {
+    String createCopyScript(File source, File target, String md5Sum, boolean move = false) {
         notNull(source)
         notNull(target)
         boolean sourceAtDKFZ
@@ -95,11 +110,15 @@ class CreateClusterScriptService {
         copyScript << "if [ -f ${source} ]; then\n"
 
         // create md5sum
+        copyScript << "${prefixDependingOnLocation}"
         if (source.isDirectory()) {
-            copyScript << "${prefixDependingOnLocation}find ${source.getPath()} -type f -exec md5sum '{}' \\; >> ${source.parent}/${MD5SUM_NAME}${suffixDependingOnLocation};\n"
+            copyScript << "find ${source.getPath()} -type f -exec md5sum '{}' \\; >>"
+        } else if ( md5Sum) {
+            copyScript << "echo '${md5Sum}  ${target.absolutePath}' >"
         } else {
-            copyScript << "${prefixDependingOnLocation}md5sum ${source} > ${source.parent}/${MD5SUM_NAME}${suffixDependingOnLocation};\n"
+            copyScript << "md5sum ${source} >"
         }
+        copyScript << " ${source.parent}/${MD5SUM_NAME}${suffixDependingOnLocation};\n"
 
         // create output directory
         prefixDependingOnLocation = targetAtDKFZ ? "" : "${CONNECT_TO_BQ} \""
