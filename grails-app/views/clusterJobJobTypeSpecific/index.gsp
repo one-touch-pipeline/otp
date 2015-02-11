@@ -50,7 +50,7 @@
                 <tr>
                     <td>
                         <div class="jobTypSpecificValue"><g:message code="jobstats.jobTypeSpecific.averageTable.averageMemoryUsedInKiB"/></div>
-                        <div class="toolTipContainer  jobTypSpecificValueToolTip">
+                        <div class="toolTipContainer jobTypSpecificValueToolTip">
                             <span class="toolTip"><g:message code="jobstats.jobTypeSpecific.averageTable.toolTip.averageMemoryUsed"/></span>
                         </div>
                     </td>
