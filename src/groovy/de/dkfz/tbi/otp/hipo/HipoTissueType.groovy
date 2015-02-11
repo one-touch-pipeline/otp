@@ -8,15 +8,16 @@ public enum HipoTissueType {
     METASTASIS                ('M'),
     SPHERE                    ('S'),
     XENOGRAFT                 ('X'),
-    BIOPSY                    ('Y'),
     BLOOD                     ('B'),
     CONTROL                   ('N'),
     CELL                      ('C'),
     INVASIVE_MARGINS          ('I'),
     PATIENT_DERIVED_CULTURE   ('P'),
     CULTURE_DERIVED_XENOGRAFT ('Q'),
-    LIQUID_BIOPSY             ('L'),
+    PLASMA                    ('L'),
     BUFFY_COAT                ('F'),
+    NORMAL_SORTED_CELLS       ('Z'),
+    TUMOR_INTERVAL_DEBULKING_SURGLEY ('E'),
 
     final char key
 

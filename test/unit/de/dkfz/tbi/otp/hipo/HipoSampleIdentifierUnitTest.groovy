@@ -115,4 +115,33 @@ class HipoSampleIdentifierUnitTest {
         assertEquals(tissueTypeExp, tissueTypeAct)
     }
 
+    @Test
+    void testSampleType_checkTissueType_PLASMA() {
+        String sampleName = "H001-BPDK-L8-C02"
+        String tissueTypeExp = "PLASMA08"
+
+        HipoSampleIdentifier identifier = HipoSampleIdentifier.tryParse(sampleName)
+        assert null != identifier
+        assert tissueTypeExp == identifier.sampleTypeDbName
+    }
+
+    @Test
+    void testSampleType_checkTissueType_NORMAL_SORTED_CELLS() {
+        String sampleName = "H001-BPDK-Z8-C02"
+        String tissueTypeExp = "NORMAL_SORTED_CELLS08"
+
+        HipoSampleIdentifier identifier = HipoSampleIdentifier.tryParse(sampleName)
+        assert null != identifier
+        assert tissueTypeExp == identifier.sampleTypeDbName
+    }
+
+    @Test
+    void testSampleType_checkTissueType_TUMOR_INTERVAL_DEBULKING_SURGLEY() {
+        String sampleName = "H003-BPDK-E8-C02"
+        String tissueTypeExp = "TUMOR_INTERVAL_DEBULKING_SURGLEY08"
+
+        HipoSampleIdentifier identifier = HipoSampleIdentifier.tryParse(sampleName)
+        assert null != identifier
+        assert tissueTypeExp == identifier.sampleTypeDbName
+    }
 }
