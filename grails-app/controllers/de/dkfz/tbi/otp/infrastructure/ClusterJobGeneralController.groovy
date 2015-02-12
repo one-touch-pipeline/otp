@@ -6,6 +6,31 @@ import org.joda.time.LocalDate
 
 class ClusterJobGeneralController {
 
+
+    public enum GeneralClusterJobsColumns {
+        CLUSTER_JOB_ID(0, 'clusterJobId'),
+        CLUSTER_JOB_NAME(1, 'clusterJobName'),
+        EXIT_STATUS(2, 'exitStatus'),
+        QUEUED(3, 'queued'),
+        STARTED(4, 'started'),
+        ENDED(5, 'ended')
+
+        private final int index
+
+        private final String columnName
+
+        GeneralClusterJobsColumns(int index, String column) {
+            this.index = index
+            this.columnName = column
+        }
+
+        static GeneralClusterJobsColumns fromDataTable(int column) {
+            return values().find {it.index == column} ?: CLUSTER_JOB_ID
+        }
+    }
+
+
+
     public static final String FORMAT_STRING = "yyyy-MM-dd HH:mm:ss"
 
     ClusterJobService clusterJobService
@@ -20,12 +45,13 @@ class ClusterJobGeneralController {
 
         LocalDate startDate = LocalDate.parse(params.from)
         LocalDate endDate = LocalDate.parse(params.to)
+        String sortColumnName = GeneralClusterJobsColumns.fromDataTable(cmd.iSortCol_0).columnName
 
-        def clusterJobs = clusterJobService.findAllClusterJobsByDateBetween(startDate, endDate)
+        def clusterJobs = clusterJobService.findAllClusterJobsByDateBetween(startDate, endDate, cmd.sSearch, cmd.iDisplayStart, cmd.iDisplayLength, sortColumnName, cmd.sSortDir_0)
         def data = clusterJobs.collect {
             return [it.clusterJobId, it.clusterJobName, it.exitStatus?.toString(), it.queued?.toString(FORMAT_STRING), it.started?.toString(FORMAT_STRING), it.ended?.toString(FORMAT_STRING), it.id]
         }
-        dataToRender.iTotalRecords = data.size()
+        dataToRender.iTotalRecords = clusterJobService.countAllClusterJobsByDateBetween(startDate, endDate, cmd.sSearch)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
         render dataToRender as JSON

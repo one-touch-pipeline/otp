@@ -147,13 +147,42 @@ class ClusterJobService {
      * returns a List of Cluster Jobs in a specific time span
      * @return List [clusterJob1, clusterJob2, ...]
      */
-    public List findAllClusterJobsByDateBetween(LocalDate sDate, LocalDate eDate) {
+    public List findAllClusterJobsByDateBetween(LocalDate sDate, LocalDate eDate, String filter, int offset, int displayedLines, String sortedColumn, String sortOrder) {
         def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
 
         return ClusterJob.createCriteria().list {
-            order('queued', 'asc')
+            order(sortedColumn, sortOrder)
             ge('queued', startDate)
             lt('ended', endDate)
+            if (filter) {
+                or {
+                    ilike('clusterJobId', "%${filter}%")
+                    ilike('clusterJobName', "%${filter}%")
+                }
+            }
+            firstResult(offset)
+            maxResults(displayedLines)
+        }
+    }
+
+    /**
+     * returns the number of Cluster Jobs in a specific time span
+     */
+    public int countAllClusterJobsByDateBetween(LocalDate sDate, LocalDate eDate, String filter) {
+        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+
+        return ClusterJob.createCriteria().get {
+            projections {
+                ge('queued', startDate)
+                lt('ended', endDate)
+                if (filter) {
+                    or {
+                        ilike('clusterJobId', "%${filter}%")
+                        ilike('clusterJobName', "%${filter}%")
+                    }
+                }
+                rowCount()
+            }
         }
     }
 
@@ -205,7 +234,7 @@ class ClusterJobService {
         }
 
         def data = hourBuckets.collect { cHour ->
-            DateTime currentHour = dateTimeFormatter.parseDateTime(cHour);
+            DateTime currentHour = dateTimeFormatter.parseDateTime(cHour)
             DateTime nextHour = currentHour.plusHours(1)
 
             return result.count {
@@ -232,7 +261,7 @@ class ClusterJobService {
                 lt(state, endDate)
             }
             data."${state}".addAll(hourBuckets.collect({ cHour ->
-                DateTime currentHour = dateTimeFormatter.parseDateTime(cHour);
+                DateTime currentHour = dateTimeFormatter.parseDateTime(cHour)
                 def nextHour = currentHour.plusHours(1)
                 def jobsThisHour = results.grep {
                     it."${state}" >= currentHour && it."${state}" <  nextHour
@@ -352,7 +381,7 @@ class ClusterJobService {
             }
             def dateTimeFormatter = DateTimeFormat.forPattern(FORMAT_STRING)
             data."${state}".addAll(hourBuckets.collect({ cHour ->
-                DateTime currentHour = dateTimeFormatter.parseDateTime(cHour);
+                DateTime currentHour = dateTimeFormatter.parseDateTime(cHour)
                 def nextHour = currentHour.plusHours(1)
                 def jobsThisHour = results.grep {
                     it."${state}" >= currentHour && it."${state}" <  nextHour

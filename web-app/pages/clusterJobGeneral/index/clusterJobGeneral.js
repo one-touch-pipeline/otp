@@ -29,7 +29,7 @@ $.otp.clusterJobGeneralTable = {
             dom: '<"top"filp<"clear">>rt',
             bFilter : true,
             bProcessing : true,
-            bServerSide : false,
+            bServerSide : true,
             bSort : true,
             bJQueryUI : false,
             bAutoWidth : false,

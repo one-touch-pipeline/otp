@@ -132,6 +132,7 @@ class ClusterJob implements ClusterJobIdentifier{
         cpuTime type: PersistentDurationAsString
 
         clusterJobId index: "cluster_job_cluster_job_id_idx"
+        clusterJobName index: "cluster_job_cluster_job_name_idx"
     }
 
     public Cluster getCluster() {
