@@ -217,11 +217,6 @@ class ProcessedMergedBamFileService {
         return assertSave(processedMergedBamFile)
     }
 
-    @Deprecated
-    public List<SeqTrack> seqTracks(ProcessedMergedBamFile processedMergedBamFile) {
-        return processedMergedBamFile.containedSeqTracks as List
-    }
-
     private def assertSave(def object) {
         object = object.save(flush: true)
         if (!object) {
@@ -466,17 +461,11 @@ class ProcessedMergedBamFileService {
         SeqType seqType = seqType(processedMergedBamFile)
         // Only in case of seqtype = exome an enrichment kit can be available, for all other seqTypes null has to be returned
         if(seqType.name == SeqTypeNames.EXOME.seqTypeName) {
-            List<ExomeSeqTrack> exomeSeqTracks = seqTracks(processedMergedBamFile).findAll { it instanceof ExomeSeqTrack }
+            Collection<ExomeSeqTrack> exomeSeqTracks = processedMergedBamFile.containedSeqTracks.findAll { it instanceof ExomeSeqTrack }
             if(exomeSeqTracks*.exomeEnrichmentKit.unique().size > 1) {
                 throw new ProcessingException("There is no unique kit for the mergedBamFile " + processedMergedBamFile)
             }
-
-            List<ExomeSeqTrack> seqTracksWithInferredExomeEnrichmentKits = exomeSeqTracks.findAll { it.kitInfoReliability == InformationReliability.INFERRED }
-            if (seqTracksWithInferredExomeEnrichmentKits.empty) {
-                return null
-            }else {
-                return seqTracksWithInferredExomeEnrichmentKits*.exomeEnrichmentKit.first()
-            }
+            return exomeSeqTracks.find({ it.kitInfoReliability == InformationReliability.INFERRED })?.exomeEnrichmentKit
         }
         return null
     }
