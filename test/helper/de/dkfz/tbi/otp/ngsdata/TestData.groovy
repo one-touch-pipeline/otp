@@ -176,28 +176,28 @@ class TestData {
 
     FastqcProcessedFile createFastqcProcessedFile(Map properties = [:]) {
         return new FastqcProcessedFile([
-                fileExists: true,
-                contentUploaded: true,
-                dataFile: dataFile,
+            fileExists: true,
+            contentUploaded: true,
+            dataFile: dataFile,
         ] + properties)
     }
 
     FastqcBasicStatistics createFastqcBasicStatistics(Map properties = [:]) {
         return new FastqcBasicStatistics([
-                fileType         : 'Conventional base calls',
-                encoding         : 'Sanger / Illumina 1.9',
-                totalSequences   : 1,
-                filteredSequences: 1,
-                sequenceLength   : 1,
+            fileType         : 'Conventional base calls',
+            encoding         : 'Sanger / Illumina 1.9',
+            totalSequences   : 1,
+            filteredSequences: 1,
+            sequenceLength   : 1,
         ] + properties)
     }
 
     DataFile createDataFile(SeqTrack seqTrack, RunSegment runSegment, FileType fileType = this.fileType) {
         return createDataFile(
-        seqTrack: seqTrack,
-        runSegment: runSegment,
-        fileType: fileType,
-        )
+                seqTrack: seqTrack,
+                runSegment: runSegment,
+                fileType: fileType,
+                )
     }
 
     DataFile createDataFile(Map properties = [:]) {
@@ -246,8 +246,8 @@ class TestData {
             run: run,
             initialFormat: DataFormat.FILES_IN_DIRECTORY,
             currentFormat: DataFormat.FILES_IN_DIRECTORY,
-            dataPath: "dataPath",
-            mdPath: "mdPath",
+            dataPath: "/tmp/",
+            mdPath: "/tmp/",
         ] + properties)
     }
 
@@ -328,8 +328,8 @@ class TestData {
 
     ProcessedSaiFile createProcessedSaiFile(Map properties = [:]) {
         return new ProcessedSaiFile([
-                fileExists: true,
-                dataFile: dataFile,
+            fileExists: true,
+            dataFile: dataFile,
         ] + properties)
     }
 

@@ -18,7 +18,7 @@ class LsdfFilesServiceTests extends GroovyTestCase {
 
     LsdfFilesService lsdfFilesService
 
-    String ftpDir = "someFtpDir"
+    String ftpDir = "/tmp"
     String fastqR1Filename = "example_fileR1.fastq.gz"
     String runName = "130312_D00133_0018_ADTWTJACXX"
     String runDate = "2013-03-12"

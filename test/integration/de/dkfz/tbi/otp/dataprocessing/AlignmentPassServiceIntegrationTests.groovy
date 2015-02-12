@@ -53,8 +53,8 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         runSegment.filesStatus = RunSegment.FilesStatus.FILES_MISSING
         runSegment.initialFormat = RunSegment.DataFormat.TAR
         runSegment.currentFormat = RunSegment.DataFormat.TAR
-        runSegment.dataPath = ''
-        runSegment.mdPath = ''
+        runSegment.dataPath = '/tmp/'
+        runSegment.mdPath = '/tmp/'
         assertNotNull(runSegment.save(flush: true))
         assertNull(alignmentPassService.findAlignableSeqTrack())
         runSegment.metaDataStatus = RunSegment.Status.COMPLETE
@@ -199,9 +199,9 @@ class AlignmentPassServiceIntegrationTests extends TestData {
     }
 
     private void findAlignableSeqTrackTest(
-                    final SeqTrack.DataProcessingState state,
-                    final int nonWithdrawnDataFiles,
-                    final int withdrawnDataFiles) {
+            final SeqTrack.DataProcessingState state,
+            final int nonWithdrawnDataFiles,
+            final int withdrawnDataFiles) {
         seqTrack.alignmentState = state
         Collection<DataFile> dataFiles = new ArrayList<DataFile>()
         for (int i = 0; i < nonWithdrawnDataFiles; i++) {
@@ -309,17 +309,17 @@ class AlignmentPassServiceIntegrationTests extends TestData {
 
     private ProcessedBamFile createProcessedBamFile(SeqTrack seqTrack, int identifier) {
         AlignmentPass alignmentPass = createAlignmentPass(
-                        identifier: identifier,
-                        seqTrack: seqTrack,
-                        description: "test"
-                        )
+                identifier: identifier,
+                seqTrack: seqTrack,
+                description: "test"
+                )
         assertNotNull(alignmentPass.save([flush: true, failOnError: true]))
 
         ProcessedBamFile processedBamFile = new ProcessedBamFile(
-                        alignmentPass: alignmentPass,
-                        type: BamType.SORTED,
-                        status: State.NEEDS_PROCESSING
-                        )
+                alignmentPass: alignmentPass,
+                type: BamType.SORTED,
+                status: State.NEEDS_PROCESSING
+                )
         assertNotNull(processedBamFile.save([flush: true, failOnError: true]))
         return processedBamFile
     }
