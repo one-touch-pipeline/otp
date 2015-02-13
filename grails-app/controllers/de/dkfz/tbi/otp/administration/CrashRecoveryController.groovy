@@ -38,12 +38,12 @@ class CrashRecoveryController {
         // TODO: sorting
         crashedJobs.each { step ->
             dataToRender.aaData << [
-                    step.id,
-                    [id: step.process.jobExecutionPlan.id, name: step.process.jobExecutionPlan.name],
-                    step.process.id,
-                    [id: step.id, name: step.jobDefinition.name],
-                    ["class": step.jobClass, version: step.jobVersion]
-                ]
+                step.id,
+                [id: step.process.jobExecutionPlan.id, name: step.process.jobExecutionPlan.name],
+                step.process.id,
+                [id: step.id, name: step.jobDefinition.name],
+                ["class": step.jobClass, version: step.jobVersion]
+            ]
         }
         render dataToRender as JSON
     }
@@ -52,8 +52,11 @@ class CrashRecoveryController {
         boolean success = true
         String error = null
         try {
-            crashRecoveryService.markJobAsFailed(params.id as Long, params.message)
-        } catch (RuntimeException e) {
+            assert params.ids : 'No ids given'
+            assert params.message : 'No message given'
+            List<Long> ids = params.ids.split(',').collect{it as long}
+            crashRecoveryService.markJobsAsFailed(ids, params.message)
+        } catch (Throwable e) {
             success = false
             error = e.message
         }
@@ -65,8 +68,11 @@ class CrashRecoveryController {
         boolean success = true
         String error = null
         try {
-            crashRecoveryService.restartJob(params.id as Long, params.message)
-        } catch (RuntimeException e) {
+            assert params.ids : 'No ids given'
+            assert params.message : 'No message given'
+            List<Long> ids = params.ids.split(',').collect{it as long}
+            crashRecoveryService.restartJobs(ids, params.message)
+        } catch (Throwable e) {
             success = false
             error = e.message
         }
@@ -75,12 +81,12 @@ class CrashRecoveryController {
     }
 
     def markFinished() {
-        def data = performMarkAsFinished(false, params.id as Long, params)
+        def data = performMarkAsFinished(false, params)
         render data as JSON
     }
 
     def markSucceeded() {
-        def data = performMarkAsFinished(true, params.id as Long, params)
+        def data = performMarkAsFinished(true, params)
         render data as JSON
     }
 
@@ -96,24 +102,31 @@ class CrashRecoveryController {
     }
 
     def parametersOfJob() {
-        [parameters: crashRecoveryService.getOutputParametersOfJob(params.id as Long)]
+        List<Long> ids = params.ids.split(',').collect{it as long}
+        [parametersPerJobs: crashRecoveryService.getOutputParametersOfJobs(ids)]
     }
 
-    private performMarkAsFinished(boolean successOrFinished, Long processingStepId, Map params) {
+    private performMarkAsFinished(boolean successOrFinished, Map params) {
         boolean success = true
         String error = null
-        def jsonParameters = JSON.parse(params["parameters"])
-        Map<String, String> parameters = [:]
-        jsonParameters.each {
-            parameters.put(it.key, it.value)
-        }
         try {
-            if (successOrFinished) {
-                crashRecoveryService.markJobAsSucceeded(processingStepId, parameters)
-            } else {
-                crashRecoveryService.markJobAsFinished(processingStepId, parameters)
+            assert params.ids : 'No ids given'
+            assert params.parameters : 'No parameters given'
+            List<Long> ids = params.ids.split(',').collect{it as long}
+            def jsonParameters = JSON.parse(params["parameters"])
+            Map parameters = ids.collectEntries{[(it): [:]]}
+            jsonParameters.each {
+                String[] keys = it.key.split('!')
+                assert keys.length == 2 : "Expect 2 parts, found ${keys.length} parts, value: ${keys}"
+                parameters.get(keys[0] as long).put(keys[1], it.value)
             }
-        } catch (RuntimeException e) {
+
+            if (successOrFinished) {
+                crashRecoveryService.markJobsAsSucceeded(ids, parameters)
+            } else {
+                crashRecoveryService.markJobsAsFinished(ids, parameters)
+            }
+        } catch (Throwable e) {
             success = false
             error = e.message
         }

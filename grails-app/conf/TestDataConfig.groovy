@@ -1,5 +1,6 @@
 import grails.util.Environment
 import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile
+import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
@@ -69,6 +70,15 @@ testDataConfig {
             //Ensure to use this subclass of AbstractBamFile
             //Otherwise the plugin tries to create an ExternallyProcessedMergedBamFile, but it fails to create the FastqSet
             bamFile = {ProcessedBamFile.build()}
+        }
+        'de.dkfz.tbi.otp.job.plan.JobExecutionPlan' {
+            name = {'plan_' + (counter++)}
+        }
+        'de.dkfz.tbi.otp.job.processing.ParameterType' {
+            name = {'parameterTypeName_' + (counter++)}
+        }
+        'de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate' {
+            state: ExecutionState.CREATED
         }
     }
 }

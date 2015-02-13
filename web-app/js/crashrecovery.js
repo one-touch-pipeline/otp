@@ -1,10 +1,13 @@
 /*global $*/
 
 $.otp.crashRecovery = {};
-$.otp.crashRecovery.processingStepId = function () {
+$.otp.crashRecovery.processingStepIds = function () {
     "use strict";
-    var id = $("#crashRecoveryTable input[name=processingStep]:checked").val();
-    if (!id) {
+    var ids = [];
+    $("#crashRecoveryTable input[name=processingStep]:checked").each (function(index, element) {
+        ids.push($(element).val());
+    });
+    if (!ids) {
         $("#dialog-select-job").dialog({
             modal: true,
             buttons: {
@@ -15,7 +18,7 @@ $.otp.crashRecovery.processingStepId = function () {
         });
         return null;
     }
-    return id;
+    return ids;
 };
 
 $.otp.crashRecovery.createListView = function () {
@@ -27,7 +30,7 @@ $.otp.crashRecovery.createListView = function () {
         var i, rowData;
         for (i = 0; i < json.aaData.length; i += 1) {
             rowData = json.aaData[i];
-            rowData[0] = '<input type="radio" name="processingStep" value="' + rowData[0] + '"/>';
+            rowData[0] = '<input type="checkbox" name="processingStep" value="' + rowData[0] + '"/>';
             rowData[1] = $.otp.createLinkMarkup({
                 controller: 'processes',
                 action: 'plan',
@@ -54,14 +57,15 @@ $.otp.crashRecovery.createListView = function () {
         140);
 };
 
-$.otp.crashRecovery.showParametersDialog = function (id, target) {
+$.otp.crashRecovery.showParametersDialog = function (ids, target) {
     "use strict";
     $.get($.otp.createLink({
         controller: 'crashRecovery',
         action: 'parametersOfJob',
-        id: id
+        parameters: {ids: ids}
     }), function (data) {
         $(data).dialog({
+            width: '500px',
             buttons: {
                 Ok: function () {
                     var parameters = [];
@@ -74,7 +78,7 @@ $.otp.crashRecovery.showParametersDialog = function (id, target) {
                     $.getJSON($.otp.createLink({
                         controller: target.controller,
                         action: target.action,
-                        id: id
+                        parameters: {ids: ids}
                     }), 'parameters=' + JSON.stringify(parameters), function (data) {
                         $("#crashRecoveryTable").dataTable().fnDraw();
                         $.otp.infoMessage(data.success);
@@ -89,7 +93,7 @@ $.otp.crashRecovery.showParametersDialog = function (id, target) {
     });
 };
 
-$.otp.crashRecovery.showFailedJobDialog = function (id, target) {
+$.otp.crashRecovery.showFailedJobDialog = function (ids, target) {
     "use strict";
     $("#dialog-error-message-job").dialog({
         modal: true,
@@ -104,7 +108,7 @@ $.otp.crashRecovery.showFailedJobDialog = function (id, target) {
                 $.getJSON($.otp.createLink({
                     controller: target.controller,
                     action: target.action,
-                    id: id
+                    parameters: {ids: ids}
                 }), {message: message}, function (data) {
                     $("#crashRecoveryTable").dataTable().fnDraw();
                     $.otp.infoMessage(data.success);
@@ -119,11 +123,11 @@ $.otp.crashRecovery.showFailedJobDialog = function (id, target) {
 
 $.otp.crashRecovery.finishedButton = function () {
     "use strict";
-    var id = $.otp.crashRecovery.processingStepId();
-    if (!id) {
+    var ids = $.otp.crashRecovery.processingStepIds();
+    if (!ids) {
         return;
     }
-    $.otp.crashRecovery.showParametersDialog(id, {
+    $.otp.crashRecovery.showParametersDialog(ids, {
         controller: 'crashRecovery',
         action: 'markFinished'
     });
@@ -131,11 +135,11 @@ $.otp.crashRecovery.finishedButton = function () {
 
 $.otp.crashRecovery.succeededButton = function () {
     "use strict";
-    var id = $.otp.crashRecovery.processingStepId();
-    if (!id) {
+    var ids = $.otp.crashRecovery.processingStepIds();
+    if (!ids) {
         return;
     }
-    $.otp.crashRecovery.showParametersDialog(id, {
+    $.otp.crashRecovery.showParametersDialog(ids, {
         controller: 'crashRecovery',
         action: 'markSucceeded'
     });
@@ -143,11 +147,11 @@ $.otp.crashRecovery.succeededButton = function () {
 
 $.otp.crashRecovery.failedButton = function () {
     "use strict";
-    var id = $.otp.crashRecovery.processingStepId();
-    if (!id) {
+    var ids = $.otp.crashRecovery.processingStepIds();
+    if (!ids) {
         return;
     }
-    $.otp.crashRecovery.showFailedJobDialog(id, {
+    $.otp.crashRecovery.showFailedJobDialog(ids, {
         controller: 'crashRecovery',
         action: 'markFailed'
     });
@@ -155,11 +159,11 @@ $.otp.crashRecovery.failedButton = function () {
 
 $.otp.crashRecovery.restartButton = function () {
     "use strict";
-    var id = $.otp.crashRecovery.processingStepId();
-    if (!id) {
+    var ids = $.otp.crashRecovery.processingStepIds();
+    if (!ids) {
         return;
     }
-    $.otp.crashRecovery.showFailedJobDialog(id, {
+    $.otp.crashRecovery.showFailedJobDialog(ids, {
         controller: 'crashRecovery',
         action: 'restart'
     });
