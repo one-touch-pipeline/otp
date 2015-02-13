@@ -394,6 +394,83 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvCompletionJob.linkConfigFiles(snvCallingInstance2)
     }
 
+
+
+    @Test
+    void testDeleteConfigFileLinkOfPreviousInstance_InputRealmNull_ShouldFail() {
+        shouldFail(IllegalArgumentException, {
+            snvCompletionJob.deleteConfigFileLinkOfPreviousInstance(null, snvCallingInstance)
+        })
+
+    }
+
+    @Test
+    void testDeleteConfigFileLinkOfPreviousInstance_InputInstanceNull_ShouldFail() {
+        shouldFail(IllegalArgumentException, {
+            snvCompletionJob.deleteConfigFileLinkOfPreviousInstance(realm_processing, null)
+        })
+    }
+
+    @Test
+    void testDeleteConfigFileLinkOfPreviousInstance_NoPreviousInstance_NothingToDelete() {
+        executionService.metaClass.executeCommand = {Realm realm, String command ->
+            throw  new RuntimeException("This method should not be reached since nothing has to be deleted")
+        }
+
+        snvCompletionJob.deleteConfigFileLinkOfPreviousInstance(realm_processing, snvCallingInstance)
+    }
+
+    @Test
+    void testDeleteConfigFileLinkOfPreviousInstance_OnePreviousInstance_OneFileToDelete() {
+        SnvCallingInstance snvCallingInstance2 = DomainFactory.createSnvCallingInstance(
+                instanceName: OTHER_INSTANCE_NAME,
+                config: snvConfig,
+                sampleType1BamFile: processedMergedBamFile1,
+                sampleType2BamFile: processedMergedBamFile2,
+                samplePair: samplePair)
+        assert snvCallingInstance2.save()
+
+        File fileToDelete = snvCallingInstance2.getStepConfigFileLinkedPath(SnvCallingStep.CALLING).absoluteDataManagementPath
+        fileToDelete.parentFile.mkdirs()
+        fileToDelete.createNewFile()
+        executionService.metaClass.executeCommand = {Realm realm, String command ->
+            assert command.contains("rm -f ${fileToDelete.path}")
+            fileToDelete.delete()
+        }
+
+        snvCompletionJob.deleteConfigFileLinkOfPreviousInstance(realm_processing, snvCallingInstance2)
+    }
+
+    @Test
+    void testDeleteConfigFileLinkOfPreviousInstance_TwoPreviousInstances_OneFileToDelete() {
+        SnvCallingInstance snvCallingInstance2 = DomainFactory.createSnvCallingInstance(
+                instanceName: OTHER_INSTANCE_NAME,
+                config: snvConfig,
+                sampleType1BamFile: processedMergedBamFile1,
+                sampleType2BamFile: processedMergedBamFile2,
+                samplePair: samplePair)
+        assert snvCallingInstance2.save()
+
+        SnvCallingInstance snvCallingInstance3 = DomainFactory.createSnvCallingInstance(
+                instanceName: "thirdInstanceName",
+                config: snvConfig,
+                sampleType1BamFile: processedMergedBamFile1,
+                sampleType2BamFile: processedMergedBamFile2,
+                samplePair: samplePair)
+        assert snvCallingInstance3.save()
+
+        File fileToDelete = snvCallingInstance3.getStepConfigFileLinkedPath(SnvCallingStep.CALLING).absoluteDataManagementPath
+        fileToDelete.parentFile.mkdirs()
+        fileToDelete.createNewFile()
+
+        executionService.metaClass.executeCommand = {Realm realm, String command ->
+            assert command.contains("rm -f ${fileToDelete.path}")
+            fileToDelete.delete()
+        }
+
+        snvCompletionJob.deleteConfigFileLinkOfPreviousInstance(realm_processing, snvCallingInstance3)
+    }
+
     // Helper methods
 
     private createFakeResultFiles(File stagingPath) {

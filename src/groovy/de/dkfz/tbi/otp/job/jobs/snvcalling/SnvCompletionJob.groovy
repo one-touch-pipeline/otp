@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.utils.LinkFileUtils
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import groovy.io.FileType
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
@@ -40,13 +41,14 @@ class SnvCompletionJob extends AbstractEndStateAwareJobImpl {
     @Override
     void execute() throws Exception {
         final SnvCallingInstance snvCallingInstance = getProcessParameterObject()
-
         assert snvCallingInstance.processingState == IN_PROGRESS
+        final Realm realm = configService.getRealmDataProcessing(snvCallingInstance.project)
 
         /**
          * link the result files of the snvCallingInstance and the config files to the sample pair folder
          */
         linkResultFiles(snvCallingInstance)
+        deleteConfigFileLinkOfPreviousInstance(realm, snvCallingInstance)
         linkConfigFiles(snvCallingInstance)
 
         deleteStagingDirectory snvCallingInstance
@@ -95,6 +97,30 @@ class SnvCompletionJob extends AbstractEndStateAwareJobImpl {
             if (config.getExecuteStepFlag(it)) {
                 File linkToFile = instance.getStepConfigFileLinkedPath(it).absoluteDataManagementPath
                 linkFileUtils.createAndValidateLinks([(configFile): linkToFile], configService.getRealmDataProcessing(instance.project))
+            }
+        }
+    }
+
+
+    /**
+     * Deletes config files links for processed SNV steps of previous SnvCallingInstances for the SamplePair
+     * if they exist in the file system.
+     */
+    void deleteConfigFileLinkOfPreviousInstance(Realm realm, SnvCallingInstance snvCallingInstance) {
+        notNull(realm)
+        notNull(snvCallingInstance)
+        SnvConfig config = snvCallingInstance.config.evaluate()
+        List<SnvCallingInstance> allInstancesForTheSamplePair = SnvCallingInstance.findAllBySamplePair(snvCallingInstance.samplePair)
+        List<SnvCallingInstance> previousInstances = allInstancesForTheSamplePair - snvCallingInstance
+        previousInstances.each { SnvCallingInstance instance ->
+            SnvCallingStep.values().each { SnvCallingStep step ->
+                if (config.getExecuteStepFlag(step)) {
+                    File configFileLink = instance.getStepConfigFileLinkedPath(step).absoluteDataManagementPath
+                    if (configFileLink.exists()) {
+                        executionService.executeCommand(realm, "rm -f ${configFileLink.path}")
+                        assert WaitingFileUtils.confirmDoesNotExist(configFileLink)
+                    }
+                }
             }
         }
     }
