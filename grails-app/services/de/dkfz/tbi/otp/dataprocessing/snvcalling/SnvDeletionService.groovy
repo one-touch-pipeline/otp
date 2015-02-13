@@ -6,37 +6,49 @@ public class SnvDeletionService {
 
 
     /**
-     * Delete all SnvJobResults, SnvCallingInstances and SamplePairs for the given bamFile.
-     * It returns the directories of the samplePairs for separate deletion by the caller.
+     * Delete all SnvJobResults, SnvCallingInstances, and empty SamplePairs (SamplePairs with no further SnvCallingInstance)
+     * for the given bam file from the database. It is the responsibility of the caller to delete the returned directories.
+     * It returns first the directories of the SnvCallingInstances and then the directories of the deleted SamplePairs
+     * for separate deletion by the caller. The SamplePair directories are parent directories of the SnvCallingInstance directories,
+     * therefore the order is important.
      */
     List<File> deleteForProcessedMergedBamFile(ProcessedMergedBamFile bamFile) {
         assert bamFile
+        List<File> directoriesToDelete = []
+
         List<SnvCallingInstance> instances = SnvCallingInstance.findAllBySampleType1BamFileOrSampleType2BamFile(bamFile, bamFile)
         assertThatNoSnvAreRunning(instances)
-
         List<SamplePair> samplePairs = instances*.samplePair.unique()
-        List<File> paths = pathsForSamplePairs(samplePairs)
 
         instances.each {
-            deleteInstance(it)
+            directoriesToDelete << deleteInstance(it)
         }
-        samplePairs*.delete()
-        return paths
+
+        directoriesToDelete.addAll(deleteSamplePairsWithoutSnvCallingInstances(samplePairs))
+
+        return directoriesToDelete
     }
 
 
-    private void deleteInstance(SnvCallingInstance snvCallingInstance) {
+    private File deleteInstance(SnvCallingInstance snvCallingInstance) {
+        File directory = snvCallingInstance.getSnvInstancePath().getAbsoluteDataManagementPath()
         List<SnvJobResult> results = SnvJobResult.findAllBySnvCallingInstance(snvCallingInstance, [sort: 'id', order: 'desc'])
         results.each {
             it.delete()
         }
         snvCallingInstance.delete()
+        return directory
     }
 
-    private List<File> pathsForSamplePairs(List<SamplePair> samplePairs) {
-        return samplePairs.collect {
-            it.getSamplePairPath().getAbsoluteDataManagementPath()
+    private List<File> deleteSamplePairsWithoutSnvCallingInstances(List<SamplePair> samplePairs) {
+        List<File> directoriesToDelete = []
+        samplePairs.each { SamplePair samplePair ->
+            if (!SnvCallingInstance.findBySamplePair(samplePair)) {
+                directoriesToDelete << samplePair.getSamplePairPath().getAbsoluteDataManagementPath()
+                samplePair.delete()
+            }
         }
+        return directoriesToDelete
     }
 
     private assertThatNoSnvAreRunning(List<SnvCallingInstance> instances) {
