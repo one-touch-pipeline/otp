@@ -79,5 +79,6 @@ class MergingWorkPackage {
     static mapping = {
         sample index: "merging_work_package_sample_idx"
         seqType index: "merging_work_package_seq_type_idx"
+        referenceGenome index: "merging_work_package_reference_genome_idx"
     }
 }

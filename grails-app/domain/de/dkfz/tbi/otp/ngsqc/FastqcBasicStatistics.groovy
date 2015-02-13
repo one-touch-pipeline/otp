@@ -28,4 +28,10 @@ class FastqcBasicStatistics {
     static belongsTo = [
         fastqcProcessedFile: FastqcProcessedFile
     ]
+
+
+
+    static mapping = {
+        fastqcProcessedFile index: "fastqc_basic_statistics_fastqc_processed_file_idx"
+    }
 }

@@ -9,7 +9,7 @@ import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames;
+import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
 
 abstract class AbstractBamFile {
 
@@ -128,6 +128,16 @@ abstract class AbstractBamFile {
         coverage(nullable: true)
         coverageWithN(nullable: true)
     }
+
+
+
+    static mapping = {
+        'class' index: "abstract_bam_file_class_idx"
+        withdrawn index: "abstract_bam_file_withdrawn_idx"
+        qualityAssessmentStatus index: "abstract_bam_file_quality_assessment_status_idx"
+    }
+
+
 
     boolean isQualityAssessed() {
         qualityAssessmentStatus == QaProcessingStatus.FINISHED

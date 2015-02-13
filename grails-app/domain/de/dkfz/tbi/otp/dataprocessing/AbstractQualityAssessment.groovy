@@ -162,4 +162,10 @@ class AbstractQualityAssessment {
         allBasesMapped(nullable: true)
         onTargetMappedBases(nullable: true)
     }
+
+
+
+    static mapping = {
+        'class' index: "abstract_quality_assessment_class_idx"
+    }
 }

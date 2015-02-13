@@ -17,5 +17,12 @@ class ChromosomeQualityAssessmentMerged extends AbstractQualityAssessment {
     static belongsTo = [
         qualityAssessmentMergedPass: QualityAssessmentMergedPass
     ]
+
+
+
+    static mapping = {
+        chromosomeName index: "abstract_quality_assessment_chromosome_name_idx"
+        //qualityAssessmentMergedPass is defined in OverallQualityAssessmentMerged
+    }
 }
 

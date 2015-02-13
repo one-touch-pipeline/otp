@@ -44,7 +44,7 @@ class OverallQualityAssessmentMergedService {
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
         ]
 
-        List<OverallQualityAssessmentMerged> qas = OverallQualityAssessmentMerged.executeQuery(HQL, parameters)
+        List<OverallQualityAssessmentMerged> qas = OverallQualityAssessmentMerged.executeQuery(HQL, parameters, [readOnly: true])
         return qas
     }
 
@@ -71,7 +71,7 @@ class OverallQualityAssessmentMergedService {
             overallQualityAssessmentMergedIds: overallQualityAssessmentMergedList*.id,
         ]
 
-        List result = OverallQualityAssessmentMerged.executeQuery(HQL, parameters)
+        List result = OverallQualityAssessmentMerged.executeQuery(HQL, parameters, [readOnly: true])
         return result
     }
 
