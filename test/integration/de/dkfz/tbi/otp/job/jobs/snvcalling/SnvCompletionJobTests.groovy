@@ -1,7 +1,9 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
 import de.dkfz.tbi.otp.job.processing.ExecutionService
+import de.dkfz.tbi.otp.utils.LinkFileUtils
 import org.junit.After
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -14,6 +16,8 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
 import de.dkfz.tbi.otp.ngsdata.*
 import org.junit.Before
 import org.junit.Test
+
+import static de.dkfz.tbi.TestCase.removeMetaClass
 
 class SnvCompletionJobTests extends GroovyTestCase {
 
@@ -34,8 +38,14 @@ class SnvCompletionJobTests extends GroovyTestCase {
     SnvCallingInstance snvCallingInstance
     SnvCompletionJob snvCompletionJob
     SnvCallingInstanceTestData testData
+    SnvConfig snvConfig
+    ProcessedMergedBamFile processedMergedBamFile1
+    ProcessedMergedBamFile processedMergedBamFile2
+    SamplePair samplePair
 
     public static final String SOME_INSTANCE_NAME = "2014-08-25_15h32"
+    public static final String OTHER_INSTANCE_NAME = "2014-09-01_15h32"
+
     public final String CONFIGURATION = """
 RUN_CALLING=1
 RUN_SNV_ANNOTATION=1
@@ -55,16 +65,23 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         realm_processing.stagingRootPath = "${testDirectory}/staging"
         assert realm_processing.save()
 
+        Realm realm_management = DomainFactory.createRealmDataManagementDKFZ([
+                rootPath: "${testDirectory}/root",
+                processingRootPath: "${testDirectory}/processing",
+                stagingRootPath: null
+        ])
+        assert realm_management.save()
+
         project = testData.project
         individual = testData.individual
         seqType = testData.seqType
 
-        ProcessedMergedBamFile processedMergedBamFile1 = createProcessedMergedBamFile()
+        processedMergedBamFile1 = createProcessedMergedBamFile()
         assert processedMergedBamFile1.save()
-        ProcessedMergedBamFile processedMergedBamFile2 = createProcessedMergedBamFile()
+        processedMergedBamFile2 = createProcessedMergedBamFile()
         assert processedMergedBamFile2.save()
 
-        SnvConfig snvConfig = new SnvConfig(
+        snvConfig = new SnvConfig(
                 project: project,
                 seqType: seqType,
                 configuration: CONFIGURATION,
@@ -74,7 +91,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile1.sampleType, category: SampleType.Category.DISEASE)
 
-        SamplePair samplePair = new SamplePair(
+        samplePair = new SamplePair(
                 individual: individual,
                 sampleType1: processedMergedBamFile1.sampleType,
                 sampleType2: processedMergedBamFile2.sampleType,
@@ -102,8 +119,15 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         seqType = null
         snvCallingInstance = null
         realm_processing = null
+        snvConfig = null
+        processedMergedBamFile1 = null
+        processedMergedBamFile2 = null
+        samplePair = null
         // Reset meta classes
         snvCompletionJob.metaClass = null
+        snvCompletionJob.linkFileUtils.metaClass = null
+
+
         // Clean-up file-system
         assert testDirectory.deleteDir()
     }
@@ -115,6 +139,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvCompletionJob.metaClass.getProcessParameterObject = { snvCallingInstance }
         // Mock deletion, so it does not get in the way of this test
         snvCompletionJob.metaClass.deleteStagingDirectory = { SnvCallingInstance instance -> }
+        snvCompletionJob.metaClass.linkResultFiles = { SnvCallingInstance instance -> }
+        snvCompletionJob.metaClass.linkConfigFiles = { SnvCallingInstance instance -> }
         // When:
         shouldFail { snvCompletionJob.execute() }
     }
@@ -125,6 +151,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvCompletionJob.metaClass.getProcessParameterObject = { snvCallingInstance }
         // Mock deletion, so it does not get in the way of this test
         snvCompletionJob.metaClass.deleteStagingDirectory = { SnvCallingInstance instance -> }
+
+        snvCompletionJob.metaClass.linkResultFiles = { SnvCallingInstance instance -> }
+        snvCompletionJob.metaClass.linkConfigFiles = { SnvCallingInstance instance -> }
         assert snvCallingInstance.processingState == SnvProcessingStates.IN_PROGRESS
         // When:
         snvCompletionJob.execute()
@@ -138,6 +167,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         LsdfFilesServiceTests.mockDeleteDirectory(lsdfFilesService)
         LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
         snvCompletionJob.metaClass.getProcessParameterObject = { snvCallingInstance }
+        snvCompletionJob.metaClass.linkResultFiles = { SnvCallingInstance instance -> }
+        snvCompletionJob.metaClass.linkConfigFiles = { SnvCallingInstance instance -> }
+
         File stagingPath = snvCallingInstance.snvInstancePath.absoluteStagingPath
         createFakeResultFiles(stagingPath)
         // When:
@@ -157,6 +189,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         // Given:
         LsdfFilesServiceTests.mockDeleteDirectory(lsdfFilesService)
         snvCompletionJob.metaClass.getProcessParameterObject = { snvCallingInstance }
+        snvCompletionJob.metaClass.linkResultFiles = { SnvCallingInstance instance -> }
+        snvCompletionJob.metaClass.linkConfigFiles = { SnvCallingInstance instance -> }
+
         File stagingPath = snvCallingInstance.snvInstancePath.absoluteStagingPath
         createFakeResultFiles(stagingPath)
         File fileNotSupposedToBeThere = new File(snvCallingInstance.snvInstancePath.absoluteStagingPath.parentFile, 'someFile.txt')
@@ -179,6 +214,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         LsdfFilesServiceTests.mockDeleteDirectory(lsdfFilesService)
         LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
         snvCompletionJob.metaClass.getProcessParameterObject = { snvCallingInstance }
+        snvCompletionJob.metaClass.linkResultFiles = { SnvCallingInstance instance -> }
+        snvCompletionJob.metaClass.linkConfigFiles = { SnvCallingInstance instance -> }
+
         File stagingPath = snvCallingInstance.snvInstancePath.absoluteStagingPath
         createFakeResultFiles(stagingPath)
         File dirNotSupposedToBeThere = new File(snvCallingInstance.snvInstancePath.absoluteStagingPath.parentFile, 'someDir')
@@ -193,6 +231,167 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         } finally {
             LsdfFilesServiceTests.removeMockFileService(lsdfFilesService)
         }
+    }
+
+
+    @Test
+    void testLinkResultFiles_InstanceIsNull_shouldFail() {
+        assert shouldFail(IllegalArgumentException, {
+            snvCompletionJob.linkResultFiles(null)
+        }).contains("The input instance must not be null")
+    }
+
+    @Test
+    void testLinkResultFiles_NoFilesInDirectory_NothingHasToBeLinked() {
+        File directory = snvCallingInstance.snvInstancePath.absoluteDataManagementPath
+        directory.mkdirs()
+
+        snvCompletionJob.linkFileUtils.metaClass.createAndValidateLinks = { Map<File, File> sourceLinkMap, Realm realm ->
+            assert sourceLinkMap.isEmpty()
+        }
+
+        snvCompletionJob.linkResultFiles(snvCallingInstance)
+    }
+
+    @Test
+    void testLinkResultFiles_OneFileInDirectory_OneFileHasToBeLinked() {
+        File directory = snvCallingInstance.snvInstancePath.absoluteDataManagementPath
+        directory.mkdirs()
+        File parentDirectory = directory.parentFile
+        String fileName = SnvCallingStep.CALLING.getResultFileName
+        File sourceFile = new File(directory, fileName)
+        assert sourceFile.createNewFile()
+        File linkFile = new File(parentDirectory, fileName)
+        snvCompletionJob.linkFileUtils.metaClass.createAndValidateLinks = { Map<File, File> sourceLinkMap, Realm realm ->
+            assert sourceLinkMap.size() == 1
+            assert sourceLinkMap.get(sourceFile) == linkFile
+        }
+
+        snvCompletionJob.linkResultFiles(snvCallingInstance)
+    }
+
+    @Test
+    void testLinkResultFiles_OneFileOneConfigFileInDirectory_OneFileHaveToBeLinked() {
+        File directory = snvCallingInstance.snvInstancePath.absoluteDataManagementPath
+        directory.mkdirs()
+        File parentDirectory = directory.parentFile
+
+        String fileName = SnvCallingStep.CALLING.getResultFileName
+        File sourceFile1 = new File(directory, fileName)
+        sourceFile1.createNewFile()
+        File linkFile1 = new File(parentDirectory, fileName)
+
+        File sourceFile2 = new File(directory, "config.txt")
+        sourceFile2.createNewFile()
+
+        snvCompletionJob.linkFileUtils.metaClass.createAndValidateLinks = { Map<File, File> sourceLinkMap, Realm realm ->
+            assert sourceLinkMap.size() == 1
+            assert sourceLinkMap.get(sourceFile1) == linkFile1
+        }
+
+        snvCompletionJob.linkResultFiles(snvCallingInstance)
+    }
+
+    @Test
+    void testLinkResultFiles_OneConfigFileInDirectory_NothingHasToBeLinked() {
+        File directory = snvCallingInstance.snvInstancePath.absoluteDataManagementPath
+        directory.mkdirs()
+
+        File sourceFile = new File(directory, "config.txt")
+        sourceFile.createNewFile()
+
+        snvCompletionJob.linkFileUtils.metaClass.createAndValidateLinks = { Map<File, File> sourceLinkMap, Realm realm ->
+            assert sourceLinkMap.isEmpty()
+        }
+
+        snvCompletionJob.linkResultFiles(snvCallingInstance)
+    }
+
+    @Test
+    void testLinkResultFiles_OneFileNotTypeFileInDirectory_NoFileHasToBeLinked() {
+        File directory = snvCallingInstance.snvInstancePath.absoluteDataManagementPath
+        directory.mkdirs()
+        File fileNotTypeFile = new File(directory, "/subDir")
+        fileNotTypeFile.mkdirs()
+
+        snvCompletionJob.linkFileUtils.metaClass.createAndValidateLinks = { Map<File, File> sourceLinkMap, Realm realm ->
+            assert sourceLinkMap.isEmpty()
+        }
+
+        snvCompletionJob.linkResultFiles(snvCallingInstance)
+    }
+
+
+
+    @Test
+    void testLinkConfigFiles_InputInstanceIsNull_ShouldFail() {
+        assert shouldFail(IllegalArgumentException, {
+            snvCompletionJob.linkConfigFiles(null)
+        }).contains("The input instance must not be null")
+    }
+
+    @Test
+    void testLinkConfigFiles() {
+        File directory = snvCallingInstance.snvInstancePath.absoluteDataManagementPath
+        File parentDirectory = directory.parentFile
+        directory.mkdirs()
+        File sourceFile = new File(directory, "config.txt")
+        sourceFile.createNewFile()
+
+        File linkFileCalling = new File(parentDirectory, "config_${SnvCallingStep.CALLING.configFileNameSuffix}_${snvCallingInstance.instanceName}.txt")
+        File linkFileAnnotation = new File(parentDirectory, "config_${SnvCallingStep.SNV_ANNOTATION.configFileNameSuffix}_${snvCallingInstance.instanceName}.txt")
+        File linkFileDeepAnnotation = new File(parentDirectory, "config_${SnvCallingStep.SNV_DEEPANNOTATION.configFileNameSuffix}_${snvCallingInstance.instanceName}.txt")
+        File linkFileFilter = new File(parentDirectory, "config_${SnvCallingStep.FILTER_VCF.configFileNameSuffix}_${snvCallingInstance.instanceName}.txt")
+
+        snvCompletionJob.linkFileUtils.metaClass.createAndValidateLinks = { Map<File, File> sourceLinkMap, Realm realm ->
+            assert [linkFileCalling, linkFileAnnotation, linkFileDeepAnnotation, linkFileFilter].contains(sourceLinkMap.get(sourceFile))
+        }
+        snvCompletionJob.linkConfigFiles(snvCallingInstance)
+    }
+
+
+    @Test
+    void testLinkConfigFiles_OnlyFilterJobShallRun_LinkOnlyFilterConfigFile() {
+        snvConfig.obsoleteDate = new Date()
+
+        final String CONFIGURATION_NEW ="""
+RUN_CALLING=0
+RUN_SNV_ANNOTATION=0
+RUN_SNV_DEEPANNOTATION=0
+RUN_FILTER_VCF=1
+CHROMOSOME_INDICES=( {1..21} X Y)
+"""
+
+        SnvConfig snvConfig2 = new SnvConfig(
+                project: project,
+                seqType: seqType,
+                configuration: CONFIGURATION_NEW,
+                externalScriptVersion: "v1",
+                previousConfig: snvConfig
+        )
+        assert snvConfig2.save(flush: true)
+
+        SnvCallingInstance snvCallingInstance2 = DomainFactory.createSnvCallingInstance(
+                instanceName: OTHER_INSTANCE_NAME,
+                config: snvConfig2,
+                sampleType1BamFile: processedMergedBamFile1,
+                sampleType2BamFile: processedMergedBamFile2,
+                samplePair: samplePair)
+        assert snvCallingInstance2.save(flush: true)
+
+        File directory = snvCallingInstance2.snvInstancePath.absoluteDataManagementPath
+        File parentDirectory = directory.parentFile
+        directory.mkdirs()
+        File sourceFile = new File(directory, "config.txt")
+        sourceFile.createNewFile()
+
+        File linkFileFilter = new File(parentDirectory, "config_${SnvCallingStep.FILTER_VCF.configFileNameSuffix}_${snvCallingInstance2.instanceName}.txt")
+
+        snvCompletionJob.linkFileUtils.metaClass.createAndValidateLinks = { Map<File, File> sourceLinkMap, Realm realm ->
+            assert sourceLinkMap.size() == 1
+            assert sourceLinkMap.get(sourceFile) == linkFileFilter
+        }
+        snvCompletionJob.linkConfigFiles(snvCallingInstance2)
     }
 
     // Helper methods

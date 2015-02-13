@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 
 import static de.dkfz.tbi.otp.utils.WaitingFileUtils.*
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 
 import java.util.regex.Pattern
 
@@ -213,12 +212,20 @@ class LsdfFilesService {
         return file.length()
     }
 
-    static void ensureFileIsReadableAndNotEmpty(final File file) {
+    private static void checkFileIsReadableAndNotEmpty(final File file, Closure existenceCheck) {
         assert file.isAbsolute()
-        assert confirmExists(file)
+        existenceCheck()
         assert file.isFile()
         assert file.canRead()
         assert file.length() > 0L
+    }
+
+    static void ensureFileIsReadableAndNotEmpty(final File file, int waitingTime) {
+        checkFileIsReadableAndNotEmpty(file) { assert confirmExists(file, waitingTime) }
+    }
+
+    static void ensureFileIsReadableAndNotEmpty(final File file) {
+        checkFileIsReadableAndNotEmpty(file) { assert confirmExists(file) }
     }
 
     /**

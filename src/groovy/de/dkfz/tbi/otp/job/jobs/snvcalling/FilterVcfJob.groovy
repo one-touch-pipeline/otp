@@ -1,13 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import groovy.io.FileType
-
-import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
-import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
-import static de.dkfz.tbi.otp.job.processing.CreateClusterScriptService.*
-import static de.dkfz.tbi.otp.utils.WaitingFileUtils.confirmExists
 import org.springframework.beans.factory.annotation.Autowired
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
@@ -46,31 +39,21 @@ class FilterVcfJob extends AbstractSnvCallingJob {
             final File inputResultFile = inputResult.resultFilePath.absoluteDataManagementPath
             LsdfFilesService.ensureFileIsReadableAndNotEmpty(inputResultFile)
 
-
-            // All files, which are currently in the staging folder are not needed anymore -> delete them
-            File instancePath = instance.snvInstancePath.absoluteStagingPath
-            if(instancePath.exists()) {
-                instancePath.eachFileRecurse (FileType.FILES) { File file ->
-                    assert file.delete()
-                }
-            }
-
-            final File configFileInStagingDirectory = writeConfigFile(instance)
+            final File configFileInProjectDirectory = writeConfigFile(instance)
 
             // the filter script of the CO group writes its output in the same folder where its input is,
-            // so we copy the input file to output folder
-            File inputFileCopy = new File(instance.snvInstancePath.absoluteStagingPath, inputResultFile.name)
-            // TODO: replace with Files.createSymbolicLink() in Java 7 (OTP-933)
-            Process process = Runtime.getRuntime().exec(["ln", "-s", inputResultFile.absolutePath, inputFileCopy.absolutePath] as String[])
-            assert process.waitFor() == 0
-
-            final File checkpointFile = step.getCheckpointFilePath(instance).absoluteStagingPath
+            // so we link the input file to output folder if they are different
+            File inputFileCopy = new File(instance.snvInstancePath.absoluteDataManagementPath, inputResultFile.name)
 
             final Realm realm = configService.getRealmDataProcessing(instance.project)
+
+            final File checkpointFile = step.getCheckpointFilePath(instance).absoluteDataManagementPath
+            deleteResultFileIfExists(checkpointFile, realm)
+
             final String pbsOptionName = getSnvPBSOptionsNameSeqTypeSpecific(instance.seqType)
 
             final String qsubParameters="{ '-v': '"+
-                    "CONFIG_FILE=${configFileInStagingDirectory}," +
+                    "CONFIG_FILE=${configFileInProjectDirectory}," +
                     "pid=${instance.individual.pid}," +
                     "PID=${instance.individual.pid}," +
                     "TOOL_ID=snvFilter," +
@@ -80,73 +63,30 @@ class FilterVcfJob extends AbstractSnvCallingJob {
                     "FILENAME_CHECKPOINT=${checkpointFile}" +
                     "'}"
 
-            final String script = step.getExternalScript(config.externalScriptVersion).scriptFilePath
+            final StringBuilder script = new StringBuilder()
+            if (inputFileCopy.absolutePath != inputResultFile.absolutePath) {
+                script << "ln -s ${inputResultFile.absolutePath} ${inputFileCopy.absolutePath}; "
+            }
+            script << "${step.getExternalScript(config.externalScriptVersion).scriptFilePath}; "
+            // In case the input file had to be linked to the output folder it has to be deleted afterwards.
+            // Otherwise it would be twice in the file system.
+            if (inputFileCopy.absolutePath != inputResultFile.absolutePath) {
+                script << "rm -f ${inputFileCopy.absolutePath}"
+            }
 
-            executionHelperService.sendScript(realm, script, pbsOptionName, qsubParameters)
+            executionHelperService.sendScript(realm, script.toString(), pbsOptionName, qsubParameters)
 
             createAndSaveSnvJobResult(instance, step.getExternalScript(config.externalScriptVersion), null, inputResult)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {
-            checkIfResultFilesExistsOrThrowException(instance, true)
+            checkIfResultFilesExistsOrThrowException(instance)
             return NextAction.SUCCEED
         }
     }
 
     @Override
     protected void validate(final SnvCallingInstance instance) throws Throwable {
-        // check that the content of the config file is still the same
-        File configFile = instance.configFilePath.absoluteStagingPath
-        assert configFile.text == instance.config.configuration
-
-        // check if the final vcf result file exists -> there are not only vcf files, but also pngs and pdfs
-        File instancePath = instance.snvInstancePath.absoluteStagingPath
-        instancePath.eachFileRecurse (FileType.FILES) { File resultFile ->
-            assert resultFile.exists()
-            assert resultFile.isAbsolute()
-            assert resultFile.isFile()
-        }
-
-        // check that the checkpoint file, produced by the script exists
-        final File checkpointFile = step.getCheckpointFilePath(instance).absoluteStagingPath
-        assert confirmExists(checkpointFile)
-        assert checkpointFile.delete()
-
-        try {
-            SnvJobResult inputResult = getSnvJobResult(instance).inputResult
-            File inputResultFile = inputResult.resultFilePath.absoluteDataManagementPath
-            LsdfFilesService.ensureFileIsReadableAndNotEmpty(inputResultFile)
-        } catch (final AssertionError e) {
-            throw new RuntimeException('The input SnvDeepAnnotation result file has changed on the file system while this job processed them.', e)
-        }
-        // mark the result of the snv annotation step as finished
-        changeProcessingStateOfJobResult(instance, SnvProcessingStates.FINISHED)
-
-        //paths for the result files, index file and config file
-        List<File> sourceLocation = []
-        List<File> targetLocation = []
-        List<File> linkLocation = []
-        instancePath.eachFileRecurse (FileType.FILES) { File resultFile ->
-            // snvs_${pid}_intermutation_distance_conf_8_to_10.txt, which is only used as input for a plot,
-            // and the input file shall not be copied
-            if (!(resultFile =~ /intermutation_distance(.*)\.txt$/ ||
-                    resultFile =~ /\.vcf\.gz$/ ||
-                    resultFile =~ /\.tbi$/)) {
-                OtpPath resultFilePath = new OtpPath(instance.snvInstancePath, resultFile.getName())
-                sourceLocation.add(resultFilePath.absoluteStagingPath)
-                targetLocation.add(resultFilePath.absoluteDataManagementPath)
-                if (resultFile.getName() == configFile.getName()) {
-                    linkLocation.add(instance.getStepConfigFileLinkedPath(step).absoluteDataManagementPath)
-                } else {
-                    linkLocation.add(new OtpPath(instance.samplePair.getResultFileLinkedPath(SnvCallingStep.FILTER_VCF), resultFile.getName()).absoluteDataManagementPath)
-                }
-            }
-        }
-        String transferClusterScript = createClusterScriptService.createTransferScript(sourceLocation, targetLocation, linkLocation, true)
-
-        //parameter for copying job
-        final Realm realm = configService.getRealmDataProcessing(instance.project)
-        addOutputParameter(REALM, realm.id.toString())
-        addOutputParameter(SCRIPT, transferClusterScript)
+        validateNonCallingJobs(instance, step)
     }
 }

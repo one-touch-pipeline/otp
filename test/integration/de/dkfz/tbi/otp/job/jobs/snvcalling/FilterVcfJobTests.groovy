@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.LinkFileUtils
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
 import static de.dkfz.tbi.TestCase.removeMetaClass
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
@@ -30,10 +32,10 @@ class FilterVcfJobTests extends GroovyTestCase {
     SchedulerService schedulerService
 
     @Autowired
-    CreateClusterScriptService createClusterScriptService
+    LsdfFilesService lsdfFilesService
 
     @Autowired
-    LsdfFilesService lsdfFilesService
+    LinkFileUtils linkFileUtils
 
     File testDirectory
     FilterVcfJob filterVcfJob
@@ -221,9 +223,10 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         sampleType1 = null
         sampleType2 = null
         LsdfFilesService.metaClass = null
+        WaitingFileUtils.metaClass = null
         assert testDirectory.deleteDir()
         removeMetaClass(ExecutionService, executionService)
-        removeMetaClass(CreateClusterScriptService, createClusterScriptService)
+        removeMetaClass(LinkFileUtils, linkFileUtils)
     }
 
 
@@ -247,8 +250,10 @@ RUN_FILTER_VCF=0
 CHROMOSOME_INDICES=( {1..21} XY)
 """
         filterVcfJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
-        filterVcfJob.metaClass.addOutputParameter = { String name, String value -> }
         snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResultFilter1 }
+        executionService.metaClass.sendScript = { Realm realm, String text, String jobIdentifier, String qsubParameters ->
+            throw new RuntimeException("This area should not be reached since the filter job shall not run")
+        }
         assertEquals(NextAction.SUCCEED, filterVcfJob.maybeSubmit(snvCallingInstance2))
     }
 
@@ -262,7 +267,6 @@ RUN_FILTER_VCF=0
 CHROMOSOME_INDICES=( {1..21} XY)
 """
         filterVcfJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
-        filterVcfJob.metaClass.addOutputParameter = { String name, String value -> }
         snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return null }
         shouldFail(RuntimeException, { filterVcfJob.maybeSubmit(snvCallingInstance2) })
     }
@@ -276,31 +280,46 @@ CHROMOSOME_INDICES=( {1..21} XY)
         }
 
         File pmbf1 = testData.createBamFile(processedMergedBamFile1)
-        File pmbf2 = testData.createBamFile(processedMergedBamFile2)
+        testData.createBamFile(processedMergedBamFile2)
 
         executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options ->
+            SnvJobResult inputResult = snvCallingInstance2.findLatestResultForSameBamFiles(SnvCallingStep.SNV_DEEPANNOTATION)
+            File inputResultFile = inputResult.resultFilePath.absoluteDataManagementPath
 
-            String scriptCommandPart = "# BEGIN ORIGINAL SCRIPT\n" +
-                    "/tmp/scriptLocation/filter.sh\n" +
-                    "# END ORIGINAL SCRIPT"
+                String scriptCommandPart = "# BEGIN ORIGINAL SCRIPT\n" +
+                        "ln -s ${inputResultFile} ${snvCallingInstance2.snvInstancePath.absoluteDataManagementPath}/${inputResultFile.name}; "
+                        "/tmp/scriptLocation/filter.sh; " +
+                        "rm -f ${snvCallingInstance2.snvInstancePath.absoluteDataManagementPath}" +
+                        "# END ORIGINAL SCRIPT"
 
-            String qsubParameterCommandPart = "-v CONFIG_FILE=" +
-                    "${snvCallingInstance2.configFilePath.absoluteStagingPath}," +
-                    "pid=654321," +
-                    "PID=654321," +
-                    "TOOL_ID=snvFilter," +
-                    "SNVFILE_PREFIX=snvs_," +
-                    "TUMOR_BAMFILE_FULLPATH_BP=${pmbf1.absolutePath}," +
-                    "FILENAME_VCF=${new OtpPath(snvCallingInstance2.snvInstancePath, SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(snvCallingInstance1.individual)).absoluteStagingPath}," +
-                    "FILENAME_CHECKPOINT=${SnvCallingStep.FILTER_VCF.getCheckpointFilePath(snvCallingInstance2).absoluteStagingPath}"
+                String qsubParameterCommandPart = "-v CONFIG_FILE=" +
+                        "${snvCallingInstance2.configFilePath.absoluteDataManagementPath}," +
+                        "pid=654321," +
+                        "PID=654321," +
+                        "TOOL_ID=snvFilter," +
+                        "SNVFILE_PREFIX=snvs_," +
+                        "TUMOR_BAMFILE_FULLPATH_BP=${pmbf1.absolutePath}," +
+                        "FILENAME_VCF=${new OtpPath(snvCallingInstance2.snvInstancePath, SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(snvCallingInstance1.individual)).absoluteDataManagementPath}," +
+                        "FILENAME_CHECKPOINT=${SnvCallingStep.FILTER_VCF.getCheckpointFilePath(snvCallingInstance2).absoluteDataManagementPath}"
 
-            assert command.contains(scriptCommandPart)
-            assert command.contains(qsubParameterCommandPart)
+                assert command.contains(scriptCommandPart)
+                assert command.contains(qsubParameterCommandPart)
 
             return [PBS_ID]
         }
 
-        testData.createInputResultFile_Staging(snvCallingInstance2, SnvCallingStep.SNV_DEEPANNOTATION)
+        filterVcfJob.metaClass.deleteResultFileIfExists = { File resultFile, Realm realm ->
+            resultFile.delete()
+        }
+
+        filterVcfJob.metaClass.writeConfigFile = { SnvCallingInstance instance ->
+            return testData.createConfigFileWithContentInFileSystem(
+                    snvCallingInstance2.configFilePath.absoluteDataManagementPath,
+                    snvCallingInstance2.config.configuration)
+        }
+
+        filterVcfJob.metaClass.linkResultFiles = { SnvCallingInstance instance -> }
+
         testData.createInputResultFile_Production(snvCallingInstance1, SnvCallingStep.SNV_DEEPANNOTATION)
         testData.createInputResultFile_Production(snvCallingInstance2, SnvCallingStep.CALLING)
 
@@ -308,11 +327,11 @@ CHROMOSOME_INDICES=( {1..21} XY)
         try {
             assertEquals(NextAction.WAIT_FOR_CLUSTER_JOBS, filterVcfJob.maybeSubmit(snvCallingInstance2))
 
-            File configFile = snvCallingInstance2.configFilePath.absoluteStagingPath
+            File configFile = snvCallingInstance2.configFilePath.absoluteDataManagementPath
             assert configFile.exists()
-            assert configFile.text == snvCallingInstance2.config.configuration
+            AbstractSnvCallingJob.assertDataManagementConfigContentsOk(snvCallingInstance2)
 
-            assert !SnvCallingStep.FILTER_VCF.getCheckpointFilePath(snvCallingInstance2).absoluteStagingPath.exists()
+            assert !SnvCallingStep.FILTER_VCF.getCheckpointFilePath(snvCallingInstance2).absoluteDataManagementPath.exists()
 
         } finally {
             schedulerService.finishedJobExecutionOnCurrentThread(filterVcfJob)
@@ -342,59 +361,17 @@ RUN_FILTER_VCF=1
 CHROMOSOME_INDICES=( {1..21} XY)
 """
         File configFile = testData.createConfigFileWithContentInFileSystem(
-                snvCallingInstance2.configFilePath.absoluteStagingPath,
+                snvCallingInstance2.configFilePath.absoluteDataManagementPath,
                 snvCallingInstance2.config.configuration)
 
         testData.createInputResultFile_Production(snvCallingInstance2, SnvCallingStep.SNV_DEEPANNOTATION)
-        testData.createInputResultFile_Staging(snvCallingInstance2, SnvCallingStep.SNV_DEEPANNOTATION)
-        // files just created to check if all files in the directory are included in the copy script
-        File testFile1_shouldBeCopied = new OtpPath(snvCallingInstance2.snvInstancePath, "SomeTestFile.txt").absoluteStagingPath
-        testFile1_shouldBeCopied << "testContent"
-        File testFile2_shouldNotBeCopied = new OtpPath(snvCallingInstance2.snvInstancePath, "Something_intermutation_distance.txt").absoluteStagingPath
-        testFile2_shouldNotBeCopied << "testContent"
-        File testFile3_shouldNotBeCopied = new OtpPath(snvCallingInstance2.snvInstancePath, "Something.tbi").absoluteStagingPath
-        testFile3_shouldNotBeCopied << "testContent"
-        File testFile4_shouldBeCopied = new OtpPath(snvCallingInstance2.snvInstancePath, "Something_intermutation_distance.txt.png").absoluteStagingPath
-        testFile4_shouldBeCopied << "testContent"
 
-
-        File checkpointFile = new OtpPath(snvCallingInstance2.snvInstancePath, SnvCallingStep.FILTER_VCF.checkpointFileName).absoluteStagingPath
+        File checkpointFile = new OtpPath(snvCallingInstance2.snvInstancePath, SnvCallingStep.FILTER_VCF.checkpointFileName).absoluteDataManagementPath
         checkpointFile.createNewFile()
 
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> }
 
-        createClusterScriptService.metaClass.createTransferScript = { List<File> sourceLocations, List<File> targetLocations, List<File> linkLocations, boolean move ->
-
-            // test that source files are correct
-            File stagingBase = new File("${testDirectory}/staging/")
-            File individualPathStaging = new File(stagingBase, "dirName/sequencing/whole_genome_sequencing/view-by-pid/654321/")
-            File samplePairPathStaging = new File(individualPathStaging, "snv_results/paired/${sampleType1.name}_${sampleType2.name}/")
-            File instancePathStaging = new File(samplePairPathStaging, "2014-09-01_15h32/")
-
-            assert sourceLocations.size() == 3
-            assert sourceLocations.contains(new File(instancePathStaging, "Something_intermutation_distance.txt.png"))
-            assert sourceLocations.contains(new File(instancePathStaging, "SomeTestFile.txt"))
-            assert sourceLocations.contains(new File(instancePathStaging, "config.txt"))
-
-            // test that target files are correct
-            File rootBase = new File("${testDirectory}/root/")
-            File individualPathRoot = new File(rootBase, "dirName/sequencing/whole_genome_sequencing/view-by-pid/654321/")
-            File samplePairPathRoot = new File(individualPathRoot, "snv_results/paired/${sampleType1.name}_${sampleType2.name}/")
-            File instancePathRoot = new File(samplePairPathRoot, "2014-09-01_15h32/")
-
-            assert targetLocations.size() == 3
-            assert targetLocations.contains(new File(instancePathRoot, "Something_intermutation_distance.txt.png"))
-            assert targetLocations.contains(new File(instancePathRoot, "SomeTestFile.txt"))
-            assert targetLocations.contains(new File(instancePathRoot, "config.txt"))
-
-            // test that linked files are correct
-            assert linkLocations.size() == 3
-            assert linkLocations.contains(new File(samplePairPathRoot, "Something_intermutation_distance.txt.png"))
-            assert linkLocations.contains(new File(samplePairPathRoot, "SomeTestFile.txt"))
-            assert linkLocations.contains(new File(samplePairPathRoot, "config_filter_vcf_2014-09-01_15h32.txt"))
-
-            return "some bash commands to copy the files and link them"
-        }
+        WaitingFileUtils.metaClass.static.confirmDoesNotExist = { File file -> return true }
 
         try {
             filterVcfJob.validate(snvCallingInstance2)
@@ -407,7 +384,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testValidate_FilterCheckpointFileDoesNotExists() {
-        File configFile = testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteStagingPath, CONFIGURATION)
+        File configFile = testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteDataManagementPath, CONFIGURATION)
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> }
 
         shouldFail(AssertionError, {filterVcfJob.validate(snvCallingInstance1)})
@@ -420,19 +397,21 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testValidate_WrongConfigurationInFilterConfigFile() {
-        File configFile = testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteStagingPath, "wrong configuration")
+        File configFile = testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteDataManagementPath, "wrong configuration")
         shouldFail(AssertionError, {filterVcfJob.validate(snvCallingInstance1)})
     }
 
     @Test
     void testValidate_InputFileNotReadable() {
         SnvCallingStep step = SnvCallingStep.FILTER_VCF
-        File configFile = testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteStagingPath, CONFIGURATION)
+        File configFile = testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteDataManagementPath, CONFIGURATION)
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file ->
                 throw new AssertionError("Not readable")
         }
 
-        File checkpointFile = new OtpPath(snvCallingInstance1.snvInstancePath, step.checkpointFileName).absoluteStagingPath
+        WaitingFileUtils.metaClass.static.confirmDoesNotExist = { File file -> return true }
+
+        File checkpointFile = new OtpPath(snvCallingInstance1.snvInstancePath, step.checkpointFileName).absoluteDataManagementPath
         checkpointFile.createNewFile()
 
         shouldFail(RuntimeException, { filterVcfJob.validate(snvCallingInstance1) })

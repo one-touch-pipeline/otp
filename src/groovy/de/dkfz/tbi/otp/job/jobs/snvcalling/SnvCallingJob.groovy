@@ -1,21 +1,18 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
-import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
+import de.dkfz.tbi.otp.job.processing.ExecutionService
 import static de.dkfz.tbi.otp.job.processing.CreateClusterScriptService.*
-
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFileService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
-import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ExternalScript
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
+import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 
 class SnvCallingJob extends AbstractSnvCallingJob {
 
@@ -24,9 +21,9 @@ class SnvCallingJob extends AbstractSnvCallingJob {
     @Autowired
     ExecutionHelperService executionHelperService
     @Autowired
-    CreateClusterScriptService createClusterScriptService
-    @Autowired
     ProcessedMergedBamFileService processedMergedBamFileService
+    @Autowired
+    ExecutionService executionService
 
     final static String CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER = "CHROMOSOME_VCF_JOIN"
 
@@ -47,14 +44,15 @@ class SnvCallingJob extends AbstractSnvCallingJob {
             final List<String> executedClusterJobsPerChromosome = []
             final Realm realm = configService.getRealmDataProcessing(instance.project)
             final String pbsOptionName = getSnvPBSOptionsNameSeqTypeSpecific(instance.seqType)
-            // write the config file in the staging directory
-            final File configFileInStagingDirectory = writeConfigFile(instance)
+
+            // write the config file in the project directory
+            final File configFileInProjectDirectory = writeConfigFile(instance)
 
             //create the parameters for calling the SnvCalling.sh per chromosome
             final File sampleType1BamFilePath = getExistingBamFilePath(instance.sampleType1BamFile)
             final File sampleType2BamFilePath = getExistingBamFilePath(instance.sampleType2BamFile)
             final String qsubParametersGeneral =
-                    "CONFIG_FILE=${configFileInStagingDirectory}," +
+                    "CONFIG_FILE=${configFileInProjectDirectory}," +
                     "pid=${instance.individual.pid}," +
                     "PID=${instance.individual.pid}," +
                     "TUMOR_BAMFILE_FULLPATH_BP=${sampleType1BamFilePath}," +
@@ -65,7 +63,7 @@ class SnvCallingJob extends AbstractSnvCallingJob {
             config.chromosomeNames.each { String chromosome ->
                 final File chromosomeResultFile = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual, chromosome)).absoluteStagingPath
                 // In case the file exists already from an earlier -not successful- run it should be deleted first
-                deleteResultFileIfExists(chromosomeResultFile)
+                deleteResultFileIfExists(chromosomeResultFile, realm)
                 chromosomeFilePaths.add(chromosomeResultFile)
                 final String qsubParametersChromosomeSpecific =
                         "TOOL_ID=snvCalling," +
@@ -84,9 +82,9 @@ class SnvCallingJob extends AbstractSnvCallingJob {
 
             //if all SnvCallings per chromosome are finished they can be merged together
             ExternalScript externalScriptJoining = ExternalScript.getLatestVersionOfScript(CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER, config.externalScriptVersion)
-            File vcfRawFile = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual, null)).absoluteStagingPath
+            File vcfRawFile = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual, null)).absoluteDataManagementPath
             // In case the file exists already from an earlier -not successful- run it should be deleted first
-            deleteResultFileIfExists(vcfRawFile)
+            deleteResultFileIfExists(vcfRawFile, realm)
             String allChromosomeFilePaths = chromosomeFilePaths.join(" ")
 
             final String qsubParametersDependency = "{'depend': 'afterok:${executedClusterJobsPerChromosome.join(":")}'}"
@@ -110,7 +108,7 @@ class SnvCallingJob extends AbstractSnvCallingJob {
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {
-            checkIfResultFilesExistsOrThrowException(instance, true)
+            checkIfResultFilesExistsOrThrowException(instance)
             return NextAction.SUCCEED
         }
     }
@@ -118,12 +116,13 @@ class SnvCallingJob extends AbstractSnvCallingJob {
 
     @Override
     protected void validate(final SnvCallingInstance instance) throws Throwable {
-        assert instance.configFilePath.absoluteStagingPath.text == instance.config.configuration
+        assertDataManagementConfigContentsOk(instance)
+
         final SnvConfig config = instance.config.evaluate()
 
         // check if the final vcf result file exists
         final OtpPath resultFile = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual, null))
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(resultFile.absoluteStagingPath)
+        LsdfFilesService.ensureFileIsReadableAndNotEmpty(resultFile.absoluteDataManagementPath, WaitingFileUtils.extendedWaitingTime)
 
         try {
             getExistingBamFilePath(instance.sampleType1BamFile)
@@ -133,33 +132,5 @@ class SnvCallingJob extends AbstractSnvCallingJob {
         }
 
         changeProcessingStateOfJobResult(instance, SnvProcessingStates.FINISHED)
-
-        //paths for the result file
-        List<File> sourceLocation = [
-            resultFile.absoluteStagingPath
-        ]
-        List<File> targetLocation = [
-            resultFile.absoluteDataManagementPath
-        ]
-        List<File> linkLocation = [
-            instance.samplePair.getResultFileLinkedPath(step).absoluteDataManagementPath
-        ]
-
-        // path for index files
-        OtpPath indexFile = new OtpPath(instance.snvInstancePath, step.getIndexFileName(instance.individual))
-        sourceLocation.add(indexFile.absoluteStagingPath)
-        targetLocation.add(indexFile.absoluteDataManagementPath)
-        linkLocation.add(instance.samplePair.getIndexFileLinkedPath(step).absoluteDataManagementPath)
-
-        //path for the config file
-        sourceLocation.add(instance.configFilePath.absoluteStagingPath)
-        targetLocation.add(instance.configFilePath.absoluteDataManagementPath)
-        linkLocation.add(instance.getStepConfigFileLinkedPath(step).absoluteDataManagementPath)
-
-        String transferClusterScript = createClusterScriptService.createTransferScript(sourceLocation, targetLocation, linkLocation, true)
-        //parameter for copying job
-        final Realm realm = configService.getRealmDataProcessing(instance.project)
-        addOutputParameter(REALM, realm.id.toString())
-        addOutputParameter(SCRIPT, transferClusterScript)
     }
 }

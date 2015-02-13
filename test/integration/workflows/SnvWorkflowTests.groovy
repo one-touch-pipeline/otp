@@ -3,27 +3,13 @@ package workflows
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFileService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstanceTestData
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingJob
 import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingStartJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.FileType
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.SampleType
-import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.ExternalScript
@@ -31,11 +17,14 @@ import de.dkfz.tbi.otp.utils.HelperUtils
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.junit.Ignore
 import org.junit.Test
+import groovy.io.FileType
+import static de.dkfz.tbi.otp.utils.WaitingFileUtils.*
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 import java.util.zip.GZIPInputStream
 
+import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertTrue
 
@@ -47,7 +36,6 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
     ProcessedMergedBamFileService processedMergedBamFileService
     ExecutionService executionService
     CreateClusterScriptService createClusterScriptService
-
 
     final int TIMEOUT_IN_MINUTES = 30
 
@@ -75,6 +63,8 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
     SnvCallingStartJob snvStartJob
 
     void prepare(Realm.Cluster where) {
+        extendedWaitingTime = 100000
+
         createUserAndRoles()
 
         baseDirDKFZ = new File("WORKFLOW_ROOT/SnvCallingWorkflow")
@@ -156,6 +146,8 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
         individual = Individual.build(
                 project: project,
                 type: Individual.Type.REAL,
+                pid: "stds",
+                mockPid: "stds",
         )
 
         seqType = SeqType.build(
@@ -239,7 +231,6 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
                 scriptVersion: "v1"
         )
 
-
         mkDirs = createClusterScriptService.makeDirs([
                 new File(processedMergedBamFileService.filePath(bamFileTumor)).parentFile,
                 new File(processedMergedBamFileService.filePath(bamFileControl)).parentFile,
@@ -276,20 +267,6 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
         check(SnvCallingStep.CALLING)
 
         tearDown(Realm.Cluster.DKFZ)
-    }
-
-
-    @Ignore
-    @Test
-    void testWholeSnvWorkflowAtBioQuant() {
-        prepare(Realm.Cluster.BIOQUANT)
-        snvConfig = SnvConfig.createFromFile(project, seqType, new File(baseDirDKFZ, "configFile/runtimeConfig.sh"))
-        assertNotNull(snvConfig.save(flush: true))
-
-        execute()
-        check(SnvCallingStep.CALLING)
-
-        tearDown(Realm.Cluster.BIOQUANT)
     }
 
 
@@ -337,7 +314,7 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
                         'in'('id', [bamFileTumor, bamFileControl].sum { it.containedSeqTracks }*.id)
                     }
                     fileType {
-                        eq('type', FileType.Type.SEQUENCE)
+                        eq('type', Type.SEQUENCE)
                     }
                     projections {
                         max('dateCreated')
@@ -415,12 +392,10 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
 
         // there will be only one plan in the database
         JobExecutionPlan jobExecutionPlan = CollectionUtils.exactlyOneElement(JobExecutionPlan.list())
-
         // hack to be able to start the workflow
         snvStartJob.setJobExecutionPlan(jobExecutionPlan)
 
         boolean workflowFinishedInGivenTimeLimit = waitUntilWorkflowIsOverOrTimeout(TIMEOUT_IN_MINUTES)
-
         assertTrue(workflowFinishedInGivenTimeLimit)
     }
 
@@ -473,31 +448,16 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
         assert filterResult.inputResult == deepAnnotationResult
         assert filterResult.externalScript == filterScript
 
-
-        // check content only for text files
-        ["germline_functional_snvs_conf_8_to_10.vcf",
-         "purityEST.txt",
-         "sequence_specific_error_Matrix_conf_8_to_10.txt",
-         "sequencing_specific_error_Matrix_conf_8_to_10.txt",
-         "somatic_functional_ncRNA_snvs_conf_8_to_10.vcf",
-         "somatic_functional_snvs_conf_8_to_10.vcf",
-         "somatic_in_dbSNP_conf_8_to_10.txt",
-         "somatic_snvs_conf_8_to_10.vcf",
-        ].each {
-            expected = new File(baseDirDKFZ, "resultFiles/snvs_stds_${it}").readLines()
-            actual = new File(filterResult.getResultFilePath().absoluteDataManagementPath, "snvs_${individual.pid}_${it}").readLines()
-            compareFiles(expected, actual)
-        }
-        // check that all other files were created
-        ["allSNVdiagnosticsPlots.pdf",
-         "intermutation_distance_conf_8_to_10.pdf",
-         "MAF_conf_8_to_10.pdf",
-         "perChromFreq_conf_8_to_10.pdf",
-         "sequence_specific_error_plot_conf_8_to_10.pdf",
-         "sequencing_specific_error_plot_conf_8_to_10.pdf",
-         "snvs_with_context_conf_8_to_10.pdf",
-        ].each {
-            assert new File(filterResult.getResultFilePath().absoluteDataManagementPath, "snvs_${individual.pid}_" + it).exists()
+        File roddyResultsDir = new File(baseDirDKFZ, "resultFiles")
+        File otpResultsDir = createdInstance.samplePair.samplePairPath.absoluteDataManagementPath
+        roddyResultsDir.eachFileRecurse (FileType.FILES) { File resultFile ->
+            File otpResultFile = new File(otpResultsDir, resultFile.name)
+            if (!resultFile.name =~ /^snvCallingCheckPoint/) {
+                assert otpResultFile.exists()
+            }
+            if (resultFile.name =~ /\.vcf$/ || resultFile.name =~ /\.txt$/) {
+                compareFiles([resultFile.readLines()], [otpResultFile.readLines()])
+            }
         }
     }
 

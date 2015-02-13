@@ -1,11 +1,10 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.CreateSNVFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.LinkFileUtils
 
 import static de.dkfz.tbi.TestCase.*
-import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
-import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
 import static org.junit.Assert.*
 import org.junit.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,8 +19,7 @@ import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExternalScript
-import static de.dkfz.tbi.otp.utils.CreateFileHelper.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static de.dkfz.tbi.otp.utils.CreateSNVFileHelper.*
 
 class SnvCallingJobTests extends GroovyTestCase{
 
@@ -46,11 +44,15 @@ class SnvCallingJobTests extends GroovyTestCase{
     @Autowired
     LsdfFilesService lsdfFilesService
 
+    @Autowired
+    LinkFileUtils linkFileUtils
+
     File testDirectory
     Realm realm_processing
     Project project
     SeqType seqType
     Individual individual
+    SamplePair samplePair
     SnvCallingInstance snvCallingInstance
     SnvCallingInstance snvCallingInstance2
     ExternalScript externalScript_Calling
@@ -128,7 +130,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile1.sampleType, category: SampleType.Category.DISEASE)
 
-        SamplePair samplePair = new SamplePair(
+        samplePair = new SamplePair(
                 individual: individual,
                 sampleType1: processedMergedBamFile1.sampleType,
                 sampleType2: processedMergedBamFile2.sampleType,
@@ -180,22 +182,6 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvCallingJob = applicationContext.getBean('snvCallingJob',
             DomainFactory.createAndSaveProcessingStep(SnvCallingJob.toString()), [])
         snvCallingJob.log = log
-
-        ParameterType typeRealm = new ParameterType(
-                name: REALM,
-                className: "${SnvCallingJob.class}",
-                jobDefinition: snvCallingJob.getProcessingStep().jobDefinition,
-                parameterUsage: ParameterUsage.OUTPUT
-                )
-        assert typeRealm.save()
-
-        ParameterType typeScript = new ParameterType(
-                name: SCRIPT,
-                className: "${SnvCallingJob.class}",
-                jobDefinition: snvCallingJob.getProcessingStep().jobDefinition,
-                parameterUsage: ParameterUsage.OUTPUT
-                )
-        assert typeScript.save()
     }
 
     @After
@@ -204,6 +190,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         individual = null
         project = null
         seqType = null
+        samplePair = null
         snvCallingInstance = null
         realm_processing = null
         snvCallingInstance2 = null
@@ -214,7 +201,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         processedMergedBamFile2 = null
         removeMetaClass(CreateClusterScriptService, createClusterScriptService)
         removeMetaClass(ExecutionService, executionService)
-        LsdfFilesService.metaClass = null
+        removeMetaClass(SnvCallingJob, snvCallingJob)
+        removeMetaClass(LinkFileUtils, linkFileUtils)
+        removeMetaClass(LsdfFilesService, lsdfFilesService)
         assert testDirectory.deleteDir()
     }
 
@@ -235,7 +224,6 @@ CHROMOSOME_INDICES=( {1..21} XY)
 """
 
         snvCallingJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
-        snvCallingJob.metaClass.addOutputParameter = { String name, String value -> }
         snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResult }
         snvCallingJob.log = log
         assertEquals(NextAction.SUCCEED, snvCallingJob.maybeSubmit(snvCallingInstance2))
@@ -252,8 +240,10 @@ CHROMOSOME_INDICES=( {1..21} XY)
 """
 
         snvCallingJob.metaClass.getProcessParameterObject = { return snvCallingInstance }
-        snvCallingJob.metaClass.addOutputParameter = { String name, String value -> }
         snvCallingInstance.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return null }
+        executionService.metaClass.sendScript = { Realm realm, String text, String jobIdentifier, String qsubParameters ->
+            throw new RuntimeException("This area should not be reached since the calling job shall not run")
+        }
         shouldFail(RuntimeException, { snvCallingJob.maybeSubmit(snvCallingInstance) })
     }
 
@@ -275,7 +265,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
                 String scriptCommandPart = "/tmp/scriptLocation/calling.sh"
 
                 String qsubParameterCommandPart = "-v CONFIG_FILE=" +
-                        "${snvCallingInstance.configFilePath.absoluteStagingPath}," +
+                        "${snvCallingInstance.configFilePath.absoluteDataManagementPath}," +
                         "pid=654321," +
                         "PID=654321," +
                         "TUMOR_BAMFILE_FULLPATH_BP=${tumorBamFile}," +
@@ -288,7 +278,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
                 assert command.contains(qsubParameterCommandPart)
 
             } else {
-                File snvFile = new OtpPath(snvCallingInstance.snvInstancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, null)).absoluteStagingPath
+                File snvFile = new OtpPath(snvCallingInstance.snvInstancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, null)).absoluteDataManagementPath
                 String scriptCommandPart = "/tmp/scriptLocation/joining.sh; " +
                         "md5sum ${snvFile} > ${snvFile}.md5sum"
                 assert command.contains(scriptCommandPart)
@@ -296,6 +286,13 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
             return [PBS_ID]
         }
+
+        snvCallingJob.metaClass.writeConfigFile = { SnvCallingInstance instance ->
+            return testData.createConfigFileWithContentInFileSystem(
+                    snvCallingInstance.configFilePath.absoluteDataManagementPath,
+                    snvCallingInstance.config.configuration)
+        }
+
         schedulerService.startingJobExecutionOnCurrentThread(snvCallingJob)
         try {
             assertEquals(NextAction.WAIT_FOR_CLUSTER_JOBS, snvCallingJob.maybeSubmit(snvCallingInstance))
@@ -305,227 +302,23 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         } finally {
             schedulerService.finishedJobExecutionOnCurrentThread(snvCallingJob)
-            LsdfFilesServiceTests.removeMockFileService(lsdfFilesService)
         }
     }
 
     @Test
     void testValidateWithSnvCallingInput() {
         File configFile = testData.createConfigFileWithContentInFileSystem(
-            snvCallingInstance.configFilePath.absoluteStagingPath,
+            snvCallingInstance.configFilePath.absoluteDataManagementPath,
             CONFIGURATION)
 
         createResultFile(snvCallingInstance, SnvCallingStep.CALLING)
         createMD5SUMFile(snvCallingInstance, SnvCallingStep.CALLING)
 
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> return true }
-        createClusterScriptService.metaClass.createTransferScript = { List<File> sourceLocations, List<File> targetLocations, List<File> linkLocations, boolean move ->
 
-            // test that source files are correct
-            File stagingBase = new File("${testDirectory}/staging/")
-            File individualPathStaging = new File(stagingBase, "otp_test_project/sequencing/whole_genome_sequencing/view-by-pid/654321/")
-            File samplePairPathStaging = new File(individualPathStaging, "snv_results/paired/sampletype1_sampletype2/")
-            File instancePathStaging = new File(samplePairPathStaging, "2014-08-25_15h32/")
+        snvCallingJob.metaClass.changeProcessingStateOfJobResult = { SnvCallingInstance instance, SnvProcessingStates newState -> }
 
-            assert sourceLocations.size() == 3
-            assert sourceLocations.contains(new File(instancePathStaging, "snvs_654321_raw.vcf.gz"))
-            assert sourceLocations.contains(new File(instancePathStaging, "snvs_654321_raw.vcf.gz.tbi"))
-            assert sourceLocations.contains(new File(instancePathStaging, "config.txt"))
-
-            // test that target files are correct
-            File rootBase = new File("${testDirectory}/root/")
-            File individualPathRoot = new File(rootBase, "otp_test_project/sequencing/whole_genome_sequencing/view-by-pid/654321/")
-            File samplePairPathRoot = new File(individualPathRoot, "snv_results/paired/sampletype1_sampletype2/")
-            File instancePathRoot = new File(samplePairPathRoot, "2014-08-25_15h32/")
-
-            assert targetLocations.size() == 3
-            assert targetLocations.contains(new File(instancePathRoot, "snvs_654321_raw.vcf.gz"))
-            assert targetLocations.contains(new File(instancePathRoot, "snvs_654321_raw.vcf.gz.tbi"))
-            assert targetLocations.contains(new File(instancePathRoot, "config.txt"))
-
-            // test that linked files are correct
-            assert linkLocations.size() == 3
-            assert linkLocations.contains(new File(samplePairPathRoot, "snvs_654321_raw.vcf.gz"))
-            assert linkLocations.contains(new File(samplePairPathRoot, "snvs_654321_raw.vcf.gz.tbi"))
-            assert linkLocations.contains(new File(samplePairPathRoot, "config_calling_2014-08-25_15h32.txt"))
-
-            return "#some script"
-        }
-        snvCallingJob.metaClass.addOutputParameter = { String name, String value -> }
-        try {
-            snvCallingJob.validate(snvCallingInstance)
-        } finally {
-            configFile.parentFile.deleteDir()
-        }
-    }
-
-    @Test
-    void testWriteConfigFile_InputIsNull() {
-        shouldFail( IllegalArgumentException, { snvCallingJob.writeConfigFile(null) })
-    }
-
-    @Test
-    void testWriteConfigFile_FileExistsAlready() {
-        File configFile = testData.createConfigFileWithContentInFileSystem(
-            snvCallingInstance.configFilePath.absoluteStagingPath,
-            CONFIGURATION)
-
-        assertEquals(configFile, snvCallingJob.writeConfigFile(snvCallingInstance))
-        try {
-            assert configFile.text == snvCallingInstance.config.configuration
-        } finally {
-            configFile.parentFile.deleteDir()
-        }
-    }
-
-    @Test
-    void testWriteConfigFile() {
-        LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
-        File file = snvCallingInstance.configFilePath.absoluteStagingPath
-        if (file.exists()) {
-            file.delete()
-        }
-        assertEquals(file, snvCallingJob.writeConfigFile(snvCallingInstance))
-        try {
-            assert file.text == CONFIGURATION
-        } finally {
-            assert file.delete()
-            LsdfFilesServiceTests.removeMockFileService(lsdfFilesService)
-        }
-    }
-
-    @Test
-    void testCreateAndSaveSnvJobResult() {
-        snvJobResult.delete()
-        assert SnvJobResult.count() == 0
-        snvCallingJob.createAndSaveSnvJobResult(snvCallingInstance, externalScript_Calling, externalScript_Joining)
-        final SnvJobResult snvJobResult = exactlyOneElement(SnvJobResult.findAll())
-        assert snvJobResult.snvCallingInstance == snvCallingInstance
-        assert snvJobResult.processingState == SnvProcessingStates.IN_PROGRESS
-        assert snvJobResult.step == SnvCallingStep.CALLING
-        assert snvJobResult.externalScript == externalScript_Calling
-        assert snvJobResult.chromosomeJoinExternalScript == externalScript_Joining
-    }
-
-    @Test
-     void testChangeProcessingStateOfJobResult() {
-         createResultFile(snvCallingInstance, SnvCallingStep.CALLING)
-         createMD5SUMFile(snvCallingInstance, SnvCallingStep.CALLING)
-         List<SnvJobResult> results = SnvJobResult.findAllBySnvCallingInstanceAndStep(snvCallingInstance, SnvCallingStep.CALLING)
-         assert results.size == 1
-         assert results.first() == snvJobResult
-         assert snvJobResult.processingState == SnvProcessingStates.IN_PROGRESS
-         snvCallingJob.changeProcessingStateOfJobResult(snvCallingInstance, SnvProcessingStates.FINISHED)
-         assert snvJobResult.processingState == SnvProcessingStates.FINISHED
-     }
-
-    @Test
-    void testAddFileInformationToJobResult() {
-        File file = createResultFile(snvCallingInstance, SnvCallingStep.CALLING)
-        File md5sum = createMD5SUMFile(snvCallingInstance, SnvCallingStep.CALLING)
-        SnvJobResult results = exactlyOneElement(SnvJobResult.findAllBySnvCallingInstanceAndStep(snvCallingInstance, SnvCallingStep.CALLING))
-
-        snvCallingJob.addFileInformationToJobResult(results)
-        assert results.fileSize == file.size()
-        assert results.md5sum == CreateFileHelper.MD5SUM
-    }
-
-    @Test
-    void testCheckIfResultFilesExistsOrThrowException_NoResults_NoPbsOut() {
-        /*
-         * In this test the method 'addOutputParameter' shall not be called since pbsOutput == false.
-         * To make sure that it can be recognized if the method would be called it is overwritten to throw an exception.
-         */
-        snvCallingJob.metaClass.addOutputParameter = { String name, String value -> throw new RuntimeException()}
-        snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return null }
-        assert shouldFail(RuntimeException, {
-            snvCallingJob.checkIfResultFilesExistsOrThrowException(snvCallingInstance2, false)
-        }).contains(SnvCallingStep.CALLING.name())
-    }
-
-    @Test
-    void testCheckIfResultFilesExistsOrThrowException_NoResults_WithPbsOut() {
-        snvCallingJob.metaClass.addOutputParameter = { String name, String value -> }
-        snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return null }
-
-        assert shouldFail(RuntimeException, {
-            snvCallingJob.checkIfResultFilesExistsOrThrowException(snvCallingInstance2, false)
-        }).contains(SnvCallingStep.CALLING.name())
-    }
-
-    @Test
-    void testCheckIfResultFilesExistsOrThrowException_WithResults_NoPbsOut() {
-        final String errorMessage = "No Pbs output"
-        /*
-         * In this test the method 'addOutputParameter' shall not be called since pbsOutput == false.
-         * To make sure that it can be recognized if the method would be called it is overwritten to throw an exception.
-         */
-        snvCallingJob.metaClass.addOutputParameter = { String name, String value -> throw new RuntimeException(errorMessage) }
-        snvCallingInstance.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResult }
-
-        snvCallingJob.checkIfResultFilesExistsOrThrowException(snvCallingInstance, false)
-    }
-
-    @Test
-    void testCheckIfResultFilesExistsOrThrowException_WithResults_WithPbsOut() {
-        snvCallingInstance.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResult }
-
-        snvCallingJob.checkIfResultFilesExistsOrThrowException(snvCallingInstance, true)
-    }
-
-
-    @Test
-    void testGetSnvPBSOptionsNameSeqTypeSpecific_InputIsNull() {
-        assert shouldFail(IllegalArgumentException,{
-            snvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(null)
-        }).contains("The input seqType must not be null in method getSnvPBSOptionsNameSeqTypeSpecific")
-    }
-
-    @Test
-    void testGetSnvPBSOptionsNameSeqTypeSpecific_CallingStep_ExomeSeqType() {
-            assert "snvPipeline_CALLING_WES" == snvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(testData.exomeSeqType)
-    }
-
-    @Test
-    void testGetSnvPBSOptionsNameSeqTypeSpecific_CallingStep_WholeGenomeSeqType() {
-            assert "snvPipeline_CALLING_WGS" == snvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(testData.seqType)
-    }
-
-    @Test
-    void testGetSnvPBSOptionsNameSeqTypeSpecific_AnnotationStep_ExomeSeqType() {
-        SnvAnnotationJob snvAnnotationJob = applicationContext.getBean('snvAnnotationJob',
-                DomainFactory.createAndSaveProcessingStep(SnvAnnotationJob.toString()), [])
-        snvCallingJob.log = log
-        assert "snvPipeline_SNV_ANNOTATION_WES" == snvAnnotationJob.getSnvPBSOptionsNameSeqTypeSpecific(testData.exomeSeqType)
-    }
-
-    @Test
-    void testGetSnvPBSOptionsNameSeqTypeSpecific_DeepAnnotationStep_ExomeSeqType() {
-        SnvDeepAnnotationJob snvDeepAnnotationJob = applicationContext.getBean('snvDeepAnnotationJob',
-                DomainFactory.createAndSaveProcessingStep(SnvDeepAnnotationJob.toString()), [])
-        snvCallingJob.log = log
-        assert "snvPipeline_SNV_DEEPANNOTATION_WES" == snvDeepAnnotationJob.getSnvPBSOptionsNameSeqTypeSpecific(testData.exomeSeqType)
-    }
-
-    @Test
-    void testGetSnvPBSOptionsNameSeqTypeSpecific_FilterStep_ExomeSeqType() {
-        FilterVcfJob filterVcfJob = applicationContext.getBean('filterVcfJob',
-                DomainFactory.createAndSaveProcessingStep(FilterVcfJob.toString()), [])
-        snvCallingJob.log = log
-        assert "snvPipeline_FILTER_VCF_WES" == filterVcfJob.getSnvPBSOptionsNameSeqTypeSpecific(testData.exomeSeqType)
-    }
-
-    @Test
-    void testGetSnvPBSOptionsNameSeqTypeSpecific_OtherSeqType() {
-        SeqType otherSeqType = new SeqType(
-        name: "ChIP Seq",
-        libraryLayout: "PAIRED",
-        dirName: "chip_seq_sequencing")
-        assert otherSeqType.save(flush: true)
-
-        assert shouldFail(RuntimeException,{
-            snvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(otherSeqType)
-        }).contains("There are no PBS Options available for the SNV pipeline for seqtype")
+        snvCallingJob.validate(snvCallingInstance)
     }
 
 

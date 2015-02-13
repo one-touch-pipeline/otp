@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.LinkFileUtils
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
 import static de.dkfz.tbi.TestCase.*
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
@@ -21,7 +23,7 @@ import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExternalScript
-import static de.dkfz.tbi.otp.utils.CreateFileHelper.*
+import static de.dkfz.tbi.otp.utils.CreateSNVFileHelper.*
 
 class SnvDeepAnnotationJobTests extends GroovyTestCase {
 
@@ -42,6 +44,9 @@ class SnvDeepAnnotationJobTests extends GroovyTestCase {
 
     @Autowired
     LsdfFilesService lsdfFilesService
+
+    @Autowired
+    LinkFileUtils linkFileUtils
 
     File testDirectory
     SnvDeepAnnotationJob snvDeepAnnotationJob
@@ -200,7 +205,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         // Reset meta classes
         removeMetaClass(ExecutionService, executionService)
         removeMetaClass(CreateClusterScriptService, createClusterScriptService)
+        removeMetaClass(LinkFileUtils, linkFileUtils)
         LsdfFilesService.metaClass = null
+        WaitingFileUtils.metaClass = null
         // Clean-up
         assert testDirectory.deleteDir()
     }
@@ -225,10 +232,11 @@ RUN_FILTER_VCF=1
 CHROMOSOME_INDICES=( {1..21} X Y)
 """
 
-        snvDeepAnnotationJob.metaClass.addOutputParameter = { String name, String value -> }
         snvDeepAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResult_DeepAnnotation }
-
+        executionService.metaClass.sendScript = { Realm realm, String text, String jobIdentifier, String qsubParameters ->
+            throw new RuntimeException("This area should not be reached since the deep annotation job shall not run")
+        }
         assertEquals(NextAction.SUCCEED, snvDeepAnnotationJob.maybeSubmit(snvCallingInstance2))
     }
 
@@ -243,7 +251,6 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 """
 
         snvDeepAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
-        snvDeepAnnotationJob.metaClass.addOutputParameter = { String name, String value -> }
         snvDeepAnnotationJob.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return null }
         shouldFail(RuntimeException, { snvDeepAnnotationJob.maybeSubmit(snvCallingInstance2) })
     }
@@ -253,29 +260,39 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
         SnvCallingStep step = SnvCallingStep.SNV_DEEPANNOTATION
         snvDeepAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
+
         snvDeepAnnotationJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult -> }
+        snvDeepAnnotationJob.metaClass.writeConfigFile = { SnvCallingInstance instance ->
+            return testData.createConfigFileWithContentInFileSystem(
+                    snvCallingInstance2.configFilePath.absoluteDataManagementPath,
+                    snvCallingInstance2.config.configuration)
+        }
+
         executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options ->
 
-            File snvFile = new OtpPath(snvCallingInstance2.snvInstancePath, step.getResultFileName(snvCallingInstance2.individual)).absoluteStagingPath
+            File snvFile = new OtpPath(snvCallingInstance2.snvInstancePath, step.getResultFileName(snvCallingInstance2.individual)).absoluteDataManagementPath
             File md5sumFile = createMD5SUMFile(snvCallingInstance2, SnvCallingStep.SNV_DEEPANNOTATION)
 
             String scriptCommandPart = "# BEGIN ORIGINAL SCRIPT\n" +
+                    "cp ${snvJobResult_Annotation.getResultFilePath().absoluteDataManagementPath} ${snvFile};"
                     "/tmp/scriptLocation/deepAnnotation.sh; " +
                     "md5sum ${snvFile} > ${md5sumFile}"
 
             String qsubParameterCommandPart = "-v CONFIG_FILE=" +
-                    "${snvCallingInstance2.configFilePath.absoluteStagingPath}," +
+                    "${snvCallingInstance2.configFilePath.absoluteDataManagementPath}," +
                     "pid=654321," +
                     "PID=654321," +
                     "TOOL_ID=snvDeepAnnotation," +
                     "PIPENAME=SNV_DEEPANNOTATION," +
                     "FILENAME_VCF=${snvFile}," +
                     "FILENAME_VCF_SNVS=${snvFile}," +
-                    "FILENAME_CHECKPOINT=${step.getCheckpointFilePath(snvCallingInstance2).absoluteStagingPath},"
+                    "FILENAME_CHECKPOINT=${step.getCheckpointFilePath(snvCallingInstance2).absoluteDataManagementPath},"
 
 
             assert command.contains(scriptCommandPart)
             assert command.contains(qsubParameterCommandPart)
+
+            createResultFile(snvCallingInstance2, SnvCallingStep.SNV_DEEPANNOTATION)
 
             return [PBS_ID]
         }
@@ -288,14 +305,14 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         try {
             assertEquals(NextAction.WAIT_FOR_CLUSTER_JOBS, snvDeepAnnotationJob.maybeSubmit(snvCallingInstance2))
 
-            assert !SnvCallingStep.SNV_DEEPANNOTATION.getCheckpointFilePath(snvCallingInstance2).absoluteStagingPath.exists()
+            assert !SnvCallingStep.SNV_DEEPANNOTATION.getCheckpointFilePath(snvCallingInstance2).absoluteDataManagementPath.exists()
 
-            File configFile = snvCallingInstance2.configFilePath.absoluteStagingPath
+            File configFile = snvCallingInstance2.configFilePath.absoluteDataManagementPath
             assert configFile.exists()
-            assert configFile.text == snvCallingInstance2.config.configuration
+            AbstractSnvCallingJob.assertDataManagementConfigContentsOk(snvCallingInstance2)
 
-            File annotationFile = new OtpPath(snvCallingInstance2.snvInstancePath, SnvCallingStep.SNV_ANNOTATION.getResultFileName(snvCallingInstance2.individual)).absoluteStagingPath
-            File deepAnnotationFile = new OtpPath(snvCallingInstance2.snvInstancePath, step.getResultFileName(snvCallingInstance2.individual)).absoluteStagingPath
+            File annotationFile = new OtpPath(snvCallingInstance2.snvInstancePath, SnvCallingStep.SNV_ANNOTATION.getResultFileName(snvCallingInstance2.individual)).absoluteDataManagementPath
+            File deepAnnotationFile = new OtpPath(snvCallingInstance2.snvInstancePath, step.getResultFileName(snvCallingInstance2.individual)).absoluteDataManagementPath
             assert annotationFile.text == deepAnnotationFile.text
         } finally {
             schedulerService.finishedJobExecutionOnCurrentThread(snvDeepAnnotationJob)
@@ -319,58 +336,39 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
     @Test
     void testValidate() {
-        File configFile = testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteStagingPath, CONFIGURATION)
+        File configFile = testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteDataManagementPath, CONFIGURATION)
 
-        File checkpointFile = SnvCallingStep.SNV_DEEPANNOTATION.getCheckpointFilePath(snvCallingInstance1).absoluteStagingPath
+        File checkpointFile = SnvCallingStep.SNV_DEEPANNOTATION.getCheckpointFilePath(snvCallingInstance1).absoluteDataManagementPath
         checkpointFile.createNewFile()
         createResultFile(snvCallingInstance1, SnvCallingStep.SNV_DEEPANNOTATION)
         createMD5SUMFile(snvCallingInstance1, SnvCallingStep.SNV_DEEPANNOTATION)
 
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> }
-        createClusterScriptService.metaClass.createTransferScript = { List<File> sourceLocations, List<File> targetLocations, List<File> linkLocations, boolean move ->
 
-            // test that source files are correct
-            File stagingBase = new File("/tmp/otp-test/${UNIQUE_PATH}/staging/")
-            File individualPathStaging = new File(stagingBase, "dirName/sequencing/whole_genome_sequencing/view-by-pid/654321/")
-            File samplePairPathStaging = new File(individualPathStaging, "snv_results/paired/sampletype1_sampletype2/")
-            File instancePathStaging = new File(samplePairPathStaging, "2014-09-01_15h32/")
-
-            assert sourceLocations.size() == 3
-            assert sourceLocations.contains(new File(instancePathStaging, "snvs_654321.vcf.gz"))
-            assert sourceLocations.contains(new File(instancePathStaging, "snvs_654321.vcf.gz.tbi"))
-            assert sourceLocations.contains(new File(instancePathStaging, "config.txt"))
-
-            // test that target files are correct
-            File rootBase = new File("/tmp/otp-test/${UNIQUE_PATH}/root/")
-            File individualPathRoot = new File(rootBase, "dirName/sequencing/whole_genome_sequencing/view-by-pid/654321/")
-            File samplePairPathRoot = new File(individualPathRoot, "snv_results/paired/sampletype1_sampletype2/")
-            File instancePathRoot = new File(samplePairPathRoot, "2014-09-01_15h32/")
-
-            assert targetLocations.size() == 3
-            assert targetLocations.contains(new File(instancePathRoot, "snvs_654321.vcf.gz"))
-            assert targetLocations.contains(new File(instancePathRoot, "snvs_654321.vcf.gz.tbi"))
-            assert targetLocations.contains(new File(instancePathRoot, "config.txt"))
-
-            // test that linked files are correct
-            assert linkLocations.size() == 3
-            assert linkLocations.contains(new File(samplePairPathRoot, "snvs_654321.vcf.gz"))
-            assert linkLocations.contains(new File(samplePairPathRoot, "snvs_654321.vcf.gz.tbi"))
-            assert linkLocations.contains(new File(samplePairPathRoot, "config_snv_deepannotation_2014-09-01_15h32.txt"))
-
-            "#some script"
+        snvDeepAnnotationJob.metaClass.deleteResultFileIfExists = { File resultFile, Realm realm ->
+            resultFile.delete()
         }
+
+        WaitingFileUtils.metaClass.static.confirmDoesNotExist = { File file -> return true }
+
+        executionService.metaClass.executeCommand = { Realm realm, String command ->
+            assert command == "rm ${checkpointFile.path}"
+            checkpointFile.delete()
+        }
+
         assert checkpointFile.exists()
         snvDeepAnnotationJob.validate(snvCallingInstance1)
         assert snvJobResult_DeepAnnotation.processingState == SnvProcessingStates.FINISHED
         assert !checkpointFile.exists()
 
         assert configFile.exists()
-        assert configFile.text == snvCallingInstance1.config.configuration
+        AbstractSnvCallingJob.assertDataManagementConfigContentsOk(snvCallingInstance1)
     }
 
     @Test
     void testValidate_CheckpointFileDoesNotExists() {
-        File configFile = testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteStagingPath, CONFIGURATION)
+        createResultFile(snvCallingInstance1, SnvCallingStep.SNV_DEEPANNOTATION)
+        testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteDataManagementPath, CONFIGURATION)
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> }
 
         shouldFail(AssertionError, {snvDeepAnnotationJob.validate(snvCallingInstance1)})
@@ -378,36 +376,48 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
     @Test
     void testValidate_ConfigFileDoesNotExists() {
+        createResultFile(snvCallingInstance1, SnvCallingStep.SNV_DEEPANNOTATION)
+
         shouldFail(FileNotFoundException, {snvDeepAnnotationJob.validate(snvCallingInstance1)})
     }
 
     @Test
     void testValidate_WrongConfigurationInConfigFile() {
-        File configFile = testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteStagingPath, "wrong configuration")
+        File configFile = testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteDataManagementPath, "wrong configuration")
         shouldFail(AssertionError, {snvDeepAnnotationJob.validate(snvCallingInstance1)})
     }
 
     @Test
     void testValidate_InputFileNotReadable() {
         SnvCallingStep step = SnvCallingStep.SNV_DEEPANNOTATION
-        File configFile = testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteStagingPath, CONFIGURATION)
+        testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteDataManagementPath, CONFIGURATION)
+        createResultFile(snvCallingInstance1, SnvCallingStep.SNV_DEEPANNOTATION)
+
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file ->
             if (file.path.contains("_annotation")) {
                 throw new AssertionError("Not readable")
             }
         }
 
-        File checkpointFile = new OtpPath(snvCallingInstance1.snvInstancePath, step.checkpointFileName).absoluteStagingPath
+        File checkpointFile = new OtpPath(snvCallingInstance1.snvInstancePath, step.checkpointFileName).absoluteDataManagementPath
         checkpointFile.createNewFile()
+
+        snvDeepAnnotationJob.metaClass.deleteResultFileIfExists = { File resultFile, Realm realm ->
+            resultFile.delete()
+        }
+
+        WaitingFileUtils.metaClass.static.confirmDoesNotExist = { File file -> return true }
 
         shouldFail(RuntimeException, { snvDeepAnnotationJob.validate(snvCallingInstance1) })
     }
 
     @Test
     void testValidate_ResultFileNotReadable() {
-        File configFile = testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteStagingPath, CONFIGURATION)
+        testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteDataManagementPath, CONFIGURATION)
 
-        LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file ->
+        createResultFile(snvCallingInstance1, SnvCallingStep.SNV_DEEPANNOTATION)
+
+        LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file, int waitingTime ->
             if (!file.path.contains("_annotation")) {
                 throw new AssertionError("Not readable")
             }

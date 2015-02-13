@@ -1,6 +1,10 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.utils.LinkFileUtils
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
+
 import static de.dkfz.tbi.TestCase.*
+import static de.dkfz.tbi.otp.utils.CreateSNVFileHelper.createResultFile
 import static org.junit.Assert.*
 import org.junit.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,6 +37,9 @@ class SnvAnnotationJobTests extends GroovyTestCase {
     @Autowired
     LsdfFilesService lsdfFilesService
 
+    @Autowired
+    LinkFileUtils linkFileUtils
+
     File testDirectory
     SnvAnnotationJob snvAnnotationJob
     SnvCallingInstance snvCallingInstance
@@ -63,7 +70,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         testData.createSnvObjects()
 
         Realm realm_processing = DomainFactory.createRealmDataProcessingDKFZ([
-            processingRootPath: '${testDirectory}/processing',
+            processingRootPath: "${testDirectory}/processing",
+            rootPath: "${testDirectory}/root",
             stagingRootPath : "${testDirectory}/staging"
         ])
         assert realm_processing.save()
@@ -146,7 +154,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvJobResultInput = null
         processedMergedBamFile1 = null
         removeMetaClass(ExecutionService, executionService)
+        removeMetaClass(LinkFileUtils, linkFileUtils)
         LsdfFilesService.metaClass = null
+        WaitingFileUtils.metaClass = null
         assert testDirectory.deleteDir()
     }
 
@@ -167,8 +177,10 @@ CHROMOSOME_INDICES=( {1..21} XY)
 """
 
         snvAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
-        snvAnnotationJob.metaClass.addOutputParameter = { String name, String value -> }
         snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResult }
+        executionService.metaClass.sendScript = { Realm realm, String text, String jobIdentifier, String qsubParameters ->
+            throw new RuntimeException("This area should not be reached since the annotation job shall not run")
+        }
         snvAnnotationJob.log = log
         assertEquals(NextAction.SUCCEED, snvAnnotationJob.maybeSubmit(snvCallingInstance2))
     }
@@ -185,7 +197,6 @@ CHROMOSOME_INDICES=( {1..21} XY)
 """
 
         snvAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
-        snvAnnotationJob.metaClass.addOutputParameter = { String name, String value -> }
         snvAnnotationJob.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return null }
         assert (
         shouldFail(RuntimeException, { snvAnnotationJob.maybeSubmit(snvCallingInstance2) })
@@ -202,7 +213,40 @@ CHROMOSOME_INDICES=( {1..21} XY)
         snvAnnotationJob.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
             return new File(processedMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
         }
+        snvAnnotationJob.metaClass.writeConfigFile = { SnvCallingInstance instance ->
+            return testData.createConfigFileWithContentInFileSystem(
+                    snvCallingInstance2.configFilePath.absoluteDataManagementPath,
+                    snvCallingInstance2.config.configuration)
+        }
+
         executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options ->
+            SnvCallingStep callingStep = SnvCallingStep.CALLING
+            File inputFile = snvCallingInstance.findLatestResultForSameBamFiles(callingStep).resultFilePath.absoluteDataManagementPath
+            File inputFileCopy = new File(snvCallingInstance2.snvInstancePath.absoluteDataManagementPath, inputFile.name)
+            File resultFile = new OtpPath(snvCallingInstance2.snvInstancePath, SnvCallingStep.SNV_ANNOTATION.getResultFileName(snvCallingInstance2.individual)).absoluteDataManagementPath
+            File bamFile = snvAnnotationJob.getExistingBamFilePath(snvCallingInstance2.sampleType1BamFile)
+
+            String commandLinkPart = "# BEGIN ORIGINAL SCRIPT\n" +
+                    "ln -s ${inputFile.path} ${inputFileCopy.path};"
+
+            String commandScriptPart = "/tmp/scriptLocation/annotation.sh"
+
+            String commandDeletePart = "rm -f ${inputFileCopy.path}"
+
+            String commandParameterPart = "-v CONFIG_FILE=" +
+                    "${snvCallingInstance2.configFilePath.absoluteDataManagementPath}," +
+                    "pid=654321," +
+                    "PID=654321," +
+                    "TUMOR_BAMFILE_FULLPATH_BP=${bamFile}"
+                    "TOOL_ID=snvAnnotation," +
+                    "FILENAME_VCF_IN=${inputFileCopy}," +
+                    "FILENAME_VCF_OUT=${resultFile}," +
+                    "FILENAME_CHECKPOINT=${callingStep.getCheckpointFilePath(snvCallingInstance2).absoluteDataManagementPath},"
+
+            assert command.contains(commandLinkPart)
+            assert command.contains(commandScriptPart)
+            assert command.contains(commandDeletePart)
+            assert command.contains(commandParameterPart)
             return [PBS_ID]
         }
         snvCallingInstance.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResultInput }
@@ -218,17 +262,27 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testValidate() {
+        SnvCallingStep annotationStep = SnvCallingStep.SNV_ANNOTATION
+
         File configFile = testData.createConfigFileWithContentInFileSystem(
-            snvCallingInstance2.configFilePath.absoluteStagingPath,
+            snvCallingInstance2.configFilePath.absoluteDataManagementPath,
             CONFIGURATION)
 
-        File checkpointFile = new OtpPath(snvCallingInstance2.snvInstancePath, SnvCallingStep.SNV_ANNOTATION.checkpointFileName).absoluteStagingPath
+        createResultFile(snvCallingInstance2, annotationStep)
+
+        File checkpointFile = new OtpPath(snvCallingInstance2.snvInstancePath, annotationStep.checkpointFileName).absoluteDataManagementPath
         checkpointFile.createNewFile()
 
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> }
         snvAnnotationJob.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
             return new File(processedMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
         }
+        snvAnnotationJob.metaClass.deleteResultFileIfExists = { File resultFile, Realm realm ->
+            resultFile.delete()
+        }
+
+        WaitingFileUtils.metaClass.static.confirmDoesNotExist = { File file -> return true }
+
         try {
             assertNull(snvAnnotationJob.validate(snvCallingInstance2))
         } finally {
@@ -241,10 +295,10 @@ CHROMOSOME_INDICES=( {1..21} XY)
     @Test
     void testValidate_FileNotReadable() {
         File configFile = testData.createConfigFileWithContentInFileSystem(
-            snvCallingInstance2.configFilePath.absoluteStagingPath,
+            snvCallingInstance2.configFilePath.absoluteDataManagementPath,
             CONFIGURATION)
 
-        LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> throw new AssertionError("Not readable") }
+        LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file, int waitingTime -> throw new AssertionError("Not readable") }
         snvAnnotationJob.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
             return new File(processedMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
         }
