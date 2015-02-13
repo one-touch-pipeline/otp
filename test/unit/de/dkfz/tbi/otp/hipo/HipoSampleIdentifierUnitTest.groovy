@@ -136,9 +136,9 @@ class HipoSampleIdentifierUnitTest {
     }
 
     @Test
-    void testSampleType_checkTissueType_TUMOR_INTERVAL_DEBULKING_SURGLEY() {
+    void testSampleType_checkTissueType_TUMOR_INTERVAL_DEBULKING_SURGERY() {
         String sampleName = "H003-BPDK-E8-C02"
-        String tissueTypeExp = "TUMOR_INTERVAL_DEBULKING_SURGLEY08"
+        String tissueTypeExp = "TUMOR_INTERVAL_DEBULKING_SURGERY08"
 
         HipoSampleIdentifier identifier = HipoSampleIdentifier.tryParse(sampleName)
         assert null != identifier

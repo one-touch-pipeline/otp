@@ -17,7 +17,7 @@ public enum HipoTissueType {
     PLASMA                    ('L'),
     BUFFY_COAT                ('F'),
     NORMAL_SORTED_CELLS       ('Z'),
-    TUMOR_INTERVAL_DEBULKING_SURGLEY ('E'),
+    TUMOR_INTERVAL_DEBULKING_SURGERY ('E'),
 
     final char key
 
