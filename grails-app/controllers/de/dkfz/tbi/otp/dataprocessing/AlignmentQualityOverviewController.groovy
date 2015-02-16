@@ -45,7 +45,7 @@ class AlignmentQualityOverviewController {
         'alignment.quality.standardDeviationPE_Insertsize',
         'alignment.quality.medianPE_insertsize',
         'alignment.quality.meanPE_Insertsize',
-        'datafile.showDetails.dates.fileSystemDate',
+        'alignment.quality.date',
     ].asImmutable()
 
     private static final List<String> HEADER_EXOME = [
@@ -61,7 +61,7 @@ class AlignmentQualityOverviewController {
         'alignment.quality.standardDeviationPE_Insertsize',
         'alignment.quality.medianPE_insertsize',
         'alignment.quality.meanPE_Insertsize',
-        'datafile.showDetails.dates.fileSystemDate',
+        'alignment.quality.date',
     ].asImmutable()
 
 
