@@ -212,6 +212,11 @@ class LsdfFilesService {
         return file.length()
     }
 
+    static boolean isFileReadableAndNotEmpty(final File file) {
+        assert file.isAbsolute()
+        return confirmExists(file) && file.isFile() && file.canRead() && file.length() > 0L
+    }
+
     private static void checkFileIsReadableAndNotEmpty(final File file, Closure existenceCheck) {
         assert file.isAbsolute()
         existenceCheck()

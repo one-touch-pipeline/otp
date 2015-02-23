@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.springframework.util.Assert.*
+
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.SavingException
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
@@ -282,8 +284,7 @@ class ProcessedMergedBamFileQaFileService {
      * @return the result of the check
      */
     private boolean validateFile(String path) {
-        File file = new File(path)
-        return file.canRead() && file.size() != 0
+        return LsdfFilesService.isFileReadableAndNotEmpty(new File(path))
     }
 
     private def assertSave(def object) {
