@@ -5,7 +5,10 @@ import grails.test.mixin.Mock
 import org.junit.Test
 
 @Mock([SeqTypeService])
-@Build([SeqTrack])
+@Build([
+    SeqPlatformGroup,
+    SeqTrack,
+])
 class SeqTrackServiceUnitTests {
 
     SeqTrackService seqTrackService

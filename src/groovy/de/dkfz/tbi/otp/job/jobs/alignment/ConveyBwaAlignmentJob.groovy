@@ -36,10 +36,6 @@ class ConveyBwaAlignmentJob extends AbstractJobImpl {
         AlignmentPass.withTransaction {
             AlignmentPass alignmentPass = AlignmentPass.get(alignmentPassId)
             SeqTrack seqTrack = alignmentPass.seqTrack
-            alignmentPassService.setReferenceGenomeAsConfigured(alignmentPass)
-            if (alignmentPassService.isExomeEnrichmentKitOrBedFileMissing(seqTrack)) {
-                throw new RuntimeException("Exome enrichment kit is not set or BED file is missing for SeqTrack ${seqTrack}.")
-            }
             List<DataFile> files = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
             for (DataFile file in files) {
                 realm = configService.getRealmDataProcessing(file.project)

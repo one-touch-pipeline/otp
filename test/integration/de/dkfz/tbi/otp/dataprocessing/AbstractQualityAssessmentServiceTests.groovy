@@ -97,7 +97,7 @@ class AbstractQualityAssessmentServiceTests {
 
     private ProcessedMergedBamFile createProcessedMergedBamFile() {
 
-        MergingWorkPackage mergingWorkPackage = data.createMergingWorkPackage()
+        MergingWorkPackage mergingWorkPackage = data.findOrSaveMergingWorkPackage(data.seqTrack, data.referenceGenome)
         mergingWorkPackage.save([flush: true])
 
         MergingSet mergingSet = data.createMergingSet([mergingWorkPackage: mergingWorkPackage])

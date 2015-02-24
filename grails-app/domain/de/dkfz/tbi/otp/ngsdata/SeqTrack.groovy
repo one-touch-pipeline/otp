@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+
+import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SeqTrack {
@@ -34,7 +36,6 @@ class SeqTrack {
     SequencingKit sequencingKit
 
     QualityEncoding qualityEncoding = QualityEncoding.UNKNOWN
-    DataProcessingState alignmentState = DataProcessingState.UNKNOWN
     DataProcessingState fastqcState = DataProcessingState.UNKNOWN
 
     static belongsTo = [
@@ -56,6 +57,25 @@ class SeqTrack {
         // for old data and data which is sequenced from external core facilities this information might not be provided.
         sequencingKit nullable: true
         ilseId nullable: true
+    }
+
+    /**
+     * @deprecated This method fails if a SeqTrack is aligned by multiple workflows or with different parameters.
+     */
+    @Deprecated
+    DataProcessingState getAlignmentState() {
+        Collection<AlignmentPass> allPasses = AlignmentPass.findAllBySeqTrack(this)
+        Collection<AlignmentPass> latestPasses = allPasses.findAll( { it.isLatestPass() } )
+        assert allPasses.empty == latestPasses.empty
+        switch (latestPasses.size()) {
+            case 0:
+                return DataProcessingState.UNKNOWN
+            case 1:
+                return DataProcessingState.valueOf(exactlyOneElement(latestPasses).alignmentState.name())
+            default:
+                throw new RuntimeException(
+                        "${this} is aligned by multiple workflows or with different parameters, therefore it does not have a single alignmentState.")
+        }
     }
 
     String nBaseString() {
@@ -99,6 +119,10 @@ class SeqTrack {
 
     SampleType getSampleType() {
         return sample.sampleType
+    }
+
+    SeqPlatformGroup getSeqPlatformGroup() {
+        return seqPlatform.seqPlatformGroup
     }
 
     short getProcessingPriority() {

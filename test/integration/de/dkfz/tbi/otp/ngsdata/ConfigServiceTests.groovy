@@ -26,14 +26,14 @@ class ConfigServiceTests {
             ])
         assertNotNull(realmBQ.save(flush: true))
 
-        projectDKFZ = new Project(
+        projectDKFZ = TestData.createProject(
                 name: 'projectDKFZ',
                 dirName: 'projectDKFZ',
                 realmName: 'DKFZ'
                 )
         assertNotNull(projectDKFZ.save([flush: true]))
 
-        projectBQ = new Project(
+        projectBQ = TestData.createProject(
                 name: 'projectBQ',
                 dirName: 'projectBQ',
                 realmName: 'BioQuant'

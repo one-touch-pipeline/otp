@@ -1,11 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.junit.Assert.*
-import grails.util.Environment
+
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.job.jobs.merging.MergingJob
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
 import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
 import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type
 import org.junit.*
@@ -40,10 +39,7 @@ class MergingJobCreateCommandTests {
         basePathMerging = "${basePath}/merging"
         basePathMergingOutput = "${basePathMerging}//name_1/${SEQ_TYPE_NAME}/${LIBRARY_LAYOUT_NAME}/DEFAULT/0/pass0"
 
-        seqPlatform = new SeqPlatform(
-                        name: "seqPlatform_name",
-                        model: "seqPlatform_model"
-                        )
+        seqPlatform = testData.findOrSaveSeqPlatform()
         assertNotNull(seqPlatform.save([flush: true, failOnError: true]))
 
         seqType = new SeqType(
@@ -53,7 +49,7 @@ class MergingJobCreateCommandTests {
                         )
         assertNotNull(seqType.save([flush: true, failOnError: true]))
 
-        Project project = new Project(
+        Project project = TestData.createProject(
                         name: "name_1",
                         dirName: "dirName",
                         realmName: realm.name
@@ -82,7 +78,8 @@ class MergingJobCreateCommandTests {
 
         MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                         sample: sample,
-                        seqType: seqType
+                        seqType: seqType,
+                        seqPlatformGroup: seqPlatform.seqPlatformGroup,
                         )
         assertNotNull(mergingWorkPackage.save([flush: true, failOnError: true]))
 

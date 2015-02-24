@@ -49,7 +49,7 @@ class ReferenceGenomeServiceTests {
             processingRootPath: 'tmp',
             ]).save([flush: true])
 
-        project = new Project()
+        project = TestData.createProject()
         project.name = "SOME_PROJECT"
         project.dirName = "/tmp/alignmentPassService/"
         project.realmName = realm.name

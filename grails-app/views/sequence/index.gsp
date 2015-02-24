@@ -60,7 +60,6 @@
                     'sequence.list.headers.run',
                     'sequence.list.headers.lane',
                     'sequence.list.headers.fastqc',
-                    'sequence.list.headers.otpAlignment',
                     'sequence.list.headers.date'
             ]}" id="sequenceTable"/>
         </div>

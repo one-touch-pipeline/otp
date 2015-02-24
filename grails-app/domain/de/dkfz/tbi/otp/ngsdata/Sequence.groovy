@@ -45,7 +45,6 @@ class Sequence implements Serializable {
     int insertSize
 
     SeqTrack.QualityEncoding qualityEncoding
-    SeqTrack.DataProcessingState alignmentState
     SeqTrack.DataProcessingState fastqcState
 
     // fields from Run

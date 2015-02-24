@@ -9,6 +9,7 @@ import org.junit.*
 
 @TestFor(Run)
 @Build([
+    SeqPlatformGroup,
     SeqTrack,
 ])
 class RunUnitTests {

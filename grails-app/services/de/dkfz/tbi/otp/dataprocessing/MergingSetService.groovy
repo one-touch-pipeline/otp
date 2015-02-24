@@ -1,10 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static org.springframework.util.Assert.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage.ProcessingType
-import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 class MergingSetService {
@@ -14,8 +13,6 @@ class MergingSetService {
     ProcessedBamFileService processedBamFileService
 
     MergingCriteriaService mergingCriteriaService
-
-    MergingWorkPackageService mergingWorkPackageService
 
     /**
      * It is checked if the {@link ProcessedBamFile} is valid for merging.
@@ -33,27 +30,18 @@ class MergingSetService {
         // In some cases it happens randomly that the status switches from "INPROGRESS" to "NEEDS_PROCESSING" between the start job and
         // the second job. Therefore the status is changed to "INPROGRESS" again, when the status is "NEEDS_PROCESSING"
         processedBamFileService.blockedForAssigningToMergingSet(bamFile)
-        mergingCriteriaService.criterias(bamFile).each { MergingCriteria criteria ->
-            Sample sample = bamFile.alignmentPass.seqTrack.sample
-            SeqType seqType = bamFile.alignmentPass.seqTrack.seqType
-            MergingWorkPackage workPackage = MergingWorkPackage.findBySampleAndSeqTypeAndMergingCriteria(sample, seqType, criteria)
-            if (!workPackage) {
-                workPackage = mergingWorkPackageService.createWorkPackage(bamFile, criteria)
-                isTrue(workPackage.processingType.equals(ProcessingType.SYSTEM), "The processing type of this merging workpackage is not SYSTEM")
-            } else {
-                isTrue(workPackage.processingType.equals(ProcessingType.SYSTEM), "The processing type of this merging workpackage is not SYSTEM")
-                ProcessedMergedBamFile mergedBamFile = mergingCriteriaService.mergedBamFile2Merge(workPackage, bamFile, criteria)
-                if (mergedBamFile) {
-                    bamFiles2Merge.add(mergedBamFile)
-                }
-            }
-            bamFiles2Merge.addAll(mergingCriteriaService.bamFiles2Merge(bamFile, criteria))
-            if (bamFiles2Merge.empty) {
-                log.info("There are no files to merge with the merging criteria ${criteria}")
-                return
-            }
-            createMergingSet(bamFiles2Merge, workPackage)
+        MergingWorkPackage workPackage = bamFile.mergingWorkPackage
+        isTrue(workPackage.processingType.equals(ProcessingType.SYSTEM), "The processing type of this merging workpackage is not SYSTEM")
+        ProcessedMergedBamFile mergedBamFile = mergingCriteriaService.processedMergedBamFileForMerging(workPackage)
+        if (mergedBamFile) {
+            bamFiles2Merge.add(mergedBamFile)
         }
+        bamFiles2Merge.addAll(mergingCriteriaService.processedBamFilesForMerging(workPackage))
+        if (bamFiles2Merge.empty) {
+            log.info("There are no files to merge for MergingWorkPackage ${workPackage}")
+            return
+        }
+        createMergingSet(bamFiles2Merge)
     }
 
     /**
@@ -62,17 +50,21 @@ class MergingSetService {
      * and assigns the bamFiles to this merging set
      *
      * @param bamFiles2Merge, List of {@link ProcessedBamFile}s, which shell be merged
-     * @param workPackage, stores the merging information
      */
-    void createMergingSet(List<AbstractBamFile> bamFiles2Merge, MergingWorkPackage workPackage) {
+    void createMergingSet(List<AbstractBamFile> bamFiles2Merge) {
         notEmpty(bamFiles2Merge, "the input list of bam files for the method createMergingSet is empty")
-        notNull(workPackage, "the input work package for the method createMergingSet is null")
+        MergingWorkPackage workPackage = exactlyOneElement(bamFiles2Merge*.mergingWorkPackage.unique())
+        if (bamFiles2Merge.size() == 1) {
+            if (bamFiles2Merge.get(0) instanceof ProcessedMergedBamFile) {
+                throw new RuntimeException('Trying to merge a single merged BAM file only. This makes no sense.')
+            }
+        }
         if (!checkIfMergingSetNotExists(bamFiles2Merge, workPackage)) {
             bamFiles2Merge.each { AbstractBamFile bamFile ->
                 bamFile.status = State.PROCESSED
                 assertSave(bamFile)
             }
-            log.info("The merging set for the criteria ${workPackage.mergingCriteria} already exists".toString())
+            log.info("The merging set for ${workPackage} already exists".toString())
             return
         }
         MergingSet mergingSet = new MergingSet(identifier: MergingSet.nextIdentifier(workPackage), mergingWorkPackage: workPackage)
@@ -82,8 +74,8 @@ class MergingSetService {
             assertSave(mergingAssigment)
             abstractBamFileService.assignedToMergingSet(bamFile)
         }
-        if (!mergingCriteriaService.validateBamFiles(mergingSet)) {
-            throw new SavingException(mergingSet.toString())
+        mergingSet.containedSeqTracks.each {    // The containedSeqTracks call itself does some useful validation.
+            assert workPackage.satisfiesCriteria(it)
         }
         mergingSet.status = MergingSet.State.NEEDS_PROCESSING
         assertSave(mergingSet)

@@ -12,6 +12,7 @@ import de.dkfz.tbi.otp.job.jobs.TestJob
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.Realm.OperationType
+import de.dkfz.tbi.otp.ngsdata.TestData
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 import static de.dkfz.tbi.otp.job.jobs.TestJobHelper.*
 
@@ -76,7 +77,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
     @Ignore("OTP-1423")
     void testExecuteJobOnlyScript() {
         assertNotNull(realm.save())
-        TestJob testJob = createTestJobWithProcessingStep(AlignmentPass.build())
+        TestJob testJob = createTestJobWithProcessingStep(TestData.createAndSaveAlignmentPass())
         testJob.log = log
         schedulerService.startingJobExecutionOnCurrentThread(testJob)
         try {
@@ -103,7 +104,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
     void testExecuteJob_failForPbsId() {
         executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options -> return [] }
         assertNotNull(realm.save())
-        TestJob testJob = createTestJobWithProcessingStep(AlignmentPass.build())
+        TestJob testJob = createTestJobWithProcessingStep(TestData.createAndSaveAlignmentPass())
         testJob.log = log
         schedulerService.startingJobExecutionOnCurrentThread(testJob)
         try {
@@ -121,7 +122,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
     @Ignore("OTP-1423")
     void testExecuteJobScriptAndJobIdentifier() {
         assertNotNull(realm.save())
-        TestJob testJob = createTestJobWithProcessingStep(AlignmentPass.build())
+        TestJob testJob = createTestJobWithProcessingStep(TestData.createAndSaveAlignmentPass())
         testJob.log = log
         schedulerService.startingJobExecutionOnCurrentThread(testJob)
         try {
@@ -155,7 +156,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
     @Ignore("OTP-1423")
     void testExecuteJobScriptAndJobIdentifierAndQsubParameter() {
         assertNotNull(realm.save())
-        TestJob testJob = createTestJobWithProcessingStep(AlignmentPass.build())
+        TestJob testJob = createTestJobWithProcessingStep(TestData.createAndSaveAlignmentPass())
         testJob.log = log
         schedulerService.startingJobExecutionOnCurrentThread(testJob)
         try {

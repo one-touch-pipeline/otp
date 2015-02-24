@@ -20,7 +20,7 @@ class ConfigPerProjectAndSeqTypeUnitTests {
     @Before
     void setUp() {
         validConfigPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
-            project: new Project(),
+            project: TestData.createProject(),
             seqType: new SeqType(),
             configuration: configuration,
             externalScriptVersion: "v1"
@@ -41,13 +41,13 @@ class ConfigPerProjectAndSeqTypeUnitTests {
                 )
         assertFalse(configPerProjectAndSeqType.validate())
 
-        configPerProjectAndSeqType.project = new Project()
+        configPerProjectAndSeqType.project = TestData.createProject()
         assertTrue(configPerProjectAndSeqType.validate())
     }
 
     void testSaveWithoutSeqType() {
         ConfigPerProjectAndSeqType configPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
-                project: new Project(),
+                project: TestData.createProject(),
                 configuration: configuration,
                 externalScriptVersion: "v1",
                 )
@@ -59,7 +59,7 @@ class ConfigPerProjectAndSeqTypeUnitTests {
 
     void testSaveWithoutConfig() {
         ConfigPerProjectAndSeqType configPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
-                project: new Project(),
+                project: TestData.createProject(),
                 seqType: new SeqType(),
                 externalScriptVersion: "v1",
                 )
@@ -71,7 +71,7 @@ class ConfigPerProjectAndSeqTypeUnitTests {
 
     void testSaveWithEmptyConfig() {
         ConfigPerProjectAndSeqType configPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
-                project: new Project(),
+                project: TestData.createProject(),
                 seqType: new SeqType(),
                 configuration: "",
                 externalScriptVersion: "v1",
@@ -84,7 +84,7 @@ class ConfigPerProjectAndSeqTypeUnitTests {
 
     void testSaveWithObsoleteDate() {
         ConfigPerProjectAndSeqType configPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
-                project: new Project(),
+                project: TestData.createProject(),
                 seqType: new SeqType(),
                 configuration: configuration,
                 obsoleteDate: new Date(),
@@ -95,7 +95,7 @@ class ConfigPerProjectAndSeqTypeUnitTests {
 
     void testSave_noScriptVersion_shouldNotValidate() {
         ConfigPerProjectAndSeqType configPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
-                project: new Project(),
+                project: TestData.createProject(),
                 seqType: new SeqType(),
                 configuration: configuration,
         )
@@ -107,7 +107,7 @@ class ConfigPerProjectAndSeqTypeUnitTests {
 
     void testSave_emptyScriptVersion_shouldNotValidate() {
         ConfigPerProjectAndSeqType configPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
-                project: new Project(),
+                project: TestData.createProject(),
                 seqType: new SeqType(),
                 configuration: configuration,
                 externalScriptVersion: ""
@@ -120,7 +120,7 @@ class ConfigPerProjectAndSeqTypeUnitTests {
 
     void testSaveWithReferenceToPreviousConfigWithoutObsolete() {
         ConfigPerProjectAndSeqType newConfigPerProjectAndSeqType = new ConfigPerProjectAndSeqType(
-                project: new Project(),
+                project: TestData.createProject(),
                 seqType: new SeqType(),
                 configuration: configuration,
                 previousConfig: validConfigPerProjectAndSeqType,

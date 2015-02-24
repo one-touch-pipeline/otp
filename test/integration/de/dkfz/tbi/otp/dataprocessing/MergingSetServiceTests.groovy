@@ -19,12 +19,13 @@ class MergingSetServiceTests {
     TestData testData = new TestData()
     Sample sample
     SeqType seqType
+    SeqPlatform seqPlatform
     SeqTrack seqTrack
     SeqTrack seqTrack2
 
     @Before
     void setUp() {
-        Project project = new Project(
+        Project project = TestData.createProject(
                         name: "name_1",
                         dirName: "dirName",
                         realmName: "realmName"
@@ -58,10 +59,7 @@ class MergingSetServiceTests {
                         )
         assertNotNull(seqType.save([flush: true, failOnError: true]))
 
-        SeqPlatform seqPlatform = new SeqPlatform(
-                        name: "name",
-                        model: "model"
-                        )
+        seqPlatform = TestData.findOrSaveSeqPlatform()
         assertNotNull(seqPlatform.save([flush: true, failOnError: true]))
 
         SeqCenter seqCenter = new SeqCenter(
@@ -243,11 +241,11 @@ class MergingSetServiceTests {
     void testNextMergingSet() {
         MergingSet next = mergingSetService.mergingSetInStateNeedsProcessing()
         assertNull(next)
-        MergingSet mergingSet = createMergingSet()
+        MergingSet mergingSet = MergingSet.build(status: MergingSet.State.NEEDS_PROCESSING)
         next = mergingSetService.mergingSetInStateNeedsProcessing()
         assertEquals(mergingSet, next)
-        MergingSet mergingSet2 = createMergingSet()
-        MergingSet mergingSet3 = createMergingSet()
+        MergingSet mergingSet2 = MergingSet.build(status: MergingSet.State.NEEDS_PROCESSING)
+        MergingSet mergingSet3 = MergingSet.build(status: MergingSet.State.NEEDS_PROCESSING)
         next = mergingSetService.mergingSetInStateNeedsProcessing()
         assertNotNull(next)
         assertTrue(next.equals(mergingSet) || next.equals(mergingSet2) || next.equals(mergingSet3) )
@@ -259,7 +257,7 @@ class MergingSetServiceTests {
         mergingSet3.save([flush: true, failOnError: true])
         next = mergingSetService.mergingSetInStateNeedsProcessing()
         assertNull(next)
-        MergingSet mergingSet4 = createMergingSet()
+        MergingSet mergingSet4 = MergingSet.build(status: MergingSet.State.NEEDS_PROCESSING)
         next = mergingSetService.mergingSetInStateNeedsProcessing()
         assertNotNull(next)
         assertTrue(next.equals(mergingSet4))
@@ -289,7 +287,7 @@ class MergingSetServiceTests {
     }
 
     @Test
-    void testCreateMergingSetForBamFileMergingPackageNotExists() {
+    void testCreateMergingSetForBamFile() {
         assertEquals(0, MergingWorkPackage.count)
         assertEquals(0, MergingSet.count)
         assertEquals(0, MergingSetAssignment.count)
@@ -322,6 +320,7 @@ class MergingSetServiceTests {
         assertEquals(0, MergingSetAssignment.count)
         ProcessedBamFile bamFile = createBamFile()
         ProcessedBamFile bamFile2 = createBamFile(seqTrack2)
+        assert bamFile.mergingWorkPackage == bamFile2.mergingWorkPackage
         mergingSetService.createMergingSetForBamFile(bamFile)
         assertEquals(1, MergingWorkPackage.count)
         assertEquals(1, MergingSet.count)
@@ -359,18 +358,15 @@ class MergingSetServiceTests {
         assertEquals(1, MergingSet.count)
         assertEquals(1, MergingSetAssignment.count)
         ProcessedBamFile bamFile2 = createBamFile(seqTrack2)
-        mergingSetService.createMergingSetForBamFile(bamFile)
+        mergingSetService.createMergingSetForBamFile(bamFile2)
         assertEquals(1, MergingWorkPackage.count)
         final Collection<MergingSet> mergingSets = MergingSet.list()
         assertEquals(2, mergingSets.size())
         final MergingSet mergingSetCreatedByServiceMethod = exactlyOneElement(mergingSets - mergingSet)
         assert TestCase.containSame(MergingSetAssignment.findAllByMergingSet(mergingSet)*.bamFile, [bamFile])
-        // TODO: Actually bamFile should not be assigned to the merging set, because processedMergedBamFile already
-        //       contains all data from bamFile. This might be the reason why sometimes the merging workflow fails
-        //       because a merging set contains a SeqTrack more than once. -> OTP-1161
         assert TestCase.containSame(MergingSetAssignment.findAllByMergingSet(mergingSetCreatedByServiceMethod)*.bamFile,
-                [bamFile, processedMergedBamFile, bamFile2])
-        assertEquals(4, MergingSetAssignment.count)
+                [processedMergedBamFile, bamFile2])
+        assertEquals(3, MergingSetAssignment.count)
     }
 
     @Test
@@ -413,10 +409,9 @@ class MergingSetServiceTests {
         assertEquals(0, MergingSet.count)
         assertEquals(0, MergingSetAssignment.count)
         List<ProcessedBamFile> bamFiles = []
-        MergingWorkPackage workPackage = createMergingWorkPackage()
         ProcessedBamFile bamFile = createBamFile()
         bamFiles.add(bamFile)
-        mergingSetService.createMergingSet(bamFiles, workPackage)
+        mergingSetService.createMergingSet(bamFiles)
         assertEquals(1, MergingSet.count)
         assertEquals(1, MergingSetAssignment.count)
     }
@@ -426,12 +421,11 @@ class MergingSetServiceTests {
         assertEquals(0, MergingSet.count)
         assertEquals(0, MergingSetAssignment.count)
         List<ProcessedBamFile> bamFiles = []
-        MergingWorkPackage workPackage = createMergingWorkPackage()
         ProcessedBamFile bamFile = createBamFile()
         bamFiles.add(bamFile)
-        ProcessedBamFile bamFile2 = createBamFile()
+        ProcessedBamFile bamFile2 = DomainFactory.createProcessedBamFile(bamFile.mergingWorkPackage)
         bamFiles.add(bamFile2)
-        mergingSetService.createMergingSet(bamFiles, workPackage)
+        mergingSetService.createMergingSet(bamFiles)
         assertEquals(1, MergingSet.count)
         assertEquals(2, MergingSetAssignment.count)
     }
@@ -441,20 +435,7 @@ class MergingSetServiceTests {
         assertEquals(0, MergingSet.count)
         assertEquals(0, MergingSetAssignment.count)
         List<ProcessedBamFile> bamFiles = []
-        MergingWorkPackage workPackage = createMergingWorkPackage()
-        mergingSetService.createMergingSet(bamFiles, workPackage)
-    }
-
-    @Test(expected = IllegalArgumentException)
-    void testCreateMergingSetWorkingPackageNull() {
-        assertEquals(0, MergingSet.count)
-        assertEquals(0, MergingSetAssignment.count)
-        List<ProcessedBamFile> bamFiles = []
-        ProcessedBamFile bamFile = createBamFile()
-        bamFiles.add(bamFile)
-        mergingSetService.createMergingSet(bamFiles, null)
-        assertEquals(1, MergingSet.count)
-        assertEquals(1, MergingSetAssignment.count)
+        mergingSetService.createMergingSet(bamFiles)
     }
 
     @Test
@@ -462,15 +443,12 @@ class MergingSetServiceTests {
         assertEquals(0, MergingSet.count)
         assertEquals(0, MergingSetAssignment.count)
         List<ProcessedBamFile> bamFiles = []
-        MergingWorkPackage workPackage = createMergingWorkPackage()
         ProcessedBamFile bamFile = createBamFile()
         bamFiles.add(bamFile)
-        ProcessedBamFile bamFile2 = createBamFile()
-        bamFiles.add(bamFile2)
-        mergingSetService.createMergingSet(bamFiles, workPackage)
+        mergingSetService.createMergingSet(bamFiles)
         bamFile.status = State.NEEDS_PROCESSING
         assertEquals(State.NEEDS_PROCESSING, bamFile.status)
-        mergingSetService.createMergingSet(bamFiles, workPackage)
+        mergingSetService.createMergingSet(bamFiles)
         assertEquals(State.PROCESSED, bamFile.status)
     }
 
@@ -508,7 +486,8 @@ class MergingSetServiceTests {
     private MergingWorkPackage createMergingWorkPackage() {
         MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                         sample: sample,
-                        seqType: seqType
+                        seqType: seqType,
+                        seqPlatformGroup: seqPlatform.seqPlatformGroup,
                         )
         assertNotNull(mergingWorkPackage.save([flush: true, failOnError: true]))
         return mergingWorkPackage

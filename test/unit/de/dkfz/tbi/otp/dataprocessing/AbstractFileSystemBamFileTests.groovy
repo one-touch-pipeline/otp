@@ -41,6 +41,11 @@ class AbstractFileSystemBamFileTests {
 
 class MockAbstractFileSystemBamFile extends AbstractFileSystemBamFile {
     @Override
+    MergingWorkPackage getMergingWorkPackage() {
+        return null
+    }
+
+    @Override
     Set<SeqTrack> getContainedSeqTracks() {
         return null
     }

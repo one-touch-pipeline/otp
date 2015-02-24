@@ -64,6 +64,11 @@ class ProcessedBamFile extends AbstractFileSystemBamFile {
     }
 
     @Override
+    MergingWorkPackage getMergingWorkPackage() {
+        return alignmentPass.workPackage
+    }
+
+    @Override
     Set<SeqTrack> getContainedSeqTracks() {
         return new HashSet<SeqTrack>([alignmentPass.seqTrack])
     }

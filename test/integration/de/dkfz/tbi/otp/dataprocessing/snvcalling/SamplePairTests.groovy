@@ -27,7 +27,7 @@ class SamplePairTests extends GroovyTestCase {
 
         testData.createObjects()
 
-        project = new Project(
+        project = TestData.createProject(
                 name: "project",
                 dirName: "/dirName/",
                 realmName: "DKFZ",
@@ -395,10 +395,7 @@ class SamplePairTests extends GroovyTestCase {
             status: AbstractBamFile.State.PROCESSED])
         processedBamFile.save()
 
-        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage([sample: sample, seqType: seqType])
-        mergingWorkPackage.save()
-
-        MergingSet mergingSet = testData.createMergingSet([mergingWorkPackage: mergingWorkPackage, status: State.PROCESSED])
+        MergingSet mergingSet = testData.createMergingSet([mergingWorkPackage: processedBamFile.mergingWorkPackage, status: State.PROCESSED])
         mergingSet.save()
 
         MergingSetAssignment mergingSetAssignment = new MergingSetAssignment(

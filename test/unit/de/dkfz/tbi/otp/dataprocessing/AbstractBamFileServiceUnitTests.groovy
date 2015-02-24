@@ -37,7 +37,7 @@ class AbstractBamFileServiceUnitTests {
             status: AbstractBamFile.State.PROCESSED,
         ] + processedBamFileMap)
         MergingSet mergingSet = MergingSet.build([
-            mergingWorkPackage: DomainFactory.createMergingWorkPackage(processedBamFile),
+            mergingWorkPackage: processedBamFile.mergingWorkPackage,
             status: MergingSet.State.PROCESSED
         ] + mergingSetMap)
         MergingSetAssignment mergingSetAssignment = MergingSetAssignment.build([

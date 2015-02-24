@@ -44,6 +44,11 @@ class ExternallyProcessedMergedBamFile extends AbstractFileSystemBamFile {
     }
 
     @Override
+    MergingWorkPackage getMergingWorkPackage() {
+        throw new UnsupportedOperationException()  // We might return a real MergingWorkPackage here in the future.
+    }
+
+    @Override
     Set<SeqTrack> getContainedSeqTracks() {
         return fastqSet.seqTracks
     }

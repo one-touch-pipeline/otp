@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import org.junit.*
@@ -7,10 +8,18 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(ExomeEnrichmentKitService)
-@Mock([ExomeEnrichmentKitService, ExomeEnrichmentKit, ExomeEnrichmentKitSynonym, Sample,
-    SeqTrack, Realm, Project, Individual, SampleType, SeqCenter, SeqPlatform, Run, SoftwareTool,
-    ExomeSeqTrack, FileType, ReferenceGenome, ReferenceGenomeProjectSeqType, SeqType, RunSegment,
-    DataFile])
+@Build([
+    DataFile,
+    ExomeEnrichmentKitSynonym,
+    ExomeSeqTrack,
+    FileType,
+    Realm,
+    ReferenceGenomeProjectSeqType,
+    RunSegment,
+    SeqTrack,
+    SeqPlatform,
+    SeqPlatformGroup,
+])
 class ExomeEnrichmentKitServiceUnitTests {
 
     ExomeEnrichmentKitService exomeEnrichmentKitService

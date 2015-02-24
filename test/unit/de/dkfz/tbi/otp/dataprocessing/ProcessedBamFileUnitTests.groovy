@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.junit.Assert.*
+import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
-import grails.test.mixin.support.*
+
 import org.junit.*
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
@@ -12,8 +13,13 @@ import de.dkfz.tbi.otp.ngsdata.Individual.Type
 import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
 
 @TestFor(ProcessedBamFile)
-@Mock([Project, SeqPlatform, SeqCenter, Run, Individual, SampleType, Sample, SoftwareTool, SeqTrack, AlignmentPass, SeqType,
-    ReferenceGenome, ReferenceGenomeProjectSeqType, ExomeEnrichmentKit, BedFile, ExomeSeqTrack])
+@Build([
+        AlignmentPass,
+        BedFile,
+        ExomeEnrichmentKit,
+        ExomeSeqTrack,
+        ReferenceGenomeProjectSeqType,
+])
 class ProcessedBamFileUnitTests {
 
     AlignmentPass alignmentPass
@@ -28,17 +34,14 @@ class ProcessedBamFileUnitTests {
     void setUp() {
         testData = new TestData()
 
-        project = new Project(
+        project = TestData.createProject(
             name: "name",
             dirName: "dirName",
             realmName: "realmName"
             )
         assertNotNull(project.save([flush: true, failOnError: true]))
 
-        seqPlatform = new SeqPlatform(
-            name: "name",
-            model: "model"
-            )
+        seqPlatform = TestData.findOrSaveSeqPlatform()
         assertNotNull(seqPlatform.save([flush: true, failOnError: true]))
 
         SeqCenter seqCenter = new SeqCenter(
@@ -153,8 +156,7 @@ class ProcessedBamFileUnitTests {
                 )
         assertNotNull(exomeSeqType.save([flush: true, failOnError: true]))
 
-        ReferenceGenome referenceGenome = testData.referenceGenome
-        assert referenceGenome.save([flush: true])
+        ReferenceGenome referenceGenome = TestData.findOrSaveReferenceGenome()
 
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = new ReferenceGenomeProjectSeqType([
             project : project,

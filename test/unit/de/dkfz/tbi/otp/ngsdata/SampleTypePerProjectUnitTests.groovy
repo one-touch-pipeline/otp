@@ -14,7 +14,7 @@ class SampleTypePerProjectUnitTests {
 
     void testSaveSampleTypePerProject() {
         SampleTypePerProject sampleTypePerProject = new SampleTypePerProject()
-        sampleTypePerProject.project = new Project()
+        sampleTypePerProject.project = TestData.createProject()
         sampleTypePerProject.sampleType = new SampleType()
         sampleTypePerProject.category = SampleType.Category.DISEASE
         assertTrue(sampleTypePerProject.validate())
@@ -24,7 +24,7 @@ class SampleTypePerProjectUnitTests {
     void testSaveSampleTypePerProjectOnlyProject() {
         SampleTypePerProject sampleTypePerProject = new SampleTypePerProject()
 
-        sampleTypePerProject.project = new Project()
+        sampleTypePerProject.project = TestData.createProject()
         assertFalse(sampleTypePerProject.validate())
     }
 

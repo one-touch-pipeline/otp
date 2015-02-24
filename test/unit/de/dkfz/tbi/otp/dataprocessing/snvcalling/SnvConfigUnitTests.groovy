@@ -106,7 +106,7 @@ class SnvConfigUnitTests extends TestCase {
 
     SnvConfig testCreateNormally(final String configuration) {
         final SnvConfig config = new SnvConfig(
-            project: new Project(),
+            project: TestData.createProject(),
             seqType: new SeqType(),
             configuration: configuration,
             externalScriptVersion: "v1",
@@ -124,7 +124,7 @@ class SnvConfigUnitTests extends TestCase {
         configFile << configuration
 
         try {
-            final SnvConfig config = SnvConfig.createFromFile(new Project(),
+            final SnvConfig config = SnvConfig.createFromFile(TestData.createProject(),
                     new SeqType(), configFile, version)
             assertNotNull(config)
             assertEquals(configuration, config.configuration)

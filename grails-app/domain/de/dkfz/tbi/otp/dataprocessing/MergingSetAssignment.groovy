@@ -14,7 +14,7 @@ class MergingSetAssignment {
 
     static constraints = {
         bamFile validator: { AbstractBamFile bamFile, MergingSetAssignment msa ->
-            if (!msa.mergingSet?.mergingWorkPackage?.satisfiesMergingCriteria(bamFile)) {
+            if (!msa.mergingSet?.mergingWorkPackage?.satisfiesCriteria(bamFile)) {
                 return false
             }
             /** Before you remove this constraint, make sure that all existing code

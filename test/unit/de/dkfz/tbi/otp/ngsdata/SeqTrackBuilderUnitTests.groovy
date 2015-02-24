@@ -30,7 +30,7 @@ class SeqTrackBuilderUnitTests {
                         )
         builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
         builder.setnBasePairs(5).setnReads(6).setInsertSize(7)
-        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setAlignmentState(DataProcessingState.FINISHED).setFastqcState(DataProcessingState.IN_PROGRESS)
+        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
 
         SeqTrack seqTrack = builder.create()
         assertNotNull(seqTrack)
@@ -48,7 +48,6 @@ class SeqTrackBuilderUnitTests {
         assertNotNull(seqTrack.seqPlatform)
         assertNotNull(seqTrack.pipelineVersion)
         assertEquals(QualityEncoding.ILLUMINA, seqTrack.qualityEncoding)
-        assertEquals(DataProcessingState.FINISHED, seqTrack.alignmentState)
         assertEquals(DataProcessingState.IN_PROGRESS, seqTrack.fastqcState)
     }
 
@@ -141,7 +140,7 @@ class SeqTrackBuilderUnitTests {
                         )
         builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
         builder.setnBasePairs(5).setnReads(6).setInsertSize(7)
-        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setAlignmentState(DataProcessingState.FINISHED).setFastqcState(DataProcessingState.IN_PROGRESS)
+        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
 
         SeqTrack seqTrack = builder.create()
         assertNotNull(seqTrack)
@@ -159,7 +158,6 @@ class SeqTrackBuilderUnitTests {
         assertNotNull(seqTrack.seqPlatform)
         assertNotNull(seqTrack.pipelineVersion)
         assertEquals(QualityEncoding.ILLUMINA, seqTrack.qualityEncoding)
-        assertEquals(DataProcessingState.FINISHED, seqTrack.alignmentState)
         assertEquals(DataProcessingState.IN_PROGRESS, seqTrack.fastqcState)
         assertEquals(InformationReliability.UNKNOWN_UNVERIFIED, seqTrack.kitInfoReliability)
         assertNull(seqTrack.exomeEnrichmentKit)
@@ -176,7 +174,7 @@ class SeqTrackBuilderUnitTests {
                         )
         builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
         builder.setnBasePairs(5).setnReads(6).setInsertSize(7)
-        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setAlignmentState(DataProcessingState.FINISHED).setFastqcState(DataProcessingState.IN_PROGRESS)
+        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
         builder.setExomeEnrichmentKit(new ExomeEnrichmentKit())
 
         SeqTrack seqTrack = builder.create()
@@ -195,7 +193,6 @@ class SeqTrackBuilderUnitTests {
         assertNotNull(seqTrack.seqPlatform)
         assertNotNull(seqTrack.pipelineVersion)
         assertEquals(QualityEncoding.ILLUMINA, seqTrack.qualityEncoding)
-        assertEquals(DataProcessingState.FINISHED, seqTrack.alignmentState)
         assertEquals(DataProcessingState.IN_PROGRESS, seqTrack.fastqcState)
         assertEquals(InformationReliability.KNOWN, seqTrack.kitInfoReliability)
         assertNotNull(seqTrack.exomeEnrichmentKit)
@@ -212,7 +209,7 @@ class SeqTrackBuilderUnitTests {
                         )
         builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
         builder.setnBasePairs(5).setnReads(6).setInsertSize(7)
-        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setAlignmentState(DataProcessingState.FINISHED).setFastqcState(DataProcessingState.IN_PROGRESS)
+        builder.setQualityEncoding(QualityEncoding.ILLUMINA)setFastqcState(DataProcessingState.IN_PROGRESS)
         builder.setInformationReliability(InformationReliability.UNKNOWN_VERIFIED)
 
         SeqTrack seqTrack = builder.create()
@@ -231,7 +228,6 @@ class SeqTrackBuilderUnitTests {
         assertNotNull(seqTrack.seqPlatform)
         assertNotNull(seqTrack.pipelineVersion)
         assertEquals(QualityEncoding.ILLUMINA, seqTrack.qualityEncoding)
-        assertEquals(DataProcessingState.FINISHED, seqTrack.alignmentState)
         assertEquals(DataProcessingState.IN_PROGRESS, seqTrack.fastqcState)
         assertEquals(InformationReliability.UNKNOWN_VERIFIED, seqTrack.kitInfoReliability)
         assertNull(seqTrack.exomeEnrichmentKit)
@@ -248,7 +244,7 @@ class SeqTrackBuilderUnitTests {
                         )
         builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
         builder.setnBasePairs(5).setnReads(6).setInsertSize(7)
-        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setAlignmentState(DataProcessingState.FINISHED).setFastqcState(DataProcessingState.IN_PROGRESS)
+        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
         builder.setInformationReliability(InformationReliability.UNKNOWN_UNVERIFIED)
 
         SeqTrack seqTrack = builder.create()
@@ -267,7 +263,6 @@ class SeqTrackBuilderUnitTests {
         assertNotNull(seqTrack.seqPlatform)
         assertNotNull(seqTrack.pipelineVersion)
         assertEquals(QualityEncoding.ILLUMINA, seqTrack.qualityEncoding)
-        assertEquals(DataProcessingState.FINISHED, seqTrack.alignmentState)
         assertEquals(DataProcessingState.IN_PROGRESS, seqTrack.fastqcState)
         assertEquals(InformationReliability.UNKNOWN_UNVERIFIED, seqTrack.kitInfoReliability)
         assertNull(seqTrack.exomeEnrichmentKit)
@@ -285,7 +280,7 @@ class SeqTrackBuilderUnitTests {
                             )
             builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
             builder.setnBasePairs(5).setnReads(6).setInsertSize(7)
-            builder.setQualityEncoding(QualityEncoding.ILLUMINA).setAlignmentState(DataProcessingState.FINISHED).setFastqcState(DataProcessingState.IN_PROGRESS)
+            builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
             builder.setExomeEnrichmentKit(null)
             builder.create()
         }
@@ -303,7 +298,7 @@ class SeqTrackBuilderUnitTests {
                             )
             builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
             builder.setnBasePairs(5).setnReads(6).setInsertSize(7)
-            builder.setQualityEncoding(QualityEncoding.ILLUMINA).setAlignmentState(DataProcessingState.FINISHED).setFastqcState(DataProcessingState.IN_PROGRESS)
+            builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
             builder.setInformationReliability(InformationReliability.KNOWN)
             builder.create()
         }
@@ -320,7 +315,7 @@ class SeqTrackBuilderUnitTests {
                         )
         builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
         builder.setnBasePairs(N_BASE_PAIRS).setnReads(N_READS).setInsertSize(INSERT_SIZE)
-        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setAlignmentState(DataProcessingState.FINISHED).setFastqcState(DataProcessingState.IN_PROGRESS)
+        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
         builder.setAntibodyTarget(ANTIBODY_TARGET)
 
         SeqTrack seqTrack = builder.create()
@@ -339,7 +334,6 @@ class SeqTrackBuilderUnitTests {
         assertNotNull(seqTrack.seqPlatform)
         assertNotNull(seqTrack.pipelineVersion)
         assertEquals(QualityEncoding.ILLUMINA, seqTrack.qualityEncoding)
-        assertEquals(DataProcessingState.FINISHED, seqTrack.alignmentState)
         assertEquals(DataProcessingState.IN_PROGRESS, seqTrack.fastqcState)
         assertEquals(ANTIBODY_TARGET, seqTrack.antibodyTarget)
         assertNull(seqTrack.antibody)
@@ -356,7 +350,7 @@ class SeqTrackBuilderUnitTests {
                         )
         builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
         builder.setnBasePairs(N_BASE_PAIRS).setnReads(N_READS).setInsertSize(INSERT_SIZE)
-        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setAlignmentState(DataProcessingState.FINISHED).setFastqcState(DataProcessingState.IN_PROGRESS)
+        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
         builder.setAntibodyTarget(ANTIBODY_TARGET)
         builder.setAntibody(ANTIBODY_NAME)
 
@@ -376,7 +370,6 @@ class SeqTrackBuilderUnitTests {
         assertNotNull(seqTrack.seqPlatform)
         assertNotNull(seqTrack.pipelineVersion)
         assertEquals(QualityEncoding.ILLUMINA, seqTrack.qualityEncoding)
-        assertEquals(DataProcessingState.FINISHED, seqTrack.alignmentState)
         assertEquals(DataProcessingState.IN_PROGRESS, seqTrack.fastqcState)
         assertEquals(ANTIBODY_TARGET, seqTrack.antibodyTarget)
         assertEquals(ANTIBODY_NAME, seqTrack.antibody)
@@ -394,7 +387,7 @@ class SeqTrackBuilderUnitTests {
                             )
             builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
             builder.setnBasePairs(N_BASE_PAIRS).setnReads(N_READS).setInsertSize(INSERT_SIZE)
-            builder.setQualityEncoding(QualityEncoding.ILLUMINA).setAlignmentState(DataProcessingState.FINISHED).setFastqcState(DataProcessingState.IN_PROGRESS)
+            builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
             builder.create()
         }
     }

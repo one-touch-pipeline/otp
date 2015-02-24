@@ -1,29 +1,28 @@
 package workflows
 
-import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static org.junit.Assert.*
+
+import org.joda.time.Duration
 import org.junit.*
-import de.dkfz.tbi.otp.dataprocessing.*
+
+import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
+import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
 import de.dkfz.tbi.otp.job.jobs.metaData.MetaDataStartJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.FileType.Type
-import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
-
-/**
- * Currently only a test for exome data exist
- */
+import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
 
 /**
  * To run this workflow test the preparation steps described in the documentation (grails doc) have to be followed.
  */
-class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
+class LoadMetaDataTests extends AbstractWorkflowTest {
 
     // The scheduler needs to access the created objects while the test is being executed
     boolean transactional = false
     // TODO ( jira: OTP-566)  want to get rid of this hardcoded.. idea: maybe calculating from the walltime of the cluster jobs..
-    int SLEEPING_TIME_IN_MINUTES = 10
+    Duration TIMEOUT = Duration.standardMinutes(2)
 
     // the String "UNKNOWN" is used instead of the enum, because that is how it appears in external input files
     final String UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE = "UNKNOWN"
@@ -80,6 +79,8 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
     String readCount = "87812110"
     String cycleCount = "101"
     String insertSize = "162"
+
+    ReferenceGenome referenceGenome = ReferenceGenome.build()
 
     private String md5sum(String filepath) {
         String cmdMd5sum = "md5sum ${filepath}"
@@ -164,12 +165,14 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
 
         SampleType sampleType = new SampleType()
         sampleType.name = "some sample type"
+        sampleType.specificReferenceGenome = SpecificReferenceGenome.USE_PROJECT_DEFAULT
         assertNotNull(sampleType.save(flush: true))
 
-        Project project = new Project()
+        Project project = TestData.createProject()
         project.name = projectName
         project.dirName = projectName
         project.realmName = realm.name
+        project.alignmentDeciderBeanName = 'defaultOtpAlignmentDecider'
         assertNotNull(project.save(flush: true))
 
         Individual individual = new Individual()
@@ -204,6 +207,7 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
         SeqPlatform seqPlatform = new SeqPlatform()
         seqPlatform.name = instrumentPlatform
         seqPlatform.model = instrumentModel
+        seqPlatform.seqPlatformGroup = SeqPlatformGroup.build()
         assertNotNull(seqPlatform.save(flush: true))
 
         SeqPlatformModelIdentifier seqPlatformModelIdentifier = new SeqPlatformModelIdentifier()
@@ -237,6 +241,18 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
         runSegment.mdPath = ftpDir
         runSegment.run = run
         assertNotNull(runSegment.save([flush: true, failOnError: true]))
+
+        [
+            createAndSaveSeqType(SeqTypeNames.WHOLE_GENOME.seqTypeName),
+            createAndSaveSeqType(SeqTypeNames.EXOME.seqTypeName),
+            createAndSaveSeqType(SeqTypeNames.CHIP_SEQ.seqTypeName),
+        ].each {
+            ReferenceGenomeProjectSeqType.build(
+                project: project,
+                seqType: it,
+                referenceGenome: referenceGenome,
+            )
+        }
     }
 
     @After
@@ -246,10 +262,10 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
 
     // TODO  (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
     // so at this moment only one test could be run at moment, all the others have to be commented
+    @Test
     @Ignore
     void testWholeGenomeMetadata() {
         String seqTypeName = SeqTypeNames.WHOLE_GENOME.seqTypeName
-        createAndSaveSeqType(seqTypeName)
 
         String path = "${ftpDir}/${runName}"
         String softLinkFastqR1Filepath1 = "${path}/${fastqR1Filename1}"
@@ -270,19 +286,22 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
         // there will be only one at the database
         JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
 
+        assert AlignmentPass.count() == 0
+
         // TODO hack to be able to star the workflow
         metaDataStartJob.setJobExecutionPlan(jobExecutionPlan)
 
-        boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
-        assertTrue(workflowFinishedSucessfully)
+        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
+
+        assertAlignmentPassesAreNotStarted(1)
     }
 
     // TODO (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
     // so at this moment only one test could be run at moment, all the others have to be commented
+    @Test
     @Ignore
     void testExomeMetadataNoEnrichmentKit() {
         String seqTypeName = SeqTypeNames.EXOME.seqTypeName
-        createAndSaveSeqType(seqTypeName)
 
         run("scripts/ExomeEnrichmentKit/LoadExomeEnrichmentKits.groovy")
         List<ExomeEnrichmentKit> exomeEnrichmentKit = ExomeEnrichmentKit.list()
@@ -309,19 +328,23 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
         // there will be only one at the database
         JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
 
+        assert AlignmentPass.count() == 0
+
         // TODO hack to be able to star the workflow
         metaDataStartJob.setJobExecutionPlan(jobExecutionPlan)
 
-        boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
-        assertTrue(workflowFinishedSucessfully)
+        waitUntilWorkflowFinishes(TIMEOUT)
+
+        assert exactlyOneElement(ProcessingStepUpdate.findAllByState(ExecutionState.FAILURE)).error.errorMessage.contains('Exome enrichment kit is not set')
+        assert AlignmentPass.count() == 0
     }
 
     // TODO (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
     // so at this moment only one test could be run at moment, all the others have to be commented
+    @Test
     @Ignore
     void testExomeMetadataWithEnrichmentKit() {
         String seqTypeName = SeqTypeNames.EXOME.seqTypeName
-        createAndSaveSeqType(seqTypeName)
 
         run("scripts/ExomeEnrichmentKit/LoadExomeEnrichmentKits.groovy")
         List<ExomeEnrichmentKit> exomeEnrichmentKit = ExomeEnrichmentKit.list()
@@ -335,6 +358,11 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
                         name: libraryPreparationKitIdentifier,
                         exomeEnrichmentKit: exomeEnrichmentKit.first())
         assertNotNull(exomeEnrichmentKitSynonym.save([flush: true]))
+
+        BedFile.build(
+                referenceGenome: referenceGenome,
+                exomeEnrichmentKit: exomeEnrichmentKit.first(),
+        )
 
         String path = "${ftpDir}/${runName}"
         String softLinkFastqR1Filepath1 = "${path}/${fastqR1Filename1}"
@@ -364,19 +392,22 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
         // there will be only one at the database
         JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
 
+        assert AlignmentPass.count() == 0
+
         // TODO hack to be able to star the workflow
         metaDataStartJob.setJobExecutionPlan(jobExecutionPlan)
 
-        boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
-        assertTrue(workflowFinishedSucessfully)
+        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
+
+        assertAlignmentPassesAreNotStarted(2)
     }
 
     // TODO (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
     // so at this moment only one test could be run at moment, all the others have to be commented
+    @Test
     @Ignore
     void testChipSeqMetadata() {
         String seqTypeName = SeqTypeNames.CHIP_SEQ.seqTypeName
-        createAndSaveSeqType(seqTypeName)
 
         String path = "${ftpDir}/${runName}"
         String softLinkFastqR1Filepath = "${path}/${fastqR1Filename1}"
@@ -402,11 +433,14 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
         // there will be only one at the database
         JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
 
+        assert AlignmentPass.count() == 0
+
         // TODO hack to be able to star the workflow
         metaDataStartJob.setJobExecutionPlan(jobExecutionPlan)
 
-        boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
-        assertTrue(workflowFinishedSucessfully)
+        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
+
+        assert AlignmentPass.count() == 0
     }
 
     private SeqType createAndSaveSeqType(String seqTypeName) {
@@ -418,47 +452,18 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
         return seqType
     }
 
+    private static void assertAlignmentPassesAreNotStarted(int expectedAlignmentPassCount) {
+        Collection<AlignmentPass> alignmentPasses = AlignmentPass.list()
+        assert alignmentPasses.size() == expectedAlignmentPassCount
+        assert alignmentPasses.every { it.alignmentState == AlignmentState.NOT_STARTED }
+    }
+
     /**
      * Returns a comand to clean up the rootPath and processingRootPath
      * @return Command to clean up used folders
      */
     String cleanUpTestFoldersCommand() {
         return "rm -rf ${rootPath}/* ${processingRootPath}/*"
-    }
-
-    /**
-     * Pauses the test until the workflow is finished or the timeout is reached
-     * @return true if the process is finished, false otherwise
-     */
-    boolean waitUntilWorkflowIsOverOrTimeout(int timeout) {
-        println "Started to wait (until workflow is over or timeout)"
-        int timeCount = 0
-        boolean finished = false
-        while (!finished && (timeCount < timeout)) {
-            println "waiting ... "
-            timeCount++
-            sleep(60000)
-            finished = isProcessFinished()
-        }
-        return finished
-    }
-
-    // TODO maybe we can make this a sub class and put this method in parent..
-    /**
-     * Checks if the process created by the test is already finished and retrieves corresponding value
-     * @return true if the process is finished, false otherwise
-     */
-    boolean isProcessFinished() {
-        //TODO there should be not more than one .. can make assert to be sure
-        List<Process> processes = Process.list()
-        boolean finished = false
-        if (processes.size() > 0) {
-            Process process = processes.first()
-            // Required otherwise will never detect the change..
-            process.refresh()
-            finished = process?.finished
-        }
-        return finished
     }
 
     /**

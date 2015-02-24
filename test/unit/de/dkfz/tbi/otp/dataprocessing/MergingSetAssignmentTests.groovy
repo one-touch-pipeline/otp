@@ -17,7 +17,7 @@ class MergingSetAssignmentTests {
     ProcessedBamFile processedBamFile = null
 
     void setUp() {
-        Project project = new Project()
+        Project project = TestData.createProject()
         project.name = "SOME_PROJECT"
         project.dirName = "/some/relative/path"
         project.realmName = "def"
@@ -57,9 +57,7 @@ class MergingSetAssignmentTests {
         seqCenter.save(flush: true)
         assertTrue(seqCenter.validate())
 
-        SeqPlatform seqPlatform = new SeqPlatform()
-        seqPlatform.name = "solid"
-        seqPlatform.model = "4"
+        SeqPlatform seqPlatform = TestData.findOrSaveSeqPlatform()
         seqPlatform.save(flush: true)
         assertTrue(seqPlatform.validate())
 
@@ -104,7 +102,7 @@ class MergingSetAssignmentTests {
         processedBamFile.save(flush: true)
         assertTrue(processedBamFile.validate())
 
-        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(processedBamFile)
+        MergingWorkPackage workPackage = processedBamFile.mergingWorkPackage
         workPackage.save(flush: true)
 
         this.mergingSet = new MergingSet(

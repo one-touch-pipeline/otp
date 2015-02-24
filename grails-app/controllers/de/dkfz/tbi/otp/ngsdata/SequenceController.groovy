@@ -76,7 +76,6 @@ class SequenceController {
                 row.seqCenterName,
                 row.name,
                 row.laneId,
-                row.alignmentState.toString(),
                 row.dateCreated?.format("yyyy-MM-dd"),
             ].join(",")
         }.join("\n")
@@ -89,7 +88,6 @@ class SequenceController {
             'Sequence Center',
             'Run',
             'Lane',
-            'OTP Alignment',
             'Run Date'
         ].join(',')
         def content = "${contentHeader}\n${contentBody}\n"
@@ -125,7 +123,6 @@ enum SequenceSortColumn {
     RUN("name"),
     LANE("laneId"),
     FASTQC("fastqcState"),
-    ALIGNMENT("alignmentState"),
     DATE("dateCreated")
 
     private final String columnName
@@ -155,8 +152,6 @@ enum SequenceSortColumn {
             case 8:
                 return SequenceSortColumn.FASTQC
             case 9:
-                return SequenceSortColumn.ALIGNMENT
-            case 10:
                 return SequenceSortColumn.DATE
             default:
                 return SequenceSortColumn.PROJECT

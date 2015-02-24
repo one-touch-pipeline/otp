@@ -1,13 +1,9 @@
 package de.dkfz.tbi.otp.job.jobs.alignment
 
 import static org.junit.Assert.*
-import grails.util.Environment
 
-import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.FileType.Type;
 import de.dkfz.tbi.otp.dataprocessing.*
-import org.apache.commons.logging.Log
 
 class BwaPairingAndSortingJobTests {
 
@@ -24,7 +20,7 @@ class BwaPairingAndSortingJobTests {
     void setUp() {
         bwaPairingAndSortingJob.log = this.log
 
-        Project project = new Project(
+        Project project = TestData.createProject(
             name: "projectName",
             dirName: "dirName",
             realmName: 'DKFZ',
@@ -58,10 +54,7 @@ class BwaPairingAndSortingJobTests {
             )
         assertNotNull(seqType.save([flush: true, failOnError: true]))
 
-        SeqPlatform seqPlatform = new SeqPlatform(
-            name: "Illumina",
-            model: "model"
-            )
+        SeqPlatform seqPlatform = TestData.findOrSaveSeqPlatform()
         assertNotNull(seqPlatform.save([flush: true, failOnError: true]))
 
         SeqCenter seqCenter = new SeqCenter(

@@ -27,7 +27,7 @@ class FastqcResultsServiceTests {
 
     @Before
     void setUp() {
-        Project project = new Project(
+        Project project = TestData.createProject(
                         name: "project",
                         dirName: "project-dir",
                         realmName: "realmName"

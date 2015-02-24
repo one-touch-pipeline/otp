@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 
@@ -17,26 +18,15 @@ import de.dkfz.tbi.otp.ngsdata.*
  */
 @TestFor(AlignmentPassService)
 @TestMixin(GrailsUnitTestMixin)
-@Mock([
+@Build([
     AlignmentPass,
-    AlignmentPassService,
     DataFile,
     FileType,
-    Individual,
     ProcessedBamFile,
-    Project,
     Realm,
-    ReferenceGenome,
     ReferenceGenomeProjectSeqType,
     Run,
     RunSegment,
-    Sample,
-    SampleType,
-    SeqCenter,
-    SeqPlatform,
-    SeqTrack,
-    SeqType,
-    SoftwareTool,
 ])
 
 class AlignmentPassServiceUnitTests extends TestData {
@@ -67,8 +57,8 @@ class AlignmentPassServiceUnitTests extends TestData {
 
     @Test
     void testReferenceGenomePath_referenceGenomeNotSet() {
-        alignmentPass.referenceGenome = null
-        Project project2 = new Project()
+        alignmentPass.workPackage.referenceGenome = null
+        Project project2 = TestData.createProject()
         project2.name = "test"
         project2.dirName = "/tmp/test"
         project2.realmName = "test"
@@ -91,49 +81,6 @@ class AlignmentPassServiceUnitTests extends TestData {
     void testAlignmentPassFinishedNull() {
         alignmentPass = null
         alignmentPassService.alignmentPassFinished(alignmentPass)
-    }
-
-    @Test
-    void testSetReferenceGenomeAsConfigured_notConfigured() {
-        seqTrack.metaClass.getConfiguredReferenceGenome = {
-            return null
-        }
-        referenceGenomeProjectSeqType.delete()
-        alignmentPass.referenceGenome = null
-        assert shouldFail(RuntimeException, { alignmentPassService.setReferenceGenomeAsConfigured(
-                alignmentPass) }).startsWith("Reference genome is not configured for SeqTrack")
-        assert alignmentPass.referenceGenome == null
-    }
-
-    @Test
-    void testSetReferenceGenomeAsConfigured_notSetYet() {
-        seqTrack.metaClass.getConfiguredReferenceGenome = {
-            return referenceGenome
-        }
-        alignmentPass.referenceGenome = null
-        alignmentPassService.setReferenceGenomeAsConfigured(alignmentPass)
-        assert alignmentPass.referenceGenome == referenceGenome
-    }
-
-    @Test
-    void testSetReferenceGenomeAsConfigured_alreadySetToSame() {
-        seqTrack.metaClass.getConfiguredReferenceGenome = {
-            return referenceGenome
-        }
-        alignmentPass.referenceGenome = referenceGenome
-        alignmentPassService.setReferenceGenomeAsConfigured(alignmentPass)
-        assert alignmentPass.referenceGenome == referenceGenome
-    }
-
-    @Test
-    void testSetReferenceGenomeAsConfigured_alreadySetToOther() {
-        seqTrack.metaClass.getConfiguredReferenceGenome = {
-            return referenceGenome
-        }
-        final ReferenceGenome otherReferenceGenome = createReferenceGenome()
-        alignmentPass.referenceGenome = otherReferenceGenome
-        assert shouldFail(AssertionError, { alignmentPassService.setReferenceGenomeAsConfigured(alignmentPass) })
-        assert alignmentPass.referenceGenome == otherReferenceGenome
     }
 
     @Test

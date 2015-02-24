@@ -61,7 +61,7 @@ class QualityAssessmentWorkflowTests extends QualityAssessmentAbstractWorkflowTe
 
         fastqcBasicStats.totalSequences = totalSequences
 
-        AlignmentPass alignmentPass = new AlignmentPass(
+        AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass(
                         referenceGenome: referenceGenome,
                         identifier: 1,
                         seqTrack: seqTrack,

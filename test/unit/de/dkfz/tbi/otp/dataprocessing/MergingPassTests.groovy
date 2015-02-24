@@ -13,7 +13,7 @@ class MergingPassTests {
     MergingSet mergingSet = null
 
     void setUp() {
-        Project project = new Project(
+        Project project = TestData.createProject(
             name: "project",
             dirName: "dirName",
             realmName: "DKFZ")

@@ -2,14 +2,10 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
 
-
 /**
- * Represents a "workpackage" to merge all {@link ProcessedBamFile}s of
- * the corresponding {@link SeqType}, which are available for the corresponding
- * {@link Sample} (currently and in the future) and satisfying the given
- * {@link MergingCriteria} or custom selection.
- *
- *
+ * Represents all generations of one merged BAM file (whereas {@link ProcessedMergedBamFile} represents a single
+ * generation). It specifies the concrete criteria for the {@link SeqTrack}s that are merged into the BAM file, and
+ * processing parameters used for alignment and merging.
  */
 class MergingWorkPackage {
 
@@ -28,41 +24,35 @@ class MergingWorkPackage {
         /**
          * The {@link MergingWorkPackage} is maintained by the system.
          * New {@link MergingSet}s are added by the system based on the presence of
-         * new {@link ProcessedBamFile}s and {@link MergingCriteria}.
+         * new {@link ProcessedBamFile}s.
          * Processing of {@link MergingSet} is started automatically.
          */
         SYSTEM
     }
 
-    /**
-     * A criteria to join {@link ProcessedBamFile}s of one sample into {@link MergingSet}s.
-     * It is not allowed to use overlapping MergingCriteria to merge the same merging set twice
-     */
-    enum MergingCriteria {
-        /**
-         * {@link ProcessedBamFile}s for this {@link Sample} must be generated
-         * from sequencing files with the same {@link SeqPlatform} and {@link SeqType}
-         */
-        DEFAULT
-        // e.g. ILLUMINA_2000_2500: illumina 2000 and 2500 and the same seq type
-    }
-
-    /**
-     * {@link ProcessingType} of this instance of {@link MergingWorkPackage}
-     */
     ProcessingType processingType = ProcessingType.SYSTEM
 
-    /**
-     * {@link MergingCriteria} used to create {@link MergingSet}s
-     * in this instance of {@link MergingWorkPackage}
-     */
-    MergingCriteria mergingCriteria = MergingCriteria.DEFAULT
+    // SeqTrack properties, part of merging criteria
+    Sample sample
+    SeqType seqType
+    SeqPlatformGroup seqPlatformGroup
+    SequencingKit sequencingKit
 
-    static belongsTo = [
-        sample: Sample,
-        seqType: SeqType,
-        referenceGenome: ReferenceGenome,
-    ]
+    // Processing parameters, part of merging criteria
+    ReferenceGenome referenceGenome
+
+    static belongsTo = Sample
+
+    static constraints = {
+        // TODO OTP-1401: In the future there may be more than one MWP for one sample and seqType.
+        // As soon a you loosen this constraint, un-ignore:
+        // - AlignmentPassUnitTests.testIsLatestPass_2PassesDifferentWorkPackages
+        // - MergingCriteriaSpecificServiceTests.testProcessedBamFilesForMerging_TwoBamFilesSeqPlatformNotEqual
+        // - MergingCriteriaSpecificServiceTests.testProcessedMergedBamFileForMerging_OnlyOneMergedBamFileWrongPlatformWrongName
+        // - MergingCriteriaSpecificServiceTests.testProcessedMergedBamFileForMerging_TwoMergedBamFileDifferentPlatform
+        sample unique: 'seqType'
+        sequencingKit nullable: true
+    }
 
     Project getProject() {
         return sample.project
@@ -76,15 +66,36 @@ class MergingWorkPackage {
         return sample.sampleType
     }
 
-    boolean satisfiesMergingCriteria(final AbstractBamFile bamFile) {
-        return  bamFile.sample.id == sample.id &&
-                bamFile.seqType.id == seqType.id &&
-                bamFile.referenceGenome.id == referenceGenome.id
+    static Map getMergingProperties(SeqTrack seqTrack) {
+        SequencingKit sequencingKit = seqTrack.sequencingKit
+        // TODO OTP-1409: This hardcoded implementation will be replaced.
+        if (['V1', 'V2', 'V3'].contains(sequencingKit?.name) && seqTrack.seqPlatformGroup.name == 'HiSeq 2000/2500') {
+            sequencingKit = null
+        }
+        return [
+                sample: seqTrack.sample,
+                seqType: seqTrack.seqType,
+                seqPlatformGroup: seqTrack.seqPlatformGroup,
+                sequencingKit: sequencingKit,
+        ]
+    }
+
+    boolean satisfiesCriteria(SeqTrack seqTrack) {
+        return getMergingProperties(seqTrack).every { key, value -> value?.id == this."${key}"?.id }
+    }
+
+    boolean satisfiesCriteria(final AbstractBamFile bamFile) {
+        return bamFile.mergingWorkPackage.id == id
     }
 
     static mapping = {
         sample index: "merging_work_package_sample_idx"
         seqType index: "merging_work_package_seq_type_idx"
         referenceGenome index: "merging_work_package_reference_genome_idx"
+    }
+
+    @Override
+    String toString() {
+        return "MWP ${id}: ${sample} ${seqType} ${seqPlatformGroup} ${sequencingKit} ${referenceGenome}"
     }
 }

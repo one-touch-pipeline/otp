@@ -6,7 +6,7 @@ import grails.validation.ValidationException
 class SampleTypePerProjectTests extends TestCase {
 
     void testUniqueConstraint() {
-        Project project = new Project(
+        Project project = TestData.createProject(
                         name: "project",
                         dirName: "/dirName/",
                         realmName: "DKFZ"

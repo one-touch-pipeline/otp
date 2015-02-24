@@ -386,7 +386,7 @@ class SnvJobResultUnitTests {
 
 
     Map preparationForGetResultFilePath(SnvCallingStep step) {
-        Project project = new Project(
+        Project project = TestData.createProject(
             dirName: "/tmp/project/"
             )
 

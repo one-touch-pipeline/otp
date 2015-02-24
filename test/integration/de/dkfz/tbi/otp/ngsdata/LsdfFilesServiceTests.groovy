@@ -87,7 +87,7 @@ class LsdfFilesServiceTests extends GroovyTestCase {
         sampleType.name = sampleTypeName
         assertNotNull(sampleType.save(flush: true))
 
-        project = new Project()
+        project = TestData.createProject()
         project.name = projectName
         project.dirName = projectName
         project.realmName = realmName

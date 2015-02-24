@@ -48,7 +48,6 @@ class UploadFastQCToDatabaseJob extends AbstractEndStateAwareJobImpl {
                     fastqcDataFilesService.setFastqcProcessedFileUploaded(fastqc)
                 }
                 seqTrackService.setFastqcFinished(seqTrack)
-                seqTrackService.setReadyForAlignment(seqTrack)
             }
         }
         succeed()

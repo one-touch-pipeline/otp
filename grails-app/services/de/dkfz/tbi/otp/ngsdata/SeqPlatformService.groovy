@@ -137,19 +137,4 @@ class SeqPlatformService {
         entry.status =  MetaDataEntry.Status.VALID
         entry.save(flush: true)
     }
-
-    SeqPlatform platformForMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {
-        notNull(processedMergedBamFile, "the input processedMergedBamFile for the method platformForMergedBamFile is null")
-        MergingSet mergingSet = processedMergedBamFile.mergingPass.mergingSet
-        MergingSetAssignment mergingSetAssignment = MergingSetAssignment.findByMergingSet(mergingSet)
-        if (!mergingSetAssignment) {
-            throw new RuntimeException("No mergingSetAssignment for the merging set ")
-        }
-        AbstractBamFile bamFile = mergingSetAssignment.bamFile
-        if (bamFile instanceof ProcessedBamFile) {
-            return bamFile.alignmentPass.seqTrack.seqPlatform
-        } else {
-            return platformForMergedBamFile(bamFile)
-        }
-    }
 }

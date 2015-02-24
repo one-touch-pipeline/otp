@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.TestConstants
+import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
 import de.dkfz.tbi.otp.dataprocessing.DataProcessingFilesService.OutputDirectories
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.TestData
 import de.dkfz.tbi.otp.utils.CheckedLogger
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import grails.buildtestdata.mixin.Build
@@ -75,7 +77,7 @@ class ProcessedAlignmentFileServiceUnitTests {
     }
 
     private AlignmentPass createTestDataForDeleteProcessingFiles(int countQaFiles = 1, int countProcessedSaiFiles = 1) {
-        AlignmentPass alignmentPass = AlignmentPass.build()
+        AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass()
 
         ProcessedBamFile processedBamFile = ProcessedBamFile.build([
             alignmentPass: alignmentPass
@@ -118,7 +120,7 @@ class ProcessedAlignmentFileServiceUnitTests {
 
     void testDeleteProcessingFiles_NoBamFile() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForDeleteProcessingFiles()
-        AlignmentPass alignmentPass = AlignmentPass.build()
+        AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass()
         checkedLogger.addError("Found 0 ProcessedBamFiles for AlignmentPass ${alignmentPass}. That's weird. Skipping that alignment pass.")
 
         assert 0 == processedAlignmentFileService.deleteProcessingFiles(alignmentPass)
@@ -200,13 +202,12 @@ class ProcessedAlignmentFileServiceUnitTests {
     }
 
     private AlignmentPass createTestDataForMayProcessingFilesBeDeleted(boolean createBamFile = true, boolean createSaiFile = false) {
-        SeqTrack seqTrack = SeqTrack.build([
-            alignmentState: SeqTrack.DataProcessingState.FINISHED
-        ])
+        SeqTrack seqTrack = SeqTrack.build()
 
-        AlignmentPass alignmentPass = AlignmentPass.build([
+        AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass(
             seqTrack: seqTrack,
-        ])
+            alignmentState: AlignmentState.FINISHED,
+        )
 
         if (createSaiFile) {
             ProcessedSaiFile.build([

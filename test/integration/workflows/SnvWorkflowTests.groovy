@@ -1,5 +1,7 @@
 package workflows
 
+import org.joda.time.Duration
+
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFileService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
@@ -28,7 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertTrue
 
-class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
+class SnvWorkflowTests extends AbstractWorkflowTest {
 
     // The scheduler needs to access the created objects while the test is being executed
     boolean transactional = false
@@ -37,7 +39,7 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
     ExecutionService executionService
     CreateClusterScriptService createClusterScriptService
 
-    final int TIMEOUT_IN_MINUTES = 30
+    final Duration TIMEOUT = Duration.standardMinutes(30)
 
     File baseDirDKFZ
     File testDirDKFZ
@@ -395,8 +397,7 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
         // hack to be able to start the workflow
         snvStartJob.setJobExecutionPlan(jobExecutionPlan)
 
-        boolean workflowFinishedInGivenTimeLimit = waitUntilWorkflowIsOverOrTimeout(TIMEOUT_IN_MINUTES)
-        assertTrue(workflowFinishedInGivenTimeLimit)
+        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
     }
 
     void check(SnvCallingStep startedWith) {
@@ -469,41 +470,5 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
                 (transposed[0] =~ differentLineContainingFileName && transposed[1] =~ differentLineContainingFileName) ||
                 (transposed[0] =~ differentLineContainingTimeMeasurements && transposed[1] =~ differentLineContainingTimeMeasurements)
         }
-    }
-
-
-    /**
-     * Pauses the test until the workflow is finished or the timeout is reached
-     * @return true if the process is finished, false otherwise
-     */
-    static boolean waitUntilWorkflowIsOverOrTimeout(int timeout) {
-        println "Started to wait (until workflow is over or timeout)"
-        int timeCount = 0
-        boolean finished = false
-        while (!finished && (timeCount < timeout)) {
-            println "waiting ... "
-            timeCount++
-            sleep(60000)
-            finished = isProcessFinished()
-        }
-        return finished
-    }
-
-    // TODO  ( jira: OTP-566) maybe we can make this a sub class and put this method in parent..
-    /**
-     * Checks if the process created by the test is already finished and retrieves corresponding value
-     * @return true if the process is finished, false otherwise
-     */
-    static boolean isProcessFinished() {
-        //TODO ( jira: OTP-566) there should be not more than one .. can make assert to be sure
-        List<de.dkfz.tbi.otp.job.processing.Process> processes = de.dkfz.tbi.otp.job.processing.Process.list()
-        boolean finished = false
-        if (processes.size() > 0) {
-            de.dkfz.tbi.otp.job.processing.Process process = CollectionUtils.exactlyOneElement(processes)
-            // Required otherwise will never detect the change..
-            process.refresh()
-            finished = process?.finished
-        }
-        return finished
     }
 }

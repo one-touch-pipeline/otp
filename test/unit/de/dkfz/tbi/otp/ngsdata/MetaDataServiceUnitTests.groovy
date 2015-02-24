@@ -11,7 +11,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(MetaDataService)
 @Mock([MetaDataKey, Realm, Project, Individual, SampleType, Sample, SeqType, SeqCenter,
-    SeqPlatform, Run, RunSegment, SoftwareTool, SeqTrack, FileType, DataFile,
+    SeqPlatform, SeqPlatformGroup, Run, RunSegment, SoftwareTool, SeqTrack, FileType, DataFile,
     ReferenceGenome, ReferenceGenomeProjectSeqType, ExomeSeqTrack, ExomeEnrichmentKit,
     ExomeEnrichmentKitService, MetaDataEntry])
 @Build([

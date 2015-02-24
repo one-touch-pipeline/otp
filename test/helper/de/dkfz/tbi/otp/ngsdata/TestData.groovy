@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
 import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
 
 import static org.junit.Assert.*
@@ -36,6 +37,11 @@ class TestData {
     ReferenceGenome referenceGenome
     ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType
 
+    /**
+     * @deprecated Use the <code>build()</code> method from the test data plugin or the static methods in this class or
+     * in {@link DomainFactory}.
+     */
+    @Deprecated
     void createObjects() {
         referenceGenomePath = "/tmp/reference_genomes/referenceGenome/"
 
@@ -88,9 +94,7 @@ class TestData {
         seqCenter.dirName = "core"
         assertNotNull(seqCenter.save(flush: true))
 
-        seqPlatform = new SeqPlatform()
-        seqPlatform.name = "solid"
-        seqPlatform.model = "4"
+        seqPlatform = findOrSaveSeqPlatform()
         assertNotNull(seqPlatform.save(flush: true))
 
         run = createRun("testname1")
@@ -121,11 +125,12 @@ class TestData {
         assertNotNull(referenceGenomeProjectSeqType.save(flush: true))
     }
 
-    Project createProject(Map properties = [:]) {
+    static Project createProject(Map properties = [:]) {
         return new Project([
             name: "project",
             dirName: "dirName",
-            realmName: "DKFZ"
+            realmName: "DKFZ",
+            alignmentDeciderBeanName: 'dummyNonExistentAlignmentDecider',
         ] + properties)
     }
 
@@ -161,6 +166,16 @@ class TestData {
             libraryLayout : "PAIRED",
             dirName : "whole_genome_sequencing",
         ] + properties)
+    }
+
+    static SeqPlatform findOrSaveSeqPlatform() {
+        SeqPlatform seqPlatform = SeqPlatform.findOrSaveWhere(
+            name: 'Illumina',
+            model: 'LoSeq9999',
+            seqPlatformGroup: SeqPlatformGroup.findOrSaveWhere(name: 'LoSeq9XXX'),
+        )
+        assert seqPlatform
+        return seqPlatform
     }
 
     SeqTrack createSeqTrack(Map properties = [:]) {
@@ -213,6 +228,9 @@ class TestData {
         ] + properties)
     }
 
+    static ReferenceGenome findOrSaveReferenceGenome() {
+        return ReferenceGenome.find{true} ?: createReferenceGenome().save(failOnError: true)
+    }
 
     public static ReferenceGenome createReferenceGenome(Map properties = [:]) {
         return new ReferenceGenome([
@@ -315,14 +333,25 @@ class TestData {
         assertNotNull(exomeSeqTrack.save(flush: true))
     }
 
+    static AlignmentPass createAndSaveAlignmentPass(Map properties = [:]) {
+        AlignmentPass alignmentPass = new TestData().createAlignmentPass(properties)
+        assert alignmentPass.save(failOnError: true)
+        return alignmentPass
+    }
+
     AlignmentPass createAlignmentPass(Map properties = [:]) {
+        final SeqTrack seqTrack = properties.get('seqTrack') ?: seqTrack ?: SeqTrack.build()
+        final MergingWorkPackage workPackage = findOrSaveMergingWorkPackage(
+                seqTrack,
+                properties.get('referenceGenome')
+        )
+        assert workPackage.save(failOnError: true)
         final AlignmentPass alignmentPass = new AlignmentPass([
-            identifier: 0,
+            identifier: AlignmentPass.nextIdentifier(seqTrack),
             seqTrack: seqTrack,
-            description: "test",
-            referenceGenome: referenceGenome,
+            workPackage: workPackage,
+            alignmentState: AlignmentState.FINISHED,
         ] + properties)
-        setReferenceGenomeIfNotSet(alignmentPass)
         return alignmentPass
     }
 
@@ -336,7 +365,7 @@ class TestData {
     /**
      * No default alignment provided, therefore the alignment needs to be passed always or <code>null</code> is used.
      */
-    ProcessedBamFile createProcessedBamFile(Map properties = [:]) {
+    static ProcessedBamFile createProcessedBamFile(Map properties = [:]) {
         return new ProcessedBamFile([
             type: AbstractBamFile.BamType.SORTED,
             withdrawn: false,
@@ -346,16 +375,33 @@ class TestData {
     }
 
 
-    MergingWorkPackage createMergingWorkPackage(Map properties = [:]) {
+    static MergingWorkPackage createMergingWorkPackage(Map properties = [:]) {
         final MergingWorkPackage mergingWorkPackage = new MergingWorkPackage([
-            sample: sample,
-            seqType: seqType,
-            referenceGenome: referenceGenome,
+                seqPlatformGroup: properties.get('seqPlatformGroup') ?: SeqPlatformGroup.build(),
+                referenceGenome: properties.get('referenceGenome') ?: findOrSaveReferenceGenome(),
         ] + properties)
-        setReferenceGenomeIfNotSet(mergingWorkPackage)
         return mergingWorkPackage
     }
 
+    static MergingWorkPackage findOrSaveMergingWorkPackage(SeqTrack seqTrack, ReferenceGenome referenceGenome = null) {
+        if (referenceGenome == null) {
+            MergingWorkPackage workPackage = MergingWorkPackage.findWhere(
+                    sample: seqTrack.sample,
+                    seqType: seqTrack.seqType,
+            )
+            if (workPackage != null) {
+                assert workPackage.seqPlatformGroup == seqTrack.seqPlatform.seqPlatformGroup
+                return workPackage
+            }
+        }
+        final MergingWorkPackage mergingWorkPackage = MergingWorkPackage.findOrSaveWhere(
+                sample: seqTrack.sample,
+                seqType: seqTrack.seqType,
+                seqPlatformGroup: seqTrack.seqPlatform.seqPlatformGroup,
+                referenceGenome: referenceGenome ?: findOrSaveReferenceGenome(),
+        )
+        return mergingWorkPackage
+    }
 
     MergingSet createMergingSet(Map properties = [:]) {
         return new MergingSet([
@@ -380,13 +426,5 @@ class TestData {
             status: AbstractBamFile.State.DECLARED,
             numberOfMergedLanes: 3
         ] + properties)
-    }
-
-    void setReferenceGenomeIfNotSet(final Object object) {
-        if (object.referenceGenome == null) {
-            referenceGenome = createReferenceGenome()
-            assert referenceGenome.save(failOnError: true)
-            object.referenceGenome = referenceGenome
-        }
     }
 }

@@ -1,5 +1,7 @@
 package workflows
 
+import org.joda.time.Duration
+
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
@@ -27,7 +29,7 @@ import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 /**
  * Preparation for execution: see src/docs/guide/devel/testing/workflowTesting.gdoc
  */
-class MergingWorkflowTests extends GroovyScriptAwareIntegrationTest {
+class MergingWorkflowTests extends AbstractWorkflowTest {
 
     ProcessingOptionService processingOptionService
 
@@ -47,7 +49,7 @@ class MergingWorkflowTests extends GroovyScriptAwareIntegrationTest {
     boolean transactional = false
 
     // TODO want to get rid of this hardcoded.. idea: maybe calculating from the walltime of the cluster jobs.. -> OTP-570/OTP-672
-    int SLEEPING_TIME_IN_MINUTES = 40
+    final Duration TIMEOUT = Duration.standardMinutes(40)
 
     // TODO This paths should be obtained from somewhere else..  maybe from ~/.otp.properties, but I am hardcoding for now.. -> OTP-570/OTP-672
     String basePath = 'WORKFLOW_ROOT/MergingWorkflow'
@@ -108,12 +110,9 @@ class MergingWorkflowTests extends GroovyScriptAwareIntegrationTest {
                         ])
         assertNotNull(processedBamFile.save([flush: true, failOnError: true]))
 
-        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage()
-        assertNotNull(mergingWorkPackage.save([flush: true, failOnError: true]))
-
         MergingSet mergingSet = new MergingSet(
                 identifier: 0,
-                mergingWorkPackage: mergingWorkPackage,
+                mergingWorkPackage: processedBamFile.mergingWorkPackage,
                 status: MergingSet.State.DECLARED
         )
         assertNotNull(mergingSet.save([flush: true, failOnError: true]))
@@ -143,41 +142,6 @@ class MergingWorkflowTests extends GroovyScriptAwareIntegrationTest {
         return "rm -rf ${rootPath}/* ${processingRootPath}/* ${loggingRootPath}/*"
         /* When testing on BioQuant, there is no write access. You have to replace the
          * above line by something like 'return "true"' */
-    }
-
-    /**
-     * Pauses the test until the workflow is finished or the timeout is reached
-     * @return true if the process is finished, false otherwise
-     */
-    boolean waitUntilWorkflowIsOverOrTimeout(int timeout) {
-        println "Started to wait (until workflow is over or timeout)"
-        int timeCount = 0
-        boolean finished = false
-        while (!finished && (timeCount < timeout)) {
-            println "waiting ... "
-            timeCount++
-            sleep(60000)
-            finished = areAllProcessFinished()
-        }
-        return finished
-    }
-
-    /**
-     * return true if all processed are finished
-     */
-    boolean areAllProcessFinished() {
-        List<Process> processes = Process.list()
-        boolean finished = false
-        if (processes.size() > 0) {
-            processes*.refresh()
-            List<Process> processesFinished = Process.createCriteria().list {
-                eq("finished", true)
-            }
-            if (processesFinished.size() == processes.size()) {
-                finished = true
-            }
-        }
-        return finished
     }
 
     /**
@@ -237,8 +201,7 @@ class MergingWorkflowTests extends GroovyScriptAwareIntegrationTest {
         mergingSet.status = MergingSet.State.NEEDS_PROCESSING
         assert mergingSet.save(flush: true, failOnError: true)
 
-        boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
-        assertTrue("test aborted because workflow-to-test didn't finish in time", workflowFinishedSucessfully)
+        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
 
         mergingSet.refresh()
 

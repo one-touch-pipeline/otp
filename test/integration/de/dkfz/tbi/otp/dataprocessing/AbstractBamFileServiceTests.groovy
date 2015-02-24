@@ -6,7 +6,6 @@ import de.dkfz.tbi.otp.InformationReliability;
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
 
 class AbstractBamFileServiceTests {
 
@@ -37,7 +36,7 @@ class AbstractBamFileServiceTests {
     @Before
     void setUp() {
 
-        Project project = new Project(
+        Project project = TestData.createProject(
                 name: "project",
                 dirName: "project-dir",
                 realmName: "realmName"
@@ -58,10 +57,7 @@ class AbstractBamFileServiceTests {
                 )
         assertNotNull(softwareTool.save([flush: true]))
 
-        SeqPlatform seqPlatform = new SeqPlatform(
-                name: "seq-platform",
-                model: "seq-platform-model"
-                )
+        SeqPlatform seqPlatform = TestData.findOrSaveSeqPlatform()
         assertNotNull(seqPlatform.save([flush: true]))
 
         Run run = new Run(
@@ -300,14 +296,14 @@ class AbstractBamFileServiceTests {
     @Test(expected = AssertionError)
     void test_calculateCoverageWithoutN_WhenBamFileIsProcessedBamFile_SeqTypeWholeGenome_AndReferenceGenomeIsNull() {
         changeStateOfBamFileToHavingPassedQC(processedBamFile)
-        processedBamFile.alignmentPass.referenceGenome = null
+        processedBamFile.mergingWorkPackage.referenceGenome = null
         abstractBamFileService.calculateCoverageWithoutN(processedBamFile)
     }
 
     @Test(expected = AssertionError)
     void test_calculateCoverageWithoutN_WhenBamFileIsProcessedBamFile_SeqTypeExome_AndReferenceGenomeIsNull() {
         changeStateOfBamFileToHavingPassedQC(exomeProcessedBamFile)
-        exomeProcessedBamFile.alignmentPass.referenceGenome = null
+        exomeProcessedBamFile.mergingWorkPackage.referenceGenome = null
         abstractBamFileService.calculateCoverageWithoutN(exomeProcessedBamFile)
     }
 
@@ -410,7 +406,7 @@ class AbstractBamFileServiceTests {
     @Test(expected = AssertionError)
     void test_calculateCoverageWithN_WhenBamFileIsProcessedBamFile_WholeGenome_AndReferenceGenomeIsNull() {
         changeStateOfBamFileToHavingPassedQC(processedBamFile)
-        processedBamFile.alignmentPass.referenceGenome = null
+        processedBamFile.mergingWorkPackage.referenceGenome = null
         abstractBamFileService.calculateCoverageWithN(processedBamFile)
     }
 
@@ -565,10 +561,9 @@ class AbstractBamFileServiceTests {
     }
 
     private MergingSet createMergingSetAndDependentObjects(SeqTrack seqTrack) {
-        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
-                referenceGenome: seqTrack.configuredReferenceGenome,
-                sample: seqTrack.sample,
-                seqType: seqTrack.seqType
+        MergingWorkPackage mergingWorkPackage = testData.findOrSaveMergingWorkPackage(
+                seqTrack,
+                seqTrack.configuredReferenceGenome,
                 )
         assertNotNull(mergingWorkPackage.save([flush: true]))
 

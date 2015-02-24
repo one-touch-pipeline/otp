@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.job.jobs.alignment
 import org.junit.Test
 
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.TestData
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
@@ -46,7 +47,7 @@ class BwaPairingAndSortingJobUnitTest {
             }
             ] as LsdfFilesService
 
-        alignmentPass = AlignmentPass.build()
+        alignmentPass = TestData.createAndSaveAlignmentPass()
         DataFile dataFile1 = DataFile.build(fileName: FILE_READ1, vbpFileName: FILE_READ1, readNumber: 1)
         DataFile dataFile2 = DataFile.build(fileName: FILE_READ2, vbpFileName: FILE_READ2, readNumber: 2)
         processedSaiFile1 = ProcessedSaiFile.build(alignmentPass: alignmentPass, dataFile: dataFile1)

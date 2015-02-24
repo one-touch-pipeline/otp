@@ -44,12 +44,9 @@ class CopyFilesJobTests extends GroovyTestCase {
         ProcessedBamFile processedBamFile = testData.createProcessedBamFile([alignmentPass: alignmentPass])
         assert processedBamFile.save()
 
-        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage([sample: sample])
-        assertNotNull(mergingWorkPackage.save([flush: true]))
-
         MergingSet mergingSet = testData.createMergingSet([
-            identifier: 0,
-            mergingWorkPackage: mergingWorkPackage,
+            identifier: MergingSet.nextIdentifier(alignmentPass.workPackage),
+            mergingWorkPackage: alignmentPass.workPackage,
             status: MergingSet.State.NEEDS_PROCESSING
         ])
         assertNotNull(mergingSet.save([flush: true]))

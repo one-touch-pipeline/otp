@@ -26,7 +26,7 @@ class MergingServiceTests extends AbstractIntegrationTest {
         shouldFail(IllegalArgumentException) {
             mergingService.printAllMergedBamForIndividual(null, null)
         }
-        Project project = new Project(name: "testProject", dirName: "testDir", host: "dkfz")
+        Project project = TestData.createProject(name: "testProject", dirName: "testDir", host: "dkfz")
         assert(project.save())
         Individual individual = new Individual(pid: "testPid", mockPid: "testMockPid", mockFullName: "testMockFullName", type: Individual.Type.POOL, project: project)
         assert(individual.save())

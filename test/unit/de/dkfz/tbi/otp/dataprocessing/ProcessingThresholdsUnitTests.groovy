@@ -24,13 +24,13 @@ class ProcessingThresholdsUnitTests {
                         )
         assertFalse(processingThresholds.validate())
 
-        processingThresholds.project = new Project()
+        processingThresholds.project = TestData.createProject()
         assertTrue(processingThresholds.validate())
     }
 
     void testSaveNoSeqType() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
-                        project: new Project(),
+                        project: TestData.createProject(),
                         sampleType: new SampleType(),
                         coverage: coverage,
                         numberOfLanes: numberOfLanes,
@@ -45,7 +45,7 @@ class ProcessingThresholdsUnitTests {
     void testSaveNoSampleType() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
                         seqType: new SeqType(),
-                        project: new Project(),
+                        project: TestData.createProject(),
                         coverage: coverage,
                         numberOfLanes: numberOfLanes,
                         )
@@ -57,7 +57,7 @@ class ProcessingThresholdsUnitTests {
 
     void testSaveNoCoverageAndNumberOfLanes() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
-                        project: new Project(),
+                        project: TestData.createProject(),
                         seqType: new SeqType(),
                         sampleType: new SampleType(),
                         )
@@ -70,7 +70,7 @@ class ProcessingThresholdsUnitTests {
 
     void testSaveNoCoverage() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
-                        project: new Project(),
+                        project: TestData.createProject(),
                         seqType: new SeqType(),
                         sampleType: new SampleType(),
                         coverage: coverage,
@@ -81,7 +81,7 @@ class ProcessingThresholdsUnitTests {
 
     void testSaveCoverageBelowZero() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
-                        project: new Project(),
+                        project: TestData.createProject(),
                         seqType: new SeqType(),
                         sampleType: new SampleType(),
                         coverage: -30.00,
@@ -91,7 +91,7 @@ class ProcessingThresholdsUnitTests {
 
     void testSaveNoNumberOfLanes() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
-                        project: new Project(),
+                        project: TestData.createProject(),
                         seqType: new SeqType(),
                         sampleType: new SampleType(),
                         numberOfLanes: numberOfLanes,
@@ -101,7 +101,7 @@ class ProcessingThresholdsUnitTests {
 
     void testSaveNumberOfLanesBelowZero() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
-                        project: new Project(),
+                        project: TestData.createProject(),
                         seqType: new SeqType(),
                         sampleType: new SampleType(),
                         numberOfLanes: -3,
@@ -111,7 +111,7 @@ class ProcessingThresholdsUnitTests {
 
     void testSaveAllCorrect() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
-                        project: new Project(),
+                        project: TestData.createProject(),
                         seqType: new SeqType(),
                         sampleType: new SampleType(),
                         coverage: coverage,

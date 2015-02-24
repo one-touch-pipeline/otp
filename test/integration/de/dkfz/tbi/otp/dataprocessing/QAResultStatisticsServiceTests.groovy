@@ -61,7 +61,7 @@ class QAResultStatisticsServiceTests {
         Realm realm = DomainFactory.createRealmDataProcessingDKFZ(paths).save([flush: true])
         Realm realm1 = DomainFactory.createRealmDataManagementDKFZ(paths).save([flush: true])
 
-        project = new Project(
+        project = TestData.createProject(
                         name: "projectName",
                         dirName: "projectDirName",
                         realmName: 'DKFZ',
@@ -95,10 +95,7 @@ class QAResultStatisticsServiceTests {
                         )
         assertNotNull(seqType.save([flush: true]))
 
-        SeqPlatform seqPlatform = new SeqPlatform(
-                        name: "Illumina",
-                        model: "model"
-                        )
+        SeqPlatform seqPlatform = TestData.findOrSaveSeqPlatform()
         assertNotNull(seqPlatform.save([flush: true]))
 
         SeqCenter seqCenter = new SeqCenter(
@@ -205,16 +202,9 @@ class QAResultStatisticsServiceTests {
         setProperties(overallQualityAssessment)
         assertNotNull(overallQualityAssessment.save([flush: true]))
 
-        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
-                        sample: sample,
-                        seqType: seqType,
-                        referenceGenome: referenceGenome,
-                        )
-        assertNotNull(mergingWorkPackage.save([flush: true]))
-
         MergingSet mergingSet = new MergingSet(
                         identifier: 0,
-                        mergingWorkPackage: mergingWorkPackage,
+                        mergingWorkPackage: processedBamFile.mergingWorkPackage,
                         status: MergingSet.State.NEEDS_PROCESSING
                         )
         assertNotNull(mergingSet.save([flush: true]))

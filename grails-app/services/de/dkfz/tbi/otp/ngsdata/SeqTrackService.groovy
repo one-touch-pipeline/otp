@@ -1,6 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import static org.springframework.util.Assert.*
+
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
+
+import de.dkfz.tbi.otp.dataprocessing.AlignmentDecider
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import groovy.xml.MarkupBuilder
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.prepost.PostAuthorize
@@ -8,7 +14,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.core.userdetails.UserDetails
 import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.dataprocessing.AlignmentPassService
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
@@ -31,6 +36,9 @@ class SeqTrackService {
      * Dependency Injection of Spring Security Service.
      */
     def springSecurityService
+
+    @Autowired
+    ApplicationContext applicationContext
 
     MultiplexingService multiplexingService
 
@@ -194,7 +202,6 @@ class SeqTrackService {
                         numberReads(p.nReads)
                         insertSize(p.insertSize)
                         qualityEncoding(p.qualityEncoding)
-                        alignmentState(p.alignmentState)
                         fastqcState(p.fastqcState)
                     }
                     run(id: p.runId, blacklisted: p.blacklisted, multipleSource: p.multipleSource, qualityEvaluated: p.qualityEvaluated) {
@@ -243,53 +250,18 @@ class SeqTrackService {
     }
 
     /**
-     * Sets all {@link SeqTrack}s fulfilling the criteria listed below to alignment state
-     * {@link SeqTrack.DataProcessingState#NOT_STARTED}.
-     *
-     * <p>Criteria for the SeqTrack:</p>
-     * <ul>
-     *   <li>It belongs to the same sample and same sequencing type as the argument of this method.</li>
-     *   <li>It is alignable as defined here: {@link AlignmentPassService#ALIGNABLE_SEQTRACK_HQL}</li>
-     *   <li>It is in alignment state {@link SeqTrack.DataProcessingState#UNKNOWN}.</li>
-     *   <li>Its {@link SeqTrack#seqType} is in {@link SeqTypeService#alignableSeqTypes()}.</li>
-     *   <li>It does not have a corresponding {@link RunSegment} where {@link RunSegment#align} is set to false.</li>
-     *   <li>For {@link ExomeSeqTrack}s, the {@link ExomeSeqTrack#exomeEnrichmentKit} must be specified or
-     *       {@link ExomeSeqTrack#kitInfoReliability} must be {@link InformationReliability#UNKNOWN_UNVERIFIED}.</li>
-     * </ul>
-     *
-     * @see AlignmentPassService#findAlignableSeqTrack()
+     * Calls the {@link AlignmentDecider#decideAndPrepareForAlignment(SeqTrack, boolean)} method of the
+     * {@link AlignmentDecider} specified by the {@link Project#alignmentDeciderBeanName} property of the specified
+     * {@link SeqTrack}'s {@link Project}.
      */
-    void setReadyForAlignment(SeqTrack seqTrack) {
-        notNull(seqTrack)
-
-        if (!SeqTypeService.alignableSeqTypes()*.id.contains(seqTrack.seqType.id)) {
-            return
+    Collection<MergingWorkPackage> decideAndPrepareForAlignment(SeqTrack seqTrack, boolean forceRealign = false) {
+        String alignmentDeciderBeanName = seqTrack.project.alignmentDeciderBeanName
+        if (!alignmentDeciderBeanName) {
+            // The validator should prevent this, but there are ways to circumvent the validator.
+            throw new RuntimeException("alignmentDeciderBeanName is not set for project ${seqTrack.project}. (In case no alignment shall be done for that project, set the alignmentDeciderBeanName to noAlignmentDecider, which is an AlignmentDecider which decides not to align.)")
         }
-
-        // Find all SeqTracks belonging to the same sample and seqType as the seqTrack which can be aligned.
-        List<SeqTrack> seqTracks = SeqTrack.findAll(AlignmentPassService.ALIGNABLE_SEQTRACK_HQL +
-                        "AND seqType.name =:seqTypeOfSeqTrack AND seqType.libraryLayout = :seqTypeLibraryLayout " +
-                        "AND sample =:sampleOfSeqTrack " +
-                        "AND NOT EXISTS (FROM DataFile WHERE seqTrack = st AND runSegment.align = false)",
-                        [
-                            alignmentState: SeqTrack.DataProcessingState.UNKNOWN,
-                            seqTypeOfSeqTrack: seqTrack.seqType.name,
-                            seqTypeLibraryLayout: "PAIRED",
-                            sampleOfSeqTrack: seqTrack.sample,
-                        ] << AlignmentPassService.ALIGNABLE_SEQTRACK_QUERY_PARAMETERS)
-
-        // ExomeSeqTracks with the kitInfoState "UNKNOWN_VERIFIED" and no kit must not be aligned.
-        seqTracks = seqTracks.findAll {
-            !(it instanceof ExomeSeqTrack) ||
-                            it.exomeEnrichmentKit ||
-                            it.kitInfoReliability == InformationReliability.UNKNOWN_UNVERIFIED
-        }
-
-        // Mark the SeqTracks as being ready for alignment.
-        seqTracks.each {
-            it.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
-            it.save(flush: true)
-        }
+        AlignmentDecider decider = applicationContext.getBean(alignmentDeciderBeanName, AlignmentDecider)
+        return decider.decideAndPrepareForAlignment(seqTrack, forceRealign)
     }
 
 
@@ -314,8 +286,8 @@ class SeqTrackService {
     }
 
     /**
-     * returns the oldest alignable {@link Seqtrack} waiting for fastqc if possible,
-     * otherwise the oldest {@link Seqtrack} waiting waiting for fastqc.
+     * returns the oldest alignable {@link SeqTrack} waiting for fastqc if possible,
+     * otherwise the oldest {@link SeqTrack} waiting waiting for fastqc.
      *
      * @return a seqTrack without fastqc
      * @see SeqTypeService#alignableSeqTypes
@@ -325,9 +297,9 @@ class SeqTrackService {
     }
 
     /**
-     * returns the oldest {@link Seqtrack} waiting for fastqc.
+     * returns the oldest {@link SeqTrack} waiting for fastqc.
      *
-     * @param onlyAlignable if true, only alignable {@link Seqtrack}s are searched, else all {@link Seqtrack}s.
+     * @param onlyAlignable if true, only alignable {@link SeqTrack}s are searched, else all {@link SeqTrack}s.
      * @return a seqTrack without fastqc
      * @see SeqTypeService#alignableSeqTypes
      */
@@ -359,6 +331,7 @@ class SeqTrackService {
         List<DataFile> filteredFiles = []
         files.each {
             if (fileTypeService.isGoodSequenceDataFile(it)) {
+                assert it.fileExists && it.fileSize > 0L
                 filteredFiles.add(it)
             }
         }
@@ -471,6 +444,9 @@ class SeqTrackService {
         consumeDataFiles(dataFiles, seqTrack)
         fillReadsForSeqTrack(seqTrack)
         seqTrack.save(flush: true)
+
+        decideAndPrepareForAlignment(seqTrack)
+
         return seqTrack
     }
 

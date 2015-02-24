@@ -29,7 +29,7 @@ class SeqTrackUnitTests {
     }
 
     void testGetProject() {
-        Project project = new Project()
+        Project project = TestData.createProject()
         assert null != project.save(validate: false)
 
         Individual individual = new Individual (project: project)

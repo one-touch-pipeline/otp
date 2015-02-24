@@ -67,7 +67,7 @@ class ProcessedMergedBamFileService {
         DataProcessingFilesService.OutputDirectories dirType = DataProcessingFilesService.OutputDirectories.MERGING
         String baseDir = dataProcessingFilesService.getOutputDirectory(individual, dirType)
         String seqTypeName = "${mergingWorkPackage.seqType.name}/${mergingWorkPackage.seqType.libraryLayout}"
-        String workPackageCriteraPart = "${(mergingWorkPackage.processingType == MergingWorkPackage.ProcessingType.SYSTEM ? mergingWorkPackage.mergingCriteria : MergingWorkPackage.ProcessingType.MANUAL)}"
+        String workPackageCriteraPart = "${(mergingWorkPackage.processingType == MergingWorkPackage.ProcessingType.SYSTEM ? 'DEFAULT' : MergingWorkPackage.ProcessingType.MANUAL)}"
         String workPackageNamePart = "${seqTypeName}/${workPackageCriteraPart}"
         String dir = "${sample.sampleType.name}/${workPackageNamePart}/${mergingSet.identifier}/pass${mergingPass.identifier}"
         return "${baseDir}/${dir}"
@@ -423,15 +423,6 @@ class ProcessedMergedBamFileService {
         isTrue(wrongSeqTracks.empty, "Different kits were used in the following seqTracks: $wrongSeqTracks, which were used to create $bamFile.")
 
         return firstKit
-    }
-
-    /**
-     * @deprecated Replaced by {@link ProcessedMergedBamFile#getContainedSeqTracks()}
-     * @return all seq tracks for the merged bam file
-     */
-    @Deprecated
-    public List<SeqTrack> seqTracksPerMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {
-        return processedMergedBamFile.getContainedSeqTracks() as List<SeqTrack>
     }
 
     /**

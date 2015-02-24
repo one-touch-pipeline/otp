@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.Run
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.TestData
 import grails.buildtestdata.mixin.Build
 import org.junit.Test
 
@@ -24,7 +25,7 @@ class ProcessingPriorityUnitTest {
 
     @Test
     void testGetProcessingPriorityForAlignmentPass() {
-        assertPriority(AlignmentPass.build())
+        assertPriority(TestData.createAndSaveAlignmentPass())
     }
 
     @Test

@@ -153,7 +153,7 @@ class MergingPassServiceTests {
     }
 
     private MergingSet createMergingSet(String uniqueId) {
-        Project project = new Project(
+        Project project = TestData.createProject(
                         name: "name_" + uniqueId,
                         dirName: "dirName",
                         realmName: 'DKFZ',
@@ -373,7 +373,8 @@ class MergingPassServiceTests {
         ] + bamFileMap)
 
         MergingSet furtherMergedSet = MergingSet.build([
-            mergingWorkPackage: DomainFactory.createMergingWorkPackage(processedMergedBamFile),
+            mergingWorkPackage: processedMergedBamFile.mergingWorkPackage,
+            identifier: MergingSet.nextIdentifier(processedMergedBamFile.mergingWorkPackage),
             status: MergingSet.State.PROCESSED
         ] + furtherMergedSetMap)
 

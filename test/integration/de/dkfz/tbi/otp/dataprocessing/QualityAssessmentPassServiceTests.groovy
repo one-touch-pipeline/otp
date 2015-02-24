@@ -1,8 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.junit.Assert.*
-import grails.test.mixin.*
-import grails.test.mixin.support.*
+
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
@@ -25,7 +24,7 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
 
     @Before
     void setUp() {
-        project = new Project(
+        project = TestData.createProject(
                         name: "TheProject",
                         dirName: "project-dir",
                         realmName: 'DKFZ',
@@ -59,10 +58,7 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
                         )
         assertNotNull(seqType.save([flush: true]))
 
-        SeqPlatform seqPlatform = new SeqPlatform()
-        seqPlatform.name = "instrumentPlatform"
-        seqPlatform.model = "instrumentModel"
-
+        SeqPlatform seqPlatform = TestData.findOrSaveSeqPlatform()
         assertNotNull(seqPlatform.save(flush: true))
 
         SeqPlatformModelIdentifier seqPlatformModelIdentifier = new SeqPlatformModelIdentifier()

@@ -104,6 +104,7 @@ abstract class AbstractBamFile {
      */
     State status = State.DECLARED
 
+    public abstract MergingWorkPackage getMergingWorkPackage()
     public abstract Set<SeqTrack> getContainedSeqTracks()
     public abstract AbstractQualityAssessment getOverallQualityAssessment()
     public abstract SeqType getSeqType()

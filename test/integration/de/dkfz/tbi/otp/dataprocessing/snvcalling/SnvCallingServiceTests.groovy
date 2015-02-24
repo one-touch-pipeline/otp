@@ -112,7 +112,7 @@ class SnvCallingServiceTests extends GroovyTestCase {
 
     @Test
     void testSnvConfigIsNullOtherProject() {
-        Project otherProject = new Project(name: "otherProject", dirName: "/tmp", realmName: "DKFZ")
+        Project otherProject = TestData.createProject(name: "otherProject", dirName: "/tmp", realmName: "DKFZ")
         otherProject.save()
 
         snvConfig.project = otherProject

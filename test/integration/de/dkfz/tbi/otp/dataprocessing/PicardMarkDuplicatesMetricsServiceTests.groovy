@@ -145,7 +145,7 @@ LIBRARY\tUNPAIRED_READS_EXAMINED\tREAD_PAIRS_EXAMINED\tUNMAPPED_READS\tUNPAIRED_
     }
 
     private ProcessedMergedBamFile createProcessedMergedBamFile() {
-        Project project = new Project(
+        Project project = TestData.createProject(
                         name: "project",
                         dirName: "project-dir",
                         realmName: realm.name

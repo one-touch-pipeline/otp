@@ -1,34 +1,19 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.*
+import org.junit.Ignore
 
-import org.junit.*
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.*
 
 import de.dkfz.tbi.otp.ngsdata.*
 
 @TestFor(AlignmentPass)
-@Mock([ReferenceGenome, SeqTrack])
+@Build([MergingWorkPackage, SeqTrack])
 class AlignmentPassUnitTests {
-
-    TestData testData
-
-
-    void setUp() {
-        testData = new TestData()
-        testData.seqTrack = testData.createSeqTrack()
-        assert testData.seqTrack.save(validate: false)
-    }
-
-
-    void tearDown() {
-        testData = null
-    }
-
 
     void testIsLatestPass_1Pass() {
         //preparation
-        AlignmentPass alignmentPass = testData.createAlignmentPass()
-        assert alignmentPass.save()
+        AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass()
 
         //tests
         assert alignmentPass.isLatestPass()
@@ -37,13 +22,27 @@ class AlignmentPassUnitTests {
 
     void testIsLatestPass_2Passes() {
         //preparation
-        AlignmentPass alignmentPass1 = testData.createAlignmentPass([identifier: 0])
-        AlignmentPass alignmentPass2 = testData.createAlignmentPass([identifier: 1])
-        assert alignmentPass1.save()
-        assert alignmentPass2.save()
+        SeqTrack seqTrack = SeqTrack.build()
+        AlignmentPass alignmentPass1 = TestData.createAndSaveAlignmentPass(seqTrack: seqTrack, identifier: 0)
+        AlignmentPass alignmentPass2 = TestData.createAndSaveAlignmentPass(seqTrack: seqTrack, identifier: 1)
 
         //tests
         assert !alignmentPass1.isLatestPass()
+        assert alignmentPass2.isLatestPass()
+    }
+
+    @Ignore  // TODO OTP-1401: Un-ignore this test as soon as the constraints on MergingWorkPackage allow multiple
+             // instances for the same Sample and SeqType.
+    void testIsLatestPass_2PassesDifferentWorkPackages() {
+        //preparation
+        SeqTrack seqTrack = SeqTrack.build()
+        AlignmentPass alignmentPass1 = TestData.createAndSaveAlignmentPass(seqTrack: seqTrack, identifier: 0,
+                referenceGenome: ReferenceGenome.build())
+        AlignmentPass alignmentPass2 = TestData.createAndSaveAlignmentPass(seqTrack: seqTrack, identifier: 1,
+                referenceGenome: ReferenceGenome.build())
+
+        //tests
+        assert alignmentPass1.isLatestPass()
         assert alignmentPass2.isLatestPass()
     }
 }

@@ -31,7 +31,7 @@ class QualityAssessmentMergedPassServiceTests {
             processingRootPath: '/tmp/otp-unit-test/pmbfs/processing',
             ]).save([flush: true])
 
-        project = new Project(
+        project = TestData.createProject(
                         name: "project",
                         dirName: "project-dir",
                         realmName: 'DKFZ',

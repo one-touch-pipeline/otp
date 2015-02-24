@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
 import de.dkfz.tbi.otp.filehandling.BwaLogFileParser
 import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
@@ -157,7 +158,7 @@ class ProcessedBamFileService {
     public void setNeedsProcessing(final ProcessedBamFile processedBamFile) {
         notNull processedBamFile
         assert [AbstractBamFile.State.DECLARED, AbstractBamFile.State.NEEDS_PROCESSING].contains(processedBamFile.status)
-        assert processedBamFile.seqTrack.alignmentState == SeqTrack.DataProcessingState.FINISHED
+        assert processedBamFile.alignmentPass.alignmentState == AlignmentState.FINISHED
         processedBamFile.status = AbstractBamFile.State.NEEDS_PROCESSING
         assertSave(processedBamFile)
     }
@@ -178,12 +179,12 @@ class ProcessedBamFileService {
      * Therefore the following requirements needs to be <code>true</code>:
      * <ul>
      * <li> The processedBamFile is not withdrawn</li>
-     * <li> All {@link SeqTrack}s (exlude withdrawn) with the same {@link Sample} and {@link SeqType} have finished their
-     *      alignments, see {@link #isAnyAlignmentPending(Iterable)}</li>
-     * <li> No merging is in process for the corresponding {@link Sample} and {@link SeqType}, see
-     *      {@link #isMergingInProgress(SeqTrack)}</li>
-     * <li> All {@link ProcessedBamFile} (exlude withdrawn) for the {SeqTrack}s with the same {@link Sample}
-     *      and {@link SeqType} have to be processable, see {@link #isAnyBamFileNotProcessable(Collection)}</li>
+     * <li> All {@link SeqTrack}s (exlude withdrawn) with the same {@link MergingWorkPackage} have finished their
+     *      alignments, see {@link #isAnyAlignmentPending(MergingWorkPackage)}</li>
+     * <li> No merging is in process for the corresponding {@link MergingWorkPackage}, see
+     *      {@link #isMergingInProgress(MergingWorkPackage)}</li>
+     * <li> All {@link ProcessedBamFile} (exlude withdrawn) for the {SeqTrack}s with the same {@link MergingWorkPackage}
+     *      have to be processable, see {@link #isAnyBamFileNotProcessable(MergingWorkPackage)}</li>
      * </ul>
      */
     public boolean isMergeable(ProcessedBamFile processedBamFile) {
@@ -193,70 +194,50 @@ class ProcessedBamFileService {
             return false
         }
 
-        final SeqTrack seqTrack = processedBamFile.seqTrack
-        List<SeqTrack> seqTracks = SeqTrack.createCriteria().list {
-            eq("sample", seqTrack.sample)
-            eq("seqType", seqTrack.seqType)
-        }
-        /* At least processedBamFile.alignmentPass.seqTrack must be in the result, so if the result
-         * is empty, something is seriously broken.
-         */
-        assert !seqTracks.isEmpty()
-
-        if (isAnyAlignmentPending(seqTracks)) {
+        MergingWorkPackage workPackage = processedBamFile.mergingWorkPackage
+        if (isAnyAlignmentPending(workPackage)) {
             return false
         }
-        if (isMergingInProgress(processedBamFile.seqTrack)) {
+        if (isMergingInProgress(workPackage)) {
             return false
         }
-        if (isAnyBamFileNotProcessable(seqTracks)) {
+        if (isAnyBamFileNotProcessable(workPackage)) {
             return false
         }
         return true
     }
 
     /**
-     * Checks for not finished alignments of the given seqtracks, ignoring withdrawn seq tracks
+     * Checks for not finished alignments of the given MergingWorkPackage, ignoring withdrawn seq tracks
      *
      * A seqtrack is handled as withdrawn, if at least one of the corresponding {@link DataFile}s is withdrawn.
      *
-     * @param seqTracks the seqTracks to be checked
      * @return <code>true</code>, if for at least one not withdrawn seqtrack the alignment is not finished yet
      */
-    public boolean isAnyAlignmentPending(Iterable<SeqTrack> seqTracks) {
-        notNull(seqTracks)
-        return seqTracks.find { it.alignmentState != SeqTrack.DataProcessingState.FINISHED && !it.withdrawn}
+    public boolean isAnyAlignmentPending(MergingWorkPackage workPackage) {
+        notNull(workPackage)
+        Collection<AlignmentPass> passes = AlignmentPass.findAllByWorkPackageAndAlignmentStateNotEqual(
+                workPackage, AlignmentState.FINISHED)
+        return passes.find { it.isLatestPass() && !it.seqTrack.withdrawn }
     }
 
-    /**
-     * @return whether there is a merging process with the {@link Sample} and {@link SeqType} of the specified
-     *      {@link SeqTrack} running at the moment
-     */
-    public boolean isMergingInProgress(SeqTrack seqTrack) {
-        notNull(seqTrack)
-        Sample sample = seqTrack.sample
-        SeqType seqType = seqTrack.seqType
-        MergingWorkPackage workPackage = MergingWorkPackage.findBySampleAndSeqType(sample, seqType)
-        if (workPackage) {
-            if (MergingSet.findByMergingWorkPackageAndStatusInList(workPackage,
-                            [MergingSet.State.DECLARED, MergingSet.State.INPROGRESS, MergingSet.State.NEEDS_PROCESSING])) {
-                return true
-            }
+    public boolean isMergingInProgress(MergingWorkPackage workPackage) {
+        notNull(workPackage)
+        if (MergingSet.findByMergingWorkPackageAndStatusInList(workPackage,
+                        [MergingSet.State.DECLARED, MergingSet.State.INPROGRESS, MergingSet.State.NEEDS_PROCESSING])) {
+            return true
         }
         return false
     }
 
 
     /**
-     * @return whether a latest {@link ProcessedBamFile} (exlude withdrawn and old passes) belonging to any of the given
-     *      {@link SeqTrack}s exists where the QA is not finished or the {@link AbstractBamFile#status}
+     * @return whether a latest {@link ProcessedBamFile} (exlude withdrawn and old passes) belonging to the given
+     *      {@link MergingWorkPackage} exists where the {@link AbstractBamFile#status}
      *      is {@link AbstractBamFile.State#DECLARED}.
      */
-    public boolean isAnyBamFileNotProcessable(Collection<SeqTrack> seqTracks) {
-        notNull(seqTracks)
-        if (seqTracks.isEmpty()) {
-            return false
-        }
+    public boolean isAnyBamFileNotProcessable(MergingWorkPackage workPackage) {
+        notNull(workPackage)
         List<AbstractBamFile.State> allowedMergingStates = [
             AbstractBamFile.State.NEEDS_PROCESSING,
             AbstractBamFile.State.INPROGRESS,
@@ -264,12 +245,10 @@ class ProcessedBamFileService {
         ]
         List<ProcessedBamFile> processedBamFiles = ProcessedBamFile.createCriteria().list {
             alignmentPass {
-                'in'("seqTrack", seqTracks)
+                eq("workPackage", workPackage)
             }
             eq("withdrawn", false) //withdrawn files should be ignored
-            or {
-                not { 'in'("status", allowedMergingStates) }
-            }
+            not { 'in'("status", allowedMergingStates) }
         }
 
         //processedBamFiles of old passes should be ignored

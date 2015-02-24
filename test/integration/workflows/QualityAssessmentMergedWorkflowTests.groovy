@@ -1,5 +1,6 @@
 package workflows
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static org.junit.Assert.*
 
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
@@ -35,25 +36,8 @@ class QualityAssessmentMergedWorkflowTests extends QualityAssessmentAbstractWork
         SeqType seqType = seqTracks.first().seqType
         ReferenceGenome referenceGenome = createReferenceGenome(Project.list().first(), seqType)
 
-        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
-                        referenceGenome: referenceGenome,
-                        sample: Sample.list().first(),
-                        seqType: seqType
-                        )
-        assertNotNull(mergingWorkPackage.save([flush: true]))
-
-        MergingSet mergingSet = new MergingSet(
-                        identifier: 0,
-                        mergingWorkPackage: mergingWorkPackage,
-                        status: MergingSet.State.PROCESSED
-                        )
-        assertNotNull(mergingSet.save([flush: true]))
-
-        MergingPass mergingPass = new MergingPass(
-                        identifier: 0,
-                        mergingSet: mergingSet
-                        )
-        assertNotNull(mergingPass.save([flush: true]))
+        MergingSet mergingSet
+        MergingPass mergingPass
 
         seqTracks.eachWithIndex { SeqTrack seqTrack, int i ->
             seqTrack.laneId = "laneId$i"
@@ -63,7 +47,25 @@ class QualityAssessmentMergedWorkflowTests extends QualityAssessmentAbstractWork
             seqTrack.pipelineVersion = SoftwareTool.list().first()
             assertNotNull(seqTrack.save([flush: true]))
 
-            AlignmentPass alignmentPass = new AlignmentPass(
+            if (i == 0) {
+                MergingWorkPackage mergingWorkPackage = TestData.findOrSaveMergingWorkPackage(seqTrack, referenceGenome)
+                assertNotNull(mergingWorkPackage.save([flush: true]))
+
+                mergingSet = new MergingSet(
+                        identifier: 0,
+                        mergingWorkPackage: mergingWorkPackage,
+                        status: MergingSet.State.PROCESSED
+                )
+                assertNotNull(mergingSet.save([flush: true]))
+
+                mergingPass = new MergingPass(
+                        identifier: 0,
+                        mergingSet: mergingSet
+                )
+                assertNotNull(mergingPass.save([flush: true]))
+            }
+
+            AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass(
                             referenceGenome: referenceGenome,
                             identifier: i,
                             seqTrack: seqTrack,

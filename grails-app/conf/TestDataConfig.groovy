@@ -64,6 +64,12 @@ testDataConfig {
             name = {'seqCenterName_' + (counter++)}
             dirName  = {'seqCenterDirName_' + (counter++)}
         }
+        'de.dkfz.tbi.otp.ngsdata.SeqPlatform' {
+            seqPlatformGroup = {SeqPlatformGroup.build()}
+        }
+        'de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup' {
+            name = {'testSeqPlatformGroup_' + (counter++)}
+        }
         'de.dkfz.tbi.otp.ngsdata.SeqType' {
             name = {'seqTypeName_' + (counter++)}
             libraryLayout  = {'seqTypelibraryLayout_' + (counter++)}
@@ -76,13 +82,16 @@ testDataConfig {
         'de.dkfz.tbi.otp.ngsdata.SoftwareToolIdentifier' {
             name = {'softwareToolIdentifier_' + (counter++)}
         }
-        'de.dkfz.tbi.otp.dataprocessing.AlignmentPass' {
-            referenceGenome = {ReferenceGenome.build()}
-        }
         'de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment' {
             //Ensure to use this subclass of AbstractBamFile
             //Otherwise the plugin tries to create an ExternallyProcessedMergedBamFile, but it fails to create the FastqSet
             bamFile = {ProcessedBamFile.build()}
+        }
+        'de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile' {
+            alignmentPass = {TestData.createAndSaveAlignmentPass()}
+        }
+        'de.dkfz.tbi.otp.dataprocessing.ProcessedSaiFile' {
+            alignmentPass = {TestData.createAndSaveAlignmentPass()}
         }
         'de.dkfz.tbi.otp.job.plan.JobExecutionPlan' {
             name = {'plan_' + (counter++)}

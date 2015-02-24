@@ -5,9 +5,15 @@ class SeqPlatform {
     String name   // eg. solid, illumina
     String model
 
+    /**
+     * If {@code null}, data from this {@link SeqPlatform} will not be aligned.
+     */
+    SeqPlatformGroup seqPlatformGroup
+
     static constraints = {
         name(blank: false)
-        model(nullable: true)
+        model(nullable: true, unique: 'name')
+        seqPlatformGroup(nullable: true)
     }
 
     String toString() {

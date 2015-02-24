@@ -1222,6 +1222,6 @@ class IndividualServiceTests extends AbstractIntegrationTest {
     }
 
     private Project mockProject(String name = "test") {
-        return Project.findOrSaveWhere(name: name, dirName: name, realmName: name)
+        return Project.findOrSaveWhere(name: name, dirName: name, realmName: name, alignmentDeciderBeanName: 'dummyNonExistentAlignmentDecider')
     }
 }

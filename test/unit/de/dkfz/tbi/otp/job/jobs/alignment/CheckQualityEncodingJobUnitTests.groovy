@@ -43,7 +43,7 @@ class CheckQualityEncodingJobUnitTests {
 
         checkQualityEncodingJob.log = this.log
 
-        Project project = new Project(
+        Project project = TestData.createProject(
                         name: "projectName",
                         dirName: "dirName",
                         realmName: 'DKFZ',

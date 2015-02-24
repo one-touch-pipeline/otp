@@ -1,37 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static org.springframework.util.Assert.*
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage.MergingCriteria
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-
 class MergingWorkPackageService {
-
-    /**
-     * @param bamFile The properties of the work package will be based on the properties of this BAM file.
-     * @param criteria, the MergingCriteria defines, which criteria the {@link ProcessedBamFile}s have to fulfill to be merged
-     * @return the new created workPackage, containing the information, which BamFiles are
-     * available for the corresponding {@link Sample} and {@link SeqType} and satisfy the given {@link MergingCriteria} or custom selection.
-     */
-    MergingWorkPackage createWorkPackage(ProcessedBamFile bamFile, MergingCriteria criteria) {
-        notNull(bamFile, "the input bamFile for the method createWorkPackage is null")
-        notNull(criteria, "the input criteria for the method createWorkPackage is null")
-        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
-                sample: bamFile.sample,
-                seqType: bamFile.seqType,
-                referenceGenome: bamFile.referenceGenome,
-                mergingCriteria: criteria
-                )
-        assertSave(mergingWorkPackage)
-    }
-
-    private def assertSave(def object) {
-        object = object.save(flush: true)
-        if (!object) {
-            throw new SavingException(object.toString())
-        }
-        return object
-    }
 
     /**
      * @return a list of workpackages, to which the processedMergedBamFiles belong to, which are currently in transfer

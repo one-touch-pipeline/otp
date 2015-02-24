@@ -4,48 +4,49 @@ import static org.junit.Assert.*
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
+import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
 import de.dkfz.tbi.otp.ngsdata.*
 
 class AlignmentPassServiceIntegrationTests extends TestData {
 
     AlignmentPassService alignmentPassService
 
-    /* SeqTrackServiceTests.testSetReadyForAlignment() relies on the criteria in
-     * AlignmentPassService.ALIGNABLE_SEQTRACK_HQL being deeply tested here.
-     */
     @Test
-    void testFindAlignableSeqTrack() {
+    void testFindAlignmentPassForProcessing() {
         createObjects()
         dataFile.delete()
         seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
 
-        findAlignableSeqTrackTest(SeqTrack.DataProcessingState.IN_PROGRESS)
-        findAlignableSeqTrackTest(SeqTrack.DataProcessingState.NOT_STARTED)
+        findAlignmentPassForProcessingTest(AlignmentState.IN_PROGRESS)
+        findAlignmentPassForProcessingTest(AlignmentState.NOT_STARTED)
 
-        seqTrack.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+        AlignmentPass alignmentPass = createAndSaveAlignmentPass(
+                seqTrack: seqTrack,
+                alignmentState: AlignmentState.NOT_STARTED,
+        )
         DataFile dataFile = createDataFile(false)
-        assertEquals(seqTrack, alignmentPassService.findAlignableSeqTrack())
+        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
 
         dataFile.fileExists = false
         assertNotNull(dataFile.save(flush: true))
-        assertNull(alignmentPassService.findAlignableSeqTrack())
+        assertNull(alignmentPassService.findAlignmentPassForProcessing())
         dataFile.fileExists = true
         assertNotNull(dataFile.save(flush: true))
-        assertEquals(seqTrack, alignmentPassService.findAlignableSeqTrack())
+        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
 
         dataFile.fileSize = 0
         assertNotNull(dataFile.save(flush: true))
-        assertNull(alignmentPassService.findAlignableSeqTrack())
+        assertNull(alignmentPassService.findAlignmentPassForProcessing())
         dataFile.fileSize = 1
         assertNotNull(dataFile.save(flush: true))
-        assertEquals(seqTrack, alignmentPassService.findAlignableSeqTrack())
+        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
 
         fileType.type = FileType.Type.ALIGNMENT
         assertNotNull(fileType.save(flush: true))
-        assertNull(alignmentPassService.findAlignableSeqTrack())
+        assertNull(alignmentPassService.findAlignmentPassForProcessing())
         fileType.type = FileType.Type.SEQUENCE
         assertNotNull(fileType.save(flush: true))
-        assertEquals(seqTrack, alignmentPassService.findAlignableSeqTrack())
+        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
 
         RunSegment runSegment = new RunSegment()
         runSegment.run = run
@@ -56,153 +57,169 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         runSegment.dataPath = '/tmp/'
         runSegment.mdPath = '/tmp/'
         assertNotNull(runSegment.save(flush: true))
-        assertNull(alignmentPassService.findAlignableSeqTrack())
+        assertNull(alignmentPassService.findAlignmentPassForProcessing())
         runSegment.metaDataStatus = RunSegment.Status.COMPLETE
         assertNotNull(runSegment.save(flush: true))
-        assertEquals(seqTrack, alignmentPassService.findAlignableSeqTrack())
+        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
 
         referenceGenomeProjectSeqType.delete(flush: true)
-        assert alignmentPassService.findAlignableSeqTrack() == seqTrack
+        assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack.alignmentState)
 
-        seqTrack.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+        alignmentPass.alignmentState = AlignmentState.NOT_STARTED
         assertNotNull(createReferenceGenomeProjectSeqType().save(flush: true))
-        assertEquals(seqTrack, alignmentPassService.findAlignableSeqTrack())
+        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
     }
 
     @Test
-    void testFindAlignableSeqTrack_fastqcMustBeFinished() {
+    void testFindAlignmentPassForProcessing_fastqcMustBeFinished() {
         createObjects()
         createDataFile(false)
-        seqTrack.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+        AlignmentPass alignmentPass = createAndSaveAlignmentPass(
+                seqTrack: seqTrack,
+                alignmentState: AlignmentState.NOT_STARTED,
+        )
 
         seqTrack.fastqcState = SeqTrack.DataProcessingState.IN_PROGRESS
-        assertNull(alignmentPassService.findAlignableSeqTrack())
+        assertNull(alignmentPassService.findAlignmentPassForProcessing())
 
         seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
-        assertEquals(seqTrack, alignmentPassService.findAlignableSeqTrack())
+        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
     }
 
     @Test
-    void testFindAlignableExomeSeqTrackKitANDBedFileANDReferenceGenomeConnectionMissing() {
+    void testFindAlignmentPassForProcessing_Exome_KitANDBedFileANDReferenceGenomeConnectionMissing() {
         createObjects()
         dataFile.delete()
         seqTrack.delete()
         ExomeSeqTrack exomeSeqTrack = createExomeSeqTrack(run)
-        exomeSeqTrack.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+        AlignmentPass alignmentPass = createAndSaveAlignmentPass(
+                seqTrack: exomeSeqTrack,
+                alignmentState: AlignmentState.NOT_STARTED,
+        )
         exomeSeqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
 
-        assertNull(alignmentPassService.findAlignableSeqTrack())
+        assertNull(alignmentPassService.findAlignmentPassForProcessing())
 
         dataFile = createDataFile([seqTrack: exomeSeqTrack])
         dataFile.save(flush: true)
-        assert alignmentPassService.findAlignableSeqTrack() == exomeSeqTrack
+        assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, exomeSeqTrack.alignmentState)
     }
 
 
     @Test
-    void testFindAlignableExomeSeqTrackKitANDBedFileMissing() {
-        ExomeSeqTrack exomeSeqTrack = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+    void testFindAlignmentPassForProcessing_Exome_KitANDBedFileMissing() {
+        AlignmentPass alignmentPass = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+        ExomeSeqTrack exomeSeqTrack = alignmentPass.seqTrack
 
         createReferenceGenomeProjectSeqType([seqType: exomeSeqType]).save(flush: true)
-        assert alignmentPassService.findAlignableSeqTrack() == exomeSeqTrack
+        assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, exomeSeqTrack.alignmentState)
     }
 
 
     @Test
-    void testFindAlignableExomeSeqTrackKitConnectionANDBedFileMissing() {
-        ExomeSeqTrack exomeSeqTrack = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+    void testFindAlignmentPassForProcessing_Exome_KitConnectionANDBedFileMissing() {
+        AlignmentPass alignmentPass = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+        ExomeSeqTrack exomeSeqTrack = alignmentPass.seqTrack
 
         ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
         createReferenceGenomeProjectSeqType([seqType: exomeSeqType]).save(flush: true)
 
-        assert alignmentPassService.findAlignableSeqTrack() == exomeSeqTrack
+        assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, exomeSeqTrack.alignmentState)
     }
 
 
     @Test
-    void testFindAlignableExomeSeqTrackBedFileMissing() {
-        ExomeSeqTrack exomeSeqTrack = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
-
-        ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
-        addKitToExomeSeqTrack(exomeSeqTrack, exomeEnrichmentKit)
-        createReferenceGenomeProjectSeqType([seqType: exomeSeqType]).save(flush: true)
-
-        assert alignmentPassService.findAlignableSeqTrack() == exomeSeqTrack
-        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, exomeSeqTrack.alignmentState)
-    }
-
-
-    @Test
-    void testFindAlignableExomeSeqTrackReferenceGenomeAndBedFileMissing() {
-        ExomeSeqTrack exomeSeqTrack = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+    void testFindAlignmentPassForProcessing_Exome_BedFileMissing() {
+        AlignmentPass alignmentPass = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+        ExomeSeqTrack exomeSeqTrack = alignmentPass.seqTrack
 
         ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
         addKitToExomeSeqTrack(exomeSeqTrack, exomeEnrichmentKit)
+        createReferenceGenomeProjectSeqType([seqType: exomeSeqType]).save(flush: true)
 
-        assert alignmentPassService.findAlignableSeqTrack() == exomeSeqTrack
+        assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, exomeSeqTrack.alignmentState)
     }
 
 
     @Test
-    void testFindAlignableExomeSeqTrackReferenceGenomeAndKitMissing() {
-        ExomeSeqTrack exomeSeqTrack = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+    void testFindAlignmentPassForProcessing_Exome_ReferenceGenomeAndBedFileMissing() {
+        AlignmentPass alignmentPass = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+        ExomeSeqTrack exomeSeqTrack = alignmentPass.seqTrack
+
+        ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
+        addKitToExomeSeqTrack(exomeSeqTrack, exomeEnrichmentKit)
+
+        assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
+        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, exomeSeqTrack.alignmentState)
+    }
+
+
+    @Test
+    void testFindAlignmentPassForProcessing_Exome_ReferenceGenomeAndKitMissing() {
+        AlignmentPass alignmentPass = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+        ExomeSeqTrack exomeSeqTrack = alignmentPass.seqTrack
 
         ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
         createBedFile(referenceGenome, exomeEnrichmentKit)
 
-        assert alignmentPassService.findAlignableSeqTrack() == exomeSeqTrack
+        assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, exomeSeqTrack.alignmentState)
     }
 
 
     @Test
-    void testFindAlignableExomeSeqTrackReferenceGenomeMissing() {
-        ExomeSeqTrack exomeSeqTrack = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+    void testFindAlignmentPassForProcessing_Exome_ReferenceGenomeMissing() {
+        AlignmentPass alignmentPass = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+        ExomeSeqTrack exomeSeqTrack = alignmentPass.seqTrack
 
         ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
         createBedFile(referenceGenome, exomeEnrichmentKit)
         addKitToExomeSeqTrack(exomeSeqTrack, exomeEnrichmentKit)
 
-        assert alignmentPassService.findAlignableSeqTrack() == exomeSeqTrack
+        assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, exomeSeqTrack.alignmentState)
     }
 
 
     @Test
-    void testFindAlignableExomeSeqTrackAllInformationAvailable() {
-        ExomeSeqTrack exomeSeqTrack = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+    void testFindAlignmentPassForProcessing_Exome_AllInformationAvailable() {
+        AlignmentPass alignmentPass = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
+        ExomeSeqTrack exomeSeqTrack = alignmentPass.seqTrack
 
         ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
         createBedFile(referenceGenome, exomeEnrichmentKit)
         addKitToExomeSeqTrack(exomeSeqTrack, exomeEnrichmentKit)
         createReferenceGenomeProjectSeqType([seqType: exomeSeqType]).save(flush: true)
 
-        assertEquals(exomeSeqTrack, alignmentPassService.findAlignableSeqTrack())
+        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
     }
 
-    private void findAlignableSeqTrackTest(final SeqTrack.DataProcessingState state) {
-        findAlignableSeqTrackTest(state, 0, 0)
-        findAlignableSeqTrackTest(state, 1, 0)
-        findAlignableSeqTrackTest(state, 0, 1)
-        findAlignableSeqTrackTest(state, 0, 2)
-        findAlignableSeqTrackTest(state, 1, 1)
-        findAlignableSeqTrackTest(state, 2, 0)
-        findAlignableSeqTrackTest(state, 0, 3)
-        findAlignableSeqTrackTest(state, 1, 2)
-        findAlignableSeqTrackTest(state, 2, 1)
-        findAlignableSeqTrackTest(state, 3, 0)
+    private void findAlignmentPassForProcessingTest(final AlignmentState state) {
+        findAlignmentPassForProcessingTest(state, 0, 0)
+        findAlignmentPassForProcessingTest(state, 1, 0)
+        findAlignmentPassForProcessingTest(state, 0, 1)
+        findAlignmentPassForProcessingTest(state, 0, 2)
+        findAlignmentPassForProcessingTest(state, 1, 1)
+        findAlignmentPassForProcessingTest(state, 2, 0)
+        findAlignmentPassForProcessingTest(state, 0, 3)
+        findAlignmentPassForProcessingTest(state, 1, 2)
+        findAlignmentPassForProcessingTest(state, 2, 1)
+        findAlignmentPassForProcessingTest(state, 3, 0)
     }
 
-    private void findAlignableSeqTrackTest(
-            final SeqTrack.DataProcessingState state,
+    private void findAlignmentPassForProcessingTest(
+            final AlignmentState state,
             final int nonWithdrawnDataFiles,
             final int withdrawnDataFiles) {
-        seqTrack.alignmentState = state
+        AlignmentPass alignmentPass = createAndSaveAlignmentPass(
+                seqTrack: seqTrack,
+                alignmentState: state,
+        )
         Collection<DataFile> dataFiles = new ArrayList<DataFile>()
         for (int i = 0; i < nonWithdrawnDataFiles; i++) {
             dataFiles.add createDataFile(false)
@@ -211,11 +228,11 @@ class AlignmentPassServiceIntegrationTests extends TestData {
             dataFiles.add createDataFile(true)
         }
         assertEquals(nonWithdrawnDataFiles + withdrawnDataFiles, DataFile.count)
-        if (state == SeqTrack.DataProcessingState.NOT_STARTED &&
+        if (state == AlignmentState.NOT_STARTED &&
         nonWithdrawnDataFiles >= 1 && withdrawnDataFiles == 0) {
-            assertEquals(seqTrack, alignmentPassService.findAlignableSeqTrack())
+            assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
         } else {
-            assertNull(alignmentPassService.findAlignableSeqTrack())
+            assertNull(alignmentPassService.findAlignmentPassForProcessing())
         }
         dataFiles*.delete(flush: true)
     }
@@ -226,43 +243,6 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         assertNotNull(dataFile.save(flush: true))
         return dataFile
     }
-
-    @Test
-    void testCreateAlignmentPass() {
-        createObjects()
-        assertNull(alignmentPassService.createAlignmentPass())
-        seqTrack.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
-        seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
-        DataFile dataFile1 = createDataFile(false)
-        AlignmentPass pass1 = alignmentPassService.createAlignmentPass()
-        assertNotNull(pass1)
-        assertEquals(seqTrack, pass1.seqTrack)
-        AlignmentPass pass2 = alignmentPassService.createAlignmentPass()
-        assertNotNull(pass2)
-        assertEquals(seqTrack, pass2.seqTrack)
-        assertNotSame(pass1.identifier, pass2.identifier)
-        dataFile1.fileWithdrawn = true
-        assertNotNull(dataFile1.save(flush: true))
-        assertNull(alignmentPassService.createAlignmentPass())
-    }
-
-    @Test
-    void testMaximalIdentifier() {
-        createObjects()
-
-        ProcessedBamFile processedBamFile = createProcessedBamFile(seqTrack, 0)
-        assertEquals(0, alignmentPassService.maximalIdentifier(processedBamFile))
-
-        ProcessedBamFile processedBamFile1 = createProcessedBamFile(seqTrack, 1)
-        assertEquals(1, alignmentPassService.maximalIdentifier(processedBamFile))
-        assertEquals(1, alignmentPassService.maximalIdentifier(processedBamFile1))
-
-        ProcessedBamFile processedBamFile2 = createProcessedBamFile(seqTrack, 2)
-        assertEquals(2, alignmentPassService.maximalIdentifier(processedBamFile))
-        assertEquals(2, alignmentPassService.maximalIdentifier(processedBamFile1))
-        assertEquals(2, alignmentPassService.maximalIdentifier(processedBamFile2))
-    }
-
 
     @Test
     void testIsExomeEnrichmentKitOrBedFileMissing() {
@@ -283,28 +263,19 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         assertFalse(alignmentPassService.isExomeEnrichmentKitOrBedFileMissing(exomeSeqTrack))
     }
 
-
-    @Test
-    void testUpdateSeqTrackDataProcessingState() {
-        createObjects()
-
-        assertEquals(SeqTrack.DataProcessingState.UNKNOWN, seqTrack.alignmentState)
-
-        alignmentPassService.updateSeqTrackDataProcessingState(seqTrack, SeqTrack.DataProcessingState.IN_PROGRESS)
-        assertEquals(SeqTrack.DataProcessingState.IN_PROGRESS, seqTrack.alignmentState)
-    }
-
-
-    private ExomeSeqTrack deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile() {
+    private AlignmentPass deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile() {
         createObjects()
         dataFile.delete()
         seqTrack.delete()
         ExomeSeqTrack exomeSeqTrack = createExomeSeqTrack(run)
-        exomeSeqTrack.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+        AlignmentPass alignmentPass = createAndSaveAlignmentPass(
+                seqTrack: exomeSeqTrack,
+                alignmentState: AlignmentState.NOT_STARTED,
+        )
         exomeSeqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
         dataFile = createDataFile([seqTrack: exomeSeqTrack])
         dataFile.save(flush: true)
-        return exomeSeqTrack
+        return alignmentPass
     }
 
     private ProcessedBamFile createProcessedBamFile(SeqTrack seqTrack, int identifier) {

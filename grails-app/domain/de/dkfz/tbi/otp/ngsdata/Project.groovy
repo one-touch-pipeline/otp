@@ -10,6 +10,7 @@ class Project {
     String emailAddressOfContactPerson
 
     short processingPriority = ProcessingPriority.NORMAL_PRIORITY
+    String alignmentDeciderBeanName
 
     static belongsTo = [
         projectGroup: ProjectGroup
@@ -22,6 +23,7 @@ class Project {
         projectGroup(nullable: true)
         emailAddressOfContactPerson (nullable: true)
         processingPriority max: ProcessingPriority.MAXIMUM_PRIORITY
+        alignmentDeciderBeanName(blank: false)  // If no alignment is desired, set to noAlignmentDecider instead of leaving blank
     }
 
     String toString() {

@@ -50,8 +50,6 @@ class SeqTrackBuilder {
 
     private QualityEncoding qualityEncoding = QualityEncoding.UNKNOWN
 
-    private DataProcessingState alignmentState = DataProcessingState.UNKNOWN
-
     private DataProcessingState fastqcState = DataProcessingState.UNKNOWN
 
     /**
@@ -133,11 +131,6 @@ class SeqTrackBuilder {
         return this
     }
 
-    public SeqTrackBuilder setAlignmentState(DataProcessingState alignmentState) {
-        this.alignmentState = alignmentState
-        return this
-    }
-
     public SeqTrackBuilder setFastqcState(DataProcessingState fastqcState) {
         this.fastqcState = fastqcState
         return this
@@ -209,7 +202,6 @@ class SeqTrackBuilder {
         seqTrack.seqPlatform = seqPlatform ? seqPlatform : run.seqPlatform
         seqTrack.pipelineVersion = pipelineVersion
         seqTrack.qualityEncoding = qualityEncoding
-        seqTrack.alignmentState = alignmentState
         seqTrack.fastqcState = fastqcState
         seqTrack.sequencingKit = sequencingKit
 

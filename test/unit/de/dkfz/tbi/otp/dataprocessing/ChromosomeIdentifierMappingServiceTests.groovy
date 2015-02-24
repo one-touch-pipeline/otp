@@ -29,7 +29,7 @@ class ChromosomeIdentifierMappingServiceTests {
 
         Realm realm = DomainFactory.createRealmDataProcessingDKFZ()
 
-        project = new Project()
+        project = TestData.createProject()
         project.name = "SOME_PROJECT"
         project.dirName = "/tmp/alignmentPassService/"
         project.realmName = realm.name

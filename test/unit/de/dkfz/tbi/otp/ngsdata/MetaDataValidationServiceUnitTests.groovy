@@ -258,7 +258,7 @@ class MetaDataValidationServiceUnitTests {
 
 
     private Run createRun() {
-        Project project = new Project(
+        Project project = TestData.createProject(
                         name: "projectname",
                         dirName: "projectdirName",
                         realmName: "realmName"

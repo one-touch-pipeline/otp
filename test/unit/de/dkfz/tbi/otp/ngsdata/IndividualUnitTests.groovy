@@ -99,7 +99,7 @@ class IndividualUnitTests {
         Realm realm = DomainFactory.createRealmDataManagementDKFZ()
         assert realm.save()
 
-        Project project = new Project(
+        Project project = TestData.createProject(
                 dirName: "projectDirName",
                 realmName: realm.name
                 )
@@ -126,7 +126,7 @@ class IndividualUnitTests {
         Realm realm = DomainFactory.createRealmDataManagementDKFZ()
         assert realm.save()
 
-        Project project = new Project(
+        Project project = TestData.createProject(
                 dirName: "projectDirName",
                 realmName: realm.name
                 )
@@ -148,7 +148,7 @@ class IndividualUnitTests {
         mockFullName: "mockFullName",
         internIdentifier: "internIdentifier",
         type: Type.REAL,
-        project: new Project()
+        project: TestData.createProject()
         )
     }
 }

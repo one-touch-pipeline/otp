@@ -60,8 +60,13 @@ class ProjectService {
      * @return The created project
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Project createProject(String name, String dirName, String realmName) {
-        Project project = new Project(name: name, dirName: dirName, realmName: realmName)
+    public Project createProject(String name, String dirName, String realmName, String alignmentDeciderBeanName) {
+        Project project = new Project(
+                name: name,
+                dirName: dirName,
+                realmName: realmName,
+                alignmentDeciderBeanName: alignmentDeciderBeanName,
+        )
         project = project.save(flush: true)
         assert(project != null)
         // add to groups

@@ -1,9 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.alignment
 
-import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.context.annotation.Scope
@@ -28,7 +26,7 @@ class BwaAlignmentStartJob extends AbstractStartJobImpl {
             return
         }
         AlignmentPass.withTransaction {
-            AlignmentPass alignmentPass = alignmentPassService.createAlignmentPass()
+            AlignmentPass alignmentPass = alignmentPassService.findAlignmentPassForProcessing()
             if (alignmentPass) {
                 log.debug "Creating Alignment process for AlignmentPass ${alignmentPass}"
                 alignmentPassService.alignmentPassStarted(alignmentPass)

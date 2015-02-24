@@ -4,19 +4,20 @@ import static org.junit.Assert.*
 import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.TestData
 
 class SnvConfigTests {
 
     @Test
     void testGetLatest() {
-        Project project = new Project(
+        Project project = TestData.createProject(
                 name: "projectName",
                 dirName: "projectDirName",
                 realmName: "realmName"
                 )
         assert project.save()
 
-        Project project2 = new Project(
+        Project project2 = TestData.createProject(
                 name: "project2Name",
                 dirName: "project2DirName",
                 realmName: "realmName"

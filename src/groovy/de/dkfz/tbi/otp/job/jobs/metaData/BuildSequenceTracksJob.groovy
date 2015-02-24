@@ -20,13 +20,15 @@ class BuildSequenceTracksJob extends AbstractJobImpl {
 
     @Override
     public void execute() throws Exception {
-        long runId = Long.parseLong(getProcessParameterValue())
-        Run run = Run.get(runId)
-        if (multiplexingService.needsMultiplexingHandling(run)) {
-            multiplexingService.executeMultiplexing(run)
-            log.debug "Multiplexing service started for run ${run.name}"
+        SeqTrack.withTransaction {
+            long runId = Long.parseLong(getProcessParameterValue())
+            Run run = Run.get(runId)
+            if (multiplexingService.needsMultiplexingHandling(run)) {
+                multiplexingService.executeMultiplexing(run)
+                log.debug "Multiplexing service started for run ${run.name}"
+            }
+            seqTrackService.buildSequenceTracks(runId)
+            metaDataService.enrichOldDataWithNewInformationFrom(run)
         }
-        seqTrackService.buildSequenceTracks(runId)
-        metaDataService.enrichOldDataWithNewInformationFrom(run)
     }
 }

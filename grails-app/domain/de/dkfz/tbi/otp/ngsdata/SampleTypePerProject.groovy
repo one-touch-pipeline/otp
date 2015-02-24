@@ -50,7 +50,7 @@ class SampleTypePerProject {
         return SampleTypePerProject.executeQuery(
             "SELECT DISTINCT st.sample.individual.project as project, st.sample.sampleType as sampleType FROM SeqTrack st " +
             "WHERE st.seqType IN (:seqTypes) " +
-            "AND NOT EXISTS (FROM DataFile WHERE ${AlignmentPassService.DATA_FILE_CRITERIA} AND fileWithdrawn = true) " +
+            "AND NOT EXISTS (FROM DataFile WHERE seqTrack = st AND fileType.type = :fileType AND fileWithdrawn = true) " +
             "AND NOT EXISTS (FROM SampleTypePerProject stpp WHERE stpp.project = st.sample.individual.project AND stpp.sampleType = st.sample.sampleType)",
             [seqTypes: SeqTypeService.alignableSeqTypes(), fileType: FileType.Type.SEQUENCE], [readOnly: true])
     }

@@ -83,15 +83,12 @@ class UploadFastQCToDatabaseJobUnitTests {
 
     @Test
     void testExecuteSuccess() {
-        int setReadyForAlignmentCalls = 0
         job.metaClass.getFastqcProcessedFile = { DataFile dataFile2 -> }
-        job.seqTrackService.metaClass.setReadyForAlignment = { SeqTrack s -> assert s == seqTrack; setReadyForAlignmentCalls++ }
         job.start()
         job.execute()
         job.end()
         assertTrue(isJobFinished(job))
         assertTrue(isJobStateSuccessful(job))
-        assert setReadyForAlignmentCalls == 1
     }
 
     private boolean isJobFinished(def job) {

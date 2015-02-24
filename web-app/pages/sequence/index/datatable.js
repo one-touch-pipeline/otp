@@ -150,7 +150,6 @@ $.otp.sequence = {
                                 }),
                                 row.laneId,
                                 fastQC,
-                                row.alignmentState.name,
                                 (new Date(row.dateCreated)).toLocaleFormat('%Y-%m-%d')
                             ];
                             json.aaData[i] = rowData;
@@ -160,7 +159,7 @@ $.otp.sequence = {
                 });
             },
             fnRowCallback: function (nRow) {
-                var fastqc, alignment;
+                var fastqc;
                 fastqc = $("td:eq(8)", nRow);
                 if ($("a", fastqc).length > 0) {
                     fastqc.addClass("true");
@@ -169,14 +168,6 @@ $.otp.sequence = {
                     fastqc.addClass("false");
                     fastqc.text("");
                 }
-                alignment = $("td:eq(9)", nRow);
-                alignment.attr("title", alignment.text());
-                if (alignment.text() === "FINISHED") {
-                    alignment.addClass("true");
-                } else {
-                    alignment.addClass("false");
-                }
-                alignment.text("");
             }
         });
     }

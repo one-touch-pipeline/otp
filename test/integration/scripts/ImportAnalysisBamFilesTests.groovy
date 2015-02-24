@@ -470,12 +470,12 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
         // it's not possible to set the id when using domain objects
         Sql sql = new Sql(dataSource.connection)
         sql.executeInsert("insert into seq_track (id, version, lane_id, run_id, sample_id, " +
-                "seq_type_id, seq_platform_id, pipeline_version_id, alignment_state, " +
+                "seq_type_id, seq_platform_id, pipeline_version_id, " +
                 "fastqc_state, has_final_bam, has_original_bam, insert_size, n_base_pairs, " +
                 "n_reads, using_original_bam, quality_encoding, class)" +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [id, 0, laneId, run1.id, sample.id, seqType.id, seqPlatform.id, softwareTool.id,
-                 "UNKNOWN", "UNKNOWN", false, false, -1, 0, 0, false, "UNKNOWN",
+                 "UNKNOWN", false, false, -1, 0, 0, false, "UNKNOWN",
                  "de.dkfz.tbi.otp.ngsdata.SeqTrack"]
         )
         return SeqTrack.get(id)

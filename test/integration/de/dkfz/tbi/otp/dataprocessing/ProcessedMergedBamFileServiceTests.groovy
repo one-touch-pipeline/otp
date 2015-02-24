@@ -44,7 +44,7 @@ class ProcessedMergedBamFileServiceTests {
         Realm realm = DomainFactory.createRealmDataProcessingDKFZ(paths).save([flush: true])
         Realm realm1 = DomainFactory.createRealmDataManagementDKFZ(paths).save([flush: true])
 
-        project = new Project(
+        project = TestData.createProject(
                         name: "project",
                         dirName: "project-dir",
                         realmName: 'DKFZ',
@@ -86,10 +86,7 @@ class ProcessedMergedBamFileServiceTests {
                         )
         assertNotNull(softwareTool.save([flush: true]))
 
-        seqPlatform = new SeqPlatform(
-                        name: "name",
-                        model: "model"
-                        )
+        seqPlatform = TestData.findOrSaveSeqPlatform()
         assertNotNull(seqPlatform.save([flush: true]))
 
         SeqCenter seqCenter = new SeqCenter(
@@ -446,14 +443,9 @@ class ProcessedMergedBamFileServiceTests {
         MergingPass mergingPass = createMergingPass()
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
         mergingSet.status = State.PROCESSED
-        MergingWorkPackage mergingWorkPackage1 = testData.createMergingWorkPackage(
-                        sample: sample,
-                        seqType: seqType
-                        )
-        assertNotNull(mergingWorkPackage1.save([flush: true]))
         MergingSet mergingSet1 = new MergingSet(
-                        identifier: 0,
-                        mergingWorkPackage: mergingWorkPackage1,
+                        identifier: MergingSet.nextIdentifier(mergedBamFile.mergingWorkPackage),
+                        mergingWorkPackage: mergedBamFile.mergingWorkPackage,
                         status: State.NEEDS_PROCESSING
                         )
         assertNotNull(mergingSet1.save([flush: true]))
@@ -475,14 +467,9 @@ class ProcessedMergedBamFileServiceTests {
         SeqTrack seqTrack = createSeqTrack()
         ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack)
         MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
-        MergingWorkPackage mergingWorkPackage1 = testData.createMergingWorkPackage(
-                        sample: sample,
-                        seqType: seqType
-                        )
-        assertNotNull(mergingWorkPackage1.save([flush: true]))
         MergingSet mergingSet1 = new MergingSet(
                         identifier: 1,
-                        mergingWorkPackage: mergingWorkPackage1,
+                        mergingWorkPackage: processedBamFile.mergingWorkPackage,
                         status: State.PROCESSED
                         )
         assertNotNull(mergingSet1.save([flush: true]))
@@ -774,17 +761,6 @@ class ProcessedMergedBamFileServiceTests {
         assertNull(processedMergedBamFileService.getInferredKit(processedMergedBamFile))
     }
 
-    @Test
-    void testSeqTracksPerMergedBamFile() {
-        SeqTrack seqTrack = createSeqTrack("lane x")
-        ProcessedBamFile processedBamFile = createProcessedBamFile(12, seqTrack)
-        MergingPass mergingPass = createMergingPass()
-        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
-        List<SeqTrack> seqTracks = processedMergedBamFileService.seqTracksPerMergedBamFile(processedMergedBamFile)
-        assert seqTracks == [seqTrack]
-    }
-
     @Test(expected = AssertionError)
     void test_saveNumberOfMergedLanes_WhenProcessedMergedBamFileIsNull_ShouldFail() {
         processedMergedBamFileService.updateNumberOfMergedLanes(null)
@@ -796,6 +772,7 @@ class ProcessedMergedBamFileServiceTests {
         MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                 sample: sample,
                 seqType: seqType,
+                seqPlatformGroup: seqPlatform.seqPlatformGroup,
         )
         assert mergingWorkPackage.save([flush: true])
 
@@ -836,6 +813,7 @@ class ProcessedMergedBamFileServiceTests {
         MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                 sample: sample,
                 seqType: seqType,
+                seqPlatformGroup: seqPlatform.seqPlatformGroup,
         )
         assert mergingWorkPackage.save([flush: true])
 
@@ -924,7 +902,8 @@ class ProcessedMergedBamFileServiceTests {
     private MergingPass createMergingPass() {
         MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                         sample: sample,
-                        seqType: seqType
+                        seqType: seqType,
+                        seqPlatformGroup: seqPlatform.seqPlatformGroup,
                         )
         assertNotNull(mergingWorkPackage.save([flush: true]))
 

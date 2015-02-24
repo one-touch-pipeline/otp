@@ -1,27 +1,26 @@
 package workflows
 
-import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 import static org.junit.Assert.*
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.joda.time.Duration
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.jobs.dataInstallation.DataInstallationStartJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
 
 /**
  * Currently only a test for exome data exist
  */
-class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
+class DataInstallationWorkflowTests extends AbstractWorkflowTest {
 
     // The scheduler needs to access the created objects while the test is being executed
     boolean transactional = false
 
     // TODO  ( jira: OTP-566)  want to get rid of this hardcoded.. idea: maybe calculating from the walltime of the cluster jobs plus some buffer..
-    final int SLEEPING_TIME_IN_MINUTES = 10
+    final Duration TIMEOUT = Duration.standardMinutes(10)
     final String PBS_WALLTIME = "00:05:00"
 
     LsdfFilesService lsdfFilesService
@@ -120,7 +119,7 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
         sampleType.name = "someSampleType"
         assertNotNull(sampleType.save(flush: true))
 
-        project = new Project()
+        project = TestData.createProject()
         project.name = projectName
         project.dirName = projectName
         project.realmName = realm.name
@@ -194,7 +193,7 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
         executionService.executeCommand(realm, cleanUpTestFoldersCommand())
     }
 
-    DataFile createDataFile(SeqTrack seqTrack, String fastqFilename, String fastqFilepath) {
+    DataFile createDataFile(SeqTrack seqTrack, Integer readNumber, String fastqFilename, String fastqFilepath) {
         DataFile dataFile = new DataFile()
         dataFile.fileName = fastqFilename
         dataFile.runSegment = runSegment
@@ -208,6 +207,7 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
         dataFile.pathName = ""  // TODO check what is going on here and why this is needed..
         dataFile.fileExists = true
         dataFile.fileSize = 100
+        dataFile.readNumber = readNumber
         assertNotNull(dataFile.save([flush: true]))
         return dataFile
     }
@@ -234,9 +234,9 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
         createDataFiles(seqTrack)
 
         setExecutionPlan()
-        boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
+        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
 
-        checkThatWorkflowWasSuccessful(seqTrack, workflowFinishedSucessfully)
+        checkThatWorkflowWasSuccessful(seqTrack)
     }
 
     // TODO  (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
@@ -269,8 +269,7 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
         createDataFiles(seqTrack)
 
         setExecutionPlan()
-        boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
-        assertTrue(workflowFinishedSucessfully)
+        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
     }
 
     @Ignore
@@ -287,9 +286,9 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
         createDataFiles(seqTrack)
 
         setExecutionPlan()
-        boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
+        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
 
-        checkThatWorkflowWasSuccessful(seqTrack, workflowFinishedSucessfully)
+        checkThatWorkflowWasSuccessful(seqTrack)
     }
 
     /**
@@ -298,41 +297,6 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
      */
     String cleanUpTestFoldersCommand() {
         return "rm -rf ${rootPath} ${processingRootPath} ${loggingPath}"
-    }
-
-    /**
-     * Pauses the test until the workflow is finished or the timeout is reached
-     * @return true if the process is finished, false otherwise
-     */
-    boolean waitUntilWorkflowIsOverOrTimeout(int timeout) {
-        println "Started to wait (until workflow is over or timeout)"
-        int timeCount = 0
-        boolean finished = false
-        while (!finished && (timeCount < timeout)) {
-            println "waiting ... "
-            timeCount++
-            sleep(60000)
-            finished = isProcessFinished()
-        }
-        return finished
-    }
-
-    // TODO  ( jira: OTP-566) maybe we can make this a sub class and put this method in parent..
-    /**
-     * Checks if the process created by the test is already finished and retrieves corresponding value
-     * @return true if the process is finished, false otherwise
-     */
-    boolean isProcessFinished() {
-        //TODO ( jira: OTP-566) there should be not more than one .. can make assert to be sure
-        List<Process> processes = Process.list()
-        boolean finished = false
-        if (processes.size() > 0) {
-            Process process = processes.first()
-            // Required otherwise will never detect the change..
-            process.refresh()
-            finished = process?.finished
-        }
-        return finished
     }
 
     private SeqTrack createSeqTrack(SeqType seqType) {
@@ -350,17 +314,14 @@ class DataInstallationWorkflowTests extends GroovyScriptAwareIntegrationTest {
         return seqTrack
     }
 
-    private void checkThatWorkflowWasSuccessful(SeqTrack seqTrack, boolean workflowFinished) {
-        assertTrue(workflowFinished)
-
+    private void checkThatWorkflowWasSuccessful(SeqTrack seqTrack) {
         seqTrack.refresh()
-        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack.alignmentState)
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack.fastqcState)
     }
 
     private void createDataFiles(SeqTrack seqTrack) {
-        createDataFile(seqTrack, fastqR1Filename, fastqR1Filepath)
-        createDataFile(seqTrack, fastqR2Filename, fastqR2Filepath)
+        createDataFile(seqTrack, 1, fastqR1Filename, fastqR1Filepath)
+        createDataFile(seqTrack, 2, fastqR2Filename, fastqR2Filepath)
     }
 
     private void setExecutionPlan() {

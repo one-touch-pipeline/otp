@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+
 import static org.junit.Assert.*
 import org.junit.*
 import de.dkfz.tbi.otp.InformationReliability
@@ -74,7 +76,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         Sample sample = new Sample(type: Sample.Type.TUMOR, subType: null)
         Realm realm = new Realm(name: "test", rootPath: "/", webHost: "http://test.me", host: "127.0.0.1", port: 12345, unixUser: "test", timeout: 100, pbsOptions: "")
         assertNotNull(realm.save())
-        Project project = new Project(name: "testProject", dirName: "testDir", host: "dkfz", realm: realm)
+        Project project = TestData.createProject(name: "testProject", dirName: "testDir", host: "dkfz", realm: realm)
         assert(project.save())
         Individual individual = new Individual(pid: "testPid", mockPid: "testMockPid", mockFullName: "testMockFullName", type: Individual.Type.POOL, project: project)
         assert(individual.save())
@@ -262,7 +264,10 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         SeqType.build(name: SeqTypeNames.EXOME.seqTypeName, libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
         ExomeEnrichmentKit.build(name: "LIB_PREP_KIT")
         SoftwareToolIdentifier.build(name: "PIPELINE_VERSION")
-        SampleIdentifier.build(name: "SAMPLE_ID")
+        SampleIdentifier sampleIdentifier = SampleIdentifier.build(name: "SAMPLE_ID")
+        Project project = sampleIdentifier.sample.project
+        project.alignmentDeciderBeanName = 'noAlignmentDecider'
+        assert project.save(failOnError: true)
         Run run = Run.build()
         Map data = [
                 LANE_NO: LANE_NR,
@@ -752,7 +757,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     private Map createData() {
         Map map = [:]
-        Project project = new Project(
+        Project project = TestData.createProject(
                         name: "name",
                         dirName: "dirName",
                         realmName: "realmName"
@@ -871,301 +876,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         final DataFile dataFile = testData.createDataFile()
         dataFile.seqTrack = seqTrack
         assertNotNull(dataFile.save(flush: true))
-    }
-
-
-    public void testSetReadyForAlignment() {
-        /* The criteria in AlignmentPassService.ALIGNABLE_SEQTRACK_HQL are deeply tested by
-         * AlignmentPassServiceIntegrationTests, so in this method we do not test it again.
-         */
-
-        testData.createObjects()
-
-        final Run run1 = testData.run
-        final Run run2 = new Run()
-        run2.name = "testRun2"
-        run2.seqCenter = testData.seqCenter
-        run2.seqPlatform = testData.seqPlatform
-        assertNotNull(run2.save(flush: true))
-
-        final Sample sampleA = testData.sample
-        final Sample sampleB = new Sample()
-        sampleB.individual = testData.createIndividual()
-        sampleB.individual.pid = "drölf"
-        assertNotNull(sampleB.individual.save(flush: true))
-        sampleB.sampleType = testData.sampleType
-        assertNotNull(sampleB.save(flush: true))
-
-        final SeqType alignableSeqType = testData.seqType
-
-        final SeqType alignableExomeSeqType = testData.exomeSeqType
-
-        final SeqType nonAlignableSeqType = new SeqType()
-        nonAlignableSeqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
-        nonAlignableSeqType.libraryLayout = "SCREWED"
-        nonAlignableSeqType.dirName = "non_alignable_wgs"
-        assertNotNull(nonAlignableSeqType.save(flush: true))
-
-        final SeqType nonAlignableExomeSeqType = new SeqType()
-        nonAlignableExomeSeqType.name = SeqTypeNames.EXOME.seqTypeName
-        nonAlignableExomeSeqType.libraryLayout = "SCREWED"
-        nonAlignableExomeSeqType.dirName = "non_alignable_exome"
-        assertNotNull(nonAlignableExomeSeqType.save(flush: true))
-
-        testData.dataFile.delete(flush: true)
-        testData.seqTrack.delete(flush: true)
-
-        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-
-        // no SeqTracks at all
-        seqTrackService.setReadyForAlignment(testData.seqTrack)
-        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-
-        final SeqTrack seqTrack1AY = testData.createSeqTrack()
-        seqTrack1AY.run = run1
-        seqTrack1AY.sample = sampleA
-        seqTrack1AY.seqType = alignableSeqType
-        seqTrack1AY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
-        seqTrack1AY.fastqcState = SeqTrack.DataProcessingState.FINISHED
-        assertNotNull(seqTrack1AY.save(flush: true))
-        addDataFile(seqTrack1AY)
-        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-
-        final SeqTrack seqTrack2AN = testData.createSeqTrack()
-        seqTrack2AN.run = run2
-        seqTrack2AN.sample = sampleA
-        seqTrack2AN.seqType = nonAlignableSeqType
-        seqTrack2AN.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
-        seqTrack2AN.fastqcState = SeqTrack.DataProcessingState.FINISHED
-        assertNotNull(seqTrack2AN.save(flush: true))
-        addDataFile(seqTrack2AN)
-        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-
-        // no alignable SeqTrack in this run
-        seqTrackService.setReadyForAlignment(seqTrack2AN)
-        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-
-        final SeqTrack seqTrack2BY = testData.createSeqTrack()
-        seqTrack2BY.run = run2
-        seqTrack2BY.sample = sampleB
-        seqTrack2BY.seqType = alignableSeqType
-        seqTrack2BY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
-        seqTrack2BY.fastqcState = SeqTrack.DataProcessingState.FINISHED
-        assertNotNull(seqTrack2BY.save(flush: true))
-        addDataFile(seqTrack2BY)
-        assertEquals(3, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-
-        // alignable SeqTrack, no other alignable SeqTrack for the sample
-        seqTrackService.setReadyForAlignment(seqTrack2BY)
-        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2BY.alignmentState)
-
-        // alignable SeqTrack (already NOT_STARTED), no other alignable SeqTrack for the sample
-        seqTrackService.setReadyForAlignment(seqTrack2BY)
-        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-
-        final SeqTrack seqTrack2AY = testData.createSeqTrack()
-        seqTrack2AY.run = run2
-        seqTrack2AY.sample = sampleA
-        seqTrack2AY.seqType = alignableSeqType
-        seqTrack2AY.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
-        seqTrack2AY.fastqcState = SeqTrack.DataProcessingState.FINISHED
-        assertNotNull(seqTrack2AY.save(flush: true))
-        addDataFile(seqTrack2AY)
-        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-
-        // alignable SeqTrack (already NOT_STARTED), other alignable SeqTrack for the sample in another run
-        seqTrackService.setReadyForAlignment(seqTrack2AY)
-        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(3, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack1AY.alignmentState)
-        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2AY.alignmentState)
-        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2BY.alignmentState)
-
-
-        final ExomeSeqTrack exomeSeqTrack1AY = testData.createExomeSeqTrack(run1)
-        exomeSeqTrack1AY.run = run1
-        exomeSeqTrack1AY.sample = sampleA
-        exomeSeqTrack1AY.seqType = alignableExomeSeqType
-        exomeSeqTrack1AY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
-        exomeSeqTrack1AY.fastqcState = SeqTrack.DataProcessingState.FINISHED
-        assertNotNull(exomeSeqTrack1AY.save(flush: true))
-        addDataFile(exomeSeqTrack1AY)
-
-        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(3, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-
-        seqTrackService.setReadyForAlignment(seqTrack2AY)
-        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(3, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack1AY.alignmentState)
-        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2AY.alignmentState)
-        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2BY.alignmentState)
-        assertEquals(SeqTrack.DataProcessingState.UNKNOWN, exomeSeqTrack1AY.alignmentState)
-
-        def reset = {
-            seqTrack1AY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
-            assertNotNull(seqTrack1AY.save(flush: true))
-            seqTrack2AY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
-            assertNotNull(seqTrack2AY.save(flush: true))
-            seqTrack2BY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
-            assertNotNull(seqTrack2BY.save(flush: true))
-            seqTrack2AN.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
-            assertNotNull(seqTrack2AN.save(flush: true))
-            exomeSeqTrack1AY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
-            assertNotNull(exomeSeqTrack1AY.save(flush: true))
-            assertEquals(5, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-            assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-        }
-
-        reset()
-
-        // alignable SeqTrack, other alignable SeqTrack for the sample in another run
-        seqTrackService.setReadyForAlignment(seqTrack1AY)
-        assertEquals(3, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack1AY.alignmentState)
-        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2AY.alignmentState)
-
-        reset()
-
-        // two alignable SeqTracks, other alignable SeqTrack for the sample in another run
-        seqTrackService.setReadyForAlignment(seqTrack2AY)
-        seqTrackService.setReadyForAlignment(seqTrack2BY)
-        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(3, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack1AY.alignmentState)
-        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2AY.alignmentState)
-        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack2BY.alignmentState)
-
-        shouldFail(IllegalArgumentException.class) {
-            seqTrackService.setReadyForAlignment(null)
-        }
-    }
-
-
-    public void testSetReadyForExomeAlignment() {
-        /* The criteria in AlignmentPassService.ALIGNABLE_SEQTRACK_HQL are deeply tested by
-         * AlignmentPassServiceIntegrationTests, so in this method we do not test it again.
-         */
-
-        testData.createObjects()
-
-        final Run run1 = testData.run
-
-        final Sample sampleA = testData.sample
-
-        final SeqType alignableExomeSeqType = testData.exomeSeqType
-
-        final SeqType nonAlignableExomeSeqType = new SeqType()
-        nonAlignableExomeSeqType.name = SeqTypeNames.EXOME.seqTypeName
-        nonAlignableExomeSeqType.libraryLayout = "SCREWED"
-        nonAlignableExomeSeqType.dirName = "non_alignable_seq_type_dir_name"
-        assertNotNull(nonAlignableExomeSeqType.save(flush: true))
-
-        testData.dataFile.delete(flush: true)
-        testData.seqTrack.delete(flush: true)
-
-        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-
-        // from here on the Exome-seqType is tested
-        final ExomeSeqTrack seqTrack1AY = testData.createExomeSeqTrack(run1)
-        seqTrack1AY.sample = sampleA
-        seqTrack1AY.seqType = alignableExomeSeqType
-        seqTrack1AY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
-        seqTrack1AY.fastqcState = SeqTrack.DataProcessingState.FINISHED
-        assertNotNull(seqTrack1AY.save(flush: true))
-        addDataFile(seqTrack1AY)
-
-        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-
-        final ExomeSeqTrack seqTrack1AN = testData.createExomeSeqTrack(run1)
-        seqTrack1AN.sample = sampleA
-        seqTrack1AN.seqType = nonAlignableExomeSeqType
-        seqTrack1AN.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
-        seqTrack1AN.fastqcState = SeqTrack.DataProcessingState.FINISHED
-        assertNotNull(seqTrack1AN.save(flush: true))
-        addDataFile(seqTrack1AN)
-
-        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-
-        // When it is verified that no kit is available for a seqTrack, it will not be aligned -> remains DataProcessingState.UNKNOWN
-        seqTrack1AY.kitInfoReliability = InformationReliability.UNKNOWN_VERIFIED
-        assertNotNull(seqTrack1AY.save(flush: true))
-        seqTrack1AN.kitInfoReliability = InformationReliability.UNKNOWN_VERIFIED
-        assertNotNull(seqTrack1AN.save(flush: true))
-
-        seqTrackService.setReadyForAlignment(seqTrack1AY)
-        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-
-        // When it is not verified that there is no kit available for the seqTrack the state changes to DataProcessingState.NOT_STARTED,
-        // so that it can be detected by the Alignment-WF to be "INVALID" (AlignmentPassService.findAlignableSeqTrack()).
-        //Of course it will only be changed if the seqTrack shall be aligned
-        seqTrack1AY.kitInfoReliability = InformationReliability.UNKNOWN_UNVERIFIED
-        assertNotNull(seqTrack1AY.save(flush: true))
-        seqTrack1AN.kitInfoReliability = InformationReliability.UNKNOWN_UNVERIFIED
-        assertNotNull(seqTrack1AN.save(flush: true))
-
-        seqTrackService.setReadyForAlignment(seqTrack1AY)
-        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack1AY.alignmentState)
-        assertEquals(SeqTrack.DataProcessingState.UNKNOWN, seqTrack1AN.alignmentState)
-
-        // In the case that there is an EnrichmentKit available for the ExomeSeqTrack it will be aligned.
-        // The kitInfoReliabilityState is not important anymore
-        seqTrack1AY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
-        assertNotNull(seqTrack1AY.save(flush: true))
-        seqTrack1AN.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
-        assertNotNull(seqTrack1AN.save(flush: true))
-
-        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-
-        ExomeEnrichmentKit exomeEnrichmentKit = testData.createEnrichmentKit("Agilent SureSelect V3")
-        testData.addKitToExomeSeqTrack(seqTrack1AY, exomeEnrichmentKit)
-        testData.addKitToExomeSeqTrack(seqTrack1AN, exomeEnrichmentKit)
-
-        seqTrackService.setReadyForAlignment(seqTrack1AY)
-        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(1, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-        assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack1AY.alignmentState)
-        assertEquals(SeqTrack.DataProcessingState.UNKNOWN, seqTrack1AN.alignmentState)
-
-        // Only seqTracks, belonging to a RunSegment which shall be be aligned (align = true), will be aligned
-        seqTrack1AY.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
-        assertNotNull(seqTrack1AY.save(flush: true))
-        seqTrack1AN.alignmentState = SeqTrack.DataProcessingState.UNKNOWN
-        assertNotNull(seqTrack1AN.save(flush: true))
-
-        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-
-
-        RunSegment runSegment = testData.runSegment
-        runSegment.align = false
-        assertNotNull(runSegment.save(flush: true))
-
-        seqTrackService.setReadyForAlignment(seqTrack1AY)
-        assertEquals(2, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.UNKNOWN))
-        assertEquals(0, SeqTrack.countByAlignmentState(SeqTrack.DataProcessingState.NOT_STARTED))
-
-        shouldFail(IllegalArgumentException.class) {
-            seqTrackService.setReadyForAlignment(null)
-        }
     }
 
 
@@ -1463,5 +1173,36 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         seqTrackService.annotateSeqTrackForChipSeq(testData.dataFile, seqTrackBuilder)
         assertEquals(ANTIBODY_IDENTIFIER, seqTrackBuilder.antibody)
         assertEquals(ANTIBODY_TARGET_IDENTIFIER, seqTrackBuilder.antibodyTarget.name)
+    }
+
+    @Test
+    void testDecideAndPrepareForAlignment_defaultDecider_shouldReturnOneWorkPackage() {
+        testData.createObjects()
+        setupProjectAndDataFile("defaultOtpAlignmentDecider")
+
+        Collection<MergingWorkPackage> workPackages = seqTrackService.decideAndPrepareForAlignment(testData.seqTrack)
+
+        assert workPackages.size() == 1
+        assert workPackages.iterator().next().seqType == testData.seqType
+    }
+
+    @Test
+    void testDecideAndPrepareForAlignment_noAlignmentDecider_shouldReturnEmptyList() {
+        testData.createObjects()
+        setupProjectAndDataFile("noAlignmentDecider")
+
+        Collection<MergingWorkPackage> workPackages = seqTrackService.decideAndPrepareForAlignment(testData.seqTrack)
+
+        assert workPackages.empty
+    }
+
+    private void setupProjectAndDataFile(String decider) {
+        testData.project.alignmentDeciderBeanName = decider
+        testData.project.save(failOnError: true)
+
+        testData.dataFile.fileExists = true
+        testData.dataFile.fileSize = 1L
+        testData.dataFile.fileType = testData.fileType
+        testData.dataFile.save(failOnError: true)
     }
 }

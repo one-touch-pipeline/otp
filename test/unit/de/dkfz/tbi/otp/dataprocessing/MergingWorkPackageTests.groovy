@@ -1,20 +1,30 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static org.junit.Assert.*
+import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
-import grails.test.mixin.support.*
 import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 @TestFor(MergingWorkPackage)
-@Mock([Individual, Project, ReferenceGenome, Sample, SampleType, SeqType])
+@Build([
+    ReferenceGenome,
+    Sample,
+    SeqPlatformGroup,
+    SeqType,
+    SequencingKit,
+    SeqPlatform,
+    SeqTrack,
+    MergingWorkPackage,
+    ProcessedBamFile,
+    AlignmentPass,
+])
 class MergingWorkPackageTests {
 
     Sample sample = null
     SeqType seqType = null
 
     void setUp() {
-        Project project = new Project(
+        Project project = TestData.createProject(
             name: "project",
             dirName: "dirName",
             realmName: "DKFZ")
@@ -57,23 +67,105 @@ class MergingWorkPackageTests {
         workPackage.save(flush: true)
     }
 
-    void testContraints() {
-        // sample is not null
-        MergingWorkPackage workPackage = new TestData().createMergingWorkPackage(
-            seqType: seqType)
-        Assert.assertFalse(workPackage.validate())
-        // processingType is not null
-        workPackage.sample = sample
-        Assert.assertTrue(workPackage.validate())
-        workPackage.processingType = null
-        Assert.assertFalse(workPackage.validate())
-        // mergingCriteria can be null
-        workPackage.processingType = MergingWorkPackage.ProcessingType.SYSTEM
-        Assert.assertTrue(workPackage.validate())
-        workPackage.mergingCriteria = null
-        Assert.assertFalse(workPackage.validate())
-        // seqType can not be null
-        workPackage.seqType = null
-        Assert.assertFalse(workPackage.validate())
+    // TODO OTP-1409: check the returned map content
+    @Test
+    void testGetMergingProperties() {
+        SequencingKit sequencingKit = SequencingKit.build(name: "V1")
+        SeqPlatformGroup seqPlatformGroup = SeqPlatformGroup.build(name: "HiSeq 2000/2500")
+        SeqPlatform seqPlatform = SeqPlatform.build(seqPlatformGroup: seqPlatformGroup)
+        SeqTrack seqTrack = SeqTrack.build(sequencingKit: sequencingKit, seqPlatform: seqPlatform)
+
+        def result = MergingWorkPackage.getMergingProperties(seqTrack)
+        assert result.sequencingKit == null
+    }
+
+    @Test
+    void testGetMergingProperties_whenNotHiSeq2xxx() {
+        SequencingKit sequencingKit = SequencingKit.build(name: "V1")
+        SeqPlatformGroup seqPlatformGroup = SeqPlatformGroup.build(name: "NOT HiSeq 2000/2500")
+        SeqPlatform seqPlatform = SeqPlatform.build(seqPlatformGroup: seqPlatformGroup)
+        SeqTrack seqTrack = SeqTrack.build(sequencingKit: sequencingKit, seqPlatform: seqPlatform)
+
+        def result = MergingWorkPackage.getMergingProperties(seqTrack)
+        assert result.sequencingKit == sequencingKit
+    }
+
+    @Test
+    void testGetMergingProperties_whenNotV123() {
+        SequencingKit sequencingKit = SequencingKit.build(name: "NEITHER V1 NOR V2 NOR V3")
+        SeqPlatformGroup seqPlatformGroup = SeqPlatformGroup.build(name: "HiSeq 2000/2500")
+        SeqPlatform seqPlatform = SeqPlatform.build(seqPlatformGroup: seqPlatformGroup)
+        SeqTrack seqTrack = SeqTrack.build(sequencingKit: sequencingKit, seqPlatform: seqPlatform)
+
+        def result = MergingWorkPackage.getMergingProperties(seqTrack)
+        assert result.sequencingKit == sequencingKit
+    }
+
+
+    @Test
+    void testSatisfiesCriteriaSeqTrack_whenValidHiSeq() {
+        SequencingKit sequencingKit = SequencingKit.build(name: "V1")
+        SeqPlatformGroup seqPlatformGroup = SeqPlatformGroup.build(name: "HiSeq 2000/2500")
+        SeqPlatform seqPlatform = SeqPlatform.build(seqPlatformGroup: seqPlatformGroup)
+        SeqTrack seqTrack = SeqTrack.build(sequencingKit: sequencingKit, seqPlatform: seqPlatform)
+
+        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqPlatformGroup, sequencingKit: null)
+        assert workPackage.satisfiesCriteria(seqTrack)
+    }
+
+    @Test
+    void testSatisfiesCriteriaSeqTrack_whenInvalid() {
+        SequencingKit sequencingKit = SequencingKit.build(name: "V1")
+        SeqPlatformGroup seqPlatformGroup = SeqPlatformGroup.build(name: "NOT HiSeq 2000/2500")
+        SeqPlatform seqPlatform = SeqPlatform.build(seqPlatformGroup: seqPlatformGroup)
+        SeqTrack seqTrack = SeqTrack.build(sequencingKit: sequencingKit, seqPlatform: seqPlatform)
+
+        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqPlatformGroup, sequencingKit: null)
+        assert !workPackage.satisfiesCriteria(seqTrack)
+    }
+    @Test
+    void testSatisfiesCriteriaSeqTrack_whenInvalidHiSeq() {
+        SequencingKit sequencingKit = SequencingKit.build(name: "V1")
+        SeqPlatformGroup seqPlatformGroup = SeqPlatformGroup.build(name: "HiSeq 2000/2500")
+        SeqPlatform seqPlatform = SeqPlatform.build(seqPlatformGroup: seqPlatformGroup)
+        SeqTrack seqTrack = SeqTrack.build(sequencingKit: sequencingKit, seqPlatform: seqPlatform)
+
+        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqPlatformGroup, sequencingKit: sequencingKit)
+        assert !workPackage.satisfiesCriteria(seqTrack)
+    }
+
+    @Test
+    void testSatisfiesCriteriaSeqTrack_whenValid() {
+        SequencingKit sequencingKit = SequencingKit.build(name: "V1")
+        SeqPlatformGroup seqPlatformGroup = SeqPlatformGroup.build(name: "NOT HiSeq 2000/2500")
+        SeqPlatform seqPlatform = SeqPlatform.build(seqPlatformGroup: seqPlatformGroup)
+        SeqTrack seqTrack = SeqTrack.build(sequencingKit: sequencingKit, seqPlatform: seqPlatform)
+
+        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqPlatformGroup, sequencingKit: sequencingKit)
+        assert workPackage.satisfiesCriteria(seqTrack)
+    }
+
+
+
+    @Test
+    void testSatisfiesCriteriaBamFile_whenValid() {
+        SequencingKit sequencingKit = SequencingKit.build(name: "V1")
+        SeqPlatformGroup seqPlatformGroup = SeqPlatformGroup.build(name: "HiSeq 2000/2500")
+        SeqPlatform seqPlatform = SeqPlatform.build(seqPlatformGroup: seqPlatformGroup)
+        SeqTrack seqTrack = SeqTrack.build(sequencingKit: sequencingKit, seqPlatform: seqPlatform)
+
+        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqPlatformGroup, sequencingKit: null)
+        AlignmentPass alignmentPass = AlignmentPass.build(seqTrack: seqTrack, workPackage: workPackage)
+
+        ProcessedBamFile processedBamFile = ProcessedBamFile.build(alignmentPass: alignmentPass)
+        assert workPackage.satisfiesCriteria(processedBamFile)
+    }
+
+    @Test
+    void testSatisfiesCriteriaBamFile_whenInvalid() {
+        MergingWorkPackage workPackage = MergingWorkPackage.build()
+
+        ProcessedBamFile processedBamFile = ProcessedBamFile.build()
+        assert !workPackage.satisfiesCriteria(processedBamFile)
     }
 }

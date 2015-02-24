@@ -35,7 +35,7 @@ class ProcessedMergedBamFileQaFileServiceTests {
             processingRootPath: '/tmp/otp-unit-test/pmbfs/processing',
             ]).save([flush: true])
 
-        Project project = new Project(
+        Project project = TestData.createProject(
                         name: "project",
                         dirName: "project-dir",
                         realmName: 'DKFZ',

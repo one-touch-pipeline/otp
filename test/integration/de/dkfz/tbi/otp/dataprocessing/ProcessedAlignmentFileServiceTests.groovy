@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -37,11 +38,9 @@ class ProcessedAlignmentFileServiceTests {
     }
 
     private AlignmentPass createTestDataForMayProcessingFilesBeDeleted(Map secondProcessedMergedBamFileMap = [:], Map secondAlignmentPassMap = [:]) {
-        SeqTrack seqTrack = SeqTrack.build([
-            alignmentState: SeqTrack.DataProcessingState.FINISHED
-        ])
+        SeqTrack seqTrack = SeqTrack.build()
 
-        AlignmentPass alignmentPass = AlignmentPass.build([
+        AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass([
             seqTrack: seqTrack,
             identifier: 1
         ])
@@ -50,7 +49,8 @@ class ProcessedAlignmentFileServiceTests {
             alignmentPass: alignmentPass,
         ])
 
-        AlignmentPass alignmentPass2 = AlignmentPass.build([
+        AlignmentPass alignmentPass2 = TestData.createAndSaveAlignmentPass([
+            alignmentState: AlignmentState.FINISHED,
             seqTrack: seqTrack,
             identifier: 2,
         ] + secondAlignmentPassMap)
@@ -79,7 +79,7 @@ class ProcessedAlignmentFileServiceTests {
     void testMayProcessingFilesBeDeleted_SecondPass_WrongAlignmentstateOfSeqtrack() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForMayProcessingFilesBeDeleted()
         AlignmentPass alignmentPass = createTestDataForMayProcessingFilesBeDeleted()
-        alignmentPass.seqTrack.alignmentState = SeqTrack.DataProcessingState.NOT_STARTED
+        alignmentPass.alignmentState = AlignmentState.NOT_STARTED
         alignmentPass.seqTrack.save(flush: true)
         Date createdBefore = new Date().plus(1)
 
@@ -174,20 +174,20 @@ class ProcessedAlignmentFileServiceTests {
         Map passOfLaterBamFileMap = map['passOfLaterBamFileMap'] ?: [:]
         Map bamFileMap = map['bamFileMap'] ?: [:]
         Map seqTrackMap = map['seqTrackMap'] ?: [:]
+        Map alignmentPassMap = map['alignmentPassMap'] ?: [:]
 
-        SeqTrack seqTrack = SeqTrack.build([
-            alignmentState: SeqTrack.DataProcessingState.FINISHED,
-        ] + seqTrackMap)
+        SeqTrack seqTrack = SeqTrack.build(seqTrackMap)
 
         ProcessedBamFile processedBamFile = ProcessedBamFile.build([
-            alignmentPass: AlignmentPass.build([
+            alignmentPass: TestData.createAndSaveAlignmentPass([
                 seqTrack: seqTrack,
                 identifier: 2,
-            ])
+                alignmentState: AlignmentState.FINISHED,
+            ] + alignmentPassMap)
         ] + bamFileMap)
 
         ProcessedBamFile processedBamFileLaterPass = ProcessedBamFile.build([
-            alignmentPass: AlignmentPass.build([
+            alignmentPass: TestData.createAndSaveAlignmentPass([
                 seqTrack: seqTrack,
                 identifier: 3
             ] + passOfLaterBamFileMap),
@@ -217,21 +217,20 @@ class ProcessedAlignmentFileServiceTests {
         Map mergingPassMap = map['mergingPassMap']?:[:]
         Map mergingBamFileMap = map['mergingBamFileMap']?:[:]
 
-        SeqTrack seqTrack = SeqTrack.build([
-            alignmentState: SeqTrack.DataProcessingState.FINISHED,
-        ] + seqTrackMap)
+        SeqTrack seqTrack = SeqTrack.build(seqTrackMap)
 
         ProcessedBamFile processedBamFile = ProcessedBamFile.build([
-            alignmentPass: AlignmentPass.build([
+            alignmentPass: TestData.createAndSaveAlignmentPass([
                 seqTrack: seqTrack,
                 identifier: 2,
+                alignmentState: AlignmentState.FINISHED,
             ]),
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
             status: AbstractBamFile.State.PROCESSED
         ] + bamFileMap)
 
         MergingSet mergedSet = MergingSet.build([
-            mergingWorkPackage: DomainFactory.createMergingWorkPackage(processedBamFile),
+            mergingWorkPackage: processedBamFile.mergingWorkPackage,
             status: MergingSet.State.PROCESSED
         ] + mergingSetMap)
 
@@ -325,8 +324,8 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_ConditionLaterPassHasProcessed_WrongAlignmentState() {
         Date createdBeforeDate = new Date().plus(1)
         ProcessedBamFile processedBamFile = createProcessedBamFileWithLaterProcessedPass(
-                        seqTrackMap: [
-                            alignmentState: SeqTrack.DataProcessingState.NOT_STARTED,
+                        alignmentPassMap: [
+                            alignmentState: AlignmentState.NOT_STARTED,
                         ])
         createProcessedAlignmentFileService()
 
@@ -602,8 +601,8 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionLaterPassHasProcessed_WrongAlignmentState() {
         Date createdBeforeDate = new Date().plus(1)
         ProcessedBamFile processedBamFile = createProcessedBamFileWithSaiFileAndWithLaterProcessedPass(
-                        seqTrackMap: [
-                            alignmentState: SeqTrack.DataProcessingState.NOT_STARTED,
+                        alignmentPassMap: [
+                            alignmentState: AlignmentState.NOT_STARTED,
                         ])
         createProcessedAlignmentFileService()
 
@@ -825,7 +824,7 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_GeneralCondition_WrongAlignmentPass() {
         Date createdBeforeDate = new Date().plus(1)
         ProcessedBamFile processedBamFile = createProcessedBamFileWithSaiFileWhichIsMerged(
-                        processedSaiFileMap: [alignmentPass: AlignmentPass.build()]
+                        processedSaiFileMap: [alignmentPass: TestData.createAndSaveAlignmentPass()]
                         )
         createProcessedAlignmentFileService()
 

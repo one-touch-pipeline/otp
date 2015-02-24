@@ -1,6 +1,8 @@
 package workflows
 
 import static org.junit.Assert.*
+
+import org.joda.time.Duration
 import org.junit.*
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -12,7 +14,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
 
-abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareIntegrationTest {
+abstract class QualityAssessmentAbstractWorkflowTests extends AbstractWorkflowTest {
 
     /*
      * preparation:
@@ -46,7 +48,7 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
     // The scheduler needs to access the created objects while the test is being executed
     boolean transactional = false
 
-    int SLEEPING_TIME_IN_MINUTES = 200
+    final Duration TIMEOUT = Duration.standardMinutes(200)
 
     ExecutionService executionService
 
@@ -98,8 +100,7 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
         JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
         assertNotNull(jobExecutionPlan)
         getJob().setJobExecutionPlan(jobExecutionPlan)
-        boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
-        assertTrue(workflowFinishedSucessfully)
+        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
     }
 
     @Test
@@ -113,8 +114,7 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
         JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
         assertNotNull(jobExecutionPlan)
         getJob().setJobExecutionPlan(jobExecutionPlan)
-        boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
-        assertTrue(workflowFinishedSucessfully)
+        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
     }
 
     abstract protected AbstractStartJobImpl getJob()
@@ -282,7 +282,7 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
         realm = DomainFactory.createRealmDataManagementDKFZ(paths).save([flush: true])
         realm = DomainFactory.createRealmDataProcessingDKFZ(paths).save([flush: true])
 
-        Project project = new Project(
+        Project project = TestData.createProject(
                         name: "project",
                         dirName: "project-dir",
                         realmName: realm.name
@@ -318,6 +318,7 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
         assertNotNull(softwareTool.save([flush: true]))
 
         SeqPlatform seqPlatform = new SeqPlatform(
+                        seqPlatformGroup: SeqPlatformGroup.build(),
                         name: "name",
                         model: "model"
                         )
@@ -358,7 +359,6 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
         List<SeqTrack> seqTracks = []
         2.times {
             SeqTrack seqTrack = new SeqTrack(seqType: seqType)
-            seqTrack.alignmentState = SeqTrack.DataProcessingState.FINISHED
             seqTracks << seqTrack
         }
         createAdditionalTestData(seqTracks)
@@ -376,7 +376,6 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
                             kitInfoReliability: InformationReliability.KNOWN,
                             exomeEnrichmentKit: kit
                             )
-            seqTrack.alignmentState = SeqTrack.DataProcessingState.FINISHED
             seqTracks << seqTrack
         }
 
@@ -398,37 +397,6 @@ abstract class QualityAssessmentAbstractWorkflowTests extends GroovyScriptAwareI
         String softLinkToReferenceGenomesDir = "${processingRootPath}/reference_genomes"
         String cmdBuildSoftLinkToReferenceGenomes = "ln -s ${referenceGenomesDir} ${softLinkToReferenceGenomesDir}"
         executionService.executeCommand(realm, "${cmdBuildSoftLinkToReferenceGenomes}")
-    }
-
-    /**
-     * Pauses the test until the workflow is finished or the timeout is reached
-     * @return true if the process is finished, false otherwise
-     */
-    boolean waitUntilWorkflowIsOverOrTimeout(int timeout) {
-        int timeCount = 0
-        boolean finished = false
-        while (!finished && (timeCount < timeout)) {
-            timeCount++
-            sleep(10000)
-            finished = isProcessFinished()
-        }
-        return finished
-    }
-
-    /**
-     * Checks if the process created by the test is already finished and retrieves corresponding value
-     * @return true if the process is finished, false otherwise
-     */
-    boolean isProcessFinished() {
-        List<Process> processes = Process.list()
-        boolean finished = false
-        if (processes.size() > 0) {
-            Process process = processes.first()
-            // Required otherwise will never detect the change..
-            process.refresh()
-            finished = process?.finished
-        }
-        return finished
     }
 
     /**

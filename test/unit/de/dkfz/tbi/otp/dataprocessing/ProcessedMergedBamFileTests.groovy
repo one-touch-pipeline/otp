@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 @TestFor(ProcessedMergedBamFile)
-@Mock([MergingPass, MergingSet, MergingWorkPackage, ReferenceGenome,
-    Sample, SampleType, Individual, Project, SeqType])
+@Build([
+    MergingPass,
+])
 class ProcessedMergedBamFileTests {
 
     MergingPass mergingPass = null
@@ -14,7 +16,7 @@ class ProcessedMergedBamFileTests {
     MergingWorkPackage workPackage = null
 
     void setUp() {
-        Project project = new Project(
+        Project project = TestData.createProject(
                 name: "project",
                 dirName: "dirName",
                 realmName: "DKFZ")

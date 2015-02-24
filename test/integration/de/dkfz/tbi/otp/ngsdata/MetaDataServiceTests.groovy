@@ -542,7 +542,7 @@ example_GATCGA_fileR2.fastq.gz\t5be4751eef9535af3df3f78047cc9137\tTheSequencingC
      * @return
      */
     private Project mockProject() {
-        Project project = new Project(name: "test", dirName: "test", realmName: "test")
+        Project project = TestData.createProject(name: "test", dirName: "test", realmName: "test")
         assertNotNull(project.save(flush: true))
         return project
     }

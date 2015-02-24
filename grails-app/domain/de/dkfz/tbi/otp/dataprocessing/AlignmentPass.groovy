@@ -4,26 +4,35 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class AlignmentPass {
 
+    enum AlignmentState {
+        NOT_STARTED,
+        IN_PROGRESS,
+        FINISHED,
+        /**
+         * For legacy data only.
+         */
+        UNKNOWN,
+    }
+
     int identifier
     SeqTrack seqTrack
-    String description
+    MergingWorkPackage workPackage
+    AlignmentState alignmentState
+
+    static belongsTo = [MergingWorkPackage, SeqTrack]
+
+    static constraints = {
+        identifier(unique: 'seqTrack')
+        seqTrack(validator: { SeqTrack seqTrack, AlignmentPass pass ->
+            pass.workPackage?.satisfiesCriteria(seqTrack) })
+    }
 
     /**
      * The reference genome which is/was used by this alignment pass. This value does not change (in contrast to the
      * return value of {@link SeqTrack#getConfiguredReferenceGenome()} when the configuration changes).
      */
-    ReferenceGenome referenceGenome
-
-    static belongsTo = [
-        seqTrack: SeqTrack
-    ]
-
-    static constraints = {
-        identifier(unique: 'seqTrack')
-        description(nullable: true)
-        referenceGenome(nullable: true)  // Nullable, because the AlignmentPass is created by the StartJob, but the
-                                         // value is not set before the AlignmentJob, because the StartJob is not a
-                                         // good point to fail if the reference genome is not configured.
+    public ReferenceGenome getReferenceGenome() {
+        return workPackage.referenceGenome
     }
 
     public String getDirectory() {
@@ -40,10 +49,22 @@ class AlignmentPass {
     }
 
     /**
-     * @return <code>true</code>, if this pass is the latest for the referenced {@link SeqTrack}
+     * @return <code>true</code>, if this pass is the latest for the referenced {@link MergingWorkPackage} and {@link SeqTrack}
      */
     public boolean isLatestPass() {
-        return identifier == maxIdentifier(seqTrack)
+        return identifier == maxIdentifier(workPackage, seqTrack)
+    }
+
+    public static Integer maxIdentifier(final MergingWorkPackage workPackage, final SeqTrack seqTrack) {
+        assert workPackage
+        assert seqTrack
+        return AlignmentPass.createCriteria().get {
+            eq("workPackage", workPackage)
+            eq("seqTrack", seqTrack)
+            projections {
+                max("identifier")
+            }
+        }
     }
 
     public static Integer maxIdentifier(final SeqTrack seqTrack) {

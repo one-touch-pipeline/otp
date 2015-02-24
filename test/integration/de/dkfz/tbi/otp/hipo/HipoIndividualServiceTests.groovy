@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.Sample
 import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
 import de.dkfz.tbi.otp.ngsdata.SampleType
+import de.dkfz.tbi.otp.ngsdata.TestData
 
 class HipoIndividualServiceTests {
 
@@ -15,7 +16,7 @@ class HipoIndividualServiceTests {
 
     @Before
     void setUp() {
-        project = new Project(
+        project = TestData.createProject(
                         name: "projectName",
                         dirName: "dirName",
                         realmName: "DKFZ")

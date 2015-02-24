@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
+import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
 import de.dkfz.tbi.otp.ngsdata.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -121,7 +122,7 @@ class ProcessedAlignmentFileService {
                 "FROM ProcessedBamFile bf1 WHERE " +
                 "((" +
                     // later pass has been processed
-                    "bf1.alignmentPass.seqTrack.alignmentState = :alignmentState AND EXISTS (" +
+                    "bf1.alignmentPass.alignmentState = :alignmentState AND EXISTS (" +
                         "FROM ProcessedBamFile bf2 " +
                         "WHERE bf2.qualityAssessmentStatus = :qaStatus " +
                         "AND bf2.dateCreated < :createdBefore " +
@@ -138,7 +139,7 @@ class ProcessedAlignmentFileService {
                     qaStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
                     mergingSetStatus: MergingSet.State.PROCESSED,
                     status: AbstractBamFile.State.PROCESSED,
-                    alignmentState: SeqTrack.DataProcessingState.FINISHED,
+                    alignmentState: AlignmentState.FINISHED,
             ]
             final Collection<AlignmentPass> passes = []
             passes.addAll(ProcessedBamFile.findAll(
@@ -170,7 +171,7 @@ class ProcessedAlignmentFileService {
             // The BAM file is not old enough.
             return false
         }
-        if (pass.seqTrack.alignmentState == SeqTrack.DataProcessingState.FINISHED) {
+        if (pass.alignmentState == AlignmentState.FINISHED) {
             if (ProcessedBamFile.createCriteria().get {
                 eq("qualityAssessmentStatus", QaProcessingStatus.FINISHED)
                 lt("dateCreated", createdBefore)

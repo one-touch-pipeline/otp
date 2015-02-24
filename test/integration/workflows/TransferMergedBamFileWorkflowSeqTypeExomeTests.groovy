@@ -2,6 +2,9 @@ package workflows
 
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 import static org.junit.Assert.*
+
+import org.joda.time.Duration
+
 import grails.test.mixin.*
 import grails.test.mixin.domain.*
 import grails.test.mixin.support.*
@@ -24,7 +27,7 @@ import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
 /**
  * Preparation for execution: see src/docs/guide/devel/testing/workflowTesting.gdoc
  */
-class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIntegrationTest {
+class TransferMergedBamFileWorkflowSeqTypeExomeTests extends AbstractWorkflowTest {
 
     ProcessingOptionService processingOptionService
 
@@ -34,7 +37,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
     boolean transactional = false
 
     // TODO want to get rid of this hardcoded.. idea: maybe calculating from the walltime of the cluster jobs.. -> OTP-570/OTP-672
-    int SLEEPING_TIME_IN_MINUTES = 40
+    final Duration TIMEOUT = Duration.standardMinutes(40)
 
     LsdfFilesService lsdfFilesService
     ExecutionService executionService
@@ -193,7 +196,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
          assertNotNull(realm.save(flush: true))
          */
 
-        Project project = new Project(
+        Project project = TestData.createProject(
                         name: projectName,
                         dirName: projectDirName,
                         realmName: realmName
@@ -246,6 +249,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
         assertNotNull(referenceGenomeProjectSeqType.save([flush: true, failOnError: true]))
 
         SeqPlatform seqPlatform = new SeqPlatform(
+                        seqPlatformGroup: SeqPlatformGroup.build(),
                         name: "Illumina",
                         model: "model"
                         )
@@ -317,7 +321,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
                         )
         assertNotNull(dataFile1.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass = new AlignmentPass(
+        AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass(
                         referenceGenome: referenceGenome,
                         identifier: 0,
                         seqTrack: seqTrack,
@@ -385,7 +389,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
                         )
         assertNotNull(dataFile3.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass1 = new AlignmentPass(
+        AlignmentPass alignmentPass1 = TestData.createAndSaveAlignmentPass(
                         referenceGenome: referenceGenome,
                         identifier: 0,
                         seqTrack: seqTrack1,
@@ -427,11 +431,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
         setProperties(overallQualityAssessment1)
         assertNotNull(overallQualityAssessment1.save([flush: true]))
 
-        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
-                        referenceGenome: referenceGenome,
-                        sample: sample,
-                        seqType: seqType
-                        )
+        MergingWorkPackage mergingWorkPackage = TestData.findOrSaveMergingWorkPackage(seqTrack, referenceGenome)
         assertNotNull(mergingWorkPackage.save([flush: true, failOnError: true]))
 
         MergingSet mergingSet = new MergingSet(
@@ -661,41 +661,6 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
     }
 
     /**
-     * Pauses the test until the workflow is finished or the timeout is reached
-     * @return true if the process is finished, false otherwise
-     */
-    boolean waitUntilWorkflowIsOverOrTimeout(int timeout) {
-        println "Started to wait (until workflow is over or timeout)"
-        int timeCount = 0
-        boolean finished = false
-        while (!finished && (timeCount < timeout)) {
-            finished = areAllProcessFinished()
-            println "waiting ... "
-            timeCount++
-            sleep(60000)
-        }
-        return finished
-    }
-
-    /**
-     * return true if all processed are finished
-     */
-    boolean areAllProcessFinished() {
-        List<Process> processes = Process.list()
-        boolean finished = false
-        if (processes.size() > 0) {
-            processes*.refresh()
-            List<Process> processesFinished = Process.createCriteria().list {
-                eq("finished", true)
-            }
-            if (processesFinished.size() == processes.size()) {
-                finished = true
-            }
-        }
-        return finished
-    }
-
-    /**
      * Helper to see logs at console ( besides seeing at the reports in the end)
      * @msg Message to be shown
      */
@@ -736,8 +701,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
         }?.first()
         processedMergedBamFile.fileOperationStatus = FileOperationStatus.NEEDS_PROCESSING
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
-        boolean workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
-        assertTrue(workflowFinishedSucessfully)
+        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
         File mergedBamFile = new File(destinationFileNameMergedBamFile)
         assertEquals(fileNameMergedBamFile1, mergedBamFile.getText())
         checkNumberOfStoredMd5sums(1)
@@ -749,11 +713,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends GroovyScriptAwareIn
         }?.first()
         processedMergedBamFile.fileOperationStatus = FileOperationStatus.NEEDS_PROCESSING
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
-        // has to wait, since the Transfer workflow checks only every minute if there are new files with status NEEDS_PROCESSING
-        // without waiting no new process would be in the process list when it is checked
-        Thread.currentThread().sleep(120000)
-        workflowFinishedSucessfully = waitUntilWorkflowIsOverOrTimeout(SLEEPING_TIME_IN_MINUTES)
-        assertTrue(workflowFinishedSucessfully)
+        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT, 2)
         assertEquals(fileNameMergedBamFile2, mergedBamFile.getText())
         checkNumberOfStoredMd5sums(2)
         checkDestinationFileStructure()

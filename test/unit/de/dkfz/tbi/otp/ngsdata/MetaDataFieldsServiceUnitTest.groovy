@@ -12,8 +12,9 @@ import org.junit.*
     ExomeEnrichmentKit,
     ExomeEnrichmentKitSynonym,
     SeqCenter,
-    SeqPlatformModelIdentifier,
     SeqPlatform,
+    SeqPlatformGroup,
+    SeqPlatformModelIdentifier,
     SeqType,
 ])
 class MetaDataFieldsServiceUnitTest {

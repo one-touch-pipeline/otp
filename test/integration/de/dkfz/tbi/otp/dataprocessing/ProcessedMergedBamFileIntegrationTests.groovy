@@ -29,7 +29,7 @@ class ProcessedMergedBamFileIntegrationTests {
 
     @Before
     void setUp() {
-        project = new Project(
+        project = TestData.createProject(
                         name: "project",
                         dirName: "project-dir",
                         realmName: 'DKFZ',
@@ -72,10 +72,7 @@ class ProcessedMergedBamFileIntegrationTests {
                         )
         assertNotNull(softwareTool.save([flush: true]))
 
-        seqPlatform = new SeqPlatform(
-                        name: "name",
-                        model: "model"
-                        )
+        seqPlatform = TestData.findOrSaveSeqPlatform()
         assertNotNull(seqPlatform.save([flush: true]))
 
         SeqCenter seqCenter = new SeqCenter(
@@ -111,7 +108,7 @@ class ProcessedMergedBamFileIntegrationTests {
     void testConstraintsExternal() {
         SeqTrack seqTrack = createSeqTrack("lane no. 1")
         ProcessedBamFile processedBamFile = createProcessedBamFile(12345, seqTrack)
-        MergingPass mergingPass = createMergingPass()
+        MergingPass mergingPass = createMergingPass(seqTrack)
         createMergingSetAssignment(processedBamFile)
         FastqSet fastqSet = new FastqSet(
                 seqTracks: [seqTrack]
@@ -147,7 +144,7 @@ class ProcessedMergedBamFileIntegrationTests {
     void testToString() {
         SeqTrack seqTrack = createSeqTrack("lane no. 1")
         ProcessedBamFile processedBamFile = createProcessedBamFile(12345, seqTrack)
-        MergingPass mergingPass = createMergingPass()
+        MergingPass mergingPass = createMergingPass(seqTrack)
         createMergingSetAssignment(processedBamFile)
         ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile(
                 type: BamType.SORTED,
@@ -187,12 +184,8 @@ class ProcessedMergedBamFileIntegrationTests {
         assert processedMergedBamFile.overallQualityAssessment != oqaFormer
     }
 
-    private MergingPass createMergingPass() {
-        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
-                        sample: sample,
-                        seqType: seqType
-                        )
-        assertNotNull(mergingWorkPackage.save([flush: true]))
+    private MergingPass createMergingPass(SeqTrack seqTrack) {
+        MergingWorkPackage mergingWorkPackage = testData.findOrSaveMergingWorkPackage(seqTrack)
 
         mergingSet = new MergingSet(
                         identifier: 0,
@@ -260,7 +253,7 @@ class ProcessedMergedBamFileIntegrationTests {
 
     private ProcessedMergedBamFile createProcessedMergedBamFile() {
 
-        MergingPass mergingPass = createMergingPass()
+        MergingPass mergingPass = createMergingPass(createSeqTrack())
 
         ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile([
                 type                   : BamType.SORTED,
