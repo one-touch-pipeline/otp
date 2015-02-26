@@ -92,7 +92,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         assert realm_management.save()
 
         ProcessingOption processingOptionWGS = new ProcessingOption(
-                name:"PBS_snvPipeline_WGS",
+                name:"PBS_snvPipeline_CALLING_WGS",
                 type: "DKFZ",
                 value:'{"-l": {walltime: "20:00:00"}}',
                 dateCreated: new Date(),
@@ -101,7 +101,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         assert processingOptionWGS.save()
 
         ProcessingOption processingOptionWES = new ProcessingOption(
-                name:"PBS_snvPipeline_WES",
+                name:"PBS_snvPipeline_CALLING_WES",
                 type: "DKFZ",
                 value:'{"-l": {walltime: "5:00:00"}}',
                 dateCreated: new Date(),
@@ -482,15 +482,37 @@ CHROMOSOME_INDICES=( {1..21} XY)
     }
 
     @Test
-    void testGetSnvPBSOptionsNameSeqTypeSpecific_ExomeSeqType() {
-            assert "snvPipeline_WES" == snvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(testData.exomeSeqType)
-
+    void testGetSnvPBSOptionsNameSeqTypeSpecific_CallingStep_ExomeSeqType() {
+            assert "snvPipeline_CALLING_WES" == snvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(testData.exomeSeqType)
     }
 
     @Test
-    void testGetSnvPBSOptionsNameSeqTypeSpecific_WholeGenomeSeqType() {
-            assert "snvPipeline_WGS" == snvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(testData.seqType)
+    void testGetSnvPBSOptionsNameSeqTypeSpecific_CallingStep_WholeGenomeSeqType() {
+            assert "snvPipeline_CALLING_WGS" == snvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(testData.seqType)
+    }
 
+    @Test
+    void testGetSnvPBSOptionsNameSeqTypeSpecific_AnnotationStep_ExomeSeqType() {
+        SnvAnnotationJob snvAnnotationJob = applicationContext.getBean('snvAnnotationJob',
+                DomainFactory.createAndSaveProcessingStep(SnvAnnotationJob.toString()), [])
+        snvCallingJob.log = log
+        assert "snvPipeline_SNV_ANNOTATION_WES" == snvAnnotationJob.getSnvPBSOptionsNameSeqTypeSpecific(testData.exomeSeqType)
+    }
+
+    @Test
+    void testGetSnvPBSOptionsNameSeqTypeSpecific_DeepAnnotationStep_ExomeSeqType() {
+        SnvDeepAnnotationJob snvDeepAnnotationJob = applicationContext.getBean('snvDeepAnnotationJob',
+                DomainFactory.createAndSaveProcessingStep(SnvDeepAnnotationJob.toString()), [])
+        snvCallingJob.log = log
+        assert "snvPipeline_SNV_DEEPANNOTATION_WES" == snvDeepAnnotationJob.getSnvPBSOptionsNameSeqTypeSpecific(testData.exomeSeqType)
+    }
+
+    @Test
+    void testGetSnvPBSOptionsNameSeqTypeSpecific_FilterStep_ExomeSeqType() {
+        FilterVcfJob filterVcfJob = applicationContext.getBean('filterVcfJob',
+                DomainFactory.createAndSaveProcessingStep(FilterVcfJob.toString()), [])
+        snvCallingJob.log = log
+        assert "snvPipeline_FILTER_VCF_WES" == filterVcfJob.getSnvPBSOptionsNameSeqTypeSpecific(testData.exomeSeqType)
     }
 
     @Test

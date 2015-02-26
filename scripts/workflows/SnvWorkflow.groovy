@@ -34,18 +34,71 @@ plan("SnvWorkflow") {
 
 
 println ctx.processingOptionService.createOrUpdate(
-  "PBS_snvPipeline_WGS",
-  "DKFZ",
-  null,
-  '{"-l": {walltime: "20:00:00"}}',
-  "according to the CO group (Ivo) 20h is enough for the snv WGS jobs"
+    "PBS_snvPipeline_CALLING_WGS",
+    "DKFZ",
+    null,
+    '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "24:00:00", mem: "400m"}}',
+    "suggestion of the CO group (Ivo) for the snv WGS calling job"
+)
+
+println ctx.processingOptionService.createOrUpdate(
+    "PBS_snvPipeline_CALLING_WES",
+    "DKFZ",
+    null,
+    '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "08:00:00", mem: "400m"}}',
+    "suggestion of the CO group (Ivo) for the snv WES calling job"
 )
 
 
+
 println ctx.processingOptionService.createOrUpdate(
-  "PBS_snvPipeline_WES",
-  "DKFZ",
-  null,
-  '{"-l": {walltime: "5:00:00"}}',
-  "according to the CO group (Ivo) 5h is enough for the snv WES jobs"
+    "PBS_snvPipeline_SNV_ANNOTATION_WGS",
+    "DKFZ",
+    null,
+    '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "48:00:00", mem: "3g"}}',
+    "suggestion of the CO group (Ivo) for the snv WGS annotation job"
+)
+
+println ctx.processingOptionService.createOrUpdate(
+    "PBS_snvPipeline_SNV_ANNOTATION_WES",
+    "DKFZ",
+    null,
+    '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "24:00:00", mem: "3g"}}',
+    "suggestion of the CO group (Ivo) for the snv WES annotation job"
+)
+
+
+
+println ctx.processingOptionService.createOrUpdate(
+    "PBS_snvPipeline_SNV_DEEPANNOTATION_WGS",
+    "DKFZ",
+    null,
+    '{"-l": {nodes: "1:ppn=3:lsdf", walltime: "04:00:00", mem: "400m"}}',
+    "suggestion of the CO group (Ivo) for the snv WGS deep annotation job"
+)
+
+println ctx.processingOptionService.createOrUpdate(
+    "PBS_snvPipeline_SNV_DEEPANNOTATION_WES",
+    "DKFZ",
+    null,
+    '{"-l": {nodes: "1:ppn=3:lsdf", walltime: "02:00:00", mem: "400m"}}',
+    "suggestion of the CO group (Ivo) for the snv WES deep annotation job"
+)
+
+
+
+println ctx.processingOptionService.createOrUpdate(
+    "PBS_snvPipeline_FILTER_VCF_WGS",
+    "DKFZ",
+    null,
+    '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "04:00:00", mem: "1g"}}',
+    "suggestion of the CO group (Ivo) for the snv WGS filter job"
+)
+
+println ctx.processingOptionService.createOrUpdate(
+    "PBS_snvPipeline_FILTER_VCF_WES",
+    "DKFZ",
+    null,
+    '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "02:00:00", mem: "1g"}}',
+    "suggestion of the CO group (Ivo) for the snv WES filter job"
 )

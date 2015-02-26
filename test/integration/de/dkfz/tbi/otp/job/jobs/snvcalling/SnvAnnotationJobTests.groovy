@@ -209,7 +209,6 @@ CHROMOSOME_INDICES=( {1..21} XY)
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> return true }
 
         schedulerService.startingJobExecutionOnCurrentThread(snvAnnotationJob)
-
         try {
             assertEquals(NextAction.WAIT_FOR_CLUSTER_JOBS, snvAnnotationJob.maybeSubmit(snvCallingInstance2))
         } finally {

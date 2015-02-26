@@ -21,23 +21,14 @@ class SnvCallingInstanceTestData extends TestData {
 
     void createSnvObjects() {
 
-        ProcessingOption processingOptionWGS = new ProcessingOption(
-                name:"PBS_snvPipeline_WGS",
-                type: "DKFZ",
-                value:'{"-l": {walltime: "20:00:00"}}',
-                dateCreated: new Date(),
-                comment:"according to the CO group (Ivo) 20h is enough for the snv WGS jobs",
-        )
-        assert processingOptionWGS.save()
-
-        ProcessingOption processingOptionWES = new ProcessingOption(
-                name:"PBS_snvPipeline_WES",
-                type: "DKFZ",
-                value:'{"-l": {walltime: "5:00:00"}}',
-                dateCreated: new Date(),
-                comment:"according to the CO group (Ivo) 5h is enough for the snv WES jobs",
-        )
-        assert processingOptionWES.save()
+        createAndSaveProcessingOption([name: "PBS_snvPipeline_CALLING_WGS", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
+        createAndSaveProcessingOption([name: "PBS_snvPipeline_CALLING_WES", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
+        createAndSaveProcessingOption([name: "PBS_snvPipeline_SNV_ANNOTATION_WGS", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
+        createAndSaveProcessingOption([name: "PBS_snvPipeline_SNV_ANNOTATION_WES", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
+        createAndSaveProcessingOption([name: "PBS_snvPipeline_SNV_DEEPANNOTATION_WGS", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
+        createAndSaveProcessingOption([name: "PBS_snvPipeline_SNV_DEEPANNOTATION_WES", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
+        createAndSaveProcessingOption([name: "PBS_snvPipeline_FILTER_VCF_WGS", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
+        createAndSaveProcessingOption([name: "PBS_snvPipeline_FILTER_VCF_WES", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
 
         processedMergedBamFileService = new ProcessedMergedBamFileService()
         processedMergedBamFileService.configService = new ConfigService()
@@ -219,5 +210,18 @@ class SnvCallingInstanceTestData extends TestData {
         processedMergedBamFile.fileSize = file.size()
         assert processedMergedBamFile.save(flush: true, failOnError: true)
         return file
+    }
+
+    ProcessingOption createAndSaveProcessingOption(Map properties = [:]){
+        ProcessingOption processingOption = new ProcessingOption([
+                name:"PBS_Name",
+                type: "DKFZ",
+                value:'{"-l": {nodes: "1:ppn=1:lsdf", walltime: "24:00:00", mem: "400m"}}',
+                dateCreated: new Date(),
+                comment:"comment",
+                ] + properties)
+
+        assert processingOption.save(flush: true)
+        return processingOption
     }
 }

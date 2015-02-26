@@ -216,22 +216,27 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
         joiningScript = ExternalScript.build(
                 scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
                 filePath: "/path/to/programs/otp/snv-pipeline-r1610/joinSNVVCFFiles.sh",
+                scriptVersion: "v1"
         )
         callingScript = ExternalScript.build(
                 scriptIdentifier: "SnvCallingStep.CALLING",
                 filePath: "/path/to/programs/otp/snv-pipeline-r1610/snvCalling.sh",
+                scriptVersion: "v1"
         )
         annotationScript = ExternalScript.build(
                 scriptIdentifier: "SnvCallingStep.SNV_ANNOTATION",
                 filePath: "/path/to/programs/otp/snv-pipeline-r1610/snvAnnotation.sh",
+                scriptVersion: "v1"
         )
         deepAnnotationScript = ExternalScript.build(
                 scriptIdentifier: "SnvCallingStep.SNV_DEEPANNOTATION",
                 filePath: "/path/to/programs/otp/co-tools-r1610/vcf_pipeAnnotator.sh",
+                scriptVersion: "v1"
         )
         filterScript = ExternalScript.build(
                 scriptIdentifier: "SnvCallingStep.FILTER_VCF",
                 filePath: "/path/to/programs/otp/snv-pipeline-r1610/filter_vcf.sh",
+                scriptVersion: "v1"
         )
 
 
@@ -265,7 +270,7 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
     @Test
     void testWholeSnvWorkflow() {
         prepare(Realm.Cluster.DKFZ)
-        snvConfig = SnvConfig.createFromFile(project, seqType, new File(baseDirDKFZ, "configFile/runtimeConfig.sh"))
+        snvConfig = SnvConfig.createFromFile(project, seqType, new File(baseDirDKFZ, "configFile/runtimeConfig.sh"), "v1")
         assertNotNull(snvConfig.save(flush: true))
         execute()
         check(SnvCallingStep.CALLING)
@@ -292,7 +297,7 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
     @Test
     void testSnvAnnotationDeepAnnotationAndFilter() {
         prepare(Realm.Cluster.DKFZ)
-        snvConfig = SnvConfig.createFromFile(project, seqType, new File(baseDirDKFZ, "configFile/runtimeConfig_anno.sh"))
+        snvConfig = SnvConfig.createFromFile(project, seqType, new File(baseDirDKFZ, "configFile/runtimeConfig_anno.sh"), "v1")
         assertNotNull(snvConfig.save(flush: true))
         createJobResults(SnvCallingStep.SNV_ANNOTATION)
 
@@ -307,7 +312,7 @@ class SnvWorkflowTests extends GroovyScriptAwareIntegrationTest {
     @Test
     void testSnvFilter() {
         prepare(Realm.Cluster.DKFZ)
-        snvConfig = SnvConfig.createFromFile(project, seqType, new File("${baseDirDKFZ}/configFile/runtimeConfig_filter.sh"))
+        snvConfig = SnvConfig.createFromFile(project, seqType, new File("${baseDirDKFZ}/configFile/runtimeConfig_filter.sh"), "v1")
         assertNotNull(snvConfig.save(flush: true))
         createJobResults(SnvCallingStep.FILTER_VCF)
 

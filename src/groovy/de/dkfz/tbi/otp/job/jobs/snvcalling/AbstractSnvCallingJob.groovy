@@ -171,9 +171,9 @@ abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob 
     protected String getSnvPBSOptionsNameSeqTypeSpecific(SeqType seqType) {
         notNull(seqType, "The input seqType must not be null in method getSnvPBSOptionsNameSeqTypeSpecific")
         if (seqType.name == SeqTypeNames.WHOLE_GENOME.seqTypeName) {
-            return "snvPipeline_WGS"
+            return "snvPipeline_${step.name()}_WGS"
         } else if (seqType.name == SeqTypeNames.EXOME.seqTypeName) {
-            return "snvPipeline_WES"
+            return "snvPipeline_${step.name()}_WES"
         } else {
             throw new RuntimeException("There are no PBS Options available for the SNV pipeline for seqtype ${seqType}")
         }
