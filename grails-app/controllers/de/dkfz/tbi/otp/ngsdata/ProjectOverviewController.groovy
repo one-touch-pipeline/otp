@@ -213,6 +213,18 @@ class ProjectOverviewController {
         render dataToRender as JSON
     }
 
+    JSON dataTableSourceReferenceGenome(DataTableCommand cmd) {
+        Project project = projectService.getProjectByName(params.project)
+        Map dataToRender = cmd.dataToRender()
+        List data = projectOverviewService.listReferenceGenome(project).collect { ReferenceGenomeProjectSeqType it->
+            [it.seqType.name, it.sampleType?.name, it.referenceGenome.name]
+        }
+        dataToRender.iTotalRecords = data.size()
+        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+        dataToRender.aaData = data
+        render dataToRender as JSON
+    }
+
     @PreAuthorize("hasRole('ROLE_MMML_MAPPING')")
     JSON dataTableMMMLMapping(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()

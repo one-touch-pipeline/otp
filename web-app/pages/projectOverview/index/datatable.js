@@ -127,6 +127,14 @@ $.otp.projectOverviewTable = {
             }),
             $.otp.projectOverviewTable.returnParameterUnchanged
         );
+        var oTableReferenceGenome = $.otp.projectOverviewTable.registerDataTable(
+                "#listReferenceGenome",
+                $.otp.createLink({
+                    controller : 'projectOverview',
+                    action : 'dataTableSourceReferenceGenome'
+                }),
+                $.otp.projectOverviewTable.returnParameterUnchanged
+            );
         $.otp.projectOverviewTable.updatePatientCount();
         $('#project_select').change(function () {
             var oSettings1 = oTable1.fnSettings();
@@ -141,6 +149,9 @@ $.otp.projectOverviewTable = {
             var oSettings5 = oTable5.fnSettings();
             oSettings5.oFeatures.bServerSide = true;
             oTable5.fnDraw();
+            var oSettings6 = oTableReferenceGenome.fnSettings();
+            oSettings6.oFeatures.bServerSide = true;
+            oTableReferenceGenome.fnDraw();
             $.otp.graph.project.init();
             $.otp.projectOverviewTable.updatePatientCount();
         });

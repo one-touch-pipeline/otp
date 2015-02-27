@@ -77,6 +77,19 @@
                     ]}"
                     id="patientsAndSamplesGBCountPerProject" />
             </div>
+            <div style="width: 20px; height: 20px;"></div>
+            <h3 class="statisticTableTitle">
+                <g:message code="projectOverview.table.ReferenceGenome.title" />
+            </h3>
+            <div class="otpDataTables">
+	            <otp:dataTable
+	                codes="${[
+	                    'projectOverview.index.referenceGenome.sequenceTypeName',
+	                    'projectOverview.index.referenceGenome.sampleTypeName',
+	                    'projectOverview.index.referenceGenome',
+	                ] }"
+	                id="listReferenceGenome" />
+            </div>
         </div>
         <div class="homeGraph">
             <div style="margin-top: 60px"></div>
@@ -94,7 +107,6 @@
          </div>
         </div>
     </div>
-
     <r:script>
         $(function() {
             $.otp.projectOverviewTable.register();

@@ -257,6 +257,9 @@ where
         return coverage
     }
 
+    public List listReferenceGenome(Project project) {
+        return ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
+    }
 
     @PreAuthorize("hasRole('ROLE_MMML_MAPPING')")
     public List tableForMMMLMapping(){
