@@ -5,7 +5,6 @@ import de.dkfz.tbi.flowcontrol.cluster.api.JobState
 import de.dkfz.tbi.flowcontrol.ws.api.pbs.JobInfo
 import de.dkfz.tbi.flowcontrol.ws.api.response.JobInfos
 import de.dkfz.tbi.flowcontrol.ws.client.FlowControlClient
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
@@ -16,6 +15,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
+import javax.sql.DataSource
 import javax.xml.namespace.QName
 import javax.xml.soap.SOAPConstants
 import javax.xml.soap.SOAPFactory
@@ -53,6 +53,8 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     TestData testData = new TestData()
 
+    DataSource dataSource
+
     @Before
     void setUp() {
         seqType = TestData.createSeqType()
@@ -89,16 +91,16 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
         clusterJobService.completeClusterJob(clusterJobIdentifier)
 
-        assertEquals(job.exitStatus, ClusterJob.Status.FAILED)
-        assertEquals(job.exitCode, 5)
-        assertEquals(job.started, new DateTime(new Date(2000, 1, 1, 0, 0, 0)))
-        assertEquals(job.ended, new DateTime(new Date(2000, 1, 1, 1, 0, 0)))
-        assertEquals(job.usedCores, null)
-        assertEquals(job.cpuTime, new Duration(4000000L))
-        assertEquals(job.usedMemory, 2048L)
-        assertEquals(job.requestedCores, 8)
-        assertEquals(job.requestedMemory, 2048L)
-        assertEquals(job.requestedWalltime, new Duration(4000000L))
+        assertEquals(ClusterJob.Status.FAILED, job.exitStatus)
+        assertEquals(5, job.exitCode)
+        assertEquals(new DateTime(new Date(2000, 1, 1, 0, 0, 0)), job.started)
+        assertEquals(new DateTime(new Date(2000, 1, 1, 1, 0, 0)), job.ended)
+        assertEquals(null, job.usedCores)
+        assertEquals(new Duration(4000000L), job.cpuTime)
+        assertEquals(2048L, job.usedMemory)
+        assertEquals(8, job.requestedCores)
+        assertEquals(2048L, job.requestedMemory)
+        assertEquals(new Duration(4000000L), job.requestedWalltime)
     }
 
     @Test
@@ -229,22 +231,27 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findAllClusterJobsByDateBetween_WhenJobIsOutOfTimeSpanToEarly_ShouldReturnEmptyList() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), ended: SDATE_DATETIME.minusDays(1)])
+        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+                          ended: SDATE_DATETIME.minusDays(1)])
 
         assert [] == clusterJobService.findAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "", 0, 10, 'clusterJobId', 'asc')
     }
 
     @Test
     void test_findAllClusterJobsByDateBetween_WhenJobIsOutOfTimeSpanToLate_ShouldReturnEmptyList() {
-        createClusterJob([queued: SDATE_DATETIME.plusDays(2), ended: SDATE_DATETIME.plusDays(2)])
+        createClusterJob([queued: SDATE_DATETIME.plusDays(2),
+                          ended: SDATE_DATETIME.plusDays(2)])
 
         assert [] == clusterJobService.findAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "", 0, 10, 'clusterJobId', 'asc')
     }
 
     @Test
     void test_findAllClusterJobsByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithJobs() {
-        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME])
-        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME])
+        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME,
+                                            ended: EDATE_DATETIME])
+
+        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME,
+                                            ended: EDATE_DATETIME])
 
         assert [job1, job2] == clusterJobService.findAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "", 0, 10, 'clusterJobId', 'asc')
     }
@@ -252,9 +259,17 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
     @Test
     void test_findAllClusterJobsByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithJobs_PassingFilter() {
         String filter = 'filter'
-        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, clusterJobName: "Value with ${filter} something _testClass"])
-        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, clusterJobName: "some other value _testClass"])
-        ClusterJob job3 = createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, clusterJobName: "Value with ${filter.toUpperCase()} something _testClass"])
+        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME,
+                                            ended: EDATE_DATETIME,
+                                            clusterJobName: "Value with ${filter} something _testClass"])
+
+        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME,
+                                            ended: EDATE_DATETIME,
+                                            clusterJobName: "some other value _testClass"])
+
+        ClusterJob job3 = createClusterJob([queued: SDATE_DATETIME,
+                                            ended: EDATE_DATETIME,
+                                            clusterJobName: "Value with ${filter.toUpperCase()} something _testClass"])
 
         assert [job1, job3] == clusterJobService.findAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, filter, 0, 10, 'clusterJobId', 'asc')
     }
@@ -262,7 +277,8 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
     @Test
     void test_findAllClusterJobsByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithJobs_UsingPage() {
         List<ClusterJob> jobs = (1..10).collect {
-            createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME])
+            createClusterJob([queued: SDATE_DATETIME,
+                              ended: EDATE_DATETIME])
         }
 
         assert jobs.subList(3,7) == clusterJobService.findAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, '', 3, 4, 'clusterJobId', 'asc')
@@ -270,22 +286,31 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findAllClusterJobsByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithJobs_SortedDesc() {
-        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME])
-        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME])
+        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME,
+                                            ended: EDATE_DATETIME])
+
+        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME,
+                                            ended: EDATE_DATETIME])
 
         assert [job2, job1] == clusterJobService.findAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "", 0, 10, 'clusterJobId', 'desc')
     }
 
     @Test
     void test_findAllClusterJobsByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithJobs_SortedByName() {
-        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, clusterJobName: "name3 _testClass"])
-        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, clusterJobName: "name1 _testClass"])
-        ClusterJob job3 = createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, clusterJobName: "name2 _testClass"])
+        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME,
+                                            ended: EDATE_DATETIME,
+                                            clusterJobName: "name3 _testClass"])
+
+        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME,
+                                            ended: EDATE_DATETIME,
+                                            clusterJobName: "name1 _testClass"])
+
+        ClusterJob job3 = createClusterJob([queued: SDATE_DATETIME,
+                                            ended: EDATE_DATETIME,
+                                            clusterJobName: "name2 _testClass"])
 
         assert [job2, job3, job1] == clusterJobService.findAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, '', 0, 10, 'clusterJobName', 'asc')
     }
-
-
 
     @Test
     void test_countAllClusterJobsByDateBetween_WhenNoJobsFound_ShouldReturnZero() {
@@ -294,15 +319,19 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_countAllClusterJobsByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnZero() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), ended: SDATE_DATETIME.minusDays(1)])
+        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+                          ended: SDATE_DATETIME.minusDays(1)])
 
         assert 0 == clusterJobService.countAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "")
     }
 
     @Test
     void test_countAllClusterJobsByDateBetween_WhenSeveralJobsAreFound_ShouldReturnTwo() {
-        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME])
-        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME])
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME])
 
         assert 2 == clusterJobService.countAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "")
     }
@@ -310,14 +339,20 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
     @Test
     void test_countAllClusterJobsByDateBetween_WhenSeveralJobsPassFilter_ShouldReturnTwo() {
         String filter = 'filter'
-        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, clusterJobName: "Value with ${filter} something _testClass"])
-        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, clusterJobName: "some other value _testClass"])
-        ClusterJob job3 = createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, clusterJobName: "Value with ${filter.toUpperCase()} something _testClass"])
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          clusterJobName: "Value with ${filter} something _testClass"])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          clusterJobName: "some other value _testClass"])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          clusterJobName: "Value with ${filter.toUpperCase()} something _testClass"])
 
         assert 2 == clusterJobService.countAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, filter)
     }
-
-
 
     @Test
     void test_findAllJobClassesByDateBetween_WhenNoJobsFound_ShouldReturnEmptyList() {
@@ -326,16 +361,26 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findAllJobClassesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnEmptyList() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), ended: SDATE_DATETIME.minusDays(1), jobClass: 'jobClass1'])
+        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+                          ended: SDATE_DATETIME.minusDays(1),
+                          jobClass: 'jobClass1'])
 
         assert [] == clusterJobService.findAllJobClassesByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     @Test
     void test_findAllJobClassesByDateBetween_WhenSeveralJobClassesAreFound_ShouldReturnUniqueListWithJobClasses() {
-        createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, jobClass: 'jobClass1'])
-        createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, jobClass: 'jobClass1'])
-        createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, jobClass: 'jobClass2'])
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          jobClass: 'jobClass1'])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          jobClass: 'jobClass1'])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          jobClass: 'jobClass2'])
 
         assert ['jobClass1', 'jobClass2'] == clusterJobService.findAllJobClassesByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
@@ -347,16 +392,26 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findAllExitCodesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnEmptyList() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), ended: SDATE_DATETIME.minusDays(1), exitCode: 0])
+        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+                          ended: SDATE_DATETIME.minusDays(1),
+                          exitCode: 0])
 
         assert [] == clusterJobService.findAllExitCodesByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     @Test
     void test_findAllExitCodesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithOccurancesPerExitCodes() {
-        createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, exitCode: 0])
-        createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, exitCode: 0])
-        createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, exitCode: 1])
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          exitCode: 0])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          exitCode: 0])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          exitCode: 1])
 
         assert [[0, 2], [1, 1]] == clusterJobService.findAllExitCodesByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
@@ -368,16 +423,26 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findAllExitStatusesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnEmptyList() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), ended: EDATE_DATETIME.minusDays(1), exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+                          ended: EDATE_DATETIME.minusDays(1),
+                          exitStatus: ClusterJob.Status.COMPLETED])
 
         assert [] == clusterJobService.findAllExitStatusesByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     @Test
     void test_findAllExitStatusesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithOccurancesPerExitStatuses() {
-        createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, exitStatus: ClusterJob.Status.COMPLETED])
-        createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, exitStatus: ClusterJob.Status.COMPLETED])
-        createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, exitStatus: ClusterJob.Status.FAILED])
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          exitStatus: ClusterJob.Status.COMPLETED])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          exitStatus: ClusterJob.Status.COMPLETED])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          exitStatus: ClusterJob.Status.FAILED])
 
         assert [[ClusterJob.Status.COMPLETED, 2], [ClusterJob.Status.FAILED, 1]] == clusterJobService.findAllExitStatusesByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
@@ -389,16 +454,26 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findAllFailedByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnMapWithListInInitialState() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), ended: SDATE_DATETIME.minusDays(1), exitStatus: ClusterJob.Status.FAILED])
+        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+                          ended: SDATE_DATETIME.minusDays(1),
+                          exitStatus: ClusterJob.Status.FAILED])
 
         assert [0] * 25 == clusterJobService.findAllFailedByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE).data
     }
 
     @Test
     void test_findAllFailedByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapWithListContainingOccurencesOfFailedJobsPerHour() {
-        createClusterJob([queued: SDATE_DATETIME, ended: SDATE_DATETIME.plusMinutes(30), exitStatus: ClusterJob.Status.FAILED])
-        createClusterJob([queued: SDATE_DATETIME, ended: SDATE_DATETIME.plusMinutes(30), exitStatus: ClusterJob.Status.FAILED])
-        createClusterJob([queued: SDATE_DATETIME, ended: SDATE_DATETIME.plusHours(1), exitStatus: ClusterJob.Status.FAILED])
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: SDATE_DATETIME.plusMinutes(30),
+                          exitStatus: ClusterJob.Status.FAILED])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: SDATE_DATETIME.plusMinutes(30),
+                          exitStatus: ClusterJob.Status.FAILED])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: SDATE_DATETIME.plusHours(1),
+                          exitStatus: ClusterJob.Status.FAILED])
 
         assert [2, 1] + [0] * 23 == clusterJobService.findAllFailedByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE).data
     }
@@ -414,7 +489,9 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findAllStatesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnMapWithListInInitialState() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), started: SDATE_DATETIME.minusDays(1), ended: SDATE_DATETIME.minusDays(1)])
+        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+                          started: SDATE_DATETIME.minusDays(1),
+                          ended: SDATE_DATETIME.minusDays(1)])
 
         Map statesMap = clusterJobService.findAllStatesByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE)
 
@@ -425,8 +502,13 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findAllStatesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapWithListsContainingOccurencesOfStatesPerHour() {
-        createClusterJob([queued: SDATE_DATETIME, started: SDATE_DATETIME, ended: SDATE_DATETIME])
-        createClusterJob([queued: SDATE_DATETIME, started: SDATE_DATETIME.plusHours(1), ended: SDATE_DATETIME.plusHours(2)])
+        createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME,
+                          ended: SDATE_DATETIME])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME.plusHours(1),
+                          ended: SDATE_DATETIME.plusHours(2)])
 
         Map statesMap = clusterJobService.findAllStatesByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE)
 
@@ -442,16 +524,34 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findAllAvgCoreUsageByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnMapWithListInInitialState() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), started: SDATE_DATETIME.minusDays(1), ended: SDATE_DATETIME.minusDays(1), cpuTime: new Duration(30 * MINUTES_TO_MILLIS)])
+        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+                          started: SDATE_DATETIME.minusDays(1),
+                          ended: SDATE_DATETIME.minusDays(1),
+                          cpuTime: new Duration(30 * MINUTES_TO_MILLIS),
+                          exitStatus: ClusterJob.Status.COMPLETED])
 
         assert [0] * 25 == clusterJobService.findAllAvgCoreUsageByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE).data
     }
 
     @Test
     void test_findAllAvgCoreUsageByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapWithListContainingCoreUsagePerHour() {
-        createClusterJob([queued: SDATE_DATETIME, started: SDATE_DATETIME, ended: SDATE_DATETIME.plusMinutes(30), cpuTime: new Duration(30 * MINUTES_TO_MILLIS)])
-        createClusterJob([queued: SDATE_DATETIME, started: SDATE_DATETIME, ended: SDATE_DATETIME.plusMinutes(30), cpuTime: new Duration(30 * MINUTES_TO_MILLIS)])
-        createClusterJob([queued: SDATE_DATETIME, started: SDATE_DATETIME.plusHours(1), ended: SDATE_DATETIME.plusHours(1).plusMinutes(30), cpuTime: new Duration(30 * MINUTES_TO_MILLIS)])
+        createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME,
+                          ended: SDATE_DATETIME.plusMinutes(30),
+                          cpuTime: new Duration(30 * MINUTES_TO_MILLIS),
+                          exitStatus: ClusterJob.Status.COMPLETED])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME,
+                          ended: SDATE_DATETIME.plusMinutes(30),
+                          cpuTime: new Duration(30 * MINUTES_TO_MILLIS),
+                          exitStatus: ClusterJob.Status.COMPLETED])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME.plusHours(1),
+                          ended: SDATE_DATETIME.plusHours(1).plusMinutes(30),
+                          cpuTime: new Duration(30 * MINUTES_TO_MILLIS),
+                          exitStatus: ClusterJob.Status.COMPLETED])
 
         assert [2, 1] + [0] * 23 == clusterJobService.findAllAvgCoreUsageByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE).data
     }
@@ -463,16 +563,34 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findAllMemoryUsageByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnMapWithDataListInInitialState() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), ended: SDATE_DATETIME.minusDays(1), usedMemory: GiB_TO_KiB])
+        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+                          started: SDATE_DATETIME.minusDays(1),
+                          ended: SDATE_DATETIME.minusDays(1),
+                          usedMemory: GiB_TO_KiB,
+                          exitStatus: ClusterJob.Status.COMPLETED])
 
         assert [0] * 25 == clusterJobService.findAllAvgCoreUsageByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE).data
     }
 
     @Test
     void test_findAllMemoryUsageByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapWithDataListContainingMemoryUsagePerHours() {
-        createClusterJob([queued: SDATE_DATETIME, ended: SDATE_DATETIME, usedMemory: GiB_TO_KiB])
-        createClusterJob([queued: SDATE_DATETIME, ended: SDATE_DATETIME, usedMemory: GiB_TO_KiB])
-        createClusterJob([queued: SDATE_DATETIME, ended: SDATE_DATETIME.plusHours(1), usedMemory: GiB_TO_KiB])
+        createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME,
+                          ended: SDATE_DATETIME.plusMinutes(30),
+                          usedMemory: GiB_TO_KiB,
+                          exitStatus: ClusterJob.Status.COMPLETED])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME,
+                          ended: SDATE_DATETIME.plusMinutes(30),
+                          usedMemory: GiB_TO_KiB,
+                          exitStatus: ClusterJob.Status.COMPLETED])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME.plusHours(1),
+                          ended: SDATE_DATETIME.plusHours(1).plusMinutes(30),
+                          usedMemory: GiB_TO_KiB,
+                          exitStatus: ClusterJob.Status.COMPLETED])
 
         assert [2, 1] + [0] * 23 == clusterJobService.findAllMemoryUsageByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE).data
     }
@@ -484,15 +602,25 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findAllStatesTimeDistributionByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnMapInInitialState() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(3), started: EDATE_DATETIME.minusDays(2), ended: EDATE_DATETIME.minusDays(1)])
+        createClusterJob([queued: SDATE_DATETIME.minusDays(3),
+                          started: EDATE_DATETIME.minusDays(2),
+                          ended: EDATE_DATETIME.minusDays(1),
+                          exitStatus: ClusterJob.Status.COMPLETED])
 
         assert [queue: [0, '0'], process: [0, '0']] == clusterJobService.findAllStatesTimeDistributionByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     @Test
-    void test_findAllStatesTimeDistricutionByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapContainingPercentagesAndAbsoluteValuesOfStatesTimeDistribution() {
-        createClusterJob([queued: SDATE_DATETIME, started: SDATE_DATETIME.plusHours(12), ended: EDATE_DATETIME])
-        createClusterJob([queued: SDATE_DATETIME, started: SDATE_DATETIME.plusHours(6), ended: EDATE_DATETIME])
+    void test_findAllStatesTimeDistributionByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapContainingPercentagesAndAbsoluteValuesOfStatesTimeDistribution() {
+        createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME.plusHours(12),
+                          ended: EDATE_DATETIME,
+                          exitStatus: ClusterJob.Status.COMPLETED])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME.plusHours(6),
+                          ended: EDATE_DATETIME,
+                          exitStatus: ClusterJob.Status.COMPLETED])
 
         assert [queue: [37, '18'], process: [63, '30']] == clusterJobService.findAllStatesTimeDistributionByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
@@ -504,7 +632,10 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findJobClassSpecificSeqTypesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnEmptyList() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), ended: EDATE_DATETIME.minusDays(1), seqType: seqType, jobClass: 'jobClass1'])
+        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+                          ended: EDATE_DATETIME.minusDays(1),
+                          seqType: seqType,
+                          jobClass: 'jobClass1'])
 
         assert [] == clusterJobService.findJobClassSpecificSeqTypesByDateBetween('jobClass1', SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
@@ -514,9 +645,20 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
         SeqType seqType2 = TestData.createSeqType([dirName: 'testDir'])
         seqType2.save([flush: true, failOnError: true])
 
-        createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, seqType: seqType, jobClass: 'jobClass1'])
-        createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, seqType: seqType, jobClass: 'jobClass1'])
-        createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, seqType: seqType2, jobClass: 'jobClass1'])
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          seqType: seqType,
+                          jobClass: 'jobClass1'])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          seqType: seqType,
+                          jobClass: 'jobClass1'])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          seqType: seqType2,
+                          jobClass: 'jobClass1'])
 
         assert [seqType, seqType2] == clusterJobService.findJobClassSpecificSeqTypesByDateBetween('jobClass1', SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
@@ -528,16 +670,30 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findJobClassAndSeqTypeSpecificExitCodesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnEmptyList() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), ended: SDATE_DATETIME.minusDays(1), jobClass: 'jobClass1', seqType: seqType, exitCode: 0])
+        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+                          ended: SDATE_DATETIME.minusDays(1),
+                          jobClass: 'jobClass1',
+                          seqType: seqType, exitCode: 0])
 
         assert [] == clusterJobService.findJobClassAndSeqTypeSpecificExitCodesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     @Test
     void test_findJobClassAndSeqTypeSpecificExitCodesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithOccurencesOfExitCodesByJobClassAndSeqType() {
-        createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, jobClass: 'jobClass1', seqType: seqType, exitCode: 0])
-        createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, jobClass: 'jobClass1', seqType: seqType, exitCode: 0])
-        createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, jobClass: 'jobClass1', seqType: seqType, exitCode: 10])
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          jobClass: 'jobClass1',
+                          seqType: seqType, exitCode: 0])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          jobClass: 'jobClass1',
+                          seqType: seqType, exitCode: 0])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          jobClass: 'jobClass1',
+                          seqType: seqType, exitCode: 10])
 
         assert [[0, 2], [10, 1]] == clusterJobService.findJobClassAndSeqTypeSpecificExitCodesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
@@ -549,16 +705,34 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findJobClassAndSeqTypeSpecificExitStatusesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnEmptyList() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), ended: SDATE_DATETIME.minusDays(1), jobClass: 'jobClass1', seqType: seqType, exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+                          ended: SDATE_DATETIME.minusDays(1),
+                          jobClass: 'jobClass1',
+                          seqType: seqType,
+                          exitStatus: ClusterJob.Status.COMPLETED])
 
         assert [] == clusterJobService.findJobClassAndSeqTypeSpecificExitStatusesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     @Test
     void test_findJobClassAndSeqTypeSpecificExitStatusesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithOccurancesOfExitStatussesByJobClassAndSeqType() {
-        createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, jobClass: 'jobClass1', seqType: seqType, exitStatus: ClusterJob.Status.COMPLETED])
-        createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, jobClass: 'jobClass1', seqType: seqType, exitStatus: ClusterJob.Status.COMPLETED])
-        createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, jobClass: 'jobClass1', seqType: seqType, exitStatus: ClusterJob.Status.FAILED])
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          jobClass: 'jobClass1',
+                          seqType: seqType,
+                          exitStatus: ClusterJob.Status.COMPLETED])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          jobClass: 'jobClass1',
+                          seqType: seqType,
+                          exitStatus: ClusterJob.Status.COMPLETED])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          ended: EDATE_DATETIME,
+                          jobClass: 'jobClass1',
+                          seqType: seqType,
+                          exitStatus: ClusterJob.Status.FAILED])
 
         assert [[ClusterJob.Status.COMPLETED, 2], [ClusterJob.Status.FAILED, 1]] == clusterJobService.findJobClassAndSeqTypeSpecificExitStatusesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
@@ -570,15 +744,26 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findJobClassAndSeqTypeSpecificStatesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnMapWithDataListsInInitialState() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), started: SDATE_DATETIME.minusDays(1), ended: SDATE_DATETIME.minusDays(1)])
+        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+                          started: SDATE_DATETIME.minusDays(1),
+                          ended: SDATE_DATETIME.minusDays(1)])
 
         assert ['queued': [0] * 25, 'started': [0] * 25, 'ended': [0] * 25] == clusterJobService.findJobClassAndSeqTypeSpecificStatesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, SDATE_LOCALDATE).data
     }
 
     @Test
     void test_findJobClassAndSeqTypeSpecificStatesByDateBetween_ShouldReturnMapWithDataListsContainingOccurencesOfStatesPerHour() {
-        createClusterJob([queued: SDATE_DATETIME, started: SDATE_DATETIME, ended: SDATE_DATETIME, jobClass: 'jobClass1', seqType: seqType])
-        createClusterJob([queued: SDATE_DATETIME, started: SDATE_DATETIME.plusHours(1), ended: SDATE_DATETIME.plusHours(2), jobClass: 'jobClass1', seqType: seqType])
+        createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME,
+                          ended: SDATE_DATETIME,
+                          jobClass: 'jobClass1',
+                          seqType: seqType])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME.plusHours(1),
+                          ended: SDATE_DATETIME.plusHours(2),
+                          jobClass: 'jobClass1',
+                          seqType: seqType])
 
         Map statesMap = clusterJobService.findJobClassAndSeqTypeSpecificStatesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, SDATE_LOCALDATE)
 
@@ -597,7 +782,13 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findJobClassAndSeqTypeSpecificWalltimesByDateBetween_WhenJobIstOutOfTimeSpan_ShouldReturnMapInInitialState() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), started: SDATE_DATETIME.minusDays(1).plusHours(12), ended: SDATE_DATETIME.minusDays(1), jobClass: 'jobClass1', seqType: seqType, requestedWalltime: new Duration(12 * HOURS_TO_MILLIS)])
+        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+                          started: SDATE_DATETIME.minusDays(1).plusHours(12),
+                          ended: SDATE_DATETIME.minusDays(1),
+                          jobClass: 'jobClass1',
+                          seqType: seqType,
+                          requestedWalltime: new Duration(12 * HOURS_TO_MILLIS),
+                          exitStatus: ClusterJob.Status.COMPLETED])
 
         Map walltimeMap = clusterJobService.findJobClassAndSeqTypeSpecificWalltimesByDateBetween('jobClass', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
 
@@ -607,8 +798,21 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findJobClassAndSeqTypeSpecificWalltimesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapContainingMaximumWalltimeAndWalltimesPerHour() {
-        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME, started: SDATE_DATETIME.plusHours(12), ended: EDATE_DATETIME, jobClass: 'jobClass1', seqType: seqType, requestedWalltime: new Duration(12 * HOURS_TO_MILLIS)])
-        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME, started: SDATE_DATETIME.plusHours(18), ended: EDATE_DATETIME, jobClass: 'jobClass1', seqType: seqType, requestedWalltime: new Duration(12 * HOURS_TO_MILLIS)])
+        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME,
+                                            started: SDATE_DATETIME.plusHours(12),
+                                            ended: EDATE_DATETIME,
+                                            jobClass: 'jobClass1',
+                                            seqType: seqType,
+                                            requestedWalltime: new Duration(12 * HOURS_TO_MILLIS),
+                                            exitStatus: ClusterJob.Status.COMPLETED])
+
+        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME,
+                                            started: SDATE_DATETIME.plusHours(18),
+                                            ended: EDATE_DATETIME,
+                                            jobClass: 'jobClass1',
+                                            seqType: seqType,
+                                            requestedWalltime: new Duration(12 * HOURS_TO_MILLIS),
+                                            exitStatus: ClusterJob.Status.COMPLETED])
 
         Map walltimeMap = clusterJobService.findJobClassAndSeqTypeSpecificWalltimesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
 
@@ -626,7 +830,13 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findJobClassAndSeqTypeSpecificMemoriesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnNullValue() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), ended: SDATE_DATETIME.minusDays(1), jobClass: 'jobClass1', seqType: seqType, usedMemory: GiB_TO_KiB, requestedMemory: GiB_TO_KiB])
+        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+                          ended: SDATE_DATETIME.minusDays(1),
+                          jobClass: 'jobClass1',
+                          seqType: seqType,
+                          usedMemory: GiB_TO_KiB,
+                          requestedMemory: GiB_TO_KiB,
+                          exitStatus: ClusterJob.Status.COMPLETED])
 
         Map memoryMap = clusterJobService.findJobClassAndSeqTypeSpecificMemoriesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
 
@@ -636,8 +846,21 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findJobClassAndSeqTypeSpecificMemoriesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMaximumMemoryUsageAndListWithMemoryUsagesPerJob() {
-        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, jobClass: 'jobClass1', seqType: seqType, usedMemory: GiB_TO_KiB, requestedMemory: GiB_TO_KiB])
-        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME, ended: EDATE_DATETIME, jobClass: 'jobClass1', seqType: seqType, usedMemory: GiB_TO_KiB, requestedMemory: 2 * GiB_TO_KiB])
+        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME,
+                                            ended: EDATE_DATETIME,
+                                            jobClass: 'jobClass1',
+                                            seqType: seqType,
+                                            usedMemory: GiB_TO_KiB,
+                                            requestedMemory: GiB_TO_KiB,
+                                            exitStatus: ClusterJob.Status.COMPLETED])
+
+        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME,
+                                            ended: EDATE_DATETIME,
+                                            jobClass: 'jobClass1',
+                                            seqType: seqType,
+                                            usedMemory: GiB_TO_KiB,
+                                            requestedMemory: 2 * GiB_TO_KiB,
+                                            exitStatus: ClusterJob.Status.COMPLETED])
 
         Map memoryMap = clusterJobService.findJobClassAndSeqTypeSpecificMemoriesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
 
@@ -652,15 +875,34 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnNullValue() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), started: SDATE_DATETIME.minusDays(1), ended: SDATE_DATETIME.minusDays(1), jobClass: 'jobClass1', seqType: seqType, cpuTime: new Duration(24 * HOURS_TO_MILLIS)])
+        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+                          started: SDATE_DATETIME.minusDays(1),
+                          ended: SDATE_DATETIME.minusDays(1),
+                          jobClass: 'jobClass1',
+                          seqType: seqType,
+                          cpuTime: new Duration(24 * HOURS_TO_MILLIS),
+                          exitStatus: ClusterJob.Status.COMPLETED])
 
         assert 0 == clusterJobService.findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     @Test
     void test_findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween_WhenSeveralJobsAreFound_ShouldReturnAverageCoreUsage() {
-        createClusterJob([queued: SDATE_DATETIME, started: SDATE_DATETIME.plusDays(1), ended: EDATE_DATETIME.plusDays(1), jobClass: 'jobClass1', seqType: seqType, cpuTime: new Duration(24 * HOURS_TO_MILLIS)])
-        createClusterJob([queued: SDATE_DATETIME, started: SDATE_DATETIME.plusDays(1), ended: EDATE_DATETIME.plusDays(1), jobClass: 'jobClass1', seqType: seqType, cpuTime: new Duration(12 * HOURS_TO_MILLIS)])
+        createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME.plusDays(1),
+                          ended: EDATE_DATETIME.plusDays(1),
+                          jobClass: 'jobClass1',
+                          seqType: seqType,
+                          cpuTime: new Duration(24 * HOURS_TO_MILLIS),
+                          exitStatus: ClusterJob.Status.COMPLETED])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME.plusDays(1),
+                          ended: EDATE_DATETIME.plusDays(1),
+                          jobClass: 'jobClass1',
+                          seqType: seqType,
+                          cpuTime: new Duration(12 * HOURS_TO_MILLIS),
+                          exitStatus: ClusterJob.Status.COMPLETED])
 
         assert 0.75 == clusterJobService.findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE.plusDays(1))
     }
@@ -672,15 +914,34 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findJobClassAndSeqTypeSpecificAvgMemoryByDateBetween_WhenNoJobIsOutOfTimeSpan_ShouldReturnNullValue() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), started: SDATE_DATETIME.minusDays(1), ended: SDATE_DATETIME.minusDays(1), jobClass: 'jobClass1', seqType: seqType, usedMemory: 900L])
+        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+                          started: SDATE_DATETIME.minusDays(1),
+                          ended: SDATE_DATETIME.minusDays(1),
+                          jobClass: 'jobClass1',
+                          seqType: seqType,
+                          usedMemory: 900L,
+                          exitStatus: ClusterJob.Status.COMPLETED])
 
         assert 0 == clusterJobService.findJobClassAndSeqTypeSpecificAvgMemoryByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     @Test
     void test_findJobClassAndSeqTypeSpecificAvgMemoryByDateBetween_WhenSeveralJobsAreFound_ShouldReturnAverageMemoryUsage() {
-        createClusterJob([queued: SDATE_DATETIME, started: SDATE_DATETIME.plusDays(1), ended: EDATE_DATETIME.plusDays(1), jobClass: 'jobClass1', seqType: seqType, usedMemory: 900L])
-        createClusterJob([queued: SDATE_DATETIME, started: SDATE_DATETIME.plusDays(1), ended: EDATE_DATETIME.plusDays(1), jobClass: 'jobClass1', seqType: seqType, usedMemory: 100L])
+        createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME.plusDays(1),
+                          ended: EDATE_DATETIME.plusDays(1),
+                          jobClass: 'jobClass1',
+                          seqType: seqType,
+                          usedMemory: 900L,
+                          exitStatus: ClusterJob.Status.COMPLETED])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME.plusDays(1),
+                          ended: EDATE_DATETIME.plusDays(1),
+                          jobClass: 'jobClass1',
+                          seqType: seqType,
+                          usedMemory: 100L,
+                          exitStatus: ClusterJob.Status.COMPLETED])
 
         assert 500 == clusterJobService.findJobClassAndSeqTypeSpecificAvgMemoryByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE.plusDays(1))
     }
@@ -692,15 +953,26 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnNullValues() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), started: SDATE_DATETIME.minusDays(1), ended: SDATE_DATETIME.minusDays(1), jobClass: 'jobClass1', seqType: seqType])
+        createClusterJob([queued: SDATE_DATETIME.minusDays(1), started: SDATE_DATETIME.minusDays(1), ended: SDATE_DATETIME.minusDays(1), jobClass: 'jobClass1', seqType: seqType, exitStatus: ClusterJob.Status.COMPLETED])
 
         assert ['avgQueue': 0, 'avgProcess': 0] == clusterJobService.findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     @Test
     void test_findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween_WhenSeveralJobsAreFound_ShouldReturnAverageStatesTimeDistribution() {
-        createClusterJob([queued: SDATE_DATETIME, started: SDATE_DATETIME.plusHours(12), ended: EDATE_DATETIME, jobClass: 'jobClass1', seqType: seqType])
-        createClusterJob([queued: SDATE_DATETIME, started: SDATE_DATETIME.plusHours(18), ended: EDATE_DATETIME, jobClass: 'jobClass1', seqType: seqType])
+        createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME.plusHours(12),
+                          ended: EDATE_DATETIME,
+                          jobClass: 'jobClass1',
+                          seqType: seqType,
+                          exitStatus: ClusterJob.Status.COMPLETED])
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME.plusHours(18),
+                          ended: EDATE_DATETIME,
+                          jobClass: 'jobClass1',
+                          seqType: seqType,
+                          exitStatus: ClusterJob.Status.COMPLETED])
 
         assert ['avgQueue': 15 * HOURS_TO_MILLIS, 'avgProcess': 9 * HOURS_TO_MILLIS] == clusterJobService.findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
@@ -712,9 +984,11 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findJobSpecificStatesTimeDistributionByJobId_WhenJobIsFound_ReturnStatesTimeDistribution() {
-        createClusterJob([queued: SDATE_DATETIME, started: SDATE_DATETIME.plusHours(18), ended: EDATE_DATETIME])
+        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME.plusHours(18),
+                          ended: EDATE_DATETIME])
 
-        assert ['queue': [75, 18 * HOURS_TO_MILLIS], 'process': [25, 6 * HOURS_TO_MILLIS]]
+        assert ['queue': [75, 18 * HOURS_TO_MILLIS], 'process': [25, 6 * HOURS_TO_MILLIS]] == clusterJobService.findJobSpecificStatesTimeDistributionByJobId(job1.id)
     }
 
     @Test
@@ -728,7 +1002,7 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
         createClusterJob([queued: SDATE_DATETIME.plusDays(1)])
         createClusterJob([queued: SDATE_DATETIME.plusDays(3)])
 
-        assert SDATE_DATETIME.plusDays(3).toLocalDate()
+        assert SDATE_DATETIME.plusDays(3).toLocalDate() == clusterJobService.getLatestJobDate()
     }
 
     private ClusterJob createClusterJob(Map myProps = [:]) {

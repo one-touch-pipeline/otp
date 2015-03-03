@@ -1,16 +1,15 @@
 package de.dkfz.tbi.otp.infrastructure
 
+import de.dkfz.tbi.otp.gorm.mapper.PersistentDateTimeAsMillis
+import de.dkfz.tbi.otp.gorm.mapper.PersistentDurationAsMillis
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
-
-import org.joda.time.Duration
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import org.joda.time.DateTime
-// all timestamps using joda-time , e.g. DateTime queued, get saved as UTC-timezone
-import org.jadira.usertype.dateandtime.joda.*
+import org.joda.time.Duration
 import org.joda.time.Period
 import org.joda.time.format.PeriodFormat
 
@@ -22,6 +21,8 @@ import org.joda.time.format.PeriodFormat
  * instantly filled.
  * Other information can be accessed through the flowcontrol-API and get filled
  * in the PbsMonitorService as soon as the cluster job is finished.
+ *
+ * all timestamps using joda-time, e.g. DateTime queued, get saved as UTC-timezone
  **/
 class ClusterJob implements ClusterJobIdentifier{
 
@@ -125,11 +126,11 @@ class ClusterJob implements ClusterJobIdentifier{
 
     static mapping = {
         processingStep index: "cluster_job_processing_step_idx"
-        queued type: PersistentDateTime
-        started type: PersistentDateTime
-        ended type: PersistentDateTime
-        requestedWalltime type: PersistentDurationAsString
-        cpuTime type: PersistentDurationAsString
+        queued type: PersistentDateTimeAsMillis
+        started type: PersistentDateTimeAsMillis
+        ended type: PersistentDateTimeAsMillis
+        requestedWalltime type: PersistentDurationAsMillis
+        cpuTime type: PersistentDurationAsMillis
 
         clusterJobId index: "cluster_job_cluster_job_id_idx"
         clusterJobName index: "cluster_job_cluster_job_name_idx"

@@ -115,7 +115,7 @@ $.otp.clusterJobJobTypeSpecific = {
         var step = Math.floor(labels.length / 24)
         var newLabels = labels.filter( function (value_ignored, index) { return index % step === 0 } )
         return newLabels;
-    },
+    }
 };
 
 $.otp.clusterJobJobTypeSpecificGraph = {

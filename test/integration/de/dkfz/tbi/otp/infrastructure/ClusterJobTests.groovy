@@ -1,9 +1,5 @@
 package de.dkfz.tbi.otp.infrastructure
 
-import static org.junit.Assert.*
-
-import org.junit.*
-
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.Process
@@ -12,6 +8,10 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import org.joda.time.DateTime
 import org.joda.time.Duration
+import org.junit.Before
+import org.junit.Test
+
+import static org.junit.Assert.*
 
 class ClusterJobTests {
 

@@ -19,8 +19,8 @@ class ClusterJobServiceUnitTests extends GroovyTestCase {
     ClusterJobService clusterJobService = new ClusterJobService()
 
     @Test
-    void test_getDaysAndHoursBetween_WhenFromEqualsTo_ShouldReturnListOfTwentyFiveDatesAsStrings() {
-        List dates = (0..24).collect { SDATE_LOCALDATE.toDateTimeAtStartOfDay().plusHours(it).toString('yyyy-MM-dd HH:mm:ss') }
+    void test_getDaysAndHoursBetween_WhenFromEqualsTo_ShouldReturnListOfTwentyFiveDates() {
+        List dates = (0..24).collect { SDATE_LOCALDATE.toDateTimeAtStartOfDay().plusHours(it)}
 
         assert dates == clusterJobService.getDaysAndHoursBetween(SDATE_LOCALDATE, SDATE_LOCALDATE)
     }
