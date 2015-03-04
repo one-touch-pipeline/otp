@@ -58,7 +58,7 @@ testDataConfig {
         }
         'de.dkfz.tbi.otp.ngsdata.SampleType' {
             name = {'sampleTypeName_' + (counter++)}
-            specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+            specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         }
         'de.dkfz.tbi.otp.ngsdata.SeqCenter' {
             name = {'seqCenterName_' + (counter++)}
@@ -68,6 +68,13 @@ testDataConfig {
             name = {'seqTypeName_' + (counter++)}
             libraryLayout  = {'seqTypelibraryLayout_' + (counter++)}
             dirName  = {'seqTypeDirName_' + (counter++)}
+        }
+        'de.dkfz.tbi.otp.ngsdata.SoftwareTool' {
+            programName = {'softwareTool_' + (counter++)}
+            type = SoftwareTool.Type.BASECALLING
+        }
+        'de.dkfz.tbi.otp.ngsdata.SoftwareToolIdentifier' {
+            name = {'softwareToolIdentifier_' + (counter++)}
         }
         'de.dkfz.tbi.otp.dataprocessing.AlignmentPass' {
             referenceGenome = {ReferenceGenome.build()}

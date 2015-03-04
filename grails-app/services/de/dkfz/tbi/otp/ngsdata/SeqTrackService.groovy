@@ -36,6 +36,8 @@ class SeqTrackService {
 
     ExomeEnrichmentKitService exomeEnrichmentKitService
 
+    SequencingKitService sequencingKitService
+
     /**
      * Retrieves the Sequences matching the given filtering the user has access to.
      * The access restriction is done through the Projects the user has access to.
@@ -458,18 +460,22 @@ class SeqTrackService {
             assertConsistentLibraryPreparationKit(dataFiles)
         }
 
+        SequencingKit sequencingKit = assertAndReturnConsistentSequencingKit(dataFiles)
+
         SoftwareTool pipeline = getPipeline(dataFiles.get(0))
         assertConsistentPipeline(pipeline, dataFiles)
 
-        SeqTrack seqTrack = createSeqTrack(dataFiles.get(0), run, sample, seqType, lane, pipeline)
+        String ilseId = assertAndReturnConcistentIlseId(dataFiles)
+
+        SeqTrack seqTrack = createSeqTrack(dataFiles.get(0), run, sample, seqType, lane, pipeline, sequencingKit, ilseId)
         consumeDataFiles(dataFiles, seqTrack)
         fillReadsForSeqTrack(seqTrack)
         seqTrack.save(flush: true)
         return seqTrack
     }
 
-    private SeqTrack createSeqTrack(DataFile dataFile, Run run, Sample sample, SeqType seqType, String lane, SoftwareTool pipeline) {
-        SeqTrackBuilder builder = new SeqTrackBuilder(lane, run, sample, seqType, run.seqPlatform, pipeline)
+    private SeqTrack createSeqTrack(DataFile dataFile, Run run, Sample sample, SeqType seqType, String lane, SoftwareTool pipeline, SequencingKit sequencingKit = null, String ilseId = null) {
+        SeqTrackBuilder builder = new SeqTrackBuilder(lane, run, sample, seqType, run.seqPlatform, pipeline, sequencingKit, ilseId)
         builder.setHasFinalBam(false).setHasOriginalBam(false).setUsingOriginalBam(false)
 
         /*
@@ -552,22 +558,38 @@ class SeqTrackService {
         for(DataFile file in files) {
             SeqType fileSeqType = getSeqType(file)
             if (!seqType.equals(fileSeqType)) {
-                throw new MetaDataInconsistentException(files, seqType, fileSeqType)
+                throw new MetaDataInconsistentException(files, seqType.name, fileSeqType.name)
             }
         }
     }
 
     private void assertConsistentLibraryPreparationKit(List<DataFile> files) {
-        List<String> libraryPreparationKits = files.collect { DataFile dataFile ->
-            MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.LIB_PREP_KIT.name())
+        assertConsistentWithinSeqTrack(files, MetaDataColumn.LIB_PREP_KIT)
+    }
+
+    private SequencingKit assertAndReturnConsistentSequencingKit(List<DataFile> files) {
+        String name = assertConsistentWithinSeqTrack(files, MetaDataColumn.SEQUENCING_KIT)
+        return sequencingKitService.findSequencingKitByNameOrAlias(name)
+    }
+
+    private String assertAndReturnConcistentIlseId(List<DataFile> files) {
+        return assertConsistentWithinSeqTrack(files, MetaDataColumn.ILSE_NO)
+    }
+
+    private String assertConsistentWithinSeqTrack(List<DataFile> files, MetaDataColumn metaDataColumn) {
+        List<String> values = files.collect { DataFile dataFile ->
+            MetaDataKey key = MetaDataKey.findByName(metaDataColumn.name())
             MetaDataEntry metaDataEntry = MetaDataEntry.findByDataFileAndKey(dataFile, key)
             return metaDataEntry?.value
         }
-        String libraryPreparationKit = libraryPreparationKits.first()
-        if (!libraryPreparationKits.every { it == libraryPreparationKit }) {
-            throw new ProcessingException("Not using the same library preparation kit (files: ${files*.fileName})")
+        String value = values.first()
+        if (!values.every { it == value }) {
+            throw new ProcessingException("Not using the same ${metaDataColumn.name()} (files: ${files*.fileName})")
         }
+        return value
     }
+
+
 
     private SoftwareTool getPipeline(DataFile file) {
         String name = metaDataValue(file, "PIPELINE_VERSION")
@@ -581,10 +603,10 @@ class SeqTrackService {
     }
 
     private void assertConsistentPipeline(SoftwareTool pipeline, List<DataFile> files) {
-        for(DataFile file in file) {
+        for (DataFile file in files) {
             SoftwareTool filePipeline = getPipeline(file)
             if (!pipeline.equals(filePipeline)) {
-                throw new MetaDataInconsistentException(files, pipeline, filePipeline)
+                throw new MetaDataInconsistentException(files, pipeline.programName, filePipeline.programName)
             }
         }
     }

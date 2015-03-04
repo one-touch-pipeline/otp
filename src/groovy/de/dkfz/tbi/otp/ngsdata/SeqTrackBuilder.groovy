@@ -22,6 +22,8 @@ class SeqTrackBuilder {
 
     private final String laneId
 
+    private final String ilseId
+
     private boolean hasFinalBam = false
 
     private boolean hasOriginalBam = false
@@ -43,6 +45,8 @@ class SeqTrackBuilder {
     private final SeqPlatform seqPlatform
 
     private final SoftwareTool pipelineVersion
+
+    private  final SequencingKit sequencingKit
 
     private QualityEncoding qualityEncoding = QualityEncoding.UNKNOWN
 
@@ -73,7 +77,9 @@ class SeqTrackBuilder {
 
     public SeqTrackBuilder(String laneId, Run run, Sample sample,
     SeqType seqType, SeqPlatform seqPlatform,
-    SoftwareTool pipelineVersion) {
+    SoftwareTool pipelineVersion,
+    SequencingKit sequencingKit = null,
+    String ilseId = null) {
         super()
         notNull(laneId, "A seq track needs a lane id")
         notNull(run, "A seq track needs a run")
@@ -88,6 +94,8 @@ class SeqTrackBuilder {
         this.seqType = seqType
         this.seqPlatform = seqPlatform
         this.pipelineVersion = pipelineVersion
+        this.sequencingKit = sequencingKit
+        this.ilseId = ilseId
     }
 
     public SeqTrackBuilder setHasFinalBam(boolean hasFinalBam) {
@@ -188,6 +196,7 @@ class SeqTrackBuilder {
         }
 
         seqTrack.laneId = laneId
+        seqTrack.ilseId = ilseId
         seqTrack.hasFinalBam = hasFinalBam
         seqTrack.hasOriginalBam = hasOriginalBam
         seqTrack.usingOriginalBam = usingOriginalBam
@@ -202,6 +211,7 @@ class SeqTrackBuilder {
         seqTrack.qualityEncoding = qualityEncoding
         seqTrack.alignmentState = alignmentState
         seqTrack.fastqcState = fastqcState
+        seqTrack.sequencingKit = sequencingKit
 
         if (!seqTrack.validate()) {
             throw new ProcessingException("seq track could not be validated: ${seqTrack.errors}")

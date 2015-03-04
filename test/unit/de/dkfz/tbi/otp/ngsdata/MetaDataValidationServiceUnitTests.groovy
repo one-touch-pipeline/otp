@@ -9,10 +9,11 @@ import de.dkfz.tbi.otp.utils.ReferencedClass
 
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(MetaDataValidationService)
-@Mock([MetaDataValidationService, ExomeEnrichmentKitService,
+@Mock([MetaDataValidationService, ExomeEnrichmentKitService, SequencingKitService,
     ReferencedClass, ChangeLog,
     Project, SeqPlatform, SeqCenter, Run,DataFile, MetaDataKey, MetaDataEntry,
-    ExomeEnrichmentKit, ExomeEnrichmentKitSynonym])
+    ExomeEnrichmentKit, ExomeEnrichmentKitSynonym,
+    SequencingKit, SequencingKitSynonym])
 class MetaDataValidationServiceUnitTests {
 
     MetaDataValidationService metaDataValidationService
@@ -34,6 +35,12 @@ class MetaDataValidationServiceUnitTests {
 
     final static String EXOME_ENRICHMENT_KIT_SYNONYM ="ExomeEnrichmentKitSynonym"
 
+    final static String SEQUENCING_KIT = "SequencingKit"
+
+    final static String OTHER_SEQUENCING_KIT = "OtherSequencingKit"
+
+    final static String SEQUENCING_KIT_SYNONYM = "SequencingKitSynonym"
+
     // the String "UNKNOWN" is used instead of the enum, because that is how it appears in external input files
     final String UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE = "UNKNOWN"
 
@@ -42,6 +49,7 @@ class MetaDataValidationServiceUnitTests {
         metaDataValidationService = new MetaDataValidationService([
             exomeEnrichmentKitService: new ExomeEnrichmentKitService()
         ])
+        metaDataValidationService.sequencingKitService = new SequencingKitService()
     }
 
     @After
@@ -208,6 +216,28 @@ class MetaDataValidationServiceUnitTests {
     }
 
 
+    void testValidateMetaDataEntryForSEQUENCING_KIT() {
+        Run run = createRun()
+        createSequencingKitSynonym()
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(MetaDataColumn.SEQUENCING_KIT.name()): SEQUENCING_KIT])
+        assertTrue(metaDataValidationService.validateMetaDataEntry(run, map[(MetaDataColumn.SEQUENCING_KIT.name())]))
+    }
+
+    void testValidateMetaDataEntryForSEQUENCING_KIT_MetadataUseSynonymValue() {
+        Run run = createRun()
+        createSequencingKitSynonym()
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(MetaDataColumn.SEQUENCING_KIT.name()): SEQUENCING_KIT_SYNONYM])
+        assertTrue(metaDataValidationService.validateMetaDataEntry(run, map[(MetaDataColumn.SEQUENCING_KIT.name())]))
+    }
+
+    void testValidateMetaDataEntryForSEQUENCING_KIT_MetadataValueDoesNotExistInDB_IsFalse() {
+        Run run = createRun()
+        createSequencingKitSynonym()
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(MetaDataColumn.SEQUENCING_KIT.name()): OTHER_SEQUENCING_KIT])
+        assertFalse(metaDataValidationService.validateMetaDataEntry(run, map[(MetaDataColumn.SEQUENCING_KIT.name())]))
+    }
+
+
 
     void testCheckSampleIdentifier_correct() {
         assert metaDataValidationService.checkSampleIdentifier('CorrectName')
@@ -264,6 +294,20 @@ class MetaDataValidationServiceUnitTests {
                         exomeEnrichmentKit: exomeEnrichmentKit)
         assertNotNull(exomeEnrichmentKitSynonym.save([flush: true]))
         return exomeEnrichmentKitSynonym
+    }
+
+    private SequencingKitSynonym createSequencingKitSynonym() {
+        SequencingKit sequencingKit = new SequencingKit(
+                name: SEQUENCING_KIT
+        )
+        assert sequencingKit.save(flush: true)
+
+        SequencingKitSynonym sequencingKitSynonym = new SequencingKitSynonym(
+                name:SEQUENCING_KIT_SYNONYM,
+                sequencingKit: sequencingKit
+        )
+        assert sequencingKitSynonym.save(flush: true)
+        return sequencingKitSynonym
     }
 
     private DataFile createDataFile() {

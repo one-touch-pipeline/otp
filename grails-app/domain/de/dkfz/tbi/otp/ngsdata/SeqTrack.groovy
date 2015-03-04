@@ -19,6 +19,7 @@ class SeqTrack {
     }
 
     String laneId
+    String ilseId
     boolean hasFinalBam = false
     boolean hasOriginalBam = false
     boolean usingOriginalBam = false
@@ -30,6 +31,7 @@ class SeqTrack {
     SeqType seqType
     SeqPlatform seqPlatform
     SoftwareTool pipelineVersion
+    SequencingKit sequencingKit
 
     QualityEncoding qualityEncoding = QualityEncoding.UNKNOWN
     DataProcessingState alignmentState = DataProcessingState.UNKNOWN
@@ -39,7 +41,8 @@ class SeqTrack {
         Run,
         Sample,
         SeqType,
-        SeqPlatform
+        SeqPlatform,
+        SequencingKit,
     ]
 
     static constraints = {
@@ -50,6 +53,9 @@ class SeqTrack {
         seqType()
         sample()
         pipelineVersion()
+        // for old data and data which is sequenced from external core facilities this information might not be provided.
+        sequencingKit nullable: true
+        ilseId nullable: true
     }
 
     String nBaseString() {
@@ -144,5 +150,6 @@ class SeqTrack {
         sample index: "seq_track_sample_idx"
         seqType index: "seq_track_seq_type_idx"
         seqPlatform index: "seq_track_seq_platform_idx"
+        sequencingKit index : "seq_track_sequencing_kit_idx"
     }
 }

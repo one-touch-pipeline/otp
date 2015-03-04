@@ -1,13 +1,13 @@
 package de.dkfz.tbi
 
 import de.dkfz.tbi.otp.utils.HelperUtils
-
-import java.util.concurrent.Callable
-
 import org.junit.*
 import org.junit.runners.model.MultipleFailureException
 import org.springframework.validation.Errors
 import org.springframework.validation.FieldError
+import junit.framework.AssertionFailedError
+
+import java.util.concurrent.Callable
 
 /**
  * A default base class for test cases. This provides some helper methods.
@@ -110,5 +110,19 @@ class TestCase extends GroovyTestCase {
         // Replacing the clazz parameter with object.class does not work because of Spring's magic wrapper classes.
         GroovySystem.metaClassRegistry.removeMetaClass(clazz)
         object.metaClass = null
+    }
+
+    /**
+     * Wrapper for instance method {@link GroovyTestCase#shouldFail}
+     */
+    static String shouldFail(Closure code) {
+        return new GroovyTestCase().shouldFail(code)
+    }
+
+    /**
+     * Wrapper for instance method {@link GroovyTestCase#shouldFail}
+     */
+    static String shouldFail(Class clazz, Closure code) {
+        return new GroovyTestCase().shouldFail(clazz, code)
     }
 }

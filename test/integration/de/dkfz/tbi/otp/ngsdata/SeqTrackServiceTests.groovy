@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.ngsdata.MetaDataEntry.Source
 import de.dkfz.tbi.otp.ngsdata.MetaDataEntry.Status
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
+import de.dkfz.tbi.TestCase
 
 class SeqTrackServiceTests extends AbstractIntegrationTest {
 
@@ -19,6 +20,9 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     static final String ANTIBODY_TARGET_IDENTIFIER = "AntibodyTargetIdentifier123"
     static final String ANTIBODY_IDENTIFIER = "AntibodyIdentifier123"
+    static final String SEQUENCING_KIT = "SequencingKit"
+    static final String ILSE_ID = "1234"
+    static final String LANE_NR = "2"
 
     // the String "UNKNOWN" is used instead of the enum, because that is how it appears in external input files
     final String UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE = "UNKNOWN"
@@ -250,6 +254,207 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
         List<DataFile> dataFiles = [dataFileR1, dataFileR2]
         seqTrackService.assertConsistentLibraryPreparationKit(dataFiles)
+    }
+
+
+    Run createDataForBuildFastqSeqTrack(String key, String valueRead1, String valueRead2) {
+        SequencingKit.build(name: SEQUENCING_KIT)
+        SeqType.build(name: SeqTypeNames.EXOME.seqTypeName, libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
+        ExomeEnrichmentKit.build(name: "LIB_PREP_KIT")
+        SoftwareToolIdentifier.build(name: "PIPELINE_VERSION")
+        SampleIdentifier.build(name: "SAMPLE_ID")
+        Run run = Run.build()
+        Map data = [
+                LANE_NO: LANE_NR,
+                SAMPLE_ID: "SAMPLE_ID",
+                SEQUENCING_TYPE: SeqTypeNames.EXOME.seqTypeName,
+                LIB_PREP_KIT: "LIB_PREP_KIT",
+                SEQUENCING_KIT: "SEQUENCING_KIT",
+                PIPELINE_VERSION: "PIPELINE_VERSION",
+                ILSE_NO: ILSE_ID,
+                LIBRARY_LAYOUT: SeqType.LIBRARYLAYOUT_PAIRED,
+                INSERT_SIZE: "10000",
+                BASE_COUNT: "100000",
+                READ_COUNT: "1000",
+        ]
+        createAndSaveDataFileAndMetaDataEntry(data + [(key): valueRead1], run)
+        createAndSaveDataFileAndMetaDataEntry(data + [(key): valueRead2], run)
+        return run
+    }
+
+
+    void testBuildFastqSeqTrack_SeqTrackCanBeBuild() {
+        Run run = createDataForBuildFastqSeqTrack("SAMPLE_ID", "SAMPLE_ID", "SAMPLE_ID")
+        SeqTrack seqTrack = seqTrackService.buildFastqSeqTrack(run, LANE_NR)
+        assert seqTrack.run == run
+        assert seqTrack.ilseId == ILSE_ID
+        assert seqTrack.laneId == LANE_NR
+    }
+
+    void testBuildFastqSeqTrack_NoDataFileFound_ThrowException() {
+        Run run = createDataForBuildFastqSeqTrack("SAMPLE_ID", "SAMPLE_ID", "SAMPLE_ID")
+
+        assert (TestCase.shouldFail(ProcessingException) {
+            seqTrackService.buildFastqSeqTrack(Run.build(), LANE_NR)
+        }).contains("No laneDataFiles found.")
+    }
+
+    void testBuildFastqSeqTrack_SamplesAreDifferent_ThrowException() {
+        Run run = createDataForBuildFastqSeqTrack("SAMPLE_ID", "SAMPLE_ID_1", "SAMPLE_ID_2")
+        SampleIdentifier.build(name: "SAMPLE_ID_1")
+        SampleIdentifier.build(name: "SAMPLE_ID_2")
+        shouldFail(SampleInconsistentException) {seqTrackService.buildFastqSeqTrack(run, LANE_NR)}
+    }
+
+    void testBuildFastqSeqTrack_SeqTypesAreDifferent_ThrowException() {
+        Run run = createDataForBuildFastqSeqTrack("SEQUENCING_TYPE", "SEQUENCING_TYPE_1", "SEQUENCING_TYPE_2")
+        SeqType.build(name: "SEQUENCING_TYPE_1", libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
+        SeqType.build(name: "SEQUENCING_TYPE_2", libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
+        shouldFail(MetaDataInconsistentException) {seqTrackService.buildFastqSeqTrack(run, LANE_NR)}
+
+    }
+
+    void testBuildFastqSeqTrack_ExomeSeqTrack_EnrichmentKitsAreDifferent_ThrowException() {
+        Run run = createDataForBuildFastqSeqTrack("LIB_PREP_KIT", "LIB_PREP_KIT_1", "LIB_PREP_KIT_2")
+        assert (TestCase.shouldFail(ProcessingException) {
+            seqTrackService.buildFastqSeqTrack(run, LANE_NR)
+        }).contains("Not using the same LIB_PREP_KIT")
+
+    }
+
+    void testBuildFastqSeqTrack_SequencingKitsAreDifferent_ThrowException() {
+        Run run = createDataForBuildFastqSeqTrack("SEQUENCING_KIT", "SEQUENCING_KIT_1", "SEQUENCING_KIT_2")
+        assert (TestCase.shouldFail(ProcessingException) {
+            seqTrackService.buildFastqSeqTrack(run, LANE_NR)
+        }).contains("Not using the same SEQUENCING_KIT")
+    }
+
+    void testBuildFastqSeqTrack_SoftwareToolsAreDifferent_ThrowException() {
+        Run run = createDataForBuildFastqSeqTrack("PIPELINE_VERSION", "PIPELINE_VERSION_1", "PIPELINE_VERSION_2")
+        SoftwareToolIdentifier.build(name: "PIPELINE_VERSION_1")
+        SoftwareToolIdentifier.build(name: "PIPELINE_VERSION_2")
+        shouldFail(MetaDataInconsistentException) {seqTrackService.buildFastqSeqTrack(run, LANE_NR)}
+    }
+
+    void testBuildFastqSeqTrack_IlseIdsAreDifferent_ThrowDifferent() {
+        Run run = createDataForBuildFastqSeqTrack("ILSE_NO", "ILSE_NO_1", "ILSE_NO_2")
+        assert (TestCase.shouldFail(ProcessingException) {
+            seqTrackService.buildFastqSeqTrack(run, LANE_NR)
+        }).contains("Not using the same ILSE_NO")
+    }
+
+
+    void testAssertConsistentWithinSeqTrack_NotEntryInDataBaseForMetaDataKey() {
+        MetaDataKey metaDataKey = new MetaDataKey(name: MetaDataColumn.SEQUENCING_KIT.name())
+        assertNotNull(metaDataKey.save())
+
+        DataFile dataFileR1 = new DataFile(fileName: "1_ACTGTG_L005_R1_complete_filtered.fastq.gz")
+        assertNotNull(dataFileR1.save())
+
+        DataFile dataFileR2 = new DataFile(fileName: "1_ACTGTG_L005_R2_complete_filtered.fastq.gz")
+        assertNotNull(dataFileR2.save())
+
+        List<DataFile> dataFiles = [dataFileR1, dataFileR2]
+        seqTrackService.assertConsistentWithinSeqTrack(dataFiles, MetaDataColumn.SEQUENCING_KIT) == null
+    }
+
+    void testAssertConsistentWithinSeqTrack_ValuesAreNotConsistent_ShouldFail() {
+        String sequencingKit = "sequencingKit"
+        DataFile dataFileR1 = createAndSaveDataFileAndMetaDataEntry([(MetaDataColumn.SEQUENCING_KIT.name()): sequencingKit])
+
+        String differentSequencingKit = "differentSequencingKit"
+        DataFile dataFileR2 = createAndSaveDataFileAndMetaDataEntry([(MetaDataColumn.SEQUENCING_KIT.name()): differentSequencingKit])
+
+        List<DataFile> dataFiles = [dataFileR1, dataFileR2]
+        shouldFail(ProcessingException) {
+            seqTrackService.assertConsistentWithinSeqTrack(dataFiles, MetaDataColumn.SEQUENCING_KIT)
+        }
+    }
+
+    void testAssertConsistentWithinSeqTrack_ValuesAreConsistent() {
+        String sequencingKit = "sequencingKit"
+
+        DataFile dataFileR1 = createAndSaveDataFileAndMetaDataEntry([(MetaDataColumn.SEQUENCING_KIT.name()): sequencingKit])
+        DataFile dataFileR2 = createAndSaveDataFileAndMetaDataEntry([(MetaDataColumn.SEQUENCING_KIT.name()): sequencingKit])
+
+        List<DataFile> dataFiles = [dataFileR1, dataFileR2]
+        assert sequencingKit == seqTrackService.assertConsistentWithinSeqTrack(dataFiles, MetaDataColumn.SEQUENCING_KIT)
+    }
+
+    void testAssertAndReturnConsistentSequencingKit_ValuesAreConsistent() {
+        String sequencingKitName = "sequencingKit"
+        SequencingKit sequencingKit = new SequencingKit(name: sequencingKitName)
+        assert sequencingKit.save(flush: true)
+
+        DataFile dataFileR1 = createAndSaveDataFileAndMetaDataEntry([(MetaDataColumn.SEQUENCING_KIT.name()): sequencingKitName])
+        DataFile dataFileR2 = createAndSaveDataFileAndMetaDataEntry([(MetaDataColumn.SEQUENCING_KIT.name()): sequencingKitName])
+
+        List<DataFile> dataFiles = [dataFileR1, dataFileR2]
+        assert sequencingKit == seqTrackService.assertAndReturnConsistentSequencingKit(dataFiles)
+    }
+
+    void testAssertAndReturnConcistentIlseId_ValuesAreConsistent() {
+        String ilseId = "1234"
+
+        DataFile dataFileR1 = createAndSaveDataFileAndMetaDataEntry([(MetaDataColumn.ILSE_NO.name()): ilseId])
+        DataFile dataFileR2 = createAndSaveDataFileAndMetaDataEntry([(MetaDataColumn.ILSE_NO.name()): ilseId])
+
+        List<DataFile> dataFiles = [dataFileR1, dataFileR2]
+        assert ilseId == seqTrackService.assertAndReturnConcistentIlseId(dataFiles)
+    }
+
+
+    void testCreateSeqTrack_WithSequencingKit() {
+        Map data = createData()
+        SeqTrack seqTrack = seqTrackService.createSeqTrack(
+                data.dataFile,
+                data.run,
+                data.sample,
+                data.seqType,
+                "1",
+                data.softwareTool,
+                data.sequencingKit
+        )
+        assertNotNull(seqTrack)
+        assertEquals(SeqTrack.class, seqTrack.class)
+        assert seqTrack.sequencingKit == data.sequencingKit
+    }
+
+    void testCreateSeqTrack_WithIlseId() {
+        String ilseId = "1234"
+        Map data = createData()
+        SeqTrack seqTrack = seqTrackService.createSeqTrack(
+                data.dataFile,
+                data.run,
+                data.sample,
+                data.seqType,
+                "1",
+                data.softwareTool,
+                null,
+                ilseId
+        )
+        assertNotNull(seqTrack)
+        assertEquals(SeqTrack.class, seqTrack.class)
+        assert seqTrack.ilseId == ilseId
+    }
+
+    void testCreateSeqTrack_WithSequencingKitAndIlseId() {
+        String ilseId = "1234"
+        Map data = createData()
+        SeqTrack seqTrack = seqTrackService.createSeqTrack(
+                data.dataFile,
+                data.run,
+                data.sample,
+                data.seqType,
+                "1",
+                data.softwareTool,
+                data.sequencingKit,
+                ilseId
+        )
+        assertNotNull(seqTrack)
+        assertEquals(SeqTrack.class, seqTrack.class)
+        assert seqTrack.sequencingKit == data.sequencingKit
+        assert seqTrack.ilseId == ilseId
     }
 
     void testCreateSeqTrackNoExome() {
@@ -525,6 +730,26 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertEquals(ChipSeqSeqTrack.class, seqTrack.class)
     }
 
+
+
+    private DataFile createAndSaveDataFileAndMetaDataEntry(Map<MetaDataKey, String> metaDataEntries, Run run = null) {
+        DataFile dataFile = new DataFile(
+                fileName: "1_ACTGTG_L005_R1_complete_filtered.fastq.gz",
+                laneNr: LANE_NR,
+                run: run,
+                fileType: FileType.buildLazy(type: FileType.Type.SEQUENCE),
+        )
+        assertNotNull(dataFile.save())
+        metaDataEntries.each { metaDataKey, value ->
+            MetaDataKey key = MetaDataKey.buildLazy(name: metaDataKey)
+
+            MetaDataEntry metaDataEntry = new MetaDataEntry(value: value, dataFile: dataFile, key: key, source: MetaDataEntry.Source.SYSTEM)
+            assertNotNull(metaDataEntry.save())
+        }
+
+        return dataFile
+    }
+
     private Map createData() {
         Map map = [:]
         Project project = new Project(
@@ -609,6 +834,11 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         name: ANTIBODY_TARGET_IDENTIFIER)
         assertNotNull(antibodyTarget.save([flush: true]))
 
+        SequencingKit sequencingKit = new SequencingKit(
+                name: SEQUENCING_KIT
+        )
+        assert sequencingKit.save(flush: true)
+
         return [
             dataFile: dataFile,
             run: run,
@@ -616,7 +846,8 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
             seqType: seqType,
             softwareTool: softwareTool,
             exomeEnrichmentKit: exomeEnrichmentKit,
-            antibodyTarget: antibodyTarget
+            antibodyTarget: antibodyTarget,
+            sequencingKit: sequencingKit,
         ]
     }
 

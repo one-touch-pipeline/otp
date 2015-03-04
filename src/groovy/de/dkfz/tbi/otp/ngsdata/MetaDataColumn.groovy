@@ -27,5 +27,7 @@ enum MetaDataColumn {
     WITHDRAWN_DATE,
     COMMENT,
     BARCODE,
-    LIB_PREP_KIT
+    LIB_PREP_KIT,
+    SEQUENCING_KIT,
+    ILSE_NO,
 }

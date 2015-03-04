@@ -17,11 +17,6 @@ import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
 
 /**
  * To run this workflow test the preparation steps described in the documentation (grails doc) have to be followed.
- * Additional preparations
- * The two files:
- * - fastqR1Filepath
- * - fastqR2Filepath
- * have to be created before the test can be started
  */
 class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
 
@@ -52,12 +47,12 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
     String fastqR2Filepath = "${testDataDir}/35-3B_NoIndex_L007_R2_complete_filtered.fastq.gz"
 
     String barcode = "GATCGA"
-    String fastqR1Filename1 = "example_${barcode}_fileR1_1.fastq.gz"
-    String fastqR2Filename1 = "example_${barcode}_fileR2_1.fastq.gz"
-    String fastqR1Filename2 = "example_${barcode}_fileR1_2.fastq.gz"
-    String fastqR2Filename2 = "example_${barcode}_fileR2_2.fastq.gz"
-    String fastqR1Filename3 = "example_${barcode}_fileR1_3.fastq.gz"
-    String fastqR2Filename3 = "example_${barcode}_fileR2_3.fastq.gz"
+    String fastqR1Filename1 = "example_${barcode}_file_L001_R1.fastq.gz"
+    String fastqR2Filename1 = "example_${barcode}_file_L001_R2.fastq.gz"
+    String fastqR1Filename2 = "example_${barcode}_file_L002_R1.fastq.gz"
+    String fastqR2Filename2 = "example_${barcode}_file_L002_R2.fastq.gz"
+    String fastqR1Filename3 = "example_${barcode}_file_L003_R1.fastq.gz"
+    String fastqR2Filename3 = "example_${barcode}_file_L003_R2.fastq.gz"
     String runName = "130312_D00133_0018_ADTWTJACXX"
     String runDate = "2013-03-12"
     String metaDataFilepath = "${ftpDir}/${runName}/${runName}.fastq.tsv"
@@ -74,6 +69,8 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
     String libraryLayout = "PAIRED"
     String instrumentPlatform = "Illumina"
     String instrumentModel = "HiSeq2000"
+    String sequencingKitName = "sequencingKit"
+    String ilseId = "1234"
 
     String laneNoKit = "1"
     String laneNoKitId = "2"
@@ -109,7 +106,10 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
             (MetaDataColumn.PIPELINE_VERSION): pipeLineVersion,
             (MetaDataColumn.INSERT_SIZE): insertSize,
             (MetaDataColumn.LIBRARY_LAYOUT): libraryLayout,
-            (MetaDataColumn.WITHDRAWN): "0"])
+            (MetaDataColumn.WITHDRAWN): "0",
+            (MetaDataColumn.SEQUENCING_KIT): sequencingKitName,
+            (MetaDataColumn.ILSE_NO): ilseId,
+        ])
         return metaDataDefault
     }
 
@@ -147,6 +147,13 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
 
         realm = DomainFactory.createRealmDataManagementDKFZ(paths).save(flush: true)
         realm = DomainFactory.createRealmDataProcessingDKFZ(paths).save(flush: true)
+
+        String path = "${ftpDir}/${runName}"
+        // Just to be sure the rootPath and the processingRootPath are clean for new test
+        String cmdCleanUp = cleanUpTestFoldersCommand()
+        String cmdBuildFileStructure = "mkdir -p ${path} ${testDataDir}"
+        String createFiles = "echo fastqR1Filepath > ${fastqR1Filepath}; echo fastqR2Filepath > ${fastqR2Filepath};"
+        executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildFileStructure}; ${createFiles}")
 
         FileType fileType = new FileType()
         fileType.type = FileType.Type.SEQUENCE
@@ -204,6 +211,11 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
         seqPlatformModelIdentifier.seqPlatform = seqPlatform
         assertNotNull(seqPlatformModelIdentifier.save(flush: true))
 
+        SequencingKit sequencingKit = new SequencingKit(
+                name: sequencingKitName
+        )
+        assert sequencingKit.save(flush: true)
+
         SeqCenter seqCenter = new SeqCenter(
                         name: seqCenterName,
                         dirName: seqCenterName
@@ -243,9 +255,6 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
         String softLinkFastqR1Filepath1 = "${path}/${fastqR1Filename1}"
         String softLinkFastqR2Filepath1 = "${path}/${fastqR2Filename1}"
 
-        // Just to be sure the rootPath and the processingRootPath are clean for new test
-        String cmdCleanUp = cleanUpTestFoldersCommand()
-        String cmdBuildFileStructure = "mkdir -p ${path}"
         String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath1}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath1}"
 
         StringBuffer sb = new StringBuffer()
@@ -255,7 +264,7 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
         String metaDataFile = sb.toString()
 
         String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
-        executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildFileStructure}; ${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
+        executionService.executeCommand(realm, "${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
         run("scripts/workflows/MetaDataWorkflow.groovy")
 
         // there will be only one at the database
@@ -282,9 +291,6 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
         String path = "${ftpDir}/${runName}"
         String softLinkFastqR1Filepath1 = "${path}/${fastqR1Filename1}"
         String softLinkFastqR2Filepath1 = "${path}/${fastqR2Filename1}"
-        // Just to be sure the rootPath and the processingRootPath are clean for new test
-        String cmdCleanUp = cleanUpTestFoldersCommand()
-        String cmdBuildFileStructure = "mkdir -p ${path}"
         String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath1}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath1}"
 
         List<MetaDataColumn> metaDataColumns = metaDataColumns()
@@ -296,7 +302,7 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
         String metaDataFile = sb.toString()
 
         String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
-        executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildFileStructure}; ${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
+        executionService.executeCommand(realm, "${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
         assertTrue(new File(metaDataFilepath).exists())
         run("scripts/workflows/MetaDataWorkflow.groovy")
 
@@ -338,9 +344,6 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
         String softLinkFastqR1Filepath3 = "${path}/${fastqR1Filename3}"
         String softLinkFastqR2Filepath3 = "${path}/${fastqR2Filename3}"
 
-        // Just to be sure the rootPath and the processingRootPath are clean for new test
-        String cmdCleanUp = cleanUpTestFoldersCommand()
-        String cmdBuildFileStructure = "mkdir -p ${path}"
         String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath1}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath1}; ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath2}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath2}; ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath3}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath3} "
 
         StringBuffer sb = new StringBuffer()
@@ -354,7 +357,7 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
         String metaDataFile = sb.toString()
 
         String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
-        executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildFileStructure}; ${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
+        executionService.executeCommand(realm, "${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
         assertTrue(new File(metaDataFilepath).exists())
         run("scripts/workflows/MetaDataWorkflow.groovy")
 
@@ -379,9 +382,6 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
         String softLinkFastqR1Filepath = "${path}/${fastqR1Filename1}"
         String softLinkFastqR2Filepath = "${path}/${fastqR2Filename1}"
 
-        // Just to be sure the rootPath and the processingRootPath are clean for new test
-        String cmdCleanUp = cleanUpTestFoldersCommand()
-        String cmdBuildFileStructure = "mkdir -p ${path}"
         String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath}"
 
         String ANTIBODY_TARGET_1 = "just4Test1"
@@ -393,7 +393,7 @@ class LoadMetaDataTests extends GroovyScriptAwareIntegrationTest {
         String metaDataFile = sb.toString()
 
         String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
-        executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildFileStructure}; ${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
+        executionService.executeCommand(realm, "${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
 
         AntibodyTarget.findOrSaveByName(ANTIBODY_TARGET_1)
 

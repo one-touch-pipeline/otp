@@ -12,6 +12,7 @@ class MetaDataValidationService {
     def hipoIndividualService
 
     ExomeEnrichmentKitService exomeEnrichmentKitService
+    SequencingKitService sequencingKitService
 
     private final Lock validateMetaDataLock = new ReentrantLock()
 
@@ -105,6 +106,9 @@ class MetaDataValidationService {
                 if (status != null) {
                     entry.status = status ? valid : invalid
                 }
+                break
+            case "SEQUENCING_KIT":
+                entry.status = !entry.value || sequencingKitService.findSequencingKitByNameOrAlias(entry.value) ? valid : invalid
                 break
             case "ANTIBODY_TARGET":
                 MetaDataEntry metaDataEntry = metaDataEntry(entry.dataFile, "SEQUENCING_TYPE")

@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 /**
- * represents different spellings of the {@ling ExomeEnrichmentKit}
+ * represents different spellings of the {@link ExomeEnrichmentKit}
  *
  */
 class ExomeEnrichmentKitSynonym {
