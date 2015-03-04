@@ -17,6 +17,12 @@ testDataConfig {
             fileName = 'DataFileFileName.gz'
             vbpFileName = 'DataFileVbpFileName.gz'
         }
+        'de.dkfz.tbi.otp.ngsdata.ExomeEnrichmentKit' {
+            name = {'name_' + (counter++)}
+        }
+        'de.dkfz.tbi.otp.ngsdata.ExomeEnrichmentKitSynonym' {
+            name = {'name_' + (counter++)}
+        }
         'de.dkfz.tbi.otp.ngsdata.Individual' {
             pid = {'pid_' + (counter++)}
         }

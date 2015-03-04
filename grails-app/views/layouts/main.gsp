@@ -89,6 +89,7 @@
                                             <li id="notification"><g:link controller="notification"><g:message code="otp.menu.manageNotifications"/></g:link></li><br>
                                             <li id="processingOption"><g:link controller="processingOption"><g:message code="otp.menu.processingOptions"/></g:link></li><br>
                                             <li id="softwareTool"><g:link controller="softwareTool" action="list"><g:message code="otp.menu.softwareTool"/></g:link></li><br>
+                                            <li id="metaDataFields"><g:link controller="metaDataFields" action="index"><g:message code="otp.menu.metaDataFields"/></g:link></li><br>
                                         </ul>
                                      </li>
                                 </ul>
