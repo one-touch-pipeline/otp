@@ -511,30 +511,38 @@ $.otp.dataTableFilter = {
 
 $.otp.initCommentBox = function (processId) {
     "use strict";
-    var cBoxRead = $('#commentRead .commentBox');
-    var cBoxWrite = $('#commentWrite .commentBox');
-    $('#editComment').click(function () {
-        $('#commentRead').hide();
-        cBoxWrite.val(cBoxRead.val());
-        $('#commentWrite').show();
+    var cBox = $('#processCommentBox #commentBox');
+    var saveCommentElement = $('#processCommentBox #saveComment');
+    var cancelCommentElement = $('#processCommentBox #cancelComment');
+    var initVal = cBox.val();
+
+    cBox.keyup(function() {
+        if(cBox.val() != initVal) {
+            saveCommentElement.enable();
+            cancelCommentElement.enable();
+        } else {
+            saveCommentElement.prop( "disabled", true);
+            cancelCommentElement.prop( "disabled", true);
+        };
     });
-    $('#saveComment').click(function () {
-        var processComment = cBoxWrite.val();
-        var promise = $.otp.workflows.saveProcessComment(processId, processComment);
+
+    $('#processCommentBox #saveComment').click(function () {
+        var promise = $.otp.workflows.saveProcessComment(processId, cBox.val());
         promise.success(function (data) {
             $('.commentDateLabel').html(data.date);
-            cBoxRead.val(cBoxWrite.val());
-            $('#commentWrite').hide();
-            $('#commentRead').show();
+            initVal = cBox.val();
+            saveCommentElement.prop("disabled", true);
+            cancelCommentElement.prop("disabled", true);
         });
         promise.error(function () {
             $.otp.warningMessage($.i18n.prop("processes.process.error"));
         });
     });
-    $('#cancelComment').click(function () {
-        $('#commentWrite').hide();
-        $('#commentRead').show();
-        cBoxWrite.val("");
+
+    $('#processCommentBox #cancelComment').click(function () {
+        cBox.val(initVal);
+        saveCommentElement.prop("disabled", true);
+        cancelCommentElement.prop("disabled", true);
     });
 };
 

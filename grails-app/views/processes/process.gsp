@@ -17,21 +17,12 @@
         </div>
         <div id="processCommentBox">
             <div id="commentLabel">Comment:</div>
-            <div id="commentRead">
-                <textarea class="commentBox" readonly>${comment?.encodeAsHTML()}</textarea>
-                <div class="commentButtonArea">
-                    <button id="editComment">&nbsp;&nbsp;&nbsp;<g:message code="processes.process.edit" /></button>
-                </div>
-                <div class="commentDateLabel">${commentDate}</div>
+            <textarea id="commentBox">${comment?.encodeAsHTML()}</textarea>
+            <div id="commentButtonArea">
+                <button id="saveComment" disabled>&nbsp;&nbsp;&nbsp;<g:message code="processes.process.save" /></button>
+                <button id="cancelComment" disabled><g:message code="processes.process.cancel" /></button>
             </div>
-            <div id="commentWrite">
-                <textarea class="commentBox"></textarea>
-                <div class="commentButtonArea">
-                    <button id="saveComment">&nbsp;&nbsp;&nbsp;<g:message code="processes.process.save" /></button>
-                    <button id="cancelComment"><g:message code="processes.process.cancel" /></button>
-                </div>
-                <div class="commentDateLabel">${commentDate}</div>
-            </div>
+            <div id="commentDateLabel">${commentDate}</div>
         </div>
         <div>
             <div id="process-visualization" style="display: none"></div>
