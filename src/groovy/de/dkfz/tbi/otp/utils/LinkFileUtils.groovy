@@ -1,10 +1,10 @@
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import static de.dkfz.tbi.otp.utils.WaitingFileUtils.confirmExists
 import org.springframework.stereotype.Component
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
 
 /**
  */
@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class LinkFileUtils {
 
     @Autowired
-    ExecutionService executionService
+    ApplicationContext applicationContext
 
     /**
      * Creates links for the key in the sourceLinkMap to the value in the sourceLinkMap.
@@ -28,7 +28,7 @@ class LinkFileUtils {
                 command << "ln -sf ${source.path} ${link.path}\n"
             }
 
-            executionService.executeCommand(realm, command.toString())
+            applicationContext.executionService.executeCommand(realm, command.toString())
 
             sourceLinkMap.each { File source, File link ->
                 if (! confirmExists(link)) {

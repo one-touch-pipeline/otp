@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import org.junit.Test
 import grails.buildtestdata.mixin.Build
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
+import org.springframework.context.ApplicationContext
 
 @Build([Realm])
 class LinkFileUtilsUnitTests {
@@ -23,7 +24,9 @@ class LinkFileUtilsUnitTests {
         realm = Realm.build()
 
         linkFileUtils = new LinkFileUtils()
-        linkFileUtils.executionService = new ExecutionService()
+
+        linkFileUtils.applicationContext = [:] as ApplicationContext
+        linkFileUtils.applicationContext.metaClass.executionService = new ExecutionService()
     }
 
     @After
@@ -49,7 +52,7 @@ class LinkFileUtilsUnitTests {
         File sourceFile = new File(testDirectory, "sourceFile")
         File linkFile = new File(testDirectory, "linkFile")
 
-        linkFileUtils.executionService.metaClass.executeCommand = { Realm realm, String command ->
+        linkFileUtils.applicationContext.executionService.metaClass.executeCommand = { Realm realm, String command ->
             assert command == "ln -sf ${sourceFile.path} ${linkFile.path}\n"
             assert linkFile.createNewFile()
             assert realm == realm
@@ -63,7 +66,7 @@ class LinkFileUtilsUnitTests {
         File sourceFile = new File(testDirectory, "sourceFile")
         File linkFile = new File(testDirectory, "linkFile")
 
-        linkFileUtils.executionService.metaClass.executeCommand = { Realm realm, String command ->
+        linkFileUtils.applicationContext.executionService.metaClass.executeCommand = { Realm realm, String command ->
             assert command == "ln -sf ${sourceFile.path} ${linkFile.path}\n"
             assert realm == realm
         }
