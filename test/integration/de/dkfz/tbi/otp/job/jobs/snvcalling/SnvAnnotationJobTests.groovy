@@ -277,9 +277,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
         snvAnnotationJob.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
             return new File(processedMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
         }
-        snvAnnotationJob.metaClass.deleteResultFileIfExists = { File resultFile, Realm realm ->
-            resultFile.delete()
-        }
+        executionService.metaClass.executeCommand = { Realm realm, String command -> }
 
         WaitingFileUtils.metaClass.static.confirmDoesNotExist = { File file -> return true }
 

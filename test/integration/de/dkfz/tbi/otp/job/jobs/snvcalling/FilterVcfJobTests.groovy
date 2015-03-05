@@ -369,6 +369,8 @@ CHROMOSOME_INDICES=( {1..21} XY)
         File checkpointFile = new OtpPath(snvCallingInstance2.snvInstancePath, SnvCallingStep.FILTER_VCF.checkpointFileName).absoluteDataManagementPath
         checkpointFile.createNewFile()
 
+        executionService.metaClass.executeCommand = { Realm realm, String command -> }
+
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> }
 
         WaitingFileUtils.metaClass.static.confirmDoesNotExist = { File file -> return true }
