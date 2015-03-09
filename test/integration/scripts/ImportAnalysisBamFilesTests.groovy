@@ -1,6 +1,7 @@
 package scripts
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.FastqSet
@@ -472,11 +473,11 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
         sql.executeInsert("insert into seq_track (id, version, lane_id, run_id, sample_id, " +
                 "seq_type_id, seq_platform_id, pipeline_version_id, " +
                 "fastqc_state, has_final_bam, has_original_bam, insert_size, n_base_pairs, " +
-                "n_reads, using_original_bam, quality_encoding, class, linked_externally)" +
-                "VALUES (?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "n_reads, using_original_bam, quality_encoding, class, linked_externally, kit_info_reliability)" +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [id, 0, laneId, run1.id, sample.id, seqType.id, seqPlatform.id, softwareTool.id,
                  "UNKNOWN", false, false, -1, 0, 0, false, "UNKNOWN",
-                 "de.dkfz.tbi.otp.ngsdata.SeqTrack", false]
+                 "de.dkfz.tbi.otp.ngsdata.SeqTrack", false, InformationReliability.UNKNOWN_UNVERIFIED.rawValue]
         )
         return SeqTrack.get(id)
     }

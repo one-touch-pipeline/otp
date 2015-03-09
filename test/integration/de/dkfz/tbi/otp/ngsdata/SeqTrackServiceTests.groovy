@@ -3,7 +3,9 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 
 import static org.junit.Assert.*
+
 import org.junit.*
+
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.ngsdata.MetaDataEntry.Source
@@ -23,6 +25,9 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
     static final String ANTIBODY_TARGET_IDENTIFIER = "AntibodyTargetIdentifier123"
     static final String ANTIBODY_IDENTIFIER = "AntibodyIdentifier123"
     static final String SEQUENCING_KIT = "SequencingKit"
+    static final String LIBRARY_PREPARATION_KIT_NAME_VALID = "Valid kit name"
+    static final String LIBRARY_PREPARATION_KIT_SYNONYM_VALID = "Valid kit synonym"
+    static final String LIBRARY_PREPARATION_KIT_NAME_INVALID = "Invalid kit name"
     static final String ILSE_ID = "1234"
     static final String LANE_NR = "2"
 
@@ -452,9 +457,11 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assert seqTrack.ilseId == ilseId
     }
 
-    void testCreateSeqTrackNoExome() {
+
+
+    void testCreateSeqTrack_shouldReturnSeqTrack_NoMetadataForLibraryPreparationKit() {
         Map data = createData()
-        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "")
+
         SeqTrack seqTrack = seqTrackService.createSeqTrack(
                         data.dataFile,
                         data.run,
@@ -467,23 +474,10 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertEquals(SeqTrack.class, seqTrack.class)
     }
 
-    void testCreateSeqTrackNoExomeInvalid() {
+    void testCreateSeqTrack_shouldReturnSeqTrack_WithUsingKitByName() {
         Map data = createData()
-        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "")
-        shouldFail(IllegalArgumentException.class) {
-            seqTrackService.createSeqTrack(
-                            data.dataFile,
-                            data.run,
-                            null,
-                            data.seqType,
-                            "1",
-                            data.softwareTool
-                            )
-        }
-    }
+        DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.LIB_PREP_KIT, LIBRARY_PREPARATION_KIT_NAME_VALID)
 
-    void testCreateSeqTrackNoExomeNo_LIB_PREP_KIT_MetaData() {
-        Map data = createData()
         SeqTrack seqTrack = seqTrackService.createSeqTrack(
                         data.dataFile,
                         data.run,
@@ -494,13 +488,13 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         )
         assertNotNull(seqTrack)
         assertEquals(SeqTrack.class, seqTrack.class)
+        assertEquals(InformationReliability.KNOWN, seqTrack.kitInfoReliability)
+        assertEquals(data.libraryPreparationKit, seqTrack.libraryPreparationKit)
     }
 
-    void testCreateSeqTrackExomeByKit() {
+    void testCreateSeqTrack_shouldReturnSeqTrack_WithKitUsingBySynonym() {
         Map data = createData()
-        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "LibraryPreparationKit")
-        data.seqType.name = SeqTypeNames.EXOME.seqTypeName
-        assertNotNull(data.seqType.save([flush: true]))
+        DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.LIB_PREP_KIT, LIBRARY_PREPARATION_KIT_SYNONYM_VALID)
 
         SeqTrack seqTrack = seqTrackService.createSeqTrack(
                         data.dataFile,
@@ -511,35 +505,14 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         data.softwareTool
                         )
         assertNotNull(seqTrack)
-        assertEquals(ExomeSeqTrack.class, seqTrack.class)
+        assertEquals(SeqTrack.class, seqTrack.class)
         assertEquals(InformationReliability.KNOWN, seqTrack.kitInfoReliability)
         assertEquals(data.libraryPreparationKit, seqTrack.libraryPreparationKit)
     }
 
-    void testCreateSeqTrackExomeByKitIdentifier() {
+    void testCreateSeqTrack_ShouldReturnExomeSeqTrack_WithSpecialValueUnknownForExome() {
         Map data = createData()
-        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "LibraryPreparationKitSynonym")
-        data.seqType.name = SeqTypeNames.EXOME.seqTypeName
-        assertNotNull(data.seqType.save([flush: true]))
-
-        SeqTrack seqTrack = seqTrackService.createSeqTrack(
-                        data.dataFile,
-                        data.run,
-                        data.sample,
-                        data.seqType,
-                        "1",
-                        data.softwareTool
-                        )
-        assertNotNull(seqTrack)
-        assertEquals(ExomeSeqTrack.class, seqTrack.class)
-        assertEquals(InformationReliability.KNOWN, seqTrack.kitInfoReliability)
-        assertEquals(data.libraryPreparationKit, seqTrack.libraryPreparationKit)
-    }
-
-
-    void testCreateSeqTrackExomeByValueUnknown() {
-        Map data = createData()
-        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE)
+        DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.LIB_PREP_KIT, UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE)
         data.seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
 
@@ -557,14 +530,66 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertNull(seqTrack.libraryPreparationKit)
     }
 
-    void testCreateSeqTrackExomeInvalidByValueUnknownUnverified() {
+    void testCreateSeqTrack_shouldFailForNotAllowedSpecialValueUnknownForNonExome() {
+        Map data = createData()
+        DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.LIB_PREP_KIT, UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE)
+
+        TestCase.shouldFail(AssertionError.class) {
+            seqTrackService.createSeqTrack(
+                            data.dataFile,
+                            data.run,
+                            data.sample,
+                            data.seqType,
+                            "1",
+                            data.softwareTool
+                            )
+        }
+    }
+
+    void testCreateSeqTrack_ShouldReturnSeqTrack_WithEmptyKitValueForNonExome() {
+        Map data = createData()
+        DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.LIB_PREP_KIT, '')
+
+        SeqTrack seqTrack = seqTrackService.createSeqTrack(
+                        data.dataFile,
+                        data.run,
+                        data.sample,
+                        data.seqType,
+                        "1",
+                        data.softwareTool
+                        )
+        assertNotNull(seqTrack)
+        assertEquals(SeqTrack.class, seqTrack.class)
+        assertEquals(InformationReliability.UNKNOWN_UNVERIFIED, seqTrack.kitInfoReliability)
+        assertNull(seqTrack.libraryPreparationKit)
+    }
+
+    void testCreateSeqTrack_shouldFailForEmptyKitValueForExome() {
+        Map data = createData()
+        DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.LIB_PREP_KIT, '')
+        data.seqType.name = SeqTypeNames.EXOME.seqTypeName
+        assertNotNull(data.seqType.save([flush: true]))
+
+        TestCase.shouldFail(AssertionError.class) {
+            seqTrackService.createSeqTrack(
+                            data.dataFile,
+                            data.run,
+                            data.sample,
+                            data.seqType,
+                            "1",
+                            data.softwareTool
+                            )
+        }
+    }
+
+
+
+    void testCreateSeqTrack_shouldFailForNotAllowedSpecialValueInMetaData_UnknownUnverified() {
         //value UNKNOWN_UNVERIFIED can not given in meta data, so this value should be handled like an unknown value
         Map data = createData()
-        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "UNKNOWN_UNVERIFIED")
-        data.seqType.name = SeqTypeNames.EXOME.seqTypeName
-        assertNotNull(data.seqType.save([flush: true]))
+        DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "UNKNOWN_UNVERIFIED")
 
-        shouldFail(IllegalArgumentException.class) {
+        TestCase.shouldFail(IllegalArgumentException.class) {
             seqTrackService.createSeqTrack(
                             data.dataFile,
                             data.run,
@@ -576,13 +601,11 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         }
     }
 
-    void testCreateSeqTrackExomeInvalidUnknownValue() {
+    void testCreateSeqTrack_shouldFailForUnknownKitValue() {
         Map data = createData()
-        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "unknown value")
-        data.seqType.name = SeqTypeNames.EXOME.seqTypeName
-        assertNotNull(data.seqType.save([flush: true]))
+        DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.LIB_PREP_KIT, LIBRARY_PREPARATION_KIT_NAME_INVALID)
 
-        shouldFail(IllegalArgumentException.class) {
+        TestCase.shouldFail(IllegalArgumentException.class) {
             seqTrackService.createSeqTrack(
                             data.dataFile,
                             data.run,
@@ -594,31 +617,11 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         }
     }
 
-    void testCreateSeqTrackExomeInvalidEmptyValue() {
+    void testCreateSeqTrack_ShouldFailForMissingSample() {
         Map data = createData()
-        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "")
-        data.seqType.name = SeqTypeNames.EXOME.seqTypeName
-        assertNotNull(data.seqType.save([flush: true]))
+        DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.LIB_PREP_KIT, LIBRARY_PREPARATION_KIT_NAME_VALID)
 
-        shouldFail(IllegalArgumentException.class) {
-            seqTrackService.createSeqTrack(
-                            data.dataFile,
-                            data.run,
-                            data.sample,
-                            data.seqType,
-                            "1",
-                            data.softwareTool
-                            )
-        }
-    }
-
-    void testCreateSeqTrackExomeInvalidNoSample() {
-        Map data = createData()
-        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "LibraryPreparationKit")
-        data.seqType.name = SeqTypeNames.EXOME.seqTypeName
-        assertNotNull(data.seqType.save([flush: true]))
-
-        shouldFail(IllegalArgumentException.class) {
+        TestCase.shouldFail(IllegalArgumentException.class) {
             seqTrackService.createSeqTrack(
                             data.dataFile,
                             data.run,
@@ -630,10 +633,9 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         }
     }
 
-    void testCreateSeqTrackExomeNoLibraryPreperationKitColumnKey() {
+    void testCreateSeqTrack_ShouldReturnSeqTrack_NoLibraryPreparationKitColumnKey() {
         Map data = createData()
-        data.seqType.name = SeqTypeNames.EXOME.seqTypeName
-        assertNotNull(data.seqType.save([flush: true]))
+
         SeqTrack seqTrack = seqTrackService.createSeqTrack(
                         data.dataFile,
                         data.run,
@@ -643,19 +645,17 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         data.softwareTool
                         )
         assertNotNull(seqTrack)
-        assertEquals(ExomeSeqTrack.class, seqTrack.class)
+        assertEquals(SeqTrack.class, seqTrack.class)
         assertEquals(InformationReliability.UNKNOWN_UNVERIFIED, seqTrack.kitInfoReliability)
         assertNull(seqTrack.libraryPreparationKit)
     }
 
-    void testCreateSeqTrackExomeNoLibraryPreperationKitColumn() {
+    void testCreateSeqTrack_ShouldReturnSeqTrack_NoLibraryPreparationKitColumn() {
         Map data = createData()
-        data.seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
-        MetaDataKey metaDataKey = new MetaDataKey(
-                        name: "LIB_PREP_KIT"
+        MetaDataKey metaDataKey = MetaDataKey.build(
+                        name: MetaDataColumn.LIB_PREP_KIT.name()
                         )
-        assertNotNull(metaDataKey.save([flush: true]))
 
         SeqTrack seqTrack = seqTrackService.createSeqTrack(
                         data.dataFile,
@@ -666,18 +666,18 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         data.softwareTool
                         )
         assertNotNull(seqTrack)
-        assertEquals(ExomeSeqTrack.class, seqTrack.class)
+        assertEquals(SeqTrack.class, seqTrack.class)
         assertEquals(InformationReliability.UNKNOWN_UNVERIFIED, seqTrack.kitInfoReliability)
         assertNull(seqTrack.libraryPreparationKit)
     }
 
     void testCreateSeqTrackChipSeqAntibodyTargetWithUnknownValue() {
         Map data = createData()
-        createMetaData(data.dataFile, MetaDataColumn.ANTIBODY_TARGET, "unknown value")
+        DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.ANTIBODY_TARGET, "unknown value")
         data.seqType.name = SeqTypeNames.CHIP_SEQ.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
 
-        shouldFail(IllegalArgumentException.class) {
+        TestCase.shouldFail(IllegalArgumentException.class) {
             seqTrackService.createSeqTrack(
                             data.dataFile,
                             data.run,
@@ -691,11 +691,11 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     void testCreateSeqTrackChipSeqAntibodyTargetWithEmptyValue() {
         Map data = createData()
-        createMetaData(data.dataFile, MetaDataColumn.ANTIBODY_TARGET, "")
+        DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.ANTIBODY_TARGET, "")
         data.seqType.name = SeqTypeNames.CHIP_SEQ.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
 
-        shouldFail(IllegalArgumentException.class) {
+        TestCase.shouldFail(IllegalArgumentException.class) {
             seqTrackService.createSeqTrack(
                             data.dataFile,
                             data.run,
@@ -709,7 +709,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     void testCreateSeqTrackChipSeqWithValidAntibodyTarget() {
         Map data = createData()
-        createMetaData(data.dataFile, MetaDataColumn.ANTIBODY_TARGET, ANTIBODY_TARGET_IDENTIFIER)
+        DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.ANTIBODY_TARGET, ANTIBODY_TARGET_IDENTIFIER)
         data.seqType.name = SeqTypeNames.CHIP_SEQ.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
 
@@ -817,12 +817,12 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertNotNull(dataFile.save([flush: true]))
 
         LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(
-                        name: "LibraryPreparationKit"
+                        name: LIBRARY_PREPARATION_KIT_NAME_VALID
                         )
         assertNotNull(libraryPreparationKit.save([flush: true]))
 
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = new LibraryPreparationKitSynonym(
-                        name: "LibraryPreparationKitSynonym",
+                        name: LIBRARY_PREPARATION_KIT_SYNONYM_VALID,
                         libraryPreparationKit: libraryPreparationKit)
         assertNotNull(libraryPreparationKitSynonym.save([flush: true]))
 
@@ -847,20 +847,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         ]
     }
 
-    private void createMetaData(DataFile dataFile, MetaDataColumn column, String value) {
-        MetaDataKey metaDataKey = new MetaDataKey(
-                        name: column as String
-                        )
-        assertNotNull(metaDataKey.save([flush: true]))
-
-        MetaDataEntry metaDataEntry = new MetaDataEntry(
-                        value: value,
-                        dataFile: dataFile,
-                        key: metaDataKey,
-                        source: MetaDataEntry.Source.SYSTEM
-                        )
-        assertNotNull(metaDataEntry.save())
-    }
 
 
     def addDataFile = { SeqTrack seqTrack ->
@@ -870,162 +856,117 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
     }
 
 
-    @Test(expected = IllegalArgumentException)
-    void testAnnotateSeqTrackForExomeDataFileIsNull() {
+    @Test
+    void testExtractAndSetLibraryPreparationKit_DataFileIsNull() {
         Run run = new Run()
         String lane = "lane"
         Sample sample = new Sample()
         SeqType seqType = new SeqType()
         SoftwareTool pipeline = new SoftwareTool()
         SeqPlatform seqPlatform = new SeqPlatform()
-        seqTrackService.annotateSeqTrackForExome(null, new SeqTrackBuilder(lane, run, sample, seqType, seqPlatform, pipeline), run, sample)
-    }
-
-
-    @Test(expected = IllegalArgumentException)
-    void testAnnotateSeqTrackForExomeBuilderIsNull() {
-        Run run = new Run()
-        DataFile dataFile = new DataFile()
-        String lane = "lane"
-        Sample sample = new Sample()
-        seqTrackService.annotateSeqTrackForExome(dataFile, null, run, sample)
-    }
-
-
-    @Test(expected = IllegalArgumentException)
-    void testAnnotateSeqTrackForExomeRunIsNull() {
-        DataFile dataFile = new DataFile()
-        Run run = new Run()
-        String lane = "lane"
-        Sample sample = new Sample()
-        SeqType seqType = new SeqType()
-        SoftwareTool pipeline = new SoftwareTool()
-        SeqPlatform seqPlatform = new SeqPlatform()
-        seqTrackService.annotateSeqTrackForExome(dataFile, new SeqTrackBuilder(lane, run, sample, seqType, seqPlatform, pipeline), null, sample)
-    }
-
-
-    @Test(expected = IllegalArgumentException)
-    void testAnnotateSeqTrackForExomeSampleIsNull() {
-        DataFile dataFile = new DataFile()
-        Run run = new Run()
-        String lane = "lane"
-        Sample sample = new Sample()
-        SeqType seqType = new SeqType()
-        SoftwareTool pipeline = new SoftwareTool()
-        SeqPlatform seqPlatform = new SeqPlatform()
-        seqTrackService.annotateSeqTrackForExome(dataFile, new SeqTrackBuilder(lane, run, sample, seqType, seqPlatform, pipeline), run, null)
+        TestCase.shouldFail(IllegalArgumentException.class) {
+            seqTrackService.extractAndSetLibraryPreparationKit(null, new SeqTrackBuilder(lane, run, sample, seqType, seqPlatform, pipeline), run, sample)
+        }
     }
 
 
     @Test
-    void testAnnotateSeqTrackForExomeMetaDataEntryIsNull() {
-        testData.createObjects()
+    void testExtractAndSetLibraryPreparationKit_BuilderIsNull() {
+        Run run = new Run()
+        DataFile dataFile = new DataFile()
         String lane = "lane"
+        Sample sample = new Sample()
+        TestCase.shouldFail(IllegalArgumentException.class) {
+            seqTrackService.extractAndSetLibraryPreparationKit(dataFile, null, run, sample)
+        }
+    }
+
+
+    @Test
+    void testExtractAndSetLibraryPreparationKit_RunIsNull() {
+        DataFile dataFile = new DataFile()
+        Run run = new Run()
+        String lane = "lane"
+        Sample sample = new Sample()
+        SeqType seqType = new SeqType()
+        SoftwareTool pipeline = new SoftwareTool()
+        SeqPlatform seqPlatform = new SeqPlatform()
+        TestCase.shouldFail(IllegalArgumentException.class) {
+            seqTrackService.extractAndSetLibraryPreparationKit(dataFile, new SeqTrackBuilder(lane, run, sample, seqType, seqPlatform, pipeline), null, sample)
+        }
+    }
+
+
+    @Test
+    void testExtractAndSetLibraryPreparationKit_SampleIsNull() {
+        DataFile dataFile = new DataFile()
+        Run run = new Run()
+        String lane = "lane"
+        Sample sample = new Sample()
+        SeqType seqType = new SeqType()
+        SoftwareTool pipeline = new SoftwareTool()
+        SeqPlatform seqPlatform = new SeqPlatform()
+        TestCase.shouldFail(IllegalArgumentException.class) {
+            seqTrackService.extractAndSetLibraryPreparationKit(dataFile, new SeqTrackBuilder(lane, run, sample, seqType, seqPlatform, pipeline), run, null)
+        }
+    }
+
+
+    @Test
+    void testExtractAndSetLibraryPreparationKit_MetaDataEntryIsNull() {
+        testData.createObjects()
         DataFile dataFile = testData.createDataFile()
         assertNotNull(dataFile.save(flush: true))
+        DomainFactory.createMetaDataKeyAndEntry(dataFile, MetaDataColumn.LIB_PREP_KIT, "testValue")
+        SeqTrackBuilder seqTrackBuilder = new SeqTrackBuilder(LANE_NR, testData.run, testData.sample, testData.seqType, testData.seqPlatform, testData.softwareTool)
 
-        MetaDataKey metaDataKey = new MetaDataKey(
-                        name: MetaDataColumn.LIB_PREP_KIT.name()
-                        )
-        assertNotNull(metaDataKey.save(flush: true))
-
-        MetaDataEntry metaDataEntry = new MetaDataEntry(
-                        value: "testValue",
-                        dataFile: dataFile,
-                        key: metaDataKey,
-                        status: Status.VALID,
-                        source: Source.MDFILE,
-                        )
-        assertNotNull(metaDataEntry.save(flush: true))
-
-        SeqTrackBuilder seqTrackBuilder = new SeqTrackBuilder(lane, testData.run, testData.sample, testData.seqType, testData.seqPlatform, testData.softwareTool)
-
-        seqTrackService.annotateSeqTrackForExome(testData.dataFile, seqTrackBuilder, testData.run, testData.sample)
+        seqTrackService.extractAndSetLibraryPreparationKit(testData.dataFile, seqTrackBuilder, testData.run, testData.sample)
         assertEquals(InformationReliability.UNKNOWN_UNVERIFIED, seqTrackBuilder.informationReliability)
     }
 
 
     @Test
-    void testAnnotateSeqTrackForExomeInformationReliabilityIsUNKNOWN_VERIFIED() {
+    void testExtractAndSetLibraryPreparationKit_InformationReliabilityIsUNKNOWN_VERIFIED() {
         testData.createObjects()
-        String lane = "lane"
-        MetaDataKey metaDataKey = new MetaDataKey(
-                        name: MetaDataColumn.LIB_PREP_KIT.name()
-                        )
-        assertNotNull(metaDataKey.save(flush: true))
+        DomainFactory.createMetaDataKeyAndEntry(testData.dataFile, MetaDataColumn.LIB_PREP_KIT, UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE)
+        testData.seqType.name = SeqTypeNames.EXOME.seqTypeName
+        assertNotNull(testData.seqType.save([flush: true]))
+        SeqTrackBuilder seqTrackBuilder = new SeqTrackBuilder(LANE_NR, testData.run, testData.sample, testData.seqType, testData.seqPlatform, testData.softwareTool)
 
-        MetaDataEntry metaDataEntry = new MetaDataEntry(
-                        value: UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE,
-                        dataFile: testData.dataFile,
-                        key: metaDataKey,
-                        status: Status.VALID,
-                        source: Source.MDFILE,
-                        )
-        assertNotNull(metaDataEntry.save(flush: true))
-
-        SeqTrackBuilder seqTrackBuilder = new SeqTrackBuilder(lane, testData.run, testData.sample, testData.seqType, testData.seqPlatform, testData.softwareTool)
-
-        seqTrackService.annotateSeqTrackForExome(testData.dataFile, seqTrackBuilder, testData.run, testData.sample)
+        seqTrackService.extractAndSetLibraryPreparationKit(testData.dataFile, seqTrackBuilder, testData.run, testData.sample)
         assertEquals(InformationReliability.UNKNOWN_VERIFIED, seqTrackBuilder.informationReliability)
     }
 
 
-    @Test(expected = IllegalArgumentException)
-    void testAnnotateSeqTrackForExomeKitIsNull() {
+    @Test
+    void testExtractAndSetLibraryPreparationKit_KitIsNull() {
         testData.createObjects()
-        String lane = "lane"
-        MetaDataKey metaDataKey = new MetaDataKey(
-                        name: MetaDataColumn.LIB_PREP_KIT.name()
-                        )
-        assertNotNull(metaDataKey.save(flush: true))
+        DomainFactory.createMetaDataKeyAndEntry(testData.dataFile, MetaDataColumn.LIB_PREP_KIT, LIBRARY_PREPARATION_KIT_NAME_INVALID)
+        SeqTrackBuilder seqTrackBuilder = new SeqTrackBuilder(LANE_NR, testData.run, testData.sample, testData.seqType, testData.seqPlatform, testData.softwareTool)
 
-        MetaDataEntry metaDataEntry = new MetaDataEntry(
-                        value: "notExistingKit",
-                        dataFile: testData.dataFile,
-                        key: metaDataKey,
-                        status: Status.VALID,
-                        source: Source.MDFILE,
-                        )
-        assertNotNull(metaDataEntry.save(flush: true))
-
-        SeqTrackBuilder seqTrackBuilder = new SeqTrackBuilder(lane, testData.run, testData.sample, testData.seqType, testData.seqPlatform, testData.softwareTool)
-
-        seqTrackService.annotateSeqTrackForExome(testData.dataFile, seqTrackBuilder, testData.run, testData.sample)
+        TestCase.shouldFail(IllegalArgumentException) {
+            seqTrackService.extractAndSetLibraryPreparationKit(testData.dataFile, seqTrackBuilder, testData.run, testData.sample)
+        }
     }
 
 
     @Test
-    void testAnnotateSeqTrackForExomeKitAvailableAndVerified() {
+    void testExtractAndSetLibraryPreparationKit_KitAvailableAndVerified() {
         testData.createObjects()
-        String lane = "lane"
-        MetaDataKey metaDataKey = new MetaDataKey(
-                        name: MetaDataColumn.LIB_PREP_KIT.name()
-                        )
-        assertNotNull(metaDataKey.save(flush: true))
-
-        MetaDataEntry metaDataEntry = new MetaDataEntry(
-                        value: "Agilent SureSelect V3",
-                        dataFile: testData.dataFile,
-                        key: metaDataKey,
-                        status: Status.VALID,
-                        source: Source.MDFILE,
-                        )
-        assertNotNull(metaDataEntry.save(flush: true))
-
-        LibraryPreparationKit libraryPreparationKit = testData.createLibraryPreparationKit("Agilent SureSelect V3")
-
-        SeqTrackBuilder seqTrackBuilder = new SeqTrackBuilder(lane, testData.run, testData.sample, testData.seqType, testData.seqPlatform, testData.softwareTool)
+        DomainFactory.createMetaDataKeyAndEntry(testData.dataFile, MetaDataColumn.LIB_PREP_KIT, LIBRARY_PREPARATION_KIT_NAME_VALID)
+        SeqTrackBuilder seqTrackBuilder = new SeqTrackBuilder(LANE_NR, testData.run, testData.sample, testData.seqType, testData.seqPlatform, testData.softwareTool)
+        LibraryPreparationKit libraryPreparationKit = testData.createLibraryPreparationKit(LIBRARY_PREPARATION_KIT_NAME_VALID)
 
         assertNull(seqTrackBuilder.libraryPreparationKit)
         assertEquals(InformationReliability.UNKNOWN_UNVERIFIED, seqTrackBuilder.informationReliability)
-        seqTrackService.annotateSeqTrackForExome(testData.dataFile, seqTrackBuilder, testData.run, testData.sample)
+        seqTrackService.extractAndSetLibraryPreparationKit(testData.dataFile, seqTrackBuilder, testData.run, testData.sample)
         assertEquals(libraryPreparationKit, seqTrackBuilder.libraryPreparationKit)
         assertEquals(InformationReliability.KNOWN, seqTrackBuilder.informationReliability)
     }
 
 
-    @Test(expected = IllegalArgumentException)
+
+    @Test
     void testAnnotateSeqTrackForChipSeqDataFileIsNull() {
         Run run = new Run()
         String lane = "lane"
@@ -1034,18 +975,22 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         SoftwareTool pipeline = new SoftwareTool()
         SeqPlatform seqPlatform = new SeqPlatform()
         SeqTrackBuilder seqTrackBuilder = new SeqTrackBuilder(lane, run, sample, seqType, seqPlatform, pipeline)
-        seqTrackService.annotateSeqTrackForChipSeq(null, seqTrackBuilder)
+        TestCase.shouldFail(IllegalArgumentException.class) {
+            seqTrackService.annotateSeqTrackForChipSeq(null, seqTrackBuilder)
+        }
     }
 
 
-    @Test(expected = IllegalArgumentException)
+    @Test
     void testAnnotateSeqTrackForChipSeqBuilderIsNull() {
         DataFile dataFile = new DataFile()
-        seqTrackService.annotateSeqTrackForChipSeq(dataFile, null)
+        TestCase.shouldFail(IllegalArgumentException) {
+            seqTrackService.annotateSeqTrackForChipSeq(dataFile, null)
+        }
     }
 
 
-    @Test(expected = IllegalArgumentException)
+    @Test
     void testAnnotateSeqTrackForChipSeqMetaDataEntryANTIBODY_TARGETIsNull() {
         testData.createObjects()
         DataFile dataFile = new DataFile()
@@ -1067,7 +1012,9 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
         SeqTrackBuilder seqTrackBuilder = new SeqTrackBuilder("lane", testData.run, testData.sample, testData.seqType, testData.seqPlatform, testData.softwareTool)
 
-        seqTrackService.annotateSeqTrackForChipSeq(testData.dataFile, seqTrackBuilder)
+        TestCase.shouldFail(IllegalArgumentException.class) {
+            seqTrackService.annotateSeqTrackForChipSeq(testData.dataFile, seqTrackBuilder)
+        }
     }
 
 

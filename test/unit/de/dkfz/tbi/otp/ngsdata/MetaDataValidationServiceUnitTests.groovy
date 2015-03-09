@@ -31,6 +31,10 @@ class MetaDataValidationServiceUnitTests {
 
     final static String SEQUENCING_TYPE = "SEQUENCING_TYPE"
 
+    final static String SEQUENCE_TYPE_ANY = "AnySeqType"
+
+    final static String SEQUENCE_TYPE_EXOME = SeqTypeNames.EXOME.seqTypeName
+
     final static String LIBRARY_PREPARATION_KIT ="LibraryPreparationKit"
 
     final static String LIBRARY_PREPARATION_KIT_SYNONYM ="LibraryPreparationKitSynonym"
@@ -170,43 +174,67 @@ class MetaDataValidationServiceUnitTests {
         assertEquals("1", getMetaDataEntryValue(dataFile, LANE_NO))
     }
 
-    void testCheckLibraryPreparationKitForExomeSeqType_UsingLibraryPreparationKit() {
+
+
+    void testCheckLibraryPreparationKit_UsingLibraryPreparationKit_shouldBeValid() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
-        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): LIBRARY_PREPARATION_KIT, (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
-        assertEquals(Boolean.TRUE, metaDataValidationService.checkLibraryPreparationKitForExomeSeqType(map[(LIB_PREP_KIT)]))
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): LIBRARY_PREPARATION_KIT, (SEQUENCING_TYPE): SEQUENCE_TYPE_ANY])
+
+        assert metaDataValidationService.checkLibraryPreparationKit(map[(LIB_PREP_KIT)])
     }
 
-    void testCheckLibraryPreparationKitForExomeSeqType_UsingLibraryPreparationKitSynonym() {
+    void testCheckLibraryPreparationKit_UsingLibraryPreparationKitSynonym_shouldBeValid() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
-        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): LIBRARY_PREPARATION_KIT_SYNONYM, (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
-        assertEquals(Boolean.TRUE, metaDataValidationService.checkLibraryPreparationKitForExomeSeqType(map[(LIB_PREP_KIT)]))
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): LIBRARY_PREPARATION_KIT_SYNONYM, (SEQUENCING_TYPE): SEQUENCE_TYPE_ANY])
+
+        assert metaDataValidationService.checkLibraryPreparationKit(map[(LIB_PREP_KIT)])
     }
 
-    void testCheckLibraryPreparationKitForExomeSeqType_UsingUNKNOWN() {
+    void testCheckLibraryPreparationKit_UsingSpecialValueUNKNOWN_ForExome_shouldBeValid() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
-        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE, (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
-        assertEquals(Boolean.TRUE, metaDataValidationService.checkLibraryPreparationKitForExomeSeqType(map[(LIB_PREP_KIT)]))
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE, (SEQUENCING_TYPE): SEQUENCE_TYPE_EXOME])
+
+        assert metaDataValidationService.checkLibraryPreparationKit(map[(LIB_PREP_KIT)])
     }
 
-    void testCheckLibraryPreparationKitForExomeSeqType_NotValidEntry() {
+    void testCheckLibraryPreparationKit_UsingSpecialValueUNKNOWN_ForNonExome_shouldBeInvalid() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
-        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): "something", (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
-        assertEquals(Boolean.FALSE, metaDataValidationService.checkLibraryPreparationKitForExomeSeqType(map[(LIB_PREP_KIT)]))
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE, (SEQUENCING_TYPE): SEQUENCE_TYPE_ANY])
+
+        assert !metaDataValidationService.checkLibraryPreparationKit(map[(LIB_PREP_KIT)])
     }
 
-    void testCheckLibraryPreparationKitForExomeSeqType_NotExome() {
+    void testCheckLibraryPreparationKit_UsingEmptyValue_ForExome_shouldBeInvalid() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
-        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): "something", (SEQUENCING_TYPE): "NOT_EXOME"])
-        assertEquals(null, metaDataValidationService.checkLibraryPreparationKitForExomeSeqType(map[(LIB_PREP_KIT)]))
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): '', (SEQUENCING_TYPE): SEQUENCE_TYPE_EXOME])
+
+        assert !metaDataValidationService.checkLibraryPreparationKit(map[(LIB_PREP_KIT)])
     }
 
-    void testCheckLibraryPreparationKitForExomeSeqType_NoSequenceType() {
+    void testCheckLibraryPreparationKit_UsingEmptyValue_ForNonExome_shouldBeValid() {
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): '', (SEQUENCING_TYPE): SEQUENCE_TYPE_ANY])
+
+        assert metaDataValidationService.checkLibraryPreparationKit(map[(LIB_PREP_KIT)])
+    }
+
+    void testCheckLibraryPreparationKit_UsingInvalidEntry_shouldBeInvalid() {
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): "something", (SEQUENCING_TYPE): SEQUENCE_TYPE_ANY])
+
+        assert !metaDataValidationService.checkLibraryPreparationKit(map[(LIB_PREP_KIT)])
+    }
+
+
+    void testCheckLibraryPreparationKit_NoSequenceType() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): "something"])
         shouldFail(NullPointerException.class) {
-            metaDataValidationService.checkLibraryPreparationKitForExomeSeqType(map[(LIB_PREP_KIT)])
+            metaDataValidationService.checkLibraryPreparationKit(map[(LIB_PREP_KIT)])
         }
     }
+
+
 
     void testValidateMetaDataEntryForLIB_PREP_KIT() {
         Run run = createRun()

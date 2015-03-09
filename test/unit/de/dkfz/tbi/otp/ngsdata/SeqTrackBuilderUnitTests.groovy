@@ -28,9 +28,9 @@ class SeqTrackBuilderUnitTests {
                         new SeqPlatform(),
                         new SoftwareTool()
                         )
-        builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
-        builder.setnBasePairs(5).setnReads(6).setInsertSize(7)
-        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
+        .setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
+        .setnBasePairs(5).setnReads(6).setInsertSize(7)
+        .setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
 
         SeqTrack seqTrack = builder.create()
         assertNotNull(seqTrack)
@@ -129,22 +129,15 @@ class SeqTrackBuilderUnitTests {
         }
     }
 
-    void testCreateExome() {
-        SeqTrackBuilder builder = new SeqTrackBuilder(
-                        "lane",
-                        new Run(),
-                        new Sample(),
-                        new SeqType(name: SeqTypeNames.EXOME.seqTypeName),
-                        new SeqPlatform(),
-                        new SoftwareTool()
-                        )
-        builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
-        builder.setnBasePairs(5).setnReads(6).setInsertSize(7)
-        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
+    void testCreateSeqTrack() {
+        SeqTrackBuilder builder = createSeqTrackBuilderWithDefaultValues()
+        .setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
+        .setnBasePairs(5).setnReads(6).setInsertSize(7)
+        .setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
 
         SeqTrack seqTrack = builder.create()
         assertNotNull(seqTrack)
-        assertEquals(ExomeSeqTrack.class, seqTrack.getClass())
+        assertEquals(SeqTrack.class, seqTrack.getClass())
         assertEquals("lane", seqTrack.laneId)
         assertEquals(true, seqTrack.hasFinalBam)
         assertEquals(true, seqTrack.hasOriginalBam)
@@ -163,23 +156,16 @@ class SeqTrackBuilderUnitTests {
         assertNull(seqTrack.libraryPreparationKit)
     }
 
-    void testCreateExomeWithLibraryPreparationKit() {
-        SeqTrackBuilder builder = new SeqTrackBuilder(
-                        "lane",
-                        new Run(),
-                        new Sample(),
-                        new SeqType(name: SeqTypeNames.EXOME.seqTypeName),
-                        new SeqPlatform(),
-                        new SoftwareTool()
-                        )
-        builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
-        builder.setnBasePairs(5).setnReads(6).setInsertSize(7)
-        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
-        builder.setLibraryPreparationKit(new LibraryPreparationKit())
+    void testCreateSeqTrackWithLibraryPreparationKit() {
+        SeqTrackBuilder builder = createSeqTrackBuilderWithDefaultValues()
+        .setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
+        .setnBasePairs(5).setnReads(6).setInsertSize(7)
+        .setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
+        .setLibraryPreparationKit(new LibraryPreparationKit())
 
         SeqTrack seqTrack = builder.create()
         assertNotNull(seqTrack)
-        assertEquals(ExomeSeqTrack.class, seqTrack.getClass())
+        assertEquals(SeqTrack.class, seqTrack.getClass())
         assertEquals("lane", seqTrack.laneId)
         assertEquals(true, seqTrack.hasFinalBam)
         assertEquals(true, seqTrack.hasOriginalBam)
@@ -198,23 +184,16 @@ class SeqTrackBuilderUnitTests {
         assertNotNull(seqTrack.libraryPreparationKit)
     }
 
-    void testCreateExomeWithKitInfoReliabilityIsUnknown() {
-        SeqTrackBuilder builder = new SeqTrackBuilder(
-                        "lane",
-                        new Run(),
-                        new Sample(),
-                        new SeqType(name: SeqTypeNames.EXOME.seqTypeName),
-                        new SeqPlatform(),
-                        new SoftwareTool()
-                        )
-        builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
-        builder.setnBasePairs(5).setnReads(6).setInsertSize(7)
-        builder.setQualityEncoding(QualityEncoding.ILLUMINA)setFastqcState(DataProcessingState.IN_PROGRESS)
-        builder.setInformationReliability(InformationReliability.UNKNOWN_VERIFIED)
+    void testCreateSeqTrackWithKitInfoReliabilityIsUnknownVerified() {
+        SeqTrackBuilder builder = createSeqTrackBuilderWithDefaultValues()
+        .setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
+        .setnBasePairs(5).setnReads(6).setInsertSize(7)
+        .setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
+        .setInformationReliability(InformationReliability.UNKNOWN_VERIFIED)
 
         SeqTrack seqTrack = builder.create()
         assertNotNull(seqTrack)
-        assertEquals(ExomeSeqTrack.class, seqTrack.getClass())
+        assertEquals(SeqTrack.class, seqTrack.getClass())
         assertEquals("lane", seqTrack.laneId)
         assertEquals(true, seqTrack.hasFinalBam)
         assertEquals(true, seqTrack.hasOriginalBam)
@@ -233,23 +212,16 @@ class SeqTrackBuilderUnitTests {
         assertNull(seqTrack.libraryPreparationKit)
     }
 
-    void testCreateExomeWithKitInfoReliabilityIsUnknownUnverified() {
-        SeqTrackBuilder builder = new SeqTrackBuilder(
-                        "lane",
-                        new Run(),
-                        new Sample(),
-                        new SeqType(name: SeqTypeNames.EXOME.seqTypeName),
-                        new SeqPlatform(),
-                        new SoftwareTool()
-                        )
-        builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
-        builder.setnBasePairs(5).setnReads(6).setInsertSize(7)
-        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
-        builder.setInformationReliability(InformationReliability.UNKNOWN_UNVERIFIED)
+    void testCreateSeqTrackWithKitInfoReliabilityIsUnknownUnverified() {
+        SeqTrackBuilder builder = createSeqTrackBuilderWithDefaultValues()
+        .setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
+        .setnBasePairs(5).setnReads(6).setInsertSize(7)
+        .setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
+        .setInformationReliability(InformationReliability.UNKNOWN_UNVERIFIED)
 
         SeqTrack seqTrack = builder.create()
         assertNotNull(seqTrack)
-        assertEquals(ExomeSeqTrack.class, seqTrack.getClass())
+        assertEquals(SeqTrack.class, seqTrack.getClass())
         assertEquals("lane", seqTrack.laneId)
         assertEquals(true, seqTrack.hasFinalBam)
         assertEquals(true, seqTrack.hasOriginalBam)
@@ -268,55 +240,24 @@ class SeqTrackBuilderUnitTests {
         assertNull(seqTrack.libraryPreparationKit)
     }
 
-    void testCreateExomeWithLibraryPreparationKitIsNull() {
+    // Exome
+
+    void testCreateSeqTrackWithLibraryPreparationKitIsNull() {
         shouldFail(IllegalArgumentException.class) {
-            SeqTrackBuilder builder = new SeqTrackBuilder(
-                            "lane",
-                            new Run(),
-                            new Sample(),
-                            new SeqType(name: SeqTypeNames.EXOME.seqTypeName),
-                            new SeqPlatform(),
-                            new SoftwareTool()
-                            )
-            builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
-            builder.setnBasePairs(5).setnReads(6).setInsertSize(7)
-            builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
-            builder.setLibraryPreparationKit(null)
-            builder.create()
+            createSeqTrackBuilderWithDefaultValuesForExome().setLibraryPreparationKit(null).create()
         }
     }
 
-    void testCreateExomeWithKitInfoReliabilityIsKnownAndNoLibraryPreparationKit() {
+    void testCreateSeqTrackWithKitInfoReliabilityIsKnownAndNoLibraryPreparationKit() {
         shouldFail(IllegalArgumentException.class) {
-            SeqTrackBuilder builder =  new SeqTrackBuilder(
-                            "lane",
-                            new Run(),
-                            new Sample(),
-                            new SeqType(name: SeqTypeNames.EXOME.seqTypeName),
-                            new SeqPlatform(),
-                            new SoftwareTool()
-                            )
-            builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
-            builder.setnBasePairs(5).setnReads(6).setInsertSize(7)
-            builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
-            builder.setInformationReliability(InformationReliability.KNOWN)
-            builder.create()
+            createSeqTrackBuilderWithDefaultValuesForExome().setInformationReliability(InformationReliability.KNOWN).create()
         }
     }
+
+    // ChipSeq
 
     void testCreateChipSeqWithAntibodyTargetAndNoAntibody() {
-        SeqTrackBuilder builder =  new SeqTrackBuilder(
-                        LANE_ID,
-                        new Run(),
-                        new Sample(),
-                        new SeqType(name: SeqTypeNames.CHIP_SEQ.seqTypeName),
-                        new SeqPlatform(),
-                        new SoftwareTool()
-                        )
-        builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
-        builder.setnBasePairs(N_BASE_PAIRS).setnReads(N_READS).setInsertSize(INSERT_SIZE)
-        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
-        builder.setAntibodyTarget(ANTIBODY_TARGET)
+        SeqTrackBuilder builder = createSeqTrackBuilderWithDefaultValuesForChipSeq().setAntibodyTarget(ANTIBODY_TARGET)
 
         SeqTrack seqTrack = builder.create()
         assertNotNull(seqTrack)
@@ -340,19 +281,7 @@ class SeqTrackBuilderUnitTests {
     }
 
     void testCreateChipSeqWithAntibodyTargetAndAntibody() {
-        SeqTrackBuilder builder =  new SeqTrackBuilder(
-                        LANE_ID,
-                        new Run(),
-                        new Sample(),
-                        new SeqType(name: SeqTypeNames.CHIP_SEQ.seqTypeName),
-                        new SeqPlatform(),
-                        new SoftwareTool()
-                        )
-        builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
-        builder.setnBasePairs(N_BASE_PAIRS).setnReads(N_READS).setInsertSize(INSERT_SIZE)
-        builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
-        builder.setAntibodyTarget(ANTIBODY_TARGET)
-        builder.setAntibody(ANTIBODY_NAME)
+        SeqTrackBuilder builder = createSeqTrackBuilderWithDefaultValuesForChipSeq().setAntibodyTarget(ANTIBODY_TARGET).setAntibody(ANTIBODY_NAME)
 
         SeqTrack seqTrack = builder.create()
         assertNotNull(seqTrack)
@@ -377,18 +306,48 @@ class SeqTrackBuilderUnitTests {
 
     void testCreateChipSeqWithNoAntibodyTarget() {
         shouldFail(IllegalArgumentException.class) {
-            SeqTrackBuilder builder =  new SeqTrackBuilder(
-                            LANE_ID,
-                            new Run(),
-                            new Sample(),
-                            new SeqType(name: SeqTypeNames.CHIP_SEQ.seqTypeName),
-                            new SeqPlatform(),
-                            new SoftwareTool()
-                            )
-            builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
-            builder.setnBasePairs(N_BASE_PAIRS).setnReads(N_READS).setInsertSize(INSERT_SIZE)
-            builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
-            builder.create()
+            createSeqTrackBuilderWithDefaultValuesForChipSeq().create()
         }
+    }
+
+    // Helper methods
+
+    private SeqTrackBuilder createSeqTrackBuilderWithDefaultValues() {
+        new SeqTrackBuilder(
+                "lane",
+                new Run(),
+                new Sample(),
+                new SeqType(),
+                new SeqPlatform(),
+                new SoftwareTool()
+        )
+    }
+
+    private SeqTrackBuilder createSeqTrackBuilderWithDefaultValuesForExome() {
+        new SeqTrackBuilder(
+                "lane",
+                new Run(),
+                new Sample(),
+                new SeqType(name: SeqTypeNames.EXOME.seqTypeName),
+                new SeqPlatform(),
+                new SoftwareTool()
+        )
+                .setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
+                .setnBasePairs(5).setnReads(6).setInsertSize(7)
+                .setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
+    }
+
+    private SeqTrackBuilder createSeqTrackBuilderWithDefaultValuesForChipSeq() {
+        new SeqTrackBuilder(
+                LANE_ID,
+                new Run(),
+                new Sample(),
+                new SeqType(name: SeqTypeNames.CHIP_SEQ.seqTypeName),
+                new SeqPlatform(),
+                new SoftwareTool()
+        )
+                .setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
+                .setnBasePairs(N_BASE_PAIRS).setnReads(N_READS).setInsertSize(INSERT_SIZE)
+                .setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
     }
 }

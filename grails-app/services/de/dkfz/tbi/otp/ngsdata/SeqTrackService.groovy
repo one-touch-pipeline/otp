@@ -431,9 +431,7 @@ class SeqTrackService {
         SeqType seqType = getSeqType(dataFiles.get(0))
         assertConsistentSeqType(seqType, dataFiles)
 
-        if (seqType.name == SeqTypeNames.EXOME.seqTypeName) {
-            assertConsistentLibraryPreparationKit(dataFiles)
-        }
+        assertConsistentLibraryPreparationKit(dataFiles)
 
         SequencingKit sequencingKit = assertAndReturnConsistentSequencingKit(dataFiles)
 
@@ -457,13 +455,13 @@ class SeqTrackService {
         SeqTrackBuilder builder = new SeqTrackBuilder(lane, run, sample, seqType, run.seqPlatform, pipeline, sequencingKit, ilseId)
         builder.setHasFinalBam(false).setHasOriginalBam(false).setUsingOriginalBam(false)
 
+        extractAndSetLibraryPreparationKit(dataFile, builder, run, sample)
+
         /*
-         * These are two special cases, which need a specific treatment.
-         * For all other cases the default suffices -> no else is needed.
+         * There is one special case which needs a specific treatment.
+         * For all other cases the default suffices.
          */
-        if (seqType.name == SeqTypeNames.EXOME.seqTypeName) {
-            annotateSeqTrackForExome(dataFile, builder, run, sample)
-        } else if (seqType.name == SeqTypeNames.CHIP_SEQ.seqTypeName) {
+        if (seqType.name == SeqTypeNames.CHIP_SEQ.seqTypeName) {
             annotateSeqTrackForChipSeq(dataFile, builder)
         }
 
@@ -473,7 +471,7 @@ class SeqTrackService {
     }
 
 
-    private void annotateSeqTrackForExome(DataFile dataFile, SeqTrackBuilder builder, Run run, Sample sample) {
+    private void extractAndSetLibraryPreparationKit(DataFile dataFile, SeqTrackBuilder builder, Run run, Sample sample) {
         notNull(dataFile, "The input dataFile of the method annotateSeqTrackForExome is null")
         notNull(builder, "The input builder of the method annotateSeqTrackForExome is null")
         notNull(run, "The input run of the method annotateSeqTrackForExome is null")
@@ -483,7 +481,11 @@ class SeqTrackService {
         MetaDataEntry metaDataEntry = MetaDataEntry.findByDataFileAndKey(dataFile, key)
         if (metaDataEntry == null) {
             builder.setInformationReliability(InformationReliability.UNKNOWN_UNVERIFIED)
+        } else if (!metaDataEntry.value) {
+            assert builder.seqType.name != SeqTypeNames.EXOME.seqTypeName
+            builder.setInformationReliability(InformationReliability.UNKNOWN_UNVERIFIED)
         } else if (metaDataEntry.value == InformationReliability.UNKNOWN_VERIFIED.rawValue) {
+            assert builder.seqType.name == SeqTypeNames.EXOME.seqTypeName
             builder.setInformationReliability(InformationReliability.UNKNOWN_VERIFIED)
         } else {
             LibraryPreparationKit libraryPreparationKit = libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(metaDataEntry.value)

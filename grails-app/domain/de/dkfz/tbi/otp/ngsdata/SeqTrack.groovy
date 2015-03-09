@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SeqTrack {
@@ -43,12 +44,29 @@ class SeqTrack {
     QualityEncoding qualityEncoding = QualityEncoding.UNKNOWN
     DataProcessingState fastqcState = DataProcessingState.UNKNOWN
 
+
+    /**
+     * Holds the information about the state of {@link #libraryPreparationKit}.
+     * If the value is {@link InformationReliability#KNOWN} or {@link InformationReliability#INFERRED},
+     * the {@link #libraryPreparationKit} needs to be set. In any other case the {@link #libraryPreparationKit} has to
+     * be <code>null</code>.
+     * The default value is {@link InformationReliability#UNKNOWN_UNVERIFIED}
+     */
+    InformationReliability kitInfoReliability = InformationReliability.UNKNOWN_UNVERIFIED
+    /**
+     * Reference to the used {@link LibraryPreparationKit}.
+     * If present, the value of {link #kitInfoReliability} has to be {@link kitInfoReliability#KNOWN}
+     */
+    LibraryPreparationKit libraryPreparationKit
+
     static belongsTo = [
         Run,
         Sample,
         SeqType,
         SeqPlatform,
         SequencingKit,
+        LibraryPreparationKit,
+
     ]
 
     static constraints = {
@@ -62,6 +80,17 @@ class SeqTrack {
         // for old data and data which is sequenced from external core facilities this information might not be provided.
         sequencingKit nullable: true
         ilseId nullable: true
+
+        //libraryPreparationKit and inferred state
+        kitInfoReliability(nullable: false)
+        libraryPreparationKit(nullable: true, validator: { LibraryPreparationKit val, SeqTrack obj ->
+            if (obj.kitInfoReliability == InformationReliability.KNOWN || obj.kitInfoReliability == InformationReliability.INFERRED) {
+                return val != null
+            } else {
+                return val == null
+            }
+        })
+
     }
 
     /**
@@ -180,5 +209,6 @@ class SeqTrack {
         seqType index: "seq_track_seq_type_idx"
         seqPlatform index: "seq_track_seq_platform_idx"
         sequencingKit index : "seq_track_sequencing_kit_idx"
+        libraryPreparationKit index: "seq_track_library_preparation_kit_idx"
     }
 }

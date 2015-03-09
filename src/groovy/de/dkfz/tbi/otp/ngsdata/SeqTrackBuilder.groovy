@@ -12,6 +12,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack.QualityEncoding
  * The created {@link SeqTrack} class depends on the {@link #seqType} is:
  * <ul>
  * <li> EXOME: {@link ExomeSeqTrack}</li>
+ * <li> CHIP_SEQ: {@link ChipSeqSeqTrack}</li>
  * <li> all other case: {@link SeqTrack}</li>
  * </ul>
  * Please Note: Using the builder the default values are used from this class and not from the dom.
@@ -52,14 +53,12 @@ class SeqTrackBuilder {
 
     private DataProcessingState fastqcState = DataProcessingState.UNKNOWN
 
-    /**
-     * For Exome, this field is also required
-     */
     private InformationReliability informationReliability = InformationReliability.UNKNOWN_UNVERIFIED
 
     /**
-     * For Exome, this field is required, if the {@link InformationReliability} has the value
-     * {@link InformationReliability#KNOWN}, otherwise, it has to be <code>null</code>
+     * This field is required, if the {@link InformationReliability} has the value
+     * {@link InformationReliability#KNOWN} or {@link InformationReliability#INFERRED},
+     * otherwise, it has to be <code>null</code>
      */
     private LibraryPreparationKit libraryPreparationKit
 
@@ -170,15 +169,7 @@ class SeqTrackBuilder {
     public SeqTrack create() {
         SeqTrack seqTrack
         if (seqType.name == SeqTypeNames.EXOME.seqTypeName) {
-            notNull(informationReliability, "A seq track needs the kitInformationReliability for exome data")
-            if (informationReliability == InformationReliability.KNOWN) {
-                notNull(libraryPreparationKit, "A exome seq track needs an library preparation kit when kitInformationReliability is KNOWN")
-            } else {
-                isNull(libraryPreparationKit, "A exome seq track are not allowed to have an library preparation kit when kitInformationReliability is not KNOWN")
-            }
             seqTrack = new ExomeSeqTrack()
-            seqTrack.kitInfoReliability = informationReliability
-            seqTrack.libraryPreparationKit = libraryPreparationKit
         } else if (seqType.name == SeqTypeNames.CHIP_SEQ.seqTypeName) {
             notNull(antibodyTarget, "A seq track needs the antibodyTarget for ChipSeq data")
             seqTrack = new ChipSeqSeqTrack()
@@ -186,6 +177,12 @@ class SeqTrackBuilder {
             seqTrack.antibody = antibody
         } else {
             seqTrack = new SeqTrack()
+        }
+        notNull(informationReliability, "A seq track needs the kitInformationReliability for exome data")
+        if (informationReliability == InformationReliability.KNOWN) {
+            notNull(libraryPreparationKit, "A seq track needs an library preparation kit when kitInformationReliability is KNOWN")
+        } else {
+            isNull(libraryPreparationKit, "A seq track is not allowed to have an library preparation kit when kitInformationReliability is not KNOWN")
         }
 
         seqTrack.laneId = laneId
@@ -204,6 +201,8 @@ class SeqTrackBuilder {
         seqTrack.qualityEncoding = qualityEncoding
         seqTrack.fastqcState = fastqcState
         seqTrack.sequencingKit = sequencingKit
+        seqTrack.kitInfoReliability = informationReliability
+        seqTrack.libraryPreparationKit = libraryPreparationKit
 
         if (!seqTrack.validate()) {
             throw new ProcessingException("seq track could not be validated: ${seqTrack.errors}")

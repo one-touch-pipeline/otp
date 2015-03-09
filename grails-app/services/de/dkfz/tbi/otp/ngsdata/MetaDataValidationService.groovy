@@ -102,10 +102,7 @@ class MetaDataValidationService {
                 entry.status = (status) ? valid : invalid
                 break
             case "LIB_PREP_KIT":
-                Boolean status = checkLibraryPreparationKitForExomeSeqType(entry)
-                if (status != null) {
-                    entry.status = status ? valid : invalid
-                }
+                entry.status = checkLibraryPreparationKit(entry) ? valid : invalid
                 break
             case "SEQUENCING_KIT":
                 entry.status = !entry.value || sequencingKitService.findSequencingKitByNameOrAlias(entry.value) ? valid : invalid
@@ -156,24 +153,34 @@ class MetaDataValidationService {
     }
 
     /**
-     * caution: trinary result!
-     *
-     * @return <code>null</code> for non-exome entries;
-     *      for exome entries <code>true/false</code>, signifying if an library preparation kit is/isn't available
+     * validate the value for library preparation kit. The value is valid, if
+     * <ul>
+     * <li> the value is in {@link LibraryPreparationKit} </li>
+     * <li> the value is in {@link LibraryPreparationKitSynonym} </li>
+     * <li> the value has the special value {@link InformationReliability#UNKNOWN_VERIFIED} ("UNKNOWN) and is an exome seq track </li>
+     * <li> the value is empty and belongs not to an exome seq track </li>
+     * </ul>
+     * All other values are invalid.
      */
-    private Boolean checkLibraryPreparationKitForExomeSeqType(MetaDataEntry entry) {
-        MetaDataEntry metaDataEntry = metaDataEntry(entry.dataFile, "SEQUENCING_TYPE")
-        boolean isSequenceOfTypeExome = metaDataEntry.value == SeqTypeNames.EXOME.seqTypeName
-
-        /*
-         * Only for the seqType exome an library preparation kit is available and has to be checked.
-         * For other seqTypes null has to be returned.
-         */
-        if (isSequenceOfTypeExome) {
-            return libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(entry.value) ||
-            InformationReliability.UNKNOWN_VERIFIED.rawValue == entry.value
+    private boolean checkLibraryPreparationKit(MetaDataEntry entry) {
+        LibraryPreparationKit libraryPreparationKit = libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(entry.value)
+        if (libraryPreparationKit) {
+            //Value could be found, so the value is valid
+            return true
         }
-        return null
+
+        //check seq type
+        MetaDataEntry metaDataEntry = metaDataEntry(entry.dataFile, "SEQUENCING_TYPE")
+        if (metaDataEntry.value == SeqTypeNames.EXOME.seqTypeName) {
+            /*
+             * It is allowed to have the value "UNKNOWN" as library preparation kit info for exome seqTrack.
+             * If this is the case return true.
+             */
+            return InformationReliability.UNKNOWN_VERIFIED.rawValue == entry.value
+        } else {
+            return !entry.value
+        }
+
     }
 
 

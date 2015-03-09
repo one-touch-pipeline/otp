@@ -267,4 +267,20 @@ class DomainFactory {
         }
     }
 
+    static MetaDataEntry createMetaDataKeyAndEntry(DataFile dataFile, String key, String value) {
+        MetaDataKey metaDataKey = MetaDataKey.buildLazy(name: key)
+
+        return MetaDataEntry.build(
+            value: value,
+            dataFile: dataFile,
+            key: metaDataKey,
+            status: MetaDataEntry.Status.VALID,
+            source: MetaDataEntry.Source.MDFILE,
+            )
+    }
+
+    static MetaDataEntry createMetaDataKeyAndEntry(DataFile dataFile, MetaDataColumn key, String value) {
+        return createMetaDataKeyAndEntry(dataFile, key.name(), value)
+    }
+
 }
