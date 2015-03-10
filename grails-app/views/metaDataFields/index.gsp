@@ -13,12 +13,22 @@
                     'dataFields.exomeEnrichmentKit',
                     'dataFields.exomeEnrichmentKit.alias',
                 ] }"
-                id="listExomeEnrichmentKit"/>
+                id="listExomeEnrichmentKit"
+            />
+        </div>
+        <div class="otpDataTables">
+            <otp:dataTable
+                codes="${[
+                    'dataFields.listAntibodyTarget',
+                ] }"
+                id="listAntibodyTarget"
+            />
         </div>
     </div>
     <r:script>
         $(function() {
-            $.otp.metadataFieldsTable.registerlistExomeEnrichmentKit();
+            $.otp.exomeEnrichmentKitTable.registerlistExomeEnrichmentKit();
+            $.otp.antibodyTargetTable.registerListAntibodyTarget();
         });
     </r:script>
 </body>

@@ -7,11 +7,14 @@ import grails.test.mixin.support.*
 import org.junit.*
 
 @TestFor(MetaDataFieldsService)
-@Build([ExomeEnrichmentKit, ExomeEnrichmentKitSynonym])
+@Build([
+    AntibodyTarget,
+    ExomeEnrichmentKit,
+    ExomeEnrichmentKitSynonym,
+])
 class MetaDataFieldsServiceUnitTest {
 
     MetaDataFieldsService metaDataFieldsService
-
 
     @Before
     void setup() {
@@ -65,5 +68,31 @@ class MetaDataFieldsServiceUnitTest {
         def list = metaDataFieldsService.listExomeEnrichmentKitWithAliases()
         assert [[exomeEnrichmentKit, [exomeEnrichmentKitSynonym1, exomeEnrichmentKitSynonym2, exomeEnrichmentKitSynonym3]]] == list
     }
+
+
+    void test_listAntibodyTarget_oneData() {
+        AntibodyTarget antibodyTarget = AntibodyTarget.build()
+
+        def list = metaDataFieldsService.listAntibodyTarget()
+        assert 1 == list.size()
+        assert antibodyTarget == list[0]
+    }
+
+    void test_listAntibodyTarget_noData() {
+        def list = metaDataFieldsService.listAntibodyTarget()
+        assert [] == list
+    }
+
+    void test_listAntibodyTarget_multipleData() {
+        AntibodyTarget antibodyTarget1 = AntibodyTarget.build()
+        AntibodyTarget antibodyTarget2 = AntibodyTarget.build()
+        AntibodyTarget antibodyTarget3 = AntibodyTarget.build()
+        def list = metaDataFieldsService.listAntibodyTarget()
+        assert 3 == list.size()
+        assert list.contains(antibodyTarget1)
+        assert list.contains(antibodyTarget2)
+        assert list.contains(antibodyTarget3)
+    }
+
 }
 

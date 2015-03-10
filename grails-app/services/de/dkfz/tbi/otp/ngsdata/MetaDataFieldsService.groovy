@@ -9,4 +9,9 @@ class MetaDataFieldsService {
             [it, ExomeEnrichmentKitSynonym.findAllByExomeEnrichmentKit(it,[sort: "name", order: "asc"])]
         }
     }
+
+    public List listAntibodyTarget(){
+        return AntibodyTarget.list(sort: "name", order: "asc")
+    }
+
 }

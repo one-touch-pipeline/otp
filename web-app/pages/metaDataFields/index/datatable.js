@@ -1,6 +1,6 @@
 /*jslint browser: true */
 /*global $ */
-$.otp.metadataFieldsTable = {
+$.otp.exomeEnrichmentKitTable = {
         registerlistExomeEnrichmentKit : function () {
             "use strict";
             var oTablelistExomeEnrichmentKit = $.otp.createListView(
@@ -14,5 +14,21 @@ $.otp.metadataFieldsTable = {
                     }
                 );
             return oTablelistExomeEnrichmentKit;
+        }
+    };
+$.otp.antibodyTargetTable = {
+        registerListAntibodyTarget: function () {
+            "use strict";
+            var oTableListAntibodyTarget = $.otp.createListView(
+                    '#listAntibodyTarget',
+                    $.otp.createLink({
+                        controller: 'metaDataFields',
+                        action: 'dataTableSourceListAntibodyTarget'
+                    }),
+                    function (json) {
+                        return json;
+                    }
+                );
+            return oTableListAntibodyTarget;
         }
     };
