@@ -16,6 +16,8 @@ class LsdfFilesService {
     ExecutionService executionService
     CreateClusterScriptService createClusterScriptService
 
+    static String midtermStorageMountPoint = "/lsdf/midterm/"
+
     /**
      * Similar to {@link Paths.get(String, String...)} from Java 7.
      */

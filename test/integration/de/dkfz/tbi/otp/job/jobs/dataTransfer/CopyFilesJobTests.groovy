@@ -1,15 +1,40 @@
 package de.dkfz.tbi.otp.job.jobs.dataTransfer
 
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.job.jobs.WatchdogJob
+import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
+import de.dkfz.tbi.otp.job.processing.ExecutionService
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.Realm.OperationType
 
 
 class CopyFilesJobTests extends GroovyTestCase {
 
-    CopyFilesJob job = new CopyFilesJob()
+    CopyFilesJob job
     TestData testData
+
+    final static String PBS_ID = "1234"
+
+    @Before
+    void setUp() {
+        job = new CopyFilesJob()
+        job.executionHelperService = new ExecutionHelperService()
+        job.runProcessingService = new RunProcessingService()
+        job.processedMergedBamFileService = new ProcessedMergedBamFileService()
+        job.lsdfFilesService = new LsdfFilesService()
+        job.configService = new ConfigService()
+        job.executionService = new ExecutionService()
+    }
+
+    @After
+    void tearDown() {
+        job = null
+        testData = null
+    }
+
 
     @Test
     void testProcessedMergedBamFilesForRun() {
@@ -33,6 +58,86 @@ class CopyFilesJobTests extends GroovyTestCase {
         ProcessedMergedBamFile pmbf2 = createMergedBamFileForRun(run1, testData.sample)
         assertEquals(2, job.processedMergedBamFilesForRun(run1).size())
     }
+
+    @Test
+    void testExecute_RunCanNotBeFound_IllegalArgumentException() {
+        job.metaClass.getProcessParameterValue = { -> "-1" }
+        shouldFail(IllegalArgumentException) {job.execute()}
+    }
+
+    @Test
+    void testExecute_NoDataFileAndOneBamFileFound_CheckForInfoFileCreation() {
+        Run run = Run.build()
+        Realm realm = Realm.build(operationType: Realm.OperationType.DATA_MANAGEMENT)
+        ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.build()
+        processedMergedBamFile.project.realmName = realm.name
+
+        job.metaClass.getProcessParameterValue = { -> run.id.toString() }
+        job.metaClass.processedMergedBamFilesForRun = { Run run2 -> assert run2 == run; return [processedMergedBamFile] }
+        job.processedMergedBamFileService.metaClass.destinationDirectory = { ProcessedMergedBamFile pmbf -> TestCase.uniqueNonExistentPath.path }
+        job.metaClass.addOutputParameter = { String parameterName, String pbsIds ->
+            assert pbsIds == WatchdogJob.SKIP_WATCHDOG
+        }
+
+        job.executionService.metaClass.executeCommand = { Realm realm1, String command ->
+            assert command.contains("A new lane is currently in progress for this sample")
+        }
+
+        job.execute()
+    }
+
+    @Test
+    void testExecute_NoBamFilesFound_DataFilesHaveToBeLinked_PBSListIsEmpty() {
+        Map paths = prepareTestExecute(true)
+
+        job.executionService.metaClass.executeCommand = {Realm realm1, String command ->
+            assert command.contains("ln -s ${paths.initialPath} ${paths.finalPath}")
+            return '0\n'
+        }
+
+        job.metaClass.addOutputParameter = { String parameterName, String pbsIds ->
+            assert pbsIds == WatchdogJob.SKIP_WATCHDOG
+        }
+
+        job.execute()
+    }
+
+    @Test
+    void testExecute_DataFilesHaveToBeCopied() {
+        Map paths = prepareTestExecute(false)
+
+        job.executionHelperService.metaClass.sendScript = { Realm realm1, String text, String jobIdentifier ->
+            assert text.contains("cp ${paths.initialPath} ${paths.finalPath};chmod 440 ${paths.finalPath}")
+            return PBS_ID
+        }
+
+        job.metaClass.addOutputParameter = { String parameterName, String pbsIds ->
+            assert pbsIds == PBS_ID
+        }
+
+        job.execute()
+    }
+
+    private Map prepareTestExecute(boolean linkedExternally) {
+        Run run = Run.build()
+        Realm realm = Realm.build(operationType: OperationType.DATA_MANAGEMENT)
+        SeqTrack seqTrack = SeqTrack.build(linkedExternally: linkedExternally)
+        seqTrack.project.realmName = realm.name
+        DataFile dataFile = DataFile.build(seqTrack: seqTrack, project: seqTrack.project)
+
+        job.metaClass.getProcessParameterValue = { -> run.id.toString() }
+        job.runProcessingService.metaClass.dataFilesForProcessing = { Run run2 -> assert run2 == run; [dataFile] }
+        String initialPath = TestCase.uniqueNonExistentPath.path
+        String finalPath = TestCase.uniqueNonExistentPath.path
+        job.lsdfFilesService.metaClass.getFileInitialPath = { DataFile file -> assert file == dataFile; return initialPath }
+        job.lsdfFilesService.metaClass.getFileFinalPath = { DataFile file -> assert file == dataFile; return finalPath }
+
+        return [
+                initialPath: initialPath,
+                finalPath: finalPath,
+        ]
+    }
+
 
     private ProcessedMergedBamFile createMergedBamFileForRun(Run run, Sample sample) {
         SeqTrack seqTrack = testData.createSeqTrack([run: run, sample: sample])

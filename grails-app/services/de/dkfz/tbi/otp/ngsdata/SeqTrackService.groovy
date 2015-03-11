@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
 import static org.springframework.util.Assert.*
 
 import org.springframework.beans.factory.annotation.Autowired
@@ -443,9 +445,10 @@ class SeqTrackService {
         SeqTrack seqTrack = createSeqTrack(dataFiles.get(0), run, sample, seqType, lane, pipeline, sequencingKit, ilseId)
         consumeDataFiles(dataFiles, seqTrack)
         fillReadsForSeqTrack(seqTrack)
-        seqTrack.save(flush: true)
+        assert seqTrack.save(failOnError: true, flush: true)
 
-        decideAndPrepareForAlignment(seqTrack)
+        boolean willBeAligned = decideAndPrepareForAlignment(seqTrack)
+        determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, willBeAligned)
 
         return seqTrack
     }
@@ -899,4 +902,32 @@ AND i.id > :seqTrackId
         }
         return SeqTrack.get(result[0] as Long)
     }
+
+    /**
+     * This method determines if a fastq file has to be linked or copied to the project folder and stores the information in the seqTrack.
+     * If a fastq file fulfills the following constraints it has to be linked:
+     * - provided by GPCF
+     * - provided via the midterm storage
+     * - will be aligned
+     * - hasToBeCopied flag is set to false
+     */
+    void determineAndStoreIfFastqFilesHaveToBeLinked(SeqTrack seqTrack, boolean willBeAligned) {
+        assert seqTrack : "The input seqTrack for determineAndStoreIfFastqFilesHaveToBeLinked must not be null"
+        SeqCenter core = CollectionUtils.exactlyOneElement(SeqCenter.findAllByName("DKFZ"))
+        if ( willBeAligned &&
+                seqTrack.run.seqCenter == core &&
+                !seqTrack.project.hasToBeCopied &&
+                areFilesLocatedOnMidTermStorage(seqTrack)) {
+            seqTrack.linkedExternally = true
+            assert seqTrack.save(flush: true)
+        }
+    }
+
+    private boolean areFilesLocatedOnMidTermStorage(SeqTrack seqTrack) {
+        assert seqTrack: "The input seqTrack for areFilesLocatedOnMidTermStorage must not be null"
+        List<DataFile> files = DataFile.findAllBySeqTrack(seqTrack)
+        RunSegment runSegment = CollectionUtils.exactlyOneElement( files*.runSegment.unique() )
+        return runSegment.dataPath.startsWith(LsdfFilesService.midtermStorageMountPoint)
+    }
+
 }

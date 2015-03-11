@@ -1,4 +1,5 @@
 import grails.util.Environment
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.ngsdata.*
@@ -55,6 +56,10 @@ testDataConfig {
         }
         'de.dkfz.tbi.otp.ngsdata.Run' {
             name = {'runName_' + (counter++)}
+        }
+        'de.dkfz.tbi.otp.ngsdata.RunSegment' {
+            dataPath = {TestCase.createEmptyTestDirectory()}
+            mdPath = {TestCase.createEmptyTestDirectory()}
         }
         'de.dkfz.tbi.otp.ngsdata.SampleType' {
             name = {'sampleTypeName_' + (counter++)}

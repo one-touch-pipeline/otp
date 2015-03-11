@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.examplePBS
 
+import de.dkfz.tbi.otp.job.jobs.WatchdogJob
+
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import org.springframework.beans.factory.annotation.Autowired

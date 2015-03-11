@@ -25,6 +25,11 @@ class SeqTrack {
     boolean hasFinalBam = false
     boolean hasOriginalBam = false
     boolean usingOriginalBam = false
+    /**
+     * {@code true} if the data files belonging to this {@link SeqTrack} are symlinked to the project folder.
+     * {@code false} if they are copied.
+     */
+    boolean linkedExternally = false
     long nBasePairs = 0
     long nReads = 0
     int insertSize = -1

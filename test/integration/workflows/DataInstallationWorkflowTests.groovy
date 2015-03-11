@@ -9,7 +9,6 @@ import de.dkfz.tbi.otp.job.jobs.dataInstallation.DataInstallationStartJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
 
 /**
  * Currently only a test for exome data exist
@@ -20,7 +19,7 @@ class DataInstallationWorkflowTests extends AbstractWorkflowTest {
     boolean transactional = false
 
     // TODO  ( jira: OTP-566)  want to get rid of this hardcoded.. idea: maybe calculating from the walltime of the cluster jobs plus some buffer..
-    final Duration TIMEOUT = Duration.standardMinutes(10)
+    final Duration TIMEOUT = Duration.standardMinutes(30)
     final String PBS_WALLTIME = "00:05:00"
 
     LsdfFilesService lsdfFilesService
@@ -103,10 +102,10 @@ class DataInstallationWorkflowTests extends AbstractWorkflowTest {
 
         // Just to be sure the rootPath and the processingRootPath are clean for new test
         String cmdCleanUp = cleanUpTestFoldersCommand()
-        String cmdBuildFileStructure = "mkdir -p ${path} ${loggingPath}/log/status/"
-        String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath}"
+        String cmdBuildFileStructure = "mkdir -p -m 2750 ${path} ${loggingPath}/log/status/"
+        String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath} && ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath}"
 
-        executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildFileStructure}; ${cmdBuildSoftLinkToFileToBeProcessed}")
+        assert '0\n' == executionService.executeCommand(realm, "${cmdCleanUp} && ${cmdBuildFileStructure} && ${cmdBuildSoftLinkToFileToBeProcessed}; echo \$?")
 
         fileType = new FileType()
         fileType.type = FileType.Type.SEQUENCE
@@ -224,14 +223,9 @@ class DataInstallationWorkflowTests extends AbstractWorkflowTest {
     // TODO  (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
     // so at this moment only one test could be run at moment, all the others have to be commented
     @Ignore
-    void testDataInstallation() {
-        SpringSecurityUtils.doWithAuth("admin") {
-            run("scripts/workflows/DataInstallationWorkflow.groovy")
-        }
-        SeqType seqType = createSeqType(SeqTypeNames.WHOLE_GENOME.seqTypeName, "SeqTypeDir")
-
-        SeqTrack seqTrack = createSeqTrack(seqType)
-        createDataFiles(seqTrack)
+    @Test
+    void testDataInstallation_FilesHaveToBeCopied() {
+        SeqTrack seqTrack = createWholeGenomeSetup()
 
         setExecutionPlan()
         waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
@@ -242,6 +236,22 @@ class DataInstallationWorkflowTests extends AbstractWorkflowTest {
     // TODO  (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
     // so at this moment only one test could be run at moment, all the others have to be commented
     @Ignore
+    @Test
+    void testDataInstallation_FilesHaveToBeLinked() {
+        SeqTrack seqTrack = createWholeGenomeSetup()
+        seqTrack.linkedExternally = true
+        assert seqTrack.save(flush: true)
+
+        setExecutionPlan()
+        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
+
+        checkThatWorkflowWasSuccessful(seqTrack)
+    }
+
+    // TODO  (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
+    // so at this moment only one test could be run at moment, all the others have to be commented
+    @Ignore
+    @Test
     void testChipSeqInstallation() {
         SpringSecurityUtils.doWithAuth("admin") {
             run("scripts/workflows/DataInstallationWorkflow.groovy")
@@ -273,6 +283,7 @@ class DataInstallationWorkflowTests extends AbstractWorkflowTest {
     }
 
     @Ignore
+    @Test
     void testDataInstallationWithFastTrack() {
         SpringSecurityUtils.doWithAuth("admin") {
             run("scripts/workflows/DataInstallationWorkflow.groovy")
@@ -329,6 +340,17 @@ class DataInstallationWorkflowTests extends AbstractWorkflowTest {
         JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
         // hack to be able to star the workflow
         dataInstallationStartJob.setJobExecutionPlan(jobExecutionPlan)
+    }
+
+    private SeqTrack createWholeGenomeSetup() {
+        SpringSecurityUtils.doWithAuth("admin") {
+            run("scripts/workflows/DataInstallationWorkflow.groovy")
+        }
+        SeqType seqType = createSeqType(SeqTypeNames.WHOLE_GENOME.seqTypeName, "SeqTypeDir")
+
+        SeqTrack seqTrack = createSeqTrack(seqType)
+        createDataFiles(seqTrack)
+        return seqTrack
     }
 
 }

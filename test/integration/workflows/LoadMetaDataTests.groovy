@@ -59,7 +59,7 @@ class LoadMetaDataTests extends AbstractWorkflowTest {
     Realm realm
     String realmProgramsRootPath = "/"
 
-    String seqCenterName = "TheSequencingCenter"
+    String seqCenterName = "DKFZ"
     String sampleID = "SampleIdentifier"
     String projectName = "TheProject"
     String softwareToolName = "CASAVA"

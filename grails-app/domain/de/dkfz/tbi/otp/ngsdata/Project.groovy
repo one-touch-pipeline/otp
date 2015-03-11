@@ -12,6 +12,12 @@ class Project {
     short processingPriority = ProcessingPriority.NORMAL_PRIORITY
     String alignmentDeciderBeanName
 
+    /**
+     * this flag defines if the fastq files of this project have to be copied (instead of linked) regardless of whether
+     * they will be processed or not
+     */
+    boolean hasToBeCopied = false
+
     static belongsTo = [
         projectGroup: ProjectGroup
     ]

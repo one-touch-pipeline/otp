@@ -15,6 +15,8 @@ import java.util.concurrent.Callable
  */
 class TestCase extends GroovyTestCase {
 
+    static final TEST_DIRECTORY = new File('/tmp/otp-test')
+
     final List<Throwable> failures = []
 
     // Implements OTP-686.
@@ -59,9 +61,13 @@ class TestCase extends GroovyTestCase {
      * soon as you do not need it anymore.
      */
     public static File createEmptyTestDirectory() {
-        final File dir = new File("/tmp/otp-test/${HelperUtils.uniqueString}")
+        final File dir = new File(TEST_DIRECTORY, HelperUtils.uniqueString)
         assert dir.mkdirs()  // This will fail if the directory already exists or if it could not be created.
         return dir
+    }
+
+    public static boolean cleanTestDirectory() {
+        return TEST_DIRECTORY.deleteDir()
     }
 
     /**

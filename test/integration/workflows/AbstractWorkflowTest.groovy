@@ -33,7 +33,7 @@ abstract class AbstractWorkflowTest extends GroovyScriptAwareIntegrationTest {
             }
             return areAllProcessesFinished(numberOfProcesses)
         }, timeout.millis, 1000L)) {
-            throw new TimeoutException("Workflow did not finish within ${PeriodFormat.default.print(timeout.toPeriod())} milliseconds.")
+            throw new TimeoutException("Workflow did not finish within ${PeriodFormat.default.print(timeout.toPeriod())}.")
         }
     }
 

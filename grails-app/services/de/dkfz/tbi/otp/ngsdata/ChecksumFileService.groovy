@@ -42,9 +42,7 @@ class ChecksumFileService {
     public boolean compareMd5(DataFile file) {
         String path = pathToMd5File(file)
         File md5File = new File(path)
-        if (!md5File.canRead()) {
-            throw new RuntimeException("Can not read md5sum file ${md5File}")
-        }
+        LsdfFilesService.ensureFileIsReadableAndNotEmpty(md5File)
         String md5sum
         try {
             List<String> lines = md5File.readLines()

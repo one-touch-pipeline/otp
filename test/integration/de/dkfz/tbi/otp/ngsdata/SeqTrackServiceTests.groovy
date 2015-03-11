@@ -31,25 +31,14 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     @Before
     void setUp() {
-        // TODO needs rewritting
-        dataPath = new File("/tmp/otp/dataPath")
-        mdPath = new File("/tmp/otp/mdPath")
-        if(!dataPath.isDirectory()) {
-            dataPath.mkdirs()
-            assertTrue(dataPath.isDirectory())
-        }
-        if(!mdPath.isDirectory()) {
-            mdPath.mkdirs()
-            assertTrue(mdPath.isDirectory())
-        }
-
+        dataPath = TestCase.createEmptyTestDirectory()
+        mdPath = TestCase.createEmptyTestDirectory()
         testData = new TestData()
     }
 
     @After
     void tearDown() {
-        dataPath.deleteDir()
-        mdPath.deleteDir()
+        TestCase.cleanTestDirectory()
         testData = null
     }
 
@@ -268,7 +257,8 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         Project project = sampleIdentifier.sample.project
         project.alignmentDeciderBeanName = 'noAlignmentDecider'
         assert project.save(failOnError: true)
-        Run run = Run.build()
+        Run run = Run.build(seqCenter: SeqCenter.buildLazy(name: "DKFZ"))
+        RunSegment runSegment = RunSegment.build(run: run)
         Map data = [
                 LANE_NO: LANE_NR,
                 SAMPLE_ID: "SAMPLE_ID",
@@ -282,8 +272,8 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                 BASE_COUNT: "100000",
                 READ_COUNT: "1000",
         ]
-        createAndSaveDataFileAndMetaDataEntry(data + [(key): valueRead1], run)
-        createAndSaveDataFileAndMetaDataEntry(data + [(key): valueRead2], run)
+        createAndSaveDataFileAndMetaDataEntry(data + [(key): valueRead1], run, runSegment)
+        createAndSaveDataFileAndMetaDataEntry(data + [(key): valueRead2], run, runSegment)
         return run
     }
 
@@ -737,12 +727,13 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
 
 
-    private DataFile createAndSaveDataFileAndMetaDataEntry(Map<MetaDataKey, String> metaDataEntries, Run run = null) {
+    private DataFile createAndSaveDataFileAndMetaDataEntry(Map<MetaDataKey, String> metaDataEntries, Run run = null, RunSegment runSegment = null) {
         DataFile dataFile = new DataFile(
                 fileName: "1_ACTGTG_L005_R1_complete_filtered.fastq.gz",
                 laneNr: LANE_NR,
                 run: run,
                 fileType: FileType.buildLazy(type: FileType.Type.SEQUENCE),
+                runSegment: runSegment,
         )
         assertNotNull(dataFile.save())
         metaDataEntries.each { metaDataKey, value ->
