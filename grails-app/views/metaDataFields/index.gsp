@@ -33,12 +33,23 @@
                 id="listSeqCenter"
             />
         </div>
+        <div class="otpDataTables">
+            <otp:dataTable
+                codes="${[
+                    'dataFields.listPlatformName',
+                    'dataFields.listPlatformModel',
+                    'dataFields.listPlatformIdentifier',
+                ] }"
+                id="listPlatformAndIdentifier"
+            />
+        </div>
     </div>
     <r:script>
         $(function() {
             $.otp.exomeEnrichmentKitTable.registerlistExomeEnrichmentKit();
             $.otp.antibodyTargetTable.registerListAntibodyTarget();
             $.otp.seqCenterTable.registerListSeqCenter();
+            $.otp.platformTable.registerListPlatformTable();
         });
     </r:script>
 </body>

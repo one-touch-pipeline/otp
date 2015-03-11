@@ -11,7 +11,9 @@ import org.junit.*
     AntibodyTarget,
     ExomeEnrichmentKit,
     ExomeEnrichmentKitSynonym,
-    SeqCenter
+    SeqCenter,
+    SeqPlatformModelIdentifier,
+    SeqPlatform,
 ])
 class MetaDataFieldsServiceUnitTest {
 
@@ -118,5 +120,55 @@ class MetaDataFieldsServiceUnitTest {
         assert list.contains(seqCenter2)
         assert list.contains(seqCenter3)
     }
+
+
+    void test_listSeqPlatformWithAliases_oneDataWithoutSynonym() {
+        SeqPlatform seqPlatform = SeqPlatform.build()
+
+        def list = metaDataFieldsService.listPlatformAndIdentifier()
+        assert [[seqPlatform, []]] == list
+
+    }
+
+    void test_listSeqPlatformWithAliases_noData() {
+        def list = metaDataFieldsService.listPlatformAndIdentifier()
+        assert [] == list
+    }
+
+    void test_listSeqPlatformWithAliases_oneDataWithOneSynonym() {
+        SeqPlatform seqPlatform = SeqPlatform.build()
+        SeqPlatformModelIdentifier seqPlatformModelIdentifier = SeqPlatformModelIdentifier.build(
+                seqPlatform: seqPlatform
+                )
+        def list = metaDataFieldsService.listPlatformAndIdentifier()
+
+        assert [[seqPlatform, [seqPlatformModelIdentifier]]] == list
+    }
+
+    void test_listSeqPlatformWithAliases_multipleData() {
+        SeqPlatform seqPlatform1 = SeqPlatform.build()
+        SeqPlatform seqPlatform2 = SeqPlatform.build()
+        SeqPlatform seqPlatform3 = SeqPlatform.build()
+
+        def list = metaDataFieldsService.listPlatformAndIdentifier()
+        assert [[seqPlatform1, []], [seqPlatform2, []], [seqPlatform3,[]]] == list
+    }
+
+    void test_listSeqPlatformWithAliases_oneDataWithMultipleSynonym() {
+        SeqPlatform seqPlatform = SeqPlatform.build()
+        SeqPlatformModelIdentifier seqPlatformModelIdentifier1 = SeqPlatformModelIdentifier.build(
+                seqPlatform: seqPlatform,
+                )
+        SeqPlatformModelIdentifier seqPlatformModelIdentifier2 = SeqPlatformModelIdentifier.build(
+                seqPlatform: seqPlatform
+                )
+        SeqPlatformModelIdentifier seqPlatformModelIdentifier3 = SeqPlatformModelIdentifier.build(
+                seqPlatform: seqPlatform
+                )
+
+        def list = metaDataFieldsService.listPlatformAndIdentifier()
+        assert [[seqPlatform, [seqPlatformModelIdentifier1, seqPlatformModelIdentifier2, seqPlatformModelIdentifier3]]] == list
+    }
+
 }
 

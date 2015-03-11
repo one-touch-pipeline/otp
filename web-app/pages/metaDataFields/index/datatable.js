@@ -50,3 +50,20 @@ $.otp.seqCenterTable = {
             return oTableListSeqCenter;
         }
 };
+
+$.otp.platformTable = {
+        registerListPlatformTable: function () {
+            "use strict";
+            var oTableListPlatform = $.otp.createListView(
+                    '#listPlatformAndIdentifier',
+                    $.otp.createLink({
+                        controller: 'metaDataFields',
+                        action: 'dataTableSourceListSeqPlatformAndIdentifier'
+                    }),
+                    function (json) {
+                        return json;
+                    }
+                );
+            return oTableListPlatform;
+        }
+};

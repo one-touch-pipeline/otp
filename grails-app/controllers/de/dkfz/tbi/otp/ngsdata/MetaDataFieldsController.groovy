@@ -32,6 +32,13 @@ class MetaDataFieldsController {
         renderData(cmd, data)
     }
 
+    JSON dataTableSourceListSeqPlatformAndIdentifier(DataTableCommand cmd) {
+        List data = metaDataFieldsService.listPlatformAndIdentifier().collect {
+            [it[0].name, it[0]?.model, it[1]*.name.join(', ')]
+        }
+        renderData(cmd, data)
+    }
+
     private JSON renderData(DataTableCommand cmd, List data) {
         Map dataToRender = cmd.dataToRender()
         dataToRender.iTotalRecords = data.size()
