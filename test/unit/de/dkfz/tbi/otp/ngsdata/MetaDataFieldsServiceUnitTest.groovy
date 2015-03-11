@@ -11,6 +11,7 @@ import org.junit.*
     AntibodyTarget,
     ExomeEnrichmentKit,
     ExomeEnrichmentKitSynonym,
+    SeqCenter
 ])
 class MetaDataFieldsServiceUnitTest {
 
@@ -94,5 +95,28 @@ class MetaDataFieldsServiceUnitTest {
         assert list.contains(antibodyTarget3)
     }
 
+
+    void test_listSeqCenter_oneData() {
+        SeqCenter seqCenter = SeqCenter.build()
+        def list = metaDataFieldsService.listSeqCenter()
+        assert 1 == list.size()
+        assert seqCenter == list[0]
+    }
+
+    void test_listSeqCenter_noData() {
+        def list = metaDataFieldsService.listSeqCenter()
+        assert [] == list
+    }
+
+    void test_listSeqCenter_multipleData() {
+        SeqCenter seqCenter1 = SeqCenter.build()
+        SeqCenter seqCenter2 = SeqCenter.build()
+        SeqCenter seqCenter3 = SeqCenter.build()
+        def list = metaDataFieldsService.listSeqCenter()
+        assert 3 == list.size()
+        assert list.contains(seqCenter1)
+        assert list.contains(seqCenter2)
+        assert list.contains(seqCenter3)
+    }
 }
 

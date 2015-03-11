@@ -24,11 +24,21 @@
                 id="listAntibodyTarget"
             />
         </div>
+        <div class="otpDataTables">
+            <otp:dataTable
+                codes="${[
+                    'dataFields.listSeqCenterName',
+                    'dataFields.listSeqCenterDirName',
+                ] }"
+                id="listSeqCenter"
+            />
+        </div>
     </div>
     <r:script>
         $(function() {
             $.otp.exomeEnrichmentKitTable.registerlistExomeEnrichmentKit();
             $.otp.antibodyTargetTable.registerListAntibodyTarget();
+            $.otp.seqCenterTable.registerListSeqCenter();
         });
     </r:script>
 </body>

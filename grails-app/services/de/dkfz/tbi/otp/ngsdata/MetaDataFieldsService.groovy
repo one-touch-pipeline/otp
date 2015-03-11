@@ -14,4 +14,7 @@ class MetaDataFieldsService {
         return AntibodyTarget.list(sort: "name", order: "asc")
     }
 
+    public List listSeqCenter(){
+        return SeqCenter.list(sort: "name", order: "asc")
+    }
 }

@@ -15,7 +15,8 @@ $.otp.exomeEnrichmentKitTable = {
                 );
             return oTablelistExomeEnrichmentKit;
         }
-    };
+};
+
 $.otp.antibodyTargetTable = {
         registerListAntibodyTarget: function () {
             "use strict";
@@ -31,4 +32,21 @@ $.otp.antibodyTargetTable = {
                 );
             return oTableListAntibodyTarget;
         }
-    };
+};
+
+$.otp.seqCenterTable = {
+        registerListSeqCenter: function () {
+            "use strict";
+            var oTableListSeqCenter = $.otp.createListView(
+                    '#listSeqCenter',
+                    $.otp.createLink({
+                        controller: 'metaDataFields',
+                        action: 'dataTableSourceListSeqCenter'
+                    }),
+                    function (json) {
+                        return json;
+                    }
+                );
+            return oTableListSeqCenter;
+        }
+};
