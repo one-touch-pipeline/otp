@@ -67,3 +67,20 @@ $.otp.platformTable = {
             return oTableListPlatform;
         }
 };
+
+$.otp.SeqTypeTable = {
+        registerListSeqTypeTable: function () {
+            "use strict";
+            var oTableListSeqType = $.otp.createListView(
+                    '#listSeqType',
+                    $.otp.createLink({
+                        controller: 'metaDataFields',
+                        action: 'dataTableSourceListSeqType'
+                    }),
+                    function (json) {
+                        return json;
+                    }
+                );
+            return oTableListSeqType;
+        }
+};

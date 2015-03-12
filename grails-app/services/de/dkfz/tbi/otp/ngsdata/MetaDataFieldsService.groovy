@@ -23,4 +23,8 @@ class MetaDataFieldsService {
             [it, SeqPlatformModelIdentifier.findAllBySeqPlatform(it, [sort: "name", order: "asc"])]
         }
     }
+
+    public List listSeqType(){
+        return SeqType.list()
+    }
 }

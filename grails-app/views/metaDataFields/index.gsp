@@ -43,6 +43,14 @@
                 id="listPlatformAndIdentifier"
             />
         </div>
+        <div class="otpDataTables">
+            <otp:dataTable
+                codes="${[
+                    'dataFields.listSeqType',
+                ] }"
+                id="listSeqType"
+            />
+        </div>
     </div>
     <r:script>
         $(function() {
@@ -50,6 +58,7 @@
             $.otp.antibodyTargetTable.registerListAntibodyTarget();
             $.otp.seqCenterTable.registerListSeqCenter();
             $.otp.platformTable.registerListPlatformTable();
+            $.otp.SeqTypeTable.registerListSeqTypeTable();
         });
     </r:script>
 </body>

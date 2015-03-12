@@ -39,6 +39,13 @@ class MetaDataFieldsController {
         renderData(cmd, data)
     }
 
+    JSON dataTableSourceListSeqType(DataTableCommand cmd) {
+        List data = metaDataFieldsService.listSeqType().sort{it.name}.collect {
+            [it.name]
+        }.unique()
+        renderData(cmd, data)
+    }
+
     private JSON renderData(DataTableCommand cmd, List data) {
         Map dataToRender = cmd.dataToRender()
         dataToRender.iTotalRecords = data.size()

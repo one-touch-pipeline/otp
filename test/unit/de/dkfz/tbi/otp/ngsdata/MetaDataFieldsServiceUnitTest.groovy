@@ -14,6 +14,7 @@ import org.junit.*
     SeqCenter,
     SeqPlatformModelIdentifier,
     SeqPlatform,
+    SeqType,
 ])
 class MetaDataFieldsServiceUnitTest {
 
@@ -168,6 +169,29 @@ class MetaDataFieldsServiceUnitTest {
 
         def list = metaDataFieldsService.listPlatformAndIdentifier()
         assert [[seqPlatform, [seqPlatformModelIdentifier1, seqPlatformModelIdentifier2, seqPlatformModelIdentifier3]]] == list
+    }
+
+    void test_listSeqType_oneData() {
+        SeqType seqType = SeqType.build()
+        def list = metaDataFieldsService.listSeqType()
+        assert 1 == list.size()
+        assert seqType == list[0]
+    }
+
+    void test_listSeqType_noData() {
+        def list = metaDataFieldsService.listSeqType()
+        assert [] == list
+    }
+
+    void test_listSeqType_multipleData() {
+        SeqType seqType1 = SeqType.build()
+        SeqType seqType2 = SeqType.build()
+        SeqType seqType3 = SeqType.build()
+        def list = metaDataFieldsService.listSeqType()
+        assert 3 == list.size()
+        assert list.contains(seqType1)
+        assert list.contains(seqType2)
+        assert list.contains(seqType3)
     }
 
 }
