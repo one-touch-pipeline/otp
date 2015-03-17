@@ -110,6 +110,7 @@ class ProjectOverviewController {
         coverage.each {
             InformationOfSamples informationOfSamples = getDataForMockPidAndSampleTypeName(it.mockPid, it.sampleTypeName)
             informationOfSamples.coverage.put(it.seqType, it.coverage)
+            informationOfSamples.laneCount.put(it.seqType, it.numberOfMergedLanes)
         }
 
         if (!hideSampleIdentifier) {

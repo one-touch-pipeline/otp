@@ -236,9 +236,29 @@ from
         join individual.project project
 where
         project = :project
-        and mergingSet.identifier = (select max(identifier) from MergingSet mergingSet where mergingSet.mergingWorkPackage = mergingWorkPackage)
-        and mergingPass.identifier = (select max(identifier) from MergingPass mergingPass where mergingPass.mergingSet = mergingSet)
+        and mergingSet.identifier = (
+            select
+                max(mergingSet2.identifier)
+            from
+                ProcessedMergedBamFile processedMergedBamFile2
+                join processedMergedBamFile2.mergingPass mergingPass2
+                join mergingPass2.mergingSet mergingSet2
+            where
+                mergingSet2.mergingWorkPackage = mergingSet.mergingWorkPackage
+                and processedMergedBamFile2.md5sum is not null
+            )
+        and mergingPass.identifier = (
+            select
+                max(mergingPass3.identifier)
+            from
+                ProcessedMergedBamFile processedMergedBamFile3
+                join processedMergedBamFile3.mergingPass mergingPass3
+            where
+                mergingPass3.mergingSet = mergingPass.mergingSet
+                and processedMergedBamFile3.md5sum is not null
+            )
 """, [project: project])
+
 
         List coverage = processedMergedBamFileList.collect { ProcessedMergedBamFile processedMergedBamFile ->
             MergingWorkPackage mergingWorkPackage = processedMergedBamFile.mergingPass.mergingSet.mergingWorkPackage
@@ -250,10 +270,10 @@ where
                 mockPid: individual.mockPid,
                 sampleTypeName: sample.sampleType.name,
                 seqType: seqType,
-                coverage: processedMergedBamFile.coverage
+                coverage: processedMergedBamFile.coverage,
+                numberOfMergedLanes: processedMergedBamFile.numberOfMergedLanes,
             ]
         }
-
         return coverage
     }
 
