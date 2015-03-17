@@ -7,6 +7,9 @@
 
 <body>
     <div class="body">
+        <h3>
+            <g:message code="dataFields.title.enrichmentKitTable" />
+        </h3>
         <div class="otpDataTables">
             <otp:dataTable
                 codes="${[
@@ -16,6 +19,10 @@
                 id="listExomeEnrichmentKit"
             />
         </div>
+        <div style="width: 20px; height: 40px;"></div>
+        <h3>
+            <g:message code="dataFields.title.antibodyTargetTable" />
+        </h3>
         <div class="otpDataTables">
             <otp:dataTable
                 codes="${[
@@ -24,6 +31,10 @@
                 id="listAntibodyTarget"
             />
         </div>
+        <div style="width: 20px; height: 40px;"></div>
+        <h3>
+            <g:message code="dataFields.title.centersTable" />
+        </h3>
         <div class="otpDataTables">
             <otp:dataTable
                 codes="${[
@@ -33,6 +44,10 @@
                 id="listSeqCenter"
             />
         </div>
+        <div style="width: 20px; height: 40px;"></div>
+        <h3>
+            <g:message code="dataFields.title.listPlatformNameTable" />
+        </h3>
         <div class="otpDataTables">
             <otp:dataTable
                 codes="${[
@@ -43,6 +58,10 @@
                 id="listPlatformAndIdentifier"
             />
         </div>
+        <div style="width: 20px; height: 40px;"></div>
+        <h3>
+            <g:message code="dataFields.titlelistSeqTypeTable" />
+        </h3>
         <div class="otpDataTables">
             <otp:dataTable
                 codes="${[
