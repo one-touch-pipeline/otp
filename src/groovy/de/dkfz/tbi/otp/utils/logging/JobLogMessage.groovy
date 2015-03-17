@@ -16,8 +16,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessingStep
  *
  *
  */
-class JobLogMessage implements Serializable {
-    private static final long serialVersionUID = 1L
+class JobLogMessage {
 
     /**
      * The original message logged by the Job.
@@ -35,13 +34,6 @@ class JobLogMessage implements Serializable {
 
     @Override
     public String toString() {
-        // serializes this JobLogMessage so that it can be deserialized in the JobAppender
-        ByteArrayOutputStream out = new ByteArrayOutputStream()
-        ObjectOutputStream oos = new ObjectOutputStream(out)
-        oos.writeObject(this)
-        oos.flush()
-        oos.close()
-        // encode as base 64 as otherwise reading will fail. A character is not a byte
-        return new String(out.toByteArray().encodeBase64().toString())
+        return "[ProcessingStep ${processingStep.id}] ${message}"
     }
 }

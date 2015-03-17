@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.utils.logging
 
+import java.util.regex.Matcher
+
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 
@@ -54,17 +56,14 @@ class JobAppender extends AppenderSkeleton {
         if (closed) {
             return
         }
-        // try to convert this message into a JobLogMessage
         try {
-            // the LoggingEvent does not provide direct access to the logged JobLogMessage as a toString() has been called on it
-            // The toString() of JobLogMessage serializes the object into a base 64 encoded String
-            // so we can try to decode it again and read the object back from the Stream
-            ByteArrayInputStream inStream = new ByteArrayInputStream(event.message.toString().decodeBase64())
-            // HACK: we need to pass in the grails ClassLoader otherwise the ClassLoader doesn't find our class. To do so we need to access the grailsApplication
-            JobLogMessage message = (JobLogMessage)inStream.newObjectInputStream(new ProcessingStep().domainClass.grailsApplication.classLoader).readObject()
-            FileAppender appender = appenderForProcessingStep(message.processingStep)
+            String message = event.message.toString()
+            Matcher matcher = message =~ /^(\[ProcessingStep (\d+)\] )/
+            matcher.find()
+            ProcessingStep processingStep = ProcessingStep.getInstance(Long.parseLong(matcher.group(2)))
+            FileAppender appender = appenderForProcessingStep(processingStep)
             if (appender) {
-                LoggingEvent e = new LoggingEvent(event.fqnOfCategoryClass, event.getLogger(), event.timeStamp, event.getLevel(), message.message, event.threadName, event.throwableInfo, event.ndc, event.locationInfo, event.properties)
+                LoggingEvent e = new LoggingEvent(event.fqnOfCategoryClass, event.getLogger(), event.timeStamp, event.getLevel(), message.substring(matcher.group(1).length()), event.threadName, event.throwableInfo, event.ndc, event.locationInfo, event.properties)
                 appender.append(e)
             }
         } catch (Exception e) {
