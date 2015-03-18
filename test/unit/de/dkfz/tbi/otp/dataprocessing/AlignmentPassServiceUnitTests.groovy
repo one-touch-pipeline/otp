@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.ngsdata.*
     Run,
     RunSegment,
 ])
-
 class AlignmentPassServiceUnitTests extends TestData {
 
     AlignmentPassService alignmentPassService

@@ -59,8 +59,7 @@ class MergingSetServiceTests {
                         )
         assertNotNull(seqType.save([flush: true, failOnError: true]))
 
-        seqPlatform = TestData.findOrSaveSeqPlatform()
-        assertNotNull(seqPlatform.save([flush: true, failOnError: true]))
+        seqPlatform = SeqPlatform.build()
 
         SeqCenter seqCenter = new SeqCenter(
                         name: "name",

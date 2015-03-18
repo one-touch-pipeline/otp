@@ -24,7 +24,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     static final String ANTIBODY_TARGET_IDENTIFIER = "AntibodyTargetIdentifier123"
     static final String ANTIBODY_IDENTIFIER = "AntibodyIdentifier123"
-    static final String SEQUENCING_KIT = "SequencingKit"
     static final String LIBRARY_PREPARATION_KIT_NAME_VALID = "Valid kit name"
     static final String LIBRARY_PREPARATION_KIT_SYNONYM_VALID = "Valid kit synonym"
     static final String LIBRARY_PREPARATION_KIT_NAME_INVALID = "Invalid kit name"
@@ -57,8 +56,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqPlatform seqPlatform = new SeqPlatform(name: "testSolid")
-        assert(seqPlatform.save())
+        SeqPlatform seqPlatform = SeqPlatform.build()
         run.seqPlatform = seqPlatform
         assert(run.save())
         // does not proceed as no DataFile is set with the run associated
@@ -254,7 +252,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
 
     Run createDataForBuildFastqSeqTrack(String key, String valueRead1, String valueRead2) {
-        SequencingKit.build(name: SEQUENCING_KIT)
         SeqType.build(name: SeqTypeNames.EXOME.seqTypeName, libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
         LibraryPreparationKit.build(name: "LIB_PREP_KIT")
         SoftwareToolIdentifier.build(name: "PIPELINE_VERSION")
@@ -269,7 +266,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                 SAMPLE_ID: "SAMPLE_ID",
                 SEQUENCING_TYPE: SeqTypeNames.EXOME.seqTypeName,
                 LIB_PREP_KIT: "LIB_PREP_KIT",
-                SEQUENCING_KIT: "SEQUENCING_KIT",
                 PIPELINE_VERSION: "PIPELINE_VERSION",
                 ILSE_NO: ILSE_ID,
                 LIBRARY_LAYOUT: SeqType.LIBRARYLAYOUT_PAIRED,
@@ -322,13 +318,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     }
 
-    void testBuildFastqSeqTrack_SequencingKitsAreDifferent_ThrowException() {
-        Run run = createDataForBuildFastqSeqTrack("SEQUENCING_KIT", "SEQUENCING_KIT_1", "SEQUENCING_KIT_2")
-        assert (TestCase.shouldFail(ProcessingException) {
-            seqTrackService.buildFastqSeqTrack(run, LANE_NR)
-        }).contains("Not using the same SEQUENCING_KIT")
-    }
-
     void testBuildFastqSeqTrack_SoftwareToolsAreDifferent_ThrowException() {
         Run run = createDataForBuildFastqSeqTrack("PIPELINE_VERSION", "PIPELINE_VERSION_1", "PIPELINE_VERSION_2")
         SoftwareToolIdentifier.build(name: "PIPELINE_VERSION_1")
@@ -345,7 +334,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
 
     void testAssertConsistentWithinSeqTrack_NotEntryInDataBaseForMetaDataKey() {
-        MetaDataKey metaDataKey = new MetaDataKey(name: MetaDataColumn.SEQUENCING_KIT.name())
+        MetaDataKey metaDataKey = new MetaDataKey(name: MetaDataColumn.SEQUENCING_TYPE.name())
         assertNotNull(metaDataKey.save())
 
         DataFile dataFileR1 = new DataFile(fileName: "1_ACTGTG_L005_R1_complete_filtered.fastq.gz")
@@ -355,42 +344,30 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertNotNull(dataFileR2.save())
 
         List<DataFile> dataFiles = [dataFileR1, dataFileR2]
-        seqTrackService.assertConsistentWithinSeqTrack(dataFiles, MetaDataColumn.SEQUENCING_KIT) == null
+        seqTrackService.assertConsistentWithinSeqTrack(dataFiles, MetaDataColumn.SEQUENCING_TYPE) == null
     }
 
     void testAssertConsistentWithinSeqTrack_ValuesAreNotConsistent_ShouldFail() {
-        String sequencingKit = "sequencingKit"
-        DataFile dataFileR1 = createAndSaveDataFileAndMetaDataEntry([(MetaDataColumn.SEQUENCING_KIT.name()): sequencingKit])
+        String sequencingType = "sequencingType"
+        DataFile dataFileR1 = createAndSaveDataFileAndMetaDataEntry([(MetaDataColumn.SEQUENCING_TYPE.name()): sequencingType])
 
-        String differentSequencingKit = "differentSequencingKit"
-        DataFile dataFileR2 = createAndSaveDataFileAndMetaDataEntry([(MetaDataColumn.SEQUENCING_KIT.name()): differentSequencingKit])
+        String differentSequencingType = "differentSequencingType"
+        DataFile dataFileR2 = createAndSaveDataFileAndMetaDataEntry([(MetaDataColumn.SEQUENCING_TYPE.name()): differentSequencingType])
 
         List<DataFile> dataFiles = [dataFileR1, dataFileR2]
         shouldFail(ProcessingException) {
-            seqTrackService.assertConsistentWithinSeqTrack(dataFiles, MetaDataColumn.SEQUENCING_KIT)
+            seqTrackService.assertConsistentWithinSeqTrack(dataFiles, MetaDataColumn.SEQUENCING_TYPE)
         }
     }
 
     void testAssertConsistentWithinSeqTrack_ValuesAreConsistent() {
-        String sequencingKit = "sequencingKit"
+        String sequencingType = "sequencingType"
 
-        DataFile dataFileR1 = createAndSaveDataFileAndMetaDataEntry([(MetaDataColumn.SEQUENCING_KIT.name()): sequencingKit])
-        DataFile dataFileR2 = createAndSaveDataFileAndMetaDataEntry([(MetaDataColumn.SEQUENCING_KIT.name()): sequencingKit])
-
-        List<DataFile> dataFiles = [dataFileR1, dataFileR2]
-        assert sequencingKit == seqTrackService.assertConsistentWithinSeqTrack(dataFiles, MetaDataColumn.SEQUENCING_KIT)
-    }
-
-    void testAssertAndReturnConsistentSequencingKit_ValuesAreConsistent() {
-        String sequencingKitName = "sequencingKit"
-        SequencingKit sequencingKit = new SequencingKit(name: sequencingKitName)
-        assert sequencingKit.save(flush: true)
-
-        DataFile dataFileR1 = createAndSaveDataFileAndMetaDataEntry([(MetaDataColumn.SEQUENCING_KIT.name()): sequencingKitName])
-        DataFile dataFileR2 = createAndSaveDataFileAndMetaDataEntry([(MetaDataColumn.SEQUENCING_KIT.name()): sequencingKitName])
+        DataFile dataFileR1 = createAndSaveDataFileAndMetaDataEntry([(MetaDataColumn.SEQUENCING_TYPE.name()): sequencingType])
+        DataFile dataFileR2 = createAndSaveDataFileAndMetaDataEntry([(MetaDataColumn.SEQUENCING_TYPE.name()): sequencingType])
 
         List<DataFile> dataFiles = [dataFileR1, dataFileR2]
-        assert sequencingKit == seqTrackService.assertAndReturnConsistentSequencingKit(dataFiles)
+        assert sequencingType == seqTrackService.assertConsistentWithinSeqTrack(dataFiles, MetaDataColumn.SEQUENCING_TYPE)
     }
 
     void testAssertAndReturnConcistentIlseId_ValuesAreConsistent() {
@@ -403,23 +380,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assert ilseId == seqTrackService.assertAndReturnConcistentIlseId(dataFiles)
     }
 
-
-    void testCreateSeqTrack_WithSequencingKit() {
-        Map data = createData()
-        SeqTrack seqTrack = seqTrackService.createSeqTrack(
-                data.dataFile,
-                data.run,
-                data.sample,
-                data.seqType,
-                "1",
-                data.softwareTool,
-                data.sequencingKit
-        )
-        assertNotNull(seqTrack)
-        assertEquals(SeqTrack.class, seqTrack.class)
-        assert seqTrack.sequencingKit == data.sequencingKit
-    }
-
     void testCreateSeqTrack_WithIlseId() {
         String ilseId = "1234"
         Map data = createData()
@@ -430,30 +390,10 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                 data.seqType,
                 "1",
                 data.softwareTool,
-                null,
                 ilseId
         )
         assertNotNull(seqTrack)
         assertEquals(SeqTrack.class, seqTrack.class)
-        assert seqTrack.ilseId == ilseId
-    }
-
-    void testCreateSeqTrack_WithSequencingKitAndIlseId() {
-        String ilseId = "1234"
-        Map data = createData()
-        SeqTrack seqTrack = seqTrackService.createSeqTrack(
-                data.dataFile,
-                data.run,
-                data.sample,
-                data.seqType,
-                "1",
-                data.softwareTool,
-                data.sequencingKit,
-                ilseId
-        )
-        assertNotNull(seqTrack)
-        assertEquals(SeqTrack.class, seqTrack.class)
-        assert seqTrack.sequencingKit == data.sequencingKit
         assert seqTrack.ilseId == ilseId
     }
 
@@ -755,11 +695,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         )
         assertNotNull(project.save([flush: true]))
 
-        SeqPlatform seqPlatform = new SeqPlatform(
-                        name: "seqplatform",
-                        model: "model"
-                        )
-        assertNotNull(seqPlatform.save([flush: true]))
+        SeqPlatform seqPlatform = SeqPlatform.build()
 
         SeqCenter seqCenter = new SeqCenter(
                         name: "seqCenter",
@@ -830,11 +766,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         name: ANTIBODY_TARGET_IDENTIFIER)
         assertNotNull(antibodyTarget.save([flush: true]))
 
-        SequencingKit sequencingKit = new SequencingKit(
-                name: SEQUENCING_KIT
-        )
-        assert sequencingKit.save(flush: true)
-
         return [
             dataFile: dataFile,
             run: run,
@@ -843,7 +774,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
             softwareTool: softwareTool,
             libraryPreparationKit: libraryPreparationKit,
             antibodyTarget: antibodyTarget,
-            sequencingKit: sequencingKit,
         ]
     }
 

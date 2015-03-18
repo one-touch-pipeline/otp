@@ -153,15 +153,7 @@ class DataInstallationWorkflowTests extends AbstractWorkflowTest {
         softwareToolIdentifier.softwareTool = softwareTool
         assertNotNull(softwareToolIdentifier.save(flush: true))
 
-        seqPlatform = new SeqPlatform()
-        seqPlatform.name = instrumentPlatform
-        seqPlatform.model = instrumentModel
-        assertNotNull(seqPlatform.save(flush: true))
-
-        SeqPlatformModelIdentifier seqPlatformModelIdentifier = new SeqPlatformModelIdentifier()
-        seqPlatformModelIdentifier.name = instrumentModel
-        seqPlatformModelIdentifier.seqPlatform = seqPlatform
-        assertNotNull(seqPlatformModelIdentifier.save(flush: true))
+        seqPlatform = SeqPlatform.build()
 
         SeqCenter seqCenter = new SeqCenter()
         seqCenter.name = seqCenterName

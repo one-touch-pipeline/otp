@@ -204,21 +204,11 @@ class LoadMetaDataTests extends AbstractWorkflowTest {
         softwareToolIdentifier.softwareTool = softwareTool
         assertNotNull(softwareToolIdentifier.save(flush: true))
 
-        SeqPlatform seqPlatform = new SeqPlatform()
-        seqPlatform.name = instrumentPlatform
-        seqPlatform.model = instrumentModel
-        seqPlatform.seqPlatformGroup = SeqPlatformGroup.build()
-        assertNotNull(seqPlatform.save(flush: true))
-
-        SeqPlatformModelIdentifier seqPlatformModelIdentifier = new SeqPlatformModelIdentifier()
-        seqPlatformModelIdentifier.name = instrumentModel
-        seqPlatformModelIdentifier.seqPlatform = seqPlatform
-        assertNotNull(seqPlatformModelIdentifier.save(flush: true))
-
-        SequencingKit sequencingKit = new SequencingKit(
-                name: sequencingKitName
-        )
-        assert sequencingKit.save(flush: true)
+        SeqPlatform seqPlatform = SeqPlatform.build(
+            name: instrumentPlatform,
+            seqPlatformModelLabel: SeqPlatformModelLabel.build(name: instrumentModel),
+            sequencingKitLabel: SequencingKitLabel.build(name: sequencingKitName),
+            )
 
         SeqCenter seqCenter = new SeqCenter(
                         name: seqCenterName,

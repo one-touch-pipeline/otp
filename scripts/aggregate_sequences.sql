@@ -7,6 +7,8 @@ CREATE VIEW aggregate_sequences AS SELECT
 
 st.seq_type_id,
 st.seq_platform_id,
+sp.seq_platform_model_label_id,
+sp.sequencing_kit_label_id,
 st.sample_id,
 r.seq_center_id,
 s.sample_type_id,
@@ -14,7 +16,8 @@ s.individual_id,
 p.id AS project_id,
 
 sp.name AS seq_platform_name,
-sp.model,
+spml.name AS seq_platform_model_label_name,
+skl.name AS sequencing_kit_label_name,
 seqType.name AS seq_type_name,
 seqType.alias AS seq_type_alias,
 (CASE WHEN seqType.alias IS NOT NULL THEN seqType.alias ELSE seqType.name END) AS seq_type_alias_or_name,
@@ -48,11 +51,17 @@ INNER JOIN project AS p
 ON i.project_id = p.id
 INNER JOIN seq_center AS sc
 ON r.seq_center_id = sc.id
+LEFT OUTER JOIN seq_platform_model_label spml
+ON sp.seq_platform_model_label_id = spml.id
+LEFT OUTER JOIN sequencing_kit_label skl
+ON sp.sequencing_kit_label_id = skl.id
 
 group by
 
 st.seq_type_id,
 st.seq_platform_id,
+sp.seq_platform_model_label_id,
+sp.sequencing_kit_label_id,
 st.sample_id,
 r.seq_center_id,
 s.sample_type_id,
@@ -60,7 +69,8 @@ s.individual_id,
 p.id,
 
 sp.name,
-sp.model,
+spml.name,
+skl.name,
 seqType.name,
 seqType.alias,
 seqType.library_layout,

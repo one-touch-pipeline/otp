@@ -50,8 +50,7 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
                         )
         assertNotNull(project.save([flush: true, failOnError: true]))
 
-        seqPlatform = testData.findOrSaveSeqPlatform()
-        assertNotNull(seqPlatform.save([flush: true, failOnError: true]))
+        seqPlatform = SeqPlatform.build()
 
         SeqCenter seqCenter = new SeqCenter(
                         name: "name",

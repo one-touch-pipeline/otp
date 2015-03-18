@@ -2,11 +2,9 @@ package de.dkfz.tbi.otp.ngsqc
 
 import static org.junit.Assert.*
 import org.junit.*
-import grails.util.Environment
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 
 class FastqcResultsServiceTests {
@@ -61,16 +59,7 @@ class FastqcResultsServiceTests {
                         )
         assertNotNull(seqType.save([flush: true]))
 
-        SeqPlatform seqPlatform = new SeqPlatform()
-        seqPlatform.name = "Illumina"
-        seqPlatform.model = instrumentModel
-
-        assertNotNull(seqPlatform.save(flush: true))
-
-        SeqPlatformModelIdentifier seqPlatformModelIdentifier = new SeqPlatformModelIdentifier()
-        seqPlatformModelIdentifier.name = "Illumina"
-        seqPlatformModelIdentifier.seqPlatform = seqPlatform
-        assertNotNull(seqPlatformModelIdentifier.save(flush: true))
+        SeqPlatform seqPlatform = SeqPlatform.build()
 
         SeqCenter seqCenter = new SeqCenter(
                         name: seqCenterName,

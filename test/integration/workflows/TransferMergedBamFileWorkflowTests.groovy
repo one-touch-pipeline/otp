@@ -671,7 +671,7 @@ class TransferMergedBamFileWorkflowTests extends AbstractWorkflowTest {
     }
 
     void tearDown() {
-        //executionService.executeCommand(realm, cleanUpTestFoldersCommand())
+        executionService.executeCommand(realm, cleanUpTestFoldersCommand())
         realm = null
     }
 

@@ -54,8 +54,7 @@ class BwaPairingAndSortingJobTests {
             )
         assertNotNull(seqType.save([flush: true, failOnError: true]))
 
-        SeqPlatform seqPlatform = TestData.findOrSaveSeqPlatform()
-        assertNotNull(seqPlatform.save([flush: true, failOnError: true]))
+        SeqPlatform seqPlatform = SeqPlatform.build(name: SAMPlatformLabel.ILLUMINA.key)
 
         SeqCenter seqCenter = new SeqCenter(
             name: "name",

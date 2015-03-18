@@ -17,6 +17,7 @@ testDataConfig {
         'de.dkfz.tbi.otp.ngsdata.DataFile' {
             fileName = 'DataFileFileName.gz'
             vbpFileName = 'DataFileVbpFileName.gz'
+            fileType = {FileType.buildLazy(type: FileType.Type.SEQUENCE)}
         }
         'de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit' {
             name = {'name_' + (counter++)}
@@ -71,9 +72,16 @@ testDataConfig {
         }
         'de.dkfz.tbi.otp.ngsdata.SeqPlatform' {
             seqPlatformGroup = {SeqPlatformGroup.build()}
+            seqPlatformModelLabel = {SeqPlatformModelLabel.build()}
         }
         'de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup' {
             name = {'testSeqPlatformGroup_' + (counter++)}
+        }
+        'de.dkfz.tbi.otp.ngsdata.SeqPlatformModelLabel' {
+            name = {'platformModelLabelName_' + (counter++)}
+        }
+        'de.dkfz.tbi.otp.ngsdata.SequencingKitLabel' {
+            name = {'sequencingKitLabel_' + (counter++)}
         }
         'de.dkfz.tbi.otp.ngsdata.SeqType' {
             name = {'seqTypeName_' + (counter++)}
@@ -108,6 +116,10 @@ testDataConfig {
             state: ExecutionState.CREATED
         }
     }
+    unitAdditionalBuild = [
+        'de.dkfz.tbi.otp.ngsdata.DataFile': [de.dkfz.tbi.otp.ngsdata.FileType],
+        'de.dkfz.tbi.otp.ngsdata.SeqPlatform': [de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup, de.dkfz.tbi.otp.ngsdata.SeqPlatformModelLabel],
+    ]
 }
 
 

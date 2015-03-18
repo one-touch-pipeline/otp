@@ -9,24 +9,32 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 @Scope("prototype")
 class SeqPlatformService {
 
-    def fileTypeService
+    FileTypeService fileTypeService
 
-    //private final Lock lock = new ReentrantLock()
+    SeqPlatformModelLabelService seqPlatformModelLabelService
 
-    final String platformKeyName = "INSTRUMENT_PLATFORM"
-    final String modelKeyName = "INSTRUMENT_MODEL"
+    SequencingKitLabelService sequencingKitLabelService
+
+
     @SuppressWarnings("GrailsStatelessService")
     MetaDataKey platformKey
     @SuppressWarnings("GrailsStatelessService")
     MetaDataKey modelKey
     @SuppressWarnings("GrailsStatelessService")
+    MetaDataKey sequencingKey
+
+    @SuppressWarnings("GrailsStatelessService")
     MetaDataEntry platformEntry
     @SuppressWarnings("GrailsStatelessService")
     MetaDataEntry modelEntry
     @SuppressWarnings("GrailsStatelessService")
+    MetaDataEntry sequencingEntry
+
+    @SuppressWarnings("GrailsStatelessService")
     SeqPlatform seqPlatform = null
 
-    //@Scope("Prototype")
+
+
     public boolean validateSeqPlatform(long runId) {
         Run run = Run.get(runId)
         seqPlatform = null
@@ -41,8 +49,9 @@ class SeqPlatformService {
     }
 
     private void setupKeys() {
-        platformKey = MetaDataKey.findByName(platformKeyName)
-        modelKey = MetaDataKey.findByName(modelKeyName)
+        platformKey = MetaDataKey.findByName(MetaDataColumn.INSTRUMENT_PLATFORM.name())
+        modelKey = MetaDataKey.findByName(MetaDataColumn.INSTRUMENT_MODEL.name())
+        sequencingKey = MetaDataKey.findByName(MetaDataColumn.SEQUENCING_KIT.name())
     }
 
     private boolean checkAllFiles(Run run) {
@@ -64,43 +73,48 @@ class SeqPlatformService {
             LogThreadLocal.getThreadLog()?.error("Platform or model are not given for '${file}")
             return false
         }
-        if (validateWithEntries(platformEntry, modelEntry)) {
-            return true
-        }
-        // known bug of swapped meta data entries
-        if (validateWithEntries(modelEntry, platformEntry)) {
-            return true
-        }
-
-        LogThreadLocal.getThreadLog()?.error("Could not find a SeqPlatform for '${platformEntry}' and '${modelEntry}' (requested by file ${file}")
-        return false
+        return validateWithEntries(platformEntry, modelEntry, sequencingEntry, file)
     }
 
     private void setupEntries(DataFile file) {
         platformEntry = MetaDataEntry.findByDataFileAndKey(file, platformKey)
         modelEntry = MetaDataEntry.findByDataFileAndKey(file, modelKey)
+        sequencingEntry = MetaDataEntry.findByDataFileAndKey(file, sequencingKey)
     }
 
-    private boolean validateWithEntries(MetaDataEntry pEntry, MetaDataEntry mEntry) {
+    private boolean validateWithEntries(MetaDataEntry pEntry, MetaDataEntry mEntry, MetaDataEntry sEntry, DataFile file) {
         SeqPlatform platform = null
-        SeqPlatformModelIdentifier identifier = SeqPlatformModelIdentifier.findByName(mEntry.value)
-        if (identifier) {
-            platform = identifier.seqPlatform
-            if (platform.name.toLowerCase() != pEntry.value.toLowerCase()) {
+        SeqPlatformModelLabel seqPlatformModelLabel = null
+        SequencingKitLabel sequencingKitLabel = null
+
+        if (mEntry?.value) {
+            seqPlatformModelLabel = seqPlatformModelLabelService.findSeqPlatformModelLabelByNameOrAlias(mEntry.value)
+            if (!seqPlatformModelLabel) {
+                LogThreadLocal.getThreadLog()?.error("Could not find a SeqPlatformModelLabel for '${mEntry.value}' (requested by file ${file})")
                 return false
             }
-        } else {
-            platform = SeqPlatform.findByNameAndModel(pEntry.value, null)
         }
-        if (platform == null) {
+        if (sEntry?.value) {
+            sequencingKitLabel = sequencingKitLabelService.findSequencingKitLabelByNameOrAlias(sEntry.value)
+            if (!sequencingKitLabel) {
+                LogThreadLocal.getThreadLog()?.error("Could not find a SequencingKitLabel for '${sEntry.value}' (requested by file ${file})")
+                return false
+            }
+        }
+        platform = findForNameAndModelAndSequencingKit(pEntry.value, seqPlatformModelLabel, sequencingKitLabel)
+        if (!platform) {
+            LogThreadLocal.getThreadLog()?.error("Could not find a SeqPlatform for '${pEntry}' and '${mEntry}' and '${sEntry}' (requested by file ${file})")
             return false
         }
+
         if (seqPlatform == null) {
             seqPlatform = platform
             return true
-        } else {
-            return seqPlatform.equals(platform)
+        } else if (!seqPlatform.equals(platform)) {
+            LogThreadLocal.getThreadLog()?.error("The found seqPlatform '${platform}' differs from the one of the run '${seqPlatform}'")
+            return false
         }
+        return true
     }
 
     private boolean correctMetaData(Run run) {
@@ -115,7 +129,10 @@ class SeqPlatformService {
     private boolean correctMetaDataIfNeeded(DataFile file) {
         setupEntries(file)
         correctMD(platformEntry, seqPlatform.name)
-        correctMD(modelEntry, seqPlatform.model)
+        correctMD(modelEntry, seqPlatform.seqPlatformModelLabel.name)
+        if (seqPlatform.sequencingKitLabel) {
+            correctMD(sequencingEntry, seqPlatform.sequencingKitLabel.name)
+        }
     }
 
     private boolean correctMD(MetaDataEntry entry, String value) {
@@ -136,5 +153,10 @@ class SeqPlatformService {
         }
         entry.status =  MetaDataEntry.Status.VALID
         entry.save(flush: true)
+    }
+
+    SeqPlatform findForNameAndModelAndSequencingKit(String platformName, SeqPlatformModelLabel seqPlatformModelLabel, SequencingKitLabel sequencingKitLabel) {
+        assert platformName
+        return SeqPlatform.findByNameIlikeAndSeqPlatformModelLabelAndSequencingKitLabel(platformName, seqPlatformModelLabel, sequencingKitLabel)
     }
 }

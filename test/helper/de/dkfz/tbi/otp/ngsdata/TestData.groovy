@@ -94,8 +94,7 @@ class TestData {
         seqCenter.dirName = "core"
         assertNotNull(seqCenter.save(flush: true))
 
-        seqPlatform = findOrSaveSeqPlatform()
-        assertNotNull(seqPlatform.save(flush: true))
+        seqPlatform = SeqPlatform.build()
 
         run = createRun("testname1")
         assertNotNull(run.save(flush: true))

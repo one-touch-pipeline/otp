@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.alignment
 
 import java.util.zip.GZIPOutputStream
+import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import grails.test.mixin.support.GrailsUnitTestMixin
 import grails.util.Environment
@@ -19,10 +20,12 @@ import de.dkfz.tbi.otp.ngsdata.*
     SampleType,
     Sample,
     SeqCenter,
-    SeqPlatform,
     SeqType,
     SoftwareTool,
     SeqTrack,
+])
+@Build([
+    SeqPlatform,
 ])
 @TestMixin(GrailsUnitTestMixin)
 class CheckQualityEncodingJobUnitTests {
@@ -77,11 +80,7 @@ class CheckQualityEncodingJobUnitTests {
                         )
         assertNotNull(seqType.save([flush: true]))
 
-        SeqPlatform seqPlatform = new SeqPlatform(
-                        name: "Illumina",
-                        model: "model"
-                        )
-        assertNotNull(seqPlatform.save([flush: true]))
+        SeqPlatform seqPlatform = SeqPlatform.build()
 
         SeqCenter seqCenter = new SeqCenter(
                         name: "name",

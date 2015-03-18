@@ -37,15 +37,7 @@ $.otp.sequence = {
 
     register: function () {
         "use strict";
-        var searchCriteria = $.otp.dataTableFilter.register($("#searchCriteriaTable"), $("#sequenceTable"), true, function (searchCriteria) {
-            $("#export-csv").attr("href", $.otp.createLink({
-                controller: 'sequence',
-                action: 'exportCsv',
-                parameters: {
-                    filtering: JSON.stringify(searchCriteria())
-                }
-            }));
-        });
+        var searchCriteria = $.otp.dataTableFilter.register($("#searchCriteriaTable"), $("#sequenceTable"), true);
 
         $("#sequenceTable").dataTable({
             sDom: '<i> T rt<"clear">S',

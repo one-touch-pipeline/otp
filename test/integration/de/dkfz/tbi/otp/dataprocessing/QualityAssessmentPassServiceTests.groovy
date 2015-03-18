@@ -58,13 +58,7 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
                         )
         assertNotNull(seqType.save([flush: true]))
 
-        SeqPlatform seqPlatform = TestData.findOrSaveSeqPlatform()
-        assertNotNull(seqPlatform.save(flush: true))
-
-        SeqPlatformModelIdentifier seqPlatformModelIdentifier = new SeqPlatformModelIdentifier()
-        seqPlatformModelIdentifier.name = "Illumina"
-        seqPlatformModelIdentifier.seqPlatform = seqPlatform
-        assertNotNull(seqPlatformModelIdentifier.save(flush: true))
+        SeqPlatform seqPlatform = SeqPlatform.build()
 
         SeqCenter seqCenter = new SeqCenter(
                         name: "TheSequencingCenter",

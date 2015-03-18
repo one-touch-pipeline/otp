@@ -9,8 +9,8 @@ class RunSubmitController {
 
     def index() {
         def centers = SeqCenter.list()
-        def seqPlatform = SeqPlatform.list(sort: "name", order: "asc")*.fullName()
-        return [centers: centers, seqPlatform: seqPlatform, cmd: flash.params]
+        def seqPlatforms = SeqPlatform.list().sort {it.fullName()}
+        return [centers: centers, seqPlatforms: seqPlatforms, cmd: flash.params]
     }
 
     def submit(SubmitCommand cmd) {
@@ -24,7 +24,7 @@ class RunSubmitController {
             if(runName.startsWith("run")) {
                 runName = runName.substring(3)
             }
-            long runId = runSubmitService.submit(runName, cmd.seqPlatform, cmd.seqCenter, dataPath, cmd.align)
+            long runId = runSubmitService.submit(runName, cmd.seqPlatformId, cmd.seqCenter, dataPath, cmd.align)
             redirect(controller: "run", action: "show", id: runId)
 
         }
@@ -33,16 +33,17 @@ class RunSubmitController {
 
 class SubmitCommand implements Serializable {
     String metaDataFile
-    String seqPlatform
+    String seqPlatformId
     String seqCenter
     boolean align
 
     static constraints = {
-        importFrom Run, include: ["seqPlatform", "seqCenter"]
+        importFrom Run, include: ["seqCenter"]
         importFrom RunSegment, include: ["align"]
         metaDataFile blank: false, validator: {
             File file = new File(it)
-            file.isAbsolute() && file.exists() && file.list() && file.canRead()
+            file.list() //Workaround to reload the file system inode
+            file.isAbsolute() && file.exists() && file.canRead()
         }
     }
 }

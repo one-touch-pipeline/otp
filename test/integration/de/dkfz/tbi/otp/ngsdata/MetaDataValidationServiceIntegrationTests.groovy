@@ -10,10 +10,7 @@ class MetaDataValidationServiceIntegrationTests {
 
     @Before
     void setUp() {
-        SeqPlatform seqPlatform = SeqPlatform.build(
-                    name: "PlatformName",
-                    model: "platformModel",
-        )
+        SeqPlatform seqPlatform = SeqPlatform.build()
 
         SeqCenter seqCenter = SeqCenter.build(
                     name: "seqCenterName",

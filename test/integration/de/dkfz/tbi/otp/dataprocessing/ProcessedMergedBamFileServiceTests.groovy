@@ -86,8 +86,7 @@ class ProcessedMergedBamFileServiceTests {
                         )
         assertNotNull(softwareTool.save([flush: true]))
 
-        seqPlatform = TestData.findOrSaveSeqPlatform()
-        assertNotNull(seqPlatform.save([flush: true]))
+        seqPlatform = SeqPlatform.build()
 
         SeqCenter seqCenter = new SeqCenter(
                         name: "name",

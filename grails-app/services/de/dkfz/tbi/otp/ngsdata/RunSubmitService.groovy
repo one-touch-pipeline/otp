@@ -2,20 +2,20 @@ package de.dkfz.tbi.otp.ngsdata
 
 class RunSubmitService {
 
-    long submit(String runName, String seqPlatform, String seqCenter, String dataPath, boolean align) {
-        Run run = findOrCreateRun(runName, seqPlatform, seqCenter)
+    long submit(String runName, String seqPlatformId, String seqCenter, String dataPath, boolean align) {
+        Run run = findOrCreateRun(runName, seqPlatformId, seqCenter)
         safeSave(run)
         RunSegment segment = createSegment(dataPath, align, run)
         safeSave(segment)
         return run.id
     }
 
-    private static Run findOrCreateRun(String runName, String seqPlatform, String seqCenter) {
+    private static Run findOrCreateRun(String runName, String seqPlatformId, String seqCenter) {
         Run run = Run.findByName(runName)
         if (run) {
             return run
         }
-        SeqPlatform platform = getPlatform(seqPlatform)
+        SeqPlatform platform = SeqPlatform.get(seqPlatformId)
         run = new Run(
                 name: runName,
                 seqCenter: SeqCenter.findByName(seqCenter),
@@ -49,13 +49,6 @@ class RunSubmitService {
                 return RunSegment.FilesStatus.NEEDS_UNPACK
         }
         throw new Exception("Unknown files format")
-    }
-
-    private static SeqPlatform getPlatform(String fullName) {
-        int idx = fullName.indexOf(" ")
-        String name = fullName.substring(0, idx)
-        String model = fullName.substring(idx+1)
-        return SeqPlatform.findByNameAndModel(name, model)
     }
 
     private static boolean safeSave(Object obj) {

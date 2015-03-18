@@ -3,7 +3,8 @@ package de.dkfz.tbi.otp.ngsdata
 class SeqPlatform {
 
     String name   // eg. solid, illumina
-    String model
+    SeqPlatformModelLabel seqPlatformModelLabel
+    SequencingKitLabel sequencingKitLabel
 
     /**
      * If {@code null}, data from this {@link SeqPlatform} will not be aligned.
@@ -11,26 +12,26 @@ class SeqPlatform {
     SeqPlatformGroup seqPlatformGroup
 
     static constraints = {
-        name(blank: false)
-        model(nullable: true, unique: 'name')
+        name(blank: false, unique: ['seqPlatformModelLabel','sequencingKitLabel'])
+        seqPlatformModelLabel(nullable: true)
+        sequencingKitLabel(nullable: true)
         seqPlatformGroup(nullable: true)
     }
 
     String toString() {
-        final int expressiveModelNameLimit = 4
-        if (!model) {
-            return name
-        }
-        if (model.size() > expressiveModelNameLimit) {
-            return model
-        }
-        return name + " " + model
+        return fullName()
     }
 
     String fullName() {
-        if (model) {
-            return name + " " + model
-        }
-        return name
+        return [
+            name,
+            seqPlatformModelLabel?.name,
+            sequencingKitLabel?.name ?: 'unknown kit'
+            ].findAll().join(' ')
+    }
+
+    static mapping = {
+        sequencingKitLabel index: "seq_platform_sequencing_kit_label_idx"
+        seqPlatformModelLabel index: "seq_platform_seq_platform_model_label_idx"
     }
 }

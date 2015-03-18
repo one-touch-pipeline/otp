@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
 
-import org.grails.plugins.springsecurity.service.acl.AclUtilService;
+import org.grails.plugins.springsecurity.service.acl.AclUtilService
 import org.junit.*
 
 import de.dkfz.tbi.otp.security.User
@@ -481,10 +481,7 @@ example_GATCGA_fileR2.fastq.gz\t5be4751eef9535af3df3f78047cc9137\tTheSequencingC
             ])
         assertNotNull(fileType.save(flush: true))
 
-        SeqPlatform seqPlatform = new SeqPlatform()
-        seqPlatform.name = "platform"
-        seqPlatform.model = "model"
-        assertNotNull(seqPlatform.save(flush: true))
+        SeqPlatform seqPlatform = SeqPlatform.build()
 
         SeqCenter seqCenter = new SeqCenter(
                         name: "seqCenter",

@@ -91,7 +91,9 @@ order by type.name asc, type.libraryLayout
             }
             seqPlatform {
                 order("name")
-                order("model")
+                seqPlatformModelLabel {
+                    order("name")
+                }
             }
             sample {
                 sampleType {

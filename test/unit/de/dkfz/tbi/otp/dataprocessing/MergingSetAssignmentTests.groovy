@@ -57,9 +57,7 @@ class MergingSetAssignmentTests {
         seqCenter.save(flush: true)
         assertTrue(seqCenter.validate())
 
-        SeqPlatform seqPlatform = TestData.findOrSaveSeqPlatform()
-        seqPlatform.save(flush: true)
-        assertTrue(seqPlatform.validate())
+        SeqPlatform seqPlatform = SeqPlatform.build()
 
         Run run = new Run()
         run.name = "testname"

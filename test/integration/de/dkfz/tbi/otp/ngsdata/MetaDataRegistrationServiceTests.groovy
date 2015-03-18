@@ -2,11 +2,11 @@ package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
 
-import java.io.File;
+import java.io.File
 
 import org.junit.*
 
-import de.dkfz.tbi.otp.testing.AbstractIntegrationTest;
+import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 
 class MetaDataRegistrationServiceTests extends AbstractIntegrationTest {
 
@@ -52,8 +52,7 @@ class MetaDataRegistrationServiceTests extends AbstractIntegrationTest {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqPlatform seqPlatform = new SeqPlatform(name: "testSolid")
-        assert(seqPlatform.save())
+        SeqPlatform seqPlatform = SeqPlatform.build()
         run.seqPlatform = seqPlatform
         assert(run.save())
         metaDataRegistrationService.registerInputFiles(run.id)

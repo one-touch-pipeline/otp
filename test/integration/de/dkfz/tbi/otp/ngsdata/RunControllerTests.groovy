@@ -106,8 +106,7 @@ class RunControllerTests extends ControllerUnitTestCase {
 
     @Ignore
     void testShowRunMinimalData() {
-        SeqPlatform seqPlatform = new SeqPlatform(name: "test")
-        assertNotNull(seqPlatform.save())
+        SeqPlatform seqPlatform = SeqPlatform.build()
         SeqCenter seqCenter = new SeqCenter(name: "test", dirName: "directory")
         assertNotNull(seqCenter.save())
         Run run = new Run(name: "test", seqCenter: seqCenter, seqPlatform: seqPlatform)
@@ -129,8 +128,7 @@ class RunControllerTests extends ControllerUnitTestCase {
 
     @Ignore
     void testShowRunByName() {
-        SeqPlatform seqPlatform = new SeqPlatform(name: "test")
-        assertNotNull(seqPlatform.save())
+        SeqPlatform seqPlatform = SeqPlatform.build()
         SeqCenter seqCenter = new SeqCenter(name: "test", dirName: "directory")
         assertNotNull(seqCenter.save())
         Run run = new Run(name: "test", seqCenter: seqCenter, seqPlatform: seqPlatform)
@@ -152,8 +150,7 @@ class RunControllerTests extends ControllerUnitTestCase {
 
     @Ignore
     void testShowRunWithNextRun() {
-        SeqPlatform seqPlatform = new SeqPlatform(name: "test")
-        assertNotNull(seqPlatform.save())
+        SeqPlatform seqPlatform = SeqPlatform.build()
         SeqCenter seqCenter = new SeqCenter(name: "test", dirName: "directory")
         assertNotNull(seqCenter.save())
         Run run = new Run(name: "test", seqCenter: seqCenter, seqPlatform: seqPlatform)
@@ -171,8 +168,7 @@ class RunControllerTests extends ControllerUnitTestCase {
     }
 
     void testShowRunWithPrevRun() {
-        SeqPlatform seqPlatform = new SeqPlatform(name: "test")
-        assertNotNull(seqPlatform.save())
+        SeqPlatform seqPlatform = SeqPlatform.build()
         SeqCenter seqCenter = new SeqCenter(name: "test", dirName: "directory")
         assertNotNull(seqCenter.save())
         Run run = new Run(name: "test", seqCenter: seqCenter, seqPlatform: seqPlatform)
@@ -196,8 +192,7 @@ class RunControllerTests extends ControllerUnitTestCase {
     }
 
     void testShowRunWithPrevNextRun() {
-        SeqPlatform seqPlatform = new SeqPlatform(name: "test")
-        assertNotNull(seqPlatform.save())
+        SeqPlatform seqPlatform = SeqPlatform.build()
         SeqCenter seqCenter = new SeqCenter(name: "test", dirName: "directory")
         assertNotNull(seqCenter.save())
         Run run1 = new Run(name: "test", seqCenter: seqCenter, seqPlatform: seqPlatform)

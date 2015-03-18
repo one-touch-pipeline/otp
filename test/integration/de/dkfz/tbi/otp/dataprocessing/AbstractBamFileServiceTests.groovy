@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.InformationReliability;
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
 
 class AbstractBamFileServiceTests {
 
@@ -57,8 +58,7 @@ class AbstractBamFileServiceTests {
                 )
         assertNotNull(softwareTool.save([flush: true]))
 
-        SeqPlatform seqPlatform = TestData.findOrSaveSeqPlatform()
-        assertNotNull(seqPlatform.save([flush: true]))
+        SeqPlatform seqPlatform = SeqPlatform.build()
 
         Run run = new Run(
                 name: "run",

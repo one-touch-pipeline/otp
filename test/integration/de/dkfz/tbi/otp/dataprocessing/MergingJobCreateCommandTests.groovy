@@ -39,8 +39,7 @@ class MergingJobCreateCommandTests {
         basePathMerging = "${basePath}/merging"
         basePathMergingOutput = "${basePathMerging}//name_1/${SEQ_TYPE_NAME}/${LIBRARY_LAYOUT_NAME}/DEFAULT/0/pass0"
 
-        seqPlatform = testData.findOrSaveSeqPlatform()
-        assertNotNull(seqPlatform.save([flush: true, failOnError: true]))
+        seqPlatform = SeqPlatform.build()
 
         seqType = new SeqType(
                         name: SEQ_TYPE_NAME,

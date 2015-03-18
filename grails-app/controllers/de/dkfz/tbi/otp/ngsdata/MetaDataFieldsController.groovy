@@ -32,9 +32,9 @@ class MetaDataFieldsController {
         renderData(cmd, data)
     }
 
-    JSON dataTableSourceListSeqPlatformAndIdentifier(DataTableCommand cmd) {
-        List data = metaDataFieldsService.listPlatformAndIdentifier().collect {
-            [it[0].name, it[0]?.model, it[1]*.name.join(', ')]
+    JSON dataTableSourceListSeqPlatforms(DataTableCommand cmd) {
+        List data = metaDataFieldsService.listPlatforms().collect {
+            [it.name, it.seqPlatformModelLabel?.name, it.seqPlatformModelLabel?.alias?.sort()?.join(', '), it.sequencingKitLabel?.name, it.sequencingKitLabel?.alias?.sort()?.join(', ')]
         }
         renderData(cmd, data)
     }

@@ -47,8 +47,6 @@ class SeqTrackBuilder {
 
     private final SoftwareTool pipelineVersion
 
-    private  final SequencingKit sequencingKit
-
     private QualityEncoding qualityEncoding = QualityEncoding.UNKNOWN
 
     private DataProcessingState fastqcState = DataProcessingState.UNKNOWN
@@ -75,7 +73,6 @@ class SeqTrackBuilder {
     public SeqTrackBuilder(String laneId, Run run, Sample sample,
     SeqType seqType, SeqPlatform seqPlatform,
     SoftwareTool pipelineVersion,
-    SequencingKit sequencingKit = null,
     String ilseId = null) {
         super()
         notNull(laneId, "A seq track needs a lane id")
@@ -91,7 +88,6 @@ class SeqTrackBuilder {
         this.seqType = seqType
         this.seqPlatform = seqPlatform
         this.pipelineVersion = pipelineVersion
-        this.sequencingKit = sequencingKit
         this.ilseId = ilseId
     }
 
@@ -200,7 +196,6 @@ class SeqTrackBuilder {
         seqTrack.pipelineVersion = pipelineVersion
         seqTrack.qualityEncoding = qualityEncoding
         seqTrack.fastqcState = fastqcState
-        seqTrack.sequencingKit = sequencingKit
         seqTrack.kitInfoReliability = informationReliability
         seqTrack.libraryPreparationKit = libraryPreparationKit
 

@@ -9,11 +9,11 @@ import de.dkfz.tbi.otp.utils.ReferencedClass
 
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(MetaDataValidationService)
-@Mock([MetaDataValidationService, LibraryPreparationKitService, SequencingKitService,
+@Mock([MetaDataValidationService, LibraryPreparationKitService, SequencingKitLabelService,
     ReferencedClass, ChangeLog,
     Project, SeqPlatform, SeqCenter, Run,DataFile, MetaDataKey, MetaDataEntry,
     LibraryPreparationKit, LibraryPreparationKitSynonym,
-    SequencingKit, SequencingKitSynonym])
+    SequencingKitLabel])
 class MetaDataValidationServiceUnitTests {
 
     MetaDataValidationService metaDataValidationService
@@ -53,7 +53,7 @@ class MetaDataValidationServiceUnitTests {
         metaDataValidationService = new MetaDataValidationService([
             libraryPreparationKitService: new LibraryPreparationKitService()
         ])
-        metaDataValidationService.sequencingKitService = new SequencingKitService()
+        metaDataValidationService.sequencingKitLabelService = new SequencingKitLabelService()
     }
 
     @After
@@ -246,21 +246,21 @@ class MetaDataValidationServiceUnitTests {
 
     void testValidateMetaDataEntryForSEQUENCING_KIT() {
         Run run = createRun()
-        createSequencingKitSynonym()
+        createSequencingKitLabel()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(MetaDataColumn.SEQUENCING_KIT.name()): SEQUENCING_KIT])
         assertTrue(metaDataValidationService.validateMetaDataEntry(run, map[(MetaDataColumn.SEQUENCING_KIT.name())]))
     }
 
     void testValidateMetaDataEntryForSEQUENCING_KIT_MetadataUseSynonymValue() {
         Run run = createRun()
-        createSequencingKitSynonym()
+        createSequencingKitLabel()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(MetaDataColumn.SEQUENCING_KIT.name()): SEQUENCING_KIT_SYNONYM])
         assertTrue(metaDataValidationService.validateMetaDataEntry(run, map[(MetaDataColumn.SEQUENCING_KIT.name())]))
     }
 
     void testValidateMetaDataEntryForSEQUENCING_KIT_MetadataValueDoesNotExistInDB_IsFalse() {
         Run run = createRun()
-        createSequencingKitSynonym()
+        createSequencingKitLabel()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(MetaDataColumn.SEQUENCING_KIT.name()): OTHER_SEQUENCING_KIT])
         assertFalse(metaDataValidationService.validateMetaDataEntry(run, map[(MetaDataColumn.SEQUENCING_KIT.name())]))
     }
@@ -324,18 +324,13 @@ class MetaDataValidationServiceUnitTests {
         return libraryPreparationKitSynonym
     }
 
-    private SequencingKitSynonym createSequencingKitSynonym() {
-        SequencingKit sequencingKit = new SequencingKit(
-                name: SEQUENCING_KIT
+    private SequencingKitLabel createSequencingKitLabel() {
+        SequencingKitLabel sequencingKitLabel = new SequencingKitLabel(
+                name: SEQUENCING_KIT,
+                alias: [SEQUENCING_KIT_SYNONYM],
         )
-        assert sequencingKit.save(flush: true)
-
-        SequencingKitSynonym sequencingKitSynonym = new SequencingKitSynonym(
-                name:SEQUENCING_KIT_SYNONYM,
-                sequencingKit: sequencingKit
-        )
-        assert sequencingKitSynonym.save(flush: true)
-        return sequencingKitSynonym
+        assert sequencingKitLabel.save(flush: true)
+        return sequencingKitLabel
     }
 
     private DataFile createDataFile() {

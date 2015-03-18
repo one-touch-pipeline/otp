@@ -29,7 +29,7 @@
         </tr>
         <tr>
             <td class="myKey"><g:message code="runSubmit.sequencingPlatform"/></td>
-            <td><g:select name="seqPlatform" from="${seqPlatform}" value="${cmd?.seqPlatform}" /></td>
+            <td><g:select name="seqPlatformId" from="${seqPlatforms}" value="${cmd?.seqPlatformId}" optionKey="id" optionValue="${it?.fullName()}"/></td>
         </tr>
         <tr>
             <td class="myKey"><g:message code="runSubmit.align"/></td>

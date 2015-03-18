@@ -1,14 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.SeqPlatform
-import de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup
+import org.junit.Test
+import org.springframework.beans.factory.annotation.Autowired
+
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
-import de.dkfz.tbi.otp.ngsdata.SequencingKit
 import de.dkfz.tbi.otp.ngsdata.TestData
-import org.junit.Test
-import org.springframework.beans.factory.annotation.Autowired
 
 public class DefaultOtpAlignmentDeciderTest {
     @Autowired
@@ -58,15 +56,9 @@ public class DefaultOtpAlignmentDeciderTest {
     }
 
     private void testPrepareForAlignment_whenEverythingIsOkay_shouldCreateAlignmentPass(boolean forceRealign) {
-        TestData testData = new TestData()
-        testData.createObjects()
+        SeqTrack seqTrack = SeqTrack.build()
 
-        SequencingKit sequencingKit = SequencingKit.build(name: "V1")
-        SeqPlatformGroup seqPlatformGroup = SeqPlatformGroup.build(name: "HiSeq 2000/2500")
-        SeqPlatform seqPlatform = SeqPlatform.build(seqPlatformGroup: seqPlatformGroup)
-        SeqTrack seqTrack = SeqTrack.build(sequencingKit: sequencingKit, seqPlatform: seqPlatform)
-
-        MergingWorkPackage workPackage = testData.createMergingWorkPackage(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqPlatformGroup)
+        MergingWorkPackage workPackage = TestData.createMergingWorkPackage(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup)
         workPackage.save(failOnError: true)
 
         defaultOtpAlignmentDecider.prepareForAlignment(workPackage, seqTrack, forceRealign)
@@ -79,19 +71,12 @@ public class DefaultOtpAlignmentDeciderTest {
 
     @Test
     void testPrepareForAlignment_whenAlignmentPassExists_shouldNotCreateAlignmentPass() {
-        TestData testData = new TestData()
-        testData.createObjects()
+        SeqTrack seqTrack = SeqTrack.build()
 
-        SequencingKit sequencingKit = SequencingKit.build(name: "V1")
-        SeqPlatformGroup seqPlatformGroup = SeqPlatformGroup.build(name: "HiSeq 2000/2500")
-        SeqPlatform seqPlatform = SeqPlatform.build(seqPlatformGroup: seqPlatformGroup)
-        SeqTrack seqTrack = SeqTrack.build(sequencingKit: sequencingKit, seqPlatform: seqPlatform)
-
-        MergingWorkPackage workPackage = testData.createMergingWorkPackage(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqPlatformGroup)
+        MergingWorkPackage workPackage = TestData.createMergingWorkPackage(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup)
         workPackage.save(failOnError: true)
 
-        AlignmentPass alignmentPass1 = testData.createAlignmentPass(seqTrack: seqTrack, workPackage: workPackage)
-        alignmentPass1.save(failOnError: true)
+        AlignmentPass alignmentPass1 = TestData.createAndSaveAlignmentPass(seqTrack: seqTrack, workPackage: workPackage)
 
         defaultOtpAlignmentDecider.prepareForAlignment(workPackage, seqTrack, false)
 
@@ -103,19 +88,12 @@ public class DefaultOtpAlignmentDeciderTest {
 
     @Test
     void testPrepareForAlignment_whenForceRealign_shouldCreateAnotherAlignmentPass() {
-        TestData testData = new TestData()
-        testData.createObjects()
+        SeqTrack seqTrack = SeqTrack.build()
 
-        SequencingKit sequencingKit = SequencingKit.build(name: "V1")
-        SeqPlatformGroup seqPlatformGroup = SeqPlatformGroup.build(name: "HiSeq 2000/2500")
-        SeqPlatform seqPlatform = SeqPlatform.build(seqPlatformGroup: seqPlatformGroup)
-        SeqTrack seqTrack = SeqTrack.build(sequencingKit: sequencingKit, seqPlatform: seqPlatform)
-
-        MergingWorkPackage workPackage = testData.createMergingWorkPackage(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqPlatformGroup)
+        MergingWorkPackage workPackage = TestData.createMergingWorkPackage(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup)
         workPackage.save(failOnError: true)
 
-        AlignmentPass alignmentPass1 = testData.createAlignmentPass(seqTrack: seqTrack, workPackage: workPackage)
-        alignmentPass1.save(failOnError: true)
+        AlignmentPass alignmentPass1 = TestData.createAndSaveAlignmentPass(seqTrack: seqTrack, workPackage: workPackage)
 
         defaultOtpAlignmentDecider.prepareForAlignment(workPackage, seqTrack, true)
 

@@ -2,8 +2,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
 
-import java.io.File;
-
 import grails.test.mixin.*
 import org.junit.*
 
@@ -47,8 +45,7 @@ class SeqScanServiceTests {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqPlatform seqPlatform = new SeqPlatform(name: "testSolid")
-        assert(seqPlatform.save())
+        SeqPlatform seqPlatform = SeqPlatform.build()
         run.seqPlatform = seqPlatform
         assert(run.save())
         SeqType seqType = new SeqType(name: "testSeqType", libraryLayout: "testLibraryLayout", dirName: "testDir")
@@ -89,8 +86,7 @@ class SeqScanServiceTests {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqPlatform seqPlatform = new SeqPlatform(name: "testSolid")
-        assert(seqPlatform.save())
+        SeqPlatform seqPlatform = SeqPlatform.build()
         run.seqPlatform = seqPlatform
         assert(run.save())
         SeqType seqType = new SeqType(name: "testSeqType", libraryLayout: "testLibraryLayout", dirName: "testDir")
@@ -131,8 +127,7 @@ class SeqScanServiceTests {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqPlatform seqPlatform = new SeqPlatform(name: "testSolid")
-        assert(seqPlatform.save())
+        SeqPlatform seqPlatform = SeqPlatform.build()
         run.seqPlatform = seqPlatform
         assert(run.save())
         SeqType seqType = new SeqType(name: "testSeqType", libraryLayout: "testLibraryLayout", dirName: "testDir")
@@ -167,8 +162,7 @@ class SeqScanServiceTests {
         assert(sample.save())
         SeqType seqType = new SeqType(name: "testSeqType", libraryLayout: "testLibraryLayout", dirName: "testDir")
         assert(seqType.save())
-        SeqPlatform seqPlatform = new SeqPlatform(name: "testSolid")
-        assert(seqPlatform.save())
+        SeqPlatform seqPlatform = SeqPlatform.build()
         SeqScan seqScan = new SeqScan(sample: sample, seqType: seqType, seqCenters: "testCenters", insertSize: "7", nLanes: 4, nBasePairs: 9l, coverage: 8.8, state: SeqScan.State.PROCESSING, qcState: SeqScan.QCState.PASS, seqPlatform: seqPlatform)
         assert(seqScan.save())
         seqScanService.fillSeqCenters(seqScan)
@@ -190,8 +184,7 @@ class SeqScanServiceTests {
         assert(sample.save())
         SeqType seqType = new SeqType(name: "testSeqType", libraryLayout: "testLibraryLayout", dirName: "testDir")
         assert(seqType.save())
-        SeqPlatform seqPlatform = new SeqPlatform(name: "testSolid")
-        assert(seqPlatform.save())
+        SeqPlatform seqPlatform = SeqPlatform.build()
         SeqScan seqScan = new SeqScan(sample: sample, seqType: seqType, seqCenters: "testCenters", insertSize: "7", nLanes: 4, nBasePairs: 9l, coverage: 8.8, state: SeqScan.State.PROCESSING, qcState: SeqScan.QCState.PASS, seqPlatform: seqPlatform)
         assert(seqScan.save())
         Run run = new Run()

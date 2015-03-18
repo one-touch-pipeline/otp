@@ -49,8 +49,7 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqPlatform seqPlatform = new SeqPlatform(name: "testSolid")
-        assert(seqPlatform.save())
+        SeqPlatform seqPlatform = SeqPlatform.build()
         run.seqPlatform = seqPlatform
         assert(run.save())
         // when no data file is associated it should always throw exception
@@ -114,8 +113,7 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqPlatform seqPlatform = new SeqPlatform(name: "testSolid")
-        assert(seqPlatform.save())
+        SeqPlatform seqPlatform = SeqPlatform.build()
         run.seqPlatform = seqPlatform
         assert(run.save())
         // when no data file is associated it should always throw exception
@@ -172,8 +170,7 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run1.seqCenter = seqCenter
-        SeqPlatform seqPlatform = new SeqPlatform(name: "testSolid")
-        assert(seqPlatform.save())
+        SeqPlatform seqPlatform = SeqPlatform.build()
         run1.seqPlatform = seqPlatform
         assert(run1.save())
         // when no data files are associated it should always throw exception
@@ -243,8 +240,7 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run1.seqCenter = seqCenter
-        SeqPlatform seqPlatform = new SeqPlatform(name: "testSolid")
-        assert(seqPlatform.save())
+        SeqPlatform seqPlatform = SeqPlatform.build()
         run1.seqPlatform = seqPlatform
         assert(run1.save())
         // when no data files are associated it should always throw exception
@@ -319,16 +315,11 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         new File(tmpPath + "/seqTypeDir4" + "/seqCenterDir4" + "/runtestRun4").mkdir()
         new File(tmpPath + "/seqTypeDir5" + "/seqCenterDir5" + "/runtestRun5").mkdir()
         // the seqTechs
-        SeqPlatform seqPlatform1 = new SeqPlatform(name: "testSolid1")
-        assert(seqPlatform1.save())
-        SeqPlatform seqPlatform2 = new SeqPlatform(name: "testSolid2")
-        assert(seqPlatform2.save())
-        SeqPlatform seqPlatform3 = new SeqPlatform(name: "testSolid3")
-        assert(seqPlatform3.save())
-        SeqPlatform seqPlatform4 = new SeqPlatform(name: "testSolid4")
-        assert(seqPlatform4.save())
-        SeqPlatform seqPlatform5 = new SeqPlatform(name: "testSolid5")
-        assert(seqPlatform5.save())
+        SeqPlatform seqPlatform1 = SeqPlatform.build()
+        SeqPlatform seqPlatform2 = SeqPlatform.build()
+        SeqPlatform seqPlatform3 = SeqPlatform.build()
+        SeqPlatform seqPlatform4 = SeqPlatform.build()
+        SeqPlatform seqPlatform5 = SeqPlatform.build()
         // the runs
         Run run1 = new Run(name: "testRun1", complete: false, seqCenter: seqCenter1, seqPlatform: seqPlatform1)
         assert(run1.save())

@@ -13,6 +13,8 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack.QualityEncoding
  * <li>SeqTrack</li>
  * <li>SeqType</li>
  * <li>SeqPlatform</li>
+ * <li>SeqPlatformModelLabel</li>
+ * <li>SequencingKitLabel</li>
  * <li>Sample</li>
  * <li>Run</li>
  * <li>PipelineVersion</li>
@@ -27,6 +29,8 @@ class Sequence implements Serializable {
     long seqTrackId
     long seqTypeId
     long seqPlatformId
+    Long seqPlatformModelLabelId
+    Long sequencingKitLabelId
     long sampleId
     long runId
     long pipelineVersionId
@@ -65,7 +69,12 @@ class Sequence implements Serializable {
      * e.g. solid, illumina
      */
     String seqPlatformName
-    String model
+
+    // fields from SeqPlatformModelLabel
+    String seqPlatformModelLabelName
+
+    // fields from SequencingKitLabel
+    String sequencingKitLabelName
 
     // fields from SeqType
     String seqTypeName
@@ -111,6 +120,8 @@ class Sequence implements Serializable {
         seqTrackId column: 'seq_track_id'
         seqTypeId column: 'seq_type_id'
         seqPlatformId column: 'seq_platform_id'
+        seqPlatformModelLabelId column: 'seq_platform_model_label_id'
+        sequencingKitLabelId column: 'sequencing_kit_label_id'
         sampleId column: 'sample_id'
         runId column: 'run_id'
         pipelineVersionId column: 'pipeline_version_id'
@@ -129,7 +140,12 @@ class Sequence implements Serializable {
         dataQuality(nullable: true)
         qualityEvaluated(nullable: true)
         // nullable constraints from SeqPlatform
-        model(nullable: true)
+        seqPlatformModelLabelId(nullable: true)
+        sequencingKitLabelId(nullable: true)
+        // nullable constraints from SeqPlatformModelLabel
+        seqPlatformModelLabelName(nullable: true)
+        // nullable constraints from SequencingKitLabel
+        sequencingKitLabelName(nullable: true)
         // nullable constraints from SeqType
         seqTypeAlias(nullable: true)
         seqTypeAliasOrName(nullable: true)

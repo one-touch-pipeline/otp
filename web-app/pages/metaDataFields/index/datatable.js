@@ -58,7 +58,7 @@ $.otp.platformTable = {
                     '#listPlatformAndIdentifier',
                     $.otp.createLink({
                         controller: 'metaDataFields',
-                        action: 'dataTableSourceListSeqPlatformAndIdentifier'
+                        action: 'dataTableSourceListSeqPlatforms'
                     }),
                     function (json) {
                         return json;

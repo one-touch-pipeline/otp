@@ -66,11 +66,7 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
                         )
         assertNotNull(softwareTool.save([flush: true]))
 
-        seqPlatform = new SeqPlatform(
-                        name: "name",
-                        model: "model"
-                        )
-        assertNotNull(seqPlatform.save([flush: true]))
+        seqPlatform = SeqPlatform.build()
 
         SeqCenter seqCenter = new SeqCenter(
                         name: "name",

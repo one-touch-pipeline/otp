@@ -35,7 +35,7 @@ class SequenceController {
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
         List<Sequence> sequences = seqTrackService.listSequences(cmd.iDisplayStart, cmd.iDisplayLength, cmd.sortOrder, SequenceSortColumn.fromDataTable(cmd.iSortCol_0), filtering)
-        List<DataFile> dataFiles = fastqcResultsService.fastQCFiles(sequences)
+        List<DataFile> dataFiles = sequences ? fastqcResultsService.fastQCFiles(sequences) : []
         // need to add an additional field to the sequences
         // if added as dynamic property, it is not included during the JSON conversion
         // because of that, we just copy all properties into a map
@@ -94,22 +94,6 @@ class SequenceController {
         response.setContentType("application/octet-stream")
         response.setHeader("Content-disposition", "filename=sequence_export.csv")
         response.outputStream << content.toString().bytes
-    }
-
-    def exportCsv = {
-        SequenceFiltering filtering = SequenceFiltering.fromJSON(params.filtering)
-        String xml = seqTrackService.performXMLExport(filtering)
-
-        // transform XML into CSV
-        TransformerFactory factory = TransformerFactory.newInstance()
-        Transformer transformer = factory.newTransformer(new StreamSource(new File(servletContext.getRealPath("xslt/sequencetocsv.xslt"))))
-        StringWriter plainText = new StringWriter()
-        transformer.transform(new StreamSource(new StringReader(xml)), new StreamResult(plainText))
-
-        // make response a file for download
-        response.setContentType("application/octet-stream")
-        response.setHeader("Content-disposition", "filename=sequence_export.csv")
-        response.outputStream << plainText.toString().bytes
     }
 }
 

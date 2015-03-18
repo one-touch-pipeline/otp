@@ -46,8 +46,6 @@ class SeqTrackService {
 
     LibraryPreparationKitService libraryPreparationKitService
 
-    SequencingKitService sequencingKitService
-
     /**
      * Retrieves the Sequences matching the given filtering the user has access to.
      * The access restriction is done through the Projects the user has access to.
@@ -151,105 +149,7 @@ class SeqTrackService {
         }
     }
 
-    /**
-     * Performs an export to XML with the applied filtering.
-     * @param filtering
-     * @return
-     */
-    public String performXMLExport(SequenceFiltering filtering) {
-        StringWriter writer = new StringWriter()
-        MarkupBuilder builder = new MarkupBuilder(writer)
 
-        def c = Sequence.createCriteria()
-        List<Sequence> sequences = c.list {
-            'in'('projectId', projectService.getAllProjects().collect { it.id })
-            if (filtering.project) {
-                'in'('projectId', filtering.project)
-            }
-            if (filtering.individual) {
-                or {
-                    filtering.individual.each {
-                        ilike('mockPid', "%${it}%")
-                    }
-                }
-            }
-            if (filtering.sampleType) {
-                'in'('sampleTypeId', filtering.sampleType)
-            }
-            if (filtering.seqType) {
-                'in'('seqTypeName', filtering.seqType)
-            }
-            if (filtering.libraryLayout) {
-                'in'('libraryLayout', filtering.libraryLayout)
-            }
-            if (filtering.seqCenter) {
-                'in'('seqCenterId', filtering.seqCenter)
-            }
-            if (filtering.run) {
-                or {
-                    filtering.run.each {
-                        ilike('name', "%${it}%")
-                    }
-                }
-            }
-        }
-        String dataFileQuery = "SELECT df FROM DataFile AS df INNER JOIN df.seqTrack AS s WHERE s.id = :seqTrackId"
-
-        builder.sequences() {
-            sequences.each { Sequence p ->
-                sequence() {
-                    seqTrack(id: p.seqTrackId, finalBam: p.hasFinalBam, originalBam: p.hasOriginalBam, usingOriginalBam: p.usingOriginalBam) {
-                        laneId(p.laneId)
-                        numberBasePairs(p.nBasePairs)
-                        numberReads(p.nReads)
-                        insertSize(p.insertSize)
-                        qualityEncoding(p.qualityEncoding)
-                        fastqcState(p.fastqcState)
-                    }
-                    run(id: p.runId, blacklisted: p.blacklisted, multipleSource: p.multipleSource, qualityEvaluated: p.qualityEvaluated) {
-                        name(p.name)
-                        dateExecuted(p.dateExecuted)
-                        dateCreated(p.dateCreated)
-                        storageRealm(p.storageRealm)
-                        dataQuality(p.dataQuality)
-                    }
-                    seqPlatform(id: p.seqPlatformId) {
-                        name(p.seqPlatformName)
-                        model(p.model)
-                    }
-                    seqType(id: p.seqTypeId) {
-                        name(p.seqTypeName)
-                        libraryLayout(p.libraryLayout)
-                        dirName(p.dirName)
-                    }
-                    individual(id: p.individualId) {
-                        pid(p.pid)
-                        mockPid(p.mockPid)
-                        mockFullName(p.mockFullName)
-                        type(p.type)
-                        sample(id: p.sampleId) {
-                            sampleType(id: p.sampleTypeId, p.sampleTypeName)
-                        }
-                    }
-                    project(id: p.projectId) {
-                        name(p.projectName)
-                        dirName(p.projectDirName)
-                        realm(p.realmName)
-                    }
-                    seqCenter(id: p.seqCenterId) {
-                        name(p.seqCenterName)
-                        dirName(p.seqCenterDirName)
-                    }
-                    dataFiles() {
-                        DataFile.executeQuery(dataFileQuery, [seqTrackId: p.seqTrackId]).each { DataFile df ->
-                            path(lsdfFilesService.getFileViewByPidPath(df, p))
-                        }
-                    }
-                }
-            }
-        }
-        return writer.toString()
-    }
 
     /**
      * Calls the {@link AlignmentDecider#decideAndPrepareForAlignment(SeqTrack, boolean)} method of the
@@ -433,14 +333,12 @@ class SeqTrackService {
 
         assertConsistentLibraryPreparationKit(dataFiles)
 
-        SequencingKit sequencingKit = assertAndReturnConsistentSequencingKit(dataFiles)
-
         SoftwareTool pipeline = getPipeline(dataFiles.get(0))
         assertConsistentPipeline(pipeline, dataFiles)
 
         String ilseId = assertAndReturnConcistentIlseId(dataFiles)
 
-        SeqTrack seqTrack = createSeqTrack(dataFiles.get(0), run, sample, seqType, lane, pipeline, sequencingKit, ilseId)
+        SeqTrack seqTrack = createSeqTrack(dataFiles.get(0), run, sample, seqType, lane, pipeline, ilseId)
         consumeDataFiles(dataFiles, seqTrack)
         fillReadsForSeqTrack(seqTrack)
         assert seqTrack.save(failOnError: true, flush: true)
@@ -451,8 +349,8 @@ class SeqTrackService {
         return seqTrack
     }
 
-    private SeqTrack createSeqTrack(DataFile dataFile, Run run, Sample sample, SeqType seqType, String lane, SoftwareTool pipeline, SequencingKit sequencingKit = null, String ilseId = null) {
-        SeqTrackBuilder builder = new SeqTrackBuilder(lane, run, sample, seqType, run.seqPlatform, pipeline, sequencingKit, ilseId)
+    private SeqTrack createSeqTrack(DataFile dataFile, Run run, Sample sample, SeqType seqType, String lane, SoftwareTool pipeline, String ilseId = null) {
+        SeqTrackBuilder builder = new SeqTrackBuilder(lane, run, sample, seqType, run.seqPlatform, pipeline, ilseId)
         builder.setHasFinalBam(false).setHasOriginalBam(false).setUsingOriginalBam(false)
 
         extractAndSetLibraryPreparationKit(dataFile, builder, run, sample)
@@ -546,11 +444,6 @@ class SeqTrackService {
 
     private void assertConsistentLibraryPreparationKit(List<DataFile> files) {
         assertConsistentWithinSeqTrack(files, MetaDataColumn.LIB_PREP_KIT)
-    }
-
-    private SequencingKit assertAndReturnConsistentSequencingKit(List<DataFile> files) {
-        String name = assertConsistentWithinSeqTrack(files, MetaDataColumn.SEQUENCING_KIT)
-        return sequencingKitService.findSequencingKitByNameOrAlias(name)
     }
 
     private String assertAndReturnConcistentIlseId(List<DataFile> files) {

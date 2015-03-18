@@ -95,8 +95,7 @@ class QAResultStatisticsServiceTests {
                         )
         assertNotNull(seqType.save([flush: true]))
 
-        SeqPlatform seqPlatform = TestData.findOrSaveSeqPlatform()
-        assertNotNull(seqPlatform.save([flush: true]))
+        SeqPlatform seqPlatform = SeqPlatform.build()
 
         SeqCenter seqCenter = new SeqCenter(
                         name: "seqCenterName",

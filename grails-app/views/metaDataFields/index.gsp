@@ -52,8 +52,10 @@
             <otp:dataTable
                 codes="${[
                     'dataFields.listPlatformName',
-                    'dataFields.listPlatformModel',
-                    'dataFields.listPlatformIdentifier',
+                    'dataFields.listPlatformModelLabel',
+                    'dataFields.listPlatformModelLabelAlias',
+                    'dataFields.listSequeningKitLabel',
+                    'dataFields.listSequeningKitLabelAlias',
                 ] }"
                 id="listPlatformAndIdentifier"
             />

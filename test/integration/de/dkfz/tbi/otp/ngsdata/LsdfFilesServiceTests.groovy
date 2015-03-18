@@ -3,16 +3,8 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.TestCase
 
 import static org.junit.Assert.*
-import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
-import grails.util.Environment
-import org.junit.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.jobs.dataInstallation.DataInstallationStartJob
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.FileType.Type
 
+import org.junit.*
 
 class LsdfFilesServiceTests extends GroovyTestCase {
 
@@ -122,15 +114,15 @@ class LsdfFilesServiceTests extends GroovyTestCase {
         softwareToolIdentifier.softwareTool = softwareTool
         assertNotNull(softwareToolIdentifier.save(flush: true))
 
+
+        SeqPlatformModelLabel seqPlatformModelLabel = new SeqPlatformModelLabel()
+        seqPlatformModelLabel.name = instrumentModel
+        assertNotNull(seqPlatformModelLabel.save(flush: true))
+
         seqPlatform = new SeqPlatform()
         seqPlatform.name = instrumentPlatform
-        seqPlatform.model = instrumentModel
+        seqPlatform.seqPlatformModelLabel= seqPlatformModelLabel
         assertNotNull(seqPlatform.save(flush: true))
-
-        SeqPlatformModelIdentifier seqPlatformModelIdentifier = new SeqPlatformModelIdentifier()
-        seqPlatformModelIdentifier.name = instrumentModel
-        seqPlatformModelIdentifier.seqPlatform = seqPlatform
-        assertNotNull(seqPlatformModelIdentifier.save(flush: true))
 
         SeqCenter seqCenter = new SeqCenter()
         seqCenter.name = seqCenterName

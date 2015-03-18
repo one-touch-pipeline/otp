@@ -211,10 +211,7 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
           seqCenter.dirName = "core"
           seqCenter.save([flush: true, failOnError: true])
 
-          SeqPlatform seqPlatform = new SeqPlatform()
-          seqPlatform.name = "solid"
-          seqPlatform.model = "4"
-          seqPlatform.save([flush: true, failOnError: true])
+          SeqPlatform seqPlatform = SeqPlatform.build()
 
           Run run = testData.createRun([seqCenter: seqCenter, seqPlatform: seqPlatform])
           run.save([flush: true, failOnError: true])

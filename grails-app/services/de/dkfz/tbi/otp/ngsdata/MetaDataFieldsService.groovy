@@ -1,6 +1,4 @@
 package de.dkfz.tbi.otp.ngsdata
-import de.dkfz.tbi.otp.ngsdata.*
-
 
 class MetaDataFieldsService {
 
@@ -18,10 +16,8 @@ class MetaDataFieldsService {
         return SeqCenter.list(sort: "name", order: "asc")
     }
 
-    public List listPlatformAndIdentifier(){
-        return SeqPlatform.list(sort: "name", order: "asc").collect {
-            [it, SeqPlatformModelIdentifier.findAllBySeqPlatform(it, [sort: "name", order: "asc"])]
-        }
+    public List listPlatforms(){
+        return SeqPlatform.list().sort {it.fullName()}
     }
 
     public List listSeqType(){
