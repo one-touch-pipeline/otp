@@ -2,10 +2,10 @@ package de.dkfz.tbi.otp.ngsdata
 
 class RunSubmitService {
 
-    long submit(String runName, String seqPlatform, String seqCenter, String initialFormat, String dataPath, boolean align) {
+    long submit(String runName, String seqPlatform, String seqCenter, String dataPath, boolean align) {
         Run run = findOrCreateRun(runName, seqPlatform, seqCenter)
         safeSave(run)
-        RunSegment segment = createSegment(initialFormat, dataPath, align, run)
+        RunSegment segment = createSegment(dataPath, align, run)
         safeSave(segment)
         return run.id
     }
@@ -17,25 +17,25 @@ class RunSubmitService {
         }
         SeqPlatform platform = getPlatform(seqPlatform)
         run = new Run(
-            name: runName,
-            seqCenter: SeqCenter.findByName(seqCenter),
-            seqPlatform: platform
-        )
+                name: runName,
+                seqCenter: SeqCenter.findByName(seqCenter),
+                seqPlatform: platform
+                )
         return run
     }
 
-    private RunSegment createSegment(String initialFormat, String dataPath, boolean align, Run run) {
-        RunSegment.DataFormat format = RunSegment.DataFormat."${initialFormat}"
+    private RunSegment createSegment(String dataPath, boolean align, Run run) {
+        RunSegment.DataFormat format = RunSegment.DataFormat.FILES_IN_DIRECTORY
         RunSegment segment = new RunSegment(
-            dataPath: dataPath,
-            mdPath: dataPath,
-            metaDataStatus: RunSegment.Status.NEW,
-            initialFormat: format,
-            currentFormat: format,
-            filesStatus: defineFilesStatus(format.toString()),
-            run: run,
-            align: align,
-        )
+                dataPath: dataPath,
+                mdPath: dataPath,
+                metaDataStatus: RunSegment.Status.NEW,
+                initialFormat: format,
+                currentFormat: format,
+                filesStatus: defineFilesStatus(format.toString()),
+                run: run,
+                align: align,
+                )
         return segment
     }
 

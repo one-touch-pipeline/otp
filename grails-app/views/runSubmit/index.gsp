@@ -36,10 +36,6 @@
             <td><g:textField name="dataPath" size="120" value="${cmd?.dataPath}" /></td>
         </tr>
         <tr>
-             <td class="myKey"><g:message code="runSubmit.formatInitialData"/></td>
-             <td><g:select name="initialFormat" from="${de.dkfz.tbi.otp.ngsdata.RunSegment.DataFormat}" value="${cmd?.initialFormat}" /></td>
-        </tr>
-        <tr>
             <td class="myKey"><g:message code="runSubmit.align"/></td>
             <td><g:checkBox name="align" checked="${cmd == null || cmd.align}" /></td>
         </tr>
