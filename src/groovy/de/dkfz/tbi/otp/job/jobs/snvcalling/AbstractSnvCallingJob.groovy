@@ -86,10 +86,10 @@ abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob 
         }
         if (confirmDoesNotExist(configFileInStagingDirectory)) {
             lsdfFilesService.createDirectory(configFileInStagingDirectory.parentFile, instance.project)
-            assert confirmExists(configFileInStagingDirectory.parentFile)
+            assert confirmExists(configFileInStagingDirectory.parentFile, extendedWaitingTime)
             instance.config.writeToFile(configFileInStagingDirectory)
         }
-        assert confirmExists(configFileInStagingDirectory)
+        lsdfFilesService.ensureFileIsReadableAndNotEmpty(configFileInStagingDirectory, extendedWaitingTime)
         assertStagingConfigContentsOk(instance)
 
         String command ="""

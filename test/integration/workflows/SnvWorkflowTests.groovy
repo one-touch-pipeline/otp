@@ -32,6 +32,12 @@ import static org.junit.Assert.assertTrue
 
 class SnvWorkflowTests extends AbstractWorkflowTest {
 
+    final String VERSION = "1.0.114"
+    final String CO_SCRIPTS_BASE_DIR = "/path/to/programs/otp/COWorkflows_${VERSION}/resources/analysisTools"
+    final String SNV_PIPELINE_SCRIPTS_PATH = "${CO_SCRIPTS_BASE_DIR}/snvPipeline"
+    final String ANALYSIS_SCRIPTS_PATH = "${CO_SCRIPTS_BASE_DIR}/tools"
+
+
     // The scheduler needs to access the created objects while the test is being executed
     boolean transactional = false
 
@@ -209,27 +215,27 @@ class SnvWorkflowTests extends AbstractWorkflowTest {
 
         joiningScript = ExternalScript.build(
                 scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
-                filePath: "/path/to/programs/otp/snv-pipeline-r1610/joinSNVVCFFiles.sh",
+                filePath: "${SNV_PIPELINE_SCRIPTS_PATH}/joinSNVVCFFiles.sh",
                 scriptVersion: "v1"
         )
         callingScript = ExternalScript.build(
                 scriptIdentifier: "SnvCallingStep.CALLING",
-                filePath: "/path/to/programs/otp/snv-pipeline-r1610/snvCalling.sh",
+                filePath: "${SNV_PIPELINE_SCRIPTS_PATH}/snvCalling.sh",
                 scriptVersion: "v1"
         )
         annotationScript = ExternalScript.build(
                 scriptIdentifier: "SnvCallingStep.SNV_ANNOTATION",
-                filePath: "/path/to/programs/otp/snv-pipeline-r1610/snvAnnotation.sh",
+                filePath: "${SNV_PIPELINE_SCRIPTS_PATH}/snvAnnotation.sh",
                 scriptVersion: "v1"
         )
         deepAnnotationScript = ExternalScript.build(
                 scriptIdentifier: "SnvCallingStep.SNV_DEEPANNOTATION",
-                filePath: "/path/to/programs/otp/co-tools-r1610/vcf_pipeAnnotator.sh",
+                filePath: "${ANALYSIS_SCRIPTS_PATH}/vcf_pipeAnnotator.sh",
                 scriptVersion: "v1"
         )
         filterScript = ExternalScript.build(
                 scriptIdentifier: "SnvCallingStep.FILTER_VCF",
-                filePath: "/path/to/programs/otp/snv-pipeline-r1610/filter_vcf.sh",
+                filePath: "${SNV_PIPELINE_SCRIPTS_PATH}/filter_vcf.sh",
                 scriptVersion: "v1"
         )
 
