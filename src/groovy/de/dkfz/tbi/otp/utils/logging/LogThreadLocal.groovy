@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.utils.logging
 
 import static org.springframework.util.Assert.*
 import org.apache.commons.logging.Log
+import org.apache.commons.logging.impl.SimpleLog
 
 /**
  * Holds a {@link Log} instance in a {@link Thread}
@@ -43,5 +44,21 @@ class LogThreadLocal {
     public static void removeThreadLog() {
         jobLogHolder.remove()
     }
-}
 
+    public static void withThreadLog(Appendable out, Closure code) {
+        assert out != null
+        assert code != null
+        assert threadLog == null
+        threadLog = new SimpleLog('ThreadLog') {
+            protected void write(StringBuffer buffer) {
+                out.append(buffer)
+                out.append('\n')
+            }
+        }
+        try {
+            code()
+        } finally {
+            removeThreadLog()
+        }
+    }
+}
