@@ -56,11 +56,16 @@ if (opt$verbose) {
 }
 # load data
 insertSizeData <- read.table(inputFile, header = FALSE, sep = "\t")
+# convert x labels from integer to character
+xlabs <- as.character(insertSizeData[insertSizeData$V1 == chr,]$V2)
+# delete every second label
+xlabs[seq(length(xlabs)) %% 2 == 0] <- ''
+# create png file
 png(outputFile, width = pngWidth, height = pngHeight, units = "px")
 # do ploting
 mp <- barplot(height = insertSizeData[insertSizeData$V1 == chr,]$V3, space = 0, main = mainTitle, xlab = xLabel, ylab = yLabel)
 # do labeling of bars:
 # adj = c(x,y) controls label positioning
 # cex = scaling factor for fontsize
-text(mp, par("usr")[3], srt = 0, adj = c(0.5, 1), labels = insertSizeData[insertSizeData$V1 == chr,]$V2, xpd = TRUE, cex = 0.8)
+text(mp, par("usr")[3], srt = 90, adj = c(1, 0.5), labels = xlabs, xpd = TRUE, cex = 0.7)
 dev.off()
