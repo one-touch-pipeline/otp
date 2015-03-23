@@ -56,77 +56,32 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         TestCase.removeMetaClass(ExecutionService, executionService)
     }
 
+    @Test
+    void testExecuteCommand_WhenRealmIsNull_ShouldFail() {
+        assertNotNull(realm.save())
+        shouldFail(NullPointerException) {
+            executionService.executeCommand(null, SCRIPT_CONTENT)
+        }
+    }
 
     @Test
-    void testExecuteCommand() {
+    void testExecuteCommand_WhenCommandIsNull_ShouldFail() {
         assertNotNull(realm.save())
-        // Neither a command nor a script specified to be run remotely.
         shouldFail(ProcessingException) {
             executionService.executeCommand(realm, null)
         }
-        // Create temporary file to be executed on pbs. The file is stored on user's home.
-        File cmdFile = File.createTempFile("test", ".tmp", new File(System.getProperty("user.home")))
-        cmdFile.setText(SCRIPT_CONTENT)
-        // File has to be executable
-        cmdFile.setExecutable(true)
-        // Construct pbs command
-        String cmd = "qsub ${cmdFile.name}"
-        // No valid realm specified.
-        shouldFail(NullPointerException) {
-            executionService.executeCommand(null, cmd)
-        }
-        // Send command to pbs
-        String response = executionService.executeCommand(realm, cmd)
-        // Extract pbs ids
-        List<String> extractedPbsIds = executionService.extractPbsIds(response)
-        assertNotNull(extractedPbsIds)
-        // Only one pbs id is set
-        String extractedPbsId = extractedPbsIds.get(0)
-        // Make new pbs command to verify whether pbs job still is running
-        cmd = "qstat ${extractedPbsId}"
-        // Send verifying command with recent pbs id to pbs
-        String extractedPbsId_qstat = getPbsIdForExecutedCommand(realm, cmd)
-        // Assert if the two extracted pbs ids are equal
-        assertEquals(extractedPbsId, extractedPbsId_qstat)
     }
 
     @Deprecated
-    @Test
-    void testExecuteJobScript() {
-        // Create temporary file to be executed on pbs. The file is stored on user's home.
-        File file = File.createTempFile("test", ".tmp", new File(System.getProperty("user.home")))
-        file.setText(SCRIPT_CONTENT)
-        file.setExecutable(true)
-        // No valid realm specified.
-        shouldFail(NullPointerException) {
-            executionService.executeJobScript(null, file.absolutePath)
-        }
-        // Send file path to pbs
-        String response = executionService.executeJobScript(realm, file.absolutePath)
-        // Extract pbs ids
-        List<String> extractedPbsIds = executionService.extractPbsIds(response)
-        assertNotNull(extractedPbsIds)
-        // Only one pbs id is set
-        String extractedPbsId = extractedPbsIds.get(0)
-        // Make new pbs command to verify whether pbs job still is running
-        String cmd = "qstat ${extractedPbsId}"
-        // Send verifying command with recent pbs id to pbs
-        String extractedPbsId_qstat = getPbsIdForExecutedCommand(realm, cmd)
-        // Assert if the two extracted pbs ids are equal
-        assertEquals(extractedPbsId, extractedPbsId_qstat)
-    }
-
-
-    @Test
+    @Ignore("OTP-1423")
     void testExecuteJobOnlyScript() {
         assertNotNull(realm.save())
         TestJob testJob = createTestJobWithProcessingStep(AlignmentPass.build())
         testJob.log = log
         schedulerService.startingJobExecutionOnCurrentThread(testJob)
         try {
-            String script = SCRIPT_CONTENT
             // Send script to pbs
-            String response = executionService.executeJob(realm, script)
+            String response = executionService.executeJob(realm, SCRIPT_CONTENT)
             // Extract pbs ids
             List<String> extractedPbsIds = executionService.extractPbsIds(response)
             assertNotNull(extractedPbsIds)
@@ -143,8 +98,6 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
             schedulerService.finishedJobExecutionOnCurrentThread(testJob)
         }
     }
-
-
 
     @Test
     void testExecuteJob_failForPbsId() {
@@ -154,9 +107,8 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         testJob.log = log
         schedulerService.startingJobExecutionOnCurrentThread(testJob)
         try {
-            String script = SCRIPT_CONTENT
             String message = new GroovyTestCase().shouldFail(RuntimeException) {
-                executionService.executeJob(realm, script)
+                executionService.executeJob(realm, SCRIPT_CONTENT)
             }
             assert "Could not extract exactly one pbs id from ''" == message
         }
@@ -165,16 +117,14 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         }
     }
 
-
-
-    @Test
+    @Deprecated
+    @Ignore("OTP-1423")
     void testExecuteJobScriptAndJobIdentifier() {
         assertNotNull(realm.save())
         TestJob testJob = createTestJobWithProcessingStep(AlignmentPass.build())
         testJob.log = log
         schedulerService.startingJobExecutionOnCurrentThread(testJob)
         try {
-            String script = SCRIPT_CONTENT
             ProcessingOption processingOption = new ProcessingOption(
                     name: PbsOptionMergingService.PBS_PREFIX + JOB_IDENTFIER,
                     type: Realm.Cluster.DKFZ.toString(),
@@ -183,7 +133,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
                     )
             assertNotNull(processingOption.save())
             // Send script to pbs
-            String response = executionService.executeJob(realm, script, JOB_IDENTFIER)
+            String response = executionService.executeJob(realm, SCRIPT_CONTENT, JOB_IDENTFIER)
             // Extract pbs ids
             List<String> extractedPbsIds = executionService.extractPbsIds(response)
             assertNotNull(extractedPbsIds)
@@ -201,15 +151,14 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         }
     }
 
-
-    @Test
+    @Deprecated
+    @Ignore("OTP-1423")
     void testExecuteJobScriptAndJobIdentifierAndQsubParameter() {
         assertNotNull(realm.save())
         TestJob testJob = createTestJobWithProcessingStep(AlignmentPass.build())
         testJob.log = log
         schedulerService.startingJobExecutionOnCurrentThread(testJob)
         try {
-            String script = SCRIPT_CONTENT
             ProcessingOption processingOption = new ProcessingOption(
                     name: PbsOptionMergingService.PBS_PREFIX + JOB_IDENTFIER,
                     type: Realm.Cluster.DKFZ.toString(),
@@ -218,7 +167,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
                     )
             assertNotNull(processingOption.save())
             // Send script to pbs
-            String response = executionService.executeJob(realm, script, JOB_IDENTFIER, QSUB_PARAMETERS)
+            String response = executionService.executeJob(realm, SCRIPT_CONTENT, JOB_IDENTFIER, QSUB_PARAMETERS)
             // Extract pbs ids
             List<String> extractedPbsIds = executionService.extractPbsIds(response)
             assertNotNull(extractedPbsIds)
@@ -236,93 +185,75 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         }
     }
 
-
-
-
     @Test
-    void testExecuteCommandCheckFrequently() {
-        // Create temporary file to be executed on pbs. The file is stored on user's home.
-        File cmdFile = File.createTempFile("test", ".tmp", new File(System.getProperty("user.home")))
-        cmdFile.setText(SCRIPT_CONTENT)
-        // File has to be executable
-        cmdFile.setExecutable(true)
-        // Construct pbs command
-        String cmd = "qsub ${cmdFile.name}"
-        String extractedPbsId = getPbsIdForExecutedCommand(realm, cmd)
-        // Make new pbs command to verify whether pbs job still is running
-        int time = 0
-        while (time < 20) {
-            cmd = "qstat ${extractedPbsId}"
-            // Send verifying command with recent pbs id to pbs
-            String extractedPbsId_qstat = getPbsIdForExecutedCommand(realm, cmd)
-            // Assert if the two extracted pbs ids are equal
-            assertEquals(extractedPbsId, extractedPbsId_qstat)
-            sleep(1000)
-            time++
-        }
-    }
-
-    @Ignore("OTP-1106")
-    @Test(expected = ProcessingException)
     void testExecuteCommandConnectionFailed() {
+        TestCase.removeMetaClass(ExecutionService, executionService)
         realm.host = "GROUP"
         assertNotNull(realm.save())
-        // Create temporary file to be executed on pbs. The file is stored on user's home.
-        File cmdFile = File.createTempFile("test", ".tmp", new File(System.getProperty("user.home")))
-        cmdFile.setText(SCRIPT_CONTENT)
-        // File has to be executable
-        cmdFile.setExecutable(true)
-        // Construct pbs command
-        String cmd = "qsub ${cmdFile.name}"
         // Send command to pbs
-        String response = executionService.executeCommand(realm, cmd)
-    }
-
-    @Ignore("OTP-1106")
-    @Test
-    void testCheckRunningJob() {
-        // Create temporary file to be executed on pbs. The file is stored on user's home.
-        File cmdFile = File.createTempFile("test", ".tmp", new File(System.getProperty("user.home")))
-        cmdFile.setText(SCRIPT_CONTENT)
-        // File has to be executable
-        cmdFile.setExecutable(true)
-        // Construct pbs command
-        String cmd = "qsub ${cmdFile.name}"
-        String extractedPbsId = getPbsIdForExecutedCommand(realm, cmd)
-        int time = 0
-        while (time < 20) {
-            executionService.checkRunningJob(extractedPbsId, realm)
-            sleep(1000)
-            time++
+        shouldFail(ProcessingException) {
+            executionService.executeRemoteJob(realm, SCRIPT_CONTENT)
         }
     }
 
-    @Ignore("OTP-1106")
     @Test
-    void testCheckRunningJobConnectionFailed() {
-        // Create temporary file to be executed on pbs. The file is stored on user's home.
-        File cmdFile = File.createTempFile("test", ".tmp", new File(System.getProperty("user.home")))
-        cmdFile.setText(SCRIPT_CONTENT)
-        // File has to be executable
-        cmdFile.setExecutable(true)
-        // Construct pbs command
-        String cmd = "qsub ${cmdFile.name}"
-        String extractedPbsId = getPbsIdForExecutedCommand(realm, cmd)
-        realm.host = "GROUP"
+    void testCheckRunningJob_WhenJobIsFoundStatusCompleted_ShouldReturnFalse() {
         assertNotNull(realm.save())
-        int time = 0
-        while (time < 20) {
-            assertTrue(executionService.checkRunningJob(extractedPbsId, realm))
-            sleep(1000)
-            time++
+        executionService.metaClass.executeCommand { Realm r, String s ->
+            return """
+Job id                    Name             User            Time Use S Queue
+------------------------- ---------------- --------------- -------- - -----
+X.headnode                test             test                   0 C verylong
+"""
         }
+        assertFalse(executionService.checkRunningJob("X", realm))
+    }
+
+    @Test
+    void testCheckRunningJob_WhenJobIsFoundStatusNotCompleted_ShouldReturnTrue() {
+        assertNotNull(realm.save())
+        executionService.metaClass.executeCommand { Realm r, String s ->
+            return """
+Job id                    Name             User            Time Use S Queue
+------------------------- ---------------- --------------- -------- - -----
+X.headnode                test             test                   0 Q verylong
+"""
+        }
+        assertTrue(executionService.checkRunningJob("X", realm))
+    }
+
+    @Test
+    void testCheckRunningJob_WhenJobIsNotFound_ShouldReturnFalse() {
+        assertNotNull(realm.save())
+        executionService.metaClass.executeCommand { Realm r, String s ->
+            return "qstat: Unknown Job Id X"
+        }
+        assertTrue(executionService.checkRunningJob("X", realm))
+    }
+
+    @Test
+    void testCheckRunningJob_WhenQStatReturnedEmptyString_ShouldReturnTrue() {
+        assertNotNull(realm.save())
+        executionService.metaClass.executeCommand { Realm r, String s ->
+            return ""
+        }
+        assertTrue(executionService.checkRunningJob("", realm))
+    }
+
+    @Test
+    void testCheckRunningJob_WhenErrorDuringRequest_ShouldReturnTrue() {
+        assertNotNull(realm.save())
+        executionService.metaClass.executeCommand { Realm r, String s ->
+            throw new Exception()
+        }
+        assertTrue(executionService.checkRunningJob("", realm))
     }
 
     /**
      * The method executes the given command on the cluster and returns the PBS ID.
      */
     String getPbsIdForExecutedCommand(Realm realm, String cmd) {
-        String response = executionService.executeCommand(realm, cmd)
+        String response = executionService.executeJob(realm, cmd)
         // Extract pbs ids
         List<String> extractedPbsIds = executionService.extractPbsIds(response)
         assertNotNull(extractedPbsIds)
