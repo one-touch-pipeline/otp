@@ -9,7 +9,7 @@ class RunSubmitController {
 
     def index() {
         def centers = SeqCenter.list()
-        def seqPlatform = SeqPlatform.list()*.fullName()
+        def seqPlatform = SeqPlatform.list(sort: "name", order: "asc")*.fullName()
         return [centers: centers, seqPlatform: seqPlatform, cmd: flash.params]
     }
 
