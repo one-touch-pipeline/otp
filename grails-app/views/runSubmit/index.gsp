@@ -20,8 +20,8 @@
     <g:form controller="runSubmit" action="submit">
     <table class="runSubmit_table">
         <tr>
-            <td class="myKey"><g:message code="runSubmit.runName"/></td>
-            <td><g:textField name="name" size="100" value="${cmd?.name}" /></td>
+            <td class="myKey"><g:message code="runSubmit.runNameAndDataLocation"/></td>
+            <td><g:textField name="metaDataFile" size="130" value="${cmd?.metaDataFile}" /></td>
         </tr>
         <tr>
             <td class="myKey"><g:message code="runSubmit.sequencingCenter"/></td>
@@ -30,10 +30,6 @@
         <tr>
             <td class="myKey"><g:message code="runSubmit.sequencingPlatform"/></td>
             <td><g:select name="seqPlatform" from="${seqPlatform}" value="${cmd?.seqPlatform}" /></td>
-        </tr>
-        <tr>
-            <td class="myKey"><g:message code="runSubmit.dataLocation"/></td>
-            <td><g:textField name="dataPath" size="120" value="${cmd?.dataPath}" /></td>
         </tr>
         <tr>
             <td class="myKey"><g:message code="runSubmit.align"/></td>
