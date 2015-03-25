@@ -38,7 +38,7 @@ class HipoSampleIdentifier {
     final String analyteTypeAndNumber
 
     private final static String REGEX =
-    /^(([HP])(\d\d\w)-\w\w\w(\w))-([${HipoTissueType.values()*.key.join("")}])(\d)-(([DRPAC])(\d{1,2}))$/
+    /^(([A-Z])(\d\d\w)-\w\w\w(\w))-([${HipoTissueType.values()*.key.join("")}])(\d)-(([DRPAC])(\d{1,2}))$/
 
     /**
      * Tries to parse a HIPO sample name.
@@ -50,12 +50,17 @@ class HipoSampleIdentifier {
         if (!matcher.matches()) {
             return null
         }
+        String projectLetter = matcher.group(2)
         String projectNumber = matcher.group(3)
+
+        if(!(projectLetter ==~ /[HP]/)) {
+            projectNumber = projectLetter.toLowerCase() + projectNumber
+        }
         HipoTissueType tissueType = HipoTissueType.fromKey(matcher.group(5))
 
         // Project 35 has even more specific rules.
         if (projectNumber == "035") {
-            if (matcher.group(2) != "H" || !(matcher.group(4) =~ /^[KM]$/)
+            if (projectLetter != "H" || !(matcher.group(4) =~ /^[KM]$/)
             || ![HipoTissueType.BLOOD, HipoTissueType.CELL].contains(tissueType)) {
                 return null
             }

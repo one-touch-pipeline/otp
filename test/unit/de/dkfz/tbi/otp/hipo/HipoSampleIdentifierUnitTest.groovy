@@ -3,9 +3,7 @@ package de.dkfz.tbi.otp.hipo
 import org.junit.Test
 
 import static junit.framework.TestCase.assertEquals
-import static org.junit.Assert.assertNotNull
-import static org.junit.Assert.assertNull
-
+import static org.junit.Assert.*
 
 class HipoSampleIdentifierUnitTest {
 
@@ -30,6 +28,18 @@ class HipoSampleIdentifierUnitTest {
         assertEquals("D1", identifier.analyteTypeAndNumber)
         assertEquals(sampleName, identifier.fullSampleName)
         assertEquals(sampleName, identifier.toString())
+
+        sampleName = "C026-EFGH-M2-D1"
+        identifier = HipoSampleIdentifier.tryParse(sampleName)
+        assertNotNull(identifier)
+        assertEquals("c026", identifier.projectNumber)
+        assertEquals("C026-EFGH", identifier.pid)
+        assertEquals(HipoTissueType.METASTASIS, identifier.tissueType)
+        assertEquals(2, identifier.sampleNumber)
+        assertEquals("D1", identifier.analyteTypeAndNumber)
+        assertEquals(sampleName, identifier.fullSampleName)
+        assertEquals(sampleName, identifier.toString())
+
         // Not testing sampleTypeDbName here because there is a dedicated test method for it.
 
         sampleName = "H004-ABCD-T1-D1"
