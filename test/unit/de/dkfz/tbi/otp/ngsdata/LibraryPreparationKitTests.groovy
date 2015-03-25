@@ -3,18 +3,18 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.test.mixin.*
 import org.junit.*
 
-@TestFor(ExomeEnrichmentKit)
-class ExomeEnrichmentKitTests {
+@TestFor(LibraryPreparationKit)
+class LibraryPreparationKitTests {
 
-    ExomeEnrichmentKit kit1
-    ExomeEnrichmentKit kit2
+    LibraryPreparationKit kit1
+    LibraryPreparationKit kit2
 
     @Before
     void setUp() {
-        kit1 = new ExomeEnrichmentKit(
+        kit1 = new LibraryPreparationKit(
                 name: "kitName1"
                 )
-        kit2 = new ExomeEnrichmentKit(
+        kit2 = new LibraryPreparationKit(
                 name: "kitName2"
                 )
     }

@@ -124,7 +124,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         AlignmentPass alignmentPass = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
         ExomeSeqTrack exomeSeqTrack = alignmentPass.seqTrack
 
-        ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
+        LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit("libraryPreparationKit")
         createReferenceGenomeProjectSeqType([seqType: exomeSeqType]).save(flush: true)
 
         assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
@@ -137,8 +137,8 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         AlignmentPass alignmentPass = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
         ExomeSeqTrack exomeSeqTrack = alignmentPass.seqTrack
 
-        ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
-        addKitToExomeSeqTrack(exomeSeqTrack, exomeEnrichmentKit)
+        LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit("libraryPreparationKit")
+        addKitToExomeSeqTrack(exomeSeqTrack, libraryPreparationKit)
         createReferenceGenomeProjectSeqType([seqType: exomeSeqType]).save(flush: true)
 
         assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
@@ -151,8 +151,8 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         AlignmentPass alignmentPass = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
         ExomeSeqTrack exomeSeqTrack = alignmentPass.seqTrack
 
-        ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
-        addKitToExomeSeqTrack(exomeSeqTrack, exomeEnrichmentKit)
+        LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit("libraryPreparationKit")
+        addKitToExomeSeqTrack(exomeSeqTrack, libraryPreparationKit)
 
         assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, exomeSeqTrack.alignmentState)
@@ -164,8 +164,8 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         AlignmentPass alignmentPass = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
         ExomeSeqTrack exomeSeqTrack = alignmentPass.seqTrack
 
-        ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
-        createBedFile(referenceGenome, exomeEnrichmentKit)
+        LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit("libraryPreparationKit")
+        createBedFile(referenceGenome, libraryPreparationKit)
 
         assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, exomeSeqTrack.alignmentState)
@@ -177,9 +177,9 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         AlignmentPass alignmentPass = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
         ExomeSeqTrack exomeSeqTrack = alignmentPass.seqTrack
 
-        ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
-        createBedFile(referenceGenome, exomeEnrichmentKit)
-        addKitToExomeSeqTrack(exomeSeqTrack, exomeEnrichmentKit)
+        LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit("libraryPreparationKit")
+        createBedFile(referenceGenome, libraryPreparationKit)
+        addKitToExomeSeqTrack(exomeSeqTrack, libraryPreparationKit)
 
         assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, exomeSeqTrack.alignmentState)
@@ -191,9 +191,9 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         AlignmentPass alignmentPass = deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile()
         ExomeSeqTrack exomeSeqTrack = alignmentPass.seqTrack
 
-        ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
-        createBedFile(referenceGenome, exomeEnrichmentKit)
-        addKitToExomeSeqTrack(exomeSeqTrack, exomeEnrichmentKit)
+        LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit("libraryPreparationKit")
+        createBedFile(referenceGenome, libraryPreparationKit)
+        addKitToExomeSeqTrack(exomeSeqTrack, libraryPreparationKit)
         createReferenceGenomeProjectSeqType([seqType: exomeSeqType]).save(flush: true)
 
         assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
@@ -245,22 +245,22 @@ class AlignmentPassServiceIntegrationTests extends TestData {
     }
 
     @Test
-    void testIsExomeEnrichmentKitOrBedFileMissing() {
+    void testIsLibraryPreparationKitOrBedFileMissing() {
         createObjects()
-        assertFalse(alignmentPassService.isExomeEnrichmentKitOrBedFileMissing(seqTrack))
+        assertFalse(alignmentPassService.isLibraryPreparationKitOrBedFileMissing(seqTrack))
 
         ExomeSeqTrack exomeSeqTrack = createExomeSeqTrack(run)
-        assertTrue(alignmentPassService.isExomeEnrichmentKitOrBedFileMissing(exomeSeqTrack))
+        assertTrue(alignmentPassService.isLibraryPreparationKitOrBedFileMissing(exomeSeqTrack))
 
         createReferenceGenomeProjectSeqType([seqType: exomeSeqType]).save(flush: true)
-        assertTrue(alignmentPassService.isExomeEnrichmentKitOrBedFileMissing(exomeSeqTrack))
+        assertTrue(alignmentPassService.isLibraryPreparationKitOrBedFileMissing(exomeSeqTrack))
 
-        ExomeEnrichmentKit exomeEnrichmentKit = createEnrichmentKit("exomeEnrichmentKit")
-        addKitToExomeSeqTrack(exomeSeqTrack, exomeEnrichmentKit)
-        assertTrue(alignmentPassService.isExomeEnrichmentKitOrBedFileMissing(exomeSeqTrack))
+        LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit("libraryPreparationKit")
+        addKitToExomeSeqTrack(exomeSeqTrack, libraryPreparationKit)
+        assertTrue(alignmentPassService.isLibraryPreparationKitOrBedFileMissing(exomeSeqTrack))
 
-        createBedFile(referenceGenome, exomeEnrichmentKit)
-        assertFalse(alignmentPassService.isExomeEnrichmentKitOrBedFileMissing(exomeSeqTrack))
+        createBedFile(referenceGenome, libraryPreparationKit)
+        assertFalse(alignmentPassService.isLibraryPreparationKitOrBedFileMissing(exomeSeqTrack))
     }
 
     private AlignmentPass deleteNonExomeSeqTrackAndPrepareExomeSeqTrackAndDataFile() {

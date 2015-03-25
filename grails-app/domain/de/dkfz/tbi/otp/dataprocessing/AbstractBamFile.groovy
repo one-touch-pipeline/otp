@@ -158,7 +158,7 @@ abstract class AbstractBamFile {
         assert seqTracks.size() > 0
         return exactlyOneElement(BedFile.findAllWhere(
                 referenceGenome: referenceGenome,
-                exomeEnrichmentKit: exactlyOneElement(seqTracks*.exomeEnrichmentKit.unique()),
+                libraryPreparationKit: exactlyOneElement(seqTracks*.libraryPreparationKit.unique()),
         ))
     }
 

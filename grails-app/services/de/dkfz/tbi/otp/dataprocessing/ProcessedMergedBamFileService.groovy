@@ -404,7 +404,7 @@ class ProcessedMergedBamFileService {
     }
 
 
-    public ExomeEnrichmentKit exomeEnrichmentKit(ProcessedMergedBamFile bamFile) {
+    public LibraryPreparationKit libraryPreparationKit(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, 'bam file must not be null')
         isTrue(seqType(bamFile).name == SeqTypeNames.EXOME.seqTypeName, 'This method must be called only on exon data')
 
@@ -414,12 +414,12 @@ class ProcessedMergedBamFileService {
 
         List<SeqTrack> seqTracks = singleLaneBamFiles*.alignmentPass*.seqTrack
         // The domain ExomeSeqTrack is new, therefore it is possible that there are many bamFiles,
-        // which do not have the connection to the ExomeEnrichtmentKit.
+        // which do not have the connection to the LibraryPreparationKit.
         List wrongSeqTracks = seqTracks.findAll { it.class != ExomeSeqTrack }
         isTrue(wrongSeqTracks.empty, "The following seqTracks used to create the given $bamFile have not the type ExomeSeqTrack: $wrongSeqTracks.")
 
-        ExomeEnrichmentKit firstKit = seqTracks.first().exomeEnrichmentKit
-        wrongSeqTracks = seqTracks.findAll { it.exomeEnrichmentKit != firstKit }
+        LibraryPreparationKit firstKit = seqTracks.first().libraryPreparationKit
+        wrongSeqTracks = seqTracks.findAll { it.libraryPreparationKit != firstKit }
         isTrue(wrongSeqTracks.empty, "Different kits were used in the following seqTracks: $wrongSeqTracks, which were used to create $bamFile.")
 
         return firstKit
@@ -444,19 +444,19 @@ class ProcessedMergedBamFileService {
 
 
     /**
-     * Checks if the {@link ExomeEnrichmentKit} was inferred at least for one lane within the given {@link ProcessedMergedBamFile}.
+     * Checks if the {@link LibraryPreparationKit} was inferred at least for one lane within the given {@link ProcessedMergedBamFile}.
      * This only has to be checked for seqType = Exome
      */
-    public ExomeEnrichmentKit getInferredKit(ProcessedMergedBamFile processedMergedBamFile) {
+    public LibraryPreparationKit getInferredKit(ProcessedMergedBamFile processedMergedBamFile) {
         notNull(processedMergedBamFile, "The input of method getInferredKit is null")
         SeqType seqType = seqType(processedMergedBamFile)
-        // Only in case of seqtype = exome an enrichment kit can be available, for all other seqTypes null has to be returned
+        // Only in case of seqtype = exome a library preparation kit can be available, for all other seqTypes null has to be returned
         if(seqType.name == SeqTypeNames.EXOME.seqTypeName) {
             Collection<ExomeSeqTrack> exomeSeqTracks = processedMergedBamFile.containedSeqTracks.findAll { it instanceof ExomeSeqTrack }
-            if(exomeSeqTracks*.exomeEnrichmentKit.unique().size > 1) {
+            if(exomeSeqTracks*.libraryPreparationKit.unique().size > 1) {
                 throw new ProcessingException("There is no unique kit for the mergedBamFile " + processedMergedBamFile)
             }
-            return exomeSeqTracks.find({ it.kitInfoReliability == InformationReliability.INFERRED })?.exomeEnrichmentKit
+            return exomeSeqTracks.find({ it.kitInfoReliability == InformationReliability.INFERRED })?.libraryPreparationKit
         }
         return null
     }

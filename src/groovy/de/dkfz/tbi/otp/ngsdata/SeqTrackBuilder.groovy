@@ -61,7 +61,7 @@ class SeqTrackBuilder {
      * For Exome, this field is required, if the {@link InformationReliability} has the value
      * {@link InformationReliability#KNOWN}, otherwise, it has to be <code>null</code>
      */
-    private ExomeEnrichmentKit exomeEnrichmentKit
+    private LibraryPreparationKit libraryPreparationKit
 
     /**
      * For ChipSeq, this field is optional
@@ -137,22 +137,22 @@ class SeqTrackBuilder {
     }
 
     /**
-     * Set the {@link InformationReliability} and change {@link #exomeEnrichmentKit} to <code>null</code> if
+     * Set the {@link InformationReliability} and change {@link #libraryPreparationKit} to <code>null</code> if
      * the InformationReliability is not {@link InformationReliability#KNOWN}
      */
     public SeqTrackBuilder setInformationReliability(InformationReliability reliability) {
         this.informationReliability = reliability
         if (reliability != InformationReliability.KNOWN) {
-            this.exomeEnrichmentKit = null
+            this.libraryPreparationKit = null
         }
         return this
     }
 
     /**
-     * Set the {@link ExomeEnrichmentKit} and change {@link InformationReliability} to {@link InformationReliability#KNOWN}
+     * Set the {@link LibraryPreparationKit} and change {@link InformationReliability} to {@link InformationReliability#KNOWN}
      */
-    public SeqTrackBuilder setExomeEnrichmentKit(ExomeEnrichmentKit exomeEnrichmentKit) {
-        this.exomeEnrichmentKit = exomeEnrichmentKit
+    public SeqTrackBuilder setLibraryPreparationKit(LibraryPreparationKit libraryPreparationKit) {
+        this.libraryPreparationKit = libraryPreparationKit
         this.informationReliability = InformationReliability.KNOWN
         return this
     }
@@ -172,13 +172,13 @@ class SeqTrackBuilder {
         if (seqType.name == SeqTypeNames.EXOME.seqTypeName) {
             notNull(informationReliability, "A seq track needs the kitInformationReliability for exome data")
             if (informationReliability == InformationReliability.KNOWN) {
-                notNull(exomeEnrichmentKit, "A exome seq track needs an exome enrichment kit when kitInformationReliability is KNOWN")
+                notNull(libraryPreparationKit, "A exome seq track needs an library preparation kit when kitInformationReliability is KNOWN")
             } else {
-                isNull(exomeEnrichmentKit, "A exome seq track are not allowed to have an exome enrichment kit when kitInformationReliability is not KNOWN")
+                isNull(libraryPreparationKit, "A exome seq track are not allowed to have an library preparation kit when kitInformationReliability is not KNOWN")
             }
             seqTrack = new ExomeSeqTrack()
             seqTrack.kitInfoReliability = informationReliability
-            seqTrack.exomeEnrichmentKit = exomeEnrichmentKit
+            seqTrack.libraryPreparationKit = libraryPreparationKit
         } else if (seqType.name == SeqTypeNames.CHIP_SEQ.seqTypeName) {
             notNull(antibodyTarget, "A seq track needs the antibodyTarget for ChipSeq data")
             seqTrack = new ChipSeqSeqTrack()

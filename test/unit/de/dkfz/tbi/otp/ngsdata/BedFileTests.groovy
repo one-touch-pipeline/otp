@@ -4,14 +4,14 @@ import grails.test.mixin.*
 import org.junit.*
 
 @TestFor(BedFile)
-@Mock([ReferenceGenome, ExomeEnrichmentKit])
+@Mock([ReferenceGenome, LibraryPreparationKit])
 class BedFileTests {
 
     final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
 
     ReferenceGenome refGen
-    ExomeEnrichmentKit kit1
-    ExomeEnrichmentKit kit2
+    LibraryPreparationKit kit1
+    LibraryPreparationKit kit2
     BedFile bedFile1
     BedFile bedFile2
 
@@ -26,11 +26,11 @@ class BedFileTests {
                 lengthRefChromosomesWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
                 )
         assertNotNull refGen.save(flush: true)
-        kit1 = new ExomeEnrichmentKit(
+        kit1 = new LibraryPreparationKit(
                 name: "kitName1"
                 )
         assertNotNull kit1.save(flush: true)
-        kit2 = new ExomeEnrichmentKit(
+        kit2 = new LibraryPreparationKit(
                 name: "kitName2"
                 )
         assertNotNull kit2.save(flush: true)
@@ -38,13 +38,13 @@ class BedFileTests {
                 fileName: "fileName1",
                 targetSize: 1,
                 referenceGenome: refGen,
-                exomeEnrichmentKit: kit1
+                libraryPreparationKit: kit1
                 )
         bedFile2 = new BedFile(
                 fileName: "fileName2",
                 targetSize: 111,
                 referenceGenome: refGen,
-                exomeEnrichmentKit: kit2
+                libraryPreparationKit: kit2
                 )
     }
 
@@ -83,7 +83,7 @@ class BedFileTests {
 
     void testGenomeKitPrimaryKey() {
         assertNotNull bedFile1.save(flush: true)
-        bedFile2.exomeEnrichmentKit = kit1
+        bedFile2.libraryPreparationKit = kit1
         assertFalse bedFile2.validate()
     }
 

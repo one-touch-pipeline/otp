@@ -128,17 +128,17 @@ class AbstractBamFileServiceTests {
         ])
         assert referenceGenomeProjectSeqTypeForExome.save([flush: true])
 
-        ExomeEnrichmentKit exomeEnrichmentKit = new ExomeEnrichmentKit(
-                name: "exomeEnrichmentKit"
+        LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(
+                name: "libraryPreparationKit"
                 )
-        assertNotNull(exomeEnrichmentKit.save([flush: true]))
+        assertNotNull(libraryPreparationKit.save([flush: true]))
 
         BedFile bedFile = new BedFile(
                 fileName: "bed_file",
                 targetSize: ARBITRARY_TARGET_SIZE,
                 mergedTargetSize: ARBITRARY_MERGED_TARGET_SIZE,
                 referenceGenome: referenceGenome,
-                exomeEnrichmentKit: exomeEnrichmentKit
+                libraryPreparationKit: libraryPreparationKit
                 )
         assert bedFile.save([flush: true])
 
@@ -159,7 +159,7 @@ class AbstractBamFileServiceTests {
                 seqType: exomeSeqType,
                 seqPlatform: seqPlatform,
                 pipelineVersion: softwareTool,
-                exomeEnrichmentKit: exomeEnrichmentKit,
+                libraryPreparationKit: libraryPreparationKit,
                 kitInfoReliability: InformationReliability.KNOWN
                 )
         assertNotNull(exomeSeqTrack.save([flush: true]))

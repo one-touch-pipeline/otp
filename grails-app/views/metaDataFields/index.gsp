@@ -8,15 +8,15 @@
 <body>
     <div class="body">
         <h3>
-            <g:message code="dataFields.title.enrichmentKitTable" />
+            <g:message code="dataFields.title.libraryPreparationKitTable" />
         </h3>
         <div class="otpDataTables">
             <otp:dataTable
                 codes="${[
-                    'dataFields.exomeEnrichmentKit',
-                    'dataFields.exomeEnrichmentKit.alias',
+                    'dataFields.libraryPreparationKit',
+                    'dataFields.libraryPreparationKit.alias',
                 ] }"
-                id="listExomeEnrichmentKit"
+                id="listLibraryPreparationKit"
             />
         </div>
         <div style="width: 20px; height: 40px;"></div>
@@ -73,7 +73,7 @@
     </div>
     <r:script>
         $(function() {
-            $.otp.exomeEnrichmentKitTable.registerlistExomeEnrichmentKit();
+            $.otp.libraryPreparationKitTable.registerlistLibraryPreparationKit();
             $.otp.antibodyTargetTable.registerListAntibodyTarget();
             $.otp.seqCenterTable.registerListSeqCenter();
             $.otp.platformTable.registerListPlatformTable();

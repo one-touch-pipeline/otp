@@ -12,8 +12,8 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 @TestFor(MetaDataService)
 @Mock([MetaDataKey, Realm, Project, Individual, SampleType, Sample, SeqType, SeqCenter,
     SeqPlatform, SeqPlatformGroup, Run, RunSegment, SoftwareTool, SeqTrack, FileType, DataFile,
-    ReferenceGenome, ReferenceGenomeProjectSeqType, ExomeSeqTrack, ExomeEnrichmentKit,
-    ExomeEnrichmentKitService, MetaDataEntry])
+    ReferenceGenome, ReferenceGenomeProjectSeqType, ExomeSeqTrack, LibraryPreparationKit,
+    LibraryPreparationKitService, MetaDataEntry])
 @Build([
     FileType,
     ])
@@ -21,7 +21,7 @@ class MetaDataServiceUnitTests {
 
     MetaDataService metaDataService
 
-    final static String EXOME_ENRICHMENT_KIT_NAME = "ExomeEnrichmentKitName"
+    final static String LIBRARY_PREPARATION_KIT_NAME = "LibraryPreparationKitName"
 
     final static String FASTQ_SEQUENCE_DIRECTORY = '/sequence/'
 
@@ -32,7 +32,7 @@ class MetaDataServiceUnitTests {
     @Before
     public void setUp() throws Exception {
         metaDataService = new MetaDataService()
-        metaDataService.exomeEnrichmentKitService = new ExomeEnrichmentKitService()
+        metaDataService.libraryPreparationKitService = new LibraryPreparationKitService()
         metaDataService.fileTypeService = new FileTypeService()
     }
 
@@ -105,17 +105,17 @@ class MetaDataServiceUnitTests {
         assertNotNull(testData.dataFile.save(flush: true))
 
         ExomeSeqTrack exomeSeqTrack2 = testData.createExomeSeqTrack(testData.run)
-        ExomeEnrichmentKit exomeEnrichmentKit = testData.createEnrichmentKit(EXOME_ENRICHMENT_KIT_NAME)
-        testData.addKitToExomeSeqTrack(exomeSeqTrack2, exomeEnrichmentKit)
+        LibraryPreparationKit libraryPreparationKit = testData.createLibraryPreparationKit(LIBRARY_PREPARATION_KIT_NAME)
+        testData.addKitToExomeSeqTrack(exomeSeqTrack2, libraryPreparationKit)
         Run run = testData.createRun("testname2")
         RunSegment runSegment = testData.createRunSegment(run)
         assertNotNull(runSegment.save(flush: true))
         DataFile dataFile = testData.createDataFile(exomeSeqTrack2, runSegment)
         assertNotNull(dataFile.save(flush: true))
 
-        assertNull(exomeSeqTrack1.exomeEnrichmentKit)
+        assertNull(exomeSeqTrack1.libraryPreparationKit)
         metaDataService.enrichOldDataWithNewInformationFrom(testData.run)
-        assertEquals(exomeEnrichmentKit, exomeSeqTrack1.exomeEnrichmentKit)
+        assertEquals(libraryPreparationKit, exomeSeqTrack1.libraryPreparationKit)
     }
 
     @Test

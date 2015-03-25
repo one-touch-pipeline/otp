@@ -75,7 +75,7 @@ class QAResultStatisticsService {
     static final String MAPPED_LOW_QUALITY_READ_2 = 'mappedLowQualityR2'
     static final String MAPPED_QUALITY_LONG_READ_1 = 'mappedQualityLongR1'
     static final String MAPPED_QUALITY_LONG_READ_2 = 'mappedQualityLongR2'
-    static final String EXOME_ENRICHMENT_KIT = "exomeEnrichmentKit"
+    static final String LIBRARY_PREPARATION_KIT = "libraryPreparationKit"
 
     /**
      * return the basis for the qa statistic overview for the merged bam file, from which all desired information can be received
@@ -86,9 +86,9 @@ class QAResultStatisticsService {
         Individual individual = sample.individual
         Project project = individual.project
         SeqType seqType = processedMergedBamFileService.seqType(bamFile)
-        ExomeEnrichmentKit kit = null
+        LibraryPreparationKit kit = null
         if (seqType.name == SeqTypeNames.EXOME.seqTypeName) {
-            kit = processedMergedBamFileService.exomeEnrichmentKit(bamFile)
+            kit = processedMergedBamFileService.libraryPreparationKit(bamFile)
         }
         String run = 'all_merged'
         String lane = 'all_merged'
@@ -116,7 +116,7 @@ class QAResultStatisticsService {
             (RUN): run,
             (LANE): lane,
             (SEQTYPE): seqType,
-            (EXOME_ENRICHMENT_KIT): kit,
+            (LIBRARY_PREPARATION_KIT): kit,
         ]
         return preparation
     }
@@ -166,8 +166,8 @@ class QAResultStatisticsService {
             (INSERT_SIZE_MEAN): formatToTwoDecimals(abstractQualityAssessment.insertSizeMean),
         ]
         if (preparation[SEQTYPE].name.equals(SeqTypeNames.EXOME.seqTypeName)) {
-            ExomeEnrichmentKit kit = preparation[EXOME_ENRICHMENT_KIT]
-            BedFile bedFile = BedFile.findByReferenceGenomeAndExomeEnrichmentKit(preparation[REFERENCE_GENOME], kit)
+            LibraryPreparationKit kit = preparation[LIBRARY_PREPARATION_KIT]
+            BedFile bedFile = BedFile.findByReferenceGenomeAndLibraryPreparationKit(preparation[REFERENCE_GENOME], kit)
             statisticResults.put(TARGET_COVERAGE,
                             formatToTwoDecimals(abstractQualityAssessment.onTargetMappedBases / bedFile.mergedTargetSize))
             statisticResults.put(ON_TARGET_RATE,

@@ -22,7 +22,7 @@ class MetaDataService {
      */
     def fileTypeService
     def metaDataFileService
-    ExomeEnrichmentKitService exomeEnrichmentKitService
+    LibraryPreparationKitService libraryPreparationKitService
 
     static transactional = true
 
@@ -513,7 +513,7 @@ class MetaDataService {
 
         List<RunSegment> runSegments = RunSegment.findAllByRun(run)
         runSegments.each { RunSegment runSegment ->
-            exomeEnrichmentKitService.inferKitInformationForOldLaneFromNewLane(runSegment)
+            libraryPreparationKitService.inferKitInformationForOldLaneFromNewLane(runSegment)
         }
     }
 

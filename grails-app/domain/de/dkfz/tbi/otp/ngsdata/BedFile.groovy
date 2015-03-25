@@ -38,24 +38,24 @@ class BedFile {
      */
     static belongsTo = [
         referenceGenome: ReferenceGenome,
-        exomeEnrichmentKit: ExomeEnrichmentKit
+        libraryPreparationKit: LibraryPreparationKit
     ]
 
     static constraints = {
         fileName(unique: true, blank: false)
-        // alternative primary key (referenceGenome, exomeEnrichmentKit)
+        // alternative primary key (referenceGenome, libraryPreparationKit)
         // we will never have 2 bed files in the db for the same
-        // referenceGenome and exomeEnrichmentKit combination
-        referenceGenome(unique: 'exomeEnrichmentKit')
+        // referenceGenome and libraryPreparationKit combination
+        referenceGenome(unique: 'libraryPreparationKit')
         targetSize(min: 1L)
     }
 
     public String toString() {
-        return "${fileName} for genome ${referenceGenome} and kit ${exomeEnrichmentKit}"
+        return "${fileName} for genome ${referenceGenome} and kit ${libraryPreparationKit}"
     }
 
     static mapping = {
         referenceGenome index: "bed_file_reference_genome_idx"
-        exomeEnrichmentKit index: "bed_file_exome_enrichment_kit_idx"
+        libraryPreparationKit index: "bed_file_library_preparation_kit_idx"
     }
 }

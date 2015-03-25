@@ -16,7 +16,7 @@ import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
 @Build([
         AlignmentPass,
         BedFile,
-        ExomeEnrichmentKit,
+        LibraryPreparationKit,
         ExomeSeqTrack,
         ReferenceGenomeProjectSeqType,
 ])
@@ -165,10 +165,10 @@ class ProcessedBamFileUnitTests {
         ])
         assert referenceGenomeProjectSeqType.save([flush: true])
 
-        ExomeEnrichmentKit exomeEnrichmentKit = testData.createEnrichmentKit("kit")
-        assertNotNull(exomeEnrichmentKit.save([flush: true]))
+        LibraryPreparationKit libraryPreparationKit = testData.createLibraryPreparationKit("kit")
+        assertNotNull(libraryPreparationKit.save([flush: true]))
 
-        BedFile bedFile = testData.createBedFile(referenceGenome, exomeEnrichmentKit)
+        BedFile bedFile = testData.createBedFile(referenceGenome, libraryPreparationKit)
         assert bedFile.save([flush: true])
 
         ExomeSeqTrack exomeSeqTrack = new ExomeSeqTrack(
@@ -178,7 +178,7 @@ class ProcessedBamFileUnitTests {
                 seqType: exomeSeqType,
                 seqPlatform: seqPlatform,
                 pipelineVersion: softwareTool,
-                exomeEnrichmentKit: exomeEnrichmentKit,
+                libraryPreparationKit: libraryPreparationKit,
                 kitInfoReliability: InformationReliability.KNOWN
                 )
         assertNotNull(exomeSeqTrack.save([flush: true, failOnError: true]))

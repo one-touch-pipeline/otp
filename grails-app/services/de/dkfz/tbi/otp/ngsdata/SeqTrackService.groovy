@@ -42,7 +42,7 @@ class SeqTrackService {
 
     MultiplexingService multiplexingService
 
-    ExomeEnrichmentKitService exomeEnrichmentKitService
+    LibraryPreparationKitService libraryPreparationKitService
 
     SequencingKitService sequencingKitService
 
@@ -483,10 +483,10 @@ class SeqTrackService {
         } else if (metaDataEntry.value == InformationReliability.UNKNOWN_VERIFIED.rawValue) {
             builder.setInformationReliability(InformationReliability.UNKNOWN_VERIFIED)
         } else {
-            ExomeEnrichmentKit exomeEnrichmentKit = exomeEnrichmentKitService.findExomeEnrichmentKitByNameOrAlias(metaDataEntry.value)
-            notNull(exomeEnrichmentKit, "There is no EnrichmentKit in the DB for the metaDataEntry ${metaDataEntry.value} of run ${run}")
-            exomeEnrichmentKitService.validateExomeEnrichmentKit(sample, exomeEnrichmentKit)
-            builder.setExomeEnrichmentKit(exomeEnrichmentKit)
+            LibraryPreparationKit libraryPreparationKit = libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(metaDataEntry.value)
+            notNull(libraryPreparationKit, "There is no LibraryPreparationKit in the DB for the metaDataEntry ${metaDataEntry.value} of run ${run}")
+            libraryPreparationKitService.validateLibraryPreparationKit(sample, libraryPreparationKit)
+            builder.setLibraryPreparationKit(libraryPreparationKit)
         }
     }
 

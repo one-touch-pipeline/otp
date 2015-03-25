@@ -40,8 +40,8 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         if (seqTrack.configuredReferenceGenome == null) {
             throw new RuntimeException("Reference genome is not configured for SeqTrack ${seqTrack}.")
         }
-        if (applicationContext.alignmentPassService.isExomeEnrichmentKitOrBedFileMissing(seqTrack)) {
-            throw new RuntimeException("Exome enrichment kit is not set or BED file is missing for SeqTrack ${seqTrack}.")
+        if (applicationContext.alignmentPassService.isLibraryPreparationKitOrBedFileMissing(seqTrack)) {
+            throw new RuntimeException("Library preparation kit is not set or BED file is missing for SeqTrack ${seqTrack}.")
         }
     }
 
@@ -76,7 +76,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         }
 
         if (seqTrack instanceof ExomeSeqTrack &&
-                seqTrack.exomeEnrichmentKit == null &&
+                seqTrack.libraryPreparationKit == null &&
                 seqTrack.kitInfoReliability == InformationReliability.UNKNOWN_VERIFIED) {
             notAligning('kitInfoReliability is UNKNOWN_VERIFIED')
             return false

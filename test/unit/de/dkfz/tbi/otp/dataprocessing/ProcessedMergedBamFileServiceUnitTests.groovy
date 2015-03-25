@@ -31,45 +31,45 @@ class ProcessedMergedBamFileServiceUnitTests {
 
 
     @Test
-    void testExomeEnrichmentKitCorrect() {
+    void testLibraryPreparationKitCorrect() {
         ProcessedMergedBamFile mergedBamFile = new ProcessedMergedBamFile()
         Map input = createKitAndSingleLaneBamFiles(SeqTypeNames.EXOME.seqTypeName, ExomeSeqTrack, mergedBamFile)
         def abstractBamFileService = [
             findAllByProcessedMergedBamFile: { input.bamFiles }
         ] as AbstractBamFileService
         service.abstractBamFileService = abstractBamFileService
-        assertEquals(input.kit, service.exomeEnrichmentKit(mergedBamFile))
+        assertEquals(input.kit, service.libraryPreparationKit(mergedBamFile))
     }
 
     @Test(expected = IllegalArgumentException)
-    void testExomeEnrichmentKitNullInput() {
-        service.exomeEnrichmentKit(null)
+    void testLibraryPreparationKitNullInput() {
+        service.libraryPreparationKit(null)
     }
 
     @Test(expected = IllegalArgumentException)
-    void testExomeEnrichmentKitNotExomSeqType() {
+    void testLibraryPreparationKitNotExomSeqType() {
         ProcessedMergedBamFile mergedBamFile = new ProcessedMergedBamFile()
         Map input = createKitAndSingleLaneBamFiles(SeqTypeNames.WHOLE_GENOME.seqTypeName, ExomeSeqTrack, mergedBamFile)
         def abstractBamFileService = [
             findAllByProcessedMergedBamFile: { input.bamFiles }
         ] as AbstractBamFileService
         service.abstractBamFileService = abstractBamFileService
-        service.exomeEnrichmentKit(mergedBamFile)
+        service.libraryPreparationKit(mergedBamFile)
     }
 
     @Test(expected = IllegalArgumentException)
-    void testExomeEnrichmentKitNoSingleLaneBamFiles() {
+    void testLibraryPreparationKitNoSingleLaneBamFiles() {
         ProcessedMergedBamFile mergedBamFile = new ProcessedMergedBamFile()
         Map input = createKitAndSingleLaneBamFiles(SeqTypeNames.EXOME.seqTypeName, ExomeSeqTrack, mergedBamFile)
         def abstractBamFileService = [
             findAllByProcessedMergedBamFile: { []}
         ] as AbstractBamFileService
         service.abstractBamFileService = abstractBamFileService
-        service.exomeEnrichmentKit(mergedBamFile)
+        service.libraryPreparationKit(mergedBamFile)
     }
 
     @Test(expected = IllegalArgumentException)
-    void testExomeEnrichmentKitDiffSeqTrackTypes() {
+    void testLibraryPreparationKitDiffSeqTrackTypes() {
         ProcessedMergedBamFile mergedBamFile = new ProcessedMergedBamFile()
         Map input = createKitAndSingleLaneBamFiles(SeqTypeNames.EXOME.seqTypeName, ExomeSeqTrack, mergedBamFile)
         SeqTrack seqTrack = new SeqTrack()
@@ -82,20 +82,20 @@ class ProcessedMergedBamFileServiceUnitTests {
             findAllByProcessedMergedBamFile: { input.bamFiles }
         ] as AbstractBamFileService
         service.abstractBamFileService = abstractBamFileService
-        service.exomeEnrichmentKit(mergedBamFile)
+        service.libraryPreparationKit(mergedBamFile)
     }
 
     @Test(expected = IllegalArgumentException)
-    void testExomeEnrichmentKitDiffKits() {
+    void testLibraryPreparationKitDiffKits() {
         ProcessedMergedBamFile mergedBamFile = new ProcessedMergedBamFile()
-        ExomeEnrichmentKit kit = new ExomeEnrichmentKit(name: 'kit2')
+        LibraryPreparationKit kit = new LibraryPreparationKit(name: 'kit2')
         Map input = createKitAndSingleLaneBamFiles(SeqTypeNames.EXOME.seqTypeName, ExomeSeqTrack, mergedBamFile)
-        input.bamFiles[2].alignmentPass.seqTrack.exomeEnrichmentKit = kit
+        input.bamFiles[2].alignmentPass.seqTrack.libraryPreparationKit = kit
         def abstractBamFileService = [
             findAllByProcessedMergedBamFile: { input.bamFiles }
         ] as AbstractBamFileService
         service.abstractBamFileService = abstractBamFileService
-        service.exomeEnrichmentKit(mergedBamFile)
+        service.libraryPreparationKit(mergedBamFile)
     }
 
     private Map createKitAndSingleLaneBamFiles(String seqTypeName, Class seqTypeClass, ProcessedMergedBamFile processegMergedBamFile) {
@@ -105,7 +105,7 @@ class ProcessedMergedBamFileServiceUnitTests {
         assert seqType.save()
         Sample sample = createSampleAndDBConnections()
         mergingPassAndDBConnections(processegMergedBamFile, sample, seqType)
-        ExomeEnrichmentKit kit = new ExomeEnrichmentKit(name: 'kit1')
+        LibraryPreparationKit kit = new LibraryPreparationKit(name: 'kit1')
         Run run = new Run(name: 'run')
         3.times {
             SeqTrack seqTrack
@@ -113,7 +113,7 @@ class ProcessedMergedBamFileServiceUnitTests {
                 seqTrack = new SeqTrack()
             }
             if (seqTypeClass == ExomeSeqTrack) {
-                seqTrack = new ExomeSeqTrack(exomeEnrichmentKit: kit)
+                seqTrack = new ExomeSeqTrack(libraryPreparationKit: kit)
             }
             seqTrack.laneId = "1"
             seqTrack.run = run

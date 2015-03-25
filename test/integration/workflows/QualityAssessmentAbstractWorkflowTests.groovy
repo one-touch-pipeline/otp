@@ -366,7 +366,7 @@ abstract class QualityAssessmentAbstractWorkflowTests extends AbstractWorkflowTe
 
     private void createAdditionalExomData() {
 
-        ExomeEnrichmentKit kit = new ExomeEnrichmentKit(name: 'kit')
+        LibraryPreparationKit kit = new LibraryPreparationKit(name: 'kit')
         assertNotNull kit.save(flush: true)
 
         List<SeqTrack> seqTracks = []
@@ -374,7 +374,7 @@ abstract class QualityAssessmentAbstractWorkflowTests extends AbstractWorkflowTe
             SeqTrack seqTrack = new ExomeSeqTrack(
                             seqType: SeqType.findByName('EXON'),
                             kitInfoReliability: InformationReliability.KNOWN,
-                            exomeEnrichmentKit: kit
+                            libraryPreparationKit: kit
                             )
             seqTracks << seqTrack
         }
@@ -387,7 +387,7 @@ abstract class QualityAssessmentAbstractWorkflowTests extends AbstractWorkflowTe
                         targetSize: 11111111111,
                         mergedTargetSize: 1111111,
                         referenceGenome: refGen,
-                        exomeEnrichmentKit: kit
+                        libraryPreparationKit: kit
                         )
         assertNotNull(bedFile.save([flush: true]))
     }

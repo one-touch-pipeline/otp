@@ -11,8 +11,8 @@ class MetaDataFieldsController {
         [:]
     }
 
-    JSON dataTableSourceListExomeEnrichmentKit(DataTableCommand cmd) {
-        List data = metaDataFieldsService.listExomeEnrichmentKitWithAliases().collect {
+    JSON dataTableSourceListLibraryPreparationKit(DataTableCommand cmd) {
+        List data = metaDataFieldsService.listLibraryPreparationKitWithAliases().collect {
             [it[0].name, it[1]*.name.join(', ')]
         }
         renderData(cmd, data)

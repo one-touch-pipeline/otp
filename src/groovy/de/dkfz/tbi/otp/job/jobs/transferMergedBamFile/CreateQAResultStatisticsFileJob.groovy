@@ -58,11 +58,11 @@ class CreateQAResultStatisticsFileJob extends AbstractEndStateAwareJobImpl {
         String fastqFilesNames = fastqFileNamesList.join("\n")
 
         // for the case when the kit of one of the lanes, merged in the mergedBamFile, was inferred, the inferred kit will be returned, otherwise null
-        ExomeEnrichmentKit inferredKit = processedMergedBamFileService.getInferredKit(mergedBamFile)
+        LibraryPreparationKit inferredKit = processedMergedBamFileService.getInferredKit(mergedBamFile)
         String inferredMessage = ""
         if (inferredKit) {
             inferredMessage = """
-The exome enrichment kit was not available for all lanes in the corresponding mergedBamFile.
+The library preparation kit was not available for all lanes in the corresponding mergedBamFile.
 The kit ${inferredKit} was inferred to be used.\n\n
 """
         }

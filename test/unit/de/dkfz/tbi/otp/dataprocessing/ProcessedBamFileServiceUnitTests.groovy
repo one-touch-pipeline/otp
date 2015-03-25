@@ -27,40 +27,40 @@ class ProcessedBamFileServiceUnitTests {
 
 
     @Test
-    void testExomeEnrichmentKitCorrect() {
+    void testLibraryPreparationKitCorrect() {
         Map input = createKitAndBamFile(SeqTypeNames.EXOME.seqTypeName, ExomeSeqTrack)
-        assertEquals(input.kit, service.exomeEnrichmentKit(input.bamFile))
+        assertEquals(input.kit, service.libraryPreparationKit(input.bamFile))
     }
 
     @Test(expected = IllegalArgumentException)
-    void testExomeEnrichmentKitNullInput() {
-        service.exomeEnrichmentKit(null)
+    void testLibraryPreparationKitNullInput() {
+        service.libraryPreparationKit(null)
     }
 
     @Test(expected = IllegalArgumentException)
-    void testExomeEnrichmentKitNotExonSeqType() {
+    void testLibraryPreparationKitNotExonSeqType() {
         Map input = createKitAndBamFile(SeqTypeNames.WHOLE_GENOME.seqTypeName, ExomeSeqTrack)
-        assertEquals(input.kit, service.exomeEnrichmentKit(input.bamFile))
+        assertEquals(input.kit, service.libraryPreparationKit(input.bamFile))
     }
 
     @Test(expected = IllegalArgumentException)
-    void testExomeEnrichmentKitWrongSeqTrackType() {
+    void testLibraryPreparationKitWrongSeqTrackType() {
         Map input = createKitAndBamFile(SeqTypeNames.EXOME.seqTypeName, SeqTrack)
-        assertEquals(input.kit, service.exomeEnrichmentKit(input.bamFile))
+        assertEquals(input.kit, service.libraryPreparationKit(input.bamFile))
     }
 
     private Map createKitAndBamFile(String seqTypeName, Class seqTypeClass) {
         assert seqTypeClass == SeqTrack || seqTypeClass == ExomeSeqTrack
         SeqType seqType = new SeqType()
         seqType.name = seqTypeName
-        ExomeEnrichmentKit kit = new ExomeEnrichmentKit()
+        LibraryPreparationKit kit = new LibraryPreparationKit()
         Run run = new Run(name: 'run')
         SeqTrack seqTrack
         if (seqTypeClass == SeqTrack) {
             seqTrack = new SeqTrack()
         }
         if (seqTypeClass == ExomeSeqTrack) {
-            seqTrack = new ExomeSeqTrack(exomeEnrichmentKit: kit)
+            seqTrack = new ExomeSeqTrack(libraryPreparationKit: kit)
         }
         seqTrack.run = run
         seqTrack.seqType = seqType

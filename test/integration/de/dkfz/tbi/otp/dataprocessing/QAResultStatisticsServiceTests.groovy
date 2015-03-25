@@ -36,7 +36,7 @@ class QAResultStatisticsServiceTests {
     Individual individual
     SeqTrack seqTrack
     ExomeSeqTrack exomeSeqTrack
-    ExomeEnrichmentKit exomeEnrichmentKit
+    LibraryPreparationKit libraryPreparationKit
     SeqType seqType
     AlignmentPass alignmentPass
     ProcessedBamFile processedBamFile
@@ -130,10 +130,10 @@ class QAResultStatisticsServiceTests {
                         )
         assertNotNull(seqTrack.save([flush: true]))
 
-        exomeEnrichmentKit = new ExomeEnrichmentKit(
-                        name: "exomeEnrichmentKit"
+        libraryPreparationKit = new LibraryPreparationKit(
+                        name: "libraryPreparationKit"
                         )
-        assertNotNull(exomeEnrichmentKit.save([flush: true]))
+        assertNotNull(libraryPreparationKit.save([flush: true]))
 
         exomeSeqTrack = new ExomeSeqTrack(
                         laneId: "laneId",
@@ -142,7 +142,7 @@ class QAResultStatisticsServiceTests {
                         seqType: seqType,
                         seqPlatform: seqPlatform,
                         pipelineVersion: softwareTool,
-                        exomeEnrichmentKit: exomeEnrichmentKit,
+                        libraryPreparationKit: libraryPreparationKit,
                         kitInfoReliability: InformationReliability.KNOWN
                         )
         assertNotNull(exomeSeqTrack.save([flush: true]))
@@ -244,7 +244,7 @@ class QAResultStatisticsServiceTests {
                         targetSize: 80,
                         mergedTargetSize: 60,
                         referenceGenome: referenceGenome,
-                        exomeEnrichmentKit: exomeEnrichmentKit
+                        libraryPreparationKit: libraryPreparationKit
                         )
         assertNotNull(bedFile.save([flush: true]))
 
@@ -305,7 +305,7 @@ class QAResultStatisticsServiceTests {
         seqTrack = null
         seqType = null
         exomeSeqTrack = null
-        exomeEnrichmentKit = null
+        libraryPreparationKit = null
         alignmentPass = null
         processedBamFile = null
         processedMergedBamFile = null
@@ -355,7 +355,7 @@ class QAResultStatisticsServiceTests {
             (QAResultStatisticsService.LANE): 'all_merged',
             (QAResultStatisticsService.RUN): 'all_merged',
             (QAResultStatisticsService.SEQTYPE): seqType,
-            (QAResultStatisticsService.EXOME_ENRICHMENT_KIT): null
+            (QAResultStatisticsService.LIBRARY_PREPARATION_KIT): null
         ]
         // assertEquals will not DTRT here, we have to use the equals() method
         assertTrue expect == actual
@@ -380,7 +380,7 @@ class QAResultStatisticsServiceTests {
             (QAResultStatisticsService.LANE): 'all_merged',
             (QAResultStatisticsService.RUN): 'all_merged',
             (QAResultStatisticsService.SEQTYPE): seqType,
-            (QAResultStatisticsService.EXOME_ENRICHMENT_KIT): exomeEnrichmentKit
+            (QAResultStatisticsService.LIBRARY_PREPARATION_KIT): libraryPreparationKit
         ]
         // assertEquals will not DTRT here, we have to use the equals() method
         assertTrue expect == actual

@@ -5,27 +5,27 @@ import grails.test.mixin.*
 import grails.test.mixin.support.*
 import org.junit.*
 
-@TestFor(ExomeEnrichmentKitSynonym)
-@Mock([ExomeEnrichmentKit])
-class ExomeEnrichmentKitSynonymTests {
+@TestFor(LibraryPreparationKitSynonym)
+@Mock([LibraryPreparationKit])
+class LibraryPreparationKitSynonymTests {
 
-    ExomeEnrichmentKit kit
-    ExomeEnrichmentKitSynonym kitId1
-    ExomeEnrichmentKitSynonym kitId2
+    LibraryPreparationKit kit
+    LibraryPreparationKitSynonym kitId1
+    LibraryPreparationKitSynonym kitId2
 
     @Before
     void setUp() {
-        kit = new ExomeEnrichmentKit(
+        kit = new LibraryPreparationKit(
                 name: "kitName1"
                 )
         assertNotNull kit.save(flush: true)
-        kitId1 = new ExomeEnrichmentKitSynonym(
+        kitId1 = new LibraryPreparationKitSynonym(
                 name: "kitID1",
-                exomeEnrichmentKit: kit
+                libraryPreparationKit: kit
                 )
-        kitId2 = new ExomeEnrichmentKitSynonym(
+        kitId2 = new LibraryPreparationKitSynonym(
                 name: "kitID2",
-                exomeEnrichmentKit: kit
+                libraryPreparationKit: kit
                 )
     }
 

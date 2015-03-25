@@ -7,21 +7,21 @@ package de.dkfz.tbi.otp
  */
 enum InformationReliability {
     /**
-     * Indicates, that the {@link ExomeEnrichmentKit} is known and present
+     * Indicates, that the {@link LibraryPreparationKit} is known and present
      */
     KNOWN,
     /**
-     * Indicates, that the {@link ExomeEnrichmentKit} is verified to be unknown
+     * Indicates, that the {@link LibraryPreparationKit} is verified to be unknown
      */
     UNKNOWN_VERIFIED("UNKNOWN"),
     /**
-     * Indicates, that {@link ExomeEnrichmentKit} is not available yet and must be asked for.
-     * The value is defined for migration of old data, where the {@link ExomeEnrichmentKit} was not asked for.
+     * Indicates, that {@link LibraryPreparationKit} is not available yet and must be asked for.
+     * The value is defined for migration of old data, where the {@link LibraryPreparationKit} was not asked for.
      */
     UNKNOWN_UNVERIFIED,
     /**
-     * Indicates that OTP inferred this {@link ExomeEnrichmentKit} from a different lane, where it was explicitly {@link #KNOWN}.
-     * This {@link ExomeEnrichmentKit} should not be relied upon (find the original instead, don't infer based on inferences!)
+     * Indicates that OTP inferred this {@link LibraryPreparationKit} from a different lane, where it was explicitly {@link #KNOWN}.
+     * This {@link LibraryPreparationKit} should not be relied upon (find the original instead, don't infer based on inferences!)
      */
     INFERRED
 

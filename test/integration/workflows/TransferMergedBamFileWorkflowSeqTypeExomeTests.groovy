@@ -276,17 +276,17 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends AbstractWorkflowTes
                         )
         assertNotNull(softwareTool.save([flush: true, failOnError: true]))
 
-        ExomeEnrichmentKit exomeEnrichmentKit  = new ExomeEnrichmentKit(
-                        name: "exomeEnrichmentKit"
+        LibraryPreparationKit libraryPreparationKit  = new LibraryPreparationKit(
+                        name: "libraryPreparationKit"
                         )
-        assertNotNull(exomeEnrichmentKit.save([flush: true, failOnError: true]))
+        assertNotNull(libraryPreparationKit.save([flush: true, failOnError: true]))
 
         BedFile bedFile = new BedFile(
                         fileName: "bedFileName",
                         targetSize: 66,
                         mergedTargetSize: 50,
                         referenceGenome: referenceGenome,
-                        exomeEnrichmentKit: exomeEnrichmentKit
+                        libraryPreparationKit: libraryPreparationKit
                         )
         assertNotNull(bedFile.save([flush: true, failOnError: true]))
 
@@ -297,7 +297,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends AbstractWorkflowTes
                         seqType: seqType,
                         seqPlatform: seqPlatform,
                         pipelineVersion: softwareTool,
-                        exomeEnrichmentKit: exomeEnrichmentKit,
+                        libraryPreparationKit: libraryPreparationKit,
                         kitInfoReliability: InformationReliability.KNOWN
                         )
         assertNotNull(seqTrack.save([flush: true, failOnError: true]))
@@ -370,7 +370,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends AbstractWorkflowTes
                         seqType: seqType,
                         seqPlatform: seqPlatform,
                         pipelineVersion: softwareTool,
-                        exomeEnrichmentKit: exomeEnrichmentKit,
+                        libraryPreparationKit: libraryPreparationKit,
                         kitInfoReliability: InformationReliability.INFERRED
                         )
         assertNotNull(seqTrack1.save([flush: true, failOnError: true]))

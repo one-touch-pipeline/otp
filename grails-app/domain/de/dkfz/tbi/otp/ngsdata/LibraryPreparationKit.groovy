@@ -1,12 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
 /**
- * This class represents Exome enrichment kits which are used
- * for the library creation for exome sequencing purpose.
+ * This class represents library preparation kits which are used
+ * for the library creation for sequencing purpose.
  *
  *
  */
-class ExomeEnrichmentKit {
+class LibraryPreparationKit {
 
     /**
      * This is supposed to be the canonical human readable name of the kit.
@@ -14,7 +14,7 @@ class ExomeEnrichmentKit {
      *
      * example: 'Agilent SureSelect V4+UTRs'
      *
-     * For alternative spellings etc., see {@link ExomeEnrichmentKitSynonym}
+     * For alternative spellings etc., see {@link LibraryPreparationKitSynonym}
      */
     String name
 

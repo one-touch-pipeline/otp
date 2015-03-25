@@ -1,19 +1,19 @@
 /*jslint browser: true */
 /*global $ */
-$.otp.exomeEnrichmentKitTable = {
-        registerlistExomeEnrichmentKit : function () {
+$.otp.libraryPreparationKitTable = {
+        registerlistLibraryPreparationKit : function () {
             "use strict";
-            var oTablelistExomeEnrichmentKit = $.otp.createListView(
-                    '#listExomeEnrichmentKit',
+            var oTablelistLibraryPreparationKit = $.otp.createListView(
+                    '#listLibraryPreparationKit',
                     $.otp.createLink({
                         controller: 'metaDataFields',
-                        action: 'dataTableSourceListExomeEnrichmentKit'
+                        action: 'dataTableSourceListLibraryPreparationKit'
                     }),
                     function (json) {
                         return json;
                     }
                 );
-            return oTablelistExomeEnrichmentKit;
+            return oTablelistLibraryPreparationKit;
         }
 };
 

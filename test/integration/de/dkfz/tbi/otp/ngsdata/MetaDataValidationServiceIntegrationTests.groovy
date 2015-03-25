@@ -51,11 +51,11 @@ class MetaDataValidationServiceIntegrationTests {
         assertTrue(key.validate())
         assertNotNull(key.save(flush: true))
 
-        String exomeEnrichmentKitName = "Agilent SureSelect V3"
-        ExomeEnrichmentKit exomeEnrichmentKit = new ExomeEnrichmentKit(name: exomeEnrichmentKitName)
-        assertNotNull(exomeEnrichmentKit.save(flush: true))
+        String libraryPreparationKitName = "Agilent SureSelect V3"
+        LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(name: libraryPreparationKitName)
+        assertNotNull(libraryPreparationKit.save(flush: true))
 
-        entry = new MetaDataEntry(value: exomeEnrichmentKitName, dataFile: dataFile, key: key, source: MetaDataEntry.Source.MANUAL)
+        entry = new MetaDataEntry(value: libraryPreparationKitName, dataFile: dataFile, key: key, source: MetaDataEntry.Source.MANUAL)
         assertTrue(entry.validate())
         entry = entry.save(flush: true)
         assertNotNull(entry)
@@ -81,9 +81,9 @@ class MetaDataValidationServiceIntegrationTests {
         assertTrue(key.validate())
         assertNotNull(key.save(flush: true))
 
-        String exomeEnrichmentKitName = "Agilent SureSelect V3"
-        ExomeEnrichmentKit exomeEnrichmentKit = new ExomeEnrichmentKit(name: exomeEnrichmentKitName)
-        assertNotNull(exomeEnrichmentKit.save(flush: true))
+        String libraryPreparationKitName = "Agilent SureSelect V3"
+        LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(name: libraryPreparationKitName)
+        assertNotNull(libraryPreparationKit.save(flush: true))
 
         entry = new MetaDataEntry(value: "some enrichement Kit name not present in the database", dataFile: dataFile, key: key, source: MetaDataEntry.Source.MANUAL)
         assertTrue(entry.validate())

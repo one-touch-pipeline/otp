@@ -689,11 +689,11 @@ class ProcessedMergedBamFileServiceTests {
         seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(seqType.save(flush: true))
         ExomeSeqTrack exomeSeqTrack1 = createExomeSeqTrack("laneId1")
-        ExomeEnrichmentKit exomeEnrichmentKit1 = createExomeEnrichmentKit("Agilent SureSelect V3")
-        addKitToSeqTrack(exomeEnrichmentKit1, exomeSeqTrack1)
+        LibraryPreparationKit libraryPreparationKit1 = createLibraryPreparationKit("Agilent SureSelect V3")
+        addKitToSeqTrack(libraryPreparationKit1, exomeSeqTrack1)
         ExomeSeqTrack exomeSeqTrack2 = createExomeSeqTrack("laneId2")
-        ExomeEnrichmentKit exomeEnrichmentKit2 = createExomeEnrichmentKit("Agilent SureSelect V4")
-        addKitToSeqTrack(exomeEnrichmentKit2, exomeSeqTrack2)
+        LibraryPreparationKit libraryPreparationKit2 = createLibraryPreparationKit("Agilent SureSelect V4")
+        addKitToSeqTrack(libraryPreparationKit2, exomeSeqTrack2)
         MergingPass mergingPass = createMergingPass()
         ProcessedBamFile processedBamFile1 = createProcessedBamFile(1, exomeSeqTrack1)
         MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile1)
@@ -710,9 +710,9 @@ class ProcessedMergedBamFileServiceTests {
         assertNotNull(seqType.save(flush: true))
         ExomeSeqTrack exomeSeqTrack1 = createExomeSeqTrack("laneId1")
         ExomeSeqTrack exomeSeqTrack2 = createExomeSeqTrack("laneId2")
-        ExomeEnrichmentKit exomeEnrichmentKit = createExomeEnrichmentKit("Agilent SureSelect V3")
-        addKitToSeqTrack(exomeEnrichmentKit, exomeSeqTrack1)
-        addKitToSeqTrack(exomeEnrichmentKit, exomeSeqTrack2)
+        LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit("Agilent SureSelect V3")
+        addKitToSeqTrack(libraryPreparationKit, exomeSeqTrack1)
+        addKitToSeqTrack(libraryPreparationKit, exomeSeqTrack2)
         MergingPass mergingPass = createMergingPass()
         ProcessedBamFile processedBamFile1 = createProcessedBamFile(1, exomeSeqTrack1)
         MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile1)
@@ -729,9 +729,9 @@ class ProcessedMergedBamFileServiceTests {
         assertNotNull(seqType.save(flush: true))
         ExomeSeqTrack exomeSeqTrack1 = createExomeSeqTrack("laneId1")
         ExomeSeqTrack exomeSeqTrack2 = createExomeSeqTrack("laneId2")
-        ExomeEnrichmentKit exomeEnrichmentKit = createExomeEnrichmentKit("Agilent SureSelect V3")
-        addKitToSeqTrack(exomeEnrichmentKit, exomeSeqTrack1)
-        addKitToSeqTrack(exomeEnrichmentKit, exomeSeqTrack2)
+        LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit("Agilent SureSelect V3")
+        addKitToSeqTrack(libraryPreparationKit, exomeSeqTrack1)
+        addKitToSeqTrack(libraryPreparationKit, exomeSeqTrack2)
         exomeSeqTrack2.kitInfoReliability = InformationReliability.INFERRED
         assertNotNull(exomeSeqTrack2.save(flush: true))
         MergingPass mergingPass = createMergingPass()
@@ -740,7 +740,7 @@ class ProcessedMergedBamFileServiceTests {
         ProcessedBamFile processedBamFile2 = createProcessedBamFile(2, exomeSeqTrack2)
         MergingSetAssignment mergingSetAssignment2 = createMergingSetAssignment(processedBamFile2)
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
-        assertEquals(exomeEnrichmentKit, processedMergedBamFileService.getInferredKit(processedMergedBamFile))
+        assertEquals(libraryPreparationKit, processedMergedBamFileService.getInferredKit(processedMergedBamFile))
     }
 
 
@@ -750,8 +750,8 @@ class ProcessedMergedBamFileServiceTests {
         assertNotNull(seqType.save(flush: true))
         SeqTrack seqTrack = createSeqTrack("laneId1")
         ExomeSeqTrack exomeSeqTrack = createExomeSeqTrack("laneId2")
-        ExomeEnrichmentKit exomeEnrichmentKit = createExomeEnrichmentKit("Agilent SureSelect V3")
-        addKitToSeqTrack(exomeEnrichmentKit, exomeSeqTrack)
+        LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit("Agilent SureSelect V3")
+        addKitToSeqTrack(libraryPreparationKit, exomeSeqTrack)
         MergingPass mergingPass = createMergingPass()
         ProcessedBamFile processedBamFile1 = createProcessedBamFile(1, seqTrack)
         MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile1)
@@ -976,23 +976,23 @@ class ProcessedMergedBamFileServiceTests {
                         seqPlatform: seqPlatform,
                         pipelineVersion: softwareTool,
                         kitInfoReliability: InformationReliability.UNKNOWN_UNVERIFIED,
-                        exomeEnrichmentKit: null
+                        libraryPreparationKit: null
                         )
         assertNotNull(exomeSeqTrack.save([flush: true]))
         return exomeSeqTrack
     }
 
 
-    ExomeEnrichmentKit createExomeEnrichmentKit(String name) {
-        ExomeEnrichmentKit exomeEnrichmentKit = new ExomeEnrichmentKit(
+    LibraryPreparationKit createLibraryPreparationKit(String name) {
+        LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(
                         name: name
                         )
-        assertNotNull(exomeEnrichmentKit.save([flush: true]))
-        return exomeEnrichmentKit
+        assertNotNull(libraryPreparationKit.save([flush: true]))
+        return libraryPreparationKit
     }
 
-    void addKitToSeqTrack(ExomeEnrichmentKit exomeEnrichmentKit, ExomeSeqTrack exomeSeqTrack) {
-        exomeSeqTrack.exomeEnrichmentKit = exomeEnrichmentKit
+    void addKitToSeqTrack(LibraryPreparationKit libraryPreparationKit, ExomeSeqTrack exomeSeqTrack) {
+        exomeSeqTrack.libraryPreparationKit = libraryPreparationKit
         exomeSeqTrack.kitInfoReliability = InformationReliability.KNOWN
         assertNotNull(exomeSeqTrack.save(flush: true))
     }

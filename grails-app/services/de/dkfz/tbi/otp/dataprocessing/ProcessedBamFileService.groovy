@@ -312,14 +312,14 @@ class ProcessedBamFileService {
         return object
     }
 
-    public ExomeEnrichmentKit exomeEnrichmentKit(ProcessedBamFile bamFile) {
+    public LibraryPreparationKit libraryPreparationKit(ProcessedBamFile bamFile) {
         notNull(bamFile, 'bam file must not be null')
         SeqTrack seqTrack = bamFile.seqTrack
         isTrue(seqTrack.seqType.name == SeqTypeNames.EXOME.seqTypeName, 'This method must not be called on not exon data')
         // The domain ExomeSeqTrack is new, therefore it is possible that there are many bamFiles,
-        // which do not have the connection to the ExomeEnrichtmentKit.
-        isInstanceOf(ExomeSeqTrack, seqTrack, "The ExomeEnrichtmentKit is not defined which means that the data were included in OTP as SeqTrack, not as ExomeSeqTrack.")
-        return seqTrack.exomeEnrichmentKit
+        // which do not have the connection to the LibraryPreparationKit.
+        isInstanceOf(ExomeSeqTrack, seqTrack, "The LibraryPreparationKit is not defined which means that the data were included in OTP as SeqTrack, not as ExomeSeqTrack.")
+        return seqTrack.libraryPreparationKit
     }
 
     long getAlignmentReadLength(ProcessedBamFile processedBamFile) {

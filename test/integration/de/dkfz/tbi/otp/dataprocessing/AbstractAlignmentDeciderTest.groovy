@@ -158,12 +158,12 @@ public class AbstractAlignmentDeciderTest {
     }
 
     @Test
-    void testEnsureConfigurationIsComplete_whenExomeEnrichmentKitIsMissing_shouldThrowRuntimeException() {
+    void testEnsureConfigurationIsComplete_whenLibraryPreparationKitIsMissing_shouldThrowRuntimeException() {
         TestData testData = new TestData()
         testData.createObjects()
 
         SeqTrack seqTrack = testData.createExomeSeqTrack(testData.run)
-        seqTrack.exomeEnrichmentKit = null
+        seqTrack.libraryPreparationKit = null
         seqTrack.kitInfoReliability = InformationReliability.UNKNOWN_UNVERIFIED
         seqTrack.save(failOnError: true)
 
@@ -246,7 +246,7 @@ public class AbstractAlignmentDeciderTest {
         testData.createObjects()
 
         SeqTrack seqTrack = testData.createExomeSeqTrack(testData.run)
-        seqTrack.exomeEnrichmentKit = null
+        seqTrack.libraryPreparationKit = null
         seqTrack.kitInfoReliability = InformationReliability.UNKNOWN_VERIFIED
         seqTrack.save(failOnError: true)
 

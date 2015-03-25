@@ -39,16 +39,16 @@ class AlignmentPassService {
 
 
     /**
-     * Checks if the {@link ExomeEnrichmentKit} and the {@link BedFile} are available for this {@link SeqTrack}.
+     * Checks if the {@link LibraryPreparationKit} and the {@link BedFile} are available for this {@link SeqTrack}.
      * If it is missing the method returns false, otherwise true.
      */
-    public boolean isExomeEnrichmentKitOrBedFileMissing(SeqTrack seqTrack) {
-        notNull(seqTrack, "The input seqTrack of method isExomeEnrichmentKitAvailable is null")
+    public boolean isLibraryPreparationKitOrBedFileMissing(SeqTrack seqTrack) {
+        notNull(seqTrack, "The input seqTrack of method isLibraryPreparationKitAvailable is null")
 
         if (seqTrack instanceof ExomeSeqTrack) {
-            return seqTrack.exomeEnrichmentKit == null || seqTrack.configuredReferenceGenome == null ||
+            return seqTrack.libraryPreparationKit == null || seqTrack.configuredReferenceGenome == null ||
                    BedFile.findWhere(
-                       exomeEnrichmentKit: seqTrack.exomeEnrichmentKit,
+                       libraryPreparationKit: seqTrack.libraryPreparationKit,
                        referenceGenome: seqTrack.configuredReferenceGenome,
                    ) == null
         } else {

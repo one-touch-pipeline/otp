@@ -300,12 +300,12 @@ class LoadMetaDataTests extends AbstractWorkflowTest {
     // so at this moment only one test could be run at moment, all the others have to be commented
     @Test
     @Ignore
-    void testExomeMetadataNoEnrichmentKit() {
+    void testExomeMetadataNoLibraryPreparationKit() {
         String seqTypeName = SeqTypeNames.EXOME.seqTypeName
 
-        run("scripts/ExomeEnrichmentKit/LoadExomeEnrichmentKits.groovy")
-        List<ExomeEnrichmentKit> exomeEnrichmentKit = ExomeEnrichmentKit.list()
-        assertFalse(exomeEnrichmentKit.isEmpty())
+        run("scripts/LibraryPreparationKit/LoadLibraryPreparationKits.groovy")
+        List<LibraryPreparationKit> libraryPreparationKits = LibraryPreparationKit.list()
+        assertFalse(libraryPreparationKits.isEmpty())
 
         String path = "${ftpDir}/${runName}"
         String softLinkFastqR1Filepath1 = "${path}/${fastqR1Filename1}"
@@ -335,7 +335,7 @@ class LoadMetaDataTests extends AbstractWorkflowTest {
 
         waitUntilWorkflowFinishes(TIMEOUT)
 
-        assert exactlyOneElement(ProcessingStepUpdate.findAllByState(ExecutionState.FAILURE)).error.errorMessage.contains('Exome enrichment kit is not set')
+        assert exactlyOneElement(ProcessingStepUpdate.findAllByState(ExecutionState.FAILURE)).error.errorMessage.contains('Library preparation kit is not set')
         assert AlignmentPass.count() == 0
     }
 
@@ -343,25 +343,25 @@ class LoadMetaDataTests extends AbstractWorkflowTest {
     // so at this moment only one test could be run at moment, all the others have to be commented
     @Test
     @Ignore
-    void testExomeMetadataWithEnrichmentKit() {
+    void testExomeMetadataWithLibraryPreparationKit() {
         String seqTypeName = SeqTypeNames.EXOME.seqTypeName
 
-        run("scripts/ExomeEnrichmentKit/LoadExomeEnrichmentKits.groovy")
-        List<ExomeEnrichmentKit> exomeEnrichmentKit = ExomeEnrichmentKit.list()
-        assertFalse(exomeEnrichmentKit.isEmpty())
+        run("scripts/LibraryPreparationKit/LoadLibraryPreparationKits.groovy")
+        List<LibraryPreparationKit> libraryPreparationKits = LibraryPreparationKit.list()
+        assertFalse(libraryPreparationKits.isEmpty())
 
         // this library PreparationKit was chosen to match the one at the script that is supposed to be executed together with the workflow
         String libraryPreparationKit = "Agilent SureSelect V3"
         String libraryPreparationKitIdentifier = "Agilent SureSelect V3 alias"
 
-        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = new ExomeEnrichmentKitSynonym(
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym = new LibraryPreparationKitSynonym(
                         name: libraryPreparationKitIdentifier,
-                        exomeEnrichmentKit: exomeEnrichmentKit.first())
-        assertNotNull(exomeEnrichmentKitSynonym.save([flush: true]))
+                        libraryPreparationKit: libraryPreparationKits.first())
+        assertNotNull(libraryPreparationKitSynonym.save([flush: true]))
 
         BedFile.build(
                 referenceGenome: referenceGenome,
-                exomeEnrichmentKit: exomeEnrichmentKit.first(),
+                libraryPreparationKit: libraryPreparationKits.first(),
         )
 
         String path = "${ftpDir}/${runName}"

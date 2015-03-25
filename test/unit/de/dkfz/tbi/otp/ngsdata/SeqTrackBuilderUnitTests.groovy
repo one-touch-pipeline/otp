@@ -160,10 +160,10 @@ class SeqTrackBuilderUnitTests {
         assertEquals(QualityEncoding.ILLUMINA, seqTrack.qualityEncoding)
         assertEquals(DataProcessingState.IN_PROGRESS, seqTrack.fastqcState)
         assertEquals(InformationReliability.UNKNOWN_UNVERIFIED, seqTrack.kitInfoReliability)
-        assertNull(seqTrack.exomeEnrichmentKit)
+        assertNull(seqTrack.libraryPreparationKit)
     }
 
-    void testCreateExomeWithExomeEnrichmentKit() {
+    void testCreateExomeWithLibraryPreparationKit() {
         SeqTrackBuilder builder = new SeqTrackBuilder(
                         "lane",
                         new Run(),
@@ -175,7 +175,7 @@ class SeqTrackBuilderUnitTests {
         builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
         builder.setnBasePairs(5).setnReads(6).setInsertSize(7)
         builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
-        builder.setExomeEnrichmentKit(new ExomeEnrichmentKit())
+        builder.setLibraryPreparationKit(new LibraryPreparationKit())
 
         SeqTrack seqTrack = builder.create()
         assertNotNull(seqTrack)
@@ -195,7 +195,7 @@ class SeqTrackBuilderUnitTests {
         assertEquals(QualityEncoding.ILLUMINA, seqTrack.qualityEncoding)
         assertEquals(DataProcessingState.IN_PROGRESS, seqTrack.fastqcState)
         assertEquals(InformationReliability.KNOWN, seqTrack.kitInfoReliability)
-        assertNotNull(seqTrack.exomeEnrichmentKit)
+        assertNotNull(seqTrack.libraryPreparationKit)
     }
 
     void testCreateExomeWithKitInfoReliabilityIsUnknown() {
@@ -230,7 +230,7 @@ class SeqTrackBuilderUnitTests {
         assertEquals(QualityEncoding.ILLUMINA, seqTrack.qualityEncoding)
         assertEquals(DataProcessingState.IN_PROGRESS, seqTrack.fastqcState)
         assertEquals(InformationReliability.UNKNOWN_VERIFIED, seqTrack.kitInfoReliability)
-        assertNull(seqTrack.exomeEnrichmentKit)
+        assertNull(seqTrack.libraryPreparationKit)
     }
 
     void testCreateExomeWithKitInfoReliabilityIsUnknownUnverified() {
@@ -265,10 +265,10 @@ class SeqTrackBuilderUnitTests {
         assertEquals(QualityEncoding.ILLUMINA, seqTrack.qualityEncoding)
         assertEquals(DataProcessingState.IN_PROGRESS, seqTrack.fastqcState)
         assertEquals(InformationReliability.UNKNOWN_UNVERIFIED, seqTrack.kitInfoReliability)
-        assertNull(seqTrack.exomeEnrichmentKit)
+        assertNull(seqTrack.libraryPreparationKit)
     }
 
-    void testCreateExomeWithExomeEnrichmentKitIsNull() {
+    void testCreateExomeWithLibraryPreparationKitIsNull() {
         shouldFail(IllegalArgumentException.class) {
             SeqTrackBuilder builder = new SeqTrackBuilder(
                             "lane",
@@ -281,12 +281,12 @@ class SeqTrackBuilderUnitTests {
             builder.setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
             builder.setnBasePairs(5).setnReads(6).setInsertSize(7)
             builder.setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
-            builder.setExomeEnrichmentKit(null)
+            builder.setLibraryPreparationKit(null)
             builder.create()
         }
     }
 
-    void testCreateExomeWithKitInfoReliabilityIsKnownAndNoExomeEnrichmentKit() {
+    void testCreateExomeWithKitInfoReliabilityIsKnownAndNoLibraryPreparationKit() {
         shouldFail(IllegalArgumentException.class) {
             SeqTrackBuilder builder =  new SeqTrackBuilder(
                             "lane",

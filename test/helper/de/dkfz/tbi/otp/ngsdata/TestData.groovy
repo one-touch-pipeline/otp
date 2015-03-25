@@ -291,28 +291,28 @@ class TestData {
                 seqType: exomeSeqType,
                 seqPlatform: seqPlatform,
                 pipelineVersion: softwareTool,
-                exomeEnrichmentKit: null
+                libraryPreparationKit: null
                 )
         assertNotNull(exomeSeqTrack.save())
         return exomeSeqTrack
     }
 
 
-    ExomeEnrichmentKit createEnrichmentKit(String name) {
-        ExomeEnrichmentKit exomeEnrichmentKit = new ExomeEnrichmentKit(
+    LibraryPreparationKit createLibraryPreparationKit(String name) {
+        LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(
                 name: name
                 )
-        assertNotNull(exomeEnrichmentKit.save())
-        return exomeEnrichmentKit
+        assertNotNull(libraryPreparationKit.save())
+        return libraryPreparationKit
     }
 
 
-    BedFile createBedFile(ReferenceGenome referenceGenome, ExomeEnrichmentKit exomeEnrichmentKit) {
+    BedFile createBedFile(ReferenceGenome referenceGenome, LibraryPreparationKit libraryPreparationKit) {
         BedFile bedFile = new BedFile (
                 fileName: "BedFile",
                 targetSize: 10000000,
                 referenceGenome: referenceGenome,
-                exomeEnrichmentKit: exomeEnrichmentKit,
+                libraryPreparationKit: libraryPreparationKit,
                 )
         assertNotNull(bedFile.save())
         return bedFile
@@ -327,8 +327,8 @@ class TestData {
     }
 
 
-    void addKitToExomeSeqTrack(ExomeSeqTrack exomeSeqTrack, ExomeEnrichmentKit sameExomeEnrichmentKit) {
-        exomeSeqTrack.exomeEnrichmentKit = sameExomeEnrichmentKit
+    void addKitToExomeSeqTrack(ExomeSeqTrack exomeSeqTrack, LibraryPreparationKit sameLibraryPreparationKit) {
+        exomeSeqTrack.libraryPreparationKit = sameLibraryPreparationKit
         exomeSeqTrack.kitInfoReliability = InformationReliability.KNOWN
         assertNotNull(exomeSeqTrack.save(flush: true))
     }

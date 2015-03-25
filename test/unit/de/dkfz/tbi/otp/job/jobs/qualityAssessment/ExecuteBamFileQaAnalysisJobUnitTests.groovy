@@ -17,7 +17,7 @@ import org.junit.*
 @TestFor(ReferenceGenome)
 @Mock([QualityAssessmentPass, ProcessedBamFile, Realm, Project,
     SeqType, ReferenceGenome, ExomeSeqTrack, SeqTrack, AlignmentPass,
-    ExomeEnrichmentKit, BedFile])
+    LibraryPreparationKit, BedFile])
 @Build([
     ProcessedBamFile,
     ReferenceGenome,
@@ -27,7 +27,7 @@ class ExecuteBamFileQaAnalysisJobUnitTests {
     ExecuteBamFileQaAnalysisJob job
     SeqType seqType
 
-    ExomeEnrichmentKit exomeEnrichmentKit
+    LibraryPreparationKit libraryPreparationKit
 
     ReferenceGenome referenceGenome
 
@@ -39,8 +39,8 @@ class ExecuteBamFileQaAnalysisJobUnitTests {
         seqType = processedBamFile.seqType
         referenceGenome = processedBamFile.referenceGenome
 
-        exomeEnrichmentKit = new ExomeEnrichmentKit(name: "ExomeEnrichmentKit")
-        assertNotNull(exomeEnrichmentKit.save([flush: true, validate: false]))
+        libraryPreparationKit = new LibraryPreparationKit(name: "LibraryPreparationKit")
+        assertNotNull(libraryPreparationKit.save([flush: true, validate: false]))
 
         QualityAssessmentPass pass = new QualityAssessmentPass(processedBamFile: processedBamFile)
         assertNotNull(pass.save([flush: true, validate: false]))
@@ -60,7 +60,7 @@ class ExecuteBamFileQaAnalysisJobUnitTests {
             baiFilePath: { 'baiFilePath' },
             project: {},
             seqType: { seqType },
-            exomeEnrichmentKit: {exomeEnrichmentKit}
+            libraryPreparationKit: {libraryPreparationKit}
             ] as ProcessedBamFileService
 
         def executionHelperService = [
@@ -105,7 +105,7 @@ class ExecuteBamFileQaAnalysisJobUnitTests {
 
         BedFile bedfile = new BedFile(
             referenceGenome: referenceGenome,
-            exomeEnrichmentKit: exomeEnrichmentKit
+            libraryPreparationKit: libraryPreparationKit
             )
         assertNotNull(bedfile.save([flush: true, validate: false]))
 
@@ -128,7 +128,7 @@ class ExecuteBamFileQaAnalysisJobUnitTests {
             assert false //this method should not be executed
         }] as ExecutionHelperService
 
-        assert "Could not find a bed file for ${referenceGenome} and ExomeEnrichmentKit" == shouldFail(ProcessingException) {
+        assert "Could not find a bed file for ${referenceGenome} and LibraryPreparationKit" == shouldFail(ProcessingException) {
             job.execute()
         }
     }

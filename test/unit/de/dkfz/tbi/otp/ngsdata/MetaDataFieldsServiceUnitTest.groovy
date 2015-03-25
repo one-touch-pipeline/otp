@@ -9,8 +9,8 @@ import org.junit.*
 @TestFor(MetaDataFieldsService)
 @Build([
     AntibodyTarget,
-    ExomeEnrichmentKit,
-    ExomeEnrichmentKitSynonym,
+    LibraryPreparationKit,
+    LibraryPreparationKitSynonym,
     SeqCenter,
     SeqPlatform,
     SeqPlatformGroup,
@@ -26,52 +26,52 @@ class MetaDataFieldsServiceUnitTest {
         metaDataFieldsService = new MetaDataFieldsService()
     }
 
-    void test_listExomeEnrichmentKitWithAliases_oneDataWithoutSynonym() {
-        ExomeEnrichmentKit exomeEnrichmentKit = ExomeEnrichmentKit.build()
+    void test_listLibraryPreparationKitWithAliases_oneDataWithoutSynonym() {
+        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
 
-        def list = metaDataFieldsService.listExomeEnrichmentKitWithAliases()
-        assert [[exomeEnrichmentKit, []]] == list
+        def list = metaDataFieldsService.listLibraryPreparationKitWithAliases()
+        assert [[libraryPreparationKit, []]] == list
 
     }
 
-    void test_listExomeEnrichmentKitWithAliases_noData() {
-        def list = metaDataFieldsService.listExomeEnrichmentKitWithAliases()
+    void test_listLibraryPreparationKitWithAliases_noData() {
+        def list = metaDataFieldsService.listLibraryPreparationKitWithAliases()
         assert [] == list
     }
 
-    void test_listExomeEnrichmentKitWithAliases_oneDataWithOneSynonym() {
-        ExomeEnrichmentKit exomeEnrichmentKit = ExomeEnrichmentKit.build()
-        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = ExomeEnrichmentKitSynonym.build(
-                exomeEnrichmentKit: exomeEnrichmentKit
+    void test_listLibraryPreparationKitWithAliases_oneDataWithOneSynonym() {
+        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym = LibraryPreparationKitSynonym.build(
+                libraryPreparationKit: libraryPreparationKit
                 )
-        def list = metaDataFieldsService.listExomeEnrichmentKitWithAliases()
+        def list = metaDataFieldsService.listLibraryPreparationKitWithAliases()
 
-        assert [[exomeEnrichmentKit, [exomeEnrichmentKitSynonym]]] == list
+        assert [[libraryPreparationKit, [libraryPreparationKitSynonym]]] == list
     }
 
-    void test_listExomeEnrichmentKitWithAliases_multipleData() {
-        ExomeEnrichmentKit exomeEnrichmentKit1 = ExomeEnrichmentKit.build()
-        ExomeEnrichmentKit exomeEnrichmentKit2 = ExomeEnrichmentKit.build()
-        ExomeEnrichmentKit exomeEnrichmentKit3 = ExomeEnrichmentKit.build()
+    void test_listLibraryPreparationKitWithAliases_multipleData() {
+        LibraryPreparationKit libraryPreparationKit1 = LibraryPreparationKit.build()
+        LibraryPreparationKit libraryPreparationKit2 = LibraryPreparationKit.build()
+        LibraryPreparationKit libraryPreparationKit3 = LibraryPreparationKit.build()
 
-        def list = metaDataFieldsService.listExomeEnrichmentKitWithAliases()
-        assert [[exomeEnrichmentKit1, []], [exomeEnrichmentKit2, []], [exomeEnrichmentKit3,[]]] == list
+        def list = metaDataFieldsService.listLibraryPreparationKitWithAliases()
+        assert [[libraryPreparationKit1, []], [libraryPreparationKit2, []], [libraryPreparationKit3,[]]] == list
     }
 
-    void test_listExomeEnrichmentKitWithAliases_oneDataWithMultipleSynonym() {
-        ExomeEnrichmentKit exomeEnrichmentKit = ExomeEnrichmentKit.build()
-        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym1 = ExomeEnrichmentKitSynonym.build(
-                exomeEnrichmentKit: exomeEnrichmentKit
+    void test_listLibraryPreparationKitWithAliases_oneDataWithMultipleSynonym() {
+        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym1 = LibraryPreparationKitSynonym.build(
+                libraryPreparationKit: libraryPreparationKit
                 )
-        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym2 = ExomeEnrichmentKitSynonym.build(
-                exomeEnrichmentKit: exomeEnrichmentKit
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym2 = LibraryPreparationKitSynonym.build(
+                libraryPreparationKit: libraryPreparationKit
                 )
-        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym3 = ExomeEnrichmentKitSynonym.build(
-                exomeEnrichmentKit: exomeEnrichmentKit
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym3 = LibraryPreparationKitSynonym.build(
+                libraryPreparationKit: libraryPreparationKit
                 )
 
-        def list = metaDataFieldsService.listExomeEnrichmentKitWithAliases()
-        assert [[exomeEnrichmentKit, [exomeEnrichmentKitSynonym1, exomeEnrichmentKitSynonym2, exomeEnrichmentKitSynonym3]]] == list
+        def list = metaDataFieldsService.listLibraryPreparationKitWithAliases()
+        assert [[libraryPreparationKit, [libraryPreparationKitSynonym1, libraryPreparationKitSynonym2, libraryPreparationKitSynonym3]]] == list
     }
 
 

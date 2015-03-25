@@ -262,7 +262,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
     Run createDataForBuildFastqSeqTrack(String key, String valueRead1, String valueRead2) {
         SequencingKit.build(name: SEQUENCING_KIT)
         SeqType.build(name: SeqTypeNames.EXOME.seqTypeName, libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
-        ExomeEnrichmentKit.build(name: "LIB_PREP_KIT")
+        LibraryPreparationKit.build(name: "LIB_PREP_KIT")
         SoftwareToolIdentifier.build(name: "PIPELINE_VERSION")
         SampleIdentifier sampleIdentifier = SampleIdentifier.build(name: "SAMPLE_ID")
         Project project = sampleIdentifier.sample.project
@@ -319,7 +319,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     }
 
-    void testBuildFastqSeqTrack_ExomeSeqTrack_EnrichmentKitsAreDifferent_ThrowException() {
+    void testBuildFastqSeqTrack_ExomeSeqTrack_LibraryPreparationKitsAreDifferent_ThrowException() {
         Run run = createDataForBuildFastqSeqTrack("LIB_PREP_KIT", "LIB_PREP_KIT_1", "LIB_PREP_KIT_2")
         assert (TestCase.shouldFail(ProcessingException) {
             seqTrackService.buildFastqSeqTrack(run, LANE_NR)
@@ -508,7 +508,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     void testCreateSeqTrackExomeByKit() {
         Map data = createData()
-        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "ExomeEnrichmentKit")
+        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "LibraryPreparationKit")
         data.seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
 
@@ -523,12 +523,12 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertNotNull(seqTrack)
         assertEquals(ExomeSeqTrack.class, seqTrack.class)
         assertEquals(InformationReliability.KNOWN, seqTrack.kitInfoReliability)
-        assertEquals(data.exomeEnrichmentKit, seqTrack.exomeEnrichmentKit)
+        assertEquals(data.libraryPreparationKit, seqTrack.libraryPreparationKit)
     }
 
     void testCreateSeqTrackExomeByKitIdentifier() {
         Map data = createData()
-        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "ExomeEnrichmentKitSynonym")
+        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "LibraryPreparationKitSynonym")
         data.seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
 
@@ -543,7 +543,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertNotNull(seqTrack)
         assertEquals(ExomeSeqTrack.class, seqTrack.class)
         assertEquals(InformationReliability.KNOWN, seqTrack.kitInfoReliability)
-        assertEquals(data.exomeEnrichmentKit, seqTrack.exomeEnrichmentKit)
+        assertEquals(data.libraryPreparationKit, seqTrack.libraryPreparationKit)
     }
 
 
@@ -564,7 +564,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertNotNull(seqTrack)
         assertEquals(ExomeSeqTrack.class, seqTrack.class)
         assertEquals(InformationReliability.UNKNOWN_VERIFIED, seqTrack.kitInfoReliability)
-        assertNull(seqTrack.exomeEnrichmentKit)
+        assertNull(seqTrack.libraryPreparationKit)
     }
 
     void testCreateSeqTrackExomeInvalidByValueUnknownUnverified() {
@@ -624,7 +624,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     void testCreateSeqTrackExomeInvalidNoSample() {
         Map data = createData()
-        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "ExomeEnrichmentKit")
+        createMetaData(data.dataFile, MetaDataColumn.LIB_PREP_KIT, "LibraryPreparationKit")
         data.seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
 
@@ -640,7 +640,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         }
     }
 
-    void testCreateSeqTrackExomeNoEnrichmentkitColumnKey() {
+    void testCreateSeqTrackExomeNoLibraryPreperationKitColumnKey() {
         Map data = createData()
         data.seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
@@ -655,10 +655,10 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertNotNull(seqTrack)
         assertEquals(ExomeSeqTrack.class, seqTrack.class)
         assertEquals(InformationReliability.UNKNOWN_UNVERIFIED, seqTrack.kitInfoReliability)
-        assertNull(seqTrack.exomeEnrichmentKit)
+        assertNull(seqTrack.libraryPreparationKit)
     }
 
-    void testCreateSeqTrackExomeNoEnrichmentkitColumn() {
+    void testCreateSeqTrackExomeNoLibraryPreperationKitColumn() {
         Map data = createData()
         data.seqType.name = SeqTypeNames.EXOME.seqTypeName
         assertNotNull(data.seqType.save([flush: true]))
@@ -678,7 +678,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertNotNull(seqTrack)
         assertEquals(ExomeSeqTrack.class, seqTrack.class)
         assertEquals(InformationReliability.UNKNOWN_UNVERIFIED, seqTrack.kitInfoReliability)
-        assertNull(seqTrack.exomeEnrichmentKit)
+        assertNull(seqTrack.libraryPreparationKit)
     }
 
     void testCreateSeqTrackChipSeqAntibodyTargetWithUnknownValue() {
@@ -825,15 +825,15 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         )
         assertNotNull(dataFile.save([flush: true]))
 
-        ExomeEnrichmentKit exomeEnrichmentKit = new ExomeEnrichmentKit(
-                        name: "ExomeEnrichmentKit"
+        LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(
+                        name: "LibraryPreparationKit"
                         )
-        assertNotNull(exomeEnrichmentKit.save([flush: true]))
+        assertNotNull(libraryPreparationKit.save([flush: true]))
 
-        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = new ExomeEnrichmentKitSynonym(
-                        name: "ExomeEnrichmentKitSynonym",
-                        exomeEnrichmentKit: exomeEnrichmentKit)
-        assertNotNull(exomeEnrichmentKitSynonym.save([flush: true]))
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym = new LibraryPreparationKitSynonym(
+                        name: "LibraryPreparationKitSynonym",
+                        libraryPreparationKit: libraryPreparationKit)
+        assertNotNull(libraryPreparationKitSynonym.save([flush: true]))
 
         AntibodyTarget antibodyTarget = new AntibodyTarget(
                         name: ANTIBODY_TARGET_IDENTIFIER)
@@ -850,7 +850,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
             sample: sample,
             seqType: seqType,
             softwareTool: softwareTool,
-            exomeEnrichmentKit: exomeEnrichmentKit,
+            libraryPreparationKit: libraryPreparationKit,
             antibodyTarget: antibodyTarget,
             sequencingKit: sequencingKit,
         ]
@@ -1022,14 +1022,14 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                         )
         assertNotNull(metaDataEntry.save(flush: true))
 
-        ExomeEnrichmentKit exomeEnrichmentKit = testData.createEnrichmentKit("Agilent SureSelect V3")
+        LibraryPreparationKit libraryPreparationKit = testData.createLibraryPreparationKit("Agilent SureSelect V3")
 
         SeqTrackBuilder seqTrackBuilder = new SeqTrackBuilder(lane, testData.run, testData.sample, testData.seqType, testData.seqPlatform, testData.softwareTool)
 
-        assertNull(seqTrackBuilder.exomeEnrichmentKit)
+        assertNull(seqTrackBuilder.libraryPreparationKit)
         assertEquals(InformationReliability.UNKNOWN_UNVERIFIED, seqTrackBuilder.informationReliability)
         seqTrackService.annotateSeqTrackForExome(testData.dataFile, seqTrackBuilder, testData.run, testData.sample)
-        assertEquals(exomeEnrichmentKit, seqTrackBuilder.exomeEnrichmentKit)
+        assertEquals(libraryPreparationKit, seqTrackBuilder.libraryPreparationKit)
         assertEquals(InformationReliability.KNOWN, seqTrackBuilder.informationReliability)
     }
 

@@ -16,7 +16,7 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
     List<File> directories = []
     List<File> bedFiles = []
 
-    private final static String SCRIPT_PATH = "scripts/ExomeEnrichmentKit/LoadBedFiles.groovy"
+    private final static String SCRIPT_PATH = "scripts/LibraryPreparationKit/LoadBedFiles.groovy"
     private final static String REFERENCE_GENOME_PATH = "/tmp/reference_genomes/"
     private final static String TARGET_REGIONS_PATH = "targetRegions"
     private final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
@@ -117,9 +117,9 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
                 entry.save(flush: true)
             }
 
-            ExomeEnrichmentKit existingKit = ExomeEnrichmentKit.findByName(input.kitName)
+            LibraryPreparationKit existingKit = LibraryPreparationKit.findByName(input.kitName)
             if (!existingKit) {
-                ExomeEnrichmentKit kit = new ExomeEnrichmentKit(
+                LibraryPreparationKit kit = new LibraryPreparationKit(
                                 name: input.kitName
                                 )
                 kit.save(flush: true)
@@ -159,7 +159,7 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
 
     @Test(expected = IllegalArgumentException)
     void testNoKitExists() {
-        ExomeEnrichmentKit kit = ExomeEnrichmentKit.list().first()
+        LibraryPreparationKit kit = LibraryPreparationKit.list().first()
         kit.name = "DOES_NOT_EXIST"
         kit.save(flush: true)
         run(SCRIPT_PATH)

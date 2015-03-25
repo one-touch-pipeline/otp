@@ -76,10 +76,10 @@ class ExecuteBamFileQaAnalysisJob extends AbstractJobImpl {
         boolean isExonePaired = (seqType.name == SeqTypeNames.EXOME.seqTypeName && seqType.libraryLayout == 'PAIRED')
         if (isExonePaired) {
             ReferenceGenome referenceGenome = pass.referenceGenome
-            ExomeEnrichmentKit exomeEnrichmentKit = processedBamFileService.exomeEnrichmentKit(processedBamFile)
-            BedFile bedFile = BedFile.findByReferenceGenomeAndExomeEnrichmentKit(referenceGenome, exomeEnrichmentKit)
+            LibraryPreparationKit libraryPreparationKit = processedBamFileService.libraryPreparationKit(processedBamFile)
+            BedFile bedFile = BedFile.findByReferenceGenomeAndLibraryPreparationKit(referenceGenome, libraryPreparationKit)
             if (!bedFile) {
-                throw new ProcessingException("Could not find a bed file for ${referenceGenome} and ${exomeEnrichmentKit}")
+                throw new ProcessingException("Could not find a bed file for ${referenceGenome} and ${libraryPreparationKit}")
             }
             String bedFilePath = bedFileService.filePath(realm, bedFile)
             String refGenMetaInfoFilePath = referenceGenomeService.referenceGenomeMetaInformationPath(realm, referenceGenome)

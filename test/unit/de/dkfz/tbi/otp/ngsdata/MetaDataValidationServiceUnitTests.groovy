@@ -9,10 +9,10 @@ import de.dkfz.tbi.otp.utils.ReferencedClass
 
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(MetaDataValidationService)
-@Mock([MetaDataValidationService, ExomeEnrichmentKitService, SequencingKitService,
+@Mock([MetaDataValidationService, LibraryPreparationKitService, SequencingKitService,
     ReferencedClass, ChangeLog,
     Project, SeqPlatform, SeqCenter, Run,DataFile, MetaDataKey, MetaDataEntry,
-    ExomeEnrichmentKit, ExomeEnrichmentKitSynonym,
+    LibraryPreparationKit, LibraryPreparationKitSynonym,
     SequencingKit, SequencingKitSynonym])
 class MetaDataValidationServiceUnitTests {
 
@@ -31,9 +31,9 @@ class MetaDataValidationServiceUnitTests {
 
     final static String SEQUENCING_TYPE = "SEQUENCING_TYPE"
 
-    final static String EXOME_ENRICHMENT_KIT ="ExomeEnrichmentKit"
+    final static String LIBRARY_PREPARATION_KIT ="LibraryPreparationKit"
 
-    final static String EXOME_ENRICHMENT_KIT_SYNONYM ="ExomeEnrichmentKitSynonym"
+    final static String LIBRARY_PREPARATION_KIT_SYNONYM ="LibraryPreparationKitSynonym"
 
     final static String SEQUENCING_KIT = "SequencingKit"
 
@@ -47,7 +47,7 @@ class MetaDataValidationServiceUnitTests {
     @Before
     public void setUp() throws Exception {
         metaDataValidationService = new MetaDataValidationService([
-            exomeEnrichmentKitService: new ExomeEnrichmentKitService()
+            libraryPreparationKitService: new LibraryPreparationKitService()
         ])
         metaDataValidationService.sequencingKitService = new SequencingKitService()
     }
@@ -170,48 +170,48 @@ class MetaDataValidationServiceUnitTests {
         assertEquals("1", getMetaDataEntryValue(dataFile, LANE_NO))
     }
 
-    void testCheckExomeEnrichmentKitForExomeSeqType_UsingExomeEnrichmentKit() {
-        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = createExomeEnrichmentKitSynonym()
-        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): EXOME_ENRICHMENT_KIT, (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
-        assertEquals(Boolean.TRUE, metaDataValidationService.checkExomeEnrichmentKitForExomeSeqType(map[(LIB_PREP_KIT)]))
+    void testCheckLibraryPreparationKitForExomeSeqType_UsingLibraryPreparationKit() {
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): LIBRARY_PREPARATION_KIT, (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
+        assertEquals(Boolean.TRUE, metaDataValidationService.checkLibraryPreparationKitForExomeSeqType(map[(LIB_PREP_KIT)]))
     }
 
-    void testCheckExomeEnrichmentKitForExomeSeqType_UsingExomeEnrichmentKitSynonym() {
-        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = createExomeEnrichmentKitSynonym()
-        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): EXOME_ENRICHMENT_KIT_SYNONYM, (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
-        assertEquals(Boolean.TRUE, metaDataValidationService.checkExomeEnrichmentKitForExomeSeqType(map[(LIB_PREP_KIT)]))
+    void testCheckLibraryPreparationKitForExomeSeqType_UsingLibraryPreparationKitSynonym() {
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): LIBRARY_PREPARATION_KIT_SYNONYM, (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
+        assertEquals(Boolean.TRUE, metaDataValidationService.checkLibraryPreparationKitForExomeSeqType(map[(LIB_PREP_KIT)]))
     }
 
-    void testCheckExomeEnrichmentKitForExomeSeqType_UsingUNKNOWN() {
-        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = createExomeEnrichmentKitSynonym()
+    void testCheckLibraryPreparationKitForExomeSeqType_UsingUNKNOWN() {
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE, (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
-        assertEquals(Boolean.TRUE, metaDataValidationService.checkExomeEnrichmentKitForExomeSeqType(map[(LIB_PREP_KIT)]))
+        assertEquals(Boolean.TRUE, metaDataValidationService.checkLibraryPreparationKitForExomeSeqType(map[(LIB_PREP_KIT)]))
     }
 
-    void testCheckExomeEnrichmentKitForExomeSeqType_NotValidEntry() {
-        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = createExomeEnrichmentKitSynonym()
+    void testCheckLibraryPreparationKitForExomeSeqType_NotValidEntry() {
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): "something", (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
-        assertEquals(Boolean.FALSE, metaDataValidationService.checkExomeEnrichmentKitForExomeSeqType(map[(LIB_PREP_KIT)]))
+        assertEquals(Boolean.FALSE, metaDataValidationService.checkLibraryPreparationKitForExomeSeqType(map[(LIB_PREP_KIT)]))
     }
 
-    void testCheckExomeEnrichmentKitForExomeSeqType_NotExome() {
-        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = createExomeEnrichmentKitSynonym()
+    void testCheckLibraryPreparationKitForExomeSeqType_NotExome() {
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): "something", (SEQUENCING_TYPE): "NOT_EXOME"])
-        assertEquals(null, metaDataValidationService.checkExomeEnrichmentKitForExomeSeqType(map[(LIB_PREP_KIT)]))
+        assertEquals(null, metaDataValidationService.checkLibraryPreparationKitForExomeSeqType(map[(LIB_PREP_KIT)]))
     }
 
-    void testCheckExomeEnrichmentKitForExomeSeqType_NoSequenceType() {
-        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = createExomeEnrichmentKitSynonym()
+    void testCheckLibraryPreparationKitForExomeSeqType_NoSequenceType() {
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): "something"])
         shouldFail(NullPointerException.class) {
-            metaDataValidationService.checkExomeEnrichmentKitForExomeSeqType(map[(LIB_PREP_KIT)])
+            metaDataValidationService.checkLibraryPreparationKitForExomeSeqType(map[(LIB_PREP_KIT)])
         }
     }
 
     void testValidateMetaDataEntryForLIB_PREP_KIT() {
         Run run = createRun()
-        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = createExomeEnrichmentKitSynonym()
-        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): EXOME_ENRICHMENT_KIT, (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
+        Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): LIBRARY_PREPARATION_KIT, (SEQUENCING_TYPE): SeqTypeNames.EXOME.seqTypeName])
         assertTrue(metaDataValidationService.validateMetaDataEntry(run, map[(LIB_PREP_KIT)]))
     }
 
@@ -284,16 +284,16 @@ class MetaDataValidationServiceUnitTests {
         return run
     }
 
-    private ExomeEnrichmentKitSynonym createExomeEnrichmentKitSynonym() {
-        ExomeEnrichmentKit exomeEnrichmentKit = new ExomeEnrichmentKit(
-                        name: EXOME_ENRICHMENT_KIT
+    private LibraryPreparationKitSynonym createLibraryPreparationKitSynonym() {
+        LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(
+                        name: LIBRARY_PREPARATION_KIT
                         )
-        assertNotNull(exomeEnrichmentKit.save([flush: true]))
-        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = new ExomeEnrichmentKitSynonym(
-                        name: EXOME_ENRICHMENT_KIT_SYNONYM,
-                        exomeEnrichmentKit: exomeEnrichmentKit)
-        assertNotNull(exomeEnrichmentKitSynonym.save([flush: true]))
-        return exomeEnrichmentKitSynonym
+        assertNotNull(libraryPreparationKit.save([flush: true]))
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym = new LibraryPreparationKitSynonym(
+                        name: LIBRARY_PREPARATION_KIT_SYNONYM,
+                        libraryPreparationKit: libraryPreparationKit)
+        assertNotNull(libraryPreparationKitSynonym.save([flush: true]))
+        return libraryPreparationKitSynonym
     }
 
     private SequencingKitSynonym createSequencingKitSynonym() {

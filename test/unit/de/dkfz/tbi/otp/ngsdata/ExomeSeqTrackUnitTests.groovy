@@ -30,67 +30,67 @@ class ExomeSeqTrackUnitTests {
         exomeSeqTrack = null
     }
 
-    void testValidateWithKitInfoReliabilityIsKnownAndGivenExomeEnrichmentKit() {
+    void testValidateWithKitInfoReliabilityIsKnownAndGivenLibraryPreparationKit() {
         exomeSeqTrack.kitInfoReliability= InformationReliability.KNOWN
-        exomeSeqTrack.exomeEnrichmentKit= new ExomeEnrichmentKit()
+        exomeSeqTrack.libraryPreparationKit= new LibraryPreparationKit()
         assertTrue(exomeSeqTrack.validate())
     }
 
-    void testValidateWithKitInfoReliabilityIsInferredAndGivenExomeEnrichmentKit() {
+    void testValidateWithKitInfoReliabilityIsInferredAndGivenLibraryPreparationKit() {
         exomeSeqTrack.kitInfoReliability= InformationReliability.INFERRED
-        exomeSeqTrack.exomeEnrichmentKit= new ExomeEnrichmentKit()
+        exomeSeqTrack.libraryPreparationKit= new LibraryPreparationKit()
         assertTrue(exomeSeqTrack.validate())
     }
 
-    void testValidateWithKitInfoReliabilityIsKnownAndNoExomeEnrichmentKit() {
+    void testValidateWithKitInfoReliabilityIsKnownAndNoLibraryPreparationKit() {
         exomeSeqTrack.kitInfoReliability= InformationReliability.KNOWN
-        exomeSeqTrack.exomeEnrichmentKit = null
+        exomeSeqTrack.libraryPreparationKit = null
         assertFalse(exomeSeqTrack.validate())
         assertEquals(1, exomeSeqTrack.errors.errorCount)
         assertEquals("de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack", exomeSeqTrack.errors.allErrors[0].objectName)
-        assertEquals("exomeEnrichmentKit", exomeSeqTrack.errors.allErrors[0].field)
+        assertEquals("libraryPreparationKit", exomeSeqTrack.errors.allErrors[0].field)
         assertNull(exomeSeqTrack.errors.allErrors[0].rejectedValue)
     }
 
-    void testValidateWithKitInfoReliabilityIsInferredAndNoExomeEnrichmentKit() {
+    void testValidateWithKitInfoReliabilityIsInferredAndNoLibraryPreparationKit() {
         exomeSeqTrack.kitInfoReliability= InformationReliability.INFERRED
-        exomeSeqTrack.exomeEnrichmentKit = null
+        exomeSeqTrack.libraryPreparationKit = null
         assertFalse(exomeSeqTrack.validate())
         assertEquals(1, exomeSeqTrack.errors.errorCount)
         assertEquals("de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack", exomeSeqTrack.errors.allErrors[0].objectName)
-        assertEquals("exomeEnrichmentKit", exomeSeqTrack.errors.allErrors[0].field)
+        assertEquals("libraryPreparationKit", exomeSeqTrack.errors.allErrors[0].field)
         assertNull(exomeSeqTrack.errors.allErrors[0].rejectedValue)
     }
 
-    void testValidateWithKitInfoReliabilityIsUnknownAndNoExomeEnrichmentKit() {
+    void testValidateWithKitInfoReliabilityIsUnknownAndNoLibraryPreparationKit() {
         exomeSeqTrack.kitInfoReliability= InformationReliability.UNKNOWN_VERIFIED
-        exomeSeqTrack.exomeEnrichmentKit = null
+        exomeSeqTrack.libraryPreparationKit = null
         assertTrue(exomeSeqTrack.validate())
     }
 
-    void testValidateWithKitInfoReliabilityIsUnknownAndGivenExomeEnrichmentKit() {
+    void testValidateWithKitInfoReliabilityIsUnknownAndGivenLibraryPreparationKit() {
         exomeSeqTrack.kitInfoReliability= InformationReliability.UNKNOWN_VERIFIED
-        exomeSeqTrack.exomeEnrichmentKit= new ExomeEnrichmentKit()
+        exomeSeqTrack.libraryPreparationKit= new LibraryPreparationKit()
         assertFalse(exomeSeqTrack.validate())
         assertEquals(1, exomeSeqTrack.errors.errorCount)
         assertEquals("de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack", exomeSeqTrack.errors.allErrors[0].objectName)
-        assertEquals("exomeEnrichmentKit", exomeSeqTrack.errors.allErrors[0].field)
+        assertEquals("libraryPreparationKit", exomeSeqTrack.errors.allErrors[0].field)
         assertNotNull(exomeSeqTrack.errors.allErrors[0].rejectedValue)
     }
 
-    void testValidateWithKitInfoReliabilityIsUnknownUnverifiedAndNoExomeEnrichmentKit() {
+    void testValidateWithKitInfoReliabilityIsUnknownUnverifiedAndNoLibraryPreparationKit() {
         exomeSeqTrack.kitInfoReliability= InformationReliability.UNKNOWN_UNVERIFIED
-        exomeSeqTrack.exomeEnrichmentKit = null
+        exomeSeqTrack.libraryPreparationKit = null
         assertTrue(exomeSeqTrack.validate())
     }
 
-    void testValidateWithKitInfoReliabilityIsUnknownUnverifiedAndGivenExomeEnrichmentKit() {
+    void testValidateWithKitInfoReliabilityIsUnknownUnverifiedAndGivenLibraryPreparationKit() {
         exomeSeqTrack.kitInfoReliability= InformationReliability.UNKNOWN_UNVERIFIED
-        exomeSeqTrack.exomeEnrichmentKit= new ExomeEnrichmentKit()
+        exomeSeqTrack.libraryPreparationKit= new LibraryPreparationKit()
         assertFalse(exomeSeqTrack.validate())
         assertEquals(1, exomeSeqTrack.errors.errorCount)
         assertEquals("de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack", exomeSeqTrack.errors.allErrors[0].objectName)
-        assertEquals("exomeEnrichmentKit", exomeSeqTrack.errors.allErrors[0].field)
+        assertEquals("libraryPreparationKit", exomeSeqTrack.errors.allErrors[0].field)
         assertNotNull(exomeSeqTrack.errors.allErrors[0].rejectedValue)
     }
 }

@@ -7,10 +7,10 @@ import org.junit.*
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 
 @TestMixin(GrailsUnitTestMixin)
-@TestFor(ExomeEnrichmentKitService)
+@TestFor(LibraryPreparationKitService)
 @Build([
     DataFile,
-    ExomeEnrichmentKitSynonym,
+    LibraryPreparationKitSynonym,
     ExomeSeqTrack,
     FileType,
     Realm,
@@ -20,16 +20,16 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
     SeqPlatform,
     SeqPlatformGroup,
 ])
-class ExomeEnrichmentKitServiceUnitTests {
+class LibraryPreparationKitServiceUnitTests {
 
-    ExomeEnrichmentKitService exomeEnrichmentKitService
+    LibraryPreparationKitService libraryPreparationKitService
     TestData testData
 
-    final static String EXOME_ENRICHMENT_KIT ="ExomeEnrichmentKit"
+    final static String LIBRARY_PREPARATION_KIT ="LibraryPreparationKit"
 
-    final static String EXOME_ENRICHMENT_KIT_NAME = "ExomeEnrichmentKitName"
+    final static String LIBRARY_PREPARATION_KIT_NAME = "LibraryPreparationKitName"
 
-    final static String DIFFERENT_EXOME_ENRICHMENT_KIT_NAME = "DifferentExomeEnrichmentKitName"
+    final static String DIFFERENT_LIBRARY_PREPARATION_KIT_NAME = "DifferentLibraryPreparationKitName"
 
     @Before
     public void setUp() throws Exception {
@@ -37,38 +37,38 @@ class ExomeEnrichmentKitServiceUnitTests {
         testData.createObjects()
         testData.seqTrack.seqType = testData.exomeSeqType
         assertNotNull(testData.seqTrack.save(flush: true))
-        exomeEnrichmentKitService = new ExomeEnrichmentKitService()
+        libraryPreparationKitService = new LibraryPreparationKitService()
     }
 
 
     @After
     public void tearDown() throws Exception {
-        exomeEnrichmentKitService = null
+        libraryPreparationKitService = null
         testData = null
     }
 
 
-    void testFindExomeEnrichmentKitByNameOrAliasUsingKitName() {
-        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = createExomeEnrichmentKitSynonym()
-        assertEquals(exomeEnrichmentKitSynonym.exomeEnrichmentKit, exomeEnrichmentKitService.findExomeEnrichmentKitByNameOrAlias(EXOME_ENRICHMENT_KIT))
+    void testFindLibraryPreparationKitByNameOrAliasUsingKitName() {
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
+        assertEquals(libraryPreparationKitSynonym.libraryPreparationKit, libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(LIBRARY_PREPARATION_KIT))
     }
 
 
-    void testFindExomeEnrichmentKitByNameOrAliasUsingAliasName() {
-        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = createExomeEnrichmentKitSynonym()
-        assertEquals(exomeEnrichmentKitSynonym.exomeEnrichmentKit, exomeEnrichmentKitService.findExomeEnrichmentKitByNameOrAlias(EXOME_ENRICHMENT_KIT_NAME))
+    void testFindLibraryPreparationKitByNameOrAliasUsingAliasName() {
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
+        assertEquals(libraryPreparationKitSynonym.libraryPreparationKit, libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(LIBRARY_PREPARATION_KIT_NAME))
     }
 
 
-    void testFindExomeEnrichmentKitByNameOrAliasUsingUnknownName() {
-        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = createExomeEnrichmentKitSynonym()
-        assertNull(exomeEnrichmentKitService.findExomeEnrichmentKitByNameOrAlias("UNKNOWN"))
+    void testFindLibraryPreparationKitByNameOrAliasUsingUnknownName() {
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
+        assertNull(libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias("UNKNOWN"))
     }
 
 
-    void testFindExomeEnrichmentKitByNameOrAliasUsingNull() {
-        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = createExomeEnrichmentKitSynonym()
-        shouldFail(IllegalArgumentException) { exomeEnrichmentKitService.findExomeEnrichmentKitByNameOrAlias(null) }
+    void testFindLibraryPreparationKitByNameOrAliasUsingNull() {
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
+        shouldFail(IllegalArgumentException) { libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(null) }
     }
 
 
@@ -76,74 +76,74 @@ class ExomeEnrichmentKitServiceUnitTests {
 
 
     @Test(expected = IllegalArgumentException)
-    void testValidateExomeEnrichmentKitKitIsNull() {
-        exomeEnrichmentKitService.validateExomeEnrichmentKit(testData.sample, null)
+    void testValidateLibraryPreparationKitKitIsNull() {
+        libraryPreparationKitService.validateLibraryPreparationKit(testData.sample, null)
     }
 
 
     @Test(expected = IllegalArgumentException)
-    void testValidateExomeEnrichmentKitSampleIsNull() {
-        exomeEnrichmentKitService.validateExomeEnrichmentKit(null, new ExomeEnrichmentKit())
+    void testValidateLibraryPreparationKitSampleIsNull() {
+        libraryPreparationKitService.validateLibraryPreparationKit(null, new LibraryPreparationKit())
     }
 
 
     @Test
-    void testValidateExomeEnrichmentKitNoSeqTrackInSample() {
+    void testValidateLibraryPreparationKitNoSeqTrackInSample() {
         testData.seqTrack.sample = null
-        exomeEnrichmentKitService.validateExomeEnrichmentKit(testData.sample, new ExomeEnrichmentKit())
+        libraryPreparationKitService.validateLibraryPreparationKit(testData.sample, new LibraryPreparationKit())
     }
 
 
     @Test
-    void testValidateExomeEnrichmentKitOneSeqTrack() {
+    void testValidateLibraryPreparationKitOneSeqTrack() {
         testData.seqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
         assertNotNull(testData.seqType.save([flush: true]))
-        exomeEnrichmentKitService.validateExomeEnrichmentKit(testData.sample, new ExomeEnrichmentKit())
+        libraryPreparationKitService.validateLibraryPreparationKit(testData.sample, new LibraryPreparationKit())
     }
 
 
     @Test
-    void testValidateExomeEnrichmentKitOneExomeSeqTrackInSampleWithoutKit() {
+    void testValidateLibraryPreparationKitOneExomeSeqTrackInSampleWithoutKit() {
         testData.seqTrack.sample = null
         ExomeSeqTrack exomeSeqTrack = testData.createExomeSeqTrack(testData.run)
-        exomeEnrichmentKitService.validateExomeEnrichmentKit(testData.sample, new ExomeEnrichmentKit())
+        libraryPreparationKitService.validateLibraryPreparationKit(testData.sample, new LibraryPreparationKit())
     }
 
 
     @Test
-    void testValidateExomeEnrichmentKitOneExomeSeqTrackInSampleWithSameKit() {
+    void testValidateLibraryPreparationKitOneExomeSeqTrackInSampleWithSameKit() {
         testData.seqTrack.sample = null
         ExomeSeqTrack exomeSeqTrack = testData.createExomeSeqTrack(testData.run)
-        ExomeEnrichmentKit sameExomeEnrichmentKit = testData.createEnrichmentKit(EXOME_ENRICHMENT_KIT_NAME)
-        testData.addKitToExomeSeqTrack(exomeSeqTrack, sameExomeEnrichmentKit)
-        exomeEnrichmentKitService.validateExomeEnrichmentKit(testData.sample, sameExomeEnrichmentKit)
+        LibraryPreparationKit sameLibraryPreparationKit = testData.createLibraryPreparationKit(LIBRARY_PREPARATION_KIT_NAME)
+        testData.addKitToExomeSeqTrack(exomeSeqTrack, sameLibraryPreparationKit)
+        libraryPreparationKitService.validateLibraryPreparationKit(testData.sample, sameLibraryPreparationKit)
     }
 
 
     @Test(expected = ProcessingException)
-    void testValidateExomeEnrichmentKitOneExomeSeqTrackInSampleComparedWithDifferentKit() {
+    void testValidateLibraryPreparationKitOneExomeSeqTrackInSampleComparedWithDifferentKit() {
         testData.seqTrack.sample = null
         ExomeSeqTrack exomeSeqTrack = testData.createExomeSeqTrack(testData.run)
-        ExomeEnrichmentKit exomeEnrichmentKit1 = testData.createEnrichmentKit(EXOME_ENRICHMENT_KIT_NAME)
-        ExomeEnrichmentKit exomeEnrichmentKit2 = testData.createEnrichmentKit(DIFFERENT_EXOME_ENRICHMENT_KIT_NAME)
-        testData.addKitToExomeSeqTrack(exomeSeqTrack, exomeEnrichmentKit1)
-        exomeEnrichmentKitService.validateExomeEnrichmentKit(testData.sample, exomeEnrichmentKit2)
+        LibraryPreparationKit libraryPreparationKit1 = testData.createLibraryPreparationKit(LIBRARY_PREPARATION_KIT_NAME)
+        LibraryPreparationKit libraryPreparationKit2 = testData.createLibraryPreparationKit(DIFFERENT_LIBRARY_PREPARATION_KIT_NAME)
+        testData.addKitToExomeSeqTrack(exomeSeqTrack, libraryPreparationKit1)
+        libraryPreparationKitService.validateLibraryPreparationKit(testData.sample, libraryPreparationKit2)
     }
 
 
     @Test(expected = ProcessingException)
-    void testValidateExomeEnrichmentKitTwoExomeSeqTrackInSampleComparedWithDifferentKit() {
+    void testValidateLibraryPreparationKitTwoExomeSeqTrackInSampleComparedWithDifferentKit() {
         testData.seqTrack.sample = null
-        ExomeEnrichmentKit exomeEnrichmentKit1 = testData.createEnrichmentKit(EXOME_ENRICHMENT_KIT_NAME)
-        ExomeEnrichmentKit exomeEnrichmentKit2 = testData.createEnrichmentKit(DIFFERENT_EXOME_ENRICHMENT_KIT_NAME)
+        LibraryPreparationKit libraryPreparationKit1 = testData.createLibraryPreparationKit(LIBRARY_PREPARATION_KIT_NAME)
+        LibraryPreparationKit libraryPreparationKit2 = testData.createLibraryPreparationKit(DIFFERENT_LIBRARY_PREPARATION_KIT_NAME)
         // create an inconsistent state. This _should_ never be in the database
         // but we want to see if this is detected
         ExomeSeqTrack exomeSeqTrack1 = testData.createExomeSeqTrack(testData.run)
-        testData.addKitToExomeSeqTrack(exomeSeqTrack1, exomeEnrichmentKit1)
+        testData.addKitToExomeSeqTrack(exomeSeqTrack1, libraryPreparationKit1)
         ExomeSeqTrack exomeSeqTrack2 = testData.createExomeSeqTrack(testData.run)
-        testData.addKitToExomeSeqTrack(exomeSeqTrack2, exomeEnrichmentKit2)
+        testData.addKitToExomeSeqTrack(exomeSeqTrack2, libraryPreparationKit2)
         // Even though kit2 already exists in the "DB", it is still invalid because it conflicts with Kit1
-        exomeEnrichmentKitService.validateExomeEnrichmentKit(testData.sample, exomeEnrichmentKit2)
+        libraryPreparationKitService.validateLibraryPreparationKit(testData.sample, libraryPreparationKit2)
     }
 
 
@@ -152,7 +152,7 @@ class ExomeEnrichmentKitServiceUnitTests {
         testData.seqTrack.seqType = testData.seqType
         assertNotNull(testData.seqTrack.save(flush: true))
 
-        exomeEnrichmentKitService.inferKitInformationForOldLaneFromNewLane(testData.runSegment)
+        libraryPreparationKitService.inferKitInformationForOldLaneFromNewLane(testData.runSegment)
     }
 
 
@@ -161,12 +161,12 @@ class ExomeEnrichmentKitServiceUnitTests {
         testData.seqTrack.sample = null
         testData.dataFile.seqTrack = null
         ExomeSeqTrack exomeSeqTrack = testData.createExomeSeqTrack(testData.run)
-        ExomeEnrichmentKit exomeEnrichmentKit = testData.createEnrichmentKit(EXOME_ENRICHMENT_KIT_NAME)
-        testData.addKitToExomeSeqTrack(exomeSeqTrack, exomeEnrichmentKit)
+        LibraryPreparationKit libraryPreparationKit = testData.createLibraryPreparationKit(LIBRARY_PREPARATION_KIT_NAME)
+        testData.addKitToExomeSeqTrack(exomeSeqTrack, libraryPreparationKit)
         testData.dataFile.seqTrack = exomeSeqTrack
         assertNotNull(testData.dataFile.seqTrack.save(flush: true))
 
-        exomeEnrichmentKitService.inferKitInformationForOldLaneFromNewLane(testData.runSegment)
+        libraryPreparationKitService.inferKitInformationForOldLaneFromNewLane(testData.runSegment)
     }
 
 
@@ -179,53 +179,53 @@ class ExomeEnrichmentKitServiceUnitTests {
         RunSegment runSegment = testData.createRunSegment(run)
         assertNotNull(runSegment.save(flush: true))
         ExomeSeqTrack exomeSeqTrack = testData.createExomeSeqTrack(testData.run)
-        ExomeEnrichmentKit exomeEnrichmentKit = testData.createEnrichmentKit(EXOME_ENRICHMENT_KIT_NAME)
-        testData.addKitToExomeSeqTrack(exomeSeqTrack, exomeEnrichmentKit)
+        LibraryPreparationKit libraryPreparationKit = testData.createLibraryPreparationKit(LIBRARY_PREPARATION_KIT_NAME)
+        testData.addKitToExomeSeqTrack(exomeSeqTrack, libraryPreparationKit)
         DataFile dataFile = testData.createDataFile(exomeSeqTrack, runSegment)
         assertNotNull(dataFile.save(flush: true))
 
-        exomeEnrichmentKitService.inferKitInformationForOldLaneFromNewLane(runSegment)
+        libraryPreparationKitService.inferKitInformationForOldLaneFromNewLane(runSegment)
     }
 
 
     @Test
     void testInferInformationForOldLaneFromNewLaneNewExomeSeqTrackAndOldExomeSeqTrackWithSameKitInSample() {
         ExomeSeqTrack exomeSeqTrack1 = testData.createExomeSeqTrack(testData.run)
-        ExomeEnrichmentKit exomeEnrichmentKit = testData.createEnrichmentKit(EXOME_ENRICHMENT_KIT_NAME)
-        testData.addKitToExomeSeqTrack(exomeSeqTrack1, exomeEnrichmentKit)
+        LibraryPreparationKit libraryPreparationKit = testData.createLibraryPreparationKit(LIBRARY_PREPARATION_KIT_NAME)
+        testData.addKitToExomeSeqTrack(exomeSeqTrack1, libraryPreparationKit)
         testData.seqTrack = exomeSeqTrack1
         assertNotNull(testData.seqTrack.save(flush: true))
 
         ExomeSeqTrack exomeSeqTrack2 = testData.createExomeSeqTrack(testData.run)
-        testData.addKitToExomeSeqTrack(exomeSeqTrack2, exomeEnrichmentKit)
+        testData.addKitToExomeSeqTrack(exomeSeqTrack2, libraryPreparationKit)
         Run run = testData.createRun("testname2")
         RunSegment runSegment = testData.createRunSegment(run)
         assertNotNull(runSegment.save(flush: true))
         DataFile dataFile = testData.createDataFile(exomeSeqTrack2, runSegment)
         assertNotNull(dataFile.save(flush: true))
 
-        exomeEnrichmentKitService.inferKitInformationForOldLaneFromNewLane(runSegment)
+        libraryPreparationKitService.inferKitInformationForOldLaneFromNewLane(runSegment)
     }
 
 
     @Test(expected = IllegalArgumentException)
     void testInferInformationForOldLaneFromNewLaneNewExomeSeqTrackAndOldExomeSeqTrackWithDiffKitInSample() {
         ExomeSeqTrack exomeSeqTrack1 = testData.createExomeSeqTrack(testData.run)
-        ExomeEnrichmentKit exomeEnrichmentKit = testData.createEnrichmentKit(EXOME_ENRICHMENT_KIT_NAME)
-        testData.addKitToExomeSeqTrack(exomeSeqTrack1, exomeEnrichmentKit)
+        LibraryPreparationKit libraryPreparationKit = testData.createLibraryPreparationKit(LIBRARY_PREPARATION_KIT_NAME)
+        testData.addKitToExomeSeqTrack(exomeSeqTrack1, libraryPreparationKit)
         testData.seqTrack = exomeSeqTrack1
         assertNotNull(testData.seqTrack.save(flush: true))
 
         ExomeSeqTrack exomeSeqTrack2 = testData.createExomeSeqTrack(testData.run)
-        ExomeEnrichmentKit exomeEnrichmentKit1 = testData.createEnrichmentKit(DIFFERENT_EXOME_ENRICHMENT_KIT_NAME)
-        testData.addKitToExomeSeqTrack(exomeSeqTrack2, exomeEnrichmentKit1)
+        LibraryPreparationKit libraryPreparationKit1 = testData.createLibraryPreparationKit(DIFFERENT_LIBRARY_PREPARATION_KIT_NAME)
+        testData.addKitToExomeSeqTrack(exomeSeqTrack2, libraryPreparationKit1)
         Run run = testData.createRun("testname2")
         RunSegment runSegment = testData.createRunSegment(run)
         assertNotNull(runSegment.save(flush: true))
         DataFile dataFile = testData.createDataFile(exomeSeqTrack2, runSegment)
         assertNotNull(dataFile.save(flush: true))
 
-        exomeEnrichmentKitService.inferKitInformationForOldLaneFromNewLane(runSegment)
+        libraryPreparationKitService.inferKitInformationForOldLaneFromNewLane(runSegment)
     }
 
 
@@ -236,17 +236,17 @@ class ExomeEnrichmentKitServiceUnitTests {
         assertNotNull(testData.seqTrack.save(flush: true))
 
         ExomeSeqTrack exomeSeqTrack2 = testData.createExomeSeqTrack(testData.run)
-        ExomeEnrichmentKit exomeEnrichmentKit = testData.createEnrichmentKit(EXOME_ENRICHMENT_KIT_NAME)
-        testData.addKitToExomeSeqTrack(exomeSeqTrack2, exomeEnrichmentKit)
+        LibraryPreparationKit libraryPreparationKit = testData.createLibraryPreparationKit(LIBRARY_PREPARATION_KIT_NAME)
+        testData.addKitToExomeSeqTrack(exomeSeqTrack2, libraryPreparationKit)
         Run run = testData.createRun("testname2")
         RunSegment runSegment = testData.createRunSegment(run)
         assertNotNull(runSegment.save(flush: true))
         DataFile dataFile = testData.createDataFile(exomeSeqTrack2, runSegment)
         assertNotNull(dataFile.save(flush: true))
 
-        assertNull(exomeSeqTrack1.exomeEnrichmentKit)
-        exomeEnrichmentKitService.inferKitInformationForOldLaneFromNewLane(runSegment)
-        assertEquals(exomeEnrichmentKit, exomeSeqTrack1.exomeEnrichmentKit)
+        assertNull(exomeSeqTrack1.libraryPreparationKit)
+        libraryPreparationKitService.inferKitInformationForOldLaneFromNewLane(runSegment)
+        assertEquals(libraryPreparationKit, exomeSeqTrack1.libraryPreparationKit)
     }
 
 
@@ -257,7 +257,7 @@ class ExomeEnrichmentKitServiceUnitTests {
         testData.dataFile.seqTrack = exomeSeqTrack
         assertNotNull(testData.dataFile.seqTrack.save(flush: true))
 
-        exomeEnrichmentKitService.inferKitInformationForOldLaneFromNewLane(testData.runSegment)
+        libraryPreparationKitService.inferKitInformationForOldLaneFromNewLane(testData.runSegment)
     }
 
 
@@ -274,7 +274,7 @@ class ExomeEnrichmentKitServiceUnitTests {
         DataFile dataFile = testData.createDataFile(exomeSeqTrack2, runSegment)
         assertNotNull(dataFile.save(flush: true))
 
-        exomeEnrichmentKitService.inferKitInformationForOldLaneFromNewLane(runSegment)
+        libraryPreparationKitService.inferKitInformationForOldLaneFromNewLane(runSegment)
     }
 
 
@@ -283,8 +283,8 @@ class ExomeEnrichmentKitServiceUnitTests {
         ExomeSeqTrack exomeSeqTrack1 = testData.createExomeSeqTrack(testData.run)
         testData.seqTrack = exomeSeqTrack1
         assertNotNull(testData.seqTrack.save(flush: true))
-        ExomeEnrichmentKit exomeEnrichmentKit = testData.createEnrichmentKit(EXOME_ENRICHMENT_KIT_NAME)
-        testData.addKitToExomeSeqTrack(exomeSeqTrack1, exomeEnrichmentKit)
+        LibraryPreparationKit libraryPreparationKit = testData.createLibraryPreparationKit(LIBRARY_PREPARATION_KIT_NAME)
+        testData.addKitToExomeSeqTrack(exomeSeqTrack1, libraryPreparationKit)
 
         ExomeSeqTrack exomeSeqTrack2 = testData.createExomeSeqTrack(testData.run)
         Run run = testData.createRun("testname2")
@@ -293,9 +293,9 @@ class ExomeEnrichmentKitServiceUnitTests {
         DataFile dataFile = testData.createDataFile(exomeSeqTrack2, runSegment)
         assertNotNull(dataFile.save(flush: true))
 
-        assertNull(exomeSeqTrack2.exomeEnrichmentKit)
-        exomeEnrichmentKitService.inferKitInformationForOldLaneFromNewLane(runSegment)
-        assertEquals(exomeEnrichmentKit, exomeSeqTrack2.exomeEnrichmentKit)
+        assertNull(exomeSeqTrack2.libraryPreparationKit)
+        libraryPreparationKitService.inferKitInformationForOldLaneFromNewLane(runSegment)
+        assertEquals(libraryPreparationKit, exomeSeqTrack2.libraryPreparationKit)
     }
 
 
@@ -309,20 +309,20 @@ class ExomeEnrichmentKitServiceUnitTests {
         DataFile dataFile = testData.createDataFile(null, testData.runSegment, fileType)
         assertNotNull(dataFile.save(flush: true))
 
-        exomeEnrichmentKitService.inferKitInformationForOldLaneFromNewLane(testData.runSegment)
+        libraryPreparationKitService.inferKitInformationForOldLaneFromNewLane(testData.runSegment)
     }
 
 
-    ExomeEnrichmentKitSynonym createExomeEnrichmentKitSynonym() {
-        ExomeEnrichmentKit exomeEnrichmentKit = new ExomeEnrichmentKit(
-                        name: EXOME_ENRICHMENT_KIT
+    LibraryPreparationKitSynonym createLibraryPreparationKitSynonym() {
+        LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(
+                        name: LIBRARY_PREPARATION_KIT
                         )
-        assertNotNull(exomeEnrichmentKit.save([flush: true]))
-        ExomeEnrichmentKitSynonym exomeEnrichmentKitSynonym = new ExomeEnrichmentKitSynonym(
-                        name: EXOME_ENRICHMENT_KIT_NAME,
-                        exomeEnrichmentKit: exomeEnrichmentKit)
-        assertNotNull(exomeEnrichmentKitSynonym.save([flush: true]))
-        return exomeEnrichmentKitSynonym
+        assertNotNull(libraryPreparationKit.save([flush: true]))
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym = new LibraryPreparationKitSynonym(
+                        name: LIBRARY_PREPARATION_KIT_NAME,
+                        libraryPreparationKit: libraryPreparationKit)
+        assertNotNull(libraryPreparationKitSynonym.save([flush: true]))
+        return libraryPreparationKitSynonym
     }
 
 }

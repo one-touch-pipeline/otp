@@ -11,7 +11,7 @@ class MetaDataValidationService {
 
     def hipoIndividualService
 
-    ExomeEnrichmentKitService exomeEnrichmentKitService
+    LibraryPreparationKitService libraryPreparationKitService
     SequencingKitService sequencingKitService
 
     private final Lock validateMetaDataLock = new ReentrantLock()
@@ -102,7 +102,7 @@ class MetaDataValidationService {
                 entry.status = (status) ? valid : invalid
                 break
             case "LIB_PREP_KIT":
-                Boolean status = checkExomeEnrichmentKitForExomeSeqType(entry)
+                Boolean status = checkLibraryPreparationKitForExomeSeqType(entry)
                 if (status != null) {
                     entry.status = status ? valid : invalid
                 }
@@ -140,18 +140,18 @@ class MetaDataValidationService {
      * caution: trinary result!
      *
      * @return <code>null</code> for non-exome entries;
-     *      for exome entries <code>true/false</code>, signifying if an Enrichment Kit is/isn't available
+     *      for exome entries <code>true/false</code>, signifying if an library preparation kit is/isn't available
      */
-    private Boolean checkExomeEnrichmentKitForExomeSeqType(MetaDataEntry entry) {
+    private Boolean checkLibraryPreparationKitForExomeSeqType(MetaDataEntry entry) {
         MetaDataEntry metaDataEntry = metaDataEntry(entry.dataFile, "SEQUENCING_TYPE")
         boolean isSequenceOfTypeExome = metaDataEntry.value == SeqTypeNames.EXOME.seqTypeName
 
         /*
-         * Only for the seqType exome an enrichment kit is available and has to be checked.
+         * Only for the seqType exome an library preparation kit is available and has to be checked.
          * For other seqTypes null has to be returned.
          */
         if (isSequenceOfTypeExome) {
-            return exomeEnrichmentKitService.findExomeEnrichmentKitByNameOrAlias(entry.value) ||
+            return libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(entry.value) ||
             InformationReliability.UNKNOWN_VERIFIED.rawValue == entry.value
         }
         return null
