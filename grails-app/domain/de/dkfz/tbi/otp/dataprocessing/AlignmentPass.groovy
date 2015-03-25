@@ -109,5 +109,7 @@ class AlignmentPass {
 
     static mapping = {
         seqTrack index: "alignment_pass_seq_track_idx"
+        workPackage index: "alignment_pass_work_package_idx"
+        alignmentState index: "alignment_pass_alignment_state_idx"  // partial index: WHERE alignment_state = 'NOT_STARTED'
     }
 }
