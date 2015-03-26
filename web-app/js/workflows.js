@@ -799,17 +799,5 @@ $.otp.workflows = {
             $.otp.workflows.processingStep.parameters(inputParamSelector, true);
             $.otp.workflows.processingStep.parameters(outputParamSelector, false);
         }
-    },
-
-    saveProcessComment: function (processId, processComment) {
-        "use strict";
-        var url = $.otp.createLink({controller: 'processes', action: 'saveProcessComment'});
-        return $.ajax({
-            type: "POST",
-            encoding:"UTF-8",
-            url: url,
-            dataType: "json",
-            data: {processId: processId, processComment: processComment}
-        });
     }
 };

@@ -27,6 +27,18 @@ class Individual {
      */
     String internIdentifier
 
+    /**
+     * Comment of this individual
+     */
+    String comment
+    /**
+     * Date, comment has been submitted
+     */
+    Date commentDate
+    /**
+     * Author of comment
+     */
+    String commentAuthor
 
     enum Type {REAL, POOL, CELLLINE, UNDEFINED}
     Type type
@@ -36,6 +48,9 @@ class Individual {
     static constraints = {
         pid(unique: true, nullable: false)
         internIdentifier(nullable: true)
+        commentDate(nullable: true)
+        comment(nullable: true)
+        commentAuthor(nullable: true)
     }
 
     String toString() {

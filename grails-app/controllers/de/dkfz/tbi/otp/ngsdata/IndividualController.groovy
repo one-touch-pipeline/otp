@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.utils.CommentCommand
 import grails.converters.JSON
 import groovy.json.JsonSlurper
 import de.dkfz.tbi.otp.utils.DataTableCommand
@@ -34,7 +35,10 @@ class IndividualController {
             ind: ind,
             previous: individualService.previousIndividual(ind),
             next: individualService.nextIndividual(ind),
-            igvMap: igvSessionFileService.createMapOfIgvEnabledScans(ind.seqScans)
+            igvMap: igvSessionFileService.createMapOfIgvEnabledScans(ind.seqScans),
+            comment: ind.comment,
+            commentDate: ind.commentDate?.format('EEE, d MMM yyyy HH:mm'),
+            commentAuthor: ind.commentAuthor
         ]
     }
 
@@ -175,6 +179,15 @@ class IndividualController {
 
     def retrieveSampleIdentifiers(RetrieveSampleIdentifiersCommand cmd) {
         render individualService.getSampleIdentifiers(cmd.id, cmd.sampleType) as JSON
+    }
+
+    // params.id, params.comment, date
+    def saveIndividualComment(CommentCommand cmd) {
+        def date = new Date()
+        Individual individual = individualService.getIndividual(cmd.id)
+        individualService.saveComment(individual, cmd.comment, date)
+        def dataToRender = [date: date?.format('EEE, d MMM yyyy HH:mm'), author: individual.commentAuthor]
+        render dataToRender as JSON
     }
 }
 

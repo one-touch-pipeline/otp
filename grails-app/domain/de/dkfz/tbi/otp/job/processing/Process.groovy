@@ -48,6 +48,10 @@ public class Process implements Serializable {
      * Date, comment has been submitted
      */
     Date commentDate
+    /**
+     * Author of comment
+     */
+    String commentAuthor
 
 
     static mapping = {
@@ -63,5 +67,6 @@ public class Process implements Serializable {
         startJobVersion(nullable: false, blank: false)
         commentDate(nullable: true)
         comment(nullable: true)
+        commentAuthor(nullable: true)
     }
 }

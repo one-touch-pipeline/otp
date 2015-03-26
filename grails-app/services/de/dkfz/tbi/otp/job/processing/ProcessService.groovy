@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.security.User
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
@@ -38,6 +39,7 @@ class ProcessService {
      **/
     def jobExecutionPlanService
 
+    def springSecurityService
     /**
      * Security aware way to access a Process.
      * @param id The Process's id
@@ -120,9 +122,11 @@ class ProcessService {
 
     @PreAuthorize("hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', write) or hasRole('ROLE_OPERATOR')")
     public void saveComment(Process process, String comment, Date date) {
+        def user = springSecurityService.principal.username
         process.comment = comment
         process.commentDate = date
-        process.save(flush: true)
+        process.commentAuthor = user
+        assert process.save(flush: true)
     }
 
     /**

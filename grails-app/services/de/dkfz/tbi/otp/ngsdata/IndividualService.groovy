@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.security.User
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PostFilter
@@ -485,5 +486,14 @@ AND i.id > :indId
             order("mockPid")
         }
         return seq
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public void saveComment(Individual individual, String comment, Date date) {
+        def user = springSecurityService.principal.username
+        individual.comment = comment
+        individual.commentDate = date
+        individual.commentAuthor = user
+        assert individual.save(flush: true)
     }
 }

@@ -14,20 +14,21 @@
             <g:if test="${parameter}">
                 <p><g:message code="processes.process.operatesOn" args="${ [parameter] }"/></p>
             </g:if>
+            <div>
+                <div id="process-visualization" style="display: none"></div>
+                <button id="show-visualization"><g:message code="processes.process.showProcessVisualization"/></button>
+                <button id="hide-visualization" style="display: none"><g:message code="processes.process.hideProcessVisualization"/></button>
+            </div>
         </div>
-        <div id="processCommentBox">
+        <div id="processCommentBox" class="commentBoxContainer">
             <div id="commentLabel">Comment:</div>
             <textarea id="commentBox">${comment?.encodeAsHTML()}</textarea>
             <div id="commentButtonArea">
-                <button id="saveComment" disabled>&nbsp;&nbsp;&nbsp;<g:message code="processes.process.save" /></button>
-                <button id="cancelComment" disabled><g:message code="processes.process.cancel" /></button>
+                <button id="saveComment" disabled>&nbsp;&nbsp;&nbsp;<g:message code="commentBox.save" /></button>
+                <button id="cancelComment" disabled><g:message code="commentBox.cancel" /></button>
             </div>
             <div id="commentDateLabel">${commentDate}</div>
-        </div>
-        <div>
-            <div id="process-visualization" style="display: none"></div>
-            <button id="show-visualization"><g:message code="processes.process.showProcessVisualization"/></button>
-            <button id="hide-visualization" style="display: none"><g:message code="processes.process.hideProcessVisualization"/></button>
+            <div id="commentAuthorLabel">${commentAuthor}</div>
         </div>
         <div id="processOverview">
             <div class="otpDataTables">
@@ -47,7 +48,7 @@
         <g:javascript>
             $(document).ready(function() {
                 $.otp.workflows.registerProcessingStep("#processOverviewTable", ${id});
-                $.otp.initCommentBox(${id});
+                $.otp.initCommentBox(${id}, "#processCommentBox");
             });
         </g:javascript>
     </div>

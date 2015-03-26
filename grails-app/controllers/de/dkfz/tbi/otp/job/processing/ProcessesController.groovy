@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.utils.CommentCommand
 import grails.converters.JSON
 import grails.util.GrailsNameUtils
 import org.springframework.security.core.context.SecurityContextHolder
@@ -193,7 +194,7 @@ class ProcessesController {
 
     def process() {
         Process process = processService.getProcess(params.id as long)
-        [name: process.jobExecutionPlan.name, id: process.id, planId: process.jobExecutionPlan.id, parameter: processParameterData(process), comment: process.comment, commentDate: process.commentDate?.format('EEE, d MMM yyyy HH:mm')]
+        [name: process.jobExecutionPlan.name, id: process.id, planId: process.jobExecutionPlan.id, parameter: processParameterData(process), comment: process.comment, commentDate: process.commentDate?.format('EEE, d MMM yyyy HH:mm'), commentAuthor: process.commentAuthor]
     }
 
     def processData(DataTableCommand cmd) {
@@ -371,17 +372,12 @@ class ProcessesController {
         return parameterData
     }
 
-    // params.processId, params.processComment, date
+    // params.id, params.comment, date
     def saveProcessComment(CommentCommand cmd) {
         def date = new Date()
-        Process process = processService.getProcess(cmd.processId)
-        processService.saveComment(process, cmd.processComment, date)
-        def dataToRender = [date: date?.format('EEE, d MMM yyyy HH:mm')]
+        Process process = processService.getProcess(cmd.id)
+        processService.saveComment(process, cmd.comment, date)
+        def dataToRender = [date: date?.format('EEE, d MMM yyyy HH:mm'), author: process.commentAuthor]
         render dataToRender as JSON
     }
-}
-
-class CommentCommand implements Serializable {
-    long processId
-    String processComment
 }

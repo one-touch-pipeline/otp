@@ -1287,14 +1287,15 @@ body {
 
 #processInfoBox {
     float: left;
-    width: 850px;
+    width: 750px;
     height: 125px;
 }
 
-#processCommentBox {
-    float: left;
+.commentBoxContainer {
+    float: right;
     width: 300px;
-    height: 125px;
+    height: 150px;
+    margin-right: 50px;
 }
 
 #commentBox {
@@ -1314,6 +1315,12 @@ body {
     width: 170px;
     text-align: right;
     margin-top: 2px;
+}
+
+#commentAuthorLabel {
+    float: right;
+    width: 170px;
+    text-align: right;
 }
 
 #saveComment {
@@ -1352,6 +1359,15 @@ body {
 #workflowOverviewTable td:nth-child(8) {
     width: 20px;
 }
+
+#processOverview {
+    margin-top: 150px;
+}
+
+#processOverview:not(*:root) {
+  margin-top: 0px;
+}
+
 
 #processOverview  td:nth-child(3) {
     max-width: 400px;
@@ -1645,4 +1661,19 @@ body {
 
 .crashRecoveryDialog {
     max-height: 400px;
+}
+
+#nextIndividualBtn {
+    float: left;
+}
+
+#prevIndividualBtn {
+    float: left;
+}
+
+#individualDetailTbl {
+    margin-top: 150px;
+}
+#individualDetailTbl:not(*:root) {
+    margin-top: 50px;
 }

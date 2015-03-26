@@ -10,16 +10,28 @@
 </head>
 <body>
     <div class="body_grow">
-        <ul>
-            <g:if test="${next}">
-                <li class="button"><g:link action="show" id="${next.id}"><g:message code="individual.show.nextIndividual"/></g:link></li>
+        <div id="processInfoBox">
+            <h1><g:message code="individual.show.title"/></h1>
+            <div>
+                <g:if test="${next}">
+                    <div class="button" id="nextIndividualBtn"><g:link action="show" id="${next.id}"><g:message code="individual.show.nextIndividual"/></g:link></div>
                 </g:if>
-            <g:if test="${previous}">
-                <li class="button"><g:link action="show" id="${previous.id}"><g:message code="individual.show.previousIndividual"/></g:link></li>
-            </g:if>
-        </ul>
-        <h1><g:message code="individual.show.title"/></h1>
-        <div class="tableBlock">
+                <g:if test="${previous}">
+                    <div class="button" id ="prevIndividualBtn"><g:link action="show" id="${previous.id}"><g:message code="individual.show.previousIndividual"/></g:link></div>
+                </g:if>
+            </div>
+        </div>
+        <div id="individualCommentBox" class="commentBoxContainer">
+            <div id="commentLabel">Comment:</div>
+            <textarea id="commentBox">${comment?.encodeAsHTML()}</textarea>
+            <div id="commentButtonArea">
+                <button id="saveComment" disabled>&nbsp;&nbsp;&nbsp;<g:message code="commentBox.save" /></button>
+                <button id="cancelComment" disabled><g:message code="commentBox.cancel" /></button>
+            </div>
+            <div id="commentDateLabel">${commentDate}</div>
+            <div id="commentAuthorLabel">${commentAuthor}</div>
+        </div>
+        <div class="tableBlock" id="individualDetailTbl">
             <input type="hidden" name="individualId" value="${ind.id}"/>
             <table>
                 <tr>
@@ -137,6 +149,7 @@
 <r:script>
     $(function() {
         $.otp.growBodyInit(240);
+        $.otp.initCommentBox(${ind.id}, "#individualCommentBox");
     });
 </r:script>
 </html>
