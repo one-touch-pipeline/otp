@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.job.jobs.examplePBS
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.job.jobs.WatchdogJob
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.job.processing.MonitoringJob
 import de.dkfz.tbi.otp.job.processing.ResumableJob
@@ -30,7 +31,13 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl implements Monitorin
     public void execute() throws Exception {
         String jobIds = getParameterValueOrClass("__pbsIds")
         queuedJobIds = parseInputString(jobIds)
-        pbsMonitorService.monitor(queuedJobIds, this)
+        if ([WatchdogJob.SKIP_WATCHDOG] == queuedJobIds) {
+            log.debug "Skip watchdog"
+            succeed()
+            schedulerService.doEndCheck(this)
+        } else {
+            pbsMonitorService.monitor(queuedJobIds, this)
+        }
     }
 
     void finished(String pbsId, Realm realm) {

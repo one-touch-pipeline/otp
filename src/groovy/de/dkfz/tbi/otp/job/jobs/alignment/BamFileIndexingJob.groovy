@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.alignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.jobs.WatchdogJob
 import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -21,10 +22,9 @@ class BamFileIndexingJob extends AbstractJobImpl {
 
         /*
          * The original version of this job executed a job on the cluster which was checked by the watchdog afterwards.
-         * To simulate the watchdog that the job has already finished on cluster a very low job ID is used.
          * TODO: Remove this entire job after OTP-505 or during OTP-1165
          */
-        addOutputParameter(JobParameterKeys.PBS_ID_LIST, "1")
+        addOutputParameter(JobParameterKeys.PBS_ID_LIST, WatchdogJob.SKIP_WATCHDOG)
         addOutputParameter(JobParameterKeys.REALM, realm.id.toString())
     }
 
