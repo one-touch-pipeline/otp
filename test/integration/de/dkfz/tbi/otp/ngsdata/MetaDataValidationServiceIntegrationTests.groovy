@@ -10,22 +10,22 @@ class MetaDataValidationServiceIntegrationTests {
 
     @Before
     void setUp() {
-        SeqPlatform seqPlatform = new SeqPlatform(
+        SeqPlatform seqPlatform = SeqPlatform.build(
                     name: "PlatformName",
-                    model: "platformModel")
-        assertNotNull(seqPlatform.save([flush: true, failOnError: true]))
+                    model: "platformModel",
+        )
 
-        SeqCenter seqCenter = new SeqCenter(
+        SeqCenter seqCenter = SeqCenter.build(
                     name: "seqCenterName",
-                    dirName: "seqCenterDirName")
-        assertNotNull(seqCenter.save([flush: true, failOnError: true]))
+                    dirName: "seqCenterDirName",
+        )
 
-        run = new Run(
+        run = Run.build(
                     name: "runName",
                     seqCenter: seqCenter,
                     seqPlatform: seqPlatform,
-                    storageRealm: Run.StorageRealm.DKFZ)
-        assertNotNull(run.save([flush: true, failOnError: true]))
+                    storageRealm: Run.StorageRealm.DKFZ,
+        )
     }
 
     @After
@@ -35,123 +35,150 @@ class MetaDataValidationServiceIntegrationTests {
 
     @Test
     void testValidateMetaDataEntry_LIB_PREP_KIT_valid() {
-        DataFile dataFile = new DataFile()
-        assertTrue(dataFile.validate())
-        assertNotNull(dataFile.save(flush: true))
+        DataFile dataFile = DataFile.build()
 
-        MetaDataKey key = new MetaDataKey(name: MetaDataColumn.SEQUENCING_TYPE.toString())
-        assertTrue(key.validate())
-        assertNotNull(key.save(flush: true))
-        MetaDataEntry entry = new MetaDataEntry(value: SeqTypeNames.EXOME.seqTypeName, dataFile: dataFile, key: key, source: MetaDataEntry.Source.MANUAL)
-        assertTrue(entry.validate())
-        entry = entry.save(flush: true)
-        assertNotNull(entry)
+        MetaDataKey key = MetaDataKey.build(name: MetaDataColumn.SEQUENCING_TYPE.toString())
+        MetaDataEntry entry = MetaDataEntry.build(
+                value: SeqTypeNames.EXOME.seqTypeName,
+                dataFile: dataFile,
+                key: key,
+                source: MetaDataEntry.Source.MANUAL,
+        )
 
-        key = new MetaDataKey(name: MetaDataColumn.LIB_PREP_KIT.toString())
-        assertTrue(key.validate())
-        assertNotNull(key.save(flush: true))
+        key = MetaDataKey.build(name: MetaDataColumn.LIB_PREP_KIT.toString())
 
         String libraryPreparationKitName = "Agilent SureSelect V3"
-        LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(name: libraryPreparationKitName)
-        assertNotNull(libraryPreparationKit.save(flush: true))
+        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build(name: libraryPreparationKitName)
 
-        entry = new MetaDataEntry(value: libraryPreparationKitName, dataFile: dataFile, key: key, source: MetaDataEntry.Source.MANUAL)
-        assertTrue(entry.validate())
-        entry = entry.save(flush: true)
-        assertNotNull(entry)
+        entry = MetaDataEntry.build(
+                value: libraryPreparationKitName,
+                dataFile: dataFile,
+                key: key,
+                source: MetaDataEntry.Source.MANUAL,
+        )
 
         assertTrue metaDataValidationService.validateMetaDataEntry(run, entry)
     }
 
     @Test
     void testValidateMetaDataEntry_LIB_PREP_KIT_invalid() {
-        DataFile dataFile = new DataFile()
-        assertTrue(dataFile.validate())
-        assertNotNull(dataFile.save(flush: true))
+        DataFile dataFile = DataFile.build()
 
-        MetaDataKey key = new MetaDataKey(name: MetaDataColumn.SEQUENCING_TYPE.toString())
-        assertTrue(key.validate())
-        assertNotNull(key.save(flush: true))
-        MetaDataEntry entry = new MetaDataEntry(value: SeqTypeNames.EXOME.seqTypeName, dataFile: dataFile, key: key, source: MetaDataEntry.Source.MANUAL)
-        assertTrue(entry.validate())
-        entry = entry.save(flush: true)
-        assertNotNull(entry)
+        MetaDataKey key = MetaDataKey.build(name: MetaDataColumn.SEQUENCING_TYPE.toString())
+        MetaDataEntry entry = MetaDataEntry.build(
+                value: SeqTypeNames.EXOME.seqTypeName,
+                dataFile: dataFile,
+                key: key,
+                source: MetaDataEntry.Source.MANUAL,
+        )
 
-        key = new MetaDataKey(name: MetaDataColumn.LIB_PREP_KIT.toString())
-        assertTrue(key.validate())
-        assertNotNull(key.save(flush: true))
+        key = MetaDataKey.build(name: MetaDataColumn.LIB_PREP_KIT.toString())
 
         String libraryPreparationKitName = "Agilent SureSelect V3"
-        LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(name: libraryPreparationKitName)
-        assertNotNull(libraryPreparationKit.save(flush: true))
+        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build(name: libraryPreparationKitName)
 
-        entry = new MetaDataEntry(value: "some enrichement Kit name not present in the database", dataFile: dataFile, key: key, source: MetaDataEntry.Source.MANUAL)
-        assertTrue(entry.validate())
-        entry = entry.save(flush: true)
-        assertNotNull(entry)
+        entry = MetaDataEntry.build(
+                value: "some enrichement Kit name not present in the database",
+                dataFile: dataFile,
+                key: key,
+                source: MetaDataEntry.Source.MANUAL,
+        )
 
         assertFalse metaDataValidationService.validateMetaDataEntry(run, entry)
     }
 
     @Test
     void testValidateMetaDataEntry_ANTIBODY_TARGET_valid() {
-        DataFile dataFile = new DataFile()
-        assertTrue(dataFile.validate())
-        assertNotNull(dataFile.save(flush: true))
+        DataFile dataFile = DataFile.build()
 
-        MetaDataKey key = new MetaDataKey(name: MetaDataColumn.SEQUENCING_TYPE.toString())
-        assertTrue(key.validate())
-        assertNotNull(key.save(flush: true))
-        MetaDataEntry entry = new MetaDataEntry(value: SeqTypeNames.CHIP_SEQ.seqTypeName, dataFile: dataFile, key: key, source: MetaDataEntry.Source.MANUAL)
-        assertTrue(entry.validate())
-        entry = entry.save(flush: true)
-        assertNotNull(entry)
+        MetaDataKey key = MetaDataKey.build(name: MetaDataColumn.SEQUENCING_TYPE.toString())
+        MetaDataEntry entry = MetaDataEntry.build(
+                value: SeqTypeNames.CHIP_SEQ.seqTypeName,
+                dataFile: dataFile,
+                key: key,
+                source: MetaDataEntry.Source.MANUAL,
+        )
 
-        key = new MetaDataKey(name: MetaDataColumn.ANTIBODY_TARGET.toString())
-        assertTrue(key.validate())
-        assertNotNull(key.save(flush: true))
+        key = MetaDataKey.build(name: MetaDataColumn.ANTIBODY_TARGET.toString())
 
         String antibodyTargetName = "lala3LALA"
-        AntibodyTarget antibodyTarget = new AntibodyTarget(name: antibodyTargetName)
-        assertNotNull(antibodyTarget.save(flush: true))
+        AntibodyTarget antibodyTarget = AntibodyTarget.build(name: antibodyTargetName)
 
-        entry = new MetaDataEntry(value: antibodyTargetName, dataFile: dataFile, key: key, source: MetaDataEntry.Source.MANUAL)
-        assertTrue(entry.validate())
-        entry = entry.save(flush: true)
-        assertNotNull(entry)
+        entry = MetaDataEntry.build(
+                value: antibodyTargetName,
+                dataFile: dataFile,
+                key: key,
+                source: MetaDataEntry.Source.MANUAL,
+        )
 
         assertTrue metaDataValidationService.validateMetaDataEntry(run, entry)
+
+        assertNull ChangeLog.findByRowId(entry.id)
+    }
+
+    @Test
+    void testValidateMetaDataEntry_ANTIBODY_TARGETwithWrongCase_valid() {
+        DataFile dataFile = DataFile.build()
+
+        MetaDataKey key = MetaDataKey.build(name: MetaDataColumn.SEQUENCING_TYPE.toString())
+        MetaDataEntry entry = MetaDataEntry.build(
+                value: SeqTypeNames.CHIP_SEQ.seqTypeName,
+                dataFile: dataFile,
+                key: key,
+                source: MetaDataEntry.Source.MANUAL,
+        )
+
+        key = MetaDataKey.build(name: MetaDataColumn.ANTIBODY_TARGET.toString())
+
+        String antibodyTargetName = "lala3LALA"
+        AntibodyTarget antibodyTarget = AntibodyTarget.build(
+                name: antibodyTargetName.toUpperCase()
+        )
+
+        entry = MetaDataEntry.build(
+                value: antibodyTargetName.toLowerCase(),
+                dataFile: dataFile,
+                key: key,
+                source: MetaDataEntry.Source.MANUAL,
+        )
+
+        assertTrue metaDataValidationService.validateMetaDataEntry(run, entry)
+
+        def changeLog = ChangeLog.findByRowId(entry.id)
+        assertNotNull changeLog
+        assertEquals changeLog.columnName, "value"
+        assertEquals changeLog.fromValue, antibodyTargetName.toLowerCase()
+        assertEquals changeLog.toValue, antibodyTargetName.toUpperCase()
+        assertEquals changeLog.comment, "fixed wrong upper/lower case"
+        assertEquals changeLog.source, ChangeLog.Source.SYSTEM
     }
 
     @Test
     void testValidateMetaDataEntry_ANTIBODY_TARGET_invalid() {
-        DataFile dataFile = new DataFile()
-        assertTrue(dataFile.validate())
-        assertNotNull(dataFile.save(flush: true))
+        DataFile dataFile = DataFile.build()
 
-        SeqTypeNames.EXOME.seqTypeName
+        MetaDataKey key = MetaDataKey.build(name: MetaDataColumn.SEQUENCING_TYPE.toString())
+        MetaDataEntry entry = MetaDataEntry.build(
+                value: SeqTypeNames.CHIP_SEQ.seqTypeName,
+                dataFile: dataFile,
+                key: key,
+                source: MetaDataEntry.Source.MANUAL,
+        )
 
-        MetaDataKey key = new MetaDataKey(name: MetaDataColumn.SEQUENCING_TYPE.toString())
-        assertTrue(key.validate())
-        assertNotNull(key.save(flush: true))
-        MetaDataEntry entry = new MetaDataEntry(value: SeqTypeNames.CHIP_SEQ.seqTypeName, dataFile: dataFile, key: key, source: MetaDataEntry.Source.MANUAL)
-        assertTrue(entry.validate())
-        entry = entry.save(flush: true)
-        assertNotNull(entry)
-
-        key = new MetaDataKey(name: MetaDataColumn.ANTIBODY_TARGET.toString())
-        assertTrue(key.validate())
-        assertNotNull(key.save(flush: true))
+        key = MetaDataKey.build(name: MetaDataColumn.ANTIBODY_TARGET.toString())
 
         String antibodyTargetName = "lala3LALA"
-        AntibodyTarget antibodyTarget = new AntibodyTarget(name: antibodyTargetName)
-        assertNotNull(antibodyTarget.save(flush: true))
+        AntibodyTarget antibodyTarget = AntibodyTarget.build(name: antibodyTargetName)
 
-        entry = new MetaDataEntry(value: "some antibody target name not present in the database", dataFile: dataFile, key: key, source: MetaDataEntry.Source.MANUAL)
-        assertTrue(entry.validate())
-        entry = entry.save(flush: true)
-        assertNotNull(entry)
+        entry = MetaDataEntry.build(
+                value: "some antibody target name not present in the database",
+                dataFile: dataFile,
+                key: key,
+                source: MetaDataEntry.Source.MANUAL,
+        )
 
         assertFalse metaDataValidationService.validateMetaDataEntry(run, entry)
+
+        assertNull ChangeLog.findByRowId(entry.id)
     }
 }

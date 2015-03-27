@@ -114,7 +114,7 @@ class MetaDataValidationService {
                 MetaDataEntry metaDataEntry = metaDataEntry(entry.dataFile, "SEQUENCING_TYPE")
                 boolean isSequenceOfTypeChipSeq = metaDataEntry?.value == SeqTypeNames.CHIP_SEQ.seqTypeName
                 if (isSequenceOfTypeChipSeq) {
-                    entry.status = AntibodyTarget.findByName(entry.value) ? valid : invalid
+                    checkAndCorrectAntibodyTarget(entry)
                 }
                 break
         }
@@ -122,6 +122,25 @@ class MetaDataValidationService {
         return (entry.status == invalid)? false : true
     }
 
+
+    private void checkAndCorrectAntibodyTarget(MetaDataEntry entry) {
+        AntibodyTarget value = AntibodyTarget.createCriteria().get {
+            eq("name", entry.value, [ignoreCase: true])
+        }
+        if(entry.value == value?.name) {
+            entry.status = MetaDataEntry.Status.VALID
+        } else if(value) {
+            ChangeLog changeLog = buildChangeLog(
+                    entry.id, entry.value, value.name, "fixed wrong upper/lower case",
+            )
+            changeLog.save(flush: true)
+            entry.status = MetaDataEntry.Status.VALID
+            entry.source = MetaDataEntry.Source.SYSTEM
+            entry.value = value.name
+        } else {
+            entry.status = MetaDataEntry.Status.INVALID
+        }
+    }
 
     private boolean checkSampleIdentifier(String value) {
         //values are trimed during upload
