@@ -30,9 +30,32 @@ import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertTrue
 
+/**
+ * Steps which have to be executed for a CO SNV-scipts update:
+ *
+ * ! you have to be in group localGroup
+ *
+ * 1) copy file "/some/relative/path/temp/roddyLocalTest/testproject/vbp/stds/applicationProperties_Stable.ini" to you local folder
+ * 2) modify your "applicationProperties_Stable.ini": usePluginVersion=COWorkflows\:1.0.131 -> to newest version
+ * 3) go to "/$WORKFLOW_ROOT/ngsPipelines/RoddyStable"
+ * 4) execute "bash roddy.sh testrun coWorkflowsTestProject.test@snvCalling stds --useconfig=/AbolsutePathTo/applicationProperties_Stable.ini"
+ * 5) execute "bash roddy.sh rerun coWorkflowsTestProject.test@snvCalling stds --useconfig=/AbolsutePathTo/applicationProperties_Stable.ini"
+ * 6) results are here "[REDACTED]rpp/stds/mpileup"
+ * 7) execution infos are here "[REDACTED]rpp/stds/roddyExecutionStore"
+ * 8) create new result folder for this version in WORKFLOW_ROOT/SnvCallingWorkflow (i.e. resultFiles_1.0.131)
+ * 9) copy results of the roddy run in the current result folder
+ * 10) since we decided not to overwrite the annotation results, but inserted "annotation" we have now differences in the naming with the CO group in some result files
+ * therefore "annotation" has to be inserted to some file names of the Roddy results -> compare with already existing file names of previous Roddy results.
+ * 11) change VERSION in ImportSnvExternalScripts & SnvWorkflowTest
+ * 12) create new config folder for this version in WORKFLOW_ROOT/SnvCallingWorkflow (i.e. configFile_1.0.131)
+ * 13) copy configs from previous version in this version & adapt paths within the configs (i.e. 1.0.114 -> 1.0.131)
+ * 14) compare runtimeConfig.sh of this Roddy run and the previous Roddy run to find out if there are new variables -> add new ones in new config files
+ * 15) run SnvWorkflowTests
+ */
+
 class SnvWorkflowTests extends AbstractWorkflowTest {
 
-    final String VERSION = "1.0.114"
+    final String VERSION = "1.0.131"
     final String CO_SCRIPTS_BASE_DIR = "/path/to/programs/otp/COWorkflows_${VERSION}/resources/analysisTools"
     final String SNV_PIPELINE_SCRIPTS_PATH = "${CO_SCRIPTS_BASE_DIR}/snvPipeline"
     final String ANALYSIS_SCRIPTS_PATH = "${CO_SCRIPTS_BASE_DIR}/tools"
@@ -269,7 +292,7 @@ class SnvWorkflowTests extends AbstractWorkflowTest {
     @Test
     void testWholeSnvWorkflow() {
         prepare(Realm.Cluster.DKFZ)
-        snvConfig = SnvConfig.createFromFile(project, seqType, new File(baseDirDKFZ, "configFile/runtimeConfig.sh"), "v1")
+        snvConfig = SnvConfig.createFromFile(project, seqType, new File(baseDirDKFZ, "configFile_${VERSION}/runtimeConfig.sh"), "v1")
         assertNotNull(snvConfig.save(flush: true))
         execute()
         check(SnvCallingStep.CALLING)
@@ -282,7 +305,7 @@ class SnvWorkflowTests extends AbstractWorkflowTest {
     @Test
     void testSnvAnnotationDeepAnnotationAndFilter() {
         prepare(Realm.Cluster.DKFZ)
-        snvConfig = SnvConfig.createFromFile(project, seqType, new File(baseDirDKFZ, "configFile/runtimeConfig_anno.sh"), "v1")
+        snvConfig = SnvConfig.createFromFile(project, seqType, new File(baseDirDKFZ, "configFile_${VERSION}/runtimeConfig_anno.sh"), "v1")
         assertNotNull(snvConfig.save(flush: true))
         createJobResults(SnvCallingStep.SNV_ANNOTATION)
 
@@ -297,7 +320,7 @@ class SnvWorkflowTests extends AbstractWorkflowTest {
     @Test
     void testSnvFilter() {
         prepare(Realm.Cluster.DKFZ)
-        snvConfig = SnvConfig.createFromFile(project, seqType, new File("${baseDirDKFZ}/configFile/runtimeConfig_filter.sh"), "v1")
+        snvConfig = SnvConfig.createFromFile(project, seqType, new File("${baseDirDKFZ}/configFile_${VERSION}/runtimeConfig_filter.sh"), "v1")
         assertNotNull(snvConfig.save(flush: true))
         createJobResults(SnvCallingStep.FILTER_VCF)
 
@@ -347,9 +370,10 @@ class SnvWorkflowTests extends AbstractWorkflowTest {
                 fileSize: 1,
         )
         assertNotNull(jobResultCalling.save(flush: true))
-        def sourceFiles = [new File("${baseDirDKFZ}/resultFiles/snvs_stds_raw.vcf.gz"), new File("${baseDirDKFZ}/resultFiles/snvs_stds_raw.vcf.gz.tbi")]
+        def sourceFiles = [new File("${baseDirDKFZ}/resultFiles_${VERSION}/snvs_stds_raw.vcf.gz"), new File("${baseDirDKFZ}/resultFiles_${VERSION}/snvs_stds_raw.vcf.gz.tbi")]
         def targetFiles = [jobResultCalling.getResultFilePath().absoluteDataManagementPath, new File("${jobResultCalling.getResultFilePath().absoluteDataManagementPath}.tbi")]
-
+        def sourceFilesForFilter = []
+        def targetFilesForFilter = []
 
         if(startWith == SnvCallingStep.FILTER_VCF) {
             jobResultAnnotation = new SnvJobResult(
@@ -376,8 +400,20 @@ class SnvWorkflowTests extends AbstractWorkflowTest {
             )
             assertNotNull(jobResultDeepAnnotation.save(flush: true))
 
-            sourceFiles += [new File("${baseDirDKFZ}/resultFiles/snvs_stds.vcf.gz"), new File("${baseDirDKFZ}/resultFiles/snvs_stds.vcf.gz.tbi")]
-            targetFiles += [jobResultDeepAnnotation.getResultFilePath().absoluteDataManagementPath, new File("${jobResultDeepAnnotation.getResultFilePath().absoluteDataManagementPath}.tbi")]
+            File previousResultDir = new File("${baseDirDKFZ}/resultFiles_${VERSION}")
+            File deepAnnotationResultFile = jobResultDeepAnnotation.getResultFilePath().absoluteDataManagementPath
+
+            previousResultDir.eachFileRecurse (FileType.FILES) { File resultFile ->
+                if (resultFile.name =~ /annotation/) {
+                    sourceFilesForFilter << resultFile
+                    targetFilesForFilter << new File(deepAnnotationResultFile.parentFile.parent, resultFile.name)
+                }
+            }
+
+            sourceFiles << new File("snvs_stds.vcf.gz", previousResultDir)
+            sourceFiles << new File("snvs_stds.vcf.gz.tbi", previousResultDir)
+            targetFiles << deepAnnotationResultFile
+            targetFiles << new File("${deepAnnotationResultFile}.tbi")
         }   else if (startWith != SnvCallingStep.SNV_ANNOTATION) {
             throw new UnsupportedOperationException()
         }
@@ -389,6 +425,15 @@ class SnvWorkflowTests extends AbstractWorkflowTest {
         String copyFiles = createClusterScriptService.createTransferScript(
             sourceFiles, targetFiles, [null] * targetFiles.size()
         )
+
+        if (!sourceFilesForFilter.empty) {
+            String copyFilesForFilter = createClusterScriptService.createTransferScript(
+                    sourceFilesForFilter, targetFilesForFilter, [null] * targetFilesForFilter.size()
+            )
+            assert executionService.executeCommand(realmDataManagement, copyFilesForFilter) == (targetFilesForFilter.collect { "${it.absolutePath}: OK\n" }).join("")
+
+        }
+
         assert executionService.executeCommand(realmDataManagement, copyFiles) == (targetFiles.collect { "${it.absolutePath}: OK\n" }).join("")
     }
 
@@ -410,8 +455,8 @@ class SnvWorkflowTests extends AbstractWorkflowTest {
         SnvCallingInstance existingInstance = SnvCallingInstance.listOrderById().first()
         SnvCallingInstance createdInstance = SnvCallingInstance.listOrderById().last()
 
-        File resultFileCalling = new File(baseDirDKFZ, "resultFiles/snvs_stds_raw.vcf.gz")
-        File resultFileAnnotation = new File(baseDirDKFZ, "resultFiles/snvs_stds.vcf.gz")
+        File resultFileCalling = new File(baseDirDKFZ, "resultFiles_${VERSION}/snvs_stds_raw.vcf.gz")
+        File resultFileAnnotation = new File(baseDirDKFZ, "resultFiles_${VERSION}/snvs_stds.vcf.gz")
 
         assert createdInstance.processingState == SnvProcessingStates.FINISHED
         assert createdInstance.config == snvConfig
@@ -455,7 +500,7 @@ class SnvWorkflowTests extends AbstractWorkflowTest {
         assert filterResult.inputResult == deepAnnotationResult
         assert filterResult.externalScript == filterScript
 
-        File roddyResultsDir = new File(baseDirDKFZ, "resultFiles")
+        File roddyResultsDir = new File(baseDirDKFZ, "resultFiles_${VERSION}")
         File otpResultsDir = createdInstance.samplePair.samplePairPath.absoluteDataManagementPath
         roddyResultsDir.eachFileRecurse (FileType.FILES) { File resultFile ->
             File otpResultFile = new File(otpResultsDir, resultFile.name)
