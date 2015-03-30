@@ -1,5 +1,5 @@
 import grails.util.Environment
-import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.ngsdata.*
@@ -111,7 +111,7 @@ testDataConfig {
 }
 
 
-//disable plugin in production enviromant
+//disable plugin in production environment
 environments {
     production {
         testDataConfig {
