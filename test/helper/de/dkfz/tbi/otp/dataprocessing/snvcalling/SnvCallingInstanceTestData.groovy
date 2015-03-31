@@ -140,7 +140,7 @@ class SnvCallingInstanceTestData extends TestData {
         MergingWorkPackage workPackage = createMergingWorkPackage(
                 sample: sample,
                 seqType: seqType
-                )
+        )
         assert workPackage.save(flush: true, failOnError: true)
 
         MergingSet mergingSet = new MergingSet(

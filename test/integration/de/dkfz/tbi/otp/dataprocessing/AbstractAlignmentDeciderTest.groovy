@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-import org.junit.After
 import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -37,6 +36,7 @@ public class AbstractAlignmentDeciderTest {
         AbstractAlignmentDecider decider = ([
                 canWorkflowAlign: { SeqTrack seqTrack -> return true },
                 prepareForAlignment: { MergingWorkPackage workPackage, SeqTrack seqTrack, boolean forceRealign -> },
+                getWorkflow: { return Workflow.findOrSaveByNameAndType(Workflow.Name.DEFAULT_OTP, Workflow.Type.ALIGNMENT) },
         ] + methods) as AbstractAlignmentDecider
         decider.applicationContext = applicationContext
         return decider
@@ -72,6 +72,7 @@ public class AbstractAlignmentDeciderTest {
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
                 referenceGenome: ReferenceGenome.build(),
+                workflow: Workflow.findOrSaveByNameAndType(Workflow.Name.DEFAULT_OTP, Workflow.Type.ALIGNMENT),
         )
         workPackage.save(failOnError: true)
 
@@ -79,6 +80,25 @@ public class AbstractAlignmentDeciderTest {
             decider.decideAndPrepareForAlignment(seqTrack, true)
         })
     }
+
+    @Test
+    void testDecideAndPrepareForAlignment_whenWrongWorkflow_shouldThrowAssertionError() {
+        SeqTrack seqTrack = buildSeqTrack()
+
+        MergingWorkPackage workPackage = new MergingWorkPackage(
+                sample: seqTrack.sample,
+                seqType: seqTrack.seqType,
+                seqPlatformGroup: seqTrack.seqPlatformGroup,
+                referenceGenome: exactlyOneElement(ReferenceGenome.list()),
+                workflow: Workflow.findOrSaveByNameAndType(Workflow.Name.RODDY, Workflow.Type.ALIGNMENT),
+        )
+        workPackage.save(failOnError: true)
+
+        shouldFail(AssertionError.class, {
+            decider.decideAndPrepareForAlignment(seqTrack, true)
+        })
+    }
+
 
     @Test
     void testDecideAndPrepareForAlignment_whenDifferentSeqPlatformGroup_shouldReturnEmptyList() {
@@ -89,6 +109,7 @@ public class AbstractAlignmentDeciderTest {
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: SeqPlatformGroup.build(),
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),
+                workflow: Workflow.findOrSaveByNameAndType(Workflow.Name.DEFAULT_OTP, Workflow.Type.ALIGNMENT),
         )
         workPackage.save(failOnError: true)
 
@@ -106,6 +127,7 @@ public class AbstractAlignmentDeciderTest {
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),
+                workflow: Workflow.findOrSaveByNameAndType(Workflow.Name.DEFAULT_OTP, Workflow.Type.ALIGNMENT),
         )
         workPackage.save(failOnError: true)
 

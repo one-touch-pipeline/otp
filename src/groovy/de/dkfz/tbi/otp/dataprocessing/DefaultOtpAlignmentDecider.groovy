@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
-
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
@@ -15,6 +15,18 @@ import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 @Component
 @Scope("singleton")
 class DefaultOtpAlignmentDecider extends AbstractAlignmentDecider {
+
+    @Override
+    Workflow getWorkflow() {
+        Workflow workflow = atMostOneElement(Workflow.findAllByNameAndType(Workflow.Name.DEFAULT_OTP, Workflow.Type.ALIGNMENT))
+        if(!workflow) {
+            workflow = new Workflow(
+                    name: Workflow.Name.DEFAULT_OTP,
+                    type: Workflow.Type.ALIGNMENT
+            ).save(failOnError: true)
+        }
+        return workflow
+    }
 
     @Override
     boolean canWorkflowAlign(SeqTrack seqTrack) {

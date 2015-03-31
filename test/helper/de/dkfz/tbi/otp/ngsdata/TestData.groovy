@@ -342,7 +342,8 @@ class TestData {
         final SeqTrack seqTrack = properties.get('seqTrack') ?: seqTrack ?: SeqTrack.build()
         final MergingWorkPackage workPackage = findOrSaveMergingWorkPackage(
                 seqTrack,
-                properties.get('referenceGenome')
+                properties.get('referenceGenome'),
+                properties.get('workflow')
         )
         assert workPackage.save(failOnError: true)
         final AlignmentPass alignmentPass = new AlignmentPass([
@@ -373,17 +374,23 @@ class TestData {
         ] + properties)
     }
 
+    static Workflow findOrSaveWorkflow() {
+        return Workflow.findOrCreateByNameAndType(Workflow.Name.DEFAULT_OTP, Workflow.Type.ALIGNMENT)
+                .save(failOnError: true, flush: true)
+    }
+
 
     static MergingWorkPackage createMergingWorkPackage(Map properties = [:]) {
         final MergingWorkPackage mergingWorkPackage = new MergingWorkPackage([
                 seqPlatformGroup: properties.get('seqPlatformGroup') ?: SeqPlatformGroup.build(),
                 referenceGenome: properties.get('referenceGenome') ?: findOrSaveReferenceGenome(),
+                workflow: properties.get('workflow') ?: findOrSaveWorkflow(),
         ] + properties)
         return mergingWorkPackage
     }
 
-    static MergingWorkPackage findOrSaveMergingWorkPackage(SeqTrack seqTrack, ReferenceGenome referenceGenome = null) {
-        if (referenceGenome == null) {
+    static MergingWorkPackage findOrSaveMergingWorkPackage(SeqTrack seqTrack, ReferenceGenome referenceGenome = null, Workflow workflow = null) {
+        if (referenceGenome == null || workflow == null) {
             MergingWorkPackage workPackage = MergingWorkPackage.findWhere(
                     sample: seqTrack.sample,
                     seqType: seqTrack.seqType,
@@ -398,6 +405,7 @@ class TestData {
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatform.seqPlatformGroup,
                 referenceGenome: referenceGenome ?: findOrSaveReferenceGenome(),
+                workflow: workflow ?: findOrSaveWorkflow(),
         )
         return mergingWorkPackage
     }

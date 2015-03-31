@@ -40,6 +40,7 @@ class MergingWorkPackage {
 
     // Processing parameters, part of merging criteria
     ReferenceGenome referenceGenome
+    Workflow workflow
 
     static belongsTo = Sample
 
@@ -86,6 +87,6 @@ class MergingWorkPackage {
 
     @Override
     String toString() {
-        return "MWP ${id}: ${sample} ${seqType} ${seqPlatformGroup} ${referenceGenome}"
+        return "MWP ${id}: ${sample} ${seqType} ${seqPlatformGroup} ${referenceGenome} ${workflow}"
     }
 }

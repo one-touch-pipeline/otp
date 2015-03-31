@@ -18,6 +18,8 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     @Autowired
     ApplicationContext applicationContext
 
+    abstract Workflow getWorkflow()
+
     @Override
     Collection<MergingWorkPackage> decideAndPrepareForAlignment(SeqTrack seqTrack, boolean forceRealign) {
 
@@ -27,7 +29,8 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
 
         ensureConfigurationIsComplete(seqTrack)
 
-        Collection<MergingWorkPackage> workPackages = findOrSaveWorkPackages(seqTrack, seqTrack.configuredReferenceGenome)
+        Collection<MergingWorkPackage> workPackages = findOrSaveWorkPackages(seqTrack,
+                seqTrack.configuredReferenceGenome, workflow)
 
         workPackages.each {
             prepareForAlignment(it, seqTrack, forceRealign)
@@ -95,13 +98,15 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         return true
     }
 
-    static Collection<MergingWorkPackage> findOrSaveWorkPackages(SeqTrack seqTrack, ReferenceGenome referenceGenome) {
+    static Collection<MergingWorkPackage> findOrSaveWorkPackages(SeqTrack seqTrack, ReferenceGenome referenceGenome,
+                                                                 Workflow workflow) {
 
         // TODO OTP-1401: In the future there may be more than one MWP for the sample and seqType.
         MergingWorkPackage workPackage = atMostOneElement(
                 MergingWorkPackage.findAllWhere(sample: seqTrack.sample, seqType: seqTrack.seqType))
         if (workPackage != null) {
             assert workPackage.referenceGenome.id == referenceGenome.id
+            assert workPackage.workflow.id == workflow.id
             if (!workPackage.satisfiesCriteria(seqTrack)) {
                 threadLog?.info("Not aligning ${seqTrack}, because it does not satisfy the criteria of the existing MergingWorkPackage ${workPackage}.")
                 return Collections.emptyList()
@@ -110,6 +115,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
             workPackage = new MergingWorkPackage(
                     MergingWorkPackage.getMergingProperties(seqTrack) + [
                     referenceGenome: referenceGenome,
+                    workflow: workflow,
             ]).save(failOnError: true)
             assert workPackage
         }

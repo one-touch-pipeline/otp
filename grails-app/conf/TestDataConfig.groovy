@@ -1,3 +1,4 @@
+import de.dkfz.tbi.otp.dataprocessing.Workflow
 import grails.util.Environment
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile
@@ -99,6 +100,9 @@ testDataConfig {
             //Ensure to use this subclass of AbstractBamFile
             //Otherwise the plugin tries to create an ExternallyProcessedMergedBamFile, but it fails to create the FastqSet
             bamFile = {ProcessedBamFile.build()}
+        }
+        'de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage' {
+            workflow = { Workflow.buildLazy() }
         }
         'de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile' {
             alignmentPass = {TestData.createAndSaveAlignmentPass()}
