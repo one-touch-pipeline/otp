@@ -123,6 +123,7 @@ testDataConfig {
     unitAdditionalBuild = [
         'de.dkfz.tbi.otp.ngsdata.DataFile': [de.dkfz.tbi.otp.ngsdata.FileType],
         'de.dkfz.tbi.otp.ngsdata.SeqPlatform': [de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup, de.dkfz.tbi.otp.ngsdata.SeqPlatformModelLabel],
+        'de.dkfz.tbi.otp.ngsdata.SeqTrack': [de.dkfz.tbi.otp.ngsdata.ChipSeqSeqTrack, de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack],
     ]
 }
 

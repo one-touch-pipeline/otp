@@ -33,7 +33,7 @@ class MergingWorkPackage {
     ProcessingType processingType = ProcessingType.SYSTEM
 
     // SeqTrack properties, part of merging criteria
-    static Collection<String> seqTrackPropertyNames = ['sample', 'seqType', 'seqPlatformGroup'].asImmutable()
+    static final Collection<String> qualifiedSeqTrackPropertyNames = ['sample', 'seqType', 'seqPlatform.seqPlatformGroup'].asImmutable()
     Sample sample
     SeqType seqType
     SeqPlatformGroup seqPlatformGroup
@@ -51,6 +51,9 @@ class MergingWorkPackage {
         sample unique: 'seqType'
     }
 
+    static final Collection<String> seqTrackPropertyNames = qualifiedSeqTrackPropertyNames.collect{nonQualifiedPropertyName(it)}
+    static final String mergeableSeqTracksQuery = 'FROM SeqTrack WHERE ' + qualifiedSeqTrackPropertyNames.collect{"${it} = :${nonQualifiedPropertyName(it)}"}.join(' AND ')
+
     Project getProject() {
         return sample.project
     }
@@ -61,6 +64,17 @@ class MergingWorkPackage {
 
     SampleType getSampleType() {
         return sample.sampleType
+    }
+
+    Collection<SeqTrack> findMergeableSeqTracks() {
+        Map properties = [:]
+        seqTrackPropertyNames.each {
+            properties."${it}" = this."${it}"
+        }
+        return SeqTrack.findAll(mergeableSeqTracksQuery, properties).findAll {
+            assert satisfiesCriteria(it)
+            return SeqTrackService.mayAlign(it)
+        }
     }
 
     static Map getMergingProperties(SeqTrack seqTrack) {
@@ -77,6 +91,10 @@ class MergingWorkPackage {
 
     boolean satisfiesCriteria(final AbstractBamFile bamFile) {
         return bamFile.mergingWorkPackage.id == id
+    }
+
+    private static nonQualifiedPropertyName(String property) {
+        return property.substring(property.lastIndexOf('.') + 1)
     }
 
     static mapping = {

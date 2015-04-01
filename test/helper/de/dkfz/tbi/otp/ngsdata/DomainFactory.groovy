@@ -166,13 +166,7 @@ class DomainFactory {
 
     public static ProcessedBamFile createProcessedBamFile(final MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
 
-        final SeqTrack seqTrack = SeqTrack.build(
-                sample: mergingWorkPackage.sample,
-                seqType: mergingWorkPackage.seqType,
-                seqPlatform: SeqPlatform.build(seqPlatformGroup: mergingWorkPackage.seqPlatformGroup),
-        )
-
-        buildSequenceDataFile(seqTrack: seqTrack)
+        SeqTrack seqTrack = buildSeqTrackWithDataFile(mergingWorkPackage)
 
         final ProcessedBamFile bamFile = ProcessedBamFile.build([
                 alignmentPass: TestData.createAndSaveAlignmentPass(
@@ -187,9 +181,23 @@ class DomainFactory {
         return bamFile
     }
 
+    public static SeqTrack buildSeqTrackWithDataFile(MergingWorkPackage mergingWorkPackage) {
+        return buildSeqTrackWithDataFile(
+                sample: mergingWorkPackage.sample,
+                seqType: mergingWorkPackage.seqType,
+                seqPlatform: SeqPlatform.build(seqPlatformGroup: mergingWorkPackage.seqPlatformGroup),
+        )
+    }
+
+    public static SeqTrack buildSeqTrackWithDataFile(Map seqTrackProperties = [:], Map dataFileProperties = [:]) {
+        SeqTrack seqTrack = SeqTrack.build(seqTrackProperties)
+        buildSequenceDataFile(dataFileProperties + [seqTrack: seqTrack])
+        return seqTrack
+    }
+
     public static DataFile buildSequenceDataFile(final Map properties = [:]) {
         return DataFile.build([
-                fileType: FileType.findByType(Type.SEQUENCE) ?: FileType.build(type: Type.SEQUENCE),
+                fileType: FileType.buildLazy(type: Type.SEQUENCE),
                 dateCreated: new Date(),  // In unit tests Grails (sometimes) does not automagically set dateCreated.
         ] + properties)
     }

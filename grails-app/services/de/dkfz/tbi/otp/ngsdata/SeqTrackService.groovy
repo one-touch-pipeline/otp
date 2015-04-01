@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractAlignmentDecider
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static org.springframework.util.Assert.*
@@ -166,6 +167,50 @@ class SeqTrackService {
         return decider.decideAndPrepareForAlignment(seqTrack, forceRealign)
     }
 
+    static boolean mayAlign(SeqTrack seqTrack) {
+
+        def notAligning = { String reason -> AbstractAlignmentDecider.logNotAligning(seqTrack, reason) }
+
+        if (seqTrack.withdrawn) {
+            notAligning('it is withdrawn')
+            return false
+        }
+
+        if (!DataFile.withCriteria {
+            eq 'seqTrack', seqTrack
+            fileType {
+                eq 'type', FileType.Type.SEQUENCE
+            }
+            eq 'fileWithdrawn', false
+        }) {
+            notAligning('it has no sequence files')
+            return false
+        }
+
+        if (DataFile.withCriteria {
+            eq 'seqTrack', seqTrack
+            runSegment {
+                eq 'align', false
+            }
+        }) {
+            notAligning('alignment is disabled for the RunSegment')
+            return false
+        }
+
+        if (seqTrack instanceof ExomeSeqTrack &&
+                seqTrack.libraryPreparationKit == null &&
+                seqTrack.kitInfoReliability == InformationReliability.UNKNOWN_VERIFIED) {
+            notAligning('kitInfoReliability is UNKNOWN_VERIFIED')
+            return false
+        }
+
+        if (seqTrack.seqPlatform.seqPlatformGroup == null) {
+            notAligning("seqPlatformGroup is null for ${seqTrack.seqPlatform}")
+            return false
+        }
+
+        return true
+    }
 
     public void setRunReadyForFastqc(Run run) {
         def unknown = SeqTrack.DataProcessingState.UNKNOWN

@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 import org.junit.After
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.InformationReliability
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.Mock
 import org.junit.Test
@@ -279,5 +280,73 @@ class SeqTrackServiceUnitTests {
         } finally {
             LsdfFilesService.midtermStorageMountPoint = originalMidtermStorageMountPoint
         }
+    }
+
+    @Test
+    void testMayAlign_everythingIsOkay_shouldReturnTrue() {
+        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile()
+
+        assert SeqTrackService.mayAlign(seqTrack)
+    }
+
+    @Test
+    void testMayAlign_whenDataFileWithdrawn_shouldReturnFalse() {
+        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile([:], [
+                fileWithdrawn: true,
+        ])
+
+        assert !SeqTrackService.mayAlign(seqTrack)
+    }
+
+    @Test
+    void testMayAlign_whenNoDataFile_shouldReturnFalse() {
+        SeqTrack seqTrack = SeqTrack.build()
+
+        assert !SeqTrackService.mayAlign(seqTrack)
+    }
+
+    @Test
+    void testMayAlign_whenWrongFileType_shouldReturnFalse() {
+        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile([:], [
+                fileType: FileType.build(type: FileType.Type.SOURCE),
+        ])
+
+        assert !SeqTrackService.mayAlign(seqTrack)
+    }
+
+    @Test
+    void testMayAlign_whenRunSegmentMustNotAlign_shouldReturnFalse() {
+        SeqTrack seqTrack = SeqTrack.build()
+        RunSegment runSegment = RunSegment.build(
+                align: false,
+        )
+        DataFile.build(
+                seqTrack: seqTrack,
+                runSegment: runSegment,
+        )
+
+        assert !SeqTrackService.mayAlign(seqTrack)
+    }
+
+    @Test
+    void testMayAlign_whenExomeKitReliabilityIsUnknownVerified_shouldReturnFalse() {
+        SeqTrack seqTrack = ExomeSeqTrack.build(
+                libraryPreparationKit: null,
+                kitInfoReliability: InformationReliability.UNKNOWN_VERIFIED,
+        )
+        DataFile.build(
+                seqTrack: seqTrack,
+        )
+
+        assert !SeqTrackService.mayAlign(seqTrack)
+    }
+
+    @Test
+    void testMayAlign_whenSeqPlatformGroupIsNull_shouldReturnFalse() {
+        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile([
+                seqPlatform: SeqPlatform.build(seqPlatformGroup: null),
+        ])
+
+        assert !SeqTrackService.mayAlign(seqTrack)
     }
 }

@@ -12,6 +12,7 @@ import de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack
 import de.dkfz.tbi.otp.ngsdata.FileType
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 
 abstract class AbstractAlignmentDecider implements AlignmentDecider {
 
@@ -23,7 +24,12 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     @Override
     Collection<MergingWorkPackage> decideAndPrepareForAlignment(SeqTrack seqTrack, boolean forceRealign) {
 
-        if (!mayAlign(seqTrack)) {
+        if (!SeqTrackService.mayAlign(seqTrack)) {
+            return Collections.emptyList()
+        }
+
+        if (!canWorkflowAlign(seqTrack)) {
+            logNotAligning(seqTrack, "${this.getClass().simpleName} says it cannot do so")
             return Collections.emptyList()
         }
 
@@ -48,56 +54,6 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         }
     }
 
-    boolean mayAlign(SeqTrack seqTrack) {
-
-        def notAligning = { String reason -> threadLog?.info("Not aligning ${seqTrack}, because ${reason}.") }
-
-        if (seqTrack.withdrawn) {
-            notAligning('it is withdrawn')
-            return false
-        }
-
-        if (!DataFile.withCriteria {
-            eq 'seqTrack', seqTrack
-            fileType {
-                eq 'type', FileType.Type.SEQUENCE
-            }
-            eq 'fileWithdrawn', false
-        }) {
-            notAligning('it has no non-withdrawn sequence file')
-            return false
-        }
-
-        if (DataFile.withCriteria {
-            eq 'seqTrack', seqTrack
-            runSegment {
-                eq 'align', false
-            }
-        }) {
-            notAligning('alignment is disabled for the RunSegment')
-            return false
-        }
-
-        if (seqTrack instanceof ExomeSeqTrack &&
-                seqTrack.libraryPreparationKit == null &&
-                seqTrack.kitInfoReliability == InformationReliability.UNKNOWN_VERIFIED) {
-            notAligning('kitInfoReliability is UNKNOWN_VERIFIED')
-            return false
-        }
-
-        if (seqTrack.seqPlatform.seqPlatformGroup == null) {
-            notAligning("seqPlatformGroup is null for ${seqTrack.seqPlatform}")
-            return false
-        }
-
-        if (!canWorkflowAlign(seqTrack)) {
-            notAligning("${this.getClass().simpleName} says it cannot do so")
-            return false
-        }
-
-        return true
-    }
-
     static Collection<MergingWorkPackage> findOrSaveWorkPackages(SeqTrack seqTrack, ReferenceGenome referenceGenome,
                                                                  Workflow workflow) {
 
@@ -108,7 +64,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
             assert workPackage.referenceGenome.id == referenceGenome.id
             assert workPackage.workflow.id == workflow.id
             if (!workPackage.satisfiesCriteria(seqTrack)) {
-                threadLog?.info("Not aligning ${seqTrack}, because it does not satisfy the criteria of the existing MergingWorkPackage ${workPackage}.")
+                logNotAligning(seqTrack, "it does not satisfy the criteria of the existing MergingWorkPackage ${workPackage}.")
                 return Collections.emptyList()
             }
         } else {
@@ -121,6 +77,10 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         }
 
         return [workPackage]
+    }
+
+    static void logNotAligning(SeqTrack seqTrack, String reason) {
+        threadLog?.info("Not aligning ${seqTrack}, because ${reason}.")
     }
 
     abstract boolean canWorkflowAlign(SeqTrack seqTrack)

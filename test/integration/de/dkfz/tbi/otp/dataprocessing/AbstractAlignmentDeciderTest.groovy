@@ -64,6 +64,15 @@ public class AbstractAlignmentDeciderTest {
     }
 
     @Test
+    void testDecideAndPrepareForAlignment_whenCanWorkflowAlignReturnsFalse_shouldReturnEmtpyList() {
+        SeqTrack st = buildSeqTrack()
+        decider = newDecider(canWorkflowAlign: { SeqTrack seqTrack -> false })
+
+        Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(st, true)
+        assert workPackages.empty
+    }
+
+    @Test
     void testDecideAndPrepareForAlignment_whenWrongReferenceGenome_shouldThrowAssertionError() {
         SeqTrack seqTrack = buildSeqTrack()
 
@@ -195,105 +204,6 @@ public class AbstractAlignmentDeciderTest {
         shouldFail(RuntimeException.class, {
             decider.ensureConfigurationIsComplete(seqTrack)
         })
-    }
-
-    @Test
-    void testMayAlign_everythingIsOkay_shouldReturnTrue() {
-        SeqTrack seqTrack = buildSeqTrack()
-
-        assert decider.mayAlign(seqTrack)
-    }
-
-    @Test
-    void testMayAlign_whenDataFileWithdrawn_shouldReturnFalse() {
-        TestData testData = new TestData()
-        testData.createObjects()
-
-        SeqTrack seqTrack = testData.createSeqTrack()
-        seqTrack.save(failOnError: true)
-
-        DataFile dataFile = testData.createDataFile(seqTrack: seqTrack)
-        dataFile.fileWithdrawn = true
-        dataFile.save(failOnError: true)
-
-        assert !decider.mayAlign(seqTrack)
-    }
-
-    @Test
-    void testMayAlign_whenNoDataFile_shouldReturnFalse() {
-        TestData testData = new TestData()
-        testData.createObjects()
-
-        SeqTrack seqTrack = testData.createSeqTrack()
-        seqTrack.save(failOnError: true)
-
-        assert !decider.mayAlign(seqTrack)
-    }
-
-    @Test
-    void testMayAlign_whenWrongFileType_shouldReturnFalse() {
-        TestData testData = new TestData()
-        testData.createObjects()
-
-        SeqTrack seqTrack = testData.createSeqTrack()
-        seqTrack.save(failOnError: true)
-
-        DataFile dataFile = testData.createDataFile(seqTrack: seqTrack)
-        dataFile.fileType = testData.createFileType(FileType.Type.SOURCE)
-        dataFile.save(failOnError: true)
-
-        assert !decider.mayAlign(seqTrack)
-    }
-
-    @Test
-    void testMayAlign_whenRunSegmentMustNotAlign_shouldReturnFalse() {
-        TestData testData = new TestData()
-        testData.createObjects()
-
-        SeqTrack seqTrack = testData.createSeqTrack()
-        seqTrack.save(failOnError: true)
-
-        RunSegment runSegment = testData.createRunSegment(align: false)
-        runSegment.save(failOnError: true)
-        DataFile dataFile = testData.createDataFile(seqTrack: seqTrack)
-        dataFile.runSegment = runSegment
-        dataFile.save(failOnError: true)
-
-        assert !decider.mayAlign(seqTrack)
-    }
-
-    @Test
-    void testMayAlign_whenExomeKitReliabilityIsUnknownVerified_shouldReturnFalse() {
-        TestData testData = new TestData()
-        testData.createObjects()
-
-        SeqTrack seqTrack = testData.createExomeSeqTrack(testData.run)
-        seqTrack.libraryPreparationKit = null
-        seqTrack.kitInfoReliability = InformationReliability.UNKNOWN_VERIFIED
-        seqTrack.save(failOnError: true)
-
-        DataFile dataFile = testData.createDataFile(seqTrack: seqTrack)
-        dataFile.save(failOnError: true)
-
-        assert !decider.mayAlign(seqTrack)
-    }
-
-    @Test
-    void testMayAlign_whenSeqPlatformGroupIsNull_shouldReturnFalse() {
-        SeqTrack seqTrack = buildSeqTrack()
-
-        seqTrack.seqPlatform.seqPlatformGroup = null
-        seqTrack.seqPlatform.save(failOnError: true)
-
-        assert !decider.mayAlign(seqTrack)
-    }
-
-    @Test
-    void testMayAlign_returnsFalseIfCanWorkflowAlignDoes() {
-        SeqTrack st = buildSeqTrack()
-        decider = newDecider(canWorkflowAlign: { SeqTrack seqTrack -> false })
-
-        assert !decider.mayAlign(st)
     }
 
     private SeqTrack buildSeqTrack() {
