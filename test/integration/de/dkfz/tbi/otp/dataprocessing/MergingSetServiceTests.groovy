@@ -171,7 +171,8 @@ class MergingSetServiceTests {
         ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
                         mergingPass: mergingPass,
                         type: BamType.MDUP,
-                        status: State.PROCESSED
+                        status: State.PROCESSED,
+                        numberOfMergedLanes: 1,
                         )
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
 
@@ -225,7 +226,8 @@ class MergingSetServiceTests {
         ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
                         mergingPass: mergingPass,
                         type: BamType.MDUP,
-                        status: State.PROCESSED
+                        status: State.PROCESSED,
+                        numberOfMergedLanes: 1,
                         )
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
 
@@ -346,7 +348,8 @@ class MergingSetServiceTests {
         ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
                         mergingPass: mergingPass,
                         type: AbstractBamFile.BamType.MDUP,
-                        status: State.PROCESSED
+                        status: State.PROCESSED,
+                        numberOfMergedLanes: 1,
                         )
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
 
@@ -386,7 +389,8 @@ class MergingSetServiceTests {
         ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
                         mergingPass: mergingPass,
                         type: AbstractBamFile.BamType.MDUP,
-                        status: State.INPROGRESS
+                        status: State.INPROGRESS,
+                        numberOfMergedLanes: 1,
                         )
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
 

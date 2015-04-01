@@ -522,15 +522,4 @@ class ProcessedMergedBamFileService {
                 allAdditionalFileNames.collect { new File(directory, it) }.toArray(new File[0])
         )
     }
-
-    /**
-     * Update the numberOfMergedLanes property of the {@link ProcessedMergedBamFile}.
-     *
-     * @param processedMergedBamFile the {@link ProcessedMergedBamFile} to update
-     */
-    void updateNumberOfMergedLanes(ProcessedMergedBamFile processedMergedBamFile) {
-        assert processedMergedBamFile : 'Argument processedMergedBamFile must not be null'
-        processedMergedBamFile.numberOfMergedLanes = processedMergedBamFile.containedSeqTracks.size()
-        assertSave(processedMergedBamFile)
-    }
 }

@@ -36,7 +36,7 @@ MergingSet.withTransaction {
     MergingSet mergingSet = createNewMergingSetAndAssignBamFiles(
       mwp, bamFileIds.collect {id as Long})
 
-    ctx.abstractBamFileService.findByMergingSet(mergingSet).each { println "${it}" + (it instanceof ProcessedBamFile ? "  ${it.alignmentPass}" : "") }
+    mergingSet.bamFiles.each { println "${it}" + (it instanceof ProcessedBamFile ? "  ${it.alignmentPass}" : "") }
     println "\n\n"
 }
 println ""

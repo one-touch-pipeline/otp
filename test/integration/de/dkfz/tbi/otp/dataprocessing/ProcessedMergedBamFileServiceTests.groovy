@@ -1,34 +1,24 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.TestCase
+
 import static org.junit.Assert.*
 import grails.validation.ValidationException
 import org.junit.*
 import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
-import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type
+
 
 class ProcessedMergedBamFileServiceTests {
 
     ProcessedMergedBamFileService processedMergedBamFileService
     DataProcessingFilesService dataProcessingFilesService
 
-    TestData testData = new TestData()
     File baseDir
-    Sample sample
-    SeqType seqType
-    MergingSet mergingSet
-    Project project
-    Individual individual
-    SampleType sampleType
-    SoftwareTool softwareTool
-    SeqPlatform seqPlatform
-    Run run
 
     final static String directory = "/tmp/otp-unit-test/pmbfs/processing/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0"
     final static String baseFile = "sample-type_patient_seq-type_library_merged.mdup"
@@ -39,68 +29,11 @@ class ProcessedMergedBamFileServiceTests {
         Map paths = [
             rootPath: '/tmp/otp-unit-test/pmfs/root',
             processingRootPath: '/tmp/otp-unit-test/pmbfs/processing',
+            name: DomainFactory.DEFAULT_REALM_NAME,
         ]
 
         Realm realm = DomainFactory.createRealmDataProcessingDKFZ(paths).save([flush: true])
         Realm realm1 = DomainFactory.createRealmDataManagementDKFZ(paths).save([flush: true])
-
-        project = TestData.createProject(
-                        name: "project",
-                        dirName: "project-dir",
-                        realmName: 'DKFZ',
-                        )
-        assertNotNull(project.save([flush: true]))
-
-        individual = new Individual(
-                        pid: "patient",
-                        mockPid: "mockPid",
-                        mockFullName: "mockFullName",
-                        type: Individual.Type.UNDEFINED,
-                        project: project
-                        )
-        assertNotNull(individual.save([flush: true]))
-
-        sampleType = new SampleType(
-                        name: "sample-type"
-                        )
-        assertNotNull(sampleType.save([flush: true]))
-
-        sample = new Sample(
-                        individual: individual,
-                        sampleType: sampleType
-                        )
-        assertNotNull(sample.save([flush: true]))
-
-        seqType = new SeqType(
-                        name: "seq-type",
-                        libraryLayout: "library",
-                        dirName: "seq-type-dir"
-                        )
-        assertNotNull(seqType.save([flush: true]))
-
-        softwareTool = new SoftwareTool(
-                        programName: "name",
-                        programVersion: "version",
-                        qualityCode: "quality",
-                        type: Type.ALIGNMENT
-                        )
-        assertNotNull(softwareTool.save([flush: true]))
-
-        seqPlatform = SeqPlatform.build()
-
-        SeqCenter seqCenter = new SeqCenter(
-                        name: "name",
-                        dirName: "dirName"
-                        )
-        assertNotNull(seqCenter.save([flush: true]))
-
-        run = new Run(
-                        name: "name",
-                        seqCenter: seqCenter,
-                        seqPlatform: seqPlatform,
-                        storageRealm: StorageRealm.DKFZ
-                        )
-        assertNotNull(run.save([flush: true]))
 
         baseDir = new File(directory)
         File bam = new File(basePath + ".bam")
@@ -125,15 +58,6 @@ class ProcessedMergedBamFileServiceTests {
             assertTrue(file.delete())
         }
         baseDir = null
-        sample = null
-        seqType = null
-        mergingSet = null
-        project = null
-        individual = null
-        sampleType = null
-        softwareTool = null
-        seqPlatform = null
-        run = null
     }
 
     @Test(expected = IllegalArgumentException)
@@ -144,8 +68,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test(expected = RuntimeException)
     void testUpdateBamMetricsFileFileIsEmpty() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
         File file = new File(processedMergedBamFileService.filePathForMetrics(processedMergedBamFile))
         file.text = ""
         processedMergedBamFileService.updateBamMetricsFile(processedMergedBamFile)
@@ -153,8 +76,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test(expected = RuntimeException)
     void testUpdateBamMetricsFileFileNotReadable() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
         File file = new File(processedMergedBamFileService.filePathForMetrics(processedMergedBamFile))
         file.setReadable(false)
         processedMergedBamFileService.updateBamMetricsFile(processedMergedBamFile)
@@ -162,8 +84,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testUpdateBamMetricsFile() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
         assertTrue(processedMergedBamFileService.updateBamMetricsFile(processedMergedBamFile))
     }
 
@@ -176,8 +97,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test(expected = RuntimeException)
     void testUpdateBamFileIndexFileIsEmpty() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
         File file = new File(processedMergedBamFileService.filePathForBai(processedMergedBamFile))
         file.text = ""
         processedMergedBamFileService.updateBamFileIndex(processedMergedBamFile)
@@ -185,8 +105,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test(expected = RuntimeException)
     void testUpdateBamFileIndexFileNotReadable() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
         File file = new File(processedMergedBamFileService.filePathForBai(processedMergedBamFile))
         file.setReadable(false)
         processedMergedBamFileService.updateBamFileIndex(processedMergedBamFile)
@@ -194,8 +113,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testUpdateBamFileIndex() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
         assertTrue(processedMergedBamFileService.updateBamFileIndex(processedMergedBamFile))
     }
 
@@ -207,8 +125,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test(expected = RuntimeException)
     void testUpdateBamFileFileNotReadable() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
         File file = new File(processedMergedBamFileService.filePath(processedMergedBamFile))
         file.setReadable(false)
         processedMergedBamFileService.updateBamFile(processedMergedBamFile)
@@ -216,8 +133,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test(expected = RuntimeException)
     void testUpdateBamFileFileIsEmpty() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
         File file = new File(processedMergedBamFileService.filePath(processedMergedBamFile))
         file.text = ""
         processedMergedBamFileService.updateBamFile(processedMergedBamFile)
@@ -225,14 +141,13 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testUpdateBamFile() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
         assertTrue(processedMergedBamFileService.updateBamFile(processedMergedBamFile))
     }
 
     @Test
     void testCreateMergedBamFile() {
-        MergingPass mergingPass = createMergingPass()
+        MergingPass mergingPass = MergingPass.build()
         DomainFactory.assignNewProcessedBamFile(mergingPass.mergingSet)
         ProcessedMergedBamFile processedMergedBamFile = processedMergedBamFileService.createMergedBamFile(mergingPass)
         assertNotNull(processedMergedBamFile)
@@ -251,8 +166,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testFilePathForBai() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
         String pathExp = basePath + ".bai"
         String pathAct = processedMergedBamFileService.filePathForBai(processedMergedBamFile)
         assertEquals(pathExp, pathAct)
@@ -266,8 +180,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testFileNameForBai() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
         String nameExp = baseFile + ".bai"
         String nameAct = processedMergedBamFileService.fileNameForBai(processedMergedBamFile)
         assertEquals(nameExp, nameAct)
@@ -281,8 +194,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testFilePathForMetrics() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
         String pathExp = basePath + "_metrics.txt"
         String pathAct = processedMergedBamFileService.filePathForMetrics(processedMergedBamFile)
         assertEquals(pathExp, pathAct)
@@ -296,8 +208,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testFileNameForMetrics() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
         String nameExp = baseFile + "_metrics.txt"
         String nameAct = processedMergedBamFileService.fileNameForMetrics(processedMergedBamFile)
         assertEquals(nameExp, nameAct)
@@ -311,8 +222,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testFilePath() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
         String pathExp = basePath +".bam"
         assertEquals(pathExp, processedMergedBamFileService.filePath(processedMergedBamFile))
     }
@@ -325,8 +235,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testFileName() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
         assertEquals(baseFile + ".bam", processedMergedBamFileService.fileName(processedMergedBamFile))
     }
 
@@ -338,8 +247,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testDirectoryByProcessedMergedBamFile() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
         String pathExp = directory
         String pathAct = processedMergedBamFileService.directory(processedMergedBamFile)
         assertEquals(pathExp, pathAct)
@@ -353,7 +261,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testDirectoryByMergingPassWithoutProcessedMergedBamFile() {
-        MergingPass mergingPass = createMergingPass()
+        MergingPass mergingPass = createProcessedMergedBamFile().mergingPass
         String pathExp = directory
         String pathAct = processedMergedBamFileService.directory(mergingPass)
         assertEquals(pathExp, pathAct)
@@ -361,87 +269,67 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testDirectoryByMergingPass() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile bamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile bamFile = createProcessedMergedBamFile()
         String pathExp = directory
-        String pathAct = processedMergedBamFileService.directory(mergingPass)
+        String pathAct = processedMergedBamFileService.directory(bamFile.mergingPass)
         assertEquals(pathExp, pathAct)
         bamFile.fileOperationStatus = FileOperationStatus.PROCESSED
         bamFile.md5sum = "68b329da9893e34099c7d8ad5cb9c940"
         pathExp = "/tmp/otp-unit-test/pmfs/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/"
-        pathAct = processedMergedBamFileService.directory(mergingPass)
+        pathAct = processedMergedBamFileService.directory(bamFile.mergingPass)
         assertEquals(pathExp, pathAct)
     }
 
     @Test
     void testMergedBamFileWithFinishedQAWhenQualityAssessmentStatusIsFalse() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
         mergedBamFile.qualityAssessmentStatus = QaProcessingStatus.IN_PROGRESS
-        mergingSet.status = State.PROCESSED
+        mergedBamFile.mergingSet.status = State.PROCESSED
         assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA())
     }
 
     @Test
     void testMergedBamFileWithFinishedQAWhenFileOperationStatusFalse() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
         mergedBamFile.fileOperationStatus = FileOperationStatus.INPROGRESS
-        mergingSet.status = State.PROCESSED
+        mergedBamFile.mergingSet.status = State.PROCESSED
         assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA())
     }
 
     @Test(expected = ValidationException)
     void testMergedBamFileWithFinishedQAWhenMd5sumNotNullStateIncorrect() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
         mergedBamFile.md5sum = "68b329da9893e34099c7d8ad5cb9c940"
-        mergingSet.status = State.PROCESSED
+        mergedBamFile.mergingSet.status = State.PROCESSED
         assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA())
     }
 
     void testMergedBamFileWithFinishedQAWhenMd5sumNotNull() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
         mergedBamFile.md5sum = "68b329da9893e34099c7d8ad5cb9c940"
         mergedBamFile.fileOperationStatus = FileOperationStatus.PROCESSED
-        mergingSet.status = State.PROCESSED
+        mergedBamFile.mergingSet.status = State.PROCESSED
         assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA())
     }
 
     @Test
     void testMergedBamFileWithFinishedQAWhenStatusNotProcessed() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
         assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA())
     }
 
     @Test
     void testMergedBamFileWithFinishedQAWhenMergingNotFinished() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
-        mergingSet.status = State.PROCESSED
+        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
+        mergedBamFile.mergingSet.status = State.PROCESSED
         mergedBamFile.status = AbstractBamFile.State.NEEDS_PROCESSING
         assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA())
     }
 
     @Test
-    void testMergedBamFileWithFinishedQAWhenSingleLaneQaNotFinished() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
-        SeqTrack seqTrack = createSeqTrack()
-        ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack)
-        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
-        processedBamFile.qualityAssessmentStatus = QaProcessingStatus.IN_PROGRESS
-        mergingSet.status = State.PROCESSED
-        assertEquals(mergedBamFile, processedMergedBamFileService.mergedBamFileWithFinishedQA())
-    }
-
-    @Test
     void testMergedBamFileWithFinishedQAWhenMergedBamFileUsedForOngoingMerging() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
-        mergingSet.status = State.PROCESSED
+        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
+        mergedBamFile.mergingSet.status = State.PROCESSED
         MergingSet mergingSet1 = new MergingSet(
                         identifier: MergingSet.nextIdentifier(mergedBamFile.mergingWorkPackage),
                         mergingWorkPackage: mergedBamFile.mergingWorkPackage,
@@ -458,17 +346,13 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testMergedBamFileWithFinishedQAWhenAllCorrect() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
-        mergingSet.status = State.PROCESSED
+        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
+        mergedBamFile.mergingSet.status = State.PROCESSED
         mergedBamFile.fileOperationStatus = FileOperationStatus.PROCESSED
         mergedBamFile.md5sum = "68b329da9893e34099c7d8ad5cb9c940"
-        SeqTrack seqTrack = createSeqTrack()
-        ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack)
-        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
         MergingSet mergingSet1 = new MergingSet(
                         identifier: 1,
-                        mergingWorkPackage: processedBamFile.mergingWorkPackage,
+                        mergingWorkPackage: mergedBamFile.mergingWorkPackage,
                         status: State.PROCESSED
                         )
         assertNotNull(mergingSet1.save([flush: true]))
@@ -477,17 +361,14 @@ class ProcessedMergedBamFileServiceTests {
                         bamFile: mergedBamFile
                         )
         assertNotNull(mergingSetAssignment1.save([flush: true]))
-        MergingSetAssignment mergingSetAssignment2 = new MergingSetAssignment(
-                        mergingSet: mergingSet1,
-                        bamFile: processedBamFile
-                        )
-        assertNotNull(mergingSetAssignment2.save([flush: true]))
-        MergingPass mergingPass1 = new MergingPass(
-                        identifier: 0,
-                        mergingSet: mergingSet1
-                        )
-        assertNotNull(mergingPass1.save([flush: true]))
-        ProcessedMergedBamFile mergedBamFile1 = createProcessedMergedBamFile(mergingPass1)
+        ProcessedMergedBamFile mergedBamFile1 = DomainFactory.createProcessedMergedBamFile(mergingSet1, [
+                numberOfMergedLanes: 2,
+                status: AbstractBamFile.State.PROCESSED,
+                qualityAssessmentStatus: QaProcessingStatus.FINISHED,
+                fileOperationStatus: FileOperationStatus.NEEDS_PROCESSING,
+        ])
+
+
         ProcessedMergedBamFile processedMergedBamFileExp = mergedBamFile1
         ProcessedMergedBamFile processedMergedBamFileAct = processedMergedBamFileService.mergedBamFileWithFinishedQA()
         assertEquals(processedMergedBamFileExp, processedMergedBamFileAct)
@@ -495,17 +376,15 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testProject() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
-        Project projectExp = project
+        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
+        Project projectExp = mergedBamFile.project
         Project projectAct = processedMergedBamFileService.project(mergedBamFile)
         assertEquals(projectExp, projectAct)
     }
 
     @Test
     void testStoreMD5Digest() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
         assertNull(mergedBamFile.md5sum)
         processedMergedBamFileService.storeMD5Digest(mergedBamFile, "68b329da9893e34099c7d8ad5cb9c940")
         String md5Exp = "68b329da9893e34099c7d8ad5cb9c940"
@@ -515,14 +394,14 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testSingleLaneQAResultsDirectories() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
-        SeqTrack seqTrack = createSeqTrack()
-        ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack)
-        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
+        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
+        ProcessedBamFile processedBamFile = mergedBamFile.mergingSet.bamFiles.first()
+        processedBamFile.seqTrack.run.name = 'name'
+        processedBamFile.seqTrack.laneId = 'laneId'
+
         QualityAssessmentPass qualityAssessmentPass = new QualityAssessmentPass(
                         identifier: 1,
-                        processedBamFile:processedBamFile
+                        processedBamFile: processedBamFile
                         )
         assertNotNull(qualityAssessmentPass.save([flush: true]))
 
@@ -530,15 +409,14 @@ class ProcessedMergedBamFileServiceTests {
         String singleLaneDirectoryNameExp = "name_laneId"
         String singleLaneDirectoryNameAct = locations.keySet().iterator().next()
         assertEquals(singleLaneDirectoryNameExp, singleLaneDirectoryNameAct)
-        String singleLanePathExp = "/tmp/otp-unit-test/pmbfs/processing/project-dir/results_per_pid/patient/alignment//name_laneId/pass1/QualityAssessment/pass1"
+        String singleLanePathExp = "/tmp/otp-unit-test/pmbfs/processing/project-dir/results_per_pid/patient/alignment//name_laneId/pass0/QualityAssessment/pass1"
         String singleLanePathAct = locations."${singleLaneDirectoryNameAct}"
         assertEquals(singleLanePathExp, singleLanePathAct)
     }
 
     @Test
     void testUpdateFileOperationStatus() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
         FileOperationStatus statusExp = FileOperationStatus.NEEDS_PROCESSING
         FileOperationStatus statusAct = mergedBamFile.fileOperationStatus
         assertEquals(statusExp, statusAct)
@@ -550,11 +428,10 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testLocationsForFileCopying() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
         Map<String, String> locations = processedMergedBamFileService.locationsForFileCopying(mergedBamFile)
         DataProcessingFilesService.OutputDirectories dirType = DataProcessingFilesService.OutputDirectories.MERGING
-        String sourceDirectoryExp = dataProcessingFilesService.getOutputDirectory(individual, dirType) + "/sample-type/seq-type/library/DEFAULT/0/pass0"
+        String sourceDirectoryExp = dataProcessingFilesService.getOutputDirectory(mergedBamFile.individual, dirType) + "/sample-type/seq-type/library/DEFAULT/0/pass0"
         assertEquals(sourceDirectoryExp, locations["sourceDirectory"])
         String destinationDirectoryExp = "/tmp/otp-unit-test/pmfs/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/"
         assertEquals(destinationDirectoryExp, locations["destinationDirectory"])
@@ -570,8 +447,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testDestinationDirectory() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
         String destinationExp = "/tmp/otp-unit-test/pmfs/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/"
         String destinationAct = processedMergedBamFileService.destinationDirectory(mergedBamFile)
         assertEquals(destinationExp, destinationAct)
@@ -584,8 +460,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testDestinationTempDirectory() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
         String destinationExp = "/tmp/otp-unit-test/pmfs/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/.tmp"
         String destinationAct = processedMergedBamFileService.destinationTempDirectory(mergedBamFile)
         assertEquals(destinationExp, destinationAct)
@@ -598,8 +473,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testQaResultTempDestinationDirectory() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
         String destinationExp = "/tmp/otp-unit-test/pmfs/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/.tmp/QualityAssessment"
         String destinationAct = processedMergedBamFileService.qaResultTempDestinationDirectory(mergedBamFile)
         assertEquals(destinationExp, destinationAct)
@@ -612,9 +486,8 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testSample() {
-        MergingPass mergingPass = createMergingPass()
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
-        Sample sampleExp = sample
+        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
+        Sample sampleExp = mergedBamFile.sample
         Sample sampleAct = processedMergedBamFileService.sample(mergedBamFile)
     }
 
@@ -625,43 +498,16 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testFastqFilesPerMergedBamFile() {
-        MergingPass mergingPass = createMergingPass()
-        SeqTrack seqTrack = createSeqTrack()
-        ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack)
-        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
-        FileType fileType = new FileType(
-                        type: de.dkfz.tbi.otp.ngsdata.FileType.Type.SEQUENCE
-                        )
-        assertNotNull(fileType.save([flush: true]))
-
-        DataFile dataFile = new DataFile(
-                        fileName: "dataFile",
-                        seqTrack: seqTrack,
-                        fileType: fileType
-                        )
-        assertNotNull(dataFile.save([flush: true]))
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
+        DataFile dataFile = DataFile.findBySeqTrack(processedMergedBamFile.containedSeqTracks.iterator().next())
         assertEquals([dataFile], processedMergedBamFileService.fastqFilesPerMergedBamFile(processedMergedBamFile))
     }
 
     @Test
     void testFastqFilesPerMergedBamFileNoFastqFiles() {
-        MergingPass mergingPass = createMergingPass()
-        SeqTrack seqTrack = createSeqTrack()
-        ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack)
-        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
-        FileType fileType = new FileType(
-                        type: de.dkfz.tbi.otp.ngsdata.FileType.Type.ALIGNMENT
-                        )
-        assertNotNull(fileType.save([flush: true]))
-
-        DataFile dataFile = new DataFile(
-                        fileName: "dataFile",
-                        seqTrack: seqTrack,
-                        fileType: fileType
-                        )
-        assertNotNull(dataFile.save([flush: true]))
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
+        DataFile dataFile = DataFile.findBySeqTrack(processedMergedBamFile.containedSeqTracks.iterator().next())
+        dataFile.fileType.type = FileType.Type.ALIGNMENT
         assert processedMergedBamFileService.fastqFilesPerMergedBamFile(processedMergedBamFile).isEmpty()
     }
 
@@ -674,325 +520,67 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testGetInferredKitBamFileIsNoExome() {
-        MergingPass mergingPass = createMergingPass()
-        SeqTrack seqTrack = createSeqTrack()
-        ProcessedBamFile processedBamFile = createProcessedBamFile(1, seqTrack)
-        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile)
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
         assertNull(processedMergedBamFileService.getInferredKit(processedMergedBamFile))
     }
 
 
-    @Test(expected = ProcessingException)
+    @Test
     void testGetInferredKitBamFileIsExomeButHasTwoDifferentKits() {
-        seqType.name = SeqTypeNames.EXOME.seqTypeName
-        assertNotNull(seqType.save(flush: true))
-        ExomeSeqTrack exomeSeqTrack1 = createExomeSeqTrack("laneId1")
-        LibraryPreparationKit libraryPreparationKit1 = createLibraryPreparationKit("Agilent SureSelect V3")
-        addKitToSeqTrack(libraryPreparationKit1, exomeSeqTrack1)
-        ExomeSeqTrack exomeSeqTrack2 = createExomeSeqTrack("laneId2")
-        LibraryPreparationKit libraryPreparationKit2 = createLibraryPreparationKit("Agilent SureSelect V4")
-        addKitToSeqTrack(libraryPreparationKit2, exomeSeqTrack2)
-        MergingPass mergingPass = createMergingPass()
-        ProcessedBamFile processedBamFile1 = createProcessedBamFile(1, exomeSeqTrack1)
-        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile1)
-        ProcessedBamFile processedBamFile2 = createProcessedBamFile(2, exomeSeqTrack2)
-        MergingSetAssignment mergingSetAssignment2 = createMergingSetAssignment(processedBamFile2)
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
-        processedMergedBamFileService.getInferredKit(processedMergedBamFile)
+        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build(seqType: SeqType.build(name: SeqTypeNames.EXOME.seqTypeName))
+        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage)
+        DomainFactory.assignNewProcessedBamFile(processedMergedBamFile)
+        List<SeqTrack> seqtracks = processedMergedBamFile.mergingSet.containedSeqTracks as List
+        seqtracks[0].libraryPreparationKit = LibraryPreparationKit.build()
+        seqtracks[0].kitInfoReliability = InformationReliability.KNOWN
+        seqtracks[1].libraryPreparationKit = LibraryPreparationKit.build()
+        seqtracks[1].kitInfoReliability = InformationReliability.KNOWN
+        TestCase.shouldFail(ProcessingException) {
+            processedMergedBamFileService.getInferredKit(processedMergedBamFile)
+        }
     }
 
 
     @Test
     void testGetInferredKitBamFileIsExomeButAllHaveKits() {
-        seqType.name = SeqTypeNames.EXOME.seqTypeName
-        assertNotNull(seqType.save(flush: true))
-        ExomeSeqTrack exomeSeqTrack1 = createExomeSeqTrack("laneId1")
-        ExomeSeqTrack exomeSeqTrack2 = createExomeSeqTrack("laneId2")
-        LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit("Agilent SureSelect V3")
-        addKitToSeqTrack(libraryPreparationKit, exomeSeqTrack1)
-        addKitToSeqTrack(libraryPreparationKit, exomeSeqTrack2)
-        MergingPass mergingPass = createMergingPass()
-        ProcessedBamFile processedBamFile1 = createProcessedBamFile(1, exomeSeqTrack1)
-        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile1)
-        ProcessedBamFile processedBamFile2 = createProcessedBamFile(2, exomeSeqTrack2)
-        MergingSetAssignment mergingSetAssignment2 = createMergingSetAssignment(processedBamFile2)
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build(seqType: SeqType.build(name: SeqTypeNames.EXOME.seqTypeName))
+        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage)
+        DomainFactory.assignNewProcessedBamFile(processedMergedBamFile)
+        List<SeqTrack> seqtracks = processedMergedBamFile.mergingSet.containedSeqTracks as List
+        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
+        seqtracks[0].libraryPreparationKit = libraryPreparationKit
+        seqtracks[1].libraryPreparationKit = libraryPreparationKit
+        seqtracks[0].kitInfoReliability = InformationReliability.KNOWN
+        seqtracks[1].kitInfoReliability = InformationReliability.KNOWN
         assertNull(processedMergedBamFileService.getInferredKit(processedMergedBamFile))
     }
 
 
     @Test
     void testGetInferredKitBamFileIsExomeAndOneKitInferred() {
-        seqType.name = SeqTypeNames.EXOME.seqTypeName
-        assertNotNull(seqType.save(flush: true))
-        ExomeSeqTrack exomeSeqTrack1 = createExomeSeqTrack("laneId1")
-        ExomeSeqTrack exomeSeqTrack2 = createExomeSeqTrack("laneId2")
-        LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit("Agilent SureSelect V3")
-        addKitToSeqTrack(libraryPreparationKit, exomeSeqTrack1)
-        addKitToSeqTrack(libraryPreparationKit, exomeSeqTrack2)
-        exomeSeqTrack2.kitInfoReliability = InformationReliability.INFERRED
-        assertNotNull(exomeSeqTrack2.save(flush: true))
-        MergingPass mergingPass = createMergingPass()
-        ProcessedBamFile processedBamFile1 = createProcessedBamFile(1, exomeSeqTrack1)
-        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile1)
-        ProcessedBamFile processedBamFile2 = createProcessedBamFile(2, exomeSeqTrack2)
-        MergingSetAssignment mergingSetAssignment2 = createMergingSetAssignment(processedBamFile2)
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
+        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build(seqType: SeqType.build(name: SeqTypeNames.EXOME.seqTypeName))
+        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage)
+        DomainFactory.assignNewProcessedBamFile(processedMergedBamFile)
+        List<SeqTrack> seqtracks = processedMergedBamFile.mergingSet.containedSeqTracks as List
+        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
+        seqtracks[0].libraryPreparationKit = libraryPreparationKit
+        seqtracks[1].libraryPreparationKit = libraryPreparationKit
+        seqtracks[0].kitInfoReliability = InformationReliability.KNOWN
+        seqtracks[1].kitInfoReliability = InformationReliability.INFERRED
         assertEquals(libraryPreparationKit, processedMergedBamFileService.getInferredKit(processedMergedBamFile))
     }
 
 
-    @Test
-    void testGetInferredKitBamFileOneIsExomeAndOneIsNot() {
-        seqType.name = SeqTypeNames.EXOME.seqTypeName
-        assertNotNull(seqType.save(flush: true))
-        SeqTrack seqTrack = createSeqTrack("laneId1")
-        ExomeSeqTrack exomeSeqTrack = createExomeSeqTrack("laneId2")
-        LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit("Agilent SureSelect V3")
-        addKitToSeqTrack(libraryPreparationKit, exomeSeqTrack)
-        MergingPass mergingPass = createMergingPass()
-        ProcessedBamFile processedBamFile1 = createProcessedBamFile(1, seqTrack)
-        MergingSetAssignment mergingSetAssignment = createMergingSetAssignment(processedBamFile1)
-        ProcessedBamFile processedBamFile2 = createProcessedBamFile(2, exomeSeqTrack)
-        MergingSetAssignment mergingSetAssignment2 = createMergingSetAssignment(processedBamFile2)
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
-        assertNull(processedMergedBamFileService.getInferredKit(processedMergedBamFile))
-    }
-
-    @Test(expected = AssertionError)
-    void test_saveNumberOfMergedLanes_WhenProcessedMergedBamFileIsNull_ShouldFail() {
-        processedMergedBamFileService.updateNumberOfMergedLanes(null)
-    }
-
-    @Test
-    void test_saveNumberOfMergedLanes_WhenOneMergingPassExist_ShouldSetValueToNumberOfLanes() {
-
-        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
-                sample: sample,
-                seqType: seqType,
-                seqPlatformGroup: seqPlatform.seqPlatformGroup,
-        )
-        assert mergingWorkPackage.save([flush: true])
-
-        MergingSet mergingSet = new MergingSet(
-                mergingWorkPackage: mergingWorkPackage,
-                status: State.PROCESSED,
-        )
-        assert mergingSet.save([flush: true])
-
-        MergingPass mergingPass = new MergingPass([mergingSet: mergingSet])
-        assert mergingPass.save([flush: true])
-
-
-        (1..2).each { id ->
-            // Create SeqTrack and lane (BAM file)
-            SeqTrack seqTrack = createSeqTrack("lane_${id}")
-            ProcessedBamFile bamFile = createProcessedBamFile(id, seqTrack)
-            // Connect the lane with the merging set
-            MergingSetAssignment mergingSetAssignment = new MergingSetAssignment([
-                    mergingSet: mergingSet,
-                    bamFile   : bamFile,
-            ])
-            assert mergingSetAssignment.save([flush: true])
-        }
-
-        // Create a new processed BAM file
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
-
-        // Calculate and update the number of merged lanes
-        assert !processedMergedBamFile.numberOfMergedLanes
-        processedMergedBamFileService.updateNumberOfMergedLanes(processedMergedBamFile)
-        assert processedMergedBamFile.numberOfMergedLanes == 2
-    }
-
-    @Test
-    void test_saveNumberOfMergedLanes_WhenTwoMergingPassesExist_ShouldSetValueToNumberOfLanesOfLatest() {
-
-        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
-                sample: sample,
-                seqType: seqType,
-                seqPlatformGroup: seqPlatform.seqPlatformGroup,
-        )
-        assert mergingWorkPackage.save([flush: true])
-
-        MergingSet mergingSet = new MergingSet(
-                mergingWorkPackage: mergingWorkPackage,
-                identifier: MergingSet.nextIdentifier(mergingWorkPackage),
-                status: State.PROCESSED,
-        )
-        assert mergingSet.save([flush: true])
-
-        MergingPass mergingPass = new MergingPass([mergingSet: mergingSet])
-        assert mergingPass.save([flush: true])
-
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile(mergingPass)
-
-        // A new merging set with an additional lane
-
-        MergingSet mergingSetLater = new MergingSet(
-                mergingWorkPackage: mergingWorkPackage,
-                identifier: MergingSet.nextIdentifier(mergingWorkPackage),
-                status: State.PROCESSED,
-        )
-        assert mergingSetLater.save([flush: true])
-
-        MergingPass mergingPassLater = new MergingPass([mergingSet: mergingSetLater])
-        assert mergingPassLater.save([flush: true])
-
-        // Connect the first two lanes to both merging sets
-        (1..2).each { id ->
-            // Create SeqTrack and lane (BAM file)
-            SeqTrack seqTrack = createSeqTrack("lane_${id}")
-            ProcessedBamFile bamFile = createProcessedBamFile(id, seqTrack)
-            // Connect the lane with the merging set
-            MergingSetAssignment mergingSetAssignment = new MergingSetAssignment([
-                    mergingSet: mergingSet,
-                    bamFile   : bamFile,
-            ])
-            assert mergingSetAssignment.save([flush: true])
-            MergingSetAssignment mergingSetAssignmentLater = new MergingSetAssignment([
-                    mergingSet: mergingSetLater,
-                    bamFile   : bamFile,
-            ])
-            assert mergingSetAssignmentLater.save([flush: true])
-        }
-
-        // Connect the "new" lane to the later merging set
-        SeqTrack seqTrack3 = createSeqTrack('lane_3')
-        ProcessedBamFile processedBamFile3 = createProcessedBamFile(3, seqTrack3)
-
-        MergingSetAssignment mergingSetAssignment3 = new MergingSetAssignment([
-                mergingSet: mergingSetLater,
-                bamFile   : processedBamFile3,
-        ])
-        assert mergingSetAssignment3.save([flush: true])
-
-        // Create a new merged BAM file
-        ProcessedMergedBamFile processedMergedBamFileLater = createProcessedMergedBamFile(mergingPassLater)
-
-        // Calculate and update the number of merged lanes for both
-        assert !processedMergedBamFile.numberOfMergedLanes
-        assert !processedMergedBamFileLater.numberOfMergedLanes
-        processedMergedBamFileService.updateNumberOfMergedLanes(processedMergedBamFile)
-        processedMergedBamFileService.updateNumberOfMergedLanes(processedMergedBamFileLater)
-        assert processedMergedBamFile.numberOfMergedLanes == 2
-        assert processedMergedBamFileLater.numberOfMergedLanes == 3
-    }
-
-    //
-    // Helper methods
-    //
-
-    private ProcessedMergedBamFile createProcessedMergedBamFile(MergingPass mergingPass) {
-        ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
-                        mergingPass: mergingPass,
-                        fileExists: true,
-                        type: BamType.MDUP,
-                        qualityAssessmentStatus: QaProcessingStatus.FINISHED,
-                        fileOperationStatus: FileOperationStatus.NEEDS_PROCESSING,
-                        md5sum: null,
-                        status: AbstractBamFile.State.PROCESSED
-                        )
-        assertNotNull(processedMergedBamFile.save([flush: true]))
-        return processedMergedBamFile
-    }
-
-    private MergingPass createMergingPass() {
-        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
-                        sample: sample,
-                        seqType: seqType,
-                        seqPlatformGroup: seqPlatform.seqPlatformGroup,
-                        )
-        assertNotNull(mergingWorkPackage.save([flush: true]))
-
-        mergingSet = new MergingSet(
-                        identifier: 0,
-                        mergingWorkPackage: mergingWorkPackage,
-                        status: State.NEEDS_PROCESSING
-                        )
-        assertNotNull(mergingSet.save([flush: true]))
-
-        MergingPass mergingPass = new MergingPass(
-                        identifier: 0,
-                        mergingSet: mergingSet
-                        )
-        assertNotNull(mergingPass.save([flush: true]))
-        return mergingPass
-    }
-
-    private ProcessedBamFile createProcessedBamFile(int identifier, SeqTrack seqTrack) {
-        AlignmentPass alignmentPass = testData.createAlignmentPass(
-                        identifier: identifier,
-                        seqTrack: seqTrack,
-                        description: "test"
-                        )
-        assertNotNull(alignmentPass.save([flush: true]))
-
-        ProcessedBamFile processedBamFile = new ProcessedBamFile(
-                        alignmentPass: alignmentPass,
-                        type: BamType.SORTED,
-                        status: AbstractBamFile.State.NEEDS_PROCESSING,
-                        qualityAssessmentStatus: QaProcessingStatus.FINISHED
-                        )
-        assertNotNull(processedBamFile.save([flush: true]))
-
-        return processedBamFile
-    }
-
-
-    MergingSetAssignment createMergingSetAssignment(ProcessedBamFile processedBamFile) {
-        MergingSetAssignment mergingSetAssignment = new MergingSetAssignment(
-                        mergingSet: mergingSet,
-                        bamFile: processedBamFile
-                        )
-        assertNotNull(mergingSetAssignment.save([flush: true]))
-        return mergingSetAssignment
-    }
-
-
-
-    SeqTrack createSeqTrack(String laneId = "laneId") {
-        SeqTrack seqTrack = new SeqTrack(
-                        laneId: laneId,
-                        run: run,
-                        sample: sample,
-                        seqType: seqType,
-                        seqPlatform: seqPlatform,
-                        pipelineVersion: softwareTool
-                        )
-        assertNotNull(seqTrack.save([flush: true]))
-        return seqTrack
-    }
-
-
-    ExomeSeqTrack createExomeSeqTrack(String laneId = "laneId") {
-        ExomeSeqTrack exomeSeqTrack = new ExomeSeqTrack(
-                        laneId: laneId,
-                        run: run,
-                        sample: sample,
-                        seqType: seqType,
-                        seqPlatform: seqPlatform,
-                        pipelineVersion: softwareTool,
-                        kitInfoReliability: InformationReliability.UNKNOWN_UNVERIFIED,
-                        libraryPreparationKit: null
-                        )
-        assertNotNull(exomeSeqTrack.save([flush: true]))
-        return exomeSeqTrack
-    }
-
-
-    LibraryPreparationKit createLibraryPreparationKit(String name) {
-        LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(
-                        name: name
-                        )
-        assertNotNull(libraryPreparationKit.save([flush: true]))
-        return libraryPreparationKit
-    }
-
-    void addKitToSeqTrack(LibraryPreparationKit libraryPreparationKit, ExomeSeqTrack exomeSeqTrack) {
-        exomeSeqTrack.libraryPreparationKit = libraryPreparationKit
-        exomeSeqTrack.kitInfoReliability = InformationReliability.KNOWN
-        assertNotNull(exomeSeqTrack.save(flush: true))
+    private ProcessedMergedBamFile createProcessedMergedBamFile() {
+        ProcessedMergedBamFile mergedBamFile = DomainFactory.createProcessedMergedBamFile()
+        mergedBamFile.project.dirName = 'project-dir'
+        mergedBamFile.individual.pid = 'patient'
+        mergedBamFile.sampleType.name = 'sample-type'
+        mergedBamFile.seqType.name = 'seq-type'
+        mergedBamFile.seqType.dirName = 'seq-type-dir'
+        mergedBamFile.seqType.libraryLayout = 'library'
+        mergedBamFile.md5sum = null
+        mergedBamFile.fileOperationStatus = FileOperationStatus.NEEDS_PROCESSING
+        return mergedBamFile
     }
 }

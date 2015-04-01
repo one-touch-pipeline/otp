@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.Individual
+import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.Sample
+import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
@@ -40,6 +42,7 @@ class AbstractFileSystemBamFileTests {
 
 
 class MockAbstractFileSystemBamFile extends AbstractFileSystemBamFile {
+
     @Override
     MergingWorkPackage getMergingWorkPackage() {
         return null
@@ -52,26 +55,6 @@ class MockAbstractFileSystemBamFile extends AbstractFileSystemBamFile {
 
     @Override
     AbstractQualityAssessment getOverallQualityAssessment() {
-        return null
-    }
-
-    @Override
-    SeqType getSeqType() {
-        return null
-    }
-
-    @Override
-    Individual getIndividual() {
-        return null
-    }
-
-    @Override
-    Sample getSample() {
-        return null
-    }
-
-    @Override
-    ReferenceGenome getReferenceGenome() {
         return null
     }
 }

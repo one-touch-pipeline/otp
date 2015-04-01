@@ -19,14 +19,7 @@ class ExternallyProcessedMergedBamFile extends AbstractFileSystemBamFile {
 
     ReferenceGenome referenceGenome
 
-    Project getProject() {
-        return fastqSet.project
-    }
-
-    Individual getIndividual() {
-        return fastqSet.individual
-    }
-
+    @Override
     Sample getSample() {
         return fastqSet.sample
     }

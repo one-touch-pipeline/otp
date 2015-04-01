@@ -93,7 +93,8 @@ class QualityAssessmentMergedWorkflowTests extends QualityAssessmentAbstractWork
                         fileExists: true,
                         type: AbstractBamFile.BamType.MDUP,
                         status: AbstractBamFile.State.PROCESSED,
-                        qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.NOT_STARTED
+                        qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.NOT_STARTED,
+                        numberOfMergedLanes: 1,
                         )
         assertNotNull(processedMergedBamFile.save([flush: true]))
     }

@@ -593,6 +593,8 @@ class SnvCallingServiceTests extends GroovyTestCase {
         final ProcessedMergedBamFile bamFile = testData.createProcessedMergedBamFile(individual, seqType, identifier)
         bamFile.coverage = COVERAGE_THRESHOLD
         bamFile.numberOfMergedLanes = LANE_THRESHOLD
+        DomainFactory.assignNewProcessedBamFile(bamFile.mergingSet)
+        DomainFactory.assignNewProcessedBamFile(bamFile.mergingSet)
         assert bamFile.save(failOnError: true)
 
         ProcessingThresholds processingThresholds1 = new ProcessingThresholds(

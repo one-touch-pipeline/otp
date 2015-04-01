@@ -1,3 +1,5 @@
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.Workflow
 import grails.util.Environment
 import de.dkfz.tbi.*
@@ -31,9 +33,11 @@ testDataConfig {
         }
         'de.dkfz.tbi.otp.ngsdata.Project' {
             name = {'projectName_' + (counter++)}
+            realmName = DomainFactory.DEFAULT_REALM_NAME
+
         }
         'de.dkfz.tbi.otp.ngsdata.Realm' {
-            name = 'FakeRealm'
+            name = DomainFactory.DEFAULT_REALM_NAME
             env = Environment.current.name
             rootPath = '/tmp/otp-unit-test/root'
             processingRootPath = '/tmp/otp-unit-test/processing'
@@ -107,8 +111,22 @@ testDataConfig {
         'de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile' {
             alignmentPass = {TestData.createAndSaveAlignmentPass()}
         }
+        'de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile' {
+            type = AbstractBamFile.BamType.MDUP
+        }
         'de.dkfz.tbi.otp.dataprocessing.ProcessedSaiFile' {
             alignmentPass = {TestData.createAndSaveAlignmentPass()}
+        }
+        'de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig' {
+            configFilePath = {
+                File config = new File("${TestCase.TEST_DIRECTORY}/default-roddy-worflow-config")
+                if (!config.exists()) {
+                    config.parentFile.mkdirs()
+                    config.deleteOnExit()
+                    config << "configuration"
+                }
+                return config.absolutePath
+            }
         }
         'de.dkfz.tbi.otp.job.plan.JobExecutionPlan' {
             name = {'plan_' + (counter++)}
@@ -123,7 +141,9 @@ testDataConfig {
     unitAdditionalBuild = [
         'de.dkfz.tbi.otp.ngsdata.DataFile': [de.dkfz.tbi.otp.ngsdata.FileType],
         'de.dkfz.tbi.otp.ngsdata.SeqPlatform': [de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup, de.dkfz.tbi.otp.ngsdata.SeqPlatformModelLabel],
-        'de.dkfz.tbi.otp.ngsdata.SeqTrack': [de.dkfz.tbi.otp.ngsdata.ChipSeqSeqTrack, de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack],
+        'de.dkfz.tbi.otp.ngsdata.SeqTrack': [de.dkfz.tbi.otp.ngsdata.ChipSeqSeqTrack, de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack, de.dkfz.tbi.otp.ngsdata.DataFile],
+        'de.dkfz.tbi.otp.dataprocessing.AbstractBamFile': [de.dkfz.tbi.otp.ngsdata.SeqTrack],
+        'de.dkfz.tbi.otp.dataprocessing.MergingSet': [de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment],
     ]
 }
 

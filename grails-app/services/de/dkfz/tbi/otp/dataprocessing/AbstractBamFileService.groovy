@@ -33,14 +33,12 @@ class AbstractBamFileService {
         assertSave(bamFile)
     }
 
-    public List<AbstractBamFile> findByMergingSet(MergingSet mergingSet) {
-        notNull(mergingSet, "The parameter merging set is not allowed to be null")
-        return MergingSetAssignment.findAllByMergingSet(mergingSet)*.bamFile
-    }
-
+    /**
+     * @return bam files connected directly with this processedMergedBamFile.mergingSet
+     */
     public List<AbstractBamFile> findByProcessedMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {
         notNull(processedMergedBamFile, "The parameter processedMergedBamFile is not allowed to be null")
-        return findByMergingSet(processedMergedBamFile.mergingPass.mergingSet)
+        return processedMergedBamFile.mergingPass.mergingSet.bamFiles
     }
 
     /**

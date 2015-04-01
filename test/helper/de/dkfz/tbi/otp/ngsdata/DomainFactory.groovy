@@ -8,6 +8,9 @@ import de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.Workflow
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
@@ -28,10 +31,12 @@ class DomainFactory {
     private DomainFactory() {
     }
 
+    static final String DEFAULT_REALM_NAME = 'FakeRealm'
     static final String DEFAULT_HOST = 'localhost'
     static final int    DEFAULT_PORT = 22
     static final String LABEL_DKFZ = 'DKFZ'
     static final String LABEL_BIOQUANT = 'BioQuant'
+    static final String DEFAULT_MD5_SUM = '123456789abcdef123456789abcdef00'
 
     /**
      * Defaults for new realms.
@@ -51,7 +56,7 @@ class DomainFactory {
      * </ul>
      */
     public static final Map REALM_DEFAULTS = [
-        name: 'FakeRealm',
+        name: DEFAULT_REALM_NAME,
         env: Environment.current.name,
         rootPath:           '/dev/null/otp-test/fakeRealm/root',
         processingRootPath: '/dev/null/otp-test/fakeRealm/processing',
@@ -149,13 +154,26 @@ class DomainFactory {
         return createProcessedMergedBamFile(mergingSet, properties)
     }
 
+    public static ProcessedMergedBamFile createProcessedMergedBamFile(Map properties = [:]) {
+        return createProcessedMergedBamFile(MergingSet.build(), properties)
+    }
+
     public static ProcessedMergedBamFile createProcessedMergedBamFile(MergingSet mergingSet, Map properties = [:]) {
-        return ProcessedMergedBamFile.build([
+        assignNewProcessedBamFile(mergingSet)
+        ProcessedMergedBamFile bamFile = ProcessedMergedBamFile.build([
                 mergingPass: MergingPass.build(
                         mergingSet: mergingSet,
                         identifier: MergingPass.nextIdentifier(mergingSet),
-                )
+                ),
+                numberOfMergedLanes: 1,
         ] + properties)
+        return bamFile
+    }
+
+    public static ProcessedBamFile assignNewProcessedBamFile(final ProcessedMergedBamFile processedMergedBamFile) {
+        final ProcessedBamFile bamFile = assignNewProcessedBamFile(processedMergedBamFile.mergingSet)
+        processedMergedBamFile.numberOfMergedLanes++
+        return bamFile
     }
 
     public static ProcessedBamFile assignNewProcessedBamFile(final MergingSet mergingSet) {
@@ -181,6 +199,37 @@ class DomainFactory {
         return bamFile
     }
 
+    public static createRoddyBamFile(Map bamFileProperties = [:]) {
+        Workflow workflow = Workflow.buildLazy(name: Workflow.Name.RODDY)
+        MergingWorkPackage workPackage = MergingWorkPackage.build(workflow: workflow)
+        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile(workPackage)
+        RoddyBamFile bamFile = RoddyBamFile.build([
+                numberOfMergedLanes: 1,
+                seqTracks: [seqTrack],
+                workPackage: workPackage,
+                config: RoddyWorkflowConfig.build(workflow: workflow),
+                md5sum: DEFAULT_MD5_SUM
+                ] + bamFileProperties
+        )
+        bamFile.save(flush: true) // build-test-data does not flush, only saves
+        return bamFile
+    }
+
+    public static createRoddyBamFile(RoddyBamFile baseBamFile, Map bamFileProperties = [:]) {
+        RoddyBamFile bamFile = RoddyBamFile.build([
+                baseBamFile: baseBamFile,
+                config: RoddyWorkflowConfig.build(workflow:  baseBamFile.config.workflow),
+                workPackage: baseBamFile.workPackage,
+                identifier: baseBamFile.identifier + 1,
+                numberOfMergedLanes: baseBamFile.numberOfMergedLanes + 1,
+                seqTracks: [DomainFactory.buildSeqTrackWithDataFile(baseBamFile.workPackage)],
+                md5sum: DEFAULT_MD5_SUM
+                ] + bamFileProperties
+        )
+        bamFile.save(flush: true)
+        return bamFile
+    }
+
     public static SeqTrack buildSeqTrackWithDataFile(MergingWorkPackage mergingWorkPackage) {
         return buildSeqTrackWithDataFile(
                 sample: mergingWorkPackage.sample,
@@ -190,7 +239,12 @@ class DomainFactory {
     }
 
     public static SeqTrack buildSeqTrackWithDataFile(Map seqTrackProperties = [:], Map dataFileProperties = [:]) {
-        SeqTrack seqTrack = SeqTrack.build(seqTrackProperties)
+        SeqTrack seqTrack
+        if (seqTrackProperties.seqType?.name == SeqTypeNames.EXOME.seqTypeName) {
+            seqTrack = ExomeSeqTrack.build(seqTrackProperties)
+        } else {
+            seqTrack = SeqTrack.build(seqTrackProperties)
+        }
         buildSequenceDataFile(dataFileProperties + [seqTrack: seqTrack])
         return seqTrack
     }

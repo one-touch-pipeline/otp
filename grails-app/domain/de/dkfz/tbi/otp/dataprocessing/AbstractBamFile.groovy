@@ -2,15 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-import de.dkfz.tbi.otp.ngsdata.BedFile
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.FileType
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.Sample
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
+import de.dkfz.tbi.otp.ngsdata.*
 
 abstract class AbstractBamFile {
 
@@ -104,12 +96,10 @@ abstract class AbstractBamFile {
      */
     State status = State.DECLARED
 
+
     public abstract MergingWorkPackage getMergingWorkPackage()
     public abstract Set<SeqTrack> getContainedSeqTracks()
     public abstract AbstractQualityAssessment getOverallQualityAssessment()
-    public abstract SeqType getSeqType()
-    public abstract Individual getIndividual()
-    public abstract Sample getSample()
 
     static constraints = {
         hasMetricsFile validator: { val, obj ->
@@ -146,11 +136,6 @@ abstract class AbstractBamFile {
         qualityAssessmentStatus == QaProcessingStatus.FINISHED
     }
 
-    /**
-     * @return The reference genome which was used to produce this BAM file.
-     */
-    abstract ReferenceGenome getReferenceGenome()
-
     public BedFile getBedFile() {
         assert seqType.name == SeqTypeNames.EXOME.seqTypeName : "A BedFile is only available when the sequencing type is exome."
         List<SeqTrack> seqTracks = containedSeqTracks as List
@@ -160,6 +145,37 @@ abstract class AbstractBamFile {
                 referenceGenome: referenceGenome,
                 libraryPreparationKit: exactlyOneElement(seqTracks*.libraryPreparationKit.unique()),
         ))
+    }
+
+    final Project getProject() {
+        return individual?.project
+    }
+
+    final short getProcessingPriority() {
+        return project?.processingPriority
+    }
+
+    final Individual getIndividual() {
+        return sample?.individual
+    }
+
+    Sample getSample() {
+        return mergingWorkPackage?.sample
+    }
+
+    final SampleType getSampleType() {
+        return  sample?.sampleType
+    }
+
+    SeqType getSeqType() {
+        return mergingWorkPackage?.seqType
+    }
+
+    /**
+     * @return The reference genome which was used to produce this BAM file.
+     */
+    ReferenceGenome getReferenceGenome() {
+        return mergingWorkPackage?.referenceGenome
     }
 
     /**

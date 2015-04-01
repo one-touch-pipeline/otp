@@ -64,7 +64,8 @@ class ProcessedMergedBamFileTests {
     void testSave() {
         ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile(
                 type: AbstractBamFile.BamType.SORTED,
-                mergingPass: mergingPass)
+                mergingPass: mergingPass,
+                numberOfMergedLanes: 1)
         Assert.assertTrue(bamFile.validate())
         bamFile.save(flush: true)
     }

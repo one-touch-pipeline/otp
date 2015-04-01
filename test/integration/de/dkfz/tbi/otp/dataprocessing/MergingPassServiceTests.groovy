@@ -35,7 +35,8 @@ class MergingPassServiceTests {
                         qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.UNKNOWN,
                         fileOperationStatus: AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING,
                         md5sum: null,
-                        status: AbstractBamFile.State.PROCESSED
+                        status: AbstractBamFile.State.PROCESSED,
+                        numberOfMergedLanes: 1,
                         )
         assertNotNull(processedMergedBamFile.save([flush: true]))
         assertEquals(AbstractBamFile.QaProcessingStatus.UNKNOWN, processedMergedBamFile.qualityAssessmentStatus)
@@ -59,7 +60,8 @@ class MergingPassServiceTests {
                         qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.UNKNOWN,
                         fileOperationStatus: AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING,
                         md5sum: null,
-                        status: AbstractBamFile.State.PROCESSED
+                        status: AbstractBamFile.State.PROCESSED,
+                        numberOfMergedLanes: 1,
                         )
         assertNotNull(processedMergedBamFile.save([flush: true]))
         assertEquals(AbstractBamFile.QaProcessingStatus.UNKNOWN, processedMergedBamFile.qualityAssessmentStatus)

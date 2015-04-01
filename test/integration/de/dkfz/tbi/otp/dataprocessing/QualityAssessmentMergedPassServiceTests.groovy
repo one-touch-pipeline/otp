@@ -91,7 +91,8 @@ class QualityAssessmentMergedPassServiceTests {
                         qualityAssessmentStatus: QaProcessingStatus.UNKNOWN,
                         fileOperationStatus: FileOperationStatus.DECLARED,
                         md5sum: null,
-                        status: AbstractBamFile.State.PROCESSED
+                        status: AbstractBamFile.State.PROCESSED,
+                        numberOfMergedLanes: 1
                         )
         assertNotNull(processedMergedBamFile.save([flush: true]))
 

@@ -9,7 +9,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 @TestFor(MergingSet)
 @Build([DataFile, FileType, MergingSet, MergingSetAssignment, ProcessedBamFile])
-class MergingSetTests {
+class MergingSetUnitTests {
 
     MergingWorkPackage workPackage = null
 

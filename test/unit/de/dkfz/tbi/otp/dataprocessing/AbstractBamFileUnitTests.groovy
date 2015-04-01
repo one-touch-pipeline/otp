@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.SampleType
 import org.joda.time.DateTime
 
 import de.dkfz.tbi.otp.ngsdata.DataFile
@@ -118,6 +120,7 @@ class AbstractBamFileUnitTests {
 
 
 class MockAbstractBamFile extends AbstractBamFile {
+
     @Override
     MergingWorkPackage getMergingWorkPackage() {
         return null
@@ -130,26 +133,6 @@ class MockAbstractBamFile extends AbstractBamFile {
 
     @Override
     AbstractQualityAssessment getOverallQualityAssessment() {
-        return null
-    }
-
-    @Override
-    SeqType getSeqType() {
-        return null
-    }
-
-    @Override
-    Individual getIndividual() {
-        return null
-    }
-
-    @Override
-    Sample getSample() {
-        return null
-    }
-
-    @Override
-    ReferenceGenome getReferenceGenome() {
         return null
     }
 }

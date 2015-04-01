@@ -18,28 +18,6 @@ class ProcessedBamFile extends AbstractFileSystemBamFile {
         return alignmentPass.seqTrack
     }
 
-    Sample getSample() {
-        return alignmentPass.sample
-    }
-
-    @Override
-    SeqType getSeqType() {
-        return alignmentPass.seqType
-    }
-
-    @Override
-    Individual getIndividual() {
-        return alignmentPass.individual
-    }
-
-    Project getProject() {
-        return alignmentPass.project
-    }
-
-    short getProcessingPriority() {
-        return project.processingPriority
-    }
-
     @Override
     public String toString() {
         return "id: ${id} " +
@@ -54,13 +32,9 @@ class ProcessedBamFile extends AbstractFileSystemBamFile {
      * @return <code>true</code>, if this {@link ProcessedBamFile} is from the latest alignment
      * @see AlignmentPass#isLatestPass()
      */
+    @Override
     public boolean isMostRecentBamFile() {
         return alignmentPass.isLatestPass()
-    }
-
-    @Override
-    ReferenceGenome getReferenceGenome() {
-        return alignmentPass.referenceGenome
     }
 
     @Override

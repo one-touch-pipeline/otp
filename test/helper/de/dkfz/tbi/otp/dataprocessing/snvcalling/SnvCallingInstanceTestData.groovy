@@ -164,6 +164,7 @@ class SnvCallingInstanceTestData extends TestData {
                 status: AbstractBamFile.State.PROCESSED,
                 fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
                 coverage: 1,
+                numberOfMergedLanes: 1,
         )
         assert bamFile.save(flush: true, failOnError: true)
 

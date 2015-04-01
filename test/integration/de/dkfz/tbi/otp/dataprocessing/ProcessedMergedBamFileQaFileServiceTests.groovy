@@ -98,7 +98,8 @@ class ProcessedMergedBamFileQaFileServiceTests {
                         qualityAssessmentStatus: QaProcessingStatus.FINISHED,
                         fileOperationStatus: FileOperationStatus.NEEDS_PROCESSING,
                         md5sum: null,
-                        status: AbstractBamFile.State.PROCESSED
+                        status: AbstractBamFile.State.PROCESSED,
+                        numberOfMergedLanes: 1,
                         )
         assertNotNull(processedMergedBamFile.save([flush: true]))
 

@@ -104,7 +104,7 @@ class MergingSetService {
         //determine, if the found merging sets have also other bam files than the once, which shall be merged in this process
         for (mergingSetId in mergingSetIds) {
             MergingSet mergingSet = MergingSet.get(mergingSetId)
-            if (bamFiles2Merge.size().equals(abstractBamFileService.findByMergingSet(mergingSet).size())) {
+            if (bamFiles2Merge.size().equals(mergingSet.bamFiles.size())) {
                 return false
             }
         }

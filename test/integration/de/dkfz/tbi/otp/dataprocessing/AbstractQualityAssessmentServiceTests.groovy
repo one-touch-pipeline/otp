@@ -121,6 +121,7 @@ class AbstractQualityAssessmentServiceTests {
                 status                 : AbstractBamFile.State.PROCESSED,
                 mergingPass            : mergingPass,
                 alignmentPass          : processedBamFile.alignmentPass,
+                numberOfMergedLanes    : 1,
         ])
         assert processedMergedBamFile.save([flush: true])
 

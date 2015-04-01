@@ -74,6 +74,13 @@ class MergingSet {
         return mergingWorkPackage.seqType
     }
 
+    /**
+     * @return bam files connected directly with this mergingSet
+     */
+    List<AbstractBamFile> getBamFiles() {
+        return MergingSetAssignment.findAllByMergingSet(this)*.bamFile
+    }
+
     Set<SeqTrack> getContainedSeqTracks() {
         final Set<SeqTrack> seqTracks = new HashSet<SeqTrack>()
         MergingSetAssignment.findAllByMergingSet(this).each {

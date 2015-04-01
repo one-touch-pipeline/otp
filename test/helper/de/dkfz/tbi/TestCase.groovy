@@ -110,6 +110,13 @@ class TestCase extends GroovyTestCase {
         assert fieldError.rejectedValue == rejectedValue
     }
 
+    static void assertAtLeastExpectedValidateError(def objectToCheck, String failedField, String failedConstraint, def rejectedValue) {
+        assert !objectToCheck.validate()
+        assert objectToCheck.errors.fieldErrors.any {
+            it.field == failedField && it.code == failedConstraint && it.rejectedValue == rejectedValue
+        }, "validation has not failed with expected error:\nEXPECTED: ${failedField} ${failedConstraint} ${rejectedValue}\nFOUND: ${objectToCheck.errors}"
+    }
+
     public static void removeMetaClass(final Class clazz, final Object object) {
         // Both of the following statements are necessary. See http://stackoverflow.com/a/15953102
         // But their order does not matter.

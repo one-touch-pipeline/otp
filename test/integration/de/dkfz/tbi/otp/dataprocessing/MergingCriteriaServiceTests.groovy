@@ -196,7 +196,8 @@ class MergingCriteriaServiceTests {
         ProcessedMergedBamFile mergedBamFile = new ProcessedMergedBamFile(
                         mergingPass: mergingPass,
                         type: AbstractBamFile.BamType.MDUP,
-                        status: State.PROCESSED
+                        status: State.PROCESSED,
+                        numberOfMergedLanes: 1,
                         )
         assertNotNull(mergedBamFile.save([flush: true, failOnError: true]))
 

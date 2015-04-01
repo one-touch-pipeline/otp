@@ -96,7 +96,8 @@ class MergingJobCreateCommandTests {
 
         processedMergedBamFile = new ProcessedMergedBamFile(
                         mergingPass: mergingPass,
-                        type: BamType.SORTED
+                        type: BamType.SORTED,
+                        numberOfMergedLanes: 1,
                         )
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
 
@@ -289,7 +290,8 @@ class MergingJobCreateCommandTests {
 
         ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
                         mergingPass: mergingPass1,
-                        type: BamType.SORTED
+                        type: BamType.SORTED,
+                        numberOfMergedLanes: 1,
                         )
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
 

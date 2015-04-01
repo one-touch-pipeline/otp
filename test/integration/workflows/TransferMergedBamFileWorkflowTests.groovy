@@ -457,7 +457,8 @@ class TransferMergedBamFileWorkflowTests extends AbstractWorkflowTest {
                         type: BamType.MDUP,
                         qualityAssessmentStatus: QaProcessingStatus.FINISHED,
                         md5sum: null,
-                        status: AbstractBamFile.State.PROCESSED
+                        status: AbstractBamFile.State.PROCESSED,
+                        numberOfMergedLanes: 1,
                         )
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
 
@@ -504,7 +505,8 @@ class TransferMergedBamFileWorkflowTests extends AbstractWorkflowTest {
                         type: BamType.MDUP,
                         qualityAssessmentStatus: QaProcessingStatus.FINISHED,
                         md5sum: null,
-                        status: AbstractBamFile.State.PROCESSED
+                        status: AbstractBamFile.State.PROCESSED,
+                        numberOfMergedLanes: 1,
                         )
         assertNotNull(processedMergedBamFile1.save([flush: true, failOnError: true]))
 

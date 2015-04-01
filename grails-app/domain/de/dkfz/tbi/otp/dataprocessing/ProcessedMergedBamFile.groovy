@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.ngsdata.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 /**
  * Represents a merged bam file stored on the file system
@@ -11,19 +10,13 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
  *
  *
  */
-class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
+class ProcessedMergedBamFile extends AbstractMergedBamFile {
 
     static belongsTo = [
         mergingPass: MergingPass
     ]
 
     FileOperationStatus fileOperationStatus = FileOperationStatus.DECLARED
-
-    /**
-     * Holds the number of lanes which were merged in this ProcessedMergedBamFile
-     */
-    // Has to be from Type Integer so that it can be nullable
-    Integer numberOfMergedLanes
 
     static constraints = {
         md5sum nullable: true, validator: { val, obj ->
@@ -33,38 +26,13 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
             return ((val != FileOperationStatus.PROCESSED && obj.md5sum == null) || (val == FileOperationStatus.PROCESSED && obj.md5sum != null))
         }
         mergingPass nullable: false, unique: true
-        numberOfMergedLanes nullable: true, min: 1
-    }
-
-    Project getProject() {
-        return mergingPass.project
-    }
-
-    short getProcessingPriority() {
-        return project.processingPriority
-    }
-
-    Individual getIndividual() {
-        return mergingPass.individual
-    }
-
-    Sample getSample() {
-        return mergingPass.sample
-    }
-
-    SampleType getSampleType() {
-        return mergingPass.sampleType
-    }
-
-    @Override
-    SeqType getSeqType() {
-        return mergingPass.seqType
     }
 
     MergingSet getMergingSet() {
         return mergingPass.mergingSet
     }
 
+    @Override
     MergingWorkPackage getMergingWorkPackage() {
         return mergingPass.mergingWorkPackage
     }
@@ -73,10 +41,10 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
      * @return <code>true</code>, if this {@link ProcessedMergedBamFile} is from the latest merging
      * @see MergingPass#isLatestPass()
      */
+    @Override
     public boolean isMostRecentBamFile() {
         return (mergingPass.isLatestPass() && mergingSet.isLatestSet())
     }
-
 
     @Override
     public String toString() {
@@ -90,11 +58,6 @@ class ProcessedMergedBamFile extends AbstractFileSystemBamFile {
     }
 
     static mapping = { mergingPass index: "abstract_bam_file_merging_pass_idx" }
-
-    @Override
-    ReferenceGenome getReferenceGenome() {
-        return mergingWorkPackage.referenceGenome
-    }
 
     @Override
     Set<SeqTrack> getContainedSeqTracks() {
