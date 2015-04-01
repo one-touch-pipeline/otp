@@ -18,7 +18,7 @@ import de.dkfz.tbi.otp.ngsdata.*
     ProcessedBamFile,
     AlignmentPass,
 ])
-class MergingWorkPackageTests {
+class MergingWorkPackageUnitTests {
 
     Sample sample = null
     SeqType seqType = null
