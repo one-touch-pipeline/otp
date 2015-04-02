@@ -168,6 +168,24 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
     }
 
     /**
+     * Executes a script on a specified host
+     *
+     * @param realm The realm which identifies the host
+     * @param filePath The path of the file to be executed
+     * @return what the server sends back
+     */
+    @Deprecated
+    public String executeJobScript(Realm realm, String filePath) {
+        if (!filePath || filePath == "") {
+            throw new ProcessingException("No file path specified.")
+        }
+        File file = new File(filePath)
+        List<String> values = executeRemoteJob(realm, null, file)
+        return concatResults(values)
+    }
+
+
+    /**
      * Triggers the sending of remote jobs
      *
      * Commands are executed on remote servers using a pbs infrastructure.
@@ -375,21 +393,9 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
      * @return true if pending, false otherwise
      */
     public boolean checkRunningJob(String pbsId, Realm realm) {
-        boolean isRunning = true
+        boolean retVal = true
         try {
-            String qstatOut = executeCommand(realm, "qstat ${pbsId}")
-            if(qstatOut =~ /(?i)\s*Job\sid\s*Name\s*User.*/) {
-                isRunning = !isExistingJobCompleted(qstatOut)
-            } else if(qstatOut =~ /(?i)\s*qstat:\s*Uknown\sJob\sId\s${pbsId}.*/) {
-                isRunning = false
-            } else {
-                if(qstatOut == '') {
-                    log.info("qstat returned empty result.")
-                } else {
-                    log.info("qstat returned ${qstatOut}")
-                }
-                isRunning = true
-            }
+            retVal = isJobPending(executeCommand(realm, "qstat ${pbsId}"))
         } catch (Exception e) {
             /*
              * Catch all exceptions, which can appear during the check if the job is still running.
@@ -398,7 +404,33 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
              */
             log.info("An Exception was thrown in checkRunningJob due to the following reason: ", e)
         }
-        return isRunning
+        return retVal
+    }
+
+    /**
+     * Verifies if a job status is still pending (Not completed)
+     *
+     * @param String containing output of a pbs "qstat jobId" command
+     * @return {@code true} if job is pending, otherwise {@code false}.
+     */
+    private boolean isJobPending(String output) {
+        boolean pending = false
+        if (isJobStatusAvailable(output)) {
+            pending = !isExistingJobCompleted(output)
+        }
+        return pending
+    }
+
+    private boolean isJobStatusAvailable(String output) {
+        Pattern pattern = Pattern.compile("\\s*Job id\\s*Name\\s*User.*", Pattern.CASE_INSENSITIVE)
+        boolean valid = false
+        output.eachLine { String line ->
+            Matcher m = pattern.matcher(line)
+            if (m.find()) {
+                valid = true
+            }
+        }
+        return valid
     }
 
     private boolean isExistingJobCompleted(String output) {
@@ -406,6 +438,7 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
     }
 
     private String existingJobStatus(String output) {
+        assert(isJobStatusAvailable(output))
         final int STATUS_INDEX = 4
         List<String> lines = output.readLines()
         String jobStatus = lines.last()

@@ -1,15 +1,23 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
 import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.LinkFileUtils
 import org.junit.After
-import org.junit.Before
-import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstanceTestData
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
+import de.dkfz.tbi.otp.ngsdata.*
+import org.junit.Before
+import org.junit.Test
+
+import static de.dkfz.tbi.TestCase.removeMetaClass
 
 class SnvCompletionJobTests extends GroovyTestCase {
 
@@ -118,7 +126,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         // Reset meta classes
         snvCompletionJob.metaClass = null
         snvCompletionJob.linkFileUtils.metaClass = null
-        TestCase.removeMetaClass(ExecutionService, executionService)
+
 
         // Clean-up file-system
         assert testDirectory.deleteDir()
