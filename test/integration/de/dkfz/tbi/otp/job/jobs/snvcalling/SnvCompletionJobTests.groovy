@@ -126,6 +126,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         // Reset meta classes
         snvCompletionJob.metaClass = null
         snvCompletionJob.linkFileUtils.metaClass = null
+        TestCase.removeMetaClass(ExecutionService, executionService)
 
 
         // Clean-up file-system
