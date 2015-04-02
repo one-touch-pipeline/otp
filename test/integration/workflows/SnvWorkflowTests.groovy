@@ -35,22 +35,28 @@ import static org.junit.Assert.assertTrue
  *
  * ! you have to be in group localGroup
  *
- * 1) copy file "/some/relative/path/temp/roddyLocalTest/testproject/vbp/stds/applicationProperties_Stable.ini" to you local folder
- * 2) modify your "applicationProperties_Stable.ini": usePluginVersion=COWorkflows\:1.0.131 -> to newest version
- * 3) go to "/$WORKFLOW_ROOT/ngsPipelines/RoddyStable"
- * 4) execute "bash roddy.sh testrun coWorkflowsTestProject.test@snvCalling stds --useconfig=/AbolsutePathTo/applicationProperties_Stable.ini"
- * 5) execute "bash roddy.sh rerun coWorkflowsTestProject.test@snvCalling stds --useconfig=/AbolsutePathTo/applicationProperties_Stable.ini"
- * 6) results are here "[REDACTED]rpp/stds/mpileup"
- * 7) execution infos are here "[REDACTED]rpp/stds/roddyExecutionStore"
- * 8) create new result folder for this version in WORKFLOW_ROOT/SnvCallingWorkflow (i.e. resultFiles_1.0.131)
- * 9) copy results of the roddy run in the current result folder
- * 10) since we decided not to overwrite the annotation results, but inserted "annotation" we have now differences in the naming with the CO group in some result files
+ * 1) find out the new revision number the CO wants you to import ("1.0.131")
+ * 2) obtain ssh access to otp@headnode (or ask someone who has access to copy the data)
+ * 3) ssh otp@headnode
+ * 4) copy the new COWorkflows_version to "/path/to/programs/otp/"
+ * 5) change the version number in the "ImportSnvExternalScripts.groovy" script
+ * 6) execute this script on you local OTP
+ * 7) copy file "/some/relative/path/temp/roddyLocalTest/testproject/vbp/stds/applicationProperties_Stable.ini" to you local folder
+ * 8) modify your "applicationProperties_Stable.ini": usePluginVersion=COWorkflows\:1.0.131 -> to newest version
+ * 9) go to "/$WORKFLOW_ROOT/ngsPipelines/RoddyStable"
+ * 10) execute "bash roddy.sh testrun coWorkflowsTestProject.test@snvCalling stds --useconfig=/AbolsutePathTo/applicationProperties_Stable.ini"
+ * 11) execute "bash roddy.sh rerun coWorkflowsTestProject.test@snvCalling stds --useconfig=/AbolsutePathTo/applicationProperties_Stable.ini"
+ * 12) results are here "[REDACTED]rpp/stds/mpileup"
+ * 13) execution infos are here "[REDACTED]rpp/stds/roddyExecutionStore"
+ * 14) create new result folder for this version in WORKFLOW_ROOT/SnvCallingWorkflow (i.e. resultFiles_1.0.131)
+ * 15) copy results of the roddy run in the current result folder
+ * 16) since we decided not to overwrite the annotation results, but inserted "annotation" we have now differences in the naming with the CO group in some result files
  * therefore "annotation" has to be inserted to some file names of the Roddy results -> compare with already existing file names of previous Roddy results.
- * 11) change VERSION in ImportSnvExternalScripts & SnvWorkflowTest
- * 12) create new config folder for this version in WORKFLOW_ROOT/SnvCallingWorkflow (i.e. configFile_1.0.131)
- * 13) copy configs from previous version in this version & adapt paths within the configs (i.e. 1.0.114 -> 1.0.131)
- * 14) compare runtimeConfig.sh of this Roddy run and the previous Roddy run to find out if there are new variables -> add new ones in new config files
- * 15) run SnvWorkflowTests
+ * 17) change VERSION in SnvWorkflowTest
+ * 18) create new config folder for this version in WORKFLOW_ROOT/SnvCallingWorkflow (i.e. configFile_1.0.131)
+ * 19) copy configs from previous version in this version & adapt paths within the configs (i.e in vi with :%s/1.0.114/1.0.131/gc)
+ * 20) compare runtimeConfig.sh of this Roddy run and the previous Roddy run to find out if there are new variables -> add new ones in new config files
+ * 21) run SnvWorkflowTests
  */
 
 class SnvWorkflowTests extends AbstractWorkflowTest {
