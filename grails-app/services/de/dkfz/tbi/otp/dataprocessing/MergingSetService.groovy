@@ -53,7 +53,7 @@ class MergingSetService {
      */
     void createMergingSet(List<AbstractBamFile> bamFiles2Merge) {
         notEmpty(bamFiles2Merge, "the input list of bam files for the method createMergingSet is empty")
-        MergingWorkPackage workPackage = exactlyOneElement(bamFiles2Merge*.mergingWorkPackage.unique())
+        MergingWorkPackage workPackage = MergingWorkPackage.get(exactlyOneElement(bamFiles2Merge*.mergingWorkPackage*.id.unique()))
         if (bamFiles2Merge.size() == 1) {
             if (bamFiles2Merge.get(0) instanceof ProcessedMergedBamFile) {
                 throw new RuntimeException('Trying to merge a single merged BAM file only. This makes no sense.')
