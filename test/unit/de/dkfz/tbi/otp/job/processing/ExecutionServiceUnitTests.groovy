@@ -33,6 +33,35 @@ class ExecutionServiceUnitTests {
         "anyQueue")
     }
 
+    String qstatOutputForJobNotFound() {
+        return "qstat: Unknown Job Id 1234567.whateverClusterHead.com"
+    }
+
+    void testIsJobPendingWithJobRunning() {
+        String output = qstatOutputForJobFound(ClusterJobStatus.RUNNING)
+        assertTrue(executionService.isJobPending(output))
+    }
+
+    void testIsJobPendingWithJobCompleted() {
+        String output = qstatOutputForJobFound(ClusterJobStatus.COMPLETED)
+        assertFalse(executionService.isJobPending(output))
+    }
+
+    void testIsJobPendingWithJobHeld() {
+        String output = qstatOutputForJobFound(ClusterJobStatus.HELD)
+        assertTrue(executionService.isJobPending(output))
+    }
+
+    void testIsJobPendingWithJobQueued() {
+        String output = qstatOutputForJobFound(ClusterJobStatus.QUEUED)
+        assertTrue(executionService.isJobPending(output))
+    }
+
+    void testIsJobPendingWithJobNotFound() {
+        String output = qstatOutputForJobNotFound()
+        assertFalse(executionService.isJobPending(output))
+    }
+
     void testExistingJobStatusWithStatusHeld() {
         ClusterJobStatus clusterJobStatus = ClusterJobStatus.HELD
         String output = qstatOutputForJobFound(clusterJobStatus)
@@ -55,5 +84,18 @@ class ExecutionServiceUnitTests {
         ClusterJobStatus clusterJobStatus = ClusterJobStatus.QUEUED
         String output = qstatOutputForJobFound(clusterJobStatus)
         assertTrue(executionService.existingJobStatus(output) == clusterJobStatus.value)
+    }
+
+    void testIsJobStatusAvailableWithInvalidValue() {
+        String output = qstatOutputForJobNotFound()
+        assertFalse(executionService.isJobStatusAvailable(output))
+    }
+
+    void testIsJobStatusAvailableWithValidValues() {
+        String output
+        ClusterJobStatus.values().each { ClusterJobStatus clusterJobStatus ->
+            output = qstatOutputForJobFound(clusterJobStatus)
+            assertTrue(executionService.isJobStatusAvailable(output))
+        }
     }
 }
