@@ -233,7 +233,6 @@ class SeqTrackService {
         List<DataFile> filteredFiles = []
         files.each {
             if (fileTypeService.isGoodSequenceDataFile(it)) {
-                assert it.fileExists && it.fileSize > 0L
                 filteredFiles.add(it)
             }
         }

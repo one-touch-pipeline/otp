@@ -41,6 +41,7 @@ class BwaAlignmentJob extends AbstractJobImpl {
         SeqTrack seqTrack = alignmentPass.seqTrack
         List<DataFile> files = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
         for (DataFile file in files) {
+            assert file.fileExists && file.fileSize > 0L
             realm = configService.getRealmDataProcessing(file.project)
             ProcessedSaiFile saiFile = processedSaiFileService.createSaiFile(alignmentPass, file)
             pbsIds << sendAlignmentScript(realm, saiFile)

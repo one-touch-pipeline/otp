@@ -30,6 +30,7 @@ class FastqcJob extends AbstractJobImpl {
         List<String> pbsIDs = []
         FastqcProcessedFile.withTransaction {
             seqFiles.each { seqFile ->
+                assert seqFile.fileExists && seqFile.fileSize > 0L
                 String rawSeq = lsdfFilesService.getFileFinalPath(seqFile)
                 String cmd = "fastqc ${rawSeq} --noextract --nogroup -o ${outDir};chmod -R 440 ${outDir}/*.zip"
                 pbsIDs.add(executionHelperService.sendScript(realm, cmd))
