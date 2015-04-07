@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 import static org.springframework.util.Assert.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage.ProcessingType
@@ -27,9 +28,6 @@ class MergingSetService {
     void createMergingSetForBamFile(ProcessedBamFile bamFile) {
         notNull(bamFile, "the bam file is null")
         List<AbstractBamFile> bamFiles2Merge = []
-        // In some cases it happens randomly that the status switches from "INPROGRESS" to "NEEDS_PROCESSING" between the start job and
-        // the second job. Therefore the status is changed to "INPROGRESS" again, when the status is "NEEDS_PROCESSING"
-        processedBamFileService.blockedForAssigningToMergingSet(bamFile)
         MergingWorkPackage workPackage = bamFile.mergingWorkPackage
         isTrue(workPackage.processingType.equals(ProcessingType.SYSTEM), "The processing type of this merging workpackage is not SYSTEM")
         ProcessedMergedBamFile mergedBamFile = mergingCriteriaService.processedMergedBamFileForMerging(workPackage)
@@ -38,7 +36,7 @@ class MergingSetService {
         }
         bamFiles2Merge.addAll(mergingCriteriaService.processedBamFilesForMerging(workPackage))
         if (bamFiles2Merge.empty) {
-            log.info("There are no files to merge for MergingWorkPackage ${workPackage}")
+            threadLog?.info("There are no files to merge for MergingWorkPackage ${workPackage}")
             return
         }
         createMergingSet(bamFiles2Merge)
