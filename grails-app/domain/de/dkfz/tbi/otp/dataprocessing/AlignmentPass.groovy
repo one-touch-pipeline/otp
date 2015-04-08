@@ -25,6 +25,7 @@ class AlignmentPass {
         identifier(unique: 'seqTrack')
         seqTrack(validator: { SeqTrack seqTrack, AlignmentPass pass ->
             pass.workPackage?.satisfiesCriteria(seqTrack) })
+        workPackage(validator: {workPackage -> workPackage.workflow.name == Workflow.Name.DEFAULT_OTP})
     }
 
     /**

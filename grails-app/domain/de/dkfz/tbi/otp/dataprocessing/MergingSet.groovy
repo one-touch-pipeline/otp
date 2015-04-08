@@ -120,6 +120,7 @@ class MergingSet {
 
     static constraints = {
         identifier(unique: 'mergingWorkPackage')
+        mergingWorkPackage(validator: {mergingWorkPackage -> mergingWorkPackage.workflow.name == Workflow.Name.DEFAULT_OTP})
     }
 
     static mapping = {

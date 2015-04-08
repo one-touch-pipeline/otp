@@ -52,6 +52,7 @@ class MergingWorkPackage {
         // - AlignmentPassUnitTests.testIsLatestPass_2PassesDifferentWorkPackages
         sample unique: 'seqType'
         needsProcessing(validator: {val, obj -> !val || obj.workflow.name == Workflow.Name.RODDY})
+        workflow(validator: {workflow -> workflow.type == Workflow.Type.ALIGNMENT})
     }
 
     static final Collection<String> seqTrackPropertyNames = qualifiedSeqTrackPropertyNames.collect{nonQualifiedPropertyName(it)}
