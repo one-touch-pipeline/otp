@@ -240,7 +240,6 @@ class ProcessedBamFileService {
         notNull(workPackage)
         List<AbstractBamFile.State> allowedMergingStates = [
             AbstractBamFile.State.NEEDS_PROCESSING,
-            AbstractBamFile.State.INPROGRESS,
             AbstractBamFile.State.PROCESSED,
         ]
         List<ProcessedBamFile> processedBamFiles = ProcessedBamFile.createCriteria().list {
