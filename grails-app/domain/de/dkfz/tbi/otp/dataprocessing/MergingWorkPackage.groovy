@@ -42,6 +42,8 @@ class MergingWorkPackage {
     ReferenceGenome referenceGenome
     Workflow workflow
 
+    boolean needsProcessing
+
     static belongsTo = Sample
 
     static constraints = {
@@ -49,6 +51,7 @@ class MergingWorkPackage {
         // As soon a you loosen this constraint, un-ignore:
         // - AlignmentPassUnitTests.testIsLatestPass_2PassesDifferentWorkPackages
         sample unique: 'seqType'
+        needsProcessing(validator: {val, obj -> !val || obj.workflow.name == Workflow.Name.RODDY})
     }
 
     static final Collection<String> seqTrackPropertyNames = qualifiedSeqTrackPropertyNames.collect{nonQualifiedPropertyName(it)}
