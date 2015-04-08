@@ -44,6 +44,8 @@ class SequenceController {
             seq.domainClass.persistentProperties.each {
                 data.put(it.name, seq[it.name])
             }
+            // format date
+            data.dateCreated = data.dateCreated.format("yyyy-MM-dd")
             dataToRender.aaData << data
         }
         // add the DataFiles to the sequences

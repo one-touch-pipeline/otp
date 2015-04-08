@@ -142,7 +142,7 @@ $.otp.sequence = {
                                 }),
                                 row.laneId,
                                 fastQC,
-                                (new Date(row.dateCreated)).toLocaleFormat('%Y-%m-%d')
+                                row.dateCreated
                             ];
                             json.aaData[i] = rowData;
                         }
