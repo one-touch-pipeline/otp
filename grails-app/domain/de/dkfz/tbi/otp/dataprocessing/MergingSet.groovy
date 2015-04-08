@@ -81,10 +81,10 @@ class MergingSet {
             if (!seqTracksInIt) {
                 throw new RuntimeException("BAM file ${it.bamFile} has reported not to contain any SeqTracks.")
             }
-            final Collection<SeqTrack> intersection = seqTracks.intersect(seqTracksInIt)
+            final Collection intersection = seqTracks*.id.intersect(seqTracksInIt*.id)
             if (!intersection.empty) {
                 throw new IllegalStateException(
-                        "MergingSet ${this} contains at least the following SeqTracks more than once:\n${intersection.join('\n')}")
+                        "MergingSet ${this} contains at least the SeqTracks with the following IDs more than once:\n${intersection.join(', ')}")
             }
             assert seqTracks.addAll(seqTracksInIt)
         }
