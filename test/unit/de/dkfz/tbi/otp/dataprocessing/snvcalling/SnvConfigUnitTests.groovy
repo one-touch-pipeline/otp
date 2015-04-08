@@ -3,17 +3,17 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 import de.dkfz.tbi.otp.ngsdata.TestData
 
 import static de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep.*
-
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import grails.test.mixin.Mock
-import grails.test.mixin.TestFor
+import grails.test.mixin.*
+import static de.dkfz.tbi.TestCase.createEmptyTestDirectory
 
 @TestFor(SnvConfig)
 @Mock([Project, SeqType])
-class SnvConfigUnitTests extends TestCase {
+class SnvConfigUnitTests {
 
     static final String LEGAL_EXECUTE_FLAGS =
     "RUN_CALLING=0\n" +
@@ -26,19 +26,88 @@ class SnvConfigUnitTests extends TestCase {
             "${LEGAL_EXECUTE_FLAGS}\n" +
             "${LEGAL_CHROMOSOME_INDICES}"
 
+
+    SnvConfig validSnvConfig
+    File configDir
+    File configFile
+
+
+    @Before
+    void setUp() {
+        validSnvConfig = new SnvConfig(
+                project: TestData.createProject(),
+                seqType: new SeqType(),
+                configuration: LEGAL_EXECUTE_FLAGS,
+                externalScriptVersion: "v1",
+        )
+        validSnvConfig.save()
+
+        configDir = createEmptyTestDirectory()
+        configFile = new File(configDir, 'tempConfigFile.txt')
+
+    }
+
+
+    @After
+    void tearDown() {
+        validSnvConfig.delete()
+        configFile.delete()
+        configDir.deleteDir()
+
+    }
+
+    @Test
+    void testSaveWithoutSeqType_shouldFail() {
+        SnvConfig snvConfig = new SnvConfig(
+                project: TestData.createProject(),
+                configuration: LEGAL_EXECUTE_FLAGS,
+                externalScriptVersion: "v1",
+                )
+        assertFalse(snvConfig.validate())
+
+        snvConfig.seqType = new SeqType()
+        assertTrue(snvConfig.validate())
+    }
+
+    void testSaveWithoutConfig_shouldFail() {
+        SnvConfig snvConfig = new SnvConfig(
+            project: TestData.createProject(),
+            seqType: new SeqType(),
+            externalScriptVersion: "v1",
+            )
+        assertFalse(snvConfig.validate())
+
+        snvConfig.configuration = LEGAL_EXECUTE_FLAGS
+        assertTrue(snvConfig.validate())
+    }
+
+    void testSaveWithEmptyConfig_shouldFail() {
+        SnvConfig snvConfig = new SnvConfig(
+            project: TestData.createProject(),
+            seqType: new SeqType(),
+            configuration: "",
+            externalScriptVersion: "v1",
+        )
+        assertFalse(snvConfig.validate())
+
+        snvConfig.configuration = LEGAL_EXECUTE_FLAGS
+        assertTrue(snvConfig.validate())
+    }
+
+
     @Test
     void testIllegalExecuteFlagValue() {
-        testWithIllegalConfig('RUN_CALLING=2', 'Illegal value for variable RUN_CALLING: 2')
+        withIllegalConfig('RUN_CALLING=2', 'Illegal value for variable RUN_CALLING: 2')
     }
 
     @Test
     void testExecuteFlagMissing() {
-        testWithIllegalConfig('RUN_CALLING=0', 'Illegal value for variable RUN_SNV_ANNOTATION: ')
+        withIllegalConfig('RUN_CALLING=0', 'Illegal value for variable RUN_SNV_ANNOTATION: ')
     }
 
     @Test
     void testPreviousStepExecuteFlagIsNotSet() {
-        testWithIllegalConfig(
+        withIllegalConfig(
                 'RUN_CALLING=1\n' +
                 'RUN_SNV_ANNOTATION=0\n' +
                 'RUN_SNV_DEEPANNOTATION=0\n' +
@@ -48,7 +117,7 @@ class SnvConfigUnitTests extends TestCase {
 
     @Test
     void testDeepAnnotationRequiresAnnotation() {
-        testWithIllegalConfig(
+        withIllegalConfig(
                 'RUN_CALLING=0\n' +
                 'RUN_SNV_ANNOTATION=0\n' +
                 'RUN_SNV_DEEPANNOTATION=1\n' +
@@ -58,53 +127,85 @@ class SnvConfigUnitTests extends TestCase {
 
     @Test
     void testNoChromosomesSpecified() {
-        testWithIllegalConfig(LEGAL_EXECUTE_FLAGS,'Illegal config. No chromosomes specified.')
+        withIllegalConfig(LEGAL_EXECUTE_FLAGS,'Illegal config. No chromosomes specified.')
     }
 
     @Test
     void testFailingConfigScript() {
-        testWithIllegalConfig("LANG=C\n${LEGAL_CONFIG}\nmissing_dummy_command", 'Script failed with exit code 127. Error output:\nbash: line 7: missing_dummy_command: command not found\n')
+        withIllegalConfig("LANG=C\n${LEGAL_CONFIG}\nmissing_dummy_command", 'Script failed with exit code 127. Error output:\nbash: line 7: missing_dummy_command: command not found\n')
     }
 
     @Test
     void testCreateFromFile_legalConfig() {
-        final SnvConfig config = testCreateFromFile(LEGAL_CONFIG)
+        final SnvConfig config = createFromFile(LEGAL_CONFIG)
         assertCorrectValues(config)
     }
 
 
     @Test
     void testCreateFromFile_NoScriptVersion_ShouldFail() {
-        shouldFail(AssertionError) {testCreateFromFile(LEGAL_CONFIG, null)}
+        shouldFail(AssertionError) {createFromFile(LEGAL_CONFIG, null)}
     }
 
 
     @Test
     void testEvaluate_legalConfig() {
-        final SnvConfig config = testCreateNormally(LEGAL_CONFIG)
+        final SnvConfig config = createNormally(LEGAL_CONFIG)
         assert config.evaluate() == config
         assertCorrectValues(config)
     }
 
-    void testWithIllegalConfig(final String configuration, final String expectedExceptionMessage) {
-        testCreateNormallyWithIllegalConfig(configuration, expectedExceptionMessage)
-        testCreateFromFileWithIllegalConfig(configuration, expectedExceptionMessage)
+
+    @Test
+    void testWriteToFile_WhenFileDoesNotExistAndOverwriteIsSet_ShouldCreateFile() {
+        validSnvConfig.writeToFile(configFile, true)
+        assertEquals(configFile.text, LEGAL_EXECUTE_FLAGS)
+
     }
 
-    void testCreateNormallyWithIllegalConfig(final String configuration, final String expectedExceptionMessage) {
-        final SnvConfig config = testCreateNormally(configuration)
+    @Test
+    void testWriteToFile_WhenFileDoesExistAndOverwriteIsSet_ShouldCreateFile() {
+        configFile << 'something different'
+        validSnvConfig.writeToFile(configFile, true)
+        assertEquals(configFile.text, LEGAL_EXECUTE_FLAGS)
+
+    }
+
+    @Test
+    void testWriteToFileNoAbsolutePath() {
+        shouldFail AssertionError, {
+            validSnvConfig.writeToFile(new File("tempConfigFile.txt"), false)
+        }
+    }
+
+    @Test
+    void testWriteToFileExistsAlready() {
+        validSnvConfig.writeToFile(configFile, false)
+        assertEquals(configFile.text, LEGAL_EXECUTE_FLAGS)
+        shouldFail RuntimeException, {
+            validSnvConfig.writeToFile(configFile, false)
+        }
+    }
+
+    void withIllegalConfig(final String configuration, final String expectedExceptionMessage) {
+        createNormallyWithIllegalConfig(configuration, expectedExceptionMessage)
+        createFromFileWithIllegalConfig(configuration, expectedExceptionMessage)
+    }
+
+    void createNormallyWithIllegalConfig(final String configuration, final String expectedExceptionMessage) {
+        final SnvConfig config = createNormally(configuration)
         assertEquals(expectedExceptionMessage, shouldFail {
             config.evaluate()
         })
     }
 
-    void testCreateFromFileWithIllegalConfig(final String configuration, final String expectedExceptionMessage) {
+    void createFromFileWithIllegalConfig(final String configuration, final String expectedExceptionMessage) {
         assertEquals(expectedExceptionMessage, shouldFail {
-            testCreateFromFile(configuration)
+            createFromFile(configuration)
         })
     }
 
-    SnvConfig testCreateNormally(final String configuration) {
+    SnvConfig createNormally(final String configuration) {
         final SnvConfig config = new SnvConfig(
             project: TestData.createProject(),
             seqType: new SeqType(),
@@ -116,7 +217,7 @@ class SnvConfigUnitTests extends TestCase {
         return config
     }
 
-    SnvConfig testCreateFromFile(final String configuration, String version = "v1") {
+    SnvConfig createFromFile(final String configuration, String version = "v1") {
         File dir = new File("/tmp/otp/otp-unit-test")
         assert dir.exists() || dir.mkdirs()
 

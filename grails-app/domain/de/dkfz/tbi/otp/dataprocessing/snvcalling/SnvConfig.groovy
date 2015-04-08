@@ -2,19 +2,39 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
+import de.dkfz.tbi.otp.dataprocessing.ConfigPerProject
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.BashScriptVariableReader
 
-class SnvConfig extends ConfigPerProjectAndSeqType {
+class SnvConfig extends ConfigPerProject {
 
     static final String CHROMOSOME_COUNT_VARIABLE_NAME = 'OTP_CHROMOSOME_COUNT'
     static final String CHROMOSOME_NAMES_VARIABLE_NAME = 'OTP_CHROMOSOME_NAMES'
 
+
+    /**
+     * In this String the complete content of the config file is stored.
+     * This solution was chosen to be as flexible as possible in case the style of the config file changes.
+     */
+    String configuration
+
     transient Map<String, String> variables
 
     static transients = [ 'variables' ]
+
+    static belongsTo = [
+            seqType: SeqType
+    ]
+
+    static constraints = {
+        configuration blank: false
+    }
+
+    static mapping = {
+        configuration type: 'text'
+        seqType index: 'snv_config_per_seq_type_seq_type_idx'
+    }
 
     SnvConfig evaluate() {
         evaluateWithoutConsistencyChecking()
@@ -143,5 +163,14 @@ ${CHROMOSOME_NAMES_VARIABLE_NAME}=\${CHROMOSOME_INDICES[@]}
         } catch (final Throwable t) {
             throw new RuntimeException("Could not get latest SnvConfig for Project ${project} and SeqType ${seqType}. ${t.message ?: ''}", t)
         }
+    }
+
+
+    void writeToFile(final File file, final boolean overwriteIfExists = false) {
+        assert file.isAbsolute()
+        if (!overwriteIfExists && file.exists()) {
+            throw new RuntimeException("overwriteIfExists is false and file already exists: ${file}")
+        }
+        file.text = configuration
     }
 }
