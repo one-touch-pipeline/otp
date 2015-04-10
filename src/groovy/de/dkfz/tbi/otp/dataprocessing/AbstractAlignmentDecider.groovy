@@ -1,25 +1,31 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqTrackService
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 
-import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack
-import de.dkfz.tbi.otp.ngsdata.FileType
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 
 abstract class AbstractAlignmentDecider implements AlignmentDecider {
 
     @Autowired
     ApplicationContext applicationContext
 
-    abstract Workflow getWorkflow()
+    Workflow getWorkflow() {
+        Workflow workflow = atMostOneElement(Workflow.findAllByNameAndType(workflowName, Workflow.Type.ALIGNMENT))
+        if(!workflow) {
+            workflow = new Workflow(
+                    name: workflowName,
+                    type: Workflow.Type.ALIGNMENT
+            ).save(failOnError: true)
+        }
+        return workflow
+    }
 
     @Override
     Collection<MergingWorkPackage> decideAndPrepareForAlignment(SeqTrack seqTrack, boolean forceRealign) {
@@ -83,7 +89,11 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         threadLog?.info("Not aligning ${seqTrack}, because ${reason}.")
     }
 
-    abstract boolean canWorkflowAlign(SeqTrack seqTrack)
+    static boolean canWorkflowAlign(SeqTrack seqTrack) {
+        return SeqTypeService.alignableSeqTypes()*.id.contains(seqTrack.seqType.id)
+    }
 
     abstract void prepareForAlignment(MergingWorkPackage workPackage, SeqTrack seqTrack, boolean forceRealign)
+
+    abstract Workflow.Name getWorkflowName()
 }

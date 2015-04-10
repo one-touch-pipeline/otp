@@ -1,5 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 import org.junit.Before
@@ -34,7 +37,6 @@ public class AbstractAlignmentDeciderTest {
 
     private AbstractAlignmentDecider newDecider(Map methods = [:]) {
         AbstractAlignmentDecider decider = ([
-                canWorkflowAlign: { SeqTrack seqTrack -> return true },
                 prepareForAlignment: { MergingWorkPackage workPackage, SeqTrack seqTrack, boolean forceRealign -> },
                 getWorkflow: { return Workflow.findOrSaveByNameAndType(Workflow.Name.DEFAULT_OTP, Workflow.Type.ALIGNMENT) },
         ] + methods) as AbstractAlignmentDecider
@@ -64,9 +66,10 @@ public class AbstractAlignmentDeciderTest {
     }
 
     @Test
-    void testDecideAndPrepareForAlignment_whenCanWorkflowAlignReturnsFalse_shouldReturnEmtpyList() {
+    void testDecideAndPrepareForAlignment_whenCanWorkflowAlignReturnsFalse_shouldReturnEmptyList() {
         SeqTrack st = buildSeqTrack()
-        decider = newDecider(canWorkflowAlign: { SeqTrack seqTrack -> false })
+        st.seqType = SeqType.build(name: "Invalid")
+        st.save(failOnError: true)
 
         Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(st, true)
         assert workPackages.empty
@@ -205,6 +208,36 @@ public class AbstractAlignmentDeciderTest {
             decider.ensureConfigurationIsComplete(seqTrack)
         })
     }
+
+
+    @Test
+    void testCanWorkflowAlign_whenEverythingIsOkay_shouldReturnTrue() {
+        TestData testData = new TestData()
+        testData.createObjects()
+
+        SeqTrack seqTrack = testData.createSeqTrack()
+        seqTrack.save(failOnError: true)
+
+        assert decider.canWorkflowAlign(seqTrack)
+    }
+
+    @Test
+    void testCanWorkflowAlign_whenWrongSeqType_shouldReturnFalse() {
+        TestData testData = new TestData()
+        testData.createObjects()
+
+        SeqType seqType = SeqType.build(
+                name: SeqTypeNames.WHOLE_GENOME,
+                libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIRED
+        )
+        seqType.save(failOnError: true)
+
+        SeqTrack seqTrack = testData.createSeqTrack(seqType: seqType)
+        seqTrack.save(failOnError: true)
+
+        assert !decider.canWorkflowAlign(seqTrack)
+    }
+
 
     private SeqTrack buildSeqTrack() {
         TestData testData = new TestData()

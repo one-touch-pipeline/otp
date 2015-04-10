@@ -14,38 +14,6 @@ public class DefaultOtpAlignmentDeciderTest {
     final shouldFail = new GroovyTestCase().&shouldFail
 
     @Test
-    void testCanWorkflowAlign_whenEverythingIsOkay_shouldReturnTrue() {
-        TestData testData = new TestData()
-        testData.createObjects()
-
-        SeqTrack seqTrack = testData.createSeqTrack()
-        seqTrack.save(failOnError: true)
-
-        assert defaultOtpAlignmentDecider.canWorkflowAlign(seqTrack)
-    }
-
-    @Test
-    void testCanWorkflowAlign_whenWrongSeqType_shouldReturnFalse() {
-        TestData testData = new TestData()
-        testData.createObjects()
-
-        SeqType seqType = SeqType.build(
-                name: SeqTypeNames.WHOLE_GENOME,
-                libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIRED
-        )
-        seqType.save(failOnError: true)
-
-        SeqTrack seqTrack = testData.createSeqTrack(seqType: seqType)
-        seqTrack.save(failOnError: true)
-
-        assert !defaultOtpAlignmentDecider.canWorkflowAlign(seqTrack)
-    }
-
-
-
-
-
-    @Test
     void testPrepareForAlignment_whenEverythingIsOkayAndForceRealignIsFalse_shouldCreateAlignmentPass() {
         testPrepareForAlignment_whenEverythingIsOkay_shouldCreateAlignmentPass(false)
     }
