@@ -22,7 +22,7 @@
                         <table id="searchCriteriaTable">
                             <tr>
                                 <td class="attribute">
-                                    <g:select class="criteria" name="criteria" from="${seqTypes}" optionKey="id" noSelection="${["none": message(code:"otp.filter.none")]}"/>
+                                    <g:select class="criteria" name="criteria" from="${seqTypes}" optionKey="id" noSelection="${["none": message(code:"otp.filter.seqType")]}"/>
                                 </td>
                                 <td class="value">
                                 </td>
@@ -34,6 +34,16 @@
                                 </td>
                             </tr>
                         </table>
+                        <div class="searchCriteriaTableSampleTypes">
+                            <table id="searchCriteriaTable">
+                                <tr>
+                                    <td class="attribute">
+                                        <g:select class="criteria" name="criteria"
+                    from='${sampleTypes}' noSelection="${["none": message(code:"otp.filter.sampleType")]}" ></g:select>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
                     </td>
                 </tr>
             </table>

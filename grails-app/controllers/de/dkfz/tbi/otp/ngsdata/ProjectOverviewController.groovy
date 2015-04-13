@@ -26,12 +26,16 @@ class ProjectOverviewController {
 
         Project project = projectService.getProjectByName(projectName)
         List<SeqType> seqTypes  = projectOverviewService.seqTypeByProject(project)
+        List<SampleType> sampleTypes  = projectOverviewService.sampleTypeByProject(project)
+        String sampleTypeName = (params.sampleType && sampleTypes.contains(params.sampleType)) ? params.sampleType : sampleTypes[0]
 
         return [
             projects: projects,
             hideSampleIdentifier: hideSampleIdentifier(project),
             project: projectName,
-            seqTypes: seqTypes
+            seqTypes: seqTypes,
+            sampleTypes: sampleTypes,
+            sampleType: sampleTypeName
         ]
     }
 
@@ -76,8 +80,6 @@ class ProjectOverviewController {
 
         List<SeqType> seqTypes = projectOverviewService.seqTypeByProject(project)
         boolean hideSampleIdentifier = hideSampleIdentifier(project)
-
-
         /*Map<mockPid, Map<sampleTypeName, InformationOfSample>>*/
         Map dataLastMap = [:]
 

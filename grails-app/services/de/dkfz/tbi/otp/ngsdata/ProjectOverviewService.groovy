@@ -136,6 +136,17 @@ class ProjectOverviewService {
         }
         return mockPids
     }
+    public List<String> sampleTypeByProject(Project project){
+        List<String> sampleTypes = AggregateSequences.withCriteria {
+            eq("projectId", project.id)
+            projections {
+                groupProperty("sampleTypeName")
+            }
+            order("sampleTypeName", "asc")
+        }
+        return sampleTypes
+    }
+
 
     /**
      * fetch and return all combination of individual(mockPid) and sampleTypeName as list.

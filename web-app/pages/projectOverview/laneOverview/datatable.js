@@ -88,6 +88,16 @@ $.otp.projectOverviewTable = {
                 }
             }
         });
+
+        $.otp.dataTableFilter.register($('.searchCriteriaTableSampleTypes'), oTableLaneOverview, false, function () {
+            var select = $('.searchCriteriaTableSampleTypes').find('select')[0],
+                column = 1;
+            if (select.selectedIndex !== 0) {
+                oTableLaneOverview.fnFilter('^' + select.value + '$', column, true);
+            } else {
+                oTableLaneOverview.fnFilter('', column);
+            }
+        });
         return oTableLaneOverview;
     }
 };
