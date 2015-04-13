@@ -5,7 +5,7 @@ The following code allows to show the processing state for
 * individuals (pid)
 * ilse id
 * project (can take some time, depending of project)
-* all lanes in processing (withdrawn lanes are ignored):
+* all lanes in processing:
 ** all withdrawn lanes are ignored
 ** lanes where fastqc not finished and data load after 1.1.2015 included
 ** alignment for seqtrack was triggered and not finished (transfere workflow finished), ignoring:
@@ -17,6 +17,8 @@ The following code allows to show the processing state for
 **** PROJECT_NAME
 **** PROJECT_NAME
 **** MMML
+** sample pairs (snv) waiting for snv calling
+** snv calling instance which are in processing
 
 entries are trimmed (spaces before after are removed)
 Names prefixed with # are ignored (handled as comment)
@@ -65,8 +67,8 @@ def projectString ="""
 """
 
 
-//if enabled, shows all lanes triggered for alignment and not finished yet, ignoring the following projects: PROJECT_NAME, PROJECT_NAME, PROJECT_NAME, mmml, PROJECT_NAME,
-//gets ignored in snv provessing
+//if enabled, shows all lanes in progressing.
+//see file header comment for details
 boolean allProcessed = false
 
 //flag if for all workflows the finished entries should be shown
@@ -720,6 +722,38 @@ if (allProcessed) {
                                     and processedMergedBamFile.fileOperationStatus = '${AbstractBamFile.FileOperationStatus.PROCESSED}'
                                     and processedMergedBamFile.qualityAssessmentStatus = '${AbstractBamFile.QaProcessingStatus.FINISHED}'
                                     and mergingPass.identifier = (select max(identifier) from MergingPass mergingPass where mergingPass.mergingSet = mergingSet)
+                        )
+                )
+            ) or (
+                seqTrack.id in (
+                    select
+                        seqTrack.id
+                    from
+                        SamplePair samplePair,
+                        SeqTrack seqTrack
+                    where
+                        samplePair.processingStatus = '${SamplePair.ProcessingStatus.NEEDS_PROCESSING}'
+                        and samplePair.individual = seqTrack.sample.individual
+                        and samplePair.seqType = seqTrack.seqType
+                        and (
+                            samplePair.sampleType1 = seqTrack.sample.sampleType
+                            or samplePair.sampleType2 = seqTrack.sample.sampleType
+                        )
+                )
+            ) or (
+                seqTrack.id in (
+                    select
+                        alignmentPass.seqTrack.id
+                    from
+                        SnvCallingInstance snvCallingInstance,
+                        AlignmentPass alignmentPass
+                    where
+                        snvCallingInstance.processingState = '${SnvProcessingStates.IN_PROGRESS}'
+                        and snvCallingInstance.sampleType1BamFile.withdrawn = false
+                        and snvCallingInstance.sampleType2BamFile.withdrawn = false
+                        and (
+                            alignmentPass.workPackage = snvCallingInstance.sampleType1BamFile.mergingPass.mergingSet.mergingWorkPackage
+                            or alignmentPass.workPackage = snvCallingInstance.sampleType2BamFile.mergingPass.mergingSet.mergingWorkPackage
                         )
                 )
             )
