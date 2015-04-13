@@ -3,6 +3,7 @@ The following code allows to show the processing state for
 
 * runs
 * individuals (pid)
+* ilse id
 * project (can take some time, depending of project)
 * all lanes in processing (withdrawn lanes are ignored):
 ** all withdrawn lanes are ignored
@@ -49,6 +50,11 @@ def individualString ="""
 
 """
 
+def ilseIdString ="""
+# ilse id1
+# ilse id2
+
+"""
 
 //name of projects, can take some time depending of project(s)
 def projectString ="""
@@ -605,6 +611,20 @@ nameStringToList(individualString).each { String individualName ->
     showSeqTracks(seqTracks)
 }
 
+
+nameStringToList(ilseIdString).each { String ilseId ->
+    output << "\n\n\n==============================\nilseId = ${ilseId}\n==============================\n"
+
+    List<SeqTrack> seqTracks = SeqTrack.createCriteria().list{
+        eq('ilseId', ilseId)
+    }
+
+    if (!seqTracks) {
+        output << "No Lanes for ilseId ${ilseId} could be found !!!!"
+        return
+    }
+    showSeqTracks(seqTracks)
+}
 
 nameStringToList(projectString).each { String projectName ->
     output << "\n\n\n==============================\nproject name = ${projectName}\n==============================\n"
