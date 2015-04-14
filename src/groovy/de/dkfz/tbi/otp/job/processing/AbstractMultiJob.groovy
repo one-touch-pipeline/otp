@@ -132,7 +132,7 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
                 finishedClusterJobs.each {
                     final ClusterJob finishedClusterJob =
                             exactlyOneElement(ClusterJob.findAllByRealmAndClusterJobId(it.realm, it.clusterJobId))
-                    assert finishedClusterJob.processingStep == processingStep
+                    assert finishedClusterJob.processingStep.id == processingStep.id
                     assert !finishedClusterJob.validated
                     finishedClusterJob.validated = true
                     assert finishedClusterJob.save(flush: true)
