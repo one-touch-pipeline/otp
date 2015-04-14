@@ -406,8 +406,10 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
             RunSegment.PROCESSING_FILE_STATUSES.contains(it.runSegment.filesStatus)
         }
         if (processingMap[true]) {
-            output << "${processingMap[true].size()} Lanes are still in data installation workflow. They will be ignored"
-            seqTracks.removeAll(processingMap[true]*.seqTrack)
+            output << "\nDataInstallationWorkflow: "
+            output << "${INDENT}${processingMap[true].size()} Lanes are still in data installation workflow. They will be ignored"
+            showRunning('DataInstallationWorkflow', processingMap[true]*.run.unique(), {it}, {it})
+            seqTracks = processingMap[false]*.seqTrack?.unique()
             allFinished=false
             if (!seqTracks){
                 output << "No lanes left"
