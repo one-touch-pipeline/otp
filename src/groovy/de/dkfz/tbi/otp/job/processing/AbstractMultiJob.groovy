@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.job.scheduler.PbsJobInfo
+
 import static de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
@@ -70,9 +72,9 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
     private void startMonitoring() {
         synchronized (lockForJobCollections) {
             log.info "Waiting for ${monitoredClusterJobs.size()} cluster jobs to finish: ${monitoredClusterJobs}"
-            monitoredClusterJobs.each {
-                pbsMonitorService.monitor(it.clusterJobId, it.realm, this)
-            }
+            pbsMonitorService.monitor(monitoredClusterJobs.collect {
+                new PbsJobInfo(pbsId: it.clusterJobId, realm: it.realm)
+            }, this)
         }
     }
 

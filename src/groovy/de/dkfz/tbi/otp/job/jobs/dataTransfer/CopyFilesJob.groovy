@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.dataTransfer
 
 import de.dkfz.tbi.otp.job.jobs.WatchdogJob
+import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
 
 import static org.springframework.util.Assert.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -10,8 +11,6 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 class CopyFilesJob extends AbstractJobImpl {
-
-    final String paramName = "__pbsIds"
 
     @Autowired
     LsdfFilesService lsdfFilesService
@@ -36,6 +35,7 @@ class CopyFilesJob extends AbstractJobImpl {
         Run run = Run.get(Long.parseLong(getProcessParameterValue()))
 
         List<String> pbsIds = []
+        List<String> realmIds = []
 
         List<ProcessedMergedBamFile> bamFiles = processedMergedBamFilesForRun(run)
         bamFiles.each {
@@ -58,15 +58,18 @@ printf "A new lane is currently in progress for this sample.\\nThe merged BAM fi
                 String cmd = "echo \$HOST;cp ${initialPath} ${finalPath};chmod 440 ${finalPath}"
                 String jobId = executionHelperService.sendScript(realm, cmd, this.getClass().simpleName)
                 pbsIds << jobId
+                realmIds << realm.id.toString()
             }
         }
         // It is not possible to give an empty list to the watchdog.
         // Therefore a pseudo value is passed and handled in the watchdog.
         if (pbsIds.empty) {
             pbsIds << WatchdogJob.SKIP_WATCHDOG
+            realmIds << WatchdogJob.SKIP_WATCHDOG
         }
 
-        addOutputParameter(paramName, pbsIds.join(","))
+        addOutputParameter(JobParameterKeys.PBS_ID_LIST, pbsIds.join(","))
+        addOutputParameter(JobParameterKeys.REALM, realmIds.join(","))
     }
 
     /**

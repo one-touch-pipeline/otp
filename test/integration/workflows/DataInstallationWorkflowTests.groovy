@@ -1,5 +1,7 @@
 package workflows
 
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
+
 import static org.junit.Assert.*
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.joda.time.Duration
@@ -81,7 +83,7 @@ class DataInstallationWorkflowTests extends AbstractWorkflowTest {
 
     @Before
     void setUp() {
-
+        WaitingFileUtils.defaultTimeoutMillis = 100000
 
         // Setup logic here
         super.createUserAndRoles()

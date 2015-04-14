@@ -1,5 +1,8 @@
 package de.dkfz.tbi.otp.job.jobs
 
+import de.dkfz.tbi.otp.job.scheduler.PbsJobInfo
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
@@ -56,6 +59,8 @@ class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob 
     /** a lock to prevent race conditions when modifying {@link #queuedClusterJobIds} */
     private final Lock lock = new ReentrantLock()
 
+    String realmIdFromJob
+
     @PostConstruct
     private void initialize() {
         // This really should be in the constructor so fields can be marked final.
@@ -65,6 +70,7 @@ class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob 
         final ProcessingStep monitoredProcessingStep = this.processingStep.previous
         monitoredProcessingStepId = monitoredProcessingStep.id
         monitoredJobClass = monitoredProcessingStep.nonQualifiedJobClass
+        realmIdFromJob = getParameterValueOrClass("${JobParameterKeys.REALM}")
     }
 
     private ProcessingStep getMonitoredProcessingStep() {
@@ -78,7 +84,8 @@ class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob 
             succeed()
             schedulerService.doEndCheck(this)
         } else {
-            pbsMonitorService.monitor(queuedClusterJobIds, this)
+            Realm realm = CollectionUtils.exactlyOneElement(Realm.findAllById(Long.parseLong(realmIdFromJob)))
+            pbsMonitorService.monitor(queuedClusterJobIds.collect { new PbsJobInfo(realm: realm, pbsId: it) }, this)
         }
     }
 
@@ -95,12 +102,7 @@ class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob 
         }
         if (allFinished) {
             ProcessingStep.withTransaction {
-                // Since the monitoring service does not always have the correct realm (it's just "guessing"), the value
-                // provided in the callback might be null. Passing the realm via job parameters is required, so we fetch
-                // the value from the input parameter.
-                Realm realmFromJob = Realm.findById(Long.parseLong(getParameterValueOrClass("${JobParameterKeys.REALM}")))
-
-                def failedClusterJobs = jobStatusLoggingService.failedOrNotFinishedClusterJobs(monitoredProcessingStep, realmFromJob, allClusterJobIds)
+                def failedClusterJobs = jobStatusLoggingService.failedOrNotFinishedClusterJobs(monitoredProcessingStep, realm, allClusterJobIds)
 
                 // Output and finish
                 if (failedClusterJobs.empty) {

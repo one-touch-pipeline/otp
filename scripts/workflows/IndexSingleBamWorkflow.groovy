@@ -1,5 +1,5 @@
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
-
+// Is not used anymore
 plan("IndexSingleBamWorkflow") {
     start("start", "indexSingleBamStartJob")
     job("sendIndexingBam", "sendIndexingBamJob") {

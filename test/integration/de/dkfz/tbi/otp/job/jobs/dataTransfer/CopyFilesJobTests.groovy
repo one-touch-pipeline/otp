@@ -2,8 +2,10 @@ package de.dkfz.tbi.otp.job.jobs.dataTransfer
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.job.jobs.WatchdogJob
+import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.job.processing.ExecutionService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
@@ -75,8 +77,8 @@ class CopyFilesJobTests extends GroovyTestCase {
         job.metaClass.getProcessParameterValue = { -> run.id.toString() }
         job.metaClass.processedMergedBamFilesForRun = { Run run2 -> assert run2 == run; return [processedMergedBamFile] }
         job.processedMergedBamFileService.metaClass.destinationDirectory = { ProcessedMergedBamFile pmbf -> TestCase.uniqueNonExistentPath.path }
-        job.metaClass.addOutputParameter = { String parameterName, String pbsIds ->
-            assert pbsIds == WatchdogJob.SKIP_WATCHDOG
+        job.metaClass.addOutputParameter = { String parameterName, String ids ->
+            assert ids == WatchdogJob.SKIP_WATCHDOG
         }
 
         job.executionService.metaClass.executeCommand = { Realm realm1, String command ->
@@ -95,8 +97,8 @@ class CopyFilesJobTests extends GroovyTestCase {
             return '0\n'
         }
 
-        job.metaClass.addOutputParameter = { String parameterName, String pbsIds ->
-            assert pbsIds == WatchdogJob.SKIP_WATCHDOG
+        job.metaClass.addOutputParameter = { String parameterName, String ids ->
+            assert ids == WatchdogJob.SKIP_WATCHDOG
         }
 
         job.execute()
@@ -111,8 +113,12 @@ class CopyFilesJobTests extends GroovyTestCase {
             return PBS_ID
         }
 
-        job.metaClass.addOutputParameter = { String parameterName, String pbsIds ->
-            assert pbsIds == PBS_ID
+        job.metaClass.addOutputParameter = { String parameterName, String ids ->
+            if (parameterName == JobParameterKeys.PBS_ID_LIST) {
+                assert ids == PBS_ID
+            } else if (parameterName == JobParameterKeys.REALM) {
+                assert ids == CollectionUtils.exactlyOneElement(Realm.list()).id.toString()
+            }
         }
 
         job.execute()

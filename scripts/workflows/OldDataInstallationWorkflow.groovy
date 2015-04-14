@@ -1,6 +1,6 @@
-import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
-
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
+
+// This JobExecutionPlan-DSL shall only be used to test if it is possible to update the JobExecutionPlan
 
 plan("DataInstallationWorkflow") {
     start("start", "dataInstallationStartJob")
@@ -14,22 +14,18 @@ plan("DataInstallationWorkflow") {
     //}
     job("createOutputDirectory", "createOutputDirectoryJob")
     job("copyFilesToFinalLocation", "copyFilesJob") {
-        outputParameter(JobParameterKeys.PBS_ID_LIST)
-        outputParameter(JobParameterKeys.REALM)
+        outputParameter("__pbsIds")
     }
     job("copyFilesToFinalLocationWatchdog", "myPBSWatchdogJob") {
-        inputParameter(JobParameterKeys.PBS_ID_LIST, "copyFilesToFinalLocation", JobParameterKeys.PBS_ID_LIST)
-        inputParameter(JobParameterKeys.REALM, "copyFilesToFinalLocation", JobParameterKeys.REALM)
+        inputParameter("__pbsIds", "copyFilesToFinalLocation", "__pbsIds")
     }
     // TODO: milestone
     job("checkFinalLocation", "checkFinalLocationJob")
     job("calculateChecksum", "calculateChecksumJob") {
-        outputParameter(JobParameterKeys.PBS_ID_LIST)
-        outputParameter(JobParameterKeys.REALM)
+        outputParameter("__pbsIds")
     }
     job("calculateChecksumWatchdog", "myPBSWatchdogJob") {
-        inputParameter(JobParameterKeys.PBS_ID_LIST, "calculateChecksum", JobParameterKeys.PBS_ID_LIST)
-        inputParameter(JobParameterKeys.REALM, "calculateChecksum", JobParameterKeys.REALM)
+        inputParameter("__pbsIds", "calculateChecksum", "__pbsIds")
     }
     job("compareChecksum", "compareChecksumJob")
     job("createViewByPid", "createViewByPidJob")
@@ -42,19 +38,18 @@ plan("DataInstallationWorkflow") {
 
 //picard option for mark duplicates
 println ctx.processingOptionService.createOrUpdate(
-  "PBS_CalculateChecksumJob",
-  null,
-  null,
-  '{"-l": { walltime: "12:00:00"}}',
-  "set the walltime for the CalculateChecksumJob to 2h to get in the faster queue"
+        "PBS_CalculateChecksumJob",
+        null,
+        null,
+        '{"-l": { walltime: "2:00:00"}}',
+        "set the walltime for the CalculateChecksumJob to 2h to get in the faster queue"
 )
 
 //picard option for mark duplicates
 println ctx.processingOptionService.createOrUpdate(
-  "PBS_CopyFilesJob",
-  null,
-  null,
-  '{"-l": { walltime: "12:00:00"}}',
-  "set the walltime for the CopyFilesJob to 2h to get in the faster queue"
+        "PBS_CopyFilesJob",
+        null,
+        null,
+        '{"-l": { walltime: "2:00:00"}}',
+        "set the walltime for the CopyFilesJob to 2h to get in the faster queue"
 )
-

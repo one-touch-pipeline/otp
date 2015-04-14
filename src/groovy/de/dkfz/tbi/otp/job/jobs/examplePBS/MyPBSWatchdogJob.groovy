@@ -1,6 +1,9 @@
 package de.dkfz.tbi.otp.job.jobs.examplePBS
 
 import de.dkfz.tbi.otp.job.jobs.WatchdogJob
+import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
+import de.dkfz.tbi.otp.job.scheduler.PbsJobInfo
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
@@ -31,14 +34,26 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl implements Monitorin
     private final Lock lock = new ReentrantLock()
 
     public void execute() throws Exception {
-        String jobIds = getParameterValueOrClass("__pbsIds")
+        List<Realm> realms = []
+        String jobIds = getParameterValueOrClass(JobParameterKeys.PBS_ID_LIST)
+        String realmIds = getParameterValueOrClass(JobParameterKeys.REALM)
+
         queuedJobIds = parseInputString(jobIds)
         if ([WatchdogJob.SKIP_WATCHDOG] == queuedJobIds) {
             log.debug "Skip watchdog"
             succeed()
             schedulerService.doEndCheck(this)
         } else {
-            pbsMonitorService.monitor(queuedJobIds, this)
+            assert realmIds != WatchdogJob.SKIP_WATCHDOG
+            realms = parseInputString(realmIds).collect( { CollectionUtils.exactlyOneElement(Realm.findAllById(Long.parseLong(it))) } )
+            if (realms.size() == 1) {
+                pbsMonitorService.monitor(queuedJobIds.collect { new PbsJobInfo(realm: realms.first(), pbsId: it) }, this)
+            } else {
+                Collection<PbsJobInfo> pbsJobInfos = [queuedJobIds, realms].transpose().collect {
+                    new PbsJobInfo(pbsId: it[0], realm: it[1])
+                }
+                pbsMonitorService.monitor(pbsJobInfos, this)
+            }
         }
     }
 
@@ -47,7 +62,7 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl implements Monitorin
         lock.lock()
         try {
             queuedJobIds.remove(pbsId)
-            log.debug("${pbsId} finished")
+            log.debug("${pbsId} on realm ${realm} finished")
             allFinished = queuedJobIds.empty
         } finally {
             lock.unlock()

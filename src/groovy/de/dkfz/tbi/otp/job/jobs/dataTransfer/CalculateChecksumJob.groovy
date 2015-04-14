@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.dataTransfer
 
+import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.job.jobs.WatchdogJob
@@ -8,8 +9,6 @@ import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.ngsdata.*
 
 public class CalculateChecksumJob extends AbstractJobImpl {
-
-    final String paramName = "__pbsIds"
 
     @Autowired
     ChecksumFileService checksumFileService
@@ -29,6 +28,7 @@ public class CalculateChecksumJob extends AbstractJobImpl {
         List<DataFile> files = runProcessingService.dataFilesForProcessing(run)
 
         List<String> pbsIds = []
+        List<String> realmIds = []
         for (DataFile file in files) {
             if (checksumFileService.md5sumFileExists(file)) {
                 log.debug "checksum file already exists for file ${file}".toString()
@@ -38,11 +38,14 @@ public class CalculateChecksumJob extends AbstractJobImpl {
             Realm realm = configService.getRealmDataManagement(file.project)
             String jobId = executionHelperService.sendScript(realm, cmd, this.getClass().simpleName)
             pbsIds << jobId
+            realmIds << realm.id.toString()
         }
         if (pbsIds.empty) {
             pbsIds << WatchdogJob.SKIP_WATCHDOG
+            realmIds << WatchdogJob.SKIP_WATCHDOG
         }
-        addOutputParameter(paramName, pbsIds.join(","))
+        addOutputParameter(JobParameterKeys.PBS_ID_LIST, pbsIds.join(","))
+        addOutputParameter(JobParameterKeys.REALM, realmIds.join(","))
     }
 
     private String scriptText(DataFile file) {

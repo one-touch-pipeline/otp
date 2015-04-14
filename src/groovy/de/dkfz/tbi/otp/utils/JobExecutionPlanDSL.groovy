@@ -200,8 +200,12 @@ class JobExecutionPlanDSL {
     }
 
     public static def plan = { String name, def ctx = null, boolean validate = false, c ->
+        JobExecutionPlan plan = CollectionUtils.atMostOneElement(JobExecutionPlan.findAllByNameAndObsoleted(name, false))
+        plan?.obsoleted = true
+        plan?.save(flush: true)
+        int version = plan ? plan.planVersion + 1 : 0
         JobExecutionPlan.withTransaction {
-            JobExecutionPlan jep = new JobExecutionPlan(name: name, planVersion: 0, enabled: true)
+            JobExecutionPlan jep = new JobExecutionPlan(name: name, planVersion: version, enabled: true, previousPlan: plan)
             assert(jep.save())
             Helper helper = new Helper()
             Boolean startJobDefined = false

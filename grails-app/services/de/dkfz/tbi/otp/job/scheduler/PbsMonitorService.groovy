@@ -48,30 +48,18 @@ class PbsMonitorService {
     private final Lock lock = new ReentrantLock()
 
     /**
-     * Registers the given PBS ID for monitoring.
-     * Will check all PBS systems for the given ID.
-     * @param pbsId The ID on the PBS system to monitor
-     * @param  The monitoring Job to notify when the job finished on the PBS
-     */
-    void monitor(String pbsId, MonitoringJob pbsMonitor) {
-        monitor(pbsId, null, pbsMonitor)
-    }
-
-    /**
      * Registers the given PBS ID for monitoring on the given realm.
-     * @param pbsId The ID on the PBS system to monitor
-     * @param realm The Realm on which the PBS job is running
+     * @param info The PbsJobInfo containing the PBS id of the job and the realm on which the PBS job is running
      * @param pbsMonitor The monitoring Job to notify when the job finished on the PBS
      */
-    void monitor(String pbsId, Realm realm, MonitoringJob pbsMonitor) {
+    void monitor(PbsJobInfo info, MonitoringJob pbsMonitor) {
         lock.lock()
         try {
-            PbsJobInfo info = new PbsJobInfo(pbsId: pbsId, realm: realm)
             if (queuedJobs.containsKey(pbsMonitor)) {
                 boolean append = true
                 queuedJobs.get(pbsMonitor).each {
-                    if (it.pbsId == pbsId) {
-                        if (it.realm == realm || !it.realm) {
+                    if (it.pbsId == info.pbsId) {
+                        if (it.realm == info.realm || !it.realm) {
                             append = false
                         }
                     }
@@ -91,28 +79,14 @@ class PbsMonitorService {
 
     /**
      * Registers the given PBS IDs for monitoring.
-     * Will check all PBS systems for the given ID.
-     * @param pbsIds The IDs on the PBS system to monitor
+     * @param pbsJobInfos A collection of PbsJobInfos containing the PBS id of the job and the realm on which the PBS job is running
      * @param pbsMonitor The monitoring Job to notify when the job finished on the PBS
      */
-    void monitor(List<String> pbsIds, MonitoringJob pbsMonitor) {
-        monitor(pbsIds, null, pbsMonitor)
-    }
-
-    /**
-     * Registers the given PBS IDs for monitoring on the given realm.
-     * @param pbsIds The IDs on the PBS system to monitor
-     * @param realm The Realm on which the PBS job is running
-     * @param pbsMonitor The monitoring Job to notify when the job finished on the PBS
-     */
-    void monitor(List<String> pbsIds, Realm realm, MonitoringJob pbsMonitor) {
-        if (!pbsIds) {
-            throw new IllegalArgumentException('No cluster job IDs specified.')
-        }
+    void monitor(Collection<PbsJobInfo> pbsJobInfos, MonitoringJob pbsMonitor) {
         lock.lock()
         try {
-            pbsIds.each { String pbsId ->
-                monitor(pbsId, realm, pbsMonitor)
+            pbsJobInfos.each { PbsJobInfo info ->
+                monitor(info, pbsMonitor)
             }
         } finally {
             lock.unlock()
