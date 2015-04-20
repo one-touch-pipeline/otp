@@ -247,6 +247,7 @@ from
         join individual.project project
 where
         project = :project
+        and processedMergedBamFile.withdrawn = false
         and mergingSet.identifier = (
             select
                 max(mergingSet2.identifier)

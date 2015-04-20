@@ -29,6 +29,14 @@ class ProjectOverviewServiceTests {
     }
 
     @Test
+    void testCoveragePerPatientAndSampleTypeAndSeqType_OneWithdrawnMergedBamFile_ShouldReturnNothing() {
+        ProcessedMergedBamFile processedMergedBamFile = createFinishedBamFileForCoveragePerPatientAndSampleTypeAndSeqTypeTest()
+        processedMergedBamFile.withdrawn = true
+        List result = projectOverviewService.coveragePerPatientAndSampleTypeAndSeqType(processedMergedBamFile.project)
+        assert [] == projectOverviewService.coveragePerPatientAndSampleTypeAndSeqType(processedMergedBamFile.project)
+    }
+
+    @Test
     void testCoveragePerPatientAndSampleTypeAndSeqType_TwoMergedBamFiles_OneInProgress_ShouldReturnInfoForFirstBam() {
         ProcessedMergedBamFile processedMergedBamFile1 = createFinishedBamFileForCoveragePerPatientAndSampleTypeAndSeqTypeTest()
         ProcessedMergedBamFile processedMergedBamFile2 = createSecondUnfinishedBamFile(processedMergedBamFile1)
