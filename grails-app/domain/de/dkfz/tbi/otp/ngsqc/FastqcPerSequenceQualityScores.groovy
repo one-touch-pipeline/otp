@@ -24,4 +24,8 @@ class FastqcPerSequenceQualityScores {
     static constraints = {
         countQS(min: 0D)
     }
+
+    static mapping = {
+        fastqcProcessedFile index: "fastqc_per_sequence_quality_scores_fastqc_processed_file_idx"
+    }
 }

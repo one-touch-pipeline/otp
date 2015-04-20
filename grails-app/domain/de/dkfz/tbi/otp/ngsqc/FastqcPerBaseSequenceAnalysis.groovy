@@ -80,4 +80,8 @@ class FastqcPerBaseSequenceAnalysis {
             val == Double.NaN || (val >= 0 && val <= 100)
         })
     }
+
+    static mapping = {
+        fastqcProcessedFile index: "fastqc_per_base_sequence_analysis_fastqc_processed_file_idx"
+    }
 }

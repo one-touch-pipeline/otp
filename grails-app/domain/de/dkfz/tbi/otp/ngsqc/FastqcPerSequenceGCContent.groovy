@@ -24,4 +24,8 @@ class FastqcPerSequenceGCContent {
     static constraints = {
         percentageOfGC(min: 0, max:100)
     }
+
+    static mapping = {
+        fastqcProcessedFile index: "fastqc_per_sequencegccontent_fastqc_processed_file_idx"
+    }
 }

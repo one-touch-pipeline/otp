@@ -26,4 +26,8 @@ class FastqcSequenceLengthDistribution {
     static constraints = {
         length nullable: false, blank: false
     }
+
+    static mapping = {
+        fastqcProcessedFile index: "fastqc_sequence_length_distribution_fastqc_processed_file_idx"
+    }
 }

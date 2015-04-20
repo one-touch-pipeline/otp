@@ -38,4 +38,8 @@ class FastqcOverrepresentedSequences {
         percentage(min:0D, max:100D)
         possibleSource(blank:false)
     }
+
+    static mapping = {
+        fastqcProcessedFile index: "fastqc_overrepresented_sequences_fastqc_processed_file_idx"
+    }
 }

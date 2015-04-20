@@ -27,4 +27,8 @@ class FastqcModuleStatus {
     static belongsTo = [
         fastqcProcessedFile : FastqcProcessedFile
     ]
+
+    static mapping = {
+        fastqcProcessedFile index: "fastqc_module_status_fastqc_processed_file_idx"
+    }
 }

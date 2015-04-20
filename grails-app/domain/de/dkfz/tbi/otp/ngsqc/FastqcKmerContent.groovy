@@ -40,4 +40,8 @@ class FastqcKmerContent {
     static belongsTo = [
         fastqcProcessedFile : FastqcProcessedFile
     ]
+
+    static mapping = {
+        fastqcProcessedFile index: "fastqc_kmer_content_fastqc_processed_file_idx"
+    }
 }

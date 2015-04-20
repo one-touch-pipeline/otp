@@ -29,4 +29,8 @@ class FastqcSequenceDuplicationLevels {
     static belongsTo = [
         fastqcProcessedFile: FastqcProcessedFile
     ]
+
+    static mapping = {
+        fastqcProcessedFile index: "fastqc_sequence_duplication_levels_fastqc_processed_file_idx"
+    }
 }
