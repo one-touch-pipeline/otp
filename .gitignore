@@ -10,7 +10,8 @@ logs/*
 
 # OTP
 ## Main application
-ast-build
+ast-build/*
+!ast-build/.keep
 web-app/js/i18n/*
 web-app/WEB-INF/tld/c.tld
 web-app/WEB-INF/tld/fmt.tld
