@@ -108,6 +108,19 @@ class CopyFilesJobTests extends GroovyTestCase {
     void testExecute_DataFilesHaveToBeCopied() {
         Map paths = prepareTestExecute(false)
 
+        mockServicesForFileCopyingAndRunService(paths)
+    }
+
+    @Test
+    void testExecute_BamDataFileHaveToBeCopied() {
+        Map paths = prepareTestExecute(false, true)
+
+        mockServicesForFileCopyingAndRunService(paths)
+    }
+
+
+
+    private void mockServicesForFileCopyingAndRunService(Map paths) {
         job.executionHelperService.metaClass.sendScript = { Realm realm1, String text, String jobIdentifier ->
             assert text.contains("cp ${paths.initialPath} ${paths.finalPath};chmod 440 ${paths.finalPath}")
             return PBS_ID
@@ -124,12 +137,22 @@ class CopyFilesJobTests extends GroovyTestCase {
         job.execute()
     }
 
-    private Map prepareTestExecute(boolean linkedExternally) {
+    private Map prepareTestExecute(boolean linkedExternally, boolean createAlignBamFile = false) {
         Run run = Run.build()
         Realm realm = Realm.build(operationType: OperationType.DATA_MANAGEMENT)
         SeqTrack seqTrack = SeqTrack.build(linkedExternally: linkedExternally)
         seqTrack.project.realmName = realm.name
-        DataFile dataFile = DataFile.build(seqTrack: seqTrack, project: seqTrack.project)
+        DataFile dataFile
+        if (createAlignBamFile) {
+            dataFile = DataFile.build(
+                seqTrack: null,
+                alignmentLog: AlignmentLog.build(seqTrack: seqTrack),
+                project: seqTrack.project,
+                fileType : FileType.buildLazy(type: FileType.Type.ALIGNMENT)
+                )
+        } else {
+            dataFile = DataFile.build(seqTrack: seqTrack, project: seqTrack.project)
+        }
 
         job.metaClass.getProcessParameterValue = { -> run.id.toString() }
         job.runProcessingService.metaClass.dataFilesForProcessing = { Run run2 -> assert run2 == run; [dataFile] }

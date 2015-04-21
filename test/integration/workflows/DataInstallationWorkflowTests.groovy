@@ -12,9 +12,6 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
-/**
- * Currently only a test for exome data exist
- */
 class DataInstallationWorkflowTests extends AbstractWorkflowTest {
 
     // The scheduler needs to access the created objects while the test is being executed
@@ -42,9 +39,11 @@ class DataInstallationWorkflowTests extends AbstractWorkflowTest {
     // files to be processed by the tests
     String fastqR1Filepath = "${testDataDir}/35-3B_NoIndex_L007_R1_complete_filtered.fastq.gz"
     String fastqR2Filepath = "${testDataDir}/35-3B_NoIndex_L007_R2_complete_filtered.fastq.gz"
+    String bamFilepath
 
     String fastqR1Filename = "example_fileR1.fastq.gz"
     String fastqR2Filename = "example_fileR2.fastq.gz"
+    String bamFilename = "example_bamFile.mdup.bam"
     String runName = "130312_D00133_0018_ADTWTJACXX"
     String runDate = "2013-03-12"
     Realm realm
@@ -73,6 +72,7 @@ class DataInstallationWorkflowTests extends AbstractWorkflowTest {
     RunSegment runSegment
     Project project
     FileType fileType
+    FileType bamFileType
 
     private String md5sum(String filepath) {
         String cmdMd5sum = "md5sum ${filepath}"
@@ -101,11 +101,12 @@ class DataInstallationWorkflowTests extends AbstractWorkflowTest {
         String path = "${ftpDir}/${runName}"
         String softLinkFastqR1Filepath = "${path}/${fastqR1Filename}"
         String softLinkFastqR2Filepath = "${path}/${fastqR2Filename}"
+        bamFilepath = "${path}/${bamFilename}"
 
         // Just to be sure the rootPath and the processingRootPath are clean for new test
         String cmdCleanUp = cleanUpTestFoldersCommand()
         String cmdBuildFileStructure = "mkdir -p -m 2750 ${path} ${loggingPath}/log/status/"
-        String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath} && ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath}"
+        String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath} && ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath} && echo 'something' > ${bamFilepath}"
 
         assert '0\n' == executionService.executeCommand(realm, "${cmdCleanUp} && ${cmdBuildFileStructure} && ${cmdBuildSoftLinkToFileToBeProcessed}; echo \$?")
 
@@ -115,6 +116,13 @@ class DataInstallationWorkflowTests extends AbstractWorkflowTest {
         fileType.vbpPath = "/sequence/"
         fileType.signature = ".fastq"
         assertNotNull(fileType.save(flush: true))
+
+        bamFileType = FileType.build(
+            type: FileType.Type.ALIGNMENT,
+            subType: "bam",
+            vbpPath: "/bam/",
+            signature: ".bam",
+        )
 
         SampleType sampleType = new SampleType()
         sampleType.name = "someSampleType"
@@ -205,6 +213,25 @@ class DataInstallationWorkflowTests extends AbstractWorkflowTest {
         return dataFile
     }
 
+    DataFile createBamDataFile(SeqTrack seqTrack, String bamFilename, String bamFilepath) {
+        DataFile dataFile = DataFile.build(
+            fileName: bamFilename,
+            vbpFileName: bamFilename,
+            run: run,
+            runSegment: runSegment,
+            used: true,
+            project: project,
+            md5sum: md5sum(bamFilepath),
+            seqTrack: null,
+            fileType: bamFileType,
+            pathName: "",
+            fileExists: true,
+            fileSize: 100,
+            alignmentLog: AlignmentLog.build(seqTrack: seqTrack),
+        )
+        return dataFile
+    }
+
     SeqType createSeqType(String name, String dirName) {
         SeqType seqType = new SeqType()
         seqType.name = name
@@ -274,6 +301,8 @@ class DataInstallationWorkflowTests extends AbstractWorkflowTest {
 
         setExecutionPlan()
         waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
+
+        checkThatWorkflowWasSuccessful(seqTrack)
     }
 
     @Ignore
@@ -322,11 +351,21 @@ class DataInstallationWorkflowTests extends AbstractWorkflowTest {
     private void checkThatWorkflowWasSuccessful(SeqTrack seqTrack) {
         seqTrack.refresh()
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack.fastqcState)
+
+        DataFile.list().collect {
+            [
+                lsdfFilesService.getFileFinalPath(it),
+                lsdfFilesService.getFileViewByPidPath(it)
+            ]
+        }.flatten().each {
+            assert WaitingFileUtils.confirmExists(new File(it))
+        }
     }
 
     private void createDataFiles(SeqTrack seqTrack) {
         createDataFile(seqTrack, 1, fastqR1Filename, fastqR1Filepath)
         createDataFile(seqTrack, 2, fastqR2Filename, fastqR2Filepath)
+        createBamDataFile(seqTrack, bamFilename, bamFilepath)
     }
 
     private void setExecutionPlan() {

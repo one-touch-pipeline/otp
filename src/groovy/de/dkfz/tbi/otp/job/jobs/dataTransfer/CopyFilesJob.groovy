@@ -52,7 +52,9 @@ printf "A new lane is currently in progress for this sample.\\nThe merged BAM fi
             Realm realm = configService.getRealmDataManagement(file.project)
             String initialPath = lsdfFilesService.getFileInitialPath(file)
             String finalPath = lsdfFilesService.getFileFinalPath(file)
-            if (file.seqTrack.linkedExternally) {
+            //Aligned bam files are not directly connected with seq track but indirectly via alignment log
+            //The following code ensures that they always are copied
+            if (file.seqTrack?.linkedExternally) {
                 assert executionService.executeCommand(realm, "ln -s ${initialPath} ${finalPath}; echo \$?") ==~ /0\s*/
             } else {
                 String cmd = "echo \$HOST;cp ${initialPath} ${finalPath};chmod 440 ${finalPath}"
