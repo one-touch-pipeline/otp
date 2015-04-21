@@ -25,7 +25,7 @@ Names prefixed with # are ignored (handled as comment)
 Empty lines are ignored
 
 
-The script has three input areas, one for run names, one for patient names, and one for project name.
+The script has four input areas, one for run names, one for patient names, one for ilse ids, and one for project names.
  */
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -342,9 +342,13 @@ def handleStateMapSnv = { List next ->
     Map stateMap = ['running': [], 'finished': [], 'waiting': [], 'notTriggered': []]
 
     List samplePairs = []
+    List unknownDiseaseStatus = []
+    List ignoredDiseaseStatus = []
+    List unknownThreshold = []
+    List noPairFound = []
 
     next.each { ProcessedMergedBamFile pMBF ->
-        samplePairs += SamplePair.createCriteria().list {
+        List samplePairsForBamFile = SamplePair.createCriteria().list {
             eq('individual', pMBF.individual)
             eq('seqType', pMBF.seqType)
             or {
@@ -352,7 +356,46 @@ def handleStateMapSnv = { List next ->
                 eq('sampleType2', pMBF.sampleType)
             }
         }
+        if (samplePairsForBamFile) {
+            samplePairs += samplePairsForBamFile
+        } else if (!SampleTypePerProject.findByProjectAndSampleType(pMBF.project, pMBF.sampleType)) {
+            unknownDiseaseStatus << "${pMBF.project} ${pMBF.sampleType.name}"
+        } else if (SampleTypePerProject.findByProjectAndSampleType(pMBF.project, pMBF.sampleType).category == SampleType.Category.IGNORED) {
+            ignoredDiseaseStatus << "${pMBF.project} ${pMBF.sampleType.name}"
+        } else if (!ProcessingThresholds.findByProjectAndSampleTypeAndSeqType(pMBF.project, pMBF.sampleType, pMBF.seqType)) {
+            unknownThreshold << "${pMBF.project} ${pMBF.sampleType.name} ${pMBF.seqType}"
+        } else {
+            noPairFound << "${pMBF.project} ${pMBF.sampleType.name} ${pMBF.seqType}"
+        }
     }
+
+    if (unknownDiseaseStatus) {
+        output << prefix("""\
+For the following project sample type combination the sample type was not classified as disease or control.
+${prefix(unknownDiseaseStatus.sort().unique().join('\n'), INDENT)}
+""", INDENT)
+    }
+    if (ignoredDiseaseStatus) {
+        output << prefix("""\
+For the following project sample type combination the sample type category is set to IGNORED.
+${prefix(ignoredDiseaseStatus.sort().unique().join('\n'), INDENT)}
+${INDENT}Therefore they will be ignored.
+""", INDENT)
+    }
+    if (unknownThreshold) {
+        output << prefix("""\
+For the following project sample type seqType combination no threshold is defined.
+${prefix(unknownThreshold.sort().unique().join('\n'), INDENT)}
+""", INDENT)
+    }
+    if (noPairFound) {
+        output << prefix("""\
+For the following PMBF no SamplePair could be found.
+${prefix(noPairFound.sort().unique().join('\n'), INDENT)}
+${INDENT}Either no sample with the other disease state is available or the SamplePairDiscoveryStartJob has not run since the sample was created.
+""", INDENT)
+    }
+
 
     if(samplePairs) {
         samplePairs.unique().each { SamplePair samplePair ->
