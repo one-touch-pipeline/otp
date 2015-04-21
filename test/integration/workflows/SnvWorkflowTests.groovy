@@ -39,29 +39,30 @@ import static org.junit.Assert.assertTrue
  * 2) obtain ssh access to otp@headnode (or ask someone who has access to copy the data)
  * 3) ssh otp@headnode
  * 4) copy the new COWorkflows_version to "/path/to/programs/otp/"
- * 5) change the version number in the "ImportSnvExternalScripts.groovy" script
- * 6) execute this script on you local OTP
- * 7) copy file "/some/relative/path/temp/roddyLocalTest/testproject/vbp/stds/applicationProperties_Stable.ini" to you local folder
- * 8) modify your "applicationProperties_Stable.ini": usePluginVersion=COWorkflows\:1.0.131 -> to newest version
- * 9) go to "/$WORKFLOW_ROOT/ngsPipelines/RoddyStable"
- * 10) execute "bash roddy.sh testrun coWorkflowsTestProject.test@snvCalling stds --useconfig=/AbolsutePathTo/applicationProperties_Stable.ini"
- * 11) execute "bash roddy.sh rerun coWorkflowsTestProject.test@snvCalling stds --useconfig=/AbolsutePathTo/applicationProperties_Stable.ini"
- * 12) results are here "[REDACTED]rpp/stds/mpileup"
- * 13) execution infos are here "[REDACTED]rpp/stds/roddyExecutionStore"
- * 14) create new result folder for this version in WORKFLOW_ROOT/SnvCallingWorkflow (i.e. resultFiles_1.0.131)
- * 15) copy results of the roddy run in the current result folder
- * 16) since we decided not to overwrite the annotation results, but inserted "annotation" we have now differences in the naming with the CO group in some result files
+ * 5) make all bash scripts in this directory executable: find . -name '*.sh' -exec chmod +x {} +
+ * 6) change the version number in the "ImportSnvExternalScripts.groovy" script
+ * 7) execute this script on you local OTP to verify it is working
+ * 8) copy file "/some/relative/path/temp/roddyLocalTest/testproject/vbp/stds/applicationProperties_Stable.ini" to you local folder
+ * 9) modify your "applicationProperties_Stable.ini": usePluginVersion=COWorkflows\:1.0.131 -> to newest version
+ * 10) go to "/$WORKFLOW_ROOT/ngsPipelines/RoddyStable"
+ * 11) execute "bash roddy.sh testrun coWorkflowsTestProject.test@snvCalling stds --useconfig=/AbolsutePathTo/applicationProperties_Stable.ini"
+ * 12) execute "bash roddy.sh rerun coWorkflowsTestProject.test@snvCalling stds --useconfig=/AbolsutePathTo/applicationProperties_Stable.ini"
+ * 13) results are here "[REDACTED]rpp/stds/mpileup"
+ * 14) execution infos are here "[REDACTED]rpp/stds/roddyExecutionStore"
+ * 15) create new result folder for this version in WORKFLOW_ROOT/SnvCallingWorkflow (i.e. resultFiles_1.0.131)
+ * 16) copy results of the roddy run in the current result folder
+ * 17) since we decided not to overwrite the annotation results, but inserted "annotation" we have now differences in the naming with the CO group in some result files
  * therefore "annotation" has to be inserted to some file names of the Roddy results -> compare with already existing file names of previous Roddy results.
- * 17) change VERSION in SnvWorkflowTest
- * 18) create new config folder for this version in WORKFLOW_ROOT/SnvCallingWorkflow (i.e. configFile_1.0.131)
- * 19) copy configs from previous version in this version & adapt paths within the configs (i.e in vi with :%s/1.0.114/1.0.131/gc)
- * 20) compare runtimeConfig.sh of this Roddy run and the previous Roddy run to find out if there are new variables -> add new ones in new config files
- * 21) run SnvWorkflowTests
+ * 18) change VERSION in SnvWorkflowTest
+ * 19) create new config folder for this version in WORKFLOW_ROOT/SnvCallingWorkflow (i.e. configFile_1.0.131)
+ * 20) copy configs from previous version in this version & adapt paths within the configs (i.e in vi with :%s/1.0.114/1.0.131/gc)
+ * 21) compare runtimeConfig.sh of this Roddy run and the previous Roddy run to find out if there are new variables -> add new ones in new config files
+ * 22) run SnvWorkflowTests
  */
 
 class SnvWorkflowTests extends AbstractWorkflowTest {
 
-    final String VERSION = "1.0.131"
+    final String VERSION = "1.0.132-1"
     final String CO_SCRIPTS_BASE_DIR = "/path/to/programs/otp/COWorkflows_${VERSION}/resources/analysisTools"
     final String SNV_PIPELINE_SCRIPTS_PATH = "${CO_SCRIPTS_BASE_DIR}/snvPipeline"
     final String ANALYSIS_SCRIPTS_PATH = "${CO_SCRIPTS_BASE_DIR}/tools"
@@ -245,27 +246,27 @@ class SnvWorkflowTests extends AbstractWorkflowTest {
         joiningScript = ExternalScript.build(
                 scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
                 filePath: "${SNV_PIPELINE_SCRIPTS_PATH}/joinSNVVCFFiles.sh",
-                scriptVersion: "v1"
+                scriptVersion: VERSION
         )
         callingScript = ExternalScript.build(
                 scriptIdentifier: "SnvCallingStep.CALLING",
                 filePath: "${SNV_PIPELINE_SCRIPTS_PATH}/snvCalling.sh",
-                scriptVersion: "v1"
+                scriptVersion: VERSION
         )
         annotationScript = ExternalScript.build(
                 scriptIdentifier: "SnvCallingStep.SNV_ANNOTATION",
                 filePath: "${SNV_PIPELINE_SCRIPTS_PATH}/snvAnnotation.sh",
-                scriptVersion: "v1"
+                scriptVersion: VERSION
         )
         deepAnnotationScript = ExternalScript.build(
                 scriptIdentifier: "SnvCallingStep.SNV_DEEPANNOTATION",
                 filePath: "${ANALYSIS_SCRIPTS_PATH}/vcf_pipeAnnotator.sh",
-                scriptVersion: "v1"
+                scriptVersion: VERSION
         )
         filterScript = ExternalScript.build(
                 scriptIdentifier: "SnvCallingStep.FILTER_VCF",
                 filePath: "${SNV_PIPELINE_SCRIPTS_PATH}/filter_vcf.sh",
-                scriptVersion: "v1"
+                scriptVersion: VERSION
         )
 
         mkDirs = createClusterScriptService.makeDirs([
@@ -298,7 +299,7 @@ class SnvWorkflowTests extends AbstractWorkflowTest {
     @Test
     void testWholeSnvWorkflow() {
         prepare(Realm.Cluster.DKFZ)
-        snvConfig = SnvConfig.createFromFile(project, seqType, new File(baseDirDKFZ, "configFile_${VERSION}/runtimeConfig.sh"), "v1")
+        snvConfig = SnvConfig.createFromFile(project, seqType, new File(baseDirDKFZ, "configFile_${VERSION}/runtimeConfig.sh"), VERSION)
         assertNotNull(snvConfig.save(flush: true))
         execute()
         check(SnvCallingStep.CALLING)
@@ -311,7 +312,7 @@ class SnvWorkflowTests extends AbstractWorkflowTest {
     @Test
     void testSnvAnnotationDeepAnnotationAndFilter() {
         prepare(Realm.Cluster.DKFZ)
-        snvConfig = SnvConfig.createFromFile(project, seqType, new File(baseDirDKFZ, "configFile_${VERSION}/runtimeConfig_anno.sh"), "v1")
+        snvConfig = SnvConfig.createFromFile(project, seqType, new File(baseDirDKFZ, "configFile_${VERSION}/runtimeConfig_anno.sh"), VERSION)
         assertNotNull(snvConfig.save(flush: true))
         createJobResults(SnvCallingStep.SNV_ANNOTATION)
 
@@ -326,7 +327,7 @@ class SnvWorkflowTests extends AbstractWorkflowTest {
     @Test
     void testSnvFilter() {
         prepare(Realm.Cluster.DKFZ)
-        snvConfig = SnvConfig.createFromFile(project, seqType, new File("${baseDirDKFZ}/configFile_${VERSION}/runtimeConfig_filter.sh"), "v1")
+        snvConfig = SnvConfig.createFromFile(project, seqType, new File("${baseDirDKFZ}/configFile_${VERSION}/runtimeConfig_filter.sh"), VERSION)
         assertNotNull(snvConfig.save(flush: true))
         createJobResults(SnvCallingStep.FILTER_VCF)
 
