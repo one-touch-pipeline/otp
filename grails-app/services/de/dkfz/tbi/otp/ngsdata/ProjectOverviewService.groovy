@@ -248,6 +248,7 @@ from
 where
         project = :project
         and processedMergedBamFile.withdrawn = false
+        and processedMergedBamFile.md5sum is not null
         and mergingSet.identifier = (
             select
                 max(mergingSet2.identifier)
@@ -273,6 +274,7 @@ where
 
 
         List coverage = processedMergedBamFileList.collect { ProcessedMergedBamFile processedMergedBamFile ->
+            assert processedMergedBamFile.numberOfMergedLanes != null && processedMergedBamFile.coverage != null
             MergingWorkPackage mergingWorkPackage = processedMergedBamFile.mergingPass.mergingSet.mergingWorkPackage
             Sample sample = mergingWorkPackage.sample
             Individual individual = sample.individual
