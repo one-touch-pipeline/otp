@@ -183,7 +183,7 @@ class MergingPassService {
                         qaStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
                         mergingSetStatus: MergingSet.State.PROCESSED,
                         status: AbstractBamFile.State.PROCESSED,
-                        fileOpStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
+                        fileOpStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 ])*.mergingPass.unique()
         })
     }
@@ -202,7 +202,7 @@ class MergingPassService {
             return false
         }
         if (bamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED &&
-                bamFile.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED &&
+                bamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED &&
                 bamFile.md5sum != null) {
             // Processing files have already been copied to the final destination.
             return true

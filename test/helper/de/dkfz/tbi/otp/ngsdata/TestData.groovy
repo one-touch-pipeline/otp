@@ -431,7 +431,8 @@ class TestData {
             coverage: 30.0,
             qualityAssessmentStatus:QaProcessingStatus.NOT_STARTED,
             status: AbstractBamFile.State.DECLARED,
-            numberOfMergedLanes: 3
+            numberOfMergedLanes: 3,
+            fileSize: 100000,
         ] + properties)
     }
 }

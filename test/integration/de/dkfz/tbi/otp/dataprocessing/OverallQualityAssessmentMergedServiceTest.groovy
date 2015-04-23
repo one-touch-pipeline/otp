@@ -28,8 +28,9 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         createUserAndRoles()
 
         overallQualityAssessmentMerged = OverallQualityAssessmentMerged.build()
-        overallQualityAssessmentMerged.processedMergedBamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.PROCESSED
+        overallQualityAssessmentMerged.processedMergedBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
         overallQualityAssessmentMerged.processedMergedBamFile.md5sum = "123456" //Some value, doesn't matter
+        overallQualityAssessmentMerged.processedMergedBamFile.fileSize = 10000
         overallQualityAssessmentMerged.processedMergedBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.FINISHED
         overallQualityAssessmentMerged.referenceGenome.lengthWithoutN = LENGTH_WITHOUT_N
     }
@@ -141,7 +142,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
 
     void testFindAllByProjectAndSeqType_wrongFileOperationStatus() {
         List expected = []
-        overallQualityAssessmentMerged.processedMergedBamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.INPROGRESS
+        overallQualityAssessmentMerged.processedMergedBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.INPROGRESS
         overallQualityAssessmentMerged.processedMergedBamFile.md5sum = null
 
         SpringSecurityUtils.doWithAuth("admin") {

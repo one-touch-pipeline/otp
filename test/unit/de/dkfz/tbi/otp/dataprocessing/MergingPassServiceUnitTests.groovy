@@ -214,8 +214,9 @@ class MergingPassServiceUnitTests {
         createDomains()
         createDataForMayProcessingFilesBeDeleted()
         processedMergedBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.FINISHED
-        processedMergedBamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.PROCESSED
+        processedMergedBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
         processedMergedBamFile.md5sum = "some value" //content doesn't matter
+        processedMergedBamFile.fileSize = 10000
         assert processedMergedBamFile.save(flush: true)
 
         assert mergingPassService.mayProcessingFilesBeDeleted(mergingPass, createdBefore)

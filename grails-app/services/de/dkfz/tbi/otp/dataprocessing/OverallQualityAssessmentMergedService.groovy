@@ -40,7 +40,7 @@ class OverallQualityAssessmentMergedService {
         Map parameters = [
             project: project,
             seqType: seqType,
-            fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
+            fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
         ]
 

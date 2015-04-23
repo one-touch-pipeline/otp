@@ -764,7 +764,7 @@ if (allProcessed) {
                                     join mergingSet.mergingWorkPackage mergingWorkPackage
                             where
                                     processedMergedBamFile.withdrawn = false
-                                    and processedMergedBamFile.fileOperationStatus = '${AbstractBamFile.FileOperationStatus.PROCESSED}'
+                                    and processedMergedBamFile.fileOperationStatus = '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}'
                                     and processedMergedBamFile.qualityAssessmentStatus = '${AbstractBamFile.QaProcessingStatus.FINISHED}'
                                     and mergingPass.identifier = (select max(identifier) from MergingPass mergingPass where mergingPass.mergingSet = mergingSet)
                         )

@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import static org.springframework.util.Assert.isTrue
 import static org.springframework.util.Assert.notNull
 import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.ngsdata.*
@@ -332,13 +332,6 @@ class ProcessedMergedBamFileService {
         return null
     }
 
-    public void updateFileOperationStatus(ProcessedMergedBamFile file, FileOperationStatus status) {
-        notNull(file, "the input file for the method updateFileOperationStatus is null")
-        notNull(status, "the input status for the method updateFileOperationStatus is null")
-        file.fileOperationStatus = status
-        assertSave(file)
-    }
-
     /**
      * stores the md5Sum of the ProcessedMergedBamFile in the database, after the copying step was finished successfully
      *
@@ -348,7 +341,7 @@ class ProcessedMergedBamFileService {
     public boolean storeMD5Digest(ProcessedMergedBamFile file, String md5) {
         notNull(file, "the input 'file' for the method storeMD5Digest is null")
         notNull(md5, "the input 'md5' for the method storeMD5Digest is null")
-        file.fileOperationStatus = FileOperationStatus.PROCESSED
+        file.updateFileOperationStatus(FileOperationStatus.PROCESSED)
         file.md5sum = md5
         return (file.save(flush: true) != null)
     }

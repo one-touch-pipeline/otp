@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.TestData
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -20,9 +21,12 @@ public class RoddyAlignmentDeciderTest {
 
 
     private createAndRunPrepare(boolean bamFileContainsSeqTrack, boolean withdrawn, boolean md5sumNotNull, boolean forceAlign) {
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 withdrawn: withdrawn,
                 md5sum: md5sumNotNull ? DomainFactory.DEFAULT_MD5_SUM : null,
+                fileOperationStatus: md5sumNotNull ? FileOperationStatus.PROCESSED : FileOperationStatus.DECLARED,
+                fileSize: md5sumNotNull ? 10000 : -1
+                ]
         )
 
         SeqTrack seqTrack = bamFileContainsSeqTrack ?
@@ -125,21 +129,22 @@ public class RoddyAlignmentDeciderTest {
     void prepareGetLatestExistingValidBamFile_latestShouldBeFound(boolean withdrawn, boolean md5sumNotNull) {
         RoddyBamFile bamFile1 = DomainFactory.createRoddyBamFile(
                 withdrawn: false,
-                md5sum: DomainFactory.DEFAULT_MD5_SUM,
         )
         RoddyBamFile bamFile2 = DomainFactory.createRoddyBamFile(
                 withdrawn: false,
-                md5sum: DomainFactory.DEFAULT_MD5_SUM,
                 identifier: bamFile1.identifier + 1,
                 workPackage: bamFile1.workPackage,
                 seqTracks: [bamFile1.seqTracks.iterator().next()] as Set<SeqTrack>,
         )
-        RoddyBamFile bamFile3 = DomainFactory.createRoddyBamFile(
+        RoddyBamFile bamFile3 = DomainFactory.createRoddyBamFile([
                 withdrawn: withdrawn,
                 md5sum: md5sumNotNull ? DomainFactory.DEFAULT_MD5_SUM : null,
                 identifier: bamFile1.identifier + 2,
                 workPackage: bamFile1.workPackage,
                 seqTracks: [bamFile1.seqTracks.iterator().next()] as Set<SeqTrack>,
+                fileOperationStatus: md5sumNotNull ? FileOperationStatus.PROCESSED : FileOperationStatus.DECLARED,
+                fileSize: md5sumNotNull ? 10000 : -1
+                ]
         )
 
         def bamFileResult = decider.getLatestBamFileWhichHasBeenOrCouldBeCopied(bamFile1.workPackage)
@@ -158,18 +163,22 @@ public class RoddyAlignmentDeciderTest {
     void prepareGetLatestExistingValidBamFile_secondShouldBeFound(boolean withdrawn, boolean md5sumNotNull) {
         RoddyBamFile bamFile1 = DomainFactory.createRoddyBamFile(
                 withdrawn: false,
-                md5sum: DomainFactory.DEFAULT_MD5_SUM,
         )
-        RoddyBamFile bamFile2 = DomainFactory.createRoddyBamFile(
+        RoddyBamFile bamFile2 = DomainFactory.createRoddyBamFile([
                 withdrawn: withdrawn,
                 md5sum: md5sumNotNull ? DomainFactory.DEFAULT_MD5_SUM : null,
                 identifier: bamFile1.identifier + 1,
                 workPackage: bamFile1.workPackage,
                 seqTracks: [bamFile1.seqTracks.iterator().next()] as Set<SeqTrack>,
+                fileOperationStatus: md5sumNotNull ? FileOperationStatus.PROCESSED : FileOperationStatus.DECLARED,
+                fileSize: md5sumNotNull ? 10000 : -1
+                ]
         )
         RoddyBamFile bamFile3 = DomainFactory.createRoddyBamFile(
                 withdrawn: true,
                 md5sum: null,
+                fileOperationStatus: FileOperationStatus.DECLARED,
+                fileSize: -1,
                 identifier: bamFile1.identifier + 2,
                 workPackage: bamFile1.workPackage,
                 seqTracks: [bamFile1.seqTracks.iterator().next()] as Set<SeqTrack>,
@@ -193,10 +202,14 @@ public class RoddyAlignmentDeciderTest {
         RoddyBamFile bamFile1 = DomainFactory.createRoddyBamFile(
                 withdrawn: true,
                 md5sum: null,
+                fileOperationStatus: FileOperationStatus.DECLARED,
+                fileSize: -1,
         )
         RoddyBamFile bamFile2 = DomainFactory.createRoddyBamFile(
                 withdrawn: true,
                 md5sum: null,
+                fileOperationStatus: FileOperationStatus.DECLARED,
+                fileSize: -1,
                 identifier: bamFile1.identifier + 1,
                 workPackage: bamFile1.workPackage,
                 seqTracks: [bamFile1.seqTracks.iterator().next()] as Set<SeqTrack>,
@@ -204,6 +217,8 @@ public class RoddyAlignmentDeciderTest {
         RoddyBamFile bamFile3 = DomainFactory.createRoddyBamFile(
                 withdrawn: true,
                 md5sum: null,
+                fileOperationStatus: FileOperationStatus.DECLARED,
+                fileSize: -1,
                 identifier: bamFile1.identifier + 2,
                 workPackage: bamFile1.workPackage,
                 seqTracks: [bamFile1.seqTracks.iterator().next()] as Set<SeqTrack>,

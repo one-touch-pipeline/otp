@@ -53,7 +53,8 @@ class ProjectOverviewServiceTests {
         processedMergedBamFile2.coverage = 40
         processedMergedBamFile2.numberOfMergedLanes = 4
         processedMergedBamFile2.md5sum = "2bb2f88846cd7f52e61f0af6987c0935"
-        processedMergedBamFile2.fileOperationStatus = AbstractBamFile.FileOperationStatus.PROCESSED
+        processedMergedBamFile2.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        processedMergedBamFile2.fileSize = 10000
         assert processedMergedBamFile2.save(flush: true)
 
         assert processedMergedBamFile1.mergingWorkPackage == processedMergedBamFile2.mergingWorkPackage
@@ -80,7 +81,8 @@ class ProjectOverviewServiceTests {
         processedMergedBamFile.coverage = 30
         processedMergedBamFile.numberOfMergedLanes = 3
         processedMergedBamFile.md5sum = "2bb2f88846cd7f52e61f0af6987c0935"
-        processedMergedBamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.PROCESSED
+        processedMergedBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        processedMergedBamFile.fileSize = 10000
         assert processedMergedBamFile.save(flush: true)
         return processedMergedBamFile
     }

@@ -33,7 +33,7 @@ class MergingPassServiceTests {
                         fileExists: true,
                         type: AbstractBamFile.BamType.MDUP,
                         qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.UNKNOWN,
-                        fileOperationStatus: AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING,
+                        fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
                         md5sum: null,
                         status: AbstractBamFile.State.PROCESSED,
                         numberOfMergedLanes: 1,
@@ -58,7 +58,7 @@ class MergingPassServiceTests {
                         fileExists: true,
                         type: AbstractBamFile.BamType.MDUP,
                         qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.UNKNOWN,
-                        fileOperationStatus: AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING,
+                        fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
                         md5sum: null,
                         status: AbstractBamFile.State.PROCESSED,
                         numberOfMergedLanes: 1,
@@ -333,8 +333,9 @@ class MergingPassServiceTests {
     private ProcessedMergedBamFile createProcessedMergedBamFileAlreadyTransfered(Map map = [:]) {
         return ProcessedMergedBamFile.build([
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-            fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
+            fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
             md5sum: "SOME_VALUE",
+            fileSize: 10000,
         ] + map)
     }
 
@@ -442,7 +443,7 @@ class MergingPassServiceTests {
     public void testDeleteOldMergingProcessingFiles_ConditionAlreadyTransferred_WrongFileOperationStateAndNoMd5sum() {
         //FileOperationState and md5sum are can't check seperatly, because they are related together
         Date createdBeforeDate = new Date().plus(1)
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileAlreadyTransfered(fileOperationStatus: AbstractBamFile.FileOperationStatus.INPROGRESS, md5sum: null)
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileAlreadyTransfered(fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS, md5sum: null)
         createMergingPassService()
 
         assert LENGTH_NO_BAMFILE == mergingPassService.deleteOldMergingProcessingFiles(createdBeforeDate)

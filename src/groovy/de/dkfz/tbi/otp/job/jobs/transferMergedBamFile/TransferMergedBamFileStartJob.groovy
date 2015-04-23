@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 
@@ -30,7 +30,8 @@ class TransferMergedBamFileStartJob extends AbstractStartJobImpl {
             ProcessedMergedBamFile file = processedMergedBamFileService.mergedBamFileWithFinishedQA()
             if (file) {
                 log.debug 'Starting to transfer merged BAM file ' + file
-                processedMergedBamFileService.updateFileOperationStatus(file, AbstractBamFile.FileOperationStatus.INPROGRESS)
+                file.updateFileOperationStatus(AbstractMergedBamFile.FileOperationStatus.INPROGRESS)
+                assert file.save(flush: true)
                 createProcess(new ProcessParameter(value: file.id.toString(), className: file.class.name))
             }
         }

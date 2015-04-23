@@ -6,7 +6,7 @@ import static org.junit.Assert.*
 import grails.validation.ValidationException
 import org.junit.*
 import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
 import de.dkfz.tbi.otp.job.processing.ProcessingException
@@ -301,6 +301,7 @@ class ProcessedMergedBamFileServiceTests {
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
         mergedBamFile.md5sum = "68b329da9893e34099c7d8ad5cb9c940"
         mergedBamFile.mergingSet.status = State.PROCESSED
+        mergedBamFile.fileSize = 10000
         assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA())
     }
 
@@ -309,6 +310,7 @@ class ProcessedMergedBamFileServiceTests {
         mergedBamFile.md5sum = "68b329da9893e34099c7d8ad5cb9c940"
         mergedBamFile.fileOperationStatus = FileOperationStatus.PROCESSED
         mergedBamFile.mergingSet.status = State.PROCESSED
+        mergedBamFile.fileSize = 10000
         assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA())
     }
 
@@ -350,6 +352,7 @@ class ProcessedMergedBamFileServiceTests {
         mergedBamFile.mergingSet.status = State.PROCESSED
         mergedBamFile.fileOperationStatus = FileOperationStatus.PROCESSED
         mergedBamFile.md5sum = "68b329da9893e34099c7d8ad5cb9c940"
+        mergedBamFile.fileSize = 10000
         MergingSet mergingSet1 = new MergingSet(
                         identifier: 1,
                         mergingWorkPackage: mergedBamFile.mergingWorkPackage,
@@ -414,17 +417,6 @@ class ProcessedMergedBamFileServiceTests {
         assertEquals(singleLanePathExp, singleLanePathAct)
     }
 
-    @Test
-    void testUpdateFileOperationStatus() {
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
-        FileOperationStatus statusExp = FileOperationStatus.NEEDS_PROCESSING
-        FileOperationStatus statusAct = mergedBamFile.fileOperationStatus
-        assertEquals(statusExp, statusAct)
-        processedMergedBamFileService.updateFileOperationStatus(mergedBamFile, FileOperationStatus.INPROGRESS)
-        statusExp = FileOperationStatus.INPROGRESS
-        statusAct = mergedBamFile.fileOperationStatus
-        assertEquals(statusExp, statusAct)
-    }
 
     @Test
     void testLocationsForFileCopying() {
@@ -581,6 +573,7 @@ class ProcessedMergedBamFileServiceTests {
         mergedBamFile.seqType.libraryLayout = 'library'
         mergedBamFile.md5sum = null
         mergedBamFile.fileOperationStatus = FileOperationStatus.NEEDS_PROCESSING
+        mergedBamFile.fileSize = 10000
         return mergedBamFile
     }
 }

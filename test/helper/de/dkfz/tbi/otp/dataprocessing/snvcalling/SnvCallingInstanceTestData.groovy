@@ -162,7 +162,7 @@ class SnvCallingInstanceTestData extends TestData {
                 md5sum: '0123456789ABCDEF0123456789ABCDEF',
                 qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
                 status: AbstractBamFile.State.PROCESSED,
-                fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 coverage: 1,
                 numberOfMergedLanes: 1,
         )

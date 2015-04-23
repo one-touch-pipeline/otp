@@ -8,7 +8,6 @@ class QualityAssessmentMergedPassService {
 
     ConfigService configService
     ProcessingOptionService processingOptionService
-    ProcessedMergedBamFileService processedMergedBamFileService
 
     public QualityAssessmentMergedPass createPass() {
         ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.findByQualityAssessmentStatusAndTypeAndWithdrawn(
@@ -36,7 +35,8 @@ class QualityAssessmentMergedPassService {
     public void passFinished(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
         notNull(qualityAssessmentMergedPass, "The input qualityAssessmentMergedPass of the method passFinished is null")
         update(qualityAssessmentMergedPass, AbstractBamFile.QaProcessingStatus.FINISHED)
-        processedMergedBamFileService.updateFileOperationStatus(qualityAssessmentMergedPass.processedMergedBamFile, AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING)
+        qualityAssessmentMergedPass.processedMergedBamFile.updateFileOperationStatus(AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING)
+        assert qualityAssessmentMergedPass.processedMergedBamFile.save(flush: true)
     }
 
     private void update(QualityAssessmentMergedPass qualityAssessmentMergedPass, AbstractBamFile.QaProcessingStatus state) {

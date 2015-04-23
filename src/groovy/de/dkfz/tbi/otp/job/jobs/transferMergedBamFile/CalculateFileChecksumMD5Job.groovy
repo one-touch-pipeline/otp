@@ -36,7 +36,8 @@ class CalculateFileChecksumMD5Job extends AbstractJobImpl {
         ProcessedMergedBamFile bamFile = ProcessedMergedBamFile.get(id)
 
         //Because of bug OTP-397 we set the state again to inprocess
-        processedMergedBamFileService.updateFileOperationStatus(bamFile, AbstractBamFile.FileOperationStatus.INPROGRESS)
+        bamFile.updateFileOperationStatus(AbstractMergedBamFile.FileOperationStatus.INPROGRESS)
+        assert bamFile.save(flush: true)
 
         Project project = processedMergedBamFileService.project(bamFile)
         Map<String, String> locations = processedMergedBamFileService.locationsForFileCopying(bamFile)

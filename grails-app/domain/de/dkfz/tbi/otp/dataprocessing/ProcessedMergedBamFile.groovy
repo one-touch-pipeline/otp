@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
@@ -16,15 +15,7 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile {
         mergingPass: MergingPass
     ]
 
-    FileOperationStatus fileOperationStatus = FileOperationStatus.DECLARED
-
     static constraints = {
-        md5sum nullable: true, validator: { val, obj ->
-            return (!val || (val && obj.fileOperationStatus == FileOperationStatus.PROCESSED))
-        }
-        fileOperationStatus validator: { val, obj ->
-            return ((val != FileOperationStatus.PROCESSED && obj.md5sum == null) || (val == FileOperationStatus.PROCESSED && obj.md5sum != null))
-        }
         mergingPass nullable: false, unique: true
     }
 

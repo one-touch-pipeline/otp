@@ -1,26 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
-import de.dkfz.tbi.otp.dataprocessing.MergingPass
-import de.dkfz.tbi.otp.dataprocessing.MergingSet
-import de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.Workflow
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.ExecutionState
-import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import grails.util.Environment
 import org.joda.time.DateTime
@@ -208,7 +196,9 @@ class DomainFactory {
                 seqTracks: [seqTrack],
                 workPackage: workPackage,
                 config: RoddyWorkflowConfig.build(workflow: workflow),
-                md5sum: DEFAULT_MD5_SUM
+                md5sum: DEFAULT_MD5_SUM,
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileSize: 10000,
                 ] + bamFileProperties
         )
         bamFile.save(flush: true) // build-test-data does not flush, only saves
@@ -223,7 +213,9 @@ class DomainFactory {
                 identifier: baseBamFile.identifier + 1,
                 numberOfMergedLanes: baseBamFile.numberOfMergedLanes + 1,
                 seqTracks: [DomainFactory.buildSeqTrackWithDataFile(baseBamFile.workPackage)],
-                md5sum: DEFAULT_MD5_SUM
+                md5sum: DEFAULT_MD5_SUM,
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileSize: 10000,
                 ] + bamFileProperties
         )
         bamFile.save(flush: true)

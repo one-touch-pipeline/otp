@@ -7,7 +7,7 @@ import grails.test.mixin.support.*
 import org.junit.*
 
 import de.dkfz.tbi.TestConstants
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CheckedLogger
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
@@ -159,7 +159,8 @@ class ProcessedMergedBamFileServiceUnitTests {
     private def createDataForDeleteChecking(Boolean valueForDataBaseConsistence = null, Boolean valueForDestinationConsistence = null) {
         ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.build([
             md5sum: SOME_MD5SUM_VALUE,
-            fileOperationStatus: FileOperationStatus.PROCESSED
+            fileOperationStatus: FileOperationStatus.PROCESSED,
+            fileSize: 10000
         ])
 
         ProcessedMergedBamFileService processedMergedBamFileService = new ProcessedMergedBamFileService()
