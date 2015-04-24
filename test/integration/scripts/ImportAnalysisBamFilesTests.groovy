@@ -14,6 +14,7 @@ import groovy.sql.Sql
 import groovy.util.logging.Log4j
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 import javax.sql.DataSource
@@ -42,7 +43,8 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     static final String SCRIPT_NAME = "scripts/ImportAnalysisBamFiles.groovy"
 
     static final String projectName = "PROJECT_NAME"
-    static final String individualPid = PID
+    static final Long individualID = 131117  // The database object ID, not what we call "PID"
+    static final String individualPid = individualID as String
     static final String mockPid = "PID"
     static final String refGenomeName = "asdfasdf"
     static final String sampleTypeName = "CONTROL"
@@ -54,19 +56,31 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     static final List<Long> lanes2 = [12345L, 23456L, 34567L]
 
 
-    static final String correctHeader = """"File","Errors","InExcludeList","Size","PID","IndOTP","RefGenome","SampleType","BamType","Lanes","LanesInOTP","MissingLanes","WithdrawnLanes","Md5Sum"
+    static final String correctHeader = """"File","Md5Sum","Errors","InExcludeList","Size","PID","IndOTP","RefGenome","SampleType","BamType","Lanes","LanesInOTP","MissingLanes","WithdrawnLanes"
 """
-    static final String wrongHeader = """"asdf","Errors","InExcludeList","Size","PID","IndOTP","RefGenome","SampleType","BamType","Lanes","LanesInOTP","MissingLanes","WithdrawnLanes","Md5Sum"
+    static final String wrongHeader = """"asdf","Md5Sum","Errors","InExcludeList","Size","PID","IndOTP","RefGenome","SampleType","BamType","Lanes","LanesInOTP","MissingLanes","WithdrawnLanes"
 """
-    static final String correctData = """"${fileName}","","no","${fileSize}","${mockPid}",${individualPid},"${refGenomeName}","${sampleTypeName}","${bamType}","111129_SN952_0063_AC0A53ACXX_L005","${lanes1.join(" ")}","","","${md5sum}"
+    static final String correctData = """"${fileName}","${md5sum}",","no","${fileSize}","${mockPid}",${individualPid},"${refGenomeName}","${sampleTypeName}","${bamType}","111129_SN952_0063_AC0A53ACXX_L005","${lanes1.join(" ")}","",""
 """
-    static final String skipData = """"${fileName}","asdfasdf","YES","${fileSize}","${mockPid}",${individualPid},"${refGenomeName}","${sampleTypeName}","${bamType}","111129_SN952_0063_AC0A53ACXX_L005","${lanes2.join(" ")}","","","${md5sum}"
+    static final String skipData = """"${fileName}","asdfasdf","${md5sum}","YES","${fileSize}","${mockPid}",${individualPid},"${refGenomeName}","${sampleTypeName}","${bamType}","111129_SN952_0063_AC0A53ACXX_L005","${lanes2.join(" ")}","",""
 """
-    static final String wrongData = """"${fileName}","","no","${fileSize}","INVALID_PID",${individualPid},"${refGenomeName}","${sampleTypeName}","${bamType}","111129_SN952_0063_AC0A53ACXX_L005","${lanes2.join(" ")}","","","${md5sum}"
+    static final String wrongData = """"${fileName}","${md5sum}","","no","${fileSize}","INVALID_PID","null","${refGenomeName}","${sampleTypeName}","${bamType}","111129_SN952_0063_AC0A53ACXX_L005","${lanes2.join(" ")}","",""
 """
-    final Map<String, String> correctDataMap = [absoluteFilePath: fileName, errors: "", inExcludeList: "no", fileSize: fileSize.toString(),
-            mockPid: mockPid, pid: individualPid, refGenome: refGenomeName, sampleType: sampleTypeName, bamType: bamType,
-            lanes: "-----", seqTrackIds: lanes1.join(" "), missingLanes: "", withdrawnLanes: "", md5sum: md5sum]
+    final Map<String, String> correctDataMap = [
+            absoluteFilePath: fileName,
+            md5sum          : md5sum,
+            errors          : "",
+            inExcludeList   : "no",
+            fileSize        : fileSize.toString(),
+            mockPid         : mockPid,
+            pid             : individualPid,
+            refGenome       : refGenomeName,
+            sampleType      : sampleTypeName,
+            bamType         : bamType,
+            lanes           : "-----",
+            seqTrackIds     : lanes1.join(" "),
+            missingLanes    : "", withdrawnLanes: ""
+    ]
 
 
     @Before
@@ -103,6 +117,9 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
                 mockPid: "${mockPid}",
                 project: project,
         )
+        // Enforce the ID in the database and update the reference
+        assert individual.executeUpdate("update Individual set id = ${individualID}") == 1
+        individual = Individual.get(individualID)
 
         sampleType = SampleType.build(
                 name: "${sampleTypeName}"
@@ -227,15 +244,15 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     @Test
     void testReadFile() {
         writeMetadataFile(correctHeader + correctData)
-        LinkedHashMap<String, String> header = [absoluteFilePath: "File", errors: "Errors", inExcludeList: "InExcludeList", fileSize: "Size", mockPid: "PID", pid: "IndOTP",
+        LinkedHashMap<String, String> header = [absoluteFilePath: "File", md5sum: "Md5Sum", errors: "Errors", inExcludeList: "InExcludeList", fileSize: "Size", mockPid: "PID", pid: "IndOTP",
          refGenome: "RefGenome", sampleType: "SampleType", bamType: "BamType", lanes: "Lanes",
          seqTrackIds: "LanesInOTP", missingLanes: "MissingLanes", withdrawnLanes: "WithdrawnLanes",
-         md5sum: "Md5Sum"]
+         ]
         List<Map<String, String>> ret = invokeMethod(new File(SCRIPT_NAME), "readFile",
                 [metaDataFile, header], ["project": "${projectName}", "metadata": "${metaDataFile}"])
-        assert ret == [[absoluteFilePath: "/tumor_PID_merged.bam.rmdup.bam", errors:"", inExcludeList:"no", fileSize:"123456", mockPid:"PID",
+        assert ret == [[absoluteFilePath: "/tumor_PID_merged.bam.rmdup.bam", md5sum:"12345678901234567890123456789012", errors:"", inExcludeList:"no", fileSize:"123456", mockPid:"PID",
                         pid:PID, refGenome:"asdfasdf", sampleType:"CONTROL", bamType:"RMDUP", lanes:"111129_SN952_0063_AC0A53ACXX_L005",
-                        seqTrackIds:"184245 186982 585992", missingLanes:"", withdrawnLanes:"", md5sum:"12345678901234567890123456789012"]]
+                        seqTrackIds:"184245 186982 585992", missingLanes:"", withdrawnLanes:""]]
     }
 
     @Test
@@ -269,19 +286,11 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
 
     @Test
     void testIndividualNotFound() {
-        correctDataMap.pid = "-----"
+        correctDataMap.pid = "-1"
         assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
                 [correctDataMap, project], ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^Ignored .*: Individual not found\./
     }
-
-    @Test
-    void testPidNotFound() {
-        correctDataMap.mockPid = "-----"
-        assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
-                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metaDataFile}"])
-        }) =~ /^Ignored .*: Individual not found\./
-   }
 
     @Test
     void testWrongProject() {
@@ -293,7 +302,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
         individual.save(flush: true)
         assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
                 [correctDataMap, project], ["project": "${projectName}", "metadata": "${metaDataFile}"])
-        }) =~ /^Ignored .*: Wrong project\./
+        }) =~ /^Ignored .*: Wrong project:/
     }
 
     @Test
@@ -334,38 +343,20 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     @Test
     void testIndividualInvalid() {
         createData()
-        String pid = "PID"
-        String mockPid = "MOPID"
         Individual individual2 = Individual.build(
-                pid: pid,
-                mockPid: mockPid,
                 project: project,
         )
-        correctDataMap.pid = pid
-        correctDataMap.mockPid = mockPid
         Sample sample1 = Sample.build(
                 individual: individual2,
                 sampleType: sampleType,
         )
+        SeqTrack track = SeqTrack.get(lanes1.first())
+        track.sample = sample1
+        assert track.save(flush: true)
+
         assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
                 [correctDataMap, project], ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^Ignored .*: Individual invalid\./
-    }
-
-    @Test
-    void testWrongProject2() {
-        createData()
-        Project project2 = Project.build(
-                name: "asdfasdf",
-                realmName: 'DKFZ',
-        )
-        Individual individual2 = SeqTrack.get(lanes1.first()).sample.individual
-        individual2.project = project2
-        individual2.save(flush: true)
-
-        assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "validate",
-                [correctDataMap, project], ["project": "${projectName}", "metadata": "${metaDataFile}"])
-        }) =~ /^Ignored .*: Wrong project\./
     }
 
     @Test
@@ -451,6 +442,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     }
 
     @Test
+    @Ignore('For most projects, we will import withdrawn lanes. The check is also disabled in the script.')
     void testWithdrawnLanes() {
         correctDataMap.withdrawnLanes = "456789"
         assert shouldFail (AssertionError.class, { invokeMethod(new File(SCRIPT_NAME), "includes",
