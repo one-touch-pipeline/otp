@@ -156,12 +156,6 @@ class MergingService {
         verboseSave(matchingScan)
     }
 
-    private List<SeqTrack> getSeqTracks(SplittedPath path) {
-        File bamFile = new File(path.filePath())
-        String text = getBamFileHeader(bamFile)
-        return getSeqTracks(text)
-    }
-
     private List<SeqTrack> getSeqTracks(String text) {
         final String lineStart = "@RG"
         List<SeqTrack> seqTracks = new ArrayList<SeqTrack>()
@@ -322,7 +316,7 @@ class MergingService {
     }
 
     /**
-     * 
+     *
      * @param scan
      * @return
      */
@@ -362,7 +356,7 @@ class MergingService {
         List<String> lines = new Vector<String>()
         text.eachLine {String line ->
             if (line.startsWith(lineStart)) {
-                lines << header 
+                lines << header
                 List<String> tokens = line.tokenize("\t")
                 for (String token in tokens) {
                     // select id only
