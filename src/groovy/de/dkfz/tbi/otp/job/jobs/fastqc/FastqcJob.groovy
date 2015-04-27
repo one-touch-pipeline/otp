@@ -32,7 +32,8 @@ class FastqcJob extends AbstractJobImpl {
             seqFiles.each { seqFile ->
                 assert seqFile.fileExists && seqFile.fileSize > 0L
                 String rawSeq = lsdfFilesService.getFileFinalPath(seqFile)
-                String cmd = "fastqc ${rawSeq} --noextract --nogroup -o ${outDir};chmod -R 440 ${outDir}/*.zip"
+                String fastqcCommand = ProcessingOptionService.findOption('fastqcCommand', null, null)
+                String cmd = "${fastqcCommand} ${rawSeq} --noextract --nogroup -o ${outDir};chmod -R 440 ${outDir}/*.zip"
                 pbsIDs.add(executionHelperService.sendScript(realm, cmd))
                 fastqcDataFilesService.createFastqcProcessedFile(seqFile)
             }
