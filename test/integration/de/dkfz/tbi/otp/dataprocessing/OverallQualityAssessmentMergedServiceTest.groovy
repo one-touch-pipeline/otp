@@ -29,7 +29,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
 
         overallQualityAssessmentMerged = OverallQualityAssessmentMerged.build()
         overallQualityAssessmentMerged.processedMergedBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
-        overallQualityAssessmentMerged.processedMergedBamFile.md5sum = "123456" //Some value, doesn't matter
+        overallQualityAssessmentMerged.processedMergedBamFile.md5sum = "12345678901234567890123456789012"
         overallQualityAssessmentMerged.processedMergedBamFile.fileSize = 10000
         overallQualityAssessmentMerged.processedMergedBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.FINISHED
         overallQualityAssessmentMerged.referenceGenome.lengthWithoutN = LENGTH_WITHOUT_N

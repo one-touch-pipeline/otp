@@ -426,7 +426,7 @@ class TestData {
 
     ProcessedMergedBamFile createProcessedMergedBamFile(Map properties = [:]) {
         return new ProcessedMergedBamFile([
-            md5sum: "12345",
+            md5sum: "12345678901234567890123456789012",
             type: BamType.MDUP,
             coverage: 30.0,
             qualityAssessmentStatus:QaProcessingStatus.NOT_STARTED,

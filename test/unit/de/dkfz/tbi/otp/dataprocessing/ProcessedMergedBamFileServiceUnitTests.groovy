@@ -20,7 +20,7 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 ])
 class ProcessedMergedBamFileServiceUnitTests {
 
-    private final static String SOME_MD5SUM_VALUE = "1234567890" //contant doesn't matter, only not empty requiered
+    private final static String SOME_MD5SUM_VALUE = "12345678901234567890123456789012"
 
     private final static long SOME_FILE_LENGTH = 10  //Content should only be positive
 

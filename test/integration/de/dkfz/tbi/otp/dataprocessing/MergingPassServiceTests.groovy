@@ -334,7 +334,7 @@ class MergingPassServiceTests {
         return ProcessedMergedBamFile.build([
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
             fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
-            md5sum: "SOME_VALUE",
+            md5sum: "12345678901234567890123456789012",
             fileSize: 10000,
         ] + map)
     }

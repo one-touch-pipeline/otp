@@ -42,7 +42,7 @@ abstract class AbstractFileSystemBamFile extends AbstractBamFile {
 
     static constraints = {
         dateFromFileSystem(nullable: true)
-        md5sum nullable: true
+        md5sum nullable: true, matches: /^[0-9a-fA-F]{32}$/
         sha256sum nullable: true
     }
 }
