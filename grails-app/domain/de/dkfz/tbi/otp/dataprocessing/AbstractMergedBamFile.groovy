@@ -4,6 +4,8 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 /**
+ * Represents a single generation of one merged BAM file (whereas a {@link MergingWorkPackage} represents all
+ * generations).
  */
 abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
 

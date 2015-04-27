@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
- * Represents all generations of one merged BAM file (whereas {@link ProcessedMergedBamFile} represents a single
+ * Represents all generations of one merged BAM file (whereas an {@link AbstractMergedBamFile} represents a single
  * generation). It specifies the concrete criteria for the {@link SeqTrack}s that are merged into the BAM file, and
  * processing parameters used for alignment and merging.
  */
