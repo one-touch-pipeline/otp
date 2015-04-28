@@ -188,14 +188,18 @@ class DomainFactory {
     }
 
     public static createRoddyBamFile(Map bamFileProperties = [:]) {
-        Workflow workflow = Workflow.buildLazy(name: Workflow.Name.RODDY)
-        MergingWorkPackage workPackage = MergingWorkPackage.build(workflow: workflow)
+        MergingWorkPackage workPackage = bamFileProperties.workPackage
+        if (!workPackage) {
+            Workflow workflow = Workflow.buildLazy(name: Workflow.Name.RODDY, type: Workflow.Type.ALIGNMENT)
+            workPackage = MergingWorkPackage.build(workflow: workflow)
+        }
         SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile(workPackage)
         RoddyBamFile bamFile = RoddyBamFile.build([
                 numberOfMergedLanes: 1,
                 seqTracks: [seqTrack],
                 workPackage: workPackage,
-                config: RoddyWorkflowConfig.build(workflow: workflow),
+                identifier: RoddyBamFile.nextIdentifier(workPackage),
+                config: RoddyWorkflowConfig.build(workflow: workPackage.workflow),
                 md5sum: DEFAULT_MD5_SUM,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 fileSize: 10000,
@@ -222,12 +226,12 @@ class DomainFactory {
         return bamFile
     }
 
-    public static SeqTrack buildSeqTrackWithDataFile(MergingWorkPackage mergingWorkPackage) {
-        return buildSeqTrackWithDataFile(
+    public static SeqTrack buildSeqTrackWithDataFile(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:]) {
+        return buildSeqTrackWithDataFile([
                 sample: mergingWorkPackage.sample,
                 seqType: mergingWorkPackage.seqType,
                 seqPlatform: SeqPlatform.build(seqPlatformGroup: mergingWorkPackage.seqPlatformGroup),
-        )
+        ] + seqTrackProperties)
     }
 
     public static SeqTrack buildSeqTrackWithDataFile(Map seqTrackProperties = [:], Map dataFileProperties = [:]) {

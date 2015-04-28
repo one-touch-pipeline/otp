@@ -14,6 +14,10 @@ class RoddyBamFile extends AbstractMergedBamFile {
 
     Set<SeqTrack> seqTracks
 
+    static hasMany = [
+            seqTracks: SeqTrack
+    ]
+
     /**
      * config file used to create this bam file
      */
@@ -29,11 +33,8 @@ class RoddyBamFile extends AbstractMergedBamFile {
      */
     int identifier
 
-    static hasMany = [
-        seqTracks: SeqTrack
-    ]
-
     static constraints = {
+        type validator: { true }
         seqTracks minSize: 1, validator: { val, obj, errors ->
             obj.isConsistentAndContainsNoWithdrawnData().each {
                 errors.reject(null, it)
@@ -116,6 +117,16 @@ class RoddyBamFile extends AbstractMergedBamFile {
     @Override
     public boolean isMostRecentBamFile() {
         return identifier == maxIdentifier(workPackage)
+    }
+
+    public static int nextIdentifier(final MergingWorkPackage mergingWorkPackage) {
+        assert mergingWorkPackage
+        final Integer maxIdentifier = maxIdentifier(mergingWorkPackage)
+        if (maxIdentifier == null) {
+            return 0
+        } else {
+            return maxIdentifier + 1
+        }
     }
 
     public static Integer maxIdentifier(MergingWorkPackage workPackage) {

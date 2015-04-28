@@ -82,6 +82,10 @@ abstract class AbstractBamFile {
     public abstract AbstractQualityAssessment getOverallQualityAssessment()
 
     static constraints = {
+        // Type is not nullable for BamFiles except RoddyBamFile,
+        // Grails does not create the SQL schema correctly when using simple nullable constraints,
+        // therefore this workaround with validator constraints is used
+        type nullable: true, validator: { it != null }
         hasMetricsFile validator: { val, obj ->
             if (obj.type == BamType.SORTED) {
                 return !val

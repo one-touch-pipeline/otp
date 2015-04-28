@@ -108,8 +108,12 @@ testDataConfig {
         'de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage' {
             workflow = { Workflow.buildLazy() }
         }
+        'de.dkfz.tbi.otp.dataprocessing.MockAbstractBamFile' {
+            type = AbstractBamFile.BamType.SORTED
+        }
         'de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile' {
             alignmentPass = {TestData.createAndSaveAlignmentPass()}
+            type = AbstractBamFile.BamType.SORTED
         }
         'de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile' {
             type = AbstractBamFile.BamType.MDUP
