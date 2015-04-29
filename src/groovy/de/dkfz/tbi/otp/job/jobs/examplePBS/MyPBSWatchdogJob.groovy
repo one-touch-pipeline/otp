@@ -8,8 +8,8 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import org.springframework.beans.factory.annotation.Autowired
-import de.dkfz.tbi.otp.job.jobs.WatchdogJob
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
+import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
 import de.dkfz.tbi.otp.job.processing.MonitoringJob
 import de.dkfz.tbi.otp.job.processing.ResumableJob
 import de.dkfz.tbi.otp.job.scheduler.PbsMonitorService
@@ -17,8 +17,8 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
 
 /**
- * @deprecated This watchdog is deprecated in favor of {@link WatchdogJob} which also provides logging capabilities.
- *             It was meant only as an example.
+ * @deprecated Do not use a separate watchdog job.
+ * Instead create/use a subclass of {@link AbstractMultiJob}, so restarting the job will resubmit the cluster jobs.
  */
 @Deprecated @ResumableJob
 class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob {

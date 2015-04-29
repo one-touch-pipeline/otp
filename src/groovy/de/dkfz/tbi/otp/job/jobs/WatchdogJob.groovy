@@ -11,12 +11,7 @@ import javax.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
-import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
-import de.dkfz.tbi.otp.job.processing.JobStatusLoggingService
-import de.dkfz.tbi.otp.job.processing.MonitoringJob
-import de.dkfz.tbi.otp.job.processing.ProcessingException
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.job.processing.ResumableJob
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.PbsMonitorService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -29,7 +24,11 @@ import de.dkfz.tbi.otp.ngsdata.Realm
  *
  * @see JobParameterKeys
  *
+ *
+ * @deprecated Do not use a separate watchdog job.
+ * Instead create/use a subclass of {@link AbstractMultiJob}, so restarting the job will resubmit the cluster jobs.
  */
+@Deprecated
 @ResumableJob
 class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob {
 
