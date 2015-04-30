@@ -18,29 +18,15 @@ abstract class QualityAssessmentAbstractWorkflowTests extends AbstractWorkflowTe
 
     /*
      * preparation:
-     *
-     *    OTP will be run as $USER and the commands on the cluster are executed as otptest
-     *    The $USER must be able only to read from $base (see below)
-     *    otptest must be able to read/write from/into $base
-     *
-     *  - in conf/spring/resources.groovy: Change line to
-     *      if (Environment.getCurrent() == Environment.TEST && false) {
-     *    to start scheduler
-     *  - create $myBase on dkfz-cluster as otptest, check that permissions are as given above
-     *  - Mount LSDF to your local system via sshfs:
-     *    sudo mkdir -p $base
-     *    sudo chown $USER $base
-     *    sshfs headnode:$base $base # !!! must be executed as $USER
-     *  - Check your PBS (Linux cluster) password in ~/.otp.properties: must pass for otptest
+     *  - see src/docs/guide/devel/testing/workflowTesting.gdoc
      *  - $myBase/test-qa.sh which calls the required version of qa.jar
      *    chmod g+x test-qa.sh
-     *  - to make the testing a bit faster, change the fixedDelay-time in the SchedulerService.pbsMonitorCheck() from 180000l to 1000l
      */
 
     /*
      * NOTE:
-     * with the current test set up the executed workflow calles production version of all
-     * scripts - it calles scripts installed on the cluster.
+     * with the current test set up the executed workflow calls production version of all
+     * scripts - it calls scripts installed on the cluster.
      * Exception to it is qa.jar which is called from $myBase/test-qa.sh.
      * Changing of test-qa.sh makes it possible to test production or a test version of qa.jar
      */
