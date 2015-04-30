@@ -365,7 +365,7 @@ def handleStateMapSnv = { List next ->
         } else if (!ProcessingThresholds.findByProjectAndSampleTypeAndSeqType(pMBF.project, pMBF.sampleType, pMBF.seqType)) {
             unknownThreshold << "${pMBF.project} ${pMBF.sampleType.name} ${pMBF.seqType}"
         } else {
-            noPairFound << "${pMBF.project} ${pMBF.sampleType.name} ${pMBF.seqType}"
+            noPairFound << "${pMBF.project} ${pMBF.individual} ${pMBF.sampleType.name} ${pMBF.seqType}"
         }
     }
 
@@ -409,7 +409,7 @@ ${INDENT}Either no sample with the other disease state is available or the Sampl
                     maxResults(1)
                 }
                 if (snvCallingInstance && snvCallingInstance.processingState == SnvProcessingStates.IN_PROGRESS) {
-                    stateMap.running << samplePair
+                    stateMap.running << snvCallingInstance
                 }
                 if (snvCallingInstance && snvCallingInstance.processingState == SnvProcessingStates.FINISHED) {
                     stateMap.finished << samplePair
@@ -422,19 +422,19 @@ ${INDENT}Either no sample with the other disease state is available or the Sampl
     }
 
     if(stateMap.notTriggered) {
-        showNotTriggered("snvWorkflow", stateMap.notTriggered, {it})
+        showNotTriggered("SnvWorkflow", stateMap.notTriggered, {it})
     }
 
     if(stateMap.waiting) {
-        showWaiting("snvWorkflow", stateMap.waiting, {it})
+        showWaiting("SnvWorkflow", stateMap.waiting, {it})
     }
 
     if(stateMap.running) {
-        showRunning("snvWorkflow", stateMap.running, {it}, {it})
+        showRunning("SnvWorkflow", stateMap.running, {it}, {it})
     }
 
     if(stateMap.finished) {
-        showFinished("snvWorkflow", stateMap.finished, {it})
+        showFinished("SnvWorkflow", stateMap.finished, {it})
     }
 
     return stateMap.finished
@@ -608,8 +608,7 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
     //end
     output << "\nFinshed samples: "
     next.collect {
-        def mergingWorkPackage = it.mergingPass.mergingSet.mergingWorkPackage
-        "        ${mergingWorkPackage.sample}  ${mergingWorkPackage.seqType}  ${mergingWorkPackage.sample.project}"
+        "        ${it}   ${it.project}"
     }.sort { it }.each { output << it }
 
     if (!allFinished) {
