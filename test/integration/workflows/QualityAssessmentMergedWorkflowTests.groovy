@@ -1,16 +1,14 @@
 package workflows
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-import static org.junit.Assert.*
-
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged.ExecuteMergedBamFileQaAnalysisJob
+import de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged.QualityAssessmentMergedStartJob
+import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
+import de.dkfz.tbi.otp.job.processing.PbsOptionMergingService
+import de.dkfz.tbi.otp.ngsdata.*
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
-import de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged.QualityAssessmentMergedStartJob
-import de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged.ExecuteMergedBamFileQaAnalysisJob
-import de.dkfz.tbi.otp.job.processing.PbsOptionMergingService
+import static org.junit.Assert.assertNotNull
 
 class QualityAssessmentMergedWorkflowTests extends QualityAssessmentAbstractWorkflowTests {
 

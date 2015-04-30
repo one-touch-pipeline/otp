@@ -5,8 +5,9 @@ import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
-import org.junit.*
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.junit.Ignore
+import org.junit.Test
 
 /**
  *

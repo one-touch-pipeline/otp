@@ -1,20 +1,22 @@
 package workflows
 
-import static org.junit.Assert.*
-
-import org.joda.time.Duration
-import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.filehandling.FileNames
 import de.dkfz.tbi.otp.job.jobs.transferMergedBamFile.TransferMergedBamFileStartJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
+import org.joda.time.Duration
+import org.junit.Before
+import org.junit.Ignore
+import org.junit.Test
+
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotNull
 
 /**
  * Preparation for execution: see src/docs/guide/devel/testing/workflowTesting.gdoc
@@ -23,69 +25,61 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
 
     ProcessingOptionService processingOptionService
 
+    LsdfFilesService lsdfFilesService
+
     TransferMergedBamFileStartJob transferMergedBamFileStartJob
 
 
     // TODO want to get rid of this hardcoded.. idea: maybe calculating from the walltime of the cluster jobs.. -> OTP-570/OTP-672
     final Duration TIMEOUT = Duration.standardMinutes(40)
 
-    LsdfFilesService lsdfFilesService
-    ExecutionService executionService
-
-    // TODO This paths should be obtained from somewhere else..  maybe from ~/.otp.properties, but I am hardcoding for now.. -> OTP-570/OTP-672
-    String dkfzBasePath = 'WORKFLOW_ROOT/TransferWorkflow'
-    String dkfzRootPath = "${dkfzBasePath}/root_path"
-    String dkfzProcessingPath = "${dkfzBasePath}/processing_root_path"
-    String dkfzLoggingPath = "${dkfzBasePath}/logging_root_path"
-    String bqBasePath = '$BQ_ROOTPATH/dmg/otp/workflow-tests/TransferWorkflow'
-    String bqRootPath = "${bqBasePath}/root_path"
-    String bqProcessingPath = "${bqBasePath}/processing_root_path"
-    String bqLoggingPath = "${bqBasePath}/logging_root_path"
-
-    // Paths for testing on DKFZ
-    //*
-    String rootPath = dkfzRootPath
-    String processingRootPath = dkfzProcessingPath
-    String loggingRootPath = dkfzLoggingPath
-    //*/
-
-    /*
-    // Paths for testing on BioQuant
-    String rootPath = bqRootPath
-    String processingRootPath = dkfzProcessingPath
-    String loggingRootPath = bqLoggingPath
-    //*/
 
     private static final String CHROMOSOME_X_NAME = "CHR_X"
     private static final String CHROMOSOME_Y_NAME = "CHR_Y"
 
     // files to be processed by the tests: 2 merged bam files, 2 bai files, 2 qa results per merged/single lane
-    String mergingMiddleDir = "${processingRootPath}/project1/results_per_pid/pid_1/merging/control/WHOLE_GENOME/PAIRED/DEFAULT"
-    String filePathMergedBamFile1 = "${mergingMiddleDir}/0/pass0/"
-    String fileNameMergedBamFile1 = "${filePathMergedBamFile1}control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bam"
-    String filePathMergedBamFile2 = "${mergingMiddleDir}/1/pass0/"
-    String fileNameMergedBamFile2 = "${filePathMergedBamFile2}control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bam"
-    String filePathBaiFile1 = "${mergingMiddleDir}/0/pass0/"
-    String fileNameBaiFile1 = "${filePathBaiFile1}control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bai"
-    String filePathBaiFile2 = "${mergingMiddleDir}/1/pass0/"
-    String fileNameBaiFile2 = "${filePathBaiFile2}control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bai"
-    String filePathMergedBamFileQA1 = "${mergingMiddleDir}/0/pass0/QualityAssessment/pass0/"
-    String fileNameMergedBamFileQA1 = "${filePathMergedBamFileQA1}/plot.jpg"
-    String filePathMergedBamFileQA2 = "${mergingMiddleDir}/1/pass0/QualityAssessment/pass0/"
-    String fileNameMergedBamFileQA2 = "${filePathMergedBamFileQA2}/plot.jpg"
-    String destinationDirMergedBamFile = "${rootPath}/project1/sequencing/whole_genome_sequencing/view-by-pid/pid_1/control/paired/merged-alignment"
-    String destinationFileNameMergedBamFile = "${destinationDirMergedBamFile}/control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bam"
-    String destinationDirQaResults = "${destinationDirMergedBamFile}/QualityAssessment/"
-    String qaResultOverviewFile = "${destinationDirQaResults}/${FileNames.QA_RESULT_OVERVIEW}"
-    String qaResultOverviewExtendedFile = "${destinationDirQaResults}/${FileNames.QA_RESULT_OVERVIEW_EXTENDED}"
-    String fastqFilesInMergedBamFile = "${destinationDirMergedBamFile}/${FileNames.FASTQ_FILES_IN_MERGEDBAMFILE}"
+    String mergingMiddleDir
+    String filePathMergedBamFile1
+    String fileNameMergedBamFile1
+    String filePathMergedBamFile2
+    String fileNameMergedBamFile2
+    String filePathBaiFile1
+    String fileNameBaiFile1
+    String filePathBaiFile2
+    String fileNameBaiFile2
+    String filePathMergedBamFileQA1
+    String fileNameMergedBamFileQA1
+    String filePathMergedBamFileQA2
+    String fileNameMergedBamFileQA2
+    String destinationDirMergedBamFile
+    String destinationFileNameMergedBamFile
+    String destinationDirQaResults
+    String qaResultOverviewFile
+    String qaResultOverviewExtendedFile
+    String fastqFilesInMergedBamFile
 
-    /**
-     * Realm necessary to cleanup folder structure
-     */
-    Realm realm
-
+    @Before
     void setUp() {
+        mergingMiddleDir = "${processingRootPath}/project1/results_per_pid/pid_1/merging/control/WHOLE_GENOME/PAIRED/DEFAULT"
+        filePathMergedBamFile1 = "${mergingMiddleDir}/0/pass0/"
+        fileNameMergedBamFile1 = "${filePathMergedBamFile1}control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bam"
+        filePathMergedBamFile2 = "${mergingMiddleDir}/1/pass0/"
+        fileNameMergedBamFile2 = "${filePathMergedBamFile2}control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bam"
+        filePathBaiFile1 = "${mergingMiddleDir}/0/pass0/"
+        fileNameBaiFile1 = "${filePathBaiFile1}control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bai"
+        filePathBaiFile2 = "${mergingMiddleDir}/1/pass0/"
+        fileNameBaiFile2 = "${filePathBaiFile2}control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bai"
+        filePathMergedBamFileQA1 = "${mergingMiddleDir}/0/pass0/QualityAssessment/pass0/"
+        fileNameMergedBamFileQA1 = "${filePathMergedBamFileQA1}/plot.jpg"
+        filePathMergedBamFileQA2 = "${mergingMiddleDir}/1/pass0/QualityAssessment/pass0/"
+        fileNameMergedBamFileQA2 = "${filePathMergedBamFileQA2}/plot.jpg"
+        destinationDirMergedBamFile = "${rootPath}/project1/sequencing/whole_genome_sequencing/view-by-pid/pid_1/control/paired/merged-alignment"
+        destinationFileNameMergedBamFile = "${destinationDirMergedBamFile}/control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bam"
+        destinationDirQaResults = "${destinationDirMergedBamFile}/QualityAssessment/"
+        qaResultOverviewFile = "${destinationDirQaResults}/${FileNames.QA_RESULT_OVERVIEW}"
+        qaResultOverviewExtendedFile = "${destinationDirQaResults}/${FileNames.QA_RESULT_OVERVIEW_EXTENDED}"
+        fastqFilesInMergedBamFile = "${destinationDirMergedBamFile}/${FileNames.FASTQ_FILES_IN_MERGEDBAMFILE}"
+
         /*
          * Initialize database
          */
@@ -103,115 +97,12 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
         // Run
         String runName = "runName"
         String runDirName = "run${runName}"
-        // Realm for DKFZ
-        String realmName = "DKFZ"
-        // Realm for BioQuant (change if testing there)
-        //String realmName = "BioQuant"
 
-        def paths = [
-            rootPath: "${rootPath}",
-            processingRootPath: "${processingRootPath}",
-            programsRootPath: '/',
-            loggingRootPath: loggingRootPath,
-        ]
-
-        // Realms for testing on DKFZ
-        realm = DomainFactory.createRealmDataManagementDKFZ(paths)
-        assertNotNull(realm.save(flush: true))
-
-        realm = DomainFactory.createRealmDataProcessingDKFZ(paths)
-        assertNotNull(realm.save(flush: true))
-
-
-        /*
-        //Variables needed for bioquant test
-        String realmBioquantUnixUser = "unixUser2"
-        String realmDkfzUnixUser = "unixUser"
-        String realmProgramsRootPath = "/"
-        String realmHost = "headnode"
-        int realmPort = 22
-        String realmWebHost = "https://otp.local/ngsdata/"
-        String realmPbsOptionsDKFZ = '{"-l": {nodes: "1:lsdf", walltime: "5:00"}}'
-        String realmPbsOptionsBQ = '{"-l": {nodes: "1:xeon", walltime: "5:00"}, "-W": {x: "NACCESSPOLICY:SINGLEJOB"}}'
-        int realmTimeout = 0
-        realmName = "BioQuant"
-
-         // Realms for testing on BioQuant
-         realm = new Realm(
-         name: "BioQuant",
-         env: Environment.getCurrent().getName(),
-         operationType: Realm.OperationType.DATA_PROCESSING,
-         cluster: Realm.Cluster.DKFZ, // Data processing for BQ projects is done on DKFZ, this is correct.
-         rootPath:           bqRootPath,
-         processingRootPath: dkfzProcessingPath,
-         programsRootPath: '/',
-         loggingRootPath: dkfzLoggingPath,
-         webHost: realmWebHost,
-         host: 'headnode',
-         port: 22,
-         unixUser: realmDkfzUnixUser,
-         timeout: realmTimeout,
-         pbsOptions: realmPbsOptionsDKFZ
-         )
-         assertNotNull(realm.save(flush: true))
-         realm = new Realm(
-         name: "BioQuant",
-         env: Environment.getCurrent().getName(),
-         operationType: Realm.OperationType.DATA_MANAGEMENT,
-         cluster: Realm.Cluster.BIOQUANT,
-         rootPath:           bqRootPath,
-         processingRootPath: bqProcessingPath,
-         programsRootPath: '/',
-         loggingRootPath: bqLoggingPath,
-         webHost: realmWebHost,
-         host: "otphost-other.example.org",
-         port: 22,
-         unixUser: realmBioquantUnixUser,
-         timeout: realmTimeout,
-         pbsOptions: realmPbsOptionsBQ
-         )
-         assertNotNull(realm.save(flush: true))
-         realm = new Realm(
-         name: "DKFZ",
-         env: Environment.getCurrent().getName(),
-         operationType: Realm.OperationType.DATA_MANAGEMENT,
-         cluster: Realm.Cluster.DKFZ,
-         rootPath:           dkfzRootPath,
-         processingRootPath: dkfzProcessingPath,
-         programsRootPath: '/',
-         loggingRootPath: dkfzLoggingPath,
-         webHost: realmWebHost,
-         host: 'headnode',
-         port: 22,
-         unixUser: realmDkfzUnixUser,
-         timeout: realmTimeout,
-         pbsOptions: realmPbsOptionsDKFZ
-         )
-         assertNotNull(realm.save(flush: true))
-         // this will be used to create the directories, so this needs to be last
-         realm = new Realm(
-         name: "DKFZ",
-         env: Environment.getCurrent().getName(),
-         operationType: Realm.OperationType.DATA_PROCESSING,
-         cluster: Realm.Cluster.DKFZ,
-         rootPath:           dkfzRootPath,
-         processingRootPath: dkfzProcessingPath,
-         programsRootPath: '/',
-         loggingRootPath: dkfzLoggingPath,
-         webHost: realmWebHost,
-         host: 'headnode',
-         port: 22,
-         unixUser: realmDkfzUnixUser,
-         timeout: realmTimeout,
-         pbsOptions: realmPbsOptionsDKFZ
-         )
-         assertNotNull(realm.save(flush: true))
-         //*/
 
         Project project = TestData.createProject(
                         name: projectName,
                         dirName: projectDirName,
-                        realmName: realmName
+                        realmName: realm.name
                         )
         assertNotNull(project.save([flush: true, failOnError: true]))
 
@@ -448,6 +339,7 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
                         md5sum: null,
                         status: AbstractBamFile.State.PROCESSED,
                         numberOfMergedLanes: 1,
+                        fileSize: 1000,
                         )
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
 
@@ -496,6 +388,7 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
                         md5sum: null,
                         status: AbstractBamFile.State.PROCESSED,
                         numberOfMergedLanes: 1,
+                        fileSize: 1000,
                         )
         assertNotNull(processedMergedBamFile1.save([flush: true, failOnError: true]))
 
@@ -570,16 +463,14 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
          * Setup directories and files for corresponding database objects
          */
         // Just to be sure the rootPath and the processingRootPath are clean for new test
-        String cmdCleanUp = cleanUpTestFoldersCommand()
-        String cmdBuildDirStructure = [
+        createDirectories([
             filePathMergedBamFile1,
             filePathMergedBamFile2,
             filePathBaiFile1,
             filePathBaiFile2,
             filePathMergedBamFileQA1,
             filePathMergedBamFileQA2,
-            loggingRootPath + "/log/status/",
-        ].collect { "mkdir -p ${it}" }.join " && "
+        ].collect { new File(it) })
 
         List<String> files = [
             fileNameMergedBamFile1,
@@ -591,7 +482,7 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
         ]
         String cmdBuildFileStructure = files.collect {"echo -n \"${it}\" > ${it}"}.join " && "
         // Call "sync" to block termination of script until I/O is done
-        executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildDirStructure} && ${cmdBuildFileStructure} && ${createMd5SumFile(fileNameMergedBamFile1)} && ${createMd5SumFile(fileNameMergedBamFile2)} && sync")
+        executionService.executeCommand(realm, "${cmdBuildFileStructure} && ${createMd5SumFile(fileNameMergedBamFile1)} && ${createMd5SumFile(fileNameMergedBamFile2)} && sync")
         checkFiles(files)
     }
 
@@ -643,16 +534,6 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
 
 
     /**
-     * Returns a comand to clean up the rootPath and processingRootPath
-     * @return Command to clean up used folders
-     */
-    String cleanUpTestFoldersCommand() {
-        return "rm -rf ${rootPath}/* ${processingRootPath}/* ${loggingRootPath}/*"
-        /* When testing on BioQuant, there is no write access. You have to replace the
-         * above line by something like 'return "true"' */
-    }
-
-    /**
      * Helper to see logs at console ( besides seeing at the reports in the end)
      * @msg Message to be shown
      */
@@ -661,10 +542,6 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
         System.out.println(msg)
     }
 
-    void tearDown() {
-        executionService.executeCommand(realm, cleanUpTestFoldersCommand())
-        realm = null
-    }
 
     /**
      * Test execution of the workflow without any processing options defined

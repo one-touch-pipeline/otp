@@ -1,12 +1,13 @@
 package workflows
 
-import static org.junit.Assert.*
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.jobs.qualityAssessment.QualityAssessmentStartJob
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+
+import static org.junit.Assert.assertNotNull
 
 class QualityAssessmentWorkflowTests extends QualityAssessmentAbstractWorkflowTests {
 

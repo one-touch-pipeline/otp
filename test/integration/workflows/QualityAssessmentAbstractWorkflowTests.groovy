@@ -1,23 +1,26 @@
 package workflows
 
-import static org.junit.Assert.*
-
-import org.joda.time.Duration
-import org.junit.*
 import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.Chromosomes
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
-import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
+import org.joda.time.Duration
+import org.junit.Before
+import org.junit.Ignore
+import org.junit.Test
+
+import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.assertTrue
 
 abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
 
     /*
      * preparation:
      *  - see src/docs/guide/devel/testing/workflowTesting.gdoc
-     *  - $myBase/test-qa.sh which calls the required version of qa.jar
+     *  - make sure test-qa.sh, which calls the required version of qa.jar, is executable:
      *    chmod g+x test-qa.sh
      */
 
@@ -25,27 +28,13 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
      * NOTE:
      * with the current test set up the executed workflow calls production version of all
      * scripts - it calls scripts installed on the cluster.
-     * Exception to it is qa.jar which is called from $myBase/test-qa.sh.
+     * Exception to it is qa.jar which is called from test-qa.sh.
      * Changing of test-qa.sh makes it possible to test production or a test version of qa.jar
      */
 
     final Duration TIMEOUT = Duration.standardMinutes(200)
 
-    ExecutionService executionService
-
     TestData testData = new TestData()
-
-    Realm realm
-
-    // TODO This paths should be obtained from somewhere else..  maybe from .otpproperties, but I am hardcoding for now..
-
-    String username = "otptest"
-    String base = "WORKFLOW_ROOT"
-    String testDataDir = "${base}/files/merged-quality-assessment/"
-    String myBase = "${base}/${username}/QualityAssessment"
-    String rootPath = "${myBase}/rootPath/"
-    String processingRootPath = "${myBase}/processingRootPath/"
-    String loggingRootPath = "${myBase}/logging_root_path"
 
     // files to be processed by the tests
     // files are the same for both merged and not-merged workflows tests
@@ -58,15 +47,15 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
 
     // take the needed versions of qa.jar
     // by default it is assumed that build directory contains version to be used for tests
-    String qaJarShellScript = "$myBase/test-qa.sh"
+    String qaJarShellScript
 
+    @Before
     void setUp() {
+        qaJarShellScript = "${getWorkflowDirectory().absolutePath}/test-qa.sh"
+
         createData()
     }
 
-    void tearDown() {
-        executionService.executeCommand(realm, cleanUpTestFoldersCommand())
-    }
 
     // it is assumed that only one test from the following two runs at one grails test-app
     // it means that one of the tests must be always @Ignore
@@ -125,14 +114,13 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
     }
 
     private void createDirectoryStructure(Map input) {
-        String softLinkFilepath = "${testDataDir}/${orgFileName}"
-        String softLinkBaiFilepath = "${testDataDir}/${baiOrgFileName}"
+        String softLinkFilepath = "${testDataDir}/merged-quality-assessment/${orgFileName}"
+        String softLinkBaiFilepath = "${testDataDir}/merged-quality-assessment/${baiOrgFileName}"
         // Just to be sure the rootPath and the processingRootPath are clean for new test
-        String cmdCleanUp = cleanUpTestFoldersCommand()
-        String cmdBuildFileStructure = "mkdir -p ${input.path} ${loggingRootPath}/log/status"
+        createDirectories([new File(input.path)])
         String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${softLinkFilepath} ${input.filePath}"
         String cmdBuildSoftLinkToBaiFileToBeProcessed = "ln -s ${softLinkBaiFilepath} ${input.baiFilePath}"
-        executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildFileStructure}; ${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdBuildSoftLinkToBaiFileToBeProcessed}")
+        executionService.executeCommand(realm, "${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdBuildSoftLinkToBaiFileToBeProcessed}")
         File file = new File(input.filePath)
         assertTrue(file.canRead())
         file = new File(input.baiFilePath)
@@ -252,16 +240,6 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
 
     private void createData() {
         super.createUserAndRoles()
-        // Realm
-        Map paths = [
-            rootPath: rootPath,
-            processingRootPath: processingRootPath,
-            programsRootPath: '/',
-            loggingRootPath: loggingRootPath,
-        ]
-
-        realm = DomainFactory.createRealmDataManagementDKFZ(paths).save([flush: true])
-        realm = DomainFactory.createRealmDataProcessingDKFZ(paths).save([flush: true])
 
         Project project = TestData.createProject(
                         name: "project",
@@ -374,17 +352,9 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
     }
 
     private void createDirectoryForReferenceGenome() {
-        String referenceGenomesDir = "${base}//files/reference_genomes"
+        String referenceGenomesDir = "${getRootDirectory()}/files/reference_genomes"
         String softLinkToReferenceGenomesDir = "${processingRootPath}/reference_genomes"
         String cmdBuildSoftLinkToReferenceGenomes = "ln -s ${referenceGenomesDir} ${softLinkToReferenceGenomesDir}"
         executionService.executeCommand(realm, "${cmdBuildSoftLinkToReferenceGenomes}")
-    }
-
-    /**
-     * Returns a comand to clean up the rootPath and processingRootPath
-     * @return Command to clean up used folders
-     */
-    String cleanUpTestFoldersCommand() {
-        return "rm -rf ${rootPath}/* ${processingRootPath}/* ${loggingRootPath}"
     }
 }

@@ -1,18 +1,20 @@
 package workflows
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-import static org.junit.Assert.*
-
-import org.joda.time.Duration
-import org.junit.*
-
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
 import de.dkfz.tbi.otp.job.jobs.metaData.MetaDataStartJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.processing.ExecutionState
+import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
+import org.joda.time.Duration
+import org.junit.Before
+import org.junit.Ignore
+import org.junit.Test
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static org.junit.Assert.*
 
 /**
  * To run this workflow test the preparation steps described in the documentation (grails doc) have to be followed.
@@ -26,22 +28,13 @@ class LoadMetaDataTests extends WorkflowTestCase {
     final String UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE = "UNKNOWN"
 
     LsdfFilesService lsdfFilesService
-    ExecutionService executionService
 
     MetaDataStartJob metaDataStartJob
 
-    // TODO This paths should be obtained from somewhere else..  maybe from .otpproperties, but I am hardcoding for now..
-    String baseDir = "WORKFLOW_ROOT/"
-    // TODO change this to be dependent of the user
-    String myBaseDir = "${baseDir}/MetaDataWorkflow"
-    String rootPath = "${myBaseDir}/root_path/"
-    String processingRootPath = "${myBaseDir}/processing_root_path/"
-    String testDataDir = "${baseDir}/files/"
-    String ftpDir = "${rootPath}/ftp/"
 
     // files to be processed by the tests
-    String fastqR1Filepath = "${testDataDir}/35-3B_NoIndex_L007_R1_complete_filtered.fastq.gz"
-    String fastqR2Filepath = "${testDataDir}/35-3B_NoIndex_L007_R2_complete_filtered.fastq.gz"
+    String fastqR1Filepath
+    String fastqR2Filepath
 
     String barcode = "GATCGA"
     String fastqR1Filename1 = "example_${barcode}_file_L001_R1.fastq.gz"
@@ -52,10 +45,7 @@ class LoadMetaDataTests extends WorkflowTestCase {
     String fastqR2Filename3 = "example_${barcode}_file_L003_R2.fastq.gz"
     String runName = "130312_D00133_0018_ADTWTJACXX"
     String runDate = "2013-03-12"
-    String metaDataFilepath = "${ftpDir}/${runName}/${runName}.fastq.tsv"
-
-    Realm realm
-    String realmProgramsRootPath = "/"
+    String metaDataFilepath
 
     String seqCenterName = "DKFZ"
     String sampleID = "SampleIdentifier"
@@ -137,22 +127,13 @@ class LoadMetaDataTests extends WorkflowTestCase {
 
     @Before
     void setUp() {
-        // Setup logic here
-        Map paths = [
-            rootPath: rootPath,
-            processingRootPath: processingRootPath,
-            programsRootPath: realmProgramsRootPath,
-        ]
+        fastqR1Filepath = "${testDataDir}/35-3B_NoIndex_L007_R1_complete_filtered.fastq.gz"
+        fastqR2Filepath = "${testDataDir}/35-3B_NoIndex_L007_R2_complete_filtered.fastq.gz"
+        metaDataFilepath = "${ftpDir}/${runName}/${runName}.fastq.tsv"
 
-        realm = DomainFactory.createRealmDataManagementDKFZ(paths).save(flush: true)
-        realm = DomainFactory.createRealmDataProcessingDKFZ(paths).save(flush: true)
-
-        String path = "${ftpDir}/${runName}"
-        // Just to be sure the rootPath and the processingRootPath are clean for new test
-        String cmdCleanUp = cleanUpTestFoldersCommand()
-        String cmdBuildFileStructure = "mkdir -p ${path} ${testDataDir}"
+        createDirectories([new File(ftpDir, runName)])
         String createFiles = "echo fastqR1Filepath > ${fastqR1Filepath}; echo fastqR2Filepath > ${fastqR2Filepath};"
-        executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildFileStructure}; ${createFiles}")
+        executionService.executeCommand(realm, "${createFiles}")
 
         FileType fileType = new FileType()
         fileType.type = FileType.Type.SEQUENCE
@@ -243,10 +224,6 @@ class LoadMetaDataTests extends WorkflowTestCase {
         }
     }
 
-    @After
-    void tearDown() {
-        executionService.executeCommand(realm, cleanUpTestFoldersCommand())
-    }
 
     // TODO  (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
     // so at this moment only one test could be run at moment, all the others have to be commented
@@ -446,13 +423,6 @@ class LoadMetaDataTests extends WorkflowTestCase {
         assert alignmentPasses.every { it.alignmentState == AlignmentState.NOT_STARTED }
     }
 
-    /**
-     * Returns a comand to clean up the rootPath and processingRootPath
-     * @return Command to clean up used folders
-     */
-    String cleanUpTestFoldersCommand() {
-        return "rm -rf ${rootPath}/* ${processingRootPath}/*"
-    }
 
     /**
      * Helper to see logs at console ( besides seeing at the reports in the end)

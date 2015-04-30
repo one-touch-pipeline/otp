@@ -1,15 +1,18 @@
 package workflows
 
-import de.dkfz.tbi.otp.job.processing.ExecutionState
-import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.ThreadUtils
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import groovy.util.logging.Log4j
 import org.joda.time.Duration
 import org.joda.time.format.PeriodFormat
+import org.junit.After
+import org.junit.Before
 
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -19,9 +22,11 @@ import java.util.concurrent.TimeoutException
  * Base class for work-flow integration test cases.
  */
 @Log4j
-class WorkflowTestCase extends GroovyScriptAwareTestCase {
+abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
     ErrorLogService errorLogService
+    CreateClusterScriptService createClusterScriptService
+    ExecutionService executionService
 
     // The scheduler needs to access the created objects while the test is being executed
     boolean transactional = false
@@ -29,6 +34,83 @@ class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
     /** The base directory for this test instance ("local root" directory). */
     private File baseDirectory = null
+
+
+    String rootPath
+    String processingRootPath
+    String loggingRootPath
+    String stagingRootPath
+    String programsRootPath
+    String testDataDir
+    String ftpDir
+
+    Realm realm
+
+
+    @Before
+    public void setUpWorkflowTests() {
+        setupDirectoriesAndRealms()
+    }
+
+
+    @After
+    void tearDownWorkflowTests() {
+        cleanupDirectories()
+    }
+
+
+    private void setupDirectoriesAndRealms() {
+        rootPath = "${getBaseDirectory()}/root_path/"
+        processingRootPath = "${getBaseDirectory()}/processing_root_path/"
+        loggingRootPath = "${getBaseDirectory()}/logging_root_path/"
+        stagingRootPath = "${getBaseDirectory()}/staging_root_path/"
+        programsRootPath = "/"
+        testDataDir = "${getRootDirectory()}/files/"
+        ftpDir = "${getBaseDirectory()}/ftp/"
+
+        Map realmParams = [
+                rootPath: rootPath,
+                processingRootPath: processingRootPath,
+                programsRootPath: programsRootPath,
+                loggingRootPath: loggingRootPath,
+                stagingRootPath: stagingRootPath,
+                unixUser: getAccountName(),
+        ]
+
+        assert DomainFactory.createRealmDataManagementBioQuant(realmParams).save(flush: true)
+        assert DomainFactory.createRealmDataProcessingBioQuant(realmParams).save(flush: true)
+
+        assert DomainFactory.createRealmDataManagementDKFZ(realmParams).save(flush: true)
+        realm = DomainFactory.createRealmDataProcessingDKFZ(realmParams).save(flush: true)
+        assert realm
+
+        assert !getBaseDirectory().exists()
+        createDirectories([
+                getBaseDirectory(),
+                new File(realm.rootPath),
+                new File(realm.loggingRootPath, JobStatusLoggingService.STATUS_LOGGING_BASE_DIR),
+                new File(realm.stagingRootPath),
+        ])
+     }
+
+
+    def createDirectories(List<File> files) {
+        String mkDirs = createClusterScriptService.makeDirs(files, "2770")
+        assert executionService.executeCommand(realm, mkDirs).toInteger() == 0
+        files.each {
+            WaitingFileUtils.confirmExists(it)
+        }
+    }
+
+    def createDirectoriesString(List<String> fileNames) {
+        createDirectories(fileNames.collect { new File(it) })
+    }
+
+
+    private void cleanupDirectories() {
+        String cleanUpCommand = createClusterScriptService.removeDirs([getBaseDirectory()], CreateClusterScriptService.RemoveOption.RECURSIVE_FORCE)
+        assert executionService.executeCommand(realm, cleanUpCommand).toInteger() == 0
+    }
 
 
     void waitUntilWorkflowFinishesWithoutFailure(Duration timeout, int numberOfProcesses = 1) {
@@ -99,11 +181,16 @@ class WorkflowTestCase extends GroovyScriptAwareTestCase {
     protected File getBaseDirectory() {
         // Create the directory like a "singleton", since randomness is involved
         if (!baseDirectory) {
-            File workflowDirectory = new File("${rootDirectory}", "${nonQualifiedClassName}")
+            File workflowDirectory = getWorkflowDirectory()
             // FIXME: This should be replaced when we updated to JDK7, finally: OTP-1502
             baseDirectory = uniqueDirectory(workflowDirectory)
         }
         return baseDirectory
+    }
+
+    protected File getWorkflowDirectory() {
+        File workflowDirectory = new File("${getRootDirectory()}", "${getNonQualifiedClassName()}")
+        return workflowDirectory
     }
 
     /**
@@ -132,7 +219,7 @@ class WorkflowTestCase extends GroovyScriptAwareTestCase {
      *
      * @see #getBaseDirectory()
      */
-    private String getRootDirectory() {
+    protected String getRootDirectory() {
         return grailsApplication.config.otp.testing.workflows.rootdir
     }
 

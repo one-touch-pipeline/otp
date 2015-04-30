@@ -1,20 +1,20 @@
 package workflows
 
-import org.joda.time.Duration
-
-import de.dkfz.tbi.otp.utils.CollectionUtils
-
-import static org.junit.Assert.*
-
-import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.job.jobs.merging.MergingStartJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.joda.time.Duration
+import org.junit.Before
+import org.junit.Ignore
+import org.junit.Test
+
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotNull
 
 /**
  * Preparation for execution: see src/docs/guide/devel/testing/workflowTesting.gdoc
@@ -31,55 +31,68 @@ class MergingWorkflowTests extends WorkflowTestCase {
 
     LsdfFilesService lsdfFilesService
 
-    ExecutionService executionService
-
     MergingStartJob mergingStartJob
 
 
     // TODO want to get rid of this hardcoded.. idea: maybe calculating from the walltime of the cluster jobs.. -> OTP-570/OTP-672
     final Duration TIMEOUT = Duration.standardMinutes(40)
 
-    // TODO This paths should be obtained from somewhere else..  maybe from ~/.otp.properties, but I am hardcoding for now.. -> OTP-570/OTP-672
-    String basePath = 'WORKFLOW_ROOT/MergingWorkflow'
-    String rootPath = "${basePath}/root_path"
-    String processingRootPath = "${basePath}/processing_root_path"
-    String loggingRootPath = "${basePath}/logging_root_path"
+    String inputSingleLaneAlingment
 
-    // this file is alrady available in the file system in the MergingWorkflowTest folder
-    String inputSingleLaneAlingment = "${basePath}/inputFile/blood_runName_s_laneId_PAIRED.sorted.bam"
-
-    String pidDir = "${processingRootPath}/otp_test_project/results_per_pid/654321"
-    String alignmentDir = "${pidDir}/alignment//testname1_123/pass0"
-    String singleLaneBamFile = "${alignmentDir}/tumor_testname1_s_123_PAIRED.sorted.bam"
+    String pidDir
+    String alignmentDir
+    String singleLaneBamFile
 
     ProcessedBamFile processedBamFile
 
-    /**
-     * Realm necessary to cleanup folder structure
-     */
-    Realm realm
-
+    @Before
     void setUp() {
-
-        def paths = [
-            rootPath: "${rootPath}",
-            processingRootPath: "${processingRootPath}",
-            programsRootPath: '/',
-            loggingRootPath: loggingRootPath,
-        ]
 
         createUserAndRoles()
 
+        // this file is already available in the file system in the MergingWorkflowTest folder
+        inputSingleLaneAlingment = "${getWorkflowDirectory().absolutePath}/inputFile/blood_runName_s_laneId_PAIRED.sorted.bam"
+
+        pidDir = "${processingRootPath}otp_test_project/results_per_pid/654321"
+        alignmentDir = "${pidDir}/alignment//testname1_123/pass0"
+        singleLaneBamFile = "${alignmentDir}/tumor_testname1_s_123_PAIRED.sorted.bam"
+
         TestData testData = new TestData()
-        testData.createObjects()
 
-        // Realms for testing on DKFZ
-        testData.realm.delete(flush: true)
-        realm = DomainFactory.createRealmDataManagementDKFZ(paths)
-        assertNotNull(realm.save(flush: true))
+        Project project = Project.build(
+            name : "otp_test_project",
+            dirName : "otp_test_project",
+            realmName : realm.name,
+        )
 
-        realm = DomainFactory.createRealmDataProcessingDKFZ(paths)
-        assertNotNull(realm.save(flush: true))
+        Individual individual = Individual.build(
+                pid: "654321",
+                project: project,
+        )
+
+        SampleType sampleType = SampleType.build(
+                name: "TUMOR",
+        )
+
+        Sample sample = Sample.build(
+                individual: individual,
+                sampleType:sampleType,
+        )
+
+        SeqType seqType = SeqType.build(
+                libraryLayout: "PAIRED",
+        )
+
+        Run run = Run.build(
+                name: "testname1",
+        )
+
+        SeqTrack seqTrack = SeqTrack.build(
+                sample: sample,
+                seqType: seqType,
+                laneId: "123",
+                run: run,
+        )
 
         DataFile dataFile1 = testData.createDataFile([fileName: "dataFile1"])
         assertNotNull(dataFile1.save([flush: true, failOnError: true]))
@@ -87,7 +100,7 @@ class MergingWorkflowTests extends WorkflowTestCase {
         DataFile dataFile2 = testData.createDataFile([fileName: "dataFile2"])
         assertNotNull(dataFile2.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass = testData.createAlignmentPass()
+        AlignmentPass alignmentPass = testData.createAlignmentPass(seqTrack: seqTrack)
         assertNotNull(alignmentPass.save([flush: true, failOnError: true]))
 
         processedBamFile = testData.createProcessedBamFile([
@@ -113,24 +126,13 @@ class MergingWorkflowTests extends WorkflowTestCase {
         /*
          * Setup directories and files for corresponding database objects
          */
-        String cmdCleanUp = cleanUpTestFoldersCommand()
-        String cmdBuildDirStructure = "mkdir -p ${alignmentDir}; mkdir -p ${loggingRootPath}/log/status/"
+        String cmdBuildDirStructure = "mkdir -p ${alignmentDir}"
         String cmdCopyFile = "rsync ${inputSingleLaneAlingment} ${singleLaneBamFile}"
         // Call "sync" to block termination of script until I/O is done
-        executionService.executeCommand(realm, "${cmdCleanUp}; ${cmdBuildDirStructure} && ${cmdCopyFile} && sync")
+        executionService.executeCommand(realm, "${cmdBuildDirStructure} && ${cmdCopyFile} && sync")
         checkFiles([singleLaneBamFile])
     }
 
-
-    /**
-     * Returns a comand to clean up the rootPath and processingRootPath
-     * @return Command to clean up used folders
-     */
-    String cleanUpTestFoldersCommand() {
-        return "rm -rf ${rootPath}/* ${processingRootPath}/* ${loggingRootPath}/*"
-        /* When testing on BioQuant, there is no write access. You have to replace the
-         * above line by something like 'return "true"' */
-    }
 
     /**
      * Helper to see logs at console ( besides seeing at the reports in the end)
@@ -141,10 +143,6 @@ class MergingWorkflowTests extends WorkflowTestCase {
         System.out.println(msg)
     }
 
-    void tearDown() {
-        executionService.executeCommand(realm, cleanUpTestFoldersCommand())
-        realm = null
-    }
 
     /**
      * Test execution of the workflow without any processing options defined
@@ -163,7 +161,7 @@ class MergingWorkflowTests extends WorkflowTestCase {
                     "PBS_mergingJob",
                     "DKFZ",
                     null,
-                    '{"-l": {nodes: "1:ppn=6:lsdf", walltime: "00:15:00", mem: "50g"}}',
+                    '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:15:00", mem: "100m"}}',
                     "merging job depending cluster option for dkfz"
             )
 

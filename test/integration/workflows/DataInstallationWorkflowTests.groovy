@@ -1,16 +1,18 @@
 package workflows
 
-import de.dkfz.tbi.otp.utils.WaitingFileUtils
-
-import static org.junit.Assert.*
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
-import org.joda.time.Duration
-import org.junit.*
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.job.jobs.dataInstallation.DataInstallationStartJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.joda.time.Duration
+import org.junit.Before
+import org.junit.Ignore
+import org.junit.Test
+
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotNull
 
 class DataInstallationWorkflowTests extends WorkflowTestCase {
 
@@ -19,23 +21,13 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
     final String PBS_WALLTIME = "00:05:00"
 
     LsdfFilesService lsdfFilesService
-    ExecutionService executionService
 
     DataInstallationStartJob dataInstallationStartJob
 
-    // TODO ( jira: OTP-566) This paths should be obtained from somewhere else..  maybe from .otpproperties, but I am hardcoding for now..
-    String baseDir = "WORKFLOW_ROOT/"
-    // TODO ( jira: OTP-566) change this to be dependent of the user
-    String myBaseDir = "${baseDir}/DataInstallationWorkflow"
-    String rootPath = "${myBaseDir}/root_path/"
-    String processingRootPath = "${myBaseDir}/processing_root_path/"
-    String testDataDir = "${baseDir}/files/"
-    String ftpDir = "${rootPath}/ftp/"
-    String loggingPath = "${myBaseDir}/logging_root_path"
 
     // files to be processed by the tests
-    String fastqR1Filepath = "${testDataDir}/35-3B_NoIndex_L007_R1_complete_filtered.fastq.gz"
-    String fastqR2Filepath = "${testDataDir}/35-3B_NoIndex_L007_R2_complete_filtered.fastq.gz"
+    String fastqR1Filepath
+    String fastqR2Filepath
     String bamFilepath
 
     String fastqR1Filename = "example_fileR1.fastq.gz"
@@ -43,8 +35,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
     String bamFilename = "example_bamFile.mdup.bam"
     String runName = "130312_D00133_0018_ADTWTJACXX"
     String runDate = "2013-03-12"
-    Realm realm
-    String realmProgramsRootPath = "/"
     String seqCenterName = "TheSequencingCenter"
     String sampleID = "1234_AB_CD_E"
     String projectName = "TheProject"
@@ -85,27 +75,17 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         // Setup logic here
         super.createUserAndRoles()
 
-        Map paths = [
-            rootPath: rootPath,
-            processingRootPath: processingRootPath,
-            programsRootPath: realmProgramsRootPath,
-            loggingRootPath: loggingPath,
-        ]
-
-        realm = DomainFactory.createRealmDataManagementDKFZ(paths).save(flush: true)
-        realm = DomainFactory.createRealmDataProcessingDKFZ(paths).save(flush: true)
+        fastqR1Filepath = "${testDataDir}/35-3B_NoIndex_L007_R1_complete_filtered.fastq.gz"
+        fastqR2Filepath = "${testDataDir}/35-3B_NoIndex_L007_R2_complete_filtered.fastq.gz"
 
         String path = "${ftpDir}/${runName}"
         String softLinkFastqR1Filepath = "${path}/${fastqR1Filename}"
         String softLinkFastqR2Filepath = "${path}/${fastqR2Filename}"
         bamFilepath = "${path}/${bamFilename}"
 
-        // Just to be sure the rootPath and the processingRootPath are clean for new test
-        String cmdCleanUp = cleanUpTestFoldersCommand()
-        String cmdBuildFileStructure = "mkdir -p -m 2750 ${path} ${loggingPath}/log/status/"
+        createDirectoriesString([path])
         String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath} && ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath} && echo 'something' > ${bamFilepath}"
-
-        assert '0\n' == executionService.executeCommand(realm, "${cmdCleanUp} && ${cmdBuildFileStructure} && ${cmdBuildSoftLinkToFileToBeProcessed}; echo \$?")
+        assert '0\n' == executionService.executeCommand(realm, "${cmdBuildSoftLinkToFileToBeProcessed}; echo \$?")
 
         fileType = new FileType()
         fileType.type = FileType.Type.SEQUENCE
@@ -186,10 +166,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         assertNotNull(runSegment.save([flush: true]))
     }
 
-    @After
-    void tearDown() {
-        executionService.executeCommand(realm, cleanUpTestFoldersCommand())
-    }
 
     DataFile createDataFile(SeqTrack seqTrack, Integer readNumber, String fastqFilename, String fastqFilepath) {
         DataFile dataFile = new DataFile()
@@ -322,13 +298,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         checkThatWorkflowWasSuccessful(seqTrack)
     }
 
-    /**
-     * Returns a comand to clean up the rootPath and processingRootPath
-     * @return Command to clean up used folders
-     */
-    String cleanUpTestFoldersCommand() {
-        return "rm -rf ${rootPath} ${processingRootPath} ${loggingPath}"
-    }
 
     private SeqTrack createSeqTrack(SeqType seqType) {
         SeqTrack seqTrack = new SeqTrack()
