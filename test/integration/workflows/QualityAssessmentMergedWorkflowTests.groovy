@@ -100,9 +100,9 @@ class QualityAssessmentMergedWorkflowTests extends QualityAssessmentAbstractWork
     }
 
     protected void createWorkflow() {
-        run('scripts/qa/QualityAssessmentMergedWorfklow.groovy')
+        runScript('scripts/qa/QualityAssessmentMergedWorfklow.groovy')
         SpringSecurityUtils.doWithAuth("admin") {
-            run('scripts/qa/InjectQualityAssessmentMergedWorkflowOptions.groovy')
+            runScript('scripts/qa/InjectQualityAssessmentMergedWorkflowOptions.groovy')
         }
         // check, that cluster option are set
         String key = PbsOptionMergingService.PBS_PREFIX + ExecuteMergedBamFileQaAnalysisJob.class.simpleName

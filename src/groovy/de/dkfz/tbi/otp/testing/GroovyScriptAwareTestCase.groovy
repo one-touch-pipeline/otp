@@ -1,11 +1,10 @@
 package de.dkfz.tbi.otp.testing
 
 import org.codehaus.groovy.control.CompilerConfiguration
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.runtime.InvokerHelper
 
-import static org.springframework.util.Assert.*
-
-import org.codehaus.groovy.grails.commons.GrailsApplication
+import static org.springframework.util.Assert.isTrue
 
 /**
  * This is a first version of a class helping to call groovy scripts
@@ -14,14 +13,21 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
  * it is not possible to use this class in the unit tests
  * to call scripts creating domain objects
  *
- *
  */
-abstract class GroovyScriptAwareIntegrationTest extends AbstractIntegrationTest {
+abstract class GroovyScriptAwareTestCase extends AbstractIntegrationTest {
 
     GrailsApplication grailsApplication
+
+
     private int counter
 
-    void run(File script, Map<String, String> properties=null) {
+    /**
+     * Load and execute a Groovy script, usually a work-flow definition.
+     *
+     * @param scriptFile the script to run
+     * @return the result of the evaluation
+     */
+    void runScript(File script, Map<String, String> properties=null) {
         isTrue script.canRead()
         GroovyShell shell = new GroovyShell(
                 grailsApplication.getClassLoader(),
@@ -33,9 +39,15 @@ abstract class GroovyScriptAwareIntegrationTest extends AbstractIntegrationTest 
         shell.evaluate(script.text)
     }
 
-    void run(String pathToScript, Map<String, String> properties=null) {
+    /**
+     * Convenience method, please use {@link #runScript(File)} instead.
+     *
+     * @param pathToScript the path to the script file
+     * @return the result of the evaluation
+     */
+    void runScript(String pathToScript, Map<String, String> properties=null) {
         File script = new File(pathToScript)
-        run(script, properties)
+        runScript(script, properties)
     }
 
 
@@ -61,5 +73,17 @@ abstract class GroovyScriptAwareIntegrationTest extends AbstractIntegrationTest 
 
     protected synchronized String generateScriptName(String name) {
         return "${name}${++this.counter}.groovy"
+    }
+
+    /**
+     * Loads and executes several Groovy scripts.
+     *
+     * @param scripts the scripts to run in order
+     * @return the results of all evaluations, in the order of the scripts provided
+     *
+     * @see #runScript(File)
+     */
+    protected List runScript(List scripts) {
+        return scripts?.collect { runScript(it) }
     }
 }

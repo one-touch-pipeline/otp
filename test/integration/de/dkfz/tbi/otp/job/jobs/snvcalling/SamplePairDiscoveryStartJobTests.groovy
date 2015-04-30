@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.job.jobs.TestJobHelper
 import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
+import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
 
-class SamplePairDiscoveryStartJobTests extends GroovyScriptAwareIntegrationTest {
+class SamplePairDiscoveryStartJobTests extends GroovyScriptAwareTestCase {
 
     @Autowired
     SamplePairDiscoveryStartJob samplePairDiscoveryStartJob
@@ -19,7 +19,7 @@ class SamplePairDiscoveryStartJobTests extends GroovyScriptAwareIntegrationTest 
     void testExecute() {
         createUserAndRoles()
         SpringSecurityUtils.doWithAuth('admin') {
-            run('scripts/workflows/SamplePairDiscoveryWorkflow.groovy')
+            runScript('scripts/workflows/SamplePairDiscoveryWorkflow.groovy')
         }
         samplePairDiscoveryStartJob.jobExecutionPlan = TestJobHelper.findJobExecutionPlan(PLAN_NAME)
         assert TestJobHelper.findProcessesForPlanName(PLAN_NAME).size() == 0

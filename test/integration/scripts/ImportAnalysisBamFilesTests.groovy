@@ -8,7 +8,7 @@ import de.dkfz.tbi.otp.dataprocessing.FastqSet
 import de.dkfz.tbi.otp.dataprocessing.MergingSet
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
+import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
 import grails.util.Environment
 import groovy.sql.Sql
 import groovy.util.logging.Log4j
@@ -22,7 +22,7 @@ import javax.sql.DataSource
 import static junit.framework.Assert.*
 
 @Log4j
-class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
+class ImportAnalysisBamFilesTests extends GroovyScriptAwareTestCase {
     DataSource dataSource
     CreateClusterScriptService createClusterScriptService
     final shouldFail = new GroovyTestCase().&shouldFail
@@ -212,7 +212,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
         writeMetadataFile(correctHeader + correctData)
         checkArgumentsForCreateTransferScript()
 
-        run(SCRIPT_NAME, ["project": "${projectName}", "metadata": "${metaDataFile}"])
+        runScript(SCRIPT_NAME, ["project": "${projectName}", "metadata": "${metaDataFile}"])
 
        checkSuccess()
     }
@@ -223,7 +223,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
         writeMetadataFile(correctHeader + skipData + correctData)
         checkArgumentsForCreateTransferScript()
 
-        run(SCRIPT_NAME, ["project": "${projectName}", "metadata": "${metaDataFile}"])
+        runScript(SCRIPT_NAME, ["project": "${projectName}", "metadata": "${metaDataFile}"])
 
         checkSuccess()
     }
@@ -234,7 +234,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
         writeMetadataFile(correctHeader + wrongData + correctData)
         checkArgumentsForCreateTransferScript()
 
-        run(SCRIPT_NAME, ["project": "${projectName}", "metadata": "${metaDataFile}"])
+        runScript(SCRIPT_NAME, ["project": "${projectName}", "metadata": "${metaDataFile}"])
 
         checkSuccess()
     }
@@ -259,7 +259,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     void testWrongHeader() {
         writeMetadataFile(wrongHeader + correctData)
 
-        assert shouldFail (AssertionError.class, { run(SCRIPT_NAME,
+        assert shouldFail (AssertionError.class, { runScript(SCRIPT_NAME,
                 ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^Error: Wrong headers/
     }
@@ -269,7 +269,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
         String wrongHeader = """"asdf","Errors","InExcludeList","Size","PID","IndOTP","RefGenome","SampleType","BamType","Lanes","LanesInOTP","MissingLanes","WithdrawnLanes"
 """
         writeMetadataFile(wrongHeader)
-        assert shouldFail (AssertionError.class, { run(SCRIPT_NAME,
+        assert shouldFail (AssertionError.class, { runScript(SCRIPT_NAME,
                 ["project": "${projectName}", "metadata": "${metaDataFile}"])
         }) =~ /^Error: File must have/
     }
@@ -380,27 +380,27 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
 
     @Test
     void testNoMDFile() {
-        assert shouldFail (AssertionError.class, { run(SCRIPT_NAME,
+        assert shouldFail (AssertionError.class, { runScript(SCRIPT_NAME,
                 ["project": "${projectName}", metadata: ""])
         }) =~ /Error: Metadata file not given\./
     }
     @Test
     void testMDFileNotReadable() {
-        assert shouldFail (AssertionError.class, { run(SCRIPT_NAME,
+        assert shouldFail (AssertionError.class, { runScript(SCRIPT_NAME,
                 ["project": "${projectName}", "metadata": "asdfasdf"])
         }) =~ /Error: Metadata file .* doesn't exist or is not readable\./
     }
     @Test
     void testNoProject() {
         writeMetadataFile('')
-        assert shouldFail (AssertionError.class, { run(SCRIPT_NAME,
+        assert shouldFail (AssertionError.class, { runScript(SCRIPT_NAME,
                 [project: "",  "metadata": "${metaDataFile}"])
         }) =~ /Error: Project name not given\./
     }
     @Test
     void testProjectNotFound() {
         writeMetadataFile('')
-        assert shouldFail (AssertionError.class, { run(SCRIPT_NAME,
+        assert shouldFail (AssertionError.class, { runScript(SCRIPT_NAME,
                 ["project": "asdf", "metadata": "${metaDataFile}"])
         }) =~ /Error: Project .* not found\./
     }
@@ -408,7 +408,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareIntegrationTest {
     void testOutputFileExists() {
         writeMetadataFile('')
         importShellScriptFile.createNewFile()
-        assert shouldFail (AssertionError.class, { run(SCRIPT_NAME,
+        assert shouldFail (AssertionError.class, { runScript(SCRIPT_NAME,
                 ["project": "${projectName}", metadata: "${metaDataFile}"])
         }) =~ /Error: Output file .* exists, please move it\./
     }

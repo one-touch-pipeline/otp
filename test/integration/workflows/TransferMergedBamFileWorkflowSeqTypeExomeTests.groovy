@@ -1,13 +1,8 @@
 package workflows
 
-import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 import static org.junit.Assert.*
 
 import org.joda.time.Duration
-
-import grails.test.mixin.*
-import grails.test.mixin.domain.*
-import grails.test.mixin.support.*
 import org.junit.*
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -18,23 +13,19 @@ import de.dkfz.tbi.otp.filehandling.FileNames
 import de.dkfz.tbi.otp.job.jobs.transferMergedBamFile.TransferMergedBamFileStartJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
-import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
 
 /**
  * Preparation for execution: see src/docs/guide/devel/testing/workflowTesting.gdoc
  */
-class TransferMergedBamFileWorkflowSeqTypeExomeTests extends AbstractWorkflowTest {
+class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
 
     ProcessingOptionService processingOptionService
 
     TransferMergedBamFileStartJob transferMergedBamFileStartJob
 
-    // The scheduler needs to access the created objects while the test is being executed
-    boolean transactional = false
 
     // TODO want to get rid of this hardcoded.. idea: maybe calculating from the walltime of the cluster jobs.. -> OTP-570/OTP-672
     final Duration TIMEOUT = Duration.standardMinutes(40)
@@ -683,7 +674,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends AbstractWorkflowTes
     @Test
     void testExecutionWithoutProcessingOptions() {
         // Import workflow from script file
-        run("scripts/workflows/TransferMergedBamFileWorkflow.groovy")
+        runScript("scripts/workflows/TransferMergedBamFileWorkflow.groovy")
 
         // there will be only one at the database
         JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()

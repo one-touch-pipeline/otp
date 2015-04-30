@@ -1,16 +1,16 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
-import grails.test.mixin.*
+
 import org.junit.*
-import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
+import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
 
 /**
  * Script to test basic functionality to load bed files and it's
  * meta information to the OTP database.
  *
  */
-class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
+class LoadBedFileScriptTests extends GroovyScriptAwareTestCase {
 
     Realm realm
     List<File> directories = []
@@ -137,7 +137,7 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
 
     @Test
     void testCorrect() {
-        run(SCRIPT_PATH)
+        runScript(SCRIPT_PATH)
         BedFile bedFile = BedFile.findByFileName(bedFilesToLoad.first().bedName)
         assertNotNull bedFile
         assertEquals (10 + 10 + 10, bedFile.targetSize)
@@ -148,13 +148,13 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
     void testNoRealmExists() {
         realm.name = "DOES_NOT_EXIST"
         assertNotNull realm.save(flush: true)
-        run(SCRIPT_PATH)
+        runScript(SCRIPT_PATH)
     }
 
     @Test(expected = IllegalArgumentException)
     void testNoRefGenExists() {
         renameOneRefGen()
-        run(SCRIPT_PATH)
+        runScript(SCRIPT_PATH)
     }
 
     @Test(expected = IllegalArgumentException)
@@ -162,13 +162,13 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
         LibraryPreparationKit kit = LibraryPreparationKit.list().first()
         kit.name = "DOES_NOT_EXIST"
         kit.save(flush: true)
-        run(SCRIPT_PATH)
+        runScript(SCRIPT_PATH)
     }
 
     @Test(expected = RuntimeException)
     void testCanNotReadBedFile() {
         assertTrue bedFiles.first().delete()
-        run(SCRIPT_PATH)
+        runScript(SCRIPT_PATH)
     }
 
     @Test
@@ -177,7 +177,7 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
         assertTrue bedFiles.first().createNewFile()
         bedFiles.first() << "chr1\t10\t20\n"
         bedFiles.first() << "chr2\t40\t30"
-        run(SCRIPT_PATH)
+        runScript(SCRIPT_PATH)
         BedFile bedFile = BedFile.findByFileName(bedFilesToLoad.first().bedName)
         assertNotNull bedFile
         assertEquals (10 + 10, bedFile.targetSize)
@@ -193,23 +193,23 @@ class LoadBedFileScriptTests extends GroovyScriptAwareIntegrationTest{
             entry.name = "DOES_NOT_EXIST"
             assertNotNull entry.save(flush: true)
         }
-        run(SCRIPT_PATH)
+        runScript(SCRIPT_PATH)
     }
 
     @Test(expected = IllegalArgumentException)
     void sumLessThenZero() {
         assertTrue bedFiles.first().delete()
         bedFiles.first().createNewFile()
-        run(SCRIPT_PATH)
+        runScript(SCRIPT_PATH)
     }
 
     @Test
     void testBedExists() {
-        run(SCRIPT_PATH)
+        runScript(SCRIPT_PATH)
         renameOneRefGen()
         // there must be no exception because the same bedFile
         // is not going to be loaded 2 times into the db
-        run(SCRIPT_PATH)
+        runScript(SCRIPT_PATH)
     }
 
     private void renameOneRefGen() {

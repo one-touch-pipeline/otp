@@ -12,7 +12,6 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.ExternalScript
 import de.dkfz.tbi.otp.utils.HelperUtils
@@ -28,7 +27,6 @@ import java.util.zip.GZIPInputStream
 
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import static org.junit.Assert.assertNotNull
-import static org.junit.Assert.assertTrue
 
 /**
  * Steps which have to be executed for a CO SNV-scipts update:
@@ -60,16 +58,13 @@ import static org.junit.Assert.assertTrue
  * 22) run SnvWorkflowTests
  */
 
-class SnvWorkflowTests extends AbstractWorkflowTest {
+class SnvWorkflowTests extends WorkflowTestCase {
 
     final String VERSION = "1.0.132-1"
     final String CO_SCRIPTS_BASE_DIR = "/path/to/programs/otp/COWorkflows_${VERSION}/resources/analysisTools"
     final String SNV_PIPELINE_SCRIPTS_PATH = "${CO_SCRIPTS_BASE_DIR}/snvPipeline"
     final String ANALYSIS_SCRIPTS_PATH = "${CO_SCRIPTS_BASE_DIR}/tools"
 
-
-    // The scheduler needs to access the created objects while the test is being executed
-    boolean transactional = false
 
     ProcessedMergedBamFileService processedMergedBamFileService
     ExecutionService executionService
@@ -446,7 +441,7 @@ class SnvWorkflowTests extends AbstractWorkflowTest {
 
     void execute() {
         SpringSecurityUtils.doWithAuth("admin") {
-            run("scripts/workflows/SnvWorkflow.groovy")
+            runScript("scripts/workflows/SnvWorkflow.groovy")
         }
 
         // there will be only one plan in the database

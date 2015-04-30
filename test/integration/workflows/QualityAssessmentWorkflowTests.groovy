@@ -79,9 +79,9 @@ class QualityAssessmentWorkflowTests extends QualityAssessmentAbstractWorkflowTe
     }
 
     protected void createWorkflow() {
-        run('scripts/qa/QualityAssessmentWorkflow.groovy')
+        runScript('scripts/qa/QualityAssessmentWorkflow.groovy')
         SpringSecurityUtils.doWithAuth("admin") {
-            run('scripts/qa/InjectQualityAssessmentWorkflowOptions.groovy')
+            runScript('scripts/qa/InjectQualityAssessmentWorkflowOptions.groovy')
         }
     }
 

@@ -18,9 +18,9 @@ import de.dkfz.tbi.otp.job.jobs.TestJobHelper
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.SampleType.Category
-import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
+import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
 
-public class SnvCallingStartJobTests extends GroovyScriptAwareIntegrationTest {
+public class SnvCallingStartJobTests extends GroovyScriptAwareTestCase {
 
     private static String PLAN_NAME = "SnvWorkflow"
     private static long ARBITRARY_TIMESTAMP = 1337
@@ -36,7 +36,7 @@ public class SnvCallingStartJobTests extends GroovyScriptAwareIntegrationTest {
     @Test
     public void testExecute() {
         createUserAndRoles()
-        SpringSecurityUtils.doWithAuth('admin') { run('scripts/workflows/SnvWorkflow.groovy') }
+        SpringSecurityUtils.doWithAuth('admin') { runScript('scripts/workflows/SnvWorkflow.groovy') }
         snvTestData = new SnvCallingInstanceTestData()
 
         SamplePair mockSamplePair

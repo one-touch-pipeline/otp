@@ -12,10 +12,7 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
-class DataInstallationWorkflowTests extends AbstractWorkflowTest {
-
-    // The scheduler needs to access the created objects while the test is being executed
-    boolean transactional = false
+class DataInstallationWorkflowTests extends WorkflowTestCase {
 
     // TODO  ( jira: OTP-566)  want to get rid of this hardcoded.. idea: maybe calculating from the walltime of the cluster jobs plus some buffer..
     final Duration TIMEOUT = Duration.standardMinutes(30)
@@ -275,7 +272,7 @@ class DataInstallationWorkflowTests extends AbstractWorkflowTest {
     @Test
     void testChipSeqInstallation() {
         SpringSecurityUtils.doWithAuth("admin") {
-            run("scripts/workflows/DataInstallationWorkflow.groovy")
+            runScript("scripts/workflows/DataInstallationWorkflow.groovy")
         }
         SeqType seqType = createSeqType(SeqTypeNames.CHIP_SEQ.seqTypeName, "chip_seq_sequencing")
 
@@ -309,7 +306,7 @@ class DataInstallationWorkflowTests extends AbstractWorkflowTest {
     @Test
     void testDataInstallationWithFastTrack() {
         SpringSecurityUtils.doWithAuth("admin") {
-            run("scripts/workflows/DataInstallationWorkflow.groovy")
+            runScript("scripts/workflows/DataInstallationWorkflow.groovy")
         }
         project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
         assert project.save(flush: true)
@@ -377,7 +374,7 @@ class DataInstallationWorkflowTests extends AbstractWorkflowTest {
 
     private SeqTrack createWholeGenomeSetup() {
         SpringSecurityUtils.doWithAuth("admin") {
-            run("scripts/workflows/DataInstallationWorkflow.groovy")
+            runScript("scripts/workflows/DataInstallationWorkflow.groovy")
         }
         SeqType seqType = createSeqType(SeqTypeNames.WHOLE_GENOME.seqTypeName, "SeqTypeDir")
 

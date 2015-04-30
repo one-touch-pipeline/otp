@@ -45,8 +45,8 @@ class WorkflowExecutionPlanUpdateTests extends DataInstallationWorkflowTests {
     private void jobExecutionPlanSetup() {
         SpringSecurityUtils.doWithAuth("admin") {
             JobExecutionPlan.withTransaction {
-                run("scripts/workflows/OldDataInstallationWorkflow.groovy")
-                run("scripts/workflows/DataInstallationWorkflow.groovy")
+                runScript("scripts/workflows/OldDataInstallationWorkflow.groovy")
+                runScript("scripts/workflows/DataInstallationWorkflow.groovy")
             }
         }
     }

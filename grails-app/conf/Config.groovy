@@ -197,6 +197,16 @@ if (otpConfig.otp.pbs.ssh.host instanceof ConfigObject) {
     otp.pbs.ssh.host = otpConfig.otp.pbs.ssh.host
 }
 
+otp {
+    testing {
+        // Default settings for work-flow integration tests
+        workflows {
+            account = otpProperties.getProperty("otp.testing.workflows.account")
+            rootdir = (otpConfig.otp.testing.workflows.rootdir) ?: 'WORKFLOW_ROOT'
+        }
+    }
+}
+
 // Added by the Spring Security Core plugin:
 grails.plugins.springsecurity.userLookup.userDomainClassName = 'de.dkfz.tbi.otp.security.User'
 grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'de.dkfz.tbi.otp.security.UserRole'

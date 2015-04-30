@@ -17,10 +17,8 @@ import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
 /**
  * To run this workflow test the preparation steps described in the documentation (grails doc) have to be followed.
  */
-class LoadMetaDataTests extends AbstractWorkflowTest {
+class LoadMetaDataTests extends WorkflowTestCase {
 
-    // The scheduler needs to access the created objects while the test is being executed
-    boolean transactional = false
     // TODO ( jira: OTP-566)  want to get rid of this hardcoded.. idea: maybe calculating from the walltime of the cluster jobs..
     Duration TIMEOUT = Duration.standardMinutes(2)
 
@@ -271,7 +269,7 @@ class LoadMetaDataTests extends AbstractWorkflowTest {
 
         String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
         executionService.executeCommand(realm, "${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
-        run("scripts/workflows/MetaDataWorkflow.groovy")
+        runScript("scripts/workflows/MetaDataWorkflow.groovy")
 
         // there will be only one at the database
         JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
@@ -293,7 +291,7 @@ class LoadMetaDataTests extends AbstractWorkflowTest {
     void testExomeMetadataNoLibraryPreparationKit() {
         String seqTypeName = SeqTypeNames.EXOME.seqTypeName
 
-        run("scripts/LibraryPreparationKit/LoadLibraryPreparationKits.groovy")
+        runScript("scripts/LibraryPreparationKit/LoadLibraryPreparationKits.groovy")
         List<LibraryPreparationKit> libraryPreparationKits = LibraryPreparationKit.list()
         assertFalse(libraryPreparationKits.isEmpty())
 
@@ -313,7 +311,7 @@ class LoadMetaDataTests extends AbstractWorkflowTest {
         String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
         executionService.executeCommand(realm, "${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
         assertTrue(new File(metaDataFilepath).exists())
-        run("scripts/workflows/MetaDataWorkflow.groovy")
+        runScript("scripts/workflows/MetaDataWorkflow.groovy")
 
         // there will be only one at the database
         JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
@@ -336,7 +334,7 @@ class LoadMetaDataTests extends AbstractWorkflowTest {
     void testExomeMetadataWithLibraryPreparationKit() {
         String seqTypeName = SeqTypeNames.EXOME.seqTypeName
 
-        run("scripts/LibraryPreparationKit/LoadLibraryPreparationKits.groovy")
+        runScript("scripts/LibraryPreparationKit/LoadLibraryPreparationKits.groovy")
         List<LibraryPreparationKit> libraryPreparationKits = LibraryPreparationKit.list()
         assertFalse(libraryPreparationKits.isEmpty())
 
@@ -377,7 +375,7 @@ class LoadMetaDataTests extends AbstractWorkflowTest {
         String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
         executionService.executeCommand(realm, "${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
         assertTrue(new File(metaDataFilepath).exists())
-        run("scripts/workflows/MetaDataWorkflow.groovy")
+        runScript("scripts/workflows/MetaDataWorkflow.groovy")
 
         // there will be only one at the database
         JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
@@ -418,7 +416,7 @@ class LoadMetaDataTests extends AbstractWorkflowTest {
 
         AntibodyTarget.findOrSaveByName(ANTIBODY_TARGET_1)
 
-        run("scripts/workflows/MetaDataWorkflow.groovy")
+        runScript("scripts/workflows/MetaDataWorkflow.groovy")
 
         // there will be only one at the database
         JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()

@@ -1,9 +1,9 @@
 package scripts.updates
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
+import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
 
-class AddReadNumberIntoDataFilesTests extends GroovyScriptAwareIntegrationTest {
+class AddReadNumberIntoDataFilesTests extends GroovyScriptAwareTestCase {
 
     static final String SCRIPT_NAME = "scripts/updates/AddReadNumberIntoDataFiles.groovy"
 

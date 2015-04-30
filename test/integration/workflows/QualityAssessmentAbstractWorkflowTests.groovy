@@ -9,12 +9,10 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
-import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
 
-abstract class QualityAssessmentAbstractWorkflowTests extends AbstractWorkflowTest {
+abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
 
     /*
      * preparation:
@@ -30,9 +28,6 @@ abstract class QualityAssessmentAbstractWorkflowTests extends AbstractWorkflowTe
      * Exception to it is qa.jar which is called from $myBase/test-qa.sh.
      * Changing of test-qa.sh makes it possible to test production or a test version of qa.jar
      */
-
-    // The scheduler needs to access the created objects while the test is being executed
-    boolean transactional = false
 
     final Duration TIMEOUT = Duration.standardMinutes(200)
 

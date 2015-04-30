@@ -4,32 +4,22 @@ import org.joda.time.Duration
 
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 import static org.junit.Assert.*
-import grails.test.mixin.*
-import grails.test.mixin.domain.*
-import grails.test.mixin.support.*
-import grails.util.Environment
+
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
-import de.dkfz.tbi.otp.filehandling.FileNames
 import de.dkfz.tbi.otp.job.jobs.merging.MergingStartJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.FileType.Type
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
-import de.dkfz.tbi.otp.testing.GroovyScriptAwareIntegrationTest
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 
 /**
  * Preparation for execution: see src/docs/guide/devel/testing/workflowTesting.gdoc
  */
-class MergingWorkflowTests extends AbstractWorkflowTest {
+class MergingWorkflowTests extends WorkflowTestCase {
 
     ProcessingOptionService processingOptionService
 
@@ -45,8 +35,6 @@ class MergingWorkflowTests extends AbstractWorkflowTest {
 
     MergingStartJob mergingStartJob
 
-    // The scheduler needs to access the created objects while the test is being executed
-    boolean transactional = false
 
     // TODO want to get rid of this hardcoded.. idea: maybe calculating from the walltime of the cluster jobs.. -> OTP-570/OTP-672
     final Duration TIMEOUT = Duration.standardMinutes(40)
@@ -167,7 +155,7 @@ class MergingWorkflowTests extends AbstractWorkflowTest {
         assertEquals(singleLaneBamFile, processedBamFileService.getFilePath(processedBamFile))
         // Import workflow from script file
         SpringSecurityUtils.doWithAuth("admin") {
-            run("scripts/workflows/MergingWorkflow.groovy")
+            runScript("scripts/workflows/MergingWorkflow.groovy")
         }
 
         SpringSecurityUtils.doWithAuth("admin") {
