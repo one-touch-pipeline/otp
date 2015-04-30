@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.dataTransfer
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
 import de.dkfz.tbi.otp.job.jobs.WatchdogJob
 import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
 
@@ -17,6 +18,9 @@ class CopyFilesJob extends AbstractJobImpl {
 
     @Autowired
     ProcessedMergedBamFileService processedMergedBamFileService
+
+    @Autowired
+    AbstractMergedBamFileService abstractMergedBamFileService
 
     @Autowired
     ConfigService configService
@@ -40,8 +44,8 @@ class CopyFilesJob extends AbstractJobImpl {
         List<ProcessedMergedBamFile> bamFiles = processedMergedBamFilesForRun(run)
         bamFiles.each {
             String cmd = """
-mkdir -p -m 2750 ${processedMergedBamFileService.destinationDirectory(it)}
-printf "A new lane is currently in progress for this sample.\\nThe merged BAM file will be created/updated as soon as processing is complete.\\n" > ${processedMergedBamFileService.destinationDirectory(it)}/${processedMergedBamFileService.inProgressFileName(it)};
+mkdir -p -m 2750 ${abstractMergedBamFileService.destinationDirectory(it)}
+printf "A new lane is currently in progress for this sample.\\nThe merged BAM file will be created/updated as soon as processing is complete.\\n" > ${abstractMergedBamFileService.destinationDirectory(it)}/${processedMergedBamFileService.inProgressFileName(it)};
 """
             Realm realm = configService.getRealmDataManagement(it.project)
             executionService.executeCommand(realm, cmd)

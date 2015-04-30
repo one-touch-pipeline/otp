@@ -11,30 +11,28 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.Realm.OperationType
+import org.springframework.beans.factory.annotation.Autowired
 
 
 class CopyFilesJobTests extends GroovyTestCase {
 
+    @Autowired
     CopyFilesJob job
+
     TestData testData
 
     final static String PBS_ID = "1234"
 
-    @Before
-    void setUp() {
-        job = new CopyFilesJob()
-        job.executionHelperService = new ExecutionHelperService()
-        job.runProcessingService = new RunProcessingService()
-        job.processedMergedBamFileService = new ProcessedMergedBamFileService()
-        job.lsdfFilesService = new LsdfFilesService()
-        job.configService = new ConfigService()
-        job.executionService = new ExecutionService()
-    }
 
     @After
     void tearDown() {
-        job = null
         testData = null
+        TestCase.removeMetaClass(CopyFilesJob ,job)
+        TestCase.removeMetaClass(ProcessedMergedBamFileService, job.processedMergedBamFileService)
+        TestCase.removeMetaClass(ExecutionService, job.executionService)
+        TestCase.removeMetaClass(ExecutionHelperService, job.executionHelperService)
+        TestCase.removeMetaClass(RunProcessingService, job.runProcessingService)
+        TestCase.removeMetaClass(LsdfFilesService, job.lsdfFilesService)
     }
 
 

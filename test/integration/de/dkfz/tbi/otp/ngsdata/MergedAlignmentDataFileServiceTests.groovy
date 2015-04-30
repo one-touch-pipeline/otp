@@ -5,7 +5,7 @@ import org.junit.*
 
 class MergedAlignmentDataFileServiceTests {
 
-    def mergedAlignmentDataFileService
+    MergedAlignmentDataFileService mergedAlignmentDataFileService
 
     @Before
     void setUp() {

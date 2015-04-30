@@ -17,6 +17,9 @@ class MoveFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl {
     ProcessedMergedBamFileService processedMergedBamFileService
 
     @Autowired
+    AbstractMergedBamFileService abstractMergedBamFileService
+
+    @Autowired
     ProcessedBamFileService processedBamFileService
 
     @Autowired
@@ -28,14 +31,11 @@ class MoveFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl {
     @Autowired
     ChecksumFileService checksumFileService
 
-    @Autowired
-    QAResultStatisticsService qaResultFromDatabaseService
-
     @Override
     public void execute() throws Exception {
         long id = Long.parseLong(getProcessParameterValue())
         ProcessedMergedBamFile mergedBamFile = ProcessedMergedBamFile.get(id)
-        String dest = processedMergedBamFileService.destinationDirectory(mergedBamFile)
+        String dest = abstractMergedBamFileService.destinationDirectory(mergedBamFile)
         String temporalDestinationDir = processedMergedBamFileService.destinationTempDirectory(mergedBamFile)
         String temporalQADestinationDir = processedMergedBamFileService.qaResultTempDestinationDirectory(mergedBamFile)
         String qaDestinationDirectory = processedMergedBamFileService.qaResultDestinationDirectory(mergedBamFile)

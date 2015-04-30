@@ -6,10 +6,16 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.ExternalScript
 import de.dkfz.tbi.otp.utils.HelperUtils
+import org.springframework.stereotype.Component
+import org.springframework.beans.factory.annotation.Autowired
 
+@Component()
 class SnvCallingInstanceTestData extends TestData {
 
+    @Autowired
     ProcessedMergedBamFileService processedMergedBamFileService
+    @Autowired
+    AbstractMergedBamFileService abstractMergedBamFileService
 
     ProcessedMergedBamFile bamFileTumor
     ProcessedMergedBamFile bamFileTumor2
@@ -29,10 +35,6 @@ class SnvCallingInstanceTestData extends TestData {
         createAndSaveProcessingOption([name: "PBS_snvPipeline_SNV_DEEPANNOTATION_WES", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
         createAndSaveProcessingOption([name: "PBS_snvPipeline_FILTER_VCF_WGS", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
         createAndSaveProcessingOption([name: "PBS_snvPipeline_FILTER_VCF_WES", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
-
-        processedMergedBamFileService = new ProcessedMergedBamFileService()
-        processedMergedBamFileService.configService = new ConfigService()
-        processedMergedBamFileService.mergedAlignmentDataFileService = new MergedAlignmentDataFileService()
 
         project = createProject()
         assert project.save(flush: true, failOnError: true)
@@ -205,7 +207,7 @@ class SnvCallingInstanceTestData extends TestData {
     }
 
     File createBamFile(ProcessedMergedBamFile processedMergedBamFile) {
-        File file = new File(processedMergedBamFileService.destinationDirectory(processedMergedBamFile), processedMergedBamFileService.fileName(processedMergedBamFile))
+        File file = new File(abstractMergedBamFileService.destinationDirectory(processedMergedBamFile), processedMergedBamFileService.fileName(processedMergedBamFile))
         CreateFileHelper.createFile(file)
 
         processedMergedBamFile.fileSize = file.size()

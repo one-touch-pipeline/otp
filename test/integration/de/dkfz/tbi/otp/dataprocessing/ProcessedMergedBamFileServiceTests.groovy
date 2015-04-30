@@ -437,13 +437,6 @@ class ProcessedMergedBamFileServiceTests {
         assertEquals(md5BaiFileExp, locations["md5BaiFile"])
     }
 
-    @Test
-    void testDestinationDirectory() {
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
-        String destinationExp = "/tmp/otp-unit-test/pmfs/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/"
-        String destinationAct = processedMergedBamFileService.destinationDirectory(mergedBamFile)
-        assertEquals(destinationExp, destinationAct)
-    }
 
     @Test(expected = IllegalArgumentException)
     void testDestinationTempDirectoryBamFileNull() {

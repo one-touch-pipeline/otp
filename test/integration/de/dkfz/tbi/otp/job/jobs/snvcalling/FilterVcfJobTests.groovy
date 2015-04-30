@@ -37,11 +37,13 @@ class FilterVcfJobTests extends GroovyTestCase {
     @Autowired
     LinkFileUtils linkFileUtils
 
+    @Autowired
+    SnvCallingInstanceTestData snvCallingInstanceTestData
+
     File testDirectory
     FilterVcfJob filterVcfJob
     SnvCallingInstance snvCallingInstance1
     SnvCallingInstance snvCallingInstance2
-    SnvCallingInstanceTestData testData
     SnvJobResult snvJobResultFilter1
     ProcessedMergedBamFile processedMergedBamFile1
     ProcessedMergedBamFile processedMergedBamFile2
@@ -67,8 +69,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         testDirectory = new File("/tmp/otp-test/${UNIQUE_PATH}")
         assert testDirectory.mkdirs()
 
-        testData = new SnvCallingInstanceTestData()
-        testData.createSnvObjects()
+        snvCallingInstanceTestData.createSnvObjects()
 
         Realm realm_processing = DomainFactory.createRealmDataProcessingDKFZ([
             processingRootPath: '${testDirectory}/processing',
@@ -83,8 +84,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         ])
         assert realm_management.save()
 
-        processedMergedBamFile1 = testData.bamFileTumor
-        processedMergedBamFile2 = testData.bamFileControl
+        processedMergedBamFile1 = snvCallingInstanceTestData.bamFileTumor
+        processedMergedBamFile2 = snvCallingInstanceTestData.bamFileControl
 
         sampleType1 = processedMergedBamFile1.sample.sampleType
         sampleType1.name = "sampletype1"
@@ -93,18 +94,18 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         sampleType2.name = "sampletype2"
         assert sampleType2.save(flush: true)
 
-        SnvConfig snvConfig = testData.snvConfig
+        SnvConfig snvConfig = snvCallingInstanceTestData.snvConfig
         snvConfig.configuration = CONFIGURATION
         assert snvConfig.save()
 
-        snvCallingInstance1 = testData.createSnvCallingInstance([
+        snvCallingInstance1 = snvCallingInstanceTestData.createSnvCallingInstance([
             sampleType1BamFile: processedMergedBamFile1,
             sampleType2BamFile: processedMergedBamFile2,
             instanceName: SOME_INSTANCE_NAME
         ])
         assert snvCallingInstance1.save()
 
-        snvCallingInstance2 = testData.createSnvCallingInstance([
+        snvCallingInstance2 = snvCallingInstanceTestData.createSnvCallingInstance([
             sampleType1BamFile: processedMergedBamFile1,
             sampleType2BamFile: processedMergedBamFile2,
             instanceName: OTHER_INSTANCE_NAME
@@ -148,7 +149,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 snvCallingInstance: snvCallingInstance1,
                 externalScript: externalScript_Calling,
                 processingState: SnvProcessingStates.FINISHED,
-                chromosomeJoinExternalScript: testData.externalScript_Joining,
+                chromosomeJoinExternalScript: snvCallingInstanceTestData.externalScript_Joining,
                 md5sum: "a841c64c5825e986c4709ac7298e9366",
                 fileSize: 235l,
                 )
@@ -214,7 +215,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
     @After
     void tearDown() {
-        testData = null
+        snvCallingInstanceTestData = null
         snvCallingInstance1 = null
         snvCallingInstance2 = null
         snvJobResultFilter1 = null
@@ -279,8 +280,8 @@ CHROMOSOME_INDICES=( {1..21} XY)
             return true
         }
 
-        File pmbf1 = testData.createBamFile(processedMergedBamFile1)
-        testData.createBamFile(processedMergedBamFile2)
+        File pmbf1 = snvCallingInstanceTestData.createBamFile(processedMergedBamFile1)
+        snvCallingInstanceTestData.createBamFile(processedMergedBamFile2)
 
         executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options ->
             SnvJobResult inputResult = snvCallingInstance2.findLatestResultForSameBamFiles(SnvCallingStep.SNV_DEEPANNOTATION)
@@ -313,15 +314,15 @@ CHROMOSOME_INDICES=( {1..21} XY)
         }
 
         filterVcfJob.metaClass.writeConfigFile = { SnvCallingInstance instance ->
-            return testData.createConfigFileWithContentInFileSystem(
+            return snvCallingInstanceTestData.createConfigFileWithContentInFileSystem(
                     snvCallingInstance2.configFilePath.absoluteDataManagementPath,
                     snvCallingInstance2.config.configuration)
         }
 
         filterVcfJob.metaClass.linkResultFiles = { SnvCallingInstance instance -> }
 
-        testData.createInputResultFile_Production(snvCallingInstance1, SnvCallingStep.SNV_DEEPANNOTATION)
-        testData.createInputResultFile_Production(snvCallingInstance2, SnvCallingStep.CALLING)
+        snvCallingInstanceTestData.createInputResultFile_Production(snvCallingInstance1, SnvCallingStep.SNV_DEEPANNOTATION)
+        snvCallingInstanceTestData.createInputResultFile_Production(snvCallingInstance2, SnvCallingStep.CALLING)
 
         schedulerService.startingJobExecutionOnCurrentThread(filterVcfJob)
         try {
@@ -360,11 +361,11 @@ RUN_SNV_DEEPANNOTATION=0
 RUN_FILTER_VCF=1
 CHROMOSOME_INDICES=( {1..21} XY)
 """
-        File configFile = testData.createConfigFileWithContentInFileSystem(
+        File configFile = snvCallingInstanceTestData.createConfigFileWithContentInFileSystem(
                 snvCallingInstance2.configFilePath.absoluteDataManagementPath,
                 snvCallingInstance2.config.configuration)
 
-        testData.createInputResultFile_Production(snvCallingInstance2, SnvCallingStep.SNV_DEEPANNOTATION)
+        snvCallingInstanceTestData.createInputResultFile_Production(snvCallingInstance2, SnvCallingStep.SNV_DEEPANNOTATION)
 
         File checkpointFile = new OtpPath(snvCallingInstance2.snvInstancePath, SnvCallingStep.FILTER_VCF.checkpointFileName).absoluteDataManagementPath
         checkpointFile.createNewFile()
@@ -386,7 +387,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testValidate_FilterCheckpointFileDoesNotExists() {
-        File configFile = testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteDataManagementPath, CONFIGURATION)
+        File configFile = snvCallingInstanceTestData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteDataManagementPath, CONFIGURATION)
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> }
 
         shouldFail(AssertionError, {filterVcfJob.validate(snvCallingInstance1)})
@@ -399,14 +400,14 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testValidate_WrongConfigurationInFilterConfigFile() {
-        File configFile = testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteDataManagementPath, "wrong configuration")
+        File configFile = snvCallingInstanceTestData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteDataManagementPath, "wrong configuration")
         shouldFail(AssertionError, {filterVcfJob.validate(snvCallingInstance1)})
     }
 
     @Test
     void testValidate_InputFileNotReadable() {
         SnvCallingStep step = SnvCallingStep.FILTER_VCF
-        File configFile = testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteDataManagementPath, CONFIGURATION)
+        File configFile = snvCallingInstanceTestData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteDataManagementPath, CONFIGURATION)
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file ->
                 throw new AssertionError("Not readable")
         }

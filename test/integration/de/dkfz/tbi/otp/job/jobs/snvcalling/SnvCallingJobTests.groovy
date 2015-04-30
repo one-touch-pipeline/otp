@@ -39,6 +39,9 @@ class SnvCallingJobTests extends GroovyTestCase{
     ProcessedMergedBamFileService processedMergedBamFileService
 
     @Autowired
+    AbstractMergedBamFileService abstractMergedBamFileService
+
+    @Autowired
     SchedulerService schedulerService
 
     @Autowired
@@ -259,8 +262,8 @@ CHROMOSOME_INDICES=( {1..21} XY)
             if (command.contains('PARM_CHR_INDEX=')) {
                 String chromosome = command.split('PARM_CHR_INDEX=')[1].split(',')[0]
                 File snvFile = new OtpPath(snvCallingInstance.snvInstancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, chromosome)).absoluteStagingPath
-                File tumorBamFile = new File(processedMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
-                File controlBamFile = new File(processedMergedBamFileService.destinationDirectory(processedMergedBamFile2), processedMergedBamFileService.fileName(processedMergedBamFile2))
+                File tumorBamFile = new File(abstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
+                File controlBamFile = new File(abstractMergedBamFileService.destinationDirectory(processedMergedBamFile2), processedMergedBamFileService.fileName(processedMergedBamFile2))
 
                 String scriptCommandPart = "/tmp/scriptLocation/calling.sh"
 
@@ -330,7 +333,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
         bamFile.fileSize = bamFileContent.length()
         assert bamFile.save(failOnError: true)
 
-        final File file = new File(processedMergedBamFileService.destinationDirectory(bamFile), processedMergedBamFileService.fileName(bamFile))
+        final File file = new File(abstractMergedBamFileService.destinationDirectory(bamFile), processedMergedBamFileService.fileName(bamFile))
         assert file.path.startsWith(testDirectory.path)
         file.parentFile.mkdirs()
         file.text = bamFileContent
