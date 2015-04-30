@@ -12,7 +12,7 @@ class WaitingFileUtils {
      * This property is needed to have the possibility to increase the waiting time until files exist.
      * This is needed since when the files are too small they make problems due to the NFS.
      */
-    public static int extendedWaitingTime = 1000
+    public static int extendedWaitingTime = 60000
 
     public static long defaultTimeoutMillis = 1000L
 

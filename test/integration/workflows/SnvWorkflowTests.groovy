@@ -101,7 +101,6 @@ class SnvWorkflowTests extends AbstractWorkflowTest {
     SnvCallingStartJob snvStartJob
 
     void prepare(Realm.Cluster where) {
-        extendedWaitingTime = 100000
 
         createUserAndRoles()
 

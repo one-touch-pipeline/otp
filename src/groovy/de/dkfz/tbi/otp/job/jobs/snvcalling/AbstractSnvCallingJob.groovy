@@ -2,6 +2,8 @@ package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static de.dkfz.tbi.otp.utils.WaitingFileUtils.confirmDoesNotExist
@@ -35,6 +37,7 @@ abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob 
 
     abstract SnvCallingStep getStep()
     abstract SnvCallingStep getPreviousStep()
+
 
     @Override
     protected final NextAction maybeSubmit() throws Throwable {
@@ -101,7 +104,7 @@ rm ${configFileInStagingDirectory}
 """
         executionService.executeCommand(realm, command)
 
-        assert confirmExists(configFileInProjectDirectory)
+        assert confirmExists(configFileInProjectDirectory, extendedWaitingTime)
         assertDataManagementConfigContentsOk(instance)
 
         return configFileInProjectDirectory
