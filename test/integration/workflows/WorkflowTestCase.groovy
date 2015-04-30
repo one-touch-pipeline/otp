@@ -1,5 +1,6 @@
 package workflows
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -8,12 +9,15 @@ import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.ThreadUtils
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
+import groovy.sql.Sql
 import groovy.util.logging.Log4j
+import org.hibernate.SessionFactory
 import org.joda.time.Duration
 import org.joda.time.format.PeriodFormat
 import org.junit.After
 import org.junit.Before
 
+import javax.sql.DataSource
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
@@ -27,6 +31,9 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     ErrorLogService errorLogService
     CreateClusterScriptService createClusterScriptService
     ExecutionService executionService
+    SessionFactory sessionFactory
+    DataSource dataSource
+
 
     // The scheduler needs to access the created objects while the test is being executed
     boolean transactional = false
@@ -46,15 +53,27 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
     Realm realm
 
+    File schemaDump
+    Sql sql
+
 
     @Before
     public void setUpWorkflowTests() {
         setupDirectoriesAndRealms()
+
+        sql = new Sql(dataSource)
+        schemaDump = new File(TestCase.createEmptyTestDirectory(), "test-database-dump.sql")
+        sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
     }
 
 
     @After
     void tearDownWorkflowTests() {
+        sql.execute("DROP ALL OBJECTS")
+        sql.execute("RUNSCRIPT FROM ?", [schemaDump.absolutePath])
+        sessionFactory.currentSession.clear()
+        TestCase.cleanTestDirectory()
+
         cleanupDirectories()
     }
 
