@@ -167,6 +167,7 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
         } catch (AssertionError e) {
             throw new RuntimeException("Could not extract exactly one pbs id from '${concatenatedValues}'", e)
         }
+        logToJob("cluster log files: \noutput: ${pbsJobDescription}.o${pbsId} \nerror: ${pbsJobDescription}.e${pbsId}")
         ClusterJob clusterJob = clusterJobService.createClusterJob(realm, pbsId, processingStep, seqType, pbsJobDescription)
 
         return concatenatedValues
