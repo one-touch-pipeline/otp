@@ -54,7 +54,7 @@ class HipoSampleIdentifier {
         String projectNumber = matcher.group(3)
 
         if(!(projectLetter ==~ /[HP]/)) {
-            projectNumber = projectLetter.toLowerCase() + projectNumber
+            projectNumber = projectLetter + projectNumber
         }
         HipoTissueType tissueType = HipoTissueType.fromKey(matcher.group(5))
 

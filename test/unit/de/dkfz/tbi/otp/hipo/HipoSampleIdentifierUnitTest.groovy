@@ -32,7 +32,7 @@ class HipoSampleIdentifierUnitTest {
         sampleName = "C026-EFGH-M2-D1"
         identifier = HipoSampleIdentifier.tryParse(sampleName)
         assertNotNull(identifier)
-        assertEquals("c026", identifier.projectNumber)
+        assertEquals("C026", identifier.projectNumber)
         assertEquals("C026-EFGH", identifier.pid)
         assertEquals(HipoTissueType.METASTASIS, identifier.tissueType)
         assertEquals(2, identifier.sampleNumber)
