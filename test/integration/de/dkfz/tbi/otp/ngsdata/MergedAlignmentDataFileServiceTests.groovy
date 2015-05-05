@@ -22,7 +22,6 @@ class MergedAlignmentDataFileServiceTests {
         List<SeqScan> scans = SeqScan.findAll([max: 10])
         for (SeqScan scan in scans) {
             List<DataFile> files = mergedAlignmentDataFileService.alignmentSequenceFiles(scan)
-            println files
         }
     }
 
@@ -33,10 +32,6 @@ class MergedAlignmentDataFileServiceTests {
         List<SeqScan> scans = SeqScan.findAllBySeqType(type)
         for (SeqScan scan in scans) {
             List<DataFile> files = mergedAlignmentDataFileService.alignmentSequenceFiles(scan)
-            println "${scan}: ${files}"
-            //if (files.size() > 1) {
-            //    println files
-            //}
         }
     }
 

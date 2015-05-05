@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
 import static org.springframework.util.Assert.notNull
 import grails.util.Environment
 
@@ -55,7 +57,7 @@ class ConfigService {
         return getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
     }
 
-    String getProjectRootPath(Project project) {
+    static String getProjectRootPath(Project project) {
         Realm realm = getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
         return realm.rootPath
     }

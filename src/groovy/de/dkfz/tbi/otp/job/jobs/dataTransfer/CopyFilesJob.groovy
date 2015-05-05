@@ -20,9 +20,6 @@ class CopyFilesJob extends AbstractJobImpl {
     ProcessedMergedBamFileService processedMergedBamFileService
 
     @Autowired
-    AbstractMergedBamFileService abstractMergedBamFileService
-
-    @Autowired
     ConfigService configService
 
     @Autowired
@@ -44,8 +41,8 @@ class CopyFilesJob extends AbstractJobImpl {
         List<ProcessedMergedBamFile> bamFiles = processedMergedBamFilesForRun(run)
         bamFiles.each {
             String cmd = """
-mkdir -p -m 2750 ${abstractMergedBamFileService.destinationDirectory(it)}
-printf "A new lane is currently in progress for this sample.\\nThe merged BAM file will be created/updated as soon as processing is complete.\\n" > ${abstractMergedBamFileService.destinationDirectory(it)}/${processedMergedBamFileService.inProgressFileName(it)};
+mkdir -p -m 2750 ${AbstractMergedBamFileService.destinationDirectory(it)}
+printf "A new lane is currently in progress for this sample.\\nThe merged BAM file will be created/updated as soon as processing is complete.\\n" > ${AbstractMergedBamFileService.destinationDirectory(it)}/${processedMergedBamFileService.inProgressFileName(it)};
 """
             Realm realm = configService.getRealmDataManagement(it.project)
             executionService.executeCommand(realm, cmd)

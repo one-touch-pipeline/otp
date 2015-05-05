@@ -36,9 +36,6 @@ class SnvAnnotationJobTests extends GroovyTestCase {
     ProcessedMergedBamFileService processedMergedBamFileService
 
     @Autowired
-    AbstractMergedBamFileService abstractMergedBamFileService
-
-    @Autowired
     LsdfFilesService lsdfFilesService
 
     @Autowired
@@ -215,7 +212,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
         snvAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         snvAnnotationJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult -> }
         snvAnnotationJob.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
-            return new File(abstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
+            return new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
         }
         snvAnnotationJob.metaClass.writeConfigFile = { SnvCallingInstance instance ->
             return testData.createConfigFileWithContentInFileSystem(
@@ -279,7 +276,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> }
         snvAnnotationJob.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
-            return new File(abstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
+            return new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
         }
         executionService.metaClass.executeCommand = { Realm realm, String command -> }
 
@@ -302,7 +299,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file, int waitingTime -> throw new AssertionError("Not readable") }
         snvAnnotationJob.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
-            return new File(abstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
+            return new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
         }
         try {
             assert shouldFail(AssertionError, { snvAnnotationJob.validate(snvCallingInstance2) }).contains("Not readable")

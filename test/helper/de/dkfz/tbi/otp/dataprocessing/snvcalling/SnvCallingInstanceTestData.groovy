@@ -14,8 +14,6 @@ class SnvCallingInstanceTestData extends TestData {
 
     @Autowired
     ProcessedMergedBamFileService processedMergedBamFileService
-    @Autowired
-    AbstractMergedBamFileService abstractMergedBamFileService
 
     ProcessedMergedBamFile bamFileTumor
     ProcessedMergedBamFile bamFileTumor2
@@ -207,7 +205,7 @@ class SnvCallingInstanceTestData extends TestData {
     }
 
     File createBamFile(ProcessedMergedBamFile processedMergedBamFile) {
-        File file = new File(abstractMergedBamFileService.destinationDirectory(processedMergedBamFile), processedMergedBamFileService.fileName(processedMergedBamFile))
+        File file = new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile), processedMergedBamFileService.fileName(processedMergedBamFile))
         CreateFileHelper.createFile(file)
 
         processedMergedBamFile.fileSize = file.size()

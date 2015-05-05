@@ -27,12 +27,13 @@ class CopyFilesJobTests extends GroovyTestCase {
     @After
     void tearDown() {
         testData = null
-        TestCase.removeMetaClass(CopyFilesJob ,job)
+        TestCase.removeMetaClass(CopyFilesJob, job)
         TestCase.removeMetaClass(ProcessedMergedBamFileService, job.processedMergedBamFileService)
         TestCase.removeMetaClass(ExecutionService, job.executionService)
         TestCase.removeMetaClass(ExecutionHelperService, job.executionHelperService)
         TestCase.removeMetaClass(RunProcessingService, job.runProcessingService)
         TestCase.removeMetaClass(LsdfFilesService, job.lsdfFilesService)
+        AbstractMergedBamFileService.metaClass = null
     }
 
 
@@ -74,7 +75,9 @@ class CopyFilesJobTests extends GroovyTestCase {
 
         job.metaClass.getProcessParameterValue = { -> run.id.toString() }
         job.metaClass.processedMergedBamFilesForRun = { Run run2 -> assert run2 == run; return [processedMergedBamFile] }
-        job.processedMergedBamFileService.metaClass.destinationDirectory = { ProcessedMergedBamFile pmbf -> TestCase.uniqueNonExistentPath.path }
+
+        AbstractMergedBamFileService.metaClass.static.destinationDirectory = { ProcessedMergedBamFile pmbf -> TestCase.uniqueNonExistentPath.path }
+
         job.metaClass.addOutputParameter = { String parameterName, String ids ->
             assert ids == WatchdogJob.SKIP_WATCHDOG
         }

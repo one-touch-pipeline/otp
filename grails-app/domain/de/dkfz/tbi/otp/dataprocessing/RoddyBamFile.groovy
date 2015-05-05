@@ -10,6 +10,13 @@ import de.dkfz.tbi.otp.ngsdata.*
  */
 class RoddyBamFile extends AbstractMergedBamFile {
 
+    static final String TMP_DIR = ".temp_RoddyPanCan"
+
+    static final String QUALITY_CONTROL_DIR = "QualityControl"
+
+    static final String RODDY_EXECUTION_STORE_DIR = 'roddyExecutionStore'
+
+
     RoddyBamFile baseBamFile
 
     Set<SeqTrack> seqTracks
@@ -138,10 +145,78 @@ class RoddyBamFile extends AbstractMergedBamFile {
         }
     }
 
+
     @Override
     String toString() {
         String latest = isMostRecentBamFile() ? ' (latest)' : ''
         String withdrawn = withdrawn ? ' (withdrawn)' : ''
         return "RBF ${id}: ${identifier}${latest}${withdrawn} ${mergingWorkPackage.toStringWithoutIdAndWorkflow()}"
+    }
+
+    // Example: blood_somePid_merged.mdup.bam
+    public String getBamFileName() {
+        return "${sampleType.dirName}_${individual.pid}_merged.mdup.bam"
+    }
+
+    // Example: blood_somePid_merged.mdup.bam.bai
+    public String getBaiFileName() {
+        return "${bamFileName}.bai"
+    }
+
+    // Example: blood_somePid_merged.mdup.bam.md5sum
+    public String getMd5sumFileName() {
+        return "${bamFileName}.md5sum"
+    }
+
+    // Example: $OTP_ROOT_PATH/${project}/sequencing/whole_genome_sequencing/view-by-pid/somePid/control/paired/merged-alignment/.temp_RoddyPanCan_${bamFileId}
+    File getTmpRoddyAlignmentDirectory() {
+        File baseDir = new File(AbstractMergedBamFileService.destinationDirectory(this))
+        return new File(baseDir, "${TMP_DIR}_${this.id}")
+    }
+
+    File getTmpRoddyQADirectory() {
+        return new File(this.tmpRoddyAlignmentDirectory, QUALITY_CONTROL_DIR)
+    }
+
+    File getFinalQADirectory() {
+        File baseDir = new File(AbstractMergedBamFileService.destinationDirectory(this))
+        return new File(baseDir, QUALITY_CONTROL_DIR)
+    }
+
+
+    File getTmpRoddyExecutionStoreDirectory() {
+        return new File(this.tmpRoddyAlignmentDirectory, RODDY_EXECUTION_STORE_DIR)
+    }
+
+    File getFinalExecutionStoreDirectory() {
+        File baseDir = new File(AbstractMergedBamFileService.destinationDirectory(this))
+        return new File(baseDir, RODDY_EXECUTION_STORE_DIR)
+    }
+
+    File getTmpRoddyBamFile() {
+        return new File(this.tmpRoddyAlignmentDirectory, this.bamFileName)
+    }
+
+    File getTmpRoddyBaiFile() {
+        return new File(this.tmpRoddyAlignmentDirectory, this.baiFileName)
+    }
+
+    File getTmpRoddyMd5sumFile() {
+        return new File(this.tmpRoddyAlignmentDirectory, this.md5sumFileName)
+    }
+
+    File getFinalBamFile() {
+        File baseDir = new File(AbstractMergedBamFileService.destinationDirectory(this))
+        return new File(baseDir, this.bamFileName)
+    }
+
+    File getFinalBaiFile() {
+        File baseDir = new File(AbstractMergedBamFileService.destinationDirectory(this))
+        return new File(baseDir, this.baiFileName)
+    }
+
+    File getFinalMd5sumFile() {
+        File baseDir = new File(AbstractMergedBamFileService.destinationDirectory(this))
+        return new File(baseDir, this.md5sumFileName)
     }
 }

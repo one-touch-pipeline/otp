@@ -20,8 +20,6 @@ class ProcessedMergedBamFileService {
 
     AbstractBamFileService abstractBamFileService
 
-    AbstractMergedBamFileService abstractMergedBamFileService
-
     ProcessedAlignmentFileService processedAlignmentFileService
 
     DataProcessingFilesService dataProcessingFilesService
@@ -50,7 +48,7 @@ class ProcessedMergedBamFileService {
         notNull(mergingPass, "The parameter mergingPass is not allowed to be null")
         ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.findByMergingPass(mergingPass)
         if (processedMergedBamFile?.md5sum) {
-            return abstractMergedBamFileService.destinationDirectory(processedMergedBamFile)
+            return AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile)
         } else {
             return processingDirectory(mergingPass)
         }
@@ -90,7 +88,7 @@ class ProcessedMergedBamFileService {
         Map<String, String> locations = [:]
 
         locations.put("sourceDirectory", directory(file))
-        locations.put("destinationDirectory", abstractMergedBamFileService.destinationDirectory(file))
+        locations.put("destinationDirectory", AbstractMergedBamFileService.destinationDirectory(file))
 
         locations.put("temporalDestinationDir", destinationTempDirectory(file))
 
@@ -336,7 +334,7 @@ class ProcessedMergedBamFileService {
      */
     public String destinationTempDirectory(ProcessedMergedBamFile file) {
         notNull(file, "the input of the method destinationTempDirectory is null")
-        return abstractMergedBamFileService.destinationDirectory(file) + ".tmp"
+        return AbstractMergedBamFileService.destinationDirectory(file) + ".tmp"
     }
 
     /**
@@ -345,7 +343,7 @@ class ProcessedMergedBamFileService {
      */
     public String qaResultDestinationDirectory(ProcessedMergedBamFile file) {
         notNull(file, "the input of the method qaResultDestinationDirectory is null")
-        return abstractMergedBamFileService.destinationDirectory(file) + '/' + QUALITY_ASSESSMENT_DIR
+        return AbstractMergedBamFileService.destinationDirectory(file) + '/' + QUALITY_ASSESSMENT_DIR
     }
 
     /**
@@ -462,7 +460,7 @@ class ProcessedMergedBamFileService {
         }
         dataProcessingFilesService.checkConsistencyWithFinalDestinationForDeletion(
                 directory,
-                new File(abstractMergedBamFileService.destinationDirectory(bamFile)),
+                new File(AbstractMergedBamFileService.destinationDirectory(bamFile)),
                 additionalFileNames(bamFile) << fileName)
     }
 

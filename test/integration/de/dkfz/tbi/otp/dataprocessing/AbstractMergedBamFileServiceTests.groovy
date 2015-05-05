@@ -1,52 +1,40 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.TestConstants
 import de.dkfz.tbi.otp.ngsdata.*
-import org.junit.Before
 import org.junit.Test
-
-import static org.junit.Assert.assertEquals
 
 /**
  */
 
 class AbstractMergedBamFileServiceTests {
 
-    AbstractMergedBamFileService abstractMergedBamFileService
 
     final String MERGED_BAM_FILES_PATH = "merged-alignment"
-
-    @Before
-    void setUp() {
-        abstractMergedBamFileService = new AbstractMergedBamFileService()
-        abstractMergedBamFileService.configService = new ConfigService()
-        abstractMergedBamFileService.mergedAlignmentDataFileService = new MergedAlignmentDataFileService()
-
-        abstractMergedBamFileService.configService = [
-                getProjectRootPath: { Project project -> return TestConstants.BASE_TEST_DIRECTORY },
-        ] as ConfigService
-
-        abstractMergedBamFileService.mergedAlignmentDataFileService = [
-                buildRelativePath: { SeqType type, Sample sample -> return MERGED_BAM_FILES_PATH },
-        ] as MergedAlignmentDataFileService
-    }
-
 
     @Test
     void testDestinationDirectory_ProcessedMergedBamFile() {
         ProcessedMergedBamFile mergedBamFile = ProcessedMergedBamFile.build()
+        Realm realm = Realm.build(name: mergedBamFile.project.realmName)
 
-        String destinationExp = "${TestConstants.BASE_TEST_DIRECTORY}/${MERGED_BAM_FILES_PATH}"
-        String destinationAct = abstractMergedBamFileService.destinationDirectory(mergedBamFile)
-        assertEquals(destinationExp, destinationAct)
+        String destinationExp = expectedMergedAlignmentPath(mergedBamFile, realm)
+        String destinationAct = AbstractMergedBamFileService.destinationDirectory(mergedBamFile)
+
+        assert destinationExp == destinationAct
     }
 
     @Test
     void testDestinationDirectory_RoddyBamFile() {
         RoddyBamFile mergedBamFile = DomainFactory.createRoddyBamFile()
+        Realm realm = Realm.build(name: mergedBamFile.project.realmName)
 
-        String destinationExp = "${TestConstants.BASE_TEST_DIRECTORY}/${MERGED_BAM_FILES_PATH}"
-        String destinationAct = abstractMergedBamFileService.destinationDirectory(mergedBamFile)
-        assertEquals(destinationExp, destinationAct)
+        String destinationExp = expectedMergedAlignmentPath(mergedBamFile, realm)
+        String destinationAct = AbstractMergedBamFileService.destinationDirectory(mergedBamFile)
+
+        assert destinationExp == destinationAct
+    }
+
+    private String expectedMergedAlignmentPath(AbstractMergedBamFile mergedBamFile, Realm realm) {
+        String pidPath = "${realm.rootPath}/${mergedBamFile.project.dirName}/sequencing/${mergedBamFile.seqType.dirName}/view-by-pid/${mergedBamFile.individual.pid}"
+        return "${pidPath}/${mergedBamFile.sampleType.dirName}/${mergedBamFile.seqType.libraryLayoutDirName}/${MERGED_BAM_FILES_PATH}/"
     }
 }

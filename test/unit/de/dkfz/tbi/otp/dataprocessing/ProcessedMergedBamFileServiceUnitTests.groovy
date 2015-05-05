@@ -27,6 +27,11 @@ class ProcessedMergedBamFileServiceUnitTests {
 
     TestData testData = new TestData()
 
+    @After
+    void tearDown() {
+        ConfigService.metaClass = null
+        MergedAlignmentDataFileService.metaClass = null
+    }
 
     @Test
     void testLibraryPreparationKitCorrect() {
@@ -162,15 +167,10 @@ class ProcessedMergedBamFileServiceUnitTests {
         ])
 
         ProcessedMergedBamFileService processedMergedBamFileService = new ProcessedMergedBamFileService()
-        processedMergedBamFileService.abstractMergedBamFileService = new AbstractMergedBamFileService()
 
-        processedMergedBamFileService.abstractMergedBamFileService.configService = [
-            getProjectRootPath: { Project project -> return TestConstants.BASE_TEST_DIRECTORY},
-        ] as ConfigService
+        ConfigService.metaClass.static.getProjectRootPath = { Project project -> return TestConstants.BASE_TEST_DIRECTORY}
 
-        processedMergedBamFileService.abstractMergedBamFileService.mergedAlignmentDataFileService = [
-            buildRelativePath: { SeqType type, Sample sample -> return "RelativeDirectory"},
-        ] as MergedAlignmentDataFileService
+        MergedAlignmentDataFileService.metaClass.static.buildRelativePath = { SeqType type, Sample sample -> return "RelativeDirectory"}
 
 
         processedMergedBamFileService.checksumFileService = [:] as ChecksumFileService
@@ -195,7 +195,7 @@ class ProcessedMergedBamFileServiceUnitTests {
 
             checkConsistencyWithFinalDestinationForDeletion: {final File processingDirectory, final File finalDestinationDirectory, final Collection<String> fileNames ->
                 File expectedProcessingDirectory = processedMergedBamFileService.processingDirectory(processedMergedBamFile.mergingPass) as File
-                File expectedFinalDestinationDirectory = processedMergedBamFileService.abstractMergedBamFileService.destinationDirectory(processedMergedBamFile) as File
+                File expectedFinalDestinationDirectory = AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile) as File
                 Collection<String> expectedAdditionalFiles = processedMergedBamFileService.additionalFileNames(processedMergedBamFile)
                 expectedAdditionalFiles << processedMergedBamFileService.fileName(processedMergedBamFile)
                 assert expectedProcessingDirectory == processingDirectory

@@ -28,8 +28,6 @@ abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob 
     @Autowired
     ProcessedMergedBamFileService processedMergedBamFileService
     @Autowired
-    AbstractMergedBamFileService abstractMergedBamFileService
-    @Autowired
     ExecutionService executionService
     @Autowired
     ConfigService configService
@@ -169,7 +167,7 @@ rm ${configFileInStagingDirectory}
     }
 
     protected File getExistingBamFilePath(final ProcessedMergedBamFile bamFile) {
-        final File file = new File(abstractMergedBamFileService.destinationDirectory(bamFile), processedMergedBamFileService.fileName(bamFile))
+        final File file = new File(AbstractMergedBamFileService.destinationDirectory(bamFile), processedMergedBamFileService.fileName(bamFile))
         assert bamFile.md5sum ==~ /^[0-9a-fA-F]{32}$/
         assert bamFile.fileSize > 0L
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
