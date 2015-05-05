@@ -57,9 +57,6 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
     }
 
 
-    // it is assumed that only one test from the following two runs at one grails test-app
-    // it means that one of the tests must be always @Ignore
-    // reason from Cristiano: some conflicts in the domain objects set up of the tests.
     @Ignore
     @Test
     void testExecutionWithProcessingOptionsWgs() {

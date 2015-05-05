@@ -16,9 +16,6 @@ import org.junit.Test
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static org.junit.Assert.*
 
-/**
- * To run this workflow test the preparation steps described in the documentation (grails doc) have to be followed.
- */
 class LoadMetaDataTests extends WorkflowTestCase {
 
     // TODO ( jira: OTP-566)  want to get rid of this hardcoded.. idea: maybe calculating from the walltime of the cluster jobs..
@@ -225,8 +222,6 @@ class LoadMetaDataTests extends WorkflowTestCase {
     }
 
 
-    // TODO  (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
-    // so at this moment only one test could be run at moment, all the others have to be commented
     @Test
     @Ignore
     void testWholeGenomeMetadata() {
@@ -261,8 +256,6 @@ class LoadMetaDataTests extends WorkflowTestCase {
         assertAlignmentPassesAreNotStarted(1)
     }
 
-    // TODO (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
-    // so at this moment only one test could be run at moment, all the others have to be commented
     @Test
     @Ignore
     void testExomeMetadataNoLibraryPreparationKit() {
@@ -304,8 +297,6 @@ class LoadMetaDataTests extends WorkflowTestCase {
         assert AlignmentPass.count() == 0
     }
 
-    // TODO (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
-    // so at this moment only one test could be run at moment, all the others have to be commented
     @Test
     @Ignore
     void testExomeMetadataWithLibraryPreparationKit() {
@@ -367,8 +358,6 @@ class LoadMetaDataTests extends WorkflowTestCase {
         assertAlignmentPassesAreNotStarted(2)
     }
 
-    // TODO (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
-    // so at this moment only one test could be run at moment, all the others have to be commented
     @Test
     @Ignore
     void testChipSeqMetadata() {
@@ -432,4 +421,12 @@ class LoadMetaDataTests extends WorkflowTestCase {
         log.debug(msg)
         System.out.println(msg)
     }
+
+    @Override
+    Runnable getStartJobRunnable() {
+        new Runnable() {
+            public void run() { metaDataStartJob.execute() }
+        }
+    }
+
 }

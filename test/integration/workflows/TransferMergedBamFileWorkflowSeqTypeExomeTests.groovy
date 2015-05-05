@@ -18,9 +18,6 @@ import org.junit.Test
 
 import static org.junit.Assert.*
 
-/**
- * Preparation for execution: see src/docs/guide/devel/testing/workflowTesting.gdoc
- */
 class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
 
     ProcessingOptionService processingOptionService
@@ -641,6 +638,13 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
             File file = new File(it)
             assertTrue(file.canRead())
             assertTrue(file.size() > 0)
+        }
+    }
+
+    @Override
+    Runnable getStartJobRunnable() {
+        new Runnable() {
+            public void run() { transferMergedBamFileStartJob.execute() }
         }
     }
 }

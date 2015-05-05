@@ -432,4 +432,11 @@ class SnvWorkflowTests extends WorkflowTestCase {
                 (transposed[0] =~ differentLineContainingTimeMeasurements && transposed[1] =~ differentLineContainingTimeMeasurements)
         }
     }
+
+    @Override
+    Runnable getStartJobRunnable() {
+        new Runnable() {
+            public void run() { snvStartJob.execute() }
+        }
+    }
 }

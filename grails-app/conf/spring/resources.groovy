@@ -19,7 +19,9 @@ beans = {
         xmlns task: "http://www.springframework.org/schema/task"
         task.executor(id: "taskExecutor", "pool-size": 10)
         task.scheduler(id: "taskScheduler", "pool-size": 10)
-        task.'annotation-driven'(executor: "taskExecutor", scheduler: "taskScheduler")
+        if (Environment.getCurrent().getName() != "WORKFLOW_TEST") {
+            task.'annotation-driven'(executor: "taskExecutor", scheduler: "taskScheduler")
+        }
     }
     if (grailsApplication.config.otp.jabber.enabled) {
         jabberService(de.dkfz.tbi.otp.notification.JabberService) {

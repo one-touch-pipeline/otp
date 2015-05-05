@@ -214,8 +214,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         return seqType
     }
 
-    // TODO  (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
-    // so at this moment only one test could be run at moment, all the others have to be commented
     @Ignore
     @Test
     void testDataInstallation_FilesHaveToBeCopied() {
@@ -227,8 +225,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         checkThatWorkflowWasSuccessful(seqTrack)
     }
 
-    // TODO  (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
-    // so at this moment only one test could be run at moment, all the others have to be commented
     @Ignore
     @Test
     void testDataInstallation_FilesHaveToBeLinked() {
@@ -242,8 +238,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         checkThatWorkflowWasSuccessful(seqTrack)
     }
 
-    // TODO  (jira: OTP-640) this ignore is here because of workflows tests are not transactional and so we cannot run multiple tests with clean database yet (We need to discovered best way to do it)
-    // so at this moment only one test could be run at moment, all the others have to be commented
     @Ignore
     @Test
     void testChipSeqInstallation() {
@@ -352,4 +346,10 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         return seqTrack
     }
 
+    @Override
+    Runnable getStartJobRunnable() {
+        new Runnable() {
+            public void run() { dataInstallationStartJob.execute() }
+        }
+    }
 }

@@ -16,9 +16,6 @@ import org.junit.Test
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 
-/**
- * Preparation for execution: see src/docs/guide/devel/testing/workflowTesting.gdoc
- */
 class MergingWorkflowTests extends WorkflowTestCase {
 
     ProcessingOptionService processingOptionService
@@ -211,6 +208,13 @@ class MergingWorkflowTests extends WorkflowTestCase {
             File file = new File(it)
             assert file.canRead()
             assert file.size() > 0
+        }
+    }
+
+    @Override
+    Runnable getStartJobRunnable() {
+        new Runnable() {
+            public void run() { mergingStartJob.execute() }
         }
     }
 }

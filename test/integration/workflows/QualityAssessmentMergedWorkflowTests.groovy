@@ -117,4 +117,11 @@ class QualityAssessmentMergedWorkflowTests extends QualityAssessmentAbstractWork
             )
         }
     }
+
+    @Override
+    Runnable getStartJobRunnable() {
+        new Runnable() {
+            public void run() { qualityAssessmentMergedStartJob.execute() }
+        }
+    }
 }

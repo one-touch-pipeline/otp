@@ -26,7 +26,7 @@ eventSetClasspath = { rootLoader ->
 eventCompileStart = {
 
     // Compile the test helper classes if we are in the test environment. Related improvement request: GRAILS-7750
-    if (grailsEnv == "test") {
+    if (grailsEnv == "test" || grailsEnv == "WORKFLOW_TEST") {
         projectCompiler.srcDirectories << "test/helper"
     }
 

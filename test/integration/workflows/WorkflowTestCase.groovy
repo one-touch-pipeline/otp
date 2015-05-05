@@ -3,27 +3,33 @@ package workflows
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.ThreadUtils
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
+import grails.util.Environment
+import grails.util.Holders
 import groovy.sql.Sql
 import groovy.util.logging.Log4j
 import org.hibernate.SessionFactory
 import org.joda.time.Duration
 import org.joda.time.format.PeriodFormat
 import org.junit.After
+import org.junit.Assume
 import org.junit.Before
 
 import javax.sql.DataSource
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
-
+import java.util.concurrent.*
 
 /**
  * Base class for work-flow integration test cases.
+ *
+ * To run the workflow tests the preparation steps described in
+ * src/docs/guide/devel/testing/workflowTesting.gdoc have to be followed.
+ *
  */
 @Log4j
 abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
@@ -56,19 +62,48 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     File schemaDump
     Sql sql
 
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1)
+
+    abstract Runnable getStartJobRunnable()
+
 
     @Before
     public void setUpWorkflowTests() {
+        // NOTE: the following assumptions won't work (they will cause the tests to fail if not true)
+        // before Grails 2.1. This means we can't remove the @Ignore annotations yet, but it will
+        // prevent the tests from being run with wrong settings. (TODO: remove this comments when
+        // we use Grails >2.1)
+        // check whether the wf test root dir is mounted
+        // (assume it is mounted if it exists and contains files)
+        Assume.assumeTrue(new File(getRootDirectory()).list().size() > 0)
+        // check whether the correct environment is set
+        Assume.assumeTrue(Environment.current.name == "WORKFLOW_TEST")
+
         setupDirectoriesAndRealms()
 
         sql = new Sql(dataSource)
         schemaDump = new File(TestCase.createEmptyTestDirectory(), "test-database-dump.sql")
         sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
+
+        // manually set up scheduled tasks
+        // this is done here so they will be stopped when each test is finished,
+        // otherwise there would be problems with the database being deleted
+        scheduler.scheduleWithFixedDelay(new Runnable() {
+            public void run() { Holders.applicationContext.getBean(SchedulerService).pbsMonitorCheck() }
+        }, 0, 10, TimeUnit.SECONDS);
+
+        scheduler.scheduleWithFixedDelay(new Runnable() {
+            public void run() { Holders.applicationContext.getBean(SchedulerService).schedule() }
+        }, 0, 100, TimeUnit.MILLISECONDS);
+
+        scheduler.scheduleWithFixedDelay(startJobRunnable, 2, 5, TimeUnit.SECONDS);
     }
 
 
     @After
     void tearDownWorkflowTests() {
+        scheduler.shutdownNow()
+
         sql.execute("DROP ALL OBJECTS")
         sql.execute("RUNSCRIPT FROM ?", [schemaDump.absolutePath])
         sessionFactory.currentSession.clear()

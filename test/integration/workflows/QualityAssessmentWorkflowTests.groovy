@@ -86,4 +86,10 @@ class QualityAssessmentWorkflowTests extends QualityAssessmentAbstractWorkflowTe
         }
     }
 
+    @Override
+    Runnable getStartJobRunnable() {
+        new Runnable() {
+            public void run() { qualityAssessmentStartJob.execute() }
+        }
+    }
 }

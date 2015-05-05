@@ -87,6 +87,9 @@ environments {
         grails.logging.jul.usebridge = false
         grails.serverURL = otpConfig.otp.server.url
     }
+    WORKFLOW_TEST {
+        grails.serverURL = "http://localhost:8080/${appName}"
+    }
     test {
         grails.serverURL = "http://localhost:8080/${appName}"
     }
