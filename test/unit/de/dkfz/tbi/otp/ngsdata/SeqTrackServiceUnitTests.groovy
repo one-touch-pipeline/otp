@@ -275,7 +275,7 @@ class SeqTrackServiceUnitTests {
     private withTestMidtermStorageMountPoint(Closure code) {
         def originalMidtermStorageMountPoint = LsdfFilesService.midtermStorageMountPoint
         try {
-            LsdfFilesService.midtermStorageMountPoint = TestCase.createEmptyTestDirectory()
+            LsdfFilesService.midtermStorageMountPoint = TestCase.getUniqueNonExistentPath()
             code()
         } finally {
             LsdfFilesService.midtermStorageMountPoint = originalMidtermStorageMountPoint

@@ -35,8 +35,8 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     @Before
     void setUp() {
-        dataPath = TestCase.createEmptyTestDirectory()
-        mdPath = TestCase.createEmptyTestDirectory()
+        dataPath = TestCase.getUniqueNonExistentPath()
+        mdPath = TestCase.getUniqueNonExistentPath()
         testData = new TestData()
     }
 

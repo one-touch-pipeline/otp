@@ -64,8 +64,8 @@ testDataConfig {
             name = {'runName_' + (counter++)}
         }
         'de.dkfz.tbi.otp.ngsdata.RunSegment' {
-            dataPath = {TestCase.createEmptyTestDirectory()}
-            mdPath = {TestCase.createEmptyTestDirectory()}
+            dataPath = {TestCase.getUniqueNonExistentPath()}
+            mdPath = {TestCase.getUniqueNonExistentPath()}
         }
         'de.dkfz.tbi.otp.ngsdata.SampleType' {
             name = {'sampleTypeName_' + (counter++)}

@@ -48,11 +48,11 @@ class RunSegment {
     static constraints = {
         dataPath blank: false, validator: {val, obj ->
             File dir = new File(val)
-            return dir.exists() && dir.isDirectory() && dir.isAbsolute()
+            return dir.isAbsolute()
         }
         mdPath blank: false, validator: {val, obj ->
             File dir = new File(val)
-            return dir.exists() && dir.isDirectory() && dir.isAbsolute()
+            return dir.isAbsolute()
         }
         //the field can be null, since for the old data the information is not needed; only for new incoming runSegments
         align(nullable: true)
