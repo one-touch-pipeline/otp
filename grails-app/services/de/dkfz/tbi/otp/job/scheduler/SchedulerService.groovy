@@ -44,29 +44,26 @@ import java.util.concurrent.locks.ReentrantLock
 import org.apache.commons.logging.Log
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.security.access.prepost.PreAuthorize
 
 class SchedulerService {
     static transactional = false
-    /**
-     * Dependency Injection of grailsApplication
-     */
+
     @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
-    /**
-     * Dependency Injection of ExecutorService
-     */
+
+    @Autowired
+    ApplicationContext applicationContext
+
+
     def executorService
-    /**
-     * Dependency Injection of PersistenceContextInterceptor
-     */
+
     @SuppressWarnings("GrailsStatelessService")
     PersistenceContextInterceptor persistenceInterceptor
-    /**
-     * Dependency Injection of PbsMonitorService
-     */
-    def pbsMonitorService
+
     /**
      * Queue of next to be started ProcessingSteps
      */
@@ -325,7 +322,7 @@ class SchedulerService {
         // method to proxy the invocation of PbsMonitorService::check() to workaround strange behavior of Spring
         persistenceInterceptor.init()
         try {
-            pbsMonitorService.check()
+            applicationContext.pbsMonitorService.check()
         } finally {
             persistenceInterceptor.flush()
             persistenceInterceptor.destroy()
