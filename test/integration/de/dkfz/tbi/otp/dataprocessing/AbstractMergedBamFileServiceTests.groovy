@@ -1,9 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.TestConstants
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
-import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
@@ -17,8 +16,12 @@ class AbstractMergedBamFileServiceTests {
 
     final String MERGED_BAM_FILES_PATH = "merged-alignment"
 
-    @After
+    @Before
     void setUp() {
+        abstractMergedBamFileService = new AbstractMergedBamFileService()
+        abstractMergedBamFileService.configService = new ConfigService()
+        abstractMergedBamFileService.mergedAlignmentDataFileService = new MergedAlignmentDataFileService()
+
         abstractMergedBamFileService.configService = [
                 getProjectRootPath: { Project project -> return TestConstants.BASE_TEST_DIRECTORY },
         ] as ConfigService
@@ -27,6 +30,7 @@ class AbstractMergedBamFileServiceTests {
                 buildRelativePath: { SeqType type, Sample sample -> return MERGED_BAM_FILES_PATH },
         ] as MergedAlignmentDataFileService
     }
+
 
     @Test
     void testDestinationDirectory_ProcessedMergedBamFile() {
