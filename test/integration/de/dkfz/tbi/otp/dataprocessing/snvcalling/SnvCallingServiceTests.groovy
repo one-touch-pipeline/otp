@@ -248,16 +248,18 @@ class SnvCallingServiceTests extends GroovyTestCase {
         SeqType otherSeqType = testData.exomeSeqType
 
         ProcessedMergedBamFile processedMergedBamFile3 = createProcessedMergedBamFile("3")
-        processedMergedBamFile3.sample.sampleType = processedMergedBamFile1.sample.sampleType
+        processedMergedBamFile3.mergingWorkPackage.sample = processedMergedBamFile1.sample
         processedMergedBamFile3.save()
+
         processedMergedBamFile3.mergingWorkPackage.seqType = otherSeqType
         processedMergedBamFile3.mergingWorkPackage.save()
         processedMergedBamFile3.getContainedSeqTracks().each {
             it.seqType = otherSeqType
             it.save()
         }
+
         ProcessedMergedBamFile processedMergedBamFile4 = createProcessedMergedBamFile("4")
-        processedMergedBamFile4.sample.sampleType = processedMergedBamFile2.sample.sampleType
+        processedMergedBamFile4.mergingWorkPackage.sample = processedMergedBamFile2.sample
         processedMergedBamFile4.save()
         processedMergedBamFile4.mergingWorkPackage.seqType = otherSeqType
         processedMergedBamFile4.mergingWorkPackage.save()
@@ -272,7 +274,6 @@ class SnvCallingServiceTests extends GroovyTestCase {
         assertEquals(processedMergedBamFile3.seqType, processedMergedBamFile4.seqType)
         assertFalse(processedMergedBamFile1.seqType == processedMergedBamFile3.seqType)
         assertFalse(processedMergedBamFile2.seqType == processedMergedBamFile4.seqType)
-
 
         SamplePair samplePair2 = new SamplePair(
                 individual: individual,

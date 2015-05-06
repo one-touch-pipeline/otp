@@ -11,7 +11,7 @@ class Sample {
 
     static constraints = {
         individual(nullable: false)
-        sampleType(nullable: false)
+        sampleType(nullable: false, unique: 'individual')
     }
 
     String toString() {
@@ -38,7 +38,6 @@ class Sample {
     }
 
     static mapping = {
-        individual index: "sample_individual_idx"
         sampleType index: "sample_sample_type_idx"
     }
 }

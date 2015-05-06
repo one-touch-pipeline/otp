@@ -390,9 +390,14 @@ class ProcessedBamFileServiceTests extends GroovyTestCase {
                         )
         assertNotNull(assignment.save([flush: true, failOnError: true]))
 
+        SampleType sampleType2 = new SampleType(
+                      name: 'name2'
+        )
+        assertNotNull(sampleType2.save([flush: true, failOnError: true]))
+
         Sample sample2 = new Sample(
                         individual: individual,
-                        sampleType: sampleType
+                        sampleType: sampleType2
                         )
         assertNotNull(sample2.save([flush: true, failOnError: true]))
 
