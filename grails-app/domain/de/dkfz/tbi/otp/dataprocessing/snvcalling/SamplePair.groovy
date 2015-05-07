@@ -135,9 +135,13 @@ class SamplePair {
         return new OtpPath(samplePairPath, step.getIndexFileName(individual))
     }
 
+    String toStringWithoutId() {
+        return "${individual.pid} ${sampleType1.name} ${sampleType2.name} ${seqType.name} ${seqType.libraryLayout}"
+    }
+
     @Override
     String toString() {
-        return "SP ${id} ${individual.pid} ${sampleType1.name} ${sampleType2.name} ${seqType.name} ${seqType.libraryLayout}"
+        return "SP ${id}: ${toStringWithoutId()}"
     }
 
     /**

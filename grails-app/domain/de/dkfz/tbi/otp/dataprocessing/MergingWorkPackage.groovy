@@ -108,8 +108,12 @@ class MergingWorkPackage {
         needsProcessing index: "merging_work_package_needs_processing_idx"  // partial index: WHERE needs_processing = true
     }
 
+    String toStringWithoutIdAndWorkflow() {
+        return "${sample} ${seqType} ${seqPlatformGroup} ${referenceGenome}"
+    }
+
     @Override
     String toString() {
-        return "MWP ${id}: ${sample} ${seqType} ${seqPlatformGroup} ${referenceGenome} ${workflow}"
+        return "MWP ${id}: ${toStringWithoutIdAndWorkflow()} ${workflow}"
     }
 }

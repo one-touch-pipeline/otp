@@ -37,9 +37,9 @@ class SnvCallingInstance {
 
     Date lastUpdated
 
-    static belongsTo = [
-        samplePair: SamplePair
-    ]
+    SamplePair samplePair
+
+    static belongsTo = SamplePair
 
     /**
      * The overall processing state of this SNV calling run.
@@ -159,6 +159,6 @@ class SnvCallingInstance {
 
     @Override
     public String toString() {
-        return "SnvCallingInstance: ${id}, ${samplePair}"
+        return "SCI ${id}: ${instanceName} ${samplePair.toStringWithoutId()}"
     }
 }

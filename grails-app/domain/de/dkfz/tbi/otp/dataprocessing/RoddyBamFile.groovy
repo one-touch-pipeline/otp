@@ -137,4 +137,11 @@ class RoddyBamFile extends AbstractMergedBamFile {
             }
         }
     }
+
+    @Override
+    String toString() {
+        String latest = isMostRecentBamFile() ? ' (latest)' : ''
+        String withdrawn = withdrawn ? ' (withdrawn)' : ''
+        return "RBF ${id}: ${identifier}${latest}${withdrawn} ${mergingWorkPackage.toStringWithoutIdAndWorkflow()}"
+    }
 }
