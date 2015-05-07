@@ -8,7 +8,7 @@ import de.dkfz.tbi.otp.job.processing.*
 ctx.pbsMonitorService.queuedJobs.each { Job otpJob, clusterJobs ->
     ProcessingStep processingStep = otpJob.processingStep
     Process process = processingStep.process
-    println "ProcessingStep ${processingStep.id} of ${process.jobExecutionPlan.name} on ${atMostOneElement(ProcessParameter.findAllByProcess(process))?.toObject()}"
+    println "ProcessingStep ${processingStep.id}: ${processingStep.jobDefinition.name} on ${atMostOneElement(ProcessParameter.findAllByProcess(process))?.toObject()}"
     clusterJobs.each {
         println "  ${it}"
     }
