@@ -39,9 +39,9 @@ class ProcessesController {
     /**
      * Dependency Injection
      */
-    def jobExecutionPlanService
-    def processService
-    def executionService
+    JobExecutionPlanService jobExecutionPlanService
+    ProcessService processService
+    ExecutionService executionService
 
     def index() {
         redirect(action: 'list')
@@ -60,30 +60,35 @@ class ProcessesController {
 
         List futures = []
         def auth = SecurityContextHolder.context.authentication
-        plans.each { JobExecutionPlan plan ->
+        plans.each { JobExecutionPlan mainThreadPlan ->
+            def planId = mainThreadPlan.id
             // spin off threads to fetch the data in parallel
             futures << callAsync {
                 SecurityContextHolder.context.authentication = auth
+                JobExecutionPlan plan = JobExecutionPlan.get(planId)
+                Process lastSucceededProcess = jobExecutionPlanService.getLastSucceededProcess(plan)
+                Process lastFailedProcess = jobExecutionPlanService.getLastFailedProcess(plan)
+                Process lastFinishedProcess = jobExecutionPlanService.getLastFinishedProcess(plan)
                 Map data = [:]
-                data.put("plan", plan)
-                data.put("lastSuccess", jobExecutionPlanService.getLastSucceededProcess(plan))
-                data.put("lastFailure", jobExecutionPlanService.getLastFailedProcess(plan))
-                data.put("lastFinished", jobExecutionPlanService.getLastFinishedProcess(plan))
+                data.put("planId", planId)
+                data.put("lastSucceededProcessId", lastSucceededProcess?.id)
+                data.put("lastFinishedProcessId", lastFinishedProcess?.id)
                 data.put("succeeded", jobExecutionPlanService.getNumberOfSuccessfulFinishedProcesses(plan))
                 data.put("finished", jobExecutionPlanService.getNumberOfFinishedProcesses(plan))
                 data.put("numberOfProcesses", jobExecutionPlanService.getNumberOfProcesses(plan))
-                data.put("lastSuccessDate", data.lastSuccess ? processService.getFinishDate(data.lastSuccess) : null)
-                data.put("lastFailureDate", data.lastFailure ? processService.getFinishDate(data.lastFailure) : null)
-                data.put("duration", data.lastFinished ? processService.getDuration(data.lastFinished) : null)
+                data.put("lastSuccessDate", lastSucceededProcess ? processService.getFinishDate(lastSucceededProcess) : null)
+                data.put("lastFailureDate", lastFailedProcess ? processService.getFinishDate(lastFailedProcess) : null)
+                data.put("duration", lastFinishedProcess ? processService.getDuration(lastFinishedProcess) : null)
                 return data
             }
         }
         futures.each { future ->
             def data = future.get()
+            JobExecutionPlan plan = JobExecutionPlan.get(data.planId)
             dataToRender.aaData << [
-                calculateStatus(data.plan, data.lastSuccess, data.lastFinished),
+                calculateStatus(plan, Process.get(data.lastSucceededProcessId), Process.get(data.lastFinishedProcessId)),
                 data.finished > 0 ? [succeeded: data.succeeded, finished: data.finished] : null,
-                [id: data.plan.id, name: data.plan.name],
+                [id: data.planId, name: plan.name],
                 data.numberOfProcesses,
                 data.finished - data.succeeded,
                 data.lastSuccessDate,
