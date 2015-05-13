@@ -2,7 +2,7 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import org.joda.time.*
 
 PrintWriter out = new PrintWriter(new FileOutputStream(
-    "$SCRIPT_ROOT_PATH/cleanup/DeleteOldProcessingFiles_" + new Date().format("yyyy-MM-dd_HH.mm.ss.SSS_Z") + ".log"), true)
+    "$SCRIPT_ROOT_PATH/script_output/cleanup/DeleteOldProcessingFiles_" + new Date().format("yyyy-MM-dd_HH.mm.ss.SSS_Z") + ".log"), true)
 
 LogThreadLocal.withThreadLog(out, {
     final ReadableInstant someTimeAgo = new Interval(Period.weeks(8), Instant.now()).start
