@@ -47,6 +47,14 @@ class SnvCallingServiceTests extends GroovyTestCase {
         seqType = testData.createSeqType([name: 'TEST_SEQTYPE', dirName: 'test_seqtype'])
         assert seqType.save()
 
+        testData.externalScript_Joining = new ExternalScript(
+                scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
+                scriptVersion: 'v1',
+                filePath: "/tmp/scriptLocation/joining.sh",
+                author: "otptest",
+        )
+        assert testData.externalScript_Joining.save()
+
         snvConfig = new SnvConfig(
                 project: project,
                 seqType: seqType,
@@ -71,13 +79,6 @@ class SnvCallingServiceTests extends GroovyTestCase {
                 )
         samplePair.save(flush: true)
 
-        testData.externalScript_Joining = new ExternalScript(
-                scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
-                scriptVersion: 'v1',
-                filePath: "/tmp/scriptLocation/joining.sh",
-                author: "otptest",
-        )
-        assert testData.externalScript_Joining.save()
     }
 
     @After

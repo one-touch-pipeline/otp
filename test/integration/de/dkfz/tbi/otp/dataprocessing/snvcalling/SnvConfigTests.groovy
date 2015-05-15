@@ -38,6 +38,8 @@ class SnvConfigTests {
                 )
         assert seqType2.save()
 
+        SnvCallingInstanceTestData.createOrFindExternalScript()
+
         SnvConfig config = new SnvConfig(
                 project: project,
                 seqType: seqType,

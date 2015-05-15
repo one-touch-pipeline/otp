@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.ngsdata.TestData
+import de.dkfz.tbi.otp.utils.ExternalScript
 
 import static de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep.*
 import org.junit.After
@@ -12,7 +13,7 @@ import grails.test.mixin.*
 import static de.dkfz.tbi.TestCase.createEmptyTestDirectory
 
 @TestFor(SnvConfig)
-@Mock([Project, SeqType])
+@Mock([ExternalScript, Project, SeqType])
 class SnvConfigUnitTests {
 
     static final String LEGAL_EXECUTE_FLAGS =
@@ -34,6 +35,8 @@ class SnvConfigUnitTests {
 
     @Before
     void setUp() {
+        SnvCallingInstanceTestData.createOrFindExternalScript()
+
         validSnvConfig = new SnvConfig(
                 project: TestData.createProject(),
                 seqType: new SeqType(),

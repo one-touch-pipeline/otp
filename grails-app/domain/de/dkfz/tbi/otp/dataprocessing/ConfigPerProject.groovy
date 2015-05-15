@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.ExternalScript
 
 /**
  * To be more flexible the configuration shall be stored in the database instead of in the code.
@@ -39,12 +40,26 @@ abstract class ConfigPerProject {
             return (val == null || val != null && val.obsoleteDate != null)
         }
         obsoleteDate nullable: true
-        externalScriptVersion blank: false
+        externalScriptVersion blank: false, validator: { val, obj ->
+            assert !ExternalScript.findAllByScriptVersionAndDeprecatedDate(val, null).empty
+        }
     }
 
     static mapping = {
         project index: 'config_per_project_project_idx'
         previousConfig index: 'config_per_project_previous_config_idx'
         externalScriptVersion index: 'config_per_project_external_script_version_idx'
+    }
+
+     void createConfigPerProject() {
+         Project.withTransaction {
+            this.previousConfig?.makeObsolete()
+            assert this.save(flush: true)
+        }
+    }
+
+    void makeObsolete() {
+        this.obsoleteDate = new Date()
+        assert this.save(flush: true)
     }
 }

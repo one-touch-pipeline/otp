@@ -83,6 +83,8 @@ public class SnvCallingStartJobTests extends GroovyScriptAwareTestCase {
 
             snvCallingService.metaClass.samplePairForSnvProcessing = { return mockSamplePair }
 
+            SnvCallingInstanceTestData.createOrFindExternalScript()
+
             // snv config
             SnvConfig config = new SnvConfig (
                     project: project,

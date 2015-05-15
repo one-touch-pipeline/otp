@@ -16,6 +16,7 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Run
 import de.dkfz.tbi.otp.ngsdata.RunSegment
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.ExternalScript
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -201,8 +202,10 @@ class RoddyAlignmentStartJobTest {
                 DomainFactory.buildSeqTrackWithDataFile(mwp),
                 DomainFactory.buildSeqTrackWithDataFile(mwp),
         ]
-        RoddyWorkflowConfig.build([workflow: mwp.workflow, project: mwp.project])
+
         DomainFactory.createRoddyProcessingOptions()
+        ExternalScript externalScript = ExternalScript.buildLazy()
+        RoddyWorkflowConfig.build([workflow: mwp.workflow, project: mwp.project, externalScriptVersion: externalScript.scriptVersion])
 
         RoddyBamFile rbf = RoddyAlignmentStartJob.createRoddyBamFile(mwp, baseBamFile)
 
@@ -255,7 +258,8 @@ class RoddyAlignmentStartJobTest {
     private MergingWorkPackage createMergingWorkPackage(RunSegment.FilesStatus filesStatus = RunSegment.FilesStatus.FILES_CORRECT) {
         Workflow workflow = Workflow.buildLazy(name: Workflow.Name.RODDY)
         MergingWorkPackage mwp = MergingWorkPackage.build([needsProcessing: true, workflow: workflow])
-        RoddyWorkflowConfig.build([workflow: workflow, project: mwp.project])
+        ExternalScript externalScript = ExternalScript.buildLazy()
+        RoddyWorkflowConfig.build([workflow: workflow, project: mwp.project, externalScriptVersion: externalScript.scriptVersion])
         Run run = Run.build()
         DomainFactory.buildSeqTrackWithDataFile(mwp, [run: run])
         RunSegment.build(run: run, filesStatus: filesStatus)

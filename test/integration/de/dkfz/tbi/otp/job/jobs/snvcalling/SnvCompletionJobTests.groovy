@@ -73,6 +73,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         processedMergedBamFile2 = createProcessedMergedBamFile()
         assert processedMergedBamFile2.save()
 
+        SnvCallingInstanceTestData.createOrFindExternalScript()
         snvConfig = new SnvConfig(
                 project: project,
                 seqType: seqType,

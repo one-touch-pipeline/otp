@@ -131,6 +131,10 @@ testDataConfig {
                 }
                 return config.absolutePath
             }
+            workflow = { Workflow.buildLazy(name: Workflow.Name.RODDY, type: Workflow.Type.ALIGNMENT) }
+        }
+        'de.dkfz.tbi.otp.utils.ExternalScript' {
+            filePath = "${TestCase.TEST_DIRECTORY}/ExternalScript_${counter++}"
         }
         'de.dkfz.tbi.otp.job.plan.JobExecutionPlan' {
             name = {'plan_' + (counter++)}
@@ -148,6 +152,7 @@ testDataConfig {
         'de.dkfz.tbi.otp.ngsdata.SeqTrack': [de.dkfz.tbi.otp.ngsdata.ChipSeqSeqTrack, de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack, de.dkfz.tbi.otp.ngsdata.DataFile],
         'de.dkfz.tbi.otp.dataprocessing.AbstractBamFile': [de.dkfz.tbi.otp.ngsdata.SeqTrack],
         'de.dkfz.tbi.otp.dataprocessing.MergingSet': [de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment],
+        'de.dkfz.tbi.otp.dataprocessing.ConfigPerProject': [de.dkfz.tbi.otp.utils.ExternalScript],
     ]
 }
 

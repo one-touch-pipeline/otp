@@ -107,6 +107,14 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile1.sampleType, category: SampleType.Category.DISEASE)
         SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile2.sampleType, category: SampleType.Category.CONTROL)
 
+        externalScript_Calling = new ExternalScript(
+                scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier,
+                scriptVersion: 'v1',
+                filePath: "/tmp/scriptLocation/calling.sh",
+                author: "otptest",
+        )
+        assert externalScript_Calling.save()
+
         snvConfig = new SnvConfig(
                 project: project,
                 seqType: seqType,
@@ -129,14 +137,6 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 sampleType2BamFile: processedMergedBamFile2,
                 samplePair: samplePair)
         assert snvCallingInstance.save(flush: true)
-
-        externalScript_Calling = new ExternalScript(
-                scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier,
-                scriptVersion: 'v1',
-                filePath: "/tmp/scriptLocation/calling.sh",
-                author: "otptest",
-        )
-        assert externalScript_Calling.save()
 
          externalScript_Joining = new ExternalScript(
                 scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,

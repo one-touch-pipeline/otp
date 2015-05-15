@@ -10,6 +10,7 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
+import de.dkfz.tbi.otp.utils.ExternalScript
 import grails.util.Environment
 import org.joda.time.DateTime
 import org.joda.time.Duration
@@ -194,12 +195,13 @@ class DomainFactory {
             workPackage = MergingWorkPackage.build(workflow: workflow)
         }
         SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile(workPackage)
+        ExternalScript externalScript = ExternalScript.buildLazy()
         RoddyBamFile bamFile = RoddyBamFile.build([
                 numberOfMergedLanes: 1,
                 seqTracks: [seqTrack],
                 workPackage: workPackage,
                 identifier: RoddyBamFile.nextIdentifier(workPackage),
-                config: RoddyWorkflowConfig.build(workflow: workPackage.workflow),
+                config: RoddyWorkflowConfig.build(workflow: workPackage.workflow, externalScriptVersion: externalScript.scriptVersion),
                 md5sum: DEFAULT_MD5_SUM,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 fileSize: 10000,
@@ -211,9 +213,10 @@ class DomainFactory {
     }
 
     public static createRoddyBamFile(RoddyBamFile baseBamFile, Map bamFileProperties = [:]) {
+        ExternalScript externalScript = ExternalScript.buildLazy()
         RoddyBamFile bamFile = RoddyBamFile.build([
                 baseBamFile: baseBamFile,
-                config: RoddyWorkflowConfig.build(workflow:  baseBamFile.config.workflow),
+                config: RoddyWorkflowConfig.build(workflow:  baseBamFile.config.workflow, externalScriptVersion: externalScript.scriptVersion),
                 workPackage: baseBamFile.workPackage,
                 identifier: baseBamFile.identifier + 1,
                 numberOfMergedLanes: baseBamFile.numberOfMergedLanes + 1,

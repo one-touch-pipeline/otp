@@ -66,14 +66,6 @@ class SnvCallingInstanceTestData extends TestData {
                 )
         assert samplePair2.save()
 
-        snvConfig = new SnvConfig(
-                project: project,
-                seqType: seqType,
-                configuration: "testConfig",
-                externalScriptVersion: "v1",
-        )
-        assert snvConfig.save()
-
         externalScript_Joining = new ExternalScript(
                 scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
                 scriptVersion: 'v1',
@@ -81,6 +73,14 @@ class SnvCallingInstanceTestData extends TestData {
                 author: "otptest",
         )
         assert externalScript_Joining.save()
+
+        snvConfig = new SnvConfig(
+                project: project,
+                seqType: seqType,
+                configuration: "testConfig",
+                externalScriptVersion: "v1",
+        )
+        assert snvConfig.save()
     }
 
     SnvJobResult createAndSaveSnvJobResult(SnvCallingInstance instance, SnvCallingStep step, SnvJobResult inputResult = null, SnvProcessingStates processingState = SnvProcessingStates.FINISHED, boolean withdrawn = false) {
@@ -224,5 +224,17 @@ class SnvCallingInstanceTestData extends TestData {
 
         assert processingOption.save(flush: true)
         return processingOption
+    }
+
+    static ExternalScript createOrFindExternalScript(Map properties = [:]) {
+        final ExternalScript externalScript = ExternalScript.findOrSaveWhere([
+                scriptIdentifier: "externalScriptIdentifier",
+                scriptVersion: 'v1',
+                deprecatedDate: null,
+                filePath: "/dev/null/otp-test/externalScript.sh",
+                author: "otptest",
+        ] + properties)
+        assert externalScript
+        return externalScript
     }
 }
