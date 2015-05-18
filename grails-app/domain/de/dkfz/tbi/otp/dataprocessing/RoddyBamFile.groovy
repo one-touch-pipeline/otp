@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 
@@ -8,7 +9,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  * The file is based on earlier created bam file (with the same workflow), if exists and
  * new SeqTracks which were not merged into the earlier created bam file (base bam file).
  */
-class RoddyBamFile extends AbstractMergedBamFile {
+class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
 
     static final String TMP_DIR = ".temp_RoddyPanCan"
 
@@ -114,6 +115,10 @@ class RoddyBamFile extends AbstractMergedBamFile {
         return workPackage
     }
 
+    Workflow getWorkflow() {
+        return workPackage.workflow
+    }
+
     @Override
     Set<SeqTrack> getContainedSeqTracks() {
         def tmpSet = baseBamFile?.containedSeqTracks ?: []
@@ -151,7 +156,7 @@ class RoddyBamFile extends AbstractMergedBamFile {
     }
 
     public String getPathToJobStateLogFiles () {
-        return "${getTmpRoddyAlignmentDirectory()}/roddyExecutionStore/"
+        return "${getTmpRoddyDirectory()}/roddyExecutionStore/"
     }
 
     @Override
@@ -177,13 +182,13 @@ class RoddyBamFile extends AbstractMergedBamFile {
     }
 
     // Example: $OTP_ROOT_PATH/${project}/sequencing/whole_genome_sequencing/view-by-pid/somePid/control/paired/merged-alignment/.temp_RoddyPanCan_${bamFileId}
-    File getTmpRoddyAlignmentDirectory() {
+    File getTmpRoddyDirectory() {
         File baseDir = new File(AbstractMergedBamFileService.destinationDirectory(this))
         return new File(baseDir, "${TMP_DIR}_${this.id}")
     }
 
     File getTmpRoddyQADirectory() {
-        return new File(this.tmpRoddyAlignmentDirectory, QUALITY_CONTROL_DIR)
+        return new File(this.tmpRoddyDirectory, QUALITY_CONTROL_DIR)
     }
 
     File getFinalQADirectory() {
@@ -193,7 +198,7 @@ class RoddyBamFile extends AbstractMergedBamFile {
 
 
     File getTmpRoddyExecutionStoreDirectory() {
-        return new File(this.tmpRoddyAlignmentDirectory, RODDY_EXECUTION_STORE_DIR)
+        return new File(this.tmpRoddyDirectory, RODDY_EXECUTION_STORE_DIR)
     }
 
     File getFinalExecutionStoreDirectory() {
@@ -202,15 +207,15 @@ class RoddyBamFile extends AbstractMergedBamFile {
     }
 
     File getTmpRoddyBamFile() {
-        return new File(this.tmpRoddyAlignmentDirectory, this.bamFileName)
+        return new File(this.tmpRoddyDirectory, this.bamFileName)
     }
 
     File getTmpRoddyBaiFile() {
-        return new File(this.tmpRoddyAlignmentDirectory, this.baiFileName)
+        return new File(this.tmpRoddyDirectory, this.baiFileName)
     }
 
     File getTmpRoddyMd5sumFile() {
-        return new File(this.tmpRoddyAlignmentDirectory, this.md5sumFileName)
+        return new File(this.tmpRoddyDirectory, this.md5sumFileName)
     }
 
     File getFinalBamFile() {

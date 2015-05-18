@@ -2,12 +2,20 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.infrastructure.ClusterJobService
+import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.utils.CreateFileHelper
-import org.junit.Before
+import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
+import de.dkfz.tbi.otp.job.scheduler.PbsJobInfo
+import de.dkfz.tbi.otp.ngsdata.ConfigService
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 class AbstractRoddyJobTests {
@@ -20,34 +28,54 @@ class AbstractRoddyJobTests {
     public static final ClusterJobIdentifier identifierF = new ClusterJobIdentifierImpl(DomainFactory.createRealmDataProcessingDKFZ(), "pbsId6")
     public static final ClusterJobIdentifier identifierG = new ClusterJobIdentifierImpl(DomainFactory.createRealmDataProcessingDKFZ(), "pbsId7")
 
-    def abstractMaybeSubmitValidateRoddyJobInst
-    File testDirectory
+    ClusterJobService clusterJobService
+    File executionStore
+
+    AbstractRoddyJob roddyJob
+    int counter
 
     @Before
     void setUp() {
-        testDirectory = TestCase.createEmptyTestDirectory()
+        counter = 0
+
+        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
+        Realm.build([name: roddyBamFile.project.realmName, operationType: Realm.OperationType.DATA_MANAGEMENT])
+
+
+        executionStore =  roddyBamFile.getTmpRoddyExecutionStoreDirectory()
+        assert executionStore.mkdirs()
+
+        roddyJob = [
+                getProcessParameterObject: { -> roddyBamFile },
+                prepareAndReturnWorkflowSpecificCommand: { Object instance, Realm realm -> return "workflowSpecificCommand" },
+                validate: { Object instance -> counter ++ },
+                getProcessingStep : { -> return DomainFactory.createAndSaveProcessingStep() },
+        ] as AbstractRoddyJob
+
+        roddyJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
+        roddyJob.configService = new ConfigService()
+
+        roddyJob.executeRoddyCommandService.metaClass.executeRoddyCommand = { String cmd ->
+            return [ 'bash', '-c', "echo Hallo" ].execute()
+        }
+        roddyJob.executeRoddyCommandService.metaClass.returnStdoutOfFinishedCommandExecution = { Process process ->
+            counter ++
+            return "Hallo"
+        }
+        roddyJob.executeRoddyCommandService.metaClass.checkIfRoddyWFExecutionWasSuccessful = { Process process ->
+            counter++
+        }
     }
 
     @After
     void tearDown() {
-        assert testDirectory.deleteDir()
+        assert executionStore.deleteDir()
+        TestCase.removeMetaClass(ExecuteRoddyCommandService, roddyJob.executeRoddyCommandService)
+        TestCase.removeMetaClass(AbstractRoddyJob, roddyJob)
     }
 
     @Test
     void testFailedOrNotFinishedClusterJobs() {
-        abstractMaybeSubmitValidateRoddyJobInst = [
-                getProcessingStep : { ->
-                    return DomainFactory.createAndSaveProcessingStep()
-                },
-                getProcessParameterObject : { ->
-                    RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
-                    bamFile.metaClass.getPathToJobStateLogFiles { ->
-                        return testDirectory.absolutePath
-                    }
-                    return bamFile
-                }
-        ] as AbstractRoddyJob
-
         Map<String, String> logFileMapA = createLogFileMap(identifierA, [exitCode: "1", timeStamp: "10"])
         Map<String, String> logFileMapB = createLogFileMap(identifierB, [exitCode: "4", timeStamp: "10"])
         Map<String, String> logFileMapC = createLogFileMap(identifierC, [exitCode: "3", timeStamp: "10"])
@@ -80,8 +108,8 @@ ${logFileMapF.pbsId}.${logFileMapF.host}:${logFileMapF.exitCode}:${logFileMapF.t
 ${logFileMapG.pbsId}.${logFileMapG.host}:${logFileMapG.exitCode}:${logFileMapG.timeStamp}:${logFileMapG.jobClass}
 """
 
-        CreateFileHelper.createFile(new File(testDirectory.absolutePath, "testFile"), content)
-        CreateFileHelper.createFile(new File(testDirectory.absolutePath, "testFile2"), content2)
+        CreateFileHelper.createFile(new File(executionStore, "testFile"), content)
+        CreateFileHelper.createFile(new File(executionStore, "testFile2"), content2)
 
         Collection<? extends ClusterJobIdentifier> finishedClusterJobs =
                 [
@@ -101,8 +129,9 @@ ${logFileMapG.pbsId}.${logFileMapG.host}:${logFileMapG.exitCode}:${logFileMapG.t
                 (identifierD): "JobStateLogFile contains no information for ${identifierD}",
                 (identifierF): "${identifierF} failed processing. ExitCode: ${logFileMapF.exitCode}",
                 (identifierG): "${identifierG} failed processing. ExitCode: ${logFileMapG.exitCode}",
-        ] == abstractMaybeSubmitValidateRoddyJobInst.failedOrNotFinishedClusterJobs(finishedClusterJobs)
+        ] == roddyJob.failedOrNotFinishedClusterJobs(finishedClusterJobs)
     }
+
 
     private Map<String, String> createLogFileMap(ClusterJobIdentifier identifier, properties = [:]) {
         return [pbsId: identifier.clusterJobId,
@@ -110,5 +139,57 @@ ${logFileMapG.pbsId}.${logFileMapG.host}:${logFileMapG.exitCode}:${logFileMapG.t
                 exitCode: "0",
                 timeStamp: "0",
                 jobClass: "testJobClass"] + properties
+    }
+
+    @Test
+    void testMaybeSubmit() {
+        assert AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == roddyJob.maybeSubmit()
+        assert counter == 2
+    }
+
+    @Test
+    void testValidate() {
+        roddyJob.validate()
+        assert counter == 1
+    }
+
+
+    @Test
+    void testExecute_finishedClusterJobsIsNull_MaybeSubmit() {
+        roddyJob.metaClass.maybeSubmit = {
+            return AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
+        }
+        roddyJob.metaClass.validate = {
+            throw new RuntimeException("should not come here")
+        }
+
+        assert AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == roddyJob.execute(null)
+    }
+
+    @Test
+    void testExecute_finishedClusterJobsIsNull_Validate() {
+        roddyJob = [
+                validate: { -> counter ++ },
+                failedOrNotFinishedClusterJobs: { Collection<? extends ClusterJobIdentifier> finishedClusterJobs -> [:] }
+        ] as AbstractRoddyJob
+        roddyJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
+
+        Realm realm = DomainFactory.createRealmDataProcessingDKFZ()
+        assert realm.save([flush: true, failOnError: true])
+
+        ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep()
+        assert processingStep
+
+        ClusterJob clusterJob = clusterJobService.createClusterJob(realm, "0000", processingStep)
+        assert clusterJob
+
+        final PbsJobInfo pbsJobInfo = new PbsJobInfo(realm: realm, pbsId: clusterJob.clusterJobId)
+
+        roddyJob.metaClass.maybeSubmit = {
+            throw new RuntimeException("should not come here")
+        }
+
+        assert AbstractMultiJob.NextAction.SUCCEED == roddyJob.execute([pbsJobInfo])
+        assert counter == 1
     }
 }

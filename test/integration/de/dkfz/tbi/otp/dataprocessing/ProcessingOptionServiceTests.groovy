@@ -1,9 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.junit.Assert.*
-import grails.test.mixin.*
-import grails.test.mixin.domain.DomainClassUnitTestMixin
-import grails.test.mixin.support.*
 import org.junit.*
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 
@@ -12,12 +9,15 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 // => make the test as integration
 class ProcessingOptionServiceTests extends GroovyTestCase {
 
+    final String NAME = "test"
+    final String VALUE = "testValue"
+
     ProcessingOptionService processingOptionService
 
-    void createProcessingOption() {
+    private void createProcessingOption() {
         ProcessingOption option = new ProcessingOption(
-            name: "test",
-            value: "testValue",
+            name: NAME,
+            value: VALUE,
             comment: "test"
         )
         assertNotNull(option.save(flush: true))
@@ -25,8 +25,8 @@ class ProcessingOptionServiceTests extends GroovyTestCase {
 
     void testFindOptionAssureSuccessed() {
         createProcessingOption()
-        String result = processingOptionService.findOptionAssure("test", null, null)
-        assertEquals("testValue", result)
+        String result = processingOptionService.findOptionAssure(NAME, null, null)
+        assertEquals(VALUE, result)
     }
 
     void testFindOptionAssureNullName() {
@@ -41,5 +41,27 @@ class ProcessingOptionServiceTests extends GroovyTestCase {
         shouldFail(ProcessingException) {
             ProcessingOption testOption = processingOptionService.findOptionAssure("isNotThere", null, null)
         }
+    }
+
+    @Test
+    void testGetValueOfProcessingOption_NoProcessingOptionWithThisNameExists_ShouldFail() {
+        shouldFail(AssertionError) {
+            processingOptionService.getValueOfProcessingOption(NAME)
+        }
+    }
+
+    @Test
+    void testGetValueOfProcessingOption_MoreThanOneProcessingOptionWithThisNameExists_ShouldFail() {
+        createProcessingOption()
+        createProcessingOption()
+        shouldFail(AssertionError) {
+            processingOptionService.getValueOfProcessingOption(NAME)
+        }
+    }
+
+    @Test
+    void testGetValueOfProcessingOption_AllFine() {
+        createProcessingOption()
+        VALUE == processingOptionService.getValueOfProcessingOption(NAME)
     }
 }

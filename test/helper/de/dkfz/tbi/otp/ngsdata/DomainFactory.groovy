@@ -188,10 +188,11 @@ class DomainFactory {
     }
 
     public static createRoddyBamFile(Map bamFileProperties = [:]) {
+        SeqType seqType = SeqType.buildLazy(name: SeqTypeNames.WHOLE_GENOME.seqTypeName, libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
         MergingWorkPackage workPackage = bamFileProperties.workPackage
         if (!workPackage) {
             Workflow workflow = Workflow.buildLazy(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT)
-            workPackage = MergingWorkPackage.build(workflow: workflow)
+            workPackage = MergingWorkPackage.build(workflow: workflow, seqType: seqType)
         }
         SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile(workPackage)
         ExternalScript externalScript = ExternalScript.buildLazy()
@@ -200,14 +201,16 @@ class DomainFactory {
                 seqTracks: [seqTrack],
                 workPackage: workPackage,
                 identifier: RoddyBamFile.nextIdentifier(workPackage),
-                config: RoddyWorkflowConfig.build(workflow: workPackage.workflow, externalScriptVersion: externalScript.scriptVersion),
+                config: RoddyWorkflowConfig.buildLazy(workflow: workPackage.workflow, externalScriptVersion: externalScript.scriptVersion, obsoleteDate: null),
                 md5sum: DEFAULT_MD5_SUM,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 fileSize: 10000,
                 roddyVersion: ProcessingOption.build(),
                 ] + bamFileProperties)
 
-        bamFile.save(flush: true) // build-test-data does not flush, only saves
+        assert bamFile.save(flush: true) // build-test-data does not flush, only saves
+        bamFile.individual.project = bamFile.config.project
+        assert bamFile.individual.save(flush: true)
         return bamFile
     }
 
@@ -324,7 +327,7 @@ class DomainFactory {
             SeqTypeNames.EXOME,
             SeqTypeNames.WHOLE_GENOME
         ].collect {
-            SeqType.build(name: it.seqTypeName, libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
+            SeqType.build(name: it.seqTypeName, alias: it.seqTypeName, libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
         }
     }
 
@@ -362,6 +365,24 @@ class DomainFactory {
             comment: "Roddy version which is used currently to process Roddy-Pipelines"
         )
         assert processingOptionVersion.save(flush: true)
+
+        ProcessingOption processingOptionBaseConfigsPath = new ProcessingOption(
+                name: "roddyBaseConfigsPath",
+                type: "",
+                project: null,
+                value: "/path/to/roddyBaseConfigs/",
+                comment: "Path to the baseConfig-files which are needed to execute Roddy",
+        )
+        assert processingOptionBaseConfigsPath.save(flush: true)
+
+        ProcessingOption processingOptionApplicationIni = new ProcessingOption(
+                name: "roddyApplicationIni",
+                type: "",
+                project: null,
+                value: "/path/to/roddyBaseConfigs/applicationProperties.ini",
+                comment: "Path to the application.ini which is needed to execute Roddy"
+        )
+        assert processingOptionApplicationIni.save(flush: true)
     }
 
 }

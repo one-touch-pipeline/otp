@@ -21,7 +21,7 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
             return maybeSubmit()
         } else {
             Map<ClusterJobIdentifier, String> failedClusterJobs = failedOrNotFinishedClusterJobs(finishedClusterJobs)
-            if (failedClusterJobs.empty) {
+            if (failedClusterJobs.isEmpty()) {
                 log.info "All ${finishedClusterJobs.size()} cluster jobs have finished successfully."
             } else {
                 throw new RuntimeException(createExceptionString(failedClusterJobs, finishedClusterJobs))

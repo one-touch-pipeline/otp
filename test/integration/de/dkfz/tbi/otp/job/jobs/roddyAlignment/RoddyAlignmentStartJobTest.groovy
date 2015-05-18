@@ -204,8 +204,6 @@ class RoddyAlignmentStartJobTest {
         ]
 
         DomainFactory.createRoddyProcessingOptions()
-        ExternalScript externalScript = ExternalScript.buildLazy()
-        RoddyWorkflowConfig.build([workflow: mwp.workflow, project: mwp.project, externalScriptVersion: externalScript.scriptVersion])
 
         RoddyBamFile rbf = RoddyAlignmentStartJob.createRoddyBamFile(mwp, baseBamFile)
 

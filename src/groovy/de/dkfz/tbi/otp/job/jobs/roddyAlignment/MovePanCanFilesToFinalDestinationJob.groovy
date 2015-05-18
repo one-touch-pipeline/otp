@@ -93,7 +93,7 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
         Realm realm = configService.getRealmDataManagement(roddyBamFile.project)
         assert realm : "Realm should not be null"
 
-        File tempWorkingDir = roddyBamFile.tmpRoddyAlignmentDirectory
+        File tempWorkingDir = roddyBamFile.tmpRoddyDirectory
         executionService.executeCommand(realm, "rm -rf ${tempWorkingDir}")
         assert WaitingFileUtils.confirmDoesNotExist(tempWorkingDir)
     }

@@ -98,4 +98,10 @@ class ReferenceGenomeService {
         notNull(referenceGenome, "The input referenceGenome of the method referenceGenomeMetaInformationPath is null")
         return filePathToDirectory(realm, referenceGenome) + "metaInformation.txt"
     }
+
+    public String pathToChromosomeSizeFilesPerReference(Project project, ReferenceGenome referenceGenome) {
+        notNull(project, "The project is not specified")
+        notNull(referenceGenome, "The reference genome is not specified")
+        return "${filePathToDirectory(project, referenceGenome)}stats/"
+    }
 }

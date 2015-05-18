@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.TestCase
 import org.apache.commons.io.FileUtils
 import static org.junit.Assert.*
 import grails.test.mixin.*
@@ -190,4 +191,23 @@ class ReferenceGenomeServiceTests {
         List<ReferenceGenomeEntry> referenceGenomeEntriesAct = referenceGenomeService.chromosomesInReferenceGenome(referenceGenome)
         assertEquals(referenceGenomeEntriesExp, referenceGenomeEntriesAct)
     }
+
+    @Test(expected = IllegalArgumentException)
+    void testPathToChromosomeSizeFilesPerReference_ProjectIsNull_ShouldFail() {
+        referenceGenomeService.pathToChromosomeSizeFilesPerReference(null, referenceGenome)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testPathToChromosomeSizeFilesPerReference_ReferenceGenomeIsNull_ShouldFail() {
+        referenceGenomeService.pathToChromosomeSizeFilesPerReference(project, null)
+    }
+
+    @Test
+    void testPathToChromosomeSizeFilesPerReference_AllFine() {
+        String pathExp = "${referenceGenomePath}stats/"
+        String pathAct = referenceGenomeService.pathToChromosomeSizeFilesPerReference(project, referenceGenome)
+        assertEquals(pathExp, pathAct)
+    }
+
+
 }

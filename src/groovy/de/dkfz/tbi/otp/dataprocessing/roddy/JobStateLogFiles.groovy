@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.roddy
 
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import groovy.io.FileType
 import groovy.transform.Immutable
 
@@ -23,7 +24,7 @@ public class JobStateLogFiles {
         Map<String, List<LogFileEntry>> entries = [:]
 
         File jobStateLogFiles = new File(pathToJobStateLogFile)
-        if(!jobStateLogFiles.exists()) { return [:] }
+        if (!WaitingFileUtils.confirmExists(jobStateLogFiles)) { return [:] }
 
         jobStateLogFiles.eachFile(FileType.FILES) { file ->
             file.eachLine {

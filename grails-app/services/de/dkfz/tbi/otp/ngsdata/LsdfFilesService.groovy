@@ -235,6 +235,11 @@ class LsdfFilesService {
         checkFileIsReadableAndNotEmpty(file) { assert confirmExists(file) }
     }
 
+    static void ensureDirIsReadableAndNotEmpty(final File dir) {
+        assert confirmExists(dir)
+    }
+
+
     /**
      *
      * @param path

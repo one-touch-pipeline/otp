@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 
 class SeqType {
@@ -58,5 +59,18 @@ class SeqType {
 
     String toString() {
         "${aliasOrName} ${libraryLayout}"
+    }
+
+
+    static SeqType getWholeGenomePairedSeqType() {
+        return CollectionUtils.exactlyOneElement(
+                SeqType.findAllByNameAndLibraryLayout(SeqTypeNames.WHOLE_GENOME.seqTypeName, SeqType.LIBRARYLAYOUT_PAIRED)
+        )
+    }
+
+    static SeqType getExomePairedSeqType() {
+        return CollectionUtils.exactlyOneElement(
+                SeqType.findAllByAliasAndLibraryLayout(SeqTypeNames.EXOME.seqTypeName, SeqType.LIBRARYLAYOUT_PAIRED)
+        )
     }
 }

@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.job.processing.ProcessingException;
 import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.core.userdetails.UserDetails
@@ -111,6 +112,14 @@ class ProcessingOptionService {
             return value.toLong()
         }
         return defaultValue
+    }
+
+    /**
+     * Returns the ProcessingOption which belongs to the input parameter name.
+     * If there is more than one or none ProcessingOption found by the query an Error is thrown.
+     */
+    static String getValueOfProcessingOption(String name) {
+        return CollectionUtils.exactlyOneElement(ProcessingOption.findAllByNameAndDateObsoleted(name, null)).value
     }
 
     /**

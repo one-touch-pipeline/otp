@@ -46,8 +46,8 @@ class RoddyBamFileUnitTests {
         assert "${sampleType.dirName}_${individual.pid}_merged.mdup.bam.md5sum" == roddyBamFile.getMd5sumFileName()
     }
 
-    void testGetTmpRoddyAlignmentDirectory_AllFine() {
-        assert "${TEST_DIR}/${RoddyBamFile.TMP_DIR}_${roddyBamFile.id}" == roddyBamFile.tmpRoddyAlignmentDirectory.path
+    void testGetTmpRoddyDirectory_AllFine() {
+        assert "${TEST_DIR}/${RoddyBamFile.TMP_DIR}_${roddyBamFile.id}" == roddyBamFile.tmpRoddyDirectory.path
     }
 
 
@@ -108,9 +108,5 @@ class RoddyBamFileUnitTests {
     void testGetFinalMd5sumFile_AllFine() {
         assert "${TEST_DIR}/${roddyBamFile.md5sumFileName}" ==
                 roddyBamFile.finalMd5sumFile.path
-    }
-
-    void testGetPathToJobStateLogFile_AllFine() {
-        assert "${TEST_DIR}/${RoddyBamFile.TMP_DIR}_${roddyBamFile.id}/roddyExecutionStore/" == roddyBamFile.getPathToJobStateLogFiles()
     }
 }
