@@ -181,6 +181,7 @@ class RoddyAlignmentStartJobTest {
         MergingWorkPackage mwp = createMergingWorkPackage()
         DomainFactory.buildSeqTrackWithDataFile(mwp)
         Collection<SeqTrack> seqTracks = mwp.findMergeableSeqTracks()
+        DomainFactory.createRoddyProcessingOptions()
 
         RoddyBamFile rbf = RoddyAlignmentStartJob.createRoddyBamFile(mwp, null)
 
@@ -201,6 +202,7 @@ class RoddyAlignmentStartJobTest {
                 DomainFactory.buildSeqTrackWithDataFile(mwp),
         ]
         RoddyWorkflowConfig.build([workflow: mwp.workflow, project: mwp.project])
+        DomainFactory.createRoddyProcessingOptions()
 
         RoddyBamFile rbf = RoddyAlignmentStartJob.createRoddyBamFile(mwp, baseBamFile)
 
@@ -229,6 +231,7 @@ class RoddyAlignmentStartJobTest {
     @Test
     void testStartRoddyAlignment_WhenEverythingIsOkay_ShouldCreateProcess() {
         MergingWorkPackage mwp = createMergingWorkPackage()
+        DomainFactory.createRoddyProcessingOptions()
 
         withJobExecutionPlan {
             testRoddyAlignmentStartJob.startRoddyAlignment()

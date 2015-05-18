@@ -203,8 +203,9 @@ class DomainFactory {
                 md5sum: DEFAULT_MD5_SUM,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 fileSize: 10000,
-                ] + bamFileProperties
-        )
+                roddyVersion: ProcessingOption.build(),
+                ] + bamFileProperties)
+
         bamFile.save(flush: true) // build-test-data does not flush, only saves
         return bamFile
     }
@@ -339,6 +340,26 @@ class DomainFactory {
 
     static MetaDataEntry createMetaDataKeyAndEntry(DataFile dataFile, MetaDataColumn key, String value) {
         return createMetaDataKeyAndEntry(dataFile, key.name(), value)
+    }
+
+    static void createRoddyProcessingOptions() {
+        ProcessingOption processingOptionPath = new ProcessingOption(
+            name: "roddyPath",
+            type: "",
+            project: null,
+            value: "/path/to/roddy/",
+            comment: "Path to the roddy.sh on the current cluster (***REMOVED***cluster 11.4)",
+        )
+        assert processingOptionPath.save(flush: true)
+
+        ProcessingOption processingOptionVersion = new ProcessingOption(
+            name: "roddyVersion",
+            type: "",
+            project: null,
+            value: "2.1.28",
+            comment: "Roddy version which is used currently to process Roddy-Pipelines"
+        )
+        assert processingOptionVersion.save(flush: true)
     }
 
 }

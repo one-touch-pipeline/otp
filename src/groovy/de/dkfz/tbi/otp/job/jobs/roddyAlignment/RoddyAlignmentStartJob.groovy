@@ -2,12 +2,14 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.ngsdata.RunSegment
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.springframework.scheduling.annotation.Scheduled
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -120,6 +122,7 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
                         workflow: mergingWorkPackage.workflow,
                         obsoleteDate: null,
                 )),
+                roddyVersion: CollectionUtils.exactlyOneElement(ProcessingOption.findAllByNameAndDateObsoleted("roddyVersion", null))
         )
         roddyBamFile.numberOfMergedLanes = roddyBamFile.containedSeqTracks.size()
         assert roddyBamFile.save(flush: true, failOnError: true)

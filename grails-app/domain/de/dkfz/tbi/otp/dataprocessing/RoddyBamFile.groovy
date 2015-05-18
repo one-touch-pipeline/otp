@@ -40,6 +40,11 @@ class RoddyBamFile extends AbstractMergedBamFile {
      */
     int identifier
 
+    /**
+     * Roddy version which was used to produce this RoddyBamFile
+     */
+    ProcessingOption roddyVersion
+
     static constraints = {
         type validator: { true }
         seqTracks minSize: 1, validator: { val, obj, errors ->
