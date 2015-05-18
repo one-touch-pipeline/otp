@@ -124,6 +124,7 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
         movePanCanFilesToFinalDestinationJob.metaClass.moveResultFiles = { RoddyBamFile roddyBamFile ->
             throw new Exception("Should not reach this method")
         }
+        movePanCanFilesToFinalDestinationJob.metaClass.deleteTemporaryDirectory = { RoddyBamFile roddyBamFile -> }
         movePanCanFilesToFinalDestinationJob.log = log
         movePanCanFilesToFinalDestinationJob.execute()
         assert roddyBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING
