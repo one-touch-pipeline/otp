@@ -19,6 +19,7 @@ import org.joda.time.Period
 import javax.sql.DataSource
 import javax.xml.ws.soap.SOAPFaultException
 
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static java.util.concurrent.TimeUnit.HOURS
@@ -34,7 +35,7 @@ class ClusterJobService {
     /**
      * creates a cluster job object with at this time known attributes
      */
-    public ClusterJob createClusterJob(Realm realm, String clusterJobId, ProcessingStep processingStep, SeqType seqType, String clusterJobName = null) {
+    public ClusterJob createClusterJob(Realm realm, String clusterJobId, ProcessingStep processingStep, SeqType seqType = null, String clusterJobName = null) {
         String cName = clusterJobName ?: processingStep.getPbsJobDescription()
         ClusterJob job = new ClusterJob(
                                     processingStep: processingStep,
@@ -46,6 +47,7 @@ class ClusterJobService {
                                     queued: new DateTime()
                                 ).save(flush: true)
         assert job != null
+        threadLog?.info(job.getLogFileNames())
         return job
     }
 

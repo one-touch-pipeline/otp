@@ -220,6 +220,10 @@ class ClusterJob implements ClusterJobIdentifier{
         return PeriodFormat.getDefault().print(new Period(value))
     }
 
+    public String getLogFileNames() {
+        return "Output log file: ${clusterJobName}.o${clusterJobId}\nError log file: ${clusterJobName}.e${clusterJobId}"
+    }
+
     @Override
     public String toString() {
         return "Cluster job ${clusterJobId} on realm ${realm}"

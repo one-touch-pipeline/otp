@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
+import org.codehaus.groovy.runtime.powerassert.Value
 import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 
 /**
  * Base class for jobs which maybe submit cluster jobs, wait for them to finish, and then validate their results.
@@ -18,16 +20,34 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
         if (finishedClusterJobs == null) {
             return maybeSubmit()
         } else {
-            def failedClusterJobs = jobStatusLoggingService.failedOrNotFinishedClusterJobs(processingStep, finishedClusterJobs)
+            Map<ClusterJobIdentifier, String> failedClusterJobs = failedOrNotFinishedClusterJobs(finishedClusterJobs)
             if (failedClusterJobs.empty) {
                 log.info "All ${finishedClusterJobs.size()} cluster jobs have finished successfully."
             } else {
-                throw new RuntimeException("${failedClusterJobs.size()} of ${finishedClusterJobs.size()} cluster jobs failed: ${failedClusterJobs}")
+                throw new RuntimeException(createExceptionString(failedClusterJobs, finishedClusterJobs))
             }
             validate()
             return NextAction.SUCCEED
         }
     }
+
+    public String createExceptionString(Map<ClusterJobIdentifier,
+            String> failedClusterJobs, Collection<? extends ClusterJobIdentifier> finishedClusterJobs) {
+        """
+${failedClusterJobs.size()} of ${finishedClusterJobs.size()} cluster jobs failed:
+${
+    failedClusterJobs.collect { ClusterJobIdentifier clusterJobIdentifier, String reason ->
+        "${clusterJobIdentifier}: ${reason}\n${ClusterJob.findByClusterJobId(clusterJobIdentifier.clusterJobId).getLogFileNames()}\n"
+    }.join("\n")
+}
+"""
+    }
+
+
+    /**
+     * Returns all failed or not finished ClusterJobs
+     */
+    protected abstract Map<ClusterJobIdentifier, String> failedOrNotFinishedClusterJobs(Collection<? extends ClusterJobIdentifier> finishedClusterJobs) throws Throwable
 
     /**
      * Called when the job is started.

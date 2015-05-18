@@ -1,19 +1,19 @@
 package de.dkfz.tbi.otp.job.jobs
 
-import de.dkfz.tbi.otp.job.processing.AbstractMaybeSubmitWaitValidateJob
-import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.job.processing.AbstractOtpJob
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.HelperUtils
 import org.springframework.beans.factory.annotation.Autowired
-
+import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
 
 /**
  * A Job that takes an script via an input parameter and executes it on the PBS cluster.
  */
-class ClusterScriptExecutorJob extends AbstractMaybeSubmitWaitValidateJob {
+class ClusterScriptExecutorJob extends AbstractOtpJob {
 
     @Autowired
     ExecutionHelperService executionHelperService

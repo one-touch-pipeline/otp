@@ -109,4 +109,8 @@ class RoddyBamFileUnitTests {
         assert "${TEST_DIR}/${roddyBamFile.md5sumFileName}" ==
                 roddyBamFile.finalMd5sumFile.path
     }
+
+    void testGetPathToJobStateLogFile_AllFine() {
+        assert "${TEST_DIR}/${RoddyBamFile.TMP_DIR}_${roddyBamFile.id}/roddyExecutionStore/" == roddyBamFile.getPathToJobStateLogFiles()
+    }
 }

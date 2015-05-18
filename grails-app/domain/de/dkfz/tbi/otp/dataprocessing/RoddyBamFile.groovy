@@ -150,6 +150,9 @@ class RoddyBamFile extends AbstractMergedBamFile {
         }
     }
 
+    public String getPathToJobStateLogFiles () {
+        return "${getTmpRoddyAlignmentDirectory()}/roddyExecutionStore/"
+    }
 
     @Override
     String toString() {

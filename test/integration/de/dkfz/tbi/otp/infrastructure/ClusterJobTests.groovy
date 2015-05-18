@@ -28,6 +28,7 @@ class ClusterJobTests {
 
     ProcessingStep step
     Realm realm
+    ClusterJobService clusterJobService
 
     @Before
     void before() {
@@ -124,6 +125,21 @@ class ClusterJobTests {
                                               )
 
         assertTrue(clusterJob2.validate())
+    }
+
+    @Test
+    void testGetLogFileNames() {
+        Realm realm = DomainFactory.createRealmDataProcessingDKFZ()
+        assert realm.save([flush: true, failOnError: true])
+
+        ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep()
+        assert processingStep
+
+        ClusterJob clusterJob = clusterJobService.createClusterJob(realm, "clusterJobId", processingStep)
+        assert clusterJob
+
+        assert "Output log file: ${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}\nError log file: ${clusterJob.clusterJobName}.e${clusterJob.clusterJobId}" ==
+                clusterJob.getLogFileNames()
     }
 
 }

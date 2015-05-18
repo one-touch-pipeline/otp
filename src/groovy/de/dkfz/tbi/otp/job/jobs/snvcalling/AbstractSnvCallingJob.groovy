@@ -1,29 +1,25 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
-import de.dkfz.tbi.otp.utils.WaitingFileUtils
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-import static de.dkfz.tbi.otp.utils.WaitingFileUtils.confirmDoesNotExist
-import static org.springframework.util.Assert.*
-import static de.dkfz.tbi.otp.utils.WaitingFileUtils.*
-import de.dkfz.tbi.otp.utils.LinkFileUtils
-import org.springframework.beans.factory.annotation.Autowired
-import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.ngsdata.ConfigService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFileService
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.job.processing.AbstractMaybeSubmitWaitValidateJob
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
+import de.dkfz.tbi.otp.job.processing.AbstractOtpJob
+import de.dkfz.tbi.otp.job.processing.ExecutionService
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExternalScript
+import de.dkfz.tbi.otp.utils.LinkFileUtils
+import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static de.dkfz.tbi.otp.utils.WaitingFileUtils.*
+import static org.springframework.util.Assert.notNull
 
-abstract class AbstractSnvCallingJob extends AbstractMaybeSubmitWaitValidateJob {
+abstract class AbstractSnvCallingJob extends AbstractOtpJob {
 
     @Autowired
     ProcessedMergedBamFileService processedMergedBamFileService
