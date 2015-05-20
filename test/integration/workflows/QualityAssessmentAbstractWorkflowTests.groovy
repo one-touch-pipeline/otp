@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import org.joda.time.Duration
 import org.junit.Before
 import org.junit.Ignore
@@ -353,5 +354,6 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
         String softLinkToReferenceGenomesDir = "${processingRootPath}/reference_genomes"
         String cmdBuildSoftLinkToReferenceGenomes = "ln -s ${referenceGenomesDir} ${softLinkToReferenceGenomesDir}"
         executionService.executeCommand(realm, "${cmdBuildSoftLinkToReferenceGenomes}")
+        WaitingFileUtils.confirmExists(new File(softLinkToReferenceGenomesDir))
     }
 }

@@ -313,7 +313,7 @@ class ProcessedBamFileService {
 
     public LibraryPreparationKit libraryPreparationKit(ProcessedBamFile bamFile) {
         notNull(bamFile, 'bam file must not be null')
-        SeqTrack seqTrack = bamFile.seqTrack
+        SeqTrack seqTrack = SeqTrack.get(bamFile.seqTrack.id)
         isTrue(seqTrack.seqType.name == SeqTypeNames.EXOME.seqTypeName, 'This method must not be called on not exon data')
         // The domain ExomeSeqTrack is new, therefore it is possible that there are many bamFiles,
         // which do not have the connection to the LibraryPreparationKit.
