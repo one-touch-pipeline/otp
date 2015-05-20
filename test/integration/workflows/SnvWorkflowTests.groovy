@@ -42,12 +42,12 @@ import static org.junit.Assert.assertNotNull
  * 12) execute "bash roddy.sh rerun coWorkflowsTestProject.test@snvCalling stds --useconfig=/AbolsutePathTo/applicationProperties_Stable.ini"
  * 13) results are here "[REDACTED]rpp/stds/mpileup"
  * 14) execution infos are here "[REDACTED]rpp/stds/roddyExecutionStore"
- * 15) create new result folder for this version in WORKFLOW_ROOT/SnvCallingWorkflow (i.e. resultFiles_1.0.131)
+ * 15) create new result folder for this version in WORKFLOW_ROOT/SnvWorkflow (i.e. resultFiles_1.0.131)
  * 16) copy results of the roddy run in the current result folder
  * 17) since we decided not to overwrite the annotation results, but inserted "annotation" we have now differences in the naming with the CO group in some result files
  * therefore "annotation" has to be inserted to some file names of the Roddy results -> compare with already existing file names of previous Roddy results.
  * 18) change VERSION in SnvWorkflowTest
- * 19) create new config folder for this version in WORKFLOW_ROOT/SnvCallingWorkflow (i.e. configFile_1.0.131)
+ * 19) create new config folder for this version in WORKFLOW_ROOT/SnvWorkflow (i.e. configFile_1.0.131)
  * 20) copy configs from previous version in this version & adapt paths within the configs (i.e in vi with :%s/1.0.114/1.0.131/gc)
  * 21) compare runtimeConfig.sh of this Roddy run and the previous Roddy run to find out if there are new variables -> add new ones in new config files
  * 22) run SnvWorkflowTests
