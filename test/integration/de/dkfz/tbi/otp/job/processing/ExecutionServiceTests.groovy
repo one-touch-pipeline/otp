@@ -225,6 +225,52 @@ X.headnode                test             test                   0 Q verylong
     }
 
     @Test
+    void testCheckRunningJob_WhenJobIsFoundStatusCompletedNewFormat_ShouldReturnFalse() {
+        assertNotNull(realm.save())
+        executionService.metaClass.executeCommand { Realm r, String s ->
+            return """
+Job ID                    Name             User            Time Use S Queue
+------------------------- ---------------- --------------- -------- - -----
+X.host          ...QaAnalysisJob klinga          00:00:00 C fast
+"""
+        }
+        assertFalse(executionService.checkRunningJob("X", realm))
+    }
+
+    @Test
+    void testCheckRunningJob_WhenJobIsFoundStatusNotCompletedNewFormat_ShouldReturnFalse() {
+        assertNotNull(realm.save())
+        executionService.metaClass.executeCommand { Realm r, String s ->
+            return """
+Job ID                    Name             User            Time Use S Queue
+------------------------- ---------------- --------------- -------- - -----
+X.host          ...QaAnalysisJob klinga          00:00:00 R fast
+"""
+        }
+        assertTrue(executionService.checkRunningJob("X", realm))
+    }
+
+    @Test
+    void testCheckRunningJob_WhenJobIsNotFoundOldFormat_ShouldReturnFalse() {
+        assertNotNull(realm.save())
+        //
+        executionService.metaClass.executeCommand { Realm r, String s ->
+            return "qstat: Unknown Job Id 22.clust_node.long-domain"
+        }
+        assertFalse(executionService.checkRunningJob("X", realm))
+    }
+
+    @Test
+    void testCheckRunningJob_WhenJobIsNotFoundNewFormat_ShouldReturnFalse() {
+        assertNotNull(realm.save())
+        executionService.metaClass.executeCommand { Realm r, String s ->
+            return "qstat: Unknown Job Id Error 22.clust_node.long-domain"
+        }
+        assertFalse(executionService.checkRunningJob("X", realm))
+    }
+
+
+    @Test
     void testCheckRunningJob_WhenQStatReturnedEmptyString_ShouldReturnTrue() {
         assertNotNull(realm.save())
         executionService.metaClass.executeCommand { Realm r, String s ->
