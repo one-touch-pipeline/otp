@@ -3,8 +3,6 @@ package workflows
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.Chromosomes
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
@@ -33,7 +31,6 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
      * Changing of test-qa.sh makes it possible to test production or a test version of qa.jar
      */
 
-    final Duration TIMEOUT = Duration.standardMinutes(200)
 
     TestData testData = new TestData()
 
@@ -63,12 +60,8 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
     void testExecutionWithProcessingOptionsWgs() {
         createAdditionalWholeGenomeData()
         createDirectoryStructure(inputFilesPath())
-        createWorkflow()
         updateOptions()
-        JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
-        assertNotNull(jobExecutionPlan)
-        getJob().setJobExecutionPlan(jobExecutionPlan)
-        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
+        execute()
     }
 
     @Test
@@ -77,22 +70,14 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
         createAdditionalExomData()
         createDirectoryStructure(inputFilesPath())
         createDirectoryForReferenceGenome()
-        createWorkflow()
         updateOptions()
-        JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
-        assertNotNull(jobExecutionPlan)
-        getJob().setJobExecutionPlan(jobExecutionPlan)
-        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
+        execute()
     }
-
-    abstract protected AbstractStartJobImpl getJob()
 
     // in the case of not-merged qa worfkflow test only one seqTrack is required, but
     // in the case of merged qa-workflow test it is better to have 2 seqTracks
     // therefore this method expects list of seqTracks as parameters
     abstract protected void createAdditionalTestData(List<SeqTrack> seqTracks)
-
-    abstract protected void createWorkflow()
 
     /**
      * @return a map containing the following key and values
@@ -237,8 +222,6 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
     }
 
     private void createData() {
-        super.createUserAndRoles()
-
         Project project = TestData.createProject(
                         name: "project",
                         dirName: "project-dir",
@@ -294,7 +277,9 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
                         storageRealm: Run.StorageRealm.DKFZ
                         )
         assertNotNull(run.save([flush: true]))
+    }
 
+    protected void setupForLoadingWorkflow() {
         SeqType seqType = new SeqType(
                         name: "WHOLE_GENOME",
                         libraryLayout: "PAIRED",
@@ -355,5 +340,10 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
         String cmdBuildSoftLinkToReferenceGenomes = "ln -s ${referenceGenomesDir} ${softLinkToReferenceGenomesDir}"
         executionService.executeCommand(realm, "${cmdBuildSoftLinkToReferenceGenomes}")
         WaitingFileUtils.confirmExists(new File(softLinkToReferenceGenomesDir))
+    }
+
+    @Override
+    Duration getTimeout() {
+        Duration.standardMinutes(200)
     }
 }

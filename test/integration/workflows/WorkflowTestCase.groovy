@@ -1,6 +1,8 @@
 package workflows
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
@@ -14,6 +16,7 @@ import grails.util.Environment
 import grails.util.Holders
 import groovy.sql.Sql
 import groovy.util.logging.Log4j
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.hibernate.SessionFactory
 import org.joda.time.Duration
 import org.joda.time.format.PeriodFormat
@@ -44,8 +47,10 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     // The scheduler needs to access the created objects while the test is being executed
     boolean transactional = false
 
+    // fast queue, here we come!
+    static final String pbsOptions = '{"-l": {nodes: "1", walltime: "20:00", mem: "5g"}, "-j": "oe"}'
 
-    /** The base directory for this test instance ("local root" directory). */
+    // The base directory for this test instance ("local root" directory).
     private File baseDirectory = null
 
 
@@ -63,8 +68,28 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     Sql sql
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1)
+    private boolean startJobRunning = false
 
-    abstract Runnable getStartJobRunnable()
+
+    /**
+     * This method must return a list of relative paths (as strings) to the workflow scripts
+     * that are required for the test.
+     */
+    abstract List<String> getWorkflowScripts()
+
+    /**
+     * A timeout for the workflow execution,
+     * if the workflow doesn't finish within the given duration the execute() method fails.
+     */
+    abstract Duration getTimeout()
+
+    /**
+     * This method can be overridden if a workflow script needs some additional setup
+     * before it can be loaded.
+     */
+    protected void setupForLoadingWorkflow() {
+        // do nothing by default
+    }
 
 
     @Before
@@ -85,24 +110,29 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         schemaDump = new File(TestCase.createEmptyTestDirectory(), "test-database-dump.sql")
         sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
 
+
+        createUserAndRoles()
+        loadWorkflow()
+
+
         // manually set up scheduled tasks
         // this is done here so they will be stopped when each test is finished,
         // otherwise there would be problems with the database being deleted
         scheduler.scheduleWithFixedDelay(new Runnable() {
             public void run() { Holders.applicationContext.getBean(SchedulerService).pbsMonitorCheck() }
-        }, 0, 10, TimeUnit.SECONDS);
+        }, 0, 10, TimeUnit.SECONDS)
 
         scheduler.scheduleWithFixedDelay(new Runnable() {
             public void run() { Holders.applicationContext.getBean(SchedulerService).schedule() }
-        }, 0, 100, TimeUnit.MILLISECONDS);
-
-        scheduler.scheduleWithFixedDelay(startJobRunnable, 2, 5, TimeUnit.SECONDS);
+        }, 0, 100, TimeUnit.MILLISECONDS)
     }
 
 
     @After
-    void tearDownWorkflowTests() {
+    public void tearDownWorkflowTests() {
+        // stop scheduled tasks in SchedulerService and start job
         scheduler.shutdownNow()
+        startJobRunning = false
 
         sql.execute("DROP ALL OBJECTS")
         sql.execute("RUNSCRIPT FROM ?", [schemaDump.absolutePath])
@@ -129,6 +159,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
                 loggingRootPath: loggingRootPath,
                 stagingRootPath: stagingRootPath,
                 unixUser: getAccountName(),
+                pbsOptions: pbsOptions,
         ]
 
         assert DomainFactory.createRealmDataManagementBioQuant(realmParams).save(flush: true)
@@ -148,7 +179,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
      }
 
 
-    def createDirectories(List<File> files) {
+    public void createDirectories(List<File> files) {
         String mkDirs = createClusterScriptService.makeDirs(files, "2770")
         assert executionService.executeCommand(realm, mkDirs).toInteger() == 0
         files.each {
@@ -156,7 +187,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         }
     }
 
-    def createDirectoriesString(List<String> fileNames) {
+    public void createDirectoriesString(List<String> fileNames) {
         createDirectories(fileNames.collect { new File(it) })
     }
 
@@ -167,12 +198,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     }
 
 
-    void waitUntilWorkflowFinishesWithoutFailure(Duration timeout, int numberOfProcesses = 1) {
-        waitUntilWorkflowFinishes(timeout, numberOfProcesses)
-        ensureThatWorkflowHasNotFailed()
-    }
-
-    void waitUntilWorkflowFinishes(Duration timeout, int numberOfProcesses = 1) {
+    private waitUntilWorkflowFinishes(Duration timeout, int numberOfProcesses = 1) {
         println "Started to wait (until workflow is finished or timeout)"
         long lastPrintln = 0L
         if (!ThreadUtils.waitFor({
@@ -186,7 +212,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         }
     }
 
-    void ensureThatWorkflowHasNotFailed() {
+    private void ensureThatWorkflowHasNotFailed() {
         Collection<ProcessingStepUpdate> failureProcessingStepUpdates = ProcessingStepUpdate.findAllByState(ExecutionState.FAILURE)
         failureProcessingStepUpdates.each {
             println "ProcessingStep ${it.processingStep.id} failed."
@@ -208,7 +234,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         }
     }
 
-    boolean areAllProcessesFinished(int numberOfProcesses) {
+    private boolean areAllProcessesFinished(int numberOfProcesses) {
         Collection<Process> processes = Process.list()
         assert processes.size() <= numberOfProcesses
         return processes.size() == numberOfProcesses && processes.every {
@@ -289,6 +315,50 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         assert root : 'No root directory provided. Unable to construct a unique directory.'
         return new File(root, "tmp-${HelperUtils.getUniqueString()}")
     }
+
+    /**
+     *  Load the workflow and update processing options
+     */
+    private void loadWorkflow() {
+        setupForLoadingWorkflow()
+
+        assert workflowScripts : 'No workflow script provided.'
+        SpringSecurityUtils.doWithAuth("admin") {
+            JobExecutionPlan.withTransaction {
+                workflowScripts.each { String script ->
+                    runScript(script)
+                }
+            }
+        }
+
+        ProcessingOption.findAllByNameLike("${PbsOptionMergingService.PBS_PREFIX}%").each {
+            it.value = pbsOptions
+            it.save(failOnError: true, flush: true)
+        }
+    }
+
+
+    /**
+     *  find the start job and execute it, then wait for
+     *  either the workflow to finish or the timeout
+     */
+    protected void execute(int numberOfProcesses = 1, ensureNoFailure = true) {
+        if(!startJobRunning) {
+            AbstractStartJobImpl startJob = Holders.applicationContext.getBean(JobExecutionPlan.list()?.first()?.startJob?.bean, AbstractStartJobImpl)
+            assert startJob : 'No start job found.'
+
+            scheduler.scheduleWithFixedDelay(new Runnable() {
+                void run() { startJob.execute() }
+            }, 0, 5, TimeUnit.SECONDS)
+            startJobRunning = true
+        }
+
+        waitUntilWorkflowFinishes(timeout, numberOfProcesses)
+        if(ensureNoFailure) {
+            ensureThatWorkflowHasNotFailed()
+        }
+    }
+
 
     /**
      * Convenience method to persist a domain instance into the database. Assert whether

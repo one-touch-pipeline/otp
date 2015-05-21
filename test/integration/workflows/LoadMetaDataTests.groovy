@@ -2,8 +2,6 @@ package workflows
 
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
-import de.dkfz.tbi.otp.job.jobs.metaData.MetaDataStartJob
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.ngsdata.*
@@ -18,15 +16,10 @@ import static org.junit.Assert.*
 
 class LoadMetaDataTests extends WorkflowTestCase {
 
-    // TODO ( jira: OTP-566)  want to get rid of this hardcoded.. idea: maybe calculating from the walltime of the cluster jobs..
-    Duration TIMEOUT = Duration.standardMinutes(2)
-
     // the String "UNKNOWN" is used instead of the enum, because that is how it appears in external input files
     final String UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE = "UNKNOWN"
 
     LsdfFilesService lsdfFilesService
-
-    MetaDataStartJob metaDataStartJob
 
 
     // files to be processed by the tests
@@ -241,17 +234,10 @@ class LoadMetaDataTests extends WorkflowTestCase {
 
         String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
         executionService.executeCommand(realm, "${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
-        runScript("scripts/workflows/MetaDataWorkflow.groovy")
-
-        // there will be only one at the database
-        JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
 
         assert AlignmentPass.count() == 0
 
-        // TODO hack to be able to star the workflow
-        metaDataStartJob.setJobExecutionPlan(jobExecutionPlan)
-
-        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
+        execute()
 
         assertAlignmentPassesAreNotStarted(1)
     }
@@ -281,17 +267,10 @@ class LoadMetaDataTests extends WorkflowTestCase {
         String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
         executionService.executeCommand(realm, "${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
         assertTrue(new File(metaDataFilepath).exists())
-        runScript("scripts/workflows/MetaDataWorkflow.groovy")
-
-        // there will be only one at the database
-        JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
 
         assert AlignmentPass.count() == 0
 
-        // TODO hack to be able to star the workflow
-        metaDataStartJob.setJobExecutionPlan(jobExecutionPlan)
-
-        waitUntilWorkflowFinishes(TIMEOUT)
+        execute(1, false)
 
         assert exactlyOneElement(ProcessingStepUpdate.findAllByState(ExecutionState.FAILURE)).error.errorMessage.contains('Library preparation kit is not set')
         assert AlignmentPass.count() == 0
@@ -343,17 +322,10 @@ class LoadMetaDataTests extends WorkflowTestCase {
         String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
         executionService.executeCommand(realm, "${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
         assertTrue(new File(metaDataFilepath).exists())
-        runScript("scripts/workflows/MetaDataWorkflow.groovy")
-
-        // there will be only one at the database
-        JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
 
         assert AlignmentPass.count() == 0
 
-        // TODO hack to be able to star the workflow
-        metaDataStartJob.setJobExecutionPlan(jobExecutionPlan)
-
-        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
+        execute()
 
         assertAlignmentPassesAreNotStarted(2)
     }
@@ -382,17 +354,9 @@ class LoadMetaDataTests extends WorkflowTestCase {
 
         AntibodyTarget.findOrSaveByName(ANTIBODY_TARGET_1)
 
-        runScript("scripts/workflows/MetaDataWorkflow.groovy")
-
-        // there will be only one at the database
-        JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
-
         assert AlignmentPass.count() == 0
 
-        // TODO hack to be able to star the workflow
-        metaDataStartJob.setJobExecutionPlan(jobExecutionPlan)
-
-        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
+        execute()
 
         assert AlignmentPass.count() == 0
     }
@@ -423,10 +387,12 @@ class LoadMetaDataTests extends WorkflowTestCase {
     }
 
     @Override
-    Runnable getStartJobRunnable() {
-        new Runnable() {
-            public void run() { metaDataStartJob.execute() }
-        }
+    List<String> getWorkflowScripts() {
+        return ["scripts/workflows/MetaDataWorkflow.groovy"]
     }
 
+    @Override
+    Duration getTimeout() {
+        Duration.standardMinutes(2)
+    }
 }

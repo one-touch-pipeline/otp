@@ -6,8 +6,6 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.filehandling.FileNames
-import de.dkfz.tbi.otp.job.jobs.transferMergedBamFile.TransferMergedBamFileStartJob
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
@@ -24,11 +22,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
 
     LsdfFilesService lsdfFilesService
 
-    TransferMergedBamFileStartJob transferMergedBamFileStartJob
 
-
-    // TODO want to get rid of this hardcoded.. idea: maybe calculating from the walltime of the cluster jobs.. -> OTP-570/OTP-672
-    final Duration TIMEOUT = Duration.standardMinutes(40)
 
 
     private static final String CHROMOSOME_X_NAME = "CHR_X"
@@ -570,28 +564,18 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
     @Ignore
     @Test
     void testExecutionWithoutProcessingOptions() {
-        // Import workflow from script file
-        runScript("scripts/workflows/TransferMergedBamFileWorkflow.groovy")
-
-        // there will be only one at the database
-        JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
-
-        assertNotNull(jobExecutionPlan)
-        // setup start condition (the fastqc file as ready to be processed)
-        /* is triggered automatically when
+        /* setup start condition (the fastqc file as ready to be processed):
          * the qa is finished,
-         * the qa for the included single lane bam files are finished
+         * the qa for the included single lane bam files are finished,
          * the merged bam file is not used in a merging process
          */
-        // TODO hack to be able to start the workflow -> OTP-570/OTP-672
-        transferMergedBamFileStartJob.setJobExecutionPlan(jobExecutionPlan)
         ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.createCriteria().list {
             eq("fileOperationStatus", FileOperationStatus.DECLARED)
             order("id", "asc")
         }?.first()
         processedMergedBamFile.fileOperationStatus = FileOperationStatus.NEEDS_PROCESSING
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
-        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
+        execute()
         File mergedBamFile = new File(destinationFileNameMergedBamFile)
         assertEquals(fileNameMergedBamFile1, mergedBamFile.getText())
         checkNumberOfStoredMd5sums(1)
@@ -603,7 +587,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
         }?.first()
         processedMergedBamFile.fileOperationStatus = FileOperationStatus.NEEDS_PROCESSING
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
-        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT, 2)
+        execute(2)
         assertEquals(fileNameMergedBamFile2, mergedBamFile.getText())
         checkNumberOfStoredMd5sums(2)
         checkDestinationFileStructure()
@@ -642,9 +626,12 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
     }
 
     @Override
-    Runnable getStartJobRunnable() {
-        new Runnable() {
-            public void run() { transferMergedBamFileStartJob.execute() }
-        }
+    List<String> getWorkflowScripts() {
+        return ["scripts/workflows/TransferMergedBamFileWorkflow.groovy"]
+    }
+
+    @Override
+    Duration getTimeout() {
+        Duration.standardMinutes(40)
     }
 }

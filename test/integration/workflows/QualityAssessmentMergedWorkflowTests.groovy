@@ -1,24 +1,15 @@
 package workflows
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged.ExecuteMergedBamFileQaAnalysisJob
-import de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged.QualityAssessmentMergedStartJob
-import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
-import de.dkfz.tbi.otp.job.processing.PbsOptionMergingService
 import de.dkfz.tbi.otp.ngsdata.*
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 
 import static org.junit.Assert.assertNotNull
 
 class QualityAssessmentMergedWorkflowTests extends QualityAssessmentAbstractWorkflowTests {
 
-    QualityAssessmentMergedStartJob qualityAssessmentMergedStartJob
     ProcessedMergedBamFileService processedMergedBamFileService
     ProcessingOptionService processingOptionService
 
-    protected AbstractStartJobImpl getJob() {
-        return qualityAssessmentMergedStartJob
-    }
 
     protected Map inputFilesPath() {
         ProcessedMergedBamFile bamFile = ProcessedMergedBamFile.list().first()
@@ -97,31 +88,8 @@ class QualityAssessmentMergedWorkflowTests extends QualityAssessmentAbstractWork
         assertNotNull(processedMergedBamFile.save([flush: true]))
     }
 
-    protected void createWorkflow() {
-        runScript('scripts/qa/QualityAssessmentMergedWorfklow.groovy')
-        SpringSecurityUtils.doWithAuth("admin") {
-            runScript('scripts/qa/InjectQualityAssessmentMergedWorkflowOptions.groovy')
-        }
-        // check, that cluster option are set
-        String key = PbsOptionMergingService.PBS_PREFIX + ExecuteMergedBamFileQaAnalysisJob.class.simpleName
-        ProcessingOption processingOption = processingOptionService.findOptionObject(key, "DKFZ", null)
-        assert processingOption
-        //modify cluster option so the test stay in the fast queue
-        SpringSecurityUtils.doWithAuth("admin") {
-            processingOptionService.createOrUpdate(
-                key,
-                "DKFZ",
-                null,
-                '{"-l": {walltime: "10:00", mem: "100m"}}',
-                "time for merged QA"
-            )
-        }
-    }
-
     @Override
-    Runnable getStartJobRunnable() {
-        new Runnable() {
-            public void run() { qualityAssessmentMergedStartJob.execute() }
-        }
+    List<String> getWorkflowScripts() {
+        return ['scripts/qa/QualityAssessmentMergedWorfklow.groovy', 'scripts/qa/InjectQualityAssessmentMergedWorkflowOptions.groovy']
     }
 }

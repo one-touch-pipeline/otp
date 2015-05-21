@@ -1,22 +1,15 @@
 package workflows
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.jobs.qualityAssessment.QualityAssessmentStartJob
-import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 
 import static org.junit.Assert.assertNotNull
 
 class QualityAssessmentWorkflowTests extends QualityAssessmentAbstractWorkflowTests {
 
-    QualityAssessmentStartJob qualityAssessmentStartJob
     ProcessedBamFileService processedBamFileService
 
-    protected AbstractStartJobImpl getJob() {
-        return qualityAssessmentStartJob
-    }
 
     protected Map inputFilesPath() {
         ProcessedBamFile bamFile = ProcessedBamFile.list().first()
@@ -79,17 +72,8 @@ class QualityAssessmentWorkflowTests extends QualityAssessmentAbstractWorkflowTe
         assertNotNull(processedBamFile.save([flush: true]))
     }
 
-    protected void createWorkflow() {
-        runScript('scripts/qa/QualityAssessmentWorkflow.groovy')
-        SpringSecurityUtils.doWithAuth("admin") {
-            runScript('scripts/qa/InjectQualityAssessmentWorkflowOptions.groovy')
-        }
-    }
-
     @Override
-    Runnable getStartJobRunnable() {
-        new Runnable() {
-            public void run() { qualityAssessmentStartJob.execute() }
-        }
+    List<String> getWorkflowScripts() {
+        return ['scripts/qa/QualityAssessmentWorkflow.groovy', 'scripts/qa/InjectQualityAssessmentWorkflowOptions.groovy']
     }
 }

@@ -3,8 +3,6 @@ package workflows
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
-import de.dkfz.tbi.otp.job.jobs.merging.MergingStartJob
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
@@ -28,11 +26,6 @@ class MergingWorkflowTests extends WorkflowTestCase {
 
     LsdfFilesService lsdfFilesService
 
-    MergingStartJob mergingStartJob
-
-
-    // TODO want to get rid of this hardcoded.. idea: maybe calculating from the walltime of the cluster jobs.. -> OTP-570/OTP-672
-    final Duration TIMEOUT = Duration.standardMinutes(40)
 
     String inputSingleLaneAlingment
 
@@ -44,9 +37,6 @@ class MergingWorkflowTests extends WorkflowTestCase {
 
     @Before
     void setUp() {
-
-        createUserAndRoles()
-
         // this file is already available in the file system in the MergingWorkflowTest folder
         inputSingleLaneAlingment = "${getWorkflowDirectory().absolutePath}/inputFile/blood_runName_s_laneId_PAIRED.sorted.bam"
 
@@ -148,20 +138,8 @@ class MergingWorkflowTests extends WorkflowTestCase {
     @Test
     void testExecutionWithoutProcessingOptions() {
         assertEquals(singleLaneBamFile, processedBamFileService.getFilePath(processedBamFile))
-        // Import workflow from script file
-        SpringSecurityUtils.doWithAuth("admin") {
-            runScript("scripts/workflows/MergingWorkflow.groovy")
-        }
 
         SpringSecurityUtils.doWithAuth("admin") {
-            processingOptionService.createOrUpdate(
-                    "PBS_mergingJob",
-                    "DKFZ",
-                    null,
-                    '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:15:00", mem: "100m"}}',
-                    "merging job depending cluster option for dkfz"
-            )
-
             processingOptionService.createOrUpdate(
                     "picardJavaSetting",
                     null,
@@ -171,11 +149,6 @@ class MergingWorkflowTests extends WorkflowTestCase {
             )
         }
 
-
-        JobExecutionPlan jobExecutionPlan = CollectionUtils.exactlyOneElement(JobExecutionPlan.list())
-
-        // TODO hack to be able to start the workflow -> OTP-570/OTP-672
-        mergingStartJob.setJobExecutionPlan(jobExecutionPlan)
         MergingSet mergingSet = CollectionUtils.exactlyOneElement(MergingSet.createCriteria().list {
             eq("status", MergingSet.State.DECLARED)
             order("id", "asc")
@@ -184,7 +157,7 @@ class MergingWorkflowTests extends WorkflowTestCase {
         mergingSet.status = MergingSet.State.NEEDS_PROCESSING
         assert mergingSet.save(flush: true, failOnError: true)
 
-        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
+        execute()
 
         mergingSet.refresh()
 
@@ -212,9 +185,12 @@ class MergingWorkflowTests extends WorkflowTestCase {
     }
 
     @Override
-    Runnable getStartJobRunnable() {
-        new Runnable() {
-            public void run() { mergingStartJob.execute() }
-        }
+    List<String> getWorkflowScripts() {
+        return ["scripts/workflows/MergingWorkflow.groovy"]
+    }
+
+    @Override
+    Duration getTimeout() {
+        Duration.standardMinutes(40)
     }
 }

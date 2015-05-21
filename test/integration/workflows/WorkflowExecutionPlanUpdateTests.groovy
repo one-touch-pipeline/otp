@@ -1,12 +1,9 @@
 package workflows
 
-import de.dkfz.tbi.otp.job.jobs.dataInstallation.DataInstallationStartJob
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.junit.Ignore
 import org.junit.Test
 
@@ -19,17 +16,12 @@ import org.junit.Test
 
 class WorkflowExecutionPlanUpdateTests extends DataInstallationWorkflowTests {
 
-    //required for getStartJobRunnable()
-    DataInstallationStartJob dataInstallationStartJob
-
-
     @Ignore
     @Test
     void testUpdateOfJobExecutionPlan() {
         SeqTrack seqTrack = furtherDataBaseSetup()
 
-        jobExecutionPlanSetup()
-        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
+        execute()
 
         checkThatWorkflowWasSuccessful(seqTrack)
     }
@@ -44,12 +36,8 @@ class WorkflowExecutionPlanUpdateTests extends DataInstallationWorkflowTests {
         return seqTrack
     }
 
-    private void jobExecutionPlanSetup() {
-        SpringSecurityUtils.doWithAuth("admin") {
-            JobExecutionPlan.withTransaction {
-                runScript("scripts/workflows/OldDataInstallationWorkflow.groovy")
-                runScript("scripts/workflows/DataInstallationWorkflow.groovy")
-            }
-        }
+    @Override
+    List<String> getWorkflowScripts() {
+        return ["scripts/workflows/OldDataInstallationWorkflow.groovy", "scripts/workflows/DataInstallationWorkflow.groovy"]
     }
 }

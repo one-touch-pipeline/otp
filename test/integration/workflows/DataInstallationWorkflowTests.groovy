@@ -1,11 +1,8 @@
 package workflows
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
-import de.dkfz.tbi.otp.job.jobs.dataInstallation.DataInstallationStartJob
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.joda.time.Duration
 import org.junit.Before
 import org.junit.Ignore
@@ -16,13 +13,7 @@ import static org.junit.Assert.assertNotNull
 
 class DataInstallationWorkflowTests extends WorkflowTestCase {
 
-    // TODO  ( jira: OTP-566)  want to get rid of this hardcoded.. idea: maybe calculating from the walltime of the cluster jobs plus some buffer..
-    final Duration TIMEOUT = Duration.standardMinutes(30)
-    final String PBS_WALLTIME = "00:05:00"
-
     LsdfFilesService lsdfFilesService
-
-    DataInstallationStartJob dataInstallationStartJob
 
 
     // files to be processed by the tests
@@ -71,9 +62,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
     @Before
     void setUp() {
         WaitingFileUtils.defaultTimeoutMillis = 100000
-
-        // Setup logic here
-        super.createUserAndRoles()
 
         fastqR1Filepath = "${testDataDir}/35-3B_NoIndex_L007_R1_complete_filtered.fastq.gz"
         fastqR2Filepath = "${testDataDir}/35-3B_NoIndex_L007_R2_complete_filtered.fastq.gz"
@@ -219,8 +207,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
     void testDataInstallation_FilesHaveToBeCopied() {
         SeqTrack seqTrack = createWholeGenomeSetup()
 
-        setExecutionPlan()
-        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
+        execute()
 
         checkThatWorkflowWasSuccessful(seqTrack)
     }
@@ -232,8 +219,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         seqTrack.linkedExternally = true
         assert seqTrack.save(flush: true)
 
-        setExecutionPlan()
-        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
+        execute()
 
         checkThatWorkflowWasSuccessful(seqTrack)
     }
@@ -241,9 +227,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
     @Ignore
     @Test
     void testChipSeqInstallation() {
-        SpringSecurityUtils.doWithAuth("admin") {
-            runScript("scripts/workflows/DataInstallationWorkflow.groovy")
-        }
         SeqType seqType = createSeqType(SeqTypeNames.CHIP_SEQ.seqTypeName, "chip_seq_sequencing")
 
         // creating required Antibody target objects
@@ -266,8 +249,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
 
         createDataFiles(seqTrack)
 
-        setExecutionPlan()
-        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
+        execute()
 
         checkThatWorkflowWasSuccessful(seqTrack)
     }
@@ -275,9 +257,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
     @Ignore
     @Test
     void testDataInstallationWithFastTrack() {
-        SpringSecurityUtils.doWithAuth("admin") {
-            runScript("scripts/workflows/DataInstallationWorkflow.groovy")
-        }
         project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
         assert project.save(flush: true)
 
@@ -286,8 +265,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         SeqTrack seqTrack = createSeqTrack(seqType)
         createDataFiles(seqTrack)
 
-        setExecutionPlan()
-        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
+        execute()
 
         checkThatWorkflowWasSuccessful(seqTrack)
     }
@@ -328,17 +306,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         createBamDataFile(seqTrack, bamFilename, bamFilepath)
     }
 
-    private void setExecutionPlan() {
-        // there will be only one at the database
-        JobExecutionPlan jobExecutionPlan = JobExecutionPlan.list()?.first()
-        // hack to be able to star the workflow
-        dataInstallationStartJob.setJobExecutionPlan(jobExecutionPlan)
-    }
-
     private SeqTrack createWholeGenomeSetup() {
-        SpringSecurityUtils.doWithAuth("admin") {
-            runScript("scripts/workflows/DataInstallationWorkflow.groovy")
-        }
         SeqType seqType = createSeqType(SeqTypeNames.WHOLE_GENOME.seqTypeName, "SeqTypeDir")
 
         SeqTrack seqTrack = createSeqTrack(seqType)
@@ -347,9 +315,12 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
     }
 
     @Override
-    Runnable getStartJobRunnable() {
-        new Runnable() {
-            public void run() { dataInstallationStartJob.execute() }
-        }
+    List<String> getWorkflowScripts() {
+        return ["scripts/workflows/DataInstallationWorkflow.groovy"]
+    }
+
+    @Override
+    Duration getTimeout() {
+        Duration.standardMinutes(30)
     }
 }

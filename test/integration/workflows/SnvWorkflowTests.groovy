@@ -5,14 +5,10 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFileService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingJob
-import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingStartJob
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.ExternalScript
 import groovy.io.FileType
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.joda.time.Duration
 import org.junit.Before
 import org.junit.Ignore
@@ -63,7 +59,7 @@ class SnvWorkflowTests extends WorkflowTestCase {
 
     ProcessedMergedBamFileService processedMergedBamFileService
 
-    final Duration TIMEOUT = Duration.standardMinutes(30)
+
 
     Individual individual
     ProcessedMergedBamFile bamFileTumor
@@ -79,13 +75,9 @@ class SnvWorkflowTests extends WorkflowTestCase {
     ExternalScript deepAnnotationScript
     ExternalScript filterScript
 
-    SnvCallingStartJob snvStartJob
 
     @Before
     void prepare() {
-
-        createUserAndRoles()
-
         File inputDiseaseBamFile = new File(getWorkflowDirectory(), "inputFiles/tumor_SOMEPID_merged.mdup.bam")
         File inputDiseaseBaiFile = new File(getWorkflowDirectory(), "inputFiles/tumor_SOMEPID_merged.mdup.bam.bai")
         File inputControlBamFile = new File(getWorkflowDirectory(), "inputFiles/control_SOMEPID_merged.mdup.bam")
@@ -348,19 +340,6 @@ class SnvWorkflowTests extends WorkflowTestCase {
     }
 
 
-    void execute() {
-        SpringSecurityUtils.doWithAuth("admin") {
-            runScript("scripts/workflows/SnvWorkflow.groovy")
-        }
-
-        // there will be only one plan in the database
-        JobExecutionPlan jobExecutionPlan = CollectionUtils.exactlyOneElement(JobExecutionPlan.list())
-        // hack to be able to start the workflow
-        snvStartJob.setJobExecutionPlan(jobExecutionPlan)
-
-        waitUntilWorkflowFinishesWithoutFailure(TIMEOUT)
-    }
-
     void check(SnvCallingStep startedWith) {
         SnvCallingInstance existingInstance = SnvCallingInstance.listOrderById().first()
         SnvCallingInstance createdInstance = SnvCallingInstance.listOrderById().last()
@@ -434,9 +413,12 @@ class SnvWorkflowTests extends WorkflowTestCase {
     }
 
     @Override
-    Runnable getStartJobRunnable() {
-        new Runnable() {
-            public void run() { snvStartJob.execute() }
-        }
+    List<String> getWorkflowScripts() {
+        return ["scripts/workflows/SnvWorkflow.groovy"]
+    }
+
+    @Override
+    Duration getTimeout() {
+        Duration.standardMinutes(30)
     }
 }
