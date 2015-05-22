@@ -1,13 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-
-import org.junit.*
-
 import de.dkfz.tbi.TestConstants
 import de.dkfz.tbi.otp.ngsdata.*
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.TestFor
+import org.junit.Test
+
 
 @TestFor(ProcessedBamFileService)
 @Build([
@@ -35,18 +33,6 @@ class ProcessedBamFileServiceUnitTests {
     @Test(expected = IllegalArgumentException)
     void testLibraryPreparationKitNullInput() {
         service.libraryPreparationKit(null)
-    }
-
-    @Test(expected = IllegalArgumentException)
-    void testLibraryPreparationKitNotExonSeqType() {
-        Map input = createKitAndBamFile(SeqTypeNames.WHOLE_GENOME.seqTypeName, ExomeSeqTrack)
-        assertEquals(input.kit, service.libraryPreparationKit(input.bamFile))
-    }
-
-    @Test(expected = IllegalArgumentException)
-    void testLibraryPreparationKitWrongSeqTrackType() {
-        Map input = createKitAndBamFile(SeqTypeNames.EXOME.seqTypeName, SeqTrack)
-        assertEquals(input.kit, service.libraryPreparationKit(input.bamFile))
     }
 
     private Map createKitAndBamFile(String seqTypeName, Class seqTypeClass) {
