@@ -454,7 +454,7 @@ $.otp.dataTableFilter = {
                     $("td.add input", lastTr).show();
                 }
             } else {
-                $("td.attribute select").val("none");
+                $("td.attribute select", tr).val("none");
                 $("td.add input", tr).hide();
                 $("td.remove input", tr).hide();
             }

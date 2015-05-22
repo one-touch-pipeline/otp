@@ -35,10 +35,10 @@
                             </tr>
                         </table>
                         <div class="searchCriteriaTableSampleTypes">
-                            <table id="searchCriteriaTable">
+                            <table id="searchCriteriaTable3">
                                 <tr>
                                     <td class="attribute">
-                                        <g:select class="criteria" name="criteria"
+                                        <g:select class="criteria" name="criteria2"
                     from='${sampleTypes}' noSelection="${["none": message(code:"otp.filter.sampleType")]}" ></g:select>
                                     </td>
                                 </tr>

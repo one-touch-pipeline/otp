@@ -80,7 +80,7 @@ $.otp.projectOverviewTable = {
                 }
             });
 
-            for (i = 0; i < tableSize; i += 1) {
+            for (i = ignoredColumns - 1; i < tableSize; i += 1) {
                 if (result.indexOf(i) !== -1) {
                     oTableLaneOverview.fnFilter('.+', i, true);
                 } else {
@@ -89,13 +89,14 @@ $.otp.projectOverviewTable = {
             }
         });
 
-        $.otp.dataTableFilter.register($('.searchCriteriaTableSampleTypes'), oTableLaneOverview, false, function () {
-            var select = $('.searchCriteriaTableSampleTypes').find('select')[0],
+        $.otp.dataTableFilter.register($('#searchCriteriaTable3'), oTableLaneOverview, false, function () {
+            var select = $('#searchCriteriaTable3').find('select')[0],
                 column = 1;
             if (select.selectedIndex !== 0) {
                 oTableLaneOverview.fnFilter('^' + select.value + '$', column, true);
             } else {
                 oTableLaneOverview.fnFilter('', column);
+
             }
         });
         return oTableLaneOverview;
