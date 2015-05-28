@@ -51,7 +51,7 @@ class MergingWorkPackage {
         // As soon a you loosen this constraint, un-ignore:
         // - AlignmentPassUnitTests.testIsLatestPass_2PassesDifferentWorkPackages
         sample unique: 'seqType'
-        needsProcessing(validator: {val, obj -> !val || obj.workflow.name == Workflow.Name.RODDY})
+        needsProcessing(validator: {val, obj -> !val || obj.workflow.name == Workflow.Name.PANCAN_ALIGNMENT})
         workflow(validator: {workflow -> workflow.type == Workflow.Type.ALIGNMENT})
     }
 

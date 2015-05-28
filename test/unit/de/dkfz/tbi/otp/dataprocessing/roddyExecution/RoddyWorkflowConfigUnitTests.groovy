@@ -3,13 +3,10 @@ package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 import de.dkfz.tbi.otp.dataprocessing.Workflow
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstanceTestData
 import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.testing.TestEndStateAwareJob
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.ExternalScript
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestFor
-import grails.validation.ValidationErrors
-import grails.validation.ValidationException
 import org.junit.*
 
 import de.dkfz.tbi.TestCase
@@ -133,7 +130,7 @@ public class RoddyWorkflowConfigUnitTests {
         return new RoddyWorkflowConfig([
             project: Project.build(),
             externalScriptVersion: "v1",
-            workflow: Workflow.buildLazy(name: Workflow.Name.RODDY, type: Workflow.Type.ALIGNMENT),
+            workflow: Workflow.buildLazy(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT),
             configFilePath: configFile.path
         ] + properties)
     }

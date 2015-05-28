@@ -53,7 +53,7 @@ class RoddyBamFile extends AbstractMergedBamFile {
             }
         }
         baseBamFile nullable: true
-        workPackage validator: { val, obj -> val?.workflow?.name == Workflow.Name.RODDY }
+        workPackage validator: { val, obj -> val?.workflow?.name == Workflow.Name.PANCAN_ALIGNMENT }
         config validator: { val, obj -> val?.workflow?.id == obj.workPackage?.workflow?.id }
         identifier unique: 'workPackage'
     }

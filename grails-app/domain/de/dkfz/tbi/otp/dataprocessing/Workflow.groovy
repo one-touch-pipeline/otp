@@ -4,7 +4,7 @@ class Workflow {
 
     enum Name {
         DEFAULT_OTP,
-        RODDY
+        PANCAN_ALIGNMENT
     }
     Name name
 

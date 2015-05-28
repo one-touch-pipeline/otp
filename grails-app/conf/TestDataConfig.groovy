@@ -131,7 +131,7 @@ testDataConfig {
                 }
                 return config.absolutePath
             }
-            workflow = { Workflow.buildLazy(name: Workflow.Name.RODDY, type: Workflow.Type.ALIGNMENT) }
+            workflow = { Workflow.buildLazy(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT) }
         }
         'de.dkfz.tbi.otp.utils.ExternalScript' {
             filePath = "${TestCase.TEST_DIRECTORY}/ExternalScript_${counter++}"

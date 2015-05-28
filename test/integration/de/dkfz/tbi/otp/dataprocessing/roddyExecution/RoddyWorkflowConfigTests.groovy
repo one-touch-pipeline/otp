@@ -9,7 +9,6 @@ import de.dkfz.tbi.otp.ngsdata.TestData
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.ExternalScript
-import junit.framework.Assert
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -63,7 +62,7 @@ class RoddyWorkflowConfigTests {
 
     @Test
     void testValidateNewConfigFile_NoExternalScriptForThisWorkflowName_ShouldFail() {
-        Workflow workflow = Workflow.build(name: Workflow.Name.RODDY, type: Workflow.Type.ALIGNMENT)
+        Workflow workflow = Workflow.build(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT)
         ExternalScript.build(scriptIdentifier: WRONG_WORKFLOW_NAME, scriptVersion: PLUGIN_VERSION)
         TestCase.shouldFail(AssertionError) {
             RoddyWorkflowConfig.validateNewConfigFile(PLUGIN_VERSION, workflow, configFile.path)
@@ -190,7 +189,7 @@ class RoddyWorkflowConfigTests {
 
 
     void testCreateConfigPerProject_PreviousConfigExists() {
-        Workflow workflow = Workflow.build(name: Workflow.Name.RODDY, type: Workflow.Type.ALIGNMENT)
+        Workflow workflow = Workflow.build(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT)
         ExternalScript externalScript1 = ExternalScript.build()
         Project project = TestData.createProject()
         ConfigPerProject firstConfigPerProject = RoddyWorkflowConfig.build(
@@ -250,7 +249,7 @@ class RoddyWorkflowConfigTests {
 
 
     private Workflow createCorrectSetupAndReturnWorkflow() {
-        Workflow workflow = Workflow.build(name: Workflow.Name.RODDY, type: Workflow.Type.ALIGNMENT)
+        Workflow workflow = Workflow.build(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT)
         ExternalScript externalScript = ExternalScript.build(scriptIdentifier: workflow.name.name(), scriptVersion: PLUGIN_VERSION)
         ExternalScript.build(scriptIdentifier: workflow.name.name(), scriptVersion: ANOTHER_PLUGIN_VERSION, filePath: "${externalScript.filePath}_v1")
         return workflow

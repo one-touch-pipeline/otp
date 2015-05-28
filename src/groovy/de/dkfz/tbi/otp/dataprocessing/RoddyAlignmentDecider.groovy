@@ -15,7 +15,7 @@ class RoddyAlignmentDecider extends AbstractAlignmentDecider {
 
     @Override
     Workflow.Name getWorkflowName() {
-        return Workflow.Name.RODDY
+        return Workflow.Name.PANCAN_ALIGNMENT
     }
 
     @Override

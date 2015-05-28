@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
@@ -191,7 +190,7 @@ class DomainFactory {
     public static createRoddyBamFile(Map bamFileProperties = [:]) {
         MergingWorkPackage workPackage = bamFileProperties.workPackage
         if (!workPackage) {
-            Workflow workflow = Workflow.buildLazy(name: Workflow.Name.RODDY, type: Workflow.Type.ALIGNMENT)
+            Workflow workflow = Workflow.buildLazy(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT)
             workPackage = MergingWorkPackage.build(workflow: workflow)
         }
         SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile(workPackage)

@@ -15,7 +15,7 @@ public class RoddyAlignmentDeciderTest {
     @Test
     void testGetWorkflow() {
         Workflow wf = decider.getWorkflow()
-        assert wf.name == Workflow.Name.RODDY
+        assert wf.name == Workflow.Name.PANCAN_ALIGNMENT
         assert wf.type == Workflow.Type.ALIGNMENT
     }
 
