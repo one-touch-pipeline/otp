@@ -48,7 +48,10 @@ class SampleTypePerProject {
      */
     static Collection findMissingCombinations() {
         return SampleTypePerProject.executeQuery(
-            "SELECT DISTINCT st.sample.individual.project as project, st.sample.sampleType as sampleType FROM SeqTrack st " +
+            "SELECT DISTINCT project as project, sampleType as sampleType " +
+            "FROM SeqTrack st " +
+            "    join st.sample.individual.project project " +
+            "    join st.sample.sampleType sampleType " +
             "WHERE st.seqType IN (:seqTypes) " +
             "AND NOT EXISTS (FROM DataFile WHERE seqTrack = st AND fileType.type = :fileType AND fileWithdrawn = true) " +
             "AND NOT EXISTS (FROM SampleTypePerProject stpp WHERE stpp.project = st.sample.individual.project AND stpp.sampleType = st.sample.sampleType)",

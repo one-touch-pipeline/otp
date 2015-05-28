@@ -186,36 +186,43 @@ class SamplePair {
     static Collection<SamplePair> findMissingDiseaseControlSamplePairs(final Date minDate) {
         final Collection queryResults = SamplePair.executeQuery("""
             SELECT DISTINCT
-              st1.sample.individual,
-              st1.sample.sampleType,
-              st2.sample.sampleType,
-              st1.seqType
+              individual_1,
+              sampleType_1,
+              sampleType_2,
+              seqType_1
             FROM
-              SeqTrack st1,
-              SeqTrack st2,
+              SeqTrack st1
+                join st1.sample.individual individual_1
+                join individual_1.project project_1
+                join st1.sample.sampleType sampleType_1
+                join st1.seqType seqType_1,
+              SeqTrack st2
+                join st2.sample.individual individual_2
+                join st2.sample.sampleType sampleType_2
+                join st2.seqType seqType_2,
               SampleTypePerProject stpp1,
               SampleTypePerProject stpp2
             WHERE
-              st1.seqType IN (:seqTypes) AND
-              st2.seqType = st1.seqType AND
-              st2.sample.individual = st1.sample.individual AND
-              stpp1.project = st1.sample.individual.project AND
-              stpp2.project = st1.sample.individual.project AND
-              stpp1.sampleType = st1.sample.sampleType AND
-              stpp2.sampleType = st2.sample.sampleType AND
+              seqType_1 IN (:seqTypes) AND
+              seqType_2 = seqType_1 AND
+              individual_2 = individual_1 AND
+              stpp1.project = project_1 AND
+              stpp2.project = project_1 AND
+              stpp1.sampleType = sampleType_1 AND
+              stpp2.sampleType = sampleType_2 AND
               stpp1.category = :disease AND
               stpp2.category = :control AND
-              EXISTS (FROM DataFile WHERE seqTrack.sample.individual = st1.sample.individual AND dateCreated >= :minDate) AND
+              EXISTS (FROM DataFile WHERE seqTrack.sample.individual = individual_1 AND dateCreated >= :minDate) AND
               NOT EXISTS (FROM DataFile WHERE seqTrack = st1 AND fileType.type = :fileType AND fileWithdrawn = true) AND
               NOT EXISTS (FROM DataFile WHERE seqTrack = st2 AND fileType.type = :fileType AND fileWithdrawn = true) AND
               NOT EXISTS (
                 FROM
                   SamplePair
                 WHERE
-                  individual = st1.sample.individual AND
-                  sampleType1 = st1.sample.sampleType AND
-                  sampleType2 = st2.sample.sampleType AND
-                  seqType = st1.seqType)
+                  individual = individual_1 AND
+                  sampleType1 = sampleType_1 AND
+                  sampleType2 = sampleType_2 AND
+                  seqType = seqType_1)
             """, [
                 seqTypes: SeqTypeService.alignableSeqTypes(),
                 disease: SampleType.Category.DISEASE,
