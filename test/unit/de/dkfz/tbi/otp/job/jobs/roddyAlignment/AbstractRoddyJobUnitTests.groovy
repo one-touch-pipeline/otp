@@ -17,19 +17,19 @@ class AbstractRoddyJobUnitTests extends TestCase {
     public static final String TEST_EXIT_CODE = "testExitCode"
     public static final String TEST_JOB_CLASS = "testJobClass"
 
-    def abstractMaybeSubmitValidateRoddyJobInst
+    def abstractRoddyJob
     ClusterJobIdentifier clusterJobIdentifier
     CreateJobStateLogFileHelper createJobStateLogFileHelper = new CreateJobStateLogFileHelper()
 
     @Before
     void setUp() {
-        abstractMaybeSubmitValidateRoddyJobInst = [processingStepId: 123456789] as AbstractRoddyJob
+        abstractRoddyJob = [processingStepId: 123456789] as AbstractRoddyJob
         clusterJobIdentifier = new ClusterJobIdentifierImpl(DomainFactory.createRealmDataProcessingDKFZ(), "pbsId")
     }
 
     @After
     void tearDown() {
-        removeMetaClass(AbstractRoddyJob, abstractMaybeSubmitValidateRoddyJobInst)
+        removeMetaClass(AbstractRoddyJob, abstractRoddyJob)
         GroovySystem.metaClassRegistry.removeMetaClass(RoddyBamFile)
     }
 
@@ -38,7 +38,7 @@ class AbstractRoddyJobUnitTests extends TestCase {
         JobStateLogFiles jobStateLogFiles = createJobStateLogFileHelper.createJobStateLogFiles()
 
         assert [(clusterJobIdentifier): "JobStateLogFile contains no information for ${clusterJobIdentifier}"] ==
-                abstractMaybeSubmitValidateRoddyJobInst.analyseFinishedClusterJobs([clusterJobIdentifier], jobStateLogFiles)
+                abstractRoddyJob.analyseFinishedClusterJobs([clusterJobIdentifier], jobStateLogFiles)
     }
 
     @Test
@@ -54,7 +54,7 @@ class AbstractRoddyJobUnitTests extends TestCase {
         ])
 
         assert [(clusterJobIdentifier): "${clusterJobIdentifier} is not finished."] ==
-                abstractMaybeSubmitValidateRoddyJobInst.analyseFinishedClusterJobs([clusterJobIdentifier], jobStateLogFiles)
+                abstractRoddyJob.analyseFinishedClusterJobs([clusterJobIdentifier], jobStateLogFiles)
     }
 
     @Test
@@ -77,7 +77,7 @@ class AbstractRoddyJobUnitTests extends TestCase {
         ])
 
         assert [(clusterJobIdentifier): "${clusterJobIdentifier} failed processing. ExitCode: ${jobStateLogFiles.getPropertyFromLatestLogFileEntry(clusterJobIdentifier.clusterJobId, "exitCode")}"] ==
-                abstractMaybeSubmitValidateRoddyJobInst.analyseFinishedClusterJobs([clusterJobIdentifier], jobStateLogFiles)
+                abstractRoddyJob.analyseFinishedClusterJobs([clusterJobIdentifier], jobStateLogFiles)
     }
 
     @Test
@@ -106,7 +106,7 @@ class AbstractRoddyJobUnitTests extends TestCase {
                 ]
         ])
 
-        assert [:] == abstractMaybeSubmitValidateRoddyJobInst.analyseFinishedClusterJobs([clusterJobIdentifier], jobStateLogFiles)
+        assert [:] == abstractRoddyJob.analyseFinishedClusterJobs([clusterJobIdentifier], jobStateLogFiles)
     }
 
     @Test
@@ -121,6 +121,6 @@ class AbstractRoddyJobUnitTests extends TestCase {
                 ]
         ])
 
-        assert [:] == abstractMaybeSubmitValidateRoddyJobInst.analyseFinishedClusterJobs([], jobStateLogFiles)
+        assert [:] == abstractRoddyJob.analyseFinishedClusterJobs([], jobStateLogFiles)
     }
 }

@@ -35,14 +35,16 @@ class ClusterJobService {
     /**
      * creates a cluster job object with at this time known attributes
      */
-    public ClusterJob createClusterJob(Realm realm, String clusterJobId, ProcessingStep processingStep, SeqType seqType = null, String clusterJobName = null) {
-        String cName = clusterJobName ?: processingStep.getPbsJobDescription()
+    public ClusterJob createClusterJob(Realm realm, String clusterJobId,
+                                       ProcessingStep processingStep, SeqType seqType = null,
+                                       String clusterJobName = processingStep.getPbsJobDescription(),
+                                       String jobClass = processingStep.nonQualifiedJobClass) {
         ClusterJob job = new ClusterJob(
                                     processingStep: processingStep,
                                     realm: realm,
                                     clusterJobId: clusterJobId,
-                                    clusterJobName: cName,
-                                    jobClass: processingStep.nonQualifiedJobClass,
+                                    clusterJobName: clusterJobName,
+                                    jobClass: jobClass,
                                     seqType: seqType,
                                     queued: new DateTime()
                                 ).save(flush: true)

@@ -1,14 +1,21 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFiles
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.job.processing.AbstractMaybeSubmitWaitValidateJob
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.infrastructure.ClusterJobService
+import de.dkfz.tbi.otp.job.processing.AbstractMaybeSubmitWaitValidateJob
+import de.dkfz.tbi.otp.job.processing.ProcessingStep
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
+
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 /**
  * class for roddy jobs that handle failed or not finished cluster jobs, analyse them and provide
@@ -22,7 +29,14 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
 
     @Autowired
     ConfigService configService
+    @Autowired
+    ClusterJobService clusterJobService
+    @Autowired
+    SchedulerService schedulerService
 
+    // Example:
+    // Running job r150428_104246480_stds_snvCallingMetaScript => 3504988
+    static final Pattern roddyOutputPattern = Pattern.compile(/(?:^|\s)Running job (.*_([^_]+)) => ([0-9]+)(?:\s|$)/)
 
     @Override
     protected final NextAction maybeSubmit() throws Throwable {
@@ -32,8 +46,10 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
             String cmd = prepareAndReturnWorkflowSpecificCommand(roddyResult, realm)
 
             Process process = executeRoddyCommandService.executeRoddyCommand(cmd)
-            // stdout is needed for OTP-1491
+
             String stdout = executeRoddyCommandService.returnStdoutOfFinishedCommandExecution(process)
+            createClusterJobObjects(realm, stdout)
+
             executeRoddyCommandService.checkIfRoddyWFExecutionWasSuccessful(process)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
@@ -83,5 +99,22 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
             }
         }
         return failedOrNotFinishedClusterJobs
+    }
+
+    void createClusterJobObjects(Realm realm, String roddyOutput) {
+        assert realm
+        ProcessingStep processingStep = getProcessingStep()
+        assert processingStep
+        SeqType seqType = ((RoddyResult)getProcessParameterObject()).getSeqType()
+        assert seqType
+
+        roddyOutput.eachLine {
+            Matcher m = it =~ roddyOutputPattern
+            m.matches()
+            String jobName = m.group(2)
+            String pbsId = m.group(3)
+
+            clusterJobService.createClusterJob(realm, pbsId, processingStep, seqType, "${jobName}_${this.class.name}", this.class.name)
+        }
     }
 }

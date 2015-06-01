@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
 import de.dkfz.tbi.otp.job.scheduler.PbsJobInfo
@@ -14,6 +15,8 @@ import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
+import org.joda.time.DateTime
+import org.joda.time.Duration
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -27,11 +30,13 @@ class AbstractRoddyJobTests {
     public static final ClusterJobIdentifier identifierE = new ClusterJobIdentifierImpl(DomainFactory.createRealmDataProcessingDKFZ(), "pbsId5")
     public static final ClusterJobIdentifier identifierF = new ClusterJobIdentifierImpl(DomainFactory.createRealmDataProcessingDKFZ(), "pbsId6")
     public static final ClusterJobIdentifier identifierG = new ClusterJobIdentifierImpl(DomainFactory.createRealmDataProcessingDKFZ(), "pbsId7")
+    final shouldFail = new GroovyTestCase().&shouldFail
 
     ClusterJobService clusterJobService
     File executionStore
 
     AbstractRoddyJob roddyJob
+    Realm realm
     int counter
 
     @Before
@@ -39,7 +44,7 @@ class AbstractRoddyJobTests {
         counter = 0
 
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        Realm.build([name: roddyBamFile.project.realmName, operationType: Realm.OperationType.DATA_MANAGEMENT])
+        realm = Realm.build([name: roddyBamFile.project.realmName, operationType: Realm.OperationType.DATA_MANAGEMENT])
 
 
         executionStore =  roddyBamFile.getTmpRoddyExecutionStoreDirectory()
@@ -54,13 +59,14 @@ class AbstractRoddyJobTests {
 
         roddyJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
         roddyJob.configService = new ConfigService()
+        roddyJob.clusterJobService = new ClusterJobService()
 
         roddyJob.executeRoddyCommandService.metaClass.executeRoddyCommand = { String cmd ->
             return [ 'bash', '-c', "echo Hallo" ].execute()
         }
         roddyJob.executeRoddyCommandService.metaClass.returnStdoutOfFinishedCommandExecution = { Process process ->
             counter ++
-            return "Hallo"
+            return "Running job r150428_104246480_stds_snvCallingMetaScript => 3504988"
         }
         roddyJob.executeRoddyCommandService.metaClass.checkIfRoddyWFExecutionWasSuccessful = { Process process ->
             counter++
@@ -191,5 +197,82 @@ ${logFileMapG.pbsId}.${logFileMapG.host}:${logFileMapG.exitCode}:${logFileMapG.t
 
         assert AbstractMultiJob.NextAction.SUCCEED == roddyJob.execute([pbsJobInfo])
         assert counter == 1
+    }
+
+
+    @Test
+    void testCreateClusterJobObjects_Works() {
+        String roddyOutput = """\
+Running job r150428_104246480_stds_snvCallingMetaScript => 3504988
+Running job r150428_104246480_stds_snvAnnotation => 3504989"""
+
+
+        roddyJob.createClusterJobObjects(realm, roddyOutput)
+
+        assert ClusterJob.all.find {
+            it.clusterJobId == "3504988" &&
+            it.clusterJobName == "snvCallingMetaScript_AbstractRoddyJob_groovyProxy" &&
+            it.jobClass == "AbstractRoddyJob_groovyProxy" &&
+            it.realm == realm &&
+            !it.validated &&
+            it.processingStep.id != null &&
+            it.seqType.id != null &&
+            it.queued != null &&
+            it.exitStatus == null &&
+            it.exitCode == null &&
+            it.started == null &&
+            it.ended == null &&
+            it.requestedWalltime == null &&
+            it.requestedCores == null &&
+            it.usedCores == null &&
+            it.cpuTime == null &&
+            it.requestedMemory == null &&
+            it.usedMemory == null
+        }
+        assert ClusterJob.all.find {
+            it.clusterJobId == "3504989" &&
+            it.clusterJobName == "snvAnnotation_AbstractRoddyJob_groovyProxy" &&
+            it.jobClass == "AbstractRoddyJob_groovyProxy" &&
+            it.realm == realm &&
+            !it.validated &&
+            it.processingStep.id != null &&
+            it.seqType.id != null &&
+            it.queued != null &&
+            it.exitStatus == null &&
+            it.exitCode == null &&
+            it.started == null &&
+            it.ended == null &&
+            it.requestedWalltime == null &&
+            it.requestedCores == null &&
+            it.usedCores == null &&
+            it.cpuTime == null &&
+            it.requestedMemory == null &&
+            it.usedMemory == null
+        }
+    }
+
+
+    @Test
+    void testCreateClusterJobObjects_realmIsNull_fails() {
+        String roddyOutput = "Running job r150428_104246480_stds_snvCallingMetaScript => 3504988"
+
+        shouldFail AssertionError, {
+            roddyJob.createClusterJobObjects(null, roddyOutput)
+        }
+
+        assert ClusterJob.all.empty
+    }
+
+
+    @Test
+    void testCreateClusterJobObjects_invalidRoddyOutput_fails() {
+        String roddyOutput = """\
+asdfasdfasdf"""
+
+        shouldFail IllegalStateException, {
+            roddyJob.createClusterJobObjects(realm, roddyOutput)
+        }
+
+        assert ClusterJob.all.empty
     }
 }
