@@ -42,7 +42,6 @@ class RunService {
                     seqCenter {
                         ilike("name", filter)
                     }
-                    sqlRestriction("upper(storage_realm) like upper('${filter}')")
                 }
             }
             if (filtering.name) {
@@ -101,7 +100,6 @@ class RunService {
                         seqCenter {
                             ilike("name", filter)
                         }
-                        sqlRestriction("upper(storage_realm) like upper('${filter}')")
                     }
                 }
                 if (filtering.name) {

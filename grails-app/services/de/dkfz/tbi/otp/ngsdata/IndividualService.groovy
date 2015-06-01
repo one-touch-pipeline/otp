@@ -182,11 +182,6 @@ AND i.id > :indId
                     project {
                         ilike("name", filter)
                     }
-                    /**
-                     * sqlRestriction because ilike could be just used for string.
-                     * The parameter type is enum and < ilike("type", filter)> did not work.
-                     **/
-                    sqlRestriction("upper(type) like upper('${filter}')")
                 }
             }
             if (filtering.project) {
@@ -248,11 +243,6 @@ AND i.id > :indId
                         project {
                             ilike("name", filter)
                         }
-                        /**
-                         * sqlRestriction because ilike could be just used for string.
-                         * The parameter type is enum and < ilike("type", filter)> did not work.
-                         **/
-                        sqlRestriction("upper(type) like upper('${filter}')")
                     }
                 }
                 if (filtering.project) {
