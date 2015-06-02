@@ -215,4 +215,8 @@ public class ProcessingStep implements Serializable {
         ].findAll().join('_')
     }
 
+    public boolean belongsToMultiJob() {
+        Class jobClass = Class.forName(jobClass, true, getClass().getClassLoader())
+        return AbstractMultiJob.isAssignableFrom(jobClass)
+    }
 }
