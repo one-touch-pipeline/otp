@@ -1025,6 +1025,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         process.finished = true
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        step.metaClass.belongsToMultiJob = { -> return false }
         assertNotNull(step.save())
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
@@ -1147,6 +1148,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        step.metaClass.belongsToMultiJob = { -> return false }
         assertNotNull(step.save())
         mockProcessingStepAsFailed(step)
         assertFalse(process.finished)
@@ -1183,6 +1185,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         process.finished = true
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        step.metaClass.belongsToMultiJob = { -> return false }
         assertNotNull(step.save())
         shouldFail(IncorrectProcessingException) {
             schedulerService.restartProcessingStep(step, false)
@@ -1213,6 +1216,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         process.finished = true
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        step.metaClass.belongsToMultiJob = { -> return false }
         assertNotNull(step.save())
         mockProcessingStepAsFailed(step)
         schedulerService.restartProcessingStep(step, false)
@@ -1289,9 +1293,11 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(process.save())
         // let first ProcessingStep succeed
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        step.metaClass.belongsToMultiJob = { -> return false }
         assertNotNull(step.save())
         mockProcessingStepAsSucceeded(step)
         ProcessingStep step2 = new ProcessingStep(jobDefinition: jobDefinition2, process: process, previous: step)
+        step2.metaClass.belongsToMultiJob = { -> return false }
         assertNotNull(step2.save())
         step.next = step2
         assertNotNull(step.save())
@@ -1457,6 +1463,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
         assertNotNull(process.save())
         ProcessingStep firstStep = new ProcessingStep(jobDefinition: jobDefinition1, process: process)
+        firstStep.metaClass.belongsToMultiJob = { -> return false }
         assertNotNull(firstStep.save())
         mockProcessingStepAsFinished(firstStep)
         // create some output parameters for the step
@@ -1466,6 +1473,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
         // create second ProcessingStep
         ProcessingStep secondStep = new ProcessingStep(jobDefinition: jobDefinition2, process: process, previous: firstStep)
+        secondStep.metaClass.belongsToMultiJob = { -> return false }
         assertNotNull(secondStep.save())
         firstStep.next = secondStep
         assertNotNull(firstStep.save(flush: true))
@@ -1486,6 +1494,51 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertFalse(restartedStep.output.empty)
         assertEquals(1, restartedStep.output.size())
         assertEquals("foo", restartedStep.output[0].value)
+    }
+
+    private ProcessingStep createFailedProcessingStep() {
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // create the JobExecutionPlan with two Job Definitions
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
+        assertNotNull(jep.save())
+        JobDefinition jobDefinition = createTestJob("test", jep)
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        jobDefinition.next = createTestEndStateAwareJob("test2", jep, jobDefinition)
+        assertNotNull(jobDefinition.save())
+        assertNotNull(jep.save(flush: true))
+        // create the Process
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: this.class.name, startJobVersion: "1")
+        process.finished = true
+        assertNotNull(process.save())
+        ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
+        step.metaClass.belongsToMultiJob = { -> return true }
+        assertNotNull(step.save())
+        mockProcessingStepAsFailed(step)
+        return step
+    }
+
+    void testRestartProcessingStep_WhenMultiJobResumeTrue() {
+        ProcessingStep step = createFailedProcessingStep()
+        schedulerService.restartProcessingStep(step, false, true)
+        assertEquals(5, ProcessingStepUpdate.countByProcessingStep(step))
+        assertEquals(ExecutionState.RESUMED, ProcessingStepUpdate.findAllByProcessingStep(step).last().state)
+        // no RestartedProcessingSteps should be created
+        assertEquals([], RestartedProcessingStep.findAllByOriginal(step))
+        assertFalse(step.process.finished)
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+    }
+
+    void testRestartProcessingStep_WhenMultiJobResumeFalse() {
+        ProcessingStep step = createFailedProcessingStep()
+        schedulerService.restartProcessingStep(step)
+        assertEquals(5, ProcessingStepUpdate.countByProcessingStep(step))
+        assertEquals(ExecutionState.RESTARTED, ProcessingStepUpdate.findAllByProcessingStep(step).last().state)
+        // RestartedProcessingStep should be created
+        assertEquals(1, RestartedProcessingStep.count())
+        assertFalse(step.process.finished)
     }
 
     void testIsJobResumable_notResumable() {

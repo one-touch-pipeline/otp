@@ -71,7 +71,7 @@ class CrashRecoveryServiceUnitTests {
                 assert allowCallOfCreateNextProcessingStep
                 callCreateNextProcessingStepCount++
             },
-            restartProcessingStep: { ProcessingStep previous, boolean schedule ->
+            restartProcessingStep: { ProcessingStep previous, boolean schedule, boolean resume3in1job ->
                 assert allowCallOfRestartProcessingStep
                 callRestartProcessingStepCount++
             },

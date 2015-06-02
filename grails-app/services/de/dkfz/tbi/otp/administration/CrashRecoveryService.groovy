@@ -96,7 +96,7 @@ class CrashRecoveryService {
         List<ProcessingStep> steps = getProcessingSteps(ids)
         steps.each { ProcessingStep processingStep->
             performMarkProcessingStepAsFailed(processingStep, reason)
-            schedulerService.restartProcessingStep(processingStep, false)
+            schedulerService.restartProcessingStep(processingStep, false, true)
         }
     }
 
