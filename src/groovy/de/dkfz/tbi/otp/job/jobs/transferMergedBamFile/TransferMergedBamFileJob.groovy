@@ -50,7 +50,7 @@ class TransferMergedBamFileJob extends AbstractEndStateAwareJobImpl {
         String text = """
 cd ${source}
 ${clusterPrefix.cp} *.bam *.bai *.md5sum ${clusterPrefix.dest}${temporalDestinationDir}
-${clusterPrefix.exec} \"find ${temporalDestinationDir} -type f -exec chmod 0640 '{}' \\;\"
+${clusterPrefix.exec} \"find ${temporalDestinationDir} -type f -exec chmod 0644 '{}' \\;\"
 """
         return text
     }

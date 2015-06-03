@@ -119,7 +119,7 @@ class ExecutePanCanJobTests {
 
         String expectedCmd =  """\
 cd ${roddyPath} \
-&& sudo -U OtherUnixUser roddy.sh rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.externalScriptVersion}.config@WHOLE_GENOME \
+&& sudo -U OtherUnixUser roddy.sh rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.externalScriptVersion}.config@WGS \
 ${roddyBamFile.individual.pid} \
 --useconfig=${roddyApplicationIni} \
 --useRoddyVersion=${roddyVersion} \
@@ -149,7 +149,7 @@ CHROM_SIZES_FILE://tmp/otp-unit-test/processing/reference_genomes/${roddyBamFile
 
         String expectedCmd = """\
 cd ${roddyPath} \
-&& sudo -U OtherUnixUser roddy.sh rerun ${roddyBamFile2.workflow.name}_${roddyBamFile2.config.externalScriptVersion}.config@WHOLE_GENOME \
+&& sudo -U OtherUnixUser roddy.sh rerun ${roddyBamFile2.workflow.name}_${roddyBamFile2.config.externalScriptVersion}.config@WGS \
 ${roddyBamFile2.individual.pid} \
 --useconfig=${roddyApplicationIni} \
 --useRoddyVersion=${roddyVersion} \

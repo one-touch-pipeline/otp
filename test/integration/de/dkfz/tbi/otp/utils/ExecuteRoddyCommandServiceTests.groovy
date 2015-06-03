@@ -29,6 +29,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Before
     void setUp() {
+        SeqType.buildLazy(name: SeqTypeNames.EXOME.seqTypeName, alias: SeqTypeNames.EXOME.seqTypeName, libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
         roddyBamFile = DomainFactory.createRoddyBamFile()
 
         realm = DomainFactory.createRealmDataManagementDKFZ([
@@ -149,12 +150,11 @@ class ExecuteRoddyCommandServiceTests {
         roddyBamFile.mergingWorkPackage.seqType = SeqType.wholeGenomePairedSeqType
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
-        assert SeqType.wholeGenomePairedSeqType.name == executeRoddyCommandService.getAnalysisIDinConfigFile(roddyBamFile)
+        assert SeqType.wholeGenomePairedSeqType.alias == executeRoddyCommandService.getAnalysisIDinConfigFile(roddyBamFile)
     }
 
     @Test
     void testGetAnalysisIDinConfigFile_SeqTypeEXOME() {
-        SeqType.build(name: SeqTypeNames.EXOME.seqTypeName, alias: SeqTypeNames.EXOME.seqTypeName, libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
         roddyBamFile.mergingWorkPackage.seqType = SeqType.exomePairedSeqType
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
@@ -163,7 +163,6 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testGetAnalysisIDinConfigFile_DifferentSeqType_ShouldFail() {
-        SeqType.build(name: SeqTypeNames.EXOME.seqTypeName, alias: SeqTypeNames.EXOME.seqTypeName, libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
         roddyBamFile.mergingWorkPackage.seqType = SeqType.build(name: "differentSeqType")
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
 

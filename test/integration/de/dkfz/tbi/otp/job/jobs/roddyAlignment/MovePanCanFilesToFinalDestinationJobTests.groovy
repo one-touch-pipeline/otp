@@ -146,7 +146,7 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
     void testMoveResultFiles_AllFine() {
         CreateRoddyFileHelper.createRoddyAlignmentTempResultFiles(realm, roddyBamFile)
 
-        movePanCanFilesToFinalDestinationJob.moveFileUtilsService.metaClass.moveFileIfExists = { Realm realm, File source, File target ->
+        movePanCanFilesToFinalDestinationJob.moveFileUtilsService.metaClass.moveFileIfExists = { Realm realm, File source, File target, boolean readableForAll ->
             assert target.createNewFile()
             assert source.delete()
         }
@@ -163,7 +163,7 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
         File finalRoddyExecutionStoreDir  = new File(mergingBaseDir, "${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}/execution1")
         assert finalRoddyExecutionStoreDir.mkdirs()
 
-        movePanCanFilesToFinalDestinationJob.moveFileUtilsService.metaClass.moveFileIfExists = { Realm realm, File source, File target -> }
+        movePanCanFilesToFinalDestinationJob.moveFileUtilsService.metaClass.moveFileIfExists = { Realm realm, File source, File target, boolean readableForAll -> }
         movePanCanFilesToFinalDestinationJob.moveFileUtilsService.metaClass.moveDirContentIfExists = { Realm realm, File source, File target -> }
 
         shouldFail (AssertionError) {
@@ -176,7 +176,7 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
         File finalRoddyExecutionStoreDir  = new File(mergingBaseDir, "${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}/execution2")
         assert finalRoddyExecutionStoreDir.mkdirs()
 
-        movePanCanFilesToFinalDestinationJob.moveFileUtilsService.metaClass.moveFileIfExists = { Realm realm, File source, File target -> }
+        movePanCanFilesToFinalDestinationJob.moveFileUtilsService.metaClass.moveFileIfExists = { Realm realm, File source, File target, boolean readableForAll -> }
         movePanCanFilesToFinalDestinationJob.moveFileUtilsService.metaClass.moveDirContentIfExists = { Realm realm, File source, File target -> }
 
         movePanCanFilesToFinalDestinationJob.moveResultFiles(roddyBamFile)
@@ -186,7 +186,7 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
         File finalRoddyExecutionStoreDir  = new File(mergingBaseDir, "${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}/execution1")
         assert finalRoddyExecutionStoreDir.mkdirs()
 
-        movePanCanFilesToFinalDestinationJob.moveFileUtilsService.metaClass.moveFileIfExists = { Realm realm, File source, File target -> }
+        movePanCanFilesToFinalDestinationJob.moveFileUtilsService.metaClass.moveFileIfExists = { Realm realm, File source, File target, boolean readableForAll -> }
         movePanCanFilesToFinalDestinationJob.moveFileUtilsService.metaClass.moveDirContentIfExists = { Realm realm, File source, File target -> }
 
         movePanCanFilesToFinalDestinationJob.moveResultFiles(roddyBamFile)

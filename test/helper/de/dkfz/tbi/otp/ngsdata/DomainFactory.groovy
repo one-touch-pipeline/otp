@@ -188,7 +188,7 @@ class DomainFactory {
     }
 
     public static createRoddyBamFile(Map bamFileProperties = [:]) {
-        SeqType seqType = SeqType.buildLazy(name: SeqTypeNames.WHOLE_GENOME.seqTypeName, libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
+        SeqType seqType = SeqType.buildLazy(name: SeqTypeNames.WHOLE_GENOME.seqTypeName, alias: "WGS", libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
         MergingWorkPackage workPackage = bamFileProperties.workPackage
         if (!workPackage) {
             Workflow workflow = Workflow.buildLazy(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT)
@@ -327,7 +327,10 @@ class DomainFactory {
             SeqTypeNames.EXOME,
             SeqTypeNames.WHOLE_GENOME
         ].collect {
-            SeqType.build(name: it.seqTypeName, alias: it.seqTypeName, libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
+            SeqType.build(
+                    name: it.seqTypeName,
+                    alias: it == SeqTypeNames.WHOLE_GENOME ? "WGS" : it.seqTypeName,
+                    libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
         }
     }
 

@@ -9,13 +9,15 @@ class MoveFileUtilsService {
 
     ExecutionService executionService
 
-    void moveFileIfExists(Realm realm, File source, File target) {
+    void moveFileIfExists(Realm realm, File source, File target, boolean readableForAll = false) {
         assert realm : "Input realm must not be null"
         assert source : "Input source must not be null"
         assert target : "Input target must not be null"
 
+        String permissions = readableForAll ? "644" : "640"
+
         if (WaitingFileUtils.confirmExists(source)) {
-            executionService.executeCommand(realm, "mkdir -m 2750 -p ${target.parent}; mv -f ${source} ${target}")
+            executionService.executeCommand(realm, "mkdir -m 2750 -p ${target.parent}; mv -f ${source} ${target}; chmod ${permissions} ${target}")
         }
         assert WaitingFileUtils.confirmExists(target)
         assert WaitingFileUtils.confirmDoesNotExist(source)

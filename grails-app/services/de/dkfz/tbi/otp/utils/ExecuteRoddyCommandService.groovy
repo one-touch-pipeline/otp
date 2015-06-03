@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
 
 class ExecuteRoddyCommandService {
@@ -100,13 +101,12 @@ class ExecuteRoddyCommandService {
      */
     String getAnalysisIDinConfigFile(RoddyResult roddyResult) {
         assert roddyResult : "The input roddyResult must not be null"
+        assert roddyResult.seqType : "There is not seqType available for ${roddyResult}"
 
-        if (roddyResult.seqType == SeqType.wholeGenomePairedSeqType) {
-            return roddyResult.seqType.name
-        } else if (roddyResult.seqType == SeqType.exomePairedSeqType) {
+        if (SeqTypeService.alignableSeqTypes().contains(roddyResult.seqType)) {
             return roddyResult.seqType.alias
         } else {
-            throw RuntimeException("The seqType ${roddyResult.seqType} can not be processed at the moment.")
+            throw RuntimeException("The seqType ${roddyResult.seqType} can not be processed at the moment." as String)
         }
     }
 

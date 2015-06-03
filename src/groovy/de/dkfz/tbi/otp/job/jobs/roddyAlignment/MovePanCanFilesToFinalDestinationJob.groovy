@@ -75,7 +75,8 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
         ['Bam', 'Bai', 'Md5sum'].each {
             moveFileUtilsService.moveFileIfExists(realm,
                     roddyBamFile."tmpRoddy${it}File",
-                    roddyBamFile."final${it}File")
+                    roddyBamFile."final${it}File",
+                    true)
         }
         //TODO: OTP-1513 -> adapt implementation of QC files movement after the structure was defined within QC-taskforce
         ['QA', 'ExecutionStore'].each {

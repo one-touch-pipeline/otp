@@ -74,7 +74,7 @@ class MoveFileUtilsServiceUnitTests {
         File targetFile = new File("targetFileDoesNotExist")
 
         moveFileUtilsService.executionService.metaClass.executeCommand = {Realm realm, String cmd ->
-            assert cmd == "mv ${sourceFile.path} ${targetFile.path}"
+            assert cmd == "mv ${sourceFile.path} ${targetFile.path}; chmod 640 ${targetFile}"
             sourceFile.delete()
         }
         shouldFail (AssertionError) {
@@ -87,7 +87,7 @@ class MoveFileUtilsServiceUnitTests {
         File targetFile = testDirectory.newFile(TARGET_FILE)
 
         moveFileUtilsService.executionService.metaClass.executeCommand = {Realm realm, String cmd ->
-            assert cmd == "mv ${sourceFile} ${targetFile}"
+            assert cmd == "mv ${sourceFile} ${targetFile}; chmod 640 ${targetFile}"
         }
         shouldFail (AssertionError) {
             moveFileUtilsService.moveFileIfExists(realm, sourceFile, targetFile)
@@ -100,7 +100,7 @@ class MoveFileUtilsServiceUnitTests {
         targetFile.delete()
 
         moveFileUtilsService.executionService.metaClass.executeCommand = {Realm realm, String cmd ->
-            assert cmd == "mkdir -m 2750 -p ${targetFile.parent}; mv -f ${sourceFile.path} ${targetFile.path}"
+            assert cmd == "mkdir -m 2750 -p ${targetFile.parent}; mv -f ${sourceFile.path} ${targetFile.path}; chmod 640 ${targetFile}"
             executeCommandLocally(cmd)
         }
         moveFileUtilsService.moveFileIfExists(realm, sourceFile, targetFile)
@@ -116,7 +116,7 @@ class MoveFileUtilsServiceUnitTests {
         targetFile_allreadyExists.text = TARGET_FILE
 
         moveFileUtilsService.executionService.metaClass.executeCommand = {Realm realm, String cmd ->
-            assert cmd == "mkdir -m 2750 -p ${targetFile_allreadyExists.parent}; mv -f ${sourceFile.path} ${targetFile_allreadyExists.path}"
+            assert cmd == "mkdir -m 2750 -p ${targetFile_allreadyExists.parent}; mv -f ${sourceFile.path} ${targetFile_allreadyExists.path}; chmod 640 ${targetFile_allreadyExists}"
             executeCommandLocally(cmd)
         }
 
@@ -124,6 +124,19 @@ class MoveFileUtilsServiceUnitTests {
         moveFileUtilsService.moveFileIfExists(realm, sourceFile, targetFile_allreadyExists)
         assert WaitingFileUtils.confirmExists(targetFile_allreadyExists)
         assert targetFile_allreadyExists.text == SOURCE_FILE
+    }
+
+    void testMoveFileIfExists_CopyingSuccessful_ReadPermissionsForAll() {
+        File sourceFile = testDirectory.newFile(SOURCE_FILE)
+        File targetFile = testDirectory.newFile(TARGET_FILE)
+        targetFile.delete()
+
+        moveFileUtilsService.executionService.metaClass.executeCommand = {Realm realm, String cmd ->
+            assert cmd == "mkdir -m 2750 -p ${targetFile.parent}; mv -f ${sourceFile.path} ${targetFile.path}; chmod 644 ${targetFile}"
+            executeCommandLocally(cmd)
+        }
+        moveFileUtilsService.moveFileIfExists(realm, sourceFile, targetFile, true)
+        assert WaitingFileUtils.confirmExists(targetFile)
     }
 
 
