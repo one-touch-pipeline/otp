@@ -1,6 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
@@ -52,5 +55,12 @@ class RoddyAlignmentDecider extends AbstractAlignmentDecider {
 
         RoddyBamFile latestValidBamFile = bamFiles.find { !it.withdrawn || it.md5sum }
         return latestValidBamFile
+    }
+
+    @Override
+    boolean canWorkflowAlign(SeqTrack seqTrack) {
+        return SeqType.findAllByNameAndLibraryLayout(
+                SeqTypeNames.WHOLE_GENOME.seqTypeName, SeqType.LIBRARYLAYOUT_PAIRED
+        )*.id.contains(seqTrack.seqType.id)
     }
 }

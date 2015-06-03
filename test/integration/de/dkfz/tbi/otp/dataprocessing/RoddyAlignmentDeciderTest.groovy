@@ -2,6 +2,8 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
 import de.dkfz.tbi.otp.ngsdata.TestData
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import org.junit.Test
@@ -234,5 +236,51 @@ public class RoddyAlignmentDeciderTest {
     void testPrepareForAlignment_forceAlignment_shouldNotSetNeedsProcessing() {
         MergingWorkPackage workPackage = createAndRunPrepare(true, false, false, true)
         assert !workPackage.needsProcessing
+    }
+
+
+    @Test
+    void testCanWorkflowAlign_whenEverythingIsOkay_shouldReturnTrue() {
+        TestData testData = new TestData()
+        testData.createObjects()
+
+        SeqTrack seqTrack = testData.createSeqTrack()
+        seqTrack.save(failOnError: true)
+
+        assert decider.canWorkflowAlign(seqTrack)
+    }
+
+    @Test
+    void testCanWorkflowAlign_whenWrongLibraryLayout_shouldReturnFalse() {
+        TestData testData = new TestData()
+        testData.createObjects()
+
+        SeqType seqType = SeqType.build(
+                name: SeqTypeNames.WHOLE_GENOME,
+                libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIRED
+        )
+        seqType.save(failOnError: true)
+
+        SeqTrack seqTrack = testData.createSeqTrack(seqType: seqType)
+        seqTrack.save(failOnError: true)
+
+        assert !decider.canWorkflowAlign(seqTrack)
+    }
+
+    @Test
+    void testCanWorkflowAlign_whenWrongSeqType_shouldReturnFalse() {
+        TestData testData = new TestData()
+        testData.createObjects()
+
+        SeqType seqType = SeqType.build(
+                name: SeqTypeNames.EXOME,
+                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED
+        )
+        seqType.save(failOnError: true)
+
+        SeqTrack seqTrack = testData.createSeqTrack(seqType: seqType)
+        seqTrack.save(failOnError: true)
+
+        assert !decider.canWorkflowAlign(seqTrack)
     }
 }

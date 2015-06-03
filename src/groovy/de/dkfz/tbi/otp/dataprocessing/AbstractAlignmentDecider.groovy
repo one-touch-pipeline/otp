@@ -89,7 +89,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         threadLog?.info("Not aligning ${seqTrack}, because ${reason}.")
     }
 
-    static boolean canWorkflowAlign(SeqTrack seqTrack) {
+    boolean canWorkflowAlign(SeqTrack seqTrack) {
         return SeqTypeService.alignableSeqTypes()*.id.contains(seqTrack.seqType.id)
     }
 
