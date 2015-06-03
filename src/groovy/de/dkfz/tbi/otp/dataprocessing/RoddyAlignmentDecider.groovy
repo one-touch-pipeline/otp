@@ -21,6 +21,7 @@ class RoddyAlignmentDecider extends AbstractAlignmentDecider {
         return Workflow.Name.PANCAN_ALIGNMENT
     }
 
+    // See integration test for explenation in which cases workpackages needs processing
     @Override
     void prepareForAlignment(MergingWorkPackage workPackage, SeqTrack seqTrack, boolean forceRealign) {
         RoddyBamFile latestValidBamFile = getLatestBamFileWhichHasBeenOrCouldBeCopied(workPackage)
@@ -53,7 +54,11 @@ class RoddyAlignmentDecider extends AbstractAlignmentDecider {
     private static RoddyBamFile getLatestBamFileWhichHasBeenOrCouldBeCopied(MergingWorkPackage workPackage) {
         List<RoddyBamFile> bamFiles = RoddyBamFile.findAllByWorkPackage(workPackage, [sort: "identifier", order: "desc"])
 
-        RoddyBamFile latestValidBamFile = bamFiles.find { !it.withdrawn || it.md5sum }
+        RoddyBamFile latestValidBamFile = bamFiles.find {
+                    !it.withdrawn ||
+                    it.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.INPROGRESS ||
+                    it.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        }
         return latestValidBamFile
     }
 

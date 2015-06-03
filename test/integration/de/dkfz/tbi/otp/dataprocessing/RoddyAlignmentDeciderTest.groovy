@@ -22,12 +22,12 @@ public class RoddyAlignmentDeciderTest {
     }
 
 
-    private createAndRunPrepare(boolean bamFileContainsSeqTrack, boolean withdrawn, boolean md5sumNotNull, boolean forceAlign) {
+    private createAndRunPrepare(boolean bamFileContainsSeqTrack, boolean withdrawn, FileOperationStatus fileOperationStatus, boolean forceAlign) {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 withdrawn: withdrawn,
-                md5sum: md5sumNotNull ? DomainFactory.DEFAULT_MD5_SUM : null,
-                fileOperationStatus: md5sumNotNull ? FileOperationStatus.PROCESSED : FileOperationStatus.DECLARED,
-                fileSize: md5sumNotNull ? 10000 : -1
+                md5sum: fileOperationStatus == FileOperationStatus.PROCESSED ? DomainFactory.DEFAULT_MD5_SUM : null,
+                fileOperationStatus: fileOperationStatus,
+                fileSize: fileOperationStatus == FileOperationStatus.PROCESSED ? 10000 : -1
                 ]
         )
 
@@ -46,67 +46,116 @@ public class RoddyAlignmentDeciderTest {
     /**
     Expected behaviour of RoddyAlignmentDecider.prepareForAlignment():
     properties checked for the latest bam file |  result
-    contains given   withdrawn   md5sum        |
-     seq track                                 |
+    contains given  withdrawn   fileOperationStatus        |   action
+     seq track                                             |
     ---------------------------------------------------------------------
-    true            true        null            look at previous bam file*
-    true            true        not null        needs processing
-    true            false       null            no op
-    true            false       not null        no op
-    false           true        null            look at previous bam file*
-    false           true        not null        needs processing
-    false           false       null            needs processing
-    false           false       not null        needs processing
-         non-existent bam file                  needs processing
+    true            true        DECLARED/NEEDS_PROCESSING      look at previous bam file*
+    true            true        INPROGRESS/PROCESSED           needs processing
+    true            false       DECLARED/NEEDS_PROCESSING      no op
+    true            false       INPROGRESS/PROCESSED           no op
+    false           true        DECLARED/NEEDS_PROCESSING      look at previous bam file*
+    false           true        INPRORGESS/PROCESSED           needs processing
+    false           false       DECLARED/NEEDS_PROCESSING      needs processing
+    false           false       INPROGRESS/PROCESSED           needs processing
+         non-existent bam file                                 needs processing
     (*if a bam file matches this criteria, the properties of the previous bam file should be used to make the decision)
 
     */
 
     @Test
-    void testPrepareForAlignment_bamFileContainsSeqTrackWithdrawnTrueMd5sumNull_shouldSetNeedsProcessing() {
-        MergingWorkPackage workPackage = createAndRunPrepare(true, true, false, false)
+    void testPrepareForAlignment_bamFileContainsSeqTrackWithdrawnTrueFileOperationStatusDeclared_shouldSetNeedsProcessing() {
+        MergingWorkPackage workPackage = createAndRunPrepare(true, true, FileOperationStatus.DECLARED, false)
         assert workPackage.needsProcessing
     }
 
     @Test
-    void testPrepareForAlignment_bamFileContainsSeqTrackWithdrawnTrueMd5sumNotNull_shouldSetNeedsProcessing() {
-        MergingWorkPackage workPackage = createAndRunPrepare(true, true, true, false)
+    void testPrepareForAlignment_bamFileContainsSeqTrackWithdrawnTrueFileOperationStatusNeedsProcessing_shouldSetNeedsProcessing() {
+        MergingWorkPackage workPackage = createAndRunPrepare(true, true, FileOperationStatus.NEEDS_PROCESSING, false)
         assert workPackage.needsProcessing
     }
 
     @Test
-    void testPrepareForAlignment_bamFileContainsSeqTrackWithdrawnFalseMd5sumNull_shouldNotSetNeedsProcessing() {
-        MergingWorkPackage workPackage = createAndRunPrepare(true, false, false, false)
+    void testPrepareForAlignment_bamFileContainsSeqTrackWithdrawnTrueFileOperationStatusInProgress_shouldSetNeedsProcessing() {
+        MergingWorkPackage workPackage = createAndRunPrepare(true, true, FileOperationStatus.INPROGRESS, false)
+        assert workPackage.needsProcessing
+    }
+
+    @Test
+    void testPrepareForAlignment_bamFileContainsSeqTrackWithdrawnTrueFileOperationStatusProcessed_shouldSetNeedsProcessing() {
+        MergingWorkPackage workPackage = createAndRunPrepare(true, true, FileOperationStatus.PROCESSED, false)
+        assert workPackage.needsProcessing
+    }
+
+    @Test
+    void testPrepareForAlignment_bamFileContainsSeqTrackWithdrawnFalseFileOperationStatusDeclared_shouldNotSetNeedsProcessing() {
+        MergingWorkPackage workPackage = createAndRunPrepare(true, false, FileOperationStatus.DECLARED, false)
         assert !workPackage.needsProcessing
     }
 
     @Test
-    void testPrepareForAlignment_bamFileContainsSeqTrackWithdrawnFalseMd5sumNotNull_shouldNotSetNeedsProcessing() {
-        MergingWorkPackage workPackage = createAndRunPrepare(true, false, true, false)
+    void testPrepareForAlignment_bamFileContainsSeqTrackWithdrawnFalseFileOperationStatusNeedsProcessing_shouldNotSetNeedsProcessing() {
+        MergingWorkPackage workPackage = createAndRunPrepare(true, false, FileOperationStatus.NEEDS_PROCESSING, false)
         assert !workPackage.needsProcessing
     }
 
     @Test
-    void testPrepareForAlignment_bamFileDoesntContainSeqTrackWithdrawnTrueMd5sumNull_shouldSetNeedsProcessing() {
-        MergingWorkPackage workPackage = createAndRunPrepare(false, true, false, false)
+    void testPrepareForAlignment_bamFileContainsSeqTrackWithdrawnFalseFileOperationStatusInProgress_shouldNotSetNeedsProcessing() {
+        MergingWorkPackage workPackage = createAndRunPrepare(true, false, FileOperationStatus.INPROGRESS, false)
+        assert !workPackage.needsProcessing
+    }
+
+    @Test
+    void testPrepareForAlignment_bamFileContainsSeqTrackWithdrawnFalseFileOperationStatusProcessed_shouldNotSetNeedsProcessing() {
+        MergingWorkPackage workPackage = createAndRunPrepare(true, false, FileOperationStatus.PROCESSED, false)
+        assert !workPackage.needsProcessing
+    }
+
+    @Test
+    void testPrepareForAlignment_bamFileDoesntContainSeqTrackWithdrawnTrueFileOperationStatusDeclared_shouldSetNeedsProcessing() {
+        MergingWorkPackage workPackage = createAndRunPrepare(false, true, FileOperationStatus.DECLARED, false)
         assert workPackage.needsProcessing
     }
 
     @Test
-    void testPrepareForAlignment_bamFileDoesntContainSeqTrackWithdrawnTrueMd5sumNotNull_shouldSetNeedsProcessing() {
-        MergingWorkPackage workPackage = createAndRunPrepare(false, true, true, false)
+    void testPrepareForAlignment_bamFileDoesntContainSeqTrackWithdrawnTrueFileOperationStatusNeedsProcessing_shouldSetNeedsProcessing() {
+        MergingWorkPackage workPackage = createAndRunPrepare(false, true, FileOperationStatus.NEEDS_PROCESSING, false)
+        assert workPackage.needsProcessing
+    }
+
+
+    @Test
+    void testPrepareForAlignment_bamFileDoesntContainSeqTrackWithdrawnTrueFileOperationStatusInProgress_shouldSetNeedsProcessing() {
+        MergingWorkPackage workPackage = createAndRunPrepare(false, true, FileOperationStatus.INPROGRESS, false)
         assert workPackage.needsProcessing
     }
 
     @Test
-    void testPrepareForAlignment_bamFileDoesntContainSeqTrackWithdrawnFalseMd5sumNull_shouldSetNeedsProcessing() {
-        MergingWorkPackage workPackage = createAndRunPrepare(false, false, false, false)
+    void testPrepareForAlignment_bamFileDoesntContainSeqTrackWithdrawnTrueFileOperationStatusProcessed_shouldSetNeedsProcessing() {
+        MergingWorkPackage workPackage = createAndRunPrepare(false, true, FileOperationStatus.PROCESSED, false)
         assert workPackage.needsProcessing
     }
 
     @Test
-    void testPrepareForAlignment_bamFileDoesntContainSeqTrackWithdrawnFalseMd5sumNotNull_shouldSetNeedsProcessing() {
-        MergingWorkPackage workPackage = createAndRunPrepare(false, false, true, false)
+    void testPrepareForAlignment_bamFileDoesntContainSeqTrackWithdrawnFalseFileOperationStatusDeclared_shouldSetNeedsProcessing() {
+        MergingWorkPackage workPackage = createAndRunPrepare(false, false, FileOperationStatus.DECLARED, false)
+        assert workPackage.needsProcessing
+    }
+
+    @Test
+    void testPrepareForAlignment_bamFileDoesntContainSeqTrackWithdrawnFalseFileOperationStatusNeedsProcessing_shouldSetNeedsProcessing() {
+        MergingWorkPackage workPackage = createAndRunPrepare(false, false, FileOperationStatus.NEEDS_PROCESSING, false)
+        assert workPackage.needsProcessing
+    }
+
+    @Test
+    void testPrepareForAlignment_bamFileDoesntContainSeqTrackWithdrawnFalseFileOperationStatusInProgress_shouldSetNeedsProcessing() {
+        MergingWorkPackage workPackage = createAndRunPrepare(false, false, FileOperationStatus.INPROGRESS, false)
+        assert workPackage.needsProcessing
+    }
+
+    @Test
+    void testPrepareForAlignment_bamFileDoesntContainSeqTrackWithdrawnFalseFileOperationStatusProcessed_shouldSetNeedsProcessing() {
+        MergingWorkPackage workPackage = createAndRunPrepare(false, false, FileOperationStatus.PROCESSED, false)
         assert workPackage.needsProcessing
     }
 
@@ -234,7 +283,7 @@ public class RoddyAlignmentDeciderTest {
 
     @Test
     void testPrepareForAlignment_forceAlignment_shouldNotSetNeedsProcessing() {
-        MergingWorkPackage workPackage = createAndRunPrepare(true, false, false, true)
+        MergingWorkPackage workPackage = createAndRunPrepare(true, false, FileOperationStatus.DECLARED, true)
         assert !workPackage.needsProcessing
     }
 
