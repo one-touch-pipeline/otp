@@ -29,9 +29,12 @@ The script has four input areas, one for run names, one for patient names, one f
  */
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
+import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
+import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
@@ -62,7 +65,6 @@ def ilseIdString ="""
 def projectString ="""
 #project 1
 #project 2
-
 
 """
 
@@ -125,28 +127,27 @@ def checkProcessesForObject = { String workflow, List noProcess, List processWit
         output << "${INDENT}Attention: no process was created for the object ${valueToShow(object)} (${object.id})"
         output << "${INDENT}Please inform a maintainer"
         noProcess << object.id
-        hasError = true
+        return true
     } else if (processes.size() > 1) {
         output << "${INDENT}Attention: There were ${processes.size()} processes created for the object ${valueToShow(object)} (${object.id}). That can make problems."
     }
-    processes.each {
-        ProcessingStep ps = ProcessingStep.findByProcessAndNextIsNull(it)
-        def update = ps.latestProcessingStepUpdate
-        def state = update?.state
-        if (state == ExecutionState.FAILURE || update == null) {
-            hasError = true
-            output << "${INDENT}An error occur for the object: ${valueToShow(object)}  (${object.id})"
-            output << "${INDENT}${INDENT}object class/id: ${object.class}/${object.id}"
-            output << "${INDENT}${INDENT}the OTP link: https://otp.dkfz.de/otp/processes/process/${it.id}"
-            output << "${INDENT}${INDENT}the error: ${ps.latestProcessingStepUpdate?.error?.errorMessage}"
-            if (ps.process.comment) {
-                output << "${INDENT}${INDENT}the comment (${ps.process.commentDate.format("yyyy-MM-dd")}): ${ps.process.comment.replaceAll('\n', "${INDENT}${INDENT}${INDENT}\n")}"
-            }
-            if (update == null) {
-                output << "${INDENT}${INDENT}no update available: Please inform a maintainer\n"
-            }
-            processWithError << object.id
+    Process lastProcess = processes.sort {it.id}.last()
+    ProcessingStep ps = ProcessingStep.findByProcessAndNextIsNull(lastProcess)
+    ProcessingStepUpdate update = ps.latestProcessingStepUpdate
+    def state = update?.state
+    if (state == ExecutionState.FAILURE || update == null) {
+        hasError = true
+        output << "${INDENT}An error occur for the object: ${valueToShow(object)}"
+        output << "${INDENT}${INDENT}object class/id: ${object.class} / ${object.id}"
+        output << "${INDENT}${INDENT}the OTP link: https://otp.dkfz.de/otp/processes/process/${lastProcess.id}"
+        output << "${INDENT}${INDENT}the error: ${ps.latestProcessingStepUpdate?.error?.errorMessage?.replaceAll('\n', "\n${INDENT}${INDENT}${INDENT}")}"
+        if (ps.process.comment) {
+            output << "${INDENT}${INDENT}the comment (${ps.process.commentDate.format("yyyy-MM-dd")}): ${ps.process.comment.replaceAll('\n', "\n${INDENT}${INDENT}${INDENT}")}"
         }
+        if (update == null) {
+            output << "${INDENT}${INDENT}no update available: Please inform a maintainer\n"
+        }
+        processWithError << object.id
     }
     return hasError
 }
@@ -267,7 +268,31 @@ def findAlignable = { List<SeqTrack> seqTracks ->
     ].flatten().findAll()
 }
 
-def showNotTriggered = {String workflow, List objects, Closure valueToShow ->
+def showUniqueList = {String info, List objects ->
+    if (!objects) {
+        return
+    }
+    output << prefix("""\
+${info} (${objects.size}):
+${prefix(objects.collect { it.toString() }.sort().groupBy{it}.collect {key, value -> "${key}  ${value.size() == 1 ? '': "(count: ${value.size()})"}"}.sort().join('\n'), INDENT)}
+""", INDENT)
+}
+
+def showList = {String info, List objects, Closure valueToShow = {it as String} ->
+    if (!objects) {
+        return
+    }
+    output << prefix("""\
+${info} (${objects.size}):
+${prefix(objectsToString(objects, valueToShow), INDENT)}
+""", INDENT)
+}
+
+
+def showNotTriggered = {String workflow, List objects, Closure valueToShow = {it as String} ->
+    if (!objects) {
+        return
+    }
     output << prefix("""\
 !!! not started (${objects.size}):
 ****************************************
@@ -279,32 +304,23 @@ The ids are: ${objects*.id.sort()}
 """, INDENT)
 }
 
-def showWaiting = {String workflow, List objects, Closure valueToShow ->
-    output << prefix("""\
-waiting (${objects.size}):
-${prefix(objectsToString(objects, valueToShow), INDENT)}
-""", INDENT)
+def showWaiting = {List objects, Closure valueToShow = {it as String} ->
+    showList('waiting', objects, valueToShow)
 }
 
-def showRunning = {String workflow, List objects, Closure valueToShow, Closure objectToCheck ->
-    output << prefix("""\
-running (${objects.size}):
-${prefix(objectsToString(objects, valueToShow), INDENT)}
-""", INDENT)
+def showRunning = {String workflow, List objects, Closure valueToShow = {it as String}, Closure objectToCheck = {it} ->
+    showList('running', objects, valueToShow)
     checkProcessesForObjects(workflow, objects, valueToShow, objectToCheck)
 }
 
-def showFinished = {String workflow, List objects, Closure valueToShow ->
+def showFinished = {List objects, Closure valueToShow = {it as String} ->
     if (!showFinishedEntries) {
         return
     }
-    output << prefix("""\
-finished (${objects.size}):
-${prefix(objectsToString(objects, valueToShow), INDENT)}
-""", INDENT)
+    showList('finished', objects, valueToShow)
 }
 
-def handleStateMap = {Map map, String workflow, Closure valueToShow, Closure objectToCheck = {it}->
+def handleStateMap = {Map map, String workflow, Closure valueToShow, Closure objectToCheck = {it} ->
     output << "\n${workflow}: "
     def ret
     def keys = map.keySet().sort{it}
@@ -316,13 +332,13 @@ def handleStateMap = {Map map, String workflow, Closure valueToShow, Closure obj
                 showNotTriggered(workflow, values, valueToShow)
                 break
             case 1:
-                showWaiting(workflow, values, valueToShow)
+                showWaiting(values, valueToShow)
                 break
             case 2:
                 showRunning(workflow, values, valueToShow, objectToCheck)
                 break
             case 3:
-                showFinished(workflow, values, valueToShow)
+                showFinished(values, valueToShow)
                 ret = map[key]
                 break
             default:
@@ -339,7 +355,7 @@ def handleStateMap = {Map map, String workflow, Closure valueToShow, Closure obj
 def handleStateMapSnv = { List next ->
     output << "\nsnvWorkflow"
 
-    Map stateMap = ['running': [], 'finished': [], 'waiting': [], 'notTriggered': []]
+    Map stateMap = ['disabled': [], 'noConfig': [], 'running': [], 'finished': [], 'waiting': [], 'notTriggered': []]
 
     List samplePairs = []
     List unknownDiseaseStatus = []
@@ -369,38 +385,21 @@ def handleStateMapSnv = { List next ->
         }
     }
 
-    if (unknownDiseaseStatus) {
-        output << prefix("""\
-For the following project sample type combination the sample type was not classified as disease or control.
-${prefix(unknownDiseaseStatus.sort().unique().join('\n'), INDENT)}
-""", INDENT)
-    }
-    if (ignoredDiseaseStatus) {
-        output << prefix("""\
-For the following project sample type combination the sample type category is set to IGNORED.
-${prefix(ignoredDiseaseStatus.sort().unique().join('\n'), INDENT)}
-${INDENT}Therefore they will be ignored.
-""", INDENT)
-    }
-    if (unknownThreshold) {
-        output << prefix("""\
-For the following project sample type seqType combination no threshold is defined.
-${prefix(unknownThreshold.sort().unique().join('\n'), INDENT)}
-""", INDENT)
-    }
-    if (noPairFound) {
-        output << prefix("""\
-For the following PMBF no SamplePair could be found.
-${prefix(noPairFound.sort().unique().join('\n'), INDENT)}
-${INDENT}Either no sample with the other disease state is available or the SamplePairDiscoveryStartJob has not run since the sample was created.
-""", INDENT)
-    }
-
+    showUniqueList('For the following project sample type combination the sample type was not classified as disease or control', unknownDiseaseStatus)
+    showUniqueList('For the following project sample type combination the sample type category is set to IGNORED', ignoredDiseaseStatus)
+    showUniqueList('For the following project sample type seqType combination no threshold is defined', unknownThreshold)
+    showUniqueList('For the following PMBF no SamplePair could be found', noPairFound)
 
     if(samplePairs) {
         samplePairs.unique().each { SamplePair samplePair ->
-            if (samplePair.processingStatus == SamplePair.ProcessingStatus.NEEDS_PROCESSING) {
-                stateMap.waiting << samplePair
+            if (samplePair.processingStatus == SamplePair.ProcessingStatus.DISABLED) {
+                stateMap.disabled << samplePair
+            } else if (samplePair.processingStatus == SamplePair.ProcessingStatus.NEEDS_PROCESSING) {
+                if (SnvConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(samplePair.project, samplePair.seqType)) {
+                    stateMap.waiting << samplePair
+                } else {
+                    stateMap.noConfig << "${samplePair.project} ${samplePair.seqType}"
+                }
             } else {
                 // get latest SnvCallingInstance for this SamplePair
                 SnvCallingInstance snvCallingInstance = SnvCallingInstance.createCriteria().get {
@@ -421,21 +420,12 @@ ${INDENT}Either no sample with the other disease state is available or the Sampl
         }
     }
 
-    if(stateMap.notTriggered) {
-        showNotTriggered("SnvWorkflow", stateMap.notTriggered, {it})
-    }
-
-    if(stateMap.waiting) {
-        showWaiting("SnvWorkflow", stateMap.waiting, {it})
-    }
-
-    if(stateMap.running) {
-        showRunning("SnvWorkflow", stateMap.running, {it}, {it})
-    }
-
-    if(stateMap.finished) {
-        showFinished("SnvWorkflow", stateMap.finished, {it})
-    }
+    showUniqueList('For the following project seqtype combination no config is defined', stateMap.noConfig)
+    showList('disabled', stateMap.disabled)
+    showList('notTriggered', stateMap.notTriggered)
+    showWaiting(stateMap.waiting)
+    showRunning("SnvWorkflow", stateMap.running)
+    showFinished(stateMap.finished)
 
     return stateMap.finished
 }
