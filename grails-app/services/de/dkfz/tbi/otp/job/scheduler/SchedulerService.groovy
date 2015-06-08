@@ -655,7 +655,7 @@ class SchedulerService {
      * @param schedule Whether to add the restarted ProcessingStep to the scheduler or not
      **/
     public void restartProcessingStep(ProcessingStep step, boolean schedule = true) {
-        ProcessingStep restartedStep = null
+        RestartedProcessingStep restartedStep = null
         ProcessingStep.withTransaction {
             final ProcessingStepUpdate lastUpdate = step.latestProcessingStepUpdate
             if (lastUpdate == null) {
@@ -667,50 +667,39 @@ class SchedulerService {
             if (lastUpdate.state != ExecutionState.FAILURE) {
                 throw new IncorrectProcessingException("ProcessingStep ${step.id} cannot be restarted as it is in state ${lastUpdate.state}")
             }
-            if(step.belongsToMultiJob()) {
-                restartedStep = step
-                ProcessingStepUpdate resumed = new ProcessingStepUpdate(
-                        date: new Date(),
-                        state: ExecutionState.RESUMED,
-                        previous: lastUpdate,
-                        processingStep: restartedStep)
-                if (!resumed.save(flush: true)) {
-                    throw new SchedulerPersistencyException("Could not save ProcessingStepUpdate for resumed ProcessingStep ${restartedStep.id}")
-                }
-            } else {
-                // create restart event
-                ProcessingStepUpdate restart = new ProcessingStepUpdate(
-                    date: new Date(),
-                    state: ExecutionState.RESTARTED,
-                    previous: lastUpdate,
-                    processingStep: step)
-                if (!restart.save(flush: true)) {
-                    log.fatal("Could not create a RESTARTED Update for ProcessingStep ${step.id}")
-                    throw new ProcessingException("Could not create a RESTARTED Update for ProcessingStep ${step.id}")
-                }
-                restartedStep = RestartedProcessingStep.create(step)
-                if (!restartedStep.save(flush: true)) {
-                    log.fatal("Could not create a RestartedProcessingStep for ProcessingStep ${step.id}")
-                    throw new SchedulerPersistencyException("Could not create a RestartedProcessingStep for ProcessingStep ${step.id}")
-                }
-                // Limitation: in case the restartedStep is the first step of the Process and the Process had been started with Input Parameters
-                // those will not be available as it is difficult to map them back
-                // this is considered as a theoretical problem as input parameters to the first ProcessingStep are from a time when the ProcessParameter
-                // did not yet exist and all existing Workflows do not use this feature
-                mapInputParamatersToStep(restartedStep, step.previous ? step.previous.output  : [])
-                // update the previous link
-                if (restartedStep.previous) {
-                    restartedStep.previous.next = restartedStep
-                    if (!restartedStep.previous.save(flush: true)) {
-                        log.fatal("Could not update previous ProcessingStep of ProcessingStep ${step.id}")
-                        throw new SchedulerPersistencyException("Could not update previous ProcessingStep of ProcessingStep ${step.id}")
-                    }
-                }
-                ProcessingStepUpdate created = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: restartedStep)
-                if (!created.save(flush: true)) {
-                    throw new SchedulerPersistencyException("Could not save the first ProcessingStepUpdate for RestartedProcessingStep ${restartedStep.id}")
+            // create restart event
+            ProcessingStepUpdate restart = new ProcessingStepUpdate(
+                date: new Date(),
+                state: ExecutionState.RESTARTED,
+                previous: lastUpdate,
+                processingStep: step)
+            if (!restart.save(flush: true)) {
+                log.fatal("Could not create a RESTARTED Update for ProcessingStep ${step.id}")
+                throw new ProcessingException("Could not create a RESTARTED Update for ProcessingStep ${step.id}")
+            }
+            restartedStep = RestartedProcessingStep.create(step)
+            if (!restartedStep.save(flush: true)) {
+                log.fatal("Could not create a RestartedProcessingStep for ProcessingStep ${step.id}")
+                throw new SchedulerPersistencyException("Could not create a RestartedProcessingStep for ProcessingStep ${step.id}")
+            }
+            // Limitation: in case the restartedStep is the first step of the Process and the Process had been started with Input Parameters
+            // those will not be available as it is difficult to map them back
+            // this is considered as a theoretical problem as input parameters to the first ProcessingStep are from a time when the ProcessParameter
+            // did not yet exist and all existing Workflows do not use this feature
+            mapInputParamatersToStep(restartedStep, step.previous ? step.previous.output  : [])
+            // update the previous link
+            if (restartedStep.previous) {
+                restartedStep.previous.next = restartedStep
+                if (!restartedStep.previous.save(flush: true)) {
+                    log.fatal("Could not update previous ProcessingStep of ProcessingStep ${step.id}")
+                    throw new SchedulerPersistencyException("Could not update previous ProcessingStep of ProcessingStep ${step.id}")
                 }
             }
+            ProcessingStepUpdate created = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: restartedStep)
+            if (!created.save(flush: true)) {
+                throw new SchedulerPersistencyException("Could not save the first ProcessingStepUpdate for RestartedProcessingStep ${restartedStep.id}")
+            }
+
             Process process = Process.get(step.process.id)
             process.finished = false
             if (!process.save(flush: true)) {
