@@ -129,7 +129,8 @@ ${roddyBamFile.individual.pid} \
 --cvalues=fastq_list:${seqTracks},\
 REFERENCE_GENOME://tmp/otp-unit-test/processing/reference_genomes/${roddyBamFile.referenceGenome.path}/fileNamePrefix.fa,\
 INDEX_PREFIX://tmp/otp-unit-test/processing/reference_genomes/${roddyBamFile.referenceGenome.path}/fileNamePrefix.fa,\
-CHROM_SIZES_FILE://tmp/otp-unit-test/processing/reference_genomes/${roddyBamFile.referenceGenome.path}/stats/\
+CHROM_SIZES_FILE://tmp/otp-unit-test/processing/reference_genomes/${roddyBamFile.referenceGenome.path}/stats/,\
+possibleControlSampleNamePrefixes:(${roddyBamFile.sampleType.dirName})\
 """
 
         String actualCmd = executePanCanJob.prepareAndReturnWorkflowSpecificCommand(roddyBamFile, dataManagement)
@@ -160,7 +161,8 @@ ${roddyBamFile2.individual.pid} \
 bam:${roddyBamFile.finalBamFile},\
 REFERENCE_GENOME://tmp/otp-unit-test/processing/reference_genomes/${roddyBamFile.referenceGenome.path}/fileNamePrefix.fa,\
 INDEX_PREFIX://tmp/otp-unit-test/processing/reference_genomes/${roddyBamFile.referenceGenome.path}/fileNamePrefix.fa,\
-CHROM_SIZES_FILE://tmp/otp-unit-test/processing/reference_genomes/${roddyBamFile.referenceGenome.path}/stats/\
+CHROM_SIZES_FILE://tmp/otp-unit-test/processing/reference_genomes/${roddyBamFile.referenceGenome.path}/stats/,\
+possibleControlSampleNamePrefixes:(${roddyBamFile.sampleType.dirName})\
 """
 
         String actualCmd =  executePanCanJob.prepareAndReturnWorkflowSpecificCommand(roddyBamFile2, dataManagement)

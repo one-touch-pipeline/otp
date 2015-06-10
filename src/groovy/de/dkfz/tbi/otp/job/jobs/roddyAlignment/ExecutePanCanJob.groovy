@@ -41,7 +41,8 @@ class ExecutePanCanJob extends AbstractRoddyJob {
                     "${baseBamFile ? "bam:${baseBamFile.finalBamFile}," : ""}" +
                     "REFERENCE_GENOME:${referenceGenomeFastaFile}," +
                     "INDEX_PREFIX:${referenceGenomeFastaFile}," +
-                    "CHROM_SIZES_FILE:${chromosomeSizeFiles}"
+                    "CHROM_SIZES_FILE:${chromosomeSizeFiles}," +
+                    "possibleControlSampleNamePrefixes:(${roddyBamFile.sampleType.dirName})"
     }
 
 
