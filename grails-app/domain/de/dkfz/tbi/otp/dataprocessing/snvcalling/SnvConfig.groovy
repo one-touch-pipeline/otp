@@ -147,19 +147,21 @@ ${CHROMOSOME_NAMES_VARIABLE_NAME}=\${CHROMOSOME_INDICES[@]}
      * </pre>
      */
     static SnvConfig createFromFile(Project project, SeqType seqType, File configFile, String externalScriptVersion) {
+        SnvConfig snvConfig = getLatest(project, seqType, true)
         final SnvConfig config = new SnvConfig(
                 project: project,
                 seqType: seqType,
                 configuration: configFile.text,
                 externalScriptVersion: externalScriptVersion,
+                previousConfig: snvConfig,
         ).evaluate()
-        assert config.save(flush: true)
+        config.createConfigPerProject()
         return config
     }
 
-    static SnvConfig getLatest(final Project project, final SeqType seqType) {
+    static SnvConfig getLatest(final Project project, final SeqType seqType, boolean allowNone = false) {
         try {
-            return exactlyOneElement(SnvConfig.findAllByProjectAndSeqTypeAndObsoleteDate(project, seqType, null))
+            return singleElement(SnvConfig.findAllByProjectAndSeqTypeAndObsoleteDate(project, seqType, null), allowNone)
         } catch (final Throwable t) {
             throw new RuntimeException("Could not get latest SnvConfig for Project ${project} and SeqType ${seqType}. ${t.message ?: ''}", t)
         }
