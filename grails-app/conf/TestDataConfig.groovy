@@ -134,7 +134,7 @@ testDataConfig {
             workflow = { Workflow.buildLazy(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT) }
         }
         'de.dkfz.tbi.otp.utils.ExternalScript' {
-            filePath = "${TestCase.TEST_DIRECTORY}/ExternalScript_${counter++}"
+            filePath = {"${TestCase.TEST_DIRECTORY}/ExternalScript_${counter++}"}
         }
         'de.dkfz.tbi.otp.job.plan.JobExecutionPlan' {
             name = {'plan_' + (counter++)}

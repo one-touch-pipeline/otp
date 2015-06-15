@@ -11,6 +11,30 @@ class SnvCallingInstanceTests extends GroovyTestCase {
         testData.createSnvObjects()
     }
 
+    /**
+     * This test ensures that "latest" is defined in respect of the {@link SnvCallingInstance}, not in respect of the
+     * {@link SnvJobResult}.
+     */
+    @Test
+    void testFindLatestResultForSameBamFiles_correctOrder() {
+        final SnvCallingInstance tumor1InstanceA = testData.createAndSaveSnvCallingInstance()
+        // Using a different (does not matter if "earlier" or "later") instance name, because instance names have to be unique for the same sample pair.
+        final SnvCallingInstance tumor1InstanceB = testData.createAndSaveSnvCallingInstance(instanceName: '2014-09-24_15h04')
+        final SnvJobResult tumor1CallingResultB = testData.createAndSaveSnvJobResult(tumor1InstanceB, SnvCallingStep.CALLING)
+        final SnvJobResult tumor1CallingResultA = testData.createAndSaveSnvJobResult(tumor1InstanceA, SnvCallingStep.CALLING)
+
+        assert tumor1InstanceA.id < tumor1InstanceB.id
+        assert tumor1CallingResultA.id > tumor1CallingResultB.id
+
+        // tumor1CallingResultB should be returned ...
+        // - although it has been created after the other result
+        // - because it belongs to the instance that has been created later
+        // This case will probably not occur in production, because currently the SnvStartJob does not create a new
+        // SnvCallingInstance as long as another instance for the same BAM files is in progress.
+        assert tumor1InstanceA.findLatestResultForSameBamFiles(SnvCallingStep.CALLING) == tumor1CallingResultB
+        assert tumor1InstanceB.findLatestResultForSameBamFiles(SnvCallingStep.CALLING) == tumor1CallingResultB
+    }
+
     @Test
     void testFindLatestResultForSameBamFiles() {
         final SnvCallingInstance tumor1InstanceA = testData.createAndSaveSnvCallingInstance()

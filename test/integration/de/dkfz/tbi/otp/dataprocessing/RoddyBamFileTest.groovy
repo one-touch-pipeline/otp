@@ -1,10 +1,16 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstanceTestData
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import org.junit.Test
 
 class RoddyBamFileTest {
@@ -188,5 +194,42 @@ class RoddyBamFileTest {
              fileSize: -1,
             ]
         )
+    }
+
+
+    @Test
+    void testMakeWithdrawn_singleFile_ShouldSetToWithdrawn() {
+        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
+        assert !roddyBamFile.withdrawn
+
+        LogThreadLocal.withThreadLog(System.out) {
+            roddyBamFile.makeWithdrawn()
+        }
+        assert roddyBamFile.withdrawn
+    }
+
+    @Test
+    void testMakeWithdrawn_fileHierarchy_StartWithFile2_ShouldSetFile2And3ToWithdrawn() {
+        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
+        RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
+        RoddyBamFile roddyBamFile3 = DomainFactory.createRoddyBamFile(roddyBamFile2)
+
+        LogThreadLocal.withThreadLog(System.out) {
+            roddyBamFile2.makeWithdrawn()
+        }
+        assert !roddyBamFile.withdrawn
+        assert roddyBamFile2.withdrawn
+        assert roddyBamFile3.withdrawn
+    }
+
+    @Test
+    void testMakeWithdrawn_singleFileWithSnv_ShouldSnvSetToWithdrawn() {
+        SnvJobResult snvJobResult = DomainFactory.createSnvJobResultWithRoddyBamFiles()
+        assert !snvJobResult.sampleType1BamFile.withdrawn
+
+        LogThreadLocal.withThreadLog(System.out) {
+            snvJobResult.sampleType1BamFile.makeWithdrawn()
+        }
+        assert snvJobResult.sampleType1BamFile.withdrawn
     }
 }

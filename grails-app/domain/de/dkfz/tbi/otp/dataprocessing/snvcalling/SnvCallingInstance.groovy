@@ -17,9 +17,10 @@ class SnvCallingInstance {
      */
     SnvConfig config
 
-    ProcessedMergedBamFile sampleType1BamFile
+    // TODO: SNV can not handle RoddyBamFiles yet, only PMBF, see OTP-1458
+    AbstractMergedBamFile sampleType1BamFile
 
-    ProcessedMergedBamFile sampleType2BamFile
+    AbstractMergedBamFile sampleType2BamFile
 
     /**
      * The maximum value of {@link DataFile#dateCreated} of all {@link DataFile}s that have been merged into one of
@@ -48,7 +49,7 @@ class SnvCallingInstance {
      */
     SnvProcessingStates processingState = SnvProcessingStates.IN_PROGRESS
 
-    static boolean isConsistentWithSamplePair(ProcessedMergedBamFile bamFile, SnvCallingInstance instance, SampleType sampleType) {
+    static boolean isConsistentWithSamplePair(AbstractMergedBamFile bamFile, SnvCallingInstance instance, SampleType sampleType) {
         return (bamFile.individual == instance.individual &&
                 bamFile.seqType == instance.seqType &&
                 bamFile.sampleType.id == sampleType.id)

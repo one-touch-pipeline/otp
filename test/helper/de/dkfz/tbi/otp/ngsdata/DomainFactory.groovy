@@ -1,12 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.job.plan.JobDefinition
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.utils.ExternalScript
@@ -25,6 +23,7 @@ class DomainFactory {
     static final String LABEL_DKFZ = 'DKFZ'
     static final String LABEL_BIOQUANT = 'BioQuant'
     static final String DEFAULT_MD5_SUM = '123456789abcdef123456789abcdef00'
+    static final long DEFAULT_FILE_SIZE = 123456
 
     /**
      * Defaults for new realms.
@@ -188,9 +187,9 @@ class DomainFactory {
     }
 
     public static createRoddyBamFile(Map bamFileProperties = [:]) {
-        SeqType seqType = SeqType.buildLazy(name: SeqTypeNames.WHOLE_GENOME.seqTypeName, alias: "WGS", libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
         MergingWorkPackage workPackage = bamFileProperties.workPackage
         if (!workPackage) {
+            SeqType seqType = SeqType.buildLazy(name: SeqTypeNames.WHOLE_GENOME.seqTypeName, alias: "WGS", libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
             Workflow workflow = Workflow.buildLazy(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT)
             workPackage = MergingWorkPackage.build(workflow: workflow, seqType: seqType)
         }
@@ -230,6 +229,106 @@ class DomainFactory {
         )
         bamFile.save(flush: true)
         return bamFile
+    }
+
+    public static SamplePair createSamplePair(Map properties = [:]) {
+        Individual individual = properties.individual ?: Individual.build()
+        SampleType sampleTypeDisease = properties.sampleType1 ?: SampleType.build()
+        SampleType sampleTypeControl = properties.sampleType1 ?: SampleType.build()
+        [
+                (sampleTypeDisease): SampleType.Category.DISEASE,
+                (sampleTypeControl): SampleType.Category.CONTROL,
+        ].each {key, value ->
+            if (!SampleTypePerProject.findByProjectAndSampleType(individual.project, key)) {
+                SampleTypePerProject.build(
+                        project: individual.project,
+                        sampleType: key,
+                        category: value,
+                )
+            }
+        }
+        SamplePair samplePair = SamplePair.build(
+                properties + [
+                        individual: individual,
+                        sampleType1: sampleTypeDisease,
+                        sampleType2: sampleTypeControl,
+                ]
+        )
+        return samplePair
+    }
+
+    public static SnvCallingInstance createSnvInstanceWithRoddyBamFiles() {
+        SamplePair samplePair = createSamplePair()
+        Workflow workflow = Workflow.buildLazy(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT)
+
+        def createRoddyBamFileHelper = { SampleType sampleType ->
+            MergingWorkPackage diseaseWorkPackage = MergingWorkPackage.build(
+                    sample: Sample.build(
+                            sampleType: sampleType,
+                            individual: samplePair.individual,
+                    ),
+                    seqType: samplePair.seqType,
+                    workflow: workflow,
+            )
+            createRoddyBamFile(workPackage: diseaseWorkPackage)
+        }
+
+        RoddyBamFile disease = createRoddyBamFileHelper(samplePair.sampleType1)
+        RoddyBamFile control = createRoddyBamFileHelper(samplePair.sampleType2)
+
+        ExternalScript externalScript = ExternalScript.buildLazy()
+
+        SnvConfig snvConfig = SnvConfig.buildLazy(
+                seqType: samplePair.seqType,
+                externalScriptVersion: externalScript.scriptVersion
+        )
+
+        SnvCallingInstance snvCallingInstance = SnvCallingInstance.build(
+                samplePair: samplePair,
+                sampleType1BamFile: disease,
+                sampleType2BamFile: control,
+                config: snvConfig,
+                latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(disease, control),
+        )
+        return snvCallingInstance
+    }
+
+    public static SnvJobResult createSnvJobResultWithRoddyBamFiles(Map properties = [:]) {
+        Map map = [
+                step: SnvCallingStep.CALLING,
+                processingState: SnvProcessingStates.FINISHED,
+                md5sum: DEFAULT_MD5_SUM,
+                fileSize: DEFAULT_FILE_SIZE,
+        ] + properties
+
+        if (map.step == SnvCallingStep.CALLING) {
+            if (!map.snvCallingInstance) {
+                map.snvCallingInstance = createSnvInstanceWithRoddyBamFiles()
+            }
+            if (!map.chromosomeJoinExternalScript) {
+                map.chromosomeJoinExternalScript = ExternalScript.buildLazy(
+                        scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier,
+                        scriptVersion: map.snvCallingInstance.config.externalScriptVersion,
+                )
+            }
+        } else {
+            if (!map.inputResult) {
+                map.inputResult = createSnvJobResultWithRoddyBamFiles(snvCallingInstance: map.snvCallingInstance)
+            }
+            if (!map.snvCallingInstance) {
+                map.snvCallingInstance = map.inputResult?.snvCallingInstance
+            }
+        }
+        if (!map.externalScript) {
+            map.externalScript = ExternalScript.buildLazy(
+                    scriptIdentifier: map.step.externalScriptIdentifier,
+                    scriptVersion: map.snvCallingInstance.config.externalScriptVersion,
+            )
+        }
+
+        SnvJobResult snvJobResult = SnvJobResult.build(map)
+
+        return snvJobResult
     }
 
     public static SeqTrack buildSeqTrackWithDataFile(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:]) {

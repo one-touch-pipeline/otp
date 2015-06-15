@@ -2,7 +2,9 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 /**
  * This bam file is produced by some Roddy alignment workflow.
@@ -231,5 +233,31 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
     File getFinalMd5sumFile() {
         File baseDir = new File(AbstractMergedBamFileService.destinationDirectory(this))
         return new File(baseDir, this.md5sumFileName)
+    }
+
+    void makeWithdrawn() {
+        withTransaction {
+            //find snv and make them withdrawn
+            SnvJobResult.withCriteria {
+                isNull 'inputResult'
+                snvCallingInstance {
+                    or {
+                        eq 'sampleType1BamFile', this
+                        eq 'sampleType2BamFile', this
+                    }
+                }
+            }.each {
+                it.makeWithdrawn()
+            }
+
+            //get later bam files
+            RoddyBamFile.findAllByBaseBamFile(this).each {
+                it.makeWithdrawn()
+            }
+
+            LogThreadLocal.threadLog.info "Withdrawing ${this}"
+            withdrawn = true
+            assert save(flush: true)
+        }
     }
 }

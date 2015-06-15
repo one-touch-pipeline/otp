@@ -1,9 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.utils.ExternalScript
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 /**
  * Represents all results (particularly VCF (variant call format) files) of one job for the comparison of disease and control.
@@ -35,7 +35,7 @@ class SnvJobResult {
      * The overall processing state of this vcf file.
      * At the moment, when the file is created a job is already working on it, which is why it always starts
      * as {@link SnvProcessingStates#IN_PROGRESS}.
-     * @see also {@link SnvProcessingStates#FAILED}
+     * @see SnvProcessingStates#FAILED
      */
     SnvProcessingStates processingState = SnvProcessingStates.IN_PROGRESS
 
@@ -70,7 +70,7 @@ class SnvJobResult {
                     !result.snvCallingInstance.sampleType2BamFile.withdrawn &&
                     !result.inputResult?.withdrawn
         }
-        inputResult validator: { val, obj ->
+        inputResult nullable: true, validator: { val, obj ->
             if (val != null && val.processingState != SnvProcessingStates.FINISHED) {
                 return false
             }
@@ -109,11 +109,11 @@ class SnvJobResult {
         snvCallingInstance index: "snv_job_result_snv_calling_instance_idx"
     }
 
-    ProcessedMergedBamFile getSampleType1BamFile() {
+    AbstractMergedBamFile getSampleType1BamFile() {
         return snvCallingInstance.sampleType1BamFile
     }
 
-    ProcessedMergedBamFile getSampleType2BamFile() {
+    AbstractMergedBamFile getSampleType2BamFile() {
         return snvCallingInstance.sampleType2BamFile
     }
 
@@ -131,6 +131,17 @@ class SnvJobResult {
             return snvCallingInstance.snvInstancePath
         } else {
             return new OtpPath(snvCallingInstance.snvInstancePath, step.getResultFileName(snvCallingInstance.individual))
+        }
+    }
+
+    void makeWithdrawn() {
+        SnvJobResult.withTransaction {
+            SnvJobResult.findAllByInputResult(this).each {
+                it.makeWithdrawn()
+            }
+            LogThreadLocal.threadLog.info "Withdrawing ${this}"
+            withdrawn = true
+            assert save(flush: true)
         }
     }
 }
