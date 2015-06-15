@@ -1,6 +1,9 @@
 package de.dkfz.tbi.otp.utils
 
+import de.dkfz.tbi.TestCase
+
 import static de.dkfz.tbi.otp.utils.StringUtils.commonPrefixLength
+import static de.dkfz.tbi.otp.utils.StringUtils.longestCommonPrefix
 
 import org.junit.Test
 
@@ -38,4 +41,47 @@ class StringUtilsUnitTests {
         assert commonPrefixLength('ab', 'abc') == 2
         assert commonPrefixLength('abc', 'ab') == 2
     }
+
+
+
+    void testLongestCommonPrefix_FirstStringIsNull_ShouldFail() {
+        TestCase.shouldFail(AssertionError) {
+            longestCommonPrefix(null, "second")
+        }
+    }
+
+    void testLongestCommonPrefix_SecondStringIsNull_ShouldFail() {
+        TestCase.shouldFail(AssertionError) {
+            longestCommonPrefix("first", null)
+        }
+    }
+
+    void testLongestCommonPrefix_FirstStringIsEmpty_ShouldFail() {
+        TestCase.shouldFail(AssertionError) {
+            longestCommonPrefix("", "second")
+        }
+    }
+
+    void testLongestCommonPrefix_SecondStringIsEmpty_ShouldFail() {
+        TestCase.shouldFail(AssertionError) {
+            longestCommonPrefix("first", "")
+        }
+    }
+
+    void testLongestCommonPrefix_FirstStringIsEqualSecondString() {
+        assert "equal" == longestCommonPrefix("equal", "equal")
+    }
+
+    void testLongestCommonPrefix_FirstStringIsSubstring() {
+        assert "String" == longestCommonPrefix("String", "StringExtended")
+    }
+
+    void testLongestCommonPrefix_SecondStringIsSubstring() {
+        assert "String" == longestCommonPrefix("StringExtended", "String")
+    }
+
+    void testLongestCommonPrefix_DifferentStrings() {
+        assert "" == longestCommonPrefix("OneString", "AnotherString")
+    }
+
 }

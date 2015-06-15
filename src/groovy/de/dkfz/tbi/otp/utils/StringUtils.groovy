@@ -14,4 +14,10 @@ class StringUtils {
         }
         return minLength
     }
+
+     static String longestCommonPrefix(String a, String b) {
+        assert a : "input String a is not allowed to be null or empty"
+        assert b : "input String b is not allowed to be null or empty"
+        return a.substring(0, commonPrefixLength(a, b));
+    }
 }

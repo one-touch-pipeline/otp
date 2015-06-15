@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.utils.StringUtils
 
 /**
  * This bam file is produced by some Roddy alignment workflow.
@@ -15,9 +16,11 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
 
     static final String TMP_DIR = ".temp_RoddyPanCan"
 
-    static final String QUALITY_CONTROL_DIR = "QualityControl"
+    static final String QUALITY_CONTROL_DIR = "qualitycontrol"
 
-    static final String RODDY_EXECUTION_STORE_DIR = 'roddyExecutionStore'
+    static final String RODDY_EXECUTION_STORE_DIR = "roddyExecutionStore"
+
+    static final String MERGED_DIR = "merged"
 
 
     RoddyBamFile baseBamFile
@@ -199,6 +202,31 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
     }
 
 
+    File getTmpRoddyMergedQADirectory() {
+        return new File(this.tmpRoddyQADirectory, MERGED_DIR)
+    }
+
+    File getFinalMergedQADirectory() {
+        return new File(this.finalQADirectory, MERGED_DIR)
+    }
+
+    Map<SeqTrack, File> getTmpRoddySingleLaneQADirectories() {
+        return getRoddySingleLaneQADirectoriesHelper(this.tmpRoddyQADirectory)
+    }
+
+    Map<SeqTrack, File> getFinalRoddySingleLaneQADirectories() {
+        return getRoddySingleLaneQADirectoriesHelper(this.finalQADirectory)
+    }
+
+    Map<SeqTrack, File> getRoddySingleLaneQADirectoriesHelper(File baseDirectory) {
+        Map<SeqTrack, File> directoriesPerSeqTrack = new HashMap<SeqTrack, File>()
+        seqTracks.each { SeqTrack seqTrack ->
+            String readGroupName = getReadGroupName(seqTrack)
+            directoriesPerSeqTrack.put(seqTrack, new File(baseDirectory, readGroupName))
+        }
+        return directoriesPerSeqTrack
+    }
+
     File getTmpRoddyExecutionStoreDirectory() {
         return new File(this.tmpRoddyDirectory, RODDY_EXECUTION_STORE_DIR)
     }
@@ -258,6 +286,31 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
             LogThreadLocal.threadLog.info "Withdrawing ${this}"
             withdrawn = true
             assert save(flush: true)
+        }
+    }
+
+    static String getReadGroupName(SeqTrack seqTrack) {
+        assert seqTrack : "The input seqTrack must not be null"
+        Run run = seqTrack.run
+        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
+        assert dataFiles.size() == 2
+        //if the names of datafile1 and datafile2 of one seqtrack are the same something strange happened -> should fail
+        assert !dataFiles[0].fileName.equals(dataFiles[1].fileName)
+        String commonFastQFilePrefix = getLongestCommonPrefixBeforeLastUnderscore(dataFiles[0].fileName, dataFiles[1].fileName)
+        return "run${run.name}_${commonFastQFilePrefix}"
+    }
+
+    static String getLongestCommonPrefixBeforeLastUnderscore(String filename1, String filename2) {
+        assert filename1 : "The input filename1 must not be null"
+        assert filename2 : "The input filename2 must not be null"
+        String commonFastqFilePrefix = StringUtils.longestCommonPrefix(filename1, filename2)
+        String pattern = /^(.*)_([^_]*)$/
+        def matcher = commonFastqFilePrefix =~ pattern
+        if (matcher.matches()) {
+            return matcher.group(1)
+        } else {
+            return commonFastqFilePrefix
+
         }
     }
 }

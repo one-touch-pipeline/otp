@@ -74,7 +74,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testRoddyBaseCommand_AllFine() {
-        String expectedCmd =  "cd ${RODDY_PATH} && sudo -U OtherUnixUser roddy.sh rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} "
+        String expectedCmd =  "cd ${RODDY_PATH} && sudo -u OtherUnixUser roddy.sh rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} "
         String actualCmd = executeRoddyCommandService.roddyBaseCommand(RODDY_PATH, CONFIG_NAME, ANALYSIS_ID)
         assert expectedCmd == actualCmd
     }
@@ -255,7 +255,7 @@ class ExecuteRoddyCommandServiceTests {
         DomainFactory.createRoddyProcessingOptions()
 
         String expectedCmd = "cd ${RODDY_PATH} && " +
-"sudo -U OtherUnixUser roddy.sh rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
+"sudo -u OtherUnixUser roddy.sh rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
 "${roddyBamFile.individual.pid} " +
 "--useconfig=/path/to/roddyBaseConfigs/applicationProperties.ini " +
 "--useRoddyVersion=2.1.28 " +

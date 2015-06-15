@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.MoveFileUtilsService
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,6 +32,10 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
     @Override
     void execute() throws Exception {
         final RoddyBamFile roddyBamFile = getProcessParameterObject()
+
+        Realm realm = configService.getRealmDataManagement(roddyBamFile.project)
+        assert realm : "Realm should not be null"
+
         boolean withdrawn = roddyBamFile.withdrawn
         if (!withdrawn) {
             RoddyBamFile.withTransaction {
@@ -39,7 +43,8 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
                 roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.INPROGRESS
                 assert roddyBamFile.save(flush: true)
             }
-            moveResultFiles(roddyBamFile)
+            deletePreviousMergedBamResultFiles(roddyBamFile, realm)
+            moveResultFiles(roddyBamFile, realm)
         } else {
             this.log.info "The results of ${roddyBamFile} will not be moved since it is marked as withdrawn"
         }
@@ -55,18 +60,38 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
             }
         }
 
-        deleteTemporaryDirectory(roddyBamFile)
+        deleteTemporaryDirectory(roddyBamFile, realm)
 
         succeed()
     }
 
 
-    // This is a helper method for this job. It should be used carefully in other cases since it moves files.
-    void moveResultFiles(RoddyBamFile roddyBamFile) {
-        assert roddyBamFile : "Input roddyBamFile must not be null"
+    /*
+     * To prevent uncertain states in the file system the old roddy bam file and the old qc for this merged bam file
+     * will be deleted before the new merged bam file is moved to the final location
+     */
+    void deletePreviousMergedBamResultFiles(RoddyBamFile roddyBamFile, Realm realm) {
+        RoddyBamFile baseBamFile = roddyBamFile.baseBamFile
+        if (baseBamFile && roddyBamFile.tmpRoddyBamFile.exists()) {
+            File bamFilePath = baseBamFile.finalBamFile
+            File baiFilePath = baseBamFile.finalBaiFile
+            File md5sumFilePath = baseBamFile.finalMd5sumFile
+            File mergedQADirectory = baseBamFile.finalMergedQADirectory
 
-        Realm realm = configService.getRealmDataManagement(roddyBamFile.project)
-        assert realm : "Realm must not be null"
+            executionService.executeCommand(realm, "rm -rf ${bamFilePath} ${baiFilePath} ${md5sumFilePath} ${mergedQADirectory}")
+
+            assert WaitingFileUtils.confirmDoesNotExist(bamFilePath)
+            assert WaitingFileUtils.confirmDoesNotExist(baiFilePath)
+            assert WaitingFileUtils.confirmDoesNotExist(md5sumFilePath)
+            assert WaitingFileUtils.confirmDoesNotExist(mergedQADirectory)
+        }
+    }
+
+
+    // This is a helper method for this job. It should be used carefully in other cases since it moves files.
+    void moveResultFiles(RoddyBamFile roddyBamFile, Realm realm) {
+        assert roddyBamFile : "Input roddyBamFile must not be null"
+        assert realm : "Input realm must not be null"
 
         // make sure that the source and the target roddyExecutionStore are disjoint
         assert !roddyBamFile.finalExecutionStoreDirectory.list() || !roddyBamFile.tmpRoddyExecutionStoreDirectory.list() ||
@@ -78,21 +103,27 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
                     roddyBamFile."final${it}File",
                     true)
         }
-        //TODO: OTP-1513 -> adapt implementation of QC files movement after the structure was defined within QC-taskforce
-        ['QA', 'ExecutionStore'].each {
+
+        ['MergedQA', 'ExecutionStore'].each {
             moveFileUtilsService.moveDirContentIfExists(realm,
                     roddyBamFile."tmpRoddy${it}Directory",
                     roddyBamFile."final${it}Directory")
+        }
+
+        Map<SeqTrack, File> tmpRoddySingleLaneQADirectories = roddyBamFile.tmpRoddySingleLaneQADirectories
+        Map<SeqTrack, File> finalRoddySingleLaneQADirectories = roddyBamFile.finalRoddySingleLaneQADirectories
+
+        tmpRoddySingleLaneQADirectories.each { seqTrack, singleLaneQcTempDir ->
+            File singleLaneQcDirFinal = finalRoddySingleLaneQADirectories.get(seqTrack)
+            moveFileUtilsService.moveDirContentIfExists(realm, singleLaneQcTempDir, singleLaneQcDirFinal)
         }
     }
 
 
     // This is a helper method for this job. It should be used carefully in other cases since it deletes files.
-    void deleteTemporaryDirectory(RoddyBamFile roddyBamFile) {
+    void deleteTemporaryDirectory(RoddyBamFile roddyBamFile, Realm realm) {
         assert roddyBamFile : "Input roddyBamFile must not be null"
-
-        Realm realm = configService.getRealmDataManagement(roddyBamFile.project)
-        assert realm : "Realm should not be null"
+        assert realm : "Input realm must not be null"
 
         File tempWorkingDir = roddyBamFile.tmpRoddyDirectory
         executionService.executeCommand(realm, "rm -rf ${tempWorkingDir}")

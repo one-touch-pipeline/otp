@@ -65,7 +65,7 @@ class ExecuteRoddyCommandService {
     }
 
     private String executeCommandAsRoddyUser() {
-        return "sudo -U OtherUnixUser"
+        return "sudo -u OtherUnixUser"
     }
 
     private String executionCommand(String configName, String analysisId){

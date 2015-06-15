@@ -4,6 +4,7 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
@@ -16,6 +17,9 @@ class ExecutePanCanJob extends AbstractRoddyJob {
     @Autowired
     ReferenceGenomeService referenceGenomeService
 
+    @Autowired
+    LsdfFilesService lsdfFilesService
+
 
     @Override
     protected String prepareAndReturnWorkflowSpecificCommand(RoddyResult roddyResult, Realm realm ) throws Throwable {
@@ -24,9 +28,14 @@ class ExecutePanCanJob extends AbstractRoddyJob {
 
         RoddyBamFile roddyBamFile = roddyResult as RoddyBamFile
         RoddyBamFile baseBamFile = roddyBamFile.baseBamFile
-        List<SeqTrack> alreadyMergedSeqTracks = baseBamFile?.seqTracks as List ?: []
-        List<SeqTrack> allSeqTracks = roddyBamFile.mergingWorkPackage.findMergeableSeqTracks()
-        String seqTracksToMerge = (allSeqTracks - alreadyMergedSeqTracks).join(";")
+        List<String> dataFiles = []
+
+        roddyBamFile.seqTracks.each { SeqTrack seqTrack ->
+            DataFile.findAllBySeqTrack(seqTrack).each { DataFile dataFile ->
+                dataFiles.add(lsdfFilesService.getFileFinalPath(dataFile))
+            }
+        }
+        String seqTracksToMerge = dataFiles.join(";")
 
         String referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome)
         assert referenceGenomeFastaFile : "Path to the reference genome file is null"
@@ -55,9 +64,13 @@ class ExecutePanCanJob extends AbstractRoddyJob {
         ['Bam', 'Bai', 'Md5sum'].each {
             LsdfFilesService.ensureFileIsReadableAndNotEmpty(roddyBamFile."tmpRoddy${it}File")
         }
-        //TODO: OTP-1513 -> adapt implementation of QC files movement after the structure was defined within QC-taskforce
-        ['QA', 'ExecutionStore'].each {
+
+        ['MergedQA', 'ExecutionStore'].each {
             LsdfFilesService.ensureDirIsReadableAndNotEmpty(roddyBamFile."tmpRoddy${it}Directory")
+        }
+
+        roddyBamFile.tmpRoddySingleLaneQADirectories.each { seqTrack, singleLaneQcDir ->
+            LsdfFilesService.ensureDirIsReadableAndNotEmpty(singleLaneQcDir)
         }
 
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING

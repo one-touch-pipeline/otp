@@ -4,7 +4,9 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
@@ -47,12 +49,19 @@ class ExecutePanCanJobTests {
         dataProcessing = Realm.build(name: roddyBamFile.project.realmName, operationType: Realm.OperationType.DATA_PROCESSING)
         dataManagement = Realm.build(name: roddyBamFile.project.realmName, operationType: Realm.OperationType.DATA_MANAGEMENT)
 
-        referenceGenomeDir = new File("${dataProcessing.processingRootPath}/reference_genomes/${roddyBamFile.referenceGenome.path}")
+        SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
+        assert DomainFactory.buildSequenceDataFile([seqTrack: seqTrack, fileName: "DataFileFileName_R2.gz"]).save(flush: true)
+
+        String processingRootPath = dataProcessing.processingRootPath
+        referenceGenomeDir = new File("${processingRootPath}/reference_genomes/${roddyBamFile.referenceGenome.path}")
         assert referenceGenomeDir.mkdirs()
         referenceGenomeFile = new File(referenceGenomeDir, "${roddyBamFile.referenceGenome.fileNamePrefix}.fa")
         assert referenceGenomeFile.createNewFile()
 
         roddyBamFile.workPackage.metaClass.findMergeableSeqTracks = { -> SeqTrack.list() }
+        executePanCanJob.lsdfFilesService.metaClass.getFileFinalPath = { DataFile dataFile ->
+            "${processingRootPath}/${dataFile.fileName}"
+        }
     }
 
     @After
@@ -60,6 +69,7 @@ class ExecutePanCanJobTests {
         TestCase.removeMetaClass(ExecutePanCanJob, executePanCanJob)
         TestCase.removeMetaClass(ReferenceGenomeService, executePanCanJob.referenceGenomeService)
         TestCase.removeMetaClass(ExecuteRoddyCommandService, executePanCanJob.executeRoddyCommandService)
+        TestCase.removeMetaClass(LsdfFilesService, executePanCanJob.lsdfFilesService)
 
         assert new File(dataManagement.rootPath).deleteDir()
         assert new File(dataManagement.processingRootPath).deleteDir()
@@ -119,14 +129,14 @@ class ExecutePanCanJobTests {
 
         String expectedCmd =  """\
 cd ${roddyPath} \
-&& sudo -U OtherUnixUser roddy.sh rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.externalScriptVersion}.config@WGS \
+&& sudo -u OtherUnixUser roddy.sh rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.externalScriptVersion}.config@WGS \
 ${roddyBamFile.individual.pid} \
 --useconfig=${roddyApplicationIni} \
 --useRoddyVersion=${roddyVersion} \
 --usePluginVersion=${roddyBamFile.config.externalScriptVersion} \
 --configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} \
 --useiodir=${roddyBamFile.tmpRoddyDirectory} \
---cvalues=fastq_list:${seqTracks},\
+--cvalues=fastq_list:/tmp/otp-unit-test/processing/DataFileFileName_R1.gz;/tmp/otp-unit-test/processing/DataFileFileName_R2.gz,\
 REFERENCE_GENOME://tmp/otp-unit-test/processing/reference_genomes/${roddyBamFile.referenceGenome.path}/fileNamePrefix.fa,\
 INDEX_PREFIX://tmp/otp-unit-test/processing/reference_genomes/${roddyBamFile.referenceGenome.path}/fileNamePrefix.fa,\
 CHROM_SIZES_FILE://tmp/otp-unit-test/processing/reference_genomes/${roddyBamFile.referenceGenome.path}/stats/,\
@@ -146,18 +156,17 @@ possibleControlSampleNamePrefixes:(${roddyBamFile.sampleType.dirName})\
         assert roddyBamFile.save(flush: true)
 
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
-        String seqTracks = (SeqTrack.list() - roddyBamFile.seqTracks as List).join(";")
 
         String expectedCmd = """\
 cd ${roddyPath} \
-&& sudo -U OtherUnixUser roddy.sh rerun ${roddyBamFile2.workflow.name}_${roddyBamFile2.config.externalScriptVersion}.config@WGS \
+&& sudo -u OtherUnixUser roddy.sh rerun ${roddyBamFile2.workflow.name}_${roddyBamFile2.config.externalScriptVersion}.config@WGS \
 ${roddyBamFile2.individual.pid} \
 --useconfig=${roddyApplicationIni} \
 --useRoddyVersion=${roddyVersion} \
 --usePluginVersion=${roddyBamFile2.config.externalScriptVersion} \
 --configurationDirectories=${new File(roddyBamFile2.config.configFilePath).parent},${roddyBaseConfigsPath} \
 --useiodir=${roddyBamFile2.tmpRoddyDirectory} \
---cvalues=fastq_list:${seqTracks},\
+--cvalues=fastq_list:/tmp/otp-unit-test/processing/DataFileFileName_R1.gz,\
 bam:${roddyBamFile.finalBamFile},\
 REFERENCE_GENOME://tmp/otp-unit-test/processing/reference_genomes/${roddyBamFile.referenceGenome.path}/fileNamePrefix.fa,\
 INDEX_PREFIX://tmp/otp-unit-test/processing/reference_genomes/${roddyBamFile.referenceGenome.path}/fileNamePrefix.fa,\
@@ -207,9 +216,18 @@ possibleControlSampleNamePrefixes:(${roddyBamFile.sampleType.dirName})\
     }
 
     @Test
-    void testValidate_QaDirDoesNotExist_ShouldFail() {
+    void testValidate_MergedQaDirDoesNotExist_ShouldFail() {
         CreateRoddyFileHelper.createRoddyAlignmentTempResultFiles(dataManagement, roddyBamFile)
         roddyBamFile.tmpRoddyQADirectory.deleteDir()
+        TestCase.shouldFail(AssertionError) {
+            executePanCanJob.validate(roddyBamFile)
+        }
+    }
+
+    @Test
+    void testValidate_SingleLaneQaDirDoesNotExist_ShouldFail() {
+        CreateRoddyFileHelper.createRoddyAlignmentTempResultFiles(dataManagement, roddyBamFile)
+        roddyBamFile.tmpRoddySingleLaneQADirectories.values()*.deleteDir()
         TestCase.shouldFail(AssertionError) {
             executePanCanJob.validate(roddyBamFile)
         }

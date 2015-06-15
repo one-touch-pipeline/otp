@@ -18,7 +18,7 @@ def counter = 0
 testDataConfig {
     sampleData {
         'de.dkfz.tbi.otp.ngsdata.DataFile' {
-            fileName = 'DataFileFileName.gz'
+            fileName = 'DataFileFileName_R1.gz'
             vbpFileName = 'DataFileVbpFileName.gz'
             fileType = {FileType.buildLazy(type: FileType.Type.SEQUENCE)}
         }

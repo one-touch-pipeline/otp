@@ -354,6 +354,7 @@ class DomainFactory {
         return DataFile.build([
                 fileType: FileType.buildLazy(type: Type.SEQUENCE),
                 dateCreated: new Date(),  // In unit tests Grails (sometimes) does not automagically set dateCreated.
+                used: true,
         ] + properties)
     }
 
