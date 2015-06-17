@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.TestData
 import org.junit.*
 
@@ -114,13 +115,11 @@ class AbstractQualityAssessmentServiceTests {
         ])
         assert mergingSetAssignment.save([flush: true])
 
-        ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile([
+        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                 type                   : AbstractBamFile.BamType.SORTED,
                 withdrawn              : false,
                 qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
                 status                 : AbstractBamFile.State.PROCESSED,
-                mergingPass            : mergingPass,
-                alignmentPass          : processedBamFile.alignmentPass,
                 numberOfMergedLanes    : 1,
         ])
         assert processedMergedBamFile.save([flush: true])

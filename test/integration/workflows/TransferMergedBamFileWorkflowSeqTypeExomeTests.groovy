@@ -351,8 +351,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
                         )
         assertNotNull(mergingPass.save([flush: true, failOnError: true]))
 
-        ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
-                        mergingPass: mergingPass,
+        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                         fileExists: true,
                         type: BamType.MDUP,
                         qualityAssessmentStatus: QaProcessingStatus.FINISHED,
@@ -360,7 +359,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
                         status: AbstractBamFile.State.PROCESSED,
                         numberOfMergedLanes: 1,
                         fileSize: 1000,
-                        )
+                        ])
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass(
@@ -400,8 +399,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
                         )
         assertNotNull(mergingPass1.save([flush: true, failOnError: true]))
 
-        ProcessedMergedBamFile processedMergedBamFile1 = new ProcessedMergedBamFile(
-                        mergingPass: mergingPass1,
+        ProcessedMergedBamFile processedMergedBamFile1 = DomainFactory.createProcessedMergedBamFile(mergingPass1, [
                         fileExists: true,
                         type: BamType.MDUP,
                         qualityAssessmentStatus: QaProcessingStatus.FINISHED,
@@ -409,7 +407,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
                         status: AbstractBamFile.State.PROCESSED,
                         numberOfMergedLanes: 1,
                         fileSize: 1000,
-                        )
+                        ])
         assertNotNull(processedMergedBamFile1.save([flush: true, failOnError: true]))
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass1 = new QualityAssessmentMergedPass(

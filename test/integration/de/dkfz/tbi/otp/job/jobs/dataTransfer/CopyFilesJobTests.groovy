@@ -189,9 +189,9 @@ class CopyFilesJobTests extends GroovyTestCase {
         MergingPass mergingPass = testData.createMergingPass([mergingSet: mergingSet])
         assertNotNull(mergingPass.save([flush: true]))
 
-        ProcessedMergedBamFile processedMergedBamFile = testData.createProcessedMergedBamFile([
+        ProcessedMergedBamFile processedMergedBamFile = TestData.createProcessedMergedBamFile([
             mergingPass: mergingPass,
-            fileOperationStatus: FileOperationStatus.PROCESSED
+            fileOperationStatus: FileOperationStatus.PROCESSED,
             ])
         assert processedMergedBamFile.save()
     }

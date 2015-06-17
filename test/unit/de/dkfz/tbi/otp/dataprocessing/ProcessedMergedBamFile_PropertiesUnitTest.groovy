@@ -29,7 +29,7 @@ class ProcessedMergedBamFile_PropertiesUnitTest {
         workPackage = new MergingWorkPackage(sample: sample, referenceGenome: referenceGenome, seqType: seqType)
         MergingSet mergingSet = new MergingSet(mergingWorkPackage: workPackage)
         MergingPass mergingPass = new MergingPass(mergingSet: mergingSet)
-        bamFile = new ProcessedMergedBamFile(mergingPass: mergingPass)
+        bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass)
     }
 
     @After

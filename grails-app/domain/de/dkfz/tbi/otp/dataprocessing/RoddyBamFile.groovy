@@ -37,11 +37,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
     RoddyWorkflowConfig config
 
     /**
-     * bam file satisfies criteria from this {@link MergingWorkPackage}
-     */
-    MergingWorkPackage workPackage
-
-    /**
      * unique identifier of this bam file in {@link RoddyBamFile#workPackage}
      */
     int identifier
@@ -67,7 +62,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
     static mapping = {
         baseBamFile index: "roddy_bam_file_base_bam_file_idx"
         config index: "roddy_bam_file_config_idx"
-        workPackage index: "roddy_bam_file_work_package_idx"
     }
 
     List<String> isConsistentAndContainsNoWithdrawnData() {
@@ -112,12 +106,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
 
 
         return errors
-    }
-
-
-    @Override
-    MergingWorkPackage getMergingWorkPackage() {
-        return workPackage
     }
 
     Workflow getWorkflow() {

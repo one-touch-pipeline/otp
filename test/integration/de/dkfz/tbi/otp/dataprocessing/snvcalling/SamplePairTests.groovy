@@ -189,7 +189,7 @@ class SamplePairTests extends GroovyTestCase {
         MergingPass mergingPass1_B = testData.createMergingPass([mergingSet: processedMergedBamFile1_A.mergingSet, identifier: 1])
         mergingPass1_B.save()
 
-        ProcessedMergedBamFile processedMergedBamFile1_B = testData.createProcessedMergedBamFile([mergingPass: mergingPass1_B,
+        ProcessedMergedBamFile processedMergedBamFile1_B = TestData.createProcessedMergedBamFile([mergingPass: mergingPass1_B,
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
             status: AbstractBamFile.State.PROCESSED,
             fileOperationStatus: FileOperationStatus.PROCESSED])
@@ -202,7 +202,7 @@ class SamplePairTests extends GroovyTestCase {
 
         final MergingSet mergingSet3 = MergingSet.build(mergingWorkPackage: processedMergedBamFile1_A.mergingWorkPackage, identifier: 1)
         final MergingPass mergingPass3 = MergingPass.build(mergingSet: mergingSet3, identifier: 0)
-        final ProcessedMergedBamFile bamFile3 = ProcessedMergedBamFile.build(mergingPass: mergingPass3)
+        final ProcessedMergedBamFile bamFile3 = ProcessedMergedBamFile.build(mergingPass: mergingPass3, workPackage: mergingPass3.mergingWorkPackage)
 
         assert bamFile3.mergingPass.identifier < processedMergedBamFile1_B.mergingPass.identifier
         assert bamFile3.mergingSet.identifier > processedMergedBamFile1_B.mergingSet.identifier
@@ -409,6 +409,7 @@ class SamplePairTests extends GroovyTestCase {
         return  testData.createProcessedMergedBamFile([mergingPass: mergingPass,
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
             status: AbstractBamFile.State.PROCESSED,
-            fileOperationStatus: FileOperationStatus.PROCESSED])
+            fileOperationStatus: FileOperationStatus.PROCESSED
+        ])
     }
 }

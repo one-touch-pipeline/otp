@@ -77,14 +77,13 @@ class QualityAssessmentMergedWorkflowTests extends QualityAssessmentAbstractWork
             assertNotNull(mergingSetAssignment.save([flush: true]))
         }
 
-        ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
-                        mergingPass: mergingPass,
+        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                         fileExists: true,
                         type: AbstractBamFile.BamType.MDUP,
                         status: AbstractBamFile.State.PROCESSED,
                         qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.NOT_STARTED,
                         numberOfMergedLanes: 1,
-                        )
+                        ])
         assertNotNull(processedMergedBamFile.save([flush: true]))
     }
 

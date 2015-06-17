@@ -244,7 +244,8 @@ class ProcessedAlignmentFileServiceTests {
                 mergingSet: mergedSet,
             ] + mergingPassMap),
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-            status: AbstractBamFile.State.PROCESSED
+            status: AbstractBamFile.State.PROCESSED,
+            workPackage: mergedSet.mergingWorkPackage,
         ] + mergingBamFileMap)
 
         return processedBamFile
@@ -525,8 +526,9 @@ class ProcessedAlignmentFileServiceTests {
 
     void testDeleteOldMergingProcessingFiles_ConditionMerged_ProcessedMergedBamFileHasWrongMergingPass() {
         Date createdBeforeDate = new Date().plus(1)
+        MergingPass mergingPass = MergingPass.build()
         ProcessedBamFile processedBamFile = createProcessedBamFileWhichIsMerged(
-                        mergingBamFileMap: [mergingPass: MergingPass.build()]
+                        mergingBamFileMap: [mergingPass: mergingPass, workPackage: mergingPass.mergingWorkPackage]
                         )
         createProcessedAlignmentFileService()
 
@@ -535,8 +537,10 @@ class ProcessedAlignmentFileServiceTests {
 
     void testDeleteOldMergingProcessingFiles_ConditionMerged_ProcessedMergedBamFileHasWrongMergingSet() {
         Date createdBeforeDate = new Date().plus(1)
+        MergingSet mergingSet = MergingSet.build()
         ProcessedBamFile processedBamFile = createProcessedBamFileWhichIsMerged(
-                        mergingPassMap: [mergingSet: MergingSet.build()]
+                        mergingPassMap: [mergingSet: mergingSet],
+                        mergingBamFileMap: [workPackage: mergingSet.mergingWorkPackage],
                         )
         createProcessedAlignmentFileService()
 
@@ -801,8 +805,9 @@ class ProcessedAlignmentFileServiceTests {
 
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionMerged_ProcessedMergedBamFileHasWrongMergingPass() {
         Date createdBeforeDate = new Date().plus(1)
+        MergingPass mergingPass = MergingPass.build()
         ProcessedBamFile processedBamFile = createProcessedBamFileWithSaiFileWhichIsMerged(
-                        mergingBamFileMap: [mergingPass: MergingPass.build()]
+                        mergingBamFileMap: [mergingPass: mergingPass, workPackage: mergingPass.mergingWorkPackage],
                         )
         createProcessedAlignmentFileService()
 
@@ -811,8 +816,10 @@ class ProcessedAlignmentFileServiceTests {
 
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionMerged_ProcessedMergedBamFileHasWrongMergingSet() {
         Date createdBeforeDate = new Date().plus(1)
+        MergingSet mergingSet = MergingSet.build()
         ProcessedBamFile processedBamFile = createProcessedBamFileWithSaiFileWhichIsMerged(
-                        mergingPassMap: [mergingSet: MergingSet.build()]
+                        mergingPassMap: [mergingSet: mergingSet],
+                        mergingBamFileMap: [workPackage: mergingSet.mergingWorkPackage],
                         )
         createProcessedAlignmentFileService()
 

@@ -154,17 +154,18 @@ class SnvCallingInstanceTestData extends TestData {
                 mergingSet: mergingSet)
         assert mergingPass.save(flush: true, failOnError: true)
 
-        ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile(
-                type: AbstractBamFile.BamType.SORTED,
-                mergingPass: mergingPass,
-                fileExists: true,
-                fileSize: 123456,
-                md5sum: '0123456789ABCDEF0123456789ABCDEF',
-                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-                status: AbstractBamFile.State.PROCESSED,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
-                coverage: 1,
-                numberOfMergedLanes: 1,
+        ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(
+                mergingPass, [
+                    type: AbstractBamFile.BamType.SORTED,
+                    fileExists: true,
+                    fileSize: 123456,
+                    md5sum: '0123456789ABCDEF0123456789ABCDEF',
+                    qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
+                    status: AbstractBamFile.State.PROCESSED,
+                    fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                    coverage: 1,
+                    numberOfMergedLanes: 1,
+                ]
         )
         assert bamFile.save(flush: true, failOnError: true)
 

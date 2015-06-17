@@ -91,8 +91,7 @@ class ProcessedMergedBamFileQaFileServiceTests {
     }
 
     private ProcessedMergedBamFile createProcessedMergedBamFile(MergingPass mergingPass) {
-        ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
-                        mergingPass: mergingPass,
+        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                         fileExists: true,
                         type: BamType.MDUP,
                         qualityAssessmentStatus: QaProcessingStatus.FINISHED,
@@ -100,7 +99,7 @@ class ProcessedMergedBamFileQaFileServiceTests {
                         md5sum: null,
                         status: AbstractBamFile.State.PROCESSED,
                         numberOfMergedLanes: 1,
-                        )
+                        ])
         assertNotNull(processedMergedBamFile.save([flush: true]))
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass(

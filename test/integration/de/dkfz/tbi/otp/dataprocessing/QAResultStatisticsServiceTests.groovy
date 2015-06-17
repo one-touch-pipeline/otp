@@ -220,16 +220,15 @@ class QAResultStatisticsServiceTests {
                         )
         assertNotNull(mergingPass.save([flush: true]))
 
-        processedMergedBamFile = new ProcessedMergedBamFile(
+        processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                         identifier: 20,
-                        mergingPass: mergingPass,
                         fileExists: true,
                         type: BamType.MDUP,
                         qualityAssessmentStatus: QaProcessingStatus.FINISHED,
                         md5sum: null,
                         status: AbstractBamFile.State.PROCESSED,
                         numberOfMergedLanes: 1,
-                        )
+                        ])
         assertNotNull(processedMergedBamFile.save([flush: true]))
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass(

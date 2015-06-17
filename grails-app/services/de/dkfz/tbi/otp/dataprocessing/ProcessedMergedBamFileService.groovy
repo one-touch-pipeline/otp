@@ -210,6 +210,7 @@ class ProcessedMergedBamFileService {
                         mergingPass: mergingPass,
                         type: AbstractBamFile.BamType.MDUP,
                         numberOfMergedLanes: mergingPass.mergingSet.containedSeqTracks.size(),
+                        workPackage: mergingPass.mergingWorkPackage,
                         )
         return save(processedMergedBamFile)
     }

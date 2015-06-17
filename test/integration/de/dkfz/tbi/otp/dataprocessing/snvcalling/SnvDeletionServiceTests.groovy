@@ -182,6 +182,7 @@ class SnvDeletionServiceTests {
         ProcessedMergedBamFile bamFile2 = testdata.createProcessedMergedBamFile(testdata.bamFileTumor.individual, testdata.bamFileTumor.seqType)
         bamFile2.mergingSet.mergingWorkPackage = testdata.bamFileTumor.mergingWorkPackage
         bamFile2.mergingSet.identifier = 1
+        bamFile2.workPackage = bamFile2.mergingSet.mergingWorkPackage
         assert bamFile2.mergingSet.save(flush: true)
         assert bamFile2.save(flush: true)
         SnvCallingInstance instance2 = testdata.createSnvCallingInstance([
@@ -211,6 +212,7 @@ class SnvDeletionServiceTests {
         ProcessedMergedBamFile bamFile2 = testdata.createProcessedMergedBamFile(testdata.bamFileTumor.individual, testdata.bamFileTumor.seqType)
         bamFile2.mergingSet.mergingWorkPackage = testdata.bamFileTumor.mergingWorkPackage
         bamFile2.mergingSet.identifier = 1
+        bamFile2.workPackage = bamFile2.mergingSet.mergingWorkPackage
         assert bamFile2.mergingSet.save(flush: true)
         assert bamFile2.save(flush: true)
         SnvCallingInstance instance2 = testdata.createSnvCallingInstance([

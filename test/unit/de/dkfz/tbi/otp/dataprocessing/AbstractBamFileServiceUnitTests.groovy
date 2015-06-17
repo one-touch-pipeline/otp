@@ -48,7 +48,8 @@ class AbstractBamFileServiceUnitTests {
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
             mergingPass: MergingPass.build([
                 mergingSet: mergingSet
-            ])
+            ]),
+            workPackage: mergingSet.mergingWorkPackage,
         ] + processedMergedBamFileMap)
         return processedBamFile
     }
@@ -124,8 +125,10 @@ class AbstractBamFileServiceUnitTests {
     }
 
     void testHasBeenQualityAssessedAndMerged_ProcessedMergedBamFileOtherMergingSet() {
+        MergingPass mergingPass = MergingPass.build()
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged([:], [:], [:], [
-            mergingPass: MergingPass.build()
+            mergingPass: mergingPass,
+            workPackage: mergingPass.mergingWorkPackage,
         ])
 
         assert !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)

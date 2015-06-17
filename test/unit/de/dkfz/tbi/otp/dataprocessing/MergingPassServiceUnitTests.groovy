@@ -43,7 +43,7 @@ class MergingPassServiceUnitTests {
 
     private void createDomains() {
         mergingPass = MergingPass.build()
-        processedMergedBamFile = ProcessedMergedBamFile.build(mergingPass: mergingPass)
+        processedMergedBamFile = ProcessedMergedBamFile.build(mergingPass: mergingPass, workPackage: mergingPass.mergingWorkPackage)
         qualityAssessmentMergedPass = QualityAssessmentMergedPass.build(processedMergedBamFile: processedMergedBamFile)
     }
 

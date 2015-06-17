@@ -198,12 +198,11 @@ LIBRARY\tUNPAIRED_READS_EXAMINED\tREAD_PAIRS_EXAMINED\tUNMAPPED_READS\tUNPAIRED_
                         )
         assertNotNull(mergingPass.save([flush: true, failOnError: true]))
 
-        ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
-                        mergingPass: mergingPass,
+        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                         fileExists: true,
                         type: AbstractBamFile.BamType.MDUP,
                         numberOfMergedLanes: 1,
-                        )
+                        ])
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
         return processedMergedBamFile
     }

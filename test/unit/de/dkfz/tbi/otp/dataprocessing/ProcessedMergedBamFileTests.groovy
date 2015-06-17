@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.TestCase
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import org.junit.*
@@ -62,19 +63,19 @@ class ProcessedMergedBamFileTests {
     }
 
     void testSave() {
-        ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile(
+        ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                 type: AbstractBamFile.BamType.SORTED,
-                mergingPass: mergingPass,
-                numberOfMergedLanes: 1)
+                numberOfMergedLanes: 1,
+        ])
         Assert.assertTrue(bamFile.validate())
         bamFile.save(flush: true)
     }
 
     void testSaveWithNumberOfLanes() {
-        ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile(
+        ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                 type: AbstractBamFile.BamType.SORTED,
-                mergingPass: mergingPass,
-                numberOfMergedLanes: 3)
+                numberOfMergedLanes: 3,
+        ])
         Assert.assertTrue(bamFile.validate())
         bamFile.save(flush: true)
     }
@@ -86,10 +87,19 @@ class ProcessedMergedBamFileTests {
         Assert.assertFalse(bamFile.validate())
     }
 
+    void testMergingWorkPackageConstraint_NoWorkpackage_ShouldFail() {
+        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
+                type: AbstractBamFile.BamType.MDUP,
+                numberOfMergedLanes: 1,
+                workPackage: null,
+        ])
+        TestCase.assertValidateError(processedMergedBamFile, "workPackage", "nullable", null)
+    }
+
     void testIsMostRecentBamFile() {
-        ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile(
+        ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                 type: AbstractBamFile.BamType.SORTED,
-                mergingPass: mergingPass)
+        ])
         bamFile.save(flush: true)
 
         assertTrue(bamFile.isMostRecentBamFile())
@@ -99,9 +109,9 @@ class ProcessedMergedBamFileTests {
                 mergingSet: mergingSet)
         secondMergingPass.save(flush: true)
 
-        ProcessedMergedBamFile secondBamFile = new ProcessedMergedBamFile(
+        ProcessedMergedBamFile secondBamFile = DomainFactory.createProcessedMergedBamFile(secondMergingPass, [
                 type: AbstractBamFile.BamType.SORTED,
-                mergingPass: secondMergingPass)
+                ])
         secondBamFile.save(flush: true)
 
         assertFalse(bamFile.isMostRecentBamFile())
@@ -117,9 +127,9 @@ class ProcessedMergedBamFileTests {
                 mergingSet: secondMergingSet)
         firstMergingPassOfSecondMergingSet.save(flush: true)
 
-        ProcessedMergedBamFile firstBamFileOfSecondMergingSet = new ProcessedMergedBamFile(
+        ProcessedMergedBamFile firstBamFileOfSecondMergingSet = DomainFactory.createProcessedMergedBamFile(firstMergingPassOfSecondMergingSet, [
                 type: AbstractBamFile.BamType.SORTED,
-                mergingPass: firstMergingPassOfSecondMergingSet)
+                ])
         firstBamFileOfSecondMergingSet.save(flush: true)
 
         assertFalse(secondBamFile.isMostRecentBamFile())

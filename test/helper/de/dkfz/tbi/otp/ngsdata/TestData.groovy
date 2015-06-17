@@ -370,7 +370,7 @@ class TestData {
             type: AbstractBamFile.BamType.SORTED,
             withdrawn: false,
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.NOT_STARTED,
-            status: AbstractBamFile.State.DECLARED
+            status: AbstractBamFile.State.DECLARED,
         ] + properties)
     }
 
@@ -424,8 +424,9 @@ class TestData {
         ] + properties)
     }
 
-    ProcessedMergedBamFile createProcessedMergedBamFile(Map properties = [:]) {
-        return new ProcessedMergedBamFile([
+    static ProcessedMergedBamFile createProcessedMergedBamFile(Map properties = [:]) {
+        return DomainFactory.createProcessedMergedBamFile(properties.mergingPass, [
+            workPackage: properties.mergingPass.mergingWorkPackage,
             md5sum: "12345678901234567890123456789012",
             type: BamType.MDUP,
             coverage: 30.0,

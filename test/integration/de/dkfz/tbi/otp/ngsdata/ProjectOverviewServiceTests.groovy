@@ -94,7 +94,8 @@ class ProjectOverviewServiceTests {
                                 mergingWorkPackage: pmbfFirst.mergingWorkPackage,
                                 identifier: 2
                         )
-                )
+                ),
+                workPackage: pmbfFirst.mergingWorkPackage,
         )
     }
 }

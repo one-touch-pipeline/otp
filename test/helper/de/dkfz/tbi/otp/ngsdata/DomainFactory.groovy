@@ -153,6 +153,15 @@ class DomainFactory {
                         identifier: MergingPass.nextIdentifier(mergingSet),
                 ),
                 numberOfMergedLanes: 1,
+                workPackage: mergingSet.mergingWorkPackage,
+        ] + properties)
+        return bamFile
+    }
+
+    public static ProcessedMergedBamFile createProcessedMergedBamFile(MergingPass mergingPass, Map properties = [:]) {
+        ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile([
+                mergingPass: mergingPass,
+                workPackage: mergingPass.mergingWorkPackage,
         ] + properties)
         return bamFile
     }

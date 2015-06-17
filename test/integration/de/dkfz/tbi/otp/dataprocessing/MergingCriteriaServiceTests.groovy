@@ -193,12 +193,11 @@ class MergingCriteriaServiceTests {
                         )
         assertNotNull(mergingPass.save([flush: true, failOnError: true]))
 
-        ProcessedMergedBamFile mergedBamFile = new ProcessedMergedBamFile(
-                        mergingPass: mergingPass,
+        ProcessedMergedBamFile mergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                         type: AbstractBamFile.BamType.MDUP,
                         status: State.PROCESSED,
                         numberOfMergedLanes: 1,
-                        )
+                        ])
         assertNotNull(mergedBamFile.save([flush: true, failOnError: true]))
 
         SeqTrack seqTrack2 = new SeqTrack(

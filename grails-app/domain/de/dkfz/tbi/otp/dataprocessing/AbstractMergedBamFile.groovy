@@ -14,6 +14,11 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
     Integer numberOfMergedLanes
 
     /**
+     * bam file satisfies criteria from this {@link MergingWorkPackage}
+     */
+    MergingWorkPackage workPackage
+
+    /**
      * This property contains the transfer state of an AbstractMergedBamFile to the project folder.
      * Be aware that in case of the ProcessedMergedBamFile the property is used to trigger the transfer workflow,
      * whereas in the RoddyBamFile it is only used for documentation of the state.
@@ -34,7 +39,9 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
 
     static mapping = {
         numberOfMergedLanes index: "abstract_merged_bam_file_number_of_merged_lanes_idx"
+        workPackage index: "abstract_merged_bam_file_work_package_idx"
     }
+
 
 /**
  * This enum is used to specify the different transfer states of the {@link AbstractMergedBamFile} until it is copied to the project folder
@@ -63,5 +70,10 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
     public void updateFileOperationStatus(FileOperationStatus status) {
         notNull(status, "the input status for the method updateFileOperationStatus is null")
         this.fileOperationStatus = status
+    }
+
+    @Override
+    MergingWorkPackage getMergingWorkPackage() {
+        return workPackage
     }
 }

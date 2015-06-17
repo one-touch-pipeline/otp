@@ -17,15 +17,14 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile {
 
     static constraints = {
         mergingPass nullable: false, unique: true
+        workPackage validator: { val, obj ->
+            val.id == obj.mergingSet.mergingWorkPackage.id &&
+            val?.workflow?.name == Workflow.Name.DEFAULT_OTP
+        }
     }
 
     MergingSet getMergingSet() {
         return mergingPass.mergingSet
-    }
-
-    @Override
-    MergingWorkPackage getMergingWorkPackage() {
-        return mergingPass.mergingWorkPackage
     }
 
     /**
