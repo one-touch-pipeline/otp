@@ -21,8 +21,7 @@ class MergingCreateOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
         long mergingPassId = Long.parseLong(getProcessParameterValue())
         MergingPass mergingPass = MergingPass.get(mergingPassId)
 
-        //Because of bug OTP-397 we set the state again to inprocess
-        mergingPassService.mergingPassStarted(mergingPass)
+        assert mergingPass.mergingSet.status == MergingSet.State.INPROGRESS
 
         String dir = processedMergedBamFileService.directory(mergingPass)
         Realm realm = mergingPassService.realmForDataProcessing(mergingPass)

@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.job.jobs.transferMergedBamFile
 
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.ProcessStatusService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -35,9 +36,7 @@ class CalculateFileChecksumMD5Job extends AbstractJobImpl {
         long id = Long.parseLong(getProcessParameterValue())
         ProcessedMergedBamFile bamFile = ProcessedMergedBamFile.get(id)
 
-        //Because of bug OTP-397 we set the state again to inprocess
-        bamFile.updateFileOperationStatus(AbstractMergedBamFile.FileOperationStatus.INPROGRESS)
-        assert bamFile.save(flush: true)
+        assert bamFile.fileOperationStatus == FileOperationStatus.INPROGRESS
 
         Project project = processedMergedBamFileService.project(bamFile)
         Map<String, String> locations = processedMergedBamFileService.locationsForFileCopying(bamFile)
