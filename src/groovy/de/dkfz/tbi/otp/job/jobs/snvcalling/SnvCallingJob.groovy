@@ -97,6 +97,7 @@ class SnvCallingJob extends AbstractSnvCallingJob {
                     "'-v': '${qsubParametersGeneral},${qsubParametersToMergeVcfs}'" +
                     "}"
             final String script =
+                    "sleep 5m; " +
                     "${ensureFileHasExpectedSizeScript(sampleType1BamFilePath, instance.sampleType1BamFile.fileSize)}" +
                     "${ensureFileHasExpectedSizeScript(sampleType2BamFilePath, instance.sampleType2BamFile.fileSize)}" +
                     "${ensureFileDoesNotExistScript(vcfRawFile)}" +
