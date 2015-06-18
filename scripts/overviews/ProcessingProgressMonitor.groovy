@@ -17,6 +17,7 @@ The following code allows to show the processing state for
 **** PROJECT_NAME
 **** PROJECT_NAME
 **** MMML
+** roddyAlignment
 ** sample pairs (snv) waiting for snv calling
 ** snv calling instance which are in processing
 
@@ -39,6 +40,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
+import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
 
 //name of runs
 def runString = """
@@ -170,6 +172,8 @@ def checkProcessesForObjects = {String workflow, Collection<Object> objects, Clo
     if (processWithError) {
         output << "\n${INDENT}objects with error: ${processWithError}"
     }
+
+    output << "\n\n"
 }
 
 
@@ -320,6 +324,10 @@ def showFinished = {List objects, Closure valueToShow = {it as String} ->
     showList('finished', objects, valueToShow)
 }
 
+def showShouldStart = {List objects, Closure valueToShow = {it as String} ->
+    showList('needs processing', objects, valueToShow)
+}
+
 def handleStateMap = {Map map, String workflow, Closure valueToShow, Closure objectToCheck = {it} ->
     output << "\n${workflow}: "
     def ret
@@ -352,6 +360,52 @@ def handleStateMap = {Map map, String workflow, Closure valueToShow, Closure obj
     return ret
 }
 
+// map: MergingWorkPackages grouped by Workpackage.needsProcessing
+// valueToShow: MergingWorkPackage properties to print out
+def handleStateMapNeedsProcessing = {Map<Boolean, Collection<MergingWorkPackage>> map, Closure valueToShow ->
+    output << "\nPanCanAlignmentWorkflow: \n${INDENT}Only SeqTracks are shown which finished fastqc-WF"
+
+    showShouldStart(map[false], valueToShow)
+
+    return map[true]
+}
+
+// map: RoddyBamFiles grouped by AbstractMergedBamFile.FileOperationStatus
+// workflow: the workflow name
+// valueToShow: RoddyBamFile properties to print out
+// objectToCheck: defines which objects should be checked to have processes
+def handleStateMapRoddy = {Map<AbstractMergedBamFile.FileOperationStatus, Collection<RoddyBamFile>> map, String workflow,
+                           Closure valueToShow, Closure objectToCheck = {it} ->
+    def ret
+    def keys = map.keySet().sort{it}
+
+    keys.each { key->
+        def values = map[key]
+        switch (key) {
+            case AbstractMergedBamFile.FileOperationStatus.DECLARED :
+                showList('running (declared)', values, valueToShow)
+                checkProcessesForObjects(workflow, values, valueToShow, objectToCheck)
+                break
+            case AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING:
+                showList('running (needs_processing)', values, valueToShow)
+                checkProcessesForObjects(workflow, values, valueToShow, objectToCheck)
+                break
+            case AbstractMergedBamFile.FileOperationStatus.INPROGRESS:
+                showList('running (in_progress)', values, valueToShow)
+                break
+            case AbstractMergedBamFile.FileOperationStatus.PROCESSED:
+                if(showFinishedEntries) {
+                    showList('processed', values, valueToShow)
+                }
+                ret = map[key]
+                break
+            default:
+                new RuntimeException("Not handled value: ${key}. Please inform a maintainer")
+        }
+    }
+    return ret
+}
+
 def handleStateMapSnv = { List next ->
     output << "\nsnvWorkflow"
 
@@ -363,7 +417,7 @@ def handleStateMapSnv = { List next ->
     List unknownThreshold = []
     List noPairFound = []
 
-    next.each { ProcessedMergedBamFile pMBF ->
+    next.each { AbstractMergedBamFile pMBF ->
         List samplePairsForBamFile = SamplePair.createCriteria().list {
             eq('individual', pMBF.individual)
             eq('seqType', pMBF.seqType)
@@ -430,82 +484,40 @@ def handleStateMapSnv = { List next ->
     return stateMap.finished
 }
 
-def showSeqTracks = {Collection<SeqTrack> seqTracks ->
+def showSeqTracksOtp = {List<SeqTrack> seqTracksToAlign ->
     boolean allFinished = true
 
-    List<DataFile> datafiles = DataFile.findAllBySeqTrackInList(seqTracks)
-    if (datafiles) {
-        Map processingMap = datafiles.groupBy{
-            RunSegment.PROCESSING_FILE_STATUSES.contains(it.runSegment.filesStatus)
-        }
-        if (processingMap[true]) {
-            output << "\nDataInstallationWorkflow: "
-            output << "${INDENT}${processingMap[true].size()} Lanes are still in data installation workflow. They will be ignored"
-            showRunning('DataInstallationWorkflow', processingMap[true]*.run.unique(), {it}, {it})
-            seqTracks = processingMap[false]*.seqTrack?.unique()
-            allFinished=false
-            if (!seqTracks){
-                output << "No lanes left"
-                return
-            }
-        }
-
-        datafiles = null
+    if(!seqTracksToAlign) {
+        return []
     }
 
-    //remove withdrawn
-    List<SeqTrack> seqTracksNotWithdrawn = findNotWithdrawn(seqTracks)
-    if (!seqTracksNotWithdrawn) {
-        output << "No not withdrawn seq tracks left, stop"
-        return
-    }
+    Map<SeqTrack.DataProcessingState, Collection<SeqTrack>> seqTracksByAlignmentState = seqTracksToAlign.groupBy {it.alignmentState}
 
+    allFinished &= seqTracksByAlignmentState.keySet() == [SeqTrack.DataProcessingState.FINISHED] as Set
+    Collection<SeqTrack> seqTracksFinishedConveyBwaAlignmentWorkflow =
+            handleStateMap(seqTracksByAlignmentState, "ConveyBwaAlignmentWorkflow",
+                    { "${it.sample}  ${it.seqType}  ${it.run}  ${it.laneId}  ${it.project}  id: ${it.id}" }, {
+                AlignmentPass.findAllBySeqTrack(it).find { it2 -> it2.isLatestPass()}
+            })
 
-    //fastqc
-    def map = seqTracksNotWithdrawn.groupBy {it.fastqcState}
-    allFinished &= map.size() == 1
-    def next = handleStateMap(map, "FastqcWorkflow", {
-        "${it.sample}  ${it.seqType}  ${it.run}  ${it.laneId}  ${it.project}  id: ${it.id}"
-    }
-    )
-
-    if (!next) {
+    if (!seqTracksFinishedConveyBwaAlignmentWorkflow) {
         output << "\nnot all workflows are finished"
-        return
+        return []
     }
-
-    //filter for alignable seq tracks
-    List<SeqTrack> seqTracksToAlign = findAlignable(next)
-    if (!seqTracksToAlign) {
-        output << "No alignable seq tracks left, stop"
-        return
-    }
-
-    output << "\nThere are ${seqTracksToAlign.size()} seqtracks to align"
-
-    //alignment
-    map = seqTracksToAlign.groupBy {it.alignmentState}
-    allFinished &= map.size() == 1
-    next = handleStateMap(map, "ConveyBwaAlignmentWorkflow", { "${it.sample}  ${it.seqType}  ${it.run}  ${it.laneId}  ${it.project}  id: ${it.id}" }, {
-        AlignmentPass.findAllBySeqTrack(it).find { it2 -> it2.isLatestPass()}
-    })
-
-    if (!next) {
-        output << "\nnot all workflows are finished"
-        return
-    }
-
 
     List<ProcessedBamFile> processedBamFiles = ProcessedBamFile.createCriteria().list {
-        alignmentPass { 'in'('seqTrack', next) }
+        alignmentPass { 'in'('seqTrack', seqTracksFinishedConveyBwaAlignmentWorkflow) }
         eq('withdrawn', false)
     }
-    processedBamFiles = processedBamFiles.findAll { it.isMostRecentBamFile()}
+
+    Collection<ProcessedBamFile> mostRecentProcessedBamFiles = processedBamFiles.findAll { it.isMostRecentBamFile()}
 
     /*
     //qa
-    map = processedBamFiles.groupBy ([{it.qualityAssessmentStatus}])
-    handleStateMap(map, "qa", {
+    Map<AbstractBamFile.QaProcessingStatus, Collection<ProcessedBamFile>> mostRecentProcessedBamFileByQualityAssessmentStatus =
+        mostRecentProcessedBamFiles.groupBy ([{it.qualityAssessmentStatus}])
+
+    handleStateMap(mostRecentProcessedBamFileByQualityAssessmentStatus, "qa", {
         def seqTrack = it.alignmentPass.seqTrack
         "${seqTrack.sample}  ${seqTrack.seqType}  ${seqTrack.run}  ${seqTrack.laneId}  ${seqTrack.project}  id: ${it.id}"
         }, {
@@ -514,41 +526,41 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
     //*/
 
     //create merging set
-    map = processedBamFiles.groupBy ([{it.status}])
-    allFinished &= map.size() == 1
-    next = handleStateMap(map, "createMergingSetWorkflow", {
+    Map<AbstractBamFile.State, Collection<ProcessedBamFile>> processedBamFilesByStatus = mostRecentProcessedBamFiles.groupBy ([{it.status}])
+
+    allFinished &= processedBamFilesByStatus.keySet() == [AbstractBamFile.State.PROCESSED] as Set
+    Collection<ProcessedBamFile> processedBamFilesFinishedCreateMergingSetWorkflow = handleStateMap(processedBamFilesByStatus, "createMergingSetWorkflow", {
         def seqTrack = it.alignmentPass.seqTrack
         "${seqTrack.sample}  ${seqTrack.seqType}  ${seqTrack.run}  ${seqTrack.laneId}  ${seqTrack.project}  id: ${it.id}"
     })
 
-    if (!next){
+    if (!processedBamFilesFinishedCreateMergingSetWorkflow){
         output << "\nnot all workflows are finished"
-        return
+        return []
     }
 
     //create merging
-    List<MergingSet> mergingSets = next.collect {
+    List<MergingSet> mergingSets = processedBamFilesFinishedCreateMergingSetWorkflow.collect {
         MergingSetAssignment.findAllByBamFile(it)*.mergingSet.sort {it.identifier}.last()
     }.findAll{
         !blackList_MergingSetId.contains(it.id)
     }.unique()
 
+    Map<MergingSet.State, Collection<MergingSet>> mergingSetsByStatus = mergingSets.groupBy ([{it.status}])
 
-
-    map = mergingSets.groupBy ([{it.status}])
-    allFinished &= map.size() == 1
-    next = handleStateMap(map, "MergingWorkflow", { "${it.mergingWorkPackage.sample}  ${it.mergingWorkPackage.seqType}  ${it.mergingWorkPackage.sample.project}  ${it.isLatestSet() ? 'latest': 'outdated'}  id: ${it.id}" }, {
+    allFinished &= mergingSetsByStatus.keySet() == [MergingSet.State.PROCESSED] as Set
+    Collection<MergingSet> mergingSetsFinishedMergingWorkflow = handleStateMap(mergingSetsByStatus, "MergingWorkflow", { "${it.mergingWorkPackage.sample}  ${it.mergingWorkPackage.seqType}  ${it.mergingWorkPackage.sample.project}  ${it.isLatestSet() ? 'latest': 'outdated'}  id: ${it.id}" }, {
         MergingPass.findAllByMergingSet(it).find { it2 -> it2.isLatestPass()}
     })
 
-    if (!next) {
+    if (!mergingSetsFinishedMergingWorkflow) {
         output << "\nnot all workflows are finished"
-        return
+        return []
     }
 
     //create merged qa
     List<ProcessedMergedBamFile> processedMergedBamFiles = ProcessedMergedBamFile.createCriteria().list {
-        mergingPass { 'in' ("mergingSet", next) }
+        mergingPass { 'in' ("mergingSet", mergingSetsFinishedMergingWorkflow) }
         eq('withdrawn', false)
     }
 
@@ -559,52 +571,187 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
         }
         return processedMergedBamFile.mergingPass.identifier == maxIdentifier
     }
-    map = processedMergedBamFiles.groupBy ([{it.qualityAssessmentStatus}])
-    allFinished &= map.size() == 1
-    next = handleStateMap(map, "QualityAssessmentMergedWorkflow", {
+
+    Map<AbstractBamFile.QaProcessingStatus, Collection<ProcessedMergedBamFile>> processedMergedBamFilesByQualityAssessmentStatus =
+            processedMergedBamFiles.groupBy ([{it.qualityAssessmentStatus}])
+
+    allFinished &= processedMergedBamFilesByQualityAssessmentStatus.keySet() == [AbstractBamFile.QaProcessingStatus.FINISHED] as Set
+    Collection<ProcessedBamFile> processedMergedBamFilesFinishedQualityAssessmentMergedWorkflow = handleStateMap(processedMergedBamFilesByQualityAssessmentStatus, "QualityAssessmentMergedWorkflow", {
         def mergingWorkPackage = it.mergingPass.mergingSet.mergingWorkPackage
         "${mergingWorkPackage.sample}  ${mergingWorkPackage.seqType}  ${mergingWorkPackage.sample.project}  id: ${it.id}"
     }, {
         QualityAssessmentMergedPass.findAllByProcessedMergedBamFile(it).find { it2 -> it2.isLatestPass()}
     })
 
-    if (!next) {
+    if (!processedMergedBamFilesFinishedQualityAssessmentMergedWorkflow) {
         output << "\nnot all workflows are finished"
-        return
+        return []
     }
 
-
     //transfer
-    map = next.groupBy ([{it.fileOperationStatus}])
-    allFinished &= map.size() == 1
-    next = handleStateMap(map, "transferMergedBamFileWorkflow", {
+    Map<AbstractMergedBamFile.FileOperationStatus, Collection<ProcessedMergedBamFile>> processedMergedBamFilesByFileOperationStatus =
+            processedMergedBamFilesFinishedQualityAssessmentMergedWorkflow.groupBy ([{it.fileOperationStatus}])
+
+    allFinished &= processedMergedBamFilesByFileOperationStatus.keySet() == [AbstractMergedBamFile.FileOperationStatus.PROCESSED] as Set
+    Collection<ProcessedMergedBamFile> processedMergedBamFilesFinishedTransferMergedBamFileWorkflow = handleStateMap(processedMergedBamFilesByFileOperationStatus, "transferMergedBamFileWorkflow", {
         def mergingWorkPackage = it.mergingPass.mergingSet.mergingWorkPackage
         "${mergingWorkPackage.sample}  ${mergingWorkPackage.seqType}  ${mergingWorkPackage.sample.project}  id: ${it.id}"
     })
 
-    if (!next) {
+    if (!processedMergedBamFilesFinishedTransferMergedBamFileWorkflow) {
+        output << "\nnot all workflows are finished"
+        return []
+    }
+
+    return processedMergedBamFilesFinishedTransferMergedBamFileWorkflow
+}
+
+def showSeqTracksRoddy = {List<SeqTrack> seqTracksToAlign ->
+    boolean allFinished = true
+
+    if(!seqTracksToAlign) {
+        return []
+    }
+
+    List<MergingWorkPackage> mergingWorkPackages = MergingWorkPackage.createCriteria().list {
+        and {
+            'in' ('sample', seqTracksToAlign*.sample)
+            'in' ('seqType', seqTracksToAlign*.seqType)
+        }
+    }
+
+    mergingWorkPackages = mergingWorkPackages.findAll { it.findMergeableSeqTracks().intersect(seqTracksToAlign) }
+
+    Map<Boolean, Collection<MergingWorkPackage>> mergingWorkPackagesByNeedsProcessing =
+            mergingWorkPackages.groupBy {it.needsProcessing}
+
+    allFinished &= map.keySet() == [false] as Set
+    Collection<MergingWorkPackage> mergingWorkPackagesNeedingProcessing = handleStateMapNeedsProcessing(mergingWorkPackagesByNeedsProcessing, {
+        "${it}"
+    })
+
+    if (!mergingWorkPackagesNeedingProcessing) {
+        output << "\nnot all PanCan alignments are finished"
+        return []
+    }
+
+    List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageInList(mergingWorkPackagesNeedingProcessing).findAll { it.isMostRecentBamFile() && !it.withdrawn }
+
+    Map<AbstractMergedBamFile.FileOperationStatus, Collection<RoddyBamFile>> roddyBamFileByFileOperationStatus =
+            roddyBamFiles.groupBy {it.fileOperationStatus}
+
+    allFinished &= roddyBamFileByFileOperationStatus.keySet() == [AbstractMergedBamFile.FileOperationStatus.PROCESSED] as Set
+    Collection<RoddyBamFile> roddyBamFilesFinishedPanCanWorkflow = handleStateMapRoddy(roddyBamFileByFileOperationStatus, "PanCanWorkflow", {
+        "${it}"
+    })
+
+    if (!roddyBamFilesFinishedPanCanWorkflow) {
+        output << "\nnot all workflows are finished"
+        return []
+    }
+
+    return roddyBamFilesFinishedPanCanWorkflow
+}
+
+def showSeqTracks = {Collection<SeqTrack> seqTracks ->
+    boolean allFinished = true
+
+    List<DataFile> datafiles = DataFile.findAllBySeqTrackInList(seqTracks)
+    if (datafiles) {
+        Map <Collection<RunSegment.FilesStatus>, Collection<DataFile>> dataFilesByInProgress = datafiles.groupBy{
+            RunSegment.PROCESSING_FILE_STATUSES.contains(it.runSegment.filesStatus)
+        }
+        if (dataFilesByInProgress[true]) {
+            output << "\nDataInstallationWorkflow: "
+            output << "${INDENT}${dataFilesByInProgress[true].size()} Lanes are still in data installation workflow. They will be ignored"
+            showRunning('DataInstallationWorkflow', dataFilesByInProgress[true]*.run.unique(), {it}, {it})
+            seqTracks = dataFilesByInProgress[false]*.seqTrack?.unique()
+            allFinished=false
+            if (!seqTracks){
+                output << "No lanes left"
+                return
+            }
+        }
+        datafiles = null
+    }
+
+    //remove withdrawn
+    List<SeqTrack> seqTracksNotWithdrawn = findNotWithdrawn(seqTracks)
+    if (!seqTracksNotWithdrawn) {
+        output << "No not withdrawn seq tracks left, stop"
+        return
+    }
+
+    //fastqc
+    Map<SeqTrack.DataProcessingState, Collection<SeqTrack>> seqTracksNotWithdrawnByFastqcState =
+            seqTracksNotWithdrawn.groupBy {it.fastqcState}
+
+    allFinished &= seqTracksNotWithdrawnByFastqcState.keySet() == [SeqTrack.DataProcessingState.FINISHED] as Set
+    Collection<SeqTrack> seqTracksNotWithdrawnFinishedFastqcWorkflow = handleStateMap(seqTracksNotWithdrawnByFastqcState, "FastqcWorkflow", {
+        "${it.sample}  ${it.seqType}  ${it.run}  ${it.laneId}  ${it.project}  id: ${it.id}"
+    })
+
+    if (!seqTracksNotWithdrawnFinishedFastqcWorkflow) {
         output << "\nnot all workflows are finished"
         return
     }
 
-    //snv
-    next = handleStateMapSnv(next)
+    //filter for alignable seq tracks
+    List<SeqTrack> seqTracksToAlign = findAlignable(seqTracksNotWithdrawnFinishedFastqcWorkflow)
+    if (!seqTracksToAlign) {
+        output << "No alignable seq tracks left, stop"
+        return
+    }
 
-    if (!next) {
+    output << "\nThere are ${seqTracksToAlign.size()} seqtracks to align"
+
+    Map<String, Collection<SeqTrack>> seqTracksByAlignmentDeciderBeanName = seqTracksToAlign.groupBy { it.project.alignmentDeciderBeanName }
+
+    seqTracksByAlignmentDeciderBeanName.keySet().sort().each {
+        switch(it) {
+            case 'defaultOtpAlignmentDecider':
+                output << "${seqTracksByAlignmentDeciderBeanName['defaultOtpAlignmentDecider'].size()} SeqTracks use OTP-Alignment"
+                break
+            case 'roddyAlignmentDecider':
+                output << "${seqTracksByAlignmentDeciderBeanName['roddyAlignmentDecider'].size()} SeqTracks use Roddy-Alignment"
+                break
+            case 'noAlignmentDecider':
+                output << "${seqTracksByAlignmentDeciderBeanName['noAlignmentDecider'].size()} SeqTracks don't align"
+                break
+            default:
+                new RuntimeException("Unknown alignment decider: ${it}. Please inform a maintainer")
+        }
+    }
+
+    Collection<SeqTrack> seqTracksFinishedAlignment = []
+
+    //alignment OTP
+    seqTracksFinishedAlignment += showSeqTracksOtp(seqTracksByAlignmentDeciderBeanName['defaultOtpAlignmentDecider'])
+
+    //alignment Roddy
+    seqTracksFinishedAlignment += showSeqTracksRoddy(seqTracksByAlignmentDeciderBeanName['roddyAlignmentDecider'])
+
+    if (!seqTracksFinishedAlignment) {
+        return
+    }
+
+    //snv
+    Collection<SeqTrack> seqTracksFinishedSnv = handleStateMapSnv(seqTracksFinishedAlignment)
+
+    if (!seqTracksFinishedSnv) {
         output << "\nnot all workflows are finished"
         return
     }
 
     //end
     output << "\nFinshed samples: "
-    next.collect {
+    seqTracksFinishedSnv.collect {
         "        ${it}   ${it.project}"
     }.sort { it }.each { output << it }
 
     if (!allFinished) {
         output << "\nnot all workflows are finished"
     }
-
 }
 
 
@@ -790,10 +937,36 @@ if (allProcessed) {
                             or alignmentPass.workPackage = snvCallingInstance.sampleType2BamFile.mergingPass.mergingSet.mergingWorkPackage
                         )
                 )
+            ) or (
+                seqTrack.id in (
+                    select
+                        seqTrack.id
+                    from
+                        RoddyBamFile roddyBamFile join roddyBamFile.seqTracks seqTrack
+                    where
+                        roddyBamFile.fileOperationStatus <> '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}'
+                        and roddyBamFile.withdrawn = false
+                    )
             )
         )
     """)
-    showSeqTracks(seqTracks)
+
+    MergingWorkPackage.executeQuery("""
+        select
+            mergingWorkPackage
+        from
+            MergingWorkPackage mergingWorkPackage
+            join mergingWorkPackage.sample.individual.project project
+        where
+            mergingWorkPackage.needsProcessing = true
+    """).each {
+        def mergeableSeqTracks = it.findMergeableSeqTracks()
+        if(mergeableSeqTracks) {
+            seqTracks += mergeableSeqTracks - RoddyAlignmentStartJob.findUsableBaseBamFile(it)?.containedSeqTracks
+        }
+    }
+
+    showSeqTracks(seqTracks.unique())
 
     output << "\n\nProjects in processing:"
     output << INDENT + seqTracks*.sample*.individual*.project*.name.unique().sort().join("\n${INDENT}")
