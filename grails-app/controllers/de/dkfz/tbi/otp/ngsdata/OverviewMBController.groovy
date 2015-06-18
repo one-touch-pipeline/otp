@@ -28,7 +28,7 @@ class OverviewMBController {
 
         List<SeqType> wp = WorkPackagesDSL.make {
             seqType("WHOLE_GENOME", "PAIRED")
-            seqType("WHOLE_GENOME", "SINGLE")
+            seqType("EXON", "PAIRED")
             seqType("WHOLE_GENOME_BISULFITE", "PAIRED")
             seqType("WHOLE_GENOME", "MATE_PAIR")
             seqType("RNA", "PAIRED")
