@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
 import static org.springframework.util.Assert.*
 import org.springframework.context.annotation.Scope
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -155,8 +157,26 @@ class SeqPlatformService {
         entry.save(flush: true)
     }
 
-    SeqPlatform findForNameAndModelAndSequencingKit(String platformName, SeqPlatformModelLabel seqPlatformModelLabel, SequencingKitLabel sequencingKitLabel) {
+    static SeqPlatform findForNameAndModelAndSequencingKit(String platformName, SeqPlatformModelLabel seqPlatformModelLabel, SequencingKitLabel sequencingKitLabel) {
         assert platformName
         return SeqPlatform.findByNameIlikeAndSeqPlatformModelLabelAndSequencingKitLabel(platformName, seqPlatformModelLabel, sequencingKitLabel)
+    }
+
+
+    public static SeqPlatform createNewSeqPlatform(String seqPlatformName, SeqPlatformGroup seqPlatformGroup = null,
+                                                   SeqPlatformModelLabel seqPlatformModelLabel = null, SequencingKitLabel sequencingKitLabel = null) {
+        assert seqPlatformName : "The input seqPlatformName must not be null"
+
+        assert !SeqPlatformService.findForNameAndModelAndSequencingKit(seqPlatformName, seqPlatformModelLabel, sequencingKitLabel) :
+            "The seqPlatform for this name model and kit exists already"
+
+        SeqPlatform seqPlatform = new SeqPlatform(
+                name: seqPlatformName,
+                seqPlatformModelLabel: seqPlatformModelLabel,
+                sequencingKitLabel: sequencingKitLabel,
+                seqPlatformGroup: seqPlatformGroup
+        )
+        assert seqPlatform.save(flush: true)
+        return seqPlatform
     }
 }

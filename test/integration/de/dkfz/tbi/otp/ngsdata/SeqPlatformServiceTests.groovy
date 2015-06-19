@@ -33,7 +33,7 @@ class SeqPlatformServiceTests {
     }
 
     @After
-    void tearDopwn() {
+    void tearDown() {
         LogThreadLocal.removeThreadLog()
         checkedLogger.assertAllMessagesConsumed()
         checkedLogger = null
@@ -272,5 +272,18 @@ class SeqPlatformServiceTests {
         checkedLogger.addError("The found seqPlatform '${PLATFORM_NAME} ${MODEL_NAME} unknown kit' differs from the one of the run '${PLATFORM_NAME} ${MODEL_NAME} ${KIT_NAME}'")
 
         assert !seqPlatformService.validateSeqPlatform(run.id)
+    }
+
+    @Test
+    void testCreateNewSeqPlatform_SeqPlatformExistsAlready_shouldFail() {
+        SeqPlatform.build(
+                name: PLATFORM_NAME,
+                seqPlatformGroup: null,
+                seqPlatformModelLabel: null,
+                sequencingKitLabel: null,
+        )
+        TestCase.shouldFail(AssertionError) {
+            SeqPlatformService.createNewSeqPlatform(PLATFORM_NAME)
+        }
     }
 }
