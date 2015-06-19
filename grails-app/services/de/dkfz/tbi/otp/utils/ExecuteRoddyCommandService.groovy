@@ -83,8 +83,7 @@ class ExecuteRoddyCommandService {
          assert process : "The input process must not be null"
          StringBuffer stdout = new StringBuffer()
          StringBuffer stderr = new StringBuffer()
-         process.consumeProcessOutput(stdout, stderr)
-         process.waitFor()
+         process.waitForProcessOutput(stdout, stderr)
 
          assert stderr.length() == 0 : "Stderr is not null, but ${stderr.toString()}"
          return stdout.toString().trim()

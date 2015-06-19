@@ -93,8 +93,7 @@ class ExecuteRoddyCommandServiceTests {
 
         Process process = executeRoddyCommandService.executeRoddyCommand("echo '${COMMAND}'")
 
-        process.consumeProcessOutput(stdout, stderr)
-        process.waitFor()
+        process.waitForProcessOutput(stdout, stderr)
         assert stdout.toString().trim() == COMMAND
     }
 
