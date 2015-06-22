@@ -11,11 +11,20 @@ import java.util.concurrent.Callable
 
 /**
  * A default base class for test cases. This provides some helper methods.
- *
  */
 class TestCase extends GroovyTestCase {
 
-    static final TEST_DIRECTORY = new File('/tmp/otp-test')
+    /**
+     * @see #createEmptyTestDirectory()
+     * @see #cleanTestDirectory()
+     */
+    private static final File TEST_DIRECTORY
+    static {
+        String tmpdir = System.getProperty('java.io.tmpdir')
+        assert tmpdir
+        TEST_DIRECTORY = new File(tmpdir, 'otp-test')
+        assert TEST_DIRECTORY.isAbsolute()
+    }
 
     final List<Throwable> failures = []
 

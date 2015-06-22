@@ -20,7 +20,7 @@ class ExecuteRoddyCommandServiceTests {
 
 
     final String RODDY_PATH = "/path/to/roddy/"
-    final File TMP_OUTPUT_DIR = new File(TestCase.TEST_DIRECTORY, "temporaryOutputDir")
+    final File TMP_OUTPUT_DIR = new File(TestCase.createEmptyTestDirectory(), "temporaryOutputDir")
     final String CONFIG_NAME = "WORKFLOW_VERSION"
     final String ANALYSIS_ID = "WHOLE_GENOME"
     final String COMMAND = "Hallo\nTest"
