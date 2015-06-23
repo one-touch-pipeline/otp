@@ -597,7 +597,9 @@ class MetaDataService {
             //SOMEPID_lane511s003237_1_sequence.txt.gz
             [regExpr: /.*[Ll]ane\d.+_([12])_sequence.txt.gz$/, readGroupNumber: 1],
             //180824_I234_ABCDEFGHIJK_L5_WHAIPI000042-43_2.raw.fq.gz
-            [regExpr: /^\d{6}_I\d{3}_[A-Z0-9]{11}_L\d_WHAIPI\d{6}-\d{2}(\+1)?_([12]).raw.fq.gz$/, readGroupNumber: 2]
+            [regExpr: /^\d{6}_I\d{3}_[A-Z0-9]{11}_L\d_WHAIPI\d{6}-\d{2}(\+1)?_([12]).raw.fq.gz$/, readGroupNumber: 2],
+            //FOOBAR_ATRT999_lib424242_1.fastq.gz
+            [regExpr: /^.*ATRT\d+_lib\d*_([12]).fastq.gz$/, readGroupNumber: 1],
         ]
 
         def readNumbers = patterns.collect { pattern ->
