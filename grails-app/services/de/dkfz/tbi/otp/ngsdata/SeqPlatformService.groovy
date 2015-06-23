@@ -168,7 +168,7 @@ class SeqPlatformService {
         assert seqPlatformName : "The input seqPlatformName must not be null"
 
         assert !SeqPlatformService.findForNameAndModelAndSequencingKit(seqPlatformName, seqPlatformModelLabel, sequencingKitLabel) :
-            "The seqPlatform for this name model and kit exists already"
+            "The seqPlatform for this name, model and kit exists already"
 
         SeqPlatform seqPlatform = new SeqPlatform(
                 name: seqPlatformName,
