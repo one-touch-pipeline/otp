@@ -188,6 +188,8 @@ class MetaDataServiceUnitTests {
             [name: 'lane8wwmp44PE2_1_sequence.txt.gz', readNumber: 1],
             [name: 'SOMEPID_lane511s003237_1_sequence.txt.gz', readNumber: 1],
             [name: '180824_I234_ABCDEFGHIJK_L5_WHAIPI000042-43_2.raw.fq.gz', readNumber: 2],
+            [name: 'FOOBAR_ATRT999_lib424242_1.fastq.gz', readNumber: 1],
+            [name: 'FOOBAR_ATRT999_lib424242_2.fastq.gz', readNumber: 2],
         ]
         files.each { file ->
             assertEquals(file.readNumber, MetaDataService.findOutReadNumber(file.name))
