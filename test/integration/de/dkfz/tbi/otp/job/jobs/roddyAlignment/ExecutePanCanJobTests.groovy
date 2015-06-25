@@ -99,7 +99,6 @@ class ExecutePanCanJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_PathToReferenceGenomeIsNull_ShouldFail() {
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         executePanCanJob.referenceGenomeService.metaClass.fastaFilePath = { Project project, ReferenceGenome referenceGenome ->
             return null
         }
@@ -157,6 +156,9 @@ possibleControlSampleNamePrefixes:(${roddyBamFile.sampleType.dirName})\
 
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
 
+        SeqTrack seqTrack = roddyBamFile2.seqTracks.iterator()[0]
+        assert DomainFactory.buildSequenceDataFile([seqTrack: seqTrack, fileName: "DataFileFileName_R2.gz"]).save(flush: true)
+
         String expectedCmd = """\
 cd ${roddyPath} \
 && sudo -u OtherUnixUser roddy.sh rerun ${roddyBamFile2.workflow.name}_${roddyBamFile2.config.externalScriptVersion}.config@WGS \
@@ -166,7 +168,7 @@ ${roddyBamFile2.individual.pid} \
 --usePluginVersion=${roddyBamFile2.config.externalScriptVersion} \
 --configurationDirectories=${new File(roddyBamFile2.config.configFilePath).parent},${roddyBaseConfigsPath} \
 --useiodir=${roddyBamFile2.tmpRoddyDirectory} \
---cvalues=fastq_list:/tmp/otp-unit-test/processing/DataFileFileName_R1.gz,\
+--cvalues=fastq_list:/tmp/otp-unit-test/processing/DataFileFileName_R1.gz;/tmp/otp-unit-test/processing/DataFileFileName_R2.gz,\
 bam:${roddyBamFile.finalBamFile},\
 REFERENCE_GENOME://tmp/otp-unit-test/processing/reference_genomes/${roddyBamFile.referenceGenome.path}/fileNamePrefix.fa,\
 INDEX_PREFIX://tmp/otp-unit-test/processing/reference_genomes/${roddyBamFile.referenceGenome.path}/fileNamePrefix.fa,\
@@ -179,6 +181,44 @@ possibleControlSampleNamePrefixes:(${roddyBamFile.sampleType.dirName})\
         assert expectedCmd == actualCmd
     }
 
+    @Test
+    void testPrepareAndReturnWorkflowSpecificCommand_WhenReadNumberOrderIsWrong_ShouldBeOk() {
+        executePanCanJob.executeRoddyCommandService.metaClass.createTemporaryOutputDirectory = { Realm realm, File file -> }
+
+        SeqTrack.list().join(";")
+
+        String expectedCmd =  """\
+cd ${roddyPath} \
+&& sudo -u OtherUnixUser roddy.sh rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.externalScriptVersion}.config@WGS \
+${roddyBamFile.individual.pid} \
+--useconfig=${roddyApplicationIni} \
+--useRoddyVersion=${roddyVersion} \
+--usePluginVersion=${roddyBamFile.config.externalScriptVersion} \
+--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} \
+--useiodir=${roddyBamFile.tmpRoddyDirectory} \
+--cvalues=fastq_list:/tmp/otp-unit-test/processing/DataFileFileName_R1.gz;/tmp/otp-unit-test/processing/DataFileFileName_R2.gz,\
+REFERENCE_GENOME://tmp/otp-unit-test/processing/reference_genomes/${roddyBamFile.referenceGenome.path}/fileNamePrefix.fa,\
+INDEX_PREFIX://tmp/otp-unit-test/processing/reference_genomes/${roddyBamFile.referenceGenome.path}/fileNamePrefix.fa,\
+CHROM_SIZES_FILE://tmp/otp-unit-test/processing/reference_genomes/${roddyBamFile.referenceGenome.path}/stats/,\
+possibleControlSampleNamePrefixes:(${roddyBamFile.sampleType.dirName})\
+"""
+
+        List<DataFile> dataFiles = []
+
+        roddyBamFile.seqTracks.each { seqTrack ->
+            DataFile.findAllBySeqTrack(seqTrack).each { DataFile dataFile ->
+                dataFiles << dataFile
+            }
+        }
+
+        dataFiles.first().fileName = "DataFileFileName_R2.gz"
+        dataFiles.last().fileName = "DataFileFileName_R1.gz"
+
+        assert roddyBamFile.save(flush: true)
+
+        String actualCmd = executePanCanJob.prepareAndReturnWorkflowSpecificCommand(roddyBamFile, dataManagement)
+        assert expectedCmd == actualCmd
+    }
 
 
     @Test

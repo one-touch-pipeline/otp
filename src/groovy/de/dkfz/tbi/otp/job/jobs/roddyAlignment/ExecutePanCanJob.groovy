@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.ngsdata.MetaDataService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
@@ -35,6 +36,11 @@ class ExecutePanCanJob extends AbstractRoddyJob {
                 dataFiles.add(lsdfFilesService.getFileFinalPath(dataFile))
             }
         }
+
+        dataFiles.sort().collate(2).each {
+            MetaDataService.ensurePairedSequenceFileNameConsistency(it.first(), it.last())
+        }
+
         String seqTracksToMerge = dataFiles.join(";")
 
         String referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome)
