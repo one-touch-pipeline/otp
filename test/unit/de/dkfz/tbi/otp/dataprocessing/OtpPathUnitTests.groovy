@@ -59,7 +59,7 @@ class OtpPathUnitTests {
 
         realm.stagingRootPath = 'staging_root'
         assert realm.save()
-        assertEquals "stagingRootPath is not absolute for ${realm}.", shouldFail { path.absoluteStagingPath }
+        assertEquals "stagingRootPath (${realm.stagingRootPath}) is not absolute for ${realm}.", shouldFail { path.absoluteStagingPath }
 
         realm.stagingRootPath = '/staging_root'
         assert realm.save()
@@ -76,7 +76,7 @@ class OtpPathUnitTests {
 
         realm.processingRootPath = 'processing_root'
         assert realm.save()
-        assertEquals "processingRootPath is not absolute for ${realm}.", shouldFail { path.absoluteDataProcessingPath }
+        assertEquals "processingRootPath (${realm.processingRootPath}) is not absolute for ${realm}.", shouldFail { path.absoluteDataProcessingPath }
 
         realm.processingRootPath = '/processing_root'
         assert realm.save()
@@ -93,7 +93,7 @@ class OtpPathUnitTests {
 
         realm.rootPath = 'project_root'
         assert realm.save()
-        assertEquals "rootPath is not absolute for ${realm}.", shouldFail { path.absoluteDataManagementPath }
+        assertEquals "rootPath (${realm.rootPath}) is not absolute for ${realm}.", shouldFail { path.absoluteDataManagementPath }
 
         realm.rootPath = '/project_root'
         assert realm.save()

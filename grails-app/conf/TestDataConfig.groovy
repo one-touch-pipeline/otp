@@ -19,7 +19,8 @@ testDataConfig {
     sampleData {
         'de.dkfz.tbi.otp.ngsdata.DataFile' {
             fileName = 'DataFileFileName_R1.gz'
-            vbpFileName = 'DataFileVbpFileName.gz'
+            vbpFileName = 'DataFileFileName_R1.gz'
+            pathName = 'path'
             fileType = {FileType.buildLazy(type: FileType.Type.SEQUENCE)}
         }
         'de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit' {

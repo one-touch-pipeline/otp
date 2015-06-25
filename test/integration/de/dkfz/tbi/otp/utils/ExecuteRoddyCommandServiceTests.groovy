@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -25,11 +26,13 @@ class ExecuteRoddyCommandServiceTests {
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 
 
-    File RODDY_PATH
-    File TMP_OUTPUT_DIR
     final String CONFIG_NAME = "WORKFLOW_VERSION"
     final String ANALYSIS_ID = "WHOLE_GENOME"
     final String COMMAND = "Hallo\nTest"
+
+    File roddyPath
+    File roddyCommand
+    File tmpOutputDir
     Realm realm
     RoddyBamFile roddyBamFile
     File roddyBaseConfigsPath
@@ -41,16 +44,17 @@ class ExecuteRoddyCommandServiceTests {
 
         DomainFactory.createRoddyProcessingOptions(temporaryFolder.newFolder())
 
-        RODDY_PATH = new File(ProcessingOptionService.getValueOfProcessingOption("roddyPath"))
-        TMP_OUTPUT_DIR = temporaryFolder.newFolder("temporaryOutputDir")
+        roddyPath = new File(ProcessingOptionService.getValueOfProcessingOption("roddyPath"))
+        roddyCommand = new File(roddyPath, 'roddy.sh')
+        tmpOutputDir = temporaryFolder.newFolder("temporaryOutputDir")
 
         SeqType.buildLazy(name: SeqTypeNames.EXOME.seqTypeName, alias: SeqTypeNames.EXOME.seqTypeName, libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
         roddyBamFile = DomainFactory.createRoddyBamFile()
 
         realm = DomainFactory.createRealmDataManagementDKFZ([
                 name: roddyBamFile.project.realmName,
-                rootPath: '${TMP_OUTPUT_DIR}/root',
-                processingRootPath: '${TMP_OUTPUT_DIR}/processing',
+                rootPath: "${tmpOutputDir}/root",
+                processingRootPath: "${tmpOutputDir}/processing",
         ])
         assert realm.save(flush: true)
 
@@ -62,20 +66,12 @@ class ExecuteRoddyCommandServiceTests {
 
     @After
     void tearDown() {
-        RODDY_PATH = null
-        TMP_OUTPUT_DIR = null
+        roddyPath = null
+        tmpOutputDir = null
         realm = null
         roddyBamFile = null
         TestCase.removeMetaClass(ExecuteRoddyCommandService, executeRoddyCommandService)
         TestCase.removeMetaClass(ExecutionService, executeRoddyCommandService.executionService)
-
-        if (applicationIniPath.exists()) {
-            assert applicationIniPath.delete()
-        }
-
-        if (roddyBaseConfigsPath.exists()) {
-            assert roddyBaseConfigsPath.deleteDir()
-        }
     }
 
     @Test
@@ -88,21 +84,21 @@ class ExecuteRoddyCommandServiceTests {
     @Test
     void testRoddyBaseCommand_ConfigNameIsNull_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.roddyBaseCommand(RODDY_PATH.path, null, ANALYSIS_ID)
+            executeRoddyCommandService.roddyBaseCommand(roddyPath, null, ANALYSIS_ID)
         }.contains("configName is not allowed to be null")
     }
 
     @Test
     void testRoddyBaseCommand_AnalysisIdIsNull_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.roddyBaseCommand(RODDY_PATH.path, CONFIG_NAME, null)
+            executeRoddyCommandService.roddyBaseCommand(roddyPath, CONFIG_NAME, null)
         }.contains("analysisId is not allowed to be null")
     }
 
     @Test
     void testRoddyBaseCommand_AllFine() {
-        String expectedCmd =  "cd ${RODDY_PATH.path} && sudo -u OtherUnixUser roddy.sh rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} "
-        String actualCmd = executeRoddyCommandService.roddyBaseCommand(RODDY_PATH.path, CONFIG_NAME, ANALYSIS_ID)
+        String expectedCmd =  "cd /tmp && sudo -u OtherUnixUser ${roddyPath}/roddy.sh rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} "
+        String actualCmd = executeRoddyCommandService.roddyBaseCommand(roddyPath, CONFIG_NAME, ANALYSIS_ID)
         assert expectedCmd == actualCmd
     }
 
@@ -135,9 +131,11 @@ class ExecuteRoddyCommandServiceTests {
     @Test
     void testReturnStdoutOfFinishedCommandExecution_AllFine() {
         Process process = [ 'bash', '-c', "echo '${COMMAND}'" ].execute()
-        String actual = executeRoddyCommandService.returnStdoutOfFinishedCommandExecution(process)
-        String expected = COMMAND
-        assert actual == expected
+        LogThreadLocal.withThreadLog(System.out) {
+            String actual = executeRoddyCommandService.returnStdoutOfFinishedCommandExecution(process)
+            String expected = COMMAND
+            assert actual == expected
+        }
     }
 
 
@@ -294,27 +292,30 @@ class ExecuteRoddyCommandServiceTests {
     void testDefaultRoddyExecutionCommand_AllFine() {
         executeRoddyCommandService.metaClass.createTemporaryOutputDirectory = { Realm realm, File file -> }
 
-        String expectedCmd = "cd ${RODDY_PATH}/ && " +
-"sudo -u OtherUnixUser roddy.sh rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
+        String viewByPid = roddyBamFile.individual.getViewByPidPathBase(roddyBamFile.seqType).absoluteDataManagementPath.path
+
+        String expectedCmd = "cd /tmp && " +
+"sudo -u OtherUnixUser ${roddyCommand} rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
 "${roddyBamFile.individual.pid} " +
 "--useconfig=${applicationIniPath} " +
 "--useRoddyVersion=2.1.28 " +
 "--usePluginVersion=${roddyBamFile.config.externalScriptVersion} " +
-"--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath}/ " +
-"--useiodir=${realm.rootPath}/${roddyBamFile.project.dirName}/sequencing/${roddyBamFile.seqType.dirName}/view-by-pid/" +
-                "${roddyBamFile.individual.pid}/${roddyBamFile.sampleType.dirName}/${roddyBamFile.seqType.libraryLayoutDirName}/" +
-                "merged-alignment/${RoddyBamFile.TMP_DIR}_${roddyBamFile.id} "
+"--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} " +
+"--useiodir=${viewByPid},${realm.rootPath}/${roddyBamFile.project.dirName}/sequencing/${roddyBamFile.seqType.dirName}/view-by-pid/" +
+"${roddyBamFile.individual.pid}/${roddyBamFile.sampleType.dirName}/${roddyBamFile.seqType.libraryLayoutDirName}/" +
+"merged-alignment/${RoddyBamFile.TMP_DIR}_${roddyBamFile.id} "
 
-        String actualCmd = executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, realm)
-
-        assert expectedCmd == actualCmd
+        LogThreadLocal.withThreadLog(System.out) {
+            String actualCmd = executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, realm)
+            assert expectedCmd == actualCmd
+        }
     }
 
 
     @Test
     void testCreateTemporaryOutputDirectory_RealmIsNull_ShouldFail() {
         TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.createTemporaryOutputDirectory(null, TMP_OUTPUT_DIR)
+            executeRoddyCommandService.createTemporaryOutputDirectory(null, tmpOutputDir)
         }
     }
 
@@ -328,9 +329,9 @@ class ExecuteRoddyCommandServiceTests {
    @Test
     void testCreateTemporaryOutputDirectory_DirectoryCreationFailed_ShouldFail() {
        executeRoddyCommandService.executionService.metaClass.executeCommand = { Realm realm, String command -> }
-       TMP_OUTPUT_DIR.absoluteFile.delete()
+       tmpOutputDir.absoluteFile.delete()
         TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.createTemporaryOutputDirectory(realm, TMP_OUTPUT_DIR)
+            executeRoddyCommandService.createTemporaryOutputDirectory(realm, tmpOutputDir)
         }
     }
 
@@ -339,7 +340,7 @@ class ExecuteRoddyCommandServiceTests {
         executeRoddyCommandService.executionService.metaClass.executeCommand = { Realm realm, String command ->
             [ 'bash', '-c', command ].execute().waitFor()
         }
-        executeRoddyCommandService.createTemporaryOutputDirectory(realm, TMP_OUTPUT_DIR)
+        executeRoddyCommandService.createTemporaryOutputDirectory(realm, tmpOutputDir)
     }
 
 }

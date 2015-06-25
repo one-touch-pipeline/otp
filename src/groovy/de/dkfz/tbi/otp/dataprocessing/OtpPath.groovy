@@ -56,7 +56,7 @@ class OtpPath {
         }
         final File rootPath = new File(rootPathString)
         if (!rootPath.isAbsolute()) {
-            throw new RuntimeException("${rootPathName} is not absolute for ${realm}.")
+            throw new RuntimeException("${rootPathName} (${rootPath}) is not absolute for ${realm}.")
         }
         return new File(rootPath, relativePath.path)
     }

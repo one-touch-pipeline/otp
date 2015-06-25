@@ -80,6 +80,7 @@ class AbstractRoddyJobTests {
         roddyJob.executeRoddyCommandService.metaClass.checkIfRoddyWFExecutionWasSuccessful = { Process process ->
             counter++
         }
+        roddyJob.log = log
     }
 
     @After

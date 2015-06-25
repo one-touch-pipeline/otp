@@ -215,6 +215,31 @@ class RoddyAlignmentStartJobTest {
     }
 
     @Test
+    void testCreateRoddyBamFile_WhenBaseBamFileIsNullAndNoConfigAvailable_ShouldFail() {
+        MergingWorkPackage mwp = createMergingWorkPackage()
+        DomainFactory.buildSeqTrackWithDataFile(mwp)
+        Collection<SeqTrack> seqTracks = mwp.findMergeableSeqTracks()
+        DomainFactory.createRoddyProcessingOptions()
+        RoddyWorkflowConfig.list()*.delete(flush: true)
+        assert 0 == RoddyWorkflowConfig.list().size()
+
+        assert TestCase.shouldFail (AssertionError) {
+            RoddyBamFile rbf = RoddyAlignmentStartJob.createRoddyBamFile(mwp, null)
+        }.contains('RoddyWorkflowConfig')
+    }
+
+    @Test
+    void testCreateRoddyBamFile_WhenBaseBamFileIsNullAndProcessingOptionDoesNotExist_ShouldFail() {
+        MergingWorkPackage mwp = createMergingWorkPackage()
+        DomainFactory.buildSeqTrackWithDataFile(mwp)
+        Collection<SeqTrack> seqTracks = mwp.findMergeableSeqTracks()
+
+        assert TestCase.shouldFail (AssertionError) {
+            RoddyBamFile rbf = RoddyAlignmentStartJob.createRoddyBamFile(mwp, null)
+        }.contains('roddyVersion')
+    }
+
+    @Test
     void testStartRoddyAlignment_WhenProcessingPriorityIsTooLow_ShouldNotCreateProcess() {
         MergingWorkPackage mwp = createMergingWorkPackage()
         mwp.project.processingPriority = ProcessingPriority.NORMAL_PRIORITY - 1

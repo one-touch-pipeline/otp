@@ -342,11 +342,16 @@ class DomainFactory {
     }
 
     public static SeqTrack buildSeqTrackWithDataFile(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:]) {
-        return buildSeqTrackWithDataFile([
+        Map map = [
                 sample: mergingWorkPackage.sample,
                 seqType: mergingWorkPackage.seqType,
                 seqPlatform: SeqPlatform.build(seqPlatformGroup: mergingWorkPackage.seqPlatformGroup),
-        ] + seqTrackProperties)
+        ] + seqTrackProperties
+        if (mergingWorkPackage.seqType.libraryLayout == SeqType.LIBRARYLAYOUT_PAIRED) {
+            return buildSeqTrackWithTwoDataFiles(map)
+        } else {
+            return buildSeqTrackWithDataFile(map)
+        }
     }
 
     public static SeqTrack buildSeqTrackWithDataFile(Map seqTrackProperties = [:], Map dataFileProperties = [:]) {
@@ -360,12 +365,37 @@ class DomainFactory {
         return seqTrack
     }
 
+    public static SeqTrack buildSeqTrackWithTwoDataFiles(Map seqTrackProperties = [:], Map dataFileProperties1 = [:], Map dataFileProperties2 = [:]) {
+        Map defaultMap1 = [
+                fileName: 'DataFileFileName_R1.gz',
+                vbpFileName: 'DataFileFileName_R1.gz',
+                readNumber: 1,
+        ]
+        Map defaultMap2 = [
+                fileName: 'DataFileFileName_R2.gz',
+                vbpFileName: 'DataFileFileName_R2.gz',
+                readNumber: 2,
+        ]
+        SeqTrack seqTrack = buildSeqTrackWithDataFile(seqTrackProperties, defaultMap1 + dataFileProperties1)
+        buildSequenceDataFile(defaultMap2 + dataFileProperties2 + [seqTrack: seqTrack])
+        return seqTrack
+    }
+
     public static DataFile buildSequenceDataFile(final Map properties = [:]) {
-        return DataFile.build([
+        DataFile dataFile = DataFile.build([
                 fileType: FileType.buildLazy(type: Type.SEQUENCE),
                 dateCreated: new Date(),  // In unit tests Grails (sometimes) does not automagically set dateCreated.
                 used: true,
         ] + properties)
+        if (!dataFile.run) {
+            dataFile.run = dataFile.seqTrack?.run
+            dataFile.save(flush: true, failOnError: true)
+        }
+        if (!dataFile.project) {
+            dataFile.project = dataFile.seqTrack?.project
+            dataFile.save(flush: true, failOnError: true)
+        }
+        return dataFile
     }
 
     public static SnvCallingInstance createSnvCallingInstance(Map properties) {

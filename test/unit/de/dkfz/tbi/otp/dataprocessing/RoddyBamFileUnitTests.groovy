@@ -172,6 +172,7 @@ class RoddyBamFileUnitTests {
     }
 
     void testGetReadGroupName_OnlyOneDataFile_ShouldFail() {
+        DataFile.findAllBySeqTrack(roddyBamFile.seqTracks.iterator()[0])[0].delete(flush: true)
         TestCase.shouldFail(AssertionError) {
             RoddyBamFile.getReadGroupName(roddyBamFile.seqTracks.iterator()[0])
         }
@@ -187,7 +188,7 @@ class RoddyBamFileUnitTests {
 
     void testGetReadGroupName_AllFine() {
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        makeSeqTrackPaired(seqTrack)
+        updateDataFileNames(seqTrack)
         assert "run${seqTrack.run.name}_${COMMON_PREFIX}" == RoddyBamFile.getReadGroupName(roddyBamFile.seqTracks.iterator()[0])
     }
 
@@ -199,15 +200,15 @@ class RoddyBamFileUnitTests {
 
     void testGetTmpRoddySingleLaneQADirectories_OneSeqTrack() {
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        makeSeqTrackPaired(seqTrack)
+        updateDataFileNames(seqTrack)
         File dir = new File("${TEST_DIR}/${RoddyBamFile.TMP_DIR}_${roddyBamFile.id}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}")
         assert [(seqTrack): dir] == roddyBamFile.tmpRoddySingleLaneQADirectories
     }
 
     void testGetTmpRoddySingleLaneQADirectories_TwoSeqTracks() {
-        makeSeqTrackPaired(roddyBamFile.seqTracks.iterator()[0])
+        updateDataFileNames(roddyBamFile.seqTracks.iterator()[0])
         SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile(roddyBamFile.workPackage)
-        makeSeqTrackPaired(seqTrack)
+        updateDataFileNames(seqTrack)
         roddyBamFile.seqTracks.add(seqTrack)
         Map<SeqTrack, File> expected = new HashMap<>()
         roddyBamFile.seqTracks.each {
@@ -227,15 +228,15 @@ class RoddyBamFileUnitTests {
 
     void testGetFinalRoddySingleLaneQADirectories_OneSeqTrack() {
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        makeSeqTrackPaired(seqTrack)
+        updateDataFileNames(seqTrack)
         File dir = new File("${TEST_DIR}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}")
         assert [(seqTrack): dir] == roddyBamFile.finalRoddySingleLaneQADirectories
     }
 
     void testGetFinalRoddySingleLaneQADirectories_TwoSeqTracks() {
-        makeSeqTrackPaired(roddyBamFile.seqTracks.iterator()[0])
+        updateDataFileNames(roddyBamFile.seqTracks.iterator()[0])
         SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile(roddyBamFile.workPackage)
-        makeSeqTrackPaired(seqTrack)
+        updateDataFileNames(seqTrack)
         roddyBamFile.seqTracks.add(seqTrack)
         Map<SeqTrack, File> expected = new HashMap<>()
         roddyBamFile.seqTracks.each {
@@ -250,21 +251,20 @@ class RoddyBamFileUnitTests {
 
     void testGetRoddySingleLaneQADirectoriesHelper_FinalFolder_OneSeqTrack() {
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        makeSeqTrackPaired(seqTrack)
+        updateDataFileNames(seqTrack)
         File dir = new File("${TEST_DIR}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}")
         assert [(seqTrack): dir] == roddyBamFile.getRoddySingleLaneQADirectoriesHelper(roddyBamFile.finalQADirectory)
     }
 
     void testGetRoddySingleLaneQADirectoriesHelper_TmpFolder_OneSeqTrack() {
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        makeSeqTrackPaired(seqTrack)
+        updateDataFileNames(seqTrack)
         File dir = new File("${TEST_DIR}/${RoddyBamFile.TMP_DIR}_${roddyBamFile.id}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}")
         assert [(seqTrack): dir] == roddyBamFile.getRoddySingleLaneQADirectoriesHelper(roddyBamFile.tmpRoddyQADirectory)
     }
 
 
-    private void makeSeqTrackPaired(SeqTrack seqTrack) {
-        assert DomainFactory.buildSequenceDataFile([seqTrack: seqTrack]).save(flush: true)
+    private void updateDataFileNames(SeqTrack seqTrack) {
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
         dataFiles[0].fileName = FIRST_DATAFILE_NAME
         dataFiles[1].fileName = SECOND_DATAFILE_NAME

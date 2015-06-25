@@ -3,14 +3,18 @@ package de.dkfz.tbi.otp.ngsdata
 import static org.junit.Assert.*
 import grails.test.mixin.*
 import grails.test.mixin.support.*
+import grails.buildtestdata.mixin.Build
 import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.Individual.Type
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 
 
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(Individual)
-@Mock([Realm, Project, SampleType, Sample, SeqType])
+@Build([
+        Realm,
+        Sample,
+        SeqType,
+])
 class IndividualUnitTests {
 
     @Test
@@ -95,29 +99,27 @@ class IndividualUnitTests {
     }
 
     @Test
-    void testGetViewByPidPath(){
-        Realm realm = DomainFactory.createRealmDataManagementDKFZ()
-        assert realm.save()
+    void testGetViewByPidPathBase() {
+        Individual individual = Individual.build()
+        SeqType seqType = SeqType.build()
+        Realm realm = Realm.build(operationType: Realm.OperationType.DATA_MANAGEMENT, name: individual.project.realmName)
 
-        Project project = TestData.createProject(
-                dirName: "projectDirName",
-                realmName: realm.name
-                )
+        String expectedPath = "${realm.rootPath}/${individual.project.dirName}/sequencing/${seqType.dirName}/view-by-pid"
+        String actualPath = individual.getViewByPidPathBase(seqType).absoluteDataManagementPath
 
-        Individual individual = createIndividual()
-        individual.project = project
+        assert expectedPath == actualPath
+    }
 
-        SeqType seqType = new SeqType(
-                name: "EXOME",
-                libraryLayout: "paired",
-                dirName: "exon_sequencing"
-                )
-        assert seqType.save()
+    @Test
+    void testGetViewByPidPath() {
+        Individual individual = Individual.build()
+        SeqType seqType = SeqType.build()
+        Realm realm = Realm.build(operationType: Realm.OperationType.DATA_MANAGEMENT, name: individual.project.realmName)
 
-        String expectedPath = "${realm.rootPath}/${project.dirName}/sequencing/${seqType.dirName}/view-by-pid/${individual.pid}"
+        String expectedPath = "${realm.rootPath}/${individual.project.dirName}/sequencing/${seqType.dirName}/view-by-pid/${individual.pid}"
         String actualPath = individual.getViewByPidPath(seqType).absoluteDataManagementPath
 
-        assertEquals(expectedPath, actualPath)
+        assert expectedPath == actualPath
     }
 
 

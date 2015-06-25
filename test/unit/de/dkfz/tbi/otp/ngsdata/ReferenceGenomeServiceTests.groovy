@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.TestCase
 import org.apache.commons.io.FileUtils
+import org.junit.rules.TemporaryFolder
 import static org.junit.Assert.*
 import grails.test.mixin.*
 import grails.test.mixin.support.*
@@ -28,31 +29,30 @@ class ReferenceGenomeServiceTests {
 
     File directory
     File file
-    String referenceGenomePath = "/tmp/reference_genomes/referenceGenome/"
+
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder()
 
     @Before
     void setUp() {
+        temporaryFolder.create() //Called directly because bug in junit
+
         referenceGenomeService = new ReferenceGenomeService()
         referenceGenomeService.configService = new ConfigService()
 
-        directory = new File(referenceGenomePath)
-        if (!directory.exists()) {
-            directory.mkdirs()
-        }
+        directory = temporaryFolder.newFolder('reference_genomes', 'referenceGenome')
 
-        file = new File("${referenceGenomePath}prefixName.fa")
-        if (!file.exists()) {
-            file.createNewFile()
-            file << "test"
-        }
+        file = new File(directory, "prefixName.fa")
+        assert file.createNewFile()
+        file << "test"
 
         realm = DomainFactory.createRealmDataProcessingDKFZ([
-            processingRootPath: '/tmp',
+            processingRootPath: temporaryFolder.getRoot().path,
             ]).save([flush: true])
 
         project = TestData.createProject()
         project.name = "SOME_PROJECT"
-        project.dirName = "/tmp/alignmentPassService/"
+        project.dirName = temporaryFolder.newFolder()
         project.realmName = realm.name
         project.save(flush: true)
 
@@ -90,46 +90,52 @@ class ReferenceGenomeServiceTests {
         project = null
         referenceGenomeService = null
         realm = null
-        directory.deleteOnExit()
-        file.deleteOnExit()
     }
 
     @Test
     void testRealmFilePathToDirectoryCorrect() {
-        String pathExp = "${referenceGenomePath}"
-        String pathAct = referenceGenomeService.filePathToDirectory(realm, referenceGenome)
+        File pathExp = directory
+        File pathAct = referenceGenomeService.filePathToDirectory(realm, referenceGenome) as File
         assertEquals(pathExp, pathAct)
     }
 
     @Test(expected = IllegalArgumentException)
     void testRealmFilePathToDirectoryNullRealm() {
         realm = null
-        String pathAct = referenceGenomeService.filePathToDirectory(realm as Realm, referenceGenome)
+        referenceGenomeService.filePathToDirectory(realm as Realm, referenceGenome)
     }
 
     @Test(expected = IllegalArgumentException)
     void testRealmFilePathToDirectoryNullRefGen() {
         referenceGenome = null
-        String pathAct = referenceGenomeService.filePathToDirectory(realm, referenceGenome)
+        referenceGenomeService.filePathToDirectory(realm, referenceGenome)
     }
 
     @Test(expected = IllegalArgumentException)
     void testRealmFilePathToDirectoryWrongRealmOperationType() {
         realm.operationType = Realm.OperationType.DATA_MANAGEMENT
-        String pathAct = referenceGenomeService.filePathToDirectory(realm, referenceGenome)
+        referenceGenomeService.filePathToDirectory(realm, referenceGenome)
     }
 
     @Test(expected = RuntimeException)
     void testRealmFilePathToDirectoryCanNotReadDirectory() {
         FileUtils.deleteDirectory(directory)
         assertFalse directory.exists()
-        String pathAct = referenceGenomeService.filePathToDirectory(realm, referenceGenome)
+        referenceGenomeService.filePathToDirectory(realm, referenceGenome)
+    }
+
+    @Test
+    void testRealmFilePathToDirectoryCanNotReadDirectory_NoFileCheck() {
+        assert directory.deleteDir()
+        File pathExp = directory
+        File pathAct = referenceGenomeService.filePathToDirectory(realm, referenceGenome, false) as File
+        assertEquals(pathExp, pathAct)
     }
 
     @Test
     void testFilePathToDirectory() {
-        String pathExp = "${referenceGenomePath}"
-        String pathAct = referenceGenomeService.filePathToDirectory(project, referenceGenome)
+        File pathExp = directory
+        File pathAct = referenceGenomeService.filePathToDirectory(project, referenceGenome) as File
         assertEquals(pathExp, pathAct)
     }
 
@@ -143,26 +149,35 @@ class ReferenceGenomeServiceTests {
     @Test(expected = IllegalArgumentException)
     void testFilePathToDirectoryProjectIsNull() {
         project = null
-        String pathAct = referenceGenomeService.filePathToDirectory(project as Project, referenceGenome)
+        referenceGenomeService.filePathToDirectory(project as Project, referenceGenome)
     }
 
     @Test(expected = IllegalArgumentException)
     void testFilePathToDirectoryRefGenIsNull() {
         referenceGenome = null
-        String pathAct = referenceGenomeService.filePathToDirectory(project, referenceGenome)
+        referenceGenomeService.filePathToDirectory(project, referenceGenome)
     }
 
     @Test(expected = RuntimeException)
     void testFilePathToDirectoryCanNotReadDirectory() {
-        FileUtils.deleteDirectory(directory)
+        assert directory.deleteDir()
         assertFalse directory.exists()
-        String pathAct = referenceGenomeService.filePathToDirectory(project, referenceGenome)
+        referenceGenomeService.filePathToDirectory(project, referenceGenome)
     }
 
     @Test
+    void testFilePathToDirectory_FileNotExistButNoFileCheck() {
+        assert directory.deleteDir()
+        File pathExp = directory
+        File pathAct = referenceGenomeService.filePathToDirectory(project, referenceGenome, false) as File
+        assertEquals(pathExp, pathAct)
+    }
+
+
+    @Test
     void testFilePathOnlyPrefix() {
-        String pathExp = "${referenceGenomePath}prefixName"
-        String pathAct = referenceGenomeService.prefixOnlyFilePath(project, referenceGenome)
+        File pathExp = new File(directory, "prefixName")
+        File pathAct = referenceGenomeService.prefixOnlyFilePath(project, referenceGenome) as File
         assertEquals(pathExp, pathAct)
     }
 
@@ -174,8 +189,8 @@ class ReferenceGenomeServiceTests {
 
     @Test
     void testFilePath() {
-        String pathExp = "${referenceGenomePath}prefixName.fa"
-        String pathAct = referenceGenomeService.fastaFilePath(project, referenceGenome)
+        File pathExp = new File(directory, "prefixName.fa")
+        File pathAct = referenceGenomeService.fastaFilePath(project, referenceGenome) as File
         assertEquals(pathExp, pathAct)
     }
 
@@ -204,8 +219,8 @@ class ReferenceGenomeServiceTests {
 
     @Test
     void testPathToChromosomeSizeFilesPerReference_AllFine() {
-        String pathExp = "${referenceGenomePath}stats/"
-        String pathAct = referenceGenomeService.pathToChromosomeSizeFilesPerReference(project, referenceGenome)
+        File pathExp = new File(directory, ReferenceGenomeService.CHROMOSOME_SIZE_FILES_PREFIX)
+        File pathAct = referenceGenomeService.pathToChromosomeSizeFilesPerReference(project, referenceGenome) as File
         assertEquals(pathExp, pathAct)
     }
 

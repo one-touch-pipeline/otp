@@ -134,8 +134,10 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         scheduler.shutdownNow()
         startJobRunning = false
 
-        sql.execute("DROP ALL OBJECTS")
-        sql.execute("RUNSCRIPT FROM ?", [schemaDump.absolutePath])
+        if (sql) {
+            sql.execute("DROP ALL OBJECTS")
+            sql.execute("RUNSCRIPT FROM ?", [schemaDump.absolutePath])
+        }
         sessionFactory.currentSession.clear()
         TestCase.cleanTestDirectory()
 
@@ -180,7 +182,11 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
 
     public void createDirectories(List<File> files) {
-        String mkDirs = createClusterScriptService.makeDirs(files, "2770")
+        createDirectories(files, "2770")
+    }
+
+    public void createDirectories(List<File> files, String mode) {
+        String mkDirs = createClusterScriptService.makeDirs(files, mode)
         assert executionService.executeCommand(realm, mkDirs).toInteger() == 0
         files.each {
             WaitingFileUtils.confirmExists(it)

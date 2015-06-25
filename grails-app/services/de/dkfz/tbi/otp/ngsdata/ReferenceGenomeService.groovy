@@ -7,6 +7,8 @@ class ReferenceGenomeService {
 
     ConfigService configService
 
+    public final static String CHROMOSOME_SIZE_FILES_PREFIX = "stats"
+
     /**
      * load the {@link ReferenceGenome} with the given id from the database and returns it.
      *
@@ -24,11 +26,11 @@ class ReferenceGenomeService {
      * @param reference genome the reference genome for which the directory path is created
      * @param project the project, which belongs to the reference genome
      */
-    public String filePathToDirectory(Project project, ReferenceGenome referenceGenome) {
+    public String filePathToDirectory(Project project, ReferenceGenome referenceGenome, boolean checkExistence = true) {
         notNull(project, "The project is not specified")
         notNull(referenceGenome, "The reference genome is not specified")
         Realm realm = configService.getRealmDataProcessing(project)
-        filePathToDirectory(realm, referenceGenome)
+        filePathToDirectory(realm, referenceGenome, checkExistence)
     }
 
     /**
@@ -36,7 +38,7 @@ class ReferenceGenomeService {
      * @param referenceGenome - the reference genome for which the directory path is created
      * @return path to a directory storing files for the given reference genome on the given realm
      */
-    public String filePathToDirectory(Realm realm, ReferenceGenome referenceGenome) {
+    public String filePathToDirectory(Realm realm, ReferenceGenome referenceGenome, boolean checkExistence = true) {
         notNull(realm, "realm is not specified")
         notNull(referenceGenome, "The reference genome is not specified")
         isTrue(realm.operationType == Realm.OperationType.DATA_PROCESSING)
@@ -45,7 +47,7 @@ class ReferenceGenomeService {
         String referenceGenomeSpecificPath = referenceGenome.path
         String directoryPath = "${realmSpecificPath}/${allReferenceGenomes}/${referenceGenomeSpecificPath}/"
         File file = new File(directoryPath)
-        if (file.canRead()) {
+        if (!checkExistence || file.canRead()) {
             return directoryPath
         } else {
             throw new RuntimeException(
@@ -102,6 +104,6 @@ class ReferenceGenomeService {
     public String pathToChromosomeSizeFilesPerReference(Project project, ReferenceGenome referenceGenome) {
         notNull(project, "The project is not specified")
         notNull(referenceGenome, "The reference genome is not specified")
-        return "${filePathToDirectory(project, referenceGenome)}stats/"
+        return "${filePathToDirectory(project, referenceGenome)}${CHROMOSOME_SIZE_FILES_PREFIX}/"
     }
 }

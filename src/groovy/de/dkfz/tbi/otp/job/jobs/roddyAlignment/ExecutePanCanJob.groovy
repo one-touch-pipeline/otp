@@ -23,35 +23,36 @@ class ExecutePanCanJob extends AbstractRoddyJob {
 
 
     @Override
-    protected String prepareAndReturnWorkflowSpecificCommand(RoddyResult roddyResult, Realm realm ) throws Throwable {
+    protected String prepareAndReturnWorkflowSpecificCommand(RoddyResult roddyResult, Realm realm) throws Throwable {
         assert roddyResult : "roddyResult must not be null"
         assert realm : "realm must not be null"
 
         RoddyBamFile roddyBamFile = roddyResult as RoddyBamFile
         RoddyBamFile baseBamFile = roddyBamFile.baseBamFile
 
-        List<String> dataFiles = []
+        List<File> vbpDataFiles = []
 
         roddyBamFile.seqTracks.each { SeqTrack seqTrack ->
-            DataFile.findAllBySeqTrack(seqTrack).each { DataFile dataFile ->
-                File file = new File(lsdfFilesService.getFileFinalPath(dataFile))
+            List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
+            assert 2 == dataFiles.size()
+            dataFiles.sort {it.readNumber}.each { DataFile dataFile ->
+                File file = new File(lsdfFilesService.getFileViewByPidPath(dataFile))
                 LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
                 assert dataFile.fileSize == file.length()
-                dataFiles.add(file.path)
+                vbpDataFiles.add(file)
             }
         }
-        dataFiles.sort()
 
-        dataFiles.collate(2).each {
-            MetaDataService.ensurePairedSequenceFileNameConsistency(it.first(), it.last())
+        vbpDataFiles.collate(2).each {
+            MetaDataService.ensurePairedSequenceFileNameConsistency(it.first().path, it.last().path)
         }
 
-        String seqTracksToMerge = dataFiles.join(";")
+        String seqTracksToMerge = vbpDataFiles.join(";")
 
-        String referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome)
+        File referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome) as File
         assert referenceGenomeFastaFile : "Path to the reference genome file is null"
 
-        String chromosomeSizeFiles = referenceGenomeService.pathToChromosomeSizeFilesPerReference(roddyBamFile.project, roddyBamFile.referenceGenome)
+        File chromosomeSizeFiles = referenceGenomeService.pathToChromosomeSizeFilesPerReference(roddyBamFile.project, roddyBamFile.referenceGenome) as File
         assert chromosomeSizeFiles : "Path to the chromosome size files is null"
 
         String analysisIDinConfigFile = executeRoddyCommandService.getAnalysisIDinConfigFile(roddyBamFile)
@@ -59,16 +60,16 @@ class ExecutePanCanJob extends AbstractRoddyJob {
 
         ensureCorrectBaseBamFileIsOnFileSystem(baseBamFile)
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(roddyBamFile.config.configFilePath))
-        LsdfFilesService.ensureDirIsReadableAndNotEmpty(new File(chromosomeSizeFiles))
+        LsdfFilesService.ensureDirIsReadableAndNotEmpty(chromosomeSizeFiles)
 
 
         return executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, nameInConfigFile, analysisIDinConfigFile, realm) +
-                    "--cvalues=fastq_list:${seqTracksToMerge},"  +
+                    "--cvalues=\"fastq_list:${seqTracksToMerge},"  +
                     "${baseBamFile ? "bam:${baseBamFile.finalBamFile}," : ""}" +
                     "REFERENCE_GENOME:${referenceGenomeFastaFile}," +
                     "INDEX_PREFIX:${referenceGenomeFastaFile}," +
                     "CHROM_SIZES_FILE:${chromosomeSizeFiles}," +
-                    "possibleControlSampleNamePrefixes:(${roddyBamFile.sampleType.dirName})"
+                    "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}\""
     }
 
 

@@ -8,17 +8,20 @@ import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.utils.logging.JobLog
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 
 class ExecuteRoddyCommandService {
 
     ExecutionService executionService
 
-    String roddyBaseCommand(String roddyPath, String configName, String analysisId) {
+    String roddyBaseCommand(File roddyPath, String configName, String analysisId) {
         assert roddyPath : "roddyPath is not allowed to be null"
         assert configName : "configName is not allowed to be null"
         assert analysisId : "analysisId is not allowed to be null"
-        return "${changeToRoddyDir(roddyPath)} && ${executeCommandAsRoddyUser()} ${executionCommand(configName, analysisId)} "
+        //we change to tmp dir to be on a specified directory where OtherUnixUser has access to
+        return "cd /tmp && ${executeCommandAsRoddyUser()} ${executionCommand(roddyPath, configName, analysisId)} "
     }
 
 
@@ -39,14 +42,14 @@ class ExecuteRoddyCommandService {
         File tempOutputDir = roddyResult.tmpRoddyDirectory
         createTemporaryOutputDirectory(realm, tempOutputDir)
 
-        String roddyPath = ProcessingOptionService.getValueOfProcessingOption("roddyPath")
+        File roddyPath = ProcessingOptionService.getValueOfProcessingOption("roddyPath") as File
         String roddyVersion = ProcessingOptionService.getValueOfProcessingOption("roddyVersion")
-        String roddyBaseConfigsPath = ProcessingOptionService.getValueOfProcessingOption("roddyBaseConfigsPath")
-        String applicationIniPath = ProcessingOptionService.getValueOfProcessingOption("roddyApplicationIni")
+        File roddyBaseConfigsPath = ProcessingOptionService.getValueOfProcessingOption("roddyBaseConfigsPath") as File
+        File applicationIniPath = ProcessingOptionService.getValueOfProcessingOption("roddyApplicationIni") as File
 
         //ensure that needed input files are available on the file system
-        LsdfFilesService.ensureDirIsReadableAndNotEmpty(new File(roddyBaseConfigsPath))
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(applicationIniPath))
+        LsdfFilesService.ensureDirIsReadableAndNotEmpty(roddyBaseConfigsPath)
+        LsdfFilesService.ensureFileIsReadableAndNotEmpty(applicationIniPath)
 
 
         RoddyWorkflowConfig config = CollectionUtils.exactlyOneElement(
@@ -55,26 +58,25 @@ class ExecuteRoddyCommandService {
         String pipelineVersion = config.externalScriptVersion
         File configFile = new File(config.configFilePath)
 
+        //base view by pid directory
+        File viewByPid = roddyResult.individual.getViewByPidPathBase(roddyResult.seqType).absoluteDataManagementPath
+
         return roddyBaseCommand(roddyPath, nameInConfigFile, analysisIDinConfigFile) +
                 "${roddyResult.individual.pid} " +
                 "--useconfig=${applicationIniPath} " +
                 "--useRoddyVersion=${roddyVersion} " +
                 "--usePluginVersion=${pipelineVersion} " +
                 "--configurationDirectories=${configFile.parent},${roddyBaseConfigsPath} " +
-                "--useiodir=${tempOutputDir} "
+                "--useiodir=${viewByPid},${tempOutputDir} "
     }
 
-
-    private String changeToRoddyDir(String roddyPath) {
-        return "cd ${roddyPath}"
-    }
 
     private String executeCommandAsRoddyUser() {
         return "sudo -u OtherUnixUser"
     }
 
-    private String executionCommand(String configName, String analysisId){
-        return "roddy.sh rerun ${configName}.config@${analysisId}"
+    private String executionCommand(File roddyPath, String configName, String analysisId){
+        return "${roddyPath}/roddy.sh rerun ${configName}.config@${analysisId}"
     }
 
 
@@ -90,7 +92,10 @@ class ExecuteRoddyCommandService {
          StringBuffer stderr = new StringBuffer()
          process.waitForProcessOutput(stdout, stderr)
 
-         assert stderr.length() == 0 : "Stderr is not null, but ${stderr.toString()}"
+         //Roddy give some output in stderr, therefor we can not check for empty stderr
+
+         LogThreadLocal.getThreadLog().debug("Roddy stderr:\n ${stderr}")
+         LogThreadLocal.getThreadLog().debug("Roddy stdout:\n ${stdout}")
          return stdout.toString().trim()
     }
 

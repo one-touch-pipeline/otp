@@ -36,8 +36,6 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
         roddyBamFile.project.realmName = realm.name
         assert roddyBamFile.project.save(flush: true)
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        DataFile dataFile = DomainFactory.buildSequenceDataFile([seqTrack: seqTrack, fileName: "DataFileFileName_R2.gz"])
-        assert dataFile.save(flush: true)
         mergingBaseDir = new File("${realm.rootPath}/${roddyBamFile.project.dirName}/sequencing/${roddyBamFile.seqType.dirName}/view-by-pid/${roddyBamFile.individual.pid}/${roddyBamFile.sampleType.dirName}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment")
         assert mergingBaseDir.mkdirs()
     }

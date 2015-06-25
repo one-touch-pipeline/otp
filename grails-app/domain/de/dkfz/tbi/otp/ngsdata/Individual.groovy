@@ -113,10 +113,19 @@ order by type.name asc, type.libraryLayout
     }
 
     /**
+     * returns the folder viewByPid without the pid
+     * Example: ${project}/sequencing/exon_sequencing/view-by-pid
+     */
+    OtpPath getViewByPidPathBase(final SeqType seqType) {
+        return new OtpPath(project, project.dirName, 'sequencing', seqType.dirName, 'view-by-pid')
+    }
+
+    /**
+     * returns the folder viewByPid with the pid
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}
      */
     OtpPath getViewByPidPath(final SeqType seqType) {
-        return new OtpPath(project, project.dirName, 'sequencing', seqType.dirName, 'view-by-pid', pid)
+        return new OtpPath(getViewByPidPathBase(seqType), pid)
     }
 
     /**

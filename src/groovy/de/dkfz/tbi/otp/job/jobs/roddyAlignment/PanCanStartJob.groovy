@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
-@Component('panCanStartJob')
+@Component('PanCanStartJob')
 @Scope('singleton')
 class PanCanStartJob extends RoddyAlignmentStartJob {
 

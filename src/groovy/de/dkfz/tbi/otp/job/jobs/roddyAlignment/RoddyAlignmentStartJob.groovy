@@ -29,14 +29,18 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
             return
         }
 
-        RoddyBamFile.withTransaction {
-            MergingWorkPackage mergingWorkPackage = findProcessableMergingWorkPackages(minPriority).find { !isDataInstallationWFInProgress(it) }
-            if (mergingWorkPackage) {
-                mergingWorkPackage.needsProcessing = false
-                assert mergingWorkPackage.save(failOnError: true)
-                RoddyBamFile roddyBamFile = createRoddyBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
-                createProcess(roddyBamFile)
+        try {
+            RoddyBamFile.withTransaction {
+                MergingWorkPackage mergingWorkPackage = findProcessableMergingWorkPackages(minPriority).find { !isDataInstallationWFInProgress(it) }
+                if (mergingWorkPackage) {
+                    mergingWorkPackage.needsProcessing = false
+                    assert mergingWorkPackage.save(failOnError: true)
+                    RoddyBamFile roddyBamFile = createRoddyBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
+                    createProcess(roddyBamFile)
+                }
             }
+        } catch (Throwable e) {
+            log.error "Exception during PanCan start job", e
         }
     }
 
@@ -113,17 +117,29 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
 
     static RoddyBamFile createRoddyBamFile(MergingWorkPackage mergingWorkPackage, RoddyBamFile baseBamFile) {
         assert mergingWorkPackage
+        List<Long> mergableSeqtracks =  mergingWorkPackage.findMergeableSeqTracks()*.id
+        List<Long> containedSeqTracks = baseBamFile?.containedSeqTracks*.id
+        Set<SeqTrack> seqTracks = SeqTrack.getAll(mergableSeqtracks - containedSeqTracks) as Set
+
+        RoddyWorkflowConfig config = exactlyOneElement(
+                RoddyWorkflowConfig.findAllWhere(
+                        project: mergingWorkPackage.project,
+                        workflow: mergingWorkPackage.workflow,
+                        obsoleteDate: null,
+                ),
+                "Could not find one RoddyWorkflowConfig for ${mergingWorkPackage.project} and ${mergingWorkPackage.workflow}")
+
+        ProcessingOption roddyVersion = CollectionUtils.exactlyOneElement(
+                ProcessingOption.findAllByNameAndDateObsoleted("roddyVersion", null),
+                "Could not find the ProccesingOption for 'roddyVersion'")
+
         RoddyBamFile roddyBamFile = new RoddyBamFile(
                 workPackage: mergingWorkPackage,
                 identifier: RoddyBamFile.nextIdentifier(mergingWorkPackage),
                 baseBamFile: baseBamFile,
-                seqTracks: SeqTrack.getAll(mergingWorkPackage.findMergeableSeqTracks()*.id - baseBamFile?.containedSeqTracks*.id) as Set,
-                config: exactlyOneElement(RoddyWorkflowConfig.findAllWhere(
-                        project: mergingWorkPackage.project,
-                        workflow: mergingWorkPackage.workflow,
-                        obsoleteDate: null,
-                )),
-                roddyVersion: CollectionUtils.exactlyOneElement(ProcessingOption.findAllByNameAndDateObsoleted("roddyVersion", null))
+                seqTracks: seqTracks,
+                config: config,
+                roddyVersion: roddyVersion
         )
         roddyBamFile.numberOfMergedLanes = roddyBamFile.containedSeqTracks.size()
         assert roddyBamFile.save(flush: true, failOnError: true)
