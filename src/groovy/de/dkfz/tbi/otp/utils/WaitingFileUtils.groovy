@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.utils
 
+import grails.util.Environment
+
 /**
  * It looks like exists() is cached (in NFS?). The cache can be cleared by calling canRead() for files and
  * by calling list() (for directories canRead() does not clear the cache in all cases)
@@ -15,6 +17,13 @@ class WaitingFileUtils {
     public static int extendedWaitingTime = 60000
 
     public static long defaultTimeoutMillis = 1000L
+
+    static {
+        if (Environment.current == Environment.TEST) {
+            defaultTimeoutMillis = 0L
+            extendedWaitingTime = 0L
+        }
+    }
 
     public static boolean confirmExists(File file, long timeoutMillis = defaultTimeoutMillis) {
         return ThreadUtils.waitFor({ file.list() || file.canRead(); file.exists() }, timeoutMillis, 50)

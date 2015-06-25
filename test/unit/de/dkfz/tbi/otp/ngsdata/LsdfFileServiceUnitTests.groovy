@@ -12,11 +12,6 @@ class LsdfFileServiceUnitTests extends GroovyTestCase {
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder()
 
-    @Before
-    void before() {
-        WaitingFileUtils.defaultTimeoutMillis = 0L
-    }
-
     @Test
     void testFileReadableAndNotEmptyMethods_AllCorrect() {
         File file = tempFolder.newFile()
