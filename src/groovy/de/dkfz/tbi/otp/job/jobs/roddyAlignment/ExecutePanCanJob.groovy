@@ -1,4 +1,3 @@
-
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
@@ -10,6 +9,7 @@ import de.dkfz.tbi.otp.ngsdata.MetaDataService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import org.springframework.beans.factory.annotation.Autowired
 
 
@@ -29,11 +29,15 @@ class ExecutePanCanJob extends AbstractRoddyJob {
 
         RoddyBamFile roddyBamFile = roddyResult as RoddyBamFile
         RoddyBamFile baseBamFile = roddyBamFile.baseBamFile
+
         List<String> dataFiles = []
 
         roddyBamFile.seqTracks.each { SeqTrack seqTrack ->
             DataFile.findAllBySeqTrack(seqTrack).each { DataFile dataFile ->
-                dataFiles.add(lsdfFilesService.getFileFinalPath(dataFile))
+                File file = new File(lsdfFilesService.getFileFinalPath(dataFile))
+                LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
+                assert dataFile.fileSize == file.length()
+                dataFiles.add(file.path)
             }
         }
 
@@ -45,11 +49,20 @@ class ExecutePanCanJob extends AbstractRoddyJob {
 
         String referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome)
         assert referenceGenomeFastaFile : "Path to the reference genome file is null"
+
         String chromosomeSizeFiles = referenceGenomeService.pathToChromosomeSizeFilesPerReference(roddyBamFile.project, roddyBamFile.referenceGenome)
         assert chromosomeSizeFiles : "Path to the chromosome size files is null"
 
         String analysisIDinConfigFile = executeRoddyCommandService.getAnalysisIDinConfigFile(roddyBamFile)
         String nameInConfigFile = "${roddyBamFile.workflow.name}_${roddyBamFile.config.externalScriptVersion}"
+
+        if (baseBamFile) {
+            LsdfFilesService.ensureFileIsReadableAndNotEmpty(baseBamFile.finalBamFile)
+            assert baseBamFile.fileSize == baseBamFile.finalBamFile.length()
+        }
+        LsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(roddyBamFile.config.configFilePath))
+        LsdfFilesService.ensureDirIsReadableAndNotEmpty(new File(chromosomeSizeFiles))
+
 
         return executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, nameInConfigFile, analysisIDinConfigFile, realm) +
                     "--cvalues=fastq_list:${seqTracksToMerge},"  +

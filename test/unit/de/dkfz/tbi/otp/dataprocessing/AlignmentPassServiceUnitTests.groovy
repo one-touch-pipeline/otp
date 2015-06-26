@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.TestCase
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import grails.test.mixin.support.*
@@ -7,11 +8,13 @@ import grails.test.mixin.support.*
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
+import org.junit.rules.TemporaryFolder
 
 /**
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
@@ -33,8 +36,22 @@ class AlignmentPassServiceUnitTests extends TestData {
     AlignmentPassService alignmentPassService
     AlignmentPass alignmentPass
 
+    File baseDir
+    File referenceGenomeDir
+    File referenceGenomeFile
+
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder()
+
     @Before
     void setUp() {
+        temporaryFolder.create()
+        baseDir = temporaryFolder.newFolder()
+        referenceGenomeDir = new File(baseDir, "reference_genomes/referenceGenome")
+        referenceGenomeDir.mkdirs()
+        referenceGenomeFile = new File("${referenceGenomeDir}/prefixName.fa")
+        referenceGenomeFile.createNewFile()
+
         alignmentPassService = new AlignmentPassService()
         alignmentPassService.qualityAssessmentPassService = new QualityAssessmentPassService()
         alignmentPassService.referenceGenomeService = new ReferenceGenomeService()
@@ -42,6 +59,9 @@ class AlignmentPassServiceUnitTests extends TestData {
         createObjects()
         alignmentPass = createAlignmentPass(identifier: 2)
         alignmentPass.save(flush: true)
+
+        realm.processingRootPath = baseDir.path
+        assert realm.save(flush: true)
     }
 
     @After
@@ -50,8 +70,6 @@ class AlignmentPassServiceUnitTests extends TestData {
         referenceGenome = null
         referenceGenomeProjectSeqType = null
         alignmentPassService = null
-        directory.deleteOnExit()
-        file.deleteOnExit()
     }
 
     @Test
@@ -59,7 +77,7 @@ class AlignmentPassServiceUnitTests extends TestData {
         alignmentPass.workPackage.referenceGenome = null
         Project project2 = TestData.createProject()
         project2.name = "test"
-        project2.dirName = "/tmp/test"
+        project2.dirName = "${baseDir}/test"
         project2.realmName = "test"
         project2.save(flush: true)
         referenceGenomeProjectSeqType.project = project2
@@ -71,8 +89,9 @@ class AlignmentPassServiceUnitTests extends TestData {
 
     @Test
     void testReferenceGenomePathAllCorrect() {
-        String pathExp = "${referenceGenomePath}prefixName.fa"
+        String pathExp = referenceGenomeFile.path
         String pathAct = alignmentPassService.referenceGenomePath(alignmentPass)
+
         assertEquals(pathExp, pathAct)
     }
 

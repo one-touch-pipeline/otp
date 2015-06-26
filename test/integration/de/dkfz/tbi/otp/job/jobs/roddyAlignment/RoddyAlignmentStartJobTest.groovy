@@ -182,7 +182,7 @@ class RoddyAlignmentStartJobTest {
         MergingWorkPackage mwp = createMergingWorkPackage()
         DomainFactory.buildSeqTrackWithDataFile(mwp)
         Collection<SeqTrack> seqTracks = mwp.findMergeableSeqTracks()
-        DomainFactory.createRoddyProcessingOptions()
+        DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
 
         RoddyBamFile rbf = RoddyAlignmentStartJob.createRoddyBamFile(mwp, null)
 
@@ -203,7 +203,7 @@ class RoddyAlignmentStartJobTest {
                 DomainFactory.buildSeqTrackWithDataFile(mwp),
         ]
 
-        DomainFactory.createRoddyProcessingOptions()
+        DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
 
         RoddyBamFile rbf = RoddyAlignmentStartJob.createRoddyBamFile(mwp, baseBamFile)
 
@@ -232,7 +232,7 @@ class RoddyAlignmentStartJobTest {
     @Test
     void testStartRoddyAlignment_WhenEverythingIsOkay_ShouldCreateProcess() {
         MergingWorkPackage mwp = createMergingWorkPackage()
-        DomainFactory.createRoddyProcessingOptions()
+        DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
 
         withJobExecutionPlan {
             testRoddyAlignmentStartJob.startRoddyAlignment()

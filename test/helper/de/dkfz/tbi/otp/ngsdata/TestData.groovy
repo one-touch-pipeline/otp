@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
 import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
 
@@ -57,7 +58,7 @@ class TestData {
         }
 
         realm = DomainFactory.createRealmDataProcessingDKFZ([
-            processingRootPath: 'tmp',
+            processingRootPath: TestCase.uniqueNonExistentPath.path,
         ])
         assertNotNull(realm.save(flush: true))
 

@@ -22,6 +22,8 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
 
     static final String MERGED_DIR = "merged"
 
+    static final String RUN_PREFIX = "run"
+
 
     RoddyBamFile baseBamFile
 
@@ -206,6 +208,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
         return getRoddySingleLaneQADirectoriesHelper(this.finalQADirectory)
     }
 
+    // Example: run140801_SN751_0197_AC4HUVACXX_D2059_AGTCAA_L001
     Map<SeqTrack, File> getRoddySingleLaneQADirectoriesHelper(File baseDirectory) {
         Map<SeqTrack, File> directoriesPerSeqTrack = new HashMap<SeqTrack, File>()
         seqTracks.each { SeqTrack seqTrack ->
@@ -285,7 +288,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
         //if the names of datafile1 and datafile2 of one seqtrack are the same something strange happened -> should fail
         assert !dataFiles[0].fileName.equals(dataFiles[1].fileName)
         String commonFastQFilePrefix = getLongestCommonPrefixBeforeLastUnderscore(dataFiles[0].fileName, dataFiles[1].fileName)
-        return "run${run.name}_${commonFastQFilePrefix}"
+        return "${RUN_PREFIX}${run.name}_${commonFastQFilePrefix}"
     }
 
     static String getLongestCommonPrefixBeforeLastUnderscore(String filename1, String filename2) {

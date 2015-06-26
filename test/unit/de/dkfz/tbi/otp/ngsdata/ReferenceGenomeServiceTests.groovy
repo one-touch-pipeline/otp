@@ -47,7 +47,7 @@ class ReferenceGenomeServiceTests {
         }
 
         realm = DomainFactory.createRealmDataProcessingDKFZ([
-            processingRootPath: 'tmp',
+            processingRootPath: '/tmp',
             ]).save([flush: true])
 
         project = TestData.createProject()

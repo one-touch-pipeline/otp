@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -459,12 +460,13 @@ class DomainFactory {
         return createMetaDataKeyAndEntry(dataFile, key.name(), value)
     }
 
-    static void createRoddyProcessingOptions() {
+    static void createRoddyProcessingOptions(File basePath) {
+
         ProcessingOption processingOptionPath = new ProcessingOption(
             name: "roddyPath",
             type: "",
             project: null,
-            value: "/path/to/roddy/",
+            value: "${basePath}/tbi_cluster/11.4/x86_64/otp/Roddy/",
             comment: "Path to the roddy.sh on the current cluster (***REMOVED***cluster 11.4)",
         )
         assert processingOptionPath.save(flush: true)
@@ -482,7 +484,7 @@ class DomainFactory {
                 name: "roddyBaseConfigsPath",
                 type: "",
                 project: null,
-                value: "/path/to/roddyBaseConfigs/",
+                value: "${basePath}/tbi_cluster/11.4/x86_64/otp/RoddyBaseConfigs/",
                 comment: "Path to the baseConfig-files which are needed to execute Roddy",
         )
         assert processingOptionBaseConfigsPath.save(flush: true)
@@ -491,7 +493,7 @@ class DomainFactory {
                 name: "roddyApplicationIni",
                 type: "",
                 project: null,
-                value: "/path/to/roddyBaseConfigs/applicationProperties.ini",
+                value: "${basePath}/tbi_cluster/11.4/x86_64/otp/RoddyBaseConfigs/applicationProperties.ini",
                 comment: "Path to the application.ini which is needed to execute Roddy"
         )
         assert processingOptionApplicationIni.save(flush: true)

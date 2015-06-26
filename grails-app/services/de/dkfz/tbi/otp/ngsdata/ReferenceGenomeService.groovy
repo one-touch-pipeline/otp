@@ -43,7 +43,7 @@ class ReferenceGenomeService {
         String realmSpecificPath = realm.processingRootPath
         final String allReferenceGenomes = "reference_genomes"
         String referenceGenomeSpecificPath = referenceGenome.path
-        String directoryPath = "/${realmSpecificPath}/${allReferenceGenomes}/${referenceGenomeSpecificPath}/"
+        String directoryPath = "${realmSpecificPath}/${allReferenceGenomes}/${referenceGenomeSpecificPath}/"
         File file = new File(directoryPath)
         if (file.canRead()) {
             return directoryPath
@@ -73,7 +73,7 @@ class ReferenceGenomeService {
         String referenceGenomeFastaFilePath = prefixOnlyFilePath(project, referenceGenome) + ".fa"
         File file = new File(referenceGenomeFastaFilePath)
         if (file.canRead()) {
-            return referenceGenomeFastaFilePath
+            return file.path
         } else {
             throw new RuntimeException(
             "The fasta file ${referenceGenomeFastaFilePath} storing the information of the reference genome can not be read")

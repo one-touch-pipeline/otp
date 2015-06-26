@@ -1,5 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.TestCase
+import org.junit.rules.TemporaryFolder
+
 import static org.junit.Assert.*
 
 import org.junit.*
@@ -16,8 +19,11 @@ class LoadBedFileScriptTests extends GroovyScriptAwareTestCase {
     List<File> directories = []
     List<File> bedFiles = []
 
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder()
+
     private final static String SCRIPT_PATH = "scripts/LibraryPreparationKit/LoadBedFiles.groovy"
-    private final static String REFERENCE_GENOME_PATH = "/tmp/reference_genomes/"
+    private final static String REFERENCE_GENOME_PATH = "reference_genomes/"
     private final static String TARGET_REGIONS_PATH = "targetRegions"
     private final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
     /*
@@ -70,15 +76,16 @@ class LoadBedFileScriptTests extends GroovyScriptAwareTestCase {
 
     @Before
     void setUp() {
+        temporaryFolder.create()
+        File baseFolder = temporaryFolder.newFolder()
+
         realm = DomainFactory.createRealmDataProcessingDKFZ([
-            processingRootPath: 'tmp',
+            processingRootPath: baseFolder.path,
         ]).save(flush : true)
 
         bedFilesToLoad.each { Input input ->
-            File directory = new File("${REFERENCE_GENOME_PATH}/${input.refGenName}/${TARGET_REGIONS_PATH}")
-            if (!directory.exists()) {
-                directory.mkdirs()
-            }
+            File directory = new File(baseFolder, "${REFERENCE_GENOME_PATH}/${input.refGenName}/${TARGET_REGIONS_PATH}")
+            directory.mkdirs()
             directories << directory
             File bedFile = new File("${directory.getAbsolutePath()}/${input.bedName}")
             bedFile.delete()
@@ -131,8 +138,8 @@ class LoadBedFileScriptTests extends GroovyScriptAwareTestCase {
     @After
     void tearDown() {
         realm = null
-        directories.each {File dir -> dir.deleteOnExit()}
-        bedFiles.each {File file -> file.deleteOnExit()}
+        directories = null
+        bedFiles = null
     }
 
     @Test

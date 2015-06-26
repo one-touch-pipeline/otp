@@ -44,6 +44,11 @@ class ExecuteRoddyCommandService {
         String roddyBaseConfigsPath = ProcessingOptionService.getValueOfProcessingOption("roddyBaseConfigsPath")
         String applicationIniPath = ProcessingOptionService.getValueOfProcessingOption("roddyApplicationIni")
 
+        //ensure that needed input files are available on the file system
+        LsdfFilesService.ensureDirIsReadableAndNotEmpty(new File(roddyBaseConfigsPath))
+        LsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(applicationIniPath))
+
+
         RoddyWorkflowConfig config = CollectionUtils.exactlyOneElement(
                 RoddyWorkflowConfig.findAllByProjectAndWorkflowAndObsoleteDate(roddyResult.project, roddyResult.workflow, null)
         )
@@ -105,7 +110,7 @@ class ExecuteRoddyCommandService {
         if (SeqTypeService.alignableSeqTypes().contains(roddyResult.seqType)) {
             return roddyResult.seqType.alias
         } else {
-            throw RuntimeException("The seqType ${roddyResult.seqType} can not be processed at the moment." as String)
+            throw new RuntimeException("The seqType ${roddyResult.seqType} can not be processed at the moment." as String)
         }
     }
 
