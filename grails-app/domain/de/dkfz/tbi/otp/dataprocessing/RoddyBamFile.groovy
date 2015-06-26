@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.utils.StringUtils
 
@@ -24,6 +25,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
 
     static final String RUN_PREFIX = "run"
 
+    static final String RODDY_EXECUTION_DIR_PATTERN = /^exec_\d{6}_\d{9}_.+_.+$/
 
     RoddyBamFile baseBamFile
 
@@ -150,8 +152,24 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
         }
     }
 
-    public String getPathToJobStateLogFiles () {
-        return "${getTmpRoddyDirectory()}/roddyExecutionStore/"
+    /**
+        @returns subdirectory of {@link #getTmpRoddyExecutionStoreDirectory} corresponding to the latest roddy call
+     */
+    // Example:
+    // exec_150625_102449388_SOMEUSER_WGS
+    // exec_yyMMdd_HHmmssSSS_user_analysis
+    File getLatestTmpRoddyExecutionDirectory () {
+        if (!WaitingFileUtils.confirmExists(this.tmpRoddyExecutionStoreDirectory)) {
+            throw new RuntimeException("can not find latest RoddyExecutionDirectory because RoddyExecutionStoreDirectory ${this.tmpRoddyExecutionStoreDirectory} does not exist")
+        }
+
+        List<File> allRoddyExecutionDirectories = this.tmpRoddyExecutionStoreDirectory.listFiles().findAll {
+            it.isDirectory() && it.name ==~ RODDY_EXECUTION_DIR_PATTERN
+        }
+        if (!allRoddyExecutionDirectories) {
+            throw new RuntimeException("can not find latest RoddyExecutionDirectory because RoddyExecutionStoreDirectory ${this.tmpRoddyExecutionStoreDirectory} is empty")
+        }
+        return allRoddyExecutionDirectories.max { it.name }
     }
 
     @Override

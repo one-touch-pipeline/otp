@@ -147,4 +147,8 @@ class TestCase extends GroovyTestCase {
     static String shouldFail(Class clazz, Closure code) {
         return new GroovyTestCase().shouldFail(clazz, code)
     }
+
+    static shouldFailWithMessage(Class clazz, String pattern, Closure code) {
+        assert shouldFail(clazz, code) ==~ pattern
+    }
 }

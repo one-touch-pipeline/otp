@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFiles
+import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
@@ -79,24 +79,29 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
         RoddyResult roddyResult = getProcessParameterObject()
         assert roddyResult
 
-        JobStateLogFiles jobStateLogFiles = JobStateLogFiles.create(roddyResult.getTmpRoddyExecutionStoreDirectory().path)
+        // Roddy has started at least one pbs-job, hence the jobStateLogFile must exist.
+        JobStateLogFile jobStateLogFile = JobStateLogFile.getInstance(roddyResult.getLatestTmpRoddyExecutionDirectory())
 
-        return analyseFinishedClusterJobs(finishedClusterJobs, jobStateLogFiles)
+        if (jobStateLogFile.isEmpty()) {
+            throw new RuntimeException("${jobStateLogFile.getFilePath()} is empty.")
+        }
+
+        return analyseFinishedClusterJobs(finishedClusterJobs, jobStateLogFile)
     }
 
     public Map<ClusterJobIdentifier, String> analyseFinishedClusterJobs(
-            Collection<? extends ClusterJobIdentifier> finishedClusterJobs, JobStateLogFiles jobStateLogFiles) {
+            Collection<? extends ClusterJobIdentifier> finishedClusterJobs, JobStateLogFile jobStateLogFile) {
 
         Map<ClusterJobIdentifier, String> failedOrNotFinishedClusterJobs = [:]
 
         finishedClusterJobs.each {
-            if (!jobStateLogFiles.containsPbsId(it.clusterJobId)) {
+            if (!jobStateLogFile.containsPbsId(it.clusterJobId)) {
                 failedOrNotFinishedClusterJobs.put(it, "JobStateLogFile contains no information for ${it}")
             } else {
-                if (jobStateLogFiles.isClusterJobInProgress(it.clusterJobId)) {
+                if (jobStateLogFile.isClusterJobInProgress(it.clusterJobId)) {
                     failedOrNotFinishedClusterJobs.put(it, "${it} is not finished.")
-                } else if (!jobStateLogFiles.isClusterJobFinishedSuccessfully(it.clusterJobId)) {
-                    failedOrNotFinishedClusterJobs.put(it, "${it} failed processing. ExitCode: ${jobStateLogFiles.getPropertyFromLatestLogFileEntry(it.clusterJobId, "exitCode")}")
+                } else if (!jobStateLogFile.isClusterJobFinishedSuccessfully(it.clusterJobId)) {
+                    failedOrNotFinishedClusterJobs.put(it, "${it} failed processing. StatusCode: ${jobStateLogFile.getPropertyFromLatestLogFileEntry(it.clusterJobId, "statusCode")}")
                 }
             }
         }

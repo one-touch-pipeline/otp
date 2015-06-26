@@ -3,9 +3,13 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CreateJobStateLogFileHelper
 import org.junit.After
 import org.junit.Before
 import grails.buildtestdata.mixin.Build
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import static de.dkfz.tbi.TestCase.shouldFailWithMessage
 
 /**
  */
@@ -16,6 +20,8 @@ class RoddyBamFileUnitTests {
     Individual individual
     RoddyBamFile roddyBamFile
     final String TEST_DIR = TestCase.getUniqueNonExistentPath()
+    @Rule
+    public TemporaryFolder tmpDir = new TemporaryFolder()
     final String FIRST_DATAFILE_NAME = "4_NoIndex_L004_R1_complete_filtered.fastq.gz"
     final String SECOND_DATAFILE_NAME = "4_NoIndex_L004_R2_complete_filtered.fastq.gz"
     final String COMMON_PREFIX = "4_NoIndex_L004"
@@ -263,6 +269,45 @@ class RoddyBamFileUnitTests {
         assert [(seqTrack): dir] == roddyBamFile.getRoddySingleLaneQADirectoriesHelper(roddyBamFile.tmpRoddyQADirectory)
     }
 
+    void testGetLatestTmpRoddyExecutionDirectory_WhenOnlyOneRoddyExecutionDirectoryExist_ShouldReturnLatestDir() {
+        CreateJobStateLogFileHelper.withTmpRoddyExecutionDir(tmpDir, { roddyExecutionDir ->
+            assert roddyExecutionDir == roddyBamFile.getLatestTmpRoddyExecutionDirectory()
+        })
+    }
+
+    void testGetLatestTmpRoddyExecutionDirectory_WhenSeveralRoddyExecutionDirectoriesExist_ShouldReturnLatestDir() {
+        CreateJobStateLogFileHelper.withTmpRoddyExecutionDir(tmpDir, { roddyExecutionDir ->
+            tmpDir.newFolder("exec_140625_102449388_SOMEUSER_WGS")
+            assert roddyExecutionDir == roddyBamFile.getLatestTmpRoddyExecutionDirectory()
+        }, "exec_150625_102449388_SOMEUSER_WGS")
+    }
+
+    void testGetLatestTmpRoddyExecutionDirectory_WhenTmpRoddyExecutionStoreDirIsEmpty_ShouldThrowException() {
+        roddyBamFile.metaClass.getTmpRoddyExecutionStoreDirectory = { ->
+            return tmpDir.root
+        }
+
+        shouldFailWithMessage(RuntimeException, /.*is\sempty/) {
+            roddyBamFile.getLatestTmpRoddyExecutionDirectory()
+        }
+    }
+
+    void testGetLatestTmpRoddyExecutionDirectory_WhenTmpRoddyExecutionStoreDirDoesNotExist_ShouldThrowException() {
+        roddyBamFile.metaClass.getTmpRoddyExecutionStoreDirectory = { ->
+            return TestCase.uniqueNonExistentPath
+        }
+
+        shouldFailWithMessage(RuntimeException, /.*does\snot\sexist/) {
+            roddyBamFile.getLatestTmpRoddyExecutionDirectory()
+        }
+    }
+
+    void testGetLatestTmpRoddyExecutionDirectory_WhenTmpRoddyExecutionStoreDirContainsNotMatchingDirs_ShouldReturnOnlyMatchingDirs() {
+        tmpDir.newFolder()
+        CreateJobStateLogFileHelper.withTmpRoddyExecutionDir(tmpDir, { roddyExecutionDir ->
+            assert roddyExecutionDir == roddyBamFile.getLatestTmpRoddyExecutionDirectory()
+        }, "exec_890420_133730004_user_analysis")
+    }
 
     private void updateDataFileNames(SeqTrack seqTrack) {
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)

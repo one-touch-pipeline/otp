@@ -1,36 +1,52 @@
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFiles
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile
+import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile.LogFileEntry
+import org.junit.rules.TemporaryFolder
 
 class CreateJobStateLogFileHelper {
 
-    public static JobStateLogFiles createJobStateLogFiles(List<Map<String, String>> listOfLogFileEntryValues) {
-        Map<Long, List<JobStateLogFiles.LogFileEntry>> jobStateLogFilesMap = [:]
+    public static JobStateLogFile createJobStateLogFile(File tempDir, List<LogFileEntry> listOfLogFileEntryValues) {
+        File file = new File(tempDir, JobStateLogFile.JOB_STATE_LOG_FILE_NAME)
+        file.createNewFile()
 
-        listOfLogFileEntryValues.each {
-            JobStateLogFiles.LogFileEntry logFileEntry = createLogFileEntry(it)
-            jobStateLogFilesMap[logFileEntry.pbsId] ?: jobStateLogFilesMap.put(logFileEntry.pbsId, [])
-            jobStateLogFilesMap[logFileEntry.pbsId] << logFileEntry
-        }
+        file << listOfLogFileEntryValues.join("\n")
 
-        JobStateLogFiles.metaClass.static.parseJobStateLogFile = { String p ->
-            return jobStateLogFilesMap
-        }
-
-        JobStateLogFiles jobStateLogFiles = JobStateLogFiles.create("")
-
-        JobStateLogFiles.metaClass = null
-
-        return jobStateLogFiles
+        return JobStateLogFile.getInstance(tempDir)
     }
 
-    public static JobStateLogFiles.LogFileEntry createLogFileEntry(Map<String, String> logFileEntryValues) {
-        return new JobStateLogFiles.LogFileEntry(
-                pbsId: logFileEntryValues.pbsId,
-                host: logFileEntryValues.host,
-                exitCode: logFileEntryValues.exitCode,
-                timeStamp: logFileEntryValues.timeStamp,
-                jobClass: logFileEntryValues.jobClass
-        )
+
+    public static void withTmpRoddyExecutionDir(TemporaryFolder tmpDir, Closure code, tmpRoddyExecutionStoreName = "exec_890420_133730004_user_analysis") {
+        File tmpRoddyExecutionDirectory = tmpDir.newFolder(tmpRoddyExecutionStoreName)
+        withTmpRoddyExecutionDir(tmpRoddyExecutionDirectory, code)
     }
+
+    public static void withJobStateLogFile(TemporaryFolder tmpDir, List<LogFileEntry> listOfLogFileEntryValues, Closure code, tmpRoddyExecutionDirName = "exec_890420_133730004_user_analysis") {
+        File tmpRoddyExecutionDirectory = tmpDir.newFolder(tmpRoddyExecutionDirName)
+        createJobStateLogFile(tmpRoddyExecutionDirectory, listOfLogFileEntryValues)
+        withTmpRoddyExecutionDir(tmpRoddyExecutionDirectory, code)
+    }
+
+    public static void withTmpRoddyExecutionDir(File tmpRoddyExecutionDirectory, Closure code) {
+        RoddyBamFile.metaClass.getTmpRoddyExecutionStoreDirectory = { ->
+            return tmpRoddyExecutionDirectory.parentFile
+        }
+        try {
+            code(tmpRoddyExecutionDirectory)
+        } finally {
+            GroovySystem.metaClassRegistry.removeMetaClass(RoddyBamFile)
+        }
+    }
+
+    public static LogFileEntry createJobStateLogFileEntry(Map properties = [:]) {
+        return new LogFileEntry([
+                pbsId: "testPbsId",
+                host: "testHost",
+                statusCode: "0",
+                timeStamp: 0L,
+                jobClass: "testJobClass"
+        ] + properties as HashMap)
+    }
+
 }
