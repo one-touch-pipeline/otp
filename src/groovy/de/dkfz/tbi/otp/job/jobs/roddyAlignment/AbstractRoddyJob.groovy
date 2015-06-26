@@ -36,7 +36,7 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
 
     // Example:
     // Running job r150428_104246480_stds_snvCallingMetaScript => 3504988
-    static final Pattern roddyOutputPattern = Pattern.compile(/(?:^|\s)(?:Running job|Rerun job) (.*_([^_]+)) => ([0-9]+)(?:\s|$)/)
+    static final Pattern roddyOutputPattern = Pattern.compile(/^\s*(?:Running job|Rerun job) (.*_([^_]+)) => ([0-9]+)\s*$/)
 
     @Override
     protected final NextAction maybeSubmit() throws Throwable {
@@ -111,13 +111,19 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
         assert seqType
 
         roddyOutput.eachLine {
+            if (it.trim().isEmpty()) {
+                return //skip empty lines
+            }
             Matcher m = it =~ roddyOutputPattern
-            m.matches()
-            String jobName = m.group(1)
-            String jobClass = m.group(2)
-            String pbsId = m.group(3)
+            if (m.matches()) {
+                String jobName = m.group(1)
+                String jobClass = m.group(2)
+                String pbsId = m.group(3)
 
-            clusterJobService.createClusterJob(realm, pbsId, processingStep, seqType, jobName, jobClass)
+                clusterJobService.createClusterJob(realm, pbsId, processingStep, seqType, jobName, jobClass)
+            } else {
+                throw new RuntimeException("Could not match '${it}' against '${roddyOutputPattern}")
+            }
         }
     }
 }

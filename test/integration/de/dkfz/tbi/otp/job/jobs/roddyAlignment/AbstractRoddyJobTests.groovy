@@ -283,6 +283,42 @@ Rerun job ${ALIGN_AND_PAIR_SLIM_JOB_NAME} => ${ALIGN_AND_PAIR_SLIM_PBSID}"""
 
 
     @Test
+    void testCreateClusterJobObjects_skipEmptyLines() {
+        String roddyOutput = ""
+
+        roddyJob.createClusterJobObjects(realm, roddyOutput)
+
+        assert ClusterJob.all.empty
+    }
+
+    @Test
+    void testCreateClusterJobObjects_skipLinesHavingOnlySpaces() {
+        String roddyOutput = "     "
+
+        roddyJob.createClusterJobObjects(realm, roddyOutput)
+
+        assert ClusterJob.all.empty
+    }
+
+    @Test
+    void testCreateClusterJobObjects_EntryHasSpacesAtTheStart() {
+        String roddyOutput = "    Running job r150428_104246480_stds_snvCallingMetaScript => 3504988"
+
+        roddyJob.createClusterJobObjects(realm, roddyOutput)
+
+        assert 1 == ClusterJob.count()
+    }
+
+    @Test
+    void testCreateClusterJobObjects_EntryHasTrailingSpaces() {
+        String roddyOutput = "Running job r150428_104246480_stds_snvCallingMetaScript => 3504988    "
+
+        roddyJob.createClusterJobObjects(realm, roddyOutput)
+
+        assert 1 == ClusterJob.count()
+    }
+
+    @Test
     void testCreateClusterJobObjects_realmIsNull_fails() {
         String roddyOutput = "Running job r150428_104246480_stds_snvCallingMetaScript => 3504988"
 
@@ -299,9 +335,9 @@ Rerun job ${ALIGN_AND_PAIR_SLIM_JOB_NAME} => ${ALIGN_AND_PAIR_SLIM_PBSID}"""
         String roddyOutput = """\
 asdfasdfasdf"""
 
-        shouldFail IllegalStateException, {
+        assert shouldFail(RuntimeException) {
             roddyJob.createClusterJobObjects(realm, roddyOutput)
-        }
+        }.startsWith('Could not match')
 
         assert ClusterJob.all.empty
     }
