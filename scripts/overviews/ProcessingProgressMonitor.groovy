@@ -710,10 +710,10 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
     seqTracksByAlignmentDeciderBeanName.keySet().sort().each {
         switch(it) {
             case 'defaultOtpAlignmentDecider':
-                output << "${seqTracksByAlignmentDeciderBeanName['defaultOtpAlignmentDecider'].size()} SeqTracks use OTP-Alignment"
+                output << "${seqTracksByAlignmentDeciderBeanName['defaultOtpAlignmentDecider'].size()} SeqTracks use the default OTP alignment"
                 break
-            case 'roddyAlignmentDecider':
-                output << "${seqTracksByAlignmentDeciderBeanName['roddyAlignmentDecider'].size()} SeqTracks use Roddy-Alignment"
+            case 'panCanAlignmentDecider':
+                output << "${seqTracksByAlignmentDeciderBeanName['panCanAlignmentDecider'].size()} SeqTracks use the Pan-Cancer alignment"
                 break
             case 'noAlignmentDecider':
                 output << "${seqTracksByAlignmentDeciderBeanName['noAlignmentDecider'].size()} SeqTracks don't align"
@@ -729,7 +729,7 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
     seqTracksFinishedAlignment += showSeqTracksOtp(seqTracksByAlignmentDeciderBeanName['defaultOtpAlignmentDecider'])
 
     //alignment Roddy
-    seqTracksFinishedAlignment += showSeqTracksRoddy(seqTracksByAlignmentDeciderBeanName['roddyAlignmentDecider'])
+    seqTracksFinishedAlignment += showSeqTracksRoddy(seqTracksByAlignmentDeciderBeanName['panCanAlignmentDecider'])
 
     if (!seqTracksFinishedAlignment) {
         return

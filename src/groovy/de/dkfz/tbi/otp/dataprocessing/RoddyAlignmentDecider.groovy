@@ -3,25 +3,12 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
-import de.dkfz.tbi.otp.ngsdata.SeqTypeService
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 
-/**
- * An {@link AlignmentDecider} which decides whether the conditions for the Roddy alignment are satisfied.
- */
-@Component
-@Scope("singleton")
-class RoddyAlignmentDecider extends AbstractAlignmentDecider {
+abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
 
-    @Override
-    Workflow.Name getWorkflowName() {
-        return Workflow.Name.PANCAN_ALIGNMENT
-    }
-
-    // See integration test for explenation in which cases workpackages needs processing
+    // See integration test for explanation in which cases workpackages needs processing
     @Override
     void prepareForAlignment(MergingWorkPackage workPackage, SeqTrack seqTrack, boolean forceRealign) {
         RoddyBamFile latestValidBamFile = getLatestBamFileWhichHasBeenOrCouldBeCopied(workPackage)
