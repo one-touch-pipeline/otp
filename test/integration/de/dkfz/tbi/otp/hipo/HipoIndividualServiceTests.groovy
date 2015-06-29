@@ -54,6 +54,7 @@ class HipoIndividualServiceTests {
     void testCreateHipoIndividual() {
         String sampleName = "H456-ABCD-T3-D1"
         project.name = "hipo_004"
+        project.save(flush: true)
         createIndividual(sampleName)
     }
 
@@ -61,6 +62,7 @@ class HipoIndividualServiceTests {
     void testCreateHipoIndividual35() {
         String sampleName = "H035-BPDK-C3-D1"
         project.name = "PROJECT_NAME"
+        project.save(flush: true)
         createIndividual(sampleName)
     }
 
@@ -84,6 +86,7 @@ class HipoIndividualServiceTests {
         String sampleName2 = "H004-ABCD-T4-D1"
         String sampleName3 = "H004-ABCD-T4-D2"
         project.name = "hipo_004"
+        project.save(flush: true)
         assertEquals(0, Individual.count)
         assertEquals(0, Sample.count)
         assertEquals(0, SampleIdentifier.count)
@@ -129,11 +132,13 @@ class HipoIndividualServiceTests {
     void testAssureProject() {
         String sampleName = "H004-ABCD-T1-D1"
         project.name = "hipo_004"
+        project.save(flush: true)
         assertEquals(project,
                 hipoIndividualService.assureProject(HipoSampleIdentifier.tryParse(sampleName)))
 
         sampleName = "H035-BPDM-B3-D2"
         project.name = "PROJECT_NAME"
+        project.save(flush: true)
         assertEquals(project,
                 hipoIndividualService.assureProject(HipoSampleIdentifier.tryParse(sampleName)))
     }
@@ -142,6 +147,7 @@ class HipoIndividualServiceTests {
     void testAssureProjectNoProjectForName() {
         String sampleName = "H004-ABCD-T1-D1"
         project.name = "PROJECT_NAME"
+        project.save(flush: true)
         hipoIndividualService.assureProject(HipoSampleIdentifier.tryParse(sampleName))
     }
 
@@ -150,9 +156,11 @@ class HipoIndividualServiceTests {
         String sampleName = "H004-ABCD-T1-D1"
         HipoSampleIdentifier sampleIdentifier = HipoSampleIdentifier.tryParse(sampleName)
         project.name = "hipo_004"
+        project.save(flush: true)
         assertEquals(project, hipoIndividualService.findProject(sampleIdentifier))
 
         project.name = "PROJECT_NAME"
+        project.save(flush: true)
         assertNull(hipoIndividualService.findProject(sampleIdentifier))
 
         sampleName = "H035-BPDM-B1-D1"
@@ -165,6 +173,7 @@ class HipoIndividualServiceTests {
         String sampleName = "H004-ABCD-T1-D1"
         HipoSampleIdentifier sampleIdentifier = HipoSampleIdentifier.tryParse(sampleName)
         project.name = "hipo_004"
+        project.save(flush: true)
         assertEquals(0, Individual.list().size())
         Individual individualAct = hipoIndividualService.createOrReturnIndividual(sampleIdentifier)
         assertEquals(1, Individual.list().size())
@@ -177,6 +186,7 @@ class HipoIndividualServiceTests {
         HipoSampleIdentifier sampleIdentifier = HipoSampleIdentifier.tryParse(sampleName)
         String pid = "H004-ABCD"
         project.name = "hipo_004"
+        project.save(flush: true)
         Individual ind = new Individual(
                         pid: pid,
                         mockPid: pid,
@@ -205,6 +215,7 @@ class HipoIndividualServiceTests {
         HipoSampleIdentifier sampleIdentifier = HipoSampleIdentifier.tryParse(sampleName)
         String pid = "H035-BPDK"
         project.name = "PROJECT_NAME"
+        project.save(flush: true)
         int projectNumber = 35
         Individual ind = new Individual(
                         pid: pid,
@@ -222,9 +233,6 @@ class HipoIndividualServiceTests {
 
         assertEquals(0, Sample.list().size())
         assertEquals(0, SampleIdentifier.list().size())
-        println "Individual " + ind
-        println "sampleName " + sampleName
-        println "projectNumber " + projectNumber
         hipoIndividualService.addSample(ind, sampleIdentifier)
         assertEquals(1, Sample.list().size())
         assertEquals(1, SampleIdentifier.list().size())

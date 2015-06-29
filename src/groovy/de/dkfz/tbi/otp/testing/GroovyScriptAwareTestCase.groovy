@@ -1,8 +1,11 @@
 package de.dkfz.tbi.otp.testing
 
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.runtime.InvokerHelper
+import org.springframework.beans.factory.annotation.Autowired
 
 import static org.springframework.util.Assert.isTrue
 
@@ -14,6 +17,7 @@ import static org.springframework.util.Assert.isTrue
  * to call scripts creating domain objects
  *
  */
+@TestMixin(IntegrationTestMixin)
 abstract class GroovyScriptAwareTestCase extends AbstractIntegrationTest {
 
     GrailsApplication grailsApplication

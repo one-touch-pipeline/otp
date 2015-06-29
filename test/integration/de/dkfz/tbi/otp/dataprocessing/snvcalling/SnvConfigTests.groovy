@@ -49,15 +49,14 @@ class SnvConfigTests {
                 dirName: "projectDirName",
                 realmName: "realmName"
         )
-        assert project.save()
+        assert project.save(flush: true)
 
         seqType = new SeqType(
                 name: "seqTypeName",
                 libraryLayout: "seqTypeLibraryLayout",
                 dirName: "seqTypeDirName"
         )
-        assert seqType.save()
-
+        assert seqType.save(flush: true)
     }
 
     @After
@@ -75,7 +74,7 @@ class SnvConfigTests {
                 configuration: "testConfig",
                 externalScriptVersion: "v1",
         )
-        assert config.save()
+        assert config.save(flush:true)
 
         assertEquals(config, SnvConfig.getLatest(project, seqType))
 
@@ -99,17 +98,17 @@ class SnvConfigTests {
                 configuration: "testConfig",
                 externalScriptVersion: "v1",
                 )
-        assert config2.save()
+        assert config2.save(flush:true)
         assertEquals(config, SnvConfig.getLatest(project, seqType))
         assertEquals(config2, SnvConfig.getLatest(project2, seqType2))
 
         config.obsoleteDate = new Date()
-        assert config.save()
+        assert config.save(flush:true)
 
         config2.project = project
         config2.seqType = seqType
         config2.previousConfig = config
-        assert config2.save()
+        assert config2.save(flush:true)
 
         assertEquals(config2, SnvConfig.getLatest(project, seqType))
     }
@@ -240,7 +239,7 @@ class SnvConfigTests {
     SnvConfig createFromFile(final String configuration, String version = "v1", Project project = project, SeqType seqType = seqType) {
         tmpDir.create()
 
-        File dir = tmpDir.newFolder("/otp-test/")
+        File dir = tmpDir.newFolder("otp-test")
         assert dir.exists() || dir.mkdirs()
 
         File configFile = new File(dir, "configFile.txt")

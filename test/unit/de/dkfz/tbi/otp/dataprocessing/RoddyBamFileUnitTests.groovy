@@ -11,6 +11,8 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
 import static de.dkfz.tbi.TestCase.shouldFail
+import static de.dkfz.tbi.otp.dataprocessing.RoddyBamFile.RODDY_EXECUTION_STORE_DIR
+import static de.dkfz.tbi.otp.dataprocessing.RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME
 
 @Build([RoddyBamFile, SeqPlatform])
 class RoddyBamFileUnitTests {
@@ -79,13 +81,13 @@ class RoddyBamFileUnitTests {
 
     @Test
     void testGetWorkExecutionStoreDirectory_AllFine() {
-        assert "${TEST_DIR}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}" ==
+        assert "${TEST_DIR}/${roddyBamFile.workDirectoryName}/${RODDY_EXECUTION_STORE_DIR}" ==
                 roddyBamFile.workExecutionStoreDirectory.path
     }
 
     @Test
     void testGetFinalRoddyExecutionStoreDirectory_AllFine() {
-        assert "${TEST_DIR}/${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}" ==
+        assert "${TEST_DIR}/${RODDY_EXECUTION_STORE_DIR}" ==
                 roddyBamFile.finalExecutionStoreDirectory.path
     }
 

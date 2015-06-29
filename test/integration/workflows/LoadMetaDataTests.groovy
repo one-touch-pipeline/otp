@@ -6,6 +6,8 @@ import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
 import org.joda.time.Duration
 import org.junit.Before
 import org.junit.Ignore
@@ -58,7 +60,7 @@ class LoadMetaDataTests extends WorkflowTestCase {
     String cycleCount = "101"
     String insertSize = "162"
 
-    ReferenceGenome referenceGenome = ReferenceGenome.build()
+    ReferenceGenome referenceGenome
 
     private String md5sum(String filepath) {
         String cmdMd5sum = "md5sum ${filepath}"
@@ -173,11 +175,22 @@ class LoadMetaDataTests extends WorkflowTestCase {
         softwareToolIdentifier.softwareTool = softwareTool
         assertNotNull(softwareToolIdentifier.save(flush: true))
 
-        SeqPlatform seqPlatform = SeqPlatform.build(
-            name: instrumentPlatform,
-            seqPlatformModelLabel: SeqPlatformModelLabel.build(name: instrumentModel),
-            sequencingKitLabel: SequencingKitLabel.build(name: sequencingKitName),
-            )
+        SeqPlatformModelLabel seqPlatformModelLabel = new SeqPlatformModelLabel(name: instrumentModel)
+        assert seqPlatformModelLabel.save(flush: true)
+
+        SequencingKitLabel sequencingKitLabel = new SequencingKitLabel(name: sequencingKitName)
+        assert sequencingKitLabel.save(flush: true)
+
+        SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup( name: "group1")
+        assert seqPlatformGroup.save(flush: true)
+
+        SeqPlatform seqPlatform = new SeqPlatform(
+                name: instrumentPlatform,
+                seqPlatformModelLabel: seqPlatformModelLabel,
+                sequencingKitLabel: sequencingKitLabel,
+                seqPlatformGroup: seqPlatformGroup
+        )
+        assert seqPlatform.save(flush: true)
 
         SeqCenter seqCenter = new SeqCenter(
                         name: seqCenterName,
@@ -201,21 +214,25 @@ class LoadMetaDataTests extends WorkflowTestCase {
         runSegment.run = run
         assertNotNull(runSegment.save([flush: true, failOnError: true]))
 
+        referenceGenome = TestData.createReferenceGenome()
+        assert referenceGenome.save(flush: true)
+
         [
             createAndSaveSeqType(SeqTypeNames.WHOLE_GENOME.seqTypeName),
             createAndSaveSeqType(SeqTypeNames.EXOME.seqTypeName),
             createAndSaveSeqType(SeqTypeNames.CHIP_SEQ.seqTypeName),
         ].each {
-            ReferenceGenomeProjectSeqType.build(
+            assert new ReferenceGenomeProjectSeqType(
                 project: project,
                 seqType: it,
                 referenceGenome: referenceGenome,
-            )
+            ).save(flush: true)
         }
     }
 
 
     @Test
+    @Ignore
     void testWholeGenomeMetadata() {
         String seqTypeName = SeqTypeNames.WHOLE_GENOME.seqTypeName
 
@@ -242,6 +259,7 @@ class LoadMetaDataTests extends WorkflowTestCase {
     }
 
     @Test
+    @Ignore
     void testExomeMetadataNoLibraryPreparationKit() {
         String seqTypeName = SeqTypeNames.EXOME.seqTypeName
 
@@ -275,6 +293,7 @@ class LoadMetaDataTests extends WorkflowTestCase {
     }
 
     @Test
+    @Ignore
     void testExomeMetadataWithLibraryPreparationKit() {
         String seqTypeName = SeqTypeNames.EXOME.seqTypeName
 
@@ -291,10 +310,13 @@ class LoadMetaDataTests extends WorkflowTestCase {
                         libraryPreparationKit: libraryPreparationKits.first())
         assertNotNull(libraryPreparationKitSynonym.save([flush: true]))
 
-        BedFile.build(
+        assert new BedFile(
                 referenceGenome: referenceGenome,
                 libraryPreparationKit: libraryPreparationKits.first(),
-        )
+                mergedTargetSize: 10l,
+                fileName: "BedFileName",
+                targetSize: 10l,
+        ).save(flush: true)
 
         String path = "${ftpDir}/${runName}"
         String softLinkFastqR1Filepath1 = "${path}/${fastqR1Filename1}"
@@ -328,6 +350,7 @@ class LoadMetaDataTests extends WorkflowTestCase {
     }
 
     @Test
+    @Ignore
     void testChipSeqMetadata() {
         String seqTypeName = SeqTypeNames.CHIP_SEQ.seqTypeName
 

@@ -1,17 +1,5 @@
 package de.dkfz.tbi.otp.job.processing
 
-import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.*
-import static de.dkfz.tbi.otp.ngsdata.DomainFactory.*
-
-import java.util.concurrent.Semaphore
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
-import org.junit.AfterClass
-import org.junit.Before
-import org.junit.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
@@ -24,8 +12,25 @@ import de.dkfz.tbi.otp.job.scheduler.PbsMonitorService
 import de.dkfz.tbi.otp.job.scheduler.Scheduler
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
+import org.junit.AfterClass
+import org.junit.Before
+import org.junit.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
 
-class AbstractMultiJobTests extends TestCase {
+import java.util.concurrent.Semaphore
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+
+import static de.dkfz.tbi.TestConstants.ARBITRARY_MESSAGE
+import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.assertFailed
+import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.assertSucceeded
+import static de.dkfz.tbi.otp.ngsdata.DomainFactory.*
+import static junit.framework.TestCase.assertEquals
+import static junit.framework.TestCase.assertTrue
+
+class AbstractMultiJobTests {
 
     static final String CLUSTER_JOB_1_ID = '123'
     static final String CLUSTER_JOB_2_ID = '456'
@@ -156,14 +161,7 @@ class AbstractMultiJobTests extends TestCase {
         if (withResuming) {
             job.planSuspend()
             assert job.resumable
-            new Thread() {
-                @Override
-                void run() {
-                    Thread.sleep(200)
-                    suspendCancelled.set(true)
-                    job.cancelSuspend()
-                }
-            }.start()
+            new TestThread(suspendCancelled, job).start()
         }
 
         pbsMonitorService.notifyJobAboutFinishedClusterJob(job, clusterJob1)
@@ -269,5 +267,23 @@ class AbstractMultiJobTests extends TestCase {
         return TestCase.containSame(
                 ClusterJobIdentifierImpl.asClusterJobIdentifierImplList(c1),
                 ClusterJobIdentifierImpl.asClusterJobIdentifierImplList(c2))
+    }
+}
+
+class TestThread extends Thread {
+
+    AtomicBoolean suspendCancelled
+    AbstractMultiJob job
+
+    TestThread(AtomicBoolean suspendCancelled, AbstractMultiJob job) {
+        this.suspendCancelled = suspendCancelled
+        this.job = job
+    }
+
+    @Override
+    void run() {
+        Thread.sleep(200)
+        suspendCancelled.set(true)
+        job.cancelSuspend()
     }
 }

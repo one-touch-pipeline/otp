@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
-import org.junit.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SampleType
+import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
+import org.junit.Test
 
-class SamplePairTests extends GroovyTestCase {
+class SamplePairTests {
 
     @Test
     void testSetProcessingStatusNeedsProcessing() {
@@ -35,7 +37,7 @@ class SamplePairTests extends GroovyTestCase {
                 mergingWorkPackage2: DomainFactory.createMergingWorkPackage(mwp1),
                 processingStatus: processingStatus == ProcessingStatus.NEEDS_PROCESSING ? ProcessingStatus.NO_PROCESSING_NEEDED : ProcessingStatus.NEEDS_PROCESSING,
         )
-        assert persistedSamplePair.save()
+        assert persistedSamplePair.save(flush: true)
 
         SamplePair.setProcessingStatus([nonPersistedSamplePair, persistedSamplePair], processingStatus)
 

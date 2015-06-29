@@ -6,7 +6,7 @@ import static org.junit.Assert.*
 
 import org.junit.*
 
-class LsdfFilesServiceTests extends GroovyTestCase {
+class LsdfFilesServiceTests {
 
     LsdfFilesService lsdfFilesService
 

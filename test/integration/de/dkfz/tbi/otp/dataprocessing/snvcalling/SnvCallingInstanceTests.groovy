@@ -1,10 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import org.junit.*
-
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
+import org.junit.Before
+import org.junit.Test
 
-class SnvCallingInstanceTests extends GroovyTestCase {
+class SnvCallingInstanceTests {
 
     SnvCallingInstanceTestData testData = new SnvCallingInstanceTestData()
 

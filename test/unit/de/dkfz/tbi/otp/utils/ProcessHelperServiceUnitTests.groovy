@@ -18,7 +18,7 @@ class ProcessHelperServiceUnitTests {
 
     @Before
     void setUp() {
-        LogThreadLocal.setThreadLog(new SimpleLog())
+        LogThreadLocal.setThreadLog(new SimpleLog(this.class.name))
     }
 
     @After

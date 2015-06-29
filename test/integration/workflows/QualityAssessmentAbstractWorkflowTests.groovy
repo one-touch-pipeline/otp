@@ -55,6 +55,7 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
     }
 
 
+    @Ignore
     @Test
     void testExecutionWithProcessingOptionsWgs() {
         createAdditionalWholeGenomeData()
@@ -64,6 +65,7 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
     }
 
     @Test
+    @Ignore
     void testExecutionWithProcessingOptionsExome() {
         createAdditionalExomData()
         createDirectoryStructure(inputFilesPath())

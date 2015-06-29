@@ -1,16 +1,13 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-import org.apache.commons.io.FileUtils
-import org.junit.*
-
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.Realm
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
+import org.junit.Test
 
 /**
  * Unit tests for the {@link JobStatusLoggingService}.
@@ -18,8 +15,8 @@ import de.dkfz.tbi.otp.ngsdata.Realm
  */
 @TestFor(JobStatusLoggingService)
 @TestMixin(GrailsUnitTestMixin)
-@Mock([JobDefinition, JobExecutionPlan, Process, ProcessingStep, Realm])
-class JobStatusLoggingServiceUnitTests extends TestCase {
+@Build([JobDefinition, JobExecutionPlan, Process, ProcessingStep, Realm])
+class JobStatusLoggingServiceUnitTests {
 
     final static String LOGGING_ROOT_PATH = '/fakeRootPath'
     final static String EXPECTED_BASE_PATH = '/fakeRootPath/log/status'
@@ -31,16 +28,12 @@ class JobStatusLoggingServiceUnitTests extends TestCase {
     final static String ARBITRARY_PBS_ID = '4711'
 
     static ProcessingStep createFakeProcessingStep() {
-        ProcessingStep processingStep = new ProcessingStep([id: ARBITRARY_ID])
-        processingStep.with {
-            jobDefinition = new JobDefinition()
-            jobDefinition.with {
-                plan = new JobExecutionPlan([name: 'SomeWorkflowName'])
-            }
-            process = new Process([id: ARBITRARY_PROCESS_ID])
-            jobClass = 'this.is.a.DummyJob'
-        }
-        processingStep
+        return ProcessingStep.build([
+                id           : ARBITRARY_ID,
+                jobDefinition: JobDefinition.build(plan: JobExecutionPlan.build([name: 'SomeWorkflowName'])),
+                process      : Process.build([id: ARBITRARY_PROCESS_ID]),
+                jobClass     : 'this.is.a.DummyJob',
+        ])
     }
 
     @Test
@@ -65,7 +58,7 @@ class JobStatusLoggingServiceUnitTests extends TestCase {
 
     @Test
     void testLogFileBaseDir() {
-        Realm realm = new Realm([id: ARBITRARY_REALM_ID, loggingRootPath: LOGGING_ROOT_PATH])
+        Realm realm = Realm.build([id: ARBITRARY_REALM_ID, loggingRootPath: LOGGING_ROOT_PATH])
         ProcessingStep processingStep = createFakeProcessingStep()
         def actual = service.logFileBaseDir(realm, processingStep)
         assert EXPECTED_BASE_PATH == actual
@@ -73,7 +66,7 @@ class JobStatusLoggingServiceUnitTests extends TestCase {
 
     @Test
     void testLogFileLocation() {
-        Realm realm = new Realm([id: ARBITRARY_REALM_ID, loggingRootPath: LOGGING_ROOT_PATH])
+        Realm realm = Realm.build([id: ARBITRARY_REALM_ID, loggingRootPath: LOGGING_ROOT_PATH])
         ProcessingStep processingStep = createFakeProcessingStep()
         def actual = service.logFileLocation(realm, processingStep)
         assert EXPECTED_LOGFILE_PATH == actual
@@ -88,13 +81,13 @@ class JobStatusLoggingServiceUnitTests extends TestCase {
     void testConstructMessageWhenPbsIdIsNotPassed() {
         ProcessingStep processingStep = createFakeProcessingStep()
         def actual = service.constructMessage(processingStep)
-        assert "SomeWorkflowName,DummyJob,23,${service.SHELL_SNIPPET_GET_NUMERIC_PBS_ID}" == actual
+        assert "SomeWorkflowName,DummyJob,${ARBITRARY_ID},${service.SHELL_SNIPPET_GET_NUMERIC_PBS_ID}" == actual
     }
 
     @Test
     void testConstructMessageWhenPbsIdIsPassed() {
         ProcessingStep processingStep = createFakeProcessingStep()
         def actual = service.constructMessage(processingStep, ARBITRARY_PBS_ID)
-        assert 'SomeWorkflowName,DummyJob,23,4711' == actual
+        assert "SomeWorkflowName,DummyJob,${ARBITRARY_ID},${ARBITRARY_PBS_ID}" == actual
     }
 }

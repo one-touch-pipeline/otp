@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.security.User
 import grails.plugin.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.core.context.SecurityContextHolder
 
 import de.dkfz.tbi.otp.job.plan.PlanInformation

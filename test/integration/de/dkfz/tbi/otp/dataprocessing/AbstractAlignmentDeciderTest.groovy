@@ -222,7 +222,7 @@ public class AbstractAlignmentDeciderTest {
     void testEnsureConfigurationIsComplete_whenReferenceGenomeNull_shouldThrowRuntimeException() {
         SeqTrack seqTrack = buildSeqTrack()
 
-        exactlyOneElement(ReferenceGenomeProjectSeqType.list()).delete()
+        exactlyOneElement(ReferenceGenomeProjectSeqType.list()).delete(flush: true)
 
         shouldFail(RuntimeException.class, {
             decider.ensureConfigurationIsComplete(seqTrack)

@@ -211,6 +211,7 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
     }
 
 
+
     void createSnvSpecificSetup() {
         SampleTypePerProject.build(
                 project: project,

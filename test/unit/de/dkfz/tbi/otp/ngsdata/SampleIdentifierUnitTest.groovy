@@ -4,13 +4,13 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import grails.test.mixin.support.*
-
+import grails.test.mixin.web.ControllerUnitTestMixin
 import org.junit.*
 
 import de.dkfz.tbi.TestCase
 
 
-@TestMixin(GrailsUnitTestMixin)
+@TestMixin(ControllerUnitTestMixin) // Workaround for Grails bug GRAILS-11136
 @Build([ProcessingOption, SampleIdentifier])
 class SampleIdentifierUnitTest {
 
@@ -87,39 +87,5 @@ class SampleIdentifierUnitTest {
         sampleIdentifier.name = name
 
         TestCase.assertValidateError(sampleIdentifier, 'name', 'validator.invalid', name)
-    }
-
-    private void createRegex(final Project project) {
-        assert new ProcessingOption(
-                name: SampleIdentifier.REGEX_OPTION_NAME,
-                project: project,
-                value: '[a-z]{4}',
-                comment: '',
-        ).save(failOnError: true)
-    }
-
-    @Test
-    void test_validate_pass_regexIsSet() {
-        createRegex(sampleIdentifier.sample.project)
-
-        assert sampleIdentifier.validate()
-    }
-
-    @Test
-    void test_validate_fail_regexIsSet() {
-        createRegex(sampleIdentifier.sample.project)
-        final String name = 'toolong'
-        sampleIdentifier.name = name
-
-        TestCase.assertValidateError(sampleIdentifier, 'name', 'validator.invalid', name)
-    }
-
-    @Test
-    void test_validate_pass_regexIsSetForOtherProject() {
-        createRegex(Project.build())
-        final String name = 'toolong'
-        sampleIdentifier.name = name
-
-        assert sampleIdentifier.validate()
     }
 }

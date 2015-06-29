@@ -12,13 +12,15 @@ import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserRole
 
-class RunControllerTests extends ControllerUnitTestCase {
+class RunControllerTests {
     def springSecurityService
     def aclUtilService
 
+    RunController controller
+
     @Before
     void setUp() {
-        super.setUp()
+        controller = new RunController()
         createUserAndRoles()
     }
 
@@ -79,7 +81,7 @@ class RunControllerTests extends ControllerUnitTestCase {
     @Test
     void testDisplayRedirect() {
         controller.display()
-        assertEquals("show", controller.redirectArgs.action)
+        assertEquals("/run/show", controller.response.redirectedUrl)
     }
 
     @Test

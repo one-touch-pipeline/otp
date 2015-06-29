@@ -34,9 +34,9 @@ public class SnvDeletionService {
         File directory = snvCallingInstance.getSnvInstancePath().getAbsoluteDataManagementPath()
         List<SnvJobResult> results = SnvJobResult.findAllBySnvCallingInstance(snvCallingInstance, [sort: 'id', order: 'desc'])
         results.each {
-            it.delete()
+            it.delete(flush: true)
         }
-        snvCallingInstance.delete()
+        snvCallingInstance.delete(flush: true)
         return directory
     }
 
@@ -45,7 +45,7 @@ public class SnvDeletionService {
         samplePairs.each { SamplePair samplePair ->
             if (!SnvCallingInstance.findBySamplePair(samplePair)) {
                 directoriesToDelete << samplePair.getSamplePairPath().getAbsoluteDataManagementPath()
-                samplePair.delete()
+                samplePair.delete(flush: true)
             }
         }
         return directoriesToDelete

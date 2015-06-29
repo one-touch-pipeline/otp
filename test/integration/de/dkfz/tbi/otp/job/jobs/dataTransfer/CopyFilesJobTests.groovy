@@ -13,8 +13,11 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.Realm.OperationType
 import org.springframework.beans.factory.annotation.Autowired
 
+import static junit.framework.TestCase.assertEquals
+import static junit.framework.TestCase.assertNotNull
 
-class CopyFilesJobTests extends GroovyTestCase {
+
+class CopyFilesJobTests {
 
     @Autowired
     CopyFilesJob job

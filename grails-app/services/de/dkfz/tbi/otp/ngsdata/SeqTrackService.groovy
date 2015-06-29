@@ -419,7 +419,7 @@ class SeqTrackService {
     }
 
 
-    private void extractAndSetLibraryPreparationKit(DataFile dataFile, SeqTrackBuilder builder, Run run, Sample sample) {
+    void extractAndSetLibraryPreparationKit(DataFile dataFile, SeqTrackBuilder builder, Run run, Sample sample) {
         notNull(dataFile, "The input dataFile of the method annotateSeqTrackForExome is null")
         notNull(builder, "The input builder of the method annotateSeqTrackForExome is null")
         notNull(run, "The input run of the method annotateSeqTrackForExome is null")

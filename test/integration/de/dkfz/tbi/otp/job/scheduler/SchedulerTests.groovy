@@ -21,8 +21,6 @@ import org.junit.*
 
 class SchedulerTests extends AbstractIntegrationTest {
 
-    static final String ARBITRARY_MESSAGE = 'The job hit its toe on a comma-shaped stone.'
-
     GrailsApplication grailsApplication
     PbsMonitorService pbsMonitorService
     Scheduler scheduler

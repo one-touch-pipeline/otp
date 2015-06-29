@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
+import grails.plugin.springsecurity.SpringSecurityService
+
 import static org.junit.Assert.*
 
 import de.dkfz.tbi.otp.job.plan.JobDefinition
@@ -17,10 +19,12 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
     def jobExecutionPlanService
     def grailsApplication
 
+    @Before
     void setUp() {
         createUserAndRoles()
     }
 
+    @After
     void tearDown() {
         (grailsApplication.mainContext.getBean("testSingletonStartJob") as TestSingletonStartJob).setExecutionPlan(null)
     }
@@ -135,14 +139,14 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertTrue(plans.contains(plan5))
         // turn plan3-5 into a sequence
         plan3.obsoleted = true
-        assertNotNull(plan3.save())
+        assertNotNull(plan3.save(flush: true))
         plan4.obsoleted = true
         plan4.previousPlan = plan3
         plan4.planVersion = 1
-        assertNotNull(plan4.save())
+        assertNotNull(plan4.save(flush: true))
         plan5.previousPlan = plan4
         plan5.planVersion = 2
-        assertNotNull(plan4.save())
+        assertNotNull(plan4.save(flush: true))
         // service should return two objects
         plans = service.getAllJobExecutionPlans()
         assertEquals(2, plans.size())
@@ -215,7 +219,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertFalse(service.isProcessRunning(plan4))
         // mark it as finished
         process2.finished = true
-        assertNotNull(process2.save())
+        assertNotNull(process2.save(flush: true))
         assertFalse(service.isProcessRunning(plan))
         assertFalse(service.isProcessRunning(plan2))
         assertFalse(service.isProcessRunning(plan3))
@@ -258,7 +262,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertNotNull(step.save())
         // lets fail
         ProcessingStepUpdate created2 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: step2)
-        assertNotNull(created2.save())
+        assertNotNull(created2.save(flush: true))
         assertNull(service.getLastSucceededProcess(plan))
     }
 
@@ -454,7 +458,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertNotNull(step.save())
         // lets fail
         ProcessingStepUpdate created2 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: step2)
-        assertNotNull(created2.save())
+        assertNotNull(created2.save(flush: true))
         assertNull(service.getLastFailedProcess(plan))
     }
 
@@ -660,9 +664,9 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         JobDefinition jobDefinition2 = new JobDefinition(name: "test2", bean: "foo", plan: plan, previous: jobDefinition1)
         assertNotNull(jobDefinition2.save())
         ProcessingStep step3 = new ProcessingStep(process: process1, jobDefinition: jobDefinition2, previous: step1)
-        assertNotNull(step3.save())
+        assertNotNull(step3.save(flush: true))
         step1.next = step3
-        assertNotNull(step1.save())
+        assertNotNull(step1.save(flush: true))
         // now we have a succeeded, but no failed
         assertSame(process2, service.getLastFinishedProcess(plan))
         assertSame(process2, service.getLastSucceededProcess(plan))
@@ -1043,6 +1047,14 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         JobExecutionPlan plan2 = new JobExecutionPlan(name: "test2", obsoleted: false, planVersion: 0, enabled: true)
         plan2 = plan2.save(flush: true)
         assertNotNull(plan2)
+        SpringSecurityUtils.doWithAuth('admin') {
+            // Workaround for some Spring Security issue: The ACL was not found, so we create a permission that is not
+            // needed (something other than READ) which will create the ACL and make the test pass as expected.
+            // The cause might be due to a bug in the permissionsFor() method of the AclCacheOptimizer, but noone knows.
+            aclUtilService.addPermission(plan, 'testuser', BasePermission.CREATE)
+            aclUtilService.addPermission(plan1, 'testuser', BasePermission.CREATE)
+            aclUtilService.addPermission(plan2, 'testuser', BasePermission.CREATE)
+        }
         // user should get an empty list
         SpringSecurityUtils.doWithAuth("testuser") {
             assertTrue(jobExecutionPlanService.getAllJobExecutionPlans().empty)

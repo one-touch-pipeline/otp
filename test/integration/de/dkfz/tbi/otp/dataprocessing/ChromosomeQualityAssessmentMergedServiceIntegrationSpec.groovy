@@ -1,16 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
-import org.junit.*
+import grails.test.mixin.TestFor
+import grails.test.spock.IntegrationSpec
+import org.junit.Before
+import org.junit.Test
 
-
-@TestFor(ChromosomeQualityAssessmentMergedService)
-@Build([
-    ChromosomeQualityAssessmentMerged,
-    ProcessedMergedBamFile,
-])
-class ChromosomeQualityAssessmentMergedServiceUnitTest {
+class ChromosomeQualityAssessmentMergedServiceIntegrationSpec extends IntegrationSpec {
 
     ChromosomeQualityAssessmentMergedService chromosomeQualityAssessmentMergedService
 
@@ -22,8 +17,7 @@ class ChromosomeQualityAssessmentMergedServiceUnitTest {
 
 
 
-    @Before
-    void setUp() {
+    void setup() {
         chromosomeQualityAssessmentMergedService = new ChromosomeQualityAssessmentMergedService()
 
         chromosomes = [
@@ -34,8 +28,8 @@ class ChromosomeQualityAssessmentMergedServiceUnitTest {
         QualityAssessmentMergedPass qualityAssessmentMergedPass1 = QualityAssessmentMergedPass.build()
         QualityAssessmentMergedPass qualityAssessmentMergedPass2 = QualityAssessmentMergedPass.build()
         qualityAssessmentMergedPasses = [
-            qualityAssessmentMergedPass1,
-            qualityAssessmentMergedPass2
+                qualityAssessmentMergedPass1,
+                qualityAssessmentMergedPass2
         ]
 
         ChromosomeQualityAssessmentMerged chromosomeQualityAssessmentMergedX1 = ChromosomeQualityAssessmentMerged.build(qualityAssessmentMergedPass: qualityAssessmentMergedPass1, chromosomeName: Chromosomes.CHR_X.alias)
@@ -43,69 +37,66 @@ class ChromosomeQualityAssessmentMergedServiceUnitTest {
         ChromosomeQualityAssessmentMerged chromosomeQualityAssessmentMergedX2 = ChromosomeQualityAssessmentMerged.build(qualityAssessmentMergedPass: qualityAssessmentMergedPass2, chromosomeName: Chromosomes.CHR_X.alias)
         ChromosomeQualityAssessmentMerged chromosomeQualityAssessmentMergedY2 = ChromosomeQualityAssessmentMerged.build(qualityAssessmentMergedPass: qualityAssessmentMergedPass2, chromosomeName: Chromosomes.CHR_Y.alias)
         chromosomeQualityAssessmentMergedList = [
-            chromosomeQualityAssessmentMergedX1,
-            chromosomeQualityAssessmentMergedY1,
-            chromosomeQualityAssessmentMergedX2,
-            chromosomeQualityAssessmentMergedY2
+                chromosomeQualityAssessmentMergedX1,
+                chromosomeQualityAssessmentMergedY1,
+                chromosomeQualityAssessmentMergedX2,
+                chromosomeQualityAssessmentMergedY2
         ]
     }
 
 
-
-    @Test
     void testQualityAssessmentMergedForSpecificChromosomes() {
         List<ChromosomeQualityAssessmentMerged> expected = chromosomeQualityAssessmentMergedList
-
         List<ChromosomeQualityAssessmentMerged> result = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes, qualityAssessmentMergedPasses)
-        assert expected == result
+
+        expect:
+        expected as Set == result as Set
     }
 
 
-    @Test
     void testQualityAssessmentMergedForSpecificChromosomes_emptyChromosomesList() {
         List<ChromosomeQualityAssessmentMerged> expected = []
-
         List<ChromosomeQualityAssessmentMerged> result = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes([], qualityAssessmentMergedPasses)
-        assert expected == result
+
+        expect:
+        expected == result
     }
 
 
-    @Test
     void testQualityAssessmentMergedForSpecificChromosomes_emptyQualityAssessmentMergedPassesList() {
         List<ChromosomeQualityAssessmentMerged> expected = []
-
         List<ChromosomeQualityAssessmentMerged> result = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes, [])
-        assert expected == result
+
+        expect:
+        expected == result
     }
 
 
-    @Test
     void testQualityAssessmentMergedForSpecificChromosomes_ChromosomesListIsNull() {
-        List<ChromosomeQualityAssessmentMerged> expected = []
+        when:
+        chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(null, qualityAssessmentMergedPasses)
 
-        shouldFail(IllegalArgumentException) {
-            chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(null, qualityAssessmentMergedPasses)
-        }
+        then:
+        thrown(IllegalArgumentException)
     }
 
 
-    @Test
     void testQualityAssessmentMergedForSpecificChromosomes_QualityAssessmentMergedPassesListIsNull() {
-        List<ChromosomeQualityAssessmentMerged> expected = []
+        when:
+        chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes, null)
 
-        shouldFail(IllegalArgumentException) {
-            chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes, null)
-        }
+        then:
+        thrown(IllegalArgumentException)
     }
 
 
-    @Test
     void testQualityAssessmentMergedForSpecificChromosomes_NoQaAvailable() {
-        chromosomeQualityAssessmentMergedList*.delete()
+        chromosomeQualityAssessmentMergedList*.delete([flush: true])
+
         List<ChromosomeQualityAssessmentMerged> expected = []
-
         List<ChromosomeQualityAssessmentMerged> result = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes, qualityAssessmentMergedPasses)
-        assert expected == result
-    }
 
+        expect:
+        expected == result
+    }
 }

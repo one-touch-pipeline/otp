@@ -1,16 +1,19 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import de.dkfz.tbi.otp.InformationReliability
-import static org.junit.Assert.*
-import org.junit.*
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static org.junit.Assert.*
 
-class SnvCallingServiceTests extends GroovyTestCase {
+class SnvCallingServiceTests {
 
     SnvCallingInstanceTestData testData
     SamplePair samplePair
@@ -71,24 +74,24 @@ class SnvCallingServiceTests extends GroovyTestCase {
     @Test
     void testSamplePairNoProcessingNeeded() {
         samplePair.processingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
-        assert samplePair.save()
+        assert samplePair.save(flush: true)
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test
     void testSamplePairDisabled() {
         samplePair.processingStatus = ProcessingStatus.DISABLED
-        assert samplePair.save()
+        assert samplePair.save(flush: true)
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test
     void testSnvConfigIsNullOtherProject() {
         Project otherProject = TestData.createProject(name: "otherProject", dirName: "/tmp", realmName: "DKFZ")
-        otherProject.save()
+        assert otherProject.save(flush: true)
 
         snvConfig.project = otherProject
-        snvConfig.save()
+        assert snvConfig.save(flush: true)
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
@@ -97,7 +100,7 @@ class SnvCallingServiceTests extends GroovyTestCase {
     void testSnvConfigIsNullOtherSeqType() {
 
         snvConfig.seqType = DomainFactory.createExomeSeqType()
-        snvConfig.save()
+        snvConfig.save(flush: true)
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
@@ -105,7 +108,7 @@ class SnvCallingServiceTests extends GroovyTestCase {
     @Test
     void testSamplePairForSnvProcessing_NoCorrespondingExternalScriptInDatabase_shouldReturnNull() {
         testData.externalScript_Joining.scriptVersion = "v2"
-        assert testData.externalScript_Joining.save()
+        assert testData.externalScript_Joining.save(flush: true)
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
@@ -261,7 +264,7 @@ class SnvCallingServiceTests extends GroovyTestCase {
         SampleTypePerProject.build(project: project, sampleType: otherMwp.sampleType, category: SampleType.Category.DISEASE)
 
         DomainFactory.createSamplePair(otherMwp, samplePair.mergingWorkPackage2)
-        samplePair.delete()
+        samplePair.delete(flush: true)
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
@@ -271,7 +274,7 @@ class SnvCallingServiceTests extends GroovyTestCase {
         MergingWorkPackage otherMwp = DomainFactory.createMergingWorkPackage(samplePair.mergingWorkPackage2)
 
         DomainFactory.createSamplePair(samplePair.mergingWorkPackage1, otherMwp)
-        samplePair.delete()
+        samplePair.delete(flush: true)
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
@@ -280,7 +283,7 @@ class SnvCallingServiceTests extends GroovyTestCase {
     void testBamFile1StillInProcessing() {
         processedMergedBamFile1.md5sum = null
         processedMergedBamFile1.fileOperationStatus = FileOperationStatus.INPROGRESS
-        processedMergedBamFile1.save()
+        assert processedMergedBamFile1.save(flush: true)
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
@@ -289,7 +292,7 @@ class SnvCallingServiceTests extends GroovyTestCase {
     void testBamFile2StillInProcessing() {
         processedMergedBamFile2.md5sum = null
         processedMergedBamFile2.fileOperationStatus = FileOperationStatus.INPROGRESS
-        processedMergedBamFile2.save()
+        assert processedMergedBamFile2.save(flush: true)
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
@@ -297,38 +300,38 @@ class SnvCallingServiceTests extends GroovyTestCase {
     @Test
     void testBamFile1CoverageTooLow() {
         processedMergedBamFile1.coverage = COVERAGE_TOO_LOW
-        processedMergedBamFile1.save()
+        assert processedMergedBamFile1.save(flush: true)
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test
     void testBamFile1NumberOfMergedLanesTooLow() {
         processedMergedBamFile1.numberOfMergedLanes = TOO_LITTLE_LANES
-        processedMergedBamFile1.save()
+        assert processedMergedBamFile1.save(flush: true)
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test
     void testBamFile2CoverageTooLow() {
         processedMergedBamFile2.coverage = COVERAGE_TOO_LOW
-        processedMergedBamFile2.save()
+        assert processedMergedBamFile2.save(flush: true)
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test
     void testBamFile2NumberOfMergedLanesTooLow() {
         processedMergedBamFile2.numberOfMergedLanes = TOO_LITTLE_LANES
-        processedMergedBamFile2.save()
+        assert processedMergedBamFile2.save(flush: true)
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test
     void testBothBamFilesCoverageTooLow() {
         processedMergedBamFile2.coverage = COVERAGE_TOO_LOW
-        processedMergedBamFile2.save()
+        assert processedMergedBamFile2.save(flush: true)
 
         processedMergedBamFile1.coverage = COVERAGE_TOO_LOW
-        processedMergedBamFile1.save()
+        assert processedMergedBamFile1.save(flush: true)
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
@@ -336,10 +339,10 @@ class SnvCallingServiceTests extends GroovyTestCase {
     @Test
     void testBothBamFilesNumberOfMergedLanesTooLow() {
         processedMergedBamFile2.numberOfMergedLanes = TOO_LITTLE_LANES
-        processedMergedBamFile2.save()
+        assert processedMergedBamFile2.save(flush: true)
 
         processedMergedBamFile1.numberOfMergedLanes = TOO_LITTLE_LANES
-        processedMergedBamFile1.save()
+        assert processedMergedBamFile1.save(flush: true)
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
 
@@ -351,7 +354,7 @@ class SnvCallingServiceTests extends GroovyTestCase {
                 processedMergedBamFile1.project, processedMergedBamFile1.seqType, processedMergedBamFile1.sample.sampleType
                 ))
         processingThreshold.project = otherProject
-        processingThreshold.save()
+        assert processingThreshold.save(flush: true)
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
@@ -364,7 +367,7 @@ class SnvCallingServiceTests extends GroovyTestCase {
                 processedMergedBamFile1.project, processedMergedBamFile1.seqType, processedMergedBamFile1.sample.sampleType
                 ))
         processingThreshold.seqType = otherSeqType
-        processingThreshold.save()
+        assert processingThreshold.save(flush: true)
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
@@ -377,7 +380,7 @@ class SnvCallingServiceTests extends GroovyTestCase {
                 processedMergedBamFile1.project, processedMergedBamFile1.seqType, processedMergedBamFile1.sample.sampleType
                 ))
         processingThreshold.sampleType = otherSampleType
-        processingThreshold.save()
+        assert processingThreshold.save(flush: true)
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
@@ -388,7 +391,7 @@ class SnvCallingServiceTests extends GroovyTestCase {
                 processedMergedBamFile1.project, processedMergedBamFile1.seqType, processedMergedBamFile1.sample.sampleType
                 ))
         processingThreshold.coverage = null
-        processingThreshold.save()
+        assert processingThreshold.save(flush: true)
 
         assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
     }
@@ -410,7 +413,7 @@ class SnvCallingServiceTests extends GroovyTestCase {
         assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
 
         processedMergedBamFile1.withdrawn = true
-        processedMergedBamFile1.save()
+        assert processedMergedBamFile1.save(flush: true)
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }

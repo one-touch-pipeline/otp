@@ -15,7 +15,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
 import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type
 
-class ProcessedBamFileServiceTests extends GroovyTestCase {
+class ProcessedBamFileServiceTests {
 
     ProcessedBamFileService processedBamFileService
 

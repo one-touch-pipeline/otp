@@ -140,7 +140,7 @@ class CheckQualityEncodingJobUnitTests {
                         )
         assertNotNull(dataFile.save(flush: true))
 
-        testDirectory = tmpDir.newFolder("/otp-test")
+        testDirectory = tmpDir.newFolder("otp-test")
 
         Realm realm = DomainFactory.createRealmDataManagement(
                 name: project.realmName,

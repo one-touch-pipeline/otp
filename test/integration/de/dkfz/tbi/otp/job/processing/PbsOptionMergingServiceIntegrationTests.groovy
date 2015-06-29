@@ -18,14 +18,6 @@ class PbsOptionMergingServiceIntegrationTests extends AbstractIntegrationTest {
 
     final String QSUB_PARAMETERS = "{-l: {nodes: '1:ppn=6:lsdf', walltime: '50:00:00', mem: '3g'}, -q: convey}"
 
-    @Before
-    void setUp() {
-    }
-
-    @After
-    void tearDown() {
-    }
-
     @Test
     void testMergePbsOptions() {
         Realm realm = createRealm()
@@ -98,13 +90,25 @@ class PbsOptionMergingServiceIntegrationTests extends AbstractIntegrationTest {
         shouldFail(IllegalArgumentException.class, { pbsOptionMergingService.mergePbsOptions(realm, "job_bq") })
 
         processingOption = createProcessingOption("job_dkfz", "{}", Realm.Cluster.DKFZ)
-        assertEquals("-q convey -a b -l nodes=1:ppn=6:lsdf -l mem=3g -l walltime=50:00:00 ", pbsOptionMergingService.mergePbsOptions(realm_dkfz, "job_dkfz", QSUB_PARAMETERS))
+        String expected = pbsOptionMergingService.mergePbsOptions(realm_dkfz, "job_dkfz", QSUB_PARAMETERS)
+
+        assert expected.contains('-q convey')
+        assert expected.contains('-a b')
+        assert expected.contains('-l nodes=1:ppn=6:lsdf -l mem=3g -l walltime=50:00:00')
 
         processingOption = createProcessingOption("job_dkfz", "{-a: c}", Realm.Cluster.DKFZ)
-        assertEquals("-q convey -a c -l nodes=1:ppn=6:lsdf -l mem=3g -l walltime=50:00:00 ", pbsOptionMergingService.mergePbsOptions(realm_dkfz, "job_dkfz", QSUB_PARAMETERS))
+        expected = pbsOptionMergingService.mergePbsOptions(realm_dkfz, "job_dkfz", QSUB_PARAMETERS)
+
+        assert expected.contains('-q convey')
+        assert expected.contains('-a c')
+        assert expected.contains('-l nodes=1:ppn=6:lsdf -l mem=3g -l walltime=50:00:00')
 
         processingOption = createProcessingOption("job_dkfz", "{-q: other_convey}", Realm.Cluster.DKFZ)
-        assertEquals("-q convey -a b -l nodes=1:ppn=6:lsdf -l mem=3g -l walltime=50:00:00 ", pbsOptionMergingService.mergePbsOptions(realm_dkfz, "job_dkfz", QSUB_PARAMETERS))
+        expected = pbsOptionMergingService.mergePbsOptions(realm_dkfz, "job_dkfz", QSUB_PARAMETERS)
+
+        assert expected.contains('-q convey')
+        assert expected.contains('-a b')
+        assert expected.contains('-l nodes=1:ppn=6:lsdf -l mem=3g -l walltime=50:00:00')
 
         realm = createRealm()
         assertEquals("-A FASTTRACK ", pbsOptionMergingService.mergePbsOptions(realm, null, '{"-A": "FASTTRACK"}'))
@@ -118,11 +122,19 @@ class PbsOptionMergingServiceIntegrationTests extends AbstractIntegrationTest {
 
         realm = createRealm("{-a: b}")
         processingOption = createProcessingOption("job_dkfz", '{"-q": "other_convey"}', Realm.Cluster.DKFZ)
-        assertEquals("-q other_convey -a b -A FASTTRACK ", pbsOptionMergingService.mergePbsOptions(realm, "job_dkfz", '{"-A": "FASTTRACK"}'))
+        expected = pbsOptionMergingService.mergePbsOptions(realm, "job_dkfz", '{"-A": "FASTTRACK"}')
+
+        assert expected.contains('-q other_convey')
+        assert expected.contains('-A FASTTRACK')
 
         realm = createRealm("{-a: b}")
         processingOption = createProcessingOption("job_dkfz", '{"-q": "other_convey"}', Realm.Cluster.DKFZ)
-        assertEquals("-q convey -a b -A FASTTRACK -l nodes=1:ppn=6:lsdf -l mem=3g -l walltime=50:00:00 ", pbsOptionMergingService.mergePbsOptions(realm, "job_dkfz", QSUB_PARAMETERS, '{"-A": "FASTTRACK"}'))
+        expected = pbsOptionMergingService.mergePbsOptions(realm, "job_dkfz", QSUB_PARAMETERS, '{"-A": "FASTTRACK"}')
+
+        assert expected.contains('-q convey')
+        assert expected.contains('-a b')
+        assert expected.contains('-A FASTTRACK')
+        assert expected.contains('-l nodes=1:ppn=6:lsdf -l mem=3g -l walltime=50:00:00')
     }
 
     private Realm createRealm(String pbsOptions = "{}", Realm.Cluster cluster = Realm.Cluster.DKFZ) {
@@ -130,7 +142,7 @@ class PbsOptionMergingServiceIntegrationTests extends AbstractIntegrationTest {
             cluster: cluster,
             pbsOptions: pbsOptions,
         ])
-        assertNotNull(realm.save())
+        assertNotNull(realm.save(flush: true))
         return realm
     }
 
@@ -140,7 +152,7 @@ class PbsOptionMergingServiceIntegrationTests extends AbstractIntegrationTest {
         //check, if already a option with this name exist and if yes, delete it
         ProcessingOption oldProcessingOption = processingOptionService.findStrict(name, cluster.toString(), null)
         if (oldProcessingOption!= null) {
-            oldProcessingOption.delete()
+            oldProcessingOption.delete(flush: true)
         }
 
         ProcessingOption processingOption = new ProcessingOption(
@@ -149,7 +161,7 @@ class PbsOptionMergingServiceIntegrationTests extends AbstractIntegrationTest {
                 value: pbsOptions,
                 comment: 'comment'
                 )
-        assertNotNull(processingOption.save())
+        assertNotNull(processingOption.save(flush: true))
         return processingOption
     }
 }

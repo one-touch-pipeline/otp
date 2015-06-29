@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import static de.dkfz.tbi.TestCase.removeMetaClass
 
-class BamFileValidationJobTests extends GroovyTestCase {
+class BamFileValidationJobTests {
 
     @Autowired
     ProcessedBamFileService processedBamFileService

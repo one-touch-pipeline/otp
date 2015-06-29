@@ -1,14 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.TestData
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.junit.Test
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-
-import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
-
-
 
 class ProcessedAlignmentFileServiceTests {
 
@@ -201,7 +200,7 @@ class ProcessedAlignmentFileServiceTests {
                 identifier: 3
             ] + passOfLaterBamFileMap),
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-        ] + laterBamFileMap)
+        ] + laterBamFileMap).save(flush: true)
 
         return processedBamFile
     }
@@ -226,7 +225,7 @@ class ProcessedAlignmentFileServiceTests {
         Map mergingPassMap = map['mergingPassMap']?:[:]
         Map mergingBamFileMap = map['mergingBamFileMap']?:[:]
 
-        SeqTrack seqTrack = SeqTrack.build(seqTrackMap)
+        SeqTrack seqTrack = SeqTrack.build(seqTrackMap).save(flush: true)
 
         ProcessedBamFile processedBamFile = ProcessedBamFile.build([
             alignmentPass: TestData.createAndSaveAlignmentPass([
@@ -236,17 +235,17 @@ class ProcessedAlignmentFileServiceTests {
             ]),
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
             status: AbstractBamFile.State.PROCESSED
-        ] + bamFileMap)
+        ] + bamFileMap).save(flush: true)
 
         MergingSet mergedSet = MergingSet.build([
             mergingWorkPackage: processedBamFile.mergingWorkPackage,
             status: MergingSet.State.PROCESSED
-        ] + mergingSetMap)
+        ] + mergingSetMap).save(flush: true)
 
         MergingSetAssignment mergingSetAssignment = MergingSetAssignment.build([
             mergingSet: mergedSet,
             bamFile: processedBamFile,
-        ] + mergingSetAssignmentMap)
+        ] + mergingSetAssignmentMap).save(flush: true)
 
         ProcessedMergedBamFile mergedBamFile = ProcessedMergedBamFile.build([
             mergingPass: MergingPass.build([
@@ -255,7 +254,7 @@ class ProcessedAlignmentFileServiceTests {
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
             status: AbstractBamFile.State.PROCESSED,
             workPackage: mergedSet.mergingWorkPackage,
-        ] + mergingBamFileMap)
+        ] + mergingBamFileMap).save(flush: true)
 
         return processedBamFile
     }
@@ -277,7 +276,7 @@ class ProcessedAlignmentFileServiceTests {
         ProcessedBamFile processedBamFile = createProcessedBamFileWithLaterProcessedPass(map)
         //ensure, that first hql do not match
         processedBamFile.deletionDate = new Date()
-        processedBamFile.save()
+        processedBamFile.save(flush: true)
 
         ProcessedSaiFile processedSaiFile = ProcessedSaiFile.build([
             alignmentPass: processedBamFile.alignmentPass
@@ -305,11 +304,11 @@ class ProcessedAlignmentFileServiceTests {
         ProcessedBamFile processedBamFile = createProcessedBamFileWhichIsMerged(map)
         //ensure, that first hql do not match
         processedBamFile.deletionDate = new Date()
-        processedBamFile.save()
+        processedBamFile.save(flush: true)
 
         ProcessedSaiFile processedSaiFile = ProcessedSaiFile.build([
             alignmentPass: processedBamFile.alignmentPass
-        ] + processedSaiFileMap)
+        ] + processedSaiFileMap).save(flush: true)
 
         return processedBamFile
     }
@@ -480,6 +479,7 @@ class ProcessedAlignmentFileServiceTests {
         ProcessedBamFile processedBamFile = createProcessedBamFileWhichIsMerged()
         MergingSetAssignment msa = exactlyOneElement(MergingSetAssignment.findAllByBamFile(processedBamFile))
         msa.mergingSet = DomainFactory.createMergingSet(msa.mergingSet.mergingWorkPackage)
+        msa.save(flush: true)
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -491,6 +491,7 @@ class ProcessedAlignmentFileServiceTests {
         ProcessedBamFile processedBamFile = createProcessedBamFileWhichIsMerged()
         MergingSetAssignment msa = exactlyOneElement(MergingSetAssignment.findAllByBamFile(processedBamFile))
         msa.bamFile = DomainFactory.createProcessedMergedBamFile(msa.mergingSet.mergingWorkPackage)
+        msa.save(flush: true)
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -786,6 +787,7 @@ class ProcessedAlignmentFileServiceTests {
         ProcessedBamFile processedBamFile = createProcessedBamFileWithSaiFileWhichIsMerged()
         MergingSetAssignment msa = exactlyOneElement(MergingSetAssignment.findAllByBamFile(processedBamFile))
         msa.mergingSet = DomainFactory.createMergingSet(msa.mergingSet.mergingWorkPackage)
+        msa.save(flush: true)
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -797,6 +799,7 @@ class ProcessedAlignmentFileServiceTests {
         ProcessedBamFile processedBamFile = createProcessedBamFileWithSaiFileWhichIsMerged()
         MergingSetAssignment msa = exactlyOneElement(MergingSetAssignment.findAllByBamFile(processedBamFile))
         msa.bamFile = DomainFactory.createProcessedMergedBamFile(msa.mergingSet.mergingWorkPackage)
+        msa.save(flush: true)
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)

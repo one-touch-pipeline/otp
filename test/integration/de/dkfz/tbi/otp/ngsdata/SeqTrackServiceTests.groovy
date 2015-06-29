@@ -1093,7 +1093,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         ExternallyProcessedMergedBamFile bamFile = ExternallyProcessedMergedBamFile.build(
                 fastqSet: FastqSet.build(seqTracks: [seqTrack]),
                 type: AbstractBamFile.BamType.RMDUP,
-        )
+        ).save(flush: true)
         assert [bamFile] == seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack])
     }
 

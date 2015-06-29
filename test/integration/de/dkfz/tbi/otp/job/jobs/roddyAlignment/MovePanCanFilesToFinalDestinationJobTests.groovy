@@ -28,7 +28,7 @@ import org.junit.rules.TemporaryFolder
 
 /**
  */
-class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
+class MovePanCanFilesToFinalDestinationJobTests {
 
     final static int COUNT_FILES = 2
     final static int COUNT_DIRS = 3

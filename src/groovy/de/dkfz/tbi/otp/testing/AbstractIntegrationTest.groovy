@@ -115,7 +115,7 @@ abstract class AbstractIntegrationTest {
               accountExpired: false,
               accountLocked: false,
               passwordExpired: false)
-      assertNotNull(user.save())
+      assertNotNull(user.save(flush: true))
       assertNotNull(new AclSid(sid: user.username, principal: true).save(flush: true))
       User user2 = new User(username: "user",
               password: springSecurityService.encodePassword("verysecret"),
@@ -125,7 +125,7 @@ abstract class AbstractIntegrationTest {
               accountExpired: false,
               accountLocked: false,
               passwordExpired: false)
-      assertNotNull(user2.save())
+      assertNotNull(user2.save(flush: true))
       assertNotNull(new AclSid(sid: user2.username, principal: true).save(flush: true))
       User operator = new User(username: "operator",
               password: springSecurityService.encodePassword("verysecret"),
@@ -135,7 +135,7 @@ abstract class AbstractIntegrationTest {
               accountExpired: false,
               accountLocked: false,
               passwordExpired: false)
-      assertNotNull(operator.save())
+      assertNotNull(operator.save(flush: true))
       assertNotNull(new AclSid(sid: operator.username, principal: true).save(flush: true))
       User admin = new User(username: "admin",
               password: springSecurityService.encodePassword("1234"),
@@ -145,18 +145,18 @@ abstract class AbstractIntegrationTest {
               accountExpired: false,
               accountLocked: false,
               passwordExpired: false)
-      assertNotNull(admin.save())
+      assertNotNull(admin.save(flush: true))
       assertNotNull(new AclSid(sid: admin.username, principal: true).save(flush: true))
       Role userRole = new Role(authority: "ROLE_USER")
-      assertNotNull(userRole.save())
+      assertNotNull(userRole.save(flush: true))
       UserRole.create(user, userRole, false)
       UserRole.create(user2, userRole, false)
       UserRole.create(admin, userRole, false)
       Role adminRole = new Role(authority: "ROLE_ADMIN")
-      assertNotNull(adminRole.save())
+      assertNotNull(adminRole.save(flush: true))
       UserRole.create(admin, adminRole, false)
       Role operatorRole = new Role(authority: "ROLE_OPERATOR")
-      assertNotNull(operatorRole.save())
+      assertNotNull(operatorRole.save(flush: true))
       UserRole.create(operator, operatorRole, true)
   }
 

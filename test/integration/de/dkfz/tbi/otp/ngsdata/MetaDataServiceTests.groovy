@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import org.springframework.security.acls.domain.BasePermission
+
 import static org.junit.Assert.*
 
 import grails.plugin.springsecurity.acl.AclUtilService

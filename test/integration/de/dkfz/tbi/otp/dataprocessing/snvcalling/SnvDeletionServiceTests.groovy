@@ -103,7 +103,7 @@ class SnvDeletionServiceTests {
             instanceName: 'instance2',
 
         ])
-        assert instance2.save()
+        assert instance2.save(flush: true)
         createAllJobResults(instance2)
         File directoryInstance1 = instance.getSnvInstancePath().getAbsoluteDataManagementPath()
         File directoryInstance2 = instance2.getSnvInstancePath().getAbsoluteDataManagementPath()
@@ -186,7 +186,7 @@ class SnvDeletionServiceTests {
             instanceName: 'test2',
             processingState: SnvProcessingStates.FINISHED,
         ])
-        assert instance2.save()
+        assert instance2.save(flush: true)
         createAllJobResults(instance2)
         return instance2
     }

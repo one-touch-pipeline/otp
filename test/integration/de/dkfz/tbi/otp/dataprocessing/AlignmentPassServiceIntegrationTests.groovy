@@ -84,6 +84,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         assertNull(alignmentPassService.findAlignmentPassForProcessing())
 
         seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
+        seqTrack.save(flush: true)
         assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
     }
 

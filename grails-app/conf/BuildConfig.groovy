@@ -1,8 +1,7 @@
 grails.servlet.version = "2.5" // Change depending on target container compliance (2.5 or 3.0)
-grails.project.source.level = 1.6 // TODO: OTP-263: lets go to java-7...
-grails.project.class.dir = "target/classes"
-grails.project.test.class.dir = "target/test-classes"
-grails.project.test.reports.dir = "target/test-reports"
+
+grails.project.work.dir = 'target'
+
 // As OTP is now productive the application's name should be clean from any version numbering
 grails.project.war.file = "target/otp.war"
 
@@ -32,8 +31,9 @@ grails.project.dependency.resolution = {
         // jdbc
         runtime "postgresql:postgresql:9.1-901.jdbc4"
         // ngstools
-        compile "gson:gson:2.2.2"
-        compile "sam:sam:1.78"
+        compile "com.google.code.gson:gson:2.2.4"
+        //compile "sam:sam:1.78"
+        compile "com.github.broadinstitute:picard:1.134"
         // bedUtils
         compile 'bedUtils:bedUtils:0.6'
         // general dependencies
@@ -45,19 +45,27 @@ grails.project.dependency.resolution = {
 
     plugins {
         // core plugins
-        build ":tomcat:7.0.53"
+        build ":tomcat:7.0.55.2"
+        //compile ":tomcat:8.0.22"
         runtime ":hibernate4:4.3.8.1"
+        compile ':cache:1.1.8'
+        compile ':scaffolding:2.1.2'
+        compile ':asset-pipeline:2.3.9'
+
+        build(":release:3.1.1", ":rest-client-builder:2.1.1") {
+            export = false
+        }
 
         // plugins for the compile step
         compile ":spring-security-core:2.0-RC5"
-        compile ":spring-security-ldap:2.0-RC2"
+        compile "org.grails.plugins:spring-security-ldap:2.0-RC2"
         compile ":spring-security-acl:2.0-RC2"
         compile ":executor:0.3"
-        compile ":console:1.3"
-        compile ":mail:1.0.5"
+        compile ":console:1.5.5"
+        compile ":mail:1.0.7"
         // used by jenkins
-        compile ":codenarc:0.21"
-        compile ":code-coverage:1.2.7"
+        compile ":codenarc:0.23"
+        test ":code-coverage:1.2.7"
 
         // plugins needed at runtime
         runtime ":database-migration:1.4.0"
@@ -69,7 +77,8 @@ grails.project.dependency.resolution = {
         runtime ":resources:1.2.14"
         runtime ":page-resources:0.2.5"
         compile ":lesscss-resources:1.3.3"
-        compile ":build-test-data:2.4.0" //http://grails.org/plugin/build-test-data
+
+        test ":build-test-data:2.4.0" //http://grails.org/plugin/build-test-data
     }
 }
 

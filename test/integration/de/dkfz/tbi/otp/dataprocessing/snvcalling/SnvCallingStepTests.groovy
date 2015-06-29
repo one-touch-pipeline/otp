@@ -10,7 +10,7 @@ import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.TestData
 import de.dkfz.tbi.otp.utils.ExternalScript
 
-class SnvCallingStepTests extends GroovyTestCase {
+class SnvCallingStepTests {
 
     @Test
     void testGetConfigExecuteFlagVariableName() {
@@ -53,13 +53,13 @@ class SnvCallingStepTests extends GroovyTestCase {
         final File testDir = TestCase.uniqueNonExistentPath
 
         ExternalScript externalScript = createExternalScript("SnvCallingStep.${step.name()}", new File(testDir, 'script_v1.sh').path)
-        assert externalScript.save()
+        assert externalScript.save(flush: true)
         assertEquals(externalScript, step.getExternalScript("v1"))
 
         externalScript.deprecatedDate = new Date()
-        assert externalScript.save()
+        assert externalScript.save(flush: true)
         ExternalScript externalScript2 = createExternalScript("SnvCallingStep.${step.name()}", new File(testDir, 'script_v2.sh').path)
-        assert externalScript2.save()
+        assert externalScript2.save(flush: true)
         assertEquals(externalScript2, step.getExternalScript("v1"))
     }
 

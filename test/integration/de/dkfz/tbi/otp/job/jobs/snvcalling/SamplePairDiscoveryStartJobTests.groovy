@@ -33,7 +33,7 @@ class SamplePairDiscoveryStartJobTests extends GroovyScriptAwareTestCase {
 
         final Process process = processes.iterator().next()
         process.finished = true
-        assert process.save()
+        assert process.save(flush: true)
         samplePairDiscoveryStartJob.execute()
         assert TestJobHelper.findProcessesForPlanName(PLAN_NAME).size() == 2
     }

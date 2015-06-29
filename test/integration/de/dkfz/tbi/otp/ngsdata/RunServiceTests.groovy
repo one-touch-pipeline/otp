@@ -102,7 +102,7 @@ class RunServiceTests extends AbstractIntegrationTest {
         SpringSecurityUtils.doWithAuth("operator") {
             assertEquals(run, runService.getRun("2"))
             run.name = run.id + 1
-            assertNotNull(run.save())
+            assertNotNull(run.save(flush: true))
             assertEquals(run, runService.getRun(run.name))
             Run run2 = new Run(name: "foo", seqCenter: SeqCenter.list().first(), seqPlatform: SeqPlatform.list().first())
             assertNotNull(run2.save())

@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.plugin.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.core.userdetails.UserDetails
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 

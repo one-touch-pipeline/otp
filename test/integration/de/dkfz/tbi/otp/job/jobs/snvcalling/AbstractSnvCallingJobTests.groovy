@@ -23,7 +23,7 @@ import static org.junit.Assert.assertEquals
 
 /**
  */
-class AbstractSnvCallingJobTests extends GroovyTestCase {
+class AbstractSnvCallingJobTests {
 
     @Autowired
     ApplicationContext applicationContext
@@ -85,7 +85,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         tmpDir.create()
 
-        testDirectory = tmpDir.newFolder("/otp-test")
+        testDirectory = tmpDir.newFolder("otp-test")
         if(!testDirectory.exists()) {
             assert testDirectory.mkdirs()
         }

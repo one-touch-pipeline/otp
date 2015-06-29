@@ -557,6 +557,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
     /**
      * Test execution of the workflow without any processing options defined
      */
+    @Ignore
     @Test
     void testExecutionWithoutProcessingOptions() {
         /* setup start condition (the fastqc file as ready to be processed):

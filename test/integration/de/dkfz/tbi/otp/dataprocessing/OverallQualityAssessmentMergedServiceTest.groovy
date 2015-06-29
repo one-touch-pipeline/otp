@@ -36,7 +36,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         abstractBamFile.withdrawn = false
         overallQualityAssessmentMerged.referenceGenome.lengthWithoutN = LENGTH_WITHOUT_N
         abstractBamFile.workPackage.bamFileInProjectFolder = abstractBamFile
-
+        overallQualityAssessmentMerged.save(flush: true)
     }
 
 
@@ -46,6 +46,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         [1..3].each {
             FastqcBasicStatistics fastqcBasicStatistics = FastqcBasicStatistics.build(sequenceLength: SEQUENCE_LENGTH)
             fastqcBasicStatistics.fastqcProcessedFile.dataFile.seqTrack = processedBamFile.seqTrack
+            fastqcBasicStatistics.fastqcProcessedFile.dataFile.save(flush: true)
         }
     }
 

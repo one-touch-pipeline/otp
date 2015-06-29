@@ -9,27 +9,29 @@ import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.otp.utils.ProcessHelperService
-import de.dkfz.tbi.otp.utils.ThreadUtils
-import de.dkfz.tbi.otp.utils.WaitingFileUtils
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
 import grails.util.Environment
 import grails.util.Holders
 import groovy.sql.Sql
 import groovy.util.logging.Log4j
-import grails.plugin.springsecurity.SpringSecurityUtils
 import org.hibernate.SessionFactory
 import org.joda.time.Duration
 import org.joda.time.format.PeriodFormat
 import org.junit.After
 import org.junit.Assume
 import org.junit.Before
-import static CollectionUtils.exactlyOneElement
 
 import javax.sql.DataSource
-import java.util.concurrent.*
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
+
+import static CollectionUtils.exactlyOneElement
 
 /**
  * Base class for work-flow integration test cases.
@@ -39,6 +41,7 @@ import java.util.concurrent.*
  *
  */
 @Log4j
+@TestMixin(IntegrationTestMixin)
 abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
     ErrorLogService errorLogService
@@ -125,13 +128,9 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         // manually set up scheduled tasks
         // this is done here so they will be stopped when each test is finished,
         // otherwise there would be problems with the database being deleted
-        scheduler.scheduleWithFixedDelay(new Runnable() {
-            public void run() { Holders.applicationContext.getBean(SchedulerService).pbsMonitorCheck() }
-        }, 0, 10, TimeUnit.SECONDS)
+        scheduler.scheduleWithFixedDelay({ Holders.applicationContext.getBean(SchedulerService).pbsMonitorCheck() } as Runnable, 0, 10, TimeUnit.SECONDS)
 
-        scheduler.scheduleWithFixedDelay(new Runnable() {
-            public void run() { Holders.applicationContext.getBean(SchedulerService).schedule() }
-        }, 0, 100, TimeUnit.MILLISECONDS)
+        scheduler.scheduleWithFixedDelay({ Holders.applicationContext.getBean(SchedulerService).schedule() } as Runnable, 0, 100, TimeUnit.MILLISECONDS)
     }
 
 

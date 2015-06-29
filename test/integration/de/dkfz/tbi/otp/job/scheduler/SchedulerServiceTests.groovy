@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.scheduler
 
+import java.util.concurrent.ExecutionException
+
 import static org.junit.Assert.*
 import de.dkfz.tbi.otp.job.jobs.ResumableSometimesResumableTestJob
 import de.dkfz.tbi.otp.job.jobs.ResumableTestJob
@@ -271,9 +273,9 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertTrue(schedulerService.running.isEmpty())
         schedulerService.schedule()
         // mapping the parameters from the second Job should have failed
-        shouldFail(RuntimeException) {
+        assert shouldFail(ExecutionException, {
             schedulerService.schedule()
-        }
+        }).contains('SchedulerException')
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
         assertFalse(process.finished)
@@ -759,7 +761,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
     }
 
     @Test
-    void tesFailingEndOfProcess() {
+    void testFailingEndOfProcess() {
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
         // create the JobExecutionPlan with one Job Definition
@@ -782,9 +784,9 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         schedulerService.createProcess(job, [])
 
         // schedule
-        shouldFail(SchedulerException) {
+        assert shouldFail(ExecutionException, {
             schedulerService.schedule()
-        }
+        }).contains('SchedulerException')
     }
 
     @Ignore

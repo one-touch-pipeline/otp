@@ -9,6 +9,8 @@ import de.dkfz.tbi.otp.utils.ExternalScript
 import de.dkfz.tbi.otp.utils.HelperUtils
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.web.ControllerUnitTestMixin
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -17,6 +19,7 @@ import static de.dkfz.tbi.TestCase.createEmptyTestDirectory
 
 @TestFor(SnvConfig)
 @Build([ExternalScript, Project, SeqType])
+@TestMixin(ControllerUnitTestMixin)
 class SnvConfigUnitTests {
 
     static final String LEGAL_EXECUTE_FLAGS =

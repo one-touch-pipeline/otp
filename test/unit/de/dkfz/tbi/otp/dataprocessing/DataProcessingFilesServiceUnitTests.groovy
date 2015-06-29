@@ -111,7 +111,7 @@ class DataProcessingFilesServiceUnitTests {
 
     void createTestDirectory() {
         tmpDir.create()
-        dir = tmpDir.newFolder(realm.processingRootPath)
+        dir = tmpDir.newFolder(realm.processingRootPath.split('/'))
         if (dir.exists()) {
             dir.deleteDir()
         }
