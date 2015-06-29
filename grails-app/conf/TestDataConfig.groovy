@@ -33,6 +33,7 @@ testDataConfig {
         }
         'de.dkfz.tbi.otp.ngsdata.Project' {
             name = {'projectName_' + (counter++)}
+            dirName = {'projectDir_' + (counter++)}
             realmName = DomainFactory.DEFAULT_REALM_NAME
 
         }

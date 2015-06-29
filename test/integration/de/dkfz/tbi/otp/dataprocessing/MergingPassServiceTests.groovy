@@ -154,8 +154,8 @@ class MergingPassServiceTests {
 
     private MergingSet createMergingSet(String uniqueId) {
         Project project = TestData.createProject(
-                        name: "name_" + uniqueId,
-                        dirName: "dirName",
+                        name: "project_" + uniqueId,
+                        dirName: "project_" + uniqueId,
                         realmName: 'DKFZ',
                         )
         assertNotNull(project.save([flush: true, failOnError: true]))

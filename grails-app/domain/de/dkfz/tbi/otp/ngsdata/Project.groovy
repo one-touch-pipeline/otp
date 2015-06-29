@@ -24,7 +24,7 @@ class Project {
 
     static constraints = {
         name(blank: false, unique: true)
-        dirName(blank: false)
+        dirName(blank: false, unique: true)
         realmName(blank: false)
         projectGroup(nullable: true)
         emailAddressOfContactPerson (nullable: true)
