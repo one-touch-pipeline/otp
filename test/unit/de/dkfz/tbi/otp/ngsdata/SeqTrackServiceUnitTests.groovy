@@ -146,6 +146,17 @@ class SeqTrackServiceUnitTests {
     }
 
     @Test
+    void testDetermineAndStoreIfFastqFilesHaveToBeLinked_HasToBeLinked_UsingSecondPath() {
+        withTestMidtermStorageMountPoint {
+            SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked(1)
+
+            seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
+
+            assert seqTrack.linkedExternally == true
+        }
+    }
+
+    @Test
     void testDetermineAndStoreIfFastqFilesHaveToBeLinked_WillBeAlignedIsFalse() {
         withTestMidtermStorageMountPoint {
             SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
@@ -220,6 +231,14 @@ class SeqTrackServiceUnitTests {
     }
 
     @Test
+    void testAreFilesLocatedOnMidTermStorage_DataFilesOnMidterm_SecondStorage() {
+        withTestMidtermStorageMountPoint {
+            SeqTrack seqTrack = createDataForAreFilesLocatedOnMidTermStorage(1)
+            assert true == seqTrackService.areFilesLocatedOnMidTermStorage(seqTrack)
+        }
+    }
+
+    @Test
     void testAreFilesLocatedOnMidTermStorage_DataFilesNotOnMidterm() {
         SeqTrack seqTrack
         withTestMidtermStorageMountPoint {
@@ -247,9 +266,9 @@ class SeqTrackServiceUnitTests {
     }
 
 
-    private SeqTrack createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked() {
+    private SeqTrack createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked(int pos = 0) {
         Run run = Run.build(seqCenter: SeqCenter.build(name: "DKFZ"))
-        RunSegment runSegment = RunSegment.build(dataPath: LsdfFilesService.midtermStorageMountPoint, run: run)
+        RunSegment runSegment = RunSegment.build(dataPath: LsdfFilesService.midtermStorageMountPoint[pos], run: run)
         SeqTrack seqTrack = SeqTrack.build(
                 run: run,
                 sample: Sample.build(
@@ -264,8 +283,8 @@ class SeqTrackServiceUnitTests {
         return seqTrack
     }
 
-    private SeqTrack createDataForAreFilesLocatedOnMidTermStorage() {
-        RunSegment runSegment = RunSegment.build(dataPath: LsdfFilesService.midtermStorageMountPoint)
+    private SeqTrack createDataForAreFilesLocatedOnMidTermStorage(int pos = 0) {
+        RunSegment runSegment = RunSegment.build(dataPath: LsdfFilesService.midtermStorageMountPoint[pos])
         SeqTrack seqTrack = SeqTrack.build()
         DataFile.build(seqTrack: seqTrack, runSegment: runSegment)
         DataFile.build(seqTrack: seqTrack, runSegment: runSegment)
@@ -275,7 +294,7 @@ class SeqTrackServiceUnitTests {
     private withTestMidtermStorageMountPoint(Closure code) {
         def originalMidtermStorageMountPoint = LsdfFilesService.midtermStorageMountPoint
         try {
-            LsdfFilesService.midtermStorageMountPoint = TestCase.getUniqueNonExistentPath()
+            LsdfFilesService.midtermStorageMountPoint = [1, 2].collect{TestCase.getUniqueNonExistentPath().path}.asImmutable()
             code()
         } finally {
             LsdfFilesService.midtermStorageMountPoint = originalMidtermStorageMountPoint

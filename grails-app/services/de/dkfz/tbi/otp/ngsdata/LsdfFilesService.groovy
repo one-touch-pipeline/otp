@@ -16,7 +16,10 @@ class LsdfFilesService {
     ExecutionService executionService
     CreateClusterScriptService createClusterScriptService
 
-    static String midtermStorageMountPoint = "/lsdf/midterm/"
+    static List<String> midtermStorageMountPoint = [
+            "STORAGE_ROOT/midterm/",
+            "STORAGE_ROOT/dmg/seq_center_inbox/dkfz/",
+            ].asImmutable()
 
     /**
      * Similar to {@link Paths.get(String, String...)} from Java 7.
