@@ -1,15 +1,16 @@
 package de.dkfz.tbi.otp.ngsdata
 
 class SeqCenter {
-	
-	String name
-	String dirName
 
-	static constraints = {
-		name(blank: false, unique: true)
-	}
+    String name
+    String dirName
 
-	String toString() {
-		name
-	}
+    static constraints = {
+        name(blank: false, unique: true)
+        dirName(blank: false, unique: true)
+    }
+
+    String toString() {
+        name
+    }
 }
