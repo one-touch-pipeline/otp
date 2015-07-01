@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.ngsdata.DataFile
@@ -9,7 +10,6 @@ import de.dkfz.tbi.otp.ngsdata.MetaDataService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import org.springframework.beans.factory.annotation.Autowired
 
 
@@ -40,8 +40,9 @@ class ExecutePanCanJob extends AbstractRoddyJob {
                 dataFiles.add(file.path)
             }
         }
+        dataFiles.sort()
 
-        dataFiles.sort().collate(2).each {
+        dataFiles.collate(2).each {
             MetaDataService.ensurePairedSequenceFileNameConsistency(it.first(), it.last())
         }
 
@@ -56,10 +57,7 @@ class ExecutePanCanJob extends AbstractRoddyJob {
         String analysisIDinConfigFile = executeRoddyCommandService.getAnalysisIDinConfigFile(roddyBamFile)
         String nameInConfigFile = "${roddyBamFile.workflow.name}_${roddyBamFile.config.externalScriptVersion}"
 
-        if (baseBamFile) {
-            LsdfFilesService.ensureFileIsReadableAndNotEmpty(baseBamFile.finalBamFile)
-            assert baseBamFile.fileSize == baseBamFile.finalBamFile.length()
-        }
+        ensureCorrectBaseBamFileIsOnFileSystem(baseBamFile)
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(roddyBamFile.config.configFilePath))
         LsdfFilesService.ensureDirIsReadableAndNotEmpty(new File(chromosomeSizeFiles))
 
@@ -80,6 +78,12 @@ class ExecutePanCanJob extends AbstractRoddyJob {
 
         RoddyBamFile roddyBamFile = roddyResult as RoddyBamFile
 
+        try {
+            ensureCorrectBaseBamFileIsOnFileSystem(roddyBamFile.baseBamFile)
+        } catch (AssertionError e) {
+            throw new RuntimeException('The input BAM file seems to have changed on the file system while this job was processing it.', e)
+        }
+
         ['Bam', 'Bai', 'Md5sum'].each {
             LsdfFilesService.ensureFileIsReadableAndNotEmpty(roddyBamFile."tmpRoddy${it}File")
         }
@@ -92,7 +96,15 @@ class ExecutePanCanJob extends AbstractRoddyJob {
             LsdfFilesService.ensureDirIsReadableAndNotEmpty(singleLaneQcDir)
         }
 
-        roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING
+        assert [FileOperationStatus.DECLARED, FileOperationStatus.NEEDS_PROCESSING].contains(roddyBamFile.fileOperationStatus)
+        roddyBamFile.fileOperationStatus = FileOperationStatus.NEEDS_PROCESSING
         assert roddyBamFile.save(flush: true)
+    }
+
+    void ensureCorrectBaseBamFileIsOnFileSystem(RoddyBamFile baseBamFile) {
+        if (baseBamFile) {
+            LsdfFilesService.ensureFileIsReadableAndNotEmpty(baseBamFile.finalBamFile)
+            assert baseBamFile.fileSize == baseBamFile.finalBamFile.length()
+        }
     }
 }
