@@ -18,7 +18,7 @@ class LsdfFilesService {
 
     static List<String> midtermStorageMountPoint = [
             "STORAGE_ROOT/midterm/",
-            "STORAGE_ROOT/dmg/seq_center_inbox/dkfz/",
+            "STORAGE_ROOTSEQUENCING_INBOX/",
             ].asImmutable()
 
     /**
