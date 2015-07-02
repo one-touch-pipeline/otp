@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.ngsdata.ConfigService
@@ -40,7 +41,8 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
         if (!withdrawn) {
             RoddyBamFile.withTransaction {
                 assert roddyBamFile.isMostRecentBamFile(): "The BamFile ${roddyBamFile} is not the most recent one. This must not happen!"
-                roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.INPROGRESS
+                assert [FileOperationStatus.NEEDS_PROCESSING, FileOperationStatus.INPROGRESS].contains(roddyBamFile.fileOperationStatus)
+                roddyBamFile.fileOperationStatus = FileOperationStatus.INPROGRESS
                 assert roddyBamFile.save(flush: true)
             }
             deletePreviousMergedBamResultFiles(roddyBamFile, realm)
@@ -50,10 +52,10 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
         }
 
         if (!withdrawn) {
+            File md5sumFile = roddyBamFile.finalMd5sumFile
+            assert WaitingFileUtils.confirmExists(md5sumFile): "The md5sum file of ${roddyBamFile} does not exist"
             RoddyBamFile.withTransaction {
-                File md5sumFile = roddyBamFile.finalMd5sumFile
-                assert WaitingFileUtils.confirmExists(md5sumFile): "The md5sum file of ${roddyBamFile} does not exist"
-                roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
+                roddyBamFile.fileOperationStatus = FileOperationStatus.PROCESSED
                 roddyBamFile.fileSize = roddyBamFile.finalBamFile.size()
                 roddyBamFile.md5sum = md5sumFile.text.split(" ")[0]
                 assert roddyBamFile.save(flush: true)
