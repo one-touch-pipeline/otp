@@ -190,7 +190,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
     @Test
     void testExecuteCommandConnectionFailed() {
         TestCase.removeMetaClass(ExecutionService, executionService)
-        realm.host = "GROUP"
+        realm.host = "test.host.invalid"
         assertNotNull(realm.save())
         // Send command to pbs
         shouldFail(ProcessingException) {
