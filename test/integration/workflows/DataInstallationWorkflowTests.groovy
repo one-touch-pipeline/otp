@@ -296,7 +296,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
                 lsdfFilesService.getFileViewByPidPath(it)
             ]
         }.flatten().each {
-            assert WaitingFileUtils.confirmExists(new File(it))
+            assert WaitingFileUtils.waitUntilExists(new File(it))
         }
     }
 

@@ -16,11 +16,11 @@ class MoveFileUtilsService {
 
         String permissions = readableForAll ? "644" : "640"
 
-        if (WaitingFileUtils.confirmExists(source)) {
+        if (WaitingFileUtils.waitUntilExists(source)) {
             executionService.executeCommand(realm, "mkdir -m 2750 -p ${target.parent}; mv -f ${source} ${target}; chmod ${permissions} ${target}")
         }
-        assert WaitingFileUtils.confirmExists(target)
-        assert WaitingFileUtils.confirmDoesNotExist(source)
+        assert WaitingFileUtils.waitUntilExists(target)
+        assert WaitingFileUtils.waitUntilDoesNotExist(source)
     }
 
 
@@ -29,7 +29,7 @@ class MoveFileUtilsService {
         assert sourceDir : "Input sourceDir must not be null"
         assert targetDir : "Input targetDir must not be null"
 
-        assert WaitingFileUtils.confirmExists(sourceDir) : "The source directory ${sourceDir} does not exist."
+        assert WaitingFileUtils.waitUntilExists(sourceDir) : "The source directory ${sourceDir} does not exist."
         Set<String> sourceDirContent = sourceDir.list() as Set
         if (sourceDirContent.size() > 0) {
             executionService.executeCommand(realm, "mkdir -m 2750 -p ${targetDir}; mv -f ${sourceDir}/* ${targetDir}")

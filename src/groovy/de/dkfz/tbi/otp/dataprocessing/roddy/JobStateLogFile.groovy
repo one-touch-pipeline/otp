@@ -44,7 +44,7 @@ public class JobStateLogFile {
     }
 
     private validateFile() {
-        if (!WaitingFileUtils.confirmExists(file)) {
+        if (!WaitingFileUtils.waitUntilExists(file)) {
             throw new RuntimeException("${JOB_STATE_LOG_FILE_NAME} is not found in ${file.parentFile}")
         }
         if (!file.canRead()) {

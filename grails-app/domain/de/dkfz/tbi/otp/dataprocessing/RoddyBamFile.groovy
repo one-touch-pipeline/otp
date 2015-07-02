@@ -159,7 +159,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
     // exec_150625_102449388_SOMEUSER_WGS
     // exec_yyMMdd_HHmmssSSS_user_analysis
     File getLatestTmpRoddyExecutionDirectory () {
-        if (!WaitingFileUtils.confirmExists(this.tmpRoddyExecutionStoreDirectory)) {
+        if (!WaitingFileUtils.waitUntilExists(this.tmpRoddyExecutionStoreDirectory)) {
             throw new RuntimeException("can not find latest RoddyExecutionDirectory because RoddyExecutionStoreDirectory ${this.tmpRoddyExecutionStoreDirectory} does not exist")
         }
 

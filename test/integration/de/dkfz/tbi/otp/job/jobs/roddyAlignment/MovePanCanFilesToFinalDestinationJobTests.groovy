@@ -274,7 +274,7 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
         RoddyBamFile roddyBamFile2 = createBamFileSetupAndReturnBamFileToWorkOn()
         File qaPath = roddyBamFile.finalMergedQADirectory
         assert qaPath.mkdirs()
-        assert WaitingFileUtils.confirmExists(qaPath)
+        assert WaitingFileUtils.waitUntilExists(qaPath)
 
         movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String cmd ->
             assert cmd == "rm -rf ${roddyBamFile.finalBamFile} ${roddyBamFile.finalBaiFile} ${roddyBamFile.finalMd5sumFile} ${roddyBamFile.finalMergedQADirectory}" : WRONG_COMMAND
@@ -295,7 +295,7 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
         assert roddyBaiFilePath.createNewFile()
         assert roddyMd5SumFilePath.createNewFile()
         assert qaPath.mkdirs()
-        assert WaitingFileUtils.confirmExists(qaPath)
+        assert WaitingFileUtils.waitUntilExists(qaPath)
 
         movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String cmd ->
             assert cmd == "rm -rf ${roddyBamFile.finalBamFile} ${roddyBamFile.finalBaiFile} ${roddyBamFile.finalMd5sumFile} ${roddyBamFile.finalMergedQADirectory}" : WRONG_COMMAND

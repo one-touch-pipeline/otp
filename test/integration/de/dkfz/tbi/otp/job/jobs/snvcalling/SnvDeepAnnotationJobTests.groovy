@@ -349,7 +349,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
             resultFile.delete()
         }
 
-        WaitingFileUtils.metaClass.static.confirmDoesNotExist = { File file -> return true }
+        WaitingFileUtils.metaClass.static.waitUntilDoesNotExist = { File file -> return true }
 
         executionService.metaClass.executeCommand = { Realm realm, String command ->
             assert command == "rm ${checkpointFile.path}"
@@ -406,7 +406,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
             resultFile.delete()
         }
 
-        WaitingFileUtils.metaClass.static.confirmDoesNotExist = { File file -> return true }
+        WaitingFileUtils.metaClass.static.waitUntilDoesNotExist = { File file -> return true }
 
         shouldFail(RuntimeException, { snvDeepAnnotationJob.validate(snvCallingInstance1) })
     }

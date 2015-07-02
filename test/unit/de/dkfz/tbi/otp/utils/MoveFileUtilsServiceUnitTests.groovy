@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.utils
 
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.Realm
-import groovy.io.FileType
+
 import org.junit.After
 import org.junit.Before
 import grails.buildtestdata.mixin.Build
@@ -104,7 +104,7 @@ class MoveFileUtilsServiceUnitTests {
             executeCommandLocally(cmd)
         }
         moveFileUtilsService.moveFileIfExists(realm, sourceFile, targetFile)
-        assert WaitingFileUtils.confirmExists(targetFile)
+        assert WaitingFileUtils.waitUntilExists(targetFile)
     }
 
     void testMoveFileIfExists_OlderTargetExistsAlready_OverwriteSuccessful() {
@@ -122,7 +122,7 @@ class MoveFileUtilsServiceUnitTests {
 
         assert targetFile_allreadyExists.text == TARGET_FILE
         moveFileUtilsService.moveFileIfExists(realm, sourceFile, targetFile_allreadyExists)
-        assert WaitingFileUtils.confirmExists(targetFile_allreadyExists)
+        assert WaitingFileUtils.waitUntilExists(targetFile_allreadyExists)
         assert targetFile_allreadyExists.text == SOURCE_FILE
     }
 
@@ -136,7 +136,7 @@ class MoveFileUtilsServiceUnitTests {
             executeCommandLocally(cmd)
         }
         moveFileUtilsService.moveFileIfExists(realm, sourceFile, targetFile, true)
-        assert WaitingFileUtils.confirmExists(targetFile)
+        assert WaitingFileUtils.waitUntilExists(targetFile)
     }
 
 
@@ -248,7 +248,7 @@ class MoveFileUtilsServiceUnitTests {
         assert targetFile_ExistsAlready.text == TARGET_FILE
         moveFileUtilsService.moveDirContentIfExists(realm, sourceFolder, targetFolder)
         assert targetFile_ExistsAlready.text == SOURCE_FILE
-        WaitingFileUtils.confirmExists(targetFile)
+        assert WaitingFileUtils.waitUntilExists(targetFile)
     }
 
 

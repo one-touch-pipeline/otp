@@ -25,11 +25,19 @@ class WaitingFileUtils {
         }
     }
 
-    public static boolean confirmExists(File file, long timeoutMillis = defaultTimeoutMillis) {
+    /**
+     * Waits until the specified file system object exists or the specified number of milliseconds elapsed.
+     * @return true if the file system object exists; false if timed out.
+     */
+    public static boolean waitUntilExists(File file, long timeoutMillis = defaultTimeoutMillis) {
         return ThreadUtils.waitFor({ file.list() || file.canRead(); file.exists() }, timeoutMillis, 50)
     }
 
-    public static boolean confirmDoesNotExist(File file, long timeoutMillis = defaultTimeoutMillis) {
+    /**
+     * Waits until the specified file system object does not exist or the specified number of milliseconds elapsed.
+     * @return true if the file system object does not exist; false if timed out.
+     */
+    public static boolean waitUntilDoesNotExist(File file, long timeoutMillis = defaultTimeoutMillis) {
         return ThreadUtils.waitFor({ file.list() || file.canRead(); !file.exists() }, timeoutMillis, 50)
     }
 }

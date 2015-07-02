@@ -280,7 +280,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
         }
         executionService.metaClass.executeCommand = { Realm realm, String command -> }
 
-        WaitingFileUtils.metaClass.static.confirmDoesNotExist = { File file -> return true }
+        WaitingFileUtils.metaClass.static.waitUntilDoesNotExist = { File file -> return true }
 
         try {
             assertNull(snvAnnotationJob.validate(snvCallingInstance2))

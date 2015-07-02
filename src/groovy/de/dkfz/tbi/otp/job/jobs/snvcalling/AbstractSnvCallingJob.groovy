@@ -62,7 +62,7 @@ abstract class AbstractSnvCallingJob extends AbstractOtpJob {
 
 
     void deleteResultFileIfExists(final File resultFile, Realm realm) {
-        if (confirmExists(resultFile)) {
+        if (waitUntilExists(resultFile)) {
             log.info "Result file ${resultFile} already exists. Presumably from an earlier, failed execution of this job. Will delete it."
             executionService.executeCommand(realm, "rm ${resultFile.path}")
         }
@@ -80,13 +80,13 @@ abstract class AbstractSnvCallingJob extends AbstractOtpJob {
         final File configFileInStagingDirectory = instance.configFilePath.absoluteStagingPath
         final File configFileInProjectDirectory = instance.configFilePath.absoluteDataManagementPath
 
-        if (confirmExists(configFileInProjectDirectory)) {
+        if (waitUntilExists(configFileInProjectDirectory)) {
             assertDataManagementConfigContentsOk(instance)
             return configFileInProjectDirectory
         }
-        if (confirmDoesNotExist(configFileInStagingDirectory)) {
+        if (waitUntilDoesNotExist(configFileInStagingDirectory)) {
             lsdfFilesService.createDirectory(configFileInStagingDirectory.parentFile, instance.project)
-            assert confirmExists(configFileInStagingDirectory.parentFile, extendedWaitingTime)
+            assert waitUntilExists(configFileInStagingDirectory.parentFile, extendedWaitingTime)
             instance.config.writeToFile(configFileInStagingDirectory)
         }
         lsdfFilesService.ensureFileIsReadableAndNotEmpty(configFileInStagingDirectory, extendedWaitingTime)
@@ -101,7 +101,7 @@ rm ${configFileInStagingDirectory}
 """
         executionService.executeCommand(realm, command)
 
-        assert confirmExists(configFileInProjectDirectory, extendedWaitingTime)
+        assert waitUntilExists(configFileInProjectDirectory, extendedWaitingTime)
         assertDataManagementConfigContentsOk(instance)
 
         return configFileInProjectDirectory
@@ -207,9 +207,9 @@ rm ${configFileInStagingDirectory}
 
     protected void confirmCheckPointFileExistsAndDeleteIt(SnvCallingInstance instance, SnvCallingStep step) {
         final File checkpointFile = step.getCheckpointFilePath(instance).absoluteDataManagementPath
-        assert confirmExists(checkpointFile, extendedWaitingTime)
+        assert waitUntilExists(checkpointFile, extendedWaitingTime)
         deleteResultFileIfExists(checkpointFile, configService.getRealmDataProcessing(instance.project))
-        assert confirmDoesNotExist(checkpointFile)
+        assert waitUntilDoesNotExist(checkpointFile)
     }
 
     /**

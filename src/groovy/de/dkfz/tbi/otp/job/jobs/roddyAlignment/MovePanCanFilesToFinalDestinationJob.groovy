@@ -53,7 +53,7 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
 
         if (!withdrawn) {
             File md5sumFile = roddyBamFile.finalMd5sumFile
-            assert WaitingFileUtils.confirmExists(md5sumFile): "The md5sum file of ${roddyBamFile} does not exist"
+            assert WaitingFileUtils.waitUntilExists(md5sumFile): "The md5sum file of ${roddyBamFile} does not exist"
             RoddyBamFile.withTransaction {
                 roddyBamFile.fileOperationStatus = FileOperationStatus.PROCESSED
                 roddyBamFile.fileSize = roddyBamFile.finalBamFile.size()
@@ -82,10 +82,10 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
 
             executionService.executeCommand(realm, "rm -rf ${bamFilePath} ${baiFilePath} ${md5sumFilePath} ${mergedQADirectory}")
 
-            assert WaitingFileUtils.confirmDoesNotExist(bamFilePath)
-            assert WaitingFileUtils.confirmDoesNotExist(baiFilePath)
-            assert WaitingFileUtils.confirmDoesNotExist(md5sumFilePath)
-            assert WaitingFileUtils.confirmDoesNotExist(mergedQADirectory)
+            assert WaitingFileUtils.waitUntilDoesNotExist(bamFilePath)
+            assert WaitingFileUtils.waitUntilDoesNotExist(baiFilePath)
+            assert WaitingFileUtils.waitUntilDoesNotExist(md5sumFilePath)
+            assert WaitingFileUtils.waitUntilDoesNotExist(mergedQADirectory)
         }
     }
 
@@ -129,7 +129,7 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
 
         File tempWorkingDir = roddyBamFile.tmpRoddyDirectory
         executionService.executeCommand(realm, "rm -rf ${tempWorkingDir}")
-        assert WaitingFileUtils.confirmDoesNotExist(tempWorkingDir)
+        assert WaitingFileUtils.waitUntilDoesNotExist(tempWorkingDir)
     }
 
 }

@@ -219,7 +219,7 @@ class LsdfFilesService {
 
     static boolean isFileReadableAndNotEmpty(final File file) {
         assert file.isAbsolute()
-        return confirmExists(file) && file.isFile() && file.canRead() && file.length() > 0L
+        return waitUntilExists(file) && file.isFile() && file.canRead() && file.length() > 0L
     }
 
     private static void checkFileIsReadableAndNotEmpty(final File file, Closure existenceCheck) {
@@ -231,15 +231,15 @@ class LsdfFilesService {
     }
 
     static void ensureFileIsReadableAndNotEmpty(final File file, int waitingTime) {
-        checkFileIsReadableAndNotEmpty(file) { assert confirmExists(file, waitingTime) }
+        checkFileIsReadableAndNotEmpty(file) { assert waitUntilExists(file, waitingTime) }
     }
 
     static void ensureFileIsReadableAndNotEmpty(final File file) {
-        checkFileIsReadableAndNotEmpty(file) { assert confirmExists(file) }
+        checkFileIsReadableAndNotEmpty(file) { assert waitUntilExists(file) }
     }
 
     static void ensureDirIsReadableAndNotEmpty(final File dir) {
-        assert confirmExists(dir)
+        assert waitUntilExists(dir)
     }
 
 
@@ -268,7 +268,7 @@ class LsdfFilesService {
         assert file.isAbsolute() && file.exists() && file.isFile()
         try {
             assert executionService.executeCommand(realm, "rm '${file}'; echo \$?") ==~ /^0\s*$/
-            assert confirmDoesNotExist(file)
+            assert waitUntilDoesNotExist(file)
         } catch (final Throwable e) {
             throw new RuntimeException("Could not delete file ${file}.", e)
         }
@@ -283,7 +283,7 @@ class LsdfFilesService {
         assert directory.isAbsolute() && directory.exists() && directory.isDirectory()
         try {
             assert executionService.executeCommand(realm, "rmdir '${directory}'; echo \$?") ==~ /^0\s*$/
-            assert confirmDoesNotExist(directory)
+            assert waitUntilDoesNotExist(directory)
         } catch (final Throwable e) {
             throw new RuntimeException("Could not delete directory ${directory}.", e)
         }
@@ -338,7 +338,7 @@ class LsdfFilesService {
     }
 
     public deleteDirectoryRecursive(Realm realm, File dir) {
-        assert confirmExists(dir)
+        assert waitUntilExists(dir)
         String cmd = createClusterScriptService.removeDirs([dir], CreateClusterScriptService.RemoveOption.RECURSIVE)
         int exitCode = executionService.executeCommand(realm, cmd).toInteger()
         if(exitCode != 0) {

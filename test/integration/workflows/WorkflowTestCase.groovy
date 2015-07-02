@@ -189,7 +189,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         String mkDirs = createClusterScriptService.makeDirs(files, mode)
         assert executionService.executeCommand(realm, mkDirs).toInteger() == 0
         files.each {
-            WaitingFileUtils.confirmExists(it)
+            assert WaitingFileUtils.waitUntilExists(it)
         }
     }
 
