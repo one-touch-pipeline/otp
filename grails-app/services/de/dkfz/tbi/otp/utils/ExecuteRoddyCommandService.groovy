@@ -52,9 +52,7 @@ class ExecuteRoddyCommandService {
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(applicationIniPath)
 
 
-        RoddyWorkflowConfig config = CollectionUtils.exactlyOneElement(
-                RoddyWorkflowConfig.findAllByProjectAndWorkflowAndObsoleteDate(roddyResult.project, roddyResult.workflow, null)
-        )
+        RoddyWorkflowConfig config = roddyResult.config
         String pipelineVersion = config.externalScriptVersion
         File configFile = new File(config.configFilePath)
 
@@ -124,6 +122,6 @@ class ExecuteRoddyCommandService {
         assert realm : "Realm must not be null"
         assert file : "File must not be null"
         executionService.executeCommand(realm, "mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 ${file};")
-        assert file.exists() : "Creation of '${file}' failed"
+        assert WaitingFileUtils.waitUntilExists(file) : "Creation of '${file}' failed"
     }
 }

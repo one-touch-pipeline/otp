@@ -17,9 +17,11 @@ public interface RoddyResult {
 
     public Individual getIndividual()
 
+    public SeqType getSeqType()
+
     public Workflow getWorkflow()
 
-    public SeqType getSeqType()
+    public RoddyWorkflowConfig getConfig()
 
     public File getTmpRoddyDirectory()
 
