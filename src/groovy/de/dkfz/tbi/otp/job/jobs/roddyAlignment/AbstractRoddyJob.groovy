@@ -19,7 +19,7 @@ import java.util.regex.Pattern
 
 /**
  * class for roddy jobs that handle failed or not finished cluster jobs, analyse them and provide
- * information about their failure for {@AbstractMaybeSubmitWaitValidateJob}
+ * information about their failure for {@link AbstractMaybeSubmitWaitValidateJob}
  */
 abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
 
@@ -97,12 +97,8 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
         finishedClusterJobs.each {
             if (!jobStateLogFile.containsPbsId(it.clusterJobId)) {
                 failedOrNotFinishedClusterJobs.put(it, "JobStateLogFile contains no information for ${it}")
-            } else {
-                if (jobStateLogFile.isClusterJobInProgress(it.clusterJobId)) {
-                    failedOrNotFinishedClusterJobs.put(it, "${it} is not finished.")
-                } else if (!jobStateLogFile.isClusterJobFinishedSuccessfully(it.clusterJobId)) {
-                    failedOrNotFinishedClusterJobs.put(it, "${it} failed processing. StatusCode: ${jobStateLogFile.getPropertyFromLatestLogFileEntry(it.clusterJobId, "statusCode")}")
-                }
+            } else if (!jobStateLogFile.isClusterJobFinishedSuccessfully(it.clusterJobId)) {
+                failedOrNotFinishedClusterJobs.put(it, "${it} has not finished successfully. Status code: ${jobStateLogFile.getPropertyFromLatestLogFileEntry(it.clusterJobId, "statusCode")}")
             }
         }
         return failedOrNotFinishedClusterJobs

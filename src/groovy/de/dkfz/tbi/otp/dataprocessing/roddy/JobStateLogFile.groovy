@@ -88,10 +88,6 @@ public class JobStateLogFile {
         return logFileEntries.containsKey(pbsId)
     }
 
-    public boolean isClusterJobInProgress(String pbsId) {
-        return logFileEntries.get(pbsId)?.size() == 1
-    }
-
     public boolean isClusterJobFinishedSuccessfully(String pbsId) {
         return getPropertyFromLatestLogFileEntry(pbsId, "statusCode") == "0"
     }

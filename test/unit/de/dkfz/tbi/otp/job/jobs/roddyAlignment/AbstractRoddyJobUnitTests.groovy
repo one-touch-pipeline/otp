@@ -65,9 +65,9 @@ class AbstractRoddyJobUnitTests {
     @Test
     void testFailedOrNotFinishedClusterJobs_WhenJobStateLogFileIsCorrect_ShouldWork() {
         CreateJobStateLogFileHelper.withJobStateLogFile(tmpDir, [
-                CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: clusterJobIdentifier.clusterJobId])
+                CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_STARTED])
         ]) {
-            assert [(clusterJobIdentifier): "${clusterJobIdentifier} is not finished."] ==
+            assert [(clusterJobIdentifier): "${clusterJobIdentifier} has not finished successfully. Status code: ${STATUS_CODE_STARTED}"] ==
                     abstractRoddyJob.failedOrNotFinishedClusterJobs([clusterJobIdentifier])
         }
     }
@@ -108,8 +108,8 @@ class AbstractRoddyJobUnitTests {
                     identifierD,
             ]
             assert [
-                    (identifierB): "${identifierB} failed processing. StatusCode: 1",
-                    (identifierC): "${identifierC} is not finished.",
+                    (identifierB): "${identifierB} has not finished successfully. Status code: ${STATUS_CODE_FAILED}",
+                    (identifierC): "${identifierC} has not finished successfully. Status code: ${STATUS_CODE_STARTED}",
                     (identifierD): "JobStateLogFile contains no information for ${identifierD}",
             ] == abstractRoddyJob.failedOrNotFinishedClusterJobs(finishedClusterJobs)
         }, "exec_150625_102449388_SOMEUSER_WGS")
@@ -126,10 +126,10 @@ class AbstractRoddyJobUnitTests {
     @Test
     void testAnalyseFinishedClusterJobs_WhenClusterJobIsInProgress_ShouldReturnSpecificErrorMsg() {
         JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tmpDir.root, [
-                CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: clusterJobIdentifier.clusterJobId])
+                CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_STARTED])
         ])
 
-        assert [(clusterJobIdentifier): "${clusterJobIdentifier} is not finished."] ==
+        assert [(clusterJobIdentifier): "${clusterJobIdentifier} has not finished successfully. Status code: ${STATUS_CODE_STARTED}"] ==
                 abstractRoddyJob.analyseFinishedClusterJobs([clusterJobIdentifier], jobStateLogFile)
     }
 
@@ -140,7 +140,7 @@ class AbstractRoddyJobUnitTests {
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: clusterJobIdentifier.clusterJobId, timeStamp: 10L, statusCode: STATUS_CODE_FAILED])
         ])
 
-        assert [(clusterJobIdentifier): "${clusterJobIdentifier} failed processing. StatusCode: ${jobStateLogFile.getPropertyFromLatestLogFileEntry(clusterJobIdentifier.clusterJobId, "statusCode")}"] ==
+        assert [(clusterJobIdentifier): "${clusterJobIdentifier} has not finished successfully. Status code: ${STATUS_CODE_FAILED}"] ==
                 abstractRoddyJob.analyseFinishedClusterJobs([clusterJobIdentifier], jobStateLogFile)
     }
 

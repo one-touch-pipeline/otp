@@ -2,18 +2,12 @@ package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import org.codehaus.groovy.runtime.powerassert.Value
-import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 
 /**
  * Base class for jobs which maybe submit cluster jobs, wait for them to finish, and then validate their results.
- *
  */
 abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
-
-    @Autowired
-    JobStatusLoggingService jobStatusLoggingService
 
     @Override
     protected final NextAction execute(final Collection<? extends ClusterJobIdentifier> finishedClusterJobs) throws Throwable {

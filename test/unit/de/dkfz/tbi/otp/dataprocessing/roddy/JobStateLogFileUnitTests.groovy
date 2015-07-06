@@ -144,29 +144,6 @@ ${logFileEntry2.toString()}"""
     }
 
     @Test
-    void testIsClusterJobInProgress_WhenLessThanTwoEntriesForPbsId_ShouldReturnTrue() {
-        JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
-                tmpDir.root, [
-                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: clusterJobIdentifier.clusterJobId])
-                ]
-        )
-
-        assertTrue(JobStateLogFile.isClusterJobInProgress(clusterJobIdentifier.clusterJobId))
-    }
-
-    @Test
-    void testIsClusterJobInProgress_WhenTwoOrMoreEntriesForPbsId_ShouldReturnFalse() {
-        JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
-                tmpDir.root, [
-                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: clusterJobIdentifier.clusterJobId]),
-                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: clusterJobIdentifier.clusterJobId, timeStamp: 10L])
-                ]
-        )
-
-        assertFalse(JobStateLogFile.isClusterJobInProgress(clusterJobIdentifier.clusterJobId))
-    }
-
-    @Test
     void testIsClusterJobFinishedSuccessfully_WhenStatusCodeIsNull_ReturnTrue() {
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
                 tmpDir.root, [
