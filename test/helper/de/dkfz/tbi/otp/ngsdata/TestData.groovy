@@ -386,6 +386,7 @@ class TestData {
                 seqPlatformGroup: properties.get('seqPlatformGroup') ?: SeqPlatformGroup.build(),
                 referenceGenome: properties.get('referenceGenome') ?: findOrSaveReferenceGenome(),
                 workflow: properties.get('workflow') ?: findOrSaveWorkflow(),
+                statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
         ] + properties)
         return mergingWorkPackage
     }

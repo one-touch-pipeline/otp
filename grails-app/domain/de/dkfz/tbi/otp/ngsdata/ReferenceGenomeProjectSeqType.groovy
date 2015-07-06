@@ -8,6 +8,8 @@ package de.dkfz.tbi.otp.ngsdata
  */
 class ReferenceGenomeProjectSeqType {
 
+    static final String TAB_FILE_PATTERN = /[0-9a-zA-Z-_\.]+\.tab/
+
     /**
      * Date when the object has been created.
      * To be filled in automatically by GORM.
@@ -23,6 +25,12 @@ class ReferenceGenomeProjectSeqType {
      * has been deprecated.
      */
     Date deprecatedDate = null
+
+    /**
+     * File name of file holding the chromosome stat size.
+     * The file ends with '.tab' and is located in the stat subdirectory of the reference genome.
+     */
+    String statSizeFileName
 
 
     static belongsTo = [
@@ -50,6 +58,7 @@ class ReferenceGenomeProjectSeqType {
         }
         sampleType(nullable: true)
         deprecatedDate(nullable: true)
+        statSizeFileName nullable: true, blank: false, matches: TAB_FILE_PATTERN
     }
 
     String toString() {

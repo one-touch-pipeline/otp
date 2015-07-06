@@ -10,6 +10,7 @@ import de.dkfz.tbi.otp.ngsdata.MetaDataService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import org.springframework.beans.factory.annotation.Autowired
 
 
@@ -51,16 +52,18 @@ class ExecutePanCanJob extends AbstractRoddyJob {
 
         File referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome) as File
         assert referenceGenomeFastaFile : "Path to the reference genome file is null"
+        LsdfFilesService.ensureFileIsReadableAndNotEmpty(referenceGenomeFastaFile)
 
-        File chromosomeSizeFiles = referenceGenomeService.pathToChromosomeSizeFilesPerReference(roddyBamFile.project, roddyBamFile.referenceGenome) as File
-        assert chromosomeSizeFiles : "Path to the chromosome size files is null"
+
+        File chromosomeStatSizeFile = referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage)
+        assert chromosomeStatSizeFile : "Path to the chromosome stat size file is null"
+        LsdfFilesService.ensureFileIsReadableAndNotEmpty(chromosomeStatSizeFile)
 
         String analysisIDinConfigFile = executeRoddyCommandService.getAnalysisIDinConfigFile(roddyBamFile)
         String nameInConfigFile = "${roddyBamFile.workflow.name}_${roddyBamFile.config.externalScriptVersion}"
 
         ensureCorrectBaseBamFileIsOnFileSystem(baseBamFile)
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(roddyBamFile.config.configFilePath))
-        LsdfFilesService.ensureDirIsReadableAndNotEmpty(chromosomeSizeFiles)
 
 
         return executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, nameInConfigFile, analysisIDinConfigFile, realm) +
@@ -68,7 +71,7 @@ class ExecutePanCanJob extends AbstractRoddyJob {
                     "${baseBamFile ? "bam:${baseBamFile.finalBamFile}," : ""}" +
                     "REFERENCE_GENOME:${referenceGenomeFastaFile}," +
                     "INDEX_PREFIX:${referenceGenomeFastaFile}," +
-                    "CHROM_SIZES_FILE:${chromosomeSizeFiles}," +
+                    "CHROM_SIZES_FILE:${chromosomeStatSizeFile}," +
                     "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}\""
     }
 

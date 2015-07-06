@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 import org.apache.commons.io.FileUtils
 import org.junit.rules.TemporaryFolder
 import static org.junit.Assert.*
@@ -11,13 +12,11 @@ import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
-/**
- * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
- */
+
 @TestFor(ReferenceGenomeService)
 @TestMixin(GrailsUnitTestMixin)
 @Mock([Realm, Project, ReferenceGenome, ReferenceGenomeEntry])
-class ReferenceGenomeServiceTests {
+class ReferenceGenomeServiceUnitTests {
 
     final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
 
@@ -81,6 +80,7 @@ class ReferenceGenomeServiceTests {
                         referenceGenome: referenceGenome
                         )
         referenceGenomeEntryTwo.save(flush: true)
+
     }
 
     @After
@@ -173,7 +173,6 @@ class ReferenceGenomeServiceTests {
         assertEquals(pathExp, pathAct)
     }
 
-
     @Test
     void testFilePathOnlyPrefix() {
         File pathExp = new File(directory, "prefixName")
@@ -207,22 +206,39 @@ class ReferenceGenomeServiceTests {
         assertEquals(referenceGenomeEntriesExp, referenceGenomeEntriesAct)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test
     void testPathToChromosomeSizeFilesPerReference_ProjectIsNull_ShouldFail() {
-        referenceGenomeService.pathToChromosomeSizeFilesPerReference(null, referenceGenome)
-    }
-
-    @Test(expected = IllegalArgumentException)
-    void testPathToChromosomeSizeFilesPerReference_ReferenceGenomeIsNull_ShouldFail() {
-        referenceGenomeService.pathToChromosomeSizeFilesPerReference(project, null)
+        assert TestCase.shouldFail(IllegalArgumentException) {
+            referenceGenomeService.pathToChromosomeSizeFilesPerReference(null, referenceGenome)
+        }.contains('The project is not specified')
     }
 
     @Test
-    void testPathToChromosomeSizeFilesPerReference_AllFine() {
+    void testPathToChromosomeSizeFilesPerReference_ReferenceGenomeIsNull_ShouldFail() {
+        assert TestCase.shouldFail(IllegalArgumentException) {
+            referenceGenomeService.pathToChromosomeSizeFilesPerReference(project, null)
+        }.contains('The reference genome is not specified')
+    }
+
+    @Test
+    void testPathToChromosomeSizeFilesPerReference_DirectoryDoesNotExist_WithExistCheck_ShoulFail() {
+        assert TestCase.shouldFail(RuntimeException) {
+            referenceGenomeService.pathToChromosomeSizeFilesPerReference(project, referenceGenome, true)
+        }.contains(ReferenceGenomeService.CHROMOSOME_SIZE_FILES_PREFIX)
+    }
+
+    @Test
+    void testPathToChromosomeSizeFilesPerReference_DirectoryDoesNotExist_WithoutExistCheck_AllFine() {
         File pathExp = new File(directory, ReferenceGenomeService.CHROMOSOME_SIZE_FILES_PREFIX)
-        File pathAct = referenceGenomeService.pathToChromosomeSizeFilesPerReference(project, referenceGenome) as File
+        File pathAct = referenceGenomeService.pathToChromosomeSizeFilesPerReference(project, referenceGenome, false)
         assertEquals(pathExp, pathAct)
     }
 
-
+    @Test
+    void testPathToChromosomeSizeFilesPerReference_DirectoryExist_WithExistCheck_AllFine() {
+        File pathExp = new File(directory, ReferenceGenomeService.CHROMOSOME_SIZE_FILES_PREFIX)
+        CreateFileHelper.createFile(pathExp)
+        File pathAct = referenceGenomeService.pathToChromosomeSizeFilesPerReference(project, referenceGenome, true)
+        assertEquals(pathExp, pathAct)
+    }
 }

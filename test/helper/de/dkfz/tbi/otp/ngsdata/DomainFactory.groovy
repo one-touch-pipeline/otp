@@ -24,6 +24,7 @@ class DomainFactory {
     static final String LABEL_DKFZ = 'DKFZ'
     static final String LABEL_BIOQUANT = 'BioQuant'
     static final String DEFAULT_MD5_SUM = '123456789abcdef123456789abcdef00'
+    static final String DEFAULT_TAB_FILE_NAME = 'DefaultTabFileName.tab'
     static final long DEFAULT_FILE_SIZE = 123456
 
     /**
@@ -202,6 +203,12 @@ class DomainFactory {
             SeqType seqType = SeqType.buildLazy(name: SeqTypeNames.WHOLE_GENOME.seqTypeName, alias: "WGS", libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
             Workflow workflow = Workflow.buildLazy(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT)
             workPackage = MergingWorkPackage.build(workflow: workflow, seqType: seqType)
+            ReferenceGenomeProjectSeqType.build(
+                    referenceGenome: workPackage.referenceGenome,
+                    project: workPackage.project,
+                    seqType: workPackage.seqType,
+                    statSizeFileName: DEFAULT_TAB_FILE_NAME,
+            )
         }
         SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile(workPackage)
         ExternalScript externalScript = ExternalScript.buildLazy()
@@ -210,16 +217,13 @@ class DomainFactory {
                 seqTracks: [seqTrack],
                 workPackage: workPackage,
                 identifier: RoddyBamFile.nextIdentifier(workPackage),
-                config: RoddyWorkflowConfig.buildLazy(workflow: workPackage.workflow, externalScriptVersion: externalScript.scriptVersion, obsoleteDate: null),
+                config: RoddyWorkflowConfig.buildLazy(workflow: workPackage.workflow, project: workPackage.project, externalScriptVersion: externalScript.scriptVersion, obsoleteDate: null),
                 md5sum: DEFAULT_MD5_SUM,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 fileSize: 10000,
                 roddyVersion: ProcessingOption.build(),
                 ] + bamFileProperties)
-
         assert bamFile.save(flush: true) // build-test-data does not flush, only saves
-        bamFile.individual.project = bamFile.config.project
-        assert bamFile.individual.save(flush: true)
         return bamFile
     }
 

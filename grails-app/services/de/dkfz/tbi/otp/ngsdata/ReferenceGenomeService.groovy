@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+
 import static org.springframework.util.Assert.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
@@ -47,12 +49,7 @@ class ReferenceGenomeService {
         String referenceGenomeSpecificPath = referenceGenome.path
         String directoryPath = "${realmSpecificPath}/${allReferenceGenomes}/${referenceGenomeSpecificPath}/"
         File file = new File(directoryPath)
-        if (!checkExistence || file.canRead()) {
-            return directoryPath
-        } else {
-            throw new RuntimeException(
-            "The directory ${directoryPath} storing the information of the reference genome can not be read")
-        }
+        return "${checkFileExistence(file, checkExistence)}/"
     }
 
     /**
@@ -74,12 +71,7 @@ class ReferenceGenomeService {
     public String fastaFilePath(Project project, ReferenceGenome referenceGenome) {
         String referenceGenomeFastaFilePath = prefixOnlyFilePath(project, referenceGenome) + ".fa"
         File file = new File(referenceGenomeFastaFilePath)
-        if (file.canRead()) {
-            return file.path
-        } else {
-            throw new RuntimeException(
-            "The fasta file ${referenceGenomeFastaFilePath} storing the information of the reference genome can not be read")
-        }
+        return checkFileExistence(file, true)
     }
 
     /**
@@ -101,9 +93,27 @@ class ReferenceGenomeService {
         return filePathToDirectory(realm, referenceGenome) + "metaInformation.txt"
     }
 
-    public String pathToChromosomeSizeFilesPerReference(Project project, ReferenceGenome referenceGenome) {
+    public File pathToChromosomeSizeFilesPerReference(Project project, ReferenceGenome referenceGenome, boolean checkExistence = true) {
         notNull(project, "The project is not specified")
         notNull(referenceGenome, "The reference genome is not specified")
-        return "${filePathToDirectory(project, referenceGenome)}${CHROMOSOME_SIZE_FILES_PREFIX}/"
+        File file = new File(filePathToDirectory(project, referenceGenome, checkExistence), CHROMOSOME_SIZE_FILES_PREFIX)
+        return checkFileExistence(file, checkExistence)
     }
+
+    public File chromosomeStatSizeFile(MergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
+        assert mergingWorkPackage, "The mergingWorkPackage is not specified"
+        assert mergingWorkPackage.statSizeFileName : "No stat file size name is defined for ${mergingWorkPackage}"
+        File file = new File(pathToChromosomeSizeFilesPerReference(mergingWorkPackage.project, mergingWorkPackage.referenceGenome, checkExistence), mergingWorkPackage.statSizeFileName)
+        return checkFileExistence(file, checkExistence)
+    }
+
+
+    private File checkFileExistence(File file, boolean checkExistence) {
+        if (!checkExistence || file.canRead()) {
+            return file
+        } else {
+            throw new RuntimeException("${file} can not be read")
+        }
+    }
+
 }

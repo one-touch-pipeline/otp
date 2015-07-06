@@ -5,6 +5,7 @@ import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.*
+import org.junit.rules.ErrorCollector
 
 @TestFor(MergingWorkPackage)
 @Build([
@@ -23,6 +24,12 @@ class MergingWorkPackageUnitTests {
     Sample sample = null
     SeqType seqType = null
 
+
+    @Rule
+    public ErrorCollector collector = new ErrorCollector();
+
+
+    @Before
     void setUp() {
         Project project = TestData.createProject(
             name: "project",
@@ -131,5 +138,71 @@ class MergingWorkPackageUnitTests {
 
         ProcessedBamFile processedBamFile = ProcessedBamFile.build()
         assert !workPackage.satisfiesCriteria(processedBamFile)
+    }
+
+
+    @Test
+    void test_constraint_onStatSizeFileName_withCorrectName_ShouldBeValid() {
+        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME])
+        assert mergingWorkPackage.validate()
+    }
+
+    @Test
+    void test_constraint_onStatSizeFileName_withNullNoPancancer_ShouldBeValid() {
+        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+                statSizeFileName: null,
+                workflow: Workflow.build(
+                        name: Workflow.Name.DEFAULT_OTP,
+                        type: Workflow.Type.ALIGNMENT,
+                ),
+        ])
+        assert mergingWorkPackage.validate()
+    }
+
+    @Test
+    void test_constraint_onStatSizeFileName_withNullForPancancer_ShouldBeInValid() {
+        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+                statSizeFileName: null,
+                workflow: Workflow.build(
+                        name: Workflow.Name.PANCAN_ALIGNMENT,
+                        type: Workflow.Type.ALIGNMENT,
+                ),
+        ])
+        TestCase.assertValidateError(mergingWorkPackage, 'statSizeFileName', 'validator.invalid', null)
+    }
+
+    @Test
+    void test_constraint_onStatSizeFileName_WhenBlank_ShouldBeInvalid() {
+        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave()
+        mergingWorkPackage.statSizeFileName = '' //setting empty string does not work via map
+
+        TestCase.assertValidateError(mergingWorkPackage, 'statSizeFileName', 'blank', '')
+    }
+
+    @Test
+    void test_constraint_onStatSizeFileName_WhenValidSpecialChar_ShouldBeValid() {
+        "-_.".each {
+            try {
+                String name = "File${it}.tab"
+                MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([statSizeFileName: name])
+                mergingWorkPackage.validate()
+                assert 0 == mergingWorkPackage.errors.errorCount
+            } catch (Throwable e) {
+                collector.addError(e)
+            }
+        }
+    }
+
+    @Test
+    void test_constraint_onStatSizeFileName_WhenInvalidSpecialChar_ShouldBeInvalid() {
+        "\"',:;%\$§&<>|^§!?=äöüÄÖÜß´`".each {
+            try {
+                String name = "File${it}.tab"
+                MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([statSizeFileName: name])
+                TestCase.assertValidateError(mergingWorkPackage, 'statSizeFileName', 'matches.invalid', name)
+            } catch (Throwable e) {
+                collector.addError(e)
+            }
+        }
     }
 }

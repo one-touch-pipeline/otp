@@ -62,6 +62,9 @@ testDataConfig {
             lengthRefChromosomes = 345
             lengthRefChromosomesWithoutN = 123
         }
+        'de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType' {
+            statSizeFileName = DomainFactory.DEFAULT_TAB_FILE_NAME
+        }
         'de.dkfz.tbi.otp.ngsdata.Run' {
             name = {'runName_' + (counter++)}
         }
@@ -109,6 +112,7 @@ testDataConfig {
         }
         'de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage' {
             workflow = { Workflow.buildLazy() }
+            statSizeFileName = DomainFactory.DEFAULT_TAB_FILE_NAME
         }
         'de.dkfz.tbi.otp.dataprocessing.MockAbstractBamFile' {
             type = AbstractBamFile.BamType.SORTED
@@ -150,6 +154,7 @@ testDataConfig {
     }
     unitAdditionalBuild = [
         'de.dkfz.tbi.otp.ngsdata.DataFile': [de.dkfz.tbi.otp.ngsdata.FileType],
+        'de.dkfz.tbi.otp.ngsdata.ReferenceGenome': [de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType],
         'de.dkfz.tbi.otp.ngsdata.SeqPlatform': [de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup, de.dkfz.tbi.otp.ngsdata.SeqPlatformModelLabel],
         'de.dkfz.tbi.otp.ngsdata.SeqTrack': [de.dkfz.tbi.otp.ngsdata.ChipSeqSeqTrack, de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack, de.dkfz.tbi.otp.ngsdata.DataFile],
         'de.dkfz.tbi.otp.dataprocessing.AbstractBamFile': [de.dkfz.tbi.otp.ngsdata.SeqTrack],

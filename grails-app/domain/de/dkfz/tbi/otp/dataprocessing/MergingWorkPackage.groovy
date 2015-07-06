@@ -40,6 +40,7 @@ class MergingWorkPackage {
 
     // Processing parameters, part of merging criteria
     ReferenceGenome referenceGenome
+    String statSizeFileName
     Workflow workflow
 
     boolean needsProcessing
@@ -53,6 +54,11 @@ class MergingWorkPackage {
         sample unique: 'seqType'
         needsProcessing(validator: {val, obj -> !val || obj.workflow.name == Workflow.Name.PANCAN_ALIGNMENT})
         workflow(validator: {workflow -> workflow.type == Workflow.Type.ALIGNMENT})
+        statSizeFileName nullable: true, blank: false, matches: ReferenceGenomeProjectSeqType.TAB_FILE_PATTERN, validator : { val, obj ->
+            if (obj.workflow?.name == Workflow.Name.PANCAN_ALIGNMENT) {
+                val != null
+            }
+        }
     }
 
     static final Collection<String> seqTrackPropertyNames = qualifiedSeqTrackPropertyNames.collect{nonQualifiedPropertyName(it)}

@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
 
@@ -101,6 +102,7 @@ public class AbstractAlignmentDeciderTest {
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),
                 workflow: Workflow.findOrSaveByNameAndType(Workflow.Name.PANCAN_ALIGNMENT, Workflow.Type.ALIGNMENT),
+                statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
         )
         workPackage.save(failOnError: true)
 

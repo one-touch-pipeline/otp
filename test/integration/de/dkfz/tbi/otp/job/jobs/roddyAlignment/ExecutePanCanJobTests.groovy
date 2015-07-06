@@ -2,8 +2,8 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -42,7 +42,7 @@ class ExecutePanCanJobTests {
     String roddyVersion
     File roddyBaseConfigsPath
     File roddyApplicationIni
-    File chromosomeSizeFiles
+    File chromosomeStatSizeFile
     File processingRootPath
     File dataFile1File
     File dataFile2File
@@ -77,14 +77,15 @@ class ExecutePanCanJobTests {
 
         referenceGenomeDir = new File("${processingRootPath}/reference_genomes/${roddyBamFile.referenceGenome.path}")
         assert referenceGenomeDir.mkdirs()
+
         referenceGenomeFile = new File(referenceGenomeDir, "${roddyBamFile.referenceGenome.fileNamePrefix}.fa")
         CreateFileHelper.createFile(referenceGenomeFile)
+
         configFile = new File(roddyBamFile.config.configFilePath)
         CreateFileHelper.createFile(configFile)
 
-        chromosomeSizeFiles = executePanCanJob.referenceGenomeService.pathToChromosomeSizeFilesPerReference(roddyBamFile.project, roddyBamFile.referenceGenome) as File
-        assert chromosomeSizeFiles.mkdirs()
-        new File(chromosomeSizeFiles, "file name").write("file content")
+        chromosomeStatSizeFile = executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage, false)
+        CreateFileHelper.createFile(chromosomeStatSizeFile)
 
         roddyBamFile.workPackage.metaClass.findMergeableSeqTracks = { -> SeqTrack.list() }
     }
@@ -106,7 +107,7 @@ class ExecutePanCanJobTests {
         roddyVersion = null
         roddyBaseConfigsPath = null
         roddyApplicationIni = null
-        chromosomeSizeFiles = null
+        chromosomeStatSizeFile = null
         dataProcessing = null
         dataManagement = null
         seqTrack = null
@@ -142,14 +143,14 @@ class ExecutePanCanJobTests {
     }
 
     @Test
-    void testPrepareAndReturnWorkflowSpecificCommand_PathToChromosomeSizeFilesIsNull_ShouldFail() {
-        executePanCanJob.referenceGenomeService.metaClass.pathToChromosomeSizeFilesPerReference = { Project project, ReferenceGenome referenceGenome ->
+    void testPrepareAndReturnWorkflowSpecificCommand_PathToChromosomeStatSizeFileIsNull_ShouldFail() {
+        executePanCanJob.referenceGenomeService.metaClass.chromosomeStatSizeFile = { MergingWorkPackage mergingWorkPackage ->
             return null
         }
 
         assert TestCase.shouldFail(AssertionError) {
             executePanCanJob.prepareAndReturnWorkflowSpecificCommand(roddyBamFile, dataManagement)
-        }.contains("Path to the chromosome size files is null")
+        }.contains("Path to the chromosome stat size file is null")
     }
 
 
@@ -209,12 +210,12 @@ class ExecutePanCanJobTests {
     }
 
     @Test
-    void testPrepareAndReturnWorkflowSpecificCommand_ChromosomeSizeDirDoesNotExist_ShouldFail() {
+    void testPrepareAndReturnWorkflowSpecificCommand_ChromosomeStatSizeFileDoesNotExist_ShouldFail() {
         executePanCanJob.executeRoddyCommandService.metaClass.createTemporaryOutputDirectory = { Realm realm, File file -> }
-        assert chromosomeSizeFiles.deleteDir()
-        assert TestCase.shouldFail(AssertionError) {
+        assert chromosomeStatSizeFile.delete()
+        assert TestCase.shouldFail(RuntimeException) {
             executePanCanJob.prepareAndReturnWorkflowSpecificCommand(roddyBamFile, dataManagement)
-        }.contains(chromosomeSizeFiles.path)
+        }.contains(chromosomeStatSizeFile.path)
     }
 
 
@@ -241,7 +242,7 @@ ${roddyBamFile.individual.pid} \
 --cvalues="fastq_list:${fastqFilesAsString},\
 REFERENCE_GENOME:${referenceGenomeFile},\
 INDEX_PREFIX:${referenceGenomeFile.path},\
-CHROM_SIZES_FILE:${chromosomeSizeFiles},\
+CHROM_SIZES_FILE:${chromosomeStatSizeFile},\
 possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
 """
 
@@ -286,7 +287,7 @@ ${roddyBamFile2.individual.pid} \
 bam:${roddyBamFile.finalBamFile},\
 REFERENCE_GENOME:${referenceGenomeFile},\
 INDEX_PREFIX:${referenceGenomeFile},\
-CHROM_SIZES_FILE:${chromosomeSizeFiles},\
+CHROM_SIZES_FILE:${chromosomeStatSizeFile},\
 possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
 """
 
@@ -318,7 +319,7 @@ ${roddyBamFile.individual.pid} \
 --cvalues="fastq_list:${fastqFilesAsString},\
 REFERENCE_GENOME:${referenceGenomeFile},\
 INDEX_PREFIX:${referenceGenomeFile},\
-CHROM_SIZES_FILE:${chromosomeSizeFiles},\
+CHROM_SIZES_FILE:${chromosomeStatSizeFile},\
 possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
 """
 

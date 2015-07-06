@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
@@ -41,8 +42,13 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
 
         ensureConfigurationIsComplete(seqTrack)
 
-        Collection<MergingWorkPackage> workPackages = findOrSaveWorkPackages(seqTrack,
-                seqTrack.configuredReferenceGenome, workflow)
+        ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = seqTrack.configuredReferenceGenomeProjectSeqType
+        Collection<MergingWorkPackage> workPackages = findOrSaveWorkPackages(
+                seqTrack,
+                referenceGenomeProjectSeqType.referenceGenome,
+                referenceGenomeProjectSeqType.statSizeFileName,
+                workflow,
+        )
 
         workPackages.each {
             prepareForAlignment(it, seqTrack, forceRealign)
@@ -60,7 +66,9 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         }
     }
 
-    static Collection<MergingWorkPackage> findOrSaveWorkPackages(SeqTrack seqTrack, ReferenceGenome referenceGenome,
+    static Collection<MergingWorkPackage> findOrSaveWorkPackages(SeqTrack seqTrack,
+                                                                 ReferenceGenome referenceGenome,
+                                                                 String statSizeFileName,
                                                                  Workflow workflow) {
 
         // TODO OTP-1401: In the future there may be more than one MWP for the sample and seqType.
@@ -68,6 +76,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
                 MergingWorkPackage.findAllWhere(sample: seqTrack.sample, seqType: seqTrack.seqType))
         if (workPackage != null) {
             assert workPackage.referenceGenome.id == referenceGenome.id
+            assert workPackage.statSizeFileName == statSizeFileName
             assert workPackage.workflow.id == workflow.id
             if (!workPackage.satisfiesCriteria(seqTrack)) {
                 logNotAligning(seqTrack, "it does not satisfy the criteria of the existing MergingWorkPackage ${workPackage}.")
@@ -77,6 +86,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
             workPackage = new MergingWorkPackage(
                     MergingWorkPackage.getMergingProperties(seqTrack) + [
                     referenceGenome: referenceGenome,
+                    statSizeFileName: statSizeFileName,
                     workflow: workflow,
             ]).save(failOnError: true)
             assert workPackage

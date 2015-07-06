@@ -166,11 +166,15 @@ class SeqTrack {
      * Note that the configuration may change in the future.
      */
     ReferenceGenome getConfiguredReferenceGenome() {
+        return getConfiguredReferenceGenomeProjectSeqType()?.referenceGenome
+    }
+
+    ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqType() {
         switch (sampleType.specificReferenceGenome) {
             case SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT:
-                return getConfiguredReferenceGenomeUsingProjectDefault()
+                return getConfiguredReferenceGenomeProjectSeqTypeUsingProjectDefault()
             case SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC:
-                return getConfiguredReferenceGenomeUsingSampleTypeSpecific()
+                return getConfiguredReferenceGenomeProjectSeqTypeUsingSampleTypeSpecific()
             case SampleType.SpecificReferenceGenome.UNKNOWN:
                     throw new RuntimeException("For sample type '${sampleType} the way to fetch the reference genome is not defined.")
             default:
@@ -178,23 +182,23 @@ class SeqTrack {
         }
     }
 
-    private ReferenceGenome getConfiguredReferenceGenomeUsingProjectDefault() {
+    private ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqTypeUsingProjectDefault() {
         assert SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT == sampleType.specificReferenceGenome
         try {
             return CollectionUtils.atMostOneElement(
                             ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType)
-                            )?.referenceGenome
+                            )
         } catch (AssertionError e) {
             throw new RuntimeException("Could not find a reference genome for project '${project}' and '${seqType}'", e)
         }
     }
 
-    private ReferenceGenome getConfiguredReferenceGenomeUsingSampleTypeSpecific() {
+    private ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqTypeUsingSampleTypeSpecific() {
         assert SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC == sampleType.specificReferenceGenome
         try {
             return CollectionUtils.atMostOneElement(
                             ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeAndDeprecatedDateIsNull(project, seqType, sampleType)
-                            )?.referenceGenome
+                            )
         } catch (AssertionError e) {
             throw new RuntimeException("Could not find a reference genome for project '${project}' and '${seqType}' and '${sampleType}'", e)
         }
