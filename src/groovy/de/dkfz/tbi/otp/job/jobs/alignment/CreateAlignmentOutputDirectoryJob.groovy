@@ -26,7 +26,7 @@ class CreateAlignmentOutputDirectoryJob extends AbstractJobImpl {
 
         String directory = processedAlignmentFileService.getDirectory(alignmentPass)
         Realm realm = alignmentPassService.realmForDataProcessing(alignmentPass)
-        String cmd = "mkdir -p -m 2750 " + directory
+        String cmd = "umask 027; mkdir -p -m 2750 " + directory
         String exitCode = executionService.executeCommand(realm, cmd)
         log.debug "creating directory finished with exit code " + exitCode
     }

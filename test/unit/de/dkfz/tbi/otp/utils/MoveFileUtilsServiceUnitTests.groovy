@@ -100,7 +100,7 @@ class MoveFileUtilsServiceUnitTests {
         targetFile.delete()
 
         moveFileUtilsService.executionService.metaClass.executeCommand = {Realm realm, String cmd ->
-            assert cmd == "mkdir -m 2750 -p ${targetFile.parent}; mv -f ${sourceFile.path} ${targetFile.path}; chmod 640 ${targetFile}"
+            assert cmd == "umask 027; mkdir -m 2750 -p ${targetFile.parent}; mv -f ${sourceFile.path} ${targetFile.path}; chmod 640 ${targetFile}"
             executeCommandLocally(cmd)
         }
         moveFileUtilsService.moveFileIfExists(realm, sourceFile, targetFile)
@@ -116,7 +116,7 @@ class MoveFileUtilsServiceUnitTests {
         targetFile_allreadyExists.text = TARGET_FILE
 
         moveFileUtilsService.executionService.metaClass.executeCommand = {Realm realm, String cmd ->
-            assert cmd == "mkdir -m 2750 -p ${targetFile_allreadyExists.parent}; mv -f ${sourceFile.path} ${targetFile_allreadyExists.path}; chmod 640 ${targetFile_allreadyExists}"
+            assert cmd == "umask 027; mkdir -m 2750 -p ${targetFile_allreadyExists.parent}; mv -f ${sourceFile.path} ${targetFile_allreadyExists.path}; chmod 640 ${targetFile_allreadyExists}"
             executeCommandLocally(cmd)
         }
 
@@ -132,7 +132,7 @@ class MoveFileUtilsServiceUnitTests {
         targetFile.delete()
 
         moveFileUtilsService.executionService.metaClass.executeCommand = {Realm realm, String cmd ->
-            assert cmd == "mkdir -m 2750 -p ${targetFile.parent}; mv -f ${sourceFile.path} ${targetFile.path}; chmod 644 ${targetFile}"
+            assert cmd == "umask 027; mkdir -m 2750 -p ${targetFile.parent}; mv -f ${sourceFile.path} ${targetFile.path}; chmod 644 ${targetFile}"
             executeCommandLocally(cmd)
         }
         moveFileUtilsService.moveFileIfExists(realm, sourceFile, targetFile, true)
@@ -223,7 +223,7 @@ class MoveFileUtilsServiceUnitTests {
         sourceFile.createNewFile()
 
         moveFileUtilsService.executionService.metaClass.executeCommand = {Realm realm, String cmd ->
-            assert cmd == "mkdir -m 2750 -p ${targetFolder}; mv -f ${sourceFolder}/* ${targetFolder}"
+            assert cmd == "umask 027; mkdir -m 2750 -p ${targetFolder}; mv -f ${sourceFolder}/* ${targetFolder}"
             executeCommandLocally(cmd)
         }
 
@@ -241,7 +241,7 @@ class MoveFileUtilsServiceUnitTests {
         targetFile_ExistsAlready << TARGET_FILE
 
         moveFileUtilsService.executionService.metaClass.executeCommand = {Realm realm, String cmd ->
-            assert cmd == "mkdir -m 2750 -p ${targetFolder}; mv -f ${sourceFolder}/* ${targetFolder}"
+            assert cmd == "umask 027; mkdir -m 2750 -p ${targetFolder}; mv -f ${sourceFolder}/* ${targetFolder}"
             executeCommandLocally(cmd)
         }
 

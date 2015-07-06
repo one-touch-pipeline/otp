@@ -26,7 +26,7 @@ class CreateMergedQaOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
 
         String directory = processedMergedBamFileQaFileService.directoryPath(pass)
         Realm realm = qualityAssessmentMergedPassService.realmForDataProcessing(pass)
-        String cmd = "mkdir -p -m 2750 " + directory
+        String cmd = "umask 027; mkdir -p -m 2750 " + directory
         String exitCode = executionService.executeCommand(realm, cmd)
         boolean dirCreated = validate(directory)
         dirCreated ? succeed() : fail()

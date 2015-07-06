@@ -37,7 +37,7 @@ class MergingCreateOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
     }
 
     private void executeOnRealm(String directory, Realm realm) {
-        String cmd = "mkdir -p -m 2750 " + directory
+        String cmd = "umask 027; mkdir -p -m 2750 " + directory
         String exitCode = executionService.executeCommand(realm, cmd)
         log.debug "creating directory finished with the output " + exitCode
     }

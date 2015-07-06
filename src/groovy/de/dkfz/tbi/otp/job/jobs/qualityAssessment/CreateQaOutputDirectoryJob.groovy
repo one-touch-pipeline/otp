@@ -26,7 +26,7 @@ class CreateQaOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
 
         String directory = processedBamFileQaFileService.directoryPath(pass)
         Realm realm = qualityAssessmentPassService.realmForDataProcessing(pass)
-        String cmd = "mkdir -p -m 2750 " + directory
+        String cmd = "umask 027; mkdir -p -m 2750 " + directory
         String exitCode = executionService.executeCommand(realm, cmd)
         boolean dirCreated = validate(directory)
         dirCreated ? succeed() : fail()

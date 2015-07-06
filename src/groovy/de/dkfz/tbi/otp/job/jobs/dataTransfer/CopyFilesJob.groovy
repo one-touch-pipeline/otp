@@ -41,6 +41,7 @@ class CopyFilesJob extends AbstractJobImpl {
         List<ProcessedMergedBamFile> bamFiles = processedMergedBamFilesForRun(run)
         bamFiles.each {
             String cmd = """
+umask 027
 mkdir -p -m 2750 ${AbstractMergedBamFileService.destinationDirectory(it)}
 printf "A new lane is currently in progress for this sample.\\nThe merged BAM file will be created/updated as soon as processing is complete.\\n" > ${AbstractMergedBamFileService.destinationDirectory(it)}/${processedMergedBamFileService.inProgressFileName(it)};
 """

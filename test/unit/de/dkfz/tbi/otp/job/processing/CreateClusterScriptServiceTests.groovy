@@ -151,6 +151,7 @@ class CreateClusterScriptServiceTests {
 
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_FILE_DKFZ_1} ]; then
 md5sum ${SOURCE_FILE_DKFZ_1} > ${SOURCE_DIR_DKFZ}/${MD5SUM_NAME};
 mkdir -p -m 2750 ${TARGET_DIR_DKFZ};
@@ -209,6 +210,7 @@ mkdir -p -m 2750 ${LINK_DIR_DKFZ}; ln -s -f ${TARGET_FILE_DKFZ_1} ${LINK_FILE_DK
         linkLocations.add(new File(LINK_FILE_DKFZ_1))
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_FILE_DKFZ_1} ]; then
 md5sum ${SOURCE_FILE_DKFZ_1} > ${SOURCE_DIR_DKFZ}/${MD5SUM_NAME};
 mkdir -p -m 2750 ${TARGET_DIR_DKFZ};
@@ -235,6 +237,7 @@ mkdir -p -m 2750 ${LINK_DIR_DKFZ}; ln -s -f ${TARGET_FILE_DKFZ_1} ${LINK_FILE_DK
         linkLocations.add(new File(LINK_FILE_DKFZ_1))
         def expectedScript = """
 set -e
+umask 027
 mkdir -p -m 2750 ${LINK_DIR_DKFZ}; ln -s -f ${TARGET_FILE_DKFZ_1} ${LINK_FILE_DKFZ_1};
 """
 
@@ -250,6 +253,7 @@ mkdir -p -m 2750 ${LINK_DIR_DKFZ}; ln -s -f ${TARGET_FILE_DKFZ_1} ${LINK_FILE_DK
         linkLocations.add(new File(LINK_FILE_DKFZ_1))
         def expectedScript = """
 set -e
+umask 027
 mkdir -p -m 2750 ${LINK_DIR_DKFZ}; ln -s -f ${SOURCE_FILE_DKFZ_1} ${LINK_FILE_DKFZ_1};
 """
 
@@ -265,6 +269,7 @@ mkdir -p -m 2750 ${LINK_DIR_DKFZ}; ln -s -f ${SOURCE_FILE_DKFZ_1} ${LINK_FILE_DK
         linkLocations.add(null)
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_FILE_DKFZ_1} ]; then
 md5sum ${SOURCE_FILE_DKFZ_1} > ${SOURCE_DIR_DKFZ}/${MD5SUM_NAME};
 mkdir -p -m 2750 ${TARGET_DIR_DKFZ};
@@ -293,6 +298,7 @@ fi;
         linkLocations.add(new File(LINK_FILE_DKFZ_2))
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_FILE_DKFZ_1} ]; then
 md5sum ${SOURCE_FILE_DKFZ_1} > ${SOURCE_DIR_DKFZ}/${MD5SUM_NAME};
 mkdir -p -m 2750 ${TARGET_DIR_DKFZ};
@@ -335,6 +341,7 @@ mkdir -p -m 2750 ${LINK_DIR_DKFZ}; ln -s -f ${TARGET_FILE_DKFZ_2} ${LINK_FILE_DK
         linkLocations.add(new File(LINK_FILE_DKFZ_2))
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_FILE_DKFZ_1} ]; then
 md5sum ${SOURCE_FILE_DKFZ_1} > ${SOURCE_DIR_DKFZ}/${MD5SUM_NAME};
 mkdir -p -m 2750 ${TARGET_DIR_DKFZ};
@@ -365,6 +372,7 @@ mkdir -p -m 2750 ${LINK_DIR_DKFZ}; ln -s -f ${TARGET_FILE_DKFZ_2} ${LINK_FILE_DK
         linkLocations.add(new File(LINK_FILE_DKFZ_2))
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_FILE_DKFZ_1} ]; then
 md5sum ${SOURCE_FILE_DKFZ_1} > ${SOURCE_DIR_DKFZ}/${MD5SUM_NAME};
 mkdir -p -m 2750 ${TARGET_DIR_DKFZ};
@@ -396,6 +404,7 @@ mkdir -p -m 2750 ${LINK_DIR_DKFZ}; ln -s -f ${SOURCE_FILE_DKFZ_2} ${LINK_FILE_DK
         linkLocations.add(null)
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_FILE_DKFZ_1} ]; then
 md5sum ${SOURCE_FILE_DKFZ_1} > ${SOURCE_DIR_DKFZ}/${MD5SUM_NAME};
 mkdir -p -m 2750 ${TARGET_DIR_DKFZ};
@@ -434,6 +443,7 @@ fi;
         linkLocations.add(new File(LINK_DIR_DKFZ))
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_DIR_DKFZ} ]; then
 find ${SOURCE_DIR_DKFZ} -type f -exec md5sum '{}' \\; >> ${SOURCE_BASE_DKFZ}/${MD5SUM_NAME};
 mkdir -p -m 2750 ${TARGET_BASE_DKFZ};
@@ -459,6 +469,7 @@ mkdir -p -m 2750 ${LINK_BASE_DKFZ}; ln -s -f ${TARGET_DIR_DKFZ} ${LINK_DIR_DKFZ}
         linkLocations.add(new File(LINK_DIR_DKFZ))
         def expectedScript = """
 set -e
+umask 027
 mkdir -p -m 2750 ${LINK_BASE_DKFZ}; ln -s -f ${TARGET_DIR_DKFZ} ${LINK_DIR_DKFZ};
 """
 
@@ -474,6 +485,7 @@ mkdir -p -m 2750 ${LINK_BASE_DKFZ}; ln -s -f ${TARGET_DIR_DKFZ} ${LINK_DIR_DKFZ}
         linkLocations.add(new File(LINK_DIR_DKFZ))
         def expectedScript = """
 set -e
+umask 027
 mkdir -p -m 2750 ${LINK_BASE_DKFZ}; ln -s -f ${SOURCE_DIR_DKFZ} ${LINK_DIR_DKFZ};
 """
 
@@ -488,6 +500,7 @@ mkdir -p -m 2750 ${LINK_BASE_DKFZ}; ln -s -f ${SOURCE_DIR_DKFZ} ${LINK_DIR_DKFZ}
         linkLocations.add(null)
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_DIR_DKFZ} ]; then
 find ${SOURCE_DIR_DKFZ} -type f -exec md5sum '{}' \\; >> ${SOURCE_BASE_DKFZ}/${MD5SUM_NAME};
 mkdir -p -m 2750 ${TARGET_BASE_DKFZ};
@@ -514,6 +527,7 @@ fi;
         linkLocations.add(new File(LINK_FILE_DKFZ_2))
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_DIR_DKFZ} ]; then
 find ${SOURCE_DIR_DKFZ} -type f -exec md5sum '{}' \\; >> ${SOURCE_BASE_DKFZ}/${MD5SUM_NAME};
 mkdir -p -m 2750 ${TARGET_BASE_DKFZ};
@@ -553,6 +567,7 @@ mkdir -p -m 2750 ${LINK_DIR_DKFZ}; ln -s -f ${TARGET_FILE_DKFZ_2} ${LINK_FILE_DK
         move = true
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_FILE_DKFZ_1} ]; then
 md5sum ${SOURCE_FILE_DKFZ_1} > ${SOURCE_DIR_DKFZ}/${MD5SUM_NAME};
 mkdir -p -m 2750 ${TARGET_DIR_DKFZ};
@@ -581,6 +596,7 @@ mkdir -p -m 2750 ${LINK_DIR_DKFZ}; ln -s -f ${TARGET_FILE_DKFZ_1} ${LINK_FILE_DK
 
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_DIR_DKFZ} ]; then
 find ${SOURCE_DIR_DKFZ} -type f -exec md5sum '{}' \\; >> ${SOURCE_BASE_DKFZ}/${MD5SUM_NAME};
 mkdir -p -m 2750 ${TARGET_BASE_DKFZ};
@@ -607,6 +623,7 @@ mkdir -p -m 2750 ${LINK_BASE_DKFZ}; ln -s -f ${TARGET_DIR_DKFZ} ${LINK_DIR_DKFZ}
         move = true
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_FILE_DKFZ_1} ]; then
 md5sum ${SOURCE_FILE_DKFZ_1} > ${SOURCE_DIR_DKFZ}/${MD5SUM_NAME};
 ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${TARGET_DIR_BQ}\";
@@ -635,6 +652,7 @@ ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${LINK_DIR_BQ}; ln -s -f ${TARGET_
         move = true
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_DIR_DKFZ} ]; then
 find ${SOURCE_DIR_DKFZ} -type f -exec md5sum '{}' \\; >> ${SOURCE_BASE_DKFZ}/${MD5SUM_NAME};
 ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${TARGET_BASE_BQ}\";
@@ -661,6 +679,7 @@ ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${LINK_BASE_BQ}; ln -s -f ${TARGET
         linkLocations.add(new File(LINK_DIR_BQ))
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_DIR_DKFZ} ]; then
 find ${SOURCE_DIR_DKFZ} -type f -exec md5sum '{}' \\; >> ${SOURCE_BASE_DKFZ}/${MD5SUM_NAME};
 ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${TARGET_BASE_BQ}\";
@@ -686,6 +705,7 @@ ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${LINK_BASE_BQ}; ln -s -f ${TARGET
         linkLocations.add(new File(LINK_FILE_BQ))
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_FILE_DKFZ_1} ]; then
 md5sum ${SOURCE_FILE_DKFZ_1} > ${SOURCE_DIR_DKFZ}/${MD5SUM_NAME};
 ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${TARGET_DIR_BQ}\";
@@ -712,6 +732,7 @@ ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${LINK_DIR_BQ}; ln -s -f ${TARGET_
         move = true
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_DIR_BQ} ]; then
 ssh -p ${port} ${hostname} \"find ${SOURCE_DIR_BQ} -type f -exec md5sum '{}' \\; >> ${SOURCE_BASE_BQ}/${MD5SUM_NAME}\";
 mkdir -p -m 2750 ${TARGET_BASE_DKFZ};
@@ -738,6 +759,7 @@ mkdir -p -m 2750 ${LINK_BASE_DKFZ}; ln -s -f ${TARGET_DIR_DKFZ} ${LINK_DIR_DKFZ}
         move = true
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_FILE_BQ} ]; then
 ssh -p ${port} ${hostname} \"md5sum ${SOURCE_FILE_BQ} > ${SOURCE_DIR_BQ}/${MD5SUM_NAME}\";
 mkdir -p -m 2750 ${TARGET_DIR_DKFZ};
@@ -765,6 +787,7 @@ mkdir -p -m 2750 ${LINK_DIR_DKFZ}; ln -s -f ${TARGET_FILE_DKFZ_1} ${LINK_FILE_DK
         linkLocations.add(new File(LINK_DIR_DKFZ))
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_DIR_BQ} ]; then
 ssh -p ${port} ${hostname} \"find ${SOURCE_DIR_BQ} -type f -exec md5sum '{}' \\; >> ${SOURCE_BASE_BQ}/${MD5SUM_NAME}\";
 mkdir -p -m 2750 ${TARGET_BASE_DKFZ};
@@ -788,6 +811,7 @@ mkdir -p -m 2750 ${LINK_BASE_DKFZ}; ln -s -f ${TARGET_DIR_DKFZ} ${LINK_DIR_DKFZ}
         linkLocations.add(new File(LINK_FILE_DKFZ_1))
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_FILE_BQ} ]; then
 ssh -p ${port} ${hostname} \"md5sum ${SOURCE_FILE_BQ} > ${SOURCE_DIR_BQ}/${MD5SUM_NAME}\";
 mkdir -p -m 2750 ${TARGET_DIR_DKFZ};
@@ -814,6 +838,7 @@ mkdir -p -m 2750 ${LINK_DIR_DKFZ}; ln -s -f ${TARGET_FILE_DKFZ_1} ${LINK_FILE_DK
         move = true
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_DIR_BQ} ]; then
 ssh -p ${port} ${hostname} \"find ${SOURCE_DIR_BQ} -type f -exec md5sum '{}' \\; >> ${SOURCE_BASE_BQ}/${MD5SUM_NAME}\";
 ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${TARGET_BASE_BQ}\";
@@ -839,6 +864,7 @@ ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${LINK_BASE_BQ}; ln -s -f ${TARGET
         move = true
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_FILE_BQ} ]; then
 ssh -p ${port} ${hostname} \"md5sum ${SOURCE_FILE_BQ} > ${SOURCE_DIR_BQ}/${MD5SUM_NAME}\";
 ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${TARGET_DIR_BQ}\";
@@ -865,6 +891,7 @@ ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${LINK_DIR_BQ}; ln -s -f ${TARGET_
         linkLocations.add(new File(LINK_DIR_BQ))
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_DIR_BQ} ]; then
 ssh -p ${port} ${hostname} \"find ${SOURCE_DIR_BQ} -type f -exec md5sum '{}' \\; >> ${SOURCE_BASE_BQ}/${MD5SUM_NAME}";
 ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${TARGET_BASE_BQ}\";
@@ -888,6 +915,7 @@ ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${LINK_BASE_BQ}; ln -s -f ${TARGET
         linkLocations.add(new File(LINK_FILE_BQ))
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_FILE_BQ} ]; then
 ssh -p ${port} ${hostname} \"md5sum ${SOURCE_FILE_BQ} > ${SOURCE_DIR_BQ}/${MD5SUM_NAME}\";
 ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${TARGET_DIR_BQ}\";
@@ -922,6 +950,7 @@ ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${LINK_DIR_BQ}; ln -s -f ${TARGET_
         linkLocations.add(new File(LINK_FILE_DKFZ_1))
         def expectedScript = """
 set -e
+umask 027
 mkdir -p -m 2750 ${LINK_DIR_DKFZ}; ln -s -f ${SOURCE_FILE_BQ} ${LINK_FILE_DKFZ_1};
 """
 
@@ -937,6 +966,7 @@ mkdir -p -m 2750 ${LINK_DIR_DKFZ}; ln -s -f ${SOURCE_FILE_BQ} ${LINK_FILE_DKFZ_1
             md5Sums.add(MD5SUM)
             def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_FILE_DKFZ_1} ]; then
 echo '${MD5SUM}  ${TARGET_FILE_DKFZ_1}' > ${SOURCE_DIR_DKFZ}/${MD5SUM_NAME};
 mkdir -p -m 2750 ${TARGET_DIR_DKFZ};
@@ -962,6 +992,7 @@ fi;
         md5Sums.add(MD5SUM)
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_FILE_BQ} ]; then
 ssh -p ${port} ${hostname} \"echo '${MD5SUM}  ${TARGET_FILE_BQ}' > ${SOURCE_DIR_BQ}/${MD5SUM_NAME}\";
 ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${TARGET_DIR_BQ}\";
@@ -987,6 +1018,7 @@ fi;
         md5Sums.add(MD5SUM)
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_FILE_DKFZ_1} ]; then
 echo '${MD5SUM}  ${TARGET_FILE_BQ}' > ${SOURCE_DIR_DKFZ}/${MD5SUM_NAME};
 ssh -p ${port} ${hostname} \"mkdir -p -m 2750 ${TARGET_DIR_BQ}\";
@@ -1012,6 +1044,7 @@ fi;
         md5Sums.add(MD5SUM)
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_FILE_BQ} ]; then
 ssh -p ${port} ${hostname} \"echo '${MD5SUM}  ${TARGET_FILE_DKFZ_1}' > ${SOURCE_DIR_BQ}/${MD5SUM_NAME}\";
 mkdir -p -m 2750 ${TARGET_DIR_DKFZ};
@@ -1041,6 +1074,7 @@ fi;
         md5Sums.add(null)
         def expectedScript = """
 set -e
+umask 027
 if [ -f ${SOURCE_FILE_DKFZ_1} ]; then
 echo '${MD5SUM}  ${TARGET_FILE_DKFZ_1}' > ${SOURCE_DIR_DKFZ}/${MD5SUM_NAME};
 mkdir -p -m 2750 ${TARGET_DIR_DKFZ};
@@ -1067,5 +1101,17 @@ fi;
 
         String actualScript = service.createTransferScript(sourceLocations, targetLocations, linkLocations, md5Sums)
         assertEquals(expectedScript.trim(), actualScript.trim())
+    }
+
+    @Test
+    void test_makeDirs() {
+        String result = service.makeDirs([new File("/asdf"), new File("/qwertz")], "777")
+        assert result == 'umask 000; mkdir --parents --mode 777 /asdf /qwertz &>/dev/null; echo $?'
+
+        result = service.makeDirs([new File("/asdf")], "750")
+        assert result == 'umask 027; mkdir --parents --mode 750 /asdf &>/dev/null; echo $?'
+
+        result = service.makeDirs([new File("/asdf")])
+        assert result == ' mkdir --parents  /asdf &>/dev/null; echo $?'
     }
 }

@@ -21,6 +21,7 @@ class CreateClusterScriptService {
     final static String MD5SUM_NAME = "md5sum.txt"
     final static String DIRECTORY_PERMISSION = "2750"
     final static String FILE_PERMISSION = "640"
+    final static String UMASK = "027"
 
     /**
      * Method to copy and/or link files.
@@ -61,7 +62,7 @@ class CreateClusterScriptService {
 
         final String CONNECT_TO_BQ = connectToBQCommand()
         StringBuilder copyScript = StringBuilder.newInstance()
-        copyScript << "set -e\n"
+        copyScript << "set -e\numask ${UMASK}\n"
 
         for (int i = 0; i < sourceLocations.size(); i ++) {
             File source = sourceLocations.get(i)
@@ -246,9 +247,13 @@ fi
 
     String makeDirs(Collection<File> dirs, String mode=null) {
         String m = mode ? "--mode ${mode}" : ""
-        return "mkdir --parents ${m} ${dirs.join(' ')} &>/dev/null; echo \$?"
+        String umask = mode ? "umask ${extractMatchingUmaskFromMode(mode)};" : ""
+        return "${umask} mkdir --parents ${m} ${dirs.join(' ')} &>/dev/null; echo \$?"
     }
 
+    String extractMatchingUmaskFromMode(String mode) {
+        return mode[-3..-1].toCharArray().collect({ 7 - Integer.parseInt(it.toString()) }).join("")
+    }
 
     enum RemoveOption {
         RECURSIVE_FORCE("rm -rf"),

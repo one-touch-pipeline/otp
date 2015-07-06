@@ -17,7 +17,7 @@ class MoveFileUtilsService {
         String permissions = readableForAll ? "644" : "640"
 
         if (WaitingFileUtils.waitUntilExists(source)) {
-            executionService.executeCommand(realm, "mkdir -m 2750 -p ${target.parent}; mv -f ${source} ${target}; chmod ${permissions} ${target}")
+            executionService.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${target.parent}; mv -f ${source} ${target}; chmod ${permissions} ${target}")
         }
         assert WaitingFileUtils.waitUntilExists(target)
         assert WaitingFileUtils.waitUntilDoesNotExist(source)
@@ -32,7 +32,7 @@ class MoveFileUtilsService {
         assert WaitingFileUtils.waitUntilExists(sourceDir) : "The source directory ${sourceDir} does not exist."
         Set<String> sourceDirContent = sourceDir.list() as Set
         if (sourceDirContent.size() > 0) {
-            executionService.executeCommand(realm, "mkdir -m 2750 -p ${targetDir}; mv -f ${sourceDir}/* ${targetDir}")
+            executionService.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${targetDir}; mv -f ${sourceDir}/* ${targetDir}")
         }
 
         assert ThreadUtils.waitFor({ (targetDir.list() as Set).containsAll(sourceDirContent) }, WaitingFileUtils.defaultTimeoutMillis, 50)

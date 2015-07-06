@@ -20,7 +20,7 @@ class CreateFastqcOutputDirectoryJob extends AbstractJobImpl {
         SeqTrack seqTrack = SeqTrack.get(seqTrackId)
         String directory = fastqcDataFilesService.fastqcOutputDirectory(seqTrack)
         Realm realm = fastqcDataFilesService.fastqcRealm(seqTrack)
-        String cmd = "mkdir -p -m 2750 " + directory
+        String cmd = "umask 027; mkdir -p -m 2750 " + directory
         String exitCode = executionService.executeCommand(realm, cmd)
         log.debug "creating directory finished with exit code " + exitCode
         if (!new File(directory).canRead()) {

@@ -35,7 +35,7 @@ class CreateViewByPidJob extends AbstractJobImpl {
             return
         }
         String dirName = linkName.substring(0, linkName.lastIndexOf('/'))
-        String cmd = "mkdir -p -m 2750 ${dirName};"
+        String cmd = "umask 027; mkdir -p -m 2750 ${dirName};"
         cmd += "ln -s " + target + " " + linkName
         Realm realm = configService.getRealmDataManagement(file.project)
         executionService.executeCommand(realm, cmd)
