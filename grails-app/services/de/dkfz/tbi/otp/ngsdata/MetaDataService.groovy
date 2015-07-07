@@ -600,6 +600,8 @@ class MetaDataService {
             [regExpr: /^\d{6}_I\d{3}_[A-Z0-9]{11}_L\d_WHAIPI\d{6}-\d{2}(\+1)?_([12]).raw.fq.gz$/, readGroupNumber: 2],
             //FOOBAR_ATRT999_lib424242_1.fastq.gz
             [regExpr: /^.*ATRT\d+_lib\d*_([12]).fastq.gz$/, readGroupNumber: 1],
+            //AS-78215-LR-10213_R1.fastq.gz
+            [regExpr: /^AS-.*-LR-.*_R([12]).fastq.gz$/, readGroupNumber: 1],
         ]
 
         def readNumbers = patterns.collect { pattern ->
