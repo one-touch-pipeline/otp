@@ -1,10 +1,13 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqPlatform
 import de.dkfz.tbi.otp.utils.CreateJobStateLogFileHelper
 import grails.buildtestdata.mixin.Build
@@ -16,7 +19,11 @@ import org.junit.rules.TemporaryFolder
 import static de.dkfz.tbi.TestCase.shouldFail
 import static de.dkfz.tbi.TestCase.shouldFailWithMessage
 
-@Build([RoddyBamFile, SeqPlatform])
+@Build([
+        ClusterJob,
+        RoddyBamFile,
+        SeqPlatform,
+])
 class AbstractRoddyJobUnitTests {
 
     public static final String STATUS_CODE_STARTED = "57427"
@@ -38,9 +45,23 @@ class AbstractRoddyJobUnitTests {
     }
 
     @Test
+    void testGetLogFilePaths() {
+        Realm realm = Realm.build(
+                name: roddyBamFile.project.realmName,
+                rootPath: tmpDir.root.path,
+        )
+        ClusterJob clusterJob = ClusterJob.build(realm: realm)
+        File logDirectory = new File(roddyBamFile.tmpRoddyExecutionStoreDirectory, 'exec_150625_102449388_username_analysis')
+        assert logDirectory.mkdirs()
+        String expected = "Log file: ${new File(logDirectory, "${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}")}"
+
+        assert abstractRoddyJob.getLogFilePaths(clusterJob) == expected
+    }
+
+    @Test
     void testFailedOrNotFinishedClusterJobs_WhenRoddyExecutionDirectoryDoesNotExist_ShouldFail() {
         roddyBamFile.metaClass.getTmpRoddyExecutionStoreDirectory = { ->
-            return new File("/does/not/exist")
+            return TestCase.uniqueNonExistentPath
         }
 
         shouldFail(RuntimeException) { abstractRoddyJob.failedOrNotFinishedClusterJobs([]) }

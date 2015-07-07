@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 import static org.springframework.util.Assert.notNull
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 
@@ -16,7 +17,6 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import static org.springframework.util.Assert.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 /**
@@ -169,6 +169,7 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
             throw new RuntimeException("Could not extract exactly one pbs id from '${concatenatedValues}'", e)
         }
         ClusterJob clusterJob = clusterJobService.createClusterJob(realm, pbsId, processingStep, seqType, pbsJobDescription)
+        threadLog?.info(AbstractOtpJob.getLogFileNames(clusterJob))
 
         return concatenatedValues
     }

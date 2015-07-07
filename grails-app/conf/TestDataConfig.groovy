@@ -16,6 +16,10 @@ def counter = 0
 
 testDataConfig {
     sampleData {
+        'de.dkfz.tbi.otp.infrastructure.ClusterJob' {
+            jobClass = 'testJobClass'
+            clusterJobName = {"clusterJob${counter++}_testJobClass"}
+        }
         'de.dkfz.tbi.otp.ngsdata.DataFile' {
             fileName = 'DataFileFileName_R1.gz'
             vbpFileName = 'DataFileFileName_R1.gz'

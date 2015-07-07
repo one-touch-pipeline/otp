@@ -19,7 +19,6 @@ import org.joda.time.Period
 import javax.sql.DataSource
 import javax.xml.ws.soap.SOAPFaultException
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static java.util.concurrent.TimeUnit.HOURS
@@ -49,7 +48,6 @@ class ClusterJobService {
                                     queued: new DateTime()
                                 ).save(flush: true)
         assert job != null
-        threadLog?.info(job.getLogFileNames())
         return job
     }
 
@@ -60,7 +58,7 @@ class ClusterJobService {
     public void completeClusterJob(ClusterJobIdentifier jobIdentifier) {
         ClusterJob job
         if (jobIdentifier.realm != null) {
-            job = exactlyOneElement(ClusterJob.findAllByRealmAndClusterJobId(jobIdentifier.realm, jobIdentifier.clusterJobId))
+            job = ClusterJob.findByClusterJobIdentifier(jobIdentifier)
         } else {
             job = exactlyOneElement(ClusterJob.findAllByClusterJobId(jobIdentifier.clusterJobId))
         }

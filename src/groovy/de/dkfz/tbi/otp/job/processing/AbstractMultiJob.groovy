@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.job.processing
 import de.dkfz.tbi.otp.job.scheduler.PbsJobInfo
 
 import static de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -133,8 +132,7 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
             final NextAction action = execute(finishedClusterJobs)
             ClusterJob.withTransaction {
                 finishedClusterJobs.each {
-                    final ClusterJob finishedClusterJob =
-                            exactlyOneElement(ClusterJob.findAllByRealmAndClusterJobId(it.realm, it.clusterJobId))
+                    final ClusterJob finishedClusterJob = ClusterJob.findByClusterJobIdentifier(it)
                     assert finishedClusterJob.processingStep.id == processingStep.id
                     assert !finishedClusterJob.validated
                     finishedClusterJob.validated = true

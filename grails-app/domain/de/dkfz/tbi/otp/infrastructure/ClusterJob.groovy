@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.infrastructure
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+
 import de.dkfz.tbi.otp.gorm.mapper.PersistentDateTimeAsMillis
 import de.dkfz.tbi.otp.gorm.mapper.PersistentDurationAsMillis
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
@@ -220,8 +222,11 @@ class ClusterJob implements ClusterJobIdentifier{
         return PeriodFormat.getDefault().print(new Period(value))
     }
 
-    public String getLogFileNames() {
-        return "Output log file: ${clusterJobName}.o${clusterJobId}\nError log file: ${clusterJobName}.e${clusterJobId}"
+    public static ClusterJob findByClusterJobIdentifier(ClusterJobIdentifier identifier) {
+        return exactlyOneElement(findAllWhere(
+                realm: identifier.realm,
+                clusterJobId: identifier.clusterJobId,
+        ))
     }
 
     @Override

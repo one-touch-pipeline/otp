@@ -1,7 +1,10 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
+
 import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.job.processing.AbstractMaybeSubmitWaitValidateJob
@@ -73,6 +76,12 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
     protected abstract void validate(RoddyResult roddyResultObject) throws Throwable
 
     @Override
+    protected String getLogFilePaths(ClusterJob clusterJob) {
+        File logDirectory = ((RoddyResult)getProcessParameterObject()).latestTmpRoddyExecutionDirectory
+        return "Log file: ${new File(logDirectory, "${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}")}"
+    }
+
+    @Override
     protected Map<ClusterJobIdentifier, String> failedOrNotFinishedClusterJobs(
             Collection<? extends ClusterJobIdentifier> finishedClusterJobs) throws Throwable {
 
@@ -121,7 +130,8 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
                 String jobClass = m.group(2)
                 String pbsId = m.group(3)
 
-                clusterJobService.createClusterJob(realm, pbsId, processingStep, seqType, jobName, jobClass)
+                ClusterJob clusterJob = clusterJobService.createClusterJob(realm, pbsId, processingStep, seqType, jobName, jobClass)
+                threadLog?.info(getLogFilePaths(clusterJob))
             } else {
                 throw new RuntimeException("Could not match '${it}' against '${roddyOutputPattern}")
             }

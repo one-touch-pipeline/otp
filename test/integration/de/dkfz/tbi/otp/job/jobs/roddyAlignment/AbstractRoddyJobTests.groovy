@@ -14,7 +14,9 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 
 class AbstractRoddyJobTests {
 
@@ -32,14 +34,18 @@ class AbstractRoddyJobTests {
     ClusterJobService clusterJobService
 
     AbstractRoddyJob roddyJob
+    RoddyBamFile roddyBamFile
     Realm realm
     int counter
+
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder()
 
     @Before
     void setUp() {
         counter = 0
 
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
+        roddyBamFile = DomainFactory.createRoddyBamFile()
         realm = Realm.build([name: roddyBamFile.project.realmName, operationType: Realm.OperationType.DATA_MANAGEMENT])
 
         roddyJob = [
@@ -72,8 +78,15 @@ class AbstractRoddyJobTests {
         TestCase.removeMetaClass(AbstractRoddyJob, roddyJob)
     }
 
+    private void setRootPathAndCreateTmpRoddyExecutionStoreDirectory() {
+        realm.rootPath = tempFolder.newFolder().path
+        assert realm.save(failOnError: true)
+        assert new File(roddyBamFile.tmpRoddyExecutionStoreDirectory, 'exec_150625_102449388_username_analysis').mkdirs()
+    }
+
     @Test
     void testMaybeSubmit() {
+        setRootPathAndCreateTmpRoddyExecutionStoreDirectory()
         assert AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == roddyJob.maybeSubmit()
         assert counter == 2
     }
@@ -87,6 +100,7 @@ class AbstractRoddyJobTests {
 
     @Test
     void testExecute_finishedClusterJobsIsNull_MaybeSubmit() {
+        setRootPathAndCreateTmpRoddyExecutionStoreDirectory()
         roddyJob.metaClass.maybeSubmit = {
             return AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
         }
@@ -127,6 +141,7 @@ class AbstractRoddyJobTests {
 
     @Test
     void testCreateClusterJobObjects_Works() {
+        setRootPathAndCreateTmpRoddyExecutionStoreDirectory()
         String roddyOutput = """\
 Running job ${SNV_CALLING_META_SCRIPT_JOB_NAME} => ${SNV_CALLING_META_SCRIPT_PBSID}
 Running job ${SNV_ANNOTATION_JOB_NAME} => ${SNV_ANNOTATION_PBSID}
@@ -217,6 +232,7 @@ Rerun job ${ALIGN_AND_PAIR_SLIM_JOB_NAME} => ${ALIGN_AND_PAIR_SLIM_PBSID}"""
 
     @Test
     void testCreateClusterJobObjects_EntryHasSpacesAtTheStart() {
+        setRootPathAndCreateTmpRoddyExecutionStoreDirectory()
         String roddyOutput = "    Running job r150428_104246480_stds_snvCallingMetaScript => 3504988"
 
         roddyJob.createClusterJobObjects(realm, roddyOutput)
@@ -226,6 +242,7 @@ Rerun job ${ALIGN_AND_PAIR_SLIM_JOB_NAME} => ${ALIGN_AND_PAIR_SLIM_PBSID}"""
 
     @Test
     void testCreateClusterJobObjects_EntryHasTrailingSpaces() {
+        setRootPathAndCreateTmpRoddyExecutionStoreDirectory()
         String roddyOutput = "Running job r150428_104246480_stds_snvCallingMetaScript => 3504988    "
 
         roddyJob.createClusterJobObjects(realm, roddyOutput)

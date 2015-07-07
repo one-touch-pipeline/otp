@@ -31,12 +31,17 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
 ${failedClusterJobs.size()} of ${finishedClusterJobs.size()} cluster jobs failed:
 ${
     failedClusterJobs.collect { ClusterJobIdentifier clusterJobIdentifier, String reason ->
-        "${clusterJobIdentifier}: ${reason}\n${ClusterJob.findByClusterJobId(clusterJobIdentifier.clusterJobId).getLogFileNames()}\n"
+        "${clusterJobIdentifier}: ${reason}\n${getLogFilePaths(ClusterJob.findByClusterJobIdentifier(clusterJobIdentifier))}\n"
     }.join("\n")
 }
 """
     }
 
+    /**
+     * Returns a string containing the absolute or relative path(s) of the log file(s) written by the specified cluster
+     * job.
+     */
+    protected abstract String getLogFilePaths(ClusterJob clusterJob)
 
     /**
      * Returns all failed or not finished ClusterJobs
