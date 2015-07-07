@@ -1,3 +1,4 @@
+import de.dkfz.tbi.otp.security.IpRestrictedLdapAuthenticationProvider
 import grails.util.Environment
 
 // Place your Spring DSL code here
@@ -31,4 +32,6 @@ beans = {
             password = grailsApplication.config.otp.jabber.password
         }
     }
+
+    ipRestrictedLdapAuthenticationProvider(IpRestrictedLdapAuthenticationProvider)
 }
