@@ -240,6 +240,8 @@ class LsdfFilesService {
 
     static void ensureDirIsReadableAndNotEmpty(final File dir) {
         assert waitUntilExists(dir)
+        assert dir.directory
+        assert dir.listFiles().length != 0
     }
 
 

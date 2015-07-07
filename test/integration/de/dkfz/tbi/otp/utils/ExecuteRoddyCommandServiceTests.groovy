@@ -60,6 +60,7 @@ class ExecuteRoddyCommandServiceTests {
 
         roddyBaseConfigsPath = new File(ProcessingOptionService.getValueOfProcessingOption("roddyBaseConfigsPath"))
         roddyBaseConfigsPath.mkdirs()
+        new File(roddyBaseConfigsPath, "file name").write("file content")
         applicationIniPath = new File(ProcessingOptionService.getValueOfProcessingOption("roddyApplicationIni"))
         assert CreateFileHelper.createFile(applicationIniPath)
     }

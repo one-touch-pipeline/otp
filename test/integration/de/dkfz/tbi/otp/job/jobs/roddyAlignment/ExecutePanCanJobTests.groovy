@@ -84,6 +84,7 @@ class ExecutePanCanJobTests {
 
         chromosomeSizeFiles = executePanCanJob.referenceGenomeService.pathToChromosomeSizeFilesPerReference(roddyBamFile.project, roddyBamFile.referenceGenome) as File
         assert chromosomeSizeFiles.mkdirs()
+        new File(chromosomeSizeFiles, "file name").write("file content")
 
         roddyBamFile.workPackage.metaClass.findMergeableSeqTracks = { -> SeqTrack.list() }
     }
