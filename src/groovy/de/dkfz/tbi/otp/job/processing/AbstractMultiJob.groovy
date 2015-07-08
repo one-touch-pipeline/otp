@@ -59,6 +59,7 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
             assert updates[0].state == ExecutionState.STARTED
             if (monitoredClusterJobs.empty) {
                 assert updates[1].state == ExecutionState.CREATED
+                assert ClusterJob.findAllByProcessingStep(processingStep).empty
                 callExecute()
             } else {
                 assert updates[1].state == ExecutionState.RESUMED
