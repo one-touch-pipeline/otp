@@ -98,9 +98,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         // before Grails 2.1. This means we can't remove the @Ignore annotations yet, but it will
         // prevent the tests from being run with wrong settings. (TODO: remove this comments when
         // we use Grails >2.1)
-        // check whether the wf test root dir is mounted
-        // (assume it is mounted if it exists and contains files)
-        Assume.assumeTrue(new File(getRootDirectory()).list().size() > 0)
         // check whether the correct environment is set
         Assume.assumeTrue(Environment.current.name == "WORKFLOW_TEST")
 
@@ -146,6 +143,12 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
 
     private void setupDirectoriesAndRealms() {
+
+        // check whether the wf test root dir is mounted
+        // (assume it is mounted if it exists and contains files)
+        File rootDirectory = getRootDirectory()
+        assert rootDirectory.list()?.size() : "${rootDirectory} seems not to be mounted"
+
         rootPath = "${getBaseDirectory()}/root_path/"
         processingRootPath = "${getBaseDirectory()}/processing_root_path/"
         loggingRootPath = "${getBaseDirectory()}/logging_root_path/"
@@ -275,7 +278,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     }
 
     protected File getWorkflowDirectory() {
-        File workflowDirectory = new File("${getRootDirectory()}", "${getNonQualifiedClassName()}")
+        File workflowDirectory = new File(getRootDirectory(), getNonQualifiedClassName())
         return workflowDirectory
     }
 
@@ -305,8 +308,8 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
      *
      * @see #getBaseDirectory()
      */
-    protected String getRootDirectory() {
-        return grailsApplication.config.otp.testing.workflows.rootdir
+    protected File getRootDirectory() {
+        return new File(grailsApplication.config.otp.testing.workflows.rootdir)
     }
 
     /**
