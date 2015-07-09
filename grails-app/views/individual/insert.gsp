@@ -27,7 +27,7 @@
                                 <label for="project"><g:message code="individual.insert.project"/></label>
                             </td>
                             <td valign="top" class="value ${hasErrors(bean:individual,field:'project','errors')}">
-                                <g:select name="project" from="${projects}" optionKey="id" id="project" />
+                                <g:select name="project" from="${projects}" optionKey="id" id="project" noSelection="[null: '']" />
                             </td>
                             <td>
                             </td>
@@ -78,7 +78,7 @@
                                 <label for="sample"><g:message code="individual.insert.sample"/></label>
                             </td>
                             <td valign="top" class="sampleType">
-                                <g:select name="sampleType" from="${sampleTypes}" class="dropDown" />
+                                <g:select name="sampleType" from="${sampleTypes}" class="dropDown" noSelection="[null: '']" />
                             </td>
                             <td>
                             </td>
@@ -101,7 +101,7 @@
                                 <label for="sample"><g:message code="individual.insert.sample"/></label>
                             </td>
                             <td valign="top" class="sampleType">
-                                <g:select name="sampleType" from="${sampleTypes}" class="dropDown" />
+                                <g:select name="sampleType" from="${sampleTypes}" class="dropDown" noSelection="[null: '']" />
                             </td>
                             <td>
                             </td>
