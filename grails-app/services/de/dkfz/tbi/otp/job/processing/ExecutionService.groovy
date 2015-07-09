@@ -244,13 +244,18 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
                 ((ChannelExec)channel).setCommand(command)
                 ((ChannelExec)channel).setInputStream(script.newInputStream())
             }
-            ((ChannelExec)channel).setErrStream(System.err)
+            OutputStream outputErrorStream = new ByteArrayOutputStream()
+            ((ChannelExec)channel).setErrStream(outputErrorStream)
             List<String> values = getInputStream(channel)
             if (values == null) {
                 // TODO: How to handle this?
                 throw new ProcessingException("test!")
             }
             logToJob("received response: " + concatResults(values))
+            String errorOutput = outputErrorStream.toString()
+            if (errorOutput) {
+                logToJob("received error response:\n" + errorOutput)
+            }
             disconnectSsh(channel)
             return values
         } catch (Exception e) {
