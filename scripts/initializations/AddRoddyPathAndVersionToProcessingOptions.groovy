@@ -1,3 +1,5 @@
+import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
+
 /**
  *
  * Script to add
@@ -13,6 +15,14 @@ println ctx.processingOptionService.createOrUpdate(
         null,
         "/path/to/roddy/",
         "Path to the roddy.sh on the current cluster (***REMOVED***cluster 11.4)",
+)
+
+println ctx.processingOptionService.createOrUpdate(
+        ExecuteRoddyCommandService.CORRECT_PERMISSION_SCRIPT_NAME,
+        "",
+        null,
+        "/path/to/programs/otp/OtherUnixUserBashScripts/correctPathPermissionsOtherUnixUserRemoteWrapper.sh",
+        "Script to correct file/directoryPermissions",
 )
 
 println ctx.processingOptionService.createOrUpdate(

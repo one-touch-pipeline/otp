@@ -7,6 +7,7 @@ import org.junit.After
 import org.junit.Before
 import grails.buildtestdata.mixin.Build
 import org.junit.Rule
+import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
 /**
@@ -41,24 +42,28 @@ class MoveFileUtilsServiceUnitTests {
         testDirectory = null
     }
 
+    @Test
     void testMoveFileIfExists_InputRealmIsNull_ShouldFail() {
-        shouldFail (AssertionError) {
+        assert shouldFail (AssertionError) {
             moveFileUtilsService.moveFileIfExists(null, new File(SOURCE_FILE), new File(TARGET_FILE))
-        }
+        }.contains('realm')
     }
 
+    @Test
     void testMoveFileIfExists_InputSourceIsNull_ShouldFail() {
-        shouldFail (AssertionError) {
+        assert shouldFail (AssertionError) {
             moveFileUtilsService.moveFileIfExists(realm, null, new File(TARGET_FILE))
-        }
+        }.contains('source')
     }
 
+    @Test
     void testMoveFileIfExists_InputTargetIsNull_ShouldFail() {
-        shouldFail (AssertionError) {
+        assert shouldFail (AssertionError) {
             moveFileUtilsService.moveFileIfExists(realm, new File(SOURCE_FILE), null)
-        }
+        }.contains('target')
     }
 
+    @Test
     void testMoveFileIfExists_SourceDoesNotExist_NoCopying() {
         File targetFile = testDirectory.newFile(TARGET_FILE)
 
@@ -69,6 +74,7 @@ class MoveFileUtilsServiceUnitTests {
         moveFileUtilsService.moveFileIfExists(realm, new File("sourceFileDoesNotExist"), targetFile)
     }
 
+    @Test
     void testMoveFileIfExists_TargetDoesNotExistsAfterCopying_ShouldFail() {
         File sourceFile = testDirectory.newFile(SOURCE_FILE)
         File targetFile = new File("targetFileDoesNotExist")
@@ -82,6 +88,7 @@ class MoveFileUtilsServiceUnitTests {
         }
     }
 
+    @Test
     void testMoveFileIfExists_SourceStillExistsAfterCopying_ShouldFail() {
         File sourceFile = testDirectory.newFile(SOURCE_FILE)
         File targetFile = testDirectory.newFile(TARGET_FILE)
@@ -94,6 +101,7 @@ class MoveFileUtilsServiceUnitTests {
         }
     }
 
+    @Test
     void testMoveFileIfExists_SourceExists_CopyingSuccessful() {
         File sourceFile = testDirectory.newFile(SOURCE_FILE)
         File targetFile = testDirectory.newFile(TARGET_FILE)
@@ -107,6 +115,7 @@ class MoveFileUtilsServiceUnitTests {
         assert WaitingFileUtils.waitUntilExists(targetFile)
     }
 
+    @Test
     void testMoveFileIfExists_OlderTargetExistsAlready_OverwriteSuccessful() {
         File sourceFolder = testDirectory.newFolder(SOURCE_FOLDER)
         File sourceFile = new File(sourceFolder, SOURCE_FILE)
@@ -126,6 +135,7 @@ class MoveFileUtilsServiceUnitTests {
         assert targetFile_allreadyExists.text == SOURCE_FILE
     }
 
+    @Test
     void testMoveFileIfExists_CopyingSuccessful_ReadPermissionsForAll() {
         File sourceFile = testDirectory.newFile(SOURCE_FILE)
         File targetFile = testDirectory.newFile(TARGET_FILE)
@@ -141,24 +151,120 @@ class MoveFileUtilsServiceUnitTests {
 
 
 
+
+    @Test
+    void testMoveFileIfExists_WithPermissionMaskParameter_InputRealmIsNull_ShouldFail() {
+        assert shouldFail (AssertionError) {
+            moveFileUtilsService.moveFileIfExists(null, new File(SOURCE_FILE), new File(TARGET_FILE), "600")
+        }.contains('realm')
+    }
+
+    @Test
+    void testMoveFileIfExists_WithPermissionMaskParameter_InputSourceIsNull_ShouldFail() {
+        assert shouldFail (AssertionError) {
+            moveFileUtilsService.moveFileIfExists(realm, null, new File(TARGET_FILE), "600")
+        }.contains('source')
+    }
+
+    @Test
+    void testMoveFileIfExists_WithPermissionMaskParameter_InputTargetIsNull_ShouldFail() {
+        assert shouldFail (AssertionError) {
+            moveFileUtilsService.moveFileIfExists(realm, new File(SOURCE_FILE), null, "600")
+        }.contains('target')
+    }
+
+    @Test
+    void testMoveFileIfExists_WithPermissionMaskParameter_SourceDoesNotExist_NoMoving() {
+        File targetFile = testDirectory.newFile(TARGET_FILE)
+
+        moveFileUtilsService.executionService.metaClass.executeCommand = {Realm realm, String cmd ->
+            assert false : "should not call this method at all since no copying is needed"
+        }
+
+        moveFileUtilsService.moveFileIfExists(realm, new File("sourceFileDoesNotExist"), targetFile, "600")
+    }
+
+    @Test
+    void testMoveFileIfExists_WithPermissionMaskParameter_TargetDoesNotExistsAfterMoving_ShouldFail() {
+        File sourceFile = testDirectory.newFile(SOURCE_FILE)
+        File targetFile = new File("targetFileDoesNotExist")
+
+        moveFileUtilsService.executionService.metaClass.executeCommand = {Realm realm, String cmd ->
+            assert cmd == "mv ${sourceFile.path} ${targetFile.path}; chmod 600 ${targetFile}"
+            sourceFile.delete()
+        }
+        assert shouldFail (AssertionError) {
+            moveFileUtilsService.moveFileIfExists(realm, sourceFile, targetFile, "600")
+        }.contains(targetFile.name)
+    }
+
+    @Test
+    void testMoveFileIfExists_WithPermissionMaskParameter_SourceStillExistsAfterMoving_ShouldFail() {
+        File sourceFile = testDirectory.newFile(SOURCE_FILE)
+        File targetFile = testDirectory.newFile(TARGET_FILE)
+
+        moveFileUtilsService.executionService.metaClass.executeCommand = {Realm realm, String cmd ->
+            assert cmd == "mv ${sourceFile} ${targetFile}; chmod 600 ${targetFile}"
+        }
+        assert shouldFail (AssertionError) {
+            moveFileUtilsService.moveFileIfExists(realm, sourceFile, targetFile, "600")
+        }.contains(targetFile.name)
+    }
+
+    @Test
+    void testMoveFileIfExists_WithPermissionMaskParameter_SourceExists_MovingSuccessful() {
+        File sourceFile = testDirectory.newFile(SOURCE_FILE)
+        File targetFile = testDirectory.newFile(TARGET_FILE)
+        targetFile.delete()
+
+        moveFileUtilsService.executionService.metaClass.executeCommand = {Realm realm, String cmd ->
+            assert cmd == "umask 027; mkdir -m 2750 -p ${targetFile.parent}; mv -f ${sourceFile.path} ${targetFile.path}; chmod 600 ${targetFile}"
+            executeCommandLocally(cmd)
+        }
+        moveFileUtilsService.moveFileIfExists(realm, sourceFile, targetFile, "600")
+        assert !sourceFile.exists()
+        assert targetFile.exists()
+    }
+
+    @Test
+    void testMoveFileIfExists_WithPermissionMaskParameter_MovingSuccessful_NoPermissionChange() {
+        File sourceFile = testDirectory.newFile(SOURCE_FILE)
+        File targetFile = testDirectory.newFile(TARGET_FILE)
+        targetFile.delete()
+
+        moveFileUtilsService.executionService.metaClass.executeCommand = {Realm realm, String cmd ->
+            assert cmd == "umask 027; mkdir -m 2750 -p ${targetFile.parent}; mv -f ${sourceFile.path} ${targetFile.path}"
+            executeCommandLocally(cmd)
+        }
+        moveFileUtilsService.moveFileIfExists(realm, sourceFile, targetFile, null)
+        assert !sourceFile.exists()
+        assert targetFile.exists()
+    }
+
+
+
+    @Test
     void testMoveDirContentIfExists_InputRealmIsNull_ShouldFail() {
         shouldFail (AssertionError) {
             moveFileUtilsService.moveDirContentIfExists(null, new File(SOURCE_FOLDER), new File(TARGET_FOLDER))
         }
     }
 
+    @Test
     void testMoveDirContentIfExists_InputSourceIsNull_ShouldFail() {
         shouldFail (AssertionError) {
             moveFileUtilsService.moveDirContentIfExists(realm, null, new File(TARGET_FOLDER))
         }
     }
 
+    @Test
     void testMoveDirContentIfExists_InputTargetIsNull_ShouldFail() {
         shouldFail (AssertionError) {
             moveFileUtilsService.moveDirContentIfExists(realm, new File(SOURCE_FOLDER), null)
         }
     }
 
+    @Test
     void testMoveDirContentIfExists_SourceDirDoesNotExist_ShouldFail() {
         File targetFolder = testDirectory.newFolder(TARGET_FOLDER)
         File sourceFolder = testDirectory.newFolder(SOURCE_FOLDER)
@@ -173,6 +279,7 @@ class MoveFileUtilsServiceUnitTests {
         }
     }
 
+    @Test
     void testMoveDirContentIfExists_FolderIsEmpty_NoCopying() {
         File targetFolder = testDirectory.newFolder(TARGET_FOLDER)
         File sourceFolder = testDirectory.newFolder(SOURCE_FOLDER)
@@ -184,6 +291,7 @@ class MoveFileUtilsServiceUnitTests {
         moveFileUtilsService.moveDirContentIfExists(realm, sourceFolder, targetFolder)
     }
 
+    @Test
     void testMoveDirContentIfExists_FilesInSourceWhereNotCopiedToTarget_ShouldFail() {
         File targetFolder = testDirectory.newFolder(TARGET_FOLDER)
         File sourceFolder = testDirectory.newFolder(SOURCE_FOLDER)
@@ -199,6 +307,7 @@ class MoveFileUtilsServiceUnitTests {
         }
     }
 
+    @Test
     void testMoveDirContentIfExists_FilesAreStillInSourceAfterCopying_ShouldFail() {
         File targetFolder = testDirectory.newFolder(TARGET_FOLDER)
         File sourceFolder = testDirectory.newFolder(SOURCE_FOLDER)
@@ -216,6 +325,7 @@ class MoveFileUtilsServiceUnitTests {
         }
     }
 
+    @Test
     void testMoveDirContentIfExists_SourceExists_CopyingSuccessful() {
         File targetFolder = testDirectory.newFolder(TARGET_FOLDER)
         File sourceFolder = testDirectory.newFolder(SOURCE_FOLDER)
@@ -230,6 +340,7 @@ class MoveFileUtilsServiceUnitTests {
         moveFileUtilsService.moveDirContentIfExists(realm, sourceFolder, targetFolder)
     }
 
+    @Test
     void testMoveDirContentIfExists_TargetDirAlreadyExistedWithDifferentContent() {
         File targetFolder = testDirectory.newFolder(TARGET_FOLDER)
         File sourceFolder = testDirectory.newFolder(SOURCE_FOLDER)

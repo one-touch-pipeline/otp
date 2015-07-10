@@ -2,12 +2,16 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.MoveFileUtilsService
+import de.dkfz.tbi.otp.utils.ProcessHelperService
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.job.processing.ExecutionService
@@ -30,6 +34,9 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
     @Autowired
     MoveFileUtilsService moveFileUtilsService
 
+    @Autowired
+    ExecuteRoddyCommandService executeRoddyCommandService
+
     @Override
     void execute() throws Exception {
         final RoddyBamFile roddyBamFile = getProcessParameterObject()
@@ -45,8 +52,10 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
                 roddyBamFile.fileOperationStatus = FileOperationStatus.INPROGRESS
                 assert roddyBamFile.save(flush: true)
             }
+            correctPermissions(roddyBamFile)
             deletePreviousMergedBamResultFiles(roddyBamFile, realm)
             moveResultFiles(roddyBamFile, realm)
+            correctPermissions(roddyBamFile)
         } else {
             this.log.info "The results of ${roddyBamFile} will not be moved since it is marked as withdrawn"
         }
@@ -67,6 +76,13 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
         succeed()
     }
 
+
+    void correctPermissions(RoddyBamFile roddyBamFile) {
+        assert roddyBamFile : "RoddyBamFile should not be null"
+        File baseFile = new File(AbstractMergedBamFileService.destinationDirectory(roddyBamFile))
+        String cmd = executeRoddyCommandService.correctPermissionCommand(baseFile)
+        ProcessHelperService.executeCommandAndAssertExistCodeAndReturnStdout(cmd)
+    }
 
     /*
      * To prevent uncertain states in the file system the old roddy bam file and the old qc for this merged bam file
@@ -103,7 +119,7 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
             moveFileUtilsService.moveFileIfExists(realm,
                     roddyBamFile."tmpRoddy${it}File",
                     roddyBamFile."final${it}File",
-                    true)
+                    null)
         }
 
         ['MergedQA', 'ExecutionStore'].each {

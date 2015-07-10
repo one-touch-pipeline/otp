@@ -14,10 +14,24 @@ class MoveFileUtilsService {
         assert source : "Input source must not be null"
         assert target : "Input target must not be null"
 
-        String permissions = readableForAll ? "644" : "640"
+        String permissionMask = readableForAll ? "644" : "640"
+
+        moveFileIfExists(realm, source, target, permissionMask)
+    }
+
+    /**
+     * Move the file from source to target and adapt the permission mask if defined. An empty or null permission mask disable changing of mask.
+     * If source does not exist, no movement and no mask change are done.
+     */
+    void moveFileIfExists(Realm realm, File source, File target, String permissionMask) {
+        assert realm : "Input realm must not be null"
+        assert source : "Input source must not be null"
+        assert target : "Input target must not be null"
+
+        String changePermission = permissionMask ? "; chmod ${permissionMask} ${target}" : ""
 
         if (WaitingFileUtils.waitUntilExists(source)) {
-            executionService.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${target.parent}; mv -f ${source} ${target}; chmod ${permissions} ${target}")
+            executionService.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${target.parent}; mv -f ${source} ${target}${changePermission}")
         }
         assert WaitingFileUtils.waitUntilExists(target)
         assert WaitingFileUtils.waitUntilDoesNotExist(source)

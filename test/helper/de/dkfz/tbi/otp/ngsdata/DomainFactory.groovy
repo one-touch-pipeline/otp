@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
+import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.ExternalScript
 import grails.util.Environment
 import org.joda.time.DateTime
@@ -516,6 +517,14 @@ class DomainFactory {
             comment: "Path to the roddy.sh on the current cluster (***REMOVED***cluster 11.4)",
         )
         assert processingOptionPath.save(flush: true)
+
+        assert new ProcessingOption(
+                name: ExecuteRoddyCommandService.CORRECT_PERMISSION_SCRIPT_NAME,
+                type: "",
+                project: null,
+                value: "${basePath}/correctPathPermissionsOtherUnixUserRemoteWrapper.sh",
+                comment: "some comment",
+        ).save(flush: true)
 
         ProcessingOption processingOptionVersion = new ProcessingOption(
             name: "roddyVersion",

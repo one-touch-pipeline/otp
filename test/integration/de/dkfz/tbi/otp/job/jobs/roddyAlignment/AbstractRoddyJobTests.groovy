@@ -12,6 +12,8 @@ import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
+import de.dkfz.tbi.otp.utils.ProcessHelperService
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -58,24 +60,17 @@ class AbstractRoddyJobTests {
         roddyJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
         roddyJob.configService = new ConfigService()
         roddyJob.clusterJobService = new ClusterJobService()
-
-        roddyJob.executeRoddyCommandService.metaClass.executeRoddyCommand = { String cmd ->
-            return [ 'bash', '-c', "echo Hallo" ].execute()
-        }
-        roddyJob.executeRoddyCommandService.metaClass.returnStdoutOfFinishedCommandExecution = { Process process ->
-            counter ++
-            return "Running job r150428_104246480_stds_snvCallingMetaScript => 3504988"
-        }
-        roddyJob.executeRoddyCommandService.metaClass.checkIfRoddyWFExecutionWasSuccessful = { Process process ->
+        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnStdout = {String cmd->
             counter++
+            'Running job abc_def => 3504988'
         }
-        roddyJob.log = log
     }
 
     @After
     void tearDown() {
         TestCase.removeMetaClass(ExecuteRoddyCommandService, roddyJob.executeRoddyCommandService)
         TestCase.removeMetaClass(AbstractRoddyJob, roddyJob)
+        GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
     }
 
     private void setRootPathAndCreateTmpRoddyExecutionStoreDirectory() {
@@ -87,8 +82,10 @@ class AbstractRoddyJobTests {
     @Test
     void testMaybeSubmit() {
         setRootPathAndCreateTmpRoddyExecutionStoreDirectory()
-        assert AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == roddyJob.maybeSubmit()
-        assert counter == 2
+        LogThreadLocal.withThreadLog(System.out) {
+            assert AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == roddyJob.maybeSubmit()
+        }
+        assert counter == 1
     }
 
     @Test
@@ -107,8 +104,9 @@ class AbstractRoddyJobTests {
         roddyJob.metaClass.validate = {
             throw new RuntimeException("should not come here")
         }
-
-        assert AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == roddyJob.execute(null)
+        LogThreadLocal.withThreadLog(System.out) {
+            assert AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == roddyJob.execute(null)
+        }
     }
 
     @Test

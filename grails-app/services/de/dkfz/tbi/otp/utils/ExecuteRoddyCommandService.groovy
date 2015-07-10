@@ -14,6 +14,8 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 class ExecuteRoddyCommandService {
 
+    static final String CORRECT_PERMISSION_SCRIPT_NAME = "OtherUnixUserCorrectPermissionScript"
+
     ExecutionService executionService
 
     String roddyBaseCommand(File roddyPath, String configName, String analysisId) {
@@ -78,31 +80,6 @@ class ExecuteRoddyCommandService {
     }
 
 
-    Process executeRoddyCommand(String cmd) {
-        assert cmd : "The input cmd must not be null"
-        return [ 'bash', '-c', cmd ].execute()
-    }
-
-
-     String returnStdoutOfFinishedCommandExecution(Process process) {
-         assert process : "The input process must not be null"
-         StringBuffer stdout = new StringBuffer()
-         StringBuffer stderr = new StringBuffer()
-         process.waitForProcessOutput(stdout, stderr)
-
-         //Roddy give some output in stderr, therefor we can not check for empty stderr
-
-         LogThreadLocal.getThreadLog().debug("Roddy stderr:\n ${stderr}")
-         LogThreadLocal.getThreadLog().debug("Roddy stdout:\n ${stdout}")
-         return stdout.toString().trim()
-    }
-
-
-    void checkIfRoddyWFExecutionWasSuccessful(Process process) {
-        assert process : "The input process must not be null"
-        assert process.exitValue() == 0 : "The Roddy exit code is not equals 0, but ${process.exitValue()}"
-    }
-
     /**
      * Returns the analysis id which has to be used in this roddy workflow
      */
@@ -121,7 +98,14 @@ class ExecuteRoddyCommandService {
     public void createTemporaryOutputDirectory(Realm realm, File file) {
         assert realm : "Realm must not be null"
         assert file : "File must not be null"
-        executionService.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 ${file};")
+        executionService.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 ${file} && chgrp localGroup ${file};")
         assert WaitingFileUtils.waitUntilExists(file) : "Creation of '${file}' failed"
     }
+
+    String correctPermissionCommand(File basePath) {
+        assert basePath : "basePath is not allowed to be null"
+        File permissionScript = ProcessingOptionService.getValueOfProcessingOption(CORRECT_PERMISSION_SCRIPT_NAME) as File
+        return "cd /tmp && ${executeCommandAsRoddyUser()} ${permissionScript} ${basePath}"
+    }
+
 }

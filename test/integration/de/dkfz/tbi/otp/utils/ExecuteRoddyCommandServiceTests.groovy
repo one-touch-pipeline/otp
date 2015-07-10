@@ -28,7 +28,6 @@ class ExecuteRoddyCommandServiceTests {
 
     final String CONFIG_NAME = "WORKFLOW_VERSION"
     final String ANALYSIS_ID = "WHOLE_GENOME"
-    final String COMMAND = "Hallo\nTest"
 
     File roddyPath
     File roddyCommand
@@ -101,57 +100,6 @@ class ExecuteRoddyCommandServiceTests {
         String expectedCmd =  "cd /tmp && sudo -u OtherUnixUser ${roddyPath}/roddy.sh rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} "
         String actualCmd = executeRoddyCommandService.roddyBaseCommand(roddyPath, CONFIG_NAME, ANALYSIS_ID)
         assert expectedCmd == actualCmd
-    }
-
-    @Test
-    void testExecuteRoddyCommand_InputCommandIsNull_ShouldFail() {
-        assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.executeRoddyCommand(null)
-        }.contains("The input cmd must not be null")
-    }
-
-    @Test
-    void testExecuteRoddyCommand_AllFine() {
-        StringBuffer stdout = new StringBuffer()
-        StringBuffer stderr = new StringBuffer()
-
-        Process process = executeRoddyCommandService.executeRoddyCommand("echo '${COMMAND}'")
-
-        process.waitForProcessOutput(stdout, stderr)
-        assert stdout.toString().trim() == COMMAND
-    }
-
-
-    @Test
-    void testReturnStdoutOfFinishedCommandExecution_InputIsNull_ShouldFail() {
-        assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.returnStdoutOfFinishedCommandExecution(null)
-        }.contains("The input process must not be null")
-    }
-
-    @Test
-    void testReturnStdoutOfFinishedCommandExecution_AllFine() {
-        Process process = [ 'bash', '-c', "echo '${COMMAND}'" ].execute()
-        LogThreadLocal.withThreadLog(System.out) {
-            String actual = executeRoddyCommandService.returnStdoutOfFinishedCommandExecution(process)
-            String expected = COMMAND
-            assert actual == expected
-        }
-    }
-
-
-    @Test
-    void testCheckIfRoddyWFExecutionWasSuccessful_InputIsNull_ShouldFail() {
-        assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.checkIfRoddyWFExecutionWasSuccessful(null)
-        }.contains("The input process must not be null")
-    }
-
-    @Test
-    void testCheckIfRoddyWFExecutionWasSuccessful_AllFine() {
-        Process process = [ 'bash', '-c', "echo '${COMMAND}'" ].execute()
-        process.waitFor()
-        executeRoddyCommandService.checkIfRoddyWFExecutionWasSuccessful(process)
     }
 
 
@@ -342,6 +290,32 @@ class ExecuteRoddyCommandServiceTests {
             [ 'bash', '-c', command ].execute().waitFor()
         }
         executeRoddyCommandService.createTemporaryOutputDirectory(realm, tmpOutputDir)
+    }
+
+
+
+    @Test
+    void testCorrectPermissionCommand_AllFine() {
+        String expected = "cd /tmp && sudo -u OtherUnixUser ${ProcessingOptionService.getValueOfProcessingOption(ExecuteRoddyCommandService.CORRECT_PERMISSION_SCRIPT_NAME)} ${tmpOutputDir}"
+        String cmd = executeRoddyCommandService.correctPermissionCommand(tmpOutputDir)
+
+        assert expected == cmd
+    }
+
+    @Test
+    void testCorrectPermissionCommand_BasePathIsNull_ShouldFail() {
+        assert TestCase.shouldFail(AssertionError) {
+            executeRoddyCommandService.correctPermissionCommand(null)
+        }.contains('basePath is not allowed to be null')
+    }
+
+    @Test
+    void testCorrectPermissionCommand_processingOptionNotSet_ShouldFail() {
+        ProcessingOption.findByName(ExecuteRoddyCommandService.CORRECT_PERMISSION_SCRIPT_NAME).delete(flush: true)
+
+        assert TestCase.shouldFail(AssertionError) {
+            executeRoddyCommandService.correctPermissionCommand(tmpOutputDir)
+        }.contains('Collection contains 0 elements. Expected 1.')
     }
 
 }

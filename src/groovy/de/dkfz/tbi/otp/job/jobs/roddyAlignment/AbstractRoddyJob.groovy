@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import de.dkfz.tbi.otp.utils.ProcessHelperService
+
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 
 import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile
@@ -47,15 +49,9 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
             final RoddyResult roddyResult = getProcessParameterObject()
             final Realm realm = configService.getRealmDataManagement(roddyResult.project)
             String cmd = prepareAndReturnWorkflowSpecificCommand(roddyResult, realm)
-            log.debug "The roddy command:\n${cmd}"
 
-            Process process = executeRoddyCommandService.executeRoddyCommand(cmd)
-
-            String stdout = executeRoddyCommandService.returnStdoutOfFinishedCommandExecution(process)
-            executeRoddyCommandService.checkIfRoddyWFExecutionWasSuccessful(process)
-
-            createClusterJobObjects(realm, stdout)
-
+            String roddyOutput = ProcessHelperService.executeCommandAndAssertExistCodeAndReturnStdout(cmd)
+            createClusterJobObjects(realm, roddyOutput)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         }
