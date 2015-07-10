@@ -123,7 +123,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
 
         // Clean-up file-system
-        assert testDirectory.deleteDir()
+        TestCase.cleanTestDirectory()
     }
 
     @Test

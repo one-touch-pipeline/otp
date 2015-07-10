@@ -5,22 +5,16 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired
-
 
 class ExecutePanCanJobTests {
 
@@ -47,13 +41,18 @@ class ExecutePanCanJobTests {
     File dataFile1File
     File dataFile2File
 
+    @Rule
+    public TemporaryFolder tmpDir = new TemporaryFolder()
+
     @Before
     void setUp() {
+        tmpDir.create()
+
         DomainFactory.createAlignableSeqTypes()
 
         roddyBamFile = DomainFactory.createRoddyBamFile([md5sum: null, fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED])
-        dataProcessing = Realm.build(name: roddyBamFile.project.realmName, operationType: Realm.OperationType.DATA_PROCESSING)
-        dataManagement = Realm.build(name: roddyBamFile.project.realmName, operationType: Realm.OperationType.DATA_MANAGEMENT)
+        dataProcessing = DomainFactory.createRealm(tmpDir.root, [name: roddyBamFile.project.realmName, operationType: Realm.OperationType.DATA_PROCESSING])
+        dataManagement = DomainFactory.createRealm(tmpDir.root, [name: roddyBamFile.project.realmName, operationType: Realm.OperationType.DATA_MANAGEMENT])
 
         processingRootPath = dataProcessing.processingRootPath as File
 
@@ -63,7 +62,7 @@ class ExecutePanCanJobTests {
         roddyCommand = new File(roddyPath, 'roddy.sh')
         roddyVersion = ProcessingOption.findByName("roddyVersion").value
         roddyBaseConfigsPath = ProcessingOption.findByName("roddyBaseConfigsPath").value as File
-        assert roddyBaseConfigsPath.mkdirs()
+        roddyBaseConfigsPath.mkdirs()
         roddyApplicationIni = ProcessingOption.findByName("roddyApplicationIni").value as File
         roddyApplicationIni.text = "Some Text"
 

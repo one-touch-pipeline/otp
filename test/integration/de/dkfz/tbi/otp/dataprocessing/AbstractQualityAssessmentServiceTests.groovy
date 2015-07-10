@@ -2,9 +2,8 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.TestData
-import org.junit.*
-
-import static org.junit.Assert.assertNotNull
+import org.junit.Before
+import org.junit.Test
 
 class AbstractQualityAssessmentServiceTests {
 

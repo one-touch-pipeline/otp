@@ -1,9 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static org.junit.Assert.*
-import org.junit.*
-import grails.util.Environment
 import de.dkfz.tbi.otp.ngsdata.*
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
+
+import static org.junit.Assert.*
 
 class PicardMarkDuplicatesMetricsServiceTests {
 
@@ -13,16 +17,27 @@ class PicardMarkDuplicatesMetricsServiceTests {
 
     File metrics
 
-    final static String directory = "/tmp/otp-unit-test/picardMarkDuplicatesMetricsServiceTests/processing/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0"
-    final static String baseFile = "sample-type_patient_seq-type_library_merged.mdup_metrics.txt"
-    final static String basePath = "${directory}/${baseFile}"
+    @Rule
+    public TemporaryFolder tmpDir = new TemporaryFolder()
+
+    File testDirectory
+
+    String directory
+    String baseFile
+    String basePath
 
     @Before
     void setUp() {
+        tmpDir.create()
+        testDirectory = tmpDir.newFolder('/otp-test/')
+
+        directory = testDirectory.absolutePath + "/processing/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0"
+        baseFile = "sample-type_patient_seq-type_library_merged.mdup_metrics.txt"
+        basePath = "${directory}/${baseFile}"
 
         realm = DomainFactory.createRealmDataProcessingDKFZ([
-            rootPath: '/tmp/otp-unit-test/picardMarkDuplicatesMetricsServiceTests/root',
-            processingRootPath: '/tmp/otp-unit-test/picardMarkDuplicatesMetricsServiceTests/processing',
+            rootPath: testDirectory.absolutePath + '/root',
+            processingRootPath: testDirectory.absolutePath + '/processing',
             ]).save([flush: true])
 
         File baseDir = new File(directory)

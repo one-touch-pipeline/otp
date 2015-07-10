@@ -39,7 +39,7 @@ class RoddyWorkflowConfigTests {
     void tearDown() {
         configFile.delete()
         secondConfigFile.delete()
-        configDir.deleteDir()
+        TestCase.cleanTestDirectory()
         LsdfFilesService.metaClass = null
     }
 

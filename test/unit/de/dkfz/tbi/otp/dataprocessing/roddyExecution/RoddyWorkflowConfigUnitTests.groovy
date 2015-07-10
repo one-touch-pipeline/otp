@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.Workflow
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstanceTestData
 import de.dkfz.tbi.otp.ngsdata.Project
@@ -7,9 +8,9 @@ import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.ExternalScript
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestFor
-import org.junit.*
-
-import de.dkfz.tbi.TestCase
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
 
 /**
  */
@@ -31,7 +32,7 @@ public class RoddyWorkflowConfigUnitTests {
     @After
     void tearDown() {
         configFile.delete()
-        configDir.deleteDir()
+        TestCase.cleanTestDirectory()
     }
 
     @Test

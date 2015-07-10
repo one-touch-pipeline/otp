@@ -1,13 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.TestData
 import de.dkfz.tbi.otp.utils.ExternalScript
-import grails.validation.ValidationErrors
-import org.junit.Test
-import grails.test.mixin.*
-import de.dkfz.tbi.otp.ngsdata.*
 import grails.buildtestdata.mixin.Build
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
 
-import static de.dkfz.tbi.TestCase.createEmptyTestDirectory
 import static de.dkfz.tbi.TestCase.shouldFail
 
 // !! This class is only to test the abstract class ConfigPerProject

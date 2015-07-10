@@ -1,11 +1,10 @@
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.Workflow
-import grails.util.Environment
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile
 import de.dkfz.tbi.otp.job.processing.ExecutionState
+import grails.util.Environment
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile
 
 /**
  * A counter used to handle unique constraints. You can use it in a closure to produce a unique value for a property.
@@ -41,10 +40,10 @@ testDataConfig {
         'de.dkfz.tbi.otp.ngsdata.Realm' {
             name = DomainFactory.DEFAULT_REALM_NAME
             env = Environment.current.name
-            rootPath = '/tmp/otp-unit-test/root'
-            processingRootPath = '/tmp/otp-unit-test/processing'
-            loggingRootPath = '/tmp/otp-unit-test/log'
-            programsRootPath = '/tmp/otp-unit-test/programs'
+            rootPath = {new File(TestCase.uniqueNonExistentPath, 'root').path}
+            processingRootPath = {new File(TestCase.uniqueNonExistentPath, 'processing').path}
+            loggingRootPath = {new File(TestCase.uniqueNonExistentPath, 'log').path}
+            programsRootPath = {new File(TestCase.uniqueNonExistentPath, 'programs').path}
             webHost = 'localhost'
             host = 'localhost'
             port = 22
@@ -132,6 +131,7 @@ testDataConfig {
                 File config = new File("${TestCase.TEST_DIRECTORY}/default-roddy-worflow-config")
                 if (!config.exists()) {
                     config.parentFile.mkdirs()
+                    config.parentFile.deleteOnExit()
                     config.deleteOnExit()
                     config << "configuration"
                 }

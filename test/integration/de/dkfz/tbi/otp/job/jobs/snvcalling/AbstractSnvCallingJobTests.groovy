@@ -1,23 +1,25 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.utils.CreateSNVFileHelper
-import de.dkfz.tbi.otp.utils.LinkFileUtils
-
-import static de.dkfz.tbi.otp.utils.CreateSNVFileHelper.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CreateSNVFileHelper
 import de.dkfz.tbi.otp.utils.ExternalScript
-import de.dkfz.tbi.otp.utils.HelperUtils
-
-import static de.dkfz.tbi.TestCase.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-import static org.junit.Assert.*
-import org.junit.*
+import de.dkfz.tbi.otp.utils.LinkFileUtils
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static de.dkfz.tbi.otp.utils.CreateSNVFileHelper.createMD5SUMFile
+import static de.dkfz.tbi.otp.utils.CreateSNVFileHelper.createResultFile
+import static org.junit.Assert.assertEquals
 
 /**
  */
@@ -48,8 +50,6 @@ class AbstractSnvCallingJobTests extends GroovyTestCase {
 
     final String PBS_ID = "123456"
 
-    String UNIQUE_PATH = HelperUtils.getUniqueString()
-
     SnvCallingStep step = SnvCallingStep.SNV_ANNOTATION
 
     final String CONFIGURATION ="""
@@ -68,6 +68,8 @@ RUN_FILTER_VCF=1
 CHROMOSOME_INDICES=( {1..21} X Y)
 """
 
+    @Rule
+    public TemporaryFolder tmpDir = new TemporaryFolder()
 
     @Before
     void setUp() {
@@ -81,8 +83,12 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         abstractSnvCallingJob.lsdfFilesService = new LsdfFilesService()
         abstractSnvCallingJob.linkFileUtils = new LinkFileUtils()
 
-        testDirectory = new File("/tmp/otp-test/${UNIQUE_PATH}")
-        assert testDirectory.mkdirs()  // This will fail if the directory already exists or if it could not be created.
+        tmpDir.create()
+
+        testDirectory = tmpDir.newFolder("/otp-test")
+        if(!testDirectory.exists()) {
+            assert testDirectory.mkdirs()
+        }
 
         testData = new SnvCallingInstanceTestData()
         testData.createObjects()

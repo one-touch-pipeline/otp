@@ -1,21 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import static org.junit.Assert.*
-import org.junit.*
+import org.junit.Test
+
+import static org.junit.Assert.assertEquals
 
 class MergedAlignmentDataFileServiceTests {
 
     MergedAlignmentDataFileService mergedAlignmentDataFileService
-
-    @Before
-    void setUp() {
-        // Setup logic here
-    }
-
-    @After
-    void tearDown() {
-        // Tear down logic here
-    }
 
     @Test
     void testAlignmentSequenceFiles() {

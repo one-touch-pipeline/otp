@@ -1,24 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.ngsdata.*
 import org.junit.Before
+import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
-import de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.TestData
-import org.junit.Test
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 public class AbstractAlignmentDeciderTest {
 
@@ -30,7 +20,7 @@ public class AbstractAlignmentDeciderTest {
     final shouldFail = new GroovyTestCase().&shouldFail
 
     @Before
-    void before() {
+    void setUp() {
         decider = newDecider()
     }
 

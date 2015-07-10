@@ -158,7 +158,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         removeMetaClass(LinkFileUtils, linkFileUtils)
         LsdfFilesService.metaClass = null
         WaitingFileUtils.metaClass = null
-        assert testDirectory.deleteDir()
+        TestCase.cleanTestDirectory()
     }
 
     @Test

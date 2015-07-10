@@ -1,24 +1,29 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
+import de.dkfz.tbi.otp.job.processing.ExecutionService
+import de.dkfz.tbi.otp.job.processing.ParameterType
+import de.dkfz.tbi.otp.job.processing.ParameterUsage
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.ExternalScript
 import de.dkfz.tbi.otp.utils.LinkFileUtils
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
 
 import static de.dkfz.tbi.TestCase.removeMetaClass
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
-import static org.junit.Assert.*
-import org.junit.*
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
-import de.dkfz.tbi.otp.job.scheduler.SchedulerService
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.ExternalScript
+import static org.junit.Assert.assertEquals
 
 class FilterVcfJobTests extends GroovyTestCase {
 
@@ -62,12 +67,17 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 """
 
     final String PBS_ID = "123456"
-    String UNIQUE_PATH = HelperUtils.getUniqueString()
+
+    @Rule
+    public TemporaryFolder tmpDir = new TemporaryFolder()
 
     @Before
     void setUp() {
-        testDirectory = new File("/tmp/otp-test/${UNIQUE_PATH}")
-        assert testDirectory.mkdirs()
+        tmpDir.create()
+        testDirectory = tmpDir.newFolder("/otp-test")
+        if(!testDirectory.exists()) {
+            assert testDirectory.mkdirs()
+        }
 
         snvCallingInstanceTestData.createSnvObjects()
 

@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.utils.ExternalScript
@@ -131,6 +132,17 @@ class DomainFactory {
         ] + myProps)
     }
 
+    public static Realm createRealm(File testDirectory, Map properties = [:]) {
+        assert testDirectory.isAbsolute()
+        Realm.build([
+                rootPath:           new File(testDirectory, 'root'),
+                processingRootPath: new File(testDirectory, 'processing'),
+                loggingRootPath:    new File(testDirectory, 'log'),
+                programsRootPath:   new File(testDirectory, 'programs'),
+                stagingRootPath:    new File(testDirectory, 'staging'),
+        ] + properties)
+    }
+
     public static MergingSet createMergingSet(final MergingWorkPackage mergingWorkPackage) {
         return MergingSet.build(
                 mergingWorkPackage: mergingWorkPackage,
@@ -231,7 +243,7 @@ class DomainFactory {
         ExternalScript externalScript = ExternalScript.buildLazy()
         RoddyBamFile bamFile = RoddyBamFile.build([
                 baseBamFile: baseBamFile,
-                config: RoddyWorkflowConfig.build(workflow:  baseBamFile.config.workflow, externalScriptVersion: externalScript.scriptVersion),
+                config: RoddyWorkflowConfig.build(workflow: baseBamFile.config.workflow, externalScriptVersion: externalScript.scriptVersion),
                 workPackage: baseBamFile.workPackage,
                 identifier: baseBamFile.identifier + 1,
                 numberOfMergedLanes: baseBamFile.numberOfMergedLanes + 1,

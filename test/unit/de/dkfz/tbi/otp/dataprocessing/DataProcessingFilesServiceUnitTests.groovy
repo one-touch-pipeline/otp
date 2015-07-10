@@ -1,17 +1,18 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-
-import org.junit.*
-
 import de.dkfz.tbi.TestConstants
 import de.dkfz.tbi.otp.dataprocessing.DataProcessingFilesService.OutputDirectories
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.Realm.OperationType;
+import de.dkfz.tbi.otp.ngsdata.Realm.OperationType
 import de.dkfz.tbi.otp.utils.CheckedLogger
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
+import org.junit.After
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
 
 //In the test the semantic "null as Type" is used to get grails to use a specific overloaded method signutare.
 @TestMixin(GrailsUnitTestMixin)
@@ -24,7 +25,6 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 ])
 class DataProcessingFilesServiceUnitTests {
 
-    private final static String TEST_DIRECTORY_NAME = "test-directory"
     private final static String TEST_FILE_NAME = "testFile.txt"
     private final static String TEST_FILE_CONTENT = "test file content"
     private final static int TEST_FILE_CONTENT_LENGTH = TEST_FILE_CONTENT.length()
@@ -53,7 +53,8 @@ class DataProcessingFilesServiceUnitTests {
     long freedBytes
     Closure passClosure
 
-
+    @Rule
+    public TemporaryFolder tmpDir = new TemporaryFolder()
 
     void setUp() {
         realm = Realm.build()
@@ -108,7 +109,8 @@ class DataProcessingFilesServiceUnitTests {
 
 
     void createTestDirectory() {
-        dir = new File(realm.processingRootPath, TEST_DIRECTORY_NAME)
+        tmpDir.create()
+        dir = tmpDir.newFolder(realm.processingRootPath)
         if (dir.exists()) {
             dir.deleteDir()
         }

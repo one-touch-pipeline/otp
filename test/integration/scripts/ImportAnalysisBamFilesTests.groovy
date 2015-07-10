@@ -19,7 +19,8 @@ import org.junit.Test
 
 import javax.sql.DataSource
 
-import static junit.framework.Assert.*
+import static junit.framework.Assert.assertNotNull
+import static junit.framework.Assert.assertTrue
 
 @Log4j
 class ImportAnalysisBamFilesTests extends GroovyScriptAwareTestCase {
@@ -147,6 +148,7 @@ class ImportAnalysisBamFilesTests extends GroovyScriptAwareTestCase {
     public void tearDown() {
         TestCase.removeMetaClass(CreateClusterScriptService, createClusterScriptService)
         metaDataFile.parentFile.deleteDir()
+        TestCase.cleanTestDirectory()
     }
 
 

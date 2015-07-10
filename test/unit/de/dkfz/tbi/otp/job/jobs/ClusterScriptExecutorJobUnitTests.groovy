@@ -6,7 +6,6 @@ import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.Realm
 import grails.test.mixin.Mock
-import org.apache.commons.io.FileUtils
 
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
@@ -61,7 +60,7 @@ class ClusterScriptExecutorJobUnitTests extends GroovyTestCase {
         try {
             assert clusterScriptExecutorJob.maybeSubmit() == AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
         } finally {
-            testDir.deleteDir()
+            TestCase.cleanTestDirectory()
             TestCase.removeMetaClass(ClusterScriptExecutorJob, clusterScriptExecutorJob)
             TestCase.removeMetaClass(Realm, realm)
         }

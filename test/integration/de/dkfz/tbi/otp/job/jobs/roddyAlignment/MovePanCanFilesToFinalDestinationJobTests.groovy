@@ -4,7 +4,10 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.ConfigService
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
 import de.dkfz.tbi.otp.utils.MoveFileUtilsService
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
@@ -46,7 +49,7 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
         TestCase.removeMetaClass(ConfigService, movePanCanFilesToFinalDestinationJob.configService)
         TestCase.removeMetaClass(ExecutionService, movePanCanFilesToFinalDestinationJob.executionService)
         TestCase.removeMetaClass(MoveFileUtilsService, movePanCanFilesToFinalDestinationJob.moveFileUtilsService)
-        assert new File(realm.rootPath).deleteDir()
+        TestCase.cleanTestDirectory()
     }
 
 

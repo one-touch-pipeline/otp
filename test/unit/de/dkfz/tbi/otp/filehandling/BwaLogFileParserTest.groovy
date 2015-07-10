@@ -34,7 +34,7 @@ cnybwa overall time  162.99 sec
             assert expectedReadNumber == BwaLogFileParser.parseReadNumberFromLog(testLogFile)
         } finally {
             testLogFile.delete()
-            testDirectory.delete()
+            TestCase.cleanTestDirectory()
         }
     }
 
@@ -53,7 +53,7 @@ cnybwa overall time  162.99 sec
             shouldFail RuntimeException, { BwaLogFileParser.parseReadNumberFromLog(testLogFile) }
         } finally {
             testLogFile.delete()
-            testDirectory.delete()
+            TestCase.cleanTestDirectory()
         }
     }
 }

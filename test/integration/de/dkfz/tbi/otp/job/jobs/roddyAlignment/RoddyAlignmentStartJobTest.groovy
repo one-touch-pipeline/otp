@@ -1,11 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.Workflow
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.jobs.TestRoddyAlignmentStartJob
 import de.dkfz.tbi.otp.job.plan.JobDefinition
@@ -17,6 +13,7 @@ import de.dkfz.tbi.otp.ngsdata.Run
 import de.dkfz.tbi.otp.ngsdata.RunSegment
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.ExternalScript
+import org.junit.After
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -26,6 +23,11 @@ class RoddyAlignmentStartJobTest {
 
     @Autowired
     TestRoddyAlignmentStartJob testRoddyAlignmentStartJob
+
+    @After
+    void tearDown() {
+        TestCase.cleanTestDirectory()
+    }
 
     @Test
     void testFindProcessableMergingWorkPackages_WhenSeveralMergingWorkPackages_ShouldReturnOrderedMergingWorkPackageList() {

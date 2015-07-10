@@ -2,9 +2,13 @@ package de.dkfz.tbi.otp.utils
 
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.Realm
-import org.junit.Test
 import grails.buildtestdata.mixin.Build
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.springframework.context.ApplicationContext
 
 @Build([Realm])
@@ -12,14 +16,19 @@ class LinkFileUtilsUnitTests {
 
     LinkFileUtils linkFileUtils
 
-    String UNIQUE_PATH = HelperUtils.getUniqueString()
     File testDirectory
     Realm realm
 
+    @Rule
+    public TemporaryFolder tmpDir = new TemporaryFolder()
+
     @Before
     void setUp() {
-        testDirectory = new File("/tmp/otp-test/${UNIQUE_PATH}")
-        assert testDirectory.mkdirs()  // This will fail if the directory already exists or if it could not be created.
+        tmpDir.create()
+        testDirectory = tmpDir.newFolder("/otp-test")
+        if(!testDirectory.exists()) {
+            assert testDirectory.mkdirs()
+        }
 
         realm = Realm.build()
 

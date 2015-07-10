@@ -1,12 +1,16 @@
 package de.dkfz.tbi.otp.job.jobs.alignment
 
-import java.util.zip.GZIPOutputStream
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
-import grails.test.mixin.support.GrailsUnitTestMixin
-import grails.util.Environment
-import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.*
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.Mock
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+
+import java.util.zip.GZIPOutputStream
 
 @Mock([
     LsdfFilesService,
@@ -35,6 +39,11 @@ class CheckQualityEncodingJobUnitTests {
     DataFile dataFile
 
     File file
+
+    @Rule
+    public TemporaryFolder tmpDir = new TemporaryFolder()
+
+    File testDirectory
 
     @Before
     public void setUp() throws Exception {
@@ -131,7 +140,9 @@ class CheckQualityEncodingJobUnitTests {
                         )
         assertNotNull(dataFile.save(flush: true))
 
-        Realm realm = DomainFactory.createRealmDataManagementDKFZ([rootPath: '/tmp/otp/otp-test/fakeRealm/root'])
+        testDirectory = tmpDir.newFolder("/otp-test")
+
+        Realm realm = DomainFactory.createRealmDataManagementDKFZ([rootPath: testDirectory.absolutePath])
         assertNotNull(realm.save(flush: true, failOnError: true))
 
         file = new File(checkQualityEncodingJob.lsdfFilesService.getFileViewByPidPath(dataFile))

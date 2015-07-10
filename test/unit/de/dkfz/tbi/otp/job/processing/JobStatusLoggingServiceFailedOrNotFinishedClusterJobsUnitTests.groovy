@@ -1,17 +1,17 @@
 package de.dkfz.tbi.otp.job.processing
 
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-
-import org.apache.commons.io.FileUtils
-import org.junit.*
-
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl
 import de.dkfz.tbi.otp.ngsdata.Realm
-
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
 
 /**
  * Unit tests for the {@link JobStatusLoggingService}.
@@ -50,9 +50,13 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
     Collection<String> jobIdsOnRealmWithSameLogDirAs1
     Collection<ClusterJobIdentifier> allUnsuccessfulJobs
 
+    @Rule
+    public TemporaryFolder tmpDir = new TemporaryFolder()
+
     @Before
     void setUp() {
-        tempDirectory = new File('/tmp/otp-test/' + System.currentTimeMillis() + '-' + sprintf('%016X', new Random().nextLong()) + '/')
+        tmpDir.create()
+        tempDirectory = tmpDir.newFolder('/otp-test')
 
         processingStep = JobStatusLoggingServiceUnitTests.createFakeProcessingStep()
         assert processingStep.save(flush: true)
@@ -128,11 +132,6 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
         new File(service.logFileLocation(realm2, processingStep)).text = "\n" + service.constructMessage(processingStep, successfulJobOnRealm2.clusterJobId)
         new File(service.logFileLocation(realmWithEmptyLogFile, processingStep)).text = ''
         new File(service.logFileLocation(realmWithSameLogDirAs1, processingStep)).text = service.constructMessage(processingStep, successfulJobOnRealmWithSameLogDirAs1.clusterJobId)
-    }
-
-    @After
-    void deleteTempDirectory() {  // Naming this method tearDown will make Grails mad.
-        FileUtils.deleteDirectory(tempDirectory)
     }
 
     @Test

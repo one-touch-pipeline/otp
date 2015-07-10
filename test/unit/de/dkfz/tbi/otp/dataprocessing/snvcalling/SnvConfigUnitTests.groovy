@@ -1,13 +1,16 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.TestData
 import de.dkfz.tbi.otp.utils.ExternalScript
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import grails.test.mixin.*
+
 import static de.dkfz.tbi.TestCase.createEmptyTestDirectory
 
 @TestFor(SnvConfig)
@@ -47,8 +50,7 @@ class SnvConfigUnitTests {
     void tearDown() {
         validSnvConfig.delete()
         configFile.delete()
-        configDir.deleteDir()
-
+        TestCase.cleanTestDirectory()
     }
 
     @Test

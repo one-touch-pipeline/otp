@@ -1,14 +1,19 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.TestCase
-import grails.validation.ValidationException
-
-import static de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep.*
-import static org.junit.Assert.*
-import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.TestData
+import grails.validation.ValidationException
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
+
+import static de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep.*
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotNull
 
 class SnvConfigTests {
 
@@ -27,6 +32,9 @@ class SnvConfigTests {
     static final String LEGAL_CONFIG =
             "${LEGAL_EXECUTE_FLAGS}\n" +
                     "${LEGAL_CHROMOSOME_INDICES}"
+
+    @Rule
+    public TemporaryFolder tmpDir = new TemporaryFolder()
 
     @Before
     void setUp() {
@@ -207,7 +215,9 @@ class SnvConfigTests {
 
 
     SnvConfig createFromFile(final String configuration, String version = "v1", Project project = project, SeqType seqType = seqType) {
-        File dir = new File("/tmp/otp/otp-unit-test")
+        tmpDir.create()
+
+        File dir = tmpDir.newFolder("/otp-test/")
         assert dir.exists() || dir.mkdirs()
 
         File configFile = new File(dir, "configFile.txt")

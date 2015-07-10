@@ -1,19 +1,17 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
+import de.dkfz.tbi.otp.ngsdata.*
 import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-
+import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
-import de.dkfz.tbi.otp.ngsdata.*
 import org.junit.rules.TemporaryFolder
 
 /**
@@ -41,12 +39,12 @@ class AlignmentPassServiceUnitTests extends TestData {
     File referenceGenomeFile
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder()
+    public TemporaryFolder tmpDir = new TemporaryFolder()
 
     @Before
     void setUp() {
-        temporaryFolder.create()
-        baseDir = temporaryFolder.newFolder()
+        tmpDir.create()
+        baseDir = tmpDir.newFolder()
         referenceGenomeDir = new File(baseDir, "reference_genomes/referenceGenome")
         referenceGenomeDir.mkdirs()
         referenceGenomeFile = new File("${referenceGenomeDir}/prefixName.fa")

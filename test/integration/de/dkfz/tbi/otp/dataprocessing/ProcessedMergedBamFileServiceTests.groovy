@@ -1,17 +1,20 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.TestCase
-
-import static org.junit.Assert.*
-import grails.validation.ValidationException
-import org.junit.*
 import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.ngsdata.*
+import grails.validation.ValidationException
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
 
+import static org.junit.Assert.*
 
 class ProcessedMergedBamFileServiceTests {
 
@@ -20,15 +23,27 @@ class ProcessedMergedBamFileServiceTests {
 
     File baseDir
 
-    final static String directory = "/tmp/otp-unit-test/pmbfs/processing/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0"
-    final static String baseFile = "sample-type_patient_seq-type_library_merged.mdup"
-    final static String basePath = directory + "/" + baseFile
+    @Rule
+    public TemporaryFolder tmpDir = new TemporaryFolder()
+
+    File testDirectory
+
+    String directory
+    String baseFile
+    String basePath
 
     @Before
     void setUp() {
+        tmpDir.create()
+        testDirectory = tmpDir.newFolder('/otp-test/')
+
+        directory = testDirectory.absolutePath + "/processing/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0"
+        baseFile = "sample-type_patient_seq-type_library_merged.mdup"
+        basePath = directory + "/" + baseFile
+
         Map paths = [
-            rootPath: '/tmp/otp-unit-test/pmfs/root',
-            processingRootPath: '/tmp/otp-unit-test/pmbfs/processing',
+            rootPath: testDirectory.absolutePath + '/root',
+            processingRootPath: testDirectory.absolutePath + '/processing',
             name: DomainFactory.DEFAULT_REALM_NAME,
         ]
 
@@ -275,7 +290,7 @@ class ProcessedMergedBamFileServiceTests {
         assertEquals(pathExp, pathAct)
         bamFile.fileOperationStatus = FileOperationStatus.PROCESSED
         bamFile.md5sum = "68b329da9893e34099c7d8ad5cb9c940"
-        pathExp = "/tmp/otp-unit-test/pmfs/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/"
+        pathExp = testDirectory.absolutePath + "/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/"
         pathAct = processedMergedBamFileService.directory(bamFile.mergingPass)
         assertEquals(pathExp, pathAct)
     }
@@ -412,7 +427,7 @@ class ProcessedMergedBamFileServiceTests {
         String singleLaneDirectoryNameExp = "name_laneId"
         String singleLaneDirectoryNameAct = locations.keySet().iterator().next()
         assertEquals(singleLaneDirectoryNameExp, singleLaneDirectoryNameAct)
-        String singleLanePathExp = "/tmp/otp-unit-test/pmbfs/processing/project-dir/results_per_pid/patient/alignment//name_laneId/pass0/QualityAssessment/pass1"
+        String singleLanePathExp =  testDirectory.absolutePath + "/processing/project-dir/results_per_pid/patient/alignment//name_laneId/pass0/QualityAssessment/pass1"
         String singleLanePathAct = locations."${singleLaneDirectoryNameAct}"
         assertEquals(singleLanePathExp, singleLanePathAct)
     }
@@ -425,7 +440,7 @@ class ProcessedMergedBamFileServiceTests {
         DataProcessingFilesService.OutputDirectories dirType = DataProcessingFilesService.OutputDirectories.MERGING
         String sourceDirectoryExp = dataProcessingFilesService.getOutputDirectory(mergedBamFile.individual, dirType) + "/sample-type/seq-type/library/DEFAULT/0/pass0"
         assertEquals(sourceDirectoryExp, locations["sourceDirectory"])
-        String destinationDirectoryExp = "/tmp/otp-unit-test/pmfs/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/"
+        String destinationDirectoryExp =  testDirectory.absolutePath + "/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/"
         assertEquals(destinationDirectoryExp, locations["destinationDirectory"])
         String bamFileExp = "sample-type_patient_seq-type_library_merged.mdup.bam"
         assertEquals(bamFileExp, locations["bamFile"])
@@ -446,7 +461,7 @@ class ProcessedMergedBamFileServiceTests {
     @Test
     void testDestinationTempDirectory() {
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
-        String destinationExp = "/tmp/otp-unit-test/pmfs/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/.tmp"
+        String destinationExp =  testDirectory.absolutePath + "/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/.tmp"
         String destinationAct = processedMergedBamFileService.destinationTempDirectory(mergedBamFile)
         assertEquals(destinationExp, destinationAct)
     }
@@ -459,7 +474,7 @@ class ProcessedMergedBamFileServiceTests {
     @Test
     void testQaResultTempDestinationDirectory() {
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
-        String destinationExp = "/tmp/otp-unit-test/pmfs/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/.tmp/QualityAssessment"
+        String destinationExp =  testDirectory.absolutePath + "/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/.tmp/QualityAssessment"
         String destinationAct = processedMergedBamFileService.qaResultTempDestinationDirectory(mergedBamFile)
         assertEquals(destinationExp, destinationAct)
     }
