@@ -60,23 +60,9 @@ public class RoddyWorkflowConfigUnitTests {
         configFile << "configuration"
         RoddyWorkflowConfig roddyWorkflowConfig = createRoddyWorkflowConfig([configFilePath: ""])
 
-        shouldFail AssertionError, {
-            roddyWorkflowConfig.save(flush: true)
-        }
+        TestCase.assertValidateError(roddyWorkflowConfig, 'configFilePath', 'validator.invalid', '')
 
         roddyWorkflowConfig.configFilePath = configFile.path
-        assert roddyWorkflowConfig.save(flush: true)
-    }
-
-    @Test
-    void testSaveRoddyWorkflowConfig_ConfigFileIsEmpty_ShouldFail() {
-        RoddyWorkflowConfig roddyWorkflowConfig = createRoddyWorkflowConfig()
-
-        shouldFail AssertionError, {
-            roddyWorkflowConfig.save(flush: true)
-        }
-
-        configFile << "configuration"
         assert roddyWorkflowConfig.save(flush: true)
     }
 
@@ -85,21 +71,8 @@ public class RoddyWorkflowConfigUnitTests {
         configFile << "configuration"
         RoddyWorkflowConfig roddyWorkflowConfig = createRoddyWorkflowConfig([configFilePath: "tmp/"])
 
-        shouldFail AssertionError, {
-            roddyWorkflowConfig.save(flush: true)
-        }
+        TestCase.assertValidateError(roddyWorkflowConfig, 'configFilePath', 'validator.invalid', 'tmp/')
     }
-
-    @Test
-    void testSaveRoddyWorkflowConfig_ConfigFileDoesNotExist_ShouldFail() {
-        configFile.delete()
-        RoddyWorkflowConfig roddyWorkflowConfig = createRoddyWorkflowConfig()
-
-        shouldFail AssertionError, {
-            roddyWorkflowConfig.save(flush: true)
-        }
-    }
-
 
     @Test
     void testGetWorkflowVersion() {

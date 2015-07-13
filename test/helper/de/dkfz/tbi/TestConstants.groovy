@@ -1,5 +1,7 @@
 package de.dkfz.tbi
 
+import org.junit.rules.TemporaryFolder
+
 /**
  * A class for collection constants used in different tests.
  *
@@ -15,7 +17,11 @@ class TestConstants {
 
     /**
      * The base otp test directory
+     *
+     * @deprecated Use {@link TestCase#getUniqueNonExistentPath()} or {@link TemporaryFolder} or
+     * {@link TestCase#createEmptyTestDirectory()}.
      */
-    public final static String BASE_TEST_DIRECTORY = "/tmp/otp/otp-test"
+    @Deprecated
+    public final static String BASE_TEST_DIRECTORY = TestCase.uniqueNonExistentPath
 
 }

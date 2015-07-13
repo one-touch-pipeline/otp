@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
@@ -80,8 +81,11 @@ class ExecutePanCanJobTests {
         referenceGenomeFile = new File(referenceGenomeDir, "${roddyBamFile.referenceGenome.fileNamePrefix}.fa")
         CreateFileHelper.createFile(referenceGenomeFile)
 
-        configFile = new File(roddyBamFile.config.configFilePath)
+        configFile = tmpDir.newFile()
         CreateFileHelper.createFile(configFile)
+        RoddyWorkflowConfig config = roddyBamFile.config
+        config.configFilePath = configFile.path
+        assert config.save(failOnError: true)
 
         chromosomeStatSizeFile = executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage, false)
         CreateFileHelper.createFile(chromosomeStatSizeFile)
@@ -260,7 +264,7 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
         CreateFileHelper.createFile(roddyBamFile.finalBamFile)
         roddyBamFile.fileSize = roddyBamFile.finalBamFile.length()
         assert roddyBamFile.save(flush: true)
-        RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
+        RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile, [config: roddyBamFile.config])
         String viewByPid = roddyBamFile2.individual.getViewByPidPathBase(roddyBamFile2.seqType).absoluteDataManagementPath.path
         String fastqFilesAsString = roddyBamFile2.seqTracks.collect {SeqTrack seqTrack ->
             DataFile.findAllBySeqTrack(seqTrack).collect { DataFile dataFile ->

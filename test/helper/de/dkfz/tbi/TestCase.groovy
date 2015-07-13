@@ -67,7 +67,7 @@ class TestCase extends GroovyTestCase {
 
     /**
      * You should delete the returned directory using Groovy's File.deleteDir() method as
-     * soon as you do not need it anymore.
+     * soon as you do not need it anymore, or delete all test directories using {@link #cleanTestDirectory()}.
      */
     public static File createEmptyTestDirectory() {
         final File dir = new File(TEST_DIRECTORY, HelperUtils.uniqueString)

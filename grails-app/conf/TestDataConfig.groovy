@@ -131,20 +131,11 @@ testDataConfig {
             alignmentPass = {TestData.createAndSaveAlignmentPass()}
         }
         'de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig' {
-            configFilePath = {
-                File config = new File("${TestCase.TEST_DIRECTORY}/default-roddy-worflow-config")
-                if (!config.exists()) {
-                    config.parentFile.mkdirs()
-                    config.parentFile.deleteOnExit()
-                    config.deleteOnExit()
-                    config << "configuration"
-                }
-                return config.absolutePath
-            }
+            configFilePath = { new File(TestCase.uniqueNonExistentPath, 'roddy-workflow-config').path }
             workflow = { Workflow.buildLazy(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT) }
         }
         'de.dkfz.tbi.otp.utils.ExternalScript' {
-            filePath = {"${TestCase.TEST_DIRECTORY}/ExternalScript_${counter++}"}
+            filePath = { new File(TestCase.uniqueNonExistentPath, 'ExternalScript').path }
         }
         'de.dkfz.tbi.otp.job.plan.JobExecutionPlan' {
             name = {'plan_' + (counter++)}

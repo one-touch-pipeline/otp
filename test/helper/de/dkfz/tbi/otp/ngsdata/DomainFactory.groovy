@@ -241,14 +241,13 @@ class DomainFactory {
     }
 
     public static createRoddyBamFile(RoddyBamFile baseBamFile, Map bamFileProperties = [:]) {
-        ExternalScript externalScript = ExternalScript.buildLazy()
         RoddyBamFile bamFile = RoddyBamFile.build([
                 baseBamFile: baseBamFile,
-                config: RoddyWorkflowConfig.build(workflow: baseBamFile.config.workflow, externalScriptVersion: externalScript.scriptVersion),
+                config: bamFileProperties.config ?: RoddyWorkflowConfig.build(workflow: baseBamFile.config.workflow, externalScriptVersion: ExternalScript.buildLazy().scriptVersion),
                 workPackage: baseBamFile.workPackage,
                 identifier: baseBamFile.identifier + 1,
                 numberOfMergedLanes: baseBamFile.numberOfMergedLanes + 1,
-                seqTracks: [DomainFactory.buildSeqTrackWithDataFile(baseBamFile.workPackage)],
+                seqTracks: bamFileProperties.seqTracks ?: [DomainFactory.buildSeqTrackWithDataFile(baseBamFile.workPackage)],
                 md5sum: DEFAULT_MD5_SUM,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 fileSize: 10000,

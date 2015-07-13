@@ -27,7 +27,7 @@ class RoddyWorkflowConfig extends ConfigPerProject {
 
     static constraints = {
         configFilePath validator: { path ->
-            LsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(path))
+            new File(path).isAbsolute()
         }
         workflow unique: ['project', 'configFilePath']
     }
