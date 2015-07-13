@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.TestCase
+
 import static org.junit.Assert.*
 
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
@@ -1212,6 +1214,82 @@ class IndividualServiceTests extends AbstractIntegrationTest {
             assertEquals(3, individualService.countIndividual("%g%"))
             results = individualService.listIndividuals(0, 15, false, 0, "%g%")
             assertEquals(3, results.size())
+        }
+    }
+
+    @Test
+    void testCreateCommentString_WhenSeveralPropertiesEqual_ShouldJustAddDifferentOnes() {
+        String operation = "operation"
+        Map mapA = [a: 1, b: 2, c: 3]
+        Map mapB = [a: 1, b: 3, c: 4]
+        Date date = new Date()
+
+        assert """== operation - ${date.format("yyyy-MM-dd hh:mm")} ==
+Old:
+b: 2
+c: 3
+New:
+b: 3
+c: 4
+""" == individualService.createCommentString(operation, mapA, mapB, date, null)
+    }
+
+    @Test
+    void testCreateCommentString_WhenCommentWithAdditionalInformation_ShouldReturnCorrectString() {
+        String operation = "operation"
+        Map mapA = [a: 1]
+        Map mapB = [a: 2]
+        Date date = new Date()
+        String additionalInformation = "additional information"
+
+        assert """== operation - ${date.format("yyyy-MM-dd hh:mm")} ==
+${additionalInformation}
+Old:
+a: 1
+New:
+a: 2
+""" == individualService.createCommentString(operation, mapA, mapB, date, additionalInformation)
+    }
+
+    @Test
+    void testCreateComment_WhenCommentAlreadyExists_ShouldAddNewComment() {
+        Individual indOld = Individual.build(comment: "old comment")
+        Individual indNew = Individual.build()
+        String operation = "operation"
+        Map mapOld = [individual: indOld]
+        Map mapNew = [individual: indNew]
+
+        SpringSecurityUtils.doWithAuth("testuser") {
+            individualService.createComment(operation, mapOld, mapNew)
+        }
+
+        assert """== operation - ${new Date().format("yyyy-MM-dd hh:mm")} ==
+Old:
+individual: ${indOld}
+New:
+individual: ${indNew}
+
+${indOld.comment}""" == indNew.comment
+    }
+
+    @Test
+    void testCreateComment_WhenParametersNull_ShouldFail() {
+        TestCase.shouldFail(AssertionError) {
+            individualService.createComment(null, null, null)
+        }
+    }
+
+    @Test
+    void testCreateComment_WhenMapsHaveDifferentKeySets_ShouldFail() {
+        TestCase.shouldFail(AssertionError) {
+            individualService.createComment(null, [individual: Individual.build(), a: 1], [individual: Individual.build()])
+        }
+    }
+
+    @Test
+    void testCreateComment_WhenInputMapsContainNoIndividual_ShouldFail() {
+        TestCase.shouldFail(AssertionError) {
+            individualService.createComment("", [property: null], [property: null])
         }
     }
 

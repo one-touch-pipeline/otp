@@ -486,4 +486,55 @@ AND i.id > :indId
         individual.commentAuthor = user
         assert individual.save(flush: true)
     }
+
+    /**
+     * Checks for missing values, as well as input maps with different key-sets and calls {@link IndividualService#saveComment(de.dkfz.tbi.otp.ngsdata.Individual, java.lang.String, java.util.Date)}}
+     * to finally store the comment for the specific individual in the DB
+     * Both input-maps have to contain an {@link Individual}, e.g. Map[individual: individual, ...]
+     * @param operation a String that describes the specific operation, e.g. "sample-swap"
+     * @param oldProperties a Map that contains the old properties of the individual/sample/lane
+     * @param newProperties a Map that contains the new properties of the individual/sample/lane
+     * @param additionalInformation a String with additional information that will be displayed between header and old/new properties
+     */
+    public void createComment (String operation, Map oldProperties, Map newProperties, String additionalInformation = null) {
+        assert oldProperties
+        assert oldProperties.individual
+        assert newProperties
+        assert newProperties.individual
+        assert oldProperties.keySet() == newProperties.keySet()
+
+        Date date = new Date()
+
+        String output = createCommentString(operation, oldProperties, newProperties, date, additionalInformation)
+        saveComment(newProperties.individual, oldProperties.individual.comment ? "${output}\n${oldProperties.individual.comment}" : "${output}", date)
+    }
+
+    /**
+     * Creates the comment-String used when comment fields on individual pages automatically get filled through swap-scripts
+     * The String gets build just with the difference of both properties-maps, equal values will be ignored
+     * @param operation a String that describes the specific operation, e.g. "sample-swap"
+     * @param oldProperties a Map that contains the old properties of the individual/sample/lane
+     * @param newProperties a Map that contains the new properties of the individual/sample/lane
+     * @param date a Date-object
+     * @param additionalInformation a String with additional information that will be displayed between header and old/new properties
+     * @return the comment-String
+     */
+    private String createCommentString(String operation, Map oldProperties, Map newProperties, Date date, String additionalInformation) {
+        Map diff = oldProperties - newProperties
+
+        String output = "== ${operation} - ${date.format("yyyy-MM-dd hh:mm")} ==\n"
+        if(additionalInformation) {
+            output += "${additionalInformation}\n"
+        }
+
+        String outputOld = "Old:\n"
+        String outputNew = "New:\n"
+
+        diff.keySet().each { key ->
+            outputOld += "${key}: ${oldProperties.get(key)}\n"
+            outputNew += "${key}: ${newProperties.get(key)}\n"
+        }
+
+        return "${output}${outputOld}${outputNew}"
+    }
 }
