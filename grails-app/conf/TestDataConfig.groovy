@@ -1,4 +1,4 @@
-import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.Workflow
 import de.dkfz.tbi.otp.job.processing.ExecutionState
