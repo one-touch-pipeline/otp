@@ -44,8 +44,7 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
         Realm realm = configService.getRealmDataManagement(roddyBamFile.project)
         assert realm : "Realm should not be null"
 
-        boolean withdrawn = roddyBamFile.withdrawn
-        if (!withdrawn) {
+        if (!roddyBamFile.withdrawn) {
             RoddyBamFile.withTransaction {
                 assert roddyBamFile.isMostRecentBamFile(): "The BamFile ${roddyBamFile} is not the most recent one. This must not happen!"
                 assert [FileOperationStatus.NEEDS_PROCESSING, FileOperationStatus.INPROGRESS].contains(roddyBamFile.fileOperationStatus)
@@ -56,11 +55,7 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
             deletePreviousMergedBamResultFiles(roddyBamFile, realm)
             moveResultFiles(roddyBamFile, realm)
             correctPermissions(roddyBamFile)
-        } else {
-            this.log.info "The results of ${roddyBamFile} will not be moved since it is marked as withdrawn"
-        }
 
-        if (!withdrawn) {
             File md5sumFile = roddyBamFile.finalMd5sumFile
             assert WaitingFileUtils.waitUntilExists(md5sumFile): "The md5sum file of ${roddyBamFile} does not exist"
             RoddyBamFile.withTransaction {
@@ -69,6 +64,8 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
                 roddyBamFile.md5sum = md5sumFile.text.split(" ")[0]
                 assert roddyBamFile.save(flush: true)
             }
+        } else {
+            this.log.info "The results of ${roddyBamFile} will not be moved since it is marked as withdrawn"
         }
 
         deleteTemporaryDirectory(roddyBamFile, realm)
@@ -89,18 +86,23 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
      * will be deleted before the new merged bam file is moved to the final location
      */
     void deletePreviousMergedBamResultFiles(RoddyBamFile roddyBamFile, Realm realm) {
-        RoddyBamFile baseBamFile = roddyBamFile.baseBamFile
-        if (baseBamFile && roddyBamFile.tmpRoddyBamFile.exists()) {
-            File bamFilePath = baseBamFile.finalBamFile
-            File baiFilePath = baseBamFile.finalBaiFile
-            File md5sumFilePath = baseBamFile.finalMd5sumFile
-            File mergedQADirectory = baseBamFile.finalMergedQADirectory
+        if (roddyBamFile.tmpRoddyBamFile.exists()) {
+            File bamFilePath = roddyBamFile.finalBamFile
+            File baiFilePath = roddyBamFile.finalBaiFile
+            File md5sumFilePath = roddyBamFile.finalMd5sumFile
 
-            executionService.executeCommand(realm, "rm -rf ${bamFilePath} ${baiFilePath} ${md5sumFilePath} ${mergedQADirectory}")
+            executionService.executeCommand(realm, "rm -f ${bamFilePath} ${baiFilePath} ${md5sumFilePath}")
 
             assert WaitingFileUtils.waitUntilDoesNotExist(bamFilePath)
             assert WaitingFileUtils.waitUntilDoesNotExist(baiFilePath)
             assert WaitingFileUtils.waitUntilDoesNotExist(md5sumFilePath)
+        }
+
+        if (roddyBamFile.tmpRoddyMergedQADirectory.exists()) {
+            File mergedQADirectory = roddyBamFile.finalMergedQADirectory
+
+            executionService.executeCommand(realm, "rm -rf ${mergedQADirectory}")
+
             assert WaitingFileUtils.waitUntilDoesNotExist(mergedQADirectory)
         }
     }

@@ -304,7 +304,7 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
         RoddyBamFile roddyBamFile2 = createBamFileSetupAndReturnBamFileToWorkOn()
 
         movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String cmd ->
-            assert cmd == "rm -rf ${roddyBamFile.finalBamFile} ${roddyBamFile.finalBaiFile} ${roddyBamFile.finalMd5sumFile} ${roddyBamFile.finalMergedQADirectory}" : WRONG_COMMAND
+            assert cmd == "rm -f ${roddyBamFile.finalBamFile} ${roddyBamFile.finalBaiFile} ${roddyBamFile.finalMd5sumFile}" : WRONG_COMMAND
         }
         assert !shouldFail(AssertionError) {
             movePanCanFilesToFinalDestinationJob.deletePreviousMergedBamResultFiles(roddyBamFile2, realm)
@@ -315,12 +315,16 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
     @Test
     void testDeletePreviousMergedBamResultFiles_BaseBamFileDeletionSuccessful_QAFilesDeletionFailed_ShouldFail() {
         RoddyBamFile roddyBamFile2 = createBamFileSetupAndReturnBamFileToWorkOn()
-        File qaPath = roddyBamFile.finalMergedQADirectory
-        assert qaPath.mkdirs()
-        assert WaitingFileUtils.waitUntilExists(qaPath)
+        File finalQaPath = roddyBamFile.finalMergedQADirectory
+        File tempQaPath = roddyBamFile2.tmpRoddyMergedQADirectory
+        assert finalQaPath.mkdirs()
+        assert tempQaPath.mkdirs()
+        assert WaitingFileUtils.waitUntilExists(finalQaPath)
+        assert WaitingFileUtils.waitUntilExists(tempQaPath)
 
         movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String cmd ->
-            assert cmd == "rm -rf ${roddyBamFile.finalBamFile} ${roddyBamFile.finalBaiFile} ${roddyBamFile.finalMd5sumFile} ${roddyBamFile.finalMergedQADirectory}" : WRONG_COMMAND
+            assert (cmd == "rm -f ${roddyBamFile.finalBamFile} ${roddyBamFile.finalBaiFile} ${roddyBamFile.finalMd5sumFile}") ||
+                    (cmd == "rm -rf ${roddyBamFile.finalMergedQADirectory}") : WRONG_COMMAND
             roddyBamFile.finalBamFile.delete()
         }
         assert !shouldFail(AssertionError) {
@@ -342,7 +346,8 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
         assert WaitingFileUtils.waitUntilExists(qaPath)
 
         movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String cmd ->
-            assert cmd == "rm -rf ${roddyBamFile.finalBamFile} ${roddyBamFile.finalBaiFile} ${roddyBamFile.finalMd5sumFile} ${roddyBamFile.finalMergedQADirectory}" : WRONG_COMMAND
+            assert (cmd == "rm -f ${roddyBamFile.finalBamFile} ${roddyBamFile.finalBaiFile} ${roddyBamFile.finalMd5sumFile}") ||
+                    (cmd == "rm -rf ${roddyBamFile.finalMergedQADirectory}") : WRONG_COMMAND
             roddyBamFile.finalBamFile.delete()
             roddyBaiFilePath.delete()
             roddyMd5SumFilePath.delete()
