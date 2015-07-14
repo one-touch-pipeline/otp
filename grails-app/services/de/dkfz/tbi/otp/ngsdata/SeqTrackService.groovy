@@ -1,24 +1,23 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.AbstractAlignmentDecider
+import de.dkfz.tbi.otp.dataprocessing.AlignmentDecider
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.FastqSet
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.utils.CollectionUtils
-
-import static org.springframework.util.Assert.*
-
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
-
-import de.dkfz.tbi.otp.dataprocessing.AlignmentDecider
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import groovy.xml.MarkupBuilder
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.core.userdetails.UserDetails
-import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.job.processing.ProcessingException
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+
+import static org.springframework.util.Assert.*
 
 class SeqTrackService {
 
@@ -867,6 +866,23 @@ AND i.id > :seqTrackId
         List<DataFile> files = DataFile.findAllBySeqTrack(seqTrack)
         RunSegment runSegment = CollectionUtils.exactlyOneElement( files*.runSegment.unique() )
         return LsdfFilesService.midtermStorageMountPoint.any{runSegment.dataPath.startsWith(it)}
+    }
+
+
+
+    List<ExternallyProcessedMergedBamFile> returnExternallyProcessedMergedBamFiles(List<SeqTrack> seqTracks) {
+        notNull(seqTracks, "The input of returnExternallyProcessedMergedBamFiles is null")
+        assert !seqTracks.empty : "The input list of returnExternallyProcessedMergedBamFiles is empty"
+
+        return ExternallyProcessedMergedBamFile.executeQuery(
+"""
+select bamFile
+from ExternallyProcessedMergedBamFile bamFile
+join bamFile.fastqSet fastqSet
+join fastqSet.seqTracks seqTracks
+where seqTracks in (:seqTrackList)
+""", ["seqTrackList": seqTracks])
+
     }
 
 }

@@ -1,5 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.FastqSet
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 
 import static org.junit.Assert.*
@@ -1063,6 +1066,37 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
         assert workPackages.empty
     }
+
+    @Test
+    void testReturnExternallyProcessedMergedBamFiles_InputIsNull_ShouldFail() {
+        shouldFail(IllegalArgumentException) {
+            seqTrackService.returnExternallyProcessedMergedBamFiles(null)
+        }
+    }
+
+    @Test
+    void testReturnExternallyProcessedMergedBamFiles_InputIsEmpty_ShouldFail() {
+        TestCase.shouldFail(AssertionError) {
+            seqTrackService.returnExternallyProcessedMergedBamFiles([])
+        }
+    }
+
+    @Test
+    void testReturnExternallyProcessedMergedBamFiles_NoExternalBamFileAttached_AllFine() {
+        SeqTrack seqTrack = SeqTrack.build()
+        assert seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack]).isEmpty()
+    }
+
+    @Test
+    void testReturnExternallyProcessedMergedBamFiles_ExternalBamFileAttached_AllFine() {
+        SeqTrack seqTrack = SeqTrack.build()
+        ExternallyProcessedMergedBamFile bamFile = ExternallyProcessedMergedBamFile.build(
+                fastqSet: FastqSet.build(seqTracks: [seqTrack]),
+                type: AbstractBamFile.BamType.RMDUP,
+        )
+        assert [bamFile] == seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack])
+    }
+
 
     private void setupProjectAndDataFile(String decider) {
         testData.project.alignmentDeciderBeanName = decider
