@@ -1,8 +1,16 @@
 package de.dkfz.tbi.otp.utils
 
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import groovy.transform.Immutable
 
 class ProcessHelperService {
+
+    @Immutable
+    static class ProcessOutput {
+        String stdout
+        String stderr
+        int exitCode
+    }
 
     static Process executeCommand(String cmd) {
         assert cmd : "The input cmd must not be null"
@@ -10,15 +18,30 @@ class ProcessHelperService {
         return [ 'bash', '-c', cmd ].execute()
     }
 
-    static String waitForCommandAndReturnStdout(Process process) {
+    static ProcessOutput waitForCommand(Process process) {
         assert process : "The input process must not be null"
         StringBuffer stdout = new StringBuffer()
         StringBuffer stderr = new StringBuffer()
         process.waitForProcessOutput(stdout, stderr)
 
-        LogThreadLocal.getThreadLog().debug("stderr:\n${stderr}")
-        LogThreadLocal.getThreadLog().debug("stdout:\n${stdout}")
-        return stdout.toString()
+        ProcessOutput processOutput = new ProcessOutput(
+                stdout: stdout,
+                stderr: stderr,
+                exitCode: process.exitValue()
+        )
+        LogThreadLocal.getThreadLog().debug("exit code:\n${processOutput.exitCode}")
+        LogThreadLocal.getThreadLog().debug("stderr:\n${processOutput.stderr}")
+        LogThreadLocal.getThreadLog().debug("stdout:\n${processOutput.stdout}")
+
+        return processOutput
+    }
+
+    static ProcessOutput waitForCommand(String cmd) {
+        return waitForCommand(executeCommand(cmd))
+    }
+
+    static String waitForCommandAndReturnStdout(Process process) {
+        return waitForCommand(process).stdout
     }
 
 

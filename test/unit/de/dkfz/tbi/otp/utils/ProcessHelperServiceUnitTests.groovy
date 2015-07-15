@@ -45,6 +45,45 @@ class ProcessHelperServiceUnitTests {
     }
 
 
+
+    @Test
+    void testWaitForCommand_Process_AllFine() {
+        Process process = [ 'bash', '-c', COMMAND ].execute()
+        ProcessHelperService.ProcessOutput actual = ProcessHelperService.waitForCommand(process)
+        String expected = COMMAND_TEXT
+
+        assert actual.stdout.trim() == expected
+        assert actual.stderr.trim().isEmpty()
+        assert actual.exitCode == 0
+    }
+
+    @Test
+    void testWaitForCommand_Process_InputIsNull_ShouldFail() {
+        assert TestCase.shouldFail(AssertionError) {
+            ProcessHelperService.waitForCommand(null as Process)
+        }.contains("The input process must not be null")
+    }
+
+
+
+    @Test
+    void testWaitForCommand_String_AllFine() {
+        ProcessHelperService.ProcessOutput actual = ProcessHelperService.waitForCommand(COMMAND)
+        String expected = COMMAND_TEXT
+
+        assert actual.stdout.trim() == expected
+        assert actual.stderr.trim().isEmpty()
+        assert actual.exitCode == 0
+    }
+
+    @Test
+    void testWaitForCommand_String_InputIsNull_ShouldFail() {
+        assert TestCase.shouldFail(AssertionError) {
+            ProcessHelperService.waitForCommand(null as String)
+        }.contains("The input cmd must not be null")
+    }
+
+
     @Test
     void testWaitForCommandAndReturnStdout_AllFine() {
         Process process = [ 'bash', '-c', COMMAND ].execute()
