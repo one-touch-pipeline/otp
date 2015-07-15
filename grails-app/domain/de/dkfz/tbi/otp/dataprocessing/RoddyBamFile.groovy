@@ -189,9 +189,9 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
         return "${bamFileName}.bai"
     }
 
-    // Example: blood_somePid_merged.mdup.bam.md5sum
+    // Example: blood_somePid_merged.mdup.bam.md5
     public String getMd5sumFileName() {
-        return "${bamFileName}.md5sum"
+        return "${bamFileName}.md5"
     }
 
     // Example: $OTP_ROOT_PATH/${project}/sequencing/whole_genome_sequencing/view-by-pid/somePid/control/paired/merged-alignment/.temp_RoddyPanCan_${bamFileId}

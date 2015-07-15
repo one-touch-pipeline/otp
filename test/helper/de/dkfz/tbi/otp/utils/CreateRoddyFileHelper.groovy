@@ -37,7 +37,7 @@ class CreateRoddyFileHelper {
         File tmpRoddyBaiFile  = new File(baseTempDir, "${bamFileName}.bai")
         assert tmpRoddyBaiFile.createNewFile()
         tmpRoddyBaiFile << "content"
-        File tmpRoddyMd5sumFile = new File(baseTempDir, "${bamFileName}.md5sum")
+        File tmpRoddyMd5sumFile = new File(baseTempDir, "${bamFileName}.md5")
         assert tmpRoddyMd5sumFile.createNewFile()
         tmpRoddyMd5sumFile << "a841c64c5825e986c4709ac7298e9366"
     }

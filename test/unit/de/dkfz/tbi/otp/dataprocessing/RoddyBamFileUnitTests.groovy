@@ -52,7 +52,7 @@ class RoddyBamFileUnitTests {
     }
 
     void testGetRoddyMd5sumFileName(){
-        assert "${sampleType.dirName}_${individual.pid}_merged.mdup.bam.md5sum" == roddyBamFile.getMd5sumFileName()
+        assert "${sampleType.dirName}_${individual.pid}_merged.mdup.bam.md5" == roddyBamFile.getMd5sumFileName()
     }
 
     void testGetTmpRoddyDirectory_AllFine() {
