@@ -223,11 +223,7 @@ if ((otpConfig.otp.security.ldap.enabled instanceof ConfigObject) || !Boolean.pa
 } else {
     println("using ldap")
     grails.plugins.springsecurity.providerNames = ['ipRestrictedLdapAuthenticationProvider']
-    if(otpConfig.otp.security.internalNetwork instanceof ConfigObject) {
-        otp.security.internalNetwork = "0.0.0.0/0 ::/0"
-    } else {
-        otp.security.internalNetwork = otpConfig.otp.security.internalNetwork
-    }
+    otp.security.internalNetwork = otpConfig.otp.security.internalNetwork
     otp.security.ldap.enabled = true
     grails.plugins.springsecurity.ldap.context.managerDn         = otpConfig.otp.security.ldap.managerDn
     grails.plugins.springsecurity.ldap.context.managerPassword   = otpConfig.otp.security.ldap.managerPw
