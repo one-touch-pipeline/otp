@@ -89,6 +89,7 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
                         processed: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 ],
         )
+        assert bamFile?.id == mergingWorkPackage.bamFileInProjectFolder?.id
         if (bamFile && bamFile.fileOperationStatus != AbstractMergedBamFile.FileOperationStatus.PROCESSED) {
             // If we get here, moving of bamFile to the final destination has been initiated, but has not been reported
             // to have finished successfully. So we do not know what currently is on the file system.
@@ -141,6 +142,8 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
                 config: config,
                 roddyVersion: roddyVersion
         )
+        // has to be set explicitly to null due strange behavior of GORM (?)
+        mergingWorkPackage.bamFileInProjectFolder = null
         roddyBamFile.numberOfMergedLanes = roddyBamFile.containedSeqTracks.size()
         assert roddyBamFile.save(flush: true, failOnError: true)
         return roddyBamFile

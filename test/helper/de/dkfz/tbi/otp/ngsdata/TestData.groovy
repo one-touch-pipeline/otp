@@ -355,7 +355,6 @@ class TestData {
                 properties.get('referenceGenome'),
                 properties.get('workflow')
         )
-        assert workPackage.save(failOnError: true)
         final AlignmentPass alignmentPass = new AlignmentPass([
             identifier: AlignmentPass.nextIdentifier(seqTrack),
             seqTrack: seqTrack,

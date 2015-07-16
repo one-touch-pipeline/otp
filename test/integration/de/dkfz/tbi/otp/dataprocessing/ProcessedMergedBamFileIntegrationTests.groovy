@@ -10,8 +10,8 @@ class ProcessedMergedBamFileIntegrationTests {
     @Test
     void testToString() {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile()
-
-        String expected = /id: \d+ pass: 0 \(latest\) set: 0 \(latest\) <br>sample: mockPid sampleTypeName_\d+ seqType: null seqTypelibraryLayout_\d+ <br>project: projectName_\d+/
+                         //PMBF 2: pass: 0 (latest) set: 0 (latest) <br>sample: mockPid sampleTypeName_3 seqType: null seqTypelibraryLayout_8 <br>project: projectName_1
+        String expected = /PMBF ${bamFile.id}: pass: 0 \(latest\) set: 0 \(latest\) <br>sample: mockPid sampleTypeName_\d+ seqType: null seqTypelibraryLayout_\d+ <br>project: projectName_\d+/
         String actual = bamFile.toString()
         assertTrue("Expected string matching '" + expected + "'. Got: " + actual, actual.matches(expected))
     }

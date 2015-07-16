@@ -191,11 +191,6 @@ class ProcessedMergedBamFileService {
         return mergedBamFile.seqType
     }
 
-    public ProcessedMergedBamFile save(ProcessedMergedBamFile processedMergedBamFile) {
-        notNull(processedMergedBamFile, "The parameter processedMergedBamFile are not allowed to be null")
-        return assertSave(processedMergedBamFile)
-    }
-
     private def assertSave(def object) {
         object = object.save(flush: true)
         if (!object) {
@@ -207,12 +202,13 @@ class ProcessedMergedBamFileService {
     public ProcessedMergedBamFile createMergedBamFile(MergingPass mergingPass) {
         notNull(mergingPass, "The parameter mergingPass is not allowed to be null")
         ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
-                        mergingPass: mergingPass,
-                        type: AbstractBamFile.BamType.MDUP,
-                        numberOfMergedLanes: mergingPass.mergingSet.containedSeqTracks.size(),
-                        workPackage: mergingPass.mergingWorkPackage,
-                        )
-        return save(processedMergedBamFile)
+                mergingPass: mergingPass,
+                type: AbstractBamFile.BamType.MDUP,
+                numberOfMergedLanes: mergingPass.mergingSet.containedSeqTracks.size(),
+                workPackage: mergingPass.mergingWorkPackage,
+        )
+        processedMergedBamFile.mergingWorkPackage.bamFileInProjectFolder = null
+        return assertSave(processedMergedBamFile)
     }
 
     public boolean updateBamFile(ProcessedMergedBamFile bamFile) {

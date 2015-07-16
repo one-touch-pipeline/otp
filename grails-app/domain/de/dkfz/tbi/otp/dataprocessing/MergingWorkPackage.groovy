@@ -10,6 +10,24 @@ import de.dkfz.tbi.otp.ngsdata.*
 class MergingWorkPackage {
 
     /**
+     * The BAM file which moving to the final destination has been initiated for most recently.
+     * Note that if {@link AbstractMergedBamFile#fileOperationStatus} is {@link FileOperationStatus#INPROGRESS}, moving is still in progress or has failed, so the file system is in an unclear state.
+     * Also note that the referenced BAM file might be withdrawn.
+     * If you use the referenced BAM file as input for further processing,
+     * <ul>
+     *     <li>ensure that it is not withdrawn,</li>
+     *     <li>ensure that its {@link AbstractMergedBamFile#fileOperationStatus} is {@link FileOperationStatus#PROCESSED},</li>
+     *     <li>ensure that the file on the file system is consistent with the database object by comparing the file size on the file system to {@link AbstractFileSystemBamFile#fileSize}. Perform this check a second time <em>after</em> reading from the file to ensure that the file has not been overwritten between the first check and starting to read the file.</li>
+     * </ul>
+     */
+    /*
+     * Due some strange behavior of GORM (?), this has to be set on null explicitly where objects of
+     * {@link de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile} or its subclasses are built or created.
+     * See {@link de.dkfz.tbi.otp.ngsdata.DomainFactory#createProcessedMergedBamFile}
+     */
+    AbstractMergedBamFile bamFileInProjectFolder
+
+    /**
      * Identifies the way how this {@link MergingWorkPackage} is maintained (updated):
      */
     enum ProcessingType {
@@ -57,6 +75,13 @@ class MergingWorkPackage {
         statSizeFileName nullable: true, blank: false, matches: ReferenceGenomeProjectSeqType.TAB_FILE_PATTERN, validator : { val, obj ->
             if (obj.workflow?.name == Workflow.Name.PANCAN_ALIGNMENT) {
                 val != null
+            }
+        }
+        bamFileInProjectFolder nullable: true, validator: { AbstractMergedBamFile val, MergingWorkPackage obj ->
+            if(val) {
+                val.workPackage.id == obj.id && [AbstractMergedBamFile.FileOperationStatus.INPROGRESS, AbstractMergedBamFile.FileOperationStatus.PROCESSED].contains(val.fileOperationStatus)
+            } else {
+                return true
             }
         }
     }
@@ -112,6 +137,7 @@ class MergingWorkPackage {
         seqType index: "merging_work_package_seq_type_idx"
         referenceGenome index: "merging_work_package_reference_genome_idx"
         needsProcessing index: "merging_work_package_needs_processing_idx"  // partial index: WHERE needs_processing = true
+        bamFileInProjectFolder index: "merging_work_package_bam_file_in_project_folder_idx"
     }
 
     String toStringWithoutIdAndWorkflow() {

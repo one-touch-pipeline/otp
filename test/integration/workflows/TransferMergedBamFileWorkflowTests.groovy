@@ -1,17 +1,24 @@
 package workflows
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.filehandling.FileNames
+import de.dkfz.tbi.otp.job.jobs.roddyAlignment.MovePanCanFilesToFinalDestinationJob
+import de.dkfz.tbi.otp.job.jobs.transferMergedBamFile.MoveFilesToFinalDestinationJob
+import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
+import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
+import de.dkfz.tbi.otp.utils.HelperUtils
 import org.joda.time.Duration
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
+import org.springframework.beans.factory.annotation.Autowired
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
@@ -48,6 +55,11 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
     String qaResultOverviewFile
     String qaResultOverviewExtendedFile
     String fastqFilesInMergedBamFile
+
+    ProcessedMergedBamFile processedMergedBamFile
+
+    @Autowired
+    MoveFilesToFinalDestinationJob moveFilesToFinalDestinationJob
 
     @Before
     void setUp() {
@@ -322,7 +334,7 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
                         )
         assertNotNull(mergingPass.save([flush: true, failOnError: true]))
 
-        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
+        processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                         fileExists: true,
                         type: BamType.MDUP,
                         qualityAssessmentStatus: QaProcessingStatus.FINISHED,
@@ -569,6 +581,34 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
         /* TODO: Test for work-around for OTP-1018. Unfortunately, there is no way to test for
            readability for "other" since Java 6 does not have PosixFilePermission of the java.nio
            library. The test can only be implemented after the upgrade to versions >= 7. */
+    }
+
+    /*
+     * This cannot be tested with an integration test, because integration tests are transactional, so this must be in the workflow test.
+     */
+    @Ignore
+    @Test
+    void testBamFileInProjectFolderIsSetPersistentlyEvenIfMovingFails() {
+        try {
+            final String exceptionMessage = HelperUtils.uniqueString
+            moveFilesToFinalDestinationJob.log = log
+            moveFilesToFinalDestinationJob.metaClass.getProcessParameterValue = {
+                processedMergedBamFile.fileOperationStatus = FileOperationStatus.INPROGRESS
+                assert processedMergedBamFile.save(failOnError: true)
+                return processedMergedBamFile.id as String
+            }
+            moveFilesToFinalDestinationJob.executionHelperService.metaClass.sendScript = { Realm realm, String text ->
+                throw new RuntimeException(exceptionMessage)
+            }
+            assert processedMergedBamFile.mergingWorkPackage.bamFileInProjectFolder == null
+            assert TestCase.shouldFail {
+                moveFilesToFinalDestinationJob.execute()
+            } == exceptionMessage
+            assert processedMergedBamFile.mergingWorkPackage.bamFileInProjectFolder == processedMergedBamFile
+        } finally {
+            TestCase.removeMetaClass(ExecutionHelperService, moveFilesToFinalDestinationJob.executionHelperService)
+            TestCase.removeMetaClass(MoveFilesToFinalDestinationJob, moveFilesToFinalDestinationJob)
+        }
     }
 
     //check if the md5sum was stored properly in the database

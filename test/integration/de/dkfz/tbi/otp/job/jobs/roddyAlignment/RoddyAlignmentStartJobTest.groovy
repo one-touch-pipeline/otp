@@ -133,12 +133,14 @@ class RoddyAlignmentStartJobTest {
                 workPackage: mwp,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
         ])
-        DomainFactory.createRoddyBamFile([
+        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
                 workPackage: mwp,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
                 md5sum: null,
                 withdrawn: true,
         ])
+
+        mwp.bamFileInProjectFolder = roddyBamFile
 
         assert null == RoddyAlignmentStartJob.findBamFileInProjectFolder(mwp)
     }
@@ -157,6 +159,8 @@ class RoddyAlignmentStartJobTest {
                 withdrawn: true,
         ])
 
+        mwp.bamFileInProjectFolder = roddyBamFile
+
         assert roddyBamFile == RoddyAlignmentStartJob.findBamFileInProjectFolder(mwp)
     }
 
@@ -167,14 +171,25 @@ class RoddyAlignmentStartJobTest {
 
     @Test
     void testFindUsableBaseBamFile_WhenBamFileInProjectFolderIsWithdrawn_ShouldReturnNull() {
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([withdrawn: true])
+        MergingWorkPackage mwp = createMergingWorkPackage()
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
+                workPackage: mwp,
+                withdrawn: true
+        ])
+
+        mwp.bamFileInProjectFolder = bamFile
 
         assert null == RoddyAlignmentStartJob.findUsableBaseBamFile(bamFile.mergingWorkPackage)
     }
 
     @Test
     void testFindUsableBaseBamFile_WhenBamFileInProjectFolderIsUsable_ShouldReturnIt() {
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
+        MergingWorkPackage mwp = createMergingWorkPackage()
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
+                workPackage: mwp
+        ])
+
+        mwp.bamFileInProjectFolder = bamFile
 
         assert bamFile == RoddyAlignmentStartJob.findUsableBaseBamFile(bamFile.mergingWorkPackage)
     }

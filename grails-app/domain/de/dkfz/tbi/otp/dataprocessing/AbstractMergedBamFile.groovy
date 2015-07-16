@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
 import static org.springframework.util.Assert.notNull
 
 /**
@@ -75,5 +77,20 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
     @Override
     MergingWorkPackage getMergingWorkPackage() {
         return workPackage
+    }
+
+    public void validateAndSetBamFileInProjectFolder() {
+        withTransaction {
+            assert fileOperationStatus == FileOperationStatus.INPROGRESS
+            assert !withdrawn
+            assert CollectionUtils.exactlyOneElement(AbstractMergedBamFile.findAll {
+                workPackage == this.workPackage &&
+                withdrawn == false &&
+                fileOperationStatus == FileOperationStatus.INPROGRESS
+            }).id == this.id
+
+            workPackage.bamFileInProjectFolder = this
+            assert workPackage.save(flush: true)
+        }
     }
 }

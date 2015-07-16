@@ -132,34 +132,34 @@ abstract class AbstractBamFile {
     }
 
     final Project getProject() {
-        return individual?.project
+        return individual.project
     }
 
     final short getProcessingPriority() {
-        return project?.processingPriority
+        return project.processingPriority
     }
 
     final Individual getIndividual() {
-        return sample?.individual
+        return sample.individual
     }
 
     Sample getSample() {
-        return mergingWorkPackage?.sample
+        return mergingWorkPackage.sample
     }
 
     final SampleType getSampleType() {
-        return  sample?.sampleType
+        return  sample.sampleType
     }
 
     SeqType getSeqType() {
-        return mergingWorkPackage?.seqType
+        return mergingWorkPackage.seqType
     }
 
     /**
      * @return The reference genome which was used to produce this BAM file.
      */
     ReferenceGenome getReferenceGenome() {
-        return mergingWorkPackage?.referenceGenome
+        return mergingWorkPackage.referenceGenome
     }
 
     /**

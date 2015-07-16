@@ -50,6 +50,7 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
                 assert [FileOperationStatus.NEEDS_PROCESSING, FileOperationStatus.INPROGRESS].contains(roddyBamFile.fileOperationStatus)
                 roddyBamFile.fileOperationStatus = FileOperationStatus.INPROGRESS
                 assert roddyBamFile.save(flush: true)
+                roddyBamFile.validateAndSetBamFileInProjectFolder()
             }
             correctPermissions(roddyBamFile)
             deletePreviousMergedBamResultFiles(roddyBamFile, realm)

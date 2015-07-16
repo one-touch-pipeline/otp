@@ -178,6 +178,8 @@ class DomainFactory {
                 mergingPass: mergingPass,
                 workPackage: mergingPass.mergingWorkPackage,
         ] + properties)
+        // has to be set explicitly to null due strange behavior of GORM (?)
+        bamFile.mergingPass.mergingWorkPackage.bamFileInProjectFolder = null
         return bamFile
     }
 
