@@ -99,6 +99,8 @@ class ProcessedMergedBamFileTests {
     void testIsMostRecentBamFile() {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                 type: AbstractBamFile.BamType.SORTED,
+                mergingPass: mergingPass,
+                numberOfMergedLanes: 1,
         ])
         bamFile.save(flush: true)
 
@@ -111,7 +113,9 @@ class ProcessedMergedBamFileTests {
 
         ProcessedMergedBamFile secondBamFile = DomainFactory.createProcessedMergedBamFile(secondMergingPass, [
                 type: AbstractBamFile.BamType.SORTED,
-                ])
+                mergingPass: secondMergingPass,
+                numberOfMergedLanes: 1,
+        ])
         secondBamFile.save(flush: true)
 
         assertFalse(bamFile.isMostRecentBamFile())
@@ -129,7 +133,9 @@ class ProcessedMergedBamFileTests {
 
         ProcessedMergedBamFile firstBamFileOfSecondMergingSet = DomainFactory.createProcessedMergedBamFile(firstMergingPassOfSecondMergingSet, [
                 type: AbstractBamFile.BamType.SORTED,
-                ])
+                mergingPass: firstMergingPassOfSecondMergingSet,
+                numberOfMergedLanes: 1,
+        ])
         firstBamFileOfSecondMergingSet.save(flush: true)
 
         assertFalse(secondBamFile.isMostRecentBamFile())

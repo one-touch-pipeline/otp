@@ -17,7 +17,7 @@ import grails.test.mixin.*
 import org.junit.*
 
 @TestFor(MockAbstractBamFile)
-@Build([FileType, DataFile, MockAbstractBamFile, ProcessedBamFile])
+@Build([FileType, DataFile, ProcessedBamFile])
 class AbstractBamFileUnitTests {
 
     void testSave() {
@@ -106,11 +106,11 @@ class AbstractBamFileUnitTests {
         assert dataFile21.dateCreated < dataFile22.dateCreated
         assert dataFile22.dateCreated < dataFile23.dateCreated
 
-        final AbstractBamFile bamFile1 = MockAbstractBamFile.build()
+        final AbstractBamFile bamFile1 = new MockAbstractBamFile(type: AbstractBamFile.BamType.SORTED)
         bamFile1.metaClass.getContainedSeqTracks = { [seqTrack1].toSet() }
-        final AbstractBamFile bamFile2 = MockAbstractBamFile.build()
+        final AbstractBamFile bamFile2 = new MockAbstractBamFile(type: AbstractBamFile.BamType.SORTED)
         bamFile2.metaClass.getContainedSeqTracks = { [seqTrack2].toSet() }
-        final AbstractBamFile bamFile3 = MockAbstractBamFile.build()
+        final AbstractBamFile bamFile3 = new MockAbstractBamFile(type: AbstractBamFile.BamType.SORTED)
         bamFile3.metaClass.getContainedSeqTracks = { [seqTrack1, seqTrack2].toSet() }
 
         assert AbstractBamFile.getLatestSequenceDataFileCreationDate(bamFile2, bamFile1) == dataFile22.dateCreated

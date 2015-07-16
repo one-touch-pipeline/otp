@@ -1,18 +1,18 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.web.ControllerUnitTestMixin
 import org.junit.Test
 
-import static org.junit.Assert.*
 import static de.dkfz.tbi.otp.ngsdata.TestData.createReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
-import grails.test.mixin.support.*
 
 /**
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
 @TestFor(ReferenceGenome)
-@TestMixin(GrailsUnitTestMixin)
+@TestMixin(ControllerUnitTestMixin)
 class ReferenceGenomeTests {
 
     final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
@@ -21,18 +21,15 @@ class ReferenceGenomeTests {
     void testValidationMethodOfReferenceGenomeNameNotUnique() {
         final String REFERENCE_GENOME_NAME = 'hg19_1_24'
         ReferenceGenome referenceGenome = createReferenceGenome([name: REFERENCE_GENOME_NAME])
-        referenceGenome.save(flush: true)
-        assert referenceGenome.validate()
+        assert referenceGenome.save(flush: true)
 
         ReferenceGenome referenceGenomeInvalid = createReferenceGenome([name: REFERENCE_GENOME_NAME])
-        referenceGenomeInvalid.save(flush: true)
         assert !referenceGenomeInvalid.validate()
     }
 
     @Test
     void testValidationMethodOfReferenceGenomeNameIsEmpty() {
         ReferenceGenome referenceGenome = createReferenceGenome([name: ''])
-        referenceGenome.save(flush: true)
         assert !referenceGenome.validate()
     }
 
@@ -40,18 +37,15 @@ class ReferenceGenomeTests {
     void testValidationMethodOfReferenceGenomePathNotUnique() {
         final String REFERENCE_GENOME_PATH = 'referenceGenome'
         ReferenceGenome referenceGenome = createReferenceGenome([path: REFERENCE_GENOME_PATH])
-        referenceGenome.save(flush: true)
-        assert referenceGenome.validate()
+        assert referenceGenome.save(flush: true)
 
         ReferenceGenome referenceGenomeInvalid = createReferenceGenome([path: REFERENCE_GENOME_PATH])
-        referenceGenomeInvalid.save(flush: true)
         assert !referenceGenomeInvalid.validate()
     }
 
     @Test
     void testValidationMethodOfReferenceGenomePathIsEmpty() {
         ReferenceGenome referenceGenome = createReferenceGenome([path: ''])
-        referenceGenome.save(flush: true)
         assert !referenceGenome.validate()
     }
 

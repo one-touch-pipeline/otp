@@ -8,6 +8,8 @@ import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.ExternalScript
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.web.ControllerUnitTestMixin
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -17,6 +19,7 @@ import org.junit.Test
 
 @TestFor(RoddyWorkflowConfig)
 @Build([ExternalScript, Project, Workflow])
+@TestMixin(ControllerUnitTestMixin)
 public class RoddyWorkflowConfigUnitTests {
 
     File configDir

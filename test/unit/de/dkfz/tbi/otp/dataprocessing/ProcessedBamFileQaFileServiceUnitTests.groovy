@@ -1,8 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.TestConstants
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.buildtestdata.mixin.Build
+import grails.test.mixin.Mock
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 @Build([
@@ -11,18 +15,26 @@ import org.junit.Test
 ])
 class ProcessedBamFileQaFileServiceUnitTests {
 
+    @Before
     public void setUp() throws Exception {
         //these domain methods are mocked, since the contained critera makes problems
         QualityAssessmentPass.metaClass.isLatestPass = {true}
         AlignmentPass.metaClass.isLatestPass = {true}
+
+        ConfigService.metaClass.static.getProjectRootPath = { Project project -> TestConstants.BASE_TEST_DIRECTORY }
+    }
+
+    @After
+    public void tearDown() {
+        QualityAssessmentPass.metaClass.isLatestPass = null
+        AlignmentPass.metaClass.isLatestPass = null
+        ConfigService.metaClass.static.getProjectRootPath = null
     }
 
 
     private ProcessedBamFileQaFileService createProcessedBamFileQaFileService() {
         ProcessedBamFileQaFileService processedBamFileQaFileService = new ProcessedBamFileQaFileService()
-        processedBamFileQaFileService.configService = [
-            getProjectRootPath: { Project project -> return TestConstants.BASE_TEST_DIRECTORY},
-        ] as ConfigService
+        processedBamFileQaFileService.configService = [] as ConfigService
         processedBamFileQaFileService.mergedAlignmentDataFileService = [
             buildRelativePath: { SeqType type, Sample sample -> return "RelativeDirectory"},
         ] as MergedAlignmentDataFileService

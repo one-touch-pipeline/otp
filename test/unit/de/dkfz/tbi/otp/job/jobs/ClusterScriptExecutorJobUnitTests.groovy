@@ -11,7 +11,7 @@ import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
 
 @Mock([ExecutionHelperService, Realm])
-class ClusterScriptExecutorJobUnitTests extends GroovyTestCase {
+class ClusterScriptExecutorJobUnitTests {
 
     final static String ARBITRARY_REALM_ID = '1'
     final static String ARBITRARY_JOB_ID = '1234'

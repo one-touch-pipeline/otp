@@ -303,3 +303,7 @@ grails.gorm.default.constraints = {
 // Documentation settings
 grails.doc.title = 'The One Touch Pipeline (OTP)'
 grails.doc.authors = 'The OTP Development Team'
+
+// Restore old data-binding behaviour (before 2.3)
+grails.databinding.convertEmptyStringsToNull = false
+grails.databinding.trimStrings = false

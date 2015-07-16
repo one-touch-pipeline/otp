@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.job.plan
 
-import static org.junit.Assert.*
+import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
+import org.junit.Test
 
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-import org.junit.*
+import static org.junit.Assert.*
 
 /**
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
@@ -14,34 +15,28 @@ import org.junit.*
 class JobDefinitionTests {
 
     void testConstraints() {
-        mockForConstraintsTests(JobDefinition, [])
         JobDefinition jobDefinition = new JobDefinition()
         assertFalse(jobDefinition.validate())
-        assertEquals("nullable", jobDefinition.errors["name"])
-        assertEquals("nullable", jobDefinition.errors["bean"])
-        assertEquals("nullable", jobDefinition.errors["plan"])
+        assertEquals("nullable", jobDefinition.errors["name"].code)
+        assertEquals("nullable", jobDefinition.errors["bean"].code)
+        assertEquals("nullable", jobDefinition.errors["plan"].code)
 
-        // mock the JobExecutionPlan
-        JobExecutionPlan jobExecutionPlan = new JobExecutionPlan()
-        mockDomain(JobExecutionPlan, [jobExecutionPlan])
+        JobExecutionPlan jobExecutionPlan = new JobExecutionPlan(name: 'some name')
         jobDefinition.plan = jobExecutionPlan
-        assertFalse(jobDefinition.validate())
-
-        // mock the previous JobDefinition
-        JobDefinition previous = new JobDefinition()
-        mockDomain(JobDefinition, [previous])
-        jobDefinition.previous = previous
-        assertFalse(jobDefinition.validate())
-
-        // mock the next JobDefinition
-        JobDefinition next = new JobDefinition()
-        mockDomain(JobDefinition, [next])
-        jobDefinition.next = next
         assertFalse(jobDefinition.validate())
 
         jobDefinition.name = "testDefinition"
         assertFalse(jobDefinition.validate())
+
         jobDefinition.bean = "testBean"
+        assertTrue(jobDefinition.validate())
+
+        JobDefinition previous = new JobDefinition()
+        jobDefinition.previous = previous
+        assertTrue(jobDefinition.validate())
+
+        JobDefinition next = new JobDefinition()
+        jobDefinition.next = next
         assertTrue(jobDefinition.validate())
     }
 }

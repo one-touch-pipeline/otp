@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
+import grails.buildtestdata.mixin.Build
+
 import static org.junit.Assert.*
 
 import de.dkfz.tbi.otp.job.plan.JobDefinition
@@ -13,6 +15,7 @@ import org.junit.*
  */
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(ProcessingStep)
+@Build([ProcessingStep])
 class ProcessingStepUnitTests {
 
     @SuppressWarnings("EmptyMethod")
@@ -203,107 +206,109 @@ class ProcessingStepUnitTests {
     @Test
     void testNullable() {
         ProcessingStep step = new ProcessingStep()
-        mockForConstraintsTests(ProcessingStep, [])
         assertFalse(step.validate())
-        assertEquals("nullable", step.errors["jobDefinition"])
-        assertEquals("nullable", step.errors["process"])
+        assertEquals("nullable", step.errors["jobDefinition"].code)
+        assertEquals("nullable", step.errors["process"].code)
+
         Process process = new Process()
-        mockDomain(Process, [process])
         step.process = process
         assertFalse(step.validate())
-        assertEquals("nullable", step.errors["jobDefinition"])
+        assertEquals("nullable", step.errors["jobDefinition"].code)
         assertNull(step.errors["process"])
+
         JobDefinition jobDefinition = new JobDefinition()
-        mockDomain(JobDefinition, [jobDefinition])
         step.jobDefinition = jobDefinition
         assertTrue(step.validate())
     }
 
     @Test
     void testPrevious() {
-        Process process = new Process(id: 1)
-        Process process2 = new Process(id: 2)
-        JobDefinition jobDefinition = new JobDefinition(id: 1)
-        JobDefinition jobDefinition2 = new JobDefinition(id: 2)
-        ProcessingStep testStep1 = new ProcessingStep(process: process2, jobDefinition: jobDefinition)
-        ProcessingStep testStep2 = new ProcessingStep(process: process, jobDefinition: jobDefinition)
-        ProcessingStep testStep3 = new ProcessingStep(process: process, jobDefinition: jobDefinition2)
-        mockDomain(Process, [process, process2])
-        mockDomain(JobDefinition, [jobDefinition, jobDefinition2])
-        ProcessingStep step = new ProcessingStep(process: process, jobDefinition: jobDefinition)
-        mockForConstraintsTests(ProcessingStep, [testStep1, testStep2])
+        Process process = Process.build(id: 1)
+        Process process2 = Process.build(id: 2)
+        JobDefinition jobDefinition = JobDefinition.build(id: 1, plan: process.jobExecutionPlan)
+        JobDefinition jobDefinition2 = JobDefinition.build(id: 2, plan: process2.jobExecutionPlan)
+
+        ProcessingStep step = ProcessingStep.build(process: process, jobDefinition: jobDefinition)
         assertTrue(step.validate())
+
+        ProcessingStep testStep1 = ProcessingStep.build(process: process2, jobDefinition: jobDefinition2)
         step.previous = testStep1
         assertFalse(step.validate())
-        assertEquals("process", step.errors["previous"])
+        assertEquals("process", step.errors["previous"].code)
+
+        ProcessingStep testStep2 = ProcessingStep.build(process: process, jobDefinition: jobDefinition)
         step.previous = testStep2
         assertFalse(step.validate())
-        assertEquals("jobDefinition", step.errors["previous"])
+        assertEquals("jobDefinition", step.errors["previous"].code)
+
+        jobDefinition2.plan = process.jobExecutionPlan
+        ProcessingStep testStep3 = ProcessingStep.build(process: process, jobDefinition: jobDefinition2)
+
         step.previous = testStep3
         step.next = testStep3
         assertFalse(step.validate())
-        assertEquals("next", step.errors["previous"])
-        assertEquals("previous", step.errors["next"])
+        assertEquals("next", step.errors["previous"].code)
+        assertEquals("previous", step.errors["next"].code)
+
         step.next = null
         assertTrue(step.validate())
     }
 
     @Test
     void testNext() {
-        Process process = new Process(id: 1)
-        Process process2 = new Process(id: 2)
-        JobDefinition jobDefinition = new JobDefinition(id: 1)
-        JobDefinition jobDefinition2 = new JobDefinition(id: 2)
-        ProcessingStep testStep1 = new ProcessingStep(process: process2, jobDefinition: jobDefinition)
-        ProcessingStep testStep2 = new ProcessingStep(process: process, jobDefinition: jobDefinition)
-        ProcessingStep testStep3 = new ProcessingStep(process: process, jobDefinition: jobDefinition2)
-        mockDomain(Process, [process, process2])
-        mockDomain(JobDefinition, [jobDefinition, jobDefinition2])
-        ProcessingStep step = new ProcessingStep(process: process, jobDefinition: jobDefinition)
-        mockForConstraintsTests(ProcessingStep, [testStep1, testStep2])
+        Process process = Process.build(id: 1)
+        Process process2 = Process.build(id: 2)
+        JobDefinition jobDefinition = JobDefinition.build(id: 1, plan: process.jobExecutionPlan)
+        JobDefinition jobDefinition2 = JobDefinition.build(id: 2, plan: process2.jobExecutionPlan)
+
+        ProcessingStep step = ProcessingStep.build(process: process, jobDefinition: jobDefinition)
         assertTrue(step.validate())
+
+        ProcessingStep testStep1 = ProcessingStep.build(process: process2, jobDefinition: jobDefinition2)
         step.next = testStep1
         assertFalse(step.validate())
-        assertEquals("process", step.errors["next"])
+        assertEquals("process", step.errors["next"].code)
+
+        ProcessingStep testStep2 = ProcessingStep.build(process: process, jobDefinition: jobDefinition)
         step.next = testStep2
         assertFalse(step.validate())
-        assertEquals("jobDefinition", step.errors["next"])
+        assertEquals("jobDefinition", step.errors["next"].code)
+
+        jobDefinition2.plan = process.jobExecutionPlan
+        ProcessingStep testStep3 = ProcessingStep.build(process: process, jobDefinition: jobDefinition2)
         step.previous = testStep3
         step.next = testStep3
         assertFalse(step.validate())
-        assertEquals("next", step.errors["previous"])
-        assertEquals("previous", step.errors["next"])
+        assertEquals("next", step.errors["previous"].code)
+        assertEquals("previous", step.errors["next"].code)
+
         step.previous = null
         assertTrue(step.validate())
     }
 
     @Test
     void testProcess() {
-        JobExecutionPlan plan1 = new JobExecutionPlan(id: 1)
-        JobExecutionPlan plan2 = new JobExecutionPlan(id: 2)
-        mockDomain(JobExecutionPlan, [plan1, plan2])
-        JobDefinition jobDefinition = new JobDefinition(plan: plan1)
-        JobDefinition jobDefinition2 = new JobDefinition(plan: plan2)
-        mockDomain(JobDefinition, [jobDefinition, jobDefinition2])
-        Process process = new Process(jobExecutionPlan: plan2)
-        mockDomain(Process, [process])
+        JobExecutionPlan plan1 = JobExecutionPlan.build(id: 1)
+        JobExecutionPlan plan2 = JobExecutionPlan.build(id: 2)
+        JobDefinition jobDefinition = JobDefinition.build(plan: plan1)
+        Process process = Process.build(jobExecutionPlan: plan2)
         ProcessingStep step = new ProcessingStep(process: process, jobDefinition: jobDefinition)
-        mockForConstraintsTests(ProcessingStep, [])
+
         assertFalse(step.validate())
-        assertEquals("jobExecutionPlan", step.errors["process"])
+        assertEquals("jobExecutionPlan", step.errors["process"].code)
         process.jobExecutionPlan = plan1
         assertTrue(step.validate())
     }
 
     @Test
     void testPbsJobDescription() {
-        JobExecutionPlan jobExecutionPlan = new JobExecutionPlan(
+        JobExecutionPlan jobExecutionPlan = JobExecutionPlan.build(
                 name: "testWorkFlow"
         )
-        Process process = new Process(
+        Process process = Process.build(
                 jobExecutionPlan: jobExecutionPlan
         )
-        ProcessingStep step = new ProcessingStep(
+        ProcessingStep step = ProcessingStep.build(
                 id: 9999999,
                 jobClass: "foo",
                 process: process,

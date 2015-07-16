@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.test.mixin.TestFor
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -7,7 +8,8 @@ import org.junit.rules.TemporaryFolder
 
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
-class LsdfFileServiceUnitTests extends GroovyTestCase {
+@TestFor(LsdfFilesService)
+class LsdfFileServiceUnitTests {
 
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder()

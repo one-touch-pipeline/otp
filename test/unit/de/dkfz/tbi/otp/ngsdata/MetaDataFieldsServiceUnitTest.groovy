@@ -142,7 +142,7 @@ class MetaDataFieldsServiceUnitTest {
         SeqPlatform seqPlatform3 = SeqPlatform.build()
 
         def list = metaDataFieldsService.listPlatforms()
-        assert [seqPlatform1, seqPlatform2, seqPlatform3] == list
+        assert [seqPlatform1, seqPlatform2, seqPlatform3] as Set == list as Set
     }
 
 

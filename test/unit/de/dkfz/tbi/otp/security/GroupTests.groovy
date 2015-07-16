@@ -1,5 +1,8 @@
 package de.dkfz.tbi.otp.security
 
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.web.ControllerUnitTestMixin
+
 import static org.junit.Assert.*
 
 import grails.test.mixin.*
@@ -8,6 +11,8 @@ import org.junit.*
 import de.dkfz.tbi.otp.administration.GroupCommand
 
 @TestFor(Group)
+@TestMixin(ControllerUnitTestMixin)
+@Build([Role])
 class GroupTests {
 
     void testWriteProjectConstraint() {
@@ -97,14 +102,12 @@ class GroupTests {
     }
 
     void testRoleUniqueConstraint() {
-        Role role = new Role(authority: "GROUP_TEST")
-        mockDomain(Role, [role])
-        Group group = new Group(name: "test", role: role, description: "")
-        mockForConstraintsTests(Group, [group])
+        Role role = Role.build(authority: "GROUP_TEST")
+        Group group = new Group(name: "test", role: role, description: "").save(flush: true)
         assertTrue(group.validate())
         Group group2 = new Group(name: "teSt", role: role, description: "Something needs to be different")
         assertFalse(group2.validate())
-        assertEquals("unique", group2.errors["role"])
+        assertEquals("unique", group2.errors["role"].code)
     }
 
     void testGroupFromCommandObject() {

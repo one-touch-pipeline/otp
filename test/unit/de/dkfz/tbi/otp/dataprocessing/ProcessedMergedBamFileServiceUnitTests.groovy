@@ -31,6 +31,8 @@ class ProcessedMergedBamFileServiceUnitTests {
     void tearDown() {
         ConfigService.metaClass = null
         MergedAlignmentDataFileService.metaClass = null
+        MergingPass.metaClass = null
+        MergingSet.metaClass = null
     }
 
     @Test

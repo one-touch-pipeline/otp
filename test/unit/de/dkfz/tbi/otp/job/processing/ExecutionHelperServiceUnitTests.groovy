@@ -11,7 +11,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(ExecutionHelperService)
 @Mock([ProcessingStep, Realm])
-class ExecutionHelperServiceUnitTests extends GroovyTestCase {
+class ExecutionHelperServiceUnitTests {
 
     final static String ARBITRARY_JOB_IDENTFIER = '42'
     final static String FIRST_PBS_ID = '1234'

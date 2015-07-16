@@ -12,9 +12,9 @@ class FileNotReadableExceptionUnitTests {
         assertEquals("can not read file: tmp", e.message)
     }
 
-    public void testFileNotReadableExceptionStringParamIsNull() {
-        String path = null
-        FileNotReadableException e = new FileNotReadableException(path)
+    @Test
+    void testFileNotReadableExceptionStringParamIsNull() {
+        FileNotReadableException e = new FileNotReadableException(null as String)
         assertEquals("can not read file: null", e.message)
     }
 
@@ -23,9 +23,9 @@ class FileNotReadableExceptionUnitTests {
         assertEquals("can not read file: tmp", e.message)
     }
 
-    public void testFileNotReadableExceptionFileParamIsNull() {
-        File path = null
-        FileNotReadableException e = new FileNotReadableException(path)
+    @Test
+    void testFileNotReadableExceptionFileParamIsNull() {
+        FileNotReadableException e = new FileNotReadableException(null as File)
         assertEquals("can not read file: null", e.message)
     }
 }

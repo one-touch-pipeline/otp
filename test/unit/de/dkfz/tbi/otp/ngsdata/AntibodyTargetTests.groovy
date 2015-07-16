@@ -27,7 +27,7 @@ class AntibodyTargetTests {
     void testUniqueName() {
         AntibodyTarget antibodyTarget = new AntibodyTarget(
             name: VALID_NAME)
-        antibodyTarget.save()
+        antibodyTarget.save(flush: true)
 
         antibodyTarget = new AntibodyTarget(
             name: VALID_NAME)

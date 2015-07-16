@@ -1,13 +1,17 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import static org.junit.Assert.*
-import static org.junit.Assert.*
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-import org.junit.*
 import de.dkfz.tbi.otp.utils.ReferencedClass
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.web.ControllerUnitTestMixin
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
 
-@TestMixin(GrailsUnitTestMixin)
+import static org.junit.Assert.*
+
+@TestMixin(ControllerUnitTestMixin) // Workaround for Grails bug GRAILS-11136
 @TestFor(MetaDataValidationService)
 @Mock([MetaDataValidationService, LibraryPreparationKitService, SequencingKitLabelService,
     ReferencedClass, ChangeLog,

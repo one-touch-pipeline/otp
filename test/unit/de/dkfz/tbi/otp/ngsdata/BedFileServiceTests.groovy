@@ -1,47 +1,64 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.TestCase
+import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestFor
+import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 
 @TestFor(BedFileService)
+@Build([BedFile])
 class BedFileServiceTests {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 
-    def fakeRealm = [] as Realm
-    def fakeBedFileDomain = [fileName: 'bedFileName'] as BedFile
-    def fakeReferenceGenomeService = [
-            filePathToDirectory: { realm, refGenome -> "${temporaryFolder.root}/referenceGenome" }
-    ] as ReferenceGenomeService
+    Realm realm
+    BedFile bedFile
+    File referenceGenomesBaseDirectory
+
+    @Before
+    void setUp() {
+        realm = DomainFactory.createRealmDataProcessingDKFZ([
+                processingRootPath: temporaryFolder.root.path,
+                rootPath          : temporaryFolder.root.path,
+        ])
+        bedFile = BedFile.build([fileName: 'bedFileName'])
+
+        referenceGenomesBaseDirectory = temporaryFolder.newFolder("reference_genomes", bedFile.referenceGenome.path, "targetRegions")
+        referenceGenomesBaseDirectory.mkdirs()
+
+        service.referenceGenomeService = new ReferenceGenomeService()
+    }
+
+    @After
+    void tearDown() {
+        TestCase.removeMetaClass(ReferenceGenomeService, service.referenceGenomeService)
+        realm = null
+        bedFile = null
+    }
 
     void test_filePath_WhenProjectIsNull_ShouldFailWithException() {
-        shouldFail(IllegalArgumentException) { service.filePath(null, fakeBedFileDomain) }
+        shouldFail(IllegalArgumentException) { service.filePath(null, bedFile) }
     }
 
     void test_filePath_WhenBedFileIsNull_ShouldFailWithException() {
-        shouldFail(IllegalArgumentException) { service.filePath(fakeRealm, null) }
+        shouldFail(IllegalArgumentException) { service.filePath(realm, null) }
     }
 
     void test_filePath_WhenBedFileDoesNotExist_ShouldFailWithException() {
-        service.referenceGenomeService = fakeReferenceGenomeService
-
         assert shouldFail(RuntimeException) {
-            service.filePath(fakeRealm, fakeBedFileDomain)
+            service.filePath(realm, bedFile)
         } =~ /the bedFile can not be read/
     }
 
     void test_filePath_WhenBedFileExists_ShouldReturnPathToFile() {
         // setup:
-        File referenceGenomesBaseDirectory = temporaryFolder.newFolder("referenceGenome/targetRegions")
-        referenceGenomesBaseDirectory.mkdirs()
-
         new File(referenceGenomesBaseDirectory, 'bedFileName').createNewFile()
 
-        service.referenceGenomeService = fakeReferenceGenomeService
-
         // expect:
-        assert service.filePath(fakeRealm, fakeBedFileDomain) == "${temporaryFolder.root.path}/referenceGenome/targetRegions/bedFileName"
+        assert service.filePath(realm, bedFile) == "${referenceGenomesBaseDirectory.parentFile.path}//targetRegions/bedFileName" as String
     }
 }

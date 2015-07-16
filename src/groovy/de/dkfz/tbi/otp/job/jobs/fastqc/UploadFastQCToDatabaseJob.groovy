@@ -53,7 +53,7 @@ class UploadFastQCToDatabaseJob extends AbstractEndStateAwareJobImpl {
         succeed()
     }
 
-    private FastqcProcessedFile getFastqcProcessedFile(DataFile dataFile) {
+    public FastqcProcessedFile getFastqcProcessedFile(DataFile dataFile) {
         FastqcProcessedFile fastqc = FastqcProcessedFile.findByDataFile(dataFile)
         fastqcDataFilesService.updateFastqcProcessedFile(fastqc)
         assertFileExists(fastqc)

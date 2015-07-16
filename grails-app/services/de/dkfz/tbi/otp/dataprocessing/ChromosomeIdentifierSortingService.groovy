@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static org.springframework.util.Assert.*
+import static org.springframework.util.Assert.notNull
+
 /**
  * sort the chromosome identifier
  * the sorting is like this: 1..22 X Y M * 23...1000 A..V
@@ -9,19 +10,17 @@ class ChromosomeIdentifierSortingService {
 
     final int CHROMOSOME_SIZE = Chromosomes.numberOfNumericChromosomes()
 
-    def listComparator = [ compare:
-        {identifier1, identifier2 ->
-            if (identifier1.isInteger() && identifier2.isInteger()) {
-                return compareTwoInteger(identifier1, identifier2)
-            } else if (identifier1.isInteger() && !(identifier2.isInteger())) {
-                return compareIntegerWithNotInteger(identifier1, identifier2)
-            } else if (!(identifier1.isInteger()) && identifier2.isInteger()) {
-                return compareNotIntegerWithInteger(identifier1, identifier2)
-            } else {
-                return compareTwoNotInteger(identifier1, identifier2)
-            }
+    def listComparator = { identifier1, identifier2 ->
+        if (identifier1.isInteger() && identifier2.isInteger()) {
+            return compareTwoInteger(identifier1, identifier2)
+        } else if (identifier1.isInteger() && !(identifier2.isInteger())) {
+            return compareIntegerWithNotInteger(identifier1, identifier2)
+        } else if (!(identifier1.isInteger()) && identifier2.isInteger()) {
+            return compareNotIntegerWithInteger(identifier1, identifier2)
+        } else {
+            return compareTwoNotInteger(identifier1, identifier2)
         }
-    ] as Comparator
+    }
 
     private int compareTwoInteger(Object identifier1, Object identifier2) {
         Integer identifierAsInteger1 = identifier1.toInteger()

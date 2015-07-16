@@ -167,11 +167,11 @@ class CrashRecoveryService {
             previous: step.latestProcessingStepUpdate,
             processingStep: step
             )
-        if (!update.save(flush: true)) {
+        if (!update.validate()) {
             log.fatal("Could not create a ${state} Update for ProcessingStep ${step.id}")
             throw new ProcessingException("Could not create a ${state} Update for ProcessingStep ${step.id}")
         }
-        return update
+        return update.save(flush: true)
     }
 
     /**
