@@ -40,7 +40,7 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
                 }
             }
         } catch (Throwable e) {
-            log.error "Exception during PanCan start job", e
+            throw new RuntimeException("Exception in ${getClass().simpleName}", e)
         }
     }
 
