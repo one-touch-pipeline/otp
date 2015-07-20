@@ -37,8 +37,7 @@ class HipoSampleIdentifier {
      */
     final String analyteTypeAndNumber
 
-    private final static String REGEX =
-    /^(([A-Z])(\d\d\w)-\w\w\w(\w))-([${HipoTissueType.values()*.key.join("")}])(\d{1,2})-(([DRPAC])(\d{1,2}))$/
+    private final static String REGEX =/^(([A-Z])(\d\d\w)-(?:\w\w)?\w\w\w(\w))-([${HipoTissueType.values()*.key.join("")}])(\d{1,2})-(([DRPAC])(\d{1,2}))$/
 
     /**
      * Tries to parse a HIPO sample name.
@@ -80,12 +79,12 @@ class HipoSampleIdentifier {
         }
 
         return new HipoSampleIdentifier(
-        /* projectNumber: */ projectNumber,
-        /* pid: */ matcher.group(1),
-        /* tissueType: */ tissueType,
-        /* sampleNumber: */ Integer.parseInt(matcher.group(6)),
-        /* experiment: */ matcher.group(7),
-        )
+                /* projectNumber: */ projectNumber,
+                /* pid: */ matcher.group(1),
+                /* tissueType: */ tissueType,
+                /* sampleNumber: */ Integer.parseInt(matcher.group(6)),
+                /* experiment: */ matcher.group(7),
+                )
     }
 
     /**

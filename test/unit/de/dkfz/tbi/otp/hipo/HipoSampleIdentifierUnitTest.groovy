@@ -40,6 +40,19 @@ class HipoSampleIdentifierUnitTest {
         assertEquals(sampleName, identifier.fullSampleName)
         assertEquals(sampleName, identifier.toString())
 
+
+        sampleName = "H035-IJKLMM-B1-D1"
+        identifier = HipoSampleIdentifier.tryParse(sampleName)
+        assertNotNull(identifier)
+        assertEquals("035", identifier.projectNumber)
+        assertEquals("H035-IJKLMM", identifier.pid)
+        assertEquals(HipoTissueType.BLOOD, identifier.tissueType)
+        assertEquals(1, identifier.sampleNumber)
+        assertEquals("D1", identifier.analyteTypeAndNumber)
+        assertEquals(sampleName, identifier.fullSampleName)
+        assertEquals(sampleName, identifier.toString())
+
+
         // Not testing sampleTypeDbName here because there is a dedicated test method for it.
 
         sampleName = "H004-ABCD-T1-D1"
@@ -101,6 +114,9 @@ class HipoSampleIdentifierUnitTest {
 
         sampleName = "H059-BPDK-C80-C02"
         assertNotNull(HipoSampleIdentifier.tryParse(sampleName))
+
+        sampleName = "H032-PX6D42-M2-D1"
+        assertNotNull(HipoSampleIdentifier.tryParse(sampleName))
     }
 
     @Test
@@ -127,6 +143,11 @@ class HipoSampleIdentifierUnitTest {
 
         sampleName = "H035-BPDM-C1-D1"
         tissueTypeExp = "CELL01"
+        tissueTypeAct = HipoSampleIdentifier.tryParse(sampleName).sampleTypeDbName
+        assertEquals(tissueTypeExp, tissueTypeAct)
+
+        sampleName = "H035-IJKLMM-B1-D1"
+        tissueTypeExp = "BLOOD01"
         tissueTypeAct = HipoSampleIdentifier.tryParse(sampleName).sampleTypeDbName
         assertEquals(tissueTypeExp, tissueTypeAct)
     }
