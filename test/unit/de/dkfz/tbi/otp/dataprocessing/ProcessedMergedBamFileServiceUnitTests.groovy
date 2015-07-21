@@ -188,7 +188,7 @@ class ProcessedMergedBamFileServiceUnitTests {
                     fail "checkConsistencyWithDatabaseForDeletion was called when it shouldn't be. Method under test should have failed earlier."
                 } else {
                     File directory = processedMergedBamFileService.processingDirectory(processedMergedBamFile.mergingPass) as File
-                    File fileName = new File(directory, processedMergedBamFileService.fileName(processedMergedBamFile))
+                    File fileName = new File(directory, processedMergedBamFile.getBamFileName())
                     assert processedMergedBamFile == dbFile
                     assert fileName == fsFile
                     return valueForDataBaseConsistence.value
@@ -199,7 +199,7 @@ class ProcessedMergedBamFileServiceUnitTests {
                 File expectedProcessingDirectory = processedMergedBamFileService.processingDirectory(processedMergedBamFile.mergingPass) as File
                 File expectedFinalDestinationDirectory = AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile) as File
                 Collection<String> expectedAdditionalFiles = processedMergedBamFileService.additionalFileNames(processedMergedBamFile)
-                expectedAdditionalFiles << processedMergedBamFileService.fileName(processedMergedBamFile)
+                expectedAdditionalFiles << processedMergedBamFile.getBamFileName()
                 assert expectedProcessingDirectory == processingDirectory
                 assert expectedFinalDestinationDirectory == finalDestinationDirectory
                 assert expectedAdditionalFiles == fileNames
@@ -212,7 +212,7 @@ class ProcessedMergedBamFileServiceUnitTests {
 
             deleteProcessingFiles: { final def dbFile, final File fsFile, final File... additionalFiles ->
                 File directory = processedMergedBamFileService.processingDirectory(processedMergedBamFile.mergingPass) as File
-                File expectedFile = new File(directory, processedMergedBamFileService.fileName(processedMergedBamFile))
+                File expectedFile = new File(directory, processedMergedBamFile.getBamFileName())
                 File[] expectedAdditionalFiles = [
                     processedMergedBamFileService.additionalFileNames(processedMergedBamFile),
                     processedMergedBamFileService.additionalFileNamesProcessingDirOnly(processedMergedBamFile)

@@ -212,7 +212,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
         snvAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         snvAnnotationJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult -> }
         snvAnnotationJob.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
-            return new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
+            return new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFile1.getBamFileName())
         }
         snvAnnotationJob.metaClass.writeConfigFile = { SnvCallingInstance instance ->
             return testData.createConfigFileWithContentInFileSystem(
@@ -276,7 +276,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> }
         snvAnnotationJob.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
-            return new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
+            return new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFile1.getBamFileName())
         }
         executionService.metaClass.executeCommand = { Realm realm, String command -> }
 

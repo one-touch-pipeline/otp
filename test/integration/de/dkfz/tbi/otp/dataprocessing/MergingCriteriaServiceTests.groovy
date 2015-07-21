@@ -196,7 +196,6 @@ class MergingCriteriaServiceTests {
         ProcessedMergedBamFile mergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                         type: AbstractBamFile.BamType.MDUP,
                         status: State.PROCESSED,
-                        numberOfMergedLanes: 1,
                         ])
         assertNotNull(mergedBamFile.save([flush: true, failOnError: true]))
 

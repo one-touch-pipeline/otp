@@ -227,7 +227,6 @@ class QAResultStatisticsServiceTests {
                         qualityAssessmentStatus: QaProcessingStatus.FINISHED,
                         md5sum: null,
                         status: AbstractBamFile.State.PROCESSED,
-                        numberOfMergedLanes: 1,
                         ])
         assertNotNull(processedMergedBamFile.save([flush: true]))
 

@@ -122,7 +122,7 @@ class ProcessedMergedBamFileQaFileService {
      */
     public String qualityAssessmentDataFileName(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, "the processed merged bam file is null")
-        String fileName = processedMergedBamFileService.fileNameNoSuffix(bamFile)
+        String fileName = bamFile.fileNameNoSuffix()
         return "${fileName}_quality.json"
     }
 
@@ -131,7 +131,7 @@ class ProcessedMergedBamFileQaFileService {
      */
     public String coverageDataFileName(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, "the processed merged bam file is null")
-        String fileName = processedMergedBamFileService.fileNameNoSuffix(bamFile)
+        String fileName = bamFile.fileNameNoSuffix()
         return "${fileName}_coverage.tsv"
     }
 
@@ -140,7 +140,7 @@ class ProcessedMergedBamFileQaFileService {
      */
     public String sortedCoverageDataFileName(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, "the processed merged bam file is null")
-        String fileName = processedMergedBamFileService.fileNameNoSuffix(bamFile)
+        String fileName = bamFile.fileNameNoSuffix()
         return "${fileName}_mappedFilteredAndSortedCoverage.tsv"
     }
 
@@ -149,7 +149,7 @@ class ProcessedMergedBamFileQaFileService {
      */
     public String coveragePlotFileName(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, "the processed merged bam file is null")
-        String fileName = processedMergedBamFileService.fileNameNoSuffix(bamFile)
+        String fileName = bamFile.fileNameNoSuffix()
         return "${fileName}_coveragePlot.png"
     }
 
@@ -158,7 +158,7 @@ class ProcessedMergedBamFileQaFileService {
      */
     public String insertSizeDataFileName(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, "the processed merged bam file is null")
-        String fileName = processedMergedBamFileService.fileNameNoSuffix(bamFile)
+        String fileName = bamFile.fileNameNoSuffix()
         return "${fileName}_qualityDistribution.hst"
     }
 
@@ -167,7 +167,7 @@ class ProcessedMergedBamFileQaFileService {
      */
     public String insertSizePlotFileName(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, "the processed merged bam file is null")
-        String fileName = processedMergedBamFileService.fileNameNoSuffix(bamFile)
+        String fileName = bamFile.fileNameNoSuffix()
         return "${fileName}_insertSizePlot.png"
     }
 
@@ -176,7 +176,7 @@ class ProcessedMergedBamFileQaFileService {
      */
     public String chromosomeMappingFileName(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, "the processed merged bam file is null")
-        String fileName = processedMergedBamFileService.fileNameNoSuffix(bamFile)
+        String fileName = bamFile.fileNameNoSuffix()
         return "${fileName}_chromosomeMapping.json"
     }
 

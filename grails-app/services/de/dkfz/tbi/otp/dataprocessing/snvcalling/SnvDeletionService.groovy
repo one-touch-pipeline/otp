@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 
 public class SnvDeletionService {
 
@@ -12,7 +12,7 @@ public class SnvDeletionService {
      * for separate deletion by the caller. The SamplePair directories are parent directories of the SnvCallingInstance directories,
      * therefore the order is important.
      */
-    List<File> deleteForProcessedMergedBamFile(ProcessedMergedBamFile bamFile) {
+    List<File> deleteForAbstractMergedBamFile(AbstractMergedBamFile bamFile) {
         assert bamFile
         List<File> directoriesToDelete = []
 

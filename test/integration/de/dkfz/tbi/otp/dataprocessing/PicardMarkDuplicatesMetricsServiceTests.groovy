@@ -216,7 +216,6 @@ LIBRARY\tUNPAIRED_READS_EXAMINED\tREAD_PAIRS_EXAMINED\tUNMAPPED_READS\tUNPAIRED_
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                         fileExists: true,
                         type: AbstractBamFile.BamType.MDUP,
-                        numberOfMergedLanes: 1,
                         ])
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
         return processedMergedBamFile

@@ -1,8 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFileService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
@@ -21,8 +20,6 @@ import static org.springframework.util.Assert.notNull
 
 abstract class AbstractSnvCallingJob extends AbstractOtpJob {
 
-    @Autowired
-    ProcessedMergedBamFileService processedMergedBamFileService
     @Autowired
     ExecutionService executionService
     @Autowired
@@ -162,8 +159,8 @@ rm ${configFileInStagingDirectory}
         return result
     }
 
-    protected File getExistingBamFilePath(final ProcessedMergedBamFile bamFile) {
-        final File file = new File(AbstractMergedBamFileService.destinationDirectory(bamFile), processedMergedBamFileService.fileName(bamFile))
+    protected File getExistingBamFilePath(final AbstractMergedBamFile bamFile) {
+        final File file = new File(AbstractMergedBamFileService.destinationDirectory(bamFile), bamFile.bamFileName)
         assert bamFile.md5sum ==~ /^[0-9a-fA-F]{32}$/
         assert bamFile.fileSize > 0L
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)

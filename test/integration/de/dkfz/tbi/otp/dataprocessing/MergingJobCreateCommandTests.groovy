@@ -94,10 +94,7 @@ class MergingJobCreateCommandTests {
                         )
         assertNotNull(mergingPass.save([flush: true, failOnError: true]))
 
-        processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
-                        type: BamType.SORTED,
-                        numberOfMergedLanes: 1,
-                        ])
+        processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass)
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
 
         MergingSetAssignment mergingSetAssignment = createMergingSetAssignment("1")
@@ -287,10 +284,7 @@ class MergingJobCreateCommandTests {
         )
         assertNotNull(mergingPass1.save([flush: true, failOnError: true]))
 
-        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass1, [
-                        type: BamType.SORTED,
-                        numberOfMergedLanes: 1,
-                        ])
+        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass1)
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
 
         MergingSetAssignment mergingSetAssignment = new MergingSetAssignment(

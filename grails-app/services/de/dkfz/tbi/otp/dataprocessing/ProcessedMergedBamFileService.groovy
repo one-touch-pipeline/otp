@@ -92,7 +92,7 @@ class ProcessedMergedBamFileService {
 
         locations.put("temporalDestinationDir", destinationTempDirectory(file))
 
-        locations.put("bamFile", fileName(file))
+        locations.put("bamFile", file.getBamFileName())
         locations.put("baiFile", fileNameForBai(file))
 
         locations.put("md5BamFile", checksumFileService.md5FileName(locations["bamFile"]))
@@ -101,37 +101,21 @@ class ProcessedMergedBamFileService {
         return locations
     }
 
-    public String fileNameNoSuffix(ProcessedMergedBamFile mergedBamFile) {
-        notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
-        MergingSet mergingSet = mergedBamFile.mergingPass.mergingSet
-        MergingWorkPackage mergingWorkPackage = mergingSet.mergingWorkPackage
-        Sample sample = mergingWorkPackage.sample
-        Individual individual = sample.individual
-        String seqTypeName = "${mergingWorkPackage.seqType.name}_${mergingWorkPackage.seqType.libraryLayout}"
-        return "${sample.sampleType.name}_${individual.pid}_${seqTypeName}_merged.mdup"
-    }
-
-    public String fileName(ProcessedMergedBamFile mergedBamFile) {
-        notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
-        String body = fileNameNoSuffix(mergedBamFile)
-        return "${body}.bam"
-    }
-
     public String filePath(ProcessedMergedBamFile mergedBamFile) {
         notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
         String dir = directory(mergedBamFile)
-        String filename = fileName(mergedBamFile)
+        String filename = mergedBamFile.getBamFileName()
         return "${dir}/${filename}"
     }
 
     public String inProgressFileName(ProcessedMergedBamFile mergedBamFile) {
         notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
-        return "${fileName(mergedBamFile)}.in_progress"
+        return "${mergedBamFile.getBamFileName()}.in_progress"
     }
 
     public String fileNameForMetrics(ProcessedMergedBamFile mergedBamFile) {
         notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
-        return fileNameNoSuffix(mergedBamFile) + "_metrics.txt"
+        return mergedBamFile.fileNameNoSuffix() + "_metrics.txt"
     }
 
     public String filePathForMetrics(ProcessedMergedBamFile mergedBamFile) {
@@ -143,7 +127,7 @@ class ProcessedMergedBamFileService {
 
     public String fileNameForBai(ProcessedMergedBamFile mergedBamFile) {
         notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
-        String body = fileNameNoSuffix(mergedBamFile)
+        String body = mergedBamFile.fileNameNoSuffix()
         return "${body}.bai"
     }
 
@@ -162,7 +146,7 @@ class ProcessedMergedBamFileService {
         return [
                 fileNameForBai(bamFile),
                 checksumFileService.md5FileName(fileNameForBai(bamFile)),
-                checksumFileService.md5FileName(fileName(bamFile)),
+                checksumFileService.md5FileName(bamFile.getBamFileName()),
         ]
     }
 
@@ -440,7 +424,7 @@ class ProcessedMergedBamFileService {
     public boolean checkConsistencyForProcessingFilesDeletion(final ProcessedMergedBamFile bamFile) {
         notNull bamFile
         final File directory = new File(processingDirectory(bamFile.mergingPass))
-        final String fileName = fileName(bamFile)
+        final String fileName = bamFile.getBamFileName()
         final File fsBamFile = new File(directory, fileName)
         if (!dataProcessingFilesService.checkConsistencyWithDatabaseForDeletion(bamFile, fsBamFile)) {
             return false
@@ -487,7 +471,7 @@ class ProcessedMergedBamFileService {
         final Collection<String> allAdditionalFileNames = additionalFileNames(bamFile) + additionalFileNamesProcessingDirOnly(bamFile)
         return dataProcessingFilesService.deleteProcessingFiles(
                 bamFile,
-                new File(directory, fileName(bamFile)),
+                new File(directory, bamFile.getBamFileName()),
                 allAdditionalFileNames.collect { new File(directory, it) }.toArray(new File[0])
         )
     }

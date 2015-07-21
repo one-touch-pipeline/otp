@@ -268,8 +268,8 @@ CHROMOSOME_INDICES=( {1..21} XY)
             if (command.contains('PARM_CHR_INDEX=')) {
                 String chromosome = command.split('PARM_CHR_INDEX=')[1].split(',')[0]
                 File snvFile = new OtpPath(snvCallingInstance.snvInstancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, chromosome)).absoluteStagingPath
-                File tumorBamFile = new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
-                File controlBamFile = new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile2), processedMergedBamFileService.fileName(processedMergedBamFile2))
+                File tumorBamFile = new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFile1.getBamFileName())
+                File controlBamFile = new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile2), processedMergedBamFile2.getBamFileName())
 
                 String scriptCommandPart = "/tmp/scriptLocation/calling.sh"
 
@@ -339,7 +339,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
         bamFile.fileSize = bamFileContent.length()
         assert bamFile.save(failOnError: true)
 
-        final File file = new File(AbstractMergedBamFileService.destinationDirectory(bamFile), processedMergedBamFileService.fileName(bamFile))
+        final File file = new File(AbstractMergedBamFileService.destinationDirectory(bamFile), bamFile.getBamFileName())
         assert file.path.startsWith(testDirectory.path)
         file.parentFile.mkdirs()
         file.text = bamFileContent

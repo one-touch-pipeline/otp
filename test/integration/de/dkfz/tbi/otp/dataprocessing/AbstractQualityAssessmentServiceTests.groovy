@@ -115,11 +115,9 @@ class AbstractQualityAssessmentServiceTests {
         assert mergingSetAssignment.save([flush: true])
 
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
-                type                   : AbstractBamFile.BamType.SORTED,
                 withdrawn              : false,
                 qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
                 status                 : AbstractBamFile.State.PROCESSED,
-                numberOfMergedLanes    : 1,
         ])
         assert processedMergedBamFile.save([flush: true])
 

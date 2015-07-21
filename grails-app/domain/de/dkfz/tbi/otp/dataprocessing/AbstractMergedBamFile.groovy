@@ -29,6 +29,8 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
 
     public abstract boolean isMostRecentBamFile()
 
+    public abstract String getBamFileName()
+
     static constraints = {
         numberOfMergedLanes min: 1
         md5sum nullable: true, validator: { val, obj ->

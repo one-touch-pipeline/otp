@@ -75,7 +75,7 @@ class SnvJobResult {
                 return false
             }
 
-            if (val != null && (val.sampleType1BamFile != obj.sampleType1BamFile || val.sampleType2BamFile != obj.sampleType2BamFile)) {
+            if (val != null && (val.sampleType1BamFile.id != obj.sampleType1BamFile.id || val.sampleType2BamFile.id != obj.sampleType2BamFile.id)) {
                 return false
             }
 

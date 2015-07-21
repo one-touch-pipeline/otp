@@ -1,23 +1,21 @@
 package workflows
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFileService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingJob
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.utils.ExternalScript
-import groovy.io.FileType
 import org.joda.time.Duration
-import org.junit.Before
+import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import org.junit.Ignore
 import org.junit.Test
 
 import java.util.zip.GZIPInputStream
 
-import static de.dkfz.tbi.otp.utils.WaitingFileUtils.extendedWaitingTime
-import static org.junit.Assert.assertNotNull
 
 /**
  * Steps which have to be executed for a CO SNV-scipts update:
@@ -48,8 +46,10 @@ import static org.junit.Assert.assertNotNull
  * 21) compare runtimeConfig.sh of this Roddy run and the previous Roddy run to find out if there are new variables -> add new ones in new config files
  * 22) run SnvWorkflowTests
  */
+import static org.junit.Assert.assertNotNull
 
-class SnvWorkflowTests extends WorkflowTestCase {
+
+abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
 
     final String VERSION = "1.0.132-1"
     final String CO_SCRIPTS_BASE_DIR = "/path/to/programs/otp/COWorkflows_${VERSION}/resources/analysisTools"
@@ -59,144 +59,21 @@ class SnvWorkflowTests extends WorkflowTestCase {
 
     ProcessedMergedBamFileService processedMergedBamFileService
 
-
-
     Individual individual
-    ProcessedMergedBamFile bamFileTumor
-    ProcessedMergedBamFile bamFileControl
     SamplePair samplePair
     SeqType seqType
     Project project
     SnvConfig snvConfig
+    AbstractMergedBamFile bamFileTumor
+    AbstractMergedBamFile bamFileControl
+    SampleType sampleTypeTumor
+    SampleType sampleTypeControl
 
     ExternalScript callingScript
     ExternalScript joiningScript
     ExternalScript annotationScript
     ExternalScript deepAnnotationScript
     ExternalScript filterScript
-
-
-    @Before
-    void prepare() {
-        File inputDiseaseBamFile = new File(getWorkflowDirectory(), "inputFiles/tumor_SOMEPID_merged.mdup.bam")
-        File inputDiseaseBaiFile = new File(getWorkflowDirectory(), "inputFiles/tumor_SOMEPID_merged.mdup.bam.bai")
-        File inputControlBamFile = new File(getWorkflowDirectory(), "inputFiles/control_SOMEPID_merged.mdup.bam")
-        File inputControlBaiFile = new File(getWorkflowDirectory(), "inputFiles/control_SOMEPID_merged.mdup.bam.bai")
-
-        String mkDirs = createClusterScriptService.makeDirs([new File(realm.stagingRootPath, "clusterScriptExecutorScripts")], "0777")
-        assert executionService.executeCommand(realm, mkDirs).toInteger() == 0
-
-        project = Project.build(
-                dirName: "test",
-                realmName: realm.name
-        )
-        assertNotNull(project.save(flush: true))
-
-        realm.pbsOptions = '{"-l": {nodes: "1:lsdf", walltime: "29:00"}, "-j": "oe"}'
-        assertNotNull(realm.save(flush: true))
-
-        individual = Individual.build(
-                project: project,
-                type: Individual.Type.REAL,
-                pid: "stds",
-                mockPid: "stds",
-        )
-
-        seqType = SeqType.build(
-                name: SeqTypeNames.EXOME.seqTypeName,
-                libraryLayout: "PAIRED",
-                dirName: "tmp",
-        )
-
-        SnvCallingInstanceTestData testData = new SnvCallingInstanceTestData()
-        bamFileTumor = testData.createProcessedMergedBamFile(individual, seqType, "TUMOR")
-        bamFileControl = testData.createProcessedMergedBamFile(individual, seqType, "CONTROL")
-
-        SampleType sampleTypeTumor = bamFileTumor.sampleType
-        bamFileTumor.fileSize = inputDiseaseBamFile.size()
-        assertNotNull(bamFileTumor.save(flush: true))
-
-        SampleTypePerProject.build(
-                project: project,
-                sampleType: sampleTypeTumor,
-                category: SampleType.Category.DISEASE,
-        )
-
-        SampleType sampleTypeControl = bamFileControl.sampleType
-        bamFileControl.fileSize = inputControlBamFile.size()
-        assertNotNull(bamFileControl.save(flush: true))
-
-        SampleTypePerProject.build(
-                project: project,
-                sampleType: sampleTypeControl,
-                category: SampleType.Category.CONTROL,
-        )
-
-        samplePair = SamplePair.build(
-                processingStatus: SamplePair.ProcessingStatus.NEEDS_PROCESSING,
-                sampleType1: sampleTypeTumor,
-                sampleType2: sampleTypeControl,
-                individual: individual,
-                seqType: seqType,
-        )
-
-        ProcessingThresholds.build(
-                project: project,
-                seqType: seqType,
-                sampleType: sampleTypeTumor,
-                coverage: 1,
-                numberOfLanes: null,
-        )
-
-        ProcessingThresholds.build(
-                project: project,
-                seqType: seqType,
-                sampleType: sampleTypeControl,
-                coverage: 1,
-                numberOfLanes: null,
-        )
-
-
-        joiningScript = ExternalScript.build(
-                scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
-                filePath: "${SNV_PIPELINE_SCRIPTS_PATH}/joinSNVVCFFiles.sh",
-                scriptVersion: VERSION
-        )
-        callingScript = ExternalScript.build(
-                scriptIdentifier: "SnvCallingStep.CALLING",
-                filePath: "${SNV_PIPELINE_SCRIPTS_PATH}/snvCalling.sh",
-                scriptVersion: VERSION
-        )
-        annotationScript = ExternalScript.build(
-                scriptIdentifier: "SnvCallingStep.SNV_ANNOTATION",
-                filePath: "${SNV_PIPELINE_SCRIPTS_PATH}/snvAnnotation.sh",
-                scriptVersion: VERSION
-        )
-        deepAnnotationScript = ExternalScript.build(
-                scriptIdentifier: "SnvCallingStep.SNV_DEEPANNOTATION",
-                filePath: "${ANALYSIS_SCRIPTS_PATH}/vcf_pipeAnnotator.sh",
-                scriptVersion: VERSION
-        )
-        filterScript = ExternalScript.build(
-                scriptIdentifier: "SnvCallingStep.FILTER_VCF",
-                filePath: "${SNV_PIPELINE_SCRIPTS_PATH}/filter_vcf.sh",
-                scriptVersion: VERSION
-        )
-
-        createDirectories([
-                new File(processedMergedBamFileService.filePath(bamFileTumor)).parentFile,
-                new File(processedMergedBamFileService.filePath(bamFileControl)).parentFile,
-        ])
-
-        def targetLocations = [processedMergedBamFileService.filePath(bamFileTumor), processedMergedBamFileService.filePathForBai(bamFileTumor),
-                processedMergedBamFileService.filePath(bamFileControl), processedMergedBamFileService.filePathForBai(bamFileControl)]
-        String copyFiles = createClusterScriptService.createTransferScript(
-                [inputDiseaseBamFile, inputDiseaseBaiFile, inputControlBamFile, inputControlBaiFile],
-                targetLocations.collect(new LinkedList<File>()) { new File(it) },
-                [null, null, null, null])
-        assert executionService.executeCommand(realm, copyFiles) == (targetLocations.collect { "${new File(it).absolutePath}: OK\n" }).join("")
-    }
-
 
 
     @Ignore
@@ -232,6 +109,122 @@ class SnvWorkflowTests extends WorkflowTestCase {
         check(SnvCallingStep.FILTER_VCF)
     }
 
+    void createExternalScripts() {
+        joiningScript = ExternalScript.build(
+                scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
+                filePath: "${SNV_PIPELINE_SCRIPTS_PATH}/joinSNVVCFFiles.sh",
+                scriptVersion: VERSION
+        )
+        callingScript = ExternalScript.build(
+                scriptIdentifier: "SnvCallingStep.CALLING",
+                filePath: "${SNV_PIPELINE_SCRIPTS_PATH}/snvCalling.sh",
+                scriptVersion: VERSION
+        )
+        annotationScript = ExternalScript.build(
+                scriptIdentifier: "SnvCallingStep.SNV_ANNOTATION",
+                filePath: "${SNV_PIPELINE_SCRIPTS_PATH}/snvAnnotation.sh",
+                scriptVersion: VERSION
+        )
+        deepAnnotationScript = ExternalScript.build(
+                scriptIdentifier: "SnvCallingStep.SNV_DEEPANNOTATION",
+                filePath: "${ANALYSIS_SCRIPTS_PATH}/vcf_pipeAnnotator.sh",
+                scriptVersion: VERSION
+        )
+        filterScript = ExternalScript.build(
+                scriptIdentifier: "SnvCallingStep.FILTER_VCF",
+                filePath: "${SNV_PIPELINE_SCRIPTS_PATH}/filter_vcf.sh",
+                scriptVersion: VERSION
+        )
+    }
+
+
+    void createThresholds() {
+        ProcessingThresholds.build(
+                project: project,
+                seqType: seqType,
+                sampleType: sampleTypeTumor,
+                coverage: 1,
+                numberOfLanes: null,
+        )
+
+        ProcessingThresholds.build(
+                project: project,
+                seqType: seqType,
+                sampleType: sampleTypeControl,
+                coverage: 1,
+                numberOfLanes: null,
+        )
+    }
+
+    void fileSystemSetup() {
+        File inputDiseaseBamFile = new File(getWorkflowDirectory(), "inputFiles/tumor_SOMEPID_merged.mdup.bam")
+        File inputDiseaseBaiFile = new File(getWorkflowDirectory(), "inputFiles/tumor_SOMEPID_merged.mdup.bam.bai")
+        File inputControlBamFile = new File(getWorkflowDirectory(), "inputFiles/control_SOMEPID_merged.mdup.bam")
+        File inputControlBaiFile = new File(getWorkflowDirectory(), "inputFiles/control_SOMEPID_merged.mdup.bam.bai")
+
+        String mkDirs = createClusterScriptService.makeDirs([new File(realm.stagingRootPath, "clusterScriptExecutorScripts")], "0777")
+        assert executionService.executeCommand(realm, mkDirs).toInteger() == 0
+
+        def targetLocations = []
+
+        if (bamFileTumor instanceof RoddyBamFile && bamFileControl instanceof RoddyBamFile) {
+            createDirectories([
+                    bamFileTumor.finalBamFile.parentFile,
+                    bamFileControl.finalBamFile.parentFile,
+            ])
+
+            targetLocations = [bamFileTumor.finalBamFile, bamFileTumor.finalBaiFile,
+                                   bamFileControl.finalBamFile, bamFileControl.finalBaiFile]
+
+        } else if (bamFileTumor instanceof  ProcessedMergedBamFile && bamFileControl instanceof ProcessedMergedBamFile) {
+            createDirectories([
+                    new File(processedMergedBamFileService.filePath(bamFileTumor)).parentFile,
+                    new File(processedMergedBamFileService.filePath(bamFileControl)).parentFile,
+            ])
+
+            targetLocations = [
+                    new File(processedMergedBamFileService.filePath(bamFileTumor)),
+                    new File(processedMergedBamFileService.filePathForBai(bamFileTumor)),
+                    new File(processedMergedBamFileService.filePath(bamFileControl)),
+                    new File(processedMergedBamFileService.filePathForBai(bamFileControl))
+            ]
+        } else {
+            throw new RuntimeException("The following bamFiles can not be processed: ${bamFileTumor}, ${bamFileControl}")
+        }
+        String copyFiles = createClusterScriptService.createTransferScript(
+                [inputDiseaseBamFile, inputDiseaseBaiFile, inputControlBamFile, inputControlBaiFile],
+                targetLocations,
+                [null, null, null, null])
+        assert executionService.executeCommand(realm, copyFiles) == (targetLocations.collect { "${it.absolutePath}: OK\n" }).join("")
+
+        bamFileTumor.fileSize = inputDiseaseBamFile.size()
+        assertNotNull(bamFileTumor.save(flush: true))
+
+        bamFileControl.fileSize = inputControlBamFile.size()
+        assertNotNull(bamFileControl.save(flush: true))
+    }
+
+    void createSnvSpecificSetup() {
+        SampleTypePerProject.build(
+                project: project,
+                sampleType: sampleTypeTumor,
+                category: SampleType.Category.DISEASE,
+        )
+
+        SampleTypePerProject.build(
+                project: project,
+                sampleType: sampleTypeControl,
+                category: SampleType.Category.CONTROL,
+        )
+
+        samplePair = SamplePair.build(
+                processingStatus: SamplePair.ProcessingStatus.NEEDS_PROCESSING,
+                sampleType1: sampleTypeTumor,
+                sampleType2: sampleTypeControl,
+                individual: individual,
+                seqType: seqType,
+        )
+    }
 
 
     void createJobResults(SnvCallingStep startWith) {
@@ -247,7 +240,7 @@ class SnvWorkflowTests extends WorkflowTestCase {
                         'in'('id', [bamFileTumor, bamFileControl].sum { it.containedSeqTracks }*.id)
                     }
                     fileType {
-                        eq('type', Type.SEQUENCE)
+                        eq('type', FileType.Type.SEQUENCE)
                     }
                     projections {
                         max('dateCreated')
@@ -277,7 +270,7 @@ class SnvWorkflowTests extends WorkflowTestCase {
         def sourceFilesForFilter = []
         def targetFilesForFilter = []
 
-        if(startWith == SnvCallingStep.FILTER_VCF) {
+        if (startWith == SnvCallingStep.FILTER_VCF) {
             jobResultAnnotation = new SnvJobResult(
                     snvCallingInstance: instance,
                     step: SnvCallingStep.SNV_ANNOTATION,
@@ -305,7 +298,7 @@ class SnvWorkflowTests extends WorkflowTestCase {
             File previousResultDir = new File("${getWorkflowDirectory()}/resultFiles_${VERSION}")
             File deepAnnotationResultFile = jobResultDeepAnnotation.getResultFilePath().absoluteDataManagementPath
 
-            previousResultDir.eachFileRecurse (FileType.FILES) { File resultFile ->
+            previousResultDir.eachFileRecurse (groovy.io.FileType.FILES) { File resultFile ->
                 if (resultFile.name =~ /annotation/) {
                     sourceFilesForFilter << resultFile
                     targetFilesForFilter << new File(deepAnnotationResultFile.parentFile.parent, resultFile.name)
@@ -325,7 +318,7 @@ class SnvWorkflowTests extends WorkflowTestCase {
         assert executionService.executeCommand(realm, makeDirs).toInteger() == 0
 
         String copyFiles = createClusterScriptService.createTransferScript(
-            sourceFiles, targetFiles, [null] * targetFiles.size()
+                sourceFiles, targetFiles, [null] * targetFiles.size()
         )
 
         if (!sourceFilesForFilter.empty) {
@@ -355,7 +348,7 @@ class SnvWorkflowTests extends WorkflowTestCase {
         List<String> expected, actual
 
         SnvJobResult callingResult = createdInstance.findLatestResultForSameBamFiles(SnvCallingStep.CALLING)
-        if(startedWith == SnvCallingStep.CALLING) {
+        if (startedWith == SnvCallingStep.CALLING) {
             assert callingResult.processingState == SnvProcessingStates.FINISHED
             assert callingResult.inputResult == null
             assert callingResult.externalScript == callingScript
@@ -370,7 +363,7 @@ class SnvWorkflowTests extends WorkflowTestCase {
         }
 
         SnvJobResult deepAnnotationResult = createdInstance.findLatestResultForSameBamFiles(SnvCallingStep.SNV_DEEPANNOTATION)
-        if(startedWith == SnvCallingStep.CALLING || startedWith == SnvCallingStep.SNV_ANNOTATION) {
+        if (startedWith == SnvCallingStep.CALLING || startedWith == SnvCallingStep.SNV_ANNOTATION) {
             SnvJobResult annotationResult = createdInstance.findLatestResultForSameBamFiles(SnvCallingStep.SNV_ANNOTATION)
             assert annotationResult.processingState == SnvProcessingStates.FINISHED
             assert annotationResult.inputResult == callingResult
@@ -391,7 +384,7 @@ class SnvWorkflowTests extends WorkflowTestCase {
 
         File roddyResultsDir = new File(getWorkflowDirectory(), "resultFiles_${VERSION}")
         File otpResultsDir = createdInstance.samplePair.samplePairPath.absoluteDataManagementPath
-        roddyResultsDir.eachFileRecurse (FileType.FILES) { File resultFile ->
+        roddyResultsDir.eachFileRecurse (groovy.io.FileType.FILES) { File resultFile ->
             File otpResultFile = new File(otpResultsDir, resultFile.name)
             if (!resultFile.name =~ /^snvCallingCheckPoint/) {
                 assert otpResultFile.exists()
@@ -407,8 +400,8 @@ class SnvWorkflowTests extends WorkflowTestCase {
         String differentLineContainingTimeMeasurements = /(Requested time:|Complet time:) .*/
         [expected, actual].transpose().collect { List<String> transposed ->
             assert transposed[0] == transposed[1] ||
-                (transposed[0] =~ differentLineContainingFileName && transposed[1] =~ differentLineContainingFileName) ||
-                (transposed[0] =~ differentLineContainingTimeMeasurements && transposed[1] =~ differentLineContainingTimeMeasurements)
+                    (transposed[0] =~ differentLineContainingFileName && transposed[1] =~ differentLineContainingFileName) ||
+                    (transposed[0] =~ differentLineContainingTimeMeasurements && transposed[1] =~ differentLineContainingTimeMeasurements)
         }
     }
 

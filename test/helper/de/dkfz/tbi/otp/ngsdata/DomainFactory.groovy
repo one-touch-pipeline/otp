@@ -177,6 +177,8 @@ class DomainFactory {
         ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile([
                 mergingPass: mergingPass,
                 workPackage: mergingPass.mergingWorkPackage,
+                type: AbstractBamFile.BamType.SORTED,
+                numberOfMergedLanes: 1,
         ] + properties)
         // has to be set explicitly to null due strange behavior of GORM (?)
         bamFile.mergingPass.mergingWorkPackage.bamFileInProjectFolder = null

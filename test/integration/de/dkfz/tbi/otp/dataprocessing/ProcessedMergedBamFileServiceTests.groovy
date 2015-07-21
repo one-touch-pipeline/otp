@@ -243,18 +243,6 @@ class ProcessedMergedBamFileServiceTests {
     }
 
     @Test(expected = IllegalArgumentException)
-    void testFileNameBamFileIsNull() {
-        ProcessedMergedBamFile processedMergedBamFile = null
-        processedMergedBamFileService.fileName(processedMergedBamFile)
-    }
-
-    @Test
-    void testFileName() {
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
-        assertEquals(baseFile + ".bam", processedMergedBamFileService.fileName(processedMergedBamFile))
-    }
-
-    @Test(expected = IllegalArgumentException)
     void testDirectoryByProcessedMergedBamFileBamFileIsNull() {
         ProcessedMergedBamFile processedMergedBamFile = null
         processedMergedBamFileService.directory(processedMergedBamFile)

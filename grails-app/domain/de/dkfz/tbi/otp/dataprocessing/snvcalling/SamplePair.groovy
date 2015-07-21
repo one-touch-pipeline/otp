@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.springframework.validation.Errors
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -145,27 +146,21 @@ class SamplePair {
     }
 
     /**
-     * Returns the latest ProcessedMergedBamFile which belongs to the given {@link SampleType}
+     * Returns the latest AbstractMergedBamFile which belongs to the given {@link SampleType}
      * for this {@link SamplePair}, if available and not withdrawn, otherwise null.
      */
-    ProcessedMergedBamFile getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(SampleType sampleType) {
-        final ProcessedMergedBamFile bamFile = ProcessedMergedBamFile.createCriteria().get {
-            mergingPass {
-                mergingSet {
-                    mergingWorkPackage {
-                        eq ("seqType", seqType)
-                        sample {
-                            eq ("sampleType", sampleType)
-                            eq ("individual", individual)
-                        }
-                    }
-                    order("identifier", "desc")
+    AbstractMergedBamFile getAbstractMergedBamFileInProjectFolder(SampleType sampleType) {
+        final AbstractMergedBamFile bamFile = CollectionUtils.atMostOneElement(
+            MergingWorkPackage.createCriteria().list {
+                eq ("seqType", seqType)
+                sample {
+                    eq ("sampleType", sampleType)
+                    eq ("individual", individual)
                 }
-                order("identifier", "desc")
             }
-            maxResults(1)
-        }
-        if (bamFile && !bamFile.withdrawn) {
+        )?.bamFileInProjectFolder
+
+        if (bamFile && !bamFile.withdrawn && bamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED) {
             return bamFile
         } else {
             return null

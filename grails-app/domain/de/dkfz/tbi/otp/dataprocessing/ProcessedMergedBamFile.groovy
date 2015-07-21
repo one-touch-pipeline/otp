@@ -68,4 +68,15 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile {
             maxResults 1
         }
     }
+
+    public String fileNameNoSuffix() {
+        String seqTypeName = "${this.seqType.name}_${this.seqType.libraryLayout}"
+        return "${this.sampleType.name}_${this.individual.pid}_${seqTypeName}_merged.mdup"
+    }
+
+    @Override
+    public String getBamFileName() {
+        String body = this.fileNameNoSuffix()
+        return "${body}.bam"
+    }
 }

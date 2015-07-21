@@ -1,22 +1,24 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import org.joda.time.DateTimeZone
-import org.joda.time.Instant
-import org.joda.time.format.DateTimeFormat
-
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
-import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Component
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
+import org.joda.time.DateTimeZone
+import org.joda.time.Instant
+import org.joda.time.format.DateTimeFormat
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Scope
+import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Component
 
 @Component("snvStartJob")
 @Scope("singleton")
@@ -43,11 +45,11 @@ class SnvCallingStartJob extends AbstractStartJobImpl {
                         samplePair.seqType
                         )
 
-                ProcessedMergedBamFile sampleType1BamFile = samplePair.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(
+                AbstractMergedBamFile sampleType1BamFile = samplePair.getAbstractMergedBamFileInProjectFolder(
                         samplePair.sampleType1
                         )
 
-                ProcessedMergedBamFile sampleType2BamFile = samplePair.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn(
+                AbstractMergedBamFile sampleType2BamFile = samplePair.getAbstractMergedBamFileInProjectFolder(
                         samplePair.sampleType2
                         )
 

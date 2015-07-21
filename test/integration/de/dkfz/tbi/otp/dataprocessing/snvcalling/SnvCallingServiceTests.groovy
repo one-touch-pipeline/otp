@@ -65,9 +65,13 @@ class SnvCallingServiceTests extends GroovyTestCase {
 
         processedMergedBamFile1 = createProcessedMergedBamFile("1")
         processedMergedBamFile1.save(flush: true)
+        processedMergedBamFile1.workPackage.bamFileInProjectFolder = processedMergedBamFile1
+        assert processedMergedBamFile1.workPackage.save(flush: true)
 
         processedMergedBamFile2 = createProcessedMergedBamFile("2")
         processedMergedBamFile2.save(flush: true)
+        processedMergedBamFile2.workPackage.bamFileInProjectFolder = processedMergedBamFile2
+        assert processedMergedBamFile2.workPackage.save(flush: true)
 
         SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile1.sample.sampleType, category: SampleType.Category.DISEASE)
 

@@ -156,7 +156,6 @@ class SnvCallingInstanceTestData extends TestData {
 
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(
                 mergingPass, [
-                    type: AbstractBamFile.BamType.SORTED,
                     fileExists: true,
                     fileSize: 123456,
                     md5sum: '0123456789ABCDEF0123456789ABCDEF',
@@ -164,7 +163,6 @@ class SnvCallingInstanceTestData extends TestData {
                     status: AbstractBamFile.State.PROCESSED,
                     fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                     coverage: 1,
-                    numberOfMergedLanes: 1,
                 ]
         )
         assert bamFile.save(flush: true, failOnError: true)
@@ -206,7 +204,7 @@ class SnvCallingInstanceTestData extends TestData {
     }
 
     File createBamFile(ProcessedMergedBamFile processedMergedBamFile) {
-        File file = new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile), processedMergedBamFileService.fileName(processedMergedBamFile))
+        File file = new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile), processedMergedBamFile.getBamFileName())
         CreateFileHelper.createFile(file)
 
         processedMergedBamFile.fileSize = file.size()

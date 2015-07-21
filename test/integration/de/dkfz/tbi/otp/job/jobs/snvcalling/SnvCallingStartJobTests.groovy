@@ -50,7 +50,11 @@ public class SnvCallingStartJobTests extends GroovyScriptAwareTestCase {
             assert seqType.save(flush: true)
 
             ProcessedMergedBamFile mockBam1 = snvTestData.createProcessedMergedBamFile(individual, seqType, "1")
+            mockBam1.workPackage.bamFileInProjectFolder = mockBam1
+            assert mockBam1.workPackage.save(flush: true)
             ProcessedMergedBamFile mockBam2 = snvTestData.createProcessedMergedBamFile(individual, seqType, "2")
+            mockBam2.workPackage.bamFileInProjectFolder = mockBam2
+            assert mockBam2.workPackage.save(flush: true)
 
             // sampletypes for sample pair
             SampleType sampleType1 = mockBam1.sampleType

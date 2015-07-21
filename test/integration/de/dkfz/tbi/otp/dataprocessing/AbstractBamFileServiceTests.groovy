@@ -474,9 +474,7 @@ class AbstractBamFileServiceTests {
 
         // Do not create as QC'ed in order to test assertions if no QC data exists. Tests explicitly change it if needed.
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
-            type         : BamType.SORTED,
             status       : State.NEEDS_PROCESSING,
-            numberOfMergedLanes: 1,
         ])
         assert processedMergedBamFile.save([flush: true])
 

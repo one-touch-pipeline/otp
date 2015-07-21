@@ -172,7 +172,6 @@ class MergingSetServiceTests {
                         mergingPass: mergingPass,
                         type: BamType.MDUP,
                         status: State.PROCESSED,
-                        numberOfMergedLanes: 1,
                         ])
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
 
@@ -226,7 +225,6 @@ class MergingSetServiceTests {
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                         type: BamType.MDUP,
                         status: State.PROCESSED,
-                        numberOfMergedLanes: 1,
                         ])
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
 
@@ -347,7 +345,6 @@ class MergingSetServiceTests {
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                         type: AbstractBamFile.BamType.MDUP,
                         status: State.PROCESSED,
-                        numberOfMergedLanes: 1,
                         ])
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
 
@@ -387,7 +384,6 @@ class MergingSetServiceTests {
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                         type: AbstractBamFile.BamType.MDUP,
                         status: State.INPROGRESS,
-                        numberOfMergedLanes: 1,
                         ])
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
 

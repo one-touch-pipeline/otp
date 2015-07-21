@@ -357,7 +357,6 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
                         qualityAssessmentStatus: QaProcessingStatus.FINISHED,
                         md5sum: null,
                         status: AbstractBamFile.State.PROCESSED,
-                        numberOfMergedLanes: 1,
                         fileSize: 1000,
                         ])
         assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
@@ -405,7 +404,6 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
                         qualityAssessmentStatus: QaProcessingStatus.FINISHED,
                         md5sum: null,
                         status: AbstractBamFile.State.PROCESSED,
-                        numberOfMergedLanes: 1,
                         fileSize: 1000,
                         ])
         assertNotNull(processedMergedBamFile1.save([flush: true, failOnError: true]))

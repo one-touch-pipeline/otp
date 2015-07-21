@@ -1,8 +1,6 @@
 
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import grails.test.mixin.*
-
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -45,22 +43,22 @@ class SnvDeletionServiceTests {
 
 
     @Test(expected=AssertionError)
-    public void testDeleteForProcessedMergedBamFile_shouldFail_NoBamFile() {
-        snvDeletionService.deleteForProcessedMergedBamFile(null)
+    public void testDeleteForAbstractMergedBamFile_shouldFail_NoBamFile() {
+        snvDeletionService.deleteForAbstractMergedBamFile(null)
     }
 
     @Test(expected=RuntimeException)
-    public void testDeleteForProcessedMergedBamFile_shouldFail_InstanceInProgress() {
-        snvDeletionService.deleteForProcessedMergedBamFile(testdata.bamFileControl)
+    public void testDeleteForAbstractMergedBamFile_shouldFail_InstanceInProgress() {
+        snvDeletionService.deleteForAbstractMergedBamFile(testdata.bamFileControl)
     }
 
     @Test
-    public void testDeleteForProcessedMergedBamFile_InstanceFinishedForControlTumor1() {
+    public void testDeleteForAbstractMergedBamFile_InstanceFinishedForControlTumor1() {
         instance.processingState = SnvProcessingStates.FINISHED
         File directoryInstance = instance.getSnvInstancePath().getAbsoluteDataManagementPath()
         File directorySamplePair = instance.samplePair.getSamplePairPath().getAbsoluteDataManagementPath()
 
-        List<File> directories = snvDeletionService.deleteForProcessedMergedBamFile(testdata.bamFileControl)
+        List<File> directories = snvDeletionService.deleteForAbstractMergedBamFile(testdata.bamFileControl)
         assert []== SnvJobResult.list()
         assert []== SnvCallingInstance.list()
         assert [testdata.samplePair2]== SamplePair.list()
@@ -69,7 +67,7 @@ class SnvDeletionServiceTests {
     }
 
     @Test
-    public void testDeleteForProcessedMergedBamFile_InstanceFinishedForControlTumor1AndControlTumor2() {
+    public void testDeleteForAbstractMergedBamFile_InstanceFinishedForControlTumor1AndControlTumor2() {
         instance.processingState = SnvProcessingStates.FINISHED
         SnvCallingInstance instance2 = testdata.createSnvCallingInstance([
             sampleType1BamFile: testdata.bamFileTumor2,
@@ -83,7 +81,7 @@ class SnvDeletionServiceTests {
         File directorySamplePair1 = instance.samplePair.getSamplePairPath().getAbsoluteDataManagementPath()
         File directorySamplePair2 = instance2.samplePair.getSamplePairPath().getAbsoluteDataManagementPath()
 
-        List<File> directories = snvDeletionService.deleteForProcessedMergedBamFile(testdata.bamFileControl)
+        List<File> directories = snvDeletionService.deleteForAbstractMergedBamFile(testdata.bamFileControl)
         assert []== SnvJobResult.list()
         assert []== SnvCallingInstance.list()
         assert []== SamplePair.list()
@@ -94,7 +92,7 @@ class SnvDeletionServiceTests {
 
 
     @Test
-    public void testDeleteForProcessedMergedBamFile_MultipleInstancesFinishedForControlTumor1() {
+    public void testDeleteForAbstractMergedBamFile_MultipleInstancesFinishedForControlTumor1() {
         instance.processingState = SnvProcessingStates.FINISHED
         SnvCallingInstance instance2 = testdata.createSnvCallingInstance([
             processingState: SnvProcessingStates.FINISHED,
@@ -107,7 +105,7 @@ class SnvDeletionServiceTests {
         File directoryInstance2 = instance2.getSnvInstancePath().getAbsoluteDataManagementPath()
         File directorySamplePair = instance.samplePair.getSamplePairPath().getAbsoluteDataManagementPath()
 
-        List<File> directories = snvDeletionService.deleteForProcessedMergedBamFile(testdata.bamFileControl)
+        List<File> directories = snvDeletionService.deleteForAbstractMergedBamFile(testdata.bamFileControl)
         assert []== SnvJobResult.list()
         assert []== SnvCallingInstance.list()
         assert [testdata.samplePair2]== SamplePair.list()
@@ -116,7 +114,7 @@ class SnvDeletionServiceTests {
     }
 
     @Test
-    public void testDeleteForProcessedMergedBamFile_InstanceFinishedForControlTumor1AndControlTumor2_DeleteTumor1() {
+    public void testDeleteForAbstractMergedBamFile_InstanceFinishedForControlTumor1AndControlTumor2_DeleteTumor1() {
         instance.processingState = SnvProcessingStates.FINISHED
         SnvCallingInstance instance2 = testdata.createSnvCallingInstance([
             sampleType1BamFile: testdata.bamFileTumor2,
@@ -128,7 +126,7 @@ class SnvDeletionServiceTests {
         File directoryInstance = instance.getSnvInstancePath().getAbsoluteDataManagementPath()
         File directorySamplePair = instance.samplePair.getSamplePairPath().getAbsoluteDataManagementPath()
 
-        List<File> directories = snvDeletionService.deleteForProcessedMergedBamFile(testdata.bamFileTumor)
+        List<File> directories = snvDeletionService.deleteForAbstractMergedBamFile(testdata.bamFileTumor)
         assert 4 == SnvJobResult.list().size()
         assert [instance2]== SnvCallingInstance.list()
         assert [testdata.samplePair2]== SamplePair.list()
@@ -137,7 +135,7 @@ class SnvDeletionServiceTests {
     }
 
     @Test
-    public void testDeleteForProcessedMergedBamFile_InstanceFinishedForControlTumor1AndControlTumor2_DeleteTumor1_tumor2InProgress() {
+    public void testDeleteForAbstractMergedBamFile_InstanceFinishedForControlTumor1AndControlTumor2_DeleteTumor1_tumor2InProgress() {
         instance.processingState = SnvProcessingStates.FINISHED
         SnvCallingInstance instance2 = testdata.createSnvCallingInstance([
             sampleType1BamFile: testdata.bamFileTumor2,
@@ -148,7 +146,7 @@ class SnvDeletionServiceTests {
         File directoryInstance = instance.getSnvInstancePath().getAbsoluteDataManagementPath()
         File directorySamplePair = instance.samplePair.getSamplePairPath().getAbsoluteDataManagementPath()
 
-        List<File> directories = snvDeletionService.deleteForProcessedMergedBamFile(testdata.bamFileTumor)
+        List<File> directories = snvDeletionService.deleteForAbstractMergedBamFile(testdata.bamFileTumor)
         assert 4== SnvJobResult.list().size()
         assert [instance2]== SnvCallingInstance.list()
         assert [testdata.samplePair2]== SamplePair.list()
@@ -157,7 +155,7 @@ class SnvDeletionServiceTests {
     }
 
     @Test
-    public void testDeleteForProcessedMergedBamFile_InstanceFailedForControlTumor1() {
+    public void testDeleteForAbstractMergedBamFile_InstanceFailedForControlTumor1() {
         SnvJobResult.list().each {
             it.withdrawn = true
             assert it.save(flush: true)
@@ -166,7 +164,7 @@ class SnvDeletionServiceTests {
         File directoryInstance = instance.getSnvInstancePath().getAbsoluteDataManagementPath()
         File directorySamplePair = instance.samplePair.getSamplePairPath().getAbsoluteDataManagementPath()
 
-        List<File> directories = snvDeletionService.deleteForProcessedMergedBamFile(testdata.bamFileControl)
+        List<File> directories = snvDeletionService.deleteForAbstractMergedBamFile(testdata.bamFileControl)
         assert []== SnvJobResult.list()
         assert []== SnvCallingInstance.list()
         assert [testdata.samplePair2]== SamplePair.list()
@@ -177,7 +175,7 @@ class SnvDeletionServiceTests {
 
 
     @Test
-    public void testDeleteForProcessedMergedBamFile_InstanceFinishedForControlTumor1_TwoBamFiles_DeleteOnlyOneInstance() {
+    public void testDeleteForAbstractMergedBamFile_InstanceFinishedForControlTumor1_TwoBamFiles_DeleteOnlyOneInstance() {
         instance.processingState = SnvProcessingStates.FINISHED
         ProcessedMergedBamFile bamFile2 = testdata.createProcessedMergedBamFile(testdata.bamFileTumor.individual, testdata.bamFileTumor.seqType)
         bamFile2.mergingSet.mergingWorkPackage = testdata.bamFileTumor.mergingWorkPackage
@@ -198,7 +196,7 @@ class SnvDeletionServiceTests {
         File directorySamplePair = instance.samplePair.getSamplePairPath().getAbsoluteDataManagementPath()
 
 
-        List<File> directories = snvDeletionService.deleteForProcessedMergedBamFile(testdata.bamFileTumor)
+        List<File> directories = snvDeletionService.deleteForAbstractMergedBamFile(testdata.bamFileTumor)
         assert 4 == SnvJobResult.list().size()
         assert [instance2] == SnvCallingInstance.list()
         assert [testdata.samplePair1, testdata.samplePair2] == SamplePair.list()
@@ -207,7 +205,7 @@ class SnvDeletionServiceTests {
     }
 
     @Test
-    public void testDeleteForProcessedMergedBamFile_InstanceFinishedForControlTumor1_TwoBamFiles_DeleteBoth() {
+    public void testDeleteForAbstractMergedBamFile_InstanceFinishedForControlTumor1_TwoBamFiles_DeleteBoth() {
         instance.processingState = SnvProcessingStates.FINISHED
         ProcessedMergedBamFile bamFile2 = testdata.createProcessedMergedBamFile(testdata.bamFileTumor.individual, testdata.bamFileTumor.seqType)
         bamFile2.mergingSet.mergingWorkPackage = testdata.bamFileTumor.mergingWorkPackage
@@ -228,8 +226,8 @@ class SnvDeletionServiceTests {
         File directorySamplePair = instance.samplePair.getSamplePairPath().getAbsoluteDataManagementPath()
 
 
-        List<File> directories1 = snvDeletionService.deleteForProcessedMergedBamFile(testdata.bamFileTumor)
-        List<File> directories2 = snvDeletionService.deleteForProcessedMergedBamFile(bamFile2)
+        List<File> directories1 = snvDeletionService.deleteForAbstractMergedBamFile(testdata.bamFileTumor)
+        List<File> directories2 = snvDeletionService.deleteForAbstractMergedBamFile(bamFile2)
         assert 0 == SnvJobResult.list().size()
         assert [] == SnvCallingInstance.list()
         assert [testdata.samplePair2] == SamplePair.list()
@@ -238,6 +236,4 @@ class SnvDeletionServiceTests {
         assert [directoryInstance1] == directories1
         assert [directoryInstance2, directorySamplePair] == directories2
     }
-
-
 }

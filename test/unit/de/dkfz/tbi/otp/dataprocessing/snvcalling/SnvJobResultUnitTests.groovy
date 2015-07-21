@@ -7,9 +7,11 @@ import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExternalScript
+import grails.buildtestdata.mixin.Build
 
 @TestFor(SnvJobResult)
-@Mock([SnvCallingInstance, ProcessedMergedBamFile, ExternalScript, Individual, Project])
+@Mock([SnvCallingInstance, ExternalScript, Individual, Project])
+@Build([ProcessedMergedBamFile])
 class SnvJobResultUnitTests {
 
     final String MD5SUM = "a841c64c5825e986c4709ac7298e9366"
@@ -175,15 +177,18 @@ class SnvJobResultUnitTests {
 
     @Test
     void testSavingOfSnvJobResultSampleType1BamDifferentFromInputFile() {
-        ProcessedMergedBamFile control = new ProcessedMergedBamFile()
+        ProcessedMergedBamFile control = ProcessedMergedBamFile.build()
+
+        ProcessedMergedBamFile tumor1 = ProcessedMergedBamFile.build()
+        ProcessedMergedBamFile tumor2 = ProcessedMergedBamFile.build()
 
         SnvCallingInstance snvCallingInstance1 = new SnvCallingInstance(
-                sampleType1BamFile: new ProcessedMergedBamFile(),
+                sampleType1BamFile: tumor1,
                 sampleType2BamFile: control
                 )
 
         SnvCallingInstance snvCallingInstance2 = new SnvCallingInstance(
-                sampleType1BamFile: new ProcessedMergedBamFile(),
+                sampleType1BamFile: tumor2,
                 sampleType2BamFile: control
                 )
 
@@ -205,16 +210,16 @@ class SnvJobResultUnitTests {
 
     @Test
     void testSavingOfSnvJobResultSampleType2BamDifferentFromInputFile() {
-        ProcessedMergedBamFile tumor = new ProcessedMergedBamFile()
+        ProcessedMergedBamFile tumor = ProcessedMergedBamFile.build()
 
         SnvCallingInstance snvCallingInstance1 = new SnvCallingInstance(
                 sampleType1BamFile: tumor,
-                sampleType2BamFile: new ProcessedMergedBamFile()
+                sampleType2BamFile: ProcessedMergedBamFile.build()
                 )
 
         SnvCallingInstance snvCallingInstance2 = new SnvCallingInstance(
                 sampleType1BamFile: tumor,
-                sampleType2BamFile: new ProcessedMergedBamFile()
+                sampleType2BamFile: ProcessedMergedBamFile.build()
                 )
 
         SnvJobResult oldSnvJobResult = new SnvJobResult(
@@ -235,11 +240,11 @@ class SnvJobResultUnitTests {
 
     @Test
     void testGetSampleType1BamFile() {
-        ProcessedMergedBamFile pmbf = new ProcessedMergedBamFile()
+        ProcessedMergedBamFile pmbf = ProcessedMergedBamFile.build()
 
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
                 sampleType1BamFile: pmbf,
-                sampleType2BamFile: new ProcessedMergedBamFile()
+                sampleType2BamFile: ProcessedMergedBamFile.build()
                 )
 
         SnvJobResult snvJobResult = new SnvJobResult(
@@ -255,10 +260,10 @@ class SnvJobResultUnitTests {
 
     @Test
     void testGetSampleType2BamFile() {
-        ProcessedMergedBamFile pmbf = new ProcessedMergedBamFile()
+        ProcessedMergedBamFile pmbf = ProcessedMergedBamFile.build()
 
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
-                sampleType1BamFile: new ProcessedMergedBamFile(),
+                sampleType1BamFile: ProcessedMergedBamFile.build(),
                 sampleType2BamFile: pmbf
                 )
 
@@ -402,8 +407,8 @@ class SnvJobResultUnitTests {
                 )
 
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
-                sampleType1BamFile: new ProcessedMergedBamFile(),
-                sampleType2BamFile: new ProcessedMergedBamFile(),
+                sampleType1BamFile: ProcessedMergedBamFile.build(),
+                sampleType2BamFile: ProcessedMergedBamFile.build(),
                 samplePair: samplePair
                 )
 
@@ -416,8 +421,8 @@ class SnvJobResultUnitTests {
 
     private SnvCallingInstance createSnvCallingInstance(final Map properties = [:]) {
         return new SnvCallingInstance([
-                sampleType1BamFile: new ProcessedMergedBamFile([withdrawn: false]),
-                sampleType2BamFile: new ProcessedMergedBamFile([withdrawn: false])
+                sampleType1BamFile: ProcessedMergedBamFile.build([withdrawn: false]),
+                sampleType2BamFile: ProcessedMergedBamFile.build([withdrawn: false])
         ] + properties)
     }
 }
