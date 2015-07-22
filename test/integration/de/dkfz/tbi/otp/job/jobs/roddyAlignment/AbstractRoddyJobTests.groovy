@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
@@ -31,6 +32,8 @@ class AbstractRoddyJobTests {
     public static final String ALIGN_AND_PAIR_SLIM_PBSID = "3744601"
     public static final String ALIGN_AND_PAIR_SLIM_JOB_NAME = "r150623_153422293_123456_alignAndPairSlim"
     public static final String ALIGN_AND_PAIR_SLIM_JOB_CLASS = "alignAndPairSlim"
+    public static final String RODDY_EXECUTION_STORE_DIRECTORY_NAME = 'exec_150625_102449388_username_analysis'
+
     final shouldFail = new GroovyTestCase().&shouldFail
 
     ClusterJobService clusterJobService
@@ -40,12 +43,16 @@ class AbstractRoddyJobTests {
     Realm realm
     int counter
 
+    String stderr
+
     @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder()
+    public TemporaryFolder tmpDir = new TemporaryFolder()
 
     @Before
     void setUp() {
         counter = 0
+
+        tmpDir.create()
 
         roddyBamFile = DomainFactory.createRoddyBamFile()
         realm = Realm.build([name: roddyBamFile.project.realmName, operationType: Realm.OperationType.DATA_MANAGEMENT])
@@ -60,28 +67,44 @@ class AbstractRoddyJobTests {
         roddyJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
         roddyJob.configService = new ConfigService()
         roddyJob.clusterJobService = new ClusterJobService()
-        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnStdout = {String cmd->
-            counter++
-            'Running job abc_def => 3504988'
-        }
     }
 
     @After
     void tearDown() {
         TestCase.removeMetaClass(ExecuteRoddyCommandService, roddyJob.executeRoddyCommandService)
         TestCase.removeMetaClass(AbstractRoddyJob, roddyJob)
+        roddyBamFile = null
         GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
     }
 
-    private void setRootPathAndCreateTmpRoddyExecutionStoreDirectory() {
-        realm.rootPath = tempFolder.newFolder().path
+    private File setRootPathAndCreateTmpRoddyExecutionStoreDirectory() {
+        realm.rootPath = tmpDir.newFolder().path
         assert realm.save(failOnError: true)
-        assert new File(roddyBamFile.tmpRoddyExecutionStoreDirectory, 'exec_150625_102449388_username_analysis').mkdirs()
+        File tmpRoddyExecutionDir =  new File(roddyBamFile.tmpRoddyExecutionStoreDirectory, RODDY_EXECUTION_STORE_DIRECTORY_NAME)
+        assert tmpRoddyExecutionDir.mkdirs()
+        return tmpRoddyExecutionDir
+    }
+
+    private File setUpTmpDirAndMockProcessOutput() {
+        File tmpRoddyExecutionDir = setRootPathAndCreateTmpRoddyExecutionStoreDirectory()
+
+        String stdout = "Running job abc_def => 3504988"
+        stderr = """newLine
+Creating the following execution directory to store information about this process:
+${tmpRoddyExecutionDir.absolutePath}
+newLine"""
+
+        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = {String cmd ->
+            counter++
+            return new ProcessHelperService.ProcessOutput(stdout: stdout, stderr: stderr, exitCode: 0)
+        }
+
+        return tmpRoddyExecutionDir
     }
 
     @Test
     void testMaybeSubmit() {
-        setRootPathAndCreateTmpRoddyExecutionStoreDirectory()
+        setUpTmpDirAndMockProcessOutput()
         LogThreadLocal.withThreadLog(System.out) {
             assert AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == roddyJob.maybeSubmit()
         }
@@ -97,7 +120,7 @@ class AbstractRoddyJobTests {
 
     @Test
     void testExecute_finishedClusterJobsIsNull_MaybeSubmit() {
-        setRootPathAndCreateTmpRoddyExecutionStoreDirectory()
+        setUpTmpDirAndMockProcessOutput()
         roddyJob.metaClass.maybeSubmit = {
             return AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
         }
@@ -139,13 +162,16 @@ class AbstractRoddyJobTests {
 
     @Test
     void testCreateClusterJobObjects_Works() {
-        setRootPathAndCreateTmpRoddyExecutionStoreDirectory()
-        String roddyOutput = """\
+        File tmpRoddyExecutionDir = setUpTmpDirAndMockProcessOutput()
+
+        roddyBamFile.roddyExecutionDirectoryNames.add(tmpRoddyExecutionDir.name)
+
+        String stdout = """\
 Running job ${SNV_CALLING_META_SCRIPT_JOB_NAME} => ${SNV_CALLING_META_SCRIPT_PBSID}
 Running job ${SNV_ANNOTATION_JOB_NAME} => ${SNV_ANNOTATION_PBSID}
 Rerun job ${ALIGN_AND_PAIR_SLIM_JOB_NAME} => ${ALIGN_AND_PAIR_SLIM_PBSID}"""
 
-        roddyJob.createClusterJobObjects(realm, roddyOutput)
+        roddyJob.createClusterJobObjects(realm, stdout)
 
         assert ClusterJob.all.find {
             it.clusterJobId == SNV_CALLING_META_SCRIPT_PBSID &&
@@ -212,63 +238,122 @@ Rerun job ${ALIGN_AND_PAIR_SLIM_JOB_NAME} => ${ALIGN_AND_PAIR_SLIM_PBSID}"""
 
     @Test
     void testCreateClusterJobObjects_skipEmptyLines() {
-        String roddyOutput = ""
+        String stdout = ""
 
-        roddyJob.createClusterJobObjects(realm, roddyOutput)
+        roddyJob.createClusterJobObjects(realm, stdout)
 
         assert ClusterJob.all.empty
     }
 
     @Test
     void testCreateClusterJobObjects_skipLinesHavingOnlySpaces() {
-        String roddyOutput = "     "
+        String stdout = "     "
 
-        roddyJob.createClusterJobObjects(realm, roddyOutput)
+        roddyJob.createClusterJobObjects(realm, stdout)
 
         assert ClusterJob.all.empty
     }
 
     @Test
     void testCreateClusterJobObjects_EntryHasSpacesAtTheStart() {
-        setRootPathAndCreateTmpRoddyExecutionStoreDirectory()
-        String roddyOutput = "    Running job r150428_104246480_stds_snvCallingMetaScript => 3504988"
+        File tmpRoddyExecutionDir = setUpTmpDirAndMockProcessOutput()
 
-        roddyJob.createClusterJobObjects(realm, roddyOutput)
+        roddyBamFile.roddyExecutionDirectoryNames.add(tmpRoddyExecutionDir.name)
+
+        String stdout = "    Running job r150428_104246480_stds_snvCallingMetaScript => 3504988"
+
+        roddyJob.createClusterJobObjects(realm, stdout)
 
         assert 1 == ClusterJob.count()
     }
 
     @Test
     void testCreateClusterJobObjects_EntryHasTrailingSpaces() {
-        setRootPathAndCreateTmpRoddyExecutionStoreDirectory()
-        String roddyOutput = "Running job r150428_104246480_stds_snvCallingMetaScript => 3504988    "
+        File tmpRoddyExecutionDir = setUpTmpDirAndMockProcessOutput()
 
-        roddyJob.createClusterJobObjects(realm, roddyOutput)
+        roddyBamFile.roddyExecutionDirectoryNames.add(tmpRoddyExecutionDir.name)
+
+        String stdout = "Running job r150428_104246480_stds_snvCallingMetaScript => 3504988    "
+
+        roddyJob.createClusterJobObjects(realm, stdout)
 
         assert 1 == ClusterJob.count()
     }
 
     @Test
     void testCreateClusterJobObjects_realmIsNull_fails() {
-        String roddyOutput = "Running job r150428_104246480_stds_snvCallingMetaScript => 3504988"
+        String stdout = "Running job r150428_104246480_stds_snvCallingMetaScript => 3504988"
 
         shouldFail AssertionError, {
-            roddyJob.createClusterJobObjects(null, roddyOutput)
+            roddyJob.createClusterJobObjects(null, stdout)
         }
 
         assert ClusterJob.all.empty
     }
 
+    @Test
+    void testSaveRoddyExecutionStoreDirectory_WhenRoddyResultIsNull_ShouldFail() {
+        shouldFail(AssertionError) {
+            roddyJob.saveRoddyExecutionStoreDirectory(null, "")
+        }
+    }
 
     @Test
-    void testCreateClusterJobObjects_invalidRoddyOutput_fails() {
-        String roddyOutput = """\
-asdfasdfasdf"""
+    void testSaveRoddyExecutionStoreDirectory_WhenParsedExecutionStoreDirNotEqualsToExpectedPath_ShouldFail() {
+        File tmpRoddyExecutionDir = setUpTmpDirAndMockProcessOutput()
 
-        assert shouldFail(RuntimeException) {
-            roddyJob.createClusterJobObjects(realm, roddyOutput)
-        }.startsWith('Could not match')
+        roddyBamFile.metaClass.getTmpRoddyExecutionStoreDirectory = {
+            return tmpDir.newFolder("Folder")
+        }
 
-        assert ClusterJob.all.empty
+        shouldFail(AssertionError) {
+            roddyJob.saveRoddyExecutionStoreDirectory(roddyBamFile as RoddyResult, stderr)
+        }
+    }
+
+    @Test
+    void testSaveRoddyExecutionStoreDirectory_WhenExecutionStoreDirDoesNotExistOnFileSystem_ShouldFail() {
+        File tmpRoddyExecutionDir = setUpTmpDirAndMockProcessOutput()
+
+        roddyBamFile.roddyExecutionDirectoryNames.add(RODDY_EXECUTION_STORE_DIRECTORY_NAME)
+
+        tmpRoddyExecutionDir.delete()
+
+        shouldFail(AssertionError) {
+            roddyJob.saveRoddyExecutionStoreDirectory(roddyBamFile as RoddyResult, stderr)
+        }
+    }
+
+    @Test
+    void testSaveRoddyExecutionStoreDirectory_WhenExecutionStoreDirIsNoDirectory_ShouldFail() {
+        File tmpRoddyExecutionDir = setUpTmpDirAndMockProcessOutput()
+
+        roddyBamFile.roddyExecutionDirectoryNames.add(RODDY_EXECUTION_STORE_DIRECTORY_NAME)
+
+        tmpRoddyExecutionDir.delete()
+        tmpDir.newFile(RODDY_EXECUTION_STORE_DIRECTORY_NAME)
+
+        shouldFail(AssertionError) {
+            roddyJob.saveRoddyExecutionStoreDirectory(roddyBamFile as RoddyResult, stderr)
+        }
+    }
+
+    @Test
+    void testSaveRoddyExecutionStoreDirectory_WhenLatestExecutionStoreDirIsNotLastElement_ShouldFail() {
+        setUpTmpDirAndMockProcessOutput()
+
+        roddyBamFile.roddyExecutionDirectoryNames.add("exec_999999_999999999_a_a")
+
+        shouldFail(AssertionError) {
+            roddyJob.saveRoddyExecutionStoreDirectory(roddyBamFile as RoddyResult, stderr)
+        }
+    }
+
+    @Test
+    void testSaveRoddyExecutionStoreDirectory_WhenAllFine_ShouldBeOk() {
+        setUpTmpDirAndMockProcessOutput()
+
+        roddyJob.saveRoddyExecutionStoreDirectory(roddyBamFile as RoddyResult, stderr)
+        assert roddyBamFile.roddyExecutionDirectoryNames.last() == RODDY_EXECUTION_STORE_DIRECTORY_NAME
     }
 }

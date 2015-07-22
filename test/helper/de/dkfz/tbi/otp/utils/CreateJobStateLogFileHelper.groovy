@@ -17,14 +17,15 @@ class CreateJobStateLogFileHelper {
     }
 
 
-    public static void withTmpRoddyExecutionDir(TemporaryFolder tmpDir, Closure code, tmpRoddyExecutionStoreName = "exec_890420_133730004_user_analysis") {
+    public static void withTmpRoddyExecutionDir(TemporaryFolder tmpDir, Closure code, String tmpRoddyExecutionStoreName = "exec_890420_133730004_user_analysis") {
         File tmpRoddyExecutionDirectory = tmpDir.newFolder(tmpRoddyExecutionStoreName)
         withTmpRoddyExecutionDir(tmpRoddyExecutionDirectory, code)
     }
 
-    public static void withJobStateLogFile(TemporaryFolder tmpDir, List<LogFileEntry> listOfLogFileEntryValues, Closure code, tmpRoddyExecutionDirName = "exec_890420_133730004_user_analysis") {
+    public static void withJobStateLogFile(TemporaryFolder tmpDir, List<LogFileEntry> listOfLogFileEntryValues, Closure code, String tmpRoddyExecutionDirName = "exec_890420_133730004_user_analysis") {
         File tmpRoddyExecutionDirectory = tmpDir.newFolder(tmpRoddyExecutionDirName)
         createJobStateLogFile(tmpRoddyExecutionDirectory, listOfLogFileEntryValues)
+
         withTmpRoddyExecutionDir(tmpRoddyExecutionDirectory, code)
     }
 

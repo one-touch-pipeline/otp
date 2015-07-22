@@ -12,11 +12,14 @@ import grails.buildtestdata.mixin.Build
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+
+import static de.dkfz.tbi.TestCase.shouldFail
 import static de.dkfz.tbi.TestCase.shouldFailWithMessage
 
 @Build([RoddyBamFile, SeqPlatform])
 class RoddyBamFileUnitTests {
 
+    public static final String RODDY_EXECUTION_DIR_NAME = "exec_000000_000000000_a_a"
     SampleType sampleType
     Individual individual
     RoddyBamFile roddyBamFile
@@ -318,48 +321,58 @@ class RoddyBamFileUnitTests {
     }
 
     @Test
-    void testGetLatestTmpRoddyExecutionDirectory_WhenOnlyOneRoddyExecutionDirectoryExist_ShouldReturnLatestDir() {
-        CreateJobStateLogFileHelper.withTmpRoddyExecutionDir(tmpDir, { roddyExecutionDir ->
-            assert roddyExecutionDir == roddyBamFile.getLatestTmpRoddyExecutionDirectory()
-        })
-    }
-
-    @Test
-    void testGetLatestTmpRoddyExecutionDirectory_WhenSeveralRoddyExecutionDirectoriesExist_ShouldReturnLatestDir() {
-        CreateJobStateLogFileHelper.withTmpRoddyExecutionDir(tmpDir, { roddyExecutionDir ->
-            tmpDir.newFolder("exec_140625_102449388_SOMEUSER_WGS")
-            assert roddyExecutionDir == roddyBamFile.getLatestTmpRoddyExecutionDirectory()
-        }, "exec_150625_102449388_SOMEUSER_WGS")
-    }
-
-    @Test
-    void testGetLatestTmpRoddyExecutionDirectory_WhenTmpRoddyExecutionStoreDirIsEmpty_ShouldThrowException() {
-        roddyBamFile.metaClass.getTmpRoddyExecutionStoreDirectory = { ->
-            return tmpDir.root
-        }
-
-        shouldFailWithMessage(RuntimeException, /.*is\sempty/) {
+    void testGetLatestTmpRoddyExecutionDirectory_WhenRoddyExecutionDirectoryNamesEmpty_ShouldFail() {
+        shouldFail(RuntimeException) {
             roddyBamFile.getLatestTmpRoddyExecutionDirectory()
         }
     }
 
     @Test
-    void testGetLatestTmpRoddyExecutionDirectory_WhenTmpRoddyExecutionStoreDirDoesNotExist_ShouldThrowException() {
-        roddyBamFile.metaClass.getTmpRoddyExecutionStoreDirectory = { ->
-            return TestCase.uniqueNonExistentPath
-        }
+    void testGetLatestTmpRoddyExecutionDirectory_WhenLatestDirectoryNameIsNotLastNameInRoddyExecutionDirectoryNames_ShouldFail() {
+        roddyBamFile.roddyExecutionDirectoryNames.addAll(["exec_100000_000000000_a_a", "exec_000000_000000000_a_a"])
+        roddyBamFile.save(flush: true)
 
-        shouldFailWithMessage(RuntimeException, /.*does\snot\sexist/) {
+        shouldFail(AssertionError) {
+            roddyBamFile.getLatestTmpRoddyExecutionDirectory()
+        }
+    }
+
+    void testGetLatestTmpRoddyExecutionDirectory_WhenLatestDirectoryNameDoesNotMatch_ShouldFail() {
+        roddyBamFile.roddyExecutionDirectoryNames.add("someName")
+
+        shouldFail(AssertionError) {
             roddyBamFile.getLatestTmpRoddyExecutionDirectory()
         }
     }
 
     @Test
-    void testGetLatestTmpRoddyExecutionDirectory_WhenTmpRoddyExecutionStoreDirContainsNotMatchingDirs_ShouldReturnOnlyMatchingDirs() {
-        tmpDir.newFolder()
-        CreateJobStateLogFileHelper.withTmpRoddyExecutionDir(tmpDir, { roddyExecutionDir ->
+    void testGetLatestTmpRoddyExecutionDirectory_WhenLatestDirectoryNameDoesNotExistOnFileSystem_ShouldFail() {
+        roddyBamFile.roddyExecutionDirectoryNames.add(RODDY_EXECUTION_DIR_NAME)
+
+        shouldFail(AssertionError) {
+            roddyBamFile.getLatestTmpRoddyExecutionDirectory()
+        }
+    }
+
+    @Test
+    void testGetLatestTmpRoddyExecutionDirectory_WhenLatestDirectoryNameIsNoDirectory_ShouldFail() {
+        String fileName = RODDY_EXECUTION_DIR_NAME
+
+        tmpDir.newFile(fileName)
+
+        roddyBamFile.roddyExecutionDirectoryNames.add(fileName)
+
+        shouldFail(AssertionError) {
+            roddyBamFile.getLatestTmpRoddyExecutionDirectory()
+        }
+    }
+
+    @Test
+    void testGetLatestTmpRoddyExecutionDirectory_WhenAllFine_ReturnLatestTmpRoddyExecutionDirectory() {
+        CreateJobStateLogFileHelper.withTmpRoddyExecutionDir(tmpDir, { File roddyExecutionDir ->
+            roddyBamFile.roddyExecutionDirectoryNames.add(RODDY_EXECUTION_DIR_NAME)
             assert roddyExecutionDir == roddyBamFile.getLatestTmpRoddyExecutionDirectory()
-        }, "exec_890420_133730004_user_analysis")
+        }, RODDY_EXECUTION_DIR_NAME)
     }
 
     private void updateDataFileNames(SeqTrack seqTrack) {

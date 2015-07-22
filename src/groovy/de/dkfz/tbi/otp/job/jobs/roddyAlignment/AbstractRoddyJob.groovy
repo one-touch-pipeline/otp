@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.utils.ProcessHelperService
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 
@@ -29,6 +31,8 @@ import java.util.regex.Pattern
 abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
 
 
+    public static final Pattern roddyExecutionStoreDirectoryPattern = Pattern.compile(/(?:^|\n)Creating\sthe\sfollowing\sexecution\sdirectory\sto\sstore\sinformation\sabout\sthis\sprocess:\s*\n(\/(.*\/)*${RoddyBamFile.RODDY_EXECUTION_DIR_PATTERN})(?:\n|$)/)
+
     @Autowired
     ExecuteRoddyCommandService executeRoddyCommandService
 
@@ -50,8 +54,11 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
             final Realm realm = configService.getRealmDataManagement(roddyResult.project)
             String cmd = prepareAndReturnWorkflowSpecificCommand(roddyResult, realm)
 
-            String roddyOutput = ProcessHelperService.executeCommandAndAssertExistCodeAndReturnStdout(cmd)
-            createClusterJobObjects(realm, roddyOutput)
+            ProcessHelperService.ProcessOutput output =  ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput(cmd)
+
+            saveRoddyExecutionStoreDirectory(roddyResult, output.stderr)
+
+            createClusterJobObjects(realm, output.stdout)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         }
@@ -131,6 +138,30 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
             } else {
                 throw new RuntimeException("Could not match '${it}' against '${roddyOutputPattern}")
             }
+        }
+    }
+
+    public void saveRoddyExecutionStoreDirectory(RoddyResult roddyResult, String roddyOutput) {
+        assert roddyResult
+
+        File directory = parseRoddyExecutionStoreDirectoryFromRoddyOutput(roddyOutput)
+        assert directory.parentFile == roddyResult.tmpRoddyExecutionStoreDirectory
+        assert WaitingFileUtils.waitUntilExists(directory)
+        assert directory.isDirectory()
+
+        roddyResult.roddyExecutionDirectoryNames.add(directory.name)
+        assert roddyResult.roddyExecutionDirectoryNames.last() == roddyResult.roddyExecutionDirectoryNames.max()
+        assert roddyResult.save(failOnError: true)
+    }
+
+    public File parseRoddyExecutionStoreDirectoryFromRoddyOutput(String roddyOutput) {
+        Matcher m = roddyOutput =~ roddyExecutionStoreDirectoryPattern
+        if (m.find()) {
+            File directory = new File(m.group(1))
+            assert !m.find()
+            return directory
+        } else {
+            throw new RuntimeException("Roddy output contains no information about output directories")
         }
     }
 }

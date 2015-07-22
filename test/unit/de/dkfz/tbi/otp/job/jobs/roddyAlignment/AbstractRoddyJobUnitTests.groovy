@@ -53,6 +53,9 @@ class AbstractRoddyJobUnitTests {
         ClusterJob clusterJob = ClusterJob.build(realm: realm)
         File logDirectory = new File(roddyBamFile.tmpRoddyExecutionStoreDirectory, 'exec_150625_102449388_username_analysis')
         assert logDirectory.mkdirs()
+
+        roddyBamFile.roddyExecutionDirectoryNames.add('exec_150625_102449388_username_analysis')
+
         String expected = "Log file: ${new File(logDirectory, "${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}")}"
 
         assert abstractRoddyJob.getLogFilePaths(clusterJob) == expected
@@ -77,6 +80,9 @@ class AbstractRoddyJobUnitTests {
     @Test
     void testFailedOrNotFinishedClusterJobs_WhenJobStateLogFileIsEmpty_ShouldFail() {
         CreateJobStateLogFileHelper.withJobStateLogFile(tmpDir, []) {
+            roddyBamFile.roddyExecutionDirectoryNames.add(it.name)
+            roddyBamFile.save(flush: true)
+
             shouldFailWithMessage(RuntimeException, /${it}\/${JobStateLogFile.JOB_STATE_LOG_FILE_NAME}\sis\sempty\./) {
                 abstractRoddyJob.failedOrNotFinishedClusterJobs([])
             }
@@ -88,6 +94,9 @@ class AbstractRoddyJobUnitTests {
         CreateJobStateLogFileHelper.withJobStateLogFile(tmpDir, [
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_STARTED])
         ]) {
+            roddyBamFile.roddyExecutionDirectoryNames.add(it.name)
+            roddyBamFile.save(flush: true)
+
             assert [(clusterJobIdentifier): "${clusterJobIdentifier} has not finished successfully. Status code: ${STATUS_CODE_STARTED}"] ==
                     abstractRoddyJob.failedOrNotFinishedClusterJobs([clusterJobIdentifier])
         }
@@ -122,6 +131,9 @@ class AbstractRoddyJobUnitTests {
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: identifierB.clusterJobId, statusCode: STATUS_CODE_FAILED, timeStamp: 100L]),
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: identifierC.clusterJobId, statusCode: STATUS_CODE_STARTED])
         ], {
+            roddyBamFile.roddyExecutionDirectoryNames.add(it.name)
+            roddyBamFile.save(flush: true)
+
             Collection<? extends ClusterJobIdentifier> finishedClusterJobs = [
                     identifierA,
                     identifierB,
@@ -183,5 +195,41 @@ class AbstractRoddyJobUnitTests {
         ])
 
         assert [:] == abstractRoddyJob.analyseFinishedClusterJobs([], jobStateLogFile)
+    }
+
+    @Test
+    void testParseRoddyExecutionDirectoryFromRoddyOutput_WhenMatcherMatches_ShouldReturnRoddyExecutionDirectory() {
+        String roddyExecutionDir = TestCase.uniqueNonExistentPath.absolutePath + "/exec_150707_142149946_SOMEUSER_WGS"
+        String output = """some String
+Creating the following execution directory to store information about this process:
+${roddyExecutionDir}
+some String"""
+
+        assert roddyExecutionDir == abstractRoddyJob.parseRoddyExecutionStoreDirectoryFromRoddyOutput(output).absolutePath
+    }
+
+    @Test
+    void testParseRoddyExecutionDirectoryFromRoddyOutput_WhenMatcherDoesNotMatch_ShouldFail() {
+        String output = "some wrong String"
+
+        TestCase.shouldFail(RuntimeException) {
+            abstractRoddyJob.parseRoddyExecutionStoreDirectoryFromRoddyOutput(output)
+        }
+    }
+
+    @Test
+    void testParseRoddyExecutionDirectoryFromRoddyOutput_WhenMatcherMatchesMoreThanOnce_ShouldFail() {
+        String roddyExecutionDir = TestCase.uniqueNonExistentPath.absolutePath + "/exec_150707_142149946_SOMEUSER_WGS"
+        String output = """some String
+Creating the following execution directory to store information about this process:
+${roddyExecutionDir}
+some String
+Creating the following execution directory to store information about this process:
+${roddyExecutionDir}
+some String"""
+
+        shouldFail(AssertionError) {
+            abstractRoddyJob.parseRoddyExecutionStoreDirectoryFromRoddyOutput(output)
+        }
     }
 }

@@ -27,14 +27,17 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
 
     static final String RUN_PREFIX = "run"
 
-    static final String RODDY_EXECUTION_DIR_PATTERN = /^exec_\d{6}_\d{9}_.+_.+$/
+    static final String RODDY_EXECUTION_DIR_PATTERN = /exec_\d{6}_\d{9}_.+_.+/
 
     RoddyBamFile baseBamFile
+
+    List<String> roddyExecutionDirectoryNames = []
 
     Set<SeqTrack> seqTracks
 
     static hasMany = [
-            seqTracks: SeqTrack
+            seqTracks: SeqTrack,
+            roddyExecutionDirectoryNames: String,
     ]
 
     /**
@@ -63,6 +66,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
         workPackage validator: { val, obj -> val?.workflow?.name == Workflow.Name.PANCAN_ALIGNMENT }
         config validator: { val, obj -> val?.workflow?.id == obj.workPackage?.workflow?.id }
         identifier unique: 'workPackage'
+        roddyExecutionDirectoryNames nullable: true
     }
 
     static mapping = {
@@ -160,18 +164,20 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
     // Example:
     // exec_150625_102449388_SOMEUSER_WGS
     // exec_yyMMdd_HHmmssSSS_user_analysis
-    File getLatestTmpRoddyExecutionDirectory () {
-        if (!WaitingFileUtils.waitUntilExists(this.tmpRoddyExecutionStoreDirectory)) {
-            throw new RuntimeException("can not find latest RoddyExecutionDirectory because RoddyExecutionStoreDirectory ${this.tmpRoddyExecutionStoreDirectory} does not exist")
+    File getLatestTmpRoddyExecutionDirectory() {
+        if (!roddyExecutionDirectoryNames) {
+            throw new RuntimeException("No roddyExecutionDirectoryNames have been stored in the database for ${this}.")
         }
 
-        List<File> allRoddyExecutionDirectories = this.tmpRoddyExecutionStoreDirectory.listFiles().findAll {
-            it.isDirectory() && it.name ==~ RODDY_EXECUTION_DIR_PATTERN
-        }
-        if (!allRoddyExecutionDirectories) {
-            throw new RuntimeException("can not find latest RoddyExecutionDirectory because RoddyExecutionStoreDirectory ${this.tmpRoddyExecutionStoreDirectory} is empty")
-        }
-        return allRoddyExecutionDirectories.max { it.name }
+        String latestDirectoryName = roddyExecutionDirectoryNames.last()
+        assert latestDirectoryName == roddyExecutionDirectoryNames.max()
+        assert latestDirectoryName ==~ RODDY_EXECUTION_DIR_PATTERN
+
+        File latestTmpDirectory = new File(tmpRoddyExecutionStoreDirectory, latestDirectoryName)
+        assert WaitingFileUtils.waitUntilExists(latestTmpDirectory)
+        assert latestTmpDirectory.isDirectory()
+
+        return latestTmpDirectory
     }
 
     @Override

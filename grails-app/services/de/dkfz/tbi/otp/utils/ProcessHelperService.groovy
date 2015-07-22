@@ -40,21 +40,15 @@ class ProcessHelperService {
         return waitForCommand(executeCommand(cmd))
     }
 
-    static String waitForCommandAndReturnStdout(Process process) {
-        return waitForCommand(process).stdout
-    }
-
-
     static void assertProcessFinishedSuccessful(Process process) {
         assert process : "The input process must not be null"
         assert process.exitValue() == 0 : "The exit value is not 0, but ${process.exitValue()}"
     }
 
-    static String executeCommandAndAssertExistCodeAndReturnStdout(String cmd) {
+    static ProcessOutput executeCommandAndAssertExistCodeAndReturnProcessOutput(String cmd) {
         Process process = executeCommand(cmd)
-        String stdout = waitForCommandAndReturnStdout(process)
+        ProcessOutput processOutput = waitForCommand(process)
         assertProcessFinishedSuccessful(process)
-        return stdout
+        return processOutput
     }
-
 }

@@ -28,4 +28,6 @@ public interface RoddyResult {
     public File getTmpRoddyExecutionStoreDirectory()
 
     public File getLatestTmpRoddyExecutionDirectory()
+
+    public List<String> getRoddyExecutionDirectoryNames()
 }

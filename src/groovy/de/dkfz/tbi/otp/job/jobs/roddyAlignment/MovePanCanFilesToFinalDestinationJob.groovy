@@ -79,7 +79,7 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
         assert roddyBamFile : "RoddyBamFile should not be null"
         File baseFile = new File(AbstractMergedBamFileService.destinationDirectory(roddyBamFile))
         String cmd = executeRoddyCommandService.correctPermissionCommand(baseFile)
-        ProcessHelperService.executeCommandAndAssertExistCodeAndReturnStdout(cmd)
+        ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput(cmd)
     }
 
     /*

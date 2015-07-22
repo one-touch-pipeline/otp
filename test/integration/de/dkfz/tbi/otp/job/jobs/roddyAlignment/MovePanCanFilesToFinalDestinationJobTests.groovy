@@ -54,9 +54,9 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
         assert mergingBaseDir.mkdirs()
         DomainFactory.createRoddyProcessingOptions(temporaryFolder.newFolder())
 
-        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnStdout.executeCommandAndAssertExistCodeAndReturnStdout = {String cmd ->
+        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = {String cmd ->
             assert cmd ==~ "cd /tmp && sudo -u OtherUnixUser ${temporaryFolder.getRoot()}/.*/correctPathPermissionsOtherUnixUserRemoteWrapper.sh ${temporaryFolder.getRoot()}/.*/merged-alignment"
-            return ''
+            return new ProcessHelperService.ProcessOutput('', '', 0)
         }
         LogThreadLocal.setThreadLog(new SimpleLog())
     }
