@@ -19,7 +19,7 @@ import static org.springframework.util.Assert.*
 ReferenceGenomeService referenceGenomeService = new ReferenceGenomeService()
 
 // the referenceGenomeName always has to be changed to the used referenceGenome
-String referenceGenomeName = "GRCm38mm10" // e.g. "hs37d5" or "hg19"
+String referenceGenomeName = "hs37d5_GRCm38mm" // e.g. "hs37d5" or "hg19"
 ReferenceGenome referenceGenome = ReferenceGenome.findByName(referenceGenomeName)
 notNull referenceGenome
 
