@@ -19,6 +19,8 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
 
     static final String QUALITY_CONTROL_DIR = "qualitycontrol"
 
+    static final String QUALITY_CONTROL_JSON_FILE_NAME = "qualitycontrol.json"
+
     static final String RODDY_EXECUTION_STORE_DIR = "roddyExecutionStore"
 
     static final String MERGED_DIR = "merged"
@@ -214,16 +216,38 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
         return new File(this.tmpRoddyQADirectory, MERGED_DIR)
     }
 
+    File getTmpRoddyMergedQAJsonFile() {
+        return new File(tmpRoddyMergedQADirectory, QUALITY_CONTROL_JSON_FILE_NAME)
+    }
+
     File getFinalMergedQADirectory() {
         return new File(this.finalQADirectory, MERGED_DIR)
+    }
+
+    File getFinalMergedQAJsonFile() {
+        return new File(finalMergedQADirectory, QUALITY_CONTROL_JSON_FILE_NAME)
     }
 
     Map<SeqTrack, File> getTmpRoddySingleLaneQADirectories() {
         return getRoddySingleLaneQADirectoriesHelper(this.tmpRoddyQADirectory)
     }
 
+    Map<SeqTrack, File> getTmpRoddySingleLaneQAJsonFiles() {
+        return getRoddySingleLaneQAJsonFiles('Tmp')
+    }
+
     Map<SeqTrack, File> getFinalRoddySingleLaneQADirectories() {
         return getRoddySingleLaneQADirectoriesHelper(this.finalQADirectory)
+    }
+
+    Map<SeqTrack, File> getFinalRoddySingleLaneQAJsonFiles() {
+        return getRoddySingleLaneQAJsonFiles('Final')
+    }
+
+    private Map<SeqTrack, File> getRoddySingleLaneQAJsonFiles(String tmpOrFinal) {
+        return "get${tmpOrFinal}RoddySingleLaneQADirectories"().collectEntries { SeqTrack seqTrack, File directory ->
+            [(seqTrack): new File(directory, QUALITY_CONTROL_JSON_FILE_NAME)]
+        }
     }
 
     // Example: run140801_SN751_0197_AC4HUVACXX_D2059_AGTCAA_L001

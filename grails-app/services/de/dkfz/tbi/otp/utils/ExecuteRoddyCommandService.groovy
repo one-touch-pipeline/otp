@@ -98,7 +98,7 @@ class ExecuteRoddyCommandService {
     public void createTemporaryOutputDirectory(Realm realm, File file) {
         assert realm : "Realm must not be null"
         assert file : "File must not be null"
-        executionService.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 ${file} && chgrp localGroup ${file};")
+        executionService.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 -p ${file} && chgrp localGroup ${file};")
         assert WaitingFileUtils.waitUntilExists(file) : "Creation of '${file}' failed"
     }
 
