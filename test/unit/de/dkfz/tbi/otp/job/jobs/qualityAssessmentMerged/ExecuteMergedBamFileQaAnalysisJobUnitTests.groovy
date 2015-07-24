@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged
 
-
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -15,13 +14,15 @@ import static org.junit.Assert.*
 import org.junit.*
 
 @TestFor(ReferenceGenome)
-@Mock([QualityAssessmentMergedPass, ProcessedMergedBamFile, Realm, Project,
-    SeqType, ReferenceGenome, ExomeSeqTrack, SeqTrack, AlignmentPass,
+@Mock([QualityAssessmentMergedPass, Realm,
+    ExomeSeqTrack,
     LibraryPreparationKit, BedFile])
 @Build([
-    ProcessedMergedBamFile,
-    ReferenceGenome,
-    ])
+    AlignmentPass,
+    MergingPass,
+    MergingSet,
+    ProcessedBamFile,
+])
 class ExecuteMergedBamFileQaAnalysisJobUnitTests {
 
     ExecuteMergedBamFileQaAnalysisJob job
@@ -35,7 +36,7 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
     void setUp() {
 
         Realm realm = new Realm()
-        ProcessedMergedBamFile bamFile = ProcessedMergedBamFile.build()
+        ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile()
         seqType = bamFile.seqType
         referenceGenome = bamFile.referenceGenome
 

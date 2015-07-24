@@ -1,13 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import static de.dkfz.tbi.otp.dataprocessing.AbstractBamFileServiceTests.*
+
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstanceTestData
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
@@ -231,5 +229,26 @@ class RoddyBamFileTest {
             snvJobResult.sampleType1BamFile.makeWithdrawn()
         }
         assert snvJobResult.sampleType1BamFile.withdrawn
+    }
+
+
+    @Test
+    void testGetOverallQualityAssessment() {
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
+        QualityAssessmentMergedPass qaPass = QualityAssessmentMergedPass.build(
+                processedMergedBamFile: bamFile,
+        )
+        RoddyMergedBamQa.build(
+                qualityAssessmentMergedPass: qaPass,
+                chromosome: '12',
+        )
+        RoddyMergedBamQa mergedQa = RoddyMergedBamQa.build(
+                ARBITRARY_QA_VALUES + [
+                qualityAssessmentMergedPass: qaPass,
+                chromosome: RoddyQualityAssessment.ALL,
+                insertSizeCV: 123,
+                percentageMatesOnDifferentChr: 0.123,
+        ])
+        assert mergedQa == bamFile.overallQualityAssessment
     }
 }

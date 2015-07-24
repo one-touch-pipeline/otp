@@ -34,6 +34,23 @@ class AbstractBamFileServiceTests {
     static final Long ARBITRARY_TARGET_SIZE = 25
     static final Long ARBITRARY_MERGED_TARGET_SIZE = 8
 
+    static final Map ARBITRARY_QA_VALUES = [
+            totalReadCounter: ARBITRARY_UNUSED_VALUE,
+            qcFailedReads: ARBITRARY_UNUSED_VALUE,
+            duplicates: ARBITRARY_UNUSED_VALUE,
+            totalMappedReadCounter: ARBITRARY_UNUSED_VALUE,
+            pairedInSequencing: ARBITRARY_UNUSED_VALUE,
+            pairedRead2: ARBITRARY_UNUSED_VALUE,
+            pairedRead1: ARBITRARY_UNUSED_VALUE,
+            properlyPaired: ARBITRARY_UNUSED_VALUE,
+            withItselfAndMateMapped: ARBITRARY_UNUSED_VALUE,
+            withMateMappedToDifferentChr: ARBITRARY_UNUSED_VALUE,
+            withMateMappedToDifferentChrMaq: ARBITRARY_UNUSED_VALUE,
+            singletons: ARBITRARY_UNUSED_VALUE,
+            insertSizeMedian: ARBITRARY_UNUSED_VALUE,
+            insertSizeSD: ARBITRARY_UNUSED_VALUE,
+    ].asImmutable()
+
     @Before
     void setUp() {
 
@@ -483,10 +500,11 @@ class AbstractBamFileServiceTests {
         ])
         assert qualityAssessmentMergedPass.save([flush: true])
 
-        OverallQualityAssessmentMerged overallQualityAssessmentMerged = new OverallQualityAssessmentMerged([
+        OverallQualityAssessmentMerged overallQualityAssessmentMerged = new OverallQualityAssessmentMerged(
+            ARBITRARY_QA_VALUES + [
             qualityAssessmentMergedPass: qualityAssessmentMergedPass,
             qcBasesMapped              : ARBITRARY_NUMBER_OF_READS,
-            onTargetMappedBases        : ARBITRARY_NUMBER_OF_READS_FOR_EXOME
+            onTargetMappedBases        : ARBITRARY_NUMBER_OF_READS_FOR_EXOME,
         ])
         assert overallQualityAssessmentMerged.save([flush: true])
 
@@ -515,10 +533,11 @@ class AbstractBamFileServiceTests {
         ])
         assert qualityAssessmentPass.save([flush: true])
 
-        OverallQualityAssessment overallQualityAssessment = new OverallQualityAssessment([
+        OverallQualityAssessment overallQualityAssessment = new OverallQualityAssessment(
+            ARBITRARY_QA_VALUES + [
             qualityAssessmentPass: qualityAssessmentPass,
             qcBasesMapped: ARBITRARY_NUMBER_OF_READS,
-            onTargetMappedBases: ARBITRARY_NUMBER_OF_READS_FOR_EXOME
+            onTargetMappedBases: ARBITRARY_NUMBER_OF_READS_FOR_EXOME,
         ])
         assert overallQualityAssessment.save([flush: true])
 

@@ -1,10 +1,8 @@
 import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.Workflow
-import de.dkfz.tbi.otp.job.processing.ExecutionState
-import grails.util.Environment
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile
+import grails.util.Environment
 
 /**
  * A counter used to handle unique constraints. You can use it in a closure to produce a unique value for a property.
@@ -108,6 +106,12 @@ testDataConfig {
         'de.dkfz.tbi.otp.ngsdata.SoftwareToolIdentifier' {
             name = {'softwareToolIdentifier_' + (counter++)}
         }
+        'de.dkfz.tbi.otp.dataprocessing.MergingSet' {
+            mergingWorkPackage = { MergingWorkPackage.build(workflow: Workflow.buildLazy(
+                    name: Workflow.Name.DEFAULT_OTP,
+                    type: Workflow.Type.ALIGNMENT,
+            )) }
+        }
         'de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment' {
             //Ensure to use this subclass of AbstractBamFile
             //Otherwise the plugin tries to create an ExternallyProcessedMergedBamFile, but it fails to create the FastqSet
@@ -129,6 +133,12 @@ testDataConfig {
         }
         'de.dkfz.tbi.otp.dataprocessing.ProcessedSaiFile' {
             alignmentPass = {TestData.createAndSaveAlignmentPass()}
+        }
+        'de.dkfz.tbi.otp.dataprocessing.QualityAssessmentMergedPass' {
+            processedMergedBamFile = { TestData.createProcessedMergedBamFile(mergingPass: MergingPass.build()) }
+        }
+        RoddyQualityAssessment {
+            qualityAssessmentMergedPass = { QualityAssessmentMergedPass.build(processedMergedBamFile: RoddyBamFile.build()) }
         }
         'de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig' {
             configFilePath = { new File(TestCase.uniqueNonExistentPath, 'roddy-workflow-config').path }
@@ -153,6 +163,7 @@ testDataConfig {
         'de.dkfz.tbi.otp.ngsdata.SeqPlatform': [de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup, de.dkfz.tbi.otp.ngsdata.SeqPlatformModelLabel],
         'de.dkfz.tbi.otp.ngsdata.SeqTrack': [de.dkfz.tbi.otp.ngsdata.ChipSeqSeqTrack, de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack, de.dkfz.tbi.otp.ngsdata.DataFile],
         'de.dkfz.tbi.otp.dataprocessing.AbstractBamFile': [de.dkfz.tbi.otp.ngsdata.SeqTrack],
+        'de.dkfz.tbi.otp.dataprocessing.QualityAssessmentMergedPass': [de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile],
         'de.dkfz.tbi.otp.dataprocessing.MergingSet': [de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment],
         'de.dkfz.tbi.otp.dataprocessing.ConfigPerProject': [de.dkfz.tbi.otp.utils.ExternalScript],
     ]

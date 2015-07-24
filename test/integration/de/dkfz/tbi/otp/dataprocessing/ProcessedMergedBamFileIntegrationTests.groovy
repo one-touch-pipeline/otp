@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import static de.dkfz.tbi.otp.dataprocessing.AbstractBamFileServiceTests.*
 
 import de.dkfz.tbi.otp.ngsdata.*
 import org.junit.Test
@@ -53,7 +54,8 @@ class ProcessedMergedBamFileIntegrationTests {
         ])
         assert qualityAssessmentMergedPass.save([flush: true])
 
-        OverallQualityAssessmentMerged overallQualityAssessmentMerged = new OverallQualityAssessmentMerged([
+        OverallQualityAssessmentMerged overallQualityAssessmentMerged = new OverallQualityAssessmentMerged(
+                ARBITRARY_QA_VALUES + [
                 id                   : identifier,
                 qualityAssessmentMergedPass: qualityAssessmentMergedPass,
         ])

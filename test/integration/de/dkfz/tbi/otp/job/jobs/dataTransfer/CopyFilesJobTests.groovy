@@ -70,7 +70,7 @@ class CopyFilesJobTests extends GroovyTestCase {
     void testExecute_NoDataFileAndOneBamFileFound_CheckForInfoFileCreation() {
         Run run = Run.build()
         Realm realm = Realm.build(operationType: Realm.OperationType.DATA_MANAGEMENT)
-        ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.build()
+        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile()
         processedMergedBamFile.project.realmName = realm.name
 
         job.metaClass.getProcessParameterValue = { -> run.id.toString() }

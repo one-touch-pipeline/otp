@@ -77,7 +77,7 @@ class ProjectOverviewServiceTests {
     }
 
     private ProcessedMergedBamFile createFinishedBamFileForCoveragePerPatientAndSampleTypeAndSeqTypeTest() {
-        ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.build()
+        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile()
         processedMergedBamFile.coverage = 30
         processedMergedBamFile.numberOfMergedLanes = 3
         processedMergedBamFile.md5sum = "2bb2f88846cd7f52e61f0af6987c0935"

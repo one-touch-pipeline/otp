@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import static de.dkfz.tbi.otp.dataprocessing.AbstractBamFileServiceTests.*
+
 import de.dkfz.tbi.otp.ngsdata.TestData
 import org.junit.*
 
@@ -66,7 +68,8 @@ class ProcessedBamFileTests {
         ])
         assert qualityAssessmentPass.save([flush: true])
 
-        OverallQualityAssessment overallQualityAssessment = new OverallQualityAssessment([
+        OverallQualityAssessment overallQualityAssessment = new OverallQualityAssessment(
+                ARBITRARY_QA_VALUES + [
                 id                   : identifier,
                 qualityAssessmentPass: qualityAssessmentPass,
         ])

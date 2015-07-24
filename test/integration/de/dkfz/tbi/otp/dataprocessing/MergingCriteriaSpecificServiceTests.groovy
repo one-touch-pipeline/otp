@@ -153,7 +153,7 @@ class MergingCriteriaSpecificServiceTests {
     }
 
     private ProcessedMergedBamFile buildProcessedMergedBamFile(Map properties = [:], MergingSet.State mergingSetStatus = MergingSet.State.PROCESSED) {
-        ProcessedMergedBamFile bamFile = ProcessedMergedBamFile.build([type: BamType.MDUP] + properties)
+        ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile([type: BamType.MDUP] + properties)
         bamFile.mergingSet.status = mergingSetStatus
         assert bamFile.mergingSet.save(failOnError: true)
         return bamFile

@@ -1,5 +1,6 @@
 package de.dkfz.tbi
 
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 import org.junit.*
 import org.junit.runners.model.MultipleFailureException
@@ -80,15 +81,10 @@ class TestCase extends GroovyTestCase {
     }
 
     /**
-     * Returns whether two collections contain the same set of elements. Each collection must not contain any two
-     * elements which are equal.
+     * @see CollectionUtils#containSame(java.util.Collection, java.util.Collection)
      */
     public static <T> boolean containSame(final Collection<? extends T> c1, final Collection<? extends T> c2) {
-        final c1Set = c1.toSet()
-        assert c1Set.size() == c1.size() : "c1 contains elements which are equal."
-        final c2Set = c2.toSet()
-        assert c2Set.size() == c2.size() : "c2 contains elements which are equal."
-        return c1Set == c2Set
+        return CollectionUtils.containSame(c1, c2)
     }
 
     /**

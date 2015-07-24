@@ -6,7 +6,7 @@ String workflow = "PanCanWorkflow"
 plan(workflow, ctx, true) {
     start("PanCanStart", "PanCanStartJob")
     job("executePanCan", "executePanCanJob")
-    job("parsePanCanQC", "parsePanCanQCJob")
+    job("parsePanCanQc", "parsePanCanQcJob")
     job("movePanCanFilesToFinalDestination", "movePanCanFilesToFinalDestinationJob")
 }
 

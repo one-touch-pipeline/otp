@@ -6,7 +6,7 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
  * Class to represent chromosomes that will be considered independently (1 to 22, X, Y and M)
  * for single lane
  */
-class ChromosomeQualityAssessment extends AbstractQualityAssessment {
+class ChromosomeQualityAssessment extends QaJarQualityAssessment {
 
     /**
      * Name of the {@link ReferenceGenomeEntry} used in the BAM file where the data to identify the chromosome is read from
@@ -17,4 +17,8 @@ class ChromosomeQualityAssessment extends AbstractQualityAssessment {
     static belongsTo = [
         qualityAssessmentPass: QualityAssessmentPass
     ]
+
+    static constraints = {
+        qualityAssessmentPass(validator: { it.processedBamFile instanceof ProcessedBamFile })
+    }
 }

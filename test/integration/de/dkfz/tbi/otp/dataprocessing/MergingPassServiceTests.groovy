@@ -328,7 +328,7 @@ class MergingPassServiceTests {
     }
 
     private ProcessedMergedBamFile createProcessedMergedBamFileAlreadyTransfered(Map map = [:]) {
-        return ProcessedMergedBamFile.build([
+        return DomainFactory.createProcessedMergedBamFile([
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
             fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
             md5sum: "12345678901234567890123456789012",

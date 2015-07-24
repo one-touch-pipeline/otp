@@ -1,7 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.SavingException
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
 import org.codehaus.groovy.grails.web.json.JSONObject
+
 import grails.converters.JSON
 
 class AbstractQualityAssessmentService {
@@ -11,6 +17,8 @@ class AbstractQualityAssessmentService {
     ProcessedBamFileQaFileService processedBamFileQaFileService
 
     ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
+
+    ReferenceGenomeService referenceGenomeService
 
     void parseQaStatistics(QualityAssessmentPass qualityAssessmentPass) {
         String qualityAssessmentDataFilePath = processedBamFileQaFileService.qualityAssessmentDataFilePath(qualityAssessmentPass)
@@ -23,6 +31,7 @@ class AbstractQualityAssessmentService {
                 qualityAssessmentStatistics = new OverallQualityAssessment(json.get(chromosome))
             } else {
                 qualityAssessmentStatistics = new ChromosomeQualityAssessment(json.get(chromosome))
+                assert qualityAssessmentStatistics.chromosomeName == chromosome
             }
             qualityAssessmentStatistics.percentIncorrectPEorientation = safePercentCalculation(qualityAssessmentStatistics.referenceAgreementStrandConflict, qualityAssessmentStatistics.referenceAgreement)
             qualityAssessmentStatistics.percentReadPairsMapToDiffChrom = safePercentCalculation(qualityAssessmentStatistics.endReadAberration, qualityAssessmentStatistics.totalMappedReadCounter)
@@ -42,6 +51,7 @@ class AbstractQualityAssessmentService {
                 qualityAssessmentStatistics = new OverallQualityAssessmentMerged(json.get(chromosome))
             } else {
                 qualityAssessmentStatistics = new ChromosomeQualityAssessmentMerged(json.get(chromosome))
+                assert qualityAssessmentStatistics.chromosomeName == chromosome
             }
             qualityAssessmentStatistics.percentIncorrectPEorientation = safePercentCalculation(qualityAssessmentStatistics.referenceAgreementStrandConflict, qualityAssessmentStatistics.referenceAgreement)
             qualityAssessmentStatistics.percentReadPairsMapToDiffChrom = safePercentCalculation(qualityAssessmentStatistics.endReadAberration, qualityAssessmentStatistics.totalMappedReadCounter)
@@ -49,6 +59,56 @@ class AbstractQualityAssessmentService {
             assertSave(qualityAssessmentStatistics)
         }
     }
+
+    void assertListContainsAllChromosomeNamesInReferenceGenome(Collection<String> chromosomeNames, ReferenceGenome referenceGenome) {
+        Collection<String> expectedChromosomeNames = [RoddyQualityAssessment.ALL] +
+                referenceGenomeService.chromosomesInReferenceGenome(referenceGenome)*.name
+        if (!CollectionUtils.containSame(chromosomeNames, expectedChromosomeNames)) {
+            throw new RuntimeException("Expected chromosomes ${expectedChromosomeNames}, but found ${chromosomeNames}.")
+        }
+    }
+
+    void parseRoddySingleLaneQaStatistics(RoddyBamFile roddyBamFile) {
+        Map<SeqTrack, File> qaFilesPerSeqTrack = roddyBamFile.getTmpRoddySingleLaneQAJsonFiles()
+        qaFilesPerSeqTrack.each { seqTrack, qaFile ->
+            JSONObject json = JSON.parse(qaFile.text)
+            Iterator chromosomes = json.keys()
+            Collection<String> allChromosomeNames = []
+            chromosomes.each { String chromosome ->
+                allChromosomeNames.add(chromosome)
+                RoddySingleLaneQa singleLaneQa = new RoddySingleLaneQa(json.get(chromosome))
+                assert singleLaneQa.chromosome == chromosome
+                singleLaneQa.seqTrack = seqTrack
+                singleLaneQa.qualityAssessmentMergedPass = roddyBamFile.findOrSaveQaPass()
+                assert singleLaneQa.save(flush: true)
+            }
+            assertListContainsAllChromosomeNamesInReferenceGenome(allChromosomeNames, roddyBamFile.referenceGenome)
+        }
+    }
+
+
+    void parseRoddyBamFileQaStatistics(RoddyBamFile roddyBamFile) {
+        File qaFile = roddyBamFile.getTmpRoddyMergedQAJsonFile()
+        JSONObject json = JSON.parse(qaFile.text)
+        Iterator chromosomes = json.keys()
+        Collection<String> allChromosomeNames = []
+        chromosomes.each { String chromosome ->
+            allChromosomeNames.add(chromosome)
+            RoddyMergedBamQa mergedQa = new RoddyMergedBamQa(json.get(chromosome))
+            assert mergedQa.chromosome == chromosome
+            mergedQa.qualityAssessmentMergedPass = roddyBamFile.findOrSaveQaPass()
+            assert mergedQa.save(flush: true)
+        }
+        assertListContainsAllChromosomeNamesInReferenceGenome(allChromosomeNames, roddyBamFile.referenceGenome)
+    }
+
+    void saveCoverageToRoddyBamFile(RoddyBamFile roddyBamFile) {
+        RoddyMergedBamQa mergedQa = roddyBamFile.overallQualityAssessment
+        roddyBamFile.coverage = mergedQa.genomeWithoutNCoverageQcBases
+        roddyBamFile.coverageWithN = abstractBamFileService.calculateCoverageWithN(roddyBamFile)
+        assert roddyBamFile.save(flush: true)
+    }
+
 
     void saveCoverageToProcessedBamFile(QualityAssessmentPass qualityAssessmentPass) {
         ProcessedBamFile processedBamFile = qualityAssessmentPass.processedBamFile

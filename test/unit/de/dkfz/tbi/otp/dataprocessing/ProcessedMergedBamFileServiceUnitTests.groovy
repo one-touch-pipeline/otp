@@ -16,7 +16,9 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 @TestFor(ProcessedMergedBamFileService)
 @Build([
-    ProcessedMergedBamFile,
+    MergingPass,
+    MergingSet,
+    ProcessedBamFile,
     Realm,
 ])
 class ProcessedMergedBamFileServiceUnitTests {
@@ -162,7 +164,7 @@ class ProcessedMergedBamFileServiceUnitTests {
 
 
     private def createDataForDeleteChecking(Boolean valueForDataBaseConsistence = null, Boolean valueForDestinationConsistence = null) {
-        ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.build([
+        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile([
             md5sum: SOME_MD5SUM_VALUE,
             fileOperationStatus: FileOperationStatus.PROCESSED,
             fileSize: 10000

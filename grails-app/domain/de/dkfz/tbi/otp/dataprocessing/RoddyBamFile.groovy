@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.utils.StringUtils
@@ -129,9 +130,23 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
         return tmpSet as Set
     }
 
+    QualityAssessmentMergedPass findOrSaveQaPass() {
+        return QualityAssessmentMergedPass.findOrSaveWhere(
+                processedMergedBamFile: this,
+                identifier: 0,
+        )
+    }
+
     @Override
     AbstractQualityAssessment getOverallQualityAssessment() {
-        throw new UnsupportedOperationException("It has not been decided if we import QA results.")
+        return CollectionUtils.exactlyOneElement(RoddyMergedBamQa.createCriteria().list {
+            eq 'chromosome', RoddyQualityAssessment.ALL
+            qualityAssessmentMergedPass {
+                processedMergedBamFile {
+                    eq 'id', this.id
+                }
+            }
+        })
     }
 
     @Override

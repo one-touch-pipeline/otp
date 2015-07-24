@@ -11,11 +11,15 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
  * Class to represent the data for the entire set of chromosomes (1 to 22, X, Y and M) as one
  * for merged bam file
  */
-class OverallQualityAssessmentMerged extends AbstractQualityAssessment {
+class OverallQualityAssessmentMerged extends QaJarQualityAssessment {
 
     static belongsTo = [
         qualityAssessmentMergedPass: QualityAssessmentMergedPass
     ]
+
+    static constraints = {
+        qualityAssessmentMergedPass(validator: { it.processedMergedBamFile instanceof ProcessedMergedBamFile })
+    }
 
     static mapping = {
         qualityAssessmentMergedPass index: "abstract_quality_assessment_quality_assessment_merged_pass_idx"

@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
 import de.dkfz.tbi.otp.ngsdata.RunSegment.DataFormat
 import de.dkfz.tbi.otp.ngsdata.RunSegment.FilesStatus
@@ -437,6 +438,7 @@ class TestData {
     static ProcessedMergedBamFile createProcessedMergedBamFile(Map properties = [:]) {
         return DomainFactory.createProcessedMergedBamFile(properties.mergingPass, [
             workPackage: properties.mergingPass.mergingWorkPackage,
+            fileOperationStatus: FileOperationStatus.PROCESSED,
             md5sum: "12345678901234567890123456789012",
             type: BamType.MDUP,
             coverage: 30.0,

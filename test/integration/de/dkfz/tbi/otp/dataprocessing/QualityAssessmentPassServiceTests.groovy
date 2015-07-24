@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.junit.Assert.*
+import static de.dkfz.tbi.otp.dataprocessing.AbstractBamFileServiceTests.*
 
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
@@ -405,9 +406,10 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
         assertNotNull(fastqcBasicStats.save(flush: true))
 
         AbstractQualityAssessment qualityAssessmentStatistics = new OverallQualityAssessment(
+                ARBITRARY_QA_VALUES + [
                         totalReadCounter: bamReadCount,
-                        qualityAssessmentPass: qualityAssessmentPass
-                        )
+                        qualityAssessmentPass: qualityAssessmentPass,
+                        ])
         assertNotNull(qualityAssessmentStatistics.save(flush: true))
     }
 

@@ -13,7 +13,7 @@ class AbstractMergedBamFileServiceTests {
 
     @Test
     void testDestinationDirectory_ProcessedMergedBamFile() {
-        ProcessedMergedBamFile mergedBamFile = ProcessedMergedBamFile.build()
+        ProcessedMergedBamFile mergedBamFile = DomainFactory.createProcessedMergedBamFile()
         Realm realm = Realm.build(name: mergedBamFile.project.realmName)
 
         String destinationExp = expectedMergedAlignmentPath(mergedBamFile, realm)

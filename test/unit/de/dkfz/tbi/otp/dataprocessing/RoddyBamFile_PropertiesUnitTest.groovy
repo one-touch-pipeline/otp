@@ -49,11 +49,6 @@ class RoddyBamFile_PropertiesUnitTest {
     }
 
     @Test
-    void testGetOverallQualityAssessment() {
-        TestCase.shouldFail(UnsupportedOperationException) { bamFile.overallQualityAssessment }
-    }
-
-    @Test
     void testGetProject() {
         assert project == bamFile.project
     }

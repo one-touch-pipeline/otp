@@ -12,7 +12,9 @@ class QualityAssessmentMergedPass {
     String description
 
     static constraints = {
-        identifier(unique: 'processedMergedBamFile')
+        identifier(unique: 'processedMergedBamFile', validator: { int val, QualityAssessmentMergedPass obj ->
+            return val == 0 || !(obj.processedMergedBamFile instanceof RoddyBamFile)
+        })
         description(nullable: true)
     }
 
@@ -55,7 +57,7 @@ class QualityAssessmentMergedPass {
     }
 
     static belongsTo = [
-        processedMergedBamFile: ProcessedMergedBamFile
+        processedMergedBamFile: AbstractMergedBamFile
     ]
 
     static mapping = {

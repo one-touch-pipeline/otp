@@ -7,6 +7,7 @@ import grails.test.mixin.*
 @TestFor(ChromosomeQualityAssessmentMergedService)
 @Build([
     ChromosomeQualityAssessmentMerged,
+    ProcessedMergedBamFile,
 ])
 class ChromosomeQualityAssessmentMergedServiceUnitTest {
 
