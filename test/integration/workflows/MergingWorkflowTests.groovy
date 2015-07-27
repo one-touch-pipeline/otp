@@ -93,6 +93,7 @@ class MergingWorkflowTests extends WorkflowTestCase {
         processedBamFile = testData.createProcessedBamFile([
                         alignmentPass: alignmentPass,
                         type: BamType.SORTED,
+                        fileSize: new File(inputSingleLaneAlingment).length(),
                         status: AbstractBamFile.State.PROCESSED,
                         qualityAssessmentStatus: QaProcessingStatus.FINISHED
                         ])

@@ -57,7 +57,7 @@ class MergingJob extends AbstractJobImpl {
         return "${createTempDir}; ${javaOptions}; ${picard} ${picardFiles} ${picardOptions}; ${chmod}"
     }
 
-    private String createInputFileString(ProcessedMergedBamFile processedMergedBamFile) {
+    public String createInputFileString(ProcessedMergedBamFile processedMergedBamFile) {
         List<AbstractBamFile> abstractBamFiles = abstractBamFileService.findByProcessedMergedBamFile(processedMergedBamFile)
         notEmpty(abstractBamFiles, "No BamFiles found for ${processedMergedBamFile}")
         if (abstractBamFiles.size() == 1) {
@@ -67,15 +67,17 @@ class MergingJob extends AbstractJobImpl {
         }
         StringBuilder stringBuilder = new StringBuilder()
         abstractBamFiles.each { AbstractBamFile abstractBamFile ->
-            String fileName
+            File file
             if (abstractBamFile instanceof ProcessedBamFile) {
-                fileName = processedBamFileService.getFilePath(abstractBamFile)
+                file = new File(processedBamFileService.getFilePath(abstractBamFile))
             } else if (abstractBamFile instanceof ProcessedMergedBamFile) {
-                fileName = processedMergedBamFileService.filePath(abstractBamFile)
+                file = new File(processedMergedBamFileService.filePath(abstractBamFile))
             } else {
                 throw new RuntimeException("service for class ${abstractBamFile.class} is unknown")
             }
-            stringBuilder.append(" I=${fileName}")
+            LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
+            assert abstractBamFile.fileSize == file.length()
+            stringBuilder.append(" I=${file}")
         }
         return stringBuilder.toString()
     }
