@@ -40,6 +40,7 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
                 }
             }
         } catch (Throwable e) {
+            log.error "Exception in ${getClass().simpleName}", e
             throw new RuntimeException("Exception in ${getClass().simpleName}", e)
         }
     }
