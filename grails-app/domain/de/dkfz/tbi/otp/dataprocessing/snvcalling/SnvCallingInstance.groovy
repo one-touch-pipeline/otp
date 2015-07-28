@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
@@ -17,7 +18,6 @@ class SnvCallingInstance {
      */
     SnvConfig config
 
-    // TODO: SNV can not handle RoddyBamFiles yet, only PMBF, see OTP-1458
     AbstractMergedBamFile sampleType1BamFile
 
     AbstractMergedBamFile sampleType2BamFile
@@ -56,10 +56,14 @@ class SnvCallingInstance {
     }
 
     static constraints = {
-        sampleType1BamFile validator: {val, obj ->
-            obj.samplePair && isConsistentWithSamplePair(val, obj, obj.samplePair.sampleType1)}
-        sampleType2BamFile validator: {val, obj ->
-            obj.samplePair && isConsistentWithSamplePair(val, obj, obj.samplePair.sampleType2)}
+        sampleType1BamFile validator: { AbstractMergedBamFile val, SnvCallingInstance obj ->
+            obj.samplePair &&
+                    val.fileOperationStatus == FileOperationStatus.PROCESSED &&
+                    isConsistentWithSamplePair(val, obj, obj.samplePair.sampleType1)}
+        sampleType2BamFile validator: { AbstractMergedBamFile val, SnvCallingInstance obj ->
+            obj.samplePair &&
+                    val.fileOperationStatus == FileOperationStatus.PROCESSED &&
+                    isConsistentWithSamplePair(val, obj, obj.samplePair.sampleType2)}
         latestDataFileCreationDate validator: { Date latestDataFileCreationDate, SnvCallingInstance instance ->
             latestDataFileCreationDate == AbstractBamFile.getLatestSequenceDataFileCreationDate(instance.sampleType1BamFile, instance.sampleType2BamFile)
         }
