@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log
 import com.jcraft.jsch.Channel
 import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.JSch
+import com.jcraft.jsch.JSchException
 import com.jcraft.jsch.Session
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
@@ -231,7 +232,11 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
             java.util.Properties config = new java.util.Properties()
             config.put("StrictHostKeyChecking", "no")
             session.setConfig(config)
-            session.connect()
+            try {
+                session.connect()
+            } catch (JSchException e) {
+                throw new ProcessingException("Connecting to ${host}:${port} with username ${username} failed.", e)
+            }
             Channel channel = session.openChannel("exec")
             if (command) {
                 logToJob("executed command: " + command)
