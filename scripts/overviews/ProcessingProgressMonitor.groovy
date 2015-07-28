@@ -8,16 +8,10 @@ The following code allows to show the processing state for
 * all lanes in processing:
 ** all withdrawn lanes are ignored
 ** lanes where fastqc not finished and data load after 1.1.2015 included
-** alignment for seqtrack was triggered and not finished (transfere workflow finished), ignoring:
-*** lanes of run segment where flag align is set to false:
-*** seqtracks of the following projects:
-**** PROJECT_NAME
-**** PROJECT_NAME
-**** PROJECT_NAME
-**** PROJECT_NAME
-**** PROJECT_NAME
-**** MMML
-** roddyAlignment
+** running alignments
+*** seqtracks which belong to run segments where flag 'align' is set to false are ignored
+*** running OTP alignments
+*** running pan can alignments
 ** sample pairs (snv) waiting for snv calling
 ** snv calling instance which are in processing
 
@@ -832,7 +826,7 @@ nameStringToList(projectString).each { String projectName ->
 
 
 if (allProcessed) {
-    output << "\n\n\n==============================\nprocessed and not finished seqtracks\nignore project MMML, PROJECT_NAME, PROJECT_NAME, PROJECT_NAME, and PROJECT_NAME\n==============================\n"
+    output << "\n\n\n==============================\nseqtracks in processing (as defined in header comment)\n==============================\n"
 
     long firstIdToCheck = 20077258 // 1.1.2015
 
@@ -866,14 +860,8 @@ if (allProcessed) {
                         AlignmentPass alignmentPass
                     where
                         alignmentPass.alignmentState != '${AlignmentPass.AlignmentState.UNKNOWN}'
-                ) and not project.name in (
-                    'PROJECT_NAME',
-                    'PROJECT_NAME',
-                    'PROJECT_NAME',
-                    'PROJECT_NAME',
-                    'MMML',
-                    'PROJECT_NAME'
-                ) and not seqTrack.id in (
+                ) and project.alignmentDeciderBeanName = 'defaultOtpAlignmentDecider'
+                and not seqTrack.id in (
                     select
                         seqTrack.id
                     from
