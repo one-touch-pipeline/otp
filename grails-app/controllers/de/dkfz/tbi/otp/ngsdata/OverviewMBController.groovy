@@ -38,7 +38,7 @@ class OverviewMBController {
         List stringTypes = new ArrayList()
         for(SeqType type in wp) {
             List<String> text = new ArrayList<String>()
-            int nTracks = SeqTrack.countBySeqType(type)
+            int nTracks = SeqTrack.findAllBySeqType(type).findAll { !it.isWithdrawn() }.size()
             int nTracksNew = countNewSeqTracks(type)
             text << type
             text << nTracks
@@ -54,7 +54,7 @@ class OverviewMBController {
         Date date = cal.getTime()
 
         int N = 0;
-        List<SeqTrack> tracks = SeqTrack.findAllBySeqType(type)
+        List<SeqTrack> tracks = SeqTrack.findAllBySeqType(type).findAll { !it.isWithdrawn() }
         for(SeqTrack track in tracks) {
             if (track.run.dateExecuted > date) {
                 N++

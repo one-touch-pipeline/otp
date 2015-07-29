@@ -1,14 +1,18 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import groovy.sql.Sql
 import org.joda.time.Days
 import org.joda.time.LocalDate
 import org.joda.time.YearMonth
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 
+import javax.sql.DataSource
+
 class StatisticService {
 
     ProjectService projectService
+    DataSource dataSource
 
     private DateTimeFormatter simpleDateFormatter = DateTimeFormat.forPattern("MMM yy").withLocale(Locale.ENGLISH)
 
@@ -57,18 +61,41 @@ class StatisticService {
         return seq
     }
 
-    public List laneCountPerDay(List<Project> projects) {
-        List seq = Sequence.withCriteria {
-            projections {
-                if (projects) {
-                    'in'("projectId", projects*.id)
-                }
-                groupProperty("dayCreated")
-                count("laneId")
-            }
-            order("dayCreated")
+    public List laneCountPerDay(List<Project> projectList) {
+        List<Project> projects = projectList ?: Project.findAll()
+
+        def sql = new Sql(dataSource)
+
+        String query = '''
+SELECT
+ date_part('year', seq.date_created)::int as year,
+ date_part('month', seq.date_created)::int as month,
+ date_part('day', seq.date_created)::int as day,
+ count(seq.seq_track_id)::int as laneCount
+ FROM sequences as seq
+ WHERE seq.seq_track_id NOT IN (
+SELECT DISTINCT seq.seq_track_id
+ FROM sequences as seq
+ JOIN data_file as df
+ ON seq.seq_track_id = df.seq_track_id
+ WHERE df.file_withdrawn != false) AND
+ seq.project_id IN (''' + projects*.id.join(", ") + ''')
+ GROUP BY
+ date_part('year', seq.date_created),
+ date_part('month', seq.date_created),
+ date_part('day', seq.date_created)
+ ORDER BY
+ date_part('year', seq.date_created),
+ date_part('month', seq.date_created),
+ date_part('day', seq.date_created)
+'''
+        List laneCountPerDay = []
+
+        sql.eachRow(query) {
+            laneCountPerDay << ["${it.year}-${it.month}-${it.day}" as String, it.laneCount]
         }
-        return seq
+
+        return laneCountPerDay
     }
 
     public List projectCountPerSequenceType(ProjectGroup projectGroup) {

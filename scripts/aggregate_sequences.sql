@@ -56,6 +56,12 @@ ON sp.seq_platform_model_label_id = spml.id
 LEFT OUTER JOIN sequencing_kit_label skl
 ON sp.sequencing_kit_label_id = skl.id
 
+WHERE st.id NOT IN (
+SELECT DISTINCT seq.seq_track_id from seq_track as st
+INNER JOIN data_file AS df ON df.seq_track_id = st.seq_track_id
+WHERE df.file_withdrawn != false
+)
+
 group by
 
 st.seq_type_id,
