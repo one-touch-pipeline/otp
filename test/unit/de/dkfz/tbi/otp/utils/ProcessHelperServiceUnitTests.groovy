@@ -13,6 +13,7 @@ class ProcessHelperServiceUnitTests {
     final String STDOUT_TEXT = "Stdout\nText"
     final String STDERR_TEXT = "Stderr\nText"
     final String COMMAND = "echo '${STDOUT_TEXT}'\n>&2 echo '${STDERR_TEXT}'"
+    final String COMMAND_NO_ERROR = "echo '${STDOUT_TEXT}'"
     final String INVALID_COMMAND = "--"
 
     @Before
@@ -123,4 +124,34 @@ class ProcessHelperServiceUnitTests {
             ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput(INVALID_COMMAND)
         }.contains("The exit value is not 0")
     }
+
+
+    @Test
+    void testExecuteAndAssertExitCodeAndErrorOutAndReturnStdout_AllFine() {
+        String stdout = ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(COMMAND_NO_ERROR)
+
+        assert stdout.toString().trim() == STDOUT_TEXT
+    }
+
+    @Test
+    void testExecuteAndAssertExitCodeAndErrorOutAndReturnStdout_InputCommandIsNull_ShouldFail() {
+        assert TestCase.shouldFail(AssertionError) {
+            ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(null)
+        }.contains("The input cmd must not be null")
+    }
+
+    @Test
+    void testExecuteAndAssertExitCodeAndErrorOutAndReturnStdout_ProcessEndsNoEmtyError_ShouldFail() {
+        assert TestCase.shouldFail(AssertionError) {
+            ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(INVALID_COMMAND)
+        }.contains("assert output.stderr.empty")
+    }
+
+    @Test
+    void testExecuteAndAssertExitCodeAndErrorOutAndReturnStdout_ProcessEndsNotNormal_ShouldFail() {
+        assert TestCase.shouldFail(AssertionError) {
+            ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout("exit 1")
+        }.contains("assert output.exitCode == 0")
+    }
+
 }

@@ -28,7 +28,7 @@ abstract class GroovyScriptAwareTestCase extends AbstractIntegrationTest {
      * @return the result of the evaluation
      */
     void runScript(File script, Map<String, String> properties=null) {
-        isTrue script.canRead()
+        assert script.canRead()
         GroovyShell shell = new GroovyShell(
                 grailsApplication.getClassLoader(),
                 new Binding(ctx: grailsApplication.getMainContext(),

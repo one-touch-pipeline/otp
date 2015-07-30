@@ -49,6 +49,8 @@ class MoveFileUtilsService {
             executionService.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${targetDir}; mv -f ${sourceDir}/* ${targetDir}")
         }
 
+        assert WaitingFileUtils.waitUntilExists(targetDir)
+
         assert ThreadUtils.waitFor({ (targetDir.list() as Set).containsAll(sourceDirContent) }, WaitingFileUtils.defaultTimeoutMillis, 50)
         assert ThreadUtils.waitFor({ sourceDir.list().size() == 0 }, WaitingFileUtils.defaultTimeoutMillis, 50)
     }

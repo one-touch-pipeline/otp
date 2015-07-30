@@ -261,6 +261,14 @@ class ExecuteRoddyCommandServiceTests {
     }
 
 
+
+    @Test
+    void testExecuteCommandAsRoddyUser() {
+        assert 'sudo -u OtherUnixUser' == executeRoddyCommandService.executeCommandAsRoddyUser()
+    }
+
+
+
     @Test
     void testCreateTemporaryOutputDirectory_RealmIsNull_ShouldFail() {
         TestCase.shouldFail(AssertionError) {

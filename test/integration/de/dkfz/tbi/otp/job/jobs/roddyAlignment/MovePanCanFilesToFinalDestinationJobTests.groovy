@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.job.processing.ExecutionService
@@ -75,31 +76,90 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
 
     @Test
     void testExecute_AllFine() {
-        String md5sum = "0123456789abcdef0123456789abcdef" // arbitrary md5sum
+        int correctPermisionCallCounter = 0
 
         movePanCanFilesToFinalDestinationJob.metaClass.moveResultFiles = { RoddyBamFile roddyBamFile, Realm realm -> }
         movePanCanFilesToFinalDestinationJob.metaClass.deletePreviousMergedBamResultFiles = { RoddyBamFile roddyBamFile, Realm realm -> }
         movePanCanFilesToFinalDestinationJob.metaClass.getProcessParameterObject = { -> roddyBamFile }
         movePanCanFilesToFinalDestinationJob.metaClass.deleteTemporaryDirectory = { RoddyBamFile roddyBamFile, Realm realm -> }
+        movePanCanFilesToFinalDestinationJob.metaClass.correctPermissions = { RoddyBamFile roddyBamFile ->
+            correctPermisionCallCounter++
+        }
+
         File md5sumFile = roddyBamFile.finalMd5sumFile
         if (!md5sumFile.parentFile.exists()) {
             md5sumFile.parentFile.mkdirs()
         }
-        md5sumFile << "${md5sum}  sampletype_individual_merged.mdup.bam"
+        md5sumFile << "${DomainFactory.DEFAULT_MD5_SUM}  sampletype_individual_merged.mdup.bam"
         roddyBamFile.finalBamFile << "some content"
         movePanCanFilesToFinalDestinationJob.execute()
         assert roddyBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
-        assert roddyBamFile.md5sum == md5sum
+        assert roddyBamFile.md5sum == DomainFactory.DEFAULT_MD5_SUM
         assert roddyBamFile.fileSize > 0
+        assert roddyBamFile.fileExists
+        assert roddyBamFile.dateFromFileSystem != null  && roddyBamFile.dateFromFileSystem instanceof Date
+        assert 2 == correctPermisionCallCounter
     }
 
     @Test
     void testExecute_RoddyBamFileIsNotLatestBamFile_ShouldFail() {
         movePanCanFilesToFinalDestinationJob.metaClass.getProcessParameterObject = { -> roddyBamFile }
         roddyBamFile.metaClass.isMostRecentBamFile = { -> false}
-        shouldFail (AssertionError) {
+        assert shouldFail (AssertionError) {
             movePanCanFilesToFinalDestinationJob.execute()
-        }
+        } ==~ /.*The BamFile .* is not the most recent one.*/
+    }
+
+    @Test
+    void testExecute_RoddyBamFileHasWrongState_ShouldFail() {
+        movePanCanFilesToFinalDestinationJob.metaClass.getProcessParameterObject = { -> roddyBamFile }
+        roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.DECLARED
+        assert shouldFail (AssertionError) {
+            movePanCanFilesToFinalDestinationJob.execute()
+        }.contains('assert [FileOperationStatus.NEEDS_PROCESSING, FileOperationStatus.INPROGRESS].contains(roddyBamFile.fileOperationStatus)')
+    }
+
+    @Test
+    void testExecute_RoddyBamFileHasSecondCandicate_ShouldFail() {
+        movePanCanFilesToFinalDestinationJob.metaClass.getProcessParameterObject = { -> roddyBamFile }
+        DomainFactory.createRoddyBamFile([
+                workPackage: roddyBamFile.workPackage,
+                withdrawn: false,
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+                md5sum: null,
+                fileSize: -1,
+                identifier: roddyBamFile.identifier - 1,
+        ])
+        assert shouldFail (AssertionError) {
+            movePanCanFilesToFinalDestinationJob.execute()
+        }.contains('Collection contains 2 elements. Expected 1.')
+    }
+
+    @Test
+    void testExecute_FailInDeletePreviousMergedBamFile_ShouldFail() {
+        movePanCanFilesToFinalDestinationJob.metaClass.getProcessParameterObject = { -> roddyBamFile }
+        movePanCanFilesToFinalDestinationJob.metaClass.deletePreviousMergedBamResultFiles = { RoddyBamFile roddyBamFile, Realm realm -> assert false: 'fail in deletion' }
+        assert shouldFail (AssertionError) {
+            movePanCanFilesToFinalDestinationJob.execute()
+        }.contains('fail in deletion')
+    }
+
+    @Test
+    void testExecute_FailInMoveResultFiles_ShouldFail() {
+        movePanCanFilesToFinalDestinationJob.metaClass.getProcessParameterObject = { -> roddyBamFile }
+        movePanCanFilesToFinalDestinationJob.metaClass.moveResultFiles = { RoddyBamFile roddyBamFile, Realm realm -> assert false: 'fail in move' }
+        assert shouldFail (AssertionError) {
+            movePanCanFilesToFinalDestinationJob.execute()
+        }.contains('fail in move')
+    }
+
+    @Test
+    void testExecute_FailInCorrectPermission_ShouldFail() {
+        movePanCanFilesToFinalDestinationJob.metaClass.getProcessParameterObject = { -> roddyBamFile }
+        movePanCanFilesToFinalDestinationJob.metaClass.correctPermissions = { RoddyBamFile roddyBamFile -> assert false: 'fail in correct' }
+        assert shouldFail (AssertionError) {
+            movePanCanFilesToFinalDestinationJob.execute()
+        }.contains('fail in correct')
     }
 
     @Test
@@ -108,9 +168,9 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
         movePanCanFilesToFinalDestinationJob.metaClass.deletePreviousMergedBamResultFiles = { RoddyBamFile roddyBamFile, Realm realm -> }
         movePanCanFilesToFinalDestinationJob.metaClass.getProcessParameterObject = { -> roddyBamFile }
         movePanCanFilesToFinalDestinationJob.metaClass.deleteTemporaryDirectory = { RoddyBamFile roddyBamFile, Realm realm -> }
-        shouldFail (AssertionError) {
+        assert shouldFail (AssertionError) {
             movePanCanFilesToFinalDestinationJob.execute()
-        }
+        } ==~ /The md5sum file of .* does not exist.*/
     }
 
     @Test
@@ -127,9 +187,9 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
         }
         md5sumFile << "${md5sum}  sampletype_individual_merged.mdup.bam"
         roddyBamFile.finalBamFile << "some content"
-        shouldFail(ValidationException) {
+        assert shouldFail(ValidationException) {
             movePanCanFilesToFinalDestinationJob.execute()
-        }
+        }.contains(md5sum)
     }
 
     @Test
@@ -144,9 +204,27 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
         }
         md5sumFile.createNewFile()
         roddyBamFile.finalBamFile << "some content"
-        movePanCanFilesToFinalDestinationJob.execute()
+        assert shouldFail(AssertionError) {
+            movePanCanFilesToFinalDestinationJob.execute()
+        } ==~ /.*The md5sum file of .* is empty.*/
     }
 
+    @Test
+    void testExecute_FailInDeleteTemporaryDirectory_ShouldFail() {
+        movePanCanFilesToFinalDestinationJob.metaClass.moveResultFiles = { RoddyBamFile roddyBamFile, Realm realm -> }
+        movePanCanFilesToFinalDestinationJob.metaClass.deletePreviousMergedBamResultFiles = { RoddyBamFile roddyBamFile, Realm realm -> }
+        movePanCanFilesToFinalDestinationJob.metaClass.getProcessParameterObject = { -> roddyBamFile }
+        movePanCanFilesToFinalDestinationJob.metaClass.deleteTemporaryDirectory = { RoddyBamFile roddyBamFile, Realm realm -> assert false: 'fail in deleteTemporaryDirectory' }
+        File md5sumFile = roddyBamFile.finalMd5sumFile
+        if (!md5sumFile.parentFile.exists()) {
+            md5sumFile.parentFile.mkdirs()
+        }
+        md5sumFile << "${DomainFactory.DEFAULT_MD5_SUM}  sampletype_individual_merged.mdup.bam"
+        roddyBamFile.finalBamFile << "some content"
+        assert shouldFail (AssertionError) {
+            movePanCanFilesToFinalDestinationJob.execute()
+        }.contains('fail in deleteTemporaryDirectory')
+    }
 
     @Test
     void testExecute_RoddyBamFileIsWithdrawn_ShouldNotBeCopied() {
@@ -166,6 +244,7 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
         movePanCanFilesToFinalDestinationJob.execute()
         assert roddyBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING
     }
+
 
 
     @Test

@@ -44,6 +44,7 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
         Realm realm = configService.getRealmDataManagement(roddyBamFile.project)
         assert realm : "Realm should not be null"
 
+        correctPermissions(roddyBamFile)
         if (!roddyBamFile.withdrawn) {
             RoddyBamFile.withTransaction {
                 assert roddyBamFile.isMostRecentBamFile(): "The BamFile ${roddyBamFile} is not the most recent one. This must not happen!"
@@ -52,17 +53,19 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
                 assert roddyBamFile.save(flush: true)
                 roddyBamFile.validateAndSetBamFileInProjectFolder()
             }
-            correctPermissions(roddyBamFile)
             deletePreviousMergedBamResultFiles(roddyBamFile, realm)
             moveResultFiles(roddyBamFile, realm)
             correctPermissions(roddyBamFile)
 
             File md5sumFile = roddyBamFile.finalMd5sumFile
             assert WaitingFileUtils.waitUntilExists(md5sumFile): "The md5sum file of ${roddyBamFile} does not exist"
+            assert md5sumFile.text: "The md5sum file of ${roddyBamFile} is empty"
             RoddyBamFile.withTransaction {
                 roddyBamFile.fileOperationStatus = FileOperationStatus.PROCESSED
                 roddyBamFile.fileSize = roddyBamFile.finalBamFile.size()
                 roddyBamFile.md5sum = md5sumFile.text.split(" ")[0]
+                roddyBamFile.fileExists = true
+                roddyBamFile.dateFromFileSystem = new Date(roddyBamFile.finalBamFile.lastModified())
                 assert roddyBamFile.save(flush: true)
             }
         } else {

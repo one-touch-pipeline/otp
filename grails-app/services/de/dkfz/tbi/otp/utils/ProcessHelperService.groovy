@@ -51,4 +51,11 @@ class ProcessHelperService {
         assertProcessFinishedSuccessful(process)
         return processOutput
     }
+
+    static String executeAndAssertExitCodeAndErrorOutAndReturnStdout(String cmd) {
+        ProcessOutput output = waitForCommand(cmd)
+        assert output.stderr.empty
+        assert output.exitCode == 0
+        return output.stdout
+    }
 }
