@@ -31,7 +31,7 @@ import java.util.regex.Pattern
 abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
 
 
-    public static final Pattern roddyExecutionStoreDirectoryPattern = Pattern.compile(/(?:^|\n)Creating\sthe\sfollowing\sexecution\sdirectory\sto\sstore\sinformation\sabout\sthis\sprocess:\s*\n(\/(.*\/)*${RoddyBamFile.RODDY_EXECUTION_DIR_PATTERN})(?:\n|$)/)
+    public static final Pattern roddyExecutionStoreDirectoryPattern = Pattern.compile(/(?:^|\n)Creating\sthe\sfollowing\sexecution\sdirectory\sto\sstore\sinformation\sabout\sthis\sprocess:\s*\n\s*(\/.*\/${RoddyBamFile.RODDY_EXECUTION_DIR_PATTERN})(?:\n|$)/)
 
     @Autowired
     ExecuteRoddyCommandService executeRoddyCommandService
@@ -50,7 +50,7 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
     @Override
     protected final NextAction maybeSubmit() throws Throwable {
         Realm.withTransaction {
-            final RoddyResult roddyResult = getProcessParameterObject()
+            final RoddyResult roddyResult = getRefreshedProcessParameterObject()
             final Realm realm = configService.getRealmDataManagement(roddyResult.project)
             String cmd = prepareAndReturnWorkflowSpecificCommand(roddyResult, realm)
 
@@ -58,7 +58,7 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
 
             saveRoddyExecutionStoreDirectory(roddyResult, output.stderr)
 
-            createClusterJobObjects(realm, output.stdout)
+            createClusterJobObjects(roddyResult, realm, output.stdout)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         }
@@ -71,7 +71,7 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
     @Override
     protected void validate() throws Throwable {
         Realm.withTransaction {
-            final RoddyResult roddyResultObject = getProcessParameterObject()
+            final RoddyResult roddyResultObject = getRefreshedProcessParameterObject()
             validate(roddyResultObject)
         }
     }
@@ -80,7 +80,7 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
 
     @Override
     protected String getLogFilePaths(ClusterJob clusterJob) {
-        File logDirectory = ((RoddyResult)getProcessParameterObject()).latestTmpRoddyExecutionDirectory
+        File logDirectory = ((RoddyResult)getRefreshedProcessParameterObject()).latestTmpRoddyExecutionDirectory
         return "Log file: ${new File(logDirectory, "${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}")}"
     }
 
@@ -88,7 +88,7 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
     protected Map<ClusterJobIdentifier, String> failedOrNotFinishedClusterJobs(
             Collection<? extends ClusterJobIdentifier> finishedClusterJobs) throws Throwable {
 
-        RoddyResult roddyResult = getProcessParameterObject()
+        RoddyResult roddyResult = getRefreshedProcessParameterObject()
         assert roddyResult
 
         // Roddy has started at least one pbs-job, hence the jobStateLogFile must exist.
@@ -116,11 +116,12 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
         return failedOrNotFinishedClusterJobs
     }
 
-    void createClusterJobObjects(Realm realm, String roddyOutput) {
+    void createClusterJobObjects(RoddyResult roddyResult, Realm realm, String roddyOutput) {
         assert realm
+        assert roddyResult
         ProcessingStep processingStep = getProcessingStep()
         assert processingStep
-        SeqType seqType = ((RoddyResult)getProcessParameterObject()).getSeqType()
+        SeqType seqType = roddyResult.getSeqType()
         assert seqType
 
         roddyOutput.eachLine {
@@ -151,7 +152,7 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
 
         roddyResult.roddyExecutionDirectoryNames.add(directory.name)
         assert roddyResult.roddyExecutionDirectoryNames.last() == roddyResult.roddyExecutionDirectoryNames.max()
-        assert roddyResult.save(failOnError: true)
+        assert roddyResult.save(flush: true, failOnError: true)
     }
 
     public File parseRoddyExecutionStoreDirectoryFromRoddyOutput(String roddyOutput) {

@@ -9,9 +9,12 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.ProcessHelperService
 import de.dkfz.tbi.otp.utils.ThreadUtils
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import grails.util.Environment
 import grails.util.Holders
 import groovy.sql.Sql
@@ -23,6 +26,7 @@ import org.joda.time.format.PeriodFormat
 import org.junit.After
 import org.junit.Assume
 import org.junit.Before
+import static CollectionUtils.exactlyOneElement
 
 import javax.sql.DataSource
 import java.util.concurrent.*
@@ -42,6 +46,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     ExecutionService executionService
     SessionFactory sessionFactory
     DataSource dataSource
+    SchedulerService schedulerService
 
 
     // The scheduler needs to access the created objects while the test is being executed
@@ -49,6 +54,10 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
     // fast queue, here we come!
     static final String pbsOptions = '{"-l": {nodes: "1", walltime: "20:00", mem: "5g"}, "-j": "oe"}'
+
+    // permissions to be applied to the source test data
+    protected final static String TEST_DATA_MODE_DIR = "2750"
+    protected final static String TEST_DATA_MODE_FILE = "640"
 
     // The base directory for this test instance ("local root" directory).
     private File baseDirectory = null
@@ -100,6 +109,8 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         // we use Grails >2.1)
         // check whether the correct environment is set
         Assume.assumeTrue(Environment.current.name == "WORKFLOW_TEST")
+
+        WaitingFileUtils.defaultTimeoutMillis = Duration.standardSeconds(120).millis
 
         setupDirectoriesAndRealms()
 
@@ -200,6 +211,18 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         createDirectories(fileNames.collect { new File(it) })
     }
 
+    public void createFilesWithContent(Map<File, String> files) {
+        createDirectories(files.keySet()*.parentFile.unique())
+        String cmd = files.collect {File key, String value ->
+            "echo '${value}' > ${key}"
+        }.join('\n')
+        executionService.executeCommand(realm, cmd)
+        files.each  {File key, String value ->
+            assert WaitingFileUtils.waitUntilExists(key)
+            assert key.text == value + '\n'
+        }
+    }
+
 
     private void cleanupDirectories() {
         String cleanUpCommand = createClusterScriptService.removeDirs([getBaseDirectory()], CreateClusterScriptService.RemoveOption.RECURSIVE_FORCE)
@@ -210,9 +233,10 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     private waitUntilWorkflowFinishes(Duration timeout, int numberOfProcesses = 1) {
         println "Started to wait (until workflow is finished or timeout)"
         long lastPrintln = 0L
+        int counter = 0
         if (!ThreadUtils.waitFor({
             if (lastPrintln < System.currentTimeMillis() - 60000L) {
-                println "waiting ..."
+                println "waiting (${counter++}) ... "
                 lastPrintln = System.currentTimeMillis()
             }
             return areAllProcessesFinished(numberOfProcesses)
@@ -221,13 +245,14 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         }
     }
 
-    private void ensureThatWorkflowHasNotFailed() {
-        Collection<ProcessingStepUpdate> failureProcessingStepUpdates = ProcessingStepUpdate.findAllByState(ExecutionState.FAILURE)
+    private void outputFailureInfoAndThrowException(Collection<ProcessingStepUpdate> failureProcessingStepUpdates) {
+        List<String> combinedErrorMessage = []
         failureProcessingStepUpdates.each {
             println "ProcessingStep ${it.processingStep.id} failed."
             if (it.error) {
                 println 'Error message:'
                 println it.error.errorMessage
+                combinedErrorMessage << it.error.errorMessage
                 if (it.error.stackTraceIdentifier) {
                     println 'Stack trace:'
                     println errorLogService.loggedError(it.error.stackTraceIdentifier)
@@ -239,8 +264,20 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
             }
         }
         if (!failureProcessingStepUpdates.empty) {
-            throw new RuntimeException("There were ${failureProcessingStepUpdates.size()} failures. Details have been written to standard output. See the test report or run grails test-app -echoOut.")
+            throw new RuntimeException("There were ${failureProcessingStepUpdates.size()} failures:\n${combinedErrorMessage.join("\n")}\nDetails have been written to standard output. See the test report or run grails test-app -echoOut.")
         }
+    }
+
+
+    private void ensureThatWorkflowHasNotFailed() {
+        Collection<ProcessingStepUpdate> failureProcessingStepUpdates = ProcessingStepUpdate.findAllByState(ExecutionState.FAILURE)
+        outputFailureInfoAndThrowException(failureProcessingStepUpdates)
+    }
+
+    private void ensureThatRestartedWorkflowHasNotFailed(ProcessingStepUpdate existingFailureProcessingStepUpdate) {
+        Collection<ProcessingStepUpdate> allFailureProcessingStepUpdates = ProcessingStepUpdate.findAllByState(ExecutionState.FAILURE)
+        Collection<ProcessingStepUpdate> failureProcessingStepUpdatesAfterRestart = allFailureProcessingStepUpdates - [existingFailureProcessingStepUpdate]
+        outputFailureInfoAndThrowException(failureProcessingStepUpdatesAfterRestart)
     }
 
     private boolean areAllProcessesFinished(int numberOfProcesses) {
@@ -368,6 +405,16 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         }
     }
 
+    protected void restartWorkflowFromFailedStep(ensureNoFailure = true) {
+        ProcessingStepUpdate failureStepUpdate = exactlyOneElement(ProcessingStepUpdate.findAllByState(ExecutionState.FAILURE))
+        ProcessingStep step = failureStepUpdate.processingStep
+        schedulerService.restartProcessingStep(step)
+        println "RESTARTED THE WORKFLOW FROM THE FAILED JOB"
+        waitUntilWorkflowFinishes(timeout)
+        if (ensureNoFailure) {
+            ensureThatRestartedWorkflowHasNotFailed(failureStepUpdate)
+        }
+    }
 
     /**
      * Convenience method to persist a domain instance into the database. Assert whether
@@ -380,5 +427,24 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         def saved = instance.save(flush: true)
         assert saved : "Failed to persist object \"${instance}\" to database!"
         return saved
+    }
+
+    String calculateMd5Sum(File file) {
+        assert file : 'file is null'
+        assert WaitingFileUtils.waitUntilExists(file)
+        String md5sum
+        LogThreadLocal.withThreadLog(System.out) {
+            md5sum = ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout("md5sum ${file}").split(' ')[0]
+        }
+        assert md5sum ==~ /^[a-f0-9]{32}$/
+        return md5sum
+    }
+
+    protected void setPermissionsRecursive(File directory, String modeDir, String modeFile) {
+        assert directory.absolutePath.startsWith(baseDirectory.absolutePath)
+        String cmd = "find -L ${directory} -user ${getAccountName()} -type d -not -perm ${modeDir} -exec chmod ${modeDir} '{}' \\; 2>&1"
+        assert executionService.executeCommand(realm, cmd).empty
+        cmd = "find -L ${directory} -user ${getAccountName()} -type f -not -perm ${modeFile} -exec chmod ${modeFile} '{}' \\; 2>&1"
+        assert executionService.executeCommand(realm, cmd).empty
     }
 }

@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.utils
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.processing.ExecutionService
@@ -106,6 +108,13 @@ class ExecuteRoddyCommandService {
         assert basePath : "basePath is not allowed to be null"
         File permissionScript = ProcessingOptionService.getValueOfProcessingOption(CORRECT_PERMISSION_SCRIPT_NAME) as File
         return "cd /tmp && ${executeCommandAsRoddyUser()} ${permissionScript} ${basePath}"
+    }
+
+    void correctPermissions(RoddyBamFile roddyBamFile) {
+        assert roddyBamFile : "RoddyBamFile should not be null"
+        File baseFile = new File(AbstractMergedBamFileService.destinationDirectory(roddyBamFile))
+        String cmd = correctPermissionCommand(baseFile)
+        ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput(cmd)
     }
 
 }

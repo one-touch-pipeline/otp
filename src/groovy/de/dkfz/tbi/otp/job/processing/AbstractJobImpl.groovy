@@ -208,6 +208,12 @@ abstract class AbstractJobImpl implements Job {
         return object
     }
 
+    public def getRefreshedProcessParameterObject() {
+        Object object = getProcessParameterObject()
+        object.refresh()
+        return object
+    }
+
     public String getProcessParameterValue() {
         ProcessParameter parameter = ProcessParameter.findByProcess(processingStep.process)
         if (!parameter) {

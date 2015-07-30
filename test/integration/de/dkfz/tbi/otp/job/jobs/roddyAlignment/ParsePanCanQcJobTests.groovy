@@ -1,5 +1,8 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
+import de.dkfz.tbi.otp.utils.HelperUtils
+
 import static de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessmentServiceTests.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
@@ -39,11 +42,34 @@ class ParsePanCanQcJobTests {
         ] as ParsePanCanQcJob
         job.abstractQualityAssessmentService = abstractQualityAssessmentService
 
+        Integer correctPermissionsCallsCounter = 0
+        job.executeRoddyCommandService = [
+                correctPermissions: { RoddyBamFile bamFile -> correctPermissionsCallsCounter++ }
+        ] as ExecuteRoddyCommandService
+
         job.execute()
 
         assert TestCase.containSame(["8", "all", "7"], RoddySingleLaneQa.list()*.chromosome)
         assert TestCase.containSame(["8", "all", "7"], RoddyMergedBamQa.list()*.chromosome)
         assert roddyBamFile.coverage != null
         assert roddyBamFile.coverageWithN != null
+        assert 1 == correctPermissionsCallsCounter
+    }
+
+    @Test
+    void textExecute_correctPermissionBeforeParsing() {
+        ParsePanCanQcJob job = [
+                getProcessParameterObject: { -> DomainFactory.createRoddyBamFile() },
+        ] as ParsePanCanQcJob
+        job.abstractQualityAssessmentService = [
+                parseRoddySingleLaneQaStatistics: { RoddyBamFile bamFile -> assert false, "must not be called" },
+                parseRoddyBamFileQaStatistics: { RoddyBamFile bamFile -> assert false, "must not be called" },
+                saveCoverageToRoddyBamFile: { RoddyBamFile bamFile -> assert false, "must not be called" },
+        ] as AbstractQualityAssessmentService
+        String message = HelperUtils.uniqueString
+        job.executeRoddyCommandService = [
+                correctPermissions: { RoddyBamFile bamFile -> assert false, message }
+        ] as ExecuteRoddyCommandService
+        assert TestCase.shouldFail(AssertionError) { job.execute() }.contains(message)
     }
 }

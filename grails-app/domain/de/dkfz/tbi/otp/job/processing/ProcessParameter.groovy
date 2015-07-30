@@ -25,7 +25,6 @@ class ProcessParameter {
             List resultList = ProcessParameter.executeQuery("FROM " + className + " WHERE id=" + value)
             if (resultList) {
                 Object domain = resultList.first()
-                domain.refresh()
                 return domain
             }
         }

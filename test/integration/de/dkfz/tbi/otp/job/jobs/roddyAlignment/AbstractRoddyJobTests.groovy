@@ -171,7 +171,7 @@ Running job ${SNV_CALLING_META_SCRIPT_JOB_NAME} => ${SNV_CALLING_META_SCRIPT_PBS
 Running job ${SNV_ANNOTATION_JOB_NAME} => ${SNV_ANNOTATION_PBSID}
 Rerun job ${ALIGN_AND_PAIR_SLIM_JOB_NAME} => ${ALIGN_AND_PAIR_SLIM_PBSID}"""
 
-        roddyJob.createClusterJobObjects(realm, stdout)
+        roddyJob.createClusterJobObjects(roddyBamFile, realm, stdout)
 
         assert ClusterJob.all.find {
             it.clusterJobId == SNV_CALLING_META_SCRIPT_PBSID &&
@@ -240,7 +240,7 @@ Rerun job ${ALIGN_AND_PAIR_SLIM_JOB_NAME} => ${ALIGN_AND_PAIR_SLIM_PBSID}"""
     void testCreateClusterJobObjects_skipEmptyLines() {
         String stdout = ""
 
-        roddyJob.createClusterJobObjects(realm, stdout)
+        roddyJob.createClusterJobObjects(roddyBamFile, realm, stdout)
 
         assert ClusterJob.all.empty
     }
@@ -249,7 +249,7 @@ Rerun job ${ALIGN_AND_PAIR_SLIM_JOB_NAME} => ${ALIGN_AND_PAIR_SLIM_PBSID}"""
     void testCreateClusterJobObjects_skipLinesHavingOnlySpaces() {
         String stdout = "     "
 
-        roddyJob.createClusterJobObjects(realm, stdout)
+        roddyJob.createClusterJobObjects(roddyBamFile, realm, stdout)
 
         assert ClusterJob.all.empty
     }
@@ -262,7 +262,7 @@ Rerun job ${ALIGN_AND_PAIR_SLIM_JOB_NAME} => ${ALIGN_AND_PAIR_SLIM_PBSID}"""
 
         String stdout = "    Running job r150428_104246480_stds_snvCallingMetaScript => 3504988"
 
-        roddyJob.createClusterJobObjects(realm, stdout)
+        roddyJob.createClusterJobObjects(roddyBamFile, realm, stdout)
 
         assert 1 == ClusterJob.count()
     }
@@ -275,7 +275,7 @@ Rerun job ${ALIGN_AND_PAIR_SLIM_JOB_NAME} => ${ALIGN_AND_PAIR_SLIM_PBSID}"""
 
         String stdout = "Running job r150428_104246480_stds_snvCallingMetaScript => 3504988    "
 
-        roddyJob.createClusterJobObjects(realm, stdout)
+        roddyJob.createClusterJobObjects(roddyBamFile, realm, stdout)
 
         assert 1 == ClusterJob.count()
     }
@@ -284,9 +284,20 @@ Rerun job ${ALIGN_AND_PAIR_SLIM_JOB_NAME} => ${ALIGN_AND_PAIR_SLIM_PBSID}"""
     void testCreateClusterJobObjects_realmIsNull_fails() {
         String stdout = "Running job r150428_104246480_stds_snvCallingMetaScript => 3504988"
 
-        shouldFail AssertionError, {
-            roddyJob.createClusterJobObjects(null, stdout)
-        }
+        assert shouldFail(AssertionError) {
+            roddyJob.createClusterJobObjects(roddyBamFile, null, stdout)
+        }.contains("assert realm")
+
+        assert ClusterJob.all.empty
+    }
+
+    @Test
+    void testCreateClusterJobObjects_roddyResultIsNull_fails() {
+        String stdout = "Running job r150428_104246480_stds_snvCallingMetaScript => 3504988"
+
+        assert shouldFail(AssertionError) {
+            roddyJob.createClusterJobObjects(null, realm, stdout)
+        }.contains("assert roddyResult")
 
         assert ClusterJob.all.empty
     }

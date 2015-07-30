@@ -62,6 +62,11 @@ class ExecuteRoddyCommandServiceTests {
         new File(roddyBaseConfigsPath, "file name").write("file content")
         applicationIniPath = new File(ProcessingOptionService.getValueOfProcessingOption("roddyApplicationIni"))
         assert CreateFileHelper.createFile(applicationIniPath)
+
+        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = {String cmd ->
+            assert cmd ==~ "cd /tmp && sudo -u OtherUnixUser ${temporaryFolder.getRoot()}/.*/correctPathPermissionsOtherUnixUserRemoteWrapper.sh ${temporaryFolder.getRoot()}/.*/merged-alignment"
+            return new ProcessHelperService.ProcessOutput('', '', 0)
+        }
     }
 
     @After
@@ -72,6 +77,7 @@ class ExecuteRoddyCommandServiceTests {
         roddyBamFile = null
         TestCase.removeMetaClass(ExecuteRoddyCommandService, executeRoddyCommandService)
         TestCase.removeMetaClass(ExecutionService, executeRoddyCommandService.executionService)
+        GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
     }
 
     @Test
@@ -326,4 +332,15 @@ class ExecuteRoddyCommandServiceTests {
         }.contains('Collection contains 0 elements. Expected 1.')
     }
 
+    @Test
+    void testCorrectPermission_AllFine() {
+        executeRoddyCommandService.correctPermissions(roddyBamFile)
+    }
+
+    @Test
+    void testCorrectPermission_BamFileIsNull_shouldFail() {
+        assert TestCase.shouldFail(AssertionError) {
+            executeRoddyCommandService.correctPermissions(null)
+        }.contains('RoddyBamFile')
+    }
 }

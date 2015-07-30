@@ -28,7 +28,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
 
     static final String RUN_PREFIX = "run"
 
-    static final String RODDY_EXECUTION_DIR_PATTERN = /exec_\d{6}_\d{9}_.+_.+/
+    static final String RODDY_EXECUTION_DIR_PATTERN = /exec_\d{6}_\d{8,9}_.+_.+/
 
     RoddyBamFile baseBamFile
 
@@ -193,6 +193,12 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
         assert latestTmpDirectory.isDirectory()
 
         return latestTmpDirectory
+    }
+
+    List<File> getFinalRoddyExecutionDirectories() {
+        this.roddyExecutionDirectoryNames.collect {
+            new File(this.finalExecutionStoreDirectory, it)
+        }
     }
 
     @Override

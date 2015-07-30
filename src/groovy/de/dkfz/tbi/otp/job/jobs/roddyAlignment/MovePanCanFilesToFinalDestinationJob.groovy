@@ -44,7 +44,6 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
         Realm realm = configService.getRealmDataManagement(roddyBamFile.project)
         assert realm : "Realm should not be null"
 
-        correctPermissions(roddyBamFile)
         if (!roddyBamFile.withdrawn) {
             RoddyBamFile.withTransaction {
                 assert roddyBamFile.isMostRecentBamFile(): "The BamFile ${roddyBamFile} is not the most recent one. This must not happen!"
@@ -55,7 +54,7 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
             }
             deletePreviousMergedBamResultFiles(roddyBamFile, realm)
             moveResultFiles(roddyBamFile, realm)
-            correctPermissions(roddyBamFile)
+            executeRoddyCommandService.correctPermissions(roddyBamFile)
 
             File md5sumFile = roddyBamFile.finalMd5sumFile
             assert WaitingFileUtils.waitUntilExists(md5sumFile): "The md5sum file of ${roddyBamFile} does not exist"
@@ -63,7 +62,7 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
             RoddyBamFile.withTransaction {
                 roddyBamFile.fileOperationStatus = FileOperationStatus.PROCESSED
                 roddyBamFile.fileSize = roddyBamFile.finalBamFile.size()
-                roddyBamFile.md5sum = md5sumFile.text.split(" ")[0]
+                roddyBamFile.md5sum = md5sumFile.text.replaceAll("\n", "")
                 roddyBamFile.fileExists = true
                 roddyBamFile.dateFromFileSystem = new Date(roddyBamFile.finalBamFile.lastModified())
                 assert roddyBamFile.save(flush: true)
@@ -75,14 +74,6 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
         deleteTemporaryDirectory(roddyBamFile, realm)
 
         succeed()
-    }
-
-
-    void correctPermissions(RoddyBamFile roddyBamFile) {
-        assert roddyBamFile : "RoddyBamFile should not be null"
-        File baseFile = new File(AbstractMergedBamFileService.destinationDirectory(roddyBamFile))
-        String cmd = executeRoddyCommandService.correctPermissionCommand(baseFile)
-        ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput(cmd)
     }
 
     /*

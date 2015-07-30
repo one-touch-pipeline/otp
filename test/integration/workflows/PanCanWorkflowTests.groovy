@@ -7,7 +7,9 @@ import de.dkfz.tbi.otp.job.jobs.roddyAlignment.MovePanCanFilesToFinalDestination
 import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.HelperUtils
+
 import org.joda.time.Duration
 import org.junit.Before
 import org.junit.Ignore
@@ -44,8 +46,11 @@ class PanCanWorkflowTests extends WorkflowTestCase {
                 return Realm.build()
             }
             movePanCanFilesToFinalDestinationJob.metaClass.correctPermissions = { RoddyBamFile roddyBamFile ->
+            }
+            movePanCanFilesToFinalDestinationJob.metaClass.deletePreviousMergedBamResultFiles = { RoddyBamFile roddyBamFile, Realm realm ->
                 throw new RuntimeException(exceptionMessage)
             }
+
             assert TestCase.shouldFail {
                 movePanCanFilesToFinalDestinationJob.execute()
             } == exceptionMessage

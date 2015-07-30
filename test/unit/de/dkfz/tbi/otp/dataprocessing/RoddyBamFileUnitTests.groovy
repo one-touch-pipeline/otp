@@ -337,6 +337,7 @@ class RoddyBamFileUnitTests {
         }
     }
 
+    @Test
     void testGetLatestTmpRoddyExecutionDirectory_WhenLatestDirectoryNameDoesNotMatch_ShouldFail() {
         roddyBamFile.roddyExecutionDirectoryNames.add("someName")
 
@@ -368,11 +369,41 @@ class RoddyBamFileUnitTests {
     }
 
     @Test
-    void testGetLatestTmpRoddyExecutionDirectory_WhenAllFine_ReturnLatestTmpRoddyExecutionDirectory() {
+    void testGetLatestTmpRoddyExecutionDirectory_WhenAllFineAndTimeStampWith8Digits_ReturnLatestTmpRoddyExecutionDirectory() {
+        helperTestGetLatestTmpRoddyExecutionDirectory_WhenAllFine('exec_000000_00000000_a_a')
+    }
+
+    @Test
+    void testGetLatestTmpRoddyExecutionDirectory_WhenAllFineAndTimeStampWith9Digits_ReturnLatestTmpRoddyExecutionDirectory() {
+        helperTestGetLatestTmpRoddyExecutionDirectory_WhenAllFine(RODDY_EXECUTION_DIR_NAME)
+    }
+
+    void helperTestGetLatestTmpRoddyExecutionDirectory_WhenAllFine(String roddyExecutionDirName) {
         CreateJobStateLogFileHelper.withTmpRoddyExecutionDir(tmpDir, { File roddyExecutionDir ->
-            roddyBamFile.roddyExecutionDirectoryNames.add(RODDY_EXECUTION_DIR_NAME)
+            roddyBamFile.roddyExecutionDirectoryNames.add(roddyExecutionDirName)
             assert roddyExecutionDir == roddyBamFile.getLatestTmpRoddyExecutionDirectory()
-        }, RODDY_EXECUTION_DIR_NAME)
+        }, roddyExecutionDirName)
+    }
+
+    @Test
+    void testFinalRoddyExecutionDirectories_noRoddyExecutionDirsExist() {
+        helperTestFinalRoddyExecutionDirectories([])
+    }
+
+    @Test
+    void testFinalRoddyExecutionDirectories_allFine() {
+        helperTestFinalRoddyExecutionDirectories([
+                'exec_123456_123456789_bla_bla',
+                'exec_654321_987654321_bla_bla'
+        ])
+    }
+
+    void helperTestFinalRoddyExecutionDirectories(List<String> roddyExecutionDirectoryNames) {
+        roddyBamFile.roddyExecutionDirectoryNames.addAll(roddyExecutionDirectoryNames)
+        List<String> expectedResult = roddyExecutionDirectoryNames.collect {
+            "${TEST_DIR}/${RODDY_EXECUTION_STORE_DIR}/${it}"
+        }
+        assert expectedResult == roddyBamFile.finalRoddyExecutionDirectories*.path
     }
 
     private void updateDataFileNames(SeqTrack seqTrack) {

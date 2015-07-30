@@ -125,7 +125,6 @@ class ProcessHelperServiceUnitTests {
         }.contains("The exit value is not 0")
     }
 
-
     @Test
     void testExecuteAndAssertExitCodeAndErrorOutAndReturnStdout_AllFine() {
         String stdout = ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(COMMAND_NO_ERROR)
@@ -153,5 +152,4 @@ class ProcessHelperServiceUnitTests {
             ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout("exit 1")
         }.contains("assert output.exitCode == 0")
     }
-
 }
