@@ -14,7 +14,7 @@ class WaitingFileUtils {
      */
     public static int extendedWaitingTime = 60000
 
-    public static long defaultTimeoutMillis = 1000L
+    public static long defaultTimeoutMillis = 10000L
 
     public static boolean confirmExists(File file, long timeoutMillis = defaultTimeoutMillis) {
         return ThreadUtils.waitFor({ file.list() || file.canRead(); file.exists() }, timeoutMillis, 50)
