@@ -4,6 +4,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.TestData
+import de.dkfz.tbi.otp.utils.ExternalScript
 import grails.validation.ValidationException
 import org.junit.After
 import org.junit.Before
@@ -19,6 +20,9 @@ class SnvConfigTests {
 
     Project project
     SeqType seqType
+    ExternalScript externalScript
+
+
 
     static final String LEGAL_EXECUTE_FLAGS =
             "RUN_CALLING=0\n" +
@@ -38,7 +42,7 @@ class SnvConfigTests {
 
     @Before
     void setUp() {
-        SnvCallingInstanceTestData.createOrFindExternalScript()
+        externalScript = SnvCallingInstanceTestData.createOrFindExternalScript()
 
         project = TestData.createProject(
                 name: "projectName",
@@ -60,6 +64,7 @@ class SnvConfigTests {
     void tearDown() {
         project = null
         seqType = null
+        externalScript = null
     }
 
     @Test
@@ -134,6 +139,24 @@ class SnvConfigTests {
         assert secondConfig.previousConfig == firstConfig
     }
 
+    @Test
+    void testCreateFromFile_UpdateConfig_oldScriptIsDepricated() {
+        final String version2 = "v2"
+        final SnvConfig firstConfig = createFromFile(LEGAL_CONFIG)
+        assertCorrectValues(firstConfig)
+        externalScript.deprecatedDate = new Date()
+        assert externalScript.save(flush: true, failOnError: true)
+        SnvCallingInstanceTestData.createOrFindExternalScript(
+                scriptVersion: version2,
+                filePath: "/dev/null/otp-test/externalScript2.sh",
+        )
+
+        final SnvConfig secondConfig = createFromFile(LEGAL_CONFIG, version2, firstConfig.project, firstConfig.seqType)
+        assertCorrectValues(secondConfig)
+
+        assert firstConfig.obsoleteDate
+        assert secondConfig.previousConfig == firstConfig
+    }
 
     @Test
     void testEvaluate_legalConfig() {

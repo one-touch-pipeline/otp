@@ -41,7 +41,11 @@ abstract class ConfigPerProject {
         }
         obsoleteDate nullable: true
         externalScriptVersion blank: false, validator: { val, obj ->
-            assert !ExternalScript.findAllByScriptVersionAndDeprecatedDate(val, null).empty
+            if (obj.obsoleteDate) {
+                !ExternalScript.findAllByScriptVersion(val).empty
+            } else {
+                !ExternalScript.findAllByScriptVersionAndDeprecatedDate(val, null).empty
+            }
         }
     }
 

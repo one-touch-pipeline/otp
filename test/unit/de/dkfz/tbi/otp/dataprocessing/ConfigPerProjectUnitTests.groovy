@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.TestData
 import de.dkfz.tbi.otp.utils.ExternalScript
@@ -24,7 +25,7 @@ class ConfigPerProjectUnitTests {
         ConfigPerProject configPerProject = new ConfigPerProjectImpl(
                 externalScriptVersion: externalScript.scriptVersion,
                 )
-        assertFalse(configPerProject.validate())
+        TestCase.assertValidateError(configPerProject, 'project', 'nullable', null)
 
         configPerProject.project = TestData.createProject()
         assertTrue(configPerProject.validate())
@@ -45,7 +46,7 @@ class ConfigPerProjectUnitTests {
         ConfigPerProject configPerProject = new ConfigPerProjectImpl(
                 project: TestData.createProject(),
         )
-        assertFalse(configPerProject.validate())
+        TestCase.assertValidateError(configPerProject, 'externalScriptVersion', 'nullable', null)
 
         configPerProject.externalScriptVersion = externalScript.scriptVersion
         assertTrue(configPerProject.validate())
@@ -57,7 +58,7 @@ class ConfigPerProjectUnitTests {
                 project: TestData.createProject(),
                 externalScriptVersion: ""
         )
-        assertFalse(configPerProject.validate())
+        TestCase.assertValidateError(configPerProject, 'externalScriptVersion', 'blank', '')
 
         configPerProject.externalScriptVersion = externalScript.scriptVersion
         assertTrue(configPerProject.validate())
@@ -76,7 +77,7 @@ class ConfigPerProjectUnitTests {
                 previousConfig: validConfigPerProject,
                 externalScriptVersion: externalScript.scriptVersion,
                 )
-        assertFalse(newConfigPerProject.validate())
+        TestCase.assertValidateError(newConfigPerProject, 'previousConfig', 'validator.invalid', validConfigPerProject)
 
         validConfigPerProject.obsoleteDate = new Date()
         assertTrue(validConfigPerProject.validate())
@@ -99,8 +100,26 @@ class ConfigPerProjectUnitTests {
                 project: TestData.createProject(),
                 externalScriptVersion: "v1"
         )
-        shouldFail(AssertionError) {
-            assert configPerProject.validate()
-        }
+        TestCase.assertValidateError(configPerProject, 'externalScriptVersion', 'validator.invalid', 'v1')
     }
+
+    void testObsolateInstanceRefersToDeprecatedExternalScript_AllFine() {
+        ExternalScript externalScript = ExternalScript.build(deprecatedDate: new Date())
+        ConfigPerProjectImpl configPerProject = new ConfigPerProjectImpl(
+                project: TestData.createProject(),
+                externalScriptVersion: externalScript.scriptVersion,
+                obsoleteDate: new Date()
+        )
+        assert configPerProject.validate()
+    }
+
+    void testNonObsolateInstanceRefersToDeprecatedExternalScript_ShouldNotValidate() {
+        ExternalScript externalScript = ExternalScript.build(deprecatedDate: new Date())
+        ConfigPerProjectImpl configPerProject = new ConfigPerProjectImpl(
+                project: TestData.createProject(),
+                externalScriptVersion: externalScript.scriptVersion
+        )
+        TestCase.assertValidateError(configPerProject, 'externalScriptVersion', 'validator.invalid', externalScript.scriptVersion)
+    }
+
 }
