@@ -1,5 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
+import de.dkfz.tbi.otp.dataprocessing.MergingPass
+import de.dkfz.tbi.otp.dataprocessing.MergingSet
 import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingJob
 import grails.test.mixin.*
 import org.junit.*
@@ -10,8 +14,13 @@ import de.dkfz.tbi.otp.utils.ExternalScript
 import grails.buildtestdata.mixin.Build
 
 @TestFor(SnvJobResult)
-@Mock([SnvCallingInstance, ExternalScript, Individual, Project])
-@Build([ProcessedMergedBamFile])
+@Mock([SnvCallingInstance, ExternalScript])
+@Build([
+        AlignmentPass,
+        MergingPass,
+        MergingSet,
+        SeqPlatform,
+])
 class SnvJobResultUnitTests {
 
     final String MD5SUM = "a841c64c5825e986c4709ac7298e9366"
@@ -177,10 +186,10 @@ class SnvJobResultUnitTests {
 
     @Test
     void testSavingOfSnvJobResultSampleType1BamDifferentFromInputFile() {
-        ProcessedMergedBamFile control = ProcessedMergedBamFile.build()
+        ProcessedMergedBamFile control = DomainFactory.createProcessedMergedBamFile()
 
-        ProcessedMergedBamFile tumor1 = ProcessedMergedBamFile.build()
-        ProcessedMergedBamFile tumor2 = ProcessedMergedBamFile.build()
+        ProcessedMergedBamFile tumor1 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile tumor2 = DomainFactory.createProcessedMergedBamFile()
 
         SnvCallingInstance snvCallingInstance1 = new SnvCallingInstance(
                 sampleType1BamFile: tumor1,
@@ -210,16 +219,16 @@ class SnvJobResultUnitTests {
 
     @Test
     void testSavingOfSnvJobResultSampleType2BamDifferentFromInputFile() {
-        ProcessedMergedBamFile tumor = ProcessedMergedBamFile.build()
+        ProcessedMergedBamFile tumor = DomainFactory.createProcessedMergedBamFile()
 
         SnvCallingInstance snvCallingInstance1 = new SnvCallingInstance(
                 sampleType1BamFile: tumor,
-                sampleType2BamFile: ProcessedMergedBamFile.build()
+                sampleType2BamFile: DomainFactory.createProcessedMergedBamFile()
                 )
 
         SnvCallingInstance snvCallingInstance2 = new SnvCallingInstance(
                 sampleType1BamFile: tumor,
-                sampleType2BamFile: ProcessedMergedBamFile.build()
+                sampleType2BamFile: DomainFactory.createProcessedMergedBamFile()
                 )
 
         SnvJobResult oldSnvJobResult = new SnvJobResult(
@@ -240,11 +249,11 @@ class SnvJobResultUnitTests {
 
     @Test
     void testGetSampleType1BamFile() {
-        ProcessedMergedBamFile pmbf = ProcessedMergedBamFile.build()
+        ProcessedMergedBamFile pmbf = DomainFactory.createProcessedMergedBamFile()
 
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
                 sampleType1BamFile: pmbf,
-                sampleType2BamFile: ProcessedMergedBamFile.build()
+                sampleType2BamFile: DomainFactory.createProcessedMergedBamFile()
                 )
 
         SnvJobResult snvJobResult = new SnvJobResult(
@@ -260,10 +269,10 @@ class SnvJobResultUnitTests {
 
     @Test
     void testGetSampleType2BamFile() {
-        ProcessedMergedBamFile pmbf = ProcessedMergedBamFile.build()
+        ProcessedMergedBamFile pmbf = DomainFactory.createProcessedMergedBamFile()
 
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
-                sampleType1BamFile: ProcessedMergedBamFile.build(),
+                sampleType1BamFile: DomainFactory.createProcessedMergedBamFile(),
                 sampleType2BamFile: pmbf
                 )
 
@@ -392,7 +401,7 @@ class SnvJobResultUnitTests {
 
     Map preparationForGetResultFilePath(SnvCallingStep step) {
         Project project = TestData.createProject(
-            dirName: "/tmp/project/"
+            dirName: TestCase.uniqueNonExistentPath,
             )
 
         OtpPath path = new OtpPath(project, "testPath/")
@@ -407,8 +416,8 @@ class SnvJobResultUnitTests {
                 )
 
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
-                sampleType1BamFile: ProcessedMergedBamFile.build(),
-                sampleType2BamFile: ProcessedMergedBamFile.build(),
+                sampleType1BamFile: DomainFactory.createProcessedMergedBamFile(),
+                sampleType2BamFile: DomainFactory.createProcessedMergedBamFile(),
                 samplePair: samplePair
                 )
 
@@ -421,8 +430,8 @@ class SnvJobResultUnitTests {
 
     private SnvCallingInstance createSnvCallingInstance(final Map properties = [:]) {
         return new SnvCallingInstance([
-                sampleType1BamFile: ProcessedMergedBamFile.build([withdrawn: false]),
-                sampleType2BamFile: ProcessedMergedBamFile.build([withdrawn: false])
+                sampleType1BamFile: DomainFactory.createProcessedMergedBamFile([withdrawn: false]),
+                sampleType2BamFile:DomainFactory.createProcessedMergedBamFile([withdrawn: false])
         ] + properties)
     }
 }
