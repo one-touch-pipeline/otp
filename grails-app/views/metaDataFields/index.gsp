@@ -51,6 +51,7 @@
         <div class="otpDataTables">
             <otp:dataTable
                 codes="${[
+                    'dataFields.listPlatformGroup',
                     'dataFields.listPlatformName',
                     'dataFields.listPlatformModelLabel',
                     'dataFields.listPlatformModelLabelAlias',

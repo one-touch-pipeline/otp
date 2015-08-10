@@ -34,7 +34,7 @@ class MetaDataFieldsController {
 
     JSON dataTableSourceListSeqPlatforms(DataTableCommand cmd) {
         List data = metaDataFieldsService.listPlatforms().collect {
-            [it.name, it.seqPlatformModelLabel?.name, it.seqPlatformModelLabel?.alias?.sort()?.join(', '), it.sequencingKitLabel?.name, it.sequencingKitLabel?.alias?.sort()?.join(', ')]
+            [it.seqPlatformGroup?.name, it.name, it.seqPlatformModelLabel?.name, it.seqPlatformModelLabel?.alias?.sort()?.join(', '), it.sequencingKitLabel?.name, it.sequencingKitLabel?.alias?.sort()?.join(', ')]
         }
         renderData(cmd, data)
     }
