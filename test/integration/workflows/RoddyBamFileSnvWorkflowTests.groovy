@@ -19,7 +19,7 @@ class RoddyBamFileSnvWorkflowTests extends AbstractSnvWorkflowTests {
         assertNotNull(realm.save(flush: true))
 
 
-        bamFileTumor = DomainFactory.createRoddyBamFile([coverage: 1])
+        bamFileTumor = DomainFactory.createRoddyBamFile(PROCESSED_BAM_FILE_PROPERTIES)
         bamFileTumor.workPackage.bamFileInProjectFolder = bamFileTumor
         assert bamFileTumor.workPackage.save(flush: true)
 
@@ -34,9 +34,9 @@ class RoddyBamFileSnvWorkflowTests extends AbstractSnvWorkflowTests {
         sampleTypeTumor = bamFileTumor.sampleType
         assertNotNull(bamFileTumor.save(flush: true))
 
-        bamFileControl = DomainFactory.createRoddyBamFile([coverage: 1])
-        bamFileControl.sample.individual = individual
-        bamFileControl.sample.save(flush: true)
+        bamFileControl = DomainFactory.createRoddyBamFile(PROCESSED_BAM_FILE_PROPERTIES + [
+                workPackage: DomainFactory.createMergingWorkPackage(bamFileTumor.mergingWorkPackage),
+        ])
 
         bamFileControl.workPackage.bamFileInProjectFolder = bamFileControl
         assert bamFileControl.workPackage.save(flush: true)

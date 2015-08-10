@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.springframework.validation.Errors
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -15,6 +14,15 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
  *
  */
 class SamplePair {
+
+    /**
+     * Creates an instance. Does <em>not</em> persist it.
+     */
+    static SamplePair createInstance(Map properties) {
+        SamplePair samplePair = new SamplePair(properties)
+        samplePair.relativePath = samplePair.buildPath().relativePath.path
+        return samplePair
+    }
 
     static enum ProcessingStatus {
 
@@ -38,18 +46,10 @@ class SamplePair {
         DISABLED,
     }
 
-    /**
-     * The sampleType pair shall be processed for this individual
-     */
-    Individual individual
+    MergingWorkPackage mergingWorkPackage1
+    MergingWorkPackage mergingWorkPackage2
 
-    /**
-     * The samples of these two sample types will be compared within the snv pipeline.
-     */
-    SampleType sampleType1
-    SampleType sampleType2
-
-    SeqType seqType
+    String relativePath
 
     ProcessingStatus processingStatus = ProcessingStatus.NEEDS_PROCESSING
 
@@ -59,47 +59,60 @@ class SamplePair {
     Date dateCreated
     Date lastUpdated
 
-    static constraints = {
-        sampleType2 validator: { val, obj ->
-            return val != obj.sampleType1
-        }
-        sampleType1 validator: { SampleType val, SamplePair obj, Errors errors ->
-            if (!obj.individual) {
-                errors.reject(null, 'Cannot validate sampleType1 without individual being set.')
-                return
-            }
-            final SampleType.Category category = val.getCategory(obj.individual.project)
-            if (category != SampleType.Category.DISEASE) {
-                errors.reject(null, "Category of sampleType1 is ${category}. Expected ${SampleType.Category.DISEASE}.")
-                return
-            }
-            final SamplePair sameOrderObj = obj.findForSameIndividualAndSeqType(val, obj.sampleType2)
-            final SamplePair otherOrderObj = obj.findForSameIndividualAndSeqType(obj.sampleType2, val)
-            if (obj.id) {
-                // change an already existing object
-                if ((sameOrderObj && sameOrderObj.id != obj.id) || (otherOrderObj && otherOrderObj.id != obj.id)) {
-                    errors.reject(null, 'A SamplePair for that combination already exists.')
-                    return
-                }
-            } else {
-                // save a new object
-                if (sameOrderObj || otherOrderObj) {
-                    errors.reject(null, 'A SamplePair for that combination already exists.')
-                    return
-                }
-            }
-        }
-    }
+    /**
+     * The names of the properties of {@link #mergingWorkPackage1} and {@link #mergingWorkPackage2} which must be equal.
+     */
+    static final Collection<String> mergingWorkPackageEqualProperties =
+            (MergingWorkPackage.seqTrackPropertyNames - ['sample'] + MergingWorkPackage.processingParameterNames).asImmutable()
 
-    private SamplePair findForSameIndividualAndSeqType(final SampleType sampleType1, final SampleType sampleType2) {
-        return atMostOneElement(SamplePair.findAllByIndividualAndSeqTypeAndSampleType1AndSampleType2(individual, seqType, sampleType1, sampleType2))
+    static constraints = {
+        mergingWorkPackage1 validator: { MergingWorkPackage val, SamplePair obj, Errors errors ->
+            final SampleType.Category category = val.sampleType.getCategory(obj.project)
+            if (category != SampleType.Category.DISEASE) {
+                errors.reject(null, "Category of mergingWorkPackage1.sampleType is ${category}. Expected ${SampleType.Category.DISEASE}.")
+            }
+        }
+        mergingWorkPackage2 unique: 'mergingWorkPackage1', validator: { MergingWorkPackage val, SamplePair obj, Errors errors ->
+            if (val == obj.mergingWorkPackage1) {
+                errors.reject(null, "mergingWorkPackage1 and mergingWorkPackage2 are equal.")
+            }
+            // Pairs of MergingWorkPackages with different reference genomes are allowed, particularly if the disease
+            // sample is a xenograft. -> OTP-1677
+            (mergingWorkPackageEqualProperties + ['individual'] - ['referenceGenome']).each {
+                def mwp1Value = obj.mergingWorkPackage1."${it}"
+                def mwp2Value = val."${it}"
+                if (mwp1Value != mwp2Value && !(mwp1Value?.hasProperty('id') && mwp2Value?.hasProperty('id') && mwp1Value.id == mwp2Value.id)) {
+                    errors.reject(null, "${it} of mergingWorkPackage1 and mergingWorkPackage2 are different:\n${mwp1Value}\n${mwp2Value}")
+                }
+            }
+            // Using a new session prevents Hibernate from trying to auto-flush this object, which would fail
+            // because it is still in validation.
+            withNewSession {
+                if (atMostOneElement(SamplePair.findAllWhere(
+                        mergingWorkPackage1: val,
+                        mergingWorkPackage2: obj.mergingWorkPackage1,
+                ))) {
+                    errors.reject(null, "A ${SamplePair.getClass().simpleName} for the same ${MergingWorkPackage.getClass().simpleName}s (in different order) already exists.")
+                }
+            }
+        }
+        relativePath unique: true, validator: { String val, SamplePair obj ->
+            return val == obj.buildPath().relativePath.path
+        }
     }
 
     static mapping = {
-        individual       index: 'sample_pair_idx1,sample_pair_idx2'
-        sampleType1      index: 'sample_pair_idx1,sample_pair_idx2'
-        sampleType2      index: 'sample_pair_idx1,sample_pair_idx2'
-        seqType          index: 'sample_pair_idx1,sample_pair_idx2'
+        /**
+         * sample_pair_idx1 is used by SamplePair.findSamplePairsForSettingNeedsProcessing and
+         * SnvCallingService.samplePairForSnvProcessing.
+         * processing_status must be the first column in this index! Grails does not provide a means to specify this, so
+         * this must be done via SQL.
+         *
+         * The implicit unique index on (mergingWorkPackage1, mergingWorkPackage2) is used by
+         * SamplePair.findMissingDiseaseControlSamplePairs.
+         */
+        mergingWorkPackage1 index: 'sample_pair_idx1'
+        mergingWorkPackage2 index: 'sample_pair_idx1'
         processingStatus index: 'sample_pair_idx1'
     }
 
@@ -107,10 +120,34 @@ class SamplePair {
         return individual.project
     }
 
+    Individual getIndividual() {
+        assert mergingWorkPackage1.individual == mergingWorkPackage2.individual
+        return mergingWorkPackage1.individual
+    }
+
+    SeqType getSeqType() {
+        assert mergingWorkPackage1.seqType == mergingWorkPackage2.seqType
+        return mergingWorkPackage1.seqType
+    }
+
+    SampleType getSampleType1() {
+        return mergingWorkPackage1.sampleType
+    }
+
+    SampleType getSampleType2() {
+        return mergingWorkPackage2.sampleType
+    }
+
     /**
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control
      */
     OtpPath getSamplePairPath() {
+        OtpPath path = buildPath()
+        assert relativePath == path.relativePath.path
+        return path
+    }
+
+    private OtpPath buildPath() {
         return new OtpPath(individual.getViewByPidPath(seqType), 'snv_results', seqType.libraryLayoutDirName, "${sampleType1.dirName}_${sampleType2.dirName}")
     }
 
@@ -146,91 +183,52 @@ class SamplePair {
     }
 
     /**
-     * Returns the latest AbstractMergedBamFile which belongs to the given {@link SampleType}
-     * for this {@link SamplePair}, if available and not withdrawn, otherwise null.
-     */
-    AbstractMergedBamFile getAbstractMergedBamFileInProjectFolder(SampleType sampleType) {
-        final AbstractMergedBamFile bamFile = CollectionUtils.atMostOneElement(
-            MergingWorkPackage.createCriteria().list {
-                eq ("seqType", seqType)
-                sample {
-                    eq ("sampleType", sampleType)
-                    eq ("individual", individual)
-                }
-            }
-        )?.bamFileInProjectFolder
-
-        if (bamFile && !bamFile.withdrawn && bamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED) {
-            return bamFile
-        } else {
-            return null
-        }
-    }
-
-    /**
-     * Finds distinct combinations of [individual, sampleType1, sampleType2, seqType] with these criteria:
+     * Finds distinct combinations of [mergingWorkPackage1, mergingWorkPackage2] with these criteria:
      * <ul>
-     *     <li>A pair of non-withdrawn SeqTracks exists for that combination and sampleType1 has category
-     *         {@link SampleType.Category#DISEASE} and sampleType2 has category {@link SampleType.Category#CONTROL}.</li>
-     *     <li>New {@link DataFile}s were added for the individual since <code>minDate</code>.</li>
-     *     <li>The seqType is processable by OTP.</li>
+     *     <li>mergingWorkPackage1 and mergingWorkPackage2 differ only in their sampleType.</li>
+     *     <li>mergingWorkPackage1.sampleType has category {@link SampleType.Category#DISEASE} and
+     *         mergingWorkPackage2.sampleType has category {@link SampleType.Category#CONTROL}.</li>
      *     <li>No SamplePair exists for that combination.</li>
      * </ul>
      * The results are returned as SamplePair instances, <em>which have not been persisted yet</em>.
      */
-    static Collection<SamplePair> findMissingDiseaseControlSamplePairs(final Date minDate) {
+    static Collection<SamplePair> findMissingDiseaseControlSamplePairs() {
         final Collection queryResults = SamplePair.executeQuery("""
             SELECT DISTINCT
-              individual_1,
-              sampleType_1,
-              sampleType_2,
-              seqType_1
+              mwp1,
+              mwp2
             FROM
-              SeqTrack st1
-                join st1.sample.individual individual_1
-                join individual_1.project project_1
-                join st1.sample.sampleType sampleType_1
-                join st1.seqType seqType_1,
-              SeqTrack st2
-                join st2.sample.individual individual_2
-                join st2.sample.sampleType sampleType_2
-                join st2.seqType seqType_2,
+              MergingWorkPackage mwp1
+                join mwp1.sample.individual.project project_1
+                join mwp1.sample.sampleType sampleType_1,
+              MergingWorkPackage mwp2
+                join mwp2.sample.sampleType sampleType_2,
               SampleTypePerProject stpp1,
               SampleTypePerProject stpp2
             WHERE
-              seqType_1 IN (:seqTypes) AND
-              seqType_2 = seqType_1 AND
-              individual_2 = individual_1 AND
+              ${(mergingWorkPackageEqualProperties + ['sample.individual']).collect{
+                  "(mwp1.${it} = mwp2.${it} OR mwp1.${it} IS NULL AND mwp2.${it} IS NULL)"
+              }.join(' AND\n')} AND
               stpp1.project = project_1 AND
               stpp2.project = project_1 AND
               stpp1.sampleType = sampleType_1 AND
               stpp2.sampleType = sampleType_2 AND
               stpp1.category = :disease AND
               stpp2.category = :control AND
-              EXISTS (FROM DataFile WHERE seqTrack.sample.individual = individual_1 AND dateCreated >= :minDate) AND
-              NOT EXISTS (FROM DataFile WHERE seqTrack = st1 AND fileType.type = :fileType AND fileWithdrawn = true) AND
-              NOT EXISTS (FROM DataFile WHERE seqTrack = st2 AND fileType.type = :fileType AND fileWithdrawn = true) AND
               NOT EXISTS (
                 FROM
                   SamplePair
                 WHERE
-                  individual = individual_1 AND
-                  sampleType1 = sampleType_1 AND
-                  sampleType2 = sampleType_2 AND
-                  seqType = seqType_1)
+                  mergingWorkPackage1 = mwp1 AND
+                  mergingWorkPackage2 = mwp2)
             """, [
-                seqTypes: SeqTypeService.alignableSeqTypes(),
                 disease: SampleType.Category.DISEASE,
                 control: SampleType.Category.CONTROL,
-                minDate: minDate,
-                fileType: FileType.Type.SEQUENCE
             ], [readOnly: true])
         return queryResults.collect {
-            new SamplePair(
-                individual: it[0],
-                sampleType1: it[1],
-                sampleType2: it[2],
-                seqType: it[3],
+            createInstance(
+                mergingWorkPackage1: it[0],
+                mergingWorkPackage2: it[1],
             )
         }
     }
@@ -239,34 +237,21 @@ class SamplePair {
      * Finds existing SamplePairs with these criteria:
      * <ul>
      *     <li>{@link #processingStatus} is set to {@link ProcessingStatus#NO_PROCESSING_NEEDED}.</li>
-     *     <li>{@link #sampleType1} (still) has category {@link SampleType.Category#DISEASE}.</li>
+     *     <li>{@code {@link #mergingWorkPackage1}.sampleType} (still) has category {@link SampleType.Category#DISEASE}.</li>
      *     <li>No {@link SnvCallingInstance} exists which belongs to the sample pair and fulfills these criteria:
      *     <ul>
-     *         <li>The BAM files that the {@link SnvCallingInstance} is based on contain all non-withdrawn
-     *             {@link DataFile}s matching the SamplePair.</li>
+     *         <li>The BAM files that the {@link SnvCallingInstance} is based on contain all alignable (see
+     *             {@link SeqTrackService#mayAlign(SeqTrack)}) {@link SeqTrack}s matching the SamplePair.</li>
      *         <li>No {@link SnvJobResult} belonging to the {@link SnvCallingInstance} is withdrawn.</li>
      *     </ul>
      * </ul>
      */
     static Collection<SamplePair> findSamplePairsForSettingNeedsProcessing() {
-        return SamplePair.executeQuery("""
-            FROM
-              SamplePair sp
-            WHERE
-              sp.processingStatus = :noProcessingNeeded AND
-              EXISTS (
-                FROM
-                  SampleTypePerProject
-                WHERE
-                  project = sp.individual.project AND
-                  sampleType = sp.sampleType1 AND
-                  category = :disease
-              ) AND
-              NOT EXISTS (
+        def sciQueryPart = { String samplePair -> """
                 FROM
                   SnvCallingInstance sci
                 WHERE
-                  sci.samplePair = sp AND
+                  sci.samplePair = ${samplePair} AND
                   NOT EXISTS (
                     FROM
                       SnvJobResult
@@ -281,10 +266,28 @@ class SamplePair {
                       DataFile
                     WHERE
                       fileType.type = :fileType AND
-                      fileWithdrawn = false AND
-                      seqTrack.sample.individual = sp.individual AND
-                      seqTrack.sample.sampleType IN (sp.sampleType1, sp.sampleType2) AND
-                      seqTrack.seqType = sp.seqType
+                      fileWithdrawn = false AND""" }
+        Collection<SamplePair> candidates = SamplePair.executeQuery("""
+            FROM
+              SamplePair sp
+            WHERE
+              sp.processingStatus = :noProcessingNeeded AND
+              EXISTS (
+                FROM
+                  SampleTypePerProject
+                WHERE
+                  project = sp.mergingWorkPackage1.sample.individual.project AND
+                  sampleType = sp.mergingWorkPackage1.sample.sampleType AND
+                  category = :disease
+              ) AND
+              NOT EXISTS (
+${sciQueryPart('sp')}
+                      ${(MergingWorkPackage.qualifiedSeqTrackPropertyNames - ['sample']).collect{
+                          "(seqTrack.${it} = sp.mergingWorkPackage1.${MergingWorkPackage.nonQualifiedPropertyName(it)} OR " +
+                          "seqTrack.${it} IS NULL AND sp.mergingWorkPackage1.${MergingWorkPackage.nonQualifiedPropertyName(it)} IS NULL)"
+                      }.join(' AND\n')} AND
+                      seqTrack.sample.individual = sp.mergingWorkPackage1.sample.individual AND
+                      seqTrack.sample.sampleType IN (sp.mergingWorkPackage1.sample.sampleType, sp.mergingWorkPackage2.sample.sampleType)
                   )
               )
             """, [
@@ -292,6 +295,24 @@ class SamplePair {
                 disease: SampleType.Category.DISEASE,
                 fileType: FileType.Type.SEQUENCE
         ], [readOnly: true])
+        return candidates.findAll {
+            Collection<SeqTrack> mwp1SeqTracks = it.mergingWorkPackage1.findMergeableSeqTracks()
+            if (!mwp1SeqTracks) {
+                return false
+            }
+            Collection<SeqTrack> mwp2SeqTracks = it.mergingWorkPackage2.findMergeableSeqTracks()
+            if (!mwp2SeqTracks) {
+                return false
+            }
+            return !SnvCallingInstance.executeQuery("""${sciQueryPart(':samplePair')}
+                      seqTrack IN (:seqTracks)
+                  )
+            """, [
+                    samplePair: it,
+                    fileType: FileType.Type.SEQUENCE,
+                    seqTracks: mwp1SeqTracks + mwp2SeqTracks,
+            ], [readOnly: true])
+        }
     }
 
     /**

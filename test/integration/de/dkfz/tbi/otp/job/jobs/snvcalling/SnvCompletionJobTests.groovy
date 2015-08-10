@@ -52,26 +52,15 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         testDirectory = TestCase.createEmptyTestDirectory()
 
         testData = new SnvCallingInstanceTestData()
-        testData.createObjects()
-        realm_processing = testData.realm
-        realm_processing.stagingRootPath = "${testDirectory}/staging"
-        assert realm_processing.save()
+        testData.createSnvObjects(testDirectory)
+        realm_processing = testData.realmProcessing
 
-        Realm realm_management = DomainFactory.createRealmDataManagementDKFZ([
-                rootPath: "${testDirectory}/root",
-                processingRootPath: "${testDirectory}/processing",
-                stagingRootPath: null
-        ])
-        assert realm_management.save()
+        processedMergedBamFile1 = testData.bamFileTumor
+        processedMergedBamFile2 = testData.bamFileControl
 
-        project = testData.project
-        individual = testData.individual
-        seqType = testData.seqType
-
-        processedMergedBamFile1 = createProcessedMergedBamFile()
-        assert processedMergedBamFile1.save()
-        processedMergedBamFile2 = createProcessedMergedBamFile()
-        assert processedMergedBamFile2.save()
+        samplePair = testData.samplePair
+        project = samplePair.project
+        seqType = samplePair.seqType
 
         SnvCallingInstanceTestData.createOrFindExternalScript()
         snvConfig = new SnvConfig(
@@ -81,15 +70,6 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 externalScriptVersion: "v1",
         )
         assert snvConfig.save()
-
-        SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile1.sampleType, category: SampleType.Category.DISEASE)
-
-        samplePair = new SamplePair(
-                individual: individual,
-                sampleType1: processedMergedBamFile1.sampleType,
-                sampleType2: processedMergedBamFile2.sampleType,
-                seqType: seqType)
-        assert samplePair.save()
 
         snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: SOME_INSTANCE_NAME,
@@ -106,10 +86,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
     @After
     void tearDown() {
-        testData = null
-        individual = null
         project = null
-        seqType = null
         snvCallingInstance = null
         realm_processing = null
         snvConfig = null
@@ -475,9 +452,5 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         dummyFile1 << 'some content'
         dummyFile2 << 'some other content'
-    }
-
-    private ProcessedMergedBamFile createProcessedMergedBamFile() {
-        return testData.createProcessedMergedBamFile(individual, seqType)
     }
 }

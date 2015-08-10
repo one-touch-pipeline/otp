@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
@@ -28,6 +29,11 @@ class DomainFactory {
     static final String DEFAULT_MD5_SUM = '123456789abcdef123456789abcdef00'
     static final String DEFAULT_TAB_FILE_NAME = 'DefaultTabFileName.tab'
     static final long DEFAULT_FILE_SIZE = 123456
+    static final Map PROCESSED_BAM_FILE_PROPERTIES = [
+            fileSize: 123456789,
+            md5sum: DEFAULT_MD5_SUM,
+            fileOperationStatus: FileOperationStatus.PROCESSED,
+    ].asImmutable()
 
     /**
      * Defaults for new realms.
@@ -133,14 +139,20 @@ class DomainFactory {
         ] + myProps)
     }
 
-    public static Realm createRealm(File testDirectory, Map properties = [:]) {
+    static Realm createRealmDataManagement(File testDirectory, Map properties = [:]) {
         assert testDirectory.isAbsolute()
         Realm.build([
-                rootPath:           new File(testDirectory, 'root'),
-                processingRootPath: new File(testDirectory, 'processing'),
-                loggingRootPath:    new File(testDirectory, 'log'),
-                programsRootPath:   new File(testDirectory, 'programs'),
-                stagingRootPath:    new File(testDirectory, 'staging'),
+                operationType:      Realm.OperationType.DATA_MANAGEMENT,
+                rootPath:           new File(testDirectory, 'root').path,
+        ] + properties)
+    }
+
+    static Realm createRealmDataProcessing(File testDirectory, Map properties = [:]) {
+        assert testDirectory.isAbsolute()
+        Realm.build([
+                operationType:      Realm.OperationType.DATA_PROCESSING,
+                processingRootPath: new File(testDirectory, 'processing').path,
+                stagingRootPath:    new File(testDirectory, 'staging').path,
         ] + properties)
     }
 
@@ -273,51 +285,79 @@ class DomainFactory {
         return bamFile
     }
 
-    public static SamplePair createSamplePair(Map properties = [:]) {
-        Individual individual = properties.individual ?: Individual.build()
-        SampleType sampleTypeDisease = properties.sampleType1 ?: SampleType.build()
-        SampleType sampleTypeControl = properties.sampleType1 ?: SampleType.build()
-        [
-                (sampleTypeDisease): SampleType.Category.DISEASE,
-                (sampleTypeControl): SampleType.Category.CONTROL,
-        ].each {key, value ->
-            if (!SampleTypePerProject.findByProjectAndSampleType(individual.project, key)) {
-                SampleTypePerProject.build(
-                        project: individual.project,
-                        sampleType: key,
-                        category: value,
-                )
-            }
-        }
-        SamplePair samplePair = SamplePair.build(
-                properties + [
-                        individual: individual,
-                        sampleType1: sampleTypeDisease,
-                        sampleType2: sampleTypeControl,
-                ]
+    /**
+     * Creates a {@link MergingWorkPackage} with the same properties as the specified one but a different
+     * {@link SampleType}.
+     */
+    public static MergingWorkPackage createMergingWorkPackage(MergingWorkPackage base) {
+        return createMergingWorkPackage(base, SampleType.build())
+    }
+
+    /**
+     * Creates a {@link MergingWorkPackage} with the same properties as the specified one but a different
+     * {@link SampleType}.
+     */
+    public static MergingWorkPackage createMergingWorkPackage(MergingWorkPackage base, SampleType sampleType) {
+        Sample sample = new Sample(
+                individual: base.individual,
+                sampleType: sampleType,
         )
+        assert sample.save(failOnError: true)
+        return createMergingWorkPackage(base, sample)
+    }
+
+    /**
+     * Creates a {@link MergingWorkPackage} with the same properties as the specified one but a different
+     * {@link Sample}.
+     */
+    static MergingWorkPackage createMergingWorkPackage(MergingWorkPackage base, Sample sample) {
+        return createMergingWorkPackage(base, [sample: sample])
+    }
+
+    /**
+     * Creates a {@link MergingWorkPackage} with the same properties except for the specified ones.
+     */
+    static MergingWorkPackage createMergingWorkPackage(MergingWorkPackage base, Map properties) {
+        MergingWorkPackage mwp = new MergingWorkPackage((MergingWorkPackage.seqTrackPropertyNames +
+                MergingWorkPackage.processingParameterNames).collectEntries{[it, base."${it}"]} + properties)
+        assert mwp.save(failOnError: true)
+        return mwp
+    }
+
+    static SamplePair createSamplePair(MergingWorkPackage mergingWorkPackage1, Map properties = [:]) {
+        return createSamplePair(
+                mergingWorkPackage1,
+                createMergingWorkPackage(mergingWorkPackage1),
+                properties)
+    }
+
+    static SamplePair createSamplePair(MergingWorkPackage mergingWorkPackage1, MergingWorkPackage mergingWorkPackage2, Map properties = [:]) {
+        SamplePair samplePair = SamplePair.createInstance([
+                mergingWorkPackage1: mergingWorkPackage1,
+                mergingWorkPackage2: mergingWorkPackage2,
+        ] + properties)
+        return samplePair.save(failOnError: true)
+    }
+
+    static SamplePair createDisease(MergingWorkPackage controlMwp) {
+        MergingWorkPackage diseaseMwp = createMergingWorkPackage(controlMwp)
+        SampleTypePerProject.build(project: controlMwp.project, sampleType: diseaseMwp.sampleType, category: SampleType.Category.DISEASE)
+        SamplePair samplePair = createSamplePair(diseaseMwp, controlMwp)
         return samplePair
     }
 
     public static SnvCallingInstance createSnvInstanceWithRoddyBamFiles() {
-        SamplePair samplePair = createSamplePair()
         Workflow workflow = createPanCanWorkflow()
 
-        def createRoddyBamFileHelper = { SampleType sampleType ->
-            MergingWorkPackage diseaseWorkPackage = MergingWorkPackage.build(
-                    sample: Sample.build(
-                            sampleType: sampleType,
-                            individual: samplePair.individual,
-                    ),
-                    seqType: samplePair.seqType,
-                    workflow: workflow,
-                    statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
-            )
-            createRoddyBamFile(workPackage: diseaseWorkPackage)
-        }
+        MergingWorkPackage controlWorkPackage = MergingWorkPackage.build(
+                workflow: workflow,
+                statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
+        )
+        SamplePair samplePair = createDisease(controlWorkPackage)
+        MergingWorkPackage diseaseWorkPackage = samplePair.mergingWorkPackage1
 
-        RoddyBamFile disease = createRoddyBamFileHelper(samplePair.sampleType1)
-        RoddyBamFile control = createRoddyBamFileHelper(samplePair.sampleType2)
+        RoddyBamFile disease = createRoddyBamFile(workPackage: diseaseWorkPackage)
+        RoddyBamFile control = createRoddyBamFile(workPackage: controlWorkPackage)
 
         ExternalScript externalScript = ExternalScript.buildLazy()
 
@@ -380,11 +420,14 @@ class DomainFactory {
                 seqType: mergingWorkPackage.seqType,
                 seqPlatform: SeqPlatform.build(seqPlatformGroup: mergingWorkPackage.seqPlatformGroup),
         ] + seqTrackProperties
+        SeqTrack seqTrack
         if (mergingWorkPackage.seqType.libraryLayout == SeqType.LIBRARYLAYOUT_PAIRED) {
-            return buildSeqTrackWithTwoDataFiles(map)
+            seqTrack = buildSeqTrackWithTwoDataFiles(map)
         } else {
-            return buildSeqTrackWithDataFile(map)
+            seqTrack = buildSeqTrackWithDataFile(map)
         }
+        assert mergingWorkPackage.satisfiesCriteria(seqTrack)
+        return seqTrack
     }
 
     public static SeqTrack buildSeqTrackWithDataFile(Map seqTrackProperties = [:], Map dataFileProperties = [:]) {
@@ -495,16 +538,27 @@ class DomainFactory {
         ] + myProps)
     }
 
+    static SeqType createWholeGenomeSeqType() {
+        SeqType.buildLazy(
+                name: SeqTypeNames.WHOLE_GENOME.seqTypeName,
+                alias: "WGS",
+                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED
+        )
+    }
+
+    static SeqType createExomeSeqType() {
+        SeqType.buildLazy(
+                name: SeqTypeNames.EXOME.seqTypeName,
+                alias:  SeqTypeNames.EXOME.seqTypeName,
+                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED
+        )
+    }
+
     static List<SeqType> createAlignableSeqTypes() {
         [
-            SeqTypeNames.EXOME,
-            SeqTypeNames.WHOLE_GENOME
-        ].collect {
-            SeqType.build(
-                    name: it.seqTypeName,
-                    alias: it == SeqTypeNames.WHOLE_GENOME ? "WGS" : it.seqTypeName,
-                    libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
-        }
+                createWholeGenomeSeqType(),
+                createExomeSeqType(),
+        ]
     }
 
     static MetaDataEntry createMetaDataKeyAndEntry(DataFile dataFile, String key, String value) {

@@ -2,6 +2,8 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import org.junit.*
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
+
 class SnvCallingInstanceTests extends GroovyTestCase {
 
     SnvCallingInstanceTestData testData = new SnvCallingInstanceTestData()
@@ -40,7 +42,8 @@ class SnvCallingInstanceTests extends GroovyTestCase {
         final SnvCallingInstance tumor1InstanceA = testData.createAndSaveSnvCallingInstance()
         // Using a different (does not matter if "earlier" or "later") instance name, because instance names have to be unique for the same sample pair.
         final SnvCallingInstance tumor1InstanceB = testData.createAndSaveSnvCallingInstance(instanceName: '2014-09-24_15h04')
-        final SnvCallingInstance tumor2Instance = testData.createAndSaveSnvCallingInstance(sampleType1BamFile: testData.bamFileTumor2, samplePair: testData.samplePair2)
+        def (ProcessedMergedBamFile bamFileTumor2, SamplePair samplePair2) = testData.createDisease(testData.bamFileControl.mergingWorkPackage)
+        final SnvCallingInstance tumor2Instance = testData.createAndSaveSnvCallingInstance(sampleType1BamFile: bamFileTumor2, samplePair: samplePair2)
 
         // no result at all
         assert tumor1InstanceA.findLatestResultForSameBamFiles(SnvCallingStep.SNV_ANNOTATION) == null

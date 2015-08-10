@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 
 /**
  * Represents all generations of one merged BAM file (whereas an {@link AbstractMergedBamFile} represents a single
@@ -11,14 +12,12 @@ class MergingWorkPackage {
 
     /**
      * The BAM file which moving to the final destination has been initiated for most recently.
-     * Note that if {@link AbstractMergedBamFile#fileOperationStatus} is {@link FileOperationStatus#INPROGRESS}, moving is still in progress or has failed, so the file system is in an unclear state.
+     *
+     * Note that if {@link AbstractMergedBamFile#fileOperationStatus} is {@link FileOperationStatus#INPROGRESS}, moving
+     * is still in progress or has failed, so the file system is in an unclear state.
      * Also note that the referenced BAM file might be withdrawn.
-     * If you use the referenced BAM file as input for further processing,
-     * <ul>
-     *     <li>ensure that it is not withdrawn,</li>
-     *     <li>ensure that its {@link AbstractMergedBamFile#fileOperationStatus} is {@link FileOperationStatus#PROCESSED},</li>
-     *     <li>ensure that the file on the file system is consistent with the database object by comparing the file size on the file system to {@link AbstractFileSystemBamFile#fileSize}. Perform this check a second time <em>after</em> reading from the file to ensure that the file has not been overwritten between the first check and starting to read the file.</li>
-     * </ul>
+     * If you want to use the referenced BAM file as input for further processing, use
+     * {@link #getProcessableBamFileInProjectFolder()}).
      */
     /*
      * Due some strange behavior of GORM (?), this has to be set on null explicitly where objects of
@@ -57,6 +56,7 @@ class MergingWorkPackage {
     SeqPlatformGroup seqPlatformGroup
 
     // Processing parameters, part of merging criteria
+    static final Collection<String> processingParameterNames = ['referenceGenome', 'statSizeFileName', 'workflow'].asImmutable()
     ReferenceGenome referenceGenome
     String statSizeFileName
     Workflow workflow
@@ -90,7 +90,7 @@ class MergingWorkPackage {
         }
     }
 
-    static final Collection<String> seqTrackPropertyNames = qualifiedSeqTrackPropertyNames.collect{nonQualifiedPropertyName(it)}
+    static final Collection<String> seqTrackPropertyNames = qualifiedSeqTrackPropertyNames.collect{nonQualifiedPropertyName(it)}.asImmutable()
     static final String mergeableSeqTracksQuery = 'FROM SeqTrack WHERE ' + qualifiedSeqTrackPropertyNames.collect{"${it} = :${nonQualifiedPropertyName(it)}"}.join(' AND ')
 
     Project getProject() {
@@ -132,8 +132,26 @@ class MergingWorkPackage {
         return bamFile.mergingWorkPackage.id == id
     }
 
-    private static nonQualifiedPropertyName(String property) {
+    static nonQualifiedPropertyName(String property) {
         return property.substring(property.lastIndexOf('.') + 1)
+    }
+
+    /**
+     * Returns the BAM file which is currently in the project folder, or <code>null</code> if there is no BAM file or it
+     * is withdrawn or it is unknown which one currently is there.
+     *
+     * If you use the returned BAM file as input for further processing, ensure that the file on the file system is
+     * consistent with the database object by comparing the file size on the file system to
+     * {@link AbstractFileSystemBamFile#fileSize}. Perform this check a second time <em>after</em> reading from the file
+     * to ensure that the file has not been overwritten between the first check and starting to read the file.
+     */
+    AbstractMergedBamFile getProcessableBamFileInProjectFolder() {
+        if (bamFileInProjectFolder && !bamFileInProjectFolder.withdrawn &&
+                bamFileInProjectFolder.fileOperationStatus == FileOperationStatus.PROCESSED) {
+            return bamFileInProjectFolder
+        } else {
+            return null
+        }
     }
 
     static mapping = {

@@ -17,6 +17,7 @@ class OtpPath {
     OtpPath(final Project project, final String first, final String... more) {
         this.project = project
         relativePath = LsdfFilesService.getPath(first, more)
+        assert !relativePath.absolute
     }
 
     OtpPath(final OtpPath path, final String first, final String... more) {

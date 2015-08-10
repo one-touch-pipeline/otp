@@ -1,8 +1,5 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingJob
-import de.dkfz.tbi.otp.utils.ExternalScript
-
 import static org.junit.Assert.*
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -36,53 +33,22 @@ class SnvCallingServiceTests extends GroovyTestCase {
     @Before
     void setUp() {
         testData = new SnvCallingInstanceTestData()
-        testData.createObjects()
+        testData.createSnvObjects()
 
-        project = testData.createProject()
-        project.save()
+        samplePair = testData.samplePair
+        project = samplePair.project
+        seqType = samplePair.seqType
 
-        individual = testData.createIndividual([project: project, pid: "testPid"])
-        individual.save()
+        snvConfig = testData.createSnvConfig()
 
-        seqType = testData.createSeqType([name: 'TEST_SEQTYPE', dirName: 'test_seqtype'])
-        assert seqType.save()
+        processedMergedBamFile1 = testData.bamFileTumor
+        processedMergedBamFile2 = testData.bamFileControl
 
-        testData.externalScript_Joining = new ExternalScript(
-                scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
-                scriptVersion: 'v1',
-                filePath: "/tmp/scriptLocation/joining.sh",
-                author: "otptest",
-        )
-        assert testData.externalScript_Joining.save()
-
-        snvConfig = new SnvConfig(
-                project: project,
-                seqType: seqType,
-                configuration: "configuration",
-                externalScriptVersion: "v1",
-                )
-        assert snvConfig.save()
-
-        processedMergedBamFile1 = createProcessedMergedBamFile("1")
-        processedMergedBamFile1.save(flush: true)
-        processedMergedBamFile1.workPackage.bamFileInProjectFolder = processedMergedBamFile1
-        assert processedMergedBamFile1.workPackage.save(flush: true)
-
-        processedMergedBamFile2 = createProcessedMergedBamFile("2")
-        processedMergedBamFile2.save(flush: true)
-        processedMergedBamFile2.workPackage.bamFileInProjectFolder = processedMergedBamFile2
-        assert processedMergedBamFile2.workPackage.save(flush: true)
-
-        SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile1.sample.sampleType, category: SampleType.Category.DISEASE)
-
-        samplePair = new SamplePair(
-                individual: individual,
-                sampleType1: processedMergedBamFile1.sample.sampleType,
-                sampleType2: processedMergedBamFile2.sample.sampleType,
-                seqType: seqType
-                )
-        samplePair.save(flush: true)
-
+        [processedMergedBamFile1, processedMergedBamFile2].each {
+            setThresholds(it)
+            it.workPackage.bamFileInProjectFolder = it
+            assert it.workPackage.save(flush: true)
+        }
     }
 
     @After
@@ -129,7 +95,7 @@ class SnvCallingServiceTests extends GroovyTestCase {
     @Test
     void testSnvConfigIsNullOtherSeqType() {
 
-        snvConfig.seqType = testData.exomeSeqType
+        snvConfig.seqType = DomainFactory.createExomeSeqType()
         snvConfig.save()
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
@@ -182,23 +148,16 @@ class SnvCallingServiceTests extends GroovyTestCase {
 
     @Test
     void testOtherSamplePairForSnvProcessingInProcess() {
-        ProcessedMergedBamFile otherProcessedMergedBamFile = createProcessedMergedBamFile("3")
-        otherProcessedMergedBamFile.save()
-
-        SamplePair samplePair2 = new SamplePair(
-                individual: individual,
-                sampleType1: processedMergedBamFile1.sample.sampleType,
-                sampleType2: otherProcessedMergedBamFile.sample.sampleType,
-                seqType: seqType
+        SamplePair samplePair2 = DomainFactory.createSamplePair(
+                processedMergedBamFile1.mergingWorkPackage,
+                DomainFactory.createMergingWorkPackage(processedMergedBamFile2.mergingWorkPackage),
                 )
-        samplePair2.save()
-
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 samplePair: samplePair2,
                 config: snvConfig,
                 sampleType1BamFile: processedMergedBamFile1,
-                sampleType2BamFile: otherProcessedMergedBamFile
+                sampleType2BamFile: createProcessedMergedBamFile(samplePair2.mergingWorkPackage2),
                 )
         snvCallingInstance.save()
 
@@ -207,17 +166,16 @@ class SnvCallingServiceTests extends GroovyTestCase {
 
     @Test
     void testSamplePairForOtherIndividualInProcess() {
-        Individual otherIndividual = testData.createIndividual([pid: "otherIndividual"])
-        otherIndividual.save()
+        Individual otherIndividual = Individual.build()
 
-        ProcessedMergedBamFile processedMergedBamFile3 = createProcessedMergedBamFile("3")
-        processedMergedBamFile3.sample.individual = otherIndividual
-        processedMergedBamFile3.sample.sampleType = processedMergedBamFile1.sample.sampleType
-        processedMergedBamFile3.save()
-        ProcessedMergedBamFile processedMergedBamFile4 = createProcessedMergedBamFile("4")
-        processedMergedBamFile4.sample.individual = otherIndividual
-        processedMergedBamFile4.sample.sampleType = processedMergedBamFile2.sample.sampleType
-        processedMergedBamFile4.save()
+        ProcessedMergedBamFile processedMergedBamFile3 = createProcessedMergedBamFile(
+                DomainFactory.createMergingWorkPackage(processedMergedBamFile1.mergingWorkPackage,
+                        [sample: Sample.build(individual: otherIndividual, sampleType: processedMergedBamFile1.sampleType)])
+        )
+        ProcessedMergedBamFile processedMergedBamFile4 = createProcessedMergedBamFile(
+                DomainFactory.createMergingWorkPackage(processedMergedBamFile2.mergingWorkPackage,
+                        [sample: Sample.build(individual: otherIndividual, sampleType: processedMergedBamFile2.sampleType)])
+        )
 
         assertEquals(processedMergedBamFile1.sample.sampleType, processedMergedBamFile3.sample.sampleType)
         assertEquals(processedMergedBamFile2.sample.sampleType, processedMergedBamFile4.sample.sampleType)
@@ -228,13 +186,8 @@ class SnvCallingServiceTests extends GroovyTestCase {
 
         SampleTypePerProject.build(project: otherIndividual.project, sampleType: processedMergedBamFile3.sample.sampleType, category: SampleType.Category.DISEASE)
 
-        SamplePair samplePair2 = new SamplePair(
-                individual: otherIndividual,
-                sampleType1: processedMergedBamFile3.sample.sampleType,
-                sampleType2: processedMergedBamFile4.sample.sampleType,
-                seqType: seqType
-                )
-        samplePair2.save()
+        SamplePair samplePair2 = DomainFactory.createSamplePair(
+                processedMergedBamFile3.mergingWorkPackage, processedMergedBamFile4.mergingWorkPackage)
 
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
@@ -250,28 +203,13 @@ class SnvCallingServiceTests extends GroovyTestCase {
 
     @Test
     void testSamplePairForOtherSeqTypeInProcess() {
-        SeqType otherSeqType = testData.exomeSeqType
+        SeqType otherSeqType = DomainFactory.createExomeSeqType()
 
-        ProcessedMergedBamFile processedMergedBamFile3 = createProcessedMergedBamFile("3")
-        processedMergedBamFile3.mergingWorkPackage.sample = processedMergedBamFile1.sample
-        processedMergedBamFile3.save()
+        ProcessedMergedBamFile processedMergedBamFile3 = createProcessedMergedBamFile(
+                DomainFactory.createMergingWorkPackage(processedMergedBamFile1.mergingWorkPackage, [seqType: otherSeqType]))
 
-        processedMergedBamFile3.mergingWorkPackage.seqType = otherSeqType
-        processedMergedBamFile3.mergingWorkPackage.save()
-        processedMergedBamFile3.getContainedSeqTracks().each {
-            it.seqType = otherSeqType
-            it.save()
-        }
-
-        ProcessedMergedBamFile processedMergedBamFile4 = createProcessedMergedBamFile("4")
-        processedMergedBamFile4.mergingWorkPackage.sample = processedMergedBamFile2.sample
-        processedMergedBamFile4.save()
-        processedMergedBamFile4.mergingWorkPackage.seqType = otherSeqType
-        processedMergedBamFile4.mergingWorkPackage.save()
-        processedMergedBamFile4.getContainedSeqTracks().each {
-            it.seqType = otherSeqType
-            it.save()
-        }
+        ProcessedMergedBamFile processedMergedBamFile4 = createProcessedMergedBamFile(
+                DomainFactory.createMergingWorkPackage(processedMergedBamFile2.mergingWorkPackage, [seqType: otherSeqType]))
 
         assertEquals(processedMergedBamFile1.sample.sampleType, processedMergedBamFile3.sample.sampleType)
         assertEquals(processedMergedBamFile2.sample.sampleType, processedMergedBamFile4.sample.sampleType)
@@ -280,13 +218,8 @@ class SnvCallingServiceTests extends GroovyTestCase {
         assertFalse(processedMergedBamFile1.seqType == processedMergedBamFile3.seqType)
         assertFalse(processedMergedBamFile2.seqType == processedMergedBamFile4.seqType)
 
-        SamplePair samplePair2 = new SamplePair(
-                individual: individual,
-                sampleType1: processedMergedBamFile3.sample.sampleType,
-                sampleType2: processedMergedBamFile4.sample.sampleType,
-                seqType: otherSeqType
-                )
-        samplePair2.save()
+        SamplePair samplePair2 = DomainFactory.createSamplePair(
+                processedMergedBamFile3.mergingWorkPackage, processedMergedBamFile4.mergingWorkPackage)
 
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
@@ -304,11 +237,7 @@ class SnvCallingServiceTests extends GroovyTestCase {
     void testBamFile1DoesNotContainAllSeqTracks() {
         assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
 
-        SeqTrack newSeqTrack = testData.createSeqTrack([
-            sample: processedMergedBamFile1.sample,
-            seqType: processedMergedBamFile1.seqType]
-        )
-        newSeqTrack.save()
+        DomainFactory.buildSeqTrackWithDataFile(processedMergedBamFile1.mergingWorkPackage)
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
@@ -317,55 +246,29 @@ class SnvCallingServiceTests extends GroovyTestCase {
     void testBamFile2DoesNotContainAllSeqTracks() {
         assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
 
-        SeqTrack newSeqTrack = testData.createSeqTrack([
-            sample: processedMergedBamFile2.sample,
-            seqType: processedMergedBamFile2.seqType]
-        )
-        newSeqTrack.save()
+        DomainFactory.buildSeqTrackWithDataFile(processedMergedBamFile2.mergingWorkPackage)
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test
-    void testBamFile1HasOtherSampleType() {
-        SampleType differentSampleType = testData.createSampleType([name: "DIFFERENT"])
-        differentSampleType.save()
+    void testNoSamplePairForBamFile1() {
+        MergingWorkPackage otherMwp = DomainFactory.createMergingWorkPackage(samplePair.mergingWorkPackage1)
 
-        SampleTypePerProject.build(project: project, sampleType: differentSampleType, category: SampleType.Category.DISEASE)
+        SampleTypePerProject.build(project: project, sampleType: otherMwp.sampleType, category: SampleType.Category.DISEASE)
 
-        samplePair.sampleType1 = differentSampleType
-        samplePair.save()
-
-        assertNull(snvCallingService.samplePairForSnvProcessing())
-    }
-
-    @Test
-    void testBamFile2HasOtherSampleType() {
-        SampleType differentSampleType = testData.createSampleType([name: "DIFFERENT"])
-        differentSampleType.save()
-
-        samplePair.sampleType2 = differentSampleType
-        samplePair.save()
+        DomainFactory.createSamplePair(otherMwp, samplePair.mergingWorkPackage2)
+        samplePair.delete()
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test
-    void testBamFilesHaveOtherSeqType() {
-        SeqType differentSeqType = testData.createSeqType([name: "DIFFERENT", dirName: "DIFFERENT_SEQUENCING"])
-        differentSeqType.save()
+    void testNoSamplePairForBamFile2() {
+        MergingWorkPackage otherMwp = DomainFactory.createMergingWorkPackage(samplePair.mergingWorkPackage2)
 
-        samplePair.seqType = differentSeqType
-        samplePair.save()
-        assertNull(snvCallingService.samplePairForSnvProcessing())
-    }
-
-    @Test
-    void testSamplePairFromOtherIndividual() {
-        Individual otherIndividual = testData.createIndividual([project: project, pid: "testPid2"])
-        otherIndividual.save()
-        samplePair.individual = otherIndividual
-        samplePair.save()
+        DomainFactory.createSamplePair(samplePair.mergingWorkPackage1, otherMwp)
+        samplePair.delete()
 
         assertNull(snvCallingService.samplePairForSnvProcessing())
     }
@@ -439,7 +342,7 @@ class SnvCallingServiceTests extends GroovyTestCase {
 
     @Test
     void testBamFile1NoProcessingThresholdWrongProject() {
-        Project otherProject = testData.project
+        Project otherProject = Project.build()
 
         ProcessingThresholds processingThreshold = exactlyOneElement(ProcessingThresholds.findAllByProjectAndSeqTypeAndSampleType(
                 processedMergedBamFile1.project, processedMergedBamFile1.seqType, processedMergedBamFile1.sample.sampleType
@@ -452,7 +355,7 @@ class SnvCallingServiceTests extends GroovyTestCase {
 
     @Test
     void testBamFile1NoProcessingThresholdWrongSeqType() {
-        SeqType otherSeqType = testData.exomeSeqType
+        SeqType otherSeqType = DomainFactory.createExomeSeqType()
 
         ProcessingThresholds processingThreshold = exactlyOneElement(ProcessingThresholds.findAllByProjectAndSeqTypeAndSampleType(
                 processedMergedBamFile1.project, processedMergedBamFile1.seqType, processedMergedBamFile1.sample.sampleType
@@ -465,7 +368,7 @@ class SnvCallingServiceTests extends GroovyTestCase {
 
     @Test
     void testBamFile1NoProcessingThresholdWrongSampleType() {
-        SampleType otherSampleType = testData.sampleType
+        SampleType otherSampleType = SampleType.build()
 
         ProcessingThresholds processingThreshold = exactlyOneElement(ProcessingThresholds.findAllByProjectAndSeqTypeAndSampleType(
                 processedMergedBamFile1.project, processedMergedBamFile1.seqType, processedMergedBamFile1.sample.sampleType
@@ -522,81 +425,56 @@ class SnvCallingServiceTests extends GroovyTestCase {
 
     @Test
     void testIfOrderOfPairsIsCorrect() {
-        ProcessedMergedBamFile processedMergedBamFile3 = createProcessedMergedBamFile("3")
-        processedMergedBamFile3.save()
 
-        ProcessedMergedBamFile processedMergedBamFile4 = createProcessedMergedBamFile("4")
-        processedMergedBamFile4.save()
+        def createAnotherProcessableSamplePair = {
+            ProcessedMergedBamFile processedMergedBamFile3 = createProcessedMergedBamFile(
+                    DomainFactory.createMergingWorkPackage(processedMergedBamFile1.mergingWorkPackage))
+            ProcessedMergedBamFile processedMergedBamFile4 = createProcessedMergedBamFile(
+                    DomainFactory.createMergingWorkPackage(processedMergedBamFile1.mergingWorkPackage))
 
-        SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile3.sample.sampleType, category: SampleType.Category.DISEASE)
+            SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile3.sample.sampleType, category: SampleType.Category.DISEASE)
 
-        SamplePair samplePair1 = new SamplePair(
-                individual: individual,
-                sampleType1: processedMergedBamFile3.sample.sampleType,
-                sampleType2: processedMergedBamFile4.sample.sampleType,
-                seqType: seqType
-                )
-        samplePair1.save()
+            DomainFactory.createSamplePair(processedMergedBamFile3.mergingWorkPackage, processedMergedBamFile4.mergingWorkPackage)
+        }
+
+        createAnotherProcessableSamplePair()
 
         assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
 
-        ProcessedMergedBamFile processedMergedBamFile5 = createProcessedMergedBamFile("5")
-        processedMergedBamFile5.save()
-
-        ProcessedMergedBamFile processedMergedBamFile6 = createProcessedMergedBamFile("6")
-        processedMergedBamFile6.save()
-
-        SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile5.sample.sampleType, category: SampleType.Category.DISEASE)
-
-        SamplePair samplePair2 = new SamplePair(
-                individual: individual,
-                sampleType1: processedMergedBamFile5.sample.sampleType,
-                sampleType2: processedMergedBamFile6.sample.sampleType,
-                seqType: seqType
-                )
-        samplePair2.save()
+        createAnotherProcessableSamplePair()
 
         assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing())
     }
 
     @Test
     void testCheckIfAllAvailableSeqTracksAreIncludedAllIncluded() {
-        ProcessedMergedBamFile processedMergedBamFile3 = createProcessedMergedBamFile("3")
-        processedMergedBamFile3.save()
-
-        assertTrue(snvCallingService.checkIfAllAvailableSeqTracksAreIncluded(processedMergedBamFile3))
+        assertTrue(snvCallingService.checkIfAllAvailableSeqTracksAreIncluded(processedMergedBamFile1))
     }
 
     @Test
     void testCheckIfAllAvailableSeqTracksAreIncludedOneMissing() {
-        ProcessedMergedBamFile processedMergedBamFile3 = createProcessedMergedBamFile("3")
-        processedMergedBamFile3.save()
+        DomainFactory.buildSeqTrackWithDataFile(processedMergedBamFile1.mergingWorkPackage)
 
-        Sample sample = processedMergedBamFile3.sample
-        SeqTrack seqTrack = testData.createSeqTrack([sample: sample, seqType: seqType])
-        seqTrack.save()
-
-        assertFalse(snvCallingService.checkIfAllAvailableSeqTracksAreIncluded(processedMergedBamFile3))
+        assertFalse(snvCallingService.checkIfAllAvailableSeqTracksAreIncluded(processedMergedBamFile1))
     }
 
     @Test
     void testCheckIfAllAvailableSeqTracksAreIncludedSeqTrackIsWithdrawn() {
-        ProcessedMergedBamFile processedMergedBamFile3 = createProcessedMergedBamFile("3")
-        processedMergedBamFile3.save()
+        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile(processedMergedBamFile1.mergingWorkPackage)
+        DataFile dataFile = DataFile.findBySeqTrack(seqTrack)
+        dataFile.fileWithdrawn = true
+        assert dataFile.save(failOnError: true)
 
-        Sample sample = processedMergedBamFile3.sample
-        SeqTrack seqTrack = testData.createSeqTrack([sample: sample, seqType: seqType, laneId: "456"])
-        seqTrack.save()
-
-        DataFile dataFile = testData.createDataFile([seqTrack: seqTrack, fileWithdrawn: true])
-        dataFile.save()
-
-        assertTrue(snvCallingService.checkIfAllAvailableSeqTracksAreIncluded(processedMergedBamFile3))
+        assertTrue(snvCallingService.checkIfAllAvailableSeqTracksAreIncluded(processedMergedBamFile1))
     }
 
-    private ProcessedMergedBamFile createProcessedMergedBamFile(String identifier) {
+    private ProcessedMergedBamFile createProcessedMergedBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
+        final ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage, properties + DomainFactory.PROCESSED_BAM_FILE_PROPERTIES)
+        setThresholds(bamFile)
+        return bamFile
+    }
 
-        final ProcessedMergedBamFile bamFile = testData.createProcessedMergedBamFile(individual, seqType, identifier)
+    private void setThresholds(ProcessedMergedBamFile bamFile) {
         bamFile.coverage = COVERAGE_THRESHOLD
         bamFile.numberOfMergedLanes = LANE_THRESHOLD
         DomainFactory.assignNewProcessedBamFile(bamFile.mergingSet)
@@ -604,15 +482,13 @@ class SnvCallingServiceTests extends GroovyTestCase {
         assert bamFile.save(failOnError: true)
 
         ProcessingThresholds processingThresholds1 = new ProcessingThresholds(
-                project: project,
-                seqType: seqType,
+                project: bamFile.project,
+                seqType: bamFile.seqType,
                 sampleType: bamFile.sampleType,
                 coverage: COVERAGE_THRESHOLD,
                 numberOfLanes: LANE_THRESHOLD
         )
         assert processingThresholds1.save(failOnError: true)
-
-        return bamFile
     }
 
     @Test

@@ -80,8 +80,8 @@ class SamplePairController {
         data.each {SamplePair samplePair ->
             ProcessingThresholds threshold1 = processingThresholdsService.findByProjectAndSampleTypeAndSeqType(samplePair.project, samplePair.sampleType1, samplePair.seqType)
             ProcessingThresholds threshold2 = processingThresholdsService.findByProjectAndSampleTypeAndSeqType(samplePair.project, samplePair.sampleType2, samplePair.seqType)
-            AbstractMergedBamFile processedMergedBamFile1 = samplePair.getAbstractMergedBamFileInProjectFolder(samplePair.sampleType1)
-            AbstractMergedBamFile processedMergedBamFile2 = samplePair.getAbstractMergedBamFileInProjectFolder(samplePair.sampleType2)
+            AbstractMergedBamFile processedMergedBamFile1 = samplePair.mergingWorkPackage1.processableBamFileInProjectFolder
+            AbstractMergedBamFile processedMergedBamFile2 = samplePair.mergingWorkPackage2.processableBamFileInProjectFolder
             def tmp = [
                 sampleType1: samplePair?.sampleType1?.name,
                 sampleType2: samplePair?.sampleType2?.name,

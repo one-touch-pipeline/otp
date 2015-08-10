@@ -39,10 +39,8 @@ class SnvCallingService {
             return "AND EXISTS (FROM AbstractMergedBamFile ambf${number} " +
             // check that the file is not withdrawn
             "       WHERE ambf${number}.withdrawn = false " +
-            //check that the bam file belongs to the sample type, seq type and individual from the SamplePair
-            "       AND ambf${number}.${INDIVIDUAL} = sp.individual " +
-            "       AND ambf${number}.${SAMPLE_TYPE} = sp.sampleType${number} " +
-            "       AND ambf${number}.${SEQ_TYPE} = sp.seqType " +
+            //check that the bam file belongs to the SamplePair
+            "       AND ambf${number}.${WORKPACKAGE} = sp.mergingWorkPackage${number} " +
             //check that transfer workflow is finished
             "       AND ambf${number}.md5sum IS NOT NULL " +
             //check that coverage is high enough & number of lanes are enough
@@ -62,8 +60,8 @@ class SnvCallingService {
 
                 //check that the config file is available with at least on script with same version
                 "AND EXISTS (FROM SnvConfig cps " +
-                "   WHERE cps.project = sp.individual.project " +
-                "   AND cps.seqType = sp.seqType " +
+                "   WHERE cps.project = sp.mergingWorkPackage1.sample.individual.project " +
+                "   AND cps.seqType = sp.mergingWorkPackage1.seqType " +
                 "   AND EXISTS (from ExternalScript es " +
                 "       where es.scriptVersion = cps.externalScriptVersion " +
                 "       and es.deprecatedDate is null " +
@@ -95,8 +93,8 @@ class SnvCallingService {
             return samplePairs.find {
 
                 //get the latest AbstractMergedBamFiles for both sample Types
-                AbstractMergedBamFile abstractMergedBamFile1 = it.getAbstractMergedBamFileInProjectFolder(it.sampleType1)
-                AbstractMergedBamFile abstractMergedBamFile2 = it.getAbstractMergedBamFileInProjectFolder(it.sampleType2)
+                AbstractMergedBamFile abstractMergedBamFile1 = it.mergingWorkPackage1.processableBamFileInProjectFolder
+                AbstractMergedBamFile abstractMergedBamFile2 = it.mergingWorkPackage2.processableBamFileInProjectFolder
 
 
                 //check that the latest AbstractMergedBamFiles contain all available seqTracks
@@ -114,8 +112,7 @@ class SnvCallingService {
     boolean checkIfAllAvailableSeqTracksAreIncluded(AbstractMergedBamFile abstractMergedBamFile) {
         notNull(abstractMergedBamFile, "The input of method checkIfAllAvailableSeqTracksAreIncluded is null")
         Set<SeqTrack> containedSeqTracks = abstractMergedBamFile.getContainedSeqTracks()
-        Set<SeqTrack> availableSeqTracks = SeqTrack.findAllBySampleAndSeqType(abstractMergedBamFile.sample,
-                abstractMergedBamFile.seqType).findAll{!it.isWithdrawn()} as Set<SeqTrack>
+        Set<SeqTrack> availableSeqTracks = abstractMergedBamFile.workPackage.findMergeableSeqTracks()
         return containedSeqTracks*.id as Set == availableSeqTracks*.id as Set
     }
 

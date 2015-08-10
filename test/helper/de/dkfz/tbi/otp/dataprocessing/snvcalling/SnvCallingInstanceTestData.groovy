@@ -5,26 +5,24 @@ import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingJob
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.ExternalScript
-import de.dkfz.tbi.otp.utils.HelperUtils
 import org.springframework.stereotype.Component
 import org.springframework.beans.factory.annotation.Autowired
 
 @Component()
-class SnvCallingInstanceTestData extends TestData {
+class SnvCallingInstanceTestData {
 
     @Autowired
     ProcessedMergedBamFileService processedMergedBamFileService
 
+    Realm realmManagement
+    Realm realmProcessing
     ProcessedMergedBamFile bamFileTumor
-    ProcessedMergedBamFile bamFileTumor2
     ProcessedMergedBamFile bamFileControl
-    SamplePair samplePair1
-    SamplePair samplePair2
+    SamplePair samplePair
     SnvConfig snvConfig
     ExternalScript externalScript_Joining
 
-    void createSnvObjects() {
-
+    static void createProcessingOptions() {
         createAndSaveProcessingOption([name: "PBS_snvPipeline_CALLING_WGS", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
         createAndSaveProcessingOption([name: "PBS_snvPipeline_CALLING_WES", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
         createAndSaveProcessingOption([name: "PBS_snvPipeline_SNV_ANNOTATION_WGS", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
@@ -33,38 +31,21 @@ class SnvCallingInstanceTestData extends TestData {
         createAndSaveProcessingOption([name: "PBS_snvPipeline_SNV_DEEPANNOTATION_WES", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
         createAndSaveProcessingOption([name: "PBS_snvPipeline_FILTER_VCF_WGS", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
         createAndSaveProcessingOption([name: "PBS_snvPipeline_FILTER_VCF_WES", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
+    }
 
-        project = createProject()
-        assert project.save(flush: true, failOnError: true)
-
-        Individual individual = createIndividual([project: project])
-        assert individual.save(flush: true, failOnError: true)
-
-        SeqType seqType = createSeqType()
-        assert seqType.save(flush: true, failOnError: true)
-
-        bamFileTumor = createProcessedMergedBamFile(individual, seqType)
-        bamFileTumor2 = createProcessedMergedBamFile(individual, seqType)
-        bamFileControl = createProcessedMergedBamFile(individual, seqType)
-
-        SampleTypePerProject.build(project: project, sampleType: bamFileTumor.sampleType, category: SampleType.Category.DISEASE)
-        SampleTypePerProject.build(project: project, sampleType: bamFileTumor2.sampleType, category: SampleType.Category.DISEASE)
-
-        samplePair1 = new SamplePair(
-                individual: individual,
-                sampleType1: bamFileTumor.sampleType,
-                sampleType2: bamFileControl.sampleType,
-                seqType: seqType
-                )
-        assert samplePair1.save()
-
-        samplePair2 = new SamplePair(
-                individual: individual,
-                sampleType1: bamFileTumor2.sampleType,
-                sampleType2: bamFileControl.sampleType,
-                seqType: seqType
-                )
-        assert samplePair2.save()
+    void createSnvObjects(File testDirectory = null) {
+        bamFileControl = DomainFactory.createProcessedMergedBamFile(MergingSet.build(), DomainFactory.PROCESSED_BAM_FILE_PROPERTIES)
+        if (testDirectory) {
+            ['Management', 'Processing'].each {
+                this."realm${it}" = DomainFactory."createRealmData${it}"(testDirectory, [
+                        name: bamFileControl.project.realmName,
+                        pbsOptions: '{"-l": {nodes: "1:lsdf", walltime: "30:00"}}',
+                ])
+            }
+        }
+        bamFileControl.seqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
+        assert bamFileControl.seqType.save(failOnError: true)
+        (bamFileTumor, samplePair) = createDisease(bamFileControl.mergingWorkPackage)
 
         externalScript_Joining = new ExternalScript(
                 scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
@@ -73,14 +54,25 @@ class SnvCallingInstanceTestData extends TestData {
                 author: "otptest",
         )
         assert externalScript_Joining.save()
+    }
 
+    SnvConfig createSnvConfig(String configuration = "testConfig") {
         snvConfig = new SnvConfig(
-                project: project,
-                seqType: seqType,
-                configuration: "testConfig",
+                project: samplePair.project,
+                seqType: samplePair.seqType,
+                configuration: configuration,
                 externalScriptVersion: "v1",
         )
-        assert snvConfig.save()
+        assert snvConfig.save(failOnError: true)
+        return snvConfig
+    }
+
+    static List createDisease(MergingWorkPackage controlMwp) {
+        SamplePair samplePair = DomainFactory.createDisease(controlMwp)
+        ProcessedMergedBamFile diseaseBamFile = DomainFactory.createProcessedMergedBamFile(
+                samplePair.mergingWorkPackage1,
+                DomainFactory.PROCESSED_BAM_FILE_PROPERTIES)
+        return [diseaseBamFile, samplePair]
     }
 
     SnvJobResult createAndSaveSnvJobResult(SnvCallingInstance instance, SnvCallingStep step, SnvJobResult inputResult = null, SnvProcessingStates processingState = SnvProcessingStates.FINISHED, boolean withdrawn = false) {
@@ -121,53 +113,10 @@ class SnvCallingInstanceTestData extends TestData {
             processingState: SnvProcessingStates.IN_PROGRESS,
             sampleType1BamFile: bamFileTumor,
             sampleType2BamFile: bamFileControl,
-            config: snvConfig,
+            config: properties.snvConfig ?: snvConfig ?: createSnvConfig(),
             instanceName: "2014-08-25_15h32",
-            samplePair: samplePair1
+            samplePair: samplePair
         ] + properties)
-    }
-
-    ProcessedMergedBamFile createProcessedMergedBamFile(Individual individual, SeqType seqType, String sampleTypeIdentifier = HelperUtils.uniqueString) {
-        SampleType sampleType = new SampleType(
-                name: "SampleType${sampleTypeIdentifier}")
-        assert sampleType.save(flush: true, failOnError: true)
-
-        Sample sample = new Sample (
-                individual: individual,
-                sampleType: sampleType)
-        assert sample.save(flush: true, failOnError: true)
-
-        MergingWorkPackage workPackage = createMergingWorkPackage(
-                sample: sample,
-                seqType: seqType
-        )
-        assert workPackage.save(flush: true, failOnError: true)
-
-        MergingSet mergingSet = new MergingSet(
-                mergingWorkPackage: workPackage)
-        assert mergingSet.save(flush: true, failOnError: true)
-
-        DomainFactory.assignNewProcessedBamFile(mergingSet)
-
-        MergingPass mergingPass = new MergingPass(
-                identifier: 1,
-                mergingSet: mergingSet)
-        assert mergingPass.save(flush: true, failOnError: true)
-
-        ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(
-                mergingPass, [
-                    fileExists: true,
-                    fileSize: 123456,
-                    md5sum: '0123456789ABCDEF0123456789ABCDEF',
-                    qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-                    status: AbstractBamFile.State.PROCESSED,
-                    fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
-                    coverage: 1,
-                ]
-        )
-        assert bamFile.save(flush: true, failOnError: true)
-
-        return bamFile
     }
 
     File createConfigFileWithContentInFileSystem(File configFile, String configuration) {
@@ -212,7 +161,7 @@ class SnvCallingInstanceTestData extends TestData {
         return file
     }
 
-    ProcessingOption createAndSaveProcessingOption(Map properties = [:]){
+    static ProcessingOption createAndSaveProcessingOption(Map properties = [:]){
         ProcessingOption processingOption = new ProcessingOption([
                 name:"PBS_Name",
                 type: "DKFZ",

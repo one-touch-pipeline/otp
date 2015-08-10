@@ -87,45 +87,16 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         }
 
         testData = new SnvCallingInstanceTestData()
-        testData.createObjects()
-        realm_processing = testData.realm
-        realm_processing.stagingRootPath = "${testDirectory}/staging"
-        assert realm_processing.save()
+        testData.createSnvObjects(testDirectory)
+        realm_processing = testData.realmProcessing
 
-        Realm realm_management = DomainFactory.createRealmDataManagementDKFZ([
-            rootPath: "${testDirectory}/root",
-            processingRootPath: "${testDirectory}/processing",
-            stagingRootPath: null
-        ])
-        assert realm_management.save()
+        samplePair = testData.samplePair
+        project = samplePair.project
+        individual = samplePair.individual
+        seqType = samplePair.seqType
 
-        ProcessingOption processingOptionWGS = new ProcessingOption(
-                name:"PBS_snvPipeline_CALLING_WGS",
-                type: "DKFZ",
-                value:'{"-l": {walltime: "20:00:00"}}',
-                dateCreated: new Date(),
-                comment:"according to the CO group (Ivo) 20h is enough for the snv WGS jobs",
-        )
-        assert processingOptionWGS.save()
-
-        ProcessingOption processingOptionWES = new ProcessingOption(
-                name:"PBS_snvPipeline_CALLING_WES",
-                type: "DKFZ",
-                value:'{"-l": {walltime: "5:00:00"}}',
-                dateCreated: new Date(),
-                comment:"according to the CO group (Ivo) 5h is enough for the snv WES jobs",
-        )
-        assert processingOptionWES.save()
-
-        project = testData.project
-        individual = testData.individual
-        seqType = testData.seqType
-
-        processedMergedBamFile1 = createProcessedMergedBamFile("1")
-        assert processedMergedBamFile1.save()
-        processedMergedBamFile2 = createProcessedMergedBamFile("2")
-        assert processedMergedBamFile2.save()
-
+        processedMergedBamFile1 = testData.bamFileTumor
+        processedMergedBamFile2 = testData.bamFileControl
 
         externalScript_Calling = new ExternalScript(
                 scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier,
@@ -143,15 +114,6 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         )
         assert snvConfig.save()
 
-        SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile1.sampleType, category: SampleType.Category.DISEASE)
-
-        samplePair = new SamplePair(
-                individual: individual,
-                sampleType1: processedMergedBamFile1.sampleType,
-                sampleType2: processedMergedBamFile2.sampleType,
-                seqType: seqType)
-        assert samplePair.save()
-
         snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: SOME_INSTANCE_NAME,
                 config: snvConfig,
@@ -168,13 +130,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 samplePair: samplePair)
         assert snvCallingInstance2.save()
 
-        externalScript_Joining = new ExternalScript(
-                scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
-                scriptVersion: 'v1',
-                filePath: "/tmp/scriptLocation/joining.sh",
-                author: "otptest",
-                )
-        assert externalScript_Joining.save()
+        externalScript_Joining = testData.externalScript_Joining
 
         snvJobResult = new SnvJobResult(
                 step: SnvCallingStep.CALLING,
@@ -258,6 +214,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testMaybeSubmitWithSnvCallingInput() {
+        testData.createProcessingOptions()
         LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
         snvJobResult.delete()
         snvCallingJob.metaClass.getProcessParameterObject = { return snvCallingInstance }
@@ -275,8 +232,8 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
                 String qsubParameterCommandPart = "-v CONFIG_FILE=" +
                         "${snvCallingInstance.configFilePath.absoluteDataManagementPath}," +
-                        "pid=654321," +
-                        "PID=654321," +
+                        "pid=${snvCallingInstance.individual.pid}," +
+                        "PID=${snvCallingInstance.individual.pid}," +
                         "TUMOR_BAMFILE_FULLPATH_BP=${tumorBamFile}," +
                         "CONTROL_BAMFILE_FULLPATH_BP=${controlBamFile}," +
                         "TOOL_ID=snvCalling," +
@@ -301,6 +258,9 @@ CHROMOSOME_INDICES=( {1..21} XY)
                     snvCallingInstance.configFilePath.absoluteDataManagementPath,
                     snvCallingInstance.config.configuration)
         }
+
+        createProcessedMergedBamFileOnFileSystem(snvCallingInstance.sampleType1BamFile)
+        createProcessedMergedBamFileOnFileSystem(snvCallingInstance.sampleType2BamFile)
 
         schedulerService.startingJobExecutionOnCurrentThread(snvCallingJob)
         try {
@@ -327,15 +287,17 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         snvCallingJob.metaClass.changeProcessingStateOfJobResult = { SnvCallingInstance instance, SnvProcessingStates newState -> }
 
+        createProcessedMergedBamFileOnFileSystem(snvCallingInstance.sampleType1BamFile)
+        createProcessedMergedBamFileOnFileSystem(snvCallingInstance.sampleType2BamFile)
+
         snvCallingJob.validate(snvCallingInstance)
     }
 
 
-    private ProcessedMergedBamFile createProcessedMergedBamFile(String identifier) {
+    private void createProcessedMergedBamFileOnFileSystem(ProcessedMergedBamFile bamFile) {
 
         final String bamFileContent = 'I am a test BAM file. Nice to meet you. :)'
 
-        final ProcessedMergedBamFile bamFile = testData.createProcessedMergedBamFile(individual, seqType, identifier)
         bamFile.fileSize = bamFileContent.length()
         assert bamFile.save(failOnError: true)
 
@@ -343,7 +305,5 @@ CHROMOSOME_INDICES=( {1..21} XY)
         assert file.path.startsWith(testDirectory.path)
         file.parentFile.mkdirs()
         file.text = bamFileContent
-
-        return bamFile
     }
 }

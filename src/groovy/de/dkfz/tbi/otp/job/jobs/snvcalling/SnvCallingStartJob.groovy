@@ -45,13 +45,8 @@ class SnvCallingStartJob extends AbstractStartJobImpl {
                         samplePair.seqType
                         )
 
-                AbstractMergedBamFile sampleType1BamFile = samplePair.getAbstractMergedBamFileInProjectFolder(
-                        samplePair.sampleType1
-                        )
-
-                AbstractMergedBamFile sampleType2BamFile = samplePair.getAbstractMergedBamFileInProjectFolder(
-                        samplePair.sampleType2
-                        )
+                AbstractMergedBamFile sampleType1BamFile = samplePair.mergingWorkPackage1.processableBamFileInProjectFolder
+                AbstractMergedBamFile sampleType2BamFile = samplePair.mergingWorkPackage2.processableBamFileInProjectFolder
 
                 SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
                         samplePair: samplePair,

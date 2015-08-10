@@ -4,6 +4,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
 import de.dkfz.tbi.otp.dataprocessing.MergingPass
 import de.dkfz.tbi.otp.dataprocessing.MergingSet
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingJob
 import grails.test.mixin.*
 import org.junit.*
@@ -411,8 +412,15 @@ class SnvJobResultUnitTests {
                 pid: "pid"
                 )
 
+        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+                sample: new Sample(
+                        individual: individual,
+                        )
+                )
+
         SamplePair samplePair = new SamplePair(
-                individual: individual,
+                mergingWorkPackage1: mergingWorkPackage,
+                mergingWorkPackage2: mergingWorkPackage,
                 )
 
         SnvCallingInstance snvCallingInstance = new SnvCallingInstance(

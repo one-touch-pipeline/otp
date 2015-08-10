@@ -1,5 +1,6 @@
 package workflows
 
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import org.junit.Before
@@ -32,11 +33,17 @@ class ProcessedMergedBamFileSnvWorkflowTests extends AbstractSnvWorkflowTests {
                 dirName: "tmp",
         )
 
-        SnvCallingInstanceTestData testData = new SnvCallingInstanceTestData()
-        bamFileTumor = testData.createProcessedMergedBamFile(individual, seqType, "TUMOR")
+        bamFileTumor = DomainFactory.createProcessedMergedBamFile(
+                MergingWorkPackage.build(
+                        sample: Sample.build(individual: individual),
+                        seqType: seqType,
+                ),
+                PROCESSED_BAM_FILE_PROPERTIES)
         bamFileTumor.workPackage.bamFileInProjectFolder = bamFileTumor
         assert bamFileTumor.workPackage.save(flush: true)
-        bamFileControl = testData.createProcessedMergedBamFile(individual, seqType, "CONTROL")
+        bamFileControl = DomainFactory.createProcessedMergedBamFile(
+                DomainFactory.createMergingWorkPackage(bamFileTumor.mergingWorkPackage),
+                PROCESSED_BAM_FILE_PROPERTIES)
         bamFileControl.workPackage.bamFileInProjectFolder = bamFileControl
         assert bamFileControl.workPackage.save(flush: true)
 

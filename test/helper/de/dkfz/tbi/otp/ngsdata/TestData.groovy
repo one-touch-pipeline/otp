@@ -20,26 +20,45 @@ class TestData {
 
     final static ARBITRARY_LENGTH_FOR_REFERENCE_GENOME = 100
 
+    @Deprecated
     String referenceGenomePath
+    @Deprecated
     File directory
+    @Deprecated
     File file
-
+    @Deprecated
     Realm realm
+    @Deprecated
     Project project
+    @Deprecated
     Individual individual
+    @Deprecated
     SampleType sampleType
+    @Deprecated
     Sample sample
+    @Deprecated
     SeqType seqType
+    @Deprecated
     SeqType exomeSeqType
+    @Deprecated
     SeqCenter seqCenter
+    @Deprecated
     SeqPlatform seqPlatform
+    @Deprecated
     Run run
+    @Deprecated
     RunSegment runSegment
+    @Deprecated
     SoftwareTool softwareTool
+    @Deprecated
     SeqTrack seqTrack
+    @Deprecated
     FileType fileType
+    @Deprecated
     DataFile dataFile
+    @Deprecated
     ReferenceGenome referenceGenome
+    @Deprecated
     ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType
 
     @Rule
@@ -144,6 +163,7 @@ class TestData {
         ] + properties)
     }
 
+    @Deprecated
     Individual createIndividual(Map properties = [:]) {
         return new Individual([
             pid: "654321",
@@ -154,14 +174,14 @@ class TestData {
         ] + properties)
     }
 
-    SampleType createSampleType(Map properties = [:]) {
+    static SampleType createSampleType(Map properties = [:]) {
         return new SampleType([
             name: "TUMOR",
             specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
         ] + properties)
     }
 
-
+    @Deprecated
     Sample createSample(Map properties = [:]) {
         return new Sample([
             individual: individual,
@@ -188,6 +208,7 @@ class TestData {
         return seqPlatform
     }
 
+    @Deprecated
     SeqTrack createSeqTrack(Map properties = [:]) {
         return new SeqTrack([
             laneId: "123",
@@ -199,6 +220,7 @@ class TestData {
         ] + properties)
     }
 
+    @Deprecated
     FastqcProcessedFile createFastqcProcessedFile(Map properties = [:]) {
         return new FastqcProcessedFile([
             fileExists: true,
@@ -207,7 +229,7 @@ class TestData {
         ] + properties)
     }
 
-    FastqcBasicStatistics createFastqcBasicStatistics(Map properties = [:]) {
+    static FastqcBasicStatistics createFastqcBasicStatistics(Map properties = [:]) {
         return new FastqcBasicStatistics([
             fileType         : 'Conventional base calls',
             encoding         : 'Sanger / Illumina 1.9',
@@ -225,6 +247,7 @@ class TestData {
                 )
     }
 
+    @Deprecated
     DataFile createDataFile(Map properties = [:]) {
         return new DataFile([
             fileName: "datafile",
@@ -255,6 +278,7 @@ class TestData {
     }
 
 
+    @Deprecated
     ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqType(Map properties = [:]) {
         return new ReferenceGenomeProjectSeqType([
             project: project,
@@ -263,10 +287,12 @@ class TestData {
         ] + properties)
     }
 
+    @Deprecated
     RunSegment createRunSegment(Run run) {
         return createRunSegment(run: run)
     }
 
+    @Deprecated
     RunSegment createRunSegment(Map properties = [:]) {
         return new RunSegment([
             filesStatus: FilesStatus.FILES_CORRECT,
@@ -279,10 +305,12 @@ class TestData {
         ] + properties)
     }
 
+    @Deprecated
     Run createRun(String name) {
         return createRun(name: name)
     }
 
+    @Deprecated
     Run createRun(Map properties = [:]) {
         return new Run([
             name: "TestRun",
@@ -292,7 +320,7 @@ class TestData {
         ] + properties)
     }
 
-
+    @Deprecated
     ExomeSeqTrack createExomeSeqTrack(Run run) {
         ExomeSeqTrack exomeSeqTrack = new ExomeSeqTrack(
                 laneId: "laneId",
@@ -308,7 +336,7 @@ class TestData {
     }
 
 
-    LibraryPreparationKit createLibraryPreparationKit(String name) {
+    static LibraryPreparationKit createLibraryPreparationKit(String name) {
         LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(
                 name: name
                 )
@@ -317,7 +345,7 @@ class TestData {
     }
 
 
-    BedFile createBedFile(ReferenceGenome referenceGenome, LibraryPreparationKit libraryPreparationKit) {
+    static BedFile createBedFile(ReferenceGenome referenceGenome, LibraryPreparationKit libraryPreparationKit) {
         BedFile bedFile = new BedFile (
                 fileName: "BedFile",
                 targetSize: 10000000,
@@ -337,7 +365,7 @@ class TestData {
     }
 
 
-    void addKitToExomeSeqTrack(ExomeSeqTrack exomeSeqTrack, LibraryPreparationKit sameLibraryPreparationKit) {
+    static void addKitToExomeSeqTrack(ExomeSeqTrack exomeSeqTrack, LibraryPreparationKit sameLibraryPreparationKit) {
         exomeSeqTrack.libraryPreparationKit = sameLibraryPreparationKit
         exomeSeqTrack.kitInfoReliability = InformationReliability.KNOWN
         assertNotNull(exomeSeqTrack.save(flush: true))
@@ -365,6 +393,7 @@ class TestData {
         return alignmentPass
     }
 
+    @Deprecated
     ProcessedSaiFile createProcessedSaiFile(Map properties = [:]) {
         return new ProcessedSaiFile([
             fileExists: true,
@@ -420,14 +449,14 @@ class TestData {
         return mergingWorkPackage
     }
 
-    MergingSet createMergingSet(Map properties = [:]) {
+    static MergingSet createMergingSet(Map properties = [:]) {
         return new MergingSet([
             identifier: 0,
         ] + properties)
     }
 
 
-    MergingPass createMergingPass(Map properties = [:]) {
+    static MergingPass createMergingPass(Map properties = [:]) {
         return new MergingPass([
             identifier: 0,
             description: "mergingPass",

@@ -17,7 +17,6 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.jobs.TestJobHelper
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.SampleType.Category
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
 
 public class SnvCallingStartJobTests extends GroovyScriptAwareTestCase {
@@ -38,42 +37,28 @@ public class SnvCallingStartJobTests extends GroovyScriptAwareTestCase {
         createUserAndRoles()
         SpringSecurityUtils.doWithAuth('admin') { runScript('scripts/workflows/SnvWorkflow.groovy') }
         snvTestData = new SnvCallingInstanceTestData()
+        snvTestData.createSnvObjects()
 
         SamplePair mockSamplePair
         try {
             // arrange: create basic objects / mock required services
-            Project project = snvTestData.createProject()
-            assert project.save(flush: true)
-            Individual individual = snvTestData.createIndividual([project: project])
-            assert individual.save(flush: true)
-            SeqType seqType = snvTestData.createSeqType()
-            assert seqType.save(flush: true)
+            Project project = snvTestData.samplePair.project
+            SeqType seqType = snvTestData.samplePair.seqType
 
-            ProcessedMergedBamFile mockBam1 = snvTestData.createProcessedMergedBamFile(individual, seqType, "1")
+            ProcessedMergedBamFile mockBam1 = snvTestData.bamFileTumor
             mockBam1.workPackage.bamFileInProjectFolder = mockBam1
             assert mockBam1.workPackage.save(flush: true)
-            ProcessedMergedBamFile mockBam2 = snvTestData.createProcessedMergedBamFile(individual, seqType, "2")
+            ProcessedMergedBamFile mockBam2 = snvTestData.bamFileControl
             mockBam2.workPackage.bamFileInProjectFolder = mockBam2
             assert mockBam2.workPackage.save(flush: true)
 
             // sampletypes for sample pair
             SampleType sampleType1 = mockBam1.sampleType
-            SampleTypePerProject sampleTypePerProject = new SampleTypePerProject(
-                    project: project,
-                    sampleType: sampleType1,
-                    category: Category.DISEASE,
-            )
-            assert sampleTypePerProject.save(flush: true)
             SampleType sampleType2 = mockBam2.sampleType
 
             // Sample pair + service-mocks to make sure it is found by the startJob
-            mockSamplePair = new SamplePair(
-                    processingStatus: ProcessingStatus.NEEDS_PROCESSING,
-                    individual: individual,
-                    sampleType1: sampleType1,
-                    sampleType2: sampleType2,
-                    seqType: seqType,
-                    )
+            mockSamplePair = snvTestData.samplePair
+            mockSamplePair.processingStatus = ProcessingStatus.NEEDS_PROCESSING
             assert mockSamplePair.save(flush: true)
             mockSamplePair.metaClass.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn = { SampleType sampleType ->
                 if (sampleType == sampleType1) {
@@ -90,13 +75,7 @@ public class SnvCallingStartJobTests extends GroovyScriptAwareTestCase {
             SnvCallingInstanceTestData.createOrFindExternalScript()
 
             // snv config
-            SnvConfig config = new SnvConfig (
-                    project: project,
-                    seqType: seqType,
-                    configuration: "testConfig",
-                    externalScriptVersion: "v1"
-                    )
-            assert config.save(flush: true)
+            SnvConfig config = snvTestData.createSnvConfig()
 
             // validate starting condition: we shouldn't have done anything yet
             snvCallingStartJob.jobExecutionPlan = TestJobHelper.findJobExecutionPlan(PLAN_NAME)

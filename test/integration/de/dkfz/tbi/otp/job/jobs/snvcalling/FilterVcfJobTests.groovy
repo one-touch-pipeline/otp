@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -79,34 +80,15 @@ CHROMOSOME_INDICES=( {1..21} X Y)
             assert testDirectory.mkdirs()
         }
 
-        snvCallingInstanceTestData.createSnvObjects()
-
-        Realm realm_processing = DomainFactory.createRealmDataProcessingDKFZ([
-            processingRootPath: '${testDirectory}/processing',
-            stagingRootPath : "${testDirectory}/staging"
-        ])
-        assert realm_processing.save()
-
-        Realm realm_management = DomainFactory.createRealmDataManagementDKFZ([
-            rootPath: "${testDirectory}/root",
-            processingRootPath: "${testDirectory}/processing",
-            stagingRootPath: null
-        ])
-        assert realm_management.save()
+        snvCallingInstanceTestData.createSnvObjects(testDirectory)
 
         processedMergedBamFile1 = snvCallingInstanceTestData.bamFileTumor
         processedMergedBamFile2 = snvCallingInstanceTestData.bamFileControl
 
         sampleType1 = processedMergedBamFile1.sample.sampleType
-        sampleType1.name = "sampletype1"
-        assert sampleType1.save(flush: true)
         sampleType2 = processedMergedBamFile2.sample.sampleType
-        sampleType2.name = "sampletype2"
-        assert sampleType2.save(flush: true)
 
-        SnvConfig snvConfig = snvCallingInstanceTestData.snvConfig
-        snvConfig.configuration = CONFIGURATION
-        assert snvConfig.save()
+        SnvConfig snvConfig = snvCallingInstanceTestData.createSnvConfig(CONFIGURATION)
 
         snvCallingInstance1 = snvCallingInstanceTestData.createSnvCallingInstance([
             sampleType1BamFile: processedMergedBamFile1,
@@ -284,6 +266,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testMaybeSubmit_InputFileExists() {
+        snvCallingInstanceTestData.createProcessingOptions()
         LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
         filterVcfJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         filterVcfJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult ->
@@ -305,8 +288,8 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
                 String qsubParameterCommandPart = "-v CONFIG_FILE=" +
                         "${snvCallingInstance2.configFilePath.absoluteDataManagementPath}," +
-                        "pid=654321," +
-                        "PID=654321," +
+                        "pid=${snvCallingInstance2.individual.pid}," +
+                        "PID=${snvCallingInstance2.individual.pid}," +
                         "TOOL_ID=snvFilter," +
                         "SNVFILE_PREFIX=snvs_," +
                         "TUMOR_BAMFILE_FULLPATH_BP=${pmbf1.absolutePath}," +

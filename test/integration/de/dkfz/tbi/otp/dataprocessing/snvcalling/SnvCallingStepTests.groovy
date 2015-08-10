@@ -139,7 +139,7 @@ class SnvCallingStepTests extends GroovyTestCase {
         assert snvCallingInstance1.save()
 
         OtpPath expectedParentPath = snvCallingInstance1.snvInstancePath
-        Project expectedProject = testData.project
+        Project expectedProject = testData.samplePair.project
 
         OtpPath actualPathCalling = SnvCallingStep.CALLING.getCheckpointFilePath(snvCallingInstance1)
         assert actualPathCalling.project == expectedProject

@@ -91,27 +91,17 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         }
 
         testData = new SnvCallingInstanceTestData()
-        testData.createObjects()
+        testData.createSnvObjects(testDirectory)
 
-        realm_processing = testData.realm
-        realm_processing.stagingRootPath = "${testDirectory}/staging"
-        assert realm_processing.save()
+        realm_processing = testData.realmProcessing
 
-        Realm realm_management = DomainFactory.createRealmDataManagementDKFZ([
-                rootPath: "${testDirectory}/root",
-                processingRootPath: "${testDirectory}/processing",
-                stagingRootPath: null
-        ])
-        assert realm_management.save()
+        samplePair = testData.samplePair
+        project = samplePair.project
+        individual = samplePair.individual
+        seqType = samplePair.seqType
 
-        project = testData.project
-        individual = testData.individual
-        seqType = testData.seqType
-
-        processedMergedBamFile1 = testData.createProcessedMergedBamFile(individual, seqType, "1")
-        processedMergedBamFile2 = testData.createProcessedMergedBamFile(individual, seqType, "2")
-        SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile1.sampleType, category: SampleType.Category.DISEASE)
-        SampleTypePerProject.build(project: project, sampleType: processedMergedBamFile2.sampleType, category: SampleType.Category.CONTROL)
+        processedMergedBamFile1 = testData.bamFileTumor
+        processedMergedBamFile2 = testData.bamFileControl
 
         externalScript_Calling = new ExternalScript(
                 scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier,
@@ -129,13 +119,6 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         )
         assert snvConfig.save(flush: true)
 
-        samplePair = new SamplePair(
-                individual: individual,
-                sampleType1: processedMergedBamFile1.sampleType,
-                sampleType2: processedMergedBamFile2.sampleType,
-                seqType: seqType)
-        assert samplePair.save(flush: true)
-
         snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: SOME_INSTANCE_NAME,
                 config: snvConfig,
@@ -144,13 +127,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 samplePair: samplePair)
         assert snvCallingInstance.save(flush: true)
 
-         externalScript_Joining = new ExternalScript(
-                scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
-                scriptVersion: 'v1',
-                filePath: "/tmp/scriptLocation/joining.sh",
-                author: "otptest",
-        )
-        assert externalScript_Joining.save()
+         externalScript_Joining = testData.externalScript_Joining
 
         snvCallingJobResult = new SnvJobResult(
                 step: SnvCallingStep.CALLING,
@@ -419,12 +396,12 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
     @Test
     void testGetSnvPBSOptionsNameSeqTypeSpecific_AnnotationStep_ExomeSeqType() {
-        assert "snvPipeline_SNV_ANNOTATION_WES" == abstractSnvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(testData.exomeSeqType)
+        assert "snvPipeline_SNV_ANNOTATION_WES" == abstractSnvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(DomainFactory.createExomeSeqType())
     }
 
     @Test
     void testGetSnvPBSOptionsNameSeqTypeSpecific_AnnotationStep_WholeGenomeSeqType() {
-        assert "snvPipeline_SNV_ANNOTATION_WGS" == abstractSnvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(testData.seqType)
+        assert "snvPipeline_SNV_ANNOTATION_WGS" == abstractSnvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(DomainFactory.createWholeGenomeSeqType())
     }
 
     @Test
@@ -432,7 +409,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         SnvCallingJob snvCallingJob = applicationContext.getBean('snvCallingJob',
                 DomainFactory.createAndSaveProcessingStep(SnvCallingJob.toString()), [])
         snvCallingJob.log = log
-        assert "snvPipeline_CALLING_WES" == snvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(testData.exomeSeqType)
+        assert "snvPipeline_CALLING_WES" == snvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(DomainFactory.createExomeSeqType())
     }
 
     @Test
@@ -440,7 +417,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         SnvDeepAnnotationJob snvDeepAnnotationJob = applicationContext.getBean('snvDeepAnnotationJob',
                 DomainFactory.createAndSaveProcessingStep(SnvDeepAnnotationJob.toString()), [])
         snvDeepAnnotationJob.log = log
-        assert "snvPipeline_SNV_DEEPANNOTATION_WES" == snvDeepAnnotationJob.getSnvPBSOptionsNameSeqTypeSpecific(testData.exomeSeqType)
+        assert "snvPipeline_SNV_DEEPANNOTATION_WES" == snvDeepAnnotationJob.getSnvPBSOptionsNameSeqTypeSpecific(DomainFactory.createExomeSeqType())
     }
 
     @Test
@@ -448,7 +425,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         FilterVcfJob filterVcfJob = applicationContext.getBean('filterVcfJob',
                 DomainFactory.createAndSaveProcessingStep(FilterVcfJob.toString()), [])
         filterVcfJob.log = log
-        assert "snvPipeline_FILTER_VCF_WES" == filterVcfJob.getSnvPBSOptionsNameSeqTypeSpecific(testData.exomeSeqType)
+        assert "snvPipeline_FILTER_VCF_WES" == filterVcfJob.getSnvPBSOptionsNameSeqTypeSpecific(DomainFactory.createExomeSeqType())
     }
 
     @Test

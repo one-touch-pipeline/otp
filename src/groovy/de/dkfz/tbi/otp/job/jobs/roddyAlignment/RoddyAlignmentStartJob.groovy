@@ -29,14 +29,19 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
             return
         }
 
-        RoddyBamFile.withTransaction {
-            MergingWorkPackage mergingWorkPackage = findProcessableMergingWorkPackages(minPriority).find { !isDataInstallationWFInProgress(it) }
-            if (mergingWorkPackage) {
-                mergingWorkPackage.needsProcessing = false
-                assert mergingWorkPackage.save(failOnError: true)
-                RoddyBamFile roddyBamFile = createRoddyBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
-                createProcess(roddyBamFile)
+        try {
+            RoddyBamFile.withTransaction {
+                MergingWorkPackage mergingWorkPackage = findProcessableMergingWorkPackages(minPriority).find { !isDataInstallationWFInProgress(it) }
+                if (mergingWorkPackage) {
+                    mergingWorkPackage.needsProcessing = false
+                    assert mergingWorkPackage.save(failOnError: true)
+                    RoddyBamFile roddyBamFile = createRoddyBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
+                    createProcess(roddyBamFile)
+                }
             }
+        } catch (Throwable e) {
+            log.error "Exception in ${getClass().simpleName}", e
+            throw new RuntimeException("Exception in ${getClass().simpleName}", e)
         }
     }
 

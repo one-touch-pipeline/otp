@@ -10,7 +10,6 @@ import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingJob
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExternalScript
 import org.joda.time.Duration
-import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import org.junit.Ignore
 import org.junit.Test
 
@@ -55,7 +54,10 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
     final String CO_SCRIPTS_BASE_DIR = "/path/to/programs/otp/COWorkflows_${VERSION}/resources/analysisTools"
     final String SNV_PIPELINE_SCRIPTS_PATH = "${CO_SCRIPTS_BASE_DIR}/snvPipeline"
     final String ANALYSIS_SCRIPTS_PATH = "${CO_SCRIPTS_BASE_DIR}/tools"
-
+    final Double COVERAGE = 30.0
+    final Map PROCESSED_BAM_FILE_PROPERTIES = DomainFactory.PROCESSED_BAM_FILE_PROPERTIES + [
+            coverage: COVERAGE,
+    ]
 
     ProcessedMergedBamFileService processedMergedBamFileService
 
@@ -143,7 +145,7 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
                 project: project,
                 seqType: seqType,
                 sampleType: sampleTypeTumor,
-                coverage: 1,
+                coverage: COVERAGE,
                 numberOfLanes: null,
         )
 
@@ -151,7 +153,7 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
                 project: project,
                 seqType: seqType,
                 sampleType: sampleTypeControl,
-                coverage: 1,
+                coverage: COVERAGE,
                 numberOfLanes: null,
         )
     }
@@ -217,13 +219,7 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
                 category: SampleType.Category.CONTROL,
         )
 
-        samplePair = SamplePair.build(
-                processingStatus: SamplePair.ProcessingStatus.NEEDS_PROCESSING,
-                sampleType1: sampleTypeTumor,
-                sampleType2: sampleTypeControl,
-                individual: individual,
-                seqType: seqType,
-        )
+        samplePair = DomainFactory.createSamplePair(bamFileTumor.mergingWorkPackage, bamFileControl.mergingWorkPackage)
     }
 
 

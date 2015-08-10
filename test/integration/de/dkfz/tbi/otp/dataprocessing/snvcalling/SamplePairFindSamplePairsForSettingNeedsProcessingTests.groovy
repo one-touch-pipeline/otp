@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -25,12 +26,12 @@ class SamplePairFindSamplePairsForSettingNeedsProcessingTests {
         testData = new SnvCallingInstanceTestData()
         testData.createSnvObjects()
 
-        samplePair = testData.samplePair1
+        samplePair = testData.samplePair
         samplePair.processingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
         assert samplePair.save(failOnError: true, flush: true)
 
         project = samplePair.project
-        sampleType1 = testData.samplePair1.sampleType1
+        sampleType1 = testData.samplePair.sampleType1
         sampleType1Stpp = exactlyOneElement(SampleTypePerProject.findAllWhere(project: project, sampleType: sampleType1))
     }
 
@@ -78,19 +79,21 @@ class SamplePairFindSamplePairsForSettingNeedsProcessingTests {
 
     @Test
     void testTwoResults() {
-        testData.samplePair2.processingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
-        assert testData.samplePair2.save(failOnError: true)
+        def (ProcessedMergedBamFile bamFileTumor2, SamplePair samplePair2) = testData.createDisease(testData.bamFileControl.mergingWorkPackage)
+        samplePair2.processingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
+        assert samplePair2.save(failOnError: true)
         assert TestCase.containSame(
                 SamplePair.findSamplePairsForSettingNeedsProcessing(),
-                [samplePair, testData.samplePair2]
+                [samplePair, samplePair2]
         )
     }
 
     @Test
     void testSnvCallingInstanceForOtherSamplePairExists() {
+        def (ProcessedMergedBamFile bamFileTumor2, SamplePair samplePair2) = testData.createDisease(testData.bamFileControl.mergingWorkPackage)
         testData.createAndSaveSnvCallingInstance(
-                samplePair: testData.samplePair2,
-                sampleType1BamFile: testData.bamFileTumor2,
+                samplePair: samplePair2,
+                sampleType1BamFile: bamFileTumor2,
         )
         assertFindsOne()
     }

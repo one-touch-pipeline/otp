@@ -49,21 +49,15 @@ class SnvCallingInstance {
      */
     SnvProcessingStates processingState = SnvProcessingStates.IN_PROGRESS
 
-    static boolean isConsistentWithSamplePair(AbstractMergedBamFile bamFile, SnvCallingInstance instance, SampleType sampleType) {
-        return (bamFile.individual == instance.individual &&
-                bamFile.seqType == instance.seqType &&
-                bamFile.sampleType.id == sampleType.id)
-    }
-
     static constraints = {
         sampleType1BamFile validator: { AbstractMergedBamFile val, SnvCallingInstance obj ->
             obj.samplePair &&
                     val.fileOperationStatus == FileOperationStatus.PROCESSED &&
-                    isConsistentWithSamplePair(val, obj, obj.samplePair.sampleType1)}
+                    val.mergingWorkPackage.id == obj.samplePair.mergingWorkPackage1.id}
         sampleType2BamFile validator: { AbstractMergedBamFile val, SnvCallingInstance obj ->
             obj.samplePair &&
                     val.fileOperationStatus == FileOperationStatus.PROCESSED &&
-                    isConsistentWithSamplePair(val, obj, obj.samplePair.sampleType2)}
+                    val.mergingWorkPackage.id == obj.samplePair.mergingWorkPackage2.id}
         latestDataFileCreationDate validator: { Date latestDataFileCreationDate, SnvCallingInstance instance ->
             latestDataFileCreationDate == AbstractBamFile.getLatestSequenceDataFileCreationDate(instance.sampleType1BamFile, instance.sampleType2BamFile)
         }

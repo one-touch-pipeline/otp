@@ -68,21 +68,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         testDirectory = TestCase.createEmptyTestDirectory()
 
         testData = new SnvCallingInstanceTestData()
-        testData.createSnvObjects()
-
-        Realm realm_processing = DomainFactory.createRealmDataProcessingDKFZ([
-            processingRootPath: "${testDirectory}/processing",
-            rootPath: "${testDirectory}/root",
-            stagingRootPath : "${testDirectory}/staging"
-        ])
-        assert realm_processing.save()
-
-        Realm realm_management = DomainFactory.createRealmDataManagementDKFZ([
-            rootPath: "${testDirectory}/root",
-            processingRootPath: "${testDirectory}/processing",
-            stagingRootPath: null
-        ])
-        assert realm_management.save()
+        testData.createSnvObjects(testDirectory)
+        testData.createSnvConfig()
 
         processedMergedBamFile1 = testData.bamFileTumor
         ProcessedMergedBamFile processedMergedBamFile2 = testData.bamFileControl
@@ -208,6 +195,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testMaybeSubmit() {
+        testData.createProcessingOptions()
         LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
         snvAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         snvAnnotationJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult -> }
@@ -236,8 +224,8 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
             String commandParameterPart = "-v CONFIG_FILE=" +
                     "${snvCallingInstance2.configFilePath.absoluteDataManagementPath}," +
-                    "pid=654321," +
-                    "PID=654321," +
+                    "pid=${snvCallingInstance2.individual.pid}," +
+                    "PID=${snvCallingInstance2.individual.pid}," +
                     "TUMOR_BAMFILE_FULLPATH_BP=${bamFile}"
                     "TOOL_ID=snvAnnotation," +
                     "FILENAME_VCF_IN=${inputFileCopy}," +

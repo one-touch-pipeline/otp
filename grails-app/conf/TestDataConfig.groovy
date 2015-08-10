@@ -46,8 +46,9 @@ testDataConfig {
             processingRootPath = {new File(TestCase.uniqueNonExistentPath, 'processing').path}
             loggingRootPath = {new File(TestCase.uniqueNonExistentPath, 'log').path}
             programsRootPath = {new File(TestCase.uniqueNonExistentPath, 'programs').path}
-            webHost = 'localhost'
-            host = 'localhost'
+            stagingRootPath = {new File(TestCase.uniqueNonExistentPath, 'staging').path}
+            webHost = 'host.invalid'
+            host = 'host.invalid'
             port = 22
             unixUser = '!fakeuser'
             timeout = 60

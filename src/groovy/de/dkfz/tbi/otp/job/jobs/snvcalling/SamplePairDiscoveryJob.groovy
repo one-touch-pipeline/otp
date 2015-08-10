@@ -1,7 +1,5 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import org.joda.time.LocalDate
-
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
@@ -66,7 +64,7 @@ class SamplePairDiscoveryJob extends AbstractEndStateAwareJobImpl {
 
     void createMissingDiseaseControlSamplePairs() {
         final Collection<SamplePair> samplePairs =
-                SamplePair.findMissingDiseaseControlSamplePairs(new LocalDate(2014, 12, 1).toDate())
+                SamplePair.findMissingDiseaseControlSamplePairs()
         log.info "Creating ${samplePairs.size()} new ${SamplePair.simpleName} instance(s)."
         SamplePair.setProcessingStatus(samplePairs, ProcessingStatus.NEEDS_PROCESSING)
     }

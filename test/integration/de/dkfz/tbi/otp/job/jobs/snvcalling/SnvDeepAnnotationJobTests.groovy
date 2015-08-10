@@ -89,34 +89,12 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         }
 
         testData = new SnvCallingInstanceTestData()
-        testData.createSnvObjects()
-
-        Realm realm_processing = DomainFactory.createRealmDataProcessingDKFZ([
-            processingRootPath: '${testDirectory}/processing',
-            stagingRootPath   : "${testDirectory}/staging"
-        ])
-        assert realm_processing.save()
-
-        Realm realm_management = DomainFactory.createRealmDataManagementDKFZ([
-            rootPath          : "${testDirectory}/root",
-            processingRootPath: "${testDirectory}/processing",
-            stagingRootPath   : null
-        ])
-        assert realm_management.save()
+        testData.createSnvObjects(testDirectory)
 
         processedMergedBamFile1 = testData.bamFileTumor
         ProcessedMergedBamFile processedMergedBamFile2 = testData.bamFileControl
 
-        SampleType sampleType1 = processedMergedBamFile1.sample.sampleType
-        sampleType1.name = "sampleType1"
-        assert sampleType1.save(flush: true)
-        SampleType sampleType2 = processedMergedBamFile2.sample.sampleType
-        sampleType2.name = "sampleType2"
-        assert sampleType2.save(flush: true)
-
-        SnvConfig snvConfig = testData.snvConfig
-        snvConfig.configuration = CONFIGURATION
-        assert snvConfig.save()
+        testData.createSnvConfig(CONFIGURATION)
 
         snvCallingInstance1 = testData.createSnvCallingInstance([
             sampleType1BamFile: processedMergedBamFile1,
@@ -268,6 +246,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
     @Test
     void testMaybeSubmit() {
+        testData.createProcessingOptions()
         LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
         SnvCallingStep step = SnvCallingStep.SNV_DEEPANNOTATION
         snvDeepAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
@@ -291,8 +270,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
             String qsubParameterCommandPart = "-v CONFIG_FILE=" +
                     "${snvCallingInstance2.configFilePath.absoluteDataManagementPath}," +
-                    "pid=654321," +
-                    "PID=654321," +
+                    "pid=${snvCallingInstance2.individual.pid}," +
+                    "PID=${snvCallingInstance2.individual.pid}," +
                     "TOOL_ID=snvDeepAnnotation," +
                     "PIPENAME=SNV_DEEPANNOTATION," +
                     "FILENAME_VCF=${snvFile}," +

@@ -74,8 +74,7 @@ class SamplePairDiscoveryJobUnitTests {
     void testCreateMissingDiseaseControlSamplePairs() {
         Collection<SamplePair> missingSamplePairs = [new SamplePair()]
         testMethodWhichCallsSetProcessingStatus(missingSamplePairs, {
-            SamplePair.metaClass.static.findMissingDiseaseControlSamplePairs = { final Date minDate ->
-                assert minDate == new LocalDate(2014, 12, 1).toDate()
+            SamplePair.metaClass.static.findMissingDiseaseControlSamplePairs = {
                 return missingSamplePairs
             }
             job.createMissingDiseaseControlSamplePairs()

@@ -24,10 +24,10 @@ class SnvCallingInstanceUnitTests {
     void setUp() {
         testData.createSnvObjects()
 
-        samplePairPath = "${testData.samplePair1.sampleType1.name}_${testData.samplePair1.sampleType2.name}"
+        samplePairPath = "${testData.samplePair.sampleType1.name}_${testData.samplePair.sampleType2.name}"
 
         SamplePair.metaClass.getSamplePairPath = {
-            return new OtpPath(testData.project, samplePairPath)
+            return new OtpPath(testData.samplePair.project, samplePairPath)
         }
     }
 
@@ -40,22 +40,6 @@ class SnvCallingInstanceUnitTests {
     void testConstraintsAllFine() {
         SnvCallingInstance instance = createSnvCallingInstance()
         assert instance.save(failOnError: true)
-    }
-
-    @Test
-    void testSeqTypeConstraint() {
-        testData.bamFileTumor.mergingPass.mergingSet.mergingWorkPackage.seqType = new SeqType()
-
-        SnvCallingInstance differentSeqTypeInstance = createSnvCallingInstance()
-        assert !differentSeqTypeInstance.validate()
-    }
-
-    @Test
-    void testIndividualConstraint() {
-        testData.bamFileTumor.mergingPass.mergingSet.mergingWorkPackage.sample.individual = new Individual()
-
-        SnvCallingInstance differentIndividualInstance = createSnvCallingInstance()
-        assert !differentIndividualInstance.validate()
     }
 
     @Test
@@ -89,21 +73,12 @@ class SnvCallingInstanceUnitTests {
     }
 
     @Test
-    void testIsConsistentWithSamplePair() {
-        SnvCallingInstance instance = createSnvCallingInstance()
-        SampleType sampleType1 = instance.samplePair.sampleType1
-        SampleType sampleType2 = instance.samplePair.sampleType2
-        assert SnvCallingInstance.isConsistentWithSamplePair(testData.bamFileControl, instance, sampleType2)
-        assert SnvCallingInstance.isConsistentWithSamplePair(testData.bamFileTumor, instance, sampleType1)
-    }
-
-    @Test
     void testGetSnvInstancePath() {
         SnvCallingInstance instance = createSnvCallingInstance()
         OtpPath snvInstancePath = instance.getSnvInstancePath()
 
         assertEquals(instance.project, snvInstancePath.project)
-        File expectedRelativePath = new File(getSnvInstancePathHelper(testData.samplePair1, instance))
+        File expectedRelativePath = new File(getSnvInstancePathHelper(testData.samplePair, instance))
         assertEquals(expectedRelativePath, snvInstancePath.relativePath)
     }
 
@@ -113,7 +88,7 @@ class SnvCallingInstanceUnitTests {
         OtpPath configFilePath = instance.getConfigFilePath()
 
         assertEquals(instance.project, configFilePath.project)
-        File expectedRelativePath = new File("${getSnvInstancePathHelper(testData.samplePair1, instance)}/config.txt")
+        File expectedRelativePath = new File("${getSnvInstancePathHelper(testData.samplePair, instance)}/config.txt")
         assertEquals(expectedRelativePath, configFilePath.relativePath)
     }
 

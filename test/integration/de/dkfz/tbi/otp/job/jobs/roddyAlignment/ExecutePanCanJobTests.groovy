@@ -53,8 +53,8 @@ class ExecutePanCanJobTests {
         DomainFactory.createAlignableSeqTypes()
 
         roddyBamFile = DomainFactory.createRoddyBamFile([md5sum: null, fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED])
-        dataProcessing = DomainFactory.createRealm(tmpDir.root, [name: roddyBamFile.project.realmName, operationType: Realm.OperationType.DATA_PROCESSING])
-        dataManagement = DomainFactory.createRealm(tmpDir.root, [name: roddyBamFile.project.realmName, operationType: Realm.OperationType.DATA_MANAGEMENT])
+        dataProcessing = DomainFactory.createRealmDataProcessing(tmpDir.root, [name: roddyBamFile.project.realmName])
+        dataManagement = DomainFactory.createRealmDataManagement(tmpDir.root, [name: roddyBamFile.project.realmName])
 
         processingRootPath = dataProcessing.processingRootPath as File
 
