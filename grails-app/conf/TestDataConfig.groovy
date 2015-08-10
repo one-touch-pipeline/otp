@@ -115,6 +115,9 @@ testDataConfig {
         'de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage' {
             workflow = { DomainFactory.createDefaultOtpWorkflow() }
         }
+        'de.dkfz.tbi.otp.ngsdata.MetaDataKey' {
+            name = {'name_' + (counter++)}
+        }
         'de.dkfz.tbi.otp.dataprocessing.MockAbstractBamFile' {
             type = AbstractBamFile.BamType.SORTED
         }
@@ -148,7 +151,7 @@ testDataConfig {
             name = {'parameterTypeName_' + (counter++)}
         }
         'de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate' {
-            state: ExecutionState.CREATED
+            state = ExecutionState.CREATED
         }
     }
     unitAdditionalBuild = [
