@@ -28,7 +28,6 @@ class BuildSequenceTracksJob extends AbstractJobImpl {
                 log.debug "Multiplexing service started for run ${run.name}"
             }
             seqTrackService.buildSequenceTracks(runId)
-            metaDataService.enrichOldDataWithNewInformationFrom(run)
         }
     }
 }

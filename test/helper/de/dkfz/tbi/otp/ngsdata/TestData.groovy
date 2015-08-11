@@ -329,7 +329,8 @@ class TestData {
                 seqType: exomeSeqType,
                 seqPlatform: seqPlatform,
                 pipelineVersion: softwareTool,
-                libraryPreparationKit: null
+                kitInfoReliability: InformationReliability.KNOWN,
+                libraryPreparationKit: LibraryPreparationKit.buildLazy(),
                 )
         assertNotNull(exomeSeqTrack.save())
         return exomeSeqTrack
@@ -423,6 +424,7 @@ class TestData {
         final MergingWorkPackage mergingWorkPackage = new MergingWorkPackage([
                 seqPlatformGroup: properties.get('seqPlatformGroup') ?: SeqPlatformGroup.build(),
                 referenceGenome: properties.get('referenceGenome') ?: findOrSaveReferenceGenome(),
+                libraryPreparationKit: properties.get('libraryPreparationKit'),
                 workflow: properties.get('workflow') ?: findOrSaveWorkflow(),
         ] + properties)
         return mergingWorkPackage
@@ -436,6 +438,7 @@ class TestData {
             )
             if (workPackage != null) {
                 assert workPackage.seqPlatformGroup == seqTrack.seqPlatform.seqPlatformGroup
+                assert workPackage.libraryPreparationKit == seqTrack.libraryPreparationKit
                 return workPackage
             }
         }
@@ -444,6 +447,7 @@ class TestData {
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatform.seqPlatformGroup,
                 referenceGenome: referenceGenome ?: findOrSaveReferenceGenome(),
+                libraryPreparationKit: seqTrack.libraryPreparationKit,
                 workflow: workflow ?: findOrSaveWorkflow(),
         )
         return mergingWorkPackage

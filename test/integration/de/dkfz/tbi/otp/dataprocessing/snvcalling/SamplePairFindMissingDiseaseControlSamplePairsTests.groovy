@@ -28,6 +28,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
     void before() {
         wholeGenome = SeqType.build(name: SeqTypeNames.WHOLE_GENOME.seqTypeName, libraryLayout: 'PAIRED')
         exome = SeqType.build(name: SeqTypeNames.EXOME.seqTypeName, libraryLayout: 'PAIRED')
+        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
 
         project = Project.build()
         diseaseSampleType = SampleType.build()
@@ -37,7 +38,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
         individual = Individual.build(project: project)
         diseaseSample = Sample.build(individual: individual, sampleType: diseaseSampleType)
         controlSample = Sample.build(individual: individual, sampleType: controlSampleType)
-        diseaseMwp = MergingWorkPackage.build(sample: diseaseSample, seqType: wholeGenome)
+        diseaseMwp = MergingWorkPackage.build(sample: diseaseSample, seqType: wholeGenome, libraryPreparationKit: libraryPreparationKit)
         controlMwp = DomainFactory.createMergingWorkPackage(diseaseMwp, controlSample)
     }
 

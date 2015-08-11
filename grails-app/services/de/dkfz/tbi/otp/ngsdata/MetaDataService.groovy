@@ -22,7 +22,6 @@ class MetaDataService {
      */
     def fileTypeService
     def metaDataFileService
-    LibraryPreparationKitService libraryPreparationKitService
 
     static transactional = true
 
@@ -501,19 +500,6 @@ class MetaDataService {
         if (!runByProject) {
             runByProject = new RunByProject(project: project, run: run)
             runByProject.save(flush: true)
-        }
-    }
-
-    /**
-     * Sometimes information for old lanes can be inferred from new lanes.
-     * This method is the hook point where the specific inferences can be called.
-     */
-    public void enrichOldDataWithNewInformationFrom(Run run) {
-        notNull(run, "The input of the method enrichOldDataWithNewInformationFrom is null")
-
-        List<RunSegment> runSegments = RunSegment.findAllByRun(run)
-        runSegments.each { RunSegment runSegment ->
-            libraryPreparationKitService.inferKitInformationForOldLaneFromNewLane(runSegment)
         }
     }
 

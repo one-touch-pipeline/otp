@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
@@ -243,6 +244,7 @@ class DomainFactory {
             workPackage = MergingWorkPackage.build(
                     workflow: workflow,
                     seqType: seqType,
+                    libraryPreparationKit: LibraryPreparationKit.buildLazy(name: 'libraryPreparationKit'),
                     statSizeFileName: DEFAULT_TAB_FILE_NAME,
             )
             ReferenceGenomeProjectSeqType.build(
@@ -301,6 +303,7 @@ class DomainFactory {
         Sample sample = new Sample(
                 individual: base.individual,
                 sampleType: sampleType,
+                libraryPreparationKit: base.libraryPreparationKit,
         )
         assert sample.save(failOnError: true)
         return createMergingWorkPackage(base, sample)
@@ -418,6 +421,8 @@ class DomainFactory {
         Map map = [
                 sample: mergingWorkPackage.sample,
                 seqType: mergingWorkPackage.seqType,
+                kitInfoReliability:  mergingWorkPackage.libraryPreparationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED,
+                libraryPreparationKit: mergingWorkPackage.libraryPreparationKit,
                 seqPlatform: SeqPlatform.build(seqPlatformGroup: mergingWorkPackage.seqPlatformGroup),
         ] + seqTrackProperties
         SeqTrack seqTrack

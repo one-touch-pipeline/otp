@@ -3,6 +3,8 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.MailHelperService
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,12 +26,18 @@ public class AbstractAlignmentDeciderTest {
         decider = newDecider()
     }
 
+    @After
+    void tearDown() {
+        TestCase.removeMetaClass(MailHelperService, decider.mailHelperService)
+    }
+
     private AbstractAlignmentDecider newDecider(Map methods = [:]) {
         AbstractAlignmentDecider decider = ([
                 prepareForAlignment: { MergingWorkPackage workPackage, SeqTrack seqTrack, boolean forceRealign -> },
                 getWorkflow: { return Workflow.findOrSaveByNameAndType(Workflow.Name.DEFAULT_OTP, Workflow.Type.ALIGNMENT) },
         ] + methods) as AbstractAlignmentDecider
         decider.applicationContext = applicationContext
+        decider.mailHelperService = applicationContext.mailHelperService
         return decider
     }
 
@@ -105,6 +113,7 @@ public class AbstractAlignmentDeciderTest {
     @Test
     void testDecideAndPrepareForAlignment_whenDifferentSeqPlatformGroup_shouldReturnEmptyList() {
         SeqTrack seqTrack = buildSeqTrack()
+        boolean emailIsSent = false
 
         MergingWorkPackage workPackage = new MergingWorkPackage(
                 sample: seqTrack.sample,
@@ -115,9 +124,48 @@ public class AbstractAlignmentDeciderTest {
         )
         workPackage.save(failOnError: true)
 
+        decider.mailHelperService.metaClass.sendEmail = {String subject, String content, String recipient ->
+            assert subject.contains(seqTrack.sample.toString())
+            assert content.contains(seqTrack.seqPlatformGroup.name)
+            assert content.contains(workPackage.seqPlatformGroup.name)
+            emailIsSent = true
+        }
+
         Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(seqTrack, true)
 
         assert workPackages.empty
+        assert emailIsSent
+    }
+
+    @Test
+    void testDecideAndPrepareForAlignment_whenDifferentLibraryPreperationKit_shouldReturnEmptyList() {
+        SeqTrack seqTrack = buildSeqTrack()
+        seqTrack.libraryPreparationKit = LibraryPreparationKit.build()
+        seqTrack.kitInfoReliability = InformationReliability.KNOWN
+        seqTrack.save(flush: true, failOnError: true)
+        boolean emailIsSent = false
+
+        MergingWorkPackage workPackage = new MergingWorkPackage(
+                sample: seqTrack.sample,
+                seqType: seqTrack.seqType,
+                seqPlatformGroup: seqTrack.seqPlatformGroup,
+                referenceGenome: exactlyOneElement(ReferenceGenome.list()),
+                libraryPreparationKit: LibraryPreparationKit.build(),
+                workflow: Workflow.findOrSaveByNameAndType(Workflow.Name.DEFAULT_OTP, Workflow.Type.ALIGNMENT),
+        )
+        workPackage.save(failOnError: true)
+
+        decider.mailHelperService.metaClass.sendEmail = {String subject, String content, String recipient ->
+            assert subject.contains(seqTrack.sample.toString())
+            assert content.contains(seqTrack.libraryPreparationKit.name)
+            assert content.contains(workPackage.libraryPreparationKit.name)
+            emailIsSent = true
+        }
+
+        Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(seqTrack, true)
+
+        assert workPackages.empty
+        assert emailIsSent
     }
 
     @Test

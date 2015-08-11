@@ -50,10 +50,11 @@ class MergingWorkPackage {
     ProcessingType processingType = ProcessingType.SYSTEM
 
     // SeqTrack properties, part of merging criteria
-    static final Collection<String> qualifiedSeqTrackPropertyNames = ['sample', 'seqType', 'seqPlatform.seqPlatformGroup'].asImmutable()
+    static final Collection<String> qualifiedSeqTrackPropertyNames = ['sample', 'seqType', 'seqPlatform.seqPlatformGroup', 'libraryPreparationKit'].asImmutable()
     Sample sample
     SeqType seqType
     SeqPlatformGroup seqPlatformGroup
+    LibraryPreparationKit libraryPreparationKit
 
     // Processing parameters, part of merging criteria
     static final Collection<String> processingParameterNames = ['referenceGenome', 'statSizeFileName', 'workflow'].asImmutable()
@@ -72,6 +73,13 @@ class MergingWorkPackage {
         sample unique: 'seqType'
         needsProcessing(validator: {val, obj -> !val || obj.workflow.name == Workflow.Name.PANCAN_ALIGNMENT})
         workflow(validator: {workflow -> workflow.type == Workflow.Type.ALIGNMENT})
+        libraryPreparationKit nullable: true, validator: {val, obj ->
+            if (obj.seqType?.name == SeqTypeNames.EXOME.seqTypeName) {
+                return val != null
+            } else {
+                return true
+            }
+        }
         statSizeFileName nullable: true, blank: false, matches: ReferenceGenomeProjectSeqType.TAB_FILE_PATTERN, validator : { val, obj ->
             if (obj.workflow?.name == Workflow.Name.PANCAN_ALIGNMENT) {
                 val != null
@@ -91,7 +99,6 @@ class MergingWorkPackage {
     }
 
     static final Collection<String> seqTrackPropertyNames = qualifiedSeqTrackPropertyNames.collect{nonQualifiedPropertyName(it)}.asImmutable()
-    static final String mergeableSeqTracksQuery = 'FROM SeqTrack WHERE ' + qualifiedSeqTrackPropertyNames.collect{"${it} = :${nonQualifiedPropertyName(it)}"}.join(' AND ')
 
     Project getProject() {
         return sample.project
@@ -107,9 +114,17 @@ class MergingWorkPackage {
 
     Collection<SeqTrack> findMergeableSeqTracks() {
         Map properties = [:]
-        seqTrackPropertyNames.each {
-            properties."${it}" = this."${it}"
-        }
+        String mergeableSeqTracksQuery = 'FROM SeqTrack WHERE ' + qualifiedSeqTrackPropertyNames.collect { String qualifiedPropertyName ->
+            String nonQualifiedPropertyName = nonQualifiedPropertyName(qualifiedPropertyName)
+            def value = this."${nonQualifiedPropertyName}"
+            if (value) {
+                properties."${nonQualifiedPropertyName}" = value
+                "${qualifiedPropertyName} = :${nonQualifiedPropertyName}"
+            } else {
+                "${qualifiedPropertyName} is null"
+            }
+        }.join(' AND ')
+
         return SeqTrack.findAll(mergeableSeqTracksQuery, properties).findAll {
             assert satisfiesCriteria(it)
             return SeqTrackService.mayAlign(it)
@@ -163,7 +178,7 @@ class MergingWorkPackage {
     }
 
     String toStringWithoutIdAndWorkflow() {
-        return "${sample} ${seqType} ${seqPlatformGroup} ${referenceGenome}"
+        return "${sample} ${seqType} ${seqPlatformGroup} ${referenceGenome} ${libraryPreparationKit ?: ''}"
     }
 
     @Override

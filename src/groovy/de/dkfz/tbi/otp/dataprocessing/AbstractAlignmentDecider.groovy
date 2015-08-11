@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.utils.MailHelperService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
@@ -16,6 +17,9 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
 
     @Autowired
     ApplicationContext applicationContext
+
+    @Autowired
+    MailHelperService mailHelperService
 
     Workflow getWorkflow() {
         Workflow workflow = atMostOneElement(Workflow.findAllByNameAndType(workflowName, Workflow.Type.ALIGNMENT))
@@ -66,7 +70,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         }
     }
 
-    static Collection<MergingWorkPackage> findOrSaveWorkPackages(SeqTrack seqTrack,
+    Collection<MergingWorkPackage> findOrSaveWorkPackages(SeqTrack seqTrack,
                                                                  ReferenceGenome referenceGenome,
                                                                  String statSizeFileName,
                                                                  Workflow workflow) {
@@ -80,6 +84,17 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
             assert workPackage.workflow.id == workflow.id
             if (!workPackage.satisfiesCriteria(seqTrack)) {
                 logNotAligning(seqTrack, "it does not satisfy the criteria of the existing MergingWorkPackage ${workPackage}.")
+                List<String> body = []
+                body << "A SeqTrack can not be aligned, because it is not compatible with the existing MergingWorkPackage."
+                body << "\nInfos:"
+                MergingWorkPackage.getMergingProperties(seqTrack).each {key, value ->
+                    body << "- ${key}: ${value}"
+                    if (value != workPackage[key]) {
+                        body << "    MergingWorkPackage uses the value: ${workPackage[key]}"
+                    }
+                }
+                body << "\n\nThis e-mail was generated automatically by OTP."
+                mailHelperService.sendNotificationEmail("Will not be aligned: ${seqTrack.ilseId ? "ILSe ${seqTrack.ilseId} " : ""} ${seqTrack.run.name} ${seqTrack.project} ${seqTrack.sample}", body.join('\n'))
                 return Collections.emptyList()
             }
         } else {

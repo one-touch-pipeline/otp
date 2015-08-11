@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.otp.InformationReliability
 import static org.junit.Assert.*
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -204,12 +205,14 @@ class SnvCallingServiceTests extends GroovyTestCase {
     @Test
     void testSamplePairForOtherSeqTypeInProcess() {
         SeqType otherSeqType = DomainFactory.createExomeSeqType()
+        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
 
         ProcessedMergedBamFile processedMergedBamFile3 = createProcessedMergedBamFile(
-                DomainFactory.createMergingWorkPackage(processedMergedBamFile1.mergingWorkPackage, [seqType: otherSeqType]))
+                DomainFactory.createMergingWorkPackage(processedMergedBamFile1.mergingWorkPackage, [seqType: otherSeqType, libraryPreparationKit: libraryPreparationKit]))
 
         ProcessedMergedBamFile processedMergedBamFile4 = createProcessedMergedBamFile(
-                DomainFactory.createMergingWorkPackage(processedMergedBamFile2.mergingWorkPackage, [seqType: otherSeqType]))
+                DomainFactory.createMergingWorkPackage(processedMergedBamFile2.mergingWorkPackage, [seqType: otherSeqType, libraryPreparationKit: libraryPreparationKit]))
+
 
         assertEquals(processedMergedBamFile1.sample.sampleType, processedMergedBamFile3.sample.sampleType)
         assertEquals(processedMergedBamFile2.sample.sampleType, processedMergedBamFile4.sample.sampleType)

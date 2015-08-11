@@ -515,11 +515,12 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testGetInferredKitBamFileIsExomeButHasTwoDifferentKits() {
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build(seqType: SeqType.build(name: SeqTypeNames.EXOME.seqTypeName))
+        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
+        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build(seqType: SeqType.build(name: SeqTypeNames.EXOME.seqTypeName), libraryPreparationKit: libraryPreparationKit)
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage)
         DomainFactory.assignNewProcessedBamFile(processedMergedBamFile)
         List<SeqTrack> seqtracks = processedMergedBamFile.mergingSet.containedSeqTracks as List
-        seqtracks[0].libraryPreparationKit = LibraryPreparationKit.build()
+        seqtracks[0].libraryPreparationKit = libraryPreparationKit
         seqtracks[0].kitInfoReliability = InformationReliability.KNOWN
         seqtracks[1].libraryPreparationKit = LibraryPreparationKit.build()
         seqtracks[1].kitInfoReliability = InformationReliability.KNOWN
@@ -531,11 +532,11 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testGetInferredKitBamFileIsExomeButAllHaveKits() {
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build(seqType: SeqType.build(name: SeqTypeNames.EXOME.seqTypeName))
+        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
+        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build(seqType: SeqType.build(name: SeqTypeNames.EXOME.seqTypeName), libraryPreparationKit: libraryPreparationKit)
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage)
         DomainFactory.assignNewProcessedBamFile(processedMergedBamFile)
         List<SeqTrack> seqtracks = processedMergedBamFile.mergingSet.containedSeqTracks as List
-        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
         seqtracks[0].libraryPreparationKit = libraryPreparationKit
         seqtracks[1].libraryPreparationKit = libraryPreparationKit
         seqtracks[0].kitInfoReliability = InformationReliability.KNOWN
@@ -546,11 +547,11 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testGetInferredKitBamFileIsExomeAndOneKitInferred() {
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build(seqType: SeqType.build(name: SeqTypeNames.EXOME.seqTypeName))
+        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
+        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build(seqType: SeqType.build(name: SeqTypeNames.EXOME.seqTypeName), libraryPreparationKit: libraryPreparationKit)
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage)
         DomainFactory.assignNewProcessedBamFile(processedMergedBamFile)
         List<SeqTrack> seqtracks = processedMergedBamFile.mergingSet.containedSeqTracks as List
-        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
         seqtracks[0].libraryPreparationKit = libraryPreparationKit
         seqtracks[1].libraryPreparationKit = libraryPreparationKit
         seqtracks[0].kitInfoReliability = InformationReliability.KNOWN

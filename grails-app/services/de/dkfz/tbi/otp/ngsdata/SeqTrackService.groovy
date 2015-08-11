@@ -435,7 +435,6 @@ class SeqTrackService {
         } else {
             LibraryPreparationKit libraryPreparationKit = libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(metaDataEntry.value)
             notNull(libraryPreparationKit, "There is no LibraryPreparationKit in the DB for the metaDataEntry ${metaDataEntry.value} of run ${run}")
-            libraryPreparationKitService.validateLibraryPreparationKit(sample, libraryPreparationKit)
             builder.setLibraryPreparationKit(libraryPreparationKit)
         }
     }

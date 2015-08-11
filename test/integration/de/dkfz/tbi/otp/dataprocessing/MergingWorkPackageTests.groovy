@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.InformationReliability
 import org.junit.Test
 
 import de.dkfz.tbi.TestCase
@@ -8,9 +9,26 @@ import de.dkfz.tbi.otp.ngsdata.*
 class MergingWorkPackageTests {
 
     @Test
-    void testFindMergeableSeqTracks() {
-        MergingWorkPackage workPackage = MergingWorkPackage.build()
+    void testFindMergeableSeqTracksNoLibraryPreparationKit() {
+        MergingWorkPackage workPackage = MergingWorkPackage.build(libraryPreparationKit: null)
 
+        createDataAndAssertResult(workPackage)
+    }
+
+    @Test
+    void testFindMergeableSeqTracksWithLibraryPreparationKit() {
+        MergingWorkPackage workPackage = MergingWorkPackage.build(libraryPreparationKit: LibraryPreparationKit.build())
+        SeqTrack incorrectLibraryPreparationKit = DomainFactory.buildSeqTrackWithDataFile(workPackage)
+        incorrectLibraryPreparationKit.libraryPreparationKit = LibraryPreparationKit.build()
+        incorrectLibraryPreparationKit.kitInfoReliability = InformationReliability.KNOWN
+        assert incorrectLibraryPreparationKit.save(flush: true, failOnError: true)
+
+        createDataAndAssertResult(workPackage)
+    }
+
+
+
+    private createDataAndAssertResult(MergingWorkPackage workPackage) {
         SeqTrack incorrectSample = DomainFactory.buildSeqTrackWithDataFile(workPackage)
         incorrectSample.sample = Sample.build()
         assert incorrectSample.save(failOnError: true)
@@ -31,6 +49,11 @@ class MergingWorkPackageTests {
         DataFile dataFile = DataFile.findBySeqTrack(correctWithdrawn)
         dataFile.fileWithdrawn = true
         assert dataFile.save(failOnError: true)
+
+        SeqTrack incorrectLibraryPreparationKit = DomainFactory.buildSeqTrackWithDataFile(workPackage)
+        incorrectLibraryPreparationKit.libraryPreparationKit = LibraryPreparationKit.build()
+        incorrectLibraryPreparationKit.kitInfoReliability = InformationReliability.KNOWN
+        assert incorrectLibraryPreparationKit.save(flush: true, failOnError: true)
 
         SeqTrack correct1 = DomainFactory.buildSeqTrackWithDataFile(workPackage)
         SeqTrack correct2 = DomainFactory.buildSeqTrackWithDataFile(workPackage)

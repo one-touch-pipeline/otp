@@ -154,6 +154,12 @@ if (otpConfig.otp.mail.sender instanceof ConfigObject) {
     otp.mail.sender = otpConfig.otp.mail.sender
 }
 
+if (otpConfig.otp.mail.notification.to instanceof ConfigObject) {
+    otp.mail.notification.to = ''
+} else {
+    otp.mail.notification.to = otpConfig.otp.mail.notification.to
+}
+
 // Folder for putting stacktrace files made by error log service
 if (otpConfig.otp.errorLogging.stacktraces instanceof ConfigObject) {
     otp.errorLogging.stacktraces = "/tmp/otp/stacktraces/"
@@ -307,3 +313,15 @@ grails.doc.authors = 'The OTP Development Team'
 // Restore old data-binding behaviour (before 2.3)
 grails.databinding.convertEmptyStringsToNull = false
 grails.databinding.trimStrings = false
+
+
+//disable mail sending for tests
+environments {
+    WORKFLOW_TEST {
+        grails.mail.disabled=true
+    }
+    test {
+        grails.mail.disabled=true
+    }
+}
+

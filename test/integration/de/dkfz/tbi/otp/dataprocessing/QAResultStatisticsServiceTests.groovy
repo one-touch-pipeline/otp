@@ -119,20 +119,22 @@ class QAResultStatisticsServiceTests {
                         )
         assertNotNull(softwareTool.save([flush: true]))
 
+        libraryPreparationKit = new LibraryPreparationKit(
+                name: "libraryPreparationKit"
+        )
+        assertNotNull(libraryPreparationKit.save([flush: true]))
+
         seqTrack = new SeqTrack(
                         laneId: "laneId",
                         run: run,
                         sample: sample,
                         seqType: seqType,
                         seqPlatform: seqPlatform,
-                        pipelineVersion: softwareTool
+                        pipelineVersion: softwareTool,
+                        libraryPreparationKit: libraryPreparationKit,
+                        kitInfoReliability: InformationReliability.KNOWN,
                         )
         assertNotNull(seqTrack.save([flush: true]))
-
-        libraryPreparationKit = new LibraryPreparationKit(
-                        name: "libraryPreparationKit"
-                        )
-        assertNotNull(libraryPreparationKit.save([flush: true]))
 
         exomeSeqTrack = new ExomeSeqTrack(
                         laneId: "laneId",
@@ -142,7 +144,7 @@ class QAResultStatisticsServiceTests {
                         seqPlatform: seqPlatform,
                         pipelineVersion: softwareTool,
                         libraryPreparationKit: libraryPreparationKit,
-                        kitInfoReliability: InformationReliability.KNOWN
+                        kitInfoReliability: InformationReliability.KNOWN,
                         )
         assertNotNull(exomeSeqTrack.save([flush: true]))
 

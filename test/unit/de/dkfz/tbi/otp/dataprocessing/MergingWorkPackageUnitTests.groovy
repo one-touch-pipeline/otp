@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.InformationReliability
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import org.junit.*
@@ -75,7 +76,7 @@ class MergingWorkPackageUnitTests {
     }
 
     @Test
-    void testGetMergingProperties() {
+    void testGetMergingProperties_NoLibraryPreperationKit() {
         SeqTrack seqTrack = SeqTrack.build()
 
         def result = MergingWorkPackage.getMergingProperties(seqTrack)
@@ -83,15 +84,45 @@ class MergingWorkPackageUnitTests {
                 sample: seqTrack.sample,
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
+                libraryPreparationKit: null,
         ]
         assert result == expectedResult
     }
 
     @Test
-    void testSatisfiesCriteriaSeqTrack_whenCorrect() {
-        SeqTrack seqTrack = SeqTrack.build()
+    void testGetMergingProperties_WithLibraryPreperationKit() {
+        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
+        SeqTrack seqTrack = SeqTrack.build(
+                libraryPreparationKit: libraryPreparationKit,
+                kitInfoReliability: InformationReliability.KNOWN
+        )
 
-        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup)
+        def result = MergingWorkPackage.getMergingProperties(seqTrack)
+        def expectedResult = [
+                sample: seqTrack.sample,
+                seqType: seqTrack.seqType,
+                seqPlatformGroup: seqTrack.seqPlatformGroup,
+                libraryPreparationKit: libraryPreparationKit,
+        ]
+        assert result == expectedResult
+    }
+
+    @Test
+    void testSatisfiesCriteriaSeqTrack_whenCorrect_NoLibraryPreparationKit() {
+        SeqTrack seqTrack = SeqTrack.build(libraryPreparationKit: null)
+
+        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup, libraryPreparationKit: seqTrack.libraryPreparationKit)
+        assert workPackage.satisfiesCriteria(seqTrack)
+    }
+
+    @Test
+    void testSatisfiesCriteriaSeqTrack_whenCorrect_WithLibraryPreparationKit() {
+        SeqTrack seqTrack = SeqTrack.build(
+                libraryPreparationKit: LibraryPreparationKit.build(),
+                kitInfoReliability: InformationReliability.KNOWN,
+        )
+
+        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup, libraryPreparationKit: seqTrack.libraryPreparationKit)
         assert workPackage.satisfiesCriteria(seqTrack)
     }
 
@@ -99,7 +130,7 @@ class MergingWorkPackageUnitTests {
     void testSatisfiesCriteriaSeqTrack_whenIncorrectSample() {
         SeqTrack seqTrack = SeqTrack.build()
 
-        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: Sample.build(), seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup)
+        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: Sample.build(), seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup, libraryPreparationKit: seqTrack.libraryPreparationKit)
         assert !workPackage.satisfiesCriteria(seqTrack)
     }
 
@@ -107,7 +138,7 @@ class MergingWorkPackageUnitTests {
     void testSatisfiesCriteriaSeqTrack_whenIncorrectSeqType() {
         SeqTrack seqTrack = SeqTrack.build()
 
-        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqType.build(), seqPlatformGroup: seqTrack.seqPlatformGroup)
+        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqType.build(), seqPlatformGroup: seqTrack.seqPlatformGroup, libraryPreparationKit: seqTrack.libraryPreparationKit)
         assert !workPackage.satisfiesCriteria(seqTrack)
     }
 
@@ -115,9 +146,40 @@ class MergingWorkPackageUnitTests {
     void testSatisfiesCriteriaSeqTrack_whenIncorrectSeqPlatformGroup() {
         SeqTrack seqTrack = SeqTrack.build()
 
-        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: SeqPlatformGroup.build())
+        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: SeqPlatformGroup.build(), libraryPreparationKit: seqTrack.libraryPreparationKit)
         assert !workPackage.satisfiesCriteria(seqTrack)
     }
+
+    @Test
+    void testSatisfiesCriteriaSeqTrack_whenOnlySeqTrackHasLibraryPrepationKit() {
+        SeqTrack seqTrack = SeqTrack.build(
+                libraryPreparationKit: LibraryPreparationKit.build(),
+                kitInfoReliability: InformationReliability.KNOWN,
+        )
+
+        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup, libraryPreparationKit: null)
+        assert !workPackage.satisfiesCriteria(seqTrack)
+    }
+
+    @Test
+    void testSatisfiesCriteriaSeqTrack_whenOnlyMergingWorkPackageHasLibraryPrepationKit() {
+        SeqTrack seqTrack = SeqTrack.build()
+
+        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup, libraryPreparationKit: LibraryPreparationKit.build())
+        assert !workPackage.satisfiesCriteria(seqTrack)
+    }
+
+    @Test
+    void testSatisfiesCriteriaSeqTrack_whenIncorrectLibraryPrepationKit() {
+        SeqTrack seqTrack = SeqTrack.build(
+                libraryPreparationKit: LibraryPreparationKit.build(),
+                kitInfoReliability: InformationReliability.KNOWN,
+        )
+
+        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup, libraryPreparationKit: LibraryPreparationKit.build())
+        assert !workPackage.satisfiesCriteria(seqTrack)
+    }
+
 
     @Test
     void testSatisfiesCriteriaBamFile_whenValid() {
@@ -221,4 +283,42 @@ class MergingWorkPackageUnitTests {
             }
         }
     }
+
+
+    @Test
+    void test_constraint_libraryPreparationKit_WhenNoExomeAndNoLibraryPreparationKit_ShouldBeValid() {
+        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+                libraryPreparationKit: null,
+                seqType: SeqType.build(),
+        ])
+        assert mergingWorkPackage.validate()
+    }
+
+    @Test
+    void test_constraint_libraryPreparationKit_WhenNoExomeAndWithLibraryPreparationKit_ShouldBeValid() {
+        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+                libraryPreparationKit: LibraryPreparationKit.build(),
+                seqType: SeqType.build(),
+        ])
+        assert mergingWorkPackage.validate()
+    }
+
+    @Test
+    void test_constraint_libraryPreparationKit_WhenExomeAndWithLibraryPreparationKit_ShouldBeValid() {
+        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+                libraryPreparationKit: LibraryPreparationKit.build(),
+                seqType: DomainFactory.createExomeSeqType(),
+        ])
+        assert mergingWorkPackage.validate()
+    }
+
+    @Test
+    void test_constraint_libraryPreparationKit_WhenExomeAndNoLibraryPreparationKit_ShouldFail() {
+        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+                libraryPreparationKit: null,
+                seqType: DomainFactory.createExomeSeqType(),
+        ])
+        TestCase.assertValidateError(mergingWorkPackage, 'libraryPreparationKit', 'validator.invalid', null)
+    }
+
 }

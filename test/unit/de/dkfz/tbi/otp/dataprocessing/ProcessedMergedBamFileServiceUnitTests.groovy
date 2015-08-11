@@ -149,7 +149,7 @@ class ProcessedMergedBamFileServiceUnitTests {
 
 
     private void mergingPassAndDBConnections(ProcessedMergedBamFile processedMergedBamFile, Sample sample, SeqType seqType) {
-        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage([sample: sample, seqType: seqType])
+        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage([sample: sample, seqType: seqType, libraryPreparationKit: LibraryPreparationKit.buildLazy(name: 'libraryPreparationKit')])
         assert mergingWorkPackage.save()
         MergingSet mergingSet = testData.createMergingSet([mergingWorkPackage: mergingWorkPackage])
         assert mergingSet.save()

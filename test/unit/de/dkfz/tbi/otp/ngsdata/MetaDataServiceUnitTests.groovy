@@ -33,7 +33,6 @@ class MetaDataServiceUnitTests {
     @Before
     public void setUp() throws Exception {
         metaDataService = new MetaDataService()
-        metaDataService.libraryPreparationKitService = new LibraryPreparationKitService()
         metaDataService.fileTypeService = new FileTypeService()
     }
 
@@ -94,29 +93,6 @@ class MetaDataServiceUnitTests {
                             )
         }
         return keys
-    }
-
-    @Test
-    void testEnrichOldDataWithNewInformationFrom() {
-        final TestData testData = new TestData()
-        testData.createObjects()
-
-        ExomeSeqTrack exomeSeqTrack1 = testData.createExomeSeqTrack(testData.run)
-        testData.dataFile.seqTrack = exomeSeqTrack1
-        assertNotNull(testData.dataFile.save(flush: true))
-
-        ExomeSeqTrack exomeSeqTrack2 = testData.createExomeSeqTrack(testData.run)
-        LibraryPreparationKit libraryPreparationKit = testData.createLibraryPreparationKit(LIBRARY_PREPARATION_KIT_NAME)
-        testData.addKitToExomeSeqTrack(exomeSeqTrack2, libraryPreparationKit)
-        Run run = testData.createRun("testname2")
-        RunSegment runSegment = testData.createRunSegment(run)
-        assertNotNull(runSegment.save(flush: true))
-        DataFile dataFile = testData.createDataFile(exomeSeqTrack2, runSegment)
-        assertNotNull(dataFile.save(flush: true))
-
-        assertNull(exomeSeqTrack1.libraryPreparationKit)
-        metaDataService.enrichOldDataWithNewInformationFrom(testData.run)
-        assertEquals(libraryPreparationKit, exomeSeqTrack1.libraryPreparationKit)
     }
 
     @Test

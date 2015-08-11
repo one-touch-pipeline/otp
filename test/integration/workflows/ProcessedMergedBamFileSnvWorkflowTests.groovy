@@ -33,10 +33,13 @@ class ProcessedMergedBamFileSnvWorkflowTests extends AbstractSnvWorkflowTests {
                 dirName: "tmp",
         )
 
+        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
+
         bamFileTumor = DomainFactory.createProcessedMergedBamFile(
                 MergingWorkPackage.build(
                         sample: Sample.build(individual: individual),
                         seqType: seqType,
+                        libraryPreparationKit: LibraryPreparationKit.build(),
                 ),
                 PROCESSED_BAM_FILE_PROPERTIES)
         bamFileTumor.workPackage.bamFileInProjectFolder = bamFileTumor
