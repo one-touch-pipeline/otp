@@ -24,6 +24,10 @@
                 <input type='hidden' id='seqType' name='seqType' value='${seqType}'/>
             </g:else>
         </form>
+        <br><br><br>
+        <div id="withdrawn_description">
+            Withdrawn data is colored gray
+        </div>
         <div class="otpDataTables alignmentQualityOverviewTable">
             <otp:dataTable
                 codes="${header}"

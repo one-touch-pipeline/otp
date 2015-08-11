@@ -17,61 +17,89 @@ class OverallQualityAssessmentMergedService {
 
 
     @PreAuthorize("hasPermission(#project, read) or hasRole('ROLE_OPERATOR')")
-    List<OverallQualityAssessmentMerged> findAllByProjectAndSeqType(Project project, SeqType seqType) {
-        final String HQL = '''
+    List<AbstractQualityAssessment> findAllByProjectAndSeqType(Project project, SeqType seqType) {
+
+        String maxQualityAssessmentMergedPassIdentifier = """
+select
+    max(identifier)
+from
+    QualityAssessmentMergedPass qualityAssessmentMergedPass
+where
+    qualityAssessmentMergedPass.processedMergedBamFile = abstractMergedBamFile
+"""
+
+        String HQL = """
             select
-                overallQualityAssessmentMerged
-            from OverallQualityAssessmentMerged overallQualityAssessmentMerged
-                join overallQualityAssessmentMerged.qualityAssessmentMergedPass qualityAssessmentMergedPass
-                join qualityAssessmentMergedPass.processedMergedBamFile processedMergedBamFile
-                join processedMergedBamFile.mergingPass mergingPass
-                join mergingPass.mergingSet mergingSet
-                join mergingSet.mergingWorkPackage mergingWorkPackage
+                abstractQualityAssessment
+            from
+                AbstractQualityAssessment abstractQualityAssessment
+                join abstractQualityAssessment.qualityAssessmentMergedPass qualityAssessmentMergedPass
+                join qualityAssessmentMergedPass.processedMergedBamFile abstractMergedBamFile
+                join abstractMergedBamFile.workPackage mergingWorkPackage
             where
                 mergingWorkPackage.sample.individual.project = :project
                 and mergingWorkPackage.seqType = :seqType
-                and qualityAssessmentMergedPass.identifier = (select max(identifier) from QualityAssessmentMergedPass qualityAssessmentMergedPass2 where qualityAssessmentMergedPass2.processedMergedBamFile = qualityAssessmentMergedPass.processedMergedBamFile)
-                and mergingPass.identifier = (select max(identifier) from MergingPass mergingPass2 where mergingPass2.mergingSet = mergingPass.mergingSet)
-                and mergingSet.identifier = (select max(identifier) from MergingSet mergingSet2 where mergingSet2.mergingWorkPackage = mergingSet.mergingWorkPackage)
-                and processedMergedBamFile.fileOperationStatus = :fileOperationStatus
-                and processedMergedBamFile.withdrawn = false
-                and processedMergedBamFile.qualityAssessmentStatus = :qualityAssessmentStatus
-        '''
+                and qualityAssessmentMergedPass.identifier = ( ${maxQualityAssessmentMergedPassIdentifier})
+                and mergingWorkPackage.bamFileInProjectFolder = abstractMergedBamFile
+                and abstractMergedBamFile.fileOperationStatus = :fileOperationStatus
+                and abstractMergedBamFile.qualityAssessmentStatus = :qualityAssessmentStatus
+                and (
+                    abstractQualityAssessment.class = :overallQualityAssessmentMergedClass
+                    or (
+                        abstractQualityAssessment.class = :roddyMergedBamQaClass
+                        and abstractQualityAssessment.chromosome = :allChromosomes
+                    )
+                )
+        """
         Map parameters = [
             project: project,
             seqType: seqType,
             fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
+            overallQualityAssessmentMergedClass: OverallQualityAssessmentMerged.getName(),
+            roddyMergedBamQaClass: RoddyMergedBamQa.getName(),
+            allChromosomes: RoddyQualityAssessment.ALL,
         ]
 
-        List<OverallQualityAssessmentMerged> qas = OverallQualityAssessmentMerged.executeQuery(HQL, parameters, [readOnly: true])
+        List<AbstractQualityAssessment> qas = AbstractQualityAssessment.executeQuery(HQL, parameters, [readOnly: true])
         return qas
     }
 
 
-    List findSequenceLengthAndReferenceGenomeLengthWithoutNForOverallQualityAssessmentMerged(List<OverallQualityAssessmentMerged> overallQualityAssessmentMergedList) {
-        if (!overallQualityAssessmentMergedList) {
+    List findSequenceLengthAndReferenceGenomeLengthWithoutNForQualityAssessmentMerged(List<AbstractQualityAssessment> abstractQualityAssessments) {
+        if (!abstractQualityAssessments) {
             return []
         }
+
+        /*
+            This method assumes:
+            It does not matter which seqTrack is used to get the sequencedLength. Within one merged bam file all are the same.
+            This is incorrect, see OTP-1670
+         */
+
         final String HQL = '''
             select distinct
-                overallQualityAssessmentMerged.id,
+                abstractQualityAssessment.id,
                 fastqcBasicStatistics.sequenceLength,
-                overallQualityAssessmentMerged.qualityAssessmentMergedPass.processedMergedBamFile.mergingPass.mergingSet.mergingWorkPackage.referenceGenome.lengthWithoutN
+                abstractQualityAssessment.qualityAssessmentMergedPass.processedMergedBamFile.workPackage.referenceGenome.lengthWithoutN
             from
-                OverallQualityAssessmentMerged overallQualityAssessmentMerged,
-                MergingSetAssignment mergingSetAssignment,
-                FastqcBasicStatistics fastqcBasicStatistics
+                AbstractQualityAssessment abstractQualityAssessment,
+                FastqcBasicStatistics fastqcBasicStatistics,
+                SeqTrack seqTrack,
+                DataFile dataFile
             where
-                overallQualityAssessmentMerged.qualityAssessmentMergedPass.processedMergedBamFile.mergingPass.mergingSet = mergingSetAssignment.mergingSet
-                and mergingSetAssignment.bamFile.alignmentPass.seqTrack = fastqcBasicStatistics.fastqcProcessedFile.dataFile.seqTrack
-                and overallQualityAssessmentMerged.id in :overallQualityAssessmentMergedIds
+                abstractQualityAssessment.qualityAssessmentMergedPass.processedMergedBamFile.workPackage.sample = seqTrack.sample
+                and abstractQualityAssessment.qualityAssessmentMergedPass.processedMergedBamFile.workPackage.seqType = seqTrack.seqType
+                and seqTrack = fastqcBasicStatistics.fastqcProcessedFile.dataFile.seqTrack
+                and dataFile.seqTrack = seqTrack
+                and dataFile.fileWithdrawn = false
+                and abstractQualityAssessment.id in :abstractQualityAssessmentIds
         '''
         Map parameters = [
-            overallQualityAssessmentMergedIds: overallQualityAssessmentMergedList*.id,
+                abstractQualityAssessmentIds: abstractQualityAssessments*.id,
         ]
 
-        List result = OverallQualityAssessmentMerged.executeQuery(HQL, parameters, [readOnly: true])
+        List result = AbstractQualityAssessment.executeQuery(HQL, parameters, [readOnly: true])
         return result
     }
 

@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+
 import grails.converters.JSON
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.ProjectService
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
@@ -45,6 +46,7 @@ class AlignmentQualityOverviewController {
         'alignment.quality.standardDeviationPE_Insertsize',
         'alignment.quality.medianPE_insertsize',
         'alignment.quality.meanPE_Insertsize',
+        'alignment.quality.workflow',
         'alignment.quality.date',
     ].asImmutable()
 
@@ -61,6 +63,7 @@ class AlignmentQualityOverviewController {
         'alignment.quality.standardDeviationPE_Insertsize',
         'alignment.quality.medianPE_insertsize',
         'alignment.quality.meanPE_Insertsize',
+        'alignment.quality.workflow',
         'alignment.quality.date',
     ].asImmutable()
 
@@ -137,24 +140,26 @@ class AlignmentQualityOverviewController {
                 )
 
 
-        List<OverallQualityAssessmentMerged> dataOverall = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(project, seqType)
-        List<ChromosomeQualityAssessmentMerged> dataChromosomeXY = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes, dataOverall*.qualityAssessmentMergedPass)
-        Map chromosomeMapXY = dataChromosomeXY.groupBy ([{it.qualityAssessmentMergedPass.id}, {it.chromosomeName}])
+        List<AbstractQualityAssessment> dataOverall = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(project, seqType)
+        List<AbstractQualityAssessment> dataChromosomeXY = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes, dataOverall*.qualityAssessmentMergedPass)
+        Map chromosomeMapXY = dataChromosomeXY.groupBy ([{it.qualityAssessmentMergedPass.id}, {it.chromosomeName }])
 
-        List sequenceLengthsAndReferenceGenomeLengthWithoutN = overallQualityAssessmentMergedService.findSequenceLengthAndReferenceGenomeLengthWithoutNForOverallQualityAssessmentMerged(dataOverall)
+        List sequenceLengthsAndReferenceGenomeLengthWithoutN = overallQualityAssessmentMergedService.findSequenceLengthAndReferenceGenomeLengthWithoutNForQualityAssessmentMerged(dataOverall)
+        // TODO: has to be adapted when issue OTP-1670 is solved
         Map sequenceLengthsAndReferenceGenomeLengthWithoutNMap = sequenceLengthsAndReferenceGenomeLengthWithoutN.groupBy{it[0]}
 
         dataToRender.iTotalRecords = dataOverall.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.aaData = dataOverall.collect { OverallQualityAssessmentMerged it->
-            ProcessedMergedBamFile processedMergedBamFile = it.processedMergedBamFile
+        dataToRender.aaData = dataOverall.collect { AbstractQualityAssessment it->
+
+            AbstractMergedBamFile abstractMergedBamFile = it.qualityAssessmentMergedPass.processedMergedBamFile
             double duplicates = it.duplicates / it.totalReadCounter * 100.0 //%duplicates (picard)
             double properlyPaired = it.properlyPaired / it.pairedInSequencing * 100.0
             double readLength = sequenceLengthsAndReferenceGenomeLengthWithoutNMap[it.id][0][1] as double
 
             Map map = [
-                mockPid: it.individual.mockPid,
-                sampleType: it.sampleType.name,
+                mockPid: abstractMergedBamFile.individual.mockPid,
+                sampleType: abstractMergedBamFile.sampleType.name,
                 mappedReads: FormatHelper.formatToTwoDecimalsNullSave(it.totalMappedReadCounter / (it.totalReadCounter as Double) * 100.0), //%mapped reads (flagstat)
                 duplicates: FormatHelper.formatToTwoDecimalsNullSave(duplicates), //%duplicates (picard)
                 totalReadCount: FormatHelper.formatGroupsNullSave(it.totalReadCounter), //#total read count
@@ -162,8 +167,7 @@ class AlignmentQualityOverviewController {
                 singletons: FormatHelper.formatToTwoDecimalsNullSave(it.singletons / it.totalReadCounter * 100.0), //%singletons (flagstat)
                 standardDeviationPE_Insertsize: FormatHelper.formatToTwoDecimalsNullSave(it.insertSizeSD), //Standard Deviation PE_insertsize
                 medianPE_insertsize: FormatHelper.formatToTwoDecimalsNullSave(it.insertSizeMedian), //Median PE_insertsize
-                meanPE_Insertsize: FormatHelper.formatToTwoDecimalsNullSave(it.insertSizeMean), //Mean PE_insertsize
-                dateFromFileSystem:it.processedMergedBamFile.dateFromFileSystem?.format("yyyy-MM-dd"),
+                dateFromFileSystem:abstractMergedBamFile.dateFromFileSystem?.format("yyyy-MM-dd"),
                 //warning for duplicates
                 duplicateWarning: warningLevelForDuplicates(duplicates).styleClass,
 
@@ -174,7 +178,19 @@ class AlignmentQualityOverviewController {
                 properlyPpairedWarning: warningLevelForProperlyPaired(properlyPaired).styleClass,
 
                 plot: it.id,
+                withdrawn: abstractMergedBamFile.withdrawn,
+                workflow: abstractMergedBamFile.workPackage.workflow.name.toString()
             ]
+            if (it instanceof OverallQualityAssessmentMerged) {
+                map << [
+                        meanPE_Insertsize: FormatHelper.formatToTwoDecimalsNullSave(it.insertSizeMean), //Mean PE_insertsize
+                ]
+            } else {
+                // there is no insert size mean for RoddyBamFile QA
+                map << [
+                        meanPE_Insertsize: "-"
+                ]
+            }
 
             switch (seqType.name) {
                 case SeqTypeNames.WHOLE_GENOME.seqTypeName:
@@ -182,8 +198,8 @@ class AlignmentQualityOverviewController {
                     Double coverageX
                     Double coverageY
                     if (referenceGenomeLengthWithoutN) {
-                        ChromosomeQualityAssessmentMerged x = chromosomeMapXY[it.qualityAssessmentMergedPass.id][Chromosomes.CHR_X.alias][0]
-                        ChromosomeQualityAssessmentMerged y = chromosomeMapXY[it.qualityAssessmentMergedPass.id][Chromosomes.CHR_Y.alias][0]
+                        AbstractQualityAssessment x = chromosomeMapXY[it.qualityAssessmentMergedPass.id][Chromosomes.CHR_X.alias][0]
+                        AbstractQualityAssessment y = chromosomeMapXY[it.qualityAssessmentMergedPass.id][Chromosomes.CHR_Y.alias][0]
                         long qcBasesMappedXChromosome = x.qcBasesMapped
                         long qcBasesMappedYChromosome = y.qcBasesMapped
                         coverageX = qcBasesMappedXChromosome / referenceGenomeLengthWithoutN
@@ -191,8 +207,8 @@ class AlignmentQualityOverviewController {
                     }
 
                     map << [
-                        coverageWithoutN: FormatHelper.formatToTwoDecimalsNullSave(processedMergedBamFile.coverage), //Coverage w/o N
-                        coverageWitN: FormatHelper.formatToTwoDecimalsNullSave(processedMergedBamFile.coverageWithN), //Coverage wN
+                        coverageWithoutN: FormatHelper.formatToTwoDecimalsNullSave(abstractMergedBamFile.coverage), //Coverage w/o N
+                        coverageWitN: FormatHelper.formatToTwoDecimalsNullSave(abstractMergedBamFile.coverageWithN), //Coverage wN
                         coverageX: FormatHelper.formatToTwoDecimalsNullSave(coverageX), //ChrX Coverage w/o N
                         coverageY: FormatHelper.formatToTwoDecimalsNullSave(coverageY), //ChrY Coverage w/o N
                     ]
@@ -201,7 +217,7 @@ class AlignmentQualityOverviewController {
                     double onTargetRate = it.onTargetMappedBases / it.allBasesMapped * 100.0
                     map << [
                         onTargetRate: FormatHelper.formatToTwoDecimalsNullSave(onTargetRate),//on target ratio
-                        targetCoverage: FormatHelper.formatToTwoDecimalsNullSave(processedMergedBamFile.coverage), //coverage
+                        targetCoverage: FormatHelper.formatToTwoDecimalsNullSave(abstractMergedBamFile.coverage), //coverage
 
                         //warning for onTargetRate
                         onTargetRateWarning: warningLevelForOnTargetRate(onTargetRate).styleClass,
@@ -213,6 +229,7 @@ class AlignmentQualityOverviewController {
 
             return map
         }
+
         render dataToRender as JSON
     }
 

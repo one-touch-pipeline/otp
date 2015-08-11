@@ -57,4 +57,9 @@ class RoddyQualityAssessment extends AbstractQualityAssessment {
     RoddyBamFile getRoddyBamFile() {
         return (RoddyBamFile)qualityAssessmentMergedPass.processedMergedBamFile
     }
+
+    // Created to have an identical way to receive the chromosome identifier as in ChromosomeQualityAssessmentMerged
+    String getChromosomeName() {
+        return chromosome
+    }
 }

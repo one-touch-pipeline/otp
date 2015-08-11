@@ -18,16 +18,35 @@ class ChromosomeQualityAssessmentMergedService {
 
 
 
-    List<ChromosomeQualityAssessmentMerged> qualityAssessmentMergedForSpecificChromosomes(List<Chromosomes> chromosomes, List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses) {
+    List<AbstractQualityAssessment> qualityAssessmentMergedForSpecificChromosomes(List<Chromosomes> chromosomes, List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses) {
         Assert.notNull(chromosomes, 'Parameter "chromosomes" may not be null')
         Assert.notNull(qualityAssessmentMergedPasses, 'Parameter "qualityAssessmentMergedPasses" may not be null')
 
-        if (chromosomes && qualityAssessmentMergedPasses) {
-            List<ChromosomeQualityAssessmentMerged> chromosomeQualityAssessments = ChromosomeQualityAssessmentMerged.createCriteria().list {
-                'in'("chromosomeName", chromosomes*.alias)
-                'in'('qualityAssessmentMergedPass', qualityAssessmentMergedPasses)
+        qualityAssessmentMergedPasses*.processedMergedBamFile.each { AbstractMergedBamFile abstractMergedBamFile ->
+            assert ( abstractMergedBamFile instanceof RoddyBamFile || abstractMergedBamFile instanceof ProcessedMergedBamFile )
+        }
+
+        List<QualityAssessmentMergedPass> roddyFilePasses = qualityAssessmentMergedPasses.findAll { it.processedMergedBamFile instanceof RoddyBamFile }
+        List<QualityAssessmentMergedPass> bamFilePasses =  qualityAssessmentMergedPasses.findAll { it.processedMergedBamFile instanceof ProcessedMergedBamFile }
+
+        if (chromosomes) {
+            List<AbstractQualityAssessment> roddyQAPerChromosome = []
+            List<AbstractQualityAssessment> bamFileQAPerChromosome = []
+
+            if (bamFilePasses) {
+                bamFileQAPerChromosome = ChromosomeQualityAssessmentMerged.createCriteria().list {
+                    'in'("chromosomeName", chromosomes*.alias)
+                    'in'('qualityAssessmentMergedPass', bamFilePasses)
+                }
             }
-            return chromosomeQualityAssessments
+
+            if (roddyFilePasses) {
+                roddyQAPerChromosome = RoddyMergedBamQa.createCriteria().list {
+                    'in'("chromosome", chromosomes*.alias)
+                    'in'('qualityAssessmentMergedPass', roddyFilePasses)
+                }
+            }
+            return bamFileQAPerChromosome + roddyQAPerChromosome
         }
         return []
     }

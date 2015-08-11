@@ -18,6 +18,7 @@ $.otp.alignmentQualityOverviewTable = {
                 action : 'dataTableSource'
             }),
             sScrollY: 'auto',
+            sScrollX: 'auto',
             bScrollCollapse: false,
             bPaginate: false,
             bDeferRender : true,
@@ -41,6 +42,7 @@ $.otp.alignmentQualityOverviewTable = {
                         table.fnSettings().oFeatures.bServerSide = false;
                     },
                     "success" : function (json) {
+                        $("#withdrawn_description").hide()
                         var seqType = $('#seqType').val()
                         for (var i = 0; i < json.aaData.length; i += 1) {
                             var row = json.aaData[i];
@@ -79,9 +81,20 @@ $.otp.alignmentQualityOverviewTable = {
                                 row.standardDeviationPE_Insertsize,
                                 "<span class='" + row.medianWarning+"'>" + row.medianPE_insertsize + " </span>",
                                 row.meanPE_Insertsize,
+                                row.workflow.replace("DEFAULT_OTP", "bwa aln").replace("PANCAN_ALIGNMENT", "PanCan"),
                                 row.dateFromFileSystem,
                             ];
                             var rowdata = identifier.concat(coverage, general);
+
+                            if (row.withdrawn) {
+                                $("#withdrawn_description").show()
+                                var withdrawnRow = []
+                                $.each(rowdata, function() {
+                                    withdrawnRow.push("<span class='withdrawn'>" + this + " </span>")
+                                })
+                                rowdata = withdrawnRow;
+                            }
+
                             json.aaData[i] = rowdata;
                         }
                         fnCallback(json);

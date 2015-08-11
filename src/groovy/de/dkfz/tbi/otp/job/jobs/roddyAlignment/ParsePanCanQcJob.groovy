@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessmentService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
@@ -35,7 +36,8 @@ class ParsePanCanQcJob extends AbstractEndStateAwareJobImpl {
 
             // Set the coverage value in roddyBamFile
             abstractQualityAssessmentService.saveCoverageToRoddyBamFile(roddyBamFile)
-
+            roddyBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.FINISHED
+            assert roddyBamFile.save(flush: true)
             succeed()
         }
     }

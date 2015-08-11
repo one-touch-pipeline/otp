@@ -1,23 +1,18 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.HelperUtils
-
-import static de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessmentServiceTests.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessmentService
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.RoddyMergedBamQa
-import de.dkfz.tbi.otp.dataprocessing.RoddySingleLaneQa
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import static de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessmentServiceTests.createReferenceGenomeEntriesAndQaFileOnFilesystem
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class ParsePanCanQcJobTests {
 
@@ -54,6 +49,7 @@ class ParsePanCanQcJobTests {
         assert roddyBamFile.coverage != null
         assert roddyBamFile.coverageWithN != null
         assert 1 == correctPermissionsCallsCounter
+        assert roddyBamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
     }
 
     @Test
