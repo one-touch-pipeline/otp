@@ -29,6 +29,7 @@ class ReferenceGenomeProjectSeqType {
     /**
      * File name of file holding the chromosome stat size.
      * The file ends with '.tab' and is located in the stat subdirectory of the reference genome.
+     * The value has to be set for alignment with Roddy and has to be null for OTP alignment.
      */
     String statSizeFileName
 

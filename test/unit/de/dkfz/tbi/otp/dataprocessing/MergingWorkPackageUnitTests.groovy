@@ -142,31 +142,37 @@ class MergingWorkPackageUnitTests {
 
 
     @Test
-    void test_constraint_onStatSizeFileName_withCorrectName_ShouldBeValid() {
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME])
-        assert mergingWorkPackage.validate()
-    }
-
-    @Test
-    void test_constraint_onStatSizeFileName_withNullNoPancancer_ShouldBeValid() {
+    void test_constraint_onStatSizeFileName_withCorrectNameForPanCan_ShouldBeValid() {
         MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
-                statSizeFileName: null,
-                workflow: Workflow.build(
-                        name: Workflow.Name.DEFAULT_OTP,
-                        type: Workflow.Type.ALIGNMENT,
-                ),
+                statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
+                workflow: DomainFactory.createPanCanWorkflow(),
         ])
         assert mergingWorkPackage.validate()
     }
 
     @Test
-    void test_constraint_onStatSizeFileName_withNullForPancancer_ShouldBeInValid() {
+    void test_constraint_onStatSizeFileName_withCorrectNameNoPanCan_ShouldBeInvalid() {
+        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+                statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
+                workflow: DomainFactory.createDefaultOtpWorkflow(),
+        ])
+        TestCase.assertValidateError(mergingWorkPackage, 'statSizeFileName', 'validator.invalid', DomainFactory.DEFAULT_TAB_FILE_NAME)
+    }
+
+    @Test
+    void test_constraint_onStatSizeFileName_withNullNoPanCan_ShouldBeValid() {
         MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
                 statSizeFileName: null,
-                workflow: Workflow.build(
-                        name: Workflow.Name.PANCAN_ALIGNMENT,
-                        type: Workflow.Type.ALIGNMENT,
-                ),
+                workflow: DomainFactory.createDefaultOtpWorkflow(),
+        ])
+        assert mergingWorkPackage.validate()
+    }
+
+    @Test
+    void test_constraint_onStatSizeFileName_withNullForPanCan_ShouldBeInvalid() {
+        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+                statSizeFileName: null,
+                workflow: DomainFactory.createPanCanWorkflow(),
         ])
         TestCase.assertValidateError(mergingWorkPackage, 'statSizeFileName', 'validator.invalid', null)
     }
@@ -181,10 +187,15 @@ class MergingWorkPackageUnitTests {
 
     @Test
     void test_constraint_onStatSizeFileName_WhenValidSpecialChar_ShouldBeValid() {
+        Workflow workflow = DomainFactory.createPanCanWorkflow()
+
         "-_.".each {
             try {
                 String name = "File${it}.tab"
-                MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([statSizeFileName: name])
+                MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+                        statSizeFileName: name,
+                        workflow: workflow,
+                ])
                 mergingWorkPackage.validate()
                 assert 0 == mergingWorkPackage.errors.errorCount
             } catch (Throwable e) {
@@ -195,10 +206,15 @@ class MergingWorkPackageUnitTests {
 
     @Test
     void test_constraint_onStatSizeFileName_WhenInvalidSpecialChar_ShouldBeInvalid() {
+        Workflow workflow = DomainFactory.createPanCanWorkflow()
+
         "\"',:;%\$§&<>|^§!?=äöüÄÖÜß´`".each {
             try {
                 String name = "File${it}.tab"
-                MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([statSizeFileName: name])
+                MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+                        statSizeFileName: name,
+                        workflow: workflow,
+                ])
                 TestCase.assertValidateError(mergingWorkPackage, 'statSizeFileName', 'matches.invalid', name)
             } catch (Throwable e) {
                 collector.addError(e)

@@ -63,9 +63,6 @@ testDataConfig {
             lengthRefChromosomes = 345
             lengthRefChromosomesWithoutN = 123
         }
-        'de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType' {
-            statSizeFileName = DomainFactory.DEFAULT_TAB_FILE_NAME
-        }
         'de.dkfz.tbi.otp.ngsdata.Run' {
             name = {'runName_' + (counter++)}
         }
@@ -107,10 +104,7 @@ testDataConfig {
             name = {'softwareToolIdentifier_' + (counter++)}
         }
         'de.dkfz.tbi.otp.dataprocessing.MergingSet' {
-            mergingWorkPackage = { MergingWorkPackage.build(workflow: Workflow.buildLazy(
-                    name: Workflow.Name.DEFAULT_OTP,
-                    type: Workflow.Type.ALIGNMENT,
-            )) }
+            mergingWorkPackage = { MergingWorkPackage.build(workflow: DomainFactory.createDefaultOtpWorkflow()) }
         }
         'de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment' {
             //Ensure to use this subclass of AbstractBamFile
@@ -118,8 +112,7 @@ testDataConfig {
             bamFile = {ProcessedBamFile.build()}
         }
         'de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage' {
-            workflow = { Workflow.buildLazy() }
-            statSizeFileName = DomainFactory.DEFAULT_TAB_FILE_NAME
+            workflow = { DomainFactory.createDefaultOtpWorkflow() }
         }
         'de.dkfz.tbi.otp.dataprocessing.MockAbstractBamFile' {
             type = AbstractBamFile.BamType.SORTED
@@ -142,7 +135,7 @@ testDataConfig {
         }
         'de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig' {
             configFilePath = { new File(TestCase.uniqueNonExistentPath, 'roddy-workflow-config').path }
-            workflow = { Workflow.buildLazy(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT) }
+            workflow = { DomainFactory.createPanCanWorkflow() }
         }
         'de.dkfz.tbi.otp.utils.ExternalScript' {
             filePath = { new File(TestCase.uniqueNonExistentPath, 'ExternalScript').path }

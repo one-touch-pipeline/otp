@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.Workflow
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstanceTestData
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.ExternalScript
@@ -107,7 +108,7 @@ public class RoddyWorkflowConfigUnitTests {
         return new RoddyWorkflowConfig([
             project: Project.build(),
             externalScriptVersion: "v1",
-            workflow: Workflow.buildLazy(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT),
+            workflow: DomainFactory.createPanCanWorkflow(),
             configFilePath: configFile.path
         ] + properties)
     }

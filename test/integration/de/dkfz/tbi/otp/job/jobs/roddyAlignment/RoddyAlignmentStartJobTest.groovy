@@ -296,8 +296,12 @@ class RoddyAlignmentStartJobTest {
     }
 
     private MergingWorkPackage createMergingWorkPackage(RunSegment.FilesStatus filesStatus = RunSegment.FilesStatus.FILES_CORRECT) {
-        Workflow workflow = Workflow.buildLazy(name: Workflow.Name.PANCAN_ALIGNMENT)
-        MergingWorkPackage mwp = MergingWorkPackage.build([needsProcessing: true, workflow: workflow])
+        Workflow workflow = DomainFactory.createPanCanWorkflow()
+        MergingWorkPackage mwp = MergingWorkPackage.build([
+                needsProcessing: true,
+                workflow: workflow,
+                statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
+        ])
         ExternalScript externalScript = ExternalScript.buildLazy()
         RoddyWorkflowConfig.build([workflow: workflow, project: mwp.project, externalScriptVersion: externalScript.scriptVersion])
         Run run = Run.build()

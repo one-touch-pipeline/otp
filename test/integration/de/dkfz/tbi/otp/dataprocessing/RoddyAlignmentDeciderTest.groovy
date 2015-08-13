@@ -163,11 +163,14 @@ public class RoddyAlignmentDeciderTest {
     void testPrepareForAlignment_noBamFileFound_shouldSetNeedsProcessing() {
         SeqTrack seqTrack = SeqTrack.build()
 
+        Workflow workflow = decider.getWorkflow()
+
         MergingWorkPackage workPackage = TestData.createMergingWorkPackage(
                 sample: seqTrack.sample,
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
-                workflow: decider.getWorkflow(),
+                workflow: workflow,
+                statSizeFileName: workflow.name == Workflow.Name.PANCAN_ALIGNMENT ? DomainFactory.DEFAULT_TAB_FILE_NAME : null
         )
         workPackage.save(failOnError: true)
 

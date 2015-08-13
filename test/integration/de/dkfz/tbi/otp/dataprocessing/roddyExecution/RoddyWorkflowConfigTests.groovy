@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProject
 import de.dkfz.tbi.otp.dataprocessing.Workflow
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.TestData
@@ -62,7 +63,7 @@ class RoddyWorkflowConfigTests {
 
     @Test
     void testValidateNewConfigFile_NoExternalScriptForThisWorkflowName_ShouldFail() {
-        Workflow workflow = Workflow.build(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT)
+        Workflow workflow = DomainFactory.createPanCanWorkflow()
         ExternalScript.build(scriptIdentifier: WRONG_WORKFLOW_NAME, scriptVersion: PLUGIN_VERSION)
         TestCase.shouldFail(AssertionError) {
             RoddyWorkflowConfig.validateNewConfigFile(PLUGIN_VERSION, workflow, configFile.path)
@@ -189,7 +190,7 @@ class RoddyWorkflowConfigTests {
 
 
     void testCreateConfigPerProject_PreviousConfigExists() {
-        Workflow workflow = Workflow.build(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT)
+        Workflow workflow = DomainFactory.createPanCanWorkflow()
         ExternalScript externalScript1 = ExternalScript.build()
         Project project = TestData.createProject()
         ConfigPerProject firstConfigPerProject = RoddyWorkflowConfig.build(
@@ -249,7 +250,7 @@ class RoddyWorkflowConfigTests {
 
 
     private Workflow createCorrectSetupAndReturnWorkflow() {
-        Workflow workflow = Workflow.build(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT)
+        Workflow workflow = DomainFactory.createPanCanWorkflow()
         ExternalScript externalScript = ExternalScript.build(scriptIdentifier: workflow.name.name(), scriptVersion: PLUGIN_VERSION)
         ExternalScript.build(scriptIdentifier: workflow.name.name(), scriptVersion: ANOTHER_PLUGIN_VERSION, filePath: "${externalScript.filePath}_v1")
         return workflow

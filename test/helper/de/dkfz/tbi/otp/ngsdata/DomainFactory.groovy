@@ -144,6 +144,14 @@ class DomainFactory {
         ] + properties)
     }
 
+    static Workflow createPanCanWorkflow() {
+        return Workflow.buildLazy(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT)
+    }
+
+    static Workflow createDefaultOtpWorkflow() {
+        return Workflow.buildLazy(name: Workflow.Name.DEFAULT_OTP, type: Workflow.Type.ALIGNMENT)
+    }
+
     public static MergingSet createMergingSet(final MergingWorkPackage mergingWorkPackage) {
         return MergingSet.build(
                 mergingWorkPackage: mergingWorkPackage,
@@ -218,8 +226,12 @@ class DomainFactory {
         MergingWorkPackage workPackage = bamFileProperties.workPackage
         if (!workPackage) {
             SeqType seqType = SeqType.buildLazy(name: SeqTypeNames.WHOLE_GENOME.seqTypeName, alias: "WGS", libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
-            Workflow workflow = Workflow.buildLazy(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT)
-            workPackage = MergingWorkPackage.build(workflow: workflow, seqType: seqType)
+            Workflow workflow = createPanCanWorkflow()
+            workPackage = MergingWorkPackage.build(
+                    workflow: workflow,
+                    seqType: seqType,
+                    statSizeFileName: DEFAULT_TAB_FILE_NAME,
+            )
             ReferenceGenomeProjectSeqType.build(
                     referenceGenome: workPackage.referenceGenome,
                     project: workPackage.project,
@@ -289,7 +301,7 @@ class DomainFactory {
 
     public static SnvCallingInstance createSnvInstanceWithRoddyBamFiles() {
         SamplePair samplePair = createSamplePair()
-        Workflow workflow = Workflow.buildLazy(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT)
+        Workflow workflow = createPanCanWorkflow()
 
         def createRoddyBamFileHelper = { SampleType sampleType ->
             MergingWorkPackage diseaseWorkPackage = MergingWorkPackage.build(
@@ -299,6 +311,7 @@ class DomainFactory {
                     ),
                     seqType: samplePair.seqType,
                     workflow: workflow,
+                    statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
             )
             createRoddyBamFile(workPackage: diseaseWorkPackage)
         }

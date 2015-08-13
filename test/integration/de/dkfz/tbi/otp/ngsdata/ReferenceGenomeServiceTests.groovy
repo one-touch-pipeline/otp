@@ -30,6 +30,7 @@ class ReferenceGenomeServiceTests {
     private MergingWorkPackage createDataForChromosomeStatSizeFile()  {
         MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build (
                 statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
+                workflow: DomainFactory.createPanCanWorkflow(),
         )
         Realm realm = Realm.build([
                 operationType: Realm.OperationType.DATA_PROCESSING,
@@ -77,6 +78,7 @@ class ReferenceGenomeServiceTests {
     void testChromosomeStatSizeFile_NoStatSizeFileIsDefined_ShouldFail() {
         MergingWorkPackage mergingWorkPackage = createDataForChromosomeStatSizeFile()
         mergingWorkPackage.statSizeFileName = null
+        mergingWorkPackage.workflow = DomainFactory.createDefaultOtpWorkflow()
         mergingWorkPackage.save(flush: true)
         assert TestCase.shouldFail(AssertionError) {
             referenceGenomeService.chromosomeStatSizeFile(mergingWorkPackage, false)
