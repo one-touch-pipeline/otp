@@ -63,6 +63,9 @@ class MergingWorkPackage implements Entity {
     String statSizeFileName
     Pipeline pipeline
 
+    //TODO: OTP-1401
+    boolean imported
+
     boolean needsProcessing
 
     static belongsTo = Sample
@@ -71,7 +74,7 @@ class MergingWorkPackage implements Entity {
         // TODO OTP-1401: In the future there may be more than one MWP for one sample and seqType.
         // As soon a you loosen this constraint, un-ignore:
         // - AlignmentPassUnitTests.testIsLatestPass_2PassesDifferentWorkPackages
-        sample unique: 'seqType'
+        sample unique: ['seqType', 'imported']
         needsProcessing(validator: {val, obj -> !val || obj.pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT})
         pipeline(validator: { pipeline -> pipeline.type == Pipeline.Type.ALIGNMENT})
         libraryPreparationKit nullable: true, validator: {val, obj ->
@@ -89,6 +92,8 @@ class MergingWorkPackage implements Entity {
                 val != null && OtpPath.isValidPathComponent(val)
             } else if (obj.pipeline?.name == Pipeline.Name.DEFAULT_OTP) {
                 val == null
+            } else if (obj.pipeline?.name == Pipeline.Name.EXTERNALLY_PROCESSED) {
+                val == null
             } else {
                 assert false: "Pipeline name is unknown: ${obj.pipeline?.name}"
             }
@@ -99,6 +104,9 @@ class MergingWorkPackage implements Entity {
             } else {
                 return true
             }
+        }
+        imported validator: { imported, mwp ->
+            imported == (mwp.pipeline.name == Pipeline.Name.EXTERNALLY_PROCESSED)
         }
     }
 
