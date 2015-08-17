@@ -653,7 +653,7 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
     List<DataFile> datafiles = DataFile.findAllBySeqTrackInList(seqTracks)
     if (datafiles) {
         Map <Collection<RunSegment.FilesStatus>, Collection<DataFile>> dataFilesByInProgress = datafiles.groupBy{
-            RunSegment.PROCESSING_FILE_STATUSES.contains(it.runSegment.filesStatus)
+            RunSegment.FilesStatus.FILES_CORRECT != it.runSegment.filesStatus
         }
         if (dataFilesByInProgress[true]) {
             output << "\nDataInstallationWorkflow: "
@@ -713,7 +713,7 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
                 output << "${seqTracksByAlignmentDeciderBeanName['noAlignmentDecider'].size()} SeqTracks don't align"
                 break
             default:
-                new RuntimeException("Unknown alignment decider: ${it}. Please inform a maintainer")
+                throw new RuntimeException("Unknown alignment decider: ${it}. Please inform a maintainer")
         }
     }
 
