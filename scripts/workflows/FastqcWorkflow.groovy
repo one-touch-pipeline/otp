@@ -19,3 +19,12 @@ plan("FastqcWorkflow") {
     //job("createFastqcProcessedFile", "")
     job("uploadFastQCToDatabase", "uploadFastQCToDatabaseJob")
 }
+
+
+ctx.processingOptionService.createOrUpdate(
+        "fastqcCommand",
+        null,
+        null,
+        "fastqc --java /path/to/programs/jdk/jdk1.6.0_45/bin/java",
+        "command for fastqc with java"
+)
