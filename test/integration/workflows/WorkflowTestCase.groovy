@@ -392,7 +392,14 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
             assert startJob : 'No start job found.'
 
             scheduler.scheduleWithFixedDelay(new Runnable() {
-                void run() { startJob.execute() }
+                void run() {
+                    try {
+                        startJob.execute()
+                    } catch (Throwable t) {
+                        log.error 'Exception in StartJob', t
+                        throw t
+                    }
+                }
             }, 0, 5, TimeUnit.SECONDS)
             startJobRunning = true
         }
