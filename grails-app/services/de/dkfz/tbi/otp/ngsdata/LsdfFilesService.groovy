@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 import static de.dkfz.tbi.otp.utils.WaitingFileUtils.*
 
 import java.util.regex.Pattern
