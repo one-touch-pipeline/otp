@@ -1,10 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
-
-import static org.junit.Assert.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.junit.*
-import grails.buildtestdata.mixin.Build
 import org.springframework.beans.factory.annotation.Autowired
 
 
@@ -67,6 +65,40 @@ class ProjectOverviewServiceTests {
         ensureResultsAreCorrect(result2, processedMergedBamFile2)
     }
 
+    @Test
+    void test_sampleTypeByProject_noData() {
+        Project project = Project.build()
+        def list = projectOverviewService.sampleTypeByProject(project)
+        assert [] == list
+    }
+
+    @Test
+    void test_sampleTypeByProject_oneData() {
+        Project project = Project.build()
+        SampleType sampleType = SampleType.build(name: "BLOOD")
+
+        createAggregateSequences(project, sampleType)
+
+        List<String> results = projectOverviewService.sampleTypeByProject(project)
+        assert sampleType.name == CollectionUtils.exactlyOneElement(results)
+    }
+
+    @Test
+    void test_sampleTypeByProject_multipleData() {
+        Project project = Project.build()
+        SampleType sampleType1 = SampleType.build(name: "BLOOD")
+        SampleType sampleType2 = SampleType.build(name: "TUMOR")
+        SampleType sampleType3 = SampleType.build(name: "RELAPSE")
+        SampleType sampleType_OfOtherProject = SampleType.build(name: "CONTROL")
+
+        createAggregateSequences(project, sampleType1)
+        createAggregateSequences(project, sampleType2)
+        createAggregateSequences(project, sampleType3)
+        createAggregateSequences(Project.build(), sampleType_OfOtherProject)
+
+        def list = projectOverviewService.sampleTypeByProject(project)
+        assert CollectionUtils.containSame(list, [sampleType1.name, sampleType2.name, sampleType3.name])
+    }
 
     private void ensureResultsAreCorrect(List result, ProcessedMergedBamFile processedMergedBamFile) {
         assert result.first().mockPid == processedMergedBamFile.individual.mockPid
@@ -96,6 +128,20 @@ class ProjectOverviewServiceTests {
                         )
                 ),
                 workPackage: pmbfFirst.mergingWorkPackage,
+        )
+    }
+
+    private void createAggregateSequences(Project project, SampleType sampleType) {
+        int identifier = AggregateSequences.findAllByProjectId(project.id).size()
+        AggregateSequences.build(
+                projectId: project.id,
+                sampleTypeName: sampleType.name,
+                seqTypeId: identifier,
+                seqPlatformId: identifier,
+                sampleId: sampleType.id,
+                seqCenterId: identifier,
+                sampleTypeId: identifier,
+                individualId: identifier,
         )
     }
 }

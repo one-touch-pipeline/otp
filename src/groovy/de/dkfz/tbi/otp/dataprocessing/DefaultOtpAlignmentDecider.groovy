@@ -34,4 +34,8 @@ class DefaultOtpAlignmentDecider extends AbstractAlignmentDecider {
         }
     }
 
+    @Override
+    String alignmentMessage() {
+        return "will be aligned with bwa aln"
+    }
 }

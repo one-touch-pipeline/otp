@@ -157,13 +157,17 @@ class SeqTrackService {
      * {@link SeqTrack}'s {@link Project}.
      */
     Collection<MergingWorkPackage> decideAndPrepareForAlignment(SeqTrack seqTrack, boolean forceRealign = false) {
-        String alignmentDeciderBeanName = seqTrack.project.alignmentDeciderBeanName
+        AlignmentDecider decider = getAlignmentDecider(seqTrack.project)
+        return decider.decideAndPrepareForAlignment(seqTrack, forceRealign)
+    }
+
+    AlignmentDecider getAlignmentDecider(Project project) {
+        String alignmentDeciderBeanName = project.alignmentDeciderBeanName
         if (!alignmentDeciderBeanName) {
             // The validator should prevent this, but there are ways to circumvent the validator.
-            throw new RuntimeException("alignmentDeciderBeanName is not set for project ${seqTrack.project}. (In case no alignment shall be done for that project, set the alignmentDeciderBeanName to noAlignmentDecider, which is an AlignmentDecider which decides not to align.)")
+            throw new RuntimeException("alignmentDeciderBeanName is not set for project ${project}. (In case no alignment shall be done for that project, set the alignmentDeciderBeanName to noAlignmentDecider, which is an AlignmentDecider which decides not to align.)")
         }
-        AlignmentDecider decider = applicationContext.getBean(alignmentDeciderBeanName, AlignmentDecider)
-        return decider.decideAndPrepareForAlignment(seqTrack, forceRealign)
+        return applicationContext.getBean(alignmentDeciderBeanName, AlignmentDecider)
     }
 
     static boolean mayAlign(SeqTrack seqTrack) {

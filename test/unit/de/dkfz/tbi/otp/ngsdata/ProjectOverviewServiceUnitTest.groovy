@@ -2,8 +2,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
-import grails.test.mixin.services.ServiceUnitTestMixin
-import grails.test.mixin.support.*
 
 import org.junit.*
 
@@ -76,8 +74,6 @@ class ProjectOverviewServiceUnitTest {
         assert list.contains(referenceGenomeProjectSeqType2)
         assert list.contains(referenceGenomeProjectSeqType3)
     }
-
-
 }
 
 

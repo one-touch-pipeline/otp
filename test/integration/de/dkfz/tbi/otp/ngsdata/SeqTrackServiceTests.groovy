@@ -1097,6 +1097,21 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assert [bamFile] == seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack])
     }
 
+    @Test
+    void testGetAlignmentDecider_WhenNoAlignmentDeciderBeanName_ShouldFail() {
+        Project project = Project.build()
+
+        TestCase.shouldFail (RuntimeException) {
+            seqTrackService.getAlignmentDecider(project)
+        }
+    }
+
+    @Test
+    void testGetAlignmentDecider_WhenAllFine_ShouldReturnAlignmentDecider() {
+        Project project = Project.build(alignmentDeciderBeanName: "noAlignmentDecider")
+
+        assert "NoAlignmentDecider" == seqTrackService.getAlignmentDecider(project).class.simpleName
+    }
 
     private void setupProjectAndDataFile(String decider) {
         testData.project.alignmentDeciderBeanName = decider

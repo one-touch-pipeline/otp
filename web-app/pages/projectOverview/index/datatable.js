@@ -154,6 +154,21 @@ $.otp.projectOverviewTable = {
             oTableReferenceGenome.fnDraw();
             $.otp.graph.project.init();
             $.otp.projectOverviewTable.updatePatientCount();
+            $.otp.projectOverviewTable.updateAlignmentInformation();
+        });
+    },
+
+    updateAlignmentInformation: function () {
+        "use strict";
+        $.getJSON($.otp.createLink({
+            controller : 'projectOverview',
+            action : 'checkForAlignment'
+        }), {
+            projectName : $('#project_select').val()
+        }, function (data) {
+            $('#projectOverview_alignmentInformation').text(data.alignmentMessage);
+        }).error(function (jqXHR) {
+            $.otp.warningMessage(jqXHR.statusText + jqXHR.status);
         });
     }
 };

@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.dataprocessing.*
 

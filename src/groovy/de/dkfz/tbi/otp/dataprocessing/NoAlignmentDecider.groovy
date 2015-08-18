@@ -19,4 +19,9 @@ class NoAlignmentDecider implements AlignmentDecider {
         threadLog?.info("Not aligning ${seqTrack}, because it is configured to use the ${this.getClass().simpleName}.")
         return Collections.emptyList()
     }
+
+    @Override
+    String alignmentMessage() {
+        return "shall not be aligned"
+    }
 }

@@ -78,17 +78,25 @@
                     id="patientsAndSamplesGBCountPerProject" />
             </div>
             <div style="width: 20px; height: 20px;"></div>
-            <h3 class="statisticTableTitle">
-                <g:message code="projectOverview.table.ReferenceGenome.title" />
+            <h3 class="statisticTableLitle">
+                <g:message code="projectOverview.index.alignmentConfiguration" />
             </h3>
+            <h4 class="statisticTableTitle">
+                <g:message code="projectOverview.index.alignmentInformation.title" />
+            </h4>
+            <div style="width: 20px; height: 20px;"></div>
+            <div id="projectOverview_alignmentInformation">No alignment information found.</div>
+            <h4 class="statisticTableTitle">
+                <g:message code="projectOverview.table.ReferenceGenome.title" />
+            </h4>
             <div class="otpDataTables">
-	            <otp:dataTable
-	                codes="${[
-	                    'projectOverview.index.referenceGenome.sequenceTypeName',
-	                    'projectOverview.index.referenceGenome.sampleTypeName',
-	                    'projectOverview.index.referenceGenome',
-	                ] }"
-	                id="listReferenceGenome" />
+                <otp:dataTable
+                    codes="${[
+                        'projectOverview.index.referenceGenome.sequenceTypeName',
+                        'projectOverview.index.referenceGenome.sampleTypeName',
+                        'projectOverview.index.referenceGenome',
+                    ] }"
+                    id="listReferenceGenome" />
             </div>
         </div>
         <div class="homeGraph">
@@ -111,6 +119,7 @@
         $(function() {
             $.otp.projectOverviewTable.register();
             $.otp.graph.project.init();
+            $.otp.projectOverviewTable.updateAlignmentInformation();
         });
     </r:script>
 </body>

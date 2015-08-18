@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.AlignmentDecider
 import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.utils.DataTableCommand
@@ -11,6 +12,8 @@ class ProjectOverviewController {
     ProjectService projectService
 
     ProjectOverviewService projectOverviewService
+
+    SeqTrackService seqTrackService
 
     Map index() {
         String projectName = params.projectName
@@ -238,5 +241,10 @@ class ProjectOverviewController {
         render dataToRender as JSON
     }
 
-
+    JSON checkForAlignment(String projectName) {
+        Project project = projectService.getProjectByName(projectName)
+        AlignmentDecider decider = seqTrackService.getAlignmentDecider(project)
+        Map dataToRender = [alignmentMessage: "Project ${project.name} ${decider.alignmentMessage()}."]
+        render dataToRender as JSON
+    }
 }
