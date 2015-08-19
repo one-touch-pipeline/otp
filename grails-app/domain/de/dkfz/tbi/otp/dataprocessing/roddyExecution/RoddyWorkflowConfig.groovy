@@ -14,12 +14,21 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
  * The other possible distinctions will be grouped within this config file.
  * The information about the config file is store in the "RoddyWorkflowConfig"-Domain.
  *
+ * The script 'scripts/operations/pancan/LoadPanCanConfig.groovy' can be used to load a roddy config.
+ *
  */
 class RoddyWorkflowConfig extends ConfigPerProject {
 
     Workflow workflow
 
-    // Path to the config file which is used in this project and workflow. The name of the configFile contains the version number.
+    /**
+     * the full path to the config file which is used in this project and workflow. The name of the configFile contains the version number.
+     *
+     * The file should be located in: $OTP_ROOT_PATH/$PROJECT/configFiles/$Workflow/
+     * The file should be named as: ${Workflow}_${WorkflowVersion}_v${fileVersion}.xml
+     *
+     * for example: $OTP_ROOT_PATH/$PROJECT/configFiles/PANCAN_ALIGNMENT/PANCAN_ALIGNMENT_1.0.177_v1.0.xml
+     */
     String configFilePath
 
     String pluginVersion
