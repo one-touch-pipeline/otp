@@ -359,9 +359,9 @@ def handleStateMap = {Map map, String workflow, Closure valueToShow, Closure obj
 def handleStateMapNeedsProcessing = {Map<Boolean, Collection<MergingWorkPackage>> map, Closure valueToShow ->
     output << "\nPanCanAlignmentWorkflow: \n${INDENT}Only SeqTracks are shown which finished fastqc-WF"
 
-    showShouldStart(map[false], valueToShow)
+    showShouldStart(map[true], valueToShow)
 
-    return map[true]
+    return map[false]
 }
 
 // map: RoddyBamFiles grouped by AbstractMergedBamFile.FileOperationStatus
@@ -620,16 +620,16 @@ def showSeqTracksRoddy = {List<SeqTrack> seqTracksToAlign ->
             mergingWorkPackages.groupBy {it.needsProcessing}
 
     allFinished &= map.keySet() == [false] as Set
-    Collection<MergingWorkPackage> mergingWorkPackagesNeedingProcessing = handleStateMapNeedsProcessing(mergingWorkPackagesByNeedsProcessing, {
+    Collection<MergingWorkPackage> mergingWorkPackagesInProcessing = handleStateMapNeedsProcessing(mergingWorkPackagesByNeedsProcessing, {
         "${it}"
     })
 
-    if (!mergingWorkPackagesNeedingProcessing) {
-        output << "\nnot all PanCan alignments are finished"
+    if (!mergingWorkPackagesInProcessing) {
+        output << "\nnot all workflows are finished"
         return []
     }
 
-    List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageInList(mergingWorkPackagesNeedingProcessing).findAll { it.isMostRecentBamFile() && !it.withdrawn }
+    List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageInList(mergingWorkPackagesInProcessing).findAll { it.isMostRecentBamFile() && !it.withdrawn }
 
     Map<AbstractMergedBamFile.FileOperationStatus, Collection<RoddyBamFile>> roddyBamFileByFileOperationStatus =
             roddyBamFiles.groupBy {it.fileOperationStatus}
