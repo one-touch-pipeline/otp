@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.ConfigPerProject
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.TestData
 import de.dkfz.tbi.otp.utils.ExternalScript
-import grails.test.mixin.Mock
+import de.dkfz.tbi.otp.utils.HelperUtils
+import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestFor
 import org.junit.After
 import org.junit.Before
@@ -14,7 +16,7 @@ import org.junit.Test
 import static de.dkfz.tbi.TestCase.createEmptyTestDirectory
 
 @TestFor(SnvConfig)
-@Mock([ExternalScript, Project, SeqType])
+@Build([ExternalScript, Project, SeqType])
 class SnvConfigUnitTests {
 
     static final String LEGAL_EXECUTE_FLAGS =
@@ -23,6 +25,7 @@ class SnvConfigUnitTests {
     "RUN_SNV_DEEPANNOTATION=1\n" +
     "RUN_FILTER_VCF=1"
 
+    ExternalScript externalScript
     SnvConfig validSnvConfig
     File configDir
     File configFile
@@ -30,13 +33,13 @@ class SnvConfigUnitTests {
 
     @Before
     void setUp() {
-        SnvCallingInstanceTestData.createOrFindExternalScript()
+        externalScript = ExternalScript.build(scriptVersion: HelperUtils.uniqueString)
 
         validSnvConfig = new SnvConfig(
                 project: TestData.createProject(),
                 seqType: new SeqType(),
                 configuration: LEGAL_EXECUTE_FLAGS,
-                externalScriptVersion: "v1",
+                externalScriptVersion: externalScript.scriptVersion,
         )
         validSnvConfig.save()
 
@@ -54,11 +57,77 @@ class SnvConfigUnitTests {
     }
 
     @Test
+    void testSave_noScriptVersion_shouldNotValidate_shouldFail() {
+        ConfigPerProject configPerProject = new SnvConfig(
+                project: TestData.createProject(),
+                seqType: new SeqType(),
+                configuration: LEGAL_EXECUTE_FLAGS,
+        )
+        TestCase.assertValidateError(configPerProject, 'externalScriptVersion', 'nullable', null)
+
+        configPerProject.externalScriptVersion = externalScript.scriptVersion
+        assertTrue(configPerProject.validate())
+    }
+
+    @Test
+    void testSave_emptyScriptVersion_shouldNotValidate_shouldFail() {
+        SnvConfig configPerProject = new SnvConfig(
+                project: TestData.createProject(),
+                seqType: new SeqType(),
+                configuration: LEGAL_EXECUTE_FLAGS,
+                externalScriptVersion: ""
+        )
+        TestCase.assertValidateError(configPerProject, 'externalScriptVersion', 'blank', '')
+
+        configPerProject.externalScriptVersion = externalScript.scriptVersion
+        assertTrue(configPerProject.validate())
+    }
+
+    @Test
+    void testExternalScriptExistsConstraint_NoExternalScript_ShouldFail() {
+        ExternalScript.list().each {
+            it.delete()
+        }
+        SnvConfig configPerProject = new SnvConfig(
+                project: TestData.createProject(),
+                seqType: new SeqType(),
+                configuration: LEGAL_EXECUTE_FLAGS,
+                externalScriptVersion: externalScript.scriptVersion
+        )
+        TestCase.assertValidateError(configPerProject, 'externalScriptVersion', 'validator.invalid', externalScript.scriptVersion)
+    }
+
+    @Test
+    void testObsoleteInstanceRefersToDeprecatedExternalScript_AllFine() {
+        ExternalScript externalScript = ExternalScript.build(deprecatedDate: new Date())
+        SnvConfig configPerProject = new SnvConfig(
+                project: TestData.createProject(),
+                seqType: new SeqType(),
+                configuration: LEGAL_EXECUTE_FLAGS,
+                externalScriptVersion: externalScript.scriptVersion,
+                obsoleteDate: new Date()
+        )
+        assert configPerProject.validate()
+    }
+
+    @Test
+    void testNonObsoleteInstanceRefersToDeprecatedExternalScript_ShouldNotValidate() {
+        ExternalScript externalScript = ExternalScript.build(deprecatedDate: new Date())
+        SnvConfig configPerProject = new SnvConfig(
+                project: TestData.createProject(),
+                seqType: new SeqType(),
+                configuration: LEGAL_EXECUTE_FLAGS,
+                externalScriptVersion: externalScript.scriptVersion
+        )
+        TestCase.assertValidateError(configPerProject, 'externalScriptVersion', 'validator.invalid', externalScript.scriptVersion)
+    }
+
+    @Test
     void testSaveWithoutSeqType_shouldFail() {
         SnvConfig snvConfig = new SnvConfig(
                 project: TestData.createProject(),
                 configuration: LEGAL_EXECUTE_FLAGS,
-                externalScriptVersion: "v1",
+                externalScriptVersion: externalScript.scriptVersion,
                 )
         assertFalse(snvConfig.validate())
 
@@ -70,7 +139,7 @@ class SnvConfigUnitTests {
         SnvConfig snvConfig = new SnvConfig(
             project: TestData.createProject(),
             seqType: new SeqType(),
-            externalScriptVersion: "v1",
+            externalScriptVersion: externalScript.scriptVersion,
             )
         assertFalse(snvConfig.validate())
 
@@ -83,7 +152,7 @@ class SnvConfigUnitTests {
             project: TestData.createProject(),
             seqType: new SeqType(),
             configuration: "",
-            externalScriptVersion: "v1",
+            externalScriptVersion: externalScript.scriptVersion,
         )
         assertFalse(snvConfig.validate())
 

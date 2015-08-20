@@ -12,6 +12,7 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.ExternalScript
+import de.dkfz.tbi.otp.utils.HelperUtils
 import grails.util.Environment
 import org.joda.time.DateTime
 import org.joda.time.Duration
@@ -252,13 +253,12 @@ class DomainFactory {
             )
         }
         SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile(workPackage)
-        ExternalScript externalScript = ExternalScript.buildLazy()
         RoddyBamFile bamFile = RoddyBamFile.build([
                 numberOfMergedLanes: 1,
                 seqTracks: [seqTrack],
                 workPackage: workPackage,
                 identifier: RoddyBamFile.nextIdentifier(workPackage),
-                config: RoddyWorkflowConfig.buildLazy(workflow: workPackage.workflow, project: workPackage.project, externalScriptVersion: externalScript.scriptVersion, obsoleteDate: null),
+                config: RoddyWorkflowConfig.buildLazy(workflow: workPackage.workflow, project: workPackage.project, pluginVersion: HelperUtils.uniqueString, obsoleteDate: null),
                 md5sum: DEFAULT_MD5_SUM,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 fileSize: 10000,
@@ -271,7 +271,7 @@ class DomainFactory {
     public static createRoddyBamFile(RoddyBamFile baseBamFile, Map bamFileProperties = [:]) {
         RoddyBamFile bamFile = RoddyBamFile.build([
                 baseBamFile: baseBamFile,
-                config: bamFileProperties.config ?: RoddyWorkflowConfig.build(workflow: baseBamFile.config.workflow, externalScriptVersion: ExternalScript.buildLazy().scriptVersion),
+                config: bamFileProperties.config ?: RoddyWorkflowConfig.build(workflow: baseBamFile.config.workflow, pluginVersion: HelperUtils.uniqueString),
                 workPackage: baseBamFile.workPackage,
                 identifier: baseBamFile.identifier + 1,
                 numberOfMergedLanes: baseBamFile.numberOfMergedLanes + 1,

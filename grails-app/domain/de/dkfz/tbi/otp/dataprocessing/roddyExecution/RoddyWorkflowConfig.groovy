@@ -4,11 +4,8 @@ import de.dkfz.tbi.otp.dataprocessing.ConfigPerProject
 import de.dkfz.tbi.otp.dataprocessing.Workflow
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.ExternalScript
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 /**
  * Each roddy call is configured by a config file. This config file can be different between the different workflows,
@@ -25,21 +22,16 @@ class RoddyWorkflowConfig extends ConfigPerProject {
     // Path to the config file which is used in this project and workflow. The name of the configFile contains the version number.
     String configFilePath
 
+    String pluginVersion
+
     static constraints = {
         configFilePath validator: { path ->
             new File(path).isAbsolute()
         }
         workflow unique: ['project', 'configFilePath']
+        pluginVersion blank: false
+        workflow unique: ['project', 'obsoleteDate']  // partial index: WHERE obsolete_date IS NULL
     }
-
-    static mapping = {
-        workflow index: 'roddy_workflow_config_workflow_idx'
-    }
-
-    String getWorkflowVersion () {
-        return this.externalScriptVersion
-    }
-
 
     static void importProjectConfigFile(Project project, String pluginVersionToUse, Workflow workflow, String configFilePath) {
         assert project : "The project is not allowed to be null"
@@ -55,7 +47,7 @@ class RoddyWorkflowConfig extends ConfigPerProject {
                 project: project,
                 workflow: workflow,
                 configFilePath: configFilePath,
-                externalScriptVersion: pluginVersionToUse,
+                pluginVersion: pluginVersionToUse,
                 previousConfig: roddyWorkflowConfig
         )
         config.createConfigPerProject()
@@ -64,7 +56,6 @@ class RoddyWorkflowConfig extends ConfigPerProject {
 
     static void validateNewConfigFile(String pluginVersionToUse, Workflow workflow, String configFilePath) {
         assert workflow : "The workflow is not allowed to be null"
-        CollectionUtils.exactlyOneElement(ExternalScript.findAllByScriptIdentifierAndScriptVersionAndDeprecatedDateIsNull(workflow.name.name(), pluginVersionToUse))
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(configFilePath))
     }
 

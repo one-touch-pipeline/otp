@@ -6,7 +6,6 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstanceTestData
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.utils.CreateFileHelper
-import de.dkfz.tbi.otp.utils.ExternalScript
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
@@ -19,7 +18,7 @@ import org.junit.Test
  */
 
 @TestFor(RoddyWorkflowConfig)
-@Build([ExternalScript, Project, Workflow])
+@Build([Project, Workflow])
 @TestMixin(ControllerUnitTestMixin)
 public class RoddyWorkflowConfigUnitTests {
 
@@ -79,13 +78,6 @@ public class RoddyWorkflowConfigUnitTests {
     }
 
     @Test
-    void testGetWorkflowVersion() {
-        RoddyWorkflowConfig roddyWorkflowConfig = createRoddyWorkflowConfig()
-        assert "v1" == roddyWorkflowConfig.workflowVersion
-    }
-
-
-    @Test
     void testUniqueConstraint() {
         CreateFileHelper.createFile(configFile)
         RoddyWorkflowConfig roddyWorkflowConfig1 = createRoddyWorkflowConfig()
@@ -104,10 +96,9 @@ public class RoddyWorkflowConfigUnitTests {
 
 
     RoddyWorkflowConfig createRoddyWorkflowConfig(Map properties = [:]) {
-        SnvCallingInstanceTestData.createOrFindExternalScript()
         return new RoddyWorkflowConfig([
             project: Project.build(),
-            externalScriptVersion: "v1",
+            pluginVersion: "v1",
             workflow: DomainFactory.createPanCanWorkflow(),
             configFilePath: configFile.path
         ] + properties)

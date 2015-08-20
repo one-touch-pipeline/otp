@@ -63,7 +63,7 @@ class ExecutePanCanJob extends AbstractRoddyJob {
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(chromosomeStatSizeFile)
 
         String analysisIDinConfigFile = executeRoddyCommandService.getAnalysisIDinConfigFile(roddyBamFile)
-        String nameInConfigFile = "${roddyBamFile.workflow.name}_${roddyBamFile.config.externalScriptVersion}"
+        String nameInConfigFile = "${roddyBamFile.workflow.name}_${roddyBamFile.config.pluginVersion}"
 
         ensureCorrectBaseBamFileIsOnFileSystem(baseBamFile)
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(roddyBamFile.config.configFilePath))

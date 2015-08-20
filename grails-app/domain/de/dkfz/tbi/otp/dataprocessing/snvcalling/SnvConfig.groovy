@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.dataprocessing.ConfigPerProject
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.BashScriptVariableReader
+import de.dkfz.tbi.otp.utils.ExternalScript
 
 class SnvConfig extends ConfigPerProject {
 
@@ -19,6 +20,11 @@ class SnvConfig extends ConfigPerProject {
      */
     String configuration
 
+    /**
+     * Defines which version of the external scripts has to be used for this project.
+     */
+    String externalScriptVersion
+
     transient Map<String, String> variables
 
     static transients = [ 'variables' ]
@@ -29,11 +35,18 @@ class SnvConfig extends ConfigPerProject {
 
     static constraints = {
         configuration blank: false
+        externalScriptVersion blank: false, validator: { val, obj ->
+            if (obj.obsoleteDate) {
+                !ExternalScript.findAllByScriptVersion(val).empty
+            } else {
+                !ExternalScript.findAllByScriptVersionAndDeprecatedDate(val, null).empty
+            }
+        }
+        seqType unique: ['project', 'obsoleteDate']  // partial index: WHERE obsolete_date IS NULL
     }
 
     static mapping = {
         configuration type: 'text'
-        seqType index: 'snv_config_per_seq_type_seq_type_idx'
     }
 
     SnvConfig evaluate() {

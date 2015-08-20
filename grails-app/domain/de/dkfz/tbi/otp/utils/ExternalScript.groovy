@@ -86,13 +86,8 @@ class ExternalScript {
         }
         author blank: false
         comment blank: true, nullable: true
-        deprecatedDate nullable: true
+        deprecatedDate nullable: true, unique: ['scriptIdentifier', 'scriptVersion']  // partial index: WHERE deprecated_date IS NULL
         scriptVersion blank: false
-    }
-
-    static mapping = {
-        scriptIdentifier index: "external_script_identifier_idx"
-        scriptVersion index: "external_script_version_idx"
     }
 
     static ExternalScript getLatestVersionOfScript(final String scriptIdentifier, String externalScriptVersion) {

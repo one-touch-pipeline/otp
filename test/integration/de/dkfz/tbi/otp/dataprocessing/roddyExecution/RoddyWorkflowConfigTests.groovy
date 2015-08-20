@@ -9,10 +9,11 @@ import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.TestData
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
-import de.dkfz.tbi.otp.utils.ExternalScript
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+
+import de.dkfz.tbi.otp.utils.HelperUtils
 
 /**
  */
@@ -20,7 +21,6 @@ class RoddyWorkflowConfigTests {
 
     final String PLUGIN_VERSION = "1234" // arbitrary version
     final String ANOTHER_PLUGIN_VERSION = "5678"
-    final Workflow.Name WRONG_WORKFLOW_NAME = Workflow.Name.DEFAULT_OTP
 
     File configDir
     File configFile
@@ -49,24 +49,6 @@ class RoddyWorkflowConfigTests {
     void testValidateNewConfigFile_WorkflowIsNull_ShouldFail() {
         TestCase.shouldFail(AssertionError) {
             RoddyWorkflowConfig.validateNewConfigFile(PLUGIN_VERSION, null, configFile.path)
-        }
-    }
-
-    @Test
-    void testValidateNewConfigFile_NoExternalScriptForThisVersion_ShouldFail() {
-        Workflow workflow = Workflow.build()
-        ExternalScript.build(scriptIdentifier: workflow.name.name(), scriptVersion: PLUGIN_VERSION)
-        TestCase.shouldFail(AssertionError) {
-            RoddyWorkflowConfig.validateNewConfigFile(ANOTHER_PLUGIN_VERSION, workflow, configFile.path)
-        }
-    }
-
-    @Test
-    void testValidateNewConfigFile_NoExternalScriptForThisWorkflowName_ShouldFail() {
-        Workflow workflow = DomainFactory.createPanCanWorkflow()
-        ExternalScript.build(scriptIdentifier: WRONG_WORKFLOW_NAME, scriptVersion: PLUGIN_VERSION)
-        TestCase.shouldFail(AssertionError) {
-            RoddyWorkflowConfig.validateNewConfigFile(PLUGIN_VERSION, workflow, configFile.path)
         }
     }
 
@@ -126,7 +108,7 @@ class RoddyWorkflowConfigTests {
         assert roddyWorkflowConfig.project == project
         assert roddyWorkflowConfig.workflow == workflow
         assert roddyWorkflowConfig.configFilePath == configFile.path
-        assert roddyWorkflowConfig.externalScriptVersion == PLUGIN_VERSION
+        assert roddyWorkflowConfig.pluginVersion == PLUGIN_VERSION
         assert roddyWorkflowConfig.previousConfig == null
     }
 
@@ -134,11 +116,11 @@ class RoddyWorkflowConfigTests {
     void testImportProjectConfigFile_PreviousRoddyWorkflowConfigExists() {
         Project project = Project.build()
         Workflow workflow = createCorrectSetupAndReturnWorkflow()
-        RoddyWorkflowConfig roddyWorkflowConfig1 = RoddyWorkflowConfig.build(project: project, workflow: workflow, externalScriptVersion: ANOTHER_PLUGIN_VERSION)
+        RoddyWorkflowConfig roddyWorkflowConfig1 = RoddyWorkflowConfig.build(project: project, workflow: workflow, pluginVersion: ANOTHER_PLUGIN_VERSION)
         assert RoddyWorkflowConfig.list().size == 1
         RoddyWorkflowConfig.importProjectConfigFile(project, PLUGIN_VERSION, workflow, configFile.path)
         assert RoddyWorkflowConfig.list().size == 2
-        RoddyWorkflowConfig roddyWorkflowConfig2 = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAllByExternalScriptVersion(PLUGIN_VERSION))
+        RoddyWorkflowConfig roddyWorkflowConfig2 = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAllByPluginVersion(PLUGIN_VERSION))
         assert roddyWorkflowConfig2.previousConfig == roddyWorkflowConfig1
         assert roddyWorkflowConfig1.obsoleteDate
     }
@@ -172,7 +154,7 @@ class RoddyWorkflowConfigTests {
     void testGetLatest_OneRoddyWorkflowConfigExists() {
         Project project = Project.build()
         Workflow workflow = createCorrectSetupAndReturnWorkflow()
-        RoddyWorkflowConfig roddyWorkflowConfig = RoddyWorkflowConfig.build(project: project, workflow: workflow, externalScriptVersion: PLUGIN_VERSION)
+        RoddyWorkflowConfig roddyWorkflowConfig = RoddyWorkflowConfig.build(project: project, workflow: workflow, pluginVersion: PLUGIN_VERSION)
         assert RoddyWorkflowConfig.getLatest(project, workflow) == roddyWorkflowConfig
     }
 
@@ -182,8 +164,8 @@ class RoddyWorkflowConfigTests {
         File newConfigFile = CreateFileHelper.createFile(new File(configDir, 'ConfigFile2.txt'))
         Project project = Project.build()
         Workflow workflow = createCorrectSetupAndReturnWorkflow()
-        RoddyWorkflowConfig roddyWorkflowConfig1 = RoddyWorkflowConfig.build(project: project, workflow: workflow, externalScriptVersion: PLUGIN_VERSION, obsoleteDate: new Date())
-        RoddyWorkflowConfig roddyWorkflowConfig2 = RoddyWorkflowConfig.build(project: project, workflow: workflow, externalScriptVersion: ANOTHER_PLUGIN_VERSION,
+        RoddyWorkflowConfig roddyWorkflowConfig1 = RoddyWorkflowConfig.build(project: project, workflow: workflow, pluginVersion: PLUGIN_VERSION, obsoleteDate: new Date())
+        RoddyWorkflowConfig roddyWorkflowConfig2 = RoddyWorkflowConfig.build(project: project, workflow: workflow, pluginVersion: ANOTHER_PLUGIN_VERSION,
                 previousConfig: roddyWorkflowConfig1, configFilePath: newConfigFile.path)
         assert RoddyWorkflowConfig.getLatest(project, workflow) == roddyWorkflowConfig2
     }
@@ -191,26 +173,19 @@ class RoddyWorkflowConfigTests {
 
     void testCreateConfigPerProject_PreviousConfigExists() {
         Workflow workflow = DomainFactory.createPanCanWorkflow()
-        ExternalScript externalScript1 = ExternalScript.build()
         Project project = TestData.createProject()
         ConfigPerProject firstConfigPerProject = RoddyWorkflowConfig.build(
                 project: project,
-                externalScriptVersion: externalScript1.scriptVersion,
+                pluginVersion: HelperUtils.uniqueString,
                 configFilePath: configFile.path,
         )
         firstConfigPerProject.save()
-
-        ExternalScript externalScript2 = ExternalScript.build([
-                scriptIdentifier: "scriptIdentifier2",
-                scriptVersion: "v2",
-                filePath: "${externalScript1.filePath}_1"
-        ])
 
         ConfigPerProject newConfigPerProject = new RoddyWorkflowConfig(
                 project: project,
                 workflow: workflow,
                 previousConfig: firstConfigPerProject,
-                externalScriptVersion: externalScript2.scriptVersion,
+                pluginVersion: HelperUtils.uniqueString,
                 configFilePath: secondConfigFile.path,
         )
 
@@ -224,11 +199,10 @@ class RoddyWorkflowConfigTests {
 
 
     void testCreateConfigPerProject_PreviousConfigDoesNotExist(){
-        ExternalScript externalScript = ExternalScript.build()
         Project project = TestData.createProject()
         ConfigPerProject configPerProject = RoddyWorkflowConfig.build(
                 project: project,
-                externalScriptVersion: externalScript.scriptVersion,
+                pluginVersion: HelperUtils.uniqueString,
                 configFilePath: configFile,
         )
         configPerProject.createConfigPerProject()
@@ -237,10 +211,9 @@ class RoddyWorkflowConfigTests {
 
 
     void testMakeObsolete() {
-        ExternalScript externalScript = ExternalScript.build()
         ConfigPerProject configPerProject = RoddyWorkflowConfig.build(
                 project: TestData.createProject(),
-                externalScriptVersion: externalScript.scriptVersion,
+                pluginVersion: HelperUtils.uniqueString,
                 configFilePath: configFile,
         )
         assert !configPerProject.obsoleteDate
@@ -251,8 +224,6 @@ class RoddyWorkflowConfigTests {
 
     private Workflow createCorrectSetupAndReturnWorkflow() {
         Workflow workflow = DomainFactory.createPanCanWorkflow()
-        ExternalScript externalScript = ExternalScript.build(scriptIdentifier: workflow.name.name(), scriptVersion: PLUGIN_VERSION)
-        ExternalScript.build(scriptIdentifier: workflow.name.name(), scriptVersion: ANOTHER_PLUGIN_VERSION, filePath: "${externalScript.filePath}_v1")
         return workflow
     }
 

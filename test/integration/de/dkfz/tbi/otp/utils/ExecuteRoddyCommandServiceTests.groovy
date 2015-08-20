@@ -254,7 +254,7 @@ class ExecuteRoddyCommandServiceTests {
 "${roddyBamFile.individual.pid} " +
 "--useconfig=${applicationIniPath} " +
 "--useRoddyVersion=2.1.28 " +
-"--usePluginVersion=${roddyBamFile.config.externalScriptVersion} " +
+"--usePluginVersion=${roddyBamFile.config.pluginVersion} " +
 "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} " +
 "--useiodir=${viewByPid},${realm.rootPath}/${roddyBamFile.project.dirName}/sequencing/${roddyBamFile.seqType.dirName}/view-by-pid/" +
 "${roddyBamFile.individual.pid}/${roddyBamFile.sampleType.dirName}/${roddyBamFile.seqType.libraryLayoutDirName}/" +

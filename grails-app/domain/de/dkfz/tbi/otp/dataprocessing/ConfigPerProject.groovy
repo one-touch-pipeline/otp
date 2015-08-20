@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.ExternalScript
 
 /**
  * To be more flexible the configuration shall be stored in the database instead of in the code.
@@ -14,11 +13,6 @@ abstract class ConfigPerProject {
     static belongsTo = [
         project: Project
     ]
-
-    /**
-     * Defines which version of the external scripts has to be used for this project.
-     */
-    String externalScriptVersion
 
     // The following two properties are automatically maintained by Grails.
     // See http://grails.org/doc/latest/ref/Database%20Mapping/autoTimestamp.html
@@ -40,19 +34,6 @@ abstract class ConfigPerProject {
             return (val == null || val != null && val.obsoleteDate != null)
         }
         obsoleteDate nullable: true
-        externalScriptVersion blank: false, validator: { val, obj ->
-            if (obj.obsoleteDate) {
-                !ExternalScript.findAllByScriptVersion(val).empty
-            } else {
-                !ExternalScript.findAllByScriptVersionAndDeprecatedDate(val, null).empty
-            }
-        }
-    }
-
-    static mapping = {
-        project index: 'config_per_project_project_idx'
-        previousConfig index: 'config_per_project_previous_config_idx'
-        externalScriptVersion index: 'config_per_project_external_script_version_idx'
     }
 
      void createConfigPerProject() {

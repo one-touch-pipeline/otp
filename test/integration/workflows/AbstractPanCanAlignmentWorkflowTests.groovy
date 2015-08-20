@@ -199,14 +199,10 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
         String pluginVersion = getPluginVersion(projectConfigFile)
 
-        ExternalScript.build(
-                scriptVersion: pluginVersion
-        )
-
         RoddyWorkflowConfig.build(
                 configFilePath: configFile.absolutePath,
                 workflow: workPackage.workflow,
-                externalScriptVersion: pluginVersion,
+                pluginVersion: pluginVersion,
                 project: workPackage.project,
                 obsoleteDate: null
         )
@@ -503,7 +499,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         RoddyWorkflowConfig config = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAll())
         externalScript.scriptVersion = pluginVersion
         externalScript.save(flush: true, failOnError: true)
-        config.externalScriptVersion = pluginVersion
+        config.pluginVersion = pluginVersion
         config.save(flush: true, failOnError: true)
     }
 

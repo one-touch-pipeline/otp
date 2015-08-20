@@ -57,7 +57,7 @@ class ExecuteRoddyCommandService {
 
 
         RoddyWorkflowConfig config = roddyResult.config
-        String pipelineVersion = config.externalScriptVersion
+        String pluginVersion = config.pluginVersion
         File configFile = new File(config.configFilePath)
 
         //base view by pid directory
@@ -67,7 +67,7 @@ class ExecuteRoddyCommandService {
                 "${roddyResult.individual.pid} " +
                 "--useconfig=${applicationIniPath} " +
                 "--useRoddyVersion=${roddyVersion} " +
-                "--usePluginVersion=${pipelineVersion} " +
+                "--usePluginVersion=${pluginVersion} " +
                 "--configurationDirectories=${configFile.parent},${roddyBaseConfigsPath} " +
                 "--useiodir=${viewByPid},${tempOutputDir} "
     }

@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+import de.dkfz.tbi.otp.utils.HelperUtils
+
 class RoddyAlignmentStartJobTest {
 
     @Autowired
@@ -302,8 +304,7 @@ class RoddyAlignmentStartJobTest {
                 workflow: workflow,
                 statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
         ])
-        ExternalScript externalScript = ExternalScript.buildLazy()
-        RoddyWorkflowConfig.build([workflow: workflow, project: mwp.project, externalScriptVersion: externalScript.scriptVersion])
+        RoddyWorkflowConfig.build([workflow: workflow, project: mwp.project, pluginVersion: HelperUtils.uniqueString])
         Run run = Run.build()
         DomainFactory.buildSeqTrackWithDataFile(mwp, [run: run])
         RunSegment.build(run: run, filesStatus: filesStatus)

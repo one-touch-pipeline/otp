@@ -238,11 +238,11 @@ class ExecutePanCanJobTests {
 
         String expectedCmd =  """\
 cd /tmp \
-&& sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.externalScriptVersion}.config@WGS \
+&& sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.pluginVersion}.config@WGS \
 ${roddyBamFile.individual.pid} \
 --useconfig=${roddyApplicationIni} \
 --useRoddyVersion=${roddyVersion} \
---usePluginVersion=${roddyBamFile.config.externalScriptVersion} \
+--usePluginVersion=${roddyBamFile.config.pluginVersion} \
 --configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} \
 --useiodir=${viewByPid},${roddyBamFile.tmpRoddyDirectory} \
 --cvalues="fastq_list:${fastqFilesAsString},\
@@ -282,11 +282,11 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
 
         String expectedCmd = """\
 cd /tmp \
-&& sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile2.workflow.name}_${roddyBamFile2.config.externalScriptVersion}.config@WGS \
+&& sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile2.workflow.name}_${roddyBamFile2.config.pluginVersion}.config@WGS \
 ${roddyBamFile2.individual.pid} \
 --useconfig=${roddyApplicationIni} \
 --useRoddyVersion=${roddyVersion} \
---usePluginVersion=${roddyBamFile2.config.externalScriptVersion} \
+--usePluginVersion=${roddyBamFile2.config.pluginVersion} \
 --configurationDirectories=${new File(roddyBamFile2.config.configFilePath).parent},${roddyBaseConfigsPath} \
 --useiodir=${viewByPid},${roddyBamFile2.tmpRoddyDirectory} \
 --cvalues="fastq_list:${fastqFilesAsString},\
@@ -315,11 +315,11 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
 
         String expectedCmd =  """\
 cd /tmp && \
-sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.externalScriptVersion}.config@WGS \
+sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.pluginVersion}.config@WGS \
 ${roddyBamFile.individual.pid} \
 --useconfig=${roddyApplicationIni} \
 --useRoddyVersion=${roddyVersion} \
---usePluginVersion=${roddyBamFile.config.externalScriptVersion} \
+--usePluginVersion=${roddyBamFile.config.pluginVersion} \
 --configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} \
 --useiodir=${viewByPid},${roddyBamFile.tmpRoddyDirectory} \
 --cvalues="fastq_list:${fastqFilesAsString},\
