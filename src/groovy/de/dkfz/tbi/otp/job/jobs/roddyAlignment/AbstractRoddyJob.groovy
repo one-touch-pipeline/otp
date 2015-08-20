@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.utils.ProcessHelperService
+import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
@@ -30,7 +31,7 @@ import java.util.regex.Pattern
  */
 abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
 
-
+    public static final String NO_STARTED_JOBS_MESSAGE = '\nThere were no started jobs, the execution directory will be removed.\n'
     public static final Pattern roddyExecutionStoreDirectoryPattern = Pattern.compile(/(?:^|\n)Creating\sthe\sfollowing\sexecution\sdirectory\sto\sstore\sinformation\sabout\sthis\sprocess:\s*\n\s*(\/.*\/${RoddyBamFile.RODDY_EXECUTION_DIR_PATTERN})(?:\n|$)/)
 
     @Autowired
@@ -56,11 +57,22 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
 
             ProcessHelperService.ProcessOutput output =  ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput(cmd)
 
-            saveRoddyExecutionStoreDirectory(roddyResult, output.stderr)
-
-            createClusterJobObjects(roddyResult, realm, output.stdout)
-
-            return NextAction.WAIT_FOR_CLUSTER_JOBS
+            Collection<ClusterJob> submittedClusterJobs = createClusterJobObjects(roddyResult, realm, output)
+            if (submittedClusterJobs) {
+                saveRoddyExecutionStoreDirectory(roddyResult, output.stderr)
+                submittedClusterJobs.each {
+                    threadLog?.info(getLogFilePaths(it))
+                }
+                return NextAction.WAIT_FOR_CLUSTER_JOBS
+            } else {
+                threadLog?.info 'Roddy has not submitted any cluster jobs. Running validate().'
+                try {
+                    validate()
+                } catch (Throwable t) {
+                    throw new RuntimeException('validate() failed after Roddy has not submitted any cluster jobs.', t)
+                }
+                return NextAction.SUCCEED
+            }
         }
     }
 
@@ -116,7 +128,7 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
         return failedOrNotFinishedClusterJobs
     }
 
-    void createClusterJobObjects(RoddyResult roddyResult, Realm realm, String roddyOutput) {
+    Collection<ClusterJob> createClusterJobObjects(RoddyResult roddyResult, Realm realm, ProcessOutput roddyOutput) {
         assert realm
         assert roddyResult
         ProcessingStep processingStep = getProcessingStep()
@@ -124,7 +136,8 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
         SeqType seqType = roddyResult.getSeqType()
         assert seqType
 
-        roddyOutput.eachLine {
+        Collection<ClusterJob> submittedClusterJobs = []
+        roddyOutput.stdout.eachLine {
             if (it.trim().isEmpty()) {
                 return //skip empty lines
             }
@@ -134,12 +147,13 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
                 String jobClass = m.group(2)
                 String pbsId = m.group(3)
 
-                ClusterJob clusterJob = clusterJobService.createClusterJob(realm, pbsId, processingStep, seqType, jobName, jobClass)
-                threadLog?.info(getLogFilePaths(clusterJob))
+                submittedClusterJobs.add(clusterJobService.createClusterJob(realm, pbsId, processingStep, seqType, jobName, jobClass))
             } else {
                 throw new RuntimeException("Could not match '${it}' against '${roddyOutputPattern}")
             }
         }
+        assert submittedClusterJobs.empty == roddyOutput.stderr.contains(NO_STARTED_JOBS_MESSAGE)
+        return submittedClusterJobs
     }
 
     public void saveRoddyExecutionStoreDirectory(RoddyResult roddyResult, String roddyOutput) {

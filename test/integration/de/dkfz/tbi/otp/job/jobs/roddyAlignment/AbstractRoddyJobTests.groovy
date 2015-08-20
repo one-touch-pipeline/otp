@@ -1,5 +1,10 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.ARBITRARY_MESSAGE
+
+import org.codehaus.groovy.control.io.NullWriter
+
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
@@ -14,6 +19,7 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.ProcessHelperService
+import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import org.junit.After
 import org.junit.Before
@@ -33,6 +39,22 @@ class AbstractRoddyJobTests {
     public static final String ALIGN_AND_PAIR_SLIM_JOB_NAME = "r150623_153422293_123456_alignAndPairSlim"
     public static final String ALIGN_AND_PAIR_SLIM_JOB_CLASS = "alignAndPairSlim"
     public static final String RODDY_EXECUTION_STORE_DIRECTORY_NAME = 'exec_150625_102449388_username_analysis'
+    public static final ProcessOutput OUTPUT_CLUSTER_JOBS_SUBMITTED = new ProcessOutput(
+            stderr: "",
+            stdout: "Running job ${SNV_CALLING_META_SCRIPT_JOB_NAME} => ${SNV_CALLING_META_SCRIPT_PBSID}  \n" +
+                    "\n" +
+                    "  Running job ${SNV_ANNOTATION_JOB_NAME} => ${SNV_ANNOTATION_PBSID}\n" +
+                    "  \n" +
+                    "Rerun job ${ALIGN_AND_PAIR_SLIM_JOB_NAME} => ${ALIGN_AND_PAIR_SLIM_PBSID}",
+            exitCode: 0,
+    )
+    public static final ProcessOutput OUTPUT_NO_CLUSTER_JOBS_SUBMITTED = new ProcessOutput(
+            stderr: "Creating the following execution directory to store information about this process:\n" +
+                    "\t${new File(TestCase.uniqueNonExistentPath, RODDY_EXECUTION_STORE_DIRECTORY_NAME)}" +
+                    "${AbstractRoddyJob.NO_STARTED_JOBS_MESSAGE}",
+            stdout: "",
+            exitCode: 0,
+    )
 
     final shouldFail = new GroovyTestCase().&shouldFail
 
@@ -41,7 +63,8 @@ class AbstractRoddyJobTests {
     AbstractRoddyJob roddyJob
     RoddyBamFile roddyBamFile
     Realm realm
-    int counter
+    int executeCommandCounter
+    int validateCounter
 
     String stderr
 
@@ -50,7 +73,8 @@ class AbstractRoddyJobTests {
 
     @Before
     void setUp() {
-        counter = 0
+        executeCommandCounter = 0
+        validateCounter = 0
 
         tmpDir.create()
 
@@ -60,7 +84,7 @@ class AbstractRoddyJobTests {
         roddyJob = [
                 getProcessParameterObject: { -> roddyBamFile },
                 prepareAndReturnWorkflowSpecificCommand: { Object instance, Realm realm -> return "workflowSpecificCommand" },
-                validate: { Object instance -> counter ++ },
+                validate: { Object instance -> validateCounter ++ },
                 getProcessingStep : { -> return DomainFactory.createAndSaveProcessingStep() },
         ] as AbstractRoddyJob
 
@@ -95,26 +119,68 @@ ${tmpRoddyExecutionDir.absolutePath}
 newLine"""
 
         ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = {String cmd ->
-            counter++
+            executeCommandCounter++
             return new ProcessHelperService.ProcessOutput(stdout: stdout, stderr: stderr, exitCode: 0)
         }
 
         return tmpRoddyExecutionDir
     }
 
+    private void mockProcessOutput_noClusterJobsSubmitted() {
+        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = {String cmd ->
+            executeCommandCounter++
+            return OUTPUT_NO_CLUSTER_JOBS_SUBMITTED
+        }
+    }
+
     @Test
-    void testMaybeSubmit() {
+    void testMaybeSubmit_clusterJobsSubmitted() {
         setUpTmpDirAndMockProcessOutput()
         LogThreadLocal.withThreadLog(System.out) {
             assert AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == roddyJob.maybeSubmit()
         }
-        assert counter == 1
+        assert executeCommandCounter == 1
+        assert validateCounter == 0
+    }
+
+    @Test
+    void testMaybeSubmit_noClusterJobsSubmitted_validateSucceeds() {
+        mockProcessOutput_noClusterJobsSubmitted()
+
+        LogThreadLocal.withThreadLog(new NullWriter()) {
+            assert AbstractMultiJob.NextAction.SUCCEED == roddyJob.maybeSubmit()
+        }
+
+        assert executeCommandCounter == 1
+        assert validateCounter == 1
+    }
+
+    @Test
+    void testMaybeSubmit_noClusterJobsSubmitted_validateFails() {
+        mockProcessOutput_noClusterJobsSubmitted()
+        roddyJob.metaClass.validate = { ->
+            validateCounter++
+            throw new RuntimeException(ARBITRARY_MESSAGE)
+        }
+
+        try {
+            LogThreadLocal.withThreadLog(new NullWriter()) {
+                roddyJob.maybeSubmit()
+            }
+            assert false : 'Should have thrown an exception.'
+        } catch (Throwable t) {
+            if (t.message != 'validate() failed after Roddy has not submitted any cluster jobs.' || t.cause?.message != ARBITRARY_MESSAGE) {
+                throw t
+            }
+        }
+
+        assert executeCommandCounter == 1
     }
 
     @Test
     void testValidate() {
         roddyJob.validate()
-        assert counter == 1
+        assert validateCounter == 1
     }
 
 
@@ -135,7 +201,7 @@ newLine"""
     @Test
     void testExecute_finishedClusterJobsIsNull_Validate() {
         roddyJob = [
-                validate: { -> counter ++ },
+                validate: { -> validateCounter++ },
                 failedOrNotFinishedClusterJobs: { Collection<? extends ClusterJobIdentifier> finishedClusterJobs -> [:] }
         ] as AbstractRoddyJob
         roddyJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
@@ -156,7 +222,8 @@ newLine"""
         }
 
         assert AbstractMultiJob.NextAction.SUCCEED == roddyJob.execute([pbsJobInfo])
-        assert counter == 1
+        assert executeCommandCounter == 0
+        assert validateCounter == 1
     }
 
 
@@ -166,12 +233,9 @@ newLine"""
 
         roddyBamFile.roddyExecutionDirectoryNames.add(tmpRoddyExecutionDir.name)
 
-        String stdout = """\
-Running job ${SNV_CALLING_META_SCRIPT_JOB_NAME} => ${SNV_CALLING_META_SCRIPT_PBSID}
-Running job ${SNV_ANNOTATION_JOB_NAME} => ${SNV_ANNOTATION_PBSID}
-Rerun job ${ALIGN_AND_PAIR_SLIM_JOB_NAME} => ${ALIGN_AND_PAIR_SLIM_PBSID}"""
-
-        roddyJob.createClusterJobObjects(roddyBamFile, realm, stdout)
+        assert containSame(
+                roddyJob.createClusterJobObjects(roddyBamFile, realm, OUTPUT_CLUSTER_JOBS_SUBMITTED),
+                ClusterJob.all)
 
         assert ClusterJob.all.find {
             it.clusterJobId == SNV_CALLING_META_SCRIPT_PBSID &&
@@ -235,57 +299,17 @@ Rerun job ${ALIGN_AND_PAIR_SLIM_JOB_NAME} => ${ALIGN_AND_PAIR_SLIM_PBSID}"""
         }
     }
 
-
     @Test
-    void testCreateClusterJobObjects_skipEmptyLines() {
-        String stdout = ""
-
-        roddyJob.createClusterJobObjects(roddyBamFile, realm, stdout)
-
-        assert ClusterJob.all.empty
-    }
-
-    @Test
-    void testCreateClusterJobObjects_skipLinesHavingOnlySpaces() {
-        String stdout = "     "
-
-        roddyJob.createClusterJobObjects(roddyBamFile, realm, stdout)
-
-        assert ClusterJob.all.empty
-    }
-
-    @Test
-    void testCreateClusterJobObjects_EntryHasSpacesAtTheStart() {
-        File tmpRoddyExecutionDir = setUpTmpDirAndMockProcessOutput()
-
-        roddyBamFile.roddyExecutionDirectoryNames.add(tmpRoddyExecutionDir.name)
-
-        String stdout = "    Running job r150428_104246480_stds_snvCallingMetaScript => 3504988"
-
-        roddyJob.createClusterJobObjects(roddyBamFile, realm, stdout)
-
-        assert 1 == ClusterJob.count()
-    }
-
-    @Test
-    void testCreateClusterJobObjects_EntryHasTrailingSpaces() {
-        File tmpRoddyExecutionDir = setUpTmpDirAndMockProcessOutput()
-
-        roddyBamFile.roddyExecutionDirectoryNames.add(tmpRoddyExecutionDir.name)
-
-        String stdout = "Running job r150428_104246480_stds_snvCallingMetaScript => 3504988    "
-
-        roddyJob.createClusterJobObjects(roddyBamFile, realm, stdout)
-
-        assert 1 == ClusterJob.count()
+    void testCreateClusterJobObjects_noneSubmitted() {
+        assert roddyJob.createClusterJobObjects(roddyBamFile, realm, OUTPUT_NO_CLUSTER_JOBS_SUBMITTED).empty
+        assert ClusterJob.count() == 0
     }
 
     @Test
     void testCreateClusterJobObjects_realmIsNull_fails() {
-        String stdout = "Running job r150428_104246480_stds_snvCallingMetaScript => 3504988"
 
         assert shouldFail(AssertionError) {
-            roddyJob.createClusterJobObjects(roddyBamFile, null, stdout)
+            roddyJob.createClusterJobObjects(roddyBamFile, null, OUTPUT_CLUSTER_JOBS_SUBMITTED)
         }.contains("assert realm")
 
         assert ClusterJob.all.empty
@@ -293,10 +317,9 @@ Rerun job ${ALIGN_AND_PAIR_SLIM_JOB_NAME} => ${ALIGN_AND_PAIR_SLIM_PBSID}"""
 
     @Test
     void testCreateClusterJobObjects_roddyResultIsNull_fails() {
-        String stdout = "Running job r150428_104246480_stds_snvCallingMetaScript => 3504988"
 
         assert shouldFail(AssertionError) {
-            roddyJob.createClusterJobObjects(null, realm, stdout)
+            roddyJob.createClusterJobObjects(null, realm, OUTPUT_CLUSTER_JOBS_SUBMITTED)
         }.contains("assert roddyResult")
 
         assert ClusterJob.all.empty
