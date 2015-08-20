@@ -10,6 +10,7 @@ import de.dkfz.tbi.otp.ngsdata.MetaDataService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -22,6 +23,8 @@ class ExecutePanCanJob extends AbstractRoddyJob {
     @Autowired
     LsdfFilesService lsdfFilesService
 
+    @Autowired
+    ExecuteRoddyCommandService executeRoddyCommandService
 
     @Override
     protected String prepareAndReturnWorkflowSpecificCommand(RoddyResult roddyResult, Realm realm) throws Throwable {
@@ -81,6 +84,8 @@ class ExecutePanCanJob extends AbstractRoddyJob {
         assert roddyResult : "Input roddyResultObject must not be null"
 
         RoddyBamFile roddyBamFile = roddyResult as RoddyBamFile
+
+        executeRoddyCommandService.correctPermissions(roddyBamFile)
 
         try {
             ensureCorrectBaseBamFileIsOnFileSystem(roddyBamFile.baseBamFile)

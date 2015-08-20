@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessmentService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
-import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import org.springframework.beans.factory.annotation.Autowired
 
 
@@ -12,9 +11,6 @@ class ParsePanCanQcJob extends AbstractEndStateAwareJobImpl {
 
     @Autowired
     AbstractQualityAssessmentService abstractQualityAssessmentService
-
-    @Autowired
-    ExecuteRoddyCommandService executeRoddyCommandService
 
     public void execute() {
 
@@ -27,8 +23,6 @@ class ParsePanCanQcJob extends AbstractEndStateAwareJobImpl {
         // org.hibernate.AssertionFailure: collection [de.dkfz.tbi.otp.dataprocessing.RoddyBamFile.seqTracks]
         // was not processed by flush()
         roddyBamFile.containedSeqTracks
-
-        executeRoddyCommandService.correctPermissions(roddyBamFile)
 
         RoddyBamFile.withTransaction {
             abstractQualityAssessmentService.parseRoddySingleLaneQaStatistics(roddyBamFile)

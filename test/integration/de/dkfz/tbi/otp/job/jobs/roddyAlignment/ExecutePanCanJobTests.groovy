@@ -10,6 +10,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
+import de.dkfz.tbi.otp.utils.HelperUtils
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -91,6 +92,8 @@ class ExecutePanCanJobTests {
         CreateFileHelper.createFile(chromosomeStatSizeFile)
 
         roddyBamFile.workPackage.metaClass.findMergeableSeqTracks = { -> SeqTrack.list() }
+
+        executePanCanJob.executeRoddyCommandService.metaClass.correctPermissions = { RoddyBamFile bamFile -> }
     }
 
     @After
@@ -409,6 +412,34 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
         assert TestCase.shouldFail(AssertionError) {
             executePanCanJob.validate(roddyBamFile)
         }.contains(roddyBamFile.tmpRoddyExecutionStoreDirectory.path)
+    }
+
+    @Test
+    void testValidate_PermissionChangeFail_ShouldFail() {
+        String message = HelperUtils.uniqueString
+        CreateRoddyFileHelper.createRoddyAlignmentTempResultFiles(dataManagement, roddyBamFile)
+        executePanCanJob.executeRoddyCommandService.metaClass.correctPermissions = { RoddyBamFile bamFile -> assert false, message }
+
+        assert TestCase.shouldFail(AssertionError) {
+            executePanCanJob.validate(roddyBamFile)
+        }.contains(message)
+    }
+
+    @Test
+    void testValidate_PermissionChangeDoneBeforeFileChecking() {
+        String MESSAGE_CORRECT_PERMISSION = 'CORECCT PERMISSION'
+        String MESSAGE_CHECK_FILES = 'CHECK FILES'
+        String message = MESSAGE_CORRECT_PERMISSION
+        CreateRoddyFileHelper.createRoddyAlignmentTempResultFiles(dataManagement, roddyBamFile)
+        executePanCanJob.executeRoddyCommandService.metaClass.correctPermissions = { RoddyBamFile bamFile ->
+            assert MESSAGE_CORRECT_PERMISSION == message
+            message = MESSAGE_CHECK_FILES
+        }
+        LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = {File file-> assert MESSAGE_CHECK_FILES == message}
+        LsdfFilesService.metaClass.static.ensureDirIsReadableAndNotEmpty = {File file-> assert MESSAGE_CHECK_FILES == message}
+
+        executePanCanJob.validate(roddyBamFile)
+        assert MESSAGE_CHECK_FILES == message
     }
 
     @Test
