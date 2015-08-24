@@ -110,8 +110,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         // check whether the correct environment is set
         Assume.assumeTrue(Environment.current.name == "WORKFLOW_TEST")
 
-        WaitingFileUtils.defaultTimeoutMillis = Duration.standardSeconds(120).millis
-
         setupDirectoriesAndRealms()
 
         sql = new Sql(dataSource)

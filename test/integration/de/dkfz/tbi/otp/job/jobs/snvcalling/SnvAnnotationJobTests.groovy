@@ -285,7 +285,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
             snvCallingInstance2.configFilePath.absoluteDataManagementPath,
             CONFIGURATION)
 
-        LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file, int waitingTime -> throw new AssertionError("Not readable") }
+        LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> throw new AssertionError("Not readable") }
         snvAnnotationJob.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
             return new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
         }

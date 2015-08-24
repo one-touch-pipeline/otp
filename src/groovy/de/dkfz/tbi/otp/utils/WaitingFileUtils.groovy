@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.utils
 
+import org.joda.time.Duration
+
 import grails.util.Environment
 
 /**
@@ -10,34 +12,27 @@ import grails.util.Environment
  */
 class WaitingFileUtils {
 
-    /**
-     * This property is needed to have the possibility to increase the waiting time until files exist.
-     * This is needed since when the files are too small they make problems due to the NFS.
-     */
-    public static int extendedWaitingTime = 60000
-
-    public static long defaultTimeoutMillis = 10000L
+    public static Duration defaultTimeout = Duration.standardMinutes(1)
 
     static {
         if (Environment.current == Environment.TEST) {
-            defaultTimeoutMillis = 0L
-            extendedWaitingTime = 0L
+            defaultTimeout = Duration.ZERO
         }
     }
 
     /**
-     * Waits until the specified file system object exists or the specified number of milliseconds elapsed.
+     * Waits until the specified file system object exists or the specified timeout elapsed.
      * @return true if the file system object exists; false if timed out.
      */
-    public static boolean waitUntilExists(File file, long timeoutMillis = defaultTimeoutMillis) {
-        return ThreadUtils.waitFor({ file.list() || file.canRead(); file.exists() }, timeoutMillis, 50)
+    public static boolean waitUntilExists(File file, Duration timeout = defaultTimeout) {
+        return ThreadUtils.waitFor({ file.list() || file.canRead(); file.exists() }, timeout.millis, 50)
     }
 
     /**
-     * Waits until the specified file system object does not exist or the specified number of milliseconds elapsed.
+     * Waits until the specified file system object does not exist or the specified timeout elapsed.
      * @return true if the file system object does not exist; false if timed out.
      */
-    public static boolean waitUntilDoesNotExist(File file, long timeoutMillis = defaultTimeoutMillis) {
-        return ThreadUtils.waitFor({ file.list() || file.canRead(); !file.exists() }, timeoutMillis, 50)
+    public static boolean waitUntilDoesNotExist(File file, Duration timeout = defaultTimeout) {
+        return ThreadUtils.waitFor({ file.list() || file.canRead(); !file.exists() }, timeout.millis, 50)
     }
 }

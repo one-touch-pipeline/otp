@@ -407,7 +407,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         createResultFile(snvCallingInstance1, SnvCallingStep.SNV_DEEPANNOTATION)
 
-        LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file, int waitingTime ->
+        LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file ->
             if (!file.path.contains("_annotation")) {
                 throw new AssertionError("Not readable")
             }

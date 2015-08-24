@@ -51,7 +51,7 @@ class MoveFileUtilsService {
 
         assert WaitingFileUtils.waitUntilExists(targetDir)
 
-        assert ThreadUtils.waitFor({ (targetDir.list() as Set).containsAll(sourceDirContent) }, WaitingFileUtils.defaultTimeoutMillis, 50)
-        assert ThreadUtils.waitFor({ sourceDir.list().size() == 0 }, WaitingFileUtils.defaultTimeoutMillis, 50)
+        assert ThreadUtils.waitFor({ (targetDir.list() as Set).containsAll(sourceDirContent) }, WaitingFileUtils.defaultTimeout.millis, 50)
+        assert ThreadUtils.waitFor({ sourceDir.list().size() == 0 }, WaitingFileUtils.defaultTimeout.millis, 50)
     }
 }

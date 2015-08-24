@@ -97,7 +97,7 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob {
 
         // check if the final vcf result file exists
         final OtpPath resultFile = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual))
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(resultFile.absoluteDataManagementPath, WaitingFileUtils.extendedWaitingTime)
+        LsdfFilesService.ensureFileIsReadableAndNotEmpty(resultFile.absoluteDataManagementPath)
 
         validateNonCallingJobs(instance, step)
     }

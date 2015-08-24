@@ -83,10 +83,10 @@ abstract class AbstractSnvCallingJob extends AbstractOtpJob {
         }
         if (waitUntilDoesNotExist(configFileInStagingDirectory)) {
             lsdfFilesService.createDirectory(configFileInStagingDirectory.parentFile, instance.project)
-            assert waitUntilExists(configFileInStagingDirectory.parentFile, extendedWaitingTime)
+            assert waitUntilExists(configFileInStagingDirectory.parentFile)
             instance.config.writeToFile(configFileInStagingDirectory)
         }
-        lsdfFilesService.ensureFileIsReadableAndNotEmpty(configFileInStagingDirectory, extendedWaitingTime)
+        lsdfFilesService.ensureFileIsReadableAndNotEmpty(configFileInStagingDirectory)
         assertStagingConfigContentsOk(instance)
 
         String command ="""
@@ -98,7 +98,7 @@ rm ${configFileInStagingDirectory}
 """
         executionService.executeCommand(realm, command)
 
-        assert waitUntilExists(configFileInProjectDirectory, extendedWaitingTime)
+        assert waitUntilExists(configFileInProjectDirectory)
         assertDataManagementConfigContentsOk(instance)
 
         return configFileInProjectDirectory
@@ -204,7 +204,7 @@ rm ${configFileInStagingDirectory}
 
     protected void confirmCheckPointFileExistsAndDeleteIt(SnvCallingInstance instance, SnvCallingStep step) {
         final File checkpointFile = step.getCheckpointFilePath(instance).absoluteDataManagementPath
-        assert waitUntilExists(checkpointFile, extendedWaitingTime)
+        assert waitUntilExists(checkpointFile)
         deleteResultFileIfExists(checkpointFile, configService.getRealmDataProcessing(instance.project))
         assert waitUntilDoesNotExist(checkpointFile)
     }

@@ -231,10 +231,6 @@ class LsdfFilesService {
         assert file.length() > 0L
     }
 
-    static void ensureFileIsReadableAndNotEmpty(final File file, int waitingTime) {
-        checkFileIsReadableAndNotEmpty(file) { assert waitUntilExists(file, waitingTime) }
-    }
-
     static void ensureFileIsReadableAndNotEmpty(final File file) {
         checkFileIsReadableAndNotEmpty(file) { assert waitUntilExists(file) }
     }

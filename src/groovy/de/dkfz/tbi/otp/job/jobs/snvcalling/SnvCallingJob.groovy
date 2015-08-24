@@ -123,7 +123,7 @@ class SnvCallingJob extends AbstractSnvCallingJob {
 
         // check if the final vcf result file exists
         final OtpPath resultFile = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual, null))
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(resultFile.absoluteDataManagementPath, WaitingFileUtils.extendedWaitingTime)
+        LsdfFilesService.ensureFileIsReadableAndNotEmpty(resultFile.absoluteDataManagementPath)
 
         try {
             getExistingBamFilePath(instance.sampleType1BamFile)

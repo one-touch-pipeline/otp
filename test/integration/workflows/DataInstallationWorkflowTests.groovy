@@ -61,8 +61,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
 
     @Before
     void setUp() {
-        WaitingFileUtils.defaultTimeoutMillis = 100000
-
         fastqR1Filepath = "${testDataDir}/35-3B_NoIndex_L007_R1_complete_filtered.fastq.gz"
         fastqR2Filepath = "${testDataDir}/35-3B_NoIndex_L007_R2_complete_filtered.fastq.gz"
 
