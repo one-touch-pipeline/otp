@@ -50,7 +50,7 @@ import static org.junit.Assert.assertNotNull
 
 abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
 
-    final String VERSION = "1.0.132-1"
+    final String VERSION = "1.0.166"
     final String CO_SCRIPTS_BASE_DIR = "/path/to/programs/otp/COWorkflows_${VERSION}/resources/analysisTools"
     final String SNV_PIPELINE_SCRIPTS_PATH = "${CO_SCRIPTS_BASE_DIR}/snvPipeline"
     final String ANALYSIS_SCRIPTS_PATH = "${CO_SCRIPTS_BASE_DIR}/tools"
