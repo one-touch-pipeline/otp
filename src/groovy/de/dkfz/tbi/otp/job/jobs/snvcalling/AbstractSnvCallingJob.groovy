@@ -59,7 +59,7 @@ abstract class AbstractSnvCallingJob extends AbstractOtpJob {
 
 
     void deleteResultFileIfExists(final File resultFile, Realm realm) {
-        if (waitUntilExists(resultFile)) {
+        if (resultFile.exists()) {
             log.info "Result file ${resultFile} already exists. Presumably from an earlier, failed execution of this job. Will delete it."
             executionService.executeCommand(realm, "rm ${resultFile.path}")
         }
