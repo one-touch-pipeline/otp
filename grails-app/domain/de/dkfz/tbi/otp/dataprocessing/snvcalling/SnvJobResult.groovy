@@ -58,6 +58,7 @@ class SnvJobResult {
     static belongsTo = [
         snvCallingInstance: SnvCallingInstance
     ]
+    SnvCallingInstance snvCallingInstance
 
     static constraints = {
         processingState validator: { val, obj ->
@@ -81,11 +82,16 @@ class SnvJobResult {
 
             return (obj.step == SnvCallingStep.CALLING ? val == null : val != null)
         }
-        externalScript validator: {val, obj ->
-            obj.step.externalScriptIdentifier == val.scriptIdentifier
+        externalScript validator: { ExternalScript val, SnvJobResult obj ->
+            return obj.step.externalScriptIdentifier == val.scriptIdentifier &&
+                    val.scriptVersion == obj.snvCallingInstance.config.externalScriptVersion
         }
-        chromosomeJoinExternalScript nullable: true, validator: { val, obj ->
-               return  (obj.step == SnvCallingStep.CALLING) == (val != null)
+        chromosomeJoinExternalScript nullable: true, validator: { ExternalScript val, SnvJobResult obj ->
+            if (obj.step == SnvCallingStep.CALLING) {
+                return val.scriptVersion == obj.snvCallingInstance.config.externalScriptVersion
+            } else {
+                return val == null
+            }
         }
         md5sum nullable: true, validator: { val, obj ->
             return validateFileInformation (val, obj, { val ==~ /^[0-9a-fA-F]{32}$/ })

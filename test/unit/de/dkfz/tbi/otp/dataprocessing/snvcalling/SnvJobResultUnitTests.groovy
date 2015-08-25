@@ -20,7 +20,9 @@ import grails.buildtestdata.mixin.Build
         AlignmentPass,
         MergingPass,
         MergingSet,
+        SampleTypePerProject,
         SeqPlatform,
+        SnvCallingInstance,
 ])
 class SnvJobResultUnitTests {
 
@@ -29,12 +31,19 @@ class SnvJobResultUnitTests {
 
     @Test
     void testSavingOfSnvJobResultNoInputFileButCallingStep() {
+        SnvCallingInstance snvCallingInstance = createSnvCallingInstance()
         SnvJobResult snvJobResult = new SnvJobResult(
                 step: SnvCallingStep.CALLING,
-                snvCallingInstance: createSnvCallingInstance(),
+                snvCallingInstance: snvCallingInstance,
                 processingState: SnvProcessingStates.IN_PROGRESS,
-                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier),
-                chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER)
+                externalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                ),
+                chromosomeJoinExternalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                )
                 )
         assert snvJobResult.validate()
         assert snvJobResult.save()
@@ -42,44 +51,67 @@ class SnvJobResultUnitTests {
 
     @Test
     void testSavingOfSnvJobResultInFailedState() {
+        SnvCallingInstance snvCallingInstance = createSnvCallingInstance()
         SnvJobResult snvJobResult = new SnvJobResult(
                 step: SnvCallingStep.CALLING,
-                snvCallingInstance: createSnvCallingInstance(),
+                snvCallingInstance: snvCallingInstance,
                 processingState: SnvProcessingStates.FAILED,
+                externalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                ),
+                chromosomeJoinExternalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                )
         )
         assert !snvJobResult.validate()
     }
 
     @Test
     void testSavingOfSnvJobResultNoExternalScript() {
+        SnvCallingInstance snvCallingInstance = createSnvCallingInstance()
         SnvJobResult snvJobResult = new SnvJobResult(
                 step: SnvCallingStep.CALLING,
-                snvCallingInstance: createSnvCallingInstance(),
+                snvCallingInstance: snvCallingInstance,
                 processingState: SnvProcessingStates.IN_PROGRESS,
-                chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER)
+                chromosomeJoinExternalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                )
                 )
         assert !snvJobResult.validate()
     }
 
     @Test
     void testSavingOfSnvJobResultWrongExternalScript() {
+        SnvCallingInstance snvCallingInstance = createSnvCallingInstance()
         SnvJobResult snvJobResult = new SnvJobResult(
                 step: SnvCallingStep.CALLING,
-                snvCallingInstance: createSnvCallingInstance(),
+                snvCallingInstance: snvCallingInstance,
                 processingState: SnvProcessingStates.IN_PROGRESS,
-                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier),
-                chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER)
+                externalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                ),
+                chromosomeJoinExternalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER),
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
                 )
         assert !snvJobResult.validate()
     }
 
     @Test
     void testSavingOfSnvJobResultCallingButNoJoiningExternalScript() {
+        SnvCallingInstance snvCallingInstance = createSnvCallingInstance()
         SnvJobResult snvJobResult = new SnvJobResult(
                 step: SnvCallingStep.CALLING,
-                snvCallingInstance: createSnvCallingInstance(),
+                snvCallingInstance: snvCallingInstance,
                 processingState: SnvProcessingStates.IN_PROGRESS,
-                chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER)
+                chromosomeJoinExternalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                )
         )
         assert !snvJobResult.validate()
     }
@@ -93,8 +125,14 @@ class SnvJobResultUnitTests {
                 step: SnvCallingStep.CALLING,
                 processingState: SnvProcessingStates.FINISHED,
                 snvCallingInstance: snvCallingInstance,
-                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier),
-                chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER)
+                externalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                ),
+                chromosomeJoinExternalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                )
         )
 
         SnvJobResult snvJobResult = new SnvJobResult(
@@ -102,7 +140,10 @@ class SnvJobResultUnitTests {
                 snvCallingInstance: snvCallingInstance,
                 processingState: SnvProcessingStates.IN_PROGRESS,
                 inputResult: callingSnvJobResult,
-                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier),
+                externalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                ),
         )
         assert snvJobResult.validate()
         assert snvJobResult.save()
@@ -110,11 +151,15 @@ class SnvJobResultUnitTests {
 
     @Test
     void testSavingOfSnvJobResultNoInputFileNotCallingStep() {
+        SnvCallingInstance snvCallingInstance = createSnvCallingInstance()
         SnvJobResult snvJobResult = new SnvJobResult(
                 step: SnvCallingStep.SNV_ANNOTATION,
-                snvCallingInstance: createSnvCallingInstance(),
+                snvCallingInstance: snvCallingInstance,
                 processingState: SnvProcessingStates.IN_PROGRESS,
-                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier),
+                externalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                ),
                 )
         assert !snvJobResult.validate()
     }
@@ -135,7 +180,10 @@ class SnvJobResultUnitTests {
                 snvCallingInstance: snvCallingInstance,
                 processingState: SnvProcessingStates.IN_PROGRESS,
                 inputResult: oldSnvJobResult,
-                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier),
+                externalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                ),
                 )
         assert snvJobResult.validate()
         assert snvJobResult.save()
@@ -157,7 +205,10 @@ class SnvJobResultUnitTests {
                 snvCallingInstance: snvCallingInstance,
                 processingState: SnvProcessingStates.IN_PROGRESS,
                 inputResult: oldSnvJobResult,
-                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier),
+                externalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                ),
                 )
         assertFalse snvJobResult.validate()
     }
@@ -179,7 +230,10 @@ class SnvJobResultUnitTests {
                 processingState: SnvProcessingStates.IN_PROGRESS,
                 inputResult: oldSnvJobResult,
                 withdrawn: true,
-                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier),
+                externalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                ),
                 )
         assert snvJobResult.validate()
     }
@@ -187,20 +241,15 @@ class SnvJobResultUnitTests {
 
     @Test
     void testSavingOfSnvJobResultSampleType1BamDifferentFromInputFile() {
-        ProcessedMergedBamFile control = DomainFactory.createProcessedMergedBamFile()
-
-        ProcessedMergedBamFile tumor1 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile tumor2 = DomainFactory.createProcessedMergedBamFile()
-
-        SnvCallingInstance snvCallingInstance1 = new SnvCallingInstance(
-                sampleType1BamFile: tumor1,
-                sampleType2BamFile: control
-                )
-
-        SnvCallingInstance snvCallingInstance2 = new SnvCallingInstance(
-                sampleType1BamFile: tumor2,
-                sampleType2BamFile: control
-                )
+        SnvCallingInstanceTestData testData = new SnvCallingInstanceTestData()
+        testData.createSnvObjects()
+        def (ProcessedMergedBamFile disease2BamFile, SamplePair disease2SamplePair) =
+                testData.createDisease(testData.bamFileControl.mergingWorkPackage)
+        SnvCallingInstance snvCallingInstance1 = testData.createSnvCallingInstance()
+        SnvCallingInstance snvCallingInstance2 = testData.createSnvCallingInstance(
+                samplePair: disease2SamplePair,
+                sampleType1BamFile: disease2BamFile,
+        )
 
         SnvJobResult oldSnvJobResult = new SnvJobResult(
                 processingState: SnvProcessingStates.FINISHED,
@@ -213,7 +262,10 @@ class SnvJobResultUnitTests {
                 snvCallingInstance: snvCallingInstance2,
                 processingState: SnvProcessingStates.IN_PROGRESS,
                 inputResult: oldSnvJobResult,
-                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier),
+                externalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier,
+                        scriptVersion: snvCallingInstance2.config.externalScriptVersion,
+                ),
                 )
         assertFalse snvJobResult.validate()
     }
@@ -331,12 +383,19 @@ class SnvJobResultUnitTests {
 
     @Test
     void testSaveMd5sum() {
+        SnvCallingInstance snvCallingInstance = createSnvCallingInstance()
         SnvJobResult snvJobResult = new SnvJobResult(
                 step: SnvCallingStep.CALLING,
-                snvCallingInstance: createSnvCallingInstance(),
+                snvCallingInstance: snvCallingInstance,
                 processingState: SnvProcessingStates.FINISHED,
-                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier),
-                chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER),
+                externalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                ),
+                chromosomeJoinExternalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                ),
                 fileSize: FILE_SIZE,
         )
         assertFalse snvJobResult.validate()
@@ -348,12 +407,19 @@ class SnvJobResultUnitTests {
 
     @Test
     void testSaveMd5sumWrongMd5sum() {
+        SnvCallingInstance snvCallingInstance = createSnvCallingInstance()
         SnvJobResult snvJobResult = new SnvJobResult(
                 step: SnvCallingStep.CALLING,
-                snvCallingInstance: createSnvCallingInstance(),
+                snvCallingInstance: snvCallingInstance,
                 processingState: SnvProcessingStates.FINISHED,
-                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier),
-                chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER),
+                externalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                ),
+                chromosomeJoinExternalScript: new ExternalScript(
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                        scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER
+                ),
                 md5sum: "1234",
                 fileSize: FILE_SIZE,
         )
@@ -366,12 +432,19 @@ class SnvJobResultUnitTests {
 
     @Test
     void testSaveFileSize() {
+        SnvCallingInstance snvCallingInstance = createSnvCallingInstance()
         SnvJobResult snvJobResult = new SnvJobResult(
                 step: SnvCallingStep.CALLING,
-                snvCallingInstance: createSnvCallingInstance(),
+                snvCallingInstance: snvCallingInstance,
                 processingState: SnvProcessingStates.FINISHED,
-                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier),
-                chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER),
+                externalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                ),
+                chromosomeJoinExternalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                ),
                 md5sum: MD5SUM,
         )
         assertFalse snvJobResult.validate()
@@ -383,12 +456,19 @@ class SnvJobResultUnitTests {
 
     @Test
     void testSaveFileSizeWrongFileSize() {
+        SnvCallingInstance snvCallingInstance = createSnvCallingInstance()
         SnvJobResult snvJobResult = new SnvJobResult(
                 step: SnvCallingStep.CALLING,
-                snvCallingInstance: createSnvCallingInstance(),
+                snvCallingInstance: snvCallingInstance,
                 processingState: SnvProcessingStates.FINISHED,
-                externalScript: new ExternalScript(scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier),
-                chromosomeJoinExternalScript: new ExternalScript(scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER),
+                externalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                ),
+                chromosomeJoinExternalScript: new ExternalScript(
+                        scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
+                        scriptVersion: snvCallingInstance.config.externalScriptVersion,
+                ),
                 md5sum: MD5SUM,
                 fileSize:0,
         )
@@ -437,9 +517,8 @@ class SnvJobResultUnitTests {
     }
 
     private SnvCallingInstance createSnvCallingInstance(final Map properties = [:]) {
-        return new SnvCallingInstance([
-                sampleType1BamFile: DomainFactory.createProcessedMergedBamFile([withdrawn: false]),
-                sampleType2BamFile:DomainFactory.createProcessedMergedBamFile([withdrawn: false])
-        ] + properties)
+        SnvCallingInstanceTestData testData = new SnvCallingInstanceTestData()
+        testData.createSnvObjects()
+        return testData.createSnvCallingInstance(properties)
     }
 }
