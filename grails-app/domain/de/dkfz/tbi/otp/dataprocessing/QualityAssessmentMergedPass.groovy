@@ -7,6 +7,11 @@ import de.dkfz.tbi.otp.ngsdata.*
  */
 class QualityAssessmentMergedPass {
 
+    static belongsTo = [
+            processedMergedBamFile: AbstractMergedBamFile
+    ]
+    AbstractMergedBamFile processedMergedBamFile
+
     int identifier
 
     String description
@@ -19,46 +24,35 @@ class QualityAssessmentMergedPass {
     }
 
     public String toString() {
-        MergingWorkPackage mergingWorkPackage = processedMergedBamFile.mergingPass.mergingSet.mergingWorkPackage
-        return "id: ${processedMergedBamFile.id} " +
-                "pass: ${identifier} " + (latestPass ? "(latest) " : "") +
-                "mergingPass: ${mergingPass?.identifier} " + (mergingPass?.latestPass ? "(latest) " : "") +
-                "set: ${mergingSet?.identifier} " + (mergingSet?.latestSet ? "(latest) " : "") +
-                "<br>sample: ${sample} " +
-                "seqType: ${mergingWorkPackage.seqType} " +
-                "<br>project: ${project}"
+        return "QAMP ${id}: pass ${identifier} " + (latestPass ? "(latest) " : "") + "on ${processedMergedBamFile}"
     }
 
     /**
-     * @return Whether this is the most recent QA pass on the referenced {@link ProcessedMergedBamFile}.
+     * @return Whether this is the most recent QA pass on the referenced {@link AbstractMergedBamFile}.
      */
     public boolean isLatestPass() {
         return identifier == maxIdentifier(processedMergedBamFile)
     }
 
-    public static Integer maxIdentifier(final ProcessedMergedBamFile processedMergedBamFile) {
-        assert processedMergedBamFile
+    public static Integer maxIdentifier(final AbstractMergedBamFile abstractMergedBamFile) {
+        assert abstractMergedBamFile
         return QualityAssessmentMergedPass.createCriteria().get {
-            eq("processedMergedBamFile", processedMergedBamFile)
+            eq("processedMergedBamFile", abstractMergedBamFile)
             projections{
                 max("identifier")
             }
         }
     }
 
-    public static int nextIdentifier(final ProcessedMergedBamFile processedMergedBamFile) {
-        assert processedMergedBamFile
-        final Integer maxIdentifier = maxIdentifier(processedMergedBamFile)
+    public static int nextIdentifier(final AbstractMergedBamFile abstractMergedBamFile) {
+        assert abstractMergedBamFile
+        final Integer maxIdentifier = maxIdentifier(abstractMergedBamFile)
         if (maxIdentifier == null) {
             return 0
         } else {
             return maxIdentifier + 1
         }
     }
-
-    static belongsTo = [
-        processedMergedBamFile: AbstractMergedBamFile
-    ]
 
     static mapping = {
         processedMergedBamFile index: "quality_assessment_merged_pass_processed_merged_bam_file_idx"
