@@ -155,8 +155,9 @@ ${CHROMOSOME_NAMES_VARIABLE_NAME}=\${CHROMOSOME_INDICES[@]}
      * Project project = Project.findByName("projectName")
      * SeqType seqType = SeqType.findByNameAndLibraryLayout("SeqTypeName", "PAIRED")
      * File configFile = new File("PathToConfigFile")
+     * String externalScriptVersion = ''
      *
-     * SnvConfig.createFromFile(project, seqType, configFile)
+     * SnvConfig.createFromFile(project, seqType, configFile, externalScriptVersion)
      * </pre>
      */
     static SnvConfig createFromFile(Project project, SeqType seqType, File configFile, String externalScriptVersion) {
