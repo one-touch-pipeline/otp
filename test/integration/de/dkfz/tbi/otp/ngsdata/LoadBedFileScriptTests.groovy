@@ -1,12 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.TestCase
 import org.junit.rules.TemporaryFolder
 
 import static org.junit.Assert.*
 
 import org.junit.*
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
+import de.dkfz.tbi.otp.WorkflowTestRealms
 
 /**
  * Script to test basic functionality to load bed files and it's
@@ -91,7 +91,8 @@ class LoadBedFileScriptTests extends GroovyScriptAwareTestCase {
         temporaryFolder.create()
         File baseFolder = temporaryFolder.newFolder()
 
-        realm = DomainFactory.createRealmDataProcessingDKFZ([
+        realm = DomainFactory.createRealmDataProcessing([
+            name: WorkflowTestRealms.LABEL_DKFZ,
             processingRootPath: baseFolder.path,
         ]).save(flush : true)
 

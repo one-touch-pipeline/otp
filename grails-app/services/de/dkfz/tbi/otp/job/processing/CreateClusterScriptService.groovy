@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static org.springframework.util.Assert.*
 import grails.util.Environment
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -9,6 +10,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
  * These methods should be written in a generic way so that it is easy to reuse them.
  *
  */
+// TODO: OTP-1131: Knowledge about our infrastructure is hardcoded into this class
 class CreateClusterScriptService {
 
     /*
@@ -216,7 +218,8 @@ rm -f ${target.parent}/${MD5SUM_NAME}${suffixDependingOnLocation};
     }
 
     Realm getBioquantRealm() {
-        return Realm.findByNameAndClusterAndEnv('BioQuant', Realm.Cluster.BIOQUANT, Environment.current.name)
+        // TODO: OTP-1738: Remove hard-coded Realm names
+        return exactlyOneElement(Realm.findAllByNameAndClusterAndEnv('BioQuant', Realm.Cluster.BIOQUANT, Environment.current.name))
     }
 
     static String ensureFileDoesNotExistScript(final File file) {

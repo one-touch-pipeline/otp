@@ -90,7 +90,7 @@ class MergingPassServiceTests {
     void testRealmForDataProcessing() {
         MergingSet mergingSet = createMergingSet("1")
         MergingPass mergingPass = mergingPassService.create()
-        Realm realm = DomainFactory.createRealmDataProcessingDKFZ().save([flush: true])
+        Realm realm = DomainFactory.createRealmDataProcessing(name: mergingSet.project.realmName)
         Realm realmAct = mergingPassService.realmForDataProcessing(mergingPass)
         assertEquals(realm, realmAct)
     }

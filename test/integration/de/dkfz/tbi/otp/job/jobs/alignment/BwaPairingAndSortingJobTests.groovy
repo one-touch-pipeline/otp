@@ -2,6 +2,9 @@ package de.dkfz.tbi.otp.job.jobs.alignment
 
 import static org.junit.Assert.*
 
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.*
 
@@ -16,6 +19,9 @@ class BwaPairingAndSortingJobTests {
     private TestData testData = new TestData()
     private AlignmentPass pass
     private ProcessedBamFile bamFile
+
+    @Rule
+    public TemporaryFolder tmpDir = new TemporaryFolder()
 
     void setUp() {
         bwaPairingAndSortingJob.log = this.log
@@ -230,20 +236,19 @@ class BwaPairingAndSortingJobTests {
         bamFile.errors
         assertNotNull(bamFile.save(flush: true))
 
-        Map paths = [
-            rootPath: "rootPath",
-            processingRootPath: "/tmp/BwaPairingAndSortingJobTests/",
-            ]
+        tmpDir.create()
 
-        Realm realm = DomainFactory.createRealmDataManagementDKFZ(paths)
-        assertNotNull(realm.save(flush: true))
+        DomainFactory.createRealmDataManagement(
+                name: project.realmName,
+        )
+        DomainFactory.createRealmDataProcessing(
+                name: project.realmName,
+                processingRootPath: tmpDir.root,
+        )
 
-        realm = DomainFactory.createRealmDataProcessingDKFZ(paths)
-        assertNotNull(realm.save(flush: true))
-
-        File dirs = new File("/tmp/BwaPairingAndSortingJobTests/reference_genomes/hg19_1_24")
+        File dirs = new File(tmpDir.root, "reference_genomes/hg19_1_24")
         dirs.mkdirs()
-        File refGenPath = new File("/tmp/BwaPairingAndSortingJobTests/reference_genomes/hg19_1_24/preffix_hg19_1_24.fa")
+        File refGenPath = new File(dirs, "preffix_hg19_1_24.fa")
         refGenPath.createNewFile()
     }
 

@@ -32,6 +32,7 @@ class ReferenceGenomeService {
         notNull(project, "The project is not specified")
         notNull(referenceGenome, "The reference genome is not specified")
         Realm realm = configService.getRealmDataProcessing(project)
+        assert realm : "Realm not found for project ${project}"
         filePathToDirectory(realm, referenceGenome, checkExistence)
     }
 

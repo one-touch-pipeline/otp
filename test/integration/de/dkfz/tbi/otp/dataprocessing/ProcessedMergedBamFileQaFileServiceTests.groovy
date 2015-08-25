@@ -13,8 +13,6 @@ class ProcessedMergedBamFileQaFileServiceTests {
 
     ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
 
-    final static String directory = "/tmp/otp-unit-test/pmbfs/processing/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0/QualityAssessment/pass1"
-
     @Test(expected = IllegalArgumentException)
     void testQaResultsMd5sumFileBamFileNull() {
         processedMergedBamFileQaFileService.qaResultsMd5sumFile(null)
@@ -23,18 +21,14 @@ class ProcessedMergedBamFileQaFileServiceTests {
     @Test
     void testQaResultsMd5sumFile() {
         MergingPass mergingPass = createMergingPass()
+        Realm realm = DomainFactory.createRealmDataProcessing(name: mergingPass.project.realmName)
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
-        String destinationExp = "${directory}/MD5SUMS"
+        String destinationExp = realm.processingRootPath + "/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0/QualityAssessment/pass1/MD5SUMS"
         String destinationAct = processedMergedBamFileQaFileService.qaResultsMd5sumFile(mergedBamFile)
         assertEquals(destinationExp, destinationAct)
     }
 
     private MergingPass createMergingPass() {
-        Realm realm = DomainFactory.createRealmDataProcessingDKFZ([
-            rootPath: '/tmp/otp-unit-test/pmfs/root',
-            processingRootPath: '/tmp/otp-unit-test/pmbfs/processing',
-            ]).save([flush: true])
-
         Project project = TestData.createProject(
                         name: "project",
                         dirName: "project-dir",

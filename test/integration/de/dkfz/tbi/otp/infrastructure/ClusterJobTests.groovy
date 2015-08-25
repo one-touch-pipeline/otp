@@ -49,7 +49,7 @@ class ClusterJobTests {
 
         assertNotNull(step.save(flush: true))
 
-        realm = DomainFactory.createRealmDataManagementBioQuant()
+        realm = DomainFactory.createRealmDataManagement()
 
         assertNotNull(realm.save(flush: true))
     }

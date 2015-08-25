@@ -9,7 +9,10 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 
 @TestFor(BedFileService)
-@Build([BedFile])
+@Build([
+        BedFile,
+        Realm,
+])
 class BedFileServiceTests {
 
     @Rule

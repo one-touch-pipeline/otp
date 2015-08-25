@@ -86,7 +86,8 @@ class TestData {
             file << "test"
         }
 
-        realm = DomainFactory.createRealmDataProcessingDKFZ([
+        realm = DomainFactory.createRealmDataProcessing([
+            name: 'DKFZ',
             processingRootPath: TestCase.uniqueNonExistentPath.path,
         ])
         assertNotNull(realm.save(flush: true))

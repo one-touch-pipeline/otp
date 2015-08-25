@@ -26,7 +26,7 @@ class QualityAssessmentMergedPassServiceTests {
 
     @Before
     void setUp() {
-        realm = DomainFactory.createRealmDataProcessingDKFZ([
+        realm = DomainFactory.createRealmDataProcessing([
             rootPath: '/tmp/otp-unit-test/pmfs/root',
             processingRootPath: '/tmp/otp-unit-test/pmbfs/processing',
             ]).save([flush: true])
@@ -34,7 +34,7 @@ class QualityAssessmentMergedPassServiceTests {
         project = TestData.createProject(
                         name: "project",
                         dirName: "project-dir",
-                        realmName: 'DKFZ',
+                        realmName: realm.name,
                         )
         assertNotNull(project.save([flush: true]))
 

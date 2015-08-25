@@ -1,12 +1,12 @@
 package workflows
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.WorkflowTestRealms
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -176,11 +176,11 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
                 pbsOptions: pbsOptions,
         ]
 
-        assert DomainFactory.createRealmDataManagementBioQuant(realmParams).save(flush: true)
-        assert DomainFactory.createRealmDataProcessingBioQuant(realmParams).save(flush: true)
+        assert WorkflowTestRealms.createRealmDataManagementBioQuant(realmParams).save(flush: true)
+        assert WorkflowTestRealms.createRealmDataProcessingBioQuant(realmParams).save(flush: true)
 
-        assert DomainFactory.createRealmDataManagementDKFZ(realmParams).save(flush: true)
-        realm = DomainFactory.createRealmDataProcessingDKFZ(realmParams).save(flush: true)
+        assert WorkflowTestRealms.createRealmDataManagementDKFZ(realmParams).save(flush: true)
+        realm = WorkflowTestRealms.createRealmDataProcessingDKFZ(realmParams).save(flush: true)
         assert realm
 
         assert !getBaseDirectory().exists()

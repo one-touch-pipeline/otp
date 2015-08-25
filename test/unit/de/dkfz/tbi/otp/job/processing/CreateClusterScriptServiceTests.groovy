@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.test.mixin.*
-import grails.test.mixin.support.*
+
 import org.junit.*
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
+
 import de.dkfz.tbi.otp.ngsdata.Realm
 import static de.dkfz.tbi.otp.job.processing.CreateClusterScriptService.*
+
+import de.dkfz.tbi.otp.WorkflowTestRealms
 
 
 @TestFor(CreateClusterScriptService)
@@ -120,8 +122,8 @@ class CreateClusterScriptServiceTests {
         //False is the default value of the method, which is why I set it here explicitly
         move = false
 
-        Realm realm = DomainFactory.createRealmDataManagementBioQuant()
-        realm.save(flush: true)
+        // TODO: OTP-1738: Remove hard-coded Realm names
+        Realm realm = WorkflowTestRealms.createRealmDataManagementBioQuant()
         hostname = "${realm.unixUser}@${realm.host}"
         port = realm.port
     }

@@ -142,7 +142,10 @@ class CheckQualityEncodingJobUnitTests {
 
         testDirectory = tmpDir.newFolder("/otp-test")
 
-        Realm realm = DomainFactory.createRealmDataManagementDKFZ([rootPath: testDirectory.absolutePath])
+        Realm realm = DomainFactory.createRealmDataManagement(
+                name: project.realmName,
+                rootPath: testDirectory.absolutePath,
+        )
         assertNotNull(realm.save(flush: true, failOnError: true))
 
         file = new File(checkQualityEncodingJob.lsdfFilesService.getFileViewByPidPath(dataFile))

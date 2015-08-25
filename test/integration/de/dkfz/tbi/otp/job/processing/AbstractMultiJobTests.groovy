@@ -37,8 +37,8 @@ class AbstractMultiJobTests extends TestCase {
     Scheduler scheduler
 
     final ProcessingStep step = createAndSaveProcessingStep()
-    final Realm realm1 = DomainFactory.createRealmDataProcessingDKFZ()
-    final Realm realm2 = DomainFactory.createRealmDataProcessingBioQuant()
+    final Realm realm1 = DomainFactory.createRealmDataProcessing()
+    final Realm realm2 = DomainFactory.createRealmDataProcessing()
     final PbsJobInfo clusterJob1 = new PbsJobInfo(realm: realm1, pbsId: CLUSTER_JOB_1_ID)
     final PbsJobInfo clusterJob2 = new PbsJobInfo(realm: realm2, pbsId: CLUSTER_JOB_2_ID)
     final PbsJobInfo clusterJob3 = new PbsJobInfo(realm: realm1, pbsId: CLUSTER_JOB_3_ID)
@@ -64,6 +64,7 @@ class AbstractMultiJobTests extends TestCase {
         // Without cleaning the database, tests in other test classes fail.
         JobDefinition.withTransaction {
             ClusterJob          .list(sort: "id", order: "desc").each { it.delete(flush: true) }
+            Realm               .list(sort: "id", order: "desc").each { it.delete(flush: true) }
             ProcessingError     .list(sort: "id", order: "desc").each { it.delete(flush: true) }
             ProcessingStepUpdate.list(sort: "id", order: "desc").each { it.delete(flush: true) }
             ProcessingStep      .list(sort: "id", order: "desc").each { it.delete(flush: true) }

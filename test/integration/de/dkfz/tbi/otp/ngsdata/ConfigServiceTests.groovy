@@ -16,13 +16,15 @@ class ConfigServiceTests {
     void setUp() {
 
         // Data on DKFZ LDSF, cluster in the DKFZ (regular case)
-        Realm realmDKFZ = DomainFactory.createRealmDataManagementDKFZ()
+        Realm realmDKFZ = DomainFactory.createRealmDataManagement(name: 'DKFZ')
         assertNotNull(realmDKFZ.save(flush: true))
 
         // Data on BioQuant LSDF, cluster in the BioQuant (regular case); fake values
-        Realm realmBQ = DomainFactory.createRealmDataManagementBioQuant([
+        Realm realmBQ = DomainFactory.createRealmDataManagement([
+            name: 'BioQuant',
             unixUser: '!invalid',
             host: 'localhost',
+            port: 22,
             ])
         assertNotNull(realmBQ.save(flush: true))
 
@@ -83,6 +85,6 @@ class ConfigServiceTests {
             'cp': 'scp -P 22',
             'dest': '!invalid@localhost:',
         ]
-        assertTrue exp == act
+        assert exp == act
     }
 }

@@ -107,7 +107,7 @@ class SampleSwapServiceTests extends GroovyScriptAwareTestCase {
     @Test
     void test_moveIndividual() {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
-        Project newProject = Project.build()
+        Project newProject = Project.build(realmName: bamFile.project.realmName)
         String script = "TEST-MOVE-INDIVIDUAL"
         Realm.build(name: bamFile.project.realmName, operationType: DATA_MANAGEMENT, rootPath: temporaryFolder.newFolder("mgmt"))
         Realm.build(name: bamFile.project.realmName, operationType: DATA_PROCESSING, rootPath: temporaryFolder.newFolder("proc"))

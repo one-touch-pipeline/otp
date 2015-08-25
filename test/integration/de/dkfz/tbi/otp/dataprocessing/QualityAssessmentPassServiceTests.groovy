@@ -186,7 +186,7 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testRealmForDataProcessing() {
-        realm = DomainFactory.createRealmDataProcessingDKFZ().save([flush:true])
+        realm = DomainFactory.createRealmDataProcessing(name: project.realmName)
         assertEquals(realm, qualityAssessmentPassService.realmForDataProcessing(qualityAssessmentPass))
     }
 

@@ -12,6 +12,7 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
+import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.ExternalScript
 import de.dkfz.tbi.otp.utils.HelperUtils
@@ -24,11 +25,6 @@ class DomainFactory {
     private DomainFactory() {
     }
 
-    static final String DEFAULT_REALM_NAME = 'FakeRealm'
-    static final String DEFAULT_HOST = 'localhost'
-    static final int    DEFAULT_PORT = 22
-    static final String LABEL_DKFZ = 'DKFZ'
-    static final String LABEL_BIOQUANT = 'BioQuant'
     static final String DEFAULT_MD5_SUM = '123456789abcdef123456789abcdef00'
     static final String DEFAULT_TAB_FILE_NAME = 'DefaultTabFileName.tab'
     static final long DEFAULT_FILE_SIZE = 123456
@@ -42,61 +38,6 @@ class DomainFactory {
      * Counter to create unique names.
      */
     static int counter = 0
-
-    /**
-     * Defaults for new realms.
-     * <p>
-     * The values are set to something passing the validator but often make no sense,
-     * so they should be overwritten with something proper. This is intentional, so
-     * they do not work by chance. The current defaults are:
-     * <ul>
-     * <li>the name "FakeRealm",</li>
-     * <li>the current environment,</li>
-     * <li>all paths beginning with "<code>#/invalidPath/</code>",</li>
-     * <li>all hosts set to "localhost",</li>
-     * <li>a port of 22 (SSH)</li>
-     * <li>a unix user called "!fakeuser",</li>
-     * <li>a time-out of 60</li>
-     * <li>no PBS options.</li>
-     * </ul>
-     */
-    public static final Map REALM_DEFAULTS = [
-        name: DEFAULT_REALM_NAME,
-        env: Environment.current.name,
-        rootPath:           '/dev/null/otp-test/fakeRealm/root',
-        processingRootPath: '/dev/null/otp-test/fakeRealm/processing',
-        loggingRootPath:    '/dev/null/otp-test/fakeRealm/log',
-        programsRootPath:   '/dev/null/otp-test/fakeRealm/programs',
-        stagingRootPath:    '/dev/null/otp-test/fakeRealm/staging',
-        webHost: DEFAULT_HOST,
-        host: DEFAULT_HOST,
-        port: DEFAULT_PORT,
-        unixUser: '!fakeuser',
-        timeout: 0,
-        pbsOptions: '',
-    ]
-
-    /** Default settings for the BioQuant cluster. These include the {@link #REALM_DEFAULTS}. */
-    public static final Map REALM_DEFAULTS_BIOQUANT_CLUSTER = REALM_DEFAULTS + [
-        name: LABEL_BIOQUANT,
-        cluster: Realm.Cluster.BIOQUANT,
-        host: 'otphost-other.example.org',
-        port: DEFAULT_PORT,
-        unixUser: 'unixUser2',
-        pbsOptions: '{"-l": {nodes: "1:xeon", walltime: "5:00"}}',
-    ]
-
-    /** Default settings for the DKFZ cluster. These include the {@link #REALM_DEFAULTS}. */
-    public static final Map REALM_DEFAULTS_DKFZ_CLUSTER = REALM_DEFAULTS + [
-        name: LABEL_DKFZ,
-        cluster: Realm.Cluster.DKFZ,
-        host: 'headnode',
-        port: DEFAULT_PORT,
-        unixUser: 'otptest',
-        pbsOptions: '{"-l": {nodes: "1:lsdf", walltime: "30:00"}}',
-    ]
-
-
 
     private static Object createDomainObject(Class domainClass, Map defaultProperties, Map parameterProperties) {
         def domain = domainClass.newInstance()
@@ -117,71 +58,65 @@ class DomainFactory {
     }
 
     /**
-     * Create a data management {@link Realm} for BioQuant with default cluster settings.
-     * A map with additional values can be passed to add to or overwrite existing domain properties.
-     *
-     * @return a new data management {@link Realm} for the BioQuant
+     * @deprecated Use {@link #createRealmDataManagement()} instead.
      */
-    public static Realm createRealmDataManagementBioQuant(Map myProps = [:]) {
-        new Realm(REALM_DEFAULTS_BIOQUANT_CLUSTER + [
-            operationType: Realm.OperationType.DATA_MANAGEMENT,
-        ] + myProps)
-    }
-
-    /**
-     * Create a data processing {@link Realm} for BioQuant with default cluster settings for the DKFZ cluster.
-     * A map with additional values can be passed to add to or overwrite existing domain properties.
-     *
-     * @return a new data processing {@link Realm} for the BioQuant, with settings for the DKFZ cluster
-     */
-    public static Realm createRealmDataProcessingBioQuant(Map myProps = [:]) {
-        // NOTE: Data processing for BQ projects is done on DKFZ cluster, so the name needs to
-        //       to be adjusted.
-        new Realm(REALM_DEFAULTS_DKFZ_CLUSTER + [
-            name: LABEL_BIOQUANT,
-            operationType: Realm.OperationType.DATA_PROCESSING,
-        ] + myProps)
-    }
-
-    /**
-     * Create a data management {@link Realm} for DKFZ with default cluster settings.
-     * A map with additional values can be passed to add to or overwrite existing domain properties.
-     *
-     * @return a new data management {@link Realm} for the DKFZ
-     */
+    @Deprecated
     public static Realm createRealmDataManagementDKFZ(Map myProps = [:]) {
-        new Realm(REALM_DEFAULTS_DKFZ_CLUSTER + [
-            operationType: Realm.OperationType.DATA_MANAGEMENT,
-        ] + myProps)
+        createRealmDataManagement(myProps)
     }
 
     /**
-     * Create a data processing {@link Realm} for DKFZ with default cluster settings.
-     * A map with additional values can be passed to add to or overwrite existing domain properties.
-     *
-     * @return a new data processing {@link Realm} for the DKFZ
+     * @deprecated Use {@link #createRealmDataProcessing()} instead.
      */
+    @Deprecated
     public static Realm createRealmDataProcessingDKFZ(Map myProps = [:]) {
-        new Realm(REALM_DEFAULTS_DKFZ_CLUSTER + [
-            operationType: Realm.OperationType.DATA_PROCESSING,
-        ] + myProps)
+        createRealmDataProcessing(myProps)
+    }
+
+    static Realm createRealmDataManagement(Map properties = [:]) {
+        createRealm([
+                operationType:      Realm.OperationType.DATA_MANAGEMENT,
+        ] + properties)
     }
 
     static Realm createRealmDataManagement(File testDirectory, Map properties = [:]) {
         assert testDirectory.isAbsolute()
-        Realm.build([
-                operationType:      Realm.OperationType.DATA_MANAGEMENT,
+        createRealmDataManagement([
                 rootPath:           new File(testDirectory, 'root').path,
+        ] + properties)
+    }
+
+    static Realm createRealmDataProcessing(Map properties = [:]) {
+        createRealm([
+                operationType:      Realm.OperationType.DATA_PROCESSING,
         ] + properties)
     }
 
     static Realm createRealmDataProcessing(File testDirectory, Map properties = [:]) {
         assert testDirectory.isAbsolute()
-        Realm.build([
-                operationType:      Realm.OperationType.DATA_PROCESSING,
+        createRealmDataProcessing([
                 processingRootPath: new File(testDirectory, 'processing').path,
                 stagingRootPath:    new File(testDirectory, 'staging').path,
         ] + properties)
+    }
+
+    static Realm createRealm(Map realmProperties = [:]) {
+        File fakePath = TestCase.uniqueNonExistentPath
+        return createDomainObject(Realm, [
+                name              : 'realmName_' + (counter++),
+                env               : Environment.current.name,
+                rootPath          : { new File(fakePath, 'root').path },
+                processingRootPath: { new File(fakePath, 'processing').path },
+                loggingRootPath   : { new File(fakePath, 'logging').path },
+                programsRootPath  : { new File(fakePath, 'programs').path },
+                webHost           : 'test.host.invalid',
+                host              : 'test.host.invalid',
+                port              : -1,
+                unixUser          : '!fakeuser',
+                timeout           : -1,
+                pbsOptions        : '',
+                cluster           : Cluster.DKFZ,
+        ], realmProperties)
     }
 
     static Workflow createPanCanWorkflow() {

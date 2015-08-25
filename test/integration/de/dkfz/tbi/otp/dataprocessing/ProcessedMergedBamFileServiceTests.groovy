@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.HelperUtils
 import grails.validation.ValidationException
 import org.junit.After
 import org.junit.Before
@@ -31,6 +32,7 @@ class ProcessedMergedBamFileServiceTests {
     String directory
     String baseFile
     String basePath
+    String realmName
 
     @Before
     void setUp() {
@@ -40,15 +42,16 @@ class ProcessedMergedBamFileServiceTests {
         directory = testDirectory.absolutePath + "/processing/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0"
         baseFile = "sample-type_patient_seq-type_library_merged.mdup"
         basePath = directory + "/" + baseFile
+        realmName = "Realm_${HelperUtils.uniqueString}"
 
-        Map paths = [
-            rootPath: testDirectory.absolutePath + '/root',
-            processingRootPath: testDirectory.absolutePath + '/processing',
-            name: DomainFactory.DEFAULT_REALM_NAME,
-        ]
-
-        Realm realm = DomainFactory.createRealmDataProcessingDKFZ(paths).save([flush: true])
-        Realm realm1 = DomainFactory.createRealmDataManagementDKFZ(paths).save([flush: true])
+        DomainFactory.createRealmDataProcessing(
+                name: realmName,
+                processingRootPath: testDirectory.absolutePath + '/processing',
+        )
+        DomainFactory.createRealmDataManagement(
+                name: realmName,
+                rootPath: testDirectory.absolutePath + '/root',
+        )
 
         baseDir = new File(directory)
         File bam = new File(basePath + ".bam")
@@ -562,6 +565,7 @@ class ProcessedMergedBamFileServiceTests {
 
     private ProcessedMergedBamFile createProcessedMergedBamFile() {
         ProcessedMergedBamFile mergedBamFile = DomainFactory.createProcessedMergedBamFile()
+        mergedBamFile.project.realmName = realmName
         mergedBamFile.project.dirName = 'project-dir'
         mergedBamFile.individual.pid = 'patient'
         mergedBamFile.sampleType.name = 'sample-type'

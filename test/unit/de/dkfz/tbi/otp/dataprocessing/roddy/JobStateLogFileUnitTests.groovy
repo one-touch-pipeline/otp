@@ -6,6 +6,7 @@ import static de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile.JOB_STATE_LOG
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.CreateJobStateLogFileHelper
 import static de.dkfz.tbi.TestCase.shouldFailWithMessage
@@ -18,6 +19,11 @@ import org.junit.rules.TemporaryFolder
 
 import static junit.framework.Assert.assertFalse
 
+import grails.test.mixin.Mock
+
+@Mock([
+        Realm,
+])
 class JobStateLogFileUnitTests {
 
     public static final String STATUS_CODE_FAILED = "1"

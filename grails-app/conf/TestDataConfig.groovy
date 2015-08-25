@@ -2,6 +2,7 @@ import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.HelperUtils
 import grails.util.Environment
 
 /**
@@ -36,11 +37,11 @@ testDataConfig {
         'de.dkfz.tbi.otp.ngsdata.Project' {
             name = {'projectName_' + (counter++)}
             dirName = {'projectDir_' + (counter++)}
-            realmName = DomainFactory.DEFAULT_REALM_NAME
+            realmName = {HelperUtils.uniqueString}
 
         }
         'de.dkfz.tbi.otp.ngsdata.Realm' {
-            name = DomainFactory.DEFAULT_REALM_NAME
+            name = {'realmName_' + (counter++)}
             env = Environment.current.name
             rootPath = {new File(TestCase.uniqueNonExistentPath, 'root').path}
             processingRootPath = {new File(TestCase.uniqueNonExistentPath, 'processing').path}
@@ -53,7 +54,6 @@ testDataConfig {
             unixUser = '!fakeuser'
             timeout = 60
             pbsOptions = ''
-            name = 'DKFZ'
             cluster = Realm.Cluster.DKFZ
         }
         'de.dkfz.tbi.otp.ngsdata.ReferenceGenome' {

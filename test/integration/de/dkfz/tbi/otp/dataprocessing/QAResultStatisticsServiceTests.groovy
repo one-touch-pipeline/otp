@@ -25,10 +25,6 @@ class QAResultStatisticsServiceTests {
      */
     def QAResultStatisticsService
 
-    // Location of the statistics file on the processing side, will be copied
-    final static PATH_TO_STAT_FILE = '/tmp/otp-unit-test/pmbfs/processing/projectDirName/results_per_pid/pid_1/merging//control/seqTypeName/seqTypeLibrary/DEFAULT/0/pass0/QualityAssessment/pass1'
-    final static FINAL_PATH_FILE = '/tmp/otp-unit-test/pmfs/root/projectDirName/sequencing/seqTypeDirName/view-by-pid/pid_1/control/seqtypelibrary/merged-alignment/.tmp/QualityAssessment'
-
     TestData testData = new TestData()
     Project project
     Sample sample
@@ -53,14 +49,6 @@ class QAResultStatisticsServiceTests {
 
     @Before
     void setUp() {
-        Map paths = [
-            rootPath: '/tmp/otp-unit-test/pmfs/root',
-            processingRootPath: '/tmp/otp-unit-test/pmbfs/processing',
-        ]
-
-        Realm realm = DomainFactory.createRealmDataProcessingDKFZ(paths).save([flush: true])
-        Realm realm1 = DomainFactory.createRealmDataManagementDKFZ(paths).save([flush: true])
-
         project = TestData.createProject(
                         name: "projectName",
                         dirName: "projectDirName",
@@ -572,7 +560,13 @@ class QAResultStatisticsServiceTests {
 
     @Test
     void testStatisticsFile() {
+        Realm realm = DomainFactory.createRealmDataManagement(name: project.realmName)
+
         Map actual = QAResultStatisticsService.statisticsFile(processedMergedBamFile)
+
+        // Location of the statistics file on the processing side, will be copied
+        final FINAL_PATH_FILE = realm.rootPath + '/projectDirName/sequencing/seqTypeDirName/view-by-pid/pid_1/control/seqtypelibrary/merged-alignment/.tmp/QualityAssessment'
+
         Map expect = [
             'small': "${FINAL_PATH_FILE}/${FileNames.QA_RESULT_OVERVIEW}",
             'extended': "${FINAL_PATH_FILE}/${FileNames.QA_RESULT_OVERVIEW_EXTENDED}",
