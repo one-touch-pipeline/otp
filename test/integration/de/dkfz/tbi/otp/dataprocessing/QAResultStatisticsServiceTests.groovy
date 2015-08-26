@@ -235,7 +235,7 @@ class QAResultStatisticsServiceTests {
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass(
                         identifier: 1,
                         description: "text2",
-                        processedMergedBamFile: processedMergedBamFile
+                        abstractMergedBamFile: processedMergedBamFile
                         )
         assertNotNull(qualityAssessmentMergedPass.save([flush: true]))
 

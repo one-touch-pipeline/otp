@@ -27,7 +27,7 @@ class RoddyQualityAssessment extends AbstractQualityAssessment {
     }
 
     static constraints = {
-        qualityAssessmentMergedPass(validator: { it.processedMergedBamFile instanceof RoddyBamFile })
+        qualityAssessmentMergedPass(validator: { it.abstractMergedBamFile instanceof RoddyBamFile })
 
         chromosome(blank: false)
 
@@ -55,7 +55,7 @@ class RoddyQualityAssessment extends AbstractQualityAssessment {
     }
 
     RoddyBamFile getRoddyBamFile() {
-        return (RoddyBamFile)qualityAssessmentMergedPass.processedMergedBamFile
+        return (RoddyBamFile)qualityAssessmentMergedPass.abstractMergedBamFile
     }
 
     // Created to have an identical way to receive the chromosome identifier as in ChromosomeQualityAssessmentMerged

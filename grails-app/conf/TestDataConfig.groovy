@@ -132,10 +132,10 @@ testDataConfig {
             alignmentPass = {TestData.createAndSaveAlignmentPass()}
         }
         'de.dkfz.tbi.otp.dataprocessing.QualityAssessmentMergedPass' {
-            processedMergedBamFile = { TestData.createProcessedMergedBamFile(mergingPass: MergingPass.build()) }
+            abstractMergedBamFile = { TestData.createProcessedMergedBamFile(mergingPass: MergingPass.build()) }
         }
         RoddyQualityAssessment {
-            qualityAssessmentMergedPass = { QualityAssessmentMergedPass.build(processedMergedBamFile: RoddyBamFile.build()) }
+            qualityAssessmentMergedPass = { QualityAssessmentMergedPass.build(abstractMergedBamFile: RoddyBamFile.build()) }
         }
         'de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig' {
             configFilePath = { new File(TestCase.uniqueNonExistentPath, 'roddy-workflow-config').path }

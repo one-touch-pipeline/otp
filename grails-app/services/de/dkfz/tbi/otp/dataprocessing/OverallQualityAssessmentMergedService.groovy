@@ -25,7 +25,7 @@ select
 from
     QualityAssessmentMergedPass qualityAssessmentMergedPass
 where
-    qualityAssessmentMergedPass.processedMergedBamFile = abstractMergedBamFile
+    qualityAssessmentMergedPass.abstractMergedBamFile = abstractMergedBamFile
 """
 
         String HQL = """
@@ -34,7 +34,7 @@ where
             from
                 AbstractQualityAssessment abstractQualityAssessment
                 join abstractQualityAssessment.qualityAssessmentMergedPass qualityAssessmentMergedPass
-                join qualityAssessmentMergedPass.processedMergedBamFile abstractMergedBamFile
+                join qualityAssessmentMergedPass.abstractMergedBamFile abstractMergedBamFile
                 join abstractMergedBamFile.workPackage mergingWorkPackage
             where
                 mergingWorkPackage.sample.individual.project = :project
@@ -81,15 +81,15 @@ where
             select distinct
                 abstractQualityAssessment.id,
                 fastqcBasicStatistics.sequenceLength,
-                abstractQualityAssessment.qualityAssessmentMergedPass.processedMergedBamFile.workPackage.referenceGenome.lengthWithoutN
+                abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.referenceGenome.lengthWithoutN
             from
                 AbstractQualityAssessment abstractQualityAssessment,
                 FastqcBasicStatistics fastqcBasicStatistics,
                 SeqTrack seqTrack,
                 DataFile dataFile
             where
-                abstractQualityAssessment.qualityAssessmentMergedPass.processedMergedBamFile.workPackage.sample = seqTrack.sample
-                and abstractQualityAssessment.qualityAssessmentMergedPass.processedMergedBamFile.workPackage.seqType = seqTrack.seqType
+                abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.sample = seqTrack.sample
+                and abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.seqType = seqTrack.seqType
                 and seqTrack = fastqcBasicStatistics.fastqcProcessedFile.dataFile.seqTrack
                 and dataFile.seqTrack = seqTrack
                 and dataFile.fileWithdrawn = false

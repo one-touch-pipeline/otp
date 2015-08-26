@@ -236,7 +236,7 @@ class RoddyBamFileTest {
     void testGetOverallQualityAssessment() {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
         QualityAssessmentMergedPass qaPass = QualityAssessmentMergedPass.build(
-                processedMergedBamFile: bamFile,
+                abstractMergedBamFile: bamFile,
         )
         RoddyMergedBamQa.build(
                 qualityAssessmentMergedPass: qaPass,

@@ -18,7 +18,7 @@ class OverallQualityAssessmentMerged extends QaJarQualityAssessment {
     ]
 
     static constraints = {
-        qualityAssessmentMergedPass(validator: { it.processedMergedBamFile instanceof ProcessedMergedBamFile })
+        qualityAssessmentMergedPass(validator: { it.abstractMergedBamFile instanceof ProcessedMergedBamFile })
     }
 
     static mapping = {
@@ -54,7 +54,7 @@ class OverallQualityAssessmentMerged extends QaJarQualityAssessment {
     }
 
     ProcessedMergedBamFile getProcessedMergedBamFile() {
-        return qualityAssessmentMergedPass.processedMergedBamFile
+        return qualityAssessmentMergedPass.abstractMergedBamFile as ProcessedMergedBamFile
     }
 
     ReferenceGenome getReferenceGenome() {

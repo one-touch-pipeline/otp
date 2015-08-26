@@ -44,7 +44,7 @@ class MergingPassServiceUnitTests {
     private void createDomains() {
         mergingPass = MergingPass.build()
         processedMergedBamFile = ProcessedMergedBamFile.build(mergingPass: mergingPass, workPackage: mergingPass.mergingWorkPackage)
-        qualityAssessmentMergedPass = QualityAssessmentMergedPass.build(processedMergedBamFile: processedMergedBamFile)
+        qualityAssessmentMergedPass = QualityAssessmentMergedPass.build(abstractMergedBamFile: processedMergedBamFile)
     }
 
     private void createTestData() {
@@ -115,8 +115,8 @@ class MergingPassServiceUnitTests {
 
     public void testDeleteProcessingFiles_MultipleQA() {
         createTestData()
-        QualityAssessmentMergedPass.build(identifier: 1, processedMergedBamFile: processedMergedBamFile)
-        QualityAssessmentMergedPass.build(identifier: 2, processedMergedBamFile: processedMergedBamFile)
+        QualityAssessmentMergedPass.build(identifier: 1, abstractMergedBamFile: processedMergedBamFile)
+        QualityAssessmentMergedPass.build(identifier: 2, abstractMergedBamFile: processedMergedBamFile)
         int expected = SOME_FILE_LENGTH_1 * 3 + SOME_FILE_LENGTH_2
         checkedLogger.addDebug("${expected} bytes have been freed for merging pass ${mergingPass}.")
         assert expected == mergingPassService.deleteProcessingFiles(mergingPass)

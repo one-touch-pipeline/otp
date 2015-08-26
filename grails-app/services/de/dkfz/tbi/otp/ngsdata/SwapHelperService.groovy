@@ -76,13 +76,13 @@ class SwapHelperService {
             OverallQualityAssessment.findAllByQualityAssessmentPassInList(qualityAssessmentPasses)*.delete()
             qualityAssessmentPasses*.delete()
         } else if (abstractBamFile instanceof ProcessedMergedBamFile) {
-            List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByProcessedMergedBamFile(abstractBamFile)
+            List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(abstractBamFile)
 
             ChromosomeQualityAssessmentMerged.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete()
             OverallQualityAssessmentMerged.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete()
             qualityAssessmentMergedPasses*.delete()
         } else if (abstractBamFile instanceof RoddyBamFile) {
-            List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByProcessedMergedBamFile(abstractBamFile)
+            List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(abstractBamFile)
             RoddyQualityAssessment.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete()
             qualityAssessmentMergedPasses*.delete()
         } else {

@@ -43,7 +43,7 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
         libraryPreparationKit = new LibraryPreparationKit(name: "LibraryPreparationKit")
         assertNotNull(libraryPreparationKit.save([flush: true, validate: false]))
 
-        QualityAssessmentMergedPass pass = new QualityAssessmentMergedPass(processedMergedBamFile: bamFile)
+        QualityAssessmentMergedPass pass = new QualityAssessmentMergedPass(abstractMergedBamFile: bamFile)
         assertNotNull(pass.save([flush: true, validate: false]))
         seqType = new SeqType()
 

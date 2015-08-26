@@ -49,7 +49,7 @@ class ProcessedMergedBamFileIntegrationTests {
         assert processedMergedBamFile: 'processedMergedBamFile must not be null'
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass([
-                processedMergedBamFile: processedMergedBamFile,
+                abstractMergedBamFile: processedMergedBamFile,
                 identifier: QualityAssessmentMergedPass.nextIdentifier(processedMergedBamFile),
         ])
         assert qualityAssessmentMergedPass.save([flush: true])

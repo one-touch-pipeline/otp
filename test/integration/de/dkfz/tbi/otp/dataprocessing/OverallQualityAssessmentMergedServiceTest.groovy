@@ -114,7 +114,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
 
     void testFindAllByProjectAndSeqType_notLastQaMergedPassIdentifier() {
         List expected = []
-        QualityAssessmentMergedPass.build(processedMergedBamFile: overallQualityAssessmentMerged.processedMergedBamFile, identifier: overallQualityAssessmentMerged.qualityAssessmentMergedPass.identifier + 1)
+        QualityAssessmentMergedPass.build(abstractMergedBamFile: overallQualityAssessmentMerged.processedMergedBamFile, identifier: overallQualityAssessmentMerged.qualityAssessmentMergedPass.identifier + 1)
 
         SpringSecurityUtils.doWithAuth("admin") {
             List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, SeqType.build())

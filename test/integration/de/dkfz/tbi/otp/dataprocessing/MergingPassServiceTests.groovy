@@ -213,7 +213,7 @@ class MergingPassServiceTests {
         MergingSet mergingSet = MergingSet.build(status: MergingSet.State.PROCESSED)
         MergingPass mergingPass1 = MergingPass.build([mergingSet: mergingSet])
         ProcessedMergedBamFile processedMergedBamFile1 = ProcessedMergedBamFile.build(mergingPass: mergingPass1, workPackage: mergingPass1.mergingWorkPackage)
-        QualityAssessmentMergedPass qualityAssessmentMergedPass1 = QualityAssessmentMergedPass.build(processedMergedBamFile: processedMergedBamFile1)
+        QualityAssessmentMergedPass qualityAssessmentMergedPass1 = QualityAssessmentMergedPass.build(abstractMergedBamFile: processedMergedBamFile1)
         MergingPass mergingPass2 = MergingPass.build([
             mergingSet: mergingSet,
             identifier: 1,

@@ -574,7 +574,7 @@ def showSeqTracksOtp = {List<SeqTrack> seqTracksToAlign ->
         def mergingWorkPackage = it.mergingPass.mergingSet.mergingWorkPackage
         "${mergingWorkPackage.sample}  ${mergingWorkPackage.seqType}  ${mergingWorkPackage.sample.project}  id: ${it.id}"
     }, {
-        QualityAssessmentMergedPass.findAllByProcessedMergedBamFile(it).find { it2 -> it2.isLatestPass()}
+        QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(it).find { it2 -> it2.isLatestPass()}
     })
 
     if (!processedMergedBamFilesFinishedQualityAssessmentMergedWorkflow) {

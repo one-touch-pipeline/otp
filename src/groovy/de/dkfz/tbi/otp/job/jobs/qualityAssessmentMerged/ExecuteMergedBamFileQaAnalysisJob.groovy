@@ -38,7 +38,7 @@ class ExecuteMergedBamFileQaAnalysisJob extends AbstractJobImpl {
         long passId = getProcessParameterValue() as long
         QualityAssessmentMergedPass pass = QualityAssessmentMergedPass.get(passId)
         Realm realm = qualityAssessmentMergedPassService.realmForDataProcessing(pass)
-        ProcessedMergedBamFile processedMergedBamFile = pass.processedMergedBamFile
+        ProcessedMergedBamFile processedMergedBamFile = pass.abstractMergedBamFile as ProcessedMergedBamFile
         String processedMergedBamFilePath = processedMergedBamFileService.filePath(processedMergedBamFile)
         String processedMergedBaiFilePath = processedMergedBamFileService.filePathForBai(processedMergedBamFile)
         String qualityAssessmentFilePath = processedMergedBamFileQaFileService.qualityAssessmentDataFilePath(pass)

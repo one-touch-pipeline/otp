@@ -34,7 +34,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
             checkConsistencyWithFinalDestinationForDeletion: {final File processingDirectory, final File finalDestinationDirectory, final Collection<String> fileNames ->
                 File expectedProcessingDirectory = processedMergedBamFileQaFileService.qaPassProcessingDirectory(qualityAssessmentMergedPass) as File
                 File expectedFinalDestinationDirectory = new File(TestConstants.BASE_TEST_DIRECTORY)
-                Collection<String> expectedAdditionalFiles = processedMergedBamFileQaFileService.allFileNames(qualityAssessmentMergedPass.processedMergedBamFile)
+                Collection<String> expectedAdditionalFiles = processedMergedBamFileQaFileService.allFileNames(qualityAssessmentMergedPass.abstractMergedBamFile)
                 assert expectedProcessingDirectory == processingDirectory
                 assert expectedFinalDestinationDirectory == finalDestinationDirectory
                 assert expectedAdditionalFiles == fileNames
@@ -47,7 +47,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
 
             deleteProcessingFilesAndDirectory: { final Project project, final File processingDirectory, final Collection<String> fileNames ->
                 File expectedDirectory = processedMergedBamFileQaFileService.qaPassProcessingDirectory(qualityAssessmentMergedPass) as File
-                Collection<String> expectedAdditionalFiles = processedMergedBamFileQaFileService.allFileNames(qualityAssessmentMergedPass.processedMergedBamFile)
+                Collection<String> expectedAdditionalFiles = processedMergedBamFileQaFileService.allFileNames(qualityAssessmentMergedPass.abstractMergedBamFile)
                 assert qualityAssessmentMergedPass.project == project
                 assert expectedDirectory == processingDirectory
                 assert expectedAdditionalFiles == fileNames
@@ -86,7 +86,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
         QualityAssessmentMergedPass qualityAssessmentMergedPass
         ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
         (qualityAssessmentMergedPass, processedMergedBamFileQaFileService) = createDataForDeleteChecking()
-        QualityAssessmentMergedPass.build(identifier: 1, processedMergedBamFile: qualityAssessmentMergedPass.processedMergedBamFile)
+        QualityAssessmentMergedPass.build(identifier: 1, abstractMergedBamFile: qualityAssessmentMergedPass.abstractMergedBamFile)
 
         assert processedMergedBamFileQaFileService.checkConsistencyForProcessingFilesDeletion(qualityAssessmentMergedPass)
     }

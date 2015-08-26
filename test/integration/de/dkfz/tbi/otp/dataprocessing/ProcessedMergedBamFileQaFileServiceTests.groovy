@@ -102,7 +102,7 @@ class ProcessedMergedBamFileQaFileServiceTests {
         assertNotNull(processedMergedBamFile.save([flush: true]))
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass(
-                        processedMergedBamFile: processedMergedBamFile,
+                        abstractMergedBamFile: processedMergedBamFile,
                         identifier: 1,
                         description: 'QualtiyAssessmentMergedPassDescription'
                         )

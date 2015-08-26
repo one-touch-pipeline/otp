@@ -326,7 +326,7 @@ class AbstractBamFileServiceTests {
         assignToMergingSet(exomeMergingSet, exomeProcessedBamFile)
         ProcessedMergedBamFile processedMergedBamFile = createAndSaveProcessedMergedBamFileAndDependentObjects(exomeMergingSet)
         changeStateOfBamFileToHavingPassedQC(processedMergedBamFile)
-        QualityAssessmentMergedPass qualityAssessmentMergedPass = QualityAssessmentMergedPass.findByProcessedMergedBamFile(processedMergedBamFile)
+        QualityAssessmentMergedPass qualityAssessmentMergedPass = QualityAssessmentMergedPass.findByAbstractMergedBamFile(processedMergedBamFile)
         OverallQualityAssessmentMerged overallQualityAssessmentMerged = OverallQualityAssessmentMerged.findByQualityAssessmentMergedPass(qualityAssessmentMergedPass)
         overallQualityAssessmentMerged.onTargetMappedBases = null
         overallQualityAssessmentMerged.save()
@@ -496,7 +496,7 @@ class AbstractBamFileServiceTests {
         assert processedMergedBamFile.save([flush: true])
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass([
-            processedMergedBamFile: processedMergedBamFile,
+            abstractMergedBamFile: processedMergedBamFile,
         ])
         assert qualityAssessmentMergedPass.save([flush: true])
 

@@ -16,7 +16,7 @@ class QualityAssessmentMergedPassService {
             return null
         }
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass(
-                processedMergedBamFile: processedMergedBamFile,
+                abstractMergedBamFile: processedMergedBamFile,
                 identifier: QualityAssessmentMergedPass.nextIdentifier(processedMergedBamFile),
         )
         assertSave(qualityAssessmentMergedPass)
@@ -35,16 +35,16 @@ class QualityAssessmentMergedPassService {
     public void passFinished(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
         notNull(qualityAssessmentMergedPass, "The input qualityAssessmentMergedPass of the method passFinished is null")
         update(qualityAssessmentMergedPass, AbstractBamFile.QaProcessingStatus.FINISHED)
-        qualityAssessmentMergedPass.processedMergedBamFile.updateFileOperationStatus(AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING)
-        assert qualityAssessmentMergedPass.processedMergedBamFile.save(flush: true)
+        qualityAssessmentMergedPass.abstractMergedBamFile.updateFileOperationStatus(AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING)
+        assert qualityAssessmentMergedPass.abstractMergedBamFile.save(flush: true)
     }
 
     private void update(QualityAssessmentMergedPass qualityAssessmentMergedPass, AbstractBamFile.QaProcessingStatus state) {
         notNull(qualityAssessmentMergedPass, "The input qualityAssessmentMergedPass of the method update is null")
         notNull(state, "The input state of the method update is null")
-        ProcessedMergedBamFile processedMergedBamFile = qualityAssessmentMergedPass.processedMergedBamFile
-        processedMergedBamFile.qualityAssessmentStatus = state
-        assertSave(processedMergedBamFile)
+        AbstractMergedBamFile abstractMergedBamFile = qualityAssessmentMergedPass.abstractMergedBamFile
+        abstractMergedBamFile.qualityAssessmentStatus = state
+        assertSave(abstractMergedBamFile)
     }
 
     public Realm realmForDataProcessing(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
@@ -71,7 +71,7 @@ class QualityAssessmentMergedPassService {
      */
     public List<QualityAssessmentMergedPass> allQualityAssessmentMergedPasses(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, "the input for the method allQualityAssessmentPasses is null")
-        return QualityAssessmentMergedPass.findAllByProcessedMergedBamFile(bamFile, [sort: "id", order: "desc"])
+        return QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(bamFile, [sort: "id", order: "desc"])
     }
 
     /**

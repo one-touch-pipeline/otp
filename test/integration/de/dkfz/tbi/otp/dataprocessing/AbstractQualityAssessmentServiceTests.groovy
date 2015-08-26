@@ -65,7 +65,7 @@ class AbstractQualityAssessmentServiceTests {
         def processedMergedBamFile = createProcessedMergedBamFile()
         def qualityAssessmentMergedPass = createQualityAssessmentDataForProcessedMergedBamFile(processedMergedBamFile, QC_BASES_MAPPED)
 
-        abstractQualityAssessmentService.saveCoverageToProcessedMergedBamFile(qualityAssessmentMergedPass)
+        abstractQualityAssessmentService.saveCoverageToAbstractMergedBamFile(qualityAssessmentMergedPass)
 
         assert processedMergedBamFile.coverage == EXPECTED_COVERAGE
         assert processedMergedBamFile.coverageWithN == EXPECTED_COVERAGE_WITH_N
@@ -80,7 +80,7 @@ class AbstractQualityAssessmentServiceTests {
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         RoddyMergedBamQa mergedQa = new RoddyMergedBamQa(
                 ARBITRARY_QA_VALUES + [
-                qualityAssessmentMergedPass : QualityAssessmentMergedPass.build(processedMergedBamFile: roddyBamFile),
+                qualityAssessmentMergedPass : QualityAssessmentMergedPass.build(abstractMergedBamFile: roddyBamFile),
                 qcBasesMapped : QC_BASES_MAPPED,
                 genomeWithoutNCoverageQcBases: EXPECTED_COVERAGE,
                 chromosome: RoddyQualityAssessment.ALL,
@@ -270,7 +270,7 @@ class AbstractQualityAssessmentServiceTests {
         assert processedMergedBamFile: 'processedMergedBamFile must not be null'
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass([
-                processedMergedBamFile: processedMergedBamFile,
+                abstractMergedBamFile: processedMergedBamFile,
                 // Explicitly set up null, so we can check the result
                 coverage: null,
                 coverageWithN: null,

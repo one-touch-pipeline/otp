@@ -36,8 +36,6 @@ class CreateMergedChromosomeMappingFileJob extends AbstractEndStateAwareJobImpl 
     public void execute() throws Exception {
         long passId = getProcessParameterValue() as long
         QualityAssessmentMergedPass pass = QualityAssessmentMergedPass.get(passId)
-        Project project = processedMergedBamFileService.project(pass.processedMergedBamFile)
-        SeqType seqType = processedMergedBamFileService.seqType(pass.processedMergedBamFile)
         ReferenceGenome referenceGenome = pass.referenceGenome
         Map<String, String> chromosomeIdentifierMap = chromosomeIdentifierMappingService.mappingAll(referenceGenome)
         List<String> filterChromosomes = chromosomeIdentifierFilteringService.filteringCoverage(referenceGenome)

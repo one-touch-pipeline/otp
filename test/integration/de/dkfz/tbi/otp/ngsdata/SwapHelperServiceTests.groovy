@@ -79,7 +79,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
     public void testDeleteQualityAssessmentInfoForAbstractBamFile_ProcessedMergedBamFile() throws Exception {
         AbstractBamFile abstractBamFile = DomainFactory.createProcessedMergedBamFile()
 
-        QualityAssessmentMergedPass qualityAssessmentPass = QualityAssessmentMergedPass.build(processedMergedBamFile: abstractBamFile)
+        QualityAssessmentMergedPass qualityAssessmentPass = QualityAssessmentMergedPass.build(abstractMergedBamFile: abstractBamFile)
         ChromosomeQualityAssessmentMerged chromosomeQualityAssessment = ChromosomeQualityAssessmentMerged.build(qualityAssessmentMergedPass: qualityAssessmentPass)
         OverallQualityAssessmentMerged overallQualityAssessment = OverallQualityAssessmentMerged.build(qualityAssessmentMergedPass: qualityAssessmentPass)
         PicardMarkDuplicatesMetrics picardMarkDuplicatesMetrics = PicardMarkDuplicatesMetrics.build(abstractBamFile: abstractBamFile)
@@ -96,7 +96,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
     public void testDeleteQualityAssessmentInfoForAbstractBamFile_RoddyBamFile() throws Exception {
         AbstractBamFile abstractBamFile = DomainFactory.createRoddyBamFile()
 
-        QualityAssessmentMergedPass qualityAssessmentPass = QualityAssessmentMergedPass.build(processedMergedBamFile: abstractBamFile)
+        QualityAssessmentMergedPass qualityAssessmentPass = QualityAssessmentMergedPass.build(abstractMergedBamFile: abstractBamFile)
         RoddyQualityAssessment roddyQualityAssessment = RoddyQualityAssessment.build(qualityAssessmentMergedPass: qualityAssessmentPass)
         RoddyMergedBamQa roddyMergedBamQa = RoddyMergedBamQa.build(qualityAssessmentMergedPass: qualityAssessmentPass)
         RoddySingleLaneQa roddySingleLaneQa = RoddySingleLaneQa.build(seqTrack: abstractBamFile.seqTracks.iterator().next(), qualityAssessmentMergedPass: qualityAssessmentPass)

@@ -111,7 +111,7 @@ class MergingPassService {
         final Collection<ProcessedMergedBamFile> bamFiles = ProcessedMergedBamFile.findAllByMergingPass(mergingPass)
         if (bamFiles.size() == 1) {
             final ProcessedMergedBamFile bamFile = bamFiles.first()
-            final Collection<QualityAssessmentMergedPass> qaPasses = QualityAssessmentMergedPass.findAllByProcessedMergedBamFile(bamFile)
+            final Collection<QualityAssessmentMergedPass> qaPasses = QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(bamFile)
             boolean consistent = true
             qaPasses.each {
                 if (!processedMergedBamFileQaFileService.checkConsistencyForProcessingFilesDeletion(it)) {

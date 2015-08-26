@@ -22,12 +22,12 @@ class ChromosomeQualityAssessmentMergedService {
         Assert.notNull(chromosomes, 'Parameter "chromosomes" may not be null')
         Assert.notNull(qualityAssessmentMergedPasses, 'Parameter "qualityAssessmentMergedPasses" may not be null')
 
-        qualityAssessmentMergedPasses*.processedMergedBamFile.each { AbstractMergedBamFile abstractMergedBamFile ->
+        qualityAssessmentMergedPasses*.abstractMergedBamFile.each { AbstractMergedBamFile abstractMergedBamFile ->
             assert ( abstractMergedBamFile instanceof RoddyBamFile || abstractMergedBamFile instanceof ProcessedMergedBamFile )
         }
 
-        List<QualityAssessmentMergedPass> roddyFilePasses = qualityAssessmentMergedPasses.findAll { it.processedMergedBamFile instanceof RoddyBamFile }
-        List<QualityAssessmentMergedPass> bamFilePasses =  qualityAssessmentMergedPasses.findAll { it.processedMergedBamFile instanceof ProcessedMergedBamFile }
+        List<QualityAssessmentMergedPass> roddyFilePasses = qualityAssessmentMergedPasses.findAll { it.abstractMergedBamFile instanceof RoddyBamFile }
+        List<QualityAssessmentMergedPass> bamFilePasses =  qualityAssessmentMergedPasses.findAll { it.abstractMergedBamFile instanceof ProcessedMergedBamFile }
 
         if (chromosomes) {
             List<AbstractQualityAssessment> roddyQAPerChromosome = []

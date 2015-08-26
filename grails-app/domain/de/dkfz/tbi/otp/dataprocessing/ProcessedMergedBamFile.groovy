@@ -62,7 +62,7 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile {
     AbstractQualityAssessment getOverallQualityAssessment() {
         OverallQualityAssessmentMerged.createCriteria().get {
             qualityAssessmentMergedPass {
-                eq 'processedMergedBamFile', this
+                eq 'abstractMergedBamFile', this
             }
             order 'id', 'desc'
             maxResults 1

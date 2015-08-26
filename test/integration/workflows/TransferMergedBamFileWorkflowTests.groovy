@@ -346,7 +346,7 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass(
                         identifier: 0,
-                        processedMergedBamFile: processedMergedBamFile
+                        abstractMergedBamFile: processedMergedBamFile
                         )
         assertNotNull(qualityAssessmentMergedPass.save([flush: true, failOnError: true]))
 
@@ -393,7 +393,7 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass1 = new QualityAssessmentMergedPass(
                         identifier: 0,
-                        processedMergedBamFile: processedMergedBamFile1
+                        abstractMergedBamFile: processedMergedBamFile1
                         )
         assertNotNull(qualityAssessmentMergedPass1.save([flush: true, failOnError: true]))
 

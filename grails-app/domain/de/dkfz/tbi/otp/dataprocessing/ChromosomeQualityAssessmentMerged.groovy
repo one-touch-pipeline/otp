@@ -19,7 +19,7 @@ class ChromosomeQualityAssessmentMerged extends QaJarQualityAssessment {
     ]
 
     static constraints = {
-        qualityAssessmentMergedPass(validator: { it.processedMergedBamFile instanceof ProcessedMergedBamFile })
+        qualityAssessmentMergedPass(validator: { it.abstractMergedBamFile instanceof ProcessedMergedBamFile })
     }
 
     static mapping = {

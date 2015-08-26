@@ -132,7 +132,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
 
     QualityAssessmentMergedPass findOrSaveQaPass() {
         return QualityAssessmentMergedPass.findOrSaveWhere(
-                processedMergedBamFile: this,
+                abstractMergedBamFile: this,
                 identifier: 0,
         )
     }
@@ -142,7 +142,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
         return CollectionUtils.exactlyOneElement(RoddyMergedBamQa.createCriteria().list {
             eq 'chromosome', RoddyQualityAssessment.ALL
             qualityAssessmentMergedPass {
-                processedMergedBamFile {
+                abstractMergedBamFile {
                     eq 'id', this.id
                 }
             }

@@ -152,7 +152,7 @@ class AlignmentQualityOverviewController {
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = dataOverall.collect { AbstractQualityAssessment it->
 
-            AbstractMergedBamFile abstractMergedBamFile = it.qualityAssessmentMergedPass.processedMergedBamFile
+            AbstractMergedBamFile abstractMergedBamFile = it.qualityAssessmentMergedPass.abstractMergedBamFile
             double duplicates = it.duplicates / it.totalReadCounter * 100.0 //%duplicates (picard)
             double properlyPaired = it.properlyPaired / it.pairedInSequencing * 100.0
             double readLength = sequenceLengthsAndReferenceGenomeLengthWithoutNMap[it.id][0][1] as double

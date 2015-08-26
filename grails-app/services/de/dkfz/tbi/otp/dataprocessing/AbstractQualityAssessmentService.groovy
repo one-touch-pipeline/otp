@@ -117,11 +117,11 @@ class AbstractQualityAssessmentService {
         assertSave(processedBamFile)
     }
 
-    void saveCoverageToProcessedMergedBamFile(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
-        ProcessedMergedBamFile processedMergedBamFile = qualityAssessmentMergedPass.processedMergedBamFile
-        processedMergedBamFile.coverage = abstractBamFileService.calculateCoverageWithoutN(processedMergedBamFile)
-        processedMergedBamFile.coverageWithN = abstractBamFileService.calculateCoverageWithN(processedMergedBamFile)
-        assertSave(processedMergedBamFile)
+    void saveCoverageToAbstractMergedBamFile(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
+        AbstractMergedBamFile abstractMergedBamFile = qualityAssessmentMergedPass.abstractMergedBamFile
+        abstractMergedBamFile.coverage = abstractBamFileService.calculateCoverageWithoutN(abstractMergedBamFile)
+        abstractMergedBamFile.coverageWithN = abstractBamFileService.calculateCoverageWithN(abstractMergedBamFile)
+        assertSave(abstractMergedBamFile)
     }
 
     private double safePercentCalculation(double numerator, double denominator) {

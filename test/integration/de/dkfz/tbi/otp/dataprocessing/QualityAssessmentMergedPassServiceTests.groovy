@@ -95,7 +95,7 @@ class QualityAssessmentMergedPassServiceTests {
         assertNotNull(processedMergedBamFile.save([flush: true]))
 
         qualityAssessmentMergedPass = new QualityAssessmentMergedPass(
-                        processedMergedBamFile: processedMergedBamFile,
+                        abstractMergedBamFile: processedMergedBamFile,
                         identifier: 0,
                         description: 'QualtiyAssessmentMergedPassDescription'
                         )
@@ -182,7 +182,7 @@ class QualityAssessmentMergedPassServiceTests {
     void testAllQualityAssessmentMergedPasses() {
         assertEquals([qualityAssessmentMergedPass], qualityAssessmentMergedPassService.allQualityAssessmentMergedPasses(processedMergedBamFile))
         QualityAssessmentMergedPass qualityAssessmentMergedPass1 = new QualityAssessmentMergedPass(
-                        processedMergedBamFile: processedMergedBamFile,
+                        abstractMergedBamFile: processedMergedBamFile,
                         identifier: 1,
                         description: 'QualtiyAssessmentMergedPassDescription'
                         )
@@ -199,7 +199,7 @@ class QualityAssessmentMergedPassServiceTests {
     void testLatestQualityAssessmentMergedPass() {
         assertEquals(qualityAssessmentMergedPass, qualityAssessmentMergedPassService.latestQualityAssessmentMergedPass(processedMergedBamFile))
         QualityAssessmentMergedPass qualityAssessmentMergedPass1 = new QualityAssessmentMergedPass(
-                        processedMergedBamFile: processedMergedBamFile,
+                        abstractMergedBamFile: processedMergedBamFile,
                         identifier: 1,
                         description: 'QualtiyAssessmentMergedPassDescription'
                         )

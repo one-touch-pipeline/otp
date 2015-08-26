@@ -16,7 +16,7 @@ class ParseMergedQaStatisticsJob extends AbstractJobImpl {
         QualityAssessmentMergedPass pass = QualityAssessmentMergedPass.get(passId)
         QualityAssessmentMergedPass.withTransaction {
             abstractQualityAssessmentService.parseQaStatistics(pass)
-            abstractQualityAssessmentService.saveCoverageToProcessedMergedBamFile(pass)
+            abstractQualityAssessmentService.saveCoverageToAbstractMergedBamFile(pass)
         }
     }
 }
