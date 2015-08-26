@@ -217,11 +217,16 @@ class SeqTrackService {
 
     public void setRunReadyForFastqc(Run run) {
         def unknown = SeqTrack.DataProcessingState.UNKNOWN
-        SeqTrack.findAllByRunAndFastqcState(run, unknown).each { SeqTrack seqTrack ->
-            if (fastqcReady(seqTrack)) {
-                seqTrack.fastqcState = SeqTrack.DataProcessingState.NOT_STARTED
-                assert(seqTrack.save(flush: true))
+        SeqTrack.findAllByRunAndFastqcState(run, unknown).findAll {
+            //use only seqtracks with finished Data installation workflow
+            DataFile.findAllBySeqTrack(it).every {
+                it.runSegment.filesStatus == RunSegment.FilesStatus.FILES_CORRECT
             }
+        }.each { SeqTrack seqTrack ->
+                if (fastqcReady(seqTrack)) {
+                    seqTrack.fastqcState = SeqTrack.DataProcessingState.NOT_STARTED
+                    assert(seqTrack.save(flush: true))
+                }
         }
     }
 

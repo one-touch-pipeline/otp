@@ -1113,6 +1113,62 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assert "NoAlignmentDecider" == seqTrackService.getAlignmentDecider(project).class.simpleName
     }
 
+
+    @Test
+    void testSetRunReadyForFastqc_SeqTracksReady() {
+        DataFile dataFile = createDataFor_setRunReadyForFastqc()
+
+        seqTrackService.setRunReadyForFastqc(dataFile.run)
+        assert SeqTrack.DataProcessingState.NOT_STARTED == dataFile.seqTrack.fastqcState
+    }
+
+    @Test
+    void testSetRunReadyForFastqc_NoSeqTracksReady() {
+        DataFile dataFile = createDataFor_setRunReadyForFastqc()
+        dataFile.seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
+        assert dataFile.save(flush: true, failOnError: true)
+
+        seqTrackService.setRunReadyForFastqc(dataFile.run)
+        assert SeqTrack.DataProcessingState.FINISHED == dataFile.seqTrack.fastqcState
+    }
+
+    @Test
+    void testSetRunReadyForFastqc_MultipleSeqTracksReady() {
+        DataFile dataFile1 = createDataFor_setRunReadyForFastqc()
+        DataFile dataFile2 = createDataFor_setRunReadyForFastqc()
+        dataFile2.runSegment.run  = dataFile1.runSegment.run
+        dataFile2.run  = dataFile1.run
+        assert dataFile2.runSegment.save(flush: true, failOnError: true)
+        assert dataFile2.save(flush: true, failOnError: true)
+
+        seqTrackService.setRunReadyForFastqc(dataFile1.run)
+        assert SeqTrack.DataProcessingState.NOT_STARTED == dataFile1.seqTrack.fastqcState
+        assert SeqTrack.DataProcessingState.NOT_STARTED == dataFile2.seqTrack.fastqcState
+    }
+
+
+    private DataFile createDataFor_setRunReadyForFastqc() {
+        Run run = DomainFactory.createRun()
+        RunSegment runSegment = DomainFactory.createRunSegment(
+                run: run,
+                filesStatus: RunSegment.FilesStatus.FILES_CORRECT,
+        )
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(
+                fastqcState: SeqTrack.DataProcessingState.NOT_STARTED,
+                run: run
+        )
+        DataFile dataFile = DomainFactory.buildSequenceDataFile(
+                seqTrack: seqTrack,
+                run: runSegment.run,
+                runSegment: runSegment,
+                project: seqTrack.project
+        )
+        return dataFile
+    }
+
+
+
+
     private void setupProjectAndDataFile(String decider) {
         testData.project.alignmentDeciderBeanName = decider
         testData.project.save(failOnError: true)

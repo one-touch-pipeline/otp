@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
@@ -36,6 +37,11 @@ class DomainFactory {
             md5sum: DEFAULT_MD5_SUM,
             fileOperationStatus: FileOperationStatus.PROCESSED,
     ].asImmutable()
+
+    /**
+     * Counter to create unique names.
+     */
+    static int counter = 0
 
     /**
      * Defaults for new realms.
@@ -89,6 +95,26 @@ class DomainFactory {
         unixUser: 'otptest',
         pbsOptions: '{"-l": {nodes: "1:lsdf", walltime: "30:00"}}',
     ]
+
+
+
+    private static Object createDomainObject(Class domainClass, Map defaultProperties, Map parameterProperties) {
+        def domain = domainClass.newInstance()
+        defaultProperties.each { String key, def value ->
+            if (!parameterProperties.containsKey(key)) {
+                if (value instanceof Closure) {
+                    domain[key] = value()
+                } else {
+                    domain[key] = value
+                }
+            }
+        }
+        parameterProperties.each { String key, def value ->
+            domain[key] = value
+        }
+        assert domain.save(flush: true, failOnError: true)
+        return domain
+    }
 
     /**
      * Create a data management {@link Realm} for BioQuant with default cluster settings.
@@ -415,6 +441,96 @@ class DomainFactory {
         SnvJobResult snvJobResult = SnvJobResult.build(map)
 
         return snvJobResult
+    }
+
+    public static SeqCenter createSeqCenter(Map seqCenterProperties = [:]) {
+        return createDomainObject(SeqCenter, [
+                name   : 'seqCenterName_' + (counter++),
+                dirName: 'seqCenterDirName_' + (counter++),
+        ], seqCenterProperties)
+    }
+
+    public static SeqPlatform createSeqPlatform(Map seqPlatformProperties = [:]) {
+        return createDomainObject(SeqPlatform, [
+                name: 'seqPlatform_' + (counter++),
+        ], seqPlatformProperties)
+    }
+
+    public static Run createRun(Map runProperties = [:]) {
+        return createDomainObject(Run, [
+                name       : 'runName_' + (counter++),
+                seqCenter  : { createSeqCenter() },
+                seqPlatform: { createSeqPlatform() },
+        ], runProperties)
+    }
+
+    public static RunSegment createRunSegment(Map runSegmentProperties = [:]) {
+        return createDomainObject(RunSegment, [
+                currentFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
+                initialFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
+                filesStatus  : RunSegment.FilesStatus.FILES_CORRECT,
+                run          : { createRun() },
+                dataPath     : { TestCase.getUniqueNonExistentPath().path },
+                mdPath       : { TestCase.getUniqueNonExistentPath().path },
+        ], runSegmentProperties)
+    }
+
+    public static Project createProject(Map projectProperties = [:]) {
+        return createDomainObject(Project, [
+                name                    : 'project_' + (counter++),
+                dirName                 : 'projectDirName_' + (counter++),
+                realmName               : 'realmName_' + (counter++),
+                alignmentDeciderBeanName: 'DUMMY_BEAN_NAME'
+        ], projectProperties)
+    }
+
+    public static Individual createIndividual(Map individualProperties = [:]) {
+        return createDomainObject(Individual, [
+                pid         : 'pid_' + (counter++),
+                mockPid     : 'mockPid_' + (counter++),
+                mockFullName: 'mockFullName_' + (counter++),
+                type        : Individual.Type.REAL,
+                project     : { createProject() },
+        ], individualProperties)
+    }
+
+    public static SampleType createSampleType(Map sampleTypeProperties = [:]) {
+        return createDomainObject(SampleType, [
+                name: 'sampleTypeName_' + (counter++),
+        ], sampleTypeProperties)
+    }
+
+    public static Sample createSample(Map sampleProperties = [:]) {
+        return createDomainObject(Sample, [
+                individual: { createIndividual() },
+                sampleType: { createSampleType() },
+        ], sampleProperties)
+    }
+
+    public static SeqType createSeqType(Map seqTypeProperties = [:]) {
+        return createDomainObject(SeqType, [
+                name         : 'seqTypeName_' + (counter++),
+                libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE,
+                dirName      : 'seqTypeDirName_' + (counter++),
+        ], seqTypeProperties)
+    }
+
+    public static SoftwareTool createSoftwareTool(Map softwareToolProperties = [:]) {
+        return createDomainObject(SoftwareTool, [
+                programName: 'softwareToolProgramName_' + (counter++),
+                type       : SoftwareTool.Type.ALIGNMENT,
+        ], softwareToolProperties)
+    }
+
+    public static SeqTrack createSeqTrack(Map seqTrackProperties = [:]) {
+        return createDomainObject(SeqTrack, [
+                laneId         : 'laneId_' + counter++,
+                seqType        : { createSeqType() },
+                sample         : { createSample() },
+                pipelineVersion: { createSoftwareTool() },
+                run            : { createRun() },
+                seqPlatform    : { createSeqPlatform() },
+        ], seqTrackProperties)
     }
 
     public static SeqTrack buildSeqTrackWithDataFile(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:]) {
