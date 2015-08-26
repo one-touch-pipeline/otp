@@ -1,9 +1,14 @@
 package de.dkfz.tbi.otp.utils
 
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormatter
+
 class HelperUtils {
     static Random random = new Random()
+    static DateTimeFormatter formatter = DateTimeFormat.forPattern('yyyy-MM-dd-HH-mm-ss-SSSZ')
 
     public static String getUniqueString() {
-        return "${System.currentTimeMillis()}-${sprintf('%016X', random.nextLong())}"
+        return "${formatter.print(new DateTime())}-${sprintf('%016X', random.nextLong())}"
     }
 }
