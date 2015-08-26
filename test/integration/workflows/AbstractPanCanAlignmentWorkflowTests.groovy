@@ -495,10 +495,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     }
 
     void setPluginVersion(String pluginVersion) {
-        ExternalScript externalScript = CollectionUtils.exactlyOneElement(ExternalScript.findAll())
         RoddyWorkflowConfig config = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAll())
-        externalScript.scriptVersion = pluginVersion
-        externalScript.save(flush: true, failOnError: true)
         config.pluginVersion = pluginVersion
         config.save(flush: true, failOnError: true)
     }
