@@ -28,6 +28,10 @@ class ProcessingError {
      */
     String stackTraceIdentifier
 
+    static mapping = {
+        errorMessage type: 'text'
+    }
+
     static constraints = {
         processingStepUpdate(nullable: false, validator: { val ->
             return val.state == ExecutionState.FAILURE

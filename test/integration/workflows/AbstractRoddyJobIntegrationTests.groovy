@@ -57,7 +57,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractPanCanAlignmentWorkflowTe
 
         assert shouldFail(RuntimeException) {
             execute()
-        }.contains("Roddy output contains no information about output directories")
+        } =~ /The project configuration .* could not be found./
 
         // repair
 
