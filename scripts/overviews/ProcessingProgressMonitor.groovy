@@ -729,6 +729,18 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
         return
     }
 
+    //finished aligned
+    output << "\nFinshed aligned samples: "
+    seqTracksFinishedAlignment.collect {
+      "${INDENT}${INDENT}${it} ${it.project}"
+    }.sort { it }.each { output << it }
+
+    if (!allFinished) {
+        output << "\nnot all workflows are finished till alignment"
+    }
+
+
+
     //snv
     Collection<SeqTrack> seqTracksFinishedSnv = handleStateMapSnv(seqTracksFinishedAlignment)
 
@@ -738,13 +750,13 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
     }
 
     //end
-    output << "\nFinshed samples: "
+    output << "\nFinshed snv sample pairs: "
     seqTracksFinishedSnv.collect {
-        "        ${it}   ${it.project}"
+        "${INDENT}${INDENT}${it} ${it.project}"
     }.sort { it }.each { output << it }
 
     if (!allFinished) {
-        output << "\nnot all workflows are finished"
+        output << "\nnot all workflows are finished inclusive snv"
     }
 }
 
