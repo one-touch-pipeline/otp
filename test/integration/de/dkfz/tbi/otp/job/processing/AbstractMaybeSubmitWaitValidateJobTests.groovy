@@ -23,26 +23,34 @@ class AbstractMaybeSubmitWaitValidateJobTests extends TestCase {
     }
 
     @Test
-    void testCreateExceptionString_AllFine() {
+    void testCreateExceptionString() {
         Realm realm = DomainFactory.createRealmDataProcessingDKFZ()
         assert realm.save([flush: true, failOnError: true])
 
         ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep()
         assert processingStep
 
-        ClusterJob clusterJob = clusterJobService.createClusterJob(realm, "0000", processingStep)
-        assert clusterJob
+        ClusterJob clusterJob1 = clusterJobService.createClusterJob(realm, "1111", processingStep)
+        ClusterJobIdentifier identifier1 = new ClusterJobIdentifierImpl(clusterJob1)
 
-        ClusterJobIdentifier identifier = new ClusterJobIdentifierImpl(clusterJob)
+        ClusterJob clusterJob2 = clusterJobService.createClusterJob(realm, "2222", processingStep)
+        ClusterJobIdentifier identifier2 = new ClusterJobIdentifierImpl(clusterJob2)
 
-        Map failedClusterJobs = [(identifier): "Failed."]
-        List finishedClusterJobs = [identifier]
+        Map failedClusterJobs = [(identifier2): "Failed2.", (identifier1): "Failed1."]
+        List finishedClusterJobs = [identifier2, identifier1]
 
-        assert """
-1 of 1 cluster jobs failed:
-${identifier}: Failed.
-${AbstractOtpJob.getLogFileNames(clusterJob)}
+        String expected = """
+2 of 2 cluster jobs failed:
+${identifier1}: Failed1.
+${AbstractOtpJob.getLogFileNames(clusterJob1)}
 
-""" == abstractMaybeSubmitWaitValidateJob.createExceptionString(failedClusterJobs, finishedClusterJobs)
+${identifier2}: Failed2.
+${AbstractOtpJob.getLogFileNames(clusterJob2)}
+
+"""
+
+        String actual = abstractMaybeSubmitWaitValidateJob.createExceptionString(failedClusterJobs, finishedClusterJobs)
+
+        assert expected == actual
     }
 }

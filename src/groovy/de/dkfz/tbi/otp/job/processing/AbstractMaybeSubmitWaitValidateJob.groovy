@@ -30,7 +30,9 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
         """
 ${failedClusterJobs.size()} of ${finishedClusterJobs.size()} cluster jobs failed:
 ${
-    failedClusterJobs.collect { ClusterJobIdentifier clusterJobIdentifier, String reason ->
+    failedClusterJobs.sort(
+            { ClusterJobIdentifier identifier1, ClusterJobIdentifier identifier2 -> identifier1.clusterJobId <=> identifier2.clusterJobId } as Comparator
+    ).collect { ClusterJobIdentifier clusterJobIdentifier, String reason ->
         "${clusterJobIdentifier}: ${reason}\n${getLogFilePaths(ClusterJob.findByClusterJobIdentifier(clusterJobIdentifier))}\n"
     }.join("\n")
 }
