@@ -136,9 +136,9 @@ def checkProcessesForObject = { String workflow, List noProcess, List processWit
         output << "${INDENT}An error occur for the object: ${valueToShow(object)}"
         output << "${INDENT}${INDENT}object class/id: ${object.class} / ${object.id}"
         output << "${INDENT}${INDENT}the OTP link: https://otp.dkfz.de/otp/processes/process/${lastProcess.id}"
-        output << "${INDENT}${INDENT}the error: ${ps.latestProcessingStepUpdate?.error?.errorMessage?.replaceAll('\n', "\n${INDENT}${INDENT}${INDENT}")}"
+        output << "${INDENT}${INDENT}the error: ${ps.latestProcessingStepUpdate?.error?.errorMessage?.replaceAll('\n', "\n${INDENT}${INDENT}${INDENT}${INDENT}${INDENT}")}"
         if (ps.process.comment) {
-            output << "${INDENT}${INDENT}the comment (${ps.process.commentDate.format("yyyy-MM-dd")}): ${ps.process.comment.replaceAll('\n', "\n${INDENT}${INDENT}${INDENT}")}"
+            output << "${INDENT}${INDENT}the comment (${ps.process.commentDate.format("yyyy-MM-dd")}): ${ps.process.comment.replaceAll('\n', "\n${INDENT}${INDENT}${INDENT}${INDENT}${INDENT}")}"
         }
         if (update == null) {
             output << "${INDENT}${INDENT}no update available: Please inform a maintainer\n"
@@ -386,6 +386,7 @@ def handleStateMapRoddy = {Map<AbstractMergedBamFile.FileOperationStatus, Collec
                 break
             case AbstractMergedBamFile.FileOperationStatus.INPROGRESS:
                 showList('running (in_progress)', values, valueToShow)
+                checkProcessesForObjects(workflow, values, valueToShow, objectToCheck)
                 break
             case AbstractMergedBamFile.FileOperationStatus.PROCESSED:
                 if(showFinishedEntries) {
@@ -411,32 +412,30 @@ def handleStateMapSnv = { List next ->
     List unknownThreshold = []
     List noPairFound = []
 
-    next.each { AbstractMergedBamFile pMBF ->
+    next.each { AbstractMergedBamFile ambf ->
         List samplePairsForBamFile = SamplePair.createCriteria().list {
-            eq('individual', pMBF.individual)
-            eq('seqType', pMBF.seqType)
             or {
-                eq('sampleType1', pMBF.sampleType)
-                eq('sampleType2', pMBF.sampleType)
+                eq('mergingWorkPackage1', ambf.mergingWorkPackage)
+                eq('mergingWorkPackage2', ambf.mergingWorkPackage)
             }
         }
         if (samplePairsForBamFile) {
             samplePairs += samplePairsForBamFile
-        } else if (!SampleTypePerProject.findByProjectAndSampleType(pMBF.project, pMBF.sampleType)) {
-            unknownDiseaseStatus << "${pMBF.project} ${pMBF.sampleType.name}"
-        } else if (SampleTypePerProject.findByProjectAndSampleType(pMBF.project, pMBF.sampleType).category == SampleType.Category.IGNORED) {
-            ignoredDiseaseStatus << "${pMBF.project} ${pMBF.sampleType.name}"
-        } else if (!ProcessingThresholds.findByProjectAndSampleTypeAndSeqType(pMBF.project, pMBF.sampleType, pMBF.seqType)) {
-            unknownThreshold << "${pMBF.project} ${pMBF.sampleType.name} ${pMBF.seqType}"
+        } else if (!SampleTypePerProject.findByProjectAndSampleType(ambf.project, ambf.sampleType)) {
+            unknownDiseaseStatus << "${ambf.project} ${ambf.sampleType.name}"
+        } else if (SampleTypePerProject.findByProjectAndSampleType(ambf.project, ambf.sampleType).category == SampleType.Category.IGNORED) {
+            ignoredDiseaseStatus << "${ambf.project} ${ambf.sampleType.name}"
+        } else if (!ProcessingThresholds.findByProjectAndSampleTypeAndSeqType(ambf.project, ambf.sampleType, ambf.seqType)) {
+            unknownThreshold << "${ambf.project} ${ambf.sampleType.name} ${ambf.seqType}"
         } else {
-            noPairFound << "${pMBF.project} ${pMBF.individual} ${pMBF.sampleType.name} ${pMBF.seqType}"
+            noPairFound << "${ambf.project} ${ambf.individual} ${ambf.sampleType.name} ${ambf.seqType}"
         }
     }
 
     showUniqueList('For the following project sample type combination the sample type was not classified as disease or control', unknownDiseaseStatus)
     showUniqueList('For the following project sample type combination the sample type category is set to IGNORED', ignoredDiseaseStatus)
     showUniqueList('For the following project sample type seqType combination no threshold is defined', unknownThreshold)
-    showUniqueList('For the following PMBF no SamplePair could be found', noPairFound)
+    showUniqueList('For the following AMBF no SamplePair could be found', noPairFound)
 
     if(samplePairs) {
         samplePairs.unique().each { SamplePair samplePair ->
@@ -732,7 +731,7 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
     //finished aligned
     output << "\nFinshed aligned samples: "
     seqTracksFinishedAlignment.collect {
-      "${INDENT}${INDENT}${it} ${it.project}"
+        "${INDENT}${INDENT}${it} ${it.project}"
     }.sort { it }.each { output << it }
 
     if (!allFinished) {
@@ -910,38 +909,6 @@ if (allProcessed) {
                     select
                         seqTrack.id
                     from
-                        SamplePair samplePair,
-                        SeqTrack seqTrack
-                    where
-                        samplePair.processingStatus = '${SamplePair.ProcessingStatus.NEEDS_PROCESSING}'
-                        and samplePair.individual = seqTrack.sample.individual
-                        and samplePair.seqType = seqTrack.seqType
-                        and (
-                            samplePair.sampleType1 = seqTrack.sample.sampleType
-                            or samplePair.sampleType2 = seqTrack.sample.sampleType
-                        )
-                )
-            ) or (
-                seqTrack.id in (
-                    select
-                        alignmentPass.seqTrack.id
-                    from
-                        SnvCallingInstance snvCallingInstance,
-                        AlignmentPass alignmentPass
-                    where
-                        snvCallingInstance.processingState = '${SnvProcessingStates.IN_PROGRESS}'
-                        and snvCallingInstance.sampleType1BamFile.withdrawn = false
-                        and snvCallingInstance.sampleType2BamFile.withdrawn = false
-                        and (
-                            alignmentPass.workPackage = snvCallingInstance.sampleType1BamFile.mergingPass.mergingSet.mergingWorkPackage
-                            or alignmentPass.workPackage = snvCallingInstance.sampleType2BamFile.mergingPass.mergingSet.mergingWorkPackage
-                        )
-                )
-            ) or (
-                seqTrack.id in (
-                    select
-                        seqTrack.id
-                    from
                         RoddyBamFile roddyBamFile join roddyBamFile.seqTracks seqTrack
                     where
                         roddyBamFile.fileOperationStatus <> '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}'
@@ -950,6 +917,30 @@ if (allProcessed) {
             )
         )
     """)
+
+    //collect waiting SamplePairs
+    SamplePair.findAllByProcessingStatus(SamplePair.ProcessingStatus.NEEDS_PROCESSING).each {SamplePair samplePair ->
+        [samplePair.mergingWorkPackage1, samplePair.mergingWorkPackage2].each { MergingWorkPackage mergingWorkPackage ->
+            seqTracks.addAll(mergingWorkPackage.findMergeableSeqTracks())
+        }
+    }
+
+    //collect running SnvCallingInstances
+    SnvCallingInstance.createCriteria().list{
+        eq('processingState', SnvProcessingStates.IN_PROGRESS)
+        sampleType1BamFile {
+            eq('withdrawn', false)
+        }
+        sampleType2BamFile {
+            eq('withdrawn', false)
+        }
+    }.each { SnvCallingInstance snvCallingInstance ->
+        [snvCallingInstance.sampleType1BamFile, snvCallingInstance.sampleType2BamFile].each {AbstractMergedBamFile abstractMergedBamFile ->
+            seqTracks.addAll(abstractMergedBamFile.containedSeqTracks)
+        }
+    }
+
+
 
     MergingWorkPackage.executeQuery("""
         select
