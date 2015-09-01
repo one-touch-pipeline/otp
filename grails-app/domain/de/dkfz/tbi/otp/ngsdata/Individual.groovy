@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.utils.IdCompareHelper
 
 class Individual {
 
@@ -137,5 +138,15 @@ order by type.name asc, type.libraryLayout
 
     static mapping = {
         project index: "individual_project_idx"
+    }
+
+    //TODO: After grails update use more generic solution, see OTP-1710
+    boolean equals(o) {
+        return IdCompareHelper.equals(this, o)
+    }
+
+    //TODO: After grails update use more generic solution, see OTP-1710
+    int hashCode() {
+        return IdCompareHelper.hashCode(this)
     }
 }
