@@ -2,12 +2,17 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 
 println "\n\nretrigger snv for pids: "
 def samplePairs = SamplePair.withCriteria {
-    individual {
-        'in'('pid', [
+    mergingWorkPackage1 {
+        sample {
+            individual {
+                'in'('pid', [
 
-        ])
+                ])
+            }
+        }
     }
 }
+
 
 //show all
 samplePairs.each { println "${it}" }
