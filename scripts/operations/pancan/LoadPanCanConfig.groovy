@@ -30,24 +30,6 @@ String pluginVersionToUse = ''
 String configFilePath = ''
 
 
-/**
- * name of reference genome. Currently the following values possible:
- * - hg19: human reference genome hg19
- * - hs37d5: human reference genome hs37d5
- * - hs37d5+mouse:  human-mouse reference genome from CO
- * - GRCm38mm10: mouse reference genome
- * - hs37d5_GRCm38mm:  human (hs37d5) - mouse (GRCm38mm) reference genome
- *
- * For a full list, execute "de.dkfz.tbi.otp.ngsdata.ReferenceGenome.list()*.name" on a groovy web console
- */
-String refGenName = ''
-
-//for example: hs37d5.fa.chrLenOnlyACGT_realChromosomes.tab
-String statSizeFileName = ''
-
-
-String seqTypeName = "WHOLE_GENOME"
-
 //-----------------------
 
 String panCanAlignmentDeciderBeanName = 'panCanAlignmentDecider'
@@ -56,8 +38,6 @@ Project.withTransaction {
     assert projectName
     assert pluginVersionToUse
     assert configFilePath
-    assert refGenName
-    assert statSizeFileName
 
     assert configFilePath.endsWith('xml')
     assert new File(configFilePath).exists()
@@ -80,23 +60,4 @@ Project.withTransaction {
     assert ctx[panCanAlignmentDeciderBeanName]
     project.alignmentDeciderBeanName = panCanAlignmentDeciderBeanName
     assert project.save(flush: true, failOnError: true)
-
-    ReferenceGenome referenceGenome = CollectionUtils.exactlyOneElement(ReferenceGenome.findAllByName(refGenName))
-
-    SeqType seqType = CollectionUtils.exactlyOneElement(SeqType.findAllByNameAndLibraryLayout(seqTypeName, SeqType.LIBRARYLAYOUT_PAIRED))
-
-    ReferenceGenomeProjectSeqType oldReferenceGenomeProjectSeqType = ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType)
-    if (oldReferenceGenomeProjectSeqType) {
-        oldReferenceGenomeProjectSeqType.deprecatedDate = new Date()
-        assert oldReferenceGenomeProjectSeqType.save(flush: true, failOnError: true)
-    }
-
-    ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = new ReferenceGenomeProjectSeqType(
-            project:  project,
-            seqType: seqType,
-            referenceGenome: referenceGenome,
-            sampleType: null,
-            statSizeFileName: statSizeFileName,
-    )
-    assert referenceGenomeProjectSeqType.save(flush: true, failOnError: true)
 }

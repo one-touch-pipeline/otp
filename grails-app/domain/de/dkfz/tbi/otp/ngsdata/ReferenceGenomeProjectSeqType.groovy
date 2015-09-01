@@ -38,8 +38,12 @@ class ReferenceGenomeProjectSeqType {
         project: Project,
         seqType: SeqType,
         sampleType: SampleType,
-        referenceGenome: ReferenceGenome
     ]
+    Project project
+    SeqType seqType
+    SampleType sampleType
+
+    ReferenceGenome referenceGenome
 
     static constraints = {
         // there must be no 2 current (not deprecated) reference genomes
@@ -63,7 +67,7 @@ class ReferenceGenomeProjectSeqType {
     }
 
     String toString() {
-        return "deprecatedDate: ${deprecatedDate}, project: ${project}, seqType: ${seqType}, sampleType: ${sampleType}, referenceGenome: ${referenceGenome}"
+        return "RGPST ${id}: [${deprecatedDate ? "deprecated ${deprecatedDate}" : "not deprecated"}] (${project.name} ${seqType.name} ${seqType.libraryLayout} sampleType ${sampleType?.name}) -> ${referenceGenome.name} statSizeFileName ${statSizeFileName}"
     }
 
     static mapping = {
