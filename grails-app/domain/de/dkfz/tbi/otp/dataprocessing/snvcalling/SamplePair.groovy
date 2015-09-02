@@ -121,12 +121,12 @@ class SamplePair {
     }
 
     Individual getIndividual() {
-        assert mergingWorkPackage1.individual == mergingWorkPackage2.individual
+        assert mergingWorkPackage1.individual.id == mergingWorkPackage2.individual.id
         return mergingWorkPackage1.individual
     }
 
     SeqType getSeqType() {
-        assert mergingWorkPackage1.seqType == mergingWorkPackage2.seqType
+        assert mergingWorkPackage1.seqType.id == mergingWorkPackage2.seqType.id
         return mergingWorkPackage1.seqType
     }
 
