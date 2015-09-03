@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.IdCompareHelper
 
 
 class SeqType {
@@ -74,15 +73,4 @@ class SeqType {
                 SeqType.findAllByAliasAndLibraryLayout(SeqTypeNames.EXOME.seqTypeName, SeqType.LIBRARYLAYOUT_PAIRED)
         )
     }
-
-    //TODO: After grails update use more generic solution, see OTP-1710
-    boolean equals(o) {
-        return IdCompareHelper.equals(this, o)
-    }
-
-    //TODO: After grails update use more generic solution, see OTP-1710
-    int hashCode() {
-        return IdCompareHelper.hashCode(this)
-    }
-
 }
