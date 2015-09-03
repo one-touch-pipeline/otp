@@ -619,7 +619,7 @@ def showSeqTracksRoddy = {List<SeqTrack> seqTracksToAlign ->
     Map<Boolean, Collection<MergingWorkPackage>> mergingWorkPackagesByNeedsProcessing =
             mergingWorkPackages.groupBy {it.needsProcessing}
 
-    allFinished &= map.keySet() == [false] as Set
+    allFinished &= mergingWorkPackagesByNeedsProcessing.keySet() == [false] as Set
     Collection<MergingWorkPackage> mergingWorkPackagesInProcessing = handleStateMapNeedsProcessing(mergingWorkPackagesByNeedsProcessing, {
         "${it}"
     })
