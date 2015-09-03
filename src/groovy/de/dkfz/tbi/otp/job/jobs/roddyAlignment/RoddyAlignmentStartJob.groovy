@@ -51,7 +51,7 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
                     'AND withdrawn = false ' +
                 ') ' +
                 'AND sample.individual.project.processingPriority >= :minPriority ' +
-                'ORDER BY sample.individual.project.processingPriority DESC',
+                'ORDER BY sample.individual.project.processingPriority DESC, mwp.id ASC',
                 [
                         processed: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                         minPriority: minPriority,
