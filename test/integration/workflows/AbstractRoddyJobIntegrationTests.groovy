@@ -2,6 +2,7 @@ package workflows
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.utils.HelperUtils
 import org.junit.Ignore
 
@@ -85,7 +86,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractPanCanAlignmentWorkflowTe
         // this will make one of pbs jobs fail
         MergingWorkPackage workPackage = firstBamFile.workPackage
         File statDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(workPackage.project, workPackage.referenceGenome)
-        File statFile = new File(statDir, "invalid-stat-${HelperUtils.getUniqueString()}.tab")
+        File statFile = new File(statDir, DomainFactory.DEFAULT_TAB_FILE_NAME)
         statFile << HelperUtils.getUniqueString()
         workPackage.refresh()
         workPackage.statSizeFileName = statFile.name
