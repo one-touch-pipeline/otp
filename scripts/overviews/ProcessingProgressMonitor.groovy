@@ -489,7 +489,7 @@ def showSeqTracksOtp = {List<SeqTrack> seqTracksToAlign ->
     allFinished &= seqTracksByAlignmentState.keySet() == [SeqTrack.DataProcessingState.FINISHED] as Set
     Collection<SeqTrack> seqTracksFinishedConveyBwaAlignmentWorkflow =
             handleStateMap(seqTracksByAlignmentState, "ConveyBwaAlignmentWorkflow",
-                    { "${it.sample}  ${it.seqType}  ${it.run}  ${it.laneId}  ${it.project}  id: ${it.id}" }, {
+                    { "${it.sample}  ${it.seqType}  ${it.run}  ${it.laneId}  ${it.project}  ilse: ${it.ilseId}  id: ${it.id}" }, {
                 AlignmentPass.findAllBySeqTrack(it).find { it2 -> it2.isLatestPass()}
             })
 
@@ -524,7 +524,7 @@ def showSeqTracksOtp = {List<SeqTrack> seqTracksToAlign ->
     allFinished &= processedBamFilesByStatus.keySet() == [AbstractBamFile.State.PROCESSED] as Set
     Collection<ProcessedBamFile> processedBamFilesFinishedCreateMergingSetWorkflow = handleStateMap(processedBamFilesByStatus, "createMergingSetWorkflow", {
         def seqTrack = it.alignmentPass.seqTrack
-        "${seqTrack.sample}  ${seqTrack.seqType}  ${seqTrack.run}  ${seqTrack.laneId}  ${seqTrack.project}  id: ${it.id}"
+        "${seqTrack.sample}  ${seqTrack.seqType}  ${seqTrack.run}  ${seqTrack.laneId}  ${seqTrack.project}  ilse: ${seqTrack.ilseId}  id: ${it.id}"
     })
 
     if (!processedBamFilesFinishedCreateMergingSetWorkflow){
@@ -681,7 +681,7 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
 
     allFinished &= seqTracksNotWithdrawnByFastqcState.keySet() == [SeqTrack.DataProcessingState.FINISHED] as Set
     Collection<SeqTrack> seqTracksNotWithdrawnFinishedFastqcWorkflow = handleStateMap(seqTracksNotWithdrawnByFastqcState, "FastqcWorkflow", {
-        "${it.sample}  ${it.seqType}  ${it.run}  ${it.laneId}  ${it.project}  id: ${it.id}"
+        "${it.sample}  ${it.seqType}  ${it.run}  ${it.laneId}  ${it.project}  ilse: ${it.ilseId} id: ${it.id}"
     })
 
     if (!seqTracksNotWithdrawnFinishedFastqcWorkflow) {
@@ -729,7 +729,7 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
     }
 
     //finished aligned
-    output << "\nFinshed aligned samples: "
+    output << "\nFinshed aligned samples (${seqTracksFinishedAlignment.size()}): "
     seqTracksFinishedAlignment.collect {
         "${INDENT}${INDENT}${it} ${it.project}"
     }.sort { it }.each { output << it }
@@ -749,7 +749,7 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
     }
 
     //end
-    output << "\nFinshed snv sample pairs: "
+    output << "\nFinshed snv sample pairs (${seqTracksFinishedSnv.size()}): "
     seqTracksFinishedSnv.collect {
         "${INDENT}${INDENT}${it} ${it.project}"
     }.sort { it }.each { output << it }
