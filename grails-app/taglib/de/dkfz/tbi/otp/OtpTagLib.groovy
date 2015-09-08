@@ -23,7 +23,7 @@ class OtpTagLib {
      *
      * In order to use this tag, you need to require the resource "editorSwitch".
      * <code>
-     * <r:require module="editorSwitch"/>
+     * <asset:javascript src="modules/editorSwitch"/>
      * </code>
      *
      * @attr link REQUIRED The link to update the data
@@ -64,7 +64,7 @@ class OtpTagLib {
      *
      * The required JavaScript code is part of the resource "changeLog", so this one has to be required.
      * <code>
-     * <r:require module="changeLog"/>
+     * <asset:javascript src="modules/changeLog"/>
      * </code>
      *
      * @attr controller REQUIRED The controller where to fetch the changelog

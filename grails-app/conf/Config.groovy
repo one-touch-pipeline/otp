@@ -71,11 +71,15 @@ grails.web.disable.multipart=false
 // request parameters to mask when logging exceptions
 grails.exceptionresolver.params.exclude = ['password']
 
+if (!otpConfig.otp.server.url) {
+    otpConfig.otp.server.url = "http://localhost:8080"
+}
+
 // set per-environment serverURL stem for creating absolute links
 environments {
     development {
         grails.logging.jul.usebridge = true
-        grails.serverURL = "${otpConfig.otp.server.url}${appName}"
+        grails.serverURL = "${otpConfig.otp.server.url}/${appName}"
 
         // Backdoor config options for BackdoorFilter in development mode
         if (!(otpConfig.otp.security.useBackdoor instanceof ConfigObject)) {
@@ -88,10 +92,10 @@ environments {
         grails.serverURL = otpConfig.otp.server.url
     }
     WORKFLOW_TEST {
-        grails.serverURL = "http://localhost:8080/${appName}"
+        grails.serverURL = "${otpConfig.otp.server.url}/${appName}"
     }
     test {
-        grails.serverURL = "http://localhost:8080/${appName}"
+        grails.serverURL = "${otpConfig.otp.server.url}/${appName}"
     }
 }
 

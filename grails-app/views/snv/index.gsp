@@ -1,9 +1,10 @@
 <%@ page contentType="text/html;charset=UTF-8"%>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="layout" content="main" />
-<title><g:message code="otp.menu.snv" /></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="layout" content="main" />
+    <title><g:message code="otp.menu.snv" /></title>
+    <asset:javascript src="pages/snv/index/snv.js"/>
 </head>
 <body>
     <div class="body">
@@ -70,11 +71,11 @@
                     ] }"
                         id="individualsPerProject" />
         </div>
-     <r:script>
+     <asset:script>
       $(function() {
             $.otp.Snv.registerIndividualIds();
         });
-    </r:script>
+    </asset:script>
     </div>
 </body>
 </html>

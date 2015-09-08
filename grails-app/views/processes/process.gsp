@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="processes.process.title.listOfProcessingSteps" args="${ [id] }"/> <g:message code="processes.process.title.workflow" args="${ [name] }"/></title>
-    <r:require module="workflows"/>
+    <asset:javascript src="modules/workflows"/>
 </head>
 <body>
     <div class="body">
@@ -45,12 +45,12 @@
                 ]}" id="processOverviewTable"/>
             </div>
         </div>
-        <g:javascript>
+        <asset:script type="text/javascript">
             $(document).ready(function() {
                 $.otp.workflows.registerProcessingStep("#processOverviewTable", ${id});
                 $.otp.initCommentBox(${id}, "#processCommentBox");
             });
-        </g:javascript>
+        </asset:script>
     </div>
 </body>
 </html>

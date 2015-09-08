@@ -72,7 +72,7 @@
         <div>
         <button id="cancelShutdown">Cancel Shutdown</button><button id="shutdownApplication">Stop Application Context</button>
         </div>
-        <r:script>
+        <asset:script>
         $("#cancelShutdown").click(function () {
             $.getJSON("${g.createLink(action: 'cancelShutdown')}", function (data) {
                 if (data.success === true) {
@@ -92,7 +92,7 @@
                 });
             }
         });
-        </r:script>
+        </asset:script>
     </div>
 </body>
 </html>

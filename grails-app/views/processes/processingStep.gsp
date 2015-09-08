@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="processes.processingStep.title" args="${ [step.jobDefinition.name, step.id] }"/></title>
-    <r:require module="workflows"/>
+    <asset:javascript src="modules/workflows"/>
 </head>
 <body>
     <div class="body_grow">
@@ -84,16 +84,16 @@
                 'workflow.processingstep.update.table.headers.error'
             ]}" id="processingStepUpdatesList"/>
     </div>
-    <r:script>
+    <asset:script>
        $(document).ready(function() {
             $.otp.workflows.processingStep.register('#processingStepUpdatesList', '#inputParametersList', '#outputParametersList', ${step.id});
         });
-    </r:script>
+    </asset:script>
     </div>
 </body>
-<r:script>
+<asset:script>
     $(function() {
         $.otp.growBodyInit(380);
     });
-</r:script>
+</asset:script>
 </html>

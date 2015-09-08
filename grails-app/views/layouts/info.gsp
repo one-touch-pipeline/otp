@@ -2,7 +2,8 @@
 <head>
 <title><g:layoutTitle default="OTP"/></title>
 <g:layoutHead/>
-<r:require module="info"/>
+    <asset:javascript src="modules/info.js"/>
+    <asset:stylesheet src="modules/info.css"/>
 </head>
 
 <body>

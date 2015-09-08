@@ -3,8 +3,10 @@
 <head>
     <meta name="layout" content="main"/>
     <title><g:message code="otp.welcome.title"/></title>
-    <r:require module="lightbox"/>
-    <r:require module="graph"/>
+    <asset:javascript src="modules/lightbox"/>
+    <asset:stylesheet src="modules/lightbox"/>
+    <asset:javascript src="modules/graph"/>
+    <asset:javascript src="pages/home/index/projectOverview.js"/>
 </head>
 <body>
     <div class="body">
@@ -56,11 +58,11 @@
             </div>
         </div>
     </div>
-    <r:script>
+    <asset:script type="text/javascript">
      $(function() {
         $.otp.projectOverviewHome.register();
         $.otp.graph.overview.init();
          });
-    </r:script>
+    </asset:script>
 </body>
 </html>

@@ -4,16 +4,17 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="layout" content="main" />
 <title><g:message code="projectProgress.progress.title" /></title>
+    <asset:javascript src="pages/projectProgress/progress/progress.js"/>
 </head>
 <body>
   <div class="body">
     <form class="blue_label" id="projectsGroupbox">
         <span class="blue_label">
-            <g:message code="search.from.date"/>:<g:datePicker name="startDate" value="${startDate}" precision="day" years="${2010..Calendar.getInstance().get(Calendar.YEAR)}"/>
+            <g:message code="search.from.date"/>:<input type="text" class="datePicker" id="startDate" value="${startDate}">
         </span>
         <br>
         <span class="blue_label">
-            <g:message code="search.to.date"/>:<g:datePicker name="endDate" value="${endDate}" precision="day" years="${2010..Calendar.getInstance().get(Calendar.YEAR)}"/>
+            <g:message code="search.to.date"/>:<input type="text" class="datePicker" id="endDate" value="${endDate}">
         </span>
         <g:select class="projectSelectMultiple blue_label"
             name="projects"
@@ -34,10 +35,10 @@
 </div>
 </div>
 
-<r:script>
+<asset:script type="text/javascript">
         $(function() {
             $.otp.projectProgressTable.registerProjectProgressId();
     });
-</r:script>
+</asset:script>
 </body>
 </html>

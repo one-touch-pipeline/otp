@@ -4,9 +4,9 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
 <title>${ind.mockFullName}</title>
-<r:require module="editorSwitch"/>
-<r:require module="editSamples"/>
-<r:require module="changeLog"/>
+    <asset:javascript src="modules/editorSwitch"/>
+    <asset:javascript src="modules/editSamples"/>
+    <asset:javascript src="modules/changeLog"/>
 </head>
 <body>
     <div class="body_grow">
@@ -146,10 +146,10 @@
         </g:form>
     </div>
 </body>
-<r:script>
+<asset:script>
     $(function() {
         $.otp.growBodyInit(240);
         $.otp.initCommentBox(${ind.id}, "#individualCommentBox");
     });
-</r:script>
+</asset:script>
 </html>

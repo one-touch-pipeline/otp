@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="processes.plan.title" args="${ [failed ? 'failed' : '', name] }" /></title>
-    <r:require module="workflows"/>
+    <asset:javascript src="modules/workflows"/>
 </head>
 <body>
     <div class="body">
@@ -14,7 +14,7 @@
         </div>
         <h1><g:message code="processes.plan.title" args="${ [failed ? 'failed' : '', name] }" /></h1>
         <div>
-            <g:img dir="images/status" file="${enabled ? 'green.png' : 'grey.png'}" style="vertical-align: middle"/>
+            <g:img dir="assets/status" file="${enabled ? 'green.png' : 'grey.png'}" style="vertical-align: middle"/>
             <g:if test="${enabled}">
                 <g:message code="processes.plan.workflowIsEnabled"/>
             </g:if>
@@ -55,11 +55,11 @@
                 ]}" id="workflowOverviewTable"/>
             </div>
         </div>
-        <g:javascript>
+        <asset:script type="text/javascript">
             $(document).ready(function() {
                 $.otp.workflows.registerProcesses("#workflowOverviewTable", ${id}, ${failed ? 'true' : 'false'});
             });
-        </g:javascript>
+        </asset:script>
     </div>
 </body>
 </html>

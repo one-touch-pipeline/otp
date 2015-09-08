@@ -4,7 +4,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
         <title><g:message code="user.administration.createUser"/></title>
-        <r:require module="userAdministration"/>
+        <asset:javascript src="modules/userAdministration"/>
     </head>
 <body>
     <div class="body">
@@ -52,10 +52,10 @@
         </div>
         </form>
     </div>
-    <r:script>
+    <asset:script>
         $(function () {
             $.otp.userAdministration.create.register();
         });
-    </r:script>
+    </asset:script>
 </body>
 </html>

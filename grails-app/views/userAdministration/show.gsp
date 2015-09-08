@@ -3,7 +3,7 @@
     <head>
         <title><g:message code="user.administration.ui.heading.user"/></title>
         <meta name="layout" content="main" />
-        <r:require module="userAdministration"/>
+        <asset:javascript src="modules/userAdministration"/>
     </head>
     <body>
         <div class="body_grow">
@@ -149,15 +149,15 @@
                 </div>
             </div>
         </div>
-        <r:script>
+        <asset:script>
             $(function() {
                 $.otp.userAdministration.editUser.register.call($.otp.userAdministration.editUser);
             });
-        </r:script>
+        </asset:script>
     </body>
-    <r:script>
+    <asset:script>
         $(function() {
             $.otp.growBodyInit(240);
         });
-    </r:script>
+    </asset:script>
 </html>

@@ -4,7 +4,8 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="layout" content="main" />
 <title>OTP - project overview</title>
-<r:require module="graph" />
+    <asset:javascript src="modules/graph"/>
+    <asset:javascript src="pages/projectOverview/index/datatable.js"/>
 </head>
 <body>
     <div class="body">
@@ -116,12 +117,12 @@
          </div>
         </div>
     </div>
-    <r:script>
+    <asset:script>
         $(function() {
             $.otp.projectOverviewTable.register();
             $.otp.graph.project.init();
             $.otp.projectOverviewTable.updateAlignmentInformation();
         });
-    </r:script>
+    </asset:script>
 </body>
 </html>

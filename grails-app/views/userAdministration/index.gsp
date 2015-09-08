@@ -3,8 +3,9 @@
 <head>
     <title><g:message code="user.administration.header"/></title>
     <meta name="layout" content="main" />
-    <r:require module="userAdministration"/>
-    <r:require module="jqueryDatatables"/>
+    <asset:javascript src="modules/userAdministration"/>
+    <asset:javascript src="modules/jqueryDatatables"/>
+    <asset:stylesheet src="modules/jqueryDatatables"/>
 </head>
 <body>
     <div class="body">
@@ -31,10 +32,10 @@
             <g:link action="create"><g:message code="user.administration.createUser"/></g:link>
         </div>
     </div>
-    <r:script>
+    <asset:script>
         $(function() {
             $.otp.userAdministration.loadUserList();
         });
-    </r:script>
+    </asset:script>
 </body>
 </html>

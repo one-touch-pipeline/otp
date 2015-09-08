@@ -4,8 +4,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title>Crash Recovery</title>
-    <r:require module="jqueryDatatables"/>
-    <r:require module="crashRecovery"/>
+    <asset:javascript src="modules/jqueryDatatables"/>
+    <asset:stylesheet src="modules/jqueryDatatables"/>
+    <asset:javascript src="modules/crashRecovery"/>
 </head>
 <body>
     <div class="body">
@@ -48,10 +49,10 @@
             <button id="startScheduler">Start Scheduler</button>
         </div>
     </div>
-    <r:script>
+    <asset:script>
         $(function () {
             $.otp.crashRecovery.setupView();
         });
-    </r:script>
+    </asset:script>
 </body>
 </html>

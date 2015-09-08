@@ -45,9 +45,9 @@ grails.project.dependency.resolution = {
 
     plugins {
         // core plugins
-        build ":tomcat:7.0.55.2"
+        build ":tomcat:7.0.55.3"
         //compile ":tomcat:8.0.22"
-        runtime ":hibernate4:4.3.8.1"
+        runtime ":hibernate4:4.3.10"
         compile ':cache:1.1.8'
         compile ':scaffolding:2.1.2'
         compile ':asset-pipeline:2.3.9'
@@ -73,10 +73,13 @@ grails.project.dependency.resolution = {
         runtime ":jquery:1.11.1"
         runtime ":jquery-ui:1.10.4"
 
+        compile ":asset-pipeline:2.5.1"
+        provided ":less-asset-pipeline:2.3.0"
+
         // resources
-        runtime ":resources:1.2.14"
-        runtime ":page-resources:0.2.5"
-        compile ":lesscss-resources:1.3.3"
+        //runtime ":resources:1.2.14"
+        //runtime ":page-resources:0.2.5"
+        //compile ":lesscss-resources:1.3.3"
 
         test ":build-test-data:2.4.0" //http://grails.org/plugin/build-test-data
     }
@@ -99,8 +102,3 @@ codenarc.properties = {
     GrailsDomainHasEquals.enabled = false
     GrailsDomainHasToString.enabled = false
 }
-
-grails.tomcat.jvmArgs = [
-    "-Xmx1024m",
-    "-XX:MaxPermSize=256m"
-]

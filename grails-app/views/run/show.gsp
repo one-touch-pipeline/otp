@@ -153,9 +153,9 @@
     </div>
   </div>
 </body>
-<r:script>
+<asset:script>
     $(function() {
         $.otp.growBodyInit(240);
     });
-</r:script>
+</asset:script>
 </html>

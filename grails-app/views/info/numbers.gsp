@@ -2,8 +2,9 @@
 <head>
     <meta name="layout" content="info"/>
     <title><g:message code="info.numbers.title" /></title>
-    <r:require module="lightbox"/>
-    <r:require module="graph"/>
+    <asset:javascript src="modules/lightbox"/>
+    <asset:stylesheet src="modules/lightbox"/>
+    <asset:javascript src="modules/graph"/>
 </head>
 
 <body>
@@ -17,10 +18,10 @@
             <canvas id="laneCountPerDate" width="530" height="380">[No canvas support]</canvas>
         </div>
     </div>
-<r:script>
+<asset:script type="text/javascript">
     $(function() {
         $.otp.graph.info.init();
     });
-</r:script>
+</asset:script>
 </body>
 </html>

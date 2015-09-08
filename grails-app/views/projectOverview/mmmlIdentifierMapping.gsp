@@ -1,9 +1,10 @@
 <%@ page contentType="text/html;charset=UTF-8"%>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="layout" content="main" />
-<title><g:message code="projectStatistic.title" /></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="layout" content="main" />
+    <title><g:message code="projectStatistic.title" /></title>
+    <asset:javascript src="pages/projectOverview/mmmlIdentifierMapping/datatable.js"/>
 </head>
 
 <body>
@@ -18,10 +19,10 @@
                 id="overviewTableMMMLMappingId"/>
         </div>
     </div>
-    <r:script>
+    <asset:script>
         $(function() {
             $.otp.projectOverviewTable.registerMMMLMappingId();
         });
-    </r:script>
+    </asset:script>
 </body>
 </html>

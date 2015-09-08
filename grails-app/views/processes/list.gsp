@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="processes.list.title"/></title>
-    <r:require module="workflows"/>
+    <asset:javascript src="modules/workflows"/>
 </head>
 <body>
     <div class="body">
@@ -23,11 +23,11 @@
                  ]}" id="workflowOverviewTable"/>
             </div>
         </div>
-        <g:javascript>
+        <asset:script type="text/javascript">
             $(document).ready(function() {
                 $.otp.workflows.registerJobExecutionPlan('#workflowOverviewTable');
             });
-        </g:javascript>
+        </asset:script>
     </div>
 </body>
 </html>
