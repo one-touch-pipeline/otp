@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 
-class AlignmentPass {
+class AlignmentPass implements ProcessParameterObject {
 
     enum AlignmentState {
         NOT_STARTED,
@@ -92,6 +93,7 @@ class AlignmentPass {
         return seqTrack.project
     }
 
+    @Override
     short getProcessingPriority() {
         return project.processingPriority
     }
@@ -100,12 +102,19 @@ class AlignmentPass {
         return seqTrack.sample
     }
 
+    @Override
     SeqType getSeqType() {
         return seqTrack.seqType
     }
 
+    @Override
     Individual getIndividual() {
         return seqTrack.individual
+    }
+
+    @Override
+    Set<SeqTrack> getContainedSeqTracks() {
+        return new HashSet<SeqTrack>([seqTrack])
     }
 
     static mapping = {

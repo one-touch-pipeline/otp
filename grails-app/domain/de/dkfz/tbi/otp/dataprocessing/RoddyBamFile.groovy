@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
+import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
@@ -14,7 +15,7 @@ import de.dkfz.tbi.otp.utils.StringUtils
  * The file is based on earlier created bam file (with the same workflow), if exists and
  * new SeqTracks which were not merged into the earlier created bam file (base bam file).
  */
-class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult {
+class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, ProcessParameterObject {
 
     static final String TMP_DIR = ".temp_RoddyPanCan"
 

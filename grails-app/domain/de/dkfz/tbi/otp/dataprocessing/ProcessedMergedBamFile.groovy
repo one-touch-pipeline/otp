@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
@@ -9,7 +10,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  *
  *
  */
-class ProcessedMergedBamFile extends AbstractMergedBamFile {
+class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessParameterObject {
 
     static belongsTo = [
         mergingPass: MergingPass
@@ -68,7 +69,6 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile {
             maxResults 1
         }
     }
-
     public String fileNameNoSuffix() {
         String seqTypeName = "${this.seqType.name}_${this.seqType.libraryLayout}"
         return "${this.sampleType.name}_${this.individual.pid}_${seqTypeName}_merged.mdup"

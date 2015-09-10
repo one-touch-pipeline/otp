@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
+
 /**
  * Run represents one sequencing Run. It is one of the most important classes
  * in the NGS database. The run is typically submitted all at once, but it
@@ -7,7 +9,7 @@ package de.dkfz.tbi.otp.ngsdata
  * projects. The initial locations are stored in RunSegment objects.
  */
 
-class Run {
+class Run implements ProcessParameterObject{
 
     String name                      // run name
 
@@ -55,6 +57,7 @@ class Run {
      * returns null if a run has more than one sequencing type,
      * because this case is unusable for creating Cluster Jobs
      */
+    @Override
     SeqType getSeqType() {
         List<SeqType> seqTypes = SeqTrack.findAllByRun(this)*.seqType
         if (seqTypes.unique().size() == 1) {
@@ -68,6 +71,7 @@ class Run {
      * returns the individual being sequenced in this run
      * returns null if a run has more than one individual
      */
+    @Override
     Individual getIndividual() {
         List<Individual> individuals = SeqTrack.findAllByRun(this)*.individual
         if (individuals.unique().size() == 1) {
@@ -77,9 +81,15 @@ class Run {
         }
     }
 
+    @Override
+    Set<SeqTrack> getContainedSeqTracks () {
+        return new HashSet<SeqTrack>(SeqTrack.findAllByRun(this))
+    }
+
     /**
      * It returns the highest priority of the corresponding projects.
      */
+    @Override
     short getProcessingPriority() {
         return DataFile.findAllByRun(this)*.project*.processingPriority.max()
     }

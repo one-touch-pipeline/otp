@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -12,7 +14,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  *
  *
  */
-class SnvCallingInstance {
+class SnvCallingInstance implements ProcessParameterObject{
     /**
      * Refers to the config file which is stored in the database and is used as a basis for all the files in the filesystem.
      */
@@ -83,14 +85,17 @@ class SnvCallingInstance {
         return samplePair.project
     }
 
+    @Override
     short getProcessingPriority() {
         return project.processingPriority
     }
 
+    @Override
     Individual getIndividual() {
         return samplePair.individual
     }
 
+    @Override
     SeqType getSeqType() {
         return samplePair.seqType
     }
@@ -114,6 +119,11 @@ class SnvCallingInstance {
      */
     OtpPath getStepConfigFileLinkedPath(final SnvCallingStep step) {
         return new OtpPath(samplePair.samplePairPath, "config_${step.configFileNameSuffix}_${instanceName}.txt")
+    }
+
+    @Override
+    Set<SeqTrack> getContainedSeqTracks() {
+        return sampleType1BamFile.containedSeqTracks + sampleType2BamFile.containedSeqTracks
     }
 
     /**

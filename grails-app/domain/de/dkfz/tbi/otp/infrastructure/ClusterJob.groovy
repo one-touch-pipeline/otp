@@ -60,6 +60,14 @@ class ClusterJob implements ClusterJobIdentifier{
      */
     SeqType seqType
     /**
+     * multiplexing was used for processing
+     */
+    Boolean multiplexing
+    /**
+     * processed with HiSeq X Ten machine
+     */
+    Boolean xten
+    /**
      * exit status of job
      */
     Status exitStatus
@@ -113,6 +121,8 @@ class ClusterJob implements ClusterJobIdentifier{
         clusterJobName(blank: false, nullable: false, validator: { clusterJobName, clusterJob -> clusterJobName.endsWith("_${clusterJob.jobClass}") } )
         jobClass(blank: false, nullable: false)
         seqType(nullable: true)                                 // gets filled after initialization, must be nullable
+        multiplexing(nullable: true)
+        xten(nullable: true)
         exitStatus(nullable: true)                              // gets filled after initialization, must be nullable
         exitCode(nullable: true)                                // gets filled after initialization, must be nullable
         queued(nullable: false)

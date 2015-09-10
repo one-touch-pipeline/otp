@@ -12,20 +12,6 @@ import org.junit.*
 @TestFor(MultiplexingService)
 class MultiplexingServiceUnitTests {
 
-    MultiplexingService multiplexingService
-
-    @Before
-    void setUp() {
-        multiplexingService = new MultiplexingService()
-    }
-
-    @After
-    void tearDown() {
-        multiplexingService = null
-    }
-
-
-
     void testBarcodePatternGATC_ValidLength6() {
         testValidBarcodePatternGATC("ACACAC")
     }
@@ -116,7 +102,7 @@ class MultiplexingServiceUnitTests {
 
     void testBarcodeNoCode() {
         String someFile = "example_something.bam"
-        assert null == multiplexingService.barcode(someFile)
+        assert null == MultiplexingService.barcode(someFile)
     }
 
 
@@ -131,17 +117,17 @@ class MultiplexingServiceUnitTests {
 
     private void testBarcodePatternGATC(String expected, String barcodePattern) {
         final String fileName = "example_${barcodePattern}_fileR1_1.fastq.gz"
-        assert expected == multiplexingService.barcode(fileName)
+        assert expected == MultiplexingService.barcode(fileName)
     }
 
     private void testBarcodePatternThreeDigitsFastq(String expected, String barcodePattern) {
         final String fileName = "example${barcodePattern}_1_sequence.txt.gz"
-        assert expected == multiplexingService.barcode(fileName)
+        assert expected == MultiplexingService.barcode(fileName)
     }
 
     private void testBarcodePatternThreeDigitsBam(String expected, String barcodePattern) {
         final String fileName = "example_140226${barcodePattern}.bam"
-        assert expected == multiplexingService.barcode(fileName)
+        assert expected == MultiplexingService.barcode(fileName)
     }
 
 }

@@ -40,7 +40,7 @@ class MultiplexingService {
      * @param fileName the name of the file to check for
      * @return the extracted barcode or null
      */
-    public String barcode(String fileName) {
+    public static String barcode(String fileName) {
         final List<String> regExpression = [
             /_([GATC]{6,8})_/ ,
             /_[0-9]_([0-9]{3})[\._]/ ,

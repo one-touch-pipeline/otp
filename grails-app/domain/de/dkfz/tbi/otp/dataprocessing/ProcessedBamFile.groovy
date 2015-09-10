@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 
-class ProcessedBamFile extends AbstractFileSystemBamFile {
+class ProcessedBamFile extends AbstractFileSystemBamFile implements ProcessParameterObject {
 
     static belongsTo = [
         alignmentPass: AlignmentPass

@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
  * Each execution of the Quality Assessment Merged Workflow on the particular data file (merged bam file) is represented as QualityAssessmentMergedPass.
  */
-class QualityAssessmentMergedPass {
+class QualityAssessmentMergedPass implements ProcessParameterObject {
 
     static belongsTo = [
             abstractMergedBamFile: AbstractMergedBamFile
@@ -62,6 +63,7 @@ class QualityAssessmentMergedPass {
         return abstractMergedBamFile.project
     }
 
+    @Override
     Individual getIndividual() {
         return abstractMergedBamFile.individual
     }
@@ -94,10 +96,17 @@ class QualityAssessmentMergedPass {
         }
     }
 
+    @Override
     SeqType getSeqType() {
         return abstractMergedBamFile.seqType
     }
 
+    @Override
+    Set<SeqTrack> getContainedSeqTracks() {
+        return abstractMergedBamFile.containedSeqTracks
+    }
+
+    @Override
     short getProcessingPriority() {
         return project.processingPriority
     }

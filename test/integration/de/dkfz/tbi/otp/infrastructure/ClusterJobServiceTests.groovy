@@ -5,6 +5,7 @@ import de.dkfz.tbi.flowcontrol.cluster.api.JobState
 import de.dkfz.tbi.flowcontrol.ws.api.pbs.JobInfo
 import de.dkfz.tbi.flowcontrol.ws.api.response.JobInfos
 import de.dkfz.tbi.flowcontrol.ws.client.FlowControlClient
+import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
@@ -53,8 +54,6 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     TestData testData = new TestData()
 
-    DataSource dataSource
-
     @Before
     void setUp() {
         seqType = TestData.createSeqType()
@@ -69,7 +68,7 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testCreateClusterJobAndCompleteClusterJob() {
-        ClusterJob job = createClusterJob()
+        def(job, run) = createClusterJobWithRun()
 
         ClusterJobIdentifier clusterJobIdentifier = new ClusterJobIdentifierImpl(job.realm, job.clusterJobId)
         JobInfo jobInfo = new JobInfo()
@@ -101,6 +100,8 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
         assertEquals(8, job.requestedCores)
         assertEquals(2048L, job.requestedMemory)
         assertEquals(new Duration(4000000L), job.requestedWalltime)
+        assertNull(job.multiplexing)
+        assertNull(job.xten)
     }
 
     @Test
@@ -203,22 +204,75 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
     }
 
     @Test
-    void testFindIndividualByClusterJob() {
-          ClusterJob job = createClusterJob()
+    void testFindWorkflowObjectByClusterJob() {
+        def(job, run) = createClusterJobWithRun()
 
-          SeqCenter seqCenter = new SeqCenter()
-          seqCenter.name = "DKFZ"
-          seqCenter.dirName = "core"
-          seqCenter.save([flush: true, failOnError: true])
+        assert run == clusterJobService.findProcessParameterObjectByClusterJob(job)
+    }
 
-          SeqPlatform seqPlatform = SeqPlatform.build()
+    @Test
+    void testIsXten_WhenSeqTrackProcessedWithXten_ShouldReturnTrue() {
+        def(job, run) = createClusterJobWithRun()
 
-          Run run = testData.createRun([seqCenter: seqCenter, seqPlatform: seqPlatform])
-          run.save([flush: true, failOnError: true])
+        SeqPlatformModelLabel seqPlatformModelLabel = SeqPlatformModelLabel.build(name: "HiSeq X Ten")
+        SeqPlatform seqPlatform = SeqPlatform.build(seqPlatformModelLabel: seqPlatformModelLabel)
+        SeqTrack.build(run: run, seqPlatform: seqPlatform)
 
-          DomainFactory.createProcessParameter(job.processingStep.process, 'de.dkfz.tbi.otp.ngsdata.Run', run.id.toString())
+        assert clusterJobService.isXten(job)
+    }
 
-          assert run.getIndividual() == clusterJobService.findIndividualByClusterJob(job)
+    @Test
+    void testIsXten_WhenSeqTrackNotProcessedWithXten_ShouldReturnFalse() {
+        def(job, run) = createClusterJobWithRun()
+
+        SeqPlatformModelLabel seqPlatformModelLabel = SeqPlatformModelLabel.build(name: "HiSeq2500")
+        SeqPlatform seqPlatform = SeqPlatform.build(seqPlatformModelLabel: seqPlatformModelLabel)
+        SeqTrack.build(run: run, seqPlatform: seqPlatform)
+
+        assertFalse(clusterJobService.isXten(job))
+    }
+
+    @Test
+    void testIsXten_WhenSeqTracksProcessedWithMixedSeqPlatforms_ShouldReturnNull() {
+        def(job, run) = createClusterJobWithRun()
+
+        SeqPlatformModelLabel seqPlatformModelLabelXTen = SeqPlatformModelLabel.build(name: "HiSeq X Ten")
+        SeqPlatform seqPlatformXTen = SeqPlatform.build(seqPlatformModelLabel: seqPlatformModelLabelXTen)
+        SeqTrack.build(run: run, seqPlatform: seqPlatformXTen)
+
+        SeqPlatformModelLabel seqPlatformModelLabelHiSeq2500 = SeqPlatformModelLabel.build(name: "HiSeq2500")
+        SeqPlatform seqPlatformHiSeq2500 = SeqPlatform.build(seqPlatformModelLabel: seqPlatformModelLabelHiSeq2500)
+        SeqTrack.build(run: run, seqPlatform: seqPlatformHiSeq2500)
+
+        assertNull(clusterJobService.isXten(job))
+    }
+
+    @Test
+    void testIsMultiplexing_WhenDataFileIsMultiplexing_ShouldReturnTrue() {
+        def(job, run) = createClusterJobWithRun()
+
+        DomainFactory.buildSeqTrackWithDataFile([run: run], [fileName: "example_ACACAC_fileR1_1.fastq.gz"])
+
+        assert clusterJobService.isMultiplexing(job)
+    }
+
+    @Test
+    void testIsMultiplexing_WhenDataFileIsNotMultiplexing_ShouldReturnTrue() {
+        def(job, run) = createClusterJobWithRun()
+
+        DomainFactory.buildSeqTrackWithDataFile([run: run], [fileName: "example.fastq.gz"])
+
+        assertFalse(clusterJobService.isMultiplexing(job))
+    }
+
+    @Test
+    void testIsMultiplexing_WhenDataFilesMixedTypes_ShouldReturnNull() {
+        def(job, run) = createClusterJobWithRun()
+
+        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile([run: run], [fileName: "example_ACACAC_fileR1_1.fastq.gz"])
+        DomainFactory.buildSequenceDataFile(seqTrack: seqTrack, fileName: "example.fastqz.gz")
+
+        assertNull(clusterJobService.isMultiplexing(job))
     }
 
     @Test
@@ -1035,5 +1089,16 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
         soapFault.setFaultCode(new QName(SOAPConstants.URI_NS_SOAP_ENVELOPE, "Sender"))
         soapFault.setFaultActor("START AP")
         return soapFault
+    }
+
+    private List createClusterJobWithRun() {
+        ClusterJob job = createClusterJob()
+
+        Run run = DomainFactory.createRun().save([flush: true, failOnError: true])
+
+        ProcessParameter processParameter = DomainFactory.createProcessParameter(job.processingStep.process, 'de.dkfz.tbi.otp.ngsdata.Run', run.id.toString())
+        processParameter.save(flush: true)
+
+        return [job, run]
     }
 }

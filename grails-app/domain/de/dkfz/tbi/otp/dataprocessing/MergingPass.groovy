@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
@@ -8,7 +9,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  *
  *
  */
-class MergingPass {
+class MergingPass implements ProcessParameterObject{
 
     /**
      * identifier unique in the scope of corresponding
@@ -31,10 +32,12 @@ class MergingPass {
         return mergingSet.project
     }
 
+    @Override
     short getProcessingPriority() {
         return project.processingPriority
     }
 
+    @Override
     Individual getIndividual() {
         return mergingSet.individual
     }
@@ -47,12 +50,18 @@ class MergingPass {
         return mergingSet.sampleType
     }
 
+    @Override
     SeqType getSeqType() {
         return mergingSet.seqType
     }
 
     MergingWorkPackage getMergingWorkPackage() {
         return mergingSet.mergingWorkPackage
+    }
+
+    @Override
+    Set<SeqTrack> getContainedSeqTracks() {
+        return mergingSet.containedSeqTracks
     }
 
     public String toString() {

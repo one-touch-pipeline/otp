@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
  * Each execution of the Quality Assessment Workflow on the particular data file is represented as QualityAssessmentPass.
  */
-class QualityAssessmentPass {
+class QualityAssessmentPass implements ProcessParameterObject{
 
     int identifier
     String description
@@ -64,6 +65,7 @@ class QualityAssessmentPass {
         return processedBamFile.project
     }
 
+    @Override
     short getProcessingPriority() {
         return project.processingPriority
     }
@@ -76,16 +78,23 @@ class QualityAssessmentPass {
         return processedBamFile.sample
     }
 
+    @Override
     SeqType getSeqType() {
         return processedBamFile.seqType
     }
 
+    @Override
     Individual getIndividual() {
         return processedBamFile.individual
     }
 
     ReferenceGenome getReferenceGenome() {
         return processedBamFile.referenceGenome
+    }
+
+    @Override
+    Set<SeqTrack> getContainedSeqTracks() {
+        return processedBamFile.containedSeqTracks
     }
 
     static mapping = {

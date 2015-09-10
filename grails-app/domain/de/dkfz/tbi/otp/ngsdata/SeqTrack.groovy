@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-class SeqTrack {
+class SeqTrack implements ProcessParameterObject {
 
     enum DataProcessingState {
         UNKNOWN,
@@ -140,6 +142,7 @@ class SeqTrack {
         return DataFile.findBySeqTrackAndFileWithdrawn(this, true)
     }
 
+    @Override
     Individual getIndividual() {
         return sample.individual
     }
@@ -156,6 +159,12 @@ class SeqTrack {
         return seqPlatform.seqPlatformGroup
     }
 
+    @Override
+    Set<SeqTrack> getContainedSeqTracks() {
+        return new HashSet<SeqTrack>([this])
+    }
+
+    @Override
     short getProcessingPriority() {
         return project.processingPriority
     }

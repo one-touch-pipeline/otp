@@ -6,9 +6,12 @@ import de.dkfz.tbi.flowcontrol.ws.client.ClientKeys
 import de.dkfz.tbi.flowcontrol.ws.client.FlowControlClient
 import de.dkfz.tbi.otp.infrastructure.ClusterJob.Status
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
+import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.ngsdata.Individual
+import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.MultiplexingService
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.SeqPlatformModelLabel
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import groovy.sql.Sql
 import org.joda.time.DateTime
@@ -74,8 +77,10 @@ class ClusterJobService {
             job.requestedWalltime = new Duration(info.getWalltimeRequestedMS())
             job.requestedMemory = info.getMemoryRequestedKB()
             job.requestedCores = info.getCores()
-            assert job.save(flush: true)
         }
+        job.multiplexing = isMultiplexing(job)
+        job.xten = isXten(job)
+        assert job.save(flush: true, failOnError: true)
     }
 
     /**
@@ -143,11 +148,36 @@ class ClusterJobService {
     }
 
     /**
-     * return the specific Individual to a cluster job
-     * @return Individual or null
+     * returns the specific workflow object to a cluster job, e.g. Run, AligmentPass
+     * @return Object or null
      */
-    public Individual findIndividualByClusterJob(ClusterJob job) {
-        return atMostOneElement(ProcessParameter.findAllByProcess(job.processingStep.process))?.toObject()?.individual
+    public ProcessParameterObject findProcessParameterObjectByClusterJob(ClusterJob job) {
+        return atMostOneElement(ProcessParameter.findAllByProcess(job.processingStep.process))?.toObject()
+    }
+
+    /**
+     * returns true if a job belongs to data that is sequenced by X-Ten machines
+     */
+    public Boolean isXten(ClusterJob job) {
+        Object workflowObject = findProcessParameterObjectByClusterJob(job)
+        List<SeqPlatformModelLabel> seqPlatformModelLabels = workflowObject.getContainedSeqTracks().toList()*.seqPlatform.seqPlatformModelLabel
+        if(seqPlatformModelLabels.unique().size() == 1) {
+            return seqPlatformModelLabels.first().name == "HiSeq X Ten"
+        }
+        return null
+    }
+
+    /**
+     * returns true if a job belongs to data that is multiplexing data
+     */
+    public Boolean isMultiplexing(ClusterJob job) {
+        Object workflowObject = findProcessParameterObjectByClusterJob(job)
+        List<DataFile> files = DataFile.findAllBySeqTrackInList(workflowObject.getContainedSeqTracks().toList())
+        List<Boolean> hasBarcode = files.collect { MultiplexingService.barcode(it.fileName) != null }.unique()
+        if (hasBarcode.size() == 1) {
+            return hasBarcode.first()
+        }
+        return null
     }
 
     /**

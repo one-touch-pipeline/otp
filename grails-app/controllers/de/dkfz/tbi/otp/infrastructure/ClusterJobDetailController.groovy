@@ -11,7 +11,7 @@ class ClusterJobDetailController {
 
     def show () {
         ClusterJob job = ClusterJob.get(params.id)
-        Individual individual = clusterJobService.findIndividualByClusterJob(job)
+        Individual individual = clusterJobService.findProcessParameterObjectByClusterJob(job)?.individual
 
         ['job': job, 'individual': individual]
     }
