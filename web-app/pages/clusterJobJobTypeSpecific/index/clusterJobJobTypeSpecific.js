@@ -24,6 +24,14 @@ $.otp.clusterJobJobTypeSpecific = {
             $.otp.clusterJobJobTypeSpecificGraph.update();
             $.otp.clusterJobJobTypeSpecific.updateAvgValues();
         });
+        $('#multiplexingSelect').change(function () {
+            $.otp.clusterJobJobTypeSpecificGraph.update();
+            $.otp.clusterJobJobTypeSpecific.updateAvgValues();
+        });
+        $('#xtenSelect').change(function () {
+            $.otp.clusterJobJobTypeSpecificGraph.update();
+            $.otp.clusterJobJobTypeSpecific.updateAvgValues();
+        });
     },
 
     updateAvgValues : function () {
@@ -33,11 +41,13 @@ $.otp.clusterJobJobTypeSpecific = {
 
         var jobClassSelect = $('#jobClassSelect').val();
         var seqTypeSelect = $('#seqTypeSelect').val();
+        var multiplexingSelect = $('#multiplexingSelect').val();
+        var xtenSelect = $('#xtenSelect').val();
 
         RGraph.AJAX($.otp.createLink({
             controller : 'clusterJobJobTypeSpecific',
             action : 'getJobTypeSpecificAvgMemory',
-            parameters: {'jobClass': jobClassSelect, 'seqType': seqTypeSelect, 'from': startDate, 'to': endDate}
+            parameters: {'jobClass': jobClassSelect, 'seqType': seqTypeSelect, 'multiplexing': multiplexingSelect, 'xten': xtenSelect, 'from': startDate, 'to': endDate}
         }), function () {
             var json = JSON.parse(this.response);
             $('#jobTypeSpecificAvgMemory').html(json.data);
@@ -46,7 +56,7 @@ $.otp.clusterJobJobTypeSpecific = {
         RGraph.AJAX($.otp.createLink({
             controller : 'clusterJobJobTypeSpecific',
             action : 'getJobTypeSpecificAvgCoreUsage',
-            parameters: {'jobClass': jobClassSelect, 'seqType': seqTypeSelect, 'from': startDate, 'to': endDate}
+            parameters: {'jobClass': jobClassSelect, 'seqType': seqTypeSelect, 'multiplexing': multiplexingSelect, 'xten': xtenSelect, 'from': startDate, 'to': endDate}
         }), function () {
             var json = JSON.parse(this.response);
             $('#jobTypeSpecificAvgCPU').html(json.data);
@@ -55,7 +65,7 @@ $.otp.clusterJobJobTypeSpecific = {
         RGraph.AJAX($.otp.createLink({
             controller : 'clusterJobJobTypeSpecific',
             action : 'getJobTypeSpecificStatesTimeDistribution',
-            parameters: {'jobClass': jobClassSelect, 'seqType': seqTypeSelect, 'from': startDate, 'to': endDate}
+            parameters: {'jobClass': jobClassSelect, 'seqType': seqTypeSelect, 'multiplexing': multiplexingSelect, 'xten': xtenSelect, 'from': startDate, 'to': endDate}
         }), function () {
             var json = JSON.parse(this.response);
             $("#jobTypeSpecificAvgDelay").html(json.data.avgQueue);
@@ -140,11 +150,13 @@ $.otp.clusterJobJobTypeSpecificGraph = {
 
         var jobClassSelect = $('#jobClassSelect').val();
         var seqTypeSelect = $('#seqTypeSelect').val();
+        var multiplexingSelect = $('#multiplexingSelect').val();
+        var xtenSelect = $('#xtenSelect').val();
 
         RGraph.AJAX($.otp.createLink({
             controller : 'clusterJobJobTypeSpecific',
             action : 'getJobTypeSpecificExitCodes',
-            parameters: {'jobClass': jobClassSelect, 'seqType': seqTypeSelect, 'from': startDate, 'to': endDate}
+            parameters: {'jobClass': jobClassSelect, 'seqType': seqTypeSelect, 'multiplexing': multiplexingSelect, 'xten': xtenSelect, 'from': startDate, 'to': endDate}
         }), function () {
             $.otp.clusterJobJobTypeSpecificGraph.getJobTypeSpecificExitCodes(this);
         });
@@ -152,7 +164,7 @@ $.otp.clusterJobJobTypeSpecificGraph = {
         RGraph.AJAX($.otp.createLink({
             controller : 'clusterJobJobTypeSpecific',
             action : 'getJobTypeSpecificExitStatuses',
-            parameters: {'jobClass': jobClassSelect, 'seqType': seqTypeSelect, 'from': startDate, 'to': endDate}
+            parameters: {'jobClass': jobClassSelect, 'seqType': seqTypeSelect, 'multiplexing': multiplexingSelect, 'xten': xtenSelect, 'from': startDate, 'to': endDate}
         }), function () {
             $.otp.clusterJobJobTypeSpecificGraph.getJobTypeSpecificExitStatuses(this);
         });
@@ -160,7 +172,7 @@ $.otp.clusterJobJobTypeSpecificGraph = {
         RGraph.AJAX($.otp.createLink({
             controller : 'clusterJobJobTypeSpecific',
             action : 'getJobTypeSpecificStates',
-            parameters: {'jobClass': jobClassSelect, 'seqType': seqTypeSelect, 'from': startDate, 'to': endDate}
+            parameters: {'jobClass': jobClassSelect, 'seqType': seqTypeSelect, 'multiplexing': multiplexingSelect, 'xten': xtenSelect, 'from': startDate, 'to': endDate}
         }), function () {
             $.otp.clusterJobJobTypeSpecificGraph.getJobTypeSpecificStates(this);
         });
@@ -168,7 +180,7 @@ $.otp.clusterJobJobTypeSpecificGraph = {
         RGraph.AJAX($.otp.createLink({
             controller : 'clusterJobJobTypeSpecific',
             action : 'getJobTypeSpecificWalltimes',
-            parameters: {'jobClass': jobClassSelect, 'seqType': seqTypeSelect,'from': startDate, 'to': endDate}
+            parameters: {'jobClass': jobClassSelect, 'seqType': seqTypeSelect, 'multiplexing': multiplexingSelect, 'xten': xtenSelect,'from': startDate, 'to': endDate}
         }), function () {
             $.otp.clusterJobJobTypeSpecificGraph.getJobTypeSpecificWalltimes(this);
         });
@@ -176,7 +188,7 @@ $.otp.clusterJobJobTypeSpecificGraph = {
         RGraph.AJAX($.otp.createLink({
             controller : 'clusterJobJobTypeSpecific',
             action : 'getJobTypeSpecificMemories',
-            parameters: {'jobClass': jobClassSelect, 'seqType': seqTypeSelect, 'from': startDate, 'to': $.otp.clusterJobJobTypeSpecific.getToday()}
+            parameters: {'jobClass': jobClassSelect, 'seqType': seqTypeSelect, 'multiplexing': multiplexingSelect, 'xten': xtenSelect, 'from': startDate, 'to': $.otp.clusterJobJobTypeSpecific.getToday()}
         }),function () {
             $.otp.clusterJobJobTypeSpecificGraph.getJobTypeSpecificMemoryUsage(this);
         });

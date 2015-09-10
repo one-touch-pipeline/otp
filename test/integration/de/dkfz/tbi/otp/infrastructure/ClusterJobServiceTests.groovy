@@ -1061,6 +1061,8 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
                 jobClass: 'testClass',
                 clusterJobId: "testId_${uniqueIdCounter++}",
                 seqType: seqType,
+                multiplexing: false,
+                xten: false
         ] + myProps
 
         Realm realm = DomainFactory.createRealmDataProcessingDKFZ()

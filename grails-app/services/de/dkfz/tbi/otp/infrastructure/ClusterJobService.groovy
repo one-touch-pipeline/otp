@@ -547,7 +547,7 @@ SELECT
      * [0] = exitCode
      * [1] = count of exitCode
      */
-    public List findJobClassAndSeqTypeSpecificExitCodesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
+    public List findJobClassAndSeqTypeSpecificExitCodesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate, boolean multiplexing = false, boolean xten = false) {
         def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
 
         def sql = new Sql(dataSource)
@@ -562,13 +562,15 @@ SELECT
  AND job.ended < ?
  AND job.job_class = ?
  AND job.seq_type_id = ?
+ AND job.multiplexing = ?
+ AND job.xten = ?
  GROUP BY job.exit_code
  ORDER BY job.exit_code
 """
 
         List exitCodeOccurenceList = []
 
-        sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType.id]) {
+        sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType.id, multiplexing, xten]) {
             exitCodeOccurenceList << [it.exitCode, it.exitCodeCount]
         }
 
@@ -582,7 +584,7 @@ SELECT
      * [0] = exitStatus
      * [1] = count of exitCode
      */
-    public List findJobClassAndSeqTypeSpecificExitStatusesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
+    public List findJobClassAndSeqTypeSpecificExitStatusesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate, boolean multiplexing = false, boolean xten = false) {
         def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
 
         def sql = new Sql(dataSource)
@@ -597,13 +599,15 @@ SELECT
  AND job.ended < ?
  AND job.job_class = ?
  AND job.seq_type_id = ?
+ AND job.multiplexing = ?
+ AND job.xten = ?
  GROUP BY job.exit_status
  ORDER BY job.exit_status
 """
 
         List exitStatusOccurenceList = []
 
-        sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType.id]) {
+        sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType.id, multiplexing, xten]) {
             exitStatusOccurenceList << [it.exitStatus as ClusterJob.Status, it.exitStatusCount]
         }
 
@@ -615,7 +619,7 @@ SELECT
      * and array of all dates (per hour) existing in the given time span
      * @return ["days": [day1Hour0, day2Hour1, ...], "data": ["queued": [...], "started": [...], "ended":[...]]]
      */
-    public Map findJobClassAndSeqTypeSpecificStatesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
+    public Map findJobClassAndSeqTypeSpecificStatesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate, boolean multiplexing = false, boolean xten = false) {
         def (DateTime startDate, DateTime endDate, ArrayList<String> hourBuckets) = parseArgs(sDate, eDate)
 
         def sql = new Sql(dataSource)
@@ -634,12 +638,14 @@ SELECT
  AND job.${it} < ?
  AND job.job_class = ?
  AND job.seq_type_id = ?
+ AND job.multiplexing = ?
+ AND job.xten = ?
  GROUP BY job.${it} / $HOURS_TO_MILLIS
 """
 
             Map hours = [:]
 
-            sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType.id]) {
+            sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType.id, multiplexing, xten]) {
                 hours[new DateTime(it.hour * HOURS_TO_MILLIS)] = it.count
             }
 
@@ -656,7 +662,7 @@ SELECT
      * the maximum values for both, to align the graphics and
      * aligned labels for the graphic
      */
-    public Map findJobClassAndSeqTypeSpecificWalltimesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
+    public Map findJobClassAndSeqTypeSpecificWalltimesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate, boolean multiplexing = false, boolean xten = false) {
         def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
 
         def sql = new Sql(dataSource)
@@ -675,11 +681,13 @@ SELECT
  AND job.exit_status != 'FAILED'
  AND job.job_class = ?
  AND job.seq_type_id = ?
+ AND job.multiplexing = ?
+ AND job.xten = ?
 """
 
         def walltimeData = []
 
-        sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType.id]) {
+        sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType.id, multiplexing, xten]) {
             walltimeData << [it.elapsedWalltime, it.requestedWalltime, it.id]
         }
 
@@ -694,7 +702,7 @@ SELECT
      * the maximum values for both, to align the graphics and
      * aligned labels for the graphic
      */
-    public Map findJobClassAndSeqTypeSpecificMemoriesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
+    public Map findJobClassAndSeqTypeSpecificMemoriesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate, boolean multiplexing = false, boolean xten = false) {
         def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
 
         def sql = new Sql(dataSource)
@@ -713,11 +721,13 @@ SELECT
  AND job.exit_status != 'FAILED'
  AND job.job_class = ?
  AND job.seq_type_id = ?
+ AND job.multiplexing = ?
+ AND job.xten = ?
 """
 
         def memoryData = []
 
-        sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType.id]) {
+        sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType.id, multiplexing, xten]) {
             memoryData << [it.usedMemory, it.requestedMemory, it.id]
         }
 
@@ -731,7 +741,7 @@ SELECT
      * returns the average core usage of a specific jobclass and seq type
      * @return double
      */
-    public double findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
+    public double findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate, boolean multiplexing = false, boolean xten = false) {
         def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
 
         def sql = new Sql(dataSource)
@@ -747,11 +757,13 @@ SELECT
  AND job.exit_status != 'FAILED'
  AND job.job_class = ?
  AND job.seq_type_id = ?
+ AND job.multiplexing = ?
+ AND job.xten = ?
 """
 
         Double avgCpu
 
-        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType.id], {
+        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType.id, multiplexing, xten], {
             it.next()
             Long avgCpuTime = it.getLong('avgCpuTime')
             Long avgWalltime = it.getLong('avgWalltime')
@@ -766,7 +778,7 @@ SELECT
      * return the average memory usage of a specific jobclass and seqtype
      * @return int
      */
-    public int findJobClassAndSeqTypeSpecificAvgMemoryByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
+    public int findJobClassAndSeqTypeSpecificAvgMemoryByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate, boolean multiplexing = false, boolean xten = false) {
         def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
 
         def sql = new Sql(dataSource)
@@ -781,11 +793,13 @@ SELECT
  AND job.exit_status != 'FAILED'
  AND job.job_class = ?
  AND job.seq_type_id = ?
+ AND job.multiplexing = ?
+ ANd job.xten = ?
 """
 
         Integer avgMemory
 
-        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType.id], {
+        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType.id, multiplexing, xten], {
             it.next()
             avgMemory = it.getLong('avgMemory')
         })
@@ -797,7 +811,7 @@ SELECT
      * returns the average time in queue and average processing time for a specific jobclass and seqtype
      * @return map ["avgQueue": avgQueue, "avgProcess": avgProcess]
      */
-    public Map findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
+    public Map findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate, boolean multiplexing = false, boolean xten = false) {
         def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
 
         def sql = new Sql(dataSource)
@@ -815,13 +829,15 @@ SELECT
  AND job.exit_status != 'FAILED'
  AND job.job_class = ?
  AND job.seq_type_id = ?
+ AND job.multiplexing = ?
+ AND job.xten = ?
 """
 
         Long avgQueue, avgProcess
 
         // prevents negative values that could appear cause of rounding errors with milliseconds values
         // OTP-1304, queued gets set through OTP, started & ended gets set by the cluster
-        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType.id], {
+        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType.id, multiplexing, xten], {
             it.next()
             avgQueue =  Math.max(0, it.getLong('avgQueue') ?: 0)
             avgProcess = Math.max(0, it.getLong('avgProcess') ?: 0)

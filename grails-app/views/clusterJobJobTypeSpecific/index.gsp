@@ -10,11 +10,24 @@
 <body>
     <div class="body">
         <h1><g:message code="jobstats.jobTypeSpecific.title"/></h1><br><br>
-        <div id="optionsContainer">
+        <div class="optionsContainer">
             <p>jobclass: <g:select name="jobClassSelect" id="jobClassSelect" from="${jobClasses}"/></p>
             <p>seqType: <select name="seqTypeSelect" id="seqTypeSelect"></select></p>
             <p>from: <input type="text" class="datePicker" id="dpFrom" value="${latestDate}"></p>
             <p>to: <input type="text" class="datePicker" id="dpTo" value="${latestDate}"></p>
+        </div>
+        <div class="optionsContainer">
+            <p>multiplexing:
+                <select name="multiplexingSelect" id="multiplexingSelect">
+                    <option value="false">FALSE</option>
+                    <option value="true">TRUE</option>
+                </select></p>
+            <p>xten:
+                <select name="xtenSelect" id="xtenSelect">
+                    <option value="false">FALSE</option>
+                    <option value="true">TRUE</option>
+                </select>
+            </p>
         </div>
         <div id="jobTypeSpecificAverageValues">
             <table>

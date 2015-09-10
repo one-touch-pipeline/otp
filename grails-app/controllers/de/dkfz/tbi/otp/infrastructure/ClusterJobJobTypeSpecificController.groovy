@@ -28,11 +28,9 @@ class ClusterJobJobTypeSpecificController {
     def getJobTypeSpecificStatesTimeDistribution() {
         Map dataToRender = [:]
 
-        LocalDate startDate = LocalDate.parse(params.from)
-        LocalDate endDate = LocalDate.parse(params.to)
-        SeqType seqType = SeqType.get(Long.parseLong(params.seqType))
+        def (startDate, endDate, seqType, multiplexing, xten) = parseParams()
 
-        def data = clusterJobService.findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween(params.jobClass, seqType, startDate, endDate)
+        def data = clusterJobService.findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween(params.jobClass, seqType, startDate, endDate, multiplexing, xten)
         dataToRender.data = ['avgQueue': PeriodFormat.getDefault().print(new Period(data.avgQueue)), 'avgProcess': PeriodFormat.getDefault().print(new Period(data.avgProcess))]
 
         render dataToRender as JSON
@@ -53,7 +51,7 @@ class ClusterJobJobTypeSpecificController {
         LocalDate endDate = LocalDate.parse(params.to)
         String jobClass = params.jobClass
 
-        dataToRender.data  = clusterJobService.findJobClassSpecificSeqTypesByDateBetween(jobClass, startDate, endDate)
+        dataToRender.data = clusterJobService.findJobClassSpecificSeqTypesByDateBetween(jobClass, startDate, endDate)
 
         render dataToRender as JSON
     }
@@ -69,11 +67,9 @@ class ClusterJobJobTypeSpecificController {
     def getJobTypeSpecificStates() {
         Map dataToRender = [data: [], labels: [], keys: []]
 
-        LocalDate startDate = LocalDate.parse(params.from)
-        LocalDate endDate = LocalDate.parse(params.to)
-        SeqType seqType = SeqType.get(Long.parseLong(params.seqType))
+        def (startDate, endDate, seqType, multiplexing, xten) = parseParams()
 
-        def result = clusterJobService.findJobClassAndSeqTypeSpecificStatesByDateBetween(params.jobClass, seqType, startDate, endDate)
+        def result = clusterJobService.findJobClassAndSeqTypeSpecificStatesByDateBetween(params.jobClass, seqType, startDate, endDate, multiplexing, xten)
         def keys = ['queued', 'started', 'ended']
         keys.each { k ->
             dataToRender.data << result.data.get(k)
@@ -95,11 +91,9 @@ class ClusterJobJobTypeSpecificController {
     private renderDataAsJSON (Closure method) {
         Map dataToRender = [:]
 
-        LocalDate startDate = LocalDate.parse(params.from)
-        LocalDate endDate = LocalDate.parse(params.to)
-        SeqType seqType = SeqType.get(Long.parseLong(params.seqType))
+        def (startDate, endDate, seqType, multiplexing, xten) = parseParams()
 
-        dataToRender.data = method(params.jobClass, seqType, startDate, endDate)
+        dataToRender.data = method(params.jobClass, seqType, startDate, endDate, multiplexing, xten)
 
         render dataToRender as JSON
     }
@@ -107,11 +101,9 @@ class ClusterJobJobTypeSpecificController {
     private renderPieDataAsJSON (Closure method) {
         Map dataToRender = [data: [], labels: []]
 
-        LocalDate startDate = LocalDate.parse(params.from)
-        LocalDate endDate = LocalDate.parse(params.to)
-        SeqType seqType = SeqType.get(Long.parseLong(params.seqType))
+        def (startDate, endDate, seqType, multiplexing, xten) = parseParams()
 
-        List results = method(params.jobClass, seqType, startDate, endDate)
+        List results = method(params.jobClass, seqType, startDate, endDate, multiplexing, xten)
         results.each { result ->
             def (labels, data) = ["${result[0]} (${result[1]})", result[1]]
             dataToRender.labels << labels
@@ -124,15 +116,23 @@ class ClusterJobJobTypeSpecificController {
     private renderDiagramDataAsJSON (Closure method) {
         Map dataToRender = [data: [], labels: [], xMax: null]
 
-        LocalDate startDate = LocalDate.parse(params.from)
-        LocalDate endDate = LocalDate.parse(params.to)
-        SeqType seqType = SeqType.get(Long.parseLong(params.seqType))
+        def (startDate, endDate, seqType, multiplexing, xten) = parseParams()
 
-        Map results = method(params.jobClass, seqType, startDate, endDate)
+        Map results = method(params.jobClass, seqType, startDate, endDate, multiplexing, xten)
         dataToRender.data = results.data
         dataToRender.xMax = results.xMax
         dataToRender.labels = results.labels
 
         render dataToRender as JSON
+    }
+
+    private List parseParams() {
+        LocalDate startDate = LocalDate.parse(params.from)
+        LocalDate endDate = LocalDate.parse(params.to)
+        SeqType seqType = SeqType.get(Long.parseLong(params.seqType))
+        boolean multiplexing = Boolean.valueOf(params.multiplexing)
+        boolean xten = Boolean.valueOf(params.xten)
+
+        return [startDate, endDate, seqType, multiplexing, xten]
     }
 }
