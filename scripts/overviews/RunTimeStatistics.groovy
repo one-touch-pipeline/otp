@@ -56,7 +56,6 @@ List<String> alignments = projects.collect { Project project ->
     return "${project} alignment: ${!(project.alignmentDeciderBeanName == 'noAlignmentDecider')}"
 }
 
-
 def bySamples = { String workflow ->
     List dates = []
 
@@ -100,6 +99,13 @@ def alignmentFinished = {
     return dates?.collect { it[1] }?.max()
 }
 
+def panCanStartedAndFinished = {
+    List dates = bySamples('PanCanWorkflow')
+    def started = dates?.collect { it[0] }?.min()
+    def ended = dates?.collect { it[1] }?.max()
+    return [started, ended]
+}
+
 def snvStartedAndFinished = {
     List dates = bySamples('SnvWorkflow')
     def started = dates?.collect { it[0] }?.min()
@@ -114,8 +120,16 @@ println "Alignment:\n\t" + alignments.join("\n")
 println "Info from GPCF:\n\t[OTRS-Ticket]"
 println "Import Started:\n\t" + importStarted()
 println "Import Finished:\n\t" + importFinished()
-println "Alignment Started:\n\t" + alignmentStarted()
-println "Alignment Finished:\n\t" + alignmentFinished()
+def alignmentStartedOTP = alignmentStarted()
+def alignmentFinishedOTP = alignmentFinished()
+if(alignmentStartedOTP || alignmentFinishedOTP) {
+    println "Alignment Started:\n\t" + alignmentStartedOTP
+    println "Alignment Finished:\n\t" + alignmentFinishedOTP
+} else {
+    def (alignmentStartedPanCan, alignmentEndedPanCan) = panCanStartedAndFinished()
+    println "Alignment Started:\n\t" + alignmentStartedPanCan
+    println "Alignment Finished:\n\t" + alignmentEndedPanCan
+}
 def (snvStarted, snvEnded) = snvStartedAndFinished()
 println "SNV Started:\n\t" + snvStarted
 println "SNV Finished:\n\t" + snvEnded
