@@ -223,7 +223,7 @@ class ProjectOverviewController {
         Project project = projectService.getProjectByName(params.project)
         Map dataToRender = cmd.dataToRender()
         List data = projectOverviewService.listReferenceGenome(project).collect { ReferenceGenomeProjectSeqType it->
-            [it.seqType.name, it.sampleType?.name, it.referenceGenome.name]
+            [it.seqType.name, it.sampleType?.name, it.referenceGenome.name, it.statSizeFileName ?: ""]
         }
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
