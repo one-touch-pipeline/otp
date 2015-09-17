@@ -57,6 +57,7 @@ public class Process implements Serializable {
     static mapping = {
         finished index: 'finished_idx'
         jobExecutionPlan index: 'job_execution_plan_idx'
+        comment type: 'text'
     }
 
 
