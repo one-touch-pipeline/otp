@@ -213,6 +213,7 @@ otp {
             account = otpProperties.getProperty("otp.testing.workflows.account")
             rootdir = (otpConfig.otp.testing.workflows.rootdir) ?: 'WORKFLOW_ROOT'
         }
+        group = otpConfig.otp.testing.group ?: ''    //A real group of the developer but not the primary one
     }
 }
 
