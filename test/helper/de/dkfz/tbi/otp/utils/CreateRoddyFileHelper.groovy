@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.utils
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 
 /**
@@ -8,7 +9,9 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 class CreateRoddyFileHelper {
 
 
-    static void createRoddyAlignmentTempResultFiles(Realm realm, RoddyBamFile roddyBamFile) {
+    //TODO: OTP-1734 delete this test
+    @Deprecated
+    static void createRoddyAlignmentWorkResultFilesOld(Realm realm, RoddyBamFile roddyBamFile) {
         File mergingBaseDir = new File("${realm.rootPath}/${roddyBamFile.project.dirName}/sequencing/${roddyBamFile.seqType.dirName}/view-by-pid/${roddyBamFile.individual.pid}/${roddyBamFile.sampleType.dirName}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment")
         if (mergingBaseDir.exists()) {
             assert mergingBaseDir.deleteDir()
@@ -41,4 +44,34 @@ class CreateRoddyFileHelper {
         assert tmpRoddyMd5sumFile.createNewFile()
         tmpRoddyMd5sumFile << "a841c64c5825e986c4709ac7298e9366"
     }
+
+    static private createRoddyAlignmentWorkOrFinalResultFiles(Realm realm, RoddyBamFile roddyBamFile, String workOrFinal) {
+        assert roddyBamFile."get${workOrFinal}MergedQADirectory"().mkdirs()
+        assert roddyBamFile."get${workOrFinal}MergedQAJsonFile"().createNewFile()
+
+        roddyBamFile."get${workOrFinal}SingleLaneQAJsonFiles"().values().each {
+            assert it.parentFile.mkdirs()
+            assert it.createNewFile()
+        }
+
+        assert roddyBamFile."get${workOrFinal}ExecutionStoreDirectory"().mkdirs()
+        roddyBamFile."get${workOrFinal}ExecutionDirectories"().each {
+            assert it.mkdirs()
+            assert new File(it, 'file').createNewFile()
+        }
+        roddyBamFile."get${workOrFinal}BamFile"() << "content"
+        roddyBamFile."get${workOrFinal}BaiFile"() << "content"
+        roddyBamFile."get${workOrFinal}Md5sumFile"() << DomainFactory.DEFAULT_MD5_SUM
+    }
+
+    static void createRoddyAlignmentWorkResultFiles(Realm realm, RoddyBamFile roddyBamFile) {
+        assert roddyBamFile.workDirectory.mkdirs()
+        createRoddyAlignmentWorkOrFinalResultFiles(realm, roddyBamFile, "Work")
+    }
+
+    static void createRoddyAlignmentFinalResultFiles(Realm realm, RoddyBamFile roddyBamFile) {
+        assert roddyBamFile.baseDirectory.mkdirs()
+        createRoddyAlignmentWorkOrFinalResultFiles(realm, roddyBamFile, "Final")
+    }
+
 }

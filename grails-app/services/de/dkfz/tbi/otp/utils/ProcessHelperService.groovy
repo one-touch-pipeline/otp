@@ -14,7 +14,7 @@ class ProcessHelperService {
 
     static Process executeCommand(String cmd) {
         assert cmd : "The input cmd must not be null"
-        LogThreadLocal.getThreadLog().debug("executing command:\n${cmd}")
+        LogThreadLocal.getThreadLog()?.debug("executing command:\n${cmd}")
         return [ 'bash', '-c', cmd ].execute()
     }
 
@@ -29,9 +29,9 @@ class ProcessHelperService {
                 stderr: stderr,
                 exitCode: process.exitValue()
         )
-        LogThreadLocal.getThreadLog().debug("exit code:\n${processOutput.exitCode}")
-        LogThreadLocal.getThreadLog().debug("stderr:\n${processOutput.stderr}")
-        LogThreadLocal.getThreadLog().debug("stdout:\n${processOutput.stdout}")
+        LogThreadLocal.getThreadLog()?.debug("exit code:\n${processOutput.exitCode}")
+        LogThreadLocal.getThreadLog()?.debug("stderr:\n${processOutput.stderr}")
+        LogThreadLocal.getThreadLog()?.debug("stdout:\n${processOutput.stdout}")
 
         return processOutput
     }

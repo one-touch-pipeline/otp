@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
@@ -160,7 +159,7 @@ rm ${configFileInStagingDirectory}
     }
 
     protected File getExistingBamFilePath(final AbstractMergedBamFile bamFile) {
-        final File file = new File(AbstractMergedBamFileService.destinationDirectory(bamFile), bamFile.bamFileName)
+        final File file = bamFile.getPathForFurtherProcessing()
         assert bamFile.md5sum ==~ /^[0-9a-fA-F]{32}$/
         assert bamFile.fileSize > 0L
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)

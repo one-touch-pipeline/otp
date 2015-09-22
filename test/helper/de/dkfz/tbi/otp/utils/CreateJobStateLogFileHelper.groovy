@@ -17,24 +17,24 @@ class CreateJobStateLogFileHelper {
     }
 
 
-    public static void withTmpRoddyExecutionDir(TemporaryFolder tmpDir, Closure code, String tmpRoddyExecutionStoreName = "exec_890420_133730004_user_analysis") {
-        File tmpRoddyExecutionDirectory = tmpDir.newFolder(tmpRoddyExecutionStoreName)
-        withTmpRoddyExecutionDir(tmpRoddyExecutionDirectory, code)
+    public static void withWorkExecutionDir(TemporaryFolder tmpDir, Closure code, String workExecutionStoreName = "exec_890420_133730004_user_analysis") {
+        File workExecutionDirectory = tmpDir.newFolder(workExecutionStoreName)
+        withWorkExecutionDir(workExecutionDirectory, code)
     }
 
-    public static void withJobStateLogFile(TemporaryFolder tmpDir, List<LogFileEntry> listOfLogFileEntryValues, Closure code, String tmpRoddyExecutionDirName = "exec_890420_133730004_user_analysis") {
-        File tmpRoddyExecutionDirectory = tmpDir.newFolder(tmpRoddyExecutionDirName)
-        createJobStateLogFile(tmpRoddyExecutionDirectory, listOfLogFileEntryValues)
+    public static void withJobStateLogFile(TemporaryFolder tmpDir, List<LogFileEntry> listOfLogFileEntryValues, Closure code, String workExecutionDirName = "exec_890420_133730004_user_analysis") {
+        File workExecutionDirectory = tmpDir.newFolder(workExecutionDirName)
+        createJobStateLogFile(workExecutionDirectory, listOfLogFileEntryValues)
 
-        withTmpRoddyExecutionDir(tmpRoddyExecutionDirectory, code)
+        withWorkExecutionDir(workExecutionDirectory, code)
     }
 
-    public static void withTmpRoddyExecutionDir(File tmpRoddyExecutionDirectory, Closure code) {
-        RoddyBamFile.metaClass.getTmpRoddyExecutionStoreDirectory = { ->
-            return tmpRoddyExecutionDirectory.parentFile
+    public static void withWorkExecutionDir(File workExecutionDirectory, Closure code) {
+        RoddyBamFile.metaClass.getWorkExecutionStoreDirectory = { ->
+            return workExecutionDirectory.parentFile
         }
         try {
-            code(tmpRoddyExecutionDirectory)
+            code(workExecutionDirectory)
         } finally {
             GroovySystem.metaClassRegistry.removeMetaClass(RoddyBamFile)
         }

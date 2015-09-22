@@ -98,6 +98,14 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         processedMergedBamFile1 = testData.bamFileTumor
         processedMergedBamFile2 = testData.bamFileControl
 
+
+        processedMergedBamFile1.mergingWorkPackage.bamFileInProjectFolder = processedMergedBamFile1
+        assert processedMergedBamFile1.mergingWorkPackage.save(flush: true)
+
+        processedMergedBamFile2.mergingWorkPackage.bamFileInProjectFolder = processedMergedBamFile2
+        assert processedMergedBamFile2.mergingWorkPackage.save(flush: true)
+
+
         externalScript_Calling = new ExternalScript(
                 scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier,
                 scriptVersion: 'v1',

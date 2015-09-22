@@ -51,7 +51,7 @@ class AbstractRoddyJobUnitTests {
                 rootPath: tmpDir.root.path,
         )
         ClusterJob clusterJob = ClusterJob.build(realm: realm)
-        File logDirectory = new File(roddyBamFile.tmpRoddyExecutionStoreDirectory, 'exec_150625_102449388_username_analysis')
+        File logDirectory = new File(roddyBamFile.workExecutionStoreDirectory, 'exec_150625_102449388_username_analysis')
         assert logDirectory.mkdirs()
 
         roddyBamFile.roddyExecutionDirectoryNames.add('exec_150625_102449388_username_analysis')
@@ -63,7 +63,7 @@ class AbstractRoddyJobUnitTests {
 
     @Test
     void testFailedOrNotFinishedClusterJobs_WhenRoddyExecutionDirectoryDoesNotExist_ShouldFail() {
-        roddyBamFile.metaClass.getTmpRoddyExecutionStoreDirectory = { ->
+        roddyBamFile.metaClass.getWorkExecutionStoreDirectory = { ->
             return TestCase.uniqueNonExistentPath
         }
 
@@ -72,7 +72,7 @@ class AbstractRoddyJobUnitTests {
 
     @Test
     void testFailedOrNotFinishedClusterJobs_WhenJobStateLogFileDoesNotExist_ShouldFail() {
-        CreateJobStateLogFileHelper.withTmpRoddyExecutionDir(tmpDir, { roddyExecutionDir ->
+        CreateJobStateLogFileHelper.withWorkExecutionDir(tmpDir, { roddyExecutionDir ->
             shouldFail(RuntimeException) { abstractRoddyJob.failedOrNotFinishedClusterJobs([]) }
         })
     }

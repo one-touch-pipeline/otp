@@ -13,6 +13,8 @@ import org.junit.rules.TemporaryFolder
 /**
  */
 @Build([Realm])
+@Deprecated
+//TODO: OTP-1734 delete class
 class MoveFileUtilsServiceUnitTests {
 
     final static String FILE_PERMISSION = "640"

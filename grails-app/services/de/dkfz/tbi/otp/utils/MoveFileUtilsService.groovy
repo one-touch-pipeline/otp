@@ -5,6 +5,8 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 
 /**
  */
+@Deprecated
+//TODO: OTP-1734 delete class
 class MoveFileUtilsService {
 
     ExecutionService executionService

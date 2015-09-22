@@ -1,9 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
+import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.junit.Before
 import org.junit.Rule
@@ -28,12 +27,15 @@ class SampleSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
 
+
     @Test
     void test_moveSample() {
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
+                roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY]
+        ])
         String script = "TEST-MOVE_SAMPLE"
         Individual individual = Individual.build(project: bamFile.project)
-        Realm.build(name: bamFile.project.realmName, operationType: DATA_MANAGEMENT, rootPath: temporaryFolder.newFolder("mgmt"))
+        Realm realm = Realm.build(name: bamFile.project.realmName, operationType: DATA_MANAGEMENT, rootPath: temporaryFolder.newFolder("mgmt"))
         Realm.build(name: bamFile.project.realmName, operationType: DATA_PROCESSING, rootPath: temporaryFolder.newFolder("proc"))
         SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
         List<String> dataFileLinks = []
@@ -44,19 +46,13 @@ class SampleSwapServiceTests extends GroovyScriptAwareTestCase {
         }
 
         String fileName = "FILE_NAME"
-        bamFile.getFinalExecutionStoreDirectory().mkdirs()
-        File execDir = new File(bamFile.getFinalExecutionStoreDirectory(), fileName)
-        assert execDir.createNewFile()
-        bamFile.getFinalMergedQADirectory().mkdirs()
-        File mergedQaDir = new File(bamFile.getFinalMergedQADirectory(), fileName)
-        assert mergedQaDir.createNewFile()
-        bamFile.getFinalRoddySingleLaneQADirectories().values().iterator().next().mkdirs()
-        File singleLaneQaFile = new File(bamFile.getFinalRoddySingleLaneQADirectories().values().iterator().next(), fileName)
-        assert singleLaneQaFile.createNewFile()
-        String destinationDirectory = AbstractMergedBamFileService.destinationDirectory(bamFile)
-
         String dataFileName1 = 'DataFileFileName_R1.gz'
         String dataFileName2 = 'DataFileFileName_R2.gz'
+
+        CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(realm, bamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, bamFile)
+        List<File> roddyFilesToDelete = createRoddyFileListToDelete(bamFile)
+        File destinationDirectory = bamFile.baseDirectory
 
         File scriptFolder = temporaryFolder.newFolder("files")
 
@@ -86,9 +82,9 @@ class SampleSwapServiceTests extends GroovyScriptAwareTestCase {
         File copyScriptOtherUser = new File(scriptFolder, "${script}-OtherUnixUser.sh")
         assert copyScriptOtherUser.exists()
         String copyScriptOtherUserContent = copyScriptOtherUser.text
-        assert copyScriptOtherUserContent.contains("#rm -rf ${execDir.absolutePath}")
-        assert copyScriptOtherUserContent.contains("#rm -rf ${mergedQaDir.absolutePath}")
-        assert copyScriptOtherUserContent.contains("#rm -rf ${singleLaneQaFile.absolutePath}")
+        roddyFilesToDelete.each {
+            assert copyScriptOtherUserContent.contains("#rm -rf ${it}")
+        }
 
         File copyScript = new File(scriptFolder, "${script}.sh")
         assert copyScript.exists()
@@ -106,10 +102,12 @@ class SampleSwapServiceTests extends GroovyScriptAwareTestCase {
 
     @Test
     void test_moveIndividual() {
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
+                roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY]
+        ])
         Project newProject = Project.build(realmName: bamFile.project.realmName)
         String script = "TEST-MOVE-INDIVIDUAL"
-        Realm.build(name: bamFile.project.realmName, operationType: DATA_MANAGEMENT, rootPath: temporaryFolder.newFolder("mgmt"))
+        Realm realm = Realm.build(name: bamFile.project.realmName, operationType: DATA_MANAGEMENT, rootPath: temporaryFolder.newFolder("mgmt"))
         Realm.build(name: bamFile.project.realmName, operationType: DATA_PROCESSING, rootPath: temporaryFolder.newFolder("proc"))
         SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
         List<String> dataFileLinks = []
@@ -120,20 +118,22 @@ class SampleSwapServiceTests extends GroovyScriptAwareTestCase {
             dataFileLinks.add(lsdfFilesService.getFileViewByPidPath(it))
             dataFilePaths.add(lsdfFilesService.getFileFinalPath(it))
         }
+        File missedFile = bamFile.finalMd5sumFile
+        File unexpectedFile = new File(bamFile.baseDirectory, 'notExpectedFile.txt')
+
+        CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(realm, bamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, bamFile)
+        assert missedFile.delete()
+        assert unexpectedFile.createNewFile()
+
+        List<File> roddyFilesToDelete = createRoddyFileListToDelete(bamFile)
+        File destinationDirectory = bamFile.baseDirectory
 
         String fileName = "FILE_NAME"
-        bamFile.getFinalExecutionStoreDirectory().mkdirs()
-        File execDir = new File(bamFile.getFinalExecutionStoreDirectory(), fileName)
-        assert execDir.createNewFile()
-        bamFile.getFinalMergedQADirectory().mkdirs()
-        File mergedQaDir = new File(bamFile.getFinalMergedQADirectory(), fileName)
-        assert mergedQaDir.createNewFile()
-        bamFile.getFinalRoddySingleLaneQADirectories().values().iterator().next().mkdirs()
-        File singleLaneQaFile = new File(bamFile.getFinalRoddySingleLaneQADirectories().values().iterator().next(), fileName)
-        assert singleLaneQaFile.createNewFile()
-        String destinationDirectory = AbstractMergedBamFileService.destinationDirectory(bamFile)
 
         File scriptFolder = temporaryFolder.newFolder("files")
+
+        StringBuilder outputStringBuilder = new StringBuilder()
 
         SpringSecurityUtils.doWithAuth("admin") {
             sampleSwapService.moveIndividual(
@@ -144,11 +144,14 @@ class SampleSwapServiceTests extends GroovyScriptAwareTestCase {
                     [(bamFile.sampleType.name): ""],
                     ['DataFileFileName_R1.gz': '', 'DataFileFileName_R2.gz': ''],
                     script,
-                    new StringBuilder(),
+                    outputStringBuilder,
                     false,
                     scriptFolder.absolutePath,
             )
         }
+        String output = outputStringBuilder.toString()
+        assert output.contains("${SampleSwapService.MISSING_FILES_TEXT}\n    ${missedFile}")
+        assert output.contains("${SampleSwapService.EXCESS_FILES_TEXT}\n    ${unexpectedFile}")
 
         assert scriptFolder.listFiles().length != 0
 
@@ -158,9 +161,9 @@ class SampleSwapServiceTests extends GroovyScriptAwareTestCase {
         File copyScriptOtherUser = new File(scriptFolder, "${script}-OtherUnixUser.sh")
         assert copyScriptOtherUser.exists()
         String copyScriptOtherUserContent = copyScriptOtherUser.text
-        assert copyScriptOtherUserContent.contains("#rm -rf ${execDir.absolutePath}")
-        assert copyScriptOtherUserContent.contains("#rm -rf ${mergedQaDir.absolutePath}")
-        assert copyScriptOtherUserContent.contains("#rm -rf ${singleLaneQaFile.absolutePath}")
+        roddyFilesToDelete.each {
+            assert copyScriptOtherUserContent.contains("#rm -rf ${it}")
+        }
 
         File copyScript = new File(scriptFolder, "${script}.sh")
         assert copyScript.exists()
@@ -294,5 +297,13 @@ class SampleSwapServiceTests extends GroovyScriptAwareTestCase {
 
         assert [(dataFile): [directFileName: lsdfFilesService.getFileFinalPath(dataFile), vbpFileName: lsdfFilesService.getFileViewByPidPath(dataFile)]] ==
                 sampleSwapService.collectFileNamesOfDataFiles([dataFile])
+    }
+
+
+    private List<File> createRoddyFileListToDelete(RoddyBamFile roddyBamFile) {
+        [
+                roddyBamFile.workQADirectory,
+                roddyBamFile.workExecutionStoreDirectory
+        ]*.absolutePath
     }
 }

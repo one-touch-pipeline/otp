@@ -101,21 +101,21 @@ class AbstractRoddyJobTests {
         GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
     }
 
-    private File setRootPathAndCreateTmpRoddyExecutionStoreDirectory() {
+    private File setRootPathAndCreateWorkExecutionStoreDirectory() {
         realm.rootPath = tmpDir.newFolder().path
         assert realm.save(failOnError: true)
-        File tmpRoddyExecutionDir =  new File(roddyBamFile.tmpRoddyExecutionStoreDirectory, RODDY_EXECUTION_STORE_DIRECTORY_NAME)
-        assert tmpRoddyExecutionDir.mkdirs()
-        return tmpRoddyExecutionDir
+        File workRoddyExecutionDir =  new File(roddyBamFile.workExecutionStoreDirectory, RODDY_EXECUTION_STORE_DIRECTORY_NAME)
+        assert workRoddyExecutionDir.mkdirs()
+        return workRoddyExecutionDir
     }
 
-    private File setUpTmpDirAndMockProcessOutput() {
-        File tmpRoddyExecutionDir = setRootPathAndCreateTmpRoddyExecutionStoreDirectory()
+    private File setUpWorkDirAndMockProcessOutput() {
+        File workExecutionDir = setRootPathAndCreateWorkExecutionStoreDirectory()
 
         String stdout = "Running job abc_def => 3504988"
         stderr = """newLine
 Creating the following execution directory to store information about this process:
-${tmpRoddyExecutionDir.absolutePath}
+${workExecutionDir.absolutePath}
 newLine"""
 
         ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = {String cmd ->
@@ -123,7 +123,7 @@ newLine"""
             return new ProcessHelperService.ProcessOutput(stdout: stdout, stderr: stderr, exitCode: 0)
         }
 
-        return tmpRoddyExecutionDir
+        return workExecutionDir
     }
 
     private void mockProcessOutput_noClusterJobsSubmitted() {
@@ -135,7 +135,7 @@ newLine"""
 
     @Test
     void testMaybeSubmit_clusterJobsSubmitted() {
-        setUpTmpDirAndMockProcessOutput()
+        setUpWorkDirAndMockProcessOutput()
         LogThreadLocal.withThreadLog(System.out) {
             assert AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == roddyJob.maybeSubmit()
         }
@@ -186,7 +186,7 @@ newLine"""
 
     @Test
     void testExecute_finishedClusterJobsIsNull_MaybeSubmit() {
-        setUpTmpDirAndMockProcessOutput()
+        setUpWorkDirAndMockProcessOutput()
         roddyJob.metaClass.maybeSubmit = {
             return AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
         }
@@ -229,9 +229,9 @@ newLine"""
 
     @Test
     void testCreateClusterJobObjects_Works() {
-        File tmpRoddyExecutionDir = setUpTmpDirAndMockProcessOutput()
+        File workRoddyExecutionDir = setUpWorkDirAndMockProcessOutput()
 
-        roddyBamFile.roddyExecutionDirectoryNames.add(tmpRoddyExecutionDir.name)
+        roddyBamFile.roddyExecutionDirectoryNames.add(workRoddyExecutionDir.name)
 
         assert containSame(
                 roddyJob.createClusterJobObjects(roddyBamFile, realm, OUTPUT_CLUSTER_JOBS_SUBMITTED),
@@ -334,9 +334,9 @@ newLine"""
 
     @Test
     void testSaveRoddyExecutionStoreDirectory_WhenParsedExecutionStoreDirNotEqualsToExpectedPath_ShouldFail() {
-        File tmpRoddyExecutionDir = setUpTmpDirAndMockProcessOutput()
+        File workRoddyExecutionDir = setUpWorkDirAndMockProcessOutput()
 
-        roddyBamFile.metaClass.getTmpRoddyExecutionStoreDirectory = {
+        roddyBamFile.metaClass.getWorkExecutionStoreDirectory = {
             return tmpDir.newFolder("Folder")
         }
 
@@ -347,11 +347,11 @@ newLine"""
 
     @Test
     void testSaveRoddyExecutionStoreDirectory_WhenExecutionStoreDirDoesNotExistOnFileSystem_ShouldFail() {
-        File tmpRoddyExecutionDir = setUpTmpDirAndMockProcessOutput()
+        File workRoddyExecutionDir = setUpWorkDirAndMockProcessOutput()
 
         roddyBamFile.roddyExecutionDirectoryNames.add(RODDY_EXECUTION_STORE_DIRECTORY_NAME)
 
-        tmpRoddyExecutionDir.delete()
+        workRoddyExecutionDir.delete()
 
         shouldFail(AssertionError) {
             roddyJob.saveRoddyExecutionStoreDirectory(roddyBamFile as RoddyResult, stderr)
@@ -360,11 +360,11 @@ newLine"""
 
     @Test
     void testSaveRoddyExecutionStoreDirectory_WhenExecutionStoreDirIsNoDirectory_ShouldFail() {
-        File tmpRoddyExecutionDir = setUpTmpDirAndMockProcessOutput()
+        File workRoddyExecutionDir = setUpWorkDirAndMockProcessOutput()
 
         roddyBamFile.roddyExecutionDirectoryNames.add(RODDY_EXECUTION_STORE_DIRECTORY_NAME)
 
-        tmpRoddyExecutionDir.delete()
+        workRoddyExecutionDir.delete()
         tmpDir.newFile(RODDY_EXECUTION_STORE_DIRECTORY_NAME)
 
         shouldFail(AssertionError) {
@@ -374,9 +374,10 @@ newLine"""
 
     @Test
     void testSaveRoddyExecutionStoreDirectory_WhenLatestExecutionStoreDirIsNotLastElement_ShouldFail() {
-        setUpTmpDirAndMockProcessOutput()
+        setUpWorkDirAndMockProcessOutput()
 
         roddyBamFile.roddyExecutionDirectoryNames.add("exec_999999_999999999_a_a")
+        assert roddyBamFile.save(flush: true, failOnError: true)
 
         shouldFail(AssertionError) {
             roddyJob.saveRoddyExecutionStoreDirectory(roddyBamFile as RoddyResult, stderr)
@@ -385,7 +386,7 @@ newLine"""
 
     @Test
     void testSaveRoddyExecutionStoreDirectory_WhenAllFine_ShouldBeOk() {
-        setUpTmpDirAndMockProcessOutput()
+        setUpWorkDirAndMockProcessOutput()
 
         roddyJob.saveRoddyExecutionStoreDirectory(roddyBamFile as RoddyResult, stderr)
         assert roddyBamFile.roddyExecutionDirectoryNames.last() == RODDY_EXECUTION_STORE_DIRECTORY_NAME

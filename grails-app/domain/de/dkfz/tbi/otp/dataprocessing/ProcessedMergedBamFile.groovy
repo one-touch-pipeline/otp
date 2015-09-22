@@ -81,6 +81,12 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
         return "${body}.bam"
     }
 
+    File getPathForFurtherProcessing() {
+        if (this.id == mergingWorkPackage.processableBamFileInProjectFolder?.id) {
+            return new File(baseDirectory, bamFileName)
+        }
+        throw new IllegalStateException()
+    }
 
     void withdraw() {
         withTransaction {
@@ -94,4 +100,5 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
             assert save(flush: true)
         }
     }
+
 }

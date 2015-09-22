@@ -69,7 +69,13 @@ class AbstractQualityAssessmentService {
     }
 
     void parseRoddySingleLaneQaStatistics(RoddyBamFile roddyBamFile) {
-        Map<SeqTrack, File> qaFilesPerSeqTrack = roddyBamFile.getTmpRoddySingleLaneQAJsonFiles()
+        Map<SeqTrack, File> qaFilesPerSeqTrack
+         if (roddyBamFile.isOldStructureUsed()) {
+            //TODO: OTP-1734 delete the if part
+            qaFilesPerSeqTrack = roddyBamFile.getTmpRoddySingleLaneQAJsonFiles()
+        } else {
+             qaFilesPerSeqTrack = roddyBamFile.getWorkSingleLaneQAJsonFiles()
+        }
         qaFilesPerSeqTrack.each { seqTrack, qaFile ->
             JSONObject json = JSON.parse(qaFile.text)
             Iterator chromosomes = json.keys()
@@ -88,7 +94,13 @@ class AbstractQualityAssessmentService {
 
 
     void parseRoddyBamFileQaStatistics(RoddyBamFile roddyBamFile) {
-        File qaFile = roddyBamFile.getTmpRoddyMergedQAJsonFile()
+        File qaFile
+        if (roddyBamFile.isOldStructureUsed()) {
+            //TODO: OTP-1734 delete the if part
+            qaFile = roddyBamFile.getTmpRoddyMergedQAJsonFile()
+        } else {
+            qaFile = roddyBamFile.getWorkMergedQAJsonFile()
+        }
         JSONObject json = JSON.parse(qaFile.text)
         Iterator chromosomes = json.keys()
         Collection<String> allChromosomeNames = []

@@ -23,11 +23,11 @@ public interface RoddyResult {
 
     public RoddyWorkflowConfig getConfig()
 
-    public File getTmpRoddyDirectory()
+    public File getWorkDirectory()
 
-    public File getTmpRoddyExecutionStoreDirectory()
+    public File getWorkExecutionStoreDirectory()
 
-    public File getLatestTmpRoddyExecutionDirectory()
+    public File getLatestWorkExecutionDirectory()
 
     public List<String> getRoddyExecutionDirectoryNames()
 }

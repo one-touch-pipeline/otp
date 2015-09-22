@@ -44,6 +44,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     ErrorLogService errorLogService
     CreateClusterScriptService createClusterScriptService
     ExecutionService executionService
+    ExecutionHelperService executionHelperService
     SessionFactory sessionFactory
     DataSource dataSource
     SchedulerService schedulerService
@@ -152,7 +153,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
 
     private void setupDirectoriesAndRealms() {
-
         // check whether the wf test root dir is mounted
         // (assume it is mounted if it exists and contains files)
         File rootDirectory = getRootDirectory()
@@ -191,7 +191,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
                 new File(realm.stagingRootPath),
         ])
      }
-
 
     public void createDirectories(List<File> files) {
         createDirectories(files, "2770")
@@ -396,7 +395,8 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
                     try {
                         startJob.execute()
                     } catch (Throwable t) {
-                        log.error 'Exception in StartJob', t
+                        println 'Exception in StartJob'
+                        t.printStackTrace(System.out)
                         throw t
                     }
                 }

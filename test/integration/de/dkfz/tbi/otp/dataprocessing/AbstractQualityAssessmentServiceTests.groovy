@@ -103,7 +103,7 @@ class AbstractQualityAssessmentServiceTests {
         File qaFile = temporaryFolder.newFile(RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME)
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         createReferenceGenomeEntriesAndQaFileOnFilesystem(roddyBamFile.referenceGenome, qaFile)
-        roddyBamFile.metaClass.getTmpRoddyMergedQAJsonFile = { ->
+        roddyBamFile.metaClass.getWorkMergedQAJsonFile = { ->
             return qaFile
         }
         assert RoddyMergedBamQa.list().empty
@@ -137,7 +137,7 @@ class AbstractQualityAssessmentServiceTests {
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         createReferenceGenomeEntriesAndQaFileOnFilesystem(roddyBamFile.referenceGenome, qaFile)
         SeqTrack seqTrack = exactlyOneElement(roddyBamFile.seqTracks)
-        roddyBamFile.metaClass.getTmpRoddySingleLaneQAJsonFiles = { ->
+        roddyBamFile.metaClass.getWorkSingleLaneQAJsonFiles = { ->
             return [(seqTrack): qaFile]
         }
         assert RoddySingleLaneQa.list().empty

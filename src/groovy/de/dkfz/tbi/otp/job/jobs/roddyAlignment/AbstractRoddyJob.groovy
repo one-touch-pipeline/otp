@@ -92,8 +92,14 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
 
     @Override
     protected String getLogFilePaths(ClusterJob clusterJob) {
-        File logDirectory = ((RoddyResult)getRefreshedProcessParameterObject()).latestTmpRoddyExecutionDirectory
-        return "Log file: ${new File(logDirectory, "${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}")}"
+        if (getRefreshedProcessParameterObject().isOldStructureUsed()) {
+            //TODO: OTP-1734 delete the if part
+            File logDirectory = ((RoddyResult) getRefreshedProcessParameterObject()).latestTmpRoddyExecutionDirectory
+            return "Log file: ${new File(logDirectory, "${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}")}"
+        } else {
+            File logDirectory = ((RoddyResult) getRefreshedProcessParameterObject()).latestWorkExecutionDirectory
+            return "Log file: ${new File(logDirectory, "${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}")}"
+        }
     }
 
     @Override
@@ -104,7 +110,14 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
         assert roddyResult
 
         // Roddy has started at least one pbs-job, hence the jobStateLogFile must exist.
-        JobStateLogFile jobStateLogFile = JobStateLogFile.getInstance(roddyResult.getLatestTmpRoddyExecutionDirectory())
+        File latestExecutionDirectory
+        if (roddyResult.isOldStructureUsed()) {
+            //TODO: OTP-1734 delete the if part
+            latestExecutionDirectory = roddyResult.latestTmpRoddyExecutionDirectory
+        } else {
+            latestExecutionDirectory = roddyResult.latestWorkExecutionDirectory
+        }
+        JobStateLogFile jobStateLogFile = JobStateLogFile.getInstance(latestExecutionDirectory)
 
         if (jobStateLogFile.isEmpty()) {
             throw new RuntimeException("${jobStateLogFile.getFilePath()} is empty.")
@@ -160,11 +173,17 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
         assert roddyResult
 
         File directory = parseRoddyExecutionStoreDirectoryFromRoddyOutput(roddyOutput)
-        assert directory.parentFile == roddyResult.tmpRoddyExecutionStoreDirectory
+        if (getRefreshedProcessParameterObject().isOldStructureUsed()) {
+            //TODO: OTP-1734 delete the if part
+            assert directory.parentFile == roddyResult.tmpRoddyExecutionStoreDirectory
+        } else {
+            assert directory.parentFile == roddyResult.workExecutionStoreDirectory
+        }
         assert WaitingFileUtils.waitUntilExists(directory)
         assert directory.isDirectory()
 
         roddyResult.roddyExecutionDirectoryNames.add(directory.name)
+
         assert roddyResult.roddyExecutionDirectoryNames.last() == roddyResult.roddyExecutionDirectoryNames.max()
         assert roddyResult.save(flush: true, failOnError: true)
     }

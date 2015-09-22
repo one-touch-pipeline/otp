@@ -6,7 +6,6 @@ import org.junit.*
 import org.junit.runners.model.MultipleFailureException
 import org.springframework.validation.Errors
 import org.springframework.validation.FieldError
-import junit.framework.AssertionFailedError
 
 import java.util.concurrent.Callable
 
@@ -150,5 +149,22 @@ class TestCase extends GroovyTestCase {
 
     static shouldFailWithMessageContaining(Class clazz, String messagePart, Closure code) {
         assert shouldFail(clazz, code).contains(messagePart)
+    }
+
+
+    static void checkDirectoryContentHelper(File baseDir, List<File> expectedDirs, List<File> expectedFiles = [], List<File> expectedLinks = []) {
+        expectedDirs.each {
+            assert it.exists() && it.isDirectory() && it.canRead() && it.canExecute()
+        }
+        expectedFiles.each {
+            assert it.exists() && it.isFile() && it.canRead() && it.size() > 0
+        }
+        expectedLinks.each {
+            assert it.exists() && it.canRead()
+        }
+
+        Set<File> expectedEntries = [expectedDirs, expectedFiles, expectedLinks].flatten() as Set
+        Set<File> foundEntries = baseDir.listFiles() as Set
+        assert expectedEntries == foundEntries
     }
 }

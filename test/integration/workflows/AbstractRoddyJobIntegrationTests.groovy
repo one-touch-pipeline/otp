@@ -86,6 +86,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractPanCanAlignmentWorkflowTe
         // this will make one of pbs jobs fail
         MergingWorkPackage workPackage = firstBamFile.workPackage
         File statDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(workPackage.project, workPackage.referenceGenome)
+        executionService.executeCommand(realm, "chmod g+w ${statDir}")
         File statFile = new File(statDir, DomainFactory.DEFAULT_TAB_FILE_NAME)
         statFile << HelperUtils.getUniqueString()
         workPackage.refresh()

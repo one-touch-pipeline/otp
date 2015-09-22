@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
@@ -8,15 +7,15 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
-import de.dkfz.tbi.otp.utils.logging.JobLog
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-
 
 class ExecuteRoddyCommandService {
 
     static final String CORRECT_PERMISSION_SCRIPT_NAME = "OtherUnixUserCorrectPermissionScript"
+
+    static final String CORRECT_GROUP_SCRIPT_NAME = "OtherUnixUserCorrectGroupScript"
+
+    static final String DELETE_CONTENT_OF_OTHERUNIXUSER_DIRECTORIES_SCRIPT = "OtherUnixUserDeleteContentOfOtherUserDirectoriesScript"
 
     ExecutionService executionService
 
@@ -43,8 +42,8 @@ class ExecuteRoddyCommandService {
         assert analysisIDinConfigFile : "The input analysisIDinConfigFile is not allowed to be null"
         assert realm : "The input realm is not allowed to be null"
 
-        File tempOutputDir = roddyResult.tmpRoddyDirectory
-        createTemporaryOutputDirectory(realm, tempOutputDir)
+        File workOutputDir = roddyResult.workDirectory
+        createWorkOutputDirectory(realm, workOutputDir)
 
         File roddyPath = ProcessingOptionService.getValueOfProcessingOption("roddyPath") as File
         String roddyVersion = ProcessingOptionService.getValueOfProcessingOption("roddyVersion")
@@ -69,7 +68,7 @@ class ExecuteRoddyCommandService {
                 "--useRoddyVersion=${roddyVersion} " +
                 "--usePluginVersion=${pluginVersion} " +
                 "--configurationDirectories=${configFile.parent},${roddyBaseConfigsPath} " +
-                "--useiodir=${viewByPid},${tempOutputDir} "
+                "--useiodir=${viewByPid},${workOutputDir} "
     }
 
 
@@ -97,7 +96,7 @@ class ExecuteRoddyCommandService {
     }
 
 
-    public void createTemporaryOutputDirectory(Realm realm, File file) {
+    public void createWorkOutputDirectory(Realm realm, File file) {
         assert realm : "Realm must not be null"
         assert file : "File must not be null"
         executionService.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 -p ${file} && chgrp localGroup ${file};")
@@ -112,9 +111,27 @@ class ExecuteRoddyCommandService {
 
     void correctPermissions(RoddyBamFile roddyBamFile) {
         assert roddyBamFile : "RoddyBamFile should not be null"
-        File baseFile = new File(AbstractMergedBamFileService.destinationDirectory(roddyBamFile))
-        String cmd = correctPermissionCommand(baseFile)
+        //TODO: OTP-1734 change baseDirectory to workDirectory
+        String cmd = correctPermissionCommand(roddyBamFile.baseDirectory)
         ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput(cmd)
     }
 
+    String correctGroupCommand(File basePath) {
+        assert basePath : "basePath is not allowed to be null"
+        File permissionScript = ProcessingOptionService.getValueOfProcessingOption(CORRECT_GROUP_SCRIPT_NAME) as File
+        return "cd /tmp && ${executeCommandAsRoddyUser()} ${permissionScript} ${basePath}"
+    }
+
+    void correctGroups(RoddyBamFile roddyBamFile) {
+        assert roddyBamFile : "RoddyBamFile should not be null"
+        String cmd = correctGroupCommand(roddyBamFile.workDirectory)
+        ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput(cmd)
+    }
+
+    void deleteContentOfOtherUnixUserDirectory(File basePath) {
+        assert basePath : "basePath is not allowed to be null"
+        File script = ProcessingOptionService.getValueOfProcessingOption(DELETE_CONTENT_OF_OTHERUNIXUSER_DIRECTORIES_SCRIPT) as File
+        String cmd = "cd /tmp && ${executeCommandAsRoddyUser()} ${script} ${basePath}"
+        ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput(cmd)
+    }
 }

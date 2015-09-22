@@ -20,17 +20,16 @@ class ParsePanCanQcJobTests {
     AbstractQualityAssessmentService abstractQualityAssessmentService
 
     @Rule
-    public TemporaryFolder temporaryFolder
+    public TemporaryFolder temporaryFolder = new TemporaryFolder()
 
     @Test
     void testExecute() {
-        temporaryFolder = new TemporaryFolder()
         temporaryFolder.create()
         File qaFile = temporaryFolder.newFile(RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME)
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         SeqTrack seqTrack = exactlyOneElement(roddyBamFile.seqTracks)
-        roddyBamFile.metaClass.getTmpRoddyMergedQAJsonFile = { -> qaFile }
-        roddyBamFile.metaClass.getTmpRoddySingleLaneQAJsonFiles = { -> [(seqTrack): qaFile] }
+        roddyBamFile.metaClass.getWorkMergedQAJsonFile = { -> qaFile }
+        roddyBamFile.metaClass.getWorkSingleLaneQAJsonFiles = { -> [(seqTrack): qaFile] }
         createReferenceGenomeEntriesAndQaFileOnFilesystem(roddyBamFile.referenceGenome, qaFile)
         ParsePanCanQcJob job = [
                 getProcessParameterObject: { -> roddyBamFile },

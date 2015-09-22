@@ -114,6 +114,7 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
 
     static RoddyBamFile createRoddyBamFile(MergingWorkPackage mergingWorkPackage, RoddyBamFile baseBamFile) {
         assert mergingWorkPackage
+        RoddyBamFile previousRoddyBamFile = mergingWorkPackage.bamFileInProjectFolder
         List<Long> mergableSeqtracks =  mergingWorkPackage.findMergeableSeqTracks()*.id
         List<Long> containedSeqTracks = baseBamFile?.containedSeqTracks*.id
         Set<SeqTrack> seqTracks = SeqTrack.getAll(mergableSeqtracks - containedSeqTracks) as Set
@@ -130,18 +131,21 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
                 ProcessingOption.findAllByNameAndDateObsoleted("roddyVersion", null),
                 "Could not find the ProccesingOption for 'roddyVersion'")
 
+        int identifier = RoddyBamFile.nextIdentifier(mergingWorkPackage)
         RoddyBamFile roddyBamFile = new RoddyBamFile(
                 workPackage: mergingWorkPackage,
-                identifier: RoddyBamFile.nextIdentifier(mergingWorkPackage),
+                identifier: identifier,
+                workDirectoryName: "${RoddyBamFile.WORK_DIR_PREFIX}_${identifier}",
                 baseBamFile: baseBamFile,
                 seqTracks: seqTracks,
                 config: config,
                 roddyVersion: roddyVersion
         )
-        // has to be set explicitly to null due strange behavior of GORM (?)
-        mergingWorkPackage.bamFileInProjectFolder = null
+        // has to be set explicitly to old value due strange behavior of GORM (?)
+        mergingWorkPackage.bamFileInProjectFolder = previousRoddyBamFile
         roddyBamFile.numberOfMergedLanes = roddyBamFile.containedSeqTracks.size()
         assert roddyBamFile.save(flush: true, failOnError: true)
+        assert !roddyBamFile.isOldStructureUsed()
         return roddyBamFile
     }
 }

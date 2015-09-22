@@ -19,7 +19,12 @@ import groovy.sql.Sql
 
 class SampleSwapService {
 
+
     DataSource dataSource
+
+    static final String MISSING_FILES_TEXT = "The following files are expected, but not found:"
+    static final String EXCESS_FILES_TEXT = "The following files are found, but not expected:"
+
     IndividualService individualService
     FastqcDataFilesService fastqcDataFilesService
     LsdfFilesService lsdfFilesService
@@ -215,7 +220,7 @@ mv '${oldDataFileName}' '${newDataFileName}';
                 if(failOnMissingFiles) {
                     throw new RuntimeException(message)
                 } else {
-                    outputStringBuilder.append(message)
+                    outputStringBuilder << '\n' << message
                 }
             }
         }
@@ -430,7 +435,7 @@ chmod 440 ${newDirectFileName}
         bashScriptToMoveFiles << bashHeader
 
 
-        createBashScriptRoddy(seqTracks, dirsToDelete, scriptOutputDirectory, bashScriptName, bashScriptToMoveFiles)
+        createBashScriptRoddy(seqTracks, dirsToDelete, scriptOutputDirectory, outputStringBuilder, bashScriptName, bashScriptToMoveFiles)
 
         List<DataFile> fastqDataFiles = getAndValidateAndShowDataFilesForSeqTracks(seqTracks, dataFileMap, outputStringBuilder)
         List<DataFile> bamDataFiles = getAndValidateAndShowAlignmentDataFilesForSeqTracks(seqTracks, dataFileMap, outputStringBuilder)
@@ -584,7 +589,7 @@ chmod 440 ${newDirectFileName}
         bashScriptToMoveFiles << bashHeader
 
 
-        createBashScriptRoddy(seqTrackList, dirsToDelete, scriptOutputDirectory, bashScriptName, bashScriptToMoveFiles)
+        createBashScriptRoddy(seqTrackList, dirsToDelete, scriptOutputDirectory, outputStringBuilder, bashScriptName, bashScriptToMoveFiles)
         if (AlignmentPass.findBySeqTrackInList(seqTrackList)) {
             bashScriptToMoveFiles << "\n\n\n ################ delete old aligned & merged files ################ \n"
 
@@ -664,7 +669,7 @@ chmod 440 ${newDirectFileName}
      * create a bash script to delete files from roddy,
      * the script must be executed as other user
      */
-    private void createBashScriptRoddy(List<SeqTrack> seqTrackList, List<File> dirsToDelete, String scriptOutputDirectory, String bashScriptName, File bashScriptToMoveFiles) {
+    private void createBashScriptRoddy(List<SeqTrack> seqTrackList, List<File> dirsToDelete, String scriptOutputDirectory, StringBuilder outputStringBuilder, String bashScriptName, File bashScriptToMoveFiles) {
         List<RoddyBamFile> roddyBamFiles = RoddyBamFile.createCriteria().list {
             seqTracks {
                 inList("id", seqTrackList*.id)
@@ -677,12 +682,49 @@ chmod 440 ${newDirectFileName}
 
             bashScriptToMoveFilesAsOtherUser << "\n\n\n ################ delete otherUser files ################ \n"
             roddyBamFiles.each { RoddyBamFile roddyBamFile ->
-                bashScriptToMoveFilesAsOtherUser <<
-                "#rm -rf ${roddyBamFile.getFinalExecutionStoreDirectory().listFiles()*.absolutePath.join(" ")}\n" +
-                "#rm -rf ${roddyBamFile.getFinalMergedQADirectory().listFiles()*.absolutePath.join(" ")}\n" +
-                "#rm -rf ${roddyBamFile.getFinalRoddySingleLaneQADirectories().values()*.listFiles().flatten()*.absolutePath.join(" ")}\n"
+                if (roddyBamFile.isOldStructureUsed()) {
+                    bashScriptToMoveFilesAsOtherUser <<
+                            "#rm -rf ${roddyBamFile.getFinalExecutionDirectories()*.absolutePath.join("\n#rm -rf ")}\n" +
+                            "#rm -rf ${roddyBamFile.getFinalSingleLaneQADirectories().values()*.listFiles().flatten()*.absolutePath.join("\n#rm -rf ")}\n"
+                    if (roddyBamFile.isMostRecentBamFile()) {
+                        bashScriptToMoveFilesAsOtherUser << "#rm -rf ${roddyBamFile.getFinalMergedQADirectory().listFiles()*.absolutePath.join("\n#rm -rf ")}\n"
+                    }
+                } else {
+                    bashScriptToMoveFilesAsOtherUser <<
+                            "#rm -rf ${roddyBamFile.getWorkExecutionDirectories()*.absolutePath.join("\n#rm -rf ")}\n" +
+                            "#rm -rf ${roddyBamFile.getWorkSingleLaneQADirectories().values()*.listFiles().flatten()*.absolutePath.join("\n#rm -rf ")}\n"
+                }
             }
-            bashScriptToMoveFiles << "#rm -rf ${AbstractMergedBamFileService.destinationDirectory(roddyBamFiles[0])}\n"
+            Set<File> expectedContent = [
+                    roddyBamFiles*.finalBamFile,
+                    roddyBamFiles*.finalBaiFile,
+                    roddyBamFiles*.finalMd5sumFile,
+                    roddyBamFiles*.finalExecutionStoreDirectory,
+                    roddyBamFiles*.finalQADirectory,
+                    roddyBamFiles.findAll {
+                        //files of old structure has no work directory
+                        !it.isOldStructureUsed()
+                    }*.workDirectory.findAll {
+                        //in case of realignment the work dir could already be deleted
+                        it.exists()
+                    },
+            ].flatten() as Set
+            Set<File> foundFiles = roddyBamFiles*.baseDirectory.unique()*.listFiles().flatten() as Set
+            if (foundFiles != expectedContent) {
+                List<File> missingFiles = (expectedContent - foundFiles).sort()
+                List<File> excessFiles = (foundFiles - expectedContent).sort()
+
+                outputStringBuilder << "\n\n=====================================================\n"
+                if (missingFiles) {
+                    outputStringBuilder << "\n${MISSING_FILES_TEXT}\n    ${missingFiles.join('\n    ')}"
+                }
+                if (excessFiles) {
+                    outputStringBuilder << "\n${EXCESS_FILES_TEXT}\n    ${excessFiles.join('\n    ')}"
+                }
+                outputStringBuilder << "\n=====================================================\n"
+            }
+
+            bashScriptToMoveFiles << "#rm -rf ${roddyBamFiles[0].baseDirectory}\n"
 
             seqTrackList.each { SeqTrack seqTrack ->
                 dirsToDelete << swapHelperService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)

@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 import static de.dkfz.tbi.otp.utils.WaitingFileUtils.*
@@ -344,4 +345,16 @@ class LsdfFilesService {
             throw new IOException("Unable to delete path '${dir}'.")
         }
     }
+
+    public void deleteFilesRecursive(Realm realm, Collection<File> filesOrDirectories) {
+        assert realm: 'realm may not be null'
+        assert filesOrDirectories != null: 'filesOrDirectories may not be null'
+        String cmd = createClusterScriptService.removeDirs(filesOrDirectories, CreateClusterScriptService.RemoveOption.RECURSIVE_FORCE)
+        executionService.executeCommand(realm, cmd)
+        filesOrDirectories.each {
+            assert WaitingFileUtils.waitUntilDoesNotExist(it)
+        }
+    }
+
+
 }

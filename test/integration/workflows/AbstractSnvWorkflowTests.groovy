@@ -171,12 +171,16 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
 
         if (bamFileTumor instanceof RoddyBamFile && bamFileControl instanceof RoddyBamFile) {
             createDirectories([
-                    bamFileTumor.finalBamFile.parentFile,
-                    bamFileControl.finalBamFile.parentFile,
+                    bamFileTumor.workDirectory,
+                    bamFileControl.workDirectory,
             ])
 
-            targetLocations = [bamFileTumor.finalBamFile, bamFileTumor.finalBaiFile,
-                                   bamFileControl.finalBamFile, bamFileControl.finalBaiFile]
+            targetLocations = [
+                    bamFileTumor.workBamFile,
+                    bamFileTumor.workBaiFile,
+                    bamFileControl.workBamFile,
+                    bamFileControl.workBaiFile
+            ]
 
         } else if (bamFileTumor instanceof  ProcessedMergedBamFile && bamFileControl instanceof ProcessedMergedBamFile) {
             createDirectories([

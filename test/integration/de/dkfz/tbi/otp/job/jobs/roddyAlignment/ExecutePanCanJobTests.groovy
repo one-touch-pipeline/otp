@@ -52,7 +52,11 @@ class ExecutePanCanJobTests {
 
         DomainFactory.createAlignableSeqTypes()
 
-        roddyBamFile = DomainFactory.createRoddyBamFile([md5sum: null, fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED])
+        roddyBamFile = DomainFactory.createRoddyBamFile([
+                md5sum: null,
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+                roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
+        ])
         dataProcessing = DomainFactory.createRealmDataProcessing(tmpDir.root, [name: roddyBamFile.project.realmName])
         dataManagement = DomainFactory.createRealmDataManagement(tmpDir.root, [name: roddyBamFile.project.realmName])
 
@@ -162,12 +166,14 @@ class ExecutePanCanJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_BaseBamFileExistsButIsNotInFileSystem_ShouldFail() {
-        executePanCanJob.executeRoddyCommandService.metaClass.createTemporaryOutputDirectory = { Realm realm, File file -> }
+        executePanCanJob.executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
         roddyBamFile.md5sum = "abcdefabcdefabcdefabcdefabcdefab"
-
         assert roddyBamFile.save(flush: true)
+
+        roddyBamFile.mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
+        assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
         SeqTrack seqTrack = roddyBamFile2.seqTracks.iterator()[0]
@@ -178,13 +184,13 @@ class ExecutePanCanJobTests {
 
         assert TestCase.shouldFail(AssertionError) {
             executePanCanJob.prepareAndReturnWorkflowSpecificCommand(roddyBamFile2, dataManagement)
-        }.contains(roddyBamFile.finalBamFile.path)
+        }.contains(roddyBamFile.workBamFile.path)
 
     }
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_DataFilesAreNotInFileSystem_ShouldFail() {
-        executePanCanJob.executeRoddyCommandService.metaClass.createTemporaryOutputDirectory = { Realm realm, File file -> }
+        executePanCanJob.executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
         DataFile.findAllBySeqTrack(seqTrack).each {
             assert new File(executePanCanJob.lsdfFilesService.getFileViewByPidPath(it)).delete()
@@ -196,7 +202,7 @@ class ExecutePanCanJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_ConfigFileIsNotInFileSystem_ShouldFail() {
-        executePanCanJob.executeRoddyCommandService.metaClass.createTemporaryOutputDirectory = { Realm realm, File file -> }
+        executePanCanJob.executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
         assert configFile.delete()
         assert TestCase.shouldFail(AssertionError) {
@@ -206,7 +212,7 @@ class ExecutePanCanJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_ReferenceGenomeIsNotInFileSystem_ShouldFail() {
-        executePanCanJob.executeRoddyCommandService.metaClass.createTemporaryOutputDirectory = { Realm realm, File file -> }
+        executePanCanJob.executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
         assert referenceGenomeFile.delete()
         assert TestCase.shouldFail(RuntimeException) {
@@ -217,7 +223,7 @@ class ExecutePanCanJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_ChromosomeStatSizeFileDoesNotExist_ShouldFail() {
-        executePanCanJob.executeRoddyCommandService.metaClass.createTemporaryOutputDirectory = { Realm realm, File file -> }
+        executePanCanJob.executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
         assert chromosomeStatSizeFile.delete()
         assert TestCase.shouldFail(RuntimeException) {
             executePanCanJob.prepareAndReturnWorkflowSpecificCommand(roddyBamFile, dataManagement)
@@ -227,7 +233,7 @@ class ExecutePanCanJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_NoBaseBamFileExists() {
-        executePanCanJob.executeRoddyCommandService.metaClass.createTemporaryOutputDirectory = { Realm realm, File file -> }
+        executePanCanJob.executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
         String viewByPid = roddyBamFile.individual.getViewByPidPathBase(roddyBamFile.seqType).absoluteDataManagementPath.path
         String fastqFilesAsString = roddyBamFile.seqTracks.collect {SeqTrack seqTrack ->
@@ -244,7 +250,7 @@ ${roddyBamFile.individual.pid} \
 --useRoddyVersion=${roddyVersion} \
 --usePluginVersion=${roddyBamFile.config.pluginVersion} \
 --configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} \
---useiodir=${viewByPid},${roddyBamFile.tmpRoddyDirectory} \
+--useiodir=${viewByPid},${roddyBamFile.workDirectory} \
 --cvalues="fastq_list:${fastqFilesAsString},\
 REFERENCE_GENOME:${referenceGenomeFile},\
 INDEX_PREFIX:${referenceGenomeFile.path},\
@@ -258,15 +264,29 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_BaseBamFileExistsAlready() {
-        executePanCanJob.executeRoddyCommandService.metaClass.createTemporaryOutputDirectory = { Realm realm, File file -> }
+        helperForTestPrepareAndReturnWorkflowSpecificCommand_BaseBamFileExistsAlready('Work')
+    }
 
+    @Test
+    void testPrepareAndReturnWorkflowSpecificCommand_BaseBamFileExistsAlreadyButInOldStructure() {
+        roddyBamFile.workDirectoryName = null
+        assert roddyBamFile.save(flush: true, failOnError: true)
+
+        helperForTestPrepareAndReturnWorkflowSpecificCommand_BaseBamFileExistsAlready('Final')
+    }
+
+    private void helperForTestPrepareAndReturnWorkflowSpecificCommand_BaseBamFileExistsAlready(String workOrFinal) {
+        executePanCanJob.executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
+
+        CreateFileHelper.createFile(roddyBamFile."get${workOrFinal}BamFile"())
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
         roddyBamFile.md5sum = DomainFactory.DEFAULT_MD5_SUM
-        assert roddyBamFile.save(flush: true)
+        roddyBamFile.fileSize = roddyBamFile."get${workOrFinal}BamFile"().length()
+        assert roddyBamFile.save(flush: true, failOnError: true)
 
-        CreateFileHelper.createFile(roddyBamFile.finalBamFile)
-        roddyBamFile.fileSize = roddyBamFile.finalBamFile.length()
-        assert roddyBamFile.save(flush: true)
+        roddyBamFile.mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
+        assert roddyBamFile.mergingWorkPackage.save(flush: true)
+
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile, [config: roddyBamFile.config])
         String viewByPid = roddyBamFile2.individual.getViewByPidPathBase(roddyBamFile2.seqType).absoluteDataManagementPath.path
         String fastqFilesAsString = roddyBamFile2.seqTracks.collect {SeqTrack seqTrack ->
@@ -288,9 +308,9 @@ ${roddyBamFile2.individual.pid} \
 --useRoddyVersion=${roddyVersion} \
 --usePluginVersion=${roddyBamFile2.config.pluginVersion} \
 --configurationDirectories=${new File(roddyBamFile2.config.configFilePath).parent},${roddyBaseConfigsPath} \
---useiodir=${viewByPid},${roddyBamFile2.tmpRoddyDirectory} \
+--useiodir=${viewByPid},${roddyBamFile2.workDirectory} \
 --cvalues="fastq_list:${fastqFilesAsString},\
-bam:${roddyBamFile.finalBamFile},\
+bam:${roddyBamFile."get${workOrFinal}BamFile"()},\
 REFERENCE_GENOME:${referenceGenomeFile},\
 INDEX_PREFIX:${referenceGenomeFile},\
 CHROM_SIZES_FILE:${chromosomeStatSizeFile},\
@@ -302,9 +322,10 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
         assert expectedCmd == actualCmd
     }
 
+
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_WhenReadNumberOrderIsWrong_ShouldBeOk() {
-        executePanCanJob.executeRoddyCommandService.metaClass.createTemporaryOutputDirectory = { Realm realm, File file -> }
+        executePanCanJob.executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
         String viewByPid = roddyBamFile.individual.getViewByPidPathBase(roddyBamFile.seqType).absoluteDataManagementPath.path
         String fastqFilesAsString = roddyBamFile.seqTracks.collect {SeqTrack seqTrack ->
@@ -321,7 +342,7 @@ ${roddyBamFile.individual.pid} \
 --useRoddyVersion=${roddyVersion} \
 --usePluginVersion=${roddyBamFile.config.pluginVersion} \
 --configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} \
---useiodir=${viewByPid},${roddyBamFile.tmpRoddyDirectory} \
+--useiodir=${viewByPid},${roddyBamFile.workDirectory} \
 --cvalues="fastq_list:${fastqFilesAsString},\
 REFERENCE_GENOME:${referenceGenomeFile},\
 INDEX_PREFIX:${referenceGenomeFile},\
@@ -362,62 +383,63 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
 
     @Test
     void testValidate_BamDoesNotExist_ShouldFail() {
-        CreateRoddyFileHelper.createRoddyAlignmentTempResultFiles(dataManagement, roddyBamFile)
-        roddyBamFile.tmpRoddyBamFile.delete()
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(dataManagement, roddyBamFile)
+        roddyBamFile.workBamFile.delete()
         assert TestCase.shouldFail(AssertionError) {
             executePanCanJob.validate(roddyBamFile)
-        }.contains(roddyBamFile.tmpRoddyBamFile.path)
+        }.contains(roddyBamFile.workBamFile.path)
     }
 
     @Test
     void testValidate_BaiDoesNotExist_ShouldFail() {
-        CreateRoddyFileHelper.createRoddyAlignmentTempResultFiles(dataManagement, roddyBamFile)
-        roddyBamFile.tmpRoddyBaiFile.delete()
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(dataManagement, roddyBamFile)
+        roddyBamFile.workBaiFile.delete()
         assert TestCase.shouldFail(AssertionError) {
             executePanCanJob.validate(roddyBamFile)
-        }.contains(roddyBamFile.tmpRoddyBaiFile.path)
+        }.contains(roddyBamFile.workBaiFile.path)
     }
 
     @Test
     void testValidate_Md5sumDoesNotExist_ShouldFail() {
-        CreateRoddyFileHelper.createRoddyAlignmentTempResultFiles(dataManagement, roddyBamFile)
-        roddyBamFile.tmpRoddyMd5sumFile.delete()
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(dataManagement, roddyBamFile)
+        roddyBamFile.workMd5sumFile.delete()
         assert TestCase.shouldFail(AssertionError) {
             executePanCanJob.validate(roddyBamFile)
-        }.contains(roddyBamFile.tmpRoddyMd5sumFile.path)
+        }.contains(roddyBamFile.workMd5sumFile.path)
     }
 
     @Test
     void testValidate_MergedQaDirDoesNotExist_ShouldFail() {
-        CreateRoddyFileHelper.createRoddyAlignmentTempResultFiles(dataManagement, roddyBamFile)
-        roddyBamFile.tmpRoddyQADirectory.deleteDir()
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(dataManagement, roddyBamFile)
+        roddyBamFile.workQADirectory.deleteDir()
         assert TestCase.shouldFail(AssertionError) {
             executePanCanJob.validate(roddyBamFile)
-        }.contains(roddyBamFile.tmpRoddyQADirectory.path)
+        }.contains(roddyBamFile.workQADirectory.path)
     }
 
     @Test
     void testValidate_SingleLaneQaDirDoesNotExist_ShouldFail() {
-        CreateRoddyFileHelper.createRoddyAlignmentTempResultFiles(dataManagement, roddyBamFile)
-        roddyBamFile.tmpRoddySingleLaneQADirectories.values()*.deleteDir()
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(dataManagement, roddyBamFile)
+        File singleLaneQa = roddyBamFile.workSingleLaneQADirectories.values().iterator().next()
+        assert singleLaneQa.deleteDir()
         assert TestCase.shouldFail(AssertionError) {
             executePanCanJob.validate(roddyBamFile)
-        }.contains(RoddyBamFile.RUN_PREFIX)
+        }.contains(singleLaneQa.path)
     }
 
     @Test
     void testValidate_ExecutionStoreDirDoesNotExist_ShouldFail() {
-        CreateRoddyFileHelper.createRoddyAlignmentTempResultFiles(dataManagement, roddyBamFile)
-        roddyBamFile.tmpRoddyExecutionStoreDirectory.deleteDir()
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(dataManagement, roddyBamFile)
+        roddyBamFile.workExecutionStoreDirectory.deleteDir()
         assert TestCase.shouldFail(AssertionError) {
             executePanCanJob.validate(roddyBamFile)
-        }.contains(roddyBamFile.tmpRoddyExecutionStoreDirectory.path)
+        }.contains(roddyBamFile.workExecutionStoreDirectory.path)
     }
 
     @Test
     void testValidate_PermissionChangeFail_ShouldFail() {
         String message = HelperUtils.uniqueString
-        CreateRoddyFileHelper.createRoddyAlignmentTempResultFiles(dataManagement, roddyBamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(dataManagement, roddyBamFile)
         executePanCanJob.executeRoddyCommandService.metaClass.correctPermissions = { RoddyBamFile bamFile -> assert false, message }
 
         assert TestCase.shouldFail(AssertionError) {
@@ -430,7 +452,7 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
         String MESSAGE_CORRECT_PERMISSION = 'CORECCT PERMISSION'
         String MESSAGE_CHECK_FILES = 'CHECK FILES'
         String message = MESSAGE_CORRECT_PERMISSION
-        CreateRoddyFileHelper.createRoddyAlignmentTempResultFiles(dataManagement, roddyBamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(dataManagement, roddyBamFile)
         executePanCanJob.executeRoddyCommandService.metaClass.correctPermissions = { RoddyBamFile bamFile ->
             assert MESSAGE_CORRECT_PERMISSION == message
             message = MESSAGE_CHECK_FILES
@@ -444,7 +466,7 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
 
     @Test
     void testValidate_AllFine() {
-        CreateRoddyFileHelper.createRoddyAlignmentTempResultFiles(dataManagement, roddyBamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(dataManagement, roddyBamFile)
         executePanCanJob.validate(roddyBamFile)
     }
 

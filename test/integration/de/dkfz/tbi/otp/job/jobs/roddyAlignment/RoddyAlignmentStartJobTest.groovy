@@ -210,6 +210,8 @@ class RoddyAlignmentStartJobTest {
         assert TestCase.containSame(seqTracks, rbf.seqTracks)
         assert seqTracks.size() == rbf.numberOfMergedLanes
         assert TestCase.containSame(seqTracks, rbf.containedSeqTracks)
+        assert rbf.workDirectoryName && rbf.workDirectoryName.startsWith(RoddyBamFile.WORK_DIR_PREFIX)
+        assert !rbf.isOldStructureUsed()
     }
 
     @Test
@@ -231,6 +233,8 @@ class RoddyAlignmentStartJobTest {
         assert TestCase.containSame(additionalSeqTracks, rbf.seqTracks)
         assert baseBamFile.numberOfMergedLanes + additionalSeqTracks.size() == rbf.numberOfMergedLanes
         assert TestCase.containSame(additionalSeqTracks + baseBamFile.containedSeqTracks, rbf.containedSeqTracks)
+        assert rbf.workDirectoryName && rbf.workDirectoryName.startsWith(RoddyBamFile.WORK_DIR_PREFIX)
+        assert !rbf.isOldStructureUsed()
     }
 
     @Test

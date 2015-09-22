@@ -118,4 +118,10 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
         }
     }
 
+    File getBaseDirectory() {
+        return new File(AbstractMergedBamFileService.destinationDirectory(this))
+    }
+
+    abstract File getPathForFurtherProcessing()
+
 }

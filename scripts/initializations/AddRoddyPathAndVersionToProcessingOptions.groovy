@@ -26,6 +26,22 @@ println ctx.processingOptionService.createOrUpdate(
 )
 
 println ctx.processingOptionService.createOrUpdate(
+        ExecuteRoddyCommandService.CORRECT_GROUP_SCRIPT_NAME,
+        null,
+        null,
+        "/path/to/programs/otp/OtherUnixUserBashScripts/correctGroupOtherUnixUserRemoteWrapper.sh",
+        "Script to correct file system groups",
+)
+
+println ctx.processingOptionService.createOrUpdate(
+        ExecuteRoddyCommandService.DELETE_CONTENT_OF_OTHERUNIXUSER_DIRECTORIES_SCRIPT,
+        null,
+        null,
+        "/path/to/programs/otp/OtherUnixUserBashScripts/deleteContentOfRoddyDirectoriesRemoteWrapper.sh",
+        "Script to delete content of directories owned by OtherUnixUser",
+)
+
+println ctx.processingOptionService.createOrUpdate(
         "roddyVersion",
         null,
         null,

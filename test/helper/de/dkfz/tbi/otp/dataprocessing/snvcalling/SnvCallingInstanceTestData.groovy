@@ -158,6 +158,10 @@ class SnvCallingInstanceTestData {
 
         processedMergedBamFile.fileSize = file.size()
         assert processedMergedBamFile.save(flush: true, failOnError: true)
+
+        processedMergedBamFile.mergingWorkPackage.bamFileInProjectFolder = processedMergedBamFile
+        assert processedMergedBamFile.mergingWorkPackage.save(flush: true)
+
         return file
     }
 

@@ -23,7 +23,7 @@ class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkflowTests 
 
     @Ignore
     @Test
-    void testNoProcessibleObjectFound() {
+    void testNoProcessableObjectFound() {
 
         // prepare
         RoddyBamFile firstBamFile = createFirstRoddyBamFile()
@@ -77,7 +77,8 @@ class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkflowTests 
         alignLanesOnly_NoBaseBamExist_TwoLanes()
     }
 
-    void alignLanesOnly_NoBaseBamExist_TwoLanes() {
+    //helper
+    protected void alignLanesOnly_NoBaseBamExist_TwoLanes() {
 
         // prepare
         SeqTrack firstSeqTrack = createSeqTrack("readGroup1")
@@ -99,9 +100,18 @@ class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkflowTests 
     @Ignore
     @Test
     void testAlignBaseBamAndNewLanes_allFine() {
+        alignBaseBamAndNewLanesHelper(false)
+    }
 
+    @Ignore
+    @Test
+    void testAlignBaseBamAndNewLanes_allFine_oldStructure() {
+        alignBaseBamAndNewLanesHelper(true)
+    }
+
+    protected void alignBaseBamAndNewLanesHelper(boolean useOldStructure) {
         // prepare
-        createFirstRoddyBamFile()
+        createFirstRoddyBamFile(useOldStructure)
         createSeqTrack("readGroup2")
 
         // run
@@ -109,5 +119,31 @@ class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkflowTests 
 
         // check
         checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes()
+    }
+
+    @Ignore
+    @Test
+    void testAlignWithWithdrawnBase_allFine() {
+        // prepare
+        RoddyBamFile roddyBamFile = createFirstRoddyBamFile()
+        roddyBamFile.withdrawn = true
+        roddyBamFile.save(flush: true, failOnError: true)
+        roddyBamFile.mergingWorkPackage.needsProcessing = true
+        roddyBamFile.mergingWorkPackage.save(flush: true, failOnError: true)
+
+        // run
+        execute()
+
+        // check
+        assert !roddyBamFile.workDirectory.exists()
+        checkWorkPackageState()
+
+        List<RoddyBamFile> bamFiles = RoddyBamFile.findAll().sort {it.id}
+        assert 2 == bamFiles.size()
+        assert roddyBamFile == bamFiles.first()
+        assert !bamFiles[1].baseBamFile
+        checkFirstBamFileState(bamFiles[1], true, [identifier: 1])
+        assertBamFileFileSystemPropertiesSet(bamFiles[1])
+        checkFileSystemState(bamFiles[1])
     }
 }

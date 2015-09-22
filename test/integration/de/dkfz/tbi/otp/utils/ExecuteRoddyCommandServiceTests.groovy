@@ -62,11 +62,6 @@ class ExecuteRoddyCommandServiceTests {
         new File(roddyBaseConfigsPath, "file name").write("file content")
         applicationIniPath = new File(ProcessingOptionService.getValueOfProcessingOption("roddyApplicationIni"))
         assert CreateFileHelper.createFile(applicationIniPath)
-
-        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = {String cmd ->
-            assert cmd ==~ "cd /tmp && sudo -u OtherUnixUser ${temporaryFolder.getRoot()}/.*/correctPathPermissionsOtherUnixUserRemoteWrapper.sh ${temporaryFolder.getRoot()}/.*/merged-alignment"
-            return new ProcessHelperService.ProcessOutput('', '', 0)
-        }
     }
 
     @After
@@ -181,7 +176,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDefaultRoddyExecutionCommand_ProcessingOptionRoddyPathIsNull_ShouldFail() {
-        executeRoddyCommandService.metaClass.createTemporaryOutputDirectory = { Realm realm, File file -> }
+        executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
         ProcessingOption.findByName("roddyPath").delete(flush: true)
         assert !ProcessingOption.findByName("roddyPath")
@@ -192,7 +187,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDefaultRoddyExecutionCommand_ProcessingOptionRoddyVersionIsNull_ShouldFail() {
-        executeRoddyCommandService.metaClass.createTemporaryOutputDirectory = { Realm realm, File file -> }
+        executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
         ProcessingOption.findByName("roddyVersion").delete(flush: true)
         assert !ProcessingOption.findByName("roddyVersion")
@@ -203,7 +198,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDefaultRoddyExecutionCommand_ProcessingOptionRoddyBaseConfigsPathIsNull_ShouldFail() {
-        executeRoddyCommandService.metaClass.createTemporaryOutputDirectory = { Realm realm, File file -> }
+        executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
         ProcessingOption.findByName("roddyBaseConfigsPath").delete(flush: true)
         assert !ProcessingOption.findByName("roddyBaseConfigsPath")
@@ -214,7 +209,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDefaultRoddyExecutionCommand_ProcessingOptionRoddyApplicationIniIsNull_ShouldFail() {
-        executeRoddyCommandService.metaClass.createTemporaryOutputDirectory = { Realm realm, File file -> }
+        executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
         ProcessingOption.findByName("roddyApplicationIni").delete(flush: true)
         assert !ProcessingOption.findByName("roddyApplicationIni")
@@ -226,7 +221,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDefaultRoddyExecutionCommand_ProcessingOptionRoddyApplicationIniDoesNotExistInFilesystem_ShouldFail() {
-        executeRoddyCommandService.metaClass.createTemporaryOutputDirectory = { Realm realm, File file -> }
+        executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
         assert applicationIniPath.delete()
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, realm)
@@ -235,7 +230,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDefaultRoddyExecutionCommand_BaseConfigFolderDoesNotExistInFilesystem_ShouldFail() {
-        executeRoddyCommandService.metaClass.createTemporaryOutputDirectory = { Realm realm, File file -> }
+        executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
         assert roddyBaseConfigsPath.deleteDir()
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, realm)
@@ -245,7 +240,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDefaultRoddyExecutionCommand_AllFine() {
-        executeRoddyCommandService.metaClass.createTemporaryOutputDirectory = { Realm realm, File file -> }
+        executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
         String viewByPid = roddyBamFile.individual.getViewByPidPathBase(roddyBamFile.seqType).absoluteDataManagementPath.path
 
@@ -256,9 +251,7 @@ class ExecuteRoddyCommandServiceTests {
 "--useRoddyVersion=2.1.28 " +
 "--usePluginVersion=${roddyBamFile.config.pluginVersion} " +
 "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} " +
-"--useiodir=${viewByPid},${realm.rootPath}/${roddyBamFile.project.dirName}/sequencing/${roddyBamFile.seqType.dirName}/view-by-pid/" +
-"${roddyBamFile.individual.pid}/${roddyBamFile.sampleType.dirName}/${roddyBamFile.seqType.libraryLayoutDirName}/" +
-"merged-alignment/${RoddyBamFile.TMP_DIR}_${roddyBamFile.id} "
+"--useiodir=${viewByPid},${roddyBamFile.workDirectory} "
 
         LogThreadLocal.withThreadLog(System.out) {
             String actualCmd = executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, realm)
@@ -276,34 +269,34 @@ class ExecuteRoddyCommandServiceTests {
 
 
     @Test
-    void testCreateTemporaryOutputDirectory_RealmIsNull_ShouldFail() {
+    void testCreateWorkOutputDirectory_RealmIsNull_ShouldFail() {
         TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.createTemporaryOutputDirectory(null, tmpOutputDir)
+            executeRoddyCommandService.createWorkOutputDirectory(null, tmpOutputDir)
         }
     }
 
     @Test
-    void testCreateTemporaryOutputDirectory_FileIsNull_ShouldFail() {
+    void testCreateWorkOutputDirectory_FileIsNull_ShouldFail() {
         TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.createTemporaryOutputDirectory(realm, null)
+            executeRoddyCommandService.createWorkOutputDirectory(realm, null)
         }
     }
 
    @Test
-    void testCreateTemporaryOutputDirectory_DirectoryCreationFailed_ShouldFail() {
+    void testCreateWorkOutputDirectory_DirectoryCreationFailed_ShouldFail() {
        executeRoddyCommandService.executionService.metaClass.executeCommand = { Realm realm, String command -> }
        tmpOutputDir.absoluteFile.delete()
         TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.createTemporaryOutputDirectory(realm, tmpOutputDir)
+            executeRoddyCommandService.createWorkOutputDirectory(realm, tmpOutputDir)
         }
     }
 
     @Test
-    void testCreateTemporaryOutputDirectory_AllFine() {
+    void testCreateWorkOutputDirectory_AllFine() {
         executeRoddyCommandService.executionService.metaClass.executeCommand = { Realm realm, String command ->
             [ 'bash', '-c', command ].execute().waitFor()
         }
-        executeRoddyCommandService.createTemporaryOutputDirectory(realm, tmpOutputDir)
+        executeRoddyCommandService.createWorkOutputDirectory(realm, tmpOutputDir)
     }
 
 
@@ -334,6 +327,12 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testCorrectPermission_AllFine() {
+        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = {String cmd ->
+            //TODO: OTP-1734 change baseDirectory to workDirectory
+            assert cmd ==~ "cd /tmp && sudo -u OtherUnixUser ${temporaryFolder.getRoot()}/.*/correctPathPermissionsOtherUnixUserRemoteWrapper.sh ${roddyBamFile.baseDirectory}"
+            return new ProcessHelperService.ProcessOutput('', '', 0)
+        }
+
         executeRoddyCommandService.correctPermissions(roddyBamFile)
     }
 
@@ -342,5 +341,76 @@ class ExecuteRoddyCommandServiceTests {
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.correctPermissions(null)
         }.contains('RoddyBamFile')
+    }
+
+
+    @Test
+    void testCorrectGroupCommand_AllFine() {
+        String expected = "cd /tmp && sudo -u OtherUnixUser ${ProcessingOptionService.getValueOfProcessingOption(ExecuteRoddyCommandService.CORRECT_GROUP_SCRIPT_NAME)} ${tmpOutputDir}"
+        String cmd = executeRoddyCommandService.correctGroupCommand(tmpOutputDir)
+
+        assert expected == cmd
+    }
+
+    @Test
+    void testCorrectGroupCommand_BasePathIsNull_ShouldFail() {
+        assert TestCase.shouldFail(AssertionError) {
+            executeRoddyCommandService.correctGroupCommand(null)
+        }.contains('basePath is not allowed to be null')
+    }
+
+    @Test
+    void testCorrectGroupCommand_processingOptionNotSet_ShouldFail() {
+        ProcessingOption.findByName(ExecuteRoddyCommandService.CORRECT_GROUP_SCRIPT_NAME).delete(flush: true)
+
+        assert TestCase.shouldFail(AssertionError) {
+            executeRoddyCommandService.correctGroupCommand(tmpOutputDir)
+        }.contains('Collection contains 0 elements. Expected 1.')
+    }
+
+    @Test
+    void testCorrectGroup_AllFine() {
+        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = {String cmd ->
+            assert cmd ==~ "cd /tmp && sudo -u OtherUnixUser ${temporaryFolder.getRoot()}/.*/correctGroupOtherUnixUserRemoteWrapper.sh ${roddyBamFile.workDirectory}"
+            return new ProcessHelperService.ProcessOutput('', '', 0)
+        }
+
+        executeRoddyCommandService.correctGroups(roddyBamFile)
+    }
+
+    @Test
+    void testCorrectGroup_BamFileIsNull_shouldFail() {
+        assert TestCase.shouldFail(AssertionError) {
+            executeRoddyCommandService.correctGroups(null)
+        }.contains('RoddyBamFile')
+    }
+
+
+
+    @Test
+    void testDeleteContentOfOtherUnixUserDirectory_AllFine() {
+        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = {String cmd ->
+            assert cmd ==~ "cd /tmp && sudo -u OtherUnixUser ${temporaryFolder.getRoot()}/.*/deleteContentOfRoddyDirectoriesRemoteWrapper.sh ${roddyBamFile.workDirectory}"
+            return new ProcessHelperService.ProcessOutput('', '', 0)
+        }
+
+        executeRoddyCommandService.deleteContentOfOtherUnixUserDirectory(roddyBamFile.workDirectory)
+    }
+
+    @Test
+    void testDeleteContentOfOtherUnixUserDirectory_processingOptionNotSet_ShouldFail() {
+        ProcessingOption.findByName(ExecuteRoddyCommandService.DELETE_CONTENT_OF_OTHERUNIXUSER_DIRECTORIES_SCRIPT).delete(flush: true)
+
+        assert TestCase.shouldFail(AssertionError) {
+            executeRoddyCommandService.deleteContentOfOtherUnixUserDirectory(roddyBamFile.workDirectory)
+        }.contains('Collection contains 0 elements. Expected 1.')
+    }
+
+
+    @Test
+    void testDeleteContentOfOtherUnixUserDirectory_BamFileIsNull_shouldFail() {
+        assert TestCase.shouldFail(AssertionError) {
+            executeRoddyCommandService.deleteContentOfOtherUnixUserDirectory(null)
+        }.contains('basePath is not allowed to be null')
     }
 }

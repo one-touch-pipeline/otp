@@ -17,7 +17,15 @@ import de.dkfz.tbi.otp.utils.StringUtils
  */
 class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, ProcessParameterObject {
 
+    //TODO: OTP-1734 delete constant
+    @Deprecated
     static final String TMP_DIR = ".temp_RoddyPanCan"
+
+    /*
+     * the value is also used in a check in the bash script: 'bashScripts/OtherUnixUser/checkInputParameter.sh'.
+     * If the value is changed here, it needs also to be changed there.
+     */
+    static final String WORK_DIR_PREFIX = ".merging"
 
     static final String QUALITY_CONTROL_DIR = "qualitycontrol"
 
@@ -57,6 +65,9 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
      */
     ProcessingOption roddyVersion
 
+
+    String workDirectoryName
+
     static constraints = {
         type validator: { true }
         seqTracks minSize: 1, validator: { val, obj, errors ->
@@ -69,6 +80,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         config validator: { val, obj -> val?.workflow?.id == obj.workPackage?.workflow?.id }
         identifier unique: 'workPackage'
         roddyExecutionDirectoryNames nullable: true
+        workDirectoryName nullable: true, unique: 'workPackage' //needs to be nullable for objects created before link structure was used
     }
 
     static mapping = {
@@ -180,6 +192,8 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     // Example:
     // exec_150625_102449388_SOMEUSER_WGS
     // exec_yyMMdd_HHmmssSSS_user_analysis
+    @Deprecated
+    //TODO: OTP-1734 delete method
     File getLatestTmpRoddyExecutionDirectory() {
         if (!roddyExecutionDirectoryNames) {
             throw new RuntimeException("No roddyExecutionDirectoryNames have been stored in the database for ${this}.")
@@ -196,11 +210,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return latestTmpDirectory
     }
 
-    List<File> getFinalRoddyExecutionDirectories() {
-        this.roddyExecutionDirectoryNames.collect {
-            new File(this.finalExecutionStoreDirectory, it)
-        }
-    }
 
     @Override
     String toString() {
@@ -226,25 +235,41 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     }
 
     // Example: $OTP_ROOT_PATH/${project}/sequencing/whole_genome_sequencing/view-by-pid/somePid/control/paired/merged-alignment/.temp_RoddyPanCan_${bamFileId}
+    @Deprecated
+    //TODO: OTP-1734 delete method
     File getTmpRoddyDirectory() {
         File baseDir = new File(AbstractMergedBamFileService.destinationDirectory(this))
         return new File(baseDir, "${TMP_DIR}_${this.id}")
     }
 
+    // Example: $OTP_ROOT_PATH/${project}/sequencing/whole_genome_sequencing/view-by-pid/somePid/control/paired/merged-alignment/.merging_3
+    File getWorkDirectory() {
+        return new File(baseDirectory, workDirectoryName)
+    }
+
+    @Deprecated
+    //TODO: OTP-1734 delete method
     File getTmpRoddyQADirectory() {
         return new File(this.tmpRoddyDirectory, QUALITY_CONTROL_DIR)
     }
 
     File getFinalQADirectory() {
-        File baseDir = new File(AbstractMergedBamFileService.destinationDirectory(this))
-        return new File(baseDir, QUALITY_CONTROL_DIR)
+        return new File(baseDirectory, QUALITY_CONTROL_DIR)
+    }
+
+    File getWorkQADirectory() {
+        return new File(workDirectory, QUALITY_CONTROL_DIR)
     }
 
 
+    @Deprecated
+    //TODO: OTP-1734 delete method
     File getTmpRoddyMergedQADirectory() {
         return new File(this.tmpRoddyQADirectory, MERGED_DIR)
     }
 
+    @Deprecated
+    //TODO: OTP-1734 delete method
     File getTmpRoddyMergedQAJsonFile() {
         return new File(tmpRoddyMergedQADirectory, QUALITY_CONTROL_JSON_FILE_NAME)
     }
@@ -253,34 +278,54 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return new File(this.finalQADirectory, MERGED_DIR)
     }
 
+    File getWorkMergedQADirectory() {
+        return new File(this.workQADirectory, MERGED_DIR)
+    }
+
     File getFinalMergedQAJsonFile() {
         return new File(finalMergedQADirectory, QUALITY_CONTROL_JSON_FILE_NAME)
     }
 
+    File getWorkMergedQAJsonFile() {
+        return new File(workMergedQADirectory, QUALITY_CONTROL_JSON_FILE_NAME)
+    }
+
+    @Deprecated
+    //TODO: OTP-1734 delete method
     Map<SeqTrack, File> getTmpRoddySingleLaneQADirectories() {
-        return getRoddySingleLaneQADirectoriesHelper(this.tmpRoddyQADirectory)
+        return getSingleLaneQADirectoriesHelper(this.tmpRoddyQADirectory)
     }
 
+    @Deprecated
+    //TODO: OTP-1734 delete method
     Map<SeqTrack, File> getTmpRoddySingleLaneQAJsonFiles() {
-        return getRoddySingleLaneQAJsonFiles('Tmp')
+        return getSingleLaneQAJsonFiles('TmpRoddy')
     }
 
-    Map<SeqTrack, File> getFinalRoddySingleLaneQADirectories() {
-        return getRoddySingleLaneQADirectoriesHelper(this.finalQADirectory)
+    Map<SeqTrack, File> getFinalSingleLaneQADirectories() {
+        return getSingleLaneQADirectoriesHelper(this.finalQADirectory)
     }
 
-    Map<SeqTrack, File> getFinalRoddySingleLaneQAJsonFiles() {
-        return getRoddySingleLaneQAJsonFiles('Final')
+    Map<SeqTrack, File> getWorkSingleLaneQADirectories() {
+        return getSingleLaneQADirectoriesHelper(this.workQADirectory)
     }
 
-    private Map<SeqTrack, File> getRoddySingleLaneQAJsonFiles(String tmpOrFinal) {
-        return "get${tmpOrFinal}RoddySingleLaneQADirectories"().collectEntries { SeqTrack seqTrack, File directory ->
+    Map<SeqTrack, File> getFinalSingleLaneQAJsonFiles() {
+        return getSingleLaneQAJsonFiles('Final')
+    }
+
+    Map<SeqTrack, File> getWorkSingleLaneQAJsonFiles() {
+        return getSingleLaneQAJsonFiles('Work')
+    }
+
+    private Map<SeqTrack, File> getSingleLaneQAJsonFiles(String workOrFinal) {
+        return "get${workOrFinal}SingleLaneQADirectories"().collectEntries { SeqTrack seqTrack, File directory ->
             [(seqTrack): new File(directory, QUALITY_CONTROL_JSON_FILE_NAME)]
         }
     }
 
     // Example: run140801_SN751_0197_AC4HUVACXX_D2059_AGTCAA_L001
-    Map<SeqTrack, File> getRoddySingleLaneQADirectoriesHelper(File baseDirectory) {
+    Map<SeqTrack, File> getSingleLaneQADirectoriesHelper(File baseDirectory) {
         Map<SeqTrack, File> directoriesPerSeqTrack = new HashMap<SeqTrack, File>()
         seqTracks.each { SeqTrack seqTrack ->
             String readGroupName = getReadGroupName(seqTrack)
@@ -289,41 +334,127 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return directoriesPerSeqTrack
     }
 
+    @Deprecated
+    //TODO: OTP-1734 delete method
     File getTmpRoddyExecutionStoreDirectory() {
         return new File(this.tmpRoddyDirectory, RODDY_EXECUTION_STORE_DIR)
     }
 
     File getFinalExecutionStoreDirectory() {
-        File baseDir = new File(AbstractMergedBamFileService.destinationDirectory(this))
-        return new File(baseDir, RODDY_EXECUTION_STORE_DIR)
+        return new File(baseDirectory, RODDY_EXECUTION_STORE_DIR)
     }
 
+    File getWorkExecutionStoreDirectory() {
+        return new File(workDirectory, RODDY_EXECUTION_STORE_DIR)
+    }
+
+    List<File> getFinalExecutionDirectories() {
+        this.roddyExecutionDirectoryNames.collect {
+            new File(this.finalExecutionStoreDirectory, it)
+        }
+    }
+
+    List<File> getWorkExecutionDirectories() {
+        this.roddyExecutionDirectoryNames.collect {
+            new File(this.workExecutionStoreDirectory, it)
+        }
+    }
+
+    /**
+     @returns subdirectory of {@link #getWorkExecutionStoreDirectory} corresponding to the latest roddy call
+     */
+    // Example:
+    // exec_150625_102449388_SOMEUSER_WGS
+    // exec_yyMMdd_HHmmssSSS_user_analysis
+    File getLatestWorkExecutionDirectory() {
+        if (!roddyExecutionDirectoryNames) {
+            throw new RuntimeException("No roddyExecutionDirectoryNames have been stored in the database for ${this}.")
+        }
+
+        String latestDirectoryName = roddyExecutionDirectoryNames.last()
+        assert latestDirectoryName == roddyExecutionDirectoryNames.max()
+        assert latestDirectoryName ==~ RODDY_EXECUTION_DIR_PATTERN
+
+        File latestWorkDirectory = new File(workExecutionStoreDirectory, latestDirectoryName)
+        assert WaitingFileUtils.waitUntilExists(latestWorkDirectory)
+        assert latestWorkDirectory.isDirectory()
+
+        return latestWorkDirectory
+    }
+
+    @Deprecated
+    //TODO: OTP-1734 delete method
     File getTmpRoddyBamFile() {
         return new File(this.tmpRoddyDirectory, this.bamFileName)
     }
 
+    @Deprecated
+    //TODO: OTP-1734 delete method
     File getTmpRoddyBaiFile() {
         return new File(this.tmpRoddyDirectory, this.baiFileName)
     }
 
+    @Deprecated
+    //TODO: OTP-1734 delete method
     File getTmpRoddyMd5sumFile() {
         return new File(this.tmpRoddyDirectory, this.md5sumFileName)
     }
 
     File getFinalBamFile() {
-        File baseDir = new File(AbstractMergedBamFileService.destinationDirectory(this))
-        return new File(baseDir, this.bamFileName)
+        return new File(baseDirectory, this.bamFileName)
+    }
+
+    File getWorkBamFile() {
+        return new File(workDirectory, this.bamFileName)
     }
 
     File getFinalBaiFile() {
-        File baseDir = new File(AbstractMergedBamFileService.destinationDirectory(this))
-        return new File(baseDir, this.baiFileName)
+        return new File(baseDirectory, this.baiFileName)
+    }
+
+    File getWorkBaiFile() {
+        return new File(workDirectory, this.baiFileName)
     }
 
     File getFinalMd5sumFile() {
-        File baseDir = new File(AbstractMergedBamFileService.destinationDirectory(this))
-        return new File(baseDir, this.md5sumFileName)
+        return new File(baseDirectory, this.md5sumFileName)
     }
+
+    File getWorkMd5sumFile() {
+        return new File(workDirectory, this.md5sumFileName)
+    }
+
+
+
+    /**
+     * returns whether the old or the new file structure is used.
+     * <ul>
+     *     <li>old file structure: in the old structure the processing was done in a temporary work directory. After
+     *     finishing the processing the files to keep were moved to there final place. At the end the temporary directory
+     *     was deleted.</li>
+     *     <li>new structure: The new structure is designed to not move files. Therefore a permanent work directory is
+     *     used to create files. After creation the files and directories are linked to the final place.</li>
+     * </ul>
+     *
+     * @return true if the old structure is used.
+     */
+    boolean isOldStructureUsed() {
+        return !workDirectoryName
+    }
+
+
+
+    /**
+     * return for old structure the final bam file and for the new structure the work bam file
+     */
+    File getPathForFurtherProcessing() {
+        if (this.id == mergingWorkPackage.processableBamFileInProjectFolder?.id) {
+            return isOldStructureUsed() ? finalBamFile : workBamFile
+        } else {
+            throw new IllegalStateException()
+        }
+    }
+
 
 
     void withdraw() {

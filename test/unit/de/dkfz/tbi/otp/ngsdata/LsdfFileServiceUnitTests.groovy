@@ -1,15 +1,21 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
+import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.ProcessHelperService
 import org.codehaus.groovy.control.io.NullWriter
 
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import grails.test.mixin.TestFor
+import grails.buildtestdata.mixin.Build
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
 @TestFor(LsdfFilesService)
+@Build([Realm])
 class LsdfFileServiceUnitTests {
 
     @Rule
@@ -78,6 +84,71 @@ class LsdfFileServiceUnitTests {
             service.deleteDirectory(realm, file)
         })
     }
+
+    @Test
+    void test_deleteFilesRecursive_shouldBeFine() {
+        Realm realm = DomainFactory.createRealmDataManagement(tempFolder.newFolder())
+        service.executionService = [
+                executeCommand: {Realm realm2, String command->
+                    ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+                }
+                ] as ExecutionService
+        service.createClusterScriptService = new CreateClusterScriptService()
+
+        List<File> files = [
+                tempFolder.newFolder(),
+                tempFolder.newFile(),
+        ]
+
+        service.deleteFilesRecursive(realm, files)
+
+        files.each {
+            assert !it.exists()
+        }
+    }
+
+    @Test
+    void test_deleteFilesRecursive_noRealm_shouldThrowException() {
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'realm may not be null.') {
+            service.deleteFilesRecursive(null, [tempFolder.newFolder()])
+        }
+    }
+
+    @Test
+    void test_deleteFilesRecursive_noFilesOrDirectoriesIsNull_shouldThrowException() {
+        Realm realm = DomainFactory.createRealmDataManagement(tempFolder.newFolder())
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'filesOrDirectories may not be null.') {
+            service.deleteFilesRecursive(realm, null)
+        }
+    }
+
+
+
+    @Test
+    void test_deleteFilesRecursive_deletionFail_shouldThrowException() {
+        final String MESSAGE = HelperUtils.uniqueString
+        Realm realm = DomainFactory.createRealmDataManagement(tempFolder.newFolder())
+        service.executionService = [
+                executeCommand: {Realm realm2, String command->
+                    assert false: MESSAGE
+                }
+        ] as ExecutionService
+        service.createClusterScriptService = new CreateClusterScriptService()
+
+        List<File> files = [
+                tempFolder.newFolder(),
+                tempFolder.newFile(),
+        ]
+        TestCase.shouldFailWithMessageContaining(AssertionError, MESSAGE) {
+            service.deleteFilesRecursive(realm, files)
+        }
+
+        files.each {
+            assert it.exists()
+        }
+    }
+
+
 
     private void testDeleteMethod(File file, Closure call) {
         Realm realm = new Realm()

@@ -28,6 +28,7 @@ class DomainFactory {
 
     static final String DEFAULT_MD5_SUM = '123456789abcdef123456789abcdef00'
     static final String DEFAULT_TAB_FILE_NAME = 'DefaultTabFileName.tab'
+    static final String DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY = 'exec_123456_123456789_test_test'
     static final long DEFAULT_FILE_SIZE = 123456
     static final Map PROCESSED_BAM_FILE_PROPERTIES = [
             fileSize: 123456789,
@@ -226,6 +227,7 @@ class DomainFactory {
         SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile(workPackage)
         RoddyBamFile bamFile = RoddyBamFile.build([
                 numberOfMergedLanes: 1,
+                workDirectoryName: "${RoddyBamFile.WORK_DIR_PREFIX}_${counter++}",
                 seqTracks: [seqTrack],
                 workPackage: workPackage,
                 identifier: RoddyBamFile.nextIdentifier(workPackage),
@@ -246,6 +248,7 @@ class DomainFactory {
                 workPackage: baseBamFile.workPackage,
                 identifier: baseBamFile.identifier + 1,
                 numberOfMergedLanes: baseBamFile.numberOfMergedLanes + 1,
+                workDirectoryName: "${RoddyBamFile.WORK_DIR_PREFIX}_${counter++}",
                 seqTracks: bamFileProperties.seqTracks ?: [DomainFactory.buildSeqTrackWithDataFile(baseBamFile.workPackage)],
                 md5sum: DEFAULT_MD5_SUM,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
@@ -672,6 +675,23 @@ class DomainFactory {
                 type: "",
                 project: null,
                 value: "${basePath}/correctPathPermissionsOtherUnixUserRemoteWrapper.sh",
+                comment: "some comment",
+        ).save(flush: true)
+
+
+        assert new ProcessingOption(
+                name: ExecuteRoddyCommandService.CORRECT_GROUP_SCRIPT_NAME,
+                type: "",
+                project: null,
+                value: "${basePath}/correctGroupOtherUnixUserRemoteWrapper.sh",
+                comment: "some comment",
+        ).save(flush: true)
+
+        assert new ProcessingOption(
+                name: ExecuteRoddyCommandService.DELETE_CONTENT_OF_OTHERUNIXUSER_DIRECTORIES_SCRIPT,
+                type: "",
+                project: null,
+                value:  "${basePath}/deleteContentOfRoddyDirectoriesRemoteWrapper.sh",
                 comment: "some comment",
         ).save(flush: true)
 

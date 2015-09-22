@@ -1,12 +1,12 @@
 package workflows
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
-import de.dkfz.tbi.otp.utils.ExternalScript
 import de.dkfz.tbi.otp.utils.ProcessHelperService
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import org.junit.After
@@ -95,12 +95,15 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
     @Override
     Duration getTimeout() {
-        return Duration.standardMinutes(30)
-
+        return Duration.standardHours(3)
     }
 
     @Before
     void setUp() {
+        String group = grailsApplication.config.otp.testing.group
+        assert group: '"otp.testing.group" is not set in your "otp.properties". Please add it with an existing secondary group.'
+        executionHelperService.setGroup(realm, realm.rootPath as File, group)
+
         //BUG in Junit, solved in 4.8.1
         //the line can be deleted after grails update
         temporaryFolder.create()
@@ -232,15 +235,16 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
 
 
-    List<File> createFileListForFirstBam(RoddyBamFile firstBamFile) {
+    List<File> createFileListForFirstBam(RoddyBamFile firstBamFile, String finalOrWork) {
+        Map<SeqTrack, File> singleLaneQa = firstBamFile."${finalOrWork}SingleLaneQAJsonFiles"
         List<File> baseAndQaJsonFiles = [
-                firstBamFile.finalBaiFile,
-                firstBamFile.finalMd5sumFile,
-                firstBamFile.finalMergedQAJsonFile,
-                firstBamFile.finalRoddySingleLaneQAJsonFiles.values()
+                firstBamFile."${finalOrWork}BaiFile",
+                firstBamFile."${finalOrWork}Md5sumFile",
+                firstBamFile."${finalOrWork}MergedQAJsonFile",
+                singleLaneQa.values(),
         ].flatten()
 
-        File roddyExecutionDirectory = new File(firstBamFile.finalExecutionStoreDirectory, firstBamFile.roddyExecutionDirectoryNames.first())
+        File roddyExecutionDirectory = new File(firstBamFile."${finalOrWork}ExecutionStoreDirectory", firstBamFile.roddyExecutionDirectoryNames.first())
         List<File> executionStorageFiles =  filesInRoddyExecutionDir.collect {
             new File(roddyExecutionDirectory, it)
         }
@@ -249,7 +253,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     }
 
 
-    RoddyBamFile createFirstRoddyBamFile() {
+    RoddyBamFile createFirstRoddyBamFile(boolean oldStructure = false) {
         assert firstBamFile.exists()
 
         MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
@@ -269,22 +273,29 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
                 dateFromFileSystem: new Date(firstBamFile.lastModified()),
                 roddyExecutionDirectoryNames: ['exec_123456_123456789_bla_bla']
         )
-        assert firstBamFile.save(flush: true)
+        if (!oldStructure) {
+            firstBamFile.workDirectoryName = "${RoddyBamFile.WORK_DIR_PREFIX}_0"
+        }
+        assert firstBamFile.save(flush: true, failOnError: true)
 
-        createDirectories([
-                firstBamFile.finalBamFile.parentFile
-        ])
         linkFileUtils.createAndValidateLinks([(this.firstBamFile): firstBamFile.finalBamFile], realm)
 
-
-        Map<File, String> filesWithContent = createFileListForFirstBam(firstBamFile).collectEntries {
+        Map<File, String> filesWithContent = createFileListForFirstBam(firstBamFile, 'final').collectEntries {
             [(it): TEST_CONTENT]
+        }
+
+        if (!oldStructure) {
+            filesWithContent << createFileListForFirstBam(firstBamFile, 'work').collectEntries {
+                [(it): TEST_CONTENT]
+            }
+            linkFileUtils.createAndValidateLinks([(this.firstBamFile): firstBamFile.workBamFile], realm)
         }
 
         createFilesWithContent(filesWithContent)
 
+        workPackage.bamFileInProjectFolder = firstBamFile
         workPackage.needsProcessing = false
-        workPackage.save(flush: true)
+        assert workPackage.save(flush: true, failOnError: true)
 
         return firstBamFile
     }
@@ -355,7 +366,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         assertBamFileFileSystemPropertiesSet(latestBamFile)
     }
 
-    void checkFirstBamFileState(RoddyBamFile bamFile, boolean isMostResentBamFile) {
+    void checkFirstBamFileState(RoddyBamFile bamFile, boolean isMostResentBamFile, Map bamFileProperties = [:]) {
         SeqTrack seqTrack = SeqTrack.findByLaneId("readGroup1")
         checkBamFileState(bamFile, [
                 identifier         : 0L,
@@ -365,7 +376,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
                 containedSeqTracks : [seqTrack],
                 fileOperationStatus: FileOperationStatus.PROCESSED,
                 withdrawn          : false
-        ])
+        ] + bamFileProperties)
     }
 
     void checkLatestBamFileState(RoddyBamFile latestBamFile, RoddyBamFile firstbamFile, Map latestBamFileProperties = [:]) {
@@ -425,53 +436,57 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     }
 
     void checkFileSystemState(RoddyBamFile bamFile, Integer numberOfWorkflowRestarts = 0) {
-        assert !bamFile.tmpRoddyDirectory.exists()
 
-        // content of the final dir: root
-        List<File> mainOutFiles = [bamFile.finalBamFile, bamFile.finalBaiFile, bamFile.finalMd5sumFile]
-        assert 5 == bamFile.finalBamFile.parentFile.list().length
-        mainOutFiles.each {
-            lsdfFilesService.ensureFileIsReadableAndNotEmpty(it)
+        //content of the final dir: root
+        List<File> rootDirs = [
+                bamFile.finalQADirectory,
+                bamFile.finalExecutionStoreDirectory,
+                bamFile.workDirectory,
+        ]
+
+        List<File> rootFileLinks = [
+                bamFile.finalBamFile,
+                bamFile.finalBaiFile,
+                bamFile.finalMd5sumFile,
+        ]
+        if (bamFile.baseBamFile && !bamFile.baseBamFile.isOldStructureUsed()) {
+            rootDirs << bamFile.baseBamFile.workDirectory
         }
+        TestCase.checkDirectoryContentHelper(bamFile.baseDirectory, rootDirs, [], rootFileLinks)
+
+        //check work directories
+        checkWorkDirFileSystemState(bamFile)
+        if (bamFile.baseBamFile && !bamFile.baseBamFile.isOldStructureUsed()) {
+            checkWorkDirFileSystemState(bamFile.baseBamFile, true)
+        }
+
+        //check md5sum content
         assert bamFile.md5sum == bamFile.finalMd5sumFile.text.replaceAll("\n", "")
 
         // content of the final dir: qa
-        assert bamFile.finalQADirectory.exists()
-        File mergedQaJson = bamFile.finalMergedQAJsonFile
-        Map<SeqTrack, File> singleLaneQaJsonFiles = bamFile.finalRoddySingleLaneQAJsonFiles
+        List<File> qaDirs = [
+                bamFile.finalSingleLaneQADirectories.values(),
+                bamFile.finalMergedQADirectory,
+        ]
         if (bamFile.baseBamFile) {
-            singleLaneQaJsonFiles += bamFile.baseBamFile.finalRoddySingleLaneQAJsonFiles
+            qaDirs << bamFile.baseBamFile.finalSingleLaneQADirectories.values()
         }
-        assert bamFile.numberOfMergedLanes == singleLaneQaJsonFiles.size()
-        List<File> qaJsonFiles = [mergedQaJson] + singleLaneQaJsonFiles.values()
-        qaJsonFiles.each { File jsonFile ->
-            lsdfFilesService.ensureDirIsReadableAndNotEmpty(jsonFile.parentFile)
-            lsdfFilesService.ensureFileIsReadableAndNotEmpty(jsonFile)
-            JSON.parse(jsonFile.text) // throws ConverterException when the JSON content is not valid
-        }
+        TestCase.checkDirectoryContentHelper(bamFile.finalQADirectory, [], [], qaDirs.flatten())
+
         // qa only for merged and one for each read group
         assert bamFile.numberOfMergedLanes + 1 == bamFile.finalQADirectory.list().length
 
-        // all roddyExecutionDirs have been copied
-        List<File> fileSystemRoddyExecutionDirs = bamFile.finalExecutionStoreDirectory.listFiles() as List
-        assert RoddyBamFile.list().size() + numberOfWorkflowRestarts == fileSystemRoddyExecutionDirs.size()
-        List<File> expectedRoddyExecutionDirs = bamFile.finalRoddyExecutionDirectories
+        // all roddyExecutionDirs have been linked
+        List<File> expectedRoddyExecutionDirs = bamFile.finalExecutionDirectories
         if (bamFile.baseBamFile) {
-            expectedRoddyExecutionDirs += bamFile.baseBamFile.finalRoddyExecutionDirectories
+            expectedRoddyExecutionDirs += bamFile.baseBamFile.finalExecutionDirectories
         }
-        assert expectedRoddyExecutionDirs.sort() == fileSystemRoddyExecutionDirs.sort()
-
-        //check that given files exist in the execution store:
-        fileSystemRoddyExecutionDirs.each { executionStore ->
-            filesInRoddyExecutionDir.each { String fileName ->
-                lsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(executionStore.absolutePath, fileName))
-            }
-        }
+        TestCase.checkDirectoryContentHelper(bamFile.finalExecutionStoreDirectory, expectedRoddyExecutionDirs)
 
         // content of the bam file
         LogThreadLocal.withThreadLog(System.out) {
-            ProcessHelperService.ProcessOutput processOutput = ProcessHelperService.waitForCommand("zcat ${bamFile.finalBamFile} 1> /dev/null")
-            assert processOutput.stderr.length() == 0: "Stderr is not null, but ${stderr.toString()}"
+            ProcessHelperService.ProcessOutput processOutput = ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput("zcat ${bamFile.finalBamFile} 1> /dev/null")
+            assert processOutput.stderr.length() == 0: "Stderr is not null, but ${processOutput.stderr.toString()}"
             assert bamFile.finalBamFile.length() == bamFile.fileSize
         }
         // samtools may under some circumstances produce small bam files of size larger than zero that however do not contain any reads.
@@ -479,6 +494,52 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
         checkInputIsNotDeleted()
     }
+
+    void checkWorkDirFileSystemState(RoddyBamFile bamFile, boolean isBaseBamFile = false) {
+        // content of the work dir: root
+        List<File> rootDir = [
+                bamFile.workQADirectory,
+                bamFile.workExecutionStoreDirectory,
+        ]
+        List<File> rootFiles
+        if (isBaseBamFile) {
+            rootFiles = [
+                    bamFile.workMd5sumFile,
+            ]
+        } else {
+            rootFiles = [
+                    bamFile.workBamFile,
+                    bamFile.workBaiFile,
+                    bamFile.workMd5sumFile,
+            ]
+        }
+        TestCase.checkDirectoryContentHelper(bamFile.workDirectory, rootDir, rootFiles)
+
+        // content of the work dir: qa
+        List<File> qaDirs = bamFile.workSingleLaneQADirectories.values() as List
+        List<File> qaJson = bamFile.workSingleLaneQAJsonFiles.values() as List
+        if (!isBaseBamFile) {
+            qaDirs << bamFile.workMergedQADirectory
+            qaJson << bamFile.workMergedQAJsonFile
+        }
+        TestCase.checkDirectoryContentHelper(bamFile.workQADirectory, qaDirs)
+        qaJson.each {
+            assert it.exists() && it.isFile() && it.canRead() && it.size() > 0
+            JSON.parse(it.text) // throws ConverterException when the JSON content is not valid
+        }
+
+        //  content of the work dir: executionStoreDirectory
+        TestCase.checkDirectoryContentHelper(bamFile.workExecutionStoreDirectory, bamFile.workExecutionDirectories)
+
+        //check that given files exist in the execution store:
+        bamFile.workExecutionDirectories.each { executionStore ->
+            filesInRoddyExecutionDir.each { String fileName ->
+                lsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(executionStore.absolutePath, fileName))
+            }
+        }
+    }
+
+
 
     void checkInputIsNotDeleted() {
         List<DataFile> fastqFiles = DataFile.findAll()

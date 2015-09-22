@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstanceTestData
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.TestCase
 
 import static de.dkfz.tbi.otp.dataprocessing.AbstractBamFileServiceTests.*
 
@@ -50,6 +51,7 @@ class ProcessedMergedBamFileIntegrationTests {
         assert processedMergedBamFile.overallQualityAssessment == oqaLater
         assert processedMergedBamFile.overallQualityAssessment != oqaFormer
     }
+
 
 
     @Test
@@ -124,6 +126,33 @@ class ProcessedMergedBamFileIntegrationTests {
         }
         assert testData.bamFileTumor.withdrawn
         assert callingResult.withdrawn
+    }
+
+
+
+    @Test
+    void testGetPathForFurtherProcessing_IsSetInMergingWorkPackage_shouldReturnDir() {
+        ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile([
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                md5sum: DomainFactory.DEFAULT_MD5_SUM,
+                fileSize: DomainFactory.DEFAULT_FILE_SIZE,
+        ])
+        assert DomainFactory.createRealmDataManagement(TestCase.getUniqueNonExistentPath(), [name: bamFile.project.realmName]).save(flush: true, failOnError: true)
+        File expected = new File(bamFile.baseDirectory, bamFile.bamFileName)
+        bamFile.mergingWorkPackage.bamFileInProjectFolder = bamFile
+        assert bamFile.mergingWorkPackage.save(flush: true, failOnError: true)
+
+        assert expected == bamFile.getPathForFurtherProcessing()
+    }
+
+    @Test
+    void testGetPathForFurtherProcessing_IsNotSetInMergingWorkPackage__shouldThrowException() {
+        ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile()
+        assert DomainFactory.createRealmDataManagement(TestCase.getUniqueNonExistentPath(), [name: bamFile.project.realmName]).save(flush: true, failOnError: true)
+
+        TestCase.shouldFail(IllegalStateException) {
+            bamFile.getPathForFurtherProcessing()
+        }
     }
 
 

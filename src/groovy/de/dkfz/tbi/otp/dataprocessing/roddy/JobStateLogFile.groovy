@@ -31,7 +31,7 @@ public class JobStateLogFile {
 
     /**
      * @param roddyExecutionDirectory subdirectory of
-     * {@link de.dkfz.tbi.otp.dataprocessing.RoddyBamFile#getTmpRoddyExecutionStoreDirectory} corresponding to a roddy call
+     * {@link de.dkfz.tbi.otp.dataprocessing.RoddyBamFile#getWorkExecutionStoreDirectory} corresponding to a roddy call
      */
     private JobStateLogFile(File roddyExecutionDirectory) {
         file = new File(roddyExecutionDirectory, JOB_STATE_LOG_FILE_NAME)
