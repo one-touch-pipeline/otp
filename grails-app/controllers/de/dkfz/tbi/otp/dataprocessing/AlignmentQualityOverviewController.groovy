@@ -16,6 +16,10 @@ import de.dkfz.tbi.otp.utils.FormatHelper
 
 class AlignmentQualityOverviewController {
 
+    public static final String CHR_X_HG19 = 'chrX'
+    public static final String CHR_Y_HG19 = 'chrY'
+
+
     enum WarningLevel {
         NO('okay'),
         WarningLevel1('warning1'),
@@ -30,7 +34,7 @@ class AlignmentQualityOverviewController {
 
 
 
-    private static final List<Chromosomes> chromosomes = [Chromosomes.CHR_X, Chromosomes.CHR_Y].asImmutable()
+    private static final List<String> chromosomes = [Chromosomes.CHR_X.alias, Chromosomes.CHR_Y.alias, CHR_X_HG19, CHR_Y_HG19].asImmutable()
 
     private static final List<String> HEADER_WHOLE_GENOME = [
         'alignment.quality.individual',
@@ -142,7 +146,7 @@ class AlignmentQualityOverviewController {
 
         List<AbstractQualityAssessment> dataOverall = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(project, seqType)
         List<AbstractQualityAssessment> dataChromosomeXY = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes, dataOverall*.qualityAssessmentMergedPass)
-        Map chromosomeMapXY = dataChromosomeXY.groupBy ([{it.qualityAssessmentMergedPass.id}, {it.chromosomeName }])
+        Map chromosomeMapXY = dataChromosomeXY.groupBy ([{it.qualityAssessmentMergedPass.id}, {it.chromosomeName}])
 
         List sequenceLengthsAndReferenceGenomeLengthWithoutN = overallQualityAssessmentMergedService.findSequenceLengthAndReferenceGenomeLengthWithoutNForQualityAssessmentMerged(dataOverall)
         // TODO: has to be adapted when issue OTP-1670 is solved
@@ -198,8 +202,9 @@ class AlignmentQualityOverviewController {
                     Double coverageX
                     Double coverageY
                     if (referenceGenomeLengthWithoutN) {
-                        AbstractQualityAssessment x = chromosomeMapXY[it.qualityAssessmentMergedPass.id][Chromosomes.CHR_X.alias][0]
-                        AbstractQualityAssessment y = chromosomeMapXY[it.qualityAssessmentMergedPass.id][Chromosomes.CHR_Y.alias][0]
+                        Map chromosomeMap = chromosomeMapXY[it.qualityAssessmentMergedPass.id]
+                        AbstractQualityAssessment x = getQualityAssessmentForFirstMatchingChromosomeName(chromosomeMap, [Chromosomes.CHR_X.alias, CHR_X_HG19])
+                        AbstractQualityAssessment y = getQualityAssessmentForFirstMatchingChromosomeName(chromosomeMap, [Chromosomes.CHR_Y.alias, CHR_Y_HG19])
                         long qcBasesMappedXChromosome = x.qcBasesMapped
                         long qcBasesMappedYChromosome = y.qcBasesMapped
                         coverageX = qcBasesMappedXChromosome / referenceGenomeLengthWithoutN
@@ -233,7 +238,9 @@ class AlignmentQualityOverviewController {
         render dataToRender as JSON
     }
 
-
+    private AbstractQualityAssessment getQualityAssessmentForFirstMatchingChromosomeName(Map qualityAssessmentMergedPassGroupedByChromosome, List<String> chromosomeNames) {
+        return exactlyOneElement(chromosomeNames.findResult { qualityAssessmentMergedPassGroupedByChromosome.get(it) })
+    }
 
     private static WarningLevel warningLevelForDuplicates(Double duplicates) {
         if (duplicates > 25) {

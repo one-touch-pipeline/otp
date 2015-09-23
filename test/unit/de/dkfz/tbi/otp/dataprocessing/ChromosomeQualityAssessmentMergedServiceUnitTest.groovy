@@ -25,8 +25,8 @@ class ChromosomeQualityAssessmentMergedServiceUnitTest {
         chromosomeQualityAssessmentMergedService = new ChromosomeQualityAssessmentMergedService()
 
         chromosomes = [
-            Chromosomes.CHR_X,
-            Chromosomes.CHR_Y
+            Chromosomes.CHR_X.getAlias(),
+            Chromosomes.CHR_Y.getAlias()
         ]
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass1 = QualityAssessmentMergedPass.build()

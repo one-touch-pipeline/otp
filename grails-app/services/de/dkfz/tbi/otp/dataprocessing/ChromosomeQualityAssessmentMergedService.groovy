@@ -18,7 +18,7 @@ class ChromosomeQualityAssessmentMergedService {
 
 
 
-    List<AbstractQualityAssessment> qualityAssessmentMergedForSpecificChromosomes(List<Chromosomes> chromosomes, List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses) {
+    List<AbstractQualityAssessment> qualityAssessmentMergedForSpecificChromosomes(List<String> chromosomes, List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses) {
         Assert.notNull(chromosomes, 'Parameter "chromosomes" may not be null')
         Assert.notNull(qualityAssessmentMergedPasses, 'Parameter "qualityAssessmentMergedPasses" may not be null')
 
@@ -35,14 +35,14 @@ class ChromosomeQualityAssessmentMergedService {
 
             if (bamFilePasses) {
                 bamFileQAPerChromosome = ChromosomeQualityAssessmentMerged.createCriteria().list {
-                    'in'("chromosomeName", chromosomes*.alias)
+                    'in'("chromosomeName", chromosomes)
                     'in'('qualityAssessmentMergedPass', bamFilePasses)
                 }
             }
 
             if (roddyFilePasses) {
                 roddyQAPerChromosome = RoddyMergedBamQa.createCriteria().list {
-                    'in'("chromosome", chromosomes*.alias)
+                    'in'("chromosome", chromosomes)
                     'in'('qualityAssessmentMergedPass', roddyFilePasses)
                 }
             }
