@@ -253,7 +253,7 @@ mv '${oldDataFileName}' '${newDataFileName}';
         notNull(newProject, "parameter newProject must not be null")
         notNull(dataFileMap, "parameter dataFileMap must not be null")
         assert dataFiles*.fileName as Set == dataFileMap.keySet()
-        assert dataFiles as Set == oldDataFileNameMap.keySet()
+        assert dataFiles*.id as Set == oldDataFileNameMap.keySet()*.id as Set
 
         String bashScriptToMoveFiles = ""
 
@@ -262,8 +262,8 @@ mv '${oldDataFileName}' '${newDataFileName}';
             String bashMoveDirectFile = ""
             String bashMoveVbpFile = ""
 
-            String oldDirectFileName = oldDataFileNameMap[it]["directFileName"]
-            String oldVbpFileName = oldDataFileNameMap[it]["vbpFileName"]
+            String oldDirectFileName = oldDataFileNameMap.find {key, value -> key.id == it.id}.value["directFileName"]
+            String oldVbpFileName = oldDataFileNameMap.find {key, value -> key.id == it.id}.value["vbpFileName"]
             File directFile = new File(oldDirectFileName)
             File vbpFile = new File(oldVbpFileName)
 
