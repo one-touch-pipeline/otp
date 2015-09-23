@@ -194,6 +194,21 @@ class SampleSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
+    void test_changeSeqType_withClassChange() {
+        SeqType wgs = DomainFactory.createSeqType(name: SeqTypeNames.WHOLE_GENOME.seqTypeName)
+        SeqType exome = DomainFactory.createSeqType(name: SeqTypeNames.EXOME.seqTypeName)
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(seqType: wgs)
+        assert seqTrack.class == SeqTrack
+        long seqTrackId = seqTrack.id
+
+        SeqTrack returnedSeqTrack = sampleSwapService.changeSeqType(seqTrack, exome)
+
+        assert returnedSeqTrack.id == seqTrackId
+        assert returnedSeqTrack.seqType.id == exome.id
+        assert returnedSeqTrack.class == ExomeSeqTrack
+    }
+
+    @Test
     void test_renameSampleIdentifiers() {
 
         Sample sample = Sample.build()
