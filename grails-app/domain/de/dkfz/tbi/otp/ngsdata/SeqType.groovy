@@ -57,6 +57,10 @@ class SeqType {
         return libraryLayout.toLowerCase()
     }
 
+    Class<? extends SeqTrack> getSeqTrackClass() {
+        return SeqTypeNames.fromSeqTypeName(name)?.seqTrackClass ?: SeqTrack
+    }
+
     String toString() {
         "${aliasOrName} ${libraryLayout}"
     }

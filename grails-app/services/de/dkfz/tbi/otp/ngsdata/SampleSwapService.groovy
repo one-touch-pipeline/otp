@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import javax.sql.DataSource
+
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
 import de.dkfz.tbi.otp.dataprocessing.DataProcessingFilesService
@@ -13,8 +15,11 @@ import de.dkfz.tbi.otp.ngsqc.*
 
 import static org.springframework.util.Assert.*
 
+import groovy.sql.Sql
+
 class SampleSwapService {
 
+    DataSource dataSource
     IndividualService individualService
     FastqcDataFilesService fastqcDataFilesService
     LsdfFilesService lsdfFilesService
@@ -67,6 +72,31 @@ class SampleSwapService {
         }
     }
 
+    /**
+     * @return The {@link SeqTrack}, possibly with a new type.
+     */
+    SeqTrack changeSeqType(SeqTrack seqTrack, SeqType newSeqType) {
+        assert seqTrack.class == seqTrack.seqType.seqTrackClass
+        if (seqTrack.seqType.id != newSeqType.id) {
+            if (seqTrack.class != newSeqType.seqTrackClass) {
+                [seqTrack.seqType, newSeqType]*.seqTrackClass.each {
+                    if (![SeqTrack, ExomeSeqTrack].contains(it)) {
+                        throw new UnsupportedOperationException("Changing the SeqTrack class from or to ${it} is not supported yet.")
+                    }
+                }
+                Sql sql = new Sql(dataSource)
+                assert 1 == sql.executeUpdate("update seq_track set class = ${newSeqType.seqTrackClass.name} where id = ${seqTrack.id} and class = ${seqTrack.class.name};")
+                SeqTrack.withSession { session ->
+                    session.clear()
+                }
+                seqTrack = SeqTrack.get(seqTrack.id)
+            }
+            assert seqTrack.class == newSeqType.seqTrackClass
+            seqTrack.seqType = newSeqType
+            assert seqTrack.save(failOnError: true, flush: true)
+        }
+        return seqTrack
+    }
 
     /**
      * rename all sample identifiers of the given identifier. The new name is the old name added with the text

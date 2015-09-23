@@ -24,7 +24,7 @@ class SeqTrackBuilderUnitTests {
                         "lane",
                         new Run(),
                         new Sample(),
-                        new SeqType(),
+                        new SeqType(name: SeqTypeNames.WHOLE_GENOME.seqTypeName),
                         new SeqPlatform(),
                         new SoftwareTool()
                         )
@@ -317,7 +317,7 @@ class SeqTrackBuilderUnitTests {
                 "lane",
                 new Run(),
                 new Sample(),
-                new SeqType(),
+                new SeqType(name: SeqTypeNames.WHOLE_GENOME.seqTypeName),
                 new SeqPlatform(),
                 new SoftwareTool()
         )

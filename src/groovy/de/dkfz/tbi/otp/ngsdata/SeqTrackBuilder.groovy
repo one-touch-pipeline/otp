@@ -174,6 +174,7 @@ class SeqTrackBuilder {
         } else {
             seqTrack = new SeqTrack()
         }
+        assert seqTrack.class == seqType.seqTrackClass
         notNull(informationReliability, "A seq track needs the kitInformationReliability for exome data")
         if (informationReliability == InformationReliability.KNOWN) {
             notNull(libraryPreparationKit, "A seq track needs an library preparation kit when kitInformationReliability is KNOWN")

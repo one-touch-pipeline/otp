@@ -735,7 +735,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertNotNull(sample.save([flush: true]))
 
         SeqType seqType = new SeqType(
-                        name: "seqtype",
+                        name: SeqTypeNames.WHOLE_GENOME.seqTypeName,
                         libraryLayout: "library",
                         dirName: "dirName"
                         )
