@@ -20,6 +20,11 @@ String projectName = ''
 String pluginVersionToUse = ''
 
 
+//The config version used. Has to be match the expression: '^v\d+_\d+$'
+//The first version of a file has 'v1_0
+String configVersion = 'v1_0'
+
+
 /**
  * the complete path to the config file.
  * The file should be located in: $OTP_ROOT_PATH/$PROJECT/configFiles/$Workflow/
@@ -55,6 +60,7 @@ Project.withTransaction {
             pluginVersionToUse,
             workflow,
             configFilePath,
+            configVersion,
     )
 
     assert ctx[panCanAlignmentDeciderBeanName]

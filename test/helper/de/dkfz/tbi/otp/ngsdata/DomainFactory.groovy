@@ -14,6 +14,7 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.ExternalScript
 import de.dkfz.tbi.otp.utils.HelperUtils
@@ -30,6 +31,7 @@ class DomainFactory {
     static final String DEFAULT_TAB_FILE_NAME = 'DefaultTabFileName.tab'
     static final String DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY = 'exec_123456_123456789_test_test'
     static final long DEFAULT_FILE_SIZE = 123456
+    static final String TEST_CONFIG_VERSION = 'v1_0'
     static final Map PROCESSED_BAM_FILE_PROPERTIES = [
             fileSize: 123456789,
             md5sum: DEFAULT_MD5_SUM,
@@ -41,7 +43,7 @@ class DomainFactory {
      */
     static int counter = 0
 
-    private static <T> T createDomainObject(Class<T> domainClass, Map defaultProperties, Map parameterProperties) {
+    private static <T> T createDomainObject(Class<T> domainClass, Map defaultProperties, Map parameterProperties, boolean saveAndValidate = true) {
         T domain = domainClass.newInstance()
         defaultProperties.each { String key, def value ->
             if (!parameterProperties.containsKey(key)) {
@@ -55,7 +57,9 @@ class DomainFactory {
         parameterProperties.each { String key, def value ->
             domain[key] = value
         }
-        assert domain.save(flush: true, failOnError: true)
+        if (saveAndValidate) {
+            assert domain.save(flush: true, failOnError: true)
+        }
         return domain
     }
 
@@ -127,6 +131,10 @@ class DomainFactory {
 
     static Workflow createDefaultOtpWorkflow() {
         return Workflow.buildLazy(name: Workflow.Name.DEFAULT_OTP, type: Workflow.Type.ALIGNMENT)
+    }
+
+    static Workflow returnOrCreateAnyWorkflow() {
+        return (CollectionUtils.atMostOneElement(Workflow.list(max: 1)) ?: createPanCanWorkflow())
     }
 
     public static MergingSet createMergingSet(final MergingWorkPackage mergingWorkPackage) {
@@ -231,7 +239,10 @@ class DomainFactory {
                 seqTracks: [seqTrack],
                 workPackage: workPackage,
                 identifier: RoddyBamFile.nextIdentifier(workPackage),
-                config: RoddyWorkflowConfig.buildLazy(workflow: workPackage.workflow, project: workPackage.project, pluginVersion: HelperUtils.uniqueString, obsoleteDate: null),
+                config: DomainFactory.createRoddyWorkflowConfig(
+                        workflow: workPackage.workflow,
+                        project: workPackage.project,
+                ),
                 md5sum: DEFAULT_MD5_SUM,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 fileSize: 10000,
@@ -244,7 +255,7 @@ class DomainFactory {
     public static createRoddyBamFile(RoddyBamFile baseBamFile, Map bamFileProperties = [:]) {
         RoddyBamFile bamFile = RoddyBamFile.build([
                 baseBamFile: baseBamFile,
-                config: bamFileProperties.config ?: RoddyWorkflowConfig.build(workflow: baseBamFile.config.workflow, pluginVersion: HelperUtils.uniqueString),
+                config: bamFileProperties.config ?: DomainFactory.createRoddyWorkflowConfig(workflow: baseBamFile.config.workflow),
                 workPackage: baseBamFile.workPackage,
                 identifier: baseBamFile.identifier + 1,
                 numberOfMergedLanes: baseBamFile.numberOfMergedLanes + 1,
@@ -492,6 +503,23 @@ class DomainFactory {
                 run            : { createRun() },
                 seqPlatform    : { createSeqPlatform() },
         ], seqTrackProperties)
+    }
+
+
+    static RoddyWorkflowConfig createRoddyWorkflowConfig(Map properties = [:], boolean saveAndValidate = true) {
+        Workflow workflow = properties.containsKey('workflow') ? properties.workflow : createPanCanWorkflow()
+        String pluginVersion = properties.containsKey('pluginVersion') ? properties.pluginVersion : "pluginVersion:1.1.${counter++}"
+        String configVersion = properties.containsKey('configVersion') ? properties.configVersion : "v1_${counter++}"
+
+        return createDomainObject(RoddyWorkflowConfig, [
+                workflow: workflow,
+                configFilePath: {"${TestCase.uniqueNonExistentPath}/${workflow.name.name()}_${pluginVersion.substring(pluginVersion.indexOf(':') + 1)}_${configVersion}.xml"},
+                pluginVersion: pluginVersion,
+                configVersion: configVersion,
+                project: {createProject()},
+                dateCreated: {new Date()},
+                lastUpdated: {new Date()},
+        ], properties, saveAndValidate)
     }
 
     public static SeqTrack buildSeqTrackWithDataFile(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:]) {

@@ -147,9 +147,9 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         firstBamFile = new File(baseTestDataDir, 'first-bam-file/first-bam-file_merged.mdup.bam')
         refGenDir = new File(baseTestDataDir, 'reference-genomes/bwa06_1KGRef')
         chromosomeNamesFile = new File(baseTestDataDir, 'reference-genomes/chromosome-names.txt')
-        projectConfigFile = new File(baseTestDataDir, 'project-config/projectTestAlignment.xml')
-        conveyProjectConfigFile = new File(baseTestDataDir, 'project-config/conveyProjectTestAlignment.xml')
-        roddyFailsProjectConfig = new File(baseTestDataDir, 'project-config/roddy-fails-project-config.xml')
+        projectConfigFile = new File(baseTestDataDir, 'project-config/projectTestAlignment-version.xml')
+        conveyProjectConfigFile = new File(baseTestDataDir, 'project-config/conveyProjectTestAlignment-version.xml')
+        roddyFailsProjectConfig = new File(baseTestDataDir, 'project-config/roddy-fails-project-config-version.xml')
     }
 
     MergingWorkPackage createWorkPackage() {
@@ -208,9 +208,12 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
                 configFilePath: configFile.absolutePath,
                 workflow: workPackage.workflow,
                 pluginVersion: pluginVersion,
+                configVersion: DomainFactory.TEST_CONFIG_VERSION,
                 project: workPackage.project,
                 obsoleteDate: null
         )
+        //ensure that expected identifier is available
+        assert configFile.text.contains("${workPackage.workflow.name}_${pluginVersion}_${DomainFactory.TEST_CONFIG_VERSION}")
     }
 
     SeqTrack createSeqTrack(String readGroupNum) {
@@ -366,7 +369,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
             }
         }
 
-        bamFile.getFinalRoddySingleLaneQAJsonFiles().each { seqTrack, qaFile ->
+        bamFile.getFinalSingleLaneQAJsonFiles().each { seqTrack, qaFile ->
             JSONObject json = JSON.parse(qaFile.text)
             Iterator chromosomes = json.keys()
             chromosomes.each { String chromosome ->
@@ -594,7 +597,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     String getPluginVersion(File projectConfig) {
         def configuration = new XmlParser().parseText(projectConfig.text)
         String nameValue = configuration.@name
-        return nameValue.replaceAll("${Workflow.Name.PANCAN_ALIGNMENT}_", "")
+        return nameValue.replaceAll("${Workflow.Name.PANCAN_ALIGNMENT}_", "").replaceAll("_${DomainFactory.TEST_CONFIG_VERSION}", '')
     }
 
     void setPluginVersion(String pluginVersion) {

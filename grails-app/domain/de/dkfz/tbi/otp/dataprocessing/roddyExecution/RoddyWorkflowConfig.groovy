@@ -2,8 +2,10 @@ package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProject
 import de.dkfz.tbi.otp.dataprocessing.Workflow
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Project
+
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
@@ -19,19 +21,24 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
  */
 class RoddyWorkflowConfig extends ConfigPerProject {
 
+    //dot makes problems in roddy config identifiers, therefore an underscore is used
+    final static String CONFIG_VERSION_PATTERN =  /^v\d+_\d+$/
+
     Workflow workflow
 
     /**
-     * the full path to the config file which is used in this project and workflow. The name of the configFile contains the version number.
+     * the full path to the config file which is used in this project and workflow. The name of the config file contains the version number.
      *
      * The file should be located in: $OTP_ROOT_PATH/$PROJECT/configFiles/$Workflow/
-     * The file should be named as: ${Workflow}_${WorkflowVersion}_v${fileVersion}.xml
+     * The file should be named as: ${Workflow}_${WorkflowVersion}_${configVersion}.xml
      *
-     * for example: $OTP_ROOT_PATH/$PROJECT/configFiles/PANCAN_ALIGNMENT/PANCAN_ALIGNMENT_1.0.177_v1.0.xml
+     * for example: $OTP_ROOT_PATH/$PROJECT/configFiles/PANCAN_ALIGNMENT/PANCAN_ALIGNMENT_1.0.177_v1_0.xml
      */
     String configFilePath
 
     String pluginVersion
+
+    String configVersion
 
     static constraints = {
         configFilePath validator: { path ->
@@ -40,15 +47,15 @@ class RoddyWorkflowConfig extends ConfigPerProject {
         workflow unique: ['project', 'configFilePath']
         pluginVersion blank: false
         workflow unique: ['project', 'obsoleteDate']  // partial index: WHERE obsolete_date IS NULL
+        configVersion nullable: true, blank: false, unique: ['project', 'workflow', 'pluginVersion'], matches: CONFIG_VERSION_PATTERN //needs to be nullable because of old data
     }
 
-    static void importProjectConfigFile(Project project, String pluginVersionToUse, Workflow workflow, String configFilePath) {
+    static void importProjectConfigFile(Project project, String pluginVersionToUse, Workflow workflow, String configFilePath, String configVersion) {
         assert project : "The project is not allowed to be null"
         assert workflow : "The workflow is not allowed to be null"
         assert pluginVersionToUse:"The pluginVersionToUse is not allowed to be null"
         assert configFilePath : "The configFilePath is not allowed to be null"
-
-        validateNewConfigFile(pluginVersionToUse, workflow, configFilePath,)
+        assert configVersion : "The configVersion is not allowed to be null"
 
         RoddyWorkflowConfig roddyWorkflowConfig = getLatest(project, workflow)
 
@@ -57,17 +64,12 @@ class RoddyWorkflowConfig extends ConfigPerProject {
                 workflow: workflow,
                 configFilePath: configFilePath,
                 pluginVersion: pluginVersionToUse,
-                previousConfig: roddyWorkflowConfig
+                previousConfig: roddyWorkflowConfig,
+                configVersion: configVersion,
         )
+        config.validateConfig()
         config.createConfigPerProject()
     }
-
-
-    static void validateNewConfigFile(String pluginVersionToUse, Workflow workflow, String configFilePath) {
-        assert workflow : "The workflow is not allowed to be null"
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(configFilePath))
-    }
-
 
     static RoddyWorkflowConfig getLatest(final Project project, final Workflow workflow) {
         assert project : "The project is not allowed to be null"
@@ -77,6 +79,25 @@ class RoddyWorkflowConfig extends ConfigPerProject {
         } catch (final Throwable t) {
             throw new RuntimeException("Found more than one RoddyWorkflowConfig for Project ${project} and Workflow ${workflow}. ${t.message ?: ''}", t)
         }
+    }
+
+    void validateConfig() {
+        File configFile = configFilePath as File
+        assert configFile.exists() :"File '${configFile}' does not exist"
+        String pattern = /^${Pattern.quote(workflow.name.name())}_(.+)_${Pattern.quote(configVersion)}\.xml$/
+        Matcher matcher = configFile.name =~ pattern
+        assert matcher.matches(): "The file name '${configFile.name}' does not match the pattern '${pattern}'"
+        assert pluginVersion.endsWith(":${matcher.group(1)}")
+        def configuration = new XmlParser().parseText(configFile.text)
+        assert configuration.@name == getNameUsedInConfig()
+    }
+
+    String getNameUsedInConfig() {
+        String nameInConfigFile = "${workflow.name}_${pluginVersion}"
+        if (configVersion) {
+            nameInConfigFile = "${nameInConfigFile}_${configVersion}"
+        }
+        return nameInConfigFile
     }
 
 }

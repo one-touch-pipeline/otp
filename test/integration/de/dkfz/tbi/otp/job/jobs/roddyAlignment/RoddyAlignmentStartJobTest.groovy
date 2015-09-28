@@ -12,7 +12,6 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Run
 import de.dkfz.tbi.otp.ngsdata.RunSegment
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.utils.ExternalScript
 import org.junit.After
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -308,8 +307,8 @@ class RoddyAlignmentStartJobTest {
                 workflow: workflow,
                 statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
         ])
-        RoddyWorkflowConfig.build([workflow: workflow, project: mwp.project, pluginVersion: HelperUtils.uniqueString])
-        Run run = Run.build()
+        DomainFactory.createRoddyWorkflowConfig([workflow: workflow, project: mwp.project])
+        Run run = DomainFactory.createRun()
         DomainFactory.buildSeqTrackWithDataFile(mwp, [run: run])
         RunSegment.build(run: run, filesStatus: filesStatus)
         return mwp

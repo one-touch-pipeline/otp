@@ -244,7 +244,7 @@ class ExecutePanCanJobTests {
 
         String expectedCmd =  """\
 cd /tmp \
-&& sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.pluginVersion}.config@WGS \
+&& sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@WGS \
 ${roddyBamFile.individual.pid} \
 --useconfig=${roddyApplicationIni} \
 --useRoddyVersion=${roddyVersion} \
@@ -302,7 +302,7 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
 
         String expectedCmd = """\
 cd /tmp \
-&& sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile2.workflow.name}_${roddyBamFile2.config.pluginVersion}.config@WGS \
+&& sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile2.workflow.name}_${roddyBamFile2.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@WGS \
 ${roddyBamFile2.individual.pid} \
 --useconfig=${roddyApplicationIni} \
 --useRoddyVersion=${roddyVersion} \
@@ -336,7 +336,7 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
 
         String expectedCmd =  """\
 cd /tmp && \
-sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.pluginVersion}.config@WGS \
+sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@WGS \
 ${roddyBamFile.individual.pid} \
 --useconfig=${roddyApplicationIni} \
 --useRoddyVersion=${roddyVersion} \

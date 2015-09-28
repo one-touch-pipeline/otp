@@ -6,21 +6,25 @@ import de.dkfz.tbi.otp.dataprocessing.Workflow
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.TestData
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-import de.dkfz.tbi.otp.utils.HelperUtils
-
 /**
  */
 class RoddyWorkflowConfigTests {
 
-    final String PLUGIN_VERSION = "1234" // arbitrary version
-    final String ANOTHER_PLUGIN_VERSION = "5678"
+    static final String TEST_RODDY_PLUGIN_VERSION_PLUGIN_PART = 'plugin'
+    static final String TEST_RODDY_PLUGIN_VERSION_VERSION_PART = '1.2.3'
+    static final String TEST_RODDY_PLUGIN_VERSION_VERSION_PART_2 = '1.2.4'
+    static final String TEST_RODDY_PLUGIN_VERSION = "${TEST_RODDY_PLUGIN_VERSION_PLUGIN_PART}:${TEST_RODDY_PLUGIN_VERSION_VERSION_PART}"
+    static final String TEST_RODDY_PLUGIN_VERSION_2 = "${TEST_RODDY_PLUGIN_VERSION_PLUGIN_PART}:${TEST_RODDY_PLUGIN_VERSION_VERSION_PART_2}"
+    static final String TEST_RODDY_CONFIG_FILE_NAME = "${Workflow.Name.PANCAN_ALIGNMENT.name()}_${TEST_RODDY_PLUGIN_VERSION_VERSION_PART}_${DomainFactory.TEST_CONFIG_VERSION}.xml"
+    static final String TEST_RODDY_CONFIG_FILE_NAME_PLUGIN_VERSION_2 = "${Workflow.Name.PANCAN_ALIGNMENT.name()}_${TEST_RODDY_PLUGIN_VERSION_VERSION_PART_2}_${DomainFactory.TEST_CONFIG_VERSION}.xml"
+    static final String TEST_RODDY_CONFIG_LABEL_IN_FILE = "${Workflow.Name.PANCAN_ALIGNMENT.name()}_${TEST_RODDY_PLUGIN_VERSION}_${DomainFactory.TEST_CONFIG_VERSION}"
+    final String INVALID_CONFIG_VERSION = "invalid"
 
     File configDir
     File configFile
@@ -29,10 +33,10 @@ class RoddyWorkflowConfigTests {
     @Before
     void setUp() {
         configDir = TestCase.createEmptyTestDirectory()
-        configFile = new File(configDir, 'tempConfigFile.txt')
-        CreateFileHelper.createFile(configFile)
-        secondConfigFile = new File(configDir, 'tempConfigFile_v2.txt')
-        CreateFileHelper.createFile(secondConfigFile)
+        configFile = new File(configDir, TEST_RODDY_CONFIG_FILE_NAME)
+        CreateFileHelper.createRoddyWorkflowConfig(configFile, TEST_RODDY_CONFIG_LABEL_IN_FILE)
+        secondConfigFile = new File(configDir, TEST_RODDY_CONFIG_FILE_NAME_PLUGIN_VERSION_2)
+        CreateFileHelper.createRoddyWorkflowConfig(secondConfigFile, TEST_RODDY_CONFIG_LABEL_IN_FILE)
     }
 
 
@@ -45,82 +49,74 @@ class RoddyWorkflowConfigTests {
     }
 
 
-    @Test
-    void testValidateNewConfigFile_WorkflowIsNull_ShouldFail() {
-        TestCase.shouldFail(AssertionError) {
-            RoddyWorkflowConfig.validateNewConfigFile(PLUGIN_VERSION, null, configFile.path)
-        }
-    }
-
-    @Test
-    void testValidateNewConfigFile_AllFine() {
-        Workflow workflow = createCorrectSetupAndReturnWorkflow()
-        int version = 0
-        LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file ->
-            version ++
-        }
-        RoddyWorkflowConfig.validateNewConfigFile(PLUGIN_VERSION, workflow, configFile.path)
-        assert version == 1
-    }
-
 
     @Test
     void testImportProjectConfigFile_ProjectIsNull_ShouldFail() {
-        Workflow workflow = createCorrectSetupAndReturnWorkflow()
-        TestCase.shouldFail(AssertionError) {
-            RoddyWorkflowConfig.importProjectConfigFile(null, PLUGIN_VERSION, workflow, configFile.path)
+        Workflow workflow = DomainFactory.returnOrCreateAnyWorkflow()
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'The project is not allowed to be null') {
+            RoddyWorkflowConfig.importProjectConfigFile(null, TEST_RODDY_PLUGIN_VERSION, workflow, configFile.path, DomainFactory.TEST_CONFIG_VERSION)
         }
     }
 
     @Test
     void testImportProjectConfigFile_WorkflowIsNull_ShouldFail() {
         Project project = Project.build()
-        TestCase.shouldFail(AssertionError) {
-            RoddyWorkflowConfig.importProjectConfigFile(project, PLUGIN_VERSION, null, configFile.path)
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'The workflow is not allowed to be null') {
+            RoddyWorkflowConfig.importProjectConfigFile(project, TEST_RODDY_PLUGIN_VERSION, null, configFile.path, DomainFactory.TEST_CONFIG_VERSION)
         }
     }
 
     @Test
     void testImportProjectConfigFile_PluginVersionToUseIsNull_ShouldFail() {
         Project project = Project.build()
-        Workflow workflow = createCorrectSetupAndReturnWorkflow()
-        TestCase.shouldFail(AssertionError) {
-            RoddyWorkflowConfig.importProjectConfigFile(project, null, workflow, configFile.path)
+        Workflow workflow = DomainFactory.returnOrCreateAnyWorkflow()
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'The pluginVersionToUse is not allowed to be null') {
+            RoddyWorkflowConfig.importProjectConfigFile(project, null, workflow, configFile.path, DomainFactory.TEST_CONFIG_VERSION)
         }
     }
 
     @Test
     void testImportProjectConfigFile_ConfigFilePathIsNull_ShouldFail() {
         Project project = Project.build()
-        Workflow workflow = createCorrectSetupAndReturnWorkflow()
-        TestCase.shouldFail(AssertionError) {
-            RoddyWorkflowConfig.importProjectConfigFile(project, PLUGIN_VERSION, workflow, null)
+        Workflow workflow = DomainFactory.returnOrCreateAnyWorkflow()
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'The configFilePath is not allowed to be null') {
+            RoddyWorkflowConfig.importProjectConfigFile(project, TEST_RODDY_PLUGIN_VERSION, workflow, null, DomainFactory.TEST_CONFIG_VERSION)
+        }
+    }
+
+    @Test
+    void testImportProjectConfigFile_ConfigVersionIsBlank_ShouldFail() {
+        Project project = Project.build()
+        Workflow workflow = DomainFactory.returnOrCreateAnyWorkflow()
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'The configVersion is not allowed to be null') {
+            RoddyWorkflowConfig.importProjectConfigFile(project, TEST_RODDY_PLUGIN_VERSION, workflow, configFile.path, '')
         }
     }
 
     @Test
     void testImportProjectConfigFile_NoPreviousRoddyWorkflowConfigExists() {
         Project project = Project.build()
-        Workflow workflow = createCorrectSetupAndReturnWorkflow()
+        Workflow workflow = DomainFactory.returnOrCreateAnyWorkflow()
         assert RoddyWorkflowConfig.list().size == 0
-        RoddyWorkflowConfig.importProjectConfigFile(project, PLUGIN_VERSION, workflow, configFile.path)
+        RoddyWorkflowConfig.importProjectConfigFile(project, TEST_RODDY_PLUGIN_VERSION, workflow, configFile.path, DomainFactory.TEST_CONFIG_VERSION)
         RoddyWorkflowConfig roddyWorkflowConfig = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.list())
         assert roddyWorkflowConfig.project == project
         assert roddyWorkflowConfig.workflow == workflow
         assert roddyWorkflowConfig.configFilePath == configFile.path
-        assert roddyWorkflowConfig.pluginVersion == PLUGIN_VERSION
+        assert roddyWorkflowConfig.pluginVersion == TEST_RODDY_PLUGIN_VERSION
         assert roddyWorkflowConfig.previousConfig == null
+        assert roddyWorkflowConfig.configVersion == DomainFactory.TEST_CONFIG_VERSION
     }
 
     @Test
     void testImportProjectConfigFile_PreviousRoddyWorkflowConfigExists() {
         Project project = Project.build()
-        Workflow workflow = createCorrectSetupAndReturnWorkflow()
-        RoddyWorkflowConfig roddyWorkflowConfig1 = RoddyWorkflowConfig.build(project: project, workflow: workflow, pluginVersion: ANOTHER_PLUGIN_VERSION)
+        Workflow workflow = DomainFactory.returnOrCreateAnyWorkflow()
+        RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(project: project, workflow: workflow, pluginVersion: TEST_RODDY_PLUGIN_VERSION_2, configVersion: DomainFactory.TEST_CONFIG_VERSION)
         assert RoddyWorkflowConfig.list().size == 1
-        RoddyWorkflowConfig.importProjectConfigFile(project, PLUGIN_VERSION, workflow, configFile.path)
+        RoddyWorkflowConfig.importProjectConfigFile(project, TEST_RODDY_PLUGIN_VERSION, workflow, configFile.path, DomainFactory.TEST_CONFIG_VERSION)
         assert RoddyWorkflowConfig.list().size == 2
-        RoddyWorkflowConfig roddyWorkflowConfig2 = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAllByPluginVersion(PLUGIN_VERSION))
+        RoddyWorkflowConfig roddyWorkflowConfig2 = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAllByPluginVersion(TEST_RODDY_PLUGIN_VERSION))
         assert roddyWorkflowConfig2.previousConfig == roddyWorkflowConfig1
         assert roddyWorkflowConfig1.obsoleteDate
     }
@@ -128,33 +124,36 @@ class RoddyWorkflowConfigTests {
 
     @Test
     void testGetLatest_ProjectIsNull_ShouldFail() {
-        Workflow workflow = Workflow.build()
-        TestCase.shouldFail(AssertionError) {
+        Workflow workflow = DomainFactory.returnOrCreateAnyWorkflow()
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'The project is not allowed to be null') {
             RoddyWorkflowConfig.getLatest(null, workflow)
         }
     }
 
     @Test
     void testGetLatest_WorkflowIsNull_ShouldFail() {
-        Project project = Project.build()
-        TestCase.shouldFail(AssertionError) {
+        Project project = DomainFactory.createProject()
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'The workflow is not allowed to be null') {
             RoddyWorkflowConfig.getLatest(project, null)
         }
     }
 
     @Test
     void testGetLatest_ThereIsNoConfigFileInTheDatabase() {
-        Project project = Project.build()
-        Workflow workflow = Workflow.build()
+        Project project = DomainFactory.createProject()
+        Workflow workflow = DomainFactory.returnOrCreateAnyWorkflow()
         assert !RoddyWorkflowConfig.getLatest(project, workflow)
     }
 
 
     @Test
     void testGetLatest_OneRoddyWorkflowConfigExists() {
-        Project project = Project.build()
-        Workflow workflow = createCorrectSetupAndReturnWorkflow()
-        RoddyWorkflowConfig roddyWorkflowConfig = RoddyWorkflowConfig.build(project: project, workflow: workflow, pluginVersion: PLUGIN_VERSION)
+        Project project = DomainFactory.createProject()
+        Workflow workflow = DomainFactory.returnOrCreateAnyWorkflow()
+        RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig([
+                project: project,
+                workflow: workflow,
+        ])
         assert RoddyWorkflowConfig.getLatest(project, workflow) == roddyWorkflowConfig
     }
 
@@ -162,32 +161,35 @@ class RoddyWorkflowConfigTests {
     @Test
     void testGetLatest_OneActiveAndOneObsoleteRoddyWorkflowConfigExists() {
         File newConfigFile = CreateFileHelper.createFile(new File(configDir, 'ConfigFile2.txt'))
-        Project project = Project.build()
-        Workflow workflow = createCorrectSetupAndReturnWorkflow()
-        RoddyWorkflowConfig roddyWorkflowConfig1 = RoddyWorkflowConfig.build(project: project, workflow: workflow, pluginVersion: PLUGIN_VERSION, obsoleteDate: new Date())
-        RoddyWorkflowConfig roddyWorkflowConfig2 = RoddyWorkflowConfig.build(project: project, workflow: workflow, pluginVersion: ANOTHER_PLUGIN_VERSION,
-                previousConfig: roddyWorkflowConfig1, configFilePath: newConfigFile.path)
+        Project project = DomainFactory.createProject()
+        Workflow workflow = DomainFactory.returnOrCreateAnyWorkflow()
+        RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(
+                project: project,
+                workflow: workflow,
+                obsoleteDate: new Date(),
+        )
+        RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig(
+                project: project,
+                workflow: workflow,
+                previousConfig: roddyWorkflowConfig1,
+        )
         assert RoddyWorkflowConfig.getLatest(project, workflow) == roddyWorkflowConfig2
     }
 
 
     void testCreateConfigPerProject_PreviousConfigExists() {
-        Workflow workflow = DomainFactory.createPanCanWorkflow()
-        Project project = TestData.createProject()
-        ConfigPerProject firstConfigPerProject = RoddyWorkflowConfig.build(
+        Workflow workflow = DomainFactory.returnOrCreateAnyWorkflow()
+        Project project = DomainFactory.createProject()
+        ConfigPerProject firstConfigPerProject = DomainFactory.createRoddyWorkflowConfig(
                 project: project,
-                pluginVersion: HelperUtils.uniqueString,
-                configFilePath: configFile.path,
+                workflow: workflow,
         )
-        firstConfigPerProject.save()
 
-        ConfigPerProject newConfigPerProject = new RoddyWorkflowConfig(
+        ConfigPerProject newConfigPerProject = DomainFactory.createRoddyWorkflowConfig([
                 project: project,
                 workflow: workflow,
                 previousConfig: firstConfigPerProject,
-                pluginVersion: HelperUtils.uniqueString,
-                configFilePath: secondConfigFile.path,
-        )
+        ], false)
 
         assert !firstConfigPerProject.obsoleteDate
 
@@ -199,11 +201,9 @@ class RoddyWorkflowConfigTests {
 
 
     void testCreateConfigPerProject_PreviousConfigDoesNotExist(){
-        Project project = TestData.createProject()
-        ConfigPerProject configPerProject = RoddyWorkflowConfig.build(
+        Project project = DomainFactory.createProject()
+        ConfigPerProject configPerProject = DomainFactory.createRoddyWorkflowConfig(
                 project: project,
-                pluginVersion: HelperUtils.uniqueString,
-                configFilePath: configFile,
         )
         configPerProject.createConfigPerProject()
         assert ConfigPerProject.findAllByProject(project).size() == 1
@@ -211,20 +211,9 @@ class RoddyWorkflowConfigTests {
 
 
     void testMakeObsolete() {
-        ConfigPerProject configPerProject = RoddyWorkflowConfig.build(
-                project: TestData.createProject(),
-                pluginVersion: HelperUtils.uniqueString,
-                configFilePath: configFile,
-        )
+        ConfigPerProject configPerProject = DomainFactory.createRoddyWorkflowConfig()
         assert !configPerProject.obsoleteDate
         configPerProject.makeObsolete()
         assert configPerProject.obsoleteDate
     }
-
-
-    private Workflow createCorrectSetupAndReturnWorkflow() {
-        Workflow workflow = DomainFactory.createPanCanWorkflow()
-        return workflow
-    }
-
 }
