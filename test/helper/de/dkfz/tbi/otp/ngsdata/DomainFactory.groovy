@@ -353,6 +353,21 @@ class DomainFactory {
         return mwp
     }
 
+    static SamplePair createSamplePair(Map properties = [:]) {
+        MergingWorkPackage mergingWorkPackage1 = TestData.createMergingWorkPackage(
+                sample: createSample(),
+                seqType: createSeqType(),
+                seqPlatformGroup: SeqPlatformGroup.build()
+        )
+        assert mergingWorkPackage1.save(flush: true, failOnError: true)
+        SampleTypePerProject sampleTypePerProject = SampleTypePerProject.build(
+                sampleType: mergingWorkPackage1.sampleType,
+                project: mergingWorkPackage1.project,
+                category: SampleType.Category.DISEASE,
+        )
+        return createSamplePair(mergingWorkPackage1, properties)
+    }
+
     static SamplePair createSamplePair(MergingWorkPackage mergingWorkPackage1, Map properties = [:]) {
         return createSamplePair(
                 mergingWorkPackage1,
@@ -375,7 +390,7 @@ class DomainFactory {
         return samplePair
     }
 
-    public static SnvCallingInstance createSnvInstanceWithRoddyBamFiles() {
+    public static SnvCallingInstance createSnvInstanceWithRoddyBamFiles(Map properties = [:]) {
         Workflow workflow = createPanCanWorkflow()
 
         MergingWorkPackage controlWorkPackage = MergingWorkPackage.build(
@@ -395,13 +410,13 @@ class DomainFactory {
                 externalScriptVersion: externalScript.scriptVersion
         )
 
-        SnvCallingInstance snvCallingInstance = SnvCallingInstance.build(
+        SnvCallingInstance snvCallingInstance = SnvCallingInstance.build( [
                 samplePair: samplePair,
                 sampleType1BamFile: disease,
                 sampleType2BamFile: control,
                 config: snvConfig,
                 latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(disease, control),
-        )
+        ] + properties)
         return snvCallingInstance
     }
 

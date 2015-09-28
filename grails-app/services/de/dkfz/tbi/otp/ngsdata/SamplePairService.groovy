@@ -8,17 +8,24 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
 
 class SamplePairService {
 
-    @PreAuthorize("hasPermission(#individual.project, read) or hasRole('ROLE_OPERATOR')")
-    Map<String, SamplePair> samplePairsBySnvProcessingState(Individual individual) {
-        assert individual
+    @PreAuthorize("hasPermission(#lookupIndividual.project, read) or hasRole('ROLE_OPERATOR')")
+    Map<String, List<SamplePair>> samplePairsBySnvProcessingState(Individual lookupIndividual) {
+
 
         List<SamplePair> finishedSamplePairs = []
         List<SamplePair> progressingSamplePairs = []
         List<SamplePair> notStarted = []
         List<SamplePair> processingDisabled = []
 
-
-        List<SamplePair> samplePairs = SamplePair.findAllByIndividual(individual)
+        List<SamplePair> samplePairs = SamplePair.createCriteria().list {
+            mergingWorkPackage1 {
+                sample {
+                    individual {
+                        eq('id', lookupIndividual.id)
+                    }
+                }
+            }
+        }
         samplePairs.each {
             switch (it.processingStatus) {
                 case ProcessingStatus.NEEDS_PROCESSING:
