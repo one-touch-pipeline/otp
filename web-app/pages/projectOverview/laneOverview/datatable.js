@@ -12,7 +12,7 @@ $.otp.projectOverviewTable = {
             bServerSide : false,
             bSort : true,
             bJQueryUI : false,
-            bAutoWidth : false,
+            bAutoWidth : true,
             sAjaxSource : $.otp.createLink({
                 controller : 'projectOverview',
                 action : 'dataTableSourceLaneOverview'
@@ -38,6 +38,9 @@ $.otp.projectOverviewTable = {
                         oTableLaneOverview.fnSettings().oFeatures.bServerSide = false;
                     },
                     "success" : function (json) {
+                        if (json.anythingWithdrawn) {
+                            $("#withdrawn_description").show();
+                        }
                         for (var i = 0; i < json.aaData.length; i += 1) {
                             var row = json.aaData[i];
                             var mockPid = row[0];
@@ -64,19 +67,27 @@ $.otp.projectOverviewTable = {
                         oTableLaneOverview.fnSettings().oFeatures.bServerSide = false;
                     }
                 });
+            },
+
+            fnInitComplete: function () {
+                $.otp.projectOverviewTable.hideEmptyColumns(this);
+                new $.fn.dataTable.FixedColumns( this, {
+                    "leftColumns": 2
+                } );
             }
         });
 
         $.otp.dataTableFilter.register($('#searchCriteriaTable'), oTableLaneOverview, false, function () {
             var tableSize = $('#laneOverviewId').find('thead > tr > th').size(),
-                ignoredColumns = $('#laneOverviewId').data('ignore-filter-columns'),
+                ignoredColumns = parseInt($('#laneOverviewId').data('ignore-filter-columns')),
+                workflowSize = parseInt($('#laneOverviewId').data('workflow-size')),
                 result = [],
                 i;
 
             $('#searchCriteriaTable').find('tr').each(function (index, element) {
                 var idx = $('td.attribute select', element)[0].selectedIndex;
                 if (idx !== 0) {
-                    result.push(idx + ignoredColumns - 1);
+                    result.push((idx-1) * (workflowSize + 1) + ignoredColumns);
                 }
             });
 
@@ -100,5 +111,35 @@ $.otp.projectOverviewTable = {
             }
         });
         return oTableLaneOverview;
-    }
+    },
+
+    hideEmptyColumns : function (tableObject) {
+        "use strict";
+        var selector = tableObject.selector;
+        var columnsToHide = [];
+
+        $(selector).find('tr:nth-child(2)').find('th').each(function(i) {
+            var columnIndex = $(this).index();
+            var rows = $(this).parents('table').find('tr td:nth-child(' + (i + 1) + ')');
+            var rowsLength = $(rows).length;
+            var emptyRows = true;
+
+            rows.each(function(r) {
+                if (this.innerHTML != '')
+                    emptyRows = false;
+            });
+
+            if(emptyRows) {
+                columnsToHide.push(columnIndex);
+            }
+        });
+
+        for(var i=0; i< columnsToHide.length; i++) {
+            tableObject.fnSetColumnVis( columnsToHide[i], false );
+        }
+
+        tableObject.fnAdjustColumnSizing();
+
+
+    },
 };

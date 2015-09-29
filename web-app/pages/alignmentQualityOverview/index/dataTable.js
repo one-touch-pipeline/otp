@@ -81,7 +81,7 @@ $.otp.alignmentQualityOverviewTable = {
                                 row.standardDeviationPE_Insertsize,
                                 "<span class='" + row.medianWarning+"'>" + row.medianPE_insertsize + " </span>",
                                 row.meanPE_Insertsize,
-                                row.workflow.replace("DEFAULT_OTP", "bwa aln").replace("PANCAN_ALIGNMENT", "PanCan"),
+                                row.workflow,
                                 row.dateFromFileSystem,
                             ];
                             var rowdata = identifier.concat(coverage, general);

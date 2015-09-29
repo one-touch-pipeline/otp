@@ -1,9 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.AlignmentDecider
+import de.dkfz.tbi.otp.dataprocessing.Workflow
 import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.utils.DataTableCommand
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.getOrPut
 
 class ProjectOverviewController {
 
@@ -29,7 +33,7 @@ class ProjectOverviewController {
 
         Project project = projectService.getProjectByName(projectName)
         List<SeqType> seqTypes  = projectOverviewService.seqTypeByProject(project)
-        List<SampleType> sampleTypes  = projectOverviewService.sampleTypeByProject(project)
+        List<String> sampleTypes  = projectOverviewService.sampleTypeByProject(project)
         String sampleTypeName = (params.sampleType && sampleTypes.contains(params.sampleType)) ? params.sampleType : sampleTypes[0]
 
         return [
@@ -38,7 +42,8 @@ class ProjectOverviewController {
             project: projectName,
             seqTypes: seqTypes,
             sampleTypes: sampleTypes,
-            sampleType: sampleTypeName
+            sampleType: sampleTypeName,
+            workflows:  Workflow.findAll(),
         ]
     }
 
@@ -53,17 +58,12 @@ class ProjectOverviewController {
         return project.name == "MMML"
     }
 
-
-    /**
-     * A helper class to collect for a sample the {@link SampleIdentifier}, the lane count for the different {@link SeqType} and the calculated coverage.
-     * It is used for transforming the data received from services to the form needed by dataTable.
-     *
-     *
-     */
-    class InformationOfSamples {
+    class InfoAboutOneSample {
         String sampleIdentifier
-        Map<SeqType, String> laneCount = [:]
-        Map<SeqType, String> coverage = [:]
+        // Map<SeqType.id, value>>
+        Map<Long, String> laneCountRegistered = [:]
+        // Map<SeqType.id, Map<Workflow.id, Collection<bamFileInProjectFolder>>>
+        Map<Long, Map<Long, Collection<AbstractMergedBamFile>>> bamFilesInProjectFolder = [:]
     }
 
     /**
@@ -79,6 +79,7 @@ class ProjectOverviewController {
      */
     JSON dataTableSourceLaneOverview(DataTableCommand cmd) {
 
+        boolean anythingWithdrawn = false
         Project project = projectService.getProjectByName(params.project)
 
         List<SeqType> seqTypes = projectOverviewService.seqTypeByProject(project)
@@ -87,61 +88,67 @@ class ProjectOverviewController {
         Map dataLastMap = [:]
 
         /**
-         * returns the InformationOfSamples for the given mock pid and sample type name.
-         * The InformationOfSamples are stored in a map of map structure in the variable dataLastMap.
+         * returns the InfoAboutOneSample for the given mock pid and sample type name.
+         * The InfoAboutOneSample are stored in a map of map structure in the variable dataLastMap.
          * If no one exist yet, it is created.
          */
         def getDataForMockPidAndSampleTypeName = { String mockPid, String sampleTypeName ->
-            Map<String, InformationOfSamples> informationOfSampleMap = dataLastMap[mockPid]
+            Map<String, InfoAboutOneSample> informationOfSampleMap = dataLastMap[mockPid]
             if (!informationOfSampleMap) {
                 informationOfSampleMap = [:]
                 dataLastMap.put(mockPid, informationOfSampleMap)
             }
-            InformationOfSamples informationOfSamples = informationOfSampleMap[sampleTypeName]
-            if (!informationOfSamples) {
-                informationOfSamples = new InformationOfSamples()
-                informationOfSampleMap.put(sampleTypeName, informationOfSamples)
+            InfoAboutOneSample informationOfSample = informationOfSampleMap[sampleTypeName]
+            if (!informationOfSample) {
+                informationOfSample = new InfoAboutOneSample()
+                informationOfSampleMap.put(sampleTypeName, informationOfSample)
             }
-            return informationOfSamples
+            return informationOfSample
         }
 
         List lanes = projectOverviewService.laneCountForSeqtypesPerPatientAndSampleType(project)
         lanes.each {
-            InformationOfSamples informationOfSamples = getDataForMockPidAndSampleTypeName(it.mockPid, it.sampleTypeName)
-            informationOfSamples.laneCount.put(it.seqType, it.laneCount)
+            InfoAboutOneSample informationOfSample = getDataForMockPidAndSampleTypeName(it.mockPid, it.sampleTypeName)
+            informationOfSample.laneCountRegistered.put(it.seqType.id, it.laneCount)
         }
 
-        List coverage = projectOverviewService.coveragePerPatientAndSampleTypeAndSeqType(project)
-        coverage.each {
-            InformationOfSamples informationOfSamples = getDataForMockPidAndSampleTypeName(it.mockPid, it.sampleTypeName)
-            informationOfSamples.coverage.put(it.seqType, it.coverage)
-            informationOfSamples.laneCount.put(it.seqType, it.numberOfMergedLanes)
+        projectOverviewService.abstractMergedBamFilesInProjectFolder(project).each {
+            assert it.numberOfMergedLanes != null
+            InfoAboutOneSample informationOfSample = getDataForMockPidAndSampleTypeName(it.individual.mockPid, it.sampleType.name)
+            getOrPut(getOrPut(informationOfSample.bamFilesInProjectFolder, it.seqType.id, [:]), it.workflow.id, []).add(it)
         }
 
         if (!hideSampleIdentifier) {
             List<SampleIdentifier> sampleIdentifier = projectOverviewService.overviewSampleIdentifier(project)
-            sampleIdentifier.each {mockPidSampleTypeMinSampleId ->
-                InformationOfSamples informationOfSample = getDataForMockPidAndSampleTypeName(mockPidSampleTypeMinSampleId[0], mockPidSampleTypeMinSampleId[1])
+            sampleIdentifier.each { mockPidSampleTypeMinSampleId ->
+                InfoAboutOneSample informationOfSample = getDataForMockPidAndSampleTypeName(mockPidSampleTypeMinSampleId[0], mockPidSampleTypeMinSampleId[1])
                 informationOfSample.sampleIdentifier = mockPidSampleTypeMinSampleId[2]
             }
         }
 
         List data = []
-        dataLastMap.each {String individual, Map<String, InformationOfSamples> dataMap ->
-            dataMap.each { String sampleType, InformationOfSamples informationOfSamples ->
+        dataLastMap.each { String individual, Map<String, InfoAboutOneSample> dataMap ->
+            dataMap.each { String sampleType, InfoAboutOneSample informationOfSample ->
                 List<String> line = [individual, sampleType]
                 if (!hideSampleIdentifier) {
-                    line << informationOfSamples.sampleIdentifier
+                    line << informationOfSample.sampleIdentifier
                 }
                 seqTypes.each { SeqType seqType ->
-                    if (informationOfSamples.laneCount[seqType]) {
-                        String value = informationOfSamples.laneCount[seqType]
-                        if (informationOfSamples.coverage[seqType]) {
-                            value += " (coverage = ${String.format(Locale.ENGLISH, '%.2f', informationOfSamples.coverage[seqType])})"
+                    line << informationOfSample.laneCountRegistered[seqType.id]
+
+                    Map<Long, Collection<AbstractMergedBamFile>> bamFilesPerWorkflow = informationOfSample.bamFilesInProjectFolder.get(seqType.id)
+
+                    Workflow.findAll().each { Workflow workflow ->
+                        String cell = ""
+                        bamFilesPerWorkflow?.get(workflow.id).each {
+                            String subCell = "${it.numberOfMergedLanes} | ${it.coverage ? String.format(Locale.ENGLISH, '%.2f', it.coverage) : "unknown"}"
+                            if (it.withdrawn) {
+                                anythingWithdrawn = true
+                                subCell = "<span class='withdrawn'>" + subCell + "</span>"
+                            }
+                            cell += "${subCell}<br>"
                         }
-                        line << value
-                    } else {
-                        line << ""
+                        line << cell
                     }
                 }
                 data << line
@@ -152,6 +159,7 @@ class ProjectOverviewController {
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
+        dataToRender.anythingWithdrawn = anythingWithdrawn
 
         render dataToRender as JSON
     }

@@ -48,10 +48,23 @@
                 </tr>
             </table>
         </div>
-
+        <br><br><br>
+        <div id="withdrawn_description">
+            Withdrawn data is colored gray.
+        </div>
         <div class="otpDataTables">
-            <table id="laneOverviewId"  data-ignore-filter-columns="${hideSampleIdentifier ? 2 : 3}">
+            <table id="laneOverviewId"  data-ignore-filter-columns="${hideSampleIdentifier ? 2 : 3}" data-workflow-size="${workflows.size()}">
                 <thead>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <g:if test="${!hideSampleIdentifier}">
+                            <th></th>
+                        </g:if>
+                        <g:each var="seqType" in="${seqTypes}">
+                            <th colspan="${workflows.size() + 1}">${seqType}</th>
+                        </g:each>
+                    </tr>
                     <tr>
                         <th><g:message code="projectOverview.index.PID"/></th>
                         <th><g:message code="projectOverview.index.sampleType"/></th>
@@ -59,7 +72,10 @@
                             <th><g:message code="projectOverview.index.sampleID"/></th>
                         </g:if>
                         <g:each var="seqType" in="${seqTypes}">
-                            <th>${seqType}<br><g:message code="projectOverview.index.laneCount"/></th>
+                            <th><g:message code="projectOverview.index.registeredLanes"/></th>
+                            <g:each var="workflow" in="${workflows}">
+                                <th>${workflow.html}<br><g:message code="projectOverview.index.lanesAndCoverage"/></th>
+                            </g:each>
                         </g:each>
                     </tr>
                 </thead>

@@ -183,7 +183,7 @@ class AlignmentQualityOverviewController {
 
                 plot: it.id,
                 withdrawn: abstractMergedBamFile.withdrawn,
-                workflow: abstractMergedBamFile.workPackage.workflow.name.toString()
+                workflow: abstractMergedBamFile.workPackage.workflow.html
             ]
             if (it instanceof OverallQualityAssessmentMerged) {
                 map << [

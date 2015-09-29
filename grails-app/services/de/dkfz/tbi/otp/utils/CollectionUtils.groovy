@@ -55,4 +55,19 @@ class CollectionUtils {
         assert c2Set.size() == c2.size() : "c2 contains elements which are equal."
         return c1Set == c2Set
     }
+
+    /**
+     * Returns the value for the specified key of the given map.
+     * In case the map does not contain specified key, it gets defined with the given default value.
+     * @param d default value
+     */
+    public static <K, V> V getOrPut(Map<K, V> map, K key, V d) {
+        V value = map.get(key)
+        if (value != null || map.containsKey(key)) {
+            return value
+        } else {
+            map.put(key, d)
+            return d
+        }
+    }
 }

@@ -155,6 +155,10 @@ abstract class AbstractBamFile {
         return mergingWorkPackage.seqType
     }
 
+    Workflow getWorkflow() {
+        return mergingWorkPackage.workflow
+    }
+
     /**
      * @return The reference genome which was used to produce this BAM file.
      */

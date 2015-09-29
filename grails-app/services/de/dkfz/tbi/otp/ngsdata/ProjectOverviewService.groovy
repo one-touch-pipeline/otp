@@ -117,10 +117,13 @@ class ProjectOverviewService {
                 groupProperty("seqTypeId")
             }
         }
-        List<SeqType> seqTypes = SeqType.withCriteria {
-            'in'("id", seqTypeIds)
-            order("name")
-            order("libraryLayout")
+        List<SeqType> seqTypes = []
+        if(seqTypeIds) {
+            seqTypes = SeqType.withCriteria {
+                'in'("id", seqTypeIds)
+                order("name")
+                order("libraryLayout")
+            }
         }
         return seqTypes
     }
@@ -175,8 +178,8 @@ class ProjectOverviewService {
      * @return all combination of name of individual(mockPid) and sampleTypeName with the first SampleIdentifier as list
      *
      */
-    public List<List<String>> overviewSampleIdentifier(Project project){
-        List<List<String>> sampleIdentifiers = SampleIdentifier.withCriteria {
+    public List<Object> overviewSampleIdentifier(Project project){
+        List<Object> sampleIdentifiers = SampleIdentifier.withCriteria {
             projections {
                 sample {
                     individual {
@@ -234,62 +237,15 @@ class ProjectOverviewService {
         return ret
     }
 
-    public List coveragePerPatientAndSampleTypeAndSeqType(Project project) {
-        List<ProcessedMergedBamFile> processedMergedBamFileList = ProcessedMergedBamFile.executeQuery("""
-select
-        processedMergedBamFile
+    public Collection<AbstractMergedBamFile> abstractMergedBamFilesInProjectFolder(Project project) {
+        return AbstractMergedBamFile.executeQuery("""
 from
-        ProcessedMergedBamFile processedMergedBamFile
-        join processedMergedBamFile.mergingPass mergingPass
-        join mergingPass.mergingSet mergingSet
-        join mergingSet.mergingWorkPackage mergingWorkPackage
-        join mergingWorkPackage.sample sample
-        join sample.individual individual
-        join individual.project project
+        AbstractMergedBamFile abstractMergedBamFile
 where
-        project = :project
-        and processedMergedBamFile.withdrawn = false
-        and processedMergedBamFile.md5sum is not null
-        and mergingSet.identifier = (
-            select
-                max(mergingSet2.identifier)
-            from
-                ProcessedMergedBamFile processedMergedBamFile2
-                join processedMergedBamFile2.mergingPass mergingPass2
-                join mergingPass2.mergingSet mergingSet2
-            where
-                mergingSet2.mergingWorkPackage = mergingSet.mergingWorkPackage
-                and processedMergedBamFile2.md5sum is not null
-            )
-        and mergingPass.identifier = (
-            select
-                max(mergingPass3.identifier)
-            from
-                ProcessedMergedBamFile processedMergedBamFile3
-                join processedMergedBamFile3.mergingPass mergingPass3
-            where
-                mergingPass3.mergingSet = mergingPass.mergingSet
-                and processedMergedBamFile3.md5sum is not null
-            )
-""", [project: project])
-
-
-        List coverage = processedMergedBamFileList.collect { ProcessedMergedBamFile processedMergedBamFile ->
-            assert processedMergedBamFile.numberOfMergedLanes != null && processedMergedBamFile.coverage != null
-            MergingWorkPackage mergingWorkPackage = processedMergedBamFile.mergingPass.mergingSet.mergingWorkPackage
-            Sample sample = mergingWorkPackage.sample
-            Individual individual = sample.individual
-            SeqType seqType = mergingWorkPackage.seqType
-
-            return [
-                mockPid: individual.mockPid,
-                sampleTypeName: sample.sampleType.name,
-                seqType: seqType,
-                coverage: processedMergedBamFile.coverage,
-                numberOfMergedLanes: processedMergedBamFile.numberOfMergedLanes,
-            ]
-        }
-        return coverage
+        workPackage.sample.individual.project = :project
+        and workPackage.bamFileInProjectFolder = abstractMergedBamFile
+        and fileOperationStatus = :fileOperationStatus
+""", [project: project, fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED])
     }
 
     public List listReferenceGenome(Project project) {
