@@ -861,7 +861,7 @@ AND i.id > :seqTrackId
         assert seqTrack : "The input seqTrack for determineAndStoreIfFastqFilesHaveToBeLinked must not be null"
         SeqCenter core = CollectionUtils.exactlyOneElement(SeqCenter.findAllByName("DKFZ"))
         if ( willBeAligned &&
-                seqTrack.run.seqCenter == core &&
+                seqTrack.run.seqCenter.id == core.id &&
                 !seqTrack.project.hasToBeCopied &&
                 areFilesLocatedOnMidTermStorage(seqTrack)) {
             seqTrack.linkedExternally = true
