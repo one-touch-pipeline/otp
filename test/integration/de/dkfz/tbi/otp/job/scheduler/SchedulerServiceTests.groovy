@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.job.processing.RestartedProcessingStep
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.job.processing.StartJob
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 
 import org.junit.*
@@ -665,7 +666,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertEquals(0, Process.count())
         assertEquals(0, ProcessingStep.count())
         // create ProcessParameter for handing over as additional parameter
-        ProcessParameter processParameter = new ProcessParameter(value: "test")
+        ProcessParameter processParameter = new ProcessParameter(className: SeqTrack.name, value: "test")
         // test for process parameter
         schedulerService.createProcess(job, [], processParameter)
         // verify that the Process is created

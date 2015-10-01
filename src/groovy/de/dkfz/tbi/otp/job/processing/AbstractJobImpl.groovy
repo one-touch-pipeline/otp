@@ -200,16 +200,16 @@ abstract class AbstractJobImpl implements Job {
      * Returns the object which is referenced by the {@link ProcessParameter} for the {@link Process} that this job
      * belongs to. If there is no such process parameter or object, this method will throw an exception.
      */
-    public def getProcessParameterObject() {
-        def object = exactlyOneElement(ProcessParameter.findAllByProcess(processingStep.process)).toObject()
+    public ProcessParameterObject getProcessParameterObject() {
+        ProcessParameterObject object = exactlyOneElement(ProcessParameter.findAllByProcess(processingStep.process)).toObject()
         if (object == null) {
             throw new RuntimeException("Object referenced by ProcessParameter was not found.")
         }
         return object
     }
 
-    public def getRefreshedProcessParameterObject() {
-        Object object = getProcessParameterObject()
+    public ProcessParameterObject getRefreshedProcessParameterObject() {
+        ProcessParameterObject object = getProcessParameterObject()
         object.refresh()
         return object
     }

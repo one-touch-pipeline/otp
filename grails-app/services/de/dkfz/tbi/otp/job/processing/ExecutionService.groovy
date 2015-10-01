@@ -114,7 +114,7 @@ class ExecutionService {
         notNull realm, 'No realm specified.'
 
         ProcessingStep processingStep = schedulerService.jobExecutedByCurrentThread.processingStep
-        def domainObject = atMostOneElement(ProcessParameter.findAllByProcess(processingStep.process))?.toObject()
+        ProcessParameterObject domainObject = atMostOneElement(ProcessParameter.findAllByProcess(processingStep.process))?.toObject()
 
         SeqType seqType = domainObject?.seqType
         short processingPriority = domainObject?.processingPriority ?: ProcessingPriority.NORMAL_PRIORITY
