@@ -1,1 +1,1 @@
-//= require ../login
+//= require ../login.js
