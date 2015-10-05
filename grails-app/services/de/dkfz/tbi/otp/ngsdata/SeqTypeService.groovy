@@ -16,7 +16,7 @@ class SeqTypeService {
 
 
 
-    @PreAuthorize("hasPermission(#project, read) or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, read)")
     List<SeqType> alignableSeqTypesByProject(Project project) {
         return SeqTrack.createCriteria().listDistinct {
             projections {

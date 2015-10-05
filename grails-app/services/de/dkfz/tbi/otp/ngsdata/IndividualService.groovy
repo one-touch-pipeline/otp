@@ -26,7 +26,7 @@ class IndividualService {
      * @param identifier Name or database Id
      * @return Individual
      **/
-    @PostAuthorize("(returnObject == null) or hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)")
     Individual getIndividual(String identifier) {
         if (!identifier) {
             return null
@@ -41,7 +41,7 @@ class IndividualService {
         return individual
     }
 
-    @PostAuthorize("(returnObject == null) or hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)")
     Individual getIndividualByMockPid(String mockPid) {
         if (!mockPid) {
             return null
@@ -57,7 +57,7 @@ class IndividualService {
      * @param identifier Name or database Id
      * @return Individual
      **/
-    @PostAuthorize("(returnObject == null) or hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)")
     Individual getIndividual(long identifier) {
         return getIndividual("${identifier}")
     }
@@ -67,7 +67,7 @@ class IndividualService {
      * @param individual The Individual for which the predecessor has to be retrieved
      * @return Previous Individual if present, otherwise null
      **/
-    @PreAuthorize("hasPermission(#individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)")
     Individual previousIndividual(Individual individual) {
         if (!individual) {
             return null
@@ -114,7 +114,7 @@ AND i.id < :indId
      * @param individual The Individual for which the successor has to be retrieved
      * @return Next Individual if present, otherwise null
      **/
-    @PreAuthorize("hasPermission(#individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)")
     Individual nextIndividual(Individual individual) {
         if (!individual) {
             return null
@@ -292,7 +292,7 @@ AND i.id > :indId
      * @return created Individual
      * @throws IndividualCreationException
      */
-    @PreAuthorize("hasPermission(#project, 'write') or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'write')")
     public Individual createIndividual(Project project, IndividualCommand command, List<SamplesParser> parsedSamples) throws IndividualCreationException {
         Individual individual = new Individual(
                         pid: command.pid,
@@ -333,7 +333,7 @@ AND i.id > :indId
      * Fetches all SampleIdentifiers available
      * @return List of SampleIdentifiers
      */
-    @PostFilter("hasPermission(filterObject.sample.individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
+    @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject.sample.individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)")
     public List<SampleIdentifier> getSampleIdentifiers() {
         return SampleIdentifier.list()
     }
@@ -344,7 +344,7 @@ AND i.id > :indId
      * @param sType The {@link SampleType}'s name of which {@link SampleIdentifier}s are fetched
      * @return List of SampleIdentifiers
      */
-    @PostFilter("hasPermission(filterObject.sample.individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
+    @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject.sample.individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)")
     public List<SampleIdentifier> getSampleIdentifiers(Long individualId, String sType) {
         List<SampleIdentifier> sampleIdentifiers = SampleIdentifier.withCriteria {
             sample {
@@ -370,7 +370,7 @@ AND i.id > :indId
      * @throws ChangelogException In case the Changelog Entry could not be created
      * @throws IndividualUpdateException In case the Individual could not be updated
      */
-    @PreAuthorize("((#individual != null) and hasPermission(#individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Individual', write)) or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or ((#individual != null) and hasPermission(#individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Individual', write))")
     void updateField(Individual individual, String key, String value) throws ChangelogException, IndividualUpdateException {
         ReferencedClass clazz = ReferencedClass.findOrSaveByClassName(individual.class.getName())
         // To check if the key handed over matches the field name
@@ -401,7 +401,7 @@ AND i.id > :indId
      * @param individual The {@link Individual} the Samples are to be associated
      * @param parsedSamples List of SamplesParser containing the Samples
      */
-    @PreAuthorize("hasPermission(#individual, 'write') or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#individual, 'write')")
     void createOrUpdateSamples(Individual individual, List<SamplesParser> parsedSamples) {
         parsedSamples.each { SamplesParser parsedSample ->
             SampleType sampleType = createSampleType(parsedSample.type)
@@ -423,7 +423,7 @@ AND i.id > :indId
      * @param individual The {@link Individual} to which the new {@link Sample} belongs to
      * @param type The type of the new {@link Sample}
      */
-    @PreAuthorize("hasPermission(#individual, 'write') or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#individual, 'write')")
     void createSample(Individual individual, String type) {
         SampleType sampleType = createSampleType(type)
         Sample.findOrSaveByIndividualAndSampleType(individual, sampleType)
@@ -466,7 +466,7 @@ AND i.id > :indId
     /**
      * show the List of Individual per Project
      */
-    @PreAuthorize("hasPermission(#project, 'read') or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'read')")
     public List findAllMockPidsByProject(Project project) {
         List seq = Sequence.withCriteria {
             eq("projectId", project.id)

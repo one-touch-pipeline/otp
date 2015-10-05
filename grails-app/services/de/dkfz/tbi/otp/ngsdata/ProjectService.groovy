@@ -28,7 +28,7 @@ class ProjectService {
      *
      * @return List of all available Projects
      */
-    @PostFilter("hasPermission(filterObject, 'read') or hasRole('ROLE_OPERATOR')")
+    @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'read')")
     public List<Project> getAllProjects() {
         return Project.list(sort: "name", order: "asc")
     }
@@ -38,12 +38,12 @@ class ProjectService {
      * @param id The Id of the Project
      * @return The Project
      */
-    @PostAuthorize("returnObject == null or hasPermission(returnObject, 'read') or hasRole('ROLE_OPERATOR')")
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject, 'read')")
     public Project getProject(Long id) {
         return Project.get(id)
     }
 
-    @PostAuthorize("returnObject == null or hasPermission(returnObject, 'read') or hasRole('ROLE_OPERATOR')")
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject, 'read')")
     public Project getProjectByName(String name) {
         return Project.findByName(name)
     }

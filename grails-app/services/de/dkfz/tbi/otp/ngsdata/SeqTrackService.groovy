@@ -733,7 +733,7 @@ AND entry.value = :value
         return 0
     }
 
-    @PostAuthorize("(returnObject == null) or hasPermission(returnObject.sample.individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.sample.individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)")
     public SeqTrack getSeqTrack(String identifier) {
         if (!identifier) {
             return null
@@ -750,7 +750,7 @@ AND entry.value = :value
      * @param seqTrack The SeqTrack for which the predecessor has to be retrieved
      * @return Previous SeqTrack if present, otherwise null
      **/
-    @PreAuthorize("(returnObject == null) or hasPermission(#seqTrack.sample.individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(#seqTrack.sample.individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)")
     SeqTrack previousSeqTrack(SeqTrack seqTrack) {
         if (!seqTrack) {
             return null
@@ -802,7 +802,7 @@ AND i.id < :seqTrackId
      * @param seqTrack The SeqTrack for which the successor has to be retrieved
      * @return Next SeqTrack if present, otherwise null
      **/
-    @PreAuthorize("(returnObject == null) or hasPermission(#seqTrack.sample.individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read) or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(#seqTrack.sample.individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)")
     SeqTrack nextSeqTrack(SeqTrack seqTrack) {
         if (!seqTrack) {
             return null

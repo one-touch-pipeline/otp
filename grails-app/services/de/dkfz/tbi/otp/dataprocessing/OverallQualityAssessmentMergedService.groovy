@@ -16,7 +16,7 @@ class OverallQualityAssessmentMergedService {
 
 
 
-    @PreAuthorize("hasPermission(#project, read) or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, read)")
     List<AbstractQualityAssessment> findAllByProjectAndSeqType(Project project, SeqType seqType) {
 
         String maxQualityAssessmentMergedPassIdentifier = """

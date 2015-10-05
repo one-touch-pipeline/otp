@@ -141,7 +141,7 @@ class RunService {
         }
     }
 
-    @PostAuthorize("returnObject == null or hasPermission(returnObject.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read) or hasRole('ROLE_OPERATOR')")
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read)")
     Run getRun(String identifier) {
         if (!identifier) {
             return null
@@ -162,7 +162,7 @@ class RunService {
      * @param identifier Name or database Id
      * @return Run
      **/
-    @PostAuthorize("returnObject == null or hasPermission(returnObject.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read) or hasRole('ROLE_OPERATOR')")
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read)")
     Run getRun(long identifier) {
         return getRun("${identifier}")
     }
@@ -172,7 +172,7 @@ class RunService {
      * @param run The Run for which the ProcessParameter should be retrieved.
      * @return List of ProcessParameter
      **/
-    @PreAuthorize("#run == null or hasPermission(#run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read) or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or #run == null or hasPermission(#run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read)")
     List<ProcessParameter> retrieveProcessParameters(Run run) {
         if (!run) {
             return []
@@ -185,7 +185,7 @@ class RunService {
      * @param run The Run for which the predecessor has to be retrieved
      * @return Previous Run if present, otherwise null
      **/
-    @PreAuthorize("#run == null or hasPermission(#run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read) or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or #run == null or hasPermission(#run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read)")
     Run previousRun(Run run) {
         if (!run) {
             return null
@@ -232,7 +232,7 @@ AND r.id < :runId
      * @param run The Run for which the successor has to be retrieved
      * @return Next Run if present, otherwise null
      **/
-    @PreAuthorize("#run == null or hasPermission(#run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read) or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or #run == null or hasPermission(#run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read)")
     Run nextRun(Run run) {
         if (!run) {
             return null
@@ -278,7 +278,7 @@ AND r.id > :runId
      * @param Run The run for which the MetaDataFiles should be retrieved
      * @return List of MetaDataFile
      **/
-    @PreAuthorize("#run == null or hasPermission(#run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read) or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or #run == null or hasPermission(#run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read)")
     List<MetaDataFile> retrieveMetaDataFilesByInitialPath(Run run) {
         if (!run) {
             return []
@@ -313,7 +313,7 @@ AND r.id > :runId
      * @param run The Run for which the Sequence Track information should be retrieved
      * @return Data Structure as described above
      **/
-    @PreAuthorize("#run == null or hasPermission(#run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read) or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or #run == null or hasPermission(#run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read)")
     Map<SeqTrack, Map<String, Object>> retrieveSequenceTrackInformation(Run run) {
         Map<SeqTrack, Map<String, Object>> returnData = new LinkedHashMap<SeqTrack, Map<String, Object>>()
         if (!run) {
@@ -337,7 +337,7 @@ AND r.id > :runId
      * @param run The Run for which the errornous data files need to be retrieved
      * @return List of DataFiles with errors.
      **/
-    @PreAuthorize("#run == null or hasPermission(#run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read) or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or #run == null or hasPermission(#run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read)")
     List<DataFile> dataFilesWithError(Run run) {
         return DataFile.findAllByRunAndUsed(run, false, [sort: "fileName"])
     }

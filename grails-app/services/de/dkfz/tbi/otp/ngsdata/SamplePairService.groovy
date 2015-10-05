@@ -8,7 +8,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
 
 class SamplePairService {
 
-    @PreAuthorize("hasPermission(#lookupIndividual.project, read) or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#lookupIndividual.project, read)")
     Map<String, List<SamplePair>> samplePairsBySnvProcessingState(Individual lookupIndividual) {
 
 
@@ -57,22 +57,22 @@ class SamplePairService {
     }
 
 
-    @PreAuthorize("hasPermission(#individual.project, read) or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#individual.project, read)")
     List<SamplePair> finishedSamplePairs(Individual individual) {
         return samplePairsBySnvProcessingState(individual)['finished'] ?: []
     }
 
-    @PreAuthorize("hasPermission(#individual.project, read) or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#individual.project, read)")
     List<SamplePair> progressingSamplePairs(Individual individual) {
         return samplePairsBySnvProcessingState(individual)['inprogress'] ?: []
     }
 
-    @PreAuthorize("hasPermission(#individual.project, read) or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#individual.project, read)")
     List<SamplePair> notStartedSamplePairs(Individual individual) {
         return samplePairsBySnvProcessingState(individual)['notStarted'] ?: []
     }
 
-    @PreAuthorize("hasPermission(#individual.project, read) or hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#individual.project, read)")
     List<SamplePair> disablesSamplePairs(Individual individual) {
         return samplePairsBySnvProcessingState(individual)['disabled'] ?: []
     }
