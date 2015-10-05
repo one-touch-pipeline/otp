@@ -24,4 +24,9 @@ class TestConstants {
     @Deprecated
     public final static String BASE_TEST_DIRECTORY = TestCase.uniqueNonExistentPath
 
+    /**
+     * Some arbitrary md5sum for testing
+     */
+    public static final String TEST_MD5SUM = "123456789012345678901234567890AB"
+
 }

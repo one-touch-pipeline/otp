@@ -1,5 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.TestConstants
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstanceTestData
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+
 import static de.dkfz.tbi.otp.dataprocessing.AbstractBamFileServiceTests.*
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -44,6 +51,82 @@ class ProcessedMergedBamFileIntegrationTests {
         assert processedMergedBamFile.overallQualityAssessment != oqaFormer
     }
 
+
+    @Test
+    void testWithdraw_SetOneBamFileWithdrawn() {
+        ProcessedMergedBamFile bamFile = createFinishedProcessedBamFile()
+
+        LogThreadLocal.withThreadLog(System.out) {
+            bamFile.withdraw()
+        }
+        assert bamFile.withdrawn
+    }
+
+    @Test
+    void testWithdraw_SetTwoBamFilesWithdrawn() {
+        ProcessedMergedBamFile bamFile = createFinishedProcessedBamFile()
+
+        ProcessedMergedBamFile secondBamFile = DomainFactory.createIncrementalMergedBamFile(bamFile)
+        assert !secondBamFile.withdrawn
+
+        secondBamFile.workPackage.bamFileInProjectFolder = secondBamFile
+        assert secondBamFile.workPackage.save(flush: true)
+
+        LogThreadLocal.withThreadLog(System.out) {
+            bamFile.withdraw()
+        }
+        assert bamFile.withdrawn
+        assert secondBamFile.withdrawn
+    }
+
+    @Test
+    void testWithdraw_SetSecondAndThirdBamFileWithdrawn() {
+        ProcessedMergedBamFile bamFile = createFinishedProcessedBamFile()
+
+        ProcessedMergedBamFile secondBamFile = DomainFactory.createIncrementalMergedBamFile(bamFile)
+        assert !secondBamFile.withdrawn
+
+        ProcessedMergedBamFile thirdBamFile = DomainFactory.createIncrementalMergedBamFile(secondBamFile)
+        assert !thirdBamFile.withdrawn
+
+        thirdBamFile.workPackage.bamFileInProjectFolder = thirdBamFile
+        assert thirdBamFile.workPackage.save(flush: true)
+
+        LogThreadLocal.withThreadLog(System.out) {
+            secondBamFile.withdraw()
+        }
+        assert !bamFile.withdrawn
+        assert secondBamFile.withdrawn
+        assert thirdBamFile.withdrawn
+    }
+
+    @Test
+    void testWithdraw_SetBamFileAndSnvResultsWithdrawn() {
+        SnvCallingInstanceTestData testData = new SnvCallingInstanceTestData()
+        testData.createSnvObjects()
+
+        assert !testData.bamFileTumor.withdrawn
+        assert !testData.bamFileControl.withdrawn
+
+        testData.bamFileTumor.workPackage.bamFileInProjectFolder = testData.bamFileTumor
+        assert testData.bamFileTumor.workPackage.save(flush: true)
+
+        testData.bamFileControl.workPackage.bamFileInProjectFolder = testData.bamFileControl
+        assert testData.bamFileControl.workPackage.save(flush: true)
+
+        SnvCallingInstance snvCallingInstance = testData.createAndSaveSnvCallingInstance()
+
+        SnvJobResult callingResult = testData.createAndSaveSnvJobResult(snvCallingInstance, SnvCallingStep.CALLING)
+        assert !callingResult.withdrawn
+
+        LogThreadLocal.withThreadLog(System.out) {
+            testData.bamFileTumor.withdraw()
+        }
+        assert testData.bamFileTumor.withdrawn
+        assert callingResult.withdrawn
+    }
+
+
     private static OverallQualityAssessmentMerged createOverallQualityAssessment(ProcessedMergedBamFile processedMergedBamFile, Long identifier) {
 
         assert processedMergedBamFile: 'processedMergedBamFile must not be null'
@@ -62,5 +145,20 @@ class ProcessedMergedBamFileIntegrationTests {
         assert overallQualityAssessmentMerged.save([flush: true])
 
         return overallQualityAssessmentMerged
+    }
+
+    private ProcessedMergedBamFile createFinishedProcessedBamFile() {
+        ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile([
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                md5sum: TestConstants.TEST_MD5SUM,
+                fileSize: 1000,
+        ])
+        bamFile.save(flush: true)
+        assert !bamFile.withdrawn
+
+        bamFile.workPackage.bamFileInProjectFolder = bamFile
+        assert bamFile.workPackage.save(flush: true)
+
+        return bamFile
     }
 }

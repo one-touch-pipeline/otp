@@ -18,7 +18,7 @@ LogThreadLocal.withThreadLog(System.out, {
     SamplePair.withTransaction {
         snvCallingInstances.each {
             if (it.processingState == SnvProcessingStates.IN_PROGRESS) {
-                SnvJobResult.findAllBySnvCallingInstance(it)*.makeWithdrawn()
+                SnvJobResult.findAllBySnvCallingInstance(it)*.withdraw()
                 it.processingState = SnvProcessingStates.FAILED
                 it.save(flush: true, failOnError: true)
             }

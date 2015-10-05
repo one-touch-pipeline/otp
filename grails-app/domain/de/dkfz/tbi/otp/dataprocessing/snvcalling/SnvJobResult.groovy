@@ -140,11 +140,13 @@ class SnvJobResult {
         }
     }
 
-    void makeWithdrawn() {
+    void withdraw() {
         SnvJobResult.withTransaction {
             SnvJobResult.findAllByInputResult(this).each {
-                it.makeWithdrawn()
+                it.withdraw()
             }
+
+            LogThreadLocal.threadLog.info "Execute WithdrawnFilesRename.groovy script afterwards"
             LogThreadLocal.threadLog.info "Withdrawing ${this}"
             withdrawn = true
             assert save(flush: true)

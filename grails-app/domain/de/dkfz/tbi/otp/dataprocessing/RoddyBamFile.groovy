@@ -325,26 +325,18 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return new File(baseDir, this.md5sumFileName)
     }
 
-    void makeWithdrawn() {
+
+    void withdraw() {
         withTransaction {
             //find snv and make them withdrawn
-            SnvJobResult.withCriteria {
-                isNull 'inputResult'
-                snvCallingInstance {
-                    or {
-                        eq 'sampleType1BamFile', this
-                        eq 'sampleType2BamFile', this
-                    }
-                }
-            }.each {
-                it.makeWithdrawn()
-            }
+            super.withdrawCorrespondingSnvResults()
 
             //get later bam files
             RoddyBamFile.findAllByBaseBamFile(this).each {
-                it.makeWithdrawn()
+                it.withdraw()
             }
 
+            LogThreadLocal.threadLog.info "Execute WithdrawnFilesRename.groovy script afterwards"
             LogThreadLocal.threadLog.info "Withdrawing ${this}"
             withdrawn = true
             assert save(flush: true)

@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static org.springframework.util.Assert.notNull
@@ -95,4 +96,26 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
             assert workPackage.save(flush: true)
         }
     }
+
+
+    abstract public void withdraw()
+
+
+    private withdrawCorrespondingSnvResults() {
+        withTransaction {
+            //find snv and make them withdrawn
+            SnvJobResult.withCriteria {
+                isNull 'inputResult'
+                snvCallingInstance {
+                    or {
+                        eq 'sampleType1BamFile', this
+                        eq 'sampleType2BamFile', this
+                    }
+                }
+            }.each {
+                it.withdraw()
+            }
+        }
+    }
+
 }

@@ -7,7 +7,7 @@ import org.junit.Test
 class SnvJobResultTests {
 
     @Test
-    void testMakeWithdrawn_useFourResults_ShouldSetTheLastThreeToWithdrawn() {
+    void testWithdraw_useFourResults_ShouldSetTheLastThreeToWithdrawn() {
         SnvJobResult snvJobResultCalling = DomainFactory.createSnvJobResultWithRoddyBamFiles(step: SnvCallingStep.CALLING)
         SnvJobResult snvJobResultAnnotation = DomainFactory.createSnvJobResultWithRoddyBamFiles(inputResult: snvJobResultCalling, step: SnvCallingStep.SNV_ANNOTATION)
         SnvJobResult snvJobResultDeepAnnotation = DomainFactory.createSnvJobResultWithRoddyBamFiles(inputResult: snvJobResultAnnotation, step: SnvCallingStep.SNV_DEEPANNOTATION)
@@ -19,7 +19,7 @@ class SnvJobResultTests {
         assert !snvJobResultFilter.withdrawn
 
         LogThreadLocal.withThreadLog(System.out) {
-            snvJobResultAnnotation.makeWithdrawn()
+            snvJobResultAnnotation.withdraw()
         }
         assert !snvJobResultCalling.withdrawn
         assert snvJobResultAnnotation.withdrawn

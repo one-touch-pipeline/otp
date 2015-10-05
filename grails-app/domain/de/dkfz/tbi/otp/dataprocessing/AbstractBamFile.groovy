@@ -189,4 +189,17 @@ abstract class AbstractBamFile {
             }
         }
     }
+
+
+    private withdrawDownstreamBamFiles() {
+        ProcessedMergedBamFile.createCriteria().list {
+            mergingPass {
+                mergingSet {
+                    'in'('id', MergingSetAssignment.findAllByBamFile(this)*.mergingSet*.id)
+                }
+            }
+        }.each {
+            it.withdraw()
+        }
+    }
 }

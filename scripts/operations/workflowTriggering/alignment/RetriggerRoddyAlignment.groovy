@@ -23,7 +23,7 @@ LogThreadLocal.withThreadLog(System.out, { SeqTrack.withTransaction {
 
     /*
     roddyBamFiles.each {
-        it.makeWithdrawn()
+        it.withdraw()
         it.workPackage.needsProcessing = true
         it.save(flush: true)
         println "restart ${it}"

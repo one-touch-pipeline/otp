@@ -196,24 +196,24 @@ class RoddyBamFileTest {
 
 
     @Test
-    void testMakeWithdrawn_singleFile_ShouldSetToWithdrawn() {
+    void testWithdraw_singleFile_ShouldSetToWithdrawn() {
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         assert !roddyBamFile.withdrawn
 
         LogThreadLocal.withThreadLog(System.out) {
-            roddyBamFile.makeWithdrawn()
+            roddyBamFile.withdraw()
         }
         assert roddyBamFile.withdrawn
     }
 
     @Test
-    void testMakeWithdrawn_fileHierarchy_StartWithFile2_ShouldSetFile2And3ToWithdrawn() {
+    void testWithdraw_fileHierarchy_StartWithFile2_ShouldSetFile2And3ToWithdrawn() {
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
         RoddyBamFile roddyBamFile3 = DomainFactory.createRoddyBamFile(roddyBamFile2)
 
         LogThreadLocal.withThreadLog(System.out) {
-            roddyBamFile2.makeWithdrawn()
+            roddyBamFile2.withdraw()
         }
         assert !roddyBamFile.withdrawn
         assert roddyBamFile2.withdrawn
@@ -221,12 +221,12 @@ class RoddyBamFileTest {
     }
 
     @Test
-    void testMakeWithdrawn_singleFileWithSnv_ShouldSnvSetToWithdrawn() {
+    void testWithdraw_singleFileWithSnv_ShouldSnvSetToWithdrawn() {
         SnvJobResult snvJobResult = DomainFactory.createSnvJobResultWithRoddyBamFiles()
         assert !snvJobResult.sampleType1BamFile.withdrawn
 
         LogThreadLocal.withThreadLog(System.out) {
-            snvJobResult.sampleType1BamFile.makeWithdrawn()
+            snvJobResult.sampleType1BamFile.withdraw()
         }
         assert snvJobResult.sampleType1BamFile.withdrawn
     }

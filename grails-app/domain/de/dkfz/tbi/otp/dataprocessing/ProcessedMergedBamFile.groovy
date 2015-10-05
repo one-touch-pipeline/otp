@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 /**
  * Represents a merged bam file stored on the file system
@@ -78,5 +79,19 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
     public String getBamFileName() {
         String body = this.fileNameNoSuffix()
         return "${body}.bam"
+    }
+
+
+    void withdraw() {
+        withTransaction {
+            super.withdrawCorrespondingSnvResults()
+
+            withdrawDownstreamBamFiles()
+
+            LogThreadLocal.threadLog.info "Execute WithdrawnFilesRename.groovy script afterwards"
+            LogThreadLocal.threadLog.info "Withdrawing ${this}"
+            withdrawn = true
+            assert save(flush: true)
+        }
     }
 }

@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.TestConstants
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
@@ -132,6 +133,13 @@ class DomainFactory {
                 mergingWorkPackage: mergingWorkPackage,
                 identifier: MergingSet.nextIdentifier(mergingWorkPackage),
         )
+    }
+
+    public static MergingPass createMergingPass(final MergingSet mergingSet) {
+        return new MergingPass(
+                mergingSet: mergingSet,
+                identifier: MergingPass.nextIdentifier(mergingSet),
+        ).save(flush: true)
     }
 
     public static ProcessedMergedBamFile createProcessedMergedBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
@@ -693,6 +701,26 @@ class DomainFactory {
                 comment: "Path to the application.ini which is needed to execute Roddy"
         )
         assert processingOptionApplicationIni.save(flush: true)
+    }
+
+
+    static ProcessedMergedBamFile createIncrementalMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {
+        MergingSet mergingSet = createMergingSet(processedMergedBamFile.workPackage)
+        MergingPass mergingPass = createMergingPass(mergingSet)
+
+        ProcessedMergedBamFile secondBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                md5sum: TestConstants.TEST_MD5SUM,
+                fileSize: 1000,
+        ])
+        assert secondBamFile.save(flush: true)
+
+        MergingSetAssignment mergingSetAssignment = new MergingSetAssignment(
+                mergingSet: mergingSet,
+                bamFile: processedMergedBamFile
+        )
+        assert mergingSetAssignment.save(flush: true)
+        return secondBamFile
     }
 
 }
