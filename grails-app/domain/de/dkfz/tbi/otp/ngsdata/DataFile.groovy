@@ -1,6 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class DataFile {
+import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.Commentable
+
+class DataFile implements Commentable{
 
     String fileName                // file name
     String pathName                // path from run folder to file or full path
@@ -25,6 +28,8 @@ class DataFile {
 
 
     Integer readNumber
+
+    Comment comment
 
     static belongsTo = [
         run : Run,
@@ -60,6 +65,8 @@ class DataFile {
         mergingLog(nullable: true)
         alignmentLog(nullable: true)
         runSegment(nullable: true)
+
+        comment(nullable: true)
 
         readNumber nullable: true, validator: { val, obj ->
             if (obj.fileType && obj.fileType.type == FileType.Type.SEQUENCE && obj.fileType.vbpPath == "/sequence/") {

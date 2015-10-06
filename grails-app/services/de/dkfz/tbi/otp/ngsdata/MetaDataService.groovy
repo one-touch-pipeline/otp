@@ -20,8 +20,8 @@ class MetaDataService {
     /**
      * Dependency injection of file type service
      */
-    def fileTypeService
-    def metaDataFileService
+    FileTypeService fileTypeService
+    MetaDataFileService metaDataFileService
 
     static transactional = true
 

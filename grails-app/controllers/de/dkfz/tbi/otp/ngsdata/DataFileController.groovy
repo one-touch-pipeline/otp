@@ -1,11 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.utils.CommentCommand
 import grails.converters.JSON
 
 class DataFileController {
 
-    def lsdfFilesService
-    def metaDataService
+    LsdfFilesService lsdfFilesService
+    MetaDataService metaDataService
+    CommentService commentService
 
     def showDetails(ShowDetailsCommand cmd) {
         if (cmd.hasErrors()) {
@@ -30,7 +33,20 @@ class DataFileController {
         keys << "view-by-pid path"
         values << lsdfFilesService.getFileViewByPidPath(dataFile)
 
-        return [dataFile: dataFile, entries: entries, values: values, changelogs: changelogs]
+        [
+                dataFile: dataFile,
+                entries: entries,
+                values: values,
+                changelogs: changelogs,
+                comment: dataFile.comment
+        ]
+    }
+
+    def saveDataFileComment(CommentCommand cmd) {
+        DataFile dataFile = metaDataService.getDataFile(cmd.id)
+        commentService.saveComment(dataFile, cmd.comment)
+        def dataToRender = [date: dataFile.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: dataFile.comment.author]
+        render dataToRender as JSON
     }
 
     def updateMetaData = {

@@ -1,4 +1,3 @@
-<%@page import="com.sun.xml.internal.org.jvnet.mimepull.DataFile"%>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
@@ -10,6 +9,21 @@
 </head>
 <body>
     <div class="body_grow">
+        <div id="dataFileCommentBox" class="commentBoxContainer">
+            <div id="commentLabel">Comment:</div>
+            <sec:ifNotGranted roles="ROLE_OPERATOR">
+                <textarea id="commentBox" readonly>${comment?.comment?.encodeAsHTML()}</textarea>
+            </sec:ifNotGranted>
+            <sec:ifAllGranted roles="ROLE_OPERATOR">
+                <textarea id="commentBox">${comment?.comment?.encodeAsHTML()}</textarea>
+                <div id="commentButtonArea">
+                        <button id="saveComment" disabled>&nbsp;&nbsp;&nbsp;<g:message code="commentBox.save" /></button>
+                        <button id="cancelComment" disabled><g:message code="commentBox.cancel" /></button>
+                </div>
+            </sec:ifAllGranted>
+            <div id="commentDateLabel">${comment?.modificationDate?.format('EEE, d MMM yyyy HH:mm')}</div>
+            <div id="commentAuthorLabel">${comment?.author}</div>
+        </div>
         <h1><g:message code="datafile.showDetails.title"/></h1>
         <table>
             <tr>
@@ -128,6 +142,7 @@
 <r:script>
     $(function() {
         $.otp.growBodyInit(240);
+        $.otp.initCommentBox(${dataFile.id},"#dataFileCommentBox");
     });
 </r:script>
 </html>
