@@ -117,6 +117,12 @@ class HipoSampleIdentifierUnitTest {
 
         sampleName = "H032-PX6D42-M2-D1"
         assertNotNull(HipoSampleIdentifier.tryParse(sampleName))
+
+        sampleName = "H032-PX6D42-T2-W1"
+        assertNotNull(HipoSampleIdentifier.tryParse(sampleName))
+
+        sampleName = "H032-PX6D42-T2-Y1"
+        assertNotNull(HipoSampleIdentifier.tryParse(sampleName))
     }
 
     @Test
