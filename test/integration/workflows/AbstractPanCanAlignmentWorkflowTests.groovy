@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.ProcessHelperService
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import org.codehaus.groovy.grails.web.json.JSONObject
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -79,6 +80,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     LinkFileUtils linkFileUtils
     ProcessingOptionService processingOptionService
     ExecuteRoddyCommandService executeRoddyCommandService
+    AbstractBamFileService abstractBamFileService
 
 
     @Rule
@@ -344,6 +346,46 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         checkDataBaseState_alignBaseBamAndNewLanes()
         RoddyBamFile latestBamFile = RoddyBamFile.findByIdentifier(1L)
         checkFileSystemState(latestBamFile)
+
+        checkQC(latestBamFile)
+    }
+
+    void checkQC(RoddyBamFile bamFile) {
+
+        QualityAssessmentMergedPass qaPass = QualityAssessmentMergedPass.findWhere(
+                abstractMergedBamFile: bamFile,
+                identifier: 0,
+        )
+        assert qaPass
+
+        bamFile.seqTracks.each {
+            List<RoddySingleLaneQa> qa = RoddySingleLaneQa.findAllBySeqTrack(it)
+            assert qa
+            qa.each {
+                assert it.qualityAssessmentMergedPass == qaPass
+            }
+        }
+
+        bamFile.getFinalRoddySingleLaneQAJsonFiles().each { seqTrack, qaFile ->
+            JSONObject json = JSON.parse(qaFile.text)
+            Iterator chromosomes = json.keys()
+            chromosomes.each { String chromosome ->
+                assert RoddySingleLaneQa.findByChromosomeAndSeqTrack(chromosome, seqTrack)
+            }
+        }
+
+        RoddyMergedBamQa mergedQa = RoddyMergedBamQa.findByQualityAssessmentMergedPass(qaPass)
+        assert mergedQa
+
+        JSONObject json = JSON.parse(bamFile.getFinalMergedQAJsonFile().text)
+        json.keys().each { String chromosome ->
+            assert RoddyMergedBamQa.findByChromosomeAndQualityAssessmentMergedPass(chromosome, qaPass)
+        }
+
+        assert bamFile.coverage == mergedQa.genomeWithoutNCoverageQcBases
+        assert bamFile.coverageWithN == abstractBamFileService.calculateCoverageWithN(bamFile)
+
+        assert bamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
     }
 
     void checkAllAfterRoddyPbsJobsRestartAndSuccessfulExecution_alignBaseBamAndNewLanes() {

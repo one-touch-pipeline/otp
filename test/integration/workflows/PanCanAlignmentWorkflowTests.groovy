@@ -61,6 +61,8 @@ class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkflowTests 
         assertBamFileFileSystemPropertiesSet(bamFile)
 
         checkFileSystemState(bamFile)
+
+        checkQC(bamFile)
     }
 
     @Ignore
@@ -95,6 +97,8 @@ class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkflowTests 
         assertBamFileFileSystemPropertiesSet(bamFile)
 
         checkFileSystemState(bamFile)
+
+        checkQC(bamFile)
     }
 
     @Ignore
