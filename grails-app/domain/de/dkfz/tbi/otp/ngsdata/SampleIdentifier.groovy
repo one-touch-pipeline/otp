@@ -7,6 +7,7 @@ class SampleIdentifier {
     static final REGEX_OPTION_NAME = 'sampleIdentifierRegex'
 
     String name
+    Sample sample
     static belongsTo = [sample: Sample]
 
     static constraints = {
@@ -29,6 +30,18 @@ class SampleIdentifier {
             }
         )
         sample()
+    }
+
+    Project getProject() {
+        return sample.project
+    }
+
+    Individual getIndividual() {
+        return sample.individual
+    }
+
+    SampleType getSampleType() {
+        return sample.sampleType
     }
 
     String toString() {

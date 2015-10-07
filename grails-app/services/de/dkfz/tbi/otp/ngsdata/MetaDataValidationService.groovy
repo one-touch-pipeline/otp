@@ -9,7 +9,7 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
  */
 class MetaDataValidationService {
 
-    def hipoIndividualService
+    SampleIdentifierService sampleIdentifierService
 
     LibraryPreparationKitService libraryPreparationKitService
     SequencingKitLabelService sequencingKitLabelService
@@ -69,9 +69,10 @@ class MetaDataValidationService {
                 break
             case "SAMPLE_ID":
                 if (checkSampleIdentifier(entry.value)) {
-                    hipoIndividualService.createHipoIndividual(entry.value)
-                    SampleIdentifier sample = SampleIdentifier.findByName(entry.value)
-                    entry.status = (sample != null) ? valid : invalid
+                    boolean sampleIdentifierExists =
+                            sampleIdentifierService.parseAndFindOrSaveSampleIdentifier(entry.value) ||
+                            SampleIdentifier.findByName(entry.value)
+                    entry.status = sampleIdentifierExists ? valid : invalid
                 } else {
                     entry.status = invalid
                 }

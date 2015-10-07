@@ -479,6 +479,13 @@ class DomainFactory {
         ], sampleProperties)
     }
 
+    public static SampleIdentifier createSampleIdentifier(Map properties = [:]) {
+        return createDomainObject(SampleIdentifier, [
+                sample: { createSample() },
+                name: 'sampleIdentifierName_' + (counter++),
+        ], properties)
+    }
+
     public static SeqType createSeqType(Map seqTypeProperties = [:]) {
         return createDomainObject(SeqType, [
                 name         : 'seqTypeName_' + (counter++),

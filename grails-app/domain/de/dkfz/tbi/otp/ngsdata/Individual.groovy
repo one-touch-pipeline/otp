@@ -43,6 +43,7 @@ class Individual {
     enum Type {REAL, POOL, CELLLINE, UNDEFINED}
     Type type
 
+    Project project
     static belongsTo = [project : Project]
 
     static constraints = {

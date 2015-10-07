@@ -1,13 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
-
 class Sample {
 
     static belongsTo = [
         individual : Individual,
         sampleType : SampleType
     ]
+    Individual individual
+    SampleType sampleType
 
     static constraints = {
         individual(nullable: false)

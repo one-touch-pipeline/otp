@@ -1,41 +1,15 @@
 package de.dkfz.tbi.otp.hipo
 
+import de.dkfz.tbi.otp.ngsdata.ParsedSampleIdentifier
+import de.dkfz.tbi.otp.ngsdata.SampleIdentifierParser
 import groovy.transform.TupleConstructor
 import java.util.regex.Matcher
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
 
-@TupleConstructor  // see http://jeffastorey.blogspot.de/2011/10/final-variables-in-groovy-with-dynamic.html
-class HipoSampleIdentifier {
-
-    /**
-     * The HIPO project number.
-     * Example: 004
-     */
-    final String projectNumber
-
-    /**
-     * The patient ID.
-     * Example: H456-ABCD
-     */
-    final String pid
-
-    /**
-     * The tissue type.
-     * Example: TUMOR
-     */
-    final HipoTissueType tissueType
-
-    /**
-     * The sample number.
-     * Example: 3
-     */
-    final int sampleNumber
-
-    /**
-     * Which analyte type was applied to the sample, [DRPAC] (DNA, RNA, Protein, miRNA or ChiPSeq).
-     * Always followed by the order number.
-     * Example: D1 (DNA, attempt 1)
-     */
-    final String analyteTypeAndNumber
+@Component
+@Scope("singleton")
+class HipoSampleIdentifierParser implements SampleIdentifierParser {
 
     private final static String REGEX =/^(([A-Z])(\d\d\w)-(?:\w\w)?\w\w\w(\w))-([${HipoTissueType.values()*.key.join("")}])(\d{1,2})-(([DRPACWY])(\d{1,2}))$/
 
@@ -44,7 +18,7 @@ class HipoSampleIdentifier {
      * @return A {@link HipoSampleIdentifier} if the supplied string is a valid HIPO sample name,
      * otherwise <code>null</code>.
      */
-    public static HipoSampleIdentifier tryParse(String sampleName) {
+    public HipoSampleIdentifier tryParse(String sampleName) {
         Matcher matcher = sampleName =~ REGEX
         if (!matcher.matches()) {
             return null
@@ -86,11 +60,52 @@ class HipoSampleIdentifier {
                 /* experiment: */ matcher.group(7),
                 )
     }
+}
+
+@TupleConstructor  // see http://jeffastorey.blogspot.de/2011/10/final-variables-in-groovy-with-dynamic.html
+class HipoSampleIdentifier implements ParsedSampleIdentifier {
+
+    /**
+     * The HIPO project number.
+     * Example: 004
+     */
+    final String projectNumber
+
+    /**
+     * The patient ID.
+     * Example: H456-ABCD
+     */
+    final String pid
+
+    /**
+     * The tissue type.
+     * Example: TUMOR
+     */
+    final HipoTissueType tissueType
+
+    /**
+     * The sample number.
+     * Example: 3
+     */
+    final int sampleNumber
+
+    /**
+     * Which analyte type was applied to the sample, [DRPAC] (DNA, RNA, Protein, miRNA or ChiPSeq).
+     * Always followed by the order number.
+     * Example: D1 (DNA, attempt 1)
+     */
+    final String analyteTypeAndNumber
+
+    @Override
+    String getProjectName() {
+        return "hipo_${projectNumber}"
+    }
 
     /**
      * The 'original' name, concatenated from the parsed subparts.
      * Example: H456-ABCD-T3-D1
      */
+    @Override
     public String getFullSampleName() {
         return "${pid}-${tissueType.key}${sampleNumber}-${analyteTypeAndNumber}"
     }
@@ -100,6 +115,7 @@ class HipoSampleIdentifier {
      * the {@link #sampleNumber} if different from 1 or for project 35.
      * Example: TUMOR03
      */
+    @Override
     public String getSampleTypeDbName() {
         String dbName = tissueType.name()
         // 'default' sample number is 1, only make explicit when not 1
