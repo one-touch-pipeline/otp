@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.infrastructure
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.Process
@@ -28,7 +30,6 @@ class ClusterJobTests {
 
     ProcessingStep step
     Realm realm
-    ClusterJobService clusterJobService
 
     @Before
     void before() {
@@ -52,6 +53,10 @@ class ClusterJobTests {
         realm = DomainFactory.createRealmDataManagement()
 
         assertNotNull(realm.save(flush: true))
+
+        ProcessingOption option = new ProcessingOption([name: "basesPerBytesFastQ", type: "", project: null, value: "1.0", comment: "some comment"])
+
+        assertNotNull(option.save(flush: true))
     }
 
     @Test
@@ -125,5 +130,64 @@ class ClusterJobTests {
                                               )
 
         assertTrue(clusterJob2.validate())
+    }
+
+    @Test
+    public void testBeforeValidate_WhenNBasesIsNullAndFileSizeGiven_ShouldFillNBases() {
+        Long fileSize = 100L
+        Float basesPerBytesFastQFactor = (ProcessingOptionService.findOptionObject('basesPerBytesFastQ', null, null).value as float)
+        ClusterJob clusterJob = new ClusterJob(
+                processingStep: step,
+                realm: realm,
+                clusterJobId: "testID",
+                clusterJobName: "testName_${step.nonQualifiedJobClass}",
+                jobClass: step.nonQualifiedJobClass,
+                queued: QUEUED,
+                fileSize: fileSize,
+                nBases: null
+        )
+        assert clusterJob.save(flush: true, failOnError: true)
+        assert clusterJob.nBases == (fileSize * basesPerBytesFastQFactor) as Long
+        assert clusterJob.basesPerBytesFastq == basesPerBytesFastQFactor
+    }
+
+    @Test
+    public void testBeforeValidate_WhenNBasesIsNotNullAndFileSizeGiven_ShouldNotFillBases() {
+        Long fileSize = 1000L
+        Long nBases = 100L
+        ClusterJob clusterJob = new ClusterJob(
+                processingStep: step,
+                realm: realm,
+                clusterJobId: "testID",
+                clusterJobName: "testName_${step.nonQualifiedJobClass}",
+                jobClass: step.nonQualifiedJobClass,
+                queued: QUEUED,
+                fileSize: fileSize,
+                nBases: nBases
+        )
+        assert clusterJob.save(flush: true, failOnError: true)
+        assert clusterJob.nBases == nBases
+        assertNull(clusterJob.basesPerBytesFastq)
+    }
+
+    @Test
+    public void testBeforeValidate_WhenClusterJobExistsAndNBasesIsNullAndFileSizeGiven_ShouldFillNBases() {
+        Long fileSize = 100L
+        Float basesPerBytesFastQFactor = (ProcessingOptionService.findOptionObject('basesPerBytesFastQ', null, null).value as float)
+        ClusterJob clusterJob = new ClusterJob(
+                processingStep: step,
+                realm: realm,
+                clusterJobId: "testID",
+                clusterJobName: "testName_${step.nonQualifiedJobClass}",
+                jobClass: step.nonQualifiedJobClass,
+                queued: QUEUED,
+                fileSize: null,
+                nBases: null
+        )
+        assert clusterJob.save(flush: true, failOnError: true)
+        clusterJob.fileSize = fileSize
+        assert clusterJob.save(flush: true, failOnError: true)
+        assert clusterJob.nBases == (fileSize * basesPerBytesFastQFactor) as Long
+        assert clusterJob.basesPerBytesFastq == basesPerBytesFastQFactor
     }
 }

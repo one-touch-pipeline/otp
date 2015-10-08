@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.infrastructure
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 import de.dkfz.tbi.otp.gorm.mapper.PersistentDateTimeAsMillis
@@ -59,6 +61,27 @@ class ClusterJob implements ClusterJobIdentifier{
      * sequence type used for this cluster job
      */
     SeqType seqType
+    /**
+     * number of bases of all {@link de.dkfz.tbi.otp.ngsdata.SeqTrack} that belong to this job
+     */
+    Long nBases
+    /**
+     * number of reads of all {@link de.dkfz.tbi.otp.ngsdata.SeqTrack} that belong to this job
+     */
+    Long nReads
+    /**
+     * file size of all {@link de.dkfz.tbi.otp.ngsdata.DataFile} that belong to this job
+     */
+    Long fileSize
+    /**
+     * the bases per bytes factor that is used to calculate the file size in bases,
+     * in case bases are not known at this time (all jobs before FastQC-WF)
+     * the factor can change from time to time and is currently calculated by hand
+     * the latest value, as well as obsolate values are stored
+     * in the {@link de.dkfz.tbi.otp.dataprocessing.ProcessingOption} with name basesPerBytesFastQ
+     * this value represents the factor that was used when this job was completed
+     */
+    Float basesPerBytesFastq
     /**
      * multiplexing was used for processing
      */
@@ -121,6 +144,10 @@ class ClusterJob implements ClusterJobIdentifier{
         clusterJobName(blank: false, nullable: false, validator: { clusterJobName, clusterJob -> clusterJobName.endsWith("_${clusterJob.jobClass}") } )
         jobClass(blank: false, nullable: false)
         seqType(nullable: true)                                 // gets filled after initialization, must be nullable
+        nBases(nullable: true)
+        nReads(nullable: true)
+        fileSize(nullable: true)
+        basesPerBytesFastq(nullable: true)
         multiplexing(nullable: true)
         xten(nullable: true)
         exitStatus(nullable: true)                              // gets filled after initialization, must be nullable
@@ -146,6 +173,23 @@ class ClusterJob implements ClusterJobIdentifier{
 
         clusterJobId index: "cluster_job_cluster_job_id_idx"
         clusterJobName index: "cluster_job_cluster_job_name_idx"
+    }
+
+    /*
+     * Due missing number of bases (SeqTrack.nBasePairs) before FastQC-WF, we have to calculate this value from the file size
+     * of the specific input files. The calculation is done with the approximation for bases per bytes stored in the
+     * ProcessingOption with name "basesPerBytesFastQ". This value should be kept in ProcessingOption to have an
+     * easy way for updating. The "bases per bytes"-value is currently calculated by hand. See OTP-1754 for more information.
+     *
+     * The calculation should be done automatically when nBases are not given and the results should be stored
+     * immediately in the database, because of the use of sql queries in ClusterJobService.
+     */
+    def beforeValidate() {
+        if (fileSize && !nBases) {
+            float basesPerBytes = ProcessingOptionService.findOptionObject('basesPerBytesFastQ', null, null).value as float
+            basesPerBytesFastq = basesPerBytes
+            nBases = fileSize * basesPerBytesFastq
+        }
     }
 
     public Cluster getCluster() {
