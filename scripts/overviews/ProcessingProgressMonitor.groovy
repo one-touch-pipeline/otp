@@ -12,7 +12,7 @@ The following code allows to show the processing state for
 *** seqtracks which belong to run segments where flag 'align' is set to false are ignored
 *** running OTP alignments
 *** running pan can alignments
-** sample pairs (snv) waiting for snv calling
+** sample pairs (snv) waiting for snv calling (ignore pairs without snv config)
 ** snv calling instance which are in processing
 
 entries are trimmed (spaces before after are removed)
@@ -920,8 +920,11 @@ if (allProcessed) {
 
     //collect waiting SamplePairs
     SamplePair.findAllByProcessingStatus(SamplePair.ProcessingStatus.NEEDS_PROCESSING).each {SamplePair samplePair ->
-        [samplePair.mergingWorkPackage1, samplePair.mergingWorkPackage2].each { MergingWorkPackage mergingWorkPackage ->
-            seqTracks.addAll(mergingWorkPackage.findMergeableSeqTracks())
+        //see also: OTP-1497 and/or OTP-1673
+        if (SnvConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(samplePair.project, samplePair.seqType)) {
+            [samplePair.mergingWorkPackage1, samplePair.mergingWorkPackage2].each { MergingWorkPackage mergingWorkPackage ->
+                seqTracks.addAll(mergingWorkPackage.findMergeableSeqTracks())
+            }
         }
     }
 
