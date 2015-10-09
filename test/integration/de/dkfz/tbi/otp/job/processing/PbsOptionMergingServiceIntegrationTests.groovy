@@ -90,7 +90,7 @@ class PbsOptionMergingServiceIntegrationTests extends AbstractIntegrationTest {
         shouldFail(IllegalArgumentException.class, { pbsOptionMergingService.mergePbsOptions(realm, "job") })
 
         realm = createRealm("{}", Realm.Cluster.BIOQUANT)
-        processingOption = createProcessingOption("job_dkfz", "{}", , Realm.Cluster.DKFZ)
+        processingOption = createProcessingOption("job_dkfz", "{}", Realm.Cluster.DKFZ)
         shouldFail(IllegalArgumentException.class, { pbsOptionMergingService.mergePbsOptions(realm, "job_dkfz") })
 
         realm = createRealm("{}", Realm.Cluster.DKFZ)
