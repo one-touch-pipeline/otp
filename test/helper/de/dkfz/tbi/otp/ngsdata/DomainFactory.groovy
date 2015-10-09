@@ -41,8 +41,8 @@ class DomainFactory {
      */
     static int counter = 0
 
-    private static Object createDomainObject(Class domainClass, Map defaultProperties, Map parameterProperties) {
-        def domain = domainClass.newInstance()
+    private static <T> T createDomainObject(Class<T> domainClass, Map defaultProperties, Map parameterProperties) {
+        T domain = domainClass.newInstance()
         defaultProperties.each { String key, def value ->
             if (!parameterProperties.containsKey(key)) {
                 if (value instanceof Closure) {
