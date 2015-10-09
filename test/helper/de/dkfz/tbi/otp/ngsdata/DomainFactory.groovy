@@ -606,6 +606,13 @@ class DomainFactory {
         return step
     }
 
+    public static RestartedProcessingStep createAndSaveRestartedProcessingStep(ProcessingStep step = null) {
+        ProcessingStep originalStep = step ?: createAndSaveProcessingStep()
+        final RestartedProcessingStep restartedProcessingStep = RestartedProcessingStep.create(originalStep)
+        assert restartedProcessingStep.save(flush: true)
+        return restartedProcessingStep
+    }
+
     public static ProcessingStepUpdate createProcessingStepUpdate(final ProcessingStep step, final ExecutionState state) {
         return new ProcessingStepUpdate(
                 date: new Date(),

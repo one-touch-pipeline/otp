@@ -31,7 +31,7 @@ class FastqcStartJob extends AbstractStartJobImpl {
         SeqTrack.withTransaction {
             SeqTrack seqTrack = seqTrackService.getSeqTrackReadyForFastqcProcessingPreferAlignable()
             if (seqTrack) {
-                log.debug "Creating fastqc process for seTrack ${seqTrack}"
+                log.debug "Creating fastqc process for seqTrack ${seqTrack}"
                 seqTrackService.setFastqcInProgress(seqTrack)
                 createProcess(new ProcessParameter(value: seqTrack.id.toString(), className: seqTrack.class.name))
             }

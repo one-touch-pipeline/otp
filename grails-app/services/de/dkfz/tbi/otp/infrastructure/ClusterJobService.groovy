@@ -80,6 +80,9 @@ class ClusterJobService {
         }
         job.multiplexing = isMultiplexing(job)
         job.xten = isXten(job)
+        job.nBases = getBasesSum(job)
+        job.nReads = getReadsSum(job)
+        job.fileSize = getFileSizesSum(job)
         assert job.save(flush: true, failOnError: true)
     }
 
@@ -151,15 +154,15 @@ class ClusterJobService {
      * returns the specific workflow object to a cluster job, e.g. Run, AligmentPass
      * @return Object or null
      */
-    public ProcessParameterObject findProcessParameterObjectByClusterJob(ClusterJob job) {
-        return atMostOneElement(ProcessParameter.findAllByProcess(job.processingStep.process))?.toObject()
+    public static ProcessParameterObject findProcessParameterObjectByClusterJob(ClusterJob job) {
+        return atMostOneElement(ProcessParameter.findAllByProcess(job.processingStep.process)).toObject()
     }
 
     /**
      * returns true if a job belongs to data that is sequenced by X-Ten machines
      */
-    public Boolean isXten(ClusterJob job) {
-        Object workflowObject = findProcessParameterObjectByClusterJob(job)
+    public static Boolean isXten(ClusterJob job) {
+        ProcessParameterObject workflowObject = findProcessParameterObjectByClusterJob(job)
         List<SeqPlatformModelLabel> seqPlatformModelLabels = workflowObject.getContainedSeqTracks().toList()*.seqPlatform.seqPlatformModelLabel
         if(seqPlatformModelLabels.unique().size() == 1) {
             return seqPlatformModelLabels.first().name == "HiSeq X Ten"
@@ -170,14 +173,66 @@ class ClusterJobService {
     /**
      * returns true if a job belongs to data that is multiplexing data
      */
-    public Boolean isMultiplexing(ClusterJob job) {
-        Object workflowObject = findProcessParameterObjectByClusterJob(job)
+    public static Boolean isMultiplexing(ClusterJob job) {
+        ProcessParameterObject workflowObject = findProcessParameterObjectByClusterJob(job)
         List<DataFile> files = DataFile.findAllBySeqTrackInList(workflowObject.getContainedSeqTracks().toList())
         List<Boolean> hasBarcode = files.collect { MultiplexingService.barcode(it.fileName) != null }.unique()
         if (hasBarcode.size() == 1) {
             return hasBarcode.first()
         }
         return null
+    }
+
+    /**
+     * returns the sum of bases of all {@link de.dkfz.tbi.otp.ngsdata.SeqTrack} that belong to this job
+     */
+    public static Long getBasesSum(ClusterJob job) {
+        return normalizePropertyToClusterJobs(job) { ProcessParameterObject workflowObject ->
+            workflowObject.getContainedSeqTracks()?.sum { it.nBasePairs }
+        }
+    }
+
+    /**
+     * returns the sum of file sizes of all {@link DataFile} that belong to this job
+     */
+    public static Long getFileSizesSum(ClusterJob job) {
+        return normalizePropertyToClusterJobs(job) { ProcessParameterObject workflowObject ->
+            DataFile.findAllBySeqTrackInList(workflowObject.getContainedSeqTracks().asList())?.sum { it.fileSize }
+        }
+    }
+
+    /**
+     * returns the sum of reads of all {@link de.dkfz.tbi.otp.ngsdata.SeqTrack} that belong to this job
+     */
+    public static Long getReadsSum(ClusterJob job) {
+        return normalizePropertyToClusterJobs(job) { ProcessParameterObject workflowObject ->
+            workflowObject.getContainedSeqTracks()?.sum { it.nReads }
+        }
+    }
+
+    /**
+     * normalizes given property to the count of {@link ClusterJob} that belong to its OTP-Job
+     * jobs work on different object-levels, e.g. FastqcJobs work on DataFiles, whereas CalculateChecksumJobs work on Runs
+     * for calculating properties of OTP-Objects per {@link ClusterJob} it is necessary to adjust these properties to
+     * the count of Input-Objects used for this {@link ClusterJob}
+     */
+    private static Long normalizePropertyToClusterJobs(ClusterJob clusterJob, Closure propertyToBeNormalized) {
+        List<ClusterJob> clusterJobs = findAllClusterJobsToOtpJob(clusterJob)
+        ProcessParameterObject workflowObject = findProcessParameterObjectByClusterJob(clusterJob)
+        Long propertyToBeNormalizedResult = propertyToBeNormalized(workflowObject)
+        if (propertyToBeNormalizedResult && clusterJobs) {
+            return propertyToBeNormalizedResult / clusterJobs.size()
+        }
+        return null
+    }
+
+    /**
+     * in case a {@link ProcessingStep} belongs to {@link de.dkfz.tbi.otp.job.processing.RestartedProcessingStep} it
+     * returns the top most {@link ProcessingStep} stored as original from ClusterJob
+     */
+    public static List<ClusterJob> findAllClusterJobsToOtpJob(ClusterJob job) {
+        ProcessingStep processingStep = ProcessingStep.findTopMostProcessingStep(job.processingStep)
+        return ClusterJob.findAllByProcessingStepAndJobClass(processingStep, job.jobClass)
     }
 
     /**

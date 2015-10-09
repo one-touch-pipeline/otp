@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.job.jobs.merging.MergingJob
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import org.junit.Test
 
 class ProcessingStepTests  {
@@ -19,5 +20,21 @@ class ProcessingStepTests  {
         Class testJob = MergingJob
         ProcessingStep p = ProcessingStep.build([jobClass: testJob.getName()])
         assert !p.belongsToMultiJob()
+    }
+
+    @Test
+    public void testFindTopMostProcessingStep_WhenRestartedProcessingStep_ShouldReturnOriginalProcessingStep() {
+        ProcessingStep originalStep = DomainFactory.createAndSaveProcessingStep()
+        RestartedProcessingStep step1 = DomainFactory.createAndSaveRestartedProcessingStep(originalStep)
+        RestartedProcessingStep step2 = DomainFactory.createAndSaveRestartedProcessingStep(step1)
+
+        assert originalStep == ProcessingStep.findTopMostProcessingStep(step2)
+    }
+
+    @Test
+    public void testFindTopMostProcessingStep_WhenProcessingStep_ShouldReturnProcessingStep() {
+        ProcessingStep step = DomainFactory.createAndSaveProcessingStep()
+
+        assert step == ProcessingStep.findTopMostProcessingStep(step)
     }
 }

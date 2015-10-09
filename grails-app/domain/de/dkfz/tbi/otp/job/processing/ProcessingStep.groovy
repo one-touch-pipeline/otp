@@ -219,4 +219,13 @@ public class ProcessingStep implements Serializable {
         Class jobClass = Class.forName(jobClass, true, getClass().getClassLoader())
         return AbstractMultiJob.isAssignableFrom(jobClass)
     }
+
+    public static ProcessingStep findTopMostProcessingStep(ProcessingStep step) {
+        if (step instanceof RestartedProcessingStep) {
+            if (step.original) {
+                return findTopMostProcessingStep(step.original)
+            }
+        }
+        return step
+    }
 }

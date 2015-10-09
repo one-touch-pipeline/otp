@@ -186,8 +186,7 @@ class ClusterJob implements ClusterJobIdentifier{
      */
     def beforeValidate() {
         if (fileSize && !nBases) {
-            float basesPerBytes = ProcessingOptionService.findOptionObject('basesPerBytesFastQ', null, null).value as float
-            basesPerBytesFastq = basesPerBytes
+            basesPerBytesFastq = ProcessingOptionService.findOptionObject('basesPerBytesFastQ', null, null).value as float
             nBases = fileSize * basesPerBytesFastq
         }
     }

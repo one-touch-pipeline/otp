@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.LocalDate
@@ -102,6 +103,9 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
         assertEquals(new Duration(4000000L), job.requestedWalltime)
         assertNull(job.multiplexing)
         assertNull(job.xten)
+        assertNull(job.nBases)
+        assertNull(job.nReads)
+        assertNull(job.fileSize)
     }
 
     @Test
@@ -211,14 +215,123 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
     }
 
     @Test
+    public void testFindAllClusterJobsToOtpJob_WhenDifferentProcessingSteps_ShouldReturnClusterJobsOfSameProcessingStepAndJobClass() {
+        ClusterJob job1 = createClusterJob()
+
+        ClusterJob job2 = createClusterJob()
+        job2.processingStep = job1.processingStep
+        job2.save(flush: true)
+
+        createClusterJob()
+
+        assert CollectionUtils.containSame([job1, job2], ClusterJobService.findAllClusterJobsToOtpJob(job1))
+    }
+
+    @Test
+    public void testFindAllClusterJobsToOtpJob_WhenDifferentJobClasses_ShouldReturnClusterJobsOfSameProcessingStepAndJobClass() {
+        String jobClass1 = "testClass1"
+        String jobClass2 = "testClass2"
+
+        ClusterJob job1 = createClusterJob([jobClass: jobClass1])
+
+        ClusterJob job2 = createClusterJob([jobClass: jobClass1])
+        job2.processingStep = job1.processingStep
+        job2.save(flush: true)
+
+        ClusterJob job3 = createClusterJob([jobClass: jobClass2])
+        job3.processingStep = job1.processingStep
+        job3.save(flush: true)
+
+        assert CollectionUtils.containSame([job1, job2], ClusterJobService.findAllClusterJobsToOtpJob(job1))
+    }
+
+    @Test
+    void testGetBasesSum_WhenContainedSeqTracksContainBasesAndSeveralJobsBelongToOtpJob_ShouldReturnNormalizedSumOfBases() {
+        def (job, run) = setupClusterJobsOfSameProcessingStepAndRun()
+
+        DomainFactory.createSeqTrack([run: run, nBasePairs: 150L])
+        DomainFactory.createSeqTrack([run: run, nBasePairs: 150L])
+
+        assert 100L == ClusterJobService.getBasesSum(job)
+    }
+
+    @Test
+    void testGetBasesSum_WhenNoContainedSeqTracks_ShouldReturnNull() {
+        def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
+
+        assert null == ClusterJobService.getBasesSum(job)
+    }
+
+    @Test
+    void testGetBasesSum_WhenContainedSeqTracksContainNoBases_ShouldReturnNull() {
+        def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
+
+        DomainFactory.createSeqTrack([run: run]).save(flush: true)
+
+        assert null == ClusterJobService.getBasesSum(job)
+    }
+
+    @Test
+    void testGetFileSizesSum_WhenContainedDataFilesContainFileSizesAndSeveralJobsBelongToOtpJob_ShouldReturnNormalizedSumOfFileSizes() {
+        def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
+
+        DomainFactory.buildSeqTrackWithDataFile([run: run], [fileSize: 150L])
+        DomainFactory.buildSeqTrackWithDataFile([run: run], [fileSize: 150L])
+
+        assert 100L == ClusterJobService.getFileSizesSum(job)
+    }
+
+    @Test
+    void testGetFileSizesSum_WhenNoContainedDataFiles_ShouldReturnNull() {
+        def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
+
+        assert null == ClusterJobService.getFileSizesSum(job)
+    }
+
+    @Test
+    void testGetFileSizesSum_WhenContainedDataFilesContainNoBases_ShouldReturnNull() {
+        def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
+
+        DomainFactory.buildSeqTrackWithDataFile([run: run])
+
+        assert null == ClusterJobService.getFileSizesSum(job)
+    }
+
+    @Test
+    void testGetReadsSum_WhenContainedSeqTracksContainBasesAndSeveralJobsBelongToOtpJob_ShouldReturnNormalizedSumOfReads() {
+        def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
+
+        DomainFactory.createSeqTrack([run: run, nReads: 150L])
+        DomainFactory.createSeqTrack([run: run, nReads: 150L])
+
+        assert 100L == ClusterJobService.getReadsSum(job)
+    }
+
+    @Test
+    void testGetReadsSum_WhenNoContainedSeqTracks_ShouldReturnNull() {
+        def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
+
+        assert null == ClusterJobService.getReadsSum(job)
+    }
+
+    @Test
+    void testGetReadsSum_WhenContainedSeqTracksContainNoBases_ShouldReturnNull() {
+        def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
+
+        DomainFactory.createSeqTrack([run: run]).save(flush: true)
+
+        assert null == ClusterJobService.getReadsSum(job)
+    }
+
+    @Test
     void testIsXten_WhenSeqTrackProcessedWithXten_ShouldReturnTrue() {
         def(job, run) = createClusterJobWithRun()
 
         SeqPlatformModelLabel seqPlatformModelLabel = SeqPlatformModelLabel.build(name: "HiSeq X Ten")
-        SeqPlatform seqPlatform = SeqPlatform.build(seqPlatformModelLabel: seqPlatformModelLabel)
-        SeqTrack.build(run: run, seqPlatform: seqPlatform)
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform([seqPlatformModelLabel: seqPlatformModelLabel])
+        DomainFactory.createSeqTrack([run: run, seqPlatform: seqPlatform])
 
-        assert clusterJobService.isXten(job)
+        assert ClusterJobService.isXten(job)
     }
 
     @Test
@@ -226,10 +339,10 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
         def(job, run) = createClusterJobWithRun()
 
         SeqPlatformModelLabel seqPlatformModelLabel = SeqPlatformModelLabel.build(name: "HiSeq2500")
-        SeqPlatform seqPlatform = SeqPlatform.build(seqPlatformModelLabel: seqPlatformModelLabel)
-        SeqTrack.build(run: run, seqPlatform: seqPlatform)
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform([seqPlatformModelLabel: seqPlatformModelLabel])
+        DomainFactory.createSeqTrack([run: run, seqPlatform: seqPlatform])
 
-        assertFalse(clusterJobService.isXten(job))
+        assertFalse(ClusterJobService.isXten(job))
     }
 
     @Test
@@ -237,14 +350,14 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
         def(job, run) = createClusterJobWithRun()
 
         SeqPlatformModelLabel seqPlatformModelLabelXTen = SeqPlatformModelLabel.build(name: "HiSeq X Ten")
-        SeqPlatform seqPlatformXTen = SeqPlatform.build(seqPlatformModelLabel: seqPlatformModelLabelXTen)
-        SeqTrack.build(run: run, seqPlatform: seqPlatformXTen)
+        SeqPlatform seqPlatformXTen = DomainFactory.createSeqPlatform([seqPlatformModelLabel: seqPlatformModelLabelXTen])
+        DomainFactory.createSeqTrack([run: run, seqPlatform: seqPlatformXTen])
 
         SeqPlatformModelLabel seqPlatformModelLabelHiSeq2500 = SeqPlatformModelLabel.build(name: "HiSeq2500")
-        SeqPlatform seqPlatformHiSeq2500 = SeqPlatform.build(seqPlatformModelLabel: seqPlatformModelLabelHiSeq2500)
-        SeqTrack.build(run: run, seqPlatform: seqPlatformHiSeq2500)
+        SeqPlatform seqPlatformHiSeq2500 = DomainFactory.createSeqPlatform([seqPlatformModelLabel: seqPlatformModelLabelHiSeq2500])
+        DomainFactory.createSeqTrack([run: run, seqPlatform: seqPlatformHiSeq2500])
 
-        assertNull(clusterJobService.isXten(job))
+        assertNull(ClusterJobService.isXten(job))
     }
 
     @Test
@@ -253,7 +366,7 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
         DomainFactory.buildSeqTrackWithDataFile([run: run], [fileName: "example_ACACAC_fileR1_1.fastq.gz"])
 
-        assert clusterJobService.isMultiplexing(job)
+        assert ClusterJobService.isMultiplexing(job)
     }
 
     @Test
@@ -262,7 +375,7 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
         DomainFactory.buildSeqTrackWithDataFile([run: run], [fileName: "example.fastq.gz"])
 
-        assertFalse(clusterJobService.isMultiplexing(job))
+        assertFalse(ClusterJobService.isMultiplexing(job))
     }
 
     @Test
@@ -272,7 +385,7 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
         SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile([run: run], [fileName: "example_ACACAC_fileR1_1.fastq.gz"])
         DomainFactory.buildSequenceDataFile(seqTrack: seqTrack, fileName: "example.fastqz.gz")
 
-        assertNull(clusterJobService.isMultiplexing(job))
+        assertNull(ClusterJobService.isMultiplexing(job))
     }
 
     @Test
@@ -314,7 +427,7 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
                                             ended: EDATE_DATETIME,
                                             clusterJobName: "Value with ${filter} something _testClass"])
 
-        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME,
+        createClusterJob([queued: SDATE_DATETIME,
                                             ended: EDATE_DATETIME,
                                             clusterJobName: "some other value _testClass"])
 
@@ -1065,7 +1178,7 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
                 xten: false
         ] + myProps
 
-        Realm realm = DomainFactory.createRealmDataProcessingDKFZ()
+        Realm realm = DomainFactory.createRealmDataProcessing()
         assert realm.save([flush: true, failOnError: true])
 
         ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep(props.jobClass)
@@ -1085,22 +1198,38 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
         return job
     }
 
+    private List createClusterJobWithRun(Run run = null, Map clusterJobProps = [:]) {
+        ClusterJob job = createClusterJob(clusterJobProps)
+
+        if (!run) {
+            run = DomainFactory.createRun().save([flush: true, failOnError: true])
+        }
+
+        ProcessParameter processParameter = DomainFactory.createProcessParameter(job.processingStep.process, 'de.dkfz.tbi.otp.ngsdata.Run', run.id.toString())
+        processParameter.save(flush: true)
+
+        return [job, run]
+    }
+
+    private List createClusterJobWithProcessingStepAndRun( ProcessingStep step = null, Run run = null, Map myProps = [:]) {
+        def (j, r) = createClusterJobWithRun(run, myProps)
+        j.processingStep = step
+        assert j.save(flush:true)
+        return [j, r]
+    }
+
+    private List setupClusterJobsOfSameProcessingStepAndRun() {
+        def (job, run) = createClusterJobWithRun()
+        createClusterJobWithProcessingStepAndRun(job.processingStep, run)
+        createClusterJobWithProcessingStepAndRun(job.processingStep, run)
+        return [job, run]
+    }
+
     private SOAPFault createSoapFault() {
         SOAPFault soapFault = SOAPFactory.newInstance().createFault()
         soapFault.setFaultString("fault message")
         soapFault.setFaultCode(new QName(SOAPConstants.URI_NS_SOAP_ENVELOPE, "Sender"))
         soapFault.setFaultActor("START AP")
         return soapFault
-    }
-
-    private List createClusterJobWithRun() {
-        ClusterJob job = createClusterJob()
-
-        Run run = DomainFactory.createRun().save([flush: true, failOnError: true])
-
-        ProcessParameter processParameter = DomainFactory.createProcessParameter(job.processingStep.process, 'de.dkfz.tbi.otp.ngsdata.Run', run.id.toString())
-        processParameter.save(flush: true)
-
-        return [job, run]
     }
 }
