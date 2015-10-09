@@ -176,9 +176,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
                 pbsOptions: pbsOptions,
         ]
 
-        assert WorkflowTestRealms.createRealmDataManagementBioQuant(realmParams).save(flush: true)
-        assert WorkflowTestRealms.createRealmDataProcessingBioQuant(realmParams).save(flush: true)
-
         assert WorkflowTestRealms.createRealmDataManagementDKFZ(realmParams).save(flush: true)
         realm = WorkflowTestRealms.createRealmDataProcessingDKFZ(realmParams).save(flush: true)
         assert realm

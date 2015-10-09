@@ -167,7 +167,7 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
         String mkDirs = createClusterScriptService.makeDirs([new File(realm.stagingRootPath, "clusterScriptExecutorScripts")], "0777")
         assert executionService.executeCommand(realm, mkDirs).toInteger() == 0
 
-        def targetLocations = []
+        List<File> targetLocations
 
         if (bamFileTumor instanceof RoddyBamFile && bamFileControl instanceof RoddyBamFile) {
             createDirectories([
@@ -197,11 +197,10 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
         } else {
             throw new RuntimeException("The following bamFiles can not be processed: ${bamFileTumor}, ${bamFileControl}")
         }
-        String copyFiles = createClusterScriptService.createTransferScript(
-                [inputDiseaseBamFile, inputDiseaseBaiFile, inputControlBamFile, inputControlBaiFile],
-                targetLocations,
-                [null, null, null, null])
-        assert executionService.executeCommand(realm, copyFiles) == (targetLocations.collect { "${it.absolutePath}: OK\n" }).join("")
+        [[inputDiseaseBamFile, inputDiseaseBaiFile, inputControlBamFile, inputControlBaiFile],
+         targetLocations].transpose().each { List<String> transposed ->
+            executionService.executeCommand(realm, "cp ${transposed[0]} ${transposed[1]}")
+        }
 
         bamFileTumor.fileSize = inputDiseaseBamFile.size()
         assertNotNull(bamFileTumor.save(flush: true))
@@ -265,10 +264,10 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
                 fileSize: 1,
         )
         assertNotNull(jobResultCalling.save(flush: true))
-        def sourceFiles = [new File("${getWorkflowDirectory()}/resultFiles_${VERSION}/snvs_stds_raw.vcf.gz"), new File("${getWorkflowDirectory()}/resultFiles_${VERSION}/snvs_stds_raw.vcf.gz.tbi")]
-        def targetFiles = [jobResultCalling.getResultFilePath().absoluteDataManagementPath, new File("${jobResultCalling.getResultFilePath().absoluteDataManagementPath}.tbi")]
-        def sourceFilesForFilter = []
-        def targetFilesForFilter = []
+        List<File> sourceFiles = [new File("${getWorkflowDirectory()}/resultFiles_${VERSION}/snvs_stds_raw.vcf.gz"), new File("${getWorkflowDirectory()}/resultFiles_${VERSION}/snvs_stds_raw.vcf.gz.tbi")]
+        List<File> targetFiles = [jobResultCalling.getResultFilePath().absoluteDataManagementPath, new File("${jobResultCalling.getResultFilePath().absoluteDataManagementPath}.tbi")]
+        List<File> sourceFilesForFilter = []
+        List<File> targetFilesForFilter = []
 
         if (startWith == SnvCallingStep.FILTER_VCF) {
             jobResultAnnotation = new SnvJobResult(
@@ -305,8 +304,8 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
                 }
             }
 
-            sourceFiles << new File("snvs_stds.vcf.gz", previousResultDir)
-            sourceFiles << new File("snvs_stds.vcf.gz.tbi", previousResultDir)
+            sourceFiles << new File(previousResultDir, "snvs_stds.vcf.gz")
+            sourceFiles << new File(previousResultDir, "snvs_stds.vcf.gz.tbi")
             targetFiles << deepAnnotationResultFile
             targetFiles << new File("${deepAnnotationResultFile}.tbi")
         }   else if (startWith != SnvCallingStep.SNV_ANNOTATION) {
@@ -317,19 +316,15 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
         String makeDirs = createClusterScriptService.makeDirs([instance.snvInstancePath.absoluteDataManagementPath,instance.snvInstancePath.absoluteStagingPath])
         assert executionService.executeCommand(realm, makeDirs).toInteger() == 0
 
-        String copyFiles = createClusterScriptService.createTransferScript(
-                sourceFiles, targetFiles, [null] * targetFiles.size()
-        )
-
-        if (!sourceFilesForFilter.empty) {
-            String copyFilesForFilter = createClusterScriptService.createTransferScript(
-                    sourceFilesForFilter, targetFilesForFilter, [null] * targetFilesForFilter.size()
-            )
-            assert executionService.executeCommand(realm, copyFilesForFilter) == (targetFilesForFilter.collect { "${it.absolutePath}: OK\n" }).join("")
-
+        [sourceFiles, targetFiles].transpose().each { List<String> transposed ->
+             executionService.executeCommand(realm, "cp ${transposed[0]} ${transposed[1]}")
         }
 
-        assert executionService.executeCommand(realm, copyFiles) == (targetFiles.collect { "${it.absolutePath}: OK\n" }).join("")
+        if (!sourceFilesForFilter.empty) {
+            [sourceFilesForFilter, targetFilesForFilter].transpose().each { List<String> transposed ->
+                executionService.executeCommand(realm, "cp ${transposed[0]} ${transposed[1]}")
+            }
+        }
     }
 
 

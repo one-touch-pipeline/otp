@@ -37,9 +37,8 @@ class TransferMergedQAResultJob extends AbstractEndStateAwareJobImpl{
         long id = Long.parseLong(getProcessParameterValue())
         ProcessedMergedBamFile bamFile = ProcessedMergedBamFile.get(id)
         Project project = processedMergedBamFileService.project(bamFile)
-        Map<String, String> clusterPrefix = configService.clusterSpecificCommandPrefixes(project)
 
-        String cmd = scriptText(bamFile, clusterPrefix)
+        String cmd = scriptText(bamFile)
         Realm realm = configService.getRealmDataProcessing(project)
         String jobId = executionHelperService.sendScript(realm, cmd)
         log.debug "Job ${jobId} submitted to PBS"
@@ -49,14 +48,14 @@ class TransferMergedQAResultJob extends AbstractEndStateAwareJobImpl{
         succeed()
     }
 
-    private String scriptText(ProcessedMergedBamFile file, Map<String, String> clusterPrefix) {
+    private String scriptText(ProcessedMergedBamFile file) {
         String tmpQADestinationDirectory = processedMergedBamFileService.qaResultTempDestinationDirectory(file)
         QualityAssessmentMergedPass pass = qualityAssessmentMergedPassService.latestQualityAssessmentMergedPass(file)
         String sourceQAResultDirectory = processedMergedBamFileQaFileService.directoryPath(pass)
         String text = """
-${clusterPrefix.exec} \"mkdir -p -m 2750 ${tmpQADestinationDirectory}\"
-${clusterPrefix.cp} -r ${sourceQAResultDirectory}/* ${clusterPrefix.dest}${tmpQADestinationDirectory}
-${clusterPrefix.exec} \"find ${tmpQADestinationDirectory} -type f -exec chmod 0640 '{}' \\;\"
+mkdir -p -m 2750 ${tmpQADestinationDirectory}
+cp -r ${sourceQAResultDirectory}/* ${tmpQADestinationDirectory}
+find ${tmpQADestinationDirectory} -type f -exec chmod 0640 '{}' \\;
 """
         return text
     }

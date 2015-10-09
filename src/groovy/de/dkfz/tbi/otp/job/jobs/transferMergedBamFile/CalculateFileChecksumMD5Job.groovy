@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.scheduler.ProcessStatusService
 import de.dkfz.tbi.otp.ngsdata.*
 
 class CalculateFileChecksumMD5Job extends AbstractJobImpl {
@@ -40,17 +39,16 @@ class CalculateFileChecksumMD5Job extends AbstractJobImpl {
 
         Project project = processedMergedBamFileService.project(bamFile)
         Map<String, String> locations = processedMergedBamFileService.locationsForFileCopying(bamFile)
-        Map<String, String> clusterPrefix = configService.clusterSpecificCommandPrefixes(project)
-        Realm realm = configService.getRealmForDKFZLSDF(Realm.OperationType.DATA_PROCESSING)
+        Realm realm = configService.getRealmDataProcessing(project)
         String projectDir = configService.getProjectRootPath(project) + "/" + project.dirName
-        String cmd = scriptText(bamFile, locations, projectDir, clusterPrefix)
+        String cmd = scriptText(bamFile, locations, projectDir)
         String jobId = executionHelperService.sendScript(realm, cmd)
         log.debug "Job " + jobId + " submitted to PBS"
         addOutputParameter(JOB, jobId)
         addOutputParameter(REALM, realm.id.toString())
     }
 
-    private String scriptText(ProcessedMergedBamFile file, Map<String, String> locations, String projectDir, Map<String, String> clusterPrefix) {
+    private String scriptText(ProcessedMergedBamFile file, Map<String, String> locations, String projectDir) {
         QualityAssessmentMergedPass pass = qualityAssessmentMergedPassService.latestQualityAssessmentMergedPass(file)
         String qaResultDirectory = processedMergedBamFileQaFileService.directoryPath(pass)
         String qaResultMd5sumFile = processedMergedBamFileQaFileService.qaResultsMd5sumFile(file)
@@ -66,7 +64,8 @@ class CalculateFileChecksumMD5Job extends AbstractJobImpl {
         // the md5sum of the bai file is written to the file md5Bai
         // the md5sums of the qa results for the merged bam file and for the single lane bam files are written to the file "MD5SUMS"
         String text = """
-${clusterPrefix.exec} \"mkdir -p -m 2750 ${tmpDirectory};  find ${projectDir} -user \\\${USER} -type d -not -perm 2750 -exec chmod 2750 '{}' \\;\"
+mkdir -p -m 2750 ${tmpDirectory}
+find ${projectDir} -user \${USER} -type d -not -perm 2750 -exec chmod 2750 '{}' \\;
 cd ${source}
 # The md5sum file produced by PICARD does not contain the name of the bam file.
 # Therefore the bam file name is added to the md5 sum.

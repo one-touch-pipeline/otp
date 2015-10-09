@@ -32,8 +32,7 @@ class TransferMergedBamFileJob extends AbstractEndStateAwareJobImpl {
 
         log.debug "Attempting to copy merged BAM file " + locations.get("bamFile") + " (id= " + file + " ) to " + locations.get("destinationDirectory")
         Project project = processedMergedBamFileService.project(file)
-        Map<String, String> clusterPrefix = configService.clusterSpecificCommandPrefixes(project)
-        String cmd = scriptText(locations, temporalDestinationDir, clusterPrefix)
+        String cmd = scriptText(locations, temporalDestinationDir)
         Realm realm = configService.getRealmDataProcessing(project)
         String jobId = executionHelperService.sendScript(realm, cmd)
         log.debug "Job ${jobId} submitted to PBS"
@@ -43,14 +42,14 @@ class TransferMergedBamFileJob extends AbstractEndStateAwareJobImpl {
         succeed()
     }
 
-    private String scriptText(Map<String, String> locations, String temporalDestinationDir, Map<String, String> clusterPrefix) {
+    private String scriptText(Map<String, String> locations, String temporalDestinationDir) {
         String source = locations.get("sourceDirectory")
 
         // FIXME: remove chmod once the ACLs in the file system are in place
         String text = """
 cd ${source}
-${clusterPrefix.cp} *.bam *.bai *.md5sum ${clusterPrefix.dest}${temporalDestinationDir}
-${clusterPrefix.exec} \"find ${temporalDestinationDir} -type f -exec chmod 0644 '{}' \\;\"
+cp *.bam *.bai *.md5sum ${temporalDestinationDir}
+find ${temporalDestinationDir} -type f -exec chmod 0644 '{}' \\;
 """
         return text
     }
