@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvDeletionService
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
 import de.dkfz.tbi.otp.ngsqc.*
@@ -232,9 +233,9 @@ class SwapHelperService {
             alignmentPass.delete()
             // The MerginWorkPackage can only be deleted if all corresponding MergingSets and AlignmentPasses are removed already
             if (!MergingSet.findByMergingWorkPackage(mergingWorkPackage) && !AlignmentPass.findByWorkPackage(mergingWorkPackage)) {
-                mergingWorkPackage.delete()
+                snvDeletionService.deleteSamplePairsWithoutSnvCallingInstances(SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
+                mergingWorkPackage.delete(flush: true)
             }
-
         }
 
         // for RoddyBamFiles
@@ -251,8 +252,12 @@ class SwapHelperService {
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
             dirsToDelete << snvDeletionService.deleteForAbstractMergedBamFile(bamFile)
             bamFile.delete()
+            // The MerginWorkPackage can only be deleted if all corresponding RoddyBamFiles are removed already
+            if (!RoddyBamFile.findByWorkPackage(mergingWorkPackage)) {
+                snvDeletionService.deleteSamplePairsWithoutSnvCallingInstances(SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
+                mergingWorkPackage.delete(flush: true)
+            }
         }
-        mergingWorkPackage?.delete(flush: true)
         return dirsToDelete
     }
 
