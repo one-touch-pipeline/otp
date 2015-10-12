@@ -22,7 +22,7 @@ class TestCase extends GroovyTestCase {
     static {
         String tmpdir = System.getProperty('java.io.tmpdir')
         assert tmpdir
-        TEST_DIRECTORY = new File(tmpdir, 'otp-test')
+        TEST_DIRECTORY = new File(new File(tmpdir, 'otp-test'), HelperUtils.uniqueString)
         assert TEST_DIRECTORY.isAbsolute()
     }
 
