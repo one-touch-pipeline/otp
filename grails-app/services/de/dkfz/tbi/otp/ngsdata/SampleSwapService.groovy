@@ -437,6 +437,11 @@ chmod 440 ${newDirectFileName}
 
         createBashScriptRoddy(seqTracks, dirsToDelete, scriptOutputDirectory, outputStringBuilder, bashScriptName, bashScriptToMoveFiles)
 
+        seqTracks.each { SeqTrack seqTrack ->
+            dirsToDelete << swapHelperService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
+            groovyConsoleScriptToRestartAlignments << startAlignmentForSeqTrack(seqTrack)
+        }
+
         List<DataFile> fastqDataFiles = getAndValidateAndShowDataFilesForSeqTracks(seqTracks, dataFileMap, outputStringBuilder)
         List<DataFile> bamDataFiles = getAndValidateAndShowAlignmentDataFilesForSeqTracks(seqTracks, dataFileMap, outputStringBuilder)
         List<DataFile> dataFiles = [fastqDataFiles, bamDataFiles].flatten()
@@ -472,11 +477,6 @@ chmod 440 ${newDirectFileName}
 
         oldFastqcFileNames.eachWithIndex() { oldFastqcFileName, i ->
             bashScriptToMoveFiles << copyAndRemoveFastqcFile(oldFastqcFileName, newFastqcFileNames.get(i), outputStringBuilder, failOnMissingFiles)
-        }
-
-        seqTracks.each { SeqTrack seqTrack ->
-            dirsToDelete << swapHelperService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
-            groovyConsoleScriptToRestartAlignments << startAlignmentForSeqTrack(seqTrack)
         }
 
         bashScriptToMoveFiles << "# delete snv stuff\n"
@@ -588,8 +588,13 @@ chmod 440 ${newDirectFileName}
         File bashScriptToMoveFiles = createFileSafely("${scriptOutputDirectory}", "${bashScriptName}.sh")
         bashScriptToMoveFiles << bashHeader
 
-
         createBashScriptRoddy(seqTrackList, dirsToDelete, scriptOutputDirectory, outputStringBuilder, bashScriptName, bashScriptToMoveFiles)
+
+        seqTrackList.each { SeqTrack seqTrack ->
+            dirsToDelete << swapHelperService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
+            groovyConsoleScriptToRestartAlignments << startAlignmentForSeqTrack(seqTrack)
+        }
+
         if (AlignmentPass.findBySeqTrackInList(seqTrackList)) {
             bashScriptToMoveFiles << "\n\n\n ################ delete old aligned & merged files ################ \n"
 
@@ -624,10 +629,6 @@ chmod 440 ${newDirectFileName}
                 bashScriptToMoveFiles << "#rm -rf ${oldProjectPathToMergedFiles}\n"
             }
 
-            seqTrackList.each { SeqTrack seqTrack ->
-                dirsToDelete << swapHelperService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
-                groovyConsoleScriptToRestartAlignments << startAlignmentForSeqTrack(seqTrack)
-            }
         } else {
             // If the seqTracks were not aligned for whatever reason they will be aligned now.
             // !! Check if the seqTracks have to be aligned. If not, comment out this part.
