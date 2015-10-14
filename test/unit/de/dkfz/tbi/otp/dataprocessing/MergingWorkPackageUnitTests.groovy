@@ -277,7 +277,7 @@ class MergingWorkPackageUnitTests {
                         statSizeFileName: name,
                         workflow: workflow,
                 ])
-                TestCase.assertValidateError(mergingWorkPackage, 'statSizeFileName', 'matches.invalid', name)
+                TestCase.assertAtLeastExpectedValidateError(mergingWorkPackage, 'statSizeFileName', 'matches.invalid', name)
             } catch (Throwable e) {
                 collector.addError(e)
             }

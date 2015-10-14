@@ -5,6 +5,8 @@ import de.dkfz.tbi.otp.utils.CreateFileHelper
 import org.apache.commons.io.FileUtils
 import org.junit.rules.TemporaryFolder
 import static org.junit.Assert.*
+
+import de.dkfz.tbi.otp.utils.HelperUtils
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import grails.util.Environment
@@ -51,7 +53,7 @@ class ReferenceGenomeServiceUnitTests {
 
         project = TestData.createProject()
         project.name = "SOME_PROJECT"
-        project.dirName = temporaryFolder.newFolder()
+        project.dirName = HelperUtils.uniqueString
         project.realmName = realm.name
         project.save(flush: true)
 

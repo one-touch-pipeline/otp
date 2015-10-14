@@ -67,6 +67,7 @@ class Realm implements Serializable {
     Integer flowControlPort
 
     static constraints = {
+        // TODO OTP-1067: Add validation on the paths
         loggingRootPath blank:false, nullable:false
         stagingRootPath blank:true, nullable:true
         flowControlKey blank:true, nullable:true, maxSize: 3072

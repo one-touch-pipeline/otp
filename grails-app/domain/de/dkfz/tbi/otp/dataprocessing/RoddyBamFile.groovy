@@ -81,7 +81,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         config validator: { val, obj -> val?.workflow?.id == obj.workPackage?.workflow?.id }
         identifier unique: 'workPackage'
         roddyExecutionDirectoryNames nullable: true
-        workDirectoryName nullable: true, unique: 'workPackage' //needs to be nullable for objects created before link structure was used
+        workDirectoryName nullable: true, unique: 'workPackage', validator: { it == null || OtpPath.isValidPathComponent(it) } //needs to be nullable for objects created before link structure was used
     }
 
     static mapping = {

@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.Commentable
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
 
 class DataFile implements Commentable{
 
@@ -47,11 +48,11 @@ class DataFile implements Commentable{
         fileExists()
         fileLinked()
 
-        fileName(nullable: true)
-        vbpFileName(nullable: true)
+        fileName(nullable: true, validator: { it == null || OtpPath.isValidPathComponent(it) })
+        vbpFileName(nullable: true, validator: { it == null || OtpPath.isValidPathComponent(it) })
 
         fileType(nullable: true)
-        pathName(nullable: true)
+        pathName(nullable: true, validator: { !it || OtpPath.isValidRelativePath(it) })
         md5sum(nullable: true)
 
         project(nullable: true)

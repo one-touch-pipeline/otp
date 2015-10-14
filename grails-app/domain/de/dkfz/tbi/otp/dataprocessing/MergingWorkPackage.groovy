@@ -82,7 +82,7 @@ class MergingWorkPackage {
         }
         statSizeFileName nullable: true, blank: false, matches: ReferenceGenomeProjectSeqType.TAB_FILE_PATTERN, validator : { val, obj ->
             if (obj.workflow?.name == Workflow.Name.PANCAN_ALIGNMENT) {
-                val != null
+                val != null && OtpPath.isValidPathComponent(val)
             } else if (obj.workflow?.name == Workflow.Name.DEFAULT_OTP) {
                 val == null
             } else {

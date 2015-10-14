@@ -95,9 +95,9 @@ class MetaDataFieldsServiceUnitTest {
 
     @Test
     void test_listAntibodyTarget_multipleData() {
-        AntibodyTarget antibodyTarget1 = AntibodyTarget.build()
-        AntibodyTarget antibodyTarget2 = AntibodyTarget.build()
-        AntibodyTarget antibodyTarget3 = AntibodyTarget.build()
+        AntibodyTarget antibodyTarget1 = DomainFactory.createAntibodyTarget()
+        AntibodyTarget antibodyTarget2 = DomainFactory.createAntibodyTarget()
+        AntibodyTarget antibodyTarget3 = DomainFactory.createAntibodyTarget()
         def list = metaDataFieldsService.listAntibodyTarget()
         assert 3 == list.size()
         assert list.contains(antibodyTarget1)

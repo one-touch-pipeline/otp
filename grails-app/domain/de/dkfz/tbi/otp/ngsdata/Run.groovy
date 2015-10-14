@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 
 /**
@@ -34,7 +35,7 @@ class Run implements ProcessParameterObject{
     ]
 
     static constraints = {
-        name(blank: false, unique: true)
+        name(blank: false, unique: true, validator: { OtpPath.isValidPathComponent(it) })
         storageRealm(nullable: true)
         dateExecuted(nullable: true)
         dateCreated()

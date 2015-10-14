@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
+
 /**
  * Represents connection between {@link Project}, {@link SeqType}
  * and {@link ReferenceGenome}
@@ -63,7 +65,7 @@ class ReferenceGenomeProjectSeqType {
         }
         sampleType(nullable: true)
         deprecatedDate(nullable: true)
-        statSizeFileName nullable: true, blank: false, matches: TAB_FILE_PATTERN
+        statSizeFileName nullable: true, blank: false, matches: TAB_FILE_PATTERN, validator: { it == null || OtpPath.isValidPathComponent(it) }
     }
 
     String toString() {

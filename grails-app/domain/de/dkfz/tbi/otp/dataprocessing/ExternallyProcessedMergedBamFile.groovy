@@ -61,8 +61,8 @@ class ExternallyProcessedMergedBamFile extends AbstractFileSystemBamFile {
 
     static constraints = {
         referenceGenome nullable: false
-        source blank: false
-        fileName blank: false
+        source blank: false, validator: { OtpPath.isValidPathComponent(it) }
+        fileName blank: false, validator: { OtpPath.isValidPathComponent(it) }
     }
 
     static mapping = {

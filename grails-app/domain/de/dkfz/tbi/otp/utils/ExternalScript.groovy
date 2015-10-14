@@ -2,6 +2,8 @@ package de.dkfz.tbi.otp.utils
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
+
 /**
  * The goal is not to write the names or paths of the used scripts in the code, but to store them in the database.
  * This provides more flexibility in cases where the name or paths of the scripts change.
@@ -68,22 +70,20 @@ class ExternalScript {
             if (obj.deprecatedDate) {
                 return true
             }
-            //I tried to do this in one step like 'findAllByScriptIdentifierAndDeprecatedDateIsNull' but it did not work
-            List<ExternalScript> externalScripts = ExternalScript.findAllByScriptIdentifierAndScriptVersion(val, obj.scriptVersion)
-            List<ExternalScript> externalScriptsNotDeprecated = externalScripts.findAll() { it.deprecatedDate == null }
-
-            if (externalScriptsNotDeprecated.empty) {
+            List externalScriptsNotDeprecatedIds
+            withNewSession {
+                externalScriptsNotDeprecatedIds = ExternalScript.findAllByScriptIdentifierAndScriptVersionAndDeprecatedDateIsNull(val, obj.scriptVersion)*.id
+            }
+            if (externalScriptsNotDeprecatedIds.empty) {
                 return true
-            } else if (externalScriptsNotDeprecated.size() == 1 && externalScriptsNotDeprecated.contains(obj) ) {
+            } else if (externalScriptsNotDeprecatedIds.size() == 1 && externalScriptsNotDeprecatedIds[0] == obj.id) {
                 return true
             } else {
                 return false
             }
         }
 
-        filePath blank: false, unique: true, validator: { val, obj ->
-            return new File(val).isAbsolute()
-        }
+        filePath blank: false, unique: true, validator: { OtpPath.isValidAbsolutePath(it) }
         author blank: false
         comment blank: true, nullable: true
         deprecatedDate nullable: true, unique: ['scriptIdentifier', 'scriptVersion']  // partial index: WHERE deprecated_date IS NULL

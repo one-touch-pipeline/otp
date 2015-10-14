@@ -17,6 +17,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.ExternalScript
+import de.dkfz.tbi.otp.utils.HelperUtils
 import grails.util.Environment
 import org.joda.time.DateTime
 import org.joda.time.Duration
@@ -409,6 +410,12 @@ class DomainFactory {
         return snvJobResult
     }
 
+    public static AntibodyTarget createAntibodyTarget(Map properties = [:]) {
+        return createDomainObject(AntibodyTarget, [
+                name: 'antibodyTargetName_' + (counter++),
+        ], properties)
+    }
+
     public static SeqCenter createSeqCenter(Map seqCenterProperties = [:]) {
         return createDomainObject(SeqCenter, [
                 name   : 'seqCenterName_' + (counter++),
@@ -510,7 +517,7 @@ class DomainFactory {
     static ReferenceGenome createReferenceGenome(Map properties = [:]) {
         return createDomainObject(ReferenceGenome, [
                 name                        : "name${counter++}",
-                path                        : TestCase.uniqueNonExistentPath.path,
+                path                        : HelperUtils.uniqueString,
                 fileNamePrefix              : "prefix_${counter++}",
                 length                      : 1,
                 lengthWithoutN              : 1,

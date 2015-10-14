@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProject
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.Workflow
 import de.dkfz.tbi.otp.ngsdata.Project
 
@@ -41,9 +42,7 @@ class RoddyWorkflowConfig extends ConfigPerProject {
     String configVersion
 
     static constraints = {
-        configFilePath validator: { path ->
-            new File(path).isAbsolute()
-        }
+        configFilePath validator: { OtpPath.isValidAbsolutePath(it) }
         workflow unique: ['project', 'configFilePath']
         pluginVersion blank: false
         obsoleteDate unique: ['project', 'workflow']  // partial index: WHERE obsolete_date IS NULL

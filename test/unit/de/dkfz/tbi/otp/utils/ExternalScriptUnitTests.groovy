@@ -26,7 +26,7 @@ class ExternalScriptUnitTests {
     void testConstraintFilePathUnique() {
         ExternalScript externalScriptFirst = createExternalScript()
         assertTrue(externalScriptFirst.validate())
-        assert externalScriptFirst.save()
+        assert externalScriptFirst.save(failOnError: true, flush: true)
 
         ExternalScript externalScriptSecond = createExternalScript(scriptIdentifier: "${SCRIPT_IDENTIFIER}_other")
         assertFalse(externalScriptSecond.validate())
@@ -39,7 +39,7 @@ class ExternalScriptUnitTests {
     void testScriptIdentifierAndDeprecatedDate() {
         ExternalScript externalScript1 = createExternalScript()
         assertTrue(externalScript1.validate())
-        externalScript1.save()
+        assert externalScript1.save(failOnError: true, flush: true)
 
         ExternalScript externalScript2 = createExternalScript(filePath: "/tmp/otherPath/testScript")
         assertFalse(externalScript2.validate())
@@ -48,7 +48,7 @@ class ExternalScriptUnitTests {
         assertTrue(externalScript2.validate())
 
         externalScript1.deprecatedDate = new Date()
-        externalScript1.save()
+        assert externalScript1.save(failOnError: true, flush: true)
         ExternalScript externalScript3 = createExternalScript(filePath: "/tmp/otherOtherPath/testScript")
         assertTrue(externalScript3.validate())
     }
@@ -96,7 +96,7 @@ class ExternalScriptUnitTests {
     @Test
     void testNotMoreThanOneNotWithdrawnExternalScript() {
         ExternalScript externalScript1 = createExternalScript()
-        externalScript1.save()
+        externalScript1.save(failOnError: true, flush: true)
         ExternalScript externalScript2 = createExternalScript()
         assertFalse(externalScript2.validate())
     }

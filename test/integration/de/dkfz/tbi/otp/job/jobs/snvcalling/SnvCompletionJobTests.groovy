@@ -229,7 +229,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         File directory = snvCallingInstance.snvInstancePath.absoluteDataManagementPath
         directory.mkdirs()
         File parentDirectory = directory.parentFile
-        String fileName = SnvCallingStep.CALLING.getResultFileName
+        String fileName = SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, null)
         File sourceFile = new File(directory, fileName)
         assert sourceFile.createNewFile()
         File linkFile = new File(parentDirectory, fileName)
@@ -247,7 +247,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         directory.mkdirs()
         File parentDirectory = directory.parentFile
 
-        String fileName = SnvCallingStep.CALLING.getResultFileName
+        String fileName = SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, null)
         File sourceFile1 = new File(directory, fileName)
         sourceFile1.createNewFile()
         File linkFile1 = new File(parentDirectory, fileName)

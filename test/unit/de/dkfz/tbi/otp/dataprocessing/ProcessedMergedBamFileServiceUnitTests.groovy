@@ -107,7 +107,7 @@ class ProcessedMergedBamFileServiceUnitTests {
     private Map createKitAndSingleLaneBamFiles(String seqTypeName, Class seqTypeClass, ProcessedMergedBamFile processegMergedBamFile) {
         assert seqTypeClass == SeqTrack || seqTypeClass == ExomeSeqTrack
         List bamFiles = []
-        SeqType seqType = testData.createSeqType([name: seqTypeName, dirName: "/tmp"])
+        SeqType seqType = testData.createSeqType([name: seqTypeName, dirName: "tmp"])
         assert seqType.save()
         Sample sample = createSampleAndDBConnections()
         mergingPassAndDBConnections(processegMergedBamFile, sample, seqType)

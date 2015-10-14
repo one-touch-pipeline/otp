@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 
@@ -30,8 +31,8 @@ class SeqType {
 
     static constraints = {
         name(blank: false)
-        libraryLayout(blank: false)  // TODO: OTP-1123: unique constraint for (name, libraryLayout)
-        dirName(blank: false, unique: 'libraryLayout')  // TODO: OTP-1124: unique constraint for (dirName, libraryLayoutDirName)
+        libraryLayout(blank: false, validator: { OtpPath.isValidPathComponent(it) })  // TODO: OTP-1123: unique constraint for (name, libraryLayout)
+        dirName(blank: false, unique: 'libraryLayout', validator: { OtpPath.isValidPathComponent(it) })  // TODO: OTP-1124: unique constraint for (dirName, libraryLayoutDirName)
         alias(nullable: true, blank: false)
         //For unknown reason the object creation fail, if it is not set as nullable
         aliasOrName(nullable: true, blank: false)

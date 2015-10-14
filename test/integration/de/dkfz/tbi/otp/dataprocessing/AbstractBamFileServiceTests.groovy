@@ -123,7 +123,7 @@ class AbstractBamFileServiceTests {
 
         ReferenceGenome referenceGenome = new ReferenceGenome([
             name                        : 'Arbitrary Reference Genome Name',
-            path                        : '/nonexistent',
+            path                        : 'nonexistent',
             fileNamePrefix              : 'somePrefix',
             length                      : ARBITRARY_GENOME_LENGTH_FOR_COVERAGE_WITH_N,
             lengthWithoutN              : ARBITRARY_GENOME_LENGTH_FOR_COVERAGE_WITHOUT_N,

@@ -10,7 +10,7 @@ class SampleTypePerProjectTests extends TestCase {
     void testUniqueConstraint() {
         Project project = TestData.createProject(
                         name: "project",
-                        dirName: "/dirName/",
+                        dirName: "dirName",
                         realmName: "DKFZ"
                         )
         assert project.save()

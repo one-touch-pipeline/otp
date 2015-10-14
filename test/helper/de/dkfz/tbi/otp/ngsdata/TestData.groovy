@@ -308,8 +308,8 @@ class TestData {
             run: run,
             initialFormat: DataFormat.FILES_IN_DIRECTORY,
             currentFormat: DataFormat.FILES_IN_DIRECTORY,
-            dataPath: "/tmp/",
-            mdPath: "/tmp/",
+            dataPath: "/tmp",
+            mdPath: "/tmp",
         ] + properties)
     }
 

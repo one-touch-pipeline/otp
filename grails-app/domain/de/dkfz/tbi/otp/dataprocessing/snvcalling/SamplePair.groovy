@@ -97,7 +97,7 @@ class SamplePair {
             }
         }
         relativePath unique: true, validator: { String val, SamplePair obj ->
-            return val == obj.buildPath().relativePath.path
+            return OtpPath.isValidRelativePath(val) && val == obj.buildPath().relativePath.path
         }
     }
 

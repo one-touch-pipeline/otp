@@ -63,7 +63,7 @@ class SnvCallingInstance implements ProcessParameterObject{
         latestDataFileCreationDate validator: { Date latestDataFileCreationDate, SnvCallingInstance instance ->
             latestDataFileCreationDate == AbstractBamFile.getLatestSequenceDataFileCreationDate(instance.sampleType1BamFile, instance.sampleType2BamFile)
         }
-        instanceName blank: false, unique: 'samplePair'
+        instanceName blank: false, unique: 'samplePair', validator: { OtpPath.isValidPathComponent(it) }
         processingState validator: {val, obj ->
             // there must be at least one withdrawn {@link SnvJobResult}
             // if {@link this#processingState} is {@link SnvProcessingStates#FAILED}

@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
+
 /**
  * This class represents a Bed file
  *
@@ -42,7 +44,7 @@ class BedFile {
     ]
 
     static constraints = {
-        fileName(unique: true, blank: false)
+        fileName(unique: true, blank: false, validator: { OtpPath.isValidPathComponent(it) })
         // alternative primary key (referenceGenome, libraryPreparationKit)
         // we will never have 2 bed files in the db for the same
         // referenceGenome and libraryPreparationKit combination

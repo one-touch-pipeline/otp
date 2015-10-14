@@ -20,7 +20,7 @@ class MergingSetAssignmentTests {
     void setUp() {
         Project project = TestData.createProject()
         project.name = "SOME_PROJECT"
-        project.dirName = "/some/relative/path"
+        project.dirName = "some/relative/path"
         project.realmName = "def"
         project.save(flush: true)
         assertTrue(project.validate())

@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 
 class Project {
@@ -24,7 +25,10 @@ class Project {
 
     static constraints = {
         name(blank: false, unique: true)
-        dirName(blank: false, unique: true)
+        dirName(blank: false, unique: true, validator: { String val ->
+            OtpPath.isValidRelativePath(val) &&
+                    ['icgc', 'dkfzlsdf', 'lsdf', 'project'].every { !val.startsWith("${it}/") }
+        })
         realmName(blank: false)
         projectGroup(nullable: true)
         emailAddressOfContactPerson (nullable: true)

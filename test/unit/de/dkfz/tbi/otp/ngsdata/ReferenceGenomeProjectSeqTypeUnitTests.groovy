@@ -53,7 +53,7 @@ class ReferenceGenomeProjectSeqTypeUnitTests {
             try {
                 String name = "File${it}.tab"
                 ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = ReferenceGenomeProjectSeqType.buildWithoutSave([statSizeFileName: name])
-                TestCase.assertValidateError(referenceGenomeProjectSeqType, 'statSizeFileName', 'matches.invalid', name)
+                TestCase.assertAtLeastExpectedValidateError(referenceGenomeProjectSeqType, 'statSizeFileName', 'matches.invalid', name)
             } catch (Throwable e) {
                 collector.addError(e)
             }

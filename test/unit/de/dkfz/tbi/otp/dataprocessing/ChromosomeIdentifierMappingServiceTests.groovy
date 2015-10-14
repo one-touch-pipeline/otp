@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.utils.HelperUtils
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import org.junit.*
@@ -31,7 +32,7 @@ class ChromosomeIdentifierMappingServiceTests {
 
         project = TestData.createProject()
         project.name = "SOME_PROJECT"
-        project.dirName = "/tmp/alignmentPassService/"
+        project.dirName = HelperUtils.uniqueString
         project.realmName = realm.name
         project.save(flush: true)
 

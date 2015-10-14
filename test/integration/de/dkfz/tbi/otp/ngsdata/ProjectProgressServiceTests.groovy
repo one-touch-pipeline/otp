@@ -35,7 +35,7 @@ class ProjectProgressServiceTests {
     }
 
     private Run createRunWithDatafile(Project project, int month) {
-        Run run = testData.createRun([ project: project, name: "Run ${month}"]).save(flush: true)
+        Run run = testData.createRun([ project: project, name: "Run${month}"]).save(flush: true)
         testData.createDataFile([run: run, project: project, dateFileSystem: new Date(2000, month, 2)]).save(flush: true)
         return run
     }

@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
+
 /**
  * This class represents an Antibody target which is used
  * for the library creation for chip seq sequencing purpose.
@@ -15,7 +17,7 @@ class AntibodyTarget {
     String name
 
     static constraints = {
-        name(unique: true, blank: false, matches: "[0-9a-zA-Z]+")
+        name(unique: true, blank: false, validator: { OtpPath.isValidPathComponent(it) })
     }
 
     public String toString() {

@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
+
 /**
  * Represents a reference genome.
  *
@@ -64,8 +66,8 @@ class ReferenceGenome {
      */
     static constraints = {
         name(unique: true, blank: false)
-        path(unique: true, blank: false)
-        fileNamePrefix(blank: false)
+        path(unique: true, blank: false, validator: { OtpPath.isValidRelativePath(it) })
+        fileNamePrefix(blank: false, validator: { OtpPath.isValidPathComponent(it) })
         length shared: 'greaterThanZero'
         lengthWithoutN shared: 'greaterThanZero'
         lengthRefChromosomes shared: 'greaterThanZero'

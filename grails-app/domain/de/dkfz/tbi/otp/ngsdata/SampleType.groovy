@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import groovy.transform.ToString
 
 @ToString()
@@ -51,7 +52,7 @@ class SampleType {
     SpecificReferenceGenome specificReferenceGenome = SpecificReferenceGenome.UNKNOWN
 
     static constraints = {
-        name(unique: true)
+        name(unique: true, validator: { OtpPath.isValidPathComponent(it) })
         // TODO: OTP-1122: unique constraint for dirName
     }
 

@@ -41,7 +41,7 @@ class Individual implements Commentable{
 
 
     static constraints = {
-        pid(unique: true, nullable: false)
+        pid(unique: true, nullable: false, validator: { OtpPath.isValidPathComponent(it) })
         internIdentifier(nullable: true)
         comment(nullable: true)
     }

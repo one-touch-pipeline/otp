@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.HelperUtils
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
@@ -75,7 +76,7 @@ class AlignmentPassServiceUnitTests extends TestData {
         alignmentPass.workPackage.referenceGenome = null
         Project project2 = TestData.createProject()
         project2.name = "test"
-        project2.dirName = "${baseDir}/test"
+        project2.dirName = HelperUtils.uniqueString
         project2.realmName = "test"
         project2.save(flush: true)
         referenceGenomeProjectSeqType.project = project2

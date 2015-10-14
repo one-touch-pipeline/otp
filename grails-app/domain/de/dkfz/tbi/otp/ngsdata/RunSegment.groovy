@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
+
 class RunSegment {
 
     enum Status {NEW, BLOCKED, PROCESSING, COMPLETE}
@@ -46,14 +48,8 @@ class RunSegment {
 
     static belongsTo = [run : Run]
     static constraints = {
-        dataPath blank: false, validator: {val, obj ->
-            File dir = new File(val)
-            return dir.isAbsolute()
-        }
-        mdPath blank: false, validator: {val, obj ->
-            File dir = new File(val)
-            return dir.isAbsolute()
-        }
+        dataPath blank: false, validator: { OtpPath.isValidAbsolutePath(it) }
+        mdPath blank: false, validator: { OtpPath.isValidAbsolutePath(it) }
         //the field can be null, since for the old data the information is not needed; only for new incoming runSegments
         align(nullable: true)
     }

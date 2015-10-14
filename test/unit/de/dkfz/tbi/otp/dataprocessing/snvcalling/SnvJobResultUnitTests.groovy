@@ -485,7 +485,7 @@ class SnvJobResultUnitTests {
             dirName: TestCase.uniqueNonExistentPath,
             )
 
-        OtpPath path = new OtpPath(project, "testPath/")
+        OtpPath path = new OtpPath(project, "testPath")
         SnvCallingInstance.metaClass.getSnvInstancePath = { return path }
 
         Individual individual = new Individual(

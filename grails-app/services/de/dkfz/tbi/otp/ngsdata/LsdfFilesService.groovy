@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
@@ -44,6 +45,9 @@ class LsdfFilesService {
         }
         if (segment =~ /(?:^|${Pattern.quote(File.separator)})\.{1,2}(?:${Pattern.quote(File.separator)}|$)/) {
             throw new IllegalArgumentException("${segmentPosition} contains '.' or '..': ${segment}")
+        }
+        if (!(segment ==~ OtpPath.PATH_CHARACTERS_REGEX)) {
+            throw new IllegalArgumentException("${segmentPosition} contains at least one illegal character: ${segment}")
         }
     }
 
