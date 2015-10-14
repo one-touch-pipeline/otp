@@ -62,7 +62,7 @@ class ExecutePanCanJobTests {
 
         processingRootPath = dataProcessing.processingRootPath as File
 
-        DomainFactory.createRoddyProcessingOptions(processingRootPath)
+        DomainFactory.createRoddyProcessingOptions(tmpDir.newFolder())
 
         roddyPath = ProcessingOption.findByName("roddyPath").value as File
         roddyCommand = new File(roddyPath, 'roddy.sh')
@@ -72,13 +72,7 @@ class ExecutePanCanJobTests {
         roddyApplicationIni = ProcessingOption.findByName("roddyApplicationIni").value as File
         roddyApplicationIni.text = "Some Text"
 
-        seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack, [sort: 'readNumber'])
-        assert 2 == dataFiles.size()
-        dataFile1File = new File(executePanCanJob.lsdfFilesService.getFileViewByPidPath(dataFiles[0]))
-        createFileAndAddFileSize(dataFile1File, dataFiles[0])
-        dataFile2File = new File(executePanCanJob.lsdfFilesService.getFileViewByPidPath(dataFiles[1]))
-        createFileAndAddFileSize(dataFile2File, dataFiles[1])
+        prepareDataFilesOnFileSystem()
 
         referenceGenomeDir = new File("${processingRootPath}/reference_genomes/${roddyBamFile.referenceGenome.path}")
         assert referenceGenomeDir.mkdirs()
@@ -125,6 +119,30 @@ class ExecutePanCanJobTests {
         configFile = null
         dataFile1File = null
         dataFile2File = null
+    }
+
+    private void prepareDataFilesOnFileSystem() {
+        assert 1 == roddyBamFile.seqTracks.size()
+        seqTrack = roddyBamFile.seqTracks.iterator()[0]
+        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack, [sort: 'readNumber'])
+        assert 2 == dataFiles.size()
+        dataFile1File = new File(executePanCanJob.lsdfFilesService.getFileViewByPidPath(dataFiles[0]))
+        createFileAndAddFileSize(dataFile1File, dataFiles[0])
+        dataFile2File = new File(executePanCanJob.lsdfFilesService.getFileViewByPidPath(dataFiles[1]))
+        createFileAndAddFileSize(dataFile2File, dataFiles[1])
+    }
+
+
+    private String viewByPidString(RoddyBamFile roddyBamFileToUse = roddyBamFile) {
+        return roddyBamFileToUse.individual.getViewByPidPathBase(roddyBamFile.seqType).absoluteDataManagementPath.path
+    }
+
+    private String fastqFilesAsString(RoddyBamFile roddyBamFileToUse = roddyBamFile) {
+        return roddyBamFileToUse.seqTracks.collect {SeqTrack seqTrack ->
+            DataFile.findAllBySeqTrack(seqTrack).collect { DataFile dataFile ->
+                lsdfFilesService.getFileViewByPidPath(dataFile) as File
+            }
+        }.flatten().join(';')
     }
 
     @Test
@@ -235,13 +253,6 @@ class ExecutePanCanJobTests {
     void testPrepareAndReturnWorkflowSpecificCommand_NoBaseBamFileExists() {
         executePanCanJob.executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
-        String viewByPid = roddyBamFile.individual.getViewByPidPathBase(roddyBamFile.seqType).absoluteDataManagementPath.path
-        String fastqFilesAsString = roddyBamFile.seqTracks.collect {SeqTrack seqTrack ->
-            DataFile.findAllBySeqTrack(seqTrack).collect { DataFile dataFile ->
-                lsdfFilesService.getFileViewByPidPath(dataFile) as File
-            }
-        }.flatten().join(';')
-
         String expectedCmd =  """\
 cd /tmp \
 && sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@WGS \
@@ -250,11 +261,55 @@ ${roddyBamFile.individual.pid} \
 --useRoddyVersion=${roddyVersion} \
 --usePluginVersion=${roddyBamFile.config.pluginVersion} \
 --configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} \
---useiodir=${viewByPid},${roddyBamFile.workDirectory} \
---cvalues="fastq_list:${fastqFilesAsString},\
+--useiodir=${viewByPidString()},${roddyBamFile.workDirectory} \
+--cvalues="fastq_list:${fastqFilesAsString()},\
 REFERENCE_GENOME:${referenceGenomeFile},\
 INDEX_PREFIX:${referenceGenomeFile.path},\
 CHROM_SIZES_FILE:${chromosomeStatSizeFile},\
+possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
+"""
+
+        String actualCmd = executePanCanJob.prepareAndReturnWorkflowSpecificCommand(roddyBamFile, dataManagement)
+        assert expectedCmd == actualCmd
+    }
+
+    @Test
+    void testPrepareAndReturnWorkflowSpecificCommand_Exome_NoBaseBamFileExists() {
+        executePanCanJob.executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
+
+        roddyBamFile.mergingWorkPackage.seqType = DomainFactory.createExomeSeqType()
+        assert roddyBamFile.mergingWorkPackage.save(flush: true, failOnError: true)
+        roddyBamFile.seqTracks = [DomainFactory.buildSeqTrackWithDataFile(roddyBamFile.mergingWorkPackage)]
+        assert roddyBamFile.save(flush: true, failOnError: true)
+
+        prepareDataFilesOnFileSystem()
+
+        DomainFactory.createBedFile(
+                referenceGenome: roddyBamFile.referenceGenome,
+                libraryPreparationKit: roddyBamFile.mergingWorkPackage.libraryPreparationKit,
+        )
+
+        BedFile bedFile = roddyBamFile.bedFile
+        File bedFilePath = executePanCanJob.bedFileService.filePath(dataProcessing, bedFile, false) as File
+        assert bedFilePath.parentFile.mkdirs()
+        assert bedFilePath.createNewFile()
+
+
+        String expectedCmd =  """\
+cd /tmp \
+&& sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@EXON \
+${roddyBamFile.individual.pid} \
+--useconfig=${roddyApplicationIni} \
+--useRoddyVersion=${roddyVersion} \
+--usePluginVersion=${roddyBamFile.config.pluginVersion} \
+--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} \
+--useiodir=${viewByPidString()},${roddyBamFile.workDirectory} \
+--cvalues="fastq_list:${fastqFilesAsString()},\
+REFERENCE_GENOME:${referenceGenomeFile},\
+INDEX_PREFIX:${referenceGenomeFile.path},\
+CHROM_SIZES_FILE:${chromosomeStatSizeFile},\
+TARGET_REGIONS_FILE:${bedFilePath},\
+TARGETSIZE:${bedFile.targetSize},\
 possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
 """
 
@@ -288,12 +343,6 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile, [config: roddyBamFile.config])
-        String viewByPid = roddyBamFile2.individual.getViewByPidPathBase(roddyBamFile2.seqType).absoluteDataManagementPath.path
-        String fastqFilesAsString = roddyBamFile2.seqTracks.collect {SeqTrack seqTrack ->
-            DataFile.findAllBySeqTrack(seqTrack).collect { DataFile dataFile ->
-                lsdfFilesService.getFileViewByPidPath(dataFile) as File
-            }
-        }.flatten().join(';')
 
         SeqTrack seqTrack2 = roddyBamFile2.seqTracks.iterator()[0]
         List<DataFile> dataFiles2 = DataFile.findAllBySeqTrack(seqTrack2)
@@ -308,8 +357,8 @@ ${roddyBamFile2.individual.pid} \
 --useRoddyVersion=${roddyVersion} \
 --usePluginVersion=${roddyBamFile2.config.pluginVersion} \
 --configurationDirectories=${new File(roddyBamFile2.config.configFilePath).parent},${roddyBaseConfigsPath} \
---useiodir=${viewByPid},${roddyBamFile2.workDirectory} \
---cvalues="fastq_list:${fastqFilesAsString},\
+--useiodir=${viewByPidString(roddyBamFile2)},${roddyBamFile2.workDirectory} \
+--cvalues="fastq_list:${fastqFilesAsString(roddyBamFile2)},\
 bam:${roddyBamFile."get${workOrFinal}BamFile"()},\
 REFERENCE_GENOME:${referenceGenomeFile},\
 INDEX_PREFIX:${referenceGenomeFile},\
@@ -327,13 +376,6 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
     void testPrepareAndReturnWorkflowSpecificCommand_WhenReadNumberOrderIsWrong_ShouldBeOk() {
         executePanCanJob.executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
-        String viewByPid = roddyBamFile.individual.getViewByPidPathBase(roddyBamFile.seqType).absoluteDataManagementPath.path
-        String fastqFilesAsString = roddyBamFile.seqTracks.collect {SeqTrack seqTrack ->
-            DataFile.findAllBySeqTrack(seqTrack).collect { DataFile dataFile ->
-                lsdfFilesService.getFileViewByPidPath(dataFile) as File
-            }
-        }.flatten().join(';')
-
         String expectedCmd =  """\
 cd /tmp && \
 sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@WGS \
@@ -342,8 +384,8 @@ ${roddyBamFile.individual.pid} \
 --useRoddyVersion=${roddyVersion} \
 --usePluginVersion=${roddyBamFile.config.pluginVersion} \
 --configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} \
---useiodir=${viewByPid},${roddyBamFile.workDirectory} \
---cvalues="fastq_list:${fastqFilesAsString},\
+--useiodir=${viewByPidString()},${roddyBamFile.workDirectory} \
+--cvalues="fastq_list:${fastqFilesAsString()},\
 REFERENCE_GENOME:${referenceGenomeFile},\
 INDEX_PREFIX:${referenceGenomeFile},\
 CHROM_SIZES_FILE:${chromosomeStatSizeFile},\

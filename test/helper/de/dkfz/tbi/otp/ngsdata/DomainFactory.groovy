@@ -494,6 +494,33 @@ class DomainFactory {
         ], softwareToolProperties)
     }
 
+    static LibraryPreparationKit createLibraryPreparationKit(Map properties = [:]) {
+        return createDomainObject(LibraryPreparationKit, [
+                name: "name_${counter++}",
+        ], properties)
+    }
+
+    static ReferenceGenome createReferenceGenome(Map properties = [:]) {
+        return createDomainObject(ReferenceGenome, [
+                name                        : "name${counter++}",
+                path                        : TestCase.uniqueNonExistentPath().path,
+                fileNamePrefix              : "prefix_${counter++}",
+                length                      : 1,
+                lengthWithoutN              : 1,
+                lengthRefChromosomes        : 1,
+                lengthRefChromosomesWithoutN: 1,
+        ], properties)
+    }
+
+    static BedFile createBedFile(Map properties = [:]) {
+        return createDomainObject(BedFile, [
+                fileName             : "fileName_${counter++}",
+                referenceGenome      : { createReferenceGenome() },
+                libraryPreparationKit: { createLibraryPreparationKit() },
+                targetSize           : 1,
+        ], properties)
+    }
+
     public static SeqTrack createSeqTrack(Map seqTrackProperties = [:]) {
         return createDomainObject(SeqTrack, [
                 laneId         : 'laneId_' + counter++,

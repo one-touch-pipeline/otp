@@ -127,8 +127,8 @@ abstract class AbstractBamFile {
         assert seqTracks.size() > 0
         return exactlyOneElement(BedFile.findAllWhere(
                 referenceGenome: referenceGenome,
-                libraryPreparationKit: exactlyOneElement(seqTracks*.libraryPreparationKit.unique()),
-        ))
+                libraryPreparationKit: exactlyOneElement(seqTracks*.libraryPreparationKit.unique(), "Wrong libraryPreparationKit count"),
+        ), "Wrong BedFile count")
     }
 
     final Project getProject() {

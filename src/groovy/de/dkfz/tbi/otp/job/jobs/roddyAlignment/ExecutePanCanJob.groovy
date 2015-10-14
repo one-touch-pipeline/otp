@@ -3,12 +3,15 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import de.dkfz.tbi.otp.ngsdata.BedFile
+import de.dkfz.tbi.otp.ngsdata.BedFileService
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.MetaDataService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -23,6 +26,9 @@ class ExecutePanCanJob extends AbstractRoddyJob {
 
     @Autowired
     ExecuteRoddyCommandService executeRoddyCommandService
+
+    @Autowired
+    BedFileService bedFileService
 
     @Override
     protected String prepareAndReturnWorkflowSpecificCommand(RoddyResult roddyResult, Realm realm) throws Throwable {
@@ -66,6 +72,15 @@ class ExecutePanCanJob extends AbstractRoddyJob {
         ensureCorrectBaseBamFileIsOnFileSystem(baseBamFile)
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(roddyBamFile.config.configFilePath))
 
+        String additionalCValues = ''
+        if (roddyBamFile.seqType.name == SeqTypeNames.EXOME.seqTypeName) {
+            BedFile bedFile = roddyBamFile.bedFile
+            Realm dataProcessingRealm = configService.getRealmDataProcessing(roddyBamFile.project)
+            File bedFilePath = bedFileService.filePath(dataProcessingRealm, bedFile) as File
+            additionalCValues += "TARGET_REGIONS_FILE:${bedFilePath},"
+            additionalCValues += "TARGETSIZE:${bedFile.targetSize},"
+        }
+
 
         return executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, nameInConfigFile, analysisIDinConfigFile, realm) +
                     "--cvalues=\"fastq_list:${seqTracksToMerge},"  +
@@ -73,6 +88,7 @@ class ExecutePanCanJob extends AbstractRoddyJob {
                     "REFERENCE_GENOME:${referenceGenomeFastaFile}," +
                     "INDEX_PREFIX:${referenceGenomeFastaFile}," +
                     "CHROM_SIZES_FILE:${chromosomeStatSizeFile}," +
+                    additionalCValues +
                     "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}\""
     }
 

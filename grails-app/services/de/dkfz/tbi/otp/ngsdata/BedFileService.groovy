@@ -11,13 +11,13 @@ class BedFileService {
      * @return absolute path to the given {@link BedFile}
      * at given {@link Realm}
      */
-    public String filePath(Realm realm, BedFile bedFile) {
+    public String filePath(Realm realm, BedFile bedFile, boolean checkExistence = true) {
         notNull(realm, "realm must not be null")
         notNull(bedFile, "bedFile must not be null")
-        String refGenomePath = referenceGenomeService.filePathToDirectory(realm, bedFile.referenceGenome)
+        String refGenomePath = referenceGenomeService.filePathToDirectory(realm, bedFile.referenceGenome, checkExistence)
         String bedFilePath = "${refGenomePath}/${TARGET_REGIONS_DIR}/${bedFile.fileName}"
         File file = new File(bedFilePath)
-        if (file.canRead()) {
+        if (!checkExistence || file.canRead()) {
             return bedFilePath
         } else {
             throw new RuntimeException(
