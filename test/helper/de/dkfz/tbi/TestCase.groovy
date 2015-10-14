@@ -25,6 +25,7 @@ class TestCase extends GroovyTestCase {
         TEST_DIRECTORY = new File(new File(tmpdir, 'otp-test'), HelperUtils.uniqueString)
         assert TEST_DIRECTORY.isAbsolute()
     }
+    private static boolean cleanTestDirectoryShutdownHookInstalled = false
 
     final List<Throwable> failures = []
 
@@ -70,6 +71,10 @@ class TestCase extends GroovyTestCase {
      * soon as you do not need it anymore, or delete all test directories using {@link #cleanTestDirectory()}.
      */
     public static File createEmptyTestDirectory() {
+        if (!cleanTestDirectoryShutdownHookInstalled) {
+            addShutdownHook { cleanTestDirectory() }
+            cleanTestDirectoryShutdownHookInstalled = true
+        }
         final File dir = new File(TEST_DIRECTORY, HelperUtils.uniqueString)
         assert dir.mkdirs()  // This will fail if the directory already exists or if it could not be created.
         return dir
