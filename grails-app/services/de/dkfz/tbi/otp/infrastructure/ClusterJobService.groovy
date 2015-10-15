@@ -164,7 +164,7 @@ class ClusterJobService {
     public static Boolean isXten(ClusterJob job) {
         ProcessParameterObject workflowObject = findProcessParameterObjectByClusterJob(job)
         List<SeqPlatformModelLabel> seqPlatformModelLabels = workflowObject.getContainedSeqTracks().toList()*.seqPlatform.seqPlatformModelLabel
-        if(seqPlatformModelLabels.unique().size() == 1) {
+        if(seqPlatformModelLabels*.id.unique().size() == 1 && seqPlatformModelLabels.first() != null) {
             return seqPlatformModelLabels.first().name == "HiSeq X Ten"
         }
         return null
