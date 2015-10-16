@@ -35,7 +35,8 @@ grails.project.dependency.resolution = {
         //compile "sam:sam:1.78"
         compile "com.github.broadinstitute:picard:1.134"
         // bedUtils
-        compile 'bedUtils:bedUtils:0.6'
+        compile 'bedUtils:bedUtils:0.7'
+
         // general dependencies
         compile "joda-time:joda-time:2.3"
         compile "org.jadira.usertype:usertype.jodatime:2.0.1"
