@@ -13,7 +13,7 @@ $.otp.submitSNV = {
             } else {
                 return true;
             }
-            if ((charCode >= 48 && charCode <= 57)|| charCode == 08 || charCode == 13 || charCode == 9 || charCode == 0 || charCode == 46) {
+            if ((charCode >= 48 && charCode <= 57)|| charCode == 8 || charCode == 13 || charCode == 9 || charCode == 0 || charCode == 46) {
                 return true;
             } else {
                 alert("Input fields should contain a numeric value");
