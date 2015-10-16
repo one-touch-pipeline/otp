@@ -272,6 +272,8 @@ grails.plugins.springsecurity.controllerAnnotations.staticRules = [
     "/js/**":                ["permitAll"],
     "/igvSessionFiles/**":   ["permitAll"],
     "/console/**":           ['ROLE_ADMIN'],
+    "/plugins/console*/**":  ['ROLE_ADMIN'],
+    "/plugins/**":           ['denyAll'],
     "/snv/**":               ['ROLE_OPERATOR'],
     "/j_spring_security_switch_user": ['ROLE_SWITCH_USER', 'IS_AUTHENTICATED_FULLY'],
     "/**":                   ['ROLE_USER'],
