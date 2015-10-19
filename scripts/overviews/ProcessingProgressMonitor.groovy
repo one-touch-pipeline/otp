@@ -608,12 +608,16 @@ def showSeqTracksRoddy = {List<SeqTrack> seqTracksToAlign ->
 
     List<MergingWorkPackage> mergingWorkPackages = MergingWorkPackage.createCriteria().list {
         and {
-            'in' ('sample', seqTracksToAlign*.sample)
-            'in' ('seqType', seqTracksToAlign*.seqType)
+          sample {
+            'in' ('id', seqTracksToAlign*.sample*.id)
+          }
+          seqType{
+            'in' ('id', seqTracksToAlign*.seqType*.id)
+          }
         }
     }
 
-    mergingWorkPackages = mergingWorkPackages.findAll { it.findMergeableSeqTracks().intersect(seqTracksToAlign) }
+    mergingWorkPackages = mergingWorkPackages.findAll { it.findMergeableSeqTracks()*.id.intersect(seqTracksToAlign*.id) }
 
     Map<Boolean, Collection<MergingWorkPackage>> mergingWorkPackagesByNeedsProcessing =
             mergingWorkPackages.groupBy {it.needsProcessing}
