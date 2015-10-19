@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.utils.CommentCommand
 import grails.converters.JSON
 import grails.util.GrailsNameUtils
@@ -42,6 +43,7 @@ class ProcessesController {
     JobExecutionPlanService jobExecutionPlanService
     ProcessService processService
     ExecutionService executionService
+    CommentService commentService
 
     def index() {
         redirect(action: 'list')
@@ -177,7 +179,7 @@ class ProcessesController {
                 latest.date,
                 latest.processingStep.jobDefinition.name,
                 [state: latest.state, error: latest.error ? latest.error.errorMessage : null, id: latest.processingStep.id],
-                process.comment?.encodeAsHTML(),
+                process.comment?.comment?.encodeAsHTML(),
                 [actions: actions]
             ]
         }
@@ -199,7 +201,13 @@ class ProcessesController {
 
     def process() {
         Process process = processService.getProcess(params.id as long)
-        [name: process.jobExecutionPlan.name, id: process.id, planId: process.jobExecutionPlan.id, parameter: processParameterData(process), comment: process.comment, commentDate: process.commentDate?.format('EEE, d MMM yyyy HH:mm'), commentAuthor: process.commentAuthor]
+        [
+                name: process.jobExecutionPlan.name,
+                id: process.id,
+                planId: process.jobExecutionPlan.id,
+                parameter: processParameterData(process),
+                comment: process.comment
+        ]
     }
 
     def processData(DataTableCommand cmd) {
@@ -379,10 +387,9 @@ class ProcessesController {
 
     // params.id, params.comment, date
     def saveProcessComment(CommentCommand cmd) {
-        def date = new Date()
         Process process = processService.getProcess(cmd.id)
-        processService.saveComment(process, cmd.comment, date)
-        def dataToRender = [date: date?.format('EEE, d MMM yyyy HH:mm'), author: process.commentAuthor]
+        commentService.saveComment(process, cmd.comment)
+        def dataToRender = [date: process.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: process.comment.author]
         render dataToRender as JSON
     }
 }

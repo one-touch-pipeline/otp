@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.Comment
 
 import static org.junit.Assert.*
 
@@ -1253,13 +1254,13 @@ a: 2
 
     @Test
     void testCreateComment_WhenCommentAlreadyExists_ShouldAddNewComment() {
-        Individual indOld = Individual.build(comment: "old comment")
+        Individual indOld = Individual.build(comment: Comment.build(comment: "old comment"))
         Individual indNew = Individual.build()
         String operation = "operation"
         Map mapOld = [individual: indOld]
         Map mapNew = [individual: indNew]
 
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth("operator") {
             individualService.createComment(operation, mapOld, mapNew)
         }
 
@@ -1269,7 +1270,7 @@ individual: ${indOld}
 New:
 individual: ${indNew}
 
-${indOld.comment}""" == indNew.comment
+${indOld.comment.comment}""" == indNew.comment.comment
     }
 
     @Test

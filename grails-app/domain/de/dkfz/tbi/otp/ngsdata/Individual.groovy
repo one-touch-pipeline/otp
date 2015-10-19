@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 
-class Individual {
+class Individual implements Commentable{
 
     /**
      * Identifier used in the file system. It should never change.
@@ -27,18 +29,7 @@ class Individual {
      */
     String internIdentifier
 
-    /**
-     * Comment of this individual
-     */
-    String comment
-    /**
-     * Date, comment has been submitted
-     */
-    Date commentDate
-    /**
-     * Author of comment
-     */
-    String commentAuthor
+    Comment comment
 
     enum Type {REAL, POOL, CELLLINE, UNDEFINED}
     Type type
@@ -46,12 +37,13 @@ class Individual {
     Project project
     static belongsTo = [project : Project]
 
+
+
+
     static constraints = {
         pid(unique: true, nullable: false)
         internIdentifier(nullable: true)
-        commentDate(nullable: true)
         comment(nullable: true)
-        commentAuthor(nullable: true)
     }
 
     String toString() {

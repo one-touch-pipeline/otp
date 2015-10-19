@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.utils.CommentCommand
 import grails.converters.JSON
 import groovy.json.JsonSlurper
@@ -10,6 +11,7 @@ class IndividualController {
     def individualService
     def igvSessionFileService
     def projectService
+    CommentService commentService
 
     def display = {
         redirect(action: "show", id: params.id)
@@ -36,9 +38,7 @@ class IndividualController {
             previous: individualService.previousIndividual(ind),
             next: individualService.nextIndividual(ind),
             igvMap: igvSessionFileService.createMapOfIgvEnabledScans(ind.seqScans),
-            comment: ind.comment,
-            commentDate: ind.commentDate?.format('EEE, d MMM yyyy HH:mm'),
-            commentAuthor: ind.commentAuthor
+            comment: ind.comment
         ]
     }
 
@@ -183,10 +183,9 @@ class IndividualController {
 
     // params.id, params.comment, date
     def saveIndividualComment(CommentCommand cmd) {
-        def date = new Date()
         Individual individual = individualService.getIndividual(cmd.id)
-        individualService.saveComment(individual, cmd.comment, date)
-        def dataToRender = [date: date?.format('EEE, d MMM yyyy HH:mm'), author: individual.commentAuthor]
+        commentService.saveComment(individual, cmd.comment)
+        def dataToRender = [date: individual.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: individual.comment.author]
         render dataToRender as JSON
     }
 }

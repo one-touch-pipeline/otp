@@ -22,13 +22,18 @@
         </div>
         <div id="processCommentBox" class="commentBoxContainer">
             <div id="commentLabel">Comment:</div>
-            <textarea id="commentBox">${comment?.encodeAsHTML()}</textarea>
-            <div id="commentButtonArea">
-                <button id="saveComment" disabled>&nbsp;&nbsp;&nbsp;<g:message code="commentBox.save" /></button>
-                <button id="cancelComment" disabled><g:message code="commentBox.cancel" /></button>
-            </div>
-            <div id="commentDateLabel">${commentDate}</div>
-            <div id="commentAuthorLabel">${commentAuthor}</div>
+            <sec:ifNotGranted roles="ROLE_OPERATOR">
+                <textarea id="commentBox" readonly>${comment?.comment?.encodeAsHTML()}</textarea>
+            </sec:ifNotGranted>
+            <sec:ifAllGranted roles="ROLE_OPERATOR">
+                <textarea id="commentBox">${comment?.comment?.encodeAsHTML()}</textarea>
+                <div id="commentButtonArea">
+                    <button id="saveComment" disabled>&nbsp;&nbsp;&nbsp;<g:message code="commentBox.save" /></button>
+                    <button id="cancelComment" disabled><g:message code="commentBox.cancel" /></button>
+                </div>
+            </sec:ifAllGranted>
+            <div id="commentDateLabel">${comment?.modificationDate?.format('EEE, d MMM yyyy HH:mm')}</div>
+            <div id="commentAuthorLabel">${comment?.author}</div>
         </div>
         <div id="processOverview">
             <div class="otpDataTables">

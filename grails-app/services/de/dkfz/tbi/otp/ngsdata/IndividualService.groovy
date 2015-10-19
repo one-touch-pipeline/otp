@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.security.User
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.prepost.PostAuthorize
@@ -15,6 +16,7 @@ class IndividualService {
     def sampleService
     def sampleIdentifierService
     def projectService
+    CommentService commentService
 
     /**
      * Retrieves the given Individual.
@@ -478,15 +480,6 @@ AND i.id > :indId
         return seq
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public void saveComment(Individual individual, String comment, Date date) {
-        def user = springSecurityService.principal.username
-        individual.comment = comment
-        individual.commentDate = date
-        individual.commentAuthor = user
-        assert individual.save(flush: true)
-    }
-
     /**
      * Checks for missing values, as well as input maps with different key-sets and calls {@link IndividualService#saveComment(de.dkfz.tbi.otp.ngsdata.Individual, java.lang.String, java.util.Date)}}
      * to finally store the comment for the specific individual in the DB
@@ -506,7 +499,7 @@ AND i.id > :indId
         Date date = new Date()
 
         String output = createCommentString(operation, oldProperties, newProperties, date, additionalInformation)
-        saveComment(newProperties.individual, oldProperties.individual.comment ? "${output}\n${oldProperties.individual.comment}" : "${output}", date)
+        commentService.saveComment(newProperties.individual, oldProperties.individual.comment?.comment ? "${output}\n${oldProperties.individual.comment.comment}" : "${output}")
     }
 
     /**

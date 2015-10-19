@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.Comment
 
 /**
  * The Process represents one execution of a JobExecutionPlan.
@@ -19,7 +21,7 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
  * @see groovy.de.dkfz.tbi.otp.job.processing.Job
  * @see groovy.de.dkfz.tbi.otp.job.processing.StartJob
  **/
-public class Process implements Serializable {
+public class Process implements Serializable, Commentable {
     /**
      * The Date when this process was started.
      **/
@@ -40,24 +42,13 @@ public class Process implements Serializable {
      * Whether there are Jobs still running (false) for this process or not (true).
      **/
     boolean finished = false
-    /**
-     * Comment of this process
-     */
-    String comment
-    /**
-     * Date, comment has been submitted
-     */
-    Date commentDate
-    /**
-     * Author of comment
-     */
-    String commentAuthor
+
+    Comment comment
 
 
     static mapping = {
         finished index: 'finished_idx'
         jobExecutionPlan index: 'job_execution_plan_idx'
-        comment type: 'text'
     }
 
 
@@ -66,8 +57,6 @@ public class Process implements Serializable {
         started(nullable: false)
         startJobClass(nullable: false, blank: false)
         startJobVersion(nullable: false, blank: false)
-        commentDate(nullable: true)
         comment(nullable: true)
-        commentAuthor(nullable: true)
     }
 }

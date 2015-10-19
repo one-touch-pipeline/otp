@@ -120,14 +120,6 @@ class ProcessService {
         schedulerService.restartProcessingStep(step)
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', write)")
-    public void saveComment(Process process, String comment, Date date) {
-        def user = springSecurityService.principal.username
-        process.comment = comment
-        process.commentDate = date
-        process.commentAuthor = user
-        assert process.save(flush: true)
-    }
 
     /**
      * Retrieves all ProcessingStepUpdates for the given ProcessingStep.
