@@ -8,6 +8,7 @@ import grails.test.mixin.*
 import grails.test.mixin.support.*
 import de.dkfz.tbi.otp.ngsdata.*
 import org.junit.After
+import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
@@ -29,6 +30,7 @@ class ExecutionHelperServiceUnitTests {
     final static String DUMMY_GROUP = "DUMMY_GROUP"
     final static String DUMMY_PERMISSION = "DUMMY_PERMISSION"
 
+    @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 
     @After

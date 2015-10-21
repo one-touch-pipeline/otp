@@ -149,7 +149,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
     public void testDeleteMergingRelatedConnectionsOfBamFile() throws Exception {
         MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build(workflow: Workflow.build(name: Workflow.Name.DEFAULT_OTP))
         MergingSet mergingSet = MergingSet.build(mergingWorkPackage: mergingWorkPackage)
-        ProcessedBamFile processedBamFile = DomainFactory.createProcessedBamFile(mergingWorkPackage)
+        ProcessedBamFile processedBamFile = DomainFactory.createProcessedBamFile(mergingWorkPackage).save(flush: true)
         MergingPass mergingPass = MergingPass.build(mergingSet: mergingSet)
         MergingSetAssignment mergingSetAssignment = MergingSetAssignment.build(bamFile: processedBamFile, mergingSet: mergingSet)
         ProcessedMergedBamFile bamFile = ProcessedMergedBamFile.build(workPackage: mergingWorkPackage, mergingPass: mergingPass)
@@ -327,7 +327,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
     public void testThrowExceptionInCaseOfExternalMergedBamFileIsAttached() throws Exception {
         SeqTrack seqTrack = SeqTrack.build()
         FastqSet fastqSet = FastqSet.build(seqTracks: [seqTrack])
-        ExternallyProcessedMergedBamFile.build(fastqSet: fastqSet, type: AbstractBamFile.BamType.RMDUP)
+        ExternallyProcessedMergedBamFile.build(fastqSet: fastqSet, type: AbstractBamFile.BamType.RMDUP).save(flush: true)
 
         final shouldFail = new GroovyTestCase().&shouldFail
         shouldFail AssertionError, {

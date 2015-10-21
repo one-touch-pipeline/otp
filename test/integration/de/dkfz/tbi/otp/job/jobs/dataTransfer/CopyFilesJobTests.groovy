@@ -30,12 +30,12 @@ class CopyFilesJobTests {
     @After
     void tearDown() {
         testData = null
-        TestCase.removeMetaClass(CopyFilesJob, job)
         TestCase.removeMetaClass(ProcessedMergedBamFileService, job.processedMergedBamFileService)
         TestCase.removeMetaClass(ExecutionService, job.executionService)
         TestCase.removeMetaClass(ExecutionHelperService, job.executionHelperService)
         TestCase.removeMetaClass(RunProcessingService, job.runProcessingService)
         TestCase.removeMetaClass(LsdfFilesService, job.lsdfFilesService)
+        TestCase.removeMetaClass(CopyFilesJob, job)
         AbstractMergedBamFileService.metaClass = null
     }
 
@@ -149,25 +149,24 @@ class CopyFilesJobTests {
         DataFile dataFile
         if (createAlignBamFile) {
             dataFile = DataFile.build(
+                run: run,
                 seqTrack: null,
                 alignmentLog: AlignmentLog.build(seqTrack: seqTrack),
                 project: seqTrack.project,
                 fileType : FileType.buildLazy(type: FileType.Type.ALIGNMENT)
                 )
         } else {
-            dataFile = DataFile.build(seqTrack: seqTrack, project: seqTrack.project)
+            dataFile = DataFile.build(run: run, seqTrack: seqTrack, project: seqTrack.project)
         }
+        dataFile.runSegment = DomainFactory.createRunSegment(run: run)
+        assert dataFile.save(failOnError: true, flush: true)
 
         job.metaClass.getProcessParameterValue = { -> run.id.toString() }
         job.runProcessingService.metaClass.dataFilesForProcessing = { Run run2 -> assert run2 == run; [dataFile] }
-        String initialPath = TestCase.uniqueNonExistentPath.path
-        String finalPath = TestCase.uniqueNonExistentPath.path
-        job.lsdfFilesService.metaClass.getFileInitialPath = { DataFile file -> assert file == dataFile; return initialPath }
-        job.lsdfFilesService.metaClass.getFileFinalPath = { DataFile file -> assert file == dataFile; return finalPath }
 
         return [
-                initialPath: initialPath,
-                finalPath: finalPath,
+                initialPath: job.lsdfFilesService.getFileInitialPath(dataFile),
+                finalPath: job.lsdfFilesService.getFileFinalPath(dataFile),
         ]
     }
 

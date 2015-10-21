@@ -99,7 +99,6 @@
                                 <th><g:message code="individual.show.sequencingScans.numberOfLanes"/></th>
                                 <th><g:message code="individual.show.sequencingScans.numberOfBases"/></th>
                                 <th><g:message code="individual.show.sequencingScans.insertSize"/></th>
-                                <th><g:message code="individual.show.sequencingScans.igv"/></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -115,11 +114,6 @@
                                             <td>${scan.nLanes}</td>
                                             <td>${scan.basePairsString()}</td>
                                             <td>${scan.insertSize}</td>
-                                            <td>
-                                                <g:if test="${igvMap.get(scan.id)}">
-                                                    <g:checkBox name="${scan.id}" value="${false}"/>
-                                                </g:if>
-                                            </td>
                                         </tr>
                                     </g:if>
                                 </g:if>

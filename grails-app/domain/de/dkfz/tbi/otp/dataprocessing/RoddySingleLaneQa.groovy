@@ -7,9 +7,9 @@ class RoddySingleLaneQa extends RoddyQualityAssessment {
 
     SeqTrack seqTrack
 
-    static belongsTo = {
+    static belongsTo = [
         seqTrack: SeqTrack
-    }
+    ]
 
     static constraints = {
         chromosome(unique: ['qualityAssessmentMergedPass', 'seqTrack'])

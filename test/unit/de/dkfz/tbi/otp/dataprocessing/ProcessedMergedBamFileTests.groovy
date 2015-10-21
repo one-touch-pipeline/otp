@@ -133,12 +133,14 @@ class ProcessedMergedBamFileTests {
         assertTrue(firstBamFileOfSecondMergingSet.isMostRecentBamFile())
     }
 
+    @Test
     void testGetBamFileName() {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass)
 
         assert "${bamFile.sampleType.name}_${bamFile.individual.pid}_${bamFile.seqType.name}_${bamFile.seqType.libraryLayout}_merged.mdup.bam" == bamFile.bamFileName
     }
 
+    @Test
     void testFileNameNoSuffix() {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass)
         assert "${bamFile.sampleType.name}_${bamFile.individual.pid}_${bamFile.seqType.name}_${bamFile.seqType.libraryLayout}_merged.mdup" == bamFile.fileNameNoSuffix()

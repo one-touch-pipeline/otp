@@ -6,6 +6,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.Mock
+import org.junit.Before
 import org.junit.Test
 
 @Mock([SeqTypeService])
@@ -21,7 +22,7 @@ class SeqTrackServiceUnitTests {
 
     SeqType alignableSeqType
 
-
+    @Before
     void setUp() throws Exception {
         seqTrackService = new SeqTrackService()
         alignableSeqType = DomainFactory.createAlignableSeqTypes().first()

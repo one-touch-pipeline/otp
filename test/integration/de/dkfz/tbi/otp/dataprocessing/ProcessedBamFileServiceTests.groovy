@@ -215,8 +215,8 @@ class ProcessedBamFileServiceTests {
         assertEquals(processedBamFile.id, processedBamFileService.processedBamFileNeedsProcessing().id)
     }
 
-    @Test
     //if a processed merged bam file is marked as withdrawn, the state of qa should be ignored
+    @Test
     void testProcessedBamFileNeedsProcessingAllCorrectWithWithdrawnProcessedBamFile() {
         SeqTrack seqTrack2 = new SeqTrack(
                         laneId: "laneId2",
@@ -276,8 +276,8 @@ class ProcessedBamFileServiceTests {
     }
 
 
-    @Test
     //if a seq track contains withdrawn data, the state of alignment should be ignored
+    @Test
     void testProcessedBamFileNeedsProcessingAllCorrectWithWithdrawnSeqTrack() {
         SeqTrack seqTrack2 = new SeqTrack(
                         laneId: "laneId2",
@@ -656,10 +656,12 @@ class ProcessedBamFileServiceTests {
         // Further tests of isAnyBamFileNotProcessable are included in the test methods above.
     }
 
+    @Test
     void testGetAlignmentReadLength_ProcessedBamFileIsNull() {
         shouldFail(IllegalArgumentException, { processedBamFileService.getAlignmentReadLength(null) })
     }
 
+    @Test
     void testGetAlignmentReadLength_LibrarySingle() {
         BwaLogFileParser.metaClass.static.parseReadNumberFromLog = { File file -> READ_NUMBER }
 
@@ -670,6 +672,7 @@ class ProcessedBamFileServiceTests {
         }
     }
 
+    @Test
     void testGetAlignmentReadLength_LibraryPaired() {
         BwaLogFileParser.metaClass.static.parseReadNumberFromLog = { File file -> READ_NUMBER }
 
@@ -694,14 +697,17 @@ class ProcessedBamFileServiceTests {
         }
     }
 
+    @Test
     void testGetFastQCReadLength_ProcessedBamFileIsNull() {
         shouldFail(IllegalArgumentException, {processedBamFileService.getFastQCReadLength(null)})
     }
 
+    @Test
     void testGetFastQCReadLength_LibrarySingle() {
         assert READ_NUMBER == processedBamFileService.getFastQCReadLength(processedBamFile)
     }
 
+    @Test
     void testGetFastQCReadLength_LibraryPaired() {
 
         DataFile datafile2 = testData.createDataFile([
@@ -722,6 +728,7 @@ class ProcessedBamFileServiceTests {
         assert READ_NUMBER * 2 == processedBamFileService.getFastQCReadLength(processedBamFile)
     }
 
+    @Test
     void testGetFastQCReadLength_LibrarySingle_WrongCountofStatistic() {
         FastqcBasicStatistics fastqcBasicStatistics2 = testData.createFastqcBasicStatistics([totalSequences: READ_NUMBER, fastqcProcessedFile: fastqcProcessedFile])
         assertNotNull(fastqcBasicStatistics2.save([flush: true, failOnError: true]))

@@ -8,6 +8,7 @@ import net.sf.samtools.SAMRecord
 import net.sf.samtools.SAMSequenceRecord
 
 import groovy.json.JsonSlurper
+import org.junit.*
 
 class QaExomeTests extends GroovyTestCase {
 
@@ -32,16 +33,19 @@ class QaExomeTests extends GroovyTestCase {
         refGenMetaInfoFilePath: "${BASE_DIR}/ref-gen-meta-info.txt"
     ]
 
+    @Before
     void setUp() {
         File baseDir = new File(BASE_DIR)
         baseDir.mkdir()
     }
 
+    @After
     void tearDown() {
         File baseDir = new File(BASE_DIR)
         baseDir.deleteDir()
     }
 
+    @Test
     void testTrivialExomeCase() {
         createSimpleBamFile(params.pathBamFile)
         createBamIndexFile(params.pathBamFile, params.pathBamIndexFile)

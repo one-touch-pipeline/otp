@@ -1,19 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
-
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.junit.Before
 import org.junit.Test
-
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.ngsdata.*
 
 
 class SamplePairServiceTests extends AbstractIntegrationTest {

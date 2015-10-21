@@ -1,13 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import static org.junit.Assert.*
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-
 import org.junit.*
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.CheckedLogger
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 

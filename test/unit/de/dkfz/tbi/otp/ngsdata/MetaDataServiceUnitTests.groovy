@@ -33,7 +33,6 @@ class MetaDataServiceUnitTests {
     @Before
     public void setUp() throws Exception {
         metaDataService = new MetaDataService()
-        metaDataService.fileTypeService = new FileTypeService()
     }
 
     @After

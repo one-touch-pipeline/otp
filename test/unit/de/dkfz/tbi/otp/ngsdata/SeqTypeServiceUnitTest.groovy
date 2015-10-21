@@ -6,12 +6,6 @@ import org.junit.Test
 @Build([SeqType])
 class SeqTypeServiceUnitTest {
 
-    SeqTypeService seqTypeService
-
-    void setUp() {
-        seqTypeService = new SeqTypeService()
-    }
-
     @Test
     void testAlignableSeqTypes() {
         DomainFactory.createAlignableSeqTypes()

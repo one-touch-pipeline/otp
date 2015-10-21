@@ -1,9 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.TestFor
 import grails.test.spock.IntegrationSpec
-import org.junit.Before
-import org.junit.Test
+
 
 class ChromosomeQualityAssessmentMergedServiceIntegrationSpec extends IntegrationSpec {
 

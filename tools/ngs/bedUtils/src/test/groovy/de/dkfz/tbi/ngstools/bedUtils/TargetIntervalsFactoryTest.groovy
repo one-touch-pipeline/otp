@@ -1,9 +1,12 @@
 package de.dkfz.tbi.ngstools.bedUtils
 
+import org.junit.*
+
 class TargetIntervalsFactoryTest extends GroovyTestCase {
 
     File file
 
+    @Test
     void testCreate() {
         file = new File("/tmp/kitname.bed")
         if (file.exists()) file.delete()
@@ -14,6 +17,7 @@ class TargetIntervalsFactoryTest extends GroovyTestCase {
         assertNotNull targetIntervals
     }
 
+    @After
     void tearDown() {
         file.delete()
     }

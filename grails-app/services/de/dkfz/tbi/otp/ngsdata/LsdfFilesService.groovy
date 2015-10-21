@@ -85,14 +85,6 @@ class LsdfFilesService {
         return (String[])paths.toArray()
     }
 
-    String getFileFinalPath(long fileId) {
-        DataFile file = DataFile.get(fileId)
-        if (!file) {
-            return null
-        }
-        return getFileFinalPath(file)
-    }
-
     /**
      * Important function.
      * This function knows all naming conventions and data organization
@@ -100,7 +92,7 @@ class LsdfFilesService {
      * @param file
      * @return String with path or null if path can not be established
      */
-    String getFileFinalPath(DataFile file) {
+    public String getFileFinalPath(DataFile file) {
         if (!checkFinalPathDefined(file)) {
             return null
         }

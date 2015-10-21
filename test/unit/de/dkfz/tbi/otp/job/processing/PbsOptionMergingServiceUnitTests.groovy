@@ -13,13 +13,6 @@ import org.junit.*
 @TestFor(PbsOptionMergingService.class)
 class PbsOptionMergingServiceUnitTests {
 
-
-    void setUp() {
-    }
-
-    void tearDown() {
-    }
-
     @Test
     void testJsonStringToMap() {
         PbsOptionMergingService pbsOptionMergingService = new PbsOptionMergingService()

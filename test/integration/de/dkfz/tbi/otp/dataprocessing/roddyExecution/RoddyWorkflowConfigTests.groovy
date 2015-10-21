@@ -4,7 +4,6 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProject
 import de.dkfz.tbi.otp.dataprocessing.Workflow
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
@@ -45,7 +44,6 @@ class RoddyWorkflowConfigTests {
         configFile.delete()
         secondConfigFile.delete()
         TestCase.cleanTestDirectory()
-        LsdfFilesService.metaClass = null
     }
 
 
@@ -177,6 +175,7 @@ class RoddyWorkflowConfigTests {
     }
 
 
+    @Test
     void testCreateConfigPerProject_PreviousConfigExists() {
         Workflow workflow = DomainFactory.returnOrCreateAnyWorkflow()
         Project project = DomainFactory.createProject()
@@ -200,6 +199,7 @@ class RoddyWorkflowConfigTests {
     }
 
 
+    @Test
     void testCreateConfigPerProject_PreviousConfigDoesNotExist(){
         Project project = DomainFactory.createProject()
         ConfigPerProject configPerProject = DomainFactory.createRoddyWorkflowConfig(
@@ -210,6 +210,7 @@ class RoddyWorkflowConfigTests {
     }
 
 
+    @Test
     void testMakeObsolete() {
         ConfigPerProject configPerProject = DomainFactory.createRoddyWorkflowConfig()
         assert !configPerProject.obsoleteDate

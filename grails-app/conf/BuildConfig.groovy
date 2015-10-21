@@ -1,3 +1,5 @@
+import grails.util.Environment
+
 grails.servlet.version = "2.5" // Change depending on target container compliance (2.5 or 3.0)
 
 grails.project.work.dir = 'target'
@@ -77,6 +79,9 @@ grails.project.dependency.resolution = {
         provided ":less-asset-pipeline:2.3.0"
 
         test ":build-test-data:2.4.0" //http://grails.org/plugin/build-test-data
+        if ((Environment.getCurrent().getName() == "WORKFLOW_TEST")) {
+            compile ":build-test-data:2.4.0"
+        }
     }
 }
 

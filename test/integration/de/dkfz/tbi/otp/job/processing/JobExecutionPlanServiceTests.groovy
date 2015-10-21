@@ -753,6 +753,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertSame(process2, service.getLastExecutedProcess(plan))
     }
 
+    @Test
     public void testGetLatestUpdatesForPlanInStateFailure() {
         JobExecutionPlanService service = new JobExecutionPlanService()
         JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0)
@@ -953,6 +954,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         }
     }
 
+    @Test
     void testEnablePlanSecurity() {
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
@@ -994,6 +996,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         }
     }
 
+    @Test
     void testDisablePlanSecurity() {
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)

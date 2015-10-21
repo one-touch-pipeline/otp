@@ -311,6 +311,7 @@ class ProcessedMergedBamFileServiceTests {
         assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA())
     }
 
+    @Test
     void testMergedBamFileWithFinishedQAWhenMd5sumNotNull() {
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
         mergedBamFile.md5sum = "68b329da9893e34099c7d8ad5cb9c940"

@@ -98,6 +98,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
      * Tests that an anonymous user does not have access to a MetaDataEntry
      * if a project is defined for it, but no ACL.
      */
+    @Test
     void testGetMetaDataEntryByIdWithProjectNoAclAsAnonymous() {
         MetaDataEntry entry = mockEntry()
         Project project = mockProject()
@@ -193,6 +194,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
      * Tests that an anonymous user cannot update a metaDataEntry
      * if there is no project defined.
      */
+    @Test
     void testUpdateMetaDataEntryNoProjectAsAnonymous() {
         MetaDataEntry entry = mockEntry()
         authenticateAnonymous()
@@ -205,6 +207,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
      * Tests that a user cannot update a metaDataEntry
      * if there is no project defined.
      */
+    @Test
     void testUpdateMetaDataEntryNoProjectAsUser() {
         MetaDataEntry entry = mockEntry()
         SpringSecurityUtils.doWithAuth("testuser") {
@@ -218,6 +221,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
      * Tests that an operator user can update a metaDataEntry
      * if there is no project defined.
      */
+    @Test
     void testUpdateMetaDataEntryNoProjectAsOperator() {
         MetaDataEntry entry = mockEntry()
         SpringSecurityUtils.doWithAuth("operator") {
@@ -229,6 +233,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
      * Tests that an admin user can update a metaDataEntry
      * if there is no project defined.
      */
+    @Test
     void testUpdateMetaDataEntryNoProjectAsAdmin() {
         MetaDataEntry entry = mockEntry()
         SpringSecurityUtils.doWithAuth("admin") {
@@ -240,6 +245,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
      * Tests that an anonymous user cannot update a metaDataEntry
      * if there is no project defined.
      */
+    @Test
     void testUpdateMetaDataEntryWithProjectAsAnonymous() {
         MetaDataEntry entry = mockEntry()
         Project project = mockProject()
@@ -255,6 +261,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
      * Tests that a user cannot update a metaDataEntry
      * if there is no project defined.
      */
+    @Test
     void testUpdateMetaDataEntryWithProjectAsUser() {
         MetaDataEntry entry = mockEntry()
         Project project = mockProject()
@@ -289,6 +296,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
      * Tests that an operator user can update a metaDataEntry
      * if there is no project defined.
      */
+    @Test
     void testUpdateMetaDataEntryWithProjectAsOperator() {
         MetaDataEntry entry = mockEntry()
         Project project = mockProject()
@@ -303,6 +311,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
      * Tests that an admin user can update a metaDataEntry
      * if there is no project defined.
      */
+    @Test
     void testUpdateMetaDataEntryWithProjectAsAdmin() {
         MetaDataEntry entry = mockEntry()
         Project project = mockProject()
@@ -318,6 +327,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
      * if there is no project assigned to the Entry yet.
      * Test for BUG OTP-36
      */
+    @Test
     void testRetrieveChangelogWithoutProject() {
         MetaDataEntry entry = mockEntry()
         // admin should always be able to see the entry
@@ -354,6 +364,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
      * Tests the security for the case that a project is assigned to the MetaDataEntry
      * but no ACL is defined
      */
+    @Test
     void testRetrieveChangelogWithProjectNoAcl() {
         MetaDataEntry entry = mockEntry()
         Project project = mockProject()
@@ -393,6 +404,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
      * Tests the security for the case that a project is assigned to the MetaDataEntry
      * but no ACL is defined
      */
+    @Test
     void testRetrieveEmptyChangelogWithAcl() {
         MetaDataEntry entry = mockEntry()
         Project project = mockProject()
@@ -423,6 +435,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
      * Tests the security for the case that a project is assigned to the MetaDataEntry
      * and the ACL is defined
      */
+    @Test
     void testRetrieveChangelogWithAcl() {
         MetaDataEntry entry = mockEntry()
         Project project = mockProject()
@@ -452,6 +465,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     }
 
 
+    @Test
     void testProcessMetaDataFileEmptyLines() {
         String runName = "130312_D00133_0018_ADTWTJACXX"
         String fileName = "${runName}.fastq.tsv"

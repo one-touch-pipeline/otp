@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp
 
-import grails.plugins.springsecurity.SpringSecurityService
+import grails.plugin.springsecurity.SpringSecurityService
 import org.springframework.security.access.prepost.PreAuthorize
 
 

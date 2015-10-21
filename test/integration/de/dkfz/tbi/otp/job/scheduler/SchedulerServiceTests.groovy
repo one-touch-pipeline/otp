@@ -45,18 +45,12 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
      */
     SchedulerService schedulerService
 
-    @SuppressWarnings("EmptyMethod")
     @Before
     void setUp() {
         schedulerService.queue.clear()
         schedulerService.running.clear()
     }
 
-    @SuppressWarnings("EmptyMethod")
-    @After
-    void tearDown() {
-        // Tear down logic here
-    }
 
     @Test
     void testEndOfProcess() {
@@ -1171,6 +1165,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertTrue(schedulerService.running.isEmpty())
     }
 
+    @Test
     void testRestartProcessingStepHasUpdates() {
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
@@ -1202,6 +1197,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertTrue(schedulerService.running.isEmpty())
     }
 
+    @Test
     void testRestartProcessingStep() {
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
@@ -1275,6 +1271,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
     /**
      * Tests that the previous next link is updated and the next job is run.
     **/
+    @Test
     void testRestartProcessingStepUpdatesLink() {
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
@@ -1339,6 +1336,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
     /**
      * Test that the branching is done correctly.
      **/
+    @Test
     void testRestartProcessingStepKeepsLinks() {
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
@@ -1431,6 +1429,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
     /**
      * Test for BUG: #OTP-57
      */
+    @Test
     void testRestartProcessingStepKeepsParameters() {
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -1522,6 +1521,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         return step
     }
 
+    @Test
     void testRestartProcessingStep_WhenMultiJobResumeTrue() {
         ProcessingStep step = createFailedProcessingStep()
         schedulerService.restartProcessingStep(step, false, true)
@@ -1534,6 +1534,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertTrue(schedulerService.running.isEmpty())
     }
 
+    @Test
     void testRestartProcessingStep_WhenMultiJobResumeFalse() {
         ProcessingStep step = createFailedProcessingStep()
         schedulerService.restartProcessingStep(step)
@@ -1544,16 +1545,19 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertFalse(step.process.finished)
     }
 
+    @Test
     void testIsJobResumable_notResumable() {
         final ProcessingStep processingStep = new ProcessingStep(jobClass: TestJob.class.name)
         assert schedulerService.isJobResumable(processingStep) == false
     }
 
+    @Test
     void testIsJobResumable_resumable() {
         final ProcessingStep processingStep = new ProcessingStep(jobClass: ResumableTestJob.class.name)
         assert schedulerService.isJobResumable(processingStep) == true
     }
 
+    @Test
     void testIsJobResumable_resumableSometimesResumable() {
         final ProcessingStep processingStep = new ProcessingStep(jobClass: ResumableSometimesResumableTestJob.class.name)
         assert schedulerService.isJobResumable(processingStep) == true
@@ -1567,14 +1571,17 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assert schedulerService.isJobResumable(processingStep) == resumable
     }
 
+    @Test
     void testIsJobResumable_sometimesResumable_true() {
         testIsJobResumable_sometimesResumable true
     }
 
+    @Test
     void testIsJobResumable_sometimesResumable_false() {
         testIsJobResumable_sometimesResumable false
     }
 
+    @Test
     void testIsJobResumable_sometimesResumable_noRunningJob() {
         final ProcessingStep processingStep = new ProcessingStep(jobClass: SometimesResumableTestJob.class.name)
         shouldFail RuntimeException, { schedulerService.isJobResumable(processingStep) }

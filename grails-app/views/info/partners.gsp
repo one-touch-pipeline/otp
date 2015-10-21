@@ -7,7 +7,7 @@
 <body>
     <h2><g:message code="info.partners.title" /></h2>
 
-    <img src="${resource(dir: 'images/partners', file: 'partners.png')}" usemap="#partners" alt="" width="850" height="800">
+    <img src="${assetPath(src: 'partners/partners.png')}" usemap="#partners" alt="" width="850" height="800">
     <map name="partners">
         <area shape="rect" coords="81,47,388,162" alt="Deutsches Konsortium für Translationale Krebsforschung" href="http://www.dkfz.de/de/dktk/" />
         <area shape="rect" coords="1,286,256,390" alt="ICGC" href="https://www.icgc.org/" />

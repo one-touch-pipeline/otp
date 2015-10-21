@@ -332,3 +332,5 @@ environments {
     }
 }
 
+grails.plugin.console.enabled = true
+grails.plugin.console.baseUrl="/${appName}/console"

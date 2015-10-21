@@ -31,25 +31,25 @@ class SnvCallingStepTests {
 
     @Test
     void testGetExternalScript_CALLING() {
-        testGetExternalScript(SnvCallingStep.CALLING)
+        getExternalScript(SnvCallingStep.CALLING)
     }
 
     @Test
     void testGetExternalScript_FILTER() {
-        testGetExternalScript(SnvCallingStep.FILTER_VCF)
+        getExternalScript(SnvCallingStep.FILTER_VCF)
     }
 
     @Test
     void testGetExternalScript_ANNOTATION() {
-        testGetExternalScript(SnvCallingStep.SNV_ANNOTATION)
+        getExternalScript(SnvCallingStep.SNV_ANNOTATION)
     }
 
     @Test
     void testGetExternalScript_DEEP_ANNOTATION() {
-        testGetExternalScript(SnvCallingStep.SNV_DEEPANNOTATION)
+        getExternalScript(SnvCallingStep.SNV_DEEPANNOTATION)
     }
 
-    void testGetExternalScript(SnvCallingStep step) {
+    private void getExternalScript(SnvCallingStep step) {
         final File testDir = TestCase.uniqueNonExistentPath
 
         ExternalScript externalScript = createExternalScript("SnvCallingStep.${step.name()}", new File(testDir, 'script_v1.sh').path)
@@ -63,6 +63,7 @@ class SnvCallingStepTests {
         assertEquals(externalScript2, step.getExternalScript("v1"))
     }
 
+    @Test
     void testGetExternalScript_NoScriptVersion_shouldFail() {
         shouldFail(AssertionError, {SnvCallingStep.SNV_DEEPANNOTATION.getExternalScript(null)})
     }

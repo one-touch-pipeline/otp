@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test

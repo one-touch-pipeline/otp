@@ -1,8 +1,7 @@
 package de.dkfz.tbi.ngstools.qualityAssessment
 
 import net.sf.samtools.SAMRecord
-import org.junit.After
-import org.junit.Before
+import org.junit.*
 
 
 class OnLineStatisticsTests extends GroovyTestCase {
@@ -25,6 +24,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         samInsertSizeStatisticWorker = null
     }
 
+    @Test
     void testProcessRecordTrueEmptyHist() {
         Map histogram = [:]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
@@ -41,6 +41,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(histogramExp, histogramAct)
     }
 
+    @Test
     void testProcessRecordTrueFilledHist() {
         Map histogram = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
@@ -57,6 +58,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(histogramExp, histogramAct)
     }
 
+    @Test
     void testProcessRecordFalseEmptyHist() {
         Map histogram = [:]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
@@ -73,6 +75,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(histogramExp, histogramAct)
     }
 
+    @Test
     void testProcessRecordFalseFilledHist() {
         Map histogram = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
@@ -89,6 +92,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(histogramExp, histogramAct)
     }
 
+    @Test
     void testPostProcess() {
         Map histogram = [9l: 10l, 25l: 10l]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
@@ -107,6 +111,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(sdExp, sdAct)
     }
 
+    @Test
     void testProcessChromosomeAllEmptyCollection() {
         Collection<ChromosomeStatisticWrapper> chromosomeWrappers = []
         Map histogram = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
@@ -117,6 +122,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(histogramExp, histogramAct)
     }
 
+    @Test
     void testProcessChromosomeAllCollectionWithEmptyHistogram() {
         Collection<ChromosomeStatisticWrapper> chromosomeWrappers = []
         ChromosomeStatisticWrapper chromosomeStatisticWrapperEmptyHist = new ChromosomeStatisticWrapper("chr", 1000)
@@ -131,6 +137,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(histogramExp, histogramAct)
     }
 
+    @Test
     void testProcessChromosomeAllEmptyHistogrammInChromosomeWrapper() {
         ChromosomeStatisticWrapper chromosomeStatisticWrapperEmptyHist = new ChromosomeStatisticWrapper("chr", 1000)
         Map histogramEmpty = [:]
@@ -152,6 +159,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(histogramExp, histogramAct)
     }
 
+    @Test
     void testProcessChromosomeAll() {
         ChromosomeStatisticWrapper chromosomeStatisticWrapperAll = new ChromosomeStatisticWrapper("chr", 1000)
         Map histogramAll = [1l: 10l, 3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
@@ -173,6 +181,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(histogramExp, histogramAct)
     }
 
+    @Test
     void testSkipRecordReadPairedFlagTrue() {
         record.setReadPairedFlag(false)
         record.setMateUnmappedFlag(false)
@@ -184,6 +193,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertTrue(samInsertSizeStatisticWorker.skipRecord(record))
     }
 
+    @Test
     void testSkipRecordMateUnmappedFlagTrue() {
         record.setReadPairedFlag(true)
         record.setMateUnmappedFlag(true)
@@ -195,6 +205,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertTrue(samInsertSizeStatisticWorker.skipRecord(record))
     }
 
+    @Test
     void testSkipRecordFirstOfPairFlagTrue() {
         record.setReadPairedFlag(true)
         record.setMateUnmappedFlag(false)
@@ -206,6 +217,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertTrue(samInsertSizeStatisticWorker.skipRecord(record))
     }
 
+    @Test
     void testSkipRecordNotPrimaryAlignmentFlagTrue() {
         record.setReadPairedFlag(true)
         record.setMateUnmappedFlag(false)
@@ -217,6 +229,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertTrue(samInsertSizeStatisticWorker.skipRecord(record))
     }
 
+    @Test
     void testSkipRecordDuplicateReadFlagTrue() {
         record.setReadPairedFlag(true)
         record.setMateUnmappedFlag(false)
@@ -228,6 +241,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertTrue(samInsertSizeStatisticWorker.skipRecord(record))
     }
 
+    @Test
     void testSkipRecordInferredInsertSizeTrue() {
         record.setReadPairedFlag(true)
         record.setMateUnmappedFlag(false)
@@ -239,6 +253,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertTrue(samInsertSizeStatisticWorker.skipRecord(record))
     }
 
+    @Test
     void testSkipRecordProperPairFlagTrue() {
         record.setReadPairedFlag(true)
         record.setMateUnmappedFlag(false)
@@ -250,6 +265,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertTrue(samInsertSizeStatisticWorker.skipRecord(record))
     }
 
+    @Test
     void testSkipRecordAllFalse() {
         record.setReadPairedFlag(true)
         record.setMateUnmappedFlag(false)
@@ -261,6 +277,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertFalse(samInsertSizeStatisticWorker.skipRecord(record))
     }
 
+    @Test
     void testAddZero() {
         Map histogram = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
         Map histogramExp = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l, 0l: 1l]
@@ -270,6 +287,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(histogramExp, histogram)
     }
 
+    @Test
     void testAddNegativeValue() {
         Map histogram = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
         Map histogramExp = [3l: 10l, 10l: 11l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
@@ -279,6 +297,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(histogramExp, histogram)
     }
 
+    @Test
     void testAddNewValue() {
         Map histogram = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
         Map histogramExp = [3l: 10l, 5l: 1l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
@@ -288,6 +307,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(histogramExp, histogram)
     }
 
+    @Test
     void testAddValueToAlreadyExists() {
         Map histogram = [3l: 10l, 10l: 10l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
         Map histogramExp = [3l: 10l, 10l: 11l, 15l: 10l, 19l: 10l, 20l: 10l, 25l: 10l, 30l: 10l]
@@ -297,6 +317,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(histogramExp, histogram)
     }
 
+    @Test
     void testAddValueToEmptyList() {
         Map histogram = [:]
         Map histogramExp = [10l: 1l]
@@ -306,6 +327,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(histogramExp, histogram)
     }
 
+    @Test
     void testMeanOfEmptyList() {
         Map histogram = [:]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
@@ -313,6 +335,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(0, chromosomeStatisticWrapper.chromosome.insertSizeMean)
     }
 
+    @Test
     void testMedianOfEmptyList() {
         Map histogram = [:]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
@@ -320,6 +343,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(0, chromosomeStatisticWrapper.chromosome.insertSizeMedian)
     }
 
+    @Test
     void testRMSOfEmptyList() {
         Map histogram = [:]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
@@ -327,6 +351,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(0, chromosomeStatisticWrapper.chromosome.insertSizeRMS)
     }
 
+    @Test
     void testSDOfEmptyList() {
         Map histogram = [:]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
@@ -334,6 +359,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(0, chromosomeStatisticWrapper.chromosome.insertSizeSD)
     }
 
+    @Test
     void testGetElementAtEmptyList() {
         int position = 3
         Map histogram = [:]
@@ -343,6 +369,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         }
     }
 
+    @Test
     void testGetElementAt() {
         int position = 12
         Map histogram = [3l: 10l, 10l: 10l, 15l: 10l]
@@ -352,6 +379,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(elementExp, elementAct)
     }
 
+    @Test
     void testGetMedianEmptyList() {
         Map histogram = [:]
         chromosomeStatisticWrapper.insertSizeHistogram = histogram
@@ -360,6 +388,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         }
     }
 
+    @Test
     void testGetMedianUnevenNumber() {
         Map histogram = [3l: 11l, 10l: 30l, 15l: 50l]
         double medianExp = 15
@@ -368,6 +397,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(medianExp, medianAct)
     }
 
+    @Test
     void testGetMedianEvenNumber() {
         Map histogram = [3l: 10l, 10l: 30l, 15l: 50l]
         double medianExp = 15
@@ -376,6 +406,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(medianExp, medianAct)
     }
 
+    @Test
     void testGetMedianGroupOfEvenNumber() {
         Map histogram = [3l: 40l, 10l: 10l, 15l: 30l]
         double medianExp = 6.5
@@ -384,6 +415,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(medianExp, medianAct)
     }
 
+    @Test
     void testMean() {
         Map histogram = [9l: 10l, 25l: 10l]
         double insertSizeMeanExp = 17
@@ -393,6 +425,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(insertSizeMeanExp, insertSizeMeanAct)
     }
 
+    @Test
     void testMedian() {
         Map histogram = [3l: 10l, 10l: 30l, 15l: 50l]
         double insertSizeMedianExp = 15
@@ -402,6 +435,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(insertSizeMedianExp, insertSizeMedianAct)
     }
 
+    @Test
     void testRMS() {
         Map histogram = [9l: 10l, 25l: 10l]
         double insertSizeRMSExp = Math.sqrt(353)
@@ -411,6 +445,7 @@ class OnLineStatisticsTests extends GroovyTestCase {
         assertEquals(insertSizeRMSExp, insertSizeRMSAct)
     }
 
+    @Test
     void testSD() {
         Map histogram = [9l: 10l, 25l: 10l]
         double insertSizeSDExp = 8

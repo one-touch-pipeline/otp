@@ -76,6 +76,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
 
     @Deprecated
     @Ignore("OTP-1423")
+    @Test
     void testExecuteJobOnlyScript() {
         assertNotNull(realm.save())
         TestJob testJob = createTestJobWithProcessingStep(TestData.createAndSaveAlignmentPass())
@@ -121,6 +122,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
 
     @Deprecated
     @Ignore("OTP-1423")
+    @Test
     void testExecuteJobScriptAndJobIdentifier() {
         assertNotNull(realm.save())
         TestJob testJob = createTestJobWithProcessingStep(TestData.createAndSaveAlignmentPass())
@@ -155,6 +157,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
 
     @Deprecated
     @Ignore("OTP-1423")
+    @Test
     void testExecuteJobScriptAndJobIdentifierAndQsubParameter() {
         assertNotNull(realm.save())
         TestJob testJob = createTestJobWithProcessingStep(TestData.createAndSaveAlignmentPass())

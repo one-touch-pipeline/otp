@@ -386,17 +386,15 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
             AbstractStartJobImpl startJob = Holders.applicationContext.getBean(JobExecutionPlan.list()?.first()?.startJob?.bean, AbstractStartJobImpl)
             assert startJob : 'No start job found.'
 
-            scheduler.scheduleWithFixedDelay(new Runnable() {
-                void run() {
-                    try {
-                        startJob.execute()
-                    } catch (Throwable t) {
-                        println 'Exception in StartJob'
-                        t.printStackTrace(System.out)
-                        throw t
-                    }
+            scheduler.scheduleWithFixedDelay({
+                try {
+                    startJob.execute()
+                } catch (Throwable t) {
+                    println 'Exception in StartJob'
+                    t.printStackTrace(System.out)
+                    throw t
                 }
-            }, 0, 5, TimeUnit.SECONDS)
+            } as Runnable, 0, 5, TimeUnit.SECONDS)
             startJobRunning = true
         }
 

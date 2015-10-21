@@ -1,6 +1,6 @@
-import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclClass
-import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclEntry
-import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclObjectIdentity
+import grails.plugin.springsecurity.acl.AclClass
+import grails.plugin.springsecurity.acl.AclEntry
+import grails.plugin.springsecurity.acl.AclObjectIdentity
 
 
 /** Script to find missing ACL object identities and entries */

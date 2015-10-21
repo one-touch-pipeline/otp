@@ -66,12 +66,10 @@ class MovePanCanFilesToFinalDestinationJobTests {
             assert cmd ==~ "cd /tmp && sudo -u OtherUnixUser ${temporaryFolder.getRoot()}/.*/correctPathPermissionsOtherUnixUserRemoteWrapper.sh ${temporaryFolder.getRoot()}/.*/merged-alignment"
             return new ProcessHelperService.ProcessOutput('', '', 0)
         }
-        LogThreadLocal.setThreadLog(new SimpleLog())
     }
 
     @After
     void tearDown() {
-        LogThreadLocal.removeThreadLog()
         TestCase.removeMetaClass(MovePanCanFilesToFinalDestinationJob, movePanCanFilesToFinalDestinationJob)
         TestCase.removeMetaClass(ConfigService, movePanCanFilesToFinalDestinationJob.configService)
         TestCase.removeMetaClass(ExecutionService, movePanCanFilesToFinalDestinationJob.executionService)
