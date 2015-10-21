@@ -43,7 +43,7 @@ class ProjectOverviewController {
             seqTypes: seqTypes,
             sampleTypes: sampleTypes,
             sampleType: sampleTypeName,
-            workflows:  Workflow.findAll(),
+            workflows: findWorkflows(),
         ]
     }
 
@@ -138,7 +138,7 @@ class ProjectOverviewController {
 
                     Map<Long, Collection<AbstractMergedBamFile>> bamFilesPerWorkflow = informationOfSample.bamFilesInProjectFolder.get(seqType.id)
 
-                    Workflow.findAll().each { Workflow workflow ->
+                    findWorkflows().each { Workflow workflow ->
                         String cell = ""
                         bamFilesPerWorkflow?.get(workflow.id).each {
                             String subCell = "${it.numberOfMergedLanes} | ${it.coverage ? String.format(Locale.ENGLISH, '%.2f', it.coverage) : "unknown"}"
@@ -162,6 +162,10 @@ class ProjectOverviewController {
         dataToRender.anythingWithdrawn = anythingWithdrawn
 
         render dataToRender as JSON
+    }
+
+    private List<Workflow> findWorkflows() {
+        Workflow.findAllByType(Workflow.Type.ALIGNMENT, [sort: "id"])
     }
 
     JSON individualCountByProject(String projectName) {
