@@ -133,6 +133,7 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
             ClusterJob.withTransaction {
                 finishedClusterJobs.each {
                     final ClusterJob finishedClusterJob = ClusterJob.findByClusterJobIdentifier(it)
+                    finishedClusterJob.refresh()  //reload object from database
                     assert finishedClusterJob.processingStep.id == processingStep.id
                     assert !finishedClusterJob.validated
                     finishedClusterJob.validated = true

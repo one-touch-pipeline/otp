@@ -38,6 +38,8 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob {
             SnvJobResult inputResult = instance.findLatestResultForSameBamFiles(previousStep)
             assert inputResult
 
+            createAndSaveSnvJobResult(instance, step.getExternalScript(config.externalScriptVersion), null, inputResult)
+
             /*
              * Check that the needed input file exists.
              */
@@ -83,7 +85,6 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob {
                     "md5sum ${deepAnnotationResultFile} > ${deepAnnotationResultFile}.md5sum"
 
             executionHelperService.sendScript(realm, script, pbsOptionName, qsubParameters)
-            createAndSaveSnvJobResult(instance, step.getExternalScript(config.externalScriptVersion), null, inputResult)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {
