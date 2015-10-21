@@ -35,6 +35,8 @@ class SnvAnnotationJob extends AbstractSnvCallingJob {
             SnvJobResult inputResult = instance.findLatestResultForSameBamFiles(previousStep)
             assert inputResult
 
+            createAndSaveSnvJobResult(instance, step.getExternalScript(config.externalScriptVersion), null, inputResult)
+
             // Check that all needed files are existing
             final File inputResultFile = inputResult.resultFilePath.absoluteDataManagementPath
             LsdfFilesService.ensureFileIsReadableAndNotEmpty(inputResultFile)
@@ -86,8 +88,6 @@ class SnvAnnotationJob extends AbstractSnvCallingJob {
                 script << " rm -f ${inputFileCopy.absolutePath}"
             }
             executionHelperService.sendScript(realm, script.toString(), pbsOptionName, qsubParameters)
-
-            createAndSaveSnvJobResult(instance, step.getExternalScript(config.externalScriptVersion), null, inputResult)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {
