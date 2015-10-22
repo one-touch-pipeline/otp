@@ -46,12 +46,10 @@ class CreateRoddyFileHelper {
     }
 
     static private createRoddyAlignmentWorkOrFinalResultFiles(Realm realm, RoddyBamFile roddyBamFile, String workOrFinal) {
-        assert roddyBamFile."get${workOrFinal}MergedQADirectory"().mkdirs()
-        assert roddyBamFile."get${workOrFinal}MergedQAJsonFile"().createNewFile()
+        assert CreateFileHelper.createFile(roddyBamFile."get${workOrFinal}MergedQAJsonFile"())
 
         roddyBamFile."get${workOrFinal}SingleLaneQAJsonFiles"().values().each {
-            assert it.parentFile.mkdirs()
-            assert it.createNewFile()
+            assert CreateFileHelper.createFile(it)
         }
 
         assert roddyBamFile."get${workOrFinal}ExecutionStoreDirectory"().mkdirs()

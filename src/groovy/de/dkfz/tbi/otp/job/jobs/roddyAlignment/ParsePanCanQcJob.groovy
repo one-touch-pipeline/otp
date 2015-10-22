@@ -26,7 +26,7 @@ class ParsePanCanQcJob extends AbstractEndStateAwareJobImpl {
 
         RoddyBamFile.withTransaction {
             abstractQualityAssessmentService.parseRoddySingleLaneQaStatistics(roddyBamFile)
-            abstractQualityAssessmentService.parseRoddyBamFileQaStatistics(roddyBamFile)
+            abstractQualityAssessmentService.parseRoddyMergedBamQaStatistics(roddyBamFile)
 
             // Set the coverage value in roddyBamFile
             abstractQualityAssessmentService.saveCoverageToRoddyBamFile(roddyBamFile)

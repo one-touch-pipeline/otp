@@ -7,15 +7,6 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 
 class OverallQualityAssessmentMergedService {
 
-    Double calcCoverageWithoutN(OverallQualityAssessmentMerged overallQualityAssessmentMerged, ReferenceGenome referenceGenome) {
-        long qcBasesMapped = overallQualityAssessmentMerged.qcBasesMapped
-        long referenceGenomeLengthWithoutN = referenceGenome.lengthWithoutN
-        double coverageWithoutN = qcBasesMapped / referenceGenomeLengthWithoutN
-        return coverageWithoutN
-    }
-
-
-
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, read)")
     List<AbstractQualityAssessment> findAllByProjectAndSeqType(Project project, SeqType seqType) {
 

@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.*
+
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
@@ -130,8 +132,12 @@ class ExecutePanCanJob extends AbstractRoddyJob {
                 LsdfFilesService.ensureDirIsReadableAndNotEmpty(roddyBamFile."work${it}Directory")
             }
 
-            roddyBamFile.workSingleLaneQADirectories.each { seqTrack, singleLaneQaDir ->
-                LsdfFilesService.ensureDirIsReadableAndNotEmpty(singleLaneQaDir)
+            ensureFileIsReadableAndNotEmpty(roddyBamFile.workMergedQAJsonFile)
+            if (roddyBamFile.seqType.seqTypeName == SeqTypeNames.EXOME) {
+                ensureFileIsReadableAndNotEmpty(roddyBamFile.workMergedQATargetExtractJsonFile)
+            }
+            roddyBamFile.workSingleLaneQAJsonFiles.values().each {
+                ensureFileIsReadableAndNotEmpty(it)
             }
         }
 

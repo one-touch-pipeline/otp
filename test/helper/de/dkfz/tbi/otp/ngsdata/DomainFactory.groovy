@@ -17,7 +17,6 @@ import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.ExternalScript
-import de.dkfz.tbi.otp.utils.HelperUtils
 import grails.util.Environment
 import org.joda.time.DateTime
 import org.joda.time.Duration
@@ -311,12 +310,7 @@ class DomainFactory {
     }
 
     static SamplePair createSamplePair(Map properties = [:]) {
-        MergingWorkPackage mergingWorkPackage1 = TestData.createMergingWorkPackage(
-                sample: createSample(),
-                seqType: createSeqType(),
-                seqPlatformGroup: SeqPlatformGroup.build()
-        )
-        assert mergingWorkPackage1.save(flush: true, failOnError: true)
+        MergingWorkPackage mergingWorkPackage1 = createMergingWorkPackage()
         SampleTypePerProject sampleTypePerProject = SampleTypePerProject.build(
                 sampleType: mergingWorkPackage1.sampleType,
                 project: mergingWorkPackage1.project,
@@ -428,6 +422,12 @@ class DomainFactory {
         ], seqPlatformProperties)
     }
 
+    public static SeqPlatformGroup createSeqPlatformGroup(Map properties = [:]) {
+        return createDomainObject(SeqPlatformGroup, [
+                name: 'seqPlatformGroup_' + (counter++),
+        ], properties)
+    }
+
     public static Run createRun(Map runProperties = [:]) {
         return createDomainObject(Run, [
                 name       : 'runName_' + (counter++),
@@ -510,7 +510,7 @@ class DomainFactory {
     static ReferenceGenome createReferenceGenome(Map properties = [:]) {
         return createDomainObject(ReferenceGenome, [
                 name                        : "name${counter++}",
-                path                        : TestCase.uniqueNonExistentPath().path,
+                path                        : TestCase.uniqueNonExistentPath.path,
                 fileNamePrefix              : "prefix_${counter++}",
                 length                      : 1,
                 lengthWithoutN              : 1,
@@ -537,6 +537,19 @@ class DomainFactory {
                 run            : { createRun() },
                 seqPlatform    : { createSeqPlatform() },
         ], seqTrackProperties)
+    }
+
+    public static MergingWorkPackage createMergingWorkPackage(Map properties = [:]) {
+        return createDomainObject(MergingWorkPackage, [
+                libraryPreparationKit: { createLibraryPreparationKit() },
+                sample:                { createSample() },
+                seqType:               { createSeqType() },
+                seqPlatformGroup:      { createSeqPlatformGroup() },
+                referenceGenome:       { createReferenceGenome() },
+                statSizeFileName:      { properties.get('workflow')?.name == Workflow.Name.PANCAN_ALIGNMENT ?
+                                            "statSizeFileName_${counter++}.tab" : null },
+                workflow:              { createDefaultOtpWorkflow() },
+        ], properties)
     }
 
 

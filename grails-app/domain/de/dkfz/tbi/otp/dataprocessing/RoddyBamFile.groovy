@@ -30,6 +30,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     static final String QUALITY_CONTROL_DIR = "qualitycontrol"
 
     static final String QUALITY_CONTROL_JSON_FILE_NAME = "qualitycontrol.json"
+    static final String QUALITY_CONTROL_TARGET_EXTRACT_JSON_FILE_NAME = "qualitycontrol_targetExtract.json"
 
     static final String RODDY_EXECUTION_STORE_DIR = "roddyExecutionStore"
 
@@ -288,6 +289,10 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
     File getWorkMergedQAJsonFile() {
         return new File(workMergedQADirectory, QUALITY_CONTROL_JSON_FILE_NAME)
+    }
+
+    File getWorkMergedQATargetExtractJsonFile() {
+        return new File(workMergedQADirectory, QUALITY_CONTROL_TARGET_EXTRACT_JSON_FILE_NAME)
     }
 
     @Deprecated

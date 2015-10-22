@@ -1,5 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+/**
+ * Be aware of semantic differences between the values produced by
+ * qa.jar and by Roddy QC. See the comments of OTP-1731 for details.
+ */
 class AbstractQualityAssessment {
 
     /**
@@ -12,7 +16,16 @@ class AbstractQualityAssessment {
      * meanBaseQuality >= minMeanBaseQuality
      * sum of all mapped bases including gaps which pass both criteria above
      */
-    long qcBasesMapped
+    Long qcBasesMapped
+
+    /**
+     * all bases mapped to the reference genome no filtering applied
+     */
+    Long allBasesMapped
+    /**
+     * bases, which were mapped to the specified target regions
+     */
+    Long onTargetMappedBases
 
     /**
      * all reads (flagstat QC-passed reads)
@@ -75,6 +88,16 @@ class AbstractQualityAssessment {
     Double insertSizeSD
 
     static constraints = {
+        // This value is not available for exome QC of RoddyBamFiles
+        qcBasesMapped(nullable: true)
+
+        // This value is only available for exome
+        allBasesMapped(nullable: true)
+
+        // This value is only available for exome
+        // It is not available for exome QC of single lanes in RoddyBamFiles
+        onTargetMappedBases(nullable: true)
+
         // These values are not available in the per chromosome QC of RoddyBamFiles
         totalReadCounter(nullable: true)
         qcFailedReads(nullable: true)

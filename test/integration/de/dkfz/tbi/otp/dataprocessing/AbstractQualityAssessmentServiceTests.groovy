@@ -8,7 +8,7 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.TestData
 import org.junit.Before
 import org.junit.Rule
@@ -21,6 +21,9 @@ class AbstractQualityAssessmentServiceTests {
 
     final static REFERENCE_GENOME_LENGTH = 80
     final static REFERENCE_GENOME_LENGTH_WITH_N = 40
+    final static long SOME_VALUE_1 = 1111111
+    final static long SOME_VALUE_2 = 2222222
+    final static long SOME_VALUE_3 = 3333333
 
     TestData data = new TestData()
 
@@ -99,27 +102,49 @@ class AbstractQualityAssessmentServiceTests {
         assert roddyBamFile.coverageWithN == EXPECTED_COVERAGE_WITH_N
     }
 
-    RoddyBamFile setUpForParseRoddyBamFileQaStatistics() {
-        File qaFile = temporaryFolder.newFile(RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME)
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        createReferenceGenomeEntriesAndQaFileOnFilesystem(roddyBamFile.referenceGenome, qaFile)
-        roddyBamFile.metaClass.getWorkMergedQAJsonFile = { ->
-            return qaFile
-        }
+    RoddyBamFile setUpForParseRoddyQaStatistics(SeqType seqType) {
+        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile(
+                workPackage: DomainFactory.createMergingWorkPackage(
+                        seqType: seqType,
+                        workflow: DomainFactory.createPanCanWorkflow(),
+                )
+        )
+        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
+        createReferenceGenomeEntries(roddyBamFile.referenceGenome)
+        createQaFileOnFileSystem(roddyBamFile.workMergedQAJsonFile, SOME_VALUE_1)
+        createQaFileOnFileSystem(roddyBamFile.workMergedQATargetExtractJsonFile, SOME_VALUE_2)
+        createQaFileOnFileSystem(exactlyOneElement(roddyBamFile.workSingleLaneQAJsonFiles.values()), SOME_VALUE_3)
         assert RoddyMergedBamQa.list().empty
+        assert RoddySingleLaneQa.list().empty
         return roddyBamFile
     }
 
-    @Test
-    void testParseRoddyBamFileQaStatistics_allFine() {
-        RoddyBamFile roddyBamFile = setUpForParseRoddyBamFileQaStatistics()
-        abstractQualityAssessmentService.parseRoddyBamFileQaStatistics(roddyBamFile)
-        assert TestCase.containSame(["8", "all", "7"], RoddyMergedBamQa.list()*.chromosome)
+    private void testParseRoddyMergedBamQaStatistics_allFine(String mergedBamOrSingleLane, SeqType seqType, Long qcBasesMappedExpected, Long allBasesMappedExpected, Long onTargetMappedBasesExpected) {
+        RoddyBamFile roddyBamFile = setUpForParseRoddyQaStatistics(seqType)
+
+        abstractQualityAssessmentService."parseRoddy${mergedBamOrSingleLane}QaStatistics"(roddyBamFile)
+
+        Collection<RoddyQualityAssessment> qas = RoddyQualityAssessment.list()
+        assert TestCase.containSame(qas*.class*.simpleName.unique(), ["Roddy${mergedBamOrSingleLane}Qa"])
+        assert TestCase.containSame(qas*.chromosome, ["8", "all", "7"])
+        assert qas.find{ it.chromosome == '8' }.qcBasesMapped == qcBasesMappedExpected
+        assert qas.find{ it.chromosome == '8' }.allBasesMapped == allBasesMappedExpected
+        assert qas.find{ it.chromosome == '8' }.onTargetMappedBases == onTargetMappedBasesExpected
     }
 
     @Test
-    void testParseRoddyBamFileQaStatistics_missingChromosome() {
-        RoddyBamFile roddyBamFile = setUpForParseRoddyBamFileQaStatistics()
+    void testParseRoddyMergedBamQaStatistics_WholeGenome_allFine() {
+        testParseRoddyMergedBamQaStatistics_allFine("MergedBam", DomainFactory.createWholeGenomeSeqType(), SOME_VALUE_1, null, null)
+    }
+
+    @Test
+    void testParseRoddyMergedBamQaStatistics_Exome_allFine() {
+        testParseRoddyMergedBamQaStatistics_allFine("MergedBam", DomainFactory.createExomeSeqType(), null, SOME_VALUE_1, SOME_VALUE_2)
+    }
+
+    @Test
+    void testParseRoddyQaStatistics_missingChromosome() {
+        RoddyBamFile roddyBamFile = setUpForParseRoddyQaStatistics(DomainFactory.createWholeGenomeSeqType())
         ReferenceGenomeEntry.build(
                 referenceGenome: roddyBamFile.referenceGenome,
                 classification: Classification.CHROMOSOME,
@@ -127,26 +152,26 @@ class AbstractQualityAssessmentServiceTests {
                 alias: '9',
         )
         TestCase.shouldFailWithMessage(RuntimeException, /^Expected chromosomes .+, but found .+\.$/, {
-            abstractQualityAssessmentService.parseRoddyBamFileQaStatistics(roddyBamFile)
+            abstractQualityAssessmentService.parseRoddyMergedBamQaStatistics(roddyBamFile)
         })
     }
 
     @Test
-    void testParseRoddySingleLaneQaStatistics() {
-        File qaFile = temporaryFolder.newFile(RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME)
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        createReferenceGenomeEntriesAndQaFileOnFilesystem(roddyBamFile.referenceGenome, qaFile)
-        SeqTrack seqTrack = exactlyOneElement(roddyBamFile.seqTracks)
-        roddyBamFile.metaClass.getWorkSingleLaneQAJsonFiles = { ->
-            return [(seqTrack): qaFile]
-        }
-        assert RoddySingleLaneQa.list().empty
-        abstractQualityAssessmentService.parseRoddySingleLaneQaStatistics(roddyBamFile)
-        assert TestCase.containSame(["8", "all", "7"], RoddySingleLaneQa.list()*.chromosome)
+    void testParseRoddySingleLaneQaStatistics_WholeGenome_allFine() {
+        testParseRoddyMergedBamQaStatistics_allFine("SingleLane", DomainFactory.createWholeGenomeSeqType(), SOME_VALUE_3, null, null)
     }
 
+    @Test
+    void testParseRoddySingleLaneQaStatistics_Exome_allFine() {
+        testParseRoddyMergedBamQaStatistics_allFine("SingleLane", DomainFactory.createExomeSeqType(), null, SOME_VALUE_3, null)
+    }
 
     static void createReferenceGenomeEntriesAndQaFileOnFilesystem(ReferenceGenome referenceGenome, File qaFile) {
+        createReferenceGenomeEntries(referenceGenome)
+        createQaFileOnFileSystem(qaFile)
+    }
+
+    static void createReferenceGenomeEntries(ReferenceGenome referenceGenome) {
         ['7', '8'].each {
             ReferenceGenomeEntry.build(
                     referenceGenome: referenceGenome,
@@ -154,7 +179,10 @@ class AbstractQualityAssessmentServiceTests {
                     name: it,
             )
         }
+    }
 
+    static void createQaFileOnFileSystem(File qaFile, long chromosome8QcBasesMapped = 1866013) {
+        qaFile.parentFile.mkdirs()
         // the values are from the documentation on the Wiki: https://wiki.local/NGS/OTP-Roddy+Interface#HTheQCData
         qaFile <<
 """
@@ -163,7 +191,7 @@ class AbstractQualityAssessmentServiceTests {
     "genomeWithoutNCoverageQcBases": 0.01,
     "referenceLength": 146364022,
     "chromosome": 8,
-    "qcBasesMapped": 1866013
+    "qcBasesMapped": ${chromosome8QcBasesMapped}
   },
   "all": {
     "pairedRead1": 209146,

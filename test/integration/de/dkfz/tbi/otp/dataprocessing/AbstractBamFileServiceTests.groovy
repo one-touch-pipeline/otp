@@ -35,6 +35,7 @@ class AbstractBamFileServiceTests {
     static final Long ARBITRARY_MERGED_TARGET_SIZE = 8
 
     static final Map ARBITRARY_QA_VALUES = [
+            qcBasesMapped: ARBITRARY_UNUSED_VALUE,
             totalReadCounter: ARBITRARY_UNUSED_VALUE,
             qcFailedReads: ARBITRARY_UNUSED_VALUE,
             duplicates: ARBITRARY_UNUSED_VALUE,

@@ -73,15 +73,6 @@ class QaJarQualityAssessment extends AbstractQualityAssessment {
      */
     double insertSizeRMS
 
-    /**
-     * all bases mapped to the reference genome no filtering applied
-     */
-    Long allBasesMapped
-    /**
-     * bases, which were mapped to the specified target regions
-     */
-    Long onTargetMappedBases
-
     // values not retrieved from the json but calculated afterwards
     /**
      * (referenceAgreementStrandConflict / referenceAgreement) * 100
@@ -94,10 +85,7 @@ class QaJarQualityAssessment extends AbstractQualityAssessment {
 
 
     static constraints = {
-        // null indicates that these values have not been calculated  // TODO: Document under which circumstances this happens
-        allBasesMapped(nullable: true)
-        onTargetMappedBases(nullable: true)
-
+        qcBasesMapped(nullable: false)
         totalReadCounter(nullable: false)
         qcFailedReads(nullable: false)
         duplicates(nullable: false)
