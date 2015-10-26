@@ -281,11 +281,14 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
                 }.collect {
                     [it.finalExecutionDirectories, it.finalSingleLaneQADirectories.values()]
                 }
+                if (roddyBamFiles.max {it.identifier}.oldStructureUsed) {
+                    roddyDirsToDelete << roddyBamFiles[0].finalMergedQADirectory
+                }
             }
         }
 
         if (filesToDelete) {
-            roddyDirsToDelete.flatten().each {
+            roddyDirsToDelete.flatten().findAll { it.exists() }.each {
                 executeRoddyCommandService.deleteContentOfOtherUnixUserDirectory(it)
             }
 

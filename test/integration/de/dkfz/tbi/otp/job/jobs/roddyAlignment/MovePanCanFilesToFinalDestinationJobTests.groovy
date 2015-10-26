@@ -604,6 +604,8 @@ class MovePanCanFilesToFinalDestinationJobTests {
 
     @Test
     void testCleanupWorkDirectory_removeDirsThrowsException_shouldFail() {
+        assert roddyBamFile.workDirectory.mkdirs()
+        assert new File(roddyBamFile.workDirectory, HelperUtils.uniqueString).createNewFile()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
 
         movePanCanFilesToFinalDestinationJob.createClusterScriptService.metaClass.removeDirs = {Collection<File> dirs, CreateClusterScriptService.RemoveOption option ->
@@ -617,6 +619,8 @@ class MovePanCanFilesToFinalDestinationJobTests {
 
     @Test
     void testCleanupWorkDirectory_executeCommandThrowsException_shouldFail() {
+        assert roddyBamFile.workDirectory.mkdirs()
+        assert new File(roddyBamFile.workDirectory, HelperUtils.uniqueString).createNewFile()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
 
         movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = {Realm realm, String command ->
@@ -680,7 +684,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
 
         movePanCanFilesToFinalDestinationJob.cleanupWorkDirectory(roddyBamFile, realm)
 
-        assert callDeleted
+        assert callDeleted  == (countTmpDir + countTmpFiles > 0)
         assert countTmpDir == callDeletedRoddy
         tmpDirectories.each {
             assert !it.exists()
@@ -776,6 +780,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
 
         movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath ->
             hasCalled_deleteContentOfOtherUnixUserDirectory = true
+            assert basePath.exists()
             if (basePath.isDirectory()) {
                 assert basePath.deleteDir()
             } else {
@@ -830,6 +835,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
 
     @Test
     void testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExist_allFine() {
+        DomainFactory.createRoddyBamFile(workPackage:  roddyBamFile.workPackage)
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(workPackage:  roddyBamFile.workPackage)
         CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(realm, roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile)
@@ -843,6 +849,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
 
         movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath ->
             hasCalled_deleteContentOfOtherUnixUserDirectory = true
+            assert basePath.exists()
             assert basePath.isDirectory()
             assert basePath.deleteDir()
         }
@@ -857,21 +864,37 @@ class MovePanCanFilesToFinalDestinationJobTests {
     }
 
     @Test
-    void testCleanupOldResults_withoutBaseBamFile_butBamFilesInOldStructureOfWorkPackageExist_allFine() {
+    void testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExistInOldStructure_latestIsOld_allFine() {
+        DomainFactory.createRoddyBamFile(workPackage:  roddyBamFile.workPackage, workDirectoryName: null)
+        helper_testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExistInOldStructure(true)
+    }
+
+    @Test
+    void testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExistInOldAndNewStructure_latestIsNew_allFine() {
+        DomainFactory.createRoddyBamFile(workPackage:  roddyBamFile.workPackage)
+        helper_testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExistInOldStructure(false)
+    }
+
+    void helper_testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExistInOldStructure(boolean latestIsOld) {
         roddyBamFile.workDirectoryName = null
         roddyBamFile.save(flush: true, failOnError: true)
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(workPackage:  roddyBamFile.workPackage)
+        CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(realm, roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile2)
         assert roddyBamFile2.workDirectory.exists()
+        boolean isCalledForMergedQaDirectory = false
 
         movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String command ->
-            assert !command.contains(RoddyBamFile.WORK_DIR_PREFIX)
+            assert latestIsOld == !command.contains(RoddyBamFile.WORK_DIR_PREFIX)
             return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
         }
 
         movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath ->
             assert !basePath.absolutePath.contains(RoddyBamFile.WORK_DIR_PREFIX)
             assert basePath.deleteDir()
+            if (basePath.path.contains("${RoddyBamFile.QUALITY_CONTROL_DIR}/${RoddyBamFile.MERGED_DIR}")) {
+                isCalledForMergedQaDirectory = true
+            }
         }
 
         movePanCanFilesToFinalDestinationJob.cleanupOldResults(roddyBamFile2, realm)
@@ -882,6 +905,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
         roddyBamFile.finalSingleLaneQADirectories.values().each {
             assert !it.exists()
         }
+        assert latestIsOld == isCalledForMergedQaDirectory
     }
 
     @Test
