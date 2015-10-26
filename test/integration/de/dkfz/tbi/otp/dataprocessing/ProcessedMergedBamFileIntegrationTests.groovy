@@ -150,7 +150,7 @@ class ProcessedMergedBamFileIntegrationTests {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile()
         assert DomainFactory.createRealmDataManagement(TestCase.getUniqueNonExistentPath(), [name: bamFile.project.realmName]).save(flush: true, failOnError: true)
 
-        TestCase.shouldFail(IllegalStateException) {
+        TestCase.shouldFailWithMessage(IllegalStateException, /^This BAM file is not in the project folder(?s).*$/) {
             bamFile.getPathForFurtherProcessing()
         }
     }
