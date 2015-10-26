@@ -108,6 +108,19 @@ class LsdfFileServiceUnitTests {
     }
 
     @Test
+    void test_deleteFilesRecursive_FilesOrDirectoriesIsEmpty_shouldDoNothing() {
+        Realm realm = DomainFactory.createRealmDataManagement()
+        service.executionService = [
+                executeCommand: {Realm realm2, String command->
+                    assert false: 'Should not be called'
+                }
+        ] as ExecutionService
+        service.createClusterScriptService = new CreateClusterScriptService()
+
+        service.deleteFilesRecursive(realm, [])
+    }
+
+    @Test
     void test_deleteFilesRecursive_noRealm_shouldThrowException() {
         TestCase.shouldFailWithMessageContaining(AssertionError, 'realm may not be null.') {
             service.deleteFilesRecursive(null, [tempFolder.newFolder()])
@@ -115,8 +128,8 @@ class LsdfFileServiceUnitTests {
     }
 
     @Test
-    void test_deleteFilesRecursive_noFilesOrDirectoriesIsNull_shouldThrowException() {
-        Realm realm = DomainFactory.createRealmDataManagement(tempFolder.newFolder())
+    void test_deleteFilesRecursive_FilesOrDirectoriesIsNull_shouldThrowException() {
+        Realm realm = DomainFactory.createRealmDataManagement()
         TestCase.shouldFailWithMessageContaining(AssertionError, 'filesOrDirectories may not be null.') {
             service.deleteFilesRecursive(realm, null)
         }
