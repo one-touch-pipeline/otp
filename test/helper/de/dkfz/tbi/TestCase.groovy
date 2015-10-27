@@ -1,5 +1,8 @@
 package de.dkfz.tbi
 
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 import org.junit.*
@@ -171,5 +174,23 @@ class TestCase extends GroovyTestCase {
         Set<File> expectedEntries = [expectedDirs, expectedFiles, expectedLinks].flatten() as Set
         Set<File> foundEntries = baseDir.listFiles() as Set
         assert expectedEntries == foundEntries
+    }
+
+    def static mockCreateDirectory(LsdfFilesService lsdfFilesService) {
+        lsdfFilesService.metaClass.createDirectory = { File file, Project project1 ->
+            file.mkdirs()
+        }
+    }
+
+    def static mockDeleteDirectory(Object lsdfFilesService) {
+        lsdfFilesService.metaClass.deleteDirectoryRecursive = { Realm realm, File dir ->
+            if (!dir.deleteDir()) {
+                throw new IOException("Unable to delete path '${dir}'.")
+            }
+        }
+    }
+
+    def static removeMockFileService(LsdfFilesService lsdfFilesService) {
+        TestCase.removeMetaClass(LsdfFilesService, lsdfFilesService)
     }
 }

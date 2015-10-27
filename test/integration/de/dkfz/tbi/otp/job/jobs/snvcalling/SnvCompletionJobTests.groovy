@@ -135,8 +135,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     @Test
     void test_execute_WhenRunAndDirectoryIsClean_ShouldDeleteDirectory() {
         // Given:
-        LsdfFilesServiceTests.mockDeleteDirectory(lsdfFilesService)
-        LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
+        TestCase.mockDeleteDirectory(lsdfFilesService)
+        TestCase.mockCreateDirectory(lsdfFilesService)
         snvCompletionJob.metaClass.getProcessParameterObject = { snvCallingInstance }
         snvCompletionJob.metaClass.linkResultFiles = { SnvCallingInstance instance -> }
         snvCompletionJob.metaClass.linkConfigFiles = { SnvCallingInstance instance -> }
@@ -151,14 +151,14 @@ CHROMOSOME_INDICES=( {1..21} X Y)
             assert !stagingPath.parentFile.exists()
             assert stagingPath.parentFile.parentFile.exists()
         } finally {
-            LsdfFilesServiceTests.removeMockFileService(lsdfFilesService)
+            TestCase.removeMockFileService(lsdfFilesService)
         }
     }
 
     @Test
     void test_execute_WhenRunAndDirectoryIsDirtyContainingFile_ShouldDeleteDirectory() {
         // Given:
-        LsdfFilesServiceTests.mockDeleteDirectory(lsdfFilesService)
+        TestCase.mockDeleteDirectory(lsdfFilesService)
         snvCompletionJob.metaClass.getProcessParameterObject = { snvCallingInstance }
         snvCompletionJob.metaClass.linkResultFiles = { SnvCallingInstance instance -> }
         snvCompletionJob.metaClass.linkConfigFiles = { SnvCallingInstance instance -> }
@@ -175,15 +175,15 @@ CHROMOSOME_INDICES=( {1..21} X Y)
             assert !stagingPath.parentFile.exists()
             assert stagingPath.parentFile.parentFile.exists()
         } finally {
-            LsdfFilesServiceTests.removeMockFileService(lsdfFilesService)
+            TestCase.removeMockFileService(lsdfFilesService)
         }
     }
 
     @Test
     void test_execute_WhenRunAndDirectoryIsDirtyContainingDirectory_ShouldDeleteDirectory() {
         // Given:
-        LsdfFilesServiceTests.mockDeleteDirectory(lsdfFilesService)
-        LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
+        TestCase.mockDeleteDirectory(lsdfFilesService)
+        TestCase.mockCreateDirectory(lsdfFilesService)
         snvCompletionJob.metaClass.getProcessParameterObject = { snvCallingInstance }
         snvCompletionJob.metaClass.linkResultFiles = { SnvCallingInstance instance -> }
         snvCompletionJob.metaClass.linkConfigFiles = { SnvCallingInstance instance -> }
@@ -200,7 +200,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
             assert !stagingPath.parentFile.exists()
             assert stagingPath.parentFile.parentFile.exists()
         } finally {
-            LsdfFilesServiceTests.removeMockFileService(lsdfFilesService)
+            TestCase.removeMockFileService(lsdfFilesService)
         }
     }
 

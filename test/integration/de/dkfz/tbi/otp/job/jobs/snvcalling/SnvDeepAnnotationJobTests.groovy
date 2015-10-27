@@ -247,7 +247,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     @Test
     void testMaybeSubmit() {
         testData.createProcessingOptions()
-        LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
+        TestCase.mockCreateDirectory(lsdfFilesService)
         SnvCallingStep step = SnvCallingStep.SNV_DEEPANNOTATION
         snvDeepAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
 
@@ -306,7 +306,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
             assert annotationFile.text == deepAnnotationFile.text
         } finally {
             schedulerService.finishedJobExecutionOnCurrentThread(snvDeepAnnotationJob)
-            LsdfFilesServiceTests.removeMockFileService(lsdfFilesService)
+            TestCase.removeMockFileService(lsdfFilesService)
         }
     }
 

@@ -196,7 +196,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
     @Test
     void testMaybeSubmit() {
         testData.createProcessingOptions()
-        LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
+        TestCase.mockCreateDirectory(lsdfFilesService)
         snvAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         snvAnnotationJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult -> }
         snvAnnotationJob.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
@@ -275,7 +275,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
         } finally {
             configFile.parentFile.deleteDir()
             checkpointFile.delete()
-            LsdfFilesServiceTests.removeMockFileService(lsdfFilesService)
+            TestCase.removeMockFileService(lsdfFilesService)
         }
     }
 

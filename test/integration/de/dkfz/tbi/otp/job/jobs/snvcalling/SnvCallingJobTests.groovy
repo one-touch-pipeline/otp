@@ -223,7 +223,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
     @Test
     void testMaybeSubmitWithSnvCallingInput() {
         testData.createProcessingOptions()
-        LsdfFilesServiceTests.mockCreateDirectory(lsdfFilesService)
+        TestCase.mockCreateDirectory(lsdfFilesService)
         snvJobResult.delete()
         snvCallingJob.metaClass.getProcessParameterObject = { return snvCallingInstance }
         snvCallingJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult ->

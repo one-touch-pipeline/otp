@@ -46,23 +46,6 @@ class LsdfFilesServiceTests extends GroovyTestCase {
     SeqTrack seqTrack
     FileType fileType
 
-    def static mockCreateDirectory(LsdfFilesService lsdfFilesService) {
-        lsdfFilesService.metaClass.createDirectory = { File file, Project project1 ->
-            file.mkdirs()
-        }
-    }
-
-    def static mockDeleteDirectory(Object lsdfFilesService) {
-        lsdfFilesService.metaClass.deleteDirectoryRecursive = { Realm realm, File dir ->
-            if (!dir.deleteDir()) {
-                throw new IOException("Unable to delete path '${dir}'.")
-            }
-        }
-    }
-
-    def static removeMockFileService(LsdfFilesService lsdfFilesService) {
-        TestCase.removeMetaClass(LsdfFilesService, lsdfFilesService)
-    }
 
     @Before
     void setUp() {
