@@ -1,4 +1,4 @@
-package scripts.updates
+package scripts.migrations
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
@@ -6,7 +6,7 @@ import org.junit.Test
 
 class AddReadNumberIntoDataFilesTests extends GroovyScriptAwareTestCase {
 
-    static final String SCRIPT_NAME = "scripts/updates/AddReadNumberIntoDataFiles.groovy"
+    static final String SCRIPT_NAME = "scripts/migrations/version_1_29/AddReadNumberIntoDataFiles.groovy"
 
     @Test
     void testUpdateDataFile_SpecialRun() {
