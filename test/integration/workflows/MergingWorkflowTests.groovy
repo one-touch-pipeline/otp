@@ -67,7 +67,7 @@ class MergingWorkflowTests extends WorkflowTestCase {
         )
 
         SeqType seqType = SeqType.build(
-                libraryLayout: "PAIRED",
+                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
         )
 
         Run run = Run.build(

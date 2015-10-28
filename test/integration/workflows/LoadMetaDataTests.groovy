@@ -43,7 +43,7 @@ class LoadMetaDataTests extends WorkflowTestCase {
     String softwareToolName = "CASAVA"
     String softwareToolVersion = "1.8.2"
     String pipeLineVersion = "${softwareToolName}-${softwareToolVersion}"
-    String libraryLayout = "PAIRED"
+    String libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED
     String instrumentPlatform = "Illumina"
     String instrumentModel = "HiSeq2000"
     String sequencingKitName = "sequencingKit"

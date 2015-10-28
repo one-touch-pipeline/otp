@@ -85,7 +85,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
         // SeqType
         String seqTypeDirName = "exome_sequencing"
         String seqTypeName = SeqTypeNames.EXOME.seqTypeName
-        String seqTypeLibrary = "PAIRED"
+        String seqTypeLibrary = SeqType.LIBRARYLAYOUT_PAIRED
         // SeqCenter
         String seqCenterName = "DKFZ"
         String seqCenterDirName = "core"

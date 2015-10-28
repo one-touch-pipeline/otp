@@ -37,7 +37,7 @@ class ChromosomeIdentifierMappingServiceTests {
 
         seqType = new SeqType()
         seqType.name = "WHOLE_GENOME"
-        seqType.libraryLayout = "SINGLE"
+        seqType.libraryLayout = SeqType.LIBRARYLAYOUT_SINGLE
         seqType.dirName = "whole_genome_sequencing"
         seqType.save(flush: true)
 

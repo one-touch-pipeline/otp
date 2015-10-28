@@ -29,7 +29,7 @@ class ProcessedMergedBamFileSnvWorkflowTests extends AbstractSnvWorkflowTests {
 
         seqType = SeqType.build(
                 name: SeqTypeNames.EXOME.seqTypeName,
-                libraryLayout: "PAIRED",
+                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
                 dirName: "tmp",
         )
 

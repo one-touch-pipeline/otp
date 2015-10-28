@@ -266,7 +266,7 @@ public class AbstractAlignmentDeciderTest {
 
         SeqType seqType = SeqType.build(
                 name: SeqTypeNames.WHOLE_GENOME,
-                libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIRED
+                libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR
         )
         seqType.save(failOnError: true)
 

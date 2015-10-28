@@ -408,7 +408,7 @@ class MetaDataService {
         if (fileType.type == FileType.Type.SEQUENCE && fileType.vbpPath == "/sequence/") {
             String fileName = dataFile.fileName
             String libraryLayout = getLibraryLayoutFromMetadata(dataFile)
-            boolean isSingle = libraryLayout == "SINGLE"
+            boolean isSingle = libraryLayout == SeqType.LIBRARYLAYOUT_SINGLE
             dataFile.readNumber = findOutReadNumberIfSingleEndOrByFileName(fileName, isSingle)
             assert dataFile.save(flush: true)
         }

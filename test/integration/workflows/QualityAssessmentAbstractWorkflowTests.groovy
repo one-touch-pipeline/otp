@@ -282,14 +282,14 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
     protected void setupForLoadingWorkflow() {
         SeqType seqType = new SeqType(
                         name: "WHOLE_GENOME",
-                        libraryLayout: "PAIRED",
+                        libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
                         dirName: "seq-type-dir"
                         )
         assertNotNull(seqType.save([flush: true]))
 
         seqType = new SeqType(
                         name: "EXON",
-                        libraryLayout: "PAIRED",
+                        libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
                         dirName: "exome-seq-type-dir"
                         )
         assertNotNull(seqType.save([flush: true]))

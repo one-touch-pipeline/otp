@@ -74,8 +74,8 @@ boolean showFinishedEntries = false
 
 //==================================================
 
-SeqType wholeGenomePaired = SeqType.findByNameAndLibraryLayout("WHOLE_GENOME", "PAIRED")
-SeqType exonPaired = SeqType.findByNameAndLibraryLayout("EXON", "PAIRED")
+SeqType wholeGenomePaired = SeqType.findByNameAndLibraryLayout("WHOLE_GENOME", SeqType.LIBRARYLAYOUT_PAIRED)
+SeqType exonPaired = SeqType.findByNameAndLibraryLayout("EXON", SeqType.LIBRARYLAYOUT_PAIRED)
 
 MetaDataKey libPrepKitKey = MetaDataKey.findByName("LIB_PREP_KIT")
 MetaDataKey enrichmentKitKey = MetaDataKey.findByName("ENRICHMENT_KIT")

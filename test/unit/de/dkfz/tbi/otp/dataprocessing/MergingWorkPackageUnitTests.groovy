@@ -57,7 +57,7 @@ class MergingWorkPackageUnitTests {
 
         this.seqType = new SeqType(
             name: "WHOLE_GENOME",
-            libraryLayout: "SINGLE",
+            libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE,
             dirName: "whole_genome_sequencing")
         seqType.save(flush: true)
     }

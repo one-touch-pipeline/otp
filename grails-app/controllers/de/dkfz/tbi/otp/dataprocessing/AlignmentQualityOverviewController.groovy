@@ -140,7 +140,7 @@ class AlignmentQualityOverviewController {
         Project project = projectService.getProjectByName(projectName)
         SeqType seqType = SeqType.findWhere(
                 'aliasOrName': seqTypeName,
-                'libraryLayout': "PAIRED"
+                'libraryLayout': SeqType.LIBRARYLAYOUT_PAIRED
                 )
 
 

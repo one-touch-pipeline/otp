@@ -110,13 +110,13 @@ class TestData {
 
         seqType = new SeqType()
         seqType.name = "WHOLE_GENOME"
-        seqType.libraryLayout = "PAIRED"
+        seqType.libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED
         seqType.dirName = "whole_genome_sequencing"
         assertNotNull(seqType.save(flush: true))
 
         exomeSeqType = new SeqType()
         exomeSeqType.name = SeqTypeNames.EXOME.seqTypeName
-        exomeSeqType.libraryLayout = "PAIRED"
+        exomeSeqType.libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED
         exomeSeqType.dirName = "exome_sequencing"
         assertNotNull(exomeSeqType.save(flush: true))
 
@@ -194,7 +194,7 @@ class TestData {
     static SeqType createSeqType(Map properties = [:]) {
         return new SeqType([
             name : "WHOLE_GENOME",
-            libraryLayout : "PAIRED",
+            libraryLayout : SeqType.LIBRARYLAYOUT_PAIRED,
             dirName : "whole_genome_sequencing",
         ] + properties)
     }

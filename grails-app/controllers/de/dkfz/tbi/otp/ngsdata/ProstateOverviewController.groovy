@@ -33,12 +33,12 @@ class ProstateOverviewController {
                     Map scanTable = [:]
 
                     if (seqScan.seqType.name == "WHOLE_GENOME" &&
-                    seqScan.seqType.libraryLayout == "PAIRED") {
+                    seqScan.seqType.libraryLayout == SeqType.LIBRARYLAYOUT_PAIRED) {
                         key = "WGP"
                     }
 
                     if (seqScan.seqType.name == "WHOLE_GENOME" &&
-                    seqScan.seqType.libraryLayout == "MATE_PAIR") {
+                    seqScan.seqType.libraryLayout == SeqType.LIBRARYLAYOUT_MATE_PAIR) {
                         key = "WGMP"
                     }
 

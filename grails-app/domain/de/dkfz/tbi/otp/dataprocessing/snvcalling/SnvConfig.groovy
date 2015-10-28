@@ -153,7 +153,7 @@ ${CHROMOSOME_NAMES_VARIABLE_NAME}=\${CHROMOSOME_INDICES[@]}
      * import de.dkfz.tbi.otp.ngsdata.*
      *
      * Project project = Project.findByName("projectName")
-     * SeqType seqType = SeqType.findByNameAndLibraryLayout("SeqTypeName", "PAIRED")
+     * SeqType seqType = SeqType.findByNameAndLibraryLayout("SeqTypeName", SeqType.LIBRARYLAYOUT_PAIRED)
      * File configFile = new File("PathToConfigFile")
      * String externalScriptVersion = ''
      *

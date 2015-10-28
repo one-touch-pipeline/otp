@@ -9,7 +9,7 @@ class SeqType {
 
     final static LIBRARYLAYOUT_SINGLE = "SINGLE"
 
-    final static LIBRARYLAYOUT_MATE_PAIRED = "MATE_PAIRED"
+    final static LIBRARYLAYOUT_MATE_PAIR = "MATE_PAIR"
 
     /**
      * One of {@link SeqTypeNames#seqTypeName}.

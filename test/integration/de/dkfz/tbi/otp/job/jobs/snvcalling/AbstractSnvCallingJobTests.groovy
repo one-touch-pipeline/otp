@@ -432,7 +432,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     void testGetSnvPBSOptionsNameSeqTypeSpecific_OtherSeqType() {
         SeqType otherSeqType = new SeqType(
                 name: "ChIP Seq",
-                libraryLayout: "PAIRED",
+                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
                 dirName: "chip_seq_sequencing")
         assert otherSeqType.save(flush: true)
 
