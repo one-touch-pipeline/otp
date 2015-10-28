@@ -16,7 +16,7 @@ String projectName = ''
 
 
 //The roddy plugin version. It needs to be a valid value for Roddy.
-//For example: QualityControlWorkflows:1.0.177
+//For example: QualityControlWorkflows:1.0.178
 String pluginVersionToUse = ''
 
 
@@ -30,7 +30,7 @@ String configVersion = 'v1_0'
  * The file should be located in: $OTP_ROOT_PATH/$PROJECT/configFiles/$Workflow/
  * The file should be named as: ${Workflow}_${WorkflowVersion}_v${fileVersion}.xml
  *
- * for example: $OTP_ROOT_PATH/$PROJECT/configFiles/PANCAN_ALIGNMENT/PANCAN_ALIGNMENT_1.0.177_v1.0.xml
+ * for example: $OTP_ROOT_PATH/$PROJECT/configFiles/PANCAN_ALIGNMENT/PANCAN_ALIGNMENT_1.0.178_v1_0.xml
  */
 String configFilePath = ''
 
@@ -46,7 +46,7 @@ Project.withTransaction {
 
     assert configFilePath.endsWith('xml')
     assert new File(configFilePath).exists()
-    assert configFilePath ==~ '$OTP_ROOT_PATH/.*/configFiles/PANCAN_ALIGNMENT/PANCAN_ALIGNMENT_\\d+.\\d+.\\d+_v\\d+.\\d+.xml'
+    assert configFilePath ==~ '$OTP_ROOT_PATH/.*/configFiles/PANCAN_ALIGNMENT/PANCAN_ALIGNMENT_\\d+.\\d+.\\d+_v\\d+_\\d+.xml'
 
     Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName))
 
@@ -66,4 +66,7 @@ Project.withTransaction {
     assert ctx[panCanAlignmentDeciderBeanName]
     project.alignmentDeciderBeanName = panCanAlignmentDeciderBeanName
     assert project.save(flush: true, failOnError: true)
+
+    println "Config file loaded."
+    println "Don't forget to also configure the reference genome (ConfigureReferenceGenome.groovy)."
 }
