@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
+
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.AbstractAlignmentDecider
 import de.dkfz.tbi.otp.dataprocessing.AlignmentDecider
@@ -858,10 +860,13 @@ AND i.id > :seqTrackId
     void determineAndStoreIfFastqFilesHaveToBeLinked(SeqTrack seqTrack, boolean willBeAligned) {
         assert seqTrack : "The input seqTrack for determineAndStoreIfFastqFilesHaveToBeLinked must not be null"
         SeqCenter core = CollectionUtils.exactlyOneElement(SeqCenter.findAllByName("DKFZ"))
-        if ( willBeAligned &&
-                seqTrack.run.seqCenter.id == core.id &&
-                !seqTrack.project.hasToBeCopied &&
-                areFilesLocatedOnMidTermStorage(seqTrack)) {
+        boolean fromCore = seqTrack.run.seqCenter.id == core.id
+        boolean onMidterm = areFilesLocatedOnMidTermStorage(seqTrack)
+        boolean projectAllowsLinking = !seqTrack.project.hasToBeCopied
+        boolean link = willBeAligned && fromCore && onMidterm && projectAllowsLinking
+        threadLog?.info("Fastq files of ${seqTrack} will be ${link ? "linked" : "copied"}, because " +
+                "willBeAligned=${willBeAligned}, fromCore=${fromCore}, onMidterm=${onMidterm}, projectAllowsLinking=${projectAllowsLinking})")
+        if (link) {
             seqTrack.linkedExternally = true
             assert seqTrack.save(flush: true)
         }
