@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired
 public class RoddyAlignmentDeciderTest {
     @Autowired
     RoddyAlignmentDecider decider
-    final shouldFail = new GroovyTestCase().&shouldFail
 
     @Test
     void testGetWorkflow() {
@@ -288,6 +287,48 @@ public class RoddyAlignmentDeciderTest {
     void testPrepareForAlignment_forceAlignment_shouldNotSetNeedsProcessing() {
         MergingWorkPackage workPackage = createAndRunPrepare(true, false, FileOperationStatus.DECLARED, true)
         assert !workPackage.needsProcessing
+    }
+
+
+    @Test
+    void test_ensureConfigurationIsComplete_whenConfigurationIsComplete_shouldReturnNormally() {
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
+        DomainFactory.createReferenceGenomeProjectSeqType(
+                project: seqTrack.project,
+                seqType: seqTrack.seqType,
+        )
+        DomainFactory.createRoddyWorkflowConfig(
+                project: seqTrack.project,
+                workflow: decider.workflow,
+        )
+
+        decider.ensureConfigurationIsComplete(seqTrack)
+    }
+
+    @Test
+    void test_ensureConfigurationIsComplete_whenReferenceGenomeIsMissing_shouldThrow() {
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
+        DomainFactory.createRoddyWorkflowConfig(
+                project: seqTrack.project,
+                workflow: decider.workflow,
+        )
+
+        assert shouldFail {
+            decider.ensureConfigurationIsComplete(seqTrack)
+        }.contains("Reference genome is not configured")
+    }
+
+    @Test
+    void test_ensureConfigurationIsComplete_whenRoddyWorkflowConfigIsMissing_shouldThrow() {
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
+        DomainFactory.createReferenceGenomeProjectSeqType(
+                project: seqTrack.project,
+                seqType: seqTrack.seqType,
+        )
+
+        assert shouldFail {
+            decider.ensureConfigurationIsComplete(seqTrack)
+        }.contains("RoddyWorkflowConfig is missing")
     }
 
 

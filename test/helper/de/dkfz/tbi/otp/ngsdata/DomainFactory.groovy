@@ -14,6 +14,7 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
+import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.ExternalScript
@@ -476,6 +477,7 @@ class DomainFactory {
     public static SampleType createSampleType(Map sampleTypeProperties = [:]) {
         return createDomainObject(SampleType, [
                 name: 'sampleTypeName_' + (counter++),
+                specificReferenceGenome: SpecificReferenceGenome.USE_PROJECT_DEFAULT,
         ], sampleTypeProperties)
     }
 
@@ -523,6 +525,14 @@ class DomainFactory {
                 lengthWithoutN              : 1,
                 lengthRefChromosomes        : 1,
                 lengthRefChromosomesWithoutN: 1,
+        ], properties)
+    }
+
+    static ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqType(Map properties = [:]) {
+        return createDomainObject(ReferenceGenomeProjectSeqType, [
+                project        : { createProject() },
+                seqType        : { createSeqType() },
+                referenceGenome: { createReferenceGenome() },
         ], properties)
     }
 

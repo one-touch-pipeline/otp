@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
@@ -47,6 +48,14 @@ abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
                     it.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
         }
         return latestValidBamFile
+    }
+
+    @Override
+    public void ensureConfigurationIsComplete(SeqTrack seqTrack) {
+        super.ensureConfigurationIsComplete(seqTrack)
+        if (RoddyWorkflowConfig.getLatest(seqTrack.project, workflow) == null) {
+            throw new RuntimeException("RoddyWorkflowConfig is missing for ${seqTrack.project} ${workflow}.")
+        }
     }
 
     @Override
