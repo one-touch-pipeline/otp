@@ -4,6 +4,9 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.ngsdata.Project
 
 Collection<String> projectNames =  // ['']
+// Named priorities:
+// ProcessingPriority.NORMAL_PRIORITY
+// ProcessingPriority.FAST_TRACK_PRIORITY
 short newProcessingPriority =  // ProcessingPriority.
 
 Project.withTransaction {
