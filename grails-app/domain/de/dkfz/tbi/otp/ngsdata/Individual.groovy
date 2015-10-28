@@ -24,7 +24,7 @@ class Individual implements Commentable{
     String mockFullName        // mnemonic used in the project
 
     /**
-     * Holds an intern identifier, which shouldn't visible for normal users.
+     * Holds an internal identifier, which shouldn't be visible for normal users.
      * Only admin users are allowed to see this value.
      */
     String internIdentifier
