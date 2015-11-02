@@ -344,7 +344,7 @@ class LsdfFilesService {
         assert realm: 'realm may not be null'
         assert filesOrDirectories != null: 'filesOrDirectories may not be null'
         String cmd = createClusterScriptService.removeDirs(filesOrDirectories, CreateClusterScriptService.RemoveOption.RECURSIVE_FORCE)
-        executionService.executeCommand(realm, cmd)
+        assert executionService.executeCommand(realm, cmd) ==~ /^0\s*$/
         filesOrDirectories.each {
             assert WaitingFileUtils.waitUntilDoesNotExist(it)
         }
