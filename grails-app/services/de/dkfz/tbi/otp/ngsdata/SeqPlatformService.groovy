@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Scope
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.ReferencedClass
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import org.springframework.security.access.prepost.PreAuthorize
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Scope("prototype")
 class SeqPlatformService {
@@ -16,6 +18,8 @@ class SeqPlatformService {
     SeqPlatformModelLabelService seqPlatformModelLabelService
 
     SequencingKitLabelService sequencingKitLabelService
+
+    SeqPlatformGroupService seqPlatformGroupService
 
 
     @SuppressWarnings("GrailsStatelessService")
@@ -178,5 +182,48 @@ class SeqPlatformService {
         )
         assert seqPlatform.save(flush: true)
         return seqPlatform
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public SeqPlatform createNewSeqPlatform(String seqPlatformName, String seqPlatformGroupName, String seqPlatformModelLabelName, String sequencingKitLabelName) {
+        assert seqPlatformName : "the input seqplatformname '${seqPlatformName}' must not be null"
+        SeqPlatformGroup seqPlatformGroup = null
+        SeqPlatformModelLabel seqPlatformModelLabel = null
+        SequencingKitLabel sequencingKitLabel = null
+
+        if(seqPlatformGroupName) {
+            seqPlatformGroup = seqPlatformGroupService.findSeqPlatformGroup(seqPlatformGroupName)?: seqPlatformGroupService.createNewSeqPlatformGroup(seqPlatformGroupName)
+        }
+        if(seqPlatformModelLabelName) {
+            seqPlatformModelLabel = seqPlatformModelLabelService.findSeqPlatformModelLabelByNameOrAlias(seqPlatformModelLabelName)?: seqPlatformModelLabelService.createNewSeqPlatformModelLabel(seqPlatformModelLabelName)
+        }
+        if(sequencingKitLabelName) {
+            sequencingKitLabel = sequencingKitLabelService.findSequencingKitLabelByNameOrAlias(sequencingKitLabelName)?: sequencingKitLabelService.createNewSequencingKitLabel(sequencingKitLabelName)
+        }
+        SeqPlatform seqPlatform = createNewSeqPlatform(seqPlatformName,seqPlatformGroup,seqPlatformModelLabel,sequencingKitLabel)
+        return seqPlatform
+    }
+
+    public static boolean hasSeqPlatform(String seqPlatformName,String seqPlatformModelLabelName, String sequencingKitLabelName){
+        if (seqPlatformModelLabelName!=null){
+            if(!SeqPlatformModelLabel.findByName(seqPlatformModelLabelName)){
+                return false
+            }
+        }
+        if (sequencingKitLabelName!=null){
+            if(!SequencingKitLabel.findByName(sequencingKitLabelName)){
+                return false
+            }
+        }
+        if(SeqPlatform.findByNameAndSeqPlatformModelLabelAndSequencingKitLabel
+                (
+                        seqPlatformName,
+                        atMostOneElement(SeqPlatformModelLabel.findAllByName(seqPlatformModelLabelName)),
+                        atMostOneElement(SequencingKitLabel.findAllByName(sequencingKitLabelName))
+                )
+        ) {
+            return true
+        }
+        return false
     }
 }

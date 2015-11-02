@@ -31,4 +31,25 @@ class SeqTypeService {
         }.sort { it.name }
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public SeqType createSeqType(String name, String dirName, String alias, String layout){
+        assert name : "the input name '${name}' must not be null"
+        assert dirName  : "the input dirname '${dirName}' must not be null"
+        assert layout  : "the input layout '${layout}' must not be null"
+        assert !SeqType.findByNameAndLibraryLayout(name, layout) : "the SeqType name '${name}' and layout '${layout}' already exists"
+            SeqType seqType = new SeqType(
+                    name: name,
+                    dirName: dirName,
+                    alias: alias,
+                    libraryLayout: layout
+            )
+        assert seqType.save(flush: true, failOnError: true)
+        return seqType
+    }
+
+    public static boolean hasSeqTypeByNameOrAlias(String nameOrAlias) {
+        assert nameOrAlias: "the input nameoralias '${nameOrAlias}' is null"
+        return SeqType.findByNameOrAlias(nameOrAlias, nameOrAlias)
+    }
+
 }

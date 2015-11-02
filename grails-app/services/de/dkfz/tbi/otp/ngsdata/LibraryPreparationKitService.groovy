@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import static org.springframework.util.Assert.*
+import org.springframework.security.access.prepost.PreAuthorize
 
 class LibraryPreparationKitService {
 
@@ -19,4 +20,22 @@ class LibraryPreparationKitService {
         return libraryPreparationKit
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public LibraryPreparationKit createLibraryPreparationKit(String name, String shortDisplayName){
+        assert name  : "the input name '${name}' must not be null"
+        assert shortDisplayName  : "the input shortdisplayname '${shortDisplayName}' must not be null"
+        assert !hasLibraryPreparationKitByNameOrAlias(name) : "The LibraryPreparationKit '${name}' exists already"
+        assert !LibraryPreparationKit.findByShortDisplayName(shortDisplayName) : "The shortdisplayname '${shortDisplayName}' exists already"
+        LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(
+                name: name,
+                shortDisplayName: shortDisplayName
+        )
+        assert libraryPreparationKit.save(flush: true, failOnError: true)
+        return libraryPreparationKit
+    }
+
+    public static boolean hasLibraryPreparationKitByNameOrAlias(String nameOrAlias) {
+        assert nameOrAlias: "the input nameoralias '${nameOrAlias}' is null"
+        return LibraryPreparationKit.findByName(nameOrAlias) || LibraryPreparationKitSynonym.findByName(nameOrAlias)
+    }
 }

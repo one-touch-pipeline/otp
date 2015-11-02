@@ -35,7 +35,7 @@ class OtpTagLib {
         String template = editorSwitchTemplate(attrs.template)
         if (attrs.roles) {
             if (SpringSecurityUtils.ifAnyGranted(attrs.roles)) {
-                out << render(template: template, model: [link: attrs.link, value: attrs.value])
+                out << render(template: template, model: [link: attrs.link, value: attrs.value, fields: attrs.fields, check: attrs.check, checkBoxes: attrs.checkBoxes])
             } else {
                 // read only
                 out << "<div>"
@@ -122,6 +122,8 @@ class OtpTagLib {
                 return "/templates/editorSwitchNewValue"
             case "newFreeTextValue":
                 return "/templates/editorSwitchNewFreeTextValue"
+            case "newFreeTextValues":
+                return "/templates/editorSwitchNewFreeTextValues"
             case "sampleIdentifier":
                 return "/templates/editSampleIdentifiers"
             default:

@@ -31,6 +31,10 @@ class LibraryPreparationKitServiceUnitTests {
 
     final static String DIFFERENT_LIBRARY_PREPARATION_KIT_NAME = "DifferentLibraryPreparationKitName"
 
+    final static String SHORT_DISPLAY_NAME ="LPK"
+
+    final static String DIFFERENT_SHORT_DISPLAY_NAME ="DLPK"
+
     @Before
     public void setUp() throws Exception {
         testData = new TestData()
@@ -73,6 +77,47 @@ class LibraryPreparationKitServiceUnitTests {
     void testFindLibraryPreparationKitByNameOrAliasUsingNull() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
         shouldFail(IllegalArgumentException) { libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(null) }
+    }
+
+    @Test
+    void testCreateLibraryPreparationKitUsingKitAndDisplayName() {
+        assertEquals(
+                libraryPreparationKitService.createLibraryPreparationKit(LIBRARY_PREPARATION_KIT, SHORT_DISPLAY_NAME),
+                libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(LIBRARY_PREPARATION_KIT)
+        )
+    }
+
+    @Test
+    void testCreateLibraryPreparationKitUsingKitTwiceAndDifferentDisplayNames() {
+        libraryPreparationKitService.createLibraryPreparationKit(LIBRARY_PREPARATION_KIT, SHORT_DISPLAY_NAME)
+        shouldFail(AssertionError) { libraryPreparationKitService.createLibraryPreparationKit(LIBRARY_PREPARATION_KIT, DIFFERENT_SHORT_DISPLAY_NAME) }
+    }
+
+    @Test
+    void testCreateLibraryPreparationKitUsingDisplayNameTwiceAndDifferentKits() {
+        libraryPreparationKitService.createLibraryPreparationKit(LIBRARY_PREPARATION_KIT, SHORT_DISPLAY_NAME)
+        shouldFail(AssertionError) { libraryPreparationKitService.createLibraryPreparationKit(DIFFERENT_LIBRARY_PREPARATION_KIT_NAME, SHORT_DISPLAY_NAME) }
+    }
+
+    @Test
+    void testCreateLibraryPreparationKitUsingDifferentKitsAndDifferentDisplayName() {
+        libraryPreparationKitService.createLibraryPreparationKit(LIBRARY_PREPARATION_KIT, SHORT_DISPLAY_NAME)
+        libraryPreparationKitService.createLibraryPreparationKit(DIFFERENT_LIBRARY_PREPARATION_KIT_NAME, DIFFERENT_SHORT_DISPLAY_NAME)
+    }
+
+    @Test
+    void testCreateLibraryPreparationKitUsingNull() {
+        shouldFail(AssertionError) { libraryPreparationKitService.createLibraryPreparationKit(null, null) }
+    }
+
+    @Test
+    void testCreateLibraryPreparationKitUsingKitAndNull() {
+        shouldFail(AssertionError) { libraryPreparationKitService.createLibraryPreparationKit(LIBRARY_PREPARATION_KIT, null) }
+    }
+
+    @Test
+    void testCreateLibraryPreparationKitUsingNullAndDisplayName() {
+        shouldFail(AssertionError) { libraryPreparationKitService.createLibraryPreparationKit(null, SHORT_DISPLAY_NAME) }
     }
 
 

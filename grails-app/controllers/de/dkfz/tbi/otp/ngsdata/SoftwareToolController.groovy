@@ -5,7 +5,7 @@ import grails.validation.Validateable
 
 class SoftwareToolController {
 
-    def softwareToolService
+    SoftwareToolService softwareToolService
 
 
     /**
