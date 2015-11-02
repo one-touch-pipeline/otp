@@ -19,16 +19,21 @@
             <p>to: <input type="text" class="datePicker" id="dpTo" value="${latestDate}"></p>
         </div>
         <div class="optionsContainer">
-            <p>multiplexing:
-                <select name="multiplexingSelect" id="multiplexingSelect">
-                    <option value="false">FALSE</option>
-                    <option value="true">TRUE</option>
-                </select></p>
-            <p>xten:
-                <select name="xtenSelect" id="xtenSelect">
-                    <option value="false">FALSE</option>
-                    <option value="true">TRUE</option>
-                </select>
+            <p>Referencesize in Gigabases:
+                <input list="basesList" id="basesInput" value="3.2348">
+                <datalist id="basesList">
+                    <option value="3.2348" selected="selected">WHOLE GENOME</option>
+                    <option value="0.0350">WHOLE EXOME</option>
+                </datalist></p>
+            <p>coverage:
+                <input list="coverageList" id="coverageInput" value="30">
+                <datalist id="coverageList">
+                    <option value="15">15x</option>
+                    <option value="30" selected="selected">30x</option>
+                    <option value="60">60x</option>
+                    <option value="90">90x</option>
+                    <option value="100">100x</option>
+                </datalist>
             </p>
         </div>
         <div id="jobTypeSpecificAverageValues">

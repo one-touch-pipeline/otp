@@ -1142,6 +1142,22 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
     }
 
     @Test
+    void test_findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween_WhenBasesToBeNormalized_ShouldReturnAverageStatesTimeDistributionNormalizedToBases() {
+        Long bases = 10
+        Long basesToBeNormalized = 5
+
+        createClusterJob([queued: SDATE_DATETIME,
+                          started: SDATE_DATETIME.plusHours(12),
+                          ended: EDATE_DATETIME,
+                          jobClass: 'jobClass1',
+                          seqType: seqType,
+                          exitStatus: ClusterJob.Status.COMPLETED,
+                          nBases: bases])
+
+        assert ['avgQueue': 12 * HOURS_TO_MILLIS, 'avgProcess': 12 * HOURS_TO_MILLIS / bases * basesToBeNormalized] == clusterJobService.findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE, basesToBeNormalized)
+    }
+
+    @Test
     void test_findJobSpecificStatesTimeDistributionByJobId_WhenNoJobIsFound_ShouldReturnNull() {
         assert null == clusterJobService.findJobSpecificStatesTimeDistributionByJobId(0)
     }

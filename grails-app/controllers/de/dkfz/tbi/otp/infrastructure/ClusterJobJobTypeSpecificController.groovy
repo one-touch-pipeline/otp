@@ -9,6 +9,8 @@ import org.joda.time.format.PeriodFormat
 
 class ClusterJobJobTypeSpecificController {
 
+    public static final int GIGABASES_TO_BASES = 1000000000
+
     ClusterJobService clusterJobService
 
     def index() {
@@ -28,9 +30,13 @@ class ClusterJobJobTypeSpecificController {
     def getJobTypeSpecificStatesTimeDistribution() {
         Map dataToRender = [:]
 
-        def (startDate, endDate, seqType, multiplexing, xten) = parseParams()
+        def (startDate, endDate, seqType) = parseParams()
 
-        def data = clusterJobService.findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween(params.jobClass, seqType, startDate, endDate, multiplexing, xten)
+        Float referenceSize = Float.parseFloat(params.bases)
+        Integer coverage = Integer.parseInt(params.coverage)
+        Long basesToBeNormalized = Math.round(referenceSize * coverage * GIGABASES_TO_BASES)
+
+        def data = clusterJobService.findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween(params.jobClass, seqType, startDate, endDate, basesToBeNormalized)
         dataToRender.data = ['avgQueue': PeriodFormat.getDefault().print(new Period(data.avgQueue)), 'avgProcess': PeriodFormat.getDefault().print(new Period(data.avgProcess))]
 
         render dataToRender as JSON
@@ -67,9 +73,9 @@ class ClusterJobJobTypeSpecificController {
     def getJobTypeSpecificStates() {
         Map dataToRender = [data: [], labels: [], keys: []]
 
-        def (startDate, endDate, seqType, multiplexing, xten) = parseParams()
+        def (startDate, endDate, seqType) = parseParams()
 
-        def result = clusterJobService.findJobClassAndSeqTypeSpecificStatesByDateBetween(params.jobClass, seqType, startDate, endDate, multiplexing, xten)
+        def result = clusterJobService.findJobClassAndSeqTypeSpecificStatesByDateBetween(params.jobClass, seqType, startDate, endDate)
         def keys = ['queued', 'started', 'ended']
         keys.each { k ->
             dataToRender.data << result.data.get(k)
@@ -91,9 +97,9 @@ class ClusterJobJobTypeSpecificController {
     private renderDataAsJSON (Closure method) {
         Map dataToRender = [:]
 
-        def (startDate, endDate, seqType, multiplexing, xten) = parseParams()
+        def (startDate, endDate, seqType) = parseParams()
 
-        dataToRender.data = method(params.jobClass, seqType, startDate, endDate, multiplexing, xten)
+        dataToRender.data = method(params.jobClass, seqType, startDate, endDate)
 
         render dataToRender as JSON
     }
@@ -101,9 +107,9 @@ class ClusterJobJobTypeSpecificController {
     private renderPieDataAsJSON (Closure method) {
         Map dataToRender = [data: [], labels: []]
 
-        def (startDate, endDate, seqType, multiplexing, xten) = parseParams()
+        def (startDate, endDate, seqType) = parseParams()
 
-        List results = method(params.jobClass, seqType, startDate, endDate, multiplexing, xten)
+        List results = method(params.jobClass, seqType, startDate, endDate)
         results.each { result ->
             def (labels, data) = ["${result[0]} (${result[1]})", result[1]]
             dataToRender.labels << labels
@@ -116,9 +122,9 @@ class ClusterJobJobTypeSpecificController {
     private renderDiagramDataAsJSON (Closure method) {
         Map dataToRender = [data: [], labels: [], xMax: null]
 
-        def (startDate, endDate, seqType, multiplexing, xten) = parseParams()
+        def (startDate, endDate, seqType) = parseParams()
 
-        Map results = method(params.jobClass, seqType, startDate, endDate, multiplexing, xten)
+        Map results = method(params.jobClass, seqType, startDate, endDate)
         dataToRender.data = results.data
         dataToRender.xMax = results.xMax
         dataToRender.labels = results.labels
@@ -130,9 +136,7 @@ class ClusterJobJobTypeSpecificController {
         LocalDate startDate = LocalDate.parse(params.from)
         LocalDate endDate = LocalDate.parse(params.to)
         SeqType seqType = SeqType.get(Long.parseLong(params.seqType))
-        boolean multiplexing = Boolean.valueOf(params.multiplexing)
-        boolean xten = Boolean.valueOf(params.xten)
 
-        return [startDate, endDate, seqType, multiplexing, xten]
+        return [startDate, endDate, seqType]
     }
 }
