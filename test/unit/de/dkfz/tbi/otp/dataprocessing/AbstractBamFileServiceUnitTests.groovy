@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import org.junit.*
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 import de.dkfz.tbi.otp.ngsdata.DataFile
@@ -25,6 +27,7 @@ class AbstractBamFileServiceUnitTests {
 
 
 
+    @Before
     void setUp() {
         abstractBamFileService = new AbstractBamFileService()
     }
@@ -55,12 +58,14 @@ class AbstractBamFileServiceUnitTests {
     }
 
 
+    @Test
     void testHasBeenQualityAssessedAndMerged() {
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged()
 
         assert abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }
 
+    @Test
     void testHasBeenQualityAssessedAndMerged_QAIsNotFinished() {
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged([
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS
@@ -69,6 +74,7 @@ class AbstractBamFileServiceUnitTests {
         assert !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }
 
+    @Test
     void testHasBeenQualityAssessedAndMerged_StatusIsNotProcessed() {
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged([
             status: AbstractBamFile.State.INPROGRESS
@@ -77,6 +83,7 @@ class AbstractBamFileServiceUnitTests {
         assert !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }
 
+    @Test
     void testHasBeenQualityAssessedAndMerged_BamFileIsNotInMergingSet() {
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged()
         MergingSetAssignment msa = exactlyOneElement(MergingSetAssignment.findAllByBamFile(processedBamFile))
@@ -86,6 +93,7 @@ class AbstractBamFileServiceUnitTests {
         assert !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }
 
+    @Test
     void testHasBeenQualityAssessedAndMerged_MergingSetIsNorProcessed() {
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged([:], [
             status: MergingSet.State.INPROGRESS
@@ -94,6 +102,7 @@ class AbstractBamFileServiceUnitTests {
         assert !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }
 
+    @Test
     void testHasBeenQualityAssessedAndMerged_ProcessedMergedBamFileHasQANotFinished() {
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged([:], [:], [:], [
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS
@@ -102,6 +111,7 @@ class AbstractBamFileServiceUnitTests {
         assert !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }
 
+    @Test
     void testHasBeenQualityAssessedAndMerged_ProcessedMergedBamFileDateIsLater() {
         createdBefore = new Date().minus(1)
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged()
@@ -109,6 +119,7 @@ class AbstractBamFileServiceUnitTests {
         assert !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }
 
+    @Test
     void testHasBeenQualityAssessedAndMerged_ProcessedMergedBamFileIsWithdrawn() {
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged([:], [:], [:], [
             withdrawn: true
@@ -117,6 +128,7 @@ class AbstractBamFileServiceUnitTests {
         assert !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }
 
+    @Test
     void testHasBeenQualityAssessedAndMerged_ProcessedMergedBamFileAndBamFileAreWithdrawn() {
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged([
             withdrawn: true], [:], [:], [withdrawn: true])
@@ -124,6 +136,7 @@ class AbstractBamFileServiceUnitTests {
         assert abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }
 
+    @Test
     void testHasBeenQualityAssessedAndMerged_ProcessedMergedBamFileOtherMergingSet() {
         MergingPass mergingPass = MergingPass.build()
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged([:], [:], [:], [

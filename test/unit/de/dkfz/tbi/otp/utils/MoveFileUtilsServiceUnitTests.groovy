@@ -2,10 +2,9 @@ package de.dkfz.tbi.otp.utils
 
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.Realm
-
+import grails.buildtestdata.mixin.Build
 import org.junit.After
 import org.junit.Before
-import grails.buildtestdata.mixin.Build
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder

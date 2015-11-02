@@ -5,7 +5,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameter
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.joda.time.DateTimeUtils

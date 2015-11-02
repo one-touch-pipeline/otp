@@ -4,6 +4,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
         <title><g:message code="run.list.title"/></title>
+        <asset:javascript src="pages/run/list/datatable.js"/>
     </head>
 <body>
     <div class="body">
@@ -67,10 +68,10 @@
                 ] }" id="runTable"/>
         </div>
     </div>
-    <r:script>
+    <asset:script>
         $(function() {
             $.otp.runList();
         });
-    </r:script>
+    </asset:script>
 </body>
 </html>

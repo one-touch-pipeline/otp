@@ -19,7 +19,7 @@ import org.junit.rules.TemporaryFolder
  */
 @TestFor(JobStatusLoggingService)
 @TestMixin(GrailsUnitTestMixin)
-@Build([ProcessingStep])
+@Build([ProcessingStep, Realm])
 class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends TestCase {
 
     final static Long ARBITRARY_REALM_ID = 987
@@ -56,15 +56,14 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
     @Before
     void setUp() {
         tmpDir.create()
-        tempDirectory = tmpDir.newFolder('/otp-test')
+        tempDirectory = tmpDir.newFolder('otp-test')
 
         processingStep = JobStatusLoggingServiceUnitTests.createFakeProcessingStep()
-        assert processingStep.save(flush: true)
 
         int realmId = ARBITRARY_REALM_ID
-        realm1 = new Realm([id: realmId++, name: 'realm1', loggingRootPath: new File(tempDirectory, '1').path])
+        realm1 = Realm.build([id: realmId++, name: 'realm1', loggingRootPath: new File(tempDirectory, '1').path])
         assert new File(service.logFileBaseDir(realm1, processingStep)).mkdirs()
-        realm2 = new Realm([id: realmId++, name: 'realm2', loggingRootPath: new File(tempDirectory, '2').path])
+        realm2 = Realm.build([id: realmId++, name: 'realm2', loggingRootPath: new File(tempDirectory, '2').path])
         assert new File(service.logFileBaseDir(realm2, processingStep)).mkdirs()
         realmWithEmptyLogFile = new Realm([id: realmId++, name: 'realmWithEmptyLogFile', loggingRootPath: new File(tempDirectory, '3').path])
         assert new File(service.logFileBaseDir(realmWithEmptyLogFile, processingStep)).mkdirs()

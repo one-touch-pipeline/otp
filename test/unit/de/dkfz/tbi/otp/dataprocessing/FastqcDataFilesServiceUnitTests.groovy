@@ -22,6 +22,7 @@ class FastqcDataFilesServiceUnitTests {
         fastqcDataFilesService = null
     }
 
+    @Test
     void testFastqcFileName() {
         DataFile dataFile = new DataFile()
         Map<String, String> files = [

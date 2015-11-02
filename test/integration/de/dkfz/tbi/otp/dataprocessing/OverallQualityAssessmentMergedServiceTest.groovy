@@ -1,14 +1,15 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
-import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.acls.domain.BasePermission
-
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
+import grails.plugin.springsecurity.SpringSecurityUtils
+import org.junit.Before
+import org.junit.Test
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.acls.domain.BasePermission
 
 class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest {
 
@@ -22,6 +23,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
 
 
 
+    @Before
     void setUp() {
         createUserAndRoles()
 
@@ -34,7 +36,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         abstractBamFile.withdrawn = false
         overallQualityAssessmentMerged.referenceGenome.lengthWithoutN = LENGTH_WITHOUT_N
         abstractBamFile.workPackage.bamFileInProjectFolder = abstractBamFile
-
+        overallQualityAssessmentMerged.save(flush: true)
     }
 
 
@@ -44,11 +46,13 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         [1..3].each {
             FastqcBasicStatistics fastqcBasicStatistics = FastqcBasicStatistics.build(sequenceLength: SEQUENCE_LENGTH)
             fastqcBasicStatistics.fastqcProcessedFile.dataFile.seqTrack = processedBamFile.seqTrack
+            fastqcBasicStatistics.fastqcProcessedFile.dataFile.save(flush: true)
         }
     }
 
 
 
+    @Test
     void testFindAllByProjectAndSeqType_admin() {
         List expected = [
             overallQualityAssessmentMerged
@@ -60,6 +64,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         }
     }
 
+    @Test
     void testFindAllByProjectAndSeqType_operator() {
         List expected = [
             overallQualityAssessmentMerged
@@ -71,6 +76,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         }
     }
 
+    @Test
     void testFindAllByProjectAndSeqType_userWithAccess() {
         List expected = [
             overallQualityAssessmentMerged
@@ -85,6 +91,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         }
     }
 
+    @Test
     void testFindAllByProjectAndSeqType_userWithoutAccess() {
 
         SpringSecurityUtils.doWithAuth("testuser") {
@@ -94,6 +101,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         }
     }
 
+    @Test
     void testFindAllByProjectAndSeqType_wrongProject() {
         List expected = []
 
@@ -103,6 +111,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         }
     }
 
+    @Test
     void testFindAllByProjectAndSeqType_wrongSeqType() {
         List expected = []
 
@@ -112,6 +121,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         }
     }
 
+    @Test
     void testFindAllByProjectAndSeqType_notLastQaMergedPassIdentifier() {
         List expected = []
         QualityAssessmentMergedPass.build(abstractMergedBamFile: overallQualityAssessmentMerged.processedMergedBamFile, identifier: overallQualityAssessmentMerged.qualityAssessmentMergedPass.identifier + 1)
@@ -122,6 +132,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         }
     }
 
+    @Test
     void testFindAllByProjectAndSeqType_notLastMergingPassIdentifier() {
         List expected = []
         MergingPass.build(mergingSet: overallQualityAssessmentMerged.mergingSet, identifier: overallQualityAssessmentMerged.mergingPass.identifier + 1)
@@ -132,6 +143,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         }
     }
 
+    @Test
     void testFindAllByProjectAndSeqType_notLastMergingSetIdentifier() {
         List expected = []
         MergingSet.build(mergingWorkPackage: overallQualityAssessmentMerged.mergingWorkPackage, identifier: overallQualityAssessmentMerged.mergingSet.identifier + 1)
@@ -142,6 +154,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         }
     }
 
+    @Test
     void testFindAllByProjectAndSeqType_wrongFileOperationStatus() {
         List expected = []
         overallQualityAssessmentMerged.processedMergedBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.INPROGRESS
@@ -153,6 +166,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         }
     }
 
+    @Test
     void testFindAllByProjectAndSeqType_BamFileIsWithdrawn() {
         List expected = []
         overallQualityAssessmentMerged.processedMergedBamFile.withdrawn = true
@@ -163,6 +177,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         }
     }
 
+    @Test
     void testFindAllByProjectAndSeqType_wrongQualityAssessmentStatus() {
         List expected = []
         overallQualityAssessmentMerged.processedMergedBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.IN_PROGRESS
@@ -175,6 +190,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
 
 
 
+    @Test
     void testFindSequenceLengthAndReferenceGenomeLengthWithoutNForQualityAssessmentMerged() {
         prepareFindSequenceLengthAndReferenceGenomeLengthWithoutNForOverallQualityAssessmentMerged()
         List expected = [
@@ -191,6 +207,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         assert expected == result
     }
 
+    @Test
     void testFindSequenceLengthAndReferenceGenomeLengthWithoutNForQualityAssessmentMerged_listIsEmpty() {
         //these objects are created to ensure, the database is not empty
         prepareFindSequenceLengthAndReferenceGenomeLengthWithoutNForOverallQualityAssessmentMerged()
@@ -200,6 +217,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         assert expected == result
     }
 
+    @Test
     void testFindSequenceLengthAndReferenceGenomeLengthWithoutNForQualityAssessmentMerged_listIsNull() {
         //these objects are created to ensure, the database is not empty
         prepareFindSequenceLengthAndReferenceGenomeLengthWithoutNForOverallQualityAssessmentMerged()
@@ -209,6 +227,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         assert expected == result
     }
 
+    @Test
     void testFindSequenceLengthAndReferenceGenomeLengthWithoutNForQualityAssessmentMerged_noFastqcAvailable() {
         List expected = []
 

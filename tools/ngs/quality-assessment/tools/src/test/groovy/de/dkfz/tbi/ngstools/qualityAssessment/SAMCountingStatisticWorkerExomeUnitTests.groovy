@@ -1,6 +1,7 @@
 package de.dkfz.tbi.ngstools.qualityAssessment
 
 import net.sf.samtools.*
+import org.junit.*
 
 class SAMCountingStatisticWorkerExomeUnitTests extends GroovyTestCase {
 
@@ -15,6 +16,7 @@ class SAMCountingStatisticWorkerExomeUnitTests extends GroovyTestCase {
     File refGenMetaFile = new File("/tmp/test-ref-gen.perfect")
 
 
+    @Before
     void setUp() {
         refGenMetaFile << 'chr17\t3000\t3000'
         allChrWrapper = new ChromosomeStatisticWrapper("all", 1)
@@ -32,6 +34,7 @@ class SAMCountingStatisticWorkerExomeUnitTests extends GroovyTestCase {
         worker.setParameters(parameters)
     }
 
+    @After
     void tearDown() {
         allChrWrapper = null
         chrWrapper = null
@@ -53,6 +56,7 @@ class SAMCountingStatisticWorkerExomeUnitTests extends GroovyTestCase {
      *      OnTargetMappedBases: 0
      *      AllMappedBases: |read1| + |read2| + |read3| = 300
      */
+    @Test
     void testNegativeControl() {
 
         ChromosomeStatisticWrapper chrQWrapper = new ChromosomeStatisticWrapper("chrQ", 1)
@@ -105,6 +109,7 @@ class SAMCountingStatisticWorkerExomeUnitTests extends GroovyTestCase {
      *      OnTargetMappedBases: |read1| + |read2| = 200
      *      AllMappedBases: 200
      */
+    @Test
     void testReadsCompletelyOnTarget() {
 
         bedFile << 'chr17\t1000\t1500'
@@ -136,6 +141,7 @@ class SAMCountingStatisticWorkerExomeUnitTests extends GroovyTestCase {
      *      OnTargetMappedBases: |read1_gapfree| + |read2_gapfree| = 200
      *      AllMappedBases: 200
      */
+    @Test
     void testReadsIncludingGapsCompletelyOnTarget() {
 
         bedFile << 'chr17\t1000\t1500'
@@ -168,6 +174,7 @@ class SAMCountingStatisticWorkerExomeUnitTests extends GroovyTestCase {
      *      AllMappedBases: 100
      *
      */
+    @Test
     void testOneSplitReadOnTarget() {
 
         bedFile << 'chr17\t1000\t1350'
@@ -199,6 +206,7 @@ class SAMCountingStatisticWorkerExomeUnitTests extends GroovyTestCase {
      *      AllMappedBases: 100
      *
      */
+    @Test
     void testOneReadCompletelyOnTarget() {
 
         bedFile << 'chr17\t1000\t1350'
@@ -230,6 +238,7 @@ class SAMCountingStatisticWorkerExomeUnitTests extends GroovyTestCase {
      *      AllMappedBases: 200
      *
      */
+    @Test
     void testOneReadCompletelyOnTargetOneSplitRead() {
 
         bedFile << 'chr17\t1000\t1350'
@@ -261,6 +270,7 @@ class SAMCountingStatisticWorkerExomeUnitTests extends GroovyTestCase {
      *      OnTargetMappedBases: |read1_gapfree| + |read2_gapfree_overlap| = 100 + 40 = 140
      *      AllMappedBases: 200
      */
+    @Test
     void testSplitReadIncludingGaps() {
 
         bedFile << 'chr17\t1000\t1305'
@@ -279,6 +289,7 @@ class SAMCountingStatisticWorkerExomeUnitTests extends GroovyTestCase {
         assertEquals(140, allChrWrapper.chromosome.onTargetMappedBases)
     }
 
+    @Test
     void testWgsCase() {
         FileParameters fileParameters = new FileParameters()
         fileParameters.inputMode = Mode.WGS
@@ -319,6 +330,7 @@ class SAMCountingStatisticWorkerExomeUnitTests extends GroovyTestCase {
      * reads:       __     __     __        ___     ___         ___  ___
      *
      */
+    @Test
     void testProcessChromosomeAllExome() {
 
         ChromosomeStatisticWrapper chrQWrapper = new ChromosomeStatisticWrapper("chrQ", 5000)
@@ -357,6 +369,7 @@ class SAMCountingStatisticWorkerExomeUnitTests extends GroovyTestCase {
         assertEquals(200, allChrWrapper.chromosome.onTargetMappedBases)
     }
 
+    @Test
     void testBaseFiltering() {
 
         bedFile << 'chr17\t1000\t1350'

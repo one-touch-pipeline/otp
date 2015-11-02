@@ -1,16 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.Sample
-import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
-
-import static org.junit.Assert.*
 import grails.test.mixin.*
-import grails.test.mixin.support.*
 import org.junit.*
 
 
@@ -18,6 +9,7 @@ import org.junit.*
 @Mock([MockAbstractFileSystemBamFile])
 class AbstractFileSystemBamFileTests {
 
+    @Test
     void testSave() {
         AbstractFileSystemBamFile bamFile = new MockAbstractFileSystemBamFile(
                 type: AbstractBamFile.BamType.SORTED)
@@ -25,6 +17,7 @@ class AbstractFileSystemBamFileTests {
         bamFile.save(flush: true)
     }
 
+    @Test
     void testContraints() {
         // dateCreated is not null
         AbstractFileSystemBamFile bamFile = new MockAbstractFileSystemBamFile(

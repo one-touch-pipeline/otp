@@ -1,13 +1,15 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.converters.JSON
-import grails.plugins.springsecurity.Secured
 import de.dkfz.tbi.otp.utils.DataTableCommand
+import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
+import org.grails.databinding.BindingFormat
 
 class ProjectProgressDataTableCommand extends DataTableCommand {
 
-    //spring set the year, month, day direct in the date object, so no temporar int var are needed
+    @BindingFormat('yyyy-MM-dd')
     Date startDate = new Date()
+    @BindingFormat('yyyy-MM-dd')
     Date endDate = new Date()
 
     String projects
@@ -19,7 +21,6 @@ class ProjectProgressDataTableCommand extends DataTableCommand {
             Project.list()*.name
         }
     }
-
 }
 
 @Secured(['ROLE_OPERATOR'])
@@ -31,8 +32,8 @@ class ProjectProgressController {
 
 
         [
-            startDate: new Date().minus(8),
-            endDate: new Date(),
+            startDate: new Date().minus(8).format('yyyy-MM-dd'),
+            endDate: new Date().format('yyyy-MM-dd'),
             projects: Project.list()*.name
         ]
     }

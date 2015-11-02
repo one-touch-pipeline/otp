@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.notification
 
-import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
+import grails.plugin.springsecurity.acl.AclSid
 
 /**
  * Concrete Recipient to use an AclSid as recipient.

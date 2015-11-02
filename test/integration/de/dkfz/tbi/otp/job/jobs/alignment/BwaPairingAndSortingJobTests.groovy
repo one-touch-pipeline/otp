@@ -1,5 +1,8 @@
 package de.dkfz.tbi.otp.job.jobs.alignment
 
+import org.junit.Before
+import org.junit.Test
+
 import static org.junit.Assert.*
 
 import org.junit.Rule
@@ -23,6 +26,7 @@ class BwaPairingAndSortingJobTests {
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()
 
+    @Before
     void setUp() {
         bwaPairingAndSortingJob.log = this.log
 
@@ -257,6 +261,7 @@ class BwaPairingAndSortingJobTests {
         bamFile = null
     }
 
+    @Test
     void testCreateGroupHeader() {
         String result = bwaPairingAndSortingJob.createGroupHeader(pass.seqTrack)
         println header()
@@ -264,6 +269,7 @@ class BwaPairingAndSortingJobTests {
         assertEquals(this.header(), result)
     }
 
+    @Test
     void testCreateCommand() {
         String refGenPath = alignmentPassService.referenceGenomePath(pass)
         String files = bwaPairingAndSortingJob.createSequenceAndSaiFiles(pass)

@@ -6,6 +6,7 @@ import grails.test.mixin.TestFor
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
+import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
 @TestFor(BedFileService)
@@ -43,20 +44,24 @@ class BedFileServiceTests {
         bedFile = null
     }
 
+    @Test
     void test_filePath_WhenProjectIsNull_ShouldFailWithException() {
         shouldFail(IllegalArgumentException) { service.filePath(null, bedFile) }
     }
 
+    @Test
     void test_filePath_WhenBedFileIsNull_ShouldFailWithException() {
         shouldFail(IllegalArgumentException) { service.filePath(realm, null) }
     }
 
+    @Test
     void test_filePath_WhenBedFileDoesNotExist_ShouldFailWithException() {
         assert shouldFail(RuntimeException) {
             service.filePath(realm, bedFile)
         } =~ /the bedFile can not be read/
     }
 
+    @Test
     void test_filePath_WhenBedFileExists_ShouldReturnPathToFile() {
         // setup:
         new File(referenceGenomesBaseDirectory, 'bedFileName').createNewFile()

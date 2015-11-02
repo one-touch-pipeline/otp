@@ -29,7 +29,7 @@ class PicardMarkDuplicatesMetricsServiceTests {
     @Before
     void setUp() {
         tmpDir.create()
-        testDirectory = tmpDir.newFolder('/otp-test/')
+        testDirectory = tmpDir.newFolder('otp-test')
 
         directory = testDirectory.absolutePath + "/processing/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0"
         baseFile = "sample-type_patient_seq-type_library_merged.mdup_metrics.txt"
@@ -57,6 +57,7 @@ class PicardMarkDuplicatesMetricsServiceTests {
         }
     }
 
+    @Test
     void testParseAndLoadMetricsForProcessedMergedBamFile() {
         metrics << """## net.sf.picard.metrics.StringHeader
 # net.sf.picard.sam.MarkDuplicates INPUT=[...]

@@ -10,24 +10,24 @@
     <title><g:layoutTitle default="Grails"/></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="contextPath" content="${request.contextPath}">
-    <link rel="shortcut icon" href="${resource(dir: 'images', file: 'favicon.ico')}" type="image/x-icon">
-    <r:require module="style"/>
-    <r:require module="core"/>
-    <g:javascript>
+    <link rel="shortcut icon" href="${assetPath(src: 'favicon.ico')}" type="image/x-icon">
+    <asset:javascript src="modules/defaultPageDependencies.js"/>
+    <asset:stylesheet src="modules/defaultPageDependencies.css"/>
+    <asset:stylesheet src="modules/style.css"/>
+    <asset:script type="text/javascript">
         $('.body').height($(window).height()-260);
         $(window).resize(function(){
             $('.body').height($(window).height()-260);
         });
         $.otp.highlight(window.location.pathname);
-    </g:javascript>
-    <r:layoutResources/>
+    </asset:script>
     <g:layoutHead/>
 </head>
 <body id="otp">
     <div class="body_position">
         <sec:ifAllGranted roles="ROLE_OPERATOR">
             <div class="header">
-                <img src="${resource(dir: 'images', file: 'header_operator.png')}" alt="OTP"/>
+                <img src="${assetPath(src: 'header_operator.png')}" alt="OTP"/>
                 <g:if test="${otp.environmentName() != 'production'}">
                     <p class="environmentName"><otp:environmentName/></p>
                 </g:if>
@@ -36,11 +36,11 @@
         <sec:ifNotGranted roles="ROLE_OPERATOR">
             <div class="header">
                 <g:if test="${controllerName == "info"}"><h1><g:message code="otp.title" /></h1></g:if>
-                <img src="${resource(dir: 'images', file: 'header.png')}" alt="OTP"/>
+                <img src="${assetPath(src: 'header.png')}" alt="OTP"/>
             </div>
         </sec:ifNotGranted>
         <div class="headerGraphic">
-            <img class="headerGraphicImg" src="${resource(dir: 'images', file: 'header_graphic.png')}" alt=""/>
+            <img class="headerGraphicImg" src="${assetPath(src: 'header_graphic.png')}" alt=""/>
         </div>
         <div class="menu">
             <div class="menuContainer menuContainerL">
@@ -116,10 +116,9 @@
         </div>
         <div id="infoBox"></div>
         <g:layoutBody/>
-        <g:javascript library="application"/>
         <div class="footer" role="contentinfo"><a href="http://ibios.dkfz.de/tbi/index.php/data-management/software/otp" target="_blank">OneTouchPipeline</a>  | <a href="http://ibios.dkfz.de/tbi/index.php" target="_blank">Eils Labs</a> | TBI DKFZ | Build: <g:render template="/templates/version"/></div>
         <div id="spinner" class="spinner" style="display:none;"><g:message code="spinner.alt" default="Loading&hellip;"/></div>
     </div>
-    <r:layoutResources/>
+    <asset:deferredScripts/>
 </body>
 </html>

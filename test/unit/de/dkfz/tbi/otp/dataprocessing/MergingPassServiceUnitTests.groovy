@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
-import grails.test.mixin.support.*
 
 import org.junit.*
 
@@ -30,6 +29,7 @@ class MergingPassServiceUnitTests {
 
     MergingPassService mergingPassService
 
+    @Before
     void setUp() {
         checkedLogger = new CheckedLogger()
         LogThreadLocal.setThreadLog(checkedLogger)
@@ -92,28 +92,32 @@ class MergingPassServiceUnitTests {
 
 
 
-    public void testDeleteProcessingFiles() {
+    @Test
+    void testDeleteProcessingFiles() {
         createTestData()
         int expected = SOME_FILE_LENGTH_1 + SOME_FILE_LENGTH_2
         checkedLogger.addDebug("${expected} bytes have been freed for merging pass ${mergingPass}.")
         assert expected == mergingPassService.deleteProcessingFiles(mergingPass)
     }
 
-    public void testDeleteProcessingFiles_NoMergingPass() {
+    @Test
+    void testDeleteProcessingFiles_NoMergingPass() {
         mergingPassService = new MergingPassService()
         assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
             mergingPassService.deleteProcessingFiles(null) //
         }
     }
 
-    public void testDeleteProcessingFiles_NoProcessedMergedBamFile() {
+    @Test
+    void testDeleteProcessingFiles_NoProcessedMergedBamFile() {
         mergingPassService = new MergingPassService()
         mergingPass = MergingPass.build()
         checkedLogger.addError("Found 0 ProcessedMergedBamFiles for MergingPass ${mergingPass}. That's weird. Skipping that merging pass.")
         assert 0 == mergingPassService.deleteProcessingFiles(mergingPass)
     }
 
-    public void testDeleteProcessingFiles_MultipleQA() {
+    @Test
+    void testDeleteProcessingFiles_MultipleQA() {
         createTestData()
         QualityAssessmentMergedPass.build(identifier: 1, abstractMergedBamFile: processedMergedBamFile)
         QualityAssessmentMergedPass.build(identifier: 2, abstractMergedBamFile: processedMergedBamFile)
@@ -122,7 +126,8 @@ class MergingPassServiceUnitTests {
         assert expected == mergingPassService.deleteProcessingFiles(mergingPass)
     }
 
-    public void testDeleteProcessingFiles_NoQA() {
+    @Test
+    void testDeleteProcessingFiles_NoQA() {
         createTestData()
         qualityAssessmentMergedPass.delete(flush: true)
         int expected = SOME_FILE_LENGTH_2
@@ -130,14 +135,16 @@ class MergingPassServiceUnitTests {
         assert expected == mergingPassService.deleteProcessingFiles(mergingPass)
     }
 
-    public void testDeleteProcessingFiles_InconsistenceInMergedQA() {
+    @Test
+    void testDeleteProcessingFiles_InconsistenceInMergedQA() {
         createTestData()
         checkedLogger.addError("There was at least one inconsistency (see earlier log message(s)) for merging pass ${mergingPass}. Skipping that merging pass.")
         mergingPassService.processedMergedBamFileQaFileService.metaClass.checkConsistencyForProcessingFilesDeletion = { final QualityAssessmentMergedPass pass -> return false }
         assert 0 == mergingPassService.deleteProcessingFiles(mergingPass)
     }
 
-    public void testDeleteProcessingFiles_InconsistenceInProcessedMergedBamFile() {
+    @Test
+    void testDeleteProcessingFiles_InconsistenceInProcessedMergedBamFile() {
         createTestData()
         qualityAssessmentMergedPass.delete(flush: true)
         checkedLogger.addError("There was at least one inconsistency (see earlier log message(s)) for merging pass ${mergingPass}. Skipping that merging pass.")
@@ -169,14 +176,16 @@ class MergingPassServiceUnitTests {
      * Some test cases for MayProcessingFilesBeDeleted case are written as Integration test, since the unit tesst
      * couldn't execute the criteria (which always return with null).
      */
-    public void testMayProcessingFilesBeDeleted() {
+    @Test
+    void testMayProcessingFilesBeDeleted() {
         createDomains()
         createDataForMayProcessingFilesBeDeleted(false)
 
         assert !mergingPassService.mayProcessingFilesBeDeleted(mergingPass, createdBefore)
     }
 
-    public void testMayProcessingFilesBeDeleted_NoMergingPass() {
+    @Test
+    void testMayProcessingFilesBeDeleted_NoMergingPass() {
         createDataForMayProcessingFilesBeDeleted()
 
         assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
@@ -184,7 +193,8 @@ class MergingPassServiceUnitTests {
         }
     }
 
-    public void testMayProcessingFilesBeDeleted_NoDateCreatedBefore() {
+    @Test
+    void testMayProcessingFilesBeDeleted_NoDateCreatedBefore() {
         createDomains()
         createDataForMayProcessingFilesBeDeleted()
 
@@ -193,7 +203,8 @@ class MergingPassServiceUnitTests {
         }
     }
 
-    public void testMayProcessingFilesBeDeleted_NoProcessedMergedBamFile() {
+    @Test
+    void testMayProcessingFilesBeDeleted_NoProcessedMergedBamFile() {
         mergingPass = MergingPass.build()
         createDataForMayProcessingFilesBeDeleted()
         checkedLogger.addError("Found 0 ProcessedMergedBamFiles for MergingPass ${mergingPass}. That's weird.")
@@ -201,7 +212,8 @@ class MergingPassServiceUnitTests {
         assert !mergingPassService.mayProcessingFilesBeDeleted(mergingPass, createdBefore)
     }
 
-    public void testMayProcessingFilesBeDeleted_FileToNew() {
+    @Test
+    void testMayProcessingFilesBeDeleted_FileToNew() {
         createDomains()
         createDataForMayProcessingFilesBeDeleted()
         createdBefore = processedMergedBamFile.dateCreated.plus(-1) //some date before the the bam file is created
@@ -210,7 +222,8 @@ class MergingPassServiceUnitTests {
     }
 
     //already copied mean, that merged quality assessment workflow and transfere workflow has run successfully
-    public void testMayProcessingFilesBeDeleted_FileAlreadyCopied() {
+    @Test
+    void testMayProcessingFilesBeDeleted_FileAlreadyCopied() {
         createDomains()
         createDataForMayProcessingFilesBeDeleted()
         processedMergedBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.FINISHED
@@ -222,7 +235,8 @@ class MergingPassServiceUnitTests {
         assert mergingPassService.mayProcessingFilesBeDeleted(mergingPass, createdBefore)
     }
 
-    public void testMayProcessingFilesBeDeleted_HasBeenQualityAssessedAndMerged() {
+    @Test
+    void testMayProcessingFilesBeDeleted_HasBeenQualityAssessedAndMerged() {
         createDomains()
         createDataForMayProcessingFilesBeDeleted(true)
 
@@ -231,7 +245,8 @@ class MergingPassServiceUnitTests {
 
 
 
-    public void testDeleteOldMergingProcessingFiles() {
+    @Test
+    void testDeleteOldMergingProcessingFiles() {
         final int MAX_RUNTIME = 1000
         final int SOME_FILE_SIZE = 10
         createdBefore = new Date()
@@ -249,7 +264,8 @@ class MergingPassServiceUnitTests {
         assert SOME_FILE_SIZE == mergingPassService.deleteOldMergingProcessingFiles(createdBefore, MAX_RUNTIME)
     }
 
-    public void testDeleteOldMergingProcessingFiles_WithoutDefault() {
+    @Test
+    void testDeleteOldMergingProcessingFiles_WithoutDefault() {
         final int SOME_FILE_SIZE = 10
         createdBefore = new Date()
         mergingPassService = new MergingPassService()
@@ -266,7 +282,8 @@ class MergingPassServiceUnitTests {
         assert SOME_FILE_SIZE == mergingPassService.deleteOldMergingProcessingFiles(createdBefore)
     }
 
-    public void testDeleteOldMergingProcessingFiles_createDateIsNull() {
+    @Test
+    void testDeleteOldMergingProcessingFiles_createDateIsNull() {
         createdBefore = new Date()
         mergingPassService = new MergingPassService()
         mergingPassService.dataProcessingFilesService = [

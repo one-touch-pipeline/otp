@@ -1,9 +1,10 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-<meta name="layout" content="main"/>
-<title><g:message code="individual.insert.title"/></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="layout" content="main"/>
+    <title><g:message code="individual.insert.title"/></title>
+    <asset:javascript src="pages/individual/insert/addIndividual.js"/>
 </head>
 <body>
     <div class="body">
@@ -132,10 +133,10 @@
             </div>
         </form>
     </div>
-    <r:script>
+    <asset:script>
         $(function() {
             $.otp.addIndividual.register();
         });
-    </r:script>
+    </asset:script>
 </body>
 </html>

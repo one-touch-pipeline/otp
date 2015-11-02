@@ -93,8 +93,7 @@ class IndividualController {
         List<Project> projects = projectService.getAllProjects()
         List<Individual.Type> individualTypes = Individual.Type.values()
         List<String> sampleTypes = individualService.getSampleTypeNames()
-        List<SampleIdentifier> sampleIdentifiers = individualService.getSampleIdentifiers()
-        [projects: projects, individualTypes: individualTypes, sampleTypes: sampleTypes, sampleIdentifiers: sampleIdentifiers]
+        [projects: projects, individualTypes: individualTypes, sampleTypes: sampleTypes]
     }
 
     def save(IndividualCommand cmd) {

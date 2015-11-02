@@ -12,6 +12,7 @@ import static org.junit.Assert.*
 @TestFor(JobExecutionPlan)
 class JobExecutionPlanTests {
 
+    @Test
     void testConstraints() {
         JobExecutionPlan jobExecutionPlan = new JobExecutionPlan()
         assertFalse(jobExecutionPlan.validate())
@@ -50,6 +51,7 @@ class JobExecutionPlanTests {
         assertTrue(jobExecutionPlan.validate())
     }
 
+    @Test
     void testProcessParameters() {
         JobExecutionPlan jobExecutionPlan = new JobExecutionPlan()
         assertFalse(jobExecutionPlan.validate())

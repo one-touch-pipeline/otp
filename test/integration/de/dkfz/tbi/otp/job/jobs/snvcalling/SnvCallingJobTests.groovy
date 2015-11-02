@@ -23,7 +23,7 @@ import static de.dkfz.tbi.otp.utils.CreateSNVFileHelper.createMD5SUMFile
 import static de.dkfz.tbi.otp.utils.CreateSNVFileHelper.createResultFile
 import static org.junit.Assert.assertEquals
 
-class SnvCallingJobTests extends GroovyTestCase{
+class SnvCallingJobTests {
 
     public static final String SOME_INSTANCE_NAME = "2014-08-25_15h32"
     public static final String OTHER_INSTANCE_NAME = "2014-09-01_15h32"
@@ -81,7 +81,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     @Before
     void setUp() {
         tmpDir.create()
-        testDirectory = tmpDir.newFolder("/otp-test")
+        testDirectory = tmpDir.newFolder("otp-test")
         if(!testDirectory.exists()) {
             assert testDirectory.mkdirs()
         }

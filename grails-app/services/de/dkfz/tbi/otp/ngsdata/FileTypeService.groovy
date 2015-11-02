@@ -59,14 +59,14 @@ class FileTypeService {
 
     /**
      * Provides object from file name and known type
-     * 
+     *
      * to make a difference between 'stats' from sequence and alignment
-     * 
+     *
      * @param filename
      * @param type
      * @return FileType
      */
-    FileType getFileType(String filename, FileType.Type type) {
+    static FileType getFileType(String filename, FileType.Type type) {
         List<FileType> types = FileType.findAllByType(type, [sort: "id", order: "asc"])
         for(FileType subType in types) {
             if (filename.contains(subType.signature)) {

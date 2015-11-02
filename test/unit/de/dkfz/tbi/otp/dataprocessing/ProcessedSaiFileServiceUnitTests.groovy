@@ -20,7 +20,8 @@ class ProcessedSaiFileServiceUnitTests {
 
 
 
-    public void setUp() throws Exception {
+    @Before
+    void setUp() throws Exception {
         //if something failed and the toString method is called, the criteria in isLatestPass makes Problems
         //Therefore this method is mocked.
         AlignmentPass.metaClass.isLatestPass= {true}
@@ -33,7 +34,8 @@ class ProcessedSaiFileServiceUnitTests {
 
 
 
-    public void testCheckConsistencyForProcessingFilesDeletion() {
+    @Test
+    void testCheckConsistencyForProcessingFilesDeletion() {
         ProcessedSaiFile processedSaiFile = ProcessedSaiFile.build()
         processedSaiFileService.dataProcessingFilesService = [
             checkConsistencyWithDatabaseForDeletion: { final def dbFile, final File fsFile ->
@@ -47,7 +49,8 @@ class ProcessedSaiFileServiceUnitTests {
         assert processedSaiFileService.checkConsistencyForProcessingFilesDeletion(processedSaiFile)
     }
 
-    public void testCheckConsistencyForProcessingFilesDeletion_ProcessedSaiFileIsNull() {
+    @Test
+    void testCheckConsistencyForProcessingFilesDeletion_ProcessedSaiFileIsNull() {
         assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
             processedSaiFileService.checkConsistencyForProcessingFilesDeletion(null) //
         }
@@ -55,7 +58,8 @@ class ProcessedSaiFileServiceUnitTests {
 
 
 
-    public void testDeleteProcessingFiles() {
+    @Test
+    void testDeleteProcessingFiles() {
         final int FILE_LENGTH = 10
         ProcessedSaiFile processedSaiFile = ProcessedSaiFile.build()
         processedSaiFileService.dataProcessingFilesService = [
@@ -71,7 +75,8 @@ class ProcessedSaiFileServiceUnitTests {
         assert FILE_LENGTH == processedSaiFileService.deleteProcessingFiles(processedSaiFile)
     }
 
-    public void testDeleteProcessingFiles_ProcessedSaiFileIsNull() {
+    @Test
+    void testDeleteProcessingFiles_ProcessedSaiFileIsNull() {
         assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
             processedSaiFileService.deleteProcessingFiles(null) //
         }

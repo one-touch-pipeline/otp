@@ -50,7 +50,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
     @Test
     void testDiseaseSeqTypeMismatch() {
         diseaseMwp.seqType = exome
-        assert diseaseMwp.save()
+        assert diseaseMwp.save(flush: true)
         assertFindsNothing()
 
         assertFindsOne(DomainFactory.createMergingWorkPackage(controlMwp, diseaseSample), controlMwp)
@@ -59,7 +59,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
     @Test
     void testControlSeqTypeMismatch() {
         controlMwp.seqType = exome
-        assert controlMwp.save()
+        assert controlMwp.save(flush: true)
         assertFindsNothing()
 
         assertFindsOne(diseaseMwp, DomainFactory.createMergingWorkPackage(diseaseMwp, controlSample))
@@ -68,7 +68,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
     @Test
     void testDiseaseIndividualMismatch() {
         diseaseSample.individual = Individual.build(project: project)
-        assert diseaseSample.save()
+        assert diseaseSample.save(flush: true)
         assertFindsNothing()
 
         assertFindsOne(DomainFactory.createMergingWorkPackage(controlMwp,
@@ -78,7 +78,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
     @Test
     void testControlIndividualMismatch() {
         controlSample.individual = Individual.build(project: project)
-        assert controlSample.save()
+        assert controlSample.save(flush: true)
         assertFindsNothing()
 
         assertFindsOne(diseaseMwp, DomainFactory.createMergingWorkPackage(
@@ -87,20 +87,20 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testDiseaseStppMissing() {
-        diseaseStpp.delete()
+        diseaseStpp.delete(flush: true)
         assertFindsNothing()
     }
 
     @Test
     void testControlStppMissing() {
-        controlStpp.delete()
+        controlStpp.delete(flush: true)
         assertFindsNothing()
     }
 
     @Test
     void testDiseaseStppProjectMismatch() {
         diseaseStpp.project = Project.build()
-        assert diseaseStpp.save()
+        assert diseaseStpp.save(flush: true)
         assertFindsNothing()
 
         SampleTypePerProject.build(project: project, sampleType: diseaseSampleType, category: SampleType.Category.DISEASE)
@@ -110,7 +110,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
     @Test
     void testControlStppProjectMismatch() {
         controlStpp.project = Project.build()
-        assert controlStpp.save()
+        assert controlStpp.save(flush: true)
         assertFindsNothing()
 
         SampleTypePerProject.build(project: project, sampleType: controlSampleType, category: SampleType.Category.CONTROL)
@@ -120,7 +120,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
     @Test
     void testDiseaseStppSampleTypeMismatch() {
         diseaseStpp.sampleType = SampleType.build()
-        assert diseaseStpp.save()
+        assert diseaseStpp.save(flush: true)
         assertFindsNothing()
 
         SampleTypePerProject.build(project: project, sampleType: diseaseSampleType, category: SampleType.Category.DISEASE)
@@ -130,7 +130,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
     @Test
     void testControlStppSampleTypeMismatch() {
         controlStpp.sampleType = SampleType.build()
-        assert controlStpp.save()
+        assert controlStpp.save(flush: true)
         assertFindsNothing()
 
         SampleTypePerProject.build(project: project, sampleType: controlSampleType, category: SampleType.Category.CONTROL)
@@ -140,28 +140,28 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
     @Test
     void testDiseaseStppSampleTypeCategoryIgnored() {
         diseaseStpp.category = SampleType.Category.IGNORED
-        assert diseaseStpp.save()
+        assert diseaseStpp.save(flush: true)
         assertFindsNothing()
     }
 
     @Test
     void testControlStppSampleTypeCategoryIgnored() {
         controlStpp.category = SampleType.Category.IGNORED
-        assert controlStpp.save()
+        assert controlStpp.save(flush: true)
         assertFindsNothing()
     }
 
     @Test
     void testBothStppDisease() {
         controlStpp.category = SampleType.Category.DISEASE
-        assert controlStpp.save()
+        assert controlStpp.save(flush: true)
         assertFindsNothing()
     }
 
     @Test
     void testBothStppControl() {
         diseaseStpp.category = SampleType.Category.CONTROL
-        assert diseaseStpp.save()
+        assert diseaseStpp.save(flush: true)
         assertFindsNothing()
     }
 

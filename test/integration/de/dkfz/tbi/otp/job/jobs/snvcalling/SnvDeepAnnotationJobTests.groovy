@@ -31,7 +31,7 @@ import static de.dkfz.tbi.otp.utils.CreateSNVFileHelper.createMD5SUMFile
 import static de.dkfz.tbi.otp.utils.CreateSNVFileHelper.createResultFile
 import static org.junit.Assert.assertEquals
 
-class SnvDeepAnnotationJobTests extends GroovyTestCase {
+class SnvDeepAnnotationJobTests {
 
     @Autowired
     ApplicationContext applicationContext
@@ -83,7 +83,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     void setUp() {
         tmpDir.create()
 
-        testDirectory = tmpDir.newFolder("/otp-test")
+        testDirectory = tmpDir.newFolder("otp-test")
         if(!testDirectory.exists()) {
             assert testDirectory.mkdirs()
         }

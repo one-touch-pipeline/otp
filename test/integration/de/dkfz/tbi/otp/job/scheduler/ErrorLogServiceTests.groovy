@@ -29,18 +29,19 @@ class ErrorLogServiceTests {
     @Before
     void setUp() {
         stacktraceFile = errorLogService.getStackTracesFile(ARBITRARY_STACKTRACE_IDENTIFIER)
+        stacktraceFile.parentFile.mkdirs()
     }
 
     @After
     void tearDown() {
         new FileUtils().deleteQuietly(exceptionStoringFile)
-        stacktraceFile.delete()
+        assert stacktraceFile.parentFile.deleteDir()
     }
 
     @Test
     void testLog() {
         tmpDir.create()
-        File testDirectory = tmpDir.newFolder("/otp-test/stacktraces/")
+        File testDirectory = tmpDir.newFolder("otp-test", "stacktraces")
         errorLogService.metaClass.getStackTracesDirectory = {
             return testDirectory.absolutePath
         }

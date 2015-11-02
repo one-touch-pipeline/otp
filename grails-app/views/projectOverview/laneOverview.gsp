@@ -1,9 +1,10 @@
 <%@ page contentType="text/html;charset=UTF-8"%>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="layout" content="main" />
-<title>OTP - project overview</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="layout" content="main" />
+    <title>OTP - project overview</title>
+    <asset:javascript src="pages/projectOverview/laneOverview/datatable.js"/>
 </head>
 <body>
     <div class="body">
@@ -86,10 +87,10 @@
             </table>
         </div>
     </div>
-    <r:script>
+    <asset:script>
         $(function() {
             $.otp.projectOverviewTable.registerLaneOverviewId();
         });
-    </r:script>
+    </asset:script>
 </body>
 </html>

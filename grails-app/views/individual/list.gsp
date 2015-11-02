@@ -4,6 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="individual.list.title"/></title>
+    <asset:javascript src="pages/individual/list/datatable.js"/>
 </head>
 <body>
     <div class="body">
@@ -61,10 +62,10 @@
         ]}" id="individualTable"/>
         </div>
     </div>
-    <r:script>
+    <asset:script type="text/javascript">
         $(function() {
             $.otp.individualList();
         });
-    </r:script>
+    </asset:script>
 </body>
 </html>

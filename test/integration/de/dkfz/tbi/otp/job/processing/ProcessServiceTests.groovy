@@ -4,10 +4,9 @@ import static org.junit.Assert.*
 
 import org.apache.commons.io.FileUtils
 import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
-import org.grails.plugins.springsecurity.service.acl.AclUtilService
+import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.acl.AclUtilService
 import org.junit.*
-import org.springframework.security.*
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.domain.BasePermission
 
@@ -53,6 +52,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
     /**
      * Tests that an operator user has access to all processes
      */
+    @Test
     void testGetProcessAsOperator() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -64,6 +64,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
     /**
      * Tests that an admin user has access to all processes
      */
+    @Test
     void testGetProcessAsAdmin() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -76,6 +77,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * Tests that a user has no access to a process unless ACL is defined
      * on the JobExecutionPlan
      */
+    @Test
     void testGetProcessAsUser() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -105,6 +107,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * Tests security of getAllProcessingSteps:
      * user should only have access if ACL defined on JobExecutionPlan
      */
+    @Test
     void testGetAllProcessingStepsSecurity() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -140,6 +143,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * Tests security of getNumberOfProcessingSteps:
      * user should only have access if ACL defined on JobExecutionPlan
      */
+    @Test
     void testNumberOfProcessingStepsSecurity() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -190,6 +194,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
     /**
      * Tests that an operator user has access to all processing steps
      */
+    @Test
     void testGetProcessingStepAsOperator() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -203,6 +208,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
     /**
      * Tests that an admin user has access to all processing steps
      */
+    @Test
     void testGetProcessingStepAsAdmin() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -217,6 +223,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * Tests that a user has no access to a processing step unless ACL is defined
      * on the JobExecutionPlan
      */
+    @Test
     void testGetProcessingStepAsUser() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -248,6 +255,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * Tests the security of getAllUpdates:
      * users should only have access if an ACL is defined on the JobExecutionPlan
      */
+    @Test
     void testGetAllUpdatesSecurity() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -285,6 +293,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * Tests security of getNumberOfUpdates:
      * user should only have access if ACL defined on JobExecutionPlan
      */
+    @Test
     void testNumberOfUpdatesSecurity() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -324,6 +333,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      *
      * and that the method behaves correctly in case of not finished processes.
      */
+    @Test
     void testGetFinishDate() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -378,6 +388,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * In addition the test checks that the method behaves correctly in case of not finished
      * Processes.
      */
+    @Test
     void testGetDuration() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -432,6 +443,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * Tests security of getLatestProcessingStep:
      * user should only have access if ACL defined on JobExecutionPlan
      */
+    @Test
     void testGetLatestProcessingStepSecurity() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -467,6 +479,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * Tests the security of getState:
      * only if ACL is defined on JobExecutionPlan a user has access
      */
+    @Test
     void testGetStateSecurity() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -514,6 +527,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * Tests the security of getError:
      * only if ACL is defined on JobExecutionPlan a user has access
      */
+    @Test
     void testGetErrorSecurity() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -561,6 +575,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * Tests the security of getLastUpdate:
      * only if ACL is defined on JobExecutionPlan a user has access
      */
+    @Test
     void testGetLastUpdateSecurity() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -608,6 +623,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * Tests the security of getLatestProcessingStepUpdate:
      * only if ACL is defined on JobExecutionPlan a user has access
      */
+    @Test
     void testGetLatestProcessingStepUpdateSecurity() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -646,6 +662,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * Tests the security of getFirstUpdate:
      * only if ACL is defined on JobExecutionPlan a user has access
      */
+    @Test
     void testGetFirstUpdateSecurity() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -684,6 +701,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * Tests the security of getProcessingStepDuration:
      * only if ACL is defined on JobExecutionPlan a user has access
      */
+    @Test
     void testGetProcessingStepDurationSecurity() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -723,6 +741,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * Tests the security of processInformation:
      * only if ACL is defined on JobExecutionPlan a user has access
      */
+    @Test
     void testProcessInformationSecurity() {
         JobExecutionPlan plan = mockPlan()
         StartJobDefinition startJob = new StartJobDefinition(name: "StartJobTest", bean: "testStartJob", plan: plan)
@@ -766,6 +785,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * Tests the security of restartProcessingStep:
      * requires write permission ACL on JobExecutionPlan
      */
+    @Test
     void testRestartProcessingStepSecurity() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)

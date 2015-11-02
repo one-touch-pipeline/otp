@@ -24,6 +24,7 @@ class MetaDataFieldsServiceUnitTest {
         metaDataFieldsService = new MetaDataFieldsService()
     }
 
+    @Test
     void test_listLibraryPreparationKitWithAliases_oneDataWithoutSynonym() {
         LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
 
@@ -32,11 +33,13 @@ class MetaDataFieldsServiceUnitTest {
 
     }
 
+    @Test
     void test_listLibraryPreparationKitWithAliases_noData() {
         def list = metaDataFieldsService.listLibraryPreparationKitWithAliases()
         assert [] == list
     }
 
+    @Test
     void test_listLibraryPreparationKitWithAliases_oneDataWithOneSynonym() {
         LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = LibraryPreparationKitSynonym.build(
@@ -47,6 +50,7 @@ class MetaDataFieldsServiceUnitTest {
         assert [[libraryPreparationKit, [libraryPreparationKitSynonym]]] == list
     }
 
+    @Test
     void test_listLibraryPreparationKitWithAliases_multipleData() {
         LibraryPreparationKit libraryPreparationKit1 = LibraryPreparationKit.build()
         LibraryPreparationKit libraryPreparationKit2 = LibraryPreparationKit.build()
@@ -56,6 +60,7 @@ class MetaDataFieldsServiceUnitTest {
         assert [[libraryPreparationKit1, []], [libraryPreparationKit2, []], [libraryPreparationKit3,[]]] == list
     }
 
+    @Test
     void test_listLibraryPreparationKitWithAliases_oneDataWithMultipleSynonym() {
         LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
         LibraryPreparationKitSynonym libraryPreparationKitSynonym1 = LibraryPreparationKitSynonym.build(
@@ -73,6 +78,7 @@ class MetaDataFieldsServiceUnitTest {
     }
 
 
+    @Test
     void test_listAntibodyTarget_oneData() {
         AntibodyTarget antibodyTarget = AntibodyTarget.build()
 
@@ -81,11 +87,13 @@ class MetaDataFieldsServiceUnitTest {
         assert antibodyTarget == list[0]
     }
 
+    @Test
     void test_listAntibodyTarget_noData() {
         def list = metaDataFieldsService.listAntibodyTarget()
         assert [] == list
     }
 
+    @Test
     void test_listAntibodyTarget_multipleData() {
         AntibodyTarget antibodyTarget1 = AntibodyTarget.build()
         AntibodyTarget antibodyTarget2 = AntibodyTarget.build()
@@ -98,6 +106,7 @@ class MetaDataFieldsServiceUnitTest {
     }
 
 
+    @Test
     void test_listSeqCenter_oneData() {
         SeqCenter seqCenter = SeqCenter.build()
         def list = metaDataFieldsService.listSeqCenter()
@@ -105,11 +114,13 @@ class MetaDataFieldsServiceUnitTest {
         assert seqCenter == list[0]
     }
 
+    @Test
     void test_listSeqCenter_noData() {
         def list = metaDataFieldsService.listSeqCenter()
         assert [] == list
     }
 
+    @Test
     void test_listSeqCenter_multipleData() {
         SeqCenter seqCenter1 = SeqCenter.build()
         SeqCenter seqCenter2 = SeqCenter.build()
@@ -123,6 +134,7 @@ class MetaDataFieldsServiceUnitTest {
 
 
 
+    @Test
     void test_listPlatforms_oneData() {
         SeqPlatform seqPlatform = SeqPlatform.build(seqPlatformModelLabel: null)
 
@@ -131,11 +143,13 @@ class MetaDataFieldsServiceUnitTest {
 
     }
 
+    @Test
     void test_listPlatforms_noData() {
         def list = metaDataFieldsService.listPlatforms()
         assert [] == list
     }
 
+    @Test
     void test_listPlatforms_multipleData() {
         SeqPlatform seqPlatform1 = SeqPlatform.build()
         SeqPlatform seqPlatform2 = SeqPlatform.build()
@@ -147,6 +161,7 @@ class MetaDataFieldsServiceUnitTest {
 
 
 
+    @Test
     void test_listSeqType_oneData() {
         SeqType seqType = SeqType.build()
         def list = metaDataFieldsService.listSeqType()
@@ -154,11 +169,13 @@ class MetaDataFieldsServiceUnitTest {
         assert seqType == list[0]
     }
 
+    @Test
     void test_listSeqType_noData() {
         def list = metaDataFieldsService.listSeqType()
         assert [] == list
     }
 
+    @Test
     void test_listSeqType_multipleData() {
         SeqType seqType1 = SeqType.build()
         SeqType seqType2 = SeqType.build()

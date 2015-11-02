@@ -31,24 +31,24 @@ class MergingWorkPackageTests {
     private createDataAndAssertResult(MergingWorkPackage workPackage) {
         SeqTrack incorrectSample = DomainFactory.buildSeqTrackWithDataFile(workPackage)
         incorrectSample.sample = Sample.build()
-        assert incorrectSample.save(failOnError: true)
+        assert incorrectSample.save(failOnError: true, flush: true)
 
         SeqTrack incorrectSeqType = DomainFactory.buildSeqTrackWithDataFile(workPackage)
         incorrectSeqType.seqType = SeqType.build()
-        assert incorrectSeqType.save(failOnError: true)
+        assert incorrectSeqType.save(failOnError: true, flush: true)
 
         SeqTrack incorrectSeqPlatformGroup = DomainFactory.buildSeqTrackWithDataFile(workPackage)
         incorrectSeqPlatformGroup.seqPlatform.seqPlatformGroup = SeqPlatformGroup.build()
-        assert incorrectSeqPlatformGroup.seqPlatform.save(failOnError: true)
+        assert incorrectSeqPlatformGroup.seqPlatform.save(failOnError: true, flush: true)
 
         SeqTrack noSeqPlatformGroup = DomainFactory.buildSeqTrackWithDataFile(workPackage)
         noSeqPlatformGroup.seqPlatform.seqPlatformGroup = null
-        assert noSeqPlatformGroup.seqPlatform.save(failOnError: true)
+        assert noSeqPlatformGroup.seqPlatform.save(failOnError: true, flush: true)
 
         SeqTrack correctWithdrawn = DomainFactory.buildSeqTrackWithDataFile(workPackage)
         DataFile dataFile = DataFile.findBySeqTrack(correctWithdrawn)
         dataFile.fileWithdrawn = true
-        assert dataFile.save(failOnError: true)
+        assert dataFile.save(failOnError: true, flush: true)
 
         SeqTrack incorrectLibraryPreparationKit = DomainFactory.buildSeqTrackWithDataFile(workPackage)
         incorrectLibraryPreparationKit.libraryPreparationKit = LibraryPreparationKit.build()

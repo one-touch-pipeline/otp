@@ -37,7 +37,7 @@ class ProcessedMergedBamFileServiceTests {
     @Before
     void setUp() {
         tmpDir.create()
-        testDirectory = tmpDir.newFolder('/otp-test/')
+        testDirectory = tmpDir.newFolder('otp-test')
 
         directory = testDirectory.absolutePath + "/processing/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0"
         baseFile = "sample-type_patient_seq-type_library_merged.mdup"
@@ -311,6 +311,7 @@ class ProcessedMergedBamFileServiceTests {
         assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA())
     }
 
+    @Test
     void testMergedBamFileWithFinishedQAWhenMd5sumNotNull() {
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
         mergedBamFile.md5sum = "68b329da9893e34099c7d8ad5cb9c940"

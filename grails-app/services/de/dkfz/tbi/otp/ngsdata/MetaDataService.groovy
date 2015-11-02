@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import static org.springframework.util.Assert.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import org.springframework.security.access.prepost.PostAuthorize
@@ -13,17 +12,12 @@ import de.dkfz.tbi.otp.utils.StringUtils
 
 class MetaDataService {
 
-
-    // locks for operation that are not tread safe
-    private final Lock loadMetaDataLock = new ReentrantLock()
-
-    /**
-     * Dependency injection of file type service
-     */
-    FileTypeService fileTypeService
     MetaDataFileService metaDataFileService
 
     static transactional = true
+
+    // locks for operation that are not tread safe
+    private final Lock loadMetaDataLock = new ReentrantLock()
 
     /**
      *
@@ -84,7 +78,7 @@ class MetaDataService {
      * @param entries The MetaDataEntries for which it should be checked whether there is a ChangeLog
      * @return Map of MetaDataEntries with boolean information as value whether there is a ChangeLog
      */
-    @PreFilter("hasRole('ROLE_OPERATOR') or ((filterObject.dataFile.project != null) and hasPermission(filterObject.dataFile.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', 'read')) or ((filterObject.dataFile.run != null) and hasPermission(filterObject.dataFile.run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', 'read'))")
+    @PreFilter("hasRole('ROLE_OPERATOR') or (hasPermission(filterObject.dataFile.project, 'read') or hasPermission(filterObject.dataFile.run?.seqCenter, 'read'))")
     Map<MetaDataEntry, Boolean> checkForChangelog(List<MetaDataEntry> entries) {
         ReferencedClass clazz = ReferencedClass.findByClassName(MetaDataEntry.class.getName())
         if (!clazz) {
@@ -393,7 +387,7 @@ class MetaDataService {
      * meta-data file
      */
     private void assignFileType(DataFile dataFile, FileType.Type type) {
-        FileType fileType = fileTypeService.getFileType(dataFile.fileName, type)
+        FileType fileType = FileTypeService.getFileType(dataFile.fileName, type)
         dataFile.fileType = fileType
         dataFile.save(flush: true)
     }
@@ -404,7 +398,7 @@ class MetaDataService {
 
 
     private void addReadNumber(DataFile dataFile, FileType.Type type) {
-        FileType fileType = fileTypeService.getFileType(dataFile.fileName, type)
+        FileType fileType = FileTypeService.getFileType(dataFile.fileName, type)
         if (fileType.type == FileType.Type.SEQUENCE && fileType.vbpPath == "/sequence/") {
             String fileName = dataFile.fileName
             String libraryLayout = getLibraryLayoutFromMetadata(dataFile)

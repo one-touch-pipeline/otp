@@ -76,6 +76,7 @@ class ChromosomeIdentifierMappingServiceTests {
         referenceGenomeEntryTwo.save(flush: true, failOnError: true)
     }
 
+    @After
     void tearDown() {
         referenceGenome = null
         referenceGenomeEntry = null
@@ -84,12 +85,14 @@ class ChromosomeIdentifierMappingServiceTests {
         seqType = null
     }
 
+    @Test
     void testMappingAllFromReferenceGenome() {
         Map<String, String> mappingExp = ["chr1":"1", "chr2":"2", "*": "*"]
         Map<String, String> mappingAct = chromosomeIdentifierMappingService.mappingAll(referenceGenome)
         assertEquals(mappingExp, mappingAct)
     }
 
+    @Test
     void testMappingOneFromReferenceGenome() {
         String mappingExp = "1"
         String mappingAct = chromosomeIdentifierMappingService.mappingOne("chr1", referenceGenome)

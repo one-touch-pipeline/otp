@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.utils
 
+import org.junit.Test
+
 import static org.junit.Assert.*
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.springframework.security.acls.domain.BasePermission
 
 import de.dkfz.tbi.otp.administration.GroupCommand
@@ -18,8 +20,8 @@ class JobExecutionPlanDSLTests extends AbstractIntegrationTest {
     def grailsApplication
     def planValidatorService
     def groupService
-    def aclUtilService
 
+    @Test
     void testEmptyPlan() {
         assertEquals(0, JobExecutionPlan.count())
         plan("test") {
@@ -33,6 +35,7 @@ class JobExecutionPlanDSLTests extends AbstractIntegrationTest {
         assertFalse(planValidatorService.validate(jep).isEmpty())
     }
 
+    @Test
     void testWatchDog() {
         assertEquals(0, JobExecutionPlan.count())
         plan("test") {
@@ -46,6 +49,7 @@ class JobExecutionPlanDSLTests extends AbstractIntegrationTest {
         assertTrue(errors.isEmpty())
     }
 
+    @Test
     void testGrantReadToGroup() {
         createUserAndRoles()
         Group group = null
@@ -75,6 +79,7 @@ class JobExecutionPlanDSLTests extends AbstractIntegrationTest {
         }
     }
 
+    @Test
     void testGrantWriteToGroup() {
         createUserAndRoles()
         Group group = null

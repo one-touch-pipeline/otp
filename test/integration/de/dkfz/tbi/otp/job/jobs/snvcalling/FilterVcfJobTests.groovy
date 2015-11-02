@@ -26,7 +26,7 @@ import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
 import static org.junit.Assert.assertEquals
 
-class FilterVcfJobTests extends GroovyTestCase {
+class FilterVcfJobTests {
 
     @Autowired
     ApplicationContext applicationContext
@@ -75,7 +75,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     @Before
     void setUp() {
         tmpDir.create()
-        testDirectory = tmpDir.newFolder("/otp-test")
+        testDirectory = tmpDir.newFolder("otp-test")
         if(!testDirectory.exists()) {
             assert testDirectory.mkdirs()
         }

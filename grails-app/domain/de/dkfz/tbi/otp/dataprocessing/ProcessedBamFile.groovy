@@ -33,7 +33,6 @@ class ProcessedBamFile extends AbstractFileSystemBamFile implements ProcessParam
      * @return <code>true</code>, if this {@link ProcessedBamFile} is from the latest alignment
      * @see AlignmentPass#isLatestPass()
      */
-    @Override
     public boolean isMostRecentBamFile() {
         return alignmentPass.isLatestPass()
     }

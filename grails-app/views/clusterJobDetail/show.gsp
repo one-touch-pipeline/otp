@@ -1,10 +1,12 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-<meta name="layout" content="main"/>
-<title><g:message code="jobstats.detail.title"/></title>
-<r:require module="multiprogressbar"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="layout" content="main"/>
+    <title><g:message code="jobstats.detail.title"/></title>
+    <asset:javascript src="modules/multiprogressbar"/>
+    <asset:stylesheet src="modules/multiprogressbar"/>
+    <asset:javascript src="pages/clusterJobDetail/show/clusterJobDetail.js"/>
 </head>
 <!--
 This page is just available for cluster jobs with filled properties
@@ -237,9 +239,9 @@ on the general cluster job page
         </div>
     </div>
 </body>
-<r:script>
+<asset:script>
     $(function() {
         $.otp.clusterJobDetailProgress.register(${job.id});
     });
-</r:script>
+</asset:script>
 </html>

@@ -44,42 +44,50 @@ class StringUtilsUnitTests {
 
 
 
+    @Test
     void testLongestCommonPrefix_FirstStringIsNull_ShouldFail() {
         TestCase.shouldFail(AssertionError) {
             longestCommonPrefix(null, "second")
         }
     }
 
+    @Test
     void testLongestCommonPrefix_SecondStringIsNull_ShouldFail() {
         TestCase.shouldFail(AssertionError) {
             longestCommonPrefix("first", null)
         }
     }
 
+    @Test
     void testLongestCommonPrefix_FirstStringIsEmpty_ShouldFail() {
         TestCase.shouldFail(AssertionError) {
             longestCommonPrefix("", "second")
         }
     }
 
+    @Test
     void testLongestCommonPrefix_SecondStringIsEmpty_ShouldFail() {
         TestCase.shouldFail(AssertionError) {
             longestCommonPrefix("first", "")
         }
     }
 
+    @Test
     void testLongestCommonPrefix_FirstStringIsEqualSecondString() {
         assert "equal" == longestCommonPrefix("equal", "equal")
     }
 
+    @Test
     void testLongestCommonPrefix_FirstStringIsSubstring() {
         assert "String" == longestCommonPrefix("String", "StringExtended")
     }
 
+    @Test
     void testLongestCommonPrefix_SecondStringIsSubstring() {
         assert "String" == longestCommonPrefix("StringExtended", "String")
     }
 
+    @Test
     void testLongestCommonPrefix_DifferentStrings() {
         assert "" == longestCommonPrefix("OneString", "AnotherString")
     }

@@ -4,8 +4,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="datafile.showDetails.title"/></title>
-    <r:require module="editorSwitch"/>
-    <r:require module="changeLog"/>
+    <asset:javascript src="modules/editorSwitch"/>
+    <asset:javascript src="modules/changeLog"/>
 </head>
 <body>
     <div class="body_grow">
@@ -139,10 +139,10 @@
     </table>
     </div>
 </body>
-<r:script>
+<asset:script>
     $(function() {
         $.otp.growBodyInit(240);
         $.otp.initCommentBox(${dataFile.id},"#dataFileCommentBox");
     });
-</r:script>
+</asset:script>
 </html>

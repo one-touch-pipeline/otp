@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.administration
 
 import grails.converters.JSON
-import grails.plugins.springsecurity.Secured
+import grails.plugin.springsecurity.annotation.Secured
 
 @Secured(['ROLE_ADMIN'])
 class ShutdownController {

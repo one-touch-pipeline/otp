@@ -4,6 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="layout" content="main" />
 <title><g:message code="projectStatistic.title" /></title>
+    <asset:javascript src="pages/alignmentQualityOverview/index/dataTable.js"/>
 </head>
 
 <body>
@@ -34,10 +35,10 @@
                 id="overviewTableProcessedMergedBMF"/>
         </div>
     </div>
-    <r:script>
+    <asset:script>
         $(function() {
             $.otp.alignmentQualityOverviewTable.register();
         });
-    </r:script>
+    </asset:script>
 </body>
 </html>

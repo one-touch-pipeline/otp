@@ -4,6 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="notification.administration.title"/></title>
+    <asset:javascript src="pages/notification/index/notificationAdministration.js"/>
 </head>
 <body>
     <div class="body">
@@ -49,10 +50,10 @@
                 'notification.administration.list.headers.message'
         ]}" id="notificationsTable"/>
     </div>
-    <r:script>
+    <asset:script>
         $(function() {
             $.otp.notificationAdministration.setup();
         });
-    </r:script>
+    </asset:script>
 </body>
 </html>

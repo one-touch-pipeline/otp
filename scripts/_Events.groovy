@@ -30,10 +30,6 @@ eventCompileStart = {
         projectCompiler.srcDirectories << "test/helper"
     }
 
-    // copy the messages.properties
-    ant.mkdir(dir: "web-app/js/i18n/")
-    ant.copy(file: "grails-app/i18n/messages.properties", todir: "web-app/js/i18n/")
-
     def proc = "git rev-parse --short HEAD".execute()
     proc.waitFor()
     ant.mkdir(dir: "grails-app/views/templates/")

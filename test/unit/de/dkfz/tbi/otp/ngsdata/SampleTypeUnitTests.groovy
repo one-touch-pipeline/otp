@@ -17,6 +17,7 @@ class SampleTypeUnitTests {
 
 
 
+    @Test
     void testValidate_valid() {
         SampleType sampleType = new SampleType(
             name: 'sampleType'
@@ -24,6 +25,7 @@ class SampleTypeUnitTests {
         assert sampleType.validate()
     }
 
+    @Test
     void testValidate_invalid_NameIsNull() {
         SampleType sampleType = new SampleType(
             name: null,
@@ -31,6 +33,7 @@ class SampleTypeUnitTests {
         TestCase.assertValidateError(sampleType, 'name', 'nullable', null)
     }
 
+    @Test
     void testValidate_invalid_SpecificReferenceGenomeIsNull() {
         SampleType sampleType = new SampleType(
             name: 'sampleType',

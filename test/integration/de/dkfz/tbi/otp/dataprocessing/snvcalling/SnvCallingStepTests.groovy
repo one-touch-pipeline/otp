@@ -10,7 +10,7 @@ import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.TestData
 import de.dkfz.tbi.otp.utils.ExternalScript
 
-class SnvCallingStepTests extends GroovyTestCase {
+class SnvCallingStepTests {
 
     @Test
     void testGetConfigExecuteFlagVariableName() {
@@ -31,38 +31,39 @@ class SnvCallingStepTests extends GroovyTestCase {
 
     @Test
     void testGetExternalScript_CALLING() {
-        testGetExternalScript(SnvCallingStep.CALLING)
+        getExternalScript(SnvCallingStep.CALLING)
     }
 
     @Test
     void testGetExternalScript_FILTER() {
-        testGetExternalScript(SnvCallingStep.FILTER_VCF)
+        getExternalScript(SnvCallingStep.FILTER_VCF)
     }
 
     @Test
     void testGetExternalScript_ANNOTATION() {
-        testGetExternalScript(SnvCallingStep.SNV_ANNOTATION)
+        getExternalScript(SnvCallingStep.SNV_ANNOTATION)
     }
 
     @Test
     void testGetExternalScript_DEEP_ANNOTATION() {
-        testGetExternalScript(SnvCallingStep.SNV_DEEPANNOTATION)
+        getExternalScript(SnvCallingStep.SNV_DEEPANNOTATION)
     }
 
-    void testGetExternalScript(SnvCallingStep step) {
+    private void getExternalScript(SnvCallingStep step) {
         final File testDir = TestCase.uniqueNonExistentPath
 
         ExternalScript externalScript = createExternalScript("SnvCallingStep.${step.name()}", new File(testDir, 'script_v1.sh').path)
-        assert externalScript.save()
+        assert externalScript.save(flush: true)
         assertEquals(externalScript, step.getExternalScript("v1"))
 
         externalScript.deprecatedDate = new Date()
-        assert externalScript.save()
+        assert externalScript.save(flush: true)
         ExternalScript externalScript2 = createExternalScript("SnvCallingStep.${step.name()}", new File(testDir, 'script_v2.sh').path)
-        assert externalScript2.save()
+        assert externalScript2.save(flush: true)
         assertEquals(externalScript2, step.getExternalScript("v1"))
     }
 
+    @Test
     void testGetExternalScript_NoScriptVersion_shouldFail() {
         shouldFail(AssertionError, {SnvCallingStep.SNV_DEEPANNOTATION.getExternalScript(null)})
     }

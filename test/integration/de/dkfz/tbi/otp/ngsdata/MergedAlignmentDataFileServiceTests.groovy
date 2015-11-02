@@ -10,7 +10,7 @@ class MergedAlignmentDataFileServiceTests {
 
     @Test
     void testAlignmentSequenceFiles() {
-        List<SeqScan> scans = SeqScan.findAll([max: 10])
+        List<SeqScan> scans = SeqScan.list([max: 10])
         for (SeqScan scan in scans) {
             List<DataFile> files = mergedAlignmentDataFileService.alignmentSequenceFiles(scan)
         }

@@ -1,7 +1,5 @@
 package de.dkfz.tbi.otp.notification
 
-import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclClass
-
 /**
  * A Trigger represents a Domain object for which Notifications are sent.
  * E.g. a JobExecutionPlan and it's Id.

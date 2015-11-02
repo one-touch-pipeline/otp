@@ -11,7 +11,6 @@ logs/*
 # OTP
 ## Main application
 ast-build
-web-app/js/i18n/*
 web-app/WEB-INF/tld/c.tld
 web-app/WEB-INF/tld/fmt.tld
 grails-app/views/templates/_version.gsp
@@ -24,6 +23,7 @@ tools/*/*/.gradle/
 # Grails
 .groovy/*
 target
+.asscache
 
 # Third-party tools
 ## CodeNarc

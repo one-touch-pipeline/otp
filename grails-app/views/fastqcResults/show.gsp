@@ -4,7 +4,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="fastqc.show.fastqcReport"/></title>
-    <r:require module="lightbox"/>
+    <asset:javascript src="modules/lightbox"/>
+    <asset:stylesheet src="modules/lightbox"/>
   </head>
   <body>
     <div class="body">

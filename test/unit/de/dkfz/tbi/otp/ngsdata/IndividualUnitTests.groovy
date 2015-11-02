@@ -1,20 +1,20 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import static org.junit.Assert.*
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-import grails.buildtestdata.mixin.Build
-import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.Individual.Type
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
+import org.junit.Test
+
+import static org.junit.Assert.assertEquals
 
 
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(Individual)
-@Build([
-        Realm,
-        Sample,
-        SeqType,
-])
+@Mock([Project, Sample])
+@Build([Individual, Realm, SampleType, SeqType])
 class IndividualUnitTests {
 
     @Test
@@ -69,9 +69,10 @@ class IndividualUnitTests {
     void testSaveIndividual_PidNotUnique() {
         Individual individual1 = createIndividual()
         assert individual1.validate()
-        assert individual1.save()
+        assert individual1.save(flush: true)
 
         Individual individual2 = createIndividual()
+
         shouldFail (AssertionError, {assert individual2.validate()})
     }
 
@@ -83,7 +84,7 @@ class IndividualUnitTests {
 
         Sample sample1 = new Sample(
                 individual: individual,
-                sampleType: new SampleType()
+                sampleType: SampleType.build(name: "name1")
                 )
         assert sample1.save()
 
@@ -91,7 +92,7 @@ class IndividualUnitTests {
 
         Sample sample2 = new Sample(
                 individual: individual,
-                sampleType: new SampleType()
+                sampleType: SampleType.build(name: "name2")
                 )
         assert sample2.save()
 

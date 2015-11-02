@@ -12,6 +12,7 @@ import org.junit.*
 @Mock([DataFile, Sample, Individual, Project])
 class SeqTrackUnitTests {
 
+    @Test
     void testIsWithDrawn() {
         SeqTrack seqTrack = new SeqTrack()
         assert null != seqTrack.save(validate: false)
@@ -30,6 +31,7 @@ class SeqTrackUnitTests {
         assertTrue seqTrack.withdrawn
     }
 
+    @Test
     void testGetProject() {
         Project project = TestData.createProject()
         assert null != project.save(validate: false)
@@ -48,6 +50,7 @@ class SeqTrackUnitTests {
 
 
 
+    @Test
     void testValidateWithKitInfoReliabilityIsKnownAndGivenLibraryPreparationKit() {
         SeqTrack seqTrack = createSeqTrack()
         seqTrack.kitInfoReliability = InformationReliability.KNOWN
@@ -55,6 +58,7 @@ class SeqTrackUnitTests {
         assert seqTrack.validate()
     }
 
+    @Test
     void testValidateWithKitInfoReliabilityIsInferredAndGivenLibraryPreparationKit() {
         SeqTrack seqTrack = createSeqTrack()
         seqTrack.kitInfoReliability = InformationReliability.INFERRED
@@ -63,6 +67,7 @@ class SeqTrackUnitTests {
         assert seqTrack.validate()
     }
 
+    @Test
     void testValidateWithKitInfoReliabilityIsKnownAndNoLibraryPreparationKit() {
         SeqTrack seqTrack = createSeqTrack()
         seqTrack.kitInfoReliability = InformationReliability.KNOWN
@@ -71,6 +76,7 @@ class SeqTrackUnitTests {
         TestCase.assertValidateError(seqTrack, "libraryPreparationKit", "validator.invalid", null)
     }
 
+    @Test
     void testValidateWithKitInfoReliabilityIsInferredAndNoLibraryPreparationKit() {
         SeqTrack seqTrack = createSeqTrack()
         seqTrack.kitInfoReliability = InformationReliability.INFERRED
@@ -79,6 +85,7 @@ class SeqTrackUnitTests {
         TestCase.assertValidateError(seqTrack, "libraryPreparationKit", "validator.invalid", null)
     }
 
+    @Test
     void testValidateWithKitInfoReliabilityIsUnknownAndNoLibraryPreparationKit() {
         SeqTrack seqTrack = createSeqTrack()
         seqTrack.kitInfoReliability = InformationReliability.UNKNOWN_VERIFIED
@@ -87,6 +94,7 @@ class SeqTrackUnitTests {
         assert seqTrack.validate()
     }
 
+    @Test
     void testValidateWithKitInfoReliabilityIsUnknownAndGivenLibraryPreparationKit() {
         SeqTrack seqTrack = createSeqTrack()
         seqTrack.kitInfoReliability = InformationReliability.UNKNOWN_VERIFIED
@@ -95,6 +103,7 @@ class SeqTrackUnitTests {
         TestCase.assertValidateError(seqTrack, "libraryPreparationKit", "validator.invalid", seqTrack.libraryPreparationKit)
     }
 
+    @Test
     void testValidateWithKitInfoReliabilityIsUnknownUnverifiedAndNoLibraryPreparationKit() {
         SeqTrack seqTrack = createSeqTrack()
         seqTrack.kitInfoReliability= InformationReliability.UNKNOWN_UNVERIFIED
@@ -103,6 +112,7 @@ class SeqTrackUnitTests {
         assertTrue(seqTrack.validate())
     }
 
+    @Test
     void testValidateWithKitInfoReliabilityIsUnknownUnverifiedAndGivenLibraryPreparationKit() {
         SeqTrack seqTrack = createSeqTrack()
         seqTrack.kitInfoReliability= InformationReliability.UNKNOWN_UNVERIFIED

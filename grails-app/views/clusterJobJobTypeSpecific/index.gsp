@@ -4,8 +4,10 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="jobstats.jobTypeSpecific.title"/></title>
-    <r:require module="graph"/>
-    <r:require module="jqueryUI"/>
+    <asset:javascript src="modules/graph"/>
+    <asset:javascript src="modules/jqueryUI"/>
+    <asset:stylesheet src="modules/jqueryUI"/>
+    <asset:javascript src="pages/clusterJobJobTypeSpecific/index/clusterJobJobTypeSpecific.js"/>
 </head>
 <body>
     <div class="body">
@@ -117,11 +119,11 @@
         </div>
         <br>
     </div>
-    <r:script>
+    <asset:script>
         $(function() {
             $.otp.clusterJobJobTypeSpecific.register();
             $.otp.clusterJobJobTypeSpecific.updateSeqTypeSelect();
         });
-    </r:script>
+    </asset:script>
 </body>
 </html>

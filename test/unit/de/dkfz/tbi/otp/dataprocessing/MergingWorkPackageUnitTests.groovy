@@ -2,10 +2,10 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
-import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.*
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.TestFor
+import org.junit.*
 import org.junit.rules.ErrorCollector
 
 @TestFor(MergingWorkPackage)
@@ -25,10 +25,8 @@ class MergingWorkPackageUnitTests {
     Sample sample = null
     SeqType seqType = null
 
-
     @Rule
     public ErrorCollector collector = new ErrorCollector();
-
 
     @Before
     void setUp() {
@@ -62,11 +60,13 @@ class MergingWorkPackageUnitTests {
         seqType.save(flush: true)
     }
 
+    @After
     void tearDown() {
         this.sample = null
         this.seqType = null
     }
 
+    @Test
     void testSave() {
         MergingWorkPackage workPackage = new TestData().createMergingWorkPackage(
             sample: sample,

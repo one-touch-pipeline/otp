@@ -4,6 +4,7 @@ import de.dkfz.tbi.TestConstants
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestFor
+import org.junit.Before
 import org.junit.Test
 
 
@@ -15,7 +16,7 @@ import org.junit.Test
 class ProcessedBamFileServiceUnitTests {
 
 
-
+    @Before
     public void setUp() throws Exception {
         //if something failed and the toString method is called, the criteria in isLatestPass makes Problems
         //Therefore this method is mocked.
@@ -64,8 +65,8 @@ class ProcessedBamFileServiceUnitTests {
     }
 
 
-
-    public void testCheckConsistencyForProcessingFilesDeletion() {
+    @Test
+    void testCheckConsistencyForProcessingFilesDeletion() {
         ProcessedBamFile processedBamFile = ProcessedBamFile.build()
         ProcessedBamFileService processedBamFileService = createProcessedBamFileService()
         processedBamFileService.dataProcessingFilesService = [
@@ -80,7 +81,8 @@ class ProcessedBamFileServiceUnitTests {
         assert processedBamFileService.checkConsistencyForProcessingFilesDeletion(processedBamFile)
     }
 
-    public void testCheckConsistencyForProcessingFilesDeletion_ProcessedBamFileIsNull() {
+    @Test
+    void testCheckConsistencyForProcessingFilesDeletion_ProcessedBamFileIsNull() {
         ProcessedBamFileService processedBamFileService = createProcessedBamFileService()
 
         assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
@@ -89,8 +91,8 @@ class ProcessedBamFileServiceUnitTests {
     }
 
 
-
-    public void testDeleteProcessingFiles() {
+    @Test
+    void testDeleteProcessingFiles() {
         final int FILE_LENGTH = 10
         ProcessedBamFile processedBamFile = ProcessedBamFile.build()
         ProcessedBamFileService processedBamFileService = createProcessedBamFileService()
@@ -111,7 +113,8 @@ class ProcessedBamFileServiceUnitTests {
         assert FILE_LENGTH == processedBamFileService.deleteProcessingFiles(processedBamFile)
     }
 
-    public void testDeleteProcessingFiles_ProcessedBamFileIsNull() {
+    @Test
+    void testDeleteProcessingFiles_ProcessedBamFileIsNull() {
         ProcessedBamFileService processedBamFileService = createProcessedBamFileService()
 
         assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {

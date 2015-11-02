@@ -1,10 +1,5 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.ARBITRARY_MESSAGE
-
-import org.codehaus.groovy.control.io.NullWriter
-
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
@@ -21,11 +16,15 @@ import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.ProcessHelperService
 import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import org.codehaus.groovy.control.io.NullWriter
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+
+import static de.dkfz.tbi.TestConstants.ARBITRARY_MESSAGE
+import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
 class AbstractRoddyJobTests {
 

@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
-import grails.test.mixin.support.*
 
 import org.junit.*
 
@@ -236,8 +235,8 @@ class ProcessedMergedBamFileServiceUnitTests {
     }
 
 
-
-    public void testCheckConsistencyForProcessingFilesDeletion() {
+    @Test
+    void testCheckConsistencyForProcessingFilesDeletion() {
         Realm.build()
         ProcessedMergedBamFile processedMergedBamFile
         ProcessedMergedBamFileService processedMergedBamFileService
@@ -246,7 +245,8 @@ class ProcessedMergedBamFileServiceUnitTests {
         assert processedMergedBamFileService.checkConsistencyForProcessingFilesDeletion(processedMergedBamFile)
     }
 
-    public void testCheckConsistencyForProcessingFilesDeletion_NoProcessedMergedBamFile() {
+    @Test
+    void testCheckConsistencyForProcessingFilesDeletion_NoProcessedMergedBamFile() {
         ProcessedMergedBamFile processedMergedBamFile
         ProcessedMergedBamFileService processedMergedBamFileService
         (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking()
@@ -256,7 +256,8 @@ class ProcessedMergedBamFileServiceUnitTests {
         }
     }
 
-    public void testCheckConsistencyForProcessingFilesDeletion_DataBaseNotConsistent() {
+    @Test
+    void testCheckConsistencyForProcessingFilesDeletion_DataBaseNotConsistent() {
         ProcessedMergedBamFile processedMergedBamFile
         ProcessedMergedBamFileService processedMergedBamFileService
         (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking(false)
@@ -264,7 +265,8 @@ class ProcessedMergedBamFileServiceUnitTests {
         assert !processedMergedBamFileService.checkConsistencyForProcessingFilesDeletion(processedMergedBamFile)
     }
 
-    public void testCheckConsistencyForProcessingFilesDeletion_NotLatestMergingPass() {
+    @Test
+    void testCheckConsistencyForProcessingFilesDeletion_NotLatestMergingPass() {
         ProcessedMergedBamFile processedMergedBamFile
         ProcessedMergedBamFileService processedMergedBamFileService
         (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking(true)
@@ -273,7 +275,8 @@ class ProcessedMergedBamFileServiceUnitTests {
         assert processedMergedBamFileService.checkConsistencyForProcessingFilesDeletion(processedMergedBamFile)
     }
 
-    public void testCheckConsistencyForProcessingFilesDeletion_NotLatestSet() {
+    @Test
+    void testCheckConsistencyForProcessingFilesDeletion_NotLatestSet() {
         ProcessedMergedBamFile processedMergedBamFile
         ProcessedMergedBamFileService processedMergedBamFileService
         (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking(true)
@@ -282,7 +285,8 @@ class ProcessedMergedBamFileServiceUnitTests {
         assert processedMergedBamFileService.checkConsistencyForProcessingFilesDeletion(processedMergedBamFile)
     }
 
-    public void testCheckConsistencyForProcessingFilesDeletion_md5SumIsNull() {
+    @Test
+    void testCheckConsistencyForProcessingFilesDeletion_md5SumIsNull() {
         ProcessedMergedBamFile processedMergedBamFile
         ProcessedMergedBamFileService processedMergedBamFileService
         (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking(true)
@@ -301,7 +305,8 @@ class ProcessedMergedBamFileServiceUnitTests {
         }
     }
 
-    public void testCheckConsistencyForProcessingFilesDeletion_FinalDestinationNotConsistent() {
+    @Test
+    void testCheckConsistencyForProcessingFilesDeletion_FinalDestinationNotConsistent() {
         Realm.build()
         ProcessedMergedBamFile processedMergedBamFile
         ProcessedMergedBamFileService processedMergedBamFileService
@@ -311,8 +316,8 @@ class ProcessedMergedBamFileServiceUnitTests {
     }
 
 
-
-    public void testDeleteProcessingFiles() {
+    @Test
+    void testDeleteProcessingFiles() {
         Realm.build()
         ProcessedMergedBamFile processedMergedBamFile
         ProcessedMergedBamFileService processedMergedBamFileService
@@ -321,8 +326,8 @@ class ProcessedMergedBamFileServiceUnitTests {
         assert SOME_FILE_LENGTH == processedMergedBamFileService.deleteProcessingFiles(processedMergedBamFile)
     }
 
-
-    public void testDeleteProcessingFiles_NoProcessedMergedBamFile() {
+    @Test
+    void testDeleteProcessingFiles_NoProcessedMergedBamFile() {
         ProcessedMergedBamFile processedMergedBamFile
         ProcessedMergedBamFileService processedMergedBamFileService
         (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking(true, true)
@@ -332,7 +337,8 @@ class ProcessedMergedBamFileServiceUnitTests {
         }
     }
 
-    public void testDeleteProcessingFiles_ConsistentCheckFail() {
+    @Test
+    void testDeleteProcessingFiles_ConsistentCheckFail() {
         ProcessedMergedBamFile processedMergedBamFile
         ProcessedMergedBamFileService processedMergedBamFileService
         (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking(false)

@@ -44,7 +44,7 @@ class SnvCallingInstanceTestData {
             }
         }
         bamFileControl.seqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
-        assert bamFileControl.seqType.save(failOnError: true)
+        assert bamFileControl.seqType.save(flush: true, failOnError: true)
         (bamFileTumor, samplePair) = createDisease(bamFileControl.mergingWorkPackage)
 
         externalScript_Joining = new ExternalScript(
@@ -53,7 +53,7 @@ class SnvCallingInstanceTestData {
                 filePath: "/tmp/scriptLocation/joining.sh",
                 author: "otptest",
         )
-        assert externalScript_Joining.save()
+        assert externalScript_Joining.save(flush: true)
     }
 
     SnvConfig createSnvConfig(String configuration = "testConfig") {
@@ -63,7 +63,7 @@ class SnvCallingInstanceTestData {
                 configuration: configuration,
                 externalScriptVersion: "v1",
         )
-        assert snvConfig.save(failOnError: true)
+        assert snvConfig.save(flush: true, failOnError: true)
         return snvConfig
     }
 
@@ -72,6 +72,7 @@ class SnvCallingInstanceTestData {
         ProcessedMergedBamFile diseaseBamFile = DomainFactory.createProcessedMergedBamFile(
                 samplePair.mergingWorkPackage1,
                 DomainFactory.PROCESSED_BAM_FILE_PROPERTIES)
+        assert diseaseBamFile.save(flush: true)
         return [diseaseBamFile, samplePair]
     }
 
@@ -83,7 +84,7 @@ class SnvCallingInstanceTestData {
             filePath: "/dev/null/otp-test/${step.externalScriptIdentifier}",
             author: "otptest",
         )
-        assert externalScript
+        assert externalScript.save(flush: true)
 
         final SnvJobResult result = new SnvJobResult([
             snvCallingInstance: instance,
@@ -98,13 +99,13 @@ class SnvCallingInstanceTestData {
         if (step == SnvCallingStep.CALLING) {
             result.chromosomeJoinExternalScript = externalScript_Joining
         }
-        assert result.save(failOnError: true)
+        assert result.save(flush: true, failOnError: true)
         return result
     }
 
     SnvCallingInstance createAndSaveSnvCallingInstance(Map properties = [:]) {
         final SnvCallingInstance instance = createSnvCallingInstance(properties)
-        assert instance.save(failOnError: true)
+        assert instance.save(flush: true, failOnError: true)
         return instance
     }
 
@@ -113,7 +114,7 @@ class SnvCallingInstanceTestData {
             processingState: SnvProcessingStates.IN_PROGRESS,
             sampleType1BamFile: bamFileTumor,
             sampleType2BamFile: bamFileControl,
-            config: properties.snvConfig ?: snvConfig ?: createSnvConfig(),
+            config: (properties.snvConfig ?: snvConfig) ?: createSnvConfig(),
             instanceName: "2014-08-25_15h32",
             samplePair: samplePair
         ] + properties)
@@ -186,7 +187,7 @@ class SnvCallingInstanceTestData {
                 filePath: "/dev/null/otp-test/externalScript.sh",
                 author: "otptest",
         ] + properties)
-        assert externalScript
+        assert externalScript.save(flush: true)
         return externalScript
     }
 }

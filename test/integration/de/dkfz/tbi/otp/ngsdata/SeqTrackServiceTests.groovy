@@ -191,6 +191,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         seqTrackService.buildSequenceTracks(run.id)
     }
 
+    @Test
     void testAssertConsistentLibraryPreparationKitConsistent() {
         MetaDataKey metaDataKey = new MetaDataKey(name: "LIB_PREP_KIT")
         assertNotNull(metaDataKey.save())
@@ -208,6 +209,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         seqTrackService.assertConsistentLibraryPreparationKit(dataFiles)
     }
 
+    @Test
     void testAssertConsistentLibraryPreparationKitNotConsistent() {
         MetaDataKey metaDataKey = new MetaDataKey(name: "LIB_PREP_KIT")
         assertNotNull(metaDataKey.save())
@@ -230,6 +232,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         }
     }
 
+    @Test
     void testAssertConsistentLibraryPreparationKitNoLibPrepKitKey() {
         DataFile dataFileR1 = new DataFile(fileName: "1_ACTGTG_L005_R1_complete_filtered.fastq.gz")
         assertNotNull(dataFileR1.save())
@@ -240,6 +243,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         seqTrackService.assertConsistentLibraryPreparationKit(dataFiles)
     }
 
+    @Test
     void testAssertConsistentLibraryPreparationKitNoLibPrepKitValue() {
         MetaDataKey metaDataKey = new MetaDataKey(name: "LIB_PREP_KIT")
         assertNotNull(metaDataKey.save())
@@ -282,6 +286,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
     }
 
 
+    @Test
     void testBuildFastqSeqTrack_SeqTrackCanBeBuild() {
         Run run = createDataForBuildFastqSeqTrack("SAMPLE_ID", "SAMPLE_ID", "SAMPLE_ID")
         SeqTrack seqTrack = seqTrackService.buildFastqSeqTrack(run, LANE_NR)
@@ -290,6 +295,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assert seqTrack.laneId == LANE_NR
     }
 
+    @Test
     void testBuildFastqSeqTrack_NoDataFileFound_ThrowException() {
         Run run = createDataForBuildFastqSeqTrack("SAMPLE_ID", "SAMPLE_ID", "SAMPLE_ID")
 
@@ -298,6 +304,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         }).contains("No laneDataFiles found.")
     }
 
+    @Test
     void testBuildFastqSeqTrack_SamplesAreDifferent_ThrowException() {
         Run run = createDataForBuildFastqSeqTrack("SAMPLE_ID", "SAMPLE_ID_1", "SAMPLE_ID_2")
         SampleIdentifier.build(name: "SAMPLE_ID_1")
@@ -305,6 +312,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         shouldFail(SampleInconsistentException) {seqTrackService.buildFastqSeqTrack(run, LANE_NR)}
     }
 
+    @Test
     void testBuildFastqSeqTrack_SeqTypesAreDifferent_ThrowException() {
         Run run = createDataForBuildFastqSeqTrack("SEQUENCING_TYPE", "SEQUENCING_TYPE_1", "SEQUENCING_TYPE_2")
         SeqType.build(name: "SEQUENCING_TYPE_1", libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
@@ -313,6 +321,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     }
 
+    @Test
     void testBuildFastqSeqTrack_ExomeSeqTrack_LibraryPreparationKitsAreDifferent_ThrowException() {
         Run run = createDataForBuildFastqSeqTrack("LIB_PREP_KIT", "LIB_PREP_KIT_1", "LIB_PREP_KIT_2")
         assert (TestCase.shouldFail(ProcessingException) {
@@ -321,6 +330,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     }
 
+    @Test
     void testBuildFastqSeqTrack_SoftwareToolsAreDifferent_ThrowException() {
         Run run = createDataForBuildFastqSeqTrack("PIPELINE_VERSION", "PIPELINE_VERSION_1", "PIPELINE_VERSION_2")
         SoftwareToolIdentifier.build(name: "PIPELINE_VERSION_1")
@@ -328,6 +338,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         shouldFail(MetaDataInconsistentException) {seqTrackService.buildFastqSeqTrack(run, LANE_NR)}
     }
 
+    @Test
     void testBuildFastqSeqTrack_IlseIdsAreDifferent_ThrowDifferent() {
         Run run = createDataForBuildFastqSeqTrack("ILSE_NO", "ILSE_NO_1", "ILSE_NO_2")
         assert (TestCase.shouldFail(ProcessingException) {
@@ -336,6 +347,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
     }
 
 
+    @Test
     void testAssertConsistentWithinSeqTrack_NotEntryInDataBaseForMetaDataKey() {
         MetaDataKey metaDataKey = new MetaDataKey(name: MetaDataColumn.SEQUENCING_TYPE.name())
         assertNotNull(metaDataKey.save())
@@ -350,6 +362,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         seqTrackService.assertConsistentWithinSeqTrack(dataFiles, MetaDataColumn.SEQUENCING_TYPE) == null
     }
 
+    @Test
     void testAssertConsistentWithinSeqTrack_ValuesAreNotConsistent_ShouldFail() {
         String sequencingType = "sequencingType"
         DataFile dataFileR1 = createAndSaveDataFileAndMetaDataEntry([(MetaDataColumn.SEQUENCING_TYPE.name()): sequencingType])
@@ -363,6 +376,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         }
     }
 
+    @Test
     void testAssertConsistentWithinSeqTrack_ValuesAreConsistent() {
         String sequencingType = "sequencingType"
 
@@ -373,6 +387,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assert sequencingType == seqTrackService.assertConsistentWithinSeqTrack(dataFiles, MetaDataColumn.SEQUENCING_TYPE)
     }
 
+    @Test
     void testAssertAndReturnConcistentIlseId_ValuesAreConsistent() {
         String ilseId = "1234"
 
@@ -383,6 +398,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assert ilseId == seqTrackService.assertAndReturnConcistentIlseId(dataFiles)
     }
 
+    @Test
     void testCreateSeqTrack_WithIlseId() {
         String ilseId = "1234"
         Map data = createData()
@@ -402,6 +418,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
 
 
+    @Test
     void testCreateSeqTrack_shouldReturnSeqTrack_NoMetadataForLibraryPreparationKit() {
         Map data = createData()
 
@@ -417,6 +434,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertEquals(SeqTrack.class, seqTrack.class)
     }
 
+    @Test
     void testCreateSeqTrack_shouldReturnSeqTrack_WithUsingKitByName() {
         Map data = createData()
         DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.LIB_PREP_KIT, LIBRARY_PREPARATION_KIT_NAME_VALID)
@@ -435,6 +453,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertEquals(data.libraryPreparationKit, seqTrack.libraryPreparationKit)
     }
 
+    @Test
     void testCreateSeqTrack_shouldReturnSeqTrack_WithKitUsingBySynonym() {
         Map data = createData()
         DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.LIB_PREP_KIT, LIBRARY_PREPARATION_KIT_SYNONYM_VALID)
@@ -453,6 +472,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertEquals(data.libraryPreparationKit, seqTrack.libraryPreparationKit)
     }
 
+    @Test
     void testCreateSeqTrack_ShouldReturnExomeSeqTrack_WithSpecialValueUnknownForExome() {
         Map data = createData()
         DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.LIB_PREP_KIT, UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE)
@@ -473,6 +493,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertNull(seqTrack.libraryPreparationKit)
     }
 
+    @Test
     void testCreateSeqTrack_shouldFailForNotAllowedSpecialValueUnknownForNonExome() {
         Map data = createData()
         DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.LIB_PREP_KIT, UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE)
@@ -489,6 +510,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         }
     }
 
+    @Test
     void testCreateSeqTrack_ShouldReturnSeqTrack_WithEmptyKitValueForNonExome() {
         Map data = createData()
         DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.LIB_PREP_KIT, '')
@@ -507,6 +529,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertNull(seqTrack.libraryPreparationKit)
     }
 
+    @Test
     void testCreateSeqTrack_shouldFailForEmptyKitValueForExome() {
         Map data = createData()
         DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.LIB_PREP_KIT, '')
@@ -527,6 +550,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
 
 
+    @Test
     void testCreateSeqTrack_shouldFailForNotAllowedSpecialValueInMetaData_UnknownUnverified() {
         //value UNKNOWN_UNVERIFIED can not given in meta data, so this value should be handled like an unknown value
         Map data = createData()
@@ -544,6 +568,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         }
     }
 
+    @Test
     void testCreateSeqTrack_shouldFailForUnknownKitValue() {
         Map data = createData()
         DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.LIB_PREP_KIT, LIBRARY_PREPARATION_KIT_NAME_INVALID)
@@ -560,6 +585,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         }
     }
 
+    @Test
     void testCreateSeqTrack_ShouldFailForMissingSample() {
         Map data = createData()
         DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.LIB_PREP_KIT, LIBRARY_PREPARATION_KIT_NAME_VALID)
@@ -576,6 +602,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         }
     }
 
+    @Test
     void testCreateSeqTrack_ShouldReturnSeqTrack_NoLibraryPreparationKitColumnKey() {
         Map data = createData()
 
@@ -593,6 +620,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertNull(seqTrack.libraryPreparationKit)
     }
 
+    @Test
     void testCreateSeqTrack_ShouldReturnSeqTrack_NoLibraryPreparationKitColumn() {
         Map data = createData()
         assertNotNull(data.seqType.save([flush: true]))
@@ -614,6 +642,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertNull(seqTrack.libraryPreparationKit)
     }
 
+    @Test
     void testCreateSeqTrackChipSeqAntibodyTargetWithUnknownValue() {
         Map data = createData()
         DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.ANTIBODY_TARGET, "unknown value")
@@ -632,6 +661,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         }
     }
 
+    @Test
     void testCreateSeqTrackChipSeqAntibodyTargetWithEmptyValue() {
         Map data = createData()
         DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.ANTIBODY_TARGET, "")
@@ -650,6 +680,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         }
     }
 
+    @Test
     void testCreateSeqTrackChipSeqWithValidAntibodyTarget() {
         Map data = createData()
         DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.ANTIBODY_TARGET, ANTIBODY_TARGET_IDENTIFIER)
@@ -1093,7 +1124,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         ExternallyProcessedMergedBamFile bamFile = ExternallyProcessedMergedBamFile.build(
                 fastqSet: FastqSet.build(seqTracks: [seqTrack]),
                 type: AbstractBamFile.BamType.RMDUP,
-        )
+        ).save(flush: true)
         assert [bamFile] == seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack])
     }
 

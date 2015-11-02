@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestFor
+import org.junit.Test
 
 import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertTrue
@@ -10,6 +11,7 @@ import static org.junit.Assert.assertTrue
 @Build([MergingPass])
 class MergingPassTests {
 
+    @Test
     void testIsLatestPass() {
         MergingSet mergingSet = MergingSet.build()
 

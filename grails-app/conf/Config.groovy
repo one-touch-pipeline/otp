@@ -71,11 +71,15 @@ grails.web.disable.multipart=false
 // request parameters to mask when logging exceptions
 grails.exceptionresolver.params.exclude = ['password']
 
+if (!otpConfig.otp.server.url) {
+    otpConfig.otp.server.url = "http://localhost:8080"
+}
+
 // set per-environment serverURL stem for creating absolute links
 environments {
     development {
         grails.logging.jul.usebridge = true
-        grails.serverURL = "${otpConfig.otp.server.url}${appName}"
+        grails.serverURL = "${otpConfig.otp.server.url}/${appName}"
 
         // Backdoor config options for BackdoorFilter in development mode
         if (!(otpConfig.otp.security.useBackdoor instanceof ConfigObject)) {
@@ -88,10 +92,10 @@ environments {
         grails.serverURL = otpConfig.otp.server.url
     }
     WORKFLOW_TEST {
-        grails.serverURL = "http://localhost:8080/${appName}"
+        grails.serverURL = "${otpConfig.otp.server.url}/${appName}"
     }
     test {
-        grails.serverURL = "http://localhost:8080/${appName}"
+        grails.serverURL = "${otpConfig.otp.server.url}/${appName}"
     }
 }
 
@@ -218,9 +222,9 @@ otp {
 }
 
 // Added by the Spring Security Core plugin:
-grails.plugins.springsecurity.userLookup.userDomainClassName = 'de.dkfz.tbi.otp.security.User'
-grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'de.dkfz.tbi.otp.security.UserRole'
-grails.plugins.springsecurity.authority.className = 'de.dkfz.tbi.otp.security.Role'
+grails.plugin.springsecurity.userLookup.userDomainClassName = 'de.dkfz.tbi.otp.security.User'
+grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'de.dkfz.tbi.otp.security.UserRole'
+grails.plugin.springsecurity.authority.className = 'de.dkfz.tbi.otp.security.Role'
 
 // ldap
 if ((otpConfig.otp.security.ldap.enabled instanceof ConfigObject) || !Boolean.parseBoolean(otpConfig.otp.security.ldap.enabled)) {
@@ -230,17 +234,17 @@ if ((otpConfig.otp.security.ldap.enabled instanceof ConfigObject) || !Boolean.pa
 } else {
     println("using ldap")
     otp.security.ldap.enabled = true
-    grails.plugins.springsecurity.ldap.context.managerDn         = otpConfig.otp.security.ldap.managerDn
-    grails.plugins.springsecurity.ldap.context.managerPassword   = otpConfig.otp.security.ldap.managerPw
-    grails.plugins.springsecurity.ldap.context.server            = otpConfig.otp.security.ldap.server
-    grails.plugins.springsecurity.ldap.search.base               = otpConfig.otp.security.ldap.search.base
-    grails.plugins.springsecurity.ldap.authorities.searchSubtree = otpConfig.otp.security.ldap.search.subTree
-    grails.plugins.springsecurity.ldap.search.filter             = otpConfig.otp.security.ldap.search.filter
+    grails.plugin.springsecurity.ldap.context.managerDn         = otpConfig.otp.security.ldap.managerDn
+    grails.plugin.springsecurity.ldap.context.managerPassword   = otpConfig.otp.security.ldap.managerPw
+    grails.plugin.springsecurity.ldap.context.server            = otpConfig.otp.security.ldap.server
+    grails.plugin.springsecurity.ldap.search.base               = otpConfig.otp.security.ldap.search.base
+    grails.plugin.springsecurity.ldap.authorities.searchSubtree = otpConfig.otp.security.ldap.search.subTree
+    grails.plugin.springsecurity.ldap.search.filter             = otpConfig.otp.security.ldap.search.filter
 
     // static options
-    grails.plugins.springsecurity.ldap.authorities.ignorePartialResultException = true
-    grails.plugins.springsecurity.ldap.authorities.retrieveGroupRoles = true
-    grails.plugins.springsecurity.ldap.authorities.retrieveDatabaseRoles = true
+    grails.plugin.springsecurity.ldap.authorities.ignorePartialResultException = true
+    grails.plugin.springsecurity.ldap.authorities.retrieveGroupRoles = true
+    grails.plugin.springsecurity.ldap.authorities.retrieveDatabaseRoles = true
 }
 
 //configuration for jabber accounts
@@ -258,7 +262,7 @@ if ((otpConfig.otp.jabber.enabled instanceof ConfigObject) || !Boolean.parseBool
 }
 
 // protect everything for role user
-grails.plugins.springsecurity.controllerAnnotations.staticRules = [
+grails.plugin.springsecurity.controllerAnnotations.staticRules = [
     "/projectOverview/mmmlIdentifierMapping/**": ['ROLE_MMML_MAPPING'],
     "/grails-errorhandler/**": ['IS_AUTHENTICATED_ANONYMOUSLY'],
     "/seqTrackDataProvider/**": ['IS_AUTHENTICATED_ANONYMOUSLY'],
@@ -281,15 +285,15 @@ grails.plugins.springsecurity.controllerAnnotations.staticRules = [
 ]
 
 // hierarchy of roles
-grails.plugins.springsecurity.roleHierarchy = '''
+grails.plugin.springsecurity.roleHierarchy = '''
     ROLE_ADMIN > ROLE_OPERATOR
     ROLE_OPERATOR > ROLE_USER
     ROLE_OPERATOR > ROLE_MMML_MAPPING
     ROLE_ADMIN > ROLE_SWITCH_USER
 '''
 
-grails.plugins.springsecurity.useSwitchUserFilter = true
-grails.plugins.springsecurity.successHandler.defaultTargetUrl = '/home/index'
+grails.plugin.springsecurity.useSwitchUserFilter = true
+grails.plugin.springsecurity.successHandler.defaultTargetUrl = '/home/index'
 
 // exclude unused plugins
 if (pluginsToExclude) {
@@ -328,3 +332,5 @@ environments {
     }
 }
 
+grails.plugin.console.enabled = true
+grails.plugin.console.baseUrl="/${appName}/console"

@@ -140,7 +140,7 @@ class CheckQualityEncodingJobUnitTests {
                         )
         assertNotNull(dataFile.save(flush: true))
 
-        testDirectory = tmpDir.newFolder("/otp-test")
+        testDirectory = tmpDir.newFolder("otp-test")
 
         Realm realm = DomainFactory.createRealmDataManagement(
                 name: project.realmName,
@@ -168,6 +168,7 @@ class CheckQualityEncodingJobUnitTests {
         file = null
     }
 
+    @Test
     void testOpenStream() {
         GZIPOutputStream stream = new GZIPOutputStream(new FileOutputStream(file))
         stream << "test"
@@ -179,6 +180,7 @@ class CheckQualityEncodingJobUnitTests {
         reader.close()
     }
 
+    @Test
     void testOpenStream_NoFile() {
         shouldFail(FileNotReadableException) {
             checkQualityEncodingJob.openStream(dataFile)

@@ -9,7 +9,7 @@ import de.dkfz.tbi.otp.notification.NotificationType
 import de.dkfz.tbi.otp.notification.Trigger
 import de.dkfz.tbi.otp.utils.DataTableCommand
 import grails.converters.JSON
-import grails.plugins.springsecurity.Secured
+import grails.plugin.springsecurity.annotation.Secured
 import grails.util.GrailsNameUtils
 
 /**

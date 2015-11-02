@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import static org.junit.Assert.*
 
-import grails.test.mixin.*
 import org.junit.*
 
 

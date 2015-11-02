@@ -4,7 +4,6 @@ import static org.junit.Assert.*
 
 import grails.test.mixin.*
 import grails.test.mixin.support.*
-import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
 import org.junit.*
 
 /**
@@ -14,13 +13,7 @@ import org.junit.*
 @TestFor(PbsOptionMergingService.class)
 class PbsOptionMergingServiceUnitTests {
 
-
-    void setUp() {
-    }
-
-    void tearDown() {
-    }
-
+    @Test
     void testJsonStringToMap() {
         PbsOptionMergingService pbsOptionMergingService = new PbsOptionMergingService()
         assertEquals([:], pbsOptionMergingService.jsonStringToMap("{}"))
@@ -46,6 +39,7 @@ class PbsOptionMergingServiceUnitTests {
         shouldFail(IllegalArgumentException.class, { pbsOptionMergingService.jsonStringToMap("{a}") } )
     }
 
+    @Test
     void testMapToPbsOptions() {
         PbsOptionMergingService pbsOptionMergingService = new PbsOptionMergingService()
         assertEquals("", pbsOptionMergingService.mapToPbsOptions([:]))
@@ -65,6 +59,7 @@ class PbsOptionMergingServiceUnitTests {
         shouldFail(RuntimeException.class, { pbsOptionMergingService.mapToPbsOptions(1) } )
     }
 
+    @Test
     void testMergeHelper() {
         PbsOptionMergingService pbsOptionMergingService = new PbsOptionMergingService()
         assertEquals([:], pbsOptionMergingService.mergeHelper([:], [:]))

@@ -3,8 +3,8 @@ package de.dkfz.tbi.otp.ngsdata
 import static org.junit.Assert.*
 import grails.test.ControllerUnitTestCase
 
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
-import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
+import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.acl.AclSid
 import org.junit.*
 import org.springframework.security.acls.domain.BasePermission
 
@@ -12,13 +12,15 @@ import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserRole
 
-class RunControllerTests extends ControllerUnitTestCase {
+class RunControllerTests {
     def springSecurityService
     def aclUtilService
 
+    RunController controller
+
     @Before
     void setUp() {
-        super.setUp()
+        controller = new RunController()
         createUserAndRoles()
     }
 
@@ -76,11 +78,13 @@ class RunControllerTests extends ControllerUnitTestCase {
       UserRole.create(operator, operatorRole, true)
   }
 
+    @Test
     void testDisplayRedirect() {
         controller.display()
-        assertEquals("show", controller.redirectArgs.action)
+        assertEquals("/run/show", controller.response.redirectedUrl)
     }
 
+    @Test
     void testShowRunNonExisting() {
         SpringSecurityUtils.doWithAuth("testuser") {
             controller.params.id = "0"
@@ -89,6 +93,7 @@ class RunControllerTests extends ControllerUnitTestCase {
         }
     }
 
+    @Test
     void testShowRunMissingId() {
         SpringSecurityUtils.doWithAuth("testuser") {
             controller.show()
@@ -96,6 +101,7 @@ class RunControllerTests extends ControllerUnitTestCase {
         }
     }
 
+    @Test
     void testShowRunIdNoLong() {
         SpringSecurityUtils.doWithAuth("testuser") {
             controller.params.id = "test"
@@ -105,6 +111,7 @@ class RunControllerTests extends ControllerUnitTestCase {
     }
 
     @Ignore
+    @Test
     void testShowRunMinimalData() {
         SeqPlatform seqPlatform = SeqPlatform.build()
         SeqCenter seqCenter = new SeqCenter(name: "test", dirName: "directory")
@@ -127,6 +134,7 @@ class RunControllerTests extends ControllerUnitTestCase {
     }
 
     @Ignore
+    @Test
     void testShowRunByName() {
         SeqPlatform seqPlatform = SeqPlatform.build()
         SeqCenter seqCenter = new SeqCenter(name: "test", dirName: "directory")
@@ -149,6 +157,7 @@ class RunControllerTests extends ControllerUnitTestCase {
     }
 
     @Ignore
+    @Test
     void testShowRunWithNextRun() {
         SeqPlatform seqPlatform = SeqPlatform.build()
         SeqCenter seqCenter = new SeqCenter(name: "test", dirName: "directory")
@@ -167,6 +176,7 @@ class RunControllerTests extends ControllerUnitTestCase {
         assertNull(model.previousRun)
     }
 
+    @Test
     void testShowRunWithPrevRun() {
         SeqPlatform seqPlatform = SeqPlatform.build()
         SeqCenter seqCenter = new SeqCenter(name: "test", dirName: "directory")
@@ -191,6 +201,7 @@ class RunControllerTests extends ControllerUnitTestCase {
         }
     }
 
+    @Test
     void testShowRunWithPrevNextRun() {
         SeqPlatform seqPlatform = SeqPlatform.build()
         SeqCenter seqCenter = new SeqCenter(name: "test", dirName: "directory")

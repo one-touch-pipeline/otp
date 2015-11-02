@@ -1,8 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8"%>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="layout" content="main" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="layout" content="main" />
+    <asset:javascript src="pages/metaDataFields/index/datatable.js"/>
 </head>
 
 <body>
@@ -74,7 +75,7 @@
             />
         </div>
     </div>
-    <r:script>
+    <asset:script>
         $(function() {
             $.otp.libraryPreparationKitTable.registerlistLibraryPreparationKit();
             $.otp.antibodyTargetTable.registerListAntibodyTarget();
@@ -82,6 +83,6 @@
             $.otp.platformTable.registerListPlatformTable();
             $.otp.SeqTypeTable.registerListSeqTypeTable();
         });
-    </r:script>
+    </asset:script>
 </body>
 </html>

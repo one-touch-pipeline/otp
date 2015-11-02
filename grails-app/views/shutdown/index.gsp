@@ -14,7 +14,7 @@
             <button id="planShutdown">Plan Shutdown</button>
         </p>
     </div>
-    <r:script>
+    <asset:script>
     $("#planShutdown").click(function () {
         $.getJSON("${g.createLink(action: 'planShutdown')}", {reason: $("#shutdownReason").val()}, function (data) {
             if (data.success === true) {
@@ -26,6 +26,6 @@
             }
         });
     });
-    </r:script>
+    </asset:script>
 </body>
 </html>

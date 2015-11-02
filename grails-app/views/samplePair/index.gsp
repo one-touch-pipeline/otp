@@ -1,9 +1,10 @@
 <%@ page contentType="text/html;charset=UTF-8"%>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="layout" content="main" />
-<title><g:message code="snv.processing.status" args="${[individual.mockPid]}"/></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="layout" content="main" />
+    <title><g:message code="snv.processing.status" args="${[individual.mockPid]}"/></title>
+    <asset:javascript src="pages/samplePair/index/dataTable.js"/>
 </head>
 <body>
     <div class="body">
@@ -61,10 +62,10 @@
         </div>
         <p></p>
     </div>
-    <r:script>
+    <asset:script>
         $(function() {
             $.otp.samplePair.register();
             });
-    </r:script>
+    </asset:script>
 </body>
 </html>

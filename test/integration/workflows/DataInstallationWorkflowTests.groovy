@@ -3,6 +3,8 @@ package workflows
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
 import org.joda.time.Duration
 import org.junit.Before
 import org.junit.Ignore
@@ -11,6 +13,7 @@ import org.junit.Test
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 
+@TestMixin(IntegrationTestMixin)
 class DataInstallationWorkflowTests extends WorkflowTestCase {
 
     LsdfFilesService lsdfFilesService
@@ -80,12 +83,13 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         fileType.signature = ".fastq"
         assertNotNull(fileType.save(flush: true))
 
-        bamFileType = FileType.build(
-            type: FileType.Type.ALIGNMENT,
-            subType: "bam",
-            vbpPath: "/bam/",
-            signature: ".bam",
+        bamFileType = new FileType(
+                type: FileType.Type.ALIGNMENT,
+                subType: "bam",
+                vbpPath: "/bam/",
+                signature: ".bam",
         )
+        assert bamFileType.save(flush: true)
 
         SampleType sampleType = new SampleType()
         sampleType.name = "someSampleType"
@@ -126,7 +130,8 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         softwareToolIdentifier.softwareTool = softwareTool
         assertNotNull(softwareToolIdentifier.save(flush: true))
 
-        seqPlatform = SeqPlatform.build()
+        seqPlatform = new SeqPlatform(name: 'seqPlatformName')
+        assert seqPlatform.save(flush: true)
 
         SeqCenter seqCenter = new SeqCenter()
         seqCenter.name = seqCenterName
@@ -173,7 +178,13 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
     }
 
     DataFile createBamDataFile(SeqTrack seqTrack, String bamFilename, String bamFilepath) {
-        DataFile dataFile = DataFile.build(
+        AlignmentParams alignmentParams = new AlignmentParams(pipeline: softwareTool)
+        assert alignmentParams.save(flush: true)
+
+        AlignmentLog alignmentLog = new AlignmentLog(seqTrack: seqTrack, alignmentParams: alignmentParams)
+        assert alignmentLog.save(flush: true)
+
+        DataFile dataFile = new DataFile(
             fileName: bamFilename,
             vbpFileName: bamFilename,
             run: run,
@@ -186,8 +197,9 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
             pathName: "",
             fileExists: true,
             fileSize: 100,
-            alignmentLog: AlignmentLog.build(seqTrack: seqTrack),
+            alignmentLog: alignmentLog,
         )
+        assert dataFile.save(flush: true)
         return dataFile
     }
 

@@ -56,6 +56,7 @@ class DataProcessingFilesServiceUnitTests {
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()
 
+    @Before
     void setUp() {
         realm = Realm.build()
 
@@ -110,7 +111,7 @@ class DataProcessingFilesServiceUnitTests {
 
     void createTestDirectory() {
         tmpDir.create()
-        dir = tmpDir.newFolder(realm.processingRootPath)
+        dir = tmpDir.newFolder(realm.processingRootPath.split('/'))
         if (dir.exists()) {
             dir.deleteDir()
         }
@@ -176,6 +177,7 @@ class DataProcessingFilesServiceUnitTests {
 
 
 
+    @Test
     void testDeleteProcessingDirectory_directoryAsFile() {
         project = Project.build()
         createTestDirectory()
@@ -184,6 +186,7 @@ class DataProcessingFilesServiceUnitTests {
         assert !dir.exists()
     }
 
+    @Test
     void testDeleteProcessingDirectory_directoryAsFile_projectIsNull() {
         createTestDirectory()
 
@@ -192,6 +195,7 @@ class DataProcessingFilesServiceUnitTests {
         }
     }
 
+    @Test
     void testDeleteProcessingDirectory_directoryAsFile_directoryIsNull() {
         project = Project.build()
 
@@ -200,6 +204,7 @@ class DataProcessingFilesServiceUnitTests {
         }
     }
 
+    @Test
     void testDeleteProcessingDirectory_directoryAsFile_directoryDoesNotExist() {
         project = Project.build()
         createTestDirectory()
@@ -210,6 +215,7 @@ class DataProcessingFilesServiceUnitTests {
         assert !dir.exists()
     }
 
+    @Test
     void testDeleteProcessingDirectory_directoryAsFile_directoryIsNotEmpty() {
         project = Project.build()
         createTestFile()
@@ -220,6 +226,7 @@ class DataProcessingFilesServiceUnitTests {
 
 
 
+    @Test
     void testDeleteProcessingDirectory_directoryAsString() {
         project = Project.build()
         createTestDirectory()
@@ -228,6 +235,7 @@ class DataProcessingFilesServiceUnitTests {
         assert !dir.exists()
     }
 
+    @Test
     void testDeleteProcessingDirectory_directoryAsString_projectIsNull() {
         createTestDirectory()
 
@@ -236,6 +244,7 @@ class DataProcessingFilesServiceUnitTests {
         }
     }
 
+    @Test
     void testDeleteProcessingDirectory_directoryAsString_directoryIsNull() {
         project = Project.build()
 
@@ -246,6 +255,7 @@ class DataProcessingFilesServiceUnitTests {
 
 
 
+    @Test
     void testDeleteProcessingFile() {
         project = Project.build()
         createTestFile()
@@ -254,6 +264,7 @@ class DataProcessingFilesServiceUnitTests {
         assert !file.exists()
     }
 
+    @Test
     void testDeleteProcessingFile_projectIsNull() {
         createTestFile()
 
@@ -263,6 +274,7 @@ class DataProcessingFilesServiceUnitTests {
         assert file.exists()
     }
 
+    @Test
     void testDeleteProcessingFile_fileIsNull() {
         project = Project.build()
 
@@ -271,6 +283,7 @@ class DataProcessingFilesServiceUnitTests {
         }
     }
 
+    @Test
     void testDeleteProcessingFile_fileDoesNotExist() {
         project = Project.build()
         createTestDirectory()
@@ -282,6 +295,7 @@ class DataProcessingFilesServiceUnitTests {
 
 
 
+    @Test
     void testDeleteProcessingFile_fileAsString() {
         project = Project.build()
         createTestFile()
@@ -290,6 +304,7 @@ class DataProcessingFilesServiceUnitTests {
         assert !file.exists()
     }
 
+    @Test
     void testDeleteProcessingFile_fileAsStringAndProjectIsNull() {
         createTestFile()
 
@@ -299,6 +314,7 @@ class DataProcessingFilesServiceUnitTests {
         assert file.exists()
     }
 
+    @Test
     void testDeleteProcessingFile_fileAsStringAndFileIsNull() {
         project = Project.build()
 
@@ -309,6 +325,7 @@ class DataProcessingFilesServiceUnitTests {
 
 
 
+    @Test
     void testDeleteProcessingFiles_TypeProject() {
         project = Project.build()
         createTestFile()
@@ -317,6 +334,7 @@ class DataProcessingFilesServiceUnitTests {
         assert !file.exists()
     }
 
+    @Test
     void testDeleteProcessingFiles_NoProject() {
         createTestFile()
 
@@ -326,6 +344,7 @@ class DataProcessingFilesServiceUnitTests {
         assert file.exists()
     }
 
+    @Test
     void testDeleteProcessingFiles_NoProcessingDirectory() {
         project = Project.build()
         createTestFile()
@@ -336,6 +355,7 @@ class DataProcessingFilesServiceUnitTests {
         assert file.exists()
     }
 
+    @Test
     void testDeleteProcessingFiles_FileNamesIsNull() {
         project = Project.build()
         createTestDirectory()
@@ -345,6 +365,7 @@ class DataProcessingFilesServiceUnitTests {
         }
     }
 
+    @Test
     void testDeleteProcessingFiles_NoFiles() {
         project = Project.build()
         createTestDirectory()
@@ -352,6 +373,7 @@ class DataProcessingFilesServiceUnitTests {
         assert 0 == dataProcessingFilesService.deleteProcessingFiles(project, dir, [])
     }
 
+    @Test
     void testDeleteProcessingFiles_MultipleFiles() {
         project = Project.build()
         createTestFile()
@@ -370,6 +392,7 @@ class DataProcessingFilesServiceUnitTests {
 
 
 
+    @Test
     void testDeleteProcessingFilesAndDirectory_TypeProject() {
         project = Project.build()
         createTestFile()
@@ -379,6 +402,7 @@ class DataProcessingFilesServiceUnitTests {
         assert !dir.exists()
     }
 
+    @Test
     void testDeleteProcessingFilesAndDirectory_NoProject() {
         createTestFile()
 
@@ -388,6 +412,7 @@ class DataProcessingFilesServiceUnitTests {
         assert file.exists()
     }
 
+    @Test
     void testDeleteProcessingFilesAndDirectory_NoProcessingDirectory() {
         project = Project.build()
         createTestFile()
@@ -398,6 +423,7 @@ class DataProcessingFilesServiceUnitTests {
         assert file.exists()
     }
 
+    @Test
     void testDeleteProcessingFilesAndDirectory_FileNamesIsNull() {
         project = Project.build()
 
@@ -406,6 +432,7 @@ class DataProcessingFilesServiceUnitTests {
         }
     }
 
+    @Test
     void testDeleteProcessingFilesAndDirectory_NoFiles() {
         project = Project.build()
         createTestDirectory()
@@ -414,6 +441,7 @@ class DataProcessingFilesServiceUnitTests {
         assert !dir.exists()
     }
 
+    @Test
     void testDeleteProcessingFilesAndDirectory_MultipleFiles() {
         project = Project.build()
         createTestFile()
@@ -432,6 +460,7 @@ class DataProcessingFilesServiceUnitTests {
     }
 
 
+    @Test
     void testDeleteProcessingFiles_TypeFile() {
         prepareDeleteProcessingFiles()
 
@@ -441,6 +470,7 @@ class DataProcessingFilesServiceUnitTests {
         assert !file.exists()
     }
 
+    @Test
     void testDeleteProcessingFiles_withAdditionalFiles() {
         final int ADDITINAL_FILE_COUNT = 5
         File[] files = prepareDeleteProcessingFiles(ADDITINAL_FILE_COUNT)
@@ -454,6 +484,7 @@ class DataProcessingFilesServiceUnitTests {
         }
     }
 
+    @Test
     void testDeleteProcessingFiles_dbFileIsNull() {
         prepareDeleteProcessingFiles()
 
@@ -465,6 +496,7 @@ class DataProcessingFilesServiceUnitTests {
         assert file.exists()
     }
 
+    @Test
     void testDeleteProcessingFiles_fsFileIsNull() {
         prepareDeleteProcessingFiles()
 
@@ -476,6 +508,7 @@ class DataProcessingFilesServiceUnitTests {
         assert file.exists()
     }
 
+    @Test
     void testDeleteProcessingFiles_additionalFilesIsNull() {
         prepareDeleteProcessingFiles()
 
@@ -487,6 +520,7 @@ class DataProcessingFilesServiceUnitTests {
         assert file.exists()
     }
 
+    @Test
     void testDeleteProcessingFiles_checkConsistencyWithDatabaseForDeletionIsFalse() {
         createTestFile()
         processedBamFile = ProcessedBamFile.build([
@@ -502,12 +536,14 @@ class DataProcessingFilesServiceUnitTests {
 
 
 
+    @Test
     void testCheckConsistencyWithFinalDestinationForDeletion() {
         createCheckConsistencyData()
 
         assert dataProcessingFilesService.checkConsistencyWithFinalDestinationForDeletion(processingDir, finalDir, [TEST_FILE_NAME])
     }
 
+    @Test
     void testCheckConsistencyWithFinalDestinationForDeletionMultipleFiles() {
         createCheckConsistencyData()
         List<String> files = [TEST_FILE_NAME]
@@ -519,6 +555,7 @@ class DataProcessingFilesServiceUnitTests {
         assert dataProcessingFilesService.checkConsistencyWithFinalDestinationForDeletion(processingDir, finalDir, files)
     }
 
+    @Test
     void testCheckConsistencyWithFinalDestinationForDeletion_NoProcessingDirectory() {
         createCheckConsistencyData()
 
@@ -527,6 +564,7 @@ class DataProcessingFilesServiceUnitTests {
         }
     }
 
+    @Test
     void testCheckConsistencyWithFinalDestinationForDeletion_NoFinalDestinationDirectory() {
         createCheckConsistencyData()
 
@@ -535,6 +573,7 @@ class DataProcessingFilesServiceUnitTests {
         }
     }
 
+    @Test
     void testCheckConsistencyWithFinalDestinationForDeletion_NoFileNames() {
         createCheckConsistencyData()
 
@@ -543,6 +582,7 @@ class DataProcessingFilesServiceUnitTests {
         }
     }
 
+    @Test
     void testCheckConsistencyWithFinalDestinationForDeletion_FileInProcessingDoesNotExist() {
         createCheckConsistencyData()
         processingFile.delete()
@@ -550,6 +590,7 @@ class DataProcessingFilesServiceUnitTests {
         assert dataProcessingFilesService.checkConsistencyWithFinalDestinationForDeletion(processingDir, finalDir, [TEST_FILE_NAME])
     }
 
+    @Test
     void testCheckConsistencyWithFinalDestinationForDeletion_FileInDestinationDoesNotExist() {
         createCheckConsistencyData()
         finalFile.delete()
@@ -560,6 +601,7 @@ class DataProcessingFilesServiceUnitTests {
         assert !dataProcessingFilesService.checkConsistencyWithFinalDestinationForDeletion(processingDir, finalDir, [TEST_FILE_NAME])
     }
 
+    @Test
     void testCheckConsistencyWithFinalDestinationForDeletion_FileInDestinationHaveDifferentSize() {
         createCheckConsistencyData()
         processingFile << "More content"
@@ -572,12 +614,14 @@ class DataProcessingFilesServiceUnitTests {
 
 
 
+    @Test
     void testCheckConsistencyWithDatabaseForDeletion() {
         prepareCheckConsistencyWithDatabaseForDeletion()
 
         assert dataProcessingFilesService.checkConsistencyWithDatabaseForDeletion(processedBamFile, file)
     }
 
+    @Test
     void testCheckConsistencyWithDatabaseForDeletion_NoDBFile() {
         prepareCheckConsistencyWithDatabaseForDeletion()
 
@@ -586,6 +630,7 @@ class DataProcessingFilesServiceUnitTests {
         }
     }
 
+    @Test
     void testCheckConsistencyWithDatabaseForDeletion_NoFsFile() {
         prepareCheckConsistencyWithDatabaseForDeletion()
 
@@ -594,6 +639,7 @@ class DataProcessingFilesServiceUnitTests {
         }
     }
 
+    @Test
     void testCheckConsistencyWithDatabaseForDeletion_CheckLogForFileExistIsFalse() {
         prepareCheckConsistencyWithDatabaseForDeletion()
         processedBamFile.fileExists = false
@@ -602,6 +648,7 @@ class DataProcessingFilesServiceUnitTests {
         assert dataProcessingFilesService.checkConsistencyWithDatabaseForDeletion(processedBamFile, file)
     }
 
+    @Test
     void testCheckConsistencyWithDatabaseForDeletion_CheckLogForDeletionDateIsSet() {
         prepareCheckConsistencyWithDatabaseForDeletion()
         processedBamFile.deletionDate = new Date()
@@ -610,6 +657,7 @@ class DataProcessingFilesServiceUnitTests {
         assert dataProcessingFilesService.checkConsistencyWithDatabaseForDeletion(processedBamFile, file)
     }
 
+    @Test
     void testCheckConsistencyWithDatabaseForDeletion_CheckLogForFileDoesNotExist() {
         prepareCheckConsistencyWithDatabaseForDeletion()
         assert file.delete()
@@ -618,6 +666,7 @@ class DataProcessingFilesServiceUnitTests {
         assert !dataProcessingFilesService.checkConsistencyWithDatabaseForDeletion(processedBamFile, file)
     }
 
+    @Test
     void testCheckConsistencyWithDatabaseForDeletion_FileSizeIsInconsistent() {
         prepareCheckConsistencyWithDatabaseForDeletion()
         processedBamFile.fileSize = -1
@@ -626,6 +675,7 @@ class DataProcessingFilesServiceUnitTests {
         assert !dataProcessingFilesService.checkConsistencyWithDatabaseForDeletion(processedBamFile, file)
     }
 
+    @Test
     void testCheckConsistencyWithDatabaseForDeletion_DateIsInconsistent() {
         prepareCheckConsistencyWithDatabaseForDeletion()
         processedBamFile.dateFromFileSystem = new Date()
@@ -636,6 +686,7 @@ class DataProcessingFilesServiceUnitTests {
 
 
 
+    @Test
     void testDeleteOldProcessingFiles() {
         prepareDeleteOldProcessingFiles()
 
@@ -646,6 +697,7 @@ class DataProcessingFilesServiceUnitTests {
         assert freedBytes == dataProcessingFilesService.deleteOldProcessingFiles(passService, PASS_TYPE_NAME, createdBefore, TIME, passClosure)
     }
 
+    @Test
     void testDeleteOldProcessingFiles_NoPassService() {
         prepareCheckConsistencyWithDatabaseForDeletion()
 
@@ -654,6 +706,7 @@ class DataProcessingFilesServiceUnitTests {
         }
     }
 
+    @Test
     void testDeleteOldProcessingFiles_NoPassTypeName() {
         prepareCheckConsistencyWithDatabaseForDeletion()
 
@@ -662,6 +715,7 @@ class DataProcessingFilesServiceUnitTests {
         }
     }
 
+    @Test
     void testDeleteOldProcessingFiles_NoCreatedBefore() {
         prepareCheckConsistencyWithDatabaseForDeletion()
 
@@ -670,6 +724,7 @@ class DataProcessingFilesServiceUnitTests {
         }
     }
 
+    @Test
     void testDeleteOldProcessingFiles_NoPassFunc() {
         prepareCheckConsistencyWithDatabaseForDeletion()
 
@@ -678,6 +733,7 @@ class DataProcessingFilesServiceUnitTests {
         }
     }
 
+    @Test
     void testDeleteOldProcessingFiles_NoTimeLeft() {
         prepareDeleteOldProcessingFiles()
         long time = -10 //negative, since 0 has not worked.
@@ -690,6 +746,7 @@ class DataProcessingFilesServiceUnitTests {
         assert 0 == dataProcessingFilesService.deleteOldProcessingFiles(passService, PASS_TYPE_NAME, createdBefore, time, passClosure)
     }
 
+    @Test
     void testDeleteOldProcessingFiles_Date() {
         prepareDeleteOldProcessingFiles(false)
 

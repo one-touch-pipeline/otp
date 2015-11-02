@@ -1,9 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.*
-
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
-import org.grails.plugins.springsecurity.service.acl.AclUtilService
+import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.acl.AclUtilService
+import org.junit.*
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.domain.BasePermission
 
@@ -18,12 +17,14 @@ class SeqTypeServiceTest extends AbstractIntegrationTest {
 
 
 
+    @Before
     void setUp() {
         createUserAndRoles()
     }
 
 
 
+    @Test
     void testAlignableSeqTypesByProject_admin_none() {
         DomainFactory.createAlignableSeqTypes()
         SeqTrack seqTrack = SeqTrack.build()
@@ -35,6 +36,7 @@ class SeqTypeServiceTest extends AbstractIntegrationTest {
     }
 
 
+    @Test
     void testAlignableSeqTypesByProject_operator_none() {
         DomainFactory.createAlignableSeqTypes()
         SeqTrack seqTrack = SeqTrack.build()
@@ -46,6 +48,7 @@ class SeqTypeServiceTest extends AbstractIntegrationTest {
     }
 
 
+    @Test
     void testAlignableSeqTypesByProject_normalUserWithAccess_none() {
         DomainFactory.createAlignableSeqTypes()
         SeqTrack seqTrack = SeqTrack.build()
@@ -60,6 +63,7 @@ class SeqTypeServiceTest extends AbstractIntegrationTest {
     }
 
 
+    @Test
     void testAlignableSeqTypesByProject_normalUserWithoutAccess_none() {
         DomainFactory.createAlignableSeqTypes()
         SeqTrack seqTrack = SeqTrack.build()
@@ -72,6 +76,7 @@ class SeqTypeServiceTest extends AbstractIntegrationTest {
     }
 
 
+    @Test
     void testAlignableSeqTypesByProject_operator_one() {
         List<SeqType> alignableSeqTypes = DomainFactory.createAlignableSeqTypes()
         SeqTrack seqTrack = SeqTrack.build()
@@ -86,6 +91,7 @@ class SeqTypeServiceTest extends AbstractIntegrationTest {
     }
 
 
+    @Test
     void testAlignableSeqTypesByProject_operator_two() {
         List<SeqType> alignableSeqTypes = DomainFactory.createAlignableSeqTypes()
         SeqTrack seqTrack = SeqTrack.build()

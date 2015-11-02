@@ -15,6 +15,7 @@ class ProcessingThresholdsUnitTests {
 
     Integer numberOfLanes = 3
 
+    @Test
     void testSaveNoProject() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
                         seqType: new SeqType(),
@@ -28,6 +29,7 @@ class ProcessingThresholdsUnitTests {
         assertTrue(processingThresholds.validate())
     }
 
+    @Test
     void testSaveNoSeqType() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
                         project: TestData.createProject(),
@@ -42,6 +44,7 @@ class ProcessingThresholdsUnitTests {
 
     }
 
+    @Test
     void testSaveNoSampleType() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
                         seqType: new SeqType(),
@@ -55,6 +58,7 @@ class ProcessingThresholdsUnitTests {
         assertTrue(processingThresholds.validate())
     }
 
+    @Test
     void testSaveNoCoverageAndNumberOfLanes() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
                         project: TestData.createProject(),
@@ -68,6 +72,7 @@ class ProcessingThresholdsUnitTests {
         assertTrue(processingThresholds.validate())
     }
 
+    @Test
     void testSaveNoCoverage() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
                         project: TestData.createProject(),
@@ -79,6 +84,7 @@ class ProcessingThresholdsUnitTests {
     }
 
 
+    @Test
     void testSaveCoverageBelowZero() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
                         project: TestData.createProject(),
@@ -89,6 +95,7 @@ class ProcessingThresholdsUnitTests {
         assertFalse(processingThresholds.validate())
     }
 
+    @Test
     void testSaveNoNumberOfLanes() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
                         project: TestData.createProject(),
@@ -99,6 +106,7 @@ class ProcessingThresholdsUnitTests {
         assertTrue(processingThresholds.validate())
     }
 
+    @Test
     void testSaveNumberOfLanesBelowZero() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
                         project: TestData.createProject(),
@@ -109,6 +117,7 @@ class ProcessingThresholdsUnitTests {
         assertFalse(processingThresholds.validate())
     }
 
+    @Test
     void testSaveAllCorrect() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
                         project: TestData.createProject(),

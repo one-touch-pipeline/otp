@@ -29,4 +29,7 @@ class TestConstants {
      */
     public static final String TEST_MD5SUM = "123456789012345678901234567890AB"
 
+    static final String ARBITRARY_CLUSTER_JOB_ID = '5678'
+
+    static final String ARBITRARY_MESSAGE = 'The job hit its toe on a comma-shaped stone.'
 }

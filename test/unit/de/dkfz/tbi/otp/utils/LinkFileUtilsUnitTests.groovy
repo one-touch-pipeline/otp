@@ -29,6 +29,9 @@ class LinkFileUtilsUnitTests {
     void setUp() {
         tmpDir.create()
         testDirectory = tmpDir.newFolder()
+        if(!testDirectory.exists()) {
+            assert testDirectory.mkdirs()
+        }
 
         realm = Realm.build()
 

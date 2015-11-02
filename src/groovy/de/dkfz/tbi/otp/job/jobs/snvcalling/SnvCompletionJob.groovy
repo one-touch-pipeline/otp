@@ -57,7 +57,7 @@ class SnvCompletionJob extends AbstractEndStateAwareJobImpl {
         succeed()
     }
 
-    private void deleteStagingDirectory(SnvCallingInstance instance) {
+    protected void deleteStagingDirectory(SnvCallingInstance instance) {
         File stagingPath = instance.snvInstancePath.absoluteStagingPath
         File parentPath = stagingPath.parentFile
 

@@ -4,8 +4,10 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="jobstats.general.title"/></title>
-    <r:require module="graph"/>
-    <r:require module="multiprogressbar"/>
+    <asset:javascript src="modules/graph"/>
+    <asset:javascript src="modules/multiprogressbar"/>
+    <asset:stylesheet src="modules/multiprogressbar"/>
+    <asset:javascript src="pages/clusterJobGeneral/index/clusterJobGeneral.js"/>
 </head>
 <body>
     <div class="body">
@@ -92,10 +94,10 @@
            <canvas id="generalGraphMemory" class="lineChart" width=1000px height=300px></canvas>
         </div>
     </div>
-    <r:script>
+    <asset:script>
         $(function() {
             $.otp.clusterJobGeneral.register();
         });
-    </r:script>
+    </asset:script>
 </body>
 </html>

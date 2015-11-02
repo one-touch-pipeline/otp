@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugins.springsecurity.Secured
+import grails.plugin.springsecurity.annotation.Secured
 
 class ResultsUploadCommand {
     String identifier

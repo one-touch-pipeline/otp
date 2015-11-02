@@ -196,7 +196,7 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
      * @return List of Strings containing the output of the triggered remote job
      */
 
-    private List<String> executeRemoteJob(Realm realm, String command = null, File script = null) {
+    protected List<String> executeRemoteJob(Realm realm, String command = null, File script = null) {
         if (!command && !script) {
             throw new ProcessingException("Neither a command nor a script specified to be run remotely.")
         }
@@ -220,7 +220,7 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
      * @param options The options To make the command more specific
      * @return List of Strings containing the output of the executed job
      */
-    private List<String> querySsh(String host, int port, int timeout, String username, String password, String command, File script, String options) {
+    protected List<String> querySsh(String host, int port, int timeout, String username, String password, String command, File script, String options) {
         if (!password) {
             throw new ProcessingException("No password for remote connection specified.")
         }

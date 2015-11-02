@@ -7,7 +7,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 
 // it looks like domain.findWhere() is not supported by DomainClassUnitTestMixin
 // => make the test as integration
-class ProcessingOptionServiceTests extends GroovyTestCase {
+class ProcessingOptionServiceTests {
 
     final String NAME = "test"
     final String VALUE = "testValue"
@@ -23,12 +23,14 @@ class ProcessingOptionServiceTests extends GroovyTestCase {
         assertNotNull(option.save(flush: true))
     }
 
+    @Test
     void testFindOptionAssureSuccessed() {
         createProcessingOption()
         String result = processingOptionService.findOptionAssure(NAME, null, null)
         assertEquals(VALUE, result)
     }
 
+    @Test
     void testFindOptionAssureNullName() {
         createProcessingOption()
         shouldFail(IllegalArgumentException) {
@@ -36,6 +38,7 @@ class ProcessingOptionServiceTests extends GroovyTestCase {
         }
     }
 
+    @Test
     void testFindOptionAssureNotFound() {
         createProcessingOption()
         shouldFail(ProcessingException) {

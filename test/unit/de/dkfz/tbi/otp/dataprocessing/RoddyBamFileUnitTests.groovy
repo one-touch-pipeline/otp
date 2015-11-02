@@ -1,19 +1,18 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static de.dkfz.tbi.otp.dataprocessing.RoddyBamFile.*
-
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateJobStateLogFileHelper
+import grails.buildtestdata.mixin.Build
 import org.junit.After
 import org.junit.Before
-import grails.buildtestdata.mixin.Build
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
 import static de.dkfz.tbi.TestCase.shouldFail
+import static de.dkfz.tbi.otp.dataprocessing.RoddyBamFile.RODDY_EXECUTION_STORE_DIR
+import static de.dkfz.tbi.otp.dataprocessing.RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME
 
 @Build([RoddyBamFile, SeqPlatform])
 class RoddyBamFileUnitTests {
@@ -82,13 +81,13 @@ class RoddyBamFileUnitTests {
 
     @Test
     void testGetWorkExecutionStoreDirectory_AllFine() {
-        assert "${TEST_DIR}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}" ==
+        assert "${TEST_DIR}/${roddyBamFile.workDirectoryName}/${RODDY_EXECUTION_STORE_DIR}" ==
                 roddyBamFile.workExecutionStoreDirectory.path
     }
 
     @Test
     void testGetFinalRoddyExecutionStoreDirectory_AllFine() {
-        assert "${TEST_DIR}/${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}" ==
+        assert "${TEST_DIR}/${RODDY_EXECUTION_STORE_DIR}" ==
                 roddyBamFile.finalExecutionStoreDirectory.path
     }
 

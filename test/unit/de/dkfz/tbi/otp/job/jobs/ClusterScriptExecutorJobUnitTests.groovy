@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.Realm
 import grails.test.mixin.Mock
+import org.junit.Test
 
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
@@ -17,36 +18,42 @@ class ClusterScriptExecutorJobUnitTests {
     final static String ARBITRARY_JOB_ID = '1234'
     final static String ARBITRARY_DUMMY_SCRIPT = '#some script'
 
+    @Test
     void test_maybeSubmit_WhenScriptIsNull_ShouldFail() {
         ClusterScriptExecutorJob clusterScriptExecutorJob = createClusterScriptExecutorJobWithRealmIdAndScript(ARBITRARY_REALM_ID, null)
 
         shouldFail AssertionError, { clusterScriptExecutorJob.maybeSubmit() }
     }
 
+    @Test
     void test_maybeSubmit_WhenOnlyScriptIsEmpty_ShouldFail() {
         ClusterScriptExecutorJob clusterScriptExecutorJob = createClusterScriptExecutorJobWithRealmIdAndScript(ARBITRARY_REALM_ID, '')
 
         shouldFail RuntimeException, { clusterScriptExecutorJob.maybeSubmit() }
     }
 
+    @Test
     void test_maybeSubmit_WhenScriptAndRealmAreEmpty_ShouldSucceed() {
         ClusterScriptExecutorJob clusterScriptExecutorJob = createClusterScriptExecutorJobWithRealmIdAndScript('', '')
 
         assert clusterScriptExecutorJob.maybeSubmit() == AbstractMultiJob.NextAction.SUCCEED
     }
 
+    @Test
     void test_maybeSubmit_WhenOnlyRealmIsEmpty_ShouldFail() {
         ClusterScriptExecutorJob clusterScriptExecutorJob = createClusterScriptExecutorJobWithRealmIdAndScript('', ARBITRARY_DUMMY_SCRIPT)
 
         shouldFail RuntimeException, { clusterScriptExecutorJob.maybeSubmit() }
     }
 
+    @Test
     void test_maybeSubmit_WhenRealmIsNull_ShouldFail() {
         ClusterScriptExecutorJob clusterScriptExecutorJob = createClusterScriptExecutorJobWithRealmIdAndScript(null, ARBITRARY_DUMMY_SCRIPT)
 
         shouldFail AssertionError, { clusterScriptExecutorJob.maybeSubmit() }
     }
 
+    @Test
     void test_maybeSubmit_WhenAllOK_ShouldReturnWaitForClusterJobs() {
         ClusterScriptExecutorJob clusterScriptExecutorJob = createClusterScriptExecutorJobWithRealmIdAndScript(ARBITRARY_REALM_ID, ARBITRARY_DUMMY_SCRIPT)
         def testDir = TestCase.createEmptyTestDirectory()

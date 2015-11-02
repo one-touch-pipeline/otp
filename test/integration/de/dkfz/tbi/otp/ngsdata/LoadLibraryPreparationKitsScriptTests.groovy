@@ -1,10 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import org.junit.Test
+
 import static org.junit.Assert.*
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
 
 class LoadLibraryPreparationKitsScriptTests extends GroovyScriptAwareTestCase {
 
+    @Test
     void testScript() {
         runScript("scripts/LibraryPreparationKit/LoadLibraryPreparationKits.groovy")
         // find the first in the list

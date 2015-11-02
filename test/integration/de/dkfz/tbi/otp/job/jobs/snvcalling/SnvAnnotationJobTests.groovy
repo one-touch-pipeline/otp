@@ -21,7 +21,7 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExternalScript
 
-class SnvAnnotationJobTests extends GroovyTestCase {
+class SnvAnnotationJobTests {
 
     @Autowired
     ApplicationContext applicationContext

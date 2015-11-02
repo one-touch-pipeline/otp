@@ -7,7 +7,8 @@ import org.junit.*
 @TestMixin(GrailsUnitTestMixin)
 class FileNotReadableExceptionUnitTests {
 
-    public void testFileNotReadableExceptionString() {
+    @Test
+    void testFileNotReadableExceptionString() {
         FileNotReadableException e = new FileNotReadableException("tmp")
         assertEquals("can not read file: tmp", e.message)
     }
@@ -18,7 +19,8 @@ class FileNotReadableExceptionUnitTests {
         assertEquals("can not read file: null", e.message)
     }
 
-    public void testFileNotReadableExceptionFile() {
+    @Test
+    void testFileNotReadableExceptionFile() {
         FileNotReadableException e = new FileNotReadableException(new File("tmp"))
         assertEquals("can not read file: tmp", e.message)
     }

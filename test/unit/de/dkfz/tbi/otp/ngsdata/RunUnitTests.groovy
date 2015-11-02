@@ -14,6 +14,7 @@ import org.junit.*
 ])
 class RunUnitTests {
 
+    @Test
     void testGetSeqType() {
 
         Run run = Run.build()
@@ -41,6 +42,7 @@ class RunUnitTests {
         assertNull(run.getSeqType())
     }
 
+    @Test
     void testGetIndividual() {
 
         Run run = Run.build()

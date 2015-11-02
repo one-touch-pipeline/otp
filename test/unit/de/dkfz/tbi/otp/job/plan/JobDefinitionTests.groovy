@@ -14,6 +14,7 @@ import static org.junit.Assert.*
 @TestFor(JobDefinition)
 class JobDefinitionTests {
 
+    @Test
     void testConstraints() {
         JobDefinition jobDefinition = new JobDefinition()
         assertFalse(jobDefinition.validate())

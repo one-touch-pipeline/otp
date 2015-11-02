@@ -1,4 +1,5 @@
 import grails.util.Environment
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
 
 // Place your Spring DSL code here
 beans = {
@@ -30,5 +31,18 @@ beans = {
             username = grailsApplication.config.otp.jabber.username
             password = grailsApplication.config.otp.jabber.password
         }
+    }
+
+    aclCacheManager(org.springframework.cache.ehcache.EhCacheManagerFactoryBean) {
+        shared = true
+    }
+
+    // workaround for @PreFilter annotation
+    // https://jira.grails.org/browse/GPSPRINGSECURITYACL-37
+    expressionHandler(DefaultMethodSecurityExpressionHandler) {
+        parameterNameDiscoverer = ref('parameterNameDiscoverer')
+        permissionEvaluator = ref('permissionEvaluator')
+        roleHierarchy = ref('roleHierarchy')
+        permissionCacheOptimizer = null
     }
 }

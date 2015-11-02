@@ -13,6 +13,7 @@ class MergingSetUnitTests {
 
     MergingWorkPackage workPackage = null
 
+    @Before
     void setUp() {
         Project project = TestData.createProject(
             name: "project",
@@ -43,10 +44,12 @@ class MergingSetUnitTests {
         this.workPackage.save(flush: true)
     }
 
+    @After
     void tearDown() {
         this.workPackage = null
     }
 
+    @Test
     void testSave() {
         MergingSet mergingSet = new MergingSet(
             status: MergingSet.State.DECLARED,
@@ -55,6 +58,7 @@ class MergingSetUnitTests {
         mergingSet.save(flush: true)
     }
 
+    @Test
     void testContraints() {
         // status in not null
         MergingSet mergingSet = new MergingSet(
@@ -68,6 +72,7 @@ class MergingSetUnitTests {
         Assert.assertFalse(mergingSet.validate())
     }
 
+    @Test
     void testIsLatestSet() {
         MergingSet mergingSet = new MergingSet(
             identifier: 1,

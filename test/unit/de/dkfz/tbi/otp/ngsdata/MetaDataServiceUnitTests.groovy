@@ -33,7 +33,6 @@ class MetaDataServiceUnitTests {
     @Before
     public void setUp() throws Exception {
         metaDataService = new MetaDataService()
-        metaDataService.fileTypeService = new FileTypeService()
     }
 
     @After
@@ -42,11 +41,13 @@ class MetaDataServiceUnitTests {
     }
 
 
+    @Test
     void testAssertAllNecessaryKeysExist() {
         metaDataService.assertAllNecessaryKeysExist(createAllMetadataKeys())
     }
 
 
+    @Test
     void testAssertAllNecessaryKeysExistWithMissingKey() {
         [
             0..MetaDataColumn.values().length
@@ -58,6 +59,7 @@ class MetaDataServiceUnitTests {
     }
 
 
+    @Test
     void testAssertAllNecessaryKeysExistWithOptionalKey() {
         List<MetaDataKey> keys = createAllMetadataKeys()
         keys.add(new MetaDataKey([name: "optional"]))
@@ -65,12 +67,14 @@ class MetaDataServiceUnitTests {
     }
 
 
+    @Test
     void testGetKeysFromTokens() {
         assertEquals(MetaDataColumn.values().length, metaDataService.getKeysFromTokens(MetaDataColumn.values()*.name()).size())
     }
 
 
     @Ignore
+    @Test
     void testGetKeysFromTokensWithMissingKey() {
         shouldFail(ProcessingException.class) {
             metaDataService.getKeysFromTokens(MetaDataColumn.values()*.name().subList(0, 10))
@@ -78,6 +82,7 @@ class MetaDataServiceUnitTests {
     }
 
 
+    @Test
     void testGetKeysFromTokensWithOptionalKey() {
         List<String> keys = MetaDataColumn.values()*.name()
         keys.add("optional")

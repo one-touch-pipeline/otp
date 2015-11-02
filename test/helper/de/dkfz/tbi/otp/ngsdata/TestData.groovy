@@ -71,7 +71,7 @@ class TestData {
     @Deprecated
     void createObjects() {
         tmpDir.create()
-        File testDir = tmpDir.newFolder("/otp-test/reference_genomes/referenceGenome")
+        File testDir = tmpDir.newFolder("otp-test", "reference_genomes", "referenceGenome")
 
         referenceGenomePath = testDir.absolutePath
 
@@ -125,7 +125,14 @@ class TestData {
         seqCenter.dirName = "core"
         assertNotNull(seqCenter.save(flush: true))
 
-        seqPlatform = SeqPlatform.build()
+        SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup(name: "group")
+        assert seqPlatformGroup.save(flush: true)
+
+        seqPlatform = new SeqPlatform(
+                name: 'seqPlatform',
+                seqPlatformGroup: seqPlatformGroup,
+        )
+        assert seqPlatform.save(flush: true)
 
         run = createRun("testname1")
         assertNotNull(run.save(flush: true))
@@ -443,6 +450,7 @@ class TestData {
                 return workPackage
             }
         }
+
         final MergingWorkPackage mergingWorkPackage = MergingWorkPackage.findOrSaveWhere(
                 sample: seqTrack.sample,
                 seqType: seqTrack.seqType,

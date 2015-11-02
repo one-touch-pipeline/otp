@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.ProcessHelperService
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.junit.After
 import org.junit.Before
@@ -121,6 +122,10 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         //OtherUnixUser user has very limited permissions, it must be checked in the tests
         //that roddy has enough permissions to work and does not try to damage other files
         setPermissionsRecursive(baseDirectory, TEST_DATA_MODE_DIR, TEST_DATA_MODE_FILE)
+
+        SpringSecurityUtils.doWithAuth("operator") {
+            processingOptionService.createOrUpdate("basesPerBytesFastQ", null, null, "2.339", "Bases Per Byte for FastQ file used to calculate count of bases before FastQC-WG is finished")
+        }
     }
 
     @After

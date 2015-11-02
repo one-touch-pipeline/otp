@@ -28,7 +28,7 @@ import org.junit.rules.TemporaryFolder
 
 /**
  */
-class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
+class MovePanCanFilesToFinalDestinationJobTests {
 
     final static int COUNT_FILES = 2
     final static int COUNT_DIRS = 3
@@ -66,12 +66,10 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
             assert cmd ==~ "cd /tmp && sudo -u OtherUnixUser ${temporaryFolder.getRoot()}/.*/correctPathPermissionsOtherUnixUserRemoteWrapper.sh ${temporaryFolder.getRoot()}/.*/merged-alignment"
             return new ProcessHelperService.ProcessOutput('', '', 0)
         }
-        LogThreadLocal.setThreadLog(new SimpleLog())
     }
 
     @After
     void tearDown() {
-        LogThreadLocal.removeThreadLog()
         TestCase.removeMetaClass(MovePanCanFilesToFinalDestinationJob, movePanCanFilesToFinalDestinationJob)
         TestCase.removeMetaClass(ConfigService, movePanCanFilesToFinalDestinationJob.configService)
         TestCase.removeMetaClass(ExecutionService, movePanCanFilesToFinalDestinationJob.executionService)
@@ -302,6 +300,7 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
     void testMoveResultFiles_InputRealmIsNull_ShouldFail() {
         roddyBamFile.workDirectoryName = null
         roddyBamFile.save(flush: true, failOnError: true)
+        realm.delete()
         shouldFail (AssertionError) {
             movePanCanFilesToFinalDestinationJob.moveResultFiles(roddyBamFile, null)
         }
@@ -395,6 +394,7 @@ class MovePanCanFilesToFinalDestinationJobTests extends GroovyTestCase {
     void testDeleteTemporaryDirectory_InputRealmIsNull_ShouldFail() {
         roddyBamFile.workDirectoryName = null
         roddyBamFile.save(flush: true, failOnError: true)
+        realm.delete()
         shouldFail (AssertionError) {
             movePanCanFilesToFinalDestinationJob.deleteTemporaryDirectory(roddyBamFile, null)
         }

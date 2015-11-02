@@ -4,7 +4,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
         <title><g:message code="softwareTool.list.title"/></title>
-        <r:require module="editorSwitch"/>
+        <asset:javascript src="modules/editorSwitch"/>
     </head>
 <body>
     <div class="body_grow">
@@ -54,9 +54,9 @@
         </div>
     </div>
 </body>
-<r:script>
+<asset:script type="text/javascript">
     $(function() {
         $.otp.growBodyInit(240);
     });
-</r:script>
+</asset:script>
 </html>

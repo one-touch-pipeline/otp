@@ -146,26 +146,26 @@ class SwapHelperService {
             List<MergingPass> mergingPasses = MergingPass.findAllByMergingSetInList(mergingSets).unique()
             List<ProcessedMergedBamFile> processedMergedBamFiles = ProcessedMergedBamFile.findAllByMergingPassInList(mergingPasses)
 
-            mergingSetAssignments*.delete()
+            mergingSetAssignments*.delete(flush: true)
 
             processedMergedBamFiles.each { ProcessedMergedBamFile processedMergedBamFile ->
                 deleteQualityAssessmentInfoForAbstractBamFile(processedMergedBamFile)
-                MergingSetAssignment.findAllByBamFile(processedMergedBamFile)*.delete()
+                MergingSetAssignment.findAllByBamFile(processedMergedBamFile)*.delete(flush: true)
                 dirsToDelete << snvDeletionService.deleteForAbstractMergedBamFile(processedMergedBamFile)
-                processedMergedBamFile.delete()
+                processedMergedBamFile.delete(flush: true)
             }
 
-            mergingPasses*.delete()
+            mergingPasses*.delete(flush: true)
 
             mergingSets.each { MergingSet mergingSet ->
                 // The MergingSet can only be deleted if all corresponding AbstractBamFiles are removed already
                 if (!MergingSetAssignment.findByMergingSet(mergingSet)) {
-                    mergingSet.delete()
+                    mergingSet.delete(flush: true)
                 }
             }
             // The MerginWorkPackage can only be deleted if all corresponding MergingSets and AlignmentPasses are removed already
             if (!MergingSet.findByMergingWorkPackage(mergingWorkPackage) && !AlignmentPass.findByWorkPackage(mergingWorkPackage)) {
-                mergingWorkPackage.delete()
+                mergingWorkPackage.delete(flush: true)
             }
         }
         return dirsToDelete
@@ -216,7 +216,7 @@ class SwapHelperService {
 
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
 
-        List<ProcessedSaiFile> processedSaiFiles = ProcessedSaiFile.findAllByDataFileInList(dataFiles)*.delete()
+        List<ProcessedSaiFile> processedSaiFiles = ProcessedSaiFile.findAllByDataFileInList(dataFiles)*.delete(flush: true)
 
         // for ProcessedMergedBamFiles
         AlignmentPass.findAllBySeqTrack(seqTrack).each { AlignmentPass alignmentPass ->
@@ -228,9 +228,9 @@ class SwapHelperService {
                 deleteQualityAssessmentInfoForAbstractBamFile(processedBamFile)
                 dirsToDelete << deleteMergingRelatedConnectionsOfBamFile(processedBamFile)
 
-                processedBamFile.delete()
+                processedBamFile.delete(flush: true)
             }
-            alignmentPass.delete()
+            alignmentPass.delete(flush: true)
             // The MerginWorkPackage can only be deleted if all corresponding MergingSets and AlignmentPasses are removed already
             if (!MergingSet.findByMergingWorkPackage(mergingWorkPackage) && !AlignmentPass.findByWorkPackage(mergingWorkPackage)) {
                 snvDeletionService.deleteSamplePairsWithoutSnvCallingInstances(SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
@@ -251,7 +251,7 @@ class SwapHelperService {
             mergingWorkPackage.save(flush: true)
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
             dirsToDelete << snvDeletionService.deleteForAbstractMergedBamFile(bamFile)
-            bamFile.delete()
+            bamFile.delete(flush: true)
             // The MerginWorkPackage can only be deleted if all corresponding RoddyBamFiles are removed already
             if (!RoddyBamFile.findByWorkPackage(mergingWorkPackage)) {
                 snvDeletionService.deleteSamplePairsWithoutSnvCallingInstances(SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))

@@ -3,8 +3,6 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.utils.CreateFileHelper
-import grails.test.mixin.*
-import grails.test.mixin.support.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test

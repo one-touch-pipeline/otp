@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.administration
 
-import grails.plugins.springsecurity.Secured;
+import grails.plugin.springsecurity.annotation.Secured
 import de.dkfz.tbi.otp.security.User
 
 /**

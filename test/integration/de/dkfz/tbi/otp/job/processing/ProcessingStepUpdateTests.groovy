@@ -2,24 +2,12 @@ package de.dkfz.tbi.otp.job.processing
 
 import static org.junit.Assert.*
 
-import grails.test.mixin.*
-import grails.test.mixin.support.*
 import org.junit.*
 
 import de.dkfz.tbi.otp.job.plan.JobDefinition;
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan;
 
 class ProcessingStepUpdateTests {
-
-    @SuppressWarnings("EmptyMethod")
-    @Before
-    void setUp() {
-    }
-
-    @SuppressWarnings("EmptyMethod")
-    @After
-    void tearDown() {
-    }
 
     @Test
     void testConstraints() {

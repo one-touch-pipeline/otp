@@ -80,11 +80,6 @@ class LoadBedFileScriptTests extends GroovyScriptAwareTestCase {
         new Input(bedName: "SureSelect50MbV5_plain_xenograft_GRCm38mm.bed", refGenName: "hs37d5_GRCm38mm", kitName: "SureSelect50MbV5"),
         new Input(bedName: "SureSelect50MbV5_plain_xenograft.bed", refGenName: "hs37d5+mouse", kitName: "SureSelect50MbV5"),
     ]
-    class Input {
-        String bedName
-        String refGenName
-        String kitName
-    }
 
     @Before
     void setUp() {
@@ -237,4 +232,10 @@ class LoadBedFileScriptTests extends GroovyScriptAwareTestCase {
         refGen.name = "DOES_NOT_EXIST"
         refGen.save(flush: true)
     }
+}
+
+class Input {
+    String bedName
+    String refGenName
+    String kitName
 }

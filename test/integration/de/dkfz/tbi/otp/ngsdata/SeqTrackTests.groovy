@@ -1,14 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import static org.junit.Assert.*
-
-import org.junit.*
-
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
+import org.junit.Before
+import org.junit.Test
 
-class SeqTrackTests extends TestCase {
-
+class SeqTrackTests {
 
 
     ReferenceGenomeProjectSeqType referenceGenomeProjectSeqTypeWithoutSampleType
@@ -16,21 +12,19 @@ class SeqTrackTests extends TestCase {
     SeqTrack seqTrack
 
 
-
     @Before
     void setup() {
-        seqTrack = SeqTrack.build()
+        seqTrack = SeqTrack.build().save(flush: true)
         referenceGenomeProjectSeqTypeWithSampleType = ReferenceGenomeProjectSeqType.build(
-            project: seqTrack.project,
-            seqType: seqTrack.seqType,
-            sampleType: seqTrack.sampleType,
-            )
+                project: seqTrack.project,
+                seqType: seqTrack.seqType,
+                sampleType: seqTrack.sampleType,
+        ).save(flush: true)
         referenceGenomeProjectSeqTypeWithoutSampleType = ReferenceGenomeProjectSeqType.build(
-            project: seqTrack.project,
-            seqType: seqTrack.seqType,
-            )
+                project: seqTrack.project,
+                seqType: seqTrack.seqType,
+        ).save(flush: true)
     }
-
 
 
     @Test
@@ -44,7 +38,9 @@ class SeqTrackTests extends TestCase {
     @Test
     void testGetConfiguredReferenceGenome_ProjectDefault_WrongProject() {
         seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        seqTrack.sampleType.save(flush: true)
         referenceGenomeProjectSeqTypeWithoutSampleType.project = Project.build()
+        referenceGenomeProjectSeqTypeWithoutSampleType.save(flush: true)
 
         ReferenceGenome referenceGenome = seqTrack.getConfiguredReferenceGenome()
         assert null == referenceGenome
@@ -53,12 +49,13 @@ class SeqTrackTests extends TestCase {
     @Test
     void testGetConfiguredReferenceGenome_ProjectDefault_WrongSeqType() {
         seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        seqTrack.sampleType.save(flush: true)
         referenceGenomeProjectSeqTypeWithoutSampleType.seqType = SeqType.build()
+        referenceGenomeProjectSeqTypeWithoutSampleType.save(flush: true)
 
         ReferenceGenome referenceGenome = seqTrack.getConfiguredReferenceGenome()
         assert null == referenceGenome
     }
-
 
 
     @Test
@@ -72,7 +69,9 @@ class SeqTrackTests extends TestCase {
     @Test
     void testGetConfiguredReferenceGenome_SampleTypeSpecific_WrongProject() {
         seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
+        seqTrack.sampleType.save(flush: true)
         referenceGenomeProjectSeqTypeWithSampleType.project = Project.build()
+        referenceGenomeProjectSeqTypeWithSampleType.save(flush: true)
 
         ReferenceGenome referenceGenome = seqTrack.getConfiguredReferenceGenome()
         assert null == referenceGenome
@@ -81,7 +80,9 @@ class SeqTrackTests extends TestCase {
     @Test
     void testGetConfiguredReferenceGenome_SampleTypeSpecific_WrongSeqType() {
         seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
+        seqTrack.sampleType.save(flush: true)
         referenceGenomeProjectSeqTypeWithSampleType.seqType = SeqType.build()
+        referenceGenomeProjectSeqTypeWithSampleType.save(flush: true)
 
         ReferenceGenome referenceGenome = seqTrack.getConfiguredReferenceGenome()
         assert null == referenceGenome
@@ -90,19 +91,21 @@ class SeqTrackTests extends TestCase {
     @Test
     void testGetConfiguredReferenceGenome_SampleTypeSpecific_WrongSampleType() {
         seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
+        seqTrack.sampleType.save(flush: true)
         referenceGenomeProjectSeqTypeWithSampleType.sampleType = SampleType.build()
+        referenceGenomeProjectSeqTypeWithSampleType.save(flush: true)
 
         ReferenceGenome referenceGenome = seqTrack.getConfiguredReferenceGenome()
         assert null == referenceGenome
     }
 
 
-
     @Test
     void testGetConfiguredReferenceGenome_NotDefined() {
         seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.UNKNOWN
+        seqTrack.sampleType.save(flush: true)
 
-        String message = shouldFail(RuntimeException) {
+        String message = TestCase.shouldFail(RuntimeException) {
             seqTrack.getConfiguredReferenceGenome()
         }
         assert message.contains(SampleType.SpecificReferenceGenome.UNKNOWN.toString())

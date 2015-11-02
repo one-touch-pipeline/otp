@@ -25,6 +25,7 @@ class LibraryPreparationKitTests {
         kit2 = null
     }
 
+    @Test
     void testCreateCorrect() {
         assertTrue kit1.validate()
         assertNotNull kit1.save(flush: true)
@@ -34,16 +35,19 @@ class LibraryPreparationKitTests {
         assertTrue !kit2.toString().empty
     }
 
+    @Test
     void testNameIsNull() {
         kit1.name = null
         assertFalse kit1.validate()
     }
 
+    @Test
     void testNameIsEmpty() {
         kit1.name = ""
         assertFalse kit1.validate()
     }
 
+    @Test
     void testNameNotUnique() {
         assertNotNull kit1.save(flush: true)
         kit2.name = "kitName1"

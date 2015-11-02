@@ -5,15 +5,21 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
 import org.joda.time.Duration
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 
+import static de.dkfz.tbi.otp.dataprocessing.Workflow.Name.DEFAULT_OTP
+import static de.dkfz.tbi.otp.ngsdata.Individual.Type.REAL
+import static de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type.ALIGNMENT
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 
+@TestMixin(IntegrationTestMixin)
 class MergingWorkflowTests extends WorkflowTestCase {
 
     ProcessingOptionService processingOptionService
@@ -46,46 +52,111 @@ class MergingWorkflowTests extends WorkflowTestCase {
 
         TestData testData = new TestData()
 
-        Project project = Project.build(
-            name : "otp_test_project",
-            dirName : "otp_test_project",
-            realmName : realm.name,
+        Project project = new Project(
+                name: "otp_test_project",
+                dirName: "otp_test_project",
+                realmName: realm.name,
+                alignmentDeciderBeanName: DefaultOtpAlignmentDecider.getClass().name
         )
+        assert project.save(flush: true)
 
-        Individual individual = Individual.build(
+        Individual individual = new Individual(
                 pid: "654321",
                 project: project,
+                mockPid: "654321",
+                mockFullName: "654321",
+                type: REAL,
         )
+        assert individual.save(flush: true)
 
-        SampleType sampleType = SampleType.build(
+        SampleType sampleType = new SampleType(
                 name: "TUMOR",
         )
+        assert sampleType.save(flush: true)
 
-        Sample sample = Sample.build(
+        Sample sample = new Sample(
                 individual: individual,
                 sampleType:sampleType,
         )
+        assert sample.save(flush: true)
 
-        SeqType seqType = SeqType.build(
+        SeqType seqType = new SeqType(
                 libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
+                name: SeqTypeNames.WHOLE_GENOME.seqTypeName,
+                dirName: 'whole_genome',
         )
+        assert seqType.save(flush: true)
 
-        Run run = Run.build(
+        SeqCenter seqCenter = new SeqCenter(
+                name: 'seqCenter',
+                dirName: 'seqCenterDirName',
+        )
+        assert seqCenter.save(flush: true)
+
+        SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup(name: 'seqPlatformGroup')
+        assert seqPlatformGroup.save(flush: true)
+
+        SeqPlatform seqPlatform = new SeqPlatform(
+                name: 'seqPlatformName',
+                seqPlatformGroup: seqPlatformGroup,
+        )
+        assert seqPlatform.save(flush: true)
+
+        Run run = new Run(
                 name: "testname1",
+                seqCenter: seqCenter,
+                seqPlatform: seqPlatform,
         )
+        assert run.save(flush: true)
 
-        SeqTrack seqTrack = SeqTrack.build(
+        SoftwareTool softwareTool = new SoftwareTool(
+                programName: 'softwaretool',
+                type: ALIGNMENT,
+        )
+        assert softwareTool.save(flush: true)
+
+        SeqTrack seqTrack = new SeqTrack(
                 sample: sample,
                 seqType: seqType,
                 laneId: "123",
                 run: run,
+                seqPlatform: seqPlatform,
+                pipelineVersion: softwareTool
         )
+        assert seqTrack.save(flush: true)
 
         DataFile dataFile1 = testData.createDataFile([fileName: "dataFile1"])
         assertNotNull(dataFile1.save([flush: true, failOnError: true]))
 
         DataFile dataFile2 = testData.createDataFile([fileName: "dataFile2"])
         assertNotNull(dataFile2.save([flush: true, failOnError: true]))
+
+        ReferenceGenome referenceGenome = new ReferenceGenome(
+                name: 'refGenome',
+                path: 'reference_genome',
+                fileNamePrefix: 'chr',
+                length: 100,
+                lengthWithoutN: 100,
+                lengthRefChromosomes: 100,
+                lengthRefChromosomesWithoutN: 100,
+        )
+        assert referenceGenome.save(flush: true)
+
+        Workflow workflow = new Workflow(
+                name: DEFAULT_OTP,
+                type: Workflow.Type.ALIGNMENT,
+        )
+        assert workflow.save(flush: true)
+
+        MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
+                sample: sample,
+                seqType: seqType,
+                seqPlatformGroup: seqPlatformGroup,
+                referenceGenome: referenceGenome,
+                workflow: workflow,
+                needsProcessing: false,
+        )
+        assert mergingWorkPackage.save(flush: true)
 
         AlignmentPass alignmentPass = testData.createAlignmentPass(seqTrack: seqTrack)
         assertNotNull(alignmentPass.save([flush: true, failOnError: true]))

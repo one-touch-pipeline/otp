@@ -46,7 +46,7 @@ class RoddyWorkflowConfig extends ConfigPerProject {
         }
         workflow unique: ['project', 'configFilePath']
         pluginVersion blank: false
-        workflow unique: ['project', 'obsoleteDate']  // partial index: WHERE obsolete_date IS NULL
+        obsoleteDate unique: ['project', 'workflow']  // partial index: WHERE obsolete_date IS NULL
         configVersion nullable: true, blank: false, unique: ['project', 'workflow', 'pluginVersion'], matches: CONFIG_VERSION_PATTERN //needs to be nullable because of old data
     }
 

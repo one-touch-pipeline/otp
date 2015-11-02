@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -33,7 +33,7 @@ class SamplePairDiscoveryStartJobTests extends GroovyScriptAwareTestCase {
 
         final Process process = processes.iterator().next()
         process.finished = true
-        assert process.save()
+        assert process.save(flush: true)
         samplePairDiscoveryStartJob.execute()
         assert TestJobHelper.findProcessesForPlanName(PLAN_NAME).size() == 2
     }

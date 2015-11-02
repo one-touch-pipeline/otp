@@ -1,19 +1,20 @@
 package de.dkfz.tbi.otp.job.scheduler
 
-import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.*
-import static de.dkfz.tbi.otp.ngsdata.DomainFactory.createAndSaveProcessingStep
-
 import de.dkfz.tbi.otp.job.jobs.MonitoringTestJob
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.MonitoringJob
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import org.junit.Test
 
-class PbsMonitorServiceTests extends AbstractIntegrationTest {
+import static de.dkfz.tbi.TestConstants.ARBITRARY_CLUSTER_JOB_ID
+import static de.dkfz.tbi.TestConstants.ARBITRARY_MESSAGE
+import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.assertFailed
+import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.assertSucceeded
+import static de.dkfz.tbi.otp.ngsdata.DomainFactory.createAndSaveProcessingStep
 
-    static final String ARBITRARY_CLUSTER_JOB_ID = '5678'
+class PbsMonitorServiceTests extends AbstractIntegrationTest {
 
     PbsMonitorService pbsMonitorService
     Scheduler scheduler
@@ -30,27 +31,9 @@ class PbsMonitorServiceTests extends AbstractIntegrationTest {
     }
 
     private MonitoringJob notifyJobAboutFinishedClusterJob(final boolean fail) {
-        final boolean executed = false
         final PbsJobInfo pbsJobInfo = new PbsJobInfo([realm: new Realm(), pbsId: ARBITRARY_CLUSTER_JOB_ID])
-        final Job testJob = new MonitoringTestJob(createAndSaveProcessingStep(), null) {
-            @Override
-            void execute() throws Exception {
-                assert schedulerService.jobExecutedByCurrentThread == this
-                assert LogThreadLocal.threadLog == this.log
-            }
-            @Override
-            void finished(String pbsId, Realm realm) {
-                assert schedulerService.jobExecutedByCurrentThread == this
-                assert LogThreadLocal.threadLog == this.log
-                assert pbsId == ARBITRARY_CLUSTER_JOB_ID && realm.is(pbsJobInfo.realm)
-                executed = true
-                if (fail) {
-                    throw new NumberFormatException(ARBITRARY_MESSAGE)
-                }
-                succeed()
-                schedulerService.doEndCheck(this)
-            }
-        }
+        final Job testJob = new MonitoringTestJob(createAndSaveProcessingStep(), null, schedulerService, pbsJobInfo, fail)
+
         testJob.log = log
         scheduler.executeJob(testJob)
         assert schedulerService.jobExecutedByCurrentThread == null
@@ -58,7 +41,7 @@ class PbsMonitorServiceTests extends AbstractIntegrationTest {
         pbsMonitorService.notifyJobAboutFinishedClusterJob(testJob, pbsJobInfo)
         assert schedulerService.jobExecutedByCurrentThread == null
         assert LogThreadLocal.threadLog == null
-        assert executed
+        assert testJob.executed
         return testJob
     }
 }

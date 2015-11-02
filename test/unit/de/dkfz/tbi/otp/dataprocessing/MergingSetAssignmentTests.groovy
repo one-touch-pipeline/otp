@@ -16,6 +16,7 @@ class MergingSetAssignmentTests {
     MergingSet mergingSet = null
     ProcessedBamFile processedBamFile = null
 
+    @Before
     void setUp() {
         Project project = TestData.createProject()
         project.name = "SOME_PROJECT"
@@ -109,11 +110,13 @@ class MergingSetAssignmentTests {
 
     }
 
+    @After
     void tearDown() {
         mergingSet = null
         processedBamFile = null
     }
 
+    @Test
     void testSave() {
         MergingSetAssignment mtm = new MergingSetAssignment(
             mergingSet: mergingSet,
@@ -122,7 +125,8 @@ class MergingSetAssignmentTests {
         mtm.save(flush: true)
     }
 
-    void testConstaints() {
+    @Test
+    void testConstraints() {
         // mergingSet must not be null
         MergingSetAssignment mtm = new MergingSetAssignment(
             bamFile: processedBamFile)

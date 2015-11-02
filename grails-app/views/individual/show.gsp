@@ -4,9 +4,9 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="layout" content="main"/>
 <title>${ind.mockFullName}</title>
-<r:require module="editorSwitch"/>
-<r:require module="editSamples"/>
-<r:require module="changeLog"/>
+    <asset:javascript src="modules/editorSwitch"/>
+    <asset:javascript src="modules/editSamples"/>
+    <asset:javascript src="modules/changeLog"/>
 </head>
 <body>
     <div class="body_grow">
@@ -104,7 +104,6 @@
                                 <th><g:message code="individual.show.sequencingScans.numberOfLanes"/></th>
                                 <th><g:message code="individual.show.sequencingScans.numberOfBases"/></th>
                                 <th><g:message code="individual.show.sequencingScans.insertSize"/></th>
-                                <th><g:message code="individual.show.sequencingScans.igv"/></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -120,11 +119,6 @@
                                             <td>${scan.nLanes}</td>
                                             <td>${scan.basePairsString()}</td>
                                             <td>${scan.insertSize}</td>
-                                            <td>
-                                                <g:if test="${igvMap.get(scan.id)}">
-                                                    <g:checkBox name="${scan.id}" value="${false}"/>
-                                                </g:if>
-                                            </td>
                                         </tr>
                                     </g:if>
                                 </g:if>
@@ -151,10 +145,10 @@
         </g:form>
     </div>
 </body>
-<r:script>
+<asset:script>
     $(function() {
         $.otp.growBodyInit(240);
         $.otp.initCommentBox(${ind.id}, "#individualCommentBox");
     });
-</r:script>
+</asset:script>
 </html>

@@ -54,7 +54,7 @@ class ClusterJobTests {
 
         assertNotNull(realm.save(flush: true))
 
-        ProcessingOption option = new ProcessingOption([name: "basesPerBytesFastQ", type: "", project: null, value: "1.0", comment: "some comment"])
+        ProcessingOption option = new ProcessingOption([name: "basesPerBytesFastQ", type: null, project: null, value: "1.0", comment: "some comment"])
 
         assertNotNull(option.save(flush: true))
     }

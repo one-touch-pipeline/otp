@@ -229,6 +229,7 @@ class QualityAssessmentMergedPassServiceTests {
     @Test
     void testCreatePass() {
         processedMergedBamFile.qualityAssessmentStatus = QaProcessingStatus.NOT_STARTED
+        assert processedMergedBamFile.save(flush: true)
         assertEquals(1, QualityAssessmentMergedPass.list().size())
         QualityAssessmentMergedPass qualityAssessmentMergedPass1 = qualityAssessmentMergedPassService.createPass()
         assertEquals(1, qualityAssessmentMergedPass1.identifier)
