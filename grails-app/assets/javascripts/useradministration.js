@@ -114,10 +114,10 @@ $.otp.userAdministration.editUser = {
                     linkText = "";
                     divInsertId = "";
                     if (action === "addRole") {
-                        linkText = $.i18n.prop("user.administration.userRole.ui.removeRole");
+                        linkText = $L("user.administration.userRole.ui.removeRole");
                         divInsertId = "#userRoles";
                     } else if (action === "removeRole") {
-                        linkText = $.i18n.prop("user.administration.userRole.ui.addRole");
+                        linkText = $L("user.administration.userRole.ui.addRole");
                         divInsertId = "#availableRoles";
                     }
                     tableRow = link.parents("tr");
@@ -156,10 +156,10 @@ $.otp.userAdministration.editUser = {
                     linkText = "";
                     divInsertId = "";
                     if (action === "addGroup") {
-                        linkText = $.i18n.prop("user.administration.userGroup.ui.removeGroup");
+                        linkText = $L("user.administration.userGroup.ui.removeGroup");
                         divInsertId = "#userGroups";
                     } else if (action === "removeGroup") {
-                        linkText = $.i18n.prop("user.administration.userGroup.ui.addGroup");
+                        linkText = $L("user.administration.userGroup.ui.addGroup");
                         divInsertId = "#availableGroups";
                     }
                     tableRow = link.parents("tr");
@@ -235,7 +235,7 @@ $.otp.userAdministration.editUser = {
                 // create the new available group
                 var row = $("<tr></tr>").appendTo($("#availableGroups table tbody"));
                 $("<td title=\"" + data.group.description + "\">" +  data.group.name + "</td>").appendTo(row);
-                $("<td><input type=\"hidden\" value=\"" + data.group.id + "\"/><a href=\"#\" rel=\"userGroups-" + data.group.id + "\">" + $.i18n.prop("user.administration.userGroup.ui.addGroup") + "</a></td>")
+                $("<td><input type=\"hidden\" value=\"" + data.group.id + "\"/><a href=\"#\" rel=\"userGroups-" + data.group.id + "\">" + $L("user.administration.userGroup.ui.addGroup") + "</a></td>")
                     .appendTo(row)
                     .click($.otp.userAdministration.editUser.addRemoveGroups);
                 this.resetFields($("#create-group-dialog"));
@@ -258,12 +258,12 @@ $.otp.userAdministration.editUser = {
             this.dialog.dialog({
                 buttons: [
                     {
-                        text: $.i18n.prop("default.button.cancel.label"),
+                        text: $L("default.button.cancel.label"),
                         click: function () {
                             $(this).dialog("close");
                         }
                     }, {
-                        text: $.i18n.prop("default.button.create.label"),
+                        text: $L("default.button.create.label"),
                         click: function () {
                             $.getJSON($.otp.createLink({
                                 controller: 'userAdministration',
@@ -296,16 +296,16 @@ $.otp.userAdministration.editUser = {
             success: function (data) {
                 if (data.error) {
                     if (data.username) {
-                        $.otp.warningMessage($.i18n.prop(data.username));
+                        $.otp.warningMessage($L(data.username));
                     }
                     if (data.jabber) {
-                        $.otp.warningMessage($.i18n.prop(data.jabber));
+                        $.otp.warningMessage($L(data.jabber));
                     }
                     if (data.email) {
-                        $.otp.warningMessage($.i18n.prop(data.email));
+                        $.otp.warningMessage($L(data.email));
                     }
                 } else if (data.success) {
-                    $.otp.infoMessage($.i18n.prop("user.administration.edit.success"));
+                    $.otp.infoMessage($L("user.administration.edit.success"));
                 }
             }
         });
@@ -342,7 +342,7 @@ $.otp.userAdministration.register = function () {
                     $.otp.warningMessage(data.userRealName);
                     $.otp.warningMessage(data.email);
                 } else if (data.success) {
-                    $.otp.infoMessage($.i18n.prop("user.administration.register.success", data.user));
+                    $.otp.infoMessage($L("user.administration.register.success", data.user));
                 }
             }
         });
@@ -381,7 +381,7 @@ $.otp.userAdministration.create = {
                     success: function (data) {
                         var validator, i;
                         if (data.success === true) {
-                            $.otp.infoMessage($.i18n.prop("user.administration.register.success", data.user.id));
+                            $.otp.infoMessage($L("user.administration.register.success", data.user.id));
                         } else if (data.errors) {
                             for (i = 0; i < data.errors.errors.length; i += 1) {
                                 validator = $("#create-user-form").validate().settings;

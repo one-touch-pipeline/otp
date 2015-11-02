@@ -261,7 +261,7 @@ $.otp.notificationAdministration = {
         span = $(this).parent();
         event.preventDefault();
         span.text(span.attr("title") + " ");
-        $('<a href="#">' + $.i18n.prop("notification.administration.template.collapse") + '</a>').appendTo(span).click($.otp.notificationAdministration.collapseTemplate);
+        $('<a href="#">' + $L("notification.administration.template.collapse") + '</a>').appendTo(span).click($.otp.notificationAdministration.collapseTemplate);
     },
     /**
      * Callback for collapsing the text of a template. Shortens in the same way as in the initial
@@ -306,7 +306,7 @@ $.otp.notificationAdministration = {
         "use strict";
         var i, message;
         if (data.success) {
-            $.otp.infoMessage($.i18n.prop("notification.administration.update.success"));
+            $.otp.infoMessage($L("notification.administration.update.success"));
         } else if (data.error) {
             $.otp.warningMessage(data.error);
         } else if (data.errors) {
@@ -326,7 +326,7 @@ $.otp.notificationAdministration = {
     errorHandler: function (jqXHR) {
         "use strict";
         if (jqXHR.status === 404) {
-            $.otp.warningMessage($.i18n.prop("notification.administration.update.notFound"));
+            $.otp.warningMessage($L("notification.administration.update.notFound"));
         } else {
             $.otp.warningMessage(jqXHR.statusText + jqXHR.status);
         }

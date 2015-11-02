@@ -11,7 +11,6 @@ logs/*
 # OTP
 ## Main application
 ast-build
-grails-app/assets/javascripts/i18n/*
 web-app/WEB-INF/tld/c.tld
 web-app/WEB-INF/tld/fmt.tld
 grails-app/views/templates/_version.gsp

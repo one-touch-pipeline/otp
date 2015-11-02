@@ -9,8 +9,8 @@ $("div.sample-identifiers-field p.sample-identifiers-field-label button.edit").c
     existingValues = $("span.wordBreak", outerContainer).text();
     existingValues = existingValues.substring(1, existingValues.length - 1);
     extractedElements = existingValues.split(', ');
-    saveButton = $("<button class=\"buttons save\">" + $.i18n.prop("default.button.update.label") + "</button>");
-    cancelButton = $("<button class=\"buttons cancel\">" + $.i18n.prop("default.button.cancel.label") + "</button>");
+    saveButton = $("<button class=\"buttons save\">" + $L("default.button.update.label") + "</button>");
+    cancelButton = $("<button class=\"buttons cancel\">" + $L("default.button.cancel.label") + "</button>");
     textFieldContainer = $("p.sample-identifiers-field-editor", outerContainer);
     textField = $("<input type=\"text\" name=\"value\"/>");
     $.each(extractedElements, function () {
@@ -106,7 +106,7 @@ $.otp.editSamples.identifiers = {
             data: {samples: samples},
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage($.i18n.prop("editorswitch.notification.success"));
+                    $.otp.infoMessage($L("editorswitch.notification.success"));
                     $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val());
                 } else {
                     $.otp.warningMessage(data.error);
@@ -114,7 +114,7 @@ $.otp.editSamples.identifiers = {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($.i18n.prop("editorswitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
                 $("input:text[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
             }
         });

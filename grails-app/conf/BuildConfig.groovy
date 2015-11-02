@@ -52,7 +52,6 @@ grails.project.dependency.resolution = {
         runtime ":hibernate4:4.3.10"
         compile ':cache:1.1.8'
         compile ':scaffolding:2.1.2'
-        compile ':asset-pipeline:2.3.9'
 
         build(":release:3.1.1", ":rest-client-builder:2.1.1") {
             export = false
@@ -77,6 +76,8 @@ grails.project.dependency.resolution = {
 
         compile ":asset-pipeline:2.5.1"
         provided ":less-asset-pipeline:2.3.0"
+        compile ":i18n-asset-pipeline:1.0.5"
+
 
         test ":build-test-data:2.4.0" //http://grails.org/plugin/build-test-data
         if ((Environment.getCurrent().getName() == "WORKFLOW_TEST")) {

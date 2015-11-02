@@ -64,7 +64,7 @@ $(function() {
             data: {value: $("input:text[name=value]", container).val()},
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage($.i18n.prop("editorswitch.notification.success"));
+                    $.otp.infoMessage($L("editorswitch.notification.success"));
                     $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val());
                 } else {
                     $.otp.warningMessage(data.error);
@@ -72,7 +72,7 @@ $(function() {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($.i18n.prop("editorswitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
                 $("input:text[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
             }
         });
@@ -90,14 +90,14 @@ $(function() {
             data: {value: $("select option:selected", container).text()},
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage($.i18n.prop("editorswitch.notification.success"));
+                    $.otp.infoMessage($L("editorswitch.notification.success"));
                     $("p.edit-switch-drop-down-label span", outerContainer).text($("select option:selected", container).text());
                 } else {
                     $.otp.warningMessage(data.error);
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($.i18n.prop("editorswitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
             }
         });
         $("p.edit-switch-drop-down-editor", outerContainer).hide();
@@ -116,7 +116,7 @@ $(function() {
             data: {value: $("select option:selected", container).text()},
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage($.i18n.prop("editorswitch.notification.success"));
+                    $.otp.infoMessage($L("editorswitch.notification.success"));
                     $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val());
                 } else {
                     $.otp.warningMessage(data.error);
@@ -124,7 +124,7 @@ $(function() {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($.i18n.prop("editorswitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
                 $("input:text[name=value]", container).val($("p.edit-switch-new-value-label span", outerContainer).text());
             }
         });
@@ -145,7 +145,7 @@ $(function() {
             data: {value: $("input:text[name=value]", container).val()},
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage($.i18n.prop("editorswitch.notification.success"));
+                    $.otp.infoMessage($L("editorswitch.notification.success"));
                     $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val());
                 } else {
                     $.otp.warningMessage(data.error);
@@ -153,7 +153,7 @@ $(function() {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($.i18n.prop("editorswitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
                 $("input:text[name=value]", container).val($("p.edit-switch-new-free-text-value-label span", outerContainer).text());
             }
         });

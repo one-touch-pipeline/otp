@@ -139,14 +139,6 @@ $.otp = {
     }
 };
 
-$.i18n.properties({
-    name: 'messages',
-    path: $.otp.createLink({
-        controller: 'js',
-        action: 'i18n/'
-    }),
-    mode: "map"
-});
 
 $.otp.message = function (message, warning) {
     "use strict";
@@ -545,7 +537,7 @@ $.otp.initCommentBox = function (id, element) {
             cancelCommentElement.prop("disabled", true);
         });
         promise.error(function () {
-            $.otp.warningMessage($.i18n.prop("commentBox.error"));
+            $.otp.warningMessage($L("commentBox.error"));
         });
     });
 

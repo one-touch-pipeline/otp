@@ -104,7 +104,7 @@ $.otp.sequence = {
                                         controller: 'fastqcResults',
                                         action: 'show',
                                         id: row.fastQCFiles[j].id,
-                                        text: $.i18n.prop("sequence.list.numberedFastQCFile", (j + 1))
+                                        text: $L("sequence.list.numberedFastQCFile", (j + 1))
                                     });
                                     fastQC += " ";
                                 }
