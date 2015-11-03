@@ -669,8 +669,10 @@ class MovePanCanFilesToFinalDestinationJobTests {
             assert tmpFiles.every {
                 command.contains(it.path)
             }
-            assert ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command).trim() == '0'
+            String stdout = ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+            assert stdout.trim() == '0'
             callDeleted = true
+            return stdout
         }
         assert filesNotToBeCalledFor.size() + tmpFiles.size() + tmpDirectories.size() == roddyBamFile.workDirectory.listFiles().size()
 
@@ -704,7 +706,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
         ].flatten()
 
         movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String command ->
-            ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+            return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
         }
 
         linkedFiles.each {
@@ -767,7 +769,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
         boolean hasCalled_deleteContentOfOtherUnixUserDirectory = false
 
         movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String command ->
-            ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+            return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
         }
 
         movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath ->
@@ -834,7 +836,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
         assert roddyBamFile.workDirectory.exists()
 
         movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String command ->
-            ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+            return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
         }
 
         movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath ->
@@ -862,7 +864,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
 
         movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String command ->
             assert !command.contains(RoddyBamFile.WORK_DIR_PREFIX)
-            ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+            return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
         }
 
         movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath ->

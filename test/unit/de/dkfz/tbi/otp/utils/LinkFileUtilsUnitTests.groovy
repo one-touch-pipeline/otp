@@ -37,7 +37,9 @@ class LinkFileUtilsUnitTests {
 
         ExecutionService executionService = [
                 executeCommand: { Realm realm, String command ->
-                    assert ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command) ==~ /^0?\s*$/
+                    String stdout = ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+                    assert stdout ==~ /^0?\s*$/
+                    return stdout
                 }
         ] as ExecutionService
 

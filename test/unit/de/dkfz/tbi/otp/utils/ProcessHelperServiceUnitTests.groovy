@@ -1,10 +1,6 @@
 package de.dkfz.tbi.otp.utils
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import org.apache.commons.logging.impl.SimpleLog
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 
 class ProcessHelperServiceUnitTests {
@@ -15,18 +11,6 @@ class ProcessHelperServiceUnitTests {
     final String COMMAND = "echo '${STDOUT_TEXT}'\n>&2 echo '${STDERR_TEXT}'"
     final String COMMAND_NO_ERROR = "echo '${STDOUT_TEXT}'"
     final String INVALID_COMMAND = "--"
-
-    @Before
-    void setUp() {
-        LogThreadLocal.setThreadLog(new SimpleLog(this.class.name))
-    }
-
-    @After
-    void tearDown() {
-        LogThreadLocal.removeThreadLog()
-    }
-
-
 
     @Test
     void testExecuteCommand_InputCommandIsNull_ShouldFail() {
