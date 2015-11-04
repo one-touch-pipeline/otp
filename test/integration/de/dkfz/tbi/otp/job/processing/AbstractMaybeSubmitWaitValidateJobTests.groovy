@@ -41,12 +41,12 @@ class AbstractMaybeSubmitWaitValidateJobTests extends TestCase {
 
         String expected = """
 2 of 2 cluster jobs failed:
+
 ${identifier1}: Failed1.
 ${AbstractOtpJob.getLogFileNames(clusterJob1)}
 
 ${identifier2}: Failed2.
 ${AbstractOtpJob.getLogFileNames(clusterJob2)}
-
 """
 
         String actual = abstractMaybeSubmitWaitValidateJob.createExceptionString(failedClusterJobs, finishedClusterJobs)

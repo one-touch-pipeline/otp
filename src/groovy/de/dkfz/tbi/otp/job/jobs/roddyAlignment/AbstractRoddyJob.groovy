@@ -133,9 +133,9 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
 
         finishedClusterJobs.each {
             if (!jobStateLogFile.containsPbsId(it.clusterJobId)) {
-                failedOrNotFinishedClusterJobs.put(it, "JobStateLogFile contains no information for ${it}")
+                failedOrNotFinishedClusterJobs.put(it, "JobStateLogFile contains no information for this cluster job.")
             } else if (!jobStateLogFile.isClusterJobFinishedSuccessfully(it.clusterJobId)) {
-                failedOrNotFinishedClusterJobs.put(it, "${it} has not finished successfully. Status code: ${jobStateLogFile.getPropertyFromLatestLogFileEntry(it.clusterJobId, "statusCode")}")
+                failedOrNotFinishedClusterJobs.put(it, "Status code: ${jobStateLogFile.getPropertyFromLatestLogFileEntry(it.clusterJobId, "statusCode")}")
             }
         }
         return failedOrNotFinishedClusterJobs
