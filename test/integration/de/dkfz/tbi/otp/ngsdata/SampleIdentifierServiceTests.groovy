@@ -29,4 +29,9 @@ class SampleIdentifierServiceTests {
     void testParseSampleIdentifier_WithDeepSampleNameAndDefaultParsers_ShouldReturnDeepSampleIdentifier() {
         assert sampleIdentifierService.parseSampleIdentifier('41_Hf01_BlAd_CD_WGBS_S_1').projectName == 'DEEP'
     }
+
+    @Test
+    void testParseSampleIdentifier_WithInformSampleNameAndDefaultParsers_ShouldReturnInformSampleIdentifier() {
+        assert sampleIdentifierService.parseSampleIdentifier('I123_456_1T3_D1').projectName == 'INFORM'
+    }
 }
