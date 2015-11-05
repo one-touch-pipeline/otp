@@ -1,3 +1,5 @@
+import grails.util.Environment
+
 Properties otpProperties = new Properties()
 try {
     String propertiesFile = System.getenv("OTP_PROPERTIES")
@@ -114,7 +116,7 @@ log4j = {
                 )
         appender name: 'performanceStatsFileAppender', performanceStatsFileAppender
 
-        console name: "stdout", threshold: org.apache.log4j.Level.DEBUG
+        console name: "stdout", threshold: Environment.getCurrent() == Environment.TEST ? org.apache.log4j.Level.OFF : org.apache.log4j.Level.DEBUG
     }
 
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
