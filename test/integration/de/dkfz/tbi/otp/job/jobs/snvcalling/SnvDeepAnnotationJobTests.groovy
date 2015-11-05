@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import org.apache.commons.logging.impl.NoOpLog
+
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
@@ -164,7 +166,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         snvDeepAnnotationJob = applicationContext.getBean('snvDeepAnnotationJob',
                 DomainFactory.createAndSaveProcessingStep(SnvDeepAnnotationJob.toString()), [])
-        snvDeepAnnotationJob.log = log
+        snvDeepAnnotationJob.log = new NoOpLog()
 
         ParameterType typeRealm = new ParameterType(
                 name: REALM,

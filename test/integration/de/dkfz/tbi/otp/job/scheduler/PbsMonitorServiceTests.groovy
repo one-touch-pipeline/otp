@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.scheduler
 
+import org.apache.commons.logging.impl.NoOpLog
+
 import de.dkfz.tbi.otp.job.jobs.MonitoringTestJob
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.MonitoringJob
@@ -34,7 +36,7 @@ class PbsMonitorServiceTests extends AbstractIntegrationTest {
         final PbsJobInfo pbsJobInfo = new PbsJobInfo([realm: new Realm(), pbsId: ARBITRARY_CLUSTER_JOB_ID])
         final Job testJob = new MonitoringTestJob(createAndSaveProcessingStep(), null, schedulerService, pbsJobInfo, fail)
 
-        testJob.log = log
+        testJob.log = new NoOpLog()
         scheduler.executeJob(testJob)
         assert schedulerService.jobExecutedByCurrentThread == null
         assert LogThreadLocal.threadLog == null

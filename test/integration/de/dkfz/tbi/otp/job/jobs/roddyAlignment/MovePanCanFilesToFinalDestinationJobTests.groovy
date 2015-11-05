@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import org.apache.commons.logging.impl.NoOpLog
+
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
@@ -276,7 +278,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
             throw new Exception("Should not reach this method")
         }
         movePanCanFilesToFinalDestinationJob.metaClass.deleteTemporaryDirectory = { RoddyBamFile roddyBamFile, Realm realm -> }
-        movePanCanFilesToFinalDestinationJob.log = log
+        movePanCanFilesToFinalDestinationJob.log = new NoOpLog()
         movePanCanFilesToFinalDestinationJob.execute()
         assert roddyBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING
     }
@@ -1160,7 +1162,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
         movePanCanFilesToFinalDestinationJob.metaClass.cleanupOldResults = { RoddyBamFile roddyBamFile, Realm realm ->
             throw new Exception("Should not reach this method")
         }
-        movePanCanFilesToFinalDestinationJob.log = log
+        movePanCanFilesToFinalDestinationJob.log = new NoOpLog()
 
         movePanCanFilesToFinalDestinationJob.execute()
         assert roddyBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING

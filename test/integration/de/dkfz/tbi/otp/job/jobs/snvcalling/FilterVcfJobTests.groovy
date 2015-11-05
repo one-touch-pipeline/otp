@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import org.apache.commons.logging.impl.NoOpLog
+
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
@@ -186,7 +188,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         filterVcfJob = applicationContext.getBean('filterVcfJob',
                 DomainFactory.createAndSaveProcessingStep(FilterVcfJob.toString()), [])
-        filterVcfJob.log = log
+        filterVcfJob.log = new NoOpLog()
 
         ParameterType typeRealm = new ParameterType(
                 name: REALM,

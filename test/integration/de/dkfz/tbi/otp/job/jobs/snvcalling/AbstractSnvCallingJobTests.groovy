@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import org.apache.commons.logging.impl.NoOpLog
+
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -408,7 +410,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     void testGetSnvPBSOptionsNameSeqTypeSpecific_CallingStep_ExomeSeqType() {
         SnvCallingJob snvCallingJob = applicationContext.getBean('snvCallingJob',
                 DomainFactory.createAndSaveProcessingStep(SnvCallingJob.toString()), [])
-        snvCallingJob.log = log
+        snvCallingJob.log = new NoOpLog()
         assert "snvPipeline_CALLING_WES" == snvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(DomainFactory.createExomeSeqType())
     }
 
@@ -416,7 +418,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     void testGetSnvPBSOptionsNameSeqTypeSpecific_DeepAnnotationStep_ExomeSeqType() {
         SnvDeepAnnotationJob snvDeepAnnotationJob = applicationContext.getBean('snvDeepAnnotationJob',
                 DomainFactory.createAndSaveProcessingStep(SnvDeepAnnotationJob.toString()), [])
-        snvDeepAnnotationJob.log = log
+        snvDeepAnnotationJob.log = new NoOpLog()
         assert "snvPipeline_SNV_DEEPANNOTATION_WES" == snvDeepAnnotationJob.getSnvPBSOptionsNameSeqTypeSpecific(DomainFactory.createExomeSeqType())
     }
 
@@ -424,7 +426,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     void testGetSnvPBSOptionsNameSeqTypeSpecific_FilterStep_ExomeSeqType() {
         FilterVcfJob filterVcfJob = applicationContext.getBean('filterVcfJob',
                 DomainFactory.createAndSaveProcessingStep(FilterVcfJob.toString()), [])
-        filterVcfJob.log = log
+        filterVcfJob.log = new NoOpLog()
         assert "snvPipeline_FILTER_VCF_WES" == filterVcfJob.getSnvPBSOptionsNameSeqTypeSpecific(DomainFactory.createExomeSeqType())
     }
 

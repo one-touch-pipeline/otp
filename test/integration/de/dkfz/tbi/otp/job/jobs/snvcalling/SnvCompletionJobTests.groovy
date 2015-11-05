@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import org.apache.commons.logging.impl.NoOpLog
+
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -81,7 +83,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         snvCompletionJob = applicationContext.getBean('snvCompletionJob',
                 DomainFactory.createAndSaveProcessingStep(SnvCompletionJob.toString()), [])
-        snvCompletionJob.log = log
+        snvCompletionJob.log = new NoOpLog()
     }
 
     @After

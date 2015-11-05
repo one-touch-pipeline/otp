@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
+import org.apache.commons.logging.impl.NoOpLog
 
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
 import de.dkfz.tbi.TestCase
@@ -80,7 +81,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
     void testExecuteJobOnlyScript() {
         assertNotNull(realm.save())
         TestJob testJob = createTestJobWithProcessingStep(TestData.createAndSaveAlignmentPass())
-        testJob.log = log
+        testJob.log = new NoOpLog()
         schedulerService.startingJobExecutionOnCurrentThread(testJob)
         try {
             // Send script to pbs
@@ -107,7 +108,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
         executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options -> return [] }
         assertNotNull(realm.save())
         TestJob testJob = createTestJobWithProcessingStep(TestData.createAndSaveAlignmentPass())
-        testJob.log = log
+        testJob.log = new NoOpLog()
         schedulerService.startingJobExecutionOnCurrentThread(testJob)
         try {
             String message = new GroovyTestCase().shouldFail(RuntimeException) {
@@ -126,7 +127,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
     void testExecuteJobScriptAndJobIdentifier() {
         assertNotNull(realm.save())
         TestJob testJob = createTestJobWithProcessingStep(TestData.createAndSaveAlignmentPass())
-        testJob.log = log
+        testJob.log = new NoOpLog()
         schedulerService.startingJobExecutionOnCurrentThread(testJob)
         try {
             ProcessingOption processingOption = new ProcessingOption(
@@ -161,7 +162,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
     void testExecuteJobScriptAndJobIdentifierAndQsubParameter() {
         assertNotNull(realm.save())
         TestJob testJob = createTestJobWithProcessingStep(TestData.createAndSaveAlignmentPass())
-        testJob.log = log
+        testJob.log = new NoOpLog()
         schedulerService.startingJobExecutionOnCurrentThread(testJob)
         try {
             ProcessingOption processingOption = new ProcessingOption(

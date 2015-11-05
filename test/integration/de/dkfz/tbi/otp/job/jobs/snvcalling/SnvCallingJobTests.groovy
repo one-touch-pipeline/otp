@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import org.apache.commons.logging.impl.NoOpLog
+
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -152,7 +154,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         snvCallingJob = applicationContext.getBean('snvCallingJob',
             DomainFactory.createAndSaveProcessingStep(SnvCallingJob.toString()), [])
-        snvCallingJob.log = log
+        snvCallingJob.log = new NoOpLog()
     }
 
     @After
@@ -198,7 +200,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         snvCallingJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResult }
-        snvCallingJob.log = log
+        snvCallingJob.log = new NoOpLog()
         assertEquals(NextAction.SUCCEED, snvCallingJob.maybeSubmit(snvCallingInstance2))
     }
 

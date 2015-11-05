@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import org.apache.commons.logging.impl.NoOpLog
+
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
 import de.dkfz.tbi.otp.utils.LinkFileUtils
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
@@ -130,7 +132,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         snvAnnotationJob = applicationContext.getBean('snvAnnotationJob',
                 DomainFactory.createAndSaveProcessingStep(SnvAnnotationJob.toString()), [])
-        snvAnnotationJob.log = log
+        snvAnnotationJob.log = new NoOpLog()
     }
 
     @After
@@ -169,7 +171,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
         executionService.metaClass.sendScript = { Realm realm, String text, String jobIdentifier, String qsubParameters ->
             throw new RuntimeException("This area should not be reached since the annotation job shall not run")
         }
-        snvAnnotationJob.log = log
+        snvAnnotationJob.log = new NoOpLog()
         assertEquals(NextAction.SUCCEED, snvAnnotationJob.maybeSubmit(snvCallingInstance2))
     }
 

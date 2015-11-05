@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
+import org.apache.commons.logging.impl.NoOpLog
+
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
@@ -92,7 +94,7 @@ class AbstractMultiJobTests {
 
     private AbstractMultiJob createJob(final Closure mainLogic) {
         final AbstractMultiJob jobBean = applicationContext.getBean("testMultiJob", step, null)
-        jobBean.log = log
+        jobBean.log = new NoOpLog()
         jobBean.metaClass.executeImpl = { final Collection<? extends ClusterJobIdentifier> finishedClusterJobs ->
             try {
                 assert delegate.is(job)
