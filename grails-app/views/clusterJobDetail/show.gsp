@@ -118,7 +118,7 @@ on the general cluster job page
                 <span class="toolTip"><g:message code="jobstats.jobSpecific.detail.table.toolTip.time"/></span>
             </div>
             <br>
-            <g:set var="formatDateString" value="${"yyyy-MM-dd hh:mm:ss"}"/>
+            <g:set var="formatDateString" value="${"yyyy-MM-dd HH:mm:ss"}"/>
             <table>
                 <col class="columnColors">
                 <col class="columnSpace">
