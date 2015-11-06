@@ -166,7 +166,7 @@ class ProcessesController {
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
         processes.each { Process process, ProcessingStepUpdate latest ->
-            String parameterData = processParameterData(process)
+            Map parameterData = processParameterData(process)
             def actions = []
             if (latest.state == ExecutionState.FAILURE) {
                 actions << "restart"
@@ -371,18 +371,20 @@ class ProcessesController {
         return PlanStatus.RUNNING
     }
 
-    private String processParameterData(Process process) {
+    private Map<String,String> processParameterData(Process process) {
         ProcessParameter parameter = ProcessParameter.findByProcess(process)
-        String parameterData = null
         if (parameter) {
             if (parameter.className) {
-                parameterData = g.link(controller: GrailsNameUtils.getShortName(parameter.className), action: "show", id: parameter.value) { parameter.toObject().toString() }
+                return [
+                    link: g.createLink(controller: GrailsNameUtils.getShortName(parameter.className), action: "show", id: parameter.value).toString(),
+                    text: parameter.toObject().toString()
+                ]
             } else {
                 // not a class, just use the value
-                parameterData = parameter.value
+                return [text: parameter.value]
             }
         }
-        return parameterData
+        return null
     }
 
     // params.id, params.comment, date

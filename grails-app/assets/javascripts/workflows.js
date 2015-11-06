@@ -507,7 +507,18 @@ $.otp.workflows = {
                     text: rowData[0]
                 });
                 rowData[1] = $.otp.workflows.statusImageHtml(rowData[1].name);
-                rowData[2] = rowData[2] || "-";
+                if (rowData[2]) {
+                    if (rowData[2].link) {
+                        rowData[2] = $.otp.createLinkMarkup({
+                            controller: rowData[2].link,
+                            text: rowData[2].text
+                        });
+                    } else {
+                        rowData[2] = rowData[2].text;
+                    }
+                } else {
+                    rowData[2] = "-";
+                }
                 rowData[3] = $.otp.workflows.renderDate(rowData[3]);
                 rowData[4] = $.otp.workflows.renderDate(rowData[4]);
                 stepId = rowData[6].id;
