@@ -24,6 +24,7 @@ tools/*/*/.gradle/
 .groovy/*
 target
 .asscache
+.slcache
 
 # Third-party tools
 ## CodeNarc
