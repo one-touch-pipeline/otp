@@ -30,7 +30,7 @@ class BwaAlignmentStartJob extends AbstractStartJobImpl {
             if (alignmentPass) {
                 log.debug "Creating Alignment process for AlignmentPass ${alignmentPass}"
                 alignmentPassService.alignmentPassStarted(alignmentPass)
-                createProcess(new ProcessParameter(value: alignmentPass.id.toString(), className: alignmentPass.class.name))
+                createProcess(alignmentPass)
             }
         }
     }

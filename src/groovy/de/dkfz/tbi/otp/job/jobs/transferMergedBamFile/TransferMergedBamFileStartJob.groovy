@@ -32,7 +32,7 @@ class TransferMergedBamFileStartJob extends AbstractStartJobImpl {
                 log.debug 'Starting to transfer merged BAM file ' + file
                 file.updateFileOperationStatus(AbstractMergedBamFile.FileOperationStatus.INPROGRESS)
                 assert file.save(flush: true)
-                createProcess(new ProcessParameter(value: file.id.toString(), className: file.class.name))
+                createProcess(file)
             }
         }
     }

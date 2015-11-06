@@ -1,9 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.unpacking
 
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
-import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.ngsdata.Run
 import de.dkfz.tbi.otp.ngsdata.RunProcessingService;
 
@@ -29,7 +27,7 @@ class RunUnpackStartJob extends AbstractStartJobImpl {
         Run run = runProcessingService.runReadyToUnpack()
         if (run) {
             runProcessingService.blockUnpack(run)
-            createProcess(new ProcessParameter(value: run.id.toString(), className: run.class.name))
+            createProcess(run)
         }
     }
 

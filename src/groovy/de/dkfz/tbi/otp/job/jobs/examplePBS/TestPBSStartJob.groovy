@@ -22,7 +22,7 @@ class TestPBSStartJob extends AbstractStartJobImpl  {
         if (!hasFreeSlot()) {
             return
         }
-        createProcess(new ProcessParameter(value: "test"))
+        createProcess([], new ProcessParameter(value: "test"))
     }
 
     private boolean hasFreeSlot() {

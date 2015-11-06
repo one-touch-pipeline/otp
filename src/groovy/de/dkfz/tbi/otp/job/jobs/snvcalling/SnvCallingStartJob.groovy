@@ -11,7 +11,6 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import org.joda.time.DateTimeZone
 import org.joda.time.Instant
 import org.joda.time.format.DateTimeFormat
@@ -61,7 +60,7 @@ class SnvCallingStartJob extends AbstractStartJobImpl {
                 samplePair.processingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
                 samplePair.save()
 
-                createProcess(new ProcessParameter(value: snvCallingInstance.id.toString(), className: SnvCallingInstance.class.name))
+                createProcess(snvCallingInstance)
                 log.debug "SnvCallingStartJob started for: ${snvCallingInstance.toString()}"
             }
         }

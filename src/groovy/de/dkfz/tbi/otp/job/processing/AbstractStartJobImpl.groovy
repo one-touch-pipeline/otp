@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import grails.util.Environment
 
 import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
+import org.hibernate.Hibernate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationListener
 
@@ -132,11 +133,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
     }
 
     protected void createProcess(Object processParameter) {
-        createProcess(new ProcessParameter(value: processParameter.id.toString(), className: processParameter.class.name))
-    }
-
-    protected void createProcess(ProcessParameter processParameter) {
-        createProcess([], processParameter)
+        createProcess([], new ProcessParameter(value: processParameter.id.toString(), className: Hibernate.getClass(processParameter).name))
     }
 
     /**

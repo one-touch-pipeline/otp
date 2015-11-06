@@ -1,9 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.dataLocation
 
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
-import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.ngsdata.Run
 import de.dkfz.tbi.otp.ngsdata.RunProcessingService
 import org.springframework.scheduling.annotation.Scheduled
@@ -30,7 +28,7 @@ class DataLocationStartJob extends AbstractStartJobImpl {
             println "RUN: ${run.id}"
             runProcessingService.blockCheckingFinalLocation(run)
             println "BLOCKED RUN: ${run.id}"
-            createProcess(new ProcessParameter(value: run.id.toString(), className: run.class.name))
+            createProcess(run)
             println "Starting dataLocationWorkflow for run ${run.name}"
         }
     }

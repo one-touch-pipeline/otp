@@ -34,7 +34,7 @@ class DataTransferDKFZStatJob extends AbstractStartJobImpl  {
                 continue
             }
             // new run to be processed
-            createProcess(new ProcessParameter(value: run.id.toString(), className: run.class.name))
+            createProcess(run)
             println run.toString()
             nRunning++
             n++

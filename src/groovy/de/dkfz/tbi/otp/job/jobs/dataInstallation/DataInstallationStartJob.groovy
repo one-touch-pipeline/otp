@@ -8,7 +8,6 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.ngsdata.*
 
 @Component("dataInstallationStartJob")
@@ -31,7 +30,7 @@ class DataInstallationStartJob extends AbstractStartJobImpl {
         Run run = runProcessingService.runReadyToInstall()
         if (run) {
             runProcessingService.blockInstallation(run)
-            createProcess(new ProcessParameter(value: run.id.toString(), className: run.class.name))
+            createProcess(run)
             log.debug "Installing Run: ${run.name}"
         }
     }

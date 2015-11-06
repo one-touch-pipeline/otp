@@ -38,7 +38,7 @@ class IndexSingleBamStartJob extends AbstractStartJobImpl {
                 continue
             }
             // new run to be processed
-            createProcess(new ProcessParameter(value: scan.id.toString(), className: scan.class.name))
+            createProcess(scan)
             println scan.toString()
             numberOfRunning++
             n++

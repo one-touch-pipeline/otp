@@ -33,7 +33,7 @@ class MergingStartJob extends AbstractStartJobImpl {
             MergingPass mergingPass = mergingPassService.create()
             if (mergingPass) {
                 mergingPassService.mergingPassStarted(mergingPass)
-                createProcess(new ProcessParameter(value: mergingPass.id.toString(), className: mergingPass.class.name))
+                createProcess(mergingPass)
                 log.debug "MergingStartJob started for: ${mergingPass.toString()}"
             }
         }

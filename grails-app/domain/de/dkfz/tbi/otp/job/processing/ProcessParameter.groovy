@@ -9,7 +9,10 @@ class ProcessParameter {
 
     static constraints = {
         process(nullable: false, unique: true)
-        className(nullable: false, validator: { ProcessParameterObject.isAssignableFrom(Class.forName(it, true, getClass().getClassLoader())) })
+        className(nullable: false, validator: { String name ->
+            ProcessParameterObject.isAssignableFrom(Class.forName(name, true, getClass().getClassLoader())) &&
+            !name.contains('$')
+        })
     }
 
     static mapping = {

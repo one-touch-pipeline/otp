@@ -32,7 +32,7 @@ class QualityAssessmentMergedStartJob extends AbstractStartJobImpl {
             if (qualityAssessmentMergedPass) {
                 log.debug "Creating merged quality assessment process for ${qualityAssessmentMergedPass}"
                 qualityAssessmentMergedPassService.passStarted(qualityAssessmentMergedPass)
-                createProcess(new ProcessParameter(value: qualityAssessmentMergedPass.id.toString(), className: qualityAssessmentMergedPass.class.name))
+                createProcess(qualityAssessmentMergedPass)
             }
         }
     }

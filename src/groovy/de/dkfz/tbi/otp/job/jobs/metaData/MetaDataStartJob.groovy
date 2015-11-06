@@ -24,7 +24,7 @@ class MetaDataStartJob extends AbstractStartJobImpl {
         Run run = runProcessingService.runWithNewMetaData()
         if (run) {
             runProcessingService.blockMetaData(run)
-            createProcess(new ProcessParameter(value: run.id.toString(), className: run.class.name))
+            createProcess(run)
             println "MetaDataWorkflow started for: ${run.toString()}"
         }
     }

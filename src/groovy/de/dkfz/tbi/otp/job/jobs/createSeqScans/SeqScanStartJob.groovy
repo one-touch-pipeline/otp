@@ -47,7 +47,7 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
         if (seqTrack == null) {
             return
         }
-        createProcess(new ProcessParameter(value: seqTrack.id.toString(), className: seqTrack.class.name))
+        createProcess(seqTrack)
         println "${name}: job started for seqTrack ${seqTrack}"
     }
 

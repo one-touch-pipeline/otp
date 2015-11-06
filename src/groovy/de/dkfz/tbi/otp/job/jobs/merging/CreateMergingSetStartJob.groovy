@@ -31,7 +31,7 @@ class CreateMergingSetStartJob extends AbstractStartJobImpl {
             ProcessedBamFile bamFile2Merge = processedBamFileService.processedBamFileNeedsProcessing()
             if (bamFile2Merge) {
                 processedBamFileService.blockedForAssigningToMergingSet(bamFile2Merge)
-                createProcess(new ProcessParameter(value: bamFile2Merge.id.toString(), className: ProcessedBamFile.class.name))
+                createProcess(bamFile2Merge)
                 println "CreateMergingSetStartJob started for: ${bamFile2Merge.toString()}"
             }
         }

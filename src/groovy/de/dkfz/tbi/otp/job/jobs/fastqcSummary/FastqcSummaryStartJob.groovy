@@ -26,7 +26,7 @@ class FastqcSummaryStartJob extends AbstractStartJobImpl{
         Run run = seqTrackService.getRunReadyForFastqcSummary()
         if (run) {
             log.debug "Creating fastqc summary process for run ${run}"
-            createProcess(new ProcessParameter(value: run.id.toString(), className: run.class.name))
+            createProcess(run)
         }
     }
 

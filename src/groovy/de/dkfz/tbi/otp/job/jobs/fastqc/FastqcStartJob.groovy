@@ -33,7 +33,7 @@ class FastqcStartJob extends AbstractStartJobImpl {
             if (seqTrack) {
                 log.debug "Creating fastqc process for seqTrack ${seqTrack}"
                 seqTrackService.setFastqcInProgress(seqTrack)
-                createProcess(new ProcessParameter(value: seqTrack.id.toString(), className: seqTrack.class.name))
+                createProcess(seqTrack)
             }
         }
     }
