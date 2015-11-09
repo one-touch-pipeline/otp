@@ -157,13 +157,13 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         File rootDirectory = getRootDirectory()
         assert rootDirectory.list()?.size() : "${rootDirectory} seems not to be mounted"
 
-        rootPath = "${getBaseDirectory()}/root_path/"
-        processingRootPath = "${getBaseDirectory()}/processing_root_path/"
-        loggingRootPath = "${getBaseDirectory()}/logging_root_path/"
-        stagingRootPath = "${getBaseDirectory()}/staging_root_path/"
+        rootPath = "${getBaseDirectory()}/root_path"
+        processingRootPath = "${getBaseDirectory()}/processing_root_path"
+        loggingRootPath = "${getBaseDirectory()}/logging_root_path"
+        stagingRootPath = "${getBaseDirectory()}/staging_root_path"
         programsRootPath = "/"
-        testDataDir = "${getRootDirectory()}/files/"
-        ftpDir = "${getBaseDirectory()}/ftp/"
+        testDataDir = "${getRootDirectory()}/files"
+        ftpDir = "${getBaseDirectory()}/ftp"
 
         Map realmParams = [
                 rootPath: rootPath,

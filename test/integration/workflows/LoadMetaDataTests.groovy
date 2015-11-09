@@ -135,7 +135,7 @@ class LoadMetaDataTests extends WorkflowTestCase {
         assertNotNull(fileType.save(flush: true))
 
         SampleType sampleType = new SampleType()
-        sampleType.name = "some sample type"
+        sampleType.name = "some_sample_type"
         sampleType.specificReferenceGenome = SpecificReferenceGenome.USE_PROJECT_DEFAULT
         assertNotNull(sampleType.save(flush: true))
 
@@ -384,7 +384,7 @@ class LoadMetaDataTests extends WorkflowTestCase {
         SeqType seqType = new SeqType()
         seqType.name = seqTypeName
         seqType.libraryLayout = libraryLayout
-        seqType.dirName = seqTypeName
+        seqType.dirName = seqTypeName.replaceAll(/\s/, "")
         assertNotNull(seqType.save(flush: true))
         return seqType
     }
