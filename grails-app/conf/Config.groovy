@@ -39,17 +39,6 @@ grails.mime.types = [ html: [
     multipartForm: 'multipart/form-data'
 ]
 
-// What URL patterns should be processed by the resources plugin
-// (prevent disclosure of configuration and code (CVE-2014-0053))
-grails.resources.adhoc.includes = [
-    '/images/**',
-    '/css/**',
-    '/js/**',
-    '/plugins/**',
-    '/pages/**',
-    '/xslt/**',
-]
-
 // The default codec used to encode data with ${}
 grails.views.default.codec = "none" // none, html, base64
 grails.views.gsp.encoding = "UTF-8"
