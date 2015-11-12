@@ -13,8 +13,8 @@ println ctx.processingOptionService.createOrUpdate(
         "roddyPath",
         null,
         null,
-        "/path/to/roddy/",
-        "Path to the roddy.sh on the current cluster (***REMOVED***cluster 11.4)",
+        "/path/to/programs/otp/Roddy/",
+        "Path to the roddy.sh on the current cluster (***REMOVED***cluster 13.1)",
 )
 
 println ctx.processingOptionService.createOrUpdate(

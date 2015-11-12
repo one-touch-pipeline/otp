@@ -412,4 +412,4 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
     Duration getTimeout() {
         Duration.standardMinutes(30)
     }
- }
+}

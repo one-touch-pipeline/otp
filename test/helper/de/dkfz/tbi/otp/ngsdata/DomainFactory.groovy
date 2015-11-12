@@ -805,8 +805,8 @@ class DomainFactory {
             name: "roddyPath",
             type: "",
             project: null,
-            value: "${basePath}/tbi_cluster/11.4/x86_64/otp/Roddy/",
-            comment: "Path to the roddy.sh on the current cluster (***REMOVED***cluster 11.4)",
+            value: "${basePath}/tbi_cluster/13.1/x86_64/otp/Roddy/",
+            comment: "Path to the roddy.sh on the current cluster (***REMOVED***cluster 13.1)",
         )
         assert processingOptionPath.save(flush: true)
 
@@ -848,7 +848,7 @@ class DomainFactory {
                 name: "roddyBaseConfigsPath",
                 type: "",
                 project: null,
-                value: "${basePath}/tbi_cluster/11.4/x86_64/otp/RoddyBaseConfigs/",
+                value: "${basePath}/tbi_cluster/13.1/x86_64/otp/RoddyBaseConfigs/",
                 comment: "Path to the baseConfig-files which are needed to execute Roddy",
         )
         assert processingOptionBaseConfigsPath.save(flush: true)
@@ -857,7 +857,7 @@ class DomainFactory {
                 name: "roddyApplicationIni",
                 type: "",
                 project: null,
-                value: "${basePath}/tbi_cluster/11.4/x86_64/otp/RoddyBaseConfigs/applicationProperties.ini",
+                value: "${basePath}/tbi_cluster/13.1/x86_64/otp/RoddyBaseConfigs/applicationProperties.ini",
                 comment: "Path to the application.ini which is needed to execute Roddy"
         )
         assert processingOptionApplicationIni.save(flush: true)

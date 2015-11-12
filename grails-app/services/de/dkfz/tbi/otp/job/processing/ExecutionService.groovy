@@ -33,7 +33,7 @@ class ExecutionService {
     //Job ID                    Name             User            Time Use S Queue
     public static final String KNOWN_JOB_ID_PATTERN = /(?i)\s*Job\sID\s*Name\s*User.*/
     //qstat: Unknown Job Id 22.headnode.long-domain
-    //qstat: Unknown Job Id Error 22.clust_node.long-domain
+    //qstat: Unknown Job Id Error 22.headnode.long-domain
     public static final String UNKNOWN_JOB_ID_PATTERN = /(?i)\s*qstat:\s*Unknown\sJob\sID\s(Error)?\d*.*/
 
     enum ClusterJobStatus {

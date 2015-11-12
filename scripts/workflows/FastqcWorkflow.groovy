@@ -25,6 +25,6 @@ ctx.processingOptionService.createOrUpdate(
         "fastqcCommand",
         null,
         null,
-        "fastqc --java /path/to/programs/jdk/jdk1.6.0_45/bin/java",
+        "fastqc-0.10.1 --java /path/to/programs/jdk/jdk1.6.0_45/bin/java",
         "command for fastqc with java"
 )

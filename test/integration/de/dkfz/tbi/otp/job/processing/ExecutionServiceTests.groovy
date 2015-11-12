@@ -235,7 +235,7 @@ X.headnode                test             test                   0 Q verylong
             return """
 Job ID                    Name             User            Time Use S Queue
 ------------------------- ---------------- --------------- -------- - -----
-X.host          ...QaAnalysisJob klinga          00:00:00 C fast
+X.headnode          ...QaAnalysisJob klinga          00:00:00 C fast
 """
         }
         assertFalse(executionService.checkRunningJob("X", realm))
@@ -248,7 +248,7 @@ X.host          ...QaAnalysisJob klinga          00:00:00 C fast
             return """
 Job ID                    Name             User            Time Use S Queue
 ------------------------- ---------------- --------------- -------- - -----
-X.host          ...QaAnalysisJob klinga          00:00:00 R fast
+X.headnode          ...QaAnalysisJob klinga          00:00:00 R fast
 """
         }
         assertTrue(executionService.checkRunningJob("X", realm))
@@ -268,7 +268,7 @@ X.host          ...QaAnalysisJob klinga          00:00:00 R fast
     void testCheckRunningJob_WhenJobIsNotFoundNewFormat_ShouldReturnFalse() {
         assertNotNull(realm.save())
         executionService.metaClass.executeCommand { Realm r, String s ->
-            return "qstat: Unknown Job Id Error 22.clust_node.long-domain"
+            return "qstat: Unknown Job Id Error 22.headnode.long-domain"
         }
         assertFalse(executionService.checkRunningJob("X", realm))
     }
