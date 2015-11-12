@@ -1,4 +1,5 @@
 import grails.util.Environment
+import org.springframework.cache.ehcache.EhCacheManagerFactoryBean
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
 
 // Place your Spring DSL code here
@@ -33,7 +34,8 @@ beans = {
         }
     }
 
-    aclCacheManager(org.springframework.cache.ehcache.EhCacheManagerFactoryBean) {
+    // http://stackoverflow.com/questions/10013288/another-unnamed-cachemanager-already-exists-in-the-same-vm-ehcache-2-5
+    aclCacheManager(EhCacheManagerFactoryBean) {
         shared = true
     }
 
