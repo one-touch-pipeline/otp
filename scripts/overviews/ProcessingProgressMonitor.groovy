@@ -138,7 +138,7 @@ def checkProcessesForObject = { String workflow, List noProcess, List processWit
         output << "${INDENT}${INDENT}the OTP link: https://otp.dkfz.de/otp/processes/process/${lastProcess.id}"
         output << "${INDENT}${INDENT}the error: ${ps.latestProcessingStepUpdate?.error?.errorMessage?.replaceAll('\n', "\n${INDENT}${INDENT}${INDENT}${INDENT}${INDENT}")}"
         if (ps.process.comment) {
-            output << "${INDENT}${INDENT}the comment (${ps.process.commentDate.format("yyyy-MM-dd")}): ${ps.process.comment.replaceAll('\n', "\n${INDENT}${INDENT}${INDENT}${INDENT}${INDENT}")}"
+            output << "${INDENT}${INDENT}the comment (${ps.process.comment.modificationDate.format("yyyy-MM-dd")}): ${ps.process.comment.comment.replaceAll('\n', "\n${INDENT}${INDENT}${INDENT}${INDENT}${INDENT}")}"
         }
         if (update == null) {
             output << "${INDENT}${INDENT}no update available: Please inform a maintainer\n"
