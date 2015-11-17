@@ -1526,7 +1526,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         ProcessingStep step = createFailedProcessingStep()
         schedulerService.restartProcessingStep(step, false, true)
         assertEquals(5, ProcessingStepUpdate.countByProcessingStep(step))
-        assertEquals(ExecutionState.RESUMED, ProcessingStepUpdate.findAllByProcessingStep(step).last().state)
+        assertEquals(ExecutionState.SUSPENDED, ProcessingStepUpdate.findAllByProcessingStep(step).last().state)
         // no RestartedProcessingSteps should be created
         assertEquals([], RestartedProcessingStep.findAllByOriginal(step))
         assertFalse(step.process.finished)
