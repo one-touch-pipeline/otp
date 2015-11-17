@@ -376,7 +376,9 @@ class ProcessesController {
         if (parameter) {
             if (parameter.className) {
                 return [
-                    link: g.createLink(controller: GrailsNameUtils.getShortName(parameter.className), action: "show", id: parameter.value).toString(),
+                    controller: GrailsNameUtils.getShortName(parameter.className),
+                    action: "show",
+                    id: parameter.value,
                     text: parameter.toObject().toString()
                 ]
             } else {

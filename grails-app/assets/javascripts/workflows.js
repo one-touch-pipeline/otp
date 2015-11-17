@@ -508,11 +508,8 @@ $.otp.workflows = {
                 });
                 rowData[1] = $.otp.workflows.statusImageHtml(rowData[1].name);
                 if (rowData[2]) {
-                    if (rowData[2].link) {
-                        rowData[2] = $.otp.createLinkMarkup({
-                            controller: rowData[2].link,
-                            text: rowData[2].text
-                        });
+                    if (rowData[2].controller) {
+                        rowData[2] = $.otp.createLinkMarkup(rowData[2]);
                     } else {
                         rowData[2] = rowData[2].text;
                     }

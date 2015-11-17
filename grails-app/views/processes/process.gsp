@@ -13,8 +13,10 @@
             <h1><g:message code="processes.process.title.listOfProcessingSteps" args="${ [id] }"/>  <g:link action="plan" id="${planId}"><g:message code="processes.process.title.workflow" args="${ [name] }"/></g:link></h1>
             <g:if test="${parameter}">
                 <p><g:message code="processes.process.operatesOn"/>
-                    <g:if test="parameter.link">
-                        <a href="${parameter.link}">${parameter.text}</a>
+                    <g:if test="parameter.controller">
+                        <g:link controller="${parameter.controller}" action="${parameter.action}" id="${parameter.id}">
+                            ${parameter.text}
+                        </g:link>
                     </g:if>
                     <g:else>
                         ${parameter.text}
