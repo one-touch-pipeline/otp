@@ -107,10 +107,6 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         assert group: '"otp.testing.group" is not set in your "otp.properties". Please add it with an existing secondary group.'
         executionHelperService.setGroup(realm, realm.rootPath as File, group)
 
-        //BUG in Junit, solved in 4.8.1
-        //the line can be deleted after grails update
-        temporaryFolder.create()
-
         setUpFilesVariables()
 
         MergingWorkPackage workPackage = createWorkPackage()
@@ -118,6 +114,16 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         setUpRefGenomeDir(workPackage)
 
         createProjectConfig(workPackage)
+
+
+        BedFile bedFile = new BedFile(
+                referenceGenome: workPackage.referenceGenome,
+                libraryPreparationKit: workPackage.libraryPreparationKit,
+                fileName: "TruSeqExomeTargetedRegions_plain.bed",
+                targetSize: 62085295,
+                mergedTargetSize: 62085286,
+        )
+        assert bedFile.save(flush: true, failOnError: true)
 
         //OtherUnixUser user has very limited permissions, it must be checked in the tests
         //that roddy has enough permissions to work and does not try to damage other files
@@ -152,17 +158,16 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         firstBamFile = new File(baseTestDataDir, 'first-bam-file/first-bam-file_merged.mdup.bam')
         refGenDir = new File(baseTestDataDir, 'reference-genomes/bwa06_1KGRef')
         chromosomeNamesFile = new File(baseTestDataDir, 'reference-genomes/chromosome-names.txt')
-        projectConfigFile = new File(baseTestDataDir, 'project-config/projectTestAlignment-version.xml')
-        conveyProjectConfigFile = new File(baseTestDataDir, 'project-config/conveyProjectTestAlignment-version.xml')
-        roddyFailsProjectConfig = new File(baseTestDataDir, 'project-config/roddy-fails-project-config-version.xml')
+        projectConfigFile = new File(baseTestDataDir, 'project-config/projectTestAlignment.xml')
+        conveyProjectConfigFile = new File(baseTestDataDir, 'project-config/conveyProjectTestAlignment.xml')
+        roddyFailsProjectConfig = new File(baseTestDataDir, 'project-config/roddy-fails-project-config.xml')
     }
+
+    abstract SeqType findSeqType()
 
     MergingWorkPackage createWorkPackage() {
         DomainFactory.createAlignableSeqTypes()
-        SeqType seqType = CollectionUtils.exactlyOneElement(SeqType.findAllWhere(
-                name: SeqTypeNames.WHOLE_GENOME.seqTypeName,
-                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
-        ))
+        SeqType seqType = findSeqType()
 
         Workflow workflow = Workflow.build(
                 name: Workflow.Name.PANCAN_ALIGNMENT,
@@ -182,12 +187,16 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
             )
         }
 
+        LibraryPreparationKit kit = new LibraryPreparationKit(name: "~* xX liBrArYprEPaRaTioNkiT Xx *~")
+        assert kit.save(flush: true, failOnError: true)
+
         MergingWorkPackage workPackage = MergingWorkPackage.build(
                 workflow: workflow,
                 seqType: seqType,
                 referenceGenome: referenceGenome,
                 needsProcessing: false,
                 statSizeFileName: CHROMOSOME_STAT_FILE_NAME,
+                libraryPreparationKit: kit,
         )
 
         workPackage.sampleType.name = "CONTROL"

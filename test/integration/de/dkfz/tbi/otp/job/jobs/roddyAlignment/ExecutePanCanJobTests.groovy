@@ -297,7 +297,7 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
 
         String expectedCmd =  """\
 cd /tmp \
-&& sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@EXON \
+&& sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@WES \
 ${roddyBamFile.individual.pid} \
 --useconfig=${roddyApplicationIni} \
 --useRoddyVersion=${roddyVersion} \

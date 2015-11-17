@@ -16,7 +16,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 /**
  * test for PanCanAlignment workflow
  */
-class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkflowTests {
+abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkflowTests {
 
     @Autowired
     PanCanStartJob panCanStartJob

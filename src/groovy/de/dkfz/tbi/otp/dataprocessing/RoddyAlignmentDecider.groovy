@@ -60,8 +60,9 @@ abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
 
     @Override
     boolean canWorkflowAlign(SeqTrack seqTrack) {
-        return SeqType.findAllByNameAndLibraryLayout(
-                SeqTypeNames.WHOLE_GENOME.seqTypeName, SeqType.LIBRARYLAYOUT_PAIRED
-        )*.id.contains(seqTrack.seqType.id)
+        return SeqType.createCriteria()({
+            'in'("name", [SeqTypeNames.WHOLE_GENOME.seqTypeName, SeqTypeNames.EXOME.seqTypeName])
+            eq("libraryLayout", SeqType.LIBRARYLAYOUT_PAIRED)
+        })*.id.contains(seqTrack.seqType.id)
     }
 }

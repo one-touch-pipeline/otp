@@ -3,6 +3,9 @@ package workflows
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 import org.junit.Ignore
 
@@ -112,5 +115,13 @@ class AbstractRoddyJobIntegrationTests extends AbstractPanCanAlignmentWorkflowTe
         // check
 
         checkAllAfterRoddyPbsJobsRestartAndSuccessfulExecution_alignBaseBamAndNewLanes()
+    }
+
+    @Override
+    SeqType findSeqType() {
+        return CollectionUtils.exactlyOneElement(SeqType.findAllWhere(
+                name: SeqTypeNames.WHOLE_GENOME.seqTypeName,
+                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
+        ))
     }
 }

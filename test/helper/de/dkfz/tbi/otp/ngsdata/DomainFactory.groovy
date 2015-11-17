@@ -734,7 +734,7 @@ class DomainFactory {
     static SeqType createExomeSeqType() {
         SeqType.buildLazy(
                 name: SeqTypeNames.EXOME.seqTypeName,
-                alias:  SeqTypeNames.EXOME.seqTypeName,
+                alias: "WES",
                 libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED
         )
     }
