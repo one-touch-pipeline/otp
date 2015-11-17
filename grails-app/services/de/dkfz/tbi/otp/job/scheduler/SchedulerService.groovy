@@ -671,7 +671,7 @@ class SchedulerService {
                 restartedStep = step
                 ProcessingStepUpdate resumed = new ProcessingStepUpdate(
                         date: new Date(),
-                        state: ExecutionState.RESUMED,
+                        state: ExecutionState.SUSPENDED,
                         previous: lastUpdate,
                         processingStep: restartedStep)
                 if (!resumed.save(flush: true)) {
