@@ -116,7 +116,9 @@ ${CHROMOSOME_NAMES_VARIABLE_NAME}=\${CHROMOSOME_INDICES[@]}
         } else {
             final String[] chromosomeNames = serializedChromosomeNames.split(' ')
             assert chromosomeNames.length == chromosomeCount
-            return Arrays.asList(chromosomeNames)
+            final List<String> chromosomeNamesArray = Arrays.asList(chromosomeNames)
+            assert chromosomeNamesArray.size() == new HashSet<String>(chromosomeNamesArray).size()
+            return chromosomeNamesArray
         }
     }
 

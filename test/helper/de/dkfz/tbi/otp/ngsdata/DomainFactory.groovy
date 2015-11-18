@@ -28,14 +28,18 @@ class DomainFactory {
     private DomainFactory() {
     }
 
-    static final String DEFAULT_MD5_SUM = '123456789abcdef123456789abcdef00'
+    /**
+     * @deprecated Use {@link HelperUtils#getRandomMd5sum()} instead.
+     */
+    @Deprecated
+    static final String DEFAULT_MD5_SUM = HelperUtils.randomMd5sum
     static final String DEFAULT_TAB_FILE_NAME = 'DefaultTabFileName.tab'
     static final String DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY = 'exec_123456_123456789_test_test'
     static final long DEFAULT_FILE_SIZE = 123456
     static final String TEST_CONFIG_VERSION = 'v1_0'
     static final Map PROCESSED_BAM_FILE_PROPERTIES = [
             fileSize: 123456789,
-            md5sum: DEFAULT_MD5_SUM,
+            md5sum: HelperUtils.randomMd5sum,
             fileOperationStatus: FileOperationStatus.PROCESSED,
     ].asImmutable()
 
@@ -244,7 +248,7 @@ class DomainFactory {
                         workflow: workPackage.workflow,
                         project: workPackage.project,
                 ),
-                md5sum: DEFAULT_MD5_SUM,
+                md5sum: HelperUtils.randomMd5sum,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 fileSize: 10000,
                 roddyVersion: ProcessingOption.build(),
@@ -262,7 +266,7 @@ class DomainFactory {
                 numberOfMergedLanes: baseBamFile.numberOfMergedLanes + 1,
                 workDirectoryName: "${RoddyBamFile.WORK_DIR_PREFIX}_${counter++}",
                 seqTracks: bamFileProperties.seqTracks ?: [DomainFactory.buildSeqTrackWithDataFile(baseBamFile.workPackage)],
-                md5sum: DEFAULT_MD5_SUM,
+                md5sum: HelperUtils.randomMd5sum,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 fileSize: 10000,
                 ] + bamFileProperties
@@ -377,7 +381,7 @@ class DomainFactory {
         Map map = [
                 step: SnvCallingStep.CALLING,
                 processingState: SnvProcessingStates.FINISHED,
-                md5sum: DEFAULT_MD5_SUM,
+                md5sum: HelperUtils.randomMd5sum,
                 fileSize: DEFAULT_FILE_SIZE,
         ] + properties
 

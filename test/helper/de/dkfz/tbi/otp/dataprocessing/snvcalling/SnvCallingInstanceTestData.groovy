@@ -1,10 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingJob
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.ExternalScript
+import de.dkfz.tbi.otp.utils.HelperUtils
 import org.springframework.stereotype.Component
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -77,15 +80,14 @@ class SnvCallingInstanceTestData {
     }
 
     SnvJobResult createAndSaveSnvJobResult(SnvCallingInstance instance, SnvCallingStep step, SnvJobResult inputResult = null, SnvProcessingStates processingState = SnvProcessingStates.FINISHED, boolean withdrawn = false) {
-        final ExternalScript externalScript = ExternalScript.findOrSaveWhere(
-            scriptIdentifier: step.externalScriptIdentifier,
-            scriptVersion: 'v1',
-            deprecatedDate: null,
-            filePath: "/dev/null/otp-test/${step.externalScriptIdentifier}",
-            author: "otptest",
-        )
-        assert externalScript.save(flush: true)
-
+        ExternalScript externalScript = atMostOneElement(ExternalScript.findAllByScriptIdentifierAndScriptVersionAndDeprecatedDateIsNull(step.externalScriptIdentifier, instance.config.externalScriptVersion))
+        if (externalScript == null) {
+            externalScript = createOrFindExternalScript(
+                    scriptIdentifier: step.externalScriptIdentifier,
+                    scriptVersion: instance.config.externalScriptVersion,
+                    filePath: "/dev/null/otp-test/${step.externalScriptIdentifier}",
+            )
+        }
         final SnvJobResult result = new SnvJobResult([
             snvCallingInstance: instance,
             step: step,
@@ -93,7 +95,7 @@ class SnvCallingInstanceTestData {
             processingState: processingState,
             withdrawn: withdrawn,
             externalScript: externalScript,
-            md5sum: "a841c64c5825e986c4709ac7298e9366",
+            md5sum: HelperUtils.randomMd5sum,
             fileSize: 1234l,
         ])
         if (step == SnvCallingStep.CALLING) {

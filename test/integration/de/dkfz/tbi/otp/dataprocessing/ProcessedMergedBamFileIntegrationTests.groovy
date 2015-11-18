@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstanceTestData
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
+import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.TestCase
 
@@ -134,7 +135,7 @@ class ProcessedMergedBamFileIntegrationTests {
     void testGetPathForFurtherProcessing_IsSetInMergingWorkPackage_shouldReturnDir() {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
-                md5sum: DomainFactory.DEFAULT_MD5_SUM,
+                md5sum: HelperUtils.randomMd5sum,
                 fileSize: DomainFactory.DEFAULT_FILE_SIZE,
         ])
         assert DomainFactory.createRealmDataManagement(TestCase.getUniqueNonExistentPath(), [name: bamFile.project.realmName]).save(flush: true, failOnError: true)

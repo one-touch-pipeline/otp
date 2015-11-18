@@ -747,7 +747,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
 
 
     private void finishOperationStateOfRoddyBamFile(RoddyBamFile roddyBamFile) {
-        roddyBamFile.md5sum = DomainFactory.DEFAULT_MD5_SUM
+        roddyBamFile.md5sum = HelperUtils.randomMd5sum
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
         roddyBamFile.fileSize = 1000
         assert roddyBamFile.save(flush: true)
@@ -758,7 +758,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
 
         assert roddyBamFile.workDirectory.mkdirs()
-        roddyBamFile2.workMd5sumFile << "${DomainFactory.DEFAULT_MD5_SUM}\n"
+        roddyBamFile2.workMd5sumFile << "${HelperUtils.randomMd5sum}\n"
         roddyBamFile2.workBamFile << "some content"
         roddyBamFile2.workBaiFile << "some content"
         return roddyBamFile2

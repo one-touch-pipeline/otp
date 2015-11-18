@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
 import de.dkfz.tbi.otp.ngsdata.TestData
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.utils.HelperUtils
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -24,7 +25,7 @@ public class RoddyAlignmentDeciderTest {
     private createAndRunPrepare(boolean bamFileContainsSeqTrack, boolean withdrawn, FileOperationStatus fileOperationStatus, boolean forceAlign) {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 withdrawn: withdrawn,
-                md5sum: fileOperationStatus == FileOperationStatus.PROCESSED ? DomainFactory.DEFAULT_MD5_SUM : null,
+                md5sum: fileOperationStatus == FileOperationStatus.PROCESSED ? HelperUtils.randomMd5sum : null,
                 fileOperationStatus: fileOperationStatus,
                 fileSize: fileOperationStatus == FileOperationStatus.PROCESSED ? 10000 : -1
                 ]
@@ -191,7 +192,7 @@ public class RoddyAlignmentDeciderTest {
         )
         RoddyBamFile bamFile3 = DomainFactory.createRoddyBamFile([
                 withdrawn: withdrawn,
-                md5sum: md5sumNotNull ? DomainFactory.DEFAULT_MD5_SUM : null,
+                md5sum: md5sumNotNull ? HelperUtils.randomMd5sum : null,
                 identifier: bamFile1.identifier + 2,
                 workPackage: bamFile1.workPackage,
                 seqTracks: [bamFile1.seqTracks.iterator().next()] as Set<SeqTrack>,
@@ -219,7 +220,7 @@ public class RoddyAlignmentDeciderTest {
         )
         RoddyBamFile bamFile2 = DomainFactory.createRoddyBamFile([
                 withdrawn: withdrawn,
-                md5sum: md5sumNotNull ? DomainFactory.DEFAULT_MD5_SUM : null,
+                md5sum: md5sumNotNull ? HelperUtils.randomMd5sum : null,
                 identifier: bamFile1.identifier + 1,
                 workPackage: bamFile1.workPackage,
                 seqTracks: [bamFile1.seqTracks.iterator().next()] as Set<SeqTrack>,

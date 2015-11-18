@@ -301,10 +301,11 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     @Test
     void testCreateAndSaveSnvJobResult() {
         assert 1 == SnvJobResult.count()
-        abstractSnvCallingJob.createAndSaveSnvJobResult(snvCallingInstance, externalScript_Annotation, null, snvCallingJobResult)
+        SnvJobResult returnedResult = abstractSnvCallingJob.createAndSaveSnvJobResult(snvCallingInstance, externalScript_Annotation, null, snvCallingJobResult)
         final List<SnvJobResult> snvJobResults = SnvJobResult.list(sort:"id", order:"desc")
         snvJobResults.size() == 2
         SnvJobResult snvJobResult = snvJobResults.first()
+        assert returnedResult == snvJobResult
         assert snvJobResult.snvCallingInstance == snvCallingInstance
         assert snvJobResult.processingState == SnvProcessingStates.IN_PROGRESS
         assert snvJobResult.step == step
@@ -320,7 +321,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvCallingJobResult.processingState = SnvProcessingStates.IN_PROGRESS
         assert snvCallingJobResult.save(flush: true)
         abstractSnvCallingJob.metaClass.getStep = { -> return SnvCallingStep.CALLING }
-        abstractSnvCallingJob.createAndSaveSnvJobResult(snvCallingInstance, externalScript_Calling, externalScript_Joining, null)
+        SnvJobResult returnedResult = abstractSnvCallingJob.createAndSaveSnvJobResult(snvCallingInstance, externalScript_Calling, externalScript_Joining, null)
+        assert returnedResult == snvCallingJobResult
         assert 1 == SnvJobResult.count()
         snvCallingJobResult.processingState == SnvProcessingStates.IN_PROGRESS
     }

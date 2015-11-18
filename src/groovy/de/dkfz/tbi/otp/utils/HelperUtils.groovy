@@ -11,4 +11,8 @@ class HelperUtils {
     public static String getUniqueString() {
         return "${formatter.print(new DateTime())}-${sprintf('%016X', random.nextLong())}"
     }
+
+    public static String getRandomMd5sum() {
+        return sprintf('%016x', random.nextLong()) + sprintf('%016x', random.nextLong())
+    }
 }

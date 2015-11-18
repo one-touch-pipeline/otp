@@ -40,9 +40,6 @@ class SnvCallingJobTests {
     ExecutionService executionService
 
     @Autowired
-    ProcessedMergedBamFileService processedMergedBamFileService
-
-    @Autowired
     SchedulerService schedulerService
 
     @Autowired
@@ -67,7 +64,7 @@ class SnvCallingJobTests {
     ProcessedMergedBamFile processedMergedBamFile1
     ProcessedMergedBamFile processedMergedBamFile2
 
-    final String CONFIGURATION ="""
+    static final String CONFIGURATION ="""
 RUN_CALLING=1
 RUN_SNV_ANNOTATION=1
 RUN_SNV_DEEPANNOTATION=1
@@ -225,7 +222,6 @@ CHROMOSOME_INDICES=( {1..21} XY)
     @Test
     void testMaybeSubmitWithSnvCallingInput() {
         testData.createProcessingOptions()
-        TestCase.mockCreateDirectory(lsdfFilesService)
         snvJobResult.delete()
         snvCallingJob.metaClass.getProcessParameterObject = { return snvCallingInstance }
         snvCallingJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult ->
@@ -269,12 +265,14 @@ CHROMOSOME_INDICES=( {1..21} XY)
                     snvCallingInstance.config.configuration)
         }
 
-        createProcessedMergedBamFileOnFileSystem(snvCallingInstance.sampleType1BamFile)
-        createProcessedMergedBamFileOnFileSystem(snvCallingInstance.sampleType2BamFile)
+        testData.createBamFile(snvCallingInstance.sampleType1BamFile)
+        testData.createBamFile(snvCallingInstance.sampleType2BamFile)
 
         schedulerService.startingJobExecutionOnCurrentThread(snvCallingJob)
         try {
-            assertEquals(NextAction.WAIT_FOR_CLUSTER_JOBS, snvCallingJob.maybeSubmit(snvCallingInstance))
+            TestCase.withMockedExecuteCommand(snvCallingJob.executionService, {
+                assertEquals(NextAction.WAIT_FOR_CLUSTER_JOBS, snvCallingJob.maybeSubmit(snvCallingInstance))
+            })
             List<SnvJobResult> result = SnvJobResult.findAllBySnvCallingInstance(snvCallingInstance)
             assert result.size() == 1
             assert result.first().chromosomeJoinExternalScript == externalScript_Joining
@@ -297,23 +295,9 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         snvCallingJob.metaClass.changeProcessingStateOfJobResult = { SnvCallingInstance instance, SnvProcessingStates newState -> }
 
-        createProcessedMergedBamFileOnFileSystem(snvCallingInstance.sampleType1BamFile)
-        createProcessedMergedBamFileOnFileSystem(snvCallingInstance.sampleType2BamFile)
+        testData.createBamFile(snvCallingInstance.sampleType1BamFile)
+        testData.createBamFile(snvCallingInstance.sampleType2BamFile)
 
         snvCallingJob.validate(snvCallingInstance)
-    }
-
-
-    private void createProcessedMergedBamFileOnFileSystem(ProcessedMergedBamFile bamFile) {
-
-        final String bamFileContent = 'I am a test BAM file. Nice to meet you. :)'
-
-        bamFile.fileSize = bamFileContent.length()
-        assert bamFile.save(failOnError: true)
-
-        final File file = new File(AbstractMergedBamFileService.destinationDirectory(bamFile), bamFile.getBamFileName())
-        assert file.path.startsWith(testDirectory.path)
-        file.parentFile.mkdirs()
-        file.text = bamFileContent
     }
 }

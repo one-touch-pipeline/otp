@@ -1,10 +1,12 @@
 package de.dkfz.tbi
 
+import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.ProcessHelperService
 import org.junit.*
 import org.junit.runners.model.MultipleFailureException
 import org.springframework.validation.Errors
@@ -176,12 +178,37 @@ class TestCase extends GroovyTestCase {
         assert expectedEntries == foundEntries
     }
 
+    static void withMockedExecuteCommand(ExecutionService executionService, Closure code) {
+        assert executionService != null
+        assert code != null
+        try {
+            mockExecuteCommand(executionService)
+            code()
+        } finally {
+            removeMetaClass(ExecutionService, executionService)
+        }
+    }
+
+    static void mockExecuteCommand(ExecutionService executionService) {
+        executionService.metaClass.executeCommand = { Realm realm, String command ->
+            return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+        }
+    }
+
+    /**
+     * @deprecated Use {@link #withMockedExecuteCommand(ExecutionService, Closure)} instead.
+     */
+    @Deprecated
     def static mockCreateDirectory(LsdfFilesService lsdfFilesService) {
         lsdfFilesService.metaClass.createDirectory = { File file, Project project1 ->
             file.mkdirs()
         }
     }
 
+    /**
+     * @deprecated Use {@link #withMockedExecuteCommand(ExecutionService, Closure)} instead.
+     */
+    @Deprecated
     def static mockDeleteDirectory(Object lsdfFilesService) {
         lsdfFilesService.metaClass.deleteDirectoryRecursive = { Realm realm, File dir ->
             if (!dir.deleteDir()) {

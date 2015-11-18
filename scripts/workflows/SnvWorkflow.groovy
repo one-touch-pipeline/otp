@@ -1,10 +1,9 @@
-import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
-import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
 plan("SnvWorkflow") {
     start("start", "snvStartJob")
     job("snvCalling", "snvCallingJob")
+    job("snvJoining", "snvJoiningJob")
     job("snvAnnotation", "snvAnnotationJob")
     job("snvDeepAnnotation", "snvDeepAnnotationJob")
     job("filterVcf", "filterVcfJob")

@@ -103,7 +103,7 @@ rm ${configFileInStagingDirectory}
         return configFileInProjectDirectory
     }
 
-    void createAndSaveSnvJobResult(final SnvCallingInstance instance, ExternalScript externalScript, ExternalScript externalScriptJoining, SnvJobResult inputResult = null) {
+    SnvJobResult createAndSaveSnvJobResult(final SnvCallingInstance instance, ExternalScript externalScript, ExternalScript externalScriptJoining, SnvJobResult inputResult = null) {
         // In case the validation step failed there exists already one result file for this instance. This has to be reused.
         SnvJobResult resultInProgress = atMostOneElement(
                 SnvJobResult.findAllBySnvCallingInstanceAndStep(instance, step)
@@ -118,6 +118,7 @@ rm ${configFileInStagingDirectory}
             resultInProgress.externalScript = externalScript
             resultInProgress.chromosomeJoinExternalScript = externalScriptJoining
             assert resultInProgress.save()
+            return resultInProgress
         } else {
             final SnvJobResult result = new SnvJobResult(
                     snvCallingInstance: instance,
@@ -128,6 +129,7 @@ rm ${configFileInStagingDirectory}
                     chromosomeJoinExternalScript: externalScriptJoining
                     )
             assert result.save()
+            return result
         }
     }
 

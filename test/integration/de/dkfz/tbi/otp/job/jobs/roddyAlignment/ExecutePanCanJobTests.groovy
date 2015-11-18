@@ -335,7 +335,7 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
 
         CreateFileHelper.createFile(roddyBamFile."get${workOrFinal}BamFile"())
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
-        roddyBamFile.md5sum = DomainFactory.DEFAULT_MD5_SUM
+        roddyBamFile.md5sum = HelperUtils.randomMd5sum
         roddyBamFile.fileSize = roddyBamFile."get${workOrFinal}BamFile"().length()
         assert roddyBamFile.save(flush: true, failOnError: true)
 
