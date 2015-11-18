@@ -76,7 +76,7 @@ abstract class AbstractSnvCallingJob extends AbstractOtpJob {
         final File configFileInStagingDirectory = instance.configFilePath.absoluteStagingPath
         final File configFileInProjectDirectory = instance.configFilePath.absoluteDataManagementPath
 
-        if (waitUntilExists(configFileInProjectDirectory)) {
+        if (configFileInProjectDirectory.exists()) {
             assertDataManagementConfigContentsOk(instance)
             return configFileInProjectDirectory
         }
@@ -88,7 +88,7 @@ abstract class AbstractSnvCallingJob extends AbstractOtpJob {
         lsdfFilesService.ensureFileIsReadableAndNotEmpty(configFileInStagingDirectory)
         assertStagingConfigContentsOk(instance)
 
-        String command ="""
+        String command = """
 mkdir -p ${configFileInProjectDirectory.parent}; \
 chmod 2750 ${configFileInProjectDirectory.parent}; \
 cp ${configFileInStagingDirectory} ${configFileInProjectDirectory}; \
