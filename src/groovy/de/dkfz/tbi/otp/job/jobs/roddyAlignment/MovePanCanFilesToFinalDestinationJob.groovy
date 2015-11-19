@@ -113,6 +113,10 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
             linkMapSourceLink.put(singleLaneQaWorkDir, singleLaneQcDirFinal)
         }
 
+        if (roddyBamFile.baseBamFile?.isOldStructureUsed()) {
+            executeRoddyCommandService.deleteContentOfOtherUnixUserDirectory(roddyBamFile.baseBamFile.finalMergedQADirectory)
+        }
+
         //create the collected links
         linkFileUtils.createAndValidateLinks(linkMapSourceLink, realm)
     }
@@ -155,8 +159,6 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
                 filesToDelete << roddyBamFile.baseBamFile.workBamFile
                 filesToDelete << roddyBamFile.baseBamFile.workBaiFile
                 //the md5sum is kept: roddyBamFile.baseBamFile.workMd5sumFile
-                filesToDelete << roddyBamFile.baseBamFile.workMergedQADirectory
-                roddyDirsToDelete << roddyBamFile.baseBamFile.workMergedQADirectory
             }
         } else {
             List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageAndIdNotEqual(roddyBamFile.mergingWorkPackage, roddyBamFile.id)

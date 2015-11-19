@@ -568,10 +568,8 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         // content of the work dir: qa
         List<File> qaDirs = bamFile.workSingleLaneQADirectories.values() as List
         List<File> qaJson = bamFile.workSingleLaneQAJsonFiles.values() as List
-        if (!isBaseBamFile) {
-            qaDirs << bamFile.workMergedQADirectory
-            qaJson << bamFile.workMergedQAJsonFile
-        }
+        qaDirs << bamFile.workMergedQADirectory
+        qaJson << bamFile.workMergedQAJsonFile
         TestCase.checkDirectoryContentHelper(bamFile.workQADirectory, qaDirs)
         qaJson.each {
             assert it.exists() && it.isFile() && it.canRead() && it.size() > 0
