@@ -1,14 +1,18 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import org.junit.Before
 import org.junit.Test
 
-/**
- */
 class ChecksumFileServiceUnitTests extends GroovyTestCase {
 
     ChecksumFileService checksumFileService
 
     final String BAM_FILE_NAME = "bamFileName.merged.mdup.bam"
+
+    @Before
+    void setUp() {
+        checksumFileService = new ChecksumFileService()
+    }
 
     @Test
     void testMd5FileName() {

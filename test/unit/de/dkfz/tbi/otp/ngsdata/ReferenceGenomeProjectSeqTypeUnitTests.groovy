@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.buildtestdata.mixin.Build
 import de.dkfz.tbi.TestCase
+import grails.test.mixin.TestFor
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ErrorCollector

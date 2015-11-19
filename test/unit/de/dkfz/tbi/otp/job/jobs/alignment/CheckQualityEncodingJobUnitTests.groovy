@@ -8,6 +8,7 @@ import grails.test.mixin.support.GrailsUnitTestMixin
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
+import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
 import java.util.zip.GZIPOutputStream
