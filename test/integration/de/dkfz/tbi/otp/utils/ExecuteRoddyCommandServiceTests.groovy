@@ -328,8 +328,7 @@ class ExecuteRoddyCommandServiceTests {
     @Test
     void testCorrectPermission_AllFine() {
         ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = {String cmd ->
-            //TODO: OTP-1734 change baseDirectory to workDirectory
-            assert cmd ==~ "cd /tmp && sudo -u OtherUnixUser ${temporaryFolder.getRoot()}/.*/correctPathPermissionsOtherUnixUserRemoteWrapper.sh ${roddyBamFile.baseDirectory}"
+            assert cmd ==~ "cd /tmp && sudo -u OtherUnixUser ${temporaryFolder.getRoot()}/.*/correctPathPermissionsOtherUnixUserRemoteWrapper.sh ${roddyBamFile.workDirectory}"
             return new ProcessHelperService.ProcessOutput('', '', 0)
         }
 

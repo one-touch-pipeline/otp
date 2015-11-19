@@ -17,10 +17,6 @@ import de.dkfz.tbi.otp.utils.StringUtils
  */
 class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, ProcessParameterObject {
 
-    //TODO: OTP-1734 delete constant
-    @Deprecated
-    static final String TMP_DIR = ".temp_RoddyPanCan"
-
     /*
      * the value is also used in a check in the bash script: 'bashScripts/OtherUnixUser/checkInputParameter.sh'.
      * If the value is changed here, it needs also to be changed there.
@@ -187,31 +183,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         }
     }
 
-    /**
-        @returns subdirectory of {@link #getTmpRoddyExecutionStoreDirectory} corresponding to the latest roddy call
-     */
-    // Example:
-    // exec_150625_102449388_SOMEUSER_WGS
-    // exec_yyMMdd_HHmmssSSS_user_analysis
-    @Deprecated
-    //TODO: OTP-1734 delete method
-    File getLatestTmpRoddyExecutionDirectory() {
-        if (!roddyExecutionDirectoryNames) {
-            throw new RuntimeException("No roddyExecutionDirectoryNames have been stored in the database for ${this}.")
-        }
-
-        String latestDirectoryName = roddyExecutionDirectoryNames.last()
-        assert latestDirectoryName == roddyExecutionDirectoryNames.max()
-        assert latestDirectoryName ==~ RODDY_EXECUTION_DIR_PATTERN
-
-        File latestTmpDirectory = new File(tmpRoddyExecutionStoreDirectory, latestDirectoryName)
-        assert WaitingFileUtils.waitUntilExists(latestTmpDirectory)
-        assert latestTmpDirectory.isDirectory()
-
-        return latestTmpDirectory
-    }
-
-
     @Override
     String toString() {
         String latest = isMostRecentBamFile() ? ' (latest)' : ''
@@ -235,23 +206,9 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return "${bamFileName}.md5"
     }
 
-    // Example: $OTP_ROOT_PATH/${project}/sequencing/whole_genome_sequencing/view-by-pid/somePid/control/paired/merged-alignment/.temp_RoddyPanCan_${bamFileId}
-    @Deprecated
-    //TODO: OTP-1734 delete method
-    File getTmpRoddyDirectory() {
-        File baseDir = new File(AbstractMergedBamFileService.destinationDirectory(this))
-        return new File(baseDir, "${TMP_DIR}_${this.id}")
-    }
-
     // Example: $OTP_ROOT_PATH/${project}/sequencing/whole_genome_sequencing/view-by-pid/somePid/control/paired/merged-alignment/.merging_3
     File getWorkDirectory() {
         return new File(baseDirectory, workDirectoryName)
-    }
-
-    @Deprecated
-    //TODO: OTP-1734 delete method
-    File getTmpRoddyQADirectory() {
-        return new File(this.tmpRoddyDirectory, QUALITY_CONTROL_DIR)
     }
 
     File getFinalQADirectory() {
@@ -260,19 +217,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
     File getWorkQADirectory() {
         return new File(workDirectory, QUALITY_CONTROL_DIR)
-    }
-
-
-    @Deprecated
-    //TODO: OTP-1734 delete method
-    File getTmpRoddyMergedQADirectory() {
-        return new File(this.tmpRoddyQADirectory, MERGED_DIR)
-    }
-
-    @Deprecated
-    //TODO: OTP-1734 delete method
-    File getTmpRoddyMergedQAJsonFile() {
-        return new File(tmpRoddyMergedQADirectory, QUALITY_CONTROL_JSON_FILE_NAME)
     }
 
     File getFinalMergedQADirectory() {
@@ -293,18 +237,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
     File getWorkMergedQATargetExtractJsonFile() {
         return new File(workMergedQADirectory, QUALITY_CONTROL_TARGET_EXTRACT_JSON_FILE_NAME)
-    }
-
-    @Deprecated
-    //TODO: OTP-1734 delete method
-    Map<SeqTrack, File> getTmpRoddySingleLaneQADirectories() {
-        return getSingleLaneQADirectoriesHelper(this.tmpRoddyQADirectory)
-    }
-
-    @Deprecated
-    //TODO: OTP-1734 delete method
-    Map<SeqTrack, File> getTmpRoddySingleLaneQAJsonFiles() {
-        return getSingleLaneQAJsonFiles('TmpRoddy')
     }
 
     Map<SeqTrack, File> getFinalSingleLaneQADirectories() {
@@ -337,12 +269,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
             directoriesPerSeqTrack.put(seqTrack, new File(baseDirectory, readGroupName))
         }
         return directoriesPerSeqTrack
-    }
-
-    @Deprecated
-    //TODO: OTP-1734 delete method
-    File getTmpRoddyExecutionStoreDirectory() {
-        return new File(this.tmpRoddyDirectory, RODDY_EXECUTION_STORE_DIR)
     }
 
     File getFinalExecutionStoreDirectory() {
@@ -385,24 +311,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         assert latestWorkDirectory.isDirectory()
 
         return latestWorkDirectory
-    }
-
-    @Deprecated
-    //TODO: OTP-1734 delete method
-    File getTmpRoddyBamFile() {
-        return new File(this.tmpRoddyDirectory, this.bamFileName)
-    }
-
-    @Deprecated
-    //TODO: OTP-1734 delete method
-    File getTmpRoddyBaiFile() {
-        return new File(this.tmpRoddyDirectory, this.baiFileName)
-    }
-
-    @Deprecated
-    //TODO: OTP-1734 delete method
-    File getTmpRoddyMd5sumFile() {
-        return new File(this.tmpRoddyDirectory, this.md5sumFileName)
     }
 
     File getFinalBamFile() {

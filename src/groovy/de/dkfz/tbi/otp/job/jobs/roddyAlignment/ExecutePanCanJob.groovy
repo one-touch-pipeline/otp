@@ -109,36 +109,20 @@ class ExecutePanCanJob extends AbstractRoddyJob {
             throw new RuntimeException('The input BAM file seems to have changed on the file system while this job was processing it.', e)
         }
 
-        if (roddyBamFile.isOldStructureUsed()) {
-            //TODO: OTP-1734 delete the if part
+        ['Bam', 'Bai', 'Md5sum'].each {
+            LsdfFilesService.ensureFileIsReadableAndNotEmpty(roddyBamFile."work${it}File")
+        }
 
-            ['Bam', 'Bai', 'Md5sum'].each {
-                LsdfFilesService.ensureFileIsReadableAndNotEmpty(roddyBamFile."tmpRoddy${it}File")
-            }
+        ['MergedQA', 'ExecutionStore'].each {
+            LsdfFilesService.ensureDirIsReadableAndNotEmpty(roddyBamFile."work${it}Directory")
+        }
 
-            ['MergedQA', 'ExecutionStore'].each {
-                LsdfFilesService.ensureDirIsReadableAndNotEmpty(roddyBamFile."tmpRoddy${it}Directory")
-            }
-
-            roddyBamFile.tmpRoddySingleLaneQADirectories.each { seqTrack, singleLaneQcDir ->
-                LsdfFilesService.ensureDirIsReadableAndNotEmpty(singleLaneQcDir)
-            }
-        } else {
-            ['Bam', 'Bai', 'Md5sum'].each {
-                LsdfFilesService.ensureFileIsReadableAndNotEmpty(roddyBamFile."work${it}File")
-            }
-
-            ['MergedQA', 'ExecutionStore'].each {
-                LsdfFilesService.ensureDirIsReadableAndNotEmpty(roddyBamFile."work${it}Directory")
-            }
-
-            ensureFileIsReadableAndNotEmpty(roddyBamFile.workMergedQAJsonFile)
-            if (roddyBamFile.seqType.seqTypeName == SeqTypeNames.EXOME) {
-                ensureFileIsReadableAndNotEmpty(roddyBamFile.workMergedQATargetExtractJsonFile)
-            }
-            roddyBamFile.workSingleLaneQAJsonFiles.values().each {
-                ensureFileIsReadableAndNotEmpty(it)
-            }
+        ensureFileIsReadableAndNotEmpty(roddyBamFile.workMergedQAJsonFile)
+        if (roddyBamFile.seqType.seqTypeName == SeqTypeNames.EXOME) {
+            ensureFileIsReadableAndNotEmpty(roddyBamFile.workMergedQATargetExtractJsonFile)
+        }
+        roddyBamFile.workSingleLaneQAJsonFiles.values().each {
+            ensureFileIsReadableAndNotEmpty(it)
         }
 
         assert [FileOperationStatus.DECLARED, FileOperationStatus.NEEDS_PROCESSING].contains(roddyBamFile.fileOperationStatus)

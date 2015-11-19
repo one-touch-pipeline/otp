@@ -12,8 +12,6 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.LinkFileUtils
-import de.dkfz.tbi.otp.utils.MoveFileUtilsService
-import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import org.springframework.beans.factory.annotation.Autowired
 
 /**
@@ -33,10 +31,6 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
 
     @Autowired
     ConfigService configService
-
-    //TODO  OTP-1734: delete this service
-    @Autowired
-    MoveFileUtilsService moveFileUtilsService
 
     @Autowired
     ExecuteRoddyCommandService executeRoddyCommandService
@@ -65,136 +59,32 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
                 assert roddyBamFile.save(flush: true)
                 roddyBamFile.validateAndSetBamFileInProjectFolder()
             }
-            if (roddyBamFile.isOldStructureUsed()) {
-                //TODO  OTP-1734: delete this if block
-                deletePreviousMergedBamResultFiles(roddyBamFile, realm)
-                moveResultFiles(roddyBamFile, realm)
-                executeRoddyCommandService.correctPermissions(roddyBamFile)
+            cleanupWorkDirectory(roddyBamFile, realm)
+            executionHelperService.setPermission(realm, roddyBamFile.workDirectory, CreateClusterScriptService.DIRECTORY_PERMISSION)
+            String group = executionHelperService.getGroup(roddyBamFile.baseDirectory)
+            executionHelperService.setGroup(realm, roddyBamFile.workDirectory, group.trim())
+            executeRoddyCommandService.correctGroups(roddyBamFile)
+            cleanupOldResults(roddyBamFile, realm)
+            linkNewResults(roddyBamFile, realm)
 
-                File md5sumFile = roddyBamFile.finalMd5sumFile
-                assert WaitingFileUtils.waitUntilExists(md5sumFile): "The md5sum file of ${roddyBamFile} does not exist"
-                assert md5sumFile.text: "The md5sum file of ${roddyBamFile} is empty"
-                RoddyBamFile.withTransaction {
-                    roddyBamFile.fileOperationStatus = FileOperationStatus.PROCESSED
-                    roddyBamFile.fileSize = roddyBamFile.finalBamFile.size()
-                    roddyBamFile.md5sum = md5sumFile.text.replaceAll("\n", "")
-                    roddyBamFile.fileExists = true
-                    roddyBamFile.dateFromFileSystem = new Date(roddyBamFile.finalBamFile.lastModified())
-                    assert roddyBamFile.save(flush: true)
-                }
-            } else {
-                cleanupWorkDirectory(roddyBamFile, realm)
-                executionHelperService.setPermission(realm, roddyBamFile.workDirectory, CreateClusterScriptService.DIRECTORY_PERMISSION)
-                String group = executionHelperService.getGroup(roddyBamFile.baseDirectory)
-                executionHelperService.setGroup(realm, roddyBamFile.workDirectory, group.trim())
-                executeRoddyCommandService.correctGroups(roddyBamFile)
-                cleanupOldResults(roddyBamFile, realm)
-                linkNewResults(roddyBamFile, realm)
-
-                File md5sumFile = roddyBamFile.workMd5sumFile
-                assert md5sumFile.exists(): "The md5sum file of ${roddyBamFile} does not exist"
-                assert md5sumFile.text: "The md5sum file of ${roddyBamFile} is empty"
-                RoddyBamFile.withTransaction {
-                    roddyBamFile.fileOperationStatus = FileOperationStatus.PROCESSED
-                    roddyBamFile.fileSize = roddyBamFile.workBamFile.size()
-                    roddyBamFile.md5sum = md5sumFile.text.replaceAll("\n", "")
-                    roddyBamFile.fileExists = true
-                    roddyBamFile.dateFromFileSystem = new Date(roddyBamFile.workBamFile.lastModified())
-                    assert roddyBamFile.save(flush: true)
-                }
+            File md5sumFile = roddyBamFile.workMd5sumFile
+            assert md5sumFile.exists(): "The md5sum file of ${roddyBamFile} does not exist"
+            assert md5sumFile.text: "The md5sum file of ${roddyBamFile} is empty"
+            RoddyBamFile.withTransaction {
+                roddyBamFile.fileOperationStatus = FileOperationStatus.PROCESSED
+                roddyBamFile.fileSize = roddyBamFile.workBamFile.size()
+                roddyBamFile.md5sum = md5sumFile.text.replaceAll("\n", "")
+                roddyBamFile.fileExists = true
+                roddyBamFile.dateFromFileSystem = new Date(roddyBamFile.workBamFile.lastModified())
+                assert roddyBamFile.save(flush: true)
             }
 
         } else {
             this.log.info "The results of ${roddyBamFile} will not be moved since it is marked as withdrawn"
         }
 
-        if (roddyBamFile.isOldStructureUsed()) {
-            //TODO OTP-1734: delete the if block
-            deleteTemporaryDirectory(roddyBamFile, realm)
-        }
-
         succeed()
     }
-
-    /*
-     * To prevent uncertain states in the file system the old roddy bam file and the old qc for this merged bam file
-     * will be deleted before the new merged bam file is moved to the final location
-     */
-    //TODO: OTP-1734 delete method
-    @Deprecated
-    void deletePreviousMergedBamResultFiles(RoddyBamFile roddyBamFile, Realm realm) {
-        assert roddyBamFile.isOldStructureUsed()
-        if (roddyBamFile.tmpRoddyBamFile.exists()) {
-            File bamFilePath = roddyBamFile.finalBamFile
-            File baiFilePath = roddyBamFile.finalBaiFile
-            File md5sumFilePath = roddyBamFile.finalMd5sumFile
-
-            executionService.executeCommand(realm, "rm -f ${bamFilePath} ${baiFilePath} ${md5sumFilePath}")
-
-            assert WaitingFileUtils.waitUntilDoesNotExist(bamFilePath)
-            assert WaitingFileUtils.waitUntilDoesNotExist(baiFilePath)
-            assert WaitingFileUtils.waitUntilDoesNotExist(md5sumFilePath)
-        }
-
-        if (roddyBamFile.tmpRoddyMergedQADirectory.exists()) {
-            File mergedQADirectory = roddyBamFile.finalMergedQADirectory
-
-            executionService.executeCommand(realm, "rm -rf ${mergedQADirectory}")
-
-            assert WaitingFileUtils.waitUntilDoesNotExist(mergedQADirectory)
-        }
-    }
-
-
-    // This is a helper method for this job. It should be used carefully in other cases since it moves files.
-    //TODO: OTP-1734 delete method
-    @Deprecated
-    void moveResultFiles(RoddyBamFile roddyBamFile, Realm realm) {
-        assert roddyBamFile : "Input roddyBamFile must not be null"
-        assert realm : "Input realm must not be null"
-        assert roddyBamFile.isOldStructureUsed()
-
-        // make sure that the source and the target roddyExecutionStore are disjoint
-        assert !roddyBamFile.finalExecutionStoreDirectory.list() || !roddyBamFile.tmpRoddyExecutionStoreDirectory.list() ||
-                (roddyBamFile.tmpRoddyExecutionStoreDirectory.list() as Set).disjoint(roddyBamFile.finalExecutionStoreDirectory.list() as Set)
-
-        ['Bam', 'Bai', 'Md5sum'].each {
-            moveFileUtilsService.moveFileIfExists(realm,
-                    roddyBamFile."tmpRoddy${it}File",
-                    roddyBamFile."final${it}File",
-                    null)
-        }
-
-        ['MergedQA', 'ExecutionStore'].each {
-            moveFileUtilsService.moveDirContentIfExists(realm,
-                    roddyBamFile."tmpRoddy${it}Directory",
-                    roddyBamFile."final${it}Directory")
-        }
-
-        Map<SeqTrack, File> tmpRoddySingleLaneQADirectories = roddyBamFile.tmpRoddySingleLaneQADirectories
-        Map<SeqTrack, File> finalRoddySingleLaneQADirectories = roddyBamFile.finalSingleLaneQADirectories
-
-        tmpRoddySingleLaneQADirectories.each { seqTrack, singleLaneQcTempDir ->
-            File singleLaneQcDirFinal = finalRoddySingleLaneQADirectories.get(seqTrack)
-            moveFileUtilsService.moveDirContentIfExists(realm, singleLaneQcTempDir, singleLaneQcDirFinal)
-        }
-    }
-
-
-    // This is a helper method for this job. It should be used carefully in other cases since it deletes files.
-    //TODO: OTP-1734 delete method
-    @Deprecated
-    void deleteTemporaryDirectory(RoddyBamFile roddyBamFile, Realm realm) {
-        assert roddyBamFile : "Input roddyBamFile must not be null"
-        assert realm : "Input realm must not be null"
-        assert roddyBamFile.isOldStructureUsed()
-
-        File tempWorkingDir = roddyBamFile.tmpRoddyDirectory
-        executionService.executeCommand(realm, "rm -rf ${tempWorkingDir}")
-        assert WaitingFileUtils.waitUntilDoesNotExist(tempWorkingDir)
-    }
-
-
 
     // This is a helper method for this job. It should be used carefully in other cases since it links files with replacing existing files on link place.
     void linkNewResults(RoddyBamFile roddyBamFile, Realm realm) {

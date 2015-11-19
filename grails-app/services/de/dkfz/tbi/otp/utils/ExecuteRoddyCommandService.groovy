@@ -111,8 +111,7 @@ class ExecuteRoddyCommandService {
 
     void correctPermissions(RoddyBamFile roddyBamFile) {
         assert roddyBamFile : "RoddyBamFile should not be null"
-        //TODO: OTP-1734 change baseDirectory to workDirectory
-        String cmd = correctPermissionCommand(roddyBamFile.baseDirectory)
+        String cmd = correctPermissionCommand(roddyBamFile.workDirectory)
         ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput(cmd)
     }
 

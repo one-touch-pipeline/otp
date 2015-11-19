@@ -109,13 +109,7 @@ class AbstractQualityAssessmentService {
     }
 
     void parseRoddySingleLaneQaStatistics(RoddyBamFile roddyBamFile) {
-        Map<SeqTrack, File> qaFilesPerSeqTrack
-         if (roddyBamFile.isOldStructureUsed()) {
-            //TODO: OTP-1734 delete the if part
-            qaFilesPerSeqTrack = roddyBamFile.getTmpRoddySingleLaneQAJsonFiles()
-        } else {
-             qaFilesPerSeqTrack = roddyBamFile.getWorkSingleLaneQAJsonFiles()
-        }
+        Map<SeqTrack, File> qaFilesPerSeqTrack = roddyBamFile.getWorkSingleLaneQAJsonFiles()
         qaFilesPerSeqTrack.each { seqTrack, qaFile ->
             parseRoddyQaStatistics(roddyBamFile, seqTrack, qaFile, null)
         }
@@ -123,13 +117,7 @@ class AbstractQualityAssessmentService {
 
 
     void parseRoddyMergedBamQaStatistics(RoddyBamFile roddyBamFile) {
-        File qaFile
-        if (roddyBamFile.isOldStructureUsed()) {
-            //TODO: OTP-1734 delete the if part
-            qaFile = roddyBamFile.getTmpRoddyMergedQAJsonFile()
-        } else {
-            qaFile = roddyBamFile.getWorkMergedQAJsonFile()
-        }
+        File qaFile = roddyBamFile.getWorkMergedQAJsonFile()
         parseRoddyQaStatistics(roddyBamFile, null, qaFile, { roddyBamFile.workMergedQATargetExtractJsonFile })
     }
 

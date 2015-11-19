@@ -92,14 +92,8 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
 
     @Override
     protected String getLogFilePaths(ClusterJob clusterJob) {
-        if (getRefreshedProcessParameterObject().isOldStructureUsed()) {
-            //TODO: OTP-1734 delete the if part
-            File logDirectory = ((RoddyResult) getRefreshedProcessParameterObject()).latestTmpRoddyExecutionDirectory
-            return "Log file: ${new File(logDirectory, "${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}")}"
-        } else {
-            File logDirectory = ((RoddyResult) getRefreshedProcessParameterObject()).latestWorkExecutionDirectory
-            return "Log file: ${new File(logDirectory, "${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}")}"
-        }
+        File logDirectory = ((RoddyResult) getRefreshedProcessParameterObject()).latestWorkExecutionDirectory
+        return "Log file: ${new File(logDirectory, "${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}")}"
     }
 
     @Override
@@ -110,13 +104,7 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
         assert roddyResult
 
         // Roddy has started at least one pbs-job, hence the jobStateLogFile must exist.
-        File latestExecutionDirectory
-        if (roddyResult.isOldStructureUsed()) {
-            //TODO: OTP-1734 delete the if part
-            latestExecutionDirectory = roddyResult.latestTmpRoddyExecutionDirectory
-        } else {
-            latestExecutionDirectory = roddyResult.latestWorkExecutionDirectory
-        }
+        File latestExecutionDirectory = roddyResult.latestWorkExecutionDirectory
         JobStateLogFile jobStateLogFile = JobStateLogFile.getInstance(latestExecutionDirectory)
 
         if (jobStateLogFile.isEmpty()) {
@@ -173,12 +161,7 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
         assert roddyResult
 
         File directory = parseRoddyExecutionStoreDirectoryFromRoddyOutput(roddyOutput)
-        if (getRefreshedProcessParameterObject().isOldStructureUsed()) {
-            //TODO: OTP-1734 delete the if part
-            assert directory.parentFile == roddyResult.tmpRoddyExecutionStoreDirectory
-        } else {
-            assert directory.parentFile == roddyResult.workExecutionStoreDirectory
-        }
+        assert directory.parentFile == roddyResult.workExecutionStoreDirectory
         assert WaitingFileUtils.waitUntilExists(directory)
         assert directory.isDirectory()
 
