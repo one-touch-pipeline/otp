@@ -17,6 +17,6 @@ public enum ExecutionState {
     RESTARTED,
     /** The execution of the groovy.de.dkfz.tbi.otp.job.processing.Job has been suspended for a save shutdown. This state is only allowed after STARTED or RESUMED*/
     SUSPENDED,
-    /** The execution of a suspended groovy.de.dkfz.tbi.otp.job.processing.Job has been resumed. This state is only allowed after the state SUSPENDED or FAILURE.*/
+    /** The execution of a suspended groovy.de.dkfz.tbi.otp.job.processing.Job has been resumed. This state is only allowed after the state SUSPENDED.*/
     RESUMED
 }
