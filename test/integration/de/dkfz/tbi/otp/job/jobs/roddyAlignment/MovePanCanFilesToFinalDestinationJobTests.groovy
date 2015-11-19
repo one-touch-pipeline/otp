@@ -772,30 +772,19 @@ class MovePanCanFilesToFinalDestinationJobTests {
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile2)
-        boolean hasCalled_deleteContentOfOtherUnixUserDirectory = false
 
         movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String command ->
             return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
         }
 
-        movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath ->
-            hasCalled_deleteContentOfOtherUnixUserDirectory = true
-            assert basePath.exists()
-            if (basePath.isDirectory()) {
-                assert basePath.deleteDir()
-            } else {
-                assert false: 'Method may only called for directories'
-            }
-        }
-
         List<File> filesToDelete = [
                 roddyBamFile.workBamFile,
                 roddyBamFile.workBaiFile,
-                roddyBamFile.workMergedQADirectory,
                 ]
         List<File> filesToKeep = [
                 roddyBamFile.workMd5sumFile,
                 roddyBamFile.workExecutionDirectories,
+                roddyBamFile.workMergedQADirectory,
                 roddyBamFile.workSingleLaneQADirectories.values(),
         ].flatten()
         [filesToKeep, filesToDelete].flatten().each {
@@ -803,8 +792,6 @@ class MovePanCanFilesToFinalDestinationJobTests {
         }
 
         movePanCanFilesToFinalDestinationJob.cleanupOldResults(roddyBamFile2, realm)
-
-        assert hasCalled_deleteContentOfOtherUnixUserDirectory
 
         filesToDelete.each {
             assert !it.exists()
@@ -946,23 +933,6 @@ class MovePanCanFilesToFinalDestinationJobTests {
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "isOldStructureUsed") {
             movePanCanFilesToFinalDestinationJob.cleanupOldResults(roddyBamFile, realm)
-        }
-    }
-
-    @Test
-    void testCleanupOldResults_deleteContentOfOtherUnixUserDirectoryThrowsException_shouldFail() {
-        final String FAIL_MESSAGE = HelperUtils.uniqueString
-        finishOperationStateOfRoddyBamFile(roddyBamFile)
-        RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile)
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile2)
-
-        movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath ->
-            assert false: FAIL_MESSAGE
-        }
-
-        TestCase.shouldFailWithMessageContaining(AssertionError, FAIL_MESSAGE) {
-            movePanCanFilesToFinalDestinationJob.cleanupOldResults(roddyBamFile2, realm)
         }
     }
 
