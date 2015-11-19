@@ -8,16 +8,35 @@
 </head>
 <body>
     <div class="body">
-        <form class="blue_label" id="projectsGroupbox">
-            <span class="blue_label"><g:message code="home.projectfilter"/> :</span>
-            <g:select class="criteria" id="project" name='project'
-                from='${projects}' value='${project}' onChange='submit();'></g:select>
-        </form>
         <div class= "searchCriteriaTableSequences">
             <table id="searchCriteriaTable2">
                 <tr>
                     <td>
-                        <span class="blue_label"><g:message code="extended.search"/> :</span>
+                        <span class="blue_label"><g:message code="home.projectfilter"/> :</span>
+                    </td>
+                    <td>
+                        <form>
+                            <g:select class="criteria" id="project" name='project'
+                            from='${projects}' value='${project}' onChange='submit();'></g:select>
+                        </form>
+                    </td>
+                    <td>
+                        <span class="blue_label"><g:message code="projectOverview.filter.sampletype"/> :</span>
+                    </td>
+                    <td>
+                        <div class="searchCriteriaTableSampleTypes">
+                            <table id="searchCriteriaTable3">
+                                <tr>
+                                    <td class="attribute">
+                                        <g:select class="criteria" name="criteria2"
+                                        from='${sampleTypes}' noSelection="${["none": message(code:"otp.filter.sampleType")]}" ></g:select>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="blue_label"><g:message code="projectOverview.filter.seqtype"/> :</span>
                     </td>
                     <td>
                         <table id="searchCriteriaTable">
@@ -28,30 +47,20 @@
                                 <td class="value">
                                 </td>
                                 <td class="remove">
-                                    <input class="blue_labelForPlus" type="button" value="${g.message(code: "otp.filter.remove")}" style="display: none"/>
+                                    <input class="blue_labelForPlus" type="button" value="${g.message(code: "projectOverview.filter.seqtype.remove")}" style="display: none"/>
                                 </td>
                                 <td class="add">
-                                    <input class="blue_labelForPlus" type="button" value="${g.message(code: "otp.filter.add")}" style="display: none"/>
+                                    <input class="blue_labelForPlus" type="button" value="${g.message(code: "projectOverview.filter.seqtype.add")}" style="display: none"/>
                                 </td>
                             </tr>
                         </table>
-                        <div class="searchCriteriaTableSampleTypes">
-                            <table id="searchCriteriaTable3">
-                                <tr>
-                                    <td class="attribute">
-                                        <g:select class="criteria" name="criteria2"
-                    from='${sampleTypes}' noSelection="${["none": message(code:"otp.filter.sampleType")]}" ></g:select>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
                     </td>
                 </tr>
             </table>
-        </div>
-        <br><br><br>
-        <div id="withdrawn_description">
-            Withdrawn data is colored gray.
+            <p id="withdrawn_description">
+                Withdrawn data is colored gray.
+                <div></div>
+            </p>
         </div>
         <div class="otpDataTables">
             <table id="laneOverviewId"  data-ignore-filter-columns="${hideSampleIdentifier ? 2 : 3}" data-workflow-size="${workflows.size()}">
@@ -90,6 +99,7 @@
     <asset:script>
         $(function() {
             $.otp.projectOverviewTable.registerLaneOverviewId();
+            $('.dataTables_scrollBody').height($('.body').height()-265);
         });
     </asset:script>
 </body>
