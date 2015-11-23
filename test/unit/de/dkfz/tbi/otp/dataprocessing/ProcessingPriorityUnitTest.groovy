@@ -9,11 +9,16 @@ import de.dkfz.tbi.otp.ngsdata.TestData
 import grails.buildtestdata.mixin.Build
 import org.junit.Test
 
+import grails.test.mixin.Mock
+
 @Build([
-    QualityAssessmentPass,
-    QualityAssessmentMergedPass,
-    DataFile,
-    ])
+        DataFile,
+        ProcessedMergedBamFile,
+        QualityAssessmentPass,
+])
+@Mock([
+        QualityAssessmentMergedPass,
+])
 class ProcessingPriorityUnitTest {
 
     private void assertPriority(def domainObject) {
@@ -46,7 +51,9 @@ class ProcessingPriorityUnitTest {
 
     @Test
     void testGetProcessingPriorityForQualityAssessmentMergedPass() {
-        assertPriority(QualityAssessmentMergedPass.build())
+        assertPriority(new QualityAssessmentMergedPass(
+                abstractMergedBamFile: DomainFactory.createProcessedMergedBamFile(),
+        ))
     }
 
     @Test
