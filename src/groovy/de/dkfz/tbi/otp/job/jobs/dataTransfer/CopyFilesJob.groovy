@@ -1,12 +1,10 @@
 package de.dkfz.tbi.otp.job.jobs.dataTransfer
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
 import de.dkfz.tbi.otp.job.jobs.WatchdogJob
 import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
 
 import static org.springframework.util.Assert.*
 import org.springframework.beans.factory.annotation.Autowired
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -34,20 +32,10 @@ class CopyFilesJob extends AbstractJobImpl {
     @Override
     public void execute() throws Exception {
         Run run = Run.get(Long.parseLong(getProcessParameterValue()))
+        notNull(run, "The run id must not be invalid.")
 
         List<String> pbsIds = []
         List<String> realmIds = []
-
-        List<ProcessedMergedBamFile> bamFiles = processedMergedBamFilesForRun(run)
-        bamFiles.each {
-            String cmd = """
-umask 027
-mkdir -p -m 2750 ${AbstractMergedBamFileService.destinationDirectory(it)}
-printf "A new lane is currently in progress for this sample.\\nThe merged BAM file will be created/updated as soon as processing is complete.\\n" > ${AbstractMergedBamFileService.destinationDirectory(it)}/${processedMergedBamFileService.inProgressFileName(it)};
-"""
-            Realm realm = configService.getRealmDataManagement(it.project)
-            executionService.executeCommand(realm, cmd)
-        }
 
         List<DataFile> files = runProcessingService.dataFilesForProcessing(run)
         files.each { DataFile file ->
@@ -74,23 +62,5 @@ printf "A new lane is currently in progress for this sample.\\nThe merged BAM fi
 
         addOutputParameter(JobParameterKeys.PBS_ID_LIST, pbsIds.join(","))
         addOutputParameter(JobParameterKeys.REALM, realmIds.join(","))
-    }
-
-    /**
-     * Returns all {@link ProcessedMergedBamFile}s for samples in the specified {@link Run}.
-     */
-    public List<ProcessedMergedBamFile> processedMergedBamFilesForRun(Run run) {
-        notNull(run, "The run argument must not be null.")
-        List<Sample> samples = SeqTrack.findByRun(run)*.sample
-        if (!samples) {
-            return Collections.emptyList()
-        }
-        return ProcessedMergedBamFile.withCriteria {
-            mergingPass {
-                mergingSet {
-                    mergingWorkPackage { "in"("sample", samples) }
-                }
-            }
-        }
     }
 }

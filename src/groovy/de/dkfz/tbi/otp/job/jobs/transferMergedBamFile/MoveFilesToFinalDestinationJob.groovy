@@ -39,7 +39,7 @@ class MoveFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl {
         Project project = processedMergedBamFileService.project(mergedBamFile)
         //has to be changed since the location of the log file moved from the .tmp folder to the final destination
         Realm realm = configService.getRealmDataManagement(project)
-        String cmd = scriptText(dest, temporalDestinationDir, temporalQADestinationDir, qaDestinationDirectory, processedMergedBamFileService.inProgressFileName(mergedBamFile))
+        String cmd = scriptText(dest, temporalDestinationDir, temporalQADestinationDir, qaDestinationDirectory)
         mergedBamFile.validateAndSetBamFileInProjectFolder()
         log.debug "Attempting to move files from the tmp directory to the final destination"
         String jobId = executionHelperService.sendScript(realm, cmd)
@@ -51,13 +51,12 @@ class MoveFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl {
     }
 
     //before moving the files to the final directory it is checked if the files, which are currently at the destination, are in use
-    private String scriptText(String dest, String temporalDestinationDir, String temporalQADestinationDir, String qaDestinationDirectory, String inProgressFileName) {
+    private String scriptText(String dest, String temporalDestinationDir, String temporalQADestinationDir, String qaDestinationDirectory) {
         String text = """
 mkdir -p -m 2750 ${dest}${processedMergedBamFileService.QUALITY_ASSESSMENT_DIR}
 flock -x ${dest} -c \"mv -f ${temporalDestinationDir}/*.bam ${temporalDestinationDir}/*.bai ${temporalDestinationDir}/*.md5sum ${temporalDestinationDir}/${FileNames.FASTQ_FILES_IN_MERGEDBAMFILE} ${dest}\"
 flock -x ${dest} -c \"mv -f ${temporalQADestinationDir}/* ${qaDestinationDirectory}/\"
 rm -rf ${temporalDestinationDir}
-rm -f ${dest}/${inProgressFileName}
 """
         // Work-around for OTP-1018: Add read permissions to BAM and BAI files to work around a bug
         // in the CREST tool. The files are still protected by the permissions of the parent directory.

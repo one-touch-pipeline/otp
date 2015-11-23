@@ -41,29 +41,6 @@ class CopyFilesJobTests {
 
 
     @Test
-    void testProcessedMergedBamFilesForRun() {
-
-        shouldFail(IllegalArgumentException.class, { job.processedMergedBamFilesForRun(null)})
-
-        testData = new TestData()
-        testData.createObjects()
-        Run run1 = testData.run
-
-        assertEquals(0, job.processedMergedBamFilesForRun(run1).size())
-
-        ProcessedMergedBamFile pmbf1 = createMergedBamFileForRun(run1, testData.sample)
-
-        assertEquals(1, job.processedMergedBamFilesForRun(run1).size())
-
-        final Run run2 = testData.createRun("run2")
-        assertNotNull(run2.save(flush: true))
-        assertEquals(0, job.processedMergedBamFilesForRun(run2).size())
-
-        ProcessedMergedBamFile pmbf2 = createMergedBamFileForRun(run1, testData.sample)
-        assertEquals(2, job.processedMergedBamFilesForRun(run1).size())
-    }
-
-    @Test
     void testExecute_RunCanNotBeFound_IllegalArgumentException() {
         job.metaClass.getProcessParameterValue = { -> "-1" }
         shouldFail(IllegalArgumentException) {job.execute()}
