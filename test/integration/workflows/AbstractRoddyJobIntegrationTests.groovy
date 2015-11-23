@@ -15,9 +15,9 @@ import org.junit.Test
 /**
  * tests for AbstractRoddyJob using PanCanAlignmentWorkflow
  */
+@Ignore
 class AbstractRoddyJobIntegrationTests extends AbstractPanCanAlignmentWorkflowTests {
 
-    @Ignore
     @Test
     void executeRoddy_roddyCallFails_noPbsJobsSent_RoddyJobFailedAndSuccessfullyRestarted() {
 
@@ -46,7 +46,6 @@ class AbstractRoddyJobIntegrationTests extends AbstractPanCanAlignmentWorkflowTe
         checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes()
     }
 
-    @Ignore
     @Test
     void executeRoddy_roddyCallSucceeds_noPbsJobsSent_RoddyJobFailedAndSuccessfullyRestarted() {
 
@@ -76,7 +75,6 @@ class AbstractRoddyJobIntegrationTests extends AbstractPanCanAlignmentWorkflowTe
         checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes()
     }
 
-    @Ignore
     @Test
     void executeRoddy_roddyCallSucceeds_onePbsJobFails_RoddyJobFailedAndSuccessfullyRestarted() {
 

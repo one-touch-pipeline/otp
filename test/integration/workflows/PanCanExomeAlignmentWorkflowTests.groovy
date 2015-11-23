@@ -3,8 +3,10 @@ package workflows
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import org.junit.Ignore
 
 
+@Ignore
 class PanCanExomeAlignmentWorkflowTests extends PanCanAlignmentWorkflowTests {
     @Override
     SeqType findSeqType() {

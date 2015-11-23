@@ -14,9 +14,9 @@ import org.junit.Test
  * which provides "Realm" as outputParameter.
  */
 
+@Ignore
 class WorkflowExecutionPlanUpdateTests extends DataInstallationWorkflowTests {
 
-    @Ignore
     @Test
     void testUpdateOfJobExecutionPlan() {
         SeqTrack seqTrack = furtherDataBaseSetup()

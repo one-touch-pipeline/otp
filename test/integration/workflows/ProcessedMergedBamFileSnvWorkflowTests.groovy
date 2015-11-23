@@ -1,12 +1,13 @@
 package workflows
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import org.junit.Before
+import org.junit.Ignore
 
 import static org.junit.Assert.assertNotNull
 
+@Ignore
 class ProcessedMergedBamFileSnvWorkflowTests extends AbstractSnvWorkflowTests {
 
     @Before

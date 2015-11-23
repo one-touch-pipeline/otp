@@ -6,8 +6,6 @@ import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
-import grails.test.mixin.TestMixin
-import grails.test.mixin.integration.IntegrationTestMixin
 import org.joda.time.Duration
 import org.junit.Before
 import org.junit.Ignore
@@ -16,6 +14,7 @@ import org.junit.Test
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static org.junit.Assert.*
 
+@Ignore
 class LoadMetaDataTests extends WorkflowTestCase {
 
     // the String "UNKNOWN" is used instead of the enum, because that is how it appears in external input files
@@ -232,7 +231,6 @@ class LoadMetaDataTests extends WorkflowTestCase {
 
 
     @Test
-    @Ignore
     void testWholeGenomeMetadata() {
         String seqTypeName = SeqTypeNames.WHOLE_GENOME.seqTypeName
 
@@ -259,7 +257,6 @@ class LoadMetaDataTests extends WorkflowTestCase {
     }
 
     @Test
-    @Ignore
     void testExomeMetadataNoLibraryPreparationKit() {
         String seqTypeName = SeqTypeNames.EXOME.seqTypeName
 
@@ -293,7 +290,6 @@ class LoadMetaDataTests extends WorkflowTestCase {
     }
 
     @Test
-    @Ignore
     void testExomeMetadataWithLibraryPreparationKit() {
         String seqTypeName = SeqTypeNames.EXOME.seqTypeName
 
@@ -350,7 +346,6 @@ class LoadMetaDataTests extends WorkflowTestCase {
     }
 
     @Test
-    @Ignore
     void testChipSeqMetadata() {
         String seqTypeName = SeqTypeNames.CHIP_SEQ.seqTypeName
 

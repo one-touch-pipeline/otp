@@ -6,10 +6,8 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.filehandling.FileNames
-import de.dkfz.tbi.otp.job.jobs.roddyAlignment.MovePanCanFilesToFinalDestinationJob
 import de.dkfz.tbi.otp.job.jobs.transferMergedBamFile.MoveFilesToFinalDestinationJob
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
-import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
@@ -23,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 
+@Ignore
 class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
 
     ProcessingOptionService processingOptionService
@@ -545,7 +544,6 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
     /**
      * Test execution of the workflow without any processing options defined
      */
-    @Ignore
     @Test
     void testExecutionWithoutProcessingOptions() {
         /* setup start condition (the fastqc file as ready to be processed):
@@ -584,7 +582,6 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
     /*
      * This cannot be tested with an integration test, because integration tests are transactional, so this must be in the workflow test.
      */
-    @Ignore
     @Test
     void testBamFileInProjectFolderIsSetPersistentlyEvenIfMovingFails() {
         try {

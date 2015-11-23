@@ -10,7 +10,6 @@ import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingJob
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExternalScript
 import org.joda.time.Duration
-import org.junit.Ignore
 import org.junit.Test
 
 import java.util.zip.GZIPInputStream
@@ -78,7 +77,6 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
     ExternalScript filterScript
 
 
-    @Ignore
     @Test
     void testWholeSnvWorkflow() {
         snvConfig = SnvConfig.createFromFile(project, seqType, new File(getWorkflowDirectory(), "configFile_${VERSION}/runtimeConfig.sh"), VERSION)
@@ -88,7 +86,6 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
     }
 
 
-    @Ignore
     @Test
     void testSnvAnnotationDeepAnnotationAndFilter() {
         snvConfig = SnvConfig.createFromFile(project, seqType, new File(getWorkflowDirectory(), "configFile_${VERSION}/runtimeConfig_anno.sh"), VERSION)
@@ -100,7 +97,6 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
     }
 
 
-    @Ignore
     @Test
     void testSnvFilter() {
         snvConfig = SnvConfig.createFromFile(project, seqType, new File("${getWorkflowDirectory()}/configFile_${VERSION}/runtimeConfig_filter.sh"), VERSION)

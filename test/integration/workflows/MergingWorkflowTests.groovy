@@ -19,6 +19,7 @@ import static de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type.ALIGNMENT
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 
+@Ignore
 @TestMixin(IntegrationTestMixin)
 class MergingWorkflowTests extends WorkflowTestCase {
 
@@ -206,7 +207,6 @@ class MergingWorkflowTests extends WorkflowTestCase {
     /**
      * Test execution of the workflow without any processing options defined
      */
-    @Ignore
     @Test
     void testExecutionWithoutProcessingOptions() {
         assertEquals(singleLaneBamFile, processedBamFileService.getFilePath(processedBamFile))

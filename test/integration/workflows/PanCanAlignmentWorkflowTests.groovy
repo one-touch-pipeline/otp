@@ -21,7 +21,6 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkf
     @Autowired
     PanCanStartJob panCanStartJob
 
-    @Ignore
     @Test
     void testNoProcessableObjectFound() {
 
@@ -43,7 +42,6 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkf
         assertBamFileFileSystemPropertiesSet(firstBamFile)
     }
 
-    @Ignore
     @Test
     void testAlignLanesOnly_NoBaseBamExist_OneLane_allFine() {
 
@@ -65,13 +63,12 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkf
         checkQC(bamFile)
     }
 
-    @Ignore
     @Test
     void testAlignLanesOnly_NoBaseBamExist_TwoLanes_allFine() {
         alignLanesOnly_NoBaseBamExist_TwoLanes()
     }
 
-    @Ignore
+    @Ignore("convey")
     @Test
     void testConveyAlignLanesOnly_NoBaseBamExist_TwoLanes_allFine() {
         // config must point to project-config with convey options
@@ -101,13 +98,11 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkf
         checkQC(bamFile)
     }
 
-    @Ignore
     @Test
     void testAlignBaseBamAndNewLanes_allFine() {
         alignBaseBamAndNewLanesHelper(false)
     }
 
-    @Ignore
     @Test
     void testAlignBaseBamAndNewLanes_allFine_oldStructure() {
         alignBaseBamAndNewLanesHelper(true)
@@ -125,7 +120,6 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkf
         checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes()
     }
 
-    @Ignore
     @Test
     void testAlignWithWithdrawnBase_allFine() {
         // prepare

@@ -3,9 +3,11 @@ package workflows
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
+import org.junit.Ignore
 
 import static org.junit.Assert.assertNotNull
 
+@Ignore
 class QualityAssessmentWorkflowTests extends QualityAssessmentAbstractWorkflowTests {
 
     ProcessedBamFileService processedBamFileService

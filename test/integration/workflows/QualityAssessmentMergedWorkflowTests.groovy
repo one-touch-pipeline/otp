@@ -2,9 +2,11 @@ package workflows
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import org.junit.Ignore
 
 import static org.junit.Assert.assertNotNull
 
+@Ignore
 class QualityAssessmentMergedWorkflowTests extends QualityAssessmentAbstractWorkflowTests {
 
     ProcessedMergedBamFileService processedMergedBamFileService

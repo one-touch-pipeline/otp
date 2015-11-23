@@ -8,7 +8,6 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import org.joda.time.Duration
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 
 import static org.junit.Assert.assertNotNull
@@ -55,7 +54,6 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
     }
 
 
-    @Ignore
     @Test
     void testExecutionWithProcessingOptionsWgs() {
         createAdditionalWholeGenomeData()
@@ -65,7 +63,6 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
     }
 
     @Test
-    @Ignore
     void testExecutionWithProcessingOptionsExome() {
         createAdditionalExomData()
         createDirectoryStructure(inputFilesPath())

@@ -2,9 +2,11 @@ package workflows
 
 import de.dkfz.tbi.otp.ngsdata.*
 import org.junit.Before
+import org.junit.Ignore
 
 import static org.junit.Assert.assertNotNull
 
+@Ignore
 class RoddyBamFileSnvWorkflowTests extends AbstractSnvWorkflowTests {
 
     @Before

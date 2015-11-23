@@ -16,6 +16,7 @@ import org.junit.Ignore
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
+@Ignore
 class PanCanWorkflowTests extends WorkflowTestCase {
 
     @Autowired
@@ -31,7 +32,6 @@ class PanCanWorkflowTests extends WorkflowTestCase {
     /*
      * This cannot be tested with an integration test, because integration tests are transactional, so this must be in the workflow test.
      */
-    @Ignore
     @Test
     void testBamFileInProjectFolderIsSetPersistentlyEvenIfMovingFails() {
         try {
