@@ -403,9 +403,6 @@ CHROMOSOME_INDICES=( {1..21} XY)
     void testValidate_InputFileNotReadable() {
         SnvCallingStep step = SnvCallingStep.FILTER_VCF
         File configFile = snvCallingInstanceTestData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteDataManagementPath, CONFIGURATION)
-        LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file ->
-                throw new AssertionError("Not readable")
-        }
 
         WaitingFileUtils.metaClass.static.waitUntilDoesNotExist = { File file -> return true }
 
