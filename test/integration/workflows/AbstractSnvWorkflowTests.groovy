@@ -13,9 +13,12 @@ import org.joda.time.Duration
 import org.junit.Test
 
 import java.util.zip.GZIPInputStream
+import static org.junit.Assert.assertNotNull
 
 
 /**
+ * More detailed documentation: https://wiki.local/Database/OTP+-+SNV+pipeline
+ *
  * Steps which have to be executed for a CO SNV-scipts update:
  *
  * ! you have to be in group localGroup
@@ -26,9 +29,12 @@ import java.util.zip.GZIPInputStream
  * 4) copy the new COWorkflows_version to "/path/to/programs/otp/"
  * 5) make all bash scripts in this directory executable: find . -name '*.sh' -exec chmod +x {} +
  * 6) change the version number in the "ImportSnvExternalScripts.groovy" script
- * 7) execute this script on you local OTP to verify it is working
- * 8) copy file "/some/relative/path/temp/roddyLocalTest/testproject/vbp/stds/applicationProperties_Stable.ini" to you local folder
- * 9) modify your "applicationProperties_Stable.ini": usePluginVersion=COWorkflows\:1.0.131 -> to newest version
+ * 7) execute this script on your local OTP to verify it is working
+ * 8) copy file "snv_application_file/applicationProperties_Stable.ini" to your local folder
+ * 9) modify your "applicationProperties_Stable.ini":
+ * 9.1) usePluginVersion=COWorkflows\:1.0.131 -> to newest version
+ * 9.2) after the change to the new cluster the "***REMOVED***pbs" hostname has to be replaced by "headnode"
+ * 9.3) enter your own user
  * 10) go to "/$WORKFLOW_ROOT/ngsPipelines/RoddyStable"
  * 11) execute "bash roddy.sh testrun coWorkflowsTestProject.test@snvCalling stds --useconfig=/AbolsutePathTo/applicationProperties_Stable.ini"
  * 12) execute "bash roddy.sh rerun coWorkflowsTestProject.test@snvCalling stds --useconfig=/AbolsutePathTo/applicationProperties_Stable.ini"
@@ -44,7 +50,6 @@ import java.util.zip.GZIPInputStream
  * 21) compare runtimeConfig.sh of this Roddy run and the previous Roddy run to find out if there are new variables -> add new ones in new config files
  * 22) run SnvWorkflowTests
  */
-import static org.junit.Assert.assertNotNull
 
 
 abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
@@ -83,8 +88,9 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
 
     @Test
     void testWholeSnvWorkflow() {
-        snvConfig = SnvConfig.createFromFile(project, seqType, new File(getWorkflowDirectory(), "configFile_${VERSION}/runtimeConfig.sh"), VERSION)
+        snvConfig = SnvConfig.createFromFile(project, seqType, new File(getWorkflowDirectory(), "configFile_${VERSION}/runtimeConfig.sh-cluster_13.1"), VERSION)
         assertNotNull(snvConfig.save(flush: true))
+
         execute()
         check(SnvCallingStep.CALLING)
     }
@@ -92,7 +98,7 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
 
     @Test
     void testSnvAnnotationDeepAnnotationAndFilter() {
-        snvConfig = SnvConfig.createFromFile(project, seqType, new File(getWorkflowDirectory(), "configFile_${VERSION}/runtimeConfig_anno.sh"), VERSION)
+        snvConfig = SnvConfig.createFromFile(project, seqType, new File(getWorkflowDirectory(), "configFile_${VERSION}/runtimeConfig_anno.sh-cluster_13.1"), VERSION)
         assertNotNull(snvConfig.save(flush: true))
         createJobResults(SnvCallingStep.SNV_ANNOTATION)
 
@@ -103,7 +109,7 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
 
     @Test
     void testSnvFilter() {
-        snvConfig = SnvConfig.createFromFile(project, seqType, new File("${getWorkflowDirectory()}/configFile_${VERSION}/runtimeConfig_filter.sh"), VERSION)
+        snvConfig = SnvConfig.createFromFile(project, seqType, new File("${getWorkflowDirectory()}/configFile_${VERSION}/runtimeConfig_filter.sh-cluster_13.1"), VERSION)
         assertNotNull(snvConfig.save(flush: true))
         createJobResults(SnvCallingStep.FILTER_VCF)
 
