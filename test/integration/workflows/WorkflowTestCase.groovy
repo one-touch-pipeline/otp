@@ -56,6 +56,11 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     // The scheduler needs to access the created objects while the test is being executed
     boolean transactional = false
 
+    // set this to true if you are working on the tests and want to keep the workflow results
+    // don't forget to delete them manually
+    protected static final boolean KEEP_TEMP_FOLDER = false
+
+
     // fast queue, here we come!
     static final String pbsOptions = '{"-l": {nodes: "1", walltime: "20:00", mem: "5g"}, "-j": "oe"}'
 
@@ -219,7 +224,11 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
     private void cleanupDirectories() {
         String cleanUpCommand = createClusterScriptService.removeDirs([getBaseDirectory()], CreateClusterScriptService.RemoveOption.RECURSIVE_FORCE)
-        assert executionService.executeCommand(realm, cleanUpCommand).toInteger() == 0
+        if(!KEEP_TEMP_FOLDER) {
+            assert executionService.executeCommand(realm, cleanUpCommand).toInteger() == 0
+        } else {
+            println "Base directory: ${getBaseDirectory()}"
+        }
     }
 
 
@@ -352,7 +361,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
      */
     private File uniqueDirectory(File root) {
         assert root : 'No root directory provided. Unable to construct a unique directory.'
-        return new File(root, "tmp-${HelperUtils.getUniqueString()}")
+        return new File(root, "tmp-${System.getProperty('user.name')}-${HelperUtils.getUniqueString()}")
     }
 
     /**
