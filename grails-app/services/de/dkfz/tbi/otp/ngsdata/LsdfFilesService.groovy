@@ -155,15 +155,6 @@ class LsdfFilesService {
         return "${basePath}/${relativePath}"
     }
 
-    String getFileViewByPidDirectory(DataFile file) {
-        if (!checkFinalPathDefined(file)) {
-            return null
-        }
-        String basePath = configService.getProjectSequencePath(file.project)
-        String relativePath = getFileViewByPidRelativeDirectory(file)
-        return "${basePath}/${relativePath}"
-    }
-
     String getFileViewByPidRelativePath(DataFile file, Sequence sequence = null) {
         if (!checkFinalPathDefined(file)) {
             return null
@@ -286,14 +277,6 @@ class LsdfFilesService {
             throw new RuntimeException("Could not delete directory ${directory}.", e)
         }
         threadLog.info "Deleted directory ${directory}"
-    }
-
-    String[] getAllPathsForRun(long runId, boolean fullPath = false) {
-        Run run = Run.getAt(runId)
-        if (!run) {
-            return null
-        }
-        return getAllPathsForRun(run, fullPath)
     }
 
     String[] getAllPathsForRun(Run run, boolean fullPath = false) {
