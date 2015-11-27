@@ -68,7 +68,7 @@ grails.project.dependency.resolution = {
         compile ":console:1.5.5"
         compile ":mail:1.0.7"
         // used by jenkins
-        compile ":codenarc:0.23"
+        compile ":codenarc:0.24.1"
         test ":code-coverage:1.2.7"
 
         // plugins needed at runtime
@@ -89,20 +89,31 @@ grails.project.dependency.resolution = {
     }
 }
 
-codenarc.reports = {
-    CodeNarcXmlReport('xml') {
-        outputFile = 'target/CodeNarc-Report.xml'
-        title = "OTP CodeNarc Report"
-    }
-    CodeNarcHtmlReport('html') {
-        outputFile = 'target/CodeNarc-Report.html'
-        title = "OTP CodeNarc Report"
+codenarc {
+    ruleSetFiles = ['file:grails-app/conf/CodeNarcRuleSet.groovy']
+    extraIncludeDirs = ['ast']
+    maxPriority1Violations = 0
+    reports = {
+        CodeNarcXmlReport('xml') {
+            outputFile = 'target/CodeNarc-Report.xml'
+            title = "OTP CodeNarc Report"
+        }
+        CodeNarcHtmlReport('html') {
+            outputFile = 'target/CodeNarc-Report.html'
+            title = "OTP CodeNarc Report"
+        }
     }
 }
-codenarc.extraIncludeDirs=['ast']
-codenarc.properties = {
-    // Each property definition is of the form:  RULE.PROPERTY-NAME = PROPERTY-VALUE
-    GrailsPublicControllerMethod.enabled = false
-    GrailsDomainHasEquals.enabled = false
-    GrailsDomainHasToString.enabled = false
+
+coverage {
+    exclusions = [
+            // configuration
+            '**/*RuleSet*',
+            '**/TestDataConfig*',
+            // test helper
+            '**/de/dkfz/tbi/otp/testing/**',
+            // tests
+            'test/**',
+    ]
+    xml = true
 }
