@@ -38,8 +38,6 @@
         </div>
         <div id="jobTypeSpecificAverageValues">
             <table>
-                <col class="columnProperty">
-                <col class="columnValue">
                 <tr>
                     <td>
                         <div class="jobTypSpecificValue">Average Delay</div>
@@ -76,6 +74,28 @@
                     </td>
                     <td id="jobTypeSpecificAvgMemory"></td>
                 </tr>
+                <tr>
+                    <td>
+                        <div class="jobTypSpecificValue"><g:message code="jobstats.jobTypeSpecific.averageTable.coverageStatistics"/></div>
+                        <div class="toolTipContainer jobTypSpecificValueToolTip">
+                            <span class="toolTip"><g:message code="jobstats.jobTypeSpecific.averageTable.toolTip.coverageStatistics"/></span>
+                        </div>
+                    </td>
+                    <td id="jobTypeSpecificMinCov"></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td id="jobTypeSpecificMaxCov"></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td id="jobTypeSpecificAvgCov"></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td id="jobTypeSpecificMedianCov"></td>
+                </tr>
+
             </table>
         </div>
         <div id="pieGraphicContainer">

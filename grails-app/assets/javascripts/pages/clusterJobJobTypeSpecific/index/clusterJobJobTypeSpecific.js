@@ -7,16 +7,25 @@ $.otp.clusterJobJobTypeSpecific = {
 
     register : function () {
         "use strict";
-        $('.datePicker').datepicker(
-            {
+        $('#dpFrom').datepicker({
                 dateFormat: 'yy-mm-dd',
-                onSelect: function () {
+                onSelect: function (selected) {
                     $.otp.clusterJobJobTypeSpecificGraph.update();
                     $.otp.clusterJobJobTypeSpecific.updateJobClassSelect();
+                    $('#dpTo').datepicker('option', 'minDate', selected);
                 },
                 maxDate: $('#dpTo').val()
-            }
-        );
+        });
+        $('#dpTo').datepicker({
+                dateFormat: 'yy-mm-dd',
+                onSelect: function (selected) {
+                    $.otp.clusterJobJobTypeSpecificGraph.update();
+                    $.otp.clusterJobJobTypeSpecific.updateJobClassSelect();
+                    $('#dpFrom').datepicker('option', 'maxDate', selected);
+                },
+                minDate: $('#dpFrom').val(),
+                maxDate: $('#dpTo').val()
+        });
         $('#jobClassSelect').change(function () {
             $.otp.clusterJobJobTypeSpecific.updateSeqTypeSelect();
         });
@@ -72,12 +81,24 @@ $.otp.clusterJobJobTypeSpecific = {
             $("#jobTypeSpecificAvgProcessing").html(json.data.avgProcess);
         });
 
+        RGraph.AJAX($.otp.createLink({
+            controller : 'clusterJobJobTypeSpecific',
+            action : 'getJobTypeSpecificCoverageStatistics',
+            parameters: {'jobClass': jobClassSelect, 'seqType': seqTypeSelect, 'bases': basesInput, 'from': startDate, 'to': endDate}
+        }), function () {
+            var json = JSON.parse(this.response);
+            $("#jobTypeSpecificMinCov").html(json.data.minCov);
+            $("#jobTypeSpecificAvgCov").html(json.data.avgCov);
+            $("#jobTypeSpecificMaxCov").html(json.data.maxCov);
+            $("#jobTypeSpecificMedianCov").html(json.data.medianCov);
+        });
+
     },
 
     updateJobClassSelect : function () {
         "use strict";
         var jobClassSelect = $('#jobClassSelect');
-        var cJobClass = jobClassSelect.val();
+        var currentJobClass = jobClassSelect.val();
         jobClassSelect.find('option').remove();
         RGraph.AJAX($.otp.createLink({
             controller: 'clusterJobJobTypeSpecific',
@@ -86,14 +107,15 @@ $.otp.clusterJobJobTypeSpecific = {
         }), function () {
             var json = JSON.parse(this.response);
             $.each(json.data, function () {
-                jobClassSelect.append($('<option>', {
-                   value: this,
-                   text: this
-               }));
+                var cOption = $('<option>', {
+                                   value: this,
+                                   text: this
+                                });
+                jobClassSelect.append(cOption);
+                if (currentJobClass == this) {
+                    cOption.attr('selected','selected');
+                }
             });
-            if($.inArray(cJobClass, json.data)) {
-                jobClassSelect.val(cJobClass);
-            }
             $.otp.clusterJobJobTypeSpecific.updateSeqTypeSelect();
         });
     },
@@ -101,7 +123,7 @@ $.otp.clusterJobJobTypeSpecific = {
     updateSeqTypeSelect : function () {
         "use strict";
         var seqTypeSelect = $('#seqTypeSelect');
-        var cSeqType = seqTypeSelect.val();
+        var currentSeqType = seqTypeSelect.val();
         seqTypeSelect.find('option').remove();
         RGraph.AJAX($.otp.createLink({
             controller: 'clusterJobJobTypeSpecific',
@@ -110,14 +132,15 @@ $.otp.clusterJobJobTypeSpecific = {
         }), function () {
             var json = JSON.parse(this.response);
             $.each(json.data, function () {
-                seqTypeSelect.append($('<option>', {
-                    value: this.id,
-                    text: this.name + " " + this.libraryLayout
-                }));
+                var cOption = $('<option>', {
+                                  value: this.id,
+                                  text: this.name + " " + this.libraryLayout
+                              });
+                seqTypeSelect.append(cOption);
+                if (currentSeqType == this.id) {
+                    cOption.attr('selected','selected');
+                }
             });
-            if($.inArray(cSeqType, json.data)) {
-                seqTypeSelect.val(cSeqType);
-            }
             $.otp.clusterJobJobTypeSpecificGraph.update();
             $.otp.clusterJobJobTypeSpecific.updateAvgValues();
         });

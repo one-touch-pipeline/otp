@@ -42,6 +42,24 @@ class ClusterJobJobTypeSpecificController {
         render dataToRender as JSON
     }
 
+    def getJobTypeSpecificCoverageStatistics() {
+        Map dataToRender = [:]
+
+        def (startDate, endDate, seqType) = parseParams()
+
+        Float referenceSize = Float.parseFloat(params.bases)
+
+        def data = clusterJobService.findJobClassAndSeqTypeSpecificCoverages(params.jobClass, seqType, startDate, endDate, referenceSize * GIGABASES_TO_BASES)
+        dataToRender.data = [
+                            'minCov': data.minCov ? "${data.minCov.round(2)} (min)" : "",
+                             'maxCov': data.maxCov ? "${data.maxCov.round(2)} (max)" : "",
+                             'avgCov': data.avgCov ? "${data.avgCov?.round(2)} (avg)" : "",
+                             'medianCov': data.medianCov ? "${data.medianCov?.round(2)} (median)" : ""
+                            ]
+
+        render dataToRender as JSON
+    }
+
     def getJobClassesByDate() {
         Map dataToRender = [:]
 

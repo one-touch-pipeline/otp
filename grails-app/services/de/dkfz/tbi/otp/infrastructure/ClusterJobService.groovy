@@ -34,6 +34,28 @@ class ClusterJobService {
     public static final String FORMAT_STRING = "yyyy-MM-dd HH:mm:ss"
     public static final Long HOURS_TO_MILLIS = HOURS.toMillis(1)
 
+    private static final QUERY_BY_TIMESPAN = """
+ job.queued >= ?
+ AND job.ended < ?
+ AND job.ended > job.started
+"""
+
+    private static final QUERY_BY_TIMESPAN_NOTFAILED = """
+ ${QUERY_BY_TIMESPAN}
+ AND job.exit_status != 'FAILED'
+"""
+
+    private static final QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE = """
+ ${QUERY_BY_TIMESPAN}
+ AND job.job_class = ?
+ AND job.seq_type_id = ?
+"""
+
+    private static final QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE_NOTFAILED = """
+ ${QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE}
+ AND job.exit_status != 'FAILED'
+"""
+
     /**
      * creates a cluster job object with at this time known attributes
      */
@@ -292,8 +314,7 @@ SELECT
  DISTINCT job.job_class AS jobClass
  FROM cluster_job AS job
  WHERE
- job.queued >= ?
- AND job.ended < ?
+ ${QUERY_BY_TIMESPAN}
  ORDER BY job.job_class
 """
 
@@ -321,8 +342,7 @@ SELECT
  count(job.exit_code) AS exitCodeCount
  FROM cluster_job AS job
  WHERE
- job.queued >= ?
- AND job.ended < ?
+ ${QUERY_BY_TIMESPAN}
  GROUP BY job.exit_code
  ORDER BY job.exit_code
 """
@@ -351,8 +371,7 @@ SELECT
  count(job.exit_status) AS exitStatusCount
  FROM cluster_job AS job
  WHERE
- job.queued >= ?
- AND job.ended < ?
+ ${QUERY_BY_TIMESPAN}
  GROUP BY job.exit_status
 """
 
@@ -381,8 +400,7 @@ SELECT
  count(job.id) AS count
  FROM cluster_job AS job
  WHERE
- job.queued >= ?
- AND job.ended < ?
+ ${QUERY_BY_TIMESPAN}
  AND job.exit_status = 'FAILED'
  GROUP BY job.ended / $HOURS_TO_MILLIS
 """
@@ -456,10 +474,7 @@ SELECT
  SUM(job.cpu_time / (job.ended - job.started)) AS sumAvgCpuTime
  FROM cluster_job AS job
  WHERE
- job.queued >= ?
- AND job.ended < ?
- AND job.exit_status != 'FAILED'
- AND job.ended > job.started
+ ${QUERY_BY_TIMESPAN_NOTFAILED}
  GROUP BY job.started / $HOURS_TO_MILLIS, job.ended / $HOURS_TO_MILLIS
 """
 
@@ -501,9 +516,7 @@ SELECT
  SUM(job.used_memory) AS sumAvgMemoryUsed
  FROM cluster_job AS job
  WHERE
- job.queued >= ?
- AND job.ended < ?
- AND job.exit_status != 'FAILED'
+ ${QUERY_BY_TIMESPAN_NOTFAILED}
  GROUP BY job.started / $HOURS_TO_MILLIS, job.ended / $HOURS_TO_MILLIS
 """
 
@@ -543,11 +556,7 @@ SELECT
  SUM (job.ended - job.started) AS processingTime
  FROM cluster_job AS job
  WHERE
- job.queued >= ?
- AND job.ended < ?
- AND job.queued IS NOT NULL
- AND job.ended IS NOT NULL
- AND job.exit_status != 'FAILED'
+ ${QUERY_BY_TIMESPAN_NOTFAILED}
 """
 
         Long queue, process, pQueue, pProcess
@@ -579,8 +588,7 @@ SELECT
  DISTINCT job.seq_type_id AS seqType
  FROM cluster_job AS job
  WHERE
- job.queued >= ?
- AND job.ended < ?
+ ${QUERY_BY_TIMESPAN}
  AND job.job_class = ?
  AND job.seq_type_id IS NOT NULL
  ORDER BY job.seq_type_id
@@ -613,10 +621,7 @@ SELECT
  count(job.exit_code) AS exitCodeCount
  FROM cluster_job AS job
  WHERE
- job.queued >= ?
- AND job.ended < ?
- AND job.job_class = ?
- AND job.seq_type_id = ?
+ ${QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE}
  GROUP BY job.exit_code
  ORDER BY job.exit_code
 """
@@ -648,10 +653,7 @@ SELECT
  count(job.exit_status) AS exitStatusCount
  FROM cluster_job AS job
  WHERE
- job.queued >= ?
- AND job.ended < ?
- AND job.job_class = ?
- AND job.seq_type_id = ?
+ ${QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE}
  GROUP BY job.exit_status
  ORDER BY job.exit_status
 """
@@ -723,13 +725,7 @@ SELECT
  job.id AS id
  FROM cluster_job AS job
  WHERE
- job.queued >= ?
- AND job.ended < ?
- AND job.queued IS NOT NULL
- AND job.ended IS NOT NULL
- AND job.exit_status != 'FAILED'
- AND job.job_class = ?
- AND job.seq_type_id = ?
+ ${QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE_NOTFAILED}
 """
 
         def walltimeData = []
@@ -761,13 +757,7 @@ SELECT
  job.id AS id
  FROM cluster_job AS job
  WHERE
- job.queued >= ?
- AND job.ended < ?
- AND job.queued IS NOT NULL
- AND job.ended IS NOT NULL
- AND job.exit_status != 'FAILED'
- AND job.job_class = ?
- AND job.seq_type_id = ?
+ ${QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE_NOTFAILED}
 """
 
         def memoryData = []
@@ -797,11 +787,7 @@ SELECT
  AVG(job.ended - job.started) as avgWalltime
  FROM cluster_job AS job
  WHERE
- job.queued >= ?
- AND job.ended < ?
- AND job.exit_status != 'FAILED'
- AND job.job_class = ?
- AND job.seq_type_id = ?
+ ${QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE_NOTFAILED}
 """
 
         Double avgCpu
@@ -831,11 +817,7 @@ SELECT
  AVG(job.used_memory) AS avgMemory
  FROM cluster_job AS job
  WHERE
- job.queued >= ?
- AND job.ended < ?
- AND job.exit_status != 'FAILED'
- AND job.job_class = ?
- AND job.seq_type_id = ?
+ ${QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE_NOTFAILED}
 """
 
         Integer avgMemory
@@ -864,13 +846,8 @@ SELECT
  CAST (AVG (job.ended - job.started) AS int) AS avgProcess
  FROM cluster_job AS job
  WHERE
- job.queued >= ?
- AND job.ended < ?
- AND job.queued IS NOT NULL
- AND job.ended IS NOT NULL
- AND job.exit_status != 'FAILED'
- AND job.job_class = ?
- AND job.seq_type_id = ?
+ ${QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE_NOTFAILED}
+ AND n_bases IS NOT NULL
 """
 
         Long avgBases, avgQueue, avgProcess
@@ -890,6 +867,84 @@ SELECT
         }
 
         return ["avgQueue": avgQueue, "avgProcess": avgProcess]
+    }
+
+    /**
+     * returns statistics about the input-coverage of the files used as input of {@link ClusterJob} for a specific jobClass and seqType
+     * @param referenceGenomeSizeInBases used to recalculate the coverage from the selected amount of bases (inputcoverage = inputbases / referencegenomesize)
+     * @return map ["minCov": minimumCoverage, "maxCov": maximumCoverage, "avgCov": averageCoverage, "medianCov": medianCoverage]
+     */
+    public Map findJobClassAndSeqTypeSpecificCoverages(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate, Double referenceGenomeSizeInBases) {
+        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+
+        def sql = new Sql(dataSource)
+
+        Map coverageStatistic = [avgCov: null, minCov: null, maxCov: null, medianCov: null]
+        Long jobCount
+
+        def query = """
+SELECT
+count(*) as jobCount,
+avg(n_bases) as avgBases,
+max(n_bases) as maxBases,
+min(n_bases) as minBases
+FROM cluster_job AS job
+WHERE
+ ${QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE_NOTFAILED}
+ AND n_bases IS NOT NULL
+"""
+
+        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType.id]) {
+            it.next()
+            jobCount = it.getLong('jobCount')
+            if (jobCount) {
+                coverageStatistic.put('avgCov', it.getLong('avgBases') / referenceGenomeSizeInBases)
+                coverageStatistic.put('minCov', it.getLong('minBases') / referenceGenomeSizeInBases)
+                coverageStatistic.put('maxCov', it.getLong('maxBases') / referenceGenomeSizeInBases)
+            }
+        }
+
+        if (!jobCount) {
+            return coverageStatistic
+        }
+
+        // if even number take the average of the two middle numbers
+        if (jobCount % 2 == 0L) {
+            query = """
+SELECT
+avg(n_bases_from_offset) as medianBases
+FROM
+ (SELECT n_bases as n_bases_from_offset
+ FROM cluster_job as job
+ WHERE
+  ${QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE_NOTFAILED}
+  AND n_bases IS NOT NULL
+  ORDER BY n_bases
+  LIMIT 2 OFFSET ?)
+job
+"""
+        } else {
+            query = """
+SELECT
+n_bases as medianBases
+FROM cluster_job AS job
+WHERE
+ ${QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE_NOTFAILED}
+ AND n_bases IS NOT NULL
+ ORDER BY n_bases
+ LIMIT 1 OFFSET ?
+"""
+        }
+
+
+        int medianOffset = Math.round(jobCount/2) - 1
+
+        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType.id, medianOffset]) {
+            it.next()
+            coverageStatistic.put('medianCov', it.getLong('medianBases') / referenceGenomeSizeInBases)
+        }
+
+        return coverageStatistic
     }
 
     /**
