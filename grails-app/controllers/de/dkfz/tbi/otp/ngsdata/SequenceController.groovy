@@ -2,10 +2,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
 import groovy.json.JsonSlurper
-import javax.xml.transform.Transformer
-import javax.xml.transform.TransformerFactory
-import javax.xml.transform.stream.StreamResult
-import javax.xml.transform.stream.StreamSource
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 
@@ -19,7 +15,7 @@ class SequenceController {
         List<SeqType> seqTypes = SeqType.list(sort: "name", order: "asc")
         [projects: projectService.getAllProjects(),
             sampleTypes: SampleType.list(sort: "name", order: "asc"),
-            seqTypes: new TreeSet(seqTypes.collect { it.aliasOrName }),
+            seqTypes: new TreeSet(seqTypes.collect { it.displayName }),
             libraryLayouts: new TreeSet(seqTypes.collect { it.libraryLayout }),
             seqCenters: SeqCenter.list(sort: "name", order: "asc")
         ]

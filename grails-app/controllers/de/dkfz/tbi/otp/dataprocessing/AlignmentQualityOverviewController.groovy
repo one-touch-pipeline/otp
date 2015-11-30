@@ -92,10 +92,10 @@ class AlignmentQualityOverviewController {
         String projectName = params.project ?: projects[0]
         Project project = projectService.getProjectByName(projectName)
 
-        List<String> seqTypes = seqTypeService.alignableSeqTypesByProject(project)*.aliasOrName
+        List<String> seqTypes = seqTypeService.alignableSeqTypesByProject(project)*.displayName
         String seqTypeName = (params.seqType && seqTypes.contains(params.seqType)) ? params.seqType : seqTypes[0]
         SeqType seqType = SeqType.findWhere(
-                'aliasOrName': seqTypeName
+                displayName: seqTypeName
                 )
 
         List<String> header = null
@@ -139,7 +139,7 @@ class AlignmentQualityOverviewController {
 
         Project project = projectService.getProjectByName(projectName)
         SeqType seqType = SeqType.findWhere(
-                'aliasOrName': seqTypeName,
+                displayName: seqTypeName,
                 'libraryLayout': SeqType.LIBRARYLAYOUT_PAIRED
                 )
 

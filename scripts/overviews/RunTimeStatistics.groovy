@@ -115,7 +115,7 @@ def snvStartedAndFinished = {
 
 println "IlseIds:\n\t" + ilseIdList
 println "Projects:\n\t" + projects
-println "SeqTypes:\n\t" + seqTypes*.aliasOrName
+println "SeqTypes:\n\t" + seqTypes*.displayName
 println "Alignment:\n\t" + alignments.join("\n")
 println "Info from GPCF:\n\t[OTRS-Ticket]"
 println "Import Started:\n\t" + importStarted()

@@ -27,7 +27,10 @@ class SeqType {
     /**
      * Display name used in the GUI.
      */
-    String aliasOrName
+    String displayName
+    /** name used in roddy config files */
+    String roddyName
+
 
     static constraints = {
         name(blank: false)
@@ -35,11 +38,12 @@ class SeqType {
         dirName(blank: false, unique: 'libraryLayout', validator: { OtpPath.isValidPathComponent(it) })  // TODO: OTP-1124: unique constraint for (dirName, libraryLayoutDirName)
         alias(nullable: true, blank: false)
         //For unknown reason the object creation fail, if it is not set as nullable
-        aliasOrName(nullable: true, blank: false)
+        displayName(nullable: true, blank: false)
+        roddyName(nullable: true, blank: false)
     }
 
     static mapping = {
-        aliasOrName formula: '(CASE WHEN alias IS NOT NULL THEN alias ELSE name END)'
+        displayName formula: '(CASE WHEN alias IS NOT NULL THEN alias ELSE name END)'
     }
 
     /**
@@ -67,19 +71,19 @@ class SeqType {
     }
 
     String toString() {
-        "${aliasOrName} ${libraryLayout}"
+        "${displayName} ${libraryLayout}"
     }
 
 
     static SeqType getWholeGenomePairedSeqType() {
         return CollectionUtils.exactlyOneElement(
-                SeqType.findAllByNameAndLibraryLayout(SeqTypeNames.WHOLE_GENOME.seqTypeName, SeqType.LIBRARYLAYOUT_PAIRED)
+                findAllByNameAndLibraryLayout(SeqTypeNames.WHOLE_GENOME.seqTypeName, LIBRARYLAYOUT_PAIRED)
         )
     }
 
     static SeqType getExomePairedSeqType() {
         return CollectionUtils.exactlyOneElement(
-                SeqType.findAllByAliasAndLibraryLayout(SeqTypeNames.EXOME.seqTypeName, SeqType.LIBRARYLAYOUT_PAIRED)
+                findAllByNameAndLibraryLayout(SeqTypeNames.EXOME.seqTypeName, LIBRARYLAYOUT_PAIRED)
         )
     }
 }

@@ -727,6 +727,7 @@ class DomainFactory {
         SeqType.buildLazy(
                 name: SeqTypeNames.WHOLE_GENOME.seqTypeName,
                 alias: "WGS",
+                roddyName: "WGS",
                 libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED
         )
     }
@@ -734,7 +735,8 @@ class DomainFactory {
     static SeqType createExomeSeqType() {
         SeqType.buildLazy(
                 name: SeqTypeNames.EXOME.seqTypeName,
-                alias: "WES",
+                alias: "EXOME",
+                roddyName: "WES",
                 libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED
         )
     }

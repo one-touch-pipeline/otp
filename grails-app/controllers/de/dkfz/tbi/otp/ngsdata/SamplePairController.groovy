@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import grails.converters.JSON
 import java.text.DecimalFormat
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
+
 import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
 import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
@@ -46,7 +46,7 @@ class SamplePairController {
             dataToRender.aaData << [
                 sampleType1: samplePair.sampleType1.name,
                 sampleType2: samplePair.sampleType2.name,
-                seqType: samplePair.seqType.aliasOrName,
+                seqType: samplePair.seqType.displayName,
                 samplePairPath: samplePair.samplePairPath.getAbsoluteDataManagementPath().getAbsolutePath(),
                 lastUpdated: snvCallingInstance.lastUpdated?.format("yyyy-MM-dd")
             ]
@@ -65,7 +65,7 @@ class SamplePairController {
             dataToRender.aaData << [
                 sampleType1: samplePair.sampleType1.name,
                 sampleType2: samplePair.sampleType2.name,
-                seqType: samplePair.seqType.aliasOrName,
+                seqType: samplePair.seqType.displayName,
                 dateCreated: snvCallingInstance.dateCreated?.format("yyyy-MM-dd")
             ]
         }
@@ -85,7 +85,7 @@ class SamplePairController {
             def tmp = [
                 sampleType1: samplePair?.sampleType1?.name,
                 sampleType2: samplePair?.sampleType2?.name,
-                seqType: samplePair?.seqType?.aliasOrName,
+                seqType: samplePair?.seqType?.displayName,
                 laneCount1: valueHelper(processedMergedBamFile1?.numberOfMergedLanes, threshold1?.numberOfLanes),
                 laneCount2: valueHelper(processedMergedBamFile2?.numberOfMergedLanes, threshold2?.numberOfLanes),
                 coverage1: valueHelper(processedMergedBamFile1?.coverage, threshold1?.coverage),
@@ -129,7 +129,7 @@ class SamplePairController {
             dataToRender.aaData << [
                 sampleType1: samplePair.sampleType1.name,
                 sampleType2: samplePair.sampleType2.name,
-                seqType: samplePair.seqType.aliasOrName,
+                seqType: samplePair.seqType.displayName,
             ]
         }
         render dataToRender as JSON

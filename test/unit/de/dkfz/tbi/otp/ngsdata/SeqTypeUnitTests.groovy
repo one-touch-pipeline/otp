@@ -66,7 +66,6 @@ class SeqTypeUnitTests {
     void testGetExomePairedSeqType_AllFine() {
         SeqType seqType = new SeqType(
                 name: SeqTypeNames.EXOME.seqTypeName,
-                alias: SeqTypeNames.EXOME.seqTypeName,
                 libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
                 dirName: "exome_sequencing"
         )
