@@ -111,8 +111,7 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
             )
         assertNotNull(bedfile.save([flush: true, validate: false]))
 
-        job.executionHelperService = [sendScript: { realm, cmd, jobId ->
-                assert jobId
+        job.executionHelperService = [sendScript: { realm, cmd ->
                 String expCommand = "qualityAssessment.sh processedBamFileFilePath baiFilePath qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath false ${Chromosomes.overallChromosomesLabel()} 36 25 0 1 1000 10 false bedFilePath referenceGenomeMetaInformationPath; chmod 440 qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath"
                 assertEquals(expCommand, cmd)
                 return 'pbsID'
@@ -127,8 +126,7 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
         seqType.name = SeqTypeNames.EXOME.seqTypeName
         seqType.libraryLayout = 'PAIRED'
 
-        job.executionHelperService = [sendScript: { realm, cmd, jobId ->
-            assert jobId
+        job.executionHelperService = [sendScript: { realm, cmd ->
             assert false //this method should not be executed
         }] as ExecutionHelperService
 
@@ -143,8 +141,7 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
         seqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
         seqType.libraryLayout = 'PAIRED'
 
-        job.executionHelperService = [sendScript: { realm, cmd, jobId ->
-                assert jobId
+        job.executionHelperService = [sendScript: { realm, cmd ->
                 String expCommand = "qualityAssessment.sh processedBamFileFilePath baiFilePath qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath false ${Chromosomes.overallChromosomesLabel()} 36 25 0 1 1000 10 false; chmod 440 qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath"
                 assertEquals(expCommand, cmd)
                 return 'pbsID'

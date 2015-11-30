@@ -43,7 +43,6 @@ abstract class AbstractSnvCallJoinJob extends AbstractSnvCallingJob {
             SnvJobResult jobResult = createAndSaveSnvJobResult(instance, step.getExternalScript(config.externalScriptVersion), externalScriptJoining)
 
             final Realm realm = configService.getRealmDataProcessing(instance.project)
-            final String pbsOptionName = getSnvPBSOptionsNameSeqTypeSpecific(instance.seqType)
 
             final File configFileInProjectDirectory = writeConfigFile(instance)
 
@@ -57,7 +56,7 @@ abstract class AbstractSnvCallJoinJob extends AbstractSnvCallingJob {
                     "CONTROL_BAMFILE_FULLPATH_BP=${sampleType2BamFilePath}"
 
             submit(jobResult, realm, { String clusterScript, String specificQsubParameters ->
-                executionHelperService.sendScript(realm, clusterScript, pbsOptionName, "{" +
+                executionHelperService.sendScript(realm, clusterScript, "{" +
                         "'-v': '${qsubParametersGeneral},${specificQsubParameters}'" +
                         "}")
             })

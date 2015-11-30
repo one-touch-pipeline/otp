@@ -32,6 +32,7 @@ class ClusterJob implements ClusterJobIdentifier{
 
     public static final String JOB_INFO_NOT_SET_MESSAGE = "Job info is not set (yet)."
 
+    ProcessingStep processingStep
     static belongsTo = [processingStep: ProcessingStep]
 
     enum Status {

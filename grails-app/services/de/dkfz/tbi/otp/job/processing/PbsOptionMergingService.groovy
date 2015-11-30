@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import grails.converters.JSON
 
 import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
@@ -30,48 +32,32 @@ class PbsOptionMergingService {
 
     ProcessingOptionService processingOptionService
 
-    /**
-     * Create the merged PBS option String based on the defaults of the realm and job-cluster depending settings.
-     * If no job key is given, only the default PBS option from the realm is used.
-     * Otherwise the job depending option from {@link ProcessingOption} is merged into the default settings.
-     * The {@link ProcessingOption} is got by name created by the prefix {@link #PBS_PREFIX} and the jobIdentifier
-     * and by a soft link to the cluster about the cluster name {@link Realm#getCluster()}.
-     * The PBS option can not be {@link Project} specific, because the project is not known here.
-     * The PBS option have to be provided as a JSON String.
-     *
-     * @param realm the realm the default PBS option should be take from
-     * @param jobIdentifier the job name, if the job needs specific PBS options for execution,
-     *          or null, if the default PBS option of the realm is sufficient for the job.
-     * @param qsubParameter The parameter which are needed for some qsub commands and can not be included in the text parameter
-     * The qsubParameter must be in JSON format!
-     * @return the created PBS option String.
-     * @throws NullPointerException if a job identifier is provided, but no PBS option is defined for this
-     *          job identifier and the cluster ({@link Realm#cluster}) of the {@link Realm}
-     */
-    public String mergePbsOptions(Realm realm, String jobIdentifier = null, String... parameters) {
-        return mapToPbsOptions(mergePbsOptionsToMap(realm, jobIdentifier, parameters))
-    }
+    public String mergePbsOptions(ProcessingStep processingStep, Realm realm, String... additionalJsonOptions) {
+        String cluster = realm.cluster
+        ProcessParameterObject parameterObject = processingStep.processParameterObject
+        assert parameterObject
+        Project project = parameterObject.project
+        SeqType seqType = parameterObject.seqType
+        String optionNameWithoutSeqType = "${PBS_PREFIX}${processingStep.nonQualifiedJobClass}"
 
-    /**
-     * Same as {@link #mergePbsOptions(Realm, String, String)}, but returns a Map.
-     */
-    public Map mergePbsOptionsToMap(Realm realm, String jobIdentifier = null, String... parameters) {
-        Map allParameter = jsonStringToMap(realm.pbsOptions)
-        if (jobIdentifier != null) {
-            String key = PBS_PREFIX + jobIdentifier
-            String cluster = realm.cluster
-            ProcessingOption processingOption = processingOptionService.findOptionObject(key, cluster, null)
-            Assert.notNull(processingOption, "No processing option is defined for job ${key} and cluster ${cluster}")
-            Map mapJob = jsonStringToMap(processingOption.value)
-            allParameter = this.mergeHelper(allParameter, mapJob)
+        // default options for the realm
+        Map options = jsonStringToMap(realm.pbsOptions)
+
+        // options for the job class
+        options = mergeMapWithJsonString(options, processingOptionService.findOption(optionNameWithoutSeqType, cluster, project))
+        if (seqType) {
+            assert seqType.processingOptionName
+            // options for the job class and SeqType
+            options = mergeMapWithJsonString(options, processingOptionService.findOption(
+                    "${optionNameWithoutSeqType}_${seqType.processingOptionName}", cluster, project))
         }
-        parameters.each {
-            if (it) {
-                Map mapQsubParameter = jsonStringToMap(it)
-                allParameter = this.mergeHelper(allParameter, mapQsubParameter)
-            }
+
+        // additional options
+        additionalJsonOptions.each {
+            options = mergeMapWithJsonString(options, it)
         }
-        return allParameter
+
+        return mapToPbsOptions(options)
     }
 
     /**
@@ -118,6 +104,14 @@ class PbsOptionMergingService {
             }
         }
         return sb.toString()
+    }
+
+    private Map mergeMapWithJsonString(Map<String, ?> baseMap, String jsonOptionsToMerge) {
+        if (jsonOptionsToMerge) {
+            return mergeHelper(baseMap, jsonStringToMap(jsonOptionsToMerge))
+        } else {
+            return baseMap
+        }
     }
 
     /**

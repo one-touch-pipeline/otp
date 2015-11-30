@@ -1,4 +1,8 @@
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
+import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.PBS_PREFIX
+
+import de.dkfz.tbi.otp.job.jobs.snvcalling.*
+import de.dkfz.tbi.otp.ngsdata.SeqType
 
 plan("SnvWorkflow") {
     start("start", "snvStartJob")
@@ -10,9 +14,13 @@ plan("SnvWorkflow") {
     job("snvCompletion", "snvCompletionJob")
 }
 
+String wgs = SeqType.wholeGenomePairedSeqType.processingOptionName
+String exome = SeqType.exomePairedSeqType.processingOptionName
+
+
 
 println ctx.processingOptionService.createOrUpdate(
-    "PBS_snvPipeline_CALLING_WGS",
+    "${PBS_PREFIX}${SnvCallingJob.simpleName}_${wgs}",
     "DKFZ",
     null,
     '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "24:00:00", mem: "400m"}}',
@@ -20,7 +28,7 @@ println ctx.processingOptionService.createOrUpdate(
 )
 
 println ctx.processingOptionService.createOrUpdate(
-    "PBS_snvPipeline_CALLING_WES",
+    "${PBS_PREFIX}${SnvCallingJob.simpleName}_${exome}",
     "DKFZ",
     null,
     '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "08:00:00", mem: "400m"}}',
@@ -30,7 +38,25 @@ println ctx.processingOptionService.createOrUpdate(
 
 
 println ctx.processingOptionService.createOrUpdate(
-    "PBS_snvPipeline_SNV_ANNOTATION_WGS",
+    "${PBS_PREFIX}${SnvJoiningJob.simpleName}_${wgs}",
+    "DKFZ",
+    null,
+    '{"-l": {nodes: "1:ppn=1", walltime: "24:00:00", mem: "400m"}}',
+    ""
+)
+
+println ctx.processingOptionService.createOrUpdate(
+    "${PBS_PREFIX}${SnvJoiningJob.simpleName}_${exome}",
+    "DKFZ",
+    null,
+    '{"-l": {nodes: "1:ppn=1", walltime: "08:00:00", mem: "400m"}}',
+    ""
+)
+
+
+
+println ctx.processingOptionService.createOrUpdate(
+    "${PBS_PREFIX}${SnvAnnotationJob.simpleName}_${wgs}",
     "DKFZ",
     null,
     '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "48:00:00", mem: "3g"}}',
@@ -38,7 +64,7 @@ println ctx.processingOptionService.createOrUpdate(
 )
 
 println ctx.processingOptionService.createOrUpdate(
-    "PBS_snvPipeline_SNV_ANNOTATION_WES",
+    "${PBS_PREFIX}${SnvAnnotationJob.simpleName}_${exome}",
     "DKFZ",
     null,
     '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "24:00:00", mem: "3g"}}',
@@ -48,7 +74,7 @@ println ctx.processingOptionService.createOrUpdate(
 
 
 println ctx.processingOptionService.createOrUpdate(
-    "PBS_snvPipeline_SNV_DEEPANNOTATION_WGS",
+    "${PBS_PREFIX}${SnvDeepAnnotationJob.simpleName}_${wgs}",
     "DKFZ",
     null,
     '{"-l": {nodes: "1:ppn=3:lsdf", walltime: "04:00:00", mem: "400m"}}',
@@ -56,7 +82,7 @@ println ctx.processingOptionService.createOrUpdate(
 )
 
 println ctx.processingOptionService.createOrUpdate(
-    "PBS_snvPipeline_SNV_DEEPANNOTATION_WES",
+    "${PBS_PREFIX}${SnvDeepAnnotationJob.simpleName}_${exome}",
     "DKFZ",
     null,
     '{"-l": {nodes: "1:ppn=3:lsdf", walltime: "02:00:00", mem: "400m"}}',
@@ -66,7 +92,7 @@ println ctx.processingOptionService.createOrUpdate(
 
 
 println ctx.processingOptionService.createOrUpdate(
-    "PBS_snvPipeline_FILTER_VCF_WGS",
+    "${PBS_PREFIX}${FilterVcfJob.simpleName}_${wgs}",
     "DKFZ",
     null,
     '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "04:00:00", mem: "1g"}}',
@@ -74,7 +100,7 @@ println ctx.processingOptionService.createOrUpdate(
 )
 
 println ctx.processingOptionService.createOrUpdate(
-    "PBS_snvPipeline_FILTER_VCF_WES",
+    "${PBS_PREFIX}${FilterVcfJob.simpleName}_${exome}",
     "DKFZ",
     null,
     '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "02:00:00", mem: "1g"}}',

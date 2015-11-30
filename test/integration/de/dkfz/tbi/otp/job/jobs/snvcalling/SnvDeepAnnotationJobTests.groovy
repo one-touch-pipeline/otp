@@ -163,7 +163,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvJobResult_DeepAnnotation.save()
 
         snvDeepAnnotationJob = applicationContext.getBean('snvDeepAnnotationJob',
-                DomainFactory.createAndSaveProcessingStep(SnvDeepAnnotationJob.toString()), [])
+                DomainFactory.createAndSaveProcessingStep(SnvDeepAnnotationJob.toString(), snvCallingInstance2), [])
         snvDeepAnnotationJob.log = new NoOpLog()
 
         ParameterType typeRealm = new ParameterType(
@@ -221,9 +221,8 @@ RUN_FILTER_VCF=1
 CHROMOSOME_INDICES=( {1..21} X Y)
 """
 
-        snvDeepAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResult_DeepAnnotation }
-        executionService.metaClass.sendScript = { Realm realm, String text, String jobIdentifier, String qsubParameters ->
+        executionService.metaClass.sendScript = { Realm realm, String text, String qsubParameters ->
             throw new RuntimeException("This area should not be reached since the deep annotation job shall not run")
         }
         assertEquals(NextAction.SUCCEED, snvDeepAnnotationJob.maybeSubmit(snvCallingInstance2))
@@ -239,17 +238,14 @@ RUN_FILTER_VCF=1
 CHROMOSOME_INDICES=( {1..21} X Y)
 """
 
-        snvDeepAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         snvDeepAnnotationJob.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return null }
         shouldFail(RuntimeException, { snvDeepAnnotationJob.maybeSubmit(snvCallingInstance2) })
     }
 
     @Test
     void testMaybeSubmit() {
-        testData.createProcessingOptions()
         TestCase.mockCreateDirectory(lsdfFilesService)
         SnvCallingStep step = SnvCallingStep.SNV_DEEPANNOTATION
-        snvDeepAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
 
         snvDeepAnnotationJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult -> }
         snvDeepAnnotationJob.metaClass.writeConfigFile = { SnvCallingInstance instance ->
@@ -313,7 +309,6 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     @Test
     void testMaybeSubmit_InputFileNotReadable() {
         SnvCallingStep step = SnvCallingStep.SNV_DEEPANNOTATION
-        snvDeepAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
 
         snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep snvCallingStep -> return snvJobResult_Annotation }
 

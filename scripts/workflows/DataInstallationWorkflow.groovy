@@ -1,3 +1,6 @@
+import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.PBS_PREFIX
+
+import de.dkfz.tbi.otp.job.jobs.dataTransfer.*
 import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
 
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
@@ -42,7 +45,7 @@ plan("DataInstallationWorkflow") {
 
 //picard option for mark duplicates
 println ctx.processingOptionService.createOrUpdate(
-  "PBS_CalculateChecksumJob",
+  "${PBS_PREFIX}${CalculateChecksumJob.simpleName}",
   null,
   null,
   '{"-l": { walltime: "12:00:00"}}',
@@ -51,7 +54,7 @@ println ctx.processingOptionService.createOrUpdate(
 
 //picard option for mark duplicates
 println ctx.processingOptionService.createOrUpdate(
-  "PBS_CopyFilesJob",
+  "${PBS_PREFIX}${CopyFilesJob.simpleName}",
   null,
   null,
   '{"-l": { walltime: "12:00:00"}}',

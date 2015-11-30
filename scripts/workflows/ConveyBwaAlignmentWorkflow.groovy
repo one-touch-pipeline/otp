@@ -1,5 +1,7 @@
+import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.PBS_PREFIX
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
-import de.dkfz.tbi.otp.dataprocessing.*
+
+import de.dkfz.tbi.otp.job.jobs.alignment.*
 
 plan("ConveyBwaAlignmentWorkflow") {
     start("start", "BwaAlignmentStartJob")
@@ -95,7 +97,7 @@ ctx.processingOptionService.createOrUpdate(
 
 // Create PBS options for bwaPairingAndSortingJob
 ctx.processingOptionService.createOrUpdate(
-    'PBS_bwaPairingAndSortingJob',
+    "${PBS_PREFIX}${BwaPairingAndSortingJob.simpleName}",
     'DKFZ',
     null,
     '''{
@@ -110,7 +112,7 @@ ctx.processingOptionService.createOrUpdate(
 
 // Create PBS options for bwaAlignmentJob
 ctx.processingOptionService.createOrUpdate(
-    'PBS_conveyBwaAlignmentJob',
+    "${PBS_PREFIX}${ConveyBwaAlignmentJob.simpleName}",
     'DKFZ',
     null,
     '''{

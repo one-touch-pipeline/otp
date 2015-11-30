@@ -63,7 +63,7 @@ class ConveyBwaAlignmentJob extends AbstractJobImpl {
         String bwaErrorCheckingCmd = BwaErrorHelper.failureCheckScript(saiFilePath, bwaLogFilePath)
         String chmodCmd = "chmod 440 ${saiFilePath} ${bwaLogFilePath}"
         String cmd = "${bwaCmd}; ${bwaErrorCheckingCmd}; ${chmodCmd}"
-        return executionHelperService.sendScript(realm, cmd, "conveyBwaAlignmentJob")
+        return executionHelperService.sendScript(realm, cmd)
     }
 
     private String qualityEncoding(AlignmentPass alignmentPass) {

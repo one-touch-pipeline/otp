@@ -155,7 +155,7 @@ class ClusterJobService {
      * @return Object or null
      */
     public static ProcessParameterObject findProcessParameterObjectByClusterJob(ClusterJob job) {
-        return atMostOneElement(ProcessParameter.findAllByProcess(job.processingStep.process)).toObject()
+        return job.processingStep.processParameterObject
     }
 
     /**

@@ -36,7 +36,7 @@ public class CalculateChecksumJob extends AbstractJobImpl {
             }
             String cmd = scriptText(file)
             Realm realm = configService.getRealmDataManagement(file.project)
-            String jobId = executionHelperService.sendScript(realm, cmd, this.getClass().simpleName)
+            String jobId = executionHelperService.sendScript(realm, cmd)
             pbsIds << jobId
             realmIds << realm.id.toString()
         }

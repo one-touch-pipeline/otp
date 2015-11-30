@@ -130,7 +130,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         assert snvJobResult.save()
 
         snvAnnotationJob = applicationContext.getBean('snvAnnotationJob',
-                DomainFactory.createAndSaveProcessingStep(SnvAnnotationJob.toString()), [])
+                DomainFactory.createAndSaveProcessingStep(SnvAnnotationJob.toString(), snvCallingInstance2), [])
         snvAnnotationJob.log = new NoOpLog()
     }
 
@@ -165,9 +165,8 @@ RUN_FILTER_VCF=1
 CHROMOSOME_INDICES=( {1..21} XY)
 """
 
-        snvAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResult }
-        executionService.metaClass.sendScript = { Realm realm, String text, String jobIdentifier, String qsubParameters ->
+        executionService.metaClass.sendScript = { Realm realm, String text, String qsubParameters ->
             throw new RuntimeException("This area should not be reached since the annotation job shall not run")
         }
         snvAnnotationJob.log = new NoOpLog()
@@ -185,7 +184,6 @@ RUN_FILTER_VCF=1
 CHROMOSOME_INDICES=( {1..21} XY)
 """
 
-        snvAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         snvAnnotationJob.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return null }
         assert (
         shouldFail(RuntimeException, { snvAnnotationJob.maybeSubmit(snvCallingInstance2) })
@@ -196,9 +194,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testMaybeSubmit() {
-        testData.createProcessingOptions()
         TestCase.mockCreateDirectory(lsdfFilesService)
-        snvAnnotationJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         snvAnnotationJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult -> }
         snvAnnotationJob.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
             return new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFile1.getBamFileName())

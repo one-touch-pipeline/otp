@@ -131,15 +131,15 @@ abstract class AbstractBamFile {
         ), "Wrong BedFile count")
     }
 
-    final Project getProject() {
+    Project getProject() {
         return individual.project
     }
 
-    final short getProcessingPriority() {
+    short getProcessingPriority() {
         return project.processingPriority
     }
 
-    final Individual getIndividual() {
+    Individual getIndividual() {
         return sample.individual
     }
 
@@ -147,7 +147,7 @@ abstract class AbstractBamFile {
         return mergingWorkPackage.sample
     }
 
-    final SampleType getSampleType() {
+    SampleType getSampleType() {
         return  sample.sampleType
     }
 

@@ -186,7 +186,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         assert snvJobResultFilter2.save()
 
         filterVcfJob = applicationContext.getBean('filterVcfJob',
-                DomainFactory.createAndSaveProcessingStep(FilterVcfJob.toString()), [])
+                DomainFactory.createAndSaveProcessingStep(FilterVcfJob.toString(), snvCallingInstance2), [])
         filterVcfJob.log = new NoOpLog()
 
         ParameterType typeRealm = new ParameterType(
@@ -243,9 +243,8 @@ RUN_SNV_DEEPANNOTATION=0
 RUN_FILTER_VCF=0
 CHROMOSOME_INDICES=( {1..21} XY)
 """
-        filterVcfJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResultFilter1 }
-        executionService.metaClass.sendScript = { Realm realm, String text, String jobIdentifier, String qsubParameters ->
+        executionService.metaClass.sendScript = { Realm realm, String text, String qsubParameters ->
             throw new RuntimeException("This area should not be reached since the filter job shall not run")
         }
         assertEquals(NextAction.SUCCEED, filterVcfJob.maybeSubmit(snvCallingInstance2))
@@ -260,16 +259,13 @@ RUN_SNV_DEEPANNOTATION=0
 RUN_FILTER_VCF=0
 CHROMOSOME_INDICES=( {1..21} XY)
 """
-        filterVcfJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return null }
         shouldFail(RuntimeException, { filterVcfJob.maybeSubmit(snvCallingInstance2) })
     }
 
     @Test
     void testMaybeSubmit_InputFileExists() {
-        snvCallingInstanceTestData.createProcessingOptions()
         TestCase.mockCreateDirectory(lsdfFilesService)
-        filterVcfJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
         filterVcfJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult ->
             return true
         }

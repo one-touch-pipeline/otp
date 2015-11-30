@@ -62,6 +62,10 @@ class SeqType {
         return libraryLayout.toLowerCase()
     }
 
+    String getProcessingOptionName() {
+        return alias ?: name
+    }
+
     SeqTypeNames getSeqTypeName() {
         return SeqTypeNames.fromSeqTypeName(name)
     }

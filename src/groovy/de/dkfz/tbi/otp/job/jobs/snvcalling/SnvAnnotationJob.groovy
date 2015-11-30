@@ -63,8 +63,6 @@ class SnvAnnotationJob extends AbstractSnvCallingJob {
             // In case the file exists already from an earlier -not successful- run it should be deleted first
             deleteResultFileIfExists(annotationResultFile, realm)
 
-            final String pbsOptionName = getSnvPBSOptionsNameSeqTypeSpecific(instance.seqType)
-
             final String qsubParameters="{ '-v': '"+
                     "CONFIG_FILE=${configFileInProjectDirectory}," +
                     "pid=${instance.individual.pid}," +
@@ -87,7 +85,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob {
             if (inputFileCopy.absolutePath != inputResultFile.absolutePath) {
                 script << " rm -f ${inputFileCopy.absolutePath}"
             }
-            executionHelperService.sendScript(realm, script.toString(), pbsOptionName, qsubParameters)
+            executionHelperService.sendScript(realm, script.toString(), qsubParameters)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {

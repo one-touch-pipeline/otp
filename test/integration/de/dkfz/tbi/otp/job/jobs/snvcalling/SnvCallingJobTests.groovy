@@ -194,7 +194,7 @@ RUN_FILTER_VCF=1
 CHROMOSOME_INDICES=( {1..21} XY)
 """
 
-        snvCallingJob.metaClass.getProcessParameterObject = { return snvCallingInstance2 }
+        DomainFactory.createProcessParameter(snvCallingJob.processingStep.process, snvCallingInstance2)
         snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResult }
         snvCallingJob.log = new NoOpLog()
         assertEquals(NextAction.SUCCEED, snvCallingJob.maybeSubmit(snvCallingInstance2))
@@ -210,9 +210,9 @@ RUN_FILTER_VCF=1
 CHROMOSOME_INDICES=( {1..21} XY)
 """
 
-        snvCallingJob.metaClass.getProcessParameterObject = { return snvCallingInstance }
+        DomainFactory.createProcessParameter(snvCallingJob.processingStep.process, snvCallingInstance)
         snvCallingInstance.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return null }
-        executionService.metaClass.sendScript = { Realm realm, String text, String jobIdentifier, String qsubParameters ->
+        executionService.metaClass.sendScript = { Realm realm, String text, String qsubParameters ->
             throw new RuntimeException("This area should not be reached since the calling job shall not run")
         }
         shouldFail(RuntimeException, { snvCallingJob.maybeSubmit(snvCallingInstance) })
@@ -220,9 +220,8 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testMaybeSubmitWithSnvCallingInput() {
-        testData.createProcessingOptions()
         snvJobResult.delete()
-        snvCallingJob.metaClass.getProcessParameterObject = { return snvCallingInstance }
+        DomainFactory.createProcessParameter(snvCallingJob.processingStep.process, snvCallingInstance)
         snvCallingJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult ->
             return true
         }

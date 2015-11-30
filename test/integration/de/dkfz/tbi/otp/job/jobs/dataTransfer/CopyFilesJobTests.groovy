@@ -102,7 +102,7 @@ class CopyFilesJobTests {
 
 
     private void mockServicesForFileCopyingAndRunService(Map paths) {
-        job.executionHelperService.metaClass.sendScript = { Realm realm1, String text, String jobIdentifier ->
+        job.executionHelperService.metaClass.sendScript = { Realm realm1, String text ->
             assert text.contains("cp ${paths.initialPath} ${paths.finalPath};chmod 440 ${paths.finalPath}")
             return PBS_ID
         }

@@ -25,19 +25,8 @@ class SnvCallingInstanceTestData {
     SnvConfig snvConfig
     ExternalScript externalScript_Joining
 
-    static void createProcessingOptions() {
-        createAndSaveProcessingOption([name: "PBS_snvPipeline_CALLING_WGS", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
-        createAndSaveProcessingOption([name: "PBS_snvPipeline_CALLING_WES", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
-        createAndSaveProcessingOption([name: "PBS_snvPipeline_SNV_ANNOTATION_WGS", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
-        createAndSaveProcessingOption([name: "PBS_snvPipeline_SNV_ANNOTATION_WES", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
-        createAndSaveProcessingOption([name: "PBS_snvPipeline_SNV_DEEPANNOTATION_WGS", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
-        createAndSaveProcessingOption([name: "PBS_snvPipeline_SNV_DEEPANNOTATION_WES", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
-        createAndSaveProcessingOption([name: "PBS_snvPipeline_FILTER_VCF_WGS", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
-        createAndSaveProcessingOption([name: "PBS_snvPipeline_FILTER_VCF_WES", value: '{"-l": {nodes: "1:ppn=1:lsdf", walltime: "00:05:00", mem: "400m"}}',])
-    }
-
     void createSnvObjects(File testDirectory = null) {
-        bamFileControl = DomainFactory.createProcessedMergedBamFile(MergingSet.build(), DomainFactory.PROCESSED_BAM_FILE_PROPERTIES)
+        bamFileControl = DomainFactory.createProcessedMergedBamFile(DomainFactory.createMergingSet(), DomainFactory.PROCESSED_BAM_FILE_PROPERTIES)
         if (testDirectory) {
             ['Management', 'Processing'].each {
                 this."realm${it}" = DomainFactory."createRealmData${it}"(testDirectory, [

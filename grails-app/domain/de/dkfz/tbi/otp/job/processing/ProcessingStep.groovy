@@ -220,6 +220,10 @@ public class ProcessingStep implements Serializable {
         return AbstractMultiJob.isAssignableFrom(jobClass)
     }
 
+    ProcessParameterObject getProcessParameterObject() {
+        return process.processParameterObject
+    }
+
     public static ProcessingStep findTopMostProcessingStep(ProcessingStep step) {
         if (step instanceof RestartedProcessingStep) {
             if (step.original) {

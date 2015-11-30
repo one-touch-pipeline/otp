@@ -34,22 +34,3 @@ plan("DataInstallationWorkflow") {
     //job("archiveInitialData", "archiveInitialDataJob")
     //job("checkFinalArchive", "checkFinalArchive")
 }
-
-
-//picard option for mark duplicates
-println ctx.processingOptionService.createOrUpdate(
-        "PBS_CalculateChecksumJob",
-        null,
-        null,
-        '{"-l": { walltime: "2:00:00"}}',
-        "set the walltime for the CalculateChecksumJob to 2h to get in the faster queue"
-)
-
-//picard option for mark duplicates
-println ctx.processingOptionService.createOrUpdate(
-        "PBS_CopyFilesJob",
-        null,
-        null,
-        '{"-l": { walltime: "2:00:00"}}',
-        "set the walltime for the CopyFilesJob to 2h to get in the faster queue"
-)

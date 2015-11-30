@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.Comment
@@ -58,5 +60,9 @@ public class Process implements Serializable, Commentable {
         startJobClass(nullable: false, blank: false)
         startJobVersion(nullable: false, blank: false)
         comment(nullable: true)
+    }
+
+    ProcessParameterObject getProcessParameterObject() {
+        return atMostOneElement(ProcessParameter.findAllByProcess(this))?.toObject()
     }
 }

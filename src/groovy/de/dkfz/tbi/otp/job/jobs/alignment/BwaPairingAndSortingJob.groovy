@@ -35,7 +35,7 @@ class BwaPairingAndSortingJob extends AbstractJobImpl {
         ProcessedBamFile bamFile = processedBamFileService.createSortedBamFile(alignmentPass)
         Realm realm = alignmentPassService.realmForDataProcessing(alignmentPass)
         String cmd = createCommand(alignmentPass)
-        String pbsId = executionHelperService.sendScript(realm, cmd, "bwaPairingAndSortingJob")
+        String pbsId = executionHelperService.sendScript(realm, cmd)
         addOutputParameter("__pbsIds", pbsId)
         addOutputParameter("__pbsRealm", realm.id.toString())
     }

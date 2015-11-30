@@ -62,9 +62,6 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob {
             // In case the file exists already from an earlier -not successful- run it should be deleted first
             deleteResultFileIfExists(deepAnnotationResultFile, realm)
 
-            final String pbsOptionName = getSnvPBSOptionsNameSeqTypeSpecific(instance.seqType)
-
-
             /*
              * The snv deep annotation script does not use the output vcf parameter but just overrides the input file.
              * Therefore the snv annotation file has to be copied so that it has the correct naming.
@@ -84,7 +81,7 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob {
                     "${step.getExternalScript(config.externalScriptVersion).scriptFilePath}; " +
                     "md5sum ${deepAnnotationResultFile} > ${deepAnnotationResultFile}.md5sum"
 
-            executionHelperService.sendScript(realm, script, pbsOptionName, qsubParameters)
+            executionHelperService.sendScript(realm, script, qsubParameters)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {

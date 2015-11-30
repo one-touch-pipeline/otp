@@ -34,7 +34,7 @@ class MergingJob extends AbstractJobImpl {
             ProcessedMergedBamFile processedMergedBamFile = processedMergedBamFileService.createMergedBamFile(mergingPass)
             Realm realm = mergingPassService.realmForDataProcessing(mergingPass)
             String cmd = createCommand(processedMergedBamFile)
-            String pbsId = executionHelperService.sendScript(realm, cmd, "mergingJob")
+            String pbsId = executionHelperService.sendScript(realm, cmd)
 
             addOutputParameter("__pbsIds", pbsId)
             addOutputParameter("__pbsRealm", realm.id.toString())

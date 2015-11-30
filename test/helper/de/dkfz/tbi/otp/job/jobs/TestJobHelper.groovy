@@ -11,7 +11,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
  */
 class TestJobHelper {
 
-    public static TestJob createTestJobWithProcessingStep(final Object processParameterValue = null) {
+    public static TestJob createTestJobWithProcessingStep(final ProcessParameterObject processParameterValue = null) {
         ProcessingStep processingStep = createAndSaveProcessingStep()
         if (processParameterValue != null) {
             assert createProcessParameter(processingStep.process, processParameterValue).save(failOnError: true)

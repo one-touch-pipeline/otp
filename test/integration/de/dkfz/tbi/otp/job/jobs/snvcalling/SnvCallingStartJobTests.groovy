@@ -34,6 +34,7 @@ public class SnvCallingStartJobTests extends GroovyScriptAwareTestCase {
 
     @Test
     public void testExecute() {
+        DomainFactory.createAlignableSeqTypes()
         createUserAndRoles()
         SpringSecurityUtils.doWithAuth('admin') { runScript('scripts/workflows/SnvWorkflow.groovy') }
         snvTestData = new SnvCallingInstanceTestData()

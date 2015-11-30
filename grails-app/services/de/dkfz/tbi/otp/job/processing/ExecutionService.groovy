@@ -92,29 +92,21 @@ class ExecutionService {
 
     /**
      * Executes a job on a specified host.
-     * It uses {@link PbsOptionMergingService#mergePbsOptions(Realm, String)}
-     * with the given realm and jobIdentifier to create the merged PBS options String to pass to qsub command.
-     * If a job key is given, a {@link ProcessingOption} for the cluster defined by the realm
-     * has to exist, otherwise a {@link NullPointerException} is thrown.
      *
      * @param realm The realm which identifies the host
      * @param text The script to be run a pbs system
-     * @param jobIdentifier the name of a job to take job-cluster specific parameters
-     * @param qsubParameter The parameter which are needed for some qsub commands and can not be included in the text parameter
-     * The qsubParameter must be in JSON format!
+     * @param qsubParameters The parameters which are needed for some qsub commands and can not be included in the text parameter
+     * The qsubParameters must be in JSON format!
      * @return what the server sends back
-     * @throws NullPointerException if a job identifier is provided, but no PBS option is defined for this
-     *          job identifier and the cluster ({@link Realm#cluster}) of the {@link Realm}
-     * @see PbsOptionMergingService#mergePbsOptions(Realm, String)
      */
-    public String executeJob(Realm realm, String text, String jobIdentifier = null, String qsubParameters = "") {
+    public String executeJob(Realm realm, String text, String qsubParameters = "") {
         if (!text) {
             throw new ProcessingException("No job text specified.")
         }
         notNull realm, 'No realm specified.'
 
         ProcessingStep processingStep = schedulerService.jobExecutedByCurrentThread.processingStep
-        ProcessParameterObject domainObject = atMostOneElement(ProcessParameter.findAllByProcess(processingStep.process))?.toObject()
+        ProcessParameterObject domainObject = processingStep.processParameterObject
 
         SeqType seqType = domainObject?.seqType
         short processingPriority = domainObject?.processingPriority ?: ProcessingPriority.NORMAL_PRIORITY
@@ -126,7 +118,7 @@ class ExecutionService {
             fastTrackParameter = '{"-A": "FASTTRACK"}'
         }
 
-        String pbsOptions = pbsOptionMergingService.mergePbsOptions(realm, jobIdentifier, qsubParameters, fastTrackParameter)
+        String pbsOptions = pbsOptionMergingService.mergePbsOptions(processingStep, realm, qsubParameters, fastTrackParameter)
 
         String pbsJobDescription = processingStep.getPbsJobDescription()
         String scriptText = """

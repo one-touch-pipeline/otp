@@ -11,6 +11,7 @@ import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.job.jobs.TestJob
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.Realm.OperationType
 import de.dkfz.tbi.otp.ngsdata.TestData
@@ -31,7 +32,6 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
                        sleep 12
                        """
     final static String QSUB_PARAMETERS = "{-l: {walltime: '00:05:00'}}"
-    final static String JOB_IDENTFIER = 'job'
 
     @Before
     void setUp() {
@@ -80,7 +80,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
     @Test
     void testExecuteJobOnlyScript() {
         assertNotNull(realm.save())
-        TestJob testJob = createTestJobWithProcessingStep(TestData.createAndSaveAlignmentPass())
+        TestJob testJob = createTestJobWithProcessingStep(DomainFactory.createSeqTrack())
         testJob.log = new NoOpLog()
         schedulerService.startingJobExecutionOnCurrentThread(testJob)
         try {
@@ -104,10 +104,10 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
     }
 
     @Test
-    void testExecuteJob_failForPbsId() {
+    void testExecuteJob_WhenSshServerDoesNotReturnAPbsId_ShouldThrow() {
         executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options -> return [] }
         assertNotNull(realm.save())
-        TestJob testJob = createTestJobWithProcessingStep(TestData.createAndSaveAlignmentPass())
+        TestJob testJob = createTestJobWithProcessingStep(DomainFactory.createSeqTrack())
         testJob.log = new NoOpLog()
         schedulerService.startingJobExecutionOnCurrentThread(testJob)
         try {
@@ -126,7 +126,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
     @Test
     void testExecuteJobScriptAndJobIdentifier() {
         assertNotNull(realm.save())
-        TestJob testJob = createTestJobWithProcessingStep(TestData.createAndSaveAlignmentPass())
+        TestJob testJob = createTestJobWithProcessingStep(DomainFactory.createSeqTrack())
         testJob.log = new NoOpLog()
         schedulerService.startingJobExecutionOnCurrentThread(testJob)
         try {
@@ -138,7 +138,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
                     )
             assertNotNull(processingOption.save())
             // Send script to pbs
-            String response = executionService.executeJob(realm, SCRIPT_CONTENT, JOB_IDENTFIER)
+            String response = executionService.executeJob(realm, SCRIPT_CONTENT)
             // Extract pbs ids
             List<String> extractedPbsIds = executionService.extractPbsIds(response)
             assertNotNull(extractedPbsIds)
@@ -161,7 +161,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
     @Test
     void testExecuteJobScriptAndJobIdentifierAndQsubParameter() {
         assertNotNull(realm.save())
-        TestJob testJob = createTestJobWithProcessingStep(TestData.createAndSaveAlignmentPass())
+        TestJob testJob = createTestJobWithProcessingStep(DomainFactory.createSeqTrack())
         testJob.log = new NoOpLog()
         schedulerService.startingJobExecutionOnCurrentThread(testJob)
         try {
@@ -173,7 +173,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
                     )
             assertNotNull(processingOption.save())
             // Send script to pbs
-            String response = executionService.executeJob(realm, SCRIPT_CONTENT, JOB_IDENTFIER, QSUB_PARAMETERS)
+            String response = executionService.executeJob(realm, SCRIPT_CONTENT, QSUB_PARAMETERS)
             // Extract pbs ids
             List<String> extractedPbsIds = executionService.extractPbsIds(response)
             assertNotNull(extractedPbsIds)

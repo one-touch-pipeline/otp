@@ -46,7 +46,7 @@ class SnvJoiningJobTests {
         jobResult = testData.createAndSaveSnvJobResult(snvCallingInstance, SnvCallingStep.CALLING, null, SnvProcessingStates.IN_PROGRESS)
 
         job = applicationContext.getBean('snvJoiningJob',
-                DomainFactory.createAndSaveProcessingStep(SnvJoiningJob.toString()), [])
+                DomainFactory.createAndSaveProcessingStep(SnvJoiningJob.toString(), snvCallingInstance), [])
         job.log = new NoOpLog()
     }
 
@@ -57,8 +57,6 @@ class SnvJoiningJobTests {
 
     @Test
     void testMaybeSubmit() {
-        testData.createProcessingOptions()
-
         boolean querySshCalled = false
         executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options ->
             assert !querySshCalled

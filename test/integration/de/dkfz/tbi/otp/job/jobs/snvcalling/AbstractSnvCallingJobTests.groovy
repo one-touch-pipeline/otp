@@ -388,62 +388,6 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     }
 
 
-
-    @Test
-    void testGetSnvPBSOptionsNameSeqTypeSpecific_InputIsNull() {
-        assert shouldFail(IllegalArgumentException,{
-            abstractSnvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(null)
-        }).contains("The input seqType must not be null in method getSnvPBSOptionsNameSeqTypeSpecific")
-    }
-
-    @Test
-    void testGetSnvPBSOptionsNameSeqTypeSpecific_AnnotationStep_ExomeSeqType() {
-        assert "snvPipeline_SNV_ANNOTATION_WES" == abstractSnvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(DomainFactory.createExomeSeqType())
-    }
-
-    @Test
-    void testGetSnvPBSOptionsNameSeqTypeSpecific_AnnotationStep_WholeGenomeSeqType() {
-        assert "snvPipeline_SNV_ANNOTATION_WGS" == abstractSnvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(DomainFactory.createWholeGenomeSeqType())
-    }
-
-    @Test
-    void testGetSnvPBSOptionsNameSeqTypeSpecific_CallingStep_ExomeSeqType() {
-        SnvCallingJob snvCallingJob = applicationContext.getBean('snvCallingJob',
-                DomainFactory.createAndSaveProcessingStep(SnvCallingJob.toString()), [])
-        snvCallingJob.log = new NoOpLog()
-        assert "snvPipeline_CALLING_WES" == snvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(DomainFactory.createExomeSeqType())
-    }
-
-    @Test
-    void testGetSnvPBSOptionsNameSeqTypeSpecific_DeepAnnotationStep_ExomeSeqType() {
-        SnvDeepAnnotationJob snvDeepAnnotationJob = applicationContext.getBean('snvDeepAnnotationJob',
-                DomainFactory.createAndSaveProcessingStep(SnvDeepAnnotationJob.toString()), [])
-        snvDeepAnnotationJob.log = new NoOpLog()
-        assert "snvPipeline_SNV_DEEPANNOTATION_WES" == snvDeepAnnotationJob.getSnvPBSOptionsNameSeqTypeSpecific(DomainFactory.createExomeSeqType())
-    }
-
-    @Test
-    void testGetSnvPBSOptionsNameSeqTypeSpecific_FilterStep_ExomeSeqType() {
-        FilterVcfJob filterVcfJob = applicationContext.getBean('filterVcfJob',
-                DomainFactory.createAndSaveProcessingStep(FilterVcfJob.toString()), [])
-        filterVcfJob.log = new NoOpLog()
-        assert "snvPipeline_FILTER_VCF_WES" == filterVcfJob.getSnvPBSOptionsNameSeqTypeSpecific(DomainFactory.createExomeSeqType())
-    }
-
-    @Test
-    void testGetSnvPBSOptionsNameSeqTypeSpecific_OtherSeqType() {
-        SeqType otherSeqType = new SeqType(
-                name: "ChIP Seq",
-                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
-                dirName: "chip_seq_sequencing")
-        assert otherSeqType.save(flush: true)
-
-        assert shouldFail(RuntimeException,{
-            abstractSnvCallingJob.getSnvPBSOptionsNameSeqTypeSpecific(otherSeqType)
-        }).contains("There are no PBS Options available for the SNV pipeline for seqtype")
-    }
-
-
     @Test(expected = AssertionError)
     void testConfirmCheckPointFileExistsAndDeleteIt_CheckpointFileDoesNotExist_ShouldFail() {
         abstractSnvCallingJob.confirmCheckPointFileExistsAndDeleteIt(snvCallingInstance, step)

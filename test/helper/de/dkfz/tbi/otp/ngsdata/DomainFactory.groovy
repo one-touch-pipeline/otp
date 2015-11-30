@@ -142,11 +142,15 @@ class DomainFactory {
         return (CollectionUtils.atMostOneElement(Workflow.list(max: 1)) ?: createPanCanWorkflow())
     }
 
-    public static MergingSet createMergingSet(final MergingWorkPackage mergingWorkPackage) {
-        return MergingSet.build(
+    public static MergingSet createMergingSet(Map properties = [:]) {
+        return createMergingSet(createMergingWorkPackage(workflow: createDefaultOtpWorkflow()), properties)
+    }
+
+    public static MergingSet createMergingSet(final MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
+        return createDomainObject(MergingSet, [
                 mergingWorkPackage: mergingWorkPackage,
                 identifier: MergingSet.nextIdentifier(mergingWorkPackage),
-        )
+        ], properties)
     }
 
     public static MergingPass createMergingPass(final MergingSet mergingSet) {
@@ -280,7 +284,7 @@ class DomainFactory {
      * {@link SampleType}.
      */
     public static MergingWorkPackage createMergingWorkPackage(MergingWorkPackage base) {
-        return createMergingWorkPackage(base, SampleType.build())
+        return createMergingWorkPackage(base, createSampleType())
     }
 
     /**
@@ -500,10 +504,12 @@ class DomainFactory {
     }
 
     public static SeqType createSeqType(Map seqTypeProperties = [:]) {
+        String defaultName = 'seqTypeName_' + (counter++)
         return createDomainObject(SeqType, [
-                name         : 'seqTypeName_' + (counter++),
+                name         : defaultName,
                 libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE,
                 dirName      : 'seqTypeDirName_' + (counter++),
+                displayName  : seqTypeProperties.get('alias') ?: seqTypeProperties.get('name') ?: defaultName,
         ], seqTypeProperties)
     }
 
@@ -660,13 +666,20 @@ class DomainFactory {
         return new SnvCallingInstance(properties)
     }
 
-    public static ProcessingStep createAndSaveProcessingStep(String jobClass = "de.dkfz.tbi.otp.test.job.jobs.NonExistentDummyJob") {
+    public static ProcessingStep createAndSaveProcessingStep(ProcessParameterObject processParameterObject = null) {
+        return createAndSaveProcessingStep("de.dkfz.tbi.otp.test.job.jobs.NonExistentDummyJob", processParameterObject)
+    }
+
+    public static ProcessingStep createAndSaveProcessingStep(String jobClass, ProcessParameterObject processParameterObject = null) {
         final JobExecutionPlan jep = new JobExecutionPlan(name: "DontCare" + sprintf('%016X', new Random().nextLong()), planVersion: 0, startJobBean: "DontCare")
         assert jep.save()
         final JobDefinition jobDefinition = new JobDefinition(name: "DontCare", bean: "DontCare", plan: jep)
         assert jobDefinition.save()
         final Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "DontCare", startJobVersion: "1")
         assert process.save()
+        if (processParameterObject != null) {
+            createProcessParameter(process, processParameterObject)
+        }
         final ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process, jobClass: jobClass)
         assert step.save()
         final ProcessingStepUpdate update = createProcessingStepUpdate(step, ExecutionState.CREATED)
@@ -690,12 +703,12 @@ class DomainFactory {
         )
     }
 
-    public static ProcessParameter createProcessParameter(final Process process, final Object parameterValue) {
-        return new ProcessParameter(
+    public static ProcessParameter createProcessParameter(final Process process, final ProcessParameterObject parameterValue, Map properties = [:]) {
+        return createDomainObject(ProcessParameter, [
                 process: process,
                 className: parameterValue.class.name,
                 value: parameterValue.id.toString(),
-        )
+        ], properties)
     }
 
     public static ProcessParameter createProcessParameter(final Process process, final String className, final String value) {

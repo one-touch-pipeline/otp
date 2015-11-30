@@ -1,5 +1,7 @@
+import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.PBS_PREFIX
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
-import de.dkfz.tbi.otp.dataprocessing.*
+
+import de.dkfz.tbi.otp.job.jobs.merging.*
 
 plan("MergingWorkflow") {
     start("start", "mergingStartJob")
@@ -19,7 +21,7 @@ plan("MergingWorkflow") {
 
 //special pbs options for merging workflow
 println ctx.processingOptionService.createOrUpdate(
-  "PBS_mergingJob",
+  "${PBS_PREFIX}${MergingJob.simpleName}",
   "DKFZ",
   null,
   '{"-l": {nodes: "1:ppn=6:lsdf", walltime: "100:00:00", mem: "50g"}}',

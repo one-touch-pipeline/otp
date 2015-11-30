@@ -1,17 +1,22 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.ngsdata.Individual
+import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SeqPlatformModelLabel
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
-interface ProcessParameterObject {
+trait ProcessParameterObject {
 
-    SeqType getSeqType()
+    abstract SeqType getSeqType()
 
-    Individual getIndividual()
+    abstract Individual getIndividual()
 
-    Set<SeqTrack> getContainedSeqTracks()
+    Project getProject() {
+        return individual?.project
+    }
 
-    short getProcessingPriority()
+    abstract Set<SeqTrack> getContainedSeqTracks()
+
+    abstract short getProcessingPriority()
 }

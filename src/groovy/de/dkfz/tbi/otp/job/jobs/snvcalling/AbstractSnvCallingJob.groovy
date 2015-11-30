@@ -180,19 +180,6 @@ rm ${configFileInStagingDirectory}
         }
     }
 
-    protected String getSnvPBSOptionsNameSeqTypeSpecific(SeqType seqType) {
-        notNull(seqType, "The input seqType must not be null in method getSnvPBSOptionsNameSeqTypeSpecific")
-        if (seqType.name == SeqTypeNames.WHOLE_GENOME.seqTypeName) {
-            return "snvPipeline_${step.name()}_WGS"
-        } else if (seqType.name == SeqTypeNames.EXOME.seqTypeName) {
-            return "snvPipeline_${step.name()}_WES"
-        } else {
-            throw new RuntimeException("There are no PBS Options available for the SNV pipeline for seqtype ${seqType}")
-        }
-    }
-
-
-
     /** checks if the on-disk staging config file matches the expected config for this instance */
     protected static void assertStagingConfigContentsOk(SnvCallingInstance instance) {
         assert instance.configFilePath.absoluteStagingPath.text == instance.config.configuration
