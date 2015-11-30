@@ -242,7 +242,7 @@ class SeqTrackService {
 
     /**
      * returns the oldest alignable {@link SeqTrack} waiting for fastqc if possible,
-     * otherwise the oldest {@link SeqTrack} waiting waiting for fastqc.
+     * otherwise the oldest {@link SeqTrack} waiting for fastqc.
      *
      * @return a seqTrack without fastqc
      * @see SeqTypeService#alignableSeqTypes

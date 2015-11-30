@@ -54,7 +54,7 @@ class FastqcUploadService {
         parseAndSaveSeqDupLevels(data, fastqDataFile)
         parseAndSaveOverSeq(data, fastqDataFile)
         parseAndSaveKmerContent(data, fastqDataFile)
-        log.debug "Parsing and upload of modules successfull"
+        log.debug "Parsing and upload of modules successful"
     }
 
     /**
