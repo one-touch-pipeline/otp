@@ -66,15 +66,15 @@ class SequenceController {
 
         def contentBody = sequences.collect { def row ->
             [
-                row.projectName,
-                row.mockPid,
-                row.sampleTypeName,
-                row.seqTypeAliasOrName,
-                row.libraryLayout,
-                row.seqCenterName,
-                row.name,
-                row.laneId,
-                row.dateCreated?.format("yyyy-MM-dd"),
+                    row.projectName,
+                    row.mockPid,
+                    row.sampleTypeName,
+                    row.seqTypeDisplayName,
+                    row.libraryLayout,
+                    row.seqCenterName,
+                    row.name,
+                    row.laneId,
+                    row.dateCreated?.format("yyyy-MM-dd"),
             ].join(",")
         }.join("\n")
         def contentHeader = [

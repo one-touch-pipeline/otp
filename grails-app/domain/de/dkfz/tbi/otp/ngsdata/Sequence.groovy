@@ -1,10 +1,4 @@
 package de.dkfz.tbi.otp.ngsdata
-
-import de.dkfz.tbi.otp.ngsdata.Individual.Type
-import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
-import de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState
-import de.dkfz.tbi.otp.ngsdata.SeqTrack.QualityEncoding
-
 /**
  * This domain class represents a database view called "sequences".
  *
@@ -79,7 +73,7 @@ class Sequence implements Serializable {
     // fields from SeqType
     String seqTypeName
     String seqTypeAlias
-    String seqTypeAliasOrName
+    String seqTypeDisplayName
     String libraryLayout
     String dirName
 
@@ -148,7 +142,7 @@ class Sequence implements Serializable {
         sequencingKitLabelName(nullable: true)
         // nullable constraints from SeqType
         seqTypeAlias(nullable: true)
-        seqTypeAliasOrName(nullable: true)
+        seqTypeDisplayName(nullable: true)
     }
 
     String getLibraryLayoutDirName() {

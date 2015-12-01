@@ -1,8 +1,4 @@
 package de.dkfz.tbi.otp.ngsdata
-
-
-import de.dkfz.tbi.otp.ngsdata.Individual.Type
-
 /**
  * This domain class represents a database view called "aggregate_sequences".
  */
@@ -38,7 +34,7 @@ class AggregateSequences implements Serializable {
     // fields from SeqType
     String seqTypeName
     String seqTypeAlias
-    String seqTypeAliasOrName
+    String seqTypeDisplayName
     String libraryLayout
     String dirName
 
@@ -95,6 +91,6 @@ class AggregateSequences implements Serializable {
         sequencingKitLabelName(nullable: true)
         // nullable constraints from SeqType
         seqTypeAlias(nullable: true)
-        seqTypeAliasOrName(nullable: true)
+        seqTypeDisplayName(nullable: true)
     }
 }

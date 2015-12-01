@@ -38,10 +38,10 @@ class StatisticService {
                     List<Project> projects = projectService.projectByProjectGroup(projectGroup)
                     'in'("projectId", projects*.id)
                 }
-                groupProperty("seqTypeAliasOrName")
+                groupProperty("seqTypeDisplayName")
                 count("sampleId")
             }
-            order("seqTypeAliasOrName")
+            order("seqTypeDisplayName")
         }
         return seq
     }
@@ -53,10 +53,10 @@ class StatisticService {
                     List<Project> projects = projectService.projectByProjectGroup(projectGroup)
                     'in'("projectId", projects*.id)
                 }
-                groupProperty("seqTypeAliasOrName")
+                groupProperty("seqTypeDisplayName")
                 countDistinct("mockPid")
             }
-            order("seqTypeAliasOrName")
+            order("seqTypeDisplayName")
         }
         return seq
     }
@@ -105,10 +105,10 @@ SELECT DISTINCT seq.seq_track_id
                     List<Project> projects = projectService.projectByProjectGroup(projectGroup)
                     'in'("projectId", projects*.id)
                 }
-                groupProperty("seqTypeAliasOrName")
+                groupProperty("seqTypeDisplayName")
                 countDistinct("projectId")
             }
-            order("seqTypeAliasOrName")
+            order("seqTypeDisplayName")
         }
         return seq
     }
@@ -117,10 +117,10 @@ SELECT DISTINCT seq.seq_track_id
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project.id)
             projections {
-                groupProperty("seqTypeAliasOrName")
+                groupProperty("seqTypeDisplayName")
                 count("sampleId")
             }
-            order("seqTypeAliasOrName")
+            order("seqTypeDisplayName")
         }
         return seq
     }

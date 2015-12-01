@@ -130,7 +130,7 @@ $.otp.sequence = {
                                     text: row.mockPid
                                 }),
                                 row.sampleTypeName,
-                                row.seqTypeAliasOrName,
+                                row.seqTypeDisplayName,
                                 row.libraryLayout,
                                 row.seqCenterName,
                                 $.otp.createLinkMarkup({

@@ -12,9 +12,9 @@ class HomeService {
             List seq = Sequence.createCriteria().listDistinct {
                 eq("projectName", projectName)
                 projections {
-                    groupProperty("seqTypeAliasOrName")
+                    groupProperty("seqTypeDisplayName")
                 }
-                order ("seqTypeAliasOrName")
+                order ("seqTypeDisplayName")
             }
             queryMap[projectName] = seq.toListString().replace("[", "").replace("]", "")
         }
