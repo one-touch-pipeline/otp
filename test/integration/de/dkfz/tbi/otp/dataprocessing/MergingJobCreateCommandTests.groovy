@@ -42,8 +42,6 @@ class MergingJobCreateCommandTests {
 
     @Before
     void setUp() {
-        tempFolder.create()
-
         Realm realm = Realm.build(
                 operationType: OperationType.DATA_PROCESSING,
                 processingRootPath: tempFolder.root.path,

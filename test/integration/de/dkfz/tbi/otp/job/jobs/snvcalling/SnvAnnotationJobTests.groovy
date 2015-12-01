@@ -6,7 +6,6 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
 import de.dkfz.tbi.otp.utils.LinkFileUtils
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
-import static de.dkfz.tbi.TestCase.*
 import static de.dkfz.tbi.otp.utils.CreateSNVFileHelper.createResultFile
 import static org.junit.Assert.*
 import org.junit.*
@@ -143,8 +142,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvCallingInstance2 = null
         snvJobResultInput = null
         processedMergedBamFile1 = null
-        removeMetaClass(ExecutionService, executionService)
-        removeMetaClass(LinkFileUtils, linkFileUtils)
+        TestCase.removeMetaClass(ExecutionService, executionService)
+        TestCase.removeMetaClass(LinkFileUtils, linkFileUtils)
         LsdfFilesService.metaClass = null
         WaitingFileUtils.metaClass = null
         TestCase.cleanTestDirectory()

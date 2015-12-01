@@ -48,8 +48,6 @@ class ExecutePanCanJobTests {
 
     @Before
     void setUp() {
-        tmpDir.create()
-
         DomainFactory.createAlignableSeqTypes()
 
         roddyBamFile = DomainFactory.createRoddyBamFile([

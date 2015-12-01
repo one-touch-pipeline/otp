@@ -8,10 +8,9 @@ import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
+import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TemporaryFolder
 
 /**
  * Unit tests for the {@link JobStatusLoggingService}.
@@ -50,13 +49,9 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
     Collection<String> jobIdsOnRealmWithSameLogDirAs1
     Collection<ClusterJobIdentifier> allUnsuccessfulJobs
 
-    @Rule
-    public TemporaryFolder tmpDir = new TemporaryFolder()
-
     @Before
     void setUp() {
-        tmpDir.create()
-        tempDirectory = tmpDir.newFolder('otp-test')
+        tempDirectory = TestCase.createEmptyTestDirectory()
 
         processingStep = JobStatusLoggingServiceUnitTests.createFakeProcessingStep()
 
@@ -131,6 +126,11 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
         new File(service.logFileLocation(realm2, processingStep)).text = "\n" + service.constructMessage(processingStep, successfulJobOnRealm2.clusterJobId)
         new File(service.logFileLocation(realmWithEmptyLogFile, processingStep)).text = ''
         new File(service.logFileLocation(realmWithSameLogDirAs1, processingStep)).text = service.constructMessage(processingStep, successfulJobOnRealmWithSameLogDirAs1.clusterJobId)
+    }
+
+    @After
+    void tearDown() {
+        assert tempDirectory.deleteDir()
     }
 
     @Test

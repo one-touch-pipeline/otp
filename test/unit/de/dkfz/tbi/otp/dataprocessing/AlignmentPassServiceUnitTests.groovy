@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
@@ -11,9 +12,7 @@ import grails.test.mixin.support.GrailsUnitTestMixin
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TemporaryFolder
 
 /**
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
@@ -39,13 +38,9 @@ class AlignmentPassServiceUnitTests extends TestData {
     File referenceGenomeDir
     File referenceGenomeFile
 
-    @Rule
-    public TemporaryFolder tmpDir = new TemporaryFolder()
-
     @Before
     void setUp() {
-        tmpDir.create()
-        baseDir = tmpDir.newFolder()
+        baseDir = TestCase.createEmptyTestDirectory()
         referenceGenomeDir = new File(baseDir, "reference_genomes/referenceGenome")
         referenceGenomeDir.mkdirs()
         referenceGenomeFile = new File("${referenceGenomeDir}/prefixName.fa")
@@ -69,6 +64,7 @@ class AlignmentPassServiceUnitTests extends TestData {
         referenceGenome = null
         referenceGenomeProjectSeqType = null
         alignmentPassService = null
+        assert baseDir.deleteDir()
     }
 
     @Test

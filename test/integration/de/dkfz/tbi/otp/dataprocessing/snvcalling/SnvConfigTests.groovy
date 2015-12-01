@@ -237,10 +237,7 @@ class SnvConfigTests {
 
 
     SnvConfig createFromFile(final String configuration, String version = "v1", Project project = project, SeqType seqType = seqType) {
-        tmpDir.create()
-
-        File dir = tmpDir.newFolder("otp-test")
-        assert dir.exists() || dir.mkdirs()
+        File dir = tmpDir.newFolder()
 
         File configFile = new File(dir, "configFile.txt")
         configFile << configuration

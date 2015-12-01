@@ -17,7 +17,7 @@ import java.util.concurrent.Callable
 /**
  * A default base class for test cases. This provides some helper methods.
  */
-class TestCase extends GroovyTestCase {
+class TestCase {
 
     /**
      * @see #createEmptyTestDirectory()

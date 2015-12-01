@@ -24,7 +24,6 @@ class ParsePanCanQcJobTests {
 
     @Test
     void testExecute() {
-        temporaryFolder.create()
         File qaFile = temporaryFolder.newFile(RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME)
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         SeqTrack seqTrack = exactlyOneElement(roddyBamFile.seqTracks)

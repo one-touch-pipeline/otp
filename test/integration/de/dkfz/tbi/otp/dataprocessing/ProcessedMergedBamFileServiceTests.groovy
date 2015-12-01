@@ -36,7 +36,6 @@ class ProcessedMergedBamFileServiceTests {
 
     @Before
     void setUp() {
-        tmpDir.create()
         testDirectory = tmpDir.newFolder('otp-test')
 
         directory = testDirectory.absolutePath + "/processing/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0"

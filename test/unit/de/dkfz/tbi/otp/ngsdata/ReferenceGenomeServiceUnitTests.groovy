@@ -36,8 +36,6 @@ class ReferenceGenomeServiceUnitTests {
 
     @Before
     void setUp() {
-        temporaryFolder.create() //Called directly because bug in junit
-
         referenceGenomeService = new ReferenceGenomeService()
         referenceGenomeService.configService = new ConfigService()
 

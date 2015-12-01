@@ -85,8 +85,6 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         abstractSnvCallingJob.lsdfFilesService = new LsdfFilesService()
         abstractSnvCallingJob.linkFileUtils = new LinkFileUtils()
 
-        tmpDir.create()
-
         testDirectory = tmpDir.newFolder("otp-test")
         if(!testDirectory.exists()) {
             assert testDirectory.mkdirs()

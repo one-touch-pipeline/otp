@@ -45,7 +45,6 @@ class MovePanCanFilesToFinalDestinationJobTests {
 
     @Before
     void setUp() {
-        temporaryFolder.create() //BUG in JUnit, remove after grails update
         roddyBamFile = DomainFactory.createRoddyBamFile()
         roddyBamFile.md5sum = null
         roddyBamFile.fileSize = -1

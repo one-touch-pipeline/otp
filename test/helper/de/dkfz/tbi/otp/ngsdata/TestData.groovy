@@ -10,8 +10,6 @@ import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
 import de.dkfz.tbi.otp.ngsdata.RunSegment.DataFormat
 import de.dkfz.tbi.otp.ngsdata.RunSegment.FilesStatus
 import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertTrue
@@ -61,17 +59,13 @@ class TestData {
     @Deprecated
     ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType
 
-    @Rule
-    public TemporaryFolder tmpDir = new TemporaryFolder()
-
     /**
      * @deprecated Use the <code>build()</code> method from the test data plugin or the static methods in this class or
      * in {@link DomainFactory}.
      */
     @Deprecated
     void createObjects() {
-        tmpDir.create()
-        File testDir = tmpDir.newFolder("otp-test", "reference_genomes", "referenceGenome")
+        File testDir = new File(TestCase.createEmptyTestDirectory(), "referenceGenome")
 
         referenceGenomePath = testDir.absolutePath
 

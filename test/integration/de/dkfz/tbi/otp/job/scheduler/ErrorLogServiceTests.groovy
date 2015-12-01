@@ -40,7 +40,6 @@ class ErrorLogServiceTests {
 
     @Test
     void testLog() {
-        tmpDir.create()
         File testDirectory = tmpDir.newFolder("otp-test", "stacktraces")
         errorLogService.metaClass.getStackTracesDirectory = {
             return testDirectory.absolutePath

@@ -39,8 +39,6 @@ class ExecuteRoddyCommandServiceTests {
 
     @Before
     void setUp() {
-        temporaryFolder.create()
-
         DomainFactory.createRoddyProcessingOptions(temporaryFolder.newFolder())
 
         roddyPath = new File(ProcessingOptionService.getValueOfProcessingOption("roddyPath"))

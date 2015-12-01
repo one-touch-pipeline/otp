@@ -10,7 +10,6 @@ import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -111,7 +110,6 @@ class DataProcessingFilesServiceUnitTests {
 
 
     void createTestDirectory() {
-        tmpDir.create()
         dir = tmpDir.newFolder(realm.processingRootPath.split('/'))
         if (dir.exists()) {
             dir.deleteDir()

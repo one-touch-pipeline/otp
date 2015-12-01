@@ -23,7 +23,6 @@ class SampleSwapServiceTests extends GroovyScriptAwareTestCase {
     @Before
     void setUp() {
         createUserAndRoles()
-        temporaryFolder.create()
     }
 
 

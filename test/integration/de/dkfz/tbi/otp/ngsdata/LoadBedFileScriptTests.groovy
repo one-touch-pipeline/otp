@@ -83,7 +83,6 @@ class LoadBedFileScriptTests extends GroovyScriptAwareTestCase {
 
     @Before
     void setUp() {
-        temporaryFolder.create()
         File baseFolder = temporaryFolder.newFolder()
 
         realm = DomainFactory.createRealmDataProcessing([

@@ -75,8 +75,6 @@ class AbstractRoddyJobTests {
         executeCommandCounter = 0
         validateCounter = 0
 
-        tmpDir.create()
-
         roddyBamFile = DomainFactory.createRoddyBamFile()
         realm = Realm.build([name: roddyBamFile.project.realmName, operationType: Realm.OperationType.DATA_MANAGEMENT])
 

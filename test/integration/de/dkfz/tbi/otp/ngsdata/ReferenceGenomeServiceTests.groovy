@@ -20,11 +20,6 @@ class ReferenceGenomeServiceTests {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 
-    @Before
-    void setUp() {
-        temporaryFolder.create() //Called directly because bug in junit
-    }
-
     private MergingWorkPackage createDataForChromosomeStatSizeFile()  {
         MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build (
                 statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,

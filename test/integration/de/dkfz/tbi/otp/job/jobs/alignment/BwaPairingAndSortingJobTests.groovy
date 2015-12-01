@@ -240,8 +240,6 @@ class BwaPairingAndSortingJobTests {
         bamFile.errors
         assertNotNull(bamFile.save(flush: true))
 
-        tmpDir.create()
-
         DomainFactory.createRealmDataManagement(
                 name: project.realmName,
         )

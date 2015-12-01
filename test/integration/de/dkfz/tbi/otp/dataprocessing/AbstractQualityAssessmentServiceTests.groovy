@@ -32,7 +32,6 @@ class AbstractQualityAssessmentServiceTests {
 
     @Before
     void setUp() {
-        temporaryFolder.create()
         data.createObjects()
 
         data.referenceGenome.with {

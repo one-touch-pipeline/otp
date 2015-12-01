@@ -79,7 +79,6 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
     @Before
     void setUp() {
-        tmpDir.create()
         testDirectory = tmpDir.newFolder("otp-test")
         if(!testDirectory.exists()) {
             assert testDirectory.mkdirs()

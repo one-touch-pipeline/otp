@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static de.dkfz.tbi.TestCase.assertEquals
+import static groovy.util.GroovyTestCase.assertEquals
 
 import org.junit.Before
 import org.junit.Test
