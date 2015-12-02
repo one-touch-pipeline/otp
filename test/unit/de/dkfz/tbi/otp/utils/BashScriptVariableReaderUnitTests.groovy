@@ -8,7 +8,7 @@ class BashScriptVariableReaderUnitTests extends TestCase {
     @Test
     void testExecuteAndGetVariableValues() {
         final Map<String, String> expectedVariables = [
-                'CALLING_PBS_RESOURCES': '-l walltime=20:00:00,nodes=1:lsdf,mem=400m',
+                'CALLING_PBS_RESOURCES': '-l walltime=20:00:00,nodes=1,mem=400m',
                 'EO_MAIL_OPTS': '-o $ROOTPATH/DummyPipelines -j oe -M dummy@example.com -m a',
                 'RESULTS_PER_PIDS_DIR': 'STORAGE_ROOT/analysis/dummy_project/exome_analysis/results_per_pid',
                 'TOOLS_DIR': '/home/dummy_user/ngs2/trunk/tools',
@@ -20,7 +20,7 @@ RESULTS_PER_PIDS_DIR=\${ANALYSIS_DIR}/results_per_pid
 #TOOLS_DIR=/home/dummy_user/ngs2/trunk/fools
 TOOLS_DIR=/home/dummy_user/ngs2/trunk/tools
 ### cluster parameters and resources
-CALLING_PBS_RESOURCES="-l walltime=20:00:00,nodes=1:lsdf,mem=400m"
+CALLING_PBS_RESOURCES="-l walltime=20:00:00,nodes=1,mem=400m"
 EMAIL=dummy@example.com
 CLUSTER_EO=$ROOTPATH/DummyPipelines # path to your cluster eo directory
 EO_MAIL_OPTS="-o \$CLUSTER_EO -j oe -M \$EMAIL -m a"

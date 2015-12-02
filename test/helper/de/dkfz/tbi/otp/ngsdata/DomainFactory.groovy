@@ -125,7 +125,7 @@ class DomainFactory {
                 port              : -1,
                 unixUser          : '!fakeuser',
                 timeout           : -1,
-                pbsOptions        : '',
+                pbsOptions        : '{}',
                 cluster           : Cluster.DKFZ,
         ], realmProperties)
     }

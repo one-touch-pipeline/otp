@@ -31,7 +31,6 @@ class SnvCallingInstanceTestData {
             ['Management', 'Processing'].each {
                 this."realm${it}" = DomainFactory."createRealmData${it}"(testDirectory, [
                         name: bamFileControl.project.realmName,
-                        pbsOptions: '{"-l": {nodes: "1:lsdf", walltime: "30:00"}}',
                 ])
             }
         }
@@ -155,19 +154,6 @@ class SnvCallingInstanceTestData {
         assert processedMergedBamFile.mergingWorkPackage.save(flush: true)
 
         return file
-    }
-
-    static ProcessingOption createAndSaveProcessingOption(Map properties = [:]){
-        ProcessingOption processingOption = new ProcessingOption([
-                name:"PBS_Name",
-                type: "DKFZ",
-                value:'{"-l": {nodes: "1:ppn=1:lsdf", walltime: "24:00:00", mem: "400m"}}',
-                dateCreated: new Date(),
-                comment:"comment",
-                ] + properties)
-
-        assert processingOption.save(flush: true)
-        return processingOption
     }
 
     static ExternalScript createOrFindExternalScript(Map properties = [:]) {

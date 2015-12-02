@@ -24,11 +24,11 @@ class PbsOptionMergingServiceUnitTests {
         assertEquals([a: [aa: 'aa', ab: 'ab',  ac: 'ac'], b: [bb: 'bb', bc: 'bc',  bd: 'bd'], c: 'c', d: 'd', e: 'e'],
         pbsOptionMergingService.jsonStringToMap("{a: {aa: aa, ab: ab, ac: ac}, b: {bb: bb, bc: bc,  bd: bd}, c: c, d: d, e: e}"))
 
-        assertEquals(['-l': ['nodes': '1:lsdf', walltime: '48:00:00']], pbsOptionMergingService.jsonStringToMap("{'-l': {nodes: '1:lsdf', walltime: '48:00:00'}}"))
+        assertEquals(['-l': ['nodes': '1', walltime: '48:00:00']], pbsOptionMergingService.jsonStringToMap("{'-l': {nodes: '1', walltime: '48:00:00'}}"))
         assertEquals(['-W': ['x': 'NACCESSPOLICY:SINGLEJOB']], pbsOptionMergingService.jsonStringToMap("{'-W': {x: 'NACCESSPOLICY:SINGLEJOB'}}"))
 
-        assertEquals(['-l': [nodes: '1:ppn=6:lsdf', walltime: '48:00:00', mem: '3g', file: '50g'], '-q': 'convey', '-A': 'RUNFAST', '-m': 'a', '-S': '/bin/bash'],
-        pbsOptionMergingService.jsonStringToMap("{'-l': {nodes: '1:ppn=6:lsdf', walltime: '48:00:00', mem: '3g', file: '50g'}, '-q': convey, '-A': RUNFAST, '-m': a, '-S': '/bin/bash'}"))
+        assertEquals(['-l': [nodes: '1:ppn=6', walltime: '48:00:00', mem: '3g', file: '50g'], '-q': 'convey', '-A': 'RUNFAST', '-m': 'a', '-S': '/bin/bash'],
+        pbsOptionMergingService.jsonStringToMap("{'-l': {nodes: '1:ppn=6', walltime: '48:00:00', mem: '3g', file: '50g'}, '-q': convey, '-A': RUNFAST, '-m': a, '-S': '/bin/bash'}"))
 
         shouldFail(IllegalArgumentException.class, { pbsOptionMergingService.jsonStringToMap(null) } )
         shouldFail(IllegalArgumentException.class, { pbsOptionMergingService.jsonStringToMap("") } )
@@ -48,11 +48,11 @@ class PbsOptionMergingServiceUnitTests {
         assertEquals("-a b=c -a d=e ", pbsOptionMergingService.mapToPbsOptions(['-a': [b: 'c', d: 'e']]))
         assertEquals("-a b=c -a d=e -a f=g -h i=j -h k=l -m n ", pbsOptionMergingService.mapToPbsOptions(['-a': [b: 'c', d: 'e', f: 'g'], '-h': [i: 'j', k: 'l'], '-m': 'n']))
 
-        assertEquals("-l nodes=1:lsdf -l walltime=48:00:00 ", pbsOptionMergingService.mapToPbsOptions(['-l': ['nodes': '1:lsdf', walltime: '48:00:00']]))
+        assertEquals("-l nodes=1 -l walltime=48:00:00 ", pbsOptionMergingService.mapToPbsOptions(['-l': ['nodes': '1', walltime: '48:00:00']]))
         assertEquals("-W x=NACCESSPOLICY:SINGLEJOB ", pbsOptionMergingService.mapToPbsOptions(['-W': ['x': 'NACCESSPOLICY:SINGLEJOB']]))
 
-        assertEquals("-l nodes=1:ppn=6:lsdf -l walltime=48:00:00 -l mem=3g -l file=50g -q convey -A RUNFAST -m a -S /bin/bash ",
-                pbsOptionMergingService.mapToPbsOptions(['-l': [nodes: '1:ppn=6:lsdf', walltime: '48:00:00', mem: '3g', file: '50g'], '-q': 'convey', '-A': 'RUNFAST', '-m': 'a', '-S': '/bin/bash']))
+        assertEquals("-l nodes=1:ppn=6 -l walltime=48:00:00 -l mem=3g -l file=50g -q convey -A RUNFAST -m a -S /bin/bash ",
+                pbsOptionMergingService.mapToPbsOptions(['-l': [nodes: '1:ppn=6', walltime: '48:00:00', mem: '3g', file: '50g'], '-q': 'convey', '-A': 'RUNFAST', '-m': 'a', '-S': '/bin/bash']))
 
         shouldFail(IllegalArgumentException.class, { pbsOptionMergingService.mapToPbsOptions(null) } )
         shouldFail(RuntimeException.class, { pbsOptionMergingService.mapToPbsOptions("") } )

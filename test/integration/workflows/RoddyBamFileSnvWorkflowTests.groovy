@@ -17,7 +17,7 @@ class RoddyBamFileSnvWorkflowTests extends AbstractSnvWorkflowTests {
         )
         assertNotNull(project.save(flush: true))
 
-        realm.pbsOptions = '{"-l": {nodes: "1:lsdf", walltime: "29:00"}, "-j": "oe"}'
+        realm.pbsOptions = '{"-l": {nodes: "1", walltime: "29:00"}, "-j": "oe"}'
         assertNotNull(realm.save(flush: true))
 
 

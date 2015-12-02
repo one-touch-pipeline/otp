@@ -24,7 +24,7 @@ println ctx.processingOptionService.createOrUpdate(
   "${PBS_PREFIX}${MergingJob.simpleName}",
   "DKFZ",
   null,
-  '{"-l": {nodes: "1:ppn=6:lsdf", walltime: "100:00:00", mem: "50g"}}',
+  '{"-l": {nodes: "1:ppn=6", walltime: "100:00:00", mem: "50g"}}',
   "merging job depending cluster option for dkfz"
 )
 

@@ -49,7 +49,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
                 port: 22,
                 unixUser: grailsApplication.config.otp.pbs.ssh.unixUser,
                 timeout: 100,
-                pbsOptions: "{-l: {nodes: '1:lsdf', walltime: '00:00:30'}}"
+                pbsOptions: "{-l: {nodes: '1', walltime: '00:00:30'}}"
                 )
         executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options -> return ['1234.example.pbs.server.invalid'] }
     }
@@ -311,7 +311,7 @@ X.host          ...QaAnalysisJob klinga          00:00:00 R fast
                 port: 22,
                 unixUser: 'otptest',
                 timeout: 0,
-                pbsOptions: "{-l: {nodes: '1:lsdf', walltime: '00:00:30'}}"
+                pbsOptions: "{-l: {nodes: '1', walltime: '00:00:30'}}"
         )
         assertNotNull(realm.save())
 

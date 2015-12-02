@@ -15,7 +15,7 @@ class WorkflowTestRealms {
             port: DEFAULT_PORT,
             unixUser: 'otptest',
             timeout: 0,
-            pbsOptions: '{"-l": {nodes: "1:lsdf", walltime: "30:00"}}',
+            pbsOptions: '{"-l": {nodes: "1", walltime: "30:00"}}',
     ]
 
     /**

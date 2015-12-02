@@ -14,7 +14,7 @@ class PbsOptionMergingServiceIntegrationTests {
     ProcessingOptionService processingOptionService
 
 
-    final String QSUB_PARAMETERS = "{-l: {nodes: '1:ppn=6:lsdf', walltime: '50:00:00', mem: '3g'}, -q: convey}"
+    final String QSUB_PARAMETERS = "{-l: {nodes: '1:ppn=6', walltime: '50:00:00', mem: '3g'}, -q: convey}"
 
     @Test
     void testMergePbsOptions() {
@@ -60,9 +60,9 @@ class PbsOptionMergingServiceIntegrationTests {
         processingOption = createProcessingOption(processingStep1.nonQualifiedJobClass, "{-a: {ab: ab}}")
         assertEquals("-a aa=aa -a ab=ab ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm))
 
-        realm = createRealm("{-l: {nodes: '1:lsdf', walltime: '48:00:00'}}")
-        processingOption = createProcessingOption(processingStep1.nonQualifiedJobClass, "{-l: {nodes: '1:ppn=6:lsdf', walltime: '50:00:00', mem: '3g'}, -q: convey}")
-        assertEquals("-q convey -l nodes=1:ppn=6:lsdf -l mem=3g -l walltime=50:00:00 ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm))
+        realm = createRealm("{-l: {nodes: '1', walltime: '48:00:00'}}")
+        processingOption = createProcessingOption(processingStep1.nonQualifiedJobClass, "{-l: {nodes: '1:ppn=6', walltime: '50:00:00', mem: '3g'}, -q: convey}")
+        assertEquals("-q convey -l nodes=1:ppn=6 -l mem=3g -l walltime=50:00:00 ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm))
 
         Realm realm_dkfz = createRealm("{-a: b}", Realm.Cluster.DKFZ)
         Realm realm_bq = createRealm("{-c: d}", Realm.Cluster.BIOQUANT)
@@ -92,21 +92,21 @@ class PbsOptionMergingServiceIntegrationTests {
 
         assert expected.contains('-q convey')
         assert expected.contains('-a b')
-        assert expected.contains('-l nodes=1:ppn=6:lsdf -l mem=3g -l walltime=50:00:00')
+        assert expected.contains('-l nodes=1:ppn=6 -l mem=3g -l walltime=50:00:00')
 
         processingOption = createProcessingOption(processingStep2.nonQualifiedJobClass, "{-a: c}", Realm.Cluster.DKFZ)
         expected = pbsOptionMergingService.mergePbsOptions(processingStep2, realm_dkfz, QSUB_PARAMETERS)
 
         assert expected.contains('-q convey')
         assert expected.contains('-a c')
-        assert expected.contains('-l nodes=1:ppn=6:lsdf -l mem=3g -l walltime=50:00:00')
+        assert expected.contains('-l nodes=1:ppn=6 -l mem=3g -l walltime=50:00:00')
 
         processingOption = createProcessingOption(processingStep2.nonQualifiedJobClass, "{-q: other_convey}", Realm.Cluster.DKFZ)
         expected = pbsOptionMergingService.mergePbsOptions(processingStep2, realm_dkfz, QSUB_PARAMETERS)
 
         assert expected.contains('-q convey')
         assert expected.contains('-a b')
-        assert expected.contains('-l nodes=1:ppn=6:lsdf -l mem=3g -l walltime=50:00:00')
+        assert expected.contains('-l nodes=1:ppn=6 -l mem=3g -l walltime=50:00:00')
 
         realm = createRealm()
         assertEquals("-A FASTTRACK ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm, '{"-A": "FASTTRACK"}'))
@@ -132,7 +132,7 @@ class PbsOptionMergingServiceIntegrationTests {
         assert expected.contains('-q convey')
         assert expected.contains('-a b')
         assert expected.contains('-A FASTTRACK')
-        assert expected.contains('-l nodes=1:ppn=6:lsdf -l mem=3g -l walltime=50:00:00')
+        assert expected.contains('-l nodes=1:ppn=6 -l mem=3g -l walltime=50:00:00')
     }
 
     @Test

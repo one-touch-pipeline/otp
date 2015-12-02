@@ -18,10 +18,10 @@ import de.dkfz.tbi.otp.ngsdata.Realm
  * or itself a Map with Strings as key and value.
  * Some examples:
  * <ul>
- * <li>"{'-l': {nodes: '1:lsdf', walltime: '48:00:00'}}"</li>
+ * <li>"{'-l': {nodes: '1', walltime: '48:00:00'}}"</li>
  * <li>"{'-W': {x: 'NACCESSPOLICY:SINGLEJOB'}}"</li>
  * <li>"{'-q': convey, '-A': RUNFAST, '-m': a, '-S': '/bin/bash'}"</li>
- * <li>"{'-l': {nodes: '1:ppn=6:lsdf', walltime: '48:00:00', mem: '3g', file: '50g'}, '-q': convey, '-A': RUNFAST, '-m': a, '-S': '/bin/bash'}"</li>
+ * <li>"{'-l': {nodes: '1:ppn=6', walltime: '48:00:00', mem: '3g', file: '50g'}, '-q': convey, '-A': RUNFAST, '-m': a, '-S': '/bin/bash'}"</li>
  * </ul>
  *
  *

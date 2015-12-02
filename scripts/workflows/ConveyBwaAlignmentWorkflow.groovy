@@ -103,7 +103,7 @@ ctx.processingOptionService.createOrUpdate(
     '''{
       "-l": {
         "walltime": "50:00:00",
-        "nodes": "1:ppn=6:lsdf",
+        "nodes": "1:ppn=6",
         "mem": "26g"
       }
     }''',
@@ -118,7 +118,7 @@ ctx.processingOptionService.createOrUpdate(
     '''{
       "-l": {
         "walltime": "01:00:00",
-        "nodes": "1:ppn=12:lsdf",
+        "nodes": "1:ppn=12",
         "mem": "3g"
       },
       "-q": "convey",
