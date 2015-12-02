@@ -25,6 +25,9 @@ class ProcessingOptionService {
     public ProcessingOption createOrUpdate(String name, String type, Project project, String value, String comment) {
         ProcessingOption option = findStrict(name, type, project)
         if (option) {
+            if (option.value == value && option.comment == comment) {
+                return option
+            }
             obsoleteOption(option)
         }
         option = new ProcessingOption(
