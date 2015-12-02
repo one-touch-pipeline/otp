@@ -104,7 +104,7 @@ ctx.processingOptionService.createOrUpdate(
       "-l": {
         "walltime": "50:00:00",
         "nodes": "1:ppn=6",
-        "mem": "26g"
+        "mem": "45g"
       }
     }''',
     'BWA Pairing And Sorting Job option for cluster'
@@ -117,9 +117,9 @@ ctx.processingOptionService.createOrUpdate(
     null,
     '''{
       "-l": {
-        "walltime": "01:00:00",
+        "walltime": "04:00:00",
         "nodes": "1:ppn=12",
-        "mem": "3g"
+        "mem": "126g"
       },
       "-q": "convey",
       "-m": "a",

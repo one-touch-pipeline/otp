@@ -1,7 +1,9 @@
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged.ExecuteMergedBamFileQaAnalysisJob;
+import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.PBS_PREFIX
+
+import de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged.*
 import de.dkfz.tbi.otp.job.processing.PbsOptionMergingService;
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
 
 
 // creates options to be used by the wf to run the qa.jar
@@ -40,6 +42,14 @@ println ctx.processingOptionService.createOrUpdate(
     PbsOptionMergingService.PBS_PREFIX + ExecuteMergedBamFileQaAnalysisJob.class.simpleName,
     "DKFZ",
     null,
-    '{"-l": {walltime: "100:00:00", mem: "10g"}}',
+    '{"-l": {walltime: "100:00:00", mem: "15g"}}',
     "time for merged QA"
+)
+
+println ctx.processingOptionService.createOrUpdate(
+    "${PBS_PREFIX}${ExecuteMergedMappingFilteringSortingToCoverageTableJob.simpleName}",
+    Cluster.DKFZ.toString(),
+    null,
+    '{"-l": {nodes: "1:ppn=6", mem: "15g"}}',
+    ''
 )

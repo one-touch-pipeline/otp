@@ -2,6 +2,8 @@ import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.PBS_PREFIX
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
 import de.dkfz.tbi.otp.job.jobs.merging.*
+import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
+import de.dkfz.tbi.otp.ngsdata.SeqType
 
 plan("MergingWorkflow") {
     start("start", "mergingStartJob")
@@ -24,8 +26,15 @@ println ctx.processingOptionService.createOrUpdate(
   "${PBS_PREFIX}${MergingJob.simpleName}",
   "DKFZ",
   null,
-  '{"-l": {nodes: "1:ppn=6", walltime: "100:00:00", mem: "50g"}}',
+  '{"-l": {nodes: "1:ppn=6", walltime: "100:00:00", mem: "25g"}}',
   "merging job depending cluster option for dkfz"
+)
+println ctx.processingOptionService.createOrUpdate(
+    "${PBS_PREFIX}${MergingJob.simpleName}_${SeqType.exomePairedSeqType.processingOptionName}",
+    Cluster.DKFZ.toString(),
+    null,
+    '{"-l": {mem: "15g"}}',
+    ''
 )
 
 //picard option for mark duplicates

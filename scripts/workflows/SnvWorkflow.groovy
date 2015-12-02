@@ -77,7 +77,7 @@ println ctx.processingOptionService.createOrUpdate(
     "${PBS_PREFIX}${SnvDeepAnnotationJob.simpleName}_${wgs}",
     "DKFZ",
     null,
-    '{"-l": {nodes: "1:ppn=3", walltime: "04:00:00", mem: "400m"}}',
+    '{"-l": {nodes: "1:ppn=4", walltime: "04:00:00", mem: "400m"}}',
     "suggestion of the CO group (Ivo) for the snv WGS deep annotation job"
 )
 
@@ -95,7 +95,7 @@ println ctx.processingOptionService.createOrUpdate(
     "${PBS_PREFIX}${FilterVcfJob.simpleName}_${wgs}",
     "DKFZ",
     null,
-    '{"-l": {nodes: "1:ppn=1", walltime: "04:00:00", mem: "1g"}}',
+    '{"-l": {nodes: "1:ppn=1", walltime: "04:00:00", mem: "3g"}}',
     "suggestion of the CO group (Ivo) for the snv WGS filter job"
 )
 
