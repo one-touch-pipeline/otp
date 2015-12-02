@@ -31,8 +31,8 @@ class FastqcWorkflowTests extends WorkflowTestCase {
 
     @Before
     void setUp() {
-        sourceFastq = new File("${getRootDirectory()}/files", "35-3B_NoIndex_L007_R1_complete_filtered.fastq.gz")
-        expectedFastqc = new File("${getRootDirectory()}/files", "expected_result_fastqc.zip")
+        sourceFastq = new File(testDataDir, "35-3B_NoIndex_L007_R1_complete_filtered.fastq.gz")
+        expectedFastqc = new File(testDataDir, "expected_result_fastqc.zip")
 
         Project project = Project.build(
                 realmName: realm.name

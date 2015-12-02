@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
+import de.dkfz.tbi.otp.utils.LinkFileUtils
 import org.joda.time.Duration
 import org.junit.Before
 import org.junit.Ignore
@@ -21,6 +22,7 @@ class LoadMetaDataTests extends WorkflowTestCase {
     final String UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE = "UNKNOWN"
 
     LsdfFilesService lsdfFilesService
+    LinkFileUtils linkFileUtils
 
 
     // files to be processed by the tests
@@ -122,9 +124,11 @@ class LoadMetaDataTests extends WorkflowTestCase {
         fastqR2Filepath = "${testDataDir}/35-3B_NoIndex_L007_R2_complete_filtered.fastq.gz"
         metaDataFilepath = "${ftpDir}/${runName}/${runName}.fastq.tsv"
 
-        createDirectories([new File(ftpDir, runName)])
-        String createFiles = "echo fastqR1Filepath > ${fastqR1Filepath}; echo fastqR2Filepath > ${fastqR2Filepath};"
-        executionService.executeCommand(realm, "${createFiles}")
+        Map<File, File> linksToCreate = [
+                (new File(fastqR1Filepath)): new File("${ftpDir}/${runName}/${fastqR1Filename1}"),
+                (new File(fastqR2Filepath)): new File("${ftpDir}/${runName}/${fastqR2Filename1}"),
+        ]
+        linkFileUtils.createAndValidateLinks(linksToCreate, realm)
 
         FileType fileType = new FileType()
         fileType.type = FileType.Type.SEQUENCE
@@ -234,12 +238,6 @@ class LoadMetaDataTests extends WorkflowTestCase {
     void testWholeGenomeMetadata() {
         String seqTypeName = SeqTypeNames.WHOLE_GENOME.seqTypeName
 
-        String path = "${ftpDir}/${runName}"
-        String softLinkFastqR1Filepath1 = "${path}/${fastqR1Filename1}"
-        String softLinkFastqR2Filepath1 = "${path}/${fastqR2Filename1}"
-
-        String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath1}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath1}"
-
         StringBuffer sb = new StringBuffer()
         sb << metaDataTableHeader()
         sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR1Filename1, (MetaDataColumn.MD5): md5sum(fastqR1Filepath), (MetaDataColumn.LANE_NO): laneNoKit, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName]))
@@ -247,7 +245,7 @@ class LoadMetaDataTests extends WorkflowTestCase {
         String metaDataFile = sb.toString()
 
         String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
-        executionService.executeCommand(realm, "${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
+        executionService.executeCommand(realm, "${cmdCreateMetadataFile}")
 
         assert AlignmentPass.count() == 0
 
@@ -264,11 +262,6 @@ class LoadMetaDataTests extends WorkflowTestCase {
         List<LibraryPreparationKit> libraryPreparationKits = LibraryPreparationKit.list()
         assertFalse(libraryPreparationKits.isEmpty())
 
-        String path = "${ftpDir}/${runName}"
-        String softLinkFastqR1Filepath1 = "${path}/${fastqR1Filename1}"
-        String softLinkFastqR2Filepath1 = "${path}/${fastqR2Filename1}"
-        String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath1}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath1}"
-
         List<MetaDataColumn> metaDataColumns = metaDataColumns()
         metaDataColumns.remove(MetaDataColumn.LIB_PREP_KIT)
         StringBuffer sb = new StringBuffer()
@@ -278,7 +271,7 @@ class LoadMetaDataTests extends WorkflowTestCase {
         String metaDataFile = sb.toString()
 
         String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
-        executionService.executeCommand(realm, "${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
+        executionService.executeCommand(realm, "${cmdCreateMetadataFile}")
         assertTrue(new File(metaDataFilepath).exists())
 
         assert AlignmentPass.count() == 0
@@ -314,15 +307,16 @@ class LoadMetaDataTests extends WorkflowTestCase {
                 targetSize: 10l,
         ).save(flush: true)
 
-        String path = "${ftpDir}/${runName}"
-        String softLinkFastqR1Filepath1 = "${path}/${fastqR1Filename1}"
-        String softLinkFastqR2Filepath1 = "${path}/${fastqR2Filename1}"
-        String softLinkFastqR1Filepath2 = "${path}/${fastqR1Filename2}"
-        String softLinkFastqR2Filepath2 = "${path}/${fastqR2Filename2}"
-        String softLinkFastqR1Filepath3 = "${path}/${fastqR1Filename3}"
-        String softLinkFastqR2Filepath3 = "${path}/${fastqR2Filename3}"
-
-        String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath1}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath1}; ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath2}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath2}; ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath3}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath3} "
+        Map<File, File> linksToCreate = [
+                (new File(fastqR1Filepath)): new File("${ftpDir}/${runName}/${fastqR1Filename2}"),
+                (new File(fastqR2Filepath)): new File("${ftpDir}/${runName}/${fastqR2Filename2}"),
+        ]
+        linkFileUtils.createAndValidateLinks(linksToCreate, realm)
+        linksToCreate = [
+                (new File(fastqR1Filepath)): new File("${ftpDir}/${runName}/${fastqR1Filename3}"),
+                (new File(fastqR2Filepath)): new File("${ftpDir}/${runName}/${fastqR2Filename3}"),
+        ]
+        linkFileUtils.createAndValidateLinks(linksToCreate, realm)
 
         StringBuffer sb = new StringBuffer()
         sb << metaDataTableHeader()
@@ -335,7 +329,7 @@ class LoadMetaDataTests extends WorkflowTestCase {
         String metaDataFile = sb.toString()
 
         String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
-        executionService.executeCommand(realm, "${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
+        executionService.executeCommand(realm, "${cmdCreateMetadataFile}")
         assertTrue(new File(metaDataFilepath).exists())
 
         assert AlignmentPass.count() == 0
@@ -349,12 +343,6 @@ class LoadMetaDataTests extends WorkflowTestCase {
     void testChipSeqMetadata() {
         String seqTypeName = SeqTypeNames.CHIP_SEQ.seqTypeName
 
-        String path = "${ftpDir}/${runName}"
-        String softLinkFastqR1Filepath = "${path}/${fastqR1Filename1}"
-        String softLinkFastqR2Filepath = "${path}/${fastqR2Filename1}"
-
-        String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${fastqR1Filepath} ${softLinkFastqR1Filepath}; ln -s ${fastqR2Filepath} ${softLinkFastqR2Filepath}"
-
         String ANTIBODY_TARGET_1 = "just4Test1"
 
         StringBuffer sb = new StringBuffer()
@@ -364,7 +352,7 @@ class LoadMetaDataTests extends WorkflowTestCase {
         String metaDataFile = sb.toString()
 
         String cmdCreateMetadataFile = "echo '${metaDataFile}' > ${metaDataFilepath}"
-        executionService.executeCommand(realm, "${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdCreateMetadataFile}")
+        executionService.executeCommand(realm, "${cmdCreateMetadataFile}")
 
         AntibodyTarget.findOrSaveByName(ANTIBODY_TARGET_1)
 
