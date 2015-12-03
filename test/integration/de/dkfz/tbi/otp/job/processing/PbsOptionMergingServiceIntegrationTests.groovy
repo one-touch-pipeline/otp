@@ -71,10 +71,6 @@ class PbsOptionMergingServiceIntegrationTests {
         assertEquals("-a b -e f ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm_dkfz))
         assertEquals("-c d -g h ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm_bq))
 
-        realm = createRealm("")
-        processingOption = createProcessingOption(processingStep1.nonQualifiedJobClass, "{-a: b}")
-        shouldFail(IllegalArgumentException.class, { pbsOptionMergingService.mergePbsOptions(processingStep1, realm) })
-
         realm = createRealm("{-a: b}")
         processingOption = createProcessingOption(processingStep1.nonQualifiedJobClass, "")
         assertEquals("-a b ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm))

@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.job.processing.PbsOptionMergingService
+
 class Realm implements Serializable {
 
     /**
@@ -73,6 +75,10 @@ class Realm implements Serializable {
         flowControlKey blank:true, nullable:true, maxSize: 3072
         flowControlHost blank:true, nullable:true
         flowControlPort nullable:true
+        pbsOptions validator: {
+            PbsOptionMergingService.jsonStringToMap(it)  // will throw an exception if invalid
+            return true
+        }
     }
 
     @Override

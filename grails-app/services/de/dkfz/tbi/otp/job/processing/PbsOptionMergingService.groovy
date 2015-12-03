@@ -66,7 +66,7 @@ class PbsOptionMergingService {
      * @param jsonString the string containing as JSON structure
      * @return the created map from the string
      */
-    private Map jsonStringToMap(String jsonString) {
+    public static Map jsonStringToMap(String jsonString) {
         Assert.notNull(jsonString, "The string is a null pointer")
         if (jsonString.isEmpty()) {
             throw new IllegalArgumentException("The string is empty")
