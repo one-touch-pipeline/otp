@@ -632,7 +632,7 @@ def showSeqTracksRoddy = {List<SeqTrack> seqTracksToAlign ->
         return []
     }
 
-    List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageInList(mergingWorkPackagesInProcessing).findAll { it.isMostRecentBamFile() && !it.withdrawn }
+    List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageInList(mergingWorkPackages).findAll { it.isMostRecentBamFile() && !it.withdrawn }
 
     Map<AbstractMergedBamFile.FileOperationStatus, Collection<RoddyBamFile>> roddyBamFileByFileOperationStatus =
             roddyBamFiles.groupBy {it.fileOperationStatus}
