@@ -32,6 +32,12 @@ class DataFile implements Commentable{
 
     Comment comment
 
+    Run run
+    RunSegment runSegment
+    SeqTrack seqTrack
+    MergingLog mergingLog
+    AlignmentLog alignmentLog
+    FileType fileType
     static belongsTo = [
         run : Run,
         runSegment : RunSegment,
@@ -99,6 +105,10 @@ class DataFile implements Commentable{
 
     String toString() {
         fileName
+    }
+
+    Individual getIndividual() {
+        return seqTrack.individual
     }
 
     static mapping = {

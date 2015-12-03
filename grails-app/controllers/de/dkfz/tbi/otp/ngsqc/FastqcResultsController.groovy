@@ -31,6 +31,10 @@ class FastqcResultsController {
         }
         return [
             id: dataFile.id,
+            pid: dataFile.individual.displayName,
+            runName: dataFile.run.name,
+            laneId: dataFile.seqTrack.laneId,
+            readNumber: dataFile.readNumber,
             fileName: dataFile.fileName,
             moduleStatus: moduleStatus,
             moduleText: moduleText,

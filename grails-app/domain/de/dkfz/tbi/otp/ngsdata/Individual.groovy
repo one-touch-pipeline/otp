@@ -50,6 +50,10 @@ class Individual implements Commentable{
         "${mockPid}"
     }
 
+    String getDisplayName() {
+        return mockFullName  // TODO: OTP-1225
+    }
+
     /**
      * @return List of Sample for this Individual
      **/
