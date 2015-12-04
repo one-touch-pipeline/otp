@@ -42,11 +42,11 @@ $.otp.alignmentQualityOverviewTable = {
                         table.fnSettings().oFeatures.bServerSide = false;
                     },
                     "success" : function (json) {
-                        $("#withdrawn_description").hide()
-                        var seqType = $('#seqType').val()
+                        $("#withdrawn_description").hide();
+                        var seqType = $('#seqType').val();
                         for (var i = 0; i < json.aaData.length; i += 1) {
                             var row = json.aaData[i];
-                            var identifier, coverage, general
+                            var identifier, coverage, general;
                             identifier = [
                                 $.otp.createLinkMarkup({
                                     controller: 'individual',
@@ -59,13 +59,13 @@ $.otp.alignmentQualityOverviewTable = {
                                 row.sampleType,
                             ];
 
-                            if (seqType == 'WGS') {
+                            if (seqType === 'WGS') {
                                 coverage = [
                                         row.coverageWithoutN,
                                         row.coverageX,
                                         row.coverageY,
                                 ];
-                            } else if (seqType == 'EXOME') {
+                            } else if (seqType === 'EXOME') {
                                 coverage = [
                                         "<span class='" + row.onTargetRateWarning+"'>" + row.onTargetRate + " </span>",
                                         row.targetCoverage,
@@ -73,25 +73,25 @@ $.otp.alignmentQualityOverviewTable = {
                             }
 
                             general = [
+                                "<span title='" + row.kit.name + "'>" + row.kit.shortName + "</span>",
                                 row.mappedReads,
-                                "<span class='" + row.duplicateWarning+"'>" + row.duplicates + " </span>",
-                                row.totalReadCount,
-                                "<span class='" +row.properlyPpairedWarning+"'>" + row.properlyPaired + " </span>",
+                                "<span class='" + row.duplicateWarning + "'>" + row.duplicates + " </span>",
+                                "<span class='" + row.properlyPpairedWarning + "'>" + row.properlyPaired + " </span>",
                                 row.singletons,
                                 row.standardDeviationPE_Insertsize,
-                                "<span class='" + row.medianWarning+"'>" + row.medianPE_insertsize + " </span>",
-                                row.meanPE_Insertsize,
+                                "<span class='" + row.medianWarning + "'>" + row.medianPE_insertsize + " </span>",
+                                "<span class='" + row.diffChrWarning + "'>" + row.diffChr + " </span>",
                                 row.workflow,
                                 row.dateFromFileSystem,
                             ];
                             var rowdata = identifier.concat(coverage, general);
 
                             if (row.withdrawn) {
-                                $("#withdrawn_description").show()
-                                var withdrawnRow = []
+                                $("#withdrawn_description").show();
+                                var withdrawnRow = [];
                                 $.each(rowdata, function() {
                                     withdrawnRow.push("<span class='withdrawn'>" + this + " </span>")
-                                })
+                                });
                                 rowdata = withdrawnRow;
                             }
 

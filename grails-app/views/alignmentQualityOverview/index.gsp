@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="layout" content="main" />
-<title><g:message code="projectStatistic.title" /></title>
+<title><g:message code="alignment.quality.title" args="${[project, seqType]}"/></title>
     <asset:javascript src="pages/alignmentQualityOverview/index/dataTable.js"/>
 </head>
 
@@ -12,11 +12,11 @@
         <form class="blue_label" id="projectsGroupbox">
             <span class="blue_label"><g:message code="alignment.quality.project"/> :</span>
             <g:select class="criteria" id="project" name='project'
-                from='${projects}' value='${project}' onChange='submit();'></g:select>
+                from='${projects}' value='${project}' onChange='submit();'/>
             <span class="blue_label"><g:message code="alignment.quality.seqType"/> :</span>
-            <g:if test="${seqTypes.size>1}">
+            <g:if test="${seqTypes.size()>1}">
                 <g:select class="criteria" id="seqType" name='seqType'
-                from='${seqTypes}' value='${seqType}' onChange='submit();'></g:select>
+                from='${seqTypes}' value='${seqType}' onChange='submit();'/>
             </g:if>
             <g:else>
                 <span class="blue_label">

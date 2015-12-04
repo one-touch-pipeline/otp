@@ -1,17 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-
-import grails.converters.JSON
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.ProjectService
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
-import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.DataTableCommand
 import de.dkfz.tbi.otp.utils.FormatHelper
+import grails.converters.JSON
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 
 class AlignmentQualityOverviewController {
@@ -20,7 +14,7 @@ class AlignmentQualityOverviewController {
     public static final String CHR_Y_HG19 = 'chrY'
 
 
-    enum WarningLevel {
+    static enum WarningLevel {
         NO('okay'),
         WarningLevel1('warning1'),
         WarningLevel2('warning2')
@@ -42,14 +36,14 @@ class AlignmentQualityOverviewController {
         'alignment.quality.coverageWithoutN',
         'alignment.quality.coverageX',
         'alignment.quality.coverageY',
+        'alignment.quality.kit',
         'alignment.quality.mappedReads',
         'alignment.quality.duplicates',
-        'alignment.quality.totalReadCount',
         'alignment.quality.properlyPaired',
         'alignment.quality.singletons',
         'alignment.quality.standardDeviationPE_Insertsize',
         'alignment.quality.medianPE_insertsize',
-        'alignment.quality.meanPE_Insertsize',
+        'alignment.quality.diffChr',
         'alignment.quality.workflow',
         'alignment.quality.date',
     ].asImmutable()
@@ -59,14 +53,14 @@ class AlignmentQualityOverviewController {
         'alignment.quality.sampleType',
         'alignment.quality.onTargetRatio',
         'alignment.quality.targetCoverage',
+        'alignment.quality.kit',
         'alignment.quality.mappedReads',
         'alignment.quality.duplicates',
-        'alignment.quality.totalReadCount',
         'alignment.quality.properlyPaired',
         'alignment.quality.singletons',
         'alignment.quality.standardDeviationPE_Insertsize',
         'alignment.quality.medianPE_insertsize',
-        'alignment.quality.meanPE_Insertsize',
+        'alignment.quality.diffChr',
         'alignment.quality.workflow',
         'alignment.quality.date',
     ].asImmutable()
@@ -132,7 +126,7 @@ class AlignmentQualityOverviewController {
         if (!projectName || !seqTypeName) {
             dataToRender.iTotalRecords = 0
             dataToRender.iTotalDisplayRecords = 0
-            dataToRender.aaData = [:]
+            dataToRender.aaData = []
             render dataToRender as JSON
             return
         }
@@ -146,7 +140,7 @@ class AlignmentQualityOverviewController {
 
         List<AbstractQualityAssessment> dataOverall = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(project, seqType)
         List<AbstractQualityAssessment> dataChromosomeXY = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes, dataOverall*.qualityAssessmentMergedPass)
-        Map chromosomeMapXY = dataChromosomeXY.groupBy ([{it.qualityAssessmentMergedPass.id}, {it.chromosomeName}])
+        Map<Long, Map<String, List<AbstractQualityAssessment>>> chromosomeMapXY = dataChromosomeXY.groupBy ([{it.qualityAssessmentMergedPass.id}, {it.chromosomeName}])
 
         List sequenceLengthsAndReferenceGenomeLengthWithoutN = overallQualityAssessmentMergedService.findSequenceLengthAndReferenceGenomeLengthWithoutNForQualityAssessmentMerged(dataOverall)
         // TODO: has to be adapted when issue OTP-1670 is solved
@@ -156,17 +150,20 @@ class AlignmentQualityOverviewController {
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = dataOverall.collect { AbstractQualityAssessment it->
 
-            AbstractMergedBamFile abstractMergedBamFile = it.qualityAssessmentMergedPass.abstractMergedBamFile
+            QualityAssessmentMergedPass qualityAssessmentMergedPass = it.qualityAssessmentMergedPass
+            AbstractMergedBamFile abstractMergedBamFile = qualityAssessmentMergedPass.abstractMergedBamFile
+            Set<LibraryPreparationKit> kit = qualityAssessmentMergedPass.containedSeqTracks*.libraryPreparationKit.findAll().unique() //findAll removes null values
             double duplicates = it.duplicates / it.totalReadCounter * 100.0 //%duplicates (picard)
             double properlyPaired = it.properlyPaired / it.pairedInSequencing * 100.0
             double readLength = sequenceLengthsAndReferenceGenomeLengthWithoutNMap[it.id][0][1] as double
+            double diffChr = it.withMateMappedToDifferentChr / it.totalReadCounter * 100.0 // % diff chrom
 
             Map map = [
                 mockPid: abstractMergedBamFile.individual.mockPid,
                 sampleType: abstractMergedBamFile.sampleType.name,
                 mappedReads: FormatHelper.formatToTwoDecimalsNullSave(it.totalMappedReadCounter / (it.totalReadCounter as Double) * 100.0), //%mapped reads (flagstat)
                 duplicates: FormatHelper.formatToTwoDecimalsNullSave(duplicates), //%duplicates (picard)
-                totalReadCount: FormatHelper.formatGroupsNullSave(it.totalReadCounter), //#total read count
+                diffChr: FormatHelper.formatToTwoDecimalsNullSave(diffChr),
                 properlyPaired: FormatHelper.formatToTwoDecimalsNullSave(properlyPaired), //%properly_paired (flagstat)
                 singletons: FormatHelper.formatToTwoDecimalsNullSave(it.singletons / it.totalReadCounter * 100.0), //%singletons (flagstat)
                 standardDeviationPE_Insertsize: FormatHelper.formatToTwoDecimalsNullSave(it.insertSizeSD), //Standard Deviation PE_insertsize
@@ -181,20 +178,14 @@ class AlignmentQualityOverviewController {
                 //warning for properlyPpaired
                 properlyPpairedWarning: warningLevelForProperlyPaired(properlyPaired).styleClass,
 
+                //warning for diff chrom
+                diffChrWarning: warningLevelForDiffChrom(diffChr).styleClass,
+
                 plot: it.id,
                 withdrawn: abstractMergedBamFile.withdrawn,
-                workflow: abstractMergedBamFile.workPackage.workflow.html
+                workflow: abstractMergedBamFile.workPackage.workflow.html,
+                kit: [name: kit*.name.join(", ") ?: "", shortName: kit*.shortDisplayName.join(", ") ?: "-"],
             ]
-            if (it instanceof OverallQualityAssessmentMerged) {
-                map << [
-                        meanPE_Insertsize: FormatHelper.formatToTwoDecimalsNullSave(it.insertSizeMean), //Mean PE_insertsize
-                ]
-            } else {
-                // there is no insert size mean for RoddyBamFile QA
-                map << [
-                        meanPE_Insertsize: "-"
-                ]
-            }
 
             switch (seqType.name) {
                 case SeqTypeNames.WHOLE_GENOME.seqTypeName:
@@ -202,7 +193,7 @@ class AlignmentQualityOverviewController {
                     Double coverageX
                     Double coverageY
                     if (referenceGenomeLengthWithoutN) {
-                        Map chromosomeMap = chromosomeMapXY[it.qualityAssessmentMergedPass.id]
+                        Map<String, List<AbstractQualityAssessment>> chromosomeMap = chromosomeMapXY[qualityAssessmentMergedPass.id]
                         AbstractQualityAssessment x = getQualityAssessmentForFirstMatchingChromosomeName(chromosomeMap, [Chromosomes.CHR_X.alias, CHR_X_HG19])
                         AbstractQualityAssessment y = getQualityAssessmentForFirstMatchingChromosomeName(chromosomeMap, [Chromosomes.CHR_Y.alias, CHR_Y_HG19])
                         long qcBasesMappedXChromosome = x.qcBasesMapped
@@ -238,7 +229,7 @@ class AlignmentQualityOverviewController {
         render dataToRender as JSON
     }
 
-    private AbstractQualityAssessment getQualityAssessmentForFirstMatchingChromosomeName(Map qualityAssessmentMergedPassGroupedByChromosome, List<String> chromosomeNames) {
+    private static AbstractQualityAssessment getQualityAssessmentForFirstMatchingChromosomeName(Map<String, List<AbstractQualityAssessment>> qualityAssessmentMergedPassGroupedByChromosome, List<String> chromosomeNames) {
         return exactlyOneElement(chromosomeNames.findResult { qualityAssessmentMergedPassGroupedByChromosome.get(it) })
     }
 
@@ -280,5 +271,13 @@ class AlignmentQualityOverviewController {
             return WarningLevel.NO
         }
     }
-
+    private static WarningLevel warningLevelForDiffChrom(Double diffChrom) {
+        if (diffChrom > 3) {
+            return WarningLevel.WarningLevel2
+        } else if (diffChrom > 2) {
+            return WarningLevel.WarningLevel1
+        } else {
+            return WarningLevel.NO
+        }
+    }
 }

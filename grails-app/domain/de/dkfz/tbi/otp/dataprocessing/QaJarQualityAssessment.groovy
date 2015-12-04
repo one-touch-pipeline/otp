@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 
-class QaJarQualityAssessment extends AbstractQualityAssessment {
+abstract class QaJarQualityAssessment extends AbstractQualityAssessment {
 
     /**
      * duplicates count for read 1 and single reads
