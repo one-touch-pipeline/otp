@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProject
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.Workflow
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Project
 
 import java.util.regex.Matcher
@@ -82,7 +83,7 @@ class RoddyWorkflowConfig extends ConfigPerProject {
 
     void validateConfig() {
         File configFile = configFilePath as File
-        assert configFile.exists() :"File '${configFile}' does not exist"
+        LsdfFilesService.ensureFileIsReadableAndNotEmpty(configFile)
         String pattern = /^${Pattern.quote(workflow.name.name())}_(.+)_${Pattern.quote(configVersion)}\.xml$/
         Matcher matcher = configFile.name =~ pattern
         assert matcher.matches(): "The file name '${configFile.name}' does not match the pattern '${pattern}'"

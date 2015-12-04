@@ -144,7 +144,7 @@ public class RoddyWorkflowConfigUnitTests {
     void tesValidateConfig_shouldFailForMissingFile() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
 
-        TestCase.shouldFailWithMessage(AssertionError, 'File .* does not exist.*') {
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'assert waitUntilExists(file)') {
             roddyWorkflowConfig.validateConfig()
         }
     }
@@ -154,7 +154,7 @@ public class RoddyWorkflowConfigUnitTests {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         File file = new File(configDir, "${HelperUtils.uniqueString}.xml")
         roddyWorkflowConfig.configFilePath = file.path
-        assert file.createNewFile()
+        CreateFileHelper.createFile(file)
 
         TestCase.shouldFailWithMessage(AssertionError, '.*The file name .*does not match the pattern.*') {
             roddyWorkflowConfig.validateConfig()
