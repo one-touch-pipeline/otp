@@ -81,12 +81,7 @@ class MergingWorkflowTests extends WorkflowTestCase {
         )
         assert sample.save(flush: true)
 
-        SeqType seqType = new SeqType(
-                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
-                name: SeqTypeNames.WHOLE_GENOME.seqTypeName,
-                dirName: 'whole_genome',
-        )
-        assert seqType.save(flush: true)
+        SeqType seqType = SeqType.wholeGenomePairedSeqType
 
         SeqCenter seqCenter = new SeqCenter(
                 name: 'seqCenter',
@@ -192,6 +187,11 @@ class MergingWorkflowTests extends WorkflowTestCase {
         executionService.executeCommand(realm, "${cmdBuildDirStructure} && ${cmdCopyFile} && sync")
         checkFiles([singleLaneBamFile])
     }
+
+    protected void setupForLoadingWorkflow() {
+        DomainFactory.createAlignableSeqTypes()
+    }
+
 
 
     /**

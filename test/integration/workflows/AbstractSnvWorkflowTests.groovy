@@ -77,6 +77,10 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
     ExternalScript filterScript
 
 
+    protected void setupForLoadingWorkflow() {
+        DomainFactory.createAlignableSeqTypes()
+    }
+
     @Test
     void testWholeSnvWorkflow() {
         snvConfig = SnvConfig.createFromFile(project, seqType, new File(getWorkflowDirectory(), "configFile_${VERSION}/runtimeConfig.sh"), VERSION)

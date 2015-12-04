@@ -28,11 +28,7 @@ class ProcessedMergedBamFileSnvWorkflowTests extends AbstractSnvWorkflowTests {
                 mockPid: "stds",
         )
 
-        seqType = SeqType.build(
-                name: SeqTypeNames.EXOME.seqTypeName,
-                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
-                dirName: "tmp",
-        )
+        seqType = SeqType.exomePairedSeqType
 
         LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
 
