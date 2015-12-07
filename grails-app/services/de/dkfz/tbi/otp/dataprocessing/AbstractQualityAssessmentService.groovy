@@ -64,8 +64,11 @@ class AbstractQualityAssessmentService {
     void assertListContainsAllChromosomeNamesInReferenceGenome(Collection<String> chromosomeNames, ReferenceGenome referenceGenome) {
         Collection<String> expectedChromosomeNames = [RoddyQualityAssessment.ALL] +
                 referenceGenomeService.chromosomesInReferenceGenome(referenceGenome)*.name
-        if (!CollectionUtils.containSame(chromosomeNames, expectedChromosomeNames)) {
-            throw new RuntimeException("Expected chromosomes ${expectedChromosomeNames}, but found ${chromosomeNames}.")
+        Collection<String> missedElements = expectedChromosomeNames.findAll { String chromosomeName ->
+            !chromosomeNames.contains(chromosomeName)
+        }
+        if (!missedElements.isEmpty()) {
+            throw new RuntimeException("Missed chromosomes: ${missedElements.join(', ')} (expected: ${expectedChromosomeNames}; found ${chromosomeNames}).")
         }
     }
 
