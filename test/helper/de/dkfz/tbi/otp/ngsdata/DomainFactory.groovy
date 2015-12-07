@@ -538,6 +538,27 @@ class DomainFactory {
         ], properties)
     }
 
+    static ReferenceGenomeEntry createReferenceGenomeEntry(Map properties = [:]) {
+        return createDomainObject(ReferenceGenomeEntry, [
+                referenceGenome: { createReferenceGenome() },
+                classification: ReferenceGenomeEntry.Classification.CHROMOSOME,
+                name: "name${counter++}",
+                alias: "alias${counter++}",
+        ], properties)
+    }
+
+    static List<ReferenceGenomeEntry> createReferenceGenomeEntries(ReferenceGenome referenceGenome = createReferenceGenome(), Collection<String> chromosomeNames) {
+        return chromosomeNames.collect {
+            createReferenceGenomeEntry([
+                    name: it,
+                    alias: it,
+                    referenceGenome: referenceGenome,
+                    classification: ReferenceGenomeEntry.Classification.CHROMOSOME,
+            ])
+        }
+    }
+
+
     static ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqType(Map properties = [:]) {
         return createDomainObject(ReferenceGenomeProjectSeqType, [
                 project        : { createProject() },

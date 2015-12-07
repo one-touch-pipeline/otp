@@ -150,7 +150,7 @@ class AbstractQualityAssessmentServiceTests {
                 name: '9',
                 alias: '9',
         )
-        TestCase.shouldFailWithMessage(RuntimeException, /^Expected chromosomes .+, but found .+\.$/, {
+        TestCase.shouldFailWithMessage(RuntimeException, /^Missed chromosomes: .+ \(expected: .*; found .*\).$/, {
             abstractQualityAssessmentService.parseRoddyMergedBamQaStatistics(roddyBamFile)
         })
     }
@@ -164,6 +164,42 @@ class AbstractQualityAssessmentServiceTests {
     void testParseRoddySingleLaneQaStatistics_Exome_allFine() {
         testParseRoddyMergedBamQaStatistics_allFine("SingleLane", DomainFactory.createExomeSeqType(), null, SOME_VALUE_3, null)
     }
+
+
+    @Test
+    void testAssertListContainsAllChromosomeNamesInReferenceGenome_listAreSame_shouldBeFine() {
+        List<String> chromosomeNamesFromRoddyJson = [RoddyQualityAssessment.ALL, '1', '2', '3']
+        List<String> chromosomeNamesFromOtp = ['1', '2', '3']
+        ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
+        DomainFactory.createReferenceGenomeEntries(referenceGenome, chromosomeNamesFromOtp)
+
+        abstractQualityAssessmentService.assertListContainsAllChromosomeNamesInReferenceGenome(chromosomeNamesFromRoddyJson, referenceGenome)
+    }
+
+    @Test
+    void testAssertListContainsAllChromosomeNamesInReferenceGenome_OtpListIsSubsetOfRoddyList_shouldBeFine() {
+        List<String> chromosomeNamesFromRoddyJson = [RoddyQualityAssessment.ALL, '1', '2', '3', '4', '5']
+        List<String> chromosomeNamesFromOtp = ['1', '2', '3']
+        ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
+        DomainFactory.createReferenceGenomeEntries(referenceGenome, chromosomeNamesFromOtp)
+
+        abstractQualityAssessmentService.assertListContainsAllChromosomeNamesInReferenceGenome(chromosomeNamesFromRoddyJson, referenceGenome)
+    }
+
+    @Test
+    void testAssertListContainsAllChromosomeNamesInReferenceGenome_OtpListIsBiggerThenRoddyList_shouldFail() {
+        List<String> chromosomeNamesFromRoddyJson = [RoddyQualityAssessment.ALL, '1', '2', '3']
+        List<String> chromosomeNamesFromOtp = ['1', '2', '3', '4', '5']
+        ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
+        DomainFactory.createReferenceGenomeEntries(referenceGenome, chromosomeNamesFromOtp)
+
+        TestCase.shouldFailWithMessage(RuntimeException, /^Missed chromosomes: .+ \(expected: .*; found .*\).$/, {
+            abstractQualityAssessmentService.assertListContainsAllChromosomeNamesInReferenceGenome(chromosomeNamesFromRoddyJson, referenceGenome)
+        })
+    }
+
+
+
 
     static void createReferenceGenomeEntriesAndQaFileOnFilesystem(ReferenceGenome referenceGenome, File qaFile) {
         createReferenceGenomeEntries(referenceGenome)
