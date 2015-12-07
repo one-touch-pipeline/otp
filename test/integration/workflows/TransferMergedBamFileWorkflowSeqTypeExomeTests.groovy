@@ -176,7 +176,8 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
         assertNotNull(softwareTool.save([flush: true, failOnError: true]))
 
         LibraryPreparationKit libraryPreparationKit  = new LibraryPreparationKit(
-                        name: "libraryPreparationKit"
+                        name: "libraryPreparationKit",
+                        shortDisplayName: "libraryPreparationKit",
                         )
         assertNotNull(libraryPreparationKit.save([flush: true, failOnError: true]))
 

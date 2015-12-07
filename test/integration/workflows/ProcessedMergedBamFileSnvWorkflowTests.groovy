@@ -30,7 +30,7 @@ class ProcessedMergedBamFileSnvWorkflowTests extends AbstractSnvWorkflowTests {
 
         seqType = SeqType.exomePairedSeqType
 
-        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
+        LibraryPreparationKit.build()
 
         bamFileTumor = DomainFactory.createProcessedMergedBamFile(
                 MergingWorkPackage.build(

@@ -134,7 +134,8 @@ class LoadBedFileScriptTests extends GroovyScriptAwareTestCase {
             LibraryPreparationKit existingKit = LibraryPreparationKit.findByName(input.kitName)
             if (!existingKit) {
                 LibraryPreparationKit kit = new LibraryPreparationKit(
-                                name: input.kitName
+                                name: input.kitName,
+                                shortDisplayName: input.kitName,
                                 )
                 kit.save(flush: true)
             }

@@ -12,10 +12,12 @@ class LibraryPreparationKitTests {
     @Before
     void setUp() {
         kit1 = new LibraryPreparationKit(
-                name: "kitName1"
+                name: "kitName1",
+                shortDisplayName: "name1",
                 )
         kit2 = new LibraryPreparationKit(
-                name: "kitName2"
+                name: "kitName2",
+                shortDisplayName: "name2",
                 )
     }
 

@@ -787,7 +787,8 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assertNotNull(dataFile.save([flush: true]))
 
         LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(
-                        name: LIBRARY_PREPARATION_KIT_NAME_VALID
+                        name: LIBRARY_PREPARATION_KIT_NAME_VALID,
+                        shortDisplayName: LIBRARY_PREPARATION_KIT_NAME_VALID,
                         )
         assertNotNull(libraryPreparationKit.save([flush: true]))
 

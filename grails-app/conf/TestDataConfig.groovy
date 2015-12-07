@@ -27,6 +27,7 @@ testDataConfig {
         }
         'de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit' {
             name = {'name_' + (counter++)}
+            shortDisplayName = {'name_' + (counter++)}
         }
         'de.dkfz.tbi.otp.ngsdata.LibraryPreparationKitSynonym' {
             name = {'name_' + (counter++)}

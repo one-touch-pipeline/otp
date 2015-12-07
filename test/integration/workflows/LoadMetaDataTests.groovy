@@ -258,9 +258,7 @@ class LoadMetaDataTests extends WorkflowTestCase {
     void testExomeMetadataNoLibraryPreparationKit() {
         String seqTypeName = SeqTypeNames.EXOME.seqTypeName
 
-        runScript("scripts/LibraryPreparationKit/LoadLibraryPreparationKits.groovy")
-        List<LibraryPreparationKit> libraryPreparationKits = LibraryPreparationKit.list()
-        assertFalse(libraryPreparationKits.isEmpty())
+        LibraryPreparationKit.build()
 
         List<MetaDataColumn> metaDataColumns = metaDataColumns()
         metaDataColumns.remove(MetaDataColumn.LIB_PREP_KIT)
@@ -286,22 +284,11 @@ class LoadMetaDataTests extends WorkflowTestCase {
     void testExomeMetadataWithLibraryPreparationKit() {
         String seqTypeName = SeqTypeNames.EXOME.seqTypeName
 
-        runScript("scripts/LibraryPreparationKit/LoadLibraryPreparationKits.groovy")
-        List<LibraryPreparationKit> libraryPreparationKits = LibraryPreparationKit.list()
-        assertFalse(libraryPreparationKits.isEmpty())
-
-        // this library PreparationKit was chosen to match the one at the script that is supposed to be executed together with the workflow
-        String libraryPreparationKit = "Agilent SureSelect V3"
-        String libraryPreparationKitIdentifier = "Agilent SureSelect V3 alias"
-
-        LibraryPreparationKitSynonym libraryPreparationKitSynonym = new LibraryPreparationKitSynonym(
-                        name: libraryPreparationKitIdentifier,
-                        libraryPreparationKit: libraryPreparationKits.first())
-        assertNotNull(libraryPreparationKitSynonym.save([flush: true]))
+        LibraryPreparationKitSynonym libraryPreparationKitSynonym = LibraryPreparationKitSynonym.build()
 
         assert new BedFile(
                 referenceGenome: referenceGenome,
-                libraryPreparationKit: libraryPreparationKits.first(),
+                libraryPreparationKit: libraryPreparationKitSynonym.libraryPreparationKit,
                 mergedTargetSize: 10l,
                 fileName: "BedFileName",
                 targetSize: 10l,
@@ -320,10 +307,10 @@ class LoadMetaDataTests extends WorkflowTestCase {
 
         StringBuffer sb = new StringBuffer()
         sb << metaDataTableHeader()
-        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR1Filename1, (MetaDataColumn.MD5): md5sum(fastqR1Filepath), (MetaDataColumn.LANE_NO): laneNoKit, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): libraryPreparationKit]))
-        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR2Filename1, (MetaDataColumn.MD5): md5sum(fastqR2Filepath), (MetaDataColumn.LANE_NO): laneNoKit, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): libraryPreparationKit]))
-        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR1Filename2, (MetaDataColumn.MD5): md5sum(fastqR1Filepath), (MetaDataColumn.LANE_NO): laneNoKitId, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): libraryPreparationKitIdentifier]))
-        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR2Filename2, (MetaDataColumn.MD5): md5sum(fastqR2Filepath), (MetaDataColumn.LANE_NO): laneNoKitId, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): libraryPreparationKitIdentifier]))
+        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR1Filename1, (MetaDataColumn.MD5): md5sum(fastqR1Filepath), (MetaDataColumn.LANE_NO): laneNoKit, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): libraryPreparationKitSynonym.libraryPreparationKit.name]))
+        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR2Filename1, (MetaDataColumn.MD5): md5sum(fastqR2Filepath), (MetaDataColumn.LANE_NO): laneNoKit, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): libraryPreparationKitSynonym.libraryPreparationKit.name]))
+        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR1Filename2, (MetaDataColumn.MD5): md5sum(fastqR1Filepath), (MetaDataColumn.LANE_NO): laneNoKitId, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): libraryPreparationKitSynonym.name]))
+        sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR2Filename2, (MetaDataColumn.MD5): md5sum(fastqR2Filepath), (MetaDataColumn.LANE_NO): laneNoKitId, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): libraryPreparationKitSynonym.name]))
         sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR1Filename3, (MetaDataColumn.MD5): md5sum(fastqR1Filepath), (MetaDataColumn.LANE_NO): laneNoUnknown, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE]))
         sb << metaDataTableEntry(metaData([(MetaDataColumn.FASTQ_FILE): fastqR2Filename3, (MetaDataColumn.MD5): md5sum(fastqR2Filepath), (MetaDataColumn.LANE_NO): laneNoUnknown, (MetaDataColumn.SEQUENCING_TYPE): seqTypeName, (MetaDataColumn.LIB_PREP_KIT): UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE]))
         String metaDataFile = sb.toString()

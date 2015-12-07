@@ -18,8 +18,11 @@ class LibraryPreparationKit {
      */
     String name
 
+    String shortDisplayName
+
     static constraints = {
         name(unique: true, blank: false)
+        shortDisplayName(unique: true, blank: false)
     }
 
     public String toString() {

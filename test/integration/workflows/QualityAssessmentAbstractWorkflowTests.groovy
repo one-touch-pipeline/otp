@@ -305,7 +305,10 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
 
     private void createAdditionalExomData() {
 
-        LibraryPreparationKit kit = new LibraryPreparationKit(name: 'kit')
+        LibraryPreparationKit kit = new LibraryPreparationKit(
+                name: 'kit',
+                shortDisplayName: 'k',
+        )
         assertNotNull kit.save(flush: true)
 
         List<SeqTrack> seqTracks = []

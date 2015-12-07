@@ -108,7 +108,8 @@ class QAResultStatisticsServiceTests {
         assertNotNull(softwareTool.save([flush: true]))
 
         libraryPreparationKit = new LibraryPreparationKit(
-                name: "libraryPreparationKit"
+                name: "libraryPreparationKit",
+                shortDisplayName: "libraryPreparationKit",
         )
         assertNotNull(libraryPreparationKit.save([flush: true]))
 

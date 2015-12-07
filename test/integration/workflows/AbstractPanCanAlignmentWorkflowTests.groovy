@@ -187,7 +187,10 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
             )
         }
 
-        LibraryPreparationKit kit = new LibraryPreparationKit(name: "~* xX liBrArYprEPaRaTioNkiT Xx *~")
+        LibraryPreparationKit kit = new LibraryPreparationKit(
+                name: "~* xX liBrArYprEPaRaTioNkiT Xx *~",
+                shortDisplayName: "~* xX lPk Xx *~",
+        )
         assert kit.save(flush: true, failOnError: true)
 
         MergingWorkPackage workPackage = MergingWorkPackage.build(

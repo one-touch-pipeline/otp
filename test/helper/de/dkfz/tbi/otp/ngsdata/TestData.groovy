@@ -341,7 +341,8 @@ class TestData {
 
     static LibraryPreparationKit createLibraryPreparationKit(String name) {
         LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(
-                name: name
+                name: name,
+                shortDisplayName: name,
                 )
         assertNotNull(libraryPreparationKit.save())
         return libraryPreparationKit

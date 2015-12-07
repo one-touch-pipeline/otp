@@ -523,6 +523,7 @@ class DomainFactory {
     static LibraryPreparationKit createLibraryPreparationKit(Map properties = [:]) {
         return createDomainObject(LibraryPreparationKit, [
                 name: "name_${counter++}",
+                shortDisplayName: "name_${counter++}",
         ], properties)
     }
 

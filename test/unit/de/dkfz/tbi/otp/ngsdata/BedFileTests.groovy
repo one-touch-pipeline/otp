@@ -28,11 +28,13 @@ class BedFileTests {
                 )
         assertNotNull refGen.save(flush: true)
         kit1 = new LibraryPreparationKit(
-                name: "kitName1"
+                name: "kitName1",
+                shortDisplayName: "name1",
                 )
         assertNotNull kit1.save(flush: true)
         kit2 = new LibraryPreparationKit(
-                name: "kitName2"
+                name: "kitName2",
+                shortDisplayName: "name2",
                 )
         assertNotNull kit2.save(flush: true)
         bedFile1 = new BedFile(

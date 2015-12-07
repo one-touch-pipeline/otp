@@ -350,7 +350,8 @@ class MetaDataValidationServiceUnitTests {
 
     private LibraryPreparationKitSynonym createLibraryPreparationKitSynonym() {
         LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(
-                        name: LIBRARY_PREPARATION_KIT
+                        name: LIBRARY_PREPARATION_KIT,
+                        shortDisplayName: LIBRARY_PREPARATION_KIT,
                         )
         assertNotNull(libraryPreparationKit.save([flush: true]))
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = new LibraryPreparationKitSynonym(

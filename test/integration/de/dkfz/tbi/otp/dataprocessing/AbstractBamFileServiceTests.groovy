@@ -147,7 +147,8 @@ class AbstractBamFileServiceTests {
         assert referenceGenomeProjectSeqTypeForExome.save([flush: true])
 
         LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(
-                name: "libraryPreparationKit"
+                name: "libraryPreparationKit",
+                shortDisplayName: "libraryPreparationKit",
                 )
         assertNotNull(libraryPreparationKit.save([flush: true]))
 

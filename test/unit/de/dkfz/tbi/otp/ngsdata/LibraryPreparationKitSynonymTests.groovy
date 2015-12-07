@@ -16,7 +16,8 @@ class LibraryPreparationKitSynonymTests {
     @Before
     void setUp() {
         kit = new LibraryPreparationKit(
-                name: "kitName1"
+                name: "kitName1",
+                shortDisplayName: "name1",
                 )
         assertNotNull kit.save(flush: true)
         kitId1 = new LibraryPreparationKitSynonym(
