@@ -861,6 +861,15 @@ class DomainFactory {
                 comment: "Path to the application.ini which is needed to execute Roddy"
         )
         assert processingOptionApplicationIni.save(flush: true)
+
+        ProcessingOption featureTogglesConfigPath = new ProcessingOption(
+                name: ExecuteRoddyCommandService.FEATURE_TOGGLES_CONFIG_PATH,
+                type: null,
+                project: null,
+                value: "${basePath}/tbi_cluster/11.4/x86_64/otp/RoddyBaseConfigs/featureToggles.ini",
+                comment: "Path to featureToggles.ini which contains feature toggles for Roddy",
+        )
+        assert featureTogglesConfigPath.save(flush: true)
     }
 
 

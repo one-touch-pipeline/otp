@@ -17,6 +17,9 @@ class ExecuteRoddyCommandService {
 
     static final String DELETE_CONTENT_OF_OTHERUNIXUSER_DIRECTORIES_SCRIPT = "OtherUnixUserDeleteContentOfOtherUserDirectoriesScript"
 
+    static final String FEATURE_TOGGLES_CONFIG_PATH = "OtherUnixUserFeatureTogglesConfigPath"
+
+
     ExecutionService executionService
 
     String roddyBaseCommand(File roddyPath, String configName, String analysisId) {
@@ -65,6 +68,7 @@ class ExecuteRoddyCommandService {
         return roddyBaseCommand(roddyPath, nameInConfigFile, analysisIDinConfigFile) +
                 "${roddyResult.individual.pid} " +
                 "--useconfig=${applicationIniPath} " +
+                "--usefeaturetoggleconfig=${featureTogglesConfigPath()} " +
                 "--useRoddyVersion=${roddyVersion} " +
                 "--usePluginVersion=${pluginVersion} " +
                 "--configurationDirectories=${configFile.parent},${roddyBaseConfigsPath} " +
@@ -132,5 +136,9 @@ class ExecuteRoddyCommandService {
         File script = ProcessingOptionService.getValueOfProcessingOption(DELETE_CONTENT_OF_OTHERUNIXUSER_DIRECTORIES_SCRIPT) as File
         String cmd = "cd /tmp && ${executeCommandAsRoddyUser()} ${script} ${basePath}"
         ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput(cmd)
+    }
+
+    File featureTogglesConfigPath() {
+        return new File(ProcessingOptionService.getValueOfProcessingOption(FEATURE_TOGGLES_CONFIG_PATH))
     }
 }

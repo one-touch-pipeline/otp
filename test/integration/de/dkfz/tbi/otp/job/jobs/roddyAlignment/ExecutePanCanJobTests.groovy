@@ -38,6 +38,7 @@ class ExecutePanCanJobTests {
     String roddyVersion
     File roddyBaseConfigsPath
     File roddyApplicationIni
+    File featureTogglesConfigPath
     File chromosomeStatSizeFile
     File processingRootPath
     File dataFile1File
@@ -69,6 +70,7 @@ class ExecutePanCanJobTests {
         roddyBaseConfigsPath.mkdirs()
         roddyApplicationIni = ProcessingOption.findByName("roddyApplicationIni").value as File
         roddyApplicationIni.text = "Some Text"
+        featureTogglesConfigPath = ProcessingOption.findByName(ExecuteRoddyCommandService.FEATURE_TOGGLES_CONFIG_PATH).value as File
 
         prepareDataFilesOnFileSystem()
 
@@ -256,6 +258,7 @@ cd /tmp \
 && sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@WGS \
 ${roddyBamFile.individual.pid} \
 --useconfig=${roddyApplicationIni} \
+--usefeaturetoggleconfig=${featureTogglesConfigPath} \
 --useRoddyVersion=${roddyVersion} \
 --usePluginVersion=${roddyBamFile.config.pluginVersion} \
 --configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} \
@@ -298,6 +301,7 @@ cd /tmp \
 && sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@WES \
 ${roddyBamFile.individual.pid} \
 --useconfig=${roddyApplicationIni} \
+--usefeaturetoggleconfig=${featureTogglesConfigPath} \
 --useRoddyVersion=${roddyVersion} \
 --usePluginVersion=${roddyBamFile.config.pluginVersion} \
 --configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} \
@@ -352,6 +356,7 @@ cd /tmp \
 && sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile2.workflow.name}_${roddyBamFile2.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@WGS \
 ${roddyBamFile2.individual.pid} \
 --useconfig=${roddyApplicationIni} \
+--usefeaturetoggleconfig=${featureTogglesConfigPath} \
 --useRoddyVersion=${roddyVersion} \
 --usePluginVersion=${roddyBamFile2.config.pluginVersion} \
 --configurationDirectories=${new File(roddyBamFile2.config.configFilePath).parent},${roddyBaseConfigsPath} \
@@ -379,6 +384,7 @@ cd /tmp && \
 sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@WGS \
 ${roddyBamFile.individual.pid} \
 --useconfig=${roddyApplicationIni} \
+--usefeaturetoggleconfig=${featureTogglesConfigPath} \
 --useRoddyVersion=${roddyVersion} \
 --usePluginVersion=${roddyBamFile.config.pluginVersion} \
 --configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} \

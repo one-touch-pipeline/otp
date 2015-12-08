@@ -36,6 +36,7 @@ class ExecuteRoddyCommandServiceTests {
     RoddyBamFile roddyBamFile
     File roddyBaseConfigsPath
     File applicationIniPath
+    File featureTogglesConfigPath
 
     @Before
     void setUp() {
@@ -60,6 +61,7 @@ class ExecuteRoddyCommandServiceTests {
         new File(roddyBaseConfigsPath, "file name").write("file content")
         applicationIniPath = new File(ProcessingOptionService.getValueOfProcessingOption("roddyApplicationIni"))
         assert CreateFileHelper.createFile(applicationIniPath)
+        featureTogglesConfigPath = ProcessingOption.findByName(ExecuteRoddyCommandService.FEATURE_TOGGLES_CONFIG_PATH).value as File
     }
 
     @After
@@ -246,6 +248,7 @@ class ExecuteRoddyCommandServiceTests {
 "sudo -u OtherUnixUser ${roddyCommand} rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
 "${roddyBamFile.individual.pid} " +
 "--useconfig=${applicationIniPath} " +
+"--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
 "--useRoddyVersion=2.1.28 " +
 "--usePluginVersion=${roddyBamFile.config.pluginVersion} " +
 "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} " +
