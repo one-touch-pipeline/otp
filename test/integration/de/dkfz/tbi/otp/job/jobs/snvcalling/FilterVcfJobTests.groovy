@@ -364,7 +364,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> }
 
-        WaitingFileUtils.metaClass.static.waitUntilDoesNotExist = { File file -> return true }
+        WaitingFileUtils.metaClass.static.waitUntilDoesNotExist = { File file -> }
 
         try {
             filterVcfJob.validate(snvCallingInstance2)
@@ -399,7 +399,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
         SnvCallingStep step = SnvCallingStep.FILTER_VCF
         File configFile = snvCallingInstanceTestData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteDataManagementPath, CONFIGURATION)
 
-        WaitingFileUtils.metaClass.static.waitUntilDoesNotExist = { File file -> return true }
+        WaitingFileUtils.metaClass.static.waitUntilDoesNotExist = { File file -> }
 
         File checkpointFile = new OtpPath(snvCallingInstance1.snvInstancePath, step.checkpointFileName).absoluteDataManagementPath
         checkpointFile.createNewFile()

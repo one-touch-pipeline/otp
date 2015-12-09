@@ -303,7 +303,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
                 lsdfFilesService.getFileViewByPidPath(it)
             ]
         }.flatten().each {
-            assert WaitingFileUtils.waitUntilExists(new File(it))
+            WaitingFileUtils.waitUntilExists(new File(it))
         }
     }
 

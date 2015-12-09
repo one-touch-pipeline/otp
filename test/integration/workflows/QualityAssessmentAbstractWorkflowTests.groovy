@@ -339,7 +339,7 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
         String softLinkToReferenceGenomesDir = "${processingRootPath}/reference_genomes"
         String cmdBuildSoftLinkToReferenceGenomes = "ln -s ${referenceGenomesDir} ${softLinkToReferenceGenomesDir}"
         executionService.executeCommand(realm, "${cmdBuildSoftLinkToReferenceGenomes}")
-        assert WaitingFileUtils.waitUntilExists(new File(softLinkToReferenceGenomesDir))
+        WaitingFileUtils.waitUntilExists(new File(softLinkToReferenceGenomesDir))
     }
 
     @Override

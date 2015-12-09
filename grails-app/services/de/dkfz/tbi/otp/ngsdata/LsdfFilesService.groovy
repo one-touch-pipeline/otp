@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
-import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 import static de.dkfz.tbi.otp.utils.WaitingFileUtils.*
@@ -27,7 +26,7 @@ class LsdfFilesService {
             ].asImmutable()
 
     /**
-     * Similar to {@link Paths.get(String, String...)} from Java 7.
+     * Similar to {@link java.nio.file.Paths#get(String, String...)} from Java 7.
      */
     public static File getPath(final String first, final String... more) {
         validatePathSegment(first, "first")
@@ -210,7 +209,10 @@ class LsdfFilesService {
 
     static boolean isFileReadableAndNotEmpty(final File file) {
         assert file.isAbsolute()
-        return waitUntilExists(file) && file.isFile() && file.canRead() && file.length() > 0L
+        try {
+            waitUntilExists(file)
+        } catch (AssertionError e) {}
+        return file.exists() &&  file.isFile() && file.canRead() && file.length() > 0L
     }
 
     private static void checkFileIsReadableAndNotEmpty(final File file, Closure existenceCheck) {
@@ -222,11 +224,11 @@ class LsdfFilesService {
     }
 
     static void ensureFileIsReadableAndNotEmpty(final File file) {
-        checkFileIsReadableAndNotEmpty(file) { assert waitUntilExists(file) }
+        checkFileIsReadableAndNotEmpty(file) { waitUntilExists(file) }
     }
 
     static void ensureDirIsReadableAndNotEmpty(final File dir) {
-        assert waitUntilExists(dir)
+        waitUntilExists(dir)
         assert dir.directory
         assert dir.listFiles().length != 0
     }
@@ -257,7 +259,7 @@ class LsdfFilesService {
         assert file.isAbsolute() && file.exists() && file.isFile()
         try {
             assert executionService.executeCommand(realm, "rm '${file}'; echo \$?") ==~ /^0\s*$/
-            assert waitUntilDoesNotExist(file)
+            waitUntilDoesNotExist(file)
         } catch (final Throwable e) {
             throw new RuntimeException("Could not delete file ${file}.", e)
         }
@@ -272,7 +274,7 @@ class LsdfFilesService {
         assert directory.isAbsolute() && directory.exists() && directory.isDirectory()
         try {
             assert executionService.executeCommand(realm, "rmdir '${directory}'; echo \$?") ==~ /^0\s*$/
-            assert waitUntilDoesNotExist(directory)
+            waitUntilDoesNotExist(directory)
         } catch (final Throwable e) {
             throw new RuntimeException("Could not delete directory ${directory}.", e)
         }
@@ -319,7 +321,7 @@ class LsdfFilesService {
     }
 
     public deleteDirectoryRecursive(Realm realm, File dir) {
-        assert waitUntilExists(dir)
+        waitUntilExists(dir)
         String cmd = createClusterScriptService.removeDirs([dir], CreateClusterScriptService.RemoveOption.RECURSIVE)
         int exitCode = executionService.executeCommand(realm, cmd).toInteger()
         if(exitCode != 0) {
@@ -336,7 +338,7 @@ class LsdfFilesService {
         String cmd = createClusterScriptService.removeDirs(filesOrDirectories, CreateClusterScriptService.RemoveOption.RECURSIVE_FORCE)
         assert executionService.executeCommand(realm, cmd) ==~ /^0\s*$/
         filesOrDirectories.each {
-            assert WaitingFileUtils.waitUntilDoesNotExist(it)
+            waitUntilDoesNotExist(it)
         }
     }
 

@@ -144,7 +144,7 @@ public class RoddyWorkflowConfigUnitTests {
     void tesValidateConfig_shouldFailForMissingFile() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
 
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'assert waitUntilExists(file)') {
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'not found.') {
             roddyWorkflowConfig.validateConfig()
         }
     }

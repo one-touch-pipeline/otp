@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -307,7 +306,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         assert latestDirectoryName ==~ RODDY_EXECUTION_DIR_PATTERN
 
         File latestWorkDirectory = new File(workExecutionStoreDirectory, latestDirectoryName)
-        assert WaitingFileUtils.waitUntilExists(latestWorkDirectory)
+        WaitingFileUtils.waitUntilExists(latestWorkDirectory)
         assert latestWorkDirectory.isDirectory()
 
         return latestWorkDirectory

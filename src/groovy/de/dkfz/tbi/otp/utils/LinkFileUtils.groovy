@@ -46,7 +46,7 @@ class LinkFileUtils {
             applicationContext.executionService.executeCommand(realm, command.toString())
 
             sourceLinkMap.each { File source, File link ->
-                assert waitUntilExists(link)
+                waitUntilExists(link)
             }
         }
     }

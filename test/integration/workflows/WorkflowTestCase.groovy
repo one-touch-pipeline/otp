@@ -201,7 +201,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         String mkDirs = createClusterScriptService.makeDirs(files, mode)
         assert executionService.executeCommand(realm, mkDirs).toInteger() == 0
         files.each {
-            assert WaitingFileUtils.waitUntilExists(it)
+            WaitingFileUtils.waitUntilExists(it)
         }
     }
 
@@ -216,7 +216,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         }.join('\n')
         executionService.executeCommand(realm, cmd)
         files.each  {File key, String value ->
-            assert WaitingFileUtils.waitUntilExists(key)
+            WaitingFileUtils.waitUntilExists(key)
             assert key.text == value + '\n'
         }
     }
@@ -439,7 +439,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
     String calculateMd5Sum(File file) {
         assert file : 'file is null'
-        assert WaitingFileUtils.waitUntilExists(file)
+        WaitingFileUtils.waitUntilExists(file)
         String md5sum
         LogThreadLocal.withThreadLog(System.out) {
             md5sum = ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout("md5sum ${file}").split(' ')[0]

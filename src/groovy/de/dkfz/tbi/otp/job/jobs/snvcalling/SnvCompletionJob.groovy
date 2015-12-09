@@ -118,7 +118,7 @@ class SnvCompletionJob extends AbstractEndStateAwareJobImpl {
                     File configFileLink = instance.getStepConfigFileLinkedPath(step).absoluteDataManagementPath
                     if (configFileLink.exists()) {
                         executionService.executeCommand(realm, "rm -f ${configFileLink.path}")
-                        assert WaitingFileUtils.waitUntilDoesNotExist(configFileLink)
+                        WaitingFileUtils.waitUntilDoesNotExist(configFileLink)
                     }
                 }
             }

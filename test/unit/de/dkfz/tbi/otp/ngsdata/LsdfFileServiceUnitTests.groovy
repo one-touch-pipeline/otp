@@ -41,7 +41,7 @@ class LsdfFileServiceUnitTests {
         //file must be absolute to make sure that the test fails the 'exists?' assertion
         File file = new File(tempFolder.newFolder(), "testFile.txt")
         assert !LsdfFilesService.isFileReadableAndNotEmpty(file)
-        assert shouldFail(AssertionError, {LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)}) =~ /(?i)exists/
+        assert shouldFail(AssertionError, {LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)}) =~ /(?i)not found\./
     }
 
     @Test

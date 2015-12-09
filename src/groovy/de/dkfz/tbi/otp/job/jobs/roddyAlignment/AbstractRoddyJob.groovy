@@ -162,7 +162,7 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
 
         File directory = parseRoddyExecutionStoreDirectoryFromRoddyOutput(roddyOutput)
         assert directory.parentFile == roddyResult.workExecutionStoreDirectory
-        assert WaitingFileUtils.waitUntilExists(directory)
+        WaitingFileUtils.waitUntilExists(directory)
         assert directory.isDirectory()
 
         roddyResult.roddyExecutionDirectoryNames.add(directory.name)

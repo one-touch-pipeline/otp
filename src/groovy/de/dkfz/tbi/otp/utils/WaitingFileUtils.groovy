@@ -22,17 +22,17 @@ class WaitingFileUtils {
 
     /**
      * Waits until the specified file system object exists or the specified timeout elapsed.
-     * @return true if the file system object exists; false if timed out.
      */
-    public static boolean waitUntilExists(File file, Duration timeout = defaultTimeout) {
-        return ThreadUtils.waitFor({ file.list() || file.canRead(); file.exists() }, timeout.millis, 50)
+    public static void waitUntilExists(File file, Duration timeout = defaultTimeout) {
+        assert ThreadUtils.waitFor({ file.list() || file.canRead(); file.exists() }, timeout.millis, 50) :
+        "${file} not found."
     }
 
     /**
      * Waits until the specified file system object does not exist or the specified timeout elapsed.
-     * @return true if the file system object does not exist; false if timed out.
      */
-    public static boolean waitUntilDoesNotExist(File file, Duration timeout = defaultTimeout) {
-        return ThreadUtils.waitFor({ file.list() || file.canRead(); !file.exists() }, timeout.millis, 50)
+    public static void waitUntilDoesNotExist(File file, Duration timeout = defaultTimeout) {
+        assert ThreadUtils.waitFor({ file.list() || file.canRead(); !file.exists() }, timeout.millis, 50) :
+        "${file} still exists."
     }
 }
