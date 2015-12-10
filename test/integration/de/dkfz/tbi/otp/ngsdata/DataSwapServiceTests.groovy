@@ -1,15 +1,304 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
+import de.dkfz.tbi.otp.fileSystemConsistency.*
 import de.dkfz.tbi.otp.ngsqc.*
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
+import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
+import grails.plugin.springsecurity.SpringSecurityUtils
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
+
+import static de.dkfz.tbi.otp.ngsdata.Realm.OperationType.DATA_MANAGEMENT
+import static de.dkfz.tbi.otp.ngsdata.Realm.OperationType.DATA_PROCESSING
+
+class DataSwapServiceTests extends GroovyScriptAwareTestCase {
+    DataSwapService dataSwapService
+    LsdfFilesService lsdfFilesService
 
 
-class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
-    SwapHelperService swapHelperService
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder()
 
+    @Before
+    void setUp() {
+        createUserAndRoles()
+    }
+
+
+
+    @Test
+    void test_moveSample() {
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
+                roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY]
+        ])
+        String script = "TEST-MOVE_SAMPLE"
+        Individual individual = Individual.build(project: bamFile.project)
+        Realm realm = Realm.build(name: bamFile.project.realmName, operationType: DATA_MANAGEMENT, rootPath: temporaryFolder.newFolder("mgmt"))
+        Realm.build(name: bamFile.project.realmName, operationType: DATA_PROCESSING, rootPath: temporaryFolder.newFolder("proc"))
+        SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
+        List<String> dataFileLinks = []
+        DataFile.findAllBySeqTrack(seqTrack).each {
+            new File(lsdfFilesService.getFileFinalPath(it)).parentFile.mkdirs()
+            assert new File(lsdfFilesService.getFileFinalPath(it)).createNewFile()
+            dataFileLinks.add(lsdfFilesService.getFileViewByPidPath(it))
+        }
+
+        String fileName = "FILE_NAME"
+        String dataFileName1 = 'DataFileFileName_R1.gz'
+        String dataFileName2 = 'DataFileFileName_R2.gz'
+
+        CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(realm, bamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, bamFile)
+        List<File> roddyFilesToDelete = createRoddyFileListToDelete(bamFile)
+        File destinationDirectory = bamFile.baseDirectory
+
+        File scriptFolder = temporaryFolder.newFolder("files")
+
+        SpringSecurityUtils.doWithAuth("admin") {
+            dataSwapService.moveSample(
+                    bamFile.project.name,
+                    bamFile.project.name,
+                    bamFile.individual.pid,
+                    individual.pid,
+                    bamFile.sampleType.name,
+                    bamFile.sampleType.name,
+                    [(dataFileName1): '', (dataFileName2): ''],
+                    script,
+                    new StringBuilder(),
+                    false,
+                    scriptFolder.absolutePath,
+            )
+        }
+
+
+        assert scriptFolder.listFiles().length != 0
+
+        File alignmentScript = new File(scriptFolder, "restartAli_${script}.groovy")
+        assert alignmentScript.exists()
+        assert alignmentScript.text.contains("ctx.seqTrackService.decideAndPrepareForAlignment(SeqTrack.get(${bamFile.seqTracks.iterator().next().id}))")
+
+        File copyScriptOtherUser = new File(scriptFolder, "${script}-OtherUnixUser.sh")
+        assert copyScriptOtherUser.exists()
+        String copyScriptOtherUserContent = copyScriptOtherUser.text
+        roddyFilesToDelete.each {
+            assert copyScriptOtherUserContent.contains("#rm -rf ${it}")
+        }
+
+        File copyScript = new File(scriptFolder, "${script}.sh")
+        assert copyScript.exists()
+        String copyScriptContent = copyScript.text
+        assert copyScriptContent.contains("#rm -rf ${destinationDirectory}")
+        DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile it, int i ->
+            assert copyScriptContent.contains("rm -f '${dataFileLinks[i]}'")
+            assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileViewByPidPath(it)).getParent()}'")
+            assert copyScriptContent.contains("ln -s '${lsdfFilesService.getFileFinalPath(it)}' '${lsdfFilesService.getFileViewByPidPath(it)}'")
+        }
+
+        assert bamFile.individual == individual
+    }
+
+
+    @Test
+    void test_moveIndividual() {
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
+                roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY]
+        ])
+        Project newProject = Project.build(realmName: bamFile.project.realmName)
+        String script = "TEST-MOVE-INDIVIDUAL"
+        Realm realm = Realm.build(name: bamFile.project.realmName, operationType: DATA_MANAGEMENT, rootPath: temporaryFolder.newFolder("mgmt"))
+        Realm.build(name: bamFile.project.realmName, operationType: DATA_PROCESSING, rootPath: temporaryFolder.newFolder("proc"))
+        SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
+        List<String> dataFileLinks = []
+        List<String> dataFilePaths = []
+        DataFile.findAllBySeqTrack(seqTrack).each {
+            new File(lsdfFilesService.getFileFinalPath(it)).parentFile.mkdirs()
+            assert new File(lsdfFilesService.getFileFinalPath(it)).createNewFile()
+            dataFileLinks.add(lsdfFilesService.getFileViewByPidPath(it))
+            dataFilePaths.add(lsdfFilesService.getFileFinalPath(it))
+        }
+        File missedFile = bamFile.finalMd5sumFile
+        File unexpectedFile = new File(bamFile.baseDirectory, 'notExpectedFile.txt')
+
+        CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(realm, bamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, bamFile)
+        assert missedFile.delete()
+        assert unexpectedFile.createNewFile()
+
+        List<File> roddyFilesToDelete = createRoddyFileListToDelete(bamFile)
+        File destinationDirectory = bamFile.baseDirectory
+
+        String fileName = "FILE_NAME"
+
+        File scriptFolder = temporaryFolder.newFolder("files")
+
+        StringBuilder outputStringBuilder = new StringBuilder()
+
+        SpringSecurityUtils.doWithAuth("admin") {
+            dataSwapService.moveIndividual(
+                    bamFile.project.name,
+                    newProject.name,
+                    bamFile.individual.pid,
+                    bamFile.individual.pid,
+                    [(bamFile.sampleType.name): ""],
+                    ['DataFileFileName_R1.gz': '', 'DataFileFileName_R2.gz': ''],
+                    script,
+                    outputStringBuilder,
+                    false,
+                    scriptFolder.absolutePath,
+            )
+        }
+        String output = outputStringBuilder.toString()
+        assert output.contains("${DataSwapService.MISSING_FILES_TEXT}\n    ${missedFile}")
+        assert output.contains("${DataSwapService.EXCESS_FILES_TEXT}\n    ${unexpectedFile}")
+
+        assert scriptFolder.listFiles().length != 0
+
+        File alignmentScript = new File(scriptFolder, "restartAli_${script}.groovy")
+        assert alignmentScript.exists()
+
+        File copyScriptOtherUser = new File(scriptFolder, "${script}-OtherUnixUser.sh")
+        assert copyScriptOtherUser.exists()
+        String copyScriptOtherUserContent = copyScriptOtherUser.text
+        roddyFilesToDelete.each {
+            assert copyScriptOtherUserContent.contains("#rm -rf ${it}")
+        }
+
+        File copyScript = new File(scriptFolder, "${script}.sh")
+        assert copyScript.exists()
+        String copyScriptContent = copyScript.text
+        assert copyScriptContent.contains("#rm -rf ${destinationDirectory}")
+        DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile it, int i ->
+            assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileFinalPath(it)).getParent()}'")
+            assert copyScriptContent.contains("mv '${dataFilePaths[i]}' '${lsdfFilesService.getFileFinalPath(it)}'")
+            assert copyScriptContent.contains("rm -f '${dataFileLinks[i]}'")
+            assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileViewByPidPath(it)).getParent()}'")
+            assert copyScriptContent.contains("ln -s '${lsdfFilesService.getFileFinalPath(it)}' '${lsdfFilesService.getFileViewByPidPath(it)}'")
+        }
+
+        assert bamFile.project == newProject
+    }
+
+
+
+    @Test
+    void test_changeMetadataEntry() {
+        Sample sample = Sample.build()
+        SeqTrack seqTrack = SeqTrack.build(sample: sample)
+        DataFile dataFile = DataFile.build(seqTrack: seqTrack)
+        MetaDataKey metaDataKey = MetaDataKey.build()
+        String newValue = "NEW"
+        MetaDataEntry metaDataEntry = MetaDataEntry.build(key: metaDataKey, dataFile: dataFile)
+
+        dataSwapService.changeMetadataEntry(sample, metaDataKey.name, metaDataEntry.value, newValue)
+
+        assert metaDataEntry.value == newValue
+    }
+
+    @Test
+    void test_changeSeqType_withClassChange() {
+        SeqType wgs = DomainFactory.createSeqType(name: SeqTypeNames.WHOLE_GENOME.seqTypeName)
+        SeqType exome = DomainFactory.createSeqType(name: SeqTypeNames.EXOME.seqTypeName)
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(seqType: wgs)
+        assert seqTrack.class == SeqTrack
+        long seqTrackId = seqTrack.id
+
+        SeqTrack returnedSeqTrack = dataSwapService.changeSeqType(seqTrack, exome)
+
+        assert returnedSeqTrack.id == seqTrackId
+        assert returnedSeqTrack.seqType.id == exome.id
+        assert returnedSeqTrack.class == ExomeSeqTrack
+    }
+
+    @Test
+    void test_renameSampleIdentifiers() {
+
+        Sample sample = Sample.build()
+        SampleIdentifier sampleIdentifier = SampleIdentifier.build(sample: sample)
+        String sampleIdentifierName = sampleIdentifier.name
+        SeqTrack seqTrack = SeqTrack.build(sample: sample)
+        DataFile dataFile = DataFile.build(seqTrack: seqTrack)
+        MetaDataKey metaDataKey = MetaDataKey.build(name: "SAMPLE_ID")
+        MetaDataEntry metaDataEntry = MetaDataEntry.build(key: metaDataKey, dataFile: dataFile)
+
+        dataSwapService.renameSampleIdentifiers(sample, new StringBuilder())
+
+        assert sampleIdentifierName != sampleIdentifier.name
+    }
+
+
+    @Test
+    void test_getSingleSampleForIndividualAndSampleType_singleSample() {
+        Individual individual = Individual.build()
+        SampleType sampleType = SampleType.build()
+        Sample sample = Sample.build(individual: individual, sampleType: sampleType)
+
+        assert sample == dataSwapService.getSingleSampleForIndividualAndSampleType(individual, sampleType, new StringBuilder())
+    }
+
+    @Test
+    void test_getSingleSampleForIndividualAndSampleType_noSample() {
+        Individual individual = Individual.build()
+        SampleType sampleType = SampleType.build()
+
+        shouldFail IllegalArgumentException, {
+            dataSwapService.getSingleSampleForIndividualAndSampleType(individual, sampleType, new StringBuilder())
+        }
+    }
+
+
+    @Test
+    void test_getAndShowSeqTracksForSample() {
+        Sample sample = Sample.build()
+        SeqTrack seqTrack = SeqTrack.build(sample: sample)
+
+        assert [seqTrack] == dataSwapService.getAndShowSeqTracksForSample(sample, new StringBuilder())
+    }
+
+    @Test
+    void test_getAndValidateAndShowDataFilesForSeqTracks_noDataFile_shouldFail() {
+        SeqTrack seqTrack = SeqTrack.build()
+        List<SeqTrack> seqTracks = [seqTrack]
+        Map<String, String> dataFileMap = [:]
+
+        shouldFail IllegalArgumentException, {
+            dataSwapService.getAndValidateAndShowDataFilesForSeqTracks(seqTracks, dataFileMap, new StringBuilder())
+        }
+    }
+
+    @Test
+    void test_getAndValidateAndShowDataFilesForSeqTracks() {
+        SeqTrack seqTrack = SeqTrack.build()
+        List<SeqTrack> seqTracks = [seqTrack]
+        DataFile dataFile = DataFile.build(seqTrack: seqTrack)
+        Map<String, String> dataFileMap = [(dataFile.fileName): ""]
+
+        assert [dataFile] == dataSwapService.getAndValidateAndShowDataFilesForSeqTracks(seqTracks, dataFileMap, new StringBuilder())
+    }
+
+    @Test
+    void test_getAndValidateAndShowAlignmentDataFilesForSeqTracks() {
+        SeqTrack seqTrack = SeqTrack.build()
+        List<SeqTrack> seqTracks = [seqTrack]
+        DataFile dataFile = DataFile.build(seqTrack: seqTrack)
+        Map<String, String> dataFileMap = [(dataFile.fileName): ""]
+
+        assert [] == dataSwapService.getAndValidateAndShowAlignmentDataFilesForSeqTracks(seqTracks, dataFileMap, new StringBuilder())
+
+        AlignmentLog alignmentLog = AlignmentLog.build(seqTrack: seqTrack)
+        DataFile dataFile2 = DataFile.build(alignmentLog: alignmentLog)
+        assert [dataFile2] == dataSwapService.getAndValidateAndShowAlignmentDataFilesForSeqTracks(seqTracks, dataFileMap, new StringBuilder())
+    }
+
+    @Test
+    void test_collectFileNamesOfDataFiles() {
+        DataFile dataFile = DataFile.build()
+
+        assert [(dataFile): [directFileName: lsdfFilesService.getFileFinalPath(dataFile), vbpFileName: lsdfFilesService.getFileViewByPidPath(dataFile)]] ==
+                dataSwapService.collectFileNamesOfDataFiles([dataFile])
+    }
 
     @Test
     public void testDeleteFastQCInformationFromDataFile() throws Exception {
@@ -25,7 +314,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
         FastqcSequenceDuplicationLevels fastqcSequenceDuplicationLevels = FastqcSequenceDuplicationLevels.build(fastqcProcessedFile: fastqcProcessedFile)
         FastqcSequenceLengthDistribution fastqcSequenceLengthDistribution = FastqcSequenceLengthDistribution.build(fastqcProcessedFile: fastqcProcessedFile)
 
-        swapHelperService.deleteFastQCInformationFromDataFile(dataFile)
+        dataSwapService.deleteFastQCInformationFromDataFile(dataFile)
 
         assert !FastqcProcessedFile.get(fastqcProcessedFile.id)
         assert !FastqcBasicStatistics.get(fastqcBasicStatistics.id)
@@ -44,7 +333,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
         DataFile dataFile = DataFile.build()
         MetaDataEntry metaDataEntry = MetaDataEntry.build(dataFile: dataFile)
 
-        swapHelperService.deleteMetaDataEntryForDataFile(dataFile)
+        dataSwapService.deleteMetaDataEntryForDataFile(dataFile)
 
         assert !MetaDataEntry.get(metaDataEntry.id)
     }
@@ -54,7 +343,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
         DataFile dataFile = DataFile.build()
         ConsistencyStatus consistencyStatus = ConsistencyStatus.build(dataFile: dataFile)
 
-        swapHelperService.deleteConsistencyStatusInformationForDataFile(dataFile)
+        dataSwapService.deleteConsistencyStatusInformationForDataFile(dataFile)
 
         assert !ConsistencyStatus.get(consistencyStatus.id)
     }
@@ -68,7 +357,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
         ChromosomeQualityAssessment chromosomeQualityAssessment = ChromosomeQualityAssessment.build(qualityAssessmentPass: qualityAssessmentPass)
         OverallQualityAssessment overallQualityAssessment = OverallQualityAssessment.build(qualityAssessmentPass: qualityAssessmentPass)
 
-        swapHelperService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
+        dataSwapService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
 
         assert !QualityAssessmentPass.get(qualityAssessmentPass.id)
         assert !ChromosomeQualityAssessment.get(chromosomeQualityAssessment.id)
@@ -84,7 +373,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
         OverallQualityAssessmentMerged overallQualityAssessment = OverallQualityAssessmentMerged.build(qualityAssessmentMergedPass: qualityAssessmentPass)
         PicardMarkDuplicatesMetrics picardMarkDuplicatesMetrics = PicardMarkDuplicatesMetrics.build(abstractBamFile: abstractBamFile)
 
-        swapHelperService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
+        dataSwapService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
 
         assert !QualityAssessmentMergedPass.get(qualityAssessmentPass.id)
         assert !ChromosomeQualityAssessmentMerged.get(chromosomeQualityAssessment.id)
@@ -101,7 +390,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
         RoddyMergedBamQa roddyMergedBamQa = RoddyMergedBamQa.build(qualityAssessmentMergedPass: qualityAssessmentPass)
         RoddySingleLaneQa roddySingleLaneQa = RoddySingleLaneQa.build(seqTrack: abstractBamFile.seqTracks.iterator().next(), qualityAssessmentMergedPass: qualityAssessmentPass)
 
-        swapHelperService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
+        dataSwapService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
 
         assert !QualityAssessmentMergedPass.get(qualityAssessmentPass.id)
         assert !ChromosomeQualityAssessmentMerged.get(roddyQualityAssessment.id)
@@ -115,7 +404,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
 
         final shouldFail = new GroovyTestCase().&shouldFail
         String message = shouldFail RuntimeException, {
-            swapHelperService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
+            dataSwapService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
         }
         assert message == "The input AbstractBamFile is null"
     }
@@ -126,7 +415,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
         Study study = Study.build(project: project)
         StudySample studySample = StudySample.build(study: study)
 
-        swapHelperService.deleteStudiesOfOneProject(project)
+        dataSwapService.deleteStudiesOfOneProject(project)
 
         assert !Study.get(study.id)
         assert !StudySample.get(studySample.id)
@@ -138,7 +427,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
         ResultsDataFile resultsDataFile = ResultsDataFile.build()
         Mutation mutation = Mutation.build(individual: individual, resultsDataFile: resultsDataFile)
 
-        swapHelperService.deleteMutationsAndResultDataFilesOfOneIndividual(individual)
+        dataSwapService.deleteMutationsAndResultDataFilesOfOneIndividual(individual)
 
         assert !ResultsDataFile.get(resultsDataFile.id)
         assert !Mutation.get(mutation.id)
@@ -154,7 +443,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
         MergingSetAssignment mergingSetAssignment = MergingSetAssignment.build(bamFile: processedBamFile, mergingSet: mergingSet)
         ProcessedMergedBamFile bamFile = ProcessedMergedBamFile.build(workPackage: mergingWorkPackage, mergingPass: mergingPass)
 
-        swapHelperService.deleteMergingRelatedConnectionsOfBamFile(processedBamFile)
+        dataSwapService.deleteMergingRelatedConnectionsOfBamFile(processedBamFile)
 
         assert !MergingPass.get(mergingPass.id)
         assert !MergingSet.get(mergingSet.id)
@@ -180,7 +469,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
 
         ConsistencyStatus consistencyStatus = ConsistencyStatus.build(dataFile: dataFile)
 
-        swapHelperService.deleteDataFile(dataFile)
+        dataSwapService.deleteDataFile(dataFile)
 
         assert !FastqcProcessedFile.get(fastqcProcessedFile.id)
         assert !FastqcBasicStatistics.get(fastqcBasicStatistics.id)
@@ -203,7 +492,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
         AlignmentLog alignmentLog = AlignmentLog.build(seqTrack: seqTrack)
         DataFile dataFile = DataFile.build(alignmentLog: alignmentLog)
 
-        swapHelperService.deleteConnectionFromSeqTrackRepresentingABamFile(seqTrack)
+        dataSwapService.deleteConnectionFromSeqTrackRepresentingABamFile(seqTrack)
 
         assert !AlignmentLog.get(alignmentLog.id)
         assert !DataFile.get(dataFile.id)
@@ -226,7 +515,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
         workPackage.save(flush: true, failOnError: true)
         alignmentPass.save(flush: true, failOnError: true)
 
-        swapHelperService.deleteAllProcessingInformationAndResultOfOneSeqTrack(alignmentPass.seqTrack)
+        dataSwapService.deleteAllProcessingInformationAndResultOfOneSeqTrack(alignmentPass.seqTrack)
 
         assert !ProcessedSaiFile.get(processedSaiFile.id)
         assert !ProcessedBamFile.get(processedMergedBamFile.id)
@@ -240,7 +529,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
         roddyBamFile.workPackage.bamFileInProjectFolder = roddyBamFile
         roddyBamFile.workPackage.save(flush: true)
 
-        swapHelperService.deleteAllProcessingInformationAndResultOfOneSeqTrack(roddyBamFile.seqTracks.iterator().next())
+        dataSwapService.deleteAllProcessingInformationAndResultOfOneSeqTrack(roddyBamFile.seqTracks.iterator().next())
 
         assert !RoddyBamFile.get(roddyBamFile.id)
         assert !MergingWorkPackage.get(roddyBamFile.workPackage.id)
@@ -253,7 +542,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
         MergingLog mergingLog = MergingLog.build(seqScan: seqScan)
         MergedAlignmentDataFile mergedAlignmentDataFile = MergedAlignmentDataFile.build(mergingLog: mergingLog)
 
-        swapHelperService.deleteSeqScanAndCorrespondingInformation(seqScan)
+        dataSwapService.deleteSeqScanAndCorrespondingInformation(seqScan)
 
         assert !MergingLog.get(mergingLog.id)
         assert !MergedAlignmentDataFile.get(mergedAlignmentDataFile.id)
@@ -266,7 +555,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
         MergingAssignment mergingAssignment = MergingAssignment.build(seqTrack: seqTrack)
         DataFile dataFile = DataFile.build(seqTrack: seqTrack)
 
-        swapHelperService.deleteSeqTrack(seqTrack)
+        dataSwapService.deleteSeqTrack(seqTrack)
 
         assert !SeqTrack.get(seqTrack.id)
         assert !MergingAssignment.get(mergingAssignment.id)
@@ -280,7 +569,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
         RunByProject runByProject = RunByProject.build(run: run, project: project)
         RunSegment runSegment = RunSegment.build(run: run)
 
-        swapHelperService.deleteRunAndRunSegmentsWithoutDataOfOtherProjects(run, project)
+        dataSwapService.deleteRunAndRunSegmentsWithoutDataOfOtherProjects(run, project)
 
         assert !RunByProject.get(runByProject.id)
         assert !Run.get(run.id)
@@ -296,7 +585,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
         DataFile dataFile = DataFile.build(run: run)
         MetaDataFile metaDataFile = MetaDataFile.build(runSegment: runSegment)
 
-        swapHelperService.deleteRun(run, outputStringBuilder)
+        dataSwapService.deleteRun(run, outputStringBuilder)
 
         assert !Run.get(run.id)
         assert !RunByProject.get(runByProject.id)
@@ -314,7 +603,7 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
         DataFile dataFile = DataFile.build(run: run)
         MetaDataFile metaDataFile = MetaDataFile.build(runSegment: runSegment)
 
-        swapHelperService.deleteRunByName(run.name, outputStringBuilder)
+        dataSwapService.deleteRunByName(run.name, outputStringBuilder)
 
         assert !Run.get(run.id)
         assert !RunByProject.get(runByProject.id)
@@ -331,7 +620,15 @@ class SwapHelperServiceTests extends GroovyScriptAwareTestCase {
 
         final shouldFail = new GroovyTestCase().&shouldFail
         shouldFail AssertionError, {
-            swapHelperService.throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
+            dataSwapService.throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
         }
+    }
+
+
+    private List<File> createRoddyFileListToDelete(RoddyBamFile roddyBamFile) {
+        [
+                roddyBamFile.workQADirectory,
+                roddyBamFile.workExecutionStoreDirectory
+        ]*.absolutePath
     }
 }
