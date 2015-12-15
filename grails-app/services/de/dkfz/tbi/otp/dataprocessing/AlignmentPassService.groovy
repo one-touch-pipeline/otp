@@ -28,7 +28,9 @@ class AlignmentPassService {
     "AND NOT EXISTS (FROM RunSegment WHERE run = ap.seqTrack.run AND metaDataStatus <> :metaDataStatus) " +
     "AND EXISTS (FROM DataFile WHERE ${ALIGNABLE_ALIGNMENT_PASS_DATA_FILE_CRITERIA} AND fileExists = true AND fileSize > 0 AND fileWithdrawn = false) " +
     "AND NOT EXISTS (FROM DataFile WHERE ${ALIGNABLE_ALIGNMENT_PASS_DATA_FILE_CRITERIA} AND fileWithdrawn = true) " +
-    "AND NOT EXISTS (FROM AlignmentPass WHERE seqTrack = ap.seqTrack AND workPackage = ap.workPackage AND identifier > ap.identifier) "
+    "AND NOT EXISTS (FROM AlignmentPass WHERE seqTrack = ap.seqTrack AND workPackage = ap.workPackage AND identifier > ap.identifier) " +
+    "AND seqTrack.sample.individual.project.processingPriority >= :minPriority " +
+    "ORDER BY seqTrack.sample.individual.project.processingPriority DESC, ap.id ASC"
 
     public static final Map ALIGNABLE_ALIGNMENT_PASS_QUERY_PARAMETERS = Collections.unmodifiableMap([
         alignmentState: AlignmentState.NOT_STARTED,
@@ -57,8 +59,8 @@ class AlignmentPassService {
     }
 
 
-    public AlignmentPass findAlignmentPassForProcessing() {
-        return AlignmentPass.find(ALIGNABLE_ALIGNMENT_PASS_HQL, ALIGNABLE_ALIGNMENT_PASS_QUERY_PARAMETERS)
+    public AlignmentPass findAlignmentPassForProcessing(short minPriority) {
+        return AlignmentPass.find(ALIGNABLE_ALIGNMENT_PASS_HQL, ALIGNABLE_ALIGNMENT_PASS_QUERY_PARAMETERS + [minPriority: minPriority])
     }
 
     public void alignmentPassStarted(AlignmentPass alignmentPass) {

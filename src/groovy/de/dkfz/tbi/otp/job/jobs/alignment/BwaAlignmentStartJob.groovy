@@ -22,27 +22,18 @@ class BwaAlignmentStartJob extends AbstractStartJobImpl {
 
     @Scheduled(fixedDelay=10000l)
     void execute() {
-        if (!hasFreeSlot()) {
+        short minPriority = minimumProcessingPriorityForOccupyingASlot
+        if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
             return
         }
         AlignmentPass.withTransaction {
-            AlignmentPass alignmentPass = alignmentPassService.findAlignmentPassForProcessing()
+            AlignmentPass alignmentPass = alignmentPassService.findAlignmentPassForProcessing(minPriority)
             if (alignmentPass) {
                 log.debug "Creating Alignment process for AlignmentPass ${alignmentPass}"
                 alignmentPassService.alignmentPassStarted(alignmentPass)
                 createProcess(alignmentPass)
             }
         }
-    }
-
-    private boolean hasFreeSlot() {
-        JobExecutionPlan jep = getExecutionPlan()
-        if (!jep || !jep.enabled) {
-            return false
-        }
-        int n = Process.countByFinishedAndJobExecutionPlan(false, jep)
-        long maxRunning = optionService.findOptionAsNumber("numberOfJobs", "BwaAlignmentWorkflow", null, MAX_RUNNING)
-        return (n < maxRunning)
     }
 
     @Override

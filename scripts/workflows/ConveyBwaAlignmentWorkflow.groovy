@@ -1,9 +1,13 @@
+import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
+
 import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.PBS_PREFIX
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
 import de.dkfz.tbi.otp.job.jobs.alignment.*
 
-plan("ConveyBwaAlignmentWorkflow") {
+final String WORKFLOW_NAME = 'ConveyBwaAlignmentWorkflow'
+
+plan(WORKFLOW_NAME, ctx, true) {
     start("start", "BwaAlignmentStartJob")
     job("createOutputDirectories", "createAlignmentOutputDirectoryJob")
     job("checkQualityEncoding", "checkQualityEncodingJob")
@@ -166,4 +170,19 @@ ctx.processingOptionService.createOrUpdate(
     null,
     '-q 20',
     'quality threshold for "soft" read trimming down to 35bp'
+)
+
+ctx.processingOptionService.createOrUpdate(
+    AbstractStartJobImpl.TOTAL_SLOTS_OPTION_NAME,
+    WORKFLOW_NAME,
+    null,
+    '100',
+    ''
+)
+ctx.processingOptionService.createOrUpdate(
+    AbstractStartJobImpl.SLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME,
+    WORKFLOW_NAME,
+    null,
+    '50',
+    ''
 )

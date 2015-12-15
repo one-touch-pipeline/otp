@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import static org.junit.Assert.*
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
@@ -10,6 +11,31 @@ import de.dkfz.tbi.otp.ngsdata.*
 class AlignmentPassServiceIntegrationTests extends TestData {
 
     AlignmentPassService alignmentPassService
+
+
+    @Test
+    void testFindAlignmentPassForProcessingWithDifferentPriorities() {
+        AlignmentPass alignmentPass = createProcessableAlignmentPass()
+        alignmentPass.project.processingPriority = ProcessingPriority.NORMAL_PRIORITY
+        assert alignmentPass.save(flush: true, failOnError: true)
+
+        AlignmentPass alignmentPass2 = createProcessableAlignmentPass()
+        alignmentPass2.seqTrack.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
+        assert alignmentPass2.save(flush: true, failOnError: true)
+
+        AlignmentPass alignmentPass3 = createProcessableAlignmentPass()
+        alignmentPass3.seqTrack.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
+        assert alignmentPass3.save(flush: true, failOnError: true)
+        assert alignmentPass2.id < alignmentPass3.id
+
+        AlignmentPass alignmentPass4 = createProcessableAlignmentPass()
+        alignmentPass4.seqTrack.project.processingPriority = ProcessingPriority.NORMAL_PRIORITY
+        assert alignmentPass4.save(flush: true, failOnError: true)
+
+        assertEquals(alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY), alignmentPass2)
+        assertEquals(alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.FAST_TRACK_PRIORITY), alignmentPass2)
+        assertNull(alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.SUPREMUM_PRIORITY))
+    }
 
     @Test
     void testFindAlignmentPassForProcessing() {
@@ -25,28 +51,28 @@ class AlignmentPassServiceIntegrationTests extends TestData {
                 alignmentState: AlignmentState.NOT_STARTED,
         )
         DataFile dataFile = createDataFile(false)
-        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
+        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
 
         dataFile.fileExists = false
         assertNotNull(dataFile.save(flush: true))
-        assertNull(alignmentPassService.findAlignmentPassForProcessing())
+        assertNull(alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
         dataFile.fileExists = true
         assertNotNull(dataFile.save(flush: true))
-        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
+        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
 
         dataFile.fileSize = 0
         assertNotNull(dataFile.save(flush: true))
-        assertNull(alignmentPassService.findAlignmentPassForProcessing())
+        assertNull(alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
         dataFile.fileSize = 1
         assertNotNull(dataFile.save(flush: true))
-        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
+        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
 
         fileType.type = FileType.Type.ALIGNMENT
         assertNotNull(fileType.save(flush: true))
-        assertNull(alignmentPassService.findAlignmentPassForProcessing())
+        assertNull(alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
         fileType.type = FileType.Type.SEQUENCE
         assertNotNull(fileType.save(flush: true))
-        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
+        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
 
         RunSegment runSegment = new RunSegment()
         runSegment.run = run
@@ -57,18 +83,18 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         runSegment.dataPath = '/tmp'
         runSegment.mdPath = '/tmp'
         assertNotNull(runSegment.save(flush: true))
-        assertNull(alignmentPassService.findAlignmentPassForProcessing())
+        assertNull(alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
         runSegment.metaDataStatus = RunSegment.Status.COMPLETE
         assertNotNull(runSegment.save(flush: true))
-        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
+        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
 
         referenceGenomeProjectSeqType.delete(flush: true)
-        assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
+        assert alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY) == alignmentPass
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack.alignmentState)
 
         alignmentPass.alignmentState = AlignmentState.NOT_STARTED
         assertNotNull(createReferenceGenomeProjectSeqType().save(flush: true))
-        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
+        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
     }
 
     @Test
@@ -81,11 +107,11 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         )
 
         seqTrack.fastqcState = SeqTrack.DataProcessingState.IN_PROGRESS
-        assertNull(alignmentPassService.findAlignmentPassForProcessing())
+        assertNull(alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
 
         seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
         seqTrack.save(flush: true)
-        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
+        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
     }
 
     @Test
@@ -100,11 +126,11 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         )
         exomeSeqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
 
-        assertNull(alignmentPassService.findAlignmentPassForProcessing())
+        assertNull(alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
 
         dataFile = createDataFile([seqTrack: exomeSeqTrack])
         dataFile.save(flush: true)
-        assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
+        assert alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY) == alignmentPass
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, exomeSeqTrack.alignmentState)
     }
 
@@ -115,7 +141,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         ExomeSeqTrack exomeSeqTrack = alignmentPass.seqTrack
 
         createReferenceGenomeProjectSeqType([seqType: exomeSeqType]).save(flush: true)
-        assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
+        assert alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY) == alignmentPass
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, exomeSeqTrack.alignmentState)
     }
 
@@ -128,7 +154,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit("libraryPreparationKit")
         createReferenceGenomeProjectSeqType([seqType: exomeSeqType]).save(flush: true)
 
-        assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
+        assert alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY) == alignmentPass
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, exomeSeqTrack.alignmentState)
     }
 
@@ -142,7 +168,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         addKitToExomeSeqTrack(exomeSeqTrack, libraryPreparationKit)
         createReferenceGenomeProjectSeqType([seqType: exomeSeqType]).save(flush: true)
 
-        assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
+        assert alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY) == alignmentPass
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, exomeSeqTrack.alignmentState)
     }
 
@@ -155,7 +181,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit("libraryPreparationKit")
         addKitToExomeSeqTrack(exomeSeqTrack, libraryPreparationKit)
 
-        assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
+        assert alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY) == alignmentPass
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, exomeSeqTrack.alignmentState)
     }
 
@@ -168,7 +194,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit("libraryPreparationKit")
         createBedFile(referenceGenome, libraryPreparationKit)
 
-        assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
+        assert alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY) == alignmentPass
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, exomeSeqTrack.alignmentState)
     }
 
@@ -182,7 +208,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         createBedFile(referenceGenome, libraryPreparationKit)
         addKitToExomeSeqTrack(exomeSeqTrack, libraryPreparationKit)
 
-        assert alignmentPassService.findAlignmentPassForProcessing() == alignmentPass
+        assert alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY) == alignmentPass
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, exomeSeqTrack.alignmentState)
     }
 
@@ -197,7 +223,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         addKitToExomeSeqTrack(exomeSeqTrack, libraryPreparationKit)
         createReferenceGenomeProjectSeqType([seqType: exomeSeqType]).save(flush: true)
 
-        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
+        assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
     }
 
     private void findAlignmentPassForProcessingTest(final AlignmentState state) {
@@ -231,9 +257,9 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         assertEquals(nonWithdrawnDataFiles + withdrawnDataFiles, DataFile.count)
         if (state == AlignmentState.NOT_STARTED &&
         nonWithdrawnDataFiles >= 1 && withdrawnDataFiles == 0) {
-            assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing())
+            assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
         } else {
-            assertNull(alignmentPassService.findAlignmentPassForProcessing())
+            assertNull(alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
         }
         dataFiles*.delete(flush: true)
     }
@@ -294,5 +320,22 @@ class AlignmentPassServiceIntegrationTests extends TestData {
                 )
         assertNotNull(processedBamFile.save([flush: true, failOnError: true]))
         return processedBamFile
+    }
+
+    private AlignmentPass createProcessableAlignmentPass() {
+        return createAlignmentPass(
+                seqTrack: createProcessableSeqTrack(),
+                alignmentState: AlignmentState.NOT_STARTED,
+        )
+    }
+    private SeqTrack createProcessableSeqTrack(){
+        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile()
+        DataFile dataFile = CollectionUtils.exactlyOneElement(DataFile.findAllBySeqTrack(seqTrack))
+        dataFile.fileExists = true
+        dataFile.fileSize = 1
+        dataFile.fileWithdrawn = false
+        assert dataFile.save(flush: true, failOnError: true)
+        seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
+        return seqTrack
     }
 }
