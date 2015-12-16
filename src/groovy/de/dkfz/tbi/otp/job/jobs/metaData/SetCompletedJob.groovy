@@ -21,24 +21,7 @@ class SetCompletedJob extends AbstractEndStateAwareJobImpl {
     }
 
     private void setStorageRealm(Run run) {
-        Set<String> hosts = new HashSet<String>()
-        List<DataFile> files = DataFile.findAllByRun(run)
-        for(DataFile file in files) {
-            if (file.project) {
-                hosts << file.project.realmName
-            }
-        }
-        switch(hosts.size()) {
-            case 0:
-                return
-            case 1: 
-                String[] array= hosts.toArray()
-                String rr = array[0].toUpperCase()
-                run.storageRealm = Run.StorageRealm."${rr}"
-                return
-            default:
-                run.storageRealm = Run.StorageRealm.MIXED
-        }
+        run.storageRealm = Run.StorageRealm.DKFZ
     }
 
 }
