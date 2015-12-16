@@ -2,8 +2,6 @@ package de.dkfz.tbi.otp.job.jobs.fastqc
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.job.processing.*
 
 import org.springframework.scheduling.annotation.Scheduled
@@ -25,27 +23,19 @@ class FastqcStartJob extends AbstractStartJobImpl {
 
     @Scheduled(fixedDelay=10000l)
     void execute() {
-        if (!hasFreeSlot()) {
+        short minPriority = minimumProcessingPriorityForOccupyingASlot
+        if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
             return
         }
+
         SeqTrack.withTransaction {
-            SeqTrack seqTrack = seqTrackService.getSeqTrackReadyForFastqcProcessingPreferAlignable()
+            SeqTrack seqTrack = seqTrackService.getSeqTrackReadyForFastqcProcessing(minPriority)
             if (seqTrack) {
                 log.debug "Creating fastqc process for seqTrack ${seqTrack}"
                 seqTrackService.setFastqcInProgress(seqTrack)
                 createProcess(seqTrack)
             }
         }
-    }
-
-    private boolean hasFreeSlot() {
-        JobExecutionPlan jep = getExecutionPlan()
-        if (!jep || !jep.enabled) {
-            return false
-        }
-        int n = Process.countByFinishedAndJobExecutionPlan(false, jep)
-        long maxRunning = optionService.findOptionAsNumber("numberOfJobs", "FastqcWorkflow", null, MAX_RUNNING)
-        return (n < maxRunning)
     }
 
     @Override

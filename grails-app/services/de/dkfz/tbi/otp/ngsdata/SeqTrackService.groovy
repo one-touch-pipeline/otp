@@ -1,6 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
+import javax.sql.DataSource
+import grails.plugin.springsecurity.SpringSecurityUtils
+import groovy.sql.GroovyRowResult
+import groovy.sql.Sql
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
+import org.springframework.security.access.prepost.PostAuthorize
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.userdetails.UserDetails
 
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.AbstractAlignmentDecider
@@ -10,14 +18,10 @@ import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
-import org.springframework.security.access.prepost.PostAuthorize
-import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.core.userdetails.UserDetails
 
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 import static org.springframework.util.Assert.notNull
+
 
 class SeqTrackService {
 
@@ -38,6 +42,8 @@ class SeqTrackService {
      * Dependency Injection of Spring Security Service.
      */
     def springSecurityService
+    DataSource dataSource
+
 
     @Autowired
     ApplicationContext applicationContext
@@ -241,34 +247,41 @@ class SeqTrackService {
     }
 
     /**
-     * returns the oldest alignable {@link SeqTrack} waiting for fastqc if possible,
-     * otherwise the oldest {@link SeqTrack} waiting for fastqc.
+     * returns the most high prioritized, oldest alignable {@link SeqTrack} waiting for fastqc if possible,
+     * otherwise the most high prioritized, oldest {@link SeqTrack} waiting for fastqc.
      *
      * @return a seqTrack without fastqc
      * @see SeqTypeService#alignableSeqTypes
      */
-    public SeqTrack getSeqTrackReadyForFastqcProcessingPreferAlignable() {
-        return getSeqTrackReadyForFastqcProcessing(true) ?: getSeqTrackReadyForFastqcProcessing()
-    }
+    public SeqTrack getSeqTrackReadyForFastqcProcessing(short minPriority) {
 
-    /**
-     * returns the oldest {@link SeqTrack} waiting for fastqc.
-     *
-     * @param onlyAlignable if true, only alignable {@link SeqTrack}s are searched, else all {@link SeqTrack}s.
-     * @return a seqTrack without fastqc
-     * @see SeqTypeService#alignableSeqTypes
-     */
-    public SeqTrack getSeqTrackReadyForFastqcProcessing(boolean onlyAlignable = false) {
-        return SeqTrack.createCriteria().get {
-            eq('fastqcState', SeqTrack.DataProcessingState.NOT_STARTED)
-            if (onlyAlignable) {
-                seqType {
-                    'in'('id', SeqTypeService.alignableSeqTypes()*.id)
-                }
-            }
-            order('id', 'asc')
-            maxResults(1)
-        }
+        List args = [SeqTrack.DataProcessingState.NOT_STARTED.toString(),
+                     minPriority,
+        ] + SeqTypeService.alignableSeqTypes()*.id
+
+        // this workaround is used because
+        // HQL would support IN but doesn't support expressions in ORDER BY clauses,
+        // JDBC doesn't support IN directly,
+        // and the H2 driver doesn't support PreparedStatement.setArray()
+        String questionMarksSeparatedByCommas = (["?"]*SeqTypeService.alignableSeqTypes().size()).join(",")
+
+        String query = """\
+SELECT st.id
+FROM seq_track AS st
+JOIN sample ON st.sample_id = sample.id
+JOIN individual ON sample.individual_id = individual.id
+JOIN project ON individual.project_id = project.id
+
+WHERE st.fastqc_state = ?
+AND project.processing_priority >= ?
+
+ORDER BY project.processing_priority DESC, (st.seq_type_id IN (${questionMarksSeparatedByCommas})) DESC, st.id ASC
+LIMIT 1
+;
+"""
+
+        GroovyRowResult seqTrack = new Sql(dataSource).firstRow(query, args)
+        return SeqTrack.get(seqTrack?.id)
     }
 
     public void setFastqcInProgress(SeqTrack seqTrack) {
