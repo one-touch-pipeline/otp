@@ -128,7 +128,7 @@ class ProcessingStepUnitTests {
                 jobClass: "foo",
                 process: process,
         )
-        assertEquals(step.getPbsJobDescription(), "otp_TEST_testWorkFlow_9999999_foo")
+        assertEquals(step.getPbsJobDescription(), "otp_test_testWorkFlow_9999999_foo")
     }
 
     @Test

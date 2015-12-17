@@ -201,7 +201,7 @@ public class ProcessingStep implements Serializable {
                 env = 'devel'
                 break
             default:
-                env = Environment.current.name()
+                env = Environment.current.name.toLowerCase()
         }
         String psId  = this.id
         String psClass = this.getNonQualifiedJobClass()
