@@ -1,10 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.TestCase
-
 import static org.junit.Assert.*
 
 import org.junit.*
+
+import de.dkfz.tbi.otp.utils.HelperUtils
 
 class LsdfFilesServiceTests {
 
@@ -137,7 +137,7 @@ class LsdfFilesServiceTests {
         dataFile.used = true // is this file used in any seqTrack
         dataFile.project = project
         dataFile.run = run
-        dataFile.md5sum = "someMD5sum"
+        dataFile.md5sum = HelperUtils.randomMd5sum
         dataFile.seqTrack = seqTrack
         dataFile.fileType = fileType
         dataFile.vbpFileName = fastqFilename
