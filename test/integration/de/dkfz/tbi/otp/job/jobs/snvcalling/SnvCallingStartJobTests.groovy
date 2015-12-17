@@ -71,7 +71,7 @@ public class SnvCallingStartJobTests extends GroovyScriptAwareTestCase {
                 }
             }
 
-            snvCallingService.metaClass.samplePairForSnvProcessing = { return mockSamplePair }
+            snvCallingService.metaClass.samplePairForSnvProcessing = { short minPriority -> return mockSamplePair }
 
             SnvCallingInstanceTestData.createOrFindExternalScript()
 

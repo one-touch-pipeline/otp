@@ -1,10 +1,14 @@
+import static de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl.SLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME
+import static de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl.TOTAL_SLOTS_OPTION_NAME
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.PBS_PREFIX
 
 import de.dkfz.tbi.otp.job.jobs.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
-plan("SnvWorkflow") {
+String workflowName = "SnvWorkflow"
+
+plan(workflowName) {
     start("start", "snvStartJob")
     job("snvCalling", "snvCallingJob")
     job("snvJoining", "snvJoiningJob")
@@ -105,3 +109,12 @@ println ctx.processingOptionService.createOrUpdate(
     '{"-l": {walltime: "02:00:00", mem: "1g"}}',
     "suggestion of the CO group (Ivo) for the snv WES filter job"
 )
+
+
+// number of all SNV Calling workflows which can be executed in parallel
+println ctx.processingOptionService.createOrUpdate(TOTAL_SLOTS_OPTION_NAME, workflowName, null, '100', '')
+/*
+ number of slots which are reserved only for FastTrack Workflows
+ -> TOTAL_SLOTS_OPTION_NAME - SLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME slots can be used by workflow runs with a normal priority
+  */
+println ctx.processingOptionService.createOrUpdate(SLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME, workflowName, null, '84', '')

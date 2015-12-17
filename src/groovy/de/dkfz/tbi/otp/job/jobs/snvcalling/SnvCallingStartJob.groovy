@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.job.jobs.snvcalling
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
@@ -33,11 +34,14 @@ class SnvCallingStartJob extends AbstractStartJobImpl {
 
     @Scheduled(fixedDelay = 60000l)
     void execute() {
-        if (!hasFreeSlot()) {
+
+        short minPriority = minimumProcessingPriorityForOccupyingASlot
+        if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
             return
         }
+
         SnvConfig.withTransaction {
-            SamplePair samplePair = snvCallingService.samplePairForSnvProcessing()
+            SamplePair samplePair = snvCallingService.samplePairForSnvProcessing(minPriority)
             if (samplePair) {
                 SnvConfig config = SnvConfig.getLatest(
                         samplePair.project,
@@ -66,16 +70,6 @@ class SnvCallingStartJob extends AbstractStartJobImpl {
         }
     }
 
-
-    private boolean hasFreeSlot() {
-        JobExecutionPlan jep = getExecutionPlan()
-        if (!jep || !jep.enabled) {
-            return false
-        }
-        int n = Process.countByFinishedAndJobExecutionPlan(false, jep)
-        long maxRunning = optionService.findOptionAsNumber("numberOfJobs", "SnvWorkflow", null, MAX_RUNNING)
-        return (n < maxRunning)
-    }
 
     @Override
     protected String getJobExecutionPlanName() {

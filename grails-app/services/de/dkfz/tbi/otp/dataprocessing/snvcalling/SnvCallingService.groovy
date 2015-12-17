@@ -23,7 +23,7 @@ class SnvCallingService {
      * - pair is not already in processing
      * - config file is available
      */
-    SamplePair samplePairForSnvProcessing() {
+    SamplePair samplePairForSnvProcessing(short minPriority) {
 
         List<SnvProcessingStates> unallowedProcessingStates = [
             SnvProcessingStates.IN_PROGRESS
@@ -57,6 +57,9 @@ class SnvCallingService {
                 "FROM SamplePair sp " +
                 //check that sample pair shall be processed
                 "WHERE sp.processingStatus = :needsProcessing " +
+                //check that processing priority of the corresponding project is high enough
+                'AND sp.mergingWorkPackage1.sample.individual.project.processingPriority >= :minPriority ' +
+
 
                 //check that the config file is available with at least on script with same version
                 "AND EXISTS (FROM SnvConfig cps " +
@@ -80,13 +83,14 @@ class SnvCallingService {
                 //check that the second bam file fulfill the criteria
                 testIfBamFileFulfillCriteria("2") +
 
-                "ORDER BY sp.dateCreated"
+                "ORDER BY sp.mergingWorkPackage1.sample.individual.project.processingPriority DESC, sp.dateCreated"
 
         List<SamplePair> samplePairs = SamplePair.findAll(
                 pairForSnvProcessing,
                 [
                         needsProcessing: ProcessingStatus.NEEDS_PROCESSING,
                         processingStates: unallowedProcessingStates,
+                        minPriority: minPriority,
                 ])
 
         if (samplePairs) {
