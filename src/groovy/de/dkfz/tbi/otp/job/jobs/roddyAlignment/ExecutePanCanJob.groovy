@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
+
 import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.*
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
@@ -91,7 +93,8 @@ class ExecutePanCanJob extends AbstractRoddyJob {
                     "INDEX_PREFIX:${referenceGenomeFastaFile}," +
                     "CHROM_SIZES_FILE:${chromosomeStatSizeFile}," +
                     additionalCValues +
-                    "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}\""
+                    "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}" +
+                    "${(roddyBamFile.processingPriority >= ProcessingPriority.FAST_TRACK_PRIORITY) ? ",PBS_AccountName:FASTTRACK" : ""}\""
     }
 
 

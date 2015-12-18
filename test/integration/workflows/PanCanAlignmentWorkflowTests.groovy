@@ -1,6 +1,7 @@
 package workflows
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.PanCanStartJob
 import de.dkfz.tbi.otp.job.processing.Process
@@ -48,20 +49,29 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkf
         // prepare
         createSeqTrack("readGroup1")
 
-        // run
-        execute()
-
-        // check
-        checkWorkPackageState()
-
-        RoddyBamFile bamFile = exactlyOneElement(RoddyBamFile.findAll())
-        checkFirstBamFileState(bamFile, true)
-        assertBamFileFileSystemPropertiesSet(bamFile)
-
-        checkFileSystemState(bamFile)
-
-        checkQC(bamFile)
+        executeAndVerify_AlignLanesOnly_AllFine()
     }
+
+    @Test
+    void testAlignLanesOnly_NoBaseBamExist_OneLane_FastTrack_allFine() {
+
+        fastTrackSetup()
+
+        executeAndVerify_AlignLanesOnly_AllFine()
+    }
+
+    @Ignore ("convey")
+    @Test
+    void testConveyAlignLanesOnly_NoBaseBamExist_OneLane_FastTrack_allFine() {
+
+        // config must point to project-config with convey options
+        resetProjectConfig(conveyProjectConfigFile)
+
+        fastTrackSetup()
+
+        executeAndVerify_AlignLanesOnly_AllFine()
+    }
+
 
     @Test
     void testAlignLanesOnly_NoBaseBamExist_TwoLanes_allFine() {
@@ -143,5 +153,28 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkf
         checkFirstBamFileState(bamFiles[1], true, [identifier: 1])
         assertBamFileFileSystemPropertiesSet(bamFiles[1])
         checkFileSystemState(bamFiles[1])
+    }
+
+
+    private executeAndVerify_AlignLanesOnly_AllFine() {
+        // run
+        execute()
+
+        // check
+        checkWorkPackageState()
+
+        RoddyBamFile bamFile = exactlyOneElement(RoddyBamFile.findAll())
+        checkFirstBamFileState(bamFile, true)
+        assertBamFileFileSystemPropertiesSet(bamFile)
+
+        checkFileSystemState(bamFile)
+
+        checkQC(bamFile)
+    }
+
+    private fastTrackSetup() {
+        SeqTrack seqTrack = createSeqTrack("readGroup1")
+        seqTrack.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
+        assert seqTrack.project.save(flush: true)
     }
 }

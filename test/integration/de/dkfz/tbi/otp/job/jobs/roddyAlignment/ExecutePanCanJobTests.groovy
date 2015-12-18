@@ -4,6 +4,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
@@ -268,6 +269,35 @@ REFERENCE_GENOME:${referenceGenomeFile},\
 INDEX_PREFIX:${referenceGenomeFile.path},\
 CHROM_SIZES_FILE:${chromosomeStatSizeFile},\
 possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
+"""
+
+        String actualCmd = executePanCanJob.prepareAndReturnWorkflowSpecificCommand(roddyBamFile, dataManagement)
+        assert expectedCmd == actualCmd
+    }
+
+    @Test
+    void testPrepareAndReturnWorkflowSpecificCommand_NoBaseBamFileExists_FastTrack() {
+        roddyBamFile.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
+        assert roddyBamFile.project.save(flush: true)
+
+        executePanCanJob.executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
+
+        String expectedCmd =  """\
+cd /tmp \
+&& sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@WGS \
+${roddyBamFile.individual.pid} \
+--useconfig=${roddyApplicationIni} \
+--usefeaturetoggleconfig=${featureTogglesConfigPath} \
+--useRoddyVersion=${roddyVersion} \
+--usePluginVersion=${roddyBamFile.config.pluginVersion} \
+--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} \
+--useiodir=${viewByPidString()},${roddyBamFile.workDirectory} \
+--cvalues="fastq_list:${fastqFilesAsString()},\
+REFERENCE_GENOME:${referenceGenomeFile},\
+INDEX_PREFIX:${referenceGenomeFile.path},\
+CHROM_SIZES_FILE:${chromosomeStatSizeFile},\
+possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName},\
+PBS_AccountName:FASTTRACK"\
 """
 
         String actualCmd = executePanCanJob.prepareAndReturnWorkflowSpecificCommand(roddyBamFile, dataManagement)
