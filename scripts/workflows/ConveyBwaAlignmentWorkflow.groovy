@@ -1,5 +1,5 @@
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
-
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.PBS_PREFIX
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
@@ -116,20 +116,19 @@ ctx.processingOptionService.createOrUpdate(
 
 // Create PBS options for bwaAlignmentJob
 ctx.processingOptionService.createOrUpdate(
-    "${PBS_PREFIX}${ConveyBwaAlignmentJob.simpleName}",
-    'DKFZ',
-    null,
-    '''{
-      "-l": {
-        "walltime": "04:00:00",
-        "nodes": "1:ppn=12",
-        "mem": "126g"
-      },
-      "-q": "convey",
-      "-m": "a",
-      "-S": "/bin/bash"
-    }''',
-    'Convey option for cluster'
+        "${PBS_PREFIX}${ConveyBwaAlignmentJob.simpleName}",
+        'DKFZ',
+        null,
+        '{"-l": {"walltime": "48:00:00", "nodes": "1:ppn=12", "mem": "126g"}, "-q": "convey", "-m": "a", "-S": "/bin/bash"}',
+        'Convey option for cluster'
+)
+
+ctx.processingOptionService.createOrUpdate(
+        "${PBS_PREFIX}${ConveyBwaAlignmentJob.simpleName}_${SeqType.exomePairedSeqType.processingOptionName}",
+        'DKFZ',
+        null,
+        '{"-l": { "walltime": "2:00:00"}}',
+        'Convey option for cluster'
 )
 
 ctx.processingOptionService.createOrUpdate(

@@ -45,6 +45,9 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
 
     final static String REF_GEN_FILE_NAME_PREFIX = 'hs37d5'
 
+    protected void setupForLoadingWorkflow() {
+        DomainFactory.createAlignableSeqTypes()
+    }
 
     @Before
     void setUp() {
@@ -172,7 +175,6 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
     }
 
     MergingWorkPackage createWorkPackage(SeqPlatformGroup seqPlatformGroup) {
-        DomainFactory.createAlignableSeqTypes()
         SeqType seqType = findSeqType()
 
         Workflow workflow = Workflow.build(
