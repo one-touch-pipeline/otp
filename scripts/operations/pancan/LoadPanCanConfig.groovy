@@ -16,7 +16,7 @@ String projectName = ''
 
 
 //The roddy plugin version. It needs to be a valid value for Roddy.
-//For example: QualityControlWorkflows:1.0.178
+//For example: QualityControlWorkflows:1.0.182
 String pluginVersionToUse = ''
 
 
