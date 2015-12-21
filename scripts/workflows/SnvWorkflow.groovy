@@ -70,7 +70,7 @@ println ctx.processingOptionService.createOrUpdate(
     "${PBS_PREFIX}${SnvAnnotationJob.simpleName}_${exome}",
     "DKFZ",
     null,
-    '{"-l": {walltime: "24:00:00"}',
+    '{"-l": {walltime: "24:00:00"}}',
     "suggestion of the CO group (Ivo) for the snv WES annotation job"
 )
 
