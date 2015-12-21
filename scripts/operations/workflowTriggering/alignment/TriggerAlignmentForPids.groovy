@@ -2,7 +2,6 @@
  * script to trigger alignments for a patient.
  * set the align flag for all runsegments used by seqtracks of the given individuals.
  */
-import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
@@ -17,10 +16,7 @@ LogThreadLocal.withThreadLog(System.out, {
                     ])
                 }
             }
-            seqType {
-                eq('name', 'WHOLE_GENOME')
-                eq('libraryLayout', 'PAIRED')
-            }
+            'in'('seqType', ctx.seqTypeService.alignableSeqTypes())
         }
 
 
