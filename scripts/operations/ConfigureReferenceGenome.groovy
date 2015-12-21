@@ -23,9 +23,26 @@ Collection<SampleType> sampleTypes = [
  * For a full list, execute "de.dkfz.tbi.otp.ngsdata.ReferenceGenome.list()*.name" on a groovy web console
  */
 String refGenName = ''
+
 /**
- * For example: hs37d5.fa.chrLenOnlyACGT_realChromosomes.tab
  * Must be set for projects which are aligned with the PanCan alignment workflow, otherwise must be null.
+ * possible Values, depends on reference genome:
+ * - hg19:
+ *   - hg19_1-22_X_Y_M.fa.chrLenOnlyACGT.tab
+ * - hs37d5:
+ *   - hs37d5.fa.chrLenOnlyACGT_realChromosomes.tab
+ *   - hs37d5.fa.chrLenOnlyACGT.tab
+ * - hs37d5+mouse:
+ *   - chrLenOnlyACGT_realChromosomes.tab
+ * - GRCm38mm10:
+ *   - GRCm38mm10.fa.chrLenOnlyACGT_realChromosomes.tab
+ *   - GRCm38mm10.fa.chrLenOnlyACGT.tab
+ *   - mm10_1-19_X_Y_M.fa.chrLenOnlyACGT_realChromosomes.tab
+ *   - mm10_1-19_X_Y_M.fa.chrLenOnlyACGT.tab
+ * - hs37d5_GRCm38mm:
+ *   - ?
+ *
+ * The list could be create with the script "statSizeFileList"
  */
 String statSizeFileName = ''
 
