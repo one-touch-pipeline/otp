@@ -46,6 +46,8 @@ class RunSegment {
     String dataPath                  // path to data (ftp area)
     String mdPath                    // path to meta-data
 
+    Run run
+
     static belongsTo = [run : Run]
     static constraints = {
         dataPath blank: false, validator: { OtpPath.isValidAbsolutePath(it) }

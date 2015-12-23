@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.HelperUtils
 import grails.util.Environment
 
+
 /**
  * A counter used to handle unique constraints. You can use it in a closure to produce a unique value for a property.
  * The class Individual show therefore an example.
@@ -156,7 +157,7 @@ testDataConfig {
         }
     }
     unitAdditionalBuild = [
-        'de.dkfz.tbi.otp.ngsdata.DataFile': [de.dkfz.tbi.otp.ngsdata.FileType],
+        'de.dkfz.tbi.otp.ngsdata.DataFile': [de.dkfz.tbi.otp.ngsdata.FileType, de.dkfz.tbi.otp.ngsdata.RunSegment],
         'de.dkfz.tbi.otp.ngsdata.ReferenceGenome': [de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType],
         'de.dkfz.tbi.otp.ngsdata.SeqPlatform': [de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup, de.dkfz.tbi.otp.ngsdata.SeqPlatformModelLabel],
         'de.dkfz.tbi.otp.ngsdata.SeqTrack': [de.dkfz.tbi.otp.ngsdata.ChipSeqSeqTrack, de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack, de.dkfz.tbi.otp.ngsdata.DataFile, de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit],

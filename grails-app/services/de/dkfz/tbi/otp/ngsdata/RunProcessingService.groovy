@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
 /**
  * This service is responsible for orchestration of workflows running on Run objects.
  */
@@ -96,26 +98,37 @@ class RunProcessingService {
         }
     }
 
-    Run runReadyToInstall() {
-        def c = RunSegment.createCriteria()
-        List<RunSegment> segments = c.list {
-            and{
-                eq("metaDataStatus", RunSegment.Status.COMPLETE)
-                eq("filesStatus", RunSegment.FilesStatus.NEEDS_INSTALLATION)
-            }
-        }
-        if (!segments) {
-            return null
-        }
-        for (final RunSegment segment : segments) {
-            final Run run = segment.run
-            // Make sure that no other instance of the data installation workflow is running for
-            // this run.
-            if (!RunSegment.findByRunAndFilesStatusInList(run, RunSegment.PROCESSING_FILE_STATUSES)) {
-                return run
-            }
-        }
-        return null
+    Run runReadyToInstall(short minPriority) {
+        final String hql = """
+select
+    runSegment.run
+from
+    DataFile dataFile
+    join dataFile.runSegment runSegment
+where
+    runSegment.metaDataStatus = :metaDataStatus
+    and runSegment.filesStatus = :filesStatus
+    and dataFile.project.processingPriority >= :minPriority
+    and not exists (
+        select
+            id
+        from
+            RunSegment runSegment2
+        where
+            runSegment2.run.id = runSegment.run.id
+            and runSegment2.filesStatus in (:processingStatuses)
+        )
+order by
+    dataFile.project.processingPriority desc, runSegment.id asc
+"""
+
+        return CollectionUtils.atMostOneElement(Run.executeQuery(hql,[
+                metaDataStatus: RunSegment.Status.COMPLETE ,
+                filesStatus: RunSegment.FilesStatus.NEEDS_INSTALLATION,
+                processingStatuses: RunSegment.PROCESSING_FILE_STATUSES,
+                minPriority: minPriority,
+                max: 1,
+        ]))
     }
 
     void blockInstallation(Run run) {

@@ -601,6 +601,33 @@ class DomainFactory {
         ], properties)
     }
 
+    static createFileType(Map properties = [:]) {
+        return createDomainObject(FileType, [
+                type: FileType.Type.SEQUENCE,
+        ], properties)
+    }
+
+    static createDataFile(Map properties = [:]) {
+        return createDomainObject(DataFile, [
+                fileName: "DataFileFileName_${counter}_R1.gz",
+                vbpFileName: "VbpDataFileFileName_${counter}_R1.gz",
+                pathName: "path_${counter}",
+                md5sum: {HelperUtils.getRandomMd5sum()},
+                project: {createProject()},
+                dateExecuted: new Date(),
+                dateFileSystem: new Date(),
+                dateCreated: new Date(),
+                vbpFilePath: "vbpPath_${counter}",
+                metaDataValid: true,
+                fileWithdrawn: false,
+                fileType: {createFileType(type: FileType.Type.SEQUENCE)},
+                used: true,
+                fileExists: true,
+                fileLinked: true,
+                fileSize: counter++,
+                readNumber: 1,
+        ], properties)
+    }
 
     static RoddyWorkflowConfig createRoddyWorkflowConfig(Map properties = [:], boolean saveAndValidate = true) {
         Workflow workflow = properties.containsKey('workflow') ? properties.workflow : createPanCanWorkflow()
