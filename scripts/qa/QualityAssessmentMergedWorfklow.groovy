@@ -1,10 +1,12 @@
-import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
+import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.plan
+import static de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl.getSLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME
+import static de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl.getTOTAL_SLOTS_OPTION_NAME
 
 // workflow requires processing options to be injected with the script InjectQualityAssessmentMergedWorkflowOptions.groovy
 
-plan("QualityAssessmentMergedWorkflow") {
+String workflowName = "QualityAssessmentMergedWorkflow"
+
+plan(workflowName) {
     start("start", "qualityAssessmentMergedStartJob")
     job("createMergedQaOutputDirectory", "createMergedQaOutputDirectoryJob")
     job("executeMergedBamFileQaAnalysis", "executeMergedBamFileQaAnalysisJob") {
@@ -48,3 +50,9 @@ plan("QualityAssessmentMergedWorkflow") {
     job("mergedInsertSizePlotValidation", "mergedInsertSizePlotValidationJob")
     job("assignMergedQaFlag", "assignMergedQaFlagJob")
 }
+
+// number of all MergedQA workflows which can be executed in parallel
+println ctx.processingOptionService.createOrUpdate(TOTAL_SLOTS_OPTION_NAME, workflowName, null, '60', '')
+
+// number of slots which are reserved only for FastTrack Workflows
+println ctx.processingOptionService.createOrUpdate(SLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME, workflowName, null, '30', '')

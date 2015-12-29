@@ -9,9 +9,32 @@ class QualityAssessmentMergedPassService {
     ConfigService configService
     ProcessingOptionService processingOptionService
 
-    public QualityAssessmentMergedPass createPass() {
-        ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.findByQualityAssessmentStatusAndTypeAndWithdrawn(
-                        AbstractBamFile.QaProcessingStatus.NOT_STARTED, AbstractBamFile.BamType.MDUP, false)
+    public QualityAssessmentMergedPass createPass(short minPriority) {
+
+        ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.createCriteria().get {
+            eq ("qualityAssessmentStatus", AbstractBamFile.QaProcessingStatus.NOT_STARTED)
+            eq ("type", AbstractBamFile.BamType.MDUP)
+            eq ("withdrawn", false)
+
+            mergingPass {
+                mergingSet {
+                    mergingWorkPackage {
+                        sample {
+                            individual {
+                                project {
+                                    ge('processingPriority', minPriority)
+                                    order("processingPriority", "desc")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            order("id", "asc")
+            maxResults(1)
+        }
+
+
         if (!processedMergedBamFile) {
             return null
         }

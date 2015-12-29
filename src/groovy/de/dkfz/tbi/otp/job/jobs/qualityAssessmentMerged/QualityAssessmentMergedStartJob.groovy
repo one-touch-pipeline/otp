@@ -24,27 +24,20 @@ class QualityAssessmentMergedStartJob extends AbstractStartJobImpl {
 
     @Scheduled(fixedDelay = 10000l)
     void execute() {
-        if (!hasFreeSlot()) {
+        short minPriority = minimumProcessingPriorityForOccupyingASlot
+
+        if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
             return
         }
+
         QualityAssessmentMergedPass.withTransaction {
-            QualityAssessmentMergedPass qualityAssessmentMergedPass = qualityAssessmentMergedPassService.createPass()
+            QualityAssessmentMergedPass qualityAssessmentMergedPass = qualityAssessmentMergedPassService.createPass(minPriority)
             if (qualityAssessmentMergedPass) {
                 log.debug "Creating merged quality assessment process for ${qualityAssessmentMergedPass}"
                 qualityAssessmentMergedPassService.passStarted(qualityAssessmentMergedPass)
                 createProcess(qualityAssessmentMergedPass)
             }
         }
-    }
-
-    private boolean hasFreeSlot() {
-        JobExecutionPlan jep = getExecutionPlan()
-        if (!jep || !jep.enabled) {
-            return false
-        }
-        int n = Process.countByFinishedAndJobExecutionPlan(false, jep)
-        long maxRunning = optionService.findOptionAsNumber("numberOfJobs", "QualityAssessmentMergedWorkflow", null, MAX_RUNNING)
-        return (n < maxRunning)
     }
 
     @Override

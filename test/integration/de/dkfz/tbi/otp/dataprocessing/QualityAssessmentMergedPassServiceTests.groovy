@@ -19,7 +19,6 @@ class QualityAssessmentMergedPassServiceTests {
 
     QualityAssessmentMergedPass qualityAssessmentMergedPass
     ProcessedMergedBamFile processedMergedBamFile
-    Project project
     Realm realm
 
     QualityAssessmentMergedPassService qualityAssessmentMergedPassService
@@ -31,68 +30,11 @@ class QualityAssessmentMergedPassServiceTests {
             processingRootPath: '/tmp/otp-unit-test/pmbfs/processing',
             ]).save([flush: true])
 
-        project = TestData.createProject(
-                        name: "project",
-                        dirName: "project-dir",
-                        realmName: realm.name,
-                        )
-        assertNotNull(project.save([flush: true]))
 
-        Individual individual = new Individual(
-                        pid: "patient",
-                        mockPid: "mockPid",
-                        mockFullName: "mockFullName",
-                        type: Individual.Type.UNDEFINED,
-                        project: project
-                        )
-        assertNotNull(individual.save([flush: true]))
+        processedMergedBamFile = DomainFactory.createProcessedMergedBamFile()
 
-        SampleType sampleType = new SampleType(
-                        name: "sample-type"
-                        )
-        assertNotNull(sampleType.save([flush: true]))
-
-        Sample sample = new Sample(
-                        individual: individual,
-                        sampleType: sampleType
-                        )
-        assertNotNull(sample.save([flush: true]))
-
-        SeqType seqType = new SeqType(
-                        name: "seq-type",
-                        libraryLayout: "library",
-                        dirName: "seq-type-dir"
-                        )
-        assertNotNull(seqType.save([flush: true]))
-
-        MergingWorkPackage mergingWorkPackage = new TestData().createMergingWorkPackage(
-                        sample: sample,
-                        seqType: seqType
-                        )
-        assertNotNull(mergingWorkPackage.save([flush: true]))
-
-        MergingSet mergingSet = new MergingSet(
-                        identifier: 0,
-                        mergingWorkPackage: mergingWorkPackage,
-                        status: State.NEEDS_PROCESSING
-                        )
-        assertNotNull(mergingSet.save([flush: true]))
-
-        MergingPass mergingPass = new MergingPass(
-                        identifier: 0,
-                        mergingSet: mergingSet
-                        )
-        assertNotNull(mergingPass.save([flush: true]))
-
-        processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
-                        fileExists: true,
-                        type: BamType.MDUP,
-                        qualityAssessmentStatus: QaProcessingStatus.UNKNOWN,
-                        fileOperationStatus: FileOperationStatus.DECLARED,
-                        md5sum: null,
-                        status: AbstractBamFile.State.PROCESSED,
-                        ])
-        assertNotNull(processedMergedBamFile.save([flush: true]))
+        processedMergedBamFile.project.realmName = realm.name
+        assert processedMergedBamFile.project.save(flush: true)
 
         qualityAssessmentMergedPass = new QualityAssessmentMergedPass(
                         abstractMergedBamFile: processedMergedBamFile,
@@ -105,7 +47,6 @@ class QualityAssessmentMergedPassServiceTests {
     @After
     void tearDown() {
         qualityAssessmentMergedPass = null
-        project = null
         processedMergedBamFile = null
         realm = null
     }
@@ -170,7 +111,7 @@ class QualityAssessmentMergedPassServiceTests {
 
     @Test
     void testProject() {
-        assertEquals(project, qualityAssessmentMergedPassService.project(qualityAssessmentMergedPass))
+        assertEquals(processedMergedBamFile.project, qualityAssessmentMergedPassService.project(qualityAssessmentMergedPass))
     }
 
     @Test(expected = IllegalArgumentException)
@@ -209,21 +150,23 @@ class QualityAssessmentMergedPassServiceTests {
 
     @Test
     void testCreatePassQualityAssessmentStatusWrong() {
-        assertNull(qualityAssessmentMergedPassService.createPass())
+        assertNull(qualityAssessmentMergedPassService.createPass(ProcessingPriority.NORMAL_PRIORITY))
     }
 
     @Test
     void testCreatePassBamTypeWrong() {
         processedMergedBamFile.qualityAssessmentStatus = QaProcessingStatus.NOT_STARTED
         processedMergedBamFile.type = BamType.SORTED
-        assertNull(qualityAssessmentMergedPassService.createPass())
+        assert processedMergedBamFile.save(flush: true)
+        assertNull(qualityAssessmentMergedPassService.createPass(ProcessingPriority.NORMAL_PRIORITY))
     }
 
     @Test
     void testCreatePassWithdrawn() {
         processedMergedBamFile.qualityAssessmentStatus = QaProcessingStatus.NOT_STARTED
         processedMergedBamFile.withdrawn = true
-        assertNull(qualityAssessmentMergedPassService.createPass())
+        assert processedMergedBamFile.save(flush: true)
+        assertNull(qualityAssessmentMergedPassService.createPass(ProcessingPriority.NORMAL_PRIORITY))
     }
 
     @Test
@@ -231,8 +174,43 @@ class QualityAssessmentMergedPassServiceTests {
         processedMergedBamFile.qualityAssessmentStatus = QaProcessingStatus.NOT_STARTED
         assert processedMergedBamFile.save(flush: true)
         assertEquals(1, QualityAssessmentMergedPass.list().size())
-        QualityAssessmentMergedPass qualityAssessmentMergedPass1 = qualityAssessmentMergedPassService.createPass()
+        QualityAssessmentMergedPass qualityAssessmentMergedPass1 = qualityAssessmentMergedPassService.createPass(ProcessingPriority.NORMAL_PRIORITY)
         assertEquals(1, qualityAssessmentMergedPass1.identifier)
         assertEquals(2, QualityAssessmentMergedPass.list().size())
     }
+
+
+    @Test
+    void testCreatePass_FastTrackFirst() {
+        processedMergedBamFile.qualityAssessmentStatus = QaProcessingStatus.NOT_STARTED
+        assert processedMergedBamFile.save(flush: true)
+
+        ProcessedMergedBamFile fastTrackBamFile =  processedMergedBamFile = DomainFactory.createProcessedMergedBamFile()
+        fastTrackBamFile.project.realmName = realm.name
+        fastTrackBamFile.qualityAssessmentStatus = QaProcessingStatus.NOT_STARTED
+        assert fastTrackBamFile.save(flush: true)
+
+        fastTrackBamFile.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
+        assert fastTrackBamFile.project.save(flush: true)
+
+        QualityAssessmentMergedPass fastTrackPass = qualityAssessmentMergedPassService.createPass(ProcessingPriority.NORMAL_PRIORITY)
+        assert fastTrackPass.abstractMergedBamFile == fastTrackBamFile
+    }
+
+    @Test
+    void testCreatePass_JobsReservedForFastTrack() {
+        processedMergedBamFile.qualityAssessmentStatus = QaProcessingStatus.NOT_STARTED
+        assert processedMergedBamFile.save(flush: true)
+        assertEquals(1, QualityAssessmentMergedPass.list().size())
+
+        assertNull(qualityAssessmentMergedPassService.createPass(ProcessingPriority.FAST_TRACK_PRIORITY))
+        assertEquals(1, QualityAssessmentMergedPass.list().size())
+
+        processedMergedBamFile.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
+        assert processedMergedBamFile.project.save(flush: true)
+
+        qualityAssessmentMergedPassService.createPass(ProcessingPriority.FAST_TRACK_PRIORITY)
+        assertEquals(2, QualityAssessmentMergedPass.list().size())
+    }
+
 }
