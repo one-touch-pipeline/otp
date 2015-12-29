@@ -24,8 +24,8 @@ class MergingPassService {
     ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
 
     @Transactional
-    MergingPass create() {
-        MergingSet mergingSet = mergingSetService.mergingSetInStateNeedsProcessing()
+    MergingPass create(short minPriority) {
+        MergingSet mergingSet = mergingSetService.mergingSetInStateNeedsProcessing(minPriority)
         if (mergingSet) {
             MergingPass mergingPass = new MergingPass(
                     mergingSet: mergingSet,

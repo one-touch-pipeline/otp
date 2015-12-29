@@ -17,36 +17,26 @@ class MergingStartJob extends AbstractStartJobImpl {
     ProcessingOptionService optionService
 
     @Autowired
-    MergingSetService mergingSetService
-
-    @Autowired
     MergingPassService mergingPassService
 
     final int MAX_RUNNING = 4
 
     @Scheduled(fixedDelay = 60000l)
     void execute() {
-        if (!hasFreeSlot()) {
+
+        short minPriority = minimumProcessingPriorityForOccupyingASlot
+        if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
             return
         }
+
         MergingPass.withTransaction {
-            MergingPass mergingPass = mergingPassService.create()
+            MergingPass mergingPass = mergingPassService.create(minPriority)
             if (mergingPass) {
                 mergingPassService.mergingPassStarted(mergingPass)
                 createProcess(mergingPass)
                 log.debug "MergingStartJob started for: ${mergingPass.toString()}"
             }
         }
-    }
-
-    private boolean hasFreeSlot() {
-        JobExecutionPlan jep = getExecutionPlan()
-        if (!jep || !jep.enabled) {
-            return false
-        }
-        int n = Process.countByFinishedAndJobExecutionPlan(false, jep)
-        long maxRunning = optionService.findOptionAsNumber("numberOfJobs", "MergingWorkflow", null, MAX_RUNNING)
-        return (n < maxRunning)
     }
 
     @Override

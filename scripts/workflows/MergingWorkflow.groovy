@@ -1,3 +1,5 @@
+import static de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl.getSLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME
+import static de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl.getTOTAL_SLOTS_OPTION_NAME
 import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.PBS_PREFIX
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
@@ -5,7 +7,9 @@ import de.dkfz.tbi.otp.job.jobs.merging.*
 import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
-plan("MergingWorkflow") {
+String workflowName = "MergingWorkflow"
+
+plan(workflowName) {
     start("start", "mergingStartJob")
     job("createOutputDirectory", "mergingCreateOutputDirectoryJob")
     job("merging", "mergingJob") {
@@ -47,6 +51,7 @@ println ctx.processingOptionService.createOrUpdate(
 )
 
 
+
 // picard program for merging job
 ctx.processingOptionService.createOrUpdate(
         'picardMdupCommand',
@@ -55,3 +60,10 @@ ctx.processingOptionService.createOrUpdate(
         'picard-1.61.sh MarkDuplicates',
         'command for versioned picard'
 )
+
+
+// number of all merging workflows which can be executed in parallel
+println ctx.processingOptionService.createOrUpdate(TOTAL_SLOTS_OPTION_NAME, workflowName, null, '60', '')
+// number of slots which are reserved only for FastTrack Workflows
+println ctx.processingOptionService.createOrUpdate(SLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME, workflowName, null, '30', '')
+

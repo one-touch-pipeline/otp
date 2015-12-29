@@ -20,14 +20,14 @@ class MergingPassServiceTests {
 
     @Test(expected = IllegalArgumentException)
     void testMergingPassFinishedAndStartQAMergingPassIsNull() {
-        MergingPass mergingPass = mergingPassService.create()
+        MergingPass mergingPass = mergingPassService.create(ProcessingPriority.NORMAL_PRIORITY)
         mergingPassService.mergingPassFinishedAndStartQA(mergingPass)
     }
 
     @Test
     void testMergingPassFinishedAndStartQA() {
         MergingSet mergingSet = createMergingSet("1")
-        MergingPass mergingPass = mergingPassService.create()
+        MergingPass mergingPass = mergingPassService.create(ProcessingPriority.NORMAL_PRIORITY)
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                         fileExists: true,
                         type: AbstractBamFile.BamType.MDUP,
@@ -67,14 +67,14 @@ class MergingPassServiceTests {
 
     @Test(expected = IllegalArgumentException)
     void testProjectMergingPassIsNull() {
-        MergingPass mergingPass = mergingPassService.create()
+        MergingPass mergingPass = mergingPassService.create(ProcessingPriority.NORMAL_PRIORITY)
         assertNull(mergingPassService.project(mergingPass))
     }
 
     @Test
     void testProject() {
         MergingSet mergingSet = createMergingSet("1")
-        MergingPass mergingPass = mergingPassService.create()
+        MergingPass mergingPass = mergingPassService.create(ProcessingPriority.NORMAL_PRIORITY)
         Project projectExp = mergingPass.project
         Project projectAct = mergingPassService.project(mergingPass)
         assertEquals(projectExp, projectAct)
@@ -82,14 +82,14 @@ class MergingPassServiceTests {
 
     @Test(expected = IllegalArgumentException)
     void testRealmForDataProcessingMergingPassIsNull() {
-        MergingPass mergingPass = mergingPassService.create()
+        MergingPass mergingPass = mergingPassService.create(ProcessingPriority.NORMAL_PRIORITY)
         assertNull(mergingPassService.realmForDataProcessing(mergingPass))
     }
 
     @Test
     void testRealmForDataProcessing() {
         MergingSet mergingSet = createMergingSet("1")
-        MergingPass mergingPass = mergingPassService.create()
+        MergingPass mergingPass = mergingPassService.create(ProcessingPriority.NORMAL_PRIORITY)
         Realm realm = DomainFactory.createRealmDataProcessing(name: mergingSet.project.realmName)
         Realm realmAct = mergingPassService.realmForDataProcessing(mergingPass)
         assertEquals(realm, realmAct)
@@ -97,36 +97,64 @@ class MergingPassServiceTests {
 
     @Test
     void testCreateMergingPass() {
-        MergingPass mergingPass = mergingPassService.create()
+        MergingPass mergingPass = mergingPassService.create(ProcessingPriority.NORMAL_PRIORITY)
         assertNull(mergingPass)
 
         MergingSet mergingSet = createMergingSet("1")
         assertNotNull(mergingSet)
-        mergingPass = mergingPassService.create()
+        mergingPass = mergingPassService.create(ProcessingPriority.NORMAL_PRIORITY)
         assertNotNull(mergingPass)
         assertEquals(mergingSet, mergingPass.mergingSet)
         assertEquals(0, mergingPass.identifier)
 
-        mergingPass = mergingPassService.create()
+        mergingPass = mergingPassService.create(ProcessingPriority.NORMAL_PRIORITY)
         assertNotNull(mergingPass)
         assertEquals(mergingSet, mergingPass.mergingSet)
         assertEquals(1, mergingPass.identifier)
 
         mergingSet.status = MergingSet.State.PROCESSED
         mergingSet.save([flush: true, failOnError: true])
-        mergingPass = mergingPassService.create()
+        mergingPass = mergingPassService.create(ProcessingPriority.NORMAL_PRIORITY)
         assertNull(mergingPass)
 
         mergingSet = createMergingSet("2")
-        mergingPass = mergingPassService.create()
+        mergingPass = mergingPassService.create(ProcessingPriority.NORMAL_PRIORITY)
         assertNotNull(mergingPass)
         assertEquals(mergingSet, mergingPass.mergingSet)
         assertEquals(0, mergingPass.identifier)
 
-        mergingPass = mergingPassService.create()
+        mergingPass = mergingPassService.create(ProcessingPriority.NORMAL_PRIORITY)
         assertNotNull(mergingPass)
         assertEquals(mergingSet, mergingPass.mergingSet)
         assertEquals(1, mergingPass.identifier)
+    }
+
+    @Test
+    void testCreateMergingPass_FastTrackProjectFirst() {
+        MergingSet mergingSetNormal = createMergingSet("1")
+
+        MergingSet mergingSetFastTrack = createMergingSet("2")
+
+        mergingSetFastTrack.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
+        assert mergingSetFastTrack.project.save(flush: true)
+
+        MergingPass mergingPass = mergingPassService.create(ProcessingPriority.NORMAL_PRIORITY)
+        assert mergingPass.mergingSet == mergingSetFastTrack
+    }
+
+
+    @Test
+    void testCreateMergingPass_SlotsReservedForFastTrack() {
+        MergingSet mergingSetNormal = createMergingSet("1")
+
+        assertNull(mergingPassService.create(ProcessingPriority.FAST_TRACK_PRIORITY))
+
+        MergingSet mergingSetFastTrack = createMergingSet("2")
+
+        mergingSetFastTrack.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
+        assert mergingSetFastTrack.project.save(flush: true)
+
+        assert mergingSetFastTrack == mergingPassService.create(ProcessingPriority.FAST_TRACK_PRIORITY).mergingSet
     }
 
     @Test
