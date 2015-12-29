@@ -238,7 +238,7 @@ class ProcessedMergedBamFileService {
     /**
      * @return the ProcessedMergedBamFile, which has to be copied to the project folder
      */
-    public ProcessedMergedBamFile mergedBamFileWithFinishedQA() {
+    public ProcessedMergedBamFile mergedBamFileWithFinishedQA(short minPriority) {
         List<AbstractBamFile.State> disallowedStatesAbstractBamFile = [
             AbstractBamFile.State.NEEDS_PROCESSING,
             AbstractBamFile.State.INPROGRESS
@@ -265,16 +265,24 @@ class ProcessedMergedBamFileService {
             mergingPass {
                 mergingSet {
                     eq ("status", MergingSet.State.PROCESSED)
-                    if (workPackageIdsOfFilesInTransfer) {
-                        mergingWorkPackage {
-                            not { 'in' ("id", workPackageIdsOfFilesInTransfer) }
+                    mergingWorkPackage {
+                        if (workPackageIdsOfFilesInTransfer) {
+                            not { 'in'("id", workPackageIdsOfFilesInTransfer) }
+                        }
+                        sample {
+                            individual {
+                                project {
+                                    ge('processingPriority', minPriority)
+                                    order("processingPriority", "desc")
+                                }
+                            }
                         }
                     }
                 }
             }
-            // the processedMergedBamFiles are sorted by id to receive the oldest file
             order("id", "asc")
         }
+
         /**
          * a mergedBamFile will only be moved when
          * - it is not currently used in another merging process

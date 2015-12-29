@@ -23,11 +23,14 @@ class TransferMergedBamFileStartJob extends AbstractStartJobImpl {
 
     @Scheduled(fixedDelay = 10000l)
     void execute() {
-        if (!hasFreeSlot()) {
+
+        short minPriority = minimumProcessingPriorityForOccupyingASlot
+        if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
             return
         }
+
         ProcessedMergedBamFile.withTransaction {
-            ProcessedMergedBamFile file = processedMergedBamFileService.mergedBamFileWithFinishedQA()
+            ProcessedMergedBamFile file = processedMergedBamFileService.mergedBamFileWithFinishedQA(minPriority)
             if (file) {
                 log.debug 'Starting to transfer merged BAM file ' + file
                 file.updateFileOperationStatus(AbstractMergedBamFile.FileOperationStatus.INPROGRESS)
@@ -37,15 +40,6 @@ class TransferMergedBamFileStartJob extends AbstractStartJobImpl {
         }
     }
 
-    private boolean hasFreeSlot() {
-        JobExecutionPlan jep = getExecutionPlan()
-        if (!jep || !jep.enabled) {
-            return false
-        }
-        int n = Process.countByFinishedAndJobExecutionPlan(false, jep)
-        long maxRunning = optionService.findOptionAsNumber("numberOfJobs", "TransferMergedBamFileWorkflow", null, MAX_RUNNING)
-        return (n < maxRunning)
-    }
 
     @Override
     protected String getJobExecutionPlanName() {

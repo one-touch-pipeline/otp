@@ -290,7 +290,7 @@ class ProcessedMergedBamFileServiceTests {
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
         mergedBamFile.qualityAssessmentStatus = QaProcessingStatus.IN_PROGRESS
         mergedBamFile.mergingSet.status = State.PROCESSED
-        assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA())
+        assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA(ProcessingPriority.NORMAL_PRIORITY))
     }
 
     @Test
@@ -298,7 +298,7 @@ class ProcessedMergedBamFileServiceTests {
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
         mergedBamFile.fileOperationStatus = FileOperationStatus.INPROGRESS
         mergedBamFile.mergingSet.status = State.PROCESSED
-        assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA())
+        assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA(ProcessingPriority.NORMAL_PRIORITY))
     }
 
     @Test(expected = ValidationException)
@@ -307,7 +307,7 @@ class ProcessedMergedBamFileServiceTests {
         mergedBamFile.md5sum = "68b329da9893e34099c7d8ad5cb9c940"
         mergedBamFile.mergingSet.status = State.PROCESSED
         mergedBamFile.fileSize = 10000
-        assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA())
+        assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA(ProcessingPriority.NORMAL_PRIORITY))
     }
 
     @Test
@@ -317,13 +317,13 @@ class ProcessedMergedBamFileServiceTests {
         mergedBamFile.fileOperationStatus = FileOperationStatus.PROCESSED
         mergedBamFile.mergingSet.status = State.PROCESSED
         mergedBamFile.fileSize = 10000
-        assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA())
+        assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA(ProcessingPriority.NORMAL_PRIORITY))
     }
 
     @Test
     void testMergedBamFileWithFinishedQAWhenStatusNotProcessed() {
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
-        assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA())
+        assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA(ProcessingPriority.NORMAL_PRIORITY))
     }
 
     @Test
@@ -331,7 +331,7 @@ class ProcessedMergedBamFileServiceTests {
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
         mergedBamFile.mergingSet.status = State.PROCESSED
         mergedBamFile.status = AbstractBamFile.State.NEEDS_PROCESSING
-        assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA())
+        assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA(ProcessingPriority.NORMAL_PRIORITY))
     }
 
     @Test
@@ -349,7 +349,7 @@ class ProcessedMergedBamFileServiceTests {
                         bamFile: mergedBamFile
                         )
         assertNotNull(mergingSetAssignment1.save([flush: true]))
-        assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA())
+        assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA(ProcessingPriority.NORMAL_PRIORITY))
     }
 
     @Test
@@ -360,15 +360,15 @@ class ProcessedMergedBamFileServiceTests {
         mergedBamFile.md5sum = "68b329da9893e34099c7d8ad5cb9c940"
         mergedBamFile.fileSize = 10000
         MergingSet mergingSet1 = new MergingSet(
-                        identifier: 1,
-                        mergingWorkPackage: mergedBamFile.mergingWorkPackage,
-                        status: State.PROCESSED
-                        )
+                identifier: 1,
+                mergingWorkPackage: mergedBamFile.mergingWorkPackage,
+                status: State.PROCESSED
+        )
         assertNotNull(mergingSet1.save([flush: true]))
         MergingSetAssignment mergingSetAssignment1 = new MergingSetAssignment(
-                        mergingSet: mergingSet1,
-                        bamFile: mergedBamFile
-                        )
+                mergingSet: mergingSet1,
+                bamFile: mergedBamFile
+        )
         assertNotNull(mergingSetAssignment1.save([flush: true]))
         ProcessedMergedBamFile mergedBamFile1 = DomainFactory.createProcessedMergedBamFile(mergingSet1, [
                 numberOfMergedLanes: 2,
@@ -379,8 +379,32 @@ class ProcessedMergedBamFileServiceTests {
 
 
         ProcessedMergedBamFile processedMergedBamFileExp = mergedBamFile1
-        ProcessedMergedBamFile processedMergedBamFileAct = processedMergedBamFileService.mergedBamFileWithFinishedQA()
+        ProcessedMergedBamFile processedMergedBamFileAct = processedMergedBamFileService.mergedBamFileWithFinishedQA(ProcessingPriority.NORMAL_PRIORITY)
         assertEquals(processedMergedBamFileExp, processedMergedBamFileAct)
+    }
+
+    @Test
+    void testMergedBamFileWithFinishedQA_FastTrackFirst() {
+        ProcessedMergedBamFile processedMergedBamFileNormalPriority = setupForSuccessfulMergedBamFileWithFinishedQa()
+
+        ProcessedMergedBamFile processedMergedBamFileFastTrackPriority = setupForSuccessfulMergedBamFileWithFinishedQa()
+
+        processedMergedBamFileFastTrackPriority.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
+        assert processedMergedBamFileFastTrackPriority.project.save(flush: true)
+
+        ProcessedMergedBamFile processedMergedBamFileAct = processedMergedBamFileService.mergedBamFileWithFinishedQA(ProcessingPriority.NORMAL_PRIORITY)
+        assertEquals(processedMergedBamFileFastTrackPriority, processedMergedBamFileAct)
+    }
+
+
+    @Test
+    void testMergedBamFileWithFinishedQA_JobsReservedForFastTrack() {
+        ProcessedMergedBamFile processedMergedBamFileFastTrackPriority = setupForSuccessfulMergedBamFileWithFinishedQa()
+        processedMergedBamFileFastTrackPriority.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
+        assert processedMergedBamFileFastTrackPriority.project.save(flush: true)
+
+        ProcessedMergedBamFile processedMergedBamFileAct = processedMergedBamFileService.mergedBamFileWithFinishedQA(ProcessingPriority.FAST_TRACK_PRIORITY)
+        assertEquals(processedMergedBamFileFastTrackPriority, processedMergedBamFileAct)
     }
 
     @Test
@@ -576,5 +600,14 @@ class ProcessedMergedBamFileServiceTests {
         mergedBamFile.fileOperationStatus = FileOperationStatus.NEEDS_PROCESSING
         mergedBamFile.fileSize = 10000
         return mergedBamFile
+    }
+
+    private ProcessedMergedBamFile setupForSuccessfulMergedBamFileWithFinishedQa() {
+        return DomainFactory.createProcessedMergedBamFile(
+                DomainFactory.createMergingSet(status: MergingSet.State.PROCESSED), [
+                qualityAssessmentStatus: QaProcessingStatus.FINISHED,
+                fileOperationStatus: FileOperationStatus.NEEDS_PROCESSING,
+                status: AbstractBamFile.State.DECLARED
+        ])
     }
 }
