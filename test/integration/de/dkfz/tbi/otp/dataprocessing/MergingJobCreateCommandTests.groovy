@@ -131,6 +131,15 @@ class MergingJobCreateCommandTests {
                         comment: "picard option used in duplicates removal"
                         )
         assertNotNull(processingOption1.save([flush: true, failOnError: true]))
+
+        ProcessingOption processingOption2 =new ProcessingOption(
+                name: "picardMdupCommand",
+                type: null,
+                value: "picard-1.61.sh MarkDuplicates",
+                project: null,
+                comment: "command for versioned picard"
+        )
+        assertNotNull(processingOption2.save([flush: true, failOnError: true]))
     }
 
     @After
@@ -155,7 +164,7 @@ class MergingJobCreateCommandTests {
         String tempDirExp = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
         String createTempDirExp = "mkdir -p -m 2750 ${tempDirExp}"
         String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
-        String picardExp = "picard.sh MarkDuplicates"
+        String picardExp = "picard-1.61.sh MarkDuplicates"
         File inputFile = new File("${basePathAlignment}/run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_${LIBRARY_LAYOUT_NAME}.sorted.bam")
         CreateFileHelper.createFile(inputFile, bamFileContent)
         String inputFilePathExp = " I=${inputFile}"
@@ -179,7 +188,7 @@ class MergingJobCreateCommandTests {
         String tempDirExp = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
         String createTempDirExp = "mkdir -p -m 2750 ${tempDirExp}"
         String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
-        String picardExp = "picard.sh MarkDuplicates"
+        String picardExp = "picard-1.61.sh MarkDuplicates"
         File inputFile1 = new File("${basePathAlignment}/run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_${LIBRARY_LAYOUT_NAME}.sorted.bam")
         File inputFile2 = new File("${basePathAlignment}/run_2_laneId_2/pass2/name_1_run_2_s_laneId_2_${LIBRARY_LAYOUT_NAME}.sorted.bam")
         CreateFileHelper.createFile(inputFile1, bamFileContent)
@@ -205,7 +214,7 @@ class MergingJobCreateCommandTests {
         String tempDirExp = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
         String createTempDirExp = "mkdir -p -m 2750 ${tempDirExp}"
         String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
-        String picardExp = "picard.sh MarkDuplicates"
+        String picardExp = "picard-1.61.sh MarkDuplicates"
         File inputFile1 = new File("${basePathAlignment}/run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_${LIBRARY_LAYOUT_NAME}.sorted.bam")
         File inputFile2 = new File("${basePathMerging}/name_1/${SEQ_TYPE_NAME}/${LIBRARY_LAYOUT_NAME}/DEFAULT/0/pass${pmbf.mergingPass.identifier}/name_1_pid_1_${SEQ_TYPE_NAME}_${LIBRARY_LAYOUT_NAME}_merged.mdup.bam")
         CreateFileHelper.createFile(inputFile1, bamFileContent)
@@ -232,7 +241,7 @@ class MergingJobCreateCommandTests {
         String tempDirExp = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
         String createTempDirExp = "mkdir -p -m 2750 ${tempDirExp}"
         String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
-        String picardExp = "picard.sh MarkDuplicates"
+        String picardExp = "picard-1.61.sh MarkDuplicates"
         File inputFile1 = new File("${basePathAlignment}/run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_${LIBRARY_LAYOUT_NAME}.sorted.bam")
         File inputFile2 = new File("${basePathAlignment}/run_2_laneId_2/pass2/name_1_run_2_s_laneId_2_${LIBRARY_LAYOUT_NAME}.sorted.bam")
         File inputFile3 = new File("${basePathMerging}/name_1/${SEQ_TYPE_NAME}/${LIBRARY_LAYOUT_NAME}/DEFAULT/0/pass${pmbf.mergingPass.identifier}/name_1_pid_1_${SEQ_TYPE_NAME}_${LIBRARY_LAYOUT_NAME}_merged.mdup.bam")

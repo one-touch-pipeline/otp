@@ -45,3 +45,13 @@ println ctx.processingOptionService.createOrUpdate(
   'VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000 CREATE_INDEX=TRUE CREATE_MD5_FILE=TRUE',
   "picard option used in duplicates marking"
 )
+
+
+// picard program for merging job
+ctx.processingOptionService.createOrUpdate(
+        'picardMdupCommand',
+        null,
+        null,
+        'picard-1.61.sh MarkDuplicates',
+        'command for versioned picard'
+)
