@@ -44,7 +44,7 @@ class SampleIdentifierIntegrationSpec extends IntegrationSpec {
 
 
     void test_validate_pass_regexIsSetForOtherProject() {
-        createRegex(Project.build())
+        createRegex(DomainFactory.createProject())
         final String name = 'toolong'
         sampleIdentifier.name = name
 
