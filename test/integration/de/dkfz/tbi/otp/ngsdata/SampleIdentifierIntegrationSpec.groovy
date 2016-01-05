@@ -13,7 +13,7 @@ class SampleIdentifierIntegrationSpec extends IntegrationSpec {
     def setup() {
         sampleIdentifier = new SampleIdentifier(
                 name: CORRECT_NAME,
-                sample: Sample.build())
+                sample: DomainFactory.createSample())
         assert sampleIdentifier.validate()
     }
 
