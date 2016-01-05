@@ -47,7 +47,7 @@ public class JobStateLogFile {
         try {
             WaitingFileUtils.waitUntilExists(file)
         } catch (AssertionError e) {
-            throw new RuntimeException("${JOB_STATE_LOG_FILE_NAME} is not found in ${file.parentFile}")
+            throw new RuntimeException("${JOB_STATE_LOG_FILE_NAME} is not found in ${file.parentFile}", e)
         }
         if (!file.canRead()) {
             throw new RuntimeException("file ${file} exists, but is not readable")
