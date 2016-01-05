@@ -226,19 +226,17 @@ class DomainFactory {
     public static createRoddyBamFile(Map bamFileProperties = [:]) {
         MergingWorkPackage workPackage = bamFileProperties.workPackage
         if (!workPackage) {
-            SeqType seqType = SeqType.buildLazy(name: SeqTypeNames.WHOLE_GENOME.seqTypeName, alias: "WGS", libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
+            SeqType seqType = createWholeGenomeSeqType()
             Workflow workflow = createPanCanWorkflow()
-            workPackage = MergingWorkPackage.build(
+            workPackage = createMergingWorkPackage(
                     workflow: workflow,
                     seqType: seqType,
-                    libraryPreparationKit: LibraryPreparationKit.buildLazy(name: 'libraryPreparationKit'),
-                    statSizeFileName: DEFAULT_TAB_FILE_NAME,
             )
             ReferenceGenomeProjectSeqType.build(
                     referenceGenome: workPackage.referenceGenome,
                     project: workPackage.project,
                     seqType: workPackage.seqType,
-                    statSizeFileName: DEFAULT_TAB_FILE_NAME,
+                    statSizeFileName: workPackage.statSizeFileName,
             )
         }
         SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile(workPackage)

@@ -46,7 +46,6 @@ class ExecuteRoddyCommandServiceTests {
         roddyCommand = new File(roddyPath, 'roddy.sh')
         tmpOutputDir = temporaryFolder.newFolder("temporaryOutputDir")
 
-        SeqType.buildLazy(name: SeqTypeNames.EXOME.seqTypeName, roddyName: "WES", alias: "EXOME", libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
         roddyBamFile = DomainFactory.createRoddyBamFile()
 
         realm = DomainFactory.createRealmDataManagementDKFZ([
@@ -121,6 +120,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testGetAnalysisIDinConfigFile_SeqTypeWGS() {
+        DomainFactory.createAlignableSeqTypes()
         roddyBamFile.mergingWorkPackage.seqType = SeqType.wholeGenomePairedSeqType
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
@@ -129,6 +129,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testGetAnalysisIDinConfigFile_SeqTypeEXOME() {
+        DomainFactory.createAlignableSeqTypes()
         roddyBamFile.mergingWorkPackage.seqType = SeqType.exomePairedSeqType
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
@@ -137,6 +138,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testGetAnalysisIDinConfigFile_DifferentSeqType_ShouldFail() {
+        DomainFactory.createAlignableSeqTypes()
         roddyBamFile.mergingWorkPackage.seqType = SeqType.build(name: "differentSeqType")
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
 

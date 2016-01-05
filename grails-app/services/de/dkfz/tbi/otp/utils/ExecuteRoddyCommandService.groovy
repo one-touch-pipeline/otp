@@ -93,7 +93,9 @@ class ExecuteRoddyCommandService {
         assert roddyResult.seqType : "There is not seqType available for ${roddyResult}"
 
         if (SeqTypeService.alignableSeqTypes().contains(roddyResult.seqType)) {
-            return roddyResult.seqType.roddyName
+            String roddyName = roddyResult.seqType.roddyName
+            assert roddyName : "roddyName is not specified for ${roddyResult.seqType}"
+            return roddyName
         } else {
             throw new RuntimeException("The seqType ${roddyResult.seqType} can not be processed at the moment." as String)
         }
