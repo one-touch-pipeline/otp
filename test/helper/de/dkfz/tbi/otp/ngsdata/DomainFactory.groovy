@@ -153,6 +153,42 @@ class DomainFactory {
         ], properties)
     }
 
+    public static JobExecutionPlan createJobExecutionPlan(Map properties = [:]) {
+        return createDomainObject(JobExecutionPlan, [
+                name: "planName_${counter++}",
+                planVersion: 0,
+                obsoleted: false,
+        ], properties)
+    }
+
+    public static Process createProcess(Map properties = [:]) {
+        return createDomainObject(Process, [
+                started: new Date(),
+                startJobClass: "startJobClass",
+                startJobVersion: "startJobVersion",
+                jobExecutionPlan: {createJobExecutionPlan()}
+        ], properties)
+    }
+
+    public static JobDefinition createJobDefinition(Map properties = [:]) {
+        return createDomainObject(JobDefinition, [
+                plan: {createJobExecutionPlan()},
+                name: "name_${counter++}",
+                bean: 'beanName',
+        ], properties)
+    }
+
+    public static ProcessingStep createProcessingStep(Map properties = [:]) {
+        JobExecutionPlan jobExecutionPlan = properties.jobDefinition?.plan ?: properties.process?.jobExecutionPlan ?: createJobExecutionPlan()
+        return createDomainObject(ProcessingStep, [
+                jobDefinition: {createJobDefinition(plan: jobExecutionPlan)},
+                jobClass: 'someClass',
+                jobVersion: '0',
+                process: {createProcess(jobExecutionPlan: jobExecutionPlan)},
+        ], properties)
+    }
+
+
     public static MergingPass createMergingPass(final MergingSet mergingSet) {
         return new MergingPass(
                 mergingSet: mergingSet,

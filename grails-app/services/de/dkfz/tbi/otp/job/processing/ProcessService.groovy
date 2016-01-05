@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.security.User
 import grails.plugin.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.core.context.SecurityContextHolder
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
 import de.dkfz.tbi.otp.job.plan.PlanInformation
 
@@ -40,6 +40,9 @@ class ProcessService {
     def jobExecutionPlanService
 
     def springSecurityService
+
+    LinkGenerator grailsLinkGenerator
+
     /**
      * Security aware way to access a Process.
      * @param id The Process's id
@@ -415,4 +418,9 @@ ORDER BY u.id desc
             order("id", "desc")
         }[0]
     }
+
+    String processUrl(Process process) {
+        return grailsLinkGenerator.link(controller: 'processes', action: 'process', id: process.id, absolute: true)
+    }
+
 }

@@ -1,5 +1,8 @@
 package de.dkfz.tbi.otp.job.scheduler
 
+import de.dkfz.tbi.otp.job.JobMailService
+import de.dkfz.tbi.otp.job.processing.ResumableJob
+
 import static org.springframework.util.Assert.*
 
 import de.dkfz.tbi.otp.job.plan.DecidingJobDefinition
@@ -25,7 +28,6 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.job.processing.RestartedProcessingStep
-import de.dkfz.tbi.otp.job.processing.ResumableJob
 import de.dkfz.tbi.otp.job.processing.SometimesResumableJob
 import de.dkfz.tbi.otp.job.processing.StartJob
 import de.dkfz.tbi.otp.job.processing.ValidatingJob
@@ -60,6 +62,8 @@ class SchedulerService {
 
 
     def executorService
+
+    JobMailService jobMailService
 
     @SuppressWarnings("GrailsStatelessService")
     PersistenceContextInterceptor persistenceInterceptor
@@ -478,77 +482,85 @@ class SchedulerService {
 
         // test whether the Job knows if it ended
         if (job instanceof EndStateAwareJob) {
-            EndStateAwareJob endStateAwareJob = job as EndStateAwareJob
-            final ExecutionState endState = endStateAwareJob.getEndState()
-            if (endState != ExecutionState.SUCCESS && endState != ExecutionState.FAILURE) {
-                throw new RuntimeException("Job ${job} has endState ${endState}, but only SUCCESS and FAILURE are allowed.")
-            }
-            ProcessingStepUpdate endStateUpdate
-            if (endState == ExecutionState.FAILURE || !ProcessingStepUpdate.findByProcessingStepAndState(step, ExecutionState.FAILURE)) {
-                endStateUpdate = new ProcessingStepUpdate(
-                    date: new Date(),
-                    state: endState,
-                    previous: step.latestProcessingStepUpdate,
-                    processingStep: step
+            try {
+                EndStateAwareJob endStateAwareJob = job as EndStateAwareJob
+                final ExecutionState endState = endStateAwareJob.getEndState()
+                if (endState == ExecutionState.FAILURE) {
+                    jobMailService.sendErrorNotificationIfFastTrack(step, "Something went wrong in endStateAwareJob")
+                }
+                if (endState != ExecutionState.SUCCESS && endState != ExecutionState.FAILURE) {
+                    throw new RuntimeException("Job ${job} has endState ${endState}, but only SUCCESS and FAILURE are allowed.")
+                }
+                ProcessingStepUpdate endStateUpdate
+                if (endState == ExecutionState.FAILURE || !ProcessingStepUpdate.findByProcessingStepAndState(step, ExecutionState.FAILURE)) {
+                    endStateUpdate = new ProcessingStepUpdate(
+                            date: new Date(),
+                            state: endState,
+                            previous: step.latestProcessingStepUpdate,
+                            processingStep: step
                     )
-                endStateUpdate.save()
-            } else {
-                job.log.info "SchedulerService.doEndCheck was called for this job, but the job has already failed. A SUCCESS ProcessingStepUpdate will NOT be created."
-            }
-            if (job instanceof DecisionJob && endStateUpdate.state == ExecutionState.SUCCESS) {
-                ((DecisionProcessingStep)step).decision = (job as DecisionJob).getDecision()
-            }
-            if (!step.save(flush: true)) {
-                log.fatal("Could not create a ERROR/SUCCESS Update for Job of type ${job.class}")
-                throw new JobExcecutionException("Could not create a ERROR/SUCCESS Update for Job")
-            }
-            if (endState == ExecutionState.FAILURE) {
-                log.debug("Something went wrong in endStateAwareJob of type ${job.class}, execution state set to FAILURE")
-                ProcessingError error = new ProcessingError(errorMessage: "Something went wrong in endStateAwareJob of type ${job.class}, execution state set to FAILURE", processingStepUpdate: endStateUpdate)
-                endStateUpdate.error = error
-                if (!error.save(flush: true)) {
-                    log.fatal("Could not create a FAILURE Update for Job of type ${jobClass}")
-                    throw new ProcessingException("Could not create a FAILURE Update for Job of type ${jobClass}")
+                    endStateUpdate.save()
+                } else {
+                    job.log.info "SchedulerService.doEndCheck was called for this job, but the job has already failed. A SUCCESS ProcessingStepUpdate will NOT be created."
                 }
-                markProcessAsFailed(step, "Something went wrong in endStateAwareJob of type ${job.class}, execution state set to FAILURE")
-                log.debug("doEndCheck performed for ${job.class} with ProcessingStep ${step.id}")
-                return
-            }
-            if (job instanceof ValidatingJob) {
-                ValidatingJob validatingJob = job as ValidatingJob
-                // get the last ProcessingStepUpdate
-                ProcessingStep validatedStep = ProcessingStep.get(validatingJob.validatorFor.id)
-                boolean succeeded = validatingJob.hasValidatedJobSucceeded()
-
-                ProcessingStepUpdate validatedUpdate = new ProcessingStepUpdate(
-                    date: new Date(),
-                    state: succeeded ? ExecutionState.SUCCESS : ExecutionState.FAILURE,
-                    previous: validatedStep.latestProcessingStepUpdate,
-                    processingStep: validatedStep
-                    )
-                validatedUpdate.save()
-                if (!succeeded) {
-                    // create error
-                    ProcessingError validatedError = new ProcessingError(errorMessage: "Marked as failed by validating job", processingStepUpdate: validatedUpdate)
-                    validatedError.save()
-                    validatedUpdate.error = validatedError
+                if (job instanceof DecisionJob && endStateUpdate.state == ExecutionState.SUCCESS) {
+                    ((DecisionProcessingStep) step).decision = (job as DecisionJob).getDecision()
                 }
-                if (!validatedUpdate.save(flush: true)) {
-                    log.fatal("Could not create a FAILED/SUCCEEDED Update for validated job processed by ${job.class}")
-                    throw new ProcessingException("Could not create a FAILED/SUCCEEDED Update for validated job")
+                if (!step.save(flush: true)) {
+                    log.fatal("Could not create a ERROR/SUCCESS Update for Job of type ${job.class}")
+                    throw new JobExcecutionException("Could not create a ERROR/SUCCESS Update for Job")
                 }
-                if (!succeeded) {
-                    Process process = Process.get(step.process.id)
-                    process.finished = true
-                    if (!process.save(flush: true)) {
-                        // TODO: trigger error handling
-                        log.fatal("Could not set Process to finished")
-                        throw new ProcessingException("Could not set Process to finished")
+                if (endState == ExecutionState.FAILURE) {
+                    log.debug("Something went wrong in endStateAwareJob of type ${job.class}, execution state set to FAILURE")
+                    ProcessingError error = new ProcessingError(errorMessage: "Something went wrong in endStateAwareJob of type ${job.class}, execution state set to FAILURE", processingStepUpdate: endStateUpdate)
+                    endStateUpdate.error = error
+                    if (!error.save(flush: true)) {
+                        log.fatal("Could not create a FAILURE Update for Job of type ${jobClass}")
+                        throw new ProcessingException("Could not create a FAILURE Update for Job of type ${jobClass}")
                     }
-                    // do not trigger next generation of Processing Step
+                    markProcessAsFailed(step, "Something went wrong in endStateAwareJob of type ${job.class}, execution state set to FAILURE")
                     log.debug("doEndCheck performed for ${job.class} with ProcessingStep ${step.id}")
                     return
                 }
+                if (job instanceof ValidatingJob) {
+                    ValidatingJob validatingJob = job as ValidatingJob
+                    // get the last ProcessingStepUpdate
+                    ProcessingStep validatedStep = ProcessingStep.get(validatingJob.validatorFor.id)
+                    boolean succeeded = validatingJob.hasValidatedJobSucceeded()
+
+                    ProcessingStepUpdate validatedUpdate = new ProcessingStepUpdate(
+                            date: new Date(),
+                            state: succeeded ? ExecutionState.SUCCESS : ExecutionState.FAILURE,
+                            previous: validatedStep.latestProcessingStepUpdate,
+                            processingStep: validatedStep
+                    )
+                    validatedUpdate.save()
+                    if (!succeeded) {
+                        // create error
+                        ProcessingError validatedError = new ProcessingError(errorMessage: "Marked as failed by validating job", processingStepUpdate: validatedUpdate)
+                        validatedError.save()
+                        validatedUpdate.error = validatedError
+                    }
+                    if (!validatedUpdate.save(flush: true)) {
+                        log.fatal("Could not create a FAILED/SUCCEEDED Update for validated job processed by ${job.class}")
+                        throw new ProcessingException("Could not create a FAILED/SUCCEEDED Update for validated job")
+                    }
+                    if (!succeeded) {
+                        Process process = Process.get(step.process.id)
+                        process.finished = true
+                        if (!process.save(flush: true)) {
+                            // TODO: trigger error handling
+                            log.fatal("Could not set Process to finished")
+                            throw new ProcessingException("Could not set Process to finished")
+                        }
+                        // do not trigger next generation of Processing Step
+                        log.debug("doEndCheck performed for ${job.class} with ProcessingStep ${step.id}")
+                        return
+                    }
+                }
+            } catch (Throwable t) {
+                jobMailService.sendErrorNotificationIfFastTrack(step, t)
+                throw t
             }
         }
         try {

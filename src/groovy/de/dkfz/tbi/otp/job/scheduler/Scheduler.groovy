@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.scheduler
 
+import de.dkfz.tbi.otp.job.JobMailService
+
 import static org.springframework.util.Assert.*
 
 import java.util.concurrent.ExecutorService
@@ -22,6 +24,7 @@ import de.dkfz.tbi.otp.job.processing.ValidatingJob
 import de.dkfz.tbi.otp.notification.NotificationEvent
 import de.dkfz.tbi.otp.notification.NotificationType
 import de.dkfz.tbi.otp.utils.ExceptionUtils
+
 
 /**
  * Class handling the scheduling of Jobs.
@@ -52,6 +55,9 @@ class Scheduler {
 
     @Autowired
     GrailsApplication grailsApplication
+
+    @Autowired
+    JobMailService jobMailService
 
     /**
      * Log for this class.
@@ -165,6 +171,7 @@ class Scheduler {
             NotificationEvent event = new NotificationEvent(this, step, NotificationType.PROCESS_STEP_STARTED)
             grailsApplication.mainContext.publishEvent(event)
         } catch (RuntimeException e) {
+            jobMailService.sendErrorNotificationIfFastTrack(ProcessingStep.getInstance(job.processingStep.id), e)
             // removing Job from running
             schedulerService.removeRunningJob(job)
             throw new SchedulerException("doCreateCheck failed for Job of type ${job.class}", e)
@@ -217,40 +224,44 @@ class Scheduler {
      * handling, use {@link #doErrorHandling(Job, Throwable)} instead.
      */
     private void doUnsafeErrorHandling(Job job, Throwable exceptionToBeHandled) {
-        schedulerService.removeRunningJob(job)
         ProcessingStep step = ProcessingStep.getInstance(job.processingStep.id)
-        // add a ProcessingStepUpdate to the ProcessingStep
-        ProcessingStepUpdate update = new ProcessingStepUpdate(
-                date: new Date(),
-                state: ExecutionState.FAILURE,
-                previous: step.latestProcessingStepUpdate,
-                processingStep: step
-                )
-        update.save()
-        String errorHash = null
         try {
-            errorHash = errorLogService.log(exceptionToBeHandled)
-        } catch (Exception exceptionDuringLogging) {
-            log.error "Another exception occured trying to log an exception for ProcessingStepUpdate ${update.id}\n" +
-                    "original exception:\n" +
-                    "${ExceptionUtils.getStackTrace(exceptionToBeHandled)}\n" +
-                    "exception during exception logging:\n" +
-                    "${ExceptionUtils.getStackTrace(exceptionDuringLogging)}"
+            schedulerService.removeRunningJob(job)
+            // add a ProcessingStepUpdate to the ProcessingStep
+            ProcessingStepUpdate update = new ProcessingStepUpdate(
+                    date: new Date(),
+                    state: ExecutionState.FAILURE,
+                    previous: step.latestProcessingStepUpdate,
+                    processingStep: step
+            )
+            update.save()
+            String errorHash = null
+            try {
+                errorHash = errorLogService.log(exceptionToBeHandled)
+            } catch (Exception exceptionDuringLogging) {
+                log.error "Another exception occured trying to log an exception for ProcessingStepUpdate ${update.id}\n" +
+                        "original exception:\n" +
+                        "${ExceptionUtils.getStackTrace(exceptionToBeHandled)}\n" +
+                        "exception during exception logging:\n" +
+                        "${ExceptionUtils.getStackTrace(exceptionDuringLogging)}"
+            }
+            ProcessingError error = new ProcessingError(
+                    errorMessage: exceptionToBeHandled.message ?: "No Exception message",
+                    processingStepUpdate: update,
+                    stackTraceIdentifier: errorHash
+            )
+            error.save()
+            update.error = error
+            if (!update.save(flush: true)) {
+                // TODO: trigger error handling
+                log.fatal("Could not create a FAILURE Update for Job of type ${job.class}")
+                throw new ProcessingException("Could not create a FAILURE Update for Job")
+            }
+            markProcessAsFailed(step, error.errorMessage)
+            log.debug("doErrorHandling performed for ${job.class} with ProcessingStep ${step.id}")
+        } finally {
+            jobMailService.sendErrorNotificationIfFastTrack(step, exceptionToBeHandled)
         }
-        ProcessingError error = new ProcessingError(
-                errorMessage: exceptionToBeHandled.message ?: "No Exception message",
-                processingStepUpdate: update,
-                stackTraceIdentifier: errorHash
-                )
-        error.save()
-        update.error = error
-        if (!update.save(flush: true)) {
-            // TODO: trigger error handling
-            log.fatal("Could not create a FAILURE Update for Job of type ${job.class}")
-            throw new ProcessingException("Could not create a FAILURE Update for Job")
-        }
-        markProcessAsFailed(step, error.errorMessage)
-        log.debug("doErrorHandling performed for ${job.class} with ProcessingStep ${step.id}")
     }
 
     /**

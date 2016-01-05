@@ -14,7 +14,7 @@ class MailHelperServiceTests {
     MailHelperService mailHelperService
 
     @After
-    void tearDorwn() {
+    void tearDown() {
         TestCase.removeMetaClass(MailHelperService, mailHelperService)
         TestCase.removeMetaClass(MailService, mailHelperService.mailService)
     }

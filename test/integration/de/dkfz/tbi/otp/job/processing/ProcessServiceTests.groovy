@@ -885,6 +885,18 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         stacktraceFile.delete()
     }
 
+    @Test
+    void testProcessUrl_shouldBeFine() {
+        String serverUrl = grailsApplication.config.grails.serverURL
+        JobExecutionPlan plan = mockPlan()
+        Process process = mockProcess(plan)
+
+        String url = processService.processUrl(process)
+        assert "${serverUrl}/processes/process/${process.id}" == url
+    }
+
+
+
     private JobExecutionPlan mockPlan(String name = "test") {
         JobExecutionPlan plan = new JobExecutionPlan(name: name, planVersion: 0, enabled: true)
         assertNotNull(plan.save(flush: true))

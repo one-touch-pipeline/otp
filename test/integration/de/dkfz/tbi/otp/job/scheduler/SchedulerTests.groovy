@@ -1,5 +1,9 @@
 package de.dkfz.tbi.otp.job.scheduler
 
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.job.JobMailService
+import de.dkfz.tbi.otp.utils.MailHelperService
+
 import static org.junit.Assert.*
 import java.util.concurrent.ExecutorService
 
@@ -29,16 +33,9 @@ class SchedulerTests extends AbstractIntegrationTest {
     Scheduler scheduler
     SchedulerService schedulerService
 
-    @SuppressWarnings("EmptyMethod")
-    @Before
-    void setUp() {
-        // Setup logic here
-    }
-
-    @SuppressWarnings("EmptyMethod")
     @After
     void tearDown() {
-        // Tear down logic here
+        TestCase.removeMetaClass(JobMailService, scheduler.jobMailService)
     }
 
     @Test
@@ -157,9 +154,14 @@ class SchedulerTests extends AbstractIntegrationTest {
         Job endStateAwareJob = grailsApplication.mainContext.getBean("testFailureEndStateAwareJob", step, [] as Set) as Job
         endStateAwareJob.log = new NoOpLog()
         // There is no Created ProcessingStep update - execution should fail
+        int executedCounter = 0
+        scheduler.jobMailService.metaClass.sendErrorNotificationIfFastTrack = { ProcessingStep step2, String message ->
+            executedCounter++
+        }
         shouldFail(RuntimeException) {
             scheduler.executeJob(endStateAwareJob)
         }
+        assert 1 == executedCounter
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.CREATED,
@@ -183,6 +185,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         assertEquals(ExecutionState.FINISHED, updates[2].state)
         assertEquals(ExecutionState.FAILURE, updates[3].state)
         assertTrue(process.finished)
+        assert 2 == executedCounter
     }
 
     @Test
@@ -206,6 +209,15 @@ class SchedulerTests extends AbstractIntegrationTest {
             processingStep: step
             )
         assertNotNull(update.save(flush: true))
+        boolean notified = false
+        scheduler.jobMailService.metaClass.sendErrorNotificationIfFastTrack = { ProcessingStep step2, Throwable exceptionToBeHandled ->
+            if (notified) {
+                assert false: 'called twiced'
+            } else {
+                notified = true
+            }
+        }
+
         shouldFail(Exception) {
             scheduler.executeJob(job)
         }
@@ -218,6 +230,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         assertEquals(ExecutionState.FAILURE, updates[2].state)
         assertNotNull(updates[2].error)
         assertEquals("Testing", updates[2].error.errorMessage)
+        assert notified
     }
 
     @Test

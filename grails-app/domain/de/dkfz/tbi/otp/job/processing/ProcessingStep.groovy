@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import grails.util.Environment
 
 /**
@@ -231,5 +232,9 @@ public class ProcessingStep implements Serializable {
             }
         }
         return step
+    }
+
+    JobExecutionPlan getJobExecutionPlan() {
+        return process.jobExecutionPlan
     }
 }

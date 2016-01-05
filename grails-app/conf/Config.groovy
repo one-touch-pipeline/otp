@@ -155,6 +155,12 @@ if (otpConfig.otp.mail.notification.to instanceof ConfigObject) {
     otp.mail.notification.to = otpConfig.otp.mail.notification.to
 }
 
+if (otpConfig.otp.mail.notification.fasttrack.to instanceof ConfigObject) {
+    otp.mail.notification.fasttrack.to = ''
+} else {
+    otp.mail.notification.fasttrack.to = otpConfig.otp.mail.notification.fasttrack.to
+}
+
 // Folder for putting stacktrace files made by error log service
 if (otpConfig.otp.errorLogging.stacktraces instanceof ConfigObject) {
     otp.errorLogging.stacktraces = "/tmp/otp/stacktraces/"
