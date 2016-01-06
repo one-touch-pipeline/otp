@@ -1,5 +1,11 @@
 includeTargets << grailsScript("_GrailsCompile")
 
+eventTestPhaseStart = { args ->
+    // Save the name of the test phase (unit, integration, ...) in a system property
+    // to be able to access it later (while bootstrapping or setting the data source)
+    System.properties['grails.test.phase'] = args
+}
+
 eventSetClasspath = { rootLoader ->
     classpathSet = false
     println "Set Classpath handler"

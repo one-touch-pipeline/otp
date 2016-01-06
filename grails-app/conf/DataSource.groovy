@@ -1,3 +1,8 @@
+import org.hibernate.dialect.H2Dialect
+import org.hibernate.dialect.PostgreSQL9Dialect
+
+import static java.util.concurrent.TimeUnit.SECONDS
+
 Properties databaseProperties = new Properties()
 String propertiesFile = System.getenv("OTP_PROPERTIES")
 if (propertiesFile && new File(propertiesFile).canRead()) {
@@ -19,7 +24,7 @@ def databaseConfig = new ConfigSlurper().parse(databaseProperties)
 dataSource {
     pooled = Boolean.parseBoolean(databaseConfig.otp.database.pooled)
     driverClassName = "org.postgresql.Driver"
-    dialect = org.hibernate.dialect.PostgreSQL9Dialect
+    dialect = PostgreSQL9Dialect
     dbCreate = databaseConfig.otp.database.dbCreate
     username = databaseConfig.otp.database.username
     password = databaseConfig.otp.database.password
@@ -53,14 +58,48 @@ environments {
             cache.use_query_cache = false
         }
         dataSource {
-            pooled = true
-            jmxExport = true
-            driverClassName = "org.h2.Driver"
-            dialect = org.hibernate.dialect.H2Dialect
-            username = "sa"
-            password = ""
-            dbCreate = "update"
-            url = "jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE"
+            jmxExport = true  // FIXME: contradicts documentation. do we need that?
+            String phase = System.properties['grails.test.phase']
+            // NOTE: FUNCTIONAL, BUT DISABLED UNTIL ALL TESTS ARE FIXED. ACTIVATE BY DELETING "false &&". (AND REMOVE THIS NOTE.)
+            if (false && phase == 'integration') {
+                // Setup the project name for use by the Continuous Integration server the prevent race conditions.
+                String projectName = System.getenv('BUILD_NUMBER') ?
+                        "--project-name otptest-build-${System.getenv('BUILD_NUMBER')}" : ''
+                // Where is docker-compose?
+                String dockerCompose = '/usr/bin/which docker-compose'.execute()?.text
+                if (!dockerCompose) {
+                    throw new IllegalStateException('Unable to find docker-compose. Is it installed and available via PATH?')
+                }
+                // Construct command string
+                String dc = "${dockerCompose} ${projectName} --file docker/otp-test/docker-compose.yml"
+                // Stop and destroy all remaining containers. Will break if you re-use BUILD_NUMBER. Don't do that!
+                "${dc} stop".execute().waitFor()
+                "${dc} rm -f".execute().waitFor()
+                // Start a fresh container
+                if ("${dc} up -d".execute().waitFor() != 0) {
+                    throw new IllegalStateException('Unable to start new database container.')
+                }
+                // Get the (dynamically assigned local) port
+                def dockerProcess = "${dc} port ${phase} 5432".execute()
+                // If we do not get a reply in time or the return code indicates a failure, fail.
+                if (!dockerProcess.waitFor(5, SECONDS) || dockerProcess.exitValue() != 0) {
+                    throw new IllegalStateException('Unable to get port information from Docker. Is the test database container running?')
+                }
+                String dockerPort = dockerProcess.text.split(':').last().trim() // should work for IPv6 also
+                driverClassName = 'org.postgresql.Driver'
+                dialect = PostgreSQL9Dialect
+                dbCreate = 'update'
+                username = 'postgres'
+                password = ''
+                url = "jdbc:postgresql://localhost:${dockerPort}/postgres"
+            } else {
+                driverClassName = 'org.h2.Driver'
+                dialect = H2Dialect
+                username = 'sa'
+                password = ''
+                dbCreate = 'update'
+                url = 'jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE'
+            }
         }
     }
     WORKFLOW_TEST {
@@ -72,7 +111,7 @@ environments {
             pooled = true
             jmxExport = true
             driverClassName = "org.h2.Driver"
-            dialect = org.hibernate.dialect.H2Dialect
+            dialect = H2Dialect
             username = "sa"
             password = ""
             dbCreate = "update"
