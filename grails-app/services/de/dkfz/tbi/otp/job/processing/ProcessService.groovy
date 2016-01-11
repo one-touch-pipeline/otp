@@ -1,6 +1,11 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.acl.AclUtilService
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.acls.domain.BasePermission
@@ -17,31 +22,21 @@ class ProcessService {
     static transactional = true
     static final profiled = true
 
-    /**
-     * Dependency Injection of schedulerService.
-     * Needed to restart Processing Steps.
-     **/
-    def schedulerService
+    /** Needed to restart Processing Steps. */
+    SchedulerService schedulerService
 
-    /**
-     * Dependency Injection of errorLogService.
-     * Required to read the stacktrace for an error.
-     **/
-    def errorLogService
+    /** Required to read the stacktrace for an error. */
+    ErrorLogService errorLogService
 
-    /**
-     * Dependency Injection of aclUtilService.
-     **/
-    def aclUtilService
+    AclUtilService aclUtilService
 
-    /**
-     * Dependency Injection of JobExecutionPlanService.
-     **/
-    def jobExecutionPlanService
+    JobExecutionPlanService jobExecutionPlanService
 
-    def springSecurityService
+    SpringSecurityService springSecurityService
 
     LinkGenerator grailsLinkGenerator
+
+    GrailsApplication grailsApplication
 
     /**
      * Security aware way to access a Process.
@@ -87,6 +82,10 @@ class ProcessService {
         return ProcessingStep.get(id)
     }
 
+    private File getLogForProcessingStep(ProcessingStep step) {
+        return new File("${grailsApplication.config.otp.logging.jobLogDir}${File.separatorChar}${step.process.id}", "${step.id}.log")
+    }
+
     /**
      * Checks whether there is a Log file for the given ProcessingStep.
      * @param step The ProcessingStep for which it should be looked for a log file
@@ -94,8 +93,7 @@ class ProcessService {
      */
     @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public boolean processingStepLogExists(ProcessingStep step) {
-        File file = new File("logs${File.separatorChar}${step.process.id}${File.separatorChar}${step.id}.log")
-        return file.exists()
+        return getLogForProcessingStep(step).exists()
     }
 
     /**
@@ -105,7 +103,7 @@ class ProcessService {
      */
     @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public String processingStepLog(ProcessingStep step) {
-        File file = new File("logs${File.separatorChar}${step.process.id}${File.separatorChar}${step.id}.log")
+        File file = getLogForProcessingStep(step)
         if (!file.exists() || !file.isFile()) {
             return ""
         }
