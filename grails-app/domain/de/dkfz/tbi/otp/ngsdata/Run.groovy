@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 
 /**
@@ -92,7 +93,7 @@ class Run implements ProcessParameterObject{
      */
     @Override
     short getProcessingPriority() {
-        return DataFile.findAllByRun(this)*.project*.processingPriority.max()
+        return DataFile.findAllByRun(this)*.project*.processingPriority.max() ?: ProcessingPriority.NORMAL_PRIORITY
     }
 
     static mapping = {

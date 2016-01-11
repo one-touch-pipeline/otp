@@ -70,8 +70,11 @@ class ProcessingPriorityUnitTest {
     void testGetProcessingPriority() {
         Project project = Project.build(processingPriority: ProcessingPriority.NORMAL_PRIORITY)
         Run run = Run.build()
-        DataFile datafile = DataFile.build(project: project, run: run)
+        DataFile datafile = DataFile.build(run: run)
+        assert ProcessingPriority.NORMAL_PRIORITY == run.processingPriority
 
+        datafile.project = project
+        datafile.save(flush: true, failOnError: true)
         assert ProcessingPriority.NORMAL_PRIORITY == run.processingPriority
 
         Project projectFasttrack = Project.build(processingPriority: ProcessingPriority.FAST_TRACK_PRIORITY)
