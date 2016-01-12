@@ -58,7 +58,7 @@ class SnvJoiningJobTests {
     @Test
     void testMaybeSubmit() {
         boolean querySshCalled = false
-        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options ->
+        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command, File script, String options ->
             assert !querySshCalled
             querySshCalled = true
             File snvFile = new OtpPath(snvCallingInstance.snvInstancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, null)).absoluteDataManagementPath

@@ -254,7 +254,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                     snvCallingInstance2.config.configuration)
         }
 
-        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options ->
+        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command, File script, String options ->
 
             File snvFile = new OtpPath(snvCallingInstance2.snvInstancePath, step.getResultFileName(snvCallingInstance2.individual)).absoluteDataManagementPath
             File md5sumFile = createMD5SUMFile(snvCallingInstance2, SnvCallingStep.SNV_DEEPANNOTATION)

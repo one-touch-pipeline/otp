@@ -187,6 +187,24 @@ if (otpConfig.otp.pbs.ssh.password instanceof ConfigObject) {
 } else {
     otp.pbs.ssh.password = otpConfig.otp.pbs.ssh.password
 }
+// pbs ssh key file
+if (otpConfig.otp.pbs.ssh.keyFile instanceof ConfigObject) {
+    otp.pbs.ssh.keyFile = System.getProperty("user.home") + "/.ssh/id_rsa"
+} else {
+    otp.pbs.ssh.keyFile = otpConfig.otp.pbs.ssh.keyFile
+}
+// should ssh-agent be used to get the password for the ssh key (true or false)
+// if false, only key files without password can be used
+// if true, an ssh-agent must be running and the key must be added to it, even if the key file doesn't have a password
+if (otpConfig.otp.pbs.ssh.useSshAgent instanceof ConfigObject) {
+    otp.pbs.ssh.useSshAgent = true
+} else {
+    otp.pbs.ssh.useSshAgent = otpConfig.otp.pbs.ssh.useSshAgent as boolean
+}
+if (otp.pbs.ssh.keyFile == "") {
+    println "\n##### No SSH key file provided               #####"
+    println "##### Using insecure password authentication #####"
+}
 // pbs unixUser
 if (otpConfig.otp.pbs.ssh.unixUser instanceof ConfigObject) {
     otp.pbs.ssh.unixUser = ""

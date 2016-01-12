@@ -45,8 +45,10 @@ grails.project.dependency.resolution = {
         // dependencies for the flowControl API
         compile "fcClient:fcClient:0.1"
 
-        //ssh library
+        // ssh and ssh-agent proxy library
         runtime "com.jcraft:jsch:0.1.53"
+        runtime "com.jcraft:jsch.agentproxy.jsch:0.0.9"
+        runtime "com.jcraft:jsch.agentproxy.connector-factory:0.0.9"
     }
 
     plugins {

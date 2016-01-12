@@ -105,7 +105,7 @@ class ExecutionServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testExecuteJob_WhenSshServerDoesNotReturnAPbsId_ShouldThrow() {
-        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, String command, File script, String options -> return [] }
+        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command, File script, String options -> return [] }
         assertNotNull(realm.save())
         TestJob testJob = createTestJobWithProcessingStep(DomainFactory.createSeqTrack())
         testJob.log = new NoOpLog()

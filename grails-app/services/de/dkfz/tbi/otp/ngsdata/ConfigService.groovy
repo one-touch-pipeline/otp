@@ -74,4 +74,15 @@ class ConfigService {
     String getPbsPassword() {
         return grailsApplication.config.otp.pbs.ssh.password
     }
+
+    File getSshKeyFile() {
+        if (grailsApplication.config.otp.pbs.ssh.keyFile) {
+            return new File(grailsApplication.config.otp.pbs.ssh.keyFile)
+        }
+        return null
+    }
+
+    boolean useSshAgent() {
+        return grailsApplication.config.otp.pbs.ssh.useSshAgent
+    }
 }

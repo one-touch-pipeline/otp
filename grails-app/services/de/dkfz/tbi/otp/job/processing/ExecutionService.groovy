@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
+
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 import static org.springframework.util.Assert.notNull
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
@@ -12,6 +13,10 @@ import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.JSchException
 import com.jcraft.jsch.Session
+import com.jcraft.jsch.IdentityRepository
+import com.jcraft.jsch.agentproxy.Connector
+import com.jcraft.jsch.agentproxy.ConnectorFactory
+import com.jcraft.jsch.agentproxy.RemoteIdentityRepository
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
@@ -193,7 +198,9 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
             throw new ProcessingException("Neither a command nor a script specified to be run remotely.")
         }
         String password = configService.getPbsPassword()
-        return querySsh(realm.host, realm.port, realm.timeout, realm.unixUser, password, command, script, realm.pbsOptions)
+        File keyFile = configService.getSshKeyFile()
+        boolean useSshAgent = configService.useSshAgent()
+        return querySsh(realm.host, realm.port, realm.timeout, realm.unixUser, password, keyFile, useSshAgent, command, script, realm.pbsOptions)
     }
 
     /**
@@ -212,17 +219,35 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
      * @param options The options To make the command more specific
      * @return List of Strings containing the output of the executed job
      */
-    protected List<String> querySsh(String host, int port, int timeout, String username, String password, String command, File script, String options) {
-        if (!password) {
-            throw new ProcessingException("No password for remote connection specified.")
+    protected List<String> querySsh(String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command, File script, String options) {
+        if (!password && !keyFile) {
+            throw new ProcessingException("Neither password nor key file for remote connection specified.")
         }
         try {
             JSch jsch = new JSch()
+
+            if (keyFile) {
+                jsch.addIdentity(keyFile.absolutePath)
+
+                if (useSshAgent) {
+                    Connector connector = ConnectorFactory.getDefault().createConnector()
+                    if (connector != null ) {
+                        IdentityRepository repository = new RemoteIdentityRepository(connector)
+                        jsch.setIdentityRepository(repository)
+                    }
+                }
+            }
+
             Session session = jsch.getSession(username, host, port)
-            session.setPassword(password)
+            if (!keyFile) {
+                session.setPassword(password)
+            }
             session.setTimeout(timeout)
-            java.util.Properties config = new java.util.Properties()
+            Properties config = new Properties()
             config.put("StrictHostKeyChecking", "no")
+            if (keyFile) {
+                config.put("PreferredAuthentications", "publickey")
+            }
             session.setConfig(config)
             try {
                 session.connect()
