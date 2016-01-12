@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 import static de.dkfz.tbi.otp.utils.WaitingFileUtils.*
@@ -152,6 +153,14 @@ class LsdfFilesService {
         String basePath = configService.getProjectSequencePath(file.project)
         String relativePath = getFileViewByPidRelativePath(file, sequence)
         return "${basePath}/${relativePath}"
+    }
+
+    File getFileViewByPidDirectory(SeqTrack seqTrack) {
+        List<DataFile> files = DataFile.findAllBySeqTrack(seqTrack)
+        List<File> paths = files.collect() { DataFile file ->
+            new File(getFileViewByPidPath(file)).parentFile
+        }
+        return CollectionUtils.exactlyOneElement(paths.unique()).parentFile
     }
 
     String getFileViewByPidRelativePath(DataFile file, Sequence sequence = null) {

@@ -38,12 +38,10 @@ class LsdfFilesServiceTests {
 
     Run run
     Sample sample
-    SeqType seqType
     SeqPlatform seqPlatform
     SoftwareTool softwareTool
     RunSegment runSegment
     Project project
-    SeqTrack seqTrack
     FileType fileType
 
 
@@ -156,37 +154,13 @@ class LsdfFilesServiceTests {
         return seqType
     }
 
-    @After
-    void tearDown() {
-        // Tear down logic here
-        run = null
-        sample = null
-        seqType  = null
-        seqPlatform  = null
-        softwareTool = null
-        runSegment = null
-        project = null
-        seqTrack = null
-        fileType = null
-    }
-
     @Test
     void testGetFileViewByPidRelativeDirectorySeqTrackAboutAlignmentLog() {
         final String SEQ_TYPE = "OtherThanChipSeq"
         final String SEQ_TYPE_SEQUENCING_DIR = SEQ_TYPE
         SeqType seqType = createSeqType(SEQ_TYPE, SEQ_TYPE_SEQUENCING_DIR)
 
-        SeqTrack seqTrack = new SeqTrack()
-        seqTrack.laneId = laneNo
-        seqTrack.nBasePairs = baseCount
-        seqTrack.nReads = readCount
-        seqTrack.insertSize = insertSize
-        seqTrack.run = run
-        seqTrack.sample = sample
-        seqTrack.seqType = seqType
-        seqTrack.seqPlatform = seqPlatform
-        seqTrack.pipelineVersion = softwareTool
-        assertNotNull(seqTrack.save([flush: true]))
+        SeqTrack seqTrack = createSeqTrack(seqType: seqType)
         DataFile dataFile = createDataFile(seqTrack, fastqR1Filename)
 
         AlignmentParams alignmentParams = new AlignmentParams(
@@ -215,17 +189,7 @@ class LsdfFilesServiceTests {
         final String SEQ_TYPE_SEQUENCING_DIR = SEQ_TYPE
         SeqType seqType = createSeqType(SEQ_TYPE, SEQ_TYPE_SEQUENCING_DIR)
 
-        SeqTrack seqTrack = new SeqTrack()
-        seqTrack.laneId = laneNo
-        seqTrack.nBasePairs = baseCount
-        seqTrack.nReads = readCount
-        seqTrack.insertSize = insertSize
-        seqTrack.run = run
-        seqTrack.sample = sample
-        seqTrack.seqType = seqType
-        seqTrack.seqPlatform = seqPlatform
-        seqTrack.pipelineVersion = softwareTool
-        assertNotNull(seqTrack.save([flush: true]))
+        SeqTrack seqTrack = createSeqTrack(seqType: seqType)
         DataFile dataFile = createDataFile(seqTrack, fastqR1Filename)
         String correctPath = "${SEQ_TYPE_SEQUENCING_DIR}/${VIEW_BY_PID_PATH}/${individualPid}/${sampleTypeName.toLowerCase()}/${seqType.libraryLayout.toLowerCase()}/run${runName}/${VBP_PATH}/"
         String path = lsdfFilesService.getFileViewByPidRelativeDirectory(dataFile)
@@ -270,20 +234,38 @@ class LsdfFilesServiceTests {
         final String SEQ_TYPE_SEQUENCING_DIR = "chip_seq_sequencing"
         SeqType seqType = createSeqType(SEQ_TYPE, SEQ_TYPE_SEQUENCING_DIR)
 
-        SeqTrack seqTrack = new SeqTrack()
-        seqTrack.laneId = laneNo
-        seqTrack.nBasePairs = baseCount
-        seqTrack.nReads = readCount
-        seqTrack.insertSize = insertSize
-        seqTrack.run = run
-        seqTrack.sample = sample
-        seqTrack.seqType = seqType
-        seqTrack.seqPlatform = seqPlatform
-        seqTrack.pipelineVersion = softwareTool
-        assertNotNull(seqTrack.save([flush: true]))
+        SeqTrack seqTrack = createSeqTrack(seqType: seqType)
         DataFile dataFile = createDataFile(seqTrack, fastqR1Filename)
         String correctPath = "${SEQ_TYPE_SEQUENCING_DIR}/${VIEW_BY_PID_PATH}/${individualPid}/${sampleTypeName.toLowerCase()}/${seqType.libraryLayout.toLowerCase()}/run${runName}/${VBP_PATH}/"
         String path = lsdfFilesService.getFileViewByPidRelativeDirectory(dataFile)
         assertEquals(new File(correctPath).path, new File(path).path)
+    }
+
+    @Test
+    void testGetFileViewByPidDirectory() {
+        Realm realm = DomainFactory.createRealmDataManagement([name: project.realmName])
+        SeqType seqType = DomainFactory.createSeqType()
+        SeqTrack seqTrack = createSeqTrack(seqType: seqType)
+        createDataFile(seqTrack, fastqR1Filename)
+
+        String viewByPidPath = "${realm.rootPath}/${seqTrack.project.dirName}/sequencing/${seqType.dirName}/view-by-pid"
+        String expectedPath = "${viewByPidPath}/${seqTrack.individual.pid}/${seqTrack.sampleType.dirName}/${seqTrack.seqType.libraryLayoutDirName}/run${seqTrack.run.name}"
+        String actualPath = lsdfFilesService.getFileViewByPidDirectory(seqTrack)
+
+        assert expectedPath == actualPath
+    }
+
+    private SeqTrack createSeqTrack(Map properties = []) {
+        return DomainFactory.createSeqTrack([
+                laneId: laneNo,
+                nBasePairs: baseCount,
+                nReads: readCount,
+                insertSize: insertSize,
+                run: run,
+                sample: sample,
+                seqPlatform: seqPlatform,
+                pipelineVersion: softwareTool
+                ] + properties
+        )
     }
 }

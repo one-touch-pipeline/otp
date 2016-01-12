@@ -160,6 +160,10 @@ class SeqTrack implements ProcessParameterObject {
         return seqPlatform.seqPlatformGroup
     }
 
+    SeqCenter getSeqCenter() {
+        return run.seqCenter
+    }
+
     @Override
     Set<SeqTrack> getContainedSeqTracks() {
         return new HashSet<SeqTrack>([this])

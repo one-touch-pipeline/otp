@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.LinkFileUtils
 import grails.plugin.springsecurity.SpringSecurityUtils
 import org.joda.time.Duration
+import org.junit.After
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
@@ -28,6 +29,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
     File sourceFastq
     File expectedFastqc
     DataFile dataFile
+    SeqCenter seqCenter
 
     @Before
     void setUp() {
@@ -47,10 +49,20 @@ class FastqcWorkflowTests extends WorkflowTestCase {
 
         DomainFactory.createAlignableSeqTypes()
 
+        Run run = DomainFactory.createRun()
+
+        RunSegment runSegment = DomainFactory.createRunSegment(
+                run: run,
+                dataPath: stagingRootPath,
+        )
+
+        seqCenter = run.seqCenter
+
         SeqTrack seqTrack = SeqTrack.build(
                 sample: sample,
                 fastqcState: SeqTrack.DataProcessingState.NOT_STARTED,
                 seqType: SeqType.wholeGenomePairedSeqType,
+                run: run,
         )
 
         dataFile = DomainFactory.buildSequenceDataFile(
@@ -58,7 +70,9 @@ class FastqcWorkflowTests extends WorkflowTestCase {
                 fileSize: 1,
                 fileName: 'asdf.fastq.gz',
                 vbpFileName: 'asdf.fastq.gz',
-                seqTrack: seqTrack
+                seqTrack: seqTrack,
+                run: run,
+                runSegment: runSegment,
         )
 
         linkFileUtils.createAndValidateLinks([(sourceFastq): new File(lsdfFilesService.getFileFinalPath(dataFile))], realm)
@@ -84,32 +98,32 @@ class FastqcWorkflowTests extends WorkflowTestCase {
         }
     }
 
+    @After
+    void tearDown() {
+        seqCenter = null
+        dataFile = null
+    }
 
     @Test
-    void testWorkflow() {
+    void testWorkflow_FastQcDataAvailable() {
+        String initialPath = new File(lsdfFilesService.getFileInitialPath(dataFile)).parent
+        String fastqcFileName = fastqcDataFilesService.fastqcFileName(dataFile)
+
+        linkFileUtils.createAndValidateLinks([(expectedFastqc): new File("${initialPath}/${fastqcFileName}")], realm)
+
         execute()
-        FastqcProcessedFile fastqcProcessedFile = CollectionUtils.exactlyOneElement(FastqcProcessedFile.all)
+
+        checkExistenceOfResultsFiles()
+        validateFastqcProcessedFile()
+    }
 
 
-        ZipFile expectedResult = new ZipFile(expectedFastqc)
-        ZipFile actualResult = new ZipFile(fastqcDataFilesService.fastqcOutputFile(fastqcProcessedFile.dataFile))
+    @Test
+    void testWorkflow_FastQcDataNotAvailable() {
+        execute()
 
-        LinkedHashMap actualFiles = [:]
-        actualResult.entries().each { ZipEntry entry ->
-            actualFiles.put(entry.name, entry.size)
-        }
-
-        expectedResult.entries().each { ZipEntry entry ->
-            assert actualFiles[entry.name] == entry.size
-            actualFiles.remove(entry.name)
-        }
-        assert actualFiles.isEmpty()
-
-
-        assert FastqcProcessedFile.all.size() == 1
-        assert fastqcProcessedFile.fileExists
-        assert fastqcProcessedFile.contentUploaded
-        assert fastqcProcessedFile.dataFile == dataFile
+        checkExistenceOfResultsFiles()
+        validateFastqcProcessedFile()
 
         checkModuleStatus("BASIC_STATISTICS", FastqcModuleStatus.Status.PASS)
         checkModuleStatus("PER_BASE_SEQUENCE_QUALITY", FastqcModuleStatus.Status.PASS)
@@ -135,6 +149,31 @@ class FastqcWorkflowTests extends WorkflowTestCase {
 
     private void checkModuleStatus(String moduleName, FastqcModuleStatus.Status status) {
         assert CollectionUtils.exactlyOneElement(FastqcModuleStatus.findAllByModule(FastqcModule.findByIdentifier(moduleName))).status == status
+    }
+
+    private void checkExistenceOfResultsFiles(){
+        ZipFile expectedResult = new ZipFile(expectedFastqc)
+        ZipFile actualResult = new ZipFile(fastqcDataFilesService.fastqcOutputFile(dataFile))
+
+        LinkedHashMap actualFiles = [:]
+        actualResult.entries().each { ZipEntry entry ->
+            actualFiles.put(entry.name, entry.size)
+        }
+
+        expectedResult.entries().each { ZipEntry entry ->
+            assert actualFiles[entry.name] == entry.size
+            actualFiles.remove(entry.name)
+        }
+        assert actualFiles.isEmpty()
+    }
+
+    private validateFastqcProcessedFile() {
+        FastqcProcessedFile fastqcProcessedFile = CollectionUtils.exactlyOneElement(FastqcProcessedFile.all)
+
+        assert FastqcProcessedFile.all.size() == 1
+        assert fastqcProcessedFile.fileExists
+        assert fastqcProcessedFile.contentUploaded
+        assert fastqcProcessedFile.dataFile == dataFile
     }
 
     @Override

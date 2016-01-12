@@ -1,25 +1,55 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.ngsdata.*
+
 import static org.junit.Assert.*
 import grails.test.mixin.*
-import grails.test.mixin.support.*
 import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.DataFile
+import grails.test.mixin.Mock
 
+@Mock([DataFile, FastqcProcessedFile, FileType, Individual, Project, Realm, Run, RunSegment, Sample, SampleType, SeqCenter, SeqPlatform, SeqTrack, SeqType, SoftwareTool])
 @TestFor(FastqcDataFilesService)
-@TestMixin(GrailsUnitTestMixin)
 class FastqcDataFilesServiceUnitTests {
 
     FastqcDataFilesService fastqcDataFilesService
 
+    SeqTrack seqTrack
+    DataFile dataFile
+    Realm realm
+    RunSegment runSegment
+
     @Before
     public void setUp() throws Exception {
         fastqcDataFilesService = new FastqcDataFilesService()
+        fastqcDataFilesService.lsdfFilesService = new LsdfFilesService()
+        fastqcDataFilesService.lsdfFilesService.configService = new ConfigService()
+
+        realm = DomainFactory.createRealmDataManagement()
+
+        seqTrack = DomainFactory.createSeqTrack()
+        seqTrack.project.realmName = realm.name
+        assert seqTrack.project.save(flush: true)
+
+        runSegment = DomainFactory.createRunSegment(
+                run: seqTrack.run,
+                dataPath: TestCase.uniqueNonExistentPath.path,
+        )
+
+        dataFile = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment])
     }
 
     @After
     public void tearDown() throws Exception {
         fastqcDataFilesService = null
+
+        seqTrack = null
+        dataFile = null
+        realm = null
+        runSegment = null
     }
 
     @Test
@@ -120,5 +150,33 @@ class FastqcDataFilesServiceUnitTests {
             assertEquals(value + fastqcDataFilesService.FASTQC_FILE_SUFFIX + fastqcDataFilesService.FASTQC_ZIP_SUFFIX,
                     fastqcDataFilesService.fastqcFileName(dataFile))
         }
+    }
+
+    @Test
+    void testFastqcOutputDirectory() {
+        String fastqc = DataProcessingFilesService.OutputDirectories.FASTX_QC.toString().toLowerCase()
+
+        String viewByPidPath = "${realm.rootPath}/${seqTrack.project.dirName}/sequencing/${seqTrack.seqType.dirName}/view-by-pid"
+        String expectedPath = "${viewByPidPath}/${seqTrack.individual.pid}/${seqTrack.sampleType.dirName}/${seqTrack.seqType.libraryLayoutDirName}/run${seqTrack.run.name}/${fastqc}"
+        String actualPath = fastqcDataFilesService.fastqcOutputDirectory(seqTrack)
+
+        assert actualPath == expectedPath
+    }
+
+
+    @Test
+    void testGetAndUpdateFastqcProcessedFile() {
+
+        FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: dataFile)
+
+        assert fastqcProcessedFile == fastqcDataFilesService.getAndUpdateFastqcProcessedFile(fastqcProcessedFile.dataFile)
+    }
+
+
+    @Test
+    void testPathToFastQcResultFromSeqCenter() {
+        String expected = "${runSegment.dataPath}/${seqTrack.run.name}/${dataFile.pathName}/${fastqcDataFilesService.fastqcFileName(dataFile)}"
+        String actual = fastqcDataFilesService.pathToFastQcResultFromSeqCenter(dataFile)
+        assert actual == expected
     }
 }

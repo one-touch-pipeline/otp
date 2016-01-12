@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.*
-import org.springframework.security.access.prepost.PreAuthorize
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.util.zip.*
 
@@ -17,15 +17,17 @@ class FastqcDataFilesService {
 
     ConfigService configService
     DataProcessingFilesService dataProcessingFilesService
+    LsdfFilesService lsdfFilesService
 
     final String FASTQC_FILE_SUFFIX = "_fastqc"
     final String FASTQC_ZIP_SUFFIX = ".zip"
 
+
     public String fastqcOutputDirectory(SeqTrack seqTrack) {
-        Individual individual = seqTrack.sample.individual
         def type = DataProcessingFilesService.OutputDirectories.FASTX_QC
-        String baseString = dataProcessingFilesService.getOutputDirectory(individual, type)
-        return "${baseString}/${seqTrack.run.name}"
+
+        File baseString = lsdfFilesService.getFileViewByPidDirectory(seqTrack)
+        return "${baseString}/${type.toString().toLowerCase()}"
     }
 
     public String fastqcOutputFile(DataFile dataFile) {
@@ -38,7 +40,7 @@ class FastqcDataFilesService {
         return "${base}/${fileName}"
     }
 
-    private String fastqcFileName(DataFile dataFile) {
+    public String fastqcFileName(DataFile dataFile) {
         return "${fastqcFileNameWithoutZipSuffix(dataFile)}${FASTQC_ZIP_SUFFIX}"
     }
 
@@ -75,6 +77,12 @@ class FastqcDataFilesService {
         assert(fastqc.save(flush: true))
     }
 
+    public FastqcProcessedFile getAndUpdateFastqcProcessedFile(DataFile dataFile) {
+        FastqcProcessedFile fastqc = CollectionUtils.exactlyOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))
+        updateFastqcProcessedFile(fastqc)
+        return fastqc
+    }
+
     public void setFastqcProcessedFileUploaded(FastqcProcessedFile fastqc) {
         fastqc.contentUploaded = true
         assert(fastqc.save(flush: true))
@@ -95,9 +103,19 @@ class FastqcDataFilesService {
         }
         ZipFile zipFile = new ZipFile(input)
         ZipEntry zipEntry = zipFile.getEntry(withinZipPath)
-        if(!zipEntry) {
+        if (!zipEntry) {
             throw new FileNotReadableException(withinZipPath)
         }
         return zipFile.getInputStream(zipEntry)
+    }
+
+    public File pathToFastQcResultFromSeqCenter(DataFile dataFile) {
+        String fastqcFileName = this.fastqcFileName(dataFile)
+        File pathToSeqCenterFastQcFile = new File(lsdfFilesService.getFileInitialPath(dataFile)).parentFile
+        return new File(pathToSeqCenterFastQcFile, fastqcFileName)
+    }
+
+    public File pathToFastQcResultMd5SumFromSeqCenter(DataFile dataFile) {
+        return new File("${pathToFastQcResultFromSeqCenter(dataFile)}.md5sum")
     }
 }

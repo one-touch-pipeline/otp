@@ -1,42 +1,138 @@
 package de.dkfz.tbi.otp.job.jobs.fastqc
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
-import de.dkfz.tbi.otp.job.processing.PbsService
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsqc.FastqcUploadService
+import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.ProcessHelperService
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
+import org.apache.commons.logging.impl.NoOpLog
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
+
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
 
 class FastqcJobTest {
 
-    @Test
-    void testExecute_allFine_returnsCorrectCommand() {
+    @Autowired
+    ApplicationContext applicationContext
+
+    FastqcJob fastqcJob
+
+    SeqTrack seqTrack
+    DataFile dataFile
+
+    @Before
+    void setUp() {
+        File testDirectory = TestCase.createEmptyTestDirectory()
+
+        seqTrack = DomainFactory.createSeqTrack()
+
+
+        RunSegment runSegment = DomainFactory.createRunSegment(
+                run: seqTrack.run,
+                dataPath: testDirectory.path,
+        )
+
+        dataFile = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment])
+
+        DomainFactory.createRealmDataProcessing([name: seqTrack.project.realmName])
+        DomainFactory.createRealmDataManagement([name: seqTrack.project.realmName])
+
+        fastqcJob = applicationContext.getBean('fastqcJob',
+                DomainFactory.createAndSaveProcessingStep(FastqcJob.toString(), seqTrack), [])
+        fastqcJob.log = new NoOpLog()
+
         ProcessingOptionService processingOptionService = new ProcessingOptionService()
         processingOptionService.createOrUpdate("fastqcCommand", null, null, "fastqc-0.10.1", "command for fastqc")
 
-        SeqTrack seqTrack = SeqTrack.build()
-        Realm realm = Realm.build()
-        DataFile dataFile = DataFile.build(fileExists: true, fileSize: 1L)
-        FastqcJob fastqcJob = new FastqcJob()
+        WaitingFileUtils.metaClass.static.waitUntilExists = { File file -> true }
+        ProcessHelperService.metaClass.static.executeAndAssertExitCodeAndErrorOutAndReturnStdout = { String cmd ->
+            return "OK"
+        }
 
-        fastqcJob.metaClass.getProcessParameterValue { -> seqTrack.id as String }
+        fastqcJob.lsdfFilesService.metaClass.ensureFileIsReadableAndNotEmpty = { File file ->
+            return true
+        }
 
-        fastqcJob.fastqcDataFilesService = [
-                fastqcOutputDirectory: {s -> 'outputDir'},
-                fastqcRealm: {s -> realm},
-                createFastqcProcessedFile: {DataFile d -> assert dataFile == d}
-        ] as FastqcDataFilesService
-        fastqcJob.seqTrackService = [ getSequenceFilesForSeqTrack: {s -> [dataFile]} ] as SeqTrackService
-        fastqcJob.lsdfFilesService = [ getFileFinalPath: {s -> 'finalPath'} ] as LsdfFilesService
-        fastqcJob.pbsService = [
-                executeJob: {Realm inputRealm, String inputCommand ->
-                    assert realm == inputRealm
-                    assert "fastqc-0.10.1 finalPath --noextract --nogroup -o outputDir;chmod -R 440 outputDir/*.zip" == inputCommand
-                    return 'pbsJobId'
-                }
-        ] as PbsService
-        fastqcJob.metaClass.addOutputParameter {String name, String value -> 'pbsJobId' == value || realm.id.toString() == value}
+        fastqcJob.lsdfFilesService.metaClass.ensureDirIsReadableAndNotEmpty = { File file ->
+            return true
+        }
 
-        fastqcJob.execute()
+
+    }
+
+    @After
+    void tearDown() {
+
+        TestCase.removeMetaClass(ExecutionHelperService, fastqcJob.pbsService)
+        TestCase.removeMetaClass(ExecutionService, fastqcJob.executionService)
+        TestCase.removeMetaClass(LsdfFilesService, fastqcJob.lsdfFilesService)
+        TestCase.removeMetaClass(FastqcUploadService, fastqcJob.fastqcUploadService)
+        TestCase.removeMetaClass(FastqcJob, fastqcJob)
+        WaitingFileUtils.metaClass = null
+        ProcessHelperService.metaClass = null
+
+        seqTrack = null
+        dataFile = null
+    }
+
+
+    @Test
+    void testMaybeSubmit_FastQcResultsNotAvailable_executesFastQcCommand() {
+        fastqcJob.pbsService.metaClass.executeJob = { Realm inputRealm, String inputCommand ->
+            assert inputCommand.contains("fastqc-0.10.1")
+            return 'pbsJobId'
+        }
+
+        fastqcJob.executionService.metaClass.executeCommand = { Realm inputRealm, String command ->
+            assert command.contains("umask 027; mkdir -p -m 2750")
+            assert !command.contains("cp ")
+        }
+
+        fastqcJob.maybeSubmit()
+    }
+
+
+    @Test
+    void testMaybeSubmit_FastQcResultsAvailable_executesCopyCommand() {
+        File fastqcFile = CreateFileHelper.createFile(fastqcJob.fastqcDataFilesService.pathToFastQcResultFromSeqCenter(dataFile))
+
+        fastqcJob.pbsService.metaClass.executeJob = { Realm inputRealm, String inputCommand ->
+            assert false : "this method should not be reached"
+        }
+
+        fastqcJob.executionService.metaClass.executeCommand = { Realm inputRealm, String command ->
+            assert command.contains("umask 027; mkdir -p -m 2750") || command.contains("cp ")
+        }
+
+        try {
+
+            fastqcJob.maybeSubmit()
+            assert seqTrack.fastqcState == SeqTrack.DataProcessingState.FINISHED
+
+        } finally {
+            fastqcFile.delete()
+            TestCase.cleanTestDirectory()
+        }
+
+    }
+
+
+    @Test
+    void testValidate_DataNotFromGPCF_shallBeUploadToDB() {
+        FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
+
+        assert fastqcProcessedFile.contentUploaded == false
+
+        fastqcJob.fastqcUploadService.metaClass.uploadFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
+        fastqcJob.validate()
+
+        assert fastqcProcessedFile.contentUploaded == true
+        assert seqTrack.fastqcState == SeqTrack.DataProcessingState.FINISHED
     }
 }

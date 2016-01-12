@@ -718,6 +718,13 @@ class DomainFactory {
         ], seqTrackProperties)
     }
 
+
+    public static FastqcProcessedFile createFastqcProcessedFile(Map properties = [:]) {
+        return createDomainObject(FastqcProcessedFile, [
+                dataFile: { createDataFile() },
+        ], properties)
+    }
+
     public static MergingWorkPackage createMergingWorkPackage(Map properties = [:]) {
         return createDomainObject(MergingWorkPackage, [
                 libraryPreparationKit: { createLibraryPreparationKit() },
@@ -737,7 +744,7 @@ class DomainFactory {
         ], properties)
     }
 
-    static createDataFile(Map properties = [:]) {
+    static DataFile createDataFile(Map properties = [:]) {
         return createDomainObject(DataFile, [
                 fileName: "DataFileFileName_${counter}_R1.gz",
                 vbpFileName: "VbpDataFileFileName_${counter}_R1.gz",
@@ -750,7 +757,7 @@ class DomainFactory {
                 vbpFilePath: "vbpPath_${counter}",
                 metaDataValid: true,
                 fileWithdrawn: false,
-                fileType: {createFileType(type: FileType.Type.SEQUENCE)},
+                fileType: {createFileType(type: FileType.Type.SEQUENCE, vbpPath: 'sequence')},
                 used: true,
                 fileExists: true,
                 fileLinked: true,
