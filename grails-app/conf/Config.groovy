@@ -92,9 +92,9 @@ environments {
 
 
 if (otpConfig.otp.log.jobLogDir instanceof ConfigObject) {
-    otp.logging.jobLogDir = otpConfig.otp.logging.jobLogDir
-} else {
     otp.logging.jobLogDir = "logs"
+} else {
+    otp.logging.jobLogDir = otpConfig.otp.logging.jobLogDir
 }
 
 // log4j configuration
