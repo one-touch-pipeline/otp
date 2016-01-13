@@ -504,9 +504,9 @@ class ProcessedAlignmentFileServiceTests {
         ProcessedBamFile processedBamFile = createProcessedBamFileWhichIsMerged(
                         mergingBamFileMap: [qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS]
                         )
-        createProcessedAlignmentFileService()
+        createProcessedAlignmentFileService(processedBamFile)
 
-        assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
+        assert LENGTH_ONE_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
     }
 
     @Test
@@ -811,9 +811,9 @@ class ProcessedAlignmentFileServiceTests {
         ProcessedBamFile processedBamFile = createProcessedBamFileWithSaiFileWhichIsMerged(
                         mergingBamFileMap: [qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS]
                         )
-        createProcessedAlignmentFileService()
+        createProcessedAlignmentFileService(processedBamFile)
 
-        assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
+        assert LENGTH_ONE_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
     }
 
     @Test

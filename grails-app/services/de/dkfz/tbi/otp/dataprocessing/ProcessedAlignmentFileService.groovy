@@ -131,7 +131,7 @@ class ProcessedAlignmentFileService {
                         "AND bf2.alignmentPass.identifier > bf1.alignmentPass.identifier)" +
                 ") OR (" +
                     // merged
-                    AbstractBamFileService.QUALITY_ASSESSED_AND_MERGED_QUERY +
+                    AbstractBamFileService.QUALITY_ASSESSED_AND_MERGED_QUERY_WITHOUT_QA_CHECK +
                 "))"
             final String query2 = " AND (fileExists = true OR deletionDate IS NULL) AND dateCreated < :createdBefore"
             final Map params = [

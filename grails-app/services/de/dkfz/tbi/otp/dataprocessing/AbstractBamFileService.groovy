@@ -6,23 +6,32 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class AbstractBamFileService {
 
-    /**
-     * Same criteria as in {@link #hasBeenQualityAssessedAndMerged(AbstractBamFile, Date)}.
-     */
-    public static final String QUALITY_ASSESSED_AND_MERGED_QUERY =
+    private static final String QUALITY_ASSESSED_AND_MERGED_QUERY_PART =
         "qualityAssessmentStatus = :qaStatus AND status = :status AND EXISTS (" +
             "FROM MergingSetAssignment msa " +
             "WHERE msa.mergingSet.status = :mergingSetStatus " +
             "AND msa.bamFile = bf1 AND EXISTS (" +
                 "FROM ProcessedMergedBamFile bf3 " +
-                // Make sure that the PMBF (bf3) which this BAM file (bf1) has been merged into has already been
-                // quality assessed and is old enough.
-                "WHERE bf3.qualityAssessmentStatus = :qaStatus " +
-                "AND bf3.dateCreated < :createdBefore " +
+                // Make sure that the PMBF (bf3) which this BAM file (bf1) has been merged into is old enough.
+                "WHERE bf3.dateCreated < :createdBefore " +
                 // If this BAM file (bf1) is withdrawn, don't care whether bf3 is withdrawn. If bf1 is *not* withdrawn,
                 // require bf3 not to be withdrawn.
                 "AND (bf1.withdrawn = true OR bf3.withdrawn = false) " +
-                "AND bf3.mergingPass.mergingSet = msa.mergingSet))"
+                "AND bf3.mergingPass.mergingSet = msa.mergingSet "
+
+    /**
+     * Same criteria as in {@link #hasBeenQualityAssessedAndMerged(AbstractBamFile, Date)}.
+     */
+    public static final String QUALITY_ASSESSED_AND_MERGED_QUERY =
+            QUALITY_ASSESSED_AND_MERGED_QUERY_PART +
+                // Make sure that the PMBF (bf3) which this BAM file (bf1) has been merged into has already been
+                // quality assessed.
+                "AND bf3.qualityAssessmentStatus = :qaStatus)) "
+
+
+    public static final String QUALITY_ASSESSED_AND_MERGED_QUERY_WITHOUT_QA_CHECK =
+            QUALITY_ASSESSED_AND_MERGED_QUERY_PART + ")) "
+
 
     /**
      * @param bamFile, which was assigned to a {@link MergingSet}
