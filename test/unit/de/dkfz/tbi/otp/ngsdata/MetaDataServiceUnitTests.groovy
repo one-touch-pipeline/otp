@@ -152,6 +152,7 @@ class MetaDataServiceUnitTests {
             [name: 'SOMEPID_s_6_2_sequence.txt.gz', readNumber: 2],
             [name: 'SOMEPID_s_3_1_sequence.txt.gz', readNumber: 1],
             [name: 'AB-1234_CDE_EFGH_091_lib14837_1189_7_1.fastq.tar.bz', readNumber: 1],
+            [name: 'AB-1234_CDE_EFGH_091_lib114837_1189_7_1.fastq.tar.bz', readNumber: 1],
             [name: 'AB-1234_5647_lib12345_1_sequence.fastq.bz2', readNumber: 1],
             [name: 'CD-2345_6789_lib234567_7890_1.fastq.bz2', readNumber: 1],
             [name: 'NB_E_789_R.2.fastq.gz', readNumber: 2],
