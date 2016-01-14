@@ -555,7 +555,7 @@ class MetaDataService {
             //AB-1234_CDE_EFGH_091_lib14837_1189_7_1.fastq.tar.bz
             //AB-1234_5647_lib12345_1_sequence.fastq.bz2
             //CD-2345_6789_lib234567_7890_1.fastq.bz2
-            [regExpr: /^[A-Z]{2}-\d{4}_.+_lib\d{5}(_\d{4})?(_\d{1,2})?_([12])(_sequence)?\.fastq.+/, readGroupNumber: 3],
+            [regExpr: /^[A-Z]{2}-\d{4}_.+_lib\d{5,6}(_\d{4})?(_\d{1,2})?_([12])(_sequence)?\.fastq.+/, readGroupNumber: 3],
             //NB_E_789_R.1.fastq.gz
             //NB_E_789_R.2.fastq.gz
             //NB_E_234_R5.2.fastq.gz
