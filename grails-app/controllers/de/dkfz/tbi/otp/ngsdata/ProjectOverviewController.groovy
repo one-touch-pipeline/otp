@@ -55,7 +55,7 @@ class ProjectOverviewController {
      * determine, if the column sample identifier should be hide in the view
      */
     private boolean hideSampleIdentifier(Project project) {
-        return project.name == "MMML"
+        return project.name == "MMML" || project.name == "MMML_XP"
     }
 
     class InfoAboutOneSample {

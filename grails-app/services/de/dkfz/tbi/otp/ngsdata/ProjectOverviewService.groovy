@@ -256,7 +256,7 @@ where
     public List tableForMMMLMapping(){
         def seq = Individual.withCriteria {
             project {
-                eq("name", "MMML")
+                'in'("name", ["MMML", "MMML_XP"])
             }
             projections {
                 property("id")

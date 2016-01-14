@@ -52,7 +52,7 @@ $.otp.projectOverviewTable = {
                                         mockPid: mockPid
                                     }
                                 });
-                            if ($('#project').val()!= "MMML") {
+                            if ($('#project').val()!= "MMML" && $('#project').val()!= "MMML_XP") {
                                 row[2] = $.otp.createLinkMarkup({
                                         controller: 'individual',
                                         action: 'show',
