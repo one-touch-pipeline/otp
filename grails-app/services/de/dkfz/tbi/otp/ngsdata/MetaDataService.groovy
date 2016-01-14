@@ -205,7 +205,8 @@ class MetaDataService {
      * @param tab - separator (typically '\t')
      * @return - array of strings
      */
-    private List<String> tokenize(String line, String tab) {
+    // TODO: OTP-1899: Revise this method
+    static List<String> tokenize(String line, String tab) {
         List<String> tokens = []
         int idx = 0
         for (int i=0; i < line.length(); i++) {
