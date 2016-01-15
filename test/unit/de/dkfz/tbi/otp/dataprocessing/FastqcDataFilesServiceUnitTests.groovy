@@ -117,7 +117,8 @@ class FastqcDataFilesServiceUnitTests {
 
         files.each { key, value ->
             dataFile.fileName = key
-            assertEquals(value + fastqcDataFilesService.fastqcFileSuffix, fastqcDataFilesService.fastqcFileName(dataFile))
+            assertEquals(value + fastqcDataFilesService.FASTQC_FILE_SUFFIX + fastqcDataFilesService.FASTQC_ZIP_SUFFIX,
+                    fastqcDataFilesService.fastqcFileName(dataFile))
         }
     }
 }

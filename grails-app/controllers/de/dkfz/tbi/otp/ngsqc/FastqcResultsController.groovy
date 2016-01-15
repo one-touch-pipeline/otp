@@ -2,44 +2,75 @@ package de.dkfz.tbi.otp.ngsqc
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
+import org.jsoup.select.Elements
+
 
 class RenderFileCommand {
-    Long id
-    String withinZipPath
+    DataFile dataFile
+    String path
+
+    static constraints = {
+        dataFile nullable: false
+        path nullable: false, blank: false
+    }
 }
 
 class FastqcResultsController {
 
-    def fastqcResultsService
-    def fastqcDataFilesService
+    FastqcDataFilesService fastqcDataFilesService
+    FastqcResultsService fastqcResultsService
+    LsdfFilesService lsdfFilesService
+    MetaDataService metaDataService
 
     def show() {
-        long id = params.id as long
-        DataFile dataFile = DataFile.get(id)
-        if (!dataFile || !fastqcResultsService.isFastqcAvailable(dataFile)) {
-            response.sendError(404)
+        DataFile dataFile = metaDataService.getDataFile(params.id as long)
+        if (!dataFile) {
+            render status: 404
             return
         }
-        FastqcProcessedFile fastqc = fastqcResultsService.fastqcProcessedFile(dataFile)
-        List<FastqcModuleStatus> modules = fastqcResultsService.moduleStatusForDataFile(fastqc)
-        Map<String, String> moduleStatus = [:]
-        Map<String, String> moduleText = [:]
-        modules.each {
-            moduleStatus.put(it.module.identifier, (it.status as String).toLowerCase())
-            moduleText.put(it.module.identifier, it.module.name)
+
+        String result
+
+        if(!fastqcResultsService.isFastqcAvailable(dataFile)) {
+            result = message(code: "fastqc.show.notAvailable")
+        } else {
+            String html = fastqcDataFilesService.getInputStreamFromZipFile(dataFile, "fastqc_report.html").text
+
+            Elements elements = Jsoup.parse(html).select("div.summary, div.main, div.footer")
+
+            elements.select("h2").first().remove()
+
+            elements.select("img").iterator().each { Element img ->
+                String file = img.attr("src")
+                String link
+                switch (file) {
+                    case "Icons/tick.png":
+                        link = createLink(controller: "assets", action: "ok.png")
+                        break
+                    case "Icons/warning.png":
+                        link = createLink(controller: "assets", action: "warning.png")
+                        break
+                    case "Icons/error.png":
+                        link = createLink(controller: "assets", action: "error.png")
+                        break
+                    default:
+                        link = createLink(controller: "fastqcResults",
+                                action: "renderFile",
+                                params: ["dataFile.id": dataFile.id, path: file]
+                        )
+                }
+                img.attr("src", link)
+            }
+            result = elements.toString()
         }
         return [
-            id: dataFile.id,
-            pid: dataFile.individual.displayName,
-            runName: dataFile.run.name,
-            laneId: dataFile.seqTrack.laneId,
-            mateNumber: dataFile.mateNumber,
-            fileName: dataFile.fileName,
-            moduleStatus: moduleStatus,
-            moduleText: moduleText,
-            basicStats: fastqcResultsService.basicStatisticsForDataFile(fastqc),
-            kmerContent: fastqcResultsService.kmerContentForDataFile(fastqc),
-            overrepSeq: fastqcResultsService.overrepresentedSequencesForDataFile(fastqc)
+                html      : result,
+                pid       : dataFile.individual.displayName,
+                runName   : dataFile.run.name,
+                laneId    : dataFile.seqTrack.laneId,
+                mateNumber: dataFile.mateNumber,
         ]
     }
 
@@ -49,13 +80,16 @@ class FastqcResultsController {
      */
     def renderFile(RenderFileCommand cmd) {
         if (cmd.hasErrors()) {
-            response.sendError(404)
-            return
+            render status: 404
+        } else {
+            InputStream stream
+            try {
+                stream = fastqcDataFilesService.getInputStreamFromZipFile(cmd.dataFile, cmd.path)
+            } catch (FileNotReadableException e) {
+                render status: 404
+                return
+            }
+            render file: stream , contentType: "image/png"
         }
-        DataFile dataFile = DataFile.get(cmd.id)
-        String zipPath = fastqcDataFilesService.fastqcOutputFile(dataFile)
-        response.outputStream << fastqcDataFilesService.getInputStreamFromZip(zipPath, cmd.withinZipPath)
-        response.outputStream.flush()
     }
 }
-

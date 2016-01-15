@@ -2,6 +2,8 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.*
+import org.springframework.security.access.prepost.PreAuthorize
+
 import java.util.zip.*
 
 /**
@@ -13,10 +15,11 @@ import java.util.zip.*
 
 class FastqcDataFilesService {
 
-    def configService
-    def dataProcessingFilesService
+    ConfigService configService
+    DataProcessingFilesService dataProcessingFilesService
 
-    final String fastqcFileSuffix = "_fastqc.zip"
+    final String FASTQC_FILE_SUFFIX = "_fastqc"
+    final String FASTQC_ZIP_SUFFIX = ".zip"
 
     public String fastqcOutputDirectory(SeqTrack seqTrack) {
         Individual individual = seqTrack.sample.individual
@@ -28,7 +31,7 @@ class FastqcDataFilesService {
     public String fastqcOutputFile(DataFile dataFile) {
         SeqTrack seqTrack = dataFile.seqTrack
         if (!seqTrack) {
-            ProcessingException("DataFile not assigned to a SeqTrack")
+            throw new ProcessingException("DataFile not assigned to a SeqTrack")
         }
         String base = fastqcOutputDirectory(seqTrack)
         String fileName = fastqcFileName(dataFile)
@@ -36,6 +39,10 @@ class FastqcDataFilesService {
     }
 
     private String fastqcFileName(DataFile dataFile) {
+        return "${fastqcFileNameWithoutZipSuffix(dataFile)}${FASTQC_ZIP_SUFFIX}"
+    }
+
+    private String fastqcFileNameWithoutZipSuffix(DataFile dataFile) {
         String fileName = dataFile.fileName
         /*
          * The fastqc tool does not allow to specify the output file name, only the output directory.
@@ -45,7 +52,7 @@ class FastqcDataFilesService {
          */
         String body = fileName.replaceAll(".gz\$", "").replaceAll(".bz2\$", "").replaceAll(".txt\$", "").
                         replaceAll(".fastq\$", "").replaceAll(".sam\$", "").replaceAll(".bam\$", "")
-        return "${body}${fastqcFileSuffix}"
+        return "${body}${FASTQC_FILE_SUFFIX}"
     }
 
     public Realm fastqcRealm(SeqTrack seqTrack) {
@@ -74,19 +81,24 @@ class FastqcDataFilesService {
     }
 
     /**
-    * Returns an inputStream from the contents of the zip file
-    * @param zipPath Path to the zip file
-    * @param withinZipPath Path to the resource within the zip file
-    * @return An inputStream for the combination of zipPath and the withinZipPath parameters
-    */
-   public InputStream getInputStreamFromZip(String zipPath, String withinZipPath) {
-       File input = new File(zipPath)
-       if (!input.canRead()) {
-           throw new FileNotReadableException(input.path)
-       }
-       ZipFile zipFile = new ZipFile(input)
-       String zipBasePath = zipPath.substring(zipPath.lastIndexOf("/")+1, zipPath.lastIndexOf(".zip"))
-       ZipEntry zipEntry = zipFile.getEntry("${zipBasePath}/${withinZipPath}")
-       return zipFile.getInputStream(zipEntry)
-   }
+     * Returns an inputStream from the contents of a fastqc zip file
+     * @param dataFile The dataFile the zip file belongs to
+     * @param withinZipPath Path to the resource within the zip file
+     * @return An inputStream for the combination of zipPath and the withinZipPath parameters
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#dataFile.project, read)")
+    public InputStream getInputStreamFromZipFile(DataFile dataFile, String withinZipPath) {
+        String zipPath = fastqcOutputFile(dataFile)
+        withinZipPath = "${fastqcFileNameWithoutZipSuffix(dataFile)}/${withinZipPath}"
+        File input = new File(zipPath)
+        if (!input.canRead()) {
+            throw new FileNotReadableException(input.path)
+        }
+        ZipFile zipFile = new ZipFile(input)
+        ZipEntry zipEntry = zipFile.getEntry(withinZipPath)
+        if(!zipEntry) {
+            throw new FileNotReadableException(withinZipPath)
+        }
+        return zipFile.getInputStream(zipEntry)
+    }
 }

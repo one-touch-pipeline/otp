@@ -3,8 +3,6 @@
 <head>
     <meta name="layout" content="main"/>
     <title><g:message code="otp.welcome.title"/></title>
-    <asset:javascript src="modules/lightbox"/>
-    <asset:stylesheet src="modules/lightbox"/>
     <asset:javascript src="modules/graph"/>
     <asset:javascript src="pages/home/index/projectOverview.js"/>
 </head>
