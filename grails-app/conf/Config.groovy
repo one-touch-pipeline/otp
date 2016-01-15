@@ -91,7 +91,7 @@ environments {
 }
 
 
-if (otpConfig.otp.log.jobLogDir instanceof ConfigObject) {
+if (otpConfig.otp.logging.jobLogDir instanceof ConfigObject) {
     otp.logging.jobLogDir = "logs"
 } else {
     otp.logging.jobLogDir = otpConfig.otp.logging.jobLogDir
