@@ -77,7 +77,7 @@ def bySamples = { String workflow ->
 
 def importStarted = {
     String folderPath = "STORAGE_ROOTSEQUENCING_INBOX"
-    List list = ilseIdList.collect {
+    List list = ilseIdList.findAll().collect {
         def matcher = it =~ /(\d)\d{3}/
         return "[ll ${folderPath}/00${matcher[0][1]}/00${it}/]"
     }
@@ -114,6 +114,9 @@ def snvStartedAndFinished = {
 }
 
 println "IlseIds:\n\t" + ilseIdList
+println "Runs:\n\t" + runIdList
+println "Number of Runs:\n\t" + runIdList.size()
+println "Number of Samples:\n\t" + samples.unique().size()
 println "Projects:\n\t" + projects
 println "SeqTypes:\n\t" + seqTypes*.displayName
 println "Alignment:\n\t" + alignments.join("\n")
