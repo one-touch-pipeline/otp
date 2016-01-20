@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled
 @Scope("singleton")
 class DataFileStatusStartJob extends AbstractStartJobImpl {
 
-    @Scheduled(cron="0 0 1 * * *")
+    @Scheduled(cron="0 0 1 * * SAT")
     void execute() {
         ConsistencyCheck consistencyCheck = new ConsistencyCheck()
         consistencyCheck.save(flush: true)
