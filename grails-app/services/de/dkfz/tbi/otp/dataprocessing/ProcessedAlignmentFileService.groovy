@@ -66,17 +66,19 @@ class ProcessedAlignmentFileService {
             final Collection<QualityAssessmentPass> qaPasses = QualityAssessmentPass.findAllByProcessedBamFile(bamFile)
             final Collection<ProcessedSaiFile> saiFiles = ProcessedSaiFile.findAllByAlignmentPass(alignmentPass)
             boolean consistent = true
-            qaPasses.each {
-                if (!applicationContext.processedBamFileQaFileService.checkConsistencyForProcessingFilesDeletion(it)) {
+            if (!bamFile.withdrawn) {
+                qaPasses.each {
+                    if (!applicationContext.processedBamFileQaFileService.checkConsistencyForProcessingFilesDeletion(it)) {
+                        consistent = false
+                    }
+                }
+                if (!applicationContext.processedBamFileService.checkConsistencyForProcessingFilesDeletion(bamFile)) {
                     consistent = false
                 }
-            }
-            if (!applicationContext.processedBamFileService.checkConsistencyForProcessingFilesDeletion(bamFile)) {
-                consistent = false
-            }
-            saiFiles.each {
-                if (!applicationContext.processedSaiFileService.checkConsistencyForProcessingFilesDeletion(it)) {
-                    consistent = false
+                saiFiles.each {
+                    if (!applicationContext.processedSaiFileService.checkConsistencyForProcessingFilesDeletion(it)) {
+                        consistent = false
+                    }
                 }
             }
             if (consistent) {
@@ -106,6 +108,7 @@ class ProcessedAlignmentFileService {
      * <ul>
      *     <li>For the same SeqTrack there is a later alignment pass that has been processed.</li>
      *     <li>The resulting BAM file has been merged.</li>
+     *     <li>The bam file is withdrawn.</li>
      * </ul>
      *
      * See {@link #deleteProcessingFiles(AlignmentPass)} for details about which files are deleted.
@@ -132,6 +135,9 @@ class ProcessedAlignmentFileService {
                 ") OR (" +
                     // merged
                     AbstractBamFileService.QUALITY_ASSESSED_AND_MERGED_QUERY_WITHOUT_QA_CHECK +
+                ") OR (" +
+                    // withdrawn
+                    "bf1.withdrawn = true" +
                 "))"
             final String query2 = " AND (fileExists = true OR deletionDate IS NULL) AND dateCreated < :createdBefore"
             final Map params = [
@@ -187,6 +193,9 @@ class ProcessedAlignmentFileService {
             }
         }
         if (abstractBamFileService.hasBeenQualityAssessedAndMerged(bamFile, createdBefore)) {
+            return true
+        }
+        if (bamFile.withdrawn) {
             return true
         }
         return false

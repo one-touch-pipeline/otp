@@ -113,13 +113,15 @@ class MergingPassService {
             final ProcessedMergedBamFile bamFile = bamFiles.first()
             final Collection<QualityAssessmentMergedPass> qaPasses = QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(bamFile)
             boolean consistent = true
-            qaPasses.each {
-                if (!processedMergedBamFileQaFileService.checkConsistencyForProcessingFilesDeletion(it)) {
+            if (!bamFile.withdrawn) {
+                qaPasses.each {
+                    if (!processedMergedBamFileQaFileService.checkConsistencyForProcessingFilesDeletion(it)) {
+                        consistent = false
+                    }
+                }
+                if (!processedMergedBamFileService.checkConsistencyForProcessingFilesDeletion(bamFile)) {
                     consistent = false
                 }
-            }
-            if (!processedMergedBamFileService.checkConsistencyForProcessingFilesDeletion(bamFile)) {
-                consistent = false
             }
             if (consistent) {
                 qaPasses.each {
@@ -146,6 +148,7 @@ class MergingPassService {
      *     <li>It has been copied to the final destination.</li>
      *     <li>For the same merging set there is a later merging pass that has been processed.</li>
      *     <li>The resulting BAM file has been further merged in a subsequent merging set.</li>
+     *     <li>The bam file is withdrawn.</li>
      * </ul>
      *
      * See {@link #deleteProcessingFiles(MergingPass)} for details about which files are deleted.
@@ -177,6 +180,9 @@ class MergingPassService {
                 ") OR (" +
                     // further merged
                     AbstractBamFileService.QUALITY_ASSESSED_AND_MERGED_QUERY +
+                ") OR (" +
+                    // withdrawn
+                    "bf1.withdrawn = true " +
                 ")) AND (fileExists = true OR deletionDate IS NULL) AND dateCreated < :createdBefore",
                 [
                         createdBefore: createdBefore,
@@ -223,6 +229,9 @@ class MergingPassService {
             }
         }
         if (abstractBamFileService.hasBeenQualityAssessedAndMerged(bamFile, createdBefore)) {
+            return true
+        }
+        if (bamFile.withdrawn) {
             return true
         }
         return false

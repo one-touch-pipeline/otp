@@ -65,7 +65,7 @@ class DataProcessingFilesService {
     }
 
     /**
-     * If there are inconsistencies, details are logged to the thread log (see {@link LogThreadLocal}).
+     * If there are inconsistencies, details are logged to the thread log (see {@link de.dkfz.tbi.otp.utils.logging.LogThreadLocal}).
      *
      * @param dbFile Any object with properties fileExists, deletionDate and dateFromFileSystem.
      * @return true if there is no serious inconsistency.
@@ -102,7 +102,7 @@ class DataProcessingFilesService {
      * Checks consistency between the files in the processing directory and the files in the final destination (= project
      * folder) as a preparation for deleting the files in the processing directory.
      *
-     * If there are inconsistencies, details are logged to the thread log (see {@link LogThreadLocal}).
+     * If there are inconsistencies, details are logged to the thread log (see {@link de.dkfz.tbi.otp.utils.logging.LogThreadLocal}).
      *
      * @return true if there is no serious inconsistency.
      */
