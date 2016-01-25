@@ -80,6 +80,131 @@ $.otp.projectOverviewTable = {
         });
     },
 
+    updateDates: function () {
+        "use strict";
+        $.getJSON($.otp.createLink({
+            controller : 'projectOverview',
+            action : 'updateDates'
+        }), {
+            projectName : $('#project').val()
+        }, function (data) {
+            var message, i;
+            if (data) {
+                $('#creation-date').html(data.creationDate);
+                $('#last-received-date').html(data.lastReceivedDate);
+            } else if (data.error) {
+                $.otp.warningMessage(data.error);
+                $('#creation-date').html("");
+                $('#last-received-date').html("");
+            } else if (data.errors) {
+                $('#creation-date').html("");
+                $('#last-received-date').html("");
+                message = "<ul>";
+                for (i = 0; i < data.errors.length; i += 1) {
+                    message += "<li>" + data.errors[i].message + "</li>";
+                }
+                message += "</ul>";
+                $.otp.warningMessage(message);
+            }
+        }).error(function (jqXHR) {
+            $.otp.warningMessage(jqXHR.statusText + jqXHR.status);
+        });
+    },
+
+    deleteUser: function (contactPersonName) {
+        "use strict";
+        $.ajax({
+            type: 'GET',
+            url: $.otp.createLink({
+                controller: 'projectOverview',
+                action: 'deleteContactPersonOrRemoveProject'
+            }),
+            dataType: 'json',
+            cache: 'false',
+            data: {
+                contactPersonName: contactPersonName,
+                projectName: $('#project').val()
+            },
+            success: function (data) {
+                if (data.success) {
+                    $.otp.infoMessage($L("editorswitch.notification.success"));
+                    window.setTimeout('location.reload()', 500);
+                } else {
+                    $.otp.warningMessage(data.error);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
+            }
+        });
+    },
+
+    updateValue: function (property, contactPersonName, value) {
+        var input = prompt("Enter new " + property, value);
+        var action = 'update'+property;
+        if (input != null) {
+            $.ajax({
+                type: 'GET',
+                url: $.otp.createLink({
+                    controller: 'projectOverview',
+                    action: action
+                }),
+                dataType: 'json',
+                cache: 'false',
+                data: {
+                    value: input,
+                    contactPersonName: contactPersonName,
+                    projectName: $('#project').val()
+                },
+                success: function (data) {
+                    if (data.success) {
+                        $.otp.infoMessage($L("editorswitch.notification.success"));
+                        window.setTimeout('location.reload()', 500);
+                    } else {
+                        $.otp.warningMessage(data.error);
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
+                }
+            });
+        }
+    },
+
+    specificOverview: function () {
+        "use strict";
+        var oTable = $.otp.projectOverviewTable.registerDataTable(
+            '#listContactPerson',
+            $.otp.createLink({
+                controller: 'projectOverview',
+                action: 'dataTableContactPerson',
+                parameters: {projectName : $('#project').val()}
+            }),
+            function (json) {
+                for (var i = 0; i < json.aaData.length; i += 1) {
+                    var row = json.aaData[i];
+                    var contactPersonName = row[0];
+                    var contactPersonEmail = row[1];
+                    var contactPersonAspera = row[2];
+                    row[1] ='<input class= "edit-button-left" type="button" onclick="$.otp.projectOverviewTable.updateValue(\'Name\',\'' + contactPersonName + '\',\'' + contactPersonName + '\')"/>';
+                    row[2] = contactPersonEmail;
+                    row[3] ='<input class= "edit-button-left" type="button" onclick="$.otp.projectOverviewTable.updateValue(\'Email\',\'' + contactPersonName + '\',\'' + contactPersonEmail + '\')"/>';
+                    row[4] = contactPersonAspera;
+                    row[5] = '<input class= "edit-button-left" type="button" onclick="$.otp.projectOverviewTable.updateValue(\'Aspera\',\'' + contactPersonName + '\',\'' + contactPersonAspera + '\')"/>';
+                    row[6] = '<input type="button" value="Delete" onclick="$.otp.projectOverviewTable.deleteUser(\'' + contactPersonName + '\')"/>';
+                }
+                return json;
+            }
+        );
+        $.otp.projectOverviewTable.updateDates();
+        $('#project').change(function () {
+            var oSettings = oTable.fnSettings();
+            oSettings.oFeatures.bServerSide = true;
+            oTable.fnDraw();
+            $.otp.projectOverviewTable.updateDates();
+        });
+    },
+
     register: function () {
         "use strict";
         var oTable1 = $.otp.projectOverviewTable.registerDataTable(

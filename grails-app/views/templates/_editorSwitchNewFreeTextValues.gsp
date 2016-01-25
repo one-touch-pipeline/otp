@@ -15,5 +15,5 @@
         <button class="buttons save"><g:message code="default.button.save.label"/></button>
         <button class="buttons cancel"><g:message code="default.button.cancel.label"/></button>
     </span>
-    <span class="edit-switch-new-free-text-values-label"><button class="edit">&nbsp;</button></span>
+    <span class="edit-switch-new-free-text-values-label"><button class="add"><g:message code="default.new"/></button></span>
 </div>

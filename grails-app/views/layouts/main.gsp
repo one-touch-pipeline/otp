@@ -61,7 +61,7 @@
                                             <li id="clusterJobJobTypeSpecific"><g:link controller="clusterJobJobTypeSpecific" action="index"><g:message code="otp.menu.jobstats.jobTypeSpecific"/></g:link></li><br>
                                         </sec:ifAllGranted>
                                         <li id="index"><g:link controller="projectOverview" action="index"><g:message code="otp.menu.projectSpecificStatistics"/></g:link></li><br>
-                                        <li id="laneOverview"><g:link controller="projectOverview" action="laneOverview"><g:message code="otp.menu.projectSpecificStatisticsTableOverview"/></g:link></li><br>
+                                        <li id="specificOverview"><g:link controller="projectOverview" action="specificOverview"><g:message code="otp.menu.projectSpecificStatisticsTableOverview"/></g:link></li><br>
                                         <sec:ifAllGranted roles="ROLE_MMML_MAPPING">
                                             <li id="mmmlIdentifierMapping"><g:link controller="projectOverview" action="mmmlIdentifierMapping"><g:message code="otp.menu.mmmlIdentifierMapping"/></g:link></li><br>
                                         </sec:ifAllGranted>

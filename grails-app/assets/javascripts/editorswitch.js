@@ -53,7 +53,7 @@ $(function() {
         $("p.edit-switch-new-free-text-value-label", outerContainer).hide();
     });
 
-    $("div.edit-switch-new-free-text-values span.edit-switch-new-free-text-values-label button.edit").click(function () {
+    $("div.edit-switch-new-free-text-values span.edit-switch-new-free-text-values-label button.add").click(function () {
         "use strict";
         var outerContainer;
         outerContainer = $(this).parent().parent();
@@ -194,7 +194,9 @@ $(function() {
                                   $("input:checked[name=MATE_PAIR]", container).is( ":checked" )),
                 group: $("input:text[name=Group]", container).val(),
                 model: $("input:text[name=Model]", container).val(),
-                kit: $("input:text[name=Kit]", container).val()
+                kit: $("input:text[name=Kit]", container).val(),
+                email: $("input:text[name=E-Mail]", container).val(),
+                aspera: $("input:text[name=Aspera]", container).val()
             },
             success: function (data) {
                 if (data.success) {

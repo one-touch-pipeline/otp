@@ -6,8 +6,12 @@ import de.dkfz.tbi.otp.dataprocessing.Workflow
 import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.utils.DataTableCommand
+import org.springframework.validation.FieldError
+
+import java.text.SimpleDateFormat
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.getOrPut
+import java.sql.Timestamp
 
 class ProjectOverviewController {
 
@@ -18,6 +22,8 @@ class ProjectOverviewController {
     ProjectOverviewService projectOverviewService
 
     SeqTrackService seqTrackService
+
+    ContactPersonService contactPersonService
 
     Map index() {
         String projectName = params.projectName
@@ -49,6 +55,15 @@ class ProjectOverviewController {
 
     Map mmmlIdentifierMapping() {
         return [:]
+    }
+
+    Map specificOverview() {
+        List<String> projects = projectService.getAllProjects()*.name
+        String projectName = params.project ?: projects[0]
+        return [
+                projects: projects,
+                project: projectName,
+        ]
     }
 
     /**
@@ -258,5 +273,188 @@ class ProjectOverviewController {
         AlignmentDecider decider = seqTrackService.getAlignmentDecider(project)
         Map dataToRender = [alignmentMessage: "Project ${project.name} ${decider.alignmentMessage()}."]
         render dataToRender as JSON
+    }
+
+    JSON createContactPersonOrAddProject(UpdateContactPersonCommand cmd){
+        if (cmd.hasErrors()) {
+            Map data = getErrorData(cmd.errors.getFieldError())
+            render data as JSON
+            return
+        }
+        if (ContactPerson.findByFullName(cmd.name)) {
+            checkErrorAndCallMethod(cmd, { contactPersonService.addProject(cmd.name, projectService.getProjectByName(cmd.projectName)) })
+        } else {
+            checkErrorAndCallMethod(cmd, { contactPersonService.createContactPerson(cmd.name, cmd.email, cmd.aspera, projectService.getProjectByName(cmd.projectName)) })
+        }
+    }
+
+    JSON deleteContactPersonOrRemoveProject(UpdateDeleteContactPersonCommand cmd){
+        checkErrorAndCallMethod(cmd, { contactPersonService.removeProjectAndDeleteContactPerson(cmd.contactPersonName, projectService.getProjectByName(cmd.projectName)) })
+    }
+
+    JSON updateName(UpdateContactPersonNameCommand cmd) {
+        checkErrorAndCallMethod(cmd, { contactPersonService.updateName(cmd.contactPersonName, cmd.newName) })
+    }
+
+    JSON updateEmail(UpdateContactPersonEmailCommand cmd) {
+        checkErrorAndCallMethod(cmd, { contactPersonService.updateEmail(cmd.contactPersonName, cmd.newEmail) })
+    }
+
+    JSON updateAspera(UpdateContactPersonAsperaCommand cmd) {
+        checkErrorAndCallMethod(cmd, { contactPersonService.updateAspera(cmd.contactPersonName, cmd.newAspera) })
+    }
+
+    JSON dataTableContactPerson(DataTableCommand cmd) {
+        Map dataToRender = cmd.dataToRender()
+        List data = ContactPerson.withCriteria
+        {
+            projects {
+                eq ('name', params.projectName)
+            }
+            projections {
+                property('fullName')
+                property('email')
+                property('aspera')
+            }
+        }
+        dataToRender.iTotalRecords = data.size()
+        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+        dataToRender.aaData = data
+        render dataToRender as JSON
+    }
+
+    JSON updateDates(String projectName) {
+        Timestamp[] timestamps = Sequence.createCriteria().get {
+            eq("projectName", projectName)
+            projections {
+                min("dateCreated")
+                max("dateCreated")
+            }
+        }
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        Map dataToRender = [creationDate: simpleDateFormat.format(timestamps[0]), lastReceivedDate: simpleDateFormat.format(timestamps[1])]
+        render dataToRender as JSON
+    }
+
+
+    private void checkErrorAndCallMethod(Serializable cmd, Closure method) {
+        Map data
+        if (cmd.hasErrors()) {
+            data = getErrorData(cmd.errors.getFieldError())
+        } else {
+            method()
+            data = [success: true]
+        }
+        render data as JSON
+    }
+
+    private Map getErrorData(FieldError errors) {
+        return [success: false, error: "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"]
+    }
+}
+
+class UpdateContactPersonCommand implements Serializable {
+    String name
+    String email
+    String aspera
+    String projectName
+    static constraints = {
+        name(blank: false, validator: {val, obj ->
+            ContactPerson contactPerson = ContactPerson.findByFullName(val)
+            if (contactPerson?.projects?.contains(Project.findByName(obj.projectName))) {
+                return 'Duplicate'
+            } else if (contactPerson && obj.email != "" && obj.email != contactPerson.email) {
+                return 'There is already a Person with \'' + contactPerson.fullName + '\' as Name and \'' + contactPerson.email + '\' as Email in the Database'
+            }})
+        email(email:true, validator: {val, obj ->
+            if (!ContactPerson.findByFullName(obj.name) && val == "") {
+                return 'Empty'
+            }})
+        aspera(blank: true)
+        projectName(blank: false, validator: {val, obj ->
+            if (!Project.findByName(val)) {
+                return 'No Project'
+            }})
+    }
+    void setName(String name) {
+        this.name = name?.trim()?.replaceAll(" +", " ")
+    }
+    void setEmail(String email) {
+        this.email = email?.trim()?.replaceAll(" +", " ")
+    }
+    void setAspera(String aspera) {
+        this.aspera = aspera?.trim()?.replaceAll(" +", " ")
+    }
+    void setId(String id) {
+        this.projectName = id
+    }
+}
+
+class UpdateDeleteContactPersonCommand implements Serializable {
+    String contactPersonName
+    String projectName
+    static constraints = {
+        contactPersonName(blank: false, validator: {val, obj ->
+            if (!ContactPerson.findByFullName(val)) {
+                return 'No ContactPerson'
+            }})
+        projectName(blank: false)
+    }
+}
+
+class UpdateContactPersonNameCommand implements Serializable {
+    String contactPersonName
+    String newName
+    static constraints = {
+        contactPersonName(blank: false, validator: {val, obj ->
+            if (!ContactPerson.findByFullName(val)) {
+                return 'No ContactPerson'
+            }})
+        newName(blank: false, validator: {val, obj ->
+            if (val == obj.contactPersonName) {
+                return 'No Change'
+            } else if (ContactPerson.findByFullName(val)) {
+                return 'Duplicate'
+            }})
+    }
+    void setValue(String value) {
+        this.newName = value?.trim()?.replaceAll(" +", " ")
+    }
+}
+
+class UpdateContactPersonEmailCommand implements Serializable {
+    String contactPersonName
+    String newEmail
+    static constraints = {
+        contactPersonName(blank: false, validator: {val, obj ->
+            if (!ContactPerson.findByFullName(val)) {
+                return 'No ContactPerson'
+            }})
+        newEmail(email:true, blank: false ,validator: {val, obj ->
+            if (ContactPerson.findByFullName(obj.contactPersonName).email == val) {
+                return 'No Change'
+            }
+        })
+    }
+    void setValue(String value) {
+        this.newEmail = value?.trim()?.replaceAll(" +", " ")
+    }
+}
+
+class UpdateContactPersonAsperaCommand implements Serializable {
+    String contactPersonName
+    String newAspera
+    static constraints = {
+        contactPersonName(blank: false, validator: {val, obj ->
+            if (!ContactPerson.findByFullName(val)) {
+                return 'No ContactPerson'
+            }})
+        newAspera(blank: true, validator: {val, obj ->
+            if (ContactPerson.findByFullName(obj.contactPersonName).aspera == val) {
+                return 'No Change'
+            }})
+    }
+    void setValue(String value) {
+        this.newAspera = value?.trim()?.replaceAll(" +", " ")
     }
 }

@@ -4,15 +4,17 @@ class ContactPerson {
 
     String fullName
     String email
+    String aspera
 
-    static belongsTo = [seqCenter : SeqCenter]
+    static belongsTo = Project
+
+    static hasMany =  [
+            projects: Project
+    ]
 
     static constraints = {
-        fullName(blank: false)
+        fullName(blank: false, unqiue: true)
         email(email:true)
-    }
-
-    static mapping = {
-        seqCenter index: "contact_person_seq_center_idx"
+        aspera(blank: true, nullable: true)
     }
 }

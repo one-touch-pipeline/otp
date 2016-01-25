@@ -8,8 +8,6 @@ class Project {
     String dirName
     String realmName
 
-    String emailAddressOfContactPerson
-
     short processingPriority = ProcessingPriority.NORMAL_PRIORITY
     String alignmentDeciderBeanName
 
@@ -23,6 +21,10 @@ class Project {
         projectGroup: ProjectGroup
     ]
 
+    static hasMany =  [
+        contactPersons: ContactPerson
+    ]
+
     static constraints = {
         name(blank: false, unique: true)
         dirName(blank: false, unique: true, validator: { String val ->
@@ -31,7 +33,6 @@ class Project {
         })
         realmName(blank: false)
         projectGroup(nullable: true)
-        emailAddressOfContactPerson (nullable: true)
         processingPriority max: ProcessingPriority.MAXIMUM_PRIORITY
         alignmentDeciderBeanName(blank: false)  // If no alignment is desired, set to noAlignmentDecider instead of leaving blank
     }
