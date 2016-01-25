@@ -427,20 +427,22 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
     }
 
     @Test
-    void testCreateSeqTrack_shouldFailForNotAllowedSpecialValueUnknownForNonExome() {
+    void testCreateSeqTrack_shouldReturnSeqTrack_UNKNOWN_value_ForNonExome() {
         Map data = createData()
         DomainFactory.createMetaDataKeyAndEntry(data.dataFile, MetaDataColumn.LIB_PREP_KIT, UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE)
 
-        TestCase.shouldFail(AssertionError.class) {
-            seqTrackService.createSeqTrack(
-                            data.dataFile,
-                            data.run,
-                            data.sample,
-                            data.seqType,
-                            "1",
-                            data.softwareTool
-                            )
-        }
+        SeqTrack seqTrack = seqTrackService.createSeqTrack(
+                        data.dataFile,
+                        data.run,
+                        data.sample,
+                        data.seqType,
+                        "1",
+                        data.softwareTool
+                        )
+        assertNotNull(seqTrack)
+        assertEquals(SeqTrack.class, seqTrack.class)
+        assertEquals(InformationReliability.UNKNOWN_VERIFIED, seqTrack.kitInfoReliability)
+        assertNull(seqTrack.libraryPreparationKit)
     }
 
     @Test

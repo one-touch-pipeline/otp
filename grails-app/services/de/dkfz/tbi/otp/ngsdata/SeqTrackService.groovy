@@ -448,7 +448,6 @@ LIMIT 1
             assert builder.seqType.name != SeqTypeNames.EXOME.seqTypeName
             builder.setInformationReliability(InformationReliability.UNKNOWN_UNVERIFIED)
         } else if (metaDataEntry.value == InformationReliability.UNKNOWN_VERIFIED.rawValue) {
-            assert builder.seqType.name == SeqTypeNames.EXOME.seqTypeName
             builder.setInformationReliability(InformationReliability.UNKNOWN_VERIFIED)
         } else {
             LibraryPreparationKit libraryPreparationKit = libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(metaDataEntry.value)

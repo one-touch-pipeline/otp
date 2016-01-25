@@ -158,28 +158,26 @@ class MetaDataValidationService {
      * <ul>
      * <li> the value is in {@link LibraryPreparationKit} </li>
      * <li> the value is in {@link LibraryPreparationKitSynonym} </li>
-     * <li> the value has the special value {@link InformationReliability#UNKNOWN_VERIFIED} ("UNKNOWN) and is an exome seq track </li>
+     * <li> the value has the special value {@link InformationReliability#UNKNOWN_VERIFIED} ("UNKNOWN)</li>
      * <li> the value is empty and belongs not to an exome seq track </li>
      * </ul>
      * All other values are invalid.
      */
     private boolean checkLibraryPreparationKit(MetaDataEntry entry) {
-        LibraryPreparationKit libraryPreparationKit = libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(entry.value)
-        if (libraryPreparationKit) {
-            //Value could be found, so the value is valid
-            return true
-        }
 
-        //check seq type
+        String libPrepKitName = entry.value
+
+        LibraryPreparationKit libraryPreparationKit = libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(libPrepKitName)
         MetaDataEntry metaDataEntry = metaDataEntry(entry.dataFile, "SEQUENCING_TYPE")
-        if (metaDataEntry.value == SeqTypeNames.EXOME.seqTypeName) {
-            /*
-             * It is allowed to have the value "UNKNOWN" as library preparation kit info for exome seqTrack.
-             * If this is the case return true.
-             */
-            return InformationReliability.UNKNOWN_VERIFIED.rawValue == entry.value
+
+        if (libraryPreparationKit) {
+            return true
+        } else if (libPrepKitName == InformationReliability.UNKNOWN_VERIFIED.rawValue) {
+            return true
+        } else if (metaDataEntry.value != SeqTypeNames.EXOME.seqTypeName && libPrepKitName.isEmpty()) {
+            return true
         } else {
-            return !entry.value
+            return false
         }
 
     }

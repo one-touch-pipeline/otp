@@ -221,11 +221,11 @@ class MetaDataValidationServiceUnitTests {
     }
 
     @Test
-    void testCheckLibraryPreparationKit_UsingSpecialValueUNKNOWN_ForNonExome_shouldBeInvalid() {
+    void testCheckLibraryPreparationKit_UsingSpecialValueUNKNOWN_ForNonExome_shouldBeValid() {
         LibraryPreparationKitSynonym libraryPreparationKitSynonym = createLibraryPreparationKitSynonym()
         Map<String, MetaDataEntry> map = createMetaDataEntry([(LIB_PREP_KIT): UNKNOWN_VERIFIED_VALUE_FROM_METADATA_FILE, (SEQUENCING_TYPE): SEQUENCE_TYPE_ANY])
 
-        assert !metaDataValidationService.checkLibraryPreparationKit(map[(LIB_PREP_KIT)])
+        assert metaDataValidationService.checkLibraryPreparationKit(map[(LIB_PREP_KIT)])
     }
 
     @Test
