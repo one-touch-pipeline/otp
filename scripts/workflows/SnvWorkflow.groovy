@@ -62,7 +62,7 @@ println ctx.processingOptionService.createOrUpdate(
     "${PBS_PREFIX}${SnvAnnotationJob.simpleName}",
     "DKFZ",
     null,
-    '{"-l": {nodes: "1:ppn=1", walltime: "48:00:00", mem: "3g"}}',
+    '{"-l": {nodes: "1:ppn=1", walltime: "96:00:00", mem: "3g"}}',
     "suggestion of the CO group (Ivo) for the snv WGS annotation job"
 )
 
