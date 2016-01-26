@@ -1,16 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
+
 import de.dkfz.tbi.otp.testing.UserAndRoles
-import grails.test.mixin.TestFor
-import spock.lang.Specification
 import grails.plugin.springsecurity.SpringSecurityUtils
+import spock.lang.Specification
 
+class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles {
 
-import static org.junit.Assert.assertNotNull
-
-
-@TestFor(MetaDataFieldsController)
-class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles{
-
+    MetaDataFieldsController controller = new MetaDataFieldsController()
 
     def setup() {
         createUserAndRoles()
