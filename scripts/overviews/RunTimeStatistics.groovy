@@ -3,6 +3,7 @@ package overviews
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import org.joda.time.DateTime
 
 /**
  * This is a script to get information for the run-time statistics @ https://sharepoint.local/Shared%20Documents/Run-Time-Statistics/.
@@ -24,6 +25,10 @@ import de.dkfz.tbi.otp.ngsdata.*
  * Notification: [OTRS-Ticket]
  */
 
+final String IMPORT = 'import'
+final String ALIGNMENT = 'alignment'
+final String SNV = 'snv'
+
 // ilse ids
 String ilseIds = """
 """
@@ -34,6 +39,15 @@ String runIds = """
 
 // defines how many entries will be searched through
 Integer entries = 100
+
+// defines which workflows to show
+List workflowsToShow = [
+        IMPORT,
+        ALIGNMENT,
+        SNV,
+]
+
+final String FORMAT_DATE = 'yyyy-MM-dd HH:mm:ss'
 
 List<String> ilseIdList = ilseIds.split("\n") - ''
 List<String> runIdList = runIds.split("\n") - ''
@@ -79,61 +93,73 @@ def importStarted = {
     String folderPath = "STORAGE_ROOTSEQUENCING_INBOX"
     List list = ilseIdList.findAll().collect {
         def matcher = it =~ /(\d)\d{3}/
-        return "[ll ${folderPath}/00${matcher[0][1]}/00${it}/]"
+        def currentFolderPath = "${folderPath}/00${matcher[0][1]}/00${it}/"
+        return new File(currentFolderPath).lastModified()
     }
-    return list.join("\n")
+    DateTime startedDate = new DateTime(list.min())
+    return startedDate.toString(FORMAT_DATE)
+}
+
+def getMinMaxDateFromCollection = { def dates ->
+    def transposedList = dates?.transpose()
+    def min = new DateTime(transposedList?.first()?.min()).toString(FORMAT_DATE)
+    def max = new DateTime(transposedList?.last()?.max()).toString(FORMAT_DATE)
+    return [min: min, max: max]
 }
 
 def importFinished = {
     List dates = bySamples('FastqcWorkflow')
-    return dates?.collect { it[1] }?.max()
+    return dates ? getMinMaxDateFromCollection(dates).max : null
 }
 
 def alignmentStarted = {
     List dates = bySamples('ConveyBwaAlignmentWorkflow')
-    return dates?.collect { it[0] }?.min()
+    return dates ? getMinMaxDateFromCollection(dates).min : null
 }
 
 def alignmentFinished = {
     List dates = bySamples('transferMergedBamFileWorkflow')
-    return dates?.collect { it[1] }?.max()
+    return dates ? getMinMaxDateFromCollection(dates).max : null
 }
 
 def panCanStartedAndFinished = {
     List dates = bySamples('PanCanWorkflow')
-    def started = dates?.collect { it[0] }?.min()
-    def ended = dates?.collect { it[1] }?.max()
-    return [started, ended]
+    def minMaxDates = dates ? getMinMaxDateFromCollection(dates) : null
+    return [minMaxDates?.min, minMaxDates?.max]
 }
 
 def snvStartedAndFinished = {
     List dates = bySamples('SnvWorkflow')
-    def started = dates?.collect { it[0] }?.min()
-    def ended = dates?.collect { it[1] }?.max()
-    return [started, ended]
+    def minMaxDates = dates ? getMinMaxDateFromCollection(dates) : null
+    return [minMaxDates?.min, minMaxDates?.max]
 }
 
 println "IlseIds:\n\t" + ilseIdList
-println "Runs:\n\t" + runIdList
-println "Number of Runs:\n\t" + runIdList.size()
+println "Runs:\n\t" + seqTracks*.run.unique()
+println "Number of Runs:\n\t" + seqTracks*.run.unique().size()
 println "Number of Samples:\n\t" + samples.unique().size()
 println "Projects:\n\t" + projects
 println "SeqTypes:\n\t" + seqTypes*.displayName
 println "Alignment:\n\t" + alignments.join("\n")
-println "Info from GPCF:\n\t[OTRS-Ticket]"
-println "Import Started:\n\t" + importStarted()
-println "Import Finished:\n\t" + importFinished()
-def alignmentStartedOTP = alignmentStarted()
-def alignmentFinishedOTP = alignmentFinished()
-if(alignmentStartedOTP || alignmentFinishedOTP) {
-    println "Alignment Started:\n\t" + alignmentStartedOTP
-    println "Alignment Finished:\n\t" + alignmentFinishedOTP
-} else {
-    def (alignmentStartedPanCan, alignmentEndedPanCan) = panCanStartedAndFinished()
-    println "Alignment Started:\n\t" + alignmentStartedPanCan
-    println "Alignment Finished:\n\t" + alignmentEndedPanCan
+if (workflowsToShow.contains(IMPORT)) {
+    println "Import Started:\n\t" + importStarted()
+    println "Import Finished:\n\t" + importFinished()
 }
-def (snvStarted, snvEnded) = snvStartedAndFinished()
-println "SNV Started:\n\t" + snvStarted
-println "SNV Finished:\n\t" + snvEnded
+if (workflowsToShow.contains(ALIGNMENT)) {
+    def alignmentStartedOTP = alignmentStarted()
+    def alignmentFinishedOTP = alignmentFinished()
+    if(alignmentStartedOTP || alignmentFinishedOTP) {
+        println "Alignment Started:\n\t" + alignmentStartedOTP
+        println "Alignment Finished:\n\t" + alignmentFinishedOTP
+    } else {
+        def (alignmentStartedPanCan, alignmentEndedPanCan) = panCanStartedAndFinished()
+        println "Alignment Started:\n\t" + alignmentStartedPanCan
+        println "Alignment Finished:\n\t" + alignmentEndedPanCan
+    }
+}
+if (workflowsToShow.contains(SNV)) {
+    def (snvStarted, snvEnded) = snvStartedAndFinished()
+    println "SNV Started:\n\t" + snvStarted
+    println "SNV Finished:\n\t" + snvEnded
+}
 println "Notification:\n\t[OTRS-Ticket]"
