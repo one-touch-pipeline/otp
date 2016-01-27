@@ -1,0 +1,37 @@
+#border {
+    border-style: solid;
+    border-width: 10px;
+}
+
+.borderMetadataImportERROR {
+    border-color: red;
+}
+
+.borderMetadataImportWARNING {
+    border-color: yellow;
+}
+
+.borderMetadataImportALL {
+    border-color: green;
+}
+
+:target {
+    border-style: solid;
+    border-color: black;
+}
+
+.ERROR {
+    background-color: #F6DEDE;
+}
+
+.WARNING {
+    background-color: #FCF8E3;
+}
+
+th.ALL, td.ALL {
+    background-color: #F0F0F0;
+}
+
+li.ALL {
+    background-color: #D9EDF7;
+}

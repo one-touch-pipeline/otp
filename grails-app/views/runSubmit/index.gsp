@@ -38,9 +38,9 @@
         <tr>
             <td></td><td><g:submitButton name="submit" value="Submit" ondblclick="return false;"/></td>
         </tr>
-
     </table>
     </g:form>
+    <p class="obsoleteMessage">This form should no longer be used. Please use the <g:link controller="MetadataImport" action="index">metadata import form</g:link> instead.</p>
   </div>
 </body>
 </html>

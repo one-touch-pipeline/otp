@@ -18,4 +18,8 @@ class Problem {
         this.level = level
         this.message = message
     }
+
+    String getLevelAndMessage() {
+        return level.getName() + ": " + message
+    }
 }

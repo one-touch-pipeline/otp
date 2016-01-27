@@ -35,7 +35,8 @@ class MetadataImportService {
      * @return Names (keys) and descriptions (values) of directory structures
      */
     Map<String, String> getSupportedDirectoryStructures() {
-        Map<String, String> directoryStructures = [(AUTO_DETECT_DIRECTORY_STRUCTURE_NAME): 'detect automatically']
+        Map<String, String> directoryStructures = new TreeMap<String, String>()
+        directoryStructures.put(AUTO_DETECT_DIRECTORY_STRUCTURE_NAME, 'detect automatically')
         applicationContext.getBeansOfType(DirectoryStructure).each { String name, DirectoryStructure directoryStructure ->
             directoryStructures.put(name, directoryStructure.description)
         }
@@ -70,7 +71,7 @@ class MetadataImportService {
     }
 
     protected Collection<MetadataValidator> getMetadataValidators() {
-        return applicationContext.getBeansOfType(MetadataValidator).values()
+        return applicationContext.getBeansOfType(MetadataValidator).values().sort { it.getClass().simpleName }
     }
 
     protected static String getDirectoryStructureBeanName(String directoryStructureName, File metadataFile) {

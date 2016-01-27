@@ -11,4 +11,14 @@ class Level extends java.util.logging.Level {
     Level(String name, int value, String resourceBundleName) {
         super(name, value, resourceBundleName)
     }
+
+    static java.util.logging.Level normalize(java.util.logging.Level level) {
+        if (level.intValue() > WARNING.intValue()) {
+            return ERROR
+        } else if (level.intValue() < WARNING.intValue()) {
+            return ALL
+        } else {
+            return WARNING
+        }
+    }
 }
