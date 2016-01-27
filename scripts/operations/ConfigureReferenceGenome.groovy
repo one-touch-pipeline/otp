@@ -33,15 +33,18 @@ String refGenName = ''
  *   - hs37d5.fa.chrLenOnlyACGT_realChromosomes.tab
  *   - hs37d5.fa.chrLenOnlyACGT.tab
  * - hs37d5+mouse:
- *   - chrLenOnlyACGT_realChromosomes.tab
+ *   - hg19_GRCh37_mm10.fa.chrLenOnlyACGT_realChromosomes.tab
+ *   - hg19_GRCh37_mm10.fa.chrLenOnlyACGT.tab
  * - GRCm38mm10:
  *   - GRCm38mm10.fa.chrLenOnlyACGT_realChromosomes.tab
  *   - GRCm38mm10.fa.chrLenOnlyACGT.tab
  *   - mm10_1-19_X_Y_M.fa.chrLenOnlyACGT_realChromosomes.tab
  *   - mm10_1-19_X_Y_M.fa.chrLenOnlyACGT.tab
  * - hs37d5_GRCm38mm:
- *   - ?
+ *   - hs37d5_GRCm38mm.fa.chrLenOnlyACGT_realChromosomes.tab
+ *   - hs37d5_GRCm38mm.fa.chrLenOnlyACGT.tab
  *
+ * Usually the realChromosome files are to prefer.
  * The list could be create with the script "statSizeFileList"
  */
 String statSizeFileName = ''
