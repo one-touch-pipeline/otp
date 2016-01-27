@@ -41,10 +41,19 @@ def directories = this.args
 // respective move.
 @Field
 List<String> sampleTypes = ["control",
+                            "CONTROL",
+                            "control_01",
+                            "control_02",
                             "blood",
                             "tumor",
                             "tumor01",
                             "tumor02",
+                            "tumor_lk01",
+                            "tumor_lk02",
+                            "tumor_01",
+                            "tumor_02",
+                            "TUMOR_01",
+                            "TUMOR_02",
                             "metastasis",
                             "relapse"]
 
@@ -189,7 +198,8 @@ for (directory in matchPidDirectoriesToImport(directoryWithPidSubdirectories, pi
 }
 */
 
+println("#!/bin/bash -x")
 this.args.each {
-    moveAdditionalRoddyFilesInDirectory(Paths.get(it))
+    moveAdditionalRoddyFilesInDirectory(Paths.get(it).toAbsolutePath())
 }
 
