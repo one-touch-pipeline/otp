@@ -11,26 +11,26 @@ import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 class ValidationContext {
 
     final Spreadsheet spreadsheet
-    final Problems problems
+    final Problems problemsObject
 
     ValidationContext(Spreadsheet spreadsheet, Problems problems = new Problems()) {
         this.spreadsheet = spreadsheet
-        this.problems = problems
+        this.problemsObject = problems
     }
 
     Problem addProblem(Set<Cell> affectedCells, Level level, String message) {
-        return problems.addProblem(affectedCells, level, message)
+        return problemsObject.addProblem(affectedCells, level, message)
     }
 
     Level getMaximumProblemLevel() {
-        return problems.maximumProblemLevel
+        return problemsObject.maximumProblemLevel
     }
 
     Set<Problem> getProblems() {
-        return problems.problems
+        return problemsObject.problems
     }
 
     Set<Problem> getProblems(Cell cell) {
-        return problems.getProblems(cell)
+        return problemsObject.getProblems(cell)
     }
 }

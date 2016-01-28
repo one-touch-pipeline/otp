@@ -7,13 +7,13 @@ import de.dkfz.tbi.util.spreadsheet.Cell
 
 class Problems {
 
-    private final Set<Problem> problems = new LinkedHashSet<Problem>()
+    private final Set<Problem> allProblems = new LinkedHashSet<Problem>()
     private final Map<Cell, Set<Problem>> problemsByCell = [:]
 
     Problem addProblem(Set<Cell> affectedCells, Level level, String message) {
         assert !affectedCells.contains(null)
         Problem problem = new Problem(affectedCells, level, message)
-        problems.add(problem)
+        allProblems.add(problem)
         affectedCells.each {
             CollectionUtils.getOrPut(problemsByCell, it, new LinkedHashSet<Problem>()).add(problem)
         }
@@ -21,7 +21,7 @@ class Problems {
     }
 
     Level getMaximumProblemLevel() {
-        return getMaximumProblemLevel(problems)
+        return getMaximumProblemLevel(allProblems)
     }
 
     static Level getMaximumProblemLevel(Collection<Problem> problems) {
@@ -29,7 +29,7 @@ class Problems {
     }
 
     Set<Problem> getProblems() {
-        return problems.asImmutable()
+        return allProblems.asImmutable()
     }
 
     Set<Problem> getProblems(Cell cell) {
