@@ -239,7 +239,7 @@ class UpdateCommandSeqPlatform implements Serializable {
         static constraints = {
             name(blank: false,
                     validator: {val, obj ->
-                        if (SeqPlatformService.hasSeqPlatform(obj.name, obj.model, obj.kit)) {
+                        if (SeqPlatformService.findSeqPlatform(obj.name, obj.model, obj.kit)) {
                             return 'Duplicate'
                         }
                     })

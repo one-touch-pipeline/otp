@@ -472,6 +472,12 @@ class DomainFactory {
         ], seqPlatformProperties)
     }
 
+    public static SeqPlatformModelLabel createSeqPlatformModelLabel(Map properties = [:]) {
+        return createDomainObject(SeqPlatformModelLabel, [
+                name: 'seqPlatformModelLabel_' + (counter++),
+        ], properties)
+    }
+
     public static SeqPlatformGroup createSeqPlatformGroup(Map properties = [:]) {
         return createDomainObject(SeqPlatformGroup, [
                 name: 'seqPlatformGroup_' + (counter++),

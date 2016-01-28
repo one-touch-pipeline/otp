@@ -204,26 +204,25 @@ class SeqPlatformService {
         return seqPlatform
     }
 
-    public static boolean hasSeqPlatform(String seqPlatformName,String seqPlatformModelLabelName, String sequencingKitLabelName){
-        if (seqPlatformModelLabelName!=null){
-            if(!SeqPlatformModelLabel.findByName(seqPlatformModelLabelName)){
-                return false
+    public static SeqPlatform findSeqPlatform(String seqPlatformName, String seqPlatformModelLabelNameOrAlias, String sequencingKitLabelNameOrAlias) {
+        SeqPlatformModelLabel seqPlatformModelLabel = null
+        if (seqPlatformModelLabelNameOrAlias != null) {
+            seqPlatformModelLabel = SeqPlatformModelLabelService.findSeqPlatformModelLabelByNameOrAlias(seqPlatformModelLabelNameOrAlias)
+            if (seqPlatformModelLabel == null) {
+                return null
             }
         }
-        if (sequencingKitLabelName!=null){
-            if(!SequencingKitLabel.findByName(sequencingKitLabelName)){
-                return false
+        SequencingKitLabel sequencingKitLabel = null
+        if (sequencingKitLabelNameOrAlias != null) {
+            sequencingKitLabel = SequencingKitLabelService.findSequencingKitLabelByNameOrAlias(sequencingKitLabelNameOrAlias)
+            if (sequencingKitLabel == null) {
+                return null
             }
         }
-        if(SeqPlatform.findByNameAndSeqPlatformModelLabelAndSequencingKitLabel
-                (
-                        seqPlatformName,
-                        atMostOneElement(SeqPlatformModelLabel.findAllByName(seqPlatformModelLabelName)),
-                        atMostOneElement(SequencingKitLabel.findAllByName(sequencingKitLabelName))
-                )
-        ) {
-            return true
-        }
-        return false
+        return atMostOneElement(SeqPlatform.findAllByNameAndSeqPlatformModelLabelAndSequencingKitLabel(
+                seqPlatformName,
+                seqPlatformModelLabel,
+                sequencingKitLabel)
+        )
     }
 }

@@ -2,14 +2,12 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-import java.util.logging.Level
-
 import org.junit.ClassRule
 import org.junit.rules.TemporaryFolder
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.util.spreadsheet.validation.Problem
+import de.dkfz.tbi.util.spreadsheet.validation.*
 import spock.lang.*
 
 class MetadataValidationContextSpec extends Specification {
@@ -28,7 +26,7 @@ class MetadataValidationContextSpec extends Specification {
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.affectedCells.isEmpty()
-        problem.level == Level.SEVERE
+        problem.level == Level.ERROR
         problem.message.contains(problemMessage)
         context.directoryStructure == directoryStructure
         context.metadataFile == file
@@ -81,7 +79,7 @@ class MetadataValidationContextSpec extends Specification {
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.affectedCells.isEmpty()
-        problem.level == Level.SEVERE
+        problem.level == Level.ERROR
         problem.message.contains("Duplicate column 'a'")
         context.directoryStructure == directoryStructure
         context.metadataFile == file

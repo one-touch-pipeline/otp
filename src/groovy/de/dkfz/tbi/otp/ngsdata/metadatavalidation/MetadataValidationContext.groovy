@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation
 
 import java.nio.charset.Charset
 import java.security.MessageDigest
-import java.util.logging.Level
 import javax.xml.bind.DatatypeConverter
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
@@ -30,19 +29,19 @@ class MetadataValidationContext extends ValidationContext {
         String metadataFileMd5sum = null
         Spreadsheet spreadsheet = null
         if (!OtpPath.isValidAbsolutePath(metadataFile.path)) {
-            problems.addProblem(Collections.emptySet(), Level.SEVERE, "'${metadataFile}' is not a valid absolute path.")
+            problems.addProblem(Collections.emptySet(), Level.ERROR, "'${metadataFile}' is not a valid absolute path.")
         } else if (!metadataFile.exists()) {
-            problems.addProblem(Collections.emptySet(), Level.SEVERE, "'${metadataFile}' could not be found by OTP.")
+            problems.addProblem(Collections.emptySet(), Level.ERROR, "'${metadataFile}' could not be found by OTP.")
         } else if (!metadataFile.isFile()) {
-            problems.addProblem(Collections.emptySet(), Level.SEVERE, "'${metadataFile}' is not a file.")
+            problems.addProblem(Collections.emptySet(), Level.ERROR, "'${metadataFile}' is not a file.")
         } else if (!metadataFile.name.endsWith('.tsv')) {
-            problems.addProblem(Collections.emptySet(), Level.SEVERE, "The file name of '${metadataFile}' does not end with '.tsv'.")
+            problems.addProblem(Collections.emptySet(), Level.ERROR, "The file name of '${metadataFile}' does not end with '.tsv'.")
         } else if (!metadataFile.canRead()) {
-            problems.addProblem(Collections.emptySet(), Level.SEVERE, "'${metadataFile}' is not readable.")
+            problems.addProblem(Collections.emptySet(), Level.ERROR, "'${metadataFile}' is not readable.")
         } else if (metadataFile.length() == 0L) {
-            problems.addProblem(Collections.emptySet(), Level.SEVERE, "'${metadataFile}' is empty.")
+            problems.addProblem(Collections.emptySet(), Level.ERROR, "'${metadataFile}' is empty.")
         } else if (metadataFile.length() > MAX_METADATA_FILE_SIZE_IN_MIB * 1024L * 1024L) {
-            problems.addProblem(Collections.emptySet(), Level.SEVERE, "'${metadataFile}' is larger than ${MAX_METADATA_FILE_SIZE_IN_MIB} MiB.")
+            problems.addProblem(Collections.emptySet(), Level.ERROR, "'${metadataFile}' is larger than ${MAX_METADATA_FILE_SIZE_IN_MIB} MiB.")
         } else {
             try {
                 byte[] bytes = metadataFile.bytes
@@ -56,7 +55,7 @@ class MetadataValidationContext extends ValidationContext {
                 }
                 spreadsheet = new Spreadsheet(document)
             } catch (Exception e) {
-                problems.addProblem(Collections.emptySet(), Level.SEVERE, e.message)
+                problems.addProblem(Collections.emptySet(), Level.ERROR, e.message)
             }
         }
         return new MetadataValidationContext(metadataFile, metadataFileMd5sum, spreadsheet, problems, directoryStructure)

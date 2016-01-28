@@ -3,9 +3,10 @@ package de.dkfz.tbi.util.spreadsheet.validation
 import java.util.logging.Level
 
 import de.dkfz.tbi.util.spreadsheet.Cell
-import groovy.transform.EqualsAndHashCode
+import groovy.transform.*
 
 @EqualsAndHashCode
+@ToString
 class Problem {
 
     final Set<Cell> affectedCells
