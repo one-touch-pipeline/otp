@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.fileSystemConsistency.*
 import de.dkfz.tbi.otp.ngsqc.*
@@ -563,6 +564,17 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
+    public void testDeleteSeqTrack_seqTrackIsOnlyLinked() throws Exception {
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(linkedExternally: true)
+        MergingAssignment mergingAssignment = MergingAssignment.build(seqTrack: seqTrack)
+        DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
+
+        TestCase.shouldFailWithMessageContaining(AssertionError, "seqTracks only linked") {
+            dataSwapService.deleteSeqTrack(seqTrack)
+        }
+    }
+
+    @Test
     public void testDeleteRunAndRunSegmentsWithoutDataOfOtherProjects() throws Exception {
         Run run = Run.build()
         Project project = Project.build()
@@ -621,6 +633,15 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         final shouldFail = new GroovyTestCase().&shouldFail
         shouldFail AssertionError, {
             dataSwapService.throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
+        }
+    }
+
+    @Test
+    public void testThrowExceptionInCaseOfSeqTracksAreOnlyLinked() throws Exception {
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(linkedExternally: true)
+
+        TestCase.shouldFailWithMessageContaining(AssertionError, "seqTracks only linked") {
+            dataSwapService.throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
         }
     }
 

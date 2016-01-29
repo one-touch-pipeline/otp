@@ -415,6 +415,7 @@ chmod 440 ${newDirectFileName}
         List<File> dirsToDelete = []
 
         throwExceptionInCaseOfExternalMergedBamFileIsAttached(seqTracks)
+        throwExceptionInCaseOfSeqTracksAreOnlyLinked(seqTracks)
 
         // now the changing process(procedure) starts
         if (AlignmentPass.findBySeqTrackInList(seqTracks)) {
@@ -545,6 +546,7 @@ chmod 440 ${newDirectFileName}
         List<SeqTrack> seqTrackList = getAndShowSeqTracksForSample(sample, outputStringBuilder)
 
         throwExceptionInCaseOfExternalMergedBamFileIsAttached(seqTrackList)
+        throwExceptionInCaseOfSeqTracksAreOnlyLinked(seqTrackList)
 
         if (AlignmentPass.findBySeqTrackInList(seqTrackList)) {
             outputStringBuilder << "\n -->     found alignments for seqtracks (${AlignmentPass.findBySeqTrackInList(seqTrackList)*.seqTrack.unique()}): "
@@ -700,6 +702,7 @@ chmod 440 ${newDirectFileName}
         isNull(AlignmentPass.findBySeqTrackInList(seqTracks))
 
         throwExceptionInCaseOfExternalMergedBamFileIsAttached(seqTracks)
+        throwExceptionInCaseOfSeqTracksAreOnlyLinked(seqTracks)
 
         List<DataFile> dataFiles = DataFile.findAllBySeqTrackInList(seqTracks)
         outputStringBuilder << "\n  dataFiles (${dataFiles.size()}):"
@@ -946,6 +949,7 @@ chmod 440 ${newDirectFileName}
         List<File> dirsToDelete = []
 
         throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
+        throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
 
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
 
@@ -1021,6 +1025,7 @@ chmod 440 ${newDirectFileName}
         List<File> dirsToDelete = []
 
         throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
+        throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
 
         dirsToDelete << deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
         deleteConnectionFromSeqTrackRepresentingABamFile(seqTrack)
@@ -1238,6 +1243,15 @@ chmod 440 ${newDirectFileName}
         assert externallyProcessedMergedBamFiles.empty : "There are ExternallyProcessedMergedBamFiles attached: ${externallyProcessedMergedBamFiles}"
     }
 
+    /**
+     * In case the seqTracks are only linked, the script shall stop
+     */
+    void throwExceptionInCaseOfSeqTracksAreOnlyLinked(List<SeqTrack> seqTracks) {
+        int linkedSeqTracks = seqTracks.findAll { SeqTrack seqTrack ->
+            seqTrack.linkedExternally
+        }.size()
+        assert !linkedSeqTracks : "There are ${linkedSeqTracks} seqTracks only linked"
+    }
 
     /**
      * A transaction wrapper for a callback.
