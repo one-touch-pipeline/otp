@@ -31,7 +31,7 @@ class SampleValidatorSpec extends Specification {
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\nABC")
+                "${SAMPLE_ID}\t${PROJECT}\nABC")
         DomainFactory.createSampleIdentifier(name: 'ABC')
 
         when:
@@ -65,7 +65,7 @@ class SampleValidatorSpec extends Specification {
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\nP:X I:Y S:Z")
+                "${SAMPLE_ID}\t${PROJECT}\nP:X I:Y S:Z")
 
         when:
         validator.validate(context)
@@ -80,12 +80,12 @@ class SampleValidatorSpec extends Specification {
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\nP:X I:Y S:Z")
+                "${SAMPLE_ID}\t${PROJECT}\nP:X I:Y S:Z")
         Individual individual = DomainFactory.createIndividual(pid: 'Y')
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
+                new Problem([context.spreadsheet.dataRows[0].cells[0]] as Set, Level.ERROR,
                         "Sample identifier 'P:X I:Y S:Z' is not registered in OTP. It looks like it belongs to project 'X', but no project with that name is registered in OTP."),
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
+                new Problem([context.spreadsheet.dataRows[0].cells[0]] as Set, Level.ERROR,
                         "Sample identifier 'P:X I:Y S:Z' is not registered in OTP. It looks like it belongs to project 'X' and individual 'Y', but individual 'Y' is already registered in OTP with project '${individual.project.name}'."),
         ]
 
@@ -100,7 +100,7 @@ class SampleValidatorSpec extends Specification {
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\nP:X I:Y S:Z")
+                "${SAMPLE_ID}\t${PROJECT}\nP:X I:Y S:Z")
         DomainFactory.createProject(name: 'X')
         Individual individual = DomainFactory.createIndividual(pid: 'Y')
 
@@ -117,7 +117,7 @@ class SampleValidatorSpec extends Specification {
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\nP:X I:Y S:Z")
+                "${SAMPLE_ID}\t${PROJECT}\nP:X I:Y S:Z")
         DomainFactory.createProject(name: 'X')
 
         when:
@@ -131,7 +131,7 @@ class SampleValidatorSpec extends Specification {
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\nP:X I:Y S:Z")
+                "${SAMPLE_ID}\t${PROJECT}\nP:X I:Y S:Z")
         createSampleIdentifier(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'A', 'Y', 'Z')
 
         when:
@@ -147,7 +147,7 @@ class SampleValidatorSpec extends Specification {
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\nP:X I:Y S:Z")
+                "${SAMPLE_ID}\t${PROJECT}\nP:X I:Y S:Z")
         createSampleIdentifier(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'X', 'B', 'Z')
 
         when:
@@ -163,7 +163,7 @@ class SampleValidatorSpec extends Specification {
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\nP:X I:Y S:Z")
+                "${SAMPLE_ID}\t${PROJECT}\nP:X I:Y S:Z")
         createSampleIdentifier(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'X', 'Y', 'C')
 
         when:
@@ -206,7 +206,7 @@ class SampleValidatorSpec extends Specification {
         containSame(context.problems, expectedProblems)
     }
 
-    void 'validate, when identifiers belong to the same project, adds no warning about different projects'() {
+    void 'validate, when all known identifiers belong to the same project, adds no warning about different projects'() {
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
@@ -227,6 +227,42 @@ class SampleValidatorSpec extends Specification {
 
         then:
         containSame(context.problems, expectedProblems)
+    }
+
+    void 'validate, when PROJECT column is missing and all identifiers are known and belong to the same project, adds info'() {
+
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${SAMPLE_ID}\n" +
+                        "SampleB\n" +
+                        "P:B I:M S:N\n")
+        createSampleIdentifier('SampleB', 'B', 'W', 'X')
+        Collection<Problem> expectedProblems = [
+                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, Level.INFO,
+                        "All sample identifiers belong to project 'B'."),
+        ]
+
+        when:
+        validator.validate(context)
+
+        then:
+        assertContainSame(context.problems, expectedProblems)
+    }
+
+    void 'validate, when PROJECT column is present and all identifiers are known and belong to the same project, adds no problem'() {
+
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${SAMPLE_ID}\t${PROJECT}\n" +
+                        "SampleB\n" +
+                        "P:B I:M S:N\n")
+        createSampleIdentifier('SampleB', 'B', 'W', 'X')
+
+        when:
+        validator.validate(context)
+
+        then:
+        context.problems.isEmpty()
     }
 
     private static SampleIdentifier createSampleIdentifier(String sampleIdentifierName, String projectName, String pid, String sampleTypeName) {

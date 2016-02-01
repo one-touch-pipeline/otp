@@ -66,6 +66,13 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
         if (!missingIdentifiers.isEmpty()) {
             context.addProblem(Collections.emptySet(), Level.INFO, "All sample identifiers which are neither registered in OTP nor match a pattern known to OTP:\n${missingIdentifiers.sort().join('\n')}")
         }
+        if (byProjectName.size() == 1 && context.spreadsheet.getColumn(PROJECT.name()) == null) {
+            String projectName = exactlyOneElement(byProjectName.keySet())
+            if (projectName != null) {
+                context.addProblem((Set)byProjectName.values().sum()*.cells.sum(), Level.INFO,
+                        "All sample identifiers belong to project '${projectName}'.")
+            }
+        }
         byProjectName.remove(null)
         if (byProjectName.size() > 1) {
             context.addProblem((Set)byProjectName.values().sum()*.cells.sum(), Level.WARNING,
