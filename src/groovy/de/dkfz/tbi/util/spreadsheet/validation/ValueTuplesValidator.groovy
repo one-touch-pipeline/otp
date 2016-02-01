@@ -42,6 +42,10 @@ class ValueTuple {
 
     final Map<String, String> valuesByColumnTitle
 
+    String getValue(String columnTitle) {
+        return valuesByColumnTitle.get(columnTitle)
+    }
+
     /**
      * The cells in which the values appear
      */
