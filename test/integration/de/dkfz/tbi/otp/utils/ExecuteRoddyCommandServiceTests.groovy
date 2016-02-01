@@ -37,6 +37,7 @@ class ExecuteRoddyCommandServiceTests {
     File roddyBaseConfigsPath
     File applicationIniPath
     File featureTogglesConfigPath
+    String roddyVersion
 
     @Before
     void setUp() {
@@ -60,7 +61,8 @@ class ExecuteRoddyCommandServiceTests {
         new File(roddyBaseConfigsPath, "file name").write("file content")
         applicationIniPath = new File(ProcessingOptionService.getValueOfProcessingOption("roddyApplicationIni"))
         assert CreateFileHelper.createFile(applicationIniPath)
-        featureTogglesConfigPath = ProcessingOption.findByName(ExecuteRoddyCommandService.FEATURE_TOGGLES_CONFIG_PATH).value as File
+        featureTogglesConfigPath = new File(ProcessingOptionService.getValueOfProcessingOption(ExecuteRoddyCommandService.FEATURE_TOGGLES_CONFIG_PATH))
+        roddyVersion = ProcessingOptionService.getValueOfProcessingOption("roddyVersion")
     }
 
     @After
@@ -77,28 +79,28 @@ class ExecuteRoddyCommandServiceTests {
     @Test
     void testRoddyBaseCommand_RoddyPathIsNull_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.roddyBaseCommand(null, CONFIG_NAME, ANALYSIS_ID)
+            executeRoddyCommandService.roddyBaseCommand(null, CONFIG_NAME, ANALYSIS_ID, ExecuteRoddyCommandService.RoddyInvocationType.EXECUTE)
         }.contains("roddyPath is not allowed to be null")
     }
 
     @Test
     void testRoddyBaseCommand_ConfigNameIsNull_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.roddyBaseCommand(roddyPath, null, ANALYSIS_ID)
+            executeRoddyCommandService.roddyBaseCommand(roddyPath, null, ANALYSIS_ID, ExecuteRoddyCommandService.RoddyInvocationType.EXECUTE)
         }.contains("configName is not allowed to be null")
     }
 
     @Test
     void testRoddyBaseCommand_AnalysisIdIsNull_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.roddyBaseCommand(roddyPath, CONFIG_NAME, null)
+            executeRoddyCommandService.roddyBaseCommand(roddyPath, CONFIG_NAME, null, ExecuteRoddyCommandService.RoddyInvocationType.EXECUTE)
         }.contains("analysisId is not allowed to be null")
     }
 
     @Test
     void testRoddyBaseCommand_AllFine() {
         String expectedCmd =  "cd /tmp && sudo -u OtherUnixUser ${roddyPath}/roddy.sh rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} "
-        String actualCmd = executeRoddyCommandService.roddyBaseCommand(roddyPath, CONFIG_NAME, ANALYSIS_ID)
+        String actualCmd = executeRoddyCommandService.roddyBaseCommand(roddyPath, CONFIG_NAME, ANALYSIS_ID, ExecuteRoddyCommandService.RoddyInvocationType.EXECUTE)
         assert expectedCmd == actualCmd
     }
 
@@ -251,7 +253,7 @@ class ExecuteRoddyCommandServiceTests {
 "${roddyBamFile.individual.pid} " +
 "--useconfig=${applicationIniPath} " +
 "--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
-"--useRoddyVersion=2.1.28 " +
+"--useRoddyVersion=${roddyVersion} " +
 "--usePluginVersion=${roddyBamFile.config.pluginVersion} " +
 "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} " +
 "--useiodir=${viewByPid},${roddyBamFile.workDirectory} "
@@ -262,6 +264,21 @@ class ExecuteRoddyCommandServiceTests {
         }
     }
 
+    @Test
+    void testRoddyGetRuntimeConfigCommand_AllFine() {
+        String expectedCmd = "cd /tmp && " +
+"sudo -u OtherUnixUser ${roddyCommand} printidlessruntimeconfig ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
+"--useconfig=${applicationIniPath} " +
+"--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
+"--useRoddyVersion=${roddyVersion} " +
+"--usePluginVersion=${roddyBamFile.config.pluginVersion} " +
+"--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} "
+
+        LogThreadLocal.withThreadLog(System.out) {
+            String actualCmd = executeRoddyCommandService.roddyGetRuntimeConfigCommand(roddyBamFile.config, CONFIG_NAME, ANALYSIS_ID)
+            assert expectedCmd == actualCmd
+        }
+    }
 
 
     @Test

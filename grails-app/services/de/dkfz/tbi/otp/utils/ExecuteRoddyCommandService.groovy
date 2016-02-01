@@ -8,6 +8,7 @@ import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import groovy.transform.TupleConstructor
 
 class ExecuteRoddyCommandService {
 
@@ -21,14 +22,6 @@ class ExecuteRoddyCommandService {
 
 
     ExecutionService executionService
-
-    String roddyBaseCommand(File roddyPath, String configName, String analysisId) {
-        assert roddyPath : "roddyPath is not allowed to be null"
-        assert configName : "configName is not allowed to be null"
-        assert analysisId : "analysisId is not allowed to be null"
-        //we change to tmp dir to be on a specified directory where OtherUnixUser has access to
-        return "cd /tmp && ${executeCommandAsRoddyUser()} ${executionCommand(roddyPath, configName, analysisId)} "
-    }
 
 
     /**
@@ -48,7 +41,25 @@ class ExecuteRoddyCommandService {
         File workOutputDir = roddyResult.workDirectory
         createWorkOutputDirectory(realm, workOutputDir)
 
-        File roddyPath = ProcessingOptionService.getValueOfProcessingOption("roddyPath") as File
+        RoddyWorkflowConfig config = roddyResult.config
+
+        //base view by pid directory
+        File viewByPid = roddyResult.individual.getViewByPidPathBase(roddyResult.seqType).absoluteDataManagementPath
+
+        return roddyBaseCommand(nameInConfigFile, analysisIDinConfigFile, RoddyInvocationType.EXECUTE) +
+                "${roddyResult.individual.pid} " +
+                commonRoddy(config) +
+                "--useiodir=${viewByPid},${workOutputDir} "
+    }
+
+
+    String roddyGetRuntimeConfigCommand(RoddyWorkflowConfig config, String nameInConfigFile, String analysisIDinConfigFile) {
+        return roddyBaseCommand(nameInConfigFile, analysisIDinConfigFile, RoddyInvocationType.CONFIG) +
+                commonRoddy(config)
+    }
+
+
+    String commonRoddy(RoddyWorkflowConfig config) {
         String roddyVersion = ProcessingOptionService.getValueOfProcessingOption("roddyVersion")
         File roddyBaseConfigsPath = ProcessingOptionService.getValueOfProcessingOption("roddyBaseConfigsPath") as File
         File applicationIniPath = ProcessingOptionService.getValueOfProcessingOption("roddyApplicationIni") as File
@@ -58,30 +69,34 @@ class ExecuteRoddyCommandService {
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(applicationIniPath)
 
 
-        RoddyWorkflowConfig config = roddyResult.config
         String pluginVersion = config.pluginVersion
         File configFile = new File(config.configFilePath)
 
-        //base view by pid directory
-        File viewByPid = roddyResult.individual.getViewByPidPathBase(roddyResult.seqType).absoluteDataManagementPath
-
-        return roddyBaseCommand(roddyPath, nameInConfigFile, analysisIDinConfigFile) +
-                "${roddyResult.individual.pid} " +
-                "--useconfig=${applicationIniPath} " +
-                "--usefeaturetoggleconfig=${featureTogglesConfigPath()} " +
-                "--useRoddyVersion=${roddyVersion} " +
-                "--usePluginVersion=${pluginVersion} " +
-                "--configurationDirectories=${configFile.parent},${roddyBaseConfigsPath} " +
-                "--useiodir=${viewByPid},${workOutputDir} "
+        return \
+            "--useconfig=${applicationIniPath} " +
+            "--usefeaturetoggleconfig=${featureTogglesConfigPath()} " +
+            "--useRoddyVersion=${roddyVersion} " +
+            "--usePluginVersion=${pluginVersion} " +
+            "--configurationDirectories=${configFile.parent},${roddyBaseConfigsPath} "
     }
 
+
+    String roddyBaseCommand(String configName, String analysisId, RoddyInvocationType type) {
+        File roddyPath = ProcessingOptionService.getValueOfProcessingOption("roddyPath") as File
+        return roddyBaseCommand(roddyPath, configName, analysisId, type)
+    }
+
+    String roddyBaseCommand(File roddyPath, String configName, String analysisId, RoddyInvocationType type) {
+        assert roddyPath : "roddyPath is not allowed to be null"
+        assert configName : "configName is not allowed to be null"
+        assert analysisId : "analysisId is not allowed to be null"
+        assert type : "type is not allowed to be null"
+        //we change to tmp dir to be on a specified directory where OtherUnixUser has access to
+        return "cd /tmp && ${executeCommandAsRoddyUser()} ${roddyPath}/roddy.sh ${type.cmd} ${configName}.config@${analysisId} "
+    }
 
     String executeCommandAsRoddyUser() {
         return "sudo -u OtherUnixUser"
-    }
-
-    private String executionCommand(File roddyPath, String configName, String analysisId){
-        return "${roddyPath}/roddy.sh rerun ${configName}.config@${analysisId}"
     }
 
 
@@ -142,5 +157,13 @@ class ExecuteRoddyCommandService {
 
     File featureTogglesConfigPath() {
         return new File(ProcessingOptionService.getValueOfProcessingOption(FEATURE_TOGGLES_CONFIG_PATH))
+    }
+
+    @TupleConstructor
+    enum RoddyInvocationType {
+        EXECUTE("rerun"),
+        CONFIG("printidlessruntimeconfig")
+
+        final String cmd
     }
 }

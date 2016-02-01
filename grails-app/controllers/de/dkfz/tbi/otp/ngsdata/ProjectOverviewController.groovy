@@ -58,11 +58,22 @@ class ProjectOverviewController {
     }
 
     Map specificOverview() {
-        List<String> projects = projectService.getAllProjects()*.name
-        String projectName = params.project ?: projects[0]
+        List<Project> projects = projectService.getAllProjects()
+        Project project = Project.findByName(params.project) ?: projects[0]
+        Map<String, ProjectOverviewService.AlignmentInfo> alignmentInfo = null
+        String alignmentError = null
+        try {
+            alignmentInfo = projectOverviewService.getAlignmentInfo(project)
+        } catch (Exception e) {
+            alignmentError = e.message
+            log.error(e.message, e)
+        }
+
         return [
-                projects: projects,
-                project: projectName,
+                projects: projects*.name,
+                project: project.name,
+                alignmentInfo: alignmentInfo,
+                alignmentError: alignmentError,
         ]
     }
 

@@ -13,7 +13,7 @@
         <form class="blue_label" id="projectsGroupbox">
             <span class="blue_label"><g:message code="home.projectfilter"/> :</span>
             <g:select class="criteria" id="project" name='project'
-                from='${projects}' value='${project}' onChange='submit();'></g:select>
+                from='${projects}' value='${project}' onChange='submit();' />
         </form>
         <div id="projectOverviewDates">
             <table>
@@ -50,6 +50,27 @@
                     link="${g.createLink(controller: "projectOverview", action: "createContactPersonOrAddProject", id: project)}"
                     value=""/>
         </p>
+        <div>
+            <h3>${g.message(code: 'projectOverview.alignmentInformation.title')}</h3>
+            <g:if test="${alignmentInfo}">
+                <table>
+                    <tr>
+                        <th>${g.message(code: 'projectOverview.alignmentInformation.tool')}</th>
+                        <th>${g.message(code: 'projectOverview.alignmentInformation.version')}</th>
+                        <th>${g.message(code: 'projectOverview.alignmentInformation.arguments')}</th>
+                    </tr>
+                    <g:each in="${alignmentInfo}" var="info">
+                        <tr><td colspan="3"><strong>${info.key}</strong></td></tr>
+                        <tr><td>${g.message(code: 'projectOverview.alignmentInformation.aligning')}</td><td>${info.value.bwaCommand}</td><td>${info.value.bwaOptions}</td></tr>
+                        <tr><td>${g.message(code: 'projectOverview.alignmentInformation.merging')}</td><td>${info.value.mergeCommand}</td><td>${info.value.mergeOptions}</td></tr>
+                        <tr><td>${g.message(code: 'projectOverview.alignmentInformation.samtools')}</td><td>${info.value.samToolsCommand}</td><td></td></tr>
+                    </g:each>
+                </table>
+            </g:if>
+            <g:else>
+                ${alignmentError ?: g.message(code: 'projectOverview.alignmentInformation.noAlign')}
+            </g:else>
+        </div>
     </div>
     <asset:script>
         $(function() {

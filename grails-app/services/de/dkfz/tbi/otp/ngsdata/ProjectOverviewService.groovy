@@ -1,10 +1,101 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.job.processing.ExecutionService
+import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
+import groovy.transform.Immutable
+import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.dataprocessing.*
 
+import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
+
+
 class ProjectOverviewService {
+    ExecutionService executionService
+    ExecuteRoddyCommandService executeRoddyCommandService
+    ProcessingOptionService processingOptionService
+    @Autowired
+    ApplicationContext applicationContext
+
+
+    Map<String, AlignmentInfo> getAlignmentInfo(Project project) throws Exception {
+        try {
+            switch (applicationContext.getBean(project.alignmentDeciderBeanName).class) {
+                case PanCanAlignmentDecider:
+                    RoddyWorkflowConfig workflowConfig = RoddyWorkflowConfig.getLatest(project, Workflow.findByNameAndType(Workflow.Name.PANCAN_ALIGNMENT, Workflow.Type.ALIGNMENT))
+                    String nameInConfigFile = workflowConfig.getNameUsedInConfig()
+
+                    List<ReferenceGenomeProjectSeqType> rgpst = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
+                    Map<String, AlignmentInfo> result = [:]
+                    rgpst*.seqType.unique().each { SeqType seqType ->
+                        ProcessOutput output = waitForCommand(
+                                executeRoddyCommandService.roddyGetRuntimeConfigCommand(workflowConfig, nameInConfigFile, seqType.roddyName)
+                        )
+                        if (output.exitCode != 0) {
+                            throw new Exception("Alignment information can't be detected. Is Roddy with support for printidlessruntimeconfig installed?")
+                        }
+                        Map<String, String> res = output.stdout.readLines().findAll({
+                            it.contains("=")
+                        })*.split("=").collectEntries({
+                            [(it[0]): it[1].startsWith("\"") && it[1].length() > 2 ? it[1].substring(1, it[1].length() - 1) : it[1]]
+                        })
+
+                        String bwaCommand, bwaOptions
+                        if (res.get("useAcceleratedHardware") == "true") {
+                            bwaCommand = res.get("BWA_ACCELERATED_BINARY")
+                            bwaOptions = res.get("BWA_MEM_OPTIONS") + res.get("BWA_MEM_CONVEY_ADDITIONAL_OPTIONS")
+                        } else {
+                            bwaCommand = res.get("BWA_BINARY")
+                            bwaOptions = res.get("BWA_MEM_OPTIONS")
+                        }
+                        String mergeCommand, mergeOptions
+                        if (res.get("useBioBamBamMarkDuplicates") == "true") {
+                            mergeCommand = res.get("MARKDUPLICATES_BINARY")
+                            mergeOptions = res.get("mergeAndRemoveDuplicates_argumentList")
+                        } else {
+                            mergeCommand = res.get("PICARD_BINARY")
+                            mergeOptions = ""
+                        }
+                        AlignmentInfo alignmentInfo = new AlignmentInfo(
+                                bwaCommand: bwaCommand,
+                                bwaOptions: bwaOptions,
+                                samToolsCommand: res.get("SAMTOOLS_BINARY"),
+                                mergeCommand: mergeCommand,
+                                mergeOptions: mergeOptions,
+                        )
+                        result.put(seqType.displayName, alignmentInfo)
+                    }
+                    return result
+                case DefaultOtpAlignmentDecider:
+                    AlignmentInfo alignmentInfo = new AlignmentInfo(
+                            bwaCommand: processingOptionService.findOptionSafe("conveyBwaCommand", null, project) + " aln",
+                            bwaOptions: processingOptionService.findOptionSafe("bwaQParameter", null, project),
+                            samToolsCommand: processingOptionService.findOptionSafe("samtoolsCommand", null, project),
+                            mergeCommand: processingOptionService.findOptionSafe("picardMdupCommand", null, project),
+                            mergeOptions: processingOptionService.findOptionSafe("picardMdup", null, project),
+                    )
+                    return [("OTP"): alignmentInfo]
+                case NoAlignmentDecider:
+                    return null
+                default:
+                    throw new Exception("Unknown Alignment configured.")
+            }
+        } catch (NoSuchBeanDefinitionException e) {
+            throw new Exception("Alignment is configured wrong!")
+        }
+    }
+
+    @Immutable
+    class AlignmentInfo {
+        String bwaCommand
+        String bwaOptions
+        String samToolsCommand
+        String mergeCommand
+        String mergeOptions
+    }
 
     List overviewProjectQuery(projectName) {
         Project project = Project.findByName(projectName)
