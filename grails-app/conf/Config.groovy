@@ -97,10 +97,11 @@ if (otpConfig.otp.logging.jobLogDir instanceof ConfigObject) {
     otp.logging.jobLogDir = otpConfig.otp.logging.jobLogDir
 }
 
+File jobLogDir = new File(otp.logging.jobLogDir)
+
 // log4j configuration
 log4j = {
     appenders {
-        File jobLogDir = new File(otp.logging.jobLogDir)
         if(Environment.currentEnvironment == Environment.PRODUCTION) {
             assert jobLogDir.isDirectory()
         }
