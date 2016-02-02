@@ -30,7 +30,7 @@ class SeqTrackBuilderUnitTests {
                         new SoftwareTool()
                         )
         .setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
-        .setnBasePairs(5).setnReads(6).setInsertSize(7)
+        .setnBasePairs(5).setInsertSize(7)
         .setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
 
         SeqTrack seqTrack = builder.create()
@@ -41,7 +41,6 @@ class SeqTrackBuilderUnitTests {
         assertEquals(true, seqTrack.hasOriginalBam)
         assertEquals(true, seqTrack.usingOriginalBam)
         assertEquals(5, seqTrack.nBasePairs)
-        assertEquals(6, seqTrack.nReads)
         assertEquals(7, seqTrack.insertSize)
         assertNotNull(seqTrack.run)
         assertNotNull(seqTrack.sample)
@@ -140,7 +139,7 @@ class SeqTrackBuilderUnitTests {
     void testCreateSeqTrack() {
         SeqTrackBuilder builder = createSeqTrackBuilderWithDefaultValues()
         .setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
-        .setnBasePairs(5).setnReads(6).setInsertSize(7)
+        .setnBasePairs(5).setInsertSize(7)
         .setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
 
         SeqTrack seqTrack = builder.create()
@@ -151,7 +150,6 @@ class SeqTrackBuilderUnitTests {
         assertEquals(true, seqTrack.hasOriginalBam)
         assertEquals(true, seqTrack.usingOriginalBam)
         assertEquals(5, seqTrack.nBasePairs)
-        assertEquals(6, seqTrack.nReads)
         assertEquals(7, seqTrack.insertSize)
         assertNotNull(seqTrack.run)
         assertNotNull(seqTrack.sample)
@@ -168,7 +166,7 @@ class SeqTrackBuilderUnitTests {
     void testCreateSeqTrackWithLibraryPreparationKit() {
         SeqTrackBuilder builder = createSeqTrackBuilderWithDefaultValues()
         .setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
-        .setnBasePairs(5).setnReads(6).setInsertSize(7)
+        .setnBasePairs(5).setInsertSize(7)
         .setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
         .setLibraryPreparationKit(new LibraryPreparationKit())
 
@@ -180,7 +178,6 @@ class SeqTrackBuilderUnitTests {
         assertEquals(true, seqTrack.hasOriginalBam)
         assertEquals(true, seqTrack.usingOriginalBam)
         assertEquals(5, seqTrack.nBasePairs)
-        assertEquals(6, seqTrack.nReads)
         assertEquals(7, seqTrack.insertSize)
         assertNotNull(seqTrack.run)
         assertNotNull(seqTrack.sample)
@@ -197,7 +194,7 @@ class SeqTrackBuilderUnitTests {
     void testCreateSeqTrackWithKitInfoReliabilityIsUnknownVerified() {
         SeqTrackBuilder builder = createSeqTrackBuilderWithDefaultValues()
         .setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
-        .setnBasePairs(5).setnReads(6).setInsertSize(7)
+        .setnBasePairs(5).setInsertSize(7)
         .setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
         .setInformationReliability(InformationReliability.UNKNOWN_VERIFIED)
 
@@ -209,7 +206,6 @@ class SeqTrackBuilderUnitTests {
         assertEquals(true, seqTrack.hasOriginalBam)
         assertEquals(true, seqTrack.usingOriginalBam)
         assertEquals(5, seqTrack.nBasePairs)
-        assertEquals(6, seqTrack.nReads)
         assertEquals(7, seqTrack.insertSize)
         assertNotNull(seqTrack.run)
         assertNotNull(seqTrack.sample)
@@ -226,7 +222,7 @@ class SeqTrackBuilderUnitTests {
     void testCreateSeqTrackWithKitInfoReliabilityIsUnknownUnverified() {
         SeqTrackBuilder builder = createSeqTrackBuilderWithDefaultValues()
         .setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
-        .setnBasePairs(5).setnReads(6).setInsertSize(7)
+        .setnBasePairs(5).setInsertSize(7)
         .setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
         .setInformationReliability(InformationReliability.UNKNOWN_UNVERIFIED)
 
@@ -238,7 +234,6 @@ class SeqTrackBuilderUnitTests {
         assertEquals(true, seqTrack.hasOriginalBam)
         assertEquals(true, seqTrack.usingOriginalBam)
         assertEquals(5, seqTrack.nBasePairs)
-        assertEquals(6, seqTrack.nReads)
         assertEquals(7, seqTrack.insertSize)
         assertNotNull(seqTrack.run)
         assertNotNull(seqTrack.sample)
@@ -281,7 +276,6 @@ class SeqTrackBuilderUnitTests {
         assertEquals(true, seqTrack.hasOriginalBam)
         assertEquals(true, seqTrack.usingOriginalBam)
         assertEquals(N_BASE_PAIRS, seqTrack.nBasePairs)
-        assertEquals(N_READS, seqTrack.nReads)
         assertEquals(INSERT_SIZE, seqTrack.insertSize)
         assertNotNull(seqTrack.run)
         assertNotNull(seqTrack.sample)
@@ -306,7 +300,6 @@ class SeqTrackBuilderUnitTests {
         assertEquals(true, seqTrack.hasOriginalBam)
         assertEquals(true, seqTrack.usingOriginalBam)
         assertEquals(N_BASE_PAIRS, seqTrack.nBasePairs)
-        assertEquals(N_READS, seqTrack.nReads)
         assertEquals(INSERT_SIZE, seqTrack.insertSize)
         assertNotNull(seqTrack.run)
         assertNotNull(seqTrack.sample)
@@ -349,7 +342,7 @@ class SeqTrackBuilderUnitTests {
                 new SoftwareTool()
         )
                 .setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
-                .setnBasePairs(5).setnReads(6).setInsertSize(7)
+                .setnBasePairs(5).setInsertSize(7)
                 .setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
     }
 
@@ -363,7 +356,7 @@ class SeqTrackBuilderUnitTests {
                 new SoftwareTool()
         )
                 .setHasFinalBam(true).setHasOriginalBam(true).setUsingOriginalBam(true)
-                .setnBasePairs(N_BASE_PAIRS).setnReads(N_READS).setInsertSize(INSERT_SIZE)
+                .setnBasePairs(N_BASE_PAIRS).setInsertSize(INSERT_SIZE)
                 .setQualityEncoding(QualityEncoding.ILLUMINA).setFastqcState(DataProcessingState.IN_PROGRESS)
     }
 }

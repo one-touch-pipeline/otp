@@ -110,6 +110,8 @@ class FastqcJobTest {
             assert command.contains("umask 027; mkdir -p -m 2750") || command.contains("cp ")
         }
 
+        fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
+
         try {
 
             fastqcJob.maybeSubmit()
@@ -129,7 +131,7 @@ class FastqcJobTest {
 
         assert fastqcProcessedFile.contentUploaded == false
 
-        fastqcJob.fastqcUploadService.metaClass.uploadFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
+        fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
         fastqcJob.validate()
 
         assert fastqcProcessedFile.contentUploaded == true

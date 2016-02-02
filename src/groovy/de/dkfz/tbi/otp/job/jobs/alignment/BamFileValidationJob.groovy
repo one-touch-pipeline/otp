@@ -30,7 +30,7 @@ class BamFileValidationJob extends AbstractEndStateAwareJobImpl {
 
 
     void validateNumberOfReads(ProcessedBamFile processedBamFile) {
-        long fastQCReadLength = processedBamFileService.getFastQCReadLength(processedBamFile)
+        long fastQCReadLength = processedBamFile.seqTrack.getNReads()
         long alignmentReadLength = processedBamFileService.getAlignmentReadLength(processedBamFile)
 
         assert fastQCReadLength == alignmentReadLength: "Number of reads differs between FastQC (${fastQCReadLength}) and alignment (${alignmentReadLength})"

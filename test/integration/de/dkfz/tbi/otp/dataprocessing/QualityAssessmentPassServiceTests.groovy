@@ -367,43 +367,31 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
         fileType.signature = ".fastq"
         assertNotNull(fileType.save(flush: true))
 
+        List<DataFile> dataFiles = []
+
         DataFile dataFile = new DataFile(
                         fileType: fileType,
                         seqTrack: seqTrack,
                         mateNumber: 1)
         assertNotNull(dataFile.save(flush: true))
+        dataFiles << dataFile
 
         FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile(
                         contentUploaded: true,
                         dataFile: dataFile)
         assertNotNull(fastqcProcessedFile.save(flush: true))
 
-        FastqcBasicStatistics fastqcBasicStats = new FastqcBasicStatistics(
-                        fileType: FILE_TYPE,
-                        encoding: FILE_ENCODING,
-                        sequenceLength: "101",
-                        totalSequences: (fastqcReadCount / 2),
-                        fastqcProcessedFile: fastqcProcessedFile)
-        assertNotNull(fastqcBasicStats.save(flush: true))
-
         dataFile = new DataFile(
                         fileType: fileType,
                         seqTrack: seqTrack,
                         mateNumber: 1)
         assertNotNull(dataFile.save(flush: true))
+        dataFiles << dataFile
 
         fastqcProcessedFile = new FastqcProcessedFile(
                         contentUploaded: true,
                         dataFile: dataFile)
         assertNotNull(fastqcProcessedFile.save(flush: true))
-
-        fastqcBasicStats = new FastqcBasicStatistics(
-                        fileType: FILE_TYPE,
-                        encoding: FILE_ENCODING,
-                        sequenceLength: "101",
-                        totalSequences: (fastqcReadCount / 2),
-                        fastqcProcessedFile: fastqcProcessedFile)
-        assertNotNull(fastqcBasicStats.save(flush: true))
 
         AbstractQualityAssessment qualityAssessmentStatistics = new OverallQualityAssessment(
                 ARBITRARY_QA_VALUES + [
@@ -411,6 +399,12 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
                         qualityAssessmentPass: qualityAssessmentPass,
                         ])
         assertNotNull(qualityAssessmentStatistics.save(flush: true))
+
+        // split fastqc number of reads into both dataFiles
+        dataFiles.each {
+            it.nReads = fastqcReadCount / dataFiles.size()
+            it.save(flush: true, failOnError: true)
+        }
     }
 
     @Test

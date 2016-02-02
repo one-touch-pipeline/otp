@@ -211,7 +211,6 @@ class LsdfFilesServiceTests {
         seqTrack.antibodyTarget = antibodyTarget
         seqTrack.laneId = laneNo
         seqTrack.nBasePairs = baseCount
-        seqTrack.nReads = readCount
         seqTrack.insertSize = insertSize
         seqTrack.run = run
         seqTrack.sample = sample
@@ -259,7 +258,6 @@ class LsdfFilesServiceTests {
         return DomainFactory.createSeqTrack([
                 laneId: laneNo,
                 nBasePairs: baseCount,
-                nReads: readCount,
                 insertSize: insertSize,
                 run: run,
                 sample: sample,

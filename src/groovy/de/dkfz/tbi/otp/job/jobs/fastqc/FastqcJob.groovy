@@ -56,7 +56,7 @@ class FastqcJob extends AbstractOtpJob {
                 return NextAction.WAIT_FOR_CLUSTER_JOBS
             } else {
                 createAndExecuteCopyCommand(realm, dataFiles, directory)
-                seqTrackService.setFastqcFinished(seqTrack)
+                validateAndReadFastQcResult()
                 return NextAction.SUCCEED
             }
         }
@@ -65,6 +65,10 @@ class FastqcJob extends AbstractOtpJob {
 
     @Override
     protected final void validate() throws Throwable {
+        validateAndReadFastQcResult()
+    }
+
+    private validateAndReadFastQcResult() {
         final SeqTrack seqTrack = getProcessParameterObject()
 
         File finalDir = new File(fastqcDataFilesService.fastqcOutputDirectory(seqTrack))
@@ -79,7 +83,7 @@ class FastqcJob extends AbstractOtpJob {
                 List<DataFile> files = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
                 for (DataFile file in files) {
                     FastqcProcessedFile fastqc = fastqcDataFilesService.getAndUpdateFastqcProcessedFile(file)
-                    fastqcUploadService.uploadFileContentsToDataBase(fastqc)
+                    fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqc)
                     fastqcDataFilesService.updateFastqcProcessedFile(fastqc)
                     fastqcDataFilesService.setFastqcProcessedFileUploaded(fastqc)
                 }

@@ -11,6 +11,7 @@ import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.MultiplexingService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqPlatformModelLabel
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import groovy.sql.Sql
 import org.joda.time.DateTime
@@ -231,7 +232,7 @@ class ClusterJobService {
      */
     public static Long getReadsSum(ClusterJob job) {
         return normalizePropertyToClusterJobs(job) { ProcessParameterObject workflowObject ->
-            workflowObject.getContainedSeqTracks()?.sum { it.nReads }
+            workflowObject.getContainedSeqTracks()?.sum { it.getNReads() }
         }
     }
 

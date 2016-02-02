@@ -300,8 +300,8 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
     void testGetReadsSum_WhenContainedSeqTracksContainBasesAndSeveralJobsBelongToOtpJob_ShouldReturnNormalizedSumOfReads() {
         def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
 
-        DomainFactory.createSeqTrack([run: run, nReads: 150L])
-        DomainFactory.createSeqTrack([run: run, nReads: 150L])
+        DomainFactory.buildSeqTrackWithDataFile([run: run], [nReads: 150L])
+        DomainFactory.buildSeqTrackWithDataFile([run: run], [nReads: 150L])
 
         assert 100L == ClusterJobService.getReadsSum(job)
     }

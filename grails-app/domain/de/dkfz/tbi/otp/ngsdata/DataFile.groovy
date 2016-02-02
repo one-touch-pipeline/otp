@@ -27,6 +27,9 @@ class DataFile implements Commentable{
     boolean fileLinked = false     // is the file properly linked
     long fileSize = 0              // size of the file
 
+    // number of reads
+    Long nReads
+    Long sequenceLength
 
     Integer mateNumber
 
@@ -73,6 +76,9 @@ class DataFile implements Commentable{
         alignmentLog(nullable: true)
         runSegment(nullable: true)
 
+        nReads(nullable: true)
+        sequenceLength(nullable: true)
+
         comment(nullable: true)
 
         mateNumber nullable: true, validator: { val, obj ->
@@ -93,7 +99,7 @@ class DataFile implements Commentable{
     }
 
     /**
-     * return formated file name starting from run directory 
+     * return formated file name starting from run directory
      * @return
      */
     public String formFileName() {

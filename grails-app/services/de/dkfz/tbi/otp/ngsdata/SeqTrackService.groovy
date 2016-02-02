@@ -568,19 +568,11 @@ LIMIT 1
     private void fillReadsForSeqTrack(SeqTrack seqTrack) {
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
         fillInsertSize(seqTrack, dataFiles)
-        fillReadCount(seqTrack, dataFiles)
         fillBaseCount(seqTrack, dataFiles)
     }
 
     private void fillInsertSize(SeqTrack seqTrack, List<DataFile> files) {
         seqTrack.insertSize = metaDataLongValue(files.get(0), MetaDataColumn.INSERT_SIZE.name())
-    }
-
-    private void fillReadCount(SeqTrack seqTrack, List<DataFile> files) {
-        seqTrack.nReads = 0
-        for(DataFile file in files) {
-            seqTrack.nReads += metaDataLongValue(file, MetaDataColumn.READ_COUNT.name())
-        }
     }
 
     private void fillBaseCount(SeqTrack seqTrack, List<DataFile> files) {

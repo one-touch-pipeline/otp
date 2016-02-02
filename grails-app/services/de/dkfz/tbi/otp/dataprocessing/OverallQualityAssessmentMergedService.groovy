@@ -69,17 +69,15 @@ where
         final String HQL = '''
             select distinct
                 abstractQualityAssessment.id,
-                fastqcBasicStatistics.sequenceLength
+                dataFile.sequenceLength
             from
                 AbstractQualityAssessment abstractQualityAssessment,
-                FastqcBasicStatistics fastqcBasicStatistics,
                 SeqTrack seqTrack,
                 DataFile dataFile
             where
                 abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.sample = seqTrack.sample
                 and abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.seqType = seqTrack.seqType
                 and abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.seqPlatformGroup = seqTrack.seqPlatform.seqPlatformGroup
-                and seqTrack = fastqcBasicStatistics.fastqcProcessedFile.dataFile.seqTrack
                 and dataFile.seqTrack = seqTrack
                 and dataFile.fileWithdrawn = false
                 and abstractQualityAssessment.id in :abstractQualityAssessmentIds

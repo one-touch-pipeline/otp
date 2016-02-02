@@ -696,47 +696,4 @@ class ProcessedBamFileServiceTests {
             BwaLogFileParser.metaClass.static.parseReadNumberFromLog = null
         }
     }
-
-    @Test
-    void testGetFastQCReadLength_ProcessedBamFileIsNull() {
-        shouldFail(IllegalArgumentException, {processedBamFileService.getFastQCReadLength(null)})
-    }
-
-    @Test
-    void testGetFastQCReadLength_LibrarySingle() {
-        assert READ_NUMBER == processedBamFileService.getFastQCReadLength(processedBamFile)
-    }
-
-    @Test
-    void testGetFastQCReadLength_LibraryPaired() {
-
-        DataFile datafile2 = testData.createDataFile([
-                fileName: "datafile2.fastq",
-                fileType: testData.createFileType(FileType.Type.SEQUENCE),
-                seqTrack: seqTrack,
-                runSegment: runSegment,
-                run: run,
-        ])
-        assertNotNull(datafile2.save([flush: true, failOnError: true]))
-
-        FastqcProcessedFile fastqcProcessedFile2 = testData.createFastqcProcessedFile([dataFile: datafile2])
-        assertNotNull(fastqcProcessedFile2.save([flush: true, failOnError: true]))
-
-        FastqcBasicStatistics fastqcBasicStatistics2 = testData.createFastqcBasicStatistics([totalSequences: READ_NUMBER, fastqcProcessedFile: fastqcProcessedFile2])
-        assertNotNull(fastqcBasicStatistics2.save([flush: true, failOnError: true]))
-
-        assert READ_NUMBER * 2 == processedBamFileService.getFastQCReadLength(processedBamFile)
-    }
-
-    @Test
-    void testGetFastQCReadLength_LibrarySingle_WrongCountofStatistic() {
-        FastqcBasicStatistics fastqcBasicStatistics2 = testData.createFastqcBasicStatistics([totalSequences: READ_NUMBER, fastqcProcessedFile: fastqcProcessedFile])
-        assertNotNull(fastqcBasicStatistics2.save([flush: true, failOnError: true]))
-
-        String message = shouldFail (RuntimeException) {
-            processedBamFileService.getFastQCReadLength(processedBamFile)
-        }
-        assert message.startsWith('Fail to fetch exactly one FastqcBasicStatistics for ')
-    }
-
 }

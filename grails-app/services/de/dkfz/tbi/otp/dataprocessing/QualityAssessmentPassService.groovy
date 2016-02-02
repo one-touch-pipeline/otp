@@ -108,13 +108,7 @@ class QualityAssessmentPassService {
         notNull(qualityAssessmentPass, "the quality assessment pass is null")
         long numberOfReadsInBAM = OverallQualityAssessment.findByQualityAssessmentPass(qualityAssessmentPass).totalReadCounter
         SeqTrack seqTrack = qualityAssessmentPass.processedBamFile.alignmentPass.seqTrack
-        List<FastqcProcessedFile> fastqcProcessedFiles = fastqcResultsService.fastqcFilesForSeqTrack(seqTrack)
-        long numberOfReadsInFASTQC = 0
-        FastqcBasicStatistics fastqcBasicStatistics
-        fastqcProcessedFiles.each { FastqcProcessedFile fastqcProcessedFile ->
-            fastqcBasicStatistics = FastqcBasicStatistics.findByFastqcProcessedFile(fastqcProcessedFile)
-            numberOfReadsInFASTQC += fastqcBasicStatistics.totalSequences
-        }
+        long numberOfReadsInFASTQC = seqTrack.getNReads()
         if (numberOfReadsInBAM != numberOfReadsInFASTQC) {
             throw new QualityAssessmentException("Different count of reads for pass ${qualityAssessmentPass} :  Fastqc : ${numberOfReadsInFASTQC} and BAM : ${numberOfReadsInBAM}.")
         }

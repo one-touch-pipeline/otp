@@ -35,7 +35,6 @@ class SeqTrack implements ProcessParameterObject {
      */
     boolean linkedExternally = false
     long nBasePairs = 0
-    long nReads = 0
     int insertSize = -1
     Run run
     Sample sample
@@ -162,6 +161,14 @@ class SeqTrack implements ProcessParameterObject {
 
     SeqCenter getSeqCenter() {
         return run.seqCenter
+    }
+
+    Long getNReads() {
+        return DataFile.findAllBySeqTrack(this).sum { it.nReads } as Long
+    }
+
+    Long getSequenceLength() {
+        return exactlyOneElement(DataFile.findAllBySeqTrack(this)*.sequenceLength.unique())
     }
 
     @Override

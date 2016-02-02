@@ -324,17 +324,4 @@ class ProcessedBamFileService {
             BwaLogFileParser.parseReadNumberFromLog(new File(bwaLogFilePath))
         }.sum()
     }
-
-    long getFastQCReadLength(ProcessedBamFile processedBamFile) {
-        notNull(processedBamFile, 'processedBamFile must not be null')
-        SeqTrack seqTrack = processedBamFile.alignmentPass.seqTrack
-        List<FastqcProcessedFile> fastqcProcessedFiles = fastqcResultsService.fastqcFilesForSeqTrack(seqTrack)
-        return fastqcProcessedFiles.collect { FastqcProcessedFile fastqcProcessedFile ->
-            try {
-                exactlyOneElement(FastqcBasicStatistics.findAllByFastqcProcessedFile(fastqcProcessedFile)).totalSequences
-            } catch (AssertionError e) {
-                throw new RuntimeException("Fail to fetch exactly one FastqcBasicStatistics for ${fastqcProcessedFile}", e)
-            }
-        }.sum()
-    }
 }

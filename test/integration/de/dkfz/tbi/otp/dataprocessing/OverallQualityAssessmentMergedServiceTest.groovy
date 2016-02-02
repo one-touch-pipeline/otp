@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
@@ -13,7 +14,7 @@ import org.springframework.security.acls.domain.BasePermission
 
 class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest {
 
-    final static String SEQUENCE_LENGTH = '100'
+    final static long SEQUENCE_LENGTH = 100
 
     OverallQualityAssessmentMergedService overallQualityAssessmentMergedService
 
@@ -40,11 +41,9 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
 
     private void prepareFindSequenceLengthForOverallQualityAssessmentMerged() {
         ProcessedBamFile processedBamFile = DomainFactory.assignNewProcessedBamFile(overallQualityAssessmentMerged.mergingSet)
-        [1..3].each {
-            FastqcBasicStatistics fastqcBasicStatistics = FastqcBasicStatistics.build(sequenceLength: SEQUENCE_LENGTH)
-            fastqcBasicStatistics.fastqcProcessedFile.dataFile.seqTrack = processedBamFile.seqTrack
-            fastqcBasicStatistics.fastqcProcessedFile.dataFile.save(flush: true)
-        }
+        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(processedBamFile.seqTrack)
+        dataFiles*.sequenceLength = SEQUENCE_LENGTH
+        dataFiles*.save(flush:true, failOnError: true)
     }
 
 

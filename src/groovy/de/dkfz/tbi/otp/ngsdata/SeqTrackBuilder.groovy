@@ -33,8 +33,6 @@ class SeqTrackBuilder {
 
     private long nBasePairs = 0
 
-    private long nReads = 0
-
     private int insertSize = -1
 
     private final Run run
@@ -111,11 +109,6 @@ class SeqTrackBuilder {
         return this
     }
 
-    public SeqTrackBuilder setnReads(long nReads) {
-        this.nReads = nReads
-        return this
-    }
-
     public SeqTrackBuilder setInsertSize(int insertSize) {
         this.insertSize = insertSize
         return this
@@ -188,7 +181,6 @@ class SeqTrackBuilder {
         seqTrack.hasOriginalBam = hasOriginalBam
         seqTrack.usingOriginalBam = usingOriginalBam
         seqTrack.nBasePairs = nBasePairs
-        seqTrack.nReads = nReads
         seqTrack.insertSize = insertSize
         seqTrack.run = run
         seqTrack.sample = sample

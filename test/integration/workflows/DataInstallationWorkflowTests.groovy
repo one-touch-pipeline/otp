@@ -247,7 +247,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         seqTrack.antibodyTarget = antibodyTarget
         seqTrack.laneId = laneNo
         seqTrack.nBasePairs = baseCount
-        seqTrack.nReads = readCount
         seqTrack.insertSize = insertSize
         seqTrack.run = run
         seqTrack.sample = sample
@@ -322,7 +321,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         SeqTrack seqTrack = new SeqTrack()
         seqTrack.laneId = laneNo
         seqTrack.nBasePairs = baseCount
-        seqTrack.nReads = readCount
         seqTrack.insertSize = insertSize
         seqTrack.run = run
         seqTrack.sample = sample
